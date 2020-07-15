@@ -1,0 +1,13 @@
+{
+  "name": "hypernet-protocol",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:GoHypernet/hypernet-protocol",
+  "author": "Caleb Ditchfield <caleb@hypernetlabs.io>",
+  "license": "MIT",
+  "dependencies": {
+    "@openzeppelin/cli": "^2.8.2",
+    "ganache-cli": "^6.9.1",
+    "truffle": "^5.1.34"
+  }
+}
