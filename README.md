@@ -38,56 +38,53 @@ deploying, testing, and migrating smart contracts; it is very powerful and helpf
 
 `npx ganache-cli --deterministic`
 
-2) Run the (Truffle) migrations:
+2) Deploy via OpenZeppelin, which uses Truffle under hood.
 
-`truffle migrate`
+`npx openzeppelin deploy`
 
-This should run any migrations that have not been deployed to the development network.
-It will throw an error if it cannot connect to the development network, or if there is a transaction error in the migrations.
+This will begin an interactive prompt that will ask you what network you want to deploy on,
+what contract you want to deploy, and will let you call any functions on it.
+
+Because we are using the Openzeppelin Upgradeable contracts, we must use initializers, and not constructors,
+for contracts. [Make sure you read up on the differences.](https://docs.openzeppelin.com/upgrades/2.8/writing-upgradeable)
 
 ```
-$ truffle migrate
+$ npx openzeppelin deploy
+
+✓ Compiling contracts with Truffle, using settings from truffle.js file
+Truffle output:
 
 Compiling your contracts...
 ===========================
-> Everything is up to date, there is nothing to compile.
+> Compiling ./contracts/Migrations.sol
+> Artifacts written to /home/caleb/hypernet-protocol/build/contracts
+> Compiled successfully using:
+   - solc: 0.5.16+commit.9c3226ce.Emscripten.clang
 
 
-
-Starting migrations...
-======================
-> Network name:    'development'
-> Network id:      1594931142764
-> Block gas limit: 6721975 (0x6691b7)
-
-
-1_initial_migration.js
-======================
-
-   Deploying 'Migrations'
-   ----------------------
-   > transaction hash:    0x1bc07139b4d74d7c1499953e2b4456725617bd0c089d5d086c5bbf1e8a807c7e
-   > Blocks: 0            Seconds: 0
-   > contract address:    0xe78A0F7E598Cc8b0Bb87894B0F60dD2a88d6a8Ab
-   > block number:        1
-   > block timestamp:     1594931157
-   > account:             0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1
-   > balance:             99.9967165
-   > gas used:            164175 (0x2814f)
-   > gas price:           20 gwei
-   > value sent:          0 ETH
-   > total cost:          0.0032835 ETH
-
-
-   > Saving migration to chain.
-   > Saving artifacts
-   -------------------------------------
-   > Total cost:           0.0032835 ETH
-
-
-Summary
-=======
-> Total deployments:   1
-> Final cost:          0.0032835 ETH
-
+? Choose the kind of deployment upgradeable
+? Pick a network development
+? Pick a contract to deploy @openzeppelin/contracts-ethereum-package/ERC20PresetMinterPauserUpgradeSafe
+✓ Deploying @openzeppelin/contracts-ethereum-package dependency to network dev-1594933911016
+All implementations are up to date
+? Call a function to initialize the instance after creating it? Yes
+? Select which function initialize(name: string, symbol: string)
+? name: string: Hypertoken
+? symbol: string: HYPE
+✓ Setting everything up to create contract instances
+✓ Instance created at 0x59d3631c86BbE35EF041872d502F218A39FBa150
+To upgrade this instance run 'oz upgrade'
+0x59d3631c86BbE35EF041872d502F218A39FBa150
 ```
+
+Note that above, we deploy the `ERC20PresetMinterPauserUpgradeSafe` [library contract from OpenZeppelin](https://github.com/OpenZeppelin/openzeppelin-contracts-ethereum-package), which was added to the project via an earlier (not shown in the Readme) command: `npx oz link @openzeppelin/contracts-ethereum-project`. We were able to deploy this even without having any contracts in the `contracts/` directory.
+
+---
+
+[Note: Next, we'll actually extend the base contract instead of deploying it - needed for Hypertoken.](https://github.com/OpenZeppelin/openzeppelin-contracts-ethereum-package#extending-contracts)
+
+## Files, Structure, & Other Notes
+
+ - Normally, when using Truffle, we'd run `truffle migrate` to deploy contracts and migrations. Because we're using the OpenZeppelin framework, we use `oz deploy` instead.
+ - OpenZeppelin stores information about deployed contracts in `.openzeppelin/` as JSON files.
+ - Contracts added to `contracts/` will be shown as a choice to deploy when running `oz deploy`
