@@ -77,7 +77,11 @@ To upgrade this instance run 'oz upgrade'
 0x59d3631c86BbE35EF041872d502F218A39FBa150
 ```
 
-Note that above, we deploy the `ERC20PresetMinterPauserUpgradeSafe` [library contract from OpenZeppelin](https://github.com/OpenZeppelin/openzeppelin-contracts-ethereum-package), which was added to the project via an earlier (not shown in the Readme) command: `npx oz link @openzeppelin/contracts-ethereum-project`. We were able to deploy this even without having any contracts in the `contracts/` directory.
+Note that above, we deploy the `ERC20PresetMinterPauserUpgradeSafe` [library contract from OpenZeppelin](https://github.com/OpenZeppelin/openzeppelin-contracts-ethereum-package), which was added to the project via an earlier (not shown in the Readme) command:
+
+`npx oz link @openzeppelin/contracts-ethereum-project`.
+
+We were able to deploy this even without having any contracts in the `contracts/` directory.
 
 ---
 
