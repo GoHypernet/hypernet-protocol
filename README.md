@@ -102,9 +102,9 @@ Next: We're going to add in the framework for payment channels.
 
 [ForceMove.sol](https://protocol.statechannels.org/docs/contract-devs/force-move) - implementation of the ForceMove protocol, which allows state channels to be adjudicated and finalized
 
-**[ForceMoveApp.sol]**(https://protocol.statechannels.org/docs/contract-api/natspec/forcemoveapp) - interface requiring children to implement a `validTransition` function, defining the state machine of a ForceMove state channel dApp. This one is important! More on this below.
+**[ForceMoveApp.sol](https://protocol.statechannels.org/docs/contract-api/natspec/forcemoveapp)** - interface requiring children to implement a `validTransition` function, defining the state machine of a ForceMove state channel dApp. This one is important! More on this below.
 
-**[Outcome.sol]**(https://github.com/statechannels/statechannels/blob/master/packages/nitro-protocol/contracts/Outcome.sol) - library containing utilities for state channel outcomes! It's very important to know how this works.
+**[Outcome.sol](https://github.com/statechannels/statechannels/blob/master/packages/nitro-protocol/contracts/Outcome.sol)** - library containing utilities for state channel outcomes! It's very important to know how this works.
 
 [TrivialApp.sol](https://protocol.statechannels.org/docs/contract-api/natspec/trivialapp) - example app implementing ForceMove; all possible state transitions are valid
 
