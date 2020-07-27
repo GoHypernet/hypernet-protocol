@@ -1,7 +1,66 @@
 {
   "contracts": {
-    "Hypertoken": {
+    "HypernetProtocol": {
       "address": "0xe982E462b094850F12AF94d21D470e21bE9D0E9C",
+      "constructorCode": "608060405234801561001057600080fd5b5061130e806100206000396000f3fe",
+      "bodyBytecodeHash": "eb3ca0d9fd858191a21273f370c252c82025c979635f9a3e20df06d029524413",
+      "localBytecodeHash": "66a3758f01f4414cd712bfa05ddf0c84b8538fd5d308f7333bf76e7daf5790ec",
+      "deployedBytecodeHash": "66a3758f01f4414cd712bfa05ddf0c84b8538fd5d308f7333bf76e7daf5790ec",
+      "types": {
+        "t_bool": {
+          "id": "t_bool",
+          "kind": "elementary",
+          "label": "bool"
+        },
+        "t_uint256": {
+          "id": "t_uint256",
+          "kind": "elementary",
+          "label": "uint256"
+        },
+        "t_array:50<t_uint256>": {
+          "id": "t_array:50<t_uint256>",
+          "valueType": "t_uint256",
+          "length": "50",
+          "kind": "array",
+          "label": "uint256[50]"
+        }
+      },
+      "storage": [
+        {
+          "contract": "Initializable",
+          "path": "@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol",
+          "label": "initialized",
+          "astId": 50,
+          "type": "t_bool",
+          "src": "757:24:1"
+        },
+        {
+          "contract": "Initializable",
+          "path": "@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol",
+          "label": "initializing",
+          "astId": 53,
+          "type": "t_bool",
+          "src": "876:25:1"
+        },
+        {
+          "contract": "Initializable",
+          "path": "@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol",
+          "label": "______gap",
+          "astId": 118,
+          "type": "t_array:50<t_uint256>",
+          "src": "1982:29:1"
+        }
+      ],
+      "warnings": {
+        "hasConstructor": false,
+        "hasSelfDestruct": false,
+        "hasDelegateCall": false,
+        "hasInitialValuesInDeclarations": false,
+        "uninitializedBaseContracts": []
+      }
+    },
+    "Hypertoken": {
+      "address": "0x9b1f7F645351AF3631a656421eD2e40f2802E6c0",
       "constructorCode": "608060405234801561001057600080fd5b506133a0806100206000396000f3fe",
       "bodyBytecodeHash": "66c37a02710ecbdc55e18c2b668b6dcfe79068b89dd8b9e64da64a4fc202ceb6",
       "localBytecodeHash": "495f385dbe692342971d7bbff9ca214d9760a439037c2e876d0c0bef94c47349",
@@ -281,11 +340,20 @@
   },
   "solidityLibs": {},
   "proxies": {
-    "hypernet-protocol/Hypertoken": [
+    "hypernet-protocol/HypernetProtocol": [
       {
         "address": "0x0290FB167208Af455bB137780163b7B7a9a10C16",
         "version": "1.0.0",
         "implementation": "0xe982E462b094850F12AF94d21D470e21bE9D0E9C",
+        "admin": "0x59d3631c86BbE35EF041872d502F218A39FBa150",
+        "kind": "Upgradeable"
+      }
+    ],
+    "hypernet-protocol/Hypertoken": [
+      {
+        "address": "0x67B5656d60a809915323Bf2C40A8bEF15A152e3e",
+        "version": "1.0.0",
+        "implementation": "0x9b1f7F645351AF3631a656421eD2e40f2802E6c0",
         "admin": "0x59d3631c86BbE35EF041872d502F218A39FBa150",
         "kind": "Upgradeable"
       }

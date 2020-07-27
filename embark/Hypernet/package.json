@@ -23,6 +23,13 @@
     "embarkjs-ipfs": "^6.0.0",
     "embarkjs-swarm": "^6.0.0",
     "embarkjs-web3": "^6.0.0",
-    "embarkjs-whisper": "^6.0.0"
+    "embarkjs-whisper": "^6.0.0",
+    "shelljs": "0.8.4"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts-ethereum-package": "^3.0.0",
+    "@statechannels/nitro-protocol": "^0.1.5",
+    "shelljs": "0.8.4",
+    "solc": "^0.6.2"
   }
 }

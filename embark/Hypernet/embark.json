@@ -1,5 +1,5 @@
 {
-  "contracts": ["contracts/**"],
+  "contracts": ["contracts/**", "../../contracts/*.sol"],
   "app": {
     "css/app.css": ["app/css/**"],
     "js/app.js": ["app/js/index.js"],
@@ -9,7 +9,7 @@
   "buildDir": "dist/",
   "config": "config/",
   "versions": {
-    "solc": "0.6.1"
+    "solc": "0.6.2"
   },
   "plugins": {
     "embark-ipfs": {},

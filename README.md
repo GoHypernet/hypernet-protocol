@@ -54,32 +54,32 @@ Because we are using the Openzeppelin Upgradeable contracts, we must use initial
 for contracts. [Make sure you read up on the differences.](https://docs.openzeppelin.com/upgrades/2.8/writing-upgradeable)
 
 ```
-$ npx openzeppelin deploy
-
-✓ Compiling contracts with Truffle, using settings from truffle.js file
-Truffle output:
-
-Compiling your contracts...
-===========================
-> Compiling ./contracts/Migrations.sol
-> Artifacts written to /home/caleb/hypernet-protocol/build/contracts
-> Compiled successfully using:
-   - solc: 0.5.16+commit.9c3226ce.Emscripten.clang
-
-
+❯ oz deploy
+Nothing to compile, all contracts are up to date.
 ? Choose the kind of deployment upgradeable
-? Pick a network development
-? Pick a contract to deploy @openzeppelin/contracts-ethereum-package/ERC20PresetMinterPauserUpgradeSafe
-✓ Deploying @openzeppelin/contracts-ethereum-package dependency to network dev-1594933911016
-All implementations are up to date
+? Pick a network forked
+? Pick a contract to deploy HypernetProtocol
+✓ Deploying @openzeppelin/contracts-ethereum-package dependency to network dev-1595834217091
+✓ Contract HypernetProtocol deployed
+All implementations have been deployed
 ? Call a function to initialize the instance after creating it? Yes
-? Select which function initialize(name: string, symbol: string)
-? name: string: Hypertoken
-? symbol: string: HYPE
+? Select which function * initialize()
 ✓ Setting everything up to create contract instances
-✓ Instance created at 0x59d3631c86BbE35EF041872d502F218A39FBa150
+✓ Instance created at 0x0290FB167208Af455bB137780163b7B7a9a10C16
 To upgrade this instance run 'oz upgrade'
-0x59d3631c86BbE35EF041872d502F218A39FBa150
+0x0290FB167208Af455bB137780163b7B7a9a10C16
+❯ oz deploy
+Nothing to compile, all contracts are up to date.
+? Choose the kind of deployment upgradeable
+? Pick a network forked
+? Pick a contract to deploy Hypertoken
+✓ Contract Hypertoken deployed
+All implementations have been deployed
+? Call a function to initialize the instance after creating it? Yes
+? Select which function * initalize()
+✓ Instance created at 0x67B5656d60a809915323Bf2C40A8bEF15A152e3e
+To upgrade this instance run 'oz upgrade'
+0x67B5656d60a809915323Bf2C40A8bEF15A152e3e
 ```
 
 Note that above, we deploy the `ERC20PresetMinterPauserUpgradeSafe` [library contract from OpenZeppelin](https://github.com/OpenZeppelin/openzeppelin-contracts-ethereum-package), which was added to the project via an earlier (not shown in the Readme) command:
@@ -91,10 +91,6 @@ We were able to deploy this even without having any contracts in the `contracts/
 ---
 
 However, we obviously want to [extend the base contracts](https://github.com/OpenZeppelin/openzeppelin-contracts-ethereum-package#extending-contracts), which we've done in `contracts/Hypertoken.sol`. This just extends the base upgradeable erc20 preset with a dummy function to mint a single token to the caller.
-
----
-
-Next: We're going to add in the framework for payment channels.
 
 ## Payment/State Channel Overview
 
@@ -118,6 +114,15 @@ The Nitro framework specifies what an app that complies to the `ForceMoveApp.sol
 
 Because our implementation, at least at first, is going to be a simple payment channel, we can use the base from `SingleAssetPayments.sol`, and build from there. `SingleAssetPayments.sol` lets only the person who's turn it is (the *mover*) send funds, and assumes that on the `nth` turn, the `n%2` participant is the mover.
 
+## Embark Framework Details
+
+The embark framework has been initialized inside the `embark/` folder. The configuration files of note:
+
+ - `embark/Hypernet/embark.json` - contains the base embark configs, including where it looks for smart contracts (ie, in the OpenZeppelin directory)
+ - `embark/Hypernet/config/contracts.js'` - specifies where smart contracts are deployed (if at all) on various environments, among other things
+
+The frontend for the dApp, at least for development, will be contained within `embark/Hypernet/app/`
+
 ## Files, Structure, & Other Notes
 
  - Normally, when using Truffle, we'd run `truffle migrate` to deploy contracts and migrations. Because we're using the OpenZeppelin framework, we use `oz deploy` instead.
@@ -125,8 +130,3 @@ Because our implementation, at least at first, is going to be a simple payment c
  - We'll also handle the frontend with Embark.
  - OpenZeppelin stores information about deployed contracts in `.openzeppelin/` as JSON files.
  - Contracts added to `contracts/` will be shown as a choice to deploy when running `oz deploy`
-
-## Future
-
-EmbarkLabs will be used to actually do the deploying, development front-end, and monitoring of our dApps once we have a base with OpenZeppelin.
-It's the next step though, so no need to start using it now (especially as we're getting used to OpenZeppelin).

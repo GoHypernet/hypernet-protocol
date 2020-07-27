@@ -1,3 +1,5 @@
+const deployedContracts = require("../../../.openzeppelin/forked-embark-temp.json");
+
 module.exports = {
   // default applies to all environments
   default: {
@@ -14,7 +16,7 @@ module.exports = {
     // Automatically call `ethereum.enable` if true.
     // If false, the following code must run before sending any transaction: `await EmbarkJS.enableEthereum();`
     // Default value is true.
-    // dappAutoEnable: true,
+    dappAutoEnable: true,
 
     gas: "auto",
 
@@ -32,16 +34,25 @@ module.exports = {
     // filteredFields: [],
 
     deploy: {
-      // example:
-      //SimpleStorage: {
-      //  args: [ 100 ]
-      //}
+			// Note that we aren't deploying any contracts at the moment - just referencing ones
+			// that are deployed by OpenZeppelin. That's environment specific, so see below for the
+			// development-specific settings (and eventually, private/production settings too!)
     }
   },
 
   // default environment, merges with the settings in default
   // assumed to be the intended environment by `embark run`
-  development: {},
+  development: {
+		deploy: {
+			Hypertoken: {
+				address: deployedContracts.contracts.Hypertoken.address,
+			},
+
+			HypernetProtocol: {
+				address: deployedContracts.contracts.HypernetProtocol.address,
+			}
+		}
+	},
 
   // merges with the settings in default
   // used with "embark run privatenet"

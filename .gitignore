@@ -1,3 +1,7 @@
+# OpenZeppelin temporary development network config files
+.openzeppelin/dev-*.json
+.openzeppelin/.session
+
 # Truffle build folder
 build/
 
