@@ -33,6 +33,28 @@ module.exports = {
     // minimalContractSize: false,
     // filteredFields: [],
 
+		// specify interfaces & libraries so that Embark doesn't try to deploy them:
+		interfaces: [
+			'AccessControlUpgradeSafe',
+			'ContextUpgradeSafe',
+			'ERC20BurnableUpgradeSafe',
+			'ERC20PauseableUpgradeSafe',
+			'ERC20PresetMinterPauserUpgradeSafe',
+			'ERC20UpgradeSafe',
+			'ForceMoveApp',
+			'IERC20',
+			'Initializable',
+			'PausableUpgradeSafe',
+			'SingleAssetPayments'
+		],
+
+		libraries: [
+			'Address',
+			'EnumerableSet',
+			'Outcome',
+			'SafeMath'
+		],
+
     deploy: {
 			// Note that we aren't deploying any contracts at the moment - just referencing ones
 			// that are deployed by OpenZeppelin. That's environment specific, so see below for the
@@ -44,13 +66,29 @@ module.exports = {
   // assumed to be the intended environment by `embark run`
   development: {
 		deploy: {
+			// note: because we're using proxy contracts we need to specify
+			// the proxy contracts AND the base contracts
+			// see: https://framework.embarklabs.io/docs/contracts_configuration.html#Proxy-Contract-Support
+
 			Hypertoken: {
-				address: deployedContracts.contracts.Hypertoken.address,
+				address: deployedContracts.contracts.Hypertoken.address
 			},
 
 			HypernetProtocol: {
-				address: deployedContracts.contracts.HypernetProtocol.address,
+				address: deployedContracts.contracts.HypernetProtocol.address
+			},
+
+			/*
+			HypertokenProxy: {
+				address: deployedContracts.proxies["hypernet-protocol/Hypertoken"].address,
+				proxyFor: "Hypertoken"
+			},
+
+			HypernetProtocolProxy: {
+				address: deployedContracts.proxies["hypernet-protocol/HypernetProtocol"].address,
+				proxyFor: "HypernetProtocol"
 			}
+			*/
 		}
 	},
 
