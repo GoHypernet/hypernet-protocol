@@ -20,13 +20,13 @@ Hypernet smart contracts, SDK, and everything else needed to start building on t
 
 ## Components
 
-  - [Truffle](https://www.trufflesuite.com/)
+	- [Truffle](https://www.trufflesuite.com/)
 
-  - [OpenZeppelin](https://openzeppelin.com/)
+	- [OpenZeppelin](https://openzeppelin.com/)
 
 	- [ganache-cli](https://github.com/trufflesuite/ganache-cli)
 
-  - [Embark Framework](https://framework.embarklabs.io/)
+	- [Embark Framework](https://framework.embarklabs.io/)
 
 Truffle and OpenZeppelin both provide frameworks and CLI tools to help develop smart contracts, test them,
 upgrade them, etc. OpenZeppelin is more dedicated toward providing example contracts to inherit as well as the upgrading
