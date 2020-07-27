@@ -19,6 +19,7 @@ Hypernet smart contracts, SDK, and everything else needed to start building on t
   - [Truffle](https://www.trufflesuite.com/)
   - [OpenZeppelin](https://openzeppelin.com/)
   - [ganache-cli](https://github.com/trufflesuite/ganache-cli)
+	- [Embark Framework](https://framework.embarklabs.io/)
 
 Truffle and OpenZeppelin both provide frameworks and CLI tools to help develop smart contracts, test them,
 upgrade them, etc. OpenZeppelin is more dedicated toward providing example contracts to inherit as well as the upgrading
@@ -26,10 +27,14 @@ process, and Truffle is more about testing, deploying, and migration of code; wh
 has been initiated as a Truffle project with OpenZeppelin added in after, as the OZ tools auto-detect and adapt to the
 Truffle project (while the reverse is not true).
 
-In order to efficiently develop in this repo, you should know primarily how Truffle works, and have a casual understanding
-of what OpenZeppelin offers.
+The embark framework is an integrated ecosystem with not only command line tools, but a web UI (called the Cockpit) that helps
+with compilation, deployment, and debugging of smart contracts as well as an easy-to-develop-on front-end system for the basics.
 
-ganache-cli is also used (which contains ganache-core), and is the main set of tools that Truffle (and us) will use for
+In order to efficiently develop in this repo, you should know primarily how OpenZeppelin works, as we'll be using the OZ cli
+primarily for compiling and deploying of smart contracts (initially), and then later on, the Embark framework for deploying,
+testing, and basic front-end development. Truffle is also helpful, but not necessary, to know.
+
+ganache-cli is also used (which contains ganache-core), and is the main set of tools that Truffle, OZ, embark (and us) will use for
 deploying, testing, and migrating smart contracts; it is very powerful and helpful if you know how to use it.
 
 ## Usage
@@ -91,12 +96,15 @@ However, we obviously want to [extend the base contracts](https://github.com/Ope
 
 Next: We're going to add in the framework for payment channels.
 
-## Payment/State Channel Resources
+## Payment/State Channel Overview
 
-### Nitro Framework
+### Nitro Framework Resources
+
 [ForceMove.sol](https://protocol.statechannels.org/docs/contract-devs/force-move) - implementation of the ForceMove protocol, which allows state channels to be adjudicated and finalized
 
-[ForceMoveApp.sol](https://protocol.statechannels.org/docs/contract-api/natspec/forcemoveapp) - interface requiring children to implement a `validTransition` function, defining the state machine of a ForceMove state channel dApp
+**[ForceMoveApp.sol]**(https://protocol.statechannels.org/docs/contract-api/natspec/forcemoveapp) - interface requiring children to implement a `validTransition` function, defining the state machine of a ForceMove state channel dApp. This one is important! More on this below.
+
+**[Outcome.sol]**(https://github.com/statechannels/statechannels/blob/master/packages/nitro-protocol/contracts/Outcome.sol) - library containing utilities for state channel outcomes! It's very important to know how this works.
 
 [TrivialApp.sol](https://protocol.statechannels.org/docs/contract-api/natspec/trivialapp) - example app implementing ForceMove; all possible state transitions are valid
 
@@ -104,10 +112,17 @@ Next: We're going to add in the framework for payment channels.
 
 [Nitro Tutorial](https://github.com/statechannels/nitro-tutorial) - minimal example tutorial for Nitro
 
+### Nitro Framework Detailed
+
+The Nitro framework specifies what an app that complies to the `ForceMoveApp.sol` interface must implement - the `validTransition(a,b)` function. This function needs to decode the appData, from state channel updates a and b, and decide if b is an acceptable transition from a. For example, in a game of chess, the position of the king in b.appData must be within one square of its position in a.appData.
+
+Because our implementation, at least at first, is going to be a simple payment channel, we can use the base from `SingleAssetPayments.sol`, and build from there. `SingleAssetPayments.sol` lets only the person who's turn it is (the *mover*) send funds, and assumes that on the `nth` turn, the `n%2` participant is the mover.
+
 ## Files, Structure, & Other Notes
 
  - Normally, when using Truffle, we'd run `truffle migrate` to deploy contracts and migrations. Because we're using the OpenZeppelin framework, we use `oz deploy` instead.
- - Addendum to above: we'd eventually go on to use truffle migration scripts, (and still might), but we're probably just going to skip over the migration scripts in order to use the embark deployment tools instead!
+ - We'll handle the deployment & compilation of the smart contracts with the (Embark framework.)[https://framework.embarklabs.io/]
+ - We'll also handle the frontend with Embark.
  - OpenZeppelin stores information about deployed contracts in `.openzeppelin/` as JSON files.
  - Contracts added to `contracts/` will be shown as a choice to deploy when running `oz deploy`
 

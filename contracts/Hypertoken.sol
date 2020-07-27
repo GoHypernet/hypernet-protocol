@@ -1,8 +1,16 @@
+// SPDX-License-Identifier: UNLICENSED
+
 pragma solidity ^0.6.2;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/presets/ERC20PresetMinterPauser.sol";
 
+/**
+ * The Hypertoken ERC20 contracts.
+ * Right now just has a dummy function to justify extending
+ * the base preset contracts. Initializable, so make sure you know
+ * the difference between initializable and constructor-based contracts!
+ **/
 contract Hypertoken is Initializable, ERC20PresetMinterPauserUpgradeSafe {
 	function initalize() public initializer {
 		ERC20PresetMinterPauserUpgradeSafe.initialize(
