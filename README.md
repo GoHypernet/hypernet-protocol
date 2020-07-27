@@ -14,6 +14,10 @@ Hypernet smart contracts, SDK, and everything else needed to start building on t
 
  `yarn install` or just `yarn`
 
+ 3) Install packages for the Embark framework:
+
+ `cd embark/Hypernet && npm install`
+
 ## Components
 
   - [Truffle](https://www.trufflesuite.com/)
@@ -130,3 +134,4 @@ The frontend for the dApp, at least for development, will be contained within `e
  - We'll also handle the frontend with Embark.
  - OpenZeppelin stores information about deployed contracts in `.openzeppelin/` as JSON files.
  - Contracts added to `contracts/` will be shown as a choice to deploy when running `oz deploy`
+ - Need to look into switching npm to yarn for the Embark framework
