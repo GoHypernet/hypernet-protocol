@@ -95,8 +95,11 @@ Next: We're going to add in the framework for payment channels.
 
 ### Nitro Framework
 [ForceMove.sol](https://protocol.statechannels.org/docs/contract-devs/force-move) - implementation of the ForceMove protocol, which allows state channels to be adjudicated and finalized
+
 [ForceMoveApp.sol](https://protocol.statechannels.org/docs/contract-api/natspec/forcemoveapp) - interface requiring children to implement a `validTransition` function, defining the state machine of a ForceMove state channel dApp
+
 [TrivialApp.sol](https://protocol.statechannels.org/docs/contract-api/natspec/trivialapp) - example app implementing ForceMove; all possible state transitions are valid
+
 [SingleAssetPayments.sol](https://protocol.statechannels.org/docs/contract-api/natspec/singleassetpayments) - example app implementing ForceMove; implements a simple payment channel with a single asset type
 
 ## Files, Structure, & Other Notes
