@@ -90,6 +90,7 @@ We were able to deploy this even without having any contracts in the `contracts/
 ## Files, Structure, & Other Notes
 
  - Normally, when using Truffle, we'd run `truffle migrate` to deploy contracts and migrations. Because we're using the OpenZeppelin framework, we use `oz deploy` instead.
+ - Addendum to above: we'd eventually go on to use truffle migration scripts, (and still might), but we're probably just going to skip over the migration scripts in order to use the embark deployment tools instead!
  - OpenZeppelin stores information about deployed contracts in `.openzeppelin/` as JSON files.
  - Contracts added to `contracts/` will be shown as a choice to deploy when running `oz deploy`
 
