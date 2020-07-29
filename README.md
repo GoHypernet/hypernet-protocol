@@ -124,14 +124,20 @@ The Nitro framework specifies what an app that complies to the `ForceMoveApp.sol
 
 Because our implementation, at least at first, is going to be a simple payment channel, we can use the base from `SingleAssetPayments.sol`, and build from there. `SingleAssetPayments.sol` lets only the person who's turn it is (the *mover*) send funds, and assumes that on the `nth` turn, the `n%2` participant is the mover.
 
+**Important Note**: The difference between ForceMove and ForceMoveApp is critical! ForceMove is the protocol; ForceMoveApp is an inheritable contract that apps can use
+to implement their specific state machine. ForceMove and implementations of ForceMoveApp are **not** linked to each other! For our case, we'll do the following:
+
+**NitroAdjuticator** is **ForceMove** <-- NitroAdjudicator is the actual deployed impelmentation of ForceMove that contains the rules and functions governing the channel
+**GalileoApp** is **ForceMoveApp* <-- GalileoApp is an implementatio of ForceMoveApp that defines what a valid transition of the state machine should be
+
 ## Embark Framework Details
 
-The embark framework has been initialized inside the `embark/` folder. The configuration files of note:
+THe embark framework has been initialized at the top level of the project. Some folders have been merged, but it theoretically shouldn't cause any issues.
 
- - `embark/Hypernet/embark.json` - contains the base embark configs, including where it looks for smart contracts (ie, in the OpenZeppelin directory)
- - `embark/Hypernet/config/contracts.js'` - specifies where smart contracts are deployed (if at all) on various environments, among other things
+ - `embark.json` - contains the base embark configs, including where it looks for smart contracts (ie, in the OpenZeppelin directory)
+ - `config/contracts.js'` - specifies where smart contracts are deployed (if at all) on various environments, among other things
 
-The frontend for the dApp, at least for development, will be contained within `embark/Hypernet/app/`
+The frontend for the dApp, at least for development, will be contained within `app/`
 
 ## Files, Structure, & Other Notes
 
@@ -140,4 +146,4 @@ The frontend for the dApp, at least for development, will be contained within `e
  - We'll also handle the frontend with Embark.
  - OpenZeppelin stores information about deployed contracts in `.openzeppelin/` as JSON files.
  - Contracts added to `contracts/` will be shown as a choice to deploy when running `oz deploy`
- - Need to look into switching npm to yarn for the Embark framework
+ - Contracts added to `contracts/` will also be picked up by Embark (and callable on the web UI!)
