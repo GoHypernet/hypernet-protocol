@@ -1,3 +1,9 @@
+# Don't upload the .embark files, dist, chains, or artifacts
+.embark
+chains.json
+dist
+embarkArtifacts
+
 # OpenZeppelin temporary development network config files
 .openzeppelin/dev-*.json
 .openzeppelin/.session

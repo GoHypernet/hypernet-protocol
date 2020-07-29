@@ -3,10 +3,10 @@
 pragma solidity ^0.6.2;
 pragma experimental ABIEncoderV2;
 
-import "/home/caleb/hypernet-protocol/.embark/node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
-import "/home/caleb/hypernet-protocol/.embark/node_modules/@statechannels/nitro-protocol/contracts/interfaces/ForceMoveApp.sol";
-import "/home/caleb/hypernet-protocol/.embark/node_modules/@statechannels/nitro-protocol/contracts/Outcome.sol";
-import "/home/caleb/hypernet-protocol/.embark/node_modules/@statechannels/nitro-protocol/contracts/examples/SingleAssetPayments.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
+import "@statechannels/nitro-protocol/contracts/interfaces/ForceMoveApp.sol";
+import "@statechannels/nitro-protocol/contracts/Outcome.sol";
+import "@statechannels/nitro-protocol/contracts/examples/SingleAssetPayments.sol";
 
 /**
  * The actual state/payment channel contract/controller system!

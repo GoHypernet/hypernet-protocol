@@ -2,8 +2,8 @@
 
 pragma solidity ^0.6.2;
 
-import "/home/caleb/hypernet-protocol/.embark/node_modules/@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
-import "/home/caleb/hypernet-protocol/.embark/node_modules/@openzeppelin/contracts-ethereum-package/contracts/presets/ERC20PresetMinterPauser.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/Initializable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/presets/ERC20PresetMinterPauser.sol";
 
 /**
  * The Hypertoken ERC20 contracts.
