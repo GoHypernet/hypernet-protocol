@@ -128,11 +128,12 @@ Because our implementation, at least at first, is going to be a simple payment c
 to implement their specific state machine. ForceMove and implementations of ForceMoveApp are **not** linked to each other! For our case, we'll do the following:
 
 **NitroAdjuticator** is **ForceMove** <-- NitroAdjudicator is the actual deployed impelmentation of ForceMove that contains the rules and functions governing the channel
-**GalileoApp** is **ForceMoveApp* <-- GalileoApp is an implementatio of ForceMoveApp that defines what a valid transition of the state machine should be
+
+**GalileoApp** is **ForceMoveApp** <-- GalileoApp is an implementatio of ForceMoveApp that defines what a valid transition of the state machine should be
 
 ## Embark Framework Details
 
-THe embark framework has been initialized at the top level of the project. Some folders have been merged, but it theoretically shouldn't cause any issues.
+The embark framework has been initialized at the top level of the project. Some folders have been merged, but it theoretically shouldn't cause any issues.
 
  - `embark.json` - contains the base embark configs, including where it looks for smart contracts (ie, in the OpenZeppelin directory)
  - `config/contracts.js'` - specifies where smart contracts are deployed (if at all) on various environments, among other things
