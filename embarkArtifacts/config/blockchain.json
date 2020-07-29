@@ -1,0 +1,14 @@
+{
+  "provider": "web3",
+  "library": "embarkjs",
+  "dappConnection": [
+    "ws://localhost:8556",
+    "$WEB3",
+    "ws://localhost:8546",
+    "http://localhost:8545"
+  ],
+  "dappAutoEnable": true,
+  "warnIfMetamask": true,
+  "blockchainClient": "ganache-cli",
+  "networkId": 1337
+}
