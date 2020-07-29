@@ -127,9 +127,9 @@ Because our implementation, at least at first, is going to be a simple payment c
 **Important Note**: The difference between ForceMove and ForceMoveApp is critical! ForceMove is the protocol; ForceMoveApp is an inheritable contract that apps can use
 to implement their specific state machine. ForceMove and implementations of ForceMoveApp are **not** linked to each other! For our case, we'll do the following:
 
-**NitroAdjuticator** is **ForceMove** <-- NitroAdjudicator is the actual deployed impelmentation of ForceMove that contains the rules and functions governing the channel
+**NitroAdjuticator** is **ForceMove** <-- NitroAdjudicator is the actual deployed implementation of ForceMove that contains the rules and functions governing the channel
 
-**GalileoApp** is **ForceMoveApp** <-- GalileoApp is an implementatio of ForceMoveApp that defines what a valid transition of the state machine should be
+**GalileoApp** is **ForceMoveApp** <-- GalileoApp is an implementation of ForceMoveApp that defines what a valid transition of the state machine should be
 
 ## Embark Framework Details
 
