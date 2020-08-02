@@ -3,6 +3,7 @@
 chains.json
 dist
 embarkArtifacts
+embarkArtifacts/
 temp
 
 # OpenZeppelin temporary development network config files
