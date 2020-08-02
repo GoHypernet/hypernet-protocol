@@ -43,19 +43,22 @@ deploying, testing, and migrating smart contracts; it is very powerful and helpf
 
 ## Usage
 
-1) Spin up the development ganache instance:
+1) Reset the Embark framework (if you desire a fresh chain to redeploy contracts!)
 
-`npx ganache-cli --deterministic`
+2) Deploy.
 
-2) Deploy via OpenZeppelin, which uses Truffle under hood.
+`embark run`
 
-`npx openzeppelin deploy`
+This will deploy any contracts specified in `config/contracts.js`, and run any before/during/after hooks associated.
 
-This will begin an interactive prompt that will ask you what network you want to deploy on,
-what contract you want to deploy, and will let you call any functions on it.
+3) Run scripts from the CLI, if desired. Interact with the UI, if desired. Examine & interact with contracts in Embark's admin UI.
 
-Because we are using the Openzeppelin Upgradeable contracts, we must use initializers, and not constructors,
-for contracts. [Make sure you read up on the differences.](https://docs.openzeppelin.com/upgrades/2.8/writing-upgradeable)
+`embark exec development scripts/001_setup_channels.js`
+
+`https://localhost:8000`
+
+`https://localhost:55555`
+
 
 ```
 ❯ oz deploy
