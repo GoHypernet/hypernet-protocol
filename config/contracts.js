@@ -63,6 +63,13 @@ module.exports = {
 				onDeploy: async ({contracts, web3, logger}) => {
 					await contracts.Hypertoken.methods.initialize().send({from: web3.eth.defaultAccount});
 				}
+			},
+
+			HypertokenAssetHolder: {
+				args: [
+					'$HypernetProtocolAdjudicator',
+					'$Hypertoken'
+				]
 			}
     }
   },
