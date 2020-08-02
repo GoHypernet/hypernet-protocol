@@ -24,18 +24,30 @@ module.exports = {
     //            when not specified
     // - explicit will only attempt to deploy the contracts that are explicitly specified inside the
     //            contracts section.
-    // strategy: 'implicit',
+    strategy: 'explicit',
 
     // minimalContractSize, when set to true, tells Embark to generate contract files without the heavy bytecodes
     // Using filteredFields lets you customize which field you want to filter out of the contract file (requires minimalContractSize: true)
     // minimalContractSize: false,
     // filteredFields: [],
 
+		interfaces: [
+			'ForceMoveApp',
+			'IAssetHolder',
+			'IForceMove',
+			'IERC20',
+		],
+
+		libraries: [
+
+		],
+
+		// Note: these are all intializable, so they don't take any constructors or deploy args.
+		// We DO, however, need to call the initialize() function after deploying them!
     deploy: {
-      // example:
-      //SimpleStorage: {
-      //  args: [ 100 ]
-      //}
+			HypernetProtocolAdjudicator: { },
+			HypernetProtocolStateMachine: { },
+			Hypertoken: { }
     }
   },
 
