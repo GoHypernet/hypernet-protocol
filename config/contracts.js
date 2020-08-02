@@ -44,10 +44,26 @@ module.exports = {
 
 		// Note: these are all intializable, so they don't take any constructors or deploy args.
 		// We DO, however, need to call the initialize() function after deploying them!
+		// This is done via the onDeploy hooks
     deploy: {
-			HypernetProtocolAdjudicator: { },
-			HypernetProtocolStateMachine: { },
-			Hypertoken: { }
+
+			HypernetProtocolAdjudicator: {
+				onDeploy: async ({contracts, web3, logger}) => {
+					await contracts.HypernetProtocolAdjudicator.methods.initialize().send({from: web3.eth.defaultAccount});
+				}
+			},
+
+			HypernetProtocolStateMachine: {
+				onDeploy: async ({contracts, web3, logger}) => {
+					await contracts.HypernetProtocolStateMachine.methods.initialize().send({from: web3.eth.defaultAccount});
+				}
+			},
+
+			Hypertoken: {
+				onDeploy: async ({contracts, web3, logger}) => {
+					await contracts.Hypertoken.methods.initialize().send({from: web3.eth.defaultAccount});
+				}
+			}
     }
   },
 

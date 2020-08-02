@@ -142,9 +142,7 @@ The frontend for the dApp, at least for development, will be contained within `a
 
 ## Files, Structure, & Other Notes
 
- - Normally, when using Truffle, we'd run `truffle migrate` to deploy contracts and migrations. Because we're using the OpenZeppelin framework, we use `oz deploy` instead.
- - We'll handle the deployment & compilation of the smart contracts with the (Embark framework.)[https://framework.embarklabs.io/]
+ - We'll handle the deployment & compilation of the smart contracts with the [Embark framework.](https://framework.embarklabs.io/)
  - We'll also handle the frontend with Embark.
  - OpenZeppelin stores information about deployed contracts in `.openzeppelin/` as JSON files.
- - Contracts added to `contracts/` will be shown as a choice to deploy when running `oz deploy`
  - Contracts added to `contracts/` will also be picked up by Embark (and callable on the web UI!)
