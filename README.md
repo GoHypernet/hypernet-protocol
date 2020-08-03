@@ -14,10 +14,6 @@ Hypernet smart contracts, SDK, and everything else needed to start building on t
 
  `yarn install` or just `yarn`
 
- 3) Install packages for the Embark framework:
-
- `cd embark/Hypernet && npm install`
-
 ## Components
 
 - [Truffle](https://www.trufflesuite.com/)
@@ -44,6 +40,8 @@ deploying, testing, and migrating smart contracts; it is very powerful and helpf
 ## Usage
 
 1) Reset the Embark framework (if you desire a fresh chain to redeploy contracts!)
+
+`embark reset`
 
 2) Deploy.
 
