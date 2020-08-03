@@ -16,6 +16,7 @@ module.exports = {
 "EnumerableSet": require('./EnumerableSet.js').default,
 "PausableUpgradeSafe": require('./PausableUpgradeSafe.js').default,
 "AssetHolder": require('./AssetHolder.js').default,
+"ERC20AssetHolder": require('./ERC20AssetHolder.js').default,
 "ForceMove": require('./ForceMove.js').default,
 "NitroAdjudicator": require('./NitroAdjudicator.js').default,
 "Outcome": require('./Outcome.js').default,
@@ -27,4 +28,5 @@ module.exports = {
 "HypernetProtocolAdjudicator": require('./HypernetProtocolAdjudicator.js').default,
 "HypernetProtocolStateMachine": require('./HypernetProtocolStateMachine.js').default,
 "Hypertoken": require('./Hypertoken.js').default,
+"HypertokenAssetHolder": require('./HypertokenAssetHolder.js').default,
 };

@@ -6,6 +6,10 @@ embarkArtifacts
 embarkArtifacts/
 temp
 
+# Swap files
+*.swp
+*.swo
+
 # OpenZeppelin temporary development network config files
 .openzeppelin/dev-*.json
 .openzeppelin/.session
