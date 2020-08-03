@@ -162,7 +162,9 @@
       "inputs": [],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "constructor"
+      "type": "constructor",
+      "name": "constructor",
+      "signature": "constructor"
     },
     {
       "anonymous": false,
@@ -551,7 +553,9 @@
       ],
       "payable": false,
       "stateMutability": "nonpayable",
-      "type": "constructor"
+      "type": "constructor",
+      "name": "constructor",
+      "signature": "constructor"
     },
     {
       "anonymous": false,

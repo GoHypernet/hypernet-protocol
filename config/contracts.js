@@ -38,40 +38,38 @@ module.exports = {
 			'IERC20',
 		],
 
-		libraries: [
-
-		],
-
 		// Note: these are all intializable, so they don't take any constructors or deploy args.
 		// We DO, however, need to call the initialize() function after deploying them!
 		// This is done via the onDeploy hooks
     deploy: {
 
 			HypernetProtocolAdjudicator: {
-				onDeploy: async ({contracts, web3, logger}) => {
-					await contracts.HypernetProtocolAdjudicator.methods.initialize().send({from: web3.eth.defaultAccount});
-				}
+
 			},
 
 			HypernetProtocolStateMachine: {
-				onDeploy: async ({contracts, web3, logger}) => {
-					await contracts.HypernetProtocolStateMachine.methods.initialize().send({from: web3.eth.defaultAccount});
-				}
+
 			},
 
 			Hypertoken: {
-				onDeploy: async ({contracts, web3, logger}) => {
-					await contracts.Hypertoken.methods.initialize().send({from: web3.eth.defaultAccount});
-				}
+
 			},
 
+			// Note that even though this does require the addresses of its two depencies to deploy, there is no type checking;
+			// Therefore, we can deploy all four contracts, and then call initialize on the three initializable contracts afterwards
 			HypertokenAssetHolder: {
 				args: [
 					'$HypernetProtocolAdjudicator',
 					'$Hypertoken'
 				]
 			}
-    }
+    },
+
+		afterDeploy: ({contracts, web3, logger}) => {
+			contracts.HypernetProtocolAdjudicator.methods.initialize().send({from: web3.eth.defaultAccount});
+			contracts.HypernetProtocolStateMachine.methods.initialize().send({from: web3.eth.defaultAccount});
+			contracts.Hypertoken.methods.initialize().send({from: web3.eth.defaultAccount});
+		}
   },
 
   // default environment, merges with the settings in default

@@ -12,6 +12,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/presets/ERC20PresetMi
  * the difference between initializable and constructor-based contracts!
  **/
 contract Hypertoken is Initializable, ERC20PresetMinterPauserUpgradeSafe {
+
 	function initialize() public initializer {
 		ERC20PresetMinterPauserUpgradeSafe.initialize(
 			"Hypertoken",
