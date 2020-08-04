@@ -2,7 +2,8 @@
 .embark
 chains.json
 dist
-embarkArtifacts
+embarkArtifacts/
+embarkArtifacts/*
 temp
 
 # Swap files
