@@ -1,11 +1,8 @@
 /* Ethereum wallet utilities */
 
-//import { ethers } from "ethers";
 const ethers = require("ethers");
-//console.log(ethers)
 //const { bigNumberify, hexlify } = ethers.utils;
 //const { HashZero } = ethers.constants;
-
 
 /* Statechannel wallet utilities */
 /*
@@ -21,8 +18,8 @@ import {
 	signChallengeMessage,
 } from "@statechannels/nitro-protocol";
 */
+
 const nitro = require("@statechannels/nitro-protocol");
-//console.log(nitro);
 
 // Contracts contains all embark smart contract instances
 // Web3 contains...web3 (and associated accounts, etc)
