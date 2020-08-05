@@ -4,17 +4,19 @@ module.exports = {
   // default applies to all environments
   default: {
     enabled: true,
-    client: "geth" // Can be ganache-cli, geth or parity (default: geth)
+    client: "ganache-cli" // Can be ganache-cli, geth or parity (default: geth)
   },
 
   development: {
     client: 'ganache-cli',
     clientConfig: {
-      miningMode: 'dev' // Mode in which the node mines. Options: dev, auto, always, off
+      miningMode: 'dev'
     }
   },
 
   privatenet: {
+		client: 'ganache-cli',
+
     // Accounts to use as node accounts
     // The order here corresponds to the order of `web3.eth.getAccounts`, so the first one is the `defaultAccount`
     // For more account configurations, see: https://framework.embarklabs.io/docs/blockchain_accounts_configuration.html
@@ -25,6 +27,7 @@ module.exports = {
         password: "config/development/password" // Password file for the accounts
       }
     ],
+
     clientConfig: {
       datadir: ".embark/privatenet/datadir", // Data directory for the databases and keystore
       miningMode: 'auto',

@@ -5,7 +5,7 @@ import EmbarkJS from 'Embark/EmbarkJS';
 //import SimpleStorage from 'Embark/contracts/SimpleStorage';
 
 EmbarkJS.onReady((err) => {
-  // You can execute contract calls after the connection
+
 });
 
 // OR if using "library: 'web3'" in config/contracts.js

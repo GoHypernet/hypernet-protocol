@@ -16,10 +16,12 @@
     "embark-swarm": {},
     "embark-whisper-geth": {},
     "embark-geth": {},
+		"embark-ganache": {},
     "embark-parity": {},
     "embark-profiler": {},
     "embark-graph": {},
-    "embark-basic-pipeline": {}
+    "embark-basic-pipeline": {},
+		"embark-scripts-runner": {}
   },
   "options": {
     "solc": {

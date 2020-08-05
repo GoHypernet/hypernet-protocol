@@ -28,6 +28,10 @@
   "dependencies": {
     "@openzeppelin/contracts": "^3.1.0",
     "@openzeppelin/contracts-ethereum-package": "^3.0.0",
-    "@statechannels/nitro-protocol": "^0.1.6"
+    "@statechannels/nitro-protocol": "^0.1.6",
+    "embark-ethereum-blockchain-client": "^6.0.0",
+    "embark-ganache": "^6.0.0",
+    "embark-scripts-runner": "^6.0.0",
+    "ethers": "^5.0.8"
   }
 }
