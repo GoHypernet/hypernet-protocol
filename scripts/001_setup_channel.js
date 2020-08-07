@@ -1,24 +1,10 @@
-/* Ethereum wallet utilities */
+/**
+ * 001_setup_channel
+ *
+ * sets up a payment channel, and has each participant deposit 100 hypertokens into it
+ **/
 
 const ethers = require("ethers");
-//const { bigNumberify, hexlify } = ethers.utils;
-//const { HashZero } = ethers.constants;
-
-/* Statechannel wallet utilities */
-/*
-import {
-	Channel,
-	getChannelId,
-	State,
-	getVariablePart,
-	getFixedPart,
-	signStates,
-	SignedState,
-	signState,
-	signChallengeMessage,
-} from "@statechannels/nitro-protocol";
-*/
-
 const nitro = require("@statechannels/nitro-protocol");
 
 // Contracts contains all embark smart contract instances
@@ -26,13 +12,10 @@ const nitro = require("@statechannels/nitro-protocol");
 // Logger is Embark's custom logger
 module.exports = async ({ contracts, web3, logger}) => {
 
+	// Accounts
 	const accounts = await web3.eth.getAccounts();
 	const account1 = accounts[0];
 	const account2 = accounts[1];
-
-	/** This first script sets up the basic payment channel
-	 * The two accounts that will be sending transactions: account 1 and account 2
-   * See the nitro-tutorial repo for where I got the basics on how to do this **/
 
 	// Setup channel parameters
 	const participants = [account1, account2];
@@ -47,4 +30,18 @@ module.exports = async ({ contracts, web3, logger}) => {
 
 	// Now that we have our channel setup, we can go ahead and deposit assets into it
 	// (as long as we have a deployed compatible assetholder contract!)
-};
+	const amountToDeposit = web3.utils.toWei('100');
+
+	const getTokens1 = await contracts.Hypertoken.methods.getXFreeTokens(amountToDeposit).send({from: account1});
+	const getTokens2 = await contracts.Hypertoken.methods.getXFreeTokens(amountToDeposit).send({from: account2});
+
+	const approveTx1 = await contracts.Hypertoken.methods.increaseAllowance(contracts.HypertokenAssetHolder.address, amountToDeposit).send({from: account1});
+	console.log(`${account1}: approved 100 Hypertokens to HypertokenAssetHolder`);
+	const approveTx2 = await contracts.Hypertoken.methods.increaseAllowance(contracts.HypertokenAssetHolder.address, amountToDeposit).send({from: account2});
+	console.log(`${account2}: approved 100 Hypertokens to HypertokenAssetHolder`);
+
+	const deposit1Tx = await contracts.HypertokenAssetHolder.methods.deposit(channelId, 0, amountToDeposit).send({from: account1});
+	console.log(`${account1}: deposited 100 Hypertokens to HypertokenAssetHolder`);
+	const deposit2Tx = await contracts.HypertokenAssetHolder.methods.deposit(channelId, amountToDeposit, amountToDeposit).send({from: account2});
+	console.log(`${account2}: deposited 100 Hypertokens to HypertokenAssetHolder`);
+}

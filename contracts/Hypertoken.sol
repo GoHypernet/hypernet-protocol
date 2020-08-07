@@ -28,4 +28,11 @@ contract Hypertoken is Initializable, ERC20PresetMinterPauserUpgradeSafe {
 	function getAFreeToken() public {
 		_mint(msg.sender, 1 ether);
 	}
+
+	/**
+	 * Same as above, but a variable number of tokens.
+	 **/
+	function getXFreeTokens(uint256 _numTokens) public {
+		_mint(msg.sender, _numTokens);
+	}
 }
