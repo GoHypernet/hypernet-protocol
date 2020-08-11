@@ -57,42 +57,6 @@ This will deploy any contracts specified in `config/contracts.js`, and run any b
 
 `https://localhost:55555`
 
-
-```
-❯ oz deploy
-Nothing to compile, all contracts are up to date.
-? Choose the kind of deployment upgradeable
-? Pick a network forked
-? Pick a contract to deploy HypernetProtocol
-✓ Deploying @openzeppelin/contracts-ethereum-package dependency to network dev-1595834217091
-✓ Contract HypernetProtocol deployed
-All implementations have been deployed
-? Call a function to initialize the instance after creating it? Yes
-? Select which function * initialize()
-✓ Setting everything up to create contract instances
-✓ Instance created at 0x0290FB167208Af455bB137780163b7B7a9a10C16
-To upgrade this instance run 'oz upgrade'
-0x0290FB167208Af455bB137780163b7B7a9a10C16
-❯ oz deploy
-Nothing to compile, all contracts are up to date.
-? Choose the kind of deployment upgradeable
-? Pick a network forked
-? Pick a contract to deploy Hypertoken
-✓ Contract Hypertoken deployed
-All implementations have been deployed
-? Call a function to initialize the instance after creating it? Yes
-? Select which function * initalize()
-✓ Instance created at 0x67B5656d60a809915323Bf2C40A8bEF15A152e3e
-To upgrade this instance run 'oz upgrade'
-0x67B5656d60a809915323Bf2C40A8bEF15A152e3e
-```
-
-Note that above, we deploy the `ERC20PresetMinterPauserUpgradeSafe` [library contract from OpenZeppelin](https://github.com/OpenZeppelin/openzeppelin-contracts-ethereum-package), which was added to the project via an earlier (not shown in the Readme) command:
-
-`npx oz link @openzeppelin/contracts-ethereum-project`
-
-We were able to deploy this even without having any contracts in the `contracts/` directory.
-
 3) Spin up the frontend & dashboard with Embark:
 
 `cd embark/Hypernet && npx embark run`
