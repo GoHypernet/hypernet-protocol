@@ -1,0 +1,82 @@
+
+				/rticipantgroup Consumer Galileo Instance
+participant Consumer UI
+participant Consumer Agent
+participant Consumer Core
+participant Consumer Nitro
+end
+
+participant 3Box
+participant ETH Blockchain
+
+participantgroup Provider Galileo Instance
+participant Provider Nitro
+participant Provider Core
+participant Provider Agent
+participant Provider UI
+end
+
+Consumer UI->Consumer Agent:makePayment(amount, walletAddr)
+activate Consumer Agent
+Consumer Agent->Consumer Core:HypernetChannelService.createChannel()
+deactivate Consumer Agent
+
+activate Consumer Core
+Consumer Core->Consumer Nitro:NitroChannelClient.createChannel()
+deactivate Consumer Core
+
+activate Consumer Nitro
+Consumer Nitro->Consumer Core:(NitroChannelResult)
+
+
+activate Consumer Core
+Consumer Core->Consumer Agent:(HypernetChannelResult)
+deactivate Consumer Core
+activate Consumer Agent
+
+Consumer Nitro->Consumer Core:callback:onMessageQueued
+deactivate Consumer Nitro
+
+activate Consumer Core
+Consumer Core->3Box:space.postData()
+deactivate Consumer Core
+
+Consumer Agent->Consumer Core:HypernetChannelService.makeDeposit(amount, walletAddr)
+deactivate Consumer Agent
+
+activate Consumer Core
+Consumer Core->ETH Blockchain:deposit()
+deactivate Consumer Core
+
+activate ETH Blockchain
+ETH Blockchain->Consumer Core:event emitted: transaction success
+deactivate ETH Blockchain
+
+activate Consumer Core
+Consumer Core->Consumer Agent:callback: deposit successful
+deactivate Consumer Core
+
+activate Consumer Agent
+Consumer Agent-> Consumer Core:HypernetChannelService.makePayment(amount, walletAddr)
+deactivate Consumer Agent
+
+activate Consumer Core
+Consumer Core->Consumer Nitro:NitroChannelClient.updateChannel()
+deactivate Consumer Core
+
+activate Consumer Nitro
+Consumer Nitro->Consumer Core:(NitroChannelResult)
+activate Consumer Core
+Consumer Core->Consumer Agent:(HypernetChannelResult)
+activate Consumer Agent
+deactivate Consumer Core
+
+Consumer Nitro->Consumer Core:callback: onMessageQueued
+deactivate Consumer Nitro
+
+activate Consumer Core
+Consumer Core->3Box:space.postData()
+deactivate Consumer Core
+
+Consumer Agent->Consumer UI:paymentSuccessful()
+deactivate Consumer Agent/console.log('Known hash detected.')
