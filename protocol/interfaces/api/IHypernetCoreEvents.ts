@@ -1,5 +1,5 @@
 import {PartialTxParams} from '@0x/subproviders';
-import {Channel, Deposit, Payment, Stake, Withdrawal} from '.';
+import {Channel, Deposit, Payment, Stake, Withdrawal} from '../objects';
 import {ITypedData} from 'eth-sig-util';
 import {Token} from './objects/Token';
 
