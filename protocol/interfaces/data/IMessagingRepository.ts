@@ -1,5 +1,5 @@
-import {Message} from "@interfaces/objects"
+import { Message } from "@interfaces/objects";
 
 export interface IMessagingRepository {
-    sendMessage(message: Message): Promise<void>;
+  sendMessage(message: Message): Promise<void>;
 }

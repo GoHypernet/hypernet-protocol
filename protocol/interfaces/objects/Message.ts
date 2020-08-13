@@ -1,7 +1,5 @@
-import {Address} from "@interfaces/objects";
+import { Address } from "@interfaces/objects";
 
 export class Message {
-    constructor(public sourceAddress: Address,
-    public destinationAddress: Address,
-    public content: string) {}
+  constructor(public sourceAddress: Address, public destinationAddress: Address, public content: string) {}
 }

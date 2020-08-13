@@ -1,3 +1,3 @@
 export interface IStateChannelListener {
-    onChannelUpdated(callback: ()=>void): void;
+  onChannelUpdated(callback: () => void): void;
 }
