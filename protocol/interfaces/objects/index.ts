@@ -1,4 +1,5 @@
 export * from "./Address";
+export * from "./BigNumber";
 export * from "./Deposit";
 export * from "./HypernetChannel";
 export * from "./Message";

@@ -1,5 +1,4 @@
-import {BigNumber} from '..';
-
+import {BigNumber, Address} from "@interfaces/objects";
 import {EChannelState} from "@interfaces/types";
 
 export class HypernetChannel {
@@ -12,10 +11,11 @@ export class HypernetChannel {
         public providerBalance: BigNumber,
         public providerStake: BigNumber,
         public state: EChannelState,
-        public internalChannelId: Optional<string>
+        public internalChannelId: string | null
     ) {}
 
-    public get id() {
-
+    public get id(): string {
+        //return hash(this.consumer, this.provider);
+        return "";
     }
 }

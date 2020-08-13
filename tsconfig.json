@@ -10,11 +10,12 @@
         "removeComments": false,
         "preserveConstEnums": true,
         "sourceMap": true,
+        "strictNullChecks": true,
         "paths": {
             "@interfaces/*": ["protocol/interfaces/*"],
             "@implementations/*": ["protocol/implementations/*"]
         }
     },
     "include": ["protocol/**/*"],
-    "exclude": ["node_modules", "**/*.spec.ts"]
+    "exclude": ["node_modules/*", "**/*.spec.ts"]
 }

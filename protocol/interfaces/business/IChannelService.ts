@@ -1,4 +1,4 @@
-import {HypernetChannel, Address} from "@interfaces/objects";
+import {HypernetChannel, Address, BigNumber} from "@interfaces/objects";
 
 export interface IChannelService {
     openChannel(consumerWallet: Address, providerWallet: Address, paymentToken: Address, depositAmount: BigNumber): Promise<HypernetChannel>;

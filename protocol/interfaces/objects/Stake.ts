@@ -1,4 +1,4 @@
-import {BigNumber} from '..';
+import {BigNumber} from "@interfaces/objects";
 
 export class NewStake {
     constructor(public amount: BigNumber, public type: 'deposit' | 'withdrawal', public state: string) {}

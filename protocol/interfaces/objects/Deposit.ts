@@ -1,5 +1,5 @@
-import {BigNumber} from '..';
-import * from moment;
+import {BigNumber} from "@interfaces/objects";
+import * as moment from "moment";
 
 export enum DepositState {
     PENDING_INITIALIZATION = 0, //the default value when one is not set

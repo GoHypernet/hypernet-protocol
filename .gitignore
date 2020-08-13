@@ -123,3 +123,6 @@ dist
 .tern-port
 
 .openzeppelin/.session
+
+# Ignore the compiled code
+/lib

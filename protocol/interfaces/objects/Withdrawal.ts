@@ -1,4 +1,4 @@
-import {BigNumber} from '..';
+import {BigNumber} from "@interfaces/objects"
 
 export enum WithdrawalState {
     PENDING_INITIALIZATION = 0, //the default value when one is not set
