@@ -33,6 +33,7 @@
     "embark-ethereum-blockchain-client": "^6.0.0",
     "embark-ganache": "^6.0.0",
     "embark-scripts-runner": "^6.0.0",
-    "ethers": "^5.0.8"
+    "ethers": "^5.0.8",
+    "momentjs": "^2.0.0"
   }
 }

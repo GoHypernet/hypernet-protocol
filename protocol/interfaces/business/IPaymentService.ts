@@ -1,3 +1,6 @@
+import {Payment} from "@interfaces/objects";
+
 export interface IPaymentService {
-    sendPayment(channelId: int, amount: float): Promise<Payment>;
+    sendPayment(channelId: string, amount: BigNumber): Promise<Payment>;
+    requestPayment(channelId: string, amount: BigNumber): Promise<Payment>;
 }

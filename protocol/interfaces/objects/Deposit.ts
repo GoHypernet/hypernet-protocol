@@ -1,4 +1,5 @@
 import {BigNumber} from '..';
+import * from moment;
 
 export enum DepositState {
     PENDING_INITIALIZATION = 0, //the default value when one is not set
@@ -9,26 +10,11 @@ export enum DepositState {
     MINED // Deposit mined
 }
 
-export class NewDeposit {
+export class Deposit {
     constructor(
-        public channelId: number,
-        public uuid: string,
+        public channelId: string,
         public depositAmount: BigNumber,
-        public consumerBalance: BigNumber,
-        public state: number
-    ) {}
-}
-
-export class Deposit extends NewDeposit {
-    constructor(
-        public id: number,
-        public channelId: number,
-        public uuid: string,
-        public depositAmount: BigNumber,
-        public consumerBalance: BigNumber,
         public state: number,
-        public minedBlock: number
-    ) {
-        super(channelId, uuid, depositAmount, consumerBalance, state);
-    }
+        public timestamp: moment.Moment
+    ) {}
 }
