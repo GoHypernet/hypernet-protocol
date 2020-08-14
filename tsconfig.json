@@ -2,20 +2,19 @@
     "compilerOptions": {
         "declaration": true,
         "outDir": "./lib",
-        "strict": true,
         "target": "es5",
         "baseUrl": ".",
         "module": "commonjs",
-        "noImplicitAny": true,
         "removeComments": false,
+        "moduleResolution": "node",
         "preserveConstEnums": true,
         "sourceMap": true,
-        "strictNullChecks": true,
+        "strict": true,
         "paths": {
             "@interfaces/*": ["protocol/interfaces/*"],
             "@implementations/*": ["protocol/implementations/*"]
         }
     },
-    "include": ["protocol/**/*"],
+    "include": ["./protocol/**/*", "./typings/**/*"],
     "exclude": ["node_modules/*", "**/*.spec.ts"]
 }
