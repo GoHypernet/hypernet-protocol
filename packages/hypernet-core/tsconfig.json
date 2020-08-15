@@ -11,10 +11,10 @@
         "sourceMap": true,
         "strict": true,
         "paths": {
-            "@interfaces/*": ["protocol/interfaces/*"],
-            "@implementations/*": ["protocol/implementations/*"]
+            "@interfaces/*": ["src/interfaces/*"],
+            "@implementations/*": ["src/implementations/*"]
         }
     },
-    "include": ["./protocol/**/*", "./typings/**/*"],
+    "include": ["./src/**/*", "./typings/**/*"],
     "exclude": ["node_modules/*", "**/*.spec.ts"]
 }

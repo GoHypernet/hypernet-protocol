@@ -1,0 +1,49 @@
+{
+  "name": "@hypernetlabs/hypernet-core",
+  "version": "0.0.1",
+  "description": "Hypernet Core. Represents the SDK for running the Hypernet Protocol.",
+  "keywords": [
+    "Blockchain",
+    "Hypernet",
+    "SDK",
+    "Nitro",
+    "Etherium"
+  ],
+  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/core#readme",
+  "license": "ISC",
+  "main": "lib/core.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "devDependencies": {
+    "prettier": "^2.0.5",
+    "tslint": "^6.1.3",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.9.7"
+  },
+  "dependencies": {
+    "3box": "^1.21.0",
+    "@statechannels/channel-client": "^0.2.0",
+    "bignumber": "^1.1.0",
+    "moment": "^2.27.0",
+    "rxjs": "^6.6.2"
+  },
+  "files": [
+    "lib/**/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "scripts": {
+    "test": "embark test",
+    "build": "npx tsc -b",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "tslint -p tsconfig.json"
+  },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  }
+}
