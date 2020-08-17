@@ -11,8 +11,8 @@ export class Payment {
   constructor(
     public channelId: string,
     public amount: BigNumber,
-    public created_timestamp: moment.Moment,
-    public updated_timestamp: moment.Moment,
+    public createdTimestamp: moment.Moment,
+    public updatedTimestamp: moment.Moment,
     public state: EPaymentState,
   ) {}
 }

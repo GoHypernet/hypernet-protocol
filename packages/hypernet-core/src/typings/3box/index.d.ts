@@ -4,6 +4,8 @@
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
 declare module "3box" {
+  import { provider } from "web3-core";
+
   export interface BoxVerified {
     Verified: () => BoxVerified;
     DID: () => string;
@@ -22,23 +24,36 @@ declare module "3box" {
     limit?: number;
     reverse?: boolean;
   }
-  export interface BoxThread {
-    BoxThread: () => BoxThread;
-    post: (message: string) => string;
-    getPosts: (opts?: BoxThreadOpts_getPosts) => any[];
-    onNewPost: (newPostFn: () => undefined) => undefined;
+  export class BoxThreadPost {
+    author: string;
+    message: string;
+    postId: string;
+    timestamp: number;
+  }
+
+  export class BoxThread {
+    /// Returns the postID of the new post
+    post: (message: string, to?: string) => string;
+    getPosts: (opts?: BoxThreadOpts_getPosts) => BoxThreadPost[];
+    addMember(address: string): Promise<void>;
+    address: string;
+    onUpdate(cb: () => void): void;
+    deletePost(id: string);
   }
   export interface BoxSpaceOpts_joinThread {
     noAutoSub?: boolean;
   }
-  export interface BoxSpace {
+  export class BoxSpace {
     public: BoxKeyValueStore;
     private: BoxKeyValueStore;
-    joinThread: (name: string, opts?: BoxSpaceOpts_joinThread) => BoxThread;
+    joinThread(name: string, opts?: BoxSpaceOpts_joinThread): Promise<BoxThread>;
+    joinThreadByAddress(threadAddress: string): Promise<BoxThread>;
     subscribeThread: (name: string) => undefined;
     unsubscribeThread: (name: string) => undefined;
     subscribedThreads: () => string[];
-    BoxSpace: () => BoxSpace;
+    syncDone: Promise<void>;
+    createThread(threadName: string): Promise<BoxThread>;
+    createConfidentialThread(threadName: string): Promise<BoxThread>;
   }
   export interface BoxKeyValueStoreMetadata {
     // missing definition
@@ -48,9 +63,9 @@ declare module "3box" {
   export interface BoxKeyValueStore {
     BoxKeyValueStore: () => BoxKeyValueStore;
     log: any[];
-    get: (key: any) => any;
+    get: (key: string) => any;
     getMetadata: (key: any) => BoxKeyValueStoreMetadata | undefined;
-    set: (key: any, value: any) => boolean;
+    set: (key: string, value: any) => boolean;
     remove: (key: any) => boolean;
   }
   export interface BoxIsMuportDIDReturn {
@@ -63,8 +78,8 @@ declare module "3box" {
     isClaim: (claim: any, opts: any) => Promise<boolean>;
   }
   export interface BoxObjectOpts_OpenSpace {
-    consentCallback?: () => any;
-    onSyncDone?: () => any;
+    consentCallback?: () => void;
+    onSyncDone?: () => void;
   }
   export interface BoxObjectOpts_GetProfile {
     addressServer?: string;
@@ -95,14 +110,22 @@ declare module "3box" {
     addressServer?: string;
   }
 
+  export interface AuthAddressObject {
+    address: string;
+  }
+
   export class BoxInstance {
     public: BoxKeyValueStore;
     private: BoxKeyValueStore;
     verified: BoxVerified;
     spaces: any;
-    openSpace: (name: string, opts?: BoxObjectOpts_OpenSpace) => any;
-    onSyncDone: (cb: () => undefined) => null;
-    logout: () => any;
+    openSpace(name: string, opts?: BoxObjectOpts_OpenSpace): Promise<BoxSpace>;
+    auth(spaces: string[], address: AuthAddressObject): Promise<void>;
+    onSyncDone(cb: () => void): void;
+    syncDone: Promise<void>;
+    logout(): Promise<void>;
+    getThread(): Promise<BoxThread>;
+    getThreadByAddress(address: string): Promise<BoxThread>;
   }
 
   export const idUtils: BoxStaticIdUtils;
@@ -113,7 +136,12 @@ declare module "3box" {
   export function listSpaces(address: any, opts?: BoxObjectOpts_ListSpaces): undefined;
   export function profileGraphQL(query: any, opts?: BoxObjectOpts_profileGraphQL): undefined;
   export function getVerifiedAccounts(profile: any): undefined;
-  export function openBox(address: any, ethereumProvider: any, opts?: BoxObjectOpts_openBox): BoxInstance;
-  export function isLoggedIn(address: any): undefined;
-  export function openSpace(spaceName: string): BoxSpace;
+  export function openBox(
+    address: string,
+    ethereumProvider: provider,
+    opts?: BoxObjectOpts_openBox,
+  ): Promise<BoxInstance>;
+  export function isLoggedIn(address: any): boolean;
+  export function openSpace(spaceName: string, opts?: BoxObjectOpts_OpenSpace): Promise<BoxSpace>;
+  export function create(etheriumProvider: provider): Promise<BoxInstance>;
 }
