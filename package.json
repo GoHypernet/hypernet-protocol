@@ -10,7 +10,7 @@
     "lerna": "^3.22.1"
   },
   "scripts": {
-    "test": "jest",
+    "test": "lerna run test",
     "lint": "lerna run lint",
     "format": "lerna run format"
   },
