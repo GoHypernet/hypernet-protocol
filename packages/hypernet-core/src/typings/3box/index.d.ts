@@ -38,7 +38,7 @@ declare module "3box" {
     addMember(address: string): Promise<void>;
     address: string;
     onUpdate(cb: () => void): void;
-    deletePost(id: string);
+    deletePost(id: string): Promise<void>;
   }
   export interface BoxSpaceOpts_joinThread {
     noAutoSub?: boolean;
@@ -60,18 +60,26 @@ declare module "3box" {
     dummy: boolean;
   }
 
-  export interface BoxKeyValueStore {
-    BoxKeyValueStore: () => BoxKeyValueStore;
-    log: any[];
-    get: (key: string) => any;
-    getMetadata: (key: any) => BoxKeyValueStoreMetadata | undefined;
-    set: (key: string, value: any) => boolean;
-    remove: (key: any) => boolean;
+  export class BoxLogEntry {
+    public op: string;
+    public key: string;
+    public value: string;
+    public timestamp: string;
   }
+
+  export class BoxKeyValueStore {
+    log(): Promise<BoxLogEntry[]>;
+    get<T>(key: string): Promise<T>;
+    getMetadata: (key: string) => BoxKeyValueStoreMetadata | undefined;
+    set<T>(key: string, value: T): Promise<boolean>;
+    remove(key: string): Promise<boolean>;
+  }
+
   export interface BoxIsMuportDIDReturn {
     // missing definition
     dummy: boolean;
   }
+
   export class BoxStaticIdUtils {
     verifyClaim: () => any;
     isMuportDID: (address: any) => BoxIsMuportDIDReturn | boolean;

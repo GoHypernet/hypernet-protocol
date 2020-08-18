@@ -34,8 +34,8 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
     return this.box;
   }
 
-  public async getPrivateSpaces(spaceNames: string[]): Promise<BoxSpace[]> {
-    const returnSpaces = new Array<BoxSpace>();
+  public async getSpaces(spaceNames: string[]): Promise<{ [spaceName: string]: BoxSpace }> {
+    const returnSpaces: { [spaceName: string]: BoxSpace } = {};
     const spacesToAuth = new Array<string>();
 
     for (const spaceName of spaceNames) {
@@ -43,7 +43,7 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
         // Need to auth the space
         spacesToAuth.push(spaceName);
       } else {
-        returnSpaces.push(this.spaces[spaceName]);
+        returnSpaces[spaceName] = this.spaces[spaceName];
       }
     }
 
@@ -73,7 +73,7 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
       this.spaces[key] = space;
 
       // Add it to the return
-      returnSpaces.push(space);
+      returnSpaces[key] = space;
     }
 
     return returnSpaces;
