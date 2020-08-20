@@ -10,11 +10,12 @@
         "preserveConstEnums": true,
         "sourceMap": true,
         "strict": true,
+        "esModuleInterop": true,
         "paths": {
             "@interfaces/*": ["./src/interfaces/*"],
             "@implementations/*": ["./src/implementations/*"]
         }
     },
-    "include": ["./src/**/*", "./typings/**/*", "**/__tests__/*"],
+    "include": ["./src/**/*", "./typings/**/*", "**/__tests__/**/*"],
     "exclude": ["node_modules/*"]
 }

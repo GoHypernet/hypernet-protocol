@@ -1,5 +1,3 @@
-import { Address } from "@interfaces/objects";
+import {Message as NitroMessage} from "@statechannels/client-api-schema";
 
-export class Message {
-  constructor(public sourceAddress: Address, public destinationAddress: Address, public content: string) {}
-}
+export type Message = NitroMessage;

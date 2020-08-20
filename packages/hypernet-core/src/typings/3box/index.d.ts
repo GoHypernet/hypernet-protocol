@@ -33,11 +33,11 @@ declare module "3box" {
 
   export class BoxThread {
     /// Returns the postID of the new post
-    post: (message: string, to?: string) => string;
-    getPosts: (opts?: BoxThreadOpts_getPosts) => BoxThreadPost[];
+    post(message: string, to?: string): Promise<string>;
+    getPosts(opts?: BoxThreadOpts_getPosts): Promise<BoxThreadPost[]>;
     addMember(address: string): Promise<void>;
     address: string;
-    onUpdate(cb: () => void): void;
+    onUpdate(cb: (post: BoxThreadPost) => void): void;
     deletePost(id: string): Promise<void>;
   }
   export interface BoxSpaceOpts_joinThread {

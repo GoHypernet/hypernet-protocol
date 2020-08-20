@@ -9,7 +9,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
     constructor(protected boxUtils: IThreeBoxUtils, 
         protected configProvider: IConfigProvider) {}
 
-    public async getActiveChannels(address: Address): Promise<HypernetChannel[]> {
+    public async getActiveChannels(): Promise<HypernetChannel[]> {
         const returnChannels = new Array<HypernetChannel>();
 
         const config = await this.configProvider.getConfig();

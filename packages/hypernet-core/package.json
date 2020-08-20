@@ -30,9 +30,12 @@
   "dependencies": {
     "3box": "^1.21.0",
     "@statechannels/channel-client": "^0.2.0",
+    "@statechannels/iframe-channel-provider": "^0.2.0",
+    "@types/sjcl": "^1.0.29",
     "bignumber": "^1.1.0",
     "moment": "^2.27.0",
-    "rxjs": "^6.6.2"
+    "rxjs": "^6.6.2",
+    "sjcl": "^1.0.8"
   },
   "files": [
     "lib/**/*"

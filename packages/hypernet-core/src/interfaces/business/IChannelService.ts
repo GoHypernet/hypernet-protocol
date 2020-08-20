@@ -1,4 +1,4 @@
-import { HypernetChannel, Address, BigNumber } from "@interfaces/objects";
+import { HypernetChannel, Address, BigNumber, Message } from "@interfaces/objects";
 
 export interface IChannelService {
   openChannel(
@@ -9,5 +9,6 @@ export interface IChannelService {
   ): Promise<HypernetChannel>;
   closeChannel(channelId: string): Promise<void>;
   getChannelsById(channelIds: string[]): Promise<HypernetChannel[]>;
-  getActiveChannels(wallet: Address): Promise<HypernetChannel[]>;
+  getActiveChannels(): Promise<HypernetChannel[]>;
+  messageRecieved(channelId: string, message: Message): Promise<void>;
 }

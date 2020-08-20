@@ -3,6 +3,7 @@ import { EChannelState } from "@interfaces/types";
 
 export class HypernetChannel {
   constructor(
+    public id: string,
     public consumer: Address,
     public provider: Address,
     public paymentToken: Address,
@@ -12,10 +13,6 @@ export class HypernetChannel {
     public providerStake: BigNumber,
     public state: EChannelState,
     public internalChannelId: string | null,
+    public threadAddress: Address | null
   ) {}
-
-  public get id(): string {
-    // return hash(this.consumer, this.provider);
-    return "";
-  }
 }
