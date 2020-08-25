@@ -1,6 +1,6 @@
-import { Message, Address, HypernetChannel } from "@interfaces/objects";
+import { Message, EthereumAddress, HypernetLink } from "@interfaces/objects";
 
 export interface IStateChannelRepository {
   pushMessage(message: Message): Promise<void>;
-  createChannel(consumerAddress: Address, providerAddress: Address): Promise<HypernetChannel>;
+  createChannel(consumerAddress: EthereumAddress, providerAddress: EthereumAddress): Promise<HypernetLink>;
 }

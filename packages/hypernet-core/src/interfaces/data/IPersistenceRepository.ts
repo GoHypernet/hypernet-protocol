@@ -1,6 +1,7 @@
-import { HypernetChannel, Address } from "@interfaces/objects";
+import { HypernetLink, EthereumAddress } from "@interfaces/objects";
 export interface IPersistenceRepository {
-  getActiveChannels(): Promise<HypernetChannel[]>;
-  getAllChannels(address: Address): Promise<HypernetChannel[]>;
-  getChannelsById(channelIds: string[]): Promise<HypernetChannel[]>;
+  getActiveLinks(): Promise<HypernetLink[]>;
+  getAllChannels(address: EthereumAddress): Promise<HypernetLink[]>;
+  getChannelsById(channelIds: string[]): Promise<HypernetLink[]>;
+  createLink(link: HypernetLink): Promise<HypernetLink>;
 }

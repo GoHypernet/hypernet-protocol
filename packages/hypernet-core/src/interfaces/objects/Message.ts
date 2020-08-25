@@ -1,3 +1,5 @@
-import {Message as NitroMessage} from "@statechannels/client-api-schema";
+import { EthereumAddress } from ".";
 
-export type Message = NitroMessage;
+export class Message {
+  constructor(public recipient: EthereumAddress, public sender: EthereumAddress, public data: any) {}
+}

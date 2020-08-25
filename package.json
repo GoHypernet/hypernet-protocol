@@ -7,6 +7,7 @@
     "lib": "lib"
   },
   "devDependencies": {
+    "@types/uuid": "^8.3.0",
     "lerna": "^3.22.1"
   },
   "scripts": {
@@ -31,5 +32,8 @@
   "bugs": {
     "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
   },
-  "homepage": "https://github.com/GoHypernet/hypernet-protocol#readme"
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol#readme",
+  "dependencies": {
+    "uuid": "^8.3.0"
+  }
 }

@@ -1,19 +1,16 @@
 import {
   HypernetLink,
-  Deposit,
-  BigNumber,
-  Payment,
   EthereumAddress,
-  PublicKey,
+  Deposit,
   PullSettings,
+  Payment,
+  BigNumber,
   Stake,
-  LinkFinalResult,
+  PublicKey,
 } from "@interfaces/objects";
 
-export interface IHypernetCore {
-  initialize(consumerWallet: string): Promise<void>;
-  getLinks(): Promise<HypernetLink[]>;
-  openHypernetLinks(
+export interface ILinkService {
+  openLink(
     consumerWallet: EthereumAddress,
     providerWallet: EthereumAddress,
     paymentToken: EthereumAddress,
@@ -26,12 +23,9 @@ export interface IHypernetCore {
   sendFunds(linkId: string, amount: BigNumber): Promise<Payment>;
   pullFunds(linkId: string, amount: BigNumber): Promise<Payment>;
   withdrawFunds(linkId: string, amount: BigNumber, destinationAddress: EthereumAddress | null): Promise<Withdrawal>;
-  closeHypernetLink(linkId: string): Promise<void>;
+  closeLink(linkId: string): Promise<void>;
   withdrawStake(linkId: string, destinationAddress: EthereumAddress | null): Promise<Stake>;
 
-  /***
-   * Called by the consumer
-   */
-  initiateDispute(linkId: string): Promise<LinkFinalResult>;
-  closeLink(linkId: string): Promise<LinkFinalResult>;
+  getLinksById(channelIds: string[]): Promise<HypernetLink[]>;
+  getActiveLinks(): Promise<HypernetLink[]>;
 }

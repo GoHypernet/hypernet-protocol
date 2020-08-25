@@ -1,3 +1,1 @@
-export interface IStateChannelListener {
-  
-}
+export interface IStateChannelListener {}
