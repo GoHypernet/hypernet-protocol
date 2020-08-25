@@ -1,7 +1,7 @@
 import { BigNumber } from "@interfaces/objects";
 
 export enum WithdrawalState {
-  PENDING_INITIALIZATION = 0, //the default value when one is not set
+  PENDING_INITIALIZATION = 0, // the default value when one is not set
   CLOSING_AUTHORIZED, // provider authorized consume rto close channel
   PENDING_CHANNEL_CLOSING_TX, // channel closing tx has been sent and needs to be mined
   PENDING_WITHDRAWAL_TX, // provider withdrawal tx has been sent and needs to be mined
@@ -10,13 +10,6 @@ export enum WithdrawalState {
   PROVIDER_WITHDRAWAL_MINED, // Provider either closed or withdrawn from the channel, which the consumer can't know yet
 }
 
-export class NewWithdrawal {
+export class Withdrawal {
   constructor(public channelId: number, public amount: BigNumber, public state: number, public minedBlock: number) {}
-}
-
-export class Withdrawal extends NewWithdrawal {
-  constructor(public id: number, channelId: number, amount: BigNumber, state: number, minedBlock: number) {
-    super(channelId, amount, state, minedBlock);
-    id = -1;
-  }
 }

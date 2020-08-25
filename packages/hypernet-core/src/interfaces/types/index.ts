@@ -1,1 +1,1 @@
-export * from "./EChannelState";
+export * from "./ELinkStatus";

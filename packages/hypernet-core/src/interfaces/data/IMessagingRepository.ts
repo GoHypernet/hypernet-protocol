@@ -1,5 +1,6 @@
-import { Message } from "@interfaces/objects";
+import { Message, MessageThread } from "@interfaces/objects";
 
 export interface IMessagingRepository {
-  sendMessage(message: Message): Promise<void>;
+  createMessageThread(): Promise<MessageThread>;
+  sendMessage(messageThread: MessageThread, message: Message): Promise<void>;
 }

@@ -1,5 +1,5 @@
-import { Address } from "@interfaces/objects";
+import { EthereumAddress } from ".";
 
 export class Message {
-  constructor(public sourceAddress: Address, public destinationAddress: Address, public content: string) {}
+  constructor(public recipient: EthereumAddress, public sender: EthereumAddress, public data: any) {}
 }
