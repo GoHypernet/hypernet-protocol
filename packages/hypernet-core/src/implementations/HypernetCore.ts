@@ -1,5 +1,5 @@
 import { IHypernetCore } from "@interfaces/IHypernetCore";
-import { HypernetLink, Deposit } from "@interfaces/objects";
+import { HypernetLink, Deposit, PullSettings, BigNumber } from "@interfaces/objects";
 import { ThreeBoxUtils } from "./utilities/3BoxUtils";
 import { Web3Provider } from "./utilities/Web3Provider";
 import { ConfigProvider } from "./utilities/ConfigProvider";
@@ -36,8 +36,44 @@ export class HypernetCore implements IHypernetCore {
 
   protected stateChannelListener: IStateChannelListener | undefined;
   protected messagingListener: IMessagingListener | undefined;
+  protected initialized: boolean;
 
-  constructor() {}
+  constructor() {
+    this.initialized= false;
+  }
+  getLinks(): Promise<HypernetLink[]> {
+    throw new Error("Method not implemented.");
+  }
+  openHypernetLinks(consumerWallet: string, providerWallet: string, paymentToken: string, disputeMediator: string, pullSettings: PullSettings): Promise<HypernetLink> {
+    throw new Error("Method not implemented.");
+  }
+  stakeIntoLink(linkId: string, amount: BigNumber): Promise<import("../interfaces/objects").Stake> {
+    throw new Error("Method not implemented.");
+  }
+  depositIntoLink(linkId: string, amount: BigNumber): Promise<Deposit> {
+    throw new Error("Method not implemented.");
+  }
+  sendFunds(linkId: string, amount: BigNumber): Promise<import("../interfaces/objects").Payment> {
+    throw new Error("Method not implemented.");
+  }
+  pullFunds(linkId: string, amount: BigNumber): Promise<import("../interfaces/objects").Payment> {
+    throw new Error("Method not implemented.");
+  }
+  withdrawFunds(linkId: string, amount: BigNumber, destinationAddress: string | null): Promise<import("../interfaces/objects").Withdrawal> {
+    throw new Error("Method not implemented.");
+  }
+  closeHypernetLink(linkId: string): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+  withdrawStake(linkId: string, destinationAddress: string | null): Promise<import("../interfaces/objects").Stake> {
+    throw new Error("Method not implemented.");
+  }
+  initiateDispute(linkId: string): Promise<import("../interfaces/objects").LinkFinalResult> {
+    throw new Error("Method not implemented.");
+  }
+  closeLink(linkId: string): Promise<import("../interfaces/objects").LinkFinalResult> {
+    throw new Error("Method not implemented.");
+  }
 
   public async initialize(consumerWallet: string): Promise<void> {
     this.web3Provider = new Web3Provider();
@@ -47,7 +83,7 @@ export class HypernetCore implements IHypernetCore {
 
     this.stateChannelRepository = new StateChannelsRepository(this.channelClientProvider);
     this.persistenceRepository = new ThreeBoxPersistenceRepository(this.boxUtils, this.configProvider);
-    this.messagingRepository = new ThreeBoxMessagingRepository();
+    this.messagingRepository = new ThreeBoxMessagingRepository(this.boxUtils);
 
     this.linkService = new LinkService(
       this.stateChannelRepository,
@@ -61,6 +97,8 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.stateChannelListener = new StateChannelListener(this.channelClientProvider, this.messageService);
-    this.messagingListener = new ThreeBoxMessagingListener(this.channelService, this.boxUtils, this.configProvider);
+    this.messagingListener = new ThreeBoxMessagingListener(this.linkService, this.messageService, this.boxUtils, this.configProvider);
+
+    this.initialized = true;
   }
 }

@@ -4,10 +4,12 @@ import { Message, HypernetLink } from "@interfaces/objects";
 import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
 import { BoxThreadPost } from "3box";
 import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
+import { IMessageService } from "@interfaces/business/IMessageService";
 
 export class ThreeBoxMessagingListener implements IMessagingListener {
   constructor(
-    protected channelService: ILinkService,
+    protected linkService: ILinkService,
+    protected messageService: IMessageService,
     protected boxUtils: IThreeBoxUtils,
     protected configProvider: IConfigProvider,
   ) {}
@@ -15,7 +17,7 @@ export class ThreeBoxMessagingListener implements IMessagingListener {
   public async initialize() {
     // Listen for 3Box
     // For each open channel, we need to join the thread
-    const channels = await this.channelService.getActiveLinks();
+    const channels = await this.linkService.getActiveLinks();
 
     const channelIds = new Array<string>();
     for (const channel of channels) {
@@ -37,7 +39,7 @@ export class ThreeBoxMessagingListener implements IMessagingListener {
           throw new Error("No channel associated with the thread. This really shouldn't happen!");
         }
         const message = JSON.parse(post.message) as Message;
-        this.channelService.messageRecieved(channel.id, message);
+        this.messageService.messageRecieved(channel.id, message);
       });
     }
   }

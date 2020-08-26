@@ -21,6 +21,6 @@ export class MessageService implements IMessageService {
   }
 
   public async sendMessage(message: Message): Promise<void> {
-    this.messagingRepository.sendMessage(message);
+    // this.messagingRepository.sendMessage(message);
   }
 }

@@ -5,6 +5,9 @@ import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 
 export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
   constructor(protected boxUtils: IThreeBoxUtils, protected configProvider: IConfigProvider) {}
+  createLink(link: HypernetLink): Promise<HypernetLink> {
+    throw new Error("Method not implemented.");
+  }
 
   public async getActiveLinks(): Promise<HypernetLink[]> {
     const returnChannels = new Array<HypernetLink>();
@@ -24,7 +27,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
     for (const [spaceName, space] of Object.entries(channelSpaces)) {
       // The space has a key with all the hypernet information
 
-      returnChannels.push(new HypernetLink());
+      // returnChannels.push(new HypernetLink());
     }
 
     return returnChannels;

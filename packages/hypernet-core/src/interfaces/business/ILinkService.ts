@@ -7,6 +7,7 @@ import {
   BigNumber,
   Stake,
   PublicKey,
+  Withdrawal
 } from "@interfaces/objects";
 
 export interface ILinkService {

@@ -60,7 +60,7 @@ export class LinkService implements ILinkService {
       link = await this.openChannel(link);
     }
 
-    return newLink;
+    return link;
   }
   public async stakeIntoLink(linkId: string, amount: BigNumber): Promise<import("../../interfaces/objects").Stake> {
     throw new Error("Method not implemented.");
@@ -100,7 +100,10 @@ export class LinkService implements ILinkService {
    */
   protected async establishMessaging(link: HypernetLink): Promise<HypernetLink> {
     const thread = this.messagingRepository.createMessageThread();
+    throw new Error("Method not implemented.");
   }
 
-  protected async openChannel(link: HypernetLink): Promise<HypernetLink> {}
+  protected async openChannel(link: HypernetLink): Promise<HypernetLink> {
+    throw new Error("Method not implemented.");
+  }
 }
