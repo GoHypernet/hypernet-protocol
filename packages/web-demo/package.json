@@ -31,7 +31,8 @@
     "compile": "tsc -b tsconfig.build.json",
     "start": "webpack-dev-server --mode development --open",
     "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "tslint -p tsconfig.json"
+    "lint": "tslint -p tsconfig.json",
+		"start-ganache-dev": "ganache-cli --deterministic"
   },
   "bugs": {
     "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
