@@ -1,1 +1,3 @@
-export class LinkFinalResult {}
+export class LinkFinalResult {
+    constructor(public linkId: string) {}
+}

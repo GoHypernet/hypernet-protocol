@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "clean-webpack-plugin": "^3.0.0",
+    "ganache-cli": "^6.10.1",
     "prettier": "^2.1.0",
     "ts-loader": "^8.0.3",
     "tsconfig-paths-webpack-plugin": "^3.3.0",

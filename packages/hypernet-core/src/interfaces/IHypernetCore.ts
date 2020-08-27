@@ -14,12 +14,12 @@ import {
 export interface IHypernetCore {
   initialize(consumerWallet: string): Promise<void>;
   getLinks(): Promise<HypernetLink[]>;
-  openHypernetLinks(
+  openLink(
     consumerWallet: EthereumAddress,
     providerWallet: EthereumAddress,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
-    pullSettings: PullSettings,
+    pullSettings: PullSettings | null,
   ): Promise<HypernetLink>;
   stakeIntoLink(linkId: string, amount: BigNumber): Promise<Stake>;
   depositIntoLink(linkId: string, amount: BigNumber): Promise<Deposit>;
@@ -27,7 +27,6 @@ export interface IHypernetCore {
   sendFunds(linkId: string, amount: BigNumber): Promise<Payment>;
   pullFunds(linkId: string, amount: BigNumber): Promise<Payment>;
   withdrawFunds(linkId: string, amount: BigNumber, destinationAddress: EthereumAddress | null): Promise<Withdrawal>;
-  closeHypernetLink(linkId: string): Promise<void>;
   withdrawStake(linkId: string, destinationAddress: EthereumAddress | null): Promise<Stake>;
 
   /***

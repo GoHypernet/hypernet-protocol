@@ -8,7 +8,7 @@ export class HypernetLink {
     public provider: EthereumAddress,
     public paymentToken: EthereumAddress,
     public disputeMediator: PublicKey,
-    public pullSettings: PullSettings,
+    public pullSettings: PullSettings | null,
     public consumerTotalDeposit: BigNumber,
     public consumerBalance: BigNumber,
     public providerBalance: BigNumber,

@@ -16,7 +16,7 @@ export interface ILinkService {
     providerWallet: EthereumAddress,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
-    pullSettings: PullSettings,
+    pullSettings: PullSettings | null,
   ): Promise<HypernetLink>;
   stakeIntoLink(linkId: string, amount: BigNumber): Promise<Stake>;
   depositIntoLink(linkId: string, amount: BigNumber): Promise<Deposit>;

@@ -151,5 +151,5 @@ declare module "3box" {
   ): Promise<BoxInstance>;
   export function isLoggedIn(address: any): boolean;
   export function openSpace(spaceName: string, opts?: BoxObjectOpts_OpenSpace): Promise<BoxSpace>;
-  export function create(etheriumProvider: provider): Promise<BoxInstance>;
+  export function create(ethereumProvider: provider): Promise<BoxInstance>;
 }
