@@ -32,14 +32,16 @@
     "start": "webpack-dev-server --mode development --open",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
-		"start-ganache-dev": "ganache-cli --deterministic"
+    "start-ganache-dev": "ganache-cli --deterministic"
   },
   "bugs": {
     "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
   },
   "devDependencies": {
+    "@types/knockout": "^3.4.68",
     "clean-webpack-plugin": "^3.0.0",
     "ganache-cli": "^6.10.1",
+    "html-loader": "^1.3.0",
     "prettier": "^2.1.0",
     "ts-loader": "^8.0.3",
     "tsconfig-paths-webpack-plugin": "^3.3.0",
@@ -51,6 +53,7 @@
     "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
-    "@hypernetlabs/hypernet-core": "^0.0.1"
+    "@hypernetlabs/hypernet-core": "^0.0.1",
+    "knockout": "^3.5.1"
   }
 }

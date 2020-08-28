@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "@types/jest": "^26.0.10",
+    "@types/reflect-metadata": "^0.1.0",
     "@types/web3": "^1.2.2",
     "copyfiles": "^2.3.0",
     "jest": "^26.4.0",
@@ -36,9 +37,12 @@
     "@statechannels/iframe-channel-provider": "^0.2.0",
     "@types/sjcl": "^1.0.29",
     "bignumber": "^1.1.0",
+    "class-transformer": "^0.3.1",
     "moment": "^2.27.0",
+    "reflect-metadata": "^0.1.13",
     "rxjs": "^6.6.2",
-    "sjcl": "^1.0.8"
+    "sjcl": "^1.0.8",
+    "web3": "^1.2.11"
   },
   "files": [
     "lib/**/*"

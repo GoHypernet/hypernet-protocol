@@ -8,7 +8,7 @@ import {
   PullSettings,
   Stake,
   LinkFinalResult,
-  Withdrawal
+  Withdrawal,
 } from "@interfaces/objects";
 
 export interface IHypernetCore {

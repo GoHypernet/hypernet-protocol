@@ -1,3 +1,3 @@
 export class HypernetContext {
-    constructor(public account: string | null) {}
+  constructor(public account: string | null) {}
 }

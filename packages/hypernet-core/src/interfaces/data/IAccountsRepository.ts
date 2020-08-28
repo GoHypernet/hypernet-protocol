@@ -1,3 +1,3 @@
 export interface IAccountsRepository {
-    getAccounts(): Promise<string[]>;
+  getAccounts(): Promise<string[]>;
 }

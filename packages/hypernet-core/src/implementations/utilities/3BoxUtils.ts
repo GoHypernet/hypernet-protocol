@@ -11,9 +11,7 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
   protected spaces: { [spaceName: string]: BoxSpace };
   protected threads: { [threadAddress: string]: BoxThread };
 
-  
-  public constructor(protected web3Provider: IWeb3Provider,
-    protected contextProvider: IContextProvider) {
+  public constructor(protected web3Provider: IWeb3Provider, protected contextProvider: IContextProvider) {
     this.box = null;
     this.privateSpace = null;
     this.ethereumAccounts = [];
@@ -30,7 +28,8 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
 
     this.box = await create(web3.currentProvider);
 
-    // await this.box.syncDone;
+    // Don't do anything until the sync is complete
+    await this.box.syncDone;
 
     return this.box;
   }
@@ -53,13 +52,13 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
       return returnSpaces;
     }
 
-    const context = await this.contextProvider.getContext()
+    const context = await this.contextProvider.getContext();
 
     // Need to auth some more spaces
     if (context.account == null) {
       throw new Error("Must have an established account!");
     }
-    
+
     const box = await this.getBox(context.account);
 
     await box.auth(spacesToAuth, { address: context.account });

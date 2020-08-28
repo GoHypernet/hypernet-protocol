@@ -1,7 +1,7 @@
 import { IWeb3Provider } from "@interfaces/utilities/IWeb3Provider";
 import Web3 from "web3";
-import {provider} from "web3-core";
-import detectEthereumProvider from "@metamask/detect-provider";
+import { provider } from "web3-core";
+// import detectEthereumProvider from "@metamask/detect-provider";
 
 declare global {
   interface Window {
@@ -24,19 +24,18 @@ export class Web3Provider implements IWeb3Provider {
 
   protected async initialize(): Promise<Web3> {
     await window.ethereum.enable();
-    const ethereumProvider: provider = await detectEthereumProvider();
+    const ethereumProvider: provider = Web3.givenProvider;
     if (ethereumProvider) {
       this.provider = ethereumProvider;
 
       this.web3 = new Web3(this.provider);
 
-
       // Sanity check
       if (this.provider !== window.ethereum) {
-        console.error('Do you have multiple wallets installed?');
+        throw new Error("Do you have multiple wallets installed?");
       }
 
-      if (this.provider == null || typeof(this.provider) === "string") {
+      if (this.provider == null || typeof this.provider === "string") {
         throw new Error("No provider available!");
       }
 
@@ -45,7 +44,7 @@ export class Web3Provider implements IWeb3Provider {
       /**********************************************************/
       // Normally, we would recommend the 'eth_chainId' RPC method, but it currently
       // returns incorrectly formatted chain ID values.
-      this.provider.on('chainChanged', (_chainId: number) => {
+      this.provider.on("chainChanged", (_chainId: number) => {
         // We recommend reloading the page, unless you must do otherwise
         window.location.reload();
       });
@@ -53,12 +52,12 @@ export class Web3Provider implements IWeb3Provider {
       // Note that this event is emitted on page load.
       // If the array of accounts is non-empty, you're already
       // connected.
-      this.provider.on('accountsChanged', (accounts: any[]) => {this.handleAccountsChanged(accounts);});
+      this.provider.on("accountsChanged", (accounts: any[]) => {
+        this.handleAccountsChanged(accounts);
+      });
       // For now, 'eth_accounts' will continue to always return an array
-      
-
     } else {
-      console.log('Please install MetaMask!');
+      throw new Error("Please install MetaMask!");
     }
     if (this.web3 == null) {
       throw Error("No Web3 provider!");
@@ -69,7 +68,7 @@ export class Web3Provider implements IWeb3Provider {
   protected handleAccountsChanged(accounts: any[]) {
     if (accounts.length === 0) {
       // MetaMask is locked or the user has not connected any accounts
-      console.log('Please connect to MetaMask.');
+      throw new Error("Please connect to MetaMask.");
     } else if (accounts[0] !== this.currentAccount) {
       this.currentAccount = accounts[0];
       // Do any other work!

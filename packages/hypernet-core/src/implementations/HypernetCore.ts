@@ -1,5 +1,15 @@
 import { IHypernetCore } from "@interfaces/IHypernetCore";
-import { HypernetLink, Deposit, PullSettings, BigNumber, Stake, Payment, LinkFinalResult, EthereumAddress, PublicKey } from "@interfaces/objects";
+import {
+  HypernetLink,
+  Deposit,
+  PullSettings,
+  BigNumber,
+  Stake,
+  Payment,
+  LinkFinalResult,
+  EthereumAddress,
+  PublicKey,
+} from "@interfaces/objects";
 import { ThreeBoxUtils } from "@implementations/utilities/3BoxUtils";
 import { Web3Provider } from "@implementations/utilities/Web3Provider";
 import { ConfigProvider } from "@implementations/utilities/ConfigProvider";
@@ -69,8 +79,12 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.stateChannelListener = new StateChannelListener(this.channelClientProvider, this.messageService);
-    this.messagingListener = new ThreeBoxMessagingListener(this.linkService, this.messageService, this.boxUtils, this.configProvider);
-
+    this.messagingListener = new ThreeBoxMessagingListener(
+      this.linkService,
+      this.messageService,
+      this.boxUtils,
+      this.configProvider,
+    );
   }
 
   public async getAccounts(): Promise<string[]> {
@@ -80,13 +94,14 @@ export class HypernetCore implements IHypernetCore {
   public async getLinks(): Promise<HypernetLink[]> {
     return this.linkService.getActiveLinks();
   }
-  public async openLink(consumerWallet: EthereumAddress, 
-    providerWallet: EthereumAddress, 
-    paymentToken: EthereumAddress, 
-    disputeMediator: PublicKey, 
-    pullSettings: PullSettings | null): Promise<HypernetLink> {
-    return this.linkService.openLink(consumerWallet, providerWallet, paymentToken,
-      disputeMediator, pullSettings)
+  public async openLink(
+    consumerWallet: EthereumAddress,
+    providerWallet: EthereumAddress,
+    paymentToken: EthereumAddress,
+    disputeMediator: PublicKey,
+    pullSettings: PullSettings | null,
+  ): Promise<HypernetLink> {
+    return this.linkService.openLink(consumerWallet, providerWallet, paymentToken, disputeMediator, pullSettings);
   }
   public async stakeIntoLink(linkId: string, amount: BigNumber): Promise<Stake> {
     throw new Error("Method not implemented.");
@@ -100,7 +115,11 @@ export class HypernetCore implements IHypernetCore {
   public async pullFunds(linkId: string, amount: BigNumber): Promise<Payment> {
     throw new Error("Method not implemented.");
   }
-  public async withdrawFunds(linkId: string, amount: BigNumber, destinationAddress: string | null): Promise<import("../interfaces/objects").Withdrawal> {
+  public async withdrawFunds(
+    linkId: string,
+    amount: BigNumber,
+    destinationAddress: string | null,
+  ): Promise<import("../interfaces/objects").Withdrawal> {
     throw new Error("Method not implemented.");
   }
   public async withdrawStake(linkId: string, destinationAddress: string | null): Promise<Stake> {

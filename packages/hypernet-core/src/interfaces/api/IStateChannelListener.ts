@@ -1,1 +1,3 @@
-export interface IStateChannelListener {}
+export interface IStateChannelListener {
+  filler(): void;
+}
