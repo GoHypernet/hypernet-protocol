@@ -1,1 +1,1 @@
-export * from "./ELinkStatus";
+export * from "@interfaces/types/ELinkStatus";

@@ -2,37 +2,34 @@ import { BoxInstance, create, BoxSpace, BoxThread } from "3box";
 import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
 import { IWeb3Provider } from "@interfaces/utilities/IWeb3Provider";
 import { EthereumAddress } from "@interfaces/objects";
+import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 
 export class ThreeBoxUtils implements IThreeBoxUtils {
   protected box: BoxInstance | null;
   protected privateSpace: BoxSpace | null;
-  protected web3Provider: IWeb3Provider;
-  protected etheriumAccounts: string[];
+  protected ethereumAccounts: string[];
   protected spaces: { [spaceName: string]: BoxSpace };
   protected threads: { [threadAddress: string]: BoxThread };
 
-  // tslint:disable-next-line: no-shadowed-variable
-  public constructor(IWeb3Provider: IWeb3Provider) {
-    this.web3Provider = IWeb3Provider;
+  public constructor(protected web3Provider: IWeb3Provider, protected contextProvider: IContextProvider) {
     this.box = null;
     this.privateSpace = null;
-    this.etheriumAccounts = [];
+    this.ethereumAccounts = [];
     this.spaces = {};
     this.threads = {};
   }
 
-  public async getBox(): Promise<BoxInstance> {
+  public async getBox(account: string): Promise<BoxInstance> {
     if (this.box != null) {
       return this.box;
     }
 
     const web3 = await this.web3Provider.getWeb3();
 
-    this.etheriumAccounts = await web3.eth.getAccounts();
-
     this.box = await create(web3.currentProvider);
 
-    // await this.box.syncDone;
+    // Don't do anything until the sync is complete
+    await this.box.syncDone;
 
     return this.box;
   }
@@ -55,10 +52,16 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
       return returnSpaces;
     }
 
-    // Need to auth some more spaces
-    const box = await this.getBox();
+    const context = await this.contextProvider.getContext();
 
-    await box.auth(spacesToAuth, { address: this.etheriumAccounts[0] });
+    // Need to auth some more spaces
+    if (context.account == null) {
+      throw new Error("Must have an established account!");
+    }
+
+    const box = await this.getBox(context.account);
+
+    await box.auth(spacesToAuth, { address: context.account });
 
     // Now start the process of opening each of the spaces
     const newSpacePromises: { [spaceName: string]: Promise<BoxSpace> } = {};

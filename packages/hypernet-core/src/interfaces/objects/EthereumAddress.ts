@@ -1,2 +1,2 @@
-/// And EthereumAddress is an Etherium (or other chain) address
+/// And EthereumAddress is an Ethereum (or other chain) address
 export type EthereumAddress = string;

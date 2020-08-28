@@ -1,14 +1,4 @@
-import {HypernetCore} from "@hypernetlabs/hypernet-core";
+import * as ko from "knockout";
+import "./components/Agent/Agent.viewmodel";
 
-
-async function startup() {
-    const core1 = new HypernetCore();
-    const core2 = new HypernetCore();
-
-    await core1.initialize("asdfa");
-    await core2.initialize("asdf");
-}
-
-startup().then(() => {
-    alert("Startup complete!");
-});
+ko.applyBindings({ test: "Test" });

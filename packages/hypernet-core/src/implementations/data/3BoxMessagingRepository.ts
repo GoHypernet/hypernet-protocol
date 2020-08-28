@@ -11,5 +11,4 @@ export class ThreeBoxMessagingRepository implements IMessagingRepository {
   sendMessage(messageThread: MessageThread, message: Message): Promise<void> {
     throw new Error("Method not implemented.");
   }
-
 }

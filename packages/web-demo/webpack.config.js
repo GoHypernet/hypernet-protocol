@@ -16,12 +16,19 @@ module.exports = {
                 loader: 'ts-loader',
                 exclude: /node_modules/,
             },
+            {
+                enforce: 'pre',
+                test: /\.html$/,
+                loader: 'html-loader',
+            },
         ]
     },
     resolve: {
-        extensions: [".tsx", ".ts", ".js"],
+        extensions: [".tsx", ".ts", ".js", ".html"],
         plugins: [new TsconfigPathsPlugin({})],
         alias: {
+            // These are copied from hypernet-core, because for local compilation 
+            // we are actually compiling hypernet-core
             "@interfaces": path.resolve(__dirname, "../hypernet-core/src/interfaces"),
             "@implementations": path.resolve(__dirname, "../hypernet-core/src/implementations"),
         }

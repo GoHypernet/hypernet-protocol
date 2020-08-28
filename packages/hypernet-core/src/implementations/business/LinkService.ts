@@ -1,9 +1,10 @@
 import { ILinkService } from "@interfaces/business/ILinkService";
 import { IStateChannelRepository, IPersistenceRepository, IMessagingRepository } from "@interfaces/data";
-import { HypernetLink, BigNumber, PullSettings } from "@interfaces/objects";
+import { HypernetLink, BigNumber, PullSettings, Payment, Deposit, Stake } from "@interfaces/objects";
 import { v4 as uuidv4 } from "uuid";
 import { ELinkStatus } from "@interfaces/types";
 
+// tslint:disable: no-console
 export class LinkService implements ILinkService {
   constructor(
     protected stateChannelRepository: IStateChannelRepository,
@@ -15,30 +16,32 @@ export class LinkService implements ILinkService {
     providerWallet: string,
     paymentToken: string,
     disputeMediator: string,
-    pullSettings: PullSettings,
+    pullSettings: PullSettings | null,
   ): Promise<HypernetLink> {
     // Check if the link already exists
     const links = await this.persistenceRepository.getActiveLinks();
 
-    let link: HypernetLink | null = null;
-    if (links.length > 0) {
-      // We may need to recover initiating the link.
-      link = links[0];
+    const existingLinks = links.filter((val: HypernetLink) => {
+      return (
+        consumerWallet === val.consumer &&
+        providerWallet === val.provider &&
+        paymentToken === val.paymentToken &&
+        disputeMediator === val.disputeMediator
+      );
+    });
 
-      // Links in INTENDED and MESSAGING_ESTABLISHED states need their
-      // open process restarted. Other statuses are post openLink.
-      if (link.status === ELinkStatus.INTENDED) {
-        link = await this.establishMessaging(link);
-        link = await this.openChannel(link);
-      } else if (link.status === ELinkStatus.MESSAGING_ESTABLISHED) {
-        link = await this.openChannel(link);
-      } else {
-        return link;
+    if (existingLinks.length > 0) {
+      for (const existinglink of existingLinks) {
+        console.log("Existing link", existinglink);
+        await this.advanceLink(existinglink);
       }
+
+      // Return the first one
+      return existingLinks[0];
     } else {
       // No link open, first we need to create an empty link and then store it.
       // The persistence repo will handle the details
-      link = await this.persistenceRepository.createLink(
+      const link = await this.persistenceRepository.createLink(
         new HypernetLink(
           uuidv4(),
           consumerWallet,
@@ -56,22 +59,19 @@ export class LinkService implements ILinkService {
         ),
       );
 
-      link = await this.establishMessaging(link);
-      link = await this.openChannel(link);
+      return this.advanceLink(link);
     }
-
-    return link;
   }
-  public async stakeIntoLink(linkId: string, amount: BigNumber): Promise<import("../../interfaces/objects").Stake> {
+  public async stakeIntoLink(linkId: string, amount: BigNumber): Promise<Stake> {
     throw new Error("Method not implemented.");
   }
-  public async depositIntoLink(linkId: string, amount: BigNumber): Promise<import("../../interfaces/objects").Deposit> {
+  public async depositIntoLink(linkId: string, amount: BigNumber): Promise<Deposit> {
     throw new Error("Method not implemented.");
   }
-  public async sendFunds(linkId: string, amount: BigNumber): Promise<import("../../interfaces/objects").Payment> {
+  public async sendFunds(linkId: string, amount: BigNumber): Promise<Payment> {
     throw new Error("Method not implemented.");
   }
-  public async pullFunds(linkId: string, amount: BigNumber): Promise<import("../../interfaces/objects").Payment> {
+  public async pullFunds(linkId: string, amount: BigNumber): Promise<Payment> {
     throw new Error("Method not implemented.");
   }
   public async withdrawFunds(linkId: string, amount: BigNumber, destinationAddress: string | null): Promise<any> {
@@ -80,30 +80,41 @@ export class LinkService implements ILinkService {
   public async closeLink(linkId: string): Promise<void> {
     throw new Error("Method not implemented.");
   }
-  public async withdrawStake(
-    linkId: string,
-    destinationAddress: string | null,
-  ): Promise<import("../../interfaces/objects").Stake> {
+  public async withdrawStake(linkId: string, destinationAddress: string | null): Promise<Stake> {
     throw new Error("Method not implemented.");
   }
   public async getLinksById(channelIds: string[]): Promise<HypernetLink[]> {
     throw new Error("Method not implemented.");
   }
   public async getActiveLinks(): Promise<HypernetLink[]> {
-    throw new Error("Method not implemented.");
+    return this.persistenceRepository.getActiveLinks();
   }
 
+  protected async advanceLink(link: HypernetLink): Promise<HypernetLink> {
+    // Links in INTENDED and MESSAGING_ESTABLISHED states need their
+    // open process restarted. Other statuses are post openLink.
+    if (link.status === ELinkStatus.INTENDED) {
+      link = await this.establishMessaging(link);
+      link = await this.openChannel(link);
+    } else if (link.status === ELinkStatus.MESSAGING_ESTABLISHED) {
+      link = await this.openChannel(link);
+    }
+
+    return link;
+  }
   /**
    * This function moves a link from INTENDED to MESSAGING_ESTABLISHED.
    *
    * It will open a message thread and associate it with the link.
    */
   protected async establishMessaging(link: HypernetLink): Promise<HypernetLink> {
-    const thread = this.messagingRepository.createMessageThread();
-    throw new Error("Method not implemented.");
+    // const thread = this.messagingRepository.createMessageThread();
+    console.log("Establish messaging", link);
+    return link;
   }
 
   protected async openChannel(link: HypernetLink): Promise<HypernetLink> {
-    throw new Error("Method not implemented.");
+    console.log("Open channel", link);
+    return link;
   }
 }

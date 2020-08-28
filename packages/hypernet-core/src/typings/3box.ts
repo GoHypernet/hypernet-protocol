@@ -3,6 +3,8 @@
 // Definitions by: KuhnChris <https://github.com/kuhnchris>
 // Definitions: https://github.com/DefinitelyTyped/DefinitelyTyped
 
+// tslint:disable: class-name
+// tslint:disable: max-classes-per-file
 declare module "3box" {
   import { provider } from "web3-core";
 
@@ -69,9 +71,10 @@ declare module "3box" {
 
   export class BoxKeyValueStore {
     log(): Promise<BoxLogEntry[]>;
-    get<T>(key: string): Promise<T>;
+    get(key: string): Promise<string>;
     getMetadata: (key: string) => BoxKeyValueStoreMetadata | undefined;
-    set<T>(key: string, value: T): Promise<boolean>;
+    set(key: string, value: string): Promise<boolean>;
+    setMultiple(keys: string[], values: string[]): Promise<boolean>;
     remove(key: string): Promise<boolean>;
   }
 
@@ -151,5 +154,5 @@ declare module "3box" {
   ): Promise<BoxInstance>;
   export function isLoggedIn(address: any): boolean;
   export function openSpace(spaceName: string, opts?: BoxObjectOpts_OpenSpace): Promise<BoxSpace>;
-  export function create(etheriumProvider: provider): Promise<BoxInstance>;
+  export function create(ethereumProvider: provider): Promise<BoxInstance>;
 }
