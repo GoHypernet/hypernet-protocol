@@ -12,11 +12,13 @@ import {
 } from "@interfaces/objects";
 
 export interface IHypernetCore {
-  initialize(consumerWallet: string): Promise<void>;
+  getAccounts(): Promise<string[]>;
+
+  initialize(account: string): Promise<void>;
   getLinks(): Promise<HypernetLink[]>;
   openLink(
-    consumerWallet: EthereumAddress,
-    providerWallet: EthereumAddress,
+    consumer: EthereumAddress,
+    provider: EthereumAddress,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
     pullSettings: PullSettings | null,
@@ -34,4 +36,7 @@ export interface IHypernetCore {
    */
   initiateDispute(linkId: string): Promise<LinkFinalResult>;
   closeLink(linkId: string): Promise<LinkFinalResult>;
+
+  // DEBUG ONLY
+  clearLinks(): Promise<void>;
 }

@@ -1,6 +1,6 @@
-import { Message } from "@interfaces/objects";
+import { Message, EthereumAddress } from "@interfaces/objects";
 
 export interface IMessageService {
-  messageRecieved(channelId: string, message: Message): Promise<void>;
-  sendMessage(message: Message): Promise<void>;
+  messageRecieved(message: Message): Promise<void>;
+  sendMessage(destination: EthereumAddress, data: any): Promise<Message>;
 }

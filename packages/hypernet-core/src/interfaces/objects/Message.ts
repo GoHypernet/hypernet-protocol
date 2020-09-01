@@ -1,5 +1,5 @@
-import { EthereumAddress } from ".";
+import { EthereumAddress } from "./EthereumAddress";
 
 export class Message {
-  constructor(public recipient: EthereumAddress, public sender: EthereumAddress, public data: any) {}
+  constructor(public author: EthereumAddress, public timestamp: number, public data: any) {}
 }

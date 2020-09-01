@@ -3,6 +3,7 @@ import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
 import { IWeb3Provider } from "@interfaces/utilities/IWeb3Provider";
 import { EthereumAddress } from "@interfaces/objects";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
+import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 
 export class ThreeBoxUtils implements IThreeBoxUtils {
   protected box: BoxInstance | null;
@@ -11,7 +12,11 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
   protected spaces: { [spaceName: string]: BoxSpace };
   protected threads: { [threadAddress: string]: BoxThread };
 
-  public constructor(protected web3Provider: IWeb3Provider, protected contextProvider: IContextProvider) {
+  public constructor(
+    protected web3Provider: IWeb3Provider,
+    protected contextProvider: IContextProvider,
+    protected configProvider: IConfigProvider,
+  ) {
     this.box = null;
     this.privateSpace = null;
     this.ethereumAccounts = [];
@@ -85,6 +90,14 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
     return returnSpaces;
   }
 
+  public async getHypernetProtocolSpace(): Promise<BoxSpace> {
+    const config = await this.configProvider.getConfig();
+
+    // Get the main space, the list of channels is here.
+    const spaces = await this.getSpaces([config.spaceName]);
+    return spaces[config.spaceName];
+  }
+
   public async getThreads(spaceName: string, threadAddresses: EthereumAddress[]): Promise<BoxThread[]> {
     const returnThreads = new Array<BoxThread>();
     const threadsToJoin = new Array<EthereumAddress>();
@@ -126,5 +139,16 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
     }
 
     return returnThreads;
+  }
+
+  public async getDiscoveryThread(): Promise<BoxThread> {
+    const config = await this.configProvider.getConfig();
+    const spaces = await this.getSpaces([config.spaceName]);
+    const space = spaces[config.spaceName];
+
+    return space.joinThread(config.discoveryThreadName, {
+      ghost: true,
+      ghostBacklogLimit: 50,
+    });
   }
 }

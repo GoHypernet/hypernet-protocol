@@ -1,5 +1,5 @@
 import { IMessageService } from "@interfaces/business/IMessageService";
-import { Message } from "@interfaces/objects";
+import { Message, EthereumAddress } from "@interfaces/objects";
 import { IPersistenceRepository, IStateChannelRepository, IMessagingRepository } from "@interfaces/data";
 
 export class MessageService implements IMessageService {
@@ -9,18 +9,17 @@ export class MessageService implements IMessageService {
     protected stateChannelRepository: IStateChannelRepository,
   ) {}
 
-  public async messageRecieved(channelId: string, message: Message): Promise<void> {
-    // Make sure the channel is actually open
-    const channels = await this.persistenceRepository.getChannelsById([channelId]);
-
-    if (channels.length === 0) {
-      throw new Error("Message recieved from unknown channel. This shouldn't ever happen");
-    }
-
+  public async messageRecieved(message: Message): Promise<void> {
     return await this.stateChannelRepository.pushMessage(message);
   }
 
-  public async sendMessage(message: Message): Promise<void> {
-    // this.messagingRepository.sendMessage(message);
+  public async sendMessage(destination: EthereumAddress, data: any): Promise<Message> {
+    // We always know the sender, it's us. That's easy. We don't know what link
+    // this message is for, so we need to figure that out.
+    // This is pretty difficult, as any two people may have two active links,
+    // one where they are the consumer and one where they are the provider
+    // We do not know which one this message is for
+    // const messageThread = this.messagingRepository.sendMessage()
+    return new Message("", 123, "afasdf");
   }
 }

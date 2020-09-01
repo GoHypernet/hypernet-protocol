@@ -8,6 +8,7 @@ import {
   Stake,
   PublicKey,
   Withdrawal,
+  EstablishLinkRequest,
 } from "@interfaces/objects";
 
 export interface ILinkService {
@@ -29,4 +30,9 @@ export interface ILinkService {
 
   getLinksById(channelIds: string[]): Promise<HypernetLink[]>;
   getActiveLinks(): Promise<HypernetLink[]>;
+
+  processEstablishLinkRequests(establishLinkRequest: EstablishLinkRequest[]): Promise<void>;
+
+  // Debug ONLY
+  clearLinks(): Promise<void>;
 }

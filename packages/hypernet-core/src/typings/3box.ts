@@ -8,6 +8,9 @@
 declare module "3box" {
   import { provider } from "web3-core";
 
+  type ThreeId = string;
+  type EthereumAddress = string;
+
   export interface BoxVerified {
     Verified: () => BoxVerified;
     DID: () => string;
@@ -27,7 +30,7 @@ declare module "3box" {
     reverse?: boolean;
   }
   export class BoxThreadPost {
-    author: string;
+    author: EthereumAddress | ThreeId;
     message: string;
     postId: string;
     timestamp: number;
@@ -37,22 +40,32 @@ declare module "3box" {
     /// Returns the postID of the new post
     post(message: string, to?: string): Promise<string>;
     getPosts(opts?: BoxThreadOpts_getPosts): Promise<BoxThreadPost[]>;
-    addMember(address: string): Promise<void>;
+    addMember(id: EthereumAddress | ThreeId): Promise<void>;
     address: string;
     onUpdate(cb: (post: BoxThreadPost) => void): void;
     deletePost(id: string): Promise<void>;
+    addModerator(id: EthereumAddress | ThreeId): Promise<void>;
+    listModerators(): Promise<string[]>;
+    listmembers(): Promise<string[]>;
   }
   export interface BoxSpaceOpts_joinThread {
+    firstModerator?: EthereumAddress | ThreeId;
+    members?: boolean;
+    noAutoSub?: boolean;
+    ghost?: boolean;
+    ghostBacklogLimit?: number;
+  }
+  export interface BoxSpaceOpts_joinThreadByAddress {
     noAutoSub?: boolean;
   }
   export class BoxSpace {
     public: BoxKeyValueStore;
     private: BoxKeyValueStore;
     joinThread(name: string, opts?: BoxSpaceOpts_joinThread): Promise<BoxThread>;
-    joinThreadByAddress(threadAddress: string): Promise<BoxThread>;
-    subscribeThread: (name: string) => undefined;
-    unsubscribeThread: (name: string) => undefined;
-    subscribedThreads: () => string[];
+    joinThreadByAddress(threadAddress: string, opts?: BoxSpaceOpts_joinThreadByAddress): Promise<BoxThread>;
+    subscribeThread(address: string): Promise<void>;
+    unsubscribeThread(address: string): Promise<void>;
+    subscribedThreads(): Promise<string[]>;
     syncDone: Promise<void>;
     createThread(threadName: string): Promise<BoxThread>;
     createConfidentialThread(threadName: string): Promise<BoxThread>;

@@ -30,10 +30,12 @@ import { StateChannelListener } from "@implementations/api/StateChannelListener"
 import { ThreeBoxMessagingListener } from "@implementations/api/ThreeBoxMessagingListener";
 import { MessageService } from "@implementations/business/MessageService";
 import { IMessageService } from "@interfaces/business/IMessageService";
-import { ContextProvider } from "./utilities/ContextProvider";
+import { ContextProvider } from "@implementations/utilities/ContextProvider";
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
-import { AccountsRepository } from "./data/AccountsRepository";
+import { AccountsRepository } from "@implementations/data/AccountsRepository";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
+import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
+import { LinkUtils } from "@implementations/utilities/LinkUtils";
 
 export class HypernetCore implements IHypernetCore {
   protected web3Provider: IWeb3Provider;
@@ -41,6 +43,7 @@ export class HypernetCore implements IHypernetCore {
   protected contextProvider: IContextProvider;
   protected boxUtils: IThreeBoxUtils;
   protected channelClientProvider: IChannelClientProvider;
+  protected linkUtils: ILinkUtils;
 
   protected stateChannelRepository: IStateChannelRepository;
   protected persistenceRepository: IPersistenceRepository;
@@ -59,18 +62,25 @@ export class HypernetCore implements IHypernetCore {
     this.web3Provider = new Web3Provider();
     this.configProvider = new ConfigProvider();
     this.contextProvider = new ContextProvider();
-    this.boxUtils = new ThreeBoxUtils(this.web3Provider, this.contextProvider);
+    this.boxUtils = new ThreeBoxUtils(this.web3Provider, this.contextProvider, this.configProvider);
     this.channelClientProvider = new ChannelClientProvider();
+    this.linkUtils = new LinkUtils();
 
     this.stateChannelRepository = new StateChannelsRepository(this.channelClientProvider);
     this.persistenceRepository = new ThreeBoxPersistenceRepository(this.boxUtils, this.configProvider);
-    this.messagingRepository = new ThreeBoxMessagingRepository(this.boxUtils);
+    this.messagingRepository = new ThreeBoxMessagingRepository(
+      this.boxUtils,
+      this.contextProvider,
+      this.configProvider,
+    );
     this.accountRepository = new AccountsRepository(this.web3Provider);
 
     this.linkService = new LinkService(
       this.stateChannelRepository,
       this.persistenceRepository,
       this.messagingRepository,
+      this.contextProvider,
+      this.linkUtils,
     );
     this.messageService = new MessageService(
       this.persistenceRepository,
@@ -84,6 +94,7 @@ export class HypernetCore implements IHypernetCore {
       this.messageService,
       this.boxUtils,
       this.configProvider,
+      this.contextProvider,
     );
   }
 
@@ -137,5 +148,10 @@ export class HypernetCore implements IHypernetCore {
     context.account = account;
     await this.contextProvider.setContext(context);
     this.initialized = true;
+  }
+
+  // DEBUG ONLY
+  public async clearLinks(): Promise<void> {
+    await this.linkService.clearLinks();
   }
 }

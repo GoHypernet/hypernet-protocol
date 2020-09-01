@@ -10,12 +10,14 @@ export class StateChannelListener implements IStateChannelListener {
   public async initialize(): Promise<void> {
     const channelClient = this.channelClientProvider.getChannelClient();
 
-    channelClient.onMessageQueued((message: NitroMessage) => {
+    const unregister = channelClient.onMessageQueued((message: NitroMessage) => {
       // The message needs to go to the 3 box thread
       // We need to package up the nitro message into a normal message for processing
-      const internalMessage = new Message(message.recipient, message.sender, message.data);
-
-      this.messageService.sendMessage(internalMessage);
+      this.messageService.sendMessage(message.recipient, message.data);
     });
+  }
+
+  public filler(): void {
+    return;
   }
 }

@@ -2,9 +2,8 @@ import "@statechannels/iframe-channel-provider";
 import { IFrameChannelProviderInterface } from "@statechannels/iframe-channel-provider";
 import {} from "@statechannels/channel-client";
 import { IChannelClientProvider } from "@interfaces/utilities/IChannelClientProvider";
-import { Message } from "@statechannels/client-api-schema";
 import { IStateChannelRepository } from "@interfaces/data";
-import { HypernetLink } from "@interfaces/objects";
+import { HypernetLink, Message, EthereumAddress } from "@interfaces/objects";
 
 declare global {
   interface Window {
@@ -30,13 +29,13 @@ export class StateChannelsRepository implements IStateChannelRepository {
     // We need to convert the internal message to a nitro message.
 
     try {
-      const result = await channelClient.pushMessage(message);
+      const result = await channelClient.pushMessage(message.data);
     } catch (e) {
       // tslint:disable-next-line: no-empty
     }
   }
 
-  public async createChannel(consumerAddress: string, providerAddress: string): Promise<HypernetLink> {
+  public async createChannel(consumer: EthereumAddress, providerAddress: EthereumAddress): Promise<HypernetLink> {
     await this.assureEnabled();
 
     throw new Error("Method not implemented.");
