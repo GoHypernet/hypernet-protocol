@@ -9,6 +9,7 @@ export * from "@interfaces/objects/LinkFinalResult";
 export * from "@interfaces/objects/LinkMetadata";
 export * from "@interfaces/objects/Message";
 export * from "@interfaces/objects/MessageThread";
+export * from "@interfaces/objects/MessagePayload";
 export * from "@interfaces/objects/Payment";
 export * from "@interfaces/objects/PublicKey";
 export * from "@interfaces/objects/PullSettings";

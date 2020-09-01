@@ -21,33 +21,36 @@ export class LinkViewModel {
   public internalChannelId: ko.Computed<string | null>;
   public threadAddress: ko.Computed<EthereumAddress | null>;
 
+  protected link: ko.Observable<HypernetLink>;
+
   constructor(params: LinkParams) {
-    const link = params.link();
-    this.id = `Link ${link.id}`;
-    this.consumer = link.consumer;
-    this.provider = link.provider;
-    this.paymentToken = link.paymentToken;
-    this.disputeMediator = link.disputeMediator;
+    this.link = params.link;
+    this.id = `Link ${this.link().id}`;
+    this.consumer = this.link().consumer;
+    this.provider = this.link().provider;
+    this.paymentToken = this.link().paymentToken;
+    this.disputeMediator = this.link().disputeMediator;
+
     this.consumerTotalDeposit = ko.pureComputed(() => {
-      return params.link().consumerTotalDeposit;
+      return this.link().consumerTotalDeposit;
     });
     this.consumerBalance = ko.pureComputed(() => {
-      return params.link().consumerBalance;
+      return this.link().consumerBalance;
     });
     this.providerBalance = ko.pureComputed(() => {
-      return params.link().providerBalance;
+      return this.link().providerBalance;
     });
     this.providerStake = ko.pureComputed(() => {
-      return params.link().providerStake;
+      return this.link().providerStake;
     });
     this.status = ko.pureComputed(() => {
-      return params.link().status;
+      return this.link().status;
     });
     this.internalChannelId = ko.pureComputed(() => {
-      return params.link().internalChannelId;
+      return this.link().internalChannelId;
     });
     this.threadAddress = ko.pureComputed(() => {
-      return params.link().threadAddress;
+      return this.link().threadAddress;
     });
   }
 }

@@ -28,7 +28,6 @@ export interface ILinkService {
   closeLink(linkId: string): Promise<void>;
   withdrawStake(linkId: string, destinationAddress: EthereumAddress | null): Promise<Stake>;
 
-  getLinksById(channelIds: string[]): Promise<HypernetLink[]>;
   getActiveLinks(): Promise<HypernetLink[]>;
 
   processEstablishLinkRequests(establishLinkRequest: EstablishLinkRequest[]): Promise<void>;

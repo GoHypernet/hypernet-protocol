@@ -9,6 +9,8 @@ import {
   LinkFinalResult,
   EthereumAddress,
   PublicKey,
+  EstablishLinkRequest,
+  EstablishLinkRequestWithApproval,
 } from "@interfaces/objects";
 import { ThreeBoxUtils } from "@implementations/utilities/3BoxUtils";
 import { Web3Provider } from "@implementations/utilities/Web3Provider";
@@ -36,8 +38,13 @@ import { AccountsRepository } from "@implementations/data/AccountsRepository";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
 import { LinkUtils } from "@implementations/utilities/LinkUtils";
+import { Subject } from "rxjs";
 
 export class HypernetCore implements IHypernetCore {
+  public onLinkUpdated: Subject<HypernetLink>;
+  public onLinkRequestReceived: Subject<EstablishLinkRequestWithApproval>;
+  public onLinkRejected: Subject<EstablishLinkRequest>;
+
   protected web3Provider: IWeb3Provider;
   protected configProvider: IConfigProvider;
   protected contextProvider: IContextProvider;
@@ -59,9 +66,14 @@ export class HypernetCore implements IHypernetCore {
 
   constructor() {
     this.initialized = false;
+
+    this.onLinkUpdated = new Subject<HypernetLink>();
+    this.onLinkRequestReceived = new Subject<EstablishLinkRequestWithApproval>();
+    this.onLinkRejected = new Subject<EstablishLinkRequest>();
+
     this.web3Provider = new Web3Provider();
     this.configProvider = new ConfigProvider();
-    this.contextProvider = new ContextProvider();
+    this.contextProvider = new ContextProvider(this.onLinkUpdated, this.onLinkRequestReceived, this.onLinkRejected);
     this.boxUtils = new ThreeBoxUtils(this.web3Provider, this.contextProvider, this.configProvider);
     this.channelClientProvider = new ChannelClientProvider();
     this.linkUtils = new LinkUtils();

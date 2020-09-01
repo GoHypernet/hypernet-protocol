@@ -9,7 +9,10 @@ import {
   Stake,
   LinkFinalResult,
   Withdrawal,
+  EstablishLinkRequestWithApproval,
+  EstablishLinkRequest,
 } from "@interfaces/objects";
+import { Subject } from "rxjs";
 
 export interface IHypernetCore {
   getAccounts(): Promise<string[]>;
@@ -36,6 +39,13 @@ export interface IHypernetCore {
    */
   initiateDispute(linkId: string): Promise<LinkFinalResult>;
   closeLink(linkId: string): Promise<LinkFinalResult>;
+
+  /**
+   * Observables for seeing what's going on
+   */
+  onLinkUpdated: Subject<HypernetLink>;
+  onLinkRequestReceived: Subject<EstablishLinkRequestWithApproval>;
+  onLinkRejected: Subject<EstablishLinkRequest>;
 
   // DEBUG ONLY
   clearLinks(): Promise<void>;

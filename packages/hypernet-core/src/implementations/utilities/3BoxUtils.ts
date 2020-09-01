@@ -98,8 +98,8 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
     return spaces[config.spaceName];
   }
 
-  public async getThreads(spaceName: string, threadAddresses: EthereumAddress[]): Promise<BoxThread[]> {
-    const returnThreads = new Array<BoxThread>();
+  public async getThreads(threadAddresses: string[]): Promise<{ [threadAddress: string]: BoxThread }> {
+    const returnThreads: { [threadAddress: string]: BoxThread } = {};
     const threadsToJoin = new Array<EthereumAddress>();
 
     for (const threadAddress of threadAddresses) {
@@ -107,7 +107,7 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
         // Need to join the thread
         threadsToJoin.push(threadAddress);
       } else {
-        returnThreads.push(this.threads[threadAddress]);
+        returnThreads[threadAddress] = this.threads[threadAddress];
       }
     }
 
@@ -117,11 +117,12 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
     }
 
     // Need to join some more threads
-    // First get the thread space, which is probably the channel ID
-    const space = (await this.getSpaces([spaceName]))[spaceName];
+    const config = await this.configProvider.getConfig();
+    const spaces = await this.getSpaces([config.spaceName]);
+    const space = spaces[config.spaceName];
 
     // Now start the process of joining each of the threads
-    const newThreadPromises: { [threadName: string]: Promise<BoxThread> } = {};
+    const newThreadPromises: { [threadAddress: string]: Promise<BoxThread> } = {};
 
     for (const threadAddress of threadsToJoin) {
       newThreadPromises[threadAddress] = space.joinThreadByAddress(threadAddress);
@@ -135,7 +136,7 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
       this.threads[threadAddress] = thread;
 
       // Add it to the return
-      returnThreads.push(thread);
+      returnThreads[threadAddress] = thread;
     }
 
     return returnThreads;

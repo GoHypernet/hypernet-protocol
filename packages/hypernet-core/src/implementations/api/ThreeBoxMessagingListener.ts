@@ -1,6 +1,6 @@
 import { ILinkService } from "@interfaces/business/ILinkService";
 import { IMessagingListener } from "@interfaces/api/IMessagingListener";
-import { Message, HypernetLink, EstablishLinkRequest } from "@interfaces/objects";
+import { EstablishLinkRequest, MessagePayload } from "@interfaces/objects";
 import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
 import { BoxThreadPost } from "3box";
 import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
@@ -40,20 +40,24 @@ export class ThreeBoxMessagingListener implements IMessagingListener {
       this.linkService.processEstablishLinkRequests([linkRequest]);
     });
 
-    // For each open channel, we need to join the thread
-    const channels = await this.linkService.getActiveLinks();
+    // For each open link, we need to join the thread
+    const links = await this.linkService.getActiveLinks();
 
-    const channelIds = new Array<string>();
-    for (const channel of channels) {
-      channelIds.push(channel.id);
-    }
+    // Map to just the thread addresses
+    const threadAddresses = links
+      .filter((val) => {
+        return val.threadAddress != null;
+      })
+      .map((val) => {
+        return val.threadAddress;
+      }) as string[];
 
     // Get all the threads
-    const threads = await this.boxUtils.getThreads(config.spaceName, channelIds);
+    const threads = await this.boxUtils.getThreads(threadAddresses);
 
-    for (const thread of threads) {
+    for (const [, thread] of Object.entries(threads)) {
       thread.onUpdate(async (post: BoxThreadPost) => {
-        const message = plainToClass(Message, post.message);
+        const message = plainToClass(MessagePayload, post.message);
         this.messageService.messageRecieved(message);
       });
     }

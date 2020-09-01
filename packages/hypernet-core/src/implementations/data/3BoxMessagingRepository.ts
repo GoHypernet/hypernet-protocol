@@ -1,8 +1,15 @@
 import { IMessagingRepository } from "@interfaces/data";
-import { Message, MessageThread, EthereumAddress, ThreadMetadata, EstablishLinkRequest } from "@interfaces/objects";
+import {
+  Message,
+  MessageThread,
+  EthereumAddress,
+  ThreadMetadata,
+  EstablishLinkRequest,
+  MessagePayload,
+} from "@interfaces/objects";
 import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
-import { ELinkRole } from "@interfaces/types";
+import { ELinkRole, EMessageType } from "@interfaces/types";
 import { plainToClass, serialize } from "class-transformer";
 import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 
@@ -85,8 +92,22 @@ export class ThreeBoxMessagingRepository implements IMessagingRepository {
     return space.subscribedThreads();
   }
 
-  public async sendMessage(messageThread: MessageThread, message: Message): Promise<void> {
-    throw new Error("Method not implemented.");
+  public async sendMessage(destination: EthereumAddress, payload: MessagePayload): Promise<void> {
+    // Get the message thread the user wants to user
+    const metadata = await this.getThreadMetadata();
+
+    const existingThreadMetadata = metadata.filter((val) => {
+      return val.userAddress === destination;
+    });
+    if (existingThreadMetadata.length < 1) {
+      throw new Error(`No existing thread established to reach destination ${destination}`);
+    }
+    const threadMetadataToUse = existingThreadMetadata[0];
+    const threads = await this.boxUtils.getThreads([threadMetadataToUse.address]);
+    const thread = threads[threadMetadataToUse.address];
+
+    // Send the payload
+    await thread.post(serialize(payload));
   }
 
   public async sendEstablishLinkRequest(request: EstablishLinkRequest): Promise<void> {
@@ -94,6 +115,16 @@ export class ThreeBoxMessagingRepository implements IMessagingRepository {
     const discoveryThread = await this.boxUtils.getDiscoveryThread();
 
     discoveryThread.post(serialize(request));
+  }
+
+  public async sendDenyLinkResponse(linkRequest: EstablishLinkRequest): Promise<void> {
+    // Get the message thread the user wants to user
+    const threads = await this.boxUtils.getThreads([linkRequest.threadAddress]);
+    const thread = threads[linkRequest.threadAddress];
+
+    // Send a deny message
+    const payload = new MessagePayload(EMessageType.DENY_LINK, serialize(linkRequest));
+    await thread.post(serialize(payload));
   }
 
   protected async getExistingThread(

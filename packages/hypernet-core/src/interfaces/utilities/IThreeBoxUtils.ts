@@ -5,6 +5,6 @@ export interface IThreeBoxUtils {
   getBox(account: string): Promise<BoxInstance>;
   getSpaces(spaceNames: string[]): Promise<{ [spaceName: string]: BoxSpace }>;
   getHypernetProtocolSpace(): Promise<BoxSpace>;
-  getThreads(spaceName: string, threadAddresses: EthereumAddress[]): Promise<BoxThread[]>;
+  getThreads(threadAddresses: string[]): Promise<{ [threadAddress: string]: BoxThread }>;
   getDiscoveryThread(): Promise<BoxThread>;
 }

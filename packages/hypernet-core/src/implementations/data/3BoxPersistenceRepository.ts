@@ -88,8 +88,8 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
     return returnLinks;
   }
 
-  public async getLinksById(linkIds: string[]): Promise<HypernetLink[]> {
-    const returnLinks = new Array<HypernetLink>();
+  public async getLinksById(linkIds: string[]): Promise<{ [linkId: string]: HypernetLink }> {
+    const returnLinks: { [linkId: string]: HypernetLink } = {};
 
     const config = await this.configProvider.getConfig();
 
@@ -119,7 +119,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
       const link = plainToClass(HypernetLink, plain);
 
       if (link != null) {
-        returnLinks.push(link);
+        returnLinks[link.id] = link;
       }
     }
 

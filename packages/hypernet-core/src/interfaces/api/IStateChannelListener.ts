@@ -1,3 +1,3 @@
 export interface IStateChannelListener {
-  filler(): void;
+  initialize(): Promise<void>;
 }

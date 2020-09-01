@@ -31,6 +31,7 @@ export class AgentViewModel {
     this.clearLinks = new ButtonParams("Clear Links", async () => {
       this.message("Clearing links");
       await this.core.clearLinks();
+      this.links.removeAll();
       this.message("Links cleared");
     });
 
