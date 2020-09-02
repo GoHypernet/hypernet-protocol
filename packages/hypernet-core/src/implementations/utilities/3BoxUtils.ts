@@ -24,7 +24,7 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
     this.threads = {};
   }
 
-  public async getBox(account: string): Promise<BoxInstance> {
+  public async getBox(): Promise<BoxInstance> {
     if (this.box != null) {
       return this.box;
     }
@@ -34,7 +34,7 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
     this.box = await create(web3.currentProvider);
 
     // Don't do anything until the sync is complete
-    await this.box.syncDone;
+    // await this.box.syncDone;
 
     return this.box;
   }
@@ -64,7 +64,7 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
       throw new Error("Must have an established account!");
     }
 
-    const box = await this.getBox(context.account);
+    const box = await this.getBox();
 
     await box.auth(spacesToAuth, { address: context.account });
 
@@ -151,5 +151,11 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
       ghost: true,
       ghostBacklogLimit: 50,
     });
+  }
+
+  public async getDID(): Promise<string> {
+    const box = await this.getBox();
+
+    return box.DID;
   }
 }

@@ -141,7 +141,6 @@ declare module "3box" {
   export class BoxInstance {
     public: BoxKeyValueStore;
     private: BoxKeyValueStore;
-    verified: BoxVerified;
     spaces: any;
     openSpace(name: string, opts?: BoxObjectOpts_OpenSpace): Promise<BoxSpace>;
     auth(spaces: string[], address: AuthAddressObject): Promise<void>;
@@ -150,6 +149,7 @@ declare module "3box" {
     logout(): Promise<void>;
     getThread(): Promise<BoxThread>;
     getThreadByAddress(address: string): Promise<BoxThread>;
+    DID: string;
   }
 
   export const idUtils: BoxStaticIdUtils;

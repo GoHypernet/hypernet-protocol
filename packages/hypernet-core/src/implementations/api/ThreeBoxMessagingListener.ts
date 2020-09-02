@@ -22,20 +22,36 @@ export class ThreeBoxMessagingListener implements IMessagingListener {
 
     const discoveryThread = await this.boxUtils.getDiscoveryThread();
 
+    const did = await this.boxUtils.getDID();
+
     // we need to process any messages that may have occured while we
     // were gone.
     const posts = await discoveryThread.getPosts();
     const linkRequests = new Array<EstablishLinkRequest>();
     for (const post of posts) {
+      // Discard posts that we sent
+      if (post.author === did) {
+        console.log("Discarding message sent by us", post.author);
+        continue;
+      }
+
       // In the discovery thread, all posts should be the same format
-      const linkRequest = plainToClass(EstablishLinkRequest, post.message);
+      const plain = JSON.parse(post.message) as object;
+      const linkRequest = plainToClass(EstablishLinkRequest, plain);
       linkRequests.push(linkRequest);
     }
     this.linkService.processEstablishLinkRequests(linkRequests);
 
     discoveryThread.onUpdate(async (post) => {
+      // Discard posts that we sent
+      if (post.author === did) {
+        console.log("Discarding message sent by us", post.author);
+        return;
+      }
+
       // In the discovery thread, all posts should be the same format
-      const linkRequest = plainToClass(EstablishLinkRequest, post.message);
+      const plain = JSON.parse(post.message) as object;
+      const linkRequest = plainToClass(EstablishLinkRequest, plain);
 
       this.linkService.processEstablishLinkRequests([linkRequest]);
     });
@@ -57,7 +73,8 @@ export class ThreeBoxMessagingListener implements IMessagingListener {
 
     for (const [, thread] of Object.entries(threads)) {
       thread.onUpdate(async (post: BoxThreadPost) => {
-        const message = plainToClass(MessagePayload, post.message);
+        const plain = JSON.parse(post.message) as object;
+        const message = plainToClass(MessagePayload, plain);
         this.messageService.messageRecieved(message);
       });
     }

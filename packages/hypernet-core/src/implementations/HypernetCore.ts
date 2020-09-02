@@ -39,6 +39,7 @@ import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
 import { LinkUtils } from "@implementations/utilities/LinkUtils";
 import { Subject } from "rxjs";
+import { plainToClass } from "class-transformer";
 
 export class HypernetCore implements IHypernetCore {
   public onLinkUpdated: Subject<HypernetLink>;
@@ -159,6 +160,9 @@ export class HypernetCore implements IHypernetCore {
     const context = await this.contextProvider.getContext();
     context.account = account;
     await this.contextProvider.setContext(context);
+    await this.messagingListener.initialize();
+    await this.stateChannelListener.initialize();
+    // await this.stateChannelRepository.initialize();
     this.initialized = true;
   }
 
@@ -166,4 +170,6 @@ export class HypernetCore implements IHypernetCore {
   public async clearLinks(): Promise<void> {
     await this.linkService.clearLinks();
   }
+
+  
 }

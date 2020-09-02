@@ -18,6 +18,26 @@ export class AgentViewModel {
 
   constructor() {
     this.core = new HypernetCore();
+
+    this.core.onLinkUpdated.subscribe({
+      next: (link) => {
+        console.log(link);
+        this.message("onLinkUpdated");
+      },
+    });
+    this.core.onLinkRequestReceived.subscribe({
+      next: (linkRequest) => {
+        console.log(linkRequest);
+        this.message("onLinkRequestReceived");
+      },
+    });
+    this.core.onLinkRejected.subscribe({
+      next: (linkRequest) => {
+        console.log(linkRequest);
+        this.message("onLinkRejected");
+      },
+    });
+
     this.links = ko.observableArray<LinkParams>();
     this.accounts = ko.observableArray<string>();
     this.message = ko.observable<string>("Starting");

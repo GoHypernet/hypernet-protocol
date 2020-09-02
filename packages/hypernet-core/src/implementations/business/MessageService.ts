@@ -13,7 +13,8 @@ export class MessageService implements IMessageService {
 
   public async messageRecieved(payload: MessagePayload): Promise<void> {
     if (payload.type === EMessageType.DENY_LINK) {
-      const denyLink = plainToClass(EstablishLinkRequest, payload.data);
+      const plain = JSON.parse(payload.data) as object;
+      const denyLink = plainToClass(EstablishLinkRequest, plain);
 
       // Creating a link has been denied
       const links = await this.persistenceRepository.getLinksById([denyLink.linkId]);
