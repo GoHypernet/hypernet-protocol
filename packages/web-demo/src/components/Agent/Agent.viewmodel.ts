@@ -3,9 +3,12 @@ import html from "./Agent.template.html";
 import { LinkParams } from "../Link/Link.viewmodel";
 import { HypernetCore, IHypernetCore } from "@hypernetlabs/hypernet-core";
 import { ButtonParams } from "../Button/Button.viewmodel";
+import { ProposedLinkParams } from "../ProposedLink/ProposedLink.viewmodel";
+import { EProposedLinkStatus } from "web-demo/src/types/EProposedLinkStatus";
 
 export class AgentViewModel {
   public links: ko.ObservableArray<LinkParams>;
+  public proposedLinks: ko.ObservableArray<ProposedLinkParams>;
   public accounts: ko.ObservableArray<string>;
   public account: ko.PureComputed<string | null>;
   public remoteAccount: ko.PureComputed<string | null>;
@@ -21,13 +24,24 @@ export class AgentViewModel {
 
     this.core.onLinkUpdated.subscribe({
       next: (link) => {
-        console.log(link);
+        const linkParams = this.links();
+        let matchFound = false;
+        for (const linkParam of linkParams) {
+          if (linkParam.link().id === link.id) {
+            linkParam.link(link);
+            matchFound = true;
+          }
+        }
+        if (!matchFound) {
+          this.links.push(new LinkParams(ko.observable(link)))
+        }
         this.message("onLinkUpdated");
       },
     });
     this.core.onLinkRequestReceived.subscribe({
       next: (linkRequest) => {
-        console.log(linkRequest);
+        const status = ko.observable<EProposedLinkStatus>(EProposedLinkStatus.Proposed);
+        this.proposedLinks.push(new ProposedLinkParams(linkRequest, status));
         this.message("onLinkRequestReceived");
       },
     });
@@ -39,6 +53,7 @@ export class AgentViewModel {
     });
 
     this.links = ko.observableArray<LinkParams>();
+    this.proposedLinks = ko.observableArray<ProposedLinkParams>();
     this.accounts = ko.observableArray<string>();
     this.message = ko.observable<string>("Starting");
     this.startupComplete = ko.observable(false);
@@ -55,7 +70,7 @@ export class AgentViewModel {
       this.message("Links cleared");
     });
 
-    this.establishLink = new ButtonParams("Establish Link", async () => {
+    this.establishLink = new ButtonParams("New Link", async () => {
       const account = this.account();
       const remoteAccount = this.remoteAccount();
       if (account == null || remoteAccount == null) {

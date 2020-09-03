@@ -10,7 +10,7 @@ export enum EButtonType {
 export class ButtonParams {
   constructor(
     public buttonText: string,
-    public action: () => Promise<any>,
+    public action: () => Promise<any> | null,
     public type: EButtonType = EButtonType.Normal,
   ) {}
 }
@@ -20,7 +20,7 @@ export class ButtonViewModel {
   public showSpinner: ko.Observable<boolean>;
   public buttonText: string;
 
-  protected action: () => Promise<any>;
+  protected action: () => Promise<any> | null;
 
   constructor(params: ButtonParams) {
     this.action = params.action;

@@ -11,6 +11,7 @@ import {
   PublicKey,
   EstablishLinkRequest,
   EstablishLinkRequestWithApproval,
+  Withdrawal,
 } from "@interfaces/objects";
 import { ThreeBoxUtils } from "@implementations/utilities/3BoxUtils";
 import { Web3Provider } from "@implementations/utilities/Web3Provider";
@@ -143,7 +144,7 @@ export class HypernetCore implements IHypernetCore {
     linkId: string,
     amount: BigNumber,
     destinationAddress: string | null,
-  ): Promise<import("../interfaces/objects").Withdrawal> {
+  ): Promise<Withdrawal> {
     throw new Error("Method not implemented.");
   }
   public async withdrawStake(linkId: string, destinationAddress: string | null): Promise<Stake> {
@@ -162,7 +163,7 @@ export class HypernetCore implements IHypernetCore {
     await this.contextProvider.setContext(context);
     await this.messagingListener.initialize();
     await this.stateChannelListener.initialize();
-    // await this.stateChannelRepository.initialize();
+    await this.stateChannelRepository.initialize();
     this.initialized = true;
   }
 
@@ -170,6 +171,18 @@ export class HypernetCore implements IHypernetCore {
   public async clearLinks(): Promise<void> {
     await this.linkService.clearLinks();
   }
+}
 
-  
+import "@statechannels/iframe-channel-provider";
+import { IFrameChannelProviderInterface } from "@statechannels/iframe-channel-provider";
+import "@statechannels/channel-client";
+
+declare global {
+  interface Window {
+    channelProvider: IFrameChannelProviderInterface;
+  }
+}
+
+export async function testStateChannels() {
+  await window.channelProvider.mountWalletComponent("https://xstate-wallet.statechannels.org/");
 }

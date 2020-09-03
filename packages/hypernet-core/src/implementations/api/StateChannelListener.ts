@@ -15,6 +15,7 @@ export class StateChannelListener implements IStateChannelListener {
     const unregister = channelClient.onMessageQueued((message: NitroMessage) => {
       // The message needs to go to the 3 box thread
       // We need to package up the nitro message into a normal message for processing
+      console.log("Nitro message queued");
       const payload = new MessagePayload(EMessageType.CHANNEL, serialize(message));
       this.messageService.sendMessage(message.recipient, payload);
     });

@@ -34,6 +34,7 @@ declare module "3box" {
     message: string;
     postId: string;
     timestamp: number;
+    type: string;
   }
 
   export class BoxThread {

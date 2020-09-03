@@ -1,6 +1,6 @@
 import "@statechannels/iframe-channel-provider";
 import { IFrameChannelProviderInterface } from "@statechannels/iframe-channel-provider";
-import {} from "@statechannels/channel-client";
+import "@statechannels/channel-client";
 import { IChannelClientProvider } from "@interfaces/utilities/IChannelClientProvider";
 import { IStateChannelRepository } from "@interfaces/data";
 import { HypernetLink, EthereumAddress } from "@interfaces/objects";
@@ -22,6 +22,7 @@ export class StateChannelsRepository implements IStateChannelRepository {
   }
 
   public async pushMessage(message: string): Promise<void> {
+    console.log("pushMessage in repository");
     // This is probably not necessary here, leaving it in for example for later
     await this.assureEnabled();
 
@@ -31,7 +32,7 @@ export class StateChannelsRepository implements IStateChannelRepository {
 
     try {
       console.log(message);
-      const nitroMessage = message as unknown as NitroMessage;
+      const nitroMessage = (message as unknown) as NitroMessage;
       const result = await channelClient.pushMessage(nitroMessage);
     } catch (e) {
       // tslint:disable-next-line: no-empty

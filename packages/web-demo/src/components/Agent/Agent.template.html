@@ -15,6 +15,15 @@
   ></div>
 </div>
 
+<h2>Proposed Links</h2>
+<div data-bind="foreach: proposedLinks">
+  <div
+    data-bind='component: {
+        name: "proposed-link",
+        params: $data}'
+  ></div>
+</div>
+
 <h2>Actions</h2>
 <span data-bind="component: {name:'button', params:establishLink}"></span>
 <span data-bind="component: {name:'button', params:clearLinks}"></span>

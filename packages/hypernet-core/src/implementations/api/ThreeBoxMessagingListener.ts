@@ -44,7 +44,7 @@ export class ThreeBoxMessagingListener implements IMessagingListener {
 
     discoveryThread.onUpdate(async (post) => {
       // Discard posts that we sent
-      if (post.author === did) {
+      if (post.author === did || post.type === "backlog") {
         console.log("Discarding message sent by us", post.author);
         return;
       }
@@ -73,6 +73,7 @@ export class ThreeBoxMessagingListener implements IMessagingListener {
 
     for (const [, thread] of Object.entries(threads)) {
       thread.onUpdate(async (post: BoxThreadPost) => {
+        console.log("3Box message received");
         const plain = JSON.parse(post.message) as object;
         const message = plainToClass(MessagePayload, plain);
         this.messageService.messageRecieved(message);
