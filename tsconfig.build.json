@@ -12,10 +12,7 @@
     "strict": true,
     "esModuleInterop": true,
     "experimentalDecorators": true,
+    "declarationMap": true
   },
-  "exclude": [
-    "node_modules/*",
-    "dist/*",
-    "lib/*"
-  ]
+  "exclude": ["node_modules/*", "dist/*", "lib/*"]
 }

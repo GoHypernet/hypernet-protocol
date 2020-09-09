@@ -1,5 +1,5 @@
 {
-  "name": "web-demo",
+  "name": "@hypernetlabs/web-demo",
   "version": "1.0.0",
   "description": "Demonstrates loading Hypernet Core on a page and connecting it to MetaMask.",
   "keywords": [

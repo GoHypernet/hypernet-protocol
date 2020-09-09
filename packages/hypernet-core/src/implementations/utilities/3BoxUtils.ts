@@ -153,6 +153,17 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
     });
   }
 
+  public async getControlThread(): Promise<BoxThread> {
+    const config = await this.configProvider.getConfig();
+    const spaces = await this.getSpaces([config.spaceName]);
+    const space = spaces[config.spaceName];
+
+    return space.joinThread(config.controlThreadName, {
+      ghost: true,
+      ghostBacklogLimit: 0,
+    });
+  }
+
   public async getDID(): Promise<string> {
     const box = await this.getBox();
 

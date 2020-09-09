@@ -16,6 +16,7 @@ export class AgentViewModel {
   public establishLink: ButtonParams;
   public message: ko.Observable<string>;
   public startupComplete: ko.Observable<boolean>;
+  public inControl: ko.Observable<boolean>;
 
   protected core: IHypernetCore;
 
@@ -51,12 +52,23 @@ export class AgentViewModel {
         this.message("onLinkRejected");
       },
     });
+    this.core.onControlClaimed.subscribe({
+      next: () => {
+        this.inControl(true);
+      }
+    });
+    this.core.onControlYielded.subscribe({
+      next: () => {
+        this.inControl(false);
+      }
+    })
 
     this.links = ko.observableArray<LinkParams>();
     this.proposedLinks = ko.observableArray<ProposedLinkParams>();
     this.accounts = ko.observableArray<string>();
     this.message = ko.observable<string>("Starting");
     this.startupComplete = ko.observable(false);
+    this.inControl = ko.observable(false);
 
     this.startup().then(() => {
       this.startupComplete(true);

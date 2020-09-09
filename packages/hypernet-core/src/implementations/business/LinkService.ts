@@ -152,6 +152,8 @@ export class LinkService implements ILinkService {
   protected async openChannel(link: HypernetLink): Promise<HypernetLink> {
     console.log("Open channel", link);
 
+    
+
     // Notify the world
     const context = await this.contextProvider.getContext();
     context.onLinkUpdated.next(link);

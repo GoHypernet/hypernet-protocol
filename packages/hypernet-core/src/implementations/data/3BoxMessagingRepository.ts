@@ -6,6 +6,7 @@ import {
   ThreadMetadata,
   EstablishLinkRequest,
   MessagePayload,
+  ControlClaim,
 } from "@interfaces/objects";
 import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
@@ -114,7 +115,7 @@ export class ThreeBoxMessagingRepository implements IMessagingRepository {
     // We just need to post into the discovery thread
     const discoveryThread = await this.boxUtils.getDiscoveryThread();
 
-    discoveryThread.post(serialize(request));
+    await discoveryThread.post(serialize(request));
   }
 
   public async sendDenyLinkResponse(linkRequest: EstablishLinkRequest): Promise<void> {
@@ -125,6 +126,12 @@ export class ThreeBoxMessagingRepository implements IMessagingRepository {
     // Send a deny message
     const payload = new MessagePayload(EMessageType.DENY_LINK, serialize(linkRequest));
     await thread.post(serialize(payload));
+  }
+
+  public async sendControlClaim(controlClaim: ControlClaim): Promise<void> {
+    const controlThread = await this.boxUtils.getControlThread();
+
+    await controlThread.post(serialize(controlClaim));
   }
 
   protected async getExistingThread(

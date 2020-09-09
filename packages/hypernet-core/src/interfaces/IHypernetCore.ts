@@ -11,10 +11,14 @@ import {
   Withdrawal,
   EstablishLinkRequestWithApproval,
   EstablishLinkRequest,
+  ControlClaim,
 } from "@interfaces/objects";
 import { Subject } from "rxjs";
 
 export interface IHypernetCore {
+  initialized(): boolean;
+  inControl(): boolean;
+
   getAccounts(): Promise<string[]>;
 
   initialize(account: string): Promise<void>;
@@ -46,6 +50,8 @@ export interface IHypernetCore {
   onLinkUpdated: Subject<HypernetLink>;
   onLinkRequestReceived: Subject<EstablishLinkRequestWithApproval>;
   onLinkRejected: Subject<EstablishLinkRequest>;
+  onControlClaimed: Subject<ControlClaim>;
+  onControlYielded: Subject<ControlClaim>;
 
   // DEBUG ONLY
   clearLinks(): Promise<void>;

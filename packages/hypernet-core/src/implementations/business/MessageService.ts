@@ -3,15 +3,27 @@ import { Message, EthereumAddress, MessagePayload, EstablishLinkRequest } from "
 import { IPersistenceRepository, IStateChannelRepository, IMessagingRepository } from "@interfaces/data";
 import { EMessageType, ELinkStatus } from "@interfaces/types";
 import { plainToClass } from "class-transformer";
+import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 
 export class MessageService implements IMessageService {
   constructor(
     protected persistenceRepository: IPersistenceRepository,
     protected messagingRepository: IMessagingRepository,
     protected stateChannelRepository: IStateChannelRepository,
+    protected contextProvider: IContextProvider
   ) {}
 
   public async messageRecieved(payload: MessagePayload): Promise<void> {
+    // Get the context
+    const context = await this.contextProvider.getContext();
+
+    // If we are not in control, we will not process any messages. This 
+    // effectively takes us out of the loop
+    if (!context.inControl) {
+      return;
+    }
+
+    // If we are in control, we need to basically act as a router.
     if (payload.type === EMessageType.DENY_LINK) {
       const plain = JSON.parse(payload.data) as object;
       const denyLink = plainToClass(EstablishLinkRequest, plain);

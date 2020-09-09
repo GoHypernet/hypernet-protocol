@@ -1,16 +1,17 @@
 {
-  "name": "hypernet-protocol",
+  "name": "hypernetlabs",
   "version": "0.0.1",
   "description": "Hypernet Protocol contracts and SDK",
   "main": "index.js",
+  "private": true,
   "directories": {
     "lib": "lib"
   },
   "devDependencies": {
-    "@types/uuid": "^8.3.0",
     "lerna": "^3.22.1"
   },
   "scripts": {
+    "bootstrap": "yarn install",
     "test": "lerna run test",
     "lint": "lerna run lint",
     "format": "lerna run format"
@@ -34,6 +35,8 @@
   },
   "homepage": "https://github.com/GoHypernet/hypernet-protocol#readme",
   "dependencies": {
-    "uuid": "^8.3.0"
-  }
+  },
+  "workspaces": [
+    "packages/*"
+  ]
 }

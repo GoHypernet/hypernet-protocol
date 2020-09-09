@@ -4,6 +4,7 @@ export class HypernetConfig {
     public openLinkKey: string,
     public linkDataKey: string,
     public discoveryThreadName: string,
+    public controlThreadName: string,
     public openThreadKey: string,
   ) {}
 }

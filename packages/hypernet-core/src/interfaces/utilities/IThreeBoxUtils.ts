@@ -6,5 +6,6 @@ export interface IThreeBoxUtils {
   getHypernetProtocolSpace(): Promise<BoxSpace>;
   getThreads(threadAddresses: string[]): Promise<{ [threadAddress: string]: BoxThread }>;
   getDiscoveryThread(): Promise<BoxThread>;
+  getControlThread(): Promise<BoxThread>;
   getDID(): Promise<string>;
 }

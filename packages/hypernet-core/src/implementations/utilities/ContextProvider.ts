@@ -3,6 +3,7 @@ import {
   HypernetLink,
   EstablishLinkRequest,
   EstablishLinkRequestWithApproval,
+  ControlClaim,
 } from "@interfaces/objects";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { Subject } from "rxjs";
@@ -13,8 +14,18 @@ export class ContextProvider implements IContextProvider {
     onLinkUpdated: Subject<HypernetLink>,
     onLinkRequestReceived: Subject<EstablishLinkRequestWithApproval>,
     onLinkRejected: Subject<EstablishLinkRequest>,
+    onControlClaimed: Subject<ControlClaim>,
+    onControlYielded: Subject<ControlClaim>,
   ) {
-    this.context = new HypernetContext(null, onLinkUpdated, onLinkRequestReceived, onLinkRejected);
+    this.context = new HypernetContext(
+      null,
+      false,
+      onLinkUpdated,
+      onLinkRequestReceived,
+      onLinkRejected,
+      onControlClaimed,
+      onControlYielded,
+    );
   }
   public async getContext(): Promise<HypernetContext> {
     return this.context;

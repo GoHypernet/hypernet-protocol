@@ -20,6 +20,8 @@ export class Web3Provider implements IWeb3Provider {
     this.provider = null;
     this.currentAccount = null;
     this.initializePromise = null;
+
+    window.ethereum.autoRefreshOnNetworkChange = false;
   }
 
   protected async initialize(): Promise<Web3> {

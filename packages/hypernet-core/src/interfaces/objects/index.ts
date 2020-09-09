@@ -1,4 +1,5 @@
 export * from "@interfaces/objects/BigNumber";
+export * from "@interfaces/objects/ControlClaim";
 export * from "@interfaces/objects/Deposit";
 export * from "@interfaces/objects/EstablishLinkRequest";
 export * from "@interfaces/objects/EthereumAddress";

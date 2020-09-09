@@ -12,6 +12,7 @@ import {
   EstablishLinkRequest,
   EstablishLinkRequestWithApproval,
   Withdrawal,
+  ControlClaim,
 } from "@interfaces/objects";
 import { ThreeBoxUtils } from "@implementations/utilities/3BoxUtils";
 import { Web3Provider } from "@implementations/utilities/Web3Provider";
@@ -40,12 +41,13 @@ import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
 import { LinkUtils } from "@implementations/utilities/LinkUtils";
 import { Subject } from "rxjs";
-import { plainToClass } from "class-transformer";
 
 export class HypernetCore implements IHypernetCore {
   public onLinkUpdated: Subject<HypernetLink>;
   public onLinkRequestReceived: Subject<EstablishLinkRequestWithApproval>;
   public onLinkRejected: Subject<EstablishLinkRequest>;
+  public onControlClaimed: Subject<ControlClaim>;
+  public onControlYielded: Subject<ControlClaim>;
 
   protected web3Provider: IWeb3Provider;
   protected configProvider: IConfigProvider;
@@ -61,21 +63,44 @@ export class HypernetCore implements IHypernetCore {
 
   protected linkService: ILinkService;
   protected messageService: IMessageService;
+  protected controlService: IControlService;
 
   protected stateChannelListener: IStateChannelListener;
   protected messagingListener: IMessagingListener;
-  protected initialized: boolean;
+  protected _initialized: boolean;
+  protected _inControl: boolean;
 
   constructor() {
-    this.initialized = false;
+    this._initialized = false;
+    this._inControl = false;
 
     this.onLinkUpdated = new Subject<HypernetLink>();
     this.onLinkRequestReceived = new Subject<EstablishLinkRequestWithApproval>();
     this.onLinkRejected = new Subject<EstablishLinkRequest>();
+    this.onControlClaimed = new Subject<ControlClaim>();
+    this.onControlYielded = new Subject<ControlClaim>();
+
+    this.onControlClaimed.subscribe({
+      next: () => {
+        this._inControl = true;
+      },
+    });
+
+    this.onControlYielded.subscribe({
+      next: () => {
+        this._inControl = false;
+      },
+    });
 
     this.web3Provider = new Web3Provider();
     this.configProvider = new ConfigProvider();
-    this.contextProvider = new ContextProvider(this.onLinkUpdated, this.onLinkRequestReceived, this.onLinkRejected);
+    this.contextProvider = new ContextProvider(
+      this.onLinkUpdated,
+      this.onLinkRequestReceived,
+      this.onLinkRejected,
+      this.onControlClaimed,
+      this.onControlYielded,
+    );
     this.boxUtils = new ThreeBoxUtils(this.web3Provider, this.contextProvider, this.configProvider);
     this.channelClientProvider = new ChannelClientProvider();
     this.linkUtils = new LinkUtils();
@@ -100,16 +125,26 @@ export class HypernetCore implements IHypernetCore {
       this.persistenceRepository,
       this.messagingRepository,
       this.stateChannelRepository,
+      this.contextProvider,
     );
+    this.controlService = new ControlService(this.messagingRepository, this.contextProvider);
 
     this.stateChannelListener = new StateChannelListener(this.channelClientProvider, this.messageService);
     this.messagingListener = new ThreeBoxMessagingListener(
       this.linkService,
       this.messageService,
+      this.controlService,
       this.boxUtils,
       this.configProvider,
       this.contextProvider,
     );
+  }
+
+  public initialized(): boolean {
+    return this._initialized;
+  }
+  public inControl(): boolean {
+    return this._inControl;
   }
 
   public async getAccounts(): Promise<string[]> {
@@ -163,8 +198,13 @@ export class HypernetCore implements IHypernetCore {
     await this.contextProvider.setContext(context);
     await this.messagingListener.initialize();
     await this.stateChannelListener.initialize();
-    await this.stateChannelRepository.initialize();
-    this.initialized = true;
+    // await this.stateChannelRepository.initialize();
+
+    // This should always be the last thing we do, after everything else is initialized
+    await this.controlService.claimControl();
+
+    // Set the status bit
+    this._initialized = true;
   }
 
   // DEBUG ONLY
@@ -176,13 +216,11 @@ export class HypernetCore implements IHypernetCore {
 import "@statechannels/iframe-channel-provider";
 import { IFrameChannelProviderInterface } from "@statechannels/iframe-channel-provider";
 import "@statechannels/channel-client";
+import { IControlService } from "@interfaces/business/IControlService";
+import { ControlService } from "./business/ControlService";
 
 declare global {
   interface Window {
     channelProvider: IFrameChannelProviderInterface;
   }
-}
-
-export async function testStateChannels() {
-  await window.channelProvider.mountWalletComponent("https://xstate-wallet.statechannels.org/");
 }
