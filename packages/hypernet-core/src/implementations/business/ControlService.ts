@@ -4,13 +4,15 @@ import { IControlService } from "@interfaces/business/IControlService";
 import { IMessagingRepository } from "@interfaces/data";
 
 export class ControlService implements IControlService {
-  protected claimPeriod = 1000*60*5; // 5 minutes
+  protected claimPeriod = 1000 * 60 * 5; // 5 minutes
   protected timeout: NodeJS.Timeout | null;
   protected lastControlClaim: ControlClaim | null;
+  protected checkControlInterval: NodeJS.Timeout | null;
 
   constructor(protected messagingRepo: IMessagingRepository, protected contextProvider: IContextProvider) {
     this.timeout = null;
     this.lastControlClaim = null;
+    this.checkControlInterval = null;
   }
 
   public async claimControl(): Promise<void> {
@@ -67,7 +69,9 @@ export class ControlService implements IControlService {
     const now = new Date().getTime();
 
     this.checkControlInterval = setInterval(() => {
-      if (now - (this.lastControlClaim?.timestamp + this.claimPeriod) > )
+      if (this.lastControlClaim != null && now - (this.lastControlClaim.timestamp + this.claimPeriod) > 5000) {
+        // TODO: take control of our lives
+      }
     }, this.claimPeriod);
 
     // Notify the world.
