@@ -198,7 +198,7 @@ export class HypernetCore implements IHypernetCore {
     await this.contextProvider.setContext(context);
     await this.messagingListener.initialize();
     await this.stateChannelListener.initialize();
-    // await this.stateChannelRepository.initialize();
+    await this.stateChannelRepository.initialize();
 
     // This should always be the last thing we do, after everything else is initialized
     await this.controlService.claimControl();
