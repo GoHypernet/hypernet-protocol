@@ -5,3 +5,10 @@ packages/*/lib
 packages/*/dist
 .idea
 tsconfig.build.tsbuildinfo
+package-lock.json
+packages/*/package-lock.json
+lib
+packages/hypernet-core/log.txt
+packages/hypernet-core/temp.txt
+*.swp
+*.swo
