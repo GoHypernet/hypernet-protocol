@@ -41,6 +41,8 @@ import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
 import { LinkUtils } from "@implementations/utilities/LinkUtils";
 import { Subject } from "rxjs";
+import { ControlService } from "@implementations/business/ControlService";
+import { IControlService } from "@interfaces/business/IControlService";
 
 export class HypernetCore implements IHypernetCore {
   public onLinkUpdated: Subject<HypernetLink>;
@@ -198,7 +200,7 @@ export class HypernetCore implements IHypernetCore {
     await this.contextProvider.setContext(context);
     await this.messagingListener.initialize();
     await this.stateChannelListener.initialize();
-    // await this.stateChannelRepository.initialize();
+    await this.stateChannelRepository.initialize();
 
     // This should always be the last thing we do, after everything else is initialized
     await this.controlService.claimControl();
@@ -210,17 +212,5 @@ export class HypernetCore implements IHypernetCore {
   // DEBUG ONLY
   public async clearLinks(): Promise<void> {
     await this.linkService.clearLinks();
-  }
-}
-
-import "@statechannels/iframe-channel-provider";
-import { IFrameChannelProviderInterface } from "@statechannels/iframe-channel-provider";
-import "@statechannels/channel-client";
-import { IControlService } from "@interfaces/business/IControlService";
-import { ControlService } from "./business/ControlService";
-
-declare global {
-  interface Window {
-    channelProvider: IFrameChannelProviderInterface;
   }
 }
