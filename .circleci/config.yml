@@ -1,0 +1,484 @@
+version: 2.1
+
+orbs:
+  docker: circleci/docker@1.0.1
+  slack: circleci/slack@3.4.1
+
+defaults: &defaults
+  environment:
+    USE_NATIVE_SOLC: true
+    PSQL_ARGS: -p 5432 -h localhost
+    NODE_ENV: test
+  working_directory: /home/circleci/project
+  resource_class: medium
+  docker:
+    - image: geoknee/statechannels:node12.18-solc0.6.9 # Fast contract compilation with solc installed
+    - image: circleci/postgres:12-alpine-ram # server-wallet uses a postgresql DB. alpine-ram is a minimal installation that runs in memory (ie. faster tests!)
+      environment:
+        POSTGRES_USER: root
+
+# MACROS
+
+integration_test_settings: &integration_test_settings
+  resource_class: large
+  working_directory: /home/circleci/project
+  docker:
+    - image: circleci/node:12.16.3-browsers
+  environment:
+    SC_ENV: << parameters.sc_env >>
+
+save_dep: &save_dep
+  save_cache:
+    key: v6-dependency-cache-{{ checksum "yarn.lock" }}
+    paths:
+      - node_modules
+      - packages/channel-client/node_modules
+      - packages/iframe-channel-provider/node_modules
+      - packages/client-api-schema/node_modules
+      - packages/devtools/node_modules
+      - packages/jest-gas-reporter/node_modules
+      - packages/nitro-protocol/node_modules
+      - packages/simple-hub/node_modules
+      - packages/wire-format/node_modules
+      - packages/xstate-wallet/node_modules
+      - packages/server-wallet/node_modules
+
+restore_dep: &restore_dep
+  restore_cache:
+    key: v6-dependency-cache-{{ checksum "yarn.lock" }}
+
+save_built_artifacts: &save_built_artifacts
+  save_cache:
+    # Force a new cache on each build
+    key: v5-built-artifacts-cache-{{ epoch }}
+    paths:
+      # Various TypeScript emissions
+      - packages/channel-client/lib
+      - packages/iframe-channel-provider/lib
+      - packages/client-api-schema/lib
+      - packages/devtools/lib
+      - packages/jest-gas-reporter/lib
+      - packages/nitro-protocol/lib
+      - packages/simple-hub/lib
+      - packages/wire-format/lib
+      - packages/xstate-wallet/lib
+      - packages/server-wallet/lib
+      # Smart contract compiles
+      - packages/nitro-protocol/build
+      # Webpack builds & contract compiles
+      - packages/xstate-wallet/build
+
+restore_built_artifacts: &restore_built_artifacts
+  restore_cache:
+    # Restore from the most recently cached version of lib, using a partial key match
+    key: v5-built-artifacts-cache-
+
+# END MACROS
+
+commands:
+  log_stats:
+    description: 'Log stats '
+    parameters:
+      file:
+        type: string
+        default: stats
+    steps:
+      - run:
+          command: bash bin/log_memory.sh <<parameters.file>>
+          background: true
+
+  upload_logs:
+    description: 'Upload logs '
+    parameters:
+      file:
+        type: string
+        default: memory-usage.txt
+    steps:
+      - store_artifacts:
+          path: /home/circleci/<< parameters.file >>.txt
+          destination: << parameters.file >>
+
+  upload_gas_report:
+    description: 'Upload gas report '
+    parameters:
+      package:
+        type: string
+    steps:
+      - store_artifacts:
+          path: /home/circleci/project/packages/<< parameters.package >>/gas.json
+          destination: << parameters.package >>-gas.json
+      - store_artifacts:
+          path: /home/circleci/project/packages/<< parameters.package >>/gas.md
+          destination: << parameters.package >>-gas.md
+
+  upload_artifacts:
+    description: 'Upload generic artifacts'
+    steps:
+      - store_artifacts:
+          path: /home/circleci/project/artifacts
+
+  notify_slack:
+    description: 'Notify slack '
+    steps:
+      - slack/status:
+          failure_message: 'A $CIRCLE_JOB job has failed on $CIRCLE_BRANCH!'
+          fail_only: true
+          mentions: 'SRHGGRGS0' # Group ID for ActiveDevs
+          only_for_branches: 'master,deploy'
+
+  install_xvfb:
+    description: 'Install display server' # See https://crbug.com/795759
+    steps:
+      - run:
+          command: sudo apt-get update && sudo apt-get install -yq libgconf-2-4 && sudo apt-get install -y wget xvfb --no-install-recommends
+
+  run_xvfb:
+    description: 'Run display server'
+    steps:
+      - run:
+          command: Xvfb -ac :99 -screen 0 1280x800x24 -ac -nolisten tcp -dpi 96 +extension RANDR > /dev/null 2>&1
+          background: true
+
+  build_push_release:
+    description: 'Build a docker image, push it to the heroku registry, and make a release in heroku'
+    parameters:
+      dockerfile_path:
+        type: string
+      pipeline:
+        type: string
+      app:
+        type: string
+    steps:
+      - run: curl https://cli-assets.heroku.com/install.sh | sh
+      - run: heroku container:login
+      - docker/build:
+          cache_from: registry.heroku.com/<< parameters.app >>/<< parameters.pipeline >>:latest
+          dockerfile: << parameters.dockerfile_path >>
+          image: registry.heroku.com/<< parameters.app >>/<< parameters.pipeline >>
+          tag: latest
+      - docker/push:
+          image: << parameters.app >>/<< parameters.pipeline >>
+          registry: registry.heroku.com
+          tag: latest
+      - run: heroku container:release -a << parameters.app >> << parameters.pipeline >>
+
+  install_postgresql_client:
+    description: 'Install postgresql client'
+    steps:
+      - run:
+          command: |
+            sudo apt-get update
+            sudo apt install -y postgresql-client || true
+
+jobs:
+  prepare:
+    <<: *defaults
+    resource_class: large
+    steps:
+      - checkout
+      - log_stats:
+          file: prepare-stats
+      - <<: *restore_dep
+      - run: yarn --frozen-lockfile
+      - run: git diff --exit-code
+      - <<: *save_dep
+
+      - persist_to_workspace:
+          root: /home/circleci/project
+          paths:
+            - packages/*/dist
+            - packages/*/build
+            - packages/*/lib
+            - packages/*/node_modules
+            - packages/client-api-schema/types
+            - node_modules
+      - upload_logs:
+          file: prepare-stats
+      - notify_slack
+
+  build:
+    <<: *defaults
+    resource_class: large
+    steps:
+      - checkout
+      - log_stats:
+          file: build-stats
+      - attach_workspace:
+          at: /home/circleci/project
+      - run: yarn lint:check
+      - run:
+          name: build
+          command: |
+            if [ "${CIRCLE_BRANCH}" = "master" ]
+            then
+                yarn build:ci
+            else
+                yarn build:ci:incremental
+            fi
+      - upload_logs:
+          file: build-stats
+      - notify_slack
+
+  test:
+    <<: *defaults
+    resource_class: large
+    steps:
+      - checkout
+      - log_stats:
+          file: test-stats
+      - attach_workspace:
+          at: /home/circleci/project
+      - install_postgresql_client
+      - run:
+          name: wallet setup
+          working_directory: packages/server-wallet
+          command: |
+            yarn db:create $PSQL_ARGS
+            yarn db:migrate
+      - run:
+          name: test
+          command: |
+            if [ "${CIRCLE_BRANCH}" = "master" ]
+            then
+              yarn test:ci
+            else
+              yarn test:ci:incremental
+            fi
+          no_output_timeout: 30m
+      - upload_logs:
+          file: test-stats
+      - upload_gas_report:
+          package: nitro-protocol
+      - notify_slack
+
+  server-wallet-e2e-test:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - install_postgresql_client
+      - run:
+          name: server-wallet setup (postgresql migrations)
+          working_directory: packages/server-wallet
+          command: |
+            createdb payer $PSQL_ARGS
+            SERVER_DB_NAME=payer yarn db:migrate
+            createdb receiver $PSQL_ARGS
+            SERVER_DB_NAME=receiver yarn db:migrate
+      - run:
+          name: server-wallet-e2e-test
+          working_directory: packages/server-wallet
+          command: yarn test:e2e
+          no_output_timeout: 30m
+      - upload_artifacts
+
+  server-wallet-stress-test:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - install_postgresql_client
+      - run:
+          name: server-wallet setup (postgresql migrations)
+          working_directory: packages/server-wallet
+          command: |
+            createdb payer $PSQL_ARGS
+            SERVER_DB_NAME=payer yarn db:migrate
+            createdb receiver $PSQL_ARGS
+            SERVER_DB_NAME=receiver yarn db:migrate
+      - run:
+          name: server-wallet-stress-test
+          working_directory: packages/server-wallet
+          command: yarn test:stress
+          no_output_timeout: 10m
+      - upload_artifacts
+
+  server-wallet-profiling:
+    <<: *defaults
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - install_postgresql_client
+      - run:
+          name: server-wallet setup (postgresql migrations)
+          working_directory: packages/server-wallet
+          command: |
+            createdb payer $PSQL_ARGS
+            SERVER_DB_NAME=payer yarn db:migrate
+            createdb receiver $PSQL_ARGS
+            SERVER_DB_NAME=receiver yarn db:migrate
+      - run:
+          name: profile
+          working_directory: packages/server-wallet
+          command: yarn profile
+          no_output_timeout: 10m
+      - run:
+          command: |
+            cp /home/circleci/project/packages/server-wallet/.clinic/*.html  /home/circleci/project/artifacts
+      - run:
+          command: |
+            cp /home/circleci/project/packages/server-wallet/metrics.log  /home/circleci/project/artifacts
+      - upload_artifacts
+
+  release-pull-request:
+    <<: *defaults
+    resource_class: large
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - run: yarn build:netlify:incremental
+      - run: yarn release:netlify:incremental
+      - notify_slack
+
+  release-master:
+    <<: *defaults
+    resource_class: large
+    steps:
+      - checkout
+      - log_stats:
+          file: netlify-stats
+      - attach_workspace:
+          at: /home/circleci/project
+      - run: yarn build:netlify
+      - run: yarn release:netlify
+      - upload_logs:
+          file: netlify-stats
+      - notify_slack
+
+  release-netlify-production:
+    <<: *defaults
+    resource_class: large
+    environment:
+      SC_ENV: production-goerli
+    steps:
+      - checkout
+      - log_stats:
+          file: netlify-stats
+      - attach_workspace:
+          at: /home/circleci/project
+      - run: yarn build:netlify:production
+      - run: yarn release:netlify:production
+      - upload_logs:
+          file: netlify-stats
+      - notify_slack
+
+  release-hub-production:
+    working_directory: /home/circleci/project
+    resource_class: large
+    docker:
+      - image: circleci/node:10.16
+    steps:
+      - setup_remote_docker
+      - checkout
+      - <<: *restore_dep
+      - <<: *restore_built_artifacts
+      - run:
+          rm patches/emberfire+3.0.0-rc.6.patch && cd packages && rm -rf client-api-docs channel-provider
+          channel-client client-api-schema xstate-wallet
+      - run: yarn --frozen-lockfile
+      - build_push_release:
+          dockerfile_path: packages/simple-hub/docker/simple-hub.dockerfile
+          pipeline: simple-hub
+          app: simple-hub-production
+      - slack/status:
+          # notify-deployments
+          channel: C0125NB072B
+          failure_message: ':red_circle: Failed to release simple-hub at $CIRCLE_SHA1!'
+          success_message: ':tada: Released simple-hub at $CIRCLE_SHA1 '
+
+  push-master-to-deploy:
+    working_directory: /home/circleci/project
+    resource_class: small
+    docker:
+      - image: circleci/node:10.16
+    steps:
+      - checkout
+      - run:
+          command: |
+            git config user.email circle@statechannels.org
+            git config user.name Circle
+            git checkout deploy
+            git rebase origin/master
+            git push origin deploy
+      - notify_slack
+
+  integration-tests:
+    <<: *defaults
+    description: 'Running integration tests'
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - run:
+          command: mkdir logs
+      - run:
+          command: SC_ENV=integration-tests yarn start-servers
+          background: true
+      - run: (cd packages/integration-tests && yarn integration-tests)
+
+workflows:
+  statechannels:
+    jobs:
+      - prepare
+
+      - build:
+          requires:
+            - prepare
+      - test:
+          requires:
+            - prepare
+
+      - integration-tests:
+          requires:
+            - prepare
+
+      - server-wallet-profiling:
+          requires:
+            - prepare
+      - server-wallet-stress-test:
+          requires:
+            - prepare
+
+      - server-wallet-e2e-test:
+          requires:
+            - prepare
+
+      - release-pull-request:
+          requires:
+            - prepare
+          filters:
+            branches:
+              ignore: master
+      - release-master:
+          requires:
+            - prepare
+          filters:
+            branches:
+              only: master
+      - release-netlify-production:
+          requires:
+            - prepare
+          filters:
+            branches:
+              only: deploy
+
+      - release-hub-production:
+          filters:
+            branches:
+              only: deploy
+  ## We are chosing to disable the daily release for now.
+  # scheduled-release:
+  #   triggers:
+  #     - schedule:
+  #         # Run once a day at midnight UTC
+  #         cron: '0 0 * * *'
+  #         filters:
+  #           branches:
+  #             only:
+  #               - master
+  #   jobs:
+  #     - push-master-to-deploy
