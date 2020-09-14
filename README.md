@@ -13,3 +13,8 @@ Hypernet smart contracts, SDK, and everything else needed to start building on t
  2) Install packages:
 
  `yarn bootstrap`
+
+ 3) Build & run packages from their package folders:
+
+ `cd packages/hypernet-core && yarn build`
+ `cd packages/web-demo && yarn build` or `cd packages/web-demo && yarn start`
