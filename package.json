@@ -12,9 +12,9 @@
   },
   "scripts": {
     "bootstrap": "yarn install",
-    "test": "lerna run test",
-    "lint": "lerna run lint",
-    "format": "lerna run format"
+		"start-shared-ganache": "",
+		"start-web-wallet": "",
+		"start": "concurrently \"yarn start-shared-ganache\" \"yarn start-web-wallet\""
   },
   "repository": {
     "type": "git",
