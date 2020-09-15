@@ -1,1 +1,0 @@
-Enter these into sequencediagram.org
