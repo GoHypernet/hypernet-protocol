@@ -1,0 +1,58 @@
+{
+  "name": "@hypernetlabs/web-demo",
+  "version": "1.0.0",
+  "description": "Demonstrates loading Hypernet Core on a page and connecting it to MetaMask.",
+  "keywords": [
+    "Typescript",
+    "Hypernet",
+    "Labs",
+    "Blockchain",
+    "Hypernet",
+    "Core"
+  ],
+  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/web-demo#readme",
+  "license": "ISC",
+  "main": "lib/web-demo.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1",
+    "build": "webpack",
+    "compile": "tsc -b tsconfig.build.json",
+    "start": "webpack-dev-server --mode development --open",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "tslint -p tsconfig.json"
+  },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "devDependencies": {
+    "@types/knockout": "^3.4.68",
+    "clean-webpack-plugin": "^3.0.0",
+    "ganache-cli": "^6.10.1",
+    "html-loader": "^1.3.0",
+    "prettier": "^2.1.0",
+    "ts-loader": "^8.0.3",
+    "tsconfig-paths-webpack-plugin": "^3.3.0",
+    "tslint": "^6.1.3",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^4.0.2",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "dependencies": {
+    "@hypernetlabs/hypernet-core": "^0.0.1",
+    "knockout": "^3.5.1"
+  }
+}
