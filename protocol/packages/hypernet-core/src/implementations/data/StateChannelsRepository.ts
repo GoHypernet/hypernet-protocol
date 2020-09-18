@@ -18,7 +18,7 @@ export class StateChannelsRepository implements IStateChannelRepository {
   constructor(protected channelClientProvider: IChannelClientProvider) {}
 
   public async initialize() {
-    window.channelProvider.mountWalletComponent("/xstatewallet/index.html");
+    window.channelProvider.mountWalletComponent("http://localhost/xstatewallet/index.html");
 
     setTimeout(() => {
       this.assureEnabled();
