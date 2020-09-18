@@ -1,0 +1,7 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ETH_TOKEN = '0x0000000000000000000000000000000000000000';
+exports.MOCK_TOKEN = '0x1000000000000000000000000000000000000001';
+exports.MOCK_ASSET_HOLDER_ADDRESS = '0x1111111111111111111111111111111111111111';
+exports.CONCLUDE_TIMEOUT = 30000;
+//# sourceMappingURL=constants.js.map

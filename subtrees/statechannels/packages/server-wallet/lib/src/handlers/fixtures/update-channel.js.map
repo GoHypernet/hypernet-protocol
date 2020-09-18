@@ -1,0 +1,1 @@
+{"version":3,"file":"update-channel.js","sourceRoot":"","sources":["../../../../src/handlers/fixtures/update-channel.ts"],"names":[],"mappings":";;AACA,gEAA6D;AAC7D,0EAAoE;AAEvD,QAAA,mBAAmB,GAAG,CAAC,CAAC;AACrC,MAAM,SAAS,GAAG,QAAQ,CAAC;AAE3B,MAAM,WAAW,GAA+B;IAC9C,GAAG,sBAAS,EAAE;IACd,SAAS;CACV,CAAC;AAEW,QAAA,oBAAoB,GAAG,eAAO,CAAC,WAAW,CAAC,CAAC"}

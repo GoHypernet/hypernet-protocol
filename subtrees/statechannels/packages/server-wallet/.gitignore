@@ -9,8 +9,8 @@
 .env.production.local
 
 **/*.log
-build
-lib
+#build
+#lib
 
 manual-test/message-sequence.json
 

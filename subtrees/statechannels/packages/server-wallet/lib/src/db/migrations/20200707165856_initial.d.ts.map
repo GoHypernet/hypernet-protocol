@@ -1,0 +1,1 @@
+{"version":3,"file":"20200707165856_initial.d.ts","sourceRoot":"","sources":["../../../../src/db/migrations/20200707165856_initial.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,IAAI,MAAM,MAAM,CAAC;AAM7B,wBAAsB,EAAE,CAAC,IAAI,EAAE,IAAI,GAAG,OAAO,CAAC,IAAI,CAAC,CAwClD;AAED,wBAAsB,IAAI,CAAC,IAAI,EAAE,IAAI,GAAG,OAAO,CAAC,IAAI,CAAC,CAGpD"}

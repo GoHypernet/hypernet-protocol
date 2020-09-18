@@ -14,10 +14,10 @@ website/i18n
 config/development/contracts.json
 config/development/*.sol.js
 config/test/contracts.json
-build
-built
+#build
+#built
 #lib
-dist
+#dist
 .outputParameter
 docs/natspec/*.md
 ganache/*[.js,.json]
