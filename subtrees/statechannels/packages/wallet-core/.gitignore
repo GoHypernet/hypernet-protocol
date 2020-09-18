@@ -6,7 +6,7 @@
 node_modules
 
 # ts output
-#lib
+lib
 
 # testing
 coverage

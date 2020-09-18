@@ -1,1 +1,0 @@
-{"version":3,"file":"wire-protocol.js","sourceRoot":"","sources":["../../src/wire-protocol.ts"],"names":[],"mappings":";;AAkBA,MAAM,KAAK,GAAG,CAAsB,IAAuB,EAAE,EAAE,CAAC,CAAC,CAAY,EAAU,EAAE,CACvF,CAAC,CAAC,IAAI,KAAK,IAAI,CAAC;AACL,QAAA,aAAa,GAAG,KAAK,CAAc,aAAa,CAAC,CAAC;AAClD,QAAA,eAAe,GAAG,KAAK,CAAgB,eAAe,CAAC,CAAC;AACxD,QAAA,eAAe,GAAG,KAAK,CAAgB,eAAe,CAAC,CAAC"}

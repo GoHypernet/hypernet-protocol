@@ -1,1 +1,0 @@
-{"version":3,"file":"messages.d.ts","sourceRoot":"","sources":["../../../../../src/wallet/__test__/fixtures/messages.ts"],"names":[],"mappings":"AAAA,OAAO,EAAC,WAAW,EAAE,OAAO,EAAC,MAAM,4BAA4B,CAAC;AAOhE,eAAO,MAAM,OAAO,mDAInB,CAAC;AAEF,aAAK,SAAS,GAAG;IAAC,YAAY,EAAE,WAAW,EAAE,CAAA;CAAC,CAAC;AAC/C,wBAAgB,gBAAgB,CAAC,KAAK,CAAC,EAAE,OAAO,CAAC,OAAO,CAAC,GAAG,OAAO,GAAG,SAAS,CAI9E"}
