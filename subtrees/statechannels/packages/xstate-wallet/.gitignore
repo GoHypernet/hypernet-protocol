@@ -7,10 +7,10 @@
 /coverage
 
 # production
-/build
+#/build
 
 # "library"
-/lib
+#/lib
 
 # misc
 .DS_Store

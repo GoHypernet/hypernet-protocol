@@ -61,9 +61,10 @@
     "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
   },
   "scripts": {
-		"start": "yarn install-state-channels && yarn build-state-channels && yarn start-with-envs",
+		"start-build": "yarn install-state-channels && yarn build-state-channels && yarn start-with-envs",
+		"start-run": "yarn start-with-envs",
 		"install-state-channels": "yarn --cwd ../../../subtrees/statechannels/ install",
-		"build-state-channels": "yarn --cwd ../../../subtrees/statechannels/ install",
+		"build-state-channels": "yarn --cwd ../../../subtrees/statechannels/ build",
     "start-with-envs": "env-cmd -f ./.env.development --use-shell \"yarn start-wallet-and-ganache\"",
     "start-shared-ganache": "yarn --cwd ../../../subtrees/statechannels/packages/devtools/ start:shared-ganache",
     "start-web-wallet": "yarn --cwd ../../../subtrees/statechannels/packages/xstate-wallet/ start",

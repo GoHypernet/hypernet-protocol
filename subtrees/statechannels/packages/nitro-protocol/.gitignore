@@ -16,7 +16,7 @@ config/development/*.sol.js
 config/test/contracts.json
 build
 built
-lib
+#lib
 dist
 .outputParameter
 docs/natspec/*.md
