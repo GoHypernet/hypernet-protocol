@@ -3,8 +3,10 @@ node_modules
 packages/**/yarn.lock
 
 # production
-#build/
-#dist/
+build/
+dist/
+build
+dist
 functions/
 
 # cache
