@@ -1,0 +1,21 @@
+{
+  "files": {
+    "main.css": "/static/css/main.52ca7eb1.chunk.css",
+    "main.js": "/static/js/main.99dffa80.chunk.js",
+    "main.js.map": "/static/js/main.99dffa80.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.f25f7b2a.js",
+    "runtime-main.js.map": "/static/js/runtime-main.f25f7b2a.js.map",
+    "static/js/2.e0d51709.chunk.js": "/static/js/2.e0d51709.chunk.js",
+    "static/js/2.e0d51709.chunk.js.map": "/static/js/2.e0d51709.chunk.js.map",
+    "COMMITHASH": "/COMMITHASH",
+    "VERSION": "/VERSION",
+    "index.html": "/index.html",
+    "service-worker.js": "/service-worker.js",
+    "service-worker.js.map": "/service-worker.js.map",
+    "static/css/main.52ca7eb1.chunk.css.map": "/static/css/main.52ca7eb1.chunk.css.map",
+    "static/media/logo.53348272.svg": "/static/media/logo.53348272.svg",
+    "static/media/wallet.scss": "/static/media/woodfordbourne-regular-webfont.f4c56906.woff2",
+    "workbox-a4a759fd.js": "/workbox-a4a759fd.js",
+    "workbox-a4a759fd.js.map": "/workbox-a4a759fd.js.map"
+  }
+}
