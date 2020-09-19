@@ -40,7 +40,7 @@
   "scripts": {
     "build": "yarn build:generate-schema && yarn build:typescript",
     "build:ci": "yarn build",
-    "build:generate-schema": "yarn --silent ts-json-schema-generator --path='src/types.ts' > src/generated-schema.json",
+    "build:generate-schema": "npx -q ts-json-schema-generator --path=src/types.ts > src/generated-schema.json",
     "build:typescript": "tsc -b",
     "generate-api": "api-extractor run --local",
     "lint:check": "eslint \"src/**/*.ts\" --cache",
