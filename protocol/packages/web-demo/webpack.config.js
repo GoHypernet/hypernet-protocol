@@ -46,9 +46,5 @@ module.exports = {
   },
   plugins: [
     new CleanWebpackPlugin(),
-    new HtmlWebpackPlugin({
-      filename: "xstatewallet/index.html",
-      template: "wallet_dist/index.html",
-    }),
   ],
 };
