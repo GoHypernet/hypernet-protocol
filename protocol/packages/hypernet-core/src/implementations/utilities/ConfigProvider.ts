@@ -11,6 +11,7 @@ export class ConfigProvider implements IConfigProvider {
         "HypernetLinkDiscovery",
         "HypernetControl",
         "openThreads",
+        "localhost:3055"
       ),
     );
   }

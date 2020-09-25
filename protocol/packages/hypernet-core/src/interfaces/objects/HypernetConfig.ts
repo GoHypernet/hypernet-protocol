@@ -6,5 +6,6 @@ export class HypernetConfig {
     public discoveryThreadName: string,
     public controlThreadName: string,
     public openThreadKey: string,
+    public xstateWalletUrl: string,
   ) {}
 }

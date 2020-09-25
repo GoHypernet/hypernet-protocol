@@ -5,6 +5,7 @@ import { IChannelClientProvider } from "@interfaces/utilities/IChannelClientProv
 import { IStateChannelRepository } from "@interfaces/data";
 import { HypernetLink, EthereumAddress } from "@interfaces/objects";
 import { Message as NitroMessage } from "@statechannels/client-api-schema";
+import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 
 declare global {
   interface Window {
@@ -15,14 +16,14 @@ declare global {
 export class StateChannelsRepository implements IStateChannelRepository {
   protected channelProviderEnabled: boolean = false;
 
-  constructor(protected channelClientProvider: IChannelClientProvider) {}
+  constructor(protected channelClientProvider: IChannelClientProvider, protected configProvider: IConfigProvider) {}
 
   public async initialize() {
-    window.channelProvider.mountWalletComponent("http://localhost:81/index.html");
+    const config = await this.configProvider.getConfig();
 
-    setTimeout(() => {
-      this.assureEnabled();
-    }, 15000);
+    window.channelProvider.mountWalletComponent(config.xstateWalletUrl);
+
+    this.assureEnabled();
   }
 
   public async pushMessage(message: string): Promise<void> {
