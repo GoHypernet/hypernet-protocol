@@ -13,6 +13,7 @@ import {
   EstablishLinkRequestWithApproval,
   Withdrawal,
   ControlClaim,
+  HypernetConfig,
 } from "@interfaces/objects";
 import { ThreeBoxUtils } from "@implementations/utilities/3BoxUtils";
 import { Web3Provider } from "@implementations/utilities/Web3Provider";
@@ -72,7 +73,7 @@ export class HypernetCore implements IHypernetCore {
   protected _initialized: boolean;
   protected _inControl: boolean;
 
-  constructor() {
+  constructor(config?: HypernetConfig) {
     this._initialized = false;
     this._inControl = false;
 
@@ -95,7 +96,7 @@ export class HypernetCore implements IHypernetCore {
     });
 
     this.web3Provider = new Web3Provider();
-    this.configProvider = new ConfigProvider();
+    this.configProvider = new ConfigProvider(config);
     this.contextProvider = new ContextProvider(
       this.onLinkUpdated,
       this.onLinkRequestReceived,

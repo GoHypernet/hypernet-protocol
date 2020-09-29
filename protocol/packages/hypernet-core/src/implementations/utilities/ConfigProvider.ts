@@ -2,9 +2,11 @@ import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 import { HypernetConfig } from "@interfaces/objects/HypernetConfig";
 
 export class ConfigProvider implements IConfigProvider {
-  public async getConfig(): Promise<HypernetConfig> {
-    return Promise.resolve(
-      new HypernetConfig(
+  protected config: HypernetConfig;
+
+  constructor(config?: HypernetConfig) {
+    if (config == null) {
+      this.config = new HypernetConfig(
         "HypernetProtocol",
         "openChannels",
         "linkData",
@@ -12,7 +14,16 @@ export class ConfigProvider implements IConfigProvider {
         "HypernetControl",
         "openThreads",
         "localhost:3055"
-      ),
+      )
+    }
+    else {
+      this.config = config;
+    }
+  }
+
+  public async getConfig(): Promise<HypernetConfig> {
+    return Promise.resolve(
+      this.config
     );
   }
 }

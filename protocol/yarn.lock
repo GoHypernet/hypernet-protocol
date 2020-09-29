@@ -23780,9 +23780,11 @@ scrypt.js@0.2.0:
     scrypt "^6.0.2"
     scryptsy "^1.2.1"
 
-scrypt@6.0.3, scrypt@^6.0.2, "scrypt@https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.0.2.tgz":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@favware/skip-dependency/-/skip-dependency-1.0.2.tgz#77a4f0789bbd0aba4a1a19c97e03402475df02d1"
+scrypt@6.0.3, scrypt@^6.0.2, "scrypt@https://github.com/barrysteyn/node-scrypt/":
+  version "6.0.3"
+  resolved "https://github.com/barrysteyn/node-scrypt/#fb60a8d3c158fe115a624b5ffa7480f3a24b03fb"
+  dependencies:
+    nan "^2.14.0"
 
 scryptsy@2.1.0, scryptsy@^2.1.0:
   version "2.1.0"
