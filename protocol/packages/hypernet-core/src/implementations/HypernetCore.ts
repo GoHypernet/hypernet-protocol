@@ -107,7 +107,7 @@ export class HypernetCore implements IHypernetCore {
     this.channelClientProvider = new ChannelClientProvider();
     this.linkUtils = new LinkUtils();
 
-    this.stateChannelRepository = new StateChannelsRepository(this.channelClientProvider);
+    this.stateChannelRepository = new StateChannelsRepository(this.channelClientProvider, this.configProvider);
     this.persistenceRepository = new ThreeBoxPersistenceRepository(this.boxUtils, this.configProvider);
     this.messagingRepository = new ThreeBoxMessagingRepository(
       this.boxUtils,
