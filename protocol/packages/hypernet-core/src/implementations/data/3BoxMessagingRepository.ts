@@ -94,7 +94,7 @@ export class ThreeBoxMessagingRepository implements IMessagingRepository {
   }
 
   public async sendMessage(destination: EthereumAddress, payload: MessagePayload): Promise<void> {
-    // Get the message thread the user wants to user
+    // Get the message thread the user wants to use
     const metadata = await this.getThreadMetadata();
 
     const existingThreadMetadata = metadata.filter((val) => {

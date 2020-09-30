@@ -10,6 +10,7 @@ import {
   Withdrawal,
   EstablishLinkRequest,
 } from "@interfaces/objects";
+import { ELinkRole } from "@interfaces/types";
 
 export interface ILinkService {
   openLink(
@@ -31,6 +32,10 @@ export interface ILinkService {
   getActiveLinks(): Promise<HypernetLink[]>;
 
   processEstablishLinkRequests(establishLinkRequest: EstablishLinkRequest[]): Promise<void>;
+  processChannelProposed(channelId: string,
+    participant1Address: string, 
+    participant2Address: string,
+    role: ELinkRole): Promise<void>;
 
   // Debug ONLY
   clearLinks(): Promise<void>;

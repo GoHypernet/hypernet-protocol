@@ -132,7 +132,7 @@ export class HypernetCore implements IHypernetCore {
     );
     this.controlService = new ControlService(this.messagingRepository, this.contextProvider);
 
-    this.stateChannelListener = new StateChannelListener(this.channelClientProvider, this.messageService);
+    this.stateChannelListener = new StateChannelListener(this.channelClientProvider, this.messageService, this.linkService);
     this.messagingListener = new ThreeBoxMessagingListener(
       this.linkService,
       this.messageService,
@@ -199,9 +199,11 @@ export class HypernetCore implements IHypernetCore {
     const context = await this.contextProvider.getContext();
     context.account = account;
     await this.contextProvider.setContext(context);
-    await this.messagingListener.initialize();
-    await this.stateChannelListener.initialize();
-    await this.stateChannelRepository.initialize();
+    const messagingListener = this.messagingListener.initialize();
+    const stateChannelListener = this.stateChannelListener.initialize();
+    const stateChannelRepository = this.stateChannelRepository.initialize();
+
+    await Promise.all([messagingListener,stateChannelListener,stateChannelRepository]);
 
     // This should always be the last thing we do, after everything else is initialized
     await this.controlService.claimControl();

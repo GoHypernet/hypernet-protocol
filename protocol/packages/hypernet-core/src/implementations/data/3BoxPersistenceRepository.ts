@@ -3,6 +3,7 @@ import { EthereumAddress, HypernetLink, LinkMetadata } from "@interfaces/objects
 import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
 import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 import { plainToClass, serialize } from "class-transformer";
+import { ELinkRole } from "@interfaces/types";
 
 export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
   constructor(protected boxUtils: IThreeBoxUtils, protected configProvider: IConfigProvider) {}
@@ -167,6 +168,47 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
     }
 
     return returnLinks;
+  }
+
+  public async getLinkByAddressAndRole(consumerOrProviderId: string, ourRole: ELinkRole): Promise<HypernetLink | null> {
+    const config = await this.configProvider.getConfig();
+
+    // Get the list of open links from the space.
+    const openLinks = await this.getOpenLinkMetadata();
+
+    if (openLinks == null) {
+      return null;
+    }
+
+    // We can do this lookup just with the metadata.
+    const matchingLinkMetadata = openLinks.filter((metadata) => {
+      return consumerOrProviderId === metadata.consumer || consumerOrProviderId === metadata.provider;
+    });
+
+    // Get the link Ids
+    const linkIds = matchingLinkMetadata.map((metadata) => {
+      if (metadata.linkId == null) {
+        return (metadata as unknown) as string;
+      }
+      return metadata.linkId;
+    });
+
+    // Now we connect to the spaces for each of those links
+    const linkSpaces = await this.boxUtils.getSpaces(linkIds);
+
+    // Loop over the spaces for each link
+    for (const [spaceName, space] of Object.entries(linkSpaces)) {
+      // The space has a key with all the hypernet information
+      const linkDataString = await space.private.get(config.linkDataKey);
+      const plain = JSON.parse(linkDataString) as object;
+      const link = plainToClass(HypernetLink, plain);
+
+      if (link != null) {
+        return link;
+      }
+    }
+
+    return null;
   }
 
   /**

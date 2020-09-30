@@ -7,5 +7,6 @@ export class HypernetConfig {
     public controlThreadName: string,
     public openThreadKey: string,
     public xstateWalletUrl: string,
+    public forceMoveAppAddress: string,
   ) {}
 }

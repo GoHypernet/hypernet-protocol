@@ -13,7 +13,7 @@ import {
   EstablishLinkRequestWithApproval,
 } from "@interfaces/objects";
 import { v4 as uuidv4 } from "uuid";
-import { ELinkStatus } from "@interfaces/types";
+import { ELinkRole, ELinkStatus } from "@interfaces/types";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
 
@@ -152,10 +152,18 @@ export class LinkService implements ILinkService {
   protected async openChannel(link: HypernetLink): Promise<HypernetLink> {
     console.log("Open channel", link);
 
-    
+    const context = await this.contextProvider.getContext();
+
+    // Call into the state wallet
+    const channelId = await this.stateChannelRepository.createChannel(link.consumer, link.provider);
+
+    // Persist the internal channel ID
+    link.internalChannelId = channelId;
+    link.status = ELinkStatus.CHANNEL_OPENED;
+    await this.persistenceRepository.updateLink(link);
+
 
     // Notify the world
-    const context = await this.contextProvider.getContext();
     context.onLinkUpdated.next(link);
     return link;
   }
@@ -269,4 +277,40 @@ export class LinkService implements ILinkService {
   public async clearLinks(): Promise<void> {
     this.persistenceRepository.clearLinks();
   }
+
+  public async processChannelProposed(channelId: string,
+    participant1Address: string, 
+    participant2Address: string,
+    role: ELinkRole): Promise<void> {
+      // Channel is proposed between two people. One of them needs to be us.
+      const context = await this.contextProvider.getContext();
+
+      let counterparty: string;
+      if (context.account === participant1Address) {
+        counterparty = participant2Address;
+      }
+      else if (context.account === participant2Address) {
+        counterparty = participant1Address;
+      }
+      else {
+        throw new Error(`Can't process a channel that we are not involved in!`);
+      }
+
+      // Get the actual link object
+      const link = await this.persistenceRepository.getLinkByAddressAndRole(counterparty, role);
+
+      if (link == null) {
+        throw new Error(`No HypernetLink exists between us (${context.account}) and ${counterparty} where we are the ${role}`);
+      }
+
+      // Stash the channelId in the Link
+      link.internalChannelId = channelId;
+      link.status = ELinkStatus.CHANNEL_OPENED;
+      await this.persistenceRepository.updateLink(link);
+
+      // If you want, you could reject the channel, but there is no
+      // need to ever, because you already had the chance to reject
+      // opening the channel during the establish messaging phase.
+      await this.stateChannelRepository.joinChannel(channelId);
+    }
 }
