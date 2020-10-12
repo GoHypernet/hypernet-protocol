@@ -1,0 +1,1 @@
+{"version":3,"file":"config.d.ts","sourceRoot":"","sources":["../../../src/ganache/config.ts"],"names":[],"mappings":"AAIA,eAAO,MAAM,2BAA2B,SAAqD,CAAC;AAC9F,eAAO,MAAM,mBAAmB,SAC0C,CAAC;AAC3E,eAAO,MAAM,eAAe,EAAE,MAAyD,CAAC;AAExF,eAAO,MAAM,QAAQ,SAAqD,CAAC;AAC3E,eAAO,MAAM,SAAS,QAAwD,CAAC;AAE/E,eAAO,MAAM,cAAc,SAAgC,CAAC;AAC5D,eAAO,MAAM,WAAW,SAA8B,CAAC"}

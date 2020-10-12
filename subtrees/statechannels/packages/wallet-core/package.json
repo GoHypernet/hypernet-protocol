@@ -1,0 +1,42 @@
+{
+  "name": "@statechannels/wallet-core",
+  "description": "State channel wallet components.",
+  "version": "0.3.6",
+  "author": "Alex Gap",
+  "dependencies": {
+    "@statechannels/nitro-protocol": "^0.3.6",
+    "@statechannels/wire-format": "^0.3.6",
+    "ethers": "5.0.12",
+    "lodash": "4.17.19"
+  },
+  "devDependencies": {
+    "@babel/core": "7.8.3",
+    "@statechannels/devtools": "^0.3.6",
+    "@types/babel__core": "7.1.7",
+    "@types/lodash": "4.14.149",
+    "awesome-typescript-loader": "5.2.1",
+    "jest": "25.1.0",
+    "ts-jest": "25.0.0",
+    "typescript": "3.7.5"
+  },
+  "engines": {
+    "node": ">=12.16.0"
+  },
+  "files": [
+    "src",
+    "lib"
+  ],
+  "license": "MIT",
+  "main": "lib/src/index.js",
+  "scripts": {
+    "build": "yarn tsc -b",
+    "build:ci": "yarn build",
+    "lint:check": "eslint . --ext .ts --cache",
+    "lint:write": "eslint . --ext .ts --fix",
+    "prepare": "rm -rf lib; yarn build",
+    "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
+    "test": "jest -c ./config/jest/jest.config.js",
+    "test:ci": "yarn test --ci --runInBand"
+  },
+  "types": "lib/src/index.d.ts"
+}

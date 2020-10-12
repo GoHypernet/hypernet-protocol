@@ -1,0 +1,90 @@
+{
+  "name": "@statechannels/nitro-protocol",
+  "description": "A protocol for state channel networks",
+  "version": "0.3.6",
+  "author": "statechannels",
+  "browser": "dist/nitro-protocol.min.js",
+  "bugs": "https://github.com/statechannels/monorepo/issues",
+  "dependencies": {
+    "@openzeppelin/contracts": "3.0.1",
+    "ethers": "5.0.12"
+  },
+  "devDependencies": {
+    "@ethereum-waffle/compiler": "^3.1.0",
+    "@statechannels/devtools": "^0.3.6",
+    "@types/eslint": "6.1.7",
+    "@types/eslint-plugin-prettier": "2.2.0",
+    "@types/jest": "25.1.0",
+    "@types/node": "13.5.1",
+    "@types/prettier": "1.19.0",
+    "@types/webpack": "4.41.12",
+    "@typescript-eslint/eslint-plugin": "2.18.0",
+    "@typescript-eslint/parser": "2.18.0",
+    "eslint": "6.8.0",
+    "eslint-config-prettier": "6.10.0",
+    "eslint-plugin-import": "2.20.0",
+    "eslint-plugin-jest": "23.6.0",
+    "eslint-plugin-prettier": "3.1.2",
+    "etherlime": "2.3.3",
+    "etherlime-lib": "1.1.5",
+    "ganache-cli": "6.9.1",
+    "jest": "25.1.0",
+    "lint-staged": "10.0.4",
+    "npm-run-all": "4.1.5",
+    "prettier": "1.19.1",
+    "prettier-plugin-solidity": "1.0.0-alpha.34",
+    "solidoc": "https://github.com/statechannels/solidoc.git#a4d4d244e367c6cf654079d1f157d5eb5903b9af",
+    "typescript": "3.7.5",
+    "webpack": "4.41.5"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "engines": {
+    "yarn": "^1.17.0",
+    "node": ">=12.16.0"
+  },
+  "files": [
+    "contracts/*",
+    "lib/build/contracts/*.json",
+    "lib/src/*",
+    "lib/test/*"
+  ],
+  "homepage": "https://github.com/statechannels/monorepo",
+  "keywords": [
+    "channel",
+    "ethereum",
+    "network",
+    "state"
+  ],
+  "license": "MIT",
+  "lint-staged": {
+    "{src,test}/**/*.{ts,tsx}": "eslint"
+  },
+  "main": "lib/src/index.js",
+  "private": false,
+  "repository": "statechannels/monorepo.git",
+  "scripts": {
+    "build": "run-s contract:compile build:typescript docgen",
+    "build:ci": "yarn build",
+    "build:typescript": "tsc -b .",
+    "build:webpack": "webpack",
+    "contract:compile": "node ./bin/compile.js",
+    "generate-api": "yarn docgen",
+    "docgen": "solidoc",
+    "lint:check": "eslint \"*/**/*.ts\" --cache",
+    "lint:write": "eslint \"*/**/*.ts\" --fix",
+    "patch-package": "cd ../.. && yarn patch-package",
+    "precommit": "lint-staged --quiet",
+    "prepare": "yarn patch-package && yarn build",
+    "prettier:check": "prettier --check '{contracts,src,test}/**/*.{ts,tsx,sol}'",
+    "prettier:write": "prettier --write '{contracts,src,test}/**/*.{ts,tsx,sol}'",
+    "test": "run-s test:contracts 'test:app --all'",
+    "test:app": "jest -c ./config/jest/jest.config.js",
+    "test:ci": "yarn run-p 'test:ci:contracts --runInBand' 'test:ci:app --runInBand'",
+    "test:ci:app": "yarn test:app --all --ci --runInBand --bail",
+    "test:ci:contracts": "yarn test:contracts --all --ci --runInBand --bail",
+    "test:contracts": "jest -c ./config/jest/jest.contracts.config.js"
+  },
+  "types": "lib/src/index.d.ts"
+}

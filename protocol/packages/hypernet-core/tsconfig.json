@@ -1,0 +1,11 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+        "experimentalDecorators": true,
+        "baseUrl": ".",
+        "paths": {
+            "@interfaces/*": ["./src/interfaces/*"],
+            "@implementations/*": ["./src/implementations/*"]
+        }
+    }
+}

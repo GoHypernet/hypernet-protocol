@@ -1,0 +1,41 @@
+{
+  "name": "hypernetlabs",
+  "version": "0.0.1",
+  "description": "Hypernet Protocol contracts and SDK",
+  "main": "index.js",
+  "private": true,
+  "directories": {
+    "lib": "lib"
+  },
+  "devDependencies": {
+    "lerna": "^3.22.1"
+  },
+  "scripts": {
+    "bootstrap": "yarn install",
+    "test": "lerna run test",
+    "lint": "lerna run lint",
+    "format": "lerna run format"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "keywords": [
+    "Hypernet",
+    "Blockchain",
+    "State",
+    "Channels",
+    "Nitro",
+    "Galileo"
+  ],
+  "author": "Hypernet Labs",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol#readme",
+  "dependencies": {},
+  "workspaces": [
+    "packages/*"
+  ]
+}

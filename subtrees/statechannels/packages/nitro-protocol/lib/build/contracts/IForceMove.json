@@ -1,0 +1,2564 @@
+{
+    "abi": [
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "bytes32",
+                    "name": "channelId",
+                    "type": "bytes32"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint48",
+                    "name": "newTurnNumRecord",
+                    "type": "uint48"
+                }
+            ],
+            "name": "ChallengeCleared",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "bytes32",
+                    "name": "channelId",
+                    "type": "bytes32"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint48",
+                    "name": "turnNumRecord",
+                    "type": "uint48"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint48",
+                    "name": "finalizesAt",
+                    "type": "uint48"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "address",
+                    "name": "challenger",
+                    "type": "address"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "bool",
+                    "name": "isFinal",
+                    "type": "bool"
+                },
+                {
+                    "components": [
+                        {
+                            "internalType": "uint256",
+                            "name": "chainId",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "address[]",
+                            "name": "participants",
+                            "type": "address[]"
+                        },
+                        {
+                            "internalType": "uint48",
+                            "name": "channelNonce",
+                            "type": "uint48"
+                        },
+                        {
+                            "internalType": "address",
+                            "name": "appDefinition",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "uint48",
+                            "name": "challengeDuration",
+                            "type": "uint48"
+                        }
+                    ],
+                    "indexed": false,
+                    "internalType": "struct IForceMove.FixedPart",
+                    "name": "fixedPart",
+                    "type": "tuple"
+                },
+                {
+                    "components": [
+                        {
+                            "internalType": "bytes",
+                            "name": "outcome",
+                            "type": "bytes"
+                        },
+                        {
+                            "internalType": "bytes",
+                            "name": "appData",
+                            "type": "bytes"
+                        }
+                    ],
+                    "indexed": false,
+                    "internalType": "struct ForceMoveApp.VariablePart[]",
+                    "name": "variableParts",
+                    "type": "tuple[]"
+                },
+                {
+                    "components": [
+                        {
+                            "internalType": "uint8",
+                            "name": "v",
+                            "type": "uint8"
+                        },
+                        {
+                            "internalType": "bytes32",
+                            "name": "r",
+                            "type": "bytes32"
+                        },
+                        {
+                            "internalType": "bytes32",
+                            "name": "s",
+                            "type": "bytes32"
+                        }
+                    ],
+                    "indexed": false,
+                    "internalType": "struct IForceMove.Signature[]",
+                    "name": "sigs",
+                    "type": "tuple[]"
+                },
+                {
+                    "indexed": false,
+                    "internalType": "uint8[]",
+                    "name": "whoSignedWhat",
+                    "type": "uint8[]"
+                }
+            ],
+            "name": "ChallengeRegistered",
+            "type": "event"
+        },
+        {
+            "anonymous": false,
+            "inputs": [
+                {
+                    "indexed": true,
+                    "internalType": "bytes32",
+                    "name": "channelId",
+                    "type": "bytes32"
+                }
+            ],
+            "name": "Concluded",
+            "type": "event"
+        },
+        {
+            "inputs": [
+                {
+                    "components": [
+                        {
+                            "internalType": "uint256",
+                            "name": "chainId",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "address[]",
+                            "name": "participants",
+                            "type": "address[]"
+                        },
+                        {
+                            "internalType": "uint48",
+                            "name": "channelNonce",
+                            "type": "uint48"
+                        },
+                        {
+                            "internalType": "address",
+                            "name": "appDefinition",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "uint48",
+                            "name": "challengeDuration",
+                            "type": "uint48"
+                        }
+                    ],
+                    "internalType": "struct IForceMove.FixedPart",
+                    "name": "fixedPart",
+                    "type": "tuple"
+                },
+                {
+                    "internalType": "uint48",
+                    "name": "largestTurnNum",
+                    "type": "uint48"
+                },
+                {
+                    "components": [
+                        {
+                            "internalType": "bytes",
+                            "name": "outcome",
+                            "type": "bytes"
+                        },
+                        {
+                            "internalType": "bytes",
+                            "name": "appData",
+                            "type": "bytes"
+                        }
+                    ],
+                    "internalType": "struct ForceMoveApp.VariablePart[]",
+                    "name": "variableParts",
+                    "type": "tuple[]"
+                },
+                {
+                    "internalType": "uint8",
+                    "name": "isFinalCount",
+                    "type": "uint8"
+                },
+                {
+                    "components": [
+                        {
+                            "internalType": "uint8",
+                            "name": "v",
+                            "type": "uint8"
+                        },
+                        {
+                            "internalType": "bytes32",
+                            "name": "r",
+                            "type": "bytes32"
+                        },
+                        {
+                            "internalType": "bytes32",
+                            "name": "s",
+                            "type": "bytes32"
+                        }
+                    ],
+                    "internalType": "struct IForceMove.Signature[]",
+                    "name": "sigs",
+                    "type": "tuple[]"
+                },
+                {
+                    "internalType": "uint8[]",
+                    "name": "whoSignedWhat",
+                    "type": "uint8[]"
+                }
+            ],
+            "name": "checkpoint",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "uint48",
+                    "name": "largestTurnNum",
+                    "type": "uint48"
+                },
+                {
+                    "components": [
+                        {
+                            "internalType": "uint256",
+                            "name": "chainId",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "address[]",
+                            "name": "participants",
+                            "type": "address[]"
+                        },
+                        {
+                            "internalType": "uint48",
+                            "name": "channelNonce",
+                            "type": "uint48"
+                        },
+                        {
+                            "internalType": "address",
+                            "name": "appDefinition",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "uint48",
+                            "name": "challengeDuration",
+                            "type": "uint48"
+                        }
+                    ],
+                    "internalType": "struct IForceMove.FixedPart",
+                    "name": "fixedPart",
+                    "type": "tuple"
+                },
+                {
+                    "internalType": "bytes32",
+                    "name": "appPartHash",
+                    "type": "bytes32"
+                },
+                {
+                    "internalType": "bytes32",
+                    "name": "outcomeHash",
+                    "type": "bytes32"
+                },
+                {
+                    "internalType": "uint8",
+                    "name": "numStates",
+                    "type": "uint8"
+                },
+                {
+                    "internalType": "uint8[]",
+                    "name": "whoSignedWhat",
+                    "type": "uint8[]"
+                },
+                {
+                    "components": [
+                        {
+                            "internalType": "uint8",
+                            "name": "v",
+                            "type": "uint8"
+                        },
+                        {
+                            "internalType": "bytes32",
+                            "name": "r",
+                            "type": "bytes32"
+                        },
+                        {
+                            "internalType": "bytes32",
+                            "name": "s",
+                            "type": "bytes32"
+                        }
+                    ],
+                    "internalType": "struct IForceMove.Signature[]",
+                    "name": "sigs",
+                    "type": "tuple[]"
+                }
+            ],
+            "name": "conclude",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "components": [
+                        {
+                            "internalType": "uint256",
+                            "name": "chainId",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "address[]",
+                            "name": "participants",
+                            "type": "address[]"
+                        },
+                        {
+                            "internalType": "uint48",
+                            "name": "channelNonce",
+                            "type": "uint48"
+                        },
+                        {
+                            "internalType": "address",
+                            "name": "appDefinition",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "uint48",
+                            "name": "challengeDuration",
+                            "type": "uint48"
+                        }
+                    ],
+                    "internalType": "struct IForceMove.FixedPart",
+                    "name": "fixedPart",
+                    "type": "tuple"
+                },
+                {
+                    "internalType": "uint48",
+                    "name": "largestTurnNum",
+                    "type": "uint48"
+                },
+                {
+                    "components": [
+                        {
+                            "internalType": "bytes",
+                            "name": "outcome",
+                            "type": "bytes"
+                        },
+                        {
+                            "internalType": "bytes",
+                            "name": "appData",
+                            "type": "bytes"
+                        }
+                    ],
+                    "internalType": "struct ForceMoveApp.VariablePart[]",
+                    "name": "variableParts",
+                    "type": "tuple[]"
+                },
+                {
+                    "internalType": "uint8",
+                    "name": "isFinalCount",
+                    "type": "uint8"
+                },
+                {
+                    "components": [
+                        {
+                            "internalType": "uint8",
+                            "name": "v",
+                            "type": "uint8"
+                        },
+                        {
+                            "internalType": "bytes32",
+                            "name": "r",
+                            "type": "bytes32"
+                        },
+                        {
+                            "internalType": "bytes32",
+                            "name": "s",
+                            "type": "bytes32"
+                        }
+                    ],
+                    "internalType": "struct IForceMove.Signature[]",
+                    "name": "sigs",
+                    "type": "tuple[]"
+                },
+                {
+                    "internalType": "uint8[]",
+                    "name": "whoSignedWhat",
+                    "type": "uint8[]"
+                },
+                {
+                    "components": [
+                        {
+                            "internalType": "uint8",
+                            "name": "v",
+                            "type": "uint8"
+                        },
+                        {
+                            "internalType": "bytes32",
+                            "name": "r",
+                            "type": "bytes32"
+                        },
+                        {
+                            "internalType": "bytes32",
+                            "name": "s",
+                            "type": "bytes32"
+                        }
+                    ],
+                    "internalType": "struct IForceMove.Signature",
+                    "name": "challengerSig",
+                    "type": "tuple"
+                }
+            ],
+            "name": "forceMove",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "address",
+                    "name": "challenger",
+                    "type": "address"
+                },
+                {
+                    "internalType": "bool[2]",
+                    "name": "isFinalAB",
+                    "type": "bool[2]"
+                },
+                {
+                    "components": [
+                        {
+                            "internalType": "uint256",
+                            "name": "chainId",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "address[]",
+                            "name": "participants",
+                            "type": "address[]"
+                        },
+                        {
+                            "internalType": "uint48",
+                            "name": "channelNonce",
+                            "type": "uint48"
+                        },
+                        {
+                            "internalType": "address",
+                            "name": "appDefinition",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "uint48",
+                            "name": "challengeDuration",
+                            "type": "uint48"
+                        }
+                    ],
+                    "internalType": "struct IForceMove.FixedPart",
+                    "name": "fixedPart",
+                    "type": "tuple"
+                },
+                {
+                    "components": [
+                        {
+                            "internalType": "bytes",
+                            "name": "outcome",
+                            "type": "bytes"
+                        },
+                        {
+                            "internalType": "bytes",
+                            "name": "appData",
+                            "type": "bytes"
+                        }
+                    ],
+                    "internalType": "struct ForceMoveApp.VariablePart[2]",
+                    "name": "variablePartAB",
+                    "type": "tuple[2]"
+                },
+                {
+                    "components": [
+                        {
+                            "internalType": "uint8",
+                            "name": "v",
+                            "type": "uint8"
+                        },
+                        {
+                            "internalType": "bytes32",
+                            "name": "r",
+                            "type": "bytes32"
+                        },
+                        {
+                            "internalType": "bytes32",
+                            "name": "s",
+                            "type": "bytes32"
+                        }
+                    ],
+                    "internalType": "struct IForceMove.Signature",
+                    "name": "sig",
+                    "type": "tuple"
+                }
+            ],
+            "name": "respond",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+    ],
+    "evm": {
+        "bytecode": {
+            "linkReferences": {},
+            "object": "",
+            "opcodes": "",
+            "sourceMap": ""
+        },
+        "deployedBytecode": {
+            "linkReferences": {},
+            "object": "",
+            "opcodes": "",
+            "sourceMap": ""
+        }
+    },
+    "bytecode": "",
+    "sourcePath": "contracts/interfaces/IForceMove.sol",
+    "ast": {
+        "absolutePath": "contracts/interfaces/IForceMove.sol",
+        "exportedSymbols": {
+            "IForceMove": [
+                4484
+            ]
+        },
+        "id": 4485,
+        "nodeType": "SourceUnit",
+        "nodes": [
+            {
+                "id": 4329,
+                "literals": [
+                    "solidity",
+                    "^",
+                    "0.6",
+                    ".0"
+                ],
+                "nodeType": "PragmaDirective",
+                "src": "0:23:18"
+            },
+            {
+                "id": 4330,
+                "literals": [
+                    "experimental",
+                    "ABIEncoderV2"
+                ],
+                "nodeType": "PragmaDirective",
+                "src": "24:33:18"
+            },
+            {
+                "absolutePath": "contracts/interfaces/ForceMoveApp.sol",
+                "file": "./ForceMoveApp.sol",
+                "id": 4331,
+                "nodeType": "ImportDirective",
+                "scope": 4485,
+                "sourceUnit": 4292,
+                "src": "59:28:18",
+                "symbolAliases": [],
+                "unitAlias": ""
+            },
+            {
+                "abstract": true,
+                "baseContracts": [],
+                "contractDependencies": [],
+                "contractKind": "contract",
+                "documentation": "@dev The IForceMove contract abstraction defines the interface that an implementation of ForceMove should implement. ForceMove protocol allows state channels to be adjudicated and finalized.",
+                "fullyImplemented": false,
+                "id": 4484,
+                "linearizedBaseContracts": [
+                    4484
+                ],
+                "name": "IForceMove",
+                "nodeType": "ContractDefinition",
+                "nodes": [
+                    {
+                        "canonicalName": "IForceMove.Signature",
+                        "id": 4338,
+                        "members": [
+                            {
+                                "constant": false,
+                                "id": 4333,
+                                "name": "v",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4338,
+                                "src": "353:7:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_uint8",
+                                    "typeString": "uint8"
+                                },
+                                "typeName": {
+                                    "id": 4332,
+                                    "name": "uint8",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "353:5:18",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint8",
+                                        "typeString": "uint8"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 4335,
+                                "name": "r",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4338,
+                                "src": "370:9:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes32",
+                                    "typeString": "bytes32"
+                                },
+                                "typeName": {
+                                    "id": 4334,
+                                    "name": "bytes32",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "370:7:18",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bytes32",
+                                        "typeString": "bytes32"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 4337,
+                                "name": "s",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4338,
+                                "src": "389:9:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes32",
+                                    "typeString": "bytes32"
+                                },
+                                "typeName": {
+                                    "id": 4336,
+                                    "name": "bytes32",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "389:7:18",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bytes32",
+                                        "typeString": "bytes32"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            }
+                        ],
+                        "name": "Signature",
+                        "nodeType": "StructDefinition",
+                        "scope": 4484,
+                        "src": "326:79:18",
+                        "visibility": "public"
+                    },
+                    {
+                        "canonicalName": "IForceMove.FixedPart",
+                        "id": 4350,
+                        "members": [
+                            {
+                                "constant": false,
+                                "id": 4340,
+                                "name": "chainId",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4350,
+                                "src": "438:15:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_uint256",
+                                    "typeString": "uint256"
+                                },
+                                "typeName": {
+                                    "id": 4339,
+                                    "name": "uint256",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "438:7:18",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint256",
+                                        "typeString": "uint256"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 4343,
+                                "name": "participants",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4350,
+                                "src": "463:22:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                                    "typeString": "address[]"
+                                },
+                                "typeName": {
+                                    "baseType": {
+                                        "id": 4341,
+                                        "name": "address",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "463:7:18",
+                                        "stateMutability": "nonpayable",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_address",
+                                            "typeString": "address"
+                                        }
+                                    },
+                                    "id": 4342,
+                                    "length": null,
+                                    "nodeType": "ArrayTypeName",
+                                    "src": "463:9:18",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_array$_t_address_$dyn_storage_ptr",
+                                        "typeString": "address[]"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 4345,
+                                "name": "channelNonce",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4350,
+                                "src": "495:19:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_uint48",
+                                    "typeString": "uint48"
+                                },
+                                "typeName": {
+                                    "id": 4344,
+                                    "name": "uint48",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "495:6:18",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint48",
+                                        "typeString": "uint48"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 4347,
+                                "name": "appDefinition",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4350,
+                                "src": "524:21:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_address",
+                                    "typeString": "address"
+                                },
+                                "typeName": {
+                                    "id": 4346,
+                                    "name": "address",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "524:7:18",
+                                    "stateMutability": "nonpayable",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_address",
+                                        "typeString": "address"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 4349,
+                                "name": "challengeDuration",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4350,
+                                "src": "555:24:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_uint48",
+                                    "typeString": "uint48"
+                                },
+                                "typeName": {
+                                    "id": 4348,
+                                    "name": "uint48",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "555:6:18",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint48",
+                                        "typeString": "uint48"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            }
+                        ],
+                        "name": "FixedPart",
+                        "nodeType": "StructDefinition",
+                        "scope": 4484,
+                        "src": "411:175:18",
+                        "visibility": "public"
+                    },
+                    {
+                        "canonicalName": "IForceMove.State",
+                        "id": 4361,
+                        "members": [
+                            {
+                                "constant": false,
+                                "id": 4352,
+                                "name": "turnNum",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4361,
+                                "src": "661:14:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_uint48",
+                                    "typeString": "uint48"
+                                },
+                                "typeName": {
+                                    "id": 4351,
+                                    "name": "uint48",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "661:6:18",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint48",
+                                        "typeString": "uint48"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 4354,
+                                "name": "isFinal",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4361,
+                                "src": "685:12:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_bool",
+                                    "typeString": "bool"
+                                },
+                                "typeName": {
+                                    "id": 4353,
+                                    "name": "bool",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "685:4:18",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bool",
+                                        "typeString": "bool"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 4356,
+                                "name": "channelId",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4361,
+                                "src": "707:17:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes32",
+                                    "typeString": "bytes32"
+                                },
+                                "typeName": {
+                                    "id": 4355,
+                                    "name": "bytes32",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "707:7:18",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bytes32",
+                                        "typeString": "bytes32"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 4358,
+                                "name": "appPartHash",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4361,
+                                "src": "780:19:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes32",
+                                    "typeString": "bytes32"
+                                },
+                                "typeName": {
+                                    "id": 4357,
+                                    "name": "bytes32",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "780:7:18",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bytes32",
+                                        "typeString": "bytes32"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 4360,
+                                "name": "outcomeHash",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4361,
+                                "src": "1008:19:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes32",
+                                    "typeString": "bytes32"
+                                },
+                                "typeName": {
+                                    "id": 4359,
+                                    "name": "bytes32",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "1008:7:18",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bytes32",
+                                        "typeString": "bytes32"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            }
+                        ],
+                        "name": "State",
+                        "nodeType": "StructDefinition",
+                        "scope": 4484,
+                        "src": "592:442:18",
+                        "visibility": "public"
+                    },
+                    {
+                        "canonicalName": "IForceMove.ChannelData",
+                        "id": 4372,
+                        "members": [
+                            {
+                                "constant": false,
+                                "id": 4363,
+                                "name": "turnNumRecord",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4372,
+                                "src": "1069:20:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_uint48",
+                                    "typeString": "uint48"
+                                },
+                                "typeName": {
+                                    "id": 4362,
+                                    "name": "uint48",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "1069:6:18",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint48",
+                                        "typeString": "uint48"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 4365,
+                                "name": "finalizesAt",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4372,
+                                "src": "1099:18:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_uint48",
+                                    "typeString": "uint48"
+                                },
+                                "typeName": {
+                                    "id": 4364,
+                                    "name": "uint48",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "1099:6:18",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint48",
+                                        "typeString": "uint48"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 4367,
+                                "name": "stateHash",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4372,
+                                "src": "1127:17:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes32",
+                                    "typeString": "bytes32"
+                                },
+                                "typeName": {
+                                    "id": 4366,
+                                    "name": "bytes32",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "1127:7:18",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bytes32",
+                                        "typeString": "bytes32"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 4369,
+                                "name": "challengerAddress",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4372,
+                                "src": "1186:25:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_address",
+                                    "typeString": "address"
+                                },
+                                "typeName": {
+                                    "id": 4368,
+                                    "name": "address",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "1186:7:18",
+                                    "stateMutability": "nonpayable",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_address",
+                                        "typeString": "address"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            },
+                            {
+                                "constant": false,
+                                "id": 4371,
+                                "name": "outcomeHash",
+                                "nodeType": "VariableDeclaration",
+                                "overrides": null,
+                                "scope": 4372,
+                                "src": "1221:19:18",
+                                "stateVariable": false,
+                                "storageLocation": "default",
+                                "typeDescriptions": {
+                                    "typeIdentifier": "t_bytes32",
+                                    "typeString": "bytes32"
+                                },
+                                "typeName": {
+                                    "id": 4370,
+                                    "name": "bytes32",
+                                    "nodeType": "ElementaryTypeName",
+                                    "src": "1221:7:18",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bytes32",
+                                        "typeString": "bytes32"
+                                    }
+                                },
+                                "value": null,
+                                "visibility": "internal"
+                            }
+                        ],
+                        "name": "ChannelData",
+                        "nodeType": "StructDefinition",
+                        "scope": 4484,
+                        "src": "1040:207:18",
+                        "visibility": "public"
+                    },
+                    {
+                        "canonicalName": "IForceMove.ChannelMode",
+                        "id": 4376,
+                        "members": [
+                            {
+                                "id": 4373,
+                                "name": "Open",
+                                "nodeType": "EnumValue",
+                                "src": "1271:4:18"
+                            },
+                            {
+                                "id": 4374,
+                                "name": "Challenge",
+                                "nodeType": "EnumValue",
+                                "src": "1277:9:18"
+                            },
+                            {
+                                "id": 4375,
+                                "name": "Finalized",
+                                "nodeType": "EnumValue",
+                                "src": "1288:9:18"
+                            }
+                        ],
+                        "name": "ChannelMode",
+                        "nodeType": "EnumDefinition",
+                        "src": "1253:45:18"
+                    },
+                    {
+                        "body": null,
+                        "documentation": "@notice Registers a challenge against a state channel. A challenge will either prompt another participant into clearing the challenge (via one of the other methods), or cause the channel to finalize at a specific time.\n@dev Registers a challenge against a state channel. A challenge will either prompt another participant into clearing the challenge (via one of the other methods), or cause the channel to finalize at a specific time.\n@param fixedPart Data describing properties of the state channel that do not change with state updates.\n@param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.\n@param variableParts An ordered array of structs, each decribing the properties of the state channel that may change with each state update.\n@param isFinalCount Describes how many of the submitted states have the `isFinal` property set to `true`. It is implied that the rightmost `isFinalCount` states are final, and the rest are not final.\n@param sigs An array of signatures that support the state with the `largestTurnNum`.\n@param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.\n@param challengerSig The signature of a participant on the keccak256 of the abi.encode of (supportedStateHash, 'forceMove').",
+                        "functionSelector": "78b9e5cb",
+                        "id": 4396,
+                        "implemented": false,
+                        "kind": "function",
+                        "modifiers": [],
+                        "name": "forceMove",
+                        "nodeType": "FunctionDefinition",
+                        "overrides": null,
+                        "parameters": {
+                            "id": 4394,
+                            "nodeType": "ParameterList",
+                            "parameters": [
+                                {
+                                    "constant": false,
+                                    "id": 4378,
+                                    "name": "fixedPart",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4396,
+                                    "src": "2770:26:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_struct$_FixedPart_$4350_memory_ptr",
+                                        "typeString": "struct IForceMove.FixedPart"
+                                    },
+                                    "typeName": {
+                                        "contractScope": null,
+                                        "id": 4377,
+                                        "name": "FixedPart",
+                                        "nodeType": "UserDefinedTypeName",
+                                        "referencedDeclaration": 4350,
+                                        "src": "2770:9:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_struct$_FixedPart_$4350_storage_ptr",
+                                            "typeString": "struct IForceMove.FixedPart"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4380,
+                                    "name": "largestTurnNum",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4396,
+                                    "src": "2806:21:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint48",
+                                        "typeString": "uint48"
+                                    },
+                                    "typeName": {
+                                        "id": 4379,
+                                        "name": "uint48",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "2806:6:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_uint48",
+                                            "typeString": "uint48"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4383,
+                                    "name": "variableParts",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4396,
+                                    "src": "2837:48:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_array$_t_struct$_VariablePart_$4277_memory_$dyn_memory_ptr",
+                                        "typeString": "struct ForceMoveApp.VariablePart[]"
+                                    },
+                                    "typeName": {
+                                        "baseType": {
+                                            "contractScope": null,
+                                            "id": 4381,
+                                            "name": "ForceMoveApp.VariablePart",
+                                            "nodeType": "UserDefinedTypeName",
+                                            "referencedDeclaration": 4277,
+                                            "src": "2837:25:18",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_struct$_VariablePart_$4277_storage_ptr",
+                                                "typeString": "struct ForceMoveApp.VariablePart"
+                                            }
+                                        },
+                                        "id": 4382,
+                                        "length": null,
+                                        "nodeType": "ArrayTypeName",
+                                        "src": "2837:27:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_array$_t_struct$_VariablePart_$4277_storage_$dyn_storage_ptr",
+                                            "typeString": "struct ForceMoveApp.VariablePart[]"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4385,
+                                    "name": "isFinalCount",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4396,
+                                    "src": "2895:18:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint8",
+                                        "typeString": "uint8"
+                                    },
+                                    "typeName": {
+                                        "id": 4384,
+                                        "name": "uint8",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "2895:5:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_uint8",
+                                            "typeString": "uint8"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4388,
+                                    "name": "sigs",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4396,
+                                    "src": "2959:23:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_array$_t_struct$_Signature_$4338_memory_$dyn_memory_ptr",
+                                        "typeString": "struct IForceMove.Signature[]"
+                                    },
+                                    "typeName": {
+                                        "baseType": {
+                                            "contractScope": null,
+                                            "id": 4386,
+                                            "name": "Signature",
+                                            "nodeType": "UserDefinedTypeName",
+                                            "referencedDeclaration": 4338,
+                                            "src": "2959:9:18",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_struct$_Signature_$4338_storage_ptr",
+                                                "typeString": "struct IForceMove.Signature"
+                                            }
+                                        },
+                                        "id": 4387,
+                                        "length": null,
+                                        "nodeType": "ArrayTypeName",
+                                        "src": "2959:11:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_array$_t_struct$_Signature_$4338_storage_$dyn_storage_ptr",
+                                            "typeString": "struct IForceMove.Signature[]"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4391,
+                                    "name": "whoSignedWhat",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4396,
+                                    "src": "2992:28:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_array$_t_uint8_$dyn_memory_ptr",
+                                        "typeString": "uint8[]"
+                                    },
+                                    "typeName": {
+                                        "baseType": {
+                                            "id": 4389,
+                                            "name": "uint8",
+                                            "nodeType": "ElementaryTypeName",
+                                            "src": "2992:5:18",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_uint8",
+                                                "typeString": "uint8"
+                                            }
+                                        },
+                                        "id": 4390,
+                                        "length": null,
+                                        "nodeType": "ArrayTypeName",
+                                        "src": "2992:7:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_array$_t_uint8_$dyn_storage_ptr",
+                                            "typeString": "uint8[]"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4393,
+                                    "name": "challengerSig",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4396,
+                                    "src": "3030:30:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_struct$_Signature_$4338_memory_ptr",
+                                        "typeString": "struct IForceMove.Signature"
+                                    },
+                                    "typeName": {
+                                        "contractScope": null,
+                                        "id": 4392,
+                                        "name": "Signature",
+                                        "nodeType": "UserDefinedTypeName",
+                                        "referencedDeclaration": 4338,
+                                        "src": "3030:9:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_struct$_Signature_$4338_storage_ptr",
+                                            "typeString": "struct IForceMove.Signature"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                }
+                            ],
+                            "src": "2760:306:18"
+                        },
+                        "returnParameters": {
+                            "id": 4395,
+                            "nodeType": "ParameterList",
+                            "parameters": [],
+                            "src": "3081:0:18"
+                        },
+                        "scope": 4484,
+                        "src": "2742:340:18",
+                        "stateMutability": "nonpayable",
+                        "virtual": true,
+                        "visibility": "public"
+                    },
+                    {
+                        "body": null,
+                        "documentation": "@notice Repsonds to an ongoing challenge registered against a state channel.\n@dev Repsonds to an ongoing challenge registered against a state channel.\n@param challenger The address of the participant whom registered the challenge.\n@param isFinalAB An pair of booleans describing if the challenge state and/or the response state have the `isFinal` property set to `true`.\n@param fixedPart Data describing properties of the state channel that do not change with state updates.\n@param variablePartAB An pair of structs, each decribing the properties of the state channel that may change with each state update (for the challenge state and for the response state).\n@param sig The responder's signature on the `responseStateHash`.",
+                        "functionSelector": "ff8ceb32",
+                        "id": 4413,
+                        "implemented": false,
+                        "kind": "function",
+                        "modifiers": [],
+                        "name": "respond",
+                        "nodeType": "FunctionDefinition",
+                        "overrides": null,
+                        "parameters": {
+                            "id": 4411,
+                            "nodeType": "ParameterList",
+                            "parameters": [
+                                {
+                                    "constant": false,
+                                    "id": 4398,
+                                    "name": "challenger",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4413,
+                                    "src": "3905:18:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_address",
+                                        "typeString": "address"
+                                    },
+                                    "typeName": {
+                                        "id": 4397,
+                                        "name": "address",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "3905:7:18",
+                                        "stateMutability": "nonpayable",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_address",
+                                            "typeString": "address"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4402,
+                                    "name": "isFinalAB",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4413,
+                                    "src": "3933:24:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_array$_t_bool_$2_memory_ptr",
+                                        "typeString": "bool[2]"
+                                    },
+                                    "typeName": {
+                                        "baseType": {
+                                            "id": 4399,
+                                            "name": "bool",
+                                            "nodeType": "ElementaryTypeName",
+                                            "src": "3933:4:18",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_bool",
+                                                "typeString": "bool"
+                                            }
+                                        },
+                                        "id": 4401,
+                                        "length": {
+                                            "argumentTypes": null,
+                                            "hexValue": "32",
+                                            "id": 4400,
+                                            "isConstant": false,
+                                            "isLValue": false,
+                                            "isPure": true,
+                                            "kind": "number",
+                                            "lValueRequested": false,
+                                            "nodeType": "Literal",
+                                            "src": "3938:1:18",
+                                            "subdenomination": null,
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_rational_2_by_1",
+                                                "typeString": "int_const 2"
+                                            },
+                                            "value": "2"
+                                        },
+                                        "nodeType": "ArrayTypeName",
+                                        "src": "3933:7:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_array$_t_bool_$2_storage_ptr",
+                                            "typeString": "bool[2]"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4404,
+                                    "name": "fixedPart",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4413,
+                                    "src": "3967:26:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_struct$_FixedPart_$4350_memory_ptr",
+                                        "typeString": "struct IForceMove.FixedPart"
+                                    },
+                                    "typeName": {
+                                        "contractScope": null,
+                                        "id": 4403,
+                                        "name": "FixedPart",
+                                        "nodeType": "UserDefinedTypeName",
+                                        "referencedDeclaration": 4350,
+                                        "src": "3967:9:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_struct$_FixedPart_$4350_storage_ptr",
+                                            "typeString": "struct IForceMove.FixedPart"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4408,
+                                    "name": "variablePartAB",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4413,
+                                    "src": "4003:50:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_array$_t_struct$_VariablePart_$4277_memory_$2_memory_ptr",
+                                        "typeString": "struct ForceMoveApp.VariablePart[2]"
+                                    },
+                                    "typeName": {
+                                        "baseType": {
+                                            "contractScope": null,
+                                            "id": 4405,
+                                            "name": "ForceMoveApp.VariablePart",
+                                            "nodeType": "UserDefinedTypeName",
+                                            "referencedDeclaration": 4277,
+                                            "src": "4003:25:18",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_struct$_VariablePart_$4277_storage_ptr",
+                                                "typeString": "struct ForceMoveApp.VariablePart"
+                                            }
+                                        },
+                                        "id": 4407,
+                                        "length": {
+                                            "argumentTypes": null,
+                                            "hexValue": "32",
+                                            "id": 4406,
+                                            "isConstant": false,
+                                            "isLValue": false,
+                                            "isPure": true,
+                                            "kind": "number",
+                                            "lValueRequested": false,
+                                            "nodeType": "Literal",
+                                            "src": "4029:1:18",
+                                            "subdenomination": null,
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_rational_2_by_1",
+                                                "typeString": "int_const 2"
+                                            },
+                                            "value": "2"
+                                        },
+                                        "nodeType": "ArrayTypeName",
+                                        "src": "4003:28:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_array$_t_struct$_VariablePart_$4277_storage_$2_storage_ptr",
+                                            "typeString": "struct ForceMoveApp.VariablePart[2]"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4410,
+                                    "name": "sig",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4413,
+                                    "src": "4168:20:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_struct$_Signature_$4338_memory_ptr",
+                                        "typeString": "struct IForceMove.Signature"
+                                    },
+                                    "typeName": {
+                                        "contractScope": null,
+                                        "id": 4409,
+                                        "name": "Signature",
+                                        "nodeType": "UserDefinedTypeName",
+                                        "referencedDeclaration": 4338,
+                                        "src": "4168:9:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_struct$_Signature_$4338_storage_ptr",
+                                            "typeString": "struct IForceMove.Signature"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                }
+                            ],
+                            "src": "3895:299:18"
+                        },
+                        "returnParameters": {
+                            "id": 4412,
+                            "nodeType": "ParameterList",
+                            "parameters": [],
+                            "src": "4209:0:18"
+                        },
+                        "scope": 4484,
+                        "src": "3879:331:18",
+                        "stateMutability": "nonpayable",
+                        "virtual": true,
+                        "visibility": "public"
+                    },
+                    {
+                        "body": null,
+                        "documentation": "@notice Overwrites the `turnNumRecord` stored against a channel by providing a state with higher turn number, supported by a signature from each participant.\n@dev Overwrites the `turnNumRecord` stored against a channel by providing a state with higher turn number, supported by a signature from each participant.\n@param fixedPart Data describing properties of the state channel that do not change with state updates.\n@param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.\n@param variableParts An ordered array of structs, each decribing the properties of the state channel that may change with each state update.\n@param isFinalCount Describes how many of the submitted states have the `isFinal` property set to `true`. It is implied that the rightmost `isFinalCount` states are final, and the rest are not final.\n@param sigs An array of signatures that support the state with the `largestTurnNum`.\n@param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.",
+                        "functionSelector": "0149b762",
+                        "id": 4431,
+                        "implemented": false,
+                        "kind": "function",
+                        "modifiers": [],
+                        "name": "checkpoint",
+                        "nodeType": "FunctionDefinition",
+                        "overrides": null,
+                        "parameters": {
+                            "id": 4429,
+                            "nodeType": "ParameterList",
+                            "parameters": [
+                                {
+                                    "constant": false,
+                                    "id": 4415,
+                                    "name": "fixedPart",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4431,
+                                    "src": "5429:26:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_struct$_FixedPart_$4350_memory_ptr",
+                                        "typeString": "struct IForceMove.FixedPart"
+                                    },
+                                    "typeName": {
+                                        "contractScope": null,
+                                        "id": 4414,
+                                        "name": "FixedPart",
+                                        "nodeType": "UserDefinedTypeName",
+                                        "referencedDeclaration": 4350,
+                                        "src": "5429:9:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_struct$_FixedPart_$4350_storage_ptr",
+                                            "typeString": "struct IForceMove.FixedPart"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4417,
+                                    "name": "largestTurnNum",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4431,
+                                    "src": "5465:21:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint48",
+                                        "typeString": "uint48"
+                                    },
+                                    "typeName": {
+                                        "id": 4416,
+                                        "name": "uint48",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "5465:6:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_uint48",
+                                            "typeString": "uint48"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4420,
+                                    "name": "variableParts",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4431,
+                                    "src": "5496:48:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_array$_t_struct$_VariablePart_$4277_memory_$dyn_memory_ptr",
+                                        "typeString": "struct ForceMoveApp.VariablePart[]"
+                                    },
+                                    "typeName": {
+                                        "baseType": {
+                                            "contractScope": null,
+                                            "id": 4418,
+                                            "name": "ForceMoveApp.VariablePart",
+                                            "nodeType": "UserDefinedTypeName",
+                                            "referencedDeclaration": 4277,
+                                            "src": "5496:25:18",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_struct$_VariablePart_$4277_storage_ptr",
+                                                "typeString": "struct ForceMoveApp.VariablePart"
+                                            }
+                                        },
+                                        "id": 4419,
+                                        "length": null,
+                                        "nodeType": "ArrayTypeName",
+                                        "src": "5496:27:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_array$_t_struct$_VariablePart_$4277_storage_$dyn_storage_ptr",
+                                            "typeString": "struct ForceMoveApp.VariablePart[]"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4422,
+                                    "name": "isFinalCount",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4431,
+                                    "src": "5554:18:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint8",
+                                        "typeString": "uint8"
+                                    },
+                                    "typeName": {
+                                        "id": 4421,
+                                        "name": "uint8",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "5554:5:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_uint8",
+                                            "typeString": "uint8"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4425,
+                                    "name": "sigs",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4431,
+                                    "src": "5618:23:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_array$_t_struct$_Signature_$4338_memory_$dyn_memory_ptr",
+                                        "typeString": "struct IForceMove.Signature[]"
+                                    },
+                                    "typeName": {
+                                        "baseType": {
+                                            "contractScope": null,
+                                            "id": 4423,
+                                            "name": "Signature",
+                                            "nodeType": "UserDefinedTypeName",
+                                            "referencedDeclaration": 4338,
+                                            "src": "5618:9:18",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_struct$_Signature_$4338_storage_ptr",
+                                                "typeString": "struct IForceMove.Signature"
+                                            }
+                                        },
+                                        "id": 4424,
+                                        "length": null,
+                                        "nodeType": "ArrayTypeName",
+                                        "src": "5618:11:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_array$_t_struct$_Signature_$4338_storage_$dyn_storage_ptr",
+                                            "typeString": "struct IForceMove.Signature[]"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4428,
+                                    "name": "whoSignedWhat",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4431,
+                                    "src": "5651:28:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_array$_t_uint8_$dyn_memory_ptr",
+                                        "typeString": "uint8[]"
+                                    },
+                                    "typeName": {
+                                        "baseType": {
+                                            "id": 4426,
+                                            "name": "uint8",
+                                            "nodeType": "ElementaryTypeName",
+                                            "src": "5651:5:18",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_uint8",
+                                                "typeString": "uint8"
+                                            }
+                                        },
+                                        "id": 4427,
+                                        "length": null,
+                                        "nodeType": "ArrayTypeName",
+                                        "src": "5651:7:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_array$_t_uint8_$dyn_storage_ptr",
+                                            "typeString": "uint8[]"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                }
+                            ],
+                            "src": "5419:266:18"
+                        },
+                        "returnParameters": {
+                            "id": 4430,
+                            "nodeType": "ParameterList",
+                            "parameters": [],
+                            "src": "5700:0:18"
+                        },
+                        "scope": 4484,
+                        "src": "5400:301:18",
+                        "stateMutability": "nonpayable",
+                        "virtual": true,
+                        "visibility": "public"
+                    },
+                    {
+                        "body": null,
+                        "documentation": "@notice Finalizes a channel by providing a finalization proof.\n@dev Finalizes a channel by providing a finalization proof.\n@param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.\n@param fixedPart Data describing properties of the state channel that do not change with state updates.\n@param appPartHash The keccak256 of the abi.encode of `(challengeDuration, appDefinition, appData)`. Applies to all states in the finalization proof.\n@param outcomeHash The keccak256 of the abi.encode of the `outcome`. Applies to all stats in the finalization proof.\n@param numStates The number of states in the finalization proof.\n@param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.\n@param sigs An array of signatures that support the state with the `largestTurnNum`.",
+                        "functionSelector": "7ff6a982",
+                        "id": 4450,
+                        "implemented": false,
+                        "kind": "function",
+                        "modifiers": [],
+                        "name": "conclude",
+                        "nodeType": "FunctionDefinition",
+                        "overrides": null,
+                        "parameters": {
+                            "id": 4448,
+                            "nodeType": "ParameterList",
+                            "parameters": [
+                                {
+                                    "constant": false,
+                                    "id": 4433,
+                                    "name": "largestTurnNum",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4450,
+                                    "src": "6726:21:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint48",
+                                        "typeString": "uint48"
+                                    },
+                                    "typeName": {
+                                        "id": 4432,
+                                        "name": "uint48",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "6726:6:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_uint48",
+                                            "typeString": "uint48"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4435,
+                                    "name": "fixedPart",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4450,
+                                    "src": "6757:26:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_struct$_FixedPart_$4350_memory_ptr",
+                                        "typeString": "struct IForceMove.FixedPart"
+                                    },
+                                    "typeName": {
+                                        "contractScope": null,
+                                        "id": 4434,
+                                        "name": "FixedPart",
+                                        "nodeType": "UserDefinedTypeName",
+                                        "referencedDeclaration": 4350,
+                                        "src": "6757:9:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_struct$_FixedPart_$4350_storage_ptr",
+                                            "typeString": "struct IForceMove.FixedPart"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4437,
+                                    "name": "appPartHash",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4450,
+                                    "src": "6793:19:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bytes32",
+                                        "typeString": "bytes32"
+                                    },
+                                    "typeName": {
+                                        "id": 4436,
+                                        "name": "bytes32",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "6793:7:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_bytes32",
+                                            "typeString": "bytes32"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4439,
+                                    "name": "outcomeHash",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4450,
+                                    "src": "6822:19:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bytes32",
+                                        "typeString": "bytes32"
+                                    },
+                                    "typeName": {
+                                        "id": 4438,
+                                        "name": "bytes32",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "6822:7:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_bytes32",
+                                            "typeString": "bytes32"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4441,
+                                    "name": "numStates",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4450,
+                                    "src": "6851:15:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint8",
+                                        "typeString": "uint8"
+                                    },
+                                    "typeName": {
+                                        "id": 4440,
+                                        "name": "uint8",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "6851:5:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_uint8",
+                                            "typeString": "uint8"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4444,
+                                    "name": "whoSignedWhat",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4450,
+                                    "src": "6876:28:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_array$_t_uint8_$dyn_memory_ptr",
+                                        "typeString": "uint8[]"
+                                    },
+                                    "typeName": {
+                                        "baseType": {
+                                            "id": 4442,
+                                            "name": "uint8",
+                                            "nodeType": "ElementaryTypeName",
+                                            "src": "6876:5:18",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_uint8",
+                                                "typeString": "uint8"
+                                            }
+                                        },
+                                        "id": 4443,
+                                        "length": null,
+                                        "nodeType": "ArrayTypeName",
+                                        "src": "6876:7:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_array$_t_uint8_$dyn_storage_ptr",
+                                            "typeString": "uint8[]"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4447,
+                                    "name": "sigs",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4450,
+                                    "src": "6914:23:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "memory",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_array$_t_struct$_Signature_$4338_memory_$dyn_memory_ptr",
+                                        "typeString": "struct IForceMove.Signature[]"
+                                    },
+                                    "typeName": {
+                                        "baseType": {
+                                            "contractScope": null,
+                                            "id": 4445,
+                                            "name": "Signature",
+                                            "nodeType": "UserDefinedTypeName",
+                                            "referencedDeclaration": 4338,
+                                            "src": "6914:9:18",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_struct$_Signature_$4338_storage_ptr",
+                                                "typeString": "struct IForceMove.Signature"
+                                            }
+                                        },
+                                        "id": 4446,
+                                        "length": null,
+                                        "nodeType": "ArrayTypeName",
+                                        "src": "6914:11:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_array$_t_struct$_Signature_$4338_storage_$dyn_storage_ptr",
+                                            "typeString": "struct IForceMove.Signature[]"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                }
+                            ],
+                            "src": "6716:227:18"
+                        },
+                        "returnParameters": {
+                            "id": 4449,
+                            "nodeType": "ParameterList",
+                            "parameters": [],
+                            "src": "6958:0:18"
+                        },
+                        "scope": 4484,
+                        "src": "6699:260:18",
+                        "stateMutability": "nonpayable",
+                        "virtual": true,
+                        "visibility": "public"
+                    },
+                    {
+                        "anonymous": false,
+                        "documentation": "@dev Indicates that a challenge has been registered against `channelId`.\n@param channelId Unique identifier for a state channel.\n@param turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.\n@param finalizesAt The unix timestamp when `channelId` will finalize.\n@param challenger The address of the participant whom registered the challenge.\n@param isFinal Boolean denoting whether the challenge state is final.\n@param fixedPart Data describing properties of the state channel that do not change with state updates.\n@param variableParts An ordered array of structs, each decribing the properties of the state channel that may change with each state update.\n@param sigs A list of Signatures that supported the challenge\n@param whoSignedWhat Indexing information to identify which signature was by which participant",
+                        "id": 4473,
+                        "name": "ChallengeRegistered",
+                        "nodeType": "EventDefinition",
+                        "parameters": {
+                            "id": 4472,
+                            "nodeType": "ParameterList",
+                            "parameters": [
+                                {
+                                    "constant": false,
+                                    "id": 4452,
+                                    "indexed": true,
+                                    "name": "channelId",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4473,
+                                    "src": "7963:25:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bytes32",
+                                        "typeString": "bytes32"
+                                    },
+                                    "typeName": {
+                                        "id": 4451,
+                                        "name": "bytes32",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "7963:7:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_bytes32",
+                                            "typeString": "bytes32"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4454,
+                                    "indexed": false,
+                                    "name": "turnNumRecord",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4473,
+                                    "src": "8052:20:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint48",
+                                        "typeString": "uint48"
+                                    },
+                                    "typeName": {
+                                        "id": 4453,
+                                        "name": "uint48",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "8052:6:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_uint48",
+                                            "typeString": "uint48"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4456,
+                                    "indexed": false,
+                                    "name": "finalizesAt",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4473,
+                                    "src": "8082:18:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint48",
+                                        "typeString": "uint48"
+                                    },
+                                    "typeName": {
+                                        "id": 4455,
+                                        "name": "uint48",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "8082:6:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_uint48",
+                                            "typeString": "uint48"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4458,
+                                    "indexed": false,
+                                    "name": "challenger",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4473,
+                                    "src": "8110:18:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_address",
+                                        "typeString": "address"
+                                    },
+                                    "typeName": {
+                                        "id": 4457,
+                                        "name": "address",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "8110:7:18",
+                                        "stateMutability": "nonpayable",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_address",
+                                            "typeString": "address"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4460,
+                                    "indexed": false,
+                                    "name": "isFinal",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4473,
+                                    "src": "8138:12:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bool",
+                                        "typeString": "bool"
+                                    },
+                                    "typeName": {
+                                        "id": 4459,
+                                        "name": "bool",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "8138:4:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_bool",
+                                            "typeString": "bool"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4462,
+                                    "indexed": false,
+                                    "name": "fixedPart",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4473,
+                                    "src": "8160:19:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_struct$_FixedPart_$4350_memory_ptr",
+                                        "typeString": "struct IForceMove.FixedPart"
+                                    },
+                                    "typeName": {
+                                        "contractScope": null,
+                                        "id": 4461,
+                                        "name": "FixedPart",
+                                        "nodeType": "UserDefinedTypeName",
+                                        "referencedDeclaration": 4350,
+                                        "src": "8160:9:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_struct$_FixedPart_$4350_storage_ptr",
+                                            "typeString": "struct IForceMove.FixedPart"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4465,
+                                    "indexed": false,
+                                    "name": "variableParts",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4473,
+                                    "src": "8189:41:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_array$_t_struct$_VariablePart_$4277_memory_$dyn_memory_ptr",
+                                        "typeString": "struct ForceMoveApp.VariablePart[]"
+                                    },
+                                    "typeName": {
+                                        "baseType": {
+                                            "contractScope": null,
+                                            "id": 4463,
+                                            "name": "ForceMoveApp.VariablePart",
+                                            "nodeType": "UserDefinedTypeName",
+                                            "referencedDeclaration": 4277,
+                                            "src": "8189:25:18",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_struct$_VariablePart_$4277_storage_ptr",
+                                                "typeString": "struct ForceMoveApp.VariablePart"
+                                            }
+                                        },
+                                        "id": 4464,
+                                        "length": null,
+                                        "nodeType": "ArrayTypeName",
+                                        "src": "8189:27:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_array$_t_struct$_VariablePart_$4277_storage_$dyn_storage_ptr",
+                                            "typeString": "struct ForceMoveApp.VariablePart[]"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4468,
+                                    "indexed": false,
+                                    "name": "sigs",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4473,
+                                    "src": "8240:16:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_array$_t_struct$_Signature_$4338_memory_$dyn_memory_ptr",
+                                        "typeString": "struct IForceMove.Signature[]"
+                                    },
+                                    "typeName": {
+                                        "baseType": {
+                                            "contractScope": null,
+                                            "id": 4466,
+                                            "name": "Signature",
+                                            "nodeType": "UserDefinedTypeName",
+                                            "referencedDeclaration": 4338,
+                                            "src": "8240:9:18",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_struct$_Signature_$4338_storage_ptr",
+                                                "typeString": "struct IForceMove.Signature"
+                                            }
+                                        },
+                                        "id": 4467,
+                                        "length": null,
+                                        "nodeType": "ArrayTypeName",
+                                        "src": "8240:11:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_array$_t_struct$_Signature_$4338_storage_$dyn_storage_ptr",
+                                            "typeString": "struct IForceMove.Signature[]"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4471,
+                                    "indexed": false,
+                                    "name": "whoSignedWhat",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4473,
+                                    "src": "8266:21:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_array$_t_uint8_$dyn_memory_ptr",
+                                        "typeString": "uint8[]"
+                                    },
+                                    "typeName": {
+                                        "baseType": {
+                                            "id": 4469,
+                                            "name": "uint8",
+                                            "nodeType": "ElementaryTypeName",
+                                            "src": "8266:5:18",
+                                            "typeDescriptions": {
+                                                "typeIdentifier": "t_uint8",
+                                                "typeString": "uint8"
+                                            }
+                                        },
+                                        "id": 4470,
+                                        "length": null,
+                                        "nodeType": "ArrayTypeName",
+                                        "src": "8266:7:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_array$_t_uint8_$dyn_storage_ptr",
+                                            "typeString": "uint8[]"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                }
+                            ],
+                            "src": "7953:340:18"
+                        },
+                        "src": "7928:366:18"
+                    },
+                    {
+                        "anonymous": false,
+                        "documentation": "@dev Indicates that a challenge, previously registered against `channelId`, has been cleared.\n@param channelId Unique identifier for a state channel.\n@param newTurnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.",
+                        "id": 4479,
+                        "name": "ChallengeCleared",
+                        "nodeType": "EventDefinition",
+                        "parameters": {
+                            "id": 4478,
+                            "nodeType": "ParameterList",
+                            "parameters": [
+                                {
+                                    "constant": false,
+                                    "id": 4475,
+                                    "indexed": true,
+                                    "name": "channelId",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4479,
+                                    "src": "8624:25:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bytes32",
+                                        "typeString": "bytes32"
+                                    },
+                                    "typeName": {
+                                        "id": 4474,
+                                        "name": "bytes32",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "8624:7:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_bytes32",
+                                            "typeString": "bytes32"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                },
+                                {
+                                    "constant": false,
+                                    "id": 4477,
+                                    "indexed": false,
+                                    "name": "newTurnNumRecord",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4479,
+                                    "src": "8651:23:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_uint48",
+                                        "typeString": "uint48"
+                                    },
+                                    "typeName": {
+                                        "id": 4476,
+                                        "name": "uint48",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "8651:6:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_uint48",
+                                            "typeString": "uint48"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                }
+                            ],
+                            "src": "8623:52:18"
+                        },
+                        "src": "8601:75:18"
+                    },
+                    {
+                        "anonymous": false,
+                        "documentation": "@dev Indicates that a challenge has been registered against `channelId`.\n@param channelId Unique identifier for a state channel.",
+                        "id": 4483,
+                        "name": "Concluded",
+                        "nodeType": "EventDefinition",
+                        "parameters": {
+                            "id": 4482,
+                            "nodeType": "ParameterList",
+                            "parameters": [
+                                {
+                                    "constant": false,
+                                    "id": 4481,
+                                    "indexed": true,
+                                    "name": "channelId",
+                                    "nodeType": "VariableDeclaration",
+                                    "overrides": null,
+                                    "scope": 4483,
+                                    "src": "8857:25:18",
+                                    "stateVariable": false,
+                                    "storageLocation": "default",
+                                    "typeDescriptions": {
+                                        "typeIdentifier": "t_bytes32",
+                                        "typeString": "bytes32"
+                                    },
+                                    "typeName": {
+                                        "id": 4480,
+                                        "name": "bytes32",
+                                        "nodeType": "ElementaryTypeName",
+                                        "src": "8857:7:18",
+                                        "typeDescriptions": {
+                                            "typeIdentifier": "t_bytes32",
+                                            "typeString": "bytes32"
+                                        }
+                                    },
+                                    "value": null,
+                                    "visibility": "internal"
+                                }
+                            ],
+                            "src": "8856:27:18"
+                        },
+                        "src": "8841:43:18"
+                    }
+                ],
+                "scope": 4485,
+                "src": "291:8595:18"
+            }
+        ],
+        "src": "0:8887:18"
+    },
+    "contractName": "IForceMove",
+    "compiler": {
+        "version": "unknown"
+    },
+    "networks": {}
+}

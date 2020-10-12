@@ -1,0 +1,1 @@
+{"version":3,"file":"fake-iframe-channel-provider.d.ts","sourceRoot":"","sources":["../../../tests/fakes/fake-iframe-channel-provider.ts"],"names":[],"mappings":"AAAA,OAAO,EAAC,8BAA8B,EAAC,MAAM,wCAAwC,CAAC;AAEtF,OAAO,EAAC,0BAA0B,EAAC,MAAM,iCAAiC,CAAC;AAE3E;;;;GAIG;AACH,qBAAa,yBAA0B,SAAQ,0BAC7C,YAAW,8BAA8B;IACnC,oBAAoB,CAAC,GAAG,CAAC,EAAE,MAAM,GAAG,OAAO,CAAC,IAAI,CAAC;CAMxD"}

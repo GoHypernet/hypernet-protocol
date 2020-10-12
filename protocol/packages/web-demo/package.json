@@ -1,0 +1,73 @@
+{
+  "name": "@hypernetlabs/web-demo",
+  "version": "1.0.0",
+  "description": "Demonstrates loading Hypernet Core on a page and connecting it to MetaMask.",
+  "keywords": [
+    "Typescript",
+    "Hypernet",
+    "Labs",
+    "Blockchain",
+    "Hypernet",
+    "Core"
+  ],
+  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/web-demo#readme",
+  "license": "ISC",
+  "main": "lib/web-demo.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1",
+    "build": "webpack",
+    "compile": "tsc -b tsconfig.build.json",
+    "start": "concurrently \"yarn start-web\" \"yarn start-xstate-wallet\"",
+    "start-web": "webpack-dev-server --mode development --open",
+    "start-xstate-wallet": "env-cmd -f ./.env.development --use-shell \"yarn start-wallet-and-ganache\"",
+    "start-wallet-and-ganache": "concurrently \"yarn start-shared-ganache\" \"wait-on tcp:8545 && yarn start-web-wallet\"",
+    "start-shared-ganache": "yarn --cwd ../../node_modules/@statechannels/devtools/ start:shared-ganache",
+    "start-web-wallet": "yarn --cwd ../../node_modules/@statechannels/xstate-wallet/ start",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "tslint -p tsconfig.json"
+  },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "devDependencies": {
+    "@statechannels/devtools": "^0.3.9",
+    "@statechannels/xstate-wallet": "^0.3.9",
+    "@types/knockout": "^3.4.68",
+    "case-sensitive-paths-webpack-plugin": "^2.3.0",
+    "clean-webpack-plugin": "^3.0.0",
+    "concurrently": "^5.3.0",
+    "env-cmd": "^10.1.0",
+    "ganache-cli": "^6.10.1",
+    "html-loader": "^1.3.0",
+    "html-webpack-plugin": "^4.4.1",
+    "http-server": "^0.12.3",
+    "postcss": "^8.1.0",
+    "postcss-loader": "^4.0.2",
+    "prettier": "^2.1.0",
+    "scrypt": "https://github.com/barrysteyn/node-scrypt/",
+    "ts-loader": "^8.0.3",
+    "tsconfig-paths-webpack-plugin": "^3.3.0",
+    "tslint": "^6.1.3",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^4.0.2",
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
+  },
+  "dependencies": {
+    "@hypernetlabs/hypernet-core": "^0.0.1",
+    "knockout": "^3.5.1"
+  }
+}

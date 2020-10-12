@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="generator" content="Docusaurus v2.0.0-alpha.59">
+<link rel="search" type="application/opensearchdescription+xml" title="statechannels docs" href="/opensearch.xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Chivo&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+<script src="https://buttons.github.io/buttons.js"></script><title data-react-helmet="true">Contract Inheritance | statechannels docs</title><meta data-react-helmet="true" property="og:image" content="https://docs.statechannels.org/img/undraw_online.svg"><meta data-react-helmet="true" property="twitter:image" content="https://docs.statechannels.org/img/undraw_online.svg"><meta data-react-helmet="true" name="twitter:image:alt" content="Image for statechannels docs"><meta data-react-helmet="true" name="twitter:card" content="summary_large_image"><meta data-react-helmet="true" property="og:title" content="Contract Inheritance | statechannels docs"><meta data-react-helmet="true" name="description" content="The following diagram shows how the contracts inherit from one another. Click on a node to see the corresponding API."><meta data-react-helmet="true" property="og:description" content="The following diagram shows how the contracts inherit from one another. Click on a node to see the corresponding API."><meta data-react-helmet="true" property="og:url" content="https://docs.statechannels.org/contract-api/contract-inheritance"><link data-react-helmet="true" rel="shortcut icon" href="/img/favicon.ico"><link data-react-helmet="true" rel="preconnect" href="https://BH4D9OD16A-dsn.algolia.net" crossorigin="true"><link data-react-helmet="true" rel="canonical" href="https://docs.statechannels.org/contract-api/contract-inheritance"><link rel="stylesheet" href="/styles.e0b33fa7.css">
+<link rel="preload" href="/styles.8e0db825.js" as="script">
+<link rel="preload" href="/runtime~main.27671965.js" as="script">
+<link rel="preload" href="/main.03452097.js" as="script">
+<link rel="preload" href="/2.4ee922d7.js" as="script">
+<link rel="preload" href="/3.4c7fc1f6.js" as="script">
+<link rel="preload" href="/4.a5988223.js" as="script">
+<link rel="preload" href="/1be78505.75ec5049.js" as="script">
+<link rel="preload" href="/369.23cc9095.js" as="script">
+<link rel="preload" href="/ec1ed54d.db84b9ba.js" as="script">
+<link rel="preload" href="/17896441.61fde53e.js" as="script">
+<link rel="preload" href="/1.12d0c272.js" as="script">
+<link rel="preload" href="/2427d19d.522ed07f.js" as="script">
+</head>
+<body>
+<script>!function(){function t(t){document.documentElement.setAttribute("data-theme",t)}var e=function(){var t=null;try{t=localStorage.getItem("theme")}catch(t){}return t}();t(null!==e?e:"light")}()</script><div id="__docusaurus">
+<nav class="navbar navbar--light navbar--fixed-top"><div class="navbar__inner"><div class="navbar__items"><div aria-label="Navigation bar toggle" class="navbar__toggle" role="button" tabindex="0"><svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 30 30" role="img" focusable="false"><title>Menu</title><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></div><a class="navbar__brand" href="/"><img class="navbar__logo" src="/img/logo.svg"><strong class="navbar__title">statechannels docs</strong></a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/">Docs</a><a class="navbar__item navbar__link" href="/typescript-api/index">Typescript API</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/contract-api/contract-inheritance">Contract API</a></div><div class="navbar__items navbar__items--right"><div class="react-toggle react-toggle--disabled displayOnlyInLargeViewport_2aTZ"><div class="react-toggle-track"><div class="react-toggle-track-check"><span class="toggle_BsTx">🌜</span></div><div class="react-toggle-track-x"><span class="toggle_BsTx">🌞</span></div></div><div class="react-toggle-thumb"></div><input type="checkbox" disabled="" aria-label="Dark mode toggle" class="react-toggle-screenreader-only"></div><button type="button" class="DocSearch DocSearch-Button" aria-label="Search"><svg width="20" height="20" class="DocSearch-Search-Icon" viewBox="0 0 20 20"><path d="M14.386 14.386l4.0877 4.0877-4.0877-4.0877c-2.9418 2.9419-7.7115 2.9419-10.6533 0-2.9419-2.9418-2.9419-7.7115 0-10.6533 2.9418-2.9419 7.7115-2.9419 10.6533 0 2.9419 2.9418 2.9419 7.7115 0 10.6533z" stroke="currentColor" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round"></path></svg><span class="DocSearch-Button-Placeholder">Search</span><span class="DocSearch-Button-Key">⌘</span><span class="DocSearch-Button-Key">K</span></button></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div><div class="navbar-sidebar"><div class="navbar-sidebar__brand"><a class="navbar__brand" href="/"><img class="navbar__logo" src="/img/logo.svg"><strong class="navbar__title">statechannels docs</strong></a></div><div class="navbar-sidebar__items"><div class="menu"><ul class="menu__list"><li class="menu__list-item"><a aria-current="page" class="menu__link navbar__link--active" href="/">Docs</a></li><li class="menu__list-item"><a class="menu__link" href="/typescript-api/index">Typescript API</a></li><li class="menu__list-item"><a aria-current="page" class="menu__link navbar__link--active" href="/contract-api/contract-inheritance">Contract API</a></li></ul></div></div></div></nav><div class="main-wrapper"><div class="docPage_2gpo"><div class="docSidebarContainer_3_JD" role="complementary"><div class="sidebar_2urC"><div class="menu menu--responsive menu_5FrY"><button aria-label="Open Menu" aria-haspopup="true" class="button button--secondary button--sm menu__button" type="button"><svg aria-label="Menu" class="sidebarMenuIcon_Dm3K" xmlns="http://www.w3.org/2000/svg" height="24" width="24" viewBox="0 0 32 32" role="img" focusable="false"><title>Menu</title><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><ul class="menu__list"><li class="menu__list-item"><a class="menu__link menu__link--sublist menu__link--active" href="#!">Overview</a><ul class="menu__list"><li class="menu__list-item"><a aria-current="page" class="menu__link menu__link--active active" tabindex="0" href="/contract-api/contract-inheritance">Contract Inheritance</a></li></ul></li><li class="menu__list-item menu__list-item--collapsed"><a class="menu__link menu__link--sublist" href="#!">Libraries</a><ul class="menu__list"><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/SafeMath">SafeMath.sol</a></li><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/Outcome">Outcome.sol</a></li></ul></li><li class="menu__list-item menu__list-item--collapsed"><a class="menu__link menu__link--sublist" href="#!">Base Contracts</a><ul class="menu__list"><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/IForceMove">IForceMove.sol</a></li><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/ForceMove">ForceMove.sol</a></li><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/Adjudicator">Adjudicator.sol</a></li><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/ForceMoveApp">ForceMoveApp.sol</a></li><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/IAssetHolder">IAssetHolder.sol</a></li><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/AssetHolder">AssetHolder.sol</a></li><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/IERC20">IERC20.sol</a></li><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/ERC20">ERC20.sol</a></li></ul></li><li class="menu__list-item menu__list-item--collapsed"><a class="menu__link menu__link--sublist" href="#!">Deployed Contracts</a><ul class="menu__list"><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/NitroAdjudicator">NitroAdjudicator.sol</a></li><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/ERC20AssetHolder">ERC20AssetHolder.sol</a></li><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/ETHAssetHolder">ETHAssetHolder.sol</a></li></ul></li><li class="menu__list-item menu__list-item--collapsed"><a class="menu__link menu__link--sublist" href="#!">ForceMove Apps</a><ul class="menu__list"><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/CountingApp">CountingApp.sol</a></li><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/SingleAssetPayments">SingleAssetPayments.sol</a></li><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/TrivialApp">TrivialApp.sol</a></li></ul></li><li class="menu__list-item menu__list-item--collapsed"><a class="menu__link menu__link--sublist" href="#!">Test Contracts</a><ul class="menu__list"><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/TESTAssetHolder">TESTAssetHolder.sol</a></li><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/TESTForceMove">TESTForceMove.sol</a></li><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/TESTNitroAdjudicator">TESTNitroAdjudicator.sol</a></li><li class="menu__list-item"><a class="menu__link" tabindex="-1" href="/contract-api/natspec/Token">Token.sol</a></li></ul></li></ul></div></div></div><main class="docMainContainer_3EyW"><div class="container padding-vert--lg docItemWrapper_1EkI"><div class="row"><div class="col docItemCol_2ASc"><div class="docItemContainer_3QWW"><article><header><h1 class="docTitle_1Lrw">Contract Inheritance</h1></header><div class="markdown"><p>The following diagram shows how the contracts inherit from one another. Click on a node to see the corresponding API.</p><h2><a aria-hidden="true" tabindex="-1" class="anchor enhancedAnchor_2cZh" id="assets"></a>Assets<a aria-hidden="true" tabindex="-1" class="hash-link" href="#assets" title="Direct link to heading">#</a></h2><div class="mermaid" align="center">
+graph TD
+linkStyle default interpolate basis
+SafeMath([SafeMath])
+Outcome([Outcome])
+IAssetHolder
+AssetHolder
+ERC20AssetHolder
+ETHAssetHolder
+TESTAssetHolder
+IAssetHolder--&gt; AssetHolder
+SafeMath-.-&gt; AssetHolder
+Outcome-.-&gt; AssetHolder
+AssetHolder--&gt;ETHAssetHolder
+AssetHolder--&gt;ERC20AssetHolder
+AssetHolder--&gt;TESTAssetHolder
+classDef Library fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
+classDef Contract fill:#ffffff,stroke:#656664;
+classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
+classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5;
+classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5;
+classDef TestContract fill:#fafe4f,stroke-width:0px
+class SafeMath,Outcome Library;
+class IAssetHolder Interface;
+class AssetHolder,ETHAssetHolder,ERC20AssetHolder Contract;
+class TESTAssetHolder TestContract;
+class ETHAssetHolder,ERC20AssetHolder DeployedContract;
+click SafeMath &quot;/contract-api/natspec/SafeMath&quot;;
+click Outcome &quot;/contract-api/natspec/Outcome&quot;;
+click AssetHolder &quot;/contract-api/natspec/AssetHolder&quot;;
+click ERC20AssetHolder &quot;/contract-api/natspec/ERC20AssetHolder&quot;;
+click ETHAssetHolder &quot;/contract-api/natspec/ETHAssetHolder&quot;;
+click IAssetHolder &quot;/contract-api/natspec/IAssetHolder&quot;;
+click TESTAssetHolder &quot;/contract-api/natspec/TESTAssetHolder&quot;;
+</div><h2><a aria-hidden="true" tabindex="-1" class="anchor enhancedAnchor_2cZh" id="adjudication"></a>Adjudication<a aria-hidden="true" tabindex="-1" class="hash-link" href="#adjudication" title="Direct link to heading">#</a></h2><div class="mermaid" align="center">
+graph TD
+linkStyle default interpolate basis
+Outcome([Outcome])
+Adjudicator
+IForceMove
+ForceMove
+NitroAdjudicator
+TESTForceMove
+TESTNitroAdjudicator
+ForceMoveApp-.-&gt; ForceMove
+IForceMove--&gt; ForceMove
+Outcome--&gt; NitroAdjudicator
+Adjudicator--&gt; NitroAdjudicator
+ForceMove--&gt; NitroAdjudicator
+ForceMove--&gt;TESTForceMove
+NitroAdjudicator--&gt; TESTNitroAdjudicator
+classDef Contract fill:#ffffff,stroke:#656664;
+classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
+classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5
+classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5
+classDef TestContract fill:#fafe4f,stroke-width:0px;
+classDef Library fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
+class Outcome,SafeMath Library;
+class IForceMove Abstraction;
+class Adjudicator,ForceMoveApp Interface;
+class ForceMove Contract;
+class TESTForceMove,TESTNitroAdjudicator TestContract;
+class NitroAdjudicator DeployedContract;
+click ForceMoveApp &quot;/contract-api/natspec/ForceMoveApp&quot;;
+click SafeMath &quot;/contract-api/natspec/SafeMath&quot;;
+click Outcome &quot;/contract-api/natspec/Outcome&quot;;
+click Adjudicator &quot;/contract-api/natspec/Adjudicator&quot;;
+click ForceMove &quot;/contract-api/natspec/ForceMove&quot;;
+click IForceMove &quot;/contract-api/natspec/IForceMove&quot;;
+click NitroAdjudicator &quot;/contract-api/natspec/NitroAdjudicator&quot;;
+click Outcome &quot;/contract-api/natspec/Outcome&quot;;
+click SafeMath &quot;/contract-api/natspec/SafeMath&quot;;
+click TESTForceMove &quot;/contract-api/natspec/TESTForceMove&quot;;
+click TESTNitroAdjudicator &quot;/contract-api/natspec/TESTNitroAdjudicator&quot;;
+</div><h2><a aria-hidden="true" tabindex="-1" class="anchor enhancedAnchor_2cZh" id="3rd-party"></a>3rd Party<a aria-hidden="true" tabindex="-1" class="hash-link" href="#3rd-party" title="Direct link to heading">#</a></h2><div class="mermaid" align="center">
+graph TD
+linkStyle default interpolate basis
+ERC20
+IERC20
+Token
+CountingApp
+ForceMoveApp
+SingleAssetPayments
+TrivialApp
+ForceMoveApp--&gt;CountingApp
+ForceMoveApp--&gt;TrivialApp
+ForceMoveApp--&gt;SingleAssetPayments
+IERC20--&gt;ERC20
+ERC20--&gt;Token
+classDef Contract fill:#ffffff,stroke:#656664;
+classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
+classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5
+classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5
+classDef TestContract fill:#fafe4f,stroke-width:0px;
+classDef fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
+class Outcome,SafeMath Library;
+class ForceMoveApp,IERC20 Interface;
+class SingleAssetPayments,TrivialApp,CountingApp,ERC20 Contract;
+class Token TestContract;
+click CountingApp &quot;/contract-api/natspec/CountingApp&quot;;
+click ERC20 &quot;/contract-api/natspec/ERC20&quot;;
+click ForceMoveApp &quot;/contract-api/natspec/ForceMoveApp&quot;;
+click IERC20 &quot;/contract-api/natspec/IERC20&quot;;
+click Outcome &quot;/contract-api/natspec/Outcome&quot;;
+click SafeMath &quot;/contract-api/natspec/SafeMath&quot;;
+click SingleAssetPayments &quot;/contract-api/natspec/SingleAssetPayments&quot;;
+click Token &quot;/contract-api/natspec/Token&quot;;
+click TrivialApp &quot;/contract-api/natspec/TrivialApp&quot;;
+</div><hr><h2><a aria-hidden="true" tabindex="-1" class="anchor enhancedAnchor_2cZh" id="key"></a>Key<a aria-hidden="true" tabindex="-1" class="hash-link" href="#key" title="Direct link to heading">#</a></h2><div class="mermaid" align="center">
+graph TD
+linkStyle default interpolate basis
+Abstraction--&gt;|Inherited by| Contract
+Contract--&gt;|Inherited by| TESTContract
+Interface--&gt;|Inherited by| Contract
+Library([Library])-.-&gt;|Imported by| Contract
+DeployedContract
+classDef Contract fill:#ffffff,stroke:#656664;
+classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5
+classDef TestContract fill:#fafe4f,stroke-width:0px;
+classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5
+classDef Library fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
+classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
+class Library Library;
+class Abstraction Abstraction;
+class Contract Contract;
+class TESTContract TestContract;
+class Interface Interface;
+class DeployedContract DeployedContract
+</div><p><code>TESTContracts</code> are only used in development.</p></div></article><div class="margin-vert--xl"><div class="row"><div class="col"></div><div class="col text--right"><em><small>Last updated on <time datetime="2020-09-16T22:30:36.000Z" class="docLastUpdatedAt_217_">9/16/2020</time> by <strong>Charlie Sibbach</strong></small></em></div></div></div><div class="margin-vert--lg"><nav class="pagination-nav" aria-label="Blog list page navigation"><div class="pagination-nav__item"></div><div class="pagination-nav__item pagination-nav__item--next"><a class="pagination-nav__link" href="/contract-api/natspec/SafeMath"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">SafeMath.sol »</div></a></div></nav></div></div></div><div class="col col--3"><div class="tableOfContents_3klQ"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#assets" class="table-of-contents__link">Assets</a></li><li><a href="#adjudication" class="table-of-contents__link">Adjudication</a></li><li><a href="#3rd-party" class="table-of-contents__link">3rd Party</a></li><li><a href="#key" class="table-of-contents__link">Key</a></li></ul></div></div></div></div></main></div></div><footer class="footer"><div class="container"><div class="text--center"><div class="margin-bottom--sm"><img class="footer__logo" src="/img/logo.svg"></div><div>Copyright © 2020</div></div></div></footer></div>
+<script src="/styles.8e0db825.js"></script>
+<script src="/runtime~main.27671965.js"></script>
+<script src="/main.03452097.js"></script>
+<script src="/2.4ee922d7.js"></script>
+<script src="/3.4c7fc1f6.js"></script>
+<script src="/4.a5988223.js"></script>
+<script src="/1be78505.75ec5049.js"></script>
+<script src="/369.23cc9095.js"></script>
+<script src="/ec1ed54d.db84b9ba.js"></script>
+<script src="/17896441.61fde53e.js"></script>
+<script src="/1.12d0c272.js"></script>
+<script src="/2427d19d.522ed07f.js"></script>
+</body>
+</html>
