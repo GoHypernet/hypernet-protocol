@@ -1,0 +1,108 @@
+name: Feature Branch
+
+on:
+  push:
+    branches-ignore:
+      - master
+      - staging
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: make pull-latest
+      - run: make all
+      - run: bash ops/build-report.sh
+
+  utils:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: make test-utils
+
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: make test-utils
+
+  protocol:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: make test-protocol
+
+  engine:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: make test-engine
+
+  server-node:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: make test-server-node
+
+  router:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: make test-router
+
+  global:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: make pull-latest
+      - run: make global
+      - run: make start-global
+      - run: make test-global
+      - name: Print logs
+        if: failure()
+        run: docker service logs --tail 200 global_auth
+
+  duet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: make pull-latest
+      - run: make duet
+      - run: make start-duet
+      - run: make test-duet
+      - name: Print logs
+        if: failure()
+        run: |
+          docker service logs --tail 200 duet_alice
+          docker service logs --tail 200 duet_bob
+
+  trio:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - run: make pull-latest
+      - run: make trio
+      - run: make start-trio
+      - run: make test-trio
+      - name: Print logs
+        if: failure()
+        run: |
+          docker service logs --tail 200 trio_roger
+          docker service logs --tail 200 trio_router
+          docker service logs --tail 200 trio_carol
+          docker service logs --tail 200 trio_dave
+
+# prod-node:
+#   runs-on: ubuntu-latest
+#   needs: [build]
+#   steps:
+#     - uses: actions/checkout@v1
+#     - run: make node && make test-runner
+#     - run: VECTOR_ENV=prod make start-node
+#     - run: VECTOR_ENV=prod make test-node
+#     - name: Print logs
+#       if: failure()
+#       run: |
+#         docker service logs --tail 200 node_proxy
+#         docker service logs --tail 200 node_node

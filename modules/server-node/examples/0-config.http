@@ -1,0 +1,47 @@
+@aliceUrl = http://localhost:8003
+@bobUrl = http://localhost:8004
+@carolUrl = http://localhost:8005
+@daveUrl = http://localhost:8006
+@rogerUrl = http://localhost:8007
+@aliceBobChannel = 0xD7b60870a3a0D52A2b9F7daBe5DCaB8EDC5bCD4e
+@carolRogerChannel = 0xEd985dC74648f968F9B42Ef2CCF2ed98777f4C3A
+@daveRogerChannel = 0x927c6026c3b8130251f528ef0CAFfab4fae57402
+@adminToken = cxt1234
+@alicePublicIdentifier = indra8WxfqTu8EC2FLM6g4y6TgbSrx4EPP9jeDFQk3VBsBM7Jv8NakR
+@bobPublicIdentifier = indra5ArRsL26avPNyfvJd2qMAppsEVeJv11n31ex542T9gCd5B1cP3
+@rogerPublicIdentifier = indra8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR
+@chainId = 1337
+
+##############
+### GET CONFIG
+GET {{aliceUrl}}/config
+
+##############
+### GET CHANNELS
+GET {{aliceUrl}}/channel
+
+##############
+### GET CHANNEL
+GET {{carolUrl}}/channel/{{carolRogerChannel}}
+
+##############
+### GET CHANNEL BY PARTICIPANTS
+GET {{aliceUrl}}/channel/{{alicePublicIdentifier}}/{{bobPublicIdentifier}}/{{chainId}}
+
+##############
+### CLEAR STORE
+POST {{aliceUrl}}/clear-store
+Content-Type: application/json
+
+{
+  "adminToken": "{{adminToken}}"
+}
+
+##############
+### CREATE NODE
+POST {{aliceUrl}}/node
+Content-Type: application/json
+
+{
+  "index": 0,
+}
