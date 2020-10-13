@@ -14,7 +14,8 @@
     "bootstrap": "yarn install",
     "test": "lerna run test",
     "lint": "lerna run lint",
-    "format": "lerna run format"
+    "format": "lerna run format",
+    "vector-pull": "git subtree pull --prefix packages/vector git@github.com:connext/vector.git master --squash"
   },
   "repository": {
     "type": "git",
@@ -26,7 +27,8 @@
     "State",
     "Channels",
     "Nitro",
-    "Galileo"
+    "Galileo",
+    "Vector"
   ],
   "author": "Hypernet Labs",
   "license": "ISC",

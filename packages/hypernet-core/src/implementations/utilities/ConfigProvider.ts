@@ -15,6 +15,24 @@ export class ConfigProvider implements IConfigProvider {
         "openThreads",
         "localhost:3055",
         "0x0",
+        "ws://localhost:4221",
+        "http://localhost:5040",
+        {
+          "1337": {
+            "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
+            "channelMastercopyAddress": "0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0",
+            "transferRegistryAddress": "0x345cA3e014Aaf5dcA488057592ee47305D9B3e10"
+          },
+          "1338": {
+            "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
+            "channelMastercopyAddress": "0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0",
+            "transferRegistryAddress": "0x345cA3e014Aaf5dcA488057592ee47305D9B3e10"
+          }
+        },
+        {
+          "1337": "http://localhost:8545",
+          "1338": "http://localhost:8546"
+        }
       )
     }
     else {
@@ -28,3 +46,5 @@ export class ConfigProvider implements IConfigProvider {
     );
   }
 }
+
+
