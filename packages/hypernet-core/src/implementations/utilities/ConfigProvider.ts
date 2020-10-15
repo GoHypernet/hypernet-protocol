@@ -32,7 +32,8 @@ export class ConfigProvider implements IConfigProvider {
         {
           "1337": "http://localhost:8545",
           "1338": "http://localhost:8546"
-        }
+        },
+        "mnemonic-goes-here"
       )
     }
     else {

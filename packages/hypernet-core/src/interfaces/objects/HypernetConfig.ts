@@ -16,6 +16,7 @@ export class HypernetConfig {
     public natsUrl: string,
     public authUrl: string,
     public chainAddresses: ChainAddresses,
-    public chainProviders: ChainProviders
+    public chainProviders: ChainProviders,
+    public mnemonic: string
   ) { }
 }

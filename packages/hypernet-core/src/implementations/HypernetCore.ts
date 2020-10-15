@@ -16,14 +16,14 @@ import {
   HypernetConfig,
 } from "@interfaces/objects";
 import { ThreeBoxUtils } from "@implementations/utilities/3BoxUtils";
-import { Web3Provider } from "@implementations/utilities/Web3Provider";
+import { EthersBlockchainProvider } from "@implementations/utilities/BlockchainProvider";
 import { ConfigProvider } from "@implementations/utilities/ConfigProvider";
 import { ChannelClientProvider } from "@implementations/utilities/ChannelClientProvider";
 import { StateChannelsRepository } from "@implementations/data/StateChannelsRepository";
 import { ThreeBoxPersistenceRepository } from "@implementations/data/3BoxPersistenceRepository";
 import { ThreeBoxMessagingRepository } from "@implementations/data/3BoxMessagingRepository";
 import { LinkService } from "@implementations/business/LinkService";
-import { IWeb3Provider } from "@interfaces/utilities/IWeb3Provider";
+import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
 import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
 import { IChannelClientProvider } from "@interfaces/utilities/IChannelClientProvider";
@@ -52,7 +52,7 @@ export class HypernetCore implements IHypernetCore {
   public onControlClaimed: Subject<ControlClaim>;
   public onControlYielded: Subject<ControlClaim>;
 
-  protected web3Provider: IWeb3Provider;
+  protected blockchainProvider: IBlockchainProvider;
   protected configProvider: IConfigProvider;
   protected contextProvider: IContextProvider;
   protected boxUtils: IThreeBoxUtils;
@@ -95,7 +95,7 @@ export class HypernetCore implements IHypernetCore {
       },
     });
 
-    this.web3Provider = new Web3Provider();
+    this.blockchainProvider = new EthersBlockchainProvider();
     this.configProvider = new ConfigProvider(config);
     this.contextProvider = new ContextProvider(
       this.onLinkUpdated,
@@ -104,7 +104,7 @@ export class HypernetCore implements IHypernetCore {
       this.onControlClaimed,
       this.onControlYielded,
     );
-    this.boxUtils = new ThreeBoxUtils(this.web3Provider, this.contextProvider, this.configProvider);
+    this.boxUtils = new ThreeBoxUtils(this.blockchainProvider, this.contextProvider, this.configProvider);
     this.channelClientProvider = new ChannelClientProvider();
     this.linkUtils = new LinkUtils();
 
@@ -115,7 +115,7 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.configProvider,
     );
-    this.accountRepository = new AccountsRepository(this.web3Provider);
+    this.accountRepository = new AccountsRepository(this.blockchainProvider);
 
     this.linkService = new LinkService(
       this.stateChannelRepository,

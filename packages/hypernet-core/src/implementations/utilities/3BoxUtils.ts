@@ -1,6 +1,6 @@
 import { BoxInstance, create, BoxSpace, BoxThread } from "3box";
 import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
-import { IWeb3Provider } from "@interfaces/utilities/IWeb3Provider";
+import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
 import { EthereumAddress } from "@interfaces/objects";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
@@ -13,7 +13,7 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
   protected threads: { [threadAddress: string]: BoxThread };
 
   public constructor(
-    protected web3Provider: IWeb3Provider,
+    protected blockchainProvider: IBlockchainProvider,
     protected contextProvider: IContextProvider,
     protected configProvider: IConfigProvider,
   ) {
@@ -29,9 +29,9 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
       return this.box;
     }
 
-    const web3 = await this.web3Provider.getWeb3();
+    const provider = await this.blockchainProvider.getProvider();
 
-    this.box = await create(web3.currentProvider);
+    this.box = await create(provider);
 
     // Don't do anything until the sync is complete
     // await this.box.syncDone;

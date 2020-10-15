@@ -1,12 +1,12 @@
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
-import { IWeb3Provider } from "@interfaces/utilities/IWeb3Provider";
+import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
 
 export class AccountsRepository implements IAccountsRepository {
-  constructor(protected web3Provider: IWeb3Provider) {}
+  constructor(protected blockchainProvider: IBlockchainProvider) {}
 
   public async getAccounts(): Promise<string[]> {
-    const web3 = await this.web3Provider.getWeb3();
+    const provider = await this.blockchainProvider.getProvider();
 
-    return await web3.eth.getAccounts();
+    return await provider.listAccounts();
   }
 }
