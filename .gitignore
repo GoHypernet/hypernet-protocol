@@ -11,3 +11,4 @@ packages/hypernet-core/log.txt
 packages/hypernet-core/temp.txt
 *.swp
 *.swo
+*/yarn-error.log

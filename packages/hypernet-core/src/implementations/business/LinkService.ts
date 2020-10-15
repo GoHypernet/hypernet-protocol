@@ -20,7 +20,6 @@ import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
 // tslint:disable: no-console
 export class LinkService implements ILinkService {
   constructor(
-    protected stateChannelRepository: IStateChannelRepository,
     protected persistenceRepository: IPersistenceRepository,
     protected messagingRepository: IMessagingRepository,
     protected contextProvider: IContextProvider,

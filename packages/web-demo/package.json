@@ -31,10 +31,6 @@
     "compile": "tsc -b tsconfig.build.json",
     "start": "concurrently \"yarn start-web\" \"yarn start-xstate-wallet\"",
     "start-web": "webpack-dev-server --mode development --open",
-    "start-xstate-wallet": "env-cmd -f ./.env.development --use-shell \"yarn start-wallet-and-ganache\"",
-    "start-wallet-and-ganache": "concurrently \"yarn start-shared-ganache\" \"wait-on tcp:8545 && yarn start-web-wallet\"",
-    "start-shared-ganache": "yarn --cwd ../../node_modules/@statechannels/devtools/ start:shared-ganache",
-    "start-web-wallet": "yarn --cwd ../../node_modules/@statechannels/xstate-wallet/ start",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json"
   },
@@ -42,8 +38,6 @@
     "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
   },
   "devDependencies": {
-    "@statechannels/devtools": "^0.3.9",
-    "@statechannels/xstate-wallet": "^0.3.9",
     "@types/knockout": "^3.4.68",
     "case-sensitive-paths-webpack-plugin": "^2.3.0",
     "clean-webpack-plugin": "^3.0.0",

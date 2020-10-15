@@ -19,7 +19,6 @@ import { ThreeBoxUtils } from "@implementations/utilities/3BoxUtils";
 import { EthersBlockchainProvider } from "@implementations/utilities/BlockchainProvider";
 import { ConfigProvider } from "@implementations/utilities/ConfigProvider";
 import { ChannelClientProvider } from "@implementations/utilities/ChannelClientProvider";
-import { StateChannelsRepository } from "@implementations/data/StateChannelsRepository";
 import { ThreeBoxPersistenceRepository } from "@implementations/data/3BoxPersistenceRepository";
 import { ThreeBoxMessagingRepository } from "@implementations/data/3BoxMessagingRepository";
 import { LinkService } from "@implementations/business/LinkService";
@@ -27,11 +26,9 @@ import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
 import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
 import { IChannelClientProvider } from "@interfaces/utilities/IChannelClientProvider";
-import { IStateChannelRepository, IPersistenceRepository, IMessagingRepository } from "@interfaces/data";
+import { IPersistenceRepository, IMessagingRepository } from "@interfaces/data";
 import { ILinkService } from "@interfaces/business/ILinkService";
-import { IStateChannelListener } from "@interfaces/api/IStateChannelListener";
 import { IMessagingListener } from "@interfaces/api/IMessagingListener";
-import { StateChannelListener } from "@implementations/api/StateChannelListener";
 import { ThreeBoxMessagingListener } from "@implementations/api/ThreeBoxMessagingListener";
 import { MessageService } from "@implementations/business/MessageService";
 import { IMessageService } from "@interfaces/business/IMessageService";
@@ -59,7 +56,6 @@ export class HypernetCore implements IHypernetCore {
   protected channelClientProvider: IChannelClientProvider;
   protected linkUtils: ILinkUtils;
 
-  protected stateChannelRepository: IStateChannelRepository;
   protected persistenceRepository: IPersistenceRepository;
   protected messagingRepository: IMessagingRepository;
   protected accountRepository: IAccountsRepository;
@@ -68,7 +64,6 @@ export class HypernetCore implements IHypernetCore {
   protected messageService: IMessageService;
   protected controlService: IControlService;
 
-  protected stateChannelListener: IStateChannelListener;
   protected messagingListener: IMessagingListener;
   protected _initialized: boolean;
   protected _inControl: boolean;
@@ -108,7 +103,6 @@ export class HypernetCore implements IHypernetCore {
     this.channelClientProvider = new ChannelClientProvider();
     this.linkUtils = new LinkUtils();
 
-    this.stateChannelRepository = new StateChannelsRepository(this.channelClientProvider, this.configProvider);
     this.persistenceRepository = new ThreeBoxPersistenceRepository(this.boxUtils, this.configProvider);
     this.messagingRepository = new ThreeBoxMessagingRepository(
       this.boxUtils,

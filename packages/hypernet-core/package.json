@@ -39,8 +39,6 @@
     "@connext/vector-utils": "^0.0.1-beta.2",
     "@hypernetlabs/hypernet-contracts": "^0.0.1",
     "@metamask/detect-provider": "^1.1.0",
-    "@statechannels/channel-client": "^0.3.4",
-    "@statechannels/iframe-channel-provider": "^0.3.4",
     "@types/pino": "^6.3.2",
     "bignumber": "^1.1.0",
     "class-transformer": "^0.3.1",
