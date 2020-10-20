@@ -34,7 +34,7 @@
   },
   "dependencies": {
     "3box": "^1.22.2",
-    "@connext/vector-browser-node": "^0.0.1-beta.2",
+    "@connext/vector-browser-node": "^0.0.1-beta.4",
     "@connext/vector-types": "^0.0.1-beta.2",
     "@connext/vector-utils": "^0.0.1-beta.2",
     "@hypernetlabs/hypernet-contracts": "^0.0.1",

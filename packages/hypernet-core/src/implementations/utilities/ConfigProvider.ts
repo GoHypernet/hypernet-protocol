@@ -16,7 +16,6 @@ export class ConfigProvider implements IConfigProvider {
         "localhost:3055",
         "0x0",
         "ws://localhost:4221",
-        "http://localhost:5040",
         {
           "1337": {
             "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",

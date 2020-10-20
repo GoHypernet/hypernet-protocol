@@ -13,8 +13,7 @@ export class HypernetConfig {
     public openThreadKey: string,
     public xstateWalletUrl: string,
     public forceMoveAppAddress: string,
-    public natsUrl: string,
-    public authUrl: string,
+    public messagingUrl: string,
     public chainAddresses: ChainAddresses,
     public chainProviders: ChainProviders,
     public mnemonic: string

@@ -1,5 +1,5 @@
 import {BrowserNode} from "@connext/vector-browser-node";
 
-export interface IBrowerNodeProvider {
+export interface IBrowserNodeProvider {
     getBrowserNode(): Promise<BrowserNode>;
 }

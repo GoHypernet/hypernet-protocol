@@ -1,5 +1,5 @@
 import { ILinkService } from "@interfaces/business/ILinkService";
-import { IStateChannelRepository, IPersistenceRepository, IMessagingRepository } from "@interfaces/data";
+import { IPersistenceRepository, IMessagingRepository } from "@interfaces/data";
 import {
   HypernetLink,
   BigNumber,

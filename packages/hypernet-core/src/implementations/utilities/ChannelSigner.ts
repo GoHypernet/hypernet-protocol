@@ -7,7 +7,7 @@ import {
     PublicIdentifier,
     SignatureString,
     UrlString,
-  } from "@connext/types";
+  } from "@connext/vector-types";
   import { Wallet, Signer, providers } from "ethers";
   
   import {

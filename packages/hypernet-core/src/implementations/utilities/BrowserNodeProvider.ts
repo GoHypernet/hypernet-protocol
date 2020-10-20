@@ -1,12 +1,12 @@
-import { IBrowerNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider";
+import { IBrowserNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider";
 import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
-import {BrowserNode} from "@connext/vector-browser-node";
+import {BrowserNode, BrowserNodeConfig} from "@connext/vector-browser-node";
 import { ChannelSigner } from "@implementations/utilities/ChannelSigner";
 import pino from "pino";
 
-import { Wallet, constants } from "ethers";
+import { Wallet } from "ethers";
 
-export class BrowerNodeProvider implements IBrowerNodeProvider {
+export class BrowserNodeProvider implements IBrowserNodeProvider {
     protected channelSigner: ChannelSigner | null
     protected logger: pino.Logger;
     protected browserNode: Promise<BrowserNode> | null;
@@ -24,11 +24,13 @@ export class BrowerNodeProvider implements IBrowerNodeProvider {
         this.channelSigner = new ChannelSigner(wallet.privateKey);
         console.log(`Signer from mnemonic: ${this.channelSigner.publicIdentifier}`);
 
-        return await BrowserNode.connect(config.natsUrl,
-          this.logger,
-          this.channelSigner,
-          config.chainProviders,
-          config.chainAddresses)
+        return await BrowserNode.connect({
+            chainAddresses: config.chainAddresses,
+            chainProviders: config.chainProviders,
+            logger: this.logger,
+            messagingUrl: config.messagingUrl,
+            signer: this.channelSigner,
+          } as BrowserNodeConfig)
     }
     public async getBrowserNode(): Promise<BrowserNode> {
         if (this.browserNode == null) {

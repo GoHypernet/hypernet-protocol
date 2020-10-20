@@ -18,14 +18,12 @@ import {
 import { ThreeBoxUtils } from "@implementations/utilities/3BoxUtils";
 import { EthersBlockchainProvider } from "@implementations/utilities/BlockchainProvider";
 import { ConfigProvider } from "@implementations/utilities/ConfigProvider";
-import { ChannelClientProvider } from "@implementations/utilities/ChannelClientProvider";
 import { ThreeBoxPersistenceRepository } from "@implementations/data/3BoxPersistenceRepository";
 import { ThreeBoxMessagingRepository } from "@implementations/data/3BoxMessagingRepository";
 import { LinkService } from "@implementations/business/LinkService";
 import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
 import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
-import { IChannelClientProvider } from "@interfaces/utilities/IChannelClientProvider";
 import { IPersistenceRepository, IMessagingRepository } from "@interfaces/data";
 import { ILinkService } from "@interfaces/business/ILinkService";
 import { IMessagingListener } from "@interfaces/api/IMessagingListener";
@@ -53,7 +51,6 @@ export class HypernetCore implements IHypernetCore {
   protected configProvider: IConfigProvider;
   protected contextProvider: IContextProvider;
   protected boxUtils: IThreeBoxUtils;
-  protected channelClientProvider: IChannelClientProvider;
   protected linkUtils: ILinkUtils;
 
   protected persistenceRepository: IPersistenceRepository;
@@ -100,7 +97,6 @@ export class HypernetCore implements IHypernetCore {
       this.onControlYielded,
     );
     this.boxUtils = new ThreeBoxUtils(this.blockchainProvider, this.contextProvider, this.configProvider);
-    this.channelClientProvider = new ChannelClientProvider();
     this.linkUtils = new LinkUtils();
 
     this.persistenceRepository = new ThreeBoxPersistenceRepository(this.boxUtils, this.configProvider);
@@ -112,7 +108,6 @@ export class HypernetCore implements IHypernetCore {
     this.accountRepository = new AccountsRepository(this.blockchainProvider);
 
     this.linkService = new LinkService(
-      this.stateChannelRepository,
       this.persistenceRepository,
       this.messagingRepository,
       this.contextProvider,
@@ -121,12 +116,10 @@ export class HypernetCore implements IHypernetCore {
     this.messageService = new MessageService(
       this.persistenceRepository,
       this.messagingRepository,
-      this.stateChannelRepository,
       this.contextProvider,
     );
     this.controlService = new ControlService(this.messagingRepository, this.contextProvider);
 
-    this.stateChannelListener = new StateChannelListener(this.channelClientProvider, this.messageService, this.linkService);
     this.messagingListener = new ThreeBoxMessagingListener(
       this.linkService,
       this.messageService,
@@ -194,10 +187,8 @@ export class HypernetCore implements IHypernetCore {
     context.account = account;
     await this.contextProvider.setContext(context);
     const messagingListener = this.messagingListener.initialize();
-    const stateChannelListener = this.stateChannelListener.initialize();
-    const stateChannelRepository = this.stateChannelRepository.initialize();
 
-    await Promise.all([messagingListener,stateChannelListener,stateChannelRepository]);
+    await Promise.all([messagingListener]);
 
     // This should always be the last thing we do, after everything else is initialized
     await this.controlService.claimControl();
