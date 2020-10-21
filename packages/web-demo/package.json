@@ -29,8 +29,9 @@
     "test": "echo \"Error: run tests from root\" && exit 1",
     "build": "webpack",
     "compile": "tsc -b tsconfig.build.json",
-    "start": "concurrently \"yarn start-web\" \"yarn start-xstate-wallet\"",
+    "start": "concurrently \"yarn start-web\" \"yarn start-router\"",
     "start-web": "webpack-dev-server --mode development --open",
+    "start-router": "echo \"Error: wait for @connext/vector-router to be published\" && exit 1",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json"
   },

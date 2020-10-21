@@ -37,7 +37,6 @@
     "@connext/vector-browser-node": "^0.0.1-beta.6",
     "@connext/vector-types": "^0.0.1-beta.6",
     "@connext/vector-utils": "^0.0.1-beta.6",
-    "@hypernetlabs/hypernet-contracts": "^0.0.1",
     "@metamask/detect-provider": "^1.1.0",
     "@types/pino": "^6.3.2",
     "bignumber": "^1.1.0",
