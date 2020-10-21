@@ -14,8 +14,7 @@
     "bootstrap": "yarn install",
     "test": "lerna run test",
     "lint": "lerna run lint",
-    "format": "lerna run format",
-    "vector-pull": "git subtree pull --prefix packages/vector git@github.com:connext/vector.git master --squash"
+    "format": "lerna run format"
   },
   "repository": {
     "type": "git",
@@ -26,7 +25,6 @@
     "Blockchain",
     "State",
     "Channels",
-    "Nitro",
     "Galileo",
     "Vector"
   ],
