@@ -24,7 +24,8 @@ import { LinkService } from "@implementations/business/LinkService";
 import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
 import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
-import { IPersistenceRepository, IMessagingRepository } from "@interfaces/data";
+import { IPersistenceRepository, IMessagingRepository, ILinkRepository } from "@interfaces/data";
+import {VectorLinkRepository} from "@implementations/data/VectorLinkRepository";
 import { ILinkService } from "@interfaces/business/ILinkService";
 import { IMessagingListener } from "@interfaces/api/IMessagingListener";
 import { ThreeBoxMessagingListener } from "@implementations/api/ThreeBoxMessagingListener";
@@ -39,6 +40,8 @@ import { LinkUtils } from "@implementations/utilities/LinkUtils";
 import { Subject } from "rxjs";
 import { ControlService } from "@implementations/business/ControlService";
 import { IControlService } from "@interfaces/business/IControlService";
+import { IBrowserNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider";
+import { BrowserNodeProvider } from "@implementations/utilities/BrowserNodeProvider";
 
 export class HypernetCore implements IHypernetCore {
   public onLinkUpdated: Subject<HypernetLink>;
@@ -50,12 +53,14 @@ export class HypernetCore implements IHypernetCore {
   protected blockchainProvider: IBlockchainProvider;
   protected configProvider: IConfigProvider;
   protected contextProvider: IContextProvider;
+  protected browserNodeProvider: IBrowserNodeProvider;
   protected boxUtils: IThreeBoxUtils;
   protected linkUtils: ILinkUtils;
 
   protected persistenceRepository: IPersistenceRepository;
   protected messagingRepository: IMessagingRepository;
   protected accountRepository: IAccountsRepository;
+  protected linkRepository: ILinkRepository;
 
   protected linkService: ILinkService;
   protected messageService: IMessageService;
@@ -96,6 +101,7 @@ export class HypernetCore implements IHypernetCore {
       this.onControlClaimed,
       this.onControlYielded,
     );
+    this.browserNodeProvider = new BrowserNodeProvider(this.configProvider);
     this.boxUtils = new ThreeBoxUtils(this.blockchainProvider, this.contextProvider, this.configProvider);
     this.linkUtils = new LinkUtils();
 
@@ -106,10 +112,10 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
     );
     this.accountRepository = new AccountsRepository(this.blockchainProvider);
+    this.linkRepository = new VectorLinkRepository(this.browserNodeProvider);
 
     this.linkService = new LinkService(
-      this.persistenceRepository,
-      this.messagingRepository,
+      this.linkRepository,
       this.contextProvider,
       this.linkUtils,
     );
@@ -186,12 +192,12 @@ export class HypernetCore implements IHypernetCore {
     const context = await this.contextProvider.getContext();
     context.account = account;
     await this.contextProvider.setContext(context);
-    const messagingListener = this.messagingListener.initialize();
+    // const messagingListener = this.messagingListener.initialize();
 
-    await Promise.all([messagingListener]);
+    // await Promise.all([messagingListener]);
 
     // This should always be the last thing we do, after everything else is initialized
-    await this.controlService.claimControl();
+    // await this.controlService.claimControl();
 
     // Set the status bit
     this._initialized = true;
