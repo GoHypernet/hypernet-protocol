@@ -154,7 +154,7 @@ export class LinkService implements ILinkService {
     const context = await this.contextProvider.getContext();
 
     // Call into the state wallet
-    const channelId = await this.stateChannelRepository.createChannel(link.consumer, link.provider);
+    // const channelId = await this.stateChannelRepository.createChannel(link.consumer, link.provider);
 
     // Persist the internal channel ID
     link.internalChannelId = channelId;
@@ -310,6 +310,6 @@ export class LinkService implements ILinkService {
       // If you want, you could reject the channel, but there is no
       // need to ever, because you already had the chance to reject
       // opening the channel during the establish messaging phase.
-      await this.stateChannelRepository.joinChannel(channelId);
+      // await this.stateChannelRepository.joinChannel(channelId);
     }
 }

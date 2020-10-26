@@ -14,6 +14,8 @@ class VectorLinkRepository implements ILinkRepository {
             throw new Error("Cannot retrieve state channels!");
         }
         const channels = channelsResult.getValue();
+
+        return [];
     }
     
 }
