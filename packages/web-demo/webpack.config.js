@@ -1,7 +1,6 @@
 const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
-const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   context: path.resolve(__dirname),
@@ -47,4 +46,9 @@ module.exports = {
   plugins: [
     new CleanWebpackPlugin(),
   ],
+  node: {
+    net: "empty",
+    tls: "empty",
+    fs: "empty",
+  },
 };

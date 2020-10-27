@@ -94,8 +94,8 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
     const config = await this.configProvider.getConfig();
 
     // Get the main space, the list of channels is here.
-    const spaces = await this.getSpaces([config.spaceName]);
-    return spaces[config.spaceName];
+    const spaces = await this.getSpaces(["config.spaceName"]);
+    return spaces["config.spaceName"];
   }
 
   public async getThreads(threadAddresses: string[]): Promise<{ [threadAddress: string]: BoxThread }> {
@@ -118,8 +118,8 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
 
     // Need to join some more threads
     const config = await this.configProvider.getConfig();
-    const spaces = await this.getSpaces([config.spaceName]);
-    const space = spaces[config.spaceName];
+    const spaces = await this.getSpaces(["config.spaceName"]);
+    const space = spaces["config.spaceName"];
 
     // Now start the process of joining each of the threads
     const newThreadPromises: { [threadAddress: string]: Promise<BoxThread> } = {};
@@ -144,10 +144,10 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
 
   public async getDiscoveryThread(): Promise<BoxThread> {
     const config = await this.configProvider.getConfig();
-    const spaces = await this.getSpaces([config.spaceName]);
-    const space = spaces[config.spaceName];
+    const spaces = await this.getSpaces(["config.spaceName"]);
+    const space = spaces["config.spaceName"];
 
-    return space.joinThread(config.discoveryThreadName, {
+    return space.joinThread("config.discoveryThreadName", {
       ghost: true,
       ghostBacklogLimit: 50,
     });
@@ -155,10 +155,10 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
 
   public async getControlThread(): Promise<BoxThread> {
     const config = await this.configProvider.getConfig();
-    const spaces = await this.getSpaces([config.spaceName]);
-    const space = spaces[config.spaceName];
+    const spaces = await this.getSpaces(["config.spaceName"]);
+    const space = spaces["config.spaceName"];
 
-    return space.joinThread(config.controlThreadName, {
+    return space.joinThread("config.controlThreadName", {
       ghost: true,
       ghostBacklogLimit: 0,
     });

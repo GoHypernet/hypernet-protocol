@@ -5,15 +5,8 @@ import {
 
 export class HypernetConfig {
   constructor(
-    public spaceName: string,
-    public openLinkKey: string,
-    public linkDataKey: string,
-    public discoveryThreadName: string,
-    public controlThreadName: string,
-    public openThreadKey: string,
-    public xstateWalletUrl: string,
-    public forceMoveAppAddress: string,
-    public messagingUrl: string,
+    public authUrl: string,
+    public natsUrl: string,
     public chainAddresses: ChainAddresses,
     public chainProviders: ChainProviders,
     public mnemonic: string

@@ -28,7 +28,8 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
             chainAddresses: config.chainAddresses,
             chainProviders: config.chainProviders,
             logger: this.logger,
-            messagingUrl: config.messagingUrl,
+            authUrl: config.authUrl,
+            natsUrl: config.natsUrl,
             signer: this.channelSigner,
           } as BrowserNodeConfig)
     }

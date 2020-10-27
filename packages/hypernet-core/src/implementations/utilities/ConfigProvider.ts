@@ -7,15 +7,8 @@ export class ConfigProvider implements IConfigProvider {
   constructor(config?: HypernetConfig) {
     if (config == null) {
       this.config = new HypernetConfig(
-        "HypernetProtocol",
-        "openChannels",
-        "linkData",
-        "HypernetLinkDiscovery",
-        "HypernetControl",
-        "openThreads",
-        "localhost:3055",
-        "0x0",
-        "ws://localhost:4221",
+        "https://messaging.connext.network",
+        "ws://messaging.connext.network:4221",
         {
           "1337": {
             "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
@@ -32,7 +25,7 @@ export class ConfigProvider implements IConfigProvider {
           "1337": "http://localhost:8545",
           "1338": "http://localhost:8546"
         },
-        "mnemonic-goes-here"
+        "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"
       )
     }
     else {

@@ -44,7 +44,7 @@ export class ThreeBoxMessagingRepository implements IMessagingRepository {
 
     // Store the new thread metadata
     openThreads.push(new ThreadMetadata(thread.address, remoteUser));
-    space.private.set(config.openThreadKey, serialize(openThreads));
+    space.private.set("config.openThreadKey", serialize(openThreads));
 
     return new MessageThread(thread.address, localUser, remoteUser, []);
   }
@@ -156,7 +156,7 @@ export class ThreeBoxMessagingRepository implements IMessagingRepository {
 
     // Check if we already have a thread created between these two people.
     const config = await this.configProvider.getConfig();
-    const openThreadString = await space.private.get(config.openThreadKey);
+    const openThreadString = await space.private.get("config.openThreadKey");
     if (openThreadString == null || openThreadString === "") {
       return [];
     }
