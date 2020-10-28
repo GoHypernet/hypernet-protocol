@@ -32,13 +32,21 @@ export class LinkService implements ILinkService {
   }
 
   public async openLink(
-    consumer: EthereumAddress,
-    provider: EthereumAddress,
+    consumerAddress: EthereumAddress,
     paymentToken: EthereumAddress,
+    stakeAmount: BigNumber,
     disputeMediator: PublicKey,
     pullSettings: PullSettings | null,
   ): Promise<HypernetLink> {
-    throw new Error("Method not implemented.");
+    const context = await this.contextProvider.getInitializedContext();
+
+    const link = await this.linkRepository.createHypernetLink(consumerAddress, 
+      paymentToken, 
+      stakeAmount,
+      disputeMediator,
+      pullSettings);
+
+    return link;
   }
   public async stakeIntoLink(linkId: string, amount: BigNumber): Promise<Stake> {
     throw new Error("Method not implemented.");

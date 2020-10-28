@@ -23,14 +23,23 @@ export interface IHypernetCore {
 
   initialize(account: string): Promise<void>;
   getLinks(): Promise<HypernetLink[]>;
+
+  /**
+   * openLink() is always called by the provider of a link, with an amount they
+   * wish to stake. This will return a HypernetLink in the STAKED status.
+   * @param consumerWallet 
+   * @param paymentToken 
+   * @param amount 
+   * @param disputeMediator 
+   * @param pullSettings 
+   */
   openLink(
-    consumer: EthereumAddress,
-    provider: EthereumAddress,
+    consumerWallet: EthereumAddress,
     paymentToken: EthereumAddress,
+    amount: BigNumber, 
     disputeMediator: PublicKey,
     pullSettings: PullSettings | null,
   ): Promise<HypernetLink>;
-  stakeIntoLink(linkId: string, amount: BigNumber): Promise<Stake>;
   depositIntoLink(linkId: string, amount: BigNumber): Promise<Deposit>;
 
   sendFunds(linkId: string, amount: BigNumber): Promise<Payment>;

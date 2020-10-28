@@ -101,7 +101,7 @@ export class HypernetCore implements IHypernetCore {
       this.onControlClaimed,
       this.onControlYielded,
     );
-    this.browserNodeProvider = new BrowserNodeProvider(this.configProvider);
+    this.browserNodeProvider = new BrowserNodeProvider(this.configProvider, this.contextProvider);
     this.boxUtils = new ThreeBoxUtils(this.blockchainProvider, this.contextProvider, this.configProvider);
     this.linkUtils = new LinkUtils();
 
@@ -112,7 +112,7 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
     );
     this.accountRepository = new AccountsRepository(this.blockchainProvider);
-    this.linkRepository = new VectorLinkRepository(this.browserNodeProvider);
+    this.linkRepository = new VectorLinkRepository(this.browserNodeProvider, this.configProvider, this.contextProvider);
 
     this.linkService = new LinkService(
       this.linkRepository,
@@ -150,14 +150,19 @@ export class HypernetCore implements IHypernetCore {
   public async getLinks(): Promise<HypernetLink[]> {
     return this.linkService.getActiveLinks();
   }
+
   public async openLink(
     consumerWallet: EthereumAddress,
-    providerWallet: EthereumAddress,
     paymentToken: EthereumAddress,
+    amount: BigNumber, 
     disputeMediator: PublicKey,
     pullSettings: PullSettings | null,
   ): Promise<HypernetLink> {
-    return this.linkService.openLink(consumerWallet, providerWallet, paymentToken, disputeMediator, pullSettings);
+    return this.linkService.openLink(consumerWallet, 
+      paymentToken,
+      amount, 
+      disputeMediator, 
+      pullSettings);
   }
   public async stakeIntoLink(linkId: string, amount: BigNumber): Promise<Stake> {
     throw new Error("Method not implemented.");
@@ -191,6 +196,13 @@ export class HypernetCore implements IHypernetCore {
   public async initialize(account: string): Promise<void> {
     const context = await this.contextProvider.getContext();
     context.account = account;
+    context.accountMnemonic = "service eyebrow orient depart note area crash soda vacuum night alley system tourist aisle umbrella";
+    await this.contextProvider.setContext(context);
+
+    // TODO: This should move downwards, we don't need Core tied to the browser node unduly
+    const browserNode = await this.browserNodeProvider.getBrowserNode();
+    context.publicIdentifier = browserNode.publicIdentifier;
+    
     await this.contextProvider.setContext(context);
     // const messagingListener = this.messagingListener.initialize();
 

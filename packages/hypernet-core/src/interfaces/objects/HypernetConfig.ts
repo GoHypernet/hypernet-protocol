@@ -1,6 +1,8 @@
+import { EthereumAddress } from "3box";
 import {
   ChainAddresses,
   ChainProviders,
+  PublicIdentifier,
 } from "@connext/vector-types";
 
 export class HypernetConfig {
@@ -9,6 +11,10 @@ export class HypernetConfig {
     public natsUrl: string,
     public chainAddresses: ChainAddresses,
     public chainProviders: ChainProviders,
-    public mnemonic: string
+    public routerMnemonic: string,
+    public routerPublicIdentifier: PublicIdentifier,
+    public chainId: number,
+    public routerUrl: string,
+    public hypertokenAddress: EthereumAddress,
   ) { }
 }

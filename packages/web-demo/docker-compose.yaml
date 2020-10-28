@@ -6,10 +6,10 @@ services:
     ports:
       - 8002:8000
     environment:
-      VECTOR_CONFIG: '{ "adminToken": "cxt1234", "messagingUrl": "https://messaging.connext.network", "logLevel": "info", "chainAddresses": { "1337": { "channelMastercopyAddress": "0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0", "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", "hashlockTransferAddress": "0x345cA3e014Aaf5dcA488057592ee47305D9B3e10", "withdrawAddress": "0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF", "testTokenAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", "transferRegistryAddress": "0x9FBDa871d559710256a2502A2517b794B482Db40" } }, "chainProviders": { "1337": "http://blockchain:8545" }, "port": 3001, "redisUrl": "redis://redis:6379", "allowedSwaps": [ ], "nodeUrl": "http://node:8000", "rebalanceProfiles": [ { "chainId": 1337, "assetId": "0x0000000000000000000000000000000000000000", "reclaimThreshold": "200000000000000000", "target": "100000000000000000", "collateralizeThreshold": "50000000000000000" }, { "chainId": 1337, "assetId": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", "reclaimThreshold": "2000000000000000000", "target": "1000000000000000000", "collateralizeThreshold": "500000000000000000" } ], "awsAccessId": "", "awsAccessKey": "", "domainName": "", "production": true }'
+      VECTOR_CONFIG: '{ "adminToken": "cxt1234", "messagingUrl": "https://messaging.connext.network", "logLevel": "info", "chainAddresses": { "1337": { "channelMastercopyAddress": "0x83e4293c7c5782630A57DD60eEbE36BF20EfDfcD", "channelFactoryAddress": "0x084aeA04D0B333506e212B1e531cA223650bF284", "hashlockTransferAddress": "0xC2B65DC9BaAD68b0f01530009a4AF6CA438b8846", "withdrawAddress": "0xC0FA4A4cE403B5bcECD243121dC5874D9A65e5Bd", "testTokenAddress": "0xae3C262638994e968D6dfC8e58978b4301E7D51A", "transferRegistryAddress": "0xa227b9C3e0cE1f74029063a5b567D97BDed316e1" } }, "chainProviders": { "1337": "http://blockchain:8545" }, "port": 3001, "redisUrl": "redis://redis:6379", "allowedSwaps": [ ], "nodeUrl": "http://node:8000", "rebalanceProfiles": [ { "chainId": 1337, "assetId": "0x0000000000000000000000000000000000000000", "reclaimThreshold": "200000000000000000", "target": "100000000000000000", "collateralizeThreshold": "50000000000000000" }, { "chainId": 1337, "assetId": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", "reclaimThreshold": "2000000000000000000", "target": "1000000000000000000", "collateralizeThreshold": "500000000000000000" } ], "awsAccessId": "", "awsAccessKey": "", "domainName": "", "production": true }'
       VECTOR_ENV: 'dev'
       VECTOR_PROD: "true"
-      VECTOR_MNEMONIC: 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'
+      VECTOR_MNEMONIC: "isolate income chaos sustain harsh suggest dawn kid sentence sad unable palace upper source below"
       VECTOR_MNEMONIC_FILE: ''
       VECTOR_PG_DATABASE: 'vector'
       VECTOR_PG_HOST: 'database'
@@ -24,9 +24,9 @@ services:
   router:
     image: connextproject/vector_router
     ports:
-      - 8008:8008
+      - 8008:8000
     environment:
-      VECTOR_CONFIG: '{ "adminToken": "cxt1234", "messagingUrl": "https://messaging.connext.network", "logLevel": "info", "chainAddresses": { "1337": { "channelMastercopyAddress": "0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0", "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", "hashlockTransferAddress": "0x345cA3e014Aaf5dcA488057592ee47305D9B3e10", "withdrawAddress": "0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF", "testTokenAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", "transferRegistryAddress": "0x9FBDa871d559710256a2502A2517b794B482Db40" } }, "chainProviders": { "1337": "http://blockchain:8545" }, "port": 3001, "redisUrl": "redis://redis:6379", "allowedSwaps": [ ], "nodeUrl": "http://node:8000", "rebalanceProfiles": [ { "chainId": 1337, "assetId": "0x0000000000000000000000000000000000000000", "reclaimThreshold": "200000000000000000", "target": "100000000000000000", "collateralizeThreshold": "50000000000000000" }, { "chainId": 1337, "assetId": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", "reclaimThreshold": "2000000000000000000", "target": "1000000000000000000", "collateralizeThreshold": "500000000000000000" } ], "awsAccessId": "", "awsAccessKey": "", "domainName": "", "production": true }'
+      VECTOR_CONFIG: '{ "adminToken": "cxt1234", "messagingUrl": "https://messaging.connext.network", "logLevel": "info", "chainAddresses": { "1337": { "channelMastercopyAddress": "0x83e4293c7c5782630A57DD60eEbE36BF20EfDfcD", "channelFactoryAddress": "0x084aeA04D0B333506e212B1e531cA223650bF284", "hashlockTransferAddress": "0xC2B65DC9BaAD68b0f01530009a4AF6CA438b8846", "withdrawAddress": "0xC0FA4A4cE403B5bcECD243121dC5874D9A65e5Bd", "testTokenAddress": "0xae3C262638994e968D6dfC8e58978b4301E7D51A", "transferRegistryAddress": "0xa227b9C3e0cE1f74029063a5b567D97BDed316e1" } }, "chainProviders": { "1337": "http://blockchain:8545" }, "port": 3001, "redisUrl": "redis://redis:6379", "allowedSwaps": [ ], "nodeUrl": "http://node:8000", "rebalanceProfiles": [ { "chainId": 1337, "assetId": "0x0000000000000000000000000000000000000000", "reclaimThreshold": "200000000000000000", "target": "100000000000000000", "collateralizeThreshold": "50000000000000000" }, { "chainId": 1337, "assetId": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", "reclaimThreshold": "2000000000000000000", "target": "1000000000000000000", "collateralizeThreshold": "500000000000000000" } ], "awsAccessId": "", "awsAccessKey": "", "domainName": "", "production": true }'
       VECTOR_ENV: 'dev'
       VECTOR_PROD: "true"
       VECTOR_NODE_URL: 'http://node:8000'
@@ -61,5 +61,5 @@ services:
     ports: 
         - 8545:8545
     environment:
-        MNEMONIC: 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'
+        MNEMONIC: "isolate income chaos sustain harsh suggest dawn kid sentence sad unable palace upper source below"
         CHAIN_ID: '1337'

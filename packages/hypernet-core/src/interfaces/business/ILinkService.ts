@@ -14,13 +14,13 @@ import { ELinkRole } from "@interfaces/types";
 
 export interface ILinkService {
   openLink(
-    consumerWallet: EthereumAddress,
-    providerWallet: EthereumAddress,
+    consumerAddress: EthereumAddress,
     paymentToken: EthereumAddress,
+    amount: BigNumber, 
     disputeMediator: PublicKey,
     pullSettings: PullSettings | null,
   ): Promise<HypernetLink>;
-  stakeIntoLink(linkId: string, amount: BigNumber): Promise<Stake>;
+  
   depositIntoLink(linkId: string, amount: BigNumber): Promise<Deposit>;
 
   sendFunds(linkId: string, amount: BigNumber): Promise<Payment>;

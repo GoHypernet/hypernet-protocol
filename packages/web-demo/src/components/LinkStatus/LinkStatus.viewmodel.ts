@@ -17,15 +17,7 @@ export class LinkStatusViewModel {
 
     this.linkStatus = ko.pureComputed<string>(() => {
       const value = this.status();
-      if (value === ELinkStatus.INTENDED) {
-        return "INTENDED";
-      } else if (value === ELinkStatus.LINK_REQUEST_SENT) {
-        return "LINK_REQUESTED_SENT";
-      } else if (value === ELinkStatus.MESSAGING_ESTABLISHED) {
-        return "MESSAGING_ESTABLISHED";
-      } else if (value === ELinkStatus.CHANNEL_OPENED) {
-        return "CHANNEL_OPENED";
-      } else if (value === ELinkStatus.STAKED) {
+      if (value === ELinkStatus.STAKED) {
         return "STAKED";
       } else if (value === ELinkStatus.RUNNING) {
         return "RUNNING";

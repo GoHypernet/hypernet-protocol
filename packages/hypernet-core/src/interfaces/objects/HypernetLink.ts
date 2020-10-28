@@ -39,9 +39,6 @@ export class HypernetLink {
   @Type(() => String)
   public internalChannelId: string | null;
 
-  @Type(() => String)
-  public threadAddress: EthereumAddress | null;
-
   constructor(
     id: string,
     consumer: EthereumAddress,
@@ -55,7 +52,6 @@ export class HypernetLink {
     providerStake: BigNumber,
     status: ELinkStatus,
     internalChannelId: string | null,
-    threadAddress: EthereumAddress | null,
   ) {
     this.id = id;
     this.consumer = consumer;
@@ -69,6 +65,5 @@ export class HypernetLink {
     this.providerStake = providerStake;
     this.status = status;
     this.internalChannelId = internalChannelId;
-    this.threadAddress = threadAddress;
   }
 }

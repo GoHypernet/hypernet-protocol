@@ -1,7 +1,7 @@
 import * as ko from "knockout";
 import html from "./Agent.template.html";
 import { LinkParams } from "../Link/Link.viewmodel";
-import { HypernetCore, IHypernetCore } from "@hypernetlabs/hypernet-core";
+import { HypernetCore, IHypernetCore, BigNumber } from "@hypernetlabs/hypernet-core";
 import { ButtonParams } from "../Button/Button.viewmodel";
 import { ProposedLinkParams } from "../ProposedLink/ProposedLink.viewmodel";
 import { EProposedLinkStatus } from "web-demo/src/types/EProposedLinkStatus";
@@ -91,7 +91,7 @@ export class AgentViewModel {
       }
 
       this.message(`Establishing link with ${remoteAccount}`);
-      const newLink = await this.core.openLink(account, remoteAccount, "asdfasdf", "dispute-mediator-public-key", null);
+      const newLink = await this.core.openLink(remoteAccount, "asdfasdf", new BigNumber(10), "dispute-mediator-public-key", null);
       this.links.push(new LinkParams(ko.observable(newLink)));
       this.message(`Link established with ${remoteAccount}`);
     });
@@ -104,10 +104,10 @@ export class AgentViewModel {
     });
 
     this.remoteAccount = ko.pureComputed<string | null>(() => {
-      if (this.account() === "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1")
-        return "0xFFcf8FDEE72ac11b5c542428B35EEF5769C409f0";
+      if (this.account() === "0xd128ACc1418DD9BD7809806b3B428b758E3722cC")
+        return "0xB6ECBa743E9fa53998Bc1F1265adf87F5CCaDc85";
 
-      return "0x90F8bf6A479f320ead074411a4B0e7944Ea8c9C1";
+      return "0xd128ACc1418DD9BD7809806b3B428b758E3722cC";
     });
   }
 
