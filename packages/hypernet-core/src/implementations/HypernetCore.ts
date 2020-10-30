@@ -22,7 +22,6 @@ import { LinkService } from "@implementations/business/LinkService";
 import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
 import { ILinkRepository } from "@interfaces/data";
 import { VectorLinkRepository } from "@implementations/data/VectorLinkRepository";
-import { ILinkService } from "@interfaces/business/ILinkService";
 import { ContextProvider } from "@implementations/utilities/ContextProvider";
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
 import { AccountsRepository } from "@implementations/data/AccountsRepository";
@@ -33,6 +32,8 @@ import { IBrowserNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider
 import { BrowserNodeProvider } from "@implementations/utilities/BrowserNodeProvider";
 import { IVectorUtils, ILinkUtils, IConfigProvider } from "@interfaces/utilities";
 import { VectorUtils } from "./utilities/VectorUtils";
+import { IAccountService, ILinkService} from "@interfaces/business";
+import { AccountService } from "./business/AccountService";
 
 export class HypernetCore implements IHypernetCore {
   public onLinkUpdated: Subject<HypernetLink>;
@@ -52,6 +53,7 @@ export class HypernetCore implements IHypernetCore {
   protected linkRepository: ILinkRepository;
 
   protected linkService: ILinkService;
+  protected accountService: IAccountService;
 
   protected _initialized: boolean;
   protected _inControl: boolean;
@@ -91,7 +93,7 @@ export class HypernetCore implements IHypernetCore {
     this.linkUtils = new LinkUtils();
     this.vectorUtils = new VectorUtils(this.configProvider, this.contextProvider, this.browserNodeProvider);
 
-    this.accountRepository = new AccountsRepository(this.blockchainProvider);
+    this.accountRepository = new AccountsRepository(this.blockchainProvider, this.vectorUtils, this.browserNodeProvider);
     this.linkRepository = new VectorLinkRepository(this.browserNodeProvider,
       this.configProvider,
       this.contextProvider,
@@ -102,7 +104,10 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.linkUtils,
     );
+
+    this.accountService = new AccountService(this.accountRepository);
   }
+  
 
   public initialized(): boolean {
     return this._initialized;
@@ -112,13 +117,17 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public async getAccounts(): Promise<string[]> {
-    return this.accountRepository.getAccounts();
+    return this.accountService.getAccounts();
   }
 
   public async getPublicIdentifier(): Promise<PublicIdentifier> {
     const context = await this.contextProvider.getInitializedContext()
 
     return context.publicIdentifier;
+  }
+
+  public async depositFunds(assetAddress: string, amount: BigNumber): Promise<void> {
+    return this.accountService.depositFunds(assetAddress, amount);
   }
 
   public async getLinks(): Promise<HypernetLink[]> {

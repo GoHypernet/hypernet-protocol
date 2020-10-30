@@ -23,8 +23,25 @@ export interface IHypernetCore {
   getAccounts(): Promise<string[]>;
   getPublicIdentifier(): Promise<PublicIdentifier>
 
+  /**
+   * This must be called before most other calls; it is used to specify what account addres
+   * hypernet core will be representing.
+   * @param account 
+   * @param privateKey 
+   */
   initialize(account: string, privateKey: string): Promise<void>;
+
+
+  /**
+   * This function will load HypernetCore with funds. It should be called for each type of asset you want to use.
+   * @param assetAddress The ethereum address of the funds you want to deposit. These can be ETH, HyperToken, Dai, or any othe supported payment token.
+   * @param amount 
+   */
+  depositFunds(assetAddress: EthereumAddress, amount: BigNumber): Promise<void>;
+
   getLinks(): Promise<HypernetLink[]>;
+
+
 
   /**
    * openLink() is always called by the provider of a link, with an amount they

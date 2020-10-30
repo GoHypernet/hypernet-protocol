@@ -21,6 +21,7 @@ export class AgentViewModel {
   public remoteAccount: ko.PureComputed<AvailableAccount>;
   public clearLinks: ButtonParams;
   public establishLink: ButtonParams;
+  public depositFundsButton: ButtonParams;
   public message: ko.Observable<string>;
   public startupComplete: ko.Observable<boolean>;
   public inControl: ko.Observable<boolean>;
@@ -105,6 +106,10 @@ export class AgentViewModel {
       this.message("Links cleared");
     });
 
+    this.depositFundsButton = new ButtonParams("Deposit Funds", async() => {
+      await this.core.depositFunds("0x0", BigNumber.from(0.1));
+      this.message("Deposited .1 ETH into router channel");
+    });
     this.establishLink = new ButtonParams("New Link", async () => {
       const account = this.account();
       const remoteAccount = this.remoteAccount();
@@ -114,7 +119,7 @@ export class AgentViewModel {
       }
 
       this.message(`Establishing link with ${remoteAccount}`);
-      const newLink = await this.core.openLink(remoteAccount.publicIdentifier, "0x0000000000000000000000000000000000000000", new BigNumber(10), "dispute-mediator-public-key", null);
+      const newLink = await this.core.openLink(remoteAccount.publicIdentifier, "0x0000000000000000000000000000000000000000", BigNumber.from(10), "dispute-mediator-public-key", null);
       this.links.push(new LinkParams(ko.observable(newLink)));
       this.message(`Link established with ${remoteAccount}`);
     });

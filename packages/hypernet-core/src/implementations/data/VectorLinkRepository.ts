@@ -3,6 +3,7 @@ import { BigNumber, EthereumAddress, HypernetLink, PublicIdentifier, PublicKey, 
 import { ELinkStatus } from "@interfaces/types";
 import { IBrowserNodeProvider, IConfigProvider, IContextProvider, IVectorUtils } from "@interfaces/utilities";
 import { v4 as uuidv4 } from "uuid";
+import { createlockHash, getRandomBytes32 } from "@connext/vector-utils";
 
 export class VectorLinkRepository implements ILinkRepository {
     constructor(protected browserNodeProvider: IBrowserNodeProvider,
@@ -42,7 +43,7 @@ export class VectorLinkRepository implements ILinkRepository {
             amount: stakeAmount.toString(),
             assetId: config.hypertokenAddress,
             details: {
-                lockHash: "lockhash",
+                lockHash: createlockHash(getRandomBytes32()),
                 expiry: "0"
             },
             recipient: consumerId,
@@ -65,9 +66,9 @@ export class VectorLinkRepository implements ILinkRepository {
             paymentToken,
             disputeMediator,
             pullSettings,
-            new BigNumber(0),
-            new BigNumber(0),
-            new BigNumber(0),
+            BigNumber.from(0),
+            BigNumber.from(0),
+            BigNumber.from(0),
             stakeAmount,
             ELinkStatus.STAKED,
             routerChannelAddress);
