@@ -3,12 +3,12 @@ import { Subject } from "rxjs";
 import { EstablishLinkRequestWithApproval, EstablishLinkRequest } from "./EstablishLinkRequest";
 import { ControlClaim } from "./ControlClaim";
 import { EthereumAddress } from "3box";
-import { PublicIdentifier } from "@connext/vector-types";
+import { PublicIdentifier } from "./PublicIdentifier";
 
 export class HypernetContext {
   constructor(
     public account: EthereumAddress | null,
-    public accountMnemonic: string | null,
+    public privateKey: string | null,
     public publicIdentifier: PublicIdentifier | null,
     public inControl: boolean,
     public onLinkUpdated: Subject<HypernetLink>,
@@ -22,7 +22,7 @@ export class HypernetContext {
 export class InitializedHypernetContext {
   constructor(
     public account: EthereumAddress,
-    public accountMnemonic: string,
+    public privateKey: string,
     public publicIdentifier: PublicIdentifier,
     public inControl: boolean,
     public onLinkUpdated: Subject<HypernetLink>,

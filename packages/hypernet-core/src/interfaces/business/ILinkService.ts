@@ -9,12 +9,13 @@ import {
   PublicKey,
   Withdrawal,
   EstablishLinkRequest,
+  PublicIdentifier,
 } from "@interfaces/objects";
 import { ELinkRole } from "@interfaces/types";
 
 export interface ILinkService {
   openLink(
-    consumerAddress: EthereumAddress,
+    consumerId: PublicIdentifier,
     paymentToken: EthereumAddress,
     amount: BigNumber, 
     disputeMediator: PublicKey,

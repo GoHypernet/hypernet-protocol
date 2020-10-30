@@ -1,5 +1,5 @@
 import { ILinkRepository } from "@interfaces/data/ILinkRepository";
-import { BigNumber, EthereumAddress, HypernetLink, PublicKey, PullSettings } from "@interfaces/objects";
+import { BigNumber, EthereumAddress, HypernetLink, PublicIdentifier, PublicKey, PullSettings } from "@interfaces/objects";
 import { ELinkStatus } from "@interfaces/types";
 import { IBrowserNodeProvider, IConfigProvider, IContextProvider } from "@interfaces/utilities";
 import { v4 as uuidv4 } from "uuid";
@@ -17,7 +17,7 @@ export class VectorLinkRepository implements ILinkRepository {
         return [];
     }
 
-    public async createHypernetLink(consumerWallet: EthereumAddress,
+    public async createHypernetLink(consumerId: PublicIdentifier,
         paymentToken: EthereumAddress,
         stakeAmount: BigNumber,
         disputeMediator: PublicKey,
@@ -98,7 +98,7 @@ export class VectorLinkRepository implements ILinkRepository {
                     lockHash: "lockhash",
                     expiry: "0"
                 },
-                recipient: consumerWallet,
+                recipient: consumerId,
                 meta: {
                     hypernetLinkId: hypernetLinkId,
                     paymentTokenAddress: paymentToken
@@ -115,8 +115,8 @@ export class VectorLinkRepository implements ILinkRepository {
             
 
             const link = new HypernetLink(hypernetLinkId,
-                consumerWallet,
-                context.account,
+                consumerId,
+                context.publicIdentifier,
                 paymentToken,
                 disputeMediator,
                 pullSettings,

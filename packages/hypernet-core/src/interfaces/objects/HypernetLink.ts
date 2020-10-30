@@ -1,4 +1,4 @@
-import { BigNumber, EthereumAddress, PublicKey, PullSettings } from "@interfaces/objects";
+import { BigNumber, EthereumAddress, PublicIdentifier, PublicKey, PullSettings } from "@interfaces/objects";
 import { ELinkStatus } from "@interfaces/types";
 import { Type, Transform } from "class-transformer";
 
@@ -41,8 +41,8 @@ export class HypernetLink {
 
   constructor(
     id: string,
-    consumer: EthereumAddress,
-    provider: EthereumAddress,
+    consumer: PublicIdentifier,
+    provider: PublicIdentifier,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
     pullSettings: PullSettings | null,

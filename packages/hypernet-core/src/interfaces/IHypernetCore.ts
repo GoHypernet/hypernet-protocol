@@ -12,6 +12,7 @@ import {
   EstablishLinkRequestWithApproval,
   EstablishLinkRequest,
   ControlClaim,
+  PublicIdentifier,
 } from "@interfaces/objects";
 import { Subject } from "rxjs";
 
@@ -20,8 +21,9 @@ export interface IHypernetCore {
   inControl(): boolean;
 
   getAccounts(): Promise<string[]>;
+  getPublicIdentifier(): Promise<PublicIdentifier>
 
-  initialize(account: string): Promise<void>;
+  initialize(account: string, privateKey: string): Promise<void>;
   getLinks(): Promise<HypernetLink[]>;
 
   /**

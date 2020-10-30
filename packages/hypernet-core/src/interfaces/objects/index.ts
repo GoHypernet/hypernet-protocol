@@ -12,6 +12,7 @@ export * from "@interfaces/objects/Message";
 export * from "@interfaces/objects/MessageThread";
 export * from "@interfaces/objects/MessagePayload";
 export * from "@interfaces/objects/Payment";
+export * from "@interfaces/objects/PublicIdentifier";
 export * from "@interfaces/objects/PublicKey";
 export * from "@interfaces/objects/PullSettings";
 export * from "@interfaces/objects/Stake";

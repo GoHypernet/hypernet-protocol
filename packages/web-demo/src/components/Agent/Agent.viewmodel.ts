@@ -6,12 +6,17 @@ import { ButtonParams } from "../Button/Button.viewmodel";
 import { ProposedLinkParams } from "../ProposedLink/ProposedLink.viewmodel";
 import { EProposedLinkStatus } from "web-demo/src/types/EProposedLinkStatus";
 
+class AvailableAccount {
+  constructor(public accountName: string, public accountAddress: string,
+    public privateKey: string) {}
+}
+
 export class AgentViewModel {
   public links: ko.ObservableArray<LinkParams>;
   public proposedLinks: ko.ObservableArray<ProposedLinkParams>;
-  public accounts: ko.ObservableArray<string>;
-  public account: ko.PureComputed<string | null>;
-  public remoteAccount: ko.PureComputed<string | null>;
+  public account: ko.Observable<AvailableAccount | null>;
+  public publicIdentifier: ko.Observable<string>;
+  public remoteAccount: ko.PureComputed<AvailableAccount>;
   public clearLinks: ButtonParams;
   public establishLink: ButtonParams;
   public message: ko.Observable<string>;
@@ -19,9 +24,15 @@ export class AgentViewModel {
   public inControl: ko.Observable<boolean>;
 
   protected core: IHypernetCore;
+  protected availableAccounts: Array<AvailableAccount>;
 
   constructor() {
     this.core = new HypernetCore();
+
+    this.availableAccounts = [
+      new AvailableAccount("Dave", "0xB6ECBa743E9fa53998Bc1F1265adf87F5CCaDc85", "0x9c9dbcc53c35a247b88818b5ef621666e4a8740c80a9f8dd1b987ce51dbb2b20"),
+      new AvailableAccount("Carol", "0x1cD4FB2583d5BD5198D9Ac42243CD07393a8a2Fe", "0x0b96cbc41fd54d952fc148dbce05270cb9ba992a94725fe720ce11e51b106556")
+    ];
 
     this.core.onLinkUpdated.subscribe({
       next: (link) => {
@@ -65,7 +76,6 @@ export class AgentViewModel {
 
     this.links = ko.observableArray<LinkParams>();
     this.proposedLinks = ko.observableArray<ProposedLinkParams>();
-    this.accounts = ko.observableArray<string>();
     this.message = ko.observable<string>("Starting");
     this.startupComplete = ko.observable(false);
     this.inControl = ko.observable(false);
@@ -73,6 +83,11 @@ export class AgentViewModel {
     this.startup().then(() => {
       this.startupComplete(true);
       this.message("Startup Complete");
+
+      return this.core.getPublicIdentifier();
+    })
+    .then((publicIdentifier: string) => {
+      this.publicIdentifier(publicIdentifier);
     });
 
     this.clearLinks = new ButtonParams("Clear Links", async () => {
@@ -91,32 +106,40 @@ export class AgentViewModel {
       }
 
       this.message(`Establishing link with ${remoteAccount}`);
-      const newLink = await this.core.openLink(remoteAccount, "asdfasdf", new BigNumber(10), "dispute-mediator-public-key", null);
+      const newLink = await this.core.openLink(remoteAccount.accountAddress, "0x0000000000000000000000000000000000000000", new BigNumber(10), "dispute-mediator-public-key", null);
       this.links.push(new LinkParams(ko.observable(newLink)));
       this.message(`Link established with ${remoteAccount}`);
     });
 
-    this.account = ko.pureComputed(() => {
-      if (this.accounts().length < 1) {
-        return null;
-      }
-      return this.accounts()[0];
-    });
+    this.account = ko.observable<AvailableAccount | null>(null);
 
-    this.remoteAccount = ko.pureComputed<string | null>(() => {
-      if (this.account() === "0xd128ACc1418DD9BD7809806b3B428b758E3722cC")
-        return "0xB6ECBa743E9fa53998Bc1F1265adf87F5CCaDc85";
+    this.publicIdentifier = ko.observable("");
 
-      return "0xd128ACc1418DD9BD7809806b3B428b758E3722cC";
+    this.remoteAccount = ko.pureComputed<AvailableAccount>(() => {
+      if (this.account()?.accountAddress === "0xB6ECBa743E9fa53998Bc1F1265adf87F5CCaDc85")
+        return this.availableAccounts[1];
+
+      return this.availableAccounts[0];
     });
   }
 
   protected async startup() {
     const accounts = await this.core.getAccounts();
 
-    this.accounts(accounts);
+    console.log(`Using account ${accounts[0]}`)
 
-    await this.core.initialize(accounts[0]);
+    const account = this.availableAccounts.find((val)=> {return val.accountAddress == accounts[0];})
+
+    if (account == null) {
+      throw new Error("Chosen MetaMask account is not supported!");
+    }
+
+    this.account(account)
+
+    console.log(account);
+
+    
+    await this.core.initialize(account.accountAddress, account.privateKey);
 
     const links = await this.core.getLinks();
     const linkParams = new Array<LinkParams>();

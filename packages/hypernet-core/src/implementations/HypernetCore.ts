@@ -14,6 +14,7 @@ import {
   Withdrawal,
   ControlClaim,
   HypernetConfig,
+  PublicIdentifier,
 } from "@interfaces/objects";
 import { ThreeBoxUtils } from "@implementations/utilities/3BoxUtils";
 import { EthersBlockchainProvider } from "@implementations/utilities/BlockchainProvider";
@@ -147,18 +148,24 @@ export class HypernetCore implements IHypernetCore {
     return this.accountRepository.getAccounts();
   }
 
+  public async getPublicIdentifier(): Promise<PublicIdentifier> {
+    const context = await this.contextProvider.getInitializedContext()
+
+    return context.publicIdentifier;
+  }
+
   public async getLinks(): Promise<HypernetLink[]> {
     return this.linkService.getActiveLinks();
   }
 
   public async openLink(
-    consumerWallet: EthereumAddress,
+    consumer: PublicIdentifier,
     paymentToken: EthereumAddress,
     amount: BigNumber, 
     disputeMediator: PublicKey,
     pullSettings: PullSettings | null,
   ): Promise<HypernetLink> {
-    return this.linkService.openLink(consumerWallet, 
+    return this.linkService.openLink(consumer, 
       paymentToken,
       amount, 
       disputeMediator, 
@@ -193,17 +200,15 @@ export class HypernetCore implements IHypernetCore {
     throw new Error("Method not implemented.");
   }
 
-  public async initialize(account: string): Promise<void> {
+  /**
+   * @param privateKey this is just for temporary usage.
+   */
+  public async initialize(account: string, privateKey: string): Promise<void> {
     const context = await this.contextProvider.getContext();
     context.account = account;
-    context.accountMnemonic = "service eyebrow orient depart note area crash soda vacuum night alley system tourist aisle umbrella";
+    context.privateKey = privateKey;
     await this.contextProvider.setContext(context);
 
-    // TODO: This should move downwards, we don't need Core tied to the browser node unduly
-    const browserNode = await this.browserNodeProvider.getBrowserNode();
-    context.publicIdentifier = browserNode.publicIdentifier;
-    
-    await this.contextProvider.setContext(context);
     // const messagingListener = this.messagingListener.initialize();
 
     // await Promise.all([messagingListener]);

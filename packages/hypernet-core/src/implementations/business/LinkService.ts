@@ -9,9 +9,8 @@ import {
   EstablishLinkRequest,
   EthereumAddress,
   PublicKey,
-  EstablishLinkRequestWithApproval,
+  PublicIdentifier
 } from "@interfaces/objects";
-import { v4 as uuidv4 } from "uuid";
 import { ELinkRole, ELinkStatus } from "@interfaces/types";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
@@ -32,7 +31,7 @@ export class LinkService implements ILinkService {
   }
 
   public async openLink(
-    consumerAddress: EthereumAddress,
+    consumerId: PublicIdentifier,
     paymentToken: EthereumAddress,
     stakeAmount: BigNumber,
     disputeMediator: PublicKey,
@@ -40,7 +39,7 @@ export class LinkService implements ILinkService {
   ): Promise<HypernetLink> {
     const context = await this.contextProvider.getInitializedContext();
 
-    const link = await this.linkRepository.createHypernetLink(consumerAddress, 
+    const link = await this.linkRepository.createHypernetLink(consumerId, 
       paymentToken, 
       stakeAmount,
       disputeMediator,

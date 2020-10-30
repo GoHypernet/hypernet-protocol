@@ -23,12 +23,12 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
         const config = await this.configProvider.getConfig();
         const context = await this.contextProvider.getContext();
 
-        if (context.accountMnemonic == null) {
+        if (context.privateKey == null) {
             throw new Error("Account mnemonic must be established first!")
         }
 
-        const wallet = Wallet.fromMnemonic(context.accountMnemonic);
-        this.channelSigner = new ChannelSigner(wallet.privateKey);
+        //const wallet = Wallet.fromMnemonic(context.accountMnemonic);
+        this.channelSigner = new ChannelSigner(context.privateKey);
         console.log(`Signer from mnemonic: ${this.channelSigner.publicIdentifier}`);
         
         return await BrowserNode.connect({
