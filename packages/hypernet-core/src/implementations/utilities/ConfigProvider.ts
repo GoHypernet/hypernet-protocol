@@ -2,7 +2,7 @@ import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 import { HypernetConfig } from "@interfaces/objects/HypernetConfig";
 import { getPublicIdentifierFromPublicKey } from "@connext/vector-utils/dist/identifiers";
 import { getPublicKeyFromPrivateKey } from "@connext/vector-utils/dist/crypto";
-import { Wallet } from "ethers";
+import { Wallet, constants} from "ethers";
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
@@ -28,7 +28,7 @@ export class ConfigProvider implements IConfigProvider {
         "", // routerPublicIdentifier
         1337, // Chain ID
         "localhost:8008", // Router address
-        "0x0000000000000000000000000000000000000000" // Hypertoken address
+        constants.AddressZero // Hypertoken address
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);

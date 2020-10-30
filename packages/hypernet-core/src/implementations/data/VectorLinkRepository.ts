@@ -34,6 +34,10 @@ export class VectorLinkRepository implements ILinkRepository {
             await Promise.all([configPromise, contextPromise, browserNodePromise,
                 routerChannelAddressPromise]);
 
+        // const blah = await browserNode.requestCollateral({channelAddress: routerChannelAddress,
+        // assetId: config.hypertokenAddress});
+        // console.log(blah);
+
         // Now we can create a transaction! When creating a link, the first thing
         // to do is create an InsurancePayment on behalf of the provider
         const hypernetLinkId = uuidv4();
