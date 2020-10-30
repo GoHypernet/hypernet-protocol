@@ -16,33 +16,23 @@ import {
   HypernetConfig,
   PublicIdentifier,
 } from "@interfaces/objects";
-import { ThreeBoxUtils } from "@implementations/utilities/3BoxUtils";
 import { EthersBlockchainProvider } from "@implementations/utilities/BlockchainProvider";
 import { ConfigProvider } from "@implementations/utilities/ConfigProvider";
-import { ThreeBoxPersistenceRepository } from "@implementations/data/3BoxPersistenceRepository";
-import { ThreeBoxMessagingRepository } from "@implementations/data/3BoxMessagingRepository";
 import { LinkService } from "@implementations/business/LinkService";
 import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
-import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
-import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
-import { IPersistenceRepository, IMessagingRepository, ILinkRepository } from "@interfaces/data";
-import {VectorLinkRepository} from "@implementations/data/VectorLinkRepository";
+import { ILinkRepository } from "@interfaces/data";
+import { VectorLinkRepository } from "@implementations/data/VectorLinkRepository";
 import { ILinkService } from "@interfaces/business/ILinkService";
-import { IMessagingListener } from "@interfaces/api/IMessagingListener";
-import { ThreeBoxMessagingListener } from "@implementations/api/ThreeBoxMessagingListener";
-import { MessageService } from "@implementations/business/MessageService";
-import { IMessageService } from "@interfaces/business/IMessageService";
 import { ContextProvider } from "@implementations/utilities/ContextProvider";
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
 import { AccountsRepository } from "@implementations/data/AccountsRepository";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
-import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
 import { LinkUtils } from "@implementations/utilities/LinkUtils";
 import { Subject } from "rxjs";
-import { ControlService } from "@implementations/business/ControlService";
-import { IControlService } from "@interfaces/business/IControlService";
 import { IBrowserNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider";
 import { BrowserNodeProvider } from "@implementations/utilities/BrowserNodeProvider";
+import { IVectorUtils, ILinkUtils, IConfigProvider } from "@interfaces/utilities";
+import { VectorUtils } from "./utilities/VectorUtils";
 
 export class HypernetCore implements IHypernetCore {
   public onLinkUpdated: Subject<HypernetLink>;
@@ -55,19 +45,14 @@ export class HypernetCore implements IHypernetCore {
   protected configProvider: IConfigProvider;
   protected contextProvider: IContextProvider;
   protected browserNodeProvider: IBrowserNodeProvider;
-  protected boxUtils: IThreeBoxUtils;
   protected linkUtils: ILinkUtils;
+  protected vectorUtils: IVectorUtils;
 
-  protected persistenceRepository: IPersistenceRepository;
-  protected messagingRepository: IMessagingRepository;
   protected accountRepository: IAccountsRepository;
   protected linkRepository: ILinkRepository;
 
   protected linkService: ILinkService;
-  protected messageService: IMessageService;
-  protected controlService: IControlService;
 
-  protected messagingListener: IMessagingListener;
   protected _initialized: boolean;
   protected _inControl: boolean;
 
@@ -103,37 +88,19 @@ export class HypernetCore implements IHypernetCore {
       this.onControlYielded,
     );
     this.browserNodeProvider = new BrowserNodeProvider(this.configProvider, this.contextProvider);
-    this.boxUtils = new ThreeBoxUtils(this.blockchainProvider, this.contextProvider, this.configProvider);
     this.linkUtils = new LinkUtils();
+    this.vectorUtils = new VectorUtils(this.configProvider, this.contextProvider, this.browserNodeProvider);
 
-    this.persistenceRepository = new ThreeBoxPersistenceRepository(this.boxUtils, this.configProvider);
-    this.messagingRepository = new ThreeBoxMessagingRepository(
-      this.boxUtils,
-      this.contextProvider,
-      this.configProvider,
-    );
     this.accountRepository = new AccountsRepository(this.blockchainProvider);
-    this.linkRepository = new VectorLinkRepository(this.browserNodeProvider, this.configProvider, this.contextProvider);
+    this.linkRepository = new VectorLinkRepository(this.browserNodeProvider,
+      this.configProvider,
+      this.contextProvider,
+      this.vectorUtils);
 
     this.linkService = new LinkService(
       this.linkRepository,
       this.contextProvider,
       this.linkUtils,
-    );
-    this.messageService = new MessageService(
-      this.persistenceRepository,
-      this.messagingRepository,
-      this.contextProvider,
-    );
-    this.controlService = new ControlService(this.messagingRepository, this.contextProvider);
-
-    this.messagingListener = new ThreeBoxMessagingListener(
-      this.linkService,
-      this.messageService,
-      this.controlService,
-      this.boxUtils,
-      this.configProvider,
-      this.contextProvider,
     );
   }
 
@@ -161,14 +128,14 @@ export class HypernetCore implements IHypernetCore {
   public async openLink(
     consumer: PublicIdentifier,
     paymentToken: EthereumAddress,
-    amount: BigNumber, 
+    amount: BigNumber,
     disputeMediator: PublicKey,
     pullSettings: PullSettings | null,
   ): Promise<HypernetLink> {
-    return this.linkService.openLink(consumer, 
+    return this.linkService.openLink(consumer,
       paymentToken,
-      amount, 
-      disputeMediator, 
+      amount,
+      disputeMediator,
       pullSettings);
   }
   public async stakeIntoLink(linkId: string, amount: BigNumber): Promise<Stake> {
