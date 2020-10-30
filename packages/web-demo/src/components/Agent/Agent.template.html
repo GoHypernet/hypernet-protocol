@@ -1,21 +1,25 @@
 <h1>Agent</h1>
 <h2>Account</h2>
-  <table>
-    <tbody>
-      <tr>
-        <td>Name</td>
-        <td data-bind="text: account.accountName"></td>
-      </tr>
-      <tr>
-        <td>Account Address</td>
-        <td data-bind="text: account.accountAddress"></td>
-      </tr>
-      <tr>
-        <td>Private Key</td>
-        <td data-bind="text: account.privateKey"></td>
-      </tr>
-    </tbody>
-  </table>
+<table data-bind="if: account() != null">
+  <tbody>
+    <tr>
+      <td>Name</td>
+      <td data-bind="text: account().accountName"></td>
+    </tr>
+    <tr>
+      <td>Account Address</td>
+      <td data-bind="text: account().accountAddress"></td>
+    </tr>
+    <tr>
+      <td>Public Identifier</td>
+      <td data-bind="text: publicIdentifier"></td>
+    </tr>
+    <tr>
+      <td>Private Key</td>
+      <td data-bind="text: account().privateKey"></td>
+    </tr>
+  </tbody>
+</table>
   
 
 <h2>Remote Account</h2>
@@ -23,15 +27,19 @@
   <tbody>
     <tr>
       <td>Name</td>
-      <td data-bind="text: remoteAccount.accountName"></td>
+      <td data-bind="text: remoteAccount().accountName"></td>
     </tr>
     <tr>
       <td>Account Address</td>
-      <td data-bind="text: remoteAccount.accountAddress"></td>
+      <td data-bind="text: remoteAccount().accountAddress"></td>
+    </tr>
+    <tr>
+      <td>Public Identifier</td>
+      <td data-bind="text: remoteAccount().publicIdentifier"></td>
     </tr>
     <tr>
       <td>Private Key</td>
-      <td data-bind="text: remoteAccount.privateKey"></td>
+      <td data-bind="text: remoteAccount().privateKey"></td>
     </tr>
   </tbody>
 </table>
@@ -69,9 +77,8 @@
 </div>
 
 <h2>Actions</h2>
-<span data-bind="component: {name:'button', params:establishLink}"></span>
+<span data-bind="visible: startupComplete, component: {name:'button', params:establishLink}"></span>
 <span data-bind="component: {name:'button', params:clearLinks}"></span>
-<button onclick='window.channelProvider.enable()'>Enable Channel Provider</button>
 
 <h2>Message</h2>
 <div data-bind="text: message"></div>

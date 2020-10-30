@@ -7,8 +7,10 @@ import { ProposedLinkParams } from "../ProposedLink/ProposedLink.viewmodel";
 import { EProposedLinkStatus } from "web-demo/src/types/EProposedLinkStatus";
 
 class AvailableAccount {
-  constructor(public accountName: string, public accountAddress: string,
-    public privateKey: string) {}
+  constructor(public accountName: string, 
+    public accountAddress: string,
+    public privateKey: string,
+    public publicIdentifier: string) {}
 }
 
 export class AgentViewModel {
@@ -30,8 +32,14 @@ export class AgentViewModel {
     this.core = new HypernetCore();
 
     this.availableAccounts = [
-      new AvailableAccount("Dave", "0xB6ECBa743E9fa53998Bc1F1265adf87F5CCaDc85", "0x9c9dbcc53c35a247b88818b5ef621666e4a8740c80a9f8dd1b987ce51dbb2b20"),
-      new AvailableAccount("Carol", "0x1cD4FB2583d5BD5198D9Ac42243CD07393a8a2Fe", "0x0b96cbc41fd54d952fc148dbce05270cb9ba992a94725fe720ce11e51b106556")
+      new AvailableAccount("Dave", 
+      "0xB6ECBa743E9fa53998Bc1F1265adf87F5CCaDc85", 
+      "0x9c9dbcc53c35a247b88818b5ef621666e4a8740c80a9f8dd1b987ce51dbb2b20",
+      "indra5DayB8qS8N2fbqxTX8PiCJfKyUSUioQyb6xh633gsJcD9HUsCd"),
+      new AvailableAccount("Carol", 
+      "0x1cD4FB2583d5BD5198D9Ac42243CD07393a8a2Fe", 
+      "0x0b96cbc41fd54d952fc148dbce05270cb9ba992a94725fe720ce11e51b106556",
+      "indra6HBZ5W5wjZ7HuC81aJ8yuSPPCDX2UGhWH8NanWqj54SUF6DNj7")
     ];
 
     this.core.onLinkUpdated.subscribe({
@@ -106,7 +114,7 @@ export class AgentViewModel {
       }
 
       this.message(`Establishing link with ${remoteAccount}`);
-      const newLink = await this.core.openLink(remoteAccount.accountAddress, "0x0000000000000000000000000000000000000000", new BigNumber(10), "dispute-mediator-public-key", null);
+      const newLink = await this.core.openLink(remoteAccount.publicIdentifier, "0x0000000000000000000000000000000000000000", new BigNumber(10), "dispute-mediator-public-key", null);
       this.links.push(new LinkParams(ko.observable(newLink)));
       this.message(`Link established with ${remoteAccount}`);
     });
@@ -134,7 +142,7 @@ export class AgentViewModel {
       throw new Error("Chosen MetaMask account is not supported!");
     }
 
-    this.account(account)
+    this.account(account);
 
     console.log(account);
 

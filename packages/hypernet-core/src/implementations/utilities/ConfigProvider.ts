@@ -13,7 +13,7 @@ export class ConfigProvider implements IConfigProvider {
 
       this.config = new HypernetConfig(
         "http://localhost:3001", // auth URL
-        "nats://localhost:4222", // nats URL
+        "ws://localhost:4221", // nats URL
         {
           "1337": {
             "channelFactoryAddress": "0x084aeA04D0B333506e212B1e531cA223650bF284",

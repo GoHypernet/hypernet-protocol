@@ -32,36 +32,38 @@ export class VectorLinkRepository implements ILinkRepository {
             console.log(`routerPublicIdentifier: ${config.routerPublicIdentifier}`);
 
             // We need to see if we already have a channel with the router setup.
-            // const channelsResult = await browserNode.getStateChannelByParticipants({
-            //     publicIdentifier: context.publicIdentifier,
-            //     counterparty: config.routerPublicIdentifier,
-            //     chainId: config.chainId
-            // });
+            const channelsByParticipantResult = await browserNode.getStateChannelByParticipants({
+                publicIdentifier: context.publicIdentifier,
+                counterparty: config.routerPublicIdentifier,
+                chainId: config.chainId
+            });
 
             const channelsResult = await browserNode.getStateChannels();
             
 
 
-            // if (channelsResult.isError) {
-            //     throw new Error("Cannot get channels!");
-            // }
+            if (channelsByParticipantResult.isError) {
+                throw new Error("Cannot get channels!");
+            }
 
             if (channelsResult.isError) {
                 throw new Error("Cannot get channels 2!");
             }
-            // const channelsByParticipants = channelsResult.getValue();
+            const channelsByParticipants = channelsByParticipantResult.getValue();
             const channels2 = channelsResult.getValue();
 
-            //console.log(channelsByParticipants);
+            console.log(channelsByParticipants);
             console.log(channels2);
 
-            const channelResult = await browserNode.getStateChannel({channelAddress: channels2[0]});
-            if (channelResult.isError) {
-                throw new Error("Cannot get details of state channel!");
+            let channel: any | null;
+            if (channels2.length > 0) {
+                const channelResult = await browserNode.getStateChannel({channelAddress: channels2[0]});
+                if (channelResult.isError) {
+                    throw new Error("Cannot get details of state channel!");
+                }
+
+                channel = channelResult.getValue();
             }
-
-            const channel = channelResult.getValue();
-
 
             // If the channel with the router does not exist, do a setup
             let channelAddress = "";
