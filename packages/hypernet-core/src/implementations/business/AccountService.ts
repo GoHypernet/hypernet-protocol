@@ -10,6 +10,6 @@ export class AccountService implements IAccountService {
       }
 
       public async depositFunds(assetAddress: string, amount: BigNumber): Promise<void> {
-        throw new Error("Method not implemented.");
+        return this.accountRepository.depositFunds(assetAddress, amount);
       }
 }

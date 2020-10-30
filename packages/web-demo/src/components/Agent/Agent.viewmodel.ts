@@ -5,6 +5,7 @@ import { HypernetCore, IHypernetCore, BigNumber } from "@hypernetlabs/hypernet-c
 import { ButtonParams } from "../Button/Button.viewmodel";
 import { ProposedLinkParams } from "../ProposedLink/ProposedLink.viewmodel";
 import { EProposedLinkStatus } from "web-demo/src/types/EProposedLinkStatus";
+import { ethers } from "ethers";
 
 class AvailableAccount {
   constructor(public accountName: string, 
@@ -107,9 +108,10 @@ export class AgentViewModel {
     });
 
     this.depositFundsButton = new ButtonParams("Deposit Funds", async() => {
-      await this.core.depositFunds("0x0", BigNumber.from(0.1));
-      this.message("Deposited .1 ETH into router channel");
+      await this.core.depositFunds("0x0000000000000000000000000000000000000000", ethers.utils.parseEther("1"));
+      this.message("Deposited 1 ETH into router channel");
     });
+
     this.establishLink = new ButtonParams("New Link", async () => {
       const account = this.account();
       const remoteAccount = this.remoteAccount();
