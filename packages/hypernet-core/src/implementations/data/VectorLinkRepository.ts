@@ -19,51 +19,11 @@ export class VectorLinkRepository implements ILinkRepository {
         return [];
     }
 
-    public async sendLinkPayment(link: HypernetLink): Promise<void> {
-        const browserNode = await this.browserNodeProvider.getBrowserNode()
-        const routerChannelAddress = await this.vectorUtils.getRouterChannelAddress()
-        const config = await this.configProvider.getConfig()
-        const stakeAmount = link.providerStake
-
-        const paymentResult = await browserNode.conditionalTransfer({
-            type: "HashlockTransfer",
-            channelAddress: routerChannelAddress,
-            amount: stakeAmount.toString(),
-            assetId: config.hypertokenAddress,
-            details: {
-                lockHash: createlockHash(getRandomBytes32()),
-                expiry: "0"
-            },
-            recipient: link.consumer,
-            meta: {
-                hypernetLinkId: link.id,
-                paymentTokenAddress: link.paymentToken
-            }
-        });
-
-        if (paymentResult.isError) {
-            console.log(paymentResult.getError());
-            throw new Error("Cannot post an insurance payment!");
-        }
-
-        const insurancePayment = paymentResult.getValue();
-    }
-
-    public async requestCollateralization(link: HypernetLink): Promise<void> {
-        const browserNode = await this.browserNodeProvider.getBrowserNode()
-        const routerChannelAddress= await this.vectorUtils.getRouterChannelAddress()
-        const config = await this.configProvider.getConfig()
-
-        await browserNode.requestCollateral({channelAddress: routerChannelAddress, assetId: config.hypertokenAddress})
-    }
-
-    public async createHypernetLink(
-        consumerId: PublicIdentifier,
+    public async createHypernetLink(consumerId: PublicIdentifier,
         paymentToken: EthereumAddress,
         stakeAmount: BigNumber,
         disputeMediator: PublicKey,
         pullSettings: PullSettings | null): Promise<HypernetLink> {
-
         // Basic setup
         const configPromise = this.configProvider.getConfig();
         const contextPromise = this.contextProvider.getInitializedContext();
@@ -74,10 +34,37 @@ export class VectorLinkRepository implements ILinkRepository {
             await Promise.all([configPromise, contextPromise, browserNodePromise,
                 routerChannelAddressPromise]);
 
+        // const blah = await browserNode.requestCollateral({channelAddress: routerChannelAddress,
+        // assetId: config.hypertokenAddress});
+        // console.log(blah);
+
+        // Now we can create a transaction! When creating a link, the first thing
+        // to do is create an InsurancePayment on behalf of the provider
         const hypernetLinkId = uuidv4();
-        
-        const link = new HypernetLink(
-            hypernetLinkId,
+        const insurancePaymentResult = await browserNode.conditionalTransfer({
+            type: "HashlockTransfer",
+            channelAddress: routerChannelAddress,
+            amount: stakeAmount.toString(),
+            assetId: config.hypertokenAddress,
+            details: {
+                lockHash: createlockHash(getRandomBytes32()),
+                expiry: "0"
+            },
+            recipient: consumerId,
+            meta: {
+                hypernetLinkId: hypernetLinkId,
+                paymentTokenAddress: paymentToken
+            }
+        });
+
+        if (insurancePaymentResult.isError) {
+            console.log(insurancePaymentResult.getError());
+            throw new Error("Cannot post an insurance payment!");
+        }
+
+        const insurancePayment = insurancePaymentResult.getValue();
+
+        const link = new HypernetLink(hypernetLinkId,
             consumerId,
             context.publicIdentifier,
             paymentToken,
@@ -92,4 +79,5 @@ export class VectorLinkRepository implements ILinkRepository {
 
         return link;
     }
+
 }

@@ -23,7 +23,7 @@ export class AgentViewModel {
   public clearLinks: ButtonParams;
   public establishLink: ButtonParams;
   public depositFundsButton: ButtonParams;
-  public collateralizeButton: ButtonParams;
+  //public collateralizeButton: ButtonParams;
   public message: ko.Observable<string>;
   public startupComplete: ko.Observable<boolean>;
   public inControl: ko.Observable<boolean>;
