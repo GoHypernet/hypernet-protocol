@@ -1,7 +1,7 @@
 import * as ko from "knockout";
 import html from "./Agent.template.html";
 import { LinkParams } from "../Link/Link.viewmodel";
-import { HypernetCore, IHypernetCore, BigNumber } from "@hypernetlabs/hypernet-core";
+import { HypernetCore, IHypernetCore, BigNumber } from "@hypernetlabs/hypernet-core"
 import { ButtonParams } from "../Button/Button.viewmodel";
 import { ProposedLinkParams } from "../ProposedLink/ProposedLink.viewmodel";
 import { EProposedLinkStatus } from "web-demo/src/types/EProposedLinkStatus";
