@@ -19,3 +19,4 @@ export * from "@interfaces/objects/Stake";
 export * from "@interfaces/objects/ThreadMetadata";
 export * from "@interfaces/objects/Token";
 export * from "@interfaces/objects/Withdrawal";
+export * from "@interfaces/objects/Balances";

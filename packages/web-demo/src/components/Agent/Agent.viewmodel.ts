@@ -61,6 +61,7 @@ export class AgentViewModel {
         this.message("onLinkUpdated");
       },
     });
+
     this.core.onLinkRequestReceived.subscribe({
       next: (linkRequest) => {
         const status = ko.observable<EProposedLinkStatus>(EProposedLinkStatus.Proposed);
@@ -68,17 +69,20 @@ export class AgentViewModel {
         this.message("onLinkRequestReceived");
       },
     });
+
     this.core.onLinkRejected.subscribe({
       next: (linkRequest) => {
         console.log(linkRequest);
         this.message("onLinkRejected");
       },
     });
+
     this.core.onControlClaimed.subscribe({
       next: () => {
         this.inControl(true);
       }
     });
+    
     this.core.onControlYielded.subscribe({
       next: () => {
         this.inControl(false);

@@ -23,9 +23,11 @@ export class LinkService implements ILinkService {
     protected contextProvider: IContextProvider,
     protected linkUtils: ILinkUtils,
   ) { }
+
   processEstablishLinkRequests(establishLinkRequest: EstablishLinkRequest[]): Promise<void> {
     throw new Error("Method not implemented.");
   }
+
   processChannelProposed(channelId: string, participant1Address: string, participant2Address: string, role: ELinkRole): Promise<void> {
     throw new Error("Method not implemented.");
   }
@@ -47,24 +49,31 @@ export class LinkService implements ILinkService {
 
     return link;
   }
+
   public async stakeIntoLink(linkId: string, amount: BigNumber): Promise<Stake> {
     throw new Error("Method not implemented.");
   }
+
   public async depositIntoLink(linkId: string, amount: BigNumber): Promise<Deposit> {
     throw new Error("Method not implemented.");
   }
+
   public async sendFunds(linkId: string, amount: BigNumber): Promise<Payment> {
     throw new Error("Method not implemented.");
   }
+
   public async pullFunds(linkId: string, amount: BigNumber): Promise<Payment> {
     throw new Error("Method not implemented.");
   }
+  
   public async withdrawFunds(linkId: string, amount: BigNumber, destinationAddress: string | null): Promise<any> {
     throw new Error("Method not implemented.");
   }
+
   public async closeLink(linkId: string): Promise<void> {
     throw new Error("Method not implemented.");
   }
+
   public async withdrawStake(linkId: string, destinationAddress: string | null): Promise<Stake> {
     throw new Error("Method not implemented.");
   }
@@ -76,6 +85,4 @@ export class LinkService implements ILinkService {
   public async clearLinks(): Promise<void> {
     throw new Error("Method not implemented.");
   }
-
-
 }

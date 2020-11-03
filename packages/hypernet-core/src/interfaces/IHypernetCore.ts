@@ -13,6 +13,7 @@ import {
   EstablishLinkRequest,
   ControlClaim,
   PublicIdentifier,
+  Balances
 } from "@interfaces/objects";
 import { Subject } from "rxjs";
 
@@ -31,17 +32,21 @@ export interface IHypernetCore {
    */
   initialize(account: string, privateKey: string): Promise<void>;
 
-
   /**
    * This function will load HypernetCore with funds. It should be called for each type of asset you want to use.
-   * @param assetAddress The ethereum address of the funds you want to deposit. These can be ETH, HyperToken, Dai, or any othe supported payment token.
+   * Can be called by either party (provider or consumer); internally, deposits into the router channel.
+   * @param assetAddress The Ethereum address of the funds you want to deposit. These can be ETH, HyperToken, Dai, or any othe supported payment token.
    * @param amount 
    */
   depositFunds(assetAddress: EthereumAddress, amount: BigNumber): Promise<void>;
 
+  /**
+   * Returns balances of the router channel, including
+   * unfinalized and finalizable funds.
+   */
+  getBalances(): Promise<Balances>
+
   getLinks(): Promise<HypernetLink[]>;
-
-
 
   /**
    * openLink() is always called by the provider of a link, with an amount they

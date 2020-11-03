@@ -15,6 +15,7 @@ import {
   ControlClaim,
   HypernetConfig,
   PublicIdentifier,
+  Balances,
 } from "@interfaces/objects";
 import { EthersBlockchainProvider } from "@implementations/utilities/BlockchainProvider";
 import { ConfigProvider } from "@implementations/utilities/ConfigProvider";
@@ -108,7 +109,6 @@ export class HypernetCore implements IHypernetCore {
     this.accountService = new AccountService(this.accountRepository);
   }
   
-
   public initialized(): boolean {
     return this._initialized;
   }
@@ -130,6 +130,10 @@ export class HypernetCore implements IHypernetCore {
     return this.accountService.depositFunds(assetAddress, amount);
   }
 
+  public async getBalances(): Promise<Balances> {
+    throw new Error('Method not yet implemented.')
+  }
+
   public async getLinks(): Promise<HypernetLink[]> {
     return this.linkService.getActiveLinks();
   }
@@ -147,18 +151,23 @@ export class HypernetCore implements IHypernetCore {
       disputeMediator,
       pullSettings);
   }
+
   public async stakeIntoLink(linkId: string, amount: BigNumber): Promise<Stake> {
     throw new Error("Method not implemented.");
   }
+
   public async depositIntoLink(linkId: string, amount: BigNumber): Promise<Deposit> {
     throw new Error("Method not implemented.");
   }
+
   public async sendFunds(linkId: string, amount: BigNumber): Promise<Payment> {
     throw new Error("Method not implemented.");
   }
+
   public async pullFunds(linkId: string, amount: BigNumber): Promise<Payment> {
     throw new Error("Method not implemented.");
   }
+
   public async withdrawFunds(
     linkId: string,
     amount: BigNumber,
@@ -166,12 +175,15 @@ export class HypernetCore implements IHypernetCore {
   ): Promise<Withdrawal> {
     throw new Error("Method not implemented.");
   }
+
   public async withdrawStake(linkId: string, destinationAddress: string | null): Promise<Stake> {
     throw new Error("Method not implemented.");
   }
+
   public async initiateDispute(linkId: string): Promise<LinkFinalResult> {
     throw new Error("Method not implemented.");
   }
+
   public async closeLink(linkId: string): Promise<LinkFinalResult> {
     throw new Error("Method not implemented.");
   }
