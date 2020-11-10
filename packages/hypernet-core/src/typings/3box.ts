@@ -6,7 +6,7 @@
 // tslint:disable: class-name
 // tslint:disable: max-classes-per-file
 declare module "3box" {
-  import { provider } from "web3-core";
+  import { ethers } from "ethers";
 
   type ThreeId = string;
   type EthereumAddress = string;
@@ -163,10 +163,10 @@ declare module "3box" {
   export function getVerifiedAccounts(profile: any): undefined;
   export function openBox(
     address: string,
-    ethereumProvider: provider,
+    ethereumProvider: ethers.providers.Web3Provider,
     opts?: BoxObjectOpts_openBox,
   ): Promise<BoxInstance>;
   export function isLoggedIn(address: any): boolean;
   export function openSpace(spaceName: string, opts?: BoxObjectOpts_OpenSpace): Promise<BoxSpace>;
-  export function create(ethereumProvider: provider): Promise<BoxInstance>;
+  export function create(ethereumProvider: ethers.providers.Web3Provider): Promise<BoxInstance>;
 }

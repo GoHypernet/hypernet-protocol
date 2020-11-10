@@ -12,9 +12,7 @@
   },
   "scripts": {
     "bootstrap": "yarn install",
-    "test": "lerna run test",
-    "lint": "lerna run lint",
-    "format": "lerna run format"
+    "start": "cd packages/web-demo && yarn start"
   },
   "repository": {
     "type": "git",
@@ -25,8 +23,8 @@
     "Blockchain",
     "State",
     "Channels",
-    "Nitro",
-    "Galileo"
+    "Galileo",
+    "Vector"
   ],
   "author": "Hypernet Labs",
   "license": "ISC",

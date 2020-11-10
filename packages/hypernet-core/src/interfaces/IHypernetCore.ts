@@ -12,6 +12,8 @@ import {
   EstablishLinkRequestWithApproval,
   EstablishLinkRequest,
   ControlClaim,
+  PublicIdentifier,
+  Balances
 } from "@interfaces/objects";
 import { Subject } from "rxjs";
 
@@ -20,17 +22,48 @@ export interface IHypernetCore {
   inControl(): boolean;
 
   getAccounts(): Promise<string[]>;
+  getPublicIdentifier(): Promise<PublicIdentifier>
 
-  initialize(account: string): Promise<void>;
+  /**
+   * This must be called before most other calls; it is used to specify what account addres
+   * hypernet core will be representing.
+   * @param account 
+   * @param privateKey 
+   */
+  initialize(account: string, privateKey: string): Promise<void>;
+
+  /**
+   * This function will load HypernetCore with funds. It should be called for each type of asset you want to use.
+   * Can be called by either party (provider or consumer); internally, deposits into the router channel.
+   * @param assetAddress The Ethereum address of the funds you want to deposit. These can be ETH, HyperToken, Dai, or any othe supported payment token.
+   * @param amount 
+   */
+  depositFunds(assetAddress: EthereumAddress, amount: BigNumber): Promise<void>;
+
+  /**
+   * Returns balances of the router channel, including
+   * unfinalized and finalizable funds.
+   */
+  getBalances(): Promise<Balances>
+
   getLinks(): Promise<HypernetLink[]>;
+
+  /**
+   * openLink() is always called by the provider of a link, with an amount they
+   * wish to stake. This will return a HypernetLink in the STAKED status.
+   * @param consumerWallet 
+   * @param paymentToken 
+   * @param amount 
+   * @param disputeMediator 
+   * @param pullSettings 
+   */
   openLink(
-    consumer: EthereumAddress,
-    provider: EthereumAddress,
+    consumerWallet: EthereumAddress,
     paymentToken: EthereumAddress,
+    amount: BigNumber, 
     disputeMediator: PublicKey,
     pullSettings: PullSettings | null,
   ): Promise<HypernetLink>;
-  stakeIntoLink(linkId: string, amount: BigNumber): Promise<Stake>;
   depositIntoLink(linkId: string, amount: BigNumber): Promise<Deposit>;
 
   sendFunds(linkId: string, amount: BigNumber): Promise<Payment>;

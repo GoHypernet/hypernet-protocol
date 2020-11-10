@@ -19,7 +19,6 @@ export class LinkViewModel {
   public providerStake: ko.Computed<BigNumber>;
   public status: ko.Computed<ELinkStatus>;
   public internalChannelId: ko.Computed<string | null>;
-  public threadAddress: ko.Computed<EthereumAddress | null>;
 
   protected link: ko.Observable<HypernetLink>;
 
@@ -48,9 +47,6 @@ export class LinkViewModel {
     });
     this.internalChannelId = ko.pureComputed(() => {
       return this.link().internalChannelId;
-    });
-    this.threadAddress = ko.pureComputed(() => {
-      return this.link().threadAddress;
     });
   }
 }

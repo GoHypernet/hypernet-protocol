@@ -1,3 +1,4 @@
 export * from "./IMessagingRepository";
 export * from "./IPersistenceRepository";
-export * from "./IStateChannelRepository";
+export * from "./IAccountsRepository";
+export * from "./ILinkRepository";

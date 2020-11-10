@@ -9,5 +9,8 @@ package-lock.json
 packages/*/package-lock.json
 packages/hypernet-core/log.txt
 packages/hypernet-core/temp.txt
+packages/*/src/*.d.ts
 *.swp
 *.swo
+*/yarn-error.log
+/lib

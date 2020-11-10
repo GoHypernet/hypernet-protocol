@@ -34,7 +34,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
     const linkSpaces = await this.boxUtils.getSpaces([link.id]);
     const linkSpace = linkSpaces[link.id];
 
-    let success = await linkSpace.private.set(config.linkDataKey, serialize(link));
+    let success = await linkSpace.private.set("config.linkDataKey", serialize(link));
     if (!success) {
       throw new Error("Can not write to the link space!");
     }
@@ -45,7 +45,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
     openLinks.push(new LinkMetadata(link.id, link.consumer, link.provider));
 
     // Now we won't forget the link
-    success = await space.private.set(config.openLinkKey, serialize(openLinks));
+    success = await space.private.set("config.openLinkKey", serialize(openLinks));
     if (!success) {
       throw new Error("Can't update the link store!");
     }
@@ -77,7 +77,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
     // Loop over the spaces for each link
     for (const [spaceName, space] of Object.entries(linkSpaces)) {
       // The space has a key with all the hypernet information
-      const linkDataString = await space.private.get(config.linkDataKey);
+      const linkDataString = await space.private.get("config.linkDataKey");
       const plain = JSON.parse(linkDataString) as object;
       const link = plainToClass(HypernetLink, plain);
 
@@ -115,7 +115,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
     // Loop over the spaces for each link
     for (const [, space] of Object.entries(linkSpaces)) {
       // The space has a key with all the hypernet information
-      const linkDataString = await space.private.get(config.linkDataKey);
+      const linkDataString = await space.private.get("config.linkDataKey");
       const plain = JSON.parse(linkDataString) as object;
       const link = plainToClass(HypernetLink, plain);
 
@@ -158,7 +158,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
     // Loop over the spaces for each link
     for (const [spaceName, space] of Object.entries(linkSpaces)) {
       // The space has a key with all the hypernet information
-      const linkDataString = await space.private.get(config.linkDataKey);
+      const linkDataString = await space.private.get("config.linkDataKey");
       const plain = JSON.parse(linkDataString) as object;
       const link = plainToClass(HypernetLink, plain);
 
@@ -199,7 +199,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
     // Loop over the spaces for each link
     for (const [spaceName, space] of Object.entries(linkSpaces)) {
       // The space has a key with all the hypernet information
-      const linkDataString = await space.private.get(config.linkDataKey);
+      const linkDataString = await space.private.get("config.linkDataKey");
       const plain = JSON.parse(linkDataString) as object;
       const link = plainToClass(HypernetLink, plain);
 
@@ -227,7 +227,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
 
     const config = await this.configProvider.getConfig();
 
-    const success = await linkSpace.private.set(config.linkDataKey, serialize(link));
+    const success = await linkSpace.private.set("config.linkDataKey", serialize(link));
     if (!success) {
       throw new Error("Can not write to the link space!");
     }
@@ -255,12 +255,12 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
     // Loop over the spaces for each link
     for (const [, space] of Object.entries(linkSpaces)) {
       // The space has a key with all the hypernet information
-      await space.private.set(config.linkDataKey, "");
+      await space.private.set("config.linkDataKey", "");
     }
 
     // Now eliminate the metadata
     const mainSpace = await this.boxUtils.getHypernetProtocolSpace();
-    await mainSpace.private.set(config.openLinkKey, "");
+    await mainSpace.private.set("config.openLinkKey", "");
   }
 
   protected async getOpenLinkMetadata(): Promise<LinkMetadata[]> {
@@ -270,7 +270,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
 
     const space = await this.boxUtils.getHypernetProtocolSpace();
 
-    const openLinksString = await space.private.get(config.openLinkKey);
+    const openLinksString = await space.private.get("config.openLinkKey");
 
     if (openLinksString == null || openLinksString === "") {
       return [];

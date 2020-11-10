@@ -1,6 +1,6 @@
 import { IMessageService } from "@interfaces/business/IMessageService";
 import { Message, EthereumAddress, MessagePayload, EstablishLinkRequest } from "@interfaces/objects";
-import { IPersistenceRepository, IStateChannelRepository, IMessagingRepository } from "@interfaces/data";
+import { IPersistenceRepository, IMessagingRepository } from "@interfaces/data";
 import { EMessageType, ELinkStatus } from "@interfaces/types";
 import { plainToClass } from "class-transformer";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
@@ -9,7 +9,6 @@ export class MessageService implements IMessageService {
   constructor(
     protected persistenceRepository: IPersistenceRepository,
     protected messagingRepository: IMessagingRepository,
-    protected stateChannelRepository: IStateChannelRepository,
     protected contextProvider: IContextProvider
   ) {}
 
@@ -40,7 +39,7 @@ export class MessageService implements IMessageService {
       link.status = ELinkStatus.DENIED;
       await this.persistenceRepository.updateLink(link);
     } else if (payload.type === EMessageType.CHANNEL) {
-      await this.stateChannelRepository.pushMessage(payload.data);
+      //await this.stateChannelRepository.pushMessage(payload.data);
     }
   }
 
