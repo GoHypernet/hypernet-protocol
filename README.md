@@ -5,6 +5,7 @@ Hypernet smart contracts, SDK, and everything else needed to start building on t
  - linux/(maybe mac?); windows users: [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
  - [nvm](https://github.com/nvm-sh/nvm#install--update-script)
  - [yarn](https://classic.yarnpkg.com/en/docs/install/#debian-stable)
+ - docker. if on windows, docker-desktop + enable the wsl integration
 
 ## Installing
 1) Switch to correct version of Node:
