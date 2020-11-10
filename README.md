@@ -20,8 +20,6 @@ Hypernet smart contracts, SDK, and everything else needed to start building on t
 
 ### Hypernet-Core
 
-`yarn build-core`
-
 Contains the bulk of the code in the monorepo; consumes the Connext SDK and exposes the concept of (and an SDK for) a "Hypernet Link". See package readme for more details on how this works exactly.
 
 ### Hypernet-Contracts
@@ -29,7 +27,5 @@ Contains the bulk of the code in the monorepo; consumes the Connext SDK and expo
 Contains the smart contracts needed for Hypernet Links to function, including Hypertoken.
 
 ### Web-Demo
-
-`yarn web-demo`
 
 A minimal demo that demonstrates consumption of the Hypernet Core SDK, as well as usage of both of the custom transfer definitions that Hypernet created (and pr'd into the Connext Vector repo).
