@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Hypernet Core is meant to be a drop-in component of applications that wish to quickly and easily send funds from a service or product consumer to a service or product provider. It is meant to be a payment protocol that allows funds to be send quickly, often, and with minimal (or no!) fees (most of the time). While developers that build on top of Hypernet Core may need to somewhat know how it works, the goal is for the Core to be completely transparent to end users - they shouldn't even need to know how blockchain works, or even what blockchain is, in order to use the Core.
+Hypernet Core is meant to be a drop-in component of applications that wish to quickly and easily send funds from a service or product consumer to a service or product provider. It is meant to be a payment protocol that allows funds to be sent quickly, often, and with minimal (or no!) fees (most of the time). While developers that build on top of Hypernet Core may need to somewhat know how it works, the goal is for the Core to be completely transparent to end users - they shouldn't even need to know how blockchain works, or even what blockchain is, in order to use the Core.
 
 ## Key Concepts
 
