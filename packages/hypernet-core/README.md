@@ -35,7 +35,7 @@ Helpful links / primers on blockchain, smart contracts, and Ethereum below:
 
 #### Payment Channels & Layer 2
 
-As noted above, transaction on Ethereum itself is still slow. Thus, "Layer 2" solutions are needed. Layer 2 refers to the group of solutions that allow applications to transact "off-chain", and return to the chain when trust or communication breaks down. The below link is a very good primer & high level overview on layer 2 in general. Pay particular attention to the section on "Channels" - this is what Hypernet Core uses.
+As noted above, transacting on Ethereum itself is still slow. Thus, "Layer 2" solutions are needed. Layer 2 refers to the group of solutions that allow applications to transact "off-chain", and return to the chain when trust or communication breaks down. The below link is a very good primer & high level overview on layer 2 in general. Pay particular attention to the section on "Channels" - this is what Hypernet Core uses.
 
 - [ethereum.org - Layer 2 Scaling](https://ethereum.org/en/developers/docs/layer-2-scaling/)
 
