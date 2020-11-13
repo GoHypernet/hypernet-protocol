@@ -4,6 +4,8 @@ import { ELinkStatus } from "@interfaces/types";
 import { IBrowserNodeProvider, IConfigProvider, IContextProvider, IVectorUtils } from "@interfaces/utilities";
 import { v4 as uuidv4 } from "uuid";
 import { createlockHash, getRandomBytes32 } from "@connext/vector-utils";
+import { ELinkOperation } from "@interfaces/types/ELinkOperation";
+import { VectorUtils } from "@implementations/utilities/VectorUtils";
 
 export class VectorLinkRepository implements ILinkRepository {
     constructor(protected browserNodeProvider: IBrowserNodeProvider,
@@ -17,6 +19,26 @@ export class VectorLinkRepository implements ILinkRepository {
 
 
         return [];
+    }
+
+    /**
+     * Given the ID of the link, return it.
+     * @param linkId The ID of the link to retrieve
+     */
+    public async getHypernetLink(linkId: string): Promise<HypernetLink> {
+        let links = await this.getHypernetLinks()
+
+        let retLink = links.filter((link) => {
+            link.id == linkId
+        })
+
+        if (retLink.length > 1) {
+            throw new Error('Multiple links found!')
+        } else if (retLink.length == 0) {
+            throw new Error('Could not find linke!')
+        }
+
+        return retLink[0]
     }
 
     public async createHypernetLink(consumerId: PublicIdentifier,
@@ -80,4 +102,39 @@ export class VectorLinkRepository implements ILinkRepository {
         return link;
     }
 
+    public async modifyHypernetLink(linkId: string, operation: ELinkOperation, data: any): Promise<HypernetLink> {
+        let link = await this.getHypernetLink(linkId)
+
+        switch(operation) {
+            case ELinkOperation.SEND_FUNDS: {
+                let updatedLink = await this.sendFunds(link, data)
+                return updatedLink
+            } break;
+
+            case ELinkOperation.WITHDRAW_FUNDS: {
+                let updatedLink = await this.withdrawFunds(link, data)
+                return updatedLink
+            } break;
+
+            default: {
+                throw new Error('Invalid operation.')
+            }
+        }
+    }
+
+    /**
+     * Sends funds via Connext/Vector payment channels.
+     * Returns the updated Hypernet Link.
+     * @param amount the amount of funds to send
+     * @todo figure out what createXPayment should actually return
+     */
+    private async sendFunds(link: HypernetLink, amount: string): Promise<HypernetLink> {
+        await this.vectorUtils.createParameterizedPayment(param1, param2, etc)
+        
+        throw new Error('Method not yet implemented.')
+    }
+
+    private async withdrawFunds(link: HypernetLink, amount: string): Promise<HypernetLink> {
+        throw new Error('Method not yet implemented.')
+    }
 }

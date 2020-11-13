@@ -88,4 +88,17 @@ export class VectorUtils implements IVectorUtils {
         return this.channelAddress
     }
 
+    /**
+     * Creates a parameterized payment transfer via the Connext/Vector SDK.
+     */
+    public async createParameterizedPayment() {
+        throw new Error('Method not yet implemented.')
+    }
+
+    /**
+     * Creates an insurance payment tranfser via the Connext/Vector SDK.
+     */
+    public async createInsurancePayment() {
+        throw new Error('Method not yet implemented.')
+    }
 }

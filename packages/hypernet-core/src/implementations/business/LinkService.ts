@@ -9,12 +9,14 @@ import {
   EstablishLinkRequest,
   EthereumAddress,
   PublicKey,
-  PublicIdentifier
+  PublicIdentifier,
+  EPaymentState
 } from "@interfaces/objects";
 import { ELinkRole, ELinkStatus } from "@interfaces/types";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
 import { ILinkRepository } from "@interfaces/data/ILinkRepository";
+import { ELinkOperation } from "@interfaces/types/ELinkOperation";
 
 // tslint:disable: no-console
 export class LinkService implements ILinkService {
@@ -41,7 +43,8 @@ export class LinkService implements ILinkService {
   ): Promise<HypernetLink> {
     const context = await this.contextProvider.getInitializedContext();
 
-    const link = await this.linkRepository.createHypernetLink(consumerId, 
+    const link = await this.linkRepository.createHypernetLink(
+      consumerId, 
       paymentToken, 
       stakeAmount,
       disputeMediator,
@@ -58,8 +61,23 @@ export class LinkService implements ILinkService {
     throw new Error("Method not implemented.");
   }
 
+  /**
+   * Sends funds on the link provided; calls into the VectorLinkRepository to do so.
+   * @param linkId the link on which to send the funds
+   * @param amount the amount of funds to send
+   */
   public async sendFunds(linkId: string, amount: BigNumber): Promise<Payment> {
-    throw new Error("Method not implemented.");
+    let updatedLink = await this.linkRepository.modifyHypernetLink(ELinkOperation.SEND_FUNDS, amount)
+    
+    let payment: Payment = {
+      channelId: linkId, // should this be channel id or link id?
+      amount: amount,
+      createdTimestamp: null, // do we need to refactor Payment? not quite sure how this works or should work.
+      updatedTimestamp: null,
+      state: EPaymentState.Sent
+    }
+
+    return payment
   }
 
   public async pullFunds(linkId: string, amount: BigNumber): Promise<Payment> {
