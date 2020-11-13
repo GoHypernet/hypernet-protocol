@@ -61,7 +61,7 @@ Similar to a *Hypernet Link*, but at a lower level of abstraction; a *payment ch
 
 Hypernet Core is built using a layered architecture with 4 layers; see the system diagram below for a brief description of each one and a sample of the modules within.
 
-![HypernetCore System Architecture](https://raw.githubusercontent.com/GoHypernet/hypernet-protocol/dev/documentation/images/HypernetCore.png)
+![HypernetCore System Architecture](https://github.com/GoHypernet/hypernet-protocol/raw/dev/documentation/images/HypernetCore.png)
 
 ## Usage
 
