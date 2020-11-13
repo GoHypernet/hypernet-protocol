@@ -24,7 +24,7 @@ Developers will need to know the basics of how blockchain works, as well as what
 
 Though most of the payments and activity occur at Layer 2 (see below), the Core must go down to Layer 1 for disputes, deposits, withdrawals, and other (hopefully rare) occasions.
 
-As of Q4 2020, the Ethereum blockchain is capable of processing only 15 transactions per second; the supply and demand market for the fees associated with transaction on the blockchain, paired with this slow transaction speed, mean that individual transactions can be costly (sometimes as much as a few dollars!)
+As of Q4 2020, the Ethereum blockchain is capable of processing only 15 transactions per second; the supply and demand market for the fees associated with transactions on the blockchain, paired with this slow transaction speed, mean that individual transactions can be costly (sometimes as much as a few dollars!)
 
 Helpful links / primers on blockchain, smart contracts, and Ethereum below:
 
