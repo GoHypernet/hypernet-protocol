@@ -14,7 +14,7 @@ Most payment protocols requires a central server infrastructure; Visa processes 
 
 *Hypernet Core* is peer to peer and serverless - mostly. Right now (as of Q4 2020), two clients communicate with each other via a central NATS messaging server, and payments are *routed* (via the Vector protocol) via a *routing node* to the end participant. 
 
-Though the routing node (we'll call it 'Roger') is an active participant in transfers, it has no knowledge of participant activity otherwise; it simply routes a payment from A to B (Alice to Bob). Routing nodes never have custody of end user funds, and if they go (even permanently) offline, funds are not lost (though the end users that had active payment channels open will have to submit a blockchain transaction in order to claim their funds; more on that in the payment channels section!)
+Though the routing node is an active participant in transfers, it has no knowledge of participant activity otherwise; it simply routes a payment from one person to another. Routing nodes never have custody of end user funds, and if they go (even permanently) offline, funds are not lost (though the end users that had active payment channels open will have to submit a blockchain transaction in order to claim their funds; more on that in the payment channels section!)
 
 ### Blockchain, Payment Channels, & Layer 2
 
