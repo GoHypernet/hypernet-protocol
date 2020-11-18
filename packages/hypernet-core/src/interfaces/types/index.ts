@@ -1,3 +1,2 @@
-export * from "@interfaces/types/ELinkStatus";
-export * from "@interfaces/types/ELinkRole";
-export * from "@interfaces/types/EMessageType";
+export * from "@interfaces/types/EPaymentDirection";
+export * from "@interfaces/types/EPaymentState";

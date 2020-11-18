@@ -1,18 +1,66 @@
 import * as moment from "moment";
-import { BigNumber } from "@interfaces/objects";
+import { BigNumber, EthereumAddress } from "@interfaces/objects";
+import { EPaymentState, EPaymentDirection } from "@interfaces/types";
 
-export enum EPaymentState {
-  Sent,
-  Approved,
-  Challenged,
+export class PullAmount {
+  constructor(public amount: BigNumber,
+    public date: number) {}
 }
 
-export class Payment {
+export abstract class Payment {
   constructor(
-    public channelId: string,
-    public amount: BigNumber,
+    public id: string,
+    public direction: EPaymentDirection,
+    public state: EPaymentState,
+    public paymentToken: EthereumAddress,
+    public requiredStake: BigNumber,
+    public amountStaked: BigNumber,
+    public expirationDate: number,
+    public finalized: boolean,
     public createdTimestamp: moment.Moment,
     public updatedTimestamp: moment.Moment,
-    public state: EPaymentState,
+    public collateralRecovered: BigNumber,
   ) {}
+}
+
+export class PushPayment extends Payment{
+  constructor(
+    id: string,
+    direction: EPaymentDirection,
+    state: EPaymentState,
+    paymentToken: EthereumAddress,
+    requiredStake: BigNumber,
+    amountStaked: BigNumber,
+    expirationDate: number,
+    finalized: boolean,
+    createdTimestamp: moment.Moment,
+    updatedTimestamp: moment.Moment,
+    collateralRecovered: BigNumber,
+    public paymentAmount: BigNumber, 
+  ) {
+    super(id, direction, state, paymentToken, requiredStake, amountStaked, expirationDate, finalized, 
+      createdTimestamp, updatedTimestamp, collateralRecovered)
+  }
+}
+
+export class PullPayment extends Payment{
+  constructor(
+    id: string,
+    direction: EPaymentDirection,
+    state: EPaymentState,
+    paymentToken: EthereumAddress,
+    requiredStake: BigNumber,
+    amountStaked: BigNumber,
+    expirationDate: number,
+    finalized: boolean,
+    createdTimestamp: moment.Moment,
+    updatedTimestamp: moment.Moment,
+    collateralRecovered: BigNumber,
+    public authorizedAmount: BigNumber,
+    public transferedAmount: BigNumber,
+    public ledger: PullAmount[],
+  ) {
+    super(id, direction, state, paymentToken, requiredStake, amountStaked, expirationDate, finalized, 
+      createdTimestamp, updatedTimestamp, collateralRecovered)
+  }
 }

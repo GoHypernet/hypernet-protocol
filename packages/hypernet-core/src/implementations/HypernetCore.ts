@@ -1,6 +1,6 @@
 import { IHypernetCore } from "@interfaces/IHypernetCore";
 import {
-  HypernetLink,
+  HypernetLedger,
   Deposit,
   PullSettings,
   BigNumber,
@@ -37,7 +37,7 @@ import { IAccountService, ILinkService} from "@interfaces/business";
 import { AccountService } from "./business/AccountService";
 
 export class HypernetCore implements IHypernetCore {
-  public onLinkUpdated: Subject<HypernetLink>;
+  public onLinkUpdated: Subject<HypernetLedger>;
   public onLinkRequestReceived: Subject<EstablishLinkRequestWithApproval>;
   public onLinkRejected: Subject<EstablishLinkRequest>;
   public onControlClaimed: Subject<ControlClaim>;
@@ -63,7 +63,7 @@ export class HypernetCore implements IHypernetCore {
     this._initialized = false;
     this._inControl = false;
 
-    this.onLinkUpdated = new Subject<HypernetLink>();
+    this.onLinkUpdated = new Subject<HypernetLedger>();
     this.onLinkRequestReceived = new Subject<EstablishLinkRequestWithApproval>();
     this.onLinkRejected = new Subject<EstablishLinkRequest>();
     this.onControlClaimed = new Subject<ControlClaim>();
@@ -116,7 +116,7 @@ export class HypernetCore implements IHypernetCore {
     return this._inControl;
   }
 
-  public async getAccounts(): Promise<string[]> {
+  public async getEthereumAccounts(): Promise<EthereumAddress[]> {
     return this.accountService.getAccounts();
   }
 
@@ -134,30 +134,28 @@ export class HypernetCore implements IHypernetCore {
     throw new Error('Method not yet implemented.')
   }
 
-  public async getLinks(): Promise<HypernetLink[]> {
+  public async getLinks(): Promise<HypernetLedger[]> {
     return this.linkService.getActiveLinks();
   }
 
   public async openLink(
-    consumer: PublicIdentifier,
-    paymentToken: EthereumAddress,
-    amount: BigNumber,
-    disputeMediator: PublicKey,
-    pullSettings: PullSettings | null,
-  ): Promise<HypernetLink> {
-    return this.linkService.openLink(consumer,
-      paymentToken,
-      amount,
-      disputeMediator,
-      pullSettings);
+    consumerAccount: PublicIdentifier,
+    allowedPaymentTokens: EthereumAddress[],
+    stakeAmount: BigNumber, 
+    stakeExpiration: number,
+    disputeMediator: PublicKey
+  ): Promise<HypernetLedger> {
+    return this.linkService.openLink(consumerAccount,
+      allowedPaymentTokens,
+      stakeAmount,
+      stakeExpiration,
+      disputeMediator);
   }
 
-  public async stakeIntoLink(linkId: string, amount: BigNumber): Promise<Stake> {
-    throw new Error("Method not implemented.");
-  }
-
-  public async depositIntoLink(linkId: string, amount: BigNumber): Promise<Deposit> {
-    throw new Error("Method not implemented.");
+public async acceptLink(linkId: string, 
+  amount: BigNumber, 
+  pullSettings: PullSettings | null): Promise<HypernetLedger> {
+    throw new Error("Method not implemented");
   }
 
   public async sendFunds(linkId: string, amount: BigNumber): Promise<Payment> {

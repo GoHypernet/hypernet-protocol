@@ -1,9 +1,9 @@
-import { HypernetLink, Deposit, Payment, Stake, Withdrawal } from "@interfaces/objects";
+import { HypernetLedger, Deposit, Payment, Stake, Withdrawal } from "@interfaces/objects";
 import { Observable } from "rxjs";
 
 export interface IHypernetworkCoreEvents {
   onPaymentReceived: Observable<Payment>;
-  onChannelOpened: Observable<HypernetLink>;
+  onChannelOpened: Observable<HypernetLedger>;
 
   // onAccountsRequested(): Promise<string[]>;
   // onSignTransactionRequested(txParams: PartialTxParams): Promise<string>;

@@ -1,5 +1,5 @@
 import { ILinkRepository } from "@interfaces/data/ILinkRepository";
-import { BigNumber, EthereumAddress, HypernetLink, PublicIdentifier, PublicKey, PullSettings } from "@interfaces/objects";
+import { BigNumber, EthereumAddress, HypernetLedger, PublicIdentifier, PublicKey, PullSettings } from "@interfaces/objects";
 import { ELinkStatus } from "@interfaces/types";
 import { IBrowserNodeProvider, IConfigProvider, IContextProvider, IVectorUtils } from "@interfaces/utilities";
 import { v4 as uuidv4 } from "uuid";
@@ -13,7 +13,7 @@ export class VectorLinkRepository implements ILinkRepository {
         protected contextProvider: IContextProvider,
         protected vectorUtils: IVectorUtils) { }
 
-    public async getHypernetLinks(): Promise<HypernetLink[]> {
+    public async getHypernetLedgers(): Promise<HypernetLedger[]> {
         const browserNode = await this.browserNodeProvider.getBrowserNode();
 
 
@@ -25,8 +25,8 @@ export class VectorLinkRepository implements ILinkRepository {
      * Given the ID of the link, return it.
      * @param linkId The ID of the link to retrieve
      */
-    public async getHypernetLink(linkId: string): Promise<HypernetLink> {
-        let links = await this.getHypernetLinks()
+    public async getHypernetLedger(linkId: string): Promise<HypernetLedger> {
+        let links = await this.getHypernetLedgers()
 
         let retLink = links.filter((link) => {
             link.id == linkId
@@ -41,11 +41,12 @@ export class VectorLinkRepository implements ILinkRepository {
         return retLink[0]
     }
 
-    public async createHypernetLink(consumerId: PublicIdentifier,
-        paymentToken: EthereumAddress,
+    public async createHypernetLedger(
+        consumerAccount: PublicIdentifier,
+        allowedPaymentTokens: EthereumAddress[],
         stakeAmount: BigNumber,
-        disputeMediator: PublicKey,
-        pullSettings: PullSettings | null): Promise<HypernetLink> {
+        stakeExpiration: number,
+        disputeMediator: PublicKey): Promise<HypernetLedger> {
         // Basic setup
         const configPromise = this.configProvider.getConfig();
         const contextPromise = this.contextProvider.getInitializedContext();
@@ -62,7 +63,7 @@ export class VectorLinkRepository implements ILinkRepository {
 
         // Now we can create a transaction! When creating a link, the first thing
         // to do is create an InsurancePayment on behalf of the provider
-        const hypernetLinkId = uuidv4();
+        const HypernetLedgerId = uuidv4();
         const insurancePaymentResult = await browserNode.conditionalTransfer({
             type: "HashlockTransfer",
             channelAddress: routerChannelAddress,
@@ -72,10 +73,10 @@ export class VectorLinkRepository implements ILinkRepository {
                 lockHash: createlockHash(getRandomBytes32()),
                 expiry: "0"
             },
-            recipient: consumerId,
+            recipient: consumerAccount,
             meta: {
-                hypernetLinkId: hypernetLinkId,
-                paymentTokenAddress: paymentToken
+                HypernetLedgerId: HypernetLedgerId,
+                allowedPaymentTokens: allowedPaymentTokens
             }
         });
 
@@ -86,10 +87,11 @@ export class VectorLinkRepository implements ILinkRepository {
 
         const insurancePayment = insurancePaymentResult.getValue();
 
-        const link = new HypernetLink(hypernetLinkId,
-            consumerId,
+        const link = new HypernetLedger(
+            HypernetLedgerId,
+            consumerAccount,
             context.publicIdentifier,
-            paymentToken,
+            allowedPaymentTokens,
             disputeMediator,
             pullSettings,
             BigNumber.from(0),
@@ -97,13 +99,14 @@ export class VectorLinkRepository implements ILinkRepository {
             BigNumber.from(0),
             stakeAmount,
             ELinkStatus.STAKED,
-            routerChannelAddress);
+            routerChannelAddress
+        );
 
         return link;
     }
 
-    public async modifyHypernetLink(linkId: string, operation: ELinkOperation, data: any): Promise<HypernetLink> {
-        let link = await this.getHypernetLink(linkId)
+    public async modifyHypernetLedger(linkId: string, operation: ELinkOperation, data: any): Promise<HypernetLedger> {
+        let link = await this.getHypernetLedger(linkId)
 
         switch(operation) {
             case ELinkOperation.SEND_FUNDS: {
@@ -128,13 +131,13 @@ export class VectorLinkRepository implements ILinkRepository {
      * @param amount the amount of funds to send
      * @todo figure out what createXPayment should actually return
      */
-    private async sendFunds(link: HypernetLink, amount: string): Promise<HypernetLink> {
+    private async sendFunds(link: HypernetLedger, amount: string): Promise<HypernetLedger> {
         await this.vectorUtils.createParameterizedPayment(param1, param2, etc)
         
         throw new Error('Method not yet implemented.')
     }
 
-    private async withdrawFunds(link: HypernetLink, amount: string): Promise<HypernetLink> {
+    private async withdrawFunds(link: HypernetLedger, amount: string): Promise<HypernetLedger> {
         throw new Error('Method not yet implemented.')
     }
 }

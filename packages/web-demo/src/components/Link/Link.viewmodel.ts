@@ -1,9 +1,9 @@
 import * as ko from "knockout";
-import { HypernetLink, EthereumAddress, PublicKey, ELinkStatus, BigNumber } from "@hypernetlabs/hypernet-core";
+import { HypernetLedger, EthereumAddress, PublicKey, ELinkStatus, BigNumber } from "@hypernetlabs/hypernet-core";
 import html from "./Link.template.html";
 
 export class LinkParams {
-  constructor(public link: ko.Observable<HypernetLink>) {}
+  constructor(public link: ko.Observable<HypernetLedger>) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -20,7 +20,7 @@ export class LinkViewModel {
   public status: ko.Computed<ELinkStatus>;
   public internalChannelId: ko.Computed<string | null>;
 
-  protected link: ko.Observable<HypernetLink>;
+  protected link: ko.Observable<HypernetLedger>;
 
   constructor(params: LinkParams) {
     this.link = params.link;

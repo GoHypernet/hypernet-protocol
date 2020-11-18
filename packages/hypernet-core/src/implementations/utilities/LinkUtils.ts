@@ -1,4 +1,4 @@
-import { PublicKey, EthereumAddress, HypernetLink } from "@interfaces/objects";
+import { PublicKey, EthereumAddress, HypernetLedger } from "@interfaces/objects";
 
 export class LinkUtils {
   public checkExistingLink(
@@ -7,9 +7,9 @@ export class LinkUtils {
     provider: EthereumAddress,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
-    links: HypernetLink[],
-  ): HypernetLink | null {
-    const existingLinks = links.filter((val: HypernetLink) => {
+    links: HypernetLedger[],
+  ): HypernetLedger | null {
+    const existingLinks = links.filter((val: HypernetLedger) => {
       return (
         (linkId === val.id || linkId == null) &&
         consumer === val.consumer &&

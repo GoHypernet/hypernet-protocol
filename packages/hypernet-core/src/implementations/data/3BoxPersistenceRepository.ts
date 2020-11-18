@@ -1,5 +1,5 @@
 import { IPersistenceRepository } from "@interfaces/data";
-import { EthereumAddress, HypernetLink, LinkMetadata } from "@interfaces/objects";
+import { EthereumAddress, HypernetLedger, LinkMetadata } from "@interfaces/objects";
 import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
 import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 import { plainToClass, serialize } from "class-transformer";
@@ -12,7 +12,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
    * createLink() will store the link ID in the user's active link space,
    * @param link
    */
-  public async createLink(link: HypernetLink): Promise<HypernetLink> {
+  public async createLink(link: HypernetLedger): Promise<HypernetLedger> {
     // Sanity check
     if (link.id == null) {
       throw new Error("Link to create must be given an ID first!");
@@ -53,8 +53,8 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
     return link;
   }
 
-  public async getActiveLinks(): Promise<HypernetLink[]> {
-    const returnLinks = new Array<HypernetLink>();
+  public async getActiveLinks(): Promise<HypernetLedger[]> {
+    const returnLinks = new Array<HypernetLedger>();
 
     const config = await this.configProvider.getConfig();
 
@@ -79,7 +79,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
       // The space has a key with all the hypernet information
       const linkDataString = await space.private.get("config.linkDataKey");
       const plain = JSON.parse(linkDataString) as object;
-      const link = plainToClass(HypernetLink, plain);
+      const link = plainToClass(HypernetLedger, plain);
 
       if (link != null) {
         returnLinks.push(link);
@@ -89,8 +89,8 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
     return returnLinks;
   }
 
-  public async getLinksById(linkIds: string[]): Promise<{ [linkId: string]: HypernetLink }> {
-    const returnLinks: { [linkId: string]: HypernetLink } = {};
+  public async getLinksById(linkIds: string[]): Promise<{ [linkId: string]: HypernetLedger }> {
+    const returnLinks: { [linkId: string]: HypernetLedger } = {};
 
     const config = await this.configProvider.getConfig();
 
@@ -117,7 +117,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
       // The space has a key with all the hypernet information
       const linkDataString = await space.private.get("config.linkDataKey");
       const plain = JSON.parse(linkDataString) as object;
-      const link = plainToClass(HypernetLink, plain);
+      const link = plainToClass(HypernetLedger, plain);
 
       if (link != null) {
         returnLinks[link.id] = link;
@@ -127,8 +127,8 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
     return returnLinks;
   }
 
-  public async getLinksByParticipant(consumerOrProviderIds: string[]): Promise<HypernetLink[]> {
-    const returnLinks = new Array<HypernetLink>();
+  public async getLinksByParticipant(consumerOrProviderIds: string[]): Promise<HypernetLedger[]> {
+    const returnLinks = new Array<HypernetLedger>();
 
     const config = await this.configProvider.getConfig();
 
@@ -160,7 +160,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
       // The space has a key with all the hypernet information
       const linkDataString = await space.private.get("config.linkDataKey");
       const plain = JSON.parse(linkDataString) as object;
-      const link = plainToClass(HypernetLink, plain);
+      const link = plainToClass(HypernetLedger, plain);
 
       if (link != null) {
         returnLinks.push(link);
@@ -170,7 +170,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
     return returnLinks;
   }
 
-  public async getLinkByAddressAndRole(consumerOrProviderId: string, ourRole: ELinkRole): Promise<HypernetLink | null> {
+  public async getLinkByAddressAndRole(consumerOrProviderId: string, ourRole: ELinkRole): Promise<HypernetLedger | null> {
     const config = await this.configProvider.getConfig();
 
     // Get the list of open links from the space.
@@ -201,7 +201,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
       // The space has a key with all the hypernet information
       const linkDataString = await space.private.get("config.linkDataKey");
       const plain = JSON.parse(linkDataString) as object;
-      const link = plainToClass(HypernetLink, plain);
+      const link = plainToClass(HypernetLedger, plain);
 
       if (link != null) {
         return link;
@@ -215,7 +215,7 @@ export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
    * Updates a link in the 3box space.
    * @param link The existing link object
    */
-  public async updateLink(link: HypernetLink): Promise<void> {
+  public async updateLink(link: HypernetLedger): Promise<void> {
     // First we'll do some sanity checking
     if (link.id == null) {
       throw new Error("Can not update a link that does not have an ID");

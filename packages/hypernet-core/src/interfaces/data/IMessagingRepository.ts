@@ -6,6 +6,9 @@ import {
   ControlClaim,
 } from "@interfaces/objects";
 
+/**
+ * @todo do we need the messaging repository anymore? delete entirely?
+ */
 export interface IMessagingRepository {
   createMessageThread(threadName: string, consumer: EthereumAddress, provider: EthereumAddress): Promise<MessageThread>;
   getMessageThread(address: string): Promise<MessageThread>;

@@ -1,6 +1,6 @@
 import { ILinkService } from "@interfaces/business/ILinkService";
 import {
-  HypernetLink,
+  HypernetLedger,
   BigNumber,
   PullSettings,
   Payment,
@@ -35,20 +35,19 @@ export class LinkService implements ILinkService {
   }
 
   public async openLink(
-    consumerId: PublicIdentifier,
-    paymentToken: EthereumAddress,
-    stakeAmount: BigNumber,
-    disputeMediator: PublicKey,
-    pullSettings: PullSettings | null,
-  ): Promise<HypernetLink> {
+    consumerAccount: PublicIdentifier,
+    allowedPaymentTokens: EthereumAddress[],
+    stakeAmount: BigNumber, 
+    stakeExpiration: number,
+    disputeMediator: PublicKey): Promise<HypernetLedger> {
     const context = await this.contextProvider.getInitializedContext();
 
-    const link = await this.linkRepository.createHypernetLink(
-      consumerId, 
-      paymentToken, 
+    const link = await this.linkRepository.createHypernetLedger(
+      consumerAccount, 
+      allowedPaymentTokens, 
       stakeAmount,
-      disputeMediator,
-      pullSettings);
+      stakeExpiration,
+      disputeMediator);
 
     return link;
   }
@@ -67,7 +66,7 @@ export class LinkService implements ILinkService {
    * @param amount the amount of funds to send
    */
   public async sendFunds(linkId: string, amount: BigNumber): Promise<Payment> {
-    let updatedLink = await this.linkRepository.modifyHypernetLink(ELinkOperation.SEND_FUNDS, amount)
+    let updatedLink = await this.linkRepository.modifyHypernetLedger(ELinkOperation.SEND_FUNDS, amount)
     
     let payment: Payment = {
       channelId: linkId, // should this be channel id or link id?
@@ -96,8 +95,8 @@ export class LinkService implements ILinkService {
     throw new Error("Method not implemented.");
   }
 
-  public async getActiveLinks(): Promise<HypernetLink[]> {
-    return this.linkRepository.getHypernetLinks();
+  public async getActiveLinks(): Promise<HypernetLedger[]> {
+    return this.linkRepository.getHypernetLedgers();
   }
 
   public async clearLinks(): Promise<void> {

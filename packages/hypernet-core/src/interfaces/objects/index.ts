@@ -5,7 +5,7 @@ export * from "@interfaces/objects/EstablishLinkRequest";
 export * from "@interfaces/objects/EthereumAddress";
 export * from "@interfaces/objects/HypernetConfig";
 export * from "@interfaces/objects/HypernetContext";
-export * from "@interfaces/objects/HypernetLink";
+export * from "@interfaces/objects/HypernetLedger";
 export * from "@interfaces/objects/LinkFinalResult";
 export * from "@interfaces/objects/LinkMetadata";
 export * from "@interfaces/objects/Message";
