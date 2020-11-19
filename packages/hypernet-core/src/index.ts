@@ -5,10 +5,7 @@ export {
   HypernetLedger,
   EthereumAddress,
   PublicKey,
-  BigNumber,
-  EstablishLinkRequest,
-  EstablishLinkRequestWithApproval,
+  BigNumber
 } from "./interfaces/objects";
-export { ELinkStatus, EMessageType, ELinkRole } from "./interfaces/types";
 import "./typings/3box";
 import "./typings/detect-provider";

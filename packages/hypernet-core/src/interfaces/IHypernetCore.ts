@@ -3,8 +3,6 @@ import {
   BigNumber,
   EthereumAddress,
   PublicKey,
-  EstablishLinkRequestWithApproval,
-  EstablishLinkRequest,
   ControlClaim,
   PublicIdentifier,
   Balances
@@ -149,12 +147,6 @@ export interface IHypernetCore {
   /**
    * Observables for seeing what's going on
    */
-  onLinkUpdated: Subject<HypernetLedger>;
-  onLinkRequestReceived: Subject<EstablishLinkRequestWithApproval>;
-  onLinkRejected: Subject<EstablishLinkRequest>;
   onControlClaimed: Subject<ControlClaim>;
   onControlYielded: Subject<ControlClaim>;
-
-  // DEBUG ONLY
-  clearLinks(): Promise<void>;
 }

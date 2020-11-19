@@ -1,7 +1,6 @@
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { ControlClaim } from "@interfaces/objects";
 import { IControlService } from "@interfaces/business/IControlService";
-import { IMessagingRepository } from "@interfaces/data";
 
 export class ControlService implements IControlService {
   protected claimPeriod = 1000 * 60 * 5; // 5 minutes
@@ -9,7 +8,7 @@ export class ControlService implements IControlService {
   protected lastControlClaim: ControlClaim | null;
   protected checkControlInterval: NodeJS.Timeout | null;
 
-  constructor(protected messagingRepo: IMessagingRepository, protected contextProvider: IContextProvider) {
+  constructor(protected contextProvider: IContextProvider) {
     this.timeout = null;
     this.lastControlClaim = null;
     this.checkControlInterval = null;
@@ -27,7 +26,7 @@ export class ControlService implements IControlService {
     const controlClaim = new ControlClaim(context.account, new Date().getTime());
 
     // Send the claim out to the other corese
-    await this.messagingRepo.sendControlClaim(controlClaim);
+    //await this.messagingRepo.sendControlClaim(controlClaim);
 
     // Update the context
     context.inControl = true;
@@ -35,7 +34,7 @@ export class ControlService implements IControlService {
 
     // We will continue to send control claims every 5 minutes
     this.timeout = setInterval(() => {
-      this.messagingRepo.sendControlClaim(controlClaim);
+      //this.messagingRepo.sendControlClaim(controlClaim);
     }, this.claimPeriod);
 
     // Notify the world.

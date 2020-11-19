@@ -1,18 +1,13 @@
-import { ILinkService } from "@interfaces/business/ILinkService";
 import { IMessagingListener } from "@interfaces/api/IMessagingListener";
-import { EstablishLinkRequest, MessagePayload, ControlClaim } from "@interfaces/objects";
 import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
 import { BoxThreadPost } from "3box";
 import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
-import { IMessageService } from "@interfaces/business/IMessageService";
 import { plainToClass } from "class-transformer";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { IControlService } from "@interfaces/business/IControlService";
 
 export class ThreeBoxMessagingListener implements IMessagingListener {
   constructor(
-    protected linkService: ILinkService,
-    protected messageService: IMessageService,
     protected controlService: IControlService,
     protected boxUtils: IThreeBoxUtils,
     protected configProvider: IConfigProvider,
