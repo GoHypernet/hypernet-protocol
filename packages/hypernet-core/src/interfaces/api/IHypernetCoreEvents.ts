@@ -1,4 +1,4 @@
-import { HypernetLedger, Deposit, Payment, Stake, Withdrawal } from "@interfaces/objects";
+import { HypernetLedger, Payment } from "@interfaces/objects";
 import { Observable } from "rxjs";
 
 export interface IHypernetworkCoreEvents {

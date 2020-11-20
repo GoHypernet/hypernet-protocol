@@ -2,9 +2,6 @@ import { getPublicKeyFromPrivateKey } from "@connext/vector-utils/dist/crypto";
 import { getPublicIdentifierFromPublicKey } from "@connext/vector-utils/dist/identifiers";
 import {
   HypernetContext,
-  HypernetLedger,
-  EstablishLinkRequest,
-  EstablishLinkRequestWithApproval,
   ControlClaim,
   InitializedHypernetContext,
 } from "@interfaces/objects";
@@ -14,9 +11,6 @@ import { Subject } from "rxjs";
 export class ContextProvider implements IContextProvider {
   protected context: HypernetContext;
   constructor(
-    onLinkUpdated: Subject<HypernetLedger>,
-    onLinkRequestReceived: Subject<EstablishLinkRequestWithApproval>,
-    onLinkRejected: Subject<EstablishLinkRequest>,
     onControlClaimed: Subject<ControlClaim>,
     onControlYielded: Subject<ControlClaim>,
   ) {
@@ -25,9 +19,6 @@ export class ContextProvider implements IContextProvider {
       null,
       null,
       false,
-      onLinkUpdated,
-      onLinkRequestReceived,
-      onLinkRejected,
       onControlClaimed,
       onControlYielded,
     );
@@ -46,9 +37,6 @@ export class ContextProvider implements IContextProvider {
       this.context.privateKey,
       this.context.publicIdentifier,
       this.context.inControl,
-      this.context.onLinkUpdated,
-      this.context.onLinkRequestReceived,
-      this.context.onLinkRejected,
       this.context.onControlClaimed,
       this.context.onControlYielded);
   }
