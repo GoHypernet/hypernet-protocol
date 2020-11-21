@@ -1,4 +1,5 @@
-import { FullChannelState } from "@connext/vector-types";
+import { FullChannelState, FullTransferState } from "@connext/vector-types";
+import { ETransferType } from "@interfaces/types";
 import { IBrowserNodeProvider, IContextProvider, IVectorUtils, IConfigProvider } from "@interfaces/utilities";
 
 export class VectorUtils implements IVectorUtils {
@@ -100,5 +101,11 @@ export class VectorUtils implements IVectorUtils {
      */
     public async createInsurancePayment() {
         throw new Error('Method not yet implemented.')
+    }
+
+    public getTransferType(transfer: FullTransferState): ETransferType {
+        // Have to jump through some hoops here
+        // TODO: Fix this.
+        return ETransferType.Offer;
     }
 }

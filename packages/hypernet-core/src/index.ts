@@ -2,7 +2,7 @@ import "reflect-metadata";
 export { IHypernetCore } from "./interfaces/IHypernetCore";
 export { HypernetCore } from "./implementations/HypernetCore";
 export {
-  HypernetLedger,
+  HypernetLink,
   EthereumAddress,
   PublicKey,
   BigNumber

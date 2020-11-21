@@ -28,7 +28,8 @@ export class ConfigProvider implements IConfigProvider {
         "", // routerPublicIdentifier
         1337, // Chain ID
         "localhost:8008", // Router address
-        constants.AddressZero // Hypertoken address
+        constants.AddressZero, // Hypertoken address,
+        "Hypernet", // Hypernet Protocol Domain for Transfers
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);

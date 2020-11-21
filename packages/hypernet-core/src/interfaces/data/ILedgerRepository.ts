@@ -1,4 +1,4 @@
-import { HypernetLedger } from "@interfaces/objects";
+import { HypernetLink } from "@interfaces/objects";
 
 
 /**
@@ -9,11 +9,11 @@ export interface ILedgerRepository {
     /**
      * Get all Hypernet Links for this client
      */
-    getHypernetLedgers(): Promise<HypernetLedger[]>;
+    getHypernetLinks(): Promise<HypernetLink[]>;
 
     /**
      * Given a linkId, return the associated Hypernet Link.
      * @param linkId The ID of the link to retrieve
      */
-    getHypernetLedger(linkId: string): Promise<HypernetLedger>
+    getHypernetLink(linkId: string): Promise<HypernetLink>
 }

@@ -1,5 +1,5 @@
 import {
-  HypernetLedger,
+  HypernetLink,
   BigNumber,
   EthereumAddress,
   PublicKey,
@@ -71,18 +71,18 @@ export interface IHypernetCore {
   /**
    * Returns all Hypernet Ledger for the user
    */
-  getLedgers(): Promise<HypernetLedger[]>;
+  getLedgers(): Promise<HypernetLink[]>;
 
   /**
    * Returns all active Hypernet Ledgers for the user
    * An active link contains an incomplete/non-finalized transfer.
    */
-  getActiveLedgers(): Promise<HypernetLedger[]>;
+  getActiveLedgers(): Promise<HypernetLink[]>;
 
   /**
    * Returns the Hypernet Ledger for the user with the specified counterparty
    */
-  getLedgerByCounterparty(counterPartyAccount: PublicIdentifier): Promise<HypernetLedger>
+  getLedgerByCounterparty(counterPartyAccount: PublicIdentifier): Promise<HypernetLink>
   
   /**
    * sendFunds can only be called by the Consumer. It sends a one-time payment to the provider.
@@ -101,7 +101,7 @@ export interface IHypernetCore {
     expirationDate: moment.Moment, 
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey): Promise<HypernetLedger>;
+    disputeMediator: PublicKey): Promise<HypernetLink>;
 
   /** 
    * authorizeFunds() sets up a pull payment.
@@ -112,13 +112,13 @@ export interface IHypernetCore {
     expirationDate: moment.Moment,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey): Promise<HypernetLedger>
+    disputeMediator: PublicKey): Promise<HypernetLink>
     
   /**
    * For a specified payment, puts up stake to accept the payment
    * @param paymentId the payment ID to accept funds
    */
-  acceptFunds(paymentId: string): Promise<HypernetLedger>;
+  acceptFunds(paymentId: string): Promise<HypernetLink>;
 
   /**
    * Pulls an incremental amount from an authorized payment
@@ -126,7 +126,7 @@ export interface IHypernetCore {
    * @param amount: The amount to pull. The token type has already been baked in.
    */
   pullFunds(paymentId: string,
-    amount: BigNumber): Promise<HypernetLedger>;
+    amount: BigNumber): Promise<HypernetLink>;
 
   /**
    * Finalized an authorized payment with the final payment amount.
@@ -134,7 +134,7 @@ export interface IHypernetCore {
    * @param finalAmount the total payment amount to pull
    */
   finalizePullPayment(paymentId: string,
-    finalAmount: BigNumber): Promise<HypernetLedger>;
+    finalAmount: BigNumber): Promise<HypernetLink>;
 
   /**
    * Called by the consumer to attempt to claim some or all of the stake within a particular insurance payment.
@@ -142,7 +142,7 @@ export interface IHypernetCore {
    * @metadata the mediator-specific metadata to provide
    */
   initiateDispute(paymentId: string,
-    metadata: string): Promise<HypernetLedger>;
+    metadata: string): Promise<HypernetLink>;
 
   /**
    * Observables for seeing what's going on
