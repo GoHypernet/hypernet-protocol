@@ -1,13 +1,14 @@
-import { ILedgerRepository } from "@interfaces/data";
+import { ILinkRepository } from "@interfaces/data";
 import { BigNumber, HypernetConfig, HypernetContext, HypernetLink, IHypernetTransferMetadata, InitializedHypernetContext, Payment, PublicIdentifier, PullAmount, PullPayment, PushPayment } from "@interfaces/objects";
 import { IBrowserNodeProvider, IConfigProvider, IContextProvider, IVectorUtils } from "@interfaces/utilities";
 import { v4 as uuidv4 } from "uuid";
 import { createlockHash, getRandomBytes32, getSignerAddressFromPublicIdentifier } from "@connext/vector-utils";
 import { FullTransferState, NodeResponses } from "@connext/vector-types";
-import { EPaymentDirection, EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
+import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
 import moment from "moment";
+import { BrowserNode } from "@connext/vector-browser-node";
 
-export class VectorLedgerRepository implements ILedgerRepository {
+export class VectorLinkRepository implements ILinkRepository {
     constructor(protected browserNodeProvider: IBrowserNodeProvider,
         protected configProvider: IConfigProvider,
         protected contextProvider: IContextProvider,
@@ -18,13 +19,13 @@ export class VectorLedgerRepository implements ILedgerRepository {
         const channelAddressPromise = await this.vectorUtils.getRouterChannelAddress();
         const configPromise = await this.configProvider.getConfig();
         const contextPromise = await this.contextProvider.getInitializedContext();
-        
+
         let [browserNode,
             channelAddress,
             config,
-            context] = await Promise.all([browserNodePromise, 
-                channelAddressPromise, 
-                configPromise, 
+            context] = await Promise.all([browserNodePromise,
+                channelAddressPromise,
+                configPromise,
                 contextPromise]);
 
         const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress: channelAddress });
@@ -36,7 +37,7 @@ export class VectorLedgerRepository implements ILedgerRepository {
 
         const activeTransfers = activeTransfersRes.getValue();
 
-        return this.transfersToHypernetLinks(activeTransfers, config, context);
+        return await this.transfersToHypernetLinks(activeTransfers, config, context, browserNode);
     }
 
     /**
@@ -48,13 +49,13 @@ export class VectorLedgerRepository implements ILedgerRepository {
         const channelAddressPromise = await this.vectorUtils.getRouterChannelAddress();
         const configPromise = await this.configProvider.getConfig();
         const contextPromise = await this.contextProvider.getInitializedContext();
-        
+
         let [browserNode,
             channelAddress,
             config,
-            context] = await Promise.all([browserNodePromise, 
-                channelAddressPromise, 
-                configPromise, 
+            context] = await Promise.all([browserNodePromise,
+                channelAddressPromise,
+                configPromise,
                 contextPromise]);
 
         const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress: channelAddress });
@@ -69,7 +70,7 @@ export class VectorLedgerRepository implements ILedgerRepository {
         });
 
         // Because of the filter above, this should only produce a single link
-        const links = this.transfersToHypernetLinks(activeTransfers, config, context);
+        const links = await this.transfersToHypernetLinks(activeTransfers, config, context, browserNode);
 
         if (links.length == 0) {
             return new HypernetLink(counterpartyId, [], [], [], [], []);
@@ -142,9 +143,10 @@ export class VectorLedgerRepository implements ILedgerRepository {
     //     return link;
     // }
 
-    protected transfersToHypernetLinks(activeTransfers: FullTransferState[], 
-        config: HypernetConfig, 
-        context: InitializedHypernetContext): HypernetLink[] {
+    protected async transfersToHypernetLinks(activeTransfers: FullTransferState[],
+        config: HypernetConfig,
+        context: InitializedHypernetContext,
+        browserNode: BrowserNode): Promise<HypernetLink[]> {
         // First, we are going to sort the transfers into buckets based on their payment_id
         let transfersByPaymentId = new Map<string, FullTransferState[]>();
         for (let transfer of activeTransfers) {
@@ -162,13 +164,21 @@ export class VectorLedgerRepository implements ILedgerRepository {
         let linksByCounterpartyId = new Map<PublicIdentifier, HypernetLink>();
 
         // Now we have the transfers sorted by their payment ID.
-        // Loop over them and convert them to proper payments
-        transfersByPaymentId.forEach((transferArray, paymentId) => {
-            const payment = this.transfersToPayment(paymentId, 
-                transferArray, 
-                config, 
-                context);
+        // Loop over them and convert them to proper payments.
+        // This is all async, so we can do the whole thing in parallel.
+        const paymentPromises = new Array<Promise<Payment>>();
+        transfersByPaymentId.forEach(async (transferArray, paymentId) => {
+            const payment = this.transfersToPayment(paymentId,
+                transferArray,
+                config,
+                context,
+                browserNode);
 
+            paymentPromises.push(payment);
+        });
+        const payments = await Promise.all(paymentPromises);
+
+        for (const payment of payments) {
             // Now that it's converted, we can stick it in the hypernet link
             let counterpartyId = payment.to == context.publicIdentifier ? payment.from : payment.to;
             let link = linksByCounterpartyId.get(counterpartyId);
@@ -189,16 +199,17 @@ export class VectorLedgerRepository implements ILedgerRepository {
             else {
                 throw new Error("Unknown payment type!");
             }
-        });
+        }
 
         // Convert to an array for return
         return Array.from(linksByCounterpartyId.values());
     }
 
-    protected transfersToPayment(fullPaymentId: string, 
-        transfers: FullTransferState[], 
-        config: HypernetConfig, 
-        context: InitializedHypernetContext): Payment {
+    protected async transfersToPayment(fullPaymentId: string,
+        transfers: FullTransferState[],
+        config: HypernetConfig,
+        context: InitializedHypernetContext,
+        browserNode: BrowserNode): Promise<Payment> {
 
         //const signerAddress = getSignerAddressFromPublicIdentifier(context.publicIdentifier);
 
@@ -211,13 +222,15 @@ export class VectorLedgerRepository implements ILedgerRepository {
             throw new Error(`Missing id component of paymentId`);
         }
 
-        const sortedTransfers = this.sortTransfers(transfers);
+        const sortedTransfers = await this.sortTransfers(fullPaymentId, transfers, browserNode);
+
 
         // Determine the state of the payment. All transfers we've been given are
         // "Active", therefore, not resolved. So we don't need to figure out if
         // the transfer is resolved, we know it's not.
         // Given that info, the payment state is never going to be Finalized,
         // because those transfers disappear.
+
         let paymentState = EPaymentState.Proposed;
         if (sortedTransfers.insuranceTransfer != null &&
             sortedTransfers.parameterizedTransfer == null) {
@@ -232,27 +245,27 @@ export class VectorLedgerRepository implements ILedgerRepository {
 
 
         if (paymentType == EPaymentType.Pull) {
-            return this.transfersToPullPayment(id, 
+            return this.transfersToPullPayment(id,
                 sortedTransfers.metadata.to,
-                sortedTransfers.metadata.from, 
-                paymentState, 
-                sortedTransfers, 
+                sortedTransfers.metadata.from,
+                paymentState,
+                sortedTransfers,
                 sortedTransfers.offerTransfer.meta);
         }
         else if (paymentType == EPaymentType.Push) {
-            return this.transfersToPushPayment(id, 
+            return this.transfersToPushPayment(id,
                 sortedTransfers.metadata.to,
-                sortedTransfers.metadata.from, 
-                paymentState, 
-                sortedTransfers, 
+                sortedTransfers.metadata.from,
+                paymentState,
+                sortedTransfers,
                 sortedTransfers.offerTransfer.meta);
         } else {
             throw new Error(`Unknown`)
         }
     }
 
-    protected transfersToPushPayment(id: string, 
-        to: PublicIdentifier, 
+    protected transfersToPushPayment(id: string,
+        to: PublicIdentifier,
         from: PublicIdentifier,
         state: EPaymentState,
         sortedTransfers: SortedTransfers,
@@ -270,7 +283,7 @@ export class VectorLedgerRepository implements ILedgerRepository {
         const amountStaked = sortedTransfers.insuranceTransfer != null ? sortedTransfers.insuranceTransfer.balance.amount[0] : 0;
 
         return new PushPayment(id,
-            to, 
+            to,
             from,
             state,
             sortedTransfers.offerTransfer.assetId,
@@ -286,7 +299,7 @@ export class VectorLedgerRepository implements ILedgerRepository {
     }
 
     protected transfersToPullPayment(id: string,
-        to: PublicIdentifier, 
+        to: PublicIdentifier,
         from: PublicIdentifier,
         state: EPaymentState,
         sortedTransfers: SortedTransfers,
@@ -326,7 +339,16 @@ export class VectorLedgerRepository implements ILedgerRepository {
         return `${config.hypernetProtocolDomain}:${paymentType}:${uuidv4()}`;
     }
 
-    protected sortTransfers(transfers: FullTransferState[]): SortedTransfers {
+    protected async sortTransfers(paymentId: string,
+        transfers: FullTransferState[],
+        browserNode: BrowserNode): Promise<SortedTransfers> {
+
+        // We need to do a lookup for non-active transfers for the payment ID.
+        // TODO
+        // let inactiveTransfers = await browserNode.getTransfers((transfer) => {return transfer.meta.paymentId == fullPaymentId;});
+        // transfers.concat(inactiveTransfers);
+
+
         const offerTransfers = transfers.filter((val) => {
             return this.vectorUtils.getTransferType(val) == ETransferType.Offer;
         });

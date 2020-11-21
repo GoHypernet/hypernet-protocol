@@ -13,8 +13,8 @@ import {
 import { EthersBlockchainProvider } from "@implementations/utilities/BlockchainProvider";
 import { ConfigProvider } from "@implementations/utilities/ConfigProvider";
 import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
-import { ILedgerRepository } from "@interfaces/data";
-import { VectorLedgerRepository } from "@implementations/data/VectorLedgerRepository";
+import { ILinkRepository } from "@interfaces/data";
+import { VectorLinkRepository } from "@implementations/data/VectorLinkRepository";
 import { ContextProvider } from "@implementations/utilities/ContextProvider";
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
 import { AccountsRepository } from "@implementations/data/AccountsRepository";
@@ -38,7 +38,7 @@ export class HypernetCore implements IHypernetCore {
   protected vectorUtils: IVectorUtils;
 
   protected accountRepository: IAccountsRepository;
-  protected ledgerRepository: ILedgerRepository;
+  protected ledgerRepository: ILinkRepository;
 
   protected accountService: IAccountService;
   protected paymentService: IPaymentService;
@@ -76,7 +76,7 @@ export class HypernetCore implements IHypernetCore {
     this.vectorUtils = new VectorUtils(this.configProvider, this.contextProvider, this.browserNodeProvider);
 
     this.accountRepository = new AccountsRepository(this.blockchainProvider, this.vectorUtils, this.browserNodeProvider);
-    this.ledgerRepository = new VectorLedgerRepository(this.browserNodeProvider,
+    this.ledgerRepository = new VectorLinkRepository(this.browserNodeProvider,
       this.configProvider,
       this.contextProvider,
       this.vectorUtils);

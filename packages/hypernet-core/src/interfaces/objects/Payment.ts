@@ -1,6 +1,6 @@
 import * as moment from "moment";
 import { BigNumber, EthereumAddress } from "@interfaces/objects";
-import { EPaymentState, EPaymentDirection } from "@interfaces/types";
+import { EPaymentState } from "@interfaces/types";
 import { PublicIdentifier } from "@connext/vector-types";
 
 export class PullAmount {

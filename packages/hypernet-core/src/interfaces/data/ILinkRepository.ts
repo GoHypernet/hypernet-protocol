@@ -4,7 +4,7 @@ import { HypernetLink } from "@interfaces/objects";
 /**
  * @todo What is the main role/purpose of this class? Description here.
  */
-export interface ILedgerRepository {
+export interface ILinkRepository {
 
     /**
      * Get all Hypernet Links for this client
