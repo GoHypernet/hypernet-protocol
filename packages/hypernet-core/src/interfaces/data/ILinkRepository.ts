@@ -31,4 +31,8 @@ export interface ILinkRepository {
         disputeMediator: PublicKey): Promise<Payment>;
 
     getPaymentsById(paymentIds: string[]): Promise<Map<string, Payment>>;
+
+    provideAssets(paymentIds: string[]): Promise<Map<string, Payment>> 
+    provideStakes(paymentIds: string[]): Promise<Map<string, Payment>>
+    finalizePayments(paymentIds: string[]): Promise<Map<string, Payment>>
 }

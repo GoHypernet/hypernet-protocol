@@ -15,7 +15,7 @@ export class HypernetContext {
     public onPushPaymentProposed: Subject<PushPayment>,
     public onPullPaymentProposed: Subject<PullPayment>,
     public onPushPaymentReceived: Subject<PushPayment>,
-    public onPullPaymentReceived: Subject<PullPayment>,
+    public onPullPaymentApproved: Subject<PullPayment>,
   ) {}
 }
 
@@ -30,6 +30,6 @@ export class InitializedHypernetContext {
     public onPushPaymentProposed: Subject<PushPayment>,
     public onPullPaymentProposed: Subject<PullPayment>,
     public onPushPaymentReceived: Subject<PushPayment>,
-    public onPullPaymentReceived: Subject<PullPayment>,
+    public onPullPaymentApproved: Subject<PullPayment>,
   ) {}
 }

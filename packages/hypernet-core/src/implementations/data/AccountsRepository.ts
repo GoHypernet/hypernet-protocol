@@ -38,6 +38,20 @@ export class AccountsRepository implements IAccountsRepository {
     return new Balances(assetBalances);
   }
 
+  public async getBalanceByAsset(assetAddress: EthereumAddress): Promise<AssetBalance> {
+    const balances = await this.getBalances();
+
+    for (const assetBalance of balances.assets) {
+      if (assetBalance.assetAddresss == assetAddress) {
+        return assetBalance;
+      }
+    }
+    return new AssetBalance(assetAddress,
+      BigNumber.from(0),
+      BigNumber.from(0),
+      BigNumber.from(0));
+  }
+
   public async depositFunds(assetAddress: EthereumAddress, amount: BigNumber): Promise<void> {
     const signer = await this.blockchainProvider.getSigner();
     const channelAddress = await this.vectorUtils.getRouterChannelAddress();

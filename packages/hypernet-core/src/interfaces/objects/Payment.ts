@@ -1,5 +1,5 @@
 import * as moment from "moment";
-import { BigNumber, EthereumAddress } from "@interfaces/objects";
+import { BigNumber, EthereumAddress, PublicKey } from "@interfaces/objects";
 import { EPaymentState } from "@interfaces/types";
 import { PublicIdentifier } from "@connext/vector-types";
 
@@ -22,6 +22,7 @@ export abstract class Payment {
     public createdTimestamp: moment.Moment,
     public updatedTimestamp: moment.Moment,
     public collateralRecovered: BigNumber,
+    public disputeMediator: PublicKey
   ) {}
 }
 
@@ -39,10 +40,13 @@ export class PushPayment extends Payment{
     createdTimestamp: moment.Moment,
     updatedTimestamp: moment.Moment,
     collateralRecovered: BigNumber,
+    disputeMediator: PublicKey,
     public paymentAmount: BigNumber, 
   ) {
-    super(id, to, from, state, paymentToken, requiredStake, amountStaked, expirationDate, finalized, 
-      createdTimestamp, updatedTimestamp, collateralRecovered)
+    super(id, to, from, state, paymentToken, requiredStake, 
+      amountStaked, expirationDate, finalized, 
+      createdTimestamp, updatedTimestamp, 
+      collateralRecovered, disputeMediator)
   }
 }
 
@@ -60,11 +64,14 @@ export class PullPayment extends Payment{
     createdTimestamp: moment.Moment,
     updatedTimestamp: moment.Moment,
     collateralRecovered: BigNumber,
+    disputeMediator: PublicKey,
     public authorizedAmount: BigNumber,
     public transferedAmount: BigNumber,
     public ledger: PullAmount[],
   ) {
-    super(id, to, from, state, paymentToken, requiredStake, amountStaked, expirationDate, finalized, 
-      createdTimestamp, updatedTimestamp, collateralRecovered)
+    super(id, to, from, state, paymentToken, requiredStake, 
+      amountStaked, expirationDate, finalized, 
+      createdTimestamp, updatedTimestamp, 
+      collateralRecovered, disputeMediator)
   }
 }

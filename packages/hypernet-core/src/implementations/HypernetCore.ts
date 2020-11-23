@@ -20,14 +20,14 @@ import { VectorLinkRepository } from "@implementations/data/VectorLinkRepository
 import { ContextProvider } from "@implementations/utilities/ContextProvider";
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
 import { AccountsRepository } from "@implementations/data/AccountsRepository";
-import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { Subject } from "rxjs";
 import { IBrowserNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider";
 import { BrowserNodeProvider } from "@implementations/utilities/BrowserNodeProvider";
-import { IVectorUtils, IConfigProvider } from "@interfaces/utilities";
+import { IVectorUtils, IConfigProvider, IContextProvider, IPaymentUtils } from "@interfaces/utilities";
 import { VectorUtils } from "@implementations/utilities/VectorUtils";
 import { IAccountService, ILinkService, IPaymentService } from "@interfaces/business";
 import { AccountService, LinkService, PaymentService } from "@implementations/business";
+import { PaymentUtils } from "./utilities";
 
 export class HypernetCore implements IHypernetCore {
   public onControlClaimed: Subject<ControlClaim>;
@@ -35,13 +35,14 @@ export class HypernetCore implements IHypernetCore {
   public onPushPaymentProposed: Subject<PushPayment>;
   public onPullPaymentProposed: Subject<PullPayment>;
   public onPushPaymentReceived: Subject<PushPayment>;
-  public onPullPaymentReceived: Subject<PullPayment>;
+  public onPullPaymentApproved: Subject<PullPayment>;
 
   protected blockchainProvider: IBlockchainProvider;
   protected configProvider: IConfigProvider;
   protected contextProvider: IContextProvider;
   protected browserNodeProvider: IBrowserNodeProvider;
   protected vectorUtils: IVectorUtils;
+  protected paymentUtils: IPaymentUtils;
 
   protected accountRepository: IAccountsRepository;
   protected linkRepository: ILinkRepository;
@@ -62,7 +63,7 @@ export class HypernetCore implements IHypernetCore {
     this.onPushPaymentProposed = new Subject<PushPayment>();
     this.onPushPaymentReceived = new Subject<PushPayment>();
     this.onPullPaymentProposed = new Subject<PullPayment>();
-    this.onPullPaymentReceived = new Subject<PullPayment>();
+    this.onPullPaymentApproved = new Subject<PullPayment>();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -79,13 +80,15 @@ export class HypernetCore implements IHypernetCore {
     this.blockchainProvider = new EthersBlockchainProvider();
     this.configProvider = new ConfigProvider(config);
 
+    this.paymentUtils = new PaymentUtils(this.configProvider);
+
     this.contextProvider = new ContextProvider(
       this.onControlClaimed,
       this.onControlYielded,
       this.onPushPaymentProposed,
       this.onPullPaymentProposed,
       this.onPushPaymentReceived,
-      this.onPullPaymentReceived
+      this.onPullPaymentApproved
     );
 
     this.browserNodeProvider = new BrowserNodeProvider(this.configProvider, this.contextProvider);
@@ -95,9 +98,13 @@ export class HypernetCore implements IHypernetCore {
     this.linkRepository = new VectorLinkRepository(this.browserNodeProvider,
       this.configProvider,
       this.contextProvider,
-      this.vectorUtils);
+      this.vectorUtils,
+      this.paymentUtils);
 
-    this.paymentService = new PaymentService(this.linkRepository, this.contextProvider);
+    this.paymentService = new PaymentService(this.linkRepository, 
+      this.accountRepository, 
+      this.contextProvider,
+      this.configProvider);
     this.accountService = new AccountService(this.accountRepository);
     this.LinkService = new LinkService(this.linkRepository);
   }
@@ -148,7 +155,7 @@ export class HypernetCore implements IHypernetCore {
   }
 
   /**
-   * sendFunds can only be called by the Consumer. It sends a one-time payment to the provider.
+   * sendsFunds sends funds on a provided link.
    * Internally, this is a three-step process. First, the consumer will notify the provider of the
    * proposed terms of the payment (amount, required stake, and payment token). If the provider
    * accepts these terms, they will create an insurance payment for the stake, and then the consumer
@@ -168,7 +175,7 @@ export class HypernetCore implements IHypernetCore {
     disputeMediator: PublicKey): Promise<Payment> {
 
     // Send payment terms to provider & request provider make insurance payment
-    this.paymentService.sendFunds(
+    const payment = await this.paymentService.sendFunds(
       counterPartyAccount,
       amount,
       expirationDate,
@@ -177,7 +184,19 @@ export class HypernetCore implements IHypernetCore {
       disputeMediator
     );
 
-    throw new Error('Method not yet implemented.')
+    return payment;
+  }
+
+  /**
+   * acceptsFunds will accept the terms of a push payment, and puts up
+   * the stake or insurance transfer.
+   * @param paymentId 
+   */
+  public async acceptFunds(paymentIds: string[]): Promise<Payment[]> {
+
+    const payment = this.paymentService.acceptFunds(paymentIds)
+
+    return payment;
   }
 
   public async authorizeFunds(counterPartyAccount: PublicIdentifier,
@@ -185,16 +204,12 @@ export class HypernetCore implements IHypernetCore {
     expirationDate: moment.Moment,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey): Promise<HypernetLink> {
-    throw new Error('Method not yet implemented.')
-  }
-
-  public async acceptFunds(paymentId: string): Promise<HypernetLink> {
+    disputeMediator: PublicKey): Promise<Payment> {
     throw new Error('Method not yet implemented.')
   }
 
   public async pullFunds(paymentId: string,
-    amount: BigNumber): Promise<HypernetLink> {
+    amount: BigNumber): Promise<Payment> {
     throw new Error('Method not yet implemented.')
   }
 

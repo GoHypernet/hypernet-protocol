@@ -116,13 +116,13 @@ export interface IHypernetCore {
     expirationDate: moment.Moment,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey): Promise<HypernetLink>
+    disputeMediator: PublicKey): Promise<Payment>
     
   /**
    * For a specified payment, puts up stake to accept the payment
    * @param paymentId the payment ID to accept funds
    */
-  acceptFunds(paymentId: string): Promise<HypernetLink>;
+  acceptFunds(paymentIds: string[]): Promise<Payment[]>;
 
   /**
    * Pulls an incremental amount from an authorized payment
@@ -130,7 +130,7 @@ export interface IHypernetCore {
    * @param amount: The amount to pull. The token type has already been baked in.
    */
   pullFunds(paymentId: string,
-    amount: BigNumber): Promise<HypernetLink>;
+    amount: BigNumber): Promise<Payment>;
 
   /**
    * Finalized an authorized payment with the final payment amount.
@@ -156,5 +156,5 @@ export interface IHypernetCore {
   onPushPaymentProposed: Subject<PushPayment>;
   onPullPaymentProposed: Subject<PullPayment>;
   onPushPaymentReceived: Subject<PushPayment>;
-  onPullPaymentReceived: Subject<PullPayment>;
+  onPullPaymentApproved: Subject<PullPayment>;
 }

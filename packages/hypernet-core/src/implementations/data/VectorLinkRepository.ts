@@ -1,7 +1,6 @@
 import { ILinkRepository } from "@interfaces/data";
 import { BigNumber, HypernetConfig, HypernetContext, HypernetLink, IHypernetTransferMetadata, InitializedHypernetContext, Payment, PublicIdentifier, PullAmount, PullPayment, PushPayment } from "@interfaces/objects";
-import { IBrowserNodeProvider, IConfigProvider, IContextProvider, IVectorUtils } from "@interfaces/utilities";
-import { v4 as uuidv4 } from "uuid";
+import { IBrowserNodeProvider, IConfigProvider, IContextProvider, IPaymentUtils, IVectorUtils } from "@interfaces/utilities";
 import { FullTransferState, NodeResponses } from "@connext/vector-types";
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
 import moment from "moment";
@@ -12,7 +11,10 @@ export class VectorLinkRepository implements ILinkRepository {
     constructor(protected browserNodeProvider: IBrowserNodeProvider,
         protected configProvider: IConfigProvider,
         protected contextProvider: IContextProvider,
-        protected vectorUtils: IVectorUtils) {}
+        protected vectorUtils: IVectorUtils,
+        protected paymentUtils: IPaymentUtils) {}
+
+    
 
     public async getPaymentsById(paymentIds: string[]): Promise<Map<string, Payment>> {
         const browserNodePromise = await this.browserNodeProvider.getBrowserNode();
@@ -47,6 +49,18 @@ export class VectorLinkRepository implements ILinkRepository {
         }, new Map<string, Payment>());
     }
 
+    public async provideAssets(paymentIds: string[]): Promise<Map<string, Payment>> {
+        throw new Error('Method not yet implemented')
+    }
+
+    public async provideStakes(paymentIds: string[]): Promise<Map<string, Payment>> {
+        throw new Error('Method not yet implemented')
+    }
+
+    public async finalizePayments(paymentIds: string[]): Promise<Map<string, Payment>> {
+        throw new Error('Method not yet implemented')
+    }
+
     public async createPushPayment(
         counterPartyAccount: PublicIdentifier,
         amount: BigNumber,
@@ -66,7 +80,7 @@ export class VectorLinkRepository implements ILinkRepository {
                 contextPromise]);
 
         // Create a null transfer, with the terms of the payment in the metadata.
-        const paymentId = await this.createPaymentId(EPaymentType.Push);    
+        const paymentId = await this.paymentUtils.createPaymentId(EPaymentType.Push);    
         const transfer = await this.vectorUtils.createNullTransfer(counterPartyAccount, {
                 paymentId: paymentId,
                 creationDate: moment().unix(),
@@ -395,7 +409,8 @@ export class VectorLinkRepository implements ILinkRepository {
             moment(),
             moment(),
             BigNumber.from(0),
-            BigNumber.from(metadata.paymentAmount)
+            metadata.disputeMediator,
+            BigNumber.from(metadata.paymentAmount),
         );
     }
 
@@ -429,16 +444,11 @@ export class VectorLinkRepository implements ILinkRepository {
             moment.unix(metadata.creationDate),
             moment(),
             BigNumber.from(0),
+            metadata.disputeMediator,
             BigNumber.from(metadata.paymentAmount),
             BigNumber.from(0),
             new Array<PullAmount>()
         );
-    }
-
-    protected async createPaymentId(paymentType: EPaymentType): Promise<string> {
-        const config = await this.configProvider.getConfig();
-
-        return `${config.hypernetProtocolDomain}:${paymentType}:${uuidv4()}`;
     }
 
     protected async sortTransfers(paymentId: string,
@@ -449,7 +459,6 @@ export class VectorLinkRepository implements ILinkRepository {
         // TODO
         // let inactiveTransfers = await browserNode.getTransfers((transfer) => {return transfer.meta.paymentId == fullPaymentId;});
         // transfers.concat(inactiveTransfers);
-
 
         const offerTransfers = transfers.filter((val) => {
             return this.vectorUtils.getTransferType(val) == ETransferType.Offer;
