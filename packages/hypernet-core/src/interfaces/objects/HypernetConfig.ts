@@ -16,5 +16,6 @@ export class HypernetConfig {
     public chainId: number,
     public routerUrl: string,
     public hypertokenAddress: EthereumAddress,
+    public hypernetProtocolDomain: string,
   ) { }
 }

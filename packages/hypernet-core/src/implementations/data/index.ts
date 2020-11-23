@@ -1,2 +1,2 @@
-export * from "./VectorLedgerRepository";
+export * from "./VectorLinkRepository";
 export * from "./AccountsRepository";

@@ -1,2 +1,3 @@
-export * from "@interfaces/types/EPaymentDirection";
-export * from "@interfaces/types/EPaymentState";
+export * from "./EPaymentState";
+export * from "./EPaymentType";
+export * from "./ETransferType";

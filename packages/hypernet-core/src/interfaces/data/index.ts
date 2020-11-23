@@ -1,2 +1,2 @@
 export * from "./IAccountsRepository";
-export * from "./ILedgerRepository";
+export * from "./ILinkRepository";

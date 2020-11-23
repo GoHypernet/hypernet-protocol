@@ -1,6 +1,7 @@
 import * as moment from "moment";
 import { BigNumber, EthereumAddress } from "@interfaces/objects";
-import { EPaymentState, EPaymentDirection } from "@interfaces/types";
+import { EPaymentState } from "@interfaces/types";
+import { PublicIdentifier } from "@connext/vector-types";
 
 export class PullAmount {
   constructor(public amount: BigNumber,
@@ -10,7 +11,8 @@ export class PullAmount {
 export abstract class Payment {
   constructor(
     public id: string,
-    public direction: EPaymentDirection,
+    public to: PublicIdentifier,
+    public from: PublicIdentifier,
     public state: EPaymentState,
     public paymentToken: EthereumAddress,
     public requiredStake: BigNumber,
@@ -26,7 +28,8 @@ export abstract class Payment {
 export class PushPayment extends Payment{
   constructor(
     id: string,
-    direction: EPaymentDirection,
+    to: PublicIdentifier,
+    from: PublicIdentifier,
     state: EPaymentState,
     paymentToken: EthereumAddress,
     requiredStake: BigNumber,
@@ -38,7 +41,7 @@ export class PushPayment extends Payment{
     collateralRecovered: BigNumber,
     public paymentAmount: BigNumber, 
   ) {
-    super(id, direction, state, paymentToken, requiredStake, amountStaked, expirationDate, finalized, 
+    super(id, to, from, state, paymentToken, requiredStake, amountStaked, expirationDate, finalized, 
       createdTimestamp, updatedTimestamp, collateralRecovered)
   }
 }
@@ -46,7 +49,8 @@ export class PushPayment extends Payment{
 export class PullPayment extends Payment{
   constructor(
     id: string,
-    direction: EPaymentDirection,
+    to: PublicIdentifier,
+    from: PublicIdentifier,
     state: EPaymentState,
     paymentToken: EthereumAddress,
     requiredStake: BigNumber,
@@ -60,7 +64,7 @@ export class PullPayment extends Payment{
     public transferedAmount: BigNumber,
     public ledger: PullAmount[],
   ) {
-    super(id, direction, state, paymentToken, requiredStake, amountStaked, expirationDate, finalized, 
+    super(id, to, from, state, paymentToken, requiredStake, amountStaked, expirationDate, finalized, 
       createdTimestamp, updatedTimestamp, collateralRecovered)
   }
 }

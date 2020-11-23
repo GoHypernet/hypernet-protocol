@@ -1,6 +1,6 @@
 import { IHypernetCore } from "@interfaces/IHypernetCore";
 import {
-  HypernetLedger,
+  HypernetLink,
   BigNumber,
   Payment,
   EthereumAddress,
@@ -13,8 +13,8 @@ import {
 import { EthersBlockchainProvider } from "@implementations/utilities/BlockchainProvider";
 import { ConfigProvider } from "@implementations/utilities/ConfigProvider";
 import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
-import { ILedgerRepository } from "@interfaces/data";
-import { VectorLedgerRepository } from "@implementations/data/VectorLedgerRepository";
+import { ILinkRepository } from "@interfaces/data";
+import { VectorLinkRepository } from "@implementations/data/VectorLinkRepository";
 import { ContextProvider } from "@implementations/utilities/ContextProvider";
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
 import { AccountsRepository } from "@implementations/data/AccountsRepository";
@@ -24,8 +24,8 @@ import { IBrowserNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider
 import { BrowserNodeProvider } from "@implementations/utilities/BrowserNodeProvider";
 import { IVectorUtils, IConfigProvider } from "@interfaces/utilities";
 import { VectorUtils } from "@implementations/utilities/VectorUtils";
-import { IAccountService, IPaymentService } from "@interfaces/business";
-import { AccountService, PaymentService } from "@implementations/business";
+import { IAccountService, ILinkService, IPaymentService } from "@interfaces/business";
+import { AccountService, LinkService, PaymentService } from "@implementations/business";
 
 export class HypernetCore implements IHypernetCore {
   public onControlClaimed: Subject<ControlClaim>;
@@ -38,10 +38,11 @@ export class HypernetCore implements IHypernetCore {
   protected vectorUtils: IVectorUtils;
 
   protected accountRepository: IAccountsRepository;
-  protected linkRepository: ILedgerRepository;
+  protected ledgerRepository: ILinkRepository;
 
   protected accountService: IAccountService;
   protected paymentService: IPaymentService;
+  protected LinkService: ILinkService;
 
   protected _initialized: boolean;
   protected _inControl: boolean;
@@ -75,14 +76,14 @@ export class HypernetCore implements IHypernetCore {
     this.vectorUtils = new VectorUtils(this.configProvider, this.contextProvider, this.browserNodeProvider);
 
     this.accountRepository = new AccountsRepository(this.blockchainProvider, this.vectorUtils, this.browserNodeProvider);
-    this.linkRepository = new VectorLedgerRepository(this.browserNodeProvider,
+    this.ledgerRepository = new VectorLinkRepository(this.browserNodeProvider,
       this.configProvider,
       this.contextProvider,
       this.vectorUtils);
 
     this.paymentService = new PaymentService();
-
     this.accountService = new AccountService(this.accountRepository);
+    this.LinkService = new LinkService(this.ledgerRepository);
   }
 
   public initialized(): boolean {
@@ -116,17 +117,17 @@ export class HypernetCore implements IHypernetCore {
     return this.accountService.getBalances();
   }
 
-  public async getLedgers(): Promise<HypernetLedger[]> {
+  public async getLedgers(): Promise<HypernetLink[]> {
+    return this.LinkService.getLedgers();
+  }
+
+
+  public async getActiveLedgers(): Promise<HypernetLink[]> {
     throw new Error('Method not yet implemented.')
   }
 
 
-  public async getActiveLedgers(): Promise<HypernetLedger[]> {
-    throw new Error('Method not yet implemented.')
-  }
-
-
-  public async getLedgerByCounterparty(counterPartyAccount: PublicIdentifier): Promise<HypernetLedger> {
+  public async getLedgerByCounterparty(counterPartyAccount: PublicIdentifier): Promise<HypernetLink> {
     throw new Error('Method not yet implemented.')
   }
 
@@ -136,7 +137,7 @@ export class HypernetCore implements IHypernetCore {
     expirationDate: moment.Moment,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey): Promise<HypernetLedger> {
+    disputeMediator: PublicKey): Promise<HypernetLink> {
     throw new Error('Method not yet implemented.')
   }
 
@@ -146,26 +147,26 @@ export class HypernetCore implements IHypernetCore {
     expirationDate: moment.Moment,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey): Promise<HypernetLedger> {
+    disputeMediator: PublicKey): Promise<HypernetLink> {
     throw new Error('Method not yet implemented.')
   }
 
-  public async acceptFunds(paymentId: string): Promise<HypernetLedger> {
+  public async acceptFunds(paymentId: string): Promise<HypernetLink> {
     throw new Error('Method not yet implemented.')
   }
 
   public async pullFunds(paymentId: string,
-    amount: BigNumber): Promise<HypernetLedger> {
+    amount: BigNumber): Promise<HypernetLink> {
     throw new Error('Method not yet implemented.')
   }
 
   public async finalizePullPayment(paymentId: string,
-    finalAmount: BigNumber): Promise<HypernetLedger> {
+    finalAmount: BigNumber): Promise<HypernetLink> {
     throw new Error('Method not yet implemented.')
   }
 
   public async initiateDispute(paymentId: string,
-    metadata: string): Promise<HypernetLedger> {
+    metadata: string): Promise<HypernetLink> {
     throw new Error('Method not yet implemented.')
   }
 
