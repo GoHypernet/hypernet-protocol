@@ -1,4 +1,5 @@
-import { FullChannelState, FullTransferState } from "@connext/vector-types";
+import { FullChannelState, FullTransferState, PublicIdentifier } from "@connext/vector-types";
+import { IHypernetTransferMetadata } from "@interfaces/objects";
 import { ETransferType } from "@interfaces/types";
 import { IBrowserNodeProvider, IContextProvider, IVectorUtils, IConfigProvider } from "@interfaces/utilities";
 
@@ -11,6 +12,10 @@ export class VectorUtils implements IVectorUtils {
             this.channelAddress = null;
         }
 
+    public async createNullTransfer(counterParty: PublicIdentifier, metadata: IHypernetTransferMetadata): Promise<FullTransferState> {
+        throw new Error('Method not yet implemented')
+    }
+    
     public async getRouterChannelAddress(): Promise<string> {
         // If we already have the address, no need to do the rest
         if (this.channelAddress != null) {
@@ -35,8 +40,6 @@ export class VectorUtils implements IVectorUtils {
         });
 
         const channelsResult = await browserNode.getStateChannels();
-
-
 
         if (channelsByParticipantResult.isError) {
             throw new Error("Cannot get channels!");
@@ -87,20 +90,6 @@ export class VectorUtils implements IVectorUtils {
 
         this.channelAddress = newChannel.channelAddress;
         return this.channelAddress
-    }
-
-    /**
-     * Creates a parameterized payment transfer via the Connext/Vector SDK.
-     */
-    public async createParameterizedPayment() {
-        throw new Error('Method not yet implemented.')
-    }
-
-    /**
-     * Creates an insurance payment tranfser via the Connext/Vector SDK.
-     */
-    public async createInsurancePayment() {
-        throw new Error('Method not yet implemented.')
     }
 
     public getTransferType(transfer: FullTransferState): ETransferType {

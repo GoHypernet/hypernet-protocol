@@ -9,6 +9,8 @@ import {
   HypernetConfig,
   PublicIdentifier,
   Balances,
+  PullPayment,
+  PushPayment,
 } from "@interfaces/objects";
 import { EthersBlockchainProvider } from "@implementations/utilities/BlockchainProvider";
 import { ConfigProvider } from "@implementations/utilities/ConfigProvider";
@@ -30,6 +32,10 @@ import { AccountService, LinkService, PaymentService } from "@implementations/bu
 export class HypernetCore implements IHypernetCore {
   public onControlClaimed: Subject<ControlClaim>;
   public onControlYielded: Subject<ControlClaim>;
+  public onPushPaymentProposed: Subject<PushPayment>;
+  public onPullPaymentProposed: Subject<PullPayment>;
+  public onPushPaymentReceived: Subject<PushPayment>;
+  public onPullPaymentReceived: Subject<PullPayment>;
 
   protected blockchainProvider: IBlockchainProvider;
   protected configProvider: IConfigProvider;
@@ -38,7 +44,7 @@ export class HypernetCore implements IHypernetCore {
   protected vectorUtils: IVectorUtils;
 
   protected accountRepository: IAccountsRepository;
-  protected ledgerRepository: ILinkRepository;
+  protected linkRepository: ILinkRepository;
 
   protected accountService: IAccountService;
   protected paymentService: IPaymentService;
@@ -53,6 +59,10 @@ export class HypernetCore implements IHypernetCore {
 
     this.onControlClaimed = new Subject<ControlClaim>();
     this.onControlYielded = new Subject<ControlClaim>();
+    this.onPushPaymentProposed = new Subject<PushPayment>();
+    this.onPushPaymentReceived = new Subject<PushPayment>();
+    this.onPullPaymentProposed = new Subject<PullPayment>();
+    this.onPullPaymentReceived = new Subject<PullPayment>();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -68,22 +78,28 @@ export class HypernetCore implements IHypernetCore {
 
     this.blockchainProvider = new EthersBlockchainProvider();
     this.configProvider = new ConfigProvider(config);
+
     this.contextProvider = new ContextProvider(
       this.onControlClaimed,
       this.onControlYielded,
+      this.onPushPaymentProposed,
+      this.onPullPaymentProposed,
+      this.onPushPaymentReceived,
+      this.onPullPaymentReceived
     );
+
     this.browserNodeProvider = new BrowserNodeProvider(this.configProvider, this.contextProvider);
     this.vectorUtils = new VectorUtils(this.configProvider, this.contextProvider, this.browserNodeProvider);
 
     this.accountRepository = new AccountsRepository(this.blockchainProvider, this.vectorUtils, this.browserNodeProvider);
-    this.ledgerRepository = new VectorLinkRepository(this.browserNodeProvider,
+    this.linkRepository = new VectorLinkRepository(this.browserNodeProvider,
       this.configProvider,
       this.contextProvider,
       this.vectorUtils);
 
-    this.paymentService = new PaymentService();
+    this.paymentService = new PaymentService(this.linkRepository, this.contextProvider);
     this.accountService = new AccountService(this.accountRepository);
-    this.LinkService = new LinkService(this.ledgerRepository);
+    this.LinkService = new LinkService(this.linkRepository);
   }
 
   public initialized(): boolean {
@@ -131,16 +147,38 @@ export class HypernetCore implements IHypernetCore {
     throw new Error('Method not yet implemented.')
   }
 
-
-  public async sendFunds(counterPartyAccount: PublicIdentifier,
+  /**
+   * sendFunds can only be called by the Consumer. It sends a one-time payment to the provider.
+   * Internally, this is a three-step process. First, the consumer will notify the provider of the
+   * proposed terms of the payment (amount, required stake, and payment token). If the provider
+   * accepts these terms, they will create an insurance payment for the stake, and then the consumer
+   * finishes by creating a parameterized payment for the amount. The provider can immediately finalize
+   * the payment.
+   * @param linkId
+   * @param amount
+   * @param requiredStake the amount of stake that the provider must put up as part of the insurancepayment
+   * @param paymentToken
+   */
+  public async sendFunds(
+    counterPartyAccount: PublicIdentifier,
     amount: BigNumber,
     expirationDate: moment.Moment,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey): Promise<HypernetLink> {
+    disputeMediator: PublicKey): Promise<Payment> {
+
+    // Send payment terms to provider & request provider make insurance payment
+    this.paymentService.sendFunds(
+      counterPartyAccount,
+      amount,
+      expirationDate,
+      requiredStake,
+      paymentToken,
+      disputeMediator
+    );
+
     throw new Error('Method not yet implemented.')
   }
-
 
   public async authorizeFunds(counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumber,

@@ -5,7 +5,10 @@ import {
   PublicKey,
   ControlClaim,
   PublicIdentifier,
-  Balances
+  Balances,
+  Payment,
+  PushPayment,
+  PullPayment
 } from "@interfaces/objects";
 import { Subject } from "rxjs";
 import * as moment from "moment";
@@ -93,15 +96,16 @@ export interface IHypernetCore {
    * the payment.
    * @param linkId
    * @param amount
-   * @param requiredStake the amount of stake that the provider mus
+   * @param requiredStake the amount of stake that the provider must put up as part of the insurancepayment
    * @param paymentToken
    */
-  sendFunds(counterPartyAccount: PublicIdentifier, 
+  sendFunds(
+    counterPartyAccount: PublicIdentifier, 
     amount: BigNumber,
     expirationDate: moment.Moment, 
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey): Promise<HypernetLink>;
+    disputeMediator: PublicKey): Promise<Payment>;
 
   /** 
    * authorizeFunds() sets up a pull payment.
@@ -149,4 +153,8 @@ export interface IHypernetCore {
    */
   onControlClaimed: Subject<ControlClaim>;
   onControlYielded: Subject<ControlClaim>;
+  onPushPaymentProposed: Subject<PushPayment>;
+  onPullPaymentProposed: Subject<PullPayment>;
+  onPushPaymentReceived: Subject<PushPayment>;
+  onPullPaymentReceived: Subject<PullPayment>;
 }

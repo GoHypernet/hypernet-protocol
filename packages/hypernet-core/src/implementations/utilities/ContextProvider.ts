@@ -4,6 +4,8 @@ import {
   HypernetContext,
   ControlClaim,
   InitializedHypernetContext,
+  PushPayment,
+  PullPayment,
 } from "@interfaces/objects";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { Subject } from "rxjs";
@@ -13,6 +15,10 @@ export class ContextProvider implements IContextProvider {
   constructor(
     onControlClaimed: Subject<ControlClaim>,
     onControlYielded: Subject<ControlClaim>,
+    onPushPaymentProposed: Subject<PushPayment>,
+    onPullPaymentProposed: Subject<PullPayment>,
+    onPushPaymentReceived: Subject<PushPayment>,
+    onPullPaymentReceived: Subject<PullPayment>,
   ) {
     this.context = new HypernetContext(
       null,
@@ -21,6 +27,10 @@ export class ContextProvider implements IContextProvider {
       false,
       onControlClaimed,
       onControlYielded,
+      onPushPaymentProposed,
+      onPullPaymentProposed,
+      onPushPaymentReceived,
+      onPullPaymentReceived
     );
   }
   public async getContext(): Promise<HypernetContext> {
@@ -38,7 +48,11 @@ export class ContextProvider implements IContextProvider {
       this.context.publicIdentifier,
       this.context.inControl,
       this.context.onControlClaimed,
-      this.context.onControlYielded);
+      this.context.onControlYielded,
+      this.context.onPushPaymentProposed,
+      this.context.onPullPaymentProposed,
+      this.context.onPushPaymentReceived,
+      this.context.onPullPaymentReceived);
   }
 
   public setContext(context: HypernetContext): void {

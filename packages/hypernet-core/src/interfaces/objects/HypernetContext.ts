@@ -2,6 +2,7 @@ import { Subject } from "rxjs";
 import { ControlClaim } from "./ControlClaim";
 import { EthereumAddress } from "3box";
 import { PublicIdentifier } from "./PublicIdentifier";
+import { PullPayment, PushPayment } from "./Payment";
 
 export class HypernetContext {
   constructor(
@@ -11,6 +12,10 @@ export class HypernetContext {
     public inControl: boolean,
     public onControlClaimed: Subject<ControlClaim>,
     public onControlYielded: Subject<ControlClaim>,
+    public onPushPaymentProposed: Subject<PushPayment>,
+    public onPullPaymentProposed: Subject<PullPayment>,
+    public onPushPaymentReceived: Subject<PushPayment>,
+    public onPullPaymentReceived: Subject<PullPayment>,
   ) {}
 }
 
@@ -22,5 +27,9 @@ export class InitializedHypernetContext {
     public inControl: boolean,
     public onControlClaimed: Subject<ControlClaim>,
     public onControlYielded: Subject<ControlClaim>,
+    public onPushPaymentProposed: Subject<PushPayment>,
+    public onPullPaymentProposed: Subject<PullPayment>,
+    public onPushPaymentReceived: Subject<PushPayment>,
+    public onPullPaymentReceived: Subject<PullPayment>,
   ) {}
 }

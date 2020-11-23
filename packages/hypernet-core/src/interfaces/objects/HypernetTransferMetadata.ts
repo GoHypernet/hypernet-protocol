@@ -1,3 +1,4 @@
+import { EthereumAddress } from "./EthereumAddress";
 import { PublicIdentifier } from "./PublicIdentifier";
 
 export interface IHypernetTransferMetadata {
@@ -7,4 +8,7 @@ export interface IHypernetTransferMetadata {
     from: PublicIdentifier;
     requiredStake: string;
     paymentAmount: string;
+    disputeMediator: EthereumAddress;
+    paymentToken: EthereumAddress;
+    expirationDate: moment.Moment;
 }

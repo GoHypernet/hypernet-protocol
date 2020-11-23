@@ -2,17 +2,91 @@ import { ILinkRepository } from "@interfaces/data";
 import { BigNumber, HypernetConfig, HypernetContext, HypernetLink, IHypernetTransferMetadata, InitializedHypernetContext, Payment, PublicIdentifier, PullAmount, PullPayment, PushPayment } from "@interfaces/objects";
 import { IBrowserNodeProvider, IConfigProvider, IContextProvider, IVectorUtils } from "@interfaces/utilities";
 import { v4 as uuidv4 } from "uuid";
-import { createlockHash, getRandomBytes32, getSignerAddressFromPublicIdentifier } from "@connext/vector-utils";
 import { FullTransferState, NodeResponses } from "@connext/vector-types";
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
 import moment from "moment";
 import { BrowserNode } from "@connext/vector-browser-node";
+import { EthereumAddress, PublicKey } from "@interfaces/objects";
 
 export class VectorLinkRepository implements ILinkRepository {
     constructor(protected browserNodeProvider: IBrowserNodeProvider,
         protected configProvider: IConfigProvider,
         protected contextProvider: IContextProvider,
-        protected vectorUtils: IVectorUtils) { }
+        protected vectorUtils: IVectorUtils) {}
+
+    public async getPaymentsById(paymentIds: string[]): Promise<Map<string, Payment>> {
+        const browserNodePromise = await this.browserNodeProvider.getBrowserNode();
+        const channelAddressPromise = await this.vectorUtils.getRouterChannelAddress();
+        const configPromise = await this.configProvider.getConfig();
+        const contextPromise = await this.contextProvider.getInitializedContext();
+
+        let [browserNode,
+            channelAddress,
+            config,
+            context] = await Promise.all([browserNodePromise,
+                channelAddressPromise,
+                configPromise,
+                contextPromise]);
+
+        const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress: channelAddress });
+
+        if (activeTransfersRes.isError) {
+            const error = activeTransfersRes.getError()
+            throw error;
+        }
+
+        const activeTransfers = activeTransfersRes.getValue().filter((val) => {
+            return paymentIds.includes(val.meta.paymentId);
+        });
+
+        const payments = await this.transfersToPayments(activeTransfers, config, context, browserNode)
+
+        return payments.reduce((map, obj) => {
+            map.set(obj.id, obj);
+            return map;
+        }, new Map<string, Payment>());
+    }
+
+    public async createPushPayment(
+        counterPartyAccount: PublicIdentifier,
+        amount: BigNumber,
+        expirationDate: moment.Moment,
+        requiredStake: BigNumber,
+        paymentToken: EthereumAddress,
+        disputeMediator: PublicKey): Promise<Payment> {
+
+        const browserNodePromise = await this.browserNodeProvider.getBrowserNode();
+        const configPromise = await this.configProvider.getConfig();
+        const contextPromise = await this.contextProvider.getInitializedContext();
+
+        let [browserNode,
+            config,
+            context] = await Promise.all([browserNodePromise,
+                configPromise,
+                contextPromise]);
+
+        // Create a null transfer, with the terms of the payment in the metadata.
+        const paymentId = await this.createPaymentId(EPaymentType.Push);    
+        const transfer = await this.vectorUtils.createNullTransfer(counterPartyAccount, {
+                paymentId: paymentId,
+                creationDate: moment().unix(),
+                to: counterPartyAccount,
+                from: context.account,
+                requiredStake: requiredStake.toString(),
+                paymentAmount: amount.toString(),
+                expirationDate: expirationDate,
+                paymentToken: paymentToken,
+                disputeMediator: disputeMediator
+            } as IHypernetTransferMetadata);
+
+        // Return the payment
+        const payment = this.transfersToPayment(paymentId,
+            [transfer],
+            config,
+            browserNode);
+        
+        return payment;
+    }
 
     public async getHypernetLinks(): Promise<HypernetLink[]> {
         const browserNodePromise = await this.browserNodeProvider.getBrowserNode();
@@ -79,6 +153,9 @@ export class VectorLinkRepository implements ILinkRepository {
         return links[0];
     }
 
+    // sendPayment
+
+
     // public async createHypernetLink(
     //     consumerAccount: PublicIdentifier,
     //     allowedPaymentTokens: EthereumAddress[],
@@ -143,40 +220,23 @@ export class VectorLinkRepository implements ILinkRepository {
     //     return link;
     // }
 
+    /**
+     * Given an array of Vector transfers, return the corresponding Hypernet Payments.
+     * Internally, calls transfersToPayments()
+     * @param activeTransfers 
+     * @param config 
+     * @param context 
+     * @param browserNode 
+     */
     protected async transfersToHypernetLinks(activeTransfers: FullTransferState[],
         config: HypernetConfig,
         context: InitializedHypernetContext,
         browserNode: BrowserNode): Promise<HypernetLink[]> {
-        // First, we are going to sort the transfers into buckets based on their payment_id
-        let transfersByPaymentId = new Map<string, FullTransferState[]>();
-        for (let transfer of activeTransfers) {
-            const paymentId = transfer.meta.paymentId;
+        
+        const payments = await this.transfersToPayments(activeTransfers,
+            config, context, browserNode);
 
-            // Get the existing array of payments. Initialize it if it's not there.
-            let transferArray = transfersByPaymentId.get(paymentId);
-            if (transferArray == undefined) {
-                transferArray = [];
-                transfersByPaymentId.set(paymentId, transferArray);
-            }
-
-            transferArray.push(transfer);
-        }
-        let linksByCounterpartyId = new Map<PublicIdentifier, HypernetLink>();
-
-        // Now we have the transfers sorted by their payment ID.
-        // Loop over them and convert them to proper payments.
-        // This is all async, so we can do the whole thing in parallel.
-        const paymentPromises = new Array<Promise<Payment>>();
-        transfersByPaymentId.forEach(async (transferArray, paymentId) => {
-            const payment = this.transfersToPayment(paymentId,
-                transferArray,
-                config,
-                context,
-                browserNode);
-
-            paymentPromises.push(payment);
-        });
-        const payments = await Promise.all(paymentPromises);
+        const linksByCounterpartyId = new Map<string, HypernetLink>();
 
         for (const payment of payments) {
             // Now that it's converted, we can stick it in the hypernet link
@@ -188,15 +248,14 @@ export class VectorLinkRepository implements ILinkRepository {
             }
 
             link.payments.push(payment);
+
             if (payment instanceof PullPayment) {
                 link.pullPayments.push(payment);
                 link.activePullPayments.push(payment);
-            }
-            else if (payment instanceof PushPayment) {
+            } else if (payment instanceof PushPayment) {
                 link.pushPayments.push(payment);
                 link.activePushPayments.push(payment);
-            }
-            else {
+            } else {
                 throw new Error("Unknown payment type!");
             }
         }
@@ -205,13 +264,58 @@ export class VectorLinkRepository implements ILinkRepository {
         return Array.from(linksByCounterpartyId.values());
     }
 
+    /**
+     * Given an array of Vector transfers, return the corresponding Hypernet Payments
+     * @param transfers 
+     * @param config 
+     * @param context 
+     * @param browserNode 
+     */
+    protected async transfersToPayments(transfers: FullTransferState[], 
+        config: HypernetConfig,
+        context: InitializedHypernetContext,
+        browserNode: BrowserNode): Promise<Payment[]> {
+
+        // First, we are going to sort the transfers into buckets based on their payment_id
+        let transfersByPaymentId = new Map<string, FullTransferState[]>();
+        for (let transfer of transfers) {
+            const paymentId = transfer.meta.paymentId;
+
+            // Get the existing array of payments. Initialize it if it's not there.
+            let transferArray = transfersByPaymentId.get(paymentId);
+            if (transferArray == undefined) {
+                transferArray = [];
+                transfersByPaymentId.set(paymentId, transferArray);
+            }
+
+            transferArray.push(transfer);
+        }
+
+        // Now we have the transfers sorted by their payment ID.
+        // Loop over them and convert them to proper payments.
+        // This is all async, so we can do the whole thing in parallel.
+        const paymentPromises = new Array<Promise<Payment>>();
+        transfersByPaymentId.forEach(async (transferArray, paymentId) => {
+            const payment = this.transfersToPayment(paymentId,
+                transferArray,
+                config,
+                browserNode);
+
+            paymentPromises.push(payment);
+        });
+        
+        // Convert all the transfers to payments
+        const payments = await Promise.all(paymentPromises);
+
+        return payments;
+    }
+
     protected async transfersToPayment(fullPaymentId: string,
         transfers: FullTransferState[],
         config: HypernetConfig,
-        context: InitializedHypernetContext,
         browserNode: BrowserNode): Promise<Payment> {
 
-        //const signerAddress = getSignerAddressFromPublicIdentifier(context.publicIdentifier);
+        // const signerAddress = getSignerAddressFromPublicIdentifier(context.publicIdentifier);
 
         let [domain, paymentType, id] = fullPaymentId.split(":");
         if (domain != config.hypernetProtocolDomain) {
@@ -223,7 +327,6 @@ export class VectorLinkRepository implements ILinkRepository {
         }
 
         const sortedTransfers = await this.sortTransfers(fullPaymentId, transfers, browserNode);
-
 
         // Determine the state of the payment. All transfers we've been given are
         // "Active", therefore, not resolved. So we don't need to figure out if
@@ -240,9 +343,8 @@ export class VectorLinkRepository implements ILinkRepository {
             sortedTransfers.parameterizedTransfer != null) {
             paymentState = EPaymentState.Approved;
         }
+
         // TODO: Figure out how to determine if the payment is Disputed
-
-
 
         if (paymentType == EPaymentType.Pull) {
             return this.transfersToPullPayment(id,
@@ -251,8 +353,7 @@ export class VectorLinkRepository implements ILinkRepository {
                 paymentState,
                 sortedTransfers,
                 sortedTransfers.offerTransfer.meta);
-        }
-        else if (paymentType == EPaymentType.Push) {
+        } else if (paymentType == EPaymentType.Push) {
             return this.transfersToPushPayment(id,
                 sortedTransfers.metadata.to,
                 sortedTransfers.metadata.from,
@@ -270,6 +371,7 @@ export class VectorLinkRepository implements ILinkRepository {
         state: EPaymentState,
         sortedTransfers: SortedTransfers,
         metadata: IHypernetTransferMetadata): PushPayment {
+
         /**
          * Push payments consist of 3 transfers, a null transfer for 0 value that represents the 
          * offer, an insurance payment, and a parameterized payment. 
@@ -278,7 +380,6 @@ export class VectorLinkRepository implements ILinkRepository {
         if (sortedTransfers.pullRecordTransfers.length > 0) {
             throw new Error("Push payment has pull transfers!");
         }
-
 
         const amountStaked = sortedTransfers.insuranceTransfer != null ? sortedTransfers.insuranceTransfer.balance.amount[0] : 0;
 
@@ -304,6 +405,7 @@ export class VectorLinkRepository implements ILinkRepository {
         state: EPaymentState,
         sortedTransfers: SortedTransfers,
         metadata: IHypernetTransferMetadata): PullPayment {
+            
         /**
          * Push payments consist of 3 transfers, a null transfer for 0 value that represents the 
          * offer, an insurance payment, and a parameterized payment. 
@@ -352,15 +454,19 @@ export class VectorLinkRepository implements ILinkRepository {
         const offerTransfers = transfers.filter((val) => {
             return this.vectorUtils.getTransferType(val) == ETransferType.Offer;
         });
+        
         const insuranceTransfers = transfers.filter((val) => {
             return this.vectorUtils.getTransferType(val) == ETransferType.Insurance;
         });
+        
         const parameterizedTransfers = transfers.filter((val) => {
             return this.vectorUtils.getTransferType(val) == ETransferType.Parameterized;
         });
+
         const pullTransfers = transfers.filter((val) => {
             return this.vectorUtils.getTransferType(val) == ETransferType.PullRecord;
         });
+
         const unrecognizedTransfers = transfers.filter((val) => {
             return this.vectorUtils.getTransferType(val) == ETransferType.Unrecognized;
         });
