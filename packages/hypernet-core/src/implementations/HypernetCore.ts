@@ -28,6 +28,10 @@ import { VectorUtils } from "@implementations/utilities/VectorUtils";
 import { IAccountService, ILinkService, IPaymentService } from "@interfaces/business";
 import { AccountService, LinkService, PaymentService } from "@implementations/business";
 import { PaymentUtils } from "./utilities";
+import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
+import { PaymentRepository } from "./data/PaymentRepository";
+import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
+import { LinkUtils } from "./utilities/LinkUtils";
 
 export class HypernetCore implements IHypernetCore {
   public onControlClaimed: Subject<ControlClaim>;
@@ -43,9 +47,11 @@ export class HypernetCore implements IHypernetCore {
   protected browserNodeProvider: IBrowserNodeProvider;
   protected vectorUtils: IVectorUtils;
   protected paymentUtils: IPaymentUtils;
+  protected linkUtils: ILinkUtils;
 
   protected accountRepository: IAccountsRepository;
   protected linkRepository: ILinkRepository;
+  protected paymentRepository: IPaymentRepository;
 
   protected accountService: IAccountService;
   protected paymentService: IPaymentService;
@@ -81,6 +87,7 @@ export class HypernetCore implements IHypernetCore {
     this.configProvider = new ConfigProvider(config);
 
     this.paymentUtils = new PaymentUtils(this.configProvider);
+    this.linkUtils = new LinkUtils()
 
     this.contextProvider = new ContextProvider(
       this.onControlClaimed,
@@ -95,16 +102,22 @@ export class HypernetCore implements IHypernetCore {
     this.vectorUtils = new VectorUtils(this.configProvider, this.contextProvider, this.browserNodeProvider);
 
     this.accountRepository = new AccountsRepository(this.blockchainProvider, this.vectorUtils, this.browserNodeProvider);
+
+    this.paymentRepository = new PaymentRepository(this.browserNodeProvider, this.vectorUtils, this.configProvider, this.contextProvider, this.paymentUtils);
+
     this.linkRepository = new VectorLinkRepository(this.browserNodeProvider,
       this.configProvider,
       this.contextProvider,
       this.vectorUtils,
-      this.paymentUtils);
+      this.paymentUtils,
+      this.linkUtils);
 
     this.paymentService = new PaymentService(this.linkRepository, 
       this.accountRepository, 
       this.contextProvider,
-      this.configProvider);
+      this.configProvider,
+      this.paymentRepository);
+
     this.accountService = new AccountService(this.accountRepository);
     this.LinkService = new LinkService(this.linkRepository);
   }

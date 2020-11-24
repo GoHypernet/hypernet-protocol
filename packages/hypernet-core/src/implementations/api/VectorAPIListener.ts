@@ -33,7 +33,7 @@ export class VectorAPIListener implements IVectorListener {
 
             // If you didn't send this transfer, you want to notify the user
             // that a payment is available for them to accept (insurance, paramterized, etc)
-            const transferType = this.vectorUtils.getTransferType(payload.transfer);
+            const transferType = this.paymentUtils.getTransferType(payload.transfer);
             if (transferType == ETransferType.Offer) {
                 this.paymentService.offerReceived(metadata.paymentId);
             } else if (transferType == ETransferType.Insurance) {
