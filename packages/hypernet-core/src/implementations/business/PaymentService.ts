@@ -1,5 +1,6 @@
 import { IPaymentService } from "@interfaces/business";
 import { IAccountsRepository, ILinkRepository } from "@interfaces/data";
+import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
 import {
     HypernetLink,
     BigNumber,
@@ -23,7 +24,8 @@ export class PaymentService implements IPaymentService {
     constructor(protected linkRepository: ILinkRepository,
         protected accountRepository: IAccountsRepository,
         protected contextProvider: IContextProvider,
-        protected configProvider: IConfigProvider) {
+        protected configProvider: IConfigProvider,
+        protected paymentRepository: IPaymentRepository) {
 
     }
 
@@ -34,7 +36,7 @@ export class PaymentService implements IPaymentService {
     public async acceptFunds(paymentIds: string[]): Promise<Payment[]> {
         // Get the payments from the repo, to make sure it can be accepted.
         const config = await this.configProvider.getConfig();
-        const payments = await this.linkRepository.getPaymentsById(paymentIds);
+        const payments = await this.paymentRepository.getPaymentsById(paymentIds);
         const hypertokenBalance = await this.accountRepository.getBalanceByAsset(config.hypertokenAddress)
 
         // Loop over the payments and do a sanity check
@@ -66,7 +68,7 @@ export class PaymentService implements IPaymentService {
      * Called by the reciever of a parameterized transfer
      */
     public async paymentPosted(paymentId: string): Promise<void> {
-        const payments = await this.linkRepository.getPaymentsById([paymentId]);
+        const payments = await this.paymentRepository.getPaymentsById([paymentId]);
         const payment = payments.get(paymentId);
 
         if (payment == null || payment.state != EPaymentState.Approved) {
@@ -86,14 +88,14 @@ export class PaymentService implements IPaymentService {
     }
 
     public async pullRecorded(paymentId: string): Promise<void> {
-        const payments = await this.linkRepository.getPaymentsById([paymentId]);
+        const payments = await this.paymentRepository.getPaymentsById([paymentId]);
         const payment = payments.get(paymentId);
         
         throw new Error('Method not yet implemented')
     }
 
     public async stakePosted(paymentId: string): Promise<void> {
-        const payments = await this.linkRepository.getPaymentsById([paymentId]);
+        const payments = await this.paymentRepository.getPaymentsById([paymentId]);
         const payment = payments.get(paymentId);
     
         if (payment == null || payment.state != EPaymentState.Staked) {
@@ -113,7 +115,7 @@ export class PaymentService implements IPaymentService {
      */
     public async offerReceived(paymentId: string): Promise<void> {
         
-        const paymentsPromise =  this.linkRepository.getPaymentsById([paymentId]);
+        const paymentsPromise =  this.paymentRepository.getPaymentsById([paymentId]);
         const contextPromise = this.contextProvider.getInitializedContext();
         const [payments, context] = await Promise.all([paymentsPromise, contextPromise])
         
@@ -156,7 +158,7 @@ export class PaymentService implements IPaymentService {
         paymentToken: EthereumAddress,
         disputeMediator: PublicKey): Promise<Payment> {
         
-        const payment = this.linkRepository.createPushPayment(counterPartyAccount,
+        const payment = this.paymentRepository.createPushPayment(counterPartyAccount,
             amount,
             expirationDate,
             requiredStake,

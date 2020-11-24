@@ -1,4 +1,6 @@
-import { BigNumber, EthereumAddress, HypernetLink, Payment, PublicIdentifier, PublicKey } from "@interfaces/objects";
+import { BrowserNode } from "@connext/vector-browser-node";
+import { FullTransferState } from "@connext/vector-types";
+import { BigNumber, EthereumAddress, HypernetConfig, HypernetLink, InitializedHypernetContext, Payment, PublicIdentifier, PublicKey } from "@interfaces/objects";
 
 
 /**
@@ -17,20 +19,10 @@ export interface ILinkRepository {
      */
     getHypernetLink(linkId: string): Promise<HypernetLink>;
 
-    /**
-     * Creates a push payment and returns it. Nothing moves until
-     * the payment is accepted; the payment will return with the
-     * "PROPOSED" status. This function just creates an OfferTransfer.
-     */
-    createPushPayment(
-        counterPartyAccount: PublicIdentifier,
-        amount: BigNumber,
-        expirationDate: moment.Moment,
-        requiredStake: BigNumber,
-        paymentToken: EthereumAddress,
-        disputeMediator: PublicKey): Promise<Payment>;
-
-    getPaymentsById(paymentIds: string[]): Promise<Map<string, Payment>>;
+    getHypernetLinksByPayments(
+        payments: Payment[],
+        context: InitializedHypernetContext,
+    ): Promise<HypernetLink[]>;
 
     provideAssets(paymentIds: string[]): Promise<Map<string, Payment>> 
     provideStakes(paymentIds: string[]): Promise<Map<string, Payment>>
