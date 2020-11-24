@@ -1,10 +1,7 @@
-import { BrowserNode } from "@connext/vector-browser-node";
-import { FullTransferState } from "@connext/vector-types";
-import { BigNumber, EthereumAddress, HypernetConfig, HypernetLink, InitializedHypernetContext, Payment, PublicIdentifier, PublicKey } from "@interfaces/objects";
-
+import { HypernetLink, Payment} from "@interfaces/objects";
 
 /**
- * @todo What is the main role/purpose of this class? Description here.
+ * 
  */
 export interface ILinkRepository {
 
@@ -19,12 +16,21 @@ export interface ILinkRepository {
      */
     getHypernetLink(linkId: string): Promise<HypernetLink>;
 
-    getHypernetLinksByPayments(
-        payments: Payment[],
-        context: InitializedHypernetContext,
-    ): Promise<HypernetLink[]>;
-
+    /**
+     * 
+     * @param paymentIds 
+     */
     provideAssets(paymentIds: string[]): Promise<Map<string, Payment>> 
+
+    /**
+     * 
+     * @param paymentIds 
+     */
     provideStakes(paymentIds: string[]): Promise<Map<string, Payment>>
+
+    /**
+     * 
+     * @param paymentIds 
+     */
     finalizePayments(paymentIds: string[]): Promise<Map<string, Payment>>
 }

@@ -30,6 +30,8 @@ import { AccountService, LinkService, PaymentService } from "@implementations/bu
 import { PaymentUtils } from "./utilities";
 import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
 import { PaymentRepository } from "./data/PaymentRepository";
+import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
+import { LinkUtils } from "./utilities/LinkUtils";
 
 export class HypernetCore implements IHypernetCore {
   public onControlClaimed: Subject<ControlClaim>;
@@ -45,6 +47,7 @@ export class HypernetCore implements IHypernetCore {
   protected browserNodeProvider: IBrowserNodeProvider;
   protected vectorUtils: IVectorUtils;
   protected paymentUtils: IPaymentUtils;
+  protected linkUtils: ILinkUtils;
 
   protected accountRepository: IAccountsRepository;
   protected linkRepository: ILinkRepository;
@@ -84,6 +87,7 @@ export class HypernetCore implements IHypernetCore {
     this.configProvider = new ConfigProvider(config);
 
     this.paymentUtils = new PaymentUtils(this.configProvider);
+    this.linkUtils = new LinkUtils()
 
     this.contextProvider = new ContextProvider(
       this.onControlClaimed,
@@ -106,7 +110,7 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.vectorUtils,
       this.paymentUtils,
-      this.paymentRepository);
+      this.linkUtils);
 
     this.paymentService = new PaymentService(this.linkRepository, 
       this.accountRepository, 

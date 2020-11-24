@@ -1,33 +1,44 @@
 import { ILinkRepository } from "@interfaces/data";
-import { BigNumber, HypernetConfig, HypernetContext, HypernetLink, IHypernetTransferMetadata, InitializedHypernetContext, Payment, PublicIdentifier, PullAmount, PullPayment, PushPayment } from "@interfaces/objects";
+import { HypernetLink, Payment, PublicIdentifier} from "@interfaces/objects";
 import { IBrowserNodeProvider, IConfigProvider, IContextProvider, IPaymentUtils, IVectorUtils } from "@interfaces/utilities";
-import { FullTransferState, NodeResponses } from "@connext/vector-types";
-import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
-import moment from "moment";
-import { BrowserNode } from "@connext/vector-browser-node";
-import { EthereumAddress, PublicKey } from "@interfaces/objects";
-import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
+import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
 
 export class VectorLinkRepository implements ILinkRepository {
-    constructor(protected browserNodeProvider: IBrowserNodeProvider,
+    constructor(
+        protected browserNodeProvider: IBrowserNodeProvider,
         protected configProvider: IConfigProvider,
         protected contextProvider: IContextProvider,
         protected vectorUtils: IVectorUtils,
         protected paymentUtils: IPaymentUtils,
-        protected paymentRepository: IPaymentRepository) {}
+        protected linkUtils: ILinkUtils) {}
 
+    /**
+     * 
+     * @param paymentIds 
+     */
     public async provideAssets(paymentIds: string[]): Promise<Map<string, Payment>> {
         throw new Error('Method not yet implemented')
     }
 
+    /**
+     * 
+     * @param paymentIds 
+     */
     public async provideStakes(paymentIds: string[]): Promise<Map<string, Payment>> {
         throw new Error('Method not yet implemented')
     }
 
+    /**
+     * 
+     * @param paymentIds 
+     */
     public async finalizePayments(paymentIds: string[]): Promise<Map<string, Payment>> {
         throw new Error('Method not yet implemented')
     }
 
+    /**
+     * 
+     */
     public async getHypernetLinks(): Promise<HypernetLink[]> {
         const browserNodePromise = await this.browserNodeProvider.getBrowserNode();
         const channelAddressPromise = await this.vectorUtils.getRouterChannelAddress();
@@ -50,14 +61,14 @@ export class VectorLinkRepository implements ILinkRepository {
         }
 
         const activeTransfers = activeTransfersRes.getValue();
-        const payments = await this.paymentRepository.getPaymentsByTransfers(activeTransfers, config, context, browserNode)
+        const payments = await this.paymentUtils.transfersToPayments(activeTransfers, config, context, browserNode)
 
-        return await this.getHypernetLinksByPayments(payments, context);
+        return await this.linkUtils.paymentsToHypernetLinks(payments, context);
     }
 
     /**
      * Given the ID of the link, return it.
-     * @param linkId The ID of the link to retrieve
+     * @param counterpartyId The ID of the link to retrieve
      */
     public async getHypernetLink(counterpartyId: PublicIdentifier): Promise<HypernetLink> {
         const browserNodePromise = await this.browserNodeProvider.getBrowserNode();
@@ -85,8 +96,8 @@ export class VectorLinkRepository implements ILinkRepository {
         });
 
         // Because of the filter above, this should only produce a single link
-        const payments = await this.paymentRepository.getPaymentsByTransfers(activeTransfers, config, context, browserNode)
-        const links = await this.getHypernetLinksByPayments(payments, context);
+        const payments = await this.paymentUtils.transfersToPayments(activeTransfers, config, context, browserNode)
+        const links = await this.linkUtils.paymentsToHypernetLinks(payments, context);
 
         if (links.length == 0) {
             return new HypernetLink(counterpartyId, [], [], [], [], []);
@@ -162,42 +173,5 @@ export class VectorLinkRepository implements ILinkRepository {
     //     return link;
     // }
 
-    /**
-     * Given an array of Vector transfers, return the corresponding Hypernet Payments.
-     * Internally, calls transfersToPayments()
-     * @param activeTransfers 
-     * @param config 
-     * @param context 
-     * @param browserNode 
-     */
-    public async getHypernetLinksByPayments(payments: Payment[], context: InitializedHypernetContext): Promise<HypernetLink[]> {
-
-        const linksByCounterpartyId = new Map<string, HypernetLink>();
-
-        for (const payment of payments) {
-            // Now that it's converted, we can stick it in the hypernet link
-            let counterpartyId = payment.to == context.publicIdentifier ? payment.from : payment.to;
-            let link = linksByCounterpartyId.get(counterpartyId);
-            if (link == null) {
-                link = new HypernetLink(counterpartyId, [], [], [], [], []);
-                linksByCounterpartyId.set(counterpartyId, link);
-            }
-
-            link.payments.push(payment);
-
-            if (payment instanceof PullPayment) {
-                link.pullPayments.push(payment);
-                link.activePullPayments.push(payment);
-            } else if (payment instanceof PushPayment) {
-                link.pushPayments.push(payment);
-                link.activePushPayments.push(payment);
-            } else {
-                throw new Error("Unknown payment type!");
-            }
-        }
-
-        // Convert to an array for return
-        return Array.from(linksByCounterpartyId.values());
-    }
-
+    
 }
