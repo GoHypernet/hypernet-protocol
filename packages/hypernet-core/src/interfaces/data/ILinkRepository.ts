@@ -16,19 +16,23 @@ export interface ILinkRepository {
   getHypernetLink(linkId: string): Promise<HypernetLink>;
 
   /**
-   *
+   * Provides assets for a given list of payment ids.
+   * Internally, this is what actually creates the ParameterizedPayments with Vector.
    * @param paymentIds
    */
   provideAssets(paymentIds: string[]): Promise<Map<string, Payment>>;
 
   /**
-   *
+   * Provides stakes for a given list of payment ids.
+   * Internally, this is what actually creates the InsurancePayments with Vector.
    * @param paymentIds
    */
   provideStakes(paymentIds: string[]): Promise<Map<string, Payment>>;
 
   /**
-   *
+   * Finalizes/confirms a list of payments.
+   * Internally, this is what actually calls resolve() on Vector transfers -
+   * be they insurancePayments or parameterizedPayments.
    * @param paymentIds
    */
   finalizePayments(paymentIds: string[]): Promise<Map<string, Payment>>;

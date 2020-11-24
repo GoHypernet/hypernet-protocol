@@ -14,9 +14,16 @@ export class VectorAPIListener implements IVectorListener {
     protected paymentUtils: IPaymentUtils,
   ) {}
 
+  /**
+   * 
+   */
   public async setup(): Promise<void> {
     const browserNode = await this.browserNodeProvider.getBrowserNode();
 
+    // When the browser node notifies us that a conditional transfer has been created
+    // (via Vector), this handles it. If we created the transfer, we do nothing.
+    // If we didn't create the transfer, then we need to handle it. Thus we call down
+    // into the appropriate method on the PaymentService to handle it.
     browserNode.on(EngineEvents.CONDITIONAL_TRANSFER_CREATED, async (payload: ConditionalTransferCreatedPayload) => {
       const context = await this.contextProvider.getInitializedContext();
 

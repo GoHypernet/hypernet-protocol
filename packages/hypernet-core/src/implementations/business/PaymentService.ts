@@ -25,12 +25,14 @@ export class PaymentService implements IPaymentService {
     protected paymentRepository: IPaymentRepository,
   ) {}
 
+
   /**
-   *
-   * @param paymentId
+   * Called by the person on the receiving end of a push payment,
+   * to accept the terms of the payment and put up the stake.
+   * @param paymentIds the payment ids to accept funds for
    */
   public async acceptFunds(paymentIds: string[]): Promise<Payment[]> {
-    // Get the payments from the repo, to make sure it can be accepted.
+    // Get the payments from the repo, to make sure they can be accepted.
     const config = await this.configProvider.getConfig();
     const payments = await this.paymentRepository.getPaymentsByIds(paymentIds);
     const hypertokenBalance = await this.accountRepository.getBalanceByAsset(config.hypertokenAddress);
@@ -60,12 +62,15 @@ export class PaymentService implements IPaymentService {
   }
 
   /**
-   * Called by the reciever of a parameterized transfer
+   * Called by the reciever of a parameterized transfer, AFTER they 
+   * have put up stake
+   * @param paymentId the payment ID to accept/resolve
    */
   public async paymentPosted(paymentId: string): Promise<void> {
     const payments = await this.paymentRepository.getPaymentsByIds([paymentId]);
     const payment = payments.get(paymentId);
 
+    // Payment state must be in "approved" to finalize
     if (payment == null || payment.state !== EPaymentState.Approved) {
       throw new Error(`Cannot accept payment ${paymentId}`);
     }
@@ -93,13 +98,15 @@ export class PaymentService implements IPaymentService {
   }
 
   /**
-   *
+   * Notifies the service that a stake has been posted; if verified,
+   * then provides assets to the counterparty (ie a parameterizedPayment)
    * @param paymentId
    */
   public async stakePosted(paymentId: string): Promise<void> {
     const payments = await this.paymentRepository.getPaymentsByIds([paymentId]);
     const payment = payments.get(paymentId);
 
+    // Payment state must be in "staked" in order to progress
     if (payment == null || payment.state !== EPaymentState.Staked) {
       throw new Error(`Invalid payment ${paymentId}, cannot provide payment!`);
     }
@@ -110,6 +117,7 @@ export class PaymentService implements IPaymentService {
   }
 
   /**
+   * Called when someone has sent us a payment offer.
    * Lookup the transfer, and convert it to a payment. Then, publish an RXJS
    * event to the user.
    * @param paymentId
@@ -148,6 +156,8 @@ export class PaymentService implements IPaymentService {
 
   /**
    * Sends a payment on the specified channel.
+   * Internally, creates a null/message/offer transfer to communicate
+   * with the counterparty and signal a request for a stake.
    * @param channelId
    * @param amount
    */

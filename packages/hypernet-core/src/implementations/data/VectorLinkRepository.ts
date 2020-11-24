@@ -45,7 +45,7 @@ export class VectorLinkRepository implements ILinkRepository {
   }
 
   /**
-   *
+   * Get all Hypernet Links for this client
    */
   public async getHypernetLinks(): Promise<HypernetLink[]> {
     const browserNodePromise = await this.browserNodeProvider.getBrowserNode();
