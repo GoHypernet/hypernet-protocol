@@ -5,6 +5,9 @@
         "composite": true,
         "rootDir": "./src",
         "baseUrl": "./",
+        "paths": {
+            "@hypernetlabs/hypernet-core": ["../hypernet-core/src"]
+        },
     },
     "include": [
         "./src/**/*",

@@ -1,5 +1,5 @@
 import * as ko from "knockout";
-import { HypernetLink, EthereumAddress, PublicKey, BigNumber } from "@hypernetlabs/hypernet-core";
+import { HypernetLink, EthereumAddress, PublicKey, BigNumber, PushPayment, PullPayment } from "@hypernetlabs/hypernet-core";
 import html from "./Link.template.html";
 import { PushPaymentParams } from "../PushPayment/PushPayment.viewmodel";
 import { PullPaymentParams } from "../PullPayment/PullPayment.viewmodel";
@@ -25,7 +25,7 @@ export class LinkViewModel {
     this.pushPayments = ko.pureComputed(() => {
       const link = this.link();
 
-      return link.pushPayments.map((val) => {
+      return link.pushPayments.map((val: PushPayment) => {
         return new PushPaymentParams(ko.observable(val));
       });
     });
@@ -33,7 +33,7 @@ export class LinkViewModel {
     this.pullPayments = ko.pureComputed(() => {
       const link = this.link();
 
-      return link.pullPayments.map((val) => {
+      return link.pullPayments.map((val: PullPayment) => {
         return new PullPaymentParams(ko.observable(val));
       });
     });

@@ -1,5 +1,5 @@
 import * as ko from "knockout";
-import { Balances } from "@hypernetlabs/hypernet-core";
+import { AssetBalance, Balances } from "@hypernetlabs/hypernet-core";
 import html from "./Balances.template.html";
 import { AssetBalanceParams } from "../AssetBalance/AssetBalance.viewmodel";
 
@@ -19,7 +19,7 @@ export class BalancesViewModel {
     this.balances = ko.pureComputed(() => {
       const source = this.source();
 
-      return source.assets.map((val) => {
+      return source.assets.map((val: AssetBalance) => {
         return new AssetBalanceParams(val);
       });
     });

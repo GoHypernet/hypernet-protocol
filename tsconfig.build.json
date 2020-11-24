@@ -15,5 +15,4 @@
     "experimentalDecorators": true,
     "declarationMap": true
   },
-  "exclude": ["node_modules/*", "dist/*", "lib/*"]
 }

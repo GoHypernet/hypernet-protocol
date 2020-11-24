@@ -1,7 +1,7 @@
 import * as ko from "knockout";
 import html from "./Agent.template.html";
 import { LinkParams } from "../Link/Link.viewmodel";
-import { HypernetCore, IHypernetCore, Balances } from "@hypernetlabs/hypernet-core"
+import { HypernetCore, IHypernetCore, Balances, HypernetLink } from "@hypernetlabs/hypernet-core"
 import { ButtonParams } from "../Button/Button.viewmodel";
 import { ethers } from "ethers";
 import { BalancesParams } from "../Balances/Balances.viewmodel";
@@ -156,7 +156,7 @@ export class AgentViewModel {
     this.balances.balances(currentBalances);
 
     const links = await this.core.getActiveLinks();
-    const linkParams = links.map((link) => new LinkParams(ko.observable(link)))
+    const linkParams = links.map((link: HypernetLink) => new LinkParams(ko.observable(link)))
     this.links(linkParams);
   }
 }
