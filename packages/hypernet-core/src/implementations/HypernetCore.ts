@@ -87,7 +87,7 @@ export class HypernetCore implements IHypernetCore {
     this.configProvider = new ConfigProvider(config);
 
     this.paymentUtils = new PaymentUtils(this.configProvider);
-    this.linkUtils = new LinkUtils()
+    this.linkUtils = new LinkUtils();
 
     this.contextProvider = new ContextProvider(
       this.onControlClaimed,
@@ -95,28 +95,42 @@ export class HypernetCore implements IHypernetCore {
       this.onPushPaymentProposed,
       this.onPullPaymentProposed,
       this.onPushPaymentReceived,
-      this.onPullPaymentApproved
+      this.onPullPaymentApproved,
     );
 
     this.browserNodeProvider = new BrowserNodeProvider(this.configProvider, this.contextProvider);
     this.vectorUtils = new VectorUtils(this.configProvider, this.contextProvider, this.browserNodeProvider);
 
-    this.accountRepository = new AccountsRepository(this.blockchainProvider, this.vectorUtils, this.browserNodeProvider);
+    this.accountRepository = new AccountsRepository(
+      this.blockchainProvider,
+      this.vectorUtils,
+      this.browserNodeProvider,
+    );
 
-    this.paymentRepository = new PaymentRepository(this.browserNodeProvider, this.vectorUtils, this.configProvider, this.contextProvider, this.paymentUtils);
+    this.paymentRepository = new PaymentRepository(
+      this.browserNodeProvider,
+      this.vectorUtils,
+      this.configProvider,
+      this.contextProvider,
+      this.paymentUtils,
+    );
 
-    this.linkRepository = new VectorLinkRepository(this.browserNodeProvider,
+    this.linkRepository = new VectorLinkRepository(
+      this.browserNodeProvider,
       this.configProvider,
       this.contextProvider,
       this.vectorUtils,
       this.paymentUtils,
-      this.linkUtils);
+      this.linkUtils,
+    );
 
-    this.paymentService = new PaymentService(this.linkRepository, 
-      this.accountRepository, 
+    this.paymentService = new PaymentService(
+      this.linkRepository,
+      this.accountRepository,
       this.contextProvider,
       this.configProvider,
-      this.paymentRepository);
+      this.paymentRepository,
+    );
 
     this.accountService = new AccountService(this.accountRepository);
     this.LinkService = new LinkService(this.linkRepository);
@@ -134,7 +148,7 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public async getPublicIdentifier(): Promise<PublicIdentifier> {
-    const context = await this.contextProvider.getInitializedContext()
+    const context = await this.contextProvider.getInitializedContext();
 
     return context.publicIdentifier;
   }
@@ -143,9 +157,11 @@ export class HypernetCore implements IHypernetCore {
     return this.accountService.depositFunds(assetAddress, amount);
   }
 
-  public async withdrawFunds(assetAddress: EthereumAddress,
+  public async withdrawFunds(
+    assetAddress: EthereumAddress,
     amount: BigNumber,
-    destinationAddress: EthereumAddress): Promise<void> {
+    destinationAddress: EthereumAddress,
+  ): Promise<void> {
     return this.accountService.withdrawFunds(assetAddress, amount, destinationAddress);
   }
 
@@ -153,18 +169,16 @@ export class HypernetCore implements IHypernetCore {
     return this.accountService.getBalances();
   }
 
-  public async getLedgers(): Promise<HypernetLink[]> {
-    return this.LinkService.getLedgers();
+  public async getLinks(): Promise<HypernetLink[]> {
+    return this.LinkService.getLinks();
   }
 
-
-  public async getActiveLedgers(): Promise<HypernetLink[]> {
-    throw new Error('Method not yet implemented.')
+  public async getActiveLinks(): Promise<HypernetLink[]> {
+    throw new Error("Method not yet implemented.");
   }
 
-
-  public async getLedgerByCounterparty(counterPartyAccount: PublicIdentifier): Promise<HypernetLink> {
-    throw new Error('Method not yet implemented.')
+  public async getLinkByCounterparty(counterPartyAccount: PublicIdentifier): Promise<HypernetLink> {
+    throw new Error("Method not yet implemented.");
   }
 
   /**
@@ -185,8 +199,8 @@ export class HypernetCore implements IHypernetCore {
     expirationDate: moment.Moment,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey): Promise<Payment> {
-
+    disputeMediator: PublicKey,
+  ): Promise<Payment> {
     // Send payment terms to provider & request provider make insurance payment
     const payment = await this.paymentService.sendFunds(
       counterPartyAccount,
@@ -194,7 +208,7 @@ export class HypernetCore implements IHypernetCore {
       expirationDate,
       requiredStake,
       paymentToken,
-      disputeMediator
+      disputeMediator,
     );
 
     return payment;
@@ -203,37 +217,35 @@ export class HypernetCore implements IHypernetCore {
   /**
    * acceptsFunds will accept the terms of a push payment, and puts up
    * the stake or insurance transfer.
-   * @param paymentId 
+   * @param paymentId
    */
   public async acceptFunds(paymentIds: string[]): Promise<Payment[]> {
-
-    const payment = this.paymentService.acceptFunds(paymentIds)
+    const payment = this.paymentService.acceptFunds(paymentIds);
 
     return payment;
   }
 
-  public async authorizeFunds(counterPartyAccount: PublicIdentifier,
+  public async authorizeFunds(
+    counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumber,
     expirationDate: moment.Moment,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey): Promise<Payment> {
-    throw new Error('Method not yet implemented.')
+    disputeMediator: PublicKey,
+  ): Promise<Payment> {
+    throw new Error("Method not yet implemented.");
   }
 
-  public async pullFunds(paymentId: string,
-    amount: BigNumber): Promise<Payment> {
-    throw new Error('Method not yet implemented.')
+  public async pullFunds(paymentId: string, amount: BigNumber): Promise<Payment> {
+    throw new Error("Method not yet implemented.");
   }
 
-  public async finalizePullPayment(paymentId: string,
-    finalAmount: BigNumber): Promise<HypernetLink> {
-    throw new Error('Method not yet implemented.')
+  public async finalizePullPayment(paymentId: string, finalAmount: BigNumber): Promise<HypernetLink> {
+    throw new Error("Method not yet implemented.");
   }
 
-  public async initiateDispute(paymentId: string,
-    metadata: string): Promise<HypernetLink> {
-    throw new Error('Method not yet implemented.')
+  public async initiateDispute(paymentId: string, metadata: string): Promise<HypernetLink> {
+    throw new Error("Method not yet implemented.");
   }
 
   /**

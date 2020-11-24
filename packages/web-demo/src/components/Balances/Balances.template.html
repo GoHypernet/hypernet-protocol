@@ -1,0 +1,8 @@
+<div>
+    <h2>Balances</h2>
+    <div data-bind="foreach: balances">
+        <div data-bind='component: {
+            name: "asset-balance",
+            params: $data}'></div>
+    </div>
+</div>

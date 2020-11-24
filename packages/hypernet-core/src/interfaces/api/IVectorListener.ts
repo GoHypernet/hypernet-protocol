@@ -1,3 +1,3 @@
 export interface IVectorListener {
-    setup(): Promise<void>;
+  setup(): Promise<void>;
 }

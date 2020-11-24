@@ -3,11 +3,6 @@ import { BigNumber, EthereumAddress, PublicKey } from "@interfaces/objects";
 import { EPaymentState } from "@interfaces/types";
 import { PublicIdentifier } from "@connext/vector-types";
 
-export class PullAmount {
-  constructor(public amount: BigNumber,
-    public date: number) {}
-}
-
 export abstract class Payment {
   constructor(
     public id: string,
@@ -22,11 +17,12 @@ export abstract class Payment {
     public createdTimestamp: moment.Moment,
     public updatedTimestamp: moment.Moment,
     public collateralRecovered: BigNumber,
-    public disputeMediator: PublicKey
+    public disputeMediator: PublicKey,
   ) {}
 }
 
-export class PushPayment extends Payment{
+// tslint:disable-next-line: max-classes-per-file
+export class PushPayment extends Payment {
   constructor(
     id: string,
     to: PublicIdentifier,
@@ -41,16 +37,28 @@ export class PushPayment extends Payment{
     updatedTimestamp: moment.Moment,
     collateralRecovered: BigNumber,
     disputeMediator: PublicKey,
-    public paymentAmount: BigNumber, 
+    public paymentAmount: BigNumber,
   ) {
-    super(id, to, from, state, paymentToken, requiredStake, 
-      amountStaked, expirationDate, finalized, 
-      createdTimestamp, updatedTimestamp, 
-      collateralRecovered, disputeMediator)
+    super(
+      id,
+      to,
+      from,
+      state,
+      paymentToken,
+      requiredStake,
+      amountStaked,
+      expirationDate,
+      finalized,
+      createdTimestamp,
+      updatedTimestamp,
+      collateralRecovered,
+      disputeMediator,
+    );
   }
 }
 
-export class PullPayment extends Payment{
+// tslint:disable-next-line: max-classes-per-file
+export class PullPayment extends Payment {
   constructor(
     id: string,
     to: PublicIdentifier,
@@ -69,9 +77,25 @@ export class PullPayment extends Payment{
     public transferedAmount: BigNumber,
     public ledger: PullAmount[],
   ) {
-    super(id, to, from, state, paymentToken, requiredStake, 
-      amountStaked, expirationDate, finalized, 
-      createdTimestamp, updatedTimestamp, 
-      collateralRecovered, disputeMediator)
+    super(
+      id,
+      to,
+      from,
+      state,
+      paymentToken,
+      requiredStake,
+      amountStaked,
+      expirationDate,
+      finalized,
+      createdTimestamp,
+      updatedTimestamp,
+      collateralRecovered,
+      disputeMediator,
+    );
   }
+}
+
+// tslint:disable-next-line: max-classes-per-file
+export class PullAmount {
+  constructor(public amount: BigNumber, public date: number) {}
 }

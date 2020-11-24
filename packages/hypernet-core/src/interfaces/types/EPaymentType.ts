@@ -1,4 +1,4 @@
 export enum EPaymentType {
-    Push = "PUSH",
-    Pull = "PULL"
+  Push = "PUSH",
+  Pull = "PULL",
 }

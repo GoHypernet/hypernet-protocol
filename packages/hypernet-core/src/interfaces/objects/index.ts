@@ -1,3 +1,4 @@
+export * from "./AssetBalance";
 export * from "./BigNumber";
 export * from "./ControlClaim";
 export * from "./EthereumAddress";
@@ -7,6 +8,7 @@ export * from "./HypernetLink";
 export * from "./Payment";
 export * from "./PublicIdentifier";
 export * from "./PublicKey";
+export * from "./SortedTransfers";
 export * from "./Token";
 export * from "./Balances";
 export * from "./HypernetTransferMetadata";

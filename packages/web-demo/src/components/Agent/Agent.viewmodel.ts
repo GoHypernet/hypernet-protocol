@@ -1,11 +1,10 @@
 import * as ko from "knockout";
 import html from "./Agent.template.html";
 import { LinkParams } from "../Link/Link.viewmodel";
-import { HypernetCore, IHypernetCore, BigNumber } from "@hypernetlabs/hypernet-core"
+import { HypernetCore, IHypernetCore, BigNumber, Balances } from "@hypernetlabs/hypernet-core"
 import { ButtonParams } from "../Button/Button.viewmodel";
-import { ProposedLinkParams } from "../ProposedLink/ProposedLink.viewmodel";
-import { EProposedLinkStatus } from "web-demo/src/types/EProposedLinkStatus";
 import { ethers } from "ethers";
+import { BalancesParams } from "../Balances/Balances.viewmodel";
 
 class AvailableAccount {
   constructor(public accountName: string, 
@@ -16,12 +15,11 @@ class AvailableAccount {
 
 export class AgentViewModel {
   public links: ko.ObservableArray<LinkParams>;
-  public proposedLinks: ko.ObservableArray<ProposedLinkParams>;
   public account: ko.Observable<AvailableAccount | null>;
   public publicIdentifier: ko.Observable<string>;
   public remoteAccount: ko.PureComputed<AvailableAccount>;
-  public clearLinks: ButtonParams;
-  public establishLink: ButtonParams;
+  public balances: BalancesParams
+  public pushPayment: ButtonParams;
   public depositFundsButton: ButtonParams;
   //public collateralizeButton: ButtonParams;
   public message: ko.Observable<string>;
@@ -45,37 +43,37 @@ export class AgentViewModel {
       "indra6HBZ5W5wjZ7HuC81aJ8yuSPPCDX2UGhWH8NanWqj54SUF6DNj7")
     ];
 
-    this.core.onLinkUpdated.subscribe({
-      next: (link) => {
-        const linkParams = this.links();
-        let matchFound = false;
-        for (const linkParam of linkParams) {
-          if (linkParam.link().id === link.id) {
-            linkParam.link(link);
-            matchFound = true;
-          }
-        }
-        if (!matchFound) {
-          this.links.push(new LinkParams(ko.observable(link)))
-        }
-        this.message("onLinkUpdated");
-      },
-    });
+    // this.core.onLinkUpdated.subscribe({
+    //   next: (link) => {
+    //     const linkParams = this.links();
+    //     let matchFound = false;
+    //     for (const linkParam of linkParams) {
+    //       if (linkParam.link().id === link.id) {
+    //         linkParam.link(link);
+    //         matchFound = true;
+    //       }
+    //     }
+    //     if (!matchFound) {
+    //       this.links.push(new LinkParams(ko.observable(link)))
+    //     }
+    //     this.message("onLinkUpdated");
+    //   },
+    // });
 
-    this.core.onLinkRequestReceived.subscribe({
-      next: (linkRequest) => {
-        const status = ko.observable<EProposedLinkStatus>(EProposedLinkStatus.Proposed);
-        this.proposedLinks.push(new ProposedLinkParams(linkRequest, status));
-        this.message("onLinkRequestReceived");
-      },
-    });
+    // this.core.onLinkRequestReceived.subscribe({
+    //   next: (linkRequest) => {
+    //     const status = ko.observable<EProposedLinkStatus>(EProposedLinkStatus.Proposed);
+    //     this.proposedLinks.push(new ProposedLinkParams(linkRequest, status));
+    //     this.message("onLinkRequestReceived");
+    //   },
+    // });
 
-    this.core.onLinkRejected.subscribe({
-      next: (linkRequest) => {
-        console.log(linkRequest);
-        this.message("onLinkRejected");
-      },
-    });
+    // this.core.onLinkRejected.subscribe({
+    //   next: (linkRequest) => {
+    //     console.log(linkRequest);
+    //     this.message("onLinkRejected");
+    //   },
+    // });
 
     this.core.onControlClaimed.subscribe({
       next: () => {
@@ -90,7 +88,6 @@ export class AgentViewModel {
     })
 
     this.links = ko.observableArray<LinkParams>();
-    this.proposedLinks = ko.observableArray<ProposedLinkParams>();
     this.message = ko.observable<string>("Starting");
     this.startupComplete = ko.observable(false);
     this.inControl = ko.observable(false);
@@ -105,19 +102,12 @@ export class AgentViewModel {
       this.publicIdentifier(publicIdentifier);
     });
 
-    this.clearLinks = new ButtonParams("Clear Links", async () => {
-      this.message("Clearing links");
-      await this.core.clearLinks();
-      this.links.removeAll();
-      this.message("Links cleared");
-    });
-
     this.depositFundsButton = new ButtonParams("Deposit Funds", async() => {
       await this.core.depositFunds("0x0000000000000000000000000000000000000000", ethers.utils.parseEther("1"));
       this.message("Deposited 1 ETH into router channel");
     });
 
-    this.establishLink = new ButtonParams("New Link", async () => {
+    this.pushPayment = new ButtonParams("Push Payment", async () => {
       const account = this.account();
       const remoteAccount = this.remoteAccount();
       if (account == null || remoteAccount == null) {
@@ -126,8 +116,8 @@ export class AgentViewModel {
       }
 
       this.message(`Establishing link with ${remoteAccount}`);
-      const newLink = await this.core.openLink(remoteAccount.publicIdentifier, "0x0000000000000000000000000000000000000000", BigNumber.from(10), "dispute-mediator-public-key", null);
-      this.links.push(new LinkParams(ko.observable(newLink)));
+      // const newLink = await this.core.openLink(remoteAccount.publicIdentifier, "0x0000000000000000000000000000000000000000", BigNumber.from(10), "dispute-mediator-public-key", null);
+      // this.links.push(new LinkParams(ko.observable(newLink)));
       this.message(`Link established with ${remoteAccount}`);
     });
 
@@ -141,10 +131,12 @@ export class AgentViewModel {
 
       return this.availableAccounts[0];
     });
+
+    this.balances = new BalancesParams(ko.observable(new Balances([])));
   }
 
   protected async startup() {
-    const accounts = await this.core.getAccounts();
+    const accounts = await this.core.getEthereumAccounts();
 
     console.log(`Using account ${accounts[0]}`)
 
@@ -158,14 +150,13 @@ export class AgentViewModel {
 
     console.log(account);
 
-    
     await this.core.initialize(account.accountAddress, account.privateKey);
+    const currentBalances = await this.core.getBalances();
 
-    const links = await this.core.getLinks();
-    const linkParams = new Array<LinkParams>();
-    for (const link of links) {
-      linkParams.push(new LinkParams(ko.observable(link)));
-    }
+    this.balances.balances(currentBalances);
+
+    const links = await this.core.getActiveLinks();
+    const linkParams = links.map((link) => new LinkParams(ko.observable(link)))
     this.links(linkParams);
   }
 }

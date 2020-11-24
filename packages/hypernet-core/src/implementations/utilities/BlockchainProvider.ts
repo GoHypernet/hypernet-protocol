@@ -21,17 +21,16 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
 
   protected async initialize(): Promise<void> {
     await window.ethereum.enable();
-    
+
     // A Web3Provider wraps a standard Web3 provider, which is
     // what Metamask injects as window.ethereum into each page
-    this.provider = new ethers.providers.Web3Provider(window.ethereum)
+    this.provider = new ethers.providers.Web3Provider(window.ethereum);
 
     // The Metamask plugin also allows signing transactions to
     // send ether and pay to change state within the blockchain.
     // For this, you need the account signer...
-    this.signer = this.provider.getSigner()
+    this.signer = this.provider.getSigner();
   }
-
 
   /**
    * getProvider
@@ -42,7 +41,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
       this.initializationPromise = this.initialize();
     }
     await this.initializationPromise;
-    
+
     if (this.provider == null) {
       throw Error("No provider available!");
     }
@@ -55,7 +54,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
       this.initializationPromise = this.initialize();
     }
     await this.initializationPromise;
-    
+
     if (this.signer == null) {
       throw Error("No signer available!");
     }

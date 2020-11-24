@@ -19,6 +19,7 @@ export class HypernetContext {
   ) {}
 }
 
+// tslint:disable-next-line: max-classes-per-file
 export class InitializedHypernetContext {
   constructor(
     public account: EthereumAddress,

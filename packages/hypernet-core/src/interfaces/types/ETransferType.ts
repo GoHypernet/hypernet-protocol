@@ -1,7 +1,7 @@
 export enum ETransferType {
-    Offer,
-    Insurance,
-    Parameterized,
-    PullRecord,
-    Unrecognized
+  Offer,
+  Insurance,
+  Parameterized,
+  PullRecord,
+  Unrecognized,
 }
