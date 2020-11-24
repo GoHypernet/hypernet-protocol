@@ -1,6 +1,4 @@
-import {
-  PublicIdentifier,
-} from "@connext/vector-types";
+import { PublicIdentifier } from "@connext/vector-types";
 import { EthereumAddress } from "./EthereumAddress";
 
 export class HypernetConfig {
@@ -12,5 +10,5 @@ export class HypernetConfig {
     public routerUrl: string,
     public hypertokenAddress: EthereumAddress,
     public hypernetProtocolDomain: string,
-  ) { }
+  ) {}
 }

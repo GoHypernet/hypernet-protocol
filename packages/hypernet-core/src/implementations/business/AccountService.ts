@@ -3,7 +3,7 @@ import { IAccountsRepository } from "@interfaces/data";
 import { Balances, BigNumber } from "@interfaces/objects";
 
 export class AccountService implements IAccountService {
-  constructor(protected accountRepository: IAccountsRepository) { }
+  constructor(protected accountRepository: IAccountsRepository) {}
 
   public async getAccounts(): Promise<string[]> {
     return this.accountRepository.getAccounts();

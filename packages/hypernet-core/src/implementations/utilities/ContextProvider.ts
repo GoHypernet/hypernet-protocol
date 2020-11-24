@@ -30,7 +30,7 @@ export class ContextProvider implements IContextProvider {
       onPushPaymentProposed,
       onPullPaymentProposed,
       onPushPaymentReceived,
-      onPullPaymentApproved
+      onPullPaymentApproved,
     );
   }
   public async getContext(): Promise<HypernetContext> {
@@ -38,12 +38,12 @@ export class ContextProvider implements IContextProvider {
   }
 
   public async getInitializedContext(): Promise<InitializedHypernetContext> {
-    if (this.context.account == null || this.context.publicIdentifier == null
-      || this.context.privateKey == null) {
-      throw new Error("Can not open a link until you have set your working account. Call HypernetCore.initialize()!")
+    if (this.context.account == null || this.context.publicIdentifier == null || this.context.privateKey == null) {
+      throw new Error("Can not open a link until you have set your working account. Call HypernetCore.initialize()!");
     }
 
-    return new InitializedHypernetContext(this.context.account,
+    return new InitializedHypernetContext(
+      this.context.account,
       this.context.privateKey,
       this.context.publicIdentifier,
       this.context.inControl,
@@ -52,7 +52,8 @@ export class ContextProvider implements IContextProvider {
       this.context.onPushPaymentProposed,
       this.context.onPullPaymentProposed,
       this.context.onPushPaymentReceived,
-      this.context.onPullPaymentApproved);
+      this.context.onPullPaymentApproved,
+    );
   }
 
   public setContext(context: HypernetContext): void {
@@ -60,7 +61,7 @@ export class ContextProvider implements IContextProvider {
       const publicKey = getPublicKeyFromPrivateKey(context.privateKey);
       context.publicIdentifier = getPublicIdentifierFromPublicKey(publicKey);
     }
-    
+
     this.context = context;
   }
 }

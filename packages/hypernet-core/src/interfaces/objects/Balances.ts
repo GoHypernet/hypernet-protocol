@@ -5,7 +5,7 @@ import { BigNumber, EthereumAddress } from "@interfaces/objects";
  * @param assets the collection of AssetBalances within the channel
  */
 export class Balances {
-    constructor(public assets: AssetBalance[]) {}
+  constructor(public assets: AssetBalance[]) {}
 }
 
 /**
@@ -16,8 +16,10 @@ export class Balances {
  * @param freeAmount the amount of the asset that is available for sending in transfers
  */
 export class AssetBalance {
-    constructor(public assetAddresss: EthereumAddress,
-        public totalAmount: BigNumber,
-        public lockedAmount: BigNumber,
-        public freeAmount: BigNumber) {}
+  constructor(
+    public assetAddresss: EthereumAddress,
+    public totalAmount: BigNumber,
+    public lockedAmount: BigNumber,
+    public freeAmount: BigNumber,
+  ) {}
 }

@@ -1,4 +1,3 @@
-
 export enum EPaymentState {
   Proposed,
   InvalidProposal,
@@ -7,5 +6,5 @@ export enum EPaymentState {
   Approved,
   InvalidFunds,
   Disputed,
-  Finalized
+  Finalized,
 }

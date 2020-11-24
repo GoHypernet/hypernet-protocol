@@ -4,10 +4,8 @@ import { AssetBalance, Balances, BigNumber, EthereumAddress } from "@interfaces/
  * @todo What is the main role/purpose of this class? Description here.
  */
 export interface IAccountService {
-    getAccounts(): Promise<string[]>;
-    depositFunds(assetAddress: EthereumAddress, amount: BigNumber): Promise<void>;
-    withdrawFunds(assetAddress: EthereumAddress,
-        amount: BigNumber,
-        destinationAddress: EthereumAddress): Promise<void>;
-    getBalances(): Promise<Balances>;
+  getAccounts(): Promise<string[]>;
+  depositFunds(assetAddress: EthereumAddress, amount: BigNumber): Promise<void>;
+  withdrawFunds(assetAddress: EthereumAddress, amount: BigNumber, destinationAddress: EthereumAddress): Promise<void>;
+  getBalances(): Promise<Balances>;
 }

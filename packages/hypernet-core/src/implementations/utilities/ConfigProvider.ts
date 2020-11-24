@@ -2,15 +2,13 @@ import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 import { HypernetConfig } from "@interfaces/objects/HypernetConfig";
 import { getPublicIdentifierFromPublicKey } from "@connext/vector-utils/dist/identifiers";
 import { getPublicKeyFromPrivateKey } from "@connext/vector-utils/dist/crypto";
-import { Wallet, constants} from "ethers";
+import { Wallet, constants } from "ethers";
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
 
   constructor(config?: HypernetConfig) {
     if (config == null) {
-
-
       this.config = new HypernetConfig(
         "http://localhost:5000", // iframeSource
         "isolate income chaos sustain harsh suggest dawn kid sentence sad unable palace upper source below", // Router mnemonic
@@ -23,21 +21,17 @@ export class ConfigProvider implements IConfigProvider {
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
       this.config.routerPublicIdentifier = getPublicIdentifierFromPublicKey(
-        getPublicKeyFromPrivateKey(wallet.privateKey));
+        getPublicKeyFromPrivateKey(wallet.privateKey),
+      );
 
       console.log("wallet private key", wallet.privateKey);
       console.log("routerPublicIdentifier", this.config.routerPublicIdentifier);
-    }
-    else {
+    } else {
       this.config = config;
     }
   }
 
   public async getConfig(): Promise<HypernetConfig> {
-    return Promise.resolve(
-      this.config
-    );
+    return Promise.resolve(this.config);
   }
 }
-
-

@@ -10,8 +10,8 @@ export {
   PushPayment,
   PullPayment,
   Balances,
-  AssetBalance
+  AssetBalance,
 } from "./interfaces/objects";
-export {EPaymentState, EPaymentType} from "./interfaces/types";
+export { EPaymentState, EPaymentType } from "./interfaces/types";
 import "./typings/3box";
 import "./typings/detect-provider";

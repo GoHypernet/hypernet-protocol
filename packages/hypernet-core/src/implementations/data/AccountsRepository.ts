@@ -4,11 +4,11 @@ import { AssetBalance, Balances, BigNumber, EthereumAddress } from "@interfaces/
 import { IVectorUtils, IBlockchainProvider, IBrowserNodeProvider } from "@interfaces/utilities";
 
 export class AccountsRepository implements IAccountsRepository {
-  constructor(protected blockchainProvider: IBlockchainProvider,
+  constructor(
+    protected blockchainProvider: IBlockchainProvider,
     protected vectorUtils: IVectorUtils,
-    protected browserNodeProvider: IBrowserNodeProvider) { }
-
-
+    protected browserNodeProvider: IBrowserNodeProvider,
+  ) {}
 
   public async getAccounts(): Promise<string[]> {
     const provider = await this.blockchainProvider.getProvider();
@@ -20,20 +20,24 @@ export class AccountsRepository implements IAccountsRepository {
     const browserNode = await this.browserNodeProvider.getBrowserNode();
     const channelAddress = await this.vectorUtils.getRouterChannelAddress();
 
-    const channelStateRes = await browserNode.getStateChannel({channelAddress: channelAddress});
+    const channelStateRes = await browserNode.getStateChannel({ channelAddress: channelAddress });
 
     if (channelStateRes.isError) {
-      throw new Error("Cannot get the state channel status!")
+      throw new Error("Cannot get the state channel status!");
     }
 
     const channelState = channelStateRes.getValue() as FullChannelState;
 
     const assetBalances = new Array<AssetBalance>();
     for (let i = 0; i < channelState.assetIds.length; i++) {
-      assetBalances.push(new AssetBalance(channelState.assetIds[i],
-        BigNumber.from(channelState.balances[i]),
+      assetBalances.push(
+        new AssetBalance(
+          channelState.assetIds[i],
+          BigNumber.from(channelState.balances[i]),
           BigNumber.from(0),
-          BigNumber.from(0)))
+          BigNumber.from(0),
+        ),
+      );
     }
     return new Balances(assetBalances);
   }
@@ -46,10 +50,7 @@ export class AccountsRepository implements IAccountsRepository {
         return assetBalance;
       }
     }
-    return new AssetBalance(assetAddress,
-      BigNumber.from(0),
-      BigNumber.from(0),
-      BigNumber.from(0));
+    return new AssetBalance(assetAddress, BigNumber.from(0), BigNumber.from(0), BigNumber.from(0));
   }
 
   public async depositFunds(assetAddress: EthereumAddress, amount: BigNumber): Promise<void> {
@@ -79,9 +80,7 @@ export class AccountsRepository implements IAccountsRepository {
     }
   }
 
-  public async withdrawFunds(assetAddress: string,
-    amount: BigNumber,
-    destinationAddress: string): Promise<void> {
+  public async withdrawFunds(assetAddress: string, amount: BigNumber, destinationAddress: string): Promise<void> {
     const channelAddress = await this.vectorUtils.getRouterChannelAddress();
     const browserNode = await this.browserNodeProvider.getBrowserNode();
 
@@ -90,7 +89,7 @@ export class AccountsRepository implements IAccountsRepository {
       amount: amount.toString(),
       assetId: assetAddress,
       recipient: destinationAddress,
-      fee: "0"
+      fee: "0",
     });
   }
 }
