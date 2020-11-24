@@ -140,17 +140,17 @@ export class HypernetCore implements IHypernetCore {
     return this.accountService.getBalances();
   }
 
-  public async getLedgers(): Promise<HypernetLink[]> {
-    return this.LinkService.getLedgers();
+  public async getLinks(): Promise<HypernetLink[]> {
+    return this.LinkService.getLinks();
   }
 
 
-  public async getActiveLedgers(): Promise<HypernetLink[]> {
+  public async getActiveLinks(): Promise<HypernetLink[]> {
     throw new Error('Method not yet implemented.')
   }
 
 
-  public async getLedgerByCounterparty(counterPartyAccount: PublicIdentifier): Promise<HypernetLink> {
+  public async getLinkByCounterparty(counterPartyAccount: PublicIdentifier): Promise<HypernetLink> {
     throw new Error('Method not yet implemented.')
   }
 

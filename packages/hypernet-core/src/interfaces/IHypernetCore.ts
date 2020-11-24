@@ -74,18 +74,18 @@ export interface IHypernetCore {
   /**
    * Returns all Hypernet Ledger for the user
    */
-  getLedgers(): Promise<HypernetLink[]>;
+  getLinks(): Promise<HypernetLink[]>;
 
   /**
    * Returns all active Hypernet Ledgers for the user
    * An active link contains an incomplete/non-finalized transfer.
    */
-  getActiveLedgers(): Promise<HypernetLink[]>;
+  getActiveLinks(): Promise<HypernetLink[]>;
 
   /**
    * Returns the Hypernet Ledger for the user with the specified counterparty
    */
-  getLedgerByCounterparty(counterPartyAccount: PublicIdentifier): Promise<HypernetLink>
+  getLinkByCounterparty(counterPartyAccount: PublicIdentifier): Promise<HypernetLink>
   
   /**
    * sendFunds can only be called by the Consumer. It sends a one-time payment to the provider.

@@ -1,0 +1,68 @@
+<div>
+  <h2>Pull Payment</h2>
+  <h2 data-bind="text: id"></h2>
+  <table>
+    <thead>
+      <tr>
+        <td>Property</td>
+        <td>Value</td>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>To</td>
+        <td data-bind="text: to"></td>
+      </tr>
+      <tr>
+        <td>From</td>
+        <td data-bind="text: from"></td>
+      </tr>
+      <tr>
+        <td>State</td>
+        <td data-bind='component: {
+                name: "payment-status",
+                params: state}'></td>
+      </tr>
+      <tr>
+        <td>Payment Token</td>
+        <td data-bind="text: paymentToken"></td>
+      </tr>
+      <tr>
+        <td>Required Stake</td>
+        <td data-bind="text: requiredStake"></td>
+      </tr>
+      <tr>
+        <td>Amount Staked</td>
+        <td data-bind="text: amountStaked"></td>
+      </tr>
+      <tr>
+        <td>Expiration Date</td>
+        <td data-bind="text: expirationDate"></td>
+      </tr>
+      <tr>
+        <td>Finalized</td>
+        <td data-bind="text: finalized"></td>
+      </tr>
+      <tr>
+        <td>Created</td>
+        <td data-bind="text: createdTimestamp"></td>
+      </tr>
+      <tr>
+        <td>Updated</td>
+        <td data-bind="text: updatedTimestamp"></td>
+      </tr>
+      <tr>
+        <td>Collateral Recovered</td>
+        <td data-bind="text: collateralRecovered"></td>
+      </tr>
+      <tr>
+        <td>Dispute Mediator</td>
+        <td data-bind="text: disputeMediator"></td>
+      </tr>
+      <tr>
+        <td>Payment Amount</td>
+        <td data-bind="text: paymentAmount"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>

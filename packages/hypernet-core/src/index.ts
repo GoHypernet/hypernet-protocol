@@ -5,7 +5,13 @@ export {
   HypernetLink,
   EthereumAddress,
   PublicKey,
-  BigNumber
+  BigNumber,
+  Payment,
+  PushPayment,
+  PullPayment,
+  Balances,
+  AssetBalance
 } from "./interfaces/objects";
+export {EPaymentState, EPaymentType} from "./interfaces/types";
 import "./typings/3box";
 import "./typings/detect-provider";

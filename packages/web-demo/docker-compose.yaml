@@ -100,3 +100,8 @@ services:
     depends_on:
       - nats
       - auth
+
+  iframe:
+    image: connextproject/vector_iframe_app:latest
+    ports:
+      - 5000:5000

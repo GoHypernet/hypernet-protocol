@@ -7,7 +7,7 @@ export class LinkService implements ILinkService {
 
     }
     
-    public async getLedgers(): Promise<HypernetLink[]> {
+    public async getLinks(): Promise<HypernetLink[]> {
         return this.ledgerRespository.getHypernetLinks();
     }
 

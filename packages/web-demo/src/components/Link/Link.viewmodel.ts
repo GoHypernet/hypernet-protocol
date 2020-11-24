@@ -1,52 +1,41 @@
 import * as ko from "knockout";
-import { HypernetLink, EthereumAddress, PublicKey, ELinkStatus, BigNumber } from "@hypernetlabs/hypernet-core";
+import { HypernetLink, EthereumAddress, PublicKey, BigNumber } from "@hypernetlabs/hypernet-core";
 import html from "./Link.template.html";
+import { PushPaymentParams } from "../PushPayment/PushPayment.viewmodel";
+import { PullPaymentParams } from "../PullPayment/PullPayment.viewmodel";
 
 export class LinkParams {
-  constructor(public link: ko.Observable<HypernetLink>) {}
+  constructor(public link: ko.Observable<HypernetLink>) { }
 }
 
 // tslint:disable-next-line: max-classes-per-file
 export class LinkViewModel {
-  public id: string;
-  public consumer: EthereumAddress;
-  public provider: EthereumAddress;
-  public paymentToken: EthereumAddress;
-  public disputeMediator: PublicKey;
-  public consumerTotalDeposit: ko.Computed<BigNumber>;
-  public consumerBalance: ko.Computed<BigNumber>;
-  public providerBalance: ko.Computed<BigNumber>;
-  public providerStake: ko.Computed<BigNumber>;
-  public status: ko.Computed<ELinkStatus>;
-  public internalChannelId: ko.Computed<string | null>;
+  public counterpartyId: ko.Computed<string>;
+  public pushPayments: ko.Computed<PushPaymentParams[]>;
+  public pullPayments: ko.Computed<PullPaymentParams[]>;
 
   protected link: ko.Observable<HypernetLink>;
 
   constructor(params: LinkParams) {
     this.link = params.link;
-    this.id = `Link ${this.link().id}`;
-    this.consumer = this.link().consumer;
-    this.provider = this.link().provider;
-    this.paymentToken = this.link().paymentToken;
-    this.disputeMediator = this.link().disputeMediator;
+    this.counterpartyId = ko.pureComputed(() => {
+      return `Counterparty ID ${this.link().counterPartyAccount}`;
+    });
 
-    this.consumerTotalDeposit = ko.pureComputed(() => {
-      return this.link().consumerTotalDeposit;
+    this.pushPayments = ko.pureComputed(() => {
+      const link = this.link();
+
+      return link.pushPayments.map((val) => {
+        return new PushPaymentParams(ko.observable(val));
+      });
     });
-    this.consumerBalance = ko.pureComputed(() => {
-      return this.link().consumerBalance;
-    });
-    this.providerBalance = ko.pureComputed(() => {
-      return this.link().providerBalance;
-    });
-    this.providerStake = ko.pureComputed(() => {
-      return this.link().providerStake;
-    });
-    this.status = ko.pureComputed(() => {
-      return this.link().status;
-    });
-    this.internalChannelId = ko.pureComputed(() => {
-      return this.link().internalChannelId;
+
+    this.pullPayments = ko.pureComputed(() => {
+      const link = this.link();
+
+      return link.pullPayments.map((val) => {
+        return new PullPaymentParams(ko.observable(val));
+      });
     });
   }
 }
