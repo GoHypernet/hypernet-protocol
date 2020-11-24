@@ -12,8 +12,8 @@
   "author": "Charlie Sibbach <charlie@hyperdyne.io>",
   "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/core#readme",
   "license": "ISC",
-  "main": "lib/index",
-  "typings": "lib/index",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -34,9 +34,9 @@
   },
   "dependencies": {
     "3box": "^1.22.2",
-    "@connext/vector-browser-node": "^0.0.13",
-    "@connext/vector-types": "^0.0.13",
-    "@connext/vector-utils": "^0.0.13",
+    "@connext/vector-browser-node": "^0.0.14",
+    "@connext/vector-types": "^0.0.14",
+    "@connext/vector-utils": "^0.0.14",
     "@metamask/detect-provider": "^1.1.0",
     "@types/pino": "^6.3.2",
     "bignumber": "^1.1.0",
@@ -61,7 +61,7 @@
     "build": "npm run clean && npm run compile",
     "clean": "",
     "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",
-    "compile": "tsc -p tsconfig.build.json",
+    "compile": "tsc -p tsconfig.json",
     "prepare": "npm run build",
     "prepublishOnly": "npm test && npm run lint",
     "preversion": "npm run lint",
