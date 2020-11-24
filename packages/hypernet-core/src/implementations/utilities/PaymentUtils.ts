@@ -10,12 +10,12 @@ import {
   PullAmount,
   PullPayment,
   PushPayment,
+  SortedTransfers,
 } from "@interfaces/objects";
 import { FullTransferState } from "@connext/vector-types";
 import { BrowserNode } from "@connext/vector-browser-node";
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
 import moment from "moment";
-import { ISortedTransfers } from "@interfaces/utilities";
 
 export class PaymentUtils implements IPaymentUtils {
   constructor(protected configProvider: IConfigProvider) {}
@@ -29,7 +29,7 @@ export class PaymentUtils implements IPaymentUtils {
 
     const paymentComponents = paymentId.split(":");
 
-    return paymentComponents[0] == config.hypernetProtocolDomain;
+    return paymentComponents[0] === config.hypernetProtocolDomain;
   }
 
   /**
@@ -153,12 +153,12 @@ export class PaymentUtils implements IPaymentUtils {
   ): Promise<Payment> {
     // const signerAddress = getSignerAddressFromPublicIdentifier(context.publicIdentifier);
 
-    let [domain, paymentType, id] = fullPaymentId.split(":");
-    if (domain != config.hypernetProtocolDomain) {
+    const [domain, paymentType, id] = fullPaymentId.split(":");
+    if (domain !== config.hypernetProtocolDomain) {
       throw new Error(`Invalid payment domain: ${domain}`);
     }
 
-    if (id == "" || id == null) {
+    if (id === "" || id == null) {
       throw new Error(`Missing id component of paymentId`);
     }
 
@@ -179,7 +179,7 @@ export class PaymentUtils implements IPaymentUtils {
 
     // TODO: Figure out how to determine if the payment is Disputed
 
-    if (paymentType == EPaymentType.Pull) {
+    if (paymentType === EPaymentType.Pull) {
       return this.transfersToPullPayment(
         id,
         sortedTransfers.metadata.to,
@@ -188,7 +188,7 @@ export class PaymentUtils implements IPaymentUtils {
         sortedTransfers,
         sortedTransfers.offerTransfer.meta,
       );
-    } else if (paymentType == EPaymentType.Push) {
+    } else if (paymentType === EPaymentType.Push) {
       return this.transfersToPushPayment(
         id,
         sortedTransfers.metadata.to,
@@ -216,13 +216,13 @@ export class PaymentUtils implements IPaymentUtils {
     browserNode: BrowserNode,
   ): Promise<Payment[]> {
     // First, we are going to sort the transfers into buckets based on their payment_id
-    let transfersByPaymentId = new Map<string, FullTransferState[]>();
-    for (let transfer of transfers) {
+    const transfersByPaymentId = new Map<string, FullTransferState[]>();
+    for (const transfer of transfers) {
       const paymentId = transfer.meta.paymentId;
 
       // Get the existing array of payments. Initialize it if it's not there.
       let transferArray = transfersByPaymentId.get(paymentId);
-      if (transferArray == undefined) {
+      if (transferArray === undefined) {
         transferArray = [];
         transfersByPaymentId.set(paymentId, transferArray);
       }
@@ -262,7 +262,7 @@ export class PaymentUtils implements IPaymentUtils {
    * @param transfers
    * @param browserNode
    */
-  public async sortTransfers(
+  protected async sortTransfers(
     paymentId: string,
     transfers: FullTransferState[],
     browserNode: BrowserNode,
@@ -273,30 +273,30 @@ export class PaymentUtils implements IPaymentUtils {
     // transfers.concat(inactiveTransfers);
 
     const offerTransfers = transfers.filter((val) => {
-      return this.getTransferType(val) == ETransferType.Offer;
+      return this.getTransferType(val) === ETransferType.Offer;
     });
 
     const insuranceTransfers = transfers.filter((val) => {
-      return this.getTransferType(val) == ETransferType.Insurance;
+      return this.getTransferType(val) === ETransferType.Insurance;
     });
 
     const parameterizedTransfers = transfers.filter((val) => {
-      return this.getTransferType(val) == ETransferType.Parameterized;
+      return this.getTransferType(val) === ETransferType.Parameterized;
     });
 
     const pullTransfers = transfers.filter((val) => {
-      return this.getTransferType(val) == ETransferType.PullRecord;
+      return this.getTransferType(val) === ETransferType.PullRecord;
     });
 
     const unrecognizedTransfers = transfers.filter((val) => {
-      return this.getTransferType(val) == ETransferType.Unrecognized;
+      return this.getTransferType(val) === ETransferType.Unrecognized;
     });
 
     if (unrecognizedTransfers.length > 0) {
       throw new Error("Payment includes unrecognized transfer types!");
     }
 
-    if (offerTransfers.length != 1) {
+    if (offerTransfers.length !== 1) {
       // TODO: this could be handled more elegantly; if there's other payments
       // but no offer, it's still a valid payment
       throw new Error("Invalid payment, no offer transfer!");
@@ -304,14 +304,14 @@ export class PaymentUtils implements IPaymentUtils {
     const offerTransfer = offerTransfers[0];
 
     let insuranceTransfer: FullTransferState | null = null;
-    if (insuranceTransfers.length == 1) {
+    if (insuranceTransfers.length === 1) {
       insuranceTransfer = insuranceTransfers[0];
     } else if (insuranceTransfers.length > 1) {
       throw new Error("Invalid payment, too many insurance transfers!");
     }
 
     let parameterizedTransfer: FullTransferState | null = null;
-    if (parameterizedTransfers.length == 1) {
+    if (parameterizedTransfers.length === 1) {
       parameterizedTransfer = parameterizedTransfers[0];
     } else if (parameterizedTransfers.length > 1) {
       throw new Error("Invalid payment, too many parameterized transfers!");
@@ -325,14 +325,4 @@ export class PaymentUtils implements IPaymentUtils {
       offerTransfer.meta,
     );
   }
-}
-
-export class SortedTransfers implements ISortedTransfers {
-  constructor(
-    public offerTransfer: FullTransferState,
-    public insuranceTransfer: FullTransferState | null,
-    public parameterizedTransfer: FullTransferState | null,
-    public pullRecordTransfers: FullTransferState[],
-    public metadata: IHypernetTransferMetadata,
-  ) {}
 }

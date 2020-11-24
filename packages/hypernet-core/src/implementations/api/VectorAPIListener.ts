@@ -28,20 +28,20 @@ export class VectorAPIListener implements IVectorListener {
       }
 
       // Determine if you sent the transfer, in which case you can ignore this
-      if (metadata.from == context.account) {
+      if (metadata.from === context.account) {
         return;
       }
 
       // If you didn't send this transfer, you want to notify the user
       // that a payment is available for them to accept (insurance, paramterized, etc)
       const transferType = this.paymentUtils.getTransferType(payload.transfer);
-      if (transferType == ETransferType.Offer) {
+      if (transferType === ETransferType.Offer) {
         this.paymentService.offerReceived(metadata.paymentId);
-      } else if (transferType == ETransferType.Insurance) {
+      } else if (transferType === ETransferType.Insurance) {
         this.paymentService.stakePosted(metadata.paymentId);
-      } else if (transferType == ETransferType.Parameterized) {
+      } else if (transferType === ETransferType.Parameterized) {
         this.paymentService.paymentPosted(metadata.paymentId);
-      } else if (transferType == ETransferType.PullRecord) {
+      } else if (transferType === ETransferType.PullRecord) {
         this.paymentService.pullRecorded(metadata.paymentId);
       } else {
         throw new Error("Unrecognized transfer type!");

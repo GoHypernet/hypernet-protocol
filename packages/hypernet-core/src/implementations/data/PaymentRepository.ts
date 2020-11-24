@@ -10,6 +10,7 @@ import {
 import { EPaymentType } from "@interfaces/types";
 import { EthereumAddress, PublicKey } from "@interfaces/objects";
 import moment from "moment";
+import { FullTransferState } from "@connext/vector-types";
 
 export class PaymentRepository implements IPaymentRepository {
   constructor(
@@ -41,20 +42,20 @@ export class PaymentRepository implements IPaymentRepository {
     const configPromise = await this.configProvider.getConfig();
     const contextPromise = await this.contextProvider.getInitializedContext();
 
-    let [browserNode, config, context] = await Promise.all([browserNodePromise, configPromise, contextPromise]);
+    const [browserNode, config, context] = await Promise.all([browserNodePromise, configPromise, contextPromise]);
 
     // Create a null transfer, with the terms of the payment in the metadata.
     const paymentId = await this.paymentUtils.createPaymentId(EPaymentType.Push);
     const transfer = await this.vectorUtils.createNullTransfer(counterPartyAccount, {
-      paymentId: paymentId,
+      paymentId,
       creationDate: moment().unix(),
       to: counterPartyAccount,
       from: context.account,
       requiredStake: requiredStake.toString(),
       paymentAmount: amount.toString(),
-      expirationDate: expirationDate,
-      paymentToken: paymentToken,
-      disputeMediator: disputeMediator,
+      expirationDate,
+      paymentToken,
+      disputeMediator,
     } as IHypernetTransferMetadata);
 
     // Return the payment
@@ -73,14 +74,14 @@ export class PaymentRepository implements IPaymentRepository {
     const configPromise = await this.configProvider.getConfig();
     const contextPromise = await this.contextProvider.getInitializedContext();
 
-    let [browserNode, channelAddress, config, context] = await Promise.all([
+    const [browserNode, channelAddress, config, context] = await Promise.all([
       browserNodePromise,
       channelAddressPromise,
       configPromise,
       contextPromise,
     ]);
 
-    const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress: channelAddress });
+    const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress });
 
     if (activeTransfersRes.isError) {
       const error = activeTransfersRes.getError();
@@ -91,7 +92,8 @@ export class PaymentRepository implements IPaymentRepository {
       return paymentIds.includes(val.meta.paymentId);
     });
 
-    const payments = await this.paymentUtils.transfersToPayments(activeTransfers, config, context, browserNode);
+    const payments = await this.paymentUtils.transfersToPayments(activeTransfers as FullTransferState[], 
+        config, context, browserNode);
 
     return payments.reduce((map, obj) => {
       map.set(obj.id, obj);

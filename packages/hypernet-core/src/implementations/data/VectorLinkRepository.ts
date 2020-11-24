@@ -1,3 +1,4 @@
+import { FullTransferState } from "@connext/vector-types";
 import { ILinkRepository } from "@interfaces/data";
 import { HypernetLink, Payment, PublicIdentifier } from "@interfaces/objects";
 import {
@@ -52,14 +53,14 @@ export class VectorLinkRepository implements ILinkRepository {
     const configPromise = await this.configProvider.getConfig();
     const contextPromise = await this.contextProvider.getInitializedContext();
 
-    let [browserNode, channelAddress, config, context] = await Promise.all([
+    const [browserNode, channelAddress, config, context] = await Promise.all([
       browserNodePromise,
       channelAddressPromise,
       configPromise,
       contextPromise,
     ]);
 
-    const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress: channelAddress });
+    const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress });
 
     if (activeTransfersRes.isError) {
       const error = activeTransfersRes.getError();
@@ -67,7 +68,8 @@ export class VectorLinkRepository implements ILinkRepository {
     }
 
     const activeTransfers = activeTransfersRes.getValue();
-    const payments = await this.paymentUtils.transfersToPayments(activeTransfers, config, context, browserNode);
+    const payments = await this.paymentUtils.transfersToPayments(activeTransfers as FullTransferState[], 
+      config, context, browserNode);
 
     return await this.linkUtils.paymentsToHypernetLinks(payments, context);
   }
@@ -82,14 +84,14 @@ export class VectorLinkRepository implements ILinkRepository {
     const configPromise = await this.configProvider.getConfig();
     const contextPromise = await this.contextProvider.getInitializedContext();
 
-    let [browserNode, channelAddress, config, context] = await Promise.all([
+    const [browserNode, channelAddress, config, context] = await Promise.all([
       browserNodePromise,
       channelAddressPromise,
       configPromise,
       contextPromise,
     ]);
 
-    const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress: channelAddress });
+    const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress });
 
     if (activeTransfersRes.isError) {
       const error = activeTransfersRes.getError();
@@ -97,14 +99,15 @@ export class VectorLinkRepository implements ILinkRepository {
     }
 
     const activeTransfers = activeTransfersRes.getValue().filter((val) => {
-      return val.meta.to == counterpartyId || val.meta.from == counterpartyId;
+      return val.meta.to === counterpartyId || val.meta.from === counterpartyId;
     });
 
     // Because of the filter above, this should only produce a single link
-    const payments = await this.paymentUtils.transfersToPayments(activeTransfers, config, context, browserNode);
+    const payments = await this.paymentUtils.transfersToPayments(activeTransfers as FullTransferState[], 
+      config, context, browserNode);
     const links = await this.linkUtils.paymentsToHypernetLinks(payments, context);
 
-    if (links.length == 0) {
+    if (links.length === 0) {
       return new HypernetLink(counterpartyId, [], [], [], [], []);
     }
 

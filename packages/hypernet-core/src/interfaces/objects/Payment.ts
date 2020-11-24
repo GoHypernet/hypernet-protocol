@@ -3,10 +3,6 @@ import { BigNumber, EthereumAddress, PublicKey } from "@interfaces/objects";
 import { EPaymentState } from "@interfaces/types";
 import { PublicIdentifier } from "@connext/vector-types";
 
-export class PullAmount {
-  constructor(public amount: BigNumber, public date: number) {}
-}
-
 export abstract class Payment {
   constructor(
     public id: string,
@@ -25,6 +21,7 @@ export abstract class Payment {
   ) {}
 }
 
+// tslint:disable-next-line: max-classes-per-file
 export class PushPayment extends Payment {
   constructor(
     id: string,
@@ -60,6 +57,7 @@ export class PushPayment extends Payment {
   }
 }
 
+// tslint:disable-next-line: max-classes-per-file
 export class PullPayment extends Payment {
   constructor(
     id: string,
@@ -95,4 +93,9 @@ export class PullPayment extends Payment {
       disputeMediator,
     );
   }
+}
+
+// tslint:disable-next-line: max-classes-per-file
+export class PullAmount {
+  constructor(public amount: BigNumber, public date: number) {}
 }

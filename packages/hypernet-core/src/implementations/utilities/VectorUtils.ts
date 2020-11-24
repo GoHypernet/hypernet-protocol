@@ -59,8 +59,8 @@ export class VectorUtils implements IVectorUtils {
     console.log(channels2);
 
     let channel: FullChannelState | null = null;
-    for (let channelAddress of channels2) {
-      const channelResult = await browserNode.getStateChannel({ channelAddress: channelAddress });
+    for (const channelAddress of channels2) {
+      const channelResult = await browserNode.getStateChannel({ channelAddress });
       if (channelResult.isError) {
         throw new Error("Cannot get details of state channel!");
       }
@@ -69,7 +69,7 @@ export class VectorUtils implements IVectorUtils {
 
       if (channel != null) {
         console.log(channel);
-        if (channel.aliceIdentifier != config.routerPublicIdentifier) {
+        if (channel.aliceIdentifier !== config.routerPublicIdentifier) {
           continue;
         }
         this.channelAddress = channel.channelAddress;

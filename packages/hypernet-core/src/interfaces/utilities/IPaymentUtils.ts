@@ -6,11 +6,11 @@ import {
   PublicIdentifier,
   PullPayment,
   PushPayment,
+  SortedTransfers,
 } from "@interfaces/objects";
 import { FullTransferState } from "@connext/vector-types";
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
 import { BrowserNode } from "@connext/vector-browser-node";
-import { SortedTransfers } from "@implementations/utilities";
 
 export interface IPaymentUtils {
   /**
@@ -55,14 +55,6 @@ export interface IPaymentUtils {
 
   /**
    *
-   * @param paymentId
-   * @param transfers
-   * @param browserNode
-   */
-  sortTransfers(paymentId: string, transfers: FullTransferState[], browserNode: BrowserNode): Promise<ISortedTransfers>;
-
-  /**
-   *
    * @param transfer
    */
   getTransferType(transfer: FullTransferState): ETransferType;
@@ -102,12 +94,4 @@ export interface IPaymentUtils {
     sortedTransfers: SortedTransfers,
     metadata: IHypernetTransferMetadata,
   ): PushPayment;
-}
-
-export interface ISortedTransfers {
-  offerTransfer: FullTransferState;
-  insuranceTransfer: FullTransferState | null;
-  parameterizedTransfer: FullTransferState | null;
-  pullRecordTransfers: FullTransferState[];
-  metadata: IHypernetTransferMetadata;
 }

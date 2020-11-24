@@ -26,7 +26,7 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
       throw new Error("Account mnemonic must be established first!");
     }
 
-    //const wallet = Wallet.fromMnemonic(context.accountMnemonic);
+    // const wallet = Wallet.fromMnemonic(context.accountMnemonic);
     this.channelSigner = new ChannelSigner(context.privateKey);
     console.log(`Signer from mnemonic: ${this.channelSigner.publicIdentifier}`);
 

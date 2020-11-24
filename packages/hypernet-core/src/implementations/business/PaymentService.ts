@@ -41,7 +41,7 @@ export class PaymentService implements IPaymentService {
 
     // Verification & sanity checking
     payments.forEach((payment) => {
-      if (payment.state != EPaymentState.Proposed) {
+      if (payment.state !== EPaymentState.Proposed) {
         throw new Error(`Cannot accept payment ${payment.id}, it is not in the Proposed state`);
       }
 
@@ -66,7 +66,7 @@ export class PaymentService implements IPaymentService {
     const payments = await this.paymentRepository.getPaymentsByIds([paymentId]);
     const payment = payments.get(paymentId);
 
-    if (payment == null || payment.state != EPaymentState.Approved) {
+    if (payment == null || payment.state !== EPaymentState.Approved) {
       throw new Error(`Cannot accept payment ${paymentId}`);
     }
 
@@ -100,7 +100,7 @@ export class PaymentService implements IPaymentService {
     const payments = await this.paymentRepository.getPaymentsByIds([paymentId]);
     const payment = payments.get(paymentId);
 
-    if (payment == null || payment.state != EPaymentState.Staked) {
+    if (payment == null || payment.state !== EPaymentState.Staked) {
       throw new Error(`Invalid payment ${paymentId}, cannot provide payment!`);
     }
 
@@ -126,7 +126,7 @@ export class PaymentService implements IPaymentService {
       throw new Error("Could not get payment!");
     }
 
-    if (payment.state != EPaymentState.Proposed) {
+    if (payment.state !== EPaymentState.Proposed) {
       // The payment has already moved forward, somehow.
       // We don't need to do anything, we probably got called
       // by another instance of the core.

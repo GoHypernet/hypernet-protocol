@@ -20,7 +20,7 @@ export class AccountsRepository implements IAccountsRepository {
     const browserNode = await this.browserNodeProvider.getBrowserNode();
     const channelAddress = await this.vectorUtils.getRouterChannelAddress();
 
-    const channelStateRes = await browserNode.getStateChannel({ channelAddress: channelAddress });
+    const channelStateRes = await browserNode.getStateChannel({ channelAddress });
 
     if (channelStateRes.isError) {
       throw new Error("Cannot get the state channel status!");
@@ -46,7 +46,7 @@ export class AccountsRepository implements IAccountsRepository {
     const balances = await this.getBalances();
 
     for (const assetBalance of balances.assets) {
-      if (assetBalance.assetAddresss == assetAddress) {
+      if (assetBalance.assetAddresss === assetAddress) {
         return assetBalance;
       }
     }
@@ -65,8 +65,8 @@ export class AccountsRepository implements IAccountsRepository {
 
     const depositRes = await browserNode.reconcileDeposit({
       assetId: assetAddress,
-      channelAddress: channelAddress,
-      //publicIdentifier: browserNode.publicIdentifier
+      channelAddress,
+      // publicIdentifier: browserNode.publicIdentifier
     });
 
     if (depositRes.isError) {
@@ -75,7 +75,7 @@ export class AccountsRepository implements IAccountsRepository {
     }
     const deposit = depositRes.getValue();
 
-    if (deposit.channelAddress != channelAddress) {
+    if (deposit.channelAddress !== channelAddress) {
       throw new Error("Something has gone horribly wrong!");
     }
   }
@@ -85,7 +85,7 @@ export class AccountsRepository implements IAccountsRepository {
     const browserNode = await this.browserNodeProvider.getBrowserNode();
 
     await browserNode.withdraw({
-      channelAddress: channelAddress,
+      channelAddress,
       amount: amount.toString(),
       assetId: assetAddress,
       recipient: destinationAddress,

@@ -26,7 +26,7 @@ export class ControlService implements IControlService {
     const controlClaim = new ControlClaim(context.account, new Date().getTime());
 
     // Send the claim out to the other corese
-    //await this.messagingRepo.sendControlClaim(controlClaim);
+    // await this.messagingRepo.sendControlClaim(controlClaim);
 
     // Update the context
     context.inControl = true;
@@ -34,7 +34,7 @@ export class ControlService implements IControlService {
 
     // We will continue to send control claims every 5 minutes
     this.timeout = setInterval(() => {
-      //this.messagingRepo.sendControlClaim(controlClaim);
+      // this.messagingRepo.sendControlClaim(controlClaim);
     }, this.claimPeriod);
 
     // Notify the world.

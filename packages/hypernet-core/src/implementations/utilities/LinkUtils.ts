@@ -2,8 +2,6 @@ import { HypernetLink, InitializedHypernetContext, Payment, PullPayment, PushPay
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
 
 export class LinkUtils implements ILinkUtils {
-  constructor() {}
-
   /**
    * Given an array of Vector transfers, return the corresponding Hypernet Payments.
    * Internally, calls transfersToPayments()
@@ -20,7 +18,7 @@ export class LinkUtils implements ILinkUtils {
 
     for (const payment of payments) {
       // Now that it's converted, we can stick it in the hypernet link
-      let counterpartyId = payment.to == context.publicIdentifier ? payment.from : payment.to;
+      const counterpartyId = payment.to === context.publicIdentifier ? payment.from : payment.to;
       let link = linksByCounterpartyId.get(counterpartyId);
       if (link == null) {
         link = new HypernetLink(counterpartyId, [], [], [], [], []);
