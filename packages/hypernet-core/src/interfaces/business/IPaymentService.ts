@@ -1,21 +1,25 @@
 import {
-  HypernetLink,
   BigNumber,
   Payment,
   EthereumAddress,
   PublicKey,
-  ControlClaim,
-  HypernetConfig,
   PublicIdentifier,
-  Balances,
 } from "@interfaces/objects";
 
 /**
- * @todo What is the main role/purpose of this class? Description here.
- * @todo delete this entirely?
+ *
  */
 export interface IPaymentService {
   
+  /**
+   * 
+   * @param counterPartyAccount 
+   * @param amount 
+   * @param expirationDate 
+   * @param requiredStake 
+   * @param paymentToken 
+   * @param disputeMediator 
+   */
   sendFunds(
     counterPartyAccount: PublicIdentifier,
     amount: BigNumber,
@@ -24,10 +28,23 @@ export interface IPaymentService {
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey): Promise<Payment>
 
+  /**
+   * 
+   * @param channelId 
+   * @param amount 
+   */
   requestPayment(channelId: string, amount: BigNumber): Promise<Payment>;
 
+  /**
+   * 
+   * @param paymentId 
+   */
   paymentPosted(paymentId: string): Promise<void>;
 
+  /**
+   * 
+   * @param paymentId 
+   */
   pullRecorded(paymentId: string): Promise<void>;
 
   /**

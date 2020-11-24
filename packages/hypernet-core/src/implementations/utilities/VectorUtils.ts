@@ -1,16 +1,17 @@
 import { FullChannelState, FullTransferState, PublicIdentifier } from "@connext/vector-types";
 import { IHypernetTransferMetadata } from "@interfaces/objects";
-import { ETransferType } from "@interfaces/types";
 import { IBrowserNodeProvider, IContextProvider, IVectorUtils, IConfigProvider } from "@interfaces/utilities";
 
 export class VectorUtils implements IVectorUtils {
     protected channelAddress: string | null;
 
-    constructor(protected configProvider: IConfigProvider,
+    constructor(
+        protected configProvider: IConfigProvider,
         protected contextProvider: IContextProvider,
         protected browserNodeProvider: IBrowserNodeProvider) { 
-            this.channelAddress = null;
-        }
+
+        this.channelAddress = null;
+    }
 
     public async createNullTransfer(counterParty: PublicIdentifier, metadata: IHypernetTransferMetadata): Promise<FullTransferState> {
         throw new Error('Method not yet implemented')
@@ -91,10 +92,5 @@ export class VectorUtils implements IVectorUtils {
         this.channelAddress = newChannel.channelAddress;
         return this.channelAddress
     }
-
-    public getTransferType(transfer: FullTransferState): ETransferType {
-        // Have to jump through some hoops here
-        // TODO: Fix this.
-        return ETransferType.Offer;
-    }
 }
+

@@ -1,8 +1,7 @@
-import { BigNumber, EthereumAddress, HypernetLink, Payment, PublicIdentifier, PublicKey } from "@interfaces/objects";
-
+import { HypernetLink, Payment} from "@interfaces/objects";
 
 /**
- * @todo What is the main role/purpose of this class? Description here.
+ * 
  */
 export interface ILinkRepository {
 
@@ -18,21 +17,20 @@ export interface ILinkRepository {
     getHypernetLink(linkId: string): Promise<HypernetLink>;
 
     /**
-     * Creates a push payment and returns it. Nothing moves until
-     * the payment is accepted; the payment will return with the
-     * "PROPOSED" status. This function just creates an OfferTransfer.
+     * 
+     * @param paymentIds 
      */
-    createPushPayment(
-        counterPartyAccount: PublicIdentifier,
-        amount: BigNumber,
-        expirationDate: moment.Moment,
-        requiredStake: BigNumber,
-        paymentToken: EthereumAddress,
-        disputeMediator: PublicKey): Promise<Payment>;
-
-    getPaymentsById(paymentIds: string[]): Promise<Map<string, Payment>>;
-
     provideAssets(paymentIds: string[]): Promise<Map<string, Payment>> 
+
+    /**
+     * 
+     * @param paymentIds 
+     */
     provideStakes(paymentIds: string[]): Promise<Map<string, Payment>>
+
+    /**
+     * 
+     * @param paymentIds 
+     */
     finalizePayments(paymentIds: string[]): Promise<Map<string, Payment>>
 }
