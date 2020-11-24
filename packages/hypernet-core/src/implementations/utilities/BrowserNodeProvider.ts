@@ -32,12 +32,9 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
         console.log(`Signer from mnemonic: ${this.channelSigner.publicIdentifier}`);
         
         return await BrowserNode.connect({
-            chainAddresses: config.chainAddresses,
-            chainProviders: config.chainProviders,
+            iframeSrc: config.iframeSource,
             logger: this.logger,
-            authUrl: config.authUrl,
-            natsUrl: config.natsUrl,
-            signer: this.channelSigner,
+            
           } as BrowserNodeConfig)
     }
     public async getBrowserNode(): Promise<BrowserNode> {

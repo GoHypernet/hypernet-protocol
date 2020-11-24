@@ -12,18 +12,7 @@ export class ConfigProvider implements IConfigProvider {
 
 
       this.config = new HypernetConfig(
-        "http://localhost:3001", // auth URL
-        "ws://localhost:4221", // nats URL
-        {
-          "1337": {
-            "channelFactoryAddress": "0x084aeA04D0B333506e212B1e531cA223650bF284",
-            "channelMastercopyAddress": "0x83e4293c7c5782630A57DD60eEbE36BF20EfDfcD",
-            "transferRegistryAddress": "0xa227b9C3e0cE1f74029063a5b567D97BDed316e1"
-          }
-        }, // Chain addresses
-        {
-          "1337": "http://localhost:8545"
-        }, // Chain providers
+        "http://localhost:5000", // iframeSource
         "isolate income chaos sustain harsh suggest dawn kid sentence sad unable palace upper source below", // Router mnemonic
         "", // routerPublicIdentifier
         1337, // Chain ID

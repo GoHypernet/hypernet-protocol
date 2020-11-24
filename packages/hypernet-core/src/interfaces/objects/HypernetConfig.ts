@@ -1,16 +1,11 @@
-import { EthereumAddress } from "3box";
 import {
-  ChainAddresses,
-  ChainProviders,
   PublicIdentifier,
 } from "@connext/vector-types";
+import { EthereumAddress } from "./EthereumAddress";
 
 export class HypernetConfig {
   constructor(
-    public authUrl: string,
-    public natsUrl: string,
-    public chainAddresses: ChainAddresses,
-    public chainProviders: ChainProviders,
+    public iframeSource: string,
     public routerMnemonic: string,
     public routerPublicIdentifier: PublicIdentifier,
     public chainId: number,
