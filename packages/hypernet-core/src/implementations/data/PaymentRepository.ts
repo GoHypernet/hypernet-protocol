@@ -183,9 +183,11 @@ export class PaymentRepository implements IPaymentRepository {
 
     // Use vectorUtils to create the parameterizedPayment
     let transferInfo = await this.vectorUtils.createPaymentTransfer(
+      payment instanceof PushPayment ? EPaymentType.Push : EPaymentType.Pull,
       paymentRecipient,
       paymentTokenAmount,
-      paymentTokenAddress
+      paymentTokenAddress,
+      
     )
 
     let transferResult = await browserNode.getTransfer({transferId: transferInfo.transferId})

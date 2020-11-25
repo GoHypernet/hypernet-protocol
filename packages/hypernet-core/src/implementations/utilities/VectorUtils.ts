@@ -1,8 +1,10 @@
-import { Balance, FullChannelState, FullTransferState, PublicIdentifier, CreateTransferParams, TransferNames, HashlockTransferName, NodeParams, OptionalPublicIdentifier, Result, NodeResponses, TransferState, HashlockTransferState } from "@connext/vector-types";
+import { FullChannelState,NodeParams, OptionalPublicIdentifier, NodeResponses } from "@connext/vector-types";
 import { BigNumber, IHypernetTransferMetadata, PullAmount } from "@interfaces/objects";
 import { IBrowserNodeProvider, IContextProvider, IVectorUtils, IConfigProvider } from "@interfaces/utilities";
-import { TestToken } from "@connext/vector-contracts"
-import { Insurance, InsuranceState, Parameterized, ParameterizedState } from "@interfaces/types";
+import { EPaymentType, InsuranceState, MessageState, ParameterizedState } from "@interfaces/types";
+import { serialize } from "class-transformer";
+import { ethers } from "ethers";
+import { Rate } from "@interfaces/types/transfers/ParameterizedTypes";
 
 export class VectorUtils implements IVectorUtils {
   protected channelAddress: string | null;
@@ -24,16 +26,18 @@ export class VectorUtils implements IVectorUtils {
   ): Promise<NodeResponses.ConditionalTransfer> {
     const browserNode = await this.browserNodeProvider.getBrowserNode()
     const channelAddress = await this.getRouterChannelAddress()
+    const config = await this.configProvider.getConfig()
     
     let initialState: MessageState = {
-    
+      message: serialize(message)
     }
 
     // Create transfer params
     let transferParams = {
+      recipient: toAddress,
       channelAddress: channelAddress,
       amount: '0',
-      assetId: HypertokenAddress,
+      assetId: config.hypertokenAddress,
       type: 'Message',
       details: initialState
     } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>
@@ -56,15 +60,34 @@ export class VectorUtils implements IVectorUtils {
    * @returns a NodeResponses.ConditionalTransfer event, which contains the channel address and the transfer ID
    */
   public async createPaymentTransfer(
+    type: EPaymentType,
     toAddress: string,
     amount: BigNumber,
-    assetAddress: string
+    assetAddress: string,
+    UUID: string,
+    start: string,
+    expiration: string,
+    rate?: Rate
   ): Promise<NodeResponses.ConditionalTransfer> {
     const browserNode = await this.browserNodeProvider.getBrowserNode()
     const channelAddress = await this.getRouterChannelAddress()
+    const config = await this.configProvider.getConfig()
+
+    if (type == EPaymentType.Pull && rate == null) {
+      throw new Error('Must provide rate for PullPaymentTransfer')
+    }
+
+    let infinite_rate = {
+      deltaAmount: ethers.constants.MaxUint256.toString(),
+      deltaTime: '1'
+    }
 
     let initialState: ParameterizedState = {
-      
+      receiver: toAddress,
+      start: start,
+      expiration: expiration,
+      UUID: UUID,
+      rate: type == EPaymentType.Push ? infinite_rate : rate as Rate
     }
 
     // Create transfer params
@@ -92,20 +115,28 @@ export class VectorUtils implements IVectorUtils {
    */
   public async createInsuranceTransfer(
     toAddress: string,
-    amount: BigNumber
+    mediatorAddress: string,
+    amount: BigNumber,
+    expiration: string,
+    UUID: string
   ): Promise<NodeResponses.ConditionalTransfer> {
     const browserNode = await this.browserNodeProvider.getBrowserNode()
     const channelAddress = await this.getRouterChannelAddress()
+    const config = await this.configProvider.getConfig()
 
     let initialState: InsuranceState = {
-      
+      receiver: toAddress,
+      mediator: mediatorAddress,
+      collateral: amount.toString(),
+      expiration: expiration,
+      UUID: UUID
     }
 
     // Create transfer params
     let transferParams = {
       channelAddress: channelAddress,
       amount: amount.toString(),
-      assetId: HypertokenAssetAddress,
+      assetId: config.hypertokenAddress,
       type: 'Insurance',
       details: initialState
     } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>

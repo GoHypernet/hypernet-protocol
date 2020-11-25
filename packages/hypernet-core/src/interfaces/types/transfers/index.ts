@@ -11,4 +11,4 @@ export { WithdrawFactory } from "./WithdrawFactory";
 export type { Withdraw } from "./Withdraw";
 export type { InsuranceState, InsuranceResolver, InsuranceResolverData } from "./InsuranceTypes";
 export type { ParameterizedState, ParameterizedResolver, ParameterizedResolverData } from "./ParameterizedTypes";
-export type { MessageState, MessageResolver } from "./MessageTypes";
+export type { MessageState, MessageResolver } from "./MessageTypes"
