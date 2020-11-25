@@ -13,7 +13,9 @@ export interface IVectorUtils {
   /**
    *
    */
-  createNullTransfer(toAddress: string, message: IHypernetTransferMetadata): Promise<NodeResponses.ConditionalTransfer>
+  createNullTransfer(
+    toAddress: string, 
+    message: IHypernetTransferMetadata): Promise<NodeResponses.ConditionalTransfer>
 
   /**
    * 
@@ -28,6 +30,11 @@ export interface IVectorUtils {
 
   /**
    * 
+   * @param toAddress
+   * @param amount
    */
-  createInsuranceTransfer(): Promise<NodeResponses.ConditionalTransfer>
+  createInsuranceTransfer(
+    toAddress: string,
+    amount: BigNumber
+  ): Promise<NodeResponses.ConditionalTransfer>
 }
