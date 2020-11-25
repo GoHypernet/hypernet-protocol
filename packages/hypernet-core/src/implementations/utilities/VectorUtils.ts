@@ -1,5 +1,5 @@
-import { FullChannelState, FullTransferState, PublicIdentifier } from "@connext/vector-types";
-import { IHypernetTransferMetadata } from "@interfaces/objects";
+import { Balance, FullChannelState, FullTransferState, PublicIdentifier, CreateTransferParams, TransferNames, HashlockTransferName, NodeParams, OptionalPublicIdentifier, Result, NodeResponses, TransferState, HashlockTransferState } from "@connext/vector-types";
+import { BigNumber, IHypernetTransferMetadata } from "@interfaces/objects";
 import { IBrowserNodeProvider, IContextProvider, IVectorUtils, IConfigProvider } from "@interfaces/utilities";
 
 export class VectorUtils implements IVectorUtils {
@@ -13,10 +13,55 @@ export class VectorUtils implements IVectorUtils {
     this.channelAddress = null;
   }
 
+  /**
+   * 
+   */
   public async createNullTransfer(
-    counterParty: PublicIdentifier,
-    metadata: IHypernetTransferMetadata,
-  ): Promise<FullTransferState> {
+  ): Promise<NodeResponses.ConditionalTransfer> {
+    throw new Error("Method not yet implemented");
+  }
+
+  /**
+   * 
+   * @param amount 
+   * @param assetAddress 
+   * @returns a NodeResponses.ConditionalTransfer event, which contains the channel address and the transfer ID
+   */
+  public async createPaymentTransfer(
+    toAddress: string,
+    amount: BigNumber,
+    assetAddress: string
+  ): Promise<NodeResponses.ConditionalTransfer> {
+
+    const browserNode = await this.browserNodeProvider.getBrowserNode()
+    const channelAddress = await this.getRouterChannelAddress()
+
+
+    let initialState: TransferState = {
+      // @todo switch this to a ParameterizedTransferState and fill in once we import the types
+    }
+
+    // Create transfer params
+    let transferParams = {
+      channelAddress: channelAddress,
+      amount: amount.toString(),
+      assetId: assetAddress,
+      type: 'Parameterized',
+      details: initialState // initial state goes here // but not initialbalance like the tests
+    } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>
+  
+    let transfer = await browserNode.conditionalTransfer(transferParams)
+
+    if (transfer.isError) {
+      throw new Error('Could not complete transfer, browser node threw an error.')
+    }
+
+    let transferResult = transfer.getValue()
+
+    return transferResult
+  }
+
+  public async createInsuranceTransfer(): Promise<NodeResponses.ConditionalTransfer> {
     throw new Error("Method not yet implemented");
   }
 

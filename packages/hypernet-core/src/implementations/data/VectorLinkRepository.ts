@@ -21,59 +21,6 @@ export class VectorLinkRepository implements ILinkRepository {
   ) {}
 
   /**
-   * Provides assets for a given list of payment ids.
-   * Internally, this is what actually creates the ParameterizedPayments with Vector.
-   * @param paymentIds
-   */
-  public async provideAssets(paymentIds: string[]): Promise<Map<string, Payment>> {
-    let map: Map<string, Payment> = new Map()
-
-    // We want to do this synchronously, otherwise we might run into concurrency issues
-    // regarding our token balances
-    paymentIds.forEach(async (paymentId) => {
-      let thisPayment = await this.provideAsset(paymentId)
-      map.set(paymentId, thisPayment)
-    });
-
-    return map;
-  }
-
-  /**
-   * Singular form of provideAssets
-   * @param paymentId the payment ID for which to provide assets
-   */
-  public async provideAsset(paymentId: string): Promise<Payment> {
-    // We don't need to do any verification here; that should be done
-    // in the service layer. Just try to provide the asset.
-
-    // get payment to look up how much to send?
-    // using the paymentRepository?
-    // change input to actually take a payment instead of a paymentId?
-
-
-    throw new Error("Method not yet implemented");
-  }
-
-  /**
-   * Provides stakes for a given list of payment ids.
-   * Internally, this is what actually creates the InsurancePayments with Vector.
-   * @param paymentIds the payment ids to provide stake for
-   */
-  public async provideStakes(paymentIds: string[]): Promise<Map<string, Payment>> {
-    
-
-    throw new Error("Method not yet implemented");
-  }
-
-  /**
-   *
-   * @param paymentIds
-   */
-  public async finalizePayments(paymentIds: string[]): Promise<Map<string, Payment>> {
-    throw new Error("Method not yet implemented");
-  }
-
-  /**
    * Get all Hypernet Links for this client
    */
   public async getHypernetLinks(): Promise<HypernetLink[]> {

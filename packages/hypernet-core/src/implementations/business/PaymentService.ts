@@ -25,7 +25,6 @@ export class PaymentService implements IPaymentService {
     protected paymentRepository: IPaymentRepository,
   ) {}
 
-
   /**
    * Called by the person on the receiving end of a push payment,
    * to accept the terms of the payment and put up the stake.
@@ -56,7 +55,7 @@ export class PaymentService implements IPaymentService {
     }
 
     // Create insurance payments
-    const updatedPayments = await this.linkRepository.provideStakes(paymentIds);
+    const updatedPayments = await this.paymentRepository.provideStakes(paymentIds);
 
     return Array.from(updatedPayments.values());
   }
@@ -78,7 +77,7 @@ export class PaymentService implements IPaymentService {
     // If the payment state is approved, we know that it matches our insurance payment
     if (payment instanceof PushPayment) {
       // Resolve the parameterized payment immediately
-      await this.linkRepository.finalizePayments([paymentId]);
+      await this.paymentRepository.finalizePayments([paymentId]);
     } else if (payment instanceof PullPayment) {
       // Notify the user that the funds have been approved.
       const context = await this.contextProvider.getContext();
@@ -113,7 +112,7 @@ export class PaymentService implements IPaymentService {
 
     // If the payment state is staked, we know that the proper
     // insurance has been posted.
-    await this.linkRepository.provideAssets([paymentId]);
+    await this.paymentRepository.provideAssets([paymentId]);
   }
 
   /**
