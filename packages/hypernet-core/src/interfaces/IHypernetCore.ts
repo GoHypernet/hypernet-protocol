@@ -122,7 +122,7 @@ export interface IHypernetCore {
    * For a specified payment, puts up stake to accept the payment
    * @param paymentId the payment ID to accept funds
    */
-  acceptFunds(paymentIds: string[]): Promise<Payment[]>;
+  acceptFunds(paymentId: string): Promise<Payment>;
 
   /**
    * Pulls an incremental amount from an authorized payment

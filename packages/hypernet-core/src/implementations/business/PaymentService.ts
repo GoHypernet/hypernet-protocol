@@ -30,34 +30,32 @@ export class PaymentService implements IPaymentService {
    * to accept the terms of the payment and put up the stake.
    * @param paymentIds the payment ids to accept funds for
    */
-  public async acceptFunds(paymentIds: string[]): Promise<Payment[]> {
+  public async acceptFunds(paymentId: string): Promise<Payment> {
     // Get the payments from the repo, to make sure they can be accepted.
     const config = await this.configProvider.getConfig();
-    const payments = await this.paymentRepository.getPaymentsByIds(paymentIds);
+    const payments = await this.paymentRepository.getPaymentsByIds([paymentId]);
+    const payment = payments.get(paymentId)
+
+    if (payment == null) {
+      throw new Error('Could not get payment with provided paymentId.')
+    }
+
     const hypertokenBalance = await this.accountRepository.getBalanceByAsset(config.hypertokenAddress);
 
-    // Loop over the payments and do a sanity check
-    // We will also calculate the total required stake
-    let totalStakeRequired = BigNumber.from(0);
-
     // Verification & sanity checking
-    payments.forEach((payment) => {
-      if (payment.state !== EPaymentState.Proposed) {
-        throw new Error(`Cannot accept payment ${payment.id}, it is not in the Proposed state`);
-      }
-
-      totalStakeRequired = totalStakeRequired.add(BigNumber.from(payment.requiredStake));
-    });
+    if (payment.state !== EPaymentState.Proposed) {
+      throw new Error(`Cannot accept payment ${payment.id}, it is not in the Proposed state`);
+    }
 
     // Check the balance and make sure you have enough HyperToken to cover it
-    if (hypertokenBalance.freeAmount < totalStakeRequired) {
+    if (hypertokenBalance.freeAmount < payment.requiredStake) {
       throw new Error("Not enough Hypertoken to cover provided payments.");
     }
 
     // Create insurance payments
-    const updatedPayments = await this.paymentRepository.provideStakes(paymentIds);
+    const updatedPayment = await this.paymentRepository.provideStake(paymentId);
 
-    return Array.from(updatedPayments.values());
+    return updatedPayment;
   }
 
   /**
@@ -77,7 +75,7 @@ export class PaymentService implements IPaymentService {
     // If the payment state is approved, we know that it matches our insurance payment
     if (payment instanceof PushPayment) {
       // Resolve the parameterized payment immediately
-      await this.paymentRepository.finalizePayments([paymentId]);
+      await this.paymentRepository.finalizePayment(paymentId);
     } else if (payment instanceof PullPayment) {
       // Notify the user that the funds have been approved.
       const context = await this.contextProvider.getContext();
@@ -112,7 +110,7 @@ export class PaymentService implements IPaymentService {
 
     // If the payment state is staked, we know that the proper
     // insurance has been posted.
-    await this.paymentRepository.provideAssets([paymentId]);
+    await this.paymentRepository.provideAsset(paymentId);
   }
 
   /**

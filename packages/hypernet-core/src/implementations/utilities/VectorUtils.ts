@@ -17,6 +17,18 @@ export class VectorUtils implements IVectorUtils {
     this.channelAddress = null;
   }
 
+  public async resolveMessageTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer> {
+    throw new Error('Method not yet implemented.')
+  }
+
+  public async resolvePaymentTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer> {
+    throw new Error('Method not yet implemented.')
+  }
+
+  public async resolveInsuranceTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer> {
+    throw new Error('Method not yet implemented.')
+  }
+
   /**
    * 
    */

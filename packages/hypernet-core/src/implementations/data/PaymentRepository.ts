@@ -9,9 +9,8 @@ import {
 } from "@interfaces/utilities";
 import { EPaymentType } from "@interfaces/types";
 import { EthereumAddress, PublicKey } from "@interfaces/objects";
+import { FullTransferState } from "@connext/vector-types";
 import moment from "moment";
-import { FullTransferState, NodeResponses } from "@connext/vector-types";
-import { BrowserNode } from "@connext/vector-browser-node";
 
 export class PaymentRepository implements IPaymentRepository {
   constructor(
@@ -133,33 +132,60 @@ export class PaymentRepository implements IPaymentRepository {
   }
 
   /**
-   * Provides stakes for a given list of payment ids.
+   * Finalizes/confirms a payment
+   * Internally, this is what actually calls resolve() on the Vector transfer -
+   * be it a insurancePayments or parameterizedPayments.
+   * @param paymentId
+   */
+  public async finalizePayment(paymentId: string): Promise<Payment> {
+    let browserNode = await this.browserNodeProvider.getBrowserNode()
+    let config = await this.configProvider.getConfig()
+    let payment = await this.getPaymentById(paymentId)
+
+    throw new Error("Method not yet implemented");
+  }
+
+  /**
+   * Provides stake for a given payment id
    * Internally, this is what actually creates the InsurancePayments with Vector.
-   * @param paymentIds the payment ids to provide stake for
+   * @param paymentId
    */
-  public async provideStakes(paymentIds: string[]): Promise<Map<string, Payment>> {
+  public async provideStake(paymentId: string): Promise<Payment> {
+    let browserNode = await this.browserNodeProvider.getBrowserNode()
+    let config = await this.configProvider.getConfig()
+    let payment = await this.getPaymentById(paymentId)
 
+    let paymentMediator = payment.disputeMediator
+    let paymentSender = payment.from
+    let paymentID = payment.id
+    let paymentStart = `${Math.floor(moment.now() / 1000)}`
+    let paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`
+    
+    let transferInfo = await this.vectorUtils.createInsuranceTransfer(
+      paymentSender,
+      paymentMediator,
+      payment.requiredStake,
+      paymentExpiration,
+      paymentID
+    )
 
+    let transferResult = await browserNode.getTransfer({transferId: transferInfo.transferId})
 
+    if (transferResult.isError) {
+      throw new Error('Could not get newly created transfer.')
+    }
 
-    throw new Error("Method not yet implemented");
-  }
+    let transfer = transferResult.getValue() as FullTransferState
 
-  /**
-   *
-   * @param paymentIds
-   */
-  public async finalizePayments(paymentIds: string[]): Promise<Map<string, Payment>> {
-    throw new Error("Method not yet implemented");
-  }
-
-  /**
-   * Provides assets for a given list of payment ids.
-   * Internally, this is what actually creates the ParameterizedPayments with Vector.
-   * @param paymentIds
-   */
-  public async provideAssets(paymentIds: string[]): Promise<Map<string, Payment>> {
-    throw new Error("Method not yet implemented")
+    // Transfer has been created successfully; return the updated payment.
+    let updatedPayment = this.paymentUtils.transfersToPayment(
+      transferInfo.transferId,
+      [transfer],
+      config,
+      browserNode
+    )
+    
+    return updatedPayment
   }
 
   /**

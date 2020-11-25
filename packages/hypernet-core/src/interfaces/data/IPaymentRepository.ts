@@ -25,24 +25,23 @@ export interface IPaymentRepository {
 
   /**
    * Provides assets for a given list of payment ids.
-   * Internally, this is what actually creates the ParameterizedPayments with Vector.
-   * @param paymentIds
+   * Internally, this is what actually creates the ParameterizedPayment with Vector.
+   * @param paymentId
    */
-  provideAssets(paymentIds: string[]): Promise<Map<string, Payment>>;
   provideAsset(paymentId: string): Promise<Payment>;
 
   /**
-   * Provides stakes for a given list of payment ids.
+   * Provides stake for a given payment id
    * Internally, this is what actually creates the InsurancePayments with Vector.
-   * @param paymentIds
+   * @param paymentId
    */
-  provideStakes(paymentIds: string[]): Promise<Map<string, Payment>>;
+  provideStake(paymentId: string): Promise<Payment>;
 
   /**
-   * Finalizes/confirms a list of payments.
-   * Internally, this is what actually calls resolve() on Vector transfers -
-   * be they insurancePayments or parameterizedPayments.
-   * @param paymentIds
+   * Finalizes/confirms a payment
+   * Internally, this is what actually calls resolve() on the Vector transfer -
+   * be it a insurancePayments or parameterizedPayments.
+   * @param paymentId
    */
-  finalizePayments(paymentIds: string[]): Promise<Map<string, Payment>>;
+  finalizePayment(paymentId: string): Promise<Payment>;
 }

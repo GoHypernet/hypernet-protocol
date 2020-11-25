@@ -59,5 +59,5 @@ export interface IPaymentService {
    * Called by the person on the receiving end of a push payment,
    * to accept the terms of the payment and put up the stake.
    */
-  acceptFunds(paymentIds: string[]): Promise<Payment[]>;
+  acceptFunds(paymentId: string): Promise<Payment>;
 }

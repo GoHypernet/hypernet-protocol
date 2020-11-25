@@ -219,8 +219,8 @@ export class HypernetCore implements IHypernetCore {
    * the stake or insurance transfer.
    * @param paymentId
    */
-  public async acceptFunds(paymentIds: string[]): Promise<Payment[]> {
-    const payment = this.paymentService.acceptFunds(paymentIds);
+  public async acceptFunds(paymentId: string): Promise<Payment> {
+    const payment = this.paymentService.acceptFunds(paymentId);
 
     return payment;
   }
