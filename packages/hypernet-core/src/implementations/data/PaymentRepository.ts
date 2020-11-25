@@ -62,7 +62,7 @@ export class PaymentRepository implements IPaymentRepository {
       disputeMediator
     }
 
-    const transferInfo = await this.vectorUtils.createNullTransfer(
+    const transferInfo = await this.vectorUtils.createMessageTransfer(
       counterPartyAccount,
       message
     )
@@ -180,6 +180,9 @@ export class PaymentRepository implements IPaymentRepository {
     let paymentTokenAddress = payment.paymentToken
     let paymentTokenAmount = payment instanceof PushPayment ? payment.paymentAmount : payment.authorizedAmount
     let paymentRecipient = payment.to
+    let paymentID = payment.id
+    let paymentStart = `${Math.floor(moment.now() / 1000)}`
+    let paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`
 
     // Use vectorUtils to create the parameterizedPayment
     let transferInfo = await this.vectorUtils.createPaymentTransfer(
@@ -187,7 +190,9 @@ export class PaymentRepository implements IPaymentRepository {
       paymentRecipient,
       paymentTokenAmount,
       paymentTokenAddress,
-      
+      paymentID,
+      paymentStart,
+      paymentExpiration
     )
 
     let transferResult = await browserNode.getTransfer({transferId: transferInfo.transferId})
