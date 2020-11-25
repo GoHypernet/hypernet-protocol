@@ -1,11 +1,18 @@
 import * as ko from "knockout";
-import { HypernetLink, EthereumAddress, PublicKey, BigNumber, PushPayment, PullPayment } from "@hypernetlabs/hypernet-core";
+import {
+  HypernetLink,
+  EthereumAddress,
+  PublicKey,
+  BigNumber,
+  PushPayment,
+  PullPayment,
+} from "@hypernetlabs/hypernet-core";
 import html from "./Link.template.html";
 import { PushPaymentParams } from "../PushPayment/PushPayment.viewmodel";
 import { PullPaymentParams } from "../PullPayment/PullPayment.viewmodel";
 
 export class LinkParams {
-  constructor(public link: ko.Observable<HypernetLink>) { }
+  constructor(public link: ko.Observable<HypernetLink>) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file

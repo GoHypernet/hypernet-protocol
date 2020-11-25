@@ -5,9 +5,7 @@ import moment from "moment";
 import { PaymentStatusParams } from "../PaymentStatus/PaymentStatus.viewmodel";
 
 export class PushPaymentParams {
-  constructor(
-    public payment: ko.Observable<PushPayment>,
-  ) { }
+  constructor(public payment: ko.Observable<PushPayment>) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -83,7 +81,7 @@ export class PaymentViewModel {
     this.disputeMediator = ko.pureComputed(() => {
       return this.payment().disputeMediator;
     });
-    
+
     this.paymentAmount = ko.pureComputed(() => {
       return this.payment().paymentAmount.toString();
     });

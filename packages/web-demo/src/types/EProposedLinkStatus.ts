@@ -1,5 +1,5 @@
 export enum EProposedLinkStatus {
-    Proposed = 0,
-    Approved = 1,
-    Denied = 2
+  Proposed = 0,
+  Approved = 1,
+  Denied = 2,
 }

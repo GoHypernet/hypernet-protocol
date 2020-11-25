@@ -3,7 +3,7 @@ import { AssetBalance } from "@hypernetlabs/hypernet-core";
 import html from "./AssetBalance.template.html";
 
 export class AssetBalanceParams {
-  constructor(public assetBalance: AssetBalance) { }
+  constructor(public assetBalance: AssetBalance) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
