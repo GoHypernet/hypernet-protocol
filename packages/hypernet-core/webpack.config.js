@@ -23,12 +23,6 @@ module.exports = {
           projectReferences: true
         }
       },
-      {
-        enforce: "pre",
-        test: /\.html$/,
-        exclude: path.join(__dirname, "wallet_dist/index.html"),
-        loader: "html-loader",
-      },
     ],
   },
   resolve: {
@@ -37,8 +31,8 @@ module.exports = {
     alias: {
       // These are copied from hypernet-core, because for local compilation
       // we are actually compiling hypernet-core
-      "@interfaces": path.resolve(__dirname, "../hypernet-core/src/interfaces"),
-      "@implementations": path.resolve(__dirname, "../hypernet-core/src/implementations"),
+      "@interfaces": path.resolve(__dirname, ".src/interfaces"),
+      "@implementations": path.resolve(__dirname, ".src/implementations"),
     },
   },
   devtool: "inline-source-map",

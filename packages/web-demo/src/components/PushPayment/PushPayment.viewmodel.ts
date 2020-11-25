@@ -1,96 +1,77 @@
 import * as ko from "knockout";
-import { PushPayment } from "@hypernetlabs/hypernet-core";
+import { EPaymentState, IHypernetCore, PushPayment } from "@hypernetlabs/hypernet-core";
 import html from "./PushPayment.template.html";
 import moment from "moment";
 import { PaymentStatusParams } from "../PaymentStatus/PaymentStatus.viewmodel";
+import { ButtonParams } from "../Button/Button.viewmodel";
 
 export class PushPaymentParams {
-  constructor(
-    public payment: ko.Observable<PushPayment>,
-  ) { }
+  constructor(public core: IHypernetCore,
+    public payment: PushPayment) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
-export class PaymentViewModel {
+export class PushPaymentViewModel {
   public id: string;
-  public to: ko.PureComputed<string>;
-  public from: ko.PureComputed<string>;
-  public state: ko.PureComputed<PaymentStatusParams>;
-  public paymentToken: ko.PureComputed<string>;
-  public requiredStake: ko.PureComputed<string>;
-  public amountStaked: ko.PureComputed<string>;
-  public expirationDate: ko.PureComputed<string>;
-  public finalized: ko.PureComputed<boolean>;
-  public createdTimestamp: ko.PureComputed<string>;
-  public updatedTimestamp: ko.PureComputed<string>;
-  public collateralRecovered: ko.PureComputed<string>;
-  public disputeMediator: ko.PureComputed<string>;
-  public paymentAmount: ko.PureComputed<string>;
+  public to: ko.Observable<string>;
+  public from: ko.Observable<string>;
+  public state: ko.Observable<PaymentStatusParams>;
+  public paymentToken: ko.Observable<string>;
+  public requiredStake: ko.Observable<string>;
+  public amountStaked: ko.Observable<string>;
+  public expirationDate: ko.Observable<string>;
+  public finalized: ko.Observable<boolean>;
+  public createdTimestamp: ko.Observable<string>;
+  public updatedTimestamp: ko.Observable<string>;
+  public collateralRecovered: ko.Observable<string>;
+  public disputeMediator: ko.Observable<string>;
+  public paymentAmount: ko.Observable<string>;
+  public acceptButton: ButtonParams;
+  public showAcceptButton: ko.PureComputed<boolean>;
 
-  protected payment: ko.Observable<PushPayment>;
+  protected core: IHypernetCore;
+  protected paymentId: string;
 
   constructor(params: PushPaymentParams) {
-    this.payment = params.payment;
+    this.core = params.core;
 
-    this.id = `Payment ${params.payment().id}`;
+    this.id = `Payment ${params.payment.id}`;
+    this.paymentId = params.payment.id;
+    this.to = ko.observable(params.payment.to);
+    this.from = ko.observable(params.payment.from);
+    this.state = ko.observable(new PaymentStatusParams(params.payment.state));
+    this.paymentToken = ko.observable(params.payment.paymentToken);
+    this.requiredStake = ko.observable(params.payment.requiredStake.toString());
+    this.amountStaked = ko.observable(params.payment.amountStaked.toString());
+    const mdate = moment.unix(params.payment.expirationDate);
+    this.expirationDate = ko.observable(mdate.format());
+    this.finalized = ko.observable(params.payment.finalized);
+    this.createdTimestamp = ko.observable(params.payment.createdTimestamp.format());
+    this.updatedTimestamp = ko.observable(params.payment.updatedTimestamp.format());
+    this.collateralRecovered = ko.observable(params.payment.collateralRecovered.toString());
+    this.disputeMediator = ko.observable(params.payment.disputeMediator);
+    this.paymentAmount = ko.observable(params.payment.paymentAmount.toString());
 
-    this.to = ko.pureComputed(() => {
-      return this.payment().to;
+    this.core.onPushPaymentReceived.subscribe({
+      next: (payment) => {
+        if (payment.id === this.paymentId) {
+          this.state(new PaymentStatusParams(params.payment.state));
+        }
+    }});
+
+    this.acceptButton = new ButtonParams("Accept", async () => {
+      const payments = await this.core.acceptFunds([this.paymentId]);
+      const payment = payments[0];
+      this.state(new PaymentStatusParams(payment.state));
     });
 
-    this.from = ko.pureComputed(() => {
-      return this.payment().from;
-    });
-
-    this.state = ko.pureComputed<PaymentStatusParams>(() => {
-      return new PaymentStatusParams(this.payment().state);
-    });
-
-    this.paymentToken = ko.pureComputed(() => {
-      return this.payment().paymentToken;
-    });
-
-    this.requiredStake = ko.pureComputed(() => {
-      return this.payment().requiredStake.toString();
-    });
-
-    this.amountStaked = ko.pureComputed(() => {
-      return this.payment().amountStaked.toString();
-    });
-
-    this.expirationDate = ko.pureComputed(() => {
-      const mdate = moment.unix(this.payment().expirationDate);
-
-      return mdate.format();
-    });
-
-    this.finalized = ko.pureComputed(() => {
-      return this.payment().finalized;
-    });
-
-    this.createdTimestamp = ko.pureComputed(() => {
-      return this.payment().createdTimestamp.format();
-    });
-
-    this.updatedTimestamp = ko.pureComputed(() => {
-      return this.payment().updatedTimestamp.format();
-    });
-
-    this.collateralRecovered = ko.pureComputed(() => {
-      return this.payment().collateralRecovered.toString();
-    });
-
-    this.disputeMediator = ko.pureComputed(() => {
-      return this.payment().disputeMediator;
-    });
-    
-    this.paymentAmount = ko.pureComputed(() => {
-      return this.payment().paymentAmount.toString();
+    this.showAcceptButton = ko.pureComputed(() => {
+      return this.state().state === EPaymentState.Proposed;
     });
   }
 }
 
 ko.components.register("push-payment", {
-  viewModel: PaymentViewModel,
+  viewModel: PushPaymentViewModel,
   template: html,
 });
