@@ -14,6 +14,7 @@
   "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/web-demo#readme",
   "license": "ISC",
   "main": "lib/web-demo.js",
+  "types": "lib/web-demo.d.ts",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -28,7 +29,7 @@
   "scripts": {
     "test": "echo \"Error: run tests from root\" && exit 1",
     "build": "webpack",
-    "compile": "tsc -b tsconfig.build.json",
+    "compile": "tsc -b tsconfig.json",
     "clean-docker": "docker-compose down && docker-compose pull",
     "start": "concurrently \"yarn start-backend\" && \"yarn start-web\"",
     "start-web": "webpack-dev-server --mode development --open",
