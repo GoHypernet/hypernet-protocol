@@ -1,49 +1,57 @@
 import * as ko from "knockout";
 import {
   HypernetLink,
-  EthereumAddress,
-  PublicKey,
-  BigNumber,
-  PushPayment,
-  PullPayment,
+  IHypernetCore,
 } from "@hypernetlabs/hypernet-core";
 import html from "./Link.template.html";
 import { PushPaymentParams } from "../PushPayment/PushPayment.viewmodel";
 import { PullPaymentParams } from "../PullPayment/PullPayment.viewmodel";
 
 export class LinkParams {
-  constructor(public link: ko.Observable<HypernetLink>) {}
+  constructor(public core: IHypernetCore, 
+    public link: HypernetLink) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
 export class LinkViewModel {
-  public counterpartyId: ko.Computed<string>;
-  public pushPayments: ko.Computed<PushPaymentParams[]>;
-  public pullPayments: ko.Computed<PullPaymentParams[]>;
+  public counterpartyId: string;
+  public pushPayments: ko.ObservableArray<PushPaymentParams>;
+  public pullPayments: ko.ObservableArray<PullPaymentParams>;
 
-  protected link: ko.Observable<HypernetLink>;
+  protected counterParty: string;
+  protected core: IHypernetCore;
 
   constructor(params: LinkParams) {
-    this.link = params.link;
-    this.counterpartyId = ko.pureComputed(() => {
-      return `Counterparty ID ${this.link().counterPartyAccount}`;
+    this.core = params.core;
+    this.counterParty = params.link.counterPartyAccount;
+
+    this.counterpartyId = `Counterparty ID ${params.link.counterPartyAccount}`;
+
+    const pushPaymentParams = params.link.pushPayments.map((val) => {
+      return new PushPaymentParams(this.core, val);
     });
+    this.pushPayments = ko.observableArray(pushPaymentParams);
 
-    this.pushPayments = ko.pureComputed(() => {
-      const link = this.link();
-
-      return link.pushPayments.map((val: PushPayment) => {
-        return new PushPaymentParams(ko.observable(val));
-      });
+    const pullPaymentParams = params.link.pullPayments.map((val) => {
+      return new PullPaymentParams(this.core, val);
     });
+    this.pullPayments = ko.observableArray(pullPaymentParams);
 
-    this.pullPayments = ko.pureComputed(() => {
-      const link = this.link();
+    this.core.onPullPaymentProposed.subscribe({
+      next: (payment) => {
+        if (payment.to === this.counterParty || payment.from === this.counterParty) {
+          // It's for us, we'll need to add it to the payments for the link
+          this.pullPayments.push(new PullPaymentParams(this.core, payment));
+        }
+    }});
 
-      return link.pullPayments.map((val: PullPayment) => {
-        return new PullPaymentParams(ko.observable(val));
-      });
-    });
+    this.core.onPushPaymentProposed.subscribe({
+      next: (payment) => {
+        if (payment.to === this.counterParty || payment.from === this.counterParty) {
+          // It's for us, we'll need to add it to the payments for the link
+          this.pushPayments.push(new PushPaymentParams(this.core, payment));
+        }
+    }});
   }
 }
 

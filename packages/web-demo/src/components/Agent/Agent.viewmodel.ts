@@ -148,6 +148,42 @@ export class AgentViewModel {
         return this.remoteAccount().publicIdentifier;
       }),
     );
+
+    this.core.onPullPaymentProposed.subscribe({
+      next: (payment) => {
+        // Check if there is a link for this counterparty already
+        const links = this.links().filter((val) => { 
+          const counterPartyAccount = val.link.counterPartyAccount;
+          return counterPartyAccount === payment.to || counterPartyAccount === payment.from; });
+
+        if (links.length === 0) {
+          // We need to create a new link for the counterparty
+          const counterPartyAccount = payment.to === this.publicIdentifier() ? payment.from : payment.to;
+          const link = new HypernetLink(counterPartyAccount, [payment],
+            [], [payment], [], [payment]);
+          this.links.push(new LinkParams(this.core, link));
+        }
+
+        // A link already exists for this counterparty, the link component will handle this
+    }});
+
+    this.core.onPushPaymentProposed.subscribe({
+      next: (payment) => {
+        // Check if there is a link for this counterparty already
+        const links = this.links().filter((val) => { 
+          const counterPartyAccount = val.link.counterPartyAccount;
+          return counterPartyAccount === payment.to || counterPartyAccount === payment.from; });
+
+        if (links.length === 0) {
+          // We need to create a new link for the counterparty
+          const counterPartyAccount = payment.to === this.publicIdentifier() ? payment.from : payment.to;
+          const link = new HypernetLink(counterPartyAccount, [payment],
+            [payment], [], [payment], []);
+          this.links.push(new LinkParams(this.core, link));
+        }
+
+        // A link already exists for this counterparty, the link component will handle this
+    }});
   }
 
   protected async startup() {
@@ -173,7 +209,7 @@ export class AgentViewModel {
     this.balances.balances(currentBalances);
 
     const links = await this.core.getActiveLinks();
-    const linkParams = links.map((link: HypernetLink) => new LinkParams(ko.observable(link)));
+    const linkParams = links.map((link: HypernetLink) => new LinkParams(this.core, link));
     this.links(linkParams);
   }
 }
