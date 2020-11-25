@@ -21,6 +21,7 @@ export interface ILinkRepository {
    * @param paymentIds
    */
   provideAssets(paymentIds: string[]): Promise<Map<string, Payment>>;
+  provideAsset(paymentId: string): Promise<Payment>;
 
   /**
    * Provides stakes for a given list of payment ids.
