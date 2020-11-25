@@ -1,7 +1,7 @@
 import * as ko from "knockout";
 import html from "./Agent.template.html";
 import { LinkParams } from "../Link/Link.viewmodel";
-import { HypernetCore, IHypernetCore, Balances, HypernetLink } from "@hypernetlabs/hypernet-core";
+import { HypernetCore, IHypernetCore, Balances, HypernetLink, EBlockchainNetwork } from "@hypernetlabs/hypernet-core";
 import { ButtonParams } from "../Button/Button.viewmodel";
 import { ethers } from "ethers";
 import { BalancesParams } from "../Balances/Balances.viewmodel";
@@ -34,7 +34,7 @@ export class AgentViewModel {
   protected availableAccounts: Array<AvailableAccount>;
 
   constructor() {
-    this.core = new HypernetCore();
+    this.core = new HypernetCore(EBlockchainNetwork.Localhost);
 
     this.availableAccounts = [
       new AvailableAccount(

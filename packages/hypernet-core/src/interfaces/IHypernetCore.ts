@@ -12,6 +12,7 @@ import {
 } from "@interfaces/objects";
 import { Subject } from "rxjs";
 import * as moment from "moment";
+import { EBlockchainNetwork } from "./types";
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
  * user account. The user can be /both/ a consumer and a provider.
