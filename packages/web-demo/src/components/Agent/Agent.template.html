@@ -20,7 +20,7 @@
     </tr>
   </tbody>
 </table>
-  
+
 
 <h2>Remote Account</h2>
 <table>
@@ -55,32 +55,26 @@
       <td>In Control</td>
       <td data-bind="text: inControl"></td>
     </tr>
-  </thead>
+    </thead>
 </table>
+
+<div data-bind='component: {
+        name: "balances",
+        params: balances}'></div>
 
 <h2>Links</h2>
 <div data-bind="foreach: links">
-  <div
-    data-bind='component: {
+  <div data-bind='component: {
         name: "link",
-        params: $data}'
-  ></div>
-</div>
-
-<h2>Proposed Links</h2>
-<div data-bind="foreach: proposedLinks">
-  <div
-    data-bind='component: {
-        name: "proposed-link",
-        params: $data}'
-  ></div>
+        params: $data}'></div>
 </div>
 
 <h2>Actions</h2>
-<span data-bind="visible: startupComplete, component: {name:'button', params:establishLink}"></span>
 <span data-bind="visible: startupComplete, component: {name:'button', params:depositFundsButton}"></span>
-<span data-bind="component: {name:'button', params:clearLinks}"></span>
-<!--<span data-bind="component: {name:'button', params:collateralize}"></span>-->
+
+<div data-bind='component: {
+        name: "payment-form",
+        params: paymentForm}'></div>
 
 <h2>Message</h2>
 <div data-bind="text: message"></div>

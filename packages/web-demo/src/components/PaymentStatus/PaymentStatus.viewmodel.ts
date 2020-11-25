@@ -11,7 +11,6 @@ export class PaymentStatusViewModel {
   public state: string;
 
   constructor(params: PaymentStatusParams) {
-    
     if (params.state === EPaymentState.Proposed) {
       this.state = "Proposed";
     } else if (params.state === EPaymentState.InvalidProposal) {
@@ -28,7 +27,7 @@ export class PaymentStatusViewModel {
       this.state = "Finalized";
     } else {
       this.state = "Unknown";
-    }    
+    }
   }
 }
 

@@ -4,7 +4,7 @@ import html from "./Balances.template.html";
 import { AssetBalanceParams } from "../AssetBalance/AssetBalance.viewmodel";
 
 export class BalancesParams {
-  constructor(public balances: ko.Observable<Balances>) { }
+  constructor(public balances: ko.Observable<Balances>) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -15,7 +15,7 @@ export class BalancesViewModel {
 
   constructor(params: BalancesParams) {
     this.source = params.balances;
-    
+
     this.balances = ko.pureComputed(() => {
       const source = this.source();
 
@@ -26,7 +26,7 @@ export class BalancesViewModel {
   }
 }
 
-ko.components.register("link", {
+ko.components.register("balances", {
   viewModel: BalancesViewModel,
   template: html,
 });
