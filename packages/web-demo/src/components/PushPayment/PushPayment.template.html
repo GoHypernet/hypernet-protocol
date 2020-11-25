@@ -63,6 +63,12 @@
         <td>Payment Amount</td>
         <td data-bind="text: paymentAmount"></td>
       </tr>
+      <tr>
+        <td colspan="2" data-bind='component: {
+          name: "button",
+          params: acceptButton}, visible: showAcceptButton'>
+        </td>
+      </tr>
     </tbody>
   </table>
 </div>
