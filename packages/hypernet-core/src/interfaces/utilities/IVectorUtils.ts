@@ -13,7 +13,7 @@ export interface IVectorUtils {
   /**
    *
    */
-  createNullTransfer(
+  createMessageTransfer(
     toAddress: string, 
     message: IHypernetTransferMetadata): Promise<NodeResponses.ConditionalTransfer>
 

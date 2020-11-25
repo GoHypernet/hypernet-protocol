@@ -1,6 +1,8 @@
 import { Balance, FullChannelState, FullTransferState, PublicIdentifier, CreateTransferParams, TransferNames, HashlockTransferName, NodeParams, OptionalPublicIdentifier, Result, NodeResponses, TransferState, HashlockTransferState } from "@connext/vector-types";
 import { BigNumber, IHypernetTransferMetadata, PullAmount } from "@interfaces/objects";
 import { IBrowserNodeProvider, IContextProvider, IVectorUtils, IConfigProvider } from "@interfaces/utilities";
+import { TestToken } from "@connext/vector-contracts"
+import { Insurance, InsuranceState, Parameterized, ParameterizedState } from "@interfaces/types";
 
 export class VectorUtils implements IVectorUtils {
   protected channelAddress: string | null;
@@ -16,15 +18,15 @@ export class VectorUtils implements IVectorUtils {
   /**
    * 
    */
-  public async createNullTransfer(
+  public async createMessageTransfer(
     toAddress: string,
     message: IHypernetTransferMetadata
   ): Promise<NodeResponses.ConditionalTransfer> {
     const browserNode = await this.browserNodeProvider.getBrowserNode()
     const channelAddress = await this.getRouterChannelAddress()
-
-    let initialState: TransferState = {
-      // @todo switch this to a NullTransferState and fill in once we import the types
+    
+    let initialState: MessageState = {
+    
     }
 
     // Create transfer params
@@ -33,7 +35,7 @@ export class VectorUtils implements IVectorUtils {
       amount: '0',
       assetId: HypertokenAddress,
       type: 'Message',
-      details: initialState // initial state goes here // but not initialbalance like the tests
+      details: initialState
     } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>
 
     let transfer = await browserNode.conditionalTransfer(transferParams)
@@ -61,8 +63,8 @@ export class VectorUtils implements IVectorUtils {
     const browserNode = await this.browserNodeProvider.getBrowserNode()
     const channelAddress = await this.getRouterChannelAddress()
 
-    let initialState: TransferState = {
-      // @todo switch this to a ParameterizedTransferState and fill in once we import the types
+    let initialState: ParameterizedState = {
+      
     }
 
     // Create transfer params
@@ -71,7 +73,7 @@ export class VectorUtils implements IVectorUtils {
       amount: amount.toString(),
       assetId: assetAddress,
       type: 'Parameterized',
-      details: initialState // initial state goes here // but not initialbalance like the tests
+      details: initialState
     } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>
   
     let transfer = await browserNode.conditionalTransfer(transferParams)
@@ -95,8 +97,8 @@ export class VectorUtils implements IVectorUtils {
     const browserNode = await this.browserNodeProvider.getBrowserNode()
     const channelAddress = await this.getRouterChannelAddress()
 
-    let initialState: TransferState = {
-      // @todo switch this to a InsuranceTranferState and fill in once we import the types
+    let initialState: InsuranceState = {
+      
     }
 
     // Create transfer params
@@ -105,7 +107,7 @@ export class VectorUtils implements IVectorUtils {
       amount: amount.toString(),
       assetId: HypertokenAssetAddress,
       type: 'Insurance',
-      details: initialState // initial state goes here // but not initialbalance like the tests
+      details: initialState
     } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>
 
     let transfer = await browserNode.conditionalTransfer(transferParams)
