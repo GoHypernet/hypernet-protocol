@@ -51,38 +51,6 @@ export class AgentViewModel {
       ),
     ];
 
-    // this.core.onLinkUpdated.subscribe({
-    //   next: (link) => {
-    //     const linkParams = this.links();
-    //     let matchFound = false;
-    //     for (const linkParam of linkParams) {
-    //       if (linkParam.link().id === link.id) {
-    //         linkParam.link(link);
-    //         matchFound = true;
-    //       }
-    //     }
-    //     if (!matchFound) {
-    //       this.links.push(new LinkParams(ko.observable(link)))
-    //     }
-    //     this.message("onLinkUpdated");
-    //   },
-    // });
-
-    // this.core.onLinkRequestReceived.subscribe({
-    //   next: (linkRequest) => {
-    //     const status = ko.observable<EProposedLinkStatus>(EProposedLinkStatus.Proposed);
-    //     this.proposedLinks.push(new ProposedLinkParams(linkRequest, status));
-    //     this.message("onLinkRequestReceived");
-    //   },
-    // });
-
-    // this.core.onLinkRejected.subscribe({
-    //   next: (linkRequest) => {
-    //     console.log(linkRequest);
-    //     this.message("onLinkRejected");
-    //   },
-    // });
-
     this.core.onControlClaimed.subscribe({
       next: () => {
         this.inControl(true);

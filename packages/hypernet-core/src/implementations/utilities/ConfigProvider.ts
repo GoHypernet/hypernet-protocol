@@ -34,6 +34,23 @@ export class ConfigProvider implements IConfigProvider {
       console.log("wallet private key", wallet.privateKey);
       console.log("routerPublicIdentifier", this.config.routerPublicIdentifier);
     }
+    else {
+      // Should be MainNet config here
+      this.config = new HypernetConfig(
+        "http://localhost:5000", // iframeSource
+        "isolate income chaos sustain harsh suggest dawn kid sentence sad unable palace upper source below", // Router mnemonic
+        "", // routerPublicIdentifier
+        1337, // Chain ID
+        "localhost:8008", // Router address
+        constants.AddressZero, // Hypertoken address,
+        "Hypernet", // Hypernet Protocol Domain for Transfers
+      );
+
+      const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
+      this.config.routerPublicIdentifier = getPublicIdentifierFromPublicKey(
+        getPublicKeyFromPrivateKey(wallet.privateKey),
+      );
+    }
   }
 
   public async getConfig(): Promise<HypernetConfig> {
