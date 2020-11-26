@@ -18,7 +18,7 @@ import { EBlockchainNetwork } from "./types";
  * user account. The user can be /both/ a consumer and a provider.
  */
 export interface IHypernetCore {
-  initialized(): boolean;
+  initialized(): Promise<void>;
 
   /**
    * Probably can be removed, but leaving as a reminder in case we need to solve

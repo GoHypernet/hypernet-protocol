@@ -24,7 +24,6 @@ export class AgentViewModel {
   public balances: BalancesParams;
   public pushPayment: ButtonParams;
   public depositFundsButton: ButtonParams;
-  //public collateralizeButton: ButtonParams;
   public message: ko.Observable<string>;
   public startupComplete: ko.Observable<boolean>;
   public inControl: ko.Observable<boolean>;
@@ -109,7 +108,7 @@ export class AgentViewModel {
       return this.availableAccounts[0];
     });
 
-    this.balances = new BalancesParams(ko.observable(new Balances([])));
+    this.balances = new BalancesParams(this.core);
     this.paymentForm = new PaymentFormParams(
       this.core,
       ko.pureComputed(() => {
@@ -172,9 +171,6 @@ export class AgentViewModel {
     console.log(account);
 
     await this.core.initialize(account.accountAddress, account.privateKey);
-    const currentBalances = await this.core.getBalances();
-
-    this.balances.balances(currentBalances);
 
     const links = await this.core.getActiveLinks();
     const linkParams = links.map((link: HypernetLink) => new LinkParams(this.core, link));
