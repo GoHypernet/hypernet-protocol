@@ -11,8 +11,22 @@ export interface IVectorUtils {
    */
   getRouterChannelAddress(): Promise<string>;
 
+  /**
+   * 
+   * @param transferId 
+   */
   resolveMessageTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer>;
+
+  /**
+   * 
+   * @param transferId 
+   */
   resolvePaymentTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer>;
+
+  /**
+   * 
+   * @param transferId 
+   */
   resolveInsuranceTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer>;
 
   /**

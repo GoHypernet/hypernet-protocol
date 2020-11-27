@@ -12,6 +12,8 @@ import {
 } from "@interfaces/objects";
 import { EPaymentState } from "@interfaces/types";
 import { IConfigProvider, IContextProvider } from "@interfaces/utilities";
+import { Result } from "@connext/vector-types"
+
 
 /**
  * PaymentService uses Vector internally to send payments on the requested channel.
@@ -22,15 +24,32 @@ export class PaymentService implements IPaymentService {
     protected accountRepository: IAccountsRepository,
     protected contextProvider: IContextProvider,
     protected configProvider: IConfigProvider,
-    protected paymentRepository: IPaymentRepository,
+    protected paymentRepository: IPaymentRepository
   ) {}
+
+  public async acceptFunds(paymentIds: string[]) : Promise<Result<Payment, Error>[]> {
+    // For each payment ID, call the singular version of acceptFunds
+    // Wrap each one as a Result object, and return an array of Results
+    let results: Result<Payment, Error>[] = []
+
+    for (let paymentId in paymentIds) {
+      try {
+        let payment = await this.acceptFund(paymentId)
+        results.push(Result.ok(payment))
+      } catch (err) {
+        results.push(Result.fail(err))
+      }
+    }
+
+    return results
+  }
 
   /**
    * Called by the person on the receiving end of a push payment,
    * to accept the terms of the payment and put up the stake.
    * @param paymentIds the payment ids to accept funds for
    */
-  public async acceptFunds(paymentId: string): Promise<Payment> {
+  public async acceptFund(paymentId: string): Promise<Payment> {
     // Get the payments from the repo, to make sure they can be accepted.
     const config = await this.configProvider.getConfig();
     const payments = await this.paymentRepository.getPaymentsByIds([paymentId]);

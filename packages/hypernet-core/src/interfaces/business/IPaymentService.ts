@@ -1,4 +1,5 @@
 import { BigNumber, Payment, EthereumAddress, PublicKey, PublicIdentifier } from "@interfaces/objects";
+import { Result } from "@connext/vector-types"
 
 /**
  *
@@ -22,6 +23,13 @@ export interface IPaymentService {
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
   ): Promise<Payment>;
+
+  /**
+   * Called by the person on the receiving end of a push payment,
+   * to accept the terms of the payment and put up the stake.
+   */
+  acceptFunds(paymentIds: string[]) : Promise<Result<Payment, Error>[]>
+  acceptFund(paymentId: string) : Promise<Payment>
 
   /**
    *
@@ -54,10 +62,4 @@ export interface IPaymentService {
    * @param transferId
    */
   offerReceived(paymentId: string): Promise<void>;
-
-  /**
-   * Called by the person on the receiving end of a push payment,
-   * to accept the terms of the payment and put up the stake.
-   */
-  acceptFunds(paymentId: string): Promise<Payment>;
 }
