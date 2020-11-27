@@ -29,6 +29,10 @@ module.exports = {
         exclude: path.join(__dirname, "wallet_dist/index.html"),
         loader: "html-loader",
       },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
+      },
     ],
   },
   resolve: {
