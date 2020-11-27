@@ -13,6 +13,6 @@ export class AssetBalance {
     public assetAddresss: EthereumAddress,
     public totalAmount: BigNumber,
     public lockedAmount: BigNumber,
-    public freeAmount: BigNumber
-  ) { }
+    public freeAmount: BigNumber,
+  ) {}
 }

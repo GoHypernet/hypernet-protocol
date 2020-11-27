@@ -1,15 +1,11 @@
 import * as ko from "knockout";
-import {
-  HypernetLink,
-  IHypernetCore,
-} from "@hypernetlabs/hypernet-core";
+import { HypernetLink, IHypernetCore } from "@hypernetlabs/hypernet-core";
 import html from "./Link.template.html";
 import { PushPaymentParams } from "../PushPayment/PushPayment.viewmodel";
 import { PullPaymentParams } from "../PullPayment/PullPayment.viewmodel";
 
 export class LinkParams {
-  constructor(public core: IHypernetCore, 
-    public link: HypernetLink) {}
+  constructor(public core: IHypernetCore, public link: HypernetLink) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -43,7 +39,8 @@ export class LinkViewModel {
           // It's for us, we'll need to add it to the payments for the link
           this.pullPayments.push(new PullPaymentParams(this.core, payment));
         }
-    }});
+      },
+    });
 
     this.core.onPushPaymentProposed.subscribe({
       next: (payment) => {
@@ -51,7 +48,8 @@ export class LinkViewModel {
           // It's for us, we'll need to add it to the payments for the link
           this.pushPayments.push(new PushPaymentParams(this.core, payment));
         }
-    }});
+      },
+    });
   }
 }
 

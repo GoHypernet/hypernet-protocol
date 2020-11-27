@@ -8,8 +8,7 @@ import { EBlockchainNetwork } from "@interfaces/types";
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
 
-  constructor(network: EBlockchainNetwork, 
-    config?: HypernetConfig) {
+  constructor(network: EBlockchainNetwork, config?: HypernetConfig) {
     if (config != null) {
       this.config = config;
       return;
@@ -33,8 +32,7 @@ export class ConfigProvider implements IConfigProvider {
 
       console.log("wallet private key", wallet.privateKey);
       console.log("routerPublicIdentifier", this.config.routerPublicIdentifier);
-    }
-    else {
+    } else {
       // Should be MainNet config here
       this.config = new HypernetConfig(
         "http://localhost:5000", // iframeSource

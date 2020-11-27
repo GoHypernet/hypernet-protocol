@@ -92,8 +92,12 @@ export class PaymentRepository implements IPaymentRepository {
       return paymentIds.includes(val.meta.paymentId);
     });
 
-    const payments = await this.paymentUtils.transfersToPayments(activeTransfers as FullTransferState[], 
-        config, context, browserNode);
+    const payments = await this.paymentUtils.transfersToPayments(
+      activeTransfers as FullTransferState[],
+      config,
+      context,
+      browserNode,
+    );
 
     return payments.reduce((map, obj) => {
       map.set(obj.id, obj);

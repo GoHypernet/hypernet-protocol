@@ -14,10 +14,24 @@ import {
 } from "@interfaces/objects";
 import { VectorLinkRepository, PaymentRepository, AccountsRepository } from "@implementations/data";
 import { Subject } from "rxjs";
-import { IBlockchainProvider, IVectorUtils, IConfigProvider, IContextProvider, IPaymentUtils } from "@interfaces/utilities";
+import {
+  IBlockchainProvider,
+  IVectorUtils,
+  IConfigProvider,
+  IContextProvider,
+  IPaymentUtils,
+} from "@interfaces/utilities";
 import { IAccountService, ILinkService, IPaymentService } from "@interfaces/business";
 import { AccountService, LinkService, PaymentService } from "@implementations/business";
-import { PaymentUtils, LinkUtils, ContextProvider, ConfigProvider, EthersBlockchainProvider, BrowserNodeProvider, VectorUtils } from "@implementations/utilities";
+import {
+  PaymentUtils,
+  LinkUtils,
+  ContextProvider,
+  ConfigProvider,
+  EthersBlockchainProvider,
+  BrowserNodeProvider,
+  VectorUtils,
+} from "@implementations/utilities";
 import { IPaymentRepository, ILinkRepository, IAccountsRepository } from "@interfaces/data";
 import { ILinkUtils, IBrowserNodeProvider } from "@interfaces/utilities";
 import { EBlockchainNetwork } from "@interfaces/types";
@@ -29,6 +43,7 @@ export class HypernetCore implements IHypernetCore {
   public onPullPaymentProposed: Subject<PullPayment>;
   public onPushPaymentReceived: Subject<PushPayment>;
   public onPullPaymentApproved: Subject<PullPayment>;
+  public onBalancesChanged: Subject<Balances>;
 
   protected blockchainProvider: IBlockchainProvider;
   protected configProvider: IConfigProvider;
@@ -62,6 +77,7 @@ export class HypernetCore implements IHypernetCore {
     this.onPushPaymentReceived = new Subject<PushPayment>();
     this.onPullPaymentProposed = new Subject<PullPayment>();
     this.onPullPaymentApproved = new Subject<PullPayment>();
+    this.onBalancesChanged = new Subject<Balances>();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -88,6 +104,7 @@ export class HypernetCore implements IHypernetCore {
       this.onPullPaymentProposed,
       this.onPushPaymentReceived,
       this.onPullPaymentApproved,
+      this.onBalancesChanged,
     );
 
     this.browserNodeProvider = new BrowserNodeProvider(this.configProvider, this.contextProvider);
@@ -124,7 +141,7 @@ export class HypernetCore implements IHypernetCore {
       this.paymentRepository,
     );
 
-    this.accountService = new AccountService(this.accountRepository);
+    this.accountService = new AccountService(this.accountRepository, this.contextProvider);
     this.LinkService = new LinkService(this.linkRepository);
   }
 
@@ -145,7 +162,7 @@ export class HypernetCore implements IHypernetCore {
     return context.publicIdentifier;
   }
 
-  public async depositFunds(assetAddress: string, amount: BigNumber): Promise<void> {
+  public async depositFunds(assetAddress: string, amount: BigNumber): Promise<Balances> {
     return this.accountService.depositFunds(assetAddress, amount);
   }
 
@@ -153,7 +170,7 @@ export class HypernetCore implements IHypernetCore {
     assetAddress: EthereumAddress,
     amount: BigNumber,
     destinationAddress: EthereumAddress,
-  ): Promise<void> {
+  ): Promise<Balances> {
     return this.accountService.withdrawFunds(assetAddress, amount, destinationAddress);
   }
 
