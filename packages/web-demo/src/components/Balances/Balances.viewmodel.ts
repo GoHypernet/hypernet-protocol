@@ -17,11 +17,14 @@ export class BalancesViewModel {
     this.core = params.core;
 
     this.balances = ko.observableArray();
+
+    this.init();
   }
 
   protected async init(): Promise<void> {
     await this.core.initialized();
     const balances = await this.core.getBalances();
+    console.log("Got balances", balances);
 
     const params = balances.assets.map((val: AssetBalance) => {
       return new AssetBalanceParams(val);

@@ -76,6 +76,11 @@ export class AgentViewModel {
       })
       .then((publicIdentifier: string) => {
         this.publicIdentifier(publicIdentifier);
+      })
+      .catch((e) => {
+        this.message("Startup failed!");
+        console.log("Startup failed!");
+        console.log(e);
       });
 
     this.depositFundsButton = new ButtonParams("Deposit Funds", async () => {
@@ -172,7 +177,10 @@ export class AgentViewModel {
 
     await this.core.initialize(account.accountAddress, account.privateKey);
 
+    console.log("core initialized!");
+
     const links = await this.core.getActiveLinks();
+    console.log("Get active links!");
     const linkParams = links.map((link: HypernetLink) => new LinkParams(this.core, link));
     this.links(linkParams);
   }

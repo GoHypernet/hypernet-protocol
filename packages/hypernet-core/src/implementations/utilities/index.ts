@@ -1,7 +1,6 @@
 export * from "./3BoxUtils";
 export * from "./BlockchainProvider";
 export * from "./BrowserNodeProvider";
-export * from "./ChannelSigner";
 export * from "./ChannelUtils";
 export * from "./ConfigProvider";
 export * from "./ContextProvider";
