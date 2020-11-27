@@ -1,101 +1,125 @@
 <div class="container-fluid">
   <h1>Agent</h1>
 
-  <div class="card">
-    <div class="card-body">
-      <h5 class="card-title">Account</h5>
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Account</h5>
 
-      <table class="table" data-bind="if: account() != null">
-        <tbody>
-          <tr>
-            <td>Name</td>
-            <td data-bind="text: account().accountName"></td>
-          </tr>
-          <tr>
-            <td>Account Address</td>
-            <td data-bind="text: account().accountAddress"></td>
-          </tr>
-          <tr>
-            <td>Public Identifier</td>
-            <td data-bind="text: publicIdentifier"></td>
-          </tr>
-          <tr>
-            <td>Private Key</td>
-            <td data-bind="text: account().privateKey"></td>
-          </tr>
-        </tbody>
-      </table>
+          <table class="table" data-bind="if: account() != null">
+            <tbody>
+              <tr>
+                <td>Name</td>
+                <td data-bind="text: account().accountName"></td>
+              </tr>
+              <tr>
+                <td>Account Address</td>
+                <td data-bind="text: account().accountAddress"></td>
+              </tr>
+              <tr>
+                <td>Public Identifier</td>
+                <td data-bind="text: publicIdentifier"></td>
+              </tr>
+              <tr>
+                <td>Private Key</td>
+                <td data-bind="text: account().privateKey"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Remote Account</h5>
+          <table class="table">
+            <tbody>
+              <tr>
+                <td>Name</td>
+                <td data-bind="text: remoteAccount().accountName"></td>
+              </tr>
+              <tr>
+                <td>Account Address</td>
+                <td data-bind="text: remoteAccount().accountAddress"></td>
+              </tr>
+              <tr>
+                <td>Public Identifier</td>
+                <td data-bind="text: remoteAccount().publicIdentifier"></td>
+              </tr>
+              <tr>
+                <td>Private Key</td>
+                <td data-bind="text: remoteAccount().privateKey"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   </div>
 
-
-  <div class="card">
-    <div class="card-body">
-      <h5 class="card-title">Remote Account</h5>
-      <table class="table">
-        <tbody>
-          <tr>
-            <td>Name</td>
-            <td data-bind="text: remoteAccount().accountName"></td>
-          </tr>
-          <tr>
-            <td>Account Address</td>
-            <td data-bind="text: remoteAccount().accountAddress"></td>
-          </tr>
-          <tr>
-            <td>Public Identifier</td>
-            <td data-bind="text: remoteAccount().publicIdentifier"></td>
-          </tr>
-          <tr>
-            <td>Private Key</td>
-            <td data-bind="text: remoteAccount().privateKey"></td>
-          </tr>
-        </tbody>
-      </table>
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Status</h5>
+          <table class="table">
+            <tbody>
+              <tr>
+                <td>Startup Complete</td>
+                <td data-bind="text: startupComplete"></td>
+              </tr>
+              <tr>
+                <td>In Control</td>
+                <td data-bind="text: inControl"></td>
+              </tr>
+              </thead>
+          </table>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <div class="card">
-    <div class="card-body">
-      <h5 class="card-title">Status</h5>
-      <table class="table">
-        <tbody>
-          <tr>
-            <td>Startup Complete</td>
-            <td data-bind="text: startupComplete"></td>
-          </tr>
-          <tr>
-            <td>In Control</td>
-            <td data-bind="text: inControl"></td>
-          </tr>
-          </thead>
-      </table>
-    </div>
-  </div>
-
-  <div data-bind='component: {
+    <div class="col">
+      <div data-bind='component: {
         name: "balances",
         params: balances}'></div>
+    </div>
 
-  <div data-bind="component: {
-    name: 'links',
-    params: links}"></div>
 
-  <div class="card">
-    <div class="card-body">
-      <h5 class="card-title">Actions</h5>
-      <span data-bind="visible: startupComplete, component: {name:'button', params:depositFundsButton}"></span>
+    <div class="col">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Actions</h5>
+          <span data-bind="visible: startupComplete, component: {name:'button', params:depositFundsButton}"></span>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div data-bind='component: {
+  <div class="row">
+    <div class="col">
+      <div data-bind="component: {
+    name: 'links',
+    params: links}"></div>
+    </div>
+
+    <div class="col">
+      <div data-bind='component: {
         name: "payment-form",
         params: paymentForm}'></div>
+    </div>
+  </div>
 
-  <div class="card">
-    <div class="card-body">
-      <h5 class="card-title">Messages</h5>
-      <div data-bind="text: message"></div>
+  <div class="row">
+    <div class="col">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Messages</h5>
+          <div data-bind="text: message"></div>
+        </div>
+      </div>
     </div>
   </div>
 </div>
