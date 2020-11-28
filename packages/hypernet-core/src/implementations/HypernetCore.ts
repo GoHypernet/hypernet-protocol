@@ -208,7 +208,7 @@ export class HypernetCore implements IHypernetCore {
    * @param paymentId
    */
   public async acceptFunds(paymentId: string): Promise<Payment> {
-    const payment = this.paymentService.acceptFunds(paymentId);
+    const payment = this.paymentService.acceptFund(paymentId);
 
     return payment;
   }

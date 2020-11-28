@@ -12,7 +12,7 @@ export class ITransferDefinitionFactory {
     address: string,
     signerOrProvider: Signer | Provider
   ): ITransferDefinition {
-    return new Contract(address, _abi, signerOrProvider) as ITransferDefinition;
+    return new Contract(address, _abi, signerOrProvider) as unknown as ITransferDefinition;
   }
 }
 

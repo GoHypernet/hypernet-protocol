@@ -12,7 +12,7 @@ export class TransferDefinitionFactory {
     address: string,
     signerOrProvider: Signer | Provider
   ): TransferDefinition {
-    return new Contract(address, _abi, signerOrProvider) as TransferDefinition;
+    return new Contract(address, _abi, signerOrProvider) as unknown as TransferDefinition;
   }
 }
 
