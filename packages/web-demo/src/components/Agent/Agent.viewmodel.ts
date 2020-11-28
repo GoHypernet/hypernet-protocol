@@ -6,6 +6,7 @@ import { ButtonParams } from "../Button/Button.viewmodel";
 import { ethers } from "ethers";
 import { BalancesParams } from "../Balances/Balances.viewmodel";
 import { PaymentFormParams } from "../PaymentForm/PaymentForm.viewmodel";
+import { LinksParams } from "../Links/Links.viewmodel";
 
 class AvailableAccount {
   constructor(
@@ -17,7 +18,7 @@ class AvailableAccount {
 }
 
 export class AgentViewModel {
-  public links: ko.ObservableArray<LinkParams>;
+  public links: LinksParams;
   public account: ko.Observable<AvailableAccount | null>;
   public publicIdentifier: ko.Observable<string>;
   public remoteAccount: ko.PureComputed<AvailableAccount>;
@@ -62,11 +63,10 @@ export class AgentViewModel {
       },
     });
 
-    this.links = ko.observableArray<LinkParams>();
     this.message = ko.observable<string>("Starting");
     this.startupComplete = ko.observable(false);
     this.inControl = ko.observable(false);
-
+    
     this.startup()
       .then(() => {
         this.startupComplete(true);
@@ -105,6 +105,7 @@ export class AgentViewModel {
     this.account = ko.observable<AvailableAccount | null>(null);
 
     this.publicIdentifier = ko.observable("");
+    this.links = new LinksParams(this.core, this.publicIdentifier);
 
     this.remoteAccount = ko.pureComputed<AvailableAccount>(() => {
       if (this.account()?.accountAddress === "0xB6ECBa743E9fa53998Bc1F1265adf87F5CCaDc85")
@@ -120,42 +121,6 @@ export class AgentViewModel {
         return this.remoteAccount().publicIdentifier;
       }),
     );
-
-    this.core.onPullPaymentProposed.subscribe({
-      next: (payment) => {
-        // Check if there is a link for this counterparty already
-        const links = this.links().filter((val) => { 
-          const counterPartyAccount = val.link.counterPartyAccount;
-          return counterPartyAccount === payment.to || counterPartyAccount === payment.from; });
-
-        if (links.length === 0) {
-          // We need to create a new link for the counterparty
-          const counterPartyAccount = payment.to === this.publicIdentifier() ? payment.from : payment.to;
-          const link = new HypernetLink(counterPartyAccount, [payment],
-            [], [payment], [], [payment]);
-          this.links.push(new LinkParams(this.core, link));
-        }
-
-        // A link already exists for this counterparty, the link component will handle this
-    }});
-
-    this.core.onPushPaymentProposed.subscribe({
-      next: (payment) => {
-        // Check if there is a link for this counterparty already
-        const links = this.links().filter((val) => { 
-          const counterPartyAccount = val.link.counterPartyAccount;
-          return counterPartyAccount === payment.to || counterPartyAccount === payment.from; });
-
-        if (links.length === 0) {
-          // We need to create a new link for the counterparty
-          const counterPartyAccount = payment.to === this.publicIdentifier() ? payment.from : payment.to;
-          const link = new HypernetLink(counterPartyAccount, [payment],
-            [payment], [], [payment], []);
-          this.links.push(new LinkParams(this.core, link));
-        }
-
-        // A link already exists for this counterparty, the link component will handle this
-    }});
   }
 
   protected async startup() {
@@ -178,11 +143,6 @@ export class AgentViewModel {
     await this.core.initialize(account.accountAddress, account.privateKey);
 
     console.log("core initialized!");
-
-    const links = await this.core.getActiveLinks();
-    console.log("Get active links!");
-    const linkParams = links.map((link: HypernetLink) => new LinkParams(this.core, link));
-    this.links(linkParams);
   }
 }
 

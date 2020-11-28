@@ -6,8 +6,7 @@ import { PaymentStatusParams } from "../PaymentStatus/PaymentStatus.viewmodel";
 import { ButtonParams } from "../Button/Button.viewmodel";
 
 export class PushPaymentParams {
-  constructor(public core: IHypernetCore,
-    public payment: PushPayment) {}
+  constructor(public core: IHypernetCore, public payment: PushPayment) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -57,7 +56,8 @@ export class PushPaymentViewModel {
         if (payment.id === this.paymentId) {
           this.state(new PaymentStatusParams(params.payment.state));
         }
-    }});
+      },
+    });
 
     this.acceptButton = new ButtonParams("Accept", async () => {
       const payments = await this.core.acceptFunds([this.paymentId]);

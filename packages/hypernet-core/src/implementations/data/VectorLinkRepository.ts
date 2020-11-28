@@ -68,8 +68,12 @@ export class VectorLinkRepository implements ILinkRepository {
     }
 
     const activeTransfers = activeTransfersRes.getValue();
-    const payments = await this.paymentUtils.transfersToPayments(activeTransfers as FullTransferState[], 
-      config, context, browserNode);
+    const payments = await this.paymentUtils.transfersToPayments(
+      activeTransfers as FullTransferState[],
+      config,
+      context,
+      browserNode,
+    );
 
     return await this.linkUtils.paymentsToHypernetLinks(payments, context);
   }
@@ -103,8 +107,12 @@ export class VectorLinkRepository implements ILinkRepository {
     });
 
     // Because of the filter above, this should only produce a single link
-    const payments = await this.paymentUtils.transfersToPayments(activeTransfers as FullTransferState[], 
-      config, context, browserNode);
+    const payments = await this.paymentUtils.transfersToPayments(
+      activeTransfers as FullTransferState[],
+      config,
+      context,
+      browserNode,
+    );
     const links = await this.linkUtils.paymentsToHypernetLinks(payments, context);
 
     if (links.length === 0) {

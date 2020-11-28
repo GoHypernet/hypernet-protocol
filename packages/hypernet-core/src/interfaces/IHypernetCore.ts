@@ -53,7 +53,7 @@ export interface IHypernetCore {
    * @param amount The amount of funds (in wei) that you are depositing
    * @dev this creates a transaction on the blockchain!
    */
-  depositFunds(assetAddress: EthereumAddress, amount: BigNumber): Promise<void>;
+  depositFunds(assetAddress: EthereumAddress, amount: BigNumber): Promise<Balances>;
 
   /**
    * This function will withdraw funds from Hypernet core into a specified Ethereum address.
@@ -61,7 +61,7 @@ export interface IHypernetCore {
    * @param amount
    * @param destinationAddress
    */
-  withdrawFunds(assetAddress: EthereumAddress, amount: BigNumber, destinationAddress: EthereumAddress): Promise<void>;
+  withdrawFunds(assetAddress: EthereumAddress, amount: BigNumber, destinationAddress: EthereumAddress): Promise<Balances>;
 
   /**
    * Returns the balance account, including funds within
@@ -155,4 +155,5 @@ export interface IHypernetCore {
   onPullPaymentProposed: Subject<PullPayment>;
   onPushPaymentReceived: Subject<PushPayment>;
   onPullPaymentApproved: Subject<PullPayment>;
+  onBalancesChanged: Subject<Balances>;
 }

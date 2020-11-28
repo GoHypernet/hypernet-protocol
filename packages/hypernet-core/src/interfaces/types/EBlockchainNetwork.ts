@@ -1,8 +1,8 @@
 export enum EBlockchainNetwork {
-    Main,
-    Ropsten,
-    Kovan,
-    Rinkeby,
-    Goerli,
-    Localhost
+  Main,
+  Ropsten,
+  Kovan,
+  Rinkeby,
+  Goerli,
+  Localhost,
 }

@@ -4,7 +4,7 @@ import html from "./Balances.template.html";
 import { AssetBalanceParams } from "../AssetBalance/AssetBalance.viewmodel";
 
 export class BalancesParams {
-  constructor(public core: IHypernetCore) { }
+  constructor(public core: IHypernetCore) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -18,20 +18,28 @@ export class BalancesViewModel {
 
     this.balances = ko.observableArray();
 
+    this.core.onBalancesChanged.subscribe({
+      next: (val) => {
+        this.updateBalances(val);
+      }
+    })
+
     this.init();
   }
 
   protected async init(): Promise<void> {
     await this.core.initialized();
     const balances = await this.core.getBalances();
-    console.log("Got balances", balances);
 
+    this.updateBalances(balances);
+  }
+
+  protected updateBalances(balances: Balances) {
     const params = balances.assets.map((val: AssetBalance) => {
       return new AssetBalanceParams(val);
     });
 
     this.balances(params);
-
   }
 }
 

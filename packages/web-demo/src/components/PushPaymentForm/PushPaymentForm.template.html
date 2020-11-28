@@ -1,12 +1,12 @@
-<div>
-    <div>Required Stake: <input data-bind="textInput: requiredStake"></div>
-    <div>Payment Token: <select data-bind="options: paymentTokens,
+<form>
+    <div>Required Stake: <input class="form-control" data-bind="textInput: requiredStake"></div>
+    <div>Payment Token: <select class="form-control" data-bind="options: paymentTokens,
         optionsText: 'tokenName',
         value: selectedPaymentToken,
         optionsCaption: 'Choose...'"></select></div>
-    <div>Amount: <input data-bind="textInput: amount"></div>
-    <div>Expiration Date: <input data-bind="textInput: expirationDate"></div>
+    <div>Amount: <input class="form-control" data-bind="textInput: amount"></div>
+    <div>Expiration Date: <input class="form-control" data-bind="textInput: expirationDate"></div>
     <span data-bind='component: {
         name: "button",
         params: submitButton}'></span>
-</div>
+    </form>
