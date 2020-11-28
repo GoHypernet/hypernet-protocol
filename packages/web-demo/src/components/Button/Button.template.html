@@ -1,4 +1,7 @@
-<button type="button" data-bind="text: buttonText, 
-click: click, 
-class: {show_spinner: showSpinner},
-enable: enabled"></button>
+<button class="btn btn-primary" type="button" data-bind="text: buttonText, 
+click: click,
+enable: enabled">
+    <div class="spinner-border" role="status" data-bind="visible:showSpinner">
+        <span class="sr-only">Loading...</span>
+    </div>
+</button>

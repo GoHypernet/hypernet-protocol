@@ -6,6 +6,7 @@ import {
   InitializedHypernetContext,
   PushPayment,
   PullPayment,
+  Balances,
 } from "@interfaces/objects";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { Subject } from "rxjs";
@@ -19,6 +20,7 @@ export class ContextProvider implements IContextProvider {
     onPullPaymentProposed: Subject<PullPayment>,
     onPushPaymentReceived: Subject<PushPayment>,
     onPullPaymentApproved: Subject<PullPayment>,
+    onBalancesChanged: Subject<Balances>,
   ) {
     this.context = new HypernetContext(
       null,
@@ -31,6 +33,7 @@ export class ContextProvider implements IContextProvider {
       onPullPaymentProposed,
       onPushPaymentReceived,
       onPullPaymentApproved,
+      onBalancesChanged,
     );
   }
   public async getContext(): Promise<HypernetContext> {
@@ -53,6 +56,7 @@ export class ContextProvider implements IContextProvider {
       this.context.onPullPaymentProposed,
       this.context.onPushPaymentReceived,
       this.context.onPullPaymentApproved,
+      this.context.onBalancesChanged,
     );
   }
 

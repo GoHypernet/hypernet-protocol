@@ -13,13 +13,14 @@ import {
 import { Subject } from "rxjs";
 import * as moment from "moment";
 import { Result } from "@connext/vector-types"
+import { EBlockchainNetwork } from "./types";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
  * user account. The user can be /both/ a consumer and a provider.
  */
 export interface IHypernetCore {
-  initialized(): boolean;
+  initialized(): Promise<void>;
 
   /**
    * Probably can be removed, but leaving as a reminder in case we need to solve
@@ -54,7 +55,7 @@ export interface IHypernetCore {
    * @param amount The amount of funds (in wei) that you are depositing
    * @dev this creates a transaction on the blockchain!
    */
-  depositFunds(assetAddress: EthereumAddress, amount: BigNumber): Promise<void>;
+  depositFunds(assetAddress: EthereumAddress, amount: BigNumber): Promise<Balances>;
 
   /**
    * This function will withdraw funds from Hypernet core into a specified Ethereum address.
@@ -62,7 +63,7 @@ export interface IHypernetCore {
    * @param amount
    * @param destinationAddress
    */
-  withdrawFunds(assetAddress: EthereumAddress, amount: BigNumber, destinationAddress: EthereumAddress): Promise<void>;
+  withdrawFunds(assetAddress: EthereumAddress, amount: BigNumber, destinationAddress: EthereumAddress): Promise<Balances>;
 
   /**
    * Returns the balance account, including funds within
@@ -156,4 +157,5 @@ export interface IHypernetCore {
   onPullPaymentProposed: Subject<PullPayment>;
   onPushPaymentReceived: Subject<PushPayment>;
   onPullPaymentApproved: Subject<PullPayment>;
+  onBalancesChanged: Subject<Balances>;
 }

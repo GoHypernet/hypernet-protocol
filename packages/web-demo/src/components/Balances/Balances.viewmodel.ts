@@ -1,28 +1,45 @@
 import * as ko from "knockout";
-import { AssetBalance, Balances } from "@hypernetlabs/hypernet-core";
+import { AssetBalance, Balances, IHypernetCore } from "@hypernetlabs/hypernet-core";
 import html from "./Balances.template.html";
 import { AssetBalanceParams } from "../AssetBalance/AssetBalance.viewmodel";
 
 export class BalancesParams {
-  constructor(public balances: ko.Observable<Balances>) {}
+  constructor(public core: IHypernetCore) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
 export class BalancesViewModel {
-  public balances: ko.PureComputed<AssetBalanceParams[]>;
+  public balances: ko.ObservableArray<AssetBalanceParams>;
 
-  protected source: ko.Observable<Balances>;
+  protected core: IHypernetCore;
 
   constructor(params: BalancesParams) {
-    this.source = params.balances;
+    this.core = params.core;
 
-    this.balances = ko.pureComputed(() => {
-      const source = this.source();
+    this.balances = ko.observableArray();
 
-      return source.assets.map((val: AssetBalance) => {
-        return new AssetBalanceParams(val);
-      });
+    this.core.onBalancesChanged.subscribe({
+      next: (val) => {
+        this.updateBalances(val);
+      }
+    })
+
+    this.init();
+  }
+
+  protected async init(): Promise<void> {
+    await this.core.initialized();
+    const balances = await this.core.getBalances();
+
+    this.updateBalances(balances);
+  }
+
+  protected updateBalances(balances: Balances) {
+    const params = balances.assets.map((val: AssetBalance) => {
+      return new AssetBalanceParams(val);
     });
+
+    this.balances(params);
   }
 }
 

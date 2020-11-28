@@ -11,8 +11,9 @@
     "lerna": "^3.22.1"
   },
   "scripts": {
-    "bootstrap": "yarn install",
-    "start": "cd packages/web-demo && yarn start"
+    "bootstrap": "yarn install && lerna init",
+    "start": "cd packages/web-demo && yarn start",
+    "format": "lerna run format"
   },
   "repository": {
     "type": "git",
@@ -32,7 +33,6 @@
     "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
   },
   "homepage": "https://github.com/GoHypernet/hypernet-protocol#readme",
-  "dependencies": {},
   "workspaces": [
     "packages/*"
   ]

@@ -7,5 +7,3 @@ import { AssetBalance } from "./AssetBalance";
 export class Balances {
   constructor(public assets: AssetBalance[]) {}
 }
-
-

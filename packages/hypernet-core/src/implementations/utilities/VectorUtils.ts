@@ -177,32 +177,31 @@ export class VectorUtils implements IVectorUtils {
     const configPromise = this.configProvider.getConfig();
     const contextPromise = this.contextProvider.getInitializedContext();
     const browserNodePromise = this.browserNodeProvider.getBrowserNode();
-
     const [config, context, browserNode] = await Promise.all([configPromise, contextPromise, browserNodePromise]);
 
     console.log(`publicIdentifier: ${context.publicIdentifier}`);
     console.log(`routerPublicIdentifier: ${config.routerPublicIdentifier}`);
 
     // We need to see if we already have a channel with the router setup.
-    const channelsByParticipantResult = await browserNode.getStateChannelByParticipants({
-      publicIdentifier: context.publicIdentifier,
-      counterparty: config.routerPublicIdentifier,
-      chainId: config.chainId,
-    });
+    // const channelsByParticipantResult = await browserNode.getStateChannelByParticipants({
+    //   publicIdentifier: context.publicIdentifier,
+    //   counterparty: config.routerPublicIdentifier,
+    //   chainId: config.chainId,
+    // });
 
     const channelsResult = await browserNode.getStateChannels();
 
-    if (channelsByParticipantResult.isError) {
-      throw new Error("Cannot get channels!");
-    }
+    // if (channelsByParticipantResult.isError) {
+    //   throw new Error("Cannot get channels!");
+    // }
 
     if (channelsResult.isError) {
       throw new Error("Cannot get channels 2!");
     }
-    const channelsByParticipants = channelsByParticipantResult.getValue();
+    // const channelsByParticipants = channelsByParticipantResult.getValue();
     const channels2 = channelsResult.getValue();
 
-    console.log(channelsByParticipants);
+    // console.log(channelsByParticipants);
     console.log(channels2);
 
     let channel: FullChannelState | null = null;

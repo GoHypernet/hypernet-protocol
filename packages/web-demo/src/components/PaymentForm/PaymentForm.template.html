@@ -1,22 +1,20 @@
-<div>
-  <h2>Create Payment</h2>
-  <select data-bind="options: paymentTypes,
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Create Payment</h5>
+    <select class="form-control" data-bind="options: paymentTypes,
                        optionsText: 'typeName',
                        value: selectedPaymentType,
                        optionsCaption: 'Choose...'"></select>
 
-  <div data-bind="if: showPullForm">
-    <div
-    data-bind='component: {
+    <div data-bind="if: showPullForm">
+      <div data-bind='component: {
         name: "pull-payment-form",
-        params: pullPayment}'
-  ></div>
-  </div>
-  <div data-bind="if: showPushForm">
-    <div
-    data-bind='component: {
+        params: pullPayment}'></div>
+    </div>
+    <div data-bind="if: showPushForm">
+      <div data-bind='component: {
         name: "push-payment-form",
-        params: pushPayment}'
-  ></div>
+        params: pushPayment}'></div>
+    </div>
   </div>
 </div>

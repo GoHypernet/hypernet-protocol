@@ -5,7 +5,11 @@ import { AssetBalance, Balances, BigNumber, EthereumAddress } from "@interfaces/
  */
 export interface IAccountService {
   getAccounts(): Promise<string[]>;
-  depositFunds(assetAddress: EthereumAddress, amount: BigNumber): Promise<void>;
-  withdrawFunds(assetAddress: EthereumAddress, amount: BigNumber, destinationAddress: EthereumAddress): Promise<void>;
+  depositFunds(assetAddress: EthereumAddress, amount: BigNumber): Promise<Balances>;
+  withdrawFunds(
+    assetAddress: EthereumAddress,
+    amount: BigNumber,
+    destinationAddress: EthereumAddress,
+  ): Promise<Balances>;
   getBalances(): Promise<Balances>;
 }
