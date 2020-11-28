@@ -20,6 +20,7 @@ import { AccountService, LinkService, PaymentService } from "@implementations/bu
 import { PaymentUtils, LinkUtils, ContextProvider, ConfigProvider, EthersBlockchainProvider, BrowserNodeProvider, VectorUtils } from "@implementations/utilities";
 import { IPaymentRepository, ILinkRepository, IAccountsRepository } from "@interfaces/data";
 import { ILinkUtils, IBrowserNodeProvider } from "@interfaces/utilities";
+import { EBlockchainNetwork } from "@interfaces/types";
 
 export class HypernetCore implements IHypernetCore {
   public onControlClaimed: Subject<ControlClaim>;
@@ -45,11 +46,14 @@ export class HypernetCore implements IHypernetCore {
   protected paymentService: IPaymentService;
   protected LinkService: ILinkService;
 
-  protected _initialized: boolean;
+  protected _initializedPromise: Promise<void>;
+  protected _initializeResolve: (() => void) | undefined;
   protected _inControl: boolean;
 
-  constructor(config?: HypernetConfig) {
-    this._initialized = false;
+  constructor(network: EBlockchainNetwork = EBlockchainNetwork.Main, config?: HypernetConfig) {
+    this._initializedPromise = new Promise((resolve) => {
+      this._initializeResolve = resolve;
+    });
     this._inControl = false;
 
     this.onControlClaimed = new Subject<ControlClaim>();
@@ -72,7 +76,7 @@ export class HypernetCore implements IHypernetCore {
     });
 
     this.blockchainProvider = new EthersBlockchainProvider();
-    this.configProvider = new ConfigProvider(config);
+    this.configProvider = new ConfigProvider(network, config);
 
     this.paymentUtils = new PaymentUtils(this.configProvider);
     this.linkUtils = new LinkUtils();
@@ -124,8 +128,8 @@ export class HypernetCore implements IHypernetCore {
     this.LinkService = new LinkService(this.linkRepository);
   }
 
-  public initialized(): boolean {
-    return this._initialized;
+  public initialized(): Promise<void> {
+    return this._initializedPromise;
   }
   public inControl(): boolean {
     return this._inControl;
@@ -162,7 +166,7 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public async getActiveLinks(): Promise<HypernetLink[]> {
-    throw new Error("Method not yet implemented.");
+    return this.LinkService.getLinks();
   }
 
   public async getLinkByCounterparty(counterPartyAccount: PublicIdentifier): Promise<HypernetLink> {
@@ -253,6 +257,8 @@ export class HypernetCore implements IHypernetCore {
     // await this.controlService.claimControl();
 
     // Set the status bit
-    this._initialized = true;
+    if (this._initializeResolve != null) {
+      this._initializeResolve();
+    }
   }
 }

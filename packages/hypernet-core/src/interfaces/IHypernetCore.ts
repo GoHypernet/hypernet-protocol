@@ -12,12 +12,13 @@ import {
 } from "@interfaces/objects";
 import { Subject } from "rxjs";
 import * as moment from "moment";
+import { EBlockchainNetwork } from "./types";
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
  * user account. The user can be /both/ a consumer and a provider.
  */
 export interface IHypernetCore {
-  initialized(): boolean;
+  initialized(): Promise<void>;
 
   /**
    * Probably can be removed, but leaving as a reminder in case we need to solve

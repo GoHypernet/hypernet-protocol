@@ -1,7 +1,7 @@
 import * as ko from "knockout";
 import html from "./Agent.template.html";
 import { LinkParams } from "../Link/Link.viewmodel";
-import { HypernetCore, IHypernetCore, Balances, HypernetLink } from "@hypernetlabs/hypernet-core";
+import { HypernetCore, IHypernetCore, Balances, HypernetLink, EBlockchainNetwork } from "@hypernetlabs/hypernet-core";
 import { ButtonParams } from "../Button/Button.viewmodel";
 import { ethers } from "ethers";
 import { BalancesParams } from "../Balances/Balances.viewmodel";
@@ -24,7 +24,6 @@ export class AgentViewModel {
   public balances: BalancesParams;
   public pushPayment: ButtonParams;
   public depositFundsButton: ButtonParams;
-  //public collateralizeButton: ButtonParams;
   public message: ko.Observable<string>;
   public startupComplete: ko.Observable<boolean>;
   public inControl: ko.Observable<boolean>;
@@ -34,7 +33,7 @@ export class AgentViewModel {
   protected availableAccounts: Array<AvailableAccount>;
 
   constructor() {
-    this.core = new HypernetCore();
+    this.core = new HypernetCore(EBlockchainNetwork.Localhost);
 
     this.availableAccounts = [
       new AvailableAccount(
@@ -50,38 +49,6 @@ export class AgentViewModel {
         "indra6HBZ5W5wjZ7HuC81aJ8yuSPPCDX2UGhWH8NanWqj54SUF6DNj7",
       ),
     ];
-
-    // this.core.onLinkUpdated.subscribe({
-    //   next: (link) => {
-    //     const linkParams = this.links();
-    //     let matchFound = false;
-    //     for (const linkParam of linkParams) {
-    //       if (linkParam.link().id === link.id) {
-    //         linkParam.link(link);
-    //         matchFound = true;
-    //       }
-    //     }
-    //     if (!matchFound) {
-    //       this.links.push(new LinkParams(ko.observable(link)))
-    //     }
-    //     this.message("onLinkUpdated");
-    //   },
-    // });
-
-    // this.core.onLinkRequestReceived.subscribe({
-    //   next: (linkRequest) => {
-    //     const status = ko.observable<EProposedLinkStatus>(EProposedLinkStatus.Proposed);
-    //     this.proposedLinks.push(new ProposedLinkParams(linkRequest, status));
-    //     this.message("onLinkRequestReceived");
-    //   },
-    // });
-
-    // this.core.onLinkRejected.subscribe({
-    //   next: (linkRequest) => {
-    //     console.log(linkRequest);
-    //     this.message("onLinkRejected");
-    //   },
-    // });
 
     this.core.onControlClaimed.subscribe({
       next: () => {
@@ -109,6 +76,11 @@ export class AgentViewModel {
       })
       .then((publicIdentifier: string) => {
         this.publicIdentifier(publicIdentifier);
+      })
+      .catch((e) => {
+        this.message("Startup failed!");
+        console.log("Startup failed!");
+        console.log(e);
       });
 
     this.depositFundsButton = new ButtonParams("Deposit Funds", async () => {
@@ -141,7 +113,7 @@ export class AgentViewModel {
       return this.availableAccounts[0];
     });
 
-    this.balances = new BalancesParams(ko.observable(new Balances([])));
+    this.balances = new BalancesParams(this.core);
     this.paymentForm = new PaymentFormParams(
       this.core,
       ko.pureComputed(() => {
@@ -204,11 +176,11 @@ export class AgentViewModel {
     console.log(account);
 
     await this.core.initialize(account.accountAddress, account.privateKey);
-    const currentBalances = await this.core.getBalances();
 
-    this.balances.balances(currentBalances);
+    console.log("core initialized!");
 
     const links = await this.core.getActiveLinks();
+    console.log("Get active links!");
     const linkParams = links.map((link: HypernetLink) => new LinkParams(this.core, link));
     this.links(linkParams);
   }

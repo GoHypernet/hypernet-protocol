@@ -8,13 +8,13 @@ export class AssetBalanceParams {
 
 // tslint:disable-next-line: max-classes-per-file
 export class AssetBalanceViewModel {
-  public assetAddresss: string;
+  public assetAddress: string;
   public totalAmount: string;
   public lockedAmount: string;
   public freeAmount: string;
 
   constructor(params: AssetBalanceParams) {
-    this.assetAddresss = params.assetBalance.assetAddresss;
+    this.assetAddress = params.assetBalance.assetAddresss;
     this.totalAmount = params.assetBalance.totalAmount.toString();
     this.lockedAmount = params.assetBalance.lockedAmount.toString();
     this.freeAmount = params.assetBalance.freeAmount.toString();

@@ -33,7 +33,7 @@ export class AccountsRepository implements IAccountsRepository {
       assetBalances.push(
         new AssetBalance(
           channelState.assetIds[i],
-          BigNumber.from(channelState.balances[i]),
+          BigNumber.from(channelState.balances[i].amount[1]),
           BigNumber.from(0),
           BigNumber.from(0),
         ),

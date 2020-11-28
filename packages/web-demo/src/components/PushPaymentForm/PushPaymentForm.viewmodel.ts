@@ -99,6 +99,8 @@ export class PushPaymentFormViewModel {
         }
       }),
     );
+
+    this.getBalances();
   }
 
   protected async getBalances() {
