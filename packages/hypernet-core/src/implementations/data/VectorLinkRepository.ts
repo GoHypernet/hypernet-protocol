@@ -21,31 +21,7 @@ export class VectorLinkRepository implements ILinkRepository {
   ) {}
 
   /**
-   *
-   * @param paymentIds
-   */
-  public async provideAssets(paymentIds: string[]): Promise<Map<string, Payment>> {
-    throw new Error("Method not yet implemented");
-  }
-
-  /**
-   *
-   * @param paymentIds
-   */
-  public async provideStakes(paymentIds: string[]): Promise<Map<string, Payment>> {
-    throw new Error("Method not yet implemented");
-  }
-
-  /**
-   *
-   * @param paymentIds
-   */
-  public async finalizePayments(paymentIds: string[]): Promise<Map<string, Payment>> {
-    throw new Error("Method not yet implemented");
-  }
-
-  /**
-   *
+   * Get all Hypernet Links for this client
    */
   public async getHypernetLinks(): Promise<HypernetLink[]> {
     const browserNodePromise = await this.browserNodeProvider.getBrowserNode();

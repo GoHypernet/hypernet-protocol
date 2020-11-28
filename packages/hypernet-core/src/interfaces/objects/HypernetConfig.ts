@@ -10,5 +10,6 @@ export class HypernetConfig {
     public routerUrl: string,
     public hypertokenAddress: EthereumAddress,
     public hypernetProtocolDomain: string,
+    public defaultPaymentExpiryLength: number
   ) {}
 }

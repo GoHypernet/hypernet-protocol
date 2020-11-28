@@ -12,7 +12,9 @@ import {
 } from "@interfaces/objects";
 import { Subject } from "rxjs";
 import * as moment from "moment";
+import { Result } from "@connext/vector-types"
 import { EBlockchainNetwork } from "./types";
+
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
  * user account. The user can be /both/ a consumer and a provider.
@@ -123,7 +125,7 @@ export interface IHypernetCore {
    * For a specified payment, puts up stake to accept the payment
    * @param paymentId the payment ID to accept funds
    */
-  acceptFunds(paymentIds: string[]): Promise<Payment[]>;
+  acceptFunds(paymentIds: string[]): Promise<Result<Payment, Error>[]>;
 
   /**
    * Pulls an incremental amount from an authorized payment

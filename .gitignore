@@ -4,8 +4,7 @@ npm-debug.log
 packages/*/lib
 packages/*/dist
 .idea
-tsconfig.build.tsbuildinfo
-tsconfig.tsbuildinfo
+*.tsbuildinfo
 package-lock.json
 packages/*/package-lock.json
 packages/hypernet-core/log.txt

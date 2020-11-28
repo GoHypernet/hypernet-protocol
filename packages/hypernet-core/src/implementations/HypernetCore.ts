@@ -34,6 +34,7 @@ import {
 } from "@implementations/utilities";
 import { IPaymentRepository, ILinkRepository, IAccountsRepository } from "@interfaces/data";
 import { ILinkUtils, IBrowserNodeProvider } from "@interfaces/utilities";
+import { Result } from "@connext/vector-types"
 import { EBlockchainNetwork } from "@interfaces/types";
 
 export class HypernetCore implements IHypernetCore {
@@ -228,10 +229,10 @@ export class HypernetCore implements IHypernetCore {
    * the stake or insurance transfer.
    * @param paymentId
    */
-  public async acceptFunds(paymentIds: string[]): Promise<Payment[]> {
-    const payment = this.paymentService.acceptFunds(paymentIds);
+  public async acceptFunds(paymentIds: string[]): Promise<Result<Payment, Error>[]> {
+    const results = await this.paymentService.acceptFunds(paymentIds);
 
-    return payment;
+    return results
   }
 
   public async authorizeFunds(

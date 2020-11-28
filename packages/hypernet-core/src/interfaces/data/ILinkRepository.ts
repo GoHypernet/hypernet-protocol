@@ -14,22 +14,4 @@ export interface ILinkRepository {
    * @param linkId The ID of the link to retrieve
    */
   getHypernetLink(linkId: string): Promise<HypernetLink>;
-
-  /**
-   *
-   * @param paymentIds
-   */
-  provideAssets(paymentIds: string[]): Promise<Map<string, Payment>>;
-
-  /**
-   *
-   * @param paymentIds
-   */
-  provideStakes(paymentIds: string[]): Promise<Map<string, Payment>>;
-
-  /**
-   *
-   * @param paymentIds
-   */
-  finalizePayments(paymentIds: string[]): Promise<Map<string, Payment>>;
 }

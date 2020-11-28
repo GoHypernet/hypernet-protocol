@@ -22,4 +22,26 @@ export interface IPaymentRepository {
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
   ): Promise<Payment>;
+
+  /**
+   * Provides assets for a given list of payment ids.
+   * Internally, this is what actually creates the ParameterizedPayment with Vector.
+   * @param paymentId
+   */
+  provideAsset(paymentId: string): Promise<Payment>;
+
+  /**
+   * Provides stake for a given payment id
+   * Internally, this is what actually creates the InsurancePayments with Vector.
+   * @param paymentId
+   */
+  provideStake(paymentId: string): Promise<Payment>;
+
+  /**
+   * Finalizes/confirms a payment
+   * Internally, this is what actually calls resolve() on the Vector transfer -
+   * be it a insurancePayments or parameterizedPayments.
+   * @param paymentId
+   */
+  finalizePayment(paymentId: string): Promise<Payment>;
 }
