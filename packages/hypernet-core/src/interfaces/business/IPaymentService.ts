@@ -29,7 +29,6 @@ export interface IPaymentService {
    * to accept the terms of the payment and put up the stake.
    */
   acceptFunds(paymentIds: string[]) : Promise<Result<Payment, Error>[]>
-  acceptFund(paymentId: string) : Promise<Payment>
 
   /**
    *

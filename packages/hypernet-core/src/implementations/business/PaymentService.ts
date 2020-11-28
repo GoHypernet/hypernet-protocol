@@ -28,13 +28,33 @@ export class PaymentService implements IPaymentService {
   ) {}
 
   public async acceptFunds(paymentIds: string[]) : Promise<Result<Payment, Error>[]> {
+    const config = await this.configProvider.getConfig()
+    const payments = await this.paymentRepository.getPaymentsByIds(paymentIds)
+    const hypertokenBalance = await this.accountRepository.getBalanceByAsset(config.hypertokenAddress)
+
     // For each payment ID, call the singular version of acceptFunds
     // Wrap each one as a Result object, and return an array of Results
     let results: Result<Payment, Error>[] = []
 
+    let totalStakeRequired = BigNumber.from(0)
+    // First, verify to make sure that we have enough hypertoken to cover the insurance collectively
+    payments.forEach((payment) => {
+      if (payment.state !== EPaymentState.Proposed) {
+        throw new Error(`Cannot accept payment ${payment.id}, it is not in the Proposed state`)
+      }
+
+      totalStakeRequired = totalStakeRequired.add(BigNumber.from(payment.requiredStake))
+    })
+
+    // Check the balance and make sure you have enough HyperToken to cover it
+    if (hypertokenBalance.freeAmount < totalStakeRequired) {
+      throw new Error("Not enough Hypertoken to cover provided payments.");
+    }
+
+    // Now that we know we can (probably) make the payments, let's try
     for (let paymentId in paymentIds) {
       try {
-        let payment = await this.acceptFund(paymentId)
+        const payment = await this.paymentRepository.provideStake(paymentId);
         results.push(Result.ok(payment))
       } catch (err) {
         results.push(Result.fail(err))
@@ -42,39 +62,6 @@ export class PaymentService implements IPaymentService {
     }
 
     return results
-  }
-
-  /**
-   * Called by the person on the receiving end of a push payment,
-   * to accept the terms of the payment and put up the stake.
-   * @param paymentIds the payment ids to accept funds for
-   */
-  public async acceptFund(paymentId: string): Promise<Payment> {
-    // Get the payments from the repo, to make sure they can be accepted.
-    const config = await this.configProvider.getConfig();
-    const payments = await this.paymentRepository.getPaymentsByIds([paymentId]);
-    const payment = payments.get(paymentId)
-
-    if (payment == null) {
-      throw new Error('Could not get payment with provided paymentId.')
-    }
-
-    const hypertokenBalance = await this.accountRepository.getBalanceByAsset(config.hypertokenAddress);
-
-    // Verification & sanity checking
-    if (payment.state !== EPaymentState.Proposed) {
-      throw new Error(`Cannot accept payment ${payment.id}, it is not in the Proposed state`);
-    }
-
-    // Check the balance and make sure you have enough HyperToken to cover it
-    if (hypertokenBalance.freeAmount < payment.requiredStake) {
-      throw new Error("Not enough Hypertoken to cover provided payments.");
-    }
-
-    // Create insurance payments
-    const updatedPayment = await this.paymentRepository.provideStake(paymentId);
-
-    return updatedPayment;
   }
 
   /**

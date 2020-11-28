@@ -20,6 +20,7 @@ import { AccountService, LinkService, PaymentService } from "@implementations/bu
 import { PaymentUtils, LinkUtils, ContextProvider, ConfigProvider, EthersBlockchainProvider, BrowserNodeProvider, VectorUtils } from "@implementations/utilities";
 import { IPaymentRepository, ILinkRepository, IAccountsRepository } from "@interfaces/data";
 import { ILinkUtils, IBrowserNodeProvider } from "@interfaces/utilities";
+import { Result } from "@connext/vector-types"
 
 export class HypernetCore implements IHypernetCore {
   public onControlClaimed: Subject<ControlClaim>;
@@ -207,10 +208,10 @@ export class HypernetCore implements IHypernetCore {
    * the stake or insurance transfer.
    * @param paymentId
    */
-  public async acceptFunds(paymentId: string): Promise<Payment> {
-    const payment = this.paymentService.acceptFund(paymentId);
+  public async acceptFunds(paymentIds: string[]): Promise<Result<Payment, Error>[]> {
+    const results = await this.paymentService.acceptFunds(paymentIds);
 
-    return payment;
+    return results
   }
 
   public async authorizeFunds(
