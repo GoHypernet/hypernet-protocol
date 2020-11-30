@@ -65,7 +65,10 @@ export class PullPaymentViewModel {
     this.acceptButton = new ButtonParams("Accept", async () => {
       const payments = await this.core.acceptFunds([this.paymentId]);
       const payment = payments[0];
-      this.state(new PaymentStatusParams(payment.state));
+      if (payment.isError) {
+        throw new Error('Error getting payment.')
+      }
+      this.state(new PaymentStatusParams(payment.getValue().state));
     });
 
     this.showAcceptButton = ko.pureComputed(() => {

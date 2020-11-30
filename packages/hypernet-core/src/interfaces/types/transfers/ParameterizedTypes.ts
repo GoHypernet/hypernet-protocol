@@ -1,3 +1,5 @@
+import { Address, Bytes32, SignatureString } from "@connext/vector-types"
+
 export type Rate = {
     deltaAmount: string
     deltaTime: string
