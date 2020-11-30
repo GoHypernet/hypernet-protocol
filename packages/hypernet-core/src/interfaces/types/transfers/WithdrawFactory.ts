@@ -25,10 +25,7 @@ export class WithdrawFactory extends ContractFactory {
   connect(signer: Signer): WithdrawFactory {
     return super.connect(signer) as WithdrawFactory;
   }
-  static connect(
-    address: string,
-    signerOrProvider: Signer | Provider
-  ): Withdraw {
+  static connect(address: string, signerOrProvider: Signer | Provider): Withdraw {
     return new Contract(address, _abi, signerOrProvider) as Withdraw;
   }
 }

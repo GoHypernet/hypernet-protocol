@@ -12,7 +12,7 @@ import {
 } from "@interfaces/objects";
 import { Subject } from "rxjs";
 import * as moment from "moment";
-import { Result } from "@connext/vector-types"
+import { Result } from "@connext/vector-types";
 import { EBlockchainNetwork } from "./types";
 
 /**
@@ -62,7 +62,11 @@ export interface IHypernetCore {
    * @param amount
    * @param destinationAddress
    */
-  withdrawFunds(assetAddress: EthereumAddress, amount: BigNumber, destinationAddress: EthereumAddress): Promise<Balances>;
+  withdrawFunds(
+    assetAddress: EthereumAddress,
+    amount: BigNumber,
+    destinationAddress: EthereumAddress,
+  ): Promise<Balances>;
 
   /**
    * Returns the balance account, including funds within

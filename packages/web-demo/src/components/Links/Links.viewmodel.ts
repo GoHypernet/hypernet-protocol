@@ -18,7 +18,7 @@ export class LinksViewModel {
     this.core = params.core;
     this.publicIdentifier = ko.observable("");
     this.links = ko.observableArray<LinkParams>();
-    
+
     this.core.onPullPaymentProposed.subscribe({
       next: (payment) => {
         // Check if there is a link for this counterparty already

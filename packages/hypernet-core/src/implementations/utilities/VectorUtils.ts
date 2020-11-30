@@ -1,4 +1,4 @@
-import { FullChannelState,NodeParams, OptionalPublicIdentifier, NodeResponses } from "@connext/vector-types";
+import { FullChannelState, NodeParams, OptionalPublicIdentifier, NodeResponses } from "@connext/vector-types";
 import { BigNumber, IHypernetTransferMetadata, PullAmount } from "@interfaces/objects";
 import { IBrowserNodeProvider, IContextProvider, IVectorUtils, IConfigProvider } from "@interfaces/utilities";
 import { EPaymentType, InsuranceState, MessageState, ParameterizedState } from "@interfaces/types";
@@ -18,55 +18,55 @@ export class VectorUtils implements IVectorUtils {
   }
 
   public async resolveMessageTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer> {
-    throw new Error('Method not yet implemented.')
+    throw new Error("Method not yet implemented.");
   }
 
   public async resolvePaymentTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer> {
-    throw new Error('Method not yet implemented.')
+    throw new Error("Method not yet implemented.");
   }
 
   public async resolveInsuranceTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer> {
-    throw new Error('Method not yet implemented.')
+    throw new Error("Method not yet implemented.");
   }
 
   /**
-   * 
+   *
    */
   public async createMessageTransfer(
     toAddress: string,
-    message: IHypernetTransferMetadata
+    message: IHypernetTransferMetadata,
   ): Promise<NodeResponses.ConditionalTransfer> {
-    const browserNode = await this.browserNodeProvider.getBrowserNode()
-    const channelAddress = await this.getRouterChannelAddress()
-    const config = await this.configProvider.getConfig()
-    
+    const browserNode = await this.browserNodeProvider.getBrowserNode();
+    const channelAddress = await this.getRouterChannelAddress();
+    const config = await this.configProvider.getConfig();
+
     let initialState: MessageState = {
-      message: serialize(message)
-    }
+      message: serialize(message),
+    };
 
     // Create transfer params
     let transferParams = {
       recipient: toAddress,
       channelAddress: channelAddress,
-      amount: '0',
+      amount: "0",
       assetId: config.hypertokenAddress,
-      type: 'Message',
-      details: initialState
-    } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>
+      type: "Message",
+      details: initialState,
+    } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
 
-    let transfer = await browserNode.conditionalTransfer(transferParams)
+    let transfer = await browserNode.conditionalTransfer(transferParams);
 
     if (transfer.isError) {
-      throw new Error('Could not complete transfer, browser node threw an error.')
+      throw new Error("Could not complete transfer, browser node threw an error.");
     }
 
-    let transferResult = transfer.getValue()
+    let transferResult = transfer.getValue();
 
-    return transferResult
+    return transferResult;
   }
 
   /**
-   * 
+   *
    * @param amount the amount of payment to send
    * @param assetAddress the address of the asset to send
    * @returns a NodeResponses.ConditionalTransfer event, which contains the channel address and the transfer ID
@@ -79,93 +79,93 @@ export class VectorUtils implements IVectorUtils {
     UUID: string,
     start: string,
     expiration: string,
-    rate?: Rate
+    rate?: Rate,
   ): Promise<NodeResponses.ConditionalTransfer> {
-    const browserNode = await this.browserNodeProvider.getBrowserNode()
-    const channelAddress = await this.getRouterChannelAddress()
-    const config = await this.configProvider.getConfig()
+    const browserNode = await this.browserNodeProvider.getBrowserNode();
+    const channelAddress = await this.getRouterChannelAddress();
+    const config = await this.configProvider.getConfig();
 
     if (type == EPaymentType.Pull && rate == null) {
-      throw new Error('Must provide rate for PullPaymentTransfer')
+      throw new Error("Must provide rate for PullPaymentTransfer");
     }
 
     let infinite_rate = {
       deltaAmount: ethers.constants.MaxUint256.toString(),
-      deltaTime: '1'
-    }
+      deltaTime: "1",
+    };
 
     let initialState: ParameterizedState = {
       receiver: toAddress,
       start: start,
       expiration: expiration,
       UUID: UUID,
-      rate: type == EPaymentType.Push ? infinite_rate : rate as Rate
-    }
+      rate: type == EPaymentType.Push ? infinite_rate : (rate as Rate),
+    };
 
     // Create transfer params
     let transferParams = {
       channelAddress: channelAddress,
       amount: amount.toString(),
       assetId: assetAddress,
-      type: 'Parameterized',
-      details: initialState
-    } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>
-  
-    let transfer = await browserNode.conditionalTransfer(transferParams)
+      type: "Parameterized",
+      details: initialState,
+    } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
+
+    let transfer = await browserNode.conditionalTransfer(transferParams);
 
     if (transfer.isError) {
-      throw new Error('Could not complete transfer, browser node threw an error.')
+      throw new Error("Could not complete transfer, browser node threw an error.");
     }
 
-    let transferResult = transfer.getValue()
+    let transferResult = transfer.getValue();
 
-    return transferResult
+    return transferResult;
   }
 
   /**
-   * 
+   *
    */
   public async createInsuranceTransfer(
     toAddress: string,
     mediatorAddress: string,
     amount: BigNumber,
     expiration: string,
-    UUID: string
+    UUID: string,
   ): Promise<NodeResponses.ConditionalTransfer> {
-    const browserNode = await this.browserNodeProvider.getBrowserNode()
-    const channelAddress = await this.getRouterChannelAddress()
-    const config = await this.configProvider.getConfig()
+    const browserNode = await this.browserNodeProvider.getBrowserNode();
+    const channelAddress = await this.getRouterChannelAddress();
+    const config = await this.configProvider.getConfig();
 
     let initialState: InsuranceState = {
       receiver: toAddress,
       mediator: mediatorAddress,
       collateral: amount.toString(),
       expiration: expiration,
-      UUID: UUID
-    }
+      UUID: UUID,
+    };
 
     // Create transfer params
     let transferParams = {
       channelAddress: channelAddress,
       amount: amount.toString(),
       assetId: config.hypertokenAddress,
-      type: 'Insurance',
-      details: initialState
-    } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>
+      type: "Insurance",
+      details: initialState,
+    } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
 
-    let transfer = await browserNode.conditionalTransfer(transferParams)
+    let transfer = await browserNode.conditionalTransfer(transferParams);
 
     if (transfer.isError) {
-      throw new Error('Could not complete transfer, browser node threw an error.')
+      throw new Error("Could not complete transfer, browser node threw an error.");
     }
 
-    let transferResult = transfer.getValue()
+    let transferResult = transfer.getValue();
 
-    return transferResult
+    return transferResult;
   }
 
   /**
-   * 
+   *
    */
   public async getRouterChannelAddress(): Promise<string> {
     // If we already have the address, no need to do the rest

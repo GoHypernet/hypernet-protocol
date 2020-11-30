@@ -21,8 +21,8 @@ import {
   IContextProvider,
   IPaymentUtils,
 } from "@interfaces/utilities";
-import { IAccountService, ILinkService, IPaymentService } from "@interfaces/business";
-import { AccountService, LinkService, PaymentService } from "@implementations/business";
+import { IAccountService, IDevelopmentService, ILinkService, IPaymentService } from "@interfaces/business";
+import { AccountService, DevelopmentService, LinkService, PaymentService } from "@implementations/business";
 import {
   PaymentUtils,
   LinkUtils,
@@ -34,7 +34,7 @@ import {
 } from "@implementations/utilities";
 import { IPaymentRepository, ILinkRepository, IAccountsRepository } from "@interfaces/data";
 import { ILinkUtils, IBrowserNodeProvider } from "@interfaces/utilities";
-import { Result } from "@connext/vector-types"
+import { Result } from "@connext/vector-types";
 import { EBlockchainNetwork } from "@interfaces/types";
 
 export class HypernetCore implements IHypernetCore {
@@ -60,7 +60,8 @@ export class HypernetCore implements IHypernetCore {
 
   protected accountService: IAccountService;
   protected paymentService: IPaymentService;
-  protected LinkService: ILinkService;
+  protected linkService: ILinkService;
+  protected developmentService: IDevelopmentService;
 
   protected _initializedPromise: Promise<void>;
   protected _initializeResolve: (() => void) | undefined;
@@ -143,7 +144,8 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.accountService = new AccountService(this.accountRepository, this.contextProvider);
-    this.LinkService = new LinkService(this.linkRepository);
+    this.linkService = new LinkService(this.linkRepository);
+    this.developmentService = new DevelopmentService(this.accountRepository);
   }
 
   public initialized(): Promise<void> {
@@ -180,11 +182,11 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public async getLinks(): Promise<HypernetLink[]> {
-    return this.LinkService.getLinks();
+    return this.linkService.getLinks();
   }
 
   public async getActiveLinks(): Promise<HypernetLink[]> {
-    return this.LinkService.getLinks();
+    return this.linkService.getLinks();
   }
 
   public async getLinkByCounterparty(counterPartyAccount: PublicIdentifier): Promise<HypernetLink> {
@@ -232,7 +234,7 @@ export class HypernetCore implements IHypernetCore {
   public async acceptFunds(paymentIds: string[]): Promise<Result<Payment, Error>[]> {
     const results = await this.paymentService.acceptFunds(paymentIds);
 
-    return results
+    return results;
   }
 
   public async authorizeFunds(

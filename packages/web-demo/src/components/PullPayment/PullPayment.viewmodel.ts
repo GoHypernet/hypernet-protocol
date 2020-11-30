@@ -66,7 +66,7 @@ export class PullPaymentViewModel {
       const payments = await this.core.acceptFunds([this.paymentId]);
       const payment = payments[0];
       if (payment.isError) {
-        throw new Error('Error getting payment.')
+        throw new Error("Error getting payment.");
       }
       this.state(new PaymentStatusParams(payment.getValue().state));
     });

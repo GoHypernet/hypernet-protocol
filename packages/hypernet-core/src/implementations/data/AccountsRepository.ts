@@ -98,4 +98,13 @@ export class AccountsRepository implements IAccountsRepository {
       fee: "0",
     });
   }
+
+  public async mintTestToken(amount: BigNumber): Promise<void> {
+    const [provider, signer] = await Promise.all([
+      this.blockchainProvider.getProvider(),
+      await this.blockchainProvider.getSigner(),
+    ]);
+
+    // TODO: Mint tokens here
+  }
 }

@@ -39,7 +39,7 @@ export class AgentViewModel {
     this.message = ko.observable<string>("Starting");
     this.startupComplete = ko.observable(false);
     this.inControl = ko.observable(false);
-    
+
     this.startup()
       .then(() => {
         this.startupComplete(true);
@@ -59,9 +59,7 @@ export class AgentViewModel {
     this.links = new LinksParams(this.core);
 
     this.balances = new BalancesParams(this.core);
-    this.paymentForm = new PaymentFormParams(
-      this.core
-    );
+    this.paymentForm = new PaymentFormParams(this.core);
   }
 
   protected async startup() {
@@ -70,12 +68,11 @@ export class AgentViewModel {
 
       this.startupComplete(true);
       this.message("Startup Complete");
-    }
-    catch(e) {
+    } catch (e) {
       this.message("Startup failed!");
       console.log("Startup failed!");
       console.log(e);
-    };
+    }
   }
 }
 

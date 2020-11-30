@@ -12,20 +12,20 @@ export interface IVectorUtils {
   getRouterChannelAddress(): Promise<string>;
 
   /**
-   * 
-   * @param transferId 
+   *
+   * @param transferId
    */
   resolveMessageTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer>;
 
   /**
-   * 
-   * @param transferId 
+   *
+   * @param transferId
    */
   resolvePaymentTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer>;
 
   /**
-   * 
-   * @param transferId 
+   *
+   * @param transferId
    */
   resolveInsuranceTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer>;
 
@@ -33,13 +33,14 @@ export interface IVectorUtils {
    *
    */
   createMessageTransfer(
-    toAddress: string, 
-    message: IHypernetTransferMetadata): Promise<NodeResponses.ConditionalTransfer>
+    toAddress: string,
+    message: IHypernetTransferMetadata,
+  ): Promise<NodeResponses.ConditionalTransfer>;
 
   /**
-   * 
-   * @param amount 
-   * @param assetAddress 
+   *
+   * @param amount
+   * @param assetAddress
    */
   createPaymentTransfer(
     type: EPaymentType,
@@ -48,11 +49,11 @@ export interface IVectorUtils {
     assetAddress: string,
     UUID: string,
     start: string,
-    expiration: string
-  ): Promise<NodeResponses.ConditionalTransfer> 
+    expiration: string,
+  ): Promise<NodeResponses.ConditionalTransfer>;
 
   /**
-   * 
+   *
    * @param toAddress
    * @param amount
    */
@@ -61,6 +62,6 @@ export interface IVectorUtils {
     mediatorAddress: string,
     amount: BigNumber,
     expiration: string,
-    UUID: string
-  ): Promise<NodeResponses.ConditionalTransfer>
+    UUID: string,
+  ): Promise<NodeResponses.ConditionalTransfer>;
 }

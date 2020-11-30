@@ -21,8 +21,8 @@ export class BalancesViewModel {
     this.core.onBalancesChanged.subscribe({
       next: (val) => {
         this.updateBalances(val);
-      }
-    })
+      },
+    });
 
     this.init();
   }

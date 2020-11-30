@@ -6,9 +6,7 @@ import { PullPaymentFormParams } from "../PullPaymentForm/PullPaymentForm.viewmo
 import { PublicIdentifier } from "@hypernetlabs/hypernet-core/lib/interfaces/objects";
 
 export class PaymentFormParams {
-  constructor(
-    public core: IHypernetCore
-  ) {}
+  constructor(public core: IHypernetCore) {}
 }
 
 export class PaymentTypeOption {
