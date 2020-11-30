@@ -43,6 +43,7 @@ export class ConfigProvider implements IConfigProvider {
         "localhost:8008", // Router address
         constants.AddressZero, // Hypertoken address,
         "Hypernet", // Hypernet Protocol Domain for Transfers
+        (5 * 24 * 60 * 60) // 5 days as default expiry length of transfers
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
