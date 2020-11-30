@@ -6,7 +6,7 @@ import { Abis } from "@hypernetlabs/hypernet-core/src/interfaces/types"
 import { artifacts } from "@connext/vector-contracts";
 
 const provider = new providers.JsonRpcProvider("http://localhost:8545");
-const owner = Wallet.fromMnemonic("candy maple cake sugar pudding cream honey rich smooth crumble sweet treat").connect(provider);
+const owner = Wallet.fromMnemonic("isolate income chaos sustain harsh suggest dawn kid sentence sad unable palace upper source below").connect(provider);
 const transfers = ["Insurance", "Parameterized"];
 
 const MIN_GAS_LIMIT = BigNumber.from(500_000);
@@ -94,22 +94,25 @@ async function main() {
 
   // Register all transfers
   const registry = new Contract(localRegistryAddress, artifacts.TransferRegistry.abi, owner)
-  const insuranceContract = new Contract(entries1['Insurance'], artifacts.TransferDefinition.abi, owner)
-  const parameterizedContract = new Contract(entries1['Parameterized'], artifacts.TransferDefinition.abi, owner)
+  const insuranceContract = new Contract(entries1['Insurance'].insuranceAddress, artifacts.TransferDefinition.abi, owner)
+  const parameterizedContract = new Contract(entries1['Parameterized'].parameterizedAddress, artifacts.TransferDefinition.abi, owner)
 
-  const insuranceTx = await registry.addTransferDefinition(await insuranceContract.getRegistryInformation());
-  const parameterizedTx = await registry.addTransferDefinition(await parameterizedContract.getRegistryInformation());
+  const insuranceRegistryInfo = await insuranceContract.getRegistryInformation()
+  const parameterizedRegistryInfo = await parameterizedContract.getRegistryInformation()
 
-  const insuranceReceipt = insuranceTx.wait()
-  const parameterizedReceipt = parameterizedTx.wait()
+  console.log(`Insurance Registry Info: ${insuranceRegistryInfo}`)
+  console.log(`Parameterized Registry Info: ${parameterizedRegistryInfo}`)
 
-  console.log(`
-    Insurance registration status: ${insuranceReceipt}
-  `)
+  const insuranceTx = await registry.addTransferDefinition(insuranceRegistryInfo);
+  const parameterizedTx = await registry.addTransferDefinition(parameterizedRegistryInfo);
 
-  console.log(`
-    Parameterzied registration status: ${parameterizedReceipt}
-  `)
+  const insuranceReceipt = await insuranceTx.wait()
+  const parameterizedReceipt = await parameterizedTx.wait()
+
+  //console.log(`Insurance registration status: ${JSON.stringify(insuranceReceipt)}`)
+  //console.log(`Parameterzied registration status: ${JSON.stringify(parameterizedReceipt)}`)
+
+  console.log('Transfer registration complete.')
 }
 
 // We recommend this pattern to be able to use async/await everywhere
