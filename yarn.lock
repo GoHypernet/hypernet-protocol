@@ -416,15 +416,15 @@
   resolved "https://registry.yarnpkg.com/@connext/pure-evm-wasm/-/pure-evm-wasm-0.1.4.tgz#5cdca4463aaa649ea7740ebbe67ed05b8443ad0e"
   integrity sha512-BeNU9oH83vXKpnFEltr5D82nfmbd26uX/gp0jMR58H5FCGnXlZS/XyoU4yXsxytVU4wc56fQwirE0xYNiqs3vw==
 
-"@connext/vector-browser-node@^0.0.17":
-  version "0.0.17"
-  resolved "https://registry.yarnpkg.com/@connext/vector-browser-node/-/vector-browser-node-0.0.17.tgz#b860ef2c5b6b841bc2ce7f30b3d51e145c40b697"
-  integrity sha512-1ShjRQDHodlflpH6eAraeVvP6EwLOVhST3oSziVwRwXyw6R40FOwQCJKYXYjHTee4UYeiRD1k+/uT3bM4U+AEg==
+"@connext/vector-browser-node@^0.0.19":
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/@connext/vector-browser-node/-/vector-browser-node-0.0.19.tgz#0f851f4143b3fc553eb5bd69246ac46e0e484e50"
+  integrity sha512-XGkJZCjPBW08AWK3tVUfJgzEeuey3PSynqMnpWQpiNHT4yHhR/TZY64EesXEuYIc1tjfMXhJ3caMBVnPhZKGPg==
   dependencies:
-    "@connext/vector-contracts" "0.0.17"
-    "@connext/vector-engine" "0.0.17"
-    "@connext/vector-types" "0.0.17"
-    "@connext/vector-utils" "0.0.17"
+    "@connext/vector-contracts" "0.0.19"
+    "@connext/vector-engine" "0.0.19"
+    "@connext/vector-types" "0.0.19"
+    "@connext/vector-utils" "0.0.19"
     "@sinclair/typebox" "0.11.0"
     ajv "6.12.6"
     axios "0.21.0"
@@ -434,14 +434,14 @@
     pino "6.7.0"
     ts-nats "1.2.15"
 
-"@connext/vector-contracts@0.0.17":
-  version "0.0.17"
-  resolved "https://registry.yarnpkg.com/@connext/vector-contracts/-/vector-contracts-0.0.17.tgz#ff9921f3a9a9cef6bb21d4377c05120a2d138cd9"
-  integrity sha512-l/SoWQzjTeimK/Vt5I5icj1acMapwzEDRcYe+5p1K6tNf48GqcaB1LSLNZdHEE9Qo20YLtloifnaZ0cx7xuLQA==
+"@connext/vector-contracts@0.0.19":
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/@connext/vector-contracts/-/vector-contracts-0.0.19.tgz#bad463c4ca162104ed663ec040b70dacc33d3241"
+  integrity sha512-bcllyorLrxZCgxcSBbfg/D1uB2MtXElSiX1qNDN8O/IiDTuv0WGOAyCRaX+NG+bn5+0Cly31p1EqU4/N7WGPGQ==
   dependencies:
     "@connext/pure-evm-wasm" "0.1.4"
-    "@connext/vector-types" "0.0.17"
-    "@connext/vector-utils" "0.0.17"
+    "@connext/vector-types" "0.0.19"
+    "@connext/vector-utils" "0.0.19"
     "@ethersproject/abi" "5.0.8"
     "@ethersproject/abstract-provider" "5.0.6"
     "@ethersproject/abstract-signer" "5.0.8"
@@ -464,15 +464,15 @@
     pino-pretty "4.3.0"
     yargs "16.1.0"
 
-"@connext/vector-engine@0.0.17":
-  version "0.0.17"
-  resolved "https://registry.yarnpkg.com/@connext/vector-engine/-/vector-engine-0.0.17.tgz#425023c5388229f44d365e59613dc464e53ea1f1"
-  integrity sha512-jgG2oWUwp24mx6tOJCIlttE3UM7zkGaym8MCY+TbeN2BXW/dzkm6QtDEdJLPqlB2Y+JVhTWD+OOTUpYHnhwzig==
+"@connext/vector-engine@0.0.19":
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/@connext/vector-engine/-/vector-engine-0.0.19.tgz#98bb8eba316849595fc32b0e9d6a98c21f020608"
+  integrity sha512-PahLesanp1LfSS7zjSRIWDjtNV5SdRS1MLn7XyK1jG5DuJzbgsm77BTClLZycTFLrRkJrcqABwsoaa1RvuvXyg==
   dependencies:
-    "@connext/vector-contracts" "0.0.17"
-    "@connext/vector-protocol" "0.0.17"
-    "@connext/vector-types" "0.0.17"
-    "@connext/vector-utils" "0.0.17"
+    "@connext/vector-contracts" "0.0.19"
+    "@connext/vector-protocol" "0.0.19"
+    "@connext/vector-types" "0.0.19"
+    "@connext/vector-utils" "0.0.19"
     "@ethersproject/bignumber" "5.0.10"
     "@ethersproject/bytes" "5.0.6"
     "@ethersproject/constants" "5.0.6"
@@ -484,14 +484,14 @@
     pino "6.7.0"
     pino-pretty "4.3.0"
 
-"@connext/vector-protocol@0.0.17":
-  version "0.0.17"
-  resolved "https://registry.yarnpkg.com/@connext/vector-protocol/-/vector-protocol-0.0.17.tgz#47b30d42bd25b755139aae992104b5e8ab09b52c"
-  integrity sha512-KRc1L9ACBaph35HxqKDQTBcb9Coa0UNloQPFFhXqolOmtnOf6cB8sKEYh8F0cUxORC9recyuKUE0033+sCxHWA==
+"@connext/vector-protocol@0.0.19":
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/@connext/vector-protocol/-/vector-protocol-0.0.19.tgz#0c9964f6cd50bc860af7a779b772fcf1d18fe87c"
+  integrity sha512-2M8F1GVHziLGWJrNueJ4A2TXzGn8fREUfnnDWohgCOvJbx5f31DjTzZZRo43A3uDOoU9reGk35HsUNCKyyiUIQ==
   dependencies:
-    "@connext/vector-contracts" "0.0.17"
-    "@connext/vector-types" "0.0.17"
-    "@connext/vector-utils" "0.0.17"
+    "@connext/vector-contracts" "0.0.19"
+    "@connext/vector-types" "0.0.19"
+    "@connext/vector-utils" "0.0.19"
     "@ethersproject/abi" "5.0.8"
     "@ethersproject/bignumber" "5.0.10"
     "@ethersproject/constants" "5.0.6"
@@ -508,10 +508,10 @@
     pino "6.7.0"
     tty "1.0.1"
 
-"@connext/vector-types@0.0.17", "@connext/vector-types@^0.0.17":
-  version "0.0.17"
-  resolved "https://registry.yarnpkg.com/@connext/vector-types/-/vector-types-0.0.17.tgz#1bd7c6680164846ba2943e74731f2725939fae1c"
-  integrity sha512-jqQSBpvLwdfIHLVBHE43NPN++5CxMT6WkcMJ4+uxM3yhC+deUE55dgotxYnuIX7OiJHxTvWu6tGZoZfeS5NFXg==
+"@connext/vector-types@0.0.19", "@connext/vector-types@^0.0.19":
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/@connext/vector-types/-/vector-types-0.0.19.tgz#af2dba4f734034f14fbe465c2ec824a3d42d8026"
+  integrity sha512-NXtMb3G6Yb3zF+TaW8F2Jj7JqcbMgsWgPybeE+nJDX7PNzgc8usLl9KPIZJmhA83fowhT8EFY5iMVvEXyCg9pQ==
   dependencies:
     "@ethersproject/abstract-provider" "5.0.6"
     "@ethersproject/abstract-signer" "5.0.8"
@@ -520,12 +520,12 @@
     "@sinclair/typebox" "0.11.0"
     evt "1.9.2"
 
-"@connext/vector-utils@0.0.17", "@connext/vector-utils@^0.0.17":
-  version "0.0.17"
-  resolved "https://registry.yarnpkg.com/@connext/vector-utils/-/vector-utils-0.0.17.tgz#449dfc27e129d86a2ed439c8e0be852ce970dff3"
-  integrity sha512-wfNJ5+aGoJiBlJAbEzY/3sVZD15agQ+qUPetrCwccjCBe9GKegp3vIyjYk46pauff529EOuGSlI0EfSZmEyMiQ==
+"@connext/vector-utils@0.0.19", "@connext/vector-utils@^0.0.19":
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/@connext/vector-utils/-/vector-utils-0.0.19.tgz#dc193f5643c5f63d07214d1e406ee670815d6e7d"
+  integrity sha512-CFzTNV4FHGjzB2zeR99868KwropP6cd8/FayBvzjMOdr2EGjl8Hc3wOUbbYVz5nWs4zUcxi812yDhtgE0RKlRg==
   dependencies:
-    "@connext/vector-types" "0.0.17"
+    "@connext/vector-types" "0.0.19"
     "@ethereum-waffle/chai" "3.2.0"
     "@ethersproject/abi" "5.0.8"
     "@ethersproject/abstract-provider" "5.0.6"
@@ -3273,14 +3273,14 @@
   integrity sha512-fh+pAqt4xRzPfqA6eh3Z2y6fyZavRIumvjhaCL753+TVkGKGhpPeyrJG2JftD0T9q4GF00KjefsQ+PQNDdWQaQ==
 
 "@types/node@^10.1.0":
-  version "10.17.47"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.47.tgz#cc88a242a835789456cfcf374928400d9f4b291c"
-  integrity sha512-YZ1mMAdUPouBZCdeugjV8y1tqqr28OyL8DYbH5ePCfe9zcXtvbh1wDBy7uzlHkXo3Qi07kpzXfvycvrkby/jXw==
+  version "10.17.48"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.48.tgz#726e7f25d00bf58d79c8f00dd586dd9a10d06a4f"
+  integrity sha512-Agl6xbYP6FOMDeAsr3QVZ+g7Yzg0uhPHWx0j5g4LFdUBHVtqtU+gH660k/lCEe506jJLOGbEzsnqPDTZGJQLag==
 
 "@types/node@^12.12.6":
-  version "12.19.7"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.19.7.tgz#cf8b6ac088dd9182ac9a1d765f787a8d12490c04"
-  integrity sha512-zvjOU1g4CpPilbTDUATnZCUb/6lARMRAqzT7ILwl1P3YvU2leEcZ2+fw9+Jrw/paXB1CgQyXTrN4hWDtqT9O2A==
+  version "12.19.8"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.19.8.tgz#efd6d1a90525519fc608c9db16c8a78f7693a978"
+  integrity sha512-D4k2kNi0URNBxIRCb1khTnkWNHv8KSL1owPmS/K5e5t8B2GzMReY7AsJIY1BnP5KdlgC4rj9jk2IkDMasIE7xg==
 
 "@types/node@^8.10.50":
   version "8.10.66"
@@ -5883,9 +5883,9 @@ camelcase@^6.0.0, camelcase@^6.2.0:
   integrity sha512-c7wVvbw3f37nuobQNtgsgG9POC9qMbNuMQmTCqZv23b6MIz0fcYpBiOlv9gEN/hdLdnZTDQhg6e9Dq5M1vKvfg==
 
 caniuse-lite@^1.0.30000844, caniuse-lite@^1.0.30001157:
-  version "1.0.30001161"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001161.tgz#64f7ffe79ee780b8c92843ff34feb36cea4651e0"
-  integrity sha512-JharrCDxOqPLBULF9/SPa6yMcBRTjZARJ6sc3cuKrPfyIk64JN6kuMINWqA99Xc8uElMFcROliwtz0n9pYej+g==
+  version "1.0.30001162"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001162.tgz#9f83aad1f42539ce9aab58bb177598f2f8e22ec6"
+  integrity sha512-E9FktFxaNnp4ky3ucIGzEXLM+Knzlpuq1oN1sFAU0KeayygabGTmOsndpo8QrL4D9pcThlf4D2pUKaDxPCUmVw==
 
 capture-exit@^2.0.0:
   version "2.0.0"
@@ -7704,9 +7704,9 @@ ee-first@1.1.1:
   integrity sha1-WQxhFWsK4vTwJVcyoViyZrxWsh0=
 
 electron-to-chromium@^1.3.47, electron-to-chromium@^1.3.591:
-  version "1.3.610"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.610.tgz#1254eb394acd220a836ea1f203f8cded4e487052"
-  integrity sha512-eFDC+yVQpEhtlapk4CYDPfV9ajF9cEof5TBcO49L1ETO+aYogrKWDmYpZyxBScMNe8Bo/gJamH4amQ4yyvXg4g==
+  version "1.3.611"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.611.tgz#43a25c07ae05f9555335908abc46c89898f5afb7"
+  integrity sha512-YhqTzCXtEO2h0foGLGS60ortd6yY/yUQhqDEp1VWG3DIyHvckFFyaRwR41M0/M3m7Yb8Exqh+nzyb2TuxaoMTw==
 
 elliptic@6.5.3, elliptic@^6.4.0, elliptic@^6.4.1, elliptic@^6.5.2, elliptic@^6.5.3:
   version "6.5.3"
@@ -9692,13 +9692,13 @@ global-prefix@^3.0.0:
     kind-of "^6.0.2"
     which "^1.3.1"
 
-global@~4.3.0:
-  version "4.3.2"
-  resolved "https://registry.yarnpkg.com/global/-/global-4.3.2.tgz#e76989268a6c74c38908b1305b10fc0e394e9d0f"
-  integrity sha1-52mJJopsdMOJCLEwWxD8DjlOnQ8=
+global@~4.4.0:
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/global/-/global-4.4.0.tgz#3e7b105179006a323ed71aafca3e9c57a5cc6406"
+  integrity sha512-wv/LAoHdRE3BeTGz53FAamhGlPLhlssK45usmGFThIi4XqnBmjKQ16u+RNbP7WvigRZDxUsM0J3gcQ5yicaL0w==
   dependencies:
     min-document "^2.19.0"
-    process "~0.5.1"
+    process "^0.11.10"
 
 globals@^11.1.0:
   version "11.12.0"
@@ -16791,11 +16791,6 @@ process@^0.11.10, process@~0.11.0:
   resolved "https://registry.yarnpkg.com/process/-/process-0.11.10.tgz#7332300e840161bda3e69a1d1d91a7d4bc16f182"
   integrity sha1-czIwDoQBYb2j5podHZGn1LwW8YI=
 
-process@~0.5.1:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/process/-/process-0.5.2.tgz#1638d8a8e34c2f440a91db95ab9aeb677fc185cf"
-  integrity sha1-FjjYqONML0QKkduVq5rrZ3/Bhc8=
-
 progress@^2.0.1:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/progress/-/progress-2.0.3.tgz#7e8cf8d8f5b8f239c1bc68beb4eb78567d572ef8"
@@ -18733,9 +18728,9 @@ spdx-expression-parse@^3.0.0:
     spdx-license-ids "^3.0.0"
 
 spdx-license-ids@^3.0.0:
-  version "3.0.6"
-  resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-3.0.6.tgz#c80757383c28abf7296744998cbc106ae8b854ce"
-  integrity sha512-+orQK83kyMva3WyPf59k1+Y525csj5JejicWut55zeTWANuN17qSiSLUXWtzHeNWORSvT7GLDJ/E/XiIWoXBTw==
+  version "3.0.7"
+  resolved "https://registry.yarnpkg.com/spdx-license-ids/-/spdx-license-ids-3.0.7.tgz#e9c18a410e5ed7e12442a549fbd8afa767038d65"
+  integrity sha512-U+MTEOO0AiDzxwFvoa4JVnMV6mZlJKk2sBLt90s7G0Gd0Mlknc7kxEn3nuDPNZRta7O2uy8oLcZLVT+4sqNZHQ==
 
 spdy-transport@^3.0.0:
   version "3.0.0"
@@ -19960,9 +19955,9 @@ typical@^6.0.0:
   integrity sha512-+g3NEp7fJLe9DPa1TArHm9QAA7YciZmWnfAqEaFrBihQ7epOv9i99rjtgb6Iz0wh3WuQDjsCTDfgRoGnmHN81A==
 
 uglify-js@^3.1.4:
-  version "3.12.0"
-  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.12.0.tgz#b943f129275c41d435eb54b643bbffee71dccf57"
-  integrity sha512-8lBMSkFZuAK7gGF8LswsXmir8eX8d2AAMOnxSDWjKBx/fBR6MypQjs78m6ML9zQVp1/hD4TBdfeMZMC7nW1TAA==
+  version "3.12.1"
+  resolved "https://registry.yarnpkg.com/uglify-js/-/uglify-js-3.12.1.tgz#78307f539f7b9ca5557babb186ea78ad30cc0375"
+  integrity sha512-o8lHP20KjIiQe5b/67Rh68xEGRrc2SRsCuuoYclXXoC74AfSRGblU1HKzJWH3HxPZ+Ort85fWHpSX7KwBUC9CQ==
 
 uid-number@0.0.6:
   version "0.0.6"
@@ -21162,9 +21157,9 @@ webpack@^4.44.1:
     webpack-sources "^1.4.1"
 
 webpack@^5.6.0:
-  version "5.8.0"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.8.0.tgz#65f00a181708279ff982c2d7338e1dd5505364c4"
-  integrity sha512-X2yosPiHip3L0TE+ylruzrOqSgEgsdGyBOGFWKYChcwlKChaw9VodZIUovG1oo7s0ss6e3ZxBMn9tXR+nkPThA==
+  version "5.9.0"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.9.0.tgz#af2e9cf9d6c7867cdcf214ea3bb5eb77aece6895"
+  integrity sha512-YnnqIV/uAS5ZrNpctSv378qV7HmbJ74DL+XfvMxzbX1bV9e7eeT6eEWU4wuUw33CNr/HspBh7R/xQlVjTEyAeA==
   dependencies:
     "@types/eslint-scope" "^3.7.0"
     "@types/estree" "^0.0.45"
@@ -21511,11 +21506,11 @@ xhr2-cookies@1.1.0:
     cookiejar "^2.1.1"
 
 xhr@^2.0.4, xhr@^2.2.0, xhr@^2.3.3:
-  version "2.5.0"
-  resolved "https://registry.yarnpkg.com/xhr/-/xhr-2.5.0.tgz#bed8d1676d5ca36108667692b74b316c496e49dd"
-  integrity sha512-4nlO/14t3BNUZRXIXfXe+3N6w3s1KoxcJUUURctd64BLRe67E4gRwp4PjywtDY72fXpZ1y6Ch0VZQRY/gMPzzQ==
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/xhr/-/xhr-2.6.0.tgz#b69d4395e792b4173d6b7df077f0fc5e4e2b249d"
+  integrity sha512-/eCGLb5rxjx5e3mF1A7s+pLlR6CGyqWN91fv1JgER5mVWg1MZmlhBvy9kjcsOdRk8RrIujotWyJamfyrp+WIcA==
   dependencies:
-    global "~4.3.0"
+    global "~4.4.0"
     is-function "^1.0.1"
     parse-headers "^2.0.0"
     xtend "^4.0.0"

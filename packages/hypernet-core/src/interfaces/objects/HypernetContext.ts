@@ -8,7 +8,6 @@ import { Balances } from "./Balances";
 export class HypernetContext {
   constructor(
     public account: EthereumAddress | null,
-    public privateKey: string | null,
     public publicIdentifier: PublicIdentifier | null,
     public inControl: boolean,
     public onControlClaimed: Subject<ControlClaim>,
@@ -25,7 +24,6 @@ export class HypernetContext {
 export class InitializedHypernetContext {
   constructor(
     public account: EthereumAddress,
-    public privateKey: string,
     public publicIdentifier: PublicIdentifier,
     public inControl: boolean,
     public onControlClaimed: Subject<ControlClaim>,

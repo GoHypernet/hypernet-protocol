@@ -15,11 +15,6 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
 
   protected async initialize(): Promise<BrowserNode> {
     const config = await this.configProvider.getConfig();
-    const context = await this.contextProvider.getContext();
-
-    if (context.privateKey == null) {
-      throw new Error("Account mnemonic must be established first!");
-    }
 
     return await BrowserNode.connect({
       iframeSrc: config.iframeSource,

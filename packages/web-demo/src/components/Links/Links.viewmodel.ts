@@ -4,8 +4,7 @@ import html from "./Links.template.html";
 import { LinkParams } from "../Link/Link.viewmodel";
 
 export class LinksParams {
-  constructor(public core: IHypernetCore, 
-    public publicIdentifier: ko.Observable<PublicIdentifier>) {}
+  constructor(public core: IHypernetCore) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -17,7 +16,7 @@ export class LinksViewModel {
 
   constructor(params: LinksParams) {
     this.core = params.core;
-    this.publicIdentifier = params.publicIdentifier;
+    this.publicIdentifier = ko.observable("");
     this.links = ko.observableArray<LinkParams>();
     
     this.core.onPullPaymentProposed.subscribe({
@@ -63,6 +62,10 @@ export class LinksViewModel {
 
   protected async init() {
     await this.core.initialized();
+
+    const publicIdentifier = await this.core.getPublicIdentifier();
+    this.publicIdentifier(publicIdentifier);
+
     const links = await this.core.getActiveLinks();
     console.log("Get active links!");
     const linkParams = links.map((link: HypernetLink) => new LinkParams(this.core, link));

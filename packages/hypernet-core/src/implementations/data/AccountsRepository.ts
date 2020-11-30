@@ -1,6 +1,6 @@
 import { FullChannelState } from "@connext/vector-types";
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
-import { AssetBalance, Balances, BigNumber, EthereumAddress } from "@interfaces/objects";
+import { AssetBalance, Balances, BigNumber, EthereumAddress, PublicIdentifier } from "@interfaces/objects";
 import { IVectorUtils, IBlockchainProvider, IBrowserNodeProvider } from "@interfaces/utilities";
 
 export class AccountsRepository implements IAccountsRepository {
@@ -9,6 +9,12 @@ export class AccountsRepository implements IAccountsRepository {
     protected vectorUtils: IVectorUtils,
     protected browserNodeProvider: IBrowserNodeProvider,
   ) {}
+
+  public async getPublicIdentifier(): Promise<PublicIdentifier> {
+    const browserNode = await this.browserNodeProvider.getBrowserNode();
+
+    return browserNode.publicIdentifier;
+  }
 
   public async getAccounts(): Promise<string[]> {
     const provider = await this.blockchainProvider.getProvider();
