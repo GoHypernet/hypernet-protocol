@@ -3,32 +3,9 @@
 
   <div class="row">
     <div class="col">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Account</h5>
-
-          <table class="table" data-bind="if: account() != null">
-            <tbody>
-              <tr>
-                <td>Name</td>
-                <td data-bind="text: account().accountName"></td>
-              </tr>
-              <tr>
-                <td>Account Address</td>
-                <td data-bind="text: account().accountAddress"></td>
-              </tr>
-              <tr>
-                <td>Public Identifier</td>
-                <td data-bind="text: publicIdentifier"></td>
-              </tr>
-              <tr>
-                <td>Private Key</td>
-                <td data-bind="text: account().privateKey"></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <div data-bind='component: {
+        name: "account",
+        params: account}'></div>
     </div>
 
     <div class="col">

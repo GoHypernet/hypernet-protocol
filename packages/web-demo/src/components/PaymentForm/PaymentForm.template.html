@@ -1,6 +1,7 @@
 <div class="card">
   <div class="card-body">
     <h5 class="card-title">Create Payment</h5>
+    <input class="form-control" data-bind="textInput: remoteAccount">
     <select class="form-control" data-bind="options: paymentTypes,
                        optionsText: 'typeName',
                        value: selectedPaymentType,

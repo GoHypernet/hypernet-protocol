@@ -7,8 +7,7 @@ import { PublicIdentifier } from "@hypernetlabs/hypernet-core/lib/interfaces/obj
 
 export class PaymentFormParams {
   constructor(
-    public core: IHypernetCore,
-    public counterparty: ko.Observable<PublicIdentifier> | ko.Computed<PublicIdentifier>,
+    public core: IHypernetCore
   ) {}
 }
 
@@ -18,6 +17,7 @@ export class PaymentTypeOption {
 
 // tslint:disable-next-line: max-classes-per-file
 export class PaymentFormViewModel {
+  public remoteAccount: ko.Observable<string>;
   public paymentTypes: PaymentTypeOption[];
   public selectedPaymentType: ko.Observable<PaymentTypeOption | null>;
   public showPushForm: ko.PureComputed<boolean>;
@@ -29,6 +29,8 @@ export class PaymentFormViewModel {
 
   constructor(params: PaymentFormParams) {
     this.core = params.core;
+
+    this.remoteAccount = ko.observable("Enter public identifier");
 
     this.paymentTypes = [
       new PaymentTypeOption("Push", EPaymentType.Push),
@@ -45,7 +47,7 @@ export class PaymentFormViewModel {
       return this.selectedPaymentType()?.type === EPaymentType.Pull;
     });
 
-    this.pushPayment = new PushPaymentFormParams(this.core, params.counterparty);
+    this.pushPayment = new PushPaymentFormParams(this.core, this.remoteAccount);
     this.pullPayment = new PullPaymentFormParams(this.core);
   }
 }
