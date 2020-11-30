@@ -10,5 +10,5 @@ export interface IHypernetTransferMetadata {
   paymentAmount: string;
   disputeMediator: EthereumAddress;
   paymentToken: EthereumAddress;
-  expirationDate: moment.Moment;
+  expirationDate: number;
 }

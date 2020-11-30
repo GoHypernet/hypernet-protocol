@@ -56,7 +56,7 @@ export class PaymentRepository implements IPaymentRepository {
       from: context.account,
       requiredStake: requiredStake.toString(),
       paymentAmount: amount.toString(),
-      expirationDate,
+      expirationDate: expirationDate.unix(),
       paymentToken,
       disputeMediator
     }

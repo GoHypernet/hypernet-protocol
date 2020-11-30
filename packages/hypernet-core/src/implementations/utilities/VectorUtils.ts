@@ -50,14 +50,19 @@ export class VectorUtils implements IVectorUtils {
       channelAddress: channelAddress,
       amount: '0',
       assetId: config.hypertokenAddress,
-      type: 'Message',
-      details: initialState
+      type: 'MessageTransfer',
+      details: initialState,
+      meta: {}
     } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>
 
     let transfer = await browserNode.conditionalTransfer(transferParams)
 
     if (transfer.isError) {
-      throw new Error('Could not complete transfer, browser node threw an error.')
+      throw new Error(`
+        Could not complete transfer, browser node threw an error:
+        ${transfer.getError()}
+        transferParams: ${JSON.stringify(transferParams)}  
+      `)
     }
 
     let transferResult = transfer.getValue()
@@ -114,7 +119,7 @@ export class VectorUtils implements IVectorUtils {
     let transfer = await browserNode.conditionalTransfer(transferParams)
 
     if (transfer.isError) {
-      throw new Error('Could not complete transfer, browser node threw an error.')
+      throw new Error(`Could not complete transfer, browser node threw an error: ${transfer.getError()}`)
     }
 
     let transferResult = transfer.getValue()
@@ -156,7 +161,7 @@ export class VectorUtils implements IVectorUtils {
     let transfer = await browserNode.conditionalTransfer(transferParams)
 
     if (transfer.isError) {
-      throw new Error('Could not complete transfer, browser node threw an error.')
+      throw new Error(`Could not complete transfer, browser node threw an error: ${transfer.getError()}`)
     }
 
     let transferResult = transfer.getValue()

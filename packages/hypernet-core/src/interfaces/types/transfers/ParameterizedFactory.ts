@@ -6,7 +6,7 @@ import { Signer } from "ethers";
 import { Provider, TransactionRequest } from "@ethersproject/providers";
 import { Contract, ContractFactory, Overrides } from "@ethersproject/contracts";
 
-import type { Parameterized } from "./Parameterized";
+import type { Parameterized } from "@hypernetlabs/hypernet-core/src/interfaces/types/transfers/Parameterized";
 
 export class ParameterizedFactory extends ContractFactory {
   constructor(signer?: Signer) {
