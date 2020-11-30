@@ -37,9 +37,8 @@ export interface IHypernetCore {
    * This must be called before most other calls; it is used to specify what account addres
    * hypernet core will be representing.
    * @param account A public identifier that says who this instance of HypernetCore is representing.
-   * @param privateKey An Ethereum private key associated with an Ethereum address
    */
-  initialize(account: PublicIdentifier, privateKey: string): Promise<void>;
+  initialize(account: PublicIdentifier): Promise<void>;
 
   /**
    * Gets the public id of the Hypernet Core user account. If the core is not initialized,

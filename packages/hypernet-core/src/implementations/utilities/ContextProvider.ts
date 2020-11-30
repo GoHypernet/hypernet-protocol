@@ -1,5 +1,3 @@
-import { getPublicKeyFromPrivateKey } from "@connext/vector-utils/dist/crypto";
-import { getPublicIdentifierFromPublicKey } from "@connext/vector-utils/dist/identifiers";
 import {
   HypernetContext,
   ControlClaim,
@@ -25,7 +23,6 @@ export class ContextProvider implements IContextProvider {
     this.context = new HypernetContext(
       null,
       null,
-      null,
       false,
       onControlClaimed,
       onControlYielded,
@@ -41,13 +38,12 @@ export class ContextProvider implements IContextProvider {
   }
 
   public async getInitializedContext(): Promise<InitializedHypernetContext> {
-    if (this.context.account == null || this.context.publicIdentifier == null || this.context.privateKey == null) {
+    if (this.context.account == null || this.context.publicIdentifier == null) {
       throw new Error("Can not open a link until you have set your working account. Call HypernetCore.initialize()!");
     }
 
     return new InitializedHypernetContext(
       this.context.account,
-      this.context.privateKey,
       this.context.publicIdentifier,
       this.context.inControl,
       this.context.onControlClaimed,
@@ -61,11 +57,6 @@ export class ContextProvider implements IContextProvider {
   }
 
   public setContext(context: HypernetContext): void {
-    if (context.privateKey != null) {
-      const publicKey = getPublicKeyFromPrivateKey(context.privateKey);
-      context.publicIdentifier = getPublicIdentifierFromPublicKey(publicKey);
-    }
-
     this.context = context;
   }
 }

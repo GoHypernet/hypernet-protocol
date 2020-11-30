@@ -1,6 +1,5 @@
 import * as ko from "knockout";
 import html from "./Agent.template.html";
-import { LinkParams } from "../Link/Link.viewmodel";
 import { HypernetCore, IHypernetCore, Balances, HypernetLink, EBlockchainNetwork } from "@hypernetlabs/hypernet-core";
 import { ButtonParams } from "../Button/Button.viewmodel";
 import { ethers } from "ethers";
@@ -8,15 +7,6 @@ import { BalancesParams } from "../Balances/Balances.viewmodel";
 import { PaymentFormParams } from "../PaymentForm/PaymentForm.viewmodel";
 import { LinksParams } from "../Links/Links.viewmodel";
 import { AccountParams } from "../Account/Account.viewmodel";
-
-class AvailableAccount {
-  constructor(
-    public accountName: string,
-    public accountAddress: string,
-    public privateKey: string,
-    public publicIdentifier: string,
-  ) {}
-}
 
 export class AgentViewModel {
   public account: AccountParams;
@@ -76,7 +66,7 @@ export class AgentViewModel {
 
   protected async startup() {
     try {
-      await this.core.initialize("", "");
+      await this.core.initialize("");
 
       this.startupComplete(true);
       this.message("Startup Complete");

@@ -1,10 +1,14 @@
 import { IAccountService } from "@interfaces/business";
 import { IAccountsRepository } from "@interfaces/data";
-import { Balances, BigNumber } from "@interfaces/objects";
+import { Balances, BigNumber, PublicIdentifier } from "@interfaces/objects";
 import { IContextProvider } from "@interfaces/utilities";
 
 export class AccountService implements IAccountService {
   constructor(protected accountRepository: IAccountsRepository, protected contextProvider: IContextProvider) {}
+
+  public getPublicIdentifier(): Promise<PublicIdentifier> {
+    return this.accountRepository.getPublicIdentifier();
+  }
 
   public async getAccounts(): Promise<string[]> {
     return this.accountRepository.getAccounts();

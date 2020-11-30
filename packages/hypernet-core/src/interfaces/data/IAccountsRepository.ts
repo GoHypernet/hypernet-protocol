@@ -1,9 +1,10 @@
-import { EthereumAddress, BigNumber, Balances, AssetBalance } from "@interfaces/objects";
+import { EthereumAddress, BigNumber, Balances, AssetBalance, PublicIdentifier } from "@interfaces/objects";
 
 /**
  * @todo What is the main role/purpose of this class? Description here.
  */
 export interface IAccountsRepository {
+  getPublicIdentifier(): Promise<PublicIdentifier>;
   getAccounts(): Promise<string[]>;
   getBalances(): Promise<Balances>;
   getBalanceByAsset(assetAddress: EthereumAddress): Promise<AssetBalance>;

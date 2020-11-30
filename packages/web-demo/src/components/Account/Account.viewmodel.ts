@@ -20,6 +20,7 @@ export class AccountViewModel {
   }
 
   protected async init() {
+    await this.core.initialized();
     const publicIdentifier = await this.core.getPublicIdentifier();
     this.publicIdentifier(publicIdentifier);
 

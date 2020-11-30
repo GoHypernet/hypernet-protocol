@@ -259,12 +259,13 @@ export class HypernetCore implements IHypernetCore {
   }
 
   /**
-   * @param privateKey this is just for temporary usage.
+   * @param account: the ethereum account. Not used.
    */
-  public async initialize(account: string, privateKey: string): Promise<void> {
+  public async initialize(account: string): Promise<void> {
     const context = await this.contextProvider.getContext();
+    const publicIdentifier = await this.accountService.getPublicIdentifier();
     context.account = account;
-    context.privateKey = privateKey;
+    context.publicIdentifier = publicIdentifier;
     await this.contextProvider.setContext(context);
 
     // const messagingListener = this.messagingListener.initialize();
