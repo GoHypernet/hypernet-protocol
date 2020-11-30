@@ -106,5 +106,6 @@ export class AccountsRepository implements IAccountsRepository {
     ]);
 
     // TODO: Mint tokens here
+    alert("Caleb needs to implement this y'all!");
   }
 }

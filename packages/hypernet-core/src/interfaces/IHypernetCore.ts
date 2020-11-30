@@ -152,6 +152,12 @@ export interface IHypernetCore {
   initiateDispute(paymentId: string, metadata: string): Promise<HypernetLink>;
 
   /**
+   * Only used for development purposes!
+   * @param amount 
+   */
+  mintTestToken(amount: BigNumber): Promise<void>;
+  
+  /**
    * Observables for seeing what's going on
    */
   onControlClaimed: Subject<ControlClaim>;

@@ -282,4 +282,8 @@ export class HypernetCore implements IHypernetCore {
       this._initializeResolve();
     }
   }
+
+  public async mintTestToken(amount: BigNumber): Promise<void> {
+    this.developmentService.mintTestToken(amount);
+  }
 }

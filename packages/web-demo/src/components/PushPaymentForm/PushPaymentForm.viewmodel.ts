@@ -1,9 +1,10 @@
 import * as ko from "knockout";
-import { Balances, EthereumAddress, IHypernetCore } from "@hypernetlabs/hypernet-core";
+import { EthereumAddress, IHypernetCore } from "@hypernetlabs/hypernet-core";
 import html from "./PushPaymentForm.template.html";
 import moment from "moment";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
 import { BigNumber, PublicIdentifier } from "@hypernetlabs/hypernet-core/lib/interfaces/objects";
+import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
 
 export class PushPaymentFormParams {
   constructor(
@@ -21,43 +22,27 @@ export class PushPaymentFormViewModel {
   public requiredStake: ko.Observable<string>;
   public expirationDate: ko.Observable<string>;
   public amount: ko.Observable<string>;
-  public paymentTokens: ko.PureComputed<PaymentTokenOption[]>;
-  public selectedPaymentToken: ko.Observable<PaymentTokenOption | null>;
-
+  public tokenSelector: TokenSelectorParams;
+ 
   public submitButton: ButtonParams;
 
   protected core: IHypernetCore;
-  protected balances: ko.Observable<Balances | null>;
   protected counterparty: ko.Observable<PublicIdentifier> | ko.Computed<PublicIdentifier>;
 
   constructor(params: PushPaymentFormParams) {
     this.core = params.core;
+    this.counterparty = params.counterparty;
 
     this.requiredStake = ko.observable("0");
     this.expirationDate = ko.observable(moment().format());
     this.amount = ko.observable("0");
-    this.balances = ko.observable(null);
-    this.paymentTokens = ko.pureComputed<PaymentTokenOption[]>(() => {
-      const balances = this.balances();
-      if (balances == null) {
-        return [];
-      }
-
-      const retArr = new Array<PaymentTokenOption>();
-      for (const assetBalance of balances.assets) {
-        // TODO: Convert the asset address to a readable name!
-        retArr.push(new PaymentTokenOption(assetBalance.assetAddresss, assetBalance.assetAddresss));
-      }
-
-      return retArr;
-    });
-    this.selectedPaymentToken = ko.observable(null);
-    this.counterparty = params.counterparty;
+    
+    this.tokenSelector = new TokenSelectorParams(this.core, ko.observable(null), true);
 
     this.submitButton = new ButtonParams(
       "Submit Payment",
       () => {
-        const selectedPaymentTokenAddress = this.selectedPaymentToken()?.address;
+        const selectedPaymentTokenAddress = this.tokenSelector.selectedToken();
 
         if (selectedPaymentTokenAddress == null) {
           return null;
@@ -82,7 +67,7 @@ export class PushPaymentFormViewModel {
       },
       EButtonType.Normal,
       ko.pureComputed(() => {
-        const selectedPaymentTokenAddress = this.selectedPaymentToken()?.address;
+        const selectedPaymentTokenAddress = this.tokenSelector.selectedToken();
 
         if (selectedPaymentTokenAddress == null) {
           return false;
@@ -99,14 +84,6 @@ export class PushPaymentFormViewModel {
         }
       }),
     );
-
-    this.getBalances();
-  }
-
-  protected async getBalances() {
-    const balances = await this.core.getBalances();
-
-    this.balances(balances);
   }
 }
 

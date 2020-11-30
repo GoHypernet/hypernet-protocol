@@ -38,12 +38,9 @@
 
 
     <div class="col">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Actions</h5>
-          <span data-bind="visible: startupComplete, component: {name:'button', params:depositFundsButton}"></span>
-        </div>
-      </div>
+      <div data-bind='component: {
+        name: "actions",
+        params: actions}'></div>
     </div>
   </div>
 
