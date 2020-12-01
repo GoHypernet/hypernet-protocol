@@ -30,10 +30,12 @@
     "test": "echo \"Error: run tests from root\" && exit 1",
     "build": "webpack",
     "compile": "tsc -b tsconfig.json",
-    "clean-docker": "docker-compose down && docker-compose pull",
-    "start": "concurrently \"yarn start-backend\" && \"yarn start-web\"",
+    "clean-docker": "docker-compose down",
+    "start": "yarn start-backend && yarn verify-backend && yarn deploy-custom-transfers && yarn start-web",
     "start-web": "webpack-dev-server --mode development --open",
-    "start-backend": "docker-compose pull && docker-compose up",
+    "start-backend": "docker-compose down && docker-compose pull && docker-compose up -d && wait-on -l -d 15000 tsconfig.json && docker-compose up -d",
+    "verify-backend": "docker ps -f status=running -f name=web-demo | grep connextproject | if [ `wc -l` -ne 8 ]; then echo 'Error: did not detect 8 running docker containers!' && `exit 1`; fi",
+    "deploy-custom-transfers": "yarn ts-node scripts/deploy.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json"
   },
@@ -73,6 +75,7 @@
     "knockout": "^3.5.1",
     "popper": "^1.0.1",
     "popper.js": "^1.16.1",
+    "ts-node": "^9.0.0",
     "wait-on": "^5.2.0"
   }
 }

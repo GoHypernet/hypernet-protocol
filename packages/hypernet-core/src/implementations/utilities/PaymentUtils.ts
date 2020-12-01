@@ -218,6 +218,8 @@ export class PaymentUtils implements IPaymentUtils {
     // First, we are going to sort the transfers into buckets based on their payment_id
     const transfersByPaymentId = new Map<string, FullTransferState[]>();
     for (const transfer of transfers) {
+      console.log(transfer.meta)
+      if (!(transfer.meta && transfer.meta.paymentId)) continue;
       const paymentId = transfer.meta.paymentId;
 
       // Get the existing array of payments. Initialize it if it's not there.

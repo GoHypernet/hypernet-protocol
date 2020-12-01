@@ -52,7 +52,7 @@ export class VectorUtils implements IVectorUtils {
       assetId: config.hypertokenAddress,
       type: 'MessageTransfer',
       details: initialState,
-      meta: {}
+      meta: message
     } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>
 
     let transfer = await browserNode.conditionalTransfer(transferParams);

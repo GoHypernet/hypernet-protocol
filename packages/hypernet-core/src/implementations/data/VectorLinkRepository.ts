@@ -44,6 +44,9 @@ export class VectorLinkRepository implements ILinkRepository {
     }
 
     const activeTransfers = activeTransfersRes.getValue();
+
+    if (activeTransfers.length == 0) return []
+
     const payments = await this.paymentUtils.transfersToPayments(
       activeTransfers as FullTransferState[],
       config,
