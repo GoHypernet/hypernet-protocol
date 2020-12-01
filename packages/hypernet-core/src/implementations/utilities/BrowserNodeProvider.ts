@@ -21,6 +21,7 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
       logger: this.logger,
     } as BrowserNodeConfig);
   }
+  
   public async getBrowserNode(): Promise<BrowserNode> {
     if (this.browserNode == null) {
       this.browserNode = this.initialize();
