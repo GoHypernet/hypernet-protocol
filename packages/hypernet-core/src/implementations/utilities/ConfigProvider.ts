@@ -17,7 +17,7 @@ export class ConfigProvider implements IConfigProvider {
     if (network == EBlockchainNetwork.Localhost) {
       this.config = new HypernetConfig(
         "http://localhost:5000", // iframeSource
-        "isolate income chaos sustain harsh suggest dawn kid sentence sad unable palace upper source below", // Router mnemonic
+        "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat", // Router mnemonic
         "", // routerPublicIdentifier
         1337, // Chain ID
         "localhost:8008", // Router address
@@ -37,7 +37,7 @@ export class ConfigProvider implements IConfigProvider {
       // Should be MainNet config here
       this.config = new HypernetConfig(
         "http://localhost:5000", // iframeSource
-        "isolate income chaos sustain harsh suggest dawn kid sentence sad unable palace upper source below", // Router mnemonic
+        "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat", // Router mnemonic
         "", // routerPublicIdentifier
         1337, // Chain ID
         "localhost:8008", // Router address

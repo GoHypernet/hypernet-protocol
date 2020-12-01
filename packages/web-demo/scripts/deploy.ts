@@ -6,12 +6,12 @@ import { Abis } from "@hypernetlabs/hypernet-core/src/interfaces/types"
 import { artifacts } from "@connext/vector-contracts";
 
 const provider = new providers.JsonRpcProvider("http://localhost:8545");
-const owner = Wallet.fromMnemonic("isolate income chaos sustain harsh suggest dawn kid sentence sad unable palace upper source below").connect(provider);
+const owner = Wallet.fromMnemonic("candy maple cake sugar pudding cream honey rich smooth crumble sweet treat").connect(provider);
 const transfers = ["Insurance", "Parameterized", "Message"];
 
 const MIN_GAS_LIMIT = BigNumber.from(500_000);
 
-const localRegistryAddress = "0xa227b9C3e0cE1f74029063a5b567D97BDed316e1"
+const localRegistryAddress = "0x9FBDa871d559710256a2502A2517b794B482Db40"
 
 const hash = (input: string): string =>
   keccak256(`0x${input.replace(/^0x/, "")}`);
