@@ -15,7 +15,7 @@ export class VectorAPIListener implements IVectorListener {
   ) {}
 
   /**
-   * 
+   *
    */
   public async setup(): Promise<void> {
     const browserNode = await this.browserNodeProvider.getBrowserNode();

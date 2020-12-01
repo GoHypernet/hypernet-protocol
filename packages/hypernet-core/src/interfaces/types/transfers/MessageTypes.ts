@@ -1,7 +1,7 @@
 export type MessageState = {
-    message: string
-}
+  message: string;
+};
 
 export type MessageResolver = {
-    message: string
-}
+  message: string;
+};

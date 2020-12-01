@@ -9,4 +9,4 @@ const Abis = {
     MessageTransfer: MessageTransferAbi
 }
 
-export { Abis }
+export { Abis };

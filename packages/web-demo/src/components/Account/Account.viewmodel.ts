@@ -9,7 +9,7 @@ export class AccountParams {
 // tslint:disable-next-line: max-classes-per-file
 export class AccountViewModel {
   public publicIdentifier: ko.Observable<string>;
-  
+
   protected core: IHypernetCore;
 
   constructor(params: AccountParams) {
@@ -23,7 +23,6 @@ export class AccountViewModel {
     await this.core.initialized();
     const publicIdentifier = await this.core.getPublicIdentifier();
     this.publicIdentifier(publicIdentifier);
-
 
     // const accounts = await this.core.getEthereumAccounts();
 
@@ -47,7 +46,3 @@ ko.components.register("account", {
   viewModel: AccountViewModel,
   template: html,
 });
-
-
-
-

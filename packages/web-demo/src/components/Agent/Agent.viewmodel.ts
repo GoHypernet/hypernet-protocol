@@ -1,18 +1,17 @@
 import * as ko from "knockout";
 import html from "./Agent.template.html";
-import { HypernetCore, IHypernetCore, Balances, HypernetLink, EBlockchainNetwork } from "@hypernetlabs/hypernet-core";
-import { ButtonParams } from "../Button/Button.viewmodel";
-import { ethers } from "ethers";
+import { HypernetCore, IHypernetCore, EBlockchainNetwork } from "@hypernetlabs/hypernet-core";
 import { BalancesParams } from "../Balances/Balances.viewmodel";
 import { PaymentFormParams } from "../PaymentForm/PaymentForm.viewmodel";
 import { LinksParams } from "../Links/Links.viewmodel";
 import { AccountParams } from "../Account/Account.viewmodel";
+import { ActionsParams } from "../Actions/Actions.viewmodel";
 
 export class AgentViewModel {
   public account: AccountParams;
   public links: LinksParams;
   public balances: BalancesParams;
-  public depositFundsButton: ButtonParams;
+  public actions: ActionsParams;
   public message: ko.Observable<string>;
   public startupComplete: ko.Observable<boolean>;
   public inControl: ko.Observable<boolean>;
@@ -39,7 +38,7 @@ export class AgentViewModel {
     this.message = ko.observable<string>("Starting");
     this.startupComplete = ko.observable(false);
     this.inControl = ko.observable(false);
-    
+
     this.startup()
       .then(() => {
         this.startupComplete(true);
@@ -51,31 +50,25 @@ export class AgentViewModel {
         console.log(e);
       });
 
-    this.depositFundsButton = new ButtonParams("Deposit Funds", async () => {
-      await this.core.depositFunds("0x0000000000000000000000000000000000000000", ethers.utils.parseEther("1"));
-      this.message("Deposited 1 ETH into router channel");
-    });
-
     this.links = new LinksParams(this.core);
-
+    this.actions = new ActionsParams(this.core);
     this.balances = new BalancesParams(this.core);
-    this.paymentForm = new PaymentFormParams(
-      this.core
-    );
+    this.paymentForm = new PaymentFormParams(this.core);
   }
 
   protected async startup() {
     try {
-      await this.core.initialize("");
+      const accounts = await this.core.getEthereumAccounts();
+
+      await this.core.initialize(accounts[0]);
 
       this.startupComplete(true);
       this.message("Startup Complete");
-    }
-    catch(e) {
+    } catch (e) {
       this.message("Startup failed!");
       console.log("Startup failed!");
       console.log(e);
-    };
+    }
   }
 }
 

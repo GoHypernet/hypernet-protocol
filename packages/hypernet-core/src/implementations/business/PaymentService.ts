@@ -12,8 +12,7 @@ import {
 } from "@interfaces/objects";
 import { EPaymentState } from "@interfaces/types";
 import { IConfigProvider, IContextProvider } from "@interfaces/utilities";
-import { Result } from "@connext/vector-types"
-
+import { Result } from "@connext/vector-types";
 
 /**
  * PaymentService uses Vector internally to send payments on the requested channel.
@@ -24,27 +23,27 @@ export class PaymentService implements IPaymentService {
     protected accountRepository: IAccountsRepository,
     protected contextProvider: IContextProvider,
     protected configProvider: IConfigProvider,
-    protected paymentRepository: IPaymentRepository
+    protected paymentRepository: IPaymentRepository,
   ) {}
 
-  public async acceptFunds(paymentIds: string[]) : Promise<Result<Payment, Error>[]> {
-    const config = await this.configProvider.getConfig()
-    const payments = await this.paymentRepository.getPaymentsByIds(paymentIds)
-    const hypertokenBalance = await this.accountRepository.getBalanceByAsset(config.hypertokenAddress)
+  public async acceptFunds(paymentIds: string[]): Promise<Result<Payment, Error>[]> {
+    const config = await this.configProvider.getConfig();
+    const payments = await this.paymentRepository.getPaymentsByIds(paymentIds);
+    const hypertokenBalance = await this.accountRepository.getBalanceByAsset(config.hypertokenAddress);
 
     // For each payment ID, call the singular version of acceptFunds
     // Wrap each one as a Result object, and return an array of Results
-    let results: Result<Payment, Error>[] = []
+    let results: Result<Payment, Error>[] = [];
 
-    let totalStakeRequired = BigNumber.from(0)
+    let totalStakeRequired = BigNumber.from(0);
     // First, verify to make sure that we have enough hypertoken to cover the insurance collectively
     payments.forEach((payment) => {
       if (payment.state !== EPaymentState.Proposed) {
-        throw new Error(`Cannot accept payment ${payment.id}, it is not in the Proposed state`)
+        throw new Error(`Cannot accept payment ${payment.id}, it is not in the Proposed state`);
       }
 
-      totalStakeRequired = totalStakeRequired.add(BigNumber.from(payment.requiredStake))
-    })
+      totalStakeRequired = totalStakeRequired.add(BigNumber.from(payment.requiredStake));
+    });
 
     // Check the balance and make sure you have enough HyperToken to cover it
     if (hypertokenBalance.freeAmount < totalStakeRequired) {
@@ -55,17 +54,17 @@ export class PaymentService implements IPaymentService {
     for (let paymentId in paymentIds) {
       try {
         const payment = await this.paymentRepository.provideStake(paymentId);
-        results.push(Result.ok(payment))
+        results.push(Result.ok(payment));
       } catch (err) {
-        results.push(Result.fail(err))
+        results.push(Result.fail(err));
       }
     }
 
-    return results
+    return results;
   }
 
   /**
-   * Called by the reciever of a parameterized transfer, AFTER they 
+   * Called by the reciever of a parameterized transfer, AFTER they
    * have put up stake
    * @param paymentId the payment ID to accept/resolve
    */

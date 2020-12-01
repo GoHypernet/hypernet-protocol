@@ -1,11 +1,10 @@
 import { BigNumber, Payment, EthereumAddress, PublicKey, PublicIdentifier } from "@interfaces/objects";
-import { Result } from "@connext/vector-types"
+import { Result } from "@connext/vector-types";
 
 /**
  *
  */
 export interface IPaymentService {
-  
   /**
    * Send funds to another person.
    * @param counterPartyAccount the account we wish to send funds to
@@ -28,7 +27,7 @@ export interface IPaymentService {
    * Called by the person on the receiving end of a push payment,
    * to accept the terms of the payment and put up the stake.
    */
-  acceptFunds(paymentIds: string[]) : Promise<Result<Payment, Error>[]>
+  acceptFunds(paymentIds: string[]): Promise<Result<Payment, Error>[]>;
 
   /**
    *
