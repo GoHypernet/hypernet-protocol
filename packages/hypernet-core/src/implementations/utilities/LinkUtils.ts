@@ -1,4 +1,4 @@
-import { HypernetLink, InitializedHypernetContext, Payment, PullPayment, PushPayment } from "@interfaces/objects";
+import { HypernetLink, InitializedHypernetContext, Payment, PublicIdentifier, PullPayment, PushPayment } from "@interfaces/objects";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
 
 export class LinkUtils implements ILinkUtils {
@@ -18,7 +18,7 @@ export class LinkUtils implements ILinkUtils {
 
     for (const payment of payments) {
       // Now that it's converted, we can stick it in the hypernet link
-      const counterpartyId = payment.to === context.publicIdentifier ? payment.from : payment.to;
+      const counterpartyId: PublicIdentifier = payment.to === context.publicIdentifier ? payment.from : payment.to;
       let link = linksByCounterpartyId.get(counterpartyId);
       if (link == null) {
         link = new HypernetLink(counterpartyId, [], [], [], [], []);

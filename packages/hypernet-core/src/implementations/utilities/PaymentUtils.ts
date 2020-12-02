@@ -181,7 +181,7 @@ export class PaymentUtils implements IPaymentUtils {
 
     if (paymentType === EPaymentType.Pull) {
       return this.transfersToPullPayment(
-        id,
+        fullPaymentId,
         sortedTransfers.metadata.to,
         sortedTransfers.metadata.from,
         paymentState,
@@ -190,7 +190,7 @@ export class PaymentUtils implements IPaymentUtils {
       );
     } else if (paymentType === EPaymentType.Push) {
       return this.transfersToPushPayment(
-        id,
+        fullPaymentId,
         sortedTransfers.metadata.to,
         sortedTransfers.metadata.from,
         paymentState,

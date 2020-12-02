@@ -60,7 +60,7 @@ export class PaymentRepository implements IPaymentRepository {
       paymentId,
       creationDate: moment().unix(),
       to: counterPartyAccount,
-      from: context.account,
+      from: context.publicIdentifier,
       requiredStake: requiredStake.toString(),
       paymentAmount: amount.toString(),
       expirationDate: expirationDate.unix(),
@@ -104,13 +104,18 @@ export class PaymentRepository implements IPaymentRepository {
     const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress });
 
     if (activeTransfersRes.isError) {
+      console.log('PaymentRepository: getPaymentsByIds: Error getting active transfers')
       const error = activeTransfersRes.getError();
       throw error;
     }
 
+    console.log(`PaymentRepository: getPaymentsByIds: activeTransfersResLength: ${activeTransfersRes.getValue().length}`)
+
     const activeTransfers = activeTransfersRes.getValue().filter((val) => {
       return paymentIds.includes(val.meta.paymentId);
     });
+
+    console.log(`PaymentRepository: getPaymentsByIds: activeTransfersLength: ${activeTransfers.length}`)
 
     const payments = await this.paymentUtils.transfersToPayments(
       activeTransfers as FullTransferState[],
@@ -133,7 +138,7 @@ export class PaymentRepository implements IPaymentRepository {
     let payment = payments.get(paymentId);
 
     if (payment == null) {
-      throw new Error("Cuold not get payment.");
+      throw new Error("Could not get payment.");
     }
 
     return payment;
