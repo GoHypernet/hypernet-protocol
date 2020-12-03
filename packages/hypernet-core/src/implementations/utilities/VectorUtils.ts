@@ -1,10 +1,11 @@
 import { FullChannelState, NodeParams, OptionalPublicIdentifier, NodeResponses } from "@connext/vector-types";
-import { BigNumber, IHypernetTransferMetadata, PullAmount } from "@interfaces/objects";
+import { BigNumber, IHypernetTransferMetadata, PublicIdentifier, PullAmount } from "@interfaces/objects";
 import { IBrowserNodeProvider, IContextProvider, IVectorUtils, IConfigProvider } from "@interfaces/utilities";
 import { EPaymentType, InsuranceState, MessageState, ParameterizedState } from "@interfaces/types";
 import { serialize } from "class-transformer";
 import { ethers } from "ethers";
 import { Rate } from "@interfaces/types/transfers/ParameterizedTypes";
+import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils/dist/identifiers";
 
 export class VectorUtils implements IVectorUtils {
   protected channelAddress: string | null;
@@ -78,7 +79,7 @@ export class VectorUtils implements IVectorUtils {
    */
   public async createPaymentTransfer(
     type: EPaymentType,
-    toAddress: string,
+    toAddress: PublicIdentifier,
     amount: BigNumber,
     assetAddress: string,
     UUID: string,
@@ -89,6 +90,7 @@ export class VectorUtils implements IVectorUtils {
     const browserNode = await this.browserNodeProvider.getBrowserNode();
     const channelAddress = await this.getRouterChannelAddress();
     const config = await this.configProvider.getConfig();
+    const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress)
 
     if (type == EPaymentType.Pull && rate == null) {
       throw new Error("Must provide rate for PullPaymentTransfer");
@@ -100,7 +102,7 @@ export class VectorUtils implements IVectorUtils {
     };
 
     let initialState: ParameterizedState = {
-      receiver: toAddress,
+      receiver: toEthAddress,
       start: start,
       expiration: expiration,
       UUID: UUID,
@@ -109,11 +111,13 @@ export class VectorUtils implements IVectorUtils {
 
     // Create transfer params
     let transferParams = {
+      recipient: toAddress,
       channelAddress: channelAddress,
       amount: amount.toString(),
       assetId: assetAddress,
       type: "Parameterized",
       details: initialState,
+      meta: {}
     } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
 
     let transfer = await browserNode.conditionalTransfer(transferParams);
@@ -131,7 +135,7 @@ export class VectorUtils implements IVectorUtils {
    *
    */
   public async createInsuranceTransfer(
-    toAddress: string,
+    toAddress: PublicIdentifier,
     mediatorAddress: string,
     amount: BigNumber,
     expiration: string,
@@ -140,9 +144,10 @@ export class VectorUtils implements IVectorUtils {
     const browserNode = await this.browserNodeProvider.getBrowserNode();
     const channelAddress = await this.getRouterChannelAddress();
     const config = await this.configProvider.getConfig();
+    const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress)
 
     let initialState: InsuranceState = {
-      receiver: toAddress,
+      receiver: toEthAddress,
       mediator: mediatorAddress,
       collateral: amount.toString(),
       expiration: expiration,
@@ -151,11 +156,13 @@ export class VectorUtils implements IVectorUtils {
 
     // Create transfer params
     let transferParams = {
+      recipient: toAddress,
       channelAddress: channelAddress,
       amount: amount.toString(),
       assetId: config.hypertokenAddress,
       type: "Insurance",
       details: initialState,
+      meta: {}
     } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
 
     let transfer = await browserNode.conditionalTransfer(transferParams);

@@ -110,8 +110,11 @@ export class PaymentRepository implements IPaymentRepository {
     }
 
     console.log(`PaymentRepository: getPaymentsByIds: activeTransfersResLength: ${activeTransfersRes.getValue().length}`)
+    console.log(activeTransfersRes.getValue())
 
     const activeTransfers = activeTransfersRes.getValue().filter((val) => {
+      console.log(`Filter step: val.meta.paymentId: ${val.meta.paymentId}`);
+      console.log(`Filter step: paymentIds: ${paymentIds}`)
       return paymentIds.includes(val.meta.paymentId);
     });
 
@@ -138,7 +141,7 @@ export class PaymentRepository implements IPaymentRepository {
     let payment = payments.get(paymentId);
 
     if (payment == null) {
-      throw new Error("Could not get payment.");
+      throw new Error(`PaymentRepository:getPaymentById():Could not get payment!`);
     }
 
     return payment;

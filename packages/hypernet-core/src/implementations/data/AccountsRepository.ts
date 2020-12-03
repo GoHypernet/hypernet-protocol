@@ -27,7 +27,6 @@ export class AccountsRepository implements IAccountsRepository {
   public async getBalances(): Promise<Balances> {
     const browserNode = await this.browserNodeProvider.getBrowserNode();
     const channelAddress = await this.vectorUtils.getRouterChannelAddress();
-
     const channelStateRes = await browserNode.getStateChannel({ channelAddress });
 
     if (channelStateRes.isError) {
@@ -42,8 +41,8 @@ export class AccountsRepository implements IAccountsRepository {
         new AssetBalance(
           channelState.assetIds[i],
           BigNumber.from(channelState.balances[i].amount[1]),
-          BigNumber.from(0),
-          BigNumber.from(0),
+          BigNumber.from(0), // @todo figure out how to grab the locked amount
+          BigNumber.from(channelState.balances[i].amount[1]),
         ),
       );
     }
@@ -68,12 +67,14 @@ export class AccountsRepository implements IAccountsRepository {
 
     let tx;
 
-    if (assetAddress = "0x0000000000000000000000000000000000000000") {
+    if (assetAddress == "0x0000000000000000000000000000000000000000") {
+      console.log('Transferring ETH.')
       // send eth
       tx = await signer.sendTransaction({ to: channelAddress, value: amount });
     } else {
+      console.log('Transferring an ERC20 asset.')
       // send an actual erc20 token
-      let tokenContract = new Contract(assetAddress, ERC20Abi)
+      let tokenContract = new Contract(assetAddress, ERC20Abi, signer)
       tx = await tokenContract.transfer(channelAddress, amount)
     }
 

@@ -51,8 +51,9 @@ export class PaymentService implements IPaymentService {
     }
 
     // Now that we know we can (probably) make the payments, let's try
-    for (let paymentId in paymentIds) {
+    for (let paymentId of paymentIds) {
       try {
+        console.log(`PaymentService:acceptFunds: attempting to provide stake for payment ${paymentId}`)
         const payment = await this.paymentRepository.provideStake(paymentId);
         results.push(Result.ok(payment));
       } catch (err) {
@@ -133,7 +134,7 @@ export class PaymentService implements IPaymentService {
     const payment = payments.get(paymentId);
 
     if (payment == null) {
-      throw new Error("Could not get payment!");
+      throw new Error(`PaymentService:offerReceived():Could not get payment!`);
     }
 
     if (payment.state !== EPaymentState.Proposed) {
