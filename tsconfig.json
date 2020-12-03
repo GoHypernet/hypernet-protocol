@@ -17,10 +17,10 @@
   "files": [],
   "references": [
     {
-      "path": "hypernet-core"
+      "path": "packages/hypernet-core"
     },
     {
-      "path": "web-demo"
+      "path": "packages/web-demo"
     }
   ]
 }

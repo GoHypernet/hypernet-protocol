@@ -11,5 +11,5 @@ export interface IAccountsRepository {
   depositFunds(assetAddress: EthereumAddress, amount: BigNumber): Promise<void>;
   withdrawFunds(assetAddress: string, amount: BigNumber, destinationAddress: string): Promise<void>;
 
-  mintTestToken(amount: BigNumber): Promise<void>;
+  mintTestToken(amount: BigNumber, to: EthereumAddress): Promise<void>;
 }

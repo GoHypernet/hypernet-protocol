@@ -284,6 +284,12 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public async mintTestToken(amount: BigNumber): Promise<void> {
-    this.developmentService.mintTestToken(amount);
+    let account = (await this.contextProvider.getContext()).account
+
+    if (account === null) {
+      throw new Error('Need an account to send funds to!')
+    }
+
+    this.developmentService.mintTestToken(amount, account);
   }
 }

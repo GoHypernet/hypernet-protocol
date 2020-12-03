@@ -2,6 +2,8 @@ import { FullChannelState } from "@connext/vector-types";
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
 import { AssetBalance, Balances, BigNumber, EthereumAddress, PublicIdentifier } from "@interfaces/objects";
 import { IVectorUtils, IBlockchainProvider, IBrowserNodeProvider } from "@interfaces/utilities";
+import { Contract } from "ethers";
+import { artifacts, TestToken } from "@connext/vector-contracts"
 
 export class AccountsRepository implements IAccountsRepository {
   constructor(
@@ -99,13 +101,14 @@ export class AccountsRepository implements IAccountsRepository {
     });
   }
 
-  public async mintTestToken(amount: BigNumber): Promise<void> {
+  public async mintTestToken(amount: BigNumber, to: EthereumAddress): Promise<void> {
     const [provider, signer] = await Promise.all([
       this.blockchainProvider.getProvider(),
       await this.blockchainProvider.getSigner(),
     ]);
 
-    // TODO: Mint tokens here
-    alert("Caleb needs to implement this y'all!");
+    const testTokenContract = new Contract("0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0", artifacts['TestToken'].abi, signer)
+    let mintTx = await testTokenContract.mint(to, amount)
+    await mintTx.wait()
   }
 }
