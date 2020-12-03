@@ -1,4 +1,4 @@
-import { FullChannelState } from "@connext/vector-types";
+import { ERC20Abi, FullChannelState } from "@connext/vector-types";
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
 import { AssetBalance, Balances, BigNumber, EthereumAddress, PublicIdentifier } from "@interfaces/objects";
 import { IVectorUtils, IBlockchainProvider, IBrowserNodeProvider } from "@interfaces/utilities";
@@ -66,7 +66,16 @@ export class AccountsRepository implements IAccountsRepository {
     const channelAddress = await this.vectorUtils.getRouterChannelAddress();
     const browserNode = await this.browserNodeProvider.getBrowserNode();
 
-    const tx = await signer.sendTransaction({ to: channelAddress, value: amount });
+    let tx;
+
+    if (assetAddress = "0x0000000000000000000000000000000000000000") {
+      // send eth
+      tx = await signer.sendTransaction({ to: channelAddress, value: amount });
+    } else {
+      // send an actual erc20 token
+      let tokenContract = new Contract(assetAddress, ERC20Abi)
+      tx = await tokenContract.transfer(channelAddress, amount)
+    }
 
     // TODO: Wait on this, break it up, this could take a while
     await tx.wait();
@@ -81,6 +90,7 @@ export class AccountsRepository implements IAccountsRepository {
       console.log(depositRes.getError());
       throw new Error("Deposit can not be reconciled");
     }
+    
     const deposit = depositRes.getValue();
 
     if (deposit.channelAddress !== channelAddress) {
