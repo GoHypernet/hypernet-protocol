@@ -1,70 +1,61 @@
 <div class="container-fluid">
-  <h1>Agent</h1>
 
   <div class="row">
-    <div class="col">
+
+    <div class="col card">
       <div data-bind='component: {
         name: "account",
-        params: account}'></div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Status</h5>
-          <table class="table">
-            <tbody>
-              <tr>
-                <td>Startup Complete</td>
-                <td data-bind="text: startupComplete"></td>
-              </tr>
-              <tr>
-                <td>In Control</td>
-                <td data-bind="text: inControl"></td>
-              </tr>
-              </thead>
-          </table>
-        </div>
+        params: account}'>
       </div>
     </div>
 
+    <!--
     <div class="col">
+      <div data-bind='component: {
+        name: "status",
+        params: status}'>
+      </div>
+    </div>
+    -->
+
+    <div class="col card">
       <div data-bind='component: {
         name: "balances",
         params: balances}'></div>
     </div>
 
 
-    <div class="col">
+    <div class="col card">
       <div data-bind='component: {
         name: "actions",
         params: actions}'></div>
     </div>
+
   </div>
 
   <div class="row">
-    <div class="col">
-      <div data-bind="component: {
-    name: 'links',
-    params: links}"></div>
-    </div>
 
-    <div class="col">
+    <div class="col card">
+      <div data-bind="component: {
+        name: 'links',
+        params: links}">
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+
+    <div class="col card">
       <div data-bind='component: {
         name: "payment-form",
-        params: paymentForm}'></div>
+        params: paymentForm}'>
+      </div>
     </div>
-  </div>
 
-  <div class="row">
-    <div class="col">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">Messages</h5>
-          <div data-bind="text: message"></div>
-        </div>
+    <div class="col card">
+      <div class="card-body">
+        <h5 class="card-title">Messages</h5>
+        <div data-bind="text: message"></div>
       </div>
     </div>
   </div>

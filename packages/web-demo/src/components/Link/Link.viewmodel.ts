@@ -20,7 +20,7 @@ export class LinkViewModel {
   constructor(params: LinkParams) {
     this.core = params.core;
     this.counterParty = params.link.counterPartyAccount;
-    this.counterpartyId = `Counterparty ID ${params.link.counterPartyAccount}`;
+    this.counterpartyId = `${params.link.counterPartyAccount}`;
     this.pushPayments = ko.observableArray<PushPaymentParams>()
     this.pullPayments = ko.observableArray<PullPaymentParams>()
 
