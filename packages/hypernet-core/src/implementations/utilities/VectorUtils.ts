@@ -106,7 +106,7 @@ export class VectorUtils implements IVectorUtils {
       receiver: toEthAddress,
       start: start,
       expiration: expiration,
-      UUID: formatBytes32String(UUID),
+      UUID: UUID,
       rate: type == EPaymentType.Push ? infinite_rate : (rate as Rate),
     };
 
@@ -140,7 +140,7 @@ export class VectorUtils implements IVectorUtils {
     mediatorAddress: string,
     amount: BigNumber,
     expiration: string,
-    UUID: string,
+    UUID: string
   ): Promise<NodeResponses.ConditionalTransfer> {
     const browserNode = await this.browserNodeProvider.getBrowserNode();
     const channelAddress = await this.getRouterChannelAddress();
@@ -152,7 +152,7 @@ export class VectorUtils implements IVectorUtils {
       mediator: mediatorAddress,
       collateral: amount.toString(),
       expiration: expiration,
-      UUID: formatBytes32String(UUID),
+      UUID: UUID
     };
 
     // Create transfer params

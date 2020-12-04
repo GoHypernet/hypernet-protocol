@@ -30,7 +30,7 @@ import {
   ConfigProvider,
   EthersBlockchainProvider,
   BrowserNodeProvider,
-  VectorUtils,
+  VectorUtils
 } from "@implementations/utilities";
 import { IPaymentRepository, ILinkRepository, IAccountsRepository } from "@interfaces/data";
 import { ILinkUtils, IBrowserNodeProvider } from "@interfaces/utilities";

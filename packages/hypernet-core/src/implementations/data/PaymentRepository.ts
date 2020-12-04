@@ -12,7 +12,7 @@ import {
   IConfigProvider,
   IContextProvider,
   IPaymentUtils,
-  IVectorUtils,
+  IVectorUtils
 } from "@interfaces/utilities";
 import { EPaymentType } from "@interfaces/types";
 import { EthereumAddress, PublicKey } from "@interfaces/objects";
@@ -57,7 +57,7 @@ export class PaymentRepository implements IPaymentRepository {
     const paymentId = await this.paymentUtils.createPaymentId(EPaymentType.Push);
 
     const message: IHypernetTransferMetadata = {
-      paymentId,
+      paymentId: paymentId,
       creationDate: moment().unix(),
       to: counterPartyAccount,
       from: context.publicIdentifier,
@@ -69,7 +69,6 @@ export class PaymentRepository implements IPaymentRepository {
     };
 
     const transferInfo = await this.vectorUtils.createMessageTransfer(counterPartyAccount, message);
-
     let transferResult = await browserNode.getTransfer({ transferId: transferInfo.transferId });
 
     if (transferResult.isError) {
@@ -113,8 +112,6 @@ export class PaymentRepository implements IPaymentRepository {
     console.log(activeTransfersRes.getValue())
 
     const activeTransfers = activeTransfersRes.getValue().filter((val) => {
-      console.log(`Filter step: val.meta.paymentId: ${val.meta.paymentId}`);
-      console.log(`Filter step: paymentIds: ${paymentIds}`)
       return paymentIds.includes(val.meta.paymentId);
     });
 
