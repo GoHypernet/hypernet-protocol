@@ -27,7 +27,7 @@ export class PaymentUtils implements IPaymentUtils {
   public async isHypernetDomain(paymentId: string): Promise<boolean> {
     const config = await this.configProvider.getConfig();
 
-    const paymentComponents = paymentId.split(":");
+    const paymentComponents = paymentId.substr(0, 10).trim()
 
     return paymentComponents[0] === config.hypernetProtocolDomain;
   }
@@ -39,7 +39,7 @@ export class PaymentUtils implements IPaymentUtils {
   public async createPaymentId(paymentType: EPaymentType): Promise<string> {
     const config = await this.configProvider.getConfig();
 
-    return `${config.hypernetProtocolDomain}:${paymentType}:${uuidv4()}`;
+    return `${config.hypernetProtocolDomain.padEnd(10)}${paymentType.padEnd(6)}${uuidv4().substr(0, 15)}`;
   }
 
   /**
@@ -152,10 +152,12 @@ export class PaymentUtils implements IPaymentUtils {
     browserNode: BrowserNode,
   ): Promise<Payment> {
     // const signerAddress = getSignerAddressFromPublicIdentifier(context.publicIdentifier);
+    const domain = fullPaymentId.substr(0, 10).trim();
+    const paymentType = fullPaymentId.substr(10, 6).trim();
+    const id = fullPaymentId.substr(16, 16).trim();
 
-    const [domain, paymentType, id] = fullPaymentId.split(":");
     if (domain !== config.hypernetProtocolDomain) {
-      throw new Error(`Invalid payment domain: ${domain}`);
+      throw new Error(`Invalid payment domain: '${domain}'`);
     }
 
     if (id === "" || id == null) {

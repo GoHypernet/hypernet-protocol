@@ -6,6 +6,7 @@ import { serialize } from "class-transformer";
 import { ethers } from "ethers";
 import { Rate } from "@interfaces/types/transfers/ParameterizedTypes";
 import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils/dist/identifiers";
+import { formatBytes32String } from "ethers/lib/utils";
 
 export class VectorUtils implements IVectorUtils {
   protected channelAddress: string | null;
@@ -105,7 +106,7 @@ export class VectorUtils implements IVectorUtils {
       receiver: toEthAddress,
       start: start,
       expiration: expiration,
-      UUID: UUID,
+      UUID: formatBytes32String(UUID),
       rate: type == EPaymentType.Push ? infinite_rate : (rate as Rate),
     };
 
@@ -151,7 +152,7 @@ export class VectorUtils implements IVectorUtils {
       mediator: mediatorAddress,
       collateral: amount.toString(),
       expiration: expiration,
-      UUID: UUID,
+      UUID: formatBytes32String(UUID),
     };
 
     // Create transfer params
@@ -165,6 +166,7 @@ export class VectorUtils implements IVectorUtils {
       meta: {}
     } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
 
+    console.log(`CreateInsuranceTransfer transferParams: ${JSON.stringify(transferParams)}`)
     let transfer = await browserNode.conditionalTransfer(transferParams);
 
     if (transfer.isError) {
