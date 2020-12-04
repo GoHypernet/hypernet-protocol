@@ -16,6 +16,7 @@ import { FullTransferState } from "@connext/vector-types";
 import { BrowserNode } from "@connext/vector-browser-node";
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
 import moment from "moment";
+import { parseBytes32String } from "ethers/lib/utils";
 
 export class PaymentUtils implements IPaymentUtils {
   constructor(protected configProvider: IConfigProvider) {}
@@ -39,7 +40,7 @@ export class PaymentUtils implements IPaymentUtils {
   public async createPaymentId(paymentType: EPaymentType): Promise<string> {
     const config = await this.configProvider.getConfig();
 
-    return `${config.hypernetProtocolDomain.padEnd(10)}${paymentType.padEnd(6)}${uuidv4().substr(0, 15)}`;
+    return `${config.hypernetProtocolDomain.padEnd(10)}${paymentType.padEnd(6)}${uuidv4()}`;
   }
 
   /**
@@ -140,18 +141,30 @@ export class PaymentUtils implements IPaymentUtils {
 
   /**
    *
-   * @param fullPaymentId
+   * @param encodedPaymentId
    * @param transfers
    * @param config
    * @param browserNode
    */
   public async transfersToPayment(
-    fullPaymentId: string,
+    encodedPaymentId: string,
     transfers: FullTransferState[],
     config: HypernetConfig,
     browserNode: BrowserNode,
   ): Promise<Payment> {
     // const signerAddress = getSignerAddressFromPublicIdentifier(context.publicIdentifier);
+    
+    console.log(`PaymentUtils:transfersToPayment:encodedPaymentId: ${encodedPaymentId}`)
+
+    let fullPaymentId
+    if (encodedPaymentId.substr(0, 2) == "0x") {
+      fullPaymentId = parseBytes32String(encodedPaymentId)
+    } else {
+      fullPaymentId = encodedPaymentId
+    }
+
+    console.log(`Full Payment ID: ${fullPaymentId}`)
+    
     const domain = fullPaymentId.substr(0, 10).trim();
     const paymentType = fullPaymentId.substr(10, 6).trim();
     const id = fullPaymentId.substr(16, 16).trim();

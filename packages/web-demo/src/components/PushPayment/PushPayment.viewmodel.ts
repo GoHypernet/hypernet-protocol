@@ -64,7 +64,8 @@ export class PushPaymentViewModel {
       const payments = await this.core.acceptFunds([this.paymentId]);
       const payment = payments[0];
       if (payment.isError) {
-        throw new Error(`Error getting payment with ID ${this.paymentId}: ${payment.getError()}`);
+        console.error(`Error getting payment with ID ${this.paymentId}: ${payment.getError()}`);
+        throw payment.getError()
       }
       this.state(new PaymentStatusParams(payment.getValue().state));
     });
