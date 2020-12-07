@@ -174,6 +174,7 @@ export class PaymentRepository implements IPaymentRepository {
     let paymentStart = `${Math.floor(moment.now() / 1000)}`;
     let paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`;
 
+    console.log(`PaymentRepository:provideStake:Creating insurance transfer for paymentId: ${paymentId}`)
     let transferInfo = await this.vectorUtils.createInsuranceTransfer(
       paymentSender,
       paymentMediator,
@@ -191,7 +192,7 @@ export class PaymentRepository implements IPaymentRepository {
     let transfer = transferResult.getValue() as FullTransferState;
 
     // Transfer has been created successfully; return the updated payment.
-    let updatedPayment = this.paymentUtils.transfersToPayment(transferInfo.transferId, [transfer], config, browserNode);
+    let updatedPayment = this.paymentUtils.transfersToPayment(paymentId, [transfer], config, browserNode);
 
     return updatedPayment;
   }

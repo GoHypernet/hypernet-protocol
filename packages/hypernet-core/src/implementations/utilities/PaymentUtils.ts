@@ -12,10 +12,11 @@ import {
   PushPayment,
   SortedTransfers,
 } from "@interfaces/objects";
-import { FullTransferState } from "@connext/vector-types";
+import { EngineParams, FullTransferState, NodeParams, NodeResponses } from "@connext/vector-types";
 import { BrowserNode } from "@connext/vector-browser-node";
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
 import moment from "moment";
+import { EthereumAddress } from "3box";
 
 export abstract class PaymentIdUtils {
   
@@ -26,7 +27,9 @@ export abstract class PaymentIdUtils {
    */
   public static getDomain(paymentIdString: string): string {
     if (!this.isValidPaymentId(paymentIdString)) throw new Error(`Not a valid paymentId: '${paymentIdString}'`)
-    const domainHex = paymentIdString.substr(0, 20)
+    const domainHex = paymentIdString.substr(2, 20)
+    console.log(`PaymentIdString: ${paymentIdString}`)
+    console.log(`DomainHex: ${domainHex}`)
     const domain = Buffer.from(domainHex, 'hex').toString('ascii')
     if (domain.length != 10) throw new Error(`Domain was not 10 characters long, got '${domain}'`)
     return domain.trim()
@@ -39,7 +42,7 @@ export abstract class PaymentIdUtils {
    */
   public static getType(paymentIdString: string): string {
     if (!this.isValidPaymentId(paymentIdString)) throw new Error(`Not a valid paymentId: '${paymentIdString}'`)
-    const typeHex = paymentIdString.substr(20, 12)
+    const typeHex = paymentIdString.substr(22, 12)
     const type = Buffer.from(typeHex, 'hex').toString('ascii')
     if (type.length != 6) throw new Error(`Type was not 6 characters long, got '${type}'`)
     return type.trim()
@@ -52,34 +55,17 @@ export abstract class PaymentIdUtils {
    */
   public static getUUID(paymentIdString: string): string {
     if (!this.isValidPaymentId(paymentIdString)) throw new Error(`Not a valid paymentId: '${paymentIdString}'`)
-    const UUID = paymentIdString.substr(32, 32)
+    const UUID = paymentIdString.substr(34, 32)
     return UUID
   }
 
   /**
-   * 
+   * A valid payment ID is exactly 64 characters, hexadecimal, refixed with 0x.
    * @param paymentIdString 
    */
   public static isValidPaymentId(paymentIdString: string): boolean {
-    const overallRegex = /[0-9A-Fa-f]{64}$/;
-    const domainRegex = /[0-9A-Fa-f]{1,20}$/;
-    const typeRegex = /[0-9A-Fa-f]{1,12}$/;
-    const uuidRegex = /[0-9A-Fa-f]{32}$/;
-
-    if (!overallRegex.test(paymentIdString)) throw new Error(`Payment ID must be 64 hexadecimal characters! Got: ${overallRegex}`)
-
-    // Bytes 0-9 are the domain (characters 0-19)
-    // Bytes 10-15 are the type (characters 20-31)
-    // Bytes 16-31 are the UUID (characters 32-63)
-
-    const domain = paymentIdString.substr(0, 20)
-    const type = paymentIdString.substr(20, 12)
-    const uuid = paymentIdString.substr(32, 32)
-
-    if (!domainRegex.test(domain)) throw new Error(`Domain must be exactly 10 hex characters or less, got ${domain}`)
-    if (!typeRegex.test(type)) throw new Error(`Type must be 6 exactly hex characters or less, got ${type}`)
-    if (!uuidRegex.test(uuid)) throw new Error(`UUID must be exactly 32 hex characters, got ${uuid}`)
-
+    const overallRegex = /^0x[0-9A-Fa-f]{64}$/;
+    if (!overallRegex.test(paymentIdString)) throw new Error(`Payment ID must be 64 hexadecimal characters (with 0x prefix)! Got: ${paymentIdString}`)
     return true
   }
 
@@ -90,9 +76,9 @@ export abstract class PaymentIdUtils {
    * @param uuid Hex string of 32 characterx exactly
    */
   public static makePaymentId(domain: string, type: string, uuid: string): string {
-    const domainRegex = /[0-9A-Za-z]{1,10}$/;
-    const typeRegex = /[0-9A-Za-z]{1,6}$/;
-    const uuidRegex = /[0-9A-Fa-f]{32}$/;
+    const domainRegex = /^[0-9A-Za-z]{1,10}$/;
+    const typeRegex = /^[0-9A-Za-z]{1,6}$/;
+    const uuidRegex = /^[0-9A-Fa-f]{32}$/;
 
     // strip out dashes from the uuid first
     uuid = uuid.split('-').join('')
@@ -107,13 +93,16 @@ export abstract class PaymentIdUtils {
 
     // Convert domain and type to hex (/w ascii encoding)
     const domainHex = Buffer.from(domain, "ascii").toString('hex')
+    console.log(`Domain: ${domain}`)
+    console.log(`DomainHex: ${domainHex}`)
+
     const typeHex = Buffer.from(type, "ascii").toString('hex')
 
     // Sanity check
     if (domainHex.length != 20) throw new Error(`Domain hex wasn't 20 chars long, got '${domainHex}'`)
     if (typeHex.length != 12) throw new Error(`Type hex wasn't 12 chars long, got '${typeHex}'`)
     
-    let paymentId = (domainHex + typeHex + uuid)
+    let paymentId = ('0x'+domainHex + typeHex + uuid)
     if (!PaymentIdUtils.isValidPaymentId(paymentId)) throw new Error(`Invalid paymentId: '${paymentId}'`)
 
     return paymentId
@@ -121,7 +110,8 @@ export abstract class PaymentIdUtils {
 }
 
 export class PaymentUtils implements IPaymentUtils {
-  constructor(protected configProvider: IConfigProvider) {}
+  constructor(
+    protected configProvider: IConfigProvider) { }
 
   /**
    *
@@ -318,12 +308,24 @@ export class PaymentUtils implements IPaymentUtils {
     context: InitializedHypernetContext,
     browserNode: BrowserNode,
   ): Promise<Payment[]> {
-    // First, we are going to sort the transfers into buckets based on their payment_id
+    // First, we are going to sort the transfers into buckets based on their paymentId
     const transfersByPaymentId = new Map<string, FullTransferState[]>();
     for (const transfer of transfers) {
-      console.log(transfer.meta)
-      if (!(transfer.meta && transfer.meta.paymentId)) continue;
-      const paymentId = transfer.meta.paymentId;
+
+      // Filter out any transfer not containing a transfer with a UUID in the transferState (insurance & parameterized transfer types)
+      // or a UUID as part of transferState.message (message transfer type)
+      let paymentId: string
+      let transferType = await this.getTransferType(transfer, browserNode)
+
+      if (transferType == ETransferType.Offer) { // @todo also add in PullRecord type)
+        let metadata: IHypernetTransferMetadata = JSON.parse(transfer.transferState.message)
+        paymentId = metadata.paymentId
+      } else if (transferType == ETransferType.Insurance || transferType == ETransferType.Parameterized) {
+        paymentId = transfer.transferState.UUID
+      } else {
+        console.log(`Transfer type was not recognized, doing nothing. TransferType: '${transfer.transferDefinition}'`)
+        continue;
+      }
 
       // Get the existing array of payments. Initialize it if it's not there.
       let transferArray = transfersByPaymentId.get(paymentId);
@@ -341,7 +343,6 @@ export class PaymentUtils implements IPaymentUtils {
     const paymentPromises = new Array<Promise<Payment>>();
     transfersByPaymentId.forEach(async (transferArray, paymentId) => {
       const payment = this.transfersToPayment(paymentId, transferArray, config, browserNode);
-
       paymentPromises.push(payment);
     });
 
@@ -352,13 +353,44 @@ export class PaymentUtils implements IPaymentUtils {
   }
 
   /**
-   *
-   * @param transfer
+   * Given a (vector) transfer @ FullTransferState, return the transfer type (as ETransferType)
+   * @param transfer the transfer to get the transfer type of
    */
-  public getTransferType(transfer: FullTransferState): ETransferType {
-    // Have to jump through some hoops here
-    // TODO: Fix this.
-    return ETransferType.Offer;
+  public async getTransferType(transfer: FullTransferState, browserNode: BrowserNode): Promise<ETransferType> {
+    // TransferDefinition here is the ETH address of the transfer
+    // We need to get the registered transfer definitions as canonical by the browser node
+    let registeredTransfersRes = await browserNode.getRegisteredTransfers({chainId: 1337})
+    if (registeredTransfersRes.isError) throw new Error(`Could not get transfer type for transfer: ${transfer}`)
+
+    let registeredTransfers: NodeResponses.GetRegisteredTransfers = registeredTransfersRes.getValue()
+
+    // registeredTransfers.name = 'Insurance', registeredTransfers.definition = <address>, transfer.transferDefinition = <address>
+    let transferMap: Map<EthereumAddress, string> = new Map
+    for (const transfer of registeredTransfers) {
+      transferMap.set(transfer.definition, transfer.name)
+    }
+
+    // If the transfer address is not one we know, we don't know what this is
+    if (!transferMap.has(transfer.transferDefinition)) {
+      return ETransferType.Unrecognized
+    } else {
+      // This is a transfer we know about, but not necessarily one we want.
+      // Narrow down to insurance, parameterized, or messagetransfer
+      let thisTransfer = transferMap.get(transfer.transferDefinition)
+      if (thisTransfer == null) throw new Error('Transfer type not unrecognized, but not in transfer map!')
+
+      // Now we know it's either insurance, parameterized, or messageTransfer
+      if (thisTransfer == 'Insurance') {
+        return ETransferType.Insurance
+      } else if (thisTransfer == 'Parameterized') {
+        return ETransferType.Parameterized
+      } else if (thisTransfer == 'MessageTransfer') {
+        // @todo check if this is a PullRecord vs an Offer subtype!
+        return ETransferType.Offer
+      } else {
+        throw new Error('Unreachable code was not unreachable!')
+      }
+    }
   }
 
   /**
@@ -377,24 +409,24 @@ export class PaymentUtils implements IPaymentUtils {
     // let inactiveTransfers = await browserNode.getTransfers((transfer) => {return transfer.meta.paymentId == fullPaymentId;});
     // transfers.concat(inactiveTransfers);
 
-    const offerTransfers = transfers.filter((val) => {
-      return this.getTransferType(val) === ETransferType.Offer;
+    const offerTransfers = transfers.filter(async (val) => {
+      return (await this.getTransferType(val, browserNode)) === ETransferType.Offer;
     });
 
-    const insuranceTransfers = transfers.filter((val) => {
-      return this.getTransferType(val) === ETransferType.Insurance;
+    const insuranceTransfers = transfers.filter(async (val) => {
+      return (await this.getTransferType(val, browserNode)) === ETransferType.Insurance;
     });
 
-    const parameterizedTransfers = transfers.filter((val) => {
-      return this.getTransferType(val) === ETransferType.Parameterized;
+    const parameterizedTransfers = transfers.filter(async (val) => {
+      return (await this.getTransferType(val, browserNode)) === ETransferType.Parameterized;
     });
 
-    const pullTransfers = transfers.filter((val) => {
-      return this.getTransferType(val) === ETransferType.PullRecord;
+    const pullTransfers = transfers.filter(async (val) => {
+      return (await this.getTransferType(val, browserNode)) === ETransferType.PullRecord;
     });
 
-    const unrecognizedTransfers = transfers.filter((val) => {
-      return this.getTransferType(val) === ETransferType.Unrecognized;
+    const unrecognizedTransfers = transfers.filter(async (val) => {
+      return (await this.getTransferType(val, browserNode)) === ETransferType.Unrecognized;
     });
 
     if (unrecognizedTransfers.length > 0) {
