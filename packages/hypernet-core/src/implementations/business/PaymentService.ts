@@ -1,18 +1,15 @@
+import { Result } from "@connext/vector-types";
 import { IPaymentService } from "@interfaces/business";
 import { IAccountsRepository, ILinkRepository } from "@interfaces/data";
 import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
 import {
   BigNumber,
-  Payment,
-  EthereumAddress,
-  PublicKey,
-  PublicIdentifier,
-  PushPayment,
-  PullPayment,
+  EthereumAddress, Payment,
+  PublicIdentifier, PublicKey,
+  PullPayment, PushPayment
 } from "@interfaces/objects";
 import { EPaymentState } from "@interfaces/types";
 import { IConfigProvider, IContextProvider } from "@interfaces/utilities";
-import { Result } from "@connext/vector-types";
 
 /**
  * PaymentService uses Vector internally to send payments on the requested channel.

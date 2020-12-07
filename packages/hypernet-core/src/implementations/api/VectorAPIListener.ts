@@ -5,6 +5,9 @@ import { IHypernetTransferMetadata } from "@interfaces/objects";
 import { ETransferType } from "@interfaces/types";
 import { IBrowserNodeProvider, IContextProvider, IPaymentUtils, IVectorUtils } from "@interfaces/utilities";
 
+/**
+ *
+ */
 export class VectorAPIListener implements IVectorListener {
   constructor(
     protected browserNodeProvider: IBrowserNodeProvider,

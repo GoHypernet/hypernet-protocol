@@ -1,5 +1,6 @@
-import { IConfigProvider, IPaymentUtils, IVectorUtils} from "@interfaces/utilities";
-import { v4 as uuidv4 } from "uuid";
+import { EthereumAddress } from "3box";
+import { BrowserNode } from "@connext/vector-browser-node";
+import { FullTransferState, NodeResponses } from "@connext/vector-types";
 import {
   BigNumber,
   HypernetConfig,
@@ -10,14 +11,22 @@ import {
   PullAmount,
   PullPayment,
   PushPayment,
-  SortedTransfers,
+  SortedTransfers
 } from "@interfaces/objects";
-import { EngineParams, FullTransferState, NodeParams, NodeResponses } from "@connext/vector-types";
-import { BrowserNode } from "@connext/vector-browser-node";
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
+import { IConfigProvider, IPaymentUtils } from "@interfaces/utilities";
 import moment from "moment";
-import { EthereumAddress } from "3box";
+import { v4 as uuidv4 } from "uuid";
 
+/**
+ * An abstract class for creating & converting payment IDs, as well as verifying
+ * correctness, and extracting information from the ID (such as type, domain, UUID)
+ * 
+ * A paymentID is a 64-length hexadecimal string:
+ * characters 0-19: domain (encoded as ascii text --> hex)
+ * characters 20-32: type  (encoded as ascii text --> hex)
+ * characters 32-63: UUID  (encoded as hex)
+ */
 export abstract class PaymentIdUtils {
   
   /**
@@ -109,12 +118,15 @@ export abstract class PaymentIdUtils {
   }
 }
 
+/**
+ * A class for creating Hypernet-Payment objects from Vector transfers, verifying information
+ * about payment Ids, sorting transfers, and other related stuff.
+ */
 export class PaymentUtils implements IPaymentUtils {
-  constructor(
-    protected configProvider: IConfigProvider) { }
+  constructor( protected configProvider: IConfigProvider) { }
 
   /**
-   *
+   * Verifies that the paymentId provided has domain matching Hypernet's domain name.
    * @param paymentId
    */
   public async isHypernetDomain(paymentId: string): Promise<boolean> {
@@ -134,7 +146,7 @@ export class PaymentUtils implements IPaymentUtils {
   }
 
   /**
-   *
+   * Given a SortedTransfers object and associated data about the payment, return a PushPayment object.
    * @param id
    * @param to
    * @param from
@@ -150,17 +162,19 @@ export class PaymentUtils implements IPaymentUtils {
     sortedTransfers: SortedTransfers,
     metadata: IHypernetTransferMetadata,
   ): PushPayment {
+
     /**
-     * Push payments consist of 3 transfers, a null transfer for 0 value that represents the
-     * offer, an insurance payment, and a parameterized payment.
+     * Push payments consist of 3 transfers: 
+     * MessageTransfer - 0 value, represents an offer
+     * InsuranceTransfer - service operator puts up to guarantee the sender's funds
+     * ParameterizedPayment - the payment to the service operator
      */
 
     if (sortedTransfers.pullRecordTransfers.length > 0) {
       throw new Error("Push payment has pull transfers!");
     }
 
-    const amountStaked =
-      sortedTransfers.insuranceTransfer != null ? sortedTransfers.insuranceTransfer.balance.amount[0] : 0;
+    const amountStaked = sortedTransfers.insuranceTransfer != null ? sortedTransfers.insuranceTransfer.balance.amount[0] : 0;
 
     return new PushPayment(
       id,
@@ -181,7 +195,7 @@ export class PaymentUtils implements IPaymentUtils {
   }
 
   /**
-   *
+   * Given a SortedTransfers object and associated data about the payment, return a PullPayment object.
    * @param id
    * @param to
    * @param from
@@ -230,7 +244,8 @@ export class PaymentUtils implements IPaymentUtils {
   }
 
   /**
-   *
+   * Given a set of Vector transfers that we /know/ are for one specific payment,
+   * return the associated payment object.
    * @param paymentId
    * @param transfers
    * @param config
@@ -296,16 +311,16 @@ export class PaymentUtils implements IPaymentUtils {
   }
 
   /**
-   * Given an array of Vector transfers, return the corresponding Hypernet Payments
+   * Given an array of (unsorted) Vector transfers, return the corresponding Hypernet Payments
    * @param transfers
    * @param config
-   * @param context
+   * @param _context
    * @param browserNode
    */
   public async transfersToPayments(
     transfers: FullTransferState[],
     config: HypernetConfig,
-    context: InitializedHypernetContext,
+    _context: InitializedHypernetContext,
     browserNode: BrowserNode,
   ): Promise<Payment[]> {
     // First, we are going to sort the transfers into buckets based on their paymentId
@@ -394,18 +409,20 @@ export class PaymentUtils implements IPaymentUtils {
   }
 
   /**
-   *
-   * @param paymentId
+   * Given a paymentID and matching transfers for this paymentId, return the SortedTransfers object associated.
+   * SortedTransfers is an object containing up to 1 of each of Offer, Insurance, Parameterized, PullRecord, and
+   * the metadata associated with this payment (as IHypernetTransferMetadata).
+   * @param _paymentId
    * @param transfers
    * @param browserNode
    */
   protected async sortTransfers(
-    paymentId: string,
+    _paymentId: string,
     transfers: FullTransferState[],
     browserNode: BrowserNode,
   ): Promise<SortedTransfers> {
-    // We need to do a lookup for non-active transfers for the payment ID.
-    // TODO
+
+    // @todo We need to do a lookup for non-active transfers for the payment ID.
     // let inactiveTransfers = await browserNode.getTransfers((transfer) => {return transfer.meta.paymentId == fullPaymentId;});
     // transfers.concat(inactiveTransfers);
 

@@ -3,6 +3,9 @@ import { IAccountsRepository } from "@interfaces/data";
 import { Balances, BigNumber, PublicIdentifier } from "@interfaces/objects";
 import { IContextProvider } from "@interfaces/utilities";
 
+/**
+ * 
+ */
 export class AccountService implements IAccountService {
   constructor(protected accountRepository: IAccountsRepository, protected contextProvider: IContextProvider) {}
 
