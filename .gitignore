@@ -9,6 +9,7 @@ package-lock.json
 packages/*/package-lock.json
 packages/hypernet-core/log.txt
 packages/hypernet-core/temp.txt
+packages/web-demo/debug.log
 packages/*/src/*.d.ts
 *.swp
 *.swo

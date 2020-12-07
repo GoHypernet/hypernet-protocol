@@ -15,6 +15,10 @@ import { IConfigProvider, IContextProvider } from "@interfaces/utilities";
  * PaymentService uses Vector internally to send payments on the requested channel.
  */
 export class PaymentService implements IPaymentService {
+
+  /**
+   * Creates an instanceo of the paymentService.
+   */
   constructor(
     protected linkRepository: ILinkRepository,
     protected accountRepository: IAccountsRepository,
@@ -23,6 +27,10 @@ export class PaymentService implements IPaymentService {
     protected paymentRepository: IPaymentRepository,
   ) {}
 
+  /**
+   * For each paymentID provided, attempts to accept funds for that payment.
+   * @param paymentIds a list of paymentIds for which to accept funds for
+   */
   public async acceptFunds(paymentIds: string[]): Promise<Result<Payment, Error>[]> {
     const config = await this.configProvider.getConfig();
     const payments = await this.paymentRepository.getPaymentsByIds(paymentIds);
@@ -62,8 +70,8 @@ export class PaymentService implements IPaymentService {
   }
 
   /**
-   * Called by the reciever of a parameterized transfer, AFTER they
-   * have put up stake
+   * Notifies the service that a payment is ready to be finalized.
+   * Called by the reciever of a parameterized transfer, AFTER they have put up stake
    * @param paymentId the payment ID to accept/resolve
    */
   public async paymentPosted(paymentId: string): Promise<void> {
@@ -87,8 +95,8 @@ export class PaymentService implements IPaymentService {
   }
 
   /**
-   *
-   * @param paymentId
+   * Notifies the service that a pull-payment has been recorded.
+   * @param paymentId the paymentId for the pull-payment
    */
   public async pullRecorded(paymentId: string): Promise<void> {
     const payments = await this.paymentRepository.getPaymentsByIds([paymentId]);
@@ -100,7 +108,7 @@ export class PaymentService implements IPaymentService {
   /**
    * Notifies the service that a stake has been posted; if verified,
    * then provides assets to the counterparty (ie a parameterizedPayment)
-   * @param paymentId
+   * @param paymentId the paymentId for the stake
    */
   public async stakePosted(paymentId: string): Promise<void> {
     const payments = await this.paymentRepository.getPaymentsByIds([paymentId]);
@@ -118,10 +126,9 @@ export class PaymentService implements IPaymentService {
 
   /**
    * Called when someone has sent us a payment offer.
-   * Lookup the transfer, and convert it to a payment. Then, publish an RXJS
-   * event to the user.
-   * @param paymentId
-   * @param transferId
+   * Lookup the transfer, and convert it to a payment. 
+   * Then, publish an RXJS event to the user.
+   * @param paymentId the paymentId for the offer
    */
   public async offerReceived(paymentId: string): Promise<void> {
     const paymentsPromise = this.paymentRepository.getPaymentsByIds([paymentId]);
@@ -155,11 +162,15 @@ export class PaymentService implements IPaymentService {
   }
 
   /**
-   * Sends a payment on the specified channel.
+   * Sends a payment to the specified recipient.
    * Internally, creates a null/message/offer transfer to communicate
    * with the counterparty and signal a request for a stake.
-   * @param channelId
-   * @param amount
+   * @param counterPartyAccount the intended recipient
+   * @param amount the amount of payment to send
+   * @param expirationDate the expiration date at which point this payment will revert
+   * @param requiredStake the amount of insurance the counterparty should put up
+   * @param paymentToken the (Ethereum) address of the payment token
+   * @param disputeMediator the (Ethereum) address of the dispute mediator
    */
   public async sendFunds(
     counterPartyAccount: PublicIdentifier,
@@ -183,8 +194,8 @@ export class PaymentService implements IPaymentService {
 
   /**
    * Requests a payment on the specified channel.
-   * @param channelId
-   * @param amount
+   * @param channelId the (Vector) channelId to request the payment on
+   * @param amount the amount of payment to request
    */
   requestPayment(channelId: string, amount: BigNumber): Promise<Payment> {
     throw new Error("Method not implemented.");
