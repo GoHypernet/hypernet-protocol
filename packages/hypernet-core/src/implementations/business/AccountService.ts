@@ -16,9 +16,11 @@ export class AccountService implements IAccountService {
   public async getAccounts(): Promise<string[]> {
     return this.accountRepository.getAccounts();
   }
+
   public async getBalances(): Promise<Balances> {
     return this.accountRepository.getBalances();
   }
+
   public async depositFunds(assetAddress: string, amount: BigNumber): Promise<Balances> {
     const context = await this.contextProvider.getInitializedContext();
 
@@ -31,6 +33,7 @@ export class AccountService implements IAccountService {
 
     return balances;
   }
+  
   public async withdrawFunds(assetAddress: string, amount: BigNumber, destinationAddress: string): Promise<Balances> {
     const context = await this.contextProvider.getInitializedContext();
     await this.accountRepository.withdrawFunds(assetAddress, amount, destinationAddress);

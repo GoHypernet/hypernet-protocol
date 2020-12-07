@@ -1,12 +1,12 @@
+import { FullTransferState } from "@connext/vector-types";
 import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
 import {
-  BigNumber,
-  IHypernetTransferMetadata,
+  BigNumber, EthereumAddress, IHypernetTransferMetadata,
   Payment,
-  PublicIdentifier,
-  PullPayment,
-  PushPayment,
+  PublicIdentifier, PublicKey, PullPayment,
+  PushPayment
 } from "@interfaces/objects";
+import { EPaymentType } from "@interfaces/types";
 import {
   IBrowserNodeProvider,
   IConfigProvider,
@@ -14,9 +14,6 @@ import {
   IPaymentUtils,
   IVectorUtils
 } from "@interfaces/utilities";
-import { EPaymentType } from "@interfaces/types";
-import { EthereumAddress, PublicKey } from "@interfaces/objects";
-import { FullTransferState } from "@connext/vector-types";
 import moment from "moment";
 
 export class PaymentRepository implements IPaymentRepository {

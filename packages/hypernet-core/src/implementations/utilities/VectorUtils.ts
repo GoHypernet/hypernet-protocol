@@ -6,7 +6,6 @@ import { serialize } from "class-transformer";
 import { ethers } from "ethers";
 import { Rate } from "@interfaces/types/transfers/ParameterizedTypes";
 import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils/dist/identifiers";
-import { formatBytes32String } from "ethers/lib/utils";
 import { PaymentIdUtils } from "./PaymentUtils";
 
 export class VectorUtils implements IVectorUtils {
