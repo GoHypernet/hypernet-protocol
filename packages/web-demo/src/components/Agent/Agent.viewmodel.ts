@@ -6,42 +6,29 @@ import { PaymentFormParams } from "../PaymentForm/PaymentForm.viewmodel";
 import { LinksParams } from "../Links/Links.viewmodel";
 import { AccountParams } from "../Account/Account.viewmodel";
 import { ActionsParams } from "../Actions/Actions.viewmodel";
+import { StatusParams } from "../Status/Status.viewmodel";
 
 export class AgentViewModel {
   public account: AccountParams;
   public links: LinksParams;
   public balances: BalancesParams;
   public actions: ActionsParams;
+  public status: StatusParams;
   public message: ko.Observable<string>;
-  public startupComplete: ko.Observable<boolean>;
-  public inControl: ko.Observable<boolean>;
+  
   public paymentForm: PaymentFormParams;
 
   protected core: IHypernetCore;
 
   constructor() {
     this.core = new HypernetCore(EBlockchainNetwork.Localhost);
-
-    this.core.onControlClaimed.subscribe({
-      next: () => {
-        this.inControl(true);
-      },
-    });
-
-    this.core.onControlYielded.subscribe({
-      next: () => {
-        this.inControl(false);
-      },
-    });
+    this.status = new StatusParams(this.core)
 
     this.account = new AccountParams(this.core);
     this.message = ko.observable<string>("Starting");
-    this.startupComplete = ko.observable(false);
-    this.inControl = ko.observable(false);
-
+    
     this.startup()
       .then(() => {
-        this.startupComplete(true);
         this.message("Startup Complete");
       })
       .catch((e) => {
@@ -59,10 +46,7 @@ export class AgentViewModel {
   protected async startup() {
     try {
       const accounts = await this.core.getEthereumAccounts();
-
       await this.core.initialize(accounts[0]);
-
-      this.startupComplete(true);
       this.message("Startup Complete");
     } catch (e) {
       this.message("Startup failed!");

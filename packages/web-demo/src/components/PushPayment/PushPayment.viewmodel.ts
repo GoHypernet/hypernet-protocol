@@ -60,10 +60,12 @@ export class PushPaymentViewModel {
     });
 
     this.acceptButton = new ButtonParams("Accept", async () => {
+      console.log(`Attempting to accept funds for payment ${this.paymentId}`)
       const payments = await this.core.acceptFunds([this.paymentId]);
       const payment = payments[0];
       if (payment.isError) {
-        throw new Error("Error getting payment.");
+        console.error(`Error getting payment with ID ${this.paymentId}: ${payment.getError()}`);
+        throw payment.getError()
       }
       this.state(new PaymentStatusParams(payment.getValue().state));
     });

@@ -43,7 +43,7 @@ export class VectorLinkRepository implements ILinkRepository {
       throw error;
     }
 
-    const activeTransfers = activeTransfersRes.getValue();
+    const activeTransfers = activeTransfersRes.getValue() as FullTransferState[]
 
     if (activeTransfers.length == 0) return []
 
@@ -100,70 +100,4 @@ export class VectorLinkRepository implements ILinkRepository {
 
     return links[0];
   }
-
-  // sendPayment
-
-  // public async createHypernetLink(
-  //     consumerAccount: PublicIdentifier,
-  //     allowedPaymentTokens: EthereumAddress[],
-  //     stakeAmount: BigNumber,
-  //     stakeExpiration: number,
-  //     disputeMediator: PublicKey): Promise<HypernetLink> {
-  //     // Basic setup
-  //     const configPromise = this.configProvider.getConfig();
-  //     const contextPromise = this.contextProvider.getInitializedContext();
-  //     const browserNodePromise = this.browserNodeProvider.getBrowserNode();
-  //     const routerChannelAddressPromise = this.vectorUtils.getRouterChannelAddress();
-
-  //     const [config, context, browserNode, routerChannelAddress] =
-  //         await Promise.all([configPromise, contextPromise, browserNodePromise,
-  //             routerChannelAddressPromise]);
-
-  //     // const blah = await browserNode.requestCollateral({channelAddress: routerChannelAddress,
-  //     // assetId: config.hypertokenAddress});
-  //     // console.log(blah);
-
-  //     // Now we can create a transaction! When creating a link, the first thing
-  //     // to do is create an InsurancePayment on behalf of the provider
-  //     const HypernetLinkId = uuidv4();
-  //     const insurancePaymentResult = await browserNode.conditionalTransfer({
-  //         type: "HashlockTransfer",
-  //         channelAddress: routerChannelAddress,
-  //         amount: stakeAmount.toString(),
-  //         assetId: config.hypertokenAddress,
-  //         details: {
-  //             lockHash: createlockHash(getRandomBytes32()),
-  //             expiry: "0"
-  //         },
-  //         recipient: consumerAccount,
-  //         meta: {
-  //             HypernetLinkId: HypernetLinkId,
-  //             allowedPaymentTokens: allowedPaymentTokens
-  //         }
-  //     });
-
-  //     if (insurancePaymentResult.isError) {
-  //         console.log(insurancePaymentResult.getError());
-  //         throw new Error("Cannot post an insurance payment!");
-  //     }
-
-  //     const insurancePayment = insurancePaymentResult.getValue();
-
-  //     const link = new HypernetLink(
-  //         HypernetLinkId,
-  //         consumerAccount,
-  //         context.publicIdentifier,
-  //         allowedPaymentTokens,
-  //         disputeMediator,
-  //         pullSettings,
-  //         BigNumber.from(0),
-  //         BigNumber.from(0),
-  //         BigNumber.from(0),
-  //         stakeAmount,
-  //         ELinkStatus.STAKED,
-  //         routerChannelAddress
-  //     );
-
-  //     return link;
-  // }
 }

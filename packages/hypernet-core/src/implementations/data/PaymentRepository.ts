@@ -12,7 +12,7 @@ import {
   IConfigProvider,
   IContextProvider,
   IPaymentUtils,
-  IVectorUtils,
+  IVectorUtils
 } from "@interfaces/utilities";
 import { EPaymentType } from "@interfaces/types";
 import { EthereumAddress, PublicKey } from "@interfaces/objects";
@@ -57,10 +57,10 @@ export class PaymentRepository implements IPaymentRepository {
     const paymentId = await this.paymentUtils.createPaymentId(EPaymentType.Push);
 
     const message: IHypernetTransferMetadata = {
-      paymentId,
+      paymentId: paymentId,
       creationDate: moment().unix(),
       to: counterPartyAccount,
-      from: context.account,
+      from: context.publicIdentifier,
       requiredStake: requiredStake.toString(),
       paymentAmount: amount.toString(),
       expirationDate: expirationDate.unix(),
@@ -69,7 +69,6 @@ export class PaymentRepository implements IPaymentRepository {
     };
 
     const transferInfo = await this.vectorUtils.createMessageTransfer(counterPartyAccount, message);
-
     let transferResult = await browserNode.getTransfer({ transferId: transferInfo.transferId });
 
     if (transferResult.isError) {
@@ -104,13 +103,19 @@ export class PaymentRepository implements IPaymentRepository {
     const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress });
 
     if (activeTransfersRes.isError) {
+      console.log('PaymentRepository: getPaymentsByIds: Error getting active transfers')
       const error = activeTransfersRes.getError();
       throw error;
     }
 
+    console.log(`PaymentRepository: getPaymentsByIds: activeTransfersResLength: ${activeTransfersRes.getValue().length}`)
+    console.log(activeTransfersRes.getValue())
+
     const activeTransfers = activeTransfersRes.getValue().filter((val) => {
       return paymentIds.includes(val.meta.paymentId);
     });
+
+    console.log(`PaymentRepository: getPaymentsByIds: activeTransfersLength: ${activeTransfers.length}`)
 
     const payments = await this.paymentUtils.transfersToPayments(
       activeTransfers as FullTransferState[],
@@ -133,7 +138,7 @@ export class PaymentRepository implements IPaymentRepository {
     let payment = payments.get(paymentId);
 
     if (payment == null) {
-      throw new Error("Cuold not get payment.");
+      throw new Error(`PaymentRepository:getPaymentById():Could not get payment!`);
     }
 
     return payment;
@@ -169,6 +174,7 @@ export class PaymentRepository implements IPaymentRepository {
     let paymentStart = `${Math.floor(moment.now() / 1000)}`;
     let paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`;
 
+    console.log(`PaymentRepository:provideStake:Creating insurance transfer for paymentId: ${paymentId}`)
     let transferInfo = await this.vectorUtils.createInsuranceTransfer(
       paymentSender,
       paymentMediator,
@@ -186,7 +192,7 @@ export class PaymentRepository implements IPaymentRepository {
     let transfer = transferResult.getValue() as FullTransferState;
 
     // Transfer has been created successfully; return the updated payment.
-    let updatedPayment = this.paymentUtils.transfersToPayment(transferInfo.transferId, [transfer], config, browserNode);
+    let updatedPayment = this.paymentUtils.transfersToPayment(paymentId, [transfer], config, browserNode);
 
     return updatedPayment;
   }

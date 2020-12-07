@@ -1,13 +1,15 @@
-<div>
-  <h2 data-bind="text: counterpartyId"></h2>
+<div class="card-body">
+  <h5 class="cart-title" data-bind="text: counterpartyId"></h5>
   <div data-bind="foreach: pushPayments">
     <div data-bind='component: {
-          name: "push-payment",
-          params: $data}'></div>
-    <div data-bind="foreach: pullPayments">
-      <div data-bind='component: {
-          name: "pull-payment",
-          params: $data}'></div>
+      name: "push-payment",
+      params: $data}'>
+    </div>
+  </div>
+  <div data-bind="foreach: pullPayments">
+    <div data-bind='component: {
+      name: "pull-payment",
+      params: $data}'>
     </div>
   </div>
 </div>

@@ -1,10 +1,8 @@
 import { BigNumber, Payment, EthereumAddress, PublicKey, PublicIdentifier } from "@interfaces/objects";
 import { Result } from "@connext/vector-types";
 
-/**
- *
- */
 export interface IPaymentService {
+
   /**
    * Send funds to another person.
    * @param counterPartyAccount the account we wish to send funds to

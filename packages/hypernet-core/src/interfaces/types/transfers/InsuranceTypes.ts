@@ -5,12 +5,12 @@ export type InsuranceState = {
   mediator: Address;
   collateral: string;
   expiration: string;
-  UUID: Bytes32;
+  UUID: string;
 };
 
 export type InsuranceResolverData = {
   amount: string;
-  UUID: Bytes32;
+  UUID: string;
 };
 
 export type InsuranceResolver = {

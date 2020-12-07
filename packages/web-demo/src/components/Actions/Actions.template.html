@@ -1,10 +1,9 @@
-<div class="card" data-bind="visible: startupComplete">
-    <div class="card-body">
-        <h5 class="card-title">Actions</h5>
-        <div class="form">
-            <div data-bind="component: {name:'token-selector', params:tokenSelector}"></div>
-            <span data-bind="component: {name:'button', params:depositFundsButton}, visible: tokenSelected"></span>
-            <span data-bind="component: {name:'button', params:mintTestTokenButton}"></span>
-        </div>
+<div class="card-body">
+    <h5 class="card-title">Actions</h5>
+    <div class="form">
+        <div data-bind="component: {name:'token-selector', params:tokenSelector}"></div>
+        <div data-bind="component: {name:'button', params:depositFundsButton}, visible: tokenSelected"></div>
+        <br>
+        <div data-bind="component: {name:'button', params:mintTestTokenButton}"></div>
     </div>
 </div>

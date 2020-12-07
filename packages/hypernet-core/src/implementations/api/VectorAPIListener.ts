@@ -5,6 +5,9 @@ import { IHypernetTransferMetadata } from "@interfaces/objects";
 import { ETransferType } from "@interfaces/types";
 import { IBrowserNodeProvider, IContextProvider, IPaymentUtils, IVectorUtils } from "@interfaces/utilities";
 
+/**
+ *
+ */
 export class VectorAPIListener implements IVectorListener {
   constructor(
     protected browserNodeProvider: IBrowserNodeProvider,
@@ -27,29 +30,42 @@ export class VectorAPIListener implements IVectorListener {
     browserNode.on(EngineEvents.CONDITIONAL_TRANSFER_CREATED, async (payload: ConditionalTransferCreatedPayload) => {
       const context = await this.contextProvider.getInitializedContext();
 
-      // Pull out the transfer itself
-      const metadata = payload.transfer.meta as IHypernetTransferMetadata;
+      // Filter out any transfer not containing a transfer with a UUID in the transferState (insurance & parameterized transfer types)
+      // or a UUID as part of transferState.message (message transfer type)
+      let paymentId: string
+      const transfer = payload.transfer
+      const transferType = await this.paymentUtils.getTransferType(transfer, browserNode)
+      const from = transfer.initiator
 
-      if (!(await this.paymentUtils.isHypernetDomain(metadata.paymentId))) {
+      if (transferType == ETransferType.Offer) { // @todo also add in PullRecord type)
+        let metadata: IHypernetTransferMetadata = JSON.parse(transfer.transferState.message)
+        paymentId = metadata.paymentId
+      } else if (transferType == ETransferType.Insurance || transferType == ETransferType.Parameterized) {
+        paymentId = transfer.transferState.UUID
+      } else {
+        console.log(`Transfer type was not recognized, doing nothing. TransferType: '${transferType}'`)
+        return;
+      }
+
+      if (!(await this.paymentUtils.isHypernetDomain(paymentId))) {
         return;
       }
 
       // Determine if you sent the transfer, in which case you can ignore this
-      if (metadata.from === context.account) {
+      if (from === context.publicIdentifier) {
         return;
       }
 
       // If you didn't send this transfer, you want to notify the user
       // that a payment is available for them to accept (insurance, paramterized, etc)
-      const transferType = this.paymentUtils.getTransferType(payload.transfer);
       if (transferType === ETransferType.Offer) {
-        this.paymentService.offerReceived(metadata.paymentId);
+        this.paymentService.offerReceived(paymentId);
       } else if (transferType === ETransferType.Insurance) {
-        this.paymentService.stakePosted(metadata.paymentId);
+        this.paymentService.stakePosted(paymentId);
       } else if (transferType === ETransferType.Parameterized) {
-        this.paymentService.paymentPosted(metadata.paymentId);
+        this.paymentService.paymentPosted(paymentId);
       } else if (transferType === ETransferType.PullRecord) {
-        this.paymentService.pullRecorded(metadata.paymentId);
+        this.paymentService.pullRecorded(paymentId);
       } else {
         throw new Error("Unrecognized transfer type!");
       }

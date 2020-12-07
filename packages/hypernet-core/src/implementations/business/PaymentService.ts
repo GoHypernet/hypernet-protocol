@@ -1,18 +1,15 @@
+import { Result } from "@connext/vector-types";
 import { IPaymentService } from "@interfaces/business";
 import { IAccountsRepository, ILinkRepository } from "@interfaces/data";
 import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
 import {
   BigNumber,
-  Payment,
-  EthereumAddress,
-  PublicKey,
-  PublicIdentifier,
-  PushPayment,
-  PullPayment,
+  EthereumAddress, Payment,
+  PublicIdentifier, PublicKey,
+  PullPayment, PushPayment
 } from "@interfaces/objects";
 import { EPaymentState } from "@interfaces/types";
 import { IConfigProvider, IContextProvider } from "@interfaces/utilities";
-import { Result } from "@connext/vector-types";
 
 /**
  * PaymentService uses Vector internally to send payments on the requested channel.
@@ -51,8 +48,9 @@ export class PaymentService implements IPaymentService {
     }
 
     // Now that we know we can (probably) make the payments, let's try
-    for (let paymentId in paymentIds) {
+    for (let paymentId of paymentIds) {
       try {
+        console.log(`PaymentService:acceptFunds: attempting to provide stake for payment ${paymentId}`)
         const payment = await this.paymentRepository.provideStake(paymentId);
         results.push(Result.ok(payment));
       } catch (err) {
@@ -133,7 +131,7 @@ export class PaymentService implements IPaymentService {
     const payment = payments.get(paymentId);
 
     if (payment == null) {
-      throw new Error("Could not get payment!");
+      throw new Error(`PaymentService:offerReceived():Could not get payment!`);
     }
 
     if (payment.state !== EPaymentState.Proposed) {

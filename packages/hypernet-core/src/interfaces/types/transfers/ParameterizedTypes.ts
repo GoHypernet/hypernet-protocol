@@ -9,12 +9,12 @@ export type ParameterizedState = {
   receiver: Address;
   start: string;
   expiration: string;
-  UUID: Bytes32;
+  UUID: string;
   rate: Rate;
 };
 
 export type ParameterizedResolverData = {
-  UUID: Bytes32;
+  UUID: string;
   paymentAmountTaken: string;
 };
 

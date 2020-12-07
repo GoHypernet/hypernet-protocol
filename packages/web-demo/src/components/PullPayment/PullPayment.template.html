@@ -1,11 +1,9 @@
-<div>
-  <h2>Pull Payment</h2>
-  <h2 data-bind="text: id"></h2>
+<div class="card-body">
   <table>
     <thead>
       <tr>
-        <td>Property</td>
-        <td>Value</td>
+        <td>Pull Payment</td>
+        <td data-bind="text: id"></td>
       </tr>
     </thead>
     <tbody>
@@ -20,8 +18,8 @@
       <tr>
         <td>State</td>
         <td data-bind='component: {
-                name: "payment-status",
-                params: state}'></td>
+          name: "payment-status",
+          params: state}'></td>
       </tr>
       <tr>
         <td>Payment Token</td>

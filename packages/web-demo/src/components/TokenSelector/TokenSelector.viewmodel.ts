@@ -37,6 +37,7 @@ export class TokenSelectorViewModel {
       read: () => {
         const selectedToken = this.selectedToken();
         if (selectedToken == null) {
+          console.log("No selected token.")
           return null;
         }
 
@@ -44,15 +45,19 @@ export class TokenSelectorViewModel {
 
         for (const option of options) {
           if (option.address === selectedToken) {
+            console.log(`Selected token: ${option.address}`)
             return option;
           }
         }
 
         // The selected token is not actually an option...
+        console.log("No selected token.")
         this.selectedToken(null);
         return null;
       },
+
       write: (val) => {
+        console.log(`Selected token (write) ${val}`)
         this.selectedToken(val == null ? null : val.address);
       }
     });
@@ -63,9 +68,10 @@ export class TokenSelectorViewModel {
   protected async getBalances() {
     if (this.onlyWithBalance) {
       await this.core.initialized();
-    const balances = await this.core.getBalances();
+      const balances = await this.core.getBalances();
 
       if (balances == null) {
+        console.log("No balances.")
         return [];
       }
 
@@ -79,10 +85,9 @@ export class TokenSelectorViewModel {
     }
     else {
       const eth = new PaymentTokenOption("ETH", "0x0000000000000000000000000000000000000000");
-      const test = new PaymentTokenOption("Test Token", "0xae3C262638994e968D6dfC8e58978b4301E7D51A");
+      const test = new PaymentTokenOption("Test Token", "0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0");
       this.paymentTokens([eth, test])
     }
-    
   }
 }
 

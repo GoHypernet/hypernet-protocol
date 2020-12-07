@@ -11,6 +11,7 @@ import {
 import { FullTransferState } from "@connext/vector-types";
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
 import { BrowserNode } from "@connext/vector-browser-node";
+import { IBrowserNodeProvider } from "./IBrowserNodeProvider";
 
 export interface IPaymentUtils {
   /**
@@ -57,7 +58,7 @@ export interface IPaymentUtils {
    *
    * @param transfer
    */
-  getTransferType(transfer: FullTransferState): ETransferType;
+  getTransferType(transfer: FullTransferState, browserNode: BrowserNode): Promise<ETransferType>;
 
   /**
    *

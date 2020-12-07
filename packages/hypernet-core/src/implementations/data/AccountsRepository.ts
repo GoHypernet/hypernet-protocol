@@ -1,7 +1,9 @@
-import { FullChannelState } from "@connext/vector-types";
+import { ERC20Abi, FullChannelState } from "@connext/vector-types";
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
 import { AssetBalance, Balances, BigNumber, EthereumAddress, PublicIdentifier } from "@interfaces/objects";
 import { IVectorUtils, IBlockchainProvider, IBrowserNodeProvider } from "@interfaces/utilities";
+import { Contract } from "ethers";
+import { artifacts, TestToken } from "@connext/vector-contracts"
 
 export class AccountsRepository implements IAccountsRepository {
   constructor(
@@ -25,7 +27,6 @@ export class AccountsRepository implements IAccountsRepository {
   public async getBalances(): Promise<Balances> {
     const browserNode = await this.browserNodeProvider.getBrowserNode();
     const channelAddress = await this.vectorUtils.getRouterChannelAddress();
-
     const channelStateRes = await browserNode.getStateChannel({ channelAddress });
 
     if (channelStateRes.isError) {
@@ -40,8 +41,8 @@ export class AccountsRepository implements IAccountsRepository {
         new AssetBalance(
           channelState.assetIds[i],
           BigNumber.from(channelState.balances[i].amount[1]),
-          BigNumber.from(0),
-          BigNumber.from(0),
+          BigNumber.from(0), // @todo figure out how to grab the locked amount
+          BigNumber.from(channelState.balances[i].amount[1]),
         ),
       );
     }
@@ -64,7 +65,18 @@ export class AccountsRepository implements IAccountsRepository {
     const channelAddress = await this.vectorUtils.getRouterChannelAddress();
     const browserNode = await this.browserNodeProvider.getBrowserNode();
 
-    const tx = await signer.sendTransaction({ to: channelAddress, value: amount });
+    let tx;
+
+    if (assetAddress == "0x0000000000000000000000000000000000000000") {
+      console.log('Transferring ETH.')
+      // send eth
+      tx = await signer.sendTransaction({ to: channelAddress, value: amount });
+    } else {
+      console.log('Transferring an ERC20 asset.')
+      // send an actual erc20 token
+      let tokenContract = new Contract(assetAddress, ERC20Abi, signer)
+      tx = await tokenContract.transfer(channelAddress, amount)
+    }
 
     // TODO: Wait on this, break it up, this could take a while
     await tx.wait();
@@ -79,6 +91,7 @@ export class AccountsRepository implements IAccountsRepository {
       console.log(depositRes.getError());
       throw new Error("Deposit can not be reconciled");
     }
+    
     const deposit = depositRes.getValue();
 
     if (deposit.channelAddress !== channelAddress) {
@@ -99,13 +112,14 @@ export class AccountsRepository implements IAccountsRepository {
     });
   }
 
-  public async mintTestToken(amount: BigNumber): Promise<void> {
+  public async mintTestToken(amount: BigNumber, to: EthereumAddress): Promise<void> {
     const [provider, signer] = await Promise.all([
       this.blockchainProvider.getProvider(),
       await this.blockchainProvider.getSigner(),
     ]);
 
-    // TODO: Mint tokens here
-    alert("Caleb needs to implement this y'all!");
+    const testTokenContract = new Contract("0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0", artifacts['TestToken'].abi, signer)
+    let mintTx = await testTokenContract.mint(to, amount)
+    await mintTx.wait()
   }
 }

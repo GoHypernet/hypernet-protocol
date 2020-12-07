@@ -3,6 +3,9 @@ import { IAccountsRepository } from "@interfaces/data";
 import { Balances, BigNumber, PublicIdentifier } from "@interfaces/objects";
 import { IContextProvider } from "@interfaces/utilities";
 
+/**
+ * 
+ */
 export class AccountService implements IAccountService {
   constructor(protected accountRepository: IAccountsRepository, protected contextProvider: IContextProvider) {}
 
@@ -18,6 +21,8 @@ export class AccountService implements IAccountService {
   }
   public async depositFunds(assetAddress: string, amount: BigNumber): Promise<Balances> {
     const context = await this.contextProvider.getInitializedContext();
+
+    console.log(`HypernetCore:depositFunds:assetAddress:${assetAddress}`)
     await this.accountRepository.depositFunds(assetAddress, amount);
 
     const balances = await this.accountRepository.getBalances();

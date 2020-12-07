@@ -1,10 +1,13 @@
 import { FullChannelState, NodeParams, OptionalPublicIdentifier, NodeResponses } from "@connext/vector-types";
-import { BigNumber, IHypernetTransferMetadata, PullAmount } from "@interfaces/objects";
+import { BigNumber, IHypernetTransferMetadata, PublicIdentifier, PullAmount } from "@interfaces/objects";
 import { IBrowserNodeProvider, IContextProvider, IVectorUtils, IConfigProvider } from "@interfaces/utilities";
 import { EPaymentType, InsuranceState, MessageState, ParameterizedState } from "@interfaces/types";
 import { serialize } from "class-transformer";
 import { ethers } from "ethers";
 import { Rate } from "@interfaces/types/transfers/ParameterizedTypes";
+import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils/dist/identifiers";
+import { formatBytes32String } from "ethers/lib/utils";
+import { PaymentIdUtils } from "./PaymentUtils";
 
 export class VectorUtils implements IVectorUtils {
   protected channelAddress: string | null;
@@ -30,7 +33,9 @@ export class VectorUtils implements IVectorUtils {
   }
 
   /**
-   *
+   * Creates a "Message" transfer with Vector.
+   * @param toAddress the public identifier (not eth address!) of the intended recipient
+   * @param message the message to send as IHypernetTransferMetadata
    */
   public async createMessageTransfer(
     toAddress: string,
@@ -39,6 +44,9 @@ export class VectorUtils implements IVectorUtils {
     const browserNode = await this.browserNodeProvider.getBrowserNode();
     const channelAddress = await this.getRouterChannelAddress();
     const config = await this.configProvider.getConfig();
+
+    // Sanity check - make sure the paymentId is valid:
+    if (!PaymentIdUtils.isValidPaymentId(message.paymentId)) throw new Error(`CreateMessageTransfer: Invalid paymentId: '${message.paymentId}'`)
 
     let initialState: MessageState = {
       message: serialize(message),
@@ -71,17 +79,22 @@ export class VectorUtils implements IVectorUtils {
   }
 
   /**
-   *
-   * @param amount the amount of payment to send
-   * @param assetAddress the address of the asset to send
-   * @returns a NodeResponses.ConditionalTransfer event, which contains the channel address and the transfer ID
+   * Creates a "Parameterized" transfer with Vector.
+   * @param type "PUSH" or "PULL"
+   * @param toAddress the public identifier of the intended recipient of this transfer
+   * @param amount the amount of tokens to commit to this transfer
+   * @param assetAddress the address of the ERC20-token to transfer; zero-address for ETH
+   * @param paymentIda length-64 hexadecimal string; this becomes the UUID component of the InsuranceState
+   * @param start the start time of this transfer (UNIX timestamp)
+   * @param expiration the expiration time of this transfer (UNIX timestamp)
+   * @param rate the maximum allowed rate of this transfer (deltaAmount/deltaTime)
    */
   public async createPaymentTransfer(
     type: EPaymentType,
-    toAddress: string,
+    toAddress: PublicIdentifier,
     amount: BigNumber,
     assetAddress: string,
-    UUID: string,
+    paymentId: string,
     start: string,
     expiration: string,
     rate?: Rate,
@@ -89,10 +102,14 @@ export class VectorUtils implements IVectorUtils {
     const browserNode = await this.browserNodeProvider.getBrowserNode();
     const channelAddress = await this.getRouterChannelAddress();
     const config = await this.configProvider.getConfig();
+    const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress)
 
     if (type == EPaymentType.Pull && rate == null) {
       throw new Error("Must provide rate for PullPaymentTransfer");
     }
+
+    // Sanity check - make sure the paymentId is valid:
+    if (!PaymentIdUtils.isValidPaymentId(paymentId)) throw new Error(`CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`)
 
     let infinite_rate = {
       deltaAmount: ethers.constants.MaxUint256.toString(),
@@ -100,20 +117,22 @@ export class VectorUtils implements IVectorUtils {
     };
 
     let initialState: ParameterizedState = {
-      receiver: toAddress,
+      receiver: toEthAddress,
       start: start,
       expiration: expiration,
-      UUID: UUID,
+      UUID: paymentId,
       rate: type == EPaymentType.Push ? infinite_rate : (rate as Rate),
     };
 
     // Create transfer params
     let transferParams = {
+      recipient: toAddress,
       channelAddress: channelAddress,
       amount: amount.toString(),
       assetId: assetAddress,
       type: "Parameterized",
       details: initialState,
+      meta: {} // intentially left blank!
     } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
 
     let transfer = await browserNode.conditionalTransfer(transferParams);
@@ -128,36 +147,48 @@ export class VectorUtils implements IVectorUtils {
   }
 
   /**
-   *
+   * Creates the actual Insurance transfer with Vector
+   * @param toAddress the publicIdentifier of the person to send the transfer to
+   * @param mediatorAddress the Ethereum address of the mediator
+   * @param amount the amount of the token to commit into the InsuranceTransfer
+   * @param expiration the expiration date of this InsuranceTransfer
+   * @param paymentId a length-64 hexadecimal string; this becomes the UUID component of the InsuranceState
    */
   public async createInsuranceTransfer(
-    toAddress: string,
+    toAddress: PublicIdentifier,
     mediatorAddress: string,
     amount: BigNumber,
     expiration: string,
-    UUID: string,
+    paymentId: string
   ): Promise<NodeResponses.ConditionalTransfer> {
     const browserNode = await this.browserNodeProvider.getBrowserNode();
     const channelAddress = await this.getRouterChannelAddress();
     const config = await this.configProvider.getConfig();
+    const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress)
+
+    // Sanity check - make sure the paymentId is valid:
+    if (!PaymentIdUtils.isValidPaymentId(paymentId)) throw new Error(`CreateInsuranceTransfer: Invalid paymentId: '${paymentId}'`)
 
     let initialState: InsuranceState = {
-      receiver: toAddress,
+      receiver: toEthAddress,
       mediator: mediatorAddress,
       collateral: amount.toString(),
       expiration: expiration,
-      UUID: UUID,
+      UUID: paymentId
     };
 
     // Create transfer params
     let transferParams = {
+      recipient: toAddress,
       channelAddress: channelAddress,
       amount: amount.toString(),
       assetId: config.hypertokenAddress,
       type: "Insurance",
       details: initialState,
+      meta: {} // left intentionally blank!
     } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
 
+    console.log(`CreateInsuranceTransfer transferParams: ${JSON.stringify(transferParams)}`)
     let transfer = await browserNode.conditionalTransfer(transferParams);
 
     if (transfer.isError) {

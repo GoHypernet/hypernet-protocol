@@ -32,11 +32,13 @@ export class ActionsViewModel {
 
     this.depositFundsButton = new ButtonParams("Deposit Funds", async () => {
       const selectedToken = this.tokenSelector.selectedToken();
+      
 
       if (selectedToken == null) {
         return;
       }
 
+      console.log(`Selected token for deposit: ${selectedToken}`)
       await this.core.depositFunds(selectedToken, ethers.utils.parseEther("1"));
       //this.message("Deposited 1 ETH into router channel");
     });

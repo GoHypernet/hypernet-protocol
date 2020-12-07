@@ -35,9 +35,10 @@
   },
   "dependencies": {
     "3box": "^1.22.2",
-    "@connext/vector-browser-node": "^0.0.20",
-    "@connext/vector-types": "^0.0.20",
-    "@connext/vector-utils": "^0.0.20",
+    "@connext/vector-browser-node": "^0.0.23",
+    "@connext/vector-contracts": "^0.0.23",
+    "@connext/vector-types": "^0.0.23",
+    "@connext/vector-utils": "^0.0.23",
     "@metamask/detect-provider": "^1.1.0",
     "@types/pino": "^6.3.2",
     "bignumber": "^1.1.0",

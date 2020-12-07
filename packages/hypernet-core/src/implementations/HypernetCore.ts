@@ -30,7 +30,7 @@ import {
   ConfigProvider,
   EthersBlockchainProvider,
   BrowserNodeProvider,
-  VectorUtils,
+  VectorUtils
 } from "@implementations/utilities";
 import { IPaymentRepository, ILinkRepository, IAccountsRepository } from "@interfaces/data";
 import { ILinkUtils, IBrowserNodeProvider } from "@interfaces/utilities";
@@ -166,6 +166,7 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public async depositFunds(assetAddress: string, amount: BigNumber): Promise<Balances> {
+    console.log(`HypernetCore:depositFunds:assetAddress:${assetAddress}`)
     return this.accountService.depositFunds(assetAddress, amount);
   }
 
@@ -232,6 +233,7 @@ export class HypernetCore implements IHypernetCore {
    * @param paymentId
    */
   public async acceptFunds(paymentIds: string[]): Promise<Result<Payment, Error>[]> {
+    console.log(`HypernetCore:acceptFunds: attempting to accept funds for paymentIds: ${paymentIds}`)
     const results = await this.paymentService.acceptFunds(paymentIds);
 
     return results;
@@ -284,6 +286,12 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public async mintTestToken(amount: BigNumber): Promise<void> {
-    this.developmentService.mintTestToken(amount);
+    let account = (await this.contextProvider.getContext()).account
+
+    if (account === null) {
+      throw new Error('Need an account to send funds to!')
+    }
+
+    this.developmentService.mintTestToken(amount, account);
   }
 }
