@@ -392,6 +392,7 @@ export class PaymentUtils implements IPaymentUtils {
 
     // If the transfer address is not one we know, we don't know what this is
     if (!transferMap.has(transfer.transferDefinition)) {
+      console.log(`Transfer type not recognized. Transfer definition: ${transfer.transferDefinition}, transferMap: ${JSON.stringify(transferMap)}`)
       return ETransferType.Unrecognized
     } else {
       // This is a transfer we know about, but not necessarily one we want.
@@ -431,25 +432,39 @@ export class PaymentUtils implements IPaymentUtils {
     // let inactiveTransfers = await browserNode.getTransfers((transfer) => {return transfer.meta.paymentId == fullPaymentId;});
     // transfers.concat(inactiveTransfers);
 
-    const offerTransfers = transfers.filter(async (val) => {
-      return (await this.getTransferType(val, browserNode)) === ETransferType.Offer;
-    });
+    let offerTransfers: FullTransferState[] = []
+    let insuranceTransfers: FullTransferState[] = []
+    let parameterizedTransfers: FullTransferState[] = []
+    let pullTransfers: FullTransferState[] = []
+    let unrecognizedTransfers: FullTransferState[] = []
 
-    const insuranceTransfers = transfers.filter(async (val) => {
-      return (await this.getTransferType(val, browserNode)) === ETransferType.Insurance;
-    });
+    for (let transfer of transfers) {
+      let transferType = await this.getTransferType(transfer, browserNode)
 
-    const parameterizedTransfers = transfers.filter(async (val) => {
-      return (await this.getTransferType(val, browserNode)) === ETransferType.Parameterized;
-    });
+      if (transferType === ETransferType.Offer) {
+        offerTransfers.push(transfer)
+      } else if (transferType === ETransferType.Insurance) {
+        insuranceTransfers.push(transfer)
+      } else if (transferType === ETransferType.Parameterized) {
+        parameterizedTransfers.push(transfer)
+      } else if (transferType === ETransferType.PullRecord) {
+        pullTransfers.push(transfer)
+      } else if (transferType === ETransferType.Unrecognized) {
+        unrecognizedTransfers.push(transfer)
+      } else {
+        throw new Error('Unreachable code reached!')
+      }
+    }
 
-    const pullTransfers = transfers.filter(async (val) => {
-      return (await this.getTransferType(val, browserNode)) === ETransferType.PullRecord;
-    });
+    console.log(`
+      PaymentUtils:sortTransfers
 
-    const unrecognizedTransfers = transfers.filter(async (val) => {
-      return (await this.getTransferType(val, browserNode)) === ETransferType.Unrecognized;
-    });
+      offerTransfers: ${offerTransfers.length}
+      insuranceTransfers: ${insuranceTransfers.length}
+      parameterizedTransfers: ${parameterizedTransfers.length}
+      pullTransfers: ${pullTransfers.length}
+      unrecognizedTransfers: ${unrecognizedTransfers.length}
+    `)
 
     if (unrecognizedTransfers.length > 0) {
       throw new Error("Payment includes unrecognized transfer types!");
