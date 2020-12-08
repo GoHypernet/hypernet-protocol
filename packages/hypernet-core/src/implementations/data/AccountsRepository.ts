@@ -3,27 +3,44 @@ import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
 import { AssetBalance, Balances, BigNumber, EthereumAddress, PublicIdentifier } from "@interfaces/objects";
 import { IVectorUtils, IBlockchainProvider, IBrowserNodeProvider } from "@interfaces/utilities";
 import { Contract } from "ethers";
-import { artifacts, TestToken } from "@connext/vector-contracts"
+import { artifacts } from "@connext/vector-contracts"
 
+/**
+ * Contains methods for getting Ethereum accounts, public identifiers,
+ * balances for accounts, and depositing & withdrawing assets.
+ */
 export class AccountsRepository implements IAccountsRepository {
+
+  /**
+   * Retrieves an instances of the AccountsRepository.
+   */
   constructor(
     protected blockchainProvider: IBlockchainProvider,
     protected vectorUtils: IVectorUtils,
     protected browserNodeProvider: IBrowserNodeProvider,
   ) {}
 
+  /**
+   * Get the current public identifier for this instance.
+   */
   public async getPublicIdentifier(): Promise<PublicIdentifier> {
     const browserNode = await this.browserNodeProvider.getBrowserNode();
 
     return browserNode.publicIdentifier;
   }
 
+  /**
+   * Get the Ethereum accounts associated with this instance.
+   */
   public async getAccounts(): Promise<string[]> {
     const provider = await this.blockchainProvider.getProvider();
 
     return await provider.listAccounts();
   }
 
+  /**
+   * Get all balances associated with this instance.
+   */
   public async getBalances(): Promise<Balances> {
     const browserNode = await this.browserNodeProvider.getBrowserNode();
     const channelAddress = await this.vectorUtils.getRouterChannelAddress();
@@ -49,6 +66,10 @@ export class AccountsRepository implements IAccountsRepository {
     return new Balances(assetBalances);
   }
 
+  /**
+   * Get balance for a particular asset for this instance
+   * @param assetAddress the (Ethereum) address of the token to get the balance of
+   */
   public async getBalanceByAsset(assetAddress: EthereumAddress): Promise<AssetBalance> {
     const balances = await this.getBalances();
 
@@ -60,6 +81,11 @@ export class AccountsRepository implements IAccountsRepository {
     return new AssetBalance(assetAddress, BigNumber.from(0), BigNumber.from(0), BigNumber.from(0));
   }
 
+  /**
+   * Deposit funds into this instance of Hypernet Core
+   * @param assetAddress the (Ethereum) token address to deposit
+   * @param amount the amount of the token to deposit
+   */
   public async depositFunds(assetAddress: EthereumAddress, amount: BigNumber): Promise<void> {
     const signer = await this.blockchainProvider.getSigner();
     const channelAddress = await this.vectorUtils.getRouterChannelAddress();
@@ -99,6 +125,12 @@ export class AccountsRepository implements IAccountsRepository {
     }
   }
 
+  /**
+   * Withdraw funds from this instance of Hypernet Core to a specified (Ethereum) destination
+   * @param assetAddress the token address to withdraw
+   * @param amount the amount of the token to withdraw
+   * @param destinationAddress the destination (Ethereum) address to withdraw to
+   */
   public async withdrawFunds(assetAddress: string, amount: BigNumber, destinationAddress: string): Promise<void> {
     const channelAddress = await this.vectorUtils.getRouterChannelAddress();
     const browserNode = await this.browserNodeProvider.getBrowserNode();
@@ -112,6 +144,11 @@ export class AccountsRepository implements IAccountsRepository {
     });
   }
 
+  /**
+   * Mint the test token to the provided address
+   * @param amount the amount of the test token to mint
+   * @param to the (Ethereum) address to mint the test token to
+   */
   public async mintTestToken(amount: BigNumber, to: EthereumAddress): Promise<void> {
     const [provider, signer] = await Promise.all([
       this.blockchainProvider.getProvider(),

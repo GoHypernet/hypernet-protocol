@@ -8,9 +8,16 @@ import { Rate } from "@interfaces/types/transfers/ParameterizedTypes";
 import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils/dist/identifiers";
 import { PaymentIdUtils } from "./PaymentUtils";
 
+/**
+ * VectorUtils contains methods for interacting directly with the core Vector stuff - 
+ * creating transfers, resolving them, & dealing the with router channel.
+ */
 export class VectorUtils implements IVectorUtils {
   protected channelAddress: string | null;
 
+  /**
+   * Creates an instance of VectorUtils
+   */
   constructor(
     protected configProvider: IConfigProvider,
     protected contextProvider: IContextProvider,
@@ -19,14 +26,26 @@ export class VectorUtils implements IVectorUtils {
     this.channelAddress = null;
   }
 
+  /**
+   * Resolves a message/offer/null transfer with Vector.
+   * @param transferId the ID of the transfer to resolve
+   */
   public async resolveMessageTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer> {
     throw new Error("Method not yet implemented.");
   }
 
+  /**
+   * Resolves a parameterized payment transfer with Vector.
+   * @param transferId the ID of the transfer to resolve
+   */
   public async resolvePaymentTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer> {
     throw new Error("Method not yet implemented.");
   }
 
+  /**
+   * Resolves an insurance transfer with Vector.
+   * @param transferId the ID of the tarnsfer to resolve
+   */
   public async resolveInsuranceTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer> {
     throw new Error("Method not yet implemented.");
   }
@@ -200,7 +219,8 @@ export class VectorUtils implements IVectorUtils {
   }
 
   /**
-   *
+   * Returns the address of the channel with the router, if exists.
+   * Otherwise, attempts to create a channel with the router & return the address.
    */
   public async getRouterChannelAddress(): Promise<string> {
     // If we already have the address, no need to do the rest

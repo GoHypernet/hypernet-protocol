@@ -2,21 +2,24 @@ import { FullTransferState } from "@connext/vector-types";
 import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
 import {
   BigNumber, EthereumAddress, IHypernetTransferMetadata,
-  Payment,
-  PublicIdentifier, PublicKey, PullPayment,
-  PushPayment
+  Payment, PublicIdentifier, PublicKey, PullPayment, PushPayment
 } from "@interfaces/objects";
 import { EPaymentType } from "@interfaces/types";
 import {
-  IBrowserNodeProvider,
-  IConfigProvider,
-  IContextProvider,
-  IPaymentUtils,
-  IVectorUtils
+  IBrowserNodeProvider, IConfigProvider,
+  IContextProvider, IPaymentUtils, IVectorUtils
 } from "@interfaces/utilities";
 import moment from "moment";
 
+/**
+ * Contains methods for creating push, pull, etc payments,
+ * as well as retrieving them, and finalizing them.
+ */
 export class PaymentRepository implements IPaymentRepository {
+
+  /**
+   * Returns an instance of PaymentRepository
+   */
   constructor(
     protected browserNodeProvider: IBrowserNodeProvider,
     protected vectorUtils: IVectorUtils,
@@ -29,12 +32,12 @@ export class PaymentRepository implements IPaymentRepository {
    * Creates a push payment and returns it. Nothing moves until
    * the payment is accepted; the payment will return with the
    * "PROPOSED" status. This function just creates an OfferTransfer.
-   * @param counterPartyAccount
-   * @param amount
-   * @param expirationDate
-   * @param requiredStake
-   * @param paymentToken
-   * @param disputeMediator
+   * @param counterPartyAccount the public identifier of the account to pay
+   * @param amount the amount to pay the counterparty
+   * @param expirationDate the date (in unix time) at which point the payment will expire & revert
+   * @param requiredStake the amount of insurance the counterparty must put up for this payment
+   * @param paymentToken the (Ethereum) address of the payment token
+   * @param disputeMediator the (Ethereum) address of the dispute mediator
    */
   public async createPushPayment(
     counterPartyAccount: PublicIdentifier,
@@ -81,8 +84,8 @@ export class PaymentRepository implements IPaymentRepository {
   }
 
   /**
-   *
-   * @param paymentIds
+   * Given a list of payment Ids, return the associated payments.
+   * @param paymentIds the list of payments to get
    */
   public async getPaymentsByIds(paymentIds: string[]): Promise<Map<string, Payment>> {
     const browserNodePromise = await this.browserNodeProvider.getBrowserNode();
@@ -129,6 +132,7 @@ export class PaymentRepository implements IPaymentRepository {
 
   /**
    * Singular version of getPaymentsByIds
+   * @param paymentId the payment to get
    */
   public async getPaymentById(paymentId: string): Promise<Payment> {
     let payments = await this.getPaymentsByIds([paymentId]);
@@ -145,7 +149,7 @@ export class PaymentRepository implements IPaymentRepository {
    * Finalizes/confirms a payment
    * Internally, this is what actually calls resolve() on the Vector transfer -
    * be it a insurancePayments or parameterizedPayments.
-   * @param paymentId
+   * @param paymentId the payment to finalize
    */
   public async finalizePayment(paymentId: string): Promise<Payment> {
     let browserNode = await this.browserNodeProvider.getBrowserNode();
@@ -158,7 +162,7 @@ export class PaymentRepository implements IPaymentRepository {
   /**
    * Provides stake for a given payment id
    * Internally, this is what actually creates the InsurancePayments with Vector.
-   * @param paymentId
+   * @param paymentId the payment for which to provide stake for
    */
   public async provideStake(paymentId: string): Promise<Payment> {
     let browserNode = await this.browserNodeProvider.getBrowserNode();
@@ -198,7 +202,7 @@ export class PaymentRepository implements IPaymentRepository {
    * Singular version of provideAssets
    * Internally, creates a parameterizedPayment with Vector,
    * and returns a payment of state 'Approved'
-   * @param paymentId
+   * @param paymentId the payment for which to provide an asset for
    */
   public async provideAsset(paymentId: string): Promise<Payment> {
     let browserNode = await this.browserNodeProvider.getBrowserNode();

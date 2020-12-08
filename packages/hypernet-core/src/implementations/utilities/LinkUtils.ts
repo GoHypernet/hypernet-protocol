@@ -1,14 +1,19 @@
-import { HypernetLink, InitializedHypernetContext, Payment, PublicIdentifier, PullPayment, PushPayment } from "@interfaces/objects";
+import { 
+  HypernetLink, InitializedHypernetContext, 
+  Payment, PublicIdentifier, PullPayment, PushPayment
+ } from "@interfaces/objects";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
 
+/**
+ * Provides functions to go from a set of payments into a set of HypernetLinks, and similar.
+ */
 export class LinkUtils implements ILinkUtils {
+
   /**
-   * Given an array of Vector transfers, return the corresponding Hypernet Payments.
+   * Given an array of Payment objects, return the corresponding Hypernet Links
    * Internally, calls transfersToPayments()
-   * @param payments
-   * @param config
-   * @param context
-   * @param browserNode
+   * @param payments the payments to get the associated Links for
+   * @param context instance of HypernetContext
    */
   public async paymentsToHypernetLinks(
     payments: Payment[],

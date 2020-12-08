@@ -1,16 +1,20 @@
 import { FullTransferState } from "@connext/vector-types";
 import { ILinkRepository } from "@interfaces/data";
-import { HypernetLink, Payment, PublicIdentifier } from "@interfaces/objects";
+import { HypernetLink, PublicIdentifier } from "@interfaces/objects";
 import {
-  IBrowserNodeProvider,
-  IConfigProvider,
-  IContextProvider,
-  IPaymentUtils,
-  IVectorUtils,
+  IBrowserNodeProvider, IConfigProvider,
+  IContextProvider, IPaymentUtils, IVectorUtils,
 } from "@interfaces/utilities";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
 
+/**
+ * Provides methods for retrieving Hypernet Links.
+ */
 export class VectorLinkRepository implements ILinkRepository {
+
+  /**
+   * Get an instance of the VectorLinkRepository
+   */
   constructor(
     protected browserNodeProvider: IBrowserNodeProvider,
     protected configProvider: IConfigProvider,
