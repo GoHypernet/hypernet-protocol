@@ -43,5 +43,5 @@ export interface IPaymentRepository {
    * be it a insurancePayments or parameterizedPayments.
    * @param paymentId
    */
-  finalizePayment(paymentId: string): Promise<Payment>;
+  finalizePayment(paymentId: string, amount: string): Promise<Payment>;
 }

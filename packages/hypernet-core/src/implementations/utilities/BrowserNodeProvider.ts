@@ -3,6 +3,7 @@ import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 import { BrowserNode, BrowserNodeConfig } from "@connext/vector-browser-node";
 import pino from "pino";
 import { IContextProvider } from "@interfaces/utilities";
+import { NodeResponses } from "@connext/vector-types";
 
 export class BrowserNodeProvider implements IBrowserNodeProvider {
   protected logger: pino.Logger;

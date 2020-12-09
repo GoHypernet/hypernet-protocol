@@ -29,6 +29,8 @@ export class PushPaymentViewModel {
   public showAcceptButton: ko.PureComputed<boolean>;
   public sendButton: ButtonParams;
   public showSendButton: ko.PureComputed<boolean>;
+  public finalizeButton: ButtonParams;
+  public showFinalizeButton: ko.PureComputed<boolean>;
 
   protected core: IHypernetCore;
   protected paymentId: string;
@@ -92,6 +94,16 @@ export class PushPaymentViewModel {
 
     this.showSendButton = ko.pureComputed(() => {
       return this.state().state === EPaymentState.Staked;
+    });
+
+    this.finalizeButton = new ButtonParams("Finalize", async () => {
+      console.log(`Attempting to finalize payment ${this.paymentId}`)
+      await this.core.finalizePushPayment(this.paymentId)
+      // @todo change return type of this after we change internal return types of core
+    });
+
+    this.showFinalizeButton = ko.pureComputed(() => {
+      return this.state().state === EPaymentState.Approved;
     });
   }
 }

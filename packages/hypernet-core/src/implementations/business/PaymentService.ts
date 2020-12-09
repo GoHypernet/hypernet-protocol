@@ -178,7 +178,8 @@ export class PaymentService implements IPaymentService {
 
   /**
    * Notifies the service that the parameterized payment has been created.
-   * Called by the reciever of a parameterized transfer, AFTER they have put up stake
+   * Called by the reciever of a parameterized transfer, AFTER they have put up stake,
+   * and after the sender has created the Parameterized transfer
    * @param paymentId the payment ID to accept/resolve
    */
   public async paymentPosted(paymentId: string): Promise<void> {
@@ -192,8 +193,8 @@ export class PaymentService implements IPaymentService {
 
     // If the payment state is approved, we know that it matches our insurance payment
     if (payment instanceof PushPayment) {
-      // Resolve the parameterized payment immediately
-      await this.paymentRepository.finalizePayment(paymentId);
+      // Resolve the parameterized payment immediately for the full balnce
+      await this.paymentRepository.finalizePayment(paymentId, payment.paymentAmount.toString());
     } else if (payment instanceof PullPayment) {
       // Notify the user that the funds have been approved.
       const context = await this.contextProvider.getContext();
