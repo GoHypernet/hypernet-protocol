@@ -396,7 +396,7 @@ export class PaymentUtils implements IPaymentUtils {
       return ETransferType.Unrecognized
     } else {
       // This is a transfer we know about, but not necessarily one we want.
-      // Narrow down to insurance, parameterized, or messagetransfer
+      // Narrow down to insurance, parameterized, or  offer/messagetransfer
       let thisTransfer = transferMap.get(transfer.transferDefinition)
       if (thisTransfer == null) throw new Error('Transfer type not unrecognized, but not in transfer map!')
 

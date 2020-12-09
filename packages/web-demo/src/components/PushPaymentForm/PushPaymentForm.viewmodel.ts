@@ -59,7 +59,7 @@ export class PushPaymentFormViewModel {
             expirationDate,
             requiredStake,
             selectedPaymentTokenAddress,
-            "0x0000000000000000000000000000000000000000", // @todo replace with an actual mediator address!
+            "0x0000000000000000000000000000000000000001", // @todo replace with an actual mediator address!
           );
         } catch {
           return null;

@@ -1,4 +1,4 @@
-import { FullChannelState, NodeParams, OptionalPublicIdentifier, NodeResponses } from "@connext/vector-types";
+import { FullChannelState, NodeParams, OptionalPublicIdentifier, NodeResponses, DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
 import { BigNumber, IHypernetTransferMetadata, PublicIdentifier, PullAmount } from "@interfaces/objects";
 import { IBrowserNodeProvider, IContextProvider, IVectorUtils, IConfigProvider } from "@interfaces/utilities";
 import { EPaymentType, InsuranceState, MessageState, ParameterizedState } from "@interfaces/types";
@@ -206,7 +206,7 @@ export class VectorUtils implements IVectorUtils {
       meta: {} // left intentionally blank!
     } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
 
-    console.log(`CreateInsuranceTransfer transferParams: ${JSON.stringify(transferParams)}`)
+    console.log(`CreateInsuranceTransfer transferParams: ${transferParams.toString()}`)
     let transfer = await browserNode.conditionalTransfer(transferParams);
 
     if (transfer.isError) {
@@ -282,7 +282,7 @@ export class VectorUtils implements IVectorUtils {
     const setupResult = await browserNode.setup({
       chainId: 1337,
       counterpartyIdentifier: config.routerPublicIdentifier,
-      timeout: "86400",
+      timeout: DEFAULT_CHANNEL_TIMEOUT.toString()
     });
 
     if (setupResult.isError) {

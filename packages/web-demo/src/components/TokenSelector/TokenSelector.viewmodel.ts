@@ -45,19 +45,19 @@ export class TokenSelectorViewModel {
 
         for (const option of options) {
           if (option.address === selectedToken) {
-            console.log(`Selected token: ${option.address}`)
+            // console.log(`Selected token: ${option.address}`)
             return option;
           }
         }
 
         // The selected token is not actually an option...
-        console.log("No selected token.")
+        // console.log("No selected token.")
         this.selectedToken(null);
         return null;
       },
 
       write: (val) => {
-        console.log(`Selected token (write) ${val}`)
+        // console.log(`Selected token (write) ${val}`)
         this.selectedToken(val == null ? null : val.address);
       }
     });

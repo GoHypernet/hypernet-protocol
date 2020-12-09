@@ -118,12 +118,12 @@ export class PaymentRepository implements IPaymentRepository {
 
     for (let transfer of activeTransfers) {
       if (transfer.meta && paymentIds.includes(transfer.meta.paymentId)) {
-        relevantTransfers.push(transfer as FullTransferState)
+        relevantTransfers.push(transfer)
       } else {
-        let transferType = await this.paymentUtils.getTransferType(transfer as FullTransferState, browserNode)
+        let transferType = await this.paymentUtils.getTransferType(transfer, browserNode)
         if (transferType == ETransferType.Insurance || transferType == ETransferType.Parameterized) {
-          if (paymentIds.includes(transfer.transferState.uuid)) {
-            relevantTransfers.push(transfer as FullTransferState)
+          if (paymentIds.includes(transfer.transferState.UUID)) {
+            relevantTransfers.push(transfer)
           } else {
             console.log(`Transfer not relevant in PaymentRepository, transferId: ${transfer.transferId}`)
           }
@@ -136,7 +136,7 @@ export class PaymentRepository implements IPaymentRepository {
     // console.log(`PaymentRepository: getPaymentsByIds: activeTransfersLength: ${activeTransfers.length}`)
 
     const payments = await this.paymentUtils.transfersToPayments(
-      relevantTransfers as FullTransferState[],
+      relevantTransfers,
       config,
       context,
       browserNode,

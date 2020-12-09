@@ -148,6 +148,16 @@ export class PaymentService implements IPaymentService {
   }
 
   /**
+   * Plural version of stakePosted.
+   * @param paymentIds the list of paymentIds to notify the service about
+   */
+  public async stakesPosted(paymentIds: string[]): Promise<void> {
+    paymentIds.forEach(paymentId => {
+      this.stakePosted(paymentId);
+    });
+  }
+
+  /**
    * Notifies the service that a stake has been posted; if verified,
    * then provides assets to the counterparty (ie a parameterizedPayment)
    * @param paymentId the paymentId for the stake

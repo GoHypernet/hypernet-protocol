@@ -27,6 +27,8 @@ export class PushPaymentViewModel {
   public paymentAmount: ko.Observable<string>;
   public acceptButton: ButtonParams;
   public showAcceptButton: ko.PureComputed<boolean>;
+  public sendButton: ButtonParams;
+  public showSendButton: ko.PureComputed<boolean>;
 
   protected core: IHypernetCore;
   protected paymentId: string;
@@ -72,6 +74,24 @@ export class PushPaymentViewModel {
 
     this.showAcceptButton = ko.pureComputed(() => {
       return this.state().state === EPaymentState.Proposed;
+    });
+
+    this.sendButton = new ButtonParams("Send", async () => {
+      console.log(`Attempting to send funds for payment ${this.paymentId}`)
+      await this.core.completePayments([this.paymentId])
+      //const payments = await this.core.completePayments([this.paymentId])
+      
+      // @todo changge this after we change the return type of completePayments & stakePosted
+      /*const payment = payments[0];
+      if (payment.isError) {
+        console.error(`Error getting payment with ID ${this.paymentId}: ${payment.getError()}`);
+        throw payment.getError()
+      }
+      this.state(new PaymentStatusParams(payment.getValue().state));*/
+    });
+
+    this.showSendButton = ko.pureComputed(() => {
+      return this.state().state === EPaymentState.Staked;
     });
   }
 }

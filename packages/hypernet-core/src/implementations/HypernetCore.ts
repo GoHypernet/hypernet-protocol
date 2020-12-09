@@ -267,10 +267,23 @@ export class HypernetCore implements IHypernetCore {
    * @param paymentId
    */
   public async acceptFunds(paymentIds: string[]): Promise<Result<Payment, Error>[]> {
-    console.log(`HypernetCore:acceptFunds: attempting to accept funds for paymentIds: ${paymentIds}`)
+    // console.log(`HypernetCore:acceptFunds: attempting to accept funds for paymentIds: ${paymentIds}`)
     const results = await this.paymentService.acceptFunds(paymentIds);
 
     return results;
+  }
+
+  /**
+   * Sends the parameterized payment internally for payments in state "Staked".
+   * Internally, calls paymentService.stakePosted()
+   * @param paymentIds the list of payment ids for which to complete the payments for
+   */
+  public async completePayments(paymentIds: string[]): Promise<void> {
+    await this.paymentService.stakesPosted(paymentIds)
+    //const results = await this.paymentService.stakesPosted(paymentIds);
+
+    // @todo change return type to Promise<Result<Payment, Error>[]>
+    // (note that this will require us to also change the underlying stakePosted function in paymentService!)
   }
 
   /**

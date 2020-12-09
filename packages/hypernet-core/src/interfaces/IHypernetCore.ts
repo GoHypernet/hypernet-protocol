@@ -131,6 +131,13 @@ export interface IHypernetCore {
   acceptFunds(paymentIds: string[]): Promise<Result<Payment, Error>[]>;
 
   /**
+   * Sends the parameterized payment internally for payments in state "Staked".
+   * Internally, calls paymentService.stakePosted()
+   * @param paymentIds the list of payment ids for which to complete the payments for
+   */
+  completePayments(paymentIds: string[]): Promise<void>
+
+  /**
    * Pulls an incremental amount from an authorized payment
    * @param paymentId: The authorized payment ID to pull from.
    * @param amount: The amount to pull. The token type has already been baked in.

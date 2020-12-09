@@ -47,6 +47,12 @@ export interface IPaymentService {
   pullRecorded(paymentId: string): Promise<void>;
 
   /**
+   * Plural version of stakePosted.
+   * @param paymentIds the payment ids to notify the service about
+   */
+  stakesPosted(paymentIds: string[]): Promise<void>
+
+  /**
    * Notify the service that a stake has been created/posted.
    * @param paymentId
    */
