@@ -86,7 +86,7 @@ export class VectorLinkRepository implements ILinkRepository {
     }
 
     const activeTransfers = activeTransfersRes.getValue().filter((val) => {
-      return val.meta.to === counterpartyId || val.meta.from === counterpartyId;
+      return val.responder === counterpartyId || val.initiator === counterpartyId;
     });
 
     // Because of the filter above, this should only produce a single link

@@ -4,7 +4,7 @@ import {
   BigNumber, EthereumAddress, IHypernetTransferMetadata,
   Payment, PublicIdentifier, PublicKey, PullPayment, PushPayment
 } from "@interfaces/objects";
-import { EPaymentType } from "@interfaces/types";
+import { EPaymentType, ETransferType } from "@interfaces/types";
 import {
   IBrowserNodeProvider, IConfigProvider,
   IContextProvider, IPaymentUtils, IVectorUtils
@@ -111,14 +111,32 @@ export class PaymentRepository implements IPaymentRepository {
     // console.log(`PaymentRepository: getPaymentsByIds: activeTransfersResLength: ${activeTransfersRes.getValue().length}`)
     // console.log(activeTransfersRes.getValue())
 
-    const activeTransfers = activeTransfersRes.getValue().filter((val) => {
-      return paymentIds.includes(val.meta.paymentId);
-    });
+    // Remember, the offer transfer is the only one that we actually use the metadata for
+    // For Insurance & Parameterized, we put the paymentId in the state itself
+    const activeTransfers = activeTransfersRes.getValue()
+    let relevantTransfers: FullTransferState[] = []
+
+    for (let transfer of activeTransfers) {
+      if (transfer.meta && paymentIds.includes(transfer.meta.paymentId)) {
+        relevantTransfers.push(transfer as FullTransferState)
+      } else {
+        let transferType = await this.paymentUtils.getTransferType(transfer as FullTransferState, browserNode)
+        if (transferType == ETransferType.Insurance || transferType == ETransferType.Parameterized) {
+          if (paymentIds.includes(transfer.transferState.uuid)) {
+            relevantTransfers.push(transfer as FullTransferState)
+          } else {
+            console.log(`Transfer not relevant in PaymentRepository, transferId: ${transfer.transferId}`)
+          }
+        } else {
+          console.log(`Unrecognized transfer in PaymentRepository, transferId: ${transfer.transferId}`)
+        }
+      }
+    }
 
     // console.log(`PaymentRepository: getPaymentsByIds: activeTransfersLength: ${activeTransfers.length}`)
 
     const payments = await this.paymentUtils.transfersToPayments(
-      activeTransfers as FullTransferState[],
+      relevantTransfers as FullTransferState[],
       config,
       context,
       browserNode,

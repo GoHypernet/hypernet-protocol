@@ -48,21 +48,30 @@ export class VectorAPIListener implements IVectorListener {
       }
 
       if (!(await this.paymentUtils.isHypernetDomain(paymentId))) {
+        console.log(`Ignoring transfer that is not in the Hypernet Domain: transferID of ${transfer.transferId}, initiator: ${transfer.initiator}`)
         return;
       }
 
       // Determine if you sent the transfer, in which case you can ignore this
       if (from === context.publicIdentifier) {
+        console.log(`Ignoring transfer that we sent, transferID of ${transfer.transferId}, initiator: ${transfer.initiator}`)
         return;
       }
 
       // If you didn't send this transfer, you want to notify the user
       // that a payment is available for them to accept (insurance, paramterized, etc)
+      
       if (transferType === ETransferType.Offer) {
+        // if the transfer is an offer transfer, we need to notify the payment service
+        // than an offer has been received. it will then attempt to provide stake (via an insurance transfer)
         this.paymentService.offerReceived(paymentId);
       } else if (transferType === ETransferType.Insurance) {
+        // if the transfer is an insurance transfer, we need to notify the payment service
+        // that stake has been posted, which will then attempt to create the parameterized transfer
         this.paymentService.stakePosted(paymentId);
       } else if (transferType === ETransferType.Parameterized) {
+        // if the transfer is the parameterized transfer, we need to notify the payment service
+        // that the last step has been completed, and the transfer can now be finalized
         this.paymentService.paymentPosted(paymentId);
       } else if (transferType === ETransferType.PullRecord) {
         this.paymentService.pullRecorded(paymentId);

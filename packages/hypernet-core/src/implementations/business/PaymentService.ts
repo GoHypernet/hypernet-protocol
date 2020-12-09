@@ -19,6 +19,9 @@ import { IConfigProvider, IContextProvider } from "@interfaces/utilities";
  * acceptFunds() to accept the sender's funds, which creates an Insurance transfer with Vector, which triggers
  * stakePosted() on the sender's side, which finally creates the Parameterized transfer with Vector, which triggers
  * paymentPosted() on the recipient's side, which finalizes/resolves the vector parameterized transfer.
+ * 
+ * Note that the general expected order of operations is mirrored by the ordering of functions within this class.
+ * 
  * @todo we should also finalize the insurance transfer, and maybe finalize the offer transfer
  */
 export class PaymentService implements IPaymentService {
