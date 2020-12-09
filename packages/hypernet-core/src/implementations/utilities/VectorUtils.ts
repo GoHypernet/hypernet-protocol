@@ -234,8 +234,8 @@ export class VectorUtils implements IVectorUtils {
     const browserNodePromise = this.browserNodeProvider.getBrowserNode();
     const [config, context, browserNode] = await Promise.all([configPromise, contextPromise, browserNodePromise]);
 
-    console.log(`publicIdentifier: ${context.publicIdentifier}`);
-    console.log(`routerPublicIdentifier: ${config.routerPublicIdentifier}`);
+    console.log(`Core publicIdentifier: ${context.publicIdentifier}`);
+    console.log(`Router publicIdentifier: ${config.routerPublicIdentifier}`);
 
     // We need to see if we already have a channel with the router setup.
     // const channelsByParticipantResult = await browserNode.getStateChannelByParticipants({
@@ -251,16 +251,16 @@ export class VectorUtils implements IVectorUtils {
     // }
 
     if (channelsResult.isError) {
-      throw new Error("Cannot get channels 2!");
+      throw new Error("Cannot get channels!");
     }
     // const channelsByParticipants = channelsByParticipantResult.getValue();
-    const channels2 = channelsResult.getValue();
+    const channels = channelsResult.getValue();
 
     // console.log(channelsByParticipants);
-    console.log(channels2);
+    // console.log(channels);
 
     let channel: FullChannelState | null = null;
-    for (const channelAddress of channels2) {
+    for (const channelAddress of channels) {
       const channelResult = await browserNode.getStateChannel({ channelAddress });
       if (channelResult.isError) {
         throw new Error("Cannot get details of state channel!");
@@ -269,7 +269,7 @@ export class VectorUtils implements IVectorUtils {
       channel = channelResult.getValue();
 
       if (channel != null) {
-        console.log(channel);
+        // console.log(channel);
         if (channel.aliceIdentifier !== config.routerPublicIdentifier) {
           continue;
         }
@@ -291,7 +291,7 @@ export class VectorUtils implements IVectorUtils {
     }
 
     const newChannel = setupResult.getValue();
-    console.log(newChannel);
+    // console.log(newChannel);
 
     this.channelAddress = newChannel.channelAddress;
     return this.channelAddress;

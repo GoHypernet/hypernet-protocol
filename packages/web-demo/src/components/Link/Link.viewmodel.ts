@@ -38,7 +38,6 @@ export class LinkViewModel {
 
     this.core.onPullPaymentProposed.subscribe({
       next: (payment) => {
-        console.log('onPullPaymentProposed')
         if (payment.to === this.counterParty || payment.from === this.counterParty) {
           // It's for us, we'll need to add it to the payments for the link
           this.pullPayments.push(new PullPaymentParams(this.core, payment));
@@ -48,7 +47,6 @@ export class LinkViewModel {
 
     this.core.onPushPaymentProposed.subscribe({
       next: (payment) => {
-        console.log('onPushPaymentProposed')
         if (payment.to === this.counterParty || payment.from === this.counterParty) {
           // It's for us, we'll need to add it to the payments for the link
           this.pushPayments.push(new PushPaymentParams(this.core, payment));

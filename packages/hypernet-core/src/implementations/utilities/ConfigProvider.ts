@@ -31,8 +31,8 @@ export class ConfigProvider implements IConfigProvider {
         getPublicKeyFromPrivateKey(wallet.privateKey),
       );
 
-      console.log("wallet private key", wallet.privateKey);
-      console.log("routerPublicIdentifier", this.config.routerPublicIdentifier);
+      console.log("Wallet private key", wallet.privateKey);
+      console.log("Router publicIdentifier", this.config.routerPublicIdentifier);
     } else {
       // Should be MainNet config here
       this.config = new HypernetConfig(

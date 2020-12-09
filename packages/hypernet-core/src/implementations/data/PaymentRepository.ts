@@ -108,14 +108,14 @@ export class PaymentRepository implements IPaymentRepository {
       throw error;
     }
 
-    console.log(`PaymentRepository: getPaymentsByIds: activeTransfersResLength: ${activeTransfersRes.getValue().length}`)
-    console.log(activeTransfersRes.getValue())
+    // console.log(`PaymentRepository: getPaymentsByIds: activeTransfersResLength: ${activeTransfersRes.getValue().length}`)
+    // console.log(activeTransfersRes.getValue())
 
     const activeTransfers = activeTransfersRes.getValue().filter((val) => {
       return paymentIds.includes(val.meta.paymentId);
     });
 
-    console.log(`PaymentRepository: getPaymentsByIds: activeTransfersLength: ${activeTransfers.length}`)
+    // console.log(`PaymentRepository: getPaymentsByIds: activeTransfersLength: ${activeTransfers.length}`)
 
     const payments = await this.paymentUtils.transfersToPayments(
       activeTransfers as FullTransferState[],
@@ -175,7 +175,7 @@ export class PaymentRepository implements IPaymentRepository {
     let paymentStart = `${Math.floor(moment.now() / 1000)}`;
     let paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`;
 
-    console.log(`PaymentRepository:provideStake:Creating insurance transfer for paymentId: ${paymentId}`)
+    console.log(`PaymentRepository:provideStake: Creating insurance transfer for paymentId: ${paymentId}`)
     let transferInfo = await this.vectorUtils.createInsuranceTransfer(
       paymentSender,
       paymentMediator,

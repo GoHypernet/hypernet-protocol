@@ -24,7 +24,7 @@ export class AccountService implements IAccountService {
   public async depositFunds(assetAddress: string, amount: BigNumber): Promise<Balances> {
     const context = await this.contextProvider.getInitializedContext();
 
-    console.log(`HypernetCore:depositFunds:assetAddress:${assetAddress}`)
+    console.log(`HypernetCore:depositFunds: assetAddress: ${assetAddress}`)
     await this.accountRepository.depositFunds(assetAddress, amount);
 
     const balances = await this.accountRepository.getBalances();

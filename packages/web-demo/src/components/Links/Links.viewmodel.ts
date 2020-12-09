@@ -67,11 +67,11 @@ export class LinksViewModel {
     this.publicIdentifier(publicIdentifier);
 
     const links = await this.core.getActiveLinks();
-    console.log("Got active links!");
+    //console.log("Got active links!");
     const linkParams = links.map((link: HypernetLink) => new LinkParams(this.core, link));
-    console.log('Mapped link params!')
+    //console.log('Mapped link params!')
     this.links.push(...linkParams);
-    console.log('Pushed link params!')
+    //console.log('Pushed link params!')
   }
 }
 

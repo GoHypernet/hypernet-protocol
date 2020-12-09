@@ -182,7 +182,7 @@ export class HypernetCore implements IHypernetCore {
    * @param amount the amount of the token to deposit
    */
   public async depositFunds(assetAddress: string, amount: BigNumber): Promise<Balances> {
-    console.log(`HypernetCore:depositFunds:assetAddress:${assetAddress}`)
+    // console.log(`HypernetCore:depositFunds:assetAddress:${assetAddress}`)
     return this.accountService.depositFunds(assetAddress, amount);
   }
 

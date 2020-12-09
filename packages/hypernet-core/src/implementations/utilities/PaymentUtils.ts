@@ -37,8 +37,8 @@ export abstract class PaymentIdUtils {
   public static getDomain(paymentIdString: string): string {
     if (!this.isValidPaymentId(paymentIdString)) throw new Error(`Not a valid paymentId: '${paymentIdString}'`)
     const domainHex = paymentIdString.substr(2, 20)
-    console.log(`PaymentIdString: ${paymentIdString}`)
-    console.log(`DomainHex: ${domainHex}`)
+    // console.log(`PaymentIdString: ${paymentIdString}`)
+    // console.log(`DomainHex: ${domainHex}`)
     const domain = Buffer.from(domainHex, 'hex').toString('ascii')
     if (domain.length != 10) throw new Error(`Domain was not 10 characters long, got '${domain}'`)
     return domain.trim()
@@ -102,8 +102,8 @@ export abstract class PaymentIdUtils {
 
     // Convert domain and type to hex (/w ascii encoding)
     const domainHex = Buffer.from(domain, "ascii").toString('hex')
-    console.log(`Domain: ${domain}`)
-    console.log(`DomainHex: ${domainHex}`)
+    // console.log(`Domain: ${domain}`)
+    // console.log(`DomainHex: ${domainHex}`)
 
     const typeHex = Buffer.from(type, "ascii").toString('hex')
 
