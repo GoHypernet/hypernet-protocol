@@ -282,7 +282,7 @@ export class VectorUtils implements IVectorUtils {
     const setupResult = await browserNode.setup({
       chainId: 1337,
       counterpartyIdentifier: config.routerPublicIdentifier,
-      timeout: "8640",
+      timeout: "86400",
     });
 
     if (setupResult.isError) {
