@@ -59,7 +59,12 @@ export class VectorUtils implements IVectorUtils {
     let encodedResolverData = defaultAbiCoder.encode(resolverDataEncoding, [resolverData])
     let hashedResolverData = keccak256(encodedResolverData)
 
-    const signature = await signer.signMessage(hashedResolverData)
+    const signatureRes = await browserNode.signUtilityMessage({message: hashedResolverData})
+    if (signatureRes.isError) {
+      throw signatureRes.getError()
+    }
+
+    const signature = signatureRes.getValue().signedMessage
 
     let resolver: ParameterizedResolver = {
       data: resolverData,

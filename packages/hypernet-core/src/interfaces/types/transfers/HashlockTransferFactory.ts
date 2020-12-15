@@ -25,7 +25,10 @@ export class HashlockTransferFactory extends ContractFactory {
   connect(signer: Signer): HashlockTransferFactory {
     return super.connect(signer) as HashlockTransferFactory;
   }
-  static connect(address: string, signerOrProvider: Signer | Provider): HashlockTransfer {
+  static connect(
+    address: string,
+    signerOrProvider: Signer | Provider
+  ): HashlockTransfer {
     return new Contract(address, _abi, signerOrProvider) as HashlockTransfer;
   }
 }
