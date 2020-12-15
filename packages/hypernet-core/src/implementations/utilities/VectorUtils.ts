@@ -178,7 +178,7 @@ export class VectorUtils implements IVectorUtils {
     if (!PaymentIdUtils.isValidPaymentId(paymentId)) throw new Error(`CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`)
 
     let infinite_rate = {
-      deltaAmount: ethers.constants.MaxUint256.toString(),
+      deltaAmount: amount.toString(),
       deltaTime: "1",
     };
 
