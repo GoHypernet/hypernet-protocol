@@ -1,6 +1,6 @@
 import { IBrowserNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider";
 import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
-import { BrowserNode, BrowserNodeConfig } from "@connext/vector-browser-node";
+import { BrowserNode } from "@connext/vector-browser-node";
 import pino from "pino";
 import { IContextProvider } from "@interfaces/utilities";
 
@@ -16,10 +16,13 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
   protected async initialize(): Promise<BrowserNode> {
     const config = await this.configProvider.getConfig();
 
-    return await BrowserNode.connect({
+    const browserNode = new BrowserNode({
       iframeSrc: config.iframeSource,
-      logger: this.logger,
-    } as BrowserNodeConfig);
+      logger: this.logger
+    })
+
+    await browserNode.init()
+    return browserNode
   }
   
   public async getBrowserNode(): Promise<BrowserNode> {
