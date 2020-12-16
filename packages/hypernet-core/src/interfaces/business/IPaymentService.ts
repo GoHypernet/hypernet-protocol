@@ -2,7 +2,6 @@ import { BigNumber, Payment, EthereumAddress, PublicKey, PublicIdentifier } from
 import { Result } from "@connext/vector-types";
 
 export interface IPaymentService {
-
   /**
    * Send funds to another person.
    * @param counterPartyAccount the account we wish to send funds to
@@ -42,7 +41,7 @@ export interface IPaymentService {
 
   /**
    * Notify the service that a payment has been completed.
-   * @param paymentId 
+   * @param paymentId
    */
   paymentCompleted(paymentId: string): Promise<void>;
 
@@ -56,7 +55,7 @@ export interface IPaymentService {
    * Plural version of stakePosted.
    * @param paymentIds the payment ids to notify the service about
    */
-  stakesPosted(paymentIds: string[]): Promise<void>
+  stakesPosted(paymentIds: string[]): Promise<void>;
 
   /**
    * Notify the service that a stake has been created/posted.

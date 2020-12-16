@@ -1,17 +1,30 @@
-import { FullChannelState, NodeParams, OptionalPublicIdentifier, NodeResponses, DEFAULT_CHANNEL_TIMEOUT, FullTransferState } from "@connext/vector-types";
+import {
+  FullChannelState,
+  NodeParams,
+  OptionalPublicIdentifier,
+  NodeResponses,
+  DEFAULT_CHANNEL_TIMEOUT,
+  FullTransferState,
+} from "@connext/vector-types";
 import { BigNumber, IHypernetTransferMetadata, PublicIdentifier, PullAmount } from "@interfaces/objects";
-import { IBrowserNodeProvider, IContextProvider, IVectorUtils, IConfigProvider, IBlockchainProvider } from "@interfaces/utilities";
+import {
+  IBrowserNodeProvider,
+  IContextProvider,
+  IVectorUtils,
+  IConfigProvider,
+  IBlockchainProvider,
+} from "@interfaces/utilities";
 import { EPaymentType, InsuranceState, MessageState, Parameterized, ParameterizedState } from "@interfaces/types";
 import { serialize } from "class-transformer";
 import { ethers } from "ethers";
 import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@interfaces/types/transfers/ParameterizedTypes";
 import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils/dist/identifiers";
 import { PaymentIdUtils } from "./PaymentUtils";
-import { encodeTransferState, encodeTransferResolver } from "@connext/vector-utils"
+import { encodeTransferState, encodeTransferResolver } from "@connext/vector-utils";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 
 /**
- * VectorUtils contains methods for interacting directly with the core Vector stuff - 
+ * VectorUtils contains methods for interacting directly with the core Vector stuff -
  * creating transfers, resolving them, & dealing the with router channel.
  */
 export class VectorUtils implements IVectorUtils {
@@ -24,7 +37,7 @@ export class VectorUtils implements IVectorUtils {
     protected configProvider: IConfigProvider,
     protected contextProvider: IContextProvider,
     protected browserNodeProvider: IBrowserNodeProvider,
-    protected blockchainProvider: IBlockchainProvider
+    protected blockchainProvider: IBlockchainProvider,
   ) {
     this.getRouterChannelAddressSetup = null;
   }
@@ -44,46 +57,48 @@ export class VectorUtils implements IVectorUtils {
   public async resolvePaymentTransfer(
     transferId: string,
     paymentId: string,
-    amount: string
+    amount: string,
   ): Promise<NodeResponses.ResolveTransfer> {
-    const signer = await this.blockchainProvider.getSigner()
-    const browserNode = await this.browserNodeProvider.getBrowserNode()
+    const signer = await this.blockchainProvider.getSigner();
+    const browserNode = await this.browserNodeProvider.getBrowserNode();
     const channelAddress = await this.getRouterChannelAddress();
 
     let resolverData: ParameterizedResolverData = {
       UUID: paymentId,
-      paymentAmountTaken: amount
-    }
+      paymentAmountTaken: amount,
+    };
 
-    let resolverDataEncoding = ["tuple(bytes32 UUID, uint256 paymentAmountTaken)"]
-    let encodedResolverData = defaultAbiCoder.encode(resolverDataEncoding, [resolverData])
-    let hashedResolverData = keccak256(encodedResolverData)
+    let resolverDataEncoding = ["tuple(bytes32 UUID, uint256 paymentAmountTaken)"];
+    let encodedResolverData = defaultAbiCoder.encode(resolverDataEncoding, [resolverData]);
+    let hashedResolverData = keccak256(encodedResolverData);
 
-    const signatureRes = await browserNode.signUtilityMessage({ message: hashedResolverData })
+    const signatureRes = await browserNode.signUtilityMessage({ message: hashedResolverData });
     if (signatureRes.isError) {
-      throw signatureRes.getError()
+      throw signatureRes.getError();
     }
 
-    const signature = signatureRes.getValue().signedMessage
+    const signature = signatureRes.getValue().signedMessage;
 
     let resolver: ParameterizedResolver = {
       data: resolverData,
-      payeeSignature: signature
-    }
+      payeeSignature: signature,
+    };
 
     let transferParams: OptionalPublicIdentifier<NodeParams.ResolveTransfer> = {
       channelAddress: channelAddress,
       transferId: transferId,
-      transferResolver: resolver
-    }
+      transferResolver: resolver,
+    };
 
-    let result = await browserNode.resolveTransfer(transferParams)
+    let result = await browserNode.resolveTransfer(transferParams);
 
     if (result.isError) {
-      throw new Error(`VectorUtils:resolvePaymentTransfer: error while attempting to resolve paymentId ${paymentId}, ${result.getError()}`)
+      throw new Error(
+        `VectorUtils:resolvePaymentTransfer: error while attempting to resolve paymentId ${paymentId}, ${result.getError()}`,
+      );
     }
 
-    return result.getValue()
+    return result.getValue();
   }
 
   /**
@@ -108,7 +123,8 @@ export class VectorUtils implements IVectorUtils {
     const config = await this.configProvider.getConfig();
 
     // Sanity check - make sure the paymentId is valid:
-    if (!PaymentIdUtils.isValidPaymentId(message.paymentId)) throw new Error(`CreateMessageTransfer: Invalid paymentId: '${message.paymentId}'`)
+    if (!PaymentIdUtils.isValidPaymentId(message.paymentId))
+      throw new Error(`CreateMessageTransfer: Invalid paymentId: '${message.paymentId}'`);
 
     let initialState: MessageState = {
       message: serialize(message),
@@ -120,10 +136,10 @@ export class VectorUtils implements IVectorUtils {
       channelAddress: channelAddress,
       amount: "0",
       assetId: config.hypertokenAddress,
-      type: 'MessageTransfer',
+      type: "MessageTransfer",
       details: initialState,
-      meta: message
-    } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>
+      meta: message,
+    } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
 
     let transfer = await browserNode.conditionalTransfer(transferParams);
 
@@ -132,7 +148,7 @@ export class VectorUtils implements IVectorUtils {
         Could not complete transfer, browser node threw an error:
         ${transfer.getError()}
         transferParams: ${JSON.stringify(transferParams)}  
-      `)
+      `);
     }
 
     let transferResult = transfer.getValue();
@@ -164,7 +180,7 @@ export class VectorUtils implements IVectorUtils {
     const browserNode = await this.browserNodeProvider.getBrowserNode();
     const channelAddress = await this.getRouterChannelAddress();
     const config = await this.configProvider.getConfig();
-    const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress)
+    const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
 
     // @todo toEthAddress isn't really an eth address, it's the internal signing key
     // therefore we need to actually do the signing of the payment transfer (on resolve)
@@ -175,7 +191,8 @@ export class VectorUtils implements IVectorUtils {
     }
 
     // Sanity check - make sure the paymentId is valid:
-    if (!PaymentIdUtils.isValidPaymentId(paymentId)) throw new Error(`CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`)
+    if (!PaymentIdUtils.isValidPaymentId(paymentId))
+      throw new Error(`CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`);
 
     let infinite_rate = {
       deltaAmount: amount.toString(),
@@ -198,13 +215,13 @@ export class VectorUtils implements IVectorUtils {
       assetId: assetAddress,
       type: "Parameterized",
       details: initialState,
-      meta: {} // intentially left blank!
+      meta: {}, // intentially left blank!
     } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
 
     let transfer = await browserNode.conditionalTransfer(transferParams);
 
     if (transfer.isError) {
-      throw new Error(`Could not complete transfer, browser node threw an error: ${transfer.getError()}`)
+      throw new Error(`Could not complete transfer, browser node threw an error: ${transfer.getError()}`);
     }
 
     let transferResult = transfer.getValue();
@@ -225,22 +242,23 @@ export class VectorUtils implements IVectorUtils {
     mediatorAddress: string,
     amount: BigNumber,
     expiration: string,
-    paymentId: string
+    paymentId: string,
   ): Promise<NodeResponses.ConditionalTransfer> {
     const browserNode = await this.browserNodeProvider.getBrowserNode();
     const channelAddress = await this.getRouterChannelAddress();
     const config = await this.configProvider.getConfig();
-    const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress)
+    const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
 
     // Sanity check - make sure the paymentId is valid:
-    if (!PaymentIdUtils.isValidPaymentId(paymentId)) throw new Error(`CreateInsuranceTransfer: Invalid paymentId: '${paymentId}'`)
+    if (!PaymentIdUtils.isValidPaymentId(paymentId))
+      throw new Error(`CreateInsuranceTransfer: Invalid paymentId: '${paymentId}'`);
 
     let initialState: InsuranceState = {
       receiver: toEthAddress,
       mediator: mediatorAddress,
       collateral: amount.toString(),
       expiration: expiration,
-      UUID: paymentId
+      UUID: paymentId,
     };
 
     // Create transfer params
@@ -251,14 +269,14 @@ export class VectorUtils implements IVectorUtils {
       assetId: config.hypertokenAddress,
       type: "Insurance",
       details: initialState,
-      meta: {} // left intentionally blank!
+      meta: {}, // left intentionally blank!
     } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
 
-    console.log(`CreateInsuranceTransfer transferParams: ${transferParams.toString()}`)
+    console.log(`CreateInsuranceTransfer transferParams: ${transferParams.toString()}`);
     let transfer = await browserNode.conditionalTransfer(transferParams);
 
     if (transfer.isError) {
-      throw new Error(`Could not complete transfer, browser node threw an error: ${transfer.getError()}`)
+      throw new Error(`Could not complete transfer, browser node threw an error: ${transfer.getError()}`);
     }
 
     let transferResult = transfer.getValue();
@@ -276,9 +294,8 @@ export class VectorUtils implements IVectorUtils {
       return this.getRouterChannelAddressSetup;
     }
 
-    this.getRouterChannelAddressSetup =
-      new Promise(async (resolve: (channel: string) => void,
-        reject: (err: Error) => void) => {
+    this.getRouterChannelAddressSetup = new Promise(
+      async (resolve: (channel: string) => void, reject: (err: Error) => void) => {
         // Basic setup
         const configPromise = this.configProvider.getConfig();
         const contextPromise = this.contextProvider.getInitializedContext();
@@ -333,7 +350,7 @@ export class VectorUtils implements IVectorUtils {
         const setupResult = await browserNode.setup({
           chainId: 1337,
           counterpartyIdentifier: config.routerPublicIdentifier,
-          timeout: DEFAULT_CHANNEL_TIMEOUT.toString()
+          timeout: DEFAULT_CHANNEL_TIMEOUT.toString(),
         });
 
         if (setupResult.isError) {
@@ -345,7 +362,8 @@ export class VectorUtils implements IVectorUtils {
         // console.log(newChannel);
         resolve(newChannel.channelAddress);
         return;
-      });
+      },
+    );
 
     return this.getRouterChannelAddressSetup;
   }

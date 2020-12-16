@@ -6,8 +6,10 @@ import {
   PullPayment,
   Balances,
 } from "@interfaces/objects";
+import { CoreUninitializedError } from "@interfaces/objects/errors";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { Subject } from "rxjs";
+import { okAsync, errAsync, ResultAsync } from "neverthrow";
 
 export class ContextProvider implements IContextProvider {
   protected context: HypernetContext;
@@ -41,24 +43,26 @@ export class ContextProvider implements IContextProvider {
     return this.context;
   }
 
-  public async getInitializedContext(): Promise<InitializedHypernetContext> {
+  public getInitializedContext(): ResultAsync<InitializedHypernetContext, CoreUninitializedError> {
     if (this.context.account == null || this.context.publicIdentifier == null) {
-      throw new Error("Can not open a link until you have set your working account. Call HypernetCore.initialize()!");
+      return errAsync(new CoreUninitializedError());
     }
 
-    return new InitializedHypernetContext(
-      this.context.account,
-      this.context.publicIdentifier,
-      this.context.inControl,
-      this.context.onControlClaimed,
-      this.context.onControlYielded,
-      this.context.onPushPaymentProposed,
-      this.context.onPullPaymentProposed,
-      this.context.onPushPaymentReceived,
-      this.context.onPullPaymentApproved,
-      this.context.onPushPaymentUpdated,
-      this.context.onPullPaymentUpdated,
-      this.context.onBalancesChanged,
+    return okAsync(
+      new InitializedHypernetContext(
+        this.context.account,
+        this.context.publicIdentifier,
+        this.context.inControl,
+        this.context.onControlClaimed,
+        this.context.onControlYielded,
+        this.context.onPushPaymentProposed,
+        this.context.onPullPaymentProposed,
+        this.context.onPushPaymentReceived,
+        this.context.onPullPaymentApproved,
+        this.context.onPushPaymentUpdated,
+        this.context.onPullPaymentUpdated,
+        this.context.onBalancesChanged,
+      ),
     );
   }
 

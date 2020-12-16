@@ -2,29 +2,43 @@ import { Result } from "@connext/vector-types";
 import { AccountService, DevelopmentService, LinkService, PaymentService } from "@implementations/business";
 import { AccountsRepository, PaymentRepository, VectorLinkRepository } from "@implementations/data";
 import {
-  BrowserNodeProvider, ConfigProvider, ContextProvider,
-  EthersBlockchainProvider, LinkUtils, PaymentUtils,
-  VectorUtils
+  BrowserNodeProvider,
+  ConfigProvider,
+  ContextProvider,
+  EthersBlockchainProvider,
+  LinkUtils,
+  PaymentUtils,
+  VectorUtils,
 } from "@implementations/utilities";
 import { IAccountService, IDevelopmentService, ILinkService, IPaymentService } from "@interfaces/business";
 import { IAccountsRepository, ILinkRepository, IPaymentRepository } from "@interfaces/data";
 import { IHypernetCore } from "@interfaces/IHypernetCore";
 import {
-  Balances, BigNumber,
-  ControlClaim, EthereumAddress,
-  HypernetConfig, HypernetLink,
+  Balances,
+  BigNumber,
+  ControlClaim,
+  Either,
+  EthereumAddress,
+  HypernetConfig,
+  HypernetLink,
   Payment,
-  PublicIdentifier, PublicKey,
-  PullPayment, PushPayment
+  PublicIdentifier,
+  PublicKey,
+  PullPayment,
+  PushPayment,
 } from "@interfaces/objects";
+import { CoreUninitializedError } from "@interfaces/objects/errors";
 import { EBlockchainNetwork } from "@interfaces/types";
 import {
-  IBlockchainProvider, IBrowserNodeProvider, IConfigProvider,
-  IContextProvider, ILinkUtils, IPaymentUtils, IVectorUtils
+  IBlockchainProvider,
+  IBrowserNodeProvider,
+  IConfigProvider,
+  IContextProvider,
+  ILinkUtils,
+  IPaymentUtils,
+  IVectorUtils,
 } from "@interfaces/utilities";
-import {
-  IVectorListener
-} from "@interfaces/api";
+import { IVectorListener } from "@interfaces/api";
 import { Subject } from "rxjs";
 import { VectorAPIListener } from "./api";
 
@@ -32,7 +46,6 @@ import { VectorAPIListener } from "./api";
  * The top-level class-definition for Hypernet Core.
  */
 export class HypernetCore implements IHypernetCore {
-
   // RXJS Observables
   public onControlClaimed: Subject<ControlClaim>;
   public onControlYielded: Subject<ControlClaim>;
@@ -122,7 +135,12 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.browserNodeProvider = new BrowserNodeProvider(this.configProvider, this.contextProvider);
-    this.vectorUtils = new VectorUtils(this.configProvider, this.contextProvider, this.browserNodeProvider, this.blockchainProvider);
+    this.vectorUtils = new VectorUtils(
+      this.configProvider,
+      this.contextProvider,
+      this.browserNodeProvider,
+      this.blockchainProvider,
+    );
 
     this.accountRepository = new AccountsRepository(
       this.blockchainProvider,
@@ -159,8 +177,13 @@ export class HypernetCore implements IHypernetCore {
     this.linkService = new LinkService(this.linkRepository);
     this.developmentService = new DevelopmentService(this.accountRepository);
 
-    this.vectorAPIListener = new VectorAPIListener(this.browserNodeProvider,
-      this.paymentService, this.vectorUtils, this.contextProvider, this.paymentUtils);
+    this.vectorAPIListener = new VectorAPIListener(
+      this.browserNodeProvider,
+      this.paymentService,
+      this.vectorUtils,
+      this.contextProvider,
+      this.paymentUtils,
+    );
   }
 
   /**
@@ -187,9 +210,9 @@ export class HypernetCore implements IHypernetCore {
   /**
    * Returns the (vector) pubId associated with this instance of HypernetCore.
    */
-  public async getPublicIdentifier(): Promise<PublicIdentifier> {
+  public async getPublicIdentifier(): Promise<Either<CoreUninitializedError, PublicIdentifier>> {
     const context = await this.contextProvider.getInitializedContext();
-    return context.publicIdentifier;
+    return context.applyOnSuccess((c) => c.publicIdentifier);
   }
 
   /**
@@ -239,7 +262,7 @@ export class HypernetCore implements IHypernetCore {
 
   /**
    * Returns all links with a specified counterparty.
-   * @param counterPartyAccount 
+   * @param counterPartyAccount
    */
   public async getLinkByCounterparty(counterPartyAccount: PublicIdentifier): Promise<HypernetLink> {
     throw new Error("Method not yet implemented.");
@@ -295,7 +318,7 @@ export class HypernetCore implements IHypernetCore {
    * @param paymentIds the list of payment ids for which to complete the payments for
    */
   public async completePayments(paymentIds: string[]): Promise<void> {
-    await this.paymentService.stakesPosted(paymentIds)
+    await this.paymentService.stakesPosted(paymentIds);
     //const results = await this.paymentService.stakesPosted(paymentIds);
 
     // @todo change return type to Promise<Result<Payment, Error>[]>
@@ -343,7 +366,7 @@ export class HypernetCore implements IHypernetCore {
    * @param paymentId the payment to finalize
    */
   public async finalizePushPayment(paymentId: string): Promise<void> {
-    await this.paymentService.paymentPosted(paymentId)
+    await this.paymentService.paymentPosted(paymentId);
     // @todo change return type to Promise<HypernetLink>
   }
 
@@ -366,7 +389,7 @@ export class HypernetCore implements IHypernetCore {
     context.account = account;
     context.publicIdentifier = publicIdentifier;
     this.contextProvider.setContext(context);
-    
+
     await this.vectorAPIListener.setup();
 
     // const messagingListener = this.messagingListener.initialize();
@@ -385,10 +408,10 @@ export class HypernetCore implements IHypernetCore {
    * @param amount the amount of test token to mint
    */
   public async mintTestToken(amount: BigNumber): Promise<void> {
-    let account = (await this.contextProvider.getContext()).account
+    let account = (await this.contextProvider.getContext()).account;
 
     if (account === null) {
-      throw new Error('Need an account to send funds to!')
+      throw new Error("Need an account to send funds to!");
     }
 
     this.developmentService.mintTestToken(amount, account);

@@ -11,7 +11,7 @@ import {
 import { FullTransferState } from "@connext/vector-types";
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
 import { BrowserNode } from "@connext/vector-browser-node";
-import { IBrowserNodeProvider } from "./IBrowserNodeProvider";
+import { ResultAsync } from "neverthrow";
 
 export interface IPaymentUtils {
   /**
@@ -21,16 +21,12 @@ export interface IPaymentUtils {
   isHypernetDomain(paymentId: string): Promise<boolean>;
 
   /**
-   *
+   * Creates a PaymentId by combining
    * @param paymentType
    */
   createPaymentId(paymentType: EPaymentType): Promise<string>;
 
-  sortTransfers(
-    _paymentId: string,
-    transfers: FullTransferState[],
-    browserNode: BrowserNode,
-  ): Promise<SortedTransfers>
+  sortTransfers(_paymentId: string, transfers: FullTransferState[], browserNode: BrowserNode): Promise<SortedTransfers>;
 
   /**
    *
@@ -64,7 +60,7 @@ export interface IPaymentUtils {
    *
    * @param transfer
    */
-  getTransferType(transfer: FullTransferState, browserNode: BrowserNode): Promise<ETransferType>;
+  getTransferType(transfer: FullTransferState, browserNode: BrowserNode): ResultAsync<ETransferType, Error>;
 
   /**
    *

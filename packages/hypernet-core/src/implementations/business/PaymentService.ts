@@ -4,9 +4,12 @@ import { IAccountsRepository, ILinkRepository } from "@interfaces/data";
 import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
 import {
   BigNumber,
-  EthereumAddress, Payment,
-  PublicIdentifier, PublicKey,
-  PullPayment, PushPayment
+  EthereumAddress,
+  Payment,
+  PublicIdentifier,
+  PublicKey,
+  PullPayment,
+  PushPayment,
 } from "@interfaces/objects";
 import { EPaymentState } from "@interfaces/types";
 import { IConfigProvider, IContextProvider } from "@interfaces/utilities";
@@ -19,13 +22,12 @@ import { IConfigProvider, IContextProvider } from "@interfaces/utilities";
  * acceptFunds() to accept the sender's funds, which creates an Insurance transfer with Vector, which triggers
  * stakePosted() on the sender's side, which finally creates the Parameterized transfer with Vector, which triggers
  * paymentPosted() on the recipient's side, which finalizes/resolves the vector parameterized transfer.
- * 
+ *
  * Note that the general expected order of operations is mirrored by the ordering of functions within this class.
- * 
+ *
  * @todo we should also finalize the insurance transfer, and maybe finalize the offer transfer
  */
 export class PaymentService implements IPaymentService {
-
   /**
    * Creates an instanceo of the paymentService.
    */
@@ -68,9 +70,9 @@ export class PaymentService implements IPaymentService {
     return payment;
   }
 
-   /**
+  /**
    * Called when someone has sent us a payment offer.
-   * Lookup the transfer, and convert it to a payment. 
+   * Lookup the transfer, and convert it to a payment.
    * Then, publish an RXJS event to the user.
    * @param paymentId the paymentId for the offer
    */
@@ -136,7 +138,7 @@ export class PaymentService implements IPaymentService {
     // Now that we know we can (probably) make the payments, let's try
     for (let paymentId of paymentIds) {
       try {
-        console.log(`PaymentService:acceptFunds: attempting to provide stake for payment ${paymentId}`)
+        console.log(`PaymentService:acceptFunds: attempting to provide stake for payment ${paymentId}`);
         const payment = await this.paymentRepository.provideStake(paymentId);
         results.push(Result.ok(payment));
       } catch (err) {
@@ -152,7 +154,7 @@ export class PaymentService implements IPaymentService {
    * @param paymentIds the list of paymentIds to notify the service about
    */
   public async stakesPosted(paymentIds: string[]): Promise<void> {
-    paymentIds.forEach(paymentId => {
+    paymentIds.forEach((paymentId) => {
       this.stakePosted(paymentId);
     });
   }
@@ -196,11 +198,10 @@ export class PaymentService implements IPaymentService {
       }
       if (updatedPayment instanceof PullPayment) {
         context.onPullPaymentUpdated.next(updatedPayment);
-      } 
+      }
     } else {
-      console.log('Not providing asset since payment is not from us!')
+      console.log("Not providing asset since payment is not from us!");
     }
-    
   }
 
   /**
@@ -212,7 +213,7 @@ export class PaymentService implements IPaymentService {
   public async paymentPosted(paymentId: string): Promise<void> {
     const payments = await this.paymentRepository.getPaymentsByIds([paymentId]);
     const payment = payments.get(paymentId);
-    const context = await this.contextProvider.getContext()
+    const context = await this.contextProvider.getContext();
 
     // Payment state must be in "approved" to finalize
     if (payment == null || payment.state !== EPaymentState.Approved) {
@@ -221,8 +222,8 @@ export class PaymentService implements IPaymentService {
 
     // If we're the ones that *sent* the payment, we can ignore this
     if (payment.from == context.publicIdentifier) {
-      console.log('Doing nothing in paymentPosted because we are the ones that posted the payment!')
-      return
+      console.log("Doing nothing in paymentPosted because we are the ones that posted the payment!");
+      return;
     }
 
     // If the payment state is approved, we know that it matches our insurance payment
@@ -243,17 +244,17 @@ export class PaymentService implements IPaymentService {
   public async paymentCompleted(paymentId: string): Promise<void> {
     const payments = await this.paymentRepository.getPaymentsByIds([paymentId]);
     const payment = payments.get(paymentId);
-    const context = await this.contextProvider.getContext()
+    const context = await this.contextProvider.getContext();
 
     if (payment == null) {
-      throw new Error(`Could not get payment with id: ${paymentId}`)
+      throw new Error(`Could not get payment with id: ${paymentId}`);
     }
 
     // @todo add some additional checking here
     // @todo add in a way to grab the resolved transfer
     // @todo probably resolve the offer and/or insurance transfer as well?
     // @todo probably genericize this so that it doesn't have to be a pushPayment
-    context.onPushPaymentReceived.next(payment as PushPayment)
+    context.onPushPaymentReceived.next(payment as PushPayment);
   }
 
   /**

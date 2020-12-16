@@ -3,14 +3,13 @@ import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
 import { AssetBalance, Balances, BigNumber, EthereumAddress, PublicIdentifier } from "@interfaces/objects";
 import { IVectorUtils, IBlockchainProvider, IBrowserNodeProvider } from "@interfaces/utilities";
 import { Contract } from "ethers";
-import { artifacts } from "@connext/vector-contracts"
+import { artifacts } from "@connext/vector-contracts";
 
 /**
  * Contains methods for getting Ethereum accounts, public identifiers,
  * balances for accounts, and depositing & withdrawing assets.
  */
 export class AccountsRepository implements IAccountsRepository {
-
   /**
    * Retrieves an instances of the AccountsRepository.
    */
@@ -94,14 +93,14 @@ export class AccountsRepository implements IAccountsRepository {
     let tx;
 
     if (assetAddress == "0x0000000000000000000000000000000000000000") {
-      console.log('Transferring ETH.')
+      console.log("Transferring ETH.");
       // send eth
       tx = await signer.sendTransaction({ to: channelAddress, value: amount });
     } else {
-      console.log('Transferring an ERC20 asset.')
+      console.log("Transferring an ERC20 asset.");
       // send an actual erc20 token
-      let tokenContract = new Contract(assetAddress, ERC20Abi, signer)
-      tx = await tokenContract.transfer(channelAddress, amount)
+      let tokenContract = new Contract(assetAddress, ERC20Abi, signer);
+      tx = await tokenContract.transfer(channelAddress, amount);
     }
 
     // TODO: Wait on this, break it up, this could take a while
@@ -117,7 +116,7 @@ export class AccountsRepository implements IAccountsRepository {
       console.log(depositRes.getError());
       throw new Error("Deposit can not be reconciled");
     }
-    
+
     const deposit = depositRes.getValue();
 
     if (deposit.channelAddress !== channelAddress) {
@@ -155,8 +154,12 @@ export class AccountsRepository implements IAccountsRepository {
       await this.blockchainProvider.getSigner(),
     ]);
 
-    const testTokenContract = new Contract("0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0", artifacts['TestToken'].abi, signer)
-    let mintTx = await testTokenContract.mint(to, amount)
-    await mintTx.wait()
+    const testTokenContract = new Contract(
+      "0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0",
+      artifacts["TestToken"].abi,
+      signer,
+    );
+    let mintTx = await testTokenContract.mint(to, amount);
+    await mintTx.wait();
   }
 }

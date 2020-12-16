@@ -19,13 +19,13 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
 
     const browserNode = new BrowserNode({
       iframeSrc: config.iframeSource,
-      logger: this.logger
-    })
+      logger: this.logger,
+    });
 
-    await browserNode.init()
-    return browserNode
+    await browserNode.init();
+    return browserNode;
   }
-  
+
   public async getBrowserNode(): Promise<BrowserNode> {
     if (this.browserNode == null) {
       this.browserNode = this.initialize();

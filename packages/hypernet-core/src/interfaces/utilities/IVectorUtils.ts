@@ -17,11 +17,7 @@ export interface IVectorUtils {
    */
   resolveMessageTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer>;
 
-  resolvePaymentTransfer(
-    transferId: string, 
-    paymentId: string, 
-    amount: string
-  ): Promise<NodeResponses.ResolveTransfer>
+  resolvePaymentTransfer(transferId: string, paymentId: string, amount: string): Promise<NodeResponses.ResolveTransfer>;
 
   /**
    *

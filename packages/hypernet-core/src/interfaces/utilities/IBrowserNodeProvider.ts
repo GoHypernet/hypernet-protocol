@@ -1,7 +1,9 @@
 import { BrowserNode } from "@connext/vector-browser-node";
 
 /**
- * @todo What is the main role/purpose of this class? Description here.
+ * IBrowserNodeProvider exists only to centralize the supply of
+ * the Vector browser node. It wraps a global object, and simplifies
+ * testing of it.
  */
 export interface IBrowserNodeProvider {
   getBrowserNode(): Promise<BrowserNode>;

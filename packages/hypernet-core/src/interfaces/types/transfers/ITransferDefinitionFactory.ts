@@ -8,11 +8,8 @@ import { Provider } from "@ethersproject/providers";
 import type { ITransferDefinition } from "./ITransferDefinition";
 
 export class ITransferDefinitionFactory {
-  static connect(
-    address: string,
-    signerOrProvider: Signer | Provider
-  ): ITransferDefinition {
-    return new Contract(address, _abi, signerOrProvider) as unknown as  ITransferDefinition;
+  static connect(address: string, signerOrProvider: Signer | Provider): ITransferDefinition {
+    return (new Contract(address, _abi, signerOrProvider) as unknown) as ITransferDefinition;
   }
 }
 
