@@ -26,6 +26,12 @@ export interface IPaymentUtils {
    */
   createPaymentId(paymentType: EPaymentType): Promise<string>;
 
+  sortTransfers(
+    _paymentId: string,
+    transfers: FullTransferState[],
+    browserNode: BrowserNode,
+  ): Promise<SortedTransfers>
+
   /**
    *
    * @param transfers

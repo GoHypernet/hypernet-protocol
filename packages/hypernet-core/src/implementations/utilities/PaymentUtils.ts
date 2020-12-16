@@ -422,7 +422,7 @@ export class PaymentUtils implements IPaymentUtils {
    * @param transfers the transfers to sort
    * @param browserNode instance of a browserNode so that we can query for registered transfer addresses
    */
-  protected async sortTransfers(
+  public async sortTransfers(
     _paymentId: string,
     transfers: FullTransferState[],
     browserNode: BrowserNode,

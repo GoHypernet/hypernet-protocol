@@ -17,11 +17,11 @@ export interface IVectorUtils {
    */
   resolveMessageTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer>;
 
-  /**
-   *
-   * @param transferId
-   */
-  resolvePaymentTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer>;
+  resolvePaymentTransfer(
+    transferId: string, 
+    paymentId: string, 
+    amount: string
+  ): Promise<NodeResponses.ResolveTransfer>
 
   /**
    *

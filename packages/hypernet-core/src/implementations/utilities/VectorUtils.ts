@@ -1,12 +1,14 @@
-import { FullChannelState, NodeParams, OptionalPublicIdentifier, NodeResponses, DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
+import { FullChannelState, NodeParams, OptionalPublicIdentifier, NodeResponses, DEFAULT_CHANNEL_TIMEOUT, FullTransferState } from "@connext/vector-types";
 import { BigNumber, IHypernetTransferMetadata, PublicIdentifier, PullAmount } from "@interfaces/objects";
-import { IBrowserNodeProvider, IContextProvider, IVectorUtils, IConfigProvider } from "@interfaces/utilities";
-import { EPaymentType, InsuranceState, MessageState, ParameterizedState } from "@interfaces/types";
+import { IBrowserNodeProvider, IContextProvider, IVectorUtils, IConfigProvider, IBlockchainProvider } from "@interfaces/utilities";
+import { EPaymentType, InsuranceState, MessageState, Parameterized, ParameterizedState } from "@interfaces/types";
 import { serialize } from "class-transformer";
 import { ethers } from "ethers";
-import { Rate } from "@interfaces/types/transfers/ParameterizedTypes";
+import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@interfaces/types/transfers/ParameterizedTypes";
 import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils/dist/identifiers";
 import { PaymentIdUtils } from "./PaymentUtils";
+import { encodeTransferState, encodeTransferResolver } from "@connext/vector-utils"
+import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 
 /**
  * VectorUtils contains methods for interacting directly with the core Vector stuff - 
@@ -22,6 +24,7 @@ export class VectorUtils implements IVectorUtils {
     protected configProvider: IConfigProvider,
     protected contextProvider: IContextProvider,
     protected browserNodeProvider: IBrowserNodeProvider,
+    protected blockchainProvider: IBlockchainProvider
   ) {
     this.channelAddress = null;
   }
@@ -38,8 +41,49 @@ export class VectorUtils implements IVectorUtils {
    * Resolves a parameterized payment transfer with Vector.
    * @param transferId the ID of the transfer to resolve
    */
-  public async resolvePaymentTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer> {
-    throw new Error("Method not yet implemented.");
+  public async resolvePaymentTransfer(
+    transferId: string, 
+    paymentId: string, 
+    amount: string
+  ): Promise<NodeResponses.ResolveTransfer> {
+    const signer = await this.blockchainProvider.getSigner()
+    const browserNode = await this.browserNodeProvider.getBrowserNode()
+    const channelAddress = await this.getRouterChannelAddress();
+
+    let resolverData: ParameterizedResolverData = {
+      UUID: paymentId,
+      paymentAmountTaken: amount
+    }
+
+    let resolverDataEncoding = ["tuple(bytes32 UUID, uint256 paymentAmountTaken)"]
+    let encodedResolverData = defaultAbiCoder.encode(resolverDataEncoding, [resolverData])
+    let hashedResolverData = keccak256(encodedResolverData)
+
+    const signatureRes = await browserNode.signUtilityMessage({message: hashedResolverData})
+    if (signatureRes.isError) {
+      throw signatureRes.getError()
+    }
+
+    const signature = signatureRes.getValue().signedMessage
+
+    let resolver: ParameterizedResolver = {
+      data: resolverData,
+      payeeSignature: signature
+    }
+
+    let transferParams: OptionalPublicIdentifier<NodeParams.ResolveTransfer> = {
+      channelAddress: channelAddress,
+      transferId: transferId,
+      transferResolver: resolver
+    }
+
+    let result = await browserNode.resolveTransfer(transferParams)
+
+    if (result.isError) {
+      throw new Error(`VectorUtils:resolvePaymentTransfer: error while attempting to resolve paymentId ${paymentId}, ${result.getError()}`)
+    }
+
+    return result.getValue()
   }
 
   /**
@@ -122,6 +166,10 @@ export class VectorUtils implements IVectorUtils {
     const config = await this.configProvider.getConfig();
     const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress)
 
+    // @todo toEthAddress isn't really an eth address, it's the internal signing key
+    // therefore we need to actually do the signing of the payment transfer (on resolve)
+    // with this internal key!
+
     if (type == EPaymentType.Pull && rate == null) {
       throw new Error("Must provide rate for PullPaymentTransfer");
     }
@@ -130,7 +178,7 @@ export class VectorUtils implements IVectorUtils {
     if (!PaymentIdUtils.isValidPaymentId(paymentId)) throw new Error(`CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`)
 
     let infinite_rate = {
-      deltaAmount: ethers.constants.MaxUint256.toString(),
+      deltaAmount: amount.toString(),
       deltaTime: "1",
     };
 

@@ -152,6 +152,12 @@ export interface IHypernetCore {
   finalizePullPayment(paymentId: string, finalAmount: BigNumber): Promise<HypernetLink>;
 
   /**
+   * Finalize a push-payment; internally, resolves the ParameterizedPayment transfer
+   * @param paymentId the payment to finalize
+   */
+  finalizePushPayment(paymentId: string): Promise<void>
+
+  /**
    * Called by the consumer to attempt to claim some or all of the stake within a particular insurance payment.
    * @param paymentId the payment ID to dispute
    * @metadata the mediator-specific metadata to provide

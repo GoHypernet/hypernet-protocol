@@ -2,7 +2,7 @@ import { FullTransferState } from "@connext/vector-types";
 import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
 import {
   BigNumber, EthereumAddress, IHypernetTransferMetadata,
-  Payment, PublicIdentifier, PublicKey, PullPayment, PushPayment
+  Payment, PublicIdentifier, PublicKey, PullPayment, PushPayment, SortedTransfers
 } from "@interfaces/objects";
 import { EPaymentType, ETransferType } from "@interfaces/types";
 import {
@@ -81,6 +81,48 @@ export class PaymentRepository implements IPaymentRepository {
     const payment = this.paymentUtils.transfersToPayment(paymentId, [transfer], config, browserNode);
 
     return payment;
+  }
+
+  /**
+   * Given a paymentId, return the component transfers.
+   * @param paymentId the payment to get transfers for
+   */
+  public async paymentToTransfers(paymentId: string): Promise<SortedTransfers> {
+    const browserNode = await this.browserNodeProvider.getBrowserNode();
+    const channelAddress = await this.vectorUtils.getRouterChannelAddress();
+    const config = await this.configProvider.getConfig();
+    const context = await this.contextProvider.getInitializedContext();
+
+    const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress });
+
+    if (activeTransfersRes.isError) {
+      console.log('PaymentRepository: getPaymentsByIds: Error getting active transfers')
+      const error = activeTransfersRes.getError();
+      throw error;
+    }
+
+    const activeTransfers = activeTransfersRes.getValue()
+    let relevantTransfers: FullTransferState[] = []
+
+    for (let transfer of activeTransfers) {
+      if (transfer.meta && paymentId == transfer.meta.paymentId) {
+        relevantTransfers.push(transfer)
+      } else {
+        let transferType = await this.paymentUtils.getTransferType(transfer, browserNode)
+        if (transferType == ETransferType.Insurance || transferType == ETransferType.Parameterized) {
+          if (paymentId == transfer.transferState.UUID) {
+            relevantTransfers.push(transfer)
+          } else {
+            console.log(`Transfer not relevant in PaymentRepository, transferId: ${transfer.transferId}`)
+          }
+        } else {
+          console.log(`Unrecognized transfer in PaymentRepository, transferId: ${transfer.transferId}`)
+        }
+      }
+    }
+
+    let sortedTransfers = await this.paymentUtils.sortTransfers(paymentId, relevantTransfers, browserNode)
+    return sortedTransfers
   }
 
   /**
@@ -168,13 +210,36 @@ export class PaymentRepository implements IPaymentRepository {
    * Internally, this is what actually calls resolve() on the Vector transfer -
    * be it a insurancePayments or parameterizedPayments.
    * @param paymentId the payment to finalize
+   * @param amount the amount of the payment to finalize for
    */
-  public async finalizePayment(paymentId: string): Promise<Payment> {
+  public async finalizePayment(paymentId: string, amount: string): Promise<Payment> {
     let browserNode = await this.browserNodeProvider.getBrowserNode();
     let config = await this.configProvider.getConfig();
     let payment = await this.getPaymentById(paymentId);
 
-    throw new Error("Method not yet implemented");
+    // get the transfer id from the paymentId
+    // use payment utils for this
+    let sortedTransfers: SortedTransfers = await this.paymentToTransfers(paymentId)
+
+    if (sortedTransfers.parameterizedTransfer == null) {
+      throw new Error(`Cannot finalize payment ${paymentId}, no parameterized transfer exists for this!`)
+    }
+
+    let transferId = sortedTransfers.parameterizedTransfer.transferId
+
+    await this.vectorUtils.resolvePaymentTransfer(transferId, paymentId, amount)
+    let transferResult = await browserNode.getTransfer({ transferId: sortedTransfers.parameterizedTransfer.transferId });
+
+    if (transferResult.isError) {
+      throw new Error("Could not get newly created transfer.");
+    }
+
+    let transfer = transferResult.getValue() as FullTransferState;
+
+    // Transfer has been resolved successfully; return the updated payment.
+    let updatedPayment = this.paymentUtils.transfersToPayment(paymentId, [transfer], config, browserNode);
+
+    return updatedPayment;
   }
 
   /**

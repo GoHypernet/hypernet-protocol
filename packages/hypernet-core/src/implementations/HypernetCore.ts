@@ -109,7 +109,7 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.browserNodeProvider = new BrowserNodeProvider(this.configProvider, this.contextProvider);
-    this.vectorUtils = new VectorUtils(this.configProvider, this.contextProvider, this.browserNodeProvider);
+    this.vectorUtils = new VectorUtils(this.configProvider, this.contextProvider, this.browserNodeProvider, this.blockchainProvider);
 
     this.accountRepository = new AccountsRepository(
       this.blockchainProvider,
@@ -320,6 +320,15 @@ export class HypernetCore implements IHypernetCore {
    */
   public async finalizePullPayment(paymentId: string, finalAmount: BigNumber): Promise<HypernetLink> {
     throw new Error("Method not yet implemented.");
+  }
+
+  /**
+   * Finalize a push-payment; internally, resolves the ParameterizedPayment transfer
+   * @param paymentId the payment to finalize
+   */
+  public async finalizePushPayment(paymentId: string): Promise<void> {
+    await this.paymentService.paymentPosted(paymentId)
+    // @todo change return type to Promise<HypernetLink>
   }
 
   /**

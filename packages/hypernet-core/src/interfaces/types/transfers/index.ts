@@ -5,6 +5,8 @@ export { HashlockTransferFactory } from "./HashlockTransferFactory";
 export type { HashlockTransfer } from "./HashlockTransfer";
 export { InsuranceFactory } from "./InsuranceFactory";
 export type { Insurance } from "./Insurance";
+export { MessageTransferFactory } from "./MessageTransferFactory";
+export type { MessageTransfer } from "./MessageTransfer";
 export { ParameterizedFactory } from "./ParameterizedFactory";
 export type { Parameterized } from "./Parameterized";
 export { WithdrawFactory } from "./WithdrawFactory";
