@@ -62,6 +62,14 @@ export class PullPaymentViewModel {
       },
     });
 
+    this.core.onPullPaymentUpdated.subscribe({
+      next: (payment) => {
+        if (payment.id === this.paymentId) {
+          this.state(new PaymentStatusParams(params.payment.state));
+        }
+      },
+    });
+
     this.acceptButton = new ButtonParams("Accept", async () => {
       const payments = await this.core.acceptFunds([this.paymentId]);
       const payment = payments[0];

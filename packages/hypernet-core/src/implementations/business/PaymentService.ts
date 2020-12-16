@@ -163,17 +163,44 @@ export class PaymentService implements IPaymentService {
    * @param paymentId the paymentId for the stake
    */
   public async stakePosted(paymentId: string): Promise<void> {
-    const payments = await this.paymentRepository.getPaymentsByIds([paymentId]);
+    const paymentsPromise = await this.paymentRepository.getPaymentsByIds([paymentId]);
+    const contextPromise = await this.contextProvider.getContext();
+
+    const [payments, context] = await Promise.all([paymentsPromise, contextPromise]);
+
     const payment = payments.get(paymentId);
+
+    if (payment == null) {
+      throw new Error("Invalid payment ID!");
+    }
+
+    // Make sure the stake is legit
+    if (!payment.requiredStake.eq(payment.amountStaked)) {
+      // TODO: We should be doing more here. The whole payment should be aborted.
+      throw new Error(`Invalid stake provided for payment ${paymentId}`);
+    }
 
     // Payment state must be in "staked" in order to progress
     if (payment == null || payment.state !== EPaymentState.Staked) {
       throw new Error(`Invalid payment ${paymentId}, cannot provide payment!`);
     }
 
-    // If the payment state is staked, we know that the proper
-    // insurance has been posted.
-    await this.paymentRepository.provideAsset(paymentId);
+    // If we created the stake, we can ignore this
+    if (payment.from == context.publicIdentifier) {
+      // If the payment state is staked, we know that the proper
+      // insurance has been posted.
+      const updatedPayment = await this.paymentRepository.provideAsset(paymentId);
+
+      if (updatedPayment instanceof PushPayment) {
+        context.onPushPaymentUpdated.next(updatedPayment);
+      }
+      if (updatedPayment instanceof PullPayment) {
+        context.onPullPaymentUpdated.next(updatedPayment);
+      } 
+    } else {
+      console.log('Not providing asset since payment is not from us!')
+    }
+    
   }
 
   /**
@@ -185,10 +212,17 @@ export class PaymentService implements IPaymentService {
   public async paymentPosted(paymentId: string): Promise<void> {
     const payments = await this.paymentRepository.getPaymentsByIds([paymentId]);
     const payment = payments.get(paymentId);
+    const context = await this.contextProvider.getContext()
 
     // Payment state must be in "approved" to finalize
     if (payment == null || payment.state !== EPaymentState.Approved) {
       throw new Error(`Cannot accept payment ${paymentId}`);
+    }
+
+    // If we're the ones that *sent* the payment, we can ignore this
+    if (payment.from == context.publicIdentifier) {
+      console.log('Doing nothing in paymentPosted because we are the ones that posted the payment!')
+      return
     }
 
     // If the payment state is approved, we know that it matches our insurance payment

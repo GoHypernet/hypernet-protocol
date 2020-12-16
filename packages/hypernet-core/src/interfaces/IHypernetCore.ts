@@ -177,6 +177,8 @@ export interface IHypernetCore {
   onControlYielded: Subject<ControlClaim>;
   onPushPaymentProposed: Subject<PushPayment>;
   onPullPaymentProposed: Subject<PullPayment>;
+  onPushPaymentUpdated: Subject<PushPayment>;
+  onPullPaymentUpdated: Subject<PullPayment>;
   onPushPaymentReceived: Subject<PushPayment>;
   onPullPaymentApproved: Subject<PullPayment>;
   onBalancesChanged: Subject<Balances>;

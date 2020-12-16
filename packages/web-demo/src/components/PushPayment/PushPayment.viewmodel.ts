@@ -1,12 +1,12 @@
 import * as ko from "knockout";
-import { EPaymentState, IHypernetCore, PushPayment } from "@hypernetlabs/hypernet-core";
+import { EPaymentState, IHypernetCore, PublicIdentifier, PushPayment } from "@hypernetlabs/hypernet-core";
 import html from "./PushPayment.template.html";
 import moment from "moment";
 import { PaymentStatusParams } from "../PaymentStatus/PaymentStatus.viewmodel";
 import { ButtonParams } from "../Button/Button.viewmodel";
 
 export class PushPaymentParams {
-  constructor(public core: IHypernetCore, public payment: PushPayment) {}
+  constructor(public core: IHypernetCore, public payment: PushPayment) { }
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -34,9 +34,11 @@ export class PushPaymentViewModel {
 
   protected core: IHypernetCore;
   protected paymentId: string;
+  protected publicIdentifier: ko.Observable<PublicIdentifier | null>;
 
   constructor(params: PushPaymentParams) {
     this.core = params.core;
+    this.publicIdentifier = ko.observable(null);
 
     this.id = `Payment ${params.payment.id}`;
     this.paymentId = params.payment.id;
@@ -63,6 +65,15 @@ export class PushPaymentViewModel {
       },
     });
 
+    this.core.onPushPaymentUpdated.subscribe({
+      next: (payment) => {
+        if (payment.id === this.paymentId) {
+          this.state(new PaymentStatusParams(params.payment.state));
+        }
+      },
+    });
+
+
     this.acceptButton = new ButtonParams("Accept", async () => {
       console.log(`Attempting to accept funds for payment ${this.paymentId}`)
       const payments = await this.core.acceptFunds([this.paymentId]);
@@ -75,14 +86,15 @@ export class PushPaymentViewModel {
     });
 
     this.showAcceptButton = ko.pureComputed(() => {
-      return this.state().state === EPaymentState.Proposed;
+      return this.state().state === EPaymentState.Proposed &&
+        this.publicIdentifier() == this.to();
     });
 
     this.sendButton = new ButtonParams("Send", async () => {
       console.log(`Attempting to send funds for payment ${this.paymentId}`)
       await this.core.completePayments([this.paymentId])
       //const payments = await this.core.completePayments([this.paymentId])
-      
+
       // @todo changge this after we change the return type of completePayments & stakePosted
       /*const payment = payments[0];
       if (payment.isError) {
@@ -105,6 +117,13 @@ export class PushPaymentViewModel {
     this.showFinalizeButton = ko.pureComputed(() => {
       return this.state().state === EPaymentState.Approved;
     });
+
+    this.init();
+  }
+
+  protected async init(): Promise<void> {
+    let publicIdentifier = await this.core.getPublicIdentifier();
+    this.publicIdentifier(publicIdentifier);
   }
 }
 
