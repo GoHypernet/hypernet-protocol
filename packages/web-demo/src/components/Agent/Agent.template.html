@@ -2,7 +2,7 @@
 
   <div class="row">
 
-    <div class="col card">
+    <div class="col card card-wrapper">
       <div data-bind='component: {
         name: "account",
         params: account}'>
@@ -18,14 +18,14 @@
     </div>
     -->
 
-    <div class="col card">
+    <div class="col card card-wrapper">
       <div data-bind='component: {
         name: "balances",
         params: balances}'></div>
     </div>
 
 
-    <div class="col card">
+    <div class="col card card-wrapper">
       <div data-bind='component: {
         name: "actions",
         params: actions}'></div>
@@ -35,7 +35,7 @@
 
   <div class="row">
 
-    <div class="col card">
+    <div class="col card card-wrapper">
       <div data-bind="component: {
         name: 'links',
         params: links}">
@@ -45,14 +45,14 @@
 
   <div class="row">
 
-    <div class="col card">
+    <div class="col card card-wrapper">
       <div data-bind='component: {
         name: "payment-form",
         params: paymentForm}'>
       </div>
     </div>
 
-    <div class="col card">
+    <div class="col card card-wrapper">
       <div class="card-body">
         <h5 class="card-title">Messages</h5>
         <div data-bind="text: message"></div>
