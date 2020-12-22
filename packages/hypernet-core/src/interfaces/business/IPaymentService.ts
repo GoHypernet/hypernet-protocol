@@ -41,6 +41,12 @@ export interface IPaymentService {
   paymentPosted(paymentId: string): Promise<void>;
 
   /**
+   * Notify the service that a payment has been completed.
+   * @param paymentId 
+   */
+  paymentCompleted(paymentId: string): Promise<void>;
+
+  /**
    * Notify the service that a pull payment has been posted.
    * @param paymentId
    */

@@ -1,5 +1,5 @@
 import * as ko from "knockout";
-import { EPaymentState, IHypernetCore, PublicIdentifier, PushPayment } from "@hypernetlabs/hypernet-core";
+import { EPaymentState, IHypernetCore, Payment, PublicIdentifier, PushPayment } from "@hypernetlabs/hypernet-core";
 import html from "./PushPayment.template.html";
 import moment from "moment";
 import { PaymentStatusParams } from "../PaymentStatus/PaymentStatus.viewmodel";
@@ -60,7 +60,12 @@ export class PushPaymentViewModel {
     this.core.onPushPaymentReceived.subscribe({
       next: (payment) => {
         if (payment.id === this.paymentId) {
-          this.state(new PaymentStatusParams(params.payment.state));
+          let paymentStatusParams = new PaymentStatusParams(EPaymentState.Finalized)
+          this.state(paymentStatusParams)
+          // @todo this is a manual override for now, since we don't yet have a way
+          // to grab a finalized transfer in the core (and thus no way to correctly 
+          // or easily report a "finalized" payment state!)
+          //this.state(new PaymentStatusParams(params.payment.state));
         }
       },
     });

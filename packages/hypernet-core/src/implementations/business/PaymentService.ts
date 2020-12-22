@@ -237,6 +237,26 @@ export class PaymentService implements IPaymentService {
   }
 
   /**
+   * Notifies the service that the parameterized payment has been resolved.
+   * @param paymentId the payment id that has been resolved.
+   */
+  public async paymentCompleted(paymentId: string): Promise<void> {
+    const payments = await this.paymentRepository.getPaymentsByIds([paymentId]);
+    const payment = payments.get(paymentId);
+    const context = await this.contextProvider.getContext()
+
+    if (payment == null) {
+      throw new Error(`Could not get payment with id: ${paymentId}`)
+    }
+
+    // @todo add some additional checking here
+    // @todo add in a way to grab the resolved transfer
+    // @todo probably resolve the offer and/or insurance transfer as well?
+    // @todo probably genericize this so that it doesn't have to be a pushPayment
+    context.onPushPaymentReceived.next(payment as PushPayment)
+  }
+
+  /**
    * Notifies the service that a pull-payment has been recorded.
    * @param paymentId the paymentId for the pull-payment
    */
