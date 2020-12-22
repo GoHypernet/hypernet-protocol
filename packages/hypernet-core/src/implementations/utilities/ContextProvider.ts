@@ -18,6 +18,8 @@ export class ContextProvider implements IContextProvider {
     onPullPaymentProposed: Subject<PullPayment>,
     onPushPaymentReceived: Subject<PushPayment>,
     onPullPaymentApproved: Subject<PullPayment>,
+    onPushPaymentUpdated: Subject<PushPayment>,
+    onPullPaymentUpdated: Subject<PullPayment>,
     onBalancesChanged: Subject<Balances>,
   ) {
     this.context = new HypernetContext(
@@ -30,6 +32,8 @@ export class ContextProvider implements IContextProvider {
       onPullPaymentProposed,
       onPushPaymentReceived,
       onPullPaymentApproved,
+      onPushPaymentUpdated,
+      onPullPaymentUpdated,
       onBalancesChanged,
     );
   }
@@ -52,6 +56,8 @@ export class ContextProvider implements IContextProvider {
       this.context.onPullPaymentProposed,
       this.context.onPushPaymentReceived,
       this.context.onPullPaymentApproved,
+      this.context.onPushPaymentUpdated,
+      this.context.onPullPaymentUpdated,
       this.context.onBalancesChanged,
     );
   }

@@ -51,15 +51,6 @@ export class VectorAPIListener implements IVectorListener {
         console.log(`Ignoring transfer that is not in the Hypernet Domain: transferID of ${transfer.transferId}, initiator: ${transfer.initiator}`)
         return;
       }
-
-      // Determine if you sent the transfer, in which case you can ignore this
-      if (from === context.publicIdentifier) {
-        console.log(`Ignoring transfer that we sent, transferID of ${transfer.transferId}, initiator: ${transfer.initiator}`)
-        return;
-      }
-
-      // If you didn't send this transfer, you want to notify the user
-      // that a payment is available for them to accept (insurance, paramterized, etc)
       
       if (transferType === ETransferType.Offer) {
         // if the transfer is an offer transfer, we need to notify the payment service
