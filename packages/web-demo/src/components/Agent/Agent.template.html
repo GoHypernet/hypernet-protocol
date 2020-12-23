@@ -1,10 +1,9 @@
-<div style="background: #ffffff;padding: 10px">
+<div style="background: #ffffff;padding: 10px 20px">
   <img src="https://hypernetlabs.io/wp-content/uploads/2018/10/galileo-logo-2-06.png" style="width: 100px;margin:10px 0px"/>
 </div>
 <div class="container-fluid">
-  <div class="row">
-
-    <div class="col card card-wrapper">
+  <div class="coustom-three-coloumn">
+    <div class="col card card-wrapper" style="margin: 20px 10px 20px 0px">
       <div data-bind='component: {
         name: "account",
         params: account}'>
@@ -20,45 +19,46 @@
     </div>
     -->
 
-    <div class="col card card-wrapper">
+    <div class="col card card-wrapper" style="margin: 20px 10px 20px 0px">
       <div data-bind='component: {
         name: "balances",
         params: balances}'></div>
     </div>
 
 
-    <div class="col card card-wrapper">
+    <div class="col card card-wrapper" style="margin: 20px 10px 20px 0px">
       <div data-bind='component: {
         name: "actions",
-        params: actions}'></div>
+       params: actions}'></div>
     </div>
 
   </div>
 
-  <div class="row">
+  <div class="coustom-tow-coloumn">
 
-    <div class="col card card-wrapper">
+    <div class="col card card-wrapper" style="margin: 0px">
       <div data-bind="component: {
         name: 'links',
         params: links}">
       </div>
     </div>
-  </div>
+    <div>
 
-  <div class="row">
-
-    <div class="col card card-wrapper">
-      <div data-bind='component: {
+      <div class="col card card-wrapper" style="margin-top:0px">
+        <div data-bind='component: {
         name: "payment-form",
         params: paymentForm}'>
+        </div>
       </div>
-    </div>
 
-    <div class="col card card-wrapper">
-      <div class="card-body">
-        <h5 class="card-title">Messages</h5>
-        <div data-bind="text: message"></div>
+      <div class="col card card-wrapper">
+        <div class="card-body">
+          <h5 class="card-title">Messages</h5>
+          <div data-bind="text: message"></div>
+        </div>
       </div>
     </div>
   </div>
+
+
 </div>

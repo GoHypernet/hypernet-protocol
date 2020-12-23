@@ -26,3 +26,14 @@ body{
 .form-control-margin{
     margin-bottom: 10px !important;
 }
+.coustom-tow-coloumn{
+    display: grid;
+    grid-column-gap: 10px;
+    grid-template-columns: 70% 28%;
+}
+.coustom-three-coloumn{
+    display: grid;
+    grid-column-gap: 10px;
+    grid-template-columns: 35% 35% 28%;
+}
+
