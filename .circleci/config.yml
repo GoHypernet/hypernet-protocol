@@ -1,4 +1,7 @@
 version: 2.1
+general:
+  artifacts:
+    - "coverage/lcov-report"
 jobs:
   build:
     docker:
@@ -8,21 +11,24 @@ jobs:
           password: $DOCKERHUB_PASSWORD # context / project UI env-var reference
     steps:
       - checkout
-      - run: echo "this is the build job"
-  test:
-    docker:
-      - image: "cimg/node:12.14.1"
-        auth:
-          username: mydockerhub-user
-          password: $DOCKERHUB_PASSWORD # context / project UI env-var reference
-    steps:
-      - checkout
-      - run: cd packages/hypernet-core && npm install
-      - run: cd packages/hypernet-core && npm run test
-
+      # TODO: Use lockfiles instead of json files
+      - restore_cache:
+          key: dependency-cache-{{ checksum "packages/hypernet-core/package.json" }}
+      - run:
+          name: Install dependencies
+          command: cd packages/hypernet-core && npm install
+      - save_cache:
+          key: dependency-cache-{{ checksum "packages/hypernet-core/package.json" }}
+          paths:
+            - packages/hypernet-core/node_modules
+      - run:
+          name: Test
+          command: cd packages/hypernet-core && npm run test:ci
+      - store_artifacts:
+          path: packages/hypernet-core/coverage
+          destination: coverage
 # Orchestrate our job run sequence
 workflows:
-  build_and_test:
+  build:
     jobs:
       - build
-      - test
