@@ -1,7 +1,28 @@
 version: 2.1
-orbs:
-  node: circleci/node@3.0.0
+jobs:
+  build:
+    docker:
+      - image: "cimg/node:12.14.1"
+        auth:
+          username: mydockerhub-user
+          password: $DOCKERHUB_PASSWORD # context / project UI env-var reference
+    steps:
+      - checkout
+      - run: echo "this is the build job"
+  test:
+    docker:
+      - image: "cimg/node:12.14.1"
+        auth:
+          username: mydockerhub-user
+          password: $DOCKERHUB_PASSWORD # context / project UI env-var reference
+    steps:
+      - checkout
+      - run: cd packages/hypernet-core && npm install
+      - run: cd packages/hypernet-core && npm run test
+
+# Orchestrate our job run sequence
 workflows:
-  node-tests:
+  build_and_test:
     jobs:
-      - node/test
+      - build
+      - test
