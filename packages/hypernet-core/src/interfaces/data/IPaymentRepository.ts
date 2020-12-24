@@ -16,9 +16,9 @@ export interface IPaymentRepository {
    */
   createPushPayment(
     counterPartyAccount: PublicIdentifier,
-    amount: BigNumber,
+    amount: string,
     expirationDate: moment.Moment,
-    requiredStake: BigNumber,
+    requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
   ): Promise<Payment>;

@@ -259,9 +259,9 @@ export class HypernetCore implements IHypernetCore {
    */
   public async sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: BigNumber,
+    amount: string,
     expirationDate: moment.Moment,
-    requiredStake: BigNumber,
+    requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
   ): Promise<Payment> {

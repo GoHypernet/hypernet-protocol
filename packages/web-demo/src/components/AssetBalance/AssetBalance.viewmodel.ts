@@ -1,6 +1,7 @@
 import * as ko from "knockout";
 import { AssetBalance } from "@hypernetlabs/hypernet-core";
 import html from "./AssetBalance.template.html";
+import Web3 from 'web3'
 
 export class AssetBalanceParams {
   constructor(public assetBalance: AssetBalance) {}
@@ -15,9 +16,9 @@ export class AssetBalanceViewModel {
 
   constructor(params: AssetBalanceParams) {
     this.assetAddress = params.assetBalance.assetAddresss;
-    this.totalAmount = params.assetBalance.totalAmount.toString();
-    this.lockedAmount = params.assetBalance.lockedAmount.toString();
-    this.freeAmount = params.assetBalance.freeAmount.toString();
+    this.totalAmount = Web3.utils.fromWei(params.assetBalance.totalAmount.toString());
+    this.lockedAmount = Web3.utils.fromWei(params.assetBalance.lockedAmount.toString());
+    this.freeAmount = Web3.utils.fromWei(params.assetBalance.freeAmount.toString());
   }
 }
 

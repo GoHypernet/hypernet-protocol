@@ -50,9 +50,9 @@ export class PaymentService implements IPaymentService {
    */
   public async sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: BigNumber,
+    amount: string,
     expirationDate: moment.Moment,
-    requiredStake: BigNumber,
+    requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
   ): Promise<Payment> {
@@ -272,7 +272,7 @@ export class PaymentService implements IPaymentService {
    * @param channelId the (Vector) channelId to request the payment on
    * @param amount the amount of payment to request
    */
-  requestPayment(channelId: string, amount: BigNumber): Promise<Payment> {
+  requestPayment(channelId: string, amount: string): Promise<Payment> {
     throw new Error("Method not implemented.");
   }
 }
