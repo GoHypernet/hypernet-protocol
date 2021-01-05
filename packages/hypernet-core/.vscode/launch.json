@@ -1,0 +1,18 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Jest Current File",
+			"cwd": "${workspaceFolder}",
+			"args": [
+				"--inspect-brk",
+				"node_modules/.bin/jest",
+				"--runInBand",
+			],
+			"console": "internalConsole",
+			"disableOptimisticBPs": true
+		}
+	]
+}

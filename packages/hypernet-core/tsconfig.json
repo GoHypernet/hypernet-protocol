@@ -4,10 +4,15 @@
         "outDir": "./lib",
         "composite": true,
         "rootDir": "./src",
+        "target": "ES2017",
         "baseUrl": ".",
         "paths": {
-            "@interfaces/*": ["./src/interfaces/*"],
-            "@implementations/*": ["./src/implementations/*"]
+            "@interfaces/*": [
+                "./src/interfaces/*"
+            ],
+            "@implementations/*": [
+                "./src/implementations/*"
+            ]
         }
     },
     "include": [

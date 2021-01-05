@@ -19,6 +19,7 @@
     "test": "__tests__"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.19",
     "@types/randomstring": "^1.1.6",
     "@types/reflect-metadata": "^0.1.0",
     "@types/sjcl": "^1.0.29",
@@ -26,6 +27,7 @@
     "@types/web3": "^1.2.2",
     "copyfiles": "^2.3.0",
     "coverage-github-reporter": "^1.1.0",
+    "factory.ts": "^0.5.1",
     "jest": "^26.4.2",
     "prettier": "^2.1.1",
     "randomstring": "^1.1.5",
@@ -77,6 +79,23 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
     "webpack": "webpack"
+  },
+  "babel": {
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": {
+            "esmodules": true
+          }
+        }
+      ],
+      "@babel/preset-react",
+      "@babel/preset-flow"
+    ],
+    "plugins": [
+      "@babel/plugin-proposal-class-properties"
+    ]
   },
   "bugs": {
     "url": "https://github.com/GoHypernet/hypernet-protocol/issues"

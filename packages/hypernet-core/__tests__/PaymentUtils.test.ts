@@ -1,7 +1,34 @@
-import { EBlockchainNetwork, EPaymentType } from "@interfaces/types";
-import { ConfigProvider } from "./ConfigProvider";
-import { PaymentIdUtils, PaymentUtils } from "./PaymentUtils";
+import { EBlockchainNetwork, EPaymentType } from "../src/interfaces/types";
+import { ConfigProvider } from "../src/implementations/utilities/ConfigProvider";
+import { PaymentIdUtils, PaymentUtils } from "../src/implementations/utilities/PaymentUtils";
 import randomstring from "randomstring";
+import { BrowserNode } from "@connext/vector-browser-node/dist/index";
+import { FullTransferState } from "@connext/vector-types";
+import * as Factory from "factory.ts";
+
+
+const transferFactory = Factory.Sync.makeFactory<FullTransferState>({
+  channelAddress: "channelAddress",
+  transferId: "transferId",
+  transferDefinition: "",
+  initiator: "sdf", // either alice or bob
+  responder: "saf", // either alice or bob
+  assetId: "id",
+  balance: {
+  	amount: [],
+  	to: [],
+  },
+  transferTimeout: "string",
+  initialStateHash: "string",
+
+  channelFactoryAddress: "networkContext", // networkContext?
+  chainId: Factory.each(i => i),
+  transferEncodings: [], // Initial state encoding, resolver encoding
+  transferState: {},
+  transferResolver: {}, // undefined iff not resolved
+  meta: {},
+  inDispute: false,
+});
 
 describe("Testing payment utils", () => {
 	const configPromise = new ConfigProvider(EBlockchainNetwork.Localhost);
@@ -27,7 +54,9 @@ describe("Testing payment utils", () => {
 	});
 
 	it("should sort transfers", async () => {
+		let browserNode = ({} as unknown) as BrowserNode;
+		const transfer = transferFactory.build({});
 		const paymentId = await paymentUtils.createPaymentId(EPaymentType.Pull);
-		// paymentUtils.sortTransfers(paymentId, )
+		paymentUtils.sortTransfers(paymentId, [transfer], browserNode );
 	})
 });
