@@ -22,7 +22,11 @@ import {
   IBlockchainProvider, IBrowserNodeProvider, IConfigProvider,
   IContextProvider, ILinkUtils, IPaymentUtils, IVectorUtils
 } from "@interfaces/utilities";
+import {
+  IVectorListener
+} from "@interfaces/api";
 import { Subject } from "rxjs";
+import { VectorAPIListener } from "./api";
 
 /**
  * The top-level class-definition for Hypernet Core.
@@ -33,8 +37,10 @@ export class HypernetCore implements IHypernetCore {
   public onControlClaimed: Subject<ControlClaim>;
   public onControlYielded: Subject<ControlClaim>;
   public onPushPaymentProposed: Subject<PushPayment>;
+  public onPushPaymentUpdated: Subject<PushPayment>;
   public onPullPaymentProposed: Subject<PullPayment>;
   public onPushPaymentReceived: Subject<PushPayment>;
+  public onPullPaymentUpdated: Subject<PullPayment>;
   public onPullPaymentApproved: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
 
@@ -58,6 +64,9 @@ export class HypernetCore implements IHypernetCore {
   protected linkService: ILinkService;
   protected developmentService: IDevelopmentService;
 
+  // API
+  protected vectorAPIListener: IVectorListener;
+
   protected _initializedPromise: Promise<void>;
   protected _initializeResolve: (() => void) | undefined;
   protected _inControl: boolean;
@@ -76,8 +85,10 @@ export class HypernetCore implements IHypernetCore {
     this.onControlClaimed = new Subject<ControlClaim>();
     this.onControlYielded = new Subject<ControlClaim>();
     this.onPushPaymentProposed = new Subject<PushPayment>();
+    this.onPushPaymentUpdated = new Subject<PushPayment>();
     this.onPushPaymentReceived = new Subject<PushPayment>();
     this.onPullPaymentProposed = new Subject<PullPayment>();
+    this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onPullPaymentApproved = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
 
@@ -105,6 +116,8 @@ export class HypernetCore implements IHypernetCore {
       this.onPullPaymentProposed,
       this.onPushPaymentReceived,
       this.onPullPaymentApproved,
+      this.onPushPaymentUpdated,
+      this.onPullPaymentUpdated,
       this.onBalancesChanged,
     );
 
@@ -145,6 +158,9 @@ export class HypernetCore implements IHypernetCore {
     this.accountService = new AccountService(this.accountRepository, this.contextProvider);
     this.linkService = new LinkService(this.linkRepository);
     this.developmentService = new DevelopmentService(this.accountRepository);
+
+    this.vectorAPIListener = new VectorAPIListener(this.browserNodeProvider,
+      this.paymentService, this.vectorUtils, this.contextProvider, this.paymentUtils);
   }
 
   /**
@@ -243,9 +259,9 @@ export class HypernetCore implements IHypernetCore {
    */
   public async sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: BigNumber,
+    amount: string,
     expirationDate: moment.Moment,
-    requiredStake: BigNumber,
+    requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
   ): Promise<Payment> {
@@ -350,6 +366,8 @@ export class HypernetCore implements IHypernetCore {
     context.account = account;
     context.publicIdentifier = publicIdentifier;
     this.contextProvider.setContext(context);
+    
+    await this.vectorAPIListener.setup();
 
     // const messagingListener = this.messagingListener.initialize();
     // await Promise.all([messagingListener]);

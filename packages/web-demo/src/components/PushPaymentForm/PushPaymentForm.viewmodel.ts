@@ -5,6 +5,7 @@ import moment from "moment";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
 import { BigNumber, PublicIdentifier } from "@hypernetlabs/hypernet-core/lib/interfaces/objects";
 import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
+import Web3 from 'web3'
 
 export class PushPaymentFormParams {
   constructor(
@@ -50,8 +51,8 @@ export class PushPaymentFormViewModel {
 
         try {
           const expirationDate = moment(this.expirationDate());
-          const amount = BigNumber.from(this.amount());
-          const requiredStake = BigNumber.from(this.requiredStake());
+          const amount = Web3.utils.toWei(this.amount());
+          const requiredStake = Web3.utils.toWei(this.requiredStake());
 
           return this.core.sendFunds(
             this.counterparty(),

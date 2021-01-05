@@ -32,6 +32,7 @@
     "compile": "tsc -b tsconfig.json",
     "clean-docker": "docker-compose down",
     "start": "yarn start-backend && yarn verify-backend && yarn deploy-custom-transfers && yarn start-web",
+    "Start-windows": "yarn start-backend && yarn deploy-custom-transfers && yarn start-web",
     "start-web": "webpack-dev-server --mode development --open",
     "start-backend": "docker-compose down && docker-compose pull && docker-compose up -d && wait-on -l -d 15000 tsconfig.json && docker-compose up -d",
     "verify-backend": "docker ps -f status=running -f name=web-demo | grep connextproject | if [ `wc -l` -ne 8 ]; then echo 'Error: did not detect 8 running docker containers!' && `exit 1`; fi",

@@ -104,9 +104,9 @@ export interface IHypernetCore {
    */
   sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: BigNumber,
+    amount: string,
     expirationDate: moment.Moment,
-    requiredStake: BigNumber,
+    requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
   ): Promise<Payment>;
@@ -177,6 +177,8 @@ export interface IHypernetCore {
   onControlYielded: Subject<ControlClaim>;
   onPushPaymentProposed: Subject<PushPayment>;
   onPullPaymentProposed: Subject<PullPayment>;
+  onPushPaymentUpdated: Subject<PushPayment>;
+  onPullPaymentUpdated: Subject<PullPayment>;
   onPushPaymentReceived: Subject<PushPayment>;
   onPullPaymentApproved: Subject<PullPayment>;
   onBalancesChanged: Subject<Balances>;

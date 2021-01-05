@@ -26,7 +26,7 @@ export class PaymentRepository implements IPaymentRepository {
     protected configProvider: IConfigProvider,
     protected contextProvider: IContextProvider,
     protected paymentUtils: IPaymentUtils,
-  ) {}
+  ) { }
 
   /**
    * Creates a push payment and returns it. Nothing moves until
@@ -41,9 +41,9 @@ export class PaymentRepository implements IPaymentRepository {
    */
   public async createPushPayment(
     counterPartyAccount: PublicIdentifier,
-    amount: BigNumber,
+    amount: string,
     expirationDate: moment.Moment,
-    requiredStake: BigNumber,
+    requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
   ): Promise<Payment> {
@@ -87,11 +87,17 @@ export class PaymentRepository implements IPaymentRepository {
    * Given a paymentId, return the component transfers.
    * @param paymentId the payment to get transfers for
    */
-  public async paymentToTransfers(paymentId: string): Promise<SortedTransfers> {
-    const browserNode = await this.browserNodeProvider.getBrowserNode();
-    const channelAddress = await this.vectorUtils.getRouterChannelAddress();
-    const config = await this.configProvider.getConfig();
-    const context = await this.contextProvider.getInitializedContext();
+  public async getTransfersByPaymentId(paymentId: string): Promise<FullTransferState[]> {
+    const browserNodePromise = await this.browserNodeProvider.getBrowserNode();
+    const channelAddressPromise = await this.vectorUtils.getRouterChannelAddress();
+    const configPromise = await this.configProvider.getConfig();
+    const contextPromise = await this.contextProvider.getInitializedContext();
+
+    const [browserNode, channelAddress, config, context] =
+      await Promise.all([browserNodePromise,
+        channelAddressPromise,
+        configPromise,
+        contextPromise]);
 
     const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress });
 
@@ -121,8 +127,7 @@ export class PaymentRepository implements IPaymentRepository {
       }
     }
 
-    let sortedTransfers = await this.paymentUtils.sortTransfers(paymentId, relevantTransfers, browserNode)
-    return sortedTransfers
+    return relevantTransfers;
   }
 
   /**
@@ -163,14 +168,15 @@ export class PaymentRepository implements IPaymentRepository {
         relevantTransfers.push(transfer)
       } else {
         let transferType = await this.paymentUtils.getTransferType(transfer, browserNode)
-        if (transferType == ETransferType.Insurance || transferType == ETransferType.Parameterized) {
+        if (transferType == ETransferType.Insurance ||
+          transferType == ETransferType.Parameterized) {
           if (paymentIds.includes(transfer.transferState.UUID)) {
             relevantTransfers.push(transfer)
           } else {
             console.log(`Transfer not relevant in PaymentRepository, transferId: ${transfer.transferId}`)
           }
         } else {
-          console.log(`Unrecognized transfer in PaymentRepository, transferId: ${transfer.transferId}`)
+          console.log(`Unrecognized transfer or not relevant to this payment in PaymentRepository, transferId: ${transfer.transferId}`)
         }
       }
     }
@@ -213,13 +219,22 @@ export class PaymentRepository implements IPaymentRepository {
    * @param amount the amount of the payment to finalize for
    */
   public async finalizePayment(paymentId: string, amount: string): Promise<Payment> {
-    let browserNode = await this.browserNodeProvider.getBrowserNode();
-    let config = await this.configProvider.getConfig();
-    let payment = await this.getPaymentById(paymentId);
+    let browserNodePromise = await this.browserNodeProvider.getBrowserNode();
+    let configPromise = await this.configProvider.getConfig();
+    let paymentPromise = await this.getPaymentById(paymentId);
+    let existingTransfersPromise = await this.getTransfersByPaymentId(paymentId);
+
+    let [browserNode, config, payment, existingTransfers] =
+      await Promise.all([browserNodePromise,
+        configPromise,
+        paymentPromise,
+        existingTransfersPromise]);
+
+    console.log(`Finalizing payment ${paymentId}`)
 
     // get the transfer id from the paymentId
     // use payment utils for this
-    let sortedTransfers: SortedTransfers = await this.paymentToTransfers(paymentId)
+    let sortedTransfers = await this.paymentUtils.sortTransfers(paymentId, existingTransfers, browserNode)
 
     if (sortedTransfers.parameterizedTransfer == null) {
       throw new Error(`Cannot finalize payment ${paymentId}, no parameterized transfer exists for this!`)
@@ -236,8 +251,12 @@ export class PaymentRepository implements IPaymentRepository {
 
     let transfer = transferResult.getValue() as FullTransferState;
 
+    // Remove the parameterized payment
+    existingTransfers = existingTransfers.filter(obj => obj.transferId != transferId)
+    existingTransfers.push(transfer)
+
     // Transfer has been resolved successfully; return the updated payment.
-    let updatedPayment = this.paymentUtils.transfersToPayment(paymentId, [transfer], config, browserNode);
+    let updatedPayment = this.paymentUtils.transfersToPayment(paymentId, existingTransfers, config, browserNode);
 
     return updatedPayment;
   }
@@ -248,9 +267,17 @@ export class PaymentRepository implements IPaymentRepository {
    * @param paymentId the payment for which to provide stake for
    */
   public async provideStake(paymentId: string): Promise<Payment> {
-    let browserNode = await this.browserNodeProvider.getBrowserNode();
-    let config = await this.configProvider.getConfig();
-    let payment = await this.getPaymentById(paymentId);
+    let browserNodePromise = await this.browserNodeProvider.getBrowserNode();
+    let configPromise = await this.configProvider.getConfig();
+    let paymentPromise = await this.getPaymentById(paymentId);
+    let existingTransfersPromise = await this.getTransfersByPaymentId(paymentId);
+
+
+    let [browserNode, config, payment, existingTransfers] =
+      await Promise.all([browserNodePromise,
+        configPromise,
+        paymentPromise,
+        existingTransfersPromise]);
 
     let paymentMediator = payment.disputeMediator;
     let paymentSender = payment.from;
@@ -274,9 +301,10 @@ export class PaymentRepository implements IPaymentRepository {
     }
 
     let transfer = transferResult.getValue() as FullTransferState;
+    let allTransfers = [transfer, ...existingTransfers]
 
     // Transfer has been created successfully; return the updated payment.
-    let updatedPayment = this.paymentUtils.transfersToPayment(paymentId, [transfer], config, browserNode);
+    let updatedPayment = this.paymentUtils.transfersToPayment(paymentId, allTransfers, config, browserNode);
 
     return updatedPayment;
   }
@@ -288,9 +316,16 @@ export class PaymentRepository implements IPaymentRepository {
    * @param paymentId the payment for which to provide an asset for
    */
   public async provideAsset(paymentId: string): Promise<Payment> {
-    let browserNode = await this.browserNodeProvider.getBrowserNode();
-    let config = await this.configProvider.getConfig();
-    let payment = await this.getPaymentById(paymentId);
+    let browserNodePromise = await this.browserNodeProvider.getBrowserNode();
+    let configPromise = await this.configProvider.getConfig();
+    let paymentPromise = await this.getPaymentById(paymentId);
+    let existingTransfersPromise = await this.getTransfersByPaymentId(paymentId);
+
+    let [browserNode, config, payment, existingTransfers] =
+      await Promise.all([browserNodePromise,
+        configPromise,
+        paymentPromise,
+        existingTransfersPromise]);
 
     if (!(payment instanceof PushPayment || payment instanceof PullPayment)) {
       throw new Error("Payment was neither Push nor Pull");
@@ -321,9 +356,10 @@ export class PaymentRepository implements IPaymentRepository {
     }
 
     let transfer = transferResult.getValue() as FullTransferState;
+    let allTransfers = [transfer, ...existingTransfers]
 
     // Transfer has been created successfully; return the updated payment.
-    let updatedPayment = this.paymentUtils.transfersToPayment(transferInfo.transferId, [transfer], config, browserNode);
+    let updatedPayment = this.paymentUtils.transfersToPayment(paymentID, allTransfers, config, browserNode);
 
     return updatedPayment;
   }

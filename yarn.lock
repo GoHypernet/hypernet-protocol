@@ -416,15 +416,15 @@
   resolved "https://registry.yarnpkg.com/@connext/pure-evm-wasm/-/pure-evm-wasm-0.1.4.tgz#5cdca4463aaa649ea7740ebbe67ed05b8443ad0e"
   integrity sha512-BeNU9oH83vXKpnFEltr5D82nfmbd26uX/gp0jMR58H5FCGnXlZS/XyoU4yXsxytVU4wc56fQwirE0xYNiqs3vw==
 
-"@connext/vector-browser-node@^0.0.34":
-  version "0.0.34"
-  resolved "https://registry.yarnpkg.com/@connext/vector-browser-node/-/vector-browser-node-0.0.34.tgz#dbc9e969142c5d9f3e0e2c1670705a9f4d2e7836"
-  integrity sha512-9slW77I60QsYAEtIEg+5MI5mDCnKCwTRp7nrg3LJDJGJNyQLJ2A8QgqYE98n1CUdtZ5vAlWjA0R0GMQd+d7Izw==
+"@connext/vector-browser-node@^0.0.37":
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/@connext/vector-browser-node/-/vector-browser-node-0.0.37.tgz#dfde290492c5545b73ab0683ad1cf642173c4b5f"
+  integrity sha512-BsWn0rUh/aXvWkg4GGdlkWA1Fzrra49MJJPGXx96I9FJOj/l/EJDMenVzcgYjx7aYW9qH1iU3iPmFU7uA8+CAA==
   dependencies:
-    "@connext/vector-contracts" "0.0.34"
-    "@connext/vector-engine" "0.0.34"
-    "@connext/vector-types" "0.0.34"
-    "@connext/vector-utils" "0.0.34"
+    "@connext/vector-contracts" "0.0.37"
+    "@connext/vector-engine" "0.0.37"
+    "@connext/vector-types" "0.0.37"
+    "@connext/vector-utils" "0.0.37"
     "@ethersproject/solidity" "5.0.6"
     "@sinclair/typebox" "0.11.0"
     ajv "6.12.6"
@@ -434,14 +434,14 @@
     pino "6.7.0"
     ts-nats "1.2.15"
 
-"@connext/vector-contracts@0.0.34", "@connext/vector-contracts@^0.0.34":
-  version "0.0.34"
-  resolved "https://registry.yarnpkg.com/@connext/vector-contracts/-/vector-contracts-0.0.34.tgz#dcb2bbb8d80644ba7c3864beb79625df14739ade"
-  integrity sha512-sxstfTSR8VLiw6xuGZVqW/ftXOwGiweRU7mDKUnl761T/xLL1UX2lAih+x+OeoJeEYeeFbLiwojQKTpvFPDmeg==
+"@connext/vector-contracts@0.0.37", "@connext/vector-contracts@^0.0.37":
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/@connext/vector-contracts/-/vector-contracts-0.0.37.tgz#6b0ae342feeaa1d4a93d947434af535670d53000"
+  integrity sha512-b4pcZMEaYh+Q7eEm3jyGvMpUSA1yZQbCHw5Npalb/9JfaV28IyJ91Xpo9iGGp+zXv4BS0tCGG5ZcsyIwKE6TDw==
   dependencies:
     "@connext/pure-evm-wasm" "0.1.4"
-    "@connext/vector-types" "0.0.34"
-    "@connext/vector-utils" "0.0.34"
+    "@connext/vector-types" "0.0.37"
+    "@connext/vector-utils" "0.0.37"
     "@ethersproject/abi" "5.0.8"
     "@ethersproject/abstract-provider" "5.0.6"
     "@ethersproject/abstract-signer" "5.0.8"
@@ -464,15 +464,15 @@
     pino-pretty "4.3.0"
     yargs "16.1.0"
 
-"@connext/vector-engine@0.0.34":
-  version "0.0.34"
-  resolved "https://registry.yarnpkg.com/@connext/vector-engine/-/vector-engine-0.0.34.tgz#aef7b65c4bc4efe201b0d4de30666bf4fac1b2fb"
-  integrity sha512-nntGX40h6oDpXV1auNJN+BmDZrf89qne72F7AkZmMrv3gIbASaaw0uDAWDrxlo/eqClLK03HVh40nRsmYQngrQ==
+"@connext/vector-engine@0.0.37":
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/@connext/vector-engine/-/vector-engine-0.0.37.tgz#b85c4f91e97132add0c4f59738084aee4dc2bfef"
+  integrity sha512-EnmqN8FqrV9v3IzeQq2oOEndV6jxLcgOCWX7STl9BYtek95fM4a4i+PAayj3kw66a2/xS24ORTOGovfWL3hzvQ==
   dependencies:
-    "@connext/vector-contracts" "0.0.34"
-    "@connext/vector-protocol" "0.0.34"
-    "@connext/vector-types" "0.0.34"
-    "@connext/vector-utils" "0.0.34"
+    "@connext/vector-contracts" "0.0.37"
+    "@connext/vector-protocol" "0.0.37"
+    "@connext/vector-types" "0.0.37"
+    "@connext/vector-utils" "0.0.37"
     "@ethersproject/bignumber" "5.0.10"
     "@ethersproject/bytes" "5.0.6"
     "@ethersproject/constants" "5.0.6"
@@ -484,14 +484,14 @@
     pino "6.7.0"
     pino-pretty "4.3.0"
 
-"@connext/vector-protocol@0.0.34":
-  version "0.0.34"
-  resolved "https://registry.yarnpkg.com/@connext/vector-protocol/-/vector-protocol-0.0.34.tgz#0e0a0d7385de14e9bd83eb378ee5b64e73a3a527"
-  integrity sha512-L8wfHNbvtyS85I/yaF/Um2aV5iuwceGtvlUbTMpSTcqZ1Uk60sAjTOCRZBQTVKovypUdo7it2GgPjHoS/xvd6w==
+"@connext/vector-protocol@0.0.37":
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/@connext/vector-protocol/-/vector-protocol-0.0.37.tgz#387c308eefa6351ae5a69df2c1c45cda2c37c39e"
+  integrity sha512-QPPIOolND92fmBMx2hQENQvWuQ8asquC4lIvdhcMUmGZHyRUNCIU8QouRidF2Y1miH3kLouKYt+U26uXHWXUuQ==
   dependencies:
-    "@connext/vector-contracts" "0.0.34"
-    "@connext/vector-types" "0.0.34"
-    "@connext/vector-utils" "0.0.34"
+    "@connext/vector-contracts" "0.0.37"
+    "@connext/vector-types" "0.0.37"
+    "@connext/vector-utils" "0.0.37"
     "@ethersproject/abi" "5.0.8"
     "@ethersproject/bignumber" "5.0.10"
     "@ethersproject/constants" "5.0.6"
@@ -508,10 +508,10 @@
     pino "6.7.0"
     tty "1.0.1"
 
-"@connext/vector-types@0.0.34", "@connext/vector-types@^0.0.34":
-  version "0.0.34"
-  resolved "https://registry.yarnpkg.com/@connext/vector-types/-/vector-types-0.0.34.tgz#55b9e68d876de507e40a5f03b8c6c1c178be3bda"
-  integrity sha512-RezxjE3u8+BICKnTMXAFvmSUKtrDtUihrtRn4MCmL0zt3E4EBtfpRTzrwY6aI43GxYj9YmjHNp5VeFwZ5CfLSw==
+"@connext/vector-types@0.0.37", "@connext/vector-types@^0.0.37":
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/@connext/vector-types/-/vector-types-0.0.37.tgz#247b86e8d1a1fb115e8276a10531cd271fc51307"
+  integrity sha512-NPK2iWaCh0cZhE5kx0+7jl8LKDz/bIm+EwvQYlNesMOG8mBiSM8yReaRM06qQhhEf1sfXkPdJhH1Tp6ZTNsoXQ==
   dependencies:
     "@ethersproject/abstract-provider" "5.0.6"
     "@ethersproject/abstract-signer" "5.0.8"
@@ -520,12 +520,12 @@
     "@sinclair/typebox" "0.11.0"
     evt "1.9.2"
 
-"@connext/vector-utils@0.0.34", "@connext/vector-utils@^0.0.34":
-  version "0.0.34"
-  resolved "https://registry.yarnpkg.com/@connext/vector-utils/-/vector-utils-0.0.34.tgz#147b9990419ada2f270ad3e79fbd60b2e78dd336"
-  integrity sha512-C/55LXgKCctk0GFBKtXnoWBqX08/ovQJFcyC6+4rOB9Q6R6u+YbRNoc0cMVp4z+DKgmAILUCkCo2WCD9oNy9Uw==
+"@connext/vector-utils@0.0.37", "@connext/vector-utils@^0.0.37":
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/@connext/vector-utils/-/vector-utils-0.0.37.tgz#9aefbe76d837905b82edde21ec72548321bc8db7"
+  integrity sha512-MjVJQtTIAUOctv0ErJO5+gsoI1TIE8aD3wdf68lhGrvoanm2bF2OCiIUhKvp+gYR63TdGhAifOeN02gItcPauw==
   dependencies:
-    "@connext/vector-types" "0.0.34"
+    "@connext/vector-types" "0.0.37"
     "@ethereum-waffle/chai" "3.2.0"
     "@ethersproject/abi" "5.0.8"
     "@ethersproject/abstract-provider" "5.0.6"

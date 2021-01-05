@@ -14,9 +14,9 @@ export interface IPaymentService {
    */
   sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: BigNumber,
+    amount: string,
     expirationDate: moment.Moment,
-    requiredStake: BigNumber,
+    requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
   ): Promise<Payment>;
@@ -32,13 +32,19 @@ export interface IPaymentService {
    * @param channelId
    * @param amount
    */
-  requestPayment(channelId: string, amount: BigNumber): Promise<Payment>;
+  requestPayment(channelId: string, amount: string): Promise<Payment>;
 
   /**
    * Notify the service that a payment has been posted.
    * @param paymentId
    */
   paymentPosted(paymentId: string): Promise<void>;
+
+  /**
+   * Notify the service that a payment has been completed.
+   * @param paymentId 
+   */
+  paymentCompleted(paymentId: string): Promise<void>;
 
   /**
    * Notify the service that a pull payment has been posted.
