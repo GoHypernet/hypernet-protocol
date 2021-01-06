@@ -102,11 +102,11 @@ describe("AccountService tests", () => {
     when(initializedHypernetContext.onBalancesChanged).thenReturn(new Subject<Balances>());
     when(contextProvider.getInitializedContext()).thenResolve(initializedHypernetContextInstance);
 
-    const depositFundsResponse = await service.withdrawFunds(assetAddress, amount, destinationAddress);
+    const withdrawFundsResponse = await service.withdrawFunds(assetAddress, amount, destinationAddress);
 
     // Assert
     verify(accountRepository.withdrawFunds(assetAddress, amount, destinationAddress)).once();
-    expect(depositFundsResponse.assets[0].assetAddresss).toStrictEqual(assetAddress);
-    expect(depositFundsResponse.assets[0].freeAmount).toStrictEqual(amount);
+    expect(withdrawFundsResponse.assets[0].assetAddresss).toStrictEqual(assetAddress);
+    expect(withdrawFundsResponse.assets[0].freeAmount).toStrictEqual(amount);
   });
 });

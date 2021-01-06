@@ -17,10 +17,10 @@ describe("LinkService tests", () => {
 
     // Act
     when(linkRepository.getHypernetLinks()).thenResolve([hypernetLinkInstance]);
-    const linkServiceResponse = await linkService.getLinks();
+    const getLinksResponse = await linkService.getLinks();
 
     // Assert
     verify(linkRepository.getHypernetLinks()).once();
-    expect(linkServiceResponse).toStrictEqual([hypernetLinkInstance]);
+    expect(getLinksResponse).toStrictEqual([hypernetLinkInstance]);
   });
 });

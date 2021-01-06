@@ -33,9 +33,9 @@ export class ControlService implements IControlService {
     this.contextProvider.setContext(context);
 
     // We will continue to send control claims every 5 minutes
-    this.timeout = setInterval(() => {
-      // this.messagingRepo.sendControlClaim(controlClaim);
-    }, this.claimPeriod);
+    /* this.timeout = setInterval(() => {
+      this.messagingRepo.sendControlClaim(controlClaim);
+    }, this.claimPeriod); */
 
     // Notify the world.
     context.onControlClaimed.next(controlClaim);
