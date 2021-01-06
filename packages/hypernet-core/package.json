@@ -28,6 +28,7 @@
     "prettier": "^2.1.1",
     "scrypt": "https://github.com/barrysteyn/node-scrypt/",
     "ts-jest": "^26.3.0",
+    "ts-mockito": "^2.6.1",
     "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^4.0.2",
