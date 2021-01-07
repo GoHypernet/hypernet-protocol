@@ -1,24 +1,19 @@
-import { mock, instance, verify } from "ts-mockito";
+import { verify } from "ts-mockito";
 
 import { BigNumber } from "@interfaces/objects";
-import { DevelopmentService } from "@implementations/business";
-import { AccountsRepository } from "@implementations/data";
+import DevelopmentServiceMocks from "../../mock/unit/business/DevelopmentServiceMocks";
 
 describe("DevelopmentService tests", () => {
   test("Should mintTestToken", async () => {
     // Arrange
-    const accountRepository: AccountsRepository = mock(AccountsRepository);
-    const accountRepositoryInstance: AccountsRepository = instance(accountRepository);
-
-    const developmentService = new DevelopmentService(accountRepositoryInstance);
-
+    const developmentServiceMock = new DevelopmentServiceMocks();
     const amount = BigNumber.from("42");
     const to = "ethereumAddress";
 
     // Act
-    developmentService.mintTestToken(amount, to);
+    developmentServiceMock.getServiceFactory().mintTestToken(amount, to);
 
     // Assert
-    verify(accountRepository.mintTestToken(amount, to)).once();
+    verify(developmentServiceMock.accountRepository.mintTestToken(amount, to)).once();
   });
 });

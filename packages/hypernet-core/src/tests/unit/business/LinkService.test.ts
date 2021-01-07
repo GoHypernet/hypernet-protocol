@@ -1,26 +1,18 @@
-import { mock, instance, verify, when } from "ts-mockito";
+import { verify, when } from "ts-mockito";
 
-import { HypernetLink } from "@interfaces/objects";
-import { LinkService } from "@implementations/business";
-import { VectorLinkRepository } from "@implementations/data";
+import LinkServiceMocks from "../../mock/unit/business/LinkServiceMocks";
 
 describe("LinkService tests", () => {
   test("Should getLinks return links", async () => {
     // Arrange
-    const linkRepository: VectorLinkRepository = mock(VectorLinkRepository);
-    const linkRepositoryInstance: VectorLinkRepository = instance(linkRepository);
-
-    const hypernetLink: HypernetLink = mock(HypernetLink);
-    const hypernetLinkInstance: HypernetLink = instance(hypernetLink);
-
-    const linkService = new LinkService(linkRepositoryInstance);
+    const linkServiceMock = new LinkServiceMocks();
 
     // Act
-    when(linkRepository.getHypernetLinks()).thenResolve([hypernetLinkInstance]);
-    const getLinksResponse = await linkService.getLinks();
+    when(linkServiceMock.linkRepository.getHypernetLinks()).thenResolve([linkServiceMock.getHypernetLinkFactory()]);
+    const getLinksResponse = await linkServiceMock.getServiceFactory().getLinks();
 
     // Assert
-    verify(linkRepository.getHypernetLinks()).once();
-    expect(getLinksResponse).toStrictEqual([hypernetLinkInstance]);
+    verify(linkServiceMock.linkRepository.getHypernetLinks()).once();
+    expect(getLinksResponse).toStrictEqual([linkServiceMock.getHypernetLinkFactory()]);
   });
 });
