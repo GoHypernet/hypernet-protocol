@@ -3,12 +3,14 @@ import { verify } from "ts-mockito";
 import { BigNumber } from "@interfaces/objects";
 import DevelopmentServiceMocks from "../../mock/unit/business/DevelopmentServiceMocks";
 
+var randomstring = require("randomstring");
+
 describe("DevelopmentService tests", () => {
   test("Should mintTestToken", async () => {
     // Arrange
     const developmentServiceMock = new DevelopmentServiceMocks();
     const amount = BigNumber.from("42");
-    const to = "ethereumAddress";
+    const to = "0x" + randomstring.generate({ length: 40, charset: "hex" });
 
     // Act
     developmentServiceMock.getServiceFactory().mintTestToken(amount, to);

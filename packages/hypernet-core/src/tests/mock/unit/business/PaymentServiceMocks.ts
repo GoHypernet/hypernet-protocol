@@ -1,17 +1,23 @@
 import { mock, instance } from "ts-mockito";
 
+import { PaymentRepository } from "@implementations/data";
 import { IPaymentService } from "@interfaces/business";
 import { IAccountsRepository, ILinkRepository, IPaymentRepository } from "@interfaces/data";
 import { PaymentService } from "@implementations/business";
 import { IConfigProvider, IContextProvider } from "@interfaces/utilities";
 import { InitializedHypernetContext } from "@interfaces/objects";
 
+jest.mock("@implementations/data");
+
+const mockGetPaymentsByIds = jest.fn();
+PaymentRepository.prototype.getPaymentsByIds = mockGetPaymentsByIds;
+
 export default class PaymentServiceMocks {
   public vectorLinkRepository: ILinkRepository = mock<ILinkRepository>();
   public accountRepository: IAccountsRepository = mock<IAccountsRepository>();
   public contextProvider: IContextProvider = mock<IContextProvider>();
   public configProvider: IConfigProvider = mock<IConfigProvider>();
-  public paymentRepository: IPaymentRepository = mock<IPaymentRepository>();
+  public paymentRepository = PaymentRepository;
   public initializedHypernetContext = mock(InitializedHypernetContext);
 
   public getVectorLinkRepositoryFactory(): ILinkRepository {
@@ -31,7 +37,9 @@ export default class PaymentServiceMocks {
   }
 
   public getPaymentRepositoryFactory(): IPaymentRepository {
-    return instance(this.paymentRepository);
+    // normal ts-mock "when" function won't work (issue: https://github.com/NagRock/ts-mockito/issues/209) that's why we had to write a different implementation here
+    const paymentRepositoryInstance = new (PaymentRepository as any)() as IPaymentRepository;
+    return paymentRepositoryInstance;
   }
 
   public getInitializedHypernetContextFactory(): InitializedHypernetContext {

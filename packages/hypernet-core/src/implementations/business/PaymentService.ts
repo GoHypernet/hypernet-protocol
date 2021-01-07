@@ -78,7 +78,6 @@ export class PaymentService implements IPaymentService {
     const paymentsPromise = this.paymentRepository.getPaymentsByIds([paymentId]);
     const contextPromise = this.contextProvider.getInitializedContext();
     const [payments, context] = await Promise.all([paymentsPromise, contextPromise]);
-    console.log('payments: ', payments);
 
     const payment = payments.get(paymentId);
 

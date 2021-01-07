@@ -5,6 +5,8 @@ import { Subject } from "rxjs";
 import { Balances, BigNumber, AssetBalance } from "@interfaces/objects";
 import AccountServiceMocks from "../../mock/unit/business/AccountServiceMocks";
 
+var randomstring = require("randomstring");
+
 describe("AccountService tests", () => {
   test("Should getPublicIdentifier return publicIdentifier", async () => {
     // Arrange
@@ -21,7 +23,7 @@ describe("AccountService tests", () => {
   test("Should getAccounts return accounts", async () => {
     // Arrange
     const accountServiceMock = new AccountServiceMocks();
-    const accounts = ["acount1"];
+    const accounts = ["0x" + randomstring.generate({ length: 40, charset: "hex" })];
 
     // Act
     when(accountServiceMock.accountRepository.getAccounts()).thenResolve(accounts);
@@ -33,7 +35,7 @@ describe("AccountService tests", () => {
   test("Should getBalances return balances", async () => {
     // Arrange
     const accountServiceMock = new AccountServiceMocks();
-    const assetAddress = "assetAddress";
+    const assetAddress = "0x" + randomstring.generate({ length: 40, charset: "hex" });
     const amount = BigNumber.from("42");
     const balances = new Balances([new AssetBalance(assetAddress, amount, amount, amount)]);
 
@@ -50,7 +52,7 @@ describe("AccountService tests", () => {
     // Arrange
     const accountServiceMock = new AccountServiceMocks();
 
-    const assetAddress = "assetAddress";
+    const assetAddress = "0x" + randomstring.generate({ length: 40, charset: "hex" });
     const amount = BigNumber.from("42");
     const balances = new Balances([new AssetBalance(assetAddress, amount, amount, amount)]);
 
@@ -73,8 +75,8 @@ describe("AccountService tests", () => {
     // Arrange
     const accountServiceMock = new AccountServiceMocks();
 
-    const assetAddress = "assetAddress";
-    const destinationAddress = "destinationAddress";
+    const assetAddress = "0x" + randomstring.generate({ length: 40, charset: "hex" });
+    const destinationAddress = "0x" + randomstring.generate({ length: 40, charset: "hex" });
     const amount = BigNumber.from("42");
     const balances = new Balances([new AssetBalance(assetAddress, amount, amount, amount)]);
 
