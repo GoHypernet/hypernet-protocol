@@ -53,10 +53,10 @@ describe("Testing payment utils", () => {
 		expect(PaymentIdUtils.getDomain(await paymentUtils.createPaymentId(EPaymentType.Pull))).toEqual("Hypernet")
 	});
 
-	it("should sort transfers", async () => {
-		let browserNode = ({} as unknown) as BrowserNode;
-		const transfer = transferFactory.build({});
-		const paymentId = await paymentUtils.createPaymentId(EPaymentType.Pull);
-		paymentUtils.sortTransfers(paymentId, [transfer], browserNode );
-	})
+	// it("should sort transfers", async () => {
+	// 	let browserNode = ({} as unknown) as BrowserNode;
+	// 	const transfer = transferFactory.build({});
+	// 	const paymentId = await paymentUtils.createPaymentId(EPaymentType.Pull);
+	// 	paymentUtils.sortTransfers(paymentId, [transfer], browserNode );
+	// })
 });

@@ -5,4 +5,3 @@ test("ChannelUtils.getChannelAddress", () => {
 
     expect(address).toBe("La/hGzkuFblLPPVg0Y1e7VEKeDh45ms48RDaGsqcjww=");
 });
- 
