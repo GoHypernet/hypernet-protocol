@@ -6,7 +6,7 @@ import {
   DEFAULT_CHANNEL_TIMEOUT,
   FullTransferState,
 } from "@connext/vector-types";
-import { BigNumber, IHypernetTransferMetadata, PublicIdentifier, PullAmount } from "@interfaces/objects";
+import { BigNumber, IHypernetTransferMetadata, InitializedHypernetContext, PublicIdentifier, PullAmount, ResultAsync } from "@interfaces/objects";
 import {
   IBrowserNodeProvider,
   IContextProvider,
@@ -22,6 +22,8 @@ import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils/dist
 import { PaymentIdUtils } from "./PaymentUtils";
 import { encodeTransferState, encodeTransferResolver } from "@connext/vector-utils";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
+import { CoreUninitializedError, RouterChannelUnknownError, RouterUnavailableError } from "@interfaces/objects/errors";
+import { errAsync, okAsync } from "neverthrow";
 
 /**
  * VectorUtils contains methods for interacting directly with the core Vector stuff -
@@ -31,7 +33,7 @@ export class VectorUtils implements IVectorUtils {
   /**
    * Creates an instance of VectorUtils
    */
-  protected getRouterChannelAddressSetup: Promise<string> | null;
+  protected getRouterChannelAddressSetup: ResultAsync<string, RouterUnavailableError | CoreUninitializedError> | null;
 
   constructor(
     protected configProvider: IConfigProvider,
@@ -288,83 +290,67 @@ export class VectorUtils implements IVectorUtils {
    * Returns the address of the channel with the router, if exists.
    * Otherwise, attempts to create a channel with the router & return the address.
    */
-  public async getRouterChannelAddress(): Promise<string> {
+  public async getRouterChannelAddress(): ResultAsync<string, RouterChannelUnknownError | CoreUninitializedError> {
     // If we already have the address, no need to do the rest
     if (this.getRouterChannelAddressSetup != null) {
       return this.getRouterChannelAddressSetup;
     }
 
-    this.getRouterChannelAddressSetup = new Promise(
-      async (resolve: (channel: string) => void, reject: (err: Error) => void) => {
-        // Basic setup
-        const configPromise = this.configProvider.getConfig();
-        const contextPromise = this.contextProvider.getInitializedContext();
-        const browserNodePromise = this.browserNodeProvider.getBrowserNode();
-        const [config, context, browserNode] = await Promise.all([configPromise, contextPromise, browserNodePromise]);
+    // Basic setup
+    const configPromise = this.configProvider.getConfig();
+    const contextRes = await this.contextProvider.getInitializedContext();
+    const browserNodePromise = this.browserNodeProvider.getBrowserNode();
+    const [config, browserNode] = await Promise.all([configPromise, browserNodePromise]);
 
-        console.log(`Core publicIdentifier: ${context.publicIdentifier}`);
-        console.log(`Router publicIdentifier: ${config.routerPublicIdentifier}`);
+    let context: InitializedHypernetContext;
+    if (contextRes.isErr()) {
+      return errAsync(contextRes.error);
+    }
+    else {
+      context = contextRes.value;
+    }
 
-        // We need to see if we already have a channel with the router setup.
-        // const channelsByParticipantResult = await browserNode.getStateChannelByParticipants({
-        //   publicIdentifier: context.publicIdentifier,
-        //   counterparty: config.routerPublicIdentifier,
-        //   chainId: config.chainId,
-        // });
+    console.log(`Core publicIdentifier: ${context.publicIdentifier}`);
+    console.log(`Router publicIdentifier: ${config.routerPublicIdentifier}`);
 
-        const channelsResult = await browserNode.getStateChannels();
+    const channelsResult = await browserNode.getStateChannels();
 
-        // if (channelsByParticipantResult.isError) {
-        //   throw new Error("Cannot get channels!");
-        // }
+    if (channelsResult.isError) {
+      throw new Error("Cannot get channels!");
+    }
+    
+    const channels = channelsResult.getValue();
 
-        if (channelsResult.isError) {
-          throw new Error("Cannot get channels!");
+    let channel: FullChannelState | null = null;
+    for (const channelAddress of channels) {
+      const channelResult = await browserNode.getStateChannel({ channelAddress });
+      if (channelResult.isError) {
+        return errAsync(new RouterChannelUnknownError(channelResult.getError()?.message));
+      }
+
+      channel = channelResult.getValue();
+
+      if (channel != null) {
+        // console.log(channel);
+        if (channel.aliceIdentifier !== config.routerPublicIdentifier) {
+          continue;
         }
-        // const channelsByParticipants = channelsByParticipantResult.getValue();
-        const channels = channelsResult.getValue();
+        return okAsync(channel.channelAddress);
+      }
+    }
 
-        // console.log(channelsByParticipants);
-        // console.log(channels);
+    // If a channel does not exist with the router, we need to create it.
+    const setupResult = await browserNode.setup({
+      chainId: 1337,
+      counterpartyIdentifier: config.routerPublicIdentifier,
+      timeout: DEFAULT_CHANNEL_TIMEOUT.toString(),
+    });
 
-        let channel: FullChannelState | null = null;
-        for (const channelAddress of channels) {
-          const channelResult = await browserNode.getStateChannel({ channelAddress });
-          if (channelResult.isError) {
-            reject(new Error("Cannot get details of state channel!"));
-          }
+    if (setupResult.isError) {
+      return errAsync(new RouterUnavailableError(setupResult.getError()?.message));
+    }
 
-          channel = channelResult.getValue();
-
-          if (channel != null) {
-            // console.log(channel);
-            if (channel.aliceIdentifier !== config.routerPublicIdentifier) {
-              continue;
-            }
-            resolve(channel.channelAddress);
-            return;
-          }
-        }
-
-        // If a channel does not exist with the router, we need to create it.
-        const setupResult = await browserNode.setup({
-          chainId: 1337,
-          counterpartyIdentifier: config.routerPublicIdentifier,
-          timeout: DEFAULT_CHANNEL_TIMEOUT.toString(),
-        });
-
-        if (setupResult.isError) {
-          console.log(setupResult.getError());
-          reject(new Error("Cannot establish channel with router!"));
-        }
-
-        const newChannel = setupResult.getValue();
-        // console.log(newChannel);
-        resolve(newChannel.channelAddress);
-        return;
-      },
-    );
-
-    return this.getRouterChannelAddressSetup;
+    const newChannel = setupResult.getValue();
+    return okAsync(newChannel.channelAddress);
   }
 }

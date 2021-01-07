@@ -12,4 +12,4 @@ export * from "./SortedTransfers";
 export * from "./Token";
 export * from "./Balances";
 export * from "./HypernetTransferMetadata";
-export * from "./Either";
+export { ResultAsync, Result } from "neverthrow";

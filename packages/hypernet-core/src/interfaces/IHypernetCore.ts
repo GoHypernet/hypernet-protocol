@@ -9,11 +9,10 @@ import {
   Payment,
   PushPayment,
   PullPayment,
-  Either,
+  ResultAsync,
 } from "@interfaces/objects";
 import { Subject } from "rxjs";
 import * as moment from "moment";
-import { Result } from "@connext/vector-types";
 import { EBlockchainNetwork } from "./types";
 import { CoreUninitializedError } from "./objects/errors";
 
@@ -47,7 +46,7 @@ export interface IHypernetCore {
    * it will throw an error
    * @dev currently this matches the Vector pubId
    */
-  getPublicIdentifier(): Promise<Either<CoreUninitializedError, PublicIdentifier>>;
+  getPublicIdentifier(): ResultAsync<PublicIdentifier, CoreUninitializedError>;
 
   /**
    * This function will load HypernetCore with funds. It should be called for each type of asset you want to use.
@@ -130,7 +129,7 @@ export interface IHypernetCore {
    * For a specified payment, puts up stake to accept the payment
    * @param paymentId the payment ID to accept funds
    */
-  acceptFunds(paymentIds: string[]): Promise<Result<Payment, Error>[]>;
+  acceptFunds(paymentIds: string[]): ResultAsync<Payment, Error>;
 
   /**
    * Sends the parameterized payment internally for payments in state "Staked".

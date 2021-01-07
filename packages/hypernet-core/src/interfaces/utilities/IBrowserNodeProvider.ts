@@ -1,4 +1,6 @@
 import { BrowserNode } from "@connext/vector-browser-node";
+import { NodeError } from "@connext/vector-types";
+import { ResultAsync } from "@interfaces/objects";
 
 /**
  * IBrowserNodeProvider exists only to centralize the supply of
@@ -6,5 +8,5 @@ import { BrowserNode } from "@connext/vector-browser-node";
  * testing of it.
  */
 export interface IBrowserNodeProvider {
-  getBrowserNode(): Promise<BrowserNode>;
+  getBrowserNode(): ResultAsync<BrowserNode, NodeError | Error>;
 }

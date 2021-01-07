@@ -1,1 +1,1 @@
-export class CoreUninitializedError {}
+export class CoreUninitializedError extends Error {}

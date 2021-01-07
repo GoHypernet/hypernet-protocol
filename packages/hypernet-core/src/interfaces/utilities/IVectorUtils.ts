@@ -1,5 +1,6 @@
-import { FullTransferState, NodeParams, NodeResponses } from "@connext/vector-types";
-import { BigNumber, IHypernetTransferMetadata, PublicIdentifier } from "@interfaces/objects";
+import { NodeResponses } from "@connext/vector-types";
+import { BigNumber, IHypernetTransferMetadata, ResultAsync } from "@interfaces/objects";
+import { CoreUninitializedError, RouterChannelUnknownError } from "@interfaces/objects/errors";
 import { EPaymentType } from "@interfaces/types";
 
 /**
@@ -9,7 +10,7 @@ export interface IVectorUtils {
   /**
    *
    */
-  getRouterChannelAddress(): Promise<string>;
+  getRouterChannelAddress(): ResultAsync<string, RouterChannelUnknownError | CoreUninitializedError>;
 
   /**
    *

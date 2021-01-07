@@ -17,7 +17,6 @@ import {
   Balances,
   BigNumber,
   ControlClaim,
-  Either,
   EthereumAddress,
   HypernetConfig,
   HypernetLink,
@@ -26,6 +25,7 @@ import {
   PublicKey,
   PullPayment,
   PushPayment,
+  ResultAsync,
 } from "@interfaces/objects";
 import { CoreUninitializedError } from "@interfaces/objects/errors";
 import { EBlockchainNetwork } from "@interfaces/types";
@@ -210,9 +210,11 @@ export class HypernetCore implements IHypernetCore {
   /**
    * Returns the (vector) pubId associated with this instance of HypernetCore.
    */
-  public async getPublicIdentifier(): Promise<Either<CoreUninitializedError, PublicIdentifier>> {
-    const context = await this.contextProvider.getInitializedContext();
-    return context.applyOnSuccess((c) => c.publicIdentifier);
+  public async getPublicIdentifier(): ResultAsync<PublicIdentifier, CoreUninitializedError> {
+    const contextRes = await this.contextProvider.getInitializedContext();
+    return contextRes.map((res) => {
+      return res.publicIdentifier;
+    });
   }
 
   /**
