@@ -9,8 +9,8 @@ import { InitializedHypernetContext } from "@interfaces/objects";
 
 jest.mock("@implementations/data");
 
-const mockGetPaymentsByIds = jest.fn();
-PaymentRepository.prototype.getPaymentsByIds = mockGetPaymentsByIds;
+PaymentRepository.prototype.getPaymentsByIds = jest.fn();
+PaymentRepository.prototype.createPushPayment = jest.fn();
 
 export default class PaymentServiceMocks {
   public vectorLinkRepository: ILinkRepository = mock<ILinkRepository>();
