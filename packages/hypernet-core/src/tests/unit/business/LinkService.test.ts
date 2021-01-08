@@ -1,6 +1,6 @@
 import { verify, when } from "ts-mockito";
 
-import LinkServiceMocks from "../../mock/unit/business/LinkServiceMocks";
+import LinkServiceMocks from "../../mock/business/LinkServiceMocks";
 
 describe("LinkService tests", () => {
   test("Should getLinks return links", async () => {

@@ -1,7 +1,7 @@
 import { verify } from "ts-mockito";
 
 import { BigNumber } from "@interfaces/objects";
-import DevelopmentServiceMocks from "../../mock/unit/business/DevelopmentServiceMocks";
+import DevelopmentServiceMocks from "../../mock/business/DevelopmentServiceMocks";
 
 var randomstring = require("randomstring");
 

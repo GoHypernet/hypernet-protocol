@@ -2,7 +2,7 @@ import { verify, when } from "ts-mockito";
 import { Subject } from "rxjs";
 
 import { ControlClaim } from "@interfaces/objects";
-import ControlServiceMocks from "../../mock/unit/business/ControlServiceMocks";
+import ControlServiceMocks from "../../mock/business/ControlServiceMocks";
 
 describe("ControlService tests", () => {
   test("Should claimControl update context inControl", async () => {

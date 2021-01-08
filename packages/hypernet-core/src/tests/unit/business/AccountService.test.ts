@@ -3,7 +3,7 @@ import { mkPublicIdentifier } from "@connext/vector-utils";
 import { Subject } from "rxjs";
 
 import { Balances, BigNumber, AssetBalance } from "@interfaces/objects";
-import AccountServiceMocks from "../../mock/unit/business/AccountServiceMocks";
+import AccountServiceMocks from "../../mock/business/AccountServiceMocks";
 
 var randomstring = require("randomstring");
 

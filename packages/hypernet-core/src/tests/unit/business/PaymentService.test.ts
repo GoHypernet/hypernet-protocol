@@ -4,7 +4,7 @@ import moment from "moment";
 
 import { BigNumber, PushPayment, Payment } from "@interfaces/objects";
 import { EPaymentState } from "@interfaces/types";
-import PaymentServiceMocks from "../../mock/unit/business/PaymentServiceMocks";
+import PaymentServiceMocks from "../../mock/business/PaymentServiceMocks";
 import { mkPublicIdentifier } from "@connext/vector-utils";
 const { when: jestWhen } = require("jest-when");
 var randomstring = require("randomstring");
