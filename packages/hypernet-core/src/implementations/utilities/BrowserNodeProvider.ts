@@ -16,13 +16,12 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
   }
 
   protected initialize(): ResultAsync<BrowserNode, NodeError | Error> {
-    this.browserNode = this.configProvider.getConfig()
-    .map(async (config) => {
+    this.browserNode = this.configProvider.getConfig().map(async (config) => {
       const browserNode = new BrowserNode({
         iframeSrc: config.iframeSource,
         logger: this.logger,
       });
-  
+
       await browserNode.init();
       return browserNode;
     });

@@ -22,22 +22,20 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
   }
 
   protected initialize(): ResultAsync<null, BlockchainUnavailableError> {
-    this.initializationPromise = ResultAsync.fromPromise(window.ethereum.enable(),
-      (e) => {
-        return new BlockchainUnavailableError("Unable to initialize ethereum provider from the window");
-      })
-      .map(() => {
-        // A Web3Provider wraps a standard Web3 provider, which is
-        // what Metamask injects as window.ethereum into each page
-        this.provider = new ethers.providers.Web3Provider(window.ethereum);
+    this.initializationPromise = ResultAsync.fromPromise(window.ethereum.enable(), (e) => {
+      return new BlockchainUnavailableError("Unable to initialize ethereum provider from the window");
+    }).map(() => {
+      // A Web3Provider wraps a standard Web3 provider, which is
+      // what Metamask injects as window.ethereum into each page
+      this.provider = new ethers.providers.Web3Provider(window.ethereum);
 
-        // The Metamask plugin also allows signing transactions to
-        // send ether and pay to change state within the blockchain.
-        // For this, you need the account signer...
-        this.signer = this.provider.getSigner();
+      // The Metamask plugin also allows signing transactions to
+      // send ether and pay to change state within the blockchain.
+      // For this, you need the account signer...
+      this.signer = this.provider.getSigner();
 
-        return null;
-      });
+      return null;
+    });
     return this.initializationPromise;
   }
 
@@ -46,24 +44,22 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
    * @return ethers.providers.Web3Provider
    */
   public getProvider(): ResultAsync<ethers.providers.Web3Provider, BlockchainUnavailableError> {
-    return this.initialize()
-      .map(() => {
-        if (this.provider == null) {
-          throw new BlockchainUnavailableError("No provider available!");
-        }
+    return this.initialize().map(() => {
+      if (this.provider == null) {
+        throw new BlockchainUnavailableError("No provider available!");
+      }
 
-        return this.provider;
-      });
+      return this.provider;
+    });
   }
 
   public getSigner(): ResultAsync<ethers.providers.JsonRpcSigner, BlockchainUnavailableError> {
-    return this.initialize()
-      .map(() => {
-        if (this.signer == null) {
-          throw new BlockchainUnavailableError("No signer available!");
-        }
+    return this.initialize().map(() => {
+      if (this.signer == null) {
+        throw new BlockchainUnavailableError("No signer available!");
+      }
 
-        return this.signer;
-      });
+      return this.signer;
+    });
   }
 }

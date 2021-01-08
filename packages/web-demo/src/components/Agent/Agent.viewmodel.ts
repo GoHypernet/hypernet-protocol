@@ -15,18 +15,18 @@ export class AgentViewModel {
   public actions: ActionsParams;
   public status: StatusParams;
   public message: ko.Observable<string>;
-  
+
   public paymentForm: PaymentFormParams;
 
   protected core: IHypernetCore;
 
   constructor() {
     this.core = new HypernetCore(EBlockchainNetwork.Localhost);
-    this.status = new StatusParams(this.core)
+    this.status = new StatusParams(this.core);
 
     this.account = new AccountParams(this.core);
     this.message = ko.observable<string>("Starting");
-    
+
     this.startup()
       .then(() => {
         this.message("Startup Complete");

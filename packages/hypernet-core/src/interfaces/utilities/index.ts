@@ -5,4 +5,5 @@ export * from "./IContextProvider";
 export * from "./IThreeBoxUtils";
 export * from "./IVectorUtils";
 export * from "./ILinkUtils";
+export * from "./ILogUtils";
 export * from "./IPaymentUtils";

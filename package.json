@@ -14,7 +14,8 @@
   "scripts": {
     "bootstrap": "yarn install && lerna init",
     "start": "cd packages/web-demo && yarn start",
-    "format": "lerna run format"
+    "format": "lerna run format",
+    "lint": "lerna run lint"
   },
   "repository": {
     "type": "git",
