@@ -2,8 +2,11 @@ import { FullTransferState } from "@connext/vector-types";
 import { ILinkRepository } from "@interfaces/data";
 import { HypernetLink, PublicIdentifier } from "@interfaces/objects";
 import {
-  IBrowserNodeProvider, IConfigProvider,
-  IContextProvider, IPaymentUtils, IVectorUtils,
+  IBrowserNodeProvider,
+  IConfigProvider,
+  IContextProvider,
+  IPaymentUtils,
+  IVectorUtils,
 } from "@interfaces/utilities";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
 
@@ -11,7 +14,6 @@ import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
  * Provides methods for retrieving Hypernet Links.
  */
 export class VectorLinkRepository implements ILinkRepository {
-
   /**
    * Get an instance of the VectorLinkRepository
    */
@@ -47,9 +49,9 @@ export class VectorLinkRepository implements ILinkRepository {
       throw error;
     }
 
-    const activeTransfers = activeTransfersRes.getValue() as FullTransferState[]
+    const activeTransfers = activeTransfersRes.getValue() as FullTransferState[];
 
-    if (activeTransfers.length == 0) return []
+    if (activeTransfers.length == 0) return [];
 
     const payments = await this.paymentUtils.transfersToPayments(
       activeTransfers as FullTransferState[],

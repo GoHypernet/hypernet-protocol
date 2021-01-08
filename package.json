@@ -8,12 +8,14 @@
     "lib": "lib"
   },
   "devDependencies": {
+    "file-loader": "^6.2.0",
     "lerna": "^3.22.1"
   },
   "scripts": {
     "bootstrap": "yarn install && lerna init",
     "start": "cd packages/web-demo && yarn start",
-    "format": "lerna run format"
+    "format": "lerna run format",
+    "lint": "lerna run lint"
   },
   "repository": {
     "type": "git",

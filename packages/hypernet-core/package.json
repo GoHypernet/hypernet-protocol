@@ -48,6 +48,7 @@
     "class-transformer": "^0.3.1",
     "ethers": "^5.0.17",
     "moment": "^2.27.0",
+    "neverthrow": "^3.1.2",
     "pino": "^6.7.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.6.2",

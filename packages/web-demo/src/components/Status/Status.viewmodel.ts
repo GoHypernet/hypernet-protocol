@@ -19,10 +19,10 @@ export class StatusViewModel {
 
     this.core.onControlClaimed.subscribe({
       next: () => {
-        this.inControl(true)
+        this.inControl(true);
       },
     });
-  
+
     this.core.onControlYielded.subscribe({
       next: () => {
         this.inControl(false);

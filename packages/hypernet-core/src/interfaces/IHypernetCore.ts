@@ -9,11 +9,12 @@ import {
   Payment,
   PushPayment,
   PullPayment,
+  ResultAsync,
 } from "@interfaces/objects";
 import { Subject } from "rxjs";
 import * as moment from "moment";
-import { Result } from "@connext/vector-types";
 import { EBlockchainNetwork } from "./types";
+import { CoreUninitializedError } from "./objects/errors";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -45,7 +46,7 @@ export interface IHypernetCore {
    * it will throw an error
    * @dev currently this matches the Vector pubId
    */
-  getPublicIdentifier(): Promise<PublicIdentifier>;
+  getPublicIdentifier(): ResultAsync<PublicIdentifier, CoreUninitializedError>;
 
   /**
    * This function will load HypernetCore with funds. It should be called for each type of asset you want to use.
@@ -128,14 +129,14 @@ export interface IHypernetCore {
    * For a specified payment, puts up stake to accept the payment
    * @param paymentId the payment ID to accept funds
    */
-  acceptFunds(paymentIds: string[]): Promise<Result<Payment, Error>[]>;
+  acceptFunds(paymentIds: string[]): ResultAsync<Payment, Error>;
 
   /**
    * Sends the parameterized payment internally for payments in state "Staked".
    * Internally, calls paymentService.stakePosted()
    * @param paymentIds the list of payment ids for which to complete the payments for
    */
-  completePayments(paymentIds: string[]): Promise<void>
+  completePayments(paymentIds: string[]): Promise<void>;
 
   /**
    * Pulls an incremental amount from an authorized payment
@@ -155,7 +156,7 @@ export interface IHypernetCore {
    * Finalize a push-payment; internally, resolves the ParameterizedPayment transfer
    * @param paymentId the payment to finalize
    */
-  finalizePushPayment(paymentId: string): Promise<void>
+  finalizePushPayment(paymentId: string): Promise<void>;
 
   /**
    * Called by the consumer to attempt to claim some or all of the stake within a particular insurance payment.
@@ -166,10 +167,10 @@ export interface IHypernetCore {
 
   /**
    * Only used for development purposes!
-   * @param amount 
+   * @param amount
    */
   mintTestToken(amount: BigNumber): Promise<void>;
-  
+
   /**
    * Observables for seeing what's going on
    */

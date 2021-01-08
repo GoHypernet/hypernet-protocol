@@ -4,6 +4,8 @@ import { getPublicIdentifierFromPublicKey } from "@connext/vector-utils/dist/ide
 import { getPublicKeyFromPrivateKey } from "@connext/vector-utils/dist/crypto";
 import { Wallet, constants } from "ethers";
 import { EBlockchainNetwork } from "@interfaces/types";
+import { ResultAsync } from "@interfaces/objects";
+import { okAsync } from "neverthrow";
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
@@ -53,7 +55,7 @@ export class ConfigProvider implements IConfigProvider {
     }
   }
 
-  public async getConfig(): Promise<HypernetConfig> {
-    return Promise.resolve(this.config);
+  public getConfig(): ResultAsync<HypernetConfig, Error> {
+    return okAsync(this.config);
   }
 }
