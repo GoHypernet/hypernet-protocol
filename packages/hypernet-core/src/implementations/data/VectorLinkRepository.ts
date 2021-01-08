@@ -1,6 +1,15 @@
-import { FullTransferState } from "@connext/vector-types";
+import { BrowserNode } from "@connext/vector-browser-node";
+import { FullTransferState, NodeError } from "@connext/vector-types";
 import { ILinkRepository } from "@interfaces/data";
-import { HypernetLink, PublicIdentifier } from "@interfaces/objects";
+import {
+  HypernetConfig,
+  HypernetLink,
+  InitializedHypernetContext,
+  Payment,
+  PublicIdentifier,
+  ResultAsync,
+} from "@interfaces/objects";
+import { CoreUninitializedError, RouterChannelUnknownError } from "@interfaces/objects/errors";
 import {
   IBrowserNodeProvider,
   IConfigProvider,
@@ -9,6 +18,7 @@ import {
   IVectorUtils,
 } from "@interfaces/utilities";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
+import { combine, errAsync, okAsync } from "neverthrow";
 
 /**
  * Provides methods for retrieving Hypernet Links.
@@ -29,81 +39,112 @@ export class VectorLinkRepository implements ILinkRepository {
   /**
    * Get all Hypernet Links for this client
    */
-  public async getHypernetLinks(): Promise<HypernetLink[]> {
-    const browserNodePromise = await this.browserNodeProvider.getBrowserNode();
-    const channelAddressPromise = await this.vectorUtils.getRouterChannelAddress();
-    const configPromise = await this.configProvider.getConfig();
-    const contextPromise = await this.contextProvider.getInitializedContext();
+  public getHypernetLinks(): ResultAsync<
+    HypernetLink[],
+    RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+  > {
+    const prerequisites = (combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.configProvider.getConfig(),
+      this.contextProvider.getInitializedContext(),
+      this.vectorUtils.getRouterChannelAddress() as ResultAsync<any, any>,
+    ]) as unknown) as ResultAsync<
+      [BrowserNode, HypernetConfig, InitializedHypernetContext, string],
+      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+    >;
 
-    const [browserNode, channelAddress, config, context] = await Promise.all([
-      browserNodePromise,
-      channelAddressPromise,
-      configPromise,
-      contextPromise,
-    ]);
+    let browserNode: BrowserNode;
+    let config: HypernetConfig;
+    let context: InitializedHypernetContext;
+    let channelAddress: string;
 
-    const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress });
+    return prerequisites
+      .andThen((vals) => {
+        [browserNode, config, context, channelAddress] = vals;
+        return ResultAsync.fromPromise(browserNode.getActiveTransfers({ channelAddress }), (e) => {
+          return e as NodeError;
+        });
+      })
+      .andThen((activeTransfersRes) => {
+        if (activeTransfersRes.isError) {
+          return errAsync(activeTransfersRes.getError() as NodeError);
+        }
 
-    if (activeTransfersRes.isError) {
-      const error = activeTransfersRes.getError();
-      throw error;
-    }
+        const activeTransfers = activeTransfersRes.getValue() as FullTransferState[];
 
-    const activeTransfers = activeTransfersRes.getValue() as FullTransferState[];
+        if (activeTransfers.length === 0) {
+          return okAsync([] as Payment[]);
+        }
 
-    if (activeTransfers.length == 0) return [];
-
-    const payments = await this.paymentUtils.transfersToPayments(
-      activeTransfers as FullTransferState[],
-      config,
-      context,
-      browserNode,
-    );
-
-    return await this.linkUtils.paymentsToHypernetLinks(payments, context);
+        return this.paymentUtils.transfersToPayments(
+          activeTransfers as FullTransferState[],
+          config,
+          context,
+          browserNode,
+        );
+      })
+      .andThen((paymentsUnk) => {
+        const payments = paymentsUnk as Payment[];
+        return this.linkUtils.paymentsToHypernetLinks(payments, context);
+      });
   }
 
   /**
    * Given the ID of the link, return it.
    * @param counterpartyId The ID of the link to retrieve
    */
-  public async getHypernetLink(counterpartyId: PublicIdentifier): Promise<HypernetLink> {
-    const browserNodePromise = await this.browserNodeProvider.getBrowserNode();
-    const channelAddressPromise = await this.vectorUtils.getRouterChannelAddress();
-    const configPromise = await this.configProvider.getConfig();
-    const contextPromise = await this.contextProvider.getInitializedContext();
+  public getHypernetLink(
+    counterpartyId: PublicIdentifier,
+  ): ResultAsync<HypernetLink, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error> {
+    const prerequisites = (combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.configProvider.getConfig(),
+      this.contextProvider.getInitializedContext(),
+      this.vectorUtils.getRouterChannelAddress() as ResultAsync<any, any>,
+    ]) as unknown) as ResultAsync<
+      [BrowserNode, HypernetConfig, InitializedHypernetContext, string],
+      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+    >;
 
-    const [browserNode, channelAddress, config, context] = await Promise.all([
-      browserNodePromise,
-      channelAddressPromise,
-      configPromise,
-      contextPromise,
-    ]);
+    let browserNode: BrowserNode;
+    let config: HypernetConfig;
+    let context: InitializedHypernetContext;
+    let channelAddress: string;
 
-    const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress });
+    return prerequisites
+      .andThen((vals) => {
+        [browserNode, config, context, channelAddress] = vals;
+        return ResultAsync.fromPromise(browserNode.getActiveTransfers({ channelAddress }), (e) => {
+          return e as NodeError;
+        });
+      })
+      .andThen((activeTransfersRes) => {
+        if (activeTransfersRes.isError) {
+          return errAsync(activeTransfersRes.getError() as NodeError);
+        }
 
-    if (activeTransfersRes.isError) {
-      const error = activeTransfersRes.getError();
-      throw error;
-    }
+        const activeTransfers = activeTransfersRes.getValue().filter((val) => {
+          return val.responder === counterpartyId || val.initiator === counterpartyId;
+        });
 
-    const activeTransfers = activeTransfersRes.getValue().filter((val) => {
-      return val.responder === counterpartyId || val.initiator === counterpartyId;
-    });
+        // Because of the filter above, this should only produce a single link
+        return this.paymentUtils.transfersToPayments(
+          activeTransfers as FullTransferState[],
+          config,
+          context,
+          browserNode,
+        );
+      })
+      .andThen((paymentsUnk) => {
+        const payments = paymentsUnk as Payment[];
+        return this.linkUtils.paymentsToHypernetLinks(payments, context);
+      })
+      .map((links) => {
+        if (links.length === 0) {
+          return new HypernetLink(counterpartyId, [], [], [], [], []);
+        }
 
-    // Because of the filter above, this should only produce a single link
-    const payments = await this.paymentUtils.transfersToPayments(
-      activeTransfers as FullTransferState[],
-      config,
-      context,
-      browserNode,
-    );
-    const links = await this.linkUtils.paymentsToHypernetLinks(payments, context);
-
-    if (links.length === 0) {
-      return new HypernetLink(counterpartyId, [], [], [], [], []);
-    }
-
-    return links[0];
+        return links[0];
+      });
   }
 }

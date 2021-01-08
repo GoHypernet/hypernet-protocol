@@ -12,7 +12,7 @@ import { FullTransferState, NodeError } from "@connext/vector-types";
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
 import { BrowserNode } from "@connext/vector-browser-node";
 import { ResultAsync } from "neverthrow";
-import { InvalidParametersError, InvalidPaymentError } from "@interfaces/objects/errors";
+import { InvalidParametersError, InvalidPaymentError, LogicalError } from "@interfaces/objects/errors";
 
 export interface IPaymentUtils {
   /**
@@ -65,7 +65,10 @@ export interface IPaymentUtils {
    *
    * @param transfer
    */
-  getTransferType(transfer: FullTransferState, browserNode: BrowserNode): ResultAsync<ETransferType, Error>;
+  getTransferType(
+    transfer: FullTransferState,
+    browserNode: BrowserNode,
+  ): ResultAsync<ETransferType, LogicalError | NodeError>;
 
   /**
    *

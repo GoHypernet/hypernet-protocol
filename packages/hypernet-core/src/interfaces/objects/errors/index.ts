@@ -4,6 +4,7 @@ export * from "./CoreUninitializedError";
 export * from "./InvalidParametersError";
 export * from "./InvalidPaymentError";
 export * from "./InvalidPaymentIdError";
+export * from "./LogicalError";
 export * from "./RouterChannelUnknownError";
 export * from "./RouterUnavailableError";
 export * from "./TransferCreationError";

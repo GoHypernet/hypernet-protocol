@@ -14,7 +14,12 @@ import {
   ResultAsync,
   SortedTransfers,
 } from "@interfaces/objects";
-import { InvalidParametersError, InvalidPaymentError, InvalidPaymentIdError } from "@interfaces/objects/errors";
+import {
+  InvalidParametersError,
+  InvalidPaymentError,
+  InvalidPaymentIdError,
+  LogicalError,
+} from "@interfaces/objects/errors";
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
 import { IConfigProvider, ILogUtils, IPaymentIdUtils, IPaymentUtils } from "@interfaces/utilities";
 import moment from "moment";
@@ -29,17 +34,18 @@ export class PaymentUtils implements IPaymentUtils {
   /**
    * Return an instance of PaymentUtils.
    */
-  constructor(protected configProvider: IConfigProvider, 
+  constructor(
+    protected configProvider: IConfigProvider,
     protected logUtils: ILogUtils,
-    protected paymentIdUtils: IPaymentIdUtils) {}
+    protected paymentIdUtils: IPaymentIdUtils,
+  ) {}
 
   /**
    * Verifies that the paymentId provided has domain matching Hypernet's domain name.
    * @param paymentId the payment ID to check
    */
   public isHypernetDomain(paymentId: string): ResultAsync<boolean, InvalidPaymentIdError> {
-    return this.configProvider.getConfig()
-    .andThen((config) => {
+    return this.configProvider.getConfig().andThen((config) => {
       const domainRes = this.paymentIdUtils.getDomain(paymentId);
 
       if (domainRes.isErr()) {
@@ -55,8 +61,7 @@ export class PaymentUtils implements IPaymentUtils {
    * @param paymentType the payment type for the id - PUSH or PULL
    */
   public createPaymentId(paymentType: EPaymentType): ResultAsync<string, InvalidParametersError> {
-    return this.configProvider.getConfig()
-    .andThen((config) => {
+    return this.configProvider.getConfig().andThen((config) => {
       return this.paymentIdUtils.makePaymentId(config.hypernetProtocolDomain, paymentType, uuidv4());
     });
   }
@@ -262,14 +267,14 @@ export class PaymentUtils implements IPaymentUtils {
       const transfersByPaymentId = new Map<string, FullTransferState[]>();
       for (const { transferType, transfer } of transferTypesWithTransfers) {
         let paymentId: string;
-        if (transferType == ETransferType.Offer) {
+        if (transferType === ETransferType.Offer) {
           // @todo also add in PullRecord type)
-          let metadata: IHypernetTransferMetadata = JSON.parse(transfer.transferState.message);
+          const metadata: IHypernetTransferMetadata = JSON.parse(transfer.transferState.message);
           paymentId = metadata.paymentId;
-        } else if (transferType == ETransferType.Insurance || transferType == ETransferType.Parameterized) {
+        } else if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
           paymentId = transfer.transferState.UUID;
         } else {
-          console.log(
+          this.logUtils.log(
             `Transfer type was not recognized, doing nothing. TransferType: '${transfer.transferDefinition}'`,
           );
           continue;
@@ -306,7 +311,7 @@ export class PaymentUtils implements IPaymentUtils {
   public getTransferType(
     transfer: FullTransferState,
     browserNode: BrowserNode,
-  ): ResultAsync<ETransferType, NodeError | Error> {
+  ): ResultAsync<ETransferType, NodeError | LogicalError> {
     // TransferDefinition here is the ETH address of the transfer
     // We need to get the registered transfer definitions as canonical by the browser node
     return ResultAsync.fromPromise(browserNode.getRegisteredTransfers({ chainId: 1337 }), (err) => {
@@ -316,12 +321,12 @@ export class PaymentUtils implements IPaymentUtils {
         return errAsync(registeredTransfersRes.getError() as NodeError);
       }
 
-      let registeredTransfers: NodeResponses.GetRegisteredTransfers = registeredTransfersRes.getValue();
+      const registeredTransfers: NodeResponses.GetRegisteredTransfers = registeredTransfersRes.getValue();
 
       // registeredTransfers.name = 'Insurance', registeredTransfers.definition = <address>, transfer.transferDefinition = <address>
-      let transferMap: Map<EthereumAddress, string> = new Map();
-      for (const transfer of registeredTransfers) {
-        transferMap.set(transfer.definition, transfer.name);
+      const transferMap: Map<EthereumAddress, string> = new Map();
+      for (const registeredTransfer of registeredTransfers) {
+        transferMap.set(registeredTransfer.definition, registeredTransfer.name);
       }
 
       // If the transfer address is not one we know, we don't know what this is
@@ -335,21 +340,21 @@ export class PaymentUtils implements IPaymentUtils {
       } else {
         // This is a transfer we know about, but not necessarily one we want.
         // Narrow down to insurance, parameterized, or  offer/messagetransfer
-        let thisTransfer = transferMap.get(transfer.transferDefinition);
+        const thisTransfer = transferMap.get(transfer.transferDefinition);
         if (thisTransfer == null) {
-          return errAsync(new Error("Transfer type not unrecognized, but not in transfer map!"));
+          return errAsync(new LogicalError("Transfer type not unrecognized, but not in transfer map!"));
         }
 
         // Now we know it's either insurance, parameterized, or messageTransfer
-        if (thisTransfer == "Insurance") {
+        if (thisTransfer === "Insurance") {
           return okAsync(ETransferType.Insurance);
-        } else if (thisTransfer == "Parameterized") {
+        } else if (thisTransfer === "Parameterized") {
           return okAsync(ETransferType.Parameterized);
-        } else if (thisTransfer == "MessageTransfer") {
+        } else if (thisTransfer === "MessageTransfer") {
           // @todo check if this is a PullRecord vs an Offer subtype!
           return okAsync(ETransferType.Offer);
         } else {
-          return errAsync(new Error("Unreachable code was not unreachable!"));
+          return errAsync(new LogicalError("Unreachable code was not unreachable!"));
         }
       }
     });
