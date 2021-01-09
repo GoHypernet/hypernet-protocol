@@ -6,17 +6,18 @@ import { Wallet, constants } from "ethers";
 import { EBlockchainNetwork } from "@interfaces/types";
 import { ResultAsync } from "@interfaces/objects";
 import { okAsync } from "neverthrow";
+import { ILogUtils } from "@interfaces/utilities";
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
 
-  constructor(network: EBlockchainNetwork, config?: HypernetConfig) {
+  constructor(network: EBlockchainNetwork, protected logUtils: ILogUtils, config?: HypernetConfig) {
     if (config != null) {
       this.config = config;
       return;
     }
 
-    if (network == EBlockchainNetwork.Localhost) {
+    if (network === EBlockchainNetwork.Localhost) {
       this.config = new HypernetConfig(
         "http://localhost:5000", // iframeSource
         "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat", // Router mnemonic
@@ -33,8 +34,8 @@ export class ConfigProvider implements IConfigProvider {
         getPublicKeyFromPrivateKey(wallet.privateKey),
       );
 
-      console.log("Wallet private key", wallet.privateKey);
-      console.log("Router publicIdentifier", this.config.routerPublicIdentifier);
+      this.logUtils.log("Wallet private key", wallet.privateKey);
+      this.logUtils.log("Router publicIdentifier", this.config.routerPublicIdentifier);
     } else {
       // Should be MainNet config here
       this.config = new HypernetConfig(

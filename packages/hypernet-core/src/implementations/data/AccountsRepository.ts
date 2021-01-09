@@ -1,7 +1,7 @@
 import { ERC20Abi, FullChannelState, NodeError, NodeResponses, Result } from "@connext/vector-types";
 import { IAccountsRepository } from "@interfaces/data";
 import { AssetBalance, Balances, BigNumber, EthereumAddress, PublicIdentifier, ResultAsync } from "@interfaces/objects";
-import { IVectorUtils, IBlockchainProvider, IBrowserNodeProvider } from "@interfaces/utilities";
+import { IVectorUtils, IBlockchainProvider, IBrowserNodeProvider, ILogUtils } from "@interfaces/utilities";
 import { Contract } from "ethers";
 import { artifacts } from "@connext/vector-contracts";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
@@ -28,6 +28,7 @@ export class AccountsRepository implements IAccountsRepository {
     protected blockchainProvider: IBlockchainProvider,
     protected vectorUtils: IVectorUtils,
     protected browserNodeProvider: IBrowserNodeProvider,
+    protected logUtils: ILogUtils,
   ) {}
 
   /**
@@ -43,8 +44,10 @@ export class AccountsRepository implements IAccountsRepository {
    * Get the Ethereum accounts associated with this instance.
    */
   public getAccounts(): ResultAsync<string[], BlockchainUnavailableError> {
-    return this.blockchainProvider.getProvider().map(async (provider) => {
-      return await provider.listAccounts();
+    return this.blockchainProvider.getProvider().andThen((provider) => {
+      return ResultAsync.fromPromise(provider.listAccounts(), (e) => {
+        return e as BlockchainUnavailableError;
+      });
     });
   }
 
@@ -55,15 +58,16 @@ export class AccountsRepository implements IAccountsRepository {
     return this.vectorUtils.getRouterChannelAddress().andThen((channelAddress: string) => {
       return this.browserNodeProvider
         .getBrowserNode()
-        .map(async (browserNode) => {
-          const stateChannelRes = await browserNode.getStateChannel({ channelAddress });
-
-          if (stateChannelRes.isError) {
-            throw stateChannelRes.getError();
-          }
-          return stateChannelRes.getValue() as FullChannelState;
+        .andThen((browserNode) => {
+          return ResultAsync.fromPromise(browserNode.getStateChannel({ channelAddress }), (e) => {
+            return e as NodeError;
+          });
         })
-        .map((channelState: FullChannelState) => {
+        .andThen((stateChannelRes) => {
+          if (stateChannelRes.isError) {
+            return errAsync(stateChannelRes.getError() as NodeError);
+          }
+          const channelState = stateChannelRes.getValue() as FullChannelState;
           const assetBalances = new Array<AssetBalance>();
 
           for (let i = 0; i < channelState.assetIds.length; i++) {
@@ -76,7 +80,7 @@ export class AccountsRepository implements IAccountsRepository {
               ),
             );
           }
-          return new Balances(assetBalances);
+          return okAsync(new Balances(assetBalances));
         });
     });
   }
@@ -117,8 +121,8 @@ export class AccountsRepository implements IAccountsRepository {
       RouterChannelUnknownError | CoreUninitializedError | NodeError | Error | BlockchainUnavailableError
     >;
 
-    let channelAddress: string | null = null;
-    let browserNode: BrowserNode | null = null;
+    let channelAddress: string;
+    let browserNode: BrowserNode;
 
     return prerequisites
       .andThen((vals) => {
@@ -128,13 +132,13 @@ export class AccountsRepository implements IAccountsRepository {
         let tx: ResultAsync<TransactionResponse, BlockchainUnavailableError>;
 
         if (assetAddress == "0x0000000000000000000000000000000000000000") {
-          console.log("Transferring ETH.");
+          this.logUtils.log("Transferring ETH.");
           // send eth
           tx = ResultAsync.fromPromise(signer.sendTransaction({ to: channelAddress, value: amount }), (err) => {
             return err as BlockchainUnavailableError;
           });
         } else {
-          console.log("Transferring an ERC20 asset.");
+          this.logUtils.log("Transferring an ERC20 asset.");
           // send an actual erc20 token
           let tokenContract = new Contract(assetAddress, ERC20Abi, signer);
           tx = ResultAsync.fromPromise(tokenContract.transfer(channelAddress, amount), (err) => {
@@ -169,7 +173,7 @@ export class AccountsRepository implements IAccountsRepository {
         const depositRes = depositVal as Result<NodeResponses.Deposit, NodeError>;
 
         if (depositRes.isError) {
-          console.log(depositRes.getError());
+          this.logUtils.log(depositRes.getError());
           return errAsync(depositRes.getError() as NodeError);
         }
 

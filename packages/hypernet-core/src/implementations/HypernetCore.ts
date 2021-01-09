@@ -210,10 +210,9 @@ export class HypernetCore implements IHypernetCore {
   /**
    * Returns the (vector) pubId associated with this instance of HypernetCore.
    */
-  public async getPublicIdentifier(): ResultAsync<PublicIdentifier, CoreUninitializedError> {
-    const contextRes = await this.contextProvider.getInitializedContext();
-    return contextRes.map((res) => {
-      return res.publicIdentifier;
+  public getPublicIdentifier(): ResultAsync<PublicIdentifier, CoreUninitializedError> {
+    return this.contextProvider.getInitializedContext().map((context) => {
+      return context.publicIdentifier;
     });
   }
 
