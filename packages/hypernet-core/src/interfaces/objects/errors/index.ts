@@ -2,6 +2,8 @@ export * from "./BalancesUnavailableError";
 export * from "./BlockchainUnavailableError";
 export * from "./CoreUninitializedError";
 export * from "./InvalidParametersError";
+export * from "./InvalidPaymentError";
+export * from "./InvalidPaymentIdError";
 export * from "./RouterChannelUnknownError";
 export * from "./RouterUnavailableError";
 export * from "./TransferCreationError";
