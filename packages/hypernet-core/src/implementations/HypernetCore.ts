@@ -1,4 +1,3 @@
-import { Result } from "@connext/vector-types";
 import { AccountService, DevelopmentService, LinkService, PaymentService } from "@implementations/business";
 import { AccountsRepository, PaymentRepository, VectorLinkRepository } from "@implementations/data";
 import {
@@ -26,8 +25,9 @@ import {
   PullPayment,
   PushPayment,
   ResultAsync,
+  Result
 } from "@interfaces/objects";
-import { CoreUninitializedError } from "@interfaces/objects/errors";
+import { AcceptPaymentError, CoreUninitializedError, InsufficientBalanceError, LogicalError, RouterChannelUnknownError } from "@interfaces/objects/errors";
 import { EBlockchainNetwork } from "@interfaces/types";
 import {
   IBlockchainProvider,
@@ -35,12 +35,16 @@ import {
   IConfigProvider,
   IContextProvider,
   ILinkUtils,
+  ILogUtils,
+  IPaymentIdUtils,
   IPaymentUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
 import { IVectorListener } from "@interfaces/api";
 import { Subject } from "rxjs";
 import { VectorAPIListener } from "./api";
+import { PaymentIdUtils } from "./utilities/PaymentIdUtils";
+import { NodeError } from "@connext/vector-types";
 
 /**
  * The top-level class-definition for Hypernet Core.
@@ -65,6 +69,8 @@ export class HypernetCore implements IHypernetCore {
   protected vectorUtils: IVectorUtils;
   protected paymentUtils: IPaymentUtils;
   protected linkUtils: ILinkUtils;
+  protected paymentIdUtils: IPaymentIdUtils;
+  protected logUtils: ILogUtils;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
@@ -117,9 +123,11 @@ export class HypernetCore implements IHypernetCore {
       },
     });
 
+    this.logUtils = new LogUtils();
     this.blockchainProvider = new EthersBlockchainProvider();
-    this.configProvider = new ConfigProvider(network, config);
-    this.paymentUtils = new PaymentUtils(this.configProvider);
+    this.paymentIdUtils = new PaymentIdUtils();
+    this.configProvider = new ConfigProvider(network, this.logUtils, config);
+    this.paymentUtils = new PaymentUtils(this.configProvider, this.logUtils, this.paymentIdUtils);
     this.linkUtils = new LinkUtils();
 
     this.contextProvider = new ContextProvider(
@@ -140,12 +148,14 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.browserNodeProvider,
       this.blockchainProvider,
+      this.logUtils
     );
 
     this.accountRepository = new AccountsRepository(
       this.blockchainProvider,
       this.vectorUtils,
       this.browserNodeProvider,
+      this.logUtils
     );
 
     this.paymentRepository = new PaymentRepository(
@@ -154,6 +164,7 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
       this.contextProvider,
       this.paymentUtils,
+      this.logUtils
     );
 
     this.linkRepository = new VectorLinkRepository(
@@ -171,6 +182,7 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.configProvider,
       this.paymentRepository,
+      this.logUtils
     );
 
     this.accountService = new AccountService(this.accountRepository, this.contextProvider);
@@ -281,16 +293,16 @@ export class HypernetCore implements IHypernetCore {
    * @param requiredStake the amount of stake that the provider must put up as part of the insurancepayment
    * @param paymentToken
    */
-  public async sendFunds(
+  public sendFunds(
     counterPartyAccount: PublicIdentifier,
     amount: string,
     expirationDate: moment.Moment,
     requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
-  ): Promise<Payment> {
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error> {
     // Send payment terms to provider & request provider make insurance payment
-    const payment = await this.paymentService.sendFunds(
+    return this.paymentService.sendFunds(
       counterPartyAccount,
       amount,
       expirationDate,
@@ -298,32 +310,15 @@ export class HypernetCore implements IHypernetCore {
       paymentToken,
       disputeMediator,
     );
-
-    return payment;
   }
 
   /**
    * Accepts the terms of a push payment, and puts up the stake/insurance transfer.
    * @param paymentId
    */
-  public async acceptFunds(paymentIds: string[]): Promise<Result<Payment, Error>[]> {
+  public acceptFunds(paymentIds: string[]): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
     // console.log(`HypernetCore:acceptFunds: attempting to accept funds for paymentIds: ${paymentIds}`)
-    const results = await this.paymentService.acceptFunds(paymentIds);
-
-    return results;
-  }
-
-  /**
-   * Sends the parameterized payment internally for payments in state "Staked".
-   * Internally, calls paymentService.stakePosted()
-   * @param paymentIds the list of payment ids for which to complete the payments for
-   */
-  public async completePayments(paymentIds: string[]): Promise<void> {
-    await this.paymentService.stakesPosted(paymentIds);
-    //const results = await this.paymentService.stakesPosted(paymentIds);
-
-    // @todo change return type to Promise<Result<Payment, Error>[]>
-    // (note that this will require us to also change the underlying stakePosted function in paymentService!)
+    return this.paymentService.acceptFunds(paymentIds);
   }
 
   /**
@@ -384,7 +379,11 @@ export class HypernetCore implements IHypernetCore {
    * Initialize this instance of Hypernet Core
    * @param account: the ethereum account to initialize with
    */
-  public async initialize(account: string): Promise<void> {
+  public initialize(account: string): ResultAsync<null, LogicalError> {
+
+
+
+    
     const context = await this.contextProvider.getContext();
     const publicIdentifier = await this.accountService.getPublicIdentifier();
     context.account = account;

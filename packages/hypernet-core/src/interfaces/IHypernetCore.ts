@@ -10,11 +10,13 @@ import {
   PushPayment,
   PullPayment,
   ResultAsync,
+  Result,
 } from "@interfaces/objects";
 import { Subject } from "rxjs";
 import * as moment from "moment";
 import { EBlockchainNetwork } from "./types";
-import { CoreUninitializedError } from "./objects/errors";
+import { AcceptPaymentError, CoreUninitializedError, InsufficientBalanceError, RouterChannelUnknownError } from "./objects/errors";
+import { NodeError } from "@connext/vector-types";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -110,7 +112,7 @@ export interface IHypernetCore {
     requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
-  ): Promise<Payment>;
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 
   /**
    * authorizeFunds() sets up a pull payment.
@@ -129,14 +131,7 @@ export interface IHypernetCore {
    * For a specified payment, puts up stake to accept the payment
    * @param paymentId the payment ID to accept funds
    */
-  acceptFunds(paymentIds: string[]): ResultAsync<Payment, Error>;
-
-  /**
-   * Sends the parameterized payment internally for payments in state "Staked".
-   * Internally, calls paymentService.stakePosted()
-   * @param paymentIds the list of payment ids for which to complete the payments for
-   */
-  completePayments(paymentIds: string[]): Promise<void>;
+  acceptFunds(paymentIds: string[]): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError>;
 
   /**
    * Pulls an incremental amount from an authorized payment

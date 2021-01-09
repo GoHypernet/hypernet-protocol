@@ -92,7 +92,7 @@ export class PaymentRepository implements IPaymentRepository {
       .andThen((myPaymentId) => {
         paymentId = myPaymentId;
         const message: IHypernetTransferMetadata = {
-          paymentId: paymentId,
+          paymentId,
           creationDate: moment().unix(),
           to: counterPartyAccount,
           from: context.publicIdentifier,
@@ -116,7 +116,7 @@ export class PaymentRepository implements IPaymentRepository {
           return errAsync(transferResult.getError() as NodeError);
         }
 
-        let transfer = transferResult.getValue() as FullTransferState;
+        const transfer = transferResult.getValue() as FullTransferState;
 
         // Return the payment
         return this.paymentUtils.transfersToPayment(paymentId, [transfer], config, browserNode);
@@ -165,7 +165,7 @@ export class PaymentRepository implements IPaymentRepository {
             NodeError | Error
           >
         >();
-        for (let transfer of activeTransfersRes.getValue()) {
+        for (const transfer of activeTransfersRes.getValue()) {
           transferTypeResults.push(this.paymentUtils.getTransferTypeWithTransfer(transfer, browserNode));
         }
 
@@ -179,15 +179,15 @@ export class PaymentRepository implements IPaymentRepository {
         // For each transfer, we are either just going to know it's relevant
         // from the data in the metadata, or we are going to check if it's an
         // insurance payment and we have more bulletproof ways to check
-        let relevantTransfers: FullTransferState[] = [];
+        const relevantTransfers: FullTransferState[] = [];
         for (const transferTypeWithTransfer of tranferTypesWithTransfers) {
           const { transferType, transfer } = transferTypeWithTransfer;
 
-          if (transfer.meta && paymentId == transfer.meta.paymentId) {
+          if (transfer.meta && paymentId === transfer.meta.paymentId) {
             relevantTransfers.push(transfer);
           } else {
-            if (transferType == ETransferType.Insurance || transferType == ETransferType.Parameterized) {
-              if (paymentId == transfer.transferState.UUID) {
+            if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
+              if (paymentId === transfer.transferState.UUID) {
                 relevantTransfers.push(transfer);
               } else {
                 this.logUtils.log(`Transfer not relevant in PaymentRepository, transferId: ${transfer.transferId}`);
@@ -245,7 +245,7 @@ export class PaymentRepository implements IPaymentRepository {
             NodeError | Error
           >
         >();
-        for (let transfer of activeTransfersRes.getValue()) {
+        for (const transfer of activeTransfersRes.getValue()) {
           transferTypeResults.push(this.paymentUtils.getTransferTypeWithTransfer(transfer, browserNode));
         }
 
@@ -259,7 +259,7 @@ export class PaymentRepository implements IPaymentRepository {
         // For each transfer, we are either just going to know it's relevant
         // from the data in the metadata, or we are going to check if it's an
         // insurance payment and we have more bulletproof ways to check
-        let relevantTransfers: FullTransferState[] = [];
+        const relevantTransfers: FullTransferState[] = [];
         for (const transferTypeWithTransfer of tranferTypesWithTransfers) {
           const { transferType, transfer } = transferTypeWithTransfer;
 
@@ -359,14 +359,14 @@ export class PaymentRepository implements IPaymentRepository {
           return errAsync(transferResult.getError() as NodeError);
         }
 
-        let transfer = transferResult.getValue() as FullTransferState;
+        const transfer = transferResult.getValue() as FullTransferState;
 
         // Remove the parameterized payment
-        existingTransfers = existingTransfers.filter((obj) => obj.transferId != parameterizedTransferId);
+        existingTransfers = existingTransfers.filter((obj) => obj.transferId !== parameterizedTransferId);
         existingTransfers.push(transfer);
 
         // Transfer has been resolved successfully; return the updated payment.
-        let updatedPayment = this.paymentUtils.transfersToPayment(paymentId, existingTransfers, config, browserNode);
+        const updatedPayment = this.paymentUtils.transfersToPayment(paymentId, existingTransfers, config, browserNode);
 
         return updatedPayment;
       });
@@ -408,11 +408,11 @@ export class PaymentRepository implements IPaymentRepository {
         return this.paymentUtils.transfersToPayment(paymentId, existingTransfers, config, browserNode);
       })
       .andThen((payment) => {
-        let paymentMediator = payment.disputeMediator;
-        let paymentSender = payment.from;
-        let paymentID = payment.id;
-        let paymentStart = `${Math.floor(moment.now() / 1000)}`;
-        let paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`;
+        const paymentMediator = payment.disputeMediator;
+        const paymentSender = payment.from;
+        const paymentID = payment.id;
+        const paymentStart = `${Math.floor(moment.now() / 1000)}`;
+        const paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`;
 
         // TODO: There are probably some logical times when you should not provide a stake
         if (false) {
@@ -439,8 +439,8 @@ export class PaymentRepository implements IPaymentRepository {
           return errAsync(transferResult.getError() as NodeError);
         }
 
-        let transfer = transferResult.getValue() as FullTransferState;
-        let allTransfers = [transfer, ...existingTransfers];
+        const transfer = transferResult.getValue() as FullTransferState;
+        const allTransfers = [transfer, ...existingTransfers];
 
         // Transfer has been created successfully; return the updated payment.
         return this.paymentUtils.transfersToPayment(paymentId, allTransfers, config, browserNode);
@@ -481,7 +481,7 @@ export class PaymentRepository implements IPaymentRepository {
         return this.paymentUtils.transfersToPayment(paymentId, existingTransfers, config, browserNode);
       })
       .andThen((payment) => {
-        let paymentTokenAddress = payment.paymentToken;
+        const paymentTokenAddress = payment.paymentToken;
         let paymentTokenAmount: BigNumber;
         if (payment instanceof PushPayment) {
           paymentTokenAmount = payment.paymentAmount;
@@ -490,10 +490,10 @@ export class PaymentRepository implements IPaymentRepository {
         } else {
           return errAsync(new LogicalError());
         }
-        let paymentRecipient = payment.to;
-        let paymentID = payment.id;
-        let paymentStart = `${Math.floor(moment.now() / 1000)}`;
-        let paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`;
+        const paymentRecipient = payment.to;
+        const paymentID = payment.id;
+        const paymentStart = `${Math.floor(moment.now() / 1000)}`;
+        const paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`;
 
         // Use vectorUtils to create the parameterizedPayment
         return this.vectorUtils.createPaymentTransfer(
@@ -508,8 +508,7 @@ export class PaymentRepository implements IPaymentRepository {
       })
       .andThen((transferInfoUnk) => {
         const transferInfo = transferInfoUnk as NodeResponses.ConditionalTransfer;
-        return ResultAsync.fromPromise(browserNode.getTransfer({ transferId: transferInfo.transferId }), 
-        (e) => {
+        return ResultAsync.fromPromise(browserNode.getTransfer({ transferId: transferInfo.transferId }), (e) => {
           return e as NodeError;
         });
       })
@@ -518,8 +517,8 @@ export class PaymentRepository implements IPaymentRepository {
           return errAsync(transferResult.getError() as NodeError);
         }
 
-        let transfer = transferResult.getValue() as FullTransferState;
-        let allTransfers = [transfer, ...existingTransfers];
+        const transfer = transferResult.getValue() as FullTransferState;
+        const allTransfers = [transfer, ...existingTransfers];
 
         // Transfer has been created successfully; return the updated payment.
         return this.paymentUtils.transfersToPayment(paymentId, allTransfers, config, browserNode);

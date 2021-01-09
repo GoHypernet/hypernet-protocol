@@ -131,7 +131,7 @@ export class AccountsRepository implements IAccountsRepository {
 
         let tx: ResultAsync<TransactionResponse, BlockchainUnavailableError>;
 
-        if (assetAddress == "0x0000000000000000000000000000000000000000") {
+        if (assetAddress === "0x0000000000000000000000000000000000000000") {
           this.logUtils.log("Transferring ETH.");
           // send eth
           tx = ResultAsync.fromPromise(signer.sendTransaction({ to: channelAddress, value: amount }), (err) => {
@@ -140,7 +140,7 @@ export class AccountsRepository implements IAccountsRepository {
         } else {
           this.logUtils.log("Transferring an ERC20 asset.");
           // send an actual erc20 token
-          let tokenContract = new Contract(assetAddress, ERC20Abi, signer);
+          const tokenContract = new Contract(assetAddress, ERC20Abi, signer);
           tx = ResultAsync.fromPromise(tokenContract.transfer(channelAddress, amount), (err) => {
             return err as BlockchainUnavailableError;
           });

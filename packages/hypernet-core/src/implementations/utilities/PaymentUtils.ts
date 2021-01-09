@@ -401,7 +401,7 @@ export class PaymentUtils implements IPaymentUtils {
       ResultAsync<{ transferType: ETransferType; transfer: FullTransferState }, NodeError | Error>
     >();
     for (const transfer of transfers) {
-      transferTypeResults.push(this._getTransferTypeWithTransfer(transfer, browserNode));
+      transferTypeResults.push(this.getTransferTypeWithTransfer(transfer, browserNode));
     }
 
     return combine(transferTypeResults).andThen((transferTypesWithTransfers) => {

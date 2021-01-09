@@ -1,5 +1,5 @@
 import { HypernetContext, InitializedHypernetContext } from "@interfaces/objects";
-import { CoreUninitializedError } from "@interfaces/objects/errors";
+import { CoreUninitializedError, LogicalError } from "@interfaces/objects/errors";
 import { ResultAsync } from "@interfaces/objects";
 
 /**
@@ -9,7 +9,7 @@ export interface IContextProvider {
   /**
    *
    */
-  getContext(): Promise<HypernetContext>;
+  getContext(): ResultAsync<HypernetContext, LogicalError>;
 
   /**
    *
@@ -19,5 +19,5 @@ export interface IContextProvider {
   /**
    *
    */
-  setContext(context: HypernetContext): void;
+  setContext(context: HypernetContext): ResultAsync<null, LogicalError>;
 }
