@@ -70,6 +70,11 @@ export interface IPaymentUtils {
     browserNode: BrowserNode,
   ): ResultAsync<ETransferType, LogicalError | NodeError>;
 
+  getTransferTypeWithTransfer(
+    transfer: FullTransferState,
+    browserNode: BrowserNode,
+  ): ResultAsync<{ transferType: ETransferType; transfer: FullTransferState }, NodeError | Error>;
+
   /**
    *
    * @param id

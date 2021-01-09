@@ -5,6 +5,8 @@ export * from "./InvalidParametersError";
 export * from "./InvalidPaymentError";
 export * from "./InvalidPaymentIdError";
 export * from "./LogicalError";
+export * from "./PaymentFinalizeError";
+export * from "./PaymentStakeError";
 export * from "./RouterChannelUnknownError";
 export * from "./RouterUnavailableError";
 export * from "./TransferCreationError";

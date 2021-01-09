@@ -1,13 +1,17 @@
 import moment from "moment";
-import { EthereumAddress, PublicKey } from "@interfaces/objects";
+import { EthereumAddress, PublicKey, ResultAsync } from "@interfaces/objects";
 import { BigNumber, Payment, PublicIdentifier } from "@interfaces/objects";
+import { CoreUninitializedError, PaymentFinalizeError, RouterChannelUnknownError } from "@interfaces/objects/errors";
+import { NodeError } from "@connext/vector-types";
 
 export interface IPaymentRepository {
   /**
    *
    * @param paymentIds
    */
-  getPaymentsByIds(paymentIds: string[]): Promise<Map<string, Payment>>;
+  getPaymentsByIds(
+    paymentIds: string[],
+  ): ResultAsync<Map<string, Payment>, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 
   /**
    * Creates a push payment and returns it. Nothing moves until
@@ -21,21 +25,25 @@ export interface IPaymentRepository {
     requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
-  ): Promise<Payment>;
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 
   /**
    * Provides assets for a given list of payment ids.
    * Internally, this is what actually creates the ParameterizedPayment with Vector.
    * @param paymentId
    */
-  provideAsset(paymentId: string): Promise<Payment>;
+  provideAsset(
+    paymentId: string,
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 
   /**
    * Provides stake for a given payment id
    * Internally, this is what actually creates the InsurancePayments with Vector.
    * @param paymentId
    */
-  provideStake(paymentId: string): Promise<Payment>;
+  provideStake(
+    paymentId: string,
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 
   /**
    * Finalizes/confirms a payment
@@ -43,5 +51,11 @@ export interface IPaymentRepository {
    * be it a insurancePayments or parameterizedPayments.
    * @param paymentId
    */
-  finalizePayment(paymentId: string, amount: string): Promise<Payment>;
+  finalizePayment(
+    paymentId: string,
+    amount: string,
+  ): ResultAsync<
+    Payment,
+    PaymentFinalizeError | RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+  >;
 }

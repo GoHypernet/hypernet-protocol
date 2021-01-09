@@ -1,25 +1,38 @@
-import { FullTransferState } from "@connext/vector-types";
+import { BrowserNode } from "@connext/vector-browser-node";
+import { FullTransferState, NodeError, NodeResponses } from "@connext/vector-types";
 import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
 import {
   BigNumber,
   EthereumAddress,
+  HypernetConfig,
   IHypernetTransferMetadata,
+  InitializedHypernetContext,
   Payment,
   PublicIdentifier,
   PublicKey,
   PullPayment,
   PushPayment,
-  SortedTransfers,
+  ResultAsync,
 } from "@interfaces/objects";
+import {
+  CoreUninitializedError,
+  LogicalError,
+  PaymentFinalizeError,
+  PaymentStakeError,
+  RouterChannelUnknownError,
+  TransferResolutionError,
+} from "@interfaces/objects/errors";
 import { EPaymentType, ETransferType } from "@interfaces/types";
 import {
   IBrowserNodeProvider,
   IConfigProvider,
   IContextProvider,
+  ILogUtils,
   IPaymentUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
 import moment from "moment";
+import { combine, errAsync, okAsync } from "neverthrow";
 
 /**
  * Contains methods for creating push, pull, etc payments,
@@ -35,6 +48,7 @@ export class PaymentRepository implements IPaymentRepository {
     protected configProvider: IConfigProvider,
     protected contextProvider: IContextProvider,
     protected paymentUtils: IPaymentUtils,
+    protected logUtils: ILogUtils,
   ) {}
 
   /**
@@ -48,173 +62,233 @@ export class PaymentRepository implements IPaymentRepository {
    * @param paymentToken the (Ethereum) address of the payment token
    * @param disputeMediator the (Ethereum) address of the dispute mediator
    */
-  public async createPushPayment(
+  public createPushPayment(
     counterPartyAccount: PublicIdentifier,
     amount: string,
     expirationDate: moment.Moment,
     requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
-  ): Promise<Payment> {
-    const browserNodePromise = await this.browserNodeProvider.getBrowserNode();
-    const configPromise = await this.configProvider.getConfig();
-    const contextPromise = await this.contextProvider.getInitializedContext();
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error> {
+    const prerequisites = (combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.configProvider.getConfig(),
+      this.contextProvider.getInitializedContext() as ResultAsync<any, any>,
+    ]) as unknown) as ResultAsync<
+      [BrowserNode, HypernetConfig, InitializedHypernetContext],
+      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+    >;
 
-    const [browserNode, config, context] = await Promise.all([browserNodePromise, configPromise, contextPromise]);
+    let browserNode: BrowserNode;
+    let config: HypernetConfig;
+    let context: InitializedHypernetContext;
+    let paymentId: string;
 
-    // Create a null transfer, with the terms of the payment in the metadata.
-    const paymentId = await this.paymentUtils.createPaymentId(EPaymentType.Push);
+    return prerequisites
+      .andThen((vals) => {
+        [browserNode, config, context] = vals;
+        return this.paymentUtils.createPaymentId(EPaymentType.Push);
+      })
+      .andThen((myPaymentId) => {
+        paymentId = myPaymentId;
+        const message: IHypernetTransferMetadata = {
+          paymentId: paymentId,
+          creationDate: moment().unix(),
+          to: counterPartyAccount,
+          from: context.publicIdentifier,
+          requiredStake: requiredStake.toString(),
+          paymentAmount: amount.toString(),
+          expirationDate: expirationDate.unix(),
+          paymentToken,
+          disputeMediator,
+        };
 
-    const message: IHypernetTransferMetadata = {
-      paymentId: paymentId,
-      creationDate: moment().unix(),
-      to: counterPartyAccount,
-      from: context.publicIdentifier,
-      requiredStake: requiredStake.toString(),
-      paymentAmount: amount.toString(),
-      expirationDate: expirationDate.unix(),
-      paymentToken,
-      disputeMediator,
-    };
+        // Create a message transfer, with the terms of the payment in the metadata.
+        return this.vectorUtils.createMessageTransfer(counterPartyAccount, message);
+      })
+      .andThen((transferInfo) => {
+        return ResultAsync.fromPromise(browserNode.getTransfer({ transferId: transferInfo.transferId }), (e) => {
+          return e as NodeError;
+        });
+      })
+      .andThen((transferResult) => {
+        if (transferResult.isError) {
+          return errAsync(transferResult.getError() as NodeError);
+        }
 
-    const transferInfo = await this.vectorUtils.createMessageTransfer(counterPartyAccount, message);
-    let transferResult = await browserNode.getTransfer({ transferId: transferInfo.transferId });
+        let transfer = transferResult.getValue() as FullTransferState;
 
-    if (transferResult.isError) {
-      throw new Error("Could not get newly created transfer.");
-    }
-
-    let transfer = transferResult.getValue() as FullTransferState;
-
-    // Return the payment
-    const payment = this.paymentUtils.transfersToPayment(paymentId, [transfer], config, browserNode);
-
-    return payment;
+        // Return the payment
+        return this.paymentUtils.transfersToPayment(paymentId, [transfer], config, browserNode);
+      });
   }
 
   /**
    * Given a paymentId, return the component transfers.
    * @param paymentId the payment to get transfers for
    */
-  public async getTransfersByPaymentId(paymentId: string): Promise<FullTransferState[]> {
-    const browserNodePromise = await this.browserNodeProvider.getBrowserNode();
-    const channelAddressPromise = await this.vectorUtils.getRouterChannelAddress();
-    const configPromise = await this.configProvider.getConfig();
-    const contextPromise = await this.contextProvider.getInitializedContext();
+  protected _getTransfersByPaymentId(paymentId: string): ResultAsync<FullTransferState[], Error> {
+    const prerequisites = (combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.vectorUtils.getRouterChannelAddress(),
+      this.configProvider.getConfig(),
+      this.contextProvider.getInitializedContext() as ResultAsync<any, any>,
+    ]) as unknown) as ResultAsync<
+      [BrowserNode, string, HypernetConfig, InitializedHypernetContext],
+      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+    >;
 
-    const [browserNode, channelAddress, config, context] = await Promise.all([
-      browserNodePromise,
-      channelAddressPromise,
-      configPromise,
-      contextPromise,
-    ]);
+    let browserNode: BrowserNode;
+    let channelAddress: string;
+    let config: HypernetConfig;
+    let context: InitializedHypernetContext;
 
-    const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress });
+    return prerequisites
+      .andThen((vals) => {
+        [browserNode, channelAddress, config, context] = vals;
+        return ResultAsync.fromPromise(browserNode.getActiveTransfers({ channelAddress }), (e) => {
+          return e as NodeError;
+        });
+      })
+      .andThen((activeTransfersRes) => {
+        if (activeTransfersRes.isError) {
+          this.logUtils.log("PaymentRepository: getPaymentsByIds: Error getting active transfers");
+          return errAsync(activeTransfersRes.getError() as NodeError);
+        }
 
-    if (activeTransfersRes.isError) {
-      console.log("PaymentRepository: getPaymentsByIds: Error getting active transfers");
-      const error = activeTransfersRes.getError();
-      throw error;
-    }
+        const transferTypeResults = new Array<
+          ResultAsync<
+            {
+              transferType: ETransferType;
+              transfer: FullTransferState;
+            },
+            NodeError | Error
+          >
+        >();
+        for (let transfer of activeTransfersRes.getValue()) {
+          transferTypeResults.push(this.paymentUtils.getTransferTypeWithTransfer(transfer, browserNode));
+        }
 
-    const activeTransfers = activeTransfersRes.getValue();
-    let relevantTransfers: FullTransferState[] = [];
+        return combine(transferTypeResults);
+      })
+      .andThen((tranferTypesWithTransfersRes) => {
+        const tranferTypesWithTransfers = tranferTypesWithTransfersRes as {
+          transferType: ETransferType;
+          transfer: FullTransferState;
+        }[];
+        // For each transfer, we are either just going to know it's relevant
+        // from the data in the metadata, or we are going to check if it's an
+        // insurance payment and we have more bulletproof ways to check
+        let relevantTransfers: FullTransferState[] = [];
+        for (const transferTypeWithTransfer of tranferTypesWithTransfers) {
+          const { transferType, transfer } = transferTypeWithTransfer;
 
-    for (let transfer of activeTransfers) {
-      if (transfer.meta && paymentId == transfer.meta.paymentId) {
-        relevantTransfers.push(transfer);
-      } else {
-        let transferType = await this.paymentUtils.getTransferType(transfer, browserNode);
-        if (transferType == ETransferType.Insurance || transferType == ETransferType.Parameterized) {
-          if (paymentId == transfer.transferState.UUID) {
+          if (transfer.meta && paymentId == transfer.meta.paymentId) {
             relevantTransfers.push(transfer);
           } else {
-            console.log(`Transfer not relevant in PaymentRepository, transferId: ${transfer.transferId}`);
+            if (transferType == ETransferType.Insurance || transferType == ETransferType.Parameterized) {
+              if (paymentId == transfer.transferState.UUID) {
+                relevantTransfers.push(transfer);
+              } else {
+                this.logUtils.log(`Transfer not relevant in PaymentRepository, transferId: ${transfer.transferId}`);
+              }
+            } else {
+              this.logUtils.log(`Unrecognized transfer in PaymentRepository, transferId: ${transfer.transferId}`);
+            }
           }
-        } else {
-          console.log(`Unrecognized transfer in PaymentRepository, transferId: ${transfer.transferId}`);
         }
-      }
-    }
 
-    return relevantTransfers;
+        return okAsync(relevantTransfers);
+      });
   }
 
   /**
    * Given a list of payment Ids, return the associated payments.
    * @param paymentIds the list of payments to get
    */
-  public async getPaymentsByIds(paymentIds: string[]): Promise<Map<string, Payment>> {
-    const browserNodePromise = await this.browserNodeProvider.getBrowserNode();
-    const channelAddressPromise = await this.vectorUtils.getRouterChannelAddress();
-    const configPromise = await this.configProvider.getConfig();
-    const contextPromise = await this.contextProvider.getInitializedContext();
+  public getPaymentsByIds(paymentIds: string[]): ResultAsync<Map<string, Payment>, Error> {
+    const prerequisites = (combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.vectorUtils.getRouterChannelAddress(),
+      this.configProvider.getConfig(),
+      this.contextProvider.getInitializedContext() as ResultAsync<any, any>,
+    ]) as unknown) as ResultAsync<
+      [BrowserNode, string, HypernetConfig, InitializedHypernetContext],
+      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+    >;
 
-    const [browserNode, channelAddress, config, context] = await Promise.all([
-      browserNodePromise,
-      channelAddressPromise,
-      configPromise,
-      contextPromise,
-    ]);
+    let browserNode: BrowserNode;
+    let channelAddress: string;
+    let config: HypernetConfig;
+    let context: InitializedHypernetContext;
 
-    const activeTransfersRes = await browserNode.getActiveTransfers({ channelAddress });
+    return prerequisites
+      .andThen((vals) => {
+        [browserNode, channelAddress, config, context] = vals;
 
-    if (activeTransfersRes.isError) {
-      console.log("PaymentRepository: getPaymentsByIds: Error getting active transfers");
-      const error = activeTransfersRes.getError();
-      throw error;
-    }
+        return ResultAsync.fromPromise(browserNode.getActiveTransfers({ channelAddress }), (e) => {
+          return e as NodeError;
+        });
+      })
+      .andThen((activeTransfersRes) => {
+        if (activeTransfersRes.isError) {
+          this.logUtils.log("PaymentRepository: getPaymentsByIds: Error getting active transfers");
+          return errAsync(activeTransfersRes.getError() as NodeError);
+        }
 
-    // console.log(`PaymentRepository: getPaymentsByIds: activeTransfersResLength: ${activeTransfersRes.getValue().length}`)
-    // console.log(activeTransfersRes.getValue())
+        const transferTypeResults = new Array<
+          ResultAsync<
+            {
+              transferType: ETransferType;
+              transfer: FullTransferState;
+            },
+            NodeError | Error
+          >
+        >();
+        for (let transfer of activeTransfersRes.getValue()) {
+          transferTypeResults.push(this.paymentUtils.getTransferTypeWithTransfer(transfer, browserNode));
+        }
 
-    // Remember, the offer transfer is the only one that we actually use the metadata for
-    // For Insurance & Parameterized, we put the paymentId in the state itself
-    const activeTransfers = activeTransfersRes.getValue();
-    let relevantTransfers: FullTransferState[] = [];
+        return combine(transferTypeResults);
+      })
+      .andThen((tranferTypesWithTransfersRes) => {
+        const tranferTypesWithTransfers = tranferTypesWithTransfersRes as {
+          transferType: ETransferType;
+          transfer: FullTransferState;
+        }[];
+        // For each transfer, we are either just going to know it's relevant
+        // from the data in the metadata, or we are going to check if it's an
+        // insurance payment and we have more bulletproof ways to check
+        let relevantTransfers: FullTransferState[] = [];
+        for (const transferTypeWithTransfer of tranferTypesWithTransfers) {
+          const { transferType, transfer } = transferTypeWithTransfer;
 
-    for (let transfer of activeTransfers) {
-      if (transfer.meta && paymentIds.includes(transfer.meta.paymentId)) {
-        relevantTransfers.push(transfer);
-      } else {
-        let transferType = await this.paymentUtils.getTransferType(transfer, browserNode);
-        if (transferType == ETransferType.Insurance || transferType == ETransferType.Parameterized) {
-          if (paymentIds.includes(transfer.transferState.UUID)) {
+          if (transfer.meta && paymentIds.includes(transfer.meta.paymentId)) {
             relevantTransfers.push(transfer);
           } else {
-            console.log(`Transfer not relevant in PaymentRepository, transferId: ${transfer.transferId}`);
+            if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
+              if (paymentIds.includes(transfer.transferState.UUID)) {
+                relevantTransfers.push(transfer);
+              } else {
+                this.logUtils.log(`Transfer not relevant in PaymentRepository, transferId: ${transfer.transferId}`);
+              }
+            } else {
+              this.logUtils.log(`Unrecognized transfer in PaymentRepository, transferId: ${transfer.transferId}`);
+            }
           }
-        } else {
-          console.log(
-            `Unrecognized transfer or not relevant to this payment in PaymentRepository, transferId: ${transfer.transferId}`,
-          );
         }
-      }
-    }
 
-    // console.log(`PaymentRepository: getPaymentsByIds: activeTransfersLength: ${activeTransfers.length}`)
-
-    const payments = await this.paymentUtils.transfersToPayments(relevantTransfers, config, context, browserNode);
-
-    return payments.reduce((map, obj) => {
-      map.set(obj.id, obj);
-      return map;
-    }, new Map<string, Payment>());
-  }
-
-  /**
-   * Singular version of getPaymentsByIds
-   * @param paymentId the payment to get
-   */
-  public async getPaymentById(paymentId: string): Promise<Payment> {
-    let payments = await this.getPaymentsByIds([paymentId]);
-    let payment = payments.get(paymentId);
-
-    if (payment == null) {
-      throw new Error(`PaymentRepository:getPaymentById():Could not get payment!`);
-    }
-
-    return payment;
+        return okAsync(relevantTransfers);
+      })
+      .andThen((relevantTransfers) => {
+        return this.paymentUtils.transfersToPayments(relevantTransfers, config, context, browserNode);
+      })
+      .map((payments) => {
+        return payments.reduce((map, obj) => {
+          map.set(obj.id, obj);
+          return map;
+        }, new Map<string, Payment>());
+      });
   }
 
   /**
@@ -224,50 +298,78 @@ export class PaymentRepository implements IPaymentRepository {
    * @param paymentId the payment to finalize
    * @param amount the amount of the payment to finalize for
    */
-  public async finalizePayment(paymentId: string, amount: string): Promise<Payment> {
-    let browserNodePromise = await this.browserNodeProvider.getBrowserNode();
-    let configPromise = await this.configProvider.getConfig();
-    let paymentPromise = await this.getPaymentById(paymentId);
-    let existingTransfersPromise = await this.getTransfersByPaymentId(paymentId);
+  public finalizePayment(
+    paymentId: string,
+    amount: string,
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error> {
+    const prerequisites = (combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.configProvider.getConfig(),
+      this._getTransfersByPaymentId(paymentId) as ResultAsync<any, any>,
+    ]) as unknown) as ResultAsync<
+      [BrowserNode, HypernetConfig, FullTransferState[]],
+      | PaymentFinalizeError
+      | TransferResolutionError
+      | RouterChannelUnknownError
+      | CoreUninitializedError
+      | NodeError
+      | Error
+    >;
 
-    let [browserNode, config, payment, existingTransfers] = await Promise.all([
-      browserNodePromise,
-      configPromise,
-      paymentPromise,
-      existingTransfersPromise,
-    ]);
+    let browserNode: BrowserNode;
+    let config: HypernetConfig;
+    let existingTransfers: FullTransferState[];
+    let parameterizedTransferId: string;
 
-    console.log(`Finalizing payment ${paymentId}`);
+    return prerequisites
+      .andThen((vals) => {
+        [browserNode, config, existingTransfers] = vals;
 
-    // get the transfer id from the paymentId
-    // use payment utils for this
-    let sortedTransfers = await this.paymentUtils.sortTransfers(paymentId, existingTransfers, browserNode);
+        this.logUtils.log(`Finalizing payment ${paymentId}`);
 
-    if (sortedTransfers.parameterizedTransfer == null) {
-      throw new Error(`Cannot finalize payment ${paymentId}, no parameterized transfer exists for this!`);
-    }
+        // get the transfer id from the paymentId
+        // use payment utils for this
+        return this.paymentUtils.sortTransfers(paymentId, existingTransfers, browserNode);
+      })
+      .andThen((sortedTransfers) => {
+        if (sortedTransfers.parameterizedTransfer == null) {
+          return errAsync(
+            new PaymentFinalizeError(
+              `Cannot finalize payment ${paymentId}, no parameterized transfer exists for this!`,
+            ),
+          );
+        }
 
-    let transferId = sortedTransfers.parameterizedTransfer.transferId;
+        parameterizedTransferId = sortedTransfers.parameterizedTransfer.transferId;
 
-    await this.vectorUtils.resolvePaymentTransfer(transferId, paymentId, amount);
-    let transferResult = await browserNode.getTransfer({
-      transferId: sortedTransfers.parameterizedTransfer.transferId,
-    });
+        return this.vectorUtils.resolvePaymentTransfer(parameterizedTransferId, paymentId, amount);
+      })
+      .andThen((res) => {
+        return ResultAsync.fromPromise(
+          browserNode.getTransfer({
+            transferId: parameterizedTransferId,
+          }),
+          (e) => {
+            return e as NodeError;
+          },
+        );
+      })
+      .andThen((transferResult) => {
+        if (transferResult.isError) {
+          return errAsync(transferResult.getError() as NodeError);
+        }
 
-    if (transferResult.isError) {
-      throw new Error("Could not get newly created transfer.");
-    }
+        let transfer = transferResult.getValue() as FullTransferState;
 
-    let transfer = transferResult.getValue() as FullTransferState;
+        // Remove the parameterized payment
+        existingTransfers = existingTransfers.filter((obj) => obj.transferId != parameterizedTransferId);
+        existingTransfers.push(transfer);
 
-    // Remove the parameterized payment
-    existingTransfers = existingTransfers.filter((obj) => obj.transferId != transferId);
-    existingTransfers.push(transfer);
+        // Transfer has been resolved successfully; return the updated payment.
+        let updatedPayment = this.paymentUtils.transfersToPayment(paymentId, existingTransfers, config, browserNode);
 
-    // Transfer has been resolved successfully; return the updated payment.
-    let updatedPayment = this.paymentUtils.transfersToPayment(paymentId, existingTransfers, config, browserNode);
-
-    return updatedPayment;
+        return updatedPayment;
+      });
   }
 
   /**
@@ -275,47 +377,74 @@ export class PaymentRepository implements IPaymentRepository {
    * Internally, this is what actually creates the InsurancePayments with Vector.
    * @param paymentId the payment for which to provide stake for
    */
-  public async provideStake(paymentId: string): Promise<Payment> {
-    let browserNodePromise = await this.browserNodeProvider.getBrowserNode();
-    let configPromise = await this.configProvider.getConfig();
-    let paymentPromise = await this.getPaymentById(paymentId);
-    let existingTransfersPromise = await this.getTransfersByPaymentId(paymentId);
+  public provideStake(
+    paymentId: string,
+  ): ResultAsync<
+    Payment,
+    PaymentStakeError | TransferResolutionError | RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+  > {
+    const prerequisites = (combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.configProvider.getConfig(),
+      this._getTransfersByPaymentId(paymentId) as ResultAsync<any, any>,
+    ]) as unknown) as ResultAsync<
+      [BrowserNode, HypernetConfig, FullTransferState[]],
+      | PaymentFinalizeError
+      | TransferResolutionError
+      | RouterChannelUnknownError
+      | CoreUninitializedError
+      | NodeError
+      | Error
+    >;
 
-    let [browserNode, config, payment, existingTransfers] = await Promise.all([
-      browserNodePromise,
-      configPromise,
-      paymentPromise,
-      existingTransfersPromise,
-    ]);
+    let browserNode: BrowserNode;
+    let config: HypernetConfig;
+    let existingTransfers: FullTransferState[];
 
-    let paymentMediator = payment.disputeMediator;
-    let paymentSender = payment.from;
-    let paymentID = payment.id;
-    let paymentStart = `${Math.floor(moment.now() / 1000)}`;
-    let paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`;
+    return prerequisites
+      .andThen((vals) => {
+        [browserNode, config, existingTransfers] = vals;
 
-    console.log(`PaymentRepository:provideStake: Creating insurance transfer for paymentId: ${paymentId}`);
-    let transferInfo = await this.vectorUtils.createInsuranceTransfer(
-      paymentSender,
-      paymentMediator,
-      payment.requiredStake,
-      paymentExpiration,
-      paymentID,
-    );
+        return this.paymentUtils.transfersToPayment(paymentId, existingTransfers, config, browserNode);
+      })
+      .andThen((payment) => {
+        let paymentMediator = payment.disputeMediator;
+        let paymentSender = payment.from;
+        let paymentID = payment.id;
+        let paymentStart = `${Math.floor(moment.now() / 1000)}`;
+        let paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`;
 
-    let transferResult = await browserNode.getTransfer({ transferId: transferInfo.transferId });
+        // TODO: There are probably some logical times when you should not provide a stake
+        if (false) {
+          return errAsync(new PaymentStakeError());
+        }
 
-    if (transferResult.isError) {
-      throw new Error("Could not get newly created transfer.");
-    }
+        this.logUtils.log(`PaymentRepository:provideStake: Creating insurance transfer for paymentId: ${paymentId}`);
+        return this.vectorUtils.createInsuranceTransfer(
+          paymentSender,
+          paymentMediator,
+          payment.requiredStake,
+          paymentExpiration,
+          paymentID,
+        );
+      })
+      .andThen((transferInfoUnk) => {
+        const transferInfo = transferInfoUnk as NodeResponses.ConditionalTransfer;
+        return ResultAsync.fromPromise(browserNode.getTransfer({ transferId: transferInfo.transferId }), (e) => {
+          return e as NodeError;
+        });
+      })
+      .andThen((transferResult) => {
+        if (transferResult.isError) {
+          return errAsync(transferResult.getError() as NodeError);
+        }
 
-    let transfer = transferResult.getValue() as FullTransferState;
-    let allTransfers = [transfer, ...existingTransfers];
+        let transfer = transferResult.getValue() as FullTransferState;
+        let allTransfers = [transfer, ...existingTransfers];
 
-    // Transfer has been created successfully; return the updated payment.
-    let updatedPayment = this.paymentUtils.transfersToPayment(paymentId, allTransfers, config, browserNode);
-
-    return updatedPayment;
+        // Transfer has been created successfully; return the updated payment.
+        return this.paymentUtils.transfersToPayment(paymentId, allTransfers, config, browserNode);
+      });
   }
 
   /**
@@ -324,53 +453,76 @@ export class PaymentRepository implements IPaymentRepository {
    * and returns a payment of state 'Approved'
    * @param paymentId the payment for which to provide an asset for
    */
-  public async provideAsset(paymentId: string): Promise<Payment> {
-    let browserNodePromise = await this.browserNodeProvider.getBrowserNode();
-    let configPromise = await this.configProvider.getConfig();
-    let paymentPromise = await this.getPaymentById(paymentId);
-    let existingTransfersPromise = await this.getTransfersByPaymentId(paymentId);
+  public provideAsset(
+    paymentId: string,
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | LogicalError> {
+    const prerequisites = (combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.configProvider.getConfig(),
+      this._getTransfersByPaymentId(paymentId) as ResultAsync<any, any>,
+    ]) as unknown) as ResultAsync<
+      [BrowserNode, HypernetConfig, FullTransferState[]],
+      | PaymentFinalizeError
+      | TransferResolutionError
+      | RouterChannelUnknownError
+      | CoreUninitializedError
+      | NodeError
+      | LogicalError
+    >;
 
-    let [browserNode, config, payment, existingTransfers] = await Promise.all([
-      browserNodePromise,
-      configPromise,
-      paymentPromise,
-      existingTransfersPromise,
-    ]);
+    let browserNode: BrowserNode;
+    let config: HypernetConfig;
+    let existingTransfers: FullTransferState[];
 
-    if (!(payment instanceof PushPayment || payment instanceof PullPayment)) {
-      throw new Error("Payment was neither Push nor Pull");
-    }
+    return prerequisites
+      .andThen((vals) => {
+        [browserNode, config, existingTransfers] = vals;
 
-    let paymentTokenAddress = payment.paymentToken;
-    let paymentTokenAmount = payment instanceof PushPayment ? payment.paymentAmount : payment.authorizedAmount;
-    let paymentRecipient = payment.to;
-    let paymentID = payment.id;
-    let paymentStart = `${Math.floor(moment.now() / 1000)}`;
-    let paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`;
+        return this.paymentUtils.transfersToPayment(paymentId, existingTransfers, config, browserNode);
+      })
+      .andThen((payment) => {
+        let paymentTokenAddress = payment.paymentToken;
+        let paymentTokenAmount: BigNumber;
+        if (payment instanceof PushPayment) {
+          paymentTokenAmount = payment.paymentAmount;
+        } else if (payment instanceof PullPayment) {
+          paymentTokenAmount = payment.authorizedAmount;
+        } else {
+          return errAsync(new LogicalError());
+        }
+        let paymentRecipient = payment.to;
+        let paymentID = payment.id;
+        let paymentStart = `${Math.floor(moment.now() / 1000)}`;
+        let paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`;
 
-    // Use vectorUtils to create the parameterizedPayment
-    let transferInfo = await this.vectorUtils.createPaymentTransfer(
-      payment instanceof PushPayment ? EPaymentType.Push : EPaymentType.Pull,
-      paymentRecipient,
-      paymentTokenAmount,
-      paymentTokenAddress,
-      paymentID,
-      paymentStart,
-      paymentExpiration,
-    );
+        // Use vectorUtils to create the parameterizedPayment
+        return this.vectorUtils.createPaymentTransfer(
+          payment instanceof PushPayment ? EPaymentType.Push : EPaymentType.Pull,
+          paymentRecipient,
+          paymentTokenAmount,
+          paymentTokenAddress,
+          paymentID,
+          paymentStart,
+          paymentExpiration,
+        );
+      })
+      .andThen((transferInfoUnk) => {
+        const transferInfo = transferInfoUnk as NodeResponses.ConditionalTransfer;
+        return ResultAsync.fromPromise(browserNode.getTransfer({ transferId: transferInfo.transferId }), 
+        (e) => {
+          return e as NodeError;
+        });
+      })
+      .andThen((transferResult) => {
+        if (transferResult.isError) {
+          return errAsync(transferResult.getError() as NodeError);
+        }
 
-    let transferResult = await browserNode.getTransfer({ transferId: transferInfo.transferId });
+        let transfer = transferResult.getValue() as FullTransferState;
+        let allTransfers = [transfer, ...existingTransfers];
 
-    if (transferResult.isError) {
-      throw new Error("Could not get newly created transfer.");
-    }
-
-    let transfer = transferResult.getValue() as FullTransferState;
-    let allTransfers = [transfer, ...existingTransfers];
-
-    // Transfer has been created successfully; return the updated payment.
-    let updatedPayment = this.paymentUtils.transfersToPayment(paymentID, allTransfers, config, browserNode);
-
-    return updatedPayment;
+        // Transfer has been created successfully; return the updated payment.
+        return this.paymentUtils.transfersToPayment(paymentId, allTransfers, config, browserNode);
+      });
   }
 }

@@ -260,7 +260,7 @@ export class PaymentUtils implements IPaymentUtils {
     // First step, get the transfer types for all the transfers
     const transferTypeResults = [];
     for (const transfer of transfers) {
-      transferTypeResults.push(this._getTransferTypeWithTransfer(transfer, browserNode));
+      transferTypeResults.push(this.getTransferTypeWithTransfer(transfer, browserNode));
     }
 
     return combine(transferTypeResults).andThen((transferTypesWithTransfers) => {
@@ -361,6 +361,20 @@ export class PaymentUtils implements IPaymentUtils {
   }
 
   /**
+   * Exactly the same as getTransferType but also returns the source transfer,
+   * useful when dealing with combine() and other contexts where it is easy
+   * to loose track of which transfer you are getting the type for.
+   */
+  public getTransferTypeWithTransfer(
+    transfer: FullTransferState,
+    browserNode: BrowserNode,
+  ): ResultAsync<{ transferType: ETransferType; transfer: FullTransferState }, NodeError | Error> {
+    return this.getTransferType(transfer, browserNode).map((transferType) => {
+      return { transferType, transfer };
+    });
+  }
+
+  /**
    * Given a paymentID and matching transfers for this paymentId, return the SortedTransfers object associated.
    * SortedTransfers is an object containing up to 1 of each of Offer, Insurance, Parameterized, PullRecord, and
    * the metadata associated with this payment (as IHypernetTransferMetadata).
@@ -446,15 +460,6 @@ export class PaymentUtils implements IPaymentUtils {
       return okAsync(
         new SortedTransfers(offerTransfer, insuranceTransfer, parameterizedTransfer, pullTransfers, offerTransfer.meta),
       );
-    });
-  }
-
-  protected _getTransferTypeWithTransfer(
-    transfer: FullTransferState,
-    browserNode: BrowserNode,
-  ): ResultAsync<{ transferType: ETransferType; transfer: FullTransferState }, NodeError | Error> {
-    return this.getTransferType(transfer, browserNode).map((transferType) => {
-      return { transferType, transfer };
     });
   }
 }
