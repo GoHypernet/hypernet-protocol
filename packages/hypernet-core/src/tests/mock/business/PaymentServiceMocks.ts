@@ -7,6 +7,7 @@ import { PaymentService } from "@implementations/business";
 import { IConfigProvider, IContextProvider } from "@interfaces/utilities";
 import { InitializedHypernetContext } from "@interfaces/objects";
 
+// normal ts-mock "when" function won't work (issue: https://github.com/NagRock/ts-mockito/issues/209) that's why we had to write a different implementation here
 jest.mock("@implementations/data");
 
 PaymentRepository.prototype.getPaymentsByIds = jest.fn();
@@ -37,7 +38,6 @@ export default class PaymentServiceMocks {
   }
 
   public getPaymentRepositoryFactory(): IPaymentRepository {
-    // normal ts-mock "when" function won't work (issue: https://github.com/NagRock/ts-mockito/issues/209) that's why we had to write a different implementation here
     const paymentRepositoryInstance = new (PaymentRepository as any)() as IPaymentRepository;
     return paymentRepositoryInstance;
   }
