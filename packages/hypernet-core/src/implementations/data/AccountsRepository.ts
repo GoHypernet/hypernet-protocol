@@ -198,7 +198,7 @@ export class AccountsRepository implements IAccountsRepository {
     assetAddress: string,
     amount: BigNumber,
     destinationAddress: string,
-  ): ResultAsync<null, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error> {
+  ): ResultAsync<void, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error> {
     const prerequisites = (combine([
       this.browserNodeProvider.getBrowserNode(),
       this.vectorUtils.getRouterChannelAddress() as ResultAsync<any, any>,
@@ -231,7 +231,8 @@ export class AccountsRepository implements IAccountsRepository {
         }
 
         return okAsync(null);
-      });
+      })
+      .map(() => {});
   }
 
   /**
@@ -239,7 +240,7 @@ export class AccountsRepository implements IAccountsRepository {
    * @param amount the amount of the test token to mint
    * @param to the (Ethereum) address to mint the test token to
    */
-  public mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<null, BlockchainUnavailableError> {
+  public mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<void, BlockchainUnavailableError> {
     return this.blockchainProvider
       .getSigner()
       .andThen((signer) => {
@@ -258,8 +259,6 @@ export class AccountsRepository implements IAccountsRepository {
           return e as BlockchainUnavailableError;
         });
       })
-      .andThen((receipt) => {
-        return okAsync(null);
-      });
+      .map(() => {});
   }
 }

@@ -23,12 +23,12 @@ import {
   IConfigProvider,
   IBlockchainProvider,
   ILogUtils,
+  IPaymentIdUtils,
 } from "@interfaces/utilities";
 import { EPaymentType, InsuranceState, MessageState, Parameterized, ParameterizedState } from "@interfaces/types";
 import { serialize } from "class-transformer";
 import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@interfaces/types/transfers/ParameterizedTypes";
 import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils/dist/identifiers";
-import { PaymentIdUtils } from "./PaymentUtils";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import {
   CoreUninitializedError,
@@ -56,6 +56,7 @@ export class VectorUtils implements IVectorUtils {
     protected contextProvider: IContextProvider,
     protected browserNodeProvider: IBrowserNodeProvider,
     protected blockchainProvider: IBlockchainProvider,
+    protected paymentIdUtils: IPaymentIdUtils,
     protected logUtils: ILogUtils,
   ) {
     this.getRouterChannelAddressSetup = null;
@@ -163,8 +164,14 @@ export class VectorUtils implements IVectorUtils {
     message: IHypernetTransferMetadata,
   ): ResultAsync<NodeResponses.ConditionalTransfer, TransferCreationError | InvalidParametersError> {
     // Sanity check - make sure the paymentId is valid:
-    if (!PaymentIdUtils.isValidPaymentId(message.paymentId)) {
-      return errAsync(new InvalidParametersError(`CreateMessageTransfer: Invalid paymentId: '${message.paymentId}'`));
+    const validPayment = this.paymentIdUtils.isValidPaymentId(message.paymentId);
+    if (validPayment.isErr()) {
+      return errAsync(validPayment.error);
+    }
+    else {
+      if (!validPayment.value) {
+        return errAsync(new InvalidParametersError(`CreateMessageTransfer: Invalid paymentId: '${message.paymentId}'`));
+      }
     }
 
     const prerequisites = (combine([
@@ -233,8 +240,14 @@ export class VectorUtils implements IVectorUtils {
     }
 
     // Make sure the paymentId is valid:
-    if (!PaymentIdUtils.isValidPaymentId(paymentId)) {
-      return errAsync(new InvalidParametersError(`CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`));
+    const validPayment = this.paymentIdUtils.isValidPaymentId(paymentId);
+    if (validPayment.isErr()) {
+      return errAsync(validPayment.error);
+    }
+    else {
+      if (!validPayment.value) {
+        return errAsync(new InvalidParametersError(`CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`));
+      }
     }
 
     const prerequisites = (combine([
@@ -306,8 +319,14 @@ export class VectorUtils implements IVectorUtils {
     paymentId: string,
   ): ResultAsync<NodeResponses.ConditionalTransfer, TransferCreationError | InvalidParametersError> {
     // Sanity check - make sure the paymentId is valid:
-    if (!PaymentIdUtils.isValidPaymentId(paymentId)) {
-      return errAsync(new InvalidParametersError(`CreateInsuranceTransfer: Invalid paymentId: '${paymentId}'`));
+    const validPayment = this.paymentIdUtils.isValidPaymentId(paymentId);
+    if (validPayment.isErr()) {
+      return errAsync(validPayment.error);
+    }
+    else {
+      if (!validPayment.value) {
+        return errAsync(new InvalidParametersError(`CreateInsuranceTransfer: Invalid paymentId: '${paymentId}'`));
+      }
     }
 
     const prerequisites = (combine([

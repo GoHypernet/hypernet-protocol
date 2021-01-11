@@ -2,5 +2,8 @@ import { HypernetLink, InitializedHypernetContext, Payment, ResultAsync } from "
 import { LogicalError } from "@interfaces/objects/errors";
 
 export interface ILinkUtils {
-  paymentsToHypernetLinks(payments: Payment[], context: InitializedHypernetContext): ResultAsync<HypernetLink[], LogicalError>;
+  paymentsToHypernetLinks(
+    payments: Payment[],
+    context: InitializedHypernetContext,
+  ): ResultAsync<HypernetLink[], LogicalError>;
 }

@@ -14,9 +14,18 @@ import {
   ResultAsync,
   Result,
   HypernetConfig,
-  HypernetContext
+  HypernetContext,
 } from "@interfaces/objects";
-import { AcceptPaymentError, CoreUninitializedError, InsufficientBalanceError, InvalidParametersError, InvalidPaymentError, LogicalError, OfferMismatchError, RouterChannelUnknownError } from "@interfaces/objects/errors";
+import {
+  AcceptPaymentError,
+  CoreUninitializedError,
+  InsufficientBalanceError,
+  InvalidParametersError,
+  InvalidPaymentError,
+  LogicalError,
+  OfferMismatchError,
+  RouterChannelUnknownError,
+} from "@interfaces/objects/errors";
 import { EPaymentState } from "@interfaces/types";
 import { IConfigProvider, IContextProvider, ILogUtils } from "@interfaces/utilities";
 import { combine, Err, err, errAsync, Ok, ok, okAsync } from "neverthrow";
@@ -44,8 +53,8 @@ export class PaymentService implements IPaymentService {
     protected contextProvider: IContextProvider,
     protected configProvider: IConfigProvider,
     protected paymentRepository: IPaymentRepository,
-    protected logUtils: ILogUtils
-  ) { }
+    protected logUtils: ILogUtils,
+  ) {}
 
   /**
    * Sends a payment to the specified recipient.
@@ -82,7 +91,9 @@ export class PaymentService implements IPaymentService {
    * Then, publish an RXJS event to the user.
    * @param paymentId the paymentId for the offer
    */
-  public offerReceived(paymentId: string): ResultAsync<null, LogicalError | RouterChannelUnknownError | CoreUninitializedError | NodeError | Error> {
+  public offerReceived(
+    paymentId: string,
+  ): ResultAsync<void, LogicalError | RouterChannelUnknownError | CoreUninitializedError | NodeError | Error> {
     const prerequisites = (combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext() as ResultAsync<any, any>,
@@ -91,44 +102,46 @@ export class PaymentService implements IPaymentService {
       RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
     >;
 
-    return prerequisites
-      .andThen((vals) => {
-        const [payments, context] = vals;
+    return prerequisites.andThen((vals) => {
+      const [payments, context] = vals;
 
-        const payment = payments.get(paymentId);
+      const payment = payments.get(paymentId);
 
-        if (payment == null) {
-          return errAsync(new LogicalError(`PaymentService:offerReceived():Could not get payment!`));
-        }
+      if (payment == null) {
+        return errAsync(new LogicalError(`PaymentService:offerReceived():Could not get payment!`));
+      }
 
-        if (payment.state !== EPaymentState.Proposed) {
-          // The payment has already moved forward, somehow.
-          // We don't need to do anything, we probably got called
-          // by another instance of the core.
-          return okAsync(null);
-        }
-
-        // Payment state is 'Proposed', continue to handle
-
-        if (payment instanceof PushPayment) {
-          // Someone wants to send us a pushPayment, emit up to the api
-          context.onPushPaymentProposed.next(payment);
-        } else if (payment instanceof PullPayment) {
-          // Someone wants to send us a pullPayment, emit up to the api
-          context.onPullPaymentProposed.next(payment);
-        } else {
-          throw new Error("Unknown payment type!");
-        }
-
+      if (payment.state !== EPaymentState.Proposed) {
+        // The payment has already moved forward, somehow.
+        // We don't need to do anything, we probably got called
+        // by another instance of the core.
         return okAsync(null);
-      });
+      }
+
+      // Payment state is 'Proposed', continue to handle
+
+      if (payment instanceof PushPayment) {
+        // Someone wants to send us a pushPayment, emit up to the api
+        context.onPushPaymentProposed.next(payment);
+      } else if (payment instanceof PullPayment) {
+        // Someone wants to send us a pullPayment, emit up to the api
+        context.onPullPaymentProposed.next(payment);
+      } else {
+        throw new Error("Unknown payment type!");
+      }
+
+      return okAsync(null);
+    })
+    .map(() => {});
   }
 
   /**
    * For each paymentID provided, attempts to accept funds (ie: provide a stake) for that payment.
    * @param paymentIds a list of paymentIds for which to accept funds for
    */
-  public acceptFunds(paymentIds: string[]): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
+  public acceptFunds(
+    paymentIds: string[],
+  ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
     const prerequisites = (combine([
       this.configProvider.getConfig(),
       this.paymentRepository.getPaymentsByIds(paymentIds) as ResultAsync<any, any>,
@@ -147,14 +160,15 @@ export class PaymentService implements IPaymentService {
         return this.accountRepository.getBalanceByAsset(config.hypertokenAddress);
       })
       .andThen((hypertokenBalance) => {
-
         // For each payment ID, call the singular version of acceptFunds
         // Wrap each one as a Result object, and return an array of Results
         let totalStakeRequired = BigNumber.from(0);
         // First, verify to make sure that we have enough hypertoken to cover the insurance collectively
         payments.forEach((payment) => {
           if (payment.state !== EPaymentState.Proposed) {
-            return errAsync(new AcceptPaymentError(`Cannot accept payment ${payment.id}, it is not in the Proposed state`));
+            return errAsync(
+              new AcceptPaymentError(`Cannot accept payment ${payment.id}, it is not in the Proposed state`),
+            );
           }
 
           totalStakeRequired = totalStakeRequired.add(BigNumber.from(payment.requiredStake));
@@ -167,16 +181,19 @@ export class PaymentService implements IPaymentService {
 
         // Now that we know we can (probably) make the payments, let's try
         const stakeAttempts = [];
-        for (let paymentId of paymentIds) {
+        for (const paymentId of paymentIds) {
           this.logUtils.log(`PaymentService:acceptFunds: attempting to provide stake for payment ${paymentId}`);
 
-          const stakeAttempt = this.paymentRepository.provideStake(paymentId)
-            .match((payment) => {
+          const stakeAttempt = this.paymentRepository.provideStake(paymentId).match(
+            (payment) => {
               return ok(payment) as Result<Payment, AcceptPaymentError>;
             },
-              (e) => {
-                return err(new AcceptPaymentError(`Payment ${paymentId} could not be staked! Source exception: ${e}`)) as Result<Payment, AcceptPaymentError>;
-              });
+            (e) => {
+              return err(
+                new AcceptPaymentError(`Payment ${paymentId} could not be staked! Source exception: ${e}`),
+              ) as Result<Payment, AcceptPaymentError>;
+            },
+          );
 
           stakeAttempts.push(stakeAttempt);
         }
@@ -189,7 +206,7 @@ export class PaymentService implements IPaymentService {
    * then provides assets to the counterparty (ie a parameterizedPayment)
    * @param paymentId the paymentId for the stake
    */
-  public stakePosted(paymentId: string): ResultAsync<null, OfferMismatchError | InvalidParametersError> {
+  public stakePosted(paymentId: string): ResultAsync<void, OfferMismatchError | InvalidParametersError> {
     const prerequisites = (combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getContext() as ResultAsync<any, any>,
@@ -201,47 +218,49 @@ export class PaymentService implements IPaymentService {
     let payments: Map<string, Payment>;
     let context: HypernetContext;
 
-    return prerequisites
-      .andThen((vals) => {
-        [payments, context] = vals;
+    return prerequisites.andThen((vals) => {
+      [payments, context] = vals;
 
-        const payment = payments.get(paymentId);
+      const payment = payments.get(paymentId);
 
-        if (payment == null) {
-          return errAsync(new InvalidParametersError("Invalid payment ID!"));
+      if (payment == null) {
+        return errAsync(new InvalidParametersError("Invalid payment ID!"));
+      }
+
+      // Make sure the stake is legit
+      if (!payment.requiredStake.eq(payment.amountStaked)) {
+        // TODO: We should be doing more here. The whole payment should be aborted.
+        return errAsync(new OfferMismatchError(`Invalid stake provided for payment ${paymentId}`));
+      }
+
+      // Payment state must be in "staked" in order to progress
+      if (payment.state !== EPaymentState.Staked) {
+        return errAsync(
+          new InvalidParametersError(
+            `Invalid payment ${paymentId}, it must be in the staked status. Cannot provide payment!`,
+          ),
+        );
+      }
+
+      // If we created the stake, we can ignore this
+      if (payment.from !== context.publicIdentifier) {
+        this.logUtils.log("Not providing asset since payment is not from us!");
+        return okAsync(null);
+      }
+
+      // If the payment state is staked, we know that the proper
+      // insurance has been posted.
+      return this.paymentRepository.provideAsset(paymentId).andThen((updatedPayment) => {
+        if (updatedPayment instanceof PushPayment) {
+          context.onPushPaymentUpdated.next(updatedPayment);
         }
-
-        // Make sure the stake is legit
-        if (!payment.requiredStake.eq(payment.amountStaked)) {
-          // TODO: We should be doing more here. The whole payment should be aborted.
-          return errAsync(new OfferMismatchError(`Invalid stake provided for payment ${paymentId}`));
+        if (updatedPayment instanceof PullPayment) {
+          context.onPullPaymentUpdated.next(updatedPayment);
         }
-
-        // Payment state must be in "staked" in order to progress
-        if (payment.state !== EPaymentState.Staked) {
-          return errAsync(new InvalidParametersError(`Invalid payment ${paymentId}, it must be in the staked status. Cannot provide payment!`));
-        }
-
-        // If we created the stake, we can ignore this
-        if (payment.from !== context.publicIdentifier) {
-          this.logUtils.log("Not providing asset since payment is not from us!");
-          return okAsync(null);
-        }
-
-        // If the payment state is staked, we know that the proper
-        // insurance has been posted.
-        return this.paymentRepository.provideAsset(paymentId)
-          .andThen((updatedPayment) => {
-
-            if (updatedPayment instanceof PushPayment) {
-              context.onPushPaymentUpdated.next(updatedPayment);
-            }
-            if (updatedPayment instanceof PullPayment) {
-              context.onPullPaymentUpdated.next(updatedPayment);
-            }
-            return okAsync(null);
-          });
+        return okAsync(null);
       });
+    })
+    .map(() => {});
   }
 
   /**
@@ -250,7 +269,7 @@ export class PaymentService implements IPaymentService {
    * and after the sender has created the Parameterized transfer
    * @param paymentId the payment ID to accept/resolve
    */
-  public paymentPosted(paymentId: string): ResultAsync<null, InvalidParametersError> {
+  public paymentPosted(paymentId: string): ResultAsync<void, InvalidParametersError> {
     const prerequisites = (combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getContext() as ResultAsync<any, any>,
@@ -262,53 +281,55 @@ export class PaymentService implements IPaymentService {
     let payments: Map<string, Payment>;
     let context: HypernetContext;
 
-    return prerequisites
-      .andThen((vals) => {
-        [payments, context] = vals;
-        const payment = payments.get(paymentId);
+    return prerequisites.andThen((vals) => {
+      [payments, context] = vals;
+      const payment = payments.get(paymentId);
 
-        if (payment == null) {
-          return errAsync(new InvalidParametersError("Invalid payment ID!"));
-        }
+      if (payment == null) {
+        return errAsync(new InvalidParametersError("Invalid payment ID!"));
+      }
 
-        // Payment state must be in "approved" to finalize
-        if (payment.state !== EPaymentState.Approved) {
-          return errAsync(new InvalidParametersError(`Invalid payment ${paymentId}, it must be in the approved status. Cannot provide payment!`));
-        }
+      // Payment state must be in "approved" to finalize
+      if (payment.state !== EPaymentState.Approved) {
+        return errAsync(
+          new InvalidParametersError(
+            `Invalid payment ${paymentId}, it must be in the approved status. Cannot provide payment!`,
+          ),
+        );
+      }
 
-        // Make sure the stake is legit
-        // if (!payment.requiredStake.eq(payment.amountStaked)) {
-        //   // TODO: We should be doing more here. The whole payment should be aborted.
-        //   return errAsync(new OfferMismatchError(`Invalid stake provided for payment ${paymentId}`));
-        // }
+      // Make sure the stake is legit
+      // if (!payment.requiredStake.eq(payment.amountStaked)) {
+      //   // TODO: We should be doing more here. The whole payment should be aborted.
+      //   return errAsync(new OfferMismatchError(`Invalid stake provided for payment ${paymentId}`));
+      // }
 
-        // If we're the ones that *sent* the payment, we can ignore this
-        if (payment.from == context.publicIdentifier) {
-          console.log("Doing nothing in paymentPosted because we are the ones that posted the payment!");
-          return okAsync(null);
-        }
-
-        // If the payment state is approved, we know that it matches our insurance payment
-        if (payment instanceof PushPayment) {
-          // Resolve the parameterized payment immediately for the full balnce
-          return this.paymentRepository.finalizePayment(paymentId, 
-            payment.paymentAmount.toString())
-            .map(() => {
-              return null;
-            });
-        } else if (payment instanceof PullPayment) {
-          // Notify the user that the funds have been approved.
-          context.onPullPaymentApproved.next(payment);
-        }
+      // If we're the ones that *sent* the payment, we can ignore this
+      if (payment.from === context.publicIdentifier) {
+        this.logUtils.log("Doing nothing in paymentPosted because we are the ones that posted the payment!");
         return okAsync(null);
-      });
+      }
+
+      // If the payment state is approved, we know that it matches our insurance payment
+      if (payment instanceof PushPayment) {
+        // Resolve the parameterized payment immediately for the full balnce
+        return this.paymentRepository.finalizePayment(paymentId, payment.paymentAmount.toString()).map(() => {
+          return null;
+        });
+      } else if (payment instanceof PullPayment) {
+        // Notify the user that the funds have been approved.
+        context.onPullPaymentApproved.next(payment);
+      }
+      return okAsync(null);
+    })
+    .map(() => {});
   }
 
   /**
    * Notifies the service that the parameterized payment has been resolved.
    * @param paymentId the payment id that has been resolved.
    */
-  public paymentCompleted(paymentId: string): ResultAsync<null, InvalidParametersError> {
+  public paymentCompleted(paymentId: string): ResultAsync<void, InvalidParametersError> {
     const prerequisites = (combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getContext() as ResultAsync<any, any>,
@@ -320,30 +341,30 @@ export class PaymentService implements IPaymentService {
     let payments: Map<string, Payment>;
     let context: HypernetContext;
 
-    return prerequisites
-      .andThen((vals) => {
-        [payments, context] = vals;
-        const payment = payments.get(paymentId);
+    return prerequisites.andThen((vals) => {
+      [payments, context] = vals;
+      const payment = payments.get(paymentId);
 
-        if (payment == null) {
-          return errAsync(new InvalidParametersError("Invalid payment ID!"));
-        }
+      if (payment == null) {
+        return errAsync(new InvalidParametersError("Invalid payment ID!"));
+      }
 
-        // @todo add some additional checking here
-        // @todo add in a way to grab the resolved transfer
-        // @todo probably resolve the offer and/or insurance transfer as well?
-        // @todo probably genericize this so that it doesn't have to be a pushPayment
-        context.onPushPaymentReceived.next(payment as PushPayment);
+      // @todo add some additional checking here
+      // @todo add in a way to grab the resolved transfer
+      // @todo probably resolve the offer and/or insurance transfer as well?
+      // @todo probably genericize this so that it doesn't have to be a pushPayment
+      context.onPushPaymentReceived.next(payment as PushPayment);
 
-        return okAsync(null);
-      });
+      return okAsync(null);
+    })
+    .map(() => {});
   }
 
   /**
    * Notifies the service that a pull-payment has been recorded.
    * @param paymentId the paymentId for the pull-payment
    */
-  public pullRecorded(paymentId: string): ResultAsync<null, InvalidParametersError> {
+  public pullRecorded(paymentId: string): ResultAsync<void, InvalidParametersError> {
     const prerequisites = (combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getContext() as ResultAsync<any, any>,
@@ -355,17 +376,16 @@ export class PaymentService implements IPaymentService {
     let payments: Map<string, Payment>;
     let context: HypernetContext;
 
-    return prerequisites
-      .andThen((vals) => {
-        [payments, context] = vals;
-        const payment = payments.get(paymentId);
+    return prerequisites.andThen((vals) => {
+      [payments, context] = vals;
+      const payment = payments.get(paymentId);
 
-        if (payment == null) {
-          return errAsync(new InvalidParametersError("Invalid payment ID!"));
-        }
+      if (payment == null) {
+        return errAsync(new InvalidParametersError("Invalid payment ID!"));
+      }
 
-        return errAsync(new Error("Method not yet implemented"));
-      });
+      return errAsync(new Error("Method not yet implemented"));
+    });
   }
 
   /**

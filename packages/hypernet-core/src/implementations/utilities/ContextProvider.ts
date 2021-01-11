@@ -66,8 +66,8 @@ export class ContextProvider implements IContextProvider {
     );
   }
 
-  public setContext(context: HypernetContext): ResultAsync<null, LogicalError> {
+  public setContext(context: HypernetContext): ResultAsync<void, LogicalError> {
     this.context = context;
-    return okAsync(null);
+    return okAsync<null, LogicalError>(null).map(() => {});
   }
 }

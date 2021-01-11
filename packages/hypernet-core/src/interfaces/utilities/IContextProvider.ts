@@ -19,5 +19,5 @@ export interface IContextProvider {
   /**
    *
    */
-  setContext(context: HypernetContext): ResultAsync<null, LogicalError>;
+  setContext(context: HypernetContext): ResultAsync<void, LogicalError>;
 }
