@@ -232,7 +232,9 @@ export class AccountsRepository implements IAccountsRepository {
 
         return okAsync(null);
       })
-      .map(() => {});
+      .map(() => {
+        return;
+      });
   }
 
   /**
@@ -246,7 +248,7 @@ export class AccountsRepository implements IAccountsRepository {
       .andThen((signer) => {
         const testTokenContract = new Contract(
           "0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0",
-          artifacts["TestToken"].abi,
+          artifacts.TestToken.abi,
           signer,
         );
 
@@ -259,6 +261,8 @@ export class AccountsRepository implements IAccountsRepository {
           return e as BlockchainUnavailableError;
         });
       })
-      .map(() => {});
+      .map(() => {
+        return;
+      });
   }
 }

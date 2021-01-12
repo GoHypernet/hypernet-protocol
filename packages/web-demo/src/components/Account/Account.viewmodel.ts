@@ -16,29 +16,14 @@ export class AccountViewModel {
     this.core = params.core;
     this.publicIdentifier = ko.observable("");
 
-    this.init();
-  }
-
-  protected async init() {
-    await this.core.initialized();
-    const publicIdentifier = await this.core.getPublicIdentifier();
-    this.publicIdentifier(publicIdentifier);
-
-    // const accounts = await this.core.getEthereumAccounts();
-
-    // console.log(`Using account ${accounts[0]}`);
-
-    // const account = this.availableAccounts.find((val) => {
-    //   return val.accountAddress == accounts[0];
-    // });
-
-    // if (account == null) {
-    //   throw new Error("Chosen MetaMask account is not supported!");
-    // }
-
-    // this.account(account);
-
-    // console.log(account);
+    this.core
+      .waitInitialized()
+      .andThen(() => {
+        return this.core.getPublicIdentifier();
+      })
+      .map((publicIdentifier) => {
+        this.publicIdentifier(publicIdentifier);
+      });
   }
 }
 

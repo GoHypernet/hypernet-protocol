@@ -33,6 +33,8 @@ import { NodeError } from "@connext/vector-types";
 export interface IHypernetCore {
   initialized(): Result<boolean, LogicalError>;
 
+  waitInitialized(): ResultAsync<void, LogicalError>;
+
   /**
    * Probably can be removed, but leaving as a reminder in case we need to solve
    * the multiple-instance-of-Hypernet-core issue
@@ -97,19 +99,13 @@ export interface IHypernetCore {
   /**
    * Returns all Hypernet Ledger for the user
    */
-  getLinks(): ResultAsync<
-  HypernetLink[],
-  RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
->;
+  getLinks(): ResultAsync<HypernetLink[], RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 
   /**
    * Returns all active Hypernet Ledgers for the user
    * An active link contains an incomplete/non-finalized transfer.
    */
-  getActiveLinks(): ResultAsync<
-  HypernetLink[],
-  RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
->;
+  getActiveLinks(): ResultAsync<HypernetLink[], RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 
   /**
    * Returns the Hypernet Ledger for the user with the specified counterparty

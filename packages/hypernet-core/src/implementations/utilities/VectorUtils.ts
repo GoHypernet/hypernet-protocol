@@ -167,8 +167,7 @@ export class VectorUtils implements IVectorUtils {
     const validPayment = this.paymentIdUtils.isValidPaymentId(message.paymentId);
     if (validPayment.isErr()) {
       return errAsync(validPayment.error);
-    }
-    else {
+    } else {
       if (!validPayment.value) {
         return errAsync(new InvalidParametersError(`CreateMessageTransfer: Invalid paymentId: '${message.paymentId}'`));
       }
@@ -243,8 +242,7 @@ export class VectorUtils implements IVectorUtils {
     const validPayment = this.paymentIdUtils.isValidPaymentId(paymentId);
     if (validPayment.isErr()) {
       return errAsync(validPayment.error);
-    }
-    else {
+    } else {
       if (!validPayment.value) {
         return errAsync(new InvalidParametersError(`CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`));
       }
@@ -322,8 +320,7 @@ export class VectorUtils implements IVectorUtils {
     const validPayment = this.paymentIdUtils.isValidPaymentId(paymentId);
     if (validPayment.isErr()) {
       return errAsync(validPayment.error);
-    }
-    else {
+    } else {
       if (!validPayment.value) {
         return errAsync(new InvalidParametersError(`CreateInsuranceTransfer: Invalid paymentId: '${paymentId}'`));
       }

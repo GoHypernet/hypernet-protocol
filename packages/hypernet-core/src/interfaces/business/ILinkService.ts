@@ -6,8 +6,5 @@ export interface ILinkService {
   /**
    *
    */
-  getLinks(): ResultAsync<
-  HypernetLink[],
-  RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
->;
+  getLinks(): ResultAsync<HypernetLink[], RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 }

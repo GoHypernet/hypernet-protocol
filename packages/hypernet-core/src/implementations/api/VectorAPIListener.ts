@@ -28,8 +28,7 @@ export class VectorAPIListener implements IVectorListener {
    *
    */
   public setup(): ResultAsync<void, LogicalError> {
-    return this.browserNodeProvider.getBrowserNode()
-    .map((browserNode) => {
+    return this.browserNodeProvider.getBrowserNode().map((browserNode) => {
       // When the browser node notifies us that a conditional transfer has been *resolved,
       // (via Vector), this handles it. We call down into the appropriate method on the
       // PaymentService to handle it.

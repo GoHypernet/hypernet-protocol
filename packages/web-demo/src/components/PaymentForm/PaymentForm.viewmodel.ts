@@ -9,6 +9,7 @@ export class PaymentFormParams {
   constructor(public core: IHypernetCore) {}
 }
 
+// tslint:disable-next-line: max-classes-per-file
 export class PaymentTypeOption {
   constructor(public typeName: string, public type: EPaymentType) {}
 }

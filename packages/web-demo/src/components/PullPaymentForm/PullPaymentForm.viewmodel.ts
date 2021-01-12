@@ -8,7 +8,7 @@ export class PullPaymentFormParams {
 
 // tslint:disable-next-line: max-classes-per-file
 export class PullPaymentFormViewModel {
-  constructor(params: PullPaymentFormParams) {}
+  // constructor(params: PullPaymentFormParams) {}
 }
 
 ko.components.register("pull-payment-form", {

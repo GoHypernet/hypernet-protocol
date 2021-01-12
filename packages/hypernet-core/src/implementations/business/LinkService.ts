@@ -11,9 +11,9 @@ export class LinkService implements ILinkService {
    *
    */
   public getLinks(): ResultAsync<
-  HypernetLink[],
-  RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
-> {
+    HypernetLink[],
+    RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+  > {
     return this.linkRepository.getHypernetLinks();
   }
 }

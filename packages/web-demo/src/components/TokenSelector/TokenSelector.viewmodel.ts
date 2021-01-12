@@ -37,6 +37,7 @@ export class TokenSelectorViewModel {
       read: () => {
         const selectedToken = this.selectedToken();
         if (selectedToken == null) {
+          // tslint:disable-next-line: no-console
           console.log("No selected token.");
           return null;
         }
@@ -65,23 +66,26 @@ export class TokenSelectorViewModel {
     this.getBalances();
   }
 
-  protected async getBalances() {
+  protected getBalances() {
     if (this.onlyWithBalance) {
-      await this.core.initialized();
-      const balances = await this.core.getBalances();
+      this.core
+        .waitInitialized()
+        .andThen(() => {
+          return this.core.getBalances();
+        })
+        .map((balances) => {
+          const paymentTokens = new Array<PaymentTokenOption>();
+          for (const assetBalance of balances.assets) {
+            // TODO: Convert the asset address to a readable name!
+            paymentTokens.push(new PaymentTokenOption(assetBalance.assetAddresss, assetBalance.assetAddresss));
+          }
 
-      if (balances == null) {
-        console.log("No balances.");
-        return [];
-      }
-
-      const paymentTokens = new Array<PaymentTokenOption>();
-      for (const assetBalance of balances.assets) {
-        // TODO: Convert the asset address to a readable name!
-        paymentTokens.push(new PaymentTokenOption(assetBalance.assetAddresss, assetBalance.assetAddresss));
-      }
-
-      this.paymentTokens(paymentTokens);
+          this.paymentTokens(paymentTokens);
+        })
+        .mapErr(() => {
+          // tslint:disable-next-line: no-console
+          console.log("No balances.");
+        });
     } else {
       const eth = new PaymentTokenOption("ETH", "0x0000000000000000000000000000000000000000");
       const test = new PaymentTokenOption("Test Token", "0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0");

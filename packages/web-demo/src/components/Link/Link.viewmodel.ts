@@ -28,12 +28,16 @@ export class LinkViewModel {
       return new PushPaymentParams(this.core, val);
     });
     this.pushPayments.push(...pushPaymentParams);
+
+    // tslint:disable-next-line: no-console
     console.log(`Pushed ${pushPaymentParams.length} push payment params`);
 
     const pullPaymentParams = params.link.pullPayments.map((val) => {
       return new PullPaymentParams(this.core, val);
     });
     this.pullPayments.push(...pullPaymentParams);
+
+    // tslint:disable-next-line: no-console
     console.log(`Pushed ${pullPaymentParams.length} pull payment params`);
 
     this.core.onPullPaymentProposed.subscribe({

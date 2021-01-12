@@ -14,6 +14,7 @@ export class PushPaymentFormParams {
   ) {}
 }
 
+// tslint:disable-next-line: max-classes-per-file
 export class PaymentTokenOption {
   constructor(public tokenName: string, public address: EthereumAddress) {}
 }
@@ -42,7 +43,7 @@ export class PushPaymentFormViewModel {
 
     this.submitButton = new ButtonParams(
       "Submit Payment",
-      () => {
+      async () => {
         const selectedPaymentTokenAddress = this.tokenSelector.selectedToken();
 
         if (selectedPaymentTokenAddress == null) {
@@ -54,7 +55,7 @@ export class PushPaymentFormViewModel {
           const amount = Web3.utils.toWei(this.amount());
           const requiredStake = Web3.utils.toWei(this.requiredStake());
 
-          return this.core.sendFunds(
+          return await this.core.sendFunds(
             this.counterparty(),
             amount,
             expirationDate,
