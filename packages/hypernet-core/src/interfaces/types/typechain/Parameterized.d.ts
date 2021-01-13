@@ -2,14 +2,26 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { ethers, EventFilter, Signer, BigNumber, BigNumberish, PopulatedTransaction } from "ethers";
-import { Contract, ContractTransaction, CallOverrides } from "@ethersproject/contracts";
+import {
+  ethers,
+  EventFilter,
+  Signer,
+  BigNumber,
+  BigNumberish,
+  PopulatedTransaction,
+} from "ethers";
+import {
+  Contract,
+  ContractTransaction,
+  CallOverrides,
+} from "@ethersproject/contracts";
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
-interface InsuranceInterface extends ethers.utils.Interface {
+interface ParameterizedInterface extends ethers.utils.Interface {
   functions: {
+    "EncodedCancel()": FunctionFragment;
     "Name()": FunctionFragment;
     "ResolverEncoding()": FunctionFragment;
     "StateEncoding()": FunctionFragment;
@@ -18,24 +30,56 @@ interface InsuranceInterface extends ethers.utils.Interface {
     "resolve(bytes,bytes,bytes)": FunctionFragment;
   };
 
+  encodeFunctionData(
+    functionFragment: "EncodedCancel",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "Name", values?: undefined): string;
-  encodeFunctionData(functionFragment: "ResolverEncoding", values?: undefined): string;
-  encodeFunctionData(functionFragment: "StateEncoding", values?: undefined): string;
-  encodeFunctionData(functionFragment: "create", values: [BytesLike, BytesLike]): string;
-  encodeFunctionData(functionFragment: "getRegistryInformation", values?: undefined): string;
-  encodeFunctionData(functionFragment: "resolve", values: [BytesLike, BytesLike, BytesLike]): string;
+  encodeFunctionData(
+    functionFragment: "ResolverEncoding",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "StateEncoding",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "create",
+    values: [BytesLike, BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getRegistryInformation",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "resolve",
+    values: [BytesLike, BytesLike, BytesLike]
+  ): string;
 
+  decodeFunctionResult(
+    functionFragment: "EncodedCancel",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "Name", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "ResolverEncoding", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "StateEncoding", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "ResolverEncoding",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "StateEncoding",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "create", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "getRegistryInformation", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getRegistryInformation",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "resolve", data: BytesLike): Result;
 
   events: {};
 }
 
-export class Insurance extends Contract {
+export class Parameterized extends Contract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -46,41 +90,53 @@ export class Insurance extends Contract {
   removeAllListeners(eventName: EventFilter | string): this;
   removeListener(eventName: any, listener: Listener): this;
 
-  interface: InsuranceInterface;
+  interface: ParameterizedInterface;
 
   functions: {
+    EncodedCancel(
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string;
+    }>;
+
+    "EncodedCancel()"(
+      overrides?: CallOverrides
+    ): Promise<{
+      0: string;
+    }>;
+
     Name(
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       0: string;
     }>;
 
     "Name()"(
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       0: string;
     }>;
 
     ResolverEncoding(
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       0: string;
     }>;
 
     "ResolverEncoding()"(
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       0: string;
     }>;
 
     StateEncoding(
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       0: string;
     }>;
 
     "StateEncoding()"(
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       0: string;
     }>;
@@ -88,7 +144,7 @@ export class Insurance extends Contract {
     create(
       encodedBalance: BytesLike,
       encodedState: BytesLike,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       0: boolean;
     }>;
@@ -96,38 +152,42 @@ export class Insurance extends Contract {
     "create(bytes,bytes)"(
       encodedBalance: BytesLike,
       encodedState: BytesLike,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       0: boolean;
     }>;
 
     getRegistryInformation(
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       0: {
         name: string;
         definition: string;
         stateEncoding: string;
         resolverEncoding: string;
+        encodedCancel: string;
         0: string;
         1: string;
         2: string;
         3: string;
+        4: string;
       };
     }>;
 
     "getRegistryInformation()"(
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       0: {
         name: string;
         definition: string;
         stateEncoding: string;
         resolverEncoding: string;
+        encodedCancel: string;
         0: string;
         1: string;
         2: string;
         3: string;
+        4: string;
       };
     }>;
 
@@ -135,7 +195,7 @@ export class Insurance extends Contract {
       encodedBalance: BytesLike,
       encodedState: BytesLike,
       encodedResolver: BytesLike,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       0: {
         amount: [BigNumber, BigNumber];
@@ -149,7 +209,7 @@ export class Insurance extends Contract {
       encodedBalance: BytesLike,
       encodedState: BytesLike,
       encodedResolver: BytesLike,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       0: {
         amount: [BigNumber, BigNumber];
@@ -159,6 +219,10 @@ export class Insurance extends Contract {
       };
     }>;
   };
+
+  EncodedCancel(overrides?: CallOverrides): Promise<string>;
+
+  "EncodedCancel()"(overrides?: CallOverrides): Promise<string>;
 
   Name(overrides?: CallOverrides): Promise<string>;
 
@@ -172,45 +236,53 @@ export class Insurance extends Contract {
 
   "StateEncoding()"(overrides?: CallOverrides): Promise<string>;
 
-  create(encodedBalance: BytesLike, encodedState: BytesLike, overrides?: CallOverrides): Promise<boolean>;
+  create(
+    encodedBalance: BytesLike,
+    encodedState: BytesLike,
+    overrides?: CallOverrides
+  ): Promise<boolean>;
 
   "create(bytes,bytes)"(
     encodedBalance: BytesLike,
     encodedState: BytesLike,
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<boolean>;
 
   getRegistryInformation(
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<{
     name: string;
     definition: string;
     stateEncoding: string;
     resolverEncoding: string;
+    encodedCancel: string;
     0: string;
     1: string;
     2: string;
     3: string;
+    4: string;
   }>;
 
   "getRegistryInformation()"(
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<{
     name: string;
     definition: string;
     stateEncoding: string;
     resolverEncoding: string;
+    encodedCancel: string;
     0: string;
     1: string;
     2: string;
     3: string;
+    4: string;
   }>;
 
   resolve(
     encodedBalance: BytesLike,
     encodedState: BytesLike,
     encodedResolver: BytesLike,
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<{
     amount: [BigNumber, BigNumber];
     to: [string, string];
@@ -222,7 +294,7 @@ export class Insurance extends Contract {
     encodedBalance: BytesLike,
     encodedState: BytesLike,
     encodedResolver: BytesLike,
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<{
     amount: [BigNumber, BigNumber];
     to: [string, string];
@@ -231,6 +303,10 @@ export class Insurance extends Contract {
   }>;
 
   callStatic: {
+    EncodedCancel(overrides?: CallOverrides): Promise<string>;
+
+    "EncodedCancel()"(overrides?: CallOverrides): Promise<string>;
+
     Name(overrides?: CallOverrides): Promise<string>;
 
     "Name()"(overrides?: CallOverrides): Promise<string>;
@@ -243,45 +319,53 @@ export class Insurance extends Contract {
 
     "StateEncoding()"(overrides?: CallOverrides): Promise<string>;
 
-    create(encodedBalance: BytesLike, encodedState: BytesLike, overrides?: CallOverrides): Promise<boolean>;
+    create(
+      encodedBalance: BytesLike,
+      encodedState: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     "create(bytes,bytes)"(
       encodedBalance: BytesLike,
       encodedState: BytesLike,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<boolean>;
 
     getRegistryInformation(
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       name: string;
       definition: string;
       stateEncoding: string;
       resolverEncoding: string;
+      encodedCancel: string;
       0: string;
       1: string;
       2: string;
       3: string;
+      4: string;
     }>;
 
     "getRegistryInformation()"(
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       name: string;
       definition: string;
       stateEncoding: string;
       resolverEncoding: string;
+      encodedCancel: string;
       0: string;
       1: string;
       2: string;
       3: string;
+      4: string;
     }>;
 
     resolve(
       encodedBalance: BytesLike,
       encodedState: BytesLike,
       encodedResolver: BytesLike,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       amount: [BigNumber, BigNumber];
       to: [string, string];
@@ -293,7 +377,7 @@ export class Insurance extends Contract {
       encodedBalance: BytesLike,
       encodedState: BytesLike,
       encodedResolver: BytesLike,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       amount: [BigNumber, BigNumber];
       to: [string, string];
@@ -305,6 +389,10 @@ export class Insurance extends Contract {
   filters: {};
 
   estimateGas: {
+    EncodedCancel(overrides?: CallOverrides): Promise<BigNumber>;
+
+    "EncodedCancel()"(overrides?: CallOverrides): Promise<BigNumber>;
+
     Name(overrides?: CallOverrides): Promise<BigNumber>;
 
     "Name()"(overrides?: CallOverrides): Promise<BigNumber>;
@@ -317,12 +405,16 @@ export class Insurance extends Contract {
 
     "StateEncoding()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-    create(encodedBalance: BytesLike, encodedState: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+    create(
+      encodedBalance: BytesLike,
+      encodedState: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     "create(bytes,bytes)"(
       encodedBalance: BytesLike,
       encodedState: BytesLike,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     getRegistryInformation(overrides?: CallOverrides): Promise<BigNumber>;
@@ -333,25 +425,31 @@ export class Insurance extends Contract {
       encodedBalance: BytesLike,
       encodedState: BytesLike,
       encodedResolver: BytesLike,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     "resolve(bytes,bytes,bytes)"(
       encodedBalance: BytesLike,
       encodedState: BytesLike,
       encodedResolver: BytesLike,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
+    EncodedCancel(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    "EncodedCancel()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     Name(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     "Name()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     ResolverEncoding(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "ResolverEncoding()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    "ResolverEncoding()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     StateEncoding(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -360,31 +458,35 @@ export class Insurance extends Contract {
     create(
       encodedBalance: BytesLike,
       encodedState: BytesLike,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     "create(bytes,bytes)"(
       encodedBalance: BytesLike,
       encodedState: BytesLike,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getRegistryInformation(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    getRegistryInformation(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
-    "getRegistryInformation()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    "getRegistryInformation()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
     resolve(
       encodedBalance: BytesLike,
       encodedState: BytesLike,
       encodedResolver: BytesLike,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     "resolve(bytes,bytes,bytes)"(
       encodedBalance: BytesLike,
       encodedState: BytesLike,
       encodedResolver: BytesLike,
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }

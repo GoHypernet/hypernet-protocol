@@ -5,15 +5,31 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { ITransferDefinition } from "./ITransferDefinition";
+import type { ITransferDefinition } from "../ITransferDefinition";
 
-export class ITransferDefinitionFactory {
-  static connect(address: string, signerOrProvider: Signer | Provider): ITransferDefinition {
-    return (new Contract(address, _abi, signerOrProvider) as unknown) as ITransferDefinition;
+export class ITransferDefinition__factory {
+  static connect(
+    address: string,
+    signerOrProvider: Signer | Provider
+  ): ITransferDefinition {
+    return new Contract(address, _abi, signerOrProvider) as ITransferDefinition;
   }
 }
 
 const _abi = [
+  {
+    inputs: [],
+    name: "EncodedCancel",
+    outputs: [
+      {
+        internalType: "bytes",
+        name: "",
+        type: "bytes",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
   {
     inputs: [],
     name: "Name",
@@ -102,6 +118,11 @@ const _abi = [
             internalType: "string",
             name: "resolverEncoding",
             type: "string",
+          },
+          {
+            internalType: "bytes",
+            name: "encodedCancel",
+            type: "bytes",
           },
         ],
         internalType: "struct RegisteredTransfer",

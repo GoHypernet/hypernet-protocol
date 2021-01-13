@@ -27,7 +27,7 @@ import {
 } from "@interfaces/utilities";
 import { EPaymentType, InsuranceState, MessageState, Parameterized, ParameterizedState } from "@interfaces/types";
 import { serialize } from "class-transformer";
-import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@interfaces/types/transfers/ParameterizedTypes";
+import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@interfaces/types/typechain/ParameterizedTypes";
 import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils/dist/identifiers";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import {
