@@ -5,7 +5,7 @@ import moment from "moment";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
 import { BigNumber, PublicIdentifier } from "@hypernetlabs/hypernet-core/lib/interfaces/objects";
 import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
-import Web3 from 'web3'
+import Web3 from "web3";
 
 export class PushPaymentFormParams {
   constructor(
@@ -14,6 +14,7 @@ export class PushPaymentFormParams {
   ) {}
 }
 
+// tslint:disable-next-line: max-classes-per-file
 export class PaymentTokenOption {
   constructor(public tokenName: string, public address: EthereumAddress) {}
 }
@@ -24,7 +25,7 @@ export class PushPaymentFormViewModel {
   public expirationDate: ko.Observable<string>;
   public amount: ko.Observable<string>;
   public tokenSelector: TokenSelectorParams;
- 
+
   public submitButton: ButtonParams;
 
   protected core: IHypernetCore;
@@ -37,12 +38,12 @@ export class PushPaymentFormViewModel {
     this.requiredStake = ko.observable("0");
     this.expirationDate = ko.observable(moment().format());
     this.amount = ko.observable("0");
-    
+
     this.tokenSelector = new TokenSelectorParams(this.core, ko.observable(null), true);
 
     this.submitButton = new ButtonParams(
       "Submit Payment",
-      () => {
+      async () => {
         const selectedPaymentTokenAddress = this.tokenSelector.selectedToken();
 
         if (selectedPaymentTokenAddress == null) {
@@ -54,7 +55,7 @@ export class PushPaymentFormViewModel {
           const amount = Web3.utils.toWei(this.amount());
           const requiredStake = Web3.utils.toWei(this.requiredStake());
 
-          return this.core.sendFunds(
+          return await this.core.sendFunds(
             this.counterparty(),
             amount,
             expirationDate,

@@ -4,10 +4,11 @@ import html from "./PushPayment.template.html";
 import moment from "moment";
 import { PaymentStatusParams } from "../PaymentStatus/PaymentStatus.viewmodel";
 import { ButtonParams } from "../Button/Button.viewmodel";
-import Web3 from 'web3'
+import Web3 from "web3";
+import { errAsync, okAsync } from "neverthrow";
 
 export class PushPaymentParams {
-  constructor(public core: IHypernetCore, public payment: PushPayment) { }
+  constructor(public core: IHypernetCore, public payment: PushPayment) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -61,12 +62,12 @@ export class PushPaymentViewModel {
     this.core.onPushPaymentReceived.subscribe({
       next: (payment) => {
         if (payment.id === this.paymentId) {
-          let paymentStatusParams = new PaymentStatusParams(EPaymentState.Finalized)
-          this.state(paymentStatusParams)
+          const paymentStatusParams = new PaymentStatusParams(EPaymentState.Finalized);
+          this.state(paymentStatusParams);
           // @todo this is a manual override for now, since we don't yet have a way
-          // to grab a finalized transfer in the core (and thus no way to correctly 
+          // to grab a finalized transfer in the core (and thus no way to correctly
           // or easily report a "finalized" payment state!)
-          //this.state(new PaymentStatusParams(params.payment.state));
+          // this.state(new PaymentStatusParams(params.payment.state));
         }
       },
     });
@@ -79,27 +80,31 @@ export class PushPaymentViewModel {
       },
     });
 
-
     this.acceptButton = new ButtonParams("Accept", async () => {
-      console.log(`Attempting to accept funds for payment ${this.paymentId}`)
-      const payments = await this.core.acceptFunds([this.paymentId]);
-      const payment = payments[0];
-      if (payment.isError) {
-        console.error(`Error getting payment with ID ${this.paymentId}: ${payment.getError()}`);
-        throw payment.getError()
-      }
-      this.state(new PaymentStatusParams(payment.getValue().state));
+      return await this.core.acceptFunds([this.paymentId]).map((results) => {
+        const result = results[0];
+
+        return result.match(
+          (payment) => {
+            this.state(new PaymentStatusParams(payment.state));
+          },
+          (e) => {
+            // tslint:disable-next-line: no-console
+            console.error(`Error getting payment with ID ${this.paymentId}: ${e}`);
+          },
+        );
+      });
     });
 
     this.showAcceptButton = ko.pureComputed(() => {
-      return this.state().state === EPaymentState.Proposed &&
-        this.publicIdentifier() == this.to();
+      return this.state().state === EPaymentState.Proposed && this.publicIdentifier() === this.to();
     });
 
     this.sendButton = new ButtonParams("Send", async () => {
-      console.log(`Attempting to send funds for payment ${this.paymentId}`)
-      await this.core.completePayments([this.paymentId])
-      //const payments = await this.core.completePayments([this.paymentId])
+      // tslint:disable-next-line: no-console
+      console.log(`Attempting to send funds for payment ${this.paymentId}`);
+      // await this.core.completePayments([this.paymentId]);
+      // const payments = await this.core.completePayments([this.paymentId])
 
       // @todo changge this after we change the return type of completePayments & stakePosted
       /*const payment = payments[0];
@@ -115,8 +120,7 @@ export class PushPaymentViewModel {
     });
 
     this.finalizeButton = new ButtonParams("Finalize", async () => {
-      console.log(`Attempting to finalize payment ${this.paymentId}`)
-      await this.core.finalizePushPayment(this.paymentId)
+      await this.core.finalizePushPayment(this.paymentId);
       // @todo change return type of this after we change internal return types of core
     });
 
@@ -124,12 +128,9 @@ export class PushPaymentViewModel {
       return this.state().state === EPaymentState.Approved;
     });
 
-    this.init();
-  }
-
-  protected async init(): Promise<void> {
-    let publicIdentifier = await this.core.getPublicIdentifier();
-    this.publicIdentifier(publicIdentifier);
+    this.core.getPublicIdentifier().map((publicIdentifier) => {
+      this.publicIdentifier(publicIdentifier);
+    });
   }
 }
 

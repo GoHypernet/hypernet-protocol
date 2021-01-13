@@ -1,12 +1,11 @@
-
-import InsuranceAbi from "./Insurance"
-import ParameterizedAbi from "./Parameterized"
-import MessageTransferAbi from "./MessageTransfer"
+import InsuranceAbi from "./Insurance";
+import ParameterizedAbi from "./Parameterized";
+import MessageTransferAbi from "./MessageTransfer";
 
 const Abis = {
-    Insurance: InsuranceAbi,
-    Parameterized: ParameterizedAbi,
-    MessageTransfer: MessageTransferAbi
-}
+  Insurance: InsuranceAbi,
+  Parameterized: ParameterizedAbi,
+  MessageTransfer: MessageTransferAbi,
+};
 
 export { Abis };

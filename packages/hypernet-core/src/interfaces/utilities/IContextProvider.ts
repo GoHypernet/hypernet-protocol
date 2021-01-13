@@ -1,4 +1,6 @@
 import { HypernetContext, InitializedHypernetContext } from "@interfaces/objects";
+import { CoreUninitializedError, LogicalError } from "@interfaces/objects/errors";
+import { ResultAsync } from "@interfaces/objects";
 
 /**
  * @todo What is the main role/purpose of this class? Description here.
@@ -7,15 +9,15 @@ export interface IContextProvider {
   /**
    *
    */
-  getContext(): Promise<HypernetContext>;
+  getContext(): ResultAsync<HypernetContext, LogicalError>;
 
   /**
    *
    */
-  getInitializedContext(): Promise<InitializedHypernetContext>;
+  getInitializedContext(): ResultAsync<InitializedHypernetContext, CoreUninitializedError>;
 
   /**
    *
    */
-  setContext(context: HypernetContext): void;
+  setContext(context: HypernetContext): ResultAsync<void, LogicalError>;
 }

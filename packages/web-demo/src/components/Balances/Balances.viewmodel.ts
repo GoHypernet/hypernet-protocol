@@ -24,14 +24,14 @@ export class BalancesViewModel {
       },
     });
 
-    this.init();
-  }
-
-  protected async init(): Promise<void> {
-    await this.core.initialized();
-    const balances = await this.core.getBalances();
-
-    this.updateBalances(balances);
+    this.core
+      .waitInitialized()
+      .andThen(() => {
+        return this.core.getBalances();
+      })
+      .map((balances) => {
+        this.updateBalances(balances);
+      });
   }
 
   protected updateBalances(balances: Balances) {

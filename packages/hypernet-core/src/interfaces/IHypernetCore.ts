@@ -9,43 +9,63 @@ import {
   Payment,
   PushPayment,
   PullPayment,
+  ResultAsync,
+  Result,
 } from "@interfaces/objects";
 import { Subject } from "rxjs";
 import * as moment from "moment";
-import { Result } from "@connext/vector-types";
 import { EBlockchainNetwork } from "./types";
+import {
+  AcceptPaymentError,
+  BalancesUnavailableError,
+  BlockchainUnavailableError,
+  CoreUninitializedError,
+  InsufficientBalanceError,
+  LogicalError,
+  RouterChannelUnknownError,
+} from "./objects/errors";
+import { NodeError } from "@connext/vector-types";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
  * user account. The user can be /both/ a consumer and a provider.
  */
 export interface IHypernetCore {
-  initialized(): Promise<void>;
+  initialized(): Result<boolean, LogicalError>;
+
+  /**
+   * Returns an ResultAsync that is resolved when the core is initalized.
+   * If you are not interested in initializing the core yourself, but are interested
+   * in the core being initialized, you can use this function first to assure
+   * that the initialization is complete. It's useful to start a chain this way,
+   * ie: core.waitInitialized().andThen(() => {return core.funcImActuallyInterestedIn()})
+   */
+  waitInitialized(): ResultAsync<void, LogicalError>;
 
   /**
    * Probably can be removed, but leaving as a reminder in case we need to solve
    * the multiple-instance-of-Hypernet-core issue
    */
-  inControl(): boolean;
+  inControl(): Result<boolean, LogicalError>;
 
   /**
    * This returns the linked Ethereum accounts via your installed wallet (ie: Metamask)
    */
-  getEthereumAccounts(): Promise<EthereumAddress[]>;
+  getEthereumAccounts(): ResultAsync<string[], BlockchainUnavailableError>;
 
   /**
    * This must be called before most other calls; it is used to specify what account addres
    * hypernet core will be representing.
    * @param account A public identifier that says who this instance of HypernetCore is representing.
    */
-  initialize(account: PublicIdentifier): Promise<void>;
+  initialize(account: PublicIdentifier): ResultAsync<void, LogicalError>;
 
   /**
    * Gets the public id of the Hypernet Core user account. If the core is not initialized,
    * it will throw an error
    * @dev currently this matches the Vector pubId
    */
-  getPublicIdentifier(): Promise<PublicIdentifier>;
+  getPublicIdentifier(): ResultAsync<PublicIdentifier, CoreUninitializedError>;
 
   /**
    * This function will load HypernetCore with funds. It should be called for each type of asset you want to use.
@@ -54,7 +74,13 @@ export interface IHypernetCore {
    * @param amount The amount of funds (in wei) that you are depositing
    * @dev this creates a transaction on the blockchain!
    */
-  depositFunds(assetAddress: EthereumAddress, amount: BigNumber): Promise<Balances>;
+  depositFunds(
+    assetAddress: EthereumAddress,
+    amount: BigNumber,
+  ): ResultAsync<
+    Balances,
+    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | NodeError | Error
+  >;
 
   /**
    * This function will withdraw funds from Hypernet core into a specified Ethereum address.
@@ -66,24 +92,27 @@ export interface IHypernetCore {
     assetAddress: EthereumAddress,
     amount: BigNumber,
     destinationAddress: EthereumAddress,
-  ): Promise<Balances>;
+  ): ResultAsync<
+    Balances,
+    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | NodeError | Error
+  >;
 
   /**
    * Returns the balance account, including funds within
    * the general channel, and funds locked inside transfers within the channel.
    */
-  getBalances(): Promise<Balances>;
+  getBalances(): ResultAsync<Balances, BalancesUnavailableError | CoreUninitializedError>;
 
   /**
    * Returns all Hypernet Ledger for the user
    */
-  getLinks(): Promise<HypernetLink[]>;
+  getLinks(): ResultAsync<HypernetLink[], RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 
   /**
    * Returns all active Hypernet Ledgers for the user
    * An active link contains an incomplete/non-finalized transfer.
    */
-  getActiveLinks(): Promise<HypernetLink[]>;
+  getActiveLinks(): ResultAsync<HypernetLink[], RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 
   /**
    * Returns the Hypernet Ledger for the user with the specified counterparty
@@ -109,7 +138,7 @@ export interface IHypernetCore {
     requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
-  ): Promise<Payment>;
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 
   /**
    * authorizeFunds() sets up a pull payment.
@@ -128,14 +157,9 @@ export interface IHypernetCore {
    * For a specified payment, puts up stake to accept the payment
    * @param paymentId the payment ID to accept funds
    */
-  acceptFunds(paymentIds: string[]): Promise<Result<Payment, Error>[]>;
-
-  /**
-   * Sends the parameterized payment internally for payments in state "Staked".
-   * Internally, calls paymentService.stakePosted()
-   * @param paymentIds the list of payment ids for which to complete the payments for
-   */
-  completePayments(paymentIds: string[]): Promise<void>
+  acceptFunds(
+    paymentIds: string[],
+  ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError>;
 
   /**
    * Pulls an incremental amount from an authorized payment
@@ -155,7 +179,7 @@ export interface IHypernetCore {
    * Finalize a push-payment; internally, resolves the ParameterizedPayment transfer
    * @param paymentId the payment to finalize
    */
-  finalizePushPayment(paymentId: string): Promise<void>
+  finalizePushPayment(paymentId: string): Promise<void>;
 
   /**
    * Called by the consumer to attempt to claim some or all of the stake within a particular insurance payment.
@@ -166,10 +190,10 @@ export interface IHypernetCore {
 
   /**
    * Only used for development purposes!
-   * @param amount 
+   * @param amount
    */
-  mintTestToken(amount: BigNumber): Promise<void>;
-  
+  mintTestToken(amount: BigNumber): ResultAsync<void, CoreUninitializedError>;
+
   /**
    * Observables for seeing what's going on
    */
