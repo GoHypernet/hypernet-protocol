@@ -1,1 +1,1 @@
-export { default } from './HypernetWebIntegration';
+export { default } from "./HypernetWebIntegration";

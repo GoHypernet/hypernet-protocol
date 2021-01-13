@@ -1,44 +1,52 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import * as React from "react";
+import * as ReactDOM from "react-dom";
 
-import { TransactionList } from 'web-ui';
-import MainContainer from '../containers/MainContainer';
-import Authentication from '../screens/Authentication';
-import { IHypernetWebIntegration } from './HypernetWebIntegration.interface';
-import { StoreProvider } from '../contexts';
-import {
-  MAIN_CONTANER_ID_SELECTOR,
-  TRANSACTION_LIST_ID_SELECTOR,
-} from '../constants';
+import { TransactionList } from "@hypernetlabs/web-ui";
+import MainContainer from "../containers/MainContainer";
+import Authentication from "../screens/Authentication";
+import { IHypernetWebIntegration } from "./HypernetWebIntegration.interface";
+import { StoreProvider } from "../contexts";
+import { MAIN_CONTANER_ID_SELECTOR, TRANSACTION_LIST_ID_SELECTOR } from "../constants";
+import IHypernetIFrameProxy from "../proxy/IHypernetIFrameProxy";
+import HypernetIFrameProxy from "../proxy/HypernetIFrameProxy";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
-  constructor(options?: object) {
-    if (!!HypernetWebIntegration.instance) {
-      return HypernetWebIntegration.instance;
-    }
-    HypernetWebIntegration.instance = this;
+  protected iframe: HTMLIFrameElement;
+  protected iframeURL: string = "some_url";
+  //protected proxy: IHypernetIFrameProxy;
 
+  protected constructor(iframeURL?: string) {
     // Get whatever we want from client window object
     // Initialize hypernet invisible iframe
-    this.hypernetCoreInstance.transactionList = [
-      {
-        id: 2,
-        amount: window?.amount || 43,
-      },
-      {
-        id: 5,
-        amount: 54,
-      },
-    ];
+
+    // Create an iframe
+    this.iframeURL = iframeURL || this.iframeURL;
+    this.iframe = document.createElement("iframe");
+    this.iframe.id = "__hypernet-protocol-iframe__";
+    this.iframe.src = this.iframeURL;
+
+    // Attach it to the body
+    document.body.appendChild(this.iframe);
+
+    // Create a proxy connection to the iframe
+    //this.proxy = new HypernetIFrameProxy(this.iframe.id);
   }
-  public hypernetCoreInstance: any = {};
-  private static instance: HypernetWebIntegration;
+  private static instance: IHypernetWebIntegration;
+
+  // This class must be used as a singleton, this enforces that restriction.
+  public static getInstance(): IHypernetWebIntegration {
+    if (HypernetWebIntegration.instance == null) {
+      HypernetWebIntegration.instance = new HypernetWebIntegration();
+    }
+
+    return HypernetWebIntegration.instance;
+  }
 
   private generateDomElement(selector: string) {
     this.removeExitedElement(selector);
 
-    const element = document.createElement('div');
-    element.setAttribute('id', selector);
+    const element = document.createElement("div");
+    element.setAttribute("id", selector);
     document.body.appendChild(element);
     document.getElementById(selector);
 
@@ -56,8 +64,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     return (
       <StoreProvider
         initialData={{
-          hypernetProtocol: { anything: 'anything asdsad' },
-          ethAddress: 'ethAdress ggggg',
+          hypernetProtocol: { anything: "anything asdsad" },
+          ethAddress: "ethAdress ggggg",
         }}
       >
         <MainContainer>{component}</MainContainer>
@@ -66,22 +74,13 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   public renderAuthentication(selector: string = MAIN_CONTANER_ID_SELECTOR) {
-    ReactDOM.render(
-      this.bootstrapComponent(<Authentication />),
-      this.generateDomElement(selector)
-    );
+    ReactDOM.render(this.bootstrapComponent(<Authentication />), this.generateDomElement(selector));
   }
 
-  public renderTransactionList(
-    selector: string = TRANSACTION_LIST_ID_SELECTOR
-  ) {
+  public renderTransactionList(selector: string = TRANSACTION_LIST_ID_SELECTOR) {
     ReactDOM.render(
-      this.bootstrapComponent(
-        <TransactionList
-          transactionDataList={this.hypernetCoreInstance.transactionList}
-        />
-      ),
-      this.generateDomElement(selector)
+      this.bootstrapComponent(<TransactionList transactionDataList={[]} />),
+      this.generateDomElement(selector),
     );
   }
 }

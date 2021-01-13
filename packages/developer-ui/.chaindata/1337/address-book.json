@@ -1,0 +1,50 @@
+{
+  "1337": {
+    "ChannelMastercopy": {
+      "address": "0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0",
+      "creationCodeHash": "0xc2722e604225995f9cb5a2904e777d29b929bcb68dcb67b826fbc51538d63c9b",
+      "runtimeCodeHash": "0x8cb3322821dc0e1ea60ff03fdd9d0ae9fc99dbea6393d3583ea0c829b450f09f",
+      "txHash": "0x1fa179886fd51cf939b2330c9c5ce94c2ebdb17effc4983a327d6781aca151f7"
+    },
+    "ChannelFactory": {
+      "address": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
+      "constructorArgs": [
+        {
+          "name": "mastercopy",
+          "value": "0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0"
+        }
+      ],
+      "creationCodeHash": "0x14b826893340d0170b22af68404032a00249a07d22bc719277249ac4be3b7431",
+      "runtimeCodeHash": "0x05aa0f2b6bc64c82cbe11e0e0c4f3f41325a1912304196b1ba0a92721f5f5510",
+      "txHash": "0x7521f30c75bc3e6da70a9b6f9fedf268e8718321f51aef539feec0a773e36689"
+    },
+    "HashlockTransfer": {
+      "address": "0x345cA3e014Aaf5dcA488057592ee47305D9B3e10",
+      "creationCodeHash": "0x912cd16b7e3ec3d61ea226c24eb80057de8b2c2bbc84ab0b0c7e77d34ec9f038",
+      "runtimeCodeHash": "0x31e23ede4a0cb3247d4e1450c3712e72d4e389bf4d3d2b0fda0f22fc57ff96dd",
+      "txHash": "0x549f65d01eb5b4a08bfe4849cee5e0b1b75b4bf08038bf537a86d791efde63c5"
+    },
+    "Withdraw": {
+      "address": "0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF",
+      "creationCodeHash": "0x9943e7491eb712062fb6f6dd12809f141d7fc4a919eb4591896718c69ff3b2f6",
+      "runtimeCodeHash": "0x3a7a3a13f85691ee1c031f5e2de184e77f2888fa59f45f386aae1bbd44523b1c",
+      "txHash": "0x2830d88bb7b2bfddf8a81bfb5749b933aad9acabc535d91118d0ffd7337277b6"
+    },
+    "TestToken": {
+      "address": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F",
+      "constructorArgs": [
+        {
+          "name": "symbol",
+          "value": "TEST"
+        },
+        {
+          "name": "name",
+          "value": "TestToken"
+        }
+      ],
+      "creationCodeHash": "0x626032e553e2b9e40b7573ef162064138b7803621d19269ebb52a3c911f6a314",
+      "runtimeCodeHash": "0x17d476d7f126fcdab078a91f36b715ce4cda5941f2056808889adf2e24cd46b7",
+      "txHash": "0x9df80480dc4099b718dd56d329c2bd2b57351defe0a2da44e2667a1b7f58c99f"
+    }
+  }
+}

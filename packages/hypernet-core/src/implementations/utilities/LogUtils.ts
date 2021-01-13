@@ -15,7 +15,7 @@ export class LogUtils implements ILogUtils {
     throw new Error("Method not implemented.");
   }
   public log(message?: any, ...optionalParams: any[]): void {
-    throw new Error("Method not implemented.");
+    //throw new Error("Method not implemented.");
   }
   public warning(message?: any, ...optionalParams: any[]): void {
     throw new Error("Method not implemented.");

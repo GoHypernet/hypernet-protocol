@@ -22,7 +22,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
   }
 
   protected initialize(): ResultAsync<void, BlockchainUnavailableError> {
-    this.initializationPromise = ResultAsync.fromPromise(window.ethereum.enable(), (e) => {
+    this.initializationPromise = ResultAsync.fromPromise(window.ethereum.enable(), (e: any) => {
       return new BlockchainUnavailableError("Unable to initialize ethereum provider from the window");
     })
       .map(() => {

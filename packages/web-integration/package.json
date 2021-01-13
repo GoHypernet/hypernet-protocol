@@ -1,29 +1,35 @@
 {
-  "name": "web-integration",
-  "version": "1.0.0",
+  "name": "@hypernetlabs/web-integration",
+  "version": "0.0.1",
   "description": "",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "dist/main.js",
+  "types": "dist/web-integration/src/index.t.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "webpack-dev-server",
     "build": "npx webpack",
-    "prepublish": "yarn build"
+    "prepublish": "yarn build",
+    "format": "prettier --write \"src/**/*.{js,ts,tsx,json,md}\"",
+    "lint": "tslint -p tsconfig.json"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@hypernetlabs/hypernet-core": "^0.0.1",
+    "@hypernetlabs/web-ui": "^0.0.1",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1",
-    "web-ui": "1.0.0"
+    "react-dom": "^17.0.1"
   },
   "devDependencies": {
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
-    "html-webpack-plugin": "^4.5.1",
+    "html-webpack-plugin": "4.5.1",
+    "prettier": "^2.1.0",
     "source-map-loader": "^2.0.0",
     "ts-loader": "^8.0.14",
+    "tslint": "^6.1.3",
+    "tslint-config-prettier": "^1.18.0",
     "typescript": "^4.1.3",
     "webpack": "^5.12.3",
     "webpack-cli": "^4.3.1",
