@@ -2,8 +2,20 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { ethers, EventFilter, Signer, BigNumber, BigNumberish, PopulatedTransaction } from "ethers";
-import { Contract, ContractTransaction, Overrides, CallOverrides } from "@ethersproject/contracts";
+import {
+  ethers,
+  EventFilter,
+  Signer,
+  BigNumber,
+  BigNumberish,
+  PopulatedTransaction,
+} from "ethers";
+import {
+  Contract,
+  ContractTransaction,
+  Overrides,
+  CallOverrides,
+} from "@ethersproject/contracts";
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
@@ -23,17 +35,39 @@ interface ITransferRegistryInterface extends ethers.utils.Interface {
         definition: string;
         stateEncoding: string;
         resolverEncoding: string;
-      },
-    ],
+        encodedCancel: BytesLike;
+      }
+    ]
   ): string;
-  encodeFunctionData(functionFragment: "getTransferDefinitions", values?: undefined): string;
-  encodeFunctionData(functionFragment: "removeTransferDefinition", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "getTransferDefinitions",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "removeTransferDefinition",
+    values: [string]
+  ): string;
 
-  decodeFunctionResult(functionFragment: "addTransferDefinition", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "getTransferDefinitions", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "removeTransferDefinition", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "addTransferDefinition",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getTransferDefinitions",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "removeTransferDefinition",
+    data: BytesLike
+  ): Result;
 
-  events: {};
+  events: {
+    "TransferAdded(tuple)": EventFragment;
+    "TransferRemoved(tuple)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "TransferAdded"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "TransferRemoved"): EventFragment;
 }
 
 export class ITransferRegistry extends Contract {
@@ -56,8 +90,9 @@ export class ITransferRegistry extends Contract {
         definition: string;
         stateEncoding: string;
         resolverEncoding: string;
+        encodedCancel: BytesLike;
       },
-      overrides?: Overrides,
+      overrides?: Overrides
     ): Promise<ContractTransaction>;
 
     "addTransferDefinition(tuple)"(
@@ -66,43 +101,54 @@ export class ITransferRegistry extends Contract {
         definition: string;
         stateEncoding: string;
         resolverEncoding: string;
+        encodedCancel: BytesLike;
       },
-      overrides?: Overrides,
+      overrides?: Overrides
     ): Promise<ContractTransaction>;
 
     getTransferDefinitions(
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       0: {
         name: string;
         definition: string;
         stateEncoding: string;
         resolverEncoding: string;
+        encodedCancel: string;
         0: string;
         1: string;
         2: string;
         3: string;
+        4: string;
       }[];
     }>;
 
     "getTransferDefinitions()"(
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<{
       0: {
         name: string;
         definition: string;
         stateEncoding: string;
         resolverEncoding: string;
+        encodedCancel: string;
         0: string;
         1: string;
         2: string;
         3: string;
+        4: string;
       }[];
     }>;
 
-    removeTransferDefinition(name: string, overrides?: Overrides): Promise<ContractTransaction>;
+    removeTransferDefinition(
+      name: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
 
-    "removeTransferDefinition(string)"(name: string, overrides?: Overrides): Promise<ContractTransaction>;
+    "removeTransferDefinition(string)"(
+      name: string,
+      overrides?: Overrides
+    ): Promise<ContractTransaction>;
   };
 
   addTransferDefinition(
@@ -111,8 +157,9 @@ export class ITransferRegistry extends Contract {
       definition: string;
       stateEncoding: string;
       resolverEncoding: string;
+      encodedCancel: BytesLike;
     },
-    overrides?: Overrides,
+    overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   "addTransferDefinition(tuple)"(
@@ -121,43 +168,54 @@ export class ITransferRegistry extends Contract {
       definition: string;
       stateEncoding: string;
       resolverEncoding: string;
+      encodedCancel: BytesLike;
     },
-    overrides?: Overrides,
+    overrides?: Overrides
   ): Promise<ContractTransaction>;
 
   getTransferDefinitions(
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<
     {
       name: string;
       definition: string;
       stateEncoding: string;
       resolverEncoding: string;
+      encodedCancel: string;
       0: string;
       1: string;
       2: string;
       3: string;
+      4: string;
     }[]
   >;
 
   "getTransferDefinitions()"(
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<
     {
       name: string;
       definition: string;
       stateEncoding: string;
       resolverEncoding: string;
+      encodedCancel: string;
       0: string;
       1: string;
       2: string;
       3: string;
+      4: string;
     }[]
   >;
 
-  removeTransferDefinition(name: string, overrides?: Overrides): Promise<ContractTransaction>;
+  removeTransferDefinition(
+    name: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
 
-  "removeTransferDefinition(string)"(name: string, overrides?: Overrides): Promise<ContractTransaction>;
+  "removeTransferDefinition(string)"(
+    name: string,
+    overrides?: Overrides
+  ): Promise<ContractTransaction>;
 
   callStatic: {
     addTransferDefinition(
@@ -166,8 +224,9 @@ export class ITransferRegistry extends Contract {
         definition: string;
         stateEncoding: string;
         resolverEncoding: string;
+        encodedCancel: BytesLike;
       },
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<void>;
 
     "addTransferDefinition(tuple)"(
@@ -176,46 +235,61 @@ export class ITransferRegistry extends Contract {
         definition: string;
         stateEncoding: string;
         resolverEncoding: string;
+        encodedCancel: BytesLike;
       },
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<void>;
 
     getTransferDefinitions(
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<
       {
         name: string;
         definition: string;
         stateEncoding: string;
         resolverEncoding: string;
+        encodedCancel: string;
         0: string;
         1: string;
         2: string;
         3: string;
+        4: string;
       }[]
     >;
 
     "getTransferDefinitions()"(
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<
       {
         name: string;
         definition: string;
         stateEncoding: string;
         resolverEncoding: string;
+        encodedCancel: string;
         0: string;
         1: string;
         2: string;
         3: string;
+        4: string;
       }[]
     >;
 
-    removeTransferDefinition(name: string, overrides?: CallOverrides): Promise<void>;
+    removeTransferDefinition(
+      name: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
-    "removeTransferDefinition(string)"(name: string, overrides?: CallOverrides): Promise<void>;
+    "removeTransferDefinition(string)"(
+      name: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
-  filters: {};
+  filters: {
+    TransferAdded(transfer: null): EventFilter;
+
+    TransferRemoved(transfer: null): EventFilter;
+  };
 
   estimateGas: {
     addTransferDefinition(
@@ -224,8 +298,9 @@ export class ITransferRegistry extends Contract {
         definition: string;
         stateEncoding: string;
         resolverEncoding: string;
+        encodedCancel: BytesLike;
       },
-      overrides?: Overrides,
+      overrides?: Overrides
     ): Promise<BigNumber>;
 
     "addTransferDefinition(tuple)"(
@@ -234,17 +309,24 @@ export class ITransferRegistry extends Contract {
         definition: string;
         stateEncoding: string;
         resolverEncoding: string;
+        encodedCancel: BytesLike;
       },
-      overrides?: Overrides,
+      overrides?: Overrides
     ): Promise<BigNumber>;
 
     getTransferDefinitions(overrides?: CallOverrides): Promise<BigNumber>;
 
     "getTransferDefinitions()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-    removeTransferDefinition(name: string, overrides?: Overrides): Promise<BigNumber>;
+    removeTransferDefinition(
+      name: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
 
-    "removeTransferDefinition(string)"(name: string, overrides?: Overrides): Promise<BigNumber>;
+    "removeTransferDefinition(string)"(
+      name: string,
+      overrides?: Overrides
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -254,8 +336,9 @@ export class ITransferRegistry extends Contract {
         definition: string;
         stateEncoding: string;
         resolverEncoding: string;
+        encodedCancel: BytesLike;
       },
-      overrides?: Overrides,
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
     "addTransferDefinition(tuple)"(
@@ -264,16 +347,27 @@ export class ITransferRegistry extends Contract {
         definition: string;
         stateEncoding: string;
         resolverEncoding: string;
+        encodedCancel: BytesLike;
       },
-      overrides?: Overrides,
+      overrides?: Overrides
     ): Promise<PopulatedTransaction>;
 
-    getTransferDefinitions(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    getTransferDefinitions(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
-    "getTransferDefinitions()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    "getTransferDefinitions()"(
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
 
-    removeTransferDefinition(name: string, overrides?: Overrides): Promise<PopulatedTransaction>;
+    removeTransferDefinition(
+      name: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
 
-    "removeTransferDefinition(string)"(name: string, overrides?: Overrides): Promise<PopulatedTransaction>;
+    "removeTransferDefinition(string)"(
+      name: string,
+      overrides?: Overrides
+    ): Promise<PopulatedTransaction>;
   };
 }

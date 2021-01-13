@@ -5,15 +5,31 @@
 import { Contract, Signer } from "ethers";
 import { Provider } from "@ethersproject/providers";
 
-import type { TransferDefinition } from "./TransferDefinition";
+import type { TransferDefinition } from "../TransferDefinition";
 
-export class TransferDefinitionFactory {
-  static connect(address: string, signerOrProvider: Signer | Provider): TransferDefinition {
-    return (new Contract(address, _abi, signerOrProvider) as unknown) as TransferDefinition;
+export class TransferDefinition__factory {
+  static connect(
+    address: string,
+    signerOrProvider: Signer | Provider
+  ): TransferDefinition {
+    return new Contract(address, _abi, signerOrProvider) as TransferDefinition;
   }
 }
 
 const _abi = [
+  {
+    inputs: [],
+    name: "EncodedCancel",
+    outputs: [
+      {
+        internalType: "bytes",
+        name: "",
+        type: "bytes",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
   {
     inputs: [],
     name: "Name",
@@ -102,6 +118,11 @@ const _abi = [
             internalType: "string",
             name: "resolverEncoding",
             type: "string",
+          },
+          {
+            internalType: "bytes",
+            name: "encodedCancel",
+            type: "bytes",
           },
         ],
         internalType: "struct RegisteredTransfer",
