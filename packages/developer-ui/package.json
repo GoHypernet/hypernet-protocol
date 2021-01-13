@@ -1,7 +1,7 @@
 {
-  "name": "@hypernetlabs/web-demo",
+  "name": "@hypernetlabs/developer-ui",
   "version": "1.0.0",
-  "description": "Demonstrates loading Hypernet Core on a page and connecting it to MetaMask.",
+  "description": "Simple, complete UI that wraps hypernet-core, intended for developer use.",
   "keywords": [
     "Typescript",
     "Hypernet",
@@ -11,10 +11,10 @@
     "Core"
   ],
   "author": "Charlie Sibbach <charlie@hyperdyne.io>",
-  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/web-demo#readme",
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/developer-ui#readme",
   "license": "ISC",
-  "main": "lib/web-demo.js",
-  "types": "lib/web-demo.d.ts",
+  "main": "lib/developer-ui.js",
+  "types": "lib/developer-ui.d.ts",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -35,7 +35,7 @@
     "Start-windows": "yarn start-backend && yarn deploy-custom-transfers && yarn start-web",
     "start-web": "webpack-dev-server --mode development --open",
     "start-backend": "docker-compose down && docker-compose pull && docker-compose up -d && wait-on -l -d 15000 tsconfig.json && docker-compose up -d",
-    "verify-backend": "docker ps -f status=running -f name=web-demo | grep connextproject | if [ `wc -l` -ne 8 ]; then echo 'Error: did not detect 8 running docker containers!' && `exit 1`; fi",
+    "verify-backend": "docker ps -f status=running -f name=developer-ui | grep connextproject | if [ `wc -l` -ne 8 ]; then echo 'Error: did not detect 8 running docker containers!' && `exit 1`; fi",
     "deploy-custom-transfers": "yarn ts-node scripts/deploy.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json"
@@ -74,6 +74,7 @@
     "bootstrap": "^4.5.3",
     "jquery": "^3.5.1",
     "knockout": "^3.5.1",
+    "neverthrow": "^3.1.4",
     "popper": "^1.0.1",
     "popper.js": "^1.16.1",
     "ts-node": "^9.0.0",
