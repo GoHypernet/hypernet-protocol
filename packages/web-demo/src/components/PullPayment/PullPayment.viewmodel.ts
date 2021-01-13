@@ -26,7 +26,7 @@ export class PullPaymentViewModel {
   public disputeMediator: ko.Observable<string>;
   public authorizedAmount: ko.Observable<string>;
   public transferedAmount: ko.Observable<string>;
-  //public ledger: PullAmount[];
+  // public ledger: PullAmount[];
   public acceptButton: ButtonParams;
   public showAcceptButton: ko.PureComputed<boolean>;
 
@@ -71,12 +71,19 @@ export class PullPaymentViewModel {
     });
 
     this.acceptButton = new ButtonParams("Accept", async () => {
-      const payments = await this.core.acceptFunds([this.paymentId]);
-      const payment = payments[0];
-      if (payment.isError) {
-        throw new Error("Error getting payment.");
-      }
-      this.state(new PaymentStatusParams(payment.getValue().state));
+      return await this.core.acceptFunds([this.paymentId]).map((results) => {
+        const result = results[0];
+
+        return result.match(
+          (payment) => {
+            this.state(new PaymentStatusParams(payment.state));
+          },
+          (e) => {
+            // tslint:disable-next-line: no-console
+            console.error(`Error getting payment with ID ${this.paymentId}: ${e}`);
+          },
+        );
+      });
     });
 
     this.showAcceptButton = ko.pureComputed(() => {

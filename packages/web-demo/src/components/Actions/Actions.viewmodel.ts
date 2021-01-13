@@ -37,9 +37,9 @@ export class ActionsViewModel {
         return;
       }
 
+      // tslint:disable-next-line: no-console
       console.log(`Selected token for deposit: ${selectedToken}`);
       await this.core.depositFunds(selectedToken, ethers.utils.parseEther("1"));
-      //this.message("Deposited 1 ETH into router channel");
     });
 
     this.mintTestTokenButton = new ButtonParams("Mint Test Token", async () => {
@@ -52,12 +52,9 @@ export class ActionsViewModel {
       await this.core.mintTestToken(ethers.utils.parseEther("1"));
     });
 
-    this.init();
-  }
-
-  protected async init() {
-    await this.core.initialized();
-    this.startupComplete(true);
+    this.core.waitInitialized().map(() => {
+      this.startupComplete(true);
+    });
   }
 }
 

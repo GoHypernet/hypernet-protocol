@@ -37,7 +37,9 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
 
         return null;
       })
-      .map(() => {});
+      .map(() => {
+        return;
+      });
     return this.initializationPromise;
   }
 

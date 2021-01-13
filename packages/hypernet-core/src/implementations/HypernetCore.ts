@@ -55,7 +55,7 @@ import { Subject } from "rxjs";
 import { VectorAPIListener } from "./api";
 import { PaymentIdUtils } from "./utilities/PaymentIdUtils";
 import { NodeError } from "@connext/vector-types";
-import { ok } from "neverthrow";
+import { errAsync, ok, okAsync } from "neverthrow";
 
 /**
  * The top-level class-definition for Hypernet Core.
@@ -218,6 +218,14 @@ export class HypernetCore implements IHypernetCore {
     return ok(this._initialized);
   }
 
+  public waitInitialized(): ResultAsync<void, LogicalError> {
+    if (this._initializeResult != null) {
+      return this._initializeResult;
+    } else {
+      return errAsync(new LogicalError("Core is not currently being initialized!"));
+    }
+  }
+
   /**
    * Whether or not this instance of Hypernet Core is currently the one in control.
    */
@@ -285,9 +293,9 @@ export class HypernetCore implements IHypernetCore {
    * Return all Hypernet Links.
    */
   public getLinks(): ResultAsync<
-  HypernetLink[],
-  RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
-> {
+    HypernetLink[],
+    RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+  > {
     return this.linkService.getLinks();
   }
 
@@ -295,9 +303,9 @@ export class HypernetCore implements IHypernetCore {
    * Return all *active* Hypernet Links.
    */
   public getActiveLinks(): ResultAsync<
-  HypernetLink[],
-  RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
-> {
+    HypernetLink[],
+    RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+  > {
     return this.linkService.getLinks();
   }
 

@@ -61,17 +61,20 @@ export class LinksViewModel {
   }
 
   protected async init() {
-    await this.core.initialized();
+    this.core
+      .waitInitialized()
+      .andThen(() => {
+        return this.core.getPublicIdentifier();
+      })
+      .andThen((publicIdentifier) => {
+        this.publicIdentifier(publicIdentifier);
 
-    const publicIdentifier = await this.core.getPublicIdentifier();
-    this.publicIdentifier(publicIdentifier);
-
-    const links = await this.core.getActiveLinks();
-    //console.log("Got active links!");
-    const linkParams = links.map((link: HypernetLink) => new LinkParams(this.core, link));
-    //console.log('Mapped link params!')
-    this.links.push(...linkParams);
-    //console.log('Pushed link params!')
+        return this.core.getActiveLinks();
+      })
+      .map((links) => {
+        const linkParams = links.map((link: HypernetLink) => new LinkParams(this.core, link));
+        this.links.push(...linkParams);
+      });
   }
 }
 

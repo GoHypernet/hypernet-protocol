@@ -34,6 +34,15 @@ export interface IHypernetCore {
   initialized(): Result<boolean, LogicalError>;
 
   /**
+   * Returns an ResultAsync that is resolved when the core is initalized.
+   * If you are not interested in initializing the core yourself, but are interested
+   * in the core being initialized, you can use this function first to assure
+   * that the initialization is complete. It's useful to start a chain this way,
+   * ie: core.waitInitialized().andThen(() => {return core.funcImActuallyInterestedIn()})
+   */
+  waitInitialized(): ResultAsync<void, LogicalError>;
+
+  /**
    * Probably can be removed, but leaving as a reminder in case we need to solve
    * the multiple-instance-of-Hypernet-core issue
    */
@@ -97,19 +106,13 @@ export interface IHypernetCore {
   /**
    * Returns all Hypernet Ledger for the user
    */
-  getLinks(): ResultAsync<
-  HypernetLink[],
-  RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
->;
+  getLinks(): ResultAsync<HypernetLink[], RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 
   /**
    * Returns all active Hypernet Ledgers for the user
    * An active link contains an incomplete/non-finalized transfer.
    */
-  getActiveLinks(): ResultAsync<
-  HypernetLink[],
-  RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
->;
+  getActiveLinks(): ResultAsync<HypernetLink[], RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 
   /**
    * Returns the Hypernet Ledger for the user with the specified counterparty

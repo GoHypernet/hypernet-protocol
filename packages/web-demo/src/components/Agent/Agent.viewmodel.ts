@@ -1,6 +1,6 @@
 import * as ko from "knockout";
 import html from "./Agent.template.html";
-import { HypernetCore, IHypernetCore, EBlockchainNetwork } from "@hypernetlabs/hypernet-core";
+import { HypernetCore, IHypernetCore, EBlockchainNetwork, ResultAsync } from "@hypernetlabs/hypernet-core";
 import { BalancesParams } from "../Balances/Balances.viewmodel";
 import { PaymentFormParams } from "../PaymentForm/PaymentForm.viewmodel";
 import { LinksParams } from "../Links/Links.viewmodel";
@@ -27,15 +27,7 @@ export class AgentViewModel {
     this.account = new AccountParams(this.core);
     this.message = ko.observable<string>("Starting");
 
-    this.startup()
-      .then(() => {
-        this.message("Startup Complete");
-      })
-      .catch((e) => {
-        this.message("Startup failed!");
-        console.log("Startup failed!");
-        console.log(e);
-      });
+    this.startup();
 
     this.links = new LinksParams(this.core);
     this.actions = new ActionsParams(this.core);
@@ -43,16 +35,24 @@ export class AgentViewModel {
     this.paymentForm = new PaymentFormParams(this.core);
   }
 
-  protected async startup() {
-    try {
-      const accounts = await this.core.getEthereumAccounts();
-      await this.core.initialize(accounts[0]);
-      this.message("Startup Complete");
-    } catch (e) {
-      this.message("Startup failed!");
-      console.log("Startup failed!");
-      console.log(e);
-    }
+  protected startup(): Promise<void> {
+    return this.core
+      .getEthereumAccounts()
+      .andThen((accounts) => {
+        return this.core.initialize(accounts[0]);
+      })
+      .match(
+        () => {
+          this.message("Startup Complete");
+        },
+        (e) => {
+          this.message("Startup failed!");
+          // tslint:disable-next-line: no-console
+          console.log("Startup failed!");
+          // tslint:disable-next-line: no-console
+          console.log(e);
+        },
+      );
   }
 }
 
