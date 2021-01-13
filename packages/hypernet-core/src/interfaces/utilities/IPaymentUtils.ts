@@ -8,29 +8,30 @@ import {
   PushPayment,
   SortedTransfers,
 } from "@interfaces/objects";
-import { FullTransferState } from "@connext/vector-types";
+import { FullTransferState, NodeError } from "@connext/vector-types";
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
 import { BrowserNode } from "@connext/vector-browser-node";
-import { IBrowserNodeProvider } from "./IBrowserNodeProvider";
+import { ResultAsync } from "neverthrow";
+import { InvalidParametersError, InvalidPaymentError, LogicalError } from "@interfaces/objects/errors";
 
 export interface IPaymentUtils {
   /**
    *
    * @param paymentId
    */
-  isHypernetDomain(paymentId: string): Promise<boolean>;
+  isHypernetDomain(paymentId: string): ResultAsync<boolean, Error>;
 
   /**
-   *
+   * Creates a PaymentId by combining
    * @param paymentType
    */
-  createPaymentId(paymentType: EPaymentType): Promise<string>;
+  createPaymentId(paymentType: EPaymentType): ResultAsync<string, Error>;
 
   sortTransfers(
     _paymentId: string,
     transfers: FullTransferState[],
     browserNode: BrowserNode,
-  ): Promise<SortedTransfers>
+  ): ResultAsync<SortedTransfers, InvalidPaymentError | NodeError | Error>;
 
   /**
    *
@@ -44,7 +45,7 @@ export interface IPaymentUtils {
     config: HypernetConfig,
     context: InitializedHypernetContext,
     browserNode: BrowserNode,
-  ): Promise<Payment[]>;
+  ): ResultAsync<Payment[], InvalidPaymentError>;
 
   /**
    *
@@ -58,13 +59,21 @@ export interface IPaymentUtils {
     transfers: FullTransferState[],
     config: HypernetConfig,
     browserNode: BrowserNode,
-  ): Promise<Payment>;
+  ): ResultAsync<Payment, InvalidPaymentError | InvalidParametersError>;
 
   /**
    *
    * @param transfer
    */
-  getTransferType(transfer: FullTransferState, browserNode: BrowserNode): Promise<ETransferType>;
+  getTransferType(
+    transfer: FullTransferState,
+    browserNode: BrowserNode,
+  ): ResultAsync<ETransferType, LogicalError | NodeError>;
+
+  getTransferTypeWithTransfer(
+    transfer: FullTransferState,
+    browserNode: BrowserNode,
+  ): ResultAsync<{ transferType: ETransferType; transfer: FullTransferState }, NodeError | Error>;
 
   /**
    *
@@ -82,7 +91,7 @@ export interface IPaymentUtils {
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
     metadata: IHypernetTransferMetadata,
-  ): PullPayment;
+  ): ResultAsync<PullPayment, Error>;
 
   /**
    *
@@ -100,5 +109,5 @@ export interface IPaymentUtils {
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
     metadata: IHypernetTransferMetadata,
-  ): PushPayment;
+  ): ResultAsync<PushPayment, Error>;
 }

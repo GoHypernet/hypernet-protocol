@@ -1,5 +1,12 @@
-import { FullTransferState, NodeParams, NodeResponses } from "@connext/vector-types";
-import { BigNumber, IHypernetTransferMetadata, PublicIdentifier } from "@interfaces/objects";
+import { NodeResponses } from "@connext/vector-types";
+import { BigNumber, IHypernetTransferMetadata, ResultAsync } from "@interfaces/objects";
+import {
+  CoreUninitializedError,
+  InvalidParametersError,
+  RouterChannelUnknownError,
+  TransferCreationError,
+  TransferResolutionError,
+} from "@interfaces/objects/errors";
 import { EPaymentType } from "@interfaces/types";
 
 /**
@@ -9,25 +16,25 @@ export interface IVectorUtils {
   /**
    *
    */
-  getRouterChannelAddress(): Promise<string>;
+  getRouterChannelAddress(): ResultAsync<string, RouterChannelUnknownError | CoreUninitializedError>;
 
   /**
    *
    * @param transferId
    */
-  resolveMessageTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer>;
+  resolveMessageTransfer(transferId: string): ResultAsync<NodeResponses.ResolveTransfer, TransferResolutionError>;
 
   resolvePaymentTransfer(
-    transferId: string, 
-    paymentId: string, 
-    amount: string
-  ): Promise<NodeResponses.ResolveTransfer>
+    transferId: string,
+    paymentId: string,
+    amount: string,
+  ): ResultAsync<NodeResponses.ResolveTransfer, TransferResolutionError>;
 
   /**
    *
    * @param transferId
    */
-  resolveInsuranceTransfer(transferId: string): Promise<NodeResponses.ResolveTransfer>;
+  resolveInsuranceTransfer(transferId: string): ResultAsync<NodeResponses.ResolveTransfer, TransferResolutionError>;
 
   /**
    *
@@ -35,7 +42,7 @@ export interface IVectorUtils {
   createMessageTransfer(
     toAddress: string,
     message: IHypernetTransferMetadata,
-  ): Promise<NodeResponses.ConditionalTransfer>;
+  ): ResultAsync<NodeResponses.ConditionalTransfer, TransferCreationError>;
 
   /**
    *
@@ -50,7 +57,7 @@ export interface IVectorUtils {
     UUID: string,
     start: string,
     expiration: string,
-  ): Promise<NodeResponses.ConditionalTransfer>;
+  ): ResultAsync<NodeResponses.ConditionalTransfer, TransferCreationError | InvalidParametersError>;
 
   /**
    *
@@ -63,5 +70,5 @@ export interface IVectorUtils {
     amount: BigNumber,
     expiration: string,
     UUID: string,
-  ): Promise<NodeResponses.ConditionalTransfer>;
+  ): ResultAsync<NodeResponses.ConditionalTransfer, TransferCreationError | InvalidParametersError>;
 }

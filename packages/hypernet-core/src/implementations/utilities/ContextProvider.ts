@@ -6,8 +6,10 @@ import {
   PullPayment,
   Balances,
 } from "@interfaces/objects";
+import { CoreUninitializedError, LogicalError } from "@interfaces/objects/errors";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { Subject } from "rxjs";
+import { okAsync, errAsync, ResultAsync } from "neverthrow";
 
 export class ContextProvider implements IContextProvider {
   protected context: HypernetContext;
@@ -37,32 +39,35 @@ export class ContextProvider implements IContextProvider {
       onBalancesChanged,
     );
   }
-  public async getContext(): Promise<HypernetContext> {
-    return this.context;
+  public getContext(): ResultAsync<HypernetContext, LogicalError> {
+    return okAsync(this.context);
   }
 
-  public async getInitializedContext(): Promise<InitializedHypernetContext> {
+  public getInitializedContext(): ResultAsync<InitializedHypernetContext, CoreUninitializedError> {
     if (this.context.account == null || this.context.publicIdentifier == null) {
-      throw new Error("Can not open a link until you have set your working account. Call HypernetCore.initialize()!");
+      return errAsync(new CoreUninitializedError());
     }
 
-    return new InitializedHypernetContext(
-      this.context.account,
-      this.context.publicIdentifier,
-      this.context.inControl,
-      this.context.onControlClaimed,
-      this.context.onControlYielded,
-      this.context.onPushPaymentProposed,
-      this.context.onPullPaymentProposed,
-      this.context.onPushPaymentReceived,
-      this.context.onPullPaymentApproved,
-      this.context.onPushPaymentUpdated,
-      this.context.onPullPaymentUpdated,
-      this.context.onBalancesChanged,
+    return okAsync(
+      new InitializedHypernetContext(
+        this.context.account,
+        this.context.publicIdentifier,
+        this.context.inControl,
+        this.context.onControlClaimed,
+        this.context.onControlYielded,
+        this.context.onPushPaymentProposed,
+        this.context.onPullPaymentProposed,
+        this.context.onPushPaymentReceived,
+        this.context.onPullPaymentApproved,
+        this.context.onPushPaymentUpdated,
+        this.context.onPullPaymentUpdated,
+        this.context.onBalancesChanged,
+      ),
     );
   }
 
-  public setContext(context: HypernetContext): void {
+  public setContext(context: HypernetContext): ResultAsync<void, LogicalError> {
     this.context = context;
+    return okAsync<null, LogicalError>(null).map(() => {});
   }
 }

@@ -11,8 +11,8 @@ export class LinkParams {
 // tslint:disable-next-line: max-classes-per-file
 export class LinkViewModel {
   public counterpartyId: string;
-  public pushPayments: ko.ObservableArray<PushPaymentParams>
-  public pullPayments: ko.ObservableArray<PullPaymentParams>
+  public pushPayments: ko.ObservableArray<PushPaymentParams>;
+  public pullPayments: ko.ObservableArray<PullPaymentParams>;
 
   protected counterParty: string;
   protected core: IHypernetCore;
@@ -21,20 +21,20 @@ export class LinkViewModel {
     this.core = params.core;
     this.counterParty = params.link.counterPartyAccount;
     this.counterpartyId = `${params.link.counterPartyAccount}`;
-    this.pushPayments = ko.observableArray<PushPaymentParams>()
-    this.pullPayments = ko.observableArray<PullPaymentParams>()
+    this.pushPayments = ko.observableArray<PushPaymentParams>();
+    this.pullPayments = ko.observableArray<PullPaymentParams>();
 
     const pushPaymentParams = params.link.pushPayments.map((val) => {
       return new PushPaymentParams(this.core, val);
     });
-    this.pushPayments.push(...pushPaymentParams)
-    console.log(`Pushed ${pushPaymentParams.length} push payment params`)
+    this.pushPayments.push(...pushPaymentParams);
+    console.log(`Pushed ${pushPaymentParams.length} push payment params`);
 
     const pullPaymentParams = params.link.pullPayments.map((val) => {
       return new PullPaymentParams(this.core, val);
     });
-    this.pullPayments.push(...pullPaymentParams)
-    console.log(`Pushed ${pullPaymentParams.length} pull payment params`)
+    this.pullPayments.push(...pullPaymentParams);
+    console.log(`Pushed ${pullPaymentParams.length} pull payment params`);
 
     this.core.onPullPaymentProposed.subscribe({
       next: (payment) => {

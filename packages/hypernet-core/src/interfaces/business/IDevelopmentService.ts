@@ -1,6 +1,7 @@
 import { EthereumAddress } from "3box";
-import { BigNumber } from "@interfaces/objects";
+import { BigNumber, ResultAsync } from "@interfaces/objects";
+import { LogicalError } from "@interfaces/objects/errors";
 
 export interface IDevelopmentService {
-  mintTestToken(amount: BigNumber, to: EthereumAddress): Promise<void>;
+  mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<void, LogicalError>;
 }

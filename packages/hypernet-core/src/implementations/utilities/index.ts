@@ -4,5 +4,6 @@ export * from "./ChannelUtils";
 export * from "./ConfigProvider";
 export * from "./ContextProvider";
 export * from "./LinkUtils";
+export * from "./LogUtils";
 export * from "./PaymentUtils";
 export * from "./VectorUtils";

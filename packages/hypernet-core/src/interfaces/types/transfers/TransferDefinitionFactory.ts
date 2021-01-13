@@ -8,11 +8,8 @@ import { Provider } from "@ethersproject/providers";
 import type { TransferDefinition } from "./TransferDefinition";
 
 export class TransferDefinitionFactory {
-  static connect(
-    address: string,
-    signerOrProvider: Signer | Provider
-  ): TransferDefinition {
-    return new Contract(address, _abi, signerOrProvider) as unknown as TransferDefinition;
+  static connect(address: string, signerOrProvider: Signer | Provider): TransferDefinition {
+    return (new Contract(address, _abi, signerOrProvider) as unknown) as TransferDefinition;
   }
 }
 
