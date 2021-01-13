@@ -1,14 +1,11 @@
-import { mock, instance, verify, when } from "ts-mockito";
 import { BrowserNodeProvider, ConfigProvider, ContextProvider, EthersBlockchainProvider, PaymentUtils } from "../src/implementations/utilities/index";
 import { VectorUtils } from "../src/implementations/utilities/VectorUtils";
 import { EBlockchainNetwork, EPaymentType } from "../src/interfaces/types";
-import { Balances, BigNumber, ControlClaim, HypernetContext, InitializedHypernetContext } from "../src/interfaces/objects";
+import { Balances, BigNumber, ControlClaim, HypernetContext, InitializedHypernetContext, PullPayment, PushPayment } from "../src/interfaces/objects";
 import { config, Subject } from "rxjs";
-import { BrowserNode } from "@connext/vector-browser-node";
 import { mkPublicIdentifier } from "@connext/vector-utils";
 import randomstring from "randomstring";
-import { Result } from "@connext/vector-types";
-import * as Factory from "factory.ts";
+
 import {NodeResponses} from "@connext/vector-types/src/schemas/node"
 
 const configProvider = new ConfigProvider(EBlockchainNetwork.Localhost);
@@ -17,48 +14,16 @@ let vectorutils: VectorUtils;
 
 let contextProvider: ContextProvider;
 
-const channelFactory = Factory.Sync.makeFactory<NodeResponses.GetChannelState>({
-		assetIds: "asset1",
-  		balances: "42",
-	  	channelAddress: "test-channel",
-		alice: "taddress",
-		bob: "baddress",
-		merkleRoot: "Byetes",
-		nonce: 3,
-		processedDepositsA: ["213123"],
-		processedDepositsB: ["hello"],
-		timeout: "400",
-		aliceIdentifier: "saf",
-		bobIdentifier: "wfff",
-		latestUpdate: {},
-		networkContext: {},
-});
 
 
-beforeEach(() => {
-    contextProvider = mock(ContextProvider);
-	const hypernetContext = mock(HypernetContext);
-	const initializedHypernextContext = mock(InitializedHypernetContext);
+beforeEach(async () => {
+		contextProvider = new ContextProvider(new Subject<ControlClaim>(), new Subject<ControlClaim>(), new Subject<PushPayment>(), new Subject<PullPayment>(), new Subject<PushPayment>(), new Subject<PullPayment>(), new Subject<Balances>());
+		const hypernetContext = await contextProvider.getContext();
+		hypernetContext.account = "";
+		hypernetContext.publicIdentifier = mkPublicIdentifier();
 
-	hypernetContext.account = "account";
-	hypernetContext.publicIdentifier = "";
-	when(hypernetContext.onControlClaimed).thenReturn(new Subject<ControlClaim>());
-
-	const hypernetContextInstance = instance(hypernetContext);
-	const initializedHypernetContextInstance = instance(initializedHypernextContext);
-	when(contextProvider.getContext()).thenResolve(hypernetContextInstance);
-	when(contextProvider.getInitializedContext()).thenResolve(initializedHypernetContextInstance);
-
-	const browserNode = mock(BrowserNode);
-	when(browserNode.getStateChannels()).thenResolve(Result.ok(["test-channel"]))
-	// FIXME: can't make this work. always returns null.
-	when(browserNode.getStateChannel({channelAddress: "test-channel"})).thenResolve(Result.ok(channelFactory.build({})));
-	// when(browserNode.getRegisteredTransfers({chainId: 1})).thenResolve({})
-
-	browserNodeProvider = mock(BrowserNodeProvider);
-	when(browserNodeProvider.getBrowserNode()).thenResolve(instance(browserNode));
-
-	vectorutils = new VectorUtils(configProvider, instance(contextProvider), instance(browserNodeProvider), {} as EthersBlockchainProvider);
+	browserNodeProvider = new BrowserNodeProvider(configProvider, contextProvider);
+	vectorutils = new VectorUtils(configProvider, contextProvider, browserNodeProvider, {} as EthersBlockchainProvider);
 })
 
 test("Test configProvider", async () => {
