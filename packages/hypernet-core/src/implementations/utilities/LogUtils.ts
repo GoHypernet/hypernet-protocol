@@ -9,19 +9,19 @@ export class LogUtils implements ILogUtils {
   }
 
   public debug(message?: any, ...optionalParams: any[]): void {
-    throw new Error("Method not implemented.");
+    this.logger.debug(message, optionalParams);
   }
   public info(message?: any, ...optionalParams: any[]): void {
-    throw new Error("Method not implemented.");
+    this.logger.info(message, optionalParams);
   }
   public log(message?: any, ...optionalParams: any[]): void {
-    throw new Error("Method not implemented.");
+    this.logger.log(message, optionalParams);
   }
   public warning(message?: any, ...optionalParams: any[]): void {
-    throw new Error("Method not implemented.");
+    this.logger.warn(message, optionalParams);
   }
   public error(message?: any, ...optionalParams: any[]): void {
-    throw new Error("Method not implemented.");
+    this.logger.error(message, optionalParams);
   }
 
   public getPino(): pino.Logger {
