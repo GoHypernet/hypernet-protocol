@@ -7,6 +7,7 @@ import { EBlockchainNetwork } from "@interfaces/types";
 import { ResultAsync } from "@interfaces/objects";
 import { okAsync } from "neverthrow";
 import { ILogUtils } from "@interfaces/utilities";
+import { ChainProviders } from "@connext/vector-types";
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
@@ -18,6 +19,10 @@ export class ConfigProvider implements IConfigProvider {
     }
 
     if (network === EBlockchainNetwork.Localhost) {
+      const chainProvider: ChainProviders = {
+        [1337]: 'http://localhost:8545'
+      }
+      
       this.config = new HypernetConfig(
         "http://localhost:5000", // iframeSource
         "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat", // Router mnemonic
@@ -27,6 +32,7 @@ export class ConfigProvider implements IConfigProvider {
         constants.AddressZero, // Hypertoken address,
         "Hypernet", // Hypernet Protocol Domain for Transfers
         5 * 24 * 60 * 60, // 5 days as the default payment expiration time
+        chainProvider
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
@@ -38,15 +44,20 @@ export class ConfigProvider implements IConfigProvider {
       this.logUtils.log("Router publicIdentifier", this.config.routerPublicIdentifier);
     } else {
       // Should be MainNet config here
+      const chainProvider: ChainProviders = {
+        [1]: 'https://mainnet.infura.io/v3/df03ad3247a4474fbdd864a276ba2478'
+      }
+
       this.config = new HypernetConfig(
         "http://localhost:5000", // iframeSource
         "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat", // Router mnemonic
         "", // routerPublicIdentifier
-        1337, // Chain ID
+        1, // Chain ID
         "localhost:8008", // Router address
         constants.AddressZero, // Hypertoken address,
         "Hypernet", // Hypernet Protocol Domain for Transfers
         5 * 24 * 60 * 60, // 5 days as the default payment expiration time
+        chainProvider
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);

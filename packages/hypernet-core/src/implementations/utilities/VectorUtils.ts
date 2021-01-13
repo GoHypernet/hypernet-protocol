@@ -431,6 +431,9 @@ export class VectorUtils implements IVectorUtils {
         const channels = channelsVal as NodeResponses.GetChannelState[];
 
         for (const channel of channels) {
+          if (!channel) {
+            continue;
+          }
           if (channel.aliceIdentifier !== config.routerPublicIdentifier) {
             continue;
           }
