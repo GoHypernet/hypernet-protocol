@@ -218,10 +218,6 @@ export class HypernetCore implements IHypernetCore {
     return ok(this._initialized);
   }
 
-  /**
-   * Returns an ResultAsync that is resolved when the core is initalized,
-   * so that if it is being initialized somewhere else.
-   */
   public waitInitialized(): ResultAsync<void, LogicalError> {
     if (this._initializeResult != null) {
       return this._initializeResult;

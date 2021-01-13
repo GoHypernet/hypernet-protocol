@@ -33,6 +33,13 @@ import { NodeError } from "@connext/vector-types";
 export interface IHypernetCore {
   initialized(): Result<boolean, LogicalError>;
 
+  /**
+   * Returns an ResultAsync that is resolved when the core is initalized.
+   * If you are not interested in initializing the core yourself, but are interested
+   * in the core being initialized, you can use this function first to assure
+   * that the initialization is complete. It's useful to start a chain this way,
+   * ie: core.waitInitialized().andThen(() => {return core.funcImActuallyInterestedIn()})
+   */
   waitInitialized(): ResultAsync<void, LogicalError>;
 
   /**
