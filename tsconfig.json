@@ -3,21 +3,31 @@
   "compilerOptions": {
     "baseUrl": "./packages",
     "paths": {
-      "@hypernetlabs/web-demo": [
-        "hypernet-core/web-demo/src"
-      ],
-      "@hypernetlabs/hypernet-core": [
-        "hypernet-core/src"
-      ],
-      "@hypernetlabs/hypernet-contracts/*": [
-        "hypernet-contracts/src"
-      ]
+      "@hypernetlabs/hypernet-contracts/*": ["hypernet-contracts/src"],
+      "@hypernetlabs/hypernet-core": ["hypernet-core/src"],
+      "@hypernetlabs/web-integration": ["web-integration/src"],
+      "@hypernetlabs/web-ui": ["web-ui/src"],
+      "@hypernetlabs/iframe": ["iframe/src"],
+      "@hypernetlabs/developer-ui": ["developer-ui/src"],
+      "@hypernetlabs/web-demo": ["web-demo/src"]
     }
   },
   "files": [],
   "references": [
     {
       "path": "packages/hypernet-core"
+    },
+    {
+      "path": "packages/web-integration"
+    },
+    {
+      "path": "packages/web-ui"
+    },
+    {
+      "path": "packages/iframe"
+    },
+    {
+      "path": "packages/developer-ui"
     },
     {
       "path": "packages/web-demo"

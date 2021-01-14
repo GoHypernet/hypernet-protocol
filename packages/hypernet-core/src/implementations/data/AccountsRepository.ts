@@ -131,7 +131,7 @@ export class AccountsRepository implements IAccountsRepository {
 
         let tx: ResultAsync<TransactionResponse, BlockchainUnavailableError>;
 
-        if (assetAddress == "0x0000000000000000000000000000000000000000") {
+        if (assetAddress === "0x0000000000000000000000000000000000000000") {
           this.logUtils.log("Transferring ETH.");
           // send eth
           tx = ResultAsync.fromPromise(signer.sendTransaction({ to: channelAddress, value: amount }), (err) => {
@@ -140,7 +140,7 @@ export class AccountsRepository implements IAccountsRepository {
         } else {
           this.logUtils.log("Transferring an ERC20 asset.");
           // send an actual erc20 token
-          let tokenContract = new Contract(assetAddress, ERC20Abi, signer);
+          const tokenContract = new Contract(assetAddress, ERC20Abi, signer);
           tx = ResultAsync.fromPromise(tokenContract.transfer(channelAddress, amount), (err) => {
             return err as BlockchainUnavailableError;
           });
@@ -198,7 +198,7 @@ export class AccountsRepository implements IAccountsRepository {
     assetAddress: string,
     amount: BigNumber,
     destinationAddress: string,
-  ): ResultAsync<null, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error> {
+  ): ResultAsync<void, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error> {
     const prerequisites = (combine([
       this.browserNodeProvider.getBrowserNode(),
       this.vectorUtils.getRouterChannelAddress() as ResultAsync<any, any>,
@@ -231,6 +231,9 @@ export class AccountsRepository implements IAccountsRepository {
         }
 
         return okAsync(null);
+      })
+      .map(() => {
+        return;
       });
   }
 
@@ -239,13 +242,13 @@ export class AccountsRepository implements IAccountsRepository {
    * @param amount the amount of the test token to mint
    * @param to the (Ethereum) address to mint the test token to
    */
-  public mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<null, BlockchainUnavailableError> {
+  public mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<void, BlockchainUnavailableError> {
     return this.blockchainProvider
       .getSigner()
       .andThen((signer) => {
         const testTokenContract = new Contract(
           "0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0",
-          artifacts["TestToken"].abi,
+          artifacts.TestToken.abi,
           signer,
         );
 
@@ -258,8 +261,8 @@ export class AccountsRepository implements IAccountsRepository {
           return e as BlockchainUnavailableError;
         });
       })
-      .andThen((receipt) => {
-        return okAsync(null);
+      .map(() => {
+        return;
       });
   }
 }

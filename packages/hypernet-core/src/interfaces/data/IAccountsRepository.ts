@@ -1,17 +1,18 @@
 import { NodeError } from "@connext/vector-types";
 import { EthereumAddress, BigNumber, Balances, AssetBalance, PublicIdentifier, ResultAsync } from "@interfaces/objects";
 import {
+  BalancesUnavailableError,
   BlockchainUnavailableError,
   CoreUninitializedError,
+  LogicalError,
   RouterChannelUnknownError,
 } from "@interfaces/objects/errors";
-import { BalancesUnavailableError } from "@interfaces/objects/errors/BalancesUnavailableError";
 
 /**
  * @todo What is the main role/purpose of this class? Description here.
  */
 export interface IAccountsRepository {
-  getPublicIdentifier(): ResultAsync<PublicIdentifier, NodeError | Error>;
+  getPublicIdentifier(): ResultAsync<PublicIdentifier, NodeError | LogicalError>;
   getAccounts(): ResultAsync<string[], BlockchainUnavailableError>;
   getBalances(): ResultAsync<Balances, BalancesUnavailableError | CoreUninitializedError>;
   getBalanceByAsset(assetAddress: EthereumAddress): ResultAsync<AssetBalance, BalancesUnavailableError>;
@@ -23,10 +24,10 @@ export interface IAccountsRepository {
     RouterChannelUnknownError | CoreUninitializedError | NodeError | Error | BlockchainUnavailableError
   >;
   withdrawFunds(
-    assetAddress: string,
+    assetAddress: EthereumAddress,
     amount: BigNumber,
-    destinationAddress: string,
-  ): ResultAsync<null, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
+    destinationAddress: EthereumAddress,
+  ): ResultAsync<void, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 
-  mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<null, BlockchainUnavailableError>;
+  mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<void, BlockchainUnavailableError>;
 }

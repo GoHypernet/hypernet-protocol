@@ -1,25 +1,28 @@
 import { IBrowserNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider";
 import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 import { BrowserNode } from "@connext/vector-browser-node";
-import pino from "pino";
-import { IContextProvider } from "@interfaces/utilities";
+import { IContextProvider, ILogUtils } from "@interfaces/utilities";
 import { NodeError } from "@connext/vector-types";
 import { ResultAsync } from "neverthrow";
 
 export class BrowserNodeProvider implements IBrowserNodeProvider {
-  protected logger: pino.Logger;
   protected browserNode: ResultAsync<BrowserNode, NodeError | Error> | null;
 
-  constructor(protected configProvider: IConfigProvider, protected contextProvider: IContextProvider) {
-    this.logger = pino();
+  constructor(
+    protected configProvider: IConfigProvider,
+    protected contextProvider: IContextProvider,
+    protected logUtils: ILogUtils,
+  ) {
     this.browserNode = null;
   }
+
 
   protected initialize(): ResultAsync<BrowserNode, NodeError | Error> {
     this.browserNode = this.configProvider.getConfig().map(async (config) => {
       const browserNode = new BrowserNode({
+        logger: this.logUtils.getPino(),
         iframeSrc: config.iframeSource,
-        logger: this.logger,
+        chainProviders: config.chainProviders
       });
 
       await browserNode.init();

@@ -1,6 +1,6 @@
 # `web-demo`
 
-web-demo is a minimal demonstration showing how to consume the SDK that the Hypernet Core exposes to create a Hypernet Link between two agents.
+<!-- web-demo is a minimal demonstration showing how to consume the SDK that the Hypernet Core exposes to create a Hypernet Link between two agents.
 
 ## Usage
 
@@ -20,4 +20,4 @@ Once you've set up Metamask, change the Network to "Localhost:8545"
 
 ### Docker-Compose Info
 
-*list out each image in the docker stack and a short description of what it does*
+*list out each image in the docker stack and a short description of what it does* -->

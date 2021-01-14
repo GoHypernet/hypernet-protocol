@@ -1,5 +1,15 @@
-import { BigNumber, Payment, EthereumAddress, PublicKey, PublicIdentifier } from "@interfaces/objects";
-import { Result } from "@connext/vector-types";
+import { Payment, EthereumAddress, PublicKey, PublicIdentifier, ResultAsync, Result } from "@interfaces/objects";
+import { NodeError } from "@connext/vector-types";
+import {
+  AcceptPaymentError,
+  CoreUninitializedError,
+  InsufficientBalanceError,
+  InvalidParametersError,
+  InvalidPaymentError,
+  LogicalError,
+  OfferMismatchError,
+  RouterChannelUnknownError,
+} from "@interfaces/objects/errors";
 
 export interface IPaymentService {
   /**
@@ -18,13 +28,15 @@ export interface IPaymentService {
     requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
-  ): Promise<Payment>;
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 
   /**
    * Called by the person on the receiving end of a push payment,
    * to accept the terms of the payment and put up the stake.
    */
-  acceptFunds(paymentIds: string[]): Promise<Result<Payment, Error>[]>;
+  acceptFunds(
+    paymentIds: string[],
+  ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError>;
 
   /**
    *
@@ -37,36 +49,32 @@ export interface IPaymentService {
    * Notify the service that a payment has been posted.
    * @param paymentId
    */
-  paymentPosted(paymentId: string): Promise<void>;
+  paymentPosted(paymentId: string): ResultAsync<void, InvalidParametersError>;
 
   /**
    * Notify the service that a payment has been completed.
    * @param paymentId
    */
-  paymentCompleted(paymentId: string): Promise<void>;
+  paymentCompleted(paymentId: string): ResultAsync<void, InvalidParametersError>;
 
   /**
    * Notify the service that a pull payment has been posted.
    * @param paymentId
    */
-  pullRecorded(paymentId: string): Promise<void>;
-
-  /**
-   * Plural version of stakePosted.
-   * @param paymentIds the payment ids to notify the service about
-   */
-  stakesPosted(paymentIds: string[]): Promise<void>;
+  pullRecorded(paymentId: string): ResultAsync<void, InvalidParametersError>;
 
   /**
    * Notify the service that a stake has been created/posted.
    * @param paymentId
    */
-  stakePosted(paymentId: string): Promise<void>;
+  stakePosted(paymentId: string): ResultAsync<void, OfferMismatchError | InvalidParametersError>;
 
   /**
    * Notify the service that an offer has been made.
    * @param paymentId
    * @param transferId
    */
-  offerReceived(paymentId: string): Promise<void>;
+  offerReceived(
+    paymentId: string,
+  ): ResultAsync<void, LogicalError | RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 }

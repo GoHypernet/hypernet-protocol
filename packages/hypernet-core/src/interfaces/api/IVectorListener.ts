@@ -1,3 +1,6 @@
+import { ResultAsync } from "@interfaces/objects";
+import { LogicalError } from "@interfaces/objects/errors";
+
 export interface IVectorListener {
-  setup(): Promise<void>;
+  setup(): ResultAsync<void, LogicalError>;
 }
