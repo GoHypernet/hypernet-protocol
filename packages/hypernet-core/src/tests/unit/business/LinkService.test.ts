@@ -1,23 +1,21 @@
-/* import { verify, when } from "ts-mockito";
+import { okAsync } from "neverthrow";
+import { verify, when } from "ts-mockito";
 
 import LinkServiceMocks from "../../mock/business/LinkServiceMocks";
 
 describe("LinkService tests", () => {
-  test("Should getLinks return links", async () => {
+  test("Should getLinks return links without errors", async () => {
     // Arrange
     const linkServiceMock = new LinkServiceMocks();
 
     // Act
-    when(linkServiceMock.linkRepository.getHypernetLinks()).thenResolve([linkServiceMock.getHypernetLinkFactory()]);
+    when(linkServiceMock.linkRepository.getHypernetLinks()).thenReturn(
+      okAsync([linkServiceMock.getHypernetLinkFactory()]),
+    );
     const getLinksResponse = await linkServiceMock.getServiceFactory().getLinks();
 
     // Assert
     verify(linkServiceMock.linkRepository.getHypernetLinks()).once();
-    expect(getLinksResponse).toStrictEqual([linkServiceMock.getHypernetLinkFactory()]);
-  });
-}); */
-describe("AccountService tests", () => {
-  test("Should acceptFunds return error if payment state is not Proposed", () => {
-    expect(true).toBe(true);
+    expect(getLinksResponse._unsafeUnwrap()).toStrictEqual([linkServiceMock.getHypernetLinkFactory()]);
   });
 });

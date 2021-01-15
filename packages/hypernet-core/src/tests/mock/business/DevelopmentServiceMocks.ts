@@ -1,4 +1,4 @@
-/* import { mock, instance } from "ts-mockito";
+import { mock, instance } from "ts-mockito";
 
 import { IDevelopmentService } from "@interfaces/business";
 import { IAccountsRepository } from "@interfaces/data";
@@ -14,4 +14,4 @@ export default class DevelopmentServiceMocks {
   public getServiceFactory(): IDevelopmentService {
     return new DevelopmentService(this.getAccountRepositoryFactory());
   }
-} */
+}

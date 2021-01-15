@@ -1,26 +1,23 @@
-/* import { verify } from "ts-mockito";
+import { when } from "ts-mockito";
 
 import { BigNumber } from "@interfaces/objects";
 import DevelopmentServiceMocks from "../../mock/business/DevelopmentServiceMocks";
-
-var randomstring = require("randomstring");
+import { mockUtils } from "../../mock/utils";
+import { okAsync } from "neverthrow";
 
 describe("DevelopmentService tests", () => {
-  test("Should mintTestToken", async () => {
+  test("Should mintTestToken without errors", async () => {
     // Arrange
     const developmentServiceMock = new DevelopmentServiceMocks();
     const amount = BigNumber.from("42");
-    const to = "0x" + randomstring.generate({ length: 40, charset: "hex" });
+    const to = mockUtils.generateRandomEtherAdress();
 
     // Act
-    developmentServiceMock.getServiceFactory().mintTestToken(amount, to);
+    when(developmentServiceMock.accountRepository.mintTestToken(amount, to)).thenReturn(okAsync(undefined));
 
     // Assert
-    verify(developmentServiceMock.accountRepository.mintTestToken(amount, to)).once();
-  });
-}); */
-describe("AccountService tests", () => {
-  test("Should acceptFunds return error if payment state is not Proposed", () => {
-    expect(true).toBe(true);
+    expect((await developmentServiceMock.getServiceFactory().mintTestToken(amount, to))._unsafeUnwrap()).toStrictEqual(
+      undefined,
+    );
   });
 });
