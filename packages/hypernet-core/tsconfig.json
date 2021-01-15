@@ -8,7 +8,8 @@
         "paths": {
             "@interfaces/*": ["./src/interfaces/*"],
             "@implementations/*": ["./src/implementations/*"]
-        }
+        },
+        "resolveJsonModule": true
     },
     "include": [
         "./src/**/*"
