@@ -4,8 +4,8 @@ import { PaymentRepository } from "@implementations/data";
 import { IPaymentService } from "@interfaces/business";
 import { IAccountsRepository, ILinkRepository, IPaymentRepository } from "@interfaces/data";
 import { PaymentService } from "@implementations/business";
-import { IConfigProvider, IContextProvider } from "@interfaces/utilities";
-import { InitializedHypernetContext } from "@interfaces/objects";
+import { IConfigProvider, IContextProvider, ILogUtils } from "@interfaces/utilities";
+import { HypernetContext, InitializedHypernetContext } from "@interfaces/objects";
 
 // normal ts-mock "when" function won't work (issue: https://github.com/NagRock/ts-mockito/issues/209) that's why we had to write a different implementation here
 jest.mock("@implementations/data");
@@ -18,8 +18,10 @@ export default class PaymentServiceMocks {
   public accountRepository: IAccountsRepository = mock<IAccountsRepository>();
   public contextProvider: IContextProvider = mock<IContextProvider>();
   public configProvider: IConfigProvider = mock<IConfigProvider>();
+  public logUtils: ILogUtils = mock<ILogUtils>();
   public paymentRepository = PaymentRepository;
   public initializedHypernetContext = mock(InitializedHypernetContext);
+  public hypernetContext: HypernetContext = mock(HypernetContext);
 
   public getVectorLinkRepositoryFactory(): ILinkRepository {
     return instance(this.vectorLinkRepository);
@@ -46,6 +48,14 @@ export default class PaymentServiceMocks {
     return instance(this.initializedHypernetContext);
   }
 
+  public getLogUtilsFactory(): ILogUtils {
+    return instance(this.logUtils);
+  }
+
+  public getHypernetContextFactory(): HypernetContext {
+    return instance(this.hypernetContext);
+  }
+
   public getServiceFactory(): IPaymentService {
     return new PaymentService(
       this.getVectorLinkRepositoryFactory(),
@@ -53,6 +63,7 @@ export default class PaymentServiceMocks {
       this.getContextProviderFactory(),
       this.getConfigProviderFactory(),
       this.getPaymentRepositoryFactory(),
+      this.getLogUtilsFactory(),
     );
   }
 }

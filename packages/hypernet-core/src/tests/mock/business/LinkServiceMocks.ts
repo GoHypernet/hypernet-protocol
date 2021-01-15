@@ -1,4 +1,4 @@
-import { mock, instance } from "ts-mockito";
+/* import { mock, instance } from "ts-mockito";
 
 import { ILinkRepository } from "@interfaces/data";
 import { LinkService } from "@implementations/business";
@@ -20,4 +20,4 @@ export default class LinkServiceMocks {
   public getServiceFactory(): ILinkService {
     return new LinkService(this.getLinkRepositoryFactory());
   }
-}
+} */

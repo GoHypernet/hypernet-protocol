@@ -5,8 +5,11 @@ import { Balances, BigNumber, AssetBalance } from "@interfaces/objects";
 import AccountsRepositoryMocks from "../../mock/data/AccountsRepositoryMocks";
 import { BrowserNode } from "@connext/vector-browser-node";
 import { mockUtils } from "../../mock/utils";
-import { BlockchainUnavailableError, RouterChannelUnknownError } from "@interfaces/objects/errors";
-import { NodeError } from "@connext/vector-types";
+import {
+  BalancesUnavailableError,
+  BlockchainUnavailableError,
+  RouterChannelUnknownError,
+} from "@interfaces/objects/errors";
 import { NodeResponses } from "@connext/vector-types";
 import { CoreChannelState, Result } from "@connext/vector-types";
 const { when: jestWhen } = require("jest-when");
@@ -22,6 +25,9 @@ describe("AccountsRepository tests", () => {
     const browserNode = new BrowserNode({
       routerPublicIdentifier,
       supportedChains,
+      chainProviders: {
+        [supportedChains[0]]: "asdad",
+      },
     });
     browserNode.publicIdentifier = publicIdentifier;
 
@@ -29,9 +35,9 @@ describe("AccountsRepository tests", () => {
     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(browserNode));
 
     // Assert
-    expect(
-      await (await accountsRepositoryMocks.getServiceFactory().getPublicIdentifier())._unsafeUnwrap(),
-    ).toStrictEqual(publicIdentifier);
+    expect((await accountsRepositoryMocks.getServiceFactory().getPublicIdentifier())._unsafeUnwrap()).toStrictEqual(
+      publicIdentifier,
+    );
   });
 
   test("Should getPublicIdentifier throw error", async () => {
@@ -43,9 +49,9 @@ describe("AccountsRepository tests", () => {
     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(errAsync(err));
 
     // Assert
-    expect(
-      await (await accountsRepositoryMocks.getServiceFactory().getPublicIdentifier())._unsafeUnwrapErr(),
-    ).toStrictEqual(err);
+    expect((await accountsRepositoryMocks.getServiceFactory().getPublicIdentifier())._unsafeUnwrapErr()).toStrictEqual(
+      err,
+    );
   });
 
   test("Should getAccounts return accounts", async () => {
@@ -58,9 +64,7 @@ describe("AccountsRepository tests", () => {
     when(accountsRepositoryMocks.blockchainProvider.getProvider()).thenReturn(okAsync(provider));
 
     // Assert
-    expect(await (await accountsRepositoryMocks.getServiceFactory().getAccounts())._unsafeUnwrap()).toStrictEqual(
-      accounts,
-    );
+    expect((await accountsRepositoryMocks.getServiceFactory().getAccounts())._unsafeUnwrap()).toStrictEqual(accounts);
   });
 
   test("Should getBalances return balances", async () => {
@@ -108,7 +112,7 @@ describe("AccountsRepository tests", () => {
       .mockResolvedValue(stateChannelRes);
 
     // Assert
-    expect(await (await accountsRepositoryMocks.getServiceFactory().getBalances())._unsafeUnwrap()).toEqual(balances);
+    expect((await accountsRepositoryMocks.getServiceFactory().getBalances())._unsafeUnwrap()).toEqual(balances);
   });
 
   test("Should getBalances throw error when getRouterChannelAddress fails", async () => {
@@ -122,7 +126,7 @@ describe("AccountsRepository tests", () => {
     );
 
     // Assert
-    expect(await (await accountsRepositoryMocks.getServiceFactory().getBalances())._unsafeUnwrapErr()).toStrictEqual(
+    expect((await accountsRepositoryMocks.getServiceFactory().getBalances())._unsafeUnwrapErr()).toStrictEqual(
       throwenError,
     );
   });
@@ -131,14 +135,14 @@ describe("AccountsRepository tests", () => {
     // Arrange
     const accountsRepositoryMocks = new AccountsRepositoryMocks();
     const routerChannelAddress = mockUtils.generateRandomEtherAdress();
-    const throwenError = new NodeError("Channel not found");
+    const throwenError = new BalancesUnavailableError("Channel not found");
 
     // Act
     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(errAsync(throwenError));
 
     // Assert
-    expect(await (await accountsRepositoryMocks.getServiceFactory().getBalances())._unsafeUnwrapErr()).toStrictEqual(
+    expect((await accountsRepositoryMocks.getServiceFactory().getBalances())._unsafeUnwrapErr()).toStrictEqual(
       throwenError,
     );
   });
@@ -186,7 +190,7 @@ describe("AccountsRepository tests", () => {
 
     // Assert
     expect(
-      await (await accountsRepositoryMocks.getServiceFactory().getBalanceByAsset(byAssetAddress))._unsafeUnwrap(),
+      (await accountsRepositoryMocks.getServiceFactory().getBalanceByAsset(byAssetAddress))._unsafeUnwrap(),
     ).toEqual(assetBalance);
   });
 
@@ -203,8 +207,11 @@ describe("AccountsRepository tests", () => {
     const browserNode = new BrowserNode({
       routerPublicIdentifier,
       supportedChains,
+      chainProviders: {
+        [supportedChains[0]]: "asdad",
+      },
     });
-    const depositRes: Result<NodeResponses.Deposit, null> = Result.ok({
+    const depositRes: Result<NodeResponses.Deposit, Error> = Result.ok({
       channelAddress: routerChannelAddress,
     });
 
@@ -221,7 +228,7 @@ describe("AccountsRepository tests", () => {
 
     // Assert
     expect(
-      await (await accountsRepositoryMocks.getServiceFactory().depositFunds(assetAddress, amount))._unsafeUnwrap(),
+      (await accountsRepositoryMocks.getServiceFactory().depositFunds(assetAddress, amount))._unsafeUnwrap(),
     ).toEqual(null);
   });
 
@@ -239,8 +246,11 @@ describe("AccountsRepository tests", () => {
     const browserNode = new BrowserNode({
       routerPublicIdentifier,
       supportedChains,
+      chainProviders: {
+        [supportedChains[0]]: "asdad",
+      },
     });
-    const depositRes: Result<NodeResponses.Deposit, null> = Result.ok({
+    const depositRes: Result<NodeResponses.Deposit, Error> = Result.ok({
       channelAddress: depositChannelAddress,
     });
     const throwenError = new Error("Something has gone horribly wrong!");
@@ -258,7 +268,7 @@ describe("AccountsRepository tests", () => {
 
     // Assert
     expect(
-      await (await accountsRepositoryMocks.getServiceFactory().depositFunds(assetAddress, amount))._unsafeUnwrapErr(),
+      (await accountsRepositoryMocks.getServiceFactory().depositFunds(assetAddress, amount))._unsafeUnwrapErr(),
     ).toStrictEqual(throwenError);
   });
 
@@ -274,8 +284,11 @@ describe("AccountsRepository tests", () => {
     const browserNode = new BrowserNode({
       routerPublicIdentifier,
       supportedChains,
+      chainProviders: {
+        [supportedChains[0]]: "asdad",
+      },
     });
-    const withdrawRes: Result<NodeResponses.Withdraw, null> = Result.ok({
+    const withdrawRes: Result<NodeResponses.Withdraw, Error> = Result.ok({
       channelAddress: routerChannelAddress,
       transferId: mockUtils.generateRandomPaymentId(),
     });
@@ -296,10 +309,10 @@ describe("AccountsRepository tests", () => {
 
     // Assert
     expect(
-      await (
+      (
         await accountsRepositoryMocks.getServiceFactory().withdrawFunds(assetAddress, amount, destinationAddress)
       )._unsafeUnwrap(),
-    ).toEqual(null);
+    ).toEqual(undefined);
   });
 
   test("Should withdrawFunds throw error if withdraw fails", async () => {
@@ -314,9 +327,12 @@ describe("AccountsRepository tests", () => {
     const browserNode = new BrowserNode({
       routerPublicIdentifier,
       supportedChains,
+      chainProviders: {
+        [supportedChains[0]]: "asdad",
+      },
     });
-    const throwenError = new NodeError("Timeout");
-    const withdrawRes: Result<NodeResponses.Withdraw, NodeError> = Result.fail(throwenError);
+    const throwenError = new RouterChannelUnknownError("Timeout");
+    const withdrawRes: Result<NodeResponses.Withdraw, RouterChannelUnknownError> = Result.fail(throwenError);
 
     // Act
     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(browserNode));
@@ -334,7 +350,7 @@ describe("AccountsRepository tests", () => {
 
     // Assert
     expect(
-      await (
+      (
         await accountsRepositoryMocks.getServiceFactory().withdrawFunds(assetAddress, amount, destinationAddress)
       )._unsafeUnwrapErr(),
     ).toStrictEqual(throwenError);
@@ -352,8 +368,8 @@ describe("AccountsRepository tests", () => {
     when(accountsRepositoryMocks.blockchainProvider.getSigner()).thenReturn(okAsync(signer));
 
     // Assert
-    expect(await (await accountsRepositoryMocks.getServiceFactory().mintTestToken(amount, to))._unsafeUnwrap()).toEqual(
-      null,
+    expect((await accountsRepositoryMocks.getServiceFactory().mintTestToken(amount, to))._unsafeUnwrap()).toEqual(
+      undefined,
     );
   });
 
@@ -368,8 +384,8 @@ describe("AccountsRepository tests", () => {
     when(accountsRepositoryMocks.blockchainProvider.getSigner()).thenReturn(errAsync(throwenError));
 
     // Assert
-    expect(
-      await (await accountsRepositoryMocks.getServiceFactory().mintTestToken(amount, to))._unsafeUnwrapErr(),
-    ).toEqual(throwenError);
+    expect((await accountsRepositoryMocks.getServiceFactory().mintTestToken(amount, to))._unsafeUnwrapErr()).toEqual(
+      throwenError,
+    );
   });
 });

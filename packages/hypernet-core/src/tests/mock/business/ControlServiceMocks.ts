@@ -1,4 +1,4 @@
-import { mock, instance } from "ts-mockito";
+/* import { mock, instance } from "ts-mockito";
 
 import { IControlService } from "@interfaces/business";
 import { HypernetContext } from "@interfaces/objects";
@@ -20,4 +20,4 @@ export default class ControlServiceMocks {
   public getServiceFactory(): IControlService {
     return new ControlService(this.getContextProviderFactory());
   }
-}
+} */

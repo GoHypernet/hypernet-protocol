@@ -10,6 +10,8 @@ import { INodeService } from "@connext/vector-types";
 jest.mock("@connext/vector-browser-node");
 
 BrowserNode.prototype.getStateChannel = jest.fn();
+BrowserNode.prototype.reconcileDeposit = jest.fn();
+BrowserNode.prototype.withdraw = jest.fn();
 
 export default class AccountsRepositoryMocks {
   public blockchainProvider: IBlockchainProvider = mock<IBlockchainProvider>();

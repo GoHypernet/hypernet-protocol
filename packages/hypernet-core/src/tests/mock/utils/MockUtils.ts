@@ -29,6 +29,10 @@ class MockUtils {
     return "0x" + randomstring.generate({ length: 64, charset: "hex" });
   }
 
+  public generateRandomPaymentToken(): string {
+    return "0x" + randomstring.generate({ length: 40, charset: "hex" });
+  }
+
   public generateMockProvider(options?: Ganache.IProviderOptions): providers.Web3Provider {
     return new MockProvider(
       options
