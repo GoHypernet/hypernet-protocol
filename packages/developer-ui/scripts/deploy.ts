@@ -12,8 +12,7 @@ const transfers = ["Insurance", "Parameterized", "Message"];
 
 const MIN_GAS_LIMIT = BigNumber.from(500_000);
 
-const localRegistryAddress = "0x9FBDa871d559710256a2502A2517b794B482Db40"
-
+const localRegistryAddress = "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F"
 const hash = (input: string): string =>
   keccak256(`0x${input.replace(/^0x/, "")}`);
 
@@ -131,26 +130,13 @@ async function main() {
   console.log(`Parameterized Registry Info: ${parameterizedRegistryInfo}`)
   console.log(`MessageTransfer Registry Info: ${messageRegistryInfo}`)
 
-  const insuranceInfoCleaned = {
-    name: insuranceRegistryInfo.name,
-    definition: insuranceRegistryInfo.definition,
-    resolverEncoding: tidy(insuranceRegistryInfo.resolverEncoding),
-    stateEncoding: tidy(insuranceRegistryInfo.stateEncoding),
-    encodedCancel: tidy(insuranceRegistryInfo.encodedCancel)
-  }
-
-  console.log(insuranceInfoCleaned)
-
-  const insuranceTx = await registry.addTransferDefinition(insuranceInfoCleaned);
-  /*const parameterizedTx = await registry.addTransferDefinition(parameterizedRegistryInfo);
+  const insuranceTx = await registry.addTransferDefinition(insuranceRegistryInfo);
+  const parameterizedTx = await registry.addTransferDefinition(parameterizedRegistryInfo);
   const messageTx = await registry.addTransferDefinition(messageRegistryInfo);
-  */
-  const insuranceReceipt = await insuranceTx.wait()
-  //const parameterizedReceipt = await parameterizedTx.wait()
-  //const messageReceipt = await messageTx.wait()
 
-  //console.log(`Insurance registration status: ${JSON.stringify(insuranceReceipt)}`)
-  //console.log(`Parameterzied registration status: ${JSON.stringify(parameterizedReceipt)}`)
+  const insuranceReceipt = await insuranceTx.wait()
+  const parameterizedReceipt = await parameterizedTx.wait()
+  const messageReceipt = await messageTx.wait()
 
   console.log('Transfer registration complete.')
 }
