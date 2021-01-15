@@ -1,40 +1,71 @@
-const path = require('path');
-const HWP = require('html-webpack-plugin');
+const path = require("path");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
+
+const configFile = path.resolve(__dirname, "./tsconfig.json");
 
 module.exports = {
-  mode: 'production',
-
-  // Enable sourcemaps for debugging webpack's output.
-  devtool: 'source-map',
-
-  resolve: {
-    extensions: ['.ts', '.tsx', '.js'],
+  context: path.resolve(__dirname),
+  entry: path.join(__dirname, "src/index.ts"),
+  output: {
+    filename: "index.js",
+    path: path.join(__dirname, "/dist"),
   },
-
+  mode: "development",
   module: {
     rules: [
       {
-        test: /\.ts(x?)$/,
+        test: /\.tsx?$/,
+        loader: "ts-loader",
         exclude: /node_modules/,
-        use: [
-          {
-            loader: 'ts-loader',
-          },
-        ],
+        options: {
+          configFile,
+          projectReferences: true
+        }
       },
-      // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
       {
-        enforce: 'pre',
-        test: /\.js$/,
-        loader: 'source-map-loader',
+        enforce: "pre",
+        test: /\.html$/,
+        exclude: path.join(__dirname, "wallet_dist/index.html"),
+        loader: "html-loader",
+      },
+      {
+        test: /\.css$/,
+        use: ['style-loader', 'css-loader']
+      },
+      {
+        test: /\.(png|jpe?g|gif)$/i,
+        loader: 'file-loader',
+        options: {
+            name: '[path][name].[ext]',
+        },
       },
     ],
   },
+  resolve: {
+    extensions: [".tsx", ".ts", ".js", ".html"],
+    plugins: [new TsconfigPathsPlugin({})],
+    alias: {
+      // These are copied from hypernet-core, because for local compilation
+      // we are actually compiling hypernet-core
+      "@interfaces": path.resolve(__dirname, "../hypernet-core/src/interfaces"),
+      "@implementations": path.resolve(__dirname, "../hypernet-core/src/implementations"),
+    },
+  },
+  devtool: "inline-source-map",
+  devServer: {
+    contentBase: path.join(__dirname, "src"),
+    liveReload: true,
+    compress: true,
+    publicPath: "/",
+    port: 8080,
+  },
   plugins: [
-    new HWP({
-      template: path.resolve(__dirname, 'index.html'),
-      filename: 'index.html',
-      inject: 'body',
-    }),
+    new CleanWebpackPlugin(),
   ],
+  node: {
+    net: "empty",
+    tls: "empty",
+    fs: "empty",
+  },
 };

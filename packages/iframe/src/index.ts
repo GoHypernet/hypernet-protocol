@@ -1,10 +1,28 @@
-import {IHypernetCore, HypernetCore} from "@hypernetlabs/hypernet-core";
+import {IHypernetCore, HypernetCore, EBlockchainNetwork} from "@hypernetlabs/hypernet-core";
+import * as Postmate from "postmate";
 
 // Instantiate the hypernet core.
-const core: IHypernetCore = new HypernetCore();
+const core: IHypernetCore = new HypernetCore(EBlockchainNetwork.Localhost);
+let parent: Postmate.ChildAPI | undefined;
 
-// Fire up a JSON-RPC listener
+// Fire up the Postmate model, and wrap up the core as the model
+const handshake = new Postmate.Model({
+    initialize: async (account: string) => {
+        const result = await core.initialize(account);
 
-// Wrap up the core with the listener.
+        if (parent != null) {
+            parent.emit("initialized", result);
+        }
+    },
+    test: () => {return "Hello world!";},
+});
+
+handshake.then(initializedParent => {
+    parent = initializedParent;
+    parent.emit("eventName", "This is an event");
+
+});
+
+
 
 // Load connectors
