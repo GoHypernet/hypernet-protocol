@@ -1,7 +1,8 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import { TransactionList } from "@hypernetlabs/web-ui";
+import { ggs } from "@hypernetlabs/web-ui";
+console.log("ggs: ", ggs);
 import MainContainer from "../containers/MainContainer";
 import Authentication from "../screens/Authentication";
 import { IHypernetWebIntegration } from "./HypernetWebIntegration.interface";
@@ -78,10 +79,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   public renderTransactionList(selector: string = TRANSACTION_LIST_ID_SELECTOR) {
-    ReactDOM.render(
-      this.bootstrapComponent(<TransactionList transactionDataList={[]} />),
-      this.generateDomElement(selector),
-    );
+    ReactDOM.render(this.bootstrapComponent(<div>asddd: {ggs}</div>), this.generateDomElement(selector));
   }
 }
 

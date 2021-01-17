@@ -58,12 +58,7 @@ module.exports = {
     liveReload: true,
     compress: true,
     publicPath: "/",
-    port: 5001,
+    port: 5000,
   },
   plugins: [new CleanWebpackPlugin()],
-  node: {
-    net: "empty",
-    tls: "empty",
-    fs: "empty",
-  },
 };
