@@ -1,19 +1,17 @@
 {
   "extends": "../../tsconfig.build.json",
   "compilerOptions": {
-    "jsx": "react",
-    "rootDirs": ["./src", "../web-ui/src/*"],
-    "baseUrl": "./",
     "outDir": "./dist",
-    "target": "es5",
-    "module": "es6",
-    "noImplicitAny": true,
-    "allowSyntheticDefaultImports": true,
+    "composite": true,
+    "rootDir": "../",
+    "target": "es6",
+    "jsx": "react",
+    "baseUrl": "./",
     "paths": {
-      "@hypernetlabs/hypernet-core": ["../hypernet-core/src/*"],
-      "@hypernetlabs/web-ui": ["../web-ui/src/*"]
+      "@hypernetlabs/hypernet-core": ["../hypernet-core/src"],
+      "@hypernetlabs/web-ui": ["../web-ui/src"]
     }
   },
-  "include": ["./src/**/*", "./typings/**/*", "**/__tests__/**/*"],
+  "include": ["./src/**/*", "./typings/**/*", "**/__tests__/**/*", "../web-ui/src", "../hypernet-core/src"],
   "references": [{ "path": "../hypernet-core/tsconfig.json" }, { "path": "../web-ui/tsconfig.json" }]
 }

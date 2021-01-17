@@ -1,5 +1,5 @@
 const path = require("path");
-/* const HtmlWebpackPlugin = require("html-webpack-plugin"); */
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   mode: "none",
@@ -8,7 +8,13 @@ module.exports = {
   },
   target: "web",
   resolve: {
-    extensions: [".ts", ".tsx", ".js"],
+    extensions: [".tsx", ".ts", ".js", ".html"],
+    alias: {
+      // These are copied from hypernet-core, because for local compilation
+      // we are actually compiling hypernet-core
+      "@interfaces": path.resolve(__dirname, "../hypernet-core/src/interfaces"),
+      "@implementations": path.resolve(__dirname, "../hypernet-core/src/implementations"),
+    },
   },
   module: {
     rules: [
@@ -23,9 +29,9 @@ module.exports = {
     filename: "[name].js",
     path: path.resolve(__dirname, "dist"),
   },
-  /* plugins: [
+  plugins: [
     new HtmlWebpackPlugin({
-      template: "./src/index.html",
+      template: path.join(__dirname, "index.html"),
     }),
   ],
   devServer: {
@@ -34,5 +40,5 @@ module.exports = {
     compress: true,
     publicPath: "/",
     port: 5001,
-  }, */
+  },
 };

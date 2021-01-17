@@ -20,8 +20,8 @@ module.exports = {
         exclude: /node_modules/,
         options: {
           configFile,
-          projectReferences: true
-        }
+          projectReferences: true,
+        },
       },
       {
         enforce: "pre",
@@ -31,13 +31,13 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader']
+        use: ["style-loader", "css-loader"],
       },
       {
         test: /\.(png|jpe?g|gif)$/i,
-        loader: 'file-loader',
+        loader: "file-loader",
         options: {
-            name: '[path][name].[ext]',
+          name: "[path][name].[ext]",
         },
       },
     ],
@@ -58,11 +58,9 @@ module.exports = {
     liveReload: true,
     compress: true,
     publicPath: "/",
-    port: 8080,
+    port: 5001,
   },
-  plugins: [
-    new CleanWebpackPlugin(),
-  ],
+  plugins: [new CleanWebpackPlugin()],
   node: {
     net: "empty",
     tls: "empty",
