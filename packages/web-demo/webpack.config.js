@@ -5,7 +5,6 @@ const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const configFile = path.resolve(__dirname, "./tsconfig.json");
 
 module.exports = {
-  context: path.resolve(__dirname),
   entry: path.join(__dirname, "src/index.ts"),
   output: {
     filename: "index.js",
@@ -26,7 +25,6 @@ module.exports = {
       {
         enforce: "pre",
         test: /\.html$/,
-        exclude: path.join(__dirname, "wallet_dist/index.html"),
         loader: "html-loader",
       },
       {
@@ -44,13 +42,13 @@ module.exports = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".html"],
-    plugins: [new TsconfigPathsPlugin({})],
     alias: {
       // These are copied from hypernet-core, because for local compilation
       // we are actually compiling hypernet-core
       "@interfaces": path.resolve(__dirname, "../hypernet-core/src/interfaces"),
       "@implementations": path.resolve(__dirname, "../hypernet-core/src/implementations"),
     },
+    plugins: [new TsconfigPathsPlugin({})],
   },
   devtool: "inline-source-map",
   devServer: {
@@ -58,7 +56,7 @@ module.exports = {
     liveReload: true,
     compress: true,
     publicPath: "/",
-    port: 5000,
+    port: 5003,
   },
   plugins: [new CleanWebpackPlugin()],
 };

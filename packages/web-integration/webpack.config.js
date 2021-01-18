@@ -1,5 +1,7 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const configFile = path.resolve(__dirname, "./tsconfig.json");
 
 module.exports = {
   mode: "none",
@@ -20,8 +22,12 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: "ts-loader",
+        loader: "ts-loader",
         exclude: "/node_modules/",
+        options: {
+          configFile,
+          projectReferences: true,
+        }
       },
     ],
   },
@@ -33,6 +39,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "index.html"),
     }),
+    new CleanWebpackPlugin()
   ],
   devServer: {
     contentBase: path.join(__dirname, "src"),

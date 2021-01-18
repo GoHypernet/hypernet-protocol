@@ -8,5 +8,9 @@
     "jsx": "react",
     "baseUrl": "./"
   },
-  "include": ["./src/**/*", "./typings/**/*", "**/__tests__/**/*"]
+  "include": [
+    "./src/**/*",
+    "./typings/**/*",
+    "**/__tests__/**/*"
+  ]
 }
