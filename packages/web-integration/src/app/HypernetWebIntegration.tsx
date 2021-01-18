@@ -16,7 +16,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   //protected proxy: IHypernetIFrameProxy;
 
   protected constructor(iframeURL?: string) {
-    // Get whatever we want from client window object
     // Initialize hypernet invisible iframe
 
     // Create an iframe
@@ -24,6 +23,10 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     this.iframe = document.createElement("iframe");
     this.iframe.id = "__hypernet-protocol-iframe__";
     this.iframe.src = this.iframeURL;
+    this.iframe.width = "0px";
+    this.iframe.height = "0px";
+    this.iframe.tabIndex = -1;
+    this.iframe.setAttribute("style", "position: absolute; border: 0; border: none;");
 
     // Attach it to the body
     document.body.appendChild(this.iframe);
@@ -78,10 +81,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   public renderTransactionList(selector: string = TRANSACTION_LIST_ID_SELECTOR) {
-    ReactDOM.render(
-      this.bootstrapComponent(<TransactionList transactionDataList={[]} />),
-      this.generateDomElement(selector),
-    );
+    ReactDOM.render(this.bootstrapComponent(<TransactionList />), this.generateDomElement(selector));
   }
 }
 
