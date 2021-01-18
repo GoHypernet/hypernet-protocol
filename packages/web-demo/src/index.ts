@@ -1,8 +1,11 @@
-import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+/* import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration"; */
 
-const client: IHypernetWebIntegration = new HypernetWebIntegration();
+import { webUiVar } from "@hypernetlabs/web-ui";
+console.log("webUiVar 123: ", webUiVar);
+
+/* const client: IHypernetWebIntegration = new HypernetWebIntegration();
 
 client.renderAuthentication();
 client.renderTransactionList();
 
-declare let window: any;
+declare let window: any; */

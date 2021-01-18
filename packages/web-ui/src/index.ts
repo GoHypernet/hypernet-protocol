@@ -1,2 +1,2 @@
 /* export { default as TransactionList } from './components/TransactionList'; */
-export const ggs = 'asdfffffff';
+export const webUiVar = 'webUiVar variable working ';
