@@ -1,8 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import { webUiVar } from "@hypernetlabs/web-ui";
-console.log("webUiVar: ", webUiVar);
+import { TransactionList } from "@hypernetlabs/web-ui";
 import MainContainer from "../containers/MainContainer";
 import Authentication from "../screens/Authentication";
 import { IHypernetWebIntegration } from "./HypernetWebIntegration.interface";
@@ -24,8 +23,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     this.iframe = document.createElement("iframe");
     this.iframe.id = "__hypernet-protocol-iframe__";
     this.iframe.src = this.iframeURL;
-    this.iframe.width = '0px';
-    this.iframe.height = '0px';
+    this.iframe.width = "0px";
+    this.iframe.height = "0px";
     this.iframe.tabIndex = -1;
     this.iframe.setAttribute("style", "position: absolute; border: 0; border: none;");
 
@@ -82,7 +81,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   public renderTransactionList(selector: string = TRANSACTION_LIST_ID_SELECTOR) {
-    ReactDOM.render(this.bootstrapComponent(<div>variable from web ui: {webUiVar}</div>), this.generateDomElement(selector));
+    ReactDOM.render(this.bootstrapComponent(<TransactionList />), this.generateDomElement(selector));
   }
 }
 
