@@ -99,6 +99,8 @@ export class HypernetCore implements IHypernetCore {
 
   protected _initializeResult: ResultAsync<void, LogicalError> | null;
   protected _initialized: boolean;
+  protected _initializePromise: Promise<void>;
+  protected _initializePromiseResolve: (() => void) | null;
   protected _inControl: boolean;
 
   /**
@@ -207,8 +209,14 @@ export class HypernetCore implements IHypernetCore {
       this.logUtils,
     );
 
+    // This whole rigamarole is to make sure it can only be initialized a single time, and that you can call waitInitialized()
+    // before the call to initialize() is made
     this._initializeResult = null;
+    this._initializePromiseResolve = null;
     this._initialized = false;
+    this._initializePromise = new Promise((resolve) => {
+      this._initializePromiseResolve = resolve;
+    });
   }
 
   /**
@@ -219,11 +227,8 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public waitInitialized(): ResultAsync<void, LogicalError> {
-    if (this._initializeResult != null) {
-      return this._initializeResult;
-    } else {
-      return errAsync(new LogicalError("Core is not currently being initialized!"));
-    }
+    return ResultAsync.fromPromise(this._initializePromise, 
+      (e) => {return e as LogicalError;})
   }
 
   /**
@@ -437,6 +442,10 @@ export class HypernetCore implements IHypernetCore {
         return this.vectorAPIListener.setup();
       })
       .map(() => {
+        if (this._initializePromiseResolve != null) {
+          this._initializePromiseResolve();
+        }
+        
         this._initialized = true;
       });
 

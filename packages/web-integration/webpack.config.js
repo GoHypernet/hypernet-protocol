@@ -48,4 +48,9 @@ module.exports = {
     publicPath: "/",
     port: 5001,
   },
+  node: {
+    net: "empty",
+    tls: "empty",
+    fs: "empty",
+  },
 };

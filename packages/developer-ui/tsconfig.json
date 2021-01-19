@@ -6,7 +6,9 @@
         "rootDir": "./src",
         "baseUrl": "./",
         "paths": {
-            "@hypernetlabs/hypernet-core": ["../hypernet-core/src"]
+            "@hypernetlabs/hypernet-core": [
+                "../hypernet-core/src"
+            ]
         },
     },
     "include": [
@@ -14,5 +16,9 @@
         "./typings/**/*",
         "**/__tests__/**/*"
     ],
-    "references": [{"path": "../hypernet-core/tsconfig.json"}]
+    "references": [
+        {
+            "path": "../hypernet-core/tsconfig.json"
+        }
+    ]
 }
