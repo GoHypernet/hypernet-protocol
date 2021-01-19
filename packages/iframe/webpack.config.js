@@ -26,7 +26,6 @@ module.exports = {
       {
         enforce: "pre",
         test: /\.html$/,
-        exclude: path.join(__dirname, "wallet_dist/index.html"),
         loader: "html-loader",
       },
       {
@@ -58,7 +57,7 @@ module.exports = {
     liveReload: true,
     compress: true,
     publicPath: "/",
-    port: 8080,
+    port: 8090,
   },
   plugins: [
     new CleanWebpackPlugin(),
