@@ -11,7 +11,7 @@ export default class DevelopmentServiceMocks {
     return instance(this.accountRepository);
   }
 
-  public getServiceFactory(): IDevelopmentService {
+  public factoryService(): IDevelopmentService {
     return new DevelopmentService(this.getAccountRepositoryFactory());
   }
 }

@@ -17,7 +17,7 @@ export default class LinkServiceMocks {
     return instance(this.hypernetLink);
   }
 
-  public getServiceFactory(): ILinkService {
+  public factoryService(): ILinkService {
     return new LinkService(this.getLinkRepositoryFactory());
   }
 }

@@ -41,7 +41,7 @@ export default class AccountsRepositoryMocks {
     return browserNodeInstance;
   }
 
-  public getServiceFactory(): IAccountsRepository {
+  public factoryService(): IAccountsRepository {
     return new AccountsRepository(
       this.getBlockchainProviderFactory(),
       this.getVectorUtilsFactory(),

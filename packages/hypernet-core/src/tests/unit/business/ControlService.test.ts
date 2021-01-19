@@ -11,7 +11,7 @@ describe("ControlService tests", () => {
     const hypernetContextInstance = controlServiceMock.getHypernetContextFactory();
     hypernetContextInstance.account = "account";
 
-    const controlService = controlServiceMock.getServiceFactory();
+    const controlService = controlServiceMock.factoryService();
 
     // Act
     when(controlServiceMock.contextProvider.getContext()).thenResolve(hypernetContextInstance);

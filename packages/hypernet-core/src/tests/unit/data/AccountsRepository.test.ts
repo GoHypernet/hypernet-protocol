@@ -31,11 +31,10 @@ describe("AccountsRepository tests", () => {
     });
     browserNode.publicIdentifier = publicIdentifier;
 
-    // Act
     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(browserNode));
 
     // Assert
-    expect((await accountsRepositoryMocks.getServiceFactory().getPublicIdentifier())._unsafeUnwrap()).toStrictEqual(
+    expect((await accountsRepositoryMocks.factoryService().getPublicIdentifier())._unsafeUnwrap()).toStrictEqual(
       publicIdentifier,
     );
   });
@@ -45,11 +44,10 @@ describe("AccountsRepository tests", () => {
     const accountsRepositoryMocks = new AccountsRepositoryMocks();
     const err = new Error();
 
-    // Act
     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(errAsync(err));
 
     // Assert
-    expect((await accountsRepositoryMocks.getServiceFactory().getPublicIdentifier())._unsafeUnwrapErr()).toStrictEqual(
+    expect((await accountsRepositoryMocks.factoryService().getPublicIdentifier())._unsafeUnwrapErr()).toStrictEqual(
       err,
     );
   });
@@ -60,11 +58,10 @@ describe("AccountsRepository tests", () => {
     const provider = mockUtils.generateMockProvider();
     const accounts = await provider.listAccounts();
 
-    // Act
     when(accountsRepositoryMocks.blockchainProvider.getProvider()).thenReturn(okAsync(provider));
 
     // Assert
-    expect((await accountsRepositoryMocks.getServiceFactory().getAccounts())._unsafeUnwrap()).toStrictEqual(accounts);
+    expect((await accountsRepositoryMocks.factoryService().getAccounts())._unsafeUnwrap()).toStrictEqual(accounts);
   });
 
   test("Should getBalances return balances", async () => {
@@ -102,7 +99,6 @@ describe("AccountsRepository tests", () => {
       ],
     };
 
-    // Act
     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(
       okAsync(accountsRepositoryMocks.getBrowserNodeFactory()),
@@ -112,7 +108,7 @@ describe("AccountsRepository tests", () => {
       .mockResolvedValue(stateChannelRes);
 
     // Assert
-    expect((await accountsRepositoryMocks.getServiceFactory().getBalances())._unsafeUnwrap()).toEqual(balances);
+    expect((await accountsRepositoryMocks.factoryService().getBalances())._unsafeUnwrap()).toEqual(balances);
   });
 
   test("Should getBalances throw error when getRouterChannelAddress fails", async () => {
@@ -120,13 +116,12 @@ describe("AccountsRepository tests", () => {
     const accountsRepositoryMocks = new AccountsRepositoryMocks();
     const throwenError = new RouterChannelUnknownError();
 
-    // Act
     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(
       errAsync(new RouterChannelUnknownError()),
     );
 
     // Assert
-    expect((await accountsRepositoryMocks.getServiceFactory().getBalances())._unsafeUnwrapErr()).toStrictEqual(
+    expect((await accountsRepositoryMocks.factoryService().getBalances())._unsafeUnwrapErr()).toStrictEqual(
       throwenError,
     );
   });
@@ -137,12 +132,11 @@ describe("AccountsRepository tests", () => {
     const routerChannelAddress = mockUtils.generateRandomEtherAdress();
     const throwenError = new BalancesUnavailableError("Channel not found");
 
-    // Act
     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(errAsync(throwenError));
 
     // Assert
-    expect((await accountsRepositoryMocks.getServiceFactory().getBalances())._unsafeUnwrapErr()).toStrictEqual(
+    expect((await accountsRepositoryMocks.factoryService().getBalances())._unsafeUnwrapErr()).toStrictEqual(
       throwenError,
     );
   });
@@ -179,7 +173,6 @@ describe("AccountsRepository tests", () => {
       BigNumber.from(channelStateMock.balances[0].amount[1]),
     );
 
-    // Act
     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(
       okAsync(accountsRepositoryMocks.getBrowserNodeFactory()),
@@ -189,9 +182,9 @@ describe("AccountsRepository tests", () => {
       .mockResolvedValue(stateChannelRes);
 
     // Assert
-    expect(
-      (await accountsRepositoryMocks.getServiceFactory().getBalanceByAsset(byAssetAddress))._unsafeUnwrap(),
-    ).toEqual(assetBalance);
+    expect((await accountsRepositoryMocks.factoryService().getBalanceByAsset(byAssetAddress))._unsafeUnwrap()).toEqual(
+      assetBalance,
+    );
   });
 
   test("Should depositFunds without errors", async () => {
@@ -215,7 +208,6 @@ describe("AccountsRepository tests", () => {
       channelAddress: routerChannelAddress,
     });
 
-    // Act
     when(accountsRepositoryMocks.blockchainProvider.getSigner()).thenReturn(okAsync(signer));
     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(browserNode));
@@ -227,9 +219,9 @@ describe("AccountsRepository tests", () => {
       .mockResolvedValue(depositRes);
 
     // Assert
-    expect(
-      (await accountsRepositoryMocks.getServiceFactory().depositFunds(assetAddress, amount))._unsafeUnwrap(),
-    ).toEqual(null);
+    expect((await accountsRepositoryMocks.factoryService().depositFunds(assetAddress, amount))._unsafeUnwrap()).toEqual(
+      null,
+    );
   });
 
   test("Should depositFunds throw error when deposit channelAddress is different from routerChannelAddress", async () => {
@@ -255,7 +247,6 @@ describe("AccountsRepository tests", () => {
     });
     const throwenError = new Error("Something has gone horribly wrong!");
 
-    // Act
     when(accountsRepositoryMocks.blockchainProvider.getSigner()).thenReturn(okAsync(signer));
     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(browserNode));
@@ -268,7 +259,7 @@ describe("AccountsRepository tests", () => {
 
     // Assert
     expect(
-      (await accountsRepositoryMocks.getServiceFactory().depositFunds(assetAddress, amount))._unsafeUnwrapErr(),
+      (await accountsRepositoryMocks.factoryService().depositFunds(assetAddress, amount))._unsafeUnwrapErr(),
     ).toStrictEqual(throwenError);
   });
 
@@ -293,7 +284,6 @@ describe("AccountsRepository tests", () => {
       transferId: mockUtils.generateRandomPaymentId(),
     });
 
-    // Act
     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(browserNode));
     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
 
@@ -310,7 +300,7 @@ describe("AccountsRepository tests", () => {
     // Assert
     expect(
       (
-        await accountsRepositoryMocks.getServiceFactory().withdrawFunds(assetAddress, amount, destinationAddress)
+        await accountsRepositoryMocks.factoryService().withdrawFunds(assetAddress, amount, destinationAddress)
       )._unsafeUnwrap(),
     ).toEqual(undefined);
   });
@@ -334,7 +324,6 @@ describe("AccountsRepository tests", () => {
     const throwenError = new RouterChannelUnknownError("Timeout");
     const withdrawRes: Result<NodeResponses.Withdraw, RouterChannelUnknownError> = Result.fail(throwenError);
 
-    // Act
     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(browserNode));
     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
 
@@ -351,7 +340,7 @@ describe("AccountsRepository tests", () => {
     // Assert
     expect(
       (
-        await accountsRepositoryMocks.getServiceFactory().withdrawFunds(assetAddress, amount, destinationAddress)
+        await accountsRepositoryMocks.factoryService().withdrawFunds(assetAddress, amount, destinationAddress)
       )._unsafeUnwrapErr(),
     ).toStrictEqual(throwenError);
   });
@@ -364,11 +353,10 @@ describe("AccountsRepository tests", () => {
     const provider = mockUtils.generateMockProvider();
     const signer = await provider.getSigner();
 
-    // Act
     when(accountsRepositoryMocks.blockchainProvider.getSigner()).thenReturn(okAsync(signer));
 
     // Assert
-    expect((await accountsRepositoryMocks.getServiceFactory().mintTestToken(amount, to))._unsafeUnwrap()).toEqual(
+    expect((await accountsRepositoryMocks.factoryService().mintTestToken(amount, to))._unsafeUnwrap()).toEqual(
       undefined,
     );
   });
@@ -380,11 +368,10 @@ describe("AccountsRepository tests", () => {
     const to = mockUtils.generateRandomEtherAdress();
     const throwenError = new BlockchainUnavailableError();
 
-    // Act
     when(accountsRepositoryMocks.blockchainProvider.getSigner()).thenReturn(errAsync(throwenError));
 
     // Assert
-    expect((await accountsRepositoryMocks.getServiceFactory().mintTestToken(amount, to))._unsafeUnwrapErr()).toEqual(
+    expect((await accountsRepositoryMocks.factoryService().mintTestToken(amount, to))._unsafeUnwrapErr()).toEqual(
       throwenError,
     );
   });

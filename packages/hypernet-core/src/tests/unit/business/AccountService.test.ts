@@ -11,49 +11,58 @@ describe("AccountService tests", () => {
   test("Should getPublicIdentifier return publicIdentifier", async () => {
     // Arrange
     const accountServiceMock = new AccountServiceMocks();
+    const accountServiceFactory = accountServiceMock.factoryService();
     const publicIdentifier = mkPublicIdentifier();
 
-    // Act
     when(accountServiceMock.accountRepository.getPublicIdentifier()).thenReturn(okAsync(publicIdentifier));
 
+    // Act
+    const getPublicIdentifierResponse = await accountServiceFactory.getPublicIdentifier();
+
     // Assert
-    expect((await accountServiceMock.getServiceFactory().getPublicIdentifier())._unsafeUnwrap()).toStrictEqual(
-      publicIdentifier,
-    );
+    expect(getPublicIdentifierResponse.isErr()).toStrictEqual(false);
+    expect(getPublicIdentifierResponse._unsafeUnwrap()).toStrictEqual(publicIdentifier);
   });
 
   test("Should getAccounts return accounts", async () => {
     // Arrange
     const accountServiceMock = new AccountServiceMocks();
+    const accountServiceFactory = accountServiceMock.factoryService();
     const accounts = [mockUtils.generateRandomEtherAdress()];
 
-    // Act
     when(accountServiceMock.accountRepository.getAccounts()).thenReturn(okAsync(accounts));
 
+    // Act
+    const getAccountsResponse = await accountServiceFactory.getAccounts();
+
     // Assert
-    expect((await accountServiceMock.getServiceFactory().getAccounts())._unsafeUnwrap()).toStrictEqual(accounts);
+    expect(getAccountsResponse.isErr()).toStrictEqual(false);
+    expect(getAccountsResponse._unsafeUnwrap()).toStrictEqual(accounts);
   });
 
   test("Should getBalances return balances", async () => {
     // Arrange
     const accountServiceMock = new AccountServiceMocks();
+    const accountServiceFactory = accountServiceMock.factoryService();
     const assetAddress = mockUtils.generateRandomEtherAdress();
     const amount = BigNumber.from("42");
     const balances = new Balances([new AssetBalance(assetAddress, amount, amount, amount)]);
 
-    // Act
     when(accountServiceMock.accountRepository.getBalances()).thenReturn(okAsync(balances));
-    const serviceResponse = (await accountServiceMock.getServiceFactory().getBalances())._unsafeUnwrap();
+
+    // Act
+    const getBalancesResponse = await accountServiceFactory.getBalances();
 
     // Assert
-    expect(serviceResponse.assets[0].assetAddresss).toStrictEqual(assetAddress);
-    expect(serviceResponse.assets[0].totalAmount).toStrictEqual(amount);
+    expect(getBalancesResponse.isErr()).toStrictEqual(false);
+    expect(getBalancesResponse._unsafeUnwrap().assets[0].assetAddresss).toStrictEqual(assetAddress);
+    expect(getBalancesResponse._unsafeUnwrap().assets[0].totalAmount).toStrictEqual(amount);
   });
 
   test("Should depositFunds call accountRepository.depositFunds ones and return balances", async () => {
     // Arrange
     const accountServiceMock = new AccountServiceMocks();
-
+    const accountServiceFactory = accountServiceMock.factoryService();
     const assetAddress = mockUtils.generateRandomEtherAdress();
     const amount = BigNumber.from("42");
     const balances = new Balances([new AssetBalance(assetAddress, amount, amount, amount)]);
@@ -61,31 +70,30 @@ describe("AccountService tests", () => {
     const hypernetContext = accountServiceMock.getHypernetContextFactory();
     hypernetContext.onBalancesChanged = new Subject<Balances>();
 
-    // Act
     when(accountServiceMock.accountRepository.getBalances()).thenReturn(okAsync(balances));
     when(accountServiceMock.accountRepository.depositFunds(assetAddress, amount)).thenReturn(okAsync(null));
     when(accountServiceMock.initializedHypernetContext.onBalancesChanged).thenReturn(new Subject<Balances>());
     when(accountServiceMock.contextProvider.getContext()).thenReturn(okAsync(hypernetContext));
-    const depositFundsResponse = (
-      await accountServiceMock.getServiceFactory().depositFunds(assetAddress, amount)
-    )._unsafeUnwrap();
+
+    // Act
+    const depositFundsResponse = await accountServiceFactory.depositFunds(assetAddress, amount);
 
     // Assert
     verify(accountServiceMock.accountRepository.depositFunds(assetAddress, amount)).twice();
-    expect(depositFundsResponse.assets[0].assetAddresss).toStrictEqual(assetAddress);
-    expect(depositFundsResponse.assets[0].freeAmount).toStrictEqual(amount);
+    expect(depositFundsResponse.isErr()).toStrictEqual(false);
+    expect(depositFundsResponse._unsafeUnwrap().assets[0].assetAddresss).toStrictEqual(assetAddress);
+    expect(depositFundsResponse._unsafeUnwrap().assets[0].freeAmount).toStrictEqual(amount);
   });
 
   test("Should withdrawFunds call accountRepository.withdrawFunds ones and return balances", async () => {
     // Arrange
     const accountServiceMock = new AccountServiceMocks();
-
+    const accountServiceFactory = accountServiceMock.factoryService();
     const assetAddress = mockUtils.generateRandomEtherAdress();
     const destinationAddress = mockUtils.generateRandomEtherAdress();
     const amount = BigNumber.from("42");
     const balances = new Balances([new AssetBalance(assetAddress, amount, amount, amount)]);
 
-    // Act
     when(accountServiceMock.accountRepository.getBalances()).thenReturn(okAsync(balances));
     when(accountServiceMock.contextProvider.getInitializedContext()).thenReturn(
       okAsync(accountServiceMock.getInitializedHypernetContextFactory()),
@@ -96,13 +104,13 @@ describe("AccountService tests", () => {
     );
     when(accountServiceMock.initializedHypernetContext.onBalancesChanged).thenReturn(new Subject<Balances>());
 
-    const withdrawFundsResponse = (
-      await accountServiceMock.getServiceFactory().withdrawFunds(assetAddress, amount, destinationAddress)
-    )._unsafeUnwrap();
+    // Act
+    const withdrawFundsResponse = await accountServiceFactory.withdrawFunds(assetAddress, amount, destinationAddress);
 
     // Assert
     verify(accountServiceMock.accountRepository.withdrawFunds(assetAddress, amount, destinationAddress)).once();
-    expect(withdrawFundsResponse.assets[0].assetAddresss).toStrictEqual(assetAddress);
-    expect(withdrawFundsResponse.assets[0].freeAmount).toStrictEqual(amount);
+    expect(withdrawFundsResponse.isErr()).toStrictEqual(false);
+    expect(withdrawFundsResponse._unsafeUnwrap().assets[0].assetAddresss).toStrictEqual(assetAddress);
+    expect(withdrawFundsResponse._unsafeUnwrap().assets[0].freeAmount).toStrictEqual(amount);
   });
 });

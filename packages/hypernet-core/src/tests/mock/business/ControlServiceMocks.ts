@@ -17,7 +17,7 @@ export default class ControlServiceMocks {
     return instance(this.hypernetContext);
   }
 
-  public getServiceFactory(): IControlService {
+  public factoryService(): IControlService {
     return new ControlService(this.getContextProviderFactory());
   }
 } */

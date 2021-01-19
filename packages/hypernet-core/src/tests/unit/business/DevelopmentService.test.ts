@@ -12,11 +12,10 @@ describe("DevelopmentService tests", () => {
     const amount = BigNumber.from("42");
     const to = mockUtils.generateRandomEtherAdress();
 
-    // Act
     when(developmentServiceMock.accountRepository.mintTestToken(amount, to)).thenReturn(okAsync(undefined));
 
     // Assert
-    expect((await developmentServiceMock.getServiceFactory().mintTestToken(amount, to))._unsafeUnwrap()).toStrictEqual(
+    expect((await developmentServiceMock.factoryService().mintTestToken(amount, to))._unsafeUnwrap()).toStrictEqual(
       undefined,
     );
   });

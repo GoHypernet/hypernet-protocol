@@ -7,12 +7,12 @@ describe("LinkService tests", () => {
   test("Should getLinks return links without errors", async () => {
     // Arrange
     const linkServiceMock = new LinkServiceMocks();
-
-    // Act
     when(linkServiceMock.linkRepository.getHypernetLinks()).thenReturn(
       okAsync([linkServiceMock.getHypernetLinkFactory()]),
     );
-    const getLinksResponse = await linkServiceMock.getServiceFactory().getLinks();
+
+    // Act
+    const getLinksResponse = await linkServiceMock.factoryService().getLinks();
 
     // Assert
     verify(linkServiceMock.linkRepository.getHypernetLinks()).once();

@@ -33,7 +33,7 @@ export default class AccountServiceMocks {
     return instance(this.hypernetContext);
   }
 
-  public getServiceFactory(): IAccountService {
+  public factoryService(): IAccountService {
     return new AccountService(
       this.getAccountRepositoryFactory(),
       this.getContextProviderFactory(),
