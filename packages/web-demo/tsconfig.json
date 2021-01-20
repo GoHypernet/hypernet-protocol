@@ -3,6 +3,9 @@
   "compilerOptions": {
     "outDir": "./dist",
     "composite": true,
+    "noImplicitAny": false,
+    "lib": ["es5", "es6", "dom"],
+    "jsx": "react",
     "rootDir": "./src",
     "baseUrl": "./",
     "paths": {

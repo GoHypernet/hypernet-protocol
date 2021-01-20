@@ -5,7 +5,7 @@ const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const configFile = path.resolve(__dirname, "./tsconfig.json");
 
 module.exports = {
-  entry: path.join(__dirname, "src/index.ts"),
+  entry: path.join(__dirname, "src/index.tsx"),
   output: {
     filename: "index.js",
     path: path.join(__dirname, "/dist"),
@@ -14,29 +14,44 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
+        test: /\.(ts|tsx)$/,
         loader: "ts-loader",
-        exclude: /node_modules/,
         options: {
           configFile,
           projectReferences: true,
         },
       },
+      { enforce: "pre", test: /\.js$/, loader: "source-map-loader" },
       {
-        enforce: "pre",
-        test: /\.html$/,
-        loader: "html-loader",
+        test: /\.(s[ac]ss|css)$/i,
+        use: [
+          "style-loader",
+          "css-loader",
+          {
+            loader: "sass-loader",
+            options: {
+              sassOptions: {
+                includePaths: [path.resolve(__dirname, "node_modules")],
+              },
+            },
+          },
+        ],
       },
       {
-        test: /\.css$/,
-        use: ["style-loader", "css-loader"],
+        test: /\.(gif|png|jpe?g|svg)/,
+        use: [
+          "url-loader",
+          {
+            loader: "image-webpack-loader",
+            options: {
+              disable: false,
+            },
+          },
+        ],
       },
       {
-        test: /\.(png|jpe?g|gif)$/i,
-        loader: "file-loader",
-        options: {
-          name: "[path][name].[ext]",
-        },
+        test: /\.ttf$/,
+        use: ["file-loader"],
       },
     ],
   },
@@ -50,13 +65,22 @@ module.exports = {
     },
     plugins: [new TsconfigPathsPlugin({})],
   },
-  devtool: "inline-source-map",
+  devtool: "eval",
   devServer: {
     contentBase: path.join(__dirname, "src"),
-    liveReload: true,
-    compress: true,
-    publicPath: "/",
-    port: 5003,
+    port: 9000,
+    watchContentBase: true,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE< PATCH, OPTIONS",
+      "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization",
+    },
+    historyApiFallback: true,
   },
   plugins: [new CleanWebpackPlugin()],
+  node: {
+    net: "empty",
+    tls: "empty",
+    fs: "empty",
+  },
 };
