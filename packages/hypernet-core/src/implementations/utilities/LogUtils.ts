@@ -15,7 +15,7 @@ export class LogUtils implements ILogUtils {
     this.logger.info(message, optionalParams);
   }
   public log(message?: any, ...optionalParams: any[]): void {
-    this.logger.log(message, optionalParams);
+    this.logger.trace(message, optionalParams);
   }
   public warning(message?: any, ...optionalParams: any[]): void {
     this.logger.warn(message, optionalParams);

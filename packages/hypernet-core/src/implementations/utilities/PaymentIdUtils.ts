@@ -83,7 +83,7 @@ export class PaymentIdUtils implements IPaymentIdUtils {
    */
   public isValidPaymentId(paymentIdString: string): Result<boolean, InvalidParametersError> {
     const overallRegex = /^0x[0-9A-Fa-f]{64}$/;
-    return ok(!overallRegex.test(paymentIdString));
+    return ok(overallRegex.test(paymentIdString));
   }
 
   /**

@@ -19,6 +19,7 @@
     "test": "__tests__"
   },
   "devDependencies": {
+    "@types/randomstring": "^1.1.6",
     "@types/reflect-metadata": "^0.1.0",
     "@types/sjcl": "^1.0.29",
     "@types/uuid": "^8.3.0",
@@ -44,9 +45,11 @@
     "bignumber": "^1.1.0",
     "class-transformer": "^0.3.1",
     "ethers": "^5.0.17",
+    "factory.ts": "^0.5.1",
     "moment": "^2.27.0",
     "neverthrow": "^3.1.2",
     "pino": "^6.7.0",
+    "randomstring": "^1.1.5",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.6.2",
     "sjcl": "^1.0.8",
@@ -60,7 +63,8 @@
     "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
   },
   "scripts": {
-    "test": "jest",
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
     "build": "npm run clean && npm run compile",
     "clean": "",
     "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",

@@ -22,7 +22,7 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
           this.browserNode = new BrowserNode({
             logger: this.logUtils.getPino(),
             iframeSrc: config.iframeSource,
-            chainProviders: config.chainProviders
+            chainProviders: config.chainProviders,
           });
           return ResultAsync.fromPromise(this.browserNode.init(),
             (e) => { return e as NodeError; });

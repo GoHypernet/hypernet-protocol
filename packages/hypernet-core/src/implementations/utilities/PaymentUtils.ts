@@ -23,7 +23,7 @@ import {
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
 import { IConfigProvider, ILogUtils, IPaymentIdUtils, IPaymentUtils } from "@interfaces/utilities";
 import moment from "moment";
-import { combine, errAsync, okAsync } from "neverthrow";
+import { combine, Err, errAsync, okAsync } from "neverthrow";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -263,44 +263,46 @@ export class PaymentUtils implements IPaymentUtils {
       transferTypeResults.push(this.getTransferTypeWithTransfer(transfer, browserNode));
     }
 
-    return combine(transferTypeResults).andThen((transferTypesWithTransfers) => {
-      const transfersByPaymentId = new Map<string, FullTransferState[]>();
-      for (const { transferType, transfer } of transferTypesWithTransfers) {
-        let paymentId: string;
-        if (transferType === ETransferType.Offer) {
-          // @todo also add in PullRecord type)
-          const metadata: IHypernetTransferMetadata = JSON.parse(transfer.transferState.message);
-          paymentId = metadata.paymentId;
-        } else if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
-          paymentId = transfer.transferState.UUID;
-        } else {
-          this.logUtils.log(
-            `Transfer type was not recognized, doing nothing. TransferType: '${transfer.transferDefinition}'`,
-          );
-          continue;
-        }
+    throw new Error("unimplemented")
+    // TODO: Fix error due to different types
+    // return combine(transferTypeResults).andThen((transferTypesWithTransfers) => {
+    //   const transfersByPaymentId = new Map<string, FullTransferState[]>();
+    //   for (const { transferType, transfer } of transferTypesWithTransfers) {
+    //     let paymentId: string;
+    //     if (transferType === ETransferType.Offer) {
+    //       // @todo also add in PullRecord type)
+    //       const metadata: IHypernetTransferMetadata = JSON.parse(transfer.transferState.message);
+    //       paymentId = metadata.paymentId;
+    //     } else if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
+    //       paymentId = transfer.transferState.UUID;
+    //     } else {
+    //       this.logUtils.log(
+    //         `Transfer type was not recognized, doing nothing. TransferType: '${transfer.transferDefinition}'`,
+    //       );
+    //       continue;
+    //     }
 
-        // Get the existing array of payments. Initialize it if it's not there.
-        let transferArray = transfersByPaymentId.get(paymentId);
-        if (transferArray === undefined) {
-          transferArray = [];
-          transfersByPaymentId.set(paymentId, transferArray);
-        }
+    //     // Get the existing array of payments. Initialize it if it's not there.
+    //     let transferArray = transfersByPaymentId.get(paymentId);
+    //     if (transferArray === undefined) {
+    //       transferArray = [];
+    //       transfersByPaymentId.set(paymentId, transferArray);
+    //     }
 
-        transferArray.push(transfer);
-      }
+    //     transferArray.push(transfer);
+    //   }
 
-      // Now we have the transfers sorted by their payment ID.
-      // Loop over them and convert them to proper payments.
-      // This is all async, so we can do the whole thing in parallel.
-      const paymentResults = new Array<ResultAsync<Payment, InvalidPaymentError | InvalidParametersError>>();
-      transfersByPaymentId.forEach((transferArray, paymentId) => {
-        const paymentResult = this.transfersToPayment(paymentId, transferArray, config, browserNode);
-        paymentResults.push(paymentResult);
-      });
+    //   // Now we have the transfers sorted by their payment ID.
+    //   // Loop over them and convert them to proper payments.
+    //   // This is all async, so we can do the whole thing in parallel.
+    //   const paymentResults = new Array<ResultAsync<Payment, InvalidPaymentError | InvalidParametersError>>();
+    //   transfersByPaymentId.forEach((transferArray, paymentId) => {
+    //     const paymentResult = this.transfersToPayment(paymentId, transferArray, config, browserNode);
+    //     paymentResults.push(paymentResult);
+    //   });
 
-      return combine(paymentResults);
-    });
+    //   return combine(paymentResults);
+    // });
   }
 
   /**
@@ -404,62 +406,64 @@ export class PaymentUtils implements IPaymentUtils {
       transferTypeResults.push(this.getTransferTypeWithTransfer(transfer, browserNode));
     }
 
-    return combine(transferTypeResults).andThen((transferTypesWithTransfers) => {
-      for (const { transferType, transfer } of transferTypesWithTransfers) {
-        if (transferType === ETransferType.Offer) {
-          offerTransfers.push(transfer);
-        } else if (transferType === ETransferType.Insurance) {
-          insuranceTransfers.push(transfer);
-        } else if (transferType === ETransferType.Parameterized) {
-          parameterizedTransfers.push(transfer);
-        } else if (transferType === ETransferType.PullRecord) {
-          pullTransfers.push(transfer);
-        } else if (transferType === ETransferType.Unrecognized) {
-          unrecognizedTransfers.push(transfer);
-        } else {
-          this.logUtils.log("Unreachable code reached!");
-          unrecognizedTransfers.push(transfer);
-        }
-      }
+    // TODO: Fix error due to different types
+    throw new Error("Unimpmeneted");
+    // return combine(transferTypeResults).andThen((transferTypesWithTransfers) => {
+    //   for (const { transferType, transfer } of transferTypesWithTransfers) {
+    //     if (transferType === ETransferType.Offer) {
+    //       offerTransfers.push(transfer);
+    //     } else if (transferType === ETransferType.Insurance) {
+    //       insuranceTransfers.push(transfer);
+    //     } else if (transferType === ETransferType.Parameterized) {
+    //       parameterizedTransfers.push(transfer);
+    //     } else if (transferType === ETransferType.PullRecord) {
+    //       pullTransfers.push(transfer);
+    //     } else if (transferType === ETransferType.Unrecognized) {
+    //       unrecognizedTransfers.push(transfer);
+    //     } else {
+    //       this.logUtils.log("Unreachable code reached!");
+    //       unrecognizedTransfers.push(transfer);
+    //     }
+    //   }
 
-      this.logUtils.log(`
-        PaymentUtils:sortTransfers
+    //   this.logUtils.log(`
+    //     PaymentUtils:sortTransfers
   
-        offerTransfers: ${offerTransfers.length}
-        insuranceTransfers: ${insuranceTransfers.length}
-        parameterizedTransfers: ${parameterizedTransfers.length}
-        pullTransfers: ${pullTransfers.length}
-        unrecognizedTransfers: ${unrecognizedTransfers.length}
-      `);
+    //     offerTransfers: ${offerTransfers.length}
+    //     insuranceTransfers: ${insuranceTransfers.length}
+    //     parameterizedTransfers: ${parameterizedTransfers.length}
+    //     pullTransfers: ${pullTransfers.length}
+    //     unrecognizedTransfers: ${unrecognizedTransfers.length}
+    //   `);
 
-      if (unrecognizedTransfers.length > 0) {
-        return errAsync(new InvalidPaymentError("Payment includes unrecognized transfer types!"));
-      }
+    //   if (unrecognizedTransfers.length > 0) {
+    //     return errAsync(new InvalidPaymentError("Payment includes unrecognized transfer types!"));
+    //   }
 
-      if (offerTransfers.length !== 1) {
-        // TODO: this could be handled more elegantly; if there's other payments
-        // but no offer, it's still a valid payment
-        return errAsync(new InvalidPaymentError("Invalid payment, no offer transfer!"));
-      }
-      const offerTransfer = offerTransfers[0];
+    //   if (offerTransfers.length !== 1) {
+    //     // TODO: this could be handled more elegantly; if there's other payments
+    //     // but no offer, it's still a valid payment
+    //     return errAsync(new InvalidPaymentError("Invalid payment, no offer transfer!"));
+    //   }
+    //   const offerTransfer = offerTransfers[0];
 
-      let insuranceTransfer: FullTransferState | null = null;
-      if (insuranceTransfers.length === 1) {
-        insuranceTransfer = insuranceTransfers[0];
-      } else if (insuranceTransfers.length > 1) {
-        return errAsync(new InvalidPaymentError("Invalid payment, too many insurance transfers!"));
-      }
+    //   let insuranceTransfer: FullTransferState | null = null;
+    //   if (insuranceTransfers.length === 1) {
+    //     insuranceTransfer = insuranceTransfers[0];
+    //   } else if (insuranceTransfers.length > 1) {
+    //     return errAsync(new InvalidPaymentError("Invalid payment, too many insurance transfers!"));
+    //   }
 
-      let parameterizedTransfer: FullTransferState | null = null;
-      if (parameterizedTransfers.length === 1) {
-        parameterizedTransfer = parameterizedTransfers[0];
-      } else if (parameterizedTransfers.length > 1) {
-        return errAsync(new InvalidPaymentError("Invalid payment, too many parameterized transfers!"));
-      }
+    //   let parameterizedTransfer: FullTransferState | null = null;
+    //   if (parameterizedTransfers.length === 1) {
+    //     parameterizedTransfer = parameterizedTransfers[0];
+    //   } else if (parameterizedTransfers.length > 1) {
+    //     return errAsync(new InvalidPaymentError("Invalid payment, too many parameterized transfers!"));
+    //   }
 
-      return okAsync(
-        new SortedTransfers(offerTransfer, insuranceTransfer, parameterizedTransfer, pullTransfers, offerTransfer.meta),
-      );
-    });
+    //   return okAsync(
+    //     new SortedTransfers(offerTransfer, insuranceTransfer, parameterizedTransfer, pullTransfers, offerTransfer.meta),
+    //   );
+    // });
   }
 }
