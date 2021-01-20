@@ -1,4 +1,4 @@
-import * as ko from "knockout";
+import ko from "knockout";
 import { Balances, EthereumAddress, IHypernetCore } from "@hypernetlabs/hypernet-core";
 import html from "./TokenSelector.template.html";
 

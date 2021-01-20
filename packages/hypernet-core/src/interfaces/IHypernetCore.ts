@@ -13,8 +13,7 @@ import {
   Result,
 } from "@interfaces/objects";
 import { Subject } from "rxjs";
-import * as moment from "moment";
-import { EBlockchainNetwork } from "./types";
+import moment from "moment";
 import {
   AcceptPaymentError,
   BalancesUnavailableError,

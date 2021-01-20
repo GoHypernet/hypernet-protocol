@@ -1,4 +1,4 @@
-import * as ko from "knockout";
+import ko from "knockout";
 import { EthereumAddress, IHypernetCore } from "@hypernetlabs/hypernet-core";
 import html from "./PushPaymentForm.template.html";
 import moment from "moment";

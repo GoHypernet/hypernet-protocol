@@ -1,4 +1,4 @@
-import * as ko from "knockout";
+import ko from "knockout";
 import { HypernetLink, IHypernetCore } from "@hypernetlabs/hypernet-core";
 import html from "./Link.template.html";
 import { PushPaymentParams } from "../PushPayment/PushPayment.viewmodel";
