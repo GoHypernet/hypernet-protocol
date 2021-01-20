@@ -11,7 +11,7 @@ const transfers = ["Insurance", "Parameterized", "Message"];
 
 const MIN_GAS_LIMIT = BigNumber.from(500_000);
 
-const localRegistryAddress = "0x9FBDa871d559710256a2502A2517b794B482Db40"
+const localRegistryAddress = "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F"
 
 const hash = (input: string): string =>
   keccak256(`0x${input.replace(/^0x/, "")}`);

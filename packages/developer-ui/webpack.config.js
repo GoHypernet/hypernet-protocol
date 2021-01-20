@@ -26,7 +26,6 @@ module.exports = {
       {
         enforce: "pre",
         test: /\.html$/,
-        exclude: path.join(__dirname, "wallet_dist/index.html"),
         loader: "html-loader",
       },
       {

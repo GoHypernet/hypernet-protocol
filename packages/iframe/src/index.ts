@@ -1,10 +1,9 @@
-import {IHypernetCore, HypernetCore} from "@hypernetlabs/hypernet-core";
+import { IHypernetCore, HypernetCore, EBlockchainNetwork } from "@hypernetlabs/hypernet-core";
+import CoreWrapper from "./CoreWrapper";
 
 // Instantiate the hypernet core.
-const core: IHypernetCore = new HypernetCore();
+const core: IHypernetCore = new HypernetCore(EBlockchainNetwork.Localhost);
 
-// Fire up a JSON-RPC listener
-
-// Wrap up the core with the listener.
+const coreWrapper = new CoreWrapper(core);
 
 // Load connectors

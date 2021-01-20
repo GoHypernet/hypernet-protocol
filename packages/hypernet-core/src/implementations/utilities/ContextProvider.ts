@@ -6,7 +6,7 @@ import {
   PullPayment,
   Balances,
 } from "@interfaces/objects";
-import { CoreUninitializedError, LogicalError } from "@interfaces/objects/errors";
+import { CoreUninitializedError } from "@interfaces/objects/errors";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { Subject } from "rxjs";
 import { okAsync, errAsync, ResultAsync } from "neverthrow";
@@ -39,7 +39,7 @@ export class ContextProvider implements IContextProvider {
       onBalancesChanged,
     );
   }
-  public getContext(): ResultAsync<HypernetContext, LogicalError> {
+  public getContext(): ResultAsync<HypernetContext, never> {
     return okAsync(this.context);
   }
 
@@ -66,9 +66,9 @@ export class ContextProvider implements IContextProvider {
     );
   }
 
-  public setContext(context: HypernetContext): ResultAsync<void, LogicalError> {
+  public setContext(context: HypernetContext): ResultAsync<void, never> {
     this.context = context;
-    return okAsync<null, LogicalError>(null).map(() => {
+    return okAsync<null, never>(null).map(() => {
       return;
     });
   }

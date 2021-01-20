@@ -2,8 +2,9 @@ import { stringify } from "@connext/vector-utils";
 import { Contract } from "@ethersproject/contracts";
 import { keccak256 } from "@ethersproject/keccak256";
 import { Wallet, providers, ContractFactory, BigNumber, utils } from "ethers"
-import { Abis } from "@hypernetlabs/hypernet-core/src/interfaces/types"
+import { TransferAbis } from "@hypernetlabs/hypernet-core/src/interfaces/types"
 import { artifacts } from "@connext/vector-contracts";
+import { tidy } from "@connext/vector-types"
 
 const provider = new providers.JsonRpcProvider("http://localhost:8545");
 const owner = Wallet.fromMnemonic("candy maple cake sugar pudding cream honey rich smooth crumble sweet treat").connect(provider);
@@ -11,8 +12,7 @@ const transfers = ["Insurance", "Parameterized", "Message"];
 
 const MIN_GAS_LIMIT = BigNumber.from(500_000);
 
-const localRegistryAddress = "0x9FBDa871d559710256a2502A2517b794B482Db40"
-
+const localRegistryAddress = "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F"
 const hash = (input: string): string =>
   keccak256(`0x${input.replace(/^0x/, "")}`);
 
@@ -28,9 +28,9 @@ async function main() {
   // Deploy all transfers
   const entries1: { [key: string]: any } = {};
   for (const transfer of transfers) {
-    const insuranceFactory = ContractFactory.fromSolidity(Abis['Insurance']); 
-    const parameterizedFactory = ContractFactory.fromSolidity(Abis['Parameterized'])
-    const messageFactory = ContractFactory.fromSolidity(Abis['MessageTransfer'])
+    const insuranceFactory = ContractFactory.fromSolidity(TransferAbis['Insurance']); 
+    const parameterizedFactory = ContractFactory.fromSolidity(TransferAbis['Parameterized'])
+    const messageFactory = ContractFactory.fromSolidity(TransferAbis['MessageTransfer'])
 
     const insuranceDeployTx = insuranceFactory.getDeployTransaction();
     const parameterizedDeployTx = parameterizedFactory.getDeployTransaction();
@@ -137,9 +137,6 @@ async function main() {
   const insuranceReceipt = await insuranceTx.wait()
   const parameterizedReceipt = await parameterizedTx.wait()
   const messageReceipt = await messageTx.wait()
-
-  //console.log(`Insurance registration status: ${JSON.stringify(insuranceReceipt)}`)
-  //console.log(`Parameterzied registration status: ${JSON.stringify(parameterizedReceipt)}`)
 
   console.log('Transfer registration complete.')
 }

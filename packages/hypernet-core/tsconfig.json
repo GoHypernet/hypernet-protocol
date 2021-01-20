@@ -1,16 +1,18 @@
 {
-  "extends": "../../tsconfig.build.json",
-  "compilerOptions": {
-    "outDir": "./lib",
-    "downlevelIteration": true,
-    "composite": true,
-    "rootDir": "./src",
-    "baseUrl": ".",
-    "paths": {
-      "@interfaces/*": ["./src/interfaces/*"],
-      "@implementations/*": ["./src/implementations/*"]
-    }
-  },
-  "include": ["./src/**/*"],
-  "references": []
+    "extends": "../../tsconfig.build.json",
+    "compilerOptions": {
+        "outDir": "./lib",
+        "composite": true,
+        "rootDir": "./src",
+        "baseUrl": ".",
+        "paths": {
+            "@interfaces/*": ["./src/interfaces/*"],
+            "@implementations/*": ["./src/implementations/*"]
+        },
+        "resolveJsonModule": true
+    },
+    "include": [
+        "./src/**/*"
+    ],
+    "references": []
 }
