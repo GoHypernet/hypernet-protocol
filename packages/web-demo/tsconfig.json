@@ -3,6 +3,14 @@
   "compilerOptions": {
     "outDir": "./dist",
     "composite": true,
+    "sourceMap": true,
+    "noImplicitAny": false,
+    "module": "commonjs",
+    "target": "es6",
+    "lib": ["es5", "es6", "dom"],
+    "jsx": "react",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "rootDir": "./src",
     "baseUrl": "./",
     "paths": {

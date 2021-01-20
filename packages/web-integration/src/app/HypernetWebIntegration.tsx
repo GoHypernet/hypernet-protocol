@@ -15,7 +15,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   protected iframeURL: string = "some_url";
   //protected proxy: IHypernetIFrameProxy;
 
-  protected constructor(iframeURL?: string) {
+  constructor(iframeURL?: string) {
     // Initialize hypernet invisible iframe
 
     // Create an iframe
