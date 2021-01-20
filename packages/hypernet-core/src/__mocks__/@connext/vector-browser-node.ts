@@ -5,12 +5,36 @@ import {
   IChannelSigner,
   INodeService,
   NodeError,
+  NodeParams,
+  NodeResponses,
   OptionalPublicIdentifier,
   Result,
 } from "@connext/vector-types";
 import { StaticProperties, TString, TDict, TUnion, TBoolean, TObject, TUndefined, TArray, TNumber, TLiteral, TAny, TOptional, TNull, TIntersect, StaticArray, TInteger, StaticDict } from "@sinclair/typebox";
 import { ok } from "neverthrow";
 import pino, { BaseLogger } from "pino";
+import * as Factory from "factory.ts";
+import { BrowserNodeError } from "@connext/vector-browser-node/dist/errors";
+
+const channelAddress = "test-channel";
+const transferId = "transferId";
+const channelFactory = Factory.Sync.makeFactory<NodeResponses.GetChannelState>({
+		assetIds: "asset1",
+  	balances: "42",
+	  channelAddress,
+		alice: "taddress",
+		bob: "baddress",
+		merkleRoot: "Byetes",
+		nonce: 3,
+		processedDepositsA: ["213123"],
+		processedDepositsB: ["hello"],
+		timeout: "400",
+		aliceIdentifier: "saf",
+		bobIdentifier: "wfff",
+		latestUpdate: {},
+		networkContext: {},
+});
+
 
 export type BrowserNodeSignerConfig = {
   natsUrl?: string;
@@ -49,11 +73,11 @@ export class BrowserNode implements INodeService {
   getStateChannelByParticipants(params: OptionalPublicIdentifier<StaticProperties<{ publicIdentifier: TString; counterparty: TString; chainId: TNumber; }>>): Promise<Result<StaticProperties<{ assetIds: TArray<TString>; balances: TArray<TObject<{ to: TArray<TString>; amount: TArray<TString>; }>>; channelAddress: TString; alice: TString; bob: TString; merkleRoot: TString; nonce: TNumber; processedDepositsA: TArray<TString>; processedDepositsB: TArray<TString>; timeout: TString; aliceIdentifier: TString; bobIdentifier: TString; latestUpdate: TObject<{ channelAddress: TString; fromIdentifier: TString; toIdentifier: TString; type: TUnion<[TLiteral<"setup" | "create" | "resolve" | "deposit">]>; nonce: TNumber; balance: TObject<{ to: TArray<TString>; amount: TArray<TString>; }>; assetId: TString; details: TDict<TAny>; aliceSignature: TOptional<TUnion<[TString, TNull]>>; bobSignature: TOptional<TUnion<[TString, TNull]>>; }>; networkContext: TIntersect<[TObject<{ channelFactoryAddress: TString; transferRegistryAddress: TString; }>, TObject<{ chainId: TNumber; providerUrl: TString; }>]>; defundNonces: TArray<TString>; inDispute: TBoolean; }> | undefined, NodeError>> {
     throw new Error("Method not implemented.");
   }
-  getStateChannels(params: OptionalPublicIdentifier<{} & {} & {} & {} & {} & {} & {} & { publicIdentifier: string; }>): Promise<Result<StaticArray<TString>, NodeError>> {
-    throw new Error("Method not implemented.");
+  async getStateChannels(params: OptionalPublicIdentifier<{} & {} & {} & {} & {} & {} & {} & { publicIdentifier: string; }>): Promise<Result<StaticArray<TString>, NodeError>> {
+    return Result.ok([channelAddress]);
   }
-  getStateChannel(params: OptionalPublicIdentifier<{} & {} & {} & { channelAddress: string; } & {} & {} & {} & { publicIdentifier: string; }>): Promise<Result<StaticProperties<{ assetIds: TArray<TString>; balances: TArray<TObject<{ to: TArray<TString>; amount: TArray<TString>; }>>; channelAddress: TString; alice: TString; bob: TString; merkleRoot: TString; nonce: TNumber; processedDepositsA: TArray<TString>; processedDepositsB: TArray<TString>; timeout: TString; aliceIdentifier: TString; bobIdentifier: TString; latestUpdate: TObject<{ channelAddress: TString; fromIdentifier: TString; toIdentifier: TString; type: TUnion<[TLiteral<"setup" | "create" | "resolve" | "deposit">]>; nonce: TNumber; balance: TObject<{ to: TArray<TString>; amount: TArray<TString>; }>; assetId: TString; details: TDict<TAny>; aliceSignature: TOptional<TUnion<[TString, TNull]>>; bobSignature: TOptional<TUnion<[TString, TNull]>>; }>; networkContext: TIntersect<[TObject<{ channelFactoryAddress: TString; transferRegistryAddress: TString; }>, TObject<{ chainId: TNumber; providerUrl: TString; }>]>; defundNonces: TArray<TString>; inDispute: TBoolean; }> | undefined, NodeError>> {
-    return Result.ok("test-channel");
+  async getStateChannel(params: OptionalPublicIdentifier<{} & {} & {} & { channelAddress: string; } & {} & {} & {} & { publicIdentifier: string; }>): Promise<Result<NodeResponses.GetChannelState | undefined, NodeError>> {
+    return Result.ok(channelFactory.build({}));
   }
   getTransferByRoutingId(params: OptionalPublicIdentifier<{} & {} & {} & { channelAddress: string; routingId: string; } & {} & {} & {} & { publicIdentifier: string; }>): Promise<Result<StaticProperties<{ balance: TObject<{ to: TArray<TString>; amount: TArray<TString>; }>; assetId: TString; channelAddress: TString; inDispute: TBoolean; transferId: TString; transferDefinition: TString; transferTimeout: TString; initialStateHash: TString; initiator: TString; responder: TString; channelFactoryAddress: TString; chainId: TNumber; transferEncodings: TArray<TString>; transferState: TDict<TAny>; transferResolver: TOptional<TAny>; meta: TOptional<TDict<TAny>>; channelNonce: TInteger; initiatorIdentifier: TString; responderIdentifier: TString; }> | undefined, NodeError>> {
     throw new Error("Method not implemented.");
@@ -73,8 +97,10 @@ export class BrowserNode implements INodeService {
   createNode(params: StaticProperties<{ index: TInteger; mnemonic: TOptional<TString>; skipCheckIn: TOptional<TBoolean>; }>): Promise<Result<StaticProperties<{ publicIdentifier: TString; signerAddress: TString; index: TInteger; }>, NodeError>> {
     throw new Error("Method not implemented.");
   }
-  setup(params: OptionalPublicIdentifier<{} & {} & { meta?: StaticDict<TAny> | undefined; } & { timeout: string; chainId: number; counterpartyIdentifier: string; } & {} & {} & {} & { publicIdentifier: string; }>): Promise<Result<StaticProperties<{ channelAddress: TString; }>, NodeError>> {
-    throw new Error("Method not implemented.");
+    async setup(params: OptionalPublicIdentifier<NodeParams.RequestSetup>): Promise<Result<NodeResponses.RequestSetup, BrowserNodeError>> {
+    return Result.ok({
+      channelAddress
+    })
   }
   internalSetup(params: OptionalPublicIdentifier<{} & {} & { meta?: StaticDict<TAny> | undefined; } & { timeout: string; chainId: number; counterpartyIdentifier: string; } & {} & {} & {} & { publicIdentifier: string; }>): Promise<Result<StaticProperties<{ channelAddress: TString; }>, NodeError>> {
     throw new Error("Method not implemented.");
@@ -88,8 +114,11 @@ export class BrowserNode implements INodeService {
   requestCollateral(params: OptionalPublicIdentifier<{} & {} & { amount?: string | undefined; } & { assetId: string; channelAddress: string; } & {} & {} & {} & { publicIdentifier: string; }>): Promise<Result<StaticProperties<{ channelAddress: TString; }>, NodeError>> {
     throw new Error("Method not implemented.");
   }
-  conditionalTransfer(params: OptionalPublicIdentifier<{} & {} & { timeout?: string | undefined; recipient?: string | undefined; meta?: StaticDict<TAny> | undefined; recipientChainId?: number | undefined; recipientAssetId?: string | undefined; } & { assetId: string; amount: string; channelAddress: string; type: string; details: StaticDict<TAny>; } & {} & {} & {} & { publicIdentifier: string; }>): Promise<Result<StaticProperties<{ channelAddress: TString; transferId: TString; routingId: TOptional<TString>; }>, NodeError>> {
-    throw new Error("Method not implemented.");
+  async conditionalTransfer(params: OptionalPublicIdentifier<NodeParams.ConditionalTransfer>): Promise<Result<NodeResponses.ConditionalTransfer, BrowserNodeError>> {
+    return Result.ok({
+      channelAddress: params.channelAddress,
+      transferId,
+    })
   }
   resolveTransfer(params: OptionalPublicIdentifier<{} & {} & { meta?: StaticDict<TAny> | undefined; } & { channelAddress: string; transferId: string; transferResolver: any; } & {} & {} & {} & { publicIdentifier: string; }>): Promise<Result<StaticProperties<{ channelAddress: TString; transferId: TString; routingId: TOptional<TString>; }>, NodeError>> {
     throw new Error("Method not implemented.");

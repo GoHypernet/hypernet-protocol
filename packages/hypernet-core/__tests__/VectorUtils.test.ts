@@ -6,8 +6,9 @@ import { Subject } from "rxjs";
 import { ok } from "neverthrow";
 import { PaymentIdUtils } from "../src/implementations/utilities/PaymentIdUtils";
 import randomstring from "randomstring";
-import { mkPublicIdentifier } from "@connext/vector-utils";
+import { mkPublicIdentifier, getSignerAddressFromPublicIdentifier } from "@connext/vector-utils";
 
+const routerPublicIdentifier = "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR";
 const logUtils = new LogUtils();
 const paymentIdUtils = new PaymentIdUtils();
 const configProvider = new ConfigProvider(EBlockchainNetwork.Localhost, logUtils);
@@ -19,9 +20,6 @@ const contextProvider = new ContextProvider(new Subject<ControlClaim>(), new Sub
 
 beforeEach(async () => {
   contextProvider.setContext(hypernetContext);
-	hypernetContext.account = "test-account";
-	hypernetContext.publicIdentifier = mkPublicIdentifier();
-
 	browserNodeProvider = new BrowserNodeProvider(configProvider, contextProvider, logUtils);
 	vectorutils = new VectorUtils(configProvider, contextProvider, browserNodeProvider, {} as EthersBlockchainProvider, paymentIdUtils, logUtils);
 })
@@ -42,9 +40,27 @@ test("Test configProvider", async () => {
      }));
   });
 
-  test("vector utils", async () => {
-  const validId = "0x" + randomstring.generate({length: 64, charset: 'hex'});
-  const res = await vectorutils.createPaymentTransfer(EPaymentType.Push, mkPublicIdentifier(), BigNumber.from("42"), "assetAddress",  validId, new Date().toISOString(), new Date().toISOString())
-  console.dir(res)
-	expect(await vectorutils.createPaymentTransfer(EPaymentType.Push, mkPublicIdentifier(), BigNumber.from("42"), "assetAddress",  validId, new Date().toISOString(), new Date().toISOString())).toEqual("as")
+  test("toAddress validity test", async() => {
+    const toEthAddress = getSignerAddressFromPublicIdentifier(routerPublicIdentifier);
+    expect(routerPublicIdentifier.length).toEqual(56);
+    expect(toEthAddress.length).toEqual(42)
   })
+
+  test("payment transfers", async () => {
+    const validId = "0x" + randomstring.generate({length: 64, charset: 'hex'});
+    const transfers = await vectorutils.createPaymentTransfer(EPaymentType.Push, routerPublicIdentifier, BigNumber.from("42"), "assetAddress",  validId, new Date().toISOString(), new Date().toISOString());
+    expect(transfers.isOk()).toEqual(true);
+  })
+
+  test("pull transfers", async () => {
+    const rate = {deltaAmount: "20", deltaTime: "20"}
+    const validId = "0x" + randomstring.generate({length: 64, charset: 'hex'});
+    let transfers = await vectorutils.createPaymentTransfer(EPaymentType.Pull, routerPublicIdentifier, BigNumber.from("42"), "assetAddress",  validId, new Date().toISOString(), new Date().toISOString());
+    // No rate provided error
+    expect(transfers.isOk()).toEqual(false);
+
+    transfers = await vectorutils.createPaymentTransfer(EPaymentType.Pull, routerPublicIdentifier, BigNumber.from("42"), "assetAddress",  validId, new Date().toISOString(), new Date().toISOString(), rate);
+    expect(transfers.isOk()).toEqual(true);
+  })
+
+  
