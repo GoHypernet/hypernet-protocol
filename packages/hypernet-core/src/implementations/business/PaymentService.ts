@@ -167,7 +167,7 @@ export class PaymentService implements IPaymentService {
         // Wrap each one as a Result object, and return an array of Results
         let totalStakeRequired = BigNumber.from(0);
         // First, verify to make sure that we have enough hypertoken to cover the insurance collectively
-        payments.forEach((payment) => {
+        for (const [key, payment] of payments) {
           if (payment.state !== EPaymentState.Proposed) {
             return errAsync(
               new AcceptPaymentError(`Cannot accept payment ${payment.id}, it is not in the Proposed state`),
@@ -175,7 +175,7 @@ export class PaymentService implements IPaymentService {
           }
 
           totalStakeRequired = totalStakeRequired.add(BigNumber.from(payment.requiredStake));
-        });
+        }
 
         // Check the balance and make sure you have enough HyperToken to cover it
         if (hypertokenBalance.freeAmount < totalStakeRequired) {
