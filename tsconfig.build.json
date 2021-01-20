@@ -4,7 +4,7 @@
     "declaration": true,
     "downlevelIteration": true,
     "outDir": "./lib",
-    "target": "es5",
+    "target": "es6",
     "baseUrl": ".",
     "module": "commonjs",
     "removeComments": false,
