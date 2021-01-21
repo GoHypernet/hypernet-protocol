@@ -19,18 +19,25 @@ function StoreProvider({ proxy, children }: IStoreProps) {
   const [balances, setBalances] = React.useState<IBalanceList[]>([]);
 
   useEffect(() => {
-    getBalances();
+    // balances
+    proxy?.getBalances().map((balance: Balances) => {
+      updateBalances(balance);
+    });
+
+    proxy?.onBalancesChanged.subscribe({
+      next: (balance) => {
+        updateBalances(balance);
+      },
+    });
   }, []);
 
-  const getBalances = () => {
-    proxy?.getBalances().map((balance: Balances) => {
-      setBalances(
-        balance.assets.reduce((acc: AssetBalanceViewModel[], assetBalance) => {
-          acc.push(new AssetBalanceViewModel(new AssetBalanceParams(assetBalance)));
-          return acc;
-        }, []),
-      );
-    });
+  const updateBalances = (balance: Balances) => {
+    setBalances(
+      balance.assets.reduce((acc: AssetBalanceViewModel[], assetBalance) => {
+        acc.push(new AssetBalanceViewModel(new AssetBalanceParams(assetBalance)));
+        return acc;
+      }, []),
+    );
   };
 
   const initialState: any = {
