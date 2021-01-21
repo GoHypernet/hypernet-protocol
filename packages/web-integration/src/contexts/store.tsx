@@ -1,25 +1,40 @@
-import * as React from "react";
-import { AssetBalanceViewModel } from "../viewModel";
+import React, { useEffect } from "react";
+import { AssetBalanceParams, AssetBalanceViewModel } from "../viewModel";
+import IHypernetIFrameProxy from "../proxy/IHypernetIFrameProxy";
+import { Balances } from "@hypernetlabs/hypernet-core";
+import { IBalanceList } from "@hypernetlabs/web-ui/src/interfaces";
 
 interface IStore {
-  balances: AssetBalanceViewModel[];
-  setBalances: () => void;
+  balances: IBalanceList[];
 }
 
 interface IStoreProps {
   children: any;
-  initialData?: any;
+  proxy?: IHypernetIFrameProxy;
 }
 
 const StoreContext = React.createContext<IStore>(undefined!);
 
-function StoreProvider({ initialData, children }: IStoreProps) {
-  console.log("initialData in StoreProvider: ", initialData);
-  const [balances, setBalances] = React.useState<AssetBalanceViewModel[]>([]);
+function StoreProvider({ proxy, children }: IStoreProps) {
+  const [balances, setBalances] = React.useState<IBalanceList[]>([]);
+
+  useEffect(() => {
+    getBalances();
+  }, []);
+
+  const getBalances = () => {
+    proxy?.getBalances().map((balance: Balances) => {
+      setBalances(
+        balance.assets.reduce((acc: AssetBalanceViewModel[], assetBalance) => {
+          acc.push(new AssetBalanceViewModel(new AssetBalanceParams(assetBalance)));
+          return acc;
+        }, []),
+      );
+    });
+  };
 
   const initialState: any = {
     balances,
-    setBalances,
   };
 
   return <StoreContext.Provider value={initialState as IStore}>{children}</StoreContext.Provider>;

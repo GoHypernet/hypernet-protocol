@@ -9,14 +9,14 @@ import { StoreProvider } from "../contexts";
 import { TRANSACTION_LIST_ID_SELECTOR, BALANCES_WIDGET_ID_SELECTOR } from "../constants";
 import IHypernetIFrameProxy from "../proxy/IHypernetIFrameProxy";
 import HypernetIFrameProxy from "../proxy/HypernetIFrameProxy";
-import { Balances } from "@hypernetlabs/hypernet-core";
-import { AssetBalanceParams, AssetBalanceViewModel } from "../viewModel";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
-  protected iframeURL: string = "http://localhost:8090";
-  protected proxy: IHypernetIFrameProxy;
-  protected iframeContainer: HTMLElement;
   private static instance: IHypernetWebIntegration;
+
+  protected iframeURL: string = "http://localhost:8090";
+  protected iframeContainer: HTMLElement;
+
+  public proxy: IHypernetIFrameProxy;
 
   constructor(iframeURL?: string) {
     this.iframeURL = iframeURL || this.iframeURL;
@@ -32,16 +32,18 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
     // Create a proxy connection to the iframe
     this.proxy = new HypernetIFrameProxy(this.iframeContainer, this.iframeURL);
+  }
 
-    // wait for the core to be intialized
-    this.ready = new Promise((resolve, reject) => {
+  // wait for the core to be intialized
+  public getReady(): Promise<IHypernetIFrameProxy> {
+    return new Promise((resolve, reject) => {
       this.proxy.proxyReady().then(() => {
         this.proxy
           .getEthereumAccounts()
           .andThen((accounts: any) => this.proxy.initialize(accounts[0]))
           .match(
             () => {
-              resolve();
+              resolve(this.proxy);
             },
             (err: any) => {
               // handle error
@@ -52,8 +54,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       });
     });
   }
-
-  public ready: Promise<void>;
 
   // This class must be used as a singleton, this enforces that restriction.
   public static getInstance(): IHypernetWebIntegration {
@@ -83,30 +83,11 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   private async bootstrapComponent(component: React.ReactNode) {
-    const ss = await this.getBlances();
-    console.log("ss: ", ss);
     return (
-      <StoreProvider
-        initialData={{
-          balances: ss,
-        }}
-      >
+      <StoreProvider proxy={this.proxy}>
         <MainContainer>{component}</MainContainer>
       </StoreProvider>
     );
-  }
-
-  public getBlances(): Promise<AssetBalanceViewModel[]> {
-    return new Promise((resolve, reject) => {
-      this.proxy.getBalances().map((balance: Balances) => {
-        resolve(
-          balance.assets.reduce((acc: AssetBalanceViewModel[], assetBalance) => {
-            acc.push(new AssetBalanceViewModel(new AssetBalanceParams(assetBalance)));
-            return acc;
-          }, []),
-        );
-      });
-    });
   }
 
   public async renderBalances(selector: string = BALANCES_WIDGET_ID_SELECTOR) {

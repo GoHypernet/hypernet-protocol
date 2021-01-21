@@ -1,22 +1,26 @@
 import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-
 import "./GalileoFrontend";
 
 const client: IHypernetWebIntegration = new HypernetWebIntegration();
 
-client.ready.then(async () => {
+client.getReady().then(async (proxy) => {
   // core initialized
   console.log("initialzed23");
 
-  try {
-    const balances = await client.getBlances();
-    console.log("balances await: ", balances);
+  // client wants to get the balances and show it in a design of his design
+  proxy.getBalances().map((balances) => {
+    console.log("get balances from proxy inside ready: ", balances.assets);
+  });
 
-    client.renderBalances();
-    //client.renderTransactionList();
-  } catch (err) {
-    console.log("err: ", err);
-  }
+  // client wants to get the widget component ready with the data
+  client.renderBalances();
 });
+
+// try to call the proxy not just in ready but after some time in an async way
+setTimeout(() => {
+  client.proxy.getBalances().map((balances) => {
+    console.log("get balances outside ready: ", balances.assets);
+  });
+}, 10000);
 
 declare let window: any;
