@@ -1,9 +1,9 @@
 import * as React from "react";
+import { AssetBalanceViewModel } from "../viewModel";
 
 interface IStore {
-  someData: any;
-  setSomeData: () => void;
-  etherAddress: any;
+  balances: AssetBalanceViewModel[];
+  setBalances: () => void;
 }
 
 interface IStoreProps {
@@ -15,13 +15,11 @@ const StoreContext = React.createContext<IStore>(undefined!);
 
 function StoreProvider({ initialData, children }: IStoreProps) {
   console.log("initialData in StoreProvider: ", initialData);
-  const [someData, setSomeData] = React.useState<string>("asdasd");
-  const [etherAddress, setEtherAddress] = React.useState<string>(initialData?.ethAddress);
+  const [balances, setBalances] = React.useState<AssetBalanceViewModel[]>([]);
 
   const initialState: any = {
-    someData,
-    setSomeData,
-    etherAddress,
+    balances,
+    setBalances,
   };
 
   return <StoreContext.Provider value={initialState as IStore}>{children}</StoreContext.Provider>;

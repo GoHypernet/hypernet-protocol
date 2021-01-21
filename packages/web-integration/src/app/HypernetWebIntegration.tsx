@@ -3,38 +3,57 @@ import * as ReactDOM from "react-dom";
 
 import { TransactionList } from "@hypernetlabs/web-ui";
 import MainContainer from "../containers/MainContainer";
-import Authentication from "../screens/Authentication";
+import BalancesWidget from "../widgets/BalancesWidget";
 import { IHypernetWebIntegration } from "./HypernetWebIntegration.interface";
 import { StoreProvider } from "../contexts";
-import { MAIN_CONTANER_ID_SELECTOR, TRANSACTION_LIST_ID_SELECTOR } from "../constants";
+import { TRANSACTION_LIST_ID_SELECTOR, BALANCES_WIDGET_ID_SELECTOR } from "../constants";
 import IHypernetIFrameProxy from "../proxy/IHypernetIFrameProxy";
 import HypernetIFrameProxy from "../proxy/HypernetIFrameProxy";
+import { Balances } from "@hypernetlabs/hypernet-core";
+import { AssetBalanceParams, AssetBalanceViewModel } from "../viewModel";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
-  protected iframe: HTMLIFrameElement;
-  protected iframeURL: string = "some_url";
-  //protected proxy: IHypernetIFrameProxy;
+  protected iframeURL: string = "http://localhost:8090";
+  protected proxy: IHypernetIFrameProxy;
+  protected iframeContainer: HTMLElement;
+  private static instance: IHypernetWebIntegration;
 
   constructor(iframeURL?: string) {
-    // Initialize hypernet invisible iframe
-
-    // Create an iframe
     this.iframeURL = iframeURL || this.iframeURL;
-    this.iframe = document.createElement("iframe");
-    this.iframe.id = "__hypernet-protocol-iframe__";
-    this.iframe.src = this.iframeURL;
-    this.iframe.width = "0px";
-    this.iframe.height = "0px";
-    this.iframe.tabIndex = -1;
-    this.iframe.setAttribute("style", "position: absolute; border: 0; border: none;");
+
+    // Create a container element for the iframe proxy
+    this.iframeContainer = document.createElement("div");
+    this.iframeContainer.id = "__hypernet-protocol-iframe-container__";
+    this.iframeContainer.tabIndex = -1;
+    this.iframeContainer.setAttribute("style", "display: none;");
 
     // Attach it to the body
-    document.body.appendChild(this.iframe);
+    document.body.appendChild(this.iframeContainer);
 
     // Create a proxy connection to the iframe
-    //this.proxy = new HypernetIFrameProxy(this.iframe.id);
+    this.proxy = new HypernetIFrameProxy(this.iframeContainer, this.iframeURL);
+
+    // wait for the core to be intialized
+    this.ready = new Promise((resolve, reject) => {
+      this.proxy.proxyReady().then(() => {
+        this.proxy
+          .getEthereumAccounts()
+          .andThen((accounts: any) => this.proxy.initialize(accounts[0]))
+          .match(
+            () => {
+              resolve();
+            },
+            (err: any) => {
+              // handle error
+              console.log("err", err);
+              reject(err);
+            },
+          );
+      });
+    });
   }
-  private static instance: IHypernetWebIntegration;
+
+  public ready: Promise<void>;
 
   // This class must be used as a singleton, this enforces that restriction.
   public static getInstance(): IHypernetWebIntegration {
@@ -46,7 +65,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   private generateDomElement(selector: string) {
-    this.removeExitedElement(selector);
+    this.removeExistedElement(selector);
 
     const element = document.createElement("div");
     element.setAttribute("id", selector);
@@ -56,19 +75,20 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     return element;
   }
 
-  private removeExitedElement(selector: string) {
+  private removeExistedElement(selector: string) {
     const element = document.getElementById(selector);
     if (element) {
       element.remove();
     }
   }
 
-  private bootstrapComponent(component: React.ReactNode) {
+  private async bootstrapComponent(component: React.ReactNode) {
+    const ss = await this.getBlances();
+    console.log("ss: ", ss);
     return (
       <StoreProvider
         initialData={{
-          hypernetProtocol: { anything: "anything asdsad" },
-          ethAddress: "ethAdress ggggg",
+          balances: ss,
         }}
       >
         <MainContainer>{component}</MainContainer>
@@ -76,12 +96,25 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     );
   }
 
-  public renderAuthentication(selector: string = MAIN_CONTANER_ID_SELECTOR) {
-    ReactDOM.render(this.bootstrapComponent(<Authentication />), this.generateDomElement(selector));
+  public getBlances(): Promise<AssetBalanceViewModel[]> {
+    return new Promise((resolve, reject) => {
+      this.proxy.getBalances().map((balance: Balances) => {
+        resolve(
+          balance.assets.reduce((acc: AssetBalanceViewModel[], assetBalance) => {
+            acc.push(new AssetBalanceViewModel(new AssetBalanceParams(assetBalance)));
+            return acc;
+          }, []),
+        );
+      });
+    });
   }
 
-  public renderTransactionList(selector: string = TRANSACTION_LIST_ID_SELECTOR) {
-    ReactDOM.render(this.bootstrapComponent(<TransactionList />), this.generateDomElement(selector));
+  public async renderBalances(selector: string = BALANCES_WIDGET_ID_SELECTOR) {
+    ReactDOM.render(await this.bootstrapComponent(<BalancesWidget />), this.generateDomElement(selector));
+  }
+
+  public async renderTransactionList(selector: string = TRANSACTION_LIST_ID_SELECTOR) {
+    ReactDOM.render(await this.bootstrapComponent(<TransactionList />), this.generateDomElement(selector));
   }
 }
 

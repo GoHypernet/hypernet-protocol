@@ -100,7 +100,7 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
       container: element,
       url: iframeUrl,
       name: "hypernet-core-iframe",
-      classListArray: ["my-class"], // Classes to add to the iframe
+      classListArray: ["hypernet-core-iframe-style"], // Classes to add to the iframe
     });
 
     // Initialize the promise that we'll use to monitor the core

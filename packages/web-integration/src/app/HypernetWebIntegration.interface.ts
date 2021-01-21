@@ -1,4 +1,8 @@
+import { AssetBalanceViewModel } from "../viewModel";
+
 export interface IHypernetWebIntegration {
-  renderAuthentication(selector?: string): void;
+  renderBalances(selector?: string): void;
   renderTransactionList(selector?: string): void;
+  ready: Promise<void>;
+  getBlances(): Promise<AssetBalanceViewModel[]>;
 }
