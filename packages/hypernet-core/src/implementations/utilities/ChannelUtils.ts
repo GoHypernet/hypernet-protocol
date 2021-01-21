@@ -1,5 +1,5 @@
 import { EthereumAddress } from "@interfaces/objects";
-import * as sjcl from "sjcl";
+import sjcl from "sjcl";
 
 export class ChannelUtils {
   public static getChannelId(consumerAddress: EthereumAddress, providerAddress: EthereumAddress): string {

@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import { StoreContext } from "../../contexts";
 
 import { AuthenticationProps } from "./Authentication.interface";

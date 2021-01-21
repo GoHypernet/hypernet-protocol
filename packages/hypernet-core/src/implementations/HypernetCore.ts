@@ -227,8 +227,9 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public waitInitialized(): ResultAsync<void, LogicalError> {
-    return ResultAsync.fromPromise(this._initializePromise, 
-      (e) => {return e as LogicalError;})
+    return ResultAsync.fromPromise(this._initializePromise, (e) => {
+      return e as LogicalError;
+    });
   }
 
   /**
@@ -445,7 +446,7 @@ export class HypernetCore implements IHypernetCore {
         if (this._initializePromiseResolve != null) {
           this._initializePromiseResolve();
         }
-        
+
         this._initialized = true;
       });
 

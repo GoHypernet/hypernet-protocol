@@ -1,4 +1,4 @@
-import * as ko from "knockout";
+import ko from "knockout";
 import { AssetBalance, Balances, IHypernetCore } from "@hypernetlabs/hypernet-core";
 import html from "./Balances.template.html";
 import { AssetBalanceParams } from "../AssetBalance/AssetBalance.viewmodel";

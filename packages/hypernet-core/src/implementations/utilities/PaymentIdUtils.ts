@@ -1,4 +1,4 @@
-import { Result } from "@interfaces/objects";
+import { Result, HexString } from "@interfaces/objects";
 import { InvalidParametersError, InvalidPaymentIdError } from "@interfaces/objects/errors";
 import { EPaymentType } from "@interfaces/types";
 import { IPaymentIdUtils } from "@interfaces/utilities";
@@ -19,19 +19,14 @@ export class PaymentIdUtils implements IPaymentIdUtils {
    * (characters 0-19 of the paymentIdString)
    * @param paymentIdString
    */
-  public getDomain(paymentIdString: string): Result<string, InvalidPaymentIdError> {
+  public getDomain(paymentIdString: HexString): Result<string, InvalidPaymentIdError> {
     const paymentIdValidRes = this.isValidPaymentId(paymentIdString);
     if (paymentIdValidRes.isErr() || !paymentIdValidRes.value) {
       return err(new InvalidPaymentIdError(`Not a valid paymentId: '${paymentIdString}'`));
     }
 
     const domainHex = paymentIdString.substr(2, 20);
-    // console.log(`PaymentIdString: ${paymentIdString}`)
-    // console.log(`DomainHex: ${domainHex}`)
     const domain = Buffer.from(domainHex, "hex").toString("ascii");
-    if (domain.length !== 10) {
-      return err(new InvalidPaymentIdError(`Domain was not 10 characters long, got '${domain}'`));
-    }
     return ok(domain.trim());
   }
 
@@ -40,17 +35,13 @@ export class PaymentIdUtils implements IPaymentIdUtils {
    * (characters 20-31 of the paymentIdString)
    * @param paymentIdString
    */
-  public getType(paymentIdString: string): Result<EPaymentType, InvalidPaymentIdError> {
+  public getType(paymentIdString: HexString): Result<EPaymentType, InvalidPaymentIdError> {
     const paymentIdValidRes = this.isValidPaymentId(paymentIdString);
     if (paymentIdValidRes.isErr() || !paymentIdValidRes.value) {
       return err(new InvalidPaymentIdError(`Not a valid paymentId: '${paymentIdString}'`));
     }
     const typeHex = paymentIdString.substr(22, 12);
     const type = Buffer.from(typeHex, "hex").toString("ascii");
-    if (type.length !== 6) {
-      return err(new InvalidPaymentIdError(`Type was not 6 characters long, got '${type}'`));
-    }
-
     const trimmedType = type.trim();
 
     if (trimmedType === EPaymentType.Pull) {
@@ -68,7 +59,7 @@ export class PaymentIdUtils implements IPaymentIdUtils {
    * (characters 32-63 of the paymentIdString)
    * @param paymentIdString
    */
-  public getUUID(paymentIdString: string): Result<string, InvalidPaymentIdError> {
+  public getUUID(paymentIdString: HexString): Result<string, InvalidPaymentIdError> {
     const paymentIdValidRes = this.isValidPaymentId(paymentIdString);
     if (paymentIdValidRes.isErr() || !paymentIdValidRes.value) {
       return err(new InvalidPaymentIdError(`Not a valid paymentId: '${paymentIdString}'`));
@@ -81,9 +72,9 @@ export class PaymentIdUtils implements IPaymentIdUtils {
    * A valid payment ID is exactly 64 characters, hexadecimal, refixed with 0x.
    * @param paymentIdString
    */
-  public isValidPaymentId(paymentIdString: string): Result<boolean, InvalidParametersError> {
+  public isValidPaymentId(paymentIdString: HexString): Result<boolean, InvalidParametersError> {
     const overallRegex = /^0x[0-9A-Fa-f]{64}$/;
-    return ok(!overallRegex.test(paymentIdString));
+    return ok(overallRegex.test(paymentIdString));
   }
 
   /**
@@ -92,7 +83,7 @@ export class PaymentIdUtils implements IPaymentIdUtils {
    * @param type Alphanumeric string of 6 characters or less
    * @param uuid Hex string of 32 characterx exactly
    */
-  public makePaymentId(domain: string, type: string, uuid: string): Result<string, InvalidParametersError> {
+  public makePaymentId(domain: string, type: string, uuid: string): Result<HexString, InvalidParametersError> {
     const domainRegex = /^[0-9A-Za-z]{1,10}$/;
     const typeRegex = /^[0-9A-Za-z]{1,6}$/;
     const uuidRegex = /^[0-9A-Fa-f]{32}$/;
@@ -135,6 +126,7 @@ export class PaymentIdUtils implements IPaymentIdUtils {
     if (isValidRes.isOk() && isValidRes.value) {
       return ok(paymentId);
     }
+    
     // Either an error or invalid, either way, it's an invalid parameter issue for us
     return err(
       new InvalidParametersError(

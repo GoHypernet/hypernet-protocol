@@ -1,4 +1,4 @@
-import { Result } from "@interfaces/objects";
+import { HexString, Result } from "@interfaces/objects";
 import { InvalidParametersError, InvalidPaymentIdError } from "@interfaces/objects/errors";
 import { EPaymentType } from "@interfaces/types";
 
@@ -17,27 +17,27 @@ export interface IPaymentIdUtils {
    * (characters 0-19 of the paymentIdString)
    * @param paymentIdString
    */
-  getDomain(paymentIdString: string): Result<string, InvalidPaymentIdError>;
+  getDomain(paymentIdString: HexString): Result<string, InvalidPaymentIdError>;
 
   /**
    * Returns an ascii representation of the type portion of the paymentID string.
    * (characters 20-31 of the paymentIdString)
    * @param paymentIdString
    */
-  getType(paymentIdString: string): Result<EPaymentType, InvalidPaymentIdError>;
+  getType(paymentIdString: HexString): Result<EPaymentType, InvalidPaymentIdError>;
 
   /**
    * Returns the UUID portion of the paymentID string.
    * (characters 32-63 of the paymentIdString)
    * @param paymentIdString
    */
-  getUUID(paymentIdString: string): Result<string, InvalidPaymentIdError>;
+  getUUID(paymentIdString: HexString): Result<string, InvalidPaymentIdError>;
 
   /**
    * A valid payment ID is exactly 64 characters, hexadecimal, prefixed with 0x.
    * @param paymentIdString
    */
-  isValidPaymentId(paymentIdString: string): Result<boolean, InvalidParametersError>;
+  isValidPaymentId(paymentIdString: HexString): Result<boolean, InvalidParametersError>;
 
   /**
    * Given domain, type, and uuid, returns the computed paymentId
@@ -45,5 +45,5 @@ export interface IPaymentIdUtils {
    * @param type Alphanumeric string of 6 characters or less
    * @param uuid Hex string of 32 characterx exactly
    */
-  makePaymentId(domain: string, type: string, uuid: string): Result<string, InvalidParametersError>;
+  makePaymentId(domain: string, type: string, uuid: string): Result<HexString, InvalidParametersError>;
 }

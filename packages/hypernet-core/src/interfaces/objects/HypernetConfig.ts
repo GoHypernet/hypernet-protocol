@@ -11,6 +11,6 @@ export class HypernetConfig {
     public hypertokenAddress: EthereumAddress,
     public hypernetProtocolDomain: string,
     public defaultPaymentExpiryLength: number,
-    public chainProviders: ChainProviders
+    public chainProviders: ChainProviders,
   ) {}
 }

@@ -6,4 +6,4 @@ export * from "./interfaces/types";
 export * from "./interfaces/objects/errors";
 
 import { NodeError } from "@connext/vector-types";
-export {NodeError};
+export { NodeError };

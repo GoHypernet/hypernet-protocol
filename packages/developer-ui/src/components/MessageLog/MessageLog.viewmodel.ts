@@ -1,4 +1,4 @@
-// import * as ko from "knockout";
+// import ko from "knockout";
 // import html from "./MessageLog.template.html";
 
 // export class MessageLogParams {

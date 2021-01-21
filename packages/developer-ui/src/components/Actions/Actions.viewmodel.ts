@@ -1,5 +1,5 @@
 import { IHypernetCore } from "@hypernetlabs/hypernet-core";
-import * as ko from "knockout";
+import ko from "knockout";
 import { ButtonParams } from "../Button/Button.viewmodel";
 import html from "./Actions.template.html";
 import { ethers } from "ethers";

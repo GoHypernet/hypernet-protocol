@@ -26,14 +26,14 @@ export { Parameterized__factory } from "./factories/Parameterized__factory";
 export { TransferDefinition__factory } from "./factories/TransferDefinition__factory";
 export { Withdraw__factory } from "./factories/Withdraw__factory";
 
-import InsuranceAbi from "./artifacts/Insurance"
-import ParameterizedAbi from "./artifacts/Parameterized"
-import MessageTransferAbi from "./artifacts/MessageTransfer"
+import InsuranceAbi from "./artifacts/Insurance";
+import ParameterizedAbi from "./artifacts/Parameterized";
+import MessageTransferAbi from "./artifacts/MessageTransfer";
 
 const TransferAbis = {
-    Insurance: InsuranceAbi,
-    Parameterized: ParameterizedAbi,
-    MessageTransfer: MessageTransferAbi
-}
+  Insurance: InsuranceAbi,
+  Parameterized: ParameterizedAbi,
+  MessageTransfer: MessageTransferAbi,
+};
 
-export { TransferAbis }
+export { TransferAbis };

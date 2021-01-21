@@ -1,4 +1,4 @@
-import * as ko from "knockout";
+import ko from "knockout";
 import html from "./Agent.template.html";
 import { HypernetCore, IHypernetCore, EBlockchainNetwork, ResultAsync } from "@hypernetlabs/hypernet-core";
 import { BalancesParams } from "../Balances/Balances.viewmodel";
