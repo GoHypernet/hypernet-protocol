@@ -1,4 +1,4 @@
-import * as ko from "knockout";
+import ko from "knockout";
 import { AssetBalance } from "@hypernetlabs/hypernet-core";
 import html from "./AssetBalance.template.html";
 import Web3 from "web3";

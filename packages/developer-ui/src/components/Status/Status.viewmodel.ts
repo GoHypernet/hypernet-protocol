@@ -1,5 +1,5 @@
 import { IHypernetCore } from "@hypernetlabs/hypernet-core";
-import * as ko from "knockout";
+import ko from "knockout";
 import html from "./Status.template.html";
 
 export class StatusParams {

@@ -2,6 +2,7 @@ export * from "./AssetBalance";
 export * from "./BigNumber";
 export * from "./ControlClaim";
 export * from "./EthereumAddress";
+export * from "./HexString";
 export * from "./HypernetConfig";
 export * from "./HypernetContext";
 export * from "./HypernetLink";

@@ -1,4 +1,4 @@
-import * as ko from "knockout";
+import ko from "knockout";
 import { EPaymentState, IHypernetCore, Payment, PublicIdentifier, PushPayment } from "@hypernetlabs/hypernet-core";
 import html from "./PushPayment.template.html";
 import moment from "moment";

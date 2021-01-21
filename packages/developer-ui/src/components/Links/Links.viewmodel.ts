@@ -1,4 +1,4 @@
-import * as ko from "knockout";
+import ko from "knockout";
 import { HypernetLink, IHypernetCore, PublicIdentifier } from "@hypernetlabs/hypernet-core";
 import html from "./Links.template.html";
 import { LinkParams } from "../Link/Link.viewmodel";

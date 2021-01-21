@@ -15,7 +15,8 @@
     "bootstrap": "yarn install && lerna init",
     "start": "cd packages/developer-ui && yarn start",
     "format": "lerna run format",
-    "lint": "lerna run lint"
+    "lint": "lerna run lint",
+    "compile": "lerna run compile"
   },
   "repository": {
     "type": "git",
