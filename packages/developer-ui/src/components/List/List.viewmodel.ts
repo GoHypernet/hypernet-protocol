@@ -1,4 +1,4 @@
-import * as ko from "knockout";
+import ko from "knockout";
 
 export class ListViewModel {}
 

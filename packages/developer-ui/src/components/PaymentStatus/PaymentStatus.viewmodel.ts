@@ -1,4 +1,4 @@
-import * as ko from "knockout";
+import ko from "knockout";
 import html from "./PaymentStatus.template.html";
 import { EPaymentState } from "@hypernetlabs/hypernet-core";
 

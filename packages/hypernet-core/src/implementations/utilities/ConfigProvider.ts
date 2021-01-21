@@ -20,9 +20,9 @@ export class ConfigProvider implements IConfigProvider {
 
     if (network === EBlockchainNetwork.Localhost) {
       const chainProvider: ChainProviders = {
-        [1337]: 'http://localhost:8545'
-      }
-      
+        [1337]: "http://localhost:8545",
+      };
+
       this.config = new HypernetConfig(
         "http://localhost:5000", // iframeSource
         "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat", // Router mnemonic
@@ -32,7 +32,7 @@ export class ConfigProvider implements IConfigProvider {
         constants.AddressZero, // Hypertoken address,
         "Hypernet", // Hypernet Protocol Domain for Transfers
         5 * 24 * 60 * 60, // 5 days as the default payment expiration time
-        chainProvider
+        chainProvider,
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
@@ -45,8 +45,8 @@ export class ConfigProvider implements IConfigProvider {
     } else {
       // Should be MainNet config here
       const chainProvider: ChainProviders = {
-        [1]: 'https://mainnet.infura.io/v3/df03ad3247a4474fbdd864a276ba2478'
-      }
+        [1]: "https://mainnet.infura.io/v3/df03ad3247a4474fbdd864a276ba2478",
+      };
 
       this.config = new HypernetConfig(
         "http://localhost:5000", // iframeSource
@@ -57,7 +57,7 @@ export class ConfigProvider implements IConfigProvider {
         constants.AddressZero, // Hypertoken address,
         "Hypernet", // Hypernet Protocol Domain for Transfers
         5 * 24 * 60 * 60, // 5 days as the default payment expiration time
-        chainProvider
+        chainProvider,
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
