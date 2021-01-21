@@ -4,5 +4,5 @@
   "excludePrivate": "true",
   "excludeProtected": "true",
   "entryPoints": ["./src/index.ts"],
-  "out": "../../doc/hypernet-core"
+  "out": "../../docs/hypernet-core"
 }
