@@ -1,7 +1,4 @@
-import {
-    InvalidParametersError,
-  InvalidPaymentIdError,
-} from "@interfaces/objects/errors";
+import { InvalidParametersError, InvalidPaymentIdError } from "@interfaces/objects/errors";
 import { PaymentIdUtils } from "@implementations/utilities/PaymentIdUtils";
 import { EPaymentType } from "@interfaces/types";
 
@@ -11,13 +8,13 @@ describe("PaymentIdUtils tests", () => {
   const invalidPaymentIdWithBadType = "0x48797065726e6574202051555348202037074ce539ff4b81b4cb43dcfe3f4513";
   const validDomain = "Hypernet";
   const invalidDomain = "BlahBlahBlah";
-  const validUuid = "37074ce5-39ff-4b81-b4cb-43dcfe3f4513"
-  const invalidUuid = "37074ce5-39ff-4b81-b4cb-43dcfe3f4513Z"
+  const validUuid = "37074ce5-39ff-4b81-b4cb-43dcfe3f4513";
+  const invalidUuid = "37074ce5-39ff-4b81-b4cb-43dcfe3f4513Z";
 
   test("makePaymentId creates a valid hex string", () => {
     // Arrange
     const paymentIdUtils = new PaymentIdUtils();
-    
+
     // Act
     const result = paymentIdUtils.makePaymentId(validDomain, EPaymentType.Push, validUuid);
 
@@ -30,7 +27,7 @@ describe("PaymentIdUtils tests", () => {
   test("makePaymentId resolves to an error with an invalid domain", () => {
     // Arrange
     const paymentIdUtils = new PaymentIdUtils();
-    
+
     // Act
     const result = paymentIdUtils.makePaymentId(invalidDomain, EPaymentType.Push, validUuid);
 
@@ -43,7 +40,7 @@ describe("PaymentIdUtils tests", () => {
   test("makePaymentId resolves to an error with an invalid type", () => {
     // Arrange
     const paymentIdUtils = new PaymentIdUtils();
-    
+
     // Act
     const result = paymentIdUtils.makePaymentId(validDomain, "1234567", validUuid);
 
@@ -56,7 +53,7 @@ describe("PaymentIdUtils tests", () => {
   test("makePaymentId resolves to an error with an invalid uuid", () => {
     // Arrange
     const paymentIdUtils = new PaymentIdUtils();
-    
+
     // Act
     const result = paymentIdUtils.makePaymentId(validDomain, EPaymentType.Push, invalidUuid);
 
@@ -65,7 +62,7 @@ describe("PaymentIdUtils tests", () => {
     const error = result._unsafeUnwrapErr();
     expect(error).toBeInstanceOf(InvalidParametersError);
   });
-    
+
   test("getDomain returns domain", () => {
     // Arrange
     const paymentIdUtils = new PaymentIdUtils();

@@ -126,7 +126,7 @@ export class PaymentIdUtils implements IPaymentIdUtils {
     if (isValidRes.isOk() && isValidRes.value) {
       return ok(paymentId);
     }
-    
+
     // Either an error or invalid, either way, it's an invalid parameter issue for us
     return err(
       new InvalidParametersError(
