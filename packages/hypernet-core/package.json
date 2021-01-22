@@ -65,6 +65,7 @@
   "scripts": {
     "test": "jest --coverage",
     "test:watch": "jest --watch",
+    "test:watch-coverage": "jest --watch --coverage",
     "build": "npm run clean && npm run compile",
     "clean": "",
     "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",
