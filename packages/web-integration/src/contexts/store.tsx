@@ -11,7 +11,7 @@ interface IStore {
   tokenSelectorOptions: ITokenSelectorOption[];
   selectedPaymentToken: ITokenSelectorOption;
   setSelectedPaymentToken: (selectedOption?: ITokenSelectorOption) => void;
-  /* depositFunds: () => ResultAsync<Balances, Error>; */
+  depositFunds: () => ResultAsync<Balances, Error>;
 }
 
 interface IStoreProps {
@@ -66,20 +66,20 @@ function StoreProvider({ proxy, children }: IStoreProps) {
     setTokenSelectorOptions([eth, test]); */
   };
 
-  /* const depositFunds: () => ResultAsync<Balances, Error> = () => {
+  const depositFunds: () => ResultAsync<Balances, Error> = () => {
     if (selectedPaymentToken?.address) {
       return proxy.depositFunds(selectedPaymentToken?.address, ethers.utils.parseEther("1"));
     } else {
       return errAsync(new Error("address not fownd"));
     }
-  }; */
+  };
 
   const initialState: any = {
     balances,
     tokenSelectorOptions,
     selectedPaymentToken,
     setSelectedPaymentToken,
-    /* depositFunds, */
+    depositFunds,
   };
 
   return <StoreContext.Provider value={initialState as IStore}>{children}</StoreContext.Provider>;

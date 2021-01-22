@@ -8,13 +8,13 @@ interface IResultMessage {
 }
 
 const FundWidget: React.FC = () => {
-  const { tokenSelectorOptions, selectedPaymentToken, setSelectedPaymentToken /* depositFunds */ } = useContext(
+  const { tokenSelectorOptions, selectedPaymentToken, setSelectedPaymentToken, depositFunds } = useContext(
     StoreContext,
   );
   const [resultMessage, setResultMessage] = useState<IResultMessage>();
 
   const handleDepositFundClick = () => {
-    /* depositFunds().match(
+    depositFunds().match(
       (balances) => {
         // show success message
         setResultMessage({
@@ -23,17 +23,22 @@ const FundWidget: React.FC = () => {
         });
       },
       (err) => {
+        console.log('err: ', err);
         //handle error
         setResultMessage({
           status: "failure",
           message: "you fund has failed",
         });
       },
-    ); */
+    );
   };
 
-  if (resultMessage?.message) {
-    return <div>{resultMessage.message}</div>;
+  if (resultMessage?.status === "success") {
+    return (
+      <div>
+        <h3>{resultMessage.message}</h3>
+      </div>
+    );
   }
 
   return (
@@ -45,6 +50,8 @@ const FundWidget: React.FC = () => {
       />
       <br />
       <Button onClick={handleDepositFundClick} disabled={!selectedPaymentToken?.address} label="Fund" />
+      <br />
+      <h3>{resultMessage?.message}</h3>
     </div>
   );
 };
