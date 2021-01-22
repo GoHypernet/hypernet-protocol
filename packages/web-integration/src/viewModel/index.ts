@@ -1,1 +1,2 @@
-export { AssetBalanceViewModel, AssetBalanceParams } from "./AssetBalanceViewModel";
+export * from "./AssetBalanceViewModel";
+export * from './PaymentTokenOptionViewModel';

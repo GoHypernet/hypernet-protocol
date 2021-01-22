@@ -13,7 +13,9 @@ client.getReady().then(async (proxy) => {
   });
 
   // client wants to get the widget component ready with the data
-  client.renderBalances();
+  client.renderBalancesWidget();
+
+  client.renderFundWidget();
 });
 
 // try to call the proxy not just in ready but after some time in an async way
