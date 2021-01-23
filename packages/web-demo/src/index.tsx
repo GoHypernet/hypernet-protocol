@@ -20,9 +20,7 @@ client.getReady().then(async (proxy) => {
 
 // try to call the proxy not just in ready but after some time in an async way
 setTimeout(() => {
-  client.proxy.getBalances().map((balances) => {
-    console.log("get balances outside ready: ", balances.assets);
-  });
+  //client.renderBalancesWidget();
 }, 10000);
 
 declare let window: any;

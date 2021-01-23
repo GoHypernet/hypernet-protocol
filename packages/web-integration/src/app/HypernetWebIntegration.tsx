@@ -83,16 +83,16 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     }
   }
 
-  private async bootstrapComponent(component: React.ReactNode) {
+  private async bootstrapComponent(component: React.ReactNode, withModal: boolean = false) {
     return (
       <StoreProvider proxy={this.proxy}>
-        <MainContainer>{component}</MainContainer>
+        <MainContainer withModal={withModal}>{component}</MainContainer>
       </StoreProvider>
     );
   }
 
   public async renderBalancesWidget(selector: string = BALANCES_WIDGET_ID_SELECTOR) {
-    ReactDOM.render(await this.bootstrapComponent(<BalancesWidget />), this.generateDomElement(selector));
+    ReactDOM.render(await this.bootstrapComponent(<BalancesWidget />, true), this.generateDomElement(selector));
   }
 
   public async renderTransactionList(selector: string = TRANSACTION_LIST_ID_SELECTOR) {
