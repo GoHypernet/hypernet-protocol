@@ -7,8 +7,9 @@ import {
   IBrowserNodeProvider,
   ILogUtils,
   IBrowserNode,
+  IFullChannelState,
 } from "@interfaces/utilities";
-import { Contract } from "ethers";
+import { Contract, ethers } from "ethers";
 import { artifacts } from "@connext/vector-contracts";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import {
@@ -19,7 +20,10 @@ import {
   VectorError,
 } from "@interfaces/objects/errors";
 import { combine, errAsync, okAsync } from "neverthrow";
-import { ethers } from "ethers";
+
+class AssetInfo {
+  constructor(public assetId: EthereumAddress, public name: string, public symbol: string) {}
+}
 
 /**
  * Contains methods for getting Ethereum accounts, public identifiers,
@@ -29,12 +33,15 @@ export class AccountsRepository implements IAccountsRepository {
   /**
    * Retrieves an instances of the AccountsRepository.
    */
+  protected assetInfo: Map<EthereumAddress, AssetInfo>;
   constructor(
     protected blockchainProvider: IBlockchainProvider,
     protected vectorUtils: IVectorUtils,
     protected browserNodeProvider: IBrowserNodeProvider,
     protected logUtils: ILogUtils,
-  ) {}
+  ) {
+    this.assetInfo = new Map();
+  }
 
   /**
    * Get the current public identifier for this instance.
@@ -59,7 +66,7 @@ export class AccountsRepository implements IAccountsRepository {
   /**
    * Get all balances associated with this instance.
    */
-  public getBalances(): ResultAsync<Balances, BalancesUnavailableError> {
+  public getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError> {
     return this.vectorUtils.getRouterChannelAddress().andThen((channelAddress: string) => {
       return this.browserNodeProvider
         .getBrowserNode()
@@ -67,25 +74,21 @@ export class AccountsRepository implements IAccountsRepository {
           return browserNode.getStateChannel(channelAddress);
         })
         .andThen((channelState) => {
-          if (channelState == null) {
-            return okAsync(new Balances([]));
-          }
+          const assetBalanceResults = new Array<ResultAsync<AssetBalance, VectorError>>();
 
-          const assetBalances = new Array<AssetBalance>();
+          if (channelState == null) {
+            return combine(assetBalanceResults);
+          }
 
           for (let i = 0; i < channelState.assetIds.length; i++) {
-            assetBalances.push(
-              new AssetBalance(
-                channelState.assetIds[i],
-                name,
-                symbol,
-                BigNumber.from(channelState.balances[i].amount[1]),
-                BigNumber.from(0), // @todo figure out how to grab the locked amount
-                BigNumber.from(channelState.balances[i].amount[1]),
-              ),
-            );
+            const assetBalanceResult = this._getAssetBalance(i, channelState);
+            assetBalanceResults.push(assetBalanceResult);
           }
-          return okAsync(new Balances(assetBalances));
+
+          return combine(assetBalanceResults);
+        })
+        .map((assetBalances) => {
+          return new Balances(assetBalances);
         });
     });
   }
@@ -95,13 +98,27 @@ export class AccountsRepository implements IAccountsRepository {
    * @param assetAddress the (Ethereum) address of the token to get the balance of
    */
   public getBalanceByAsset(assetAddress: EthereumAddress): ResultAsync<AssetBalance, BalancesUnavailableError> {
-    return this.getBalances().map((balances) => {
+    return this.getBalances().andThen((balances) => {
       for (const assetBalance of balances.assets) {
         if (assetBalance.assetAddresss === assetAddress) {
-          return assetBalance;
+          // The user has a balance of the selected asset type, so we have an asset balance
+          // to give back.
+          return okAsync(assetBalance);
         }
       }
-      return new AssetBalance(assetAddress, BigNumber.from(0), BigNumber.from(0), BigNumber.from(0));
+
+      // The user does not have a balance in the existing asset. The only problem here
+      // is that we still would like to return a proper name for the asset.
+      return this._getAssetInfo(assetAddress).map((assetInfo) => {
+        return new AssetBalance(
+          assetAddress,
+          assetInfo.name,
+          assetInfo.symbol,
+          BigNumber.from(0),
+          BigNumber.from(0),
+          BigNumber.from(0),
+        );
+      });
     });
   }
 
@@ -234,5 +251,64 @@ export class AccountsRepository implements IAccountsRepository {
       .map(() => {
         return;
       });
+  }
+
+  protected _getAssetBalance(i: number, channelState: IFullChannelState): ResultAsync<AssetBalance, VectorError> {
+    const assetAddress = channelState.assetIds[i];
+
+    return this._getAssetInfo(assetAddress).map((assetInfo) => {
+      // Return the asset balance
+      const assetBalance = new AssetBalance(
+        assetAddress,
+        assetInfo.name,
+        assetInfo.symbol,
+        BigNumber.from(channelState.balances[i].amount[1]),
+        BigNumber.from(0), // @todo figure out how to grab the locked amount
+        BigNumber.from(channelState.balances[i].amount[1]),
+      );
+
+      return assetBalance;
+    });
+  }
+
+  protected _getAssetInfo(assetAddress: EthereumAddress): ResultAsync<AssetInfo, BlockchainUnavailableError> {
+    let name: string;
+    let tokenContract: Contract;
+
+    // First, check if we have already cached the info about this asset.
+    const cachedAssetInfo = this.assetInfo.get(assetAddress);
+
+    if (cachedAssetInfo == null) {
+      // No cached info, we'll have to get it
+      return this.blockchainProvider
+        .getSigner()
+        .andThen((signer) => {
+          tokenContract = new Contract(assetAddress, ERC20Abi, signer);
+
+          return ResultAsync.fromPromise<string | null, BlockchainUnavailableError>(tokenContract.name(), (err) => {
+            return err as BlockchainUnavailableError;
+          });
+        })
+        .andThen((myName) => {
+          name = myName ?? `Unknown Token (${assetAddress})`;
+
+          return ResultAsync.fromPromise<string | null, BlockchainUnavailableError>(tokenContract.symbol(), (err) => {
+            return err as BlockchainUnavailableError;
+          });
+        })
+        .map((mySymbol) => {
+          const symbol = mySymbol ?? "Unk";
+
+          const assetInfo = new AssetInfo(assetAddress, name, symbol);
+
+          // Store the cached info
+          this.assetInfo.set(assetAddress, assetInfo);
+
+          return assetInfo;
+        });
+    }
+
+    // We have cached info
+    return okAsync(cachedAssetInfo);
   }
 }

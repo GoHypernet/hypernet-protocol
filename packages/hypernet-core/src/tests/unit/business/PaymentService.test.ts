@@ -18,6 +18,9 @@ import {
 } from "@interfaces/objects/errors";
 const { when: jestWhen } = require("jest-when");
 
+const assetName = "PhoebeCoin";
+const assetSymbol = ":P";
+
 describe("PaymentService tests", () => {
   test("Should sendFunds return payment", async () => {
     // Arrange
@@ -114,7 +117,14 @@ describe("PaymentService tests", () => {
       returnedPaymentsMap.set(paymentId, payment);
     }
 
-    const assetBalance = new AssetBalance(hyperTokenAddress, paymentAmount, BigNumber.from(0), paymentAmount);
+    const assetBalance = new AssetBalance(
+      hyperTokenAddress,
+      assetName,
+      assetSymbol,
+      paymentAmount,
+      BigNumber.from(0),
+      paymentAmount,
+    );
 
     when(paymentServiceMock.configProvider.getConfig()).thenReturn(okAsync(hypernetConfig));
     when(paymentServiceMock.accountRepository.getBalanceByAsset(hyperTokenAddress)).thenReturn(okAsync(assetBalance));
@@ -163,7 +173,14 @@ describe("PaymentService tests", () => {
       returnedPaymentsMap.set(paymentId, payment);
     }
 
-    const assetBalance = new AssetBalance(hyperTokenAddress, paymentAmount, BigNumber.from(0), paymentAmount);
+    const assetBalance = new AssetBalance(
+      hyperTokenAddress,
+      assetName,
+      assetSymbol,
+      paymentAmount,
+      BigNumber.from(0),
+      paymentAmount,
+    );
 
     when(paymentServiceMock.configProvider.getConfig()).thenReturn(okAsync(hypernetConfig));
     when(paymentServiceMock.accountRepository.getBalanceByAsset(hyperTokenAddress)).thenReturn(okAsync(assetBalance));
@@ -216,7 +233,14 @@ describe("PaymentService tests", () => {
       returnedPaymentsMap.set(paymentId, payment);
     }
 
-    const assetBalance = new AssetBalance(hyperTokenAddress, paymentAmount, BigNumber.from(0), paymentAmount);
+    const assetBalance = new AssetBalance(
+      hyperTokenAddress,
+      assetName,
+      assetSymbol,
+      paymentAmount,
+      BigNumber.from(0),
+      paymentAmount,
+    );
 
     when(paymentServiceMock.configProvider.getConfig()).thenReturn(okAsync(hypernetConfig));
     when(paymentServiceMock.accountRepository.getBalanceByAsset(hyperTokenAddress)).thenReturn(okAsync(assetBalance));
@@ -262,7 +286,14 @@ describe("PaymentService tests", () => {
       returnedPaymentsMap.set(paymentId, payment);
     }
 
-    const assetBalance = new AssetBalance(hyperTokenAddress, paymentAmount, BigNumber.from(0), paymentAmount);
+    const assetBalance = new AssetBalance(
+      hyperTokenAddress,
+      assetName,
+      assetSymbol,
+      paymentAmount,
+      BigNumber.from(0),
+      paymentAmount,
+    );
 
     when(paymentServiceMock.configProvider.getConfig()).thenReturn(okAsync(hypernetConfig));
     when(paymentServiceMock.accountRepository.getBalanceByAsset(hyperTokenAddress)).thenReturn(okAsync(assetBalance));

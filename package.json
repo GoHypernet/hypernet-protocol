@@ -17,7 +17,7 @@
     "format": "lerna run format",
     "lint": "lerna run lint",
     "compile": "lerna run compile",
-	"generate-docs": "lerna run generate-docs"
+    "generate-docs": "lerna run generate-docs"
   },
   "repository": {
     "type": "git",
