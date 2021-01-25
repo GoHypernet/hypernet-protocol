@@ -363,6 +363,13 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
     return call.getResult();
   }
 
+  public startConnectorFlow(connector?: string): void {
+    // call iframe where it's gonna render the connector screen
+    const call = this._createCall("startConnectorFlow", connector);
+
+    //return call.getResult();
+  }
+
   /**
    * Observables for seeing what's going on
    */

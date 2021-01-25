@@ -6,4 +6,5 @@ export interface IHypernetWebIntegration {
   renderBalancesWidget(selector?: string): void;
   renderTransactionList(selector?: string): void;
   renderFundWidget(selector?: string): void;
+  startConnectorFlow(connector?: string): void;
 }

@@ -102,6 +102,11 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   public async renderFundWidget(selector: string = FUND_ID_SELECTOR) {
     ReactDOM.render(await this.bootstrapComponent(<FundWidget />), this.generateDomElement(selector));
   }
+
+  public async startConnectorFlow(connector?: string) {
+    //ReactDOM.render(await this.bootstrapComponent(<ConnectWidget />), this.generateDomElement(selector));
+    this.proxy.startConnectorFlow();
+  }
 }
 
 declare let window: any;

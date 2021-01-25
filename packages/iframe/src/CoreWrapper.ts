@@ -133,6 +133,10 @@ export default class CoreWrapper {
           return core.mintTestToken(BigNumber.from(data.data));
         }, data.callId);
       },
+      startConnectorFlow: (connector?: string) => {
+        // render modal with connect button
+        console.log("startConnectorFlow worked");
+      },
     });
 
     handshake.then((initializedParent) => {
