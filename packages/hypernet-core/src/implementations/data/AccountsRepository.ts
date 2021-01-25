@@ -77,6 +77,8 @@ export class AccountsRepository implements IAccountsRepository {
             assetBalances.push(
               new AssetBalance(
                 channelState.assetIds[i],
+                name,
+                symbol,
                 BigNumber.from(channelState.balances[i].amount[1]),
                 BigNumber.from(0), // @todo figure out how to grab the locked amount
                 BigNumber.from(channelState.balances[i].amount[1]),
