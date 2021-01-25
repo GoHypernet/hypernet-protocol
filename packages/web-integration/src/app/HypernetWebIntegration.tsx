@@ -26,6 +26,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     this.iframeContainer = document.createElement("div");
     this.iframeContainer.id = "__hypernet-protocol-iframe-container__";
     this.iframeContainer.tabIndex = -1;
+    // TODO: add window popup like style and set it to display block whenever we want to show the iframe popup,
     this.iframeContainer.setAttribute("style", "display: none;");
 
     // Attach it to the body
@@ -104,8 +105,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   public async startConnectorFlow(connector?: string) {
-    //ReactDOM.render(await this.bootstrapComponent(<ConnectWidget />), this.generateDomElement(selector));
-    this.proxy.startConnectorFlow();
+    this.iframeContainer.setAttribute("style", "display: block;");
+    this.proxy.startConnectorFlow(connector);
   }
 }
 

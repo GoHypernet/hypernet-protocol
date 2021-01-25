@@ -20,8 +20,8 @@ module.exports = {
         exclude: /node_modules/,
         options: {
           configFile,
-          projectReferences: true
-        }
+          projectReferences: true,
+        },
       },
       {
         enforce: "pre",
@@ -30,13 +30,13 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader']
+        use: ["style-loader", "css-loader"],
       },
       {
         test: /\.(png|jpe?g|gif)$/i,
-        loader: 'file-loader',
+        loader: "file-loader",
         options: {
-            name: '[path][name].[ext]',
+          name: "[path][name].[ext]",
         },
       },
     ],
@@ -49,6 +49,7 @@ module.exports = {
       // we are actually compiling hypernet-core
       "@interfaces": path.resolve(__dirname, "../hypernet-core/src/interfaces"),
       "@implementations": path.resolve(__dirname, "../hypernet-core/src/implementations"),
+      react: path.resolve(__dirname, "../../node_modules/react"),
     },
   },
   devtool: "inline-source-map",
@@ -59,9 +60,7 @@ module.exports = {
     publicPath: "/",
     port: 8090,
   },
-  plugins: [
-    new CleanWebpackPlugin(),
-  ],
+  plugins: [new CleanWebpackPlugin()],
   node: {
     net: "empty",
     tls: "empty",

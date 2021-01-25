@@ -6,6 +6,7 @@ import {
   PublicKey,
   ResultAsync,
 } from "@hypernetlabs/hypernet-core";
+import { renderConnectorAuthenticatorScreen } from "@hypernetlabs/web-ui";
 import moment from "moment";
 import Postmate from "postmate";
 
@@ -134,8 +135,14 @@ export default class CoreWrapper {
         }, data.callId);
       },
       startConnectorFlow: (connector?: string) => {
-        // render modal with connect button
-        console.log("startConnectorFlow worked");
+        // get balances first then render modal with connect button
+        // TODO: balances need viewModel class just like the one in web-integration store
+        this.core.getBalances().map((balances) => {
+          renderConnectorAuthenticatorScreen(connector, balances.assets, () => {
+            // user clicked connect confirm button
+            console.log("hello from callback");
+          });
+        });
       },
     });
 
