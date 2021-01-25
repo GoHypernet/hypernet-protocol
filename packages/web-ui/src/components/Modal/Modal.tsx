@@ -1,16 +1,9 @@
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 
-
 const modalRoot: HTMLElement = document.createElement("div");
 modalRoot.id = "__hypernet-protocol-modal-root__";
 document.body.appendChild(modalRoot);
-
-// element to which the modal will be rendered
-const el = document.createElement("div");
-
-// append to root when the children of Modal are mounted
-modalRoot.appendChild(el);
 
 interface IModal {
   isOpen: boolean;
@@ -19,9 +12,11 @@ interface IModal {
 
 const Modal: React.FC<IModal> = (props: IModal) => {
   const { isOpen, children } = props;
-  console.log("isOpen: ", isOpen);
 
-  /* useEffect(() => {
+  // element to which the modal will be rendered
+  const el = document.createElement("div");
+
+  useEffect(() => {
     // append to root when the children of Modal are mounted
     modalRoot.appendChild(el);
 
@@ -29,7 +24,7 @@ const Modal: React.FC<IModal> = (props: IModal) => {
     return () => {
       modalRoot.removeChild(el);
     };
-  }, [el]); */
+  }, [el]);
 
   return (
     <>

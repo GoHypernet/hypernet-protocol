@@ -62,6 +62,7 @@ module.exports = {
       // we are actually compiling hypernet-core
       "@interfaces": path.resolve(__dirname, "../hypernet-core/src/interfaces"),
       "@implementations": path.resolve(__dirname, "../hypernet-core/src/implementations"),
+      react: path.resolve(__dirname, "../../node_modules/react"),
     },
     plugins: [new TsconfigPathsPlugin({})],
   },
