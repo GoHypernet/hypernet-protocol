@@ -126,11 +126,12 @@ describe("PaymentService tests", () => {
         .calledWith(paymentId)
         .mockReturnValue(okAsync(payment));
     }
+    // Act
+    const result = await paymentServiceMock.factoryService().acceptFunds(paymentIds)
 
     // Assert
-    expect((await paymentServiceMock.factoryService().acceptFunds(paymentIds))._unsafeUnwrap()).toStrictEqual([
-      ok(payment),
-    ]);
+    const paym = result._unsafeUnwrap();
+    expect(paym).toStrictEqual([ok(payment)]);
   });
 
   test("Should acceptFunds return error if payment state is not Proposed", async () => {

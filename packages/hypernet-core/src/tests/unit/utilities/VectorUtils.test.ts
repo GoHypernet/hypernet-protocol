@@ -7,8 +7,6 @@ import {
   PushPayment,
   PullPayment,
 } from "@interfaces/objects";
-import { NodeResponses } from "@connext/vector-types";
-import { Result } from "@connext/vector-types";
 import {
   IBlockchainProvider,
   IBrowserNode,
