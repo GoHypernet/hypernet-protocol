@@ -1,6 +1,6 @@
-import React, { useState, useContext } from "react";
-import { StoreContext } from "../../contexts";
+import React, { useState } from "react";
 import { TokenSelector, Button } from "@hypernetlabs/web-ui";
+import { useFund } from "../../hooks";
 
 interface IResultMessage {
   status?: string;
@@ -8,9 +8,7 @@ interface IResultMessage {
 }
 
 const FundWidget: React.FC = () => {
-  const { tokenSelectorOptions, selectedPaymentToken, setSelectedPaymentToken, depositFunds } = useContext(
-    StoreContext,
-  );
+  const { tokenSelectorOptions, selectedPaymentToken, setSelectedPaymentToken, depositFunds } = useFund();
   const [resultMessage, setResultMessage] = useState<IResultMessage>();
 
   const handleDepositFundClick = () => {
@@ -23,11 +21,11 @@ const FundWidget: React.FC = () => {
         });
       },
       (err) => {
-        console.log('err: ', err);
+        console.log("err: ", err);
         //handle error
         setResultMessage({
           status: "failure",
-          message: "you fund has failed",
+          message: err.message || "you fund has failed",
         });
       },
     );

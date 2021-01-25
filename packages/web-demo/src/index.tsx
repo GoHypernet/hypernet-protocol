@@ -1,5 +1,5 @@
 import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import "./GalileoFrontend";
+/* import "./GalileoFrontend"; */
 
 const client: IHypernetWebIntegration = new HypernetWebIntegration();
 

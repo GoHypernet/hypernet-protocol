@@ -3,7 +3,7 @@ import { ITokenSelectorOption } from "../../interfaces";
 
 interface TokenSelectorProps {
   tokenSelectorOptions: ITokenSelectorOption[];
-  selectedPaymentToken: ITokenSelectorOption;
+  selectedPaymentToken?: ITokenSelectorOption;
   setSelectedPaymentToken: (selectedOption?: ITokenSelectorOption) => void;
 }
 
