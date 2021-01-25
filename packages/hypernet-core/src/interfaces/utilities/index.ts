@@ -1,4 +1,5 @@
 export * from "./IBlockchainProvider";
+export * from "./IBrowserNode";
 export * from "./IBrowserNodeProvider";
 export * from "./IConfigProvider";
 export * from "./IContextProvider";

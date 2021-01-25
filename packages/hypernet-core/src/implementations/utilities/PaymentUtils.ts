@@ -1,8 +1,6 @@
-import { EthereumAddress } from "3box";
-import { BrowserNode } from "@connext/vector-browser-node";
-import { FullTransferState, NodeError, NodeResponses } from "@connext/vector-types";
 import {
   BigNumber,
+  EthereumAddress,
   HypernetConfig,
   IHypernetTransferMetadata,
   InitializedHypernetContext,
@@ -19,9 +17,17 @@ import {
   InvalidPaymentError,
   InvalidPaymentIdError,
   LogicalError,
+  VectorError,
 } from "@interfaces/objects/errors";
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
-import { IConfigProvider, ILogUtils, IPaymentIdUtils, IPaymentUtils } from "@interfaces/utilities";
+import {
+  IBrowserNode,
+  IConfigProvider,
+  IFullTransferState,
+  ILogUtils,
+  IPaymentIdUtils,
+  IPaymentUtils,
+} from "@interfaces/utilities";
 import moment from "moment";
 import { combine, errAsync, okAsync } from "neverthrow";
 import { v4 as uuidv4 } from "uuid";
@@ -172,15 +178,15 @@ export class PaymentUtils implements IPaymentUtils {
    * Given a set of Vector transfers that we /know/ are for one specific payment,
    * return the associated payment object.
    * @param paymentId the payment associated with the provided transfers
-   * @param transfers the transfers as FullTransferState
+   * @param transfers the transfers as IFullTransferState
    * @param config instance of HypernetConfig
-   * @param browserNode instance of BrowserNode
+   * @param browserNode instance of IBrowserNode
    */
   public transfersToPayment(
     paymentId: string,
-    transfers: FullTransferState[],
+    transfers: IFullTransferState[],
     config: HypernetConfig,
-    browserNode: BrowserNode,
+    browserNode: IBrowserNode,
   ): ResultAsync<Payment, InvalidPaymentError | InvalidParametersError> {
     // const signerAddress = getSignerAddressFromPublicIdentifier(context.publicIdentifier);
     const domainRes = this.paymentIdUtils.getDomain(paymentId);
@@ -246,16 +252,16 @@ export class PaymentUtils implements IPaymentUtils {
 
   /**
    * Given an array of (unsorted) Vector transfers, return the corresponding Hypernet Payments
-   * @param transfers array of unsorted Vector transfers as FullTransferState
+   * @param transfers array of unsorted Vector transfers as IFullTransferState
    * @param config instance of HypernetConfig
    * @param _context instance of HypernetContext
-   * @param browserNode instance of the BrowserNode
+   * @param browserNode instance of the IBrowserNode
    */
   public transfersToPayments(
-    transfers: FullTransferState[],
+    transfers: IFullTransferState[],
     config: HypernetConfig,
     _context: InitializedHypernetContext,
-    browserNode: BrowserNode,
+    browserNode: IBrowserNode,
   ): ResultAsync<Payment[], InvalidPaymentError> {
     // First step, get the transfer types for all the transfers
     const transferTypeResults = [];
@@ -264,7 +270,7 @@ export class PaymentUtils implements IPaymentUtils {
     }
 
     return combine(transferTypeResults).andThen((transferTypesWithTransfers) => {
-      const transfersByPaymentId = new Map<string, FullTransferState[]>();
+      const transfersByPaymentId = new Map<string, IFullTransferState[]>();
       for (const { transferType, transfer } of transferTypesWithTransfers) {
         let paymentId: string;
         if (transferType === ETransferType.Offer) {
@@ -304,25 +310,17 @@ export class PaymentUtils implements IPaymentUtils {
   }
 
   /**
-   * Given a (vector) transfer @ FullTransferState, return the transfer type (as ETransferType)
+   * Given a (vector) transfer @ IFullTransferState, return the transfer type (as ETransferType)
    * @param transfer the transfer to get the transfer type of
    * @param browserNode instance of a browserNode so that we can query for registered transfer addresses
    */
   public getTransferType(
-    transfer: FullTransferState,
-    browserNode: BrowserNode,
-  ): ResultAsync<ETransferType, NodeError | LogicalError> {
+    transfer: IFullTransferState,
+    browserNode: IBrowserNode,
+  ): ResultAsync<ETransferType, VectorError | LogicalError> {
     // TransferDefinition here is the ETH address of the transfer
     // We need to get the registered transfer definitions as canonical by the browser node
-    return ResultAsync.fromPromise(browserNode.getRegisteredTransfers({ chainId: 1337 }), (err) => {
-      return err as Error;
-    }).andThen((registeredTransfersRes) => {
-      if (registeredTransfersRes.isError) {
-        return errAsync(registeredTransfersRes.getError() as NodeError);
-      }
-
-      const registeredTransfers: NodeResponses.GetRegisteredTransfers = registeredTransfersRes.getValue();
-
+    return browserNode.getRegisteredTransfers(1337).andThen((registeredTransfers) => {
       // registeredTransfers.name = 'Insurance', registeredTransfers.definition = <address>, transfer.transferDefinition = <address>
       const transferMap: Map<EthereumAddress, string> = new Map();
       for (const registeredTransfer of registeredTransfers) {
@@ -366,9 +364,9 @@ export class PaymentUtils implements IPaymentUtils {
    * to loose track of which transfer you are getting the type for.
    */
   public getTransferTypeWithTransfer(
-    transfer: FullTransferState,
-    browserNode: BrowserNode,
-  ): ResultAsync<{ transferType: ETransferType; transfer: FullTransferState }, NodeError | Error> {
+    transfer: IFullTransferState,
+    browserNode: IBrowserNode,
+  ): ResultAsync<{ transferType: ETransferType; transfer: IFullTransferState }, VectorError | Error> {
     return this.getTransferType(transfer, browserNode).map((transferType) => {
       return { transferType, transfer };
     });
@@ -384,21 +382,21 @@ export class PaymentUtils implements IPaymentUtils {
    */
   public sortTransfers(
     _paymentId: string,
-    transfers: FullTransferState[],
-    browserNode: BrowserNode,
-  ): ResultAsync<SortedTransfers, InvalidPaymentError | NodeError | Error> {
+    transfers: IFullTransferState[],
+    browserNode: IBrowserNode,
+  ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError | Error> {
     // @todo We need to do a lookup for non-active transfers for the payment ID.
     // let inactiveTransfers = await browserNode.getTransfers((transfer) => {return transfer.meta.paymentId == fullPaymentId;});
     // transfers.concat(inactiveTransfers);
 
-    const offerTransfers: FullTransferState[] = [];
-    const insuranceTransfers: FullTransferState[] = [];
-    const parameterizedTransfers: FullTransferState[] = [];
-    const pullTransfers: FullTransferState[] = [];
-    const unrecognizedTransfers: FullTransferState[] = [];
+    const offerTransfers: IFullTransferState[] = [];
+    const insuranceTransfers: IFullTransferState[] = [];
+    const parameterizedTransfers: IFullTransferState[] = [];
+    const pullTransfers: IFullTransferState[] = [];
+    const unrecognizedTransfers: IFullTransferState[] = [];
 
     const transferTypeResults = new Array<
-      ResultAsync<{ transferType: ETransferType; transfer: FullTransferState }, NodeError | Error>
+      ResultAsync<{ transferType: ETransferType; transfer: IFullTransferState }, VectorError | Error>
     >();
     for (const transfer of transfers) {
       transferTypeResults.push(this.getTransferTypeWithTransfer(transfer, browserNode));
@@ -443,14 +441,14 @@ export class PaymentUtils implements IPaymentUtils {
       }
       const offerTransfer = offerTransfers[0];
 
-      let insuranceTransfer: FullTransferState | null = null;
+      let insuranceTransfer: IFullTransferState | null = null;
       if (insuranceTransfers.length === 1) {
         insuranceTransfer = insuranceTransfers[0];
       } else if (insuranceTransfers.length > 1) {
         return errAsync(new InvalidPaymentError("Invalid payment, too many insurance transfers!"));
       }
 
-      let parameterizedTransfer: FullTransferState | null = null;
+      let parameterizedTransfer: IFullTransferState | null = null;
       if (parameterizedTransfers.length === 1) {
         parameterizedTransfer = parameterizedTransfers[0];
       } else if (parameterizedTransfers.length > 1) {

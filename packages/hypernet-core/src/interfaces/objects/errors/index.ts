@@ -14,3 +14,4 @@ export * from "./RouterChannelUnknownError";
 export * from "./RouterUnavailableError";
 export * from "./TransferCreationError";
 export * from "./TransferResolutionError";
+export * from "./VectorError";

@@ -1,5 +1,3 @@
-import { BrowserNode } from "@connext/vector-browser-node";
-import { FullTransferState, NodeError } from "@connext/vector-types";
 import { ILinkRepository } from "@interfaces/data";
 import {
   HypernetConfig,
@@ -9,8 +7,9 @@ import {
   PublicIdentifier,
   ResultAsync,
 } from "@interfaces/objects";
-import { CoreUninitializedError, RouterChannelUnknownError } from "@interfaces/objects/errors";
+import { CoreUninitializedError, RouterChannelUnknownError, VectorError } from "@interfaces/objects/errors";
 import {
+  IBrowserNode,
   IBrowserNodeProvider,
   IConfigProvider,
   IContextProvider,
@@ -18,7 +17,7 @@ import {
   IVectorUtils,
 } from "@interfaces/utilities";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
-import { combine, errAsync, okAsync } from "neverthrow";
+import { combine, okAsync } from "neverthrow";
 
 /**
  * Provides methods for retrieving Hypernet Links.
@@ -41,7 +40,7 @@ export class VectorLinkRepository implements ILinkRepository {
    */
   public getHypernetLinks(): ResultAsync<
     HypernetLink[],
-    RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
   > {
     const prerequisites = (combine([
       this.browserNodeProvider.getBrowserNode(),
@@ -49,11 +48,11 @@ export class VectorLinkRepository implements ILinkRepository {
       this.contextProvider.getInitializedContext(),
       this.vectorUtils.getRouterChannelAddress() as ResultAsync<any, any>,
     ]) as unknown) as ResultAsync<
-      [BrowserNode, HypernetConfig, InitializedHypernetContext, string],
-      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+      [IBrowserNode, HypernetConfig, InitializedHypernetContext, string],
+      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
     >;
 
-    let browserNode: BrowserNode;
+    let browserNode: IBrowserNode;
     let config: HypernetConfig;
     let context: InitializedHypernetContext;
     let channelAddress: string;
@@ -61,30 +60,16 @@ export class VectorLinkRepository implements ILinkRepository {
     return prerequisites
       .andThen((vals) => {
         [browserNode, config, context, channelAddress] = vals;
-        return ResultAsync.fromPromise(browserNode.getActiveTransfers({ channelAddress }), (e) => {
-          return e as NodeError;
-        });
+        return browserNode.getActiveTransfers(channelAddress);
       })
-      .andThen((activeTransfersRes) => {
-        if (activeTransfersRes.isError) {
-          return errAsync(activeTransfersRes.getError() as NodeError);
-        }
-
-        const activeTransfers = activeTransfersRes.getValue() as FullTransferState[];
-
+      .andThen((activeTransfers) => {
         if (activeTransfers.length === 0) {
           return okAsync([] as Payment[]);
         }
 
-        return this.paymentUtils.transfersToPayments(
-          activeTransfers as FullTransferState[],
-          config,
-          context,
-          browserNode,
-        );
+        return this.paymentUtils.transfersToPayments(activeTransfers, config, context, browserNode);
       })
-      .andThen((paymentsUnk) => {
-        const payments = paymentsUnk as Payment[];
+      .andThen((payments) => {
         return this.linkUtils.paymentsToHypernetLinks(payments, context);
       });
   }
@@ -95,18 +80,18 @@ export class VectorLinkRepository implements ILinkRepository {
    */
   public getHypernetLink(
     counterpartyId: PublicIdentifier,
-  ): ResultAsync<HypernetLink, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error> {
+  ): ResultAsync<HypernetLink, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     const prerequisites = (combine([
       this.browserNodeProvider.getBrowserNode(),
       this.configProvider.getConfig(),
       this.contextProvider.getInitializedContext(),
       this.vectorUtils.getRouterChannelAddress() as ResultAsync<any, any>,
     ]) as unknown) as ResultAsync<
-      [BrowserNode, HypernetConfig, InitializedHypernetContext, string],
-      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+      [IBrowserNode, HypernetConfig, InitializedHypernetContext, string],
+      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
     >;
 
-    let browserNode: BrowserNode;
+    let browserNode: IBrowserNode;
     let config: HypernetConfig;
     let context: InitializedHypernetContext;
     let channelAddress: string;
@@ -114,29 +99,17 @@ export class VectorLinkRepository implements ILinkRepository {
     return prerequisites
       .andThen((vals) => {
         [browserNode, config, context, channelAddress] = vals;
-        return ResultAsync.fromPromise(browserNode.getActiveTransfers({ channelAddress }), (e) => {
-          return e as NodeError;
-        });
+        return browserNode.getActiveTransfers(channelAddress);
       })
-      .andThen((activeTransfersRes) => {
-        if (activeTransfersRes.isError) {
-          return errAsync(activeTransfersRes.getError() as NodeError);
-        }
-
-        const activeTransfers = activeTransfersRes.getValue().filter((val) => {
+      .andThen((activeTransfers) => {
+        const filteredActiveTransfers = activeTransfers.filter((val) => {
           return val.responder === counterpartyId || val.initiator === counterpartyId;
         });
 
         // Because of the filter above, this should only produce a single link
-        return this.paymentUtils.transfersToPayments(
-          activeTransfers as FullTransferState[],
-          config,
-          context,
-          browserNode,
-        );
+        return this.paymentUtils.transfersToPayments(filteredActiveTransfers, config, context, browserNode);
       })
-      .andThen((paymentsUnk) => {
-        const payments = paymentsUnk as Payment[];
+      .andThen((payments) => {
         return this.linkUtils.paymentsToHypernetLinks(payments, context);
       })
       .map((links) => {

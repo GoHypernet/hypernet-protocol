@@ -7,12 +7,11 @@ import {
   PullPayment,
   PushPayment,
   SortedTransfers,
+  ResultAsync,
 } from "@interfaces/objects";
-import { FullTransferState, NodeError } from "@connext/vector-types";
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
-import { BrowserNode } from "@connext/vector-browser-node";
-import { ResultAsync } from "neverthrow";
-import { InvalidParametersError, InvalidPaymentError, LogicalError } from "@interfaces/objects/errors";
+import { InvalidParametersError, InvalidPaymentError, LogicalError, VectorError } from "@interfaces/objects/errors";
+import { IBrowserNode, IFullTransferState } from "./IBrowserNode";
 
 export interface IPaymentUtils {
   /**
@@ -29,9 +28,9 @@ export interface IPaymentUtils {
 
   sortTransfers(
     _paymentId: string,
-    transfers: FullTransferState[],
-    browserNode: BrowserNode,
-  ): ResultAsync<SortedTransfers, InvalidPaymentError | NodeError | Error>;
+    transfers: IFullTransferState[],
+    browserNode: IBrowserNode,
+  ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError | Error>;
 
   /**
    *
@@ -41,10 +40,10 @@ export interface IPaymentUtils {
    * @param browserNode
    */
   transfersToPayments(
-    transfers: FullTransferState[],
+    transfers: IFullTransferState[],
     config: HypernetConfig,
     context: InitializedHypernetContext,
-    browserNode: BrowserNode,
+    browserNode: IBrowserNode,
   ): ResultAsync<Payment[], InvalidPaymentError>;
 
   /**
@@ -56,9 +55,9 @@ export interface IPaymentUtils {
    */
   transfersToPayment(
     fullPaymentId: string,
-    transfers: FullTransferState[],
+    transfers: IFullTransferState[],
     config: HypernetConfig,
-    browserNode: BrowserNode,
+    browserNode: IBrowserNode,
   ): ResultAsync<Payment, InvalidPaymentError | InvalidParametersError>;
 
   /**
@@ -66,14 +65,14 @@ export interface IPaymentUtils {
    * @param transfer
    */
   getTransferType(
-    transfer: FullTransferState,
-    browserNode: BrowserNode,
-  ): ResultAsync<ETransferType, LogicalError | NodeError>;
+    transfer: IFullTransferState,
+    browserNode: IBrowserNode,
+  ): ResultAsync<ETransferType, LogicalError | VectorError>;
 
   getTransferTypeWithTransfer(
-    transfer: FullTransferState,
-    browserNode: BrowserNode,
-  ): ResultAsync<{ transferType: ETransferType; transfer: FullTransferState }, NodeError | Error>;
+    transfer: IFullTransferState,
+    browserNode: IBrowserNode,
+  ): ResultAsync<{ transferType: ETransferType; transfer: IFullTransferState }, VectorError | Error>;
 
   /**
    *

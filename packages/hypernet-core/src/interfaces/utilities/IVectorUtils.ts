@@ -1,4 +1,3 @@
-import { NodeResponses } from "@connext/vector-types";
 import { BigNumber, IHypernetTransferMetadata, ResultAsync } from "@interfaces/objects";
 import {
   CoreUninitializedError,
@@ -8,6 +7,7 @@ import {
   TransferResolutionError,
 } from "@interfaces/objects/errors";
 import { EPaymentType } from "@interfaces/types";
+import { IBasicTransferResponse } from "./IBrowserNode";
 
 /**
  *
@@ -22,19 +22,19 @@ export interface IVectorUtils {
    *
    * @param transferId
    */
-  resolveMessageTransfer(transferId: string): ResultAsync<NodeResponses.ResolveTransfer, TransferResolutionError>;
+  resolveMessageTransfer(transferId: string): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
   resolvePaymentTransfer(
     transferId: string,
     paymentId: string,
     amount: string,
-  ): ResultAsync<NodeResponses.ResolveTransfer, TransferResolutionError>;
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
   /**
    *
    * @param transferId
    */
-  resolveInsuranceTransfer(transferId: string): ResultAsync<NodeResponses.ResolveTransfer, TransferResolutionError>;
+  resolveInsuranceTransfer(transferId: string): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
   /**
    *
@@ -42,7 +42,7 @@ export interface IVectorUtils {
   createMessageTransfer(
     toAddress: string,
     message: IHypernetTransferMetadata,
-  ): ResultAsync<NodeResponses.ConditionalTransfer, TransferCreationError>;
+  ): ResultAsync<IBasicTransferResponse, TransferCreationError>;
 
   /**
    *
@@ -57,7 +57,7 @@ export interface IVectorUtils {
     UUID: string,
     start: string,
     expiration: string,
-  ): ResultAsync<NodeResponses.ConditionalTransfer, TransferCreationError | InvalidParametersError>;
+  ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
 
   /**
    *
@@ -70,5 +70,5 @@ export interface IVectorUtils {
     amount: BigNumber,
     expiration: string,
     UUID: string,
-  ): ResultAsync<NodeResponses.ConditionalTransfer, TransferCreationError | InvalidParametersError>;
+  ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
 }

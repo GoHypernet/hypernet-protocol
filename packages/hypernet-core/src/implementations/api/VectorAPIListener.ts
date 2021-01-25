@@ -1,14 +1,17 @@
-import {
-  ConditionalTransferCreatedPayload,
-  ConditionalTransferResolvedPayload,
-  EngineEvents,
-} from "@connext/vector-types";
 import { IVectorListener } from "@interfaces/api";
 import { IPaymentService } from "@interfaces/business";
 import { IHypernetTransferMetadata, ResultAsync } from "@interfaces/objects";
 import { LogicalError } from "@interfaces/objects/errors";
 import { ETransferType } from "@interfaces/types";
-import { IBrowserNodeProvider, IContextProvider, ILogUtils, IPaymentUtils, IVectorUtils } from "@interfaces/utilities";
+import {
+  IBrowserNodeProvider,
+  IConditionalTransferCreatedPayload,
+  IConditionalTransferResolvedPayload,
+  IContextProvider,
+  ILogUtils,
+  IPaymentUtils,
+  IVectorUtils,
+} from "@interfaces/utilities";
 import { errAsync, okAsync } from "neverthrow";
 
 /**
@@ -32,7 +35,7 @@ export class VectorAPIListener implements IVectorListener {
       // When the browser node notifies us that a conditional transfer has been *resolved,
       // (via Vector), this handles it. We call down into the appropriate method on the
       // PaymentService to handle it.
-      browserNode.on(EngineEvents.CONDITIONAL_TRANSFER_RESOLVED, (payload: ConditionalTransferResolvedPayload) => {
+      browserNode.onConditionalTransferResolved((payload: IConditionalTransferResolvedPayload) => {
         // Filter out any transfer not containing a transfer with a UUID in the transferState (insurance & parameterized transfer types)
         // or a UUID as part of transferState.message (message transfer type)
 
@@ -86,7 +89,7 @@ export class VectorAPIListener implements IVectorListener {
       // When the browser node notifies us that a conditional transfer has been created
       // (via Vector), this handles it. We call down into the appropriate method on the
       // PaymentService to handle it.
-      browserNode.on(EngineEvents.CONDITIONAL_TRANSFER_CREATED, (payload: ConditionalTransferCreatedPayload) => {
+      browserNode.onConditionalTransferCreated((payload: IConditionalTransferCreatedPayload) => {
         // Filter out any transfer not containing a transfer with a UUID in the transferState (insurance & parameterized transfer types)
         // or a UUID as part of transferState.message (message transfer type)
 
