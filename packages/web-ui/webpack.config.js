@@ -1,14 +1,20 @@
-const path = require('path');
-const HWP = require('html-webpack-plugin');
+const path = require("path");
+const HWP = require("html-webpack-plugin");
 
 module.exports = {
-  mode: 'production',
+  mode: "production",
 
   // Enable sourcemaps for debugging webpack's output.
-  devtool: 'source-map',
+  devtool: "source-map",
 
   resolve: {
-    extensions: ['.ts', '.tsx', '.js'],
+    extensions: [".ts", ".tsx", ".js"],
+    alias: {
+      // These are copied from hypernet-core, because for local compilation
+      // we are actually compiling hypernet-core
+      "@interfaces": path.resolve(__dirname, "../hypernet-core/src/interfaces"),
+      "@implementations": path.resolve(__dirname, "../hypernet-core/src/implementations"),
+    },
   },
 
   module: {
@@ -18,23 +24,23 @@ module.exports = {
         exclude: /node_modules/,
         use: [
           {
-            loader: 'ts-loader',
+            loader: "ts-loader",
           },
         ],
       },
       // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
       {
-        enforce: 'pre',
+        enforce: "pre",
         test: /\.js$/,
-        loader: 'source-map-loader',
+        loader: "source-map-loader",
       },
     ],
   },
   plugins: [
     new HWP({
-      template: path.resolve(__dirname, 'index.html'),
-      filename: 'index.html',
-      inject: 'body',
+      template: path.resolve(__dirname, "index.html"),
+      filename: "index.html",
+      inject: "body",
     }),
   ],
 };
