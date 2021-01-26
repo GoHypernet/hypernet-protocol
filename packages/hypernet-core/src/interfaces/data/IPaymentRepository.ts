@@ -1,8 +1,12 @@
 import moment from "moment";
 import { EthereumAddress, PublicKey, ResultAsync } from "@interfaces/objects";
-import { BigNumber, Payment, PublicIdentifier } from "@interfaces/objects";
-import { CoreUninitializedError, PaymentFinalizeError, RouterChannelUnknownError } from "@interfaces/objects/errors";
-import { NodeError } from "@connext/vector-types";
+import { Payment, PublicIdentifier } from "@interfaces/objects";
+import {
+  CoreUninitializedError,
+  PaymentFinalizeError,
+  RouterChannelUnknownError,
+  VectorError,
+} from "@interfaces/objects/errors";
 
 export interface IPaymentRepository {
   /**
@@ -11,7 +15,7 @@ export interface IPaymentRepository {
    */
   getPaymentsByIds(
     paymentIds: string[],
-  ): ResultAsync<Map<string, Payment>, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
+  ): ResultAsync<Map<string, Payment>, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**
    * Creates a push payment and returns it. Nothing moves until
@@ -25,7 +29,7 @@ export interface IPaymentRepository {
     requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**
    * Provides assets for a given list of payment ids.
@@ -34,7 +38,7 @@ export interface IPaymentRepository {
    */
   provideAsset(
     paymentId: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**
    * Provides stake for a given payment id
@@ -43,7 +47,7 @@ export interface IPaymentRepository {
    */
   provideStake(
     paymentId: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**
    * Finalizes/confirms a payment
@@ -56,6 +60,6 @@ export interface IPaymentRepository {
     amount: string,
   ): ResultAsync<
     Payment,
-    PaymentFinalizeError | RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+    PaymentFinalizeError | RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
   >;
 }

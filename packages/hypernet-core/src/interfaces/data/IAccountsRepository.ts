@@ -1,4 +1,3 @@
-import { NodeError } from "@connext/vector-types";
 import { EthereumAddress, BigNumber, Balances, AssetBalance, PublicIdentifier, ResultAsync } from "@interfaces/objects";
 import {
   BalancesUnavailableError,
@@ -6,13 +5,14 @@ import {
   CoreUninitializedError,
   LogicalError,
   RouterChannelUnknownError,
+  VectorError,
 } from "@interfaces/objects/errors";
 
 /**
  * @todo What is the main role/purpose of this class? Description here.
  */
 export interface IAccountsRepository {
-  getPublicIdentifier(): ResultAsync<PublicIdentifier, NodeError | LogicalError>;
+  getPublicIdentifier(): ResultAsync<PublicIdentifier, VectorError | LogicalError>;
   getAccounts(): ResultAsync<string[], BlockchainUnavailableError>;
   getBalances(): ResultAsync<Balances, BalancesUnavailableError | CoreUninitializedError>;
   getBalanceByAsset(assetAddress: EthereumAddress): ResultAsync<AssetBalance, BalancesUnavailableError>;
@@ -21,13 +21,13 @@ export interface IAccountsRepository {
     amount: BigNumber,
   ): ResultAsync<
     null,
-    RouterChannelUnknownError | CoreUninitializedError | NodeError | Error | BlockchainUnavailableError
+    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error | BlockchainUnavailableError
   >;
   withdrawFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
     destinationAddress: EthereumAddress,
-  ): ResultAsync<void, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
+  ): ResultAsync<void, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<void, BlockchainUnavailableError>;
 }

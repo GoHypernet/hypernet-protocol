@@ -1,6 +1,6 @@
-import { BrowserNode } from "@connext/vector-browser-node";
-import { NodeError } from "@connext/vector-types";
 import { ResultAsync } from "@interfaces/objects";
+import { VectorError } from "@interfaces/objects/errors";
+import { IBrowserNode } from "./IBrowserNode";
 
 /**
  * IBrowserNodeProvider exists only to centralize the supply of
@@ -8,5 +8,5 @@ import { ResultAsync } from "@interfaces/objects";
  * testing of it.
  */
 export interface IBrowserNodeProvider {
-  getBrowserNode(): ResultAsync<BrowserNode, NodeError | Error>;
+  getBrowserNode(): ResultAsync<IBrowserNode, VectorError | Error>;
 }

@@ -1,13 +1,4 @@
-import {
-  FullChannelState,
-  NodeParams,
-  OptionalPublicIdentifier,
-  NodeResponses,
-  DEFAULT_CHANNEL_TIMEOUT,
-  FullTransferState,
-  NodeError,
-  Result,
-} from "@connext/vector-types";
+import { NodeParams, OptionalPublicIdentifier, NodeResponses, DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
 import {
   BigNumber,
   HypernetConfig,
@@ -24,6 +15,10 @@ import {
   IBlockchainProvider,
   ILogUtils,
   IPaymentIdUtils,
+  IBrowserNode,
+  IBasicTransferResponse,
+  IBasicChannelResponse,
+  IFullChannelState,
 } from "@interfaces/utilities";
 import { EPaymentType, InsuranceState, MessageState, Parameterized, ParameterizedState } from "@interfaces/types";
 import { serialize } from "class-transformer";
@@ -37,9 +32,9 @@ import {
   RouterUnavailableError,
   TransferCreationError,
   TransferResolutionError,
+  VectorError,
 } from "@interfaces/objects/errors";
 import { combine, errAsync, okAsync } from "neverthrow";
-import { BrowserNode } from "@connext/vector-browser-node";
 
 /**
  * VectorUtils contains methods for interacting directly with the core Vector stuff -
@@ -66,9 +61,7 @@ export class VectorUtils implements IVectorUtils {
    * Resolves a message/offer/null transfer with Vector.
    * @param transferId the ID of the transfer to resolve
    */
-  public resolveMessageTransfer(
-    transferId: string,
-  ): ResultAsync<NodeResponses.ResolveTransfer, TransferResolutionError> {
+  public resolveMessageTransfer(transferId: string): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
     return errAsync(new TransferResolutionError());
   }
 
@@ -80,13 +73,13 @@ export class VectorUtils implements IVectorUtils {
     transferId: string,
     paymentId: string,
     amount: string,
-  ): ResultAsync<NodeResponses.ResolveTransfer, TransferResolutionError> {
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
     const prerequisites = (combine([
       this.browserNodeProvider.getBrowserNode(),
       this.getRouterChannelAddress() as ResultAsync<any, any>,
     ]) as unknown) as ResultAsync<
-      [BrowserNode, string],
-      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+      [IBrowserNode, string],
+      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
     >;
 
     const resolverData: ParameterizedResolverData = {
@@ -95,7 +88,7 @@ export class VectorUtils implements IVectorUtils {
     };
 
     let channelAddress: string;
-    let browserNode: BrowserNode;
+    let browserNode: IBrowserNode;
 
     return prerequisites
       .andThen((vals) => {
@@ -107,40 +100,15 @@ export class VectorUtils implements IVectorUtils {
         const encodedResolverData = defaultAbiCoder.encode(resolverDataEncoding, [resolverData]);
         const hashedResolverData = keccak256(encodedResolverData);
 
-        return ResultAsync.fromPromise(browserNode.signUtilityMessage({ message: hashedResolverData }));
+        return browserNode.signUtilityMessage(hashedResolverData);
       })
-      .andThen((signatureVal) => {
-        const signatureRes = signatureVal as Result<NodeResponses.SignUtilityMessage, NodeError>;
-        if (signatureRes.isError) {
-          return errAsync(signatureRes.getError() as NodeError);
-        }
-
-        const signature = signatureRes.getValue().signedMessage;
-
+      .andThen((signature) => {
         const resolver: ParameterizedResolver = {
           data: resolverData,
           payeeSignature: signature,
         };
 
-        const transferParams: OptionalPublicIdentifier<NodeParams.ResolveTransfer> = {
-          channelAddress,
-          transferId,
-          transferResolver: resolver,
-        };
-
-        return ResultAsync.fromPromise(browserNode.resolveTransfer(transferParams));
-      })
-      .andThen((resolveTransferVal) => {
-        const resolveTransferRes = resolveTransferVal as Result<NodeResponses.ResolveTransfer, NodeError>;
-        if (resolveTransferRes.isError) {
-          return errAsync(
-            new TransferResolutionError(
-              `VectorUtils:resolvePaymentTransfer: error while attempting to resolve paymentId ${paymentId}, ${resolveTransferRes.getError()}`,
-            ),
-          );
-        }
-
-        return okAsync(resolveTransferRes.getValue());
+        return browserNode.resolveTransfer(channelAddress, transferId, resolver);
       });
   }
 
@@ -148,9 +116,7 @@ export class VectorUtils implements IVectorUtils {
    * Resolves an insurance transfer with Vector.
    * @param transferId the ID of the tarnsfer to resolve
    */
-  public resolveInsuranceTransfer(
-    transferId: string,
-  ): ResultAsync<NodeResponses.ResolveTransfer, TransferResolutionError> {
+  public resolveInsuranceTransfer(transferId: string): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
     return errAsync(new TransferResolutionError());
   }
 
@@ -162,7 +128,7 @@ export class VectorUtils implements IVectorUtils {
   public createMessageTransfer(
     toAddress: string,
     message: IHypernetTransferMetadata,
-  ): ResultAsync<NodeResponses.ConditionalTransfer, TransferCreationError | InvalidParametersError> {
+  ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // Sanity check - make sure the paymentId is valid:
     const validPayment = this.paymentIdUtils.isValidPaymentId(message.paymentId);
     if (validPayment.isErr()) {
@@ -178,38 +144,41 @@ export class VectorUtils implements IVectorUtils {
       this.getRouterChannelAddress(),
       this.browserNodeProvider.getBrowserNode(),
     ]) as unknown) as ResultAsync<
-      [HypernetConfig, string, BrowserNode],
-      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+      [HypernetConfig, string, IBrowserNode],
+      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
     >;
 
-    return prerequisites
-      .andThen((vals) => {
-        const [config, channelAddress, browserNode] = vals;
+    return prerequisites.andThen((vals) => {
+      const [config, channelAddress, browserNode] = vals;
 
-        const initialState: MessageState = {
-          message: serialize(message),
-        };
+      const initialState: MessageState = {
+        message: serialize(message),
+      };
 
-        // Create transfer params
-        const transferParams = {
-          recipient: toAddress,
-          channelAddress,
-          amount: "0",
-          assetId: config.hypertokenAddress,
-          type: "MessageTransfer",
-          details: initialState,
-          meta: message,
-        } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
+      // Create transfer params
+      const transferParams = {
+        recipient: toAddress,
+        channelAddress,
+        amount: "0",
+        assetId: config.hypertokenAddress,
+        type: "MessageTransfer",
+        details: initialState,
+        meta: message,
+      } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
 
-        return ResultAsync.fromPromise(browserNode.conditionalTransfer(transferParams));
-      })
-      .andThen((transferRes) => {
-        if (transferRes.isError) {
-          return errAsync(new TransferCreationError());
-        }
-
-        return okAsync(transferRes.getValue());
-      });
+      return browserNode.conditionalTransfer(
+        channelAddress,
+        "0",
+        config.hypertokenAddress,
+        "MessageTransfer",
+        initialState,
+        toAddress,
+        null,
+        null,
+        null,
+        message,
+      );
+    });
   }
 
   /**
@@ -232,7 +201,7 @@ export class VectorUtils implements IVectorUtils {
     start: string,
     expiration: string,
     rate?: Rate,
-  ): ResultAsync<NodeResponses.ConditionalTransfer, TransferCreationError | InvalidParametersError> {
+  ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // Sanity check
     if (type === EPaymentType.Pull && rate == null) {
       return errAsync(new InvalidParametersError("Must provide rate for Pull payments"));
@@ -252,53 +221,45 @@ export class VectorUtils implements IVectorUtils {
       this.getRouterChannelAddress() as ResultAsync<any, any>,
       this.browserNodeProvider.getBrowserNode(),
     ]) as unknown) as ResultAsync<
-      [string, BrowserNode],
-      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+      [string, IBrowserNode],
+      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
     >;
 
-    return prerequisites
-      .andThen((vals) => {
-        const [channelAddress, browserNode] = vals;
+    return prerequisites.andThen((vals) => {
+      const [channelAddress, browserNode] = vals;
 
-        const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
+      const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
 
-        // @todo toEthAddress isn't really an eth address, it's the internal signing key
-        // therefore we need to actually do the signing of the payment transfer (on resolve)
-        // with this internal key!
+      // @todo toEthAddress isn't really an eth address, it's the internal signing key
+      // therefore we need to actually do the signing of the payment transfer (on resolve)
+      // with this internal key!
 
-        const infiniteRate = {
-          deltaAmount: amount.toString(),
-          deltaTime: "1",
-        };
+      const infiniteRate = {
+        deltaAmount: amount.toString(),
+        deltaTime: "1",
+      };
 
-        const initialState: ParameterizedState = {
-          receiver: toEthAddress,
-          start,
-          expiration,
-          UUID: paymentId,
-          rate: type === EPaymentType.Push ? infiniteRate : (rate as Rate),
-        };
+      const initialState: ParameterizedState = {
+        receiver: toEthAddress,
+        start,
+        expiration,
+        UUID: paymentId,
+        rate: type === EPaymentType.Push ? infiniteRate : (rate as Rate),
+      };
 
-        // Create transfer params
-        const transferParams = {
-          recipient: toAddress,
-          channelAddress,
-          amount: amount.toString(),
-          assetId: assetAddress,
-          type: "Parameterized",
-          details: initialState,
-          meta: {}, // intentially left blank!
-        } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
-
-        return ResultAsync.fromPromise(browserNode.conditionalTransfer(transferParams));
-      })
-      .andThen((transferRes) => {
-        if (transferRes.isError) {
-          return errAsync(new TransferCreationError());
-        }
-
-        return okAsync(transferRes.getValue());
-      });
+      return browserNode.conditionalTransfer(
+        channelAddress,
+        amount.toString(),
+        assetAddress,
+        "ParameterizedTransfer",
+        initialState,
+        toAddress,
+        null,
+        null,
+        null,
+        {}, // intentially left blank!
+      );
+    });
   }
 
   /**
@@ -315,7 +276,7 @@ export class VectorUtils implements IVectorUtils {
     amount: BigNumber,
     expiration: string,
     paymentId: string,
-  ): ResultAsync<NodeResponses.ConditionalTransfer, TransferCreationError | InvalidParametersError> {
+  ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // Sanity check - make sure the paymentId is valid:
     const validPayment = this.paymentIdUtils.isValidPaymentId(paymentId);
     if (validPayment.isErr()) {
@@ -331,49 +292,36 @@ export class VectorUtils implements IVectorUtils {
       this.getRouterChannelAddress(),
       this.browserNodeProvider.getBrowserNode(),
     ]) as unknown) as ResultAsync<
-      [HypernetConfig, string, BrowserNode],
-      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+      [HypernetConfig, string, IBrowserNode],
+      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
     >;
 
-    return prerequisites
-      .andThen((vals) => {
-        const [config, channelAddress, browserNode] = vals;
+    return prerequisites.andThen((vals) => {
+      const [config, channelAddress, browserNode] = vals;
 
-        const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
+      const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
 
-        const initialState: InsuranceState = {
-          receiver: toEthAddress,
-          mediator: mediatorAddress,
-          collateral: amount.toString(),
-          expiration,
-          UUID: paymentId,
-        };
+      const initialState: InsuranceState = {
+        receiver: toEthAddress,
+        mediator: mediatorAddress,
+        collateral: amount.toString(),
+        expiration,
+        UUID: paymentId,
+      };
 
-        // Create transfer params
-        const transferParams = {
-          recipient: toAddress,
-          channelAddress,
-          amount: amount.toString(),
-          assetId: config.hypertokenAddress,
-          type: "Insurance",
-          details: initialState,
-          meta: {}, // left intentionally blank!
-        } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
-
-        this.logUtils.log(`CreateInsuranceTransfer transferParams: ${transferParams.toString()}`);
-        return ResultAsync.fromPromise(browserNode.conditionalTransfer(transferParams));
-      })
-      .andThen((insuranceTransfer) => {
-        if (insuranceTransfer.isError) {
-          return errAsync(
-            new TransferCreationError(
-              `Could not complete transfer, browser node threw an error: ${insuranceTransfer.getError()}`,
-            ),
-          );
-        }
-
-        return okAsync(insuranceTransfer.getValue());
-      });
+      return browserNode.conditionalTransfer(
+        channelAddress,
+        amount.toString(),
+        config.hypertokenAddress,
+        "Insurance",
+        initialState,
+        toAddress,
+        null,
+        null,
+        null,
+        {}, // left intentionally blank!
+      );
+    });
   }
 
   /**
@@ -391,36 +339,28 @@ export class VectorUtils implements IVectorUtils {
       this.contextProvider.getInitializedContext(),
       this.browserNodeProvider.getBrowserNode(),
     ]) as unknown) as ResultAsync<
-      [HypernetConfig, InitializedHypernetContext, BrowserNode],
-      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+      [HypernetConfig, InitializedHypernetContext, IBrowserNode],
+      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
     >;
 
     let config: HypernetConfig;
     let context: InitializedHypernetContext;
-    let browserNode: BrowserNode;
+    let browserNode: IBrowserNode;
 
     return prerequisites
       .andThen((vals) => {
         [config, context, browserNode] = vals;
+        console.log(config);
+        console.log(context);
+        console.log(browserNode);
 
         this.logUtils.log(`Core publicIdentifier: ${context.publicIdentifier}`);
         this.logUtils.log(`Router publicIdentifier: ${config.routerPublicIdentifier}`);
 
-        return ResultAsync.fromPromise(browserNode.getStateChannels(), (err) => {
-          return err as RouterUnavailableError;
-        });
+        return browserNode.getStateChannels();
       })
-      .andThen((channelsResult) => {
-        if (channelsResult.isError) {
-          return errAsync(channelsResult.getError() as NodeError);
-        }
-
-        const channelAddresses = channelsResult.getValue();
-
-        // let channel: FullChannelState | null = null;
-        const channelResults = new Array<
-          ResultAsync<NodeResponses.GetChannelState, RouterChannelUnknownError | NodeError>
-        >();
+      .andThen((channelAddresses) => {
+        const channelResults = new Array<ResultAsync<IFullChannelState, RouterChannelUnknownError | VectorError>>();
         for (const channelAddress of channelAddresses) {
           channelResults.push(this._getStateChannel(channelAddress, browserNode));
         }
@@ -448,41 +388,17 @@ export class VectorUtils implements IVectorUtils {
   }
 
   protected _createRouterStateChannel(
-    browserNode: BrowserNode,
+    browserNode: IBrowserNode,
     config: HypernetConfig,
-  ): ResultAsync<NodeResponses.RequestSetup, NodeError> {
-    return ResultAsync.fromPromise(
-      browserNode.setup({
-        chainId: 1337,
-        counterpartyIdentifier: config.routerPublicIdentifier,
-        timeout: DEFAULT_CHANNEL_TIMEOUT.toString(),
-      }),
-      (err) => {
-        return err as NodeError;
-      },
-    ).andThen((setupResult) => {
-      if (setupResult.isError) {
-        return errAsync(setupResult.getError() as NodeError);
-      }
-
-      const newChannel = setupResult.getValue();
-      return okAsync(newChannel);
-    });
+  ): ResultAsync<IBasicChannelResponse, VectorError> {
+    return browserNode.setup(config.routerPublicIdentifier, 1337, DEFAULT_CHANNEL_TIMEOUT.toString());
   }
 
   protected _getStateChannel(
     channelAddress: string,
-    browserNode: BrowserNode,
-  ): ResultAsync<NodeResponses.GetChannelState, RouterChannelUnknownError | NodeError> {
-    return ResultAsync.fromPromise(browserNode.getStateChannel({ channelAddress }), (e) => {
-      return e as RouterChannelUnknownError;
-    }).andThen((channelResult) => {
-      if (channelResult.isError) {
-        return errAsync(channelResult.getError() as NodeError);
-      }
-
-      const channel = channelResult.getValue() as NodeResponses.GetChannelState | null;
-
+    browserNode: IBrowserNode,
+  ): ResultAsync<IFullChannelState, RouterChannelUnknownError | VectorError> {
+    return browserNode.getStateChannel(channelAddress).andThen((channel) => {
       if (channel == null) {
         return errAsync(new RouterChannelUnknownError());
       }

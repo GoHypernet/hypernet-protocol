@@ -1,12 +1,14 @@
 import { IBrowserNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider";
 import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 import { BrowserNode } from "@connext/vector-browser-node";
-import { IContextProvider, ILogUtils } from "@interfaces/utilities";
-import { NodeError } from "@connext/vector-types";
+import { IBrowserNode, IContextProvider, ILogUtils } from "@interfaces/utilities";
 import { ResultAsync } from "neverthrow";
+import { WrappedBrowserNode } from "./WrappedBrowserNode";
+import { VectorError } from "@interfaces/objects/errors";
+
 export class BrowserNodeProvider implements IBrowserNodeProvider {
-  protected browserNodeResult: ResultAsync<BrowserNode, NodeError | Error> | null;
-  protected browserNode: BrowserNode | null;
+  protected browserNodeResult: ResultAsync<IBrowserNode, VectorError | Error> | null;
+  protected browserNode: IBrowserNode | null;
   constructor(
     protected configProvider: IConfigProvider,
     protected contextProvider: IContextProvider,
@@ -15,27 +17,28 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
     this.browserNodeResult = null;
     this.browserNode = null;
   }
-  protected initialize(): ResultAsync<BrowserNode, NodeError | Error> {
+  protected initialize(): ResultAsync<IBrowserNode, VectorError | Error> {
     if (this.browserNodeResult == null) {
       this.browserNodeResult = this.configProvider
         .getConfig()
         .andThen((config) => {
-          this.browserNode = new BrowserNode({
+          const vectorBrowserNode = new BrowserNode({
             logger: this.logUtils.getPino(),
             iframeSrc: config.iframeSource,
             chainProviders: config.chainProviders,
           });
-          return ResultAsync.fromPromise(this.browserNode.init(), (e) => {
-            return e as NodeError;
-          });
+
+          this.browserNode = new WrappedBrowserNode(vectorBrowserNode);
+
+          return this.browserNode.init();
         })
         .map(() => {
-          return this.browserNode as BrowserNode;
+          return this.browserNode as IBrowserNode;
         });
     }
     return this.browserNodeResult;
   }
-  public getBrowserNode(): ResultAsync<BrowserNode, NodeError | Error> {
+  public getBrowserNode(): ResultAsync<IBrowserNode, VectorError | Error> {
     return this.initialize();
   }
 }
