@@ -1,17 +1,15 @@
 import React from "react";
-import { BalanceList } from "@hypernetlabs/web-ui";
-import { useBalances } from "../../hooks";
+import { useLinks } from "../../hooks";
 
 const LinksWidget: React.FC = () => {
-  const { balances } = useBalances();
-  console.log("balances123: ", balances);
+  const { links } = useLinks();
+  console.log("linkssssssss: ", links);
 
   // put some logic if needed
 
   return (
     <div>
-      <h2>here are your LinksWidget: </h2>
-      <BalanceList balances={balances} />
+      <h2>here is your LinksWidget: </h2>
     </div>
   );
 };

@@ -30,8 +30,8 @@ interface IMockedPaymentParams {
   amountStaked?: BigNumber;
   expirationDate?: number;
   finalized?: boolean;
-  createdTimestamp?: moment.Moment;
-  updatedTimestamp?: moment.Moment;
+  createdTimestamp?: number;
+  updatedTimestamp?: number;
   collateralRecovered?: BigNumber;
   disputeMediator?: PublicKey;
   paymentAmount?: BigNumber;
@@ -67,8 +67,8 @@ export default class PaymentServiceMocks {
     state: EPaymentState.Proposed,
     finalized: false,
     requiredStake: BigNumber.from("42"),
-    createdTimestamp: moment(moment().format()),
-    updatedTimestamp: moment(moment().format()),
+    createdTimestamp: moment(moment().format()).unix(),
+    updatedTimestamp: moment(moment().format()).unix(),
     collateralRecovered: BigNumber.from("42"),
     paymentAmount: BigNumber.from("42"),
     authorizedAmount: BigNumber.from("42"),

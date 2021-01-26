@@ -1,8 +1,7 @@
 import { useEffect, useReducer, useContext } from "react";
 import { StoreContext } from "../contexts";
 import { ILinkList } from "@hypernetlabs/web-ui/src/interfaces";
-import { HypernetLink, Balances } from "@hypernetlabs/hypernet-core";
-import { LinkParams } from "../viewModel";
+import { HypernetLink } from "@hypernetlabs/hypernet-core";
 
 enum EActionTypes {
   FETCHING = "FETCHING",
@@ -16,7 +15,7 @@ interface IState {
   links: ILinkList[];
 }
 
-export function useLinks() {
+export function useLinks(): IState {
   const { proxy } = useContext(StoreContext);
 
   const initialState: IState = {
@@ -30,7 +29,7 @@ export function useLinks() {
       case EActionTypes.FETCHING:
         return { ...state, loading: true };
       case EActionTypes.FETCHED:
-        return { ...state, loading: false, balances: action.payload };
+        return { ...state, loading: false, links: action.payload };
       case EActionTypes.ERROR:
         return { ...state, loading: false, error: action.payload };
       default:
@@ -48,16 +47,13 @@ export function useLinks() {
         if (cancelRequest) return;
         // get data from proxy
         proxy
-          .waitInitialized()
-          .andThen(() => {
-            return proxy.getPublicIdentifier();
-          })
+          .getPublicIdentifier()
           .andThen((publicIdentifierRes) => {
             publicIdentifier = publicIdentifierRes;
-
-            return proxy.getActiveLinks();
+            return proxy.getLinks();
           })
           .map((links) => {
+            console.log("links123: ", links);
             dispatch({ type: EActionTypes.FETCHED, payload: [...links] });
           });
       } catch (error) {
@@ -70,45 +66,47 @@ export function useLinks() {
 
     proxy.onPullPaymentProposed.subscribe({
       next: (payment) => {
+        const linksArr = [...state.links];
+
         // Check if there is a link for this counterparty already
-        const filteredLinks = [...state.links].filter((val) => {
+        const paymentLinkIndex = linksArr.findIndex((val) => {
           const counterPartyAccount = val.counterPartyAccount;
           return counterPartyAccount === payment.to || counterPartyAccount === payment.from;
         });
 
-        if (filteredLinks.length === 0) {
+        if (paymentLinkIndex === -1) {
           // We need to create a new link for the counterparty
           const counterPartyAccount = payment.to === publicIdentifier ? payment.from : payment.to;
-          const link = new HypernetLink(counterPartyAccount, [payment], [], [payment], [], [payment]);
-          dispatch({ type: EActionTypes.FETCHED, payload: [...state.links, link] });
+          linksArr.push(new HypernetLink(counterPartyAccount, [payment], [], [payment], [], [payment]));
+        } else {
+          // It's for us, we'll need to add it to the payments for the link
+          linksArr[paymentLinkIndex].pullPayments.push(payment);
         }
+
+        dispatch({ type: EActionTypes.FETCHED, payload: [...linksArr] });
       },
     });
 
-    proxy.onPullPaymentProposed.subscribe({
+    proxy.onPushPaymentProposed.subscribe({
       next: (payment) => {
+        const linksArr = [...state.links];
+
         // Check if there is a link for this counterparty already
-        const links = [...state.links].filter((val) => {
+        const paymentLinkIndex = linksArr.findIndex((val) => {
           const counterPartyAccount = val.counterPartyAccount;
           return counterPartyAccount === payment.to || counterPartyAccount === payment.from;
         });
 
-        if (links.length === 0) {
+        if (paymentLinkIndex === -1) {
           // We need to create a new link for the counterparty
           const counterPartyAccount = payment.to === publicIdentifier ? payment.from : payment.to;
-          const link = new HypernetLink(counterPartyAccount, [payment], [], [payment], [], [payment]);
-          dispatch({ type: EActionTypes.FETCHED, payload: [...state.links, link] });
+          linksArr.push(new HypernetLink(counterPartyAccount, [payment], [payment], [], [payment], []));
         } else {
-          // update payments inside links
-          /* proxy.onPullPaymentProposed.subscribe({
-      next: (payment) => {
-        if (payment.to === this.counterParty || payment.from === this.counterParty) {
           // It's for us, we'll need to add it to the payments for the link
-          this.pullPayments.push(new PullPaymentParams(proxy, payment));
+          linksArr[paymentLinkIndex].pushPayments.push(payment);
         }
-      },
-    }); */
-        }
+
+        dispatch({ type: EActionTypes.FETCHED, payload: [...linksArr] });
       },
     });
 
