@@ -13,6 +13,7 @@ export class AssetBalance {
     public assetAddresss: EthereumAddress,
     public name: string,
     public symbol: string,
+    public decimals: number,
     public totalAmount: BigNumber,
     public lockedAmount: BigNumber,
     public freeAmount: BigNumber,

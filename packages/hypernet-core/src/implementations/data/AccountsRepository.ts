@@ -20,9 +20,13 @@ import {
   VectorError,
 } from "@interfaces/objects/errors";
 import { combine, errAsync, okAsync } from "neverthrow";
+import { constants } from "ethers";
 
 class AssetInfo {
-  constructor(public assetId: EthereumAddress, public name: string, public symbol: string) {}
+  constructor(public assetId: EthereumAddress, 
+    public name: string, 
+    public symbol: string,
+    public decimals: number) {}
 }
 
 /**
@@ -34,13 +38,22 @@ export class AccountsRepository implements IAccountsRepository {
    * Retrieves an instances of the AccountsRepository.
    */
   protected assetInfo: Map<EthereumAddress, AssetInfo>;
+  protected erc20Abi: string[];
   constructor(
     protected blockchainProvider: IBlockchainProvider,
     protected vectorUtils: IVectorUtils,
     protected browserNodeProvider: IBrowserNodeProvider,
     protected logUtils: ILogUtils,
   ) {
+    // The ERC20Abi from Vector does not include the name() function, so we will roll our own
+    this.erc20Abi  = Object.assign([], ERC20Abi);
+    this.erc20Abi.push("function name() view returns (string)");
+
+    // We will cache the info about each asset type, so we only have to look it up once.
     this.assetInfo = new Map();
+    
+    // Add a default entry for Ethereum, it's not an ERC20, it's special and it's also universal.
+    this.assetInfo.set(constants.AddressZero, new AssetInfo(constants.AddressZero, "Ethereum", "ETH", 18));
   }
 
   /**
@@ -114,6 +127,7 @@ export class AccountsRepository implements IAccountsRepository {
           assetAddress,
           assetInfo.name,
           assetInfo.symbol,
+          assetInfo.decimals,
           BigNumber.from(0),
           BigNumber.from(0),
           BigNumber.from(0),
@@ -162,7 +176,7 @@ export class AccountsRepository implements IAccountsRepository {
         } else {
           this.logUtils.log("Transferring an ERC20 asset.");
           // send an actual erc20 token
-          const tokenContract = new Contract(assetAddress, ERC20Abi, signer);
+          const tokenContract = new Contract(assetAddress, this.erc20Abi, signer);
           tx = ResultAsync.fromPromise(tokenContract.transfer(channelAddress, amount), (err) => {
             return err as BlockchainUnavailableError;
           });
@@ -262,6 +276,7 @@ export class AccountsRepository implements IAccountsRepository {
         assetAddress,
         assetInfo.name,
         assetInfo.symbol,
+        assetInfo.decimals,
         BigNumber.from(channelState.balances[i].amount[1]),
         BigNumber.from(0), // @todo figure out how to grab the locked amount
         BigNumber.from(channelState.balances[i].amount[1]),
@@ -273,6 +288,7 @@ export class AccountsRepository implements IAccountsRepository {
 
   protected _getAssetInfo(assetAddress: EthereumAddress): ResultAsync<AssetInfo, BlockchainUnavailableError> {
     let name: string;
+    let symbol: string;
     let tokenContract: Contract;
 
     // First, check if we have already cached the info about this asset.
@@ -283,7 +299,7 @@ export class AccountsRepository implements IAccountsRepository {
       return this.blockchainProvider
         .getSigner()
         .andThen((signer) => {
-          tokenContract = new Contract(assetAddress, ERC20Abi, signer);
+          tokenContract = new Contract(assetAddress, this.erc20Abi, signer);
 
           return ResultAsync.fromPromise<string | null, BlockchainUnavailableError>(tokenContract.name(), (err) => {
             return err as BlockchainUnavailableError;
@@ -296,10 +312,16 @@ export class AccountsRepository implements IAccountsRepository {
             return err as BlockchainUnavailableError;
           });
         })
-        .map((mySymbol) => {
-          const symbol = mySymbol ?? "Unk";
+        .andThen((mySymbol) => {
+          symbol = mySymbol ?? "Unk";
 
-          const assetInfo = new AssetInfo(assetAddress, name, symbol);
+          return ResultAsync.fromPromise<number | null, BlockchainUnavailableError>(tokenContract.decimals(), (err) => {
+            return err as BlockchainUnavailableError;
+          });
+        })
+        .map((myDecimals) => {
+          const decimals = myDecimals ?? 18;
+          const assetInfo = new AssetInfo(assetAddress, name, symbol, decimals);
 
           // Store the cached info
           this.assetInfo.set(assetAddress, assetInfo);
