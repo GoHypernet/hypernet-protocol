@@ -23,10 +23,7 @@ import { combine, errAsync, okAsync } from "neverthrow";
 import { constants } from "ethers";
 
 class AssetInfo {
-  constructor(public assetId: EthereumAddress, 
-    public name: string, 
-    public symbol: string,
-    public decimals: number) {}
+  constructor(public assetId: EthereumAddress, public name: string, public symbol: string, public decimals: number) {}
 }
 
 /**
@@ -46,12 +43,12 @@ export class AccountsRepository implements IAccountsRepository {
     protected logUtils: ILogUtils,
   ) {
     // The ERC20Abi from Vector does not include the name() function, so we will roll our own
-    this.erc20Abi  = Object.assign([], ERC20Abi);
+    this.erc20Abi = Object.assign([], ERC20Abi);
     this.erc20Abi.push("function name() view returns (string)");
 
     // We will cache the info about each asset type, so we only have to look it up once.
     this.assetInfo = new Map();
-    
+
     // Add a default entry for Ethereum, it's not an ERC20, it's special and it's also universal.
     this.assetInfo.set(constants.AddressZero, new AssetInfo(constants.AddressZero, "Ethereum", "ETH", 18));
   }
@@ -306,14 +303,22 @@ export class AccountsRepository implements IAccountsRepository {
           });
         })
         .andThen((myName) => {
-          name = myName ?? `Unknown Token (${assetAddress})`;
+          if (myName == null || myName == "0x") {
+            name = `Unknown Token (${assetAddress})`;
+          } else {
+            name = myName;
+          }
 
           return ResultAsync.fromPromise<string | null, BlockchainUnavailableError>(tokenContract.symbol(), (err) => {
             return err as BlockchainUnavailableError;
           });
         })
         .andThen((mySymbol) => {
-          symbol = mySymbol ?? "Unk";
+          if (mySymbol == null || mySymbol == "0x") {
+            symbol = "Unk";
+          } else {
+            symbol = mySymbol;
+          }
 
           return ResultAsync.fromPromise<number | null, BlockchainUnavailableError>(tokenContract.decimals(), (err) => {
             return err as BlockchainUnavailableError;
