@@ -35,7 +35,7 @@
     "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0",
     "typescript": "^4.0.2",
-	"typedoc": "^0.20.16",
+    "typedoc": "^0.20.16",
     "webpack": "^5.6.0"
   },
   "dependencies": {
@@ -66,8 +66,8 @@
     "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
   },
   "scripts": {
-    "test": "jest --coverage",
-    "test:watch": "jest --watch",
+    "test": "jest --coverage --runInBand",
+    "test:watch": "jest --watch --runInBand --detectOpenHandles",
     "build": "npm run clean && npm run compile",
     "clean": "",
     "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",
@@ -79,7 +79,7 @@
     "postversion": "git push && git push --tags",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
-	"generate-docs": "npx typedoc --options typedoc.json",
+    "generate-docs": "npx typedoc --options typedoc.json",
     "webpack": "webpack"
   },
   "bugs": {
