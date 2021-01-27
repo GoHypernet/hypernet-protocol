@@ -17,6 +17,8 @@ client.getReady().then(async (proxy) => {
   client.startConnectorFlow();
 
   client.renderLinksWidget();
+
+  client.renderPaymentWidget();
 });
 
 // try to call the proxy not just in ready but after some time in an async way

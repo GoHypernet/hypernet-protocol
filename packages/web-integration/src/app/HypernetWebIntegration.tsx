@@ -124,17 +124,17 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     );
   }
 
-  public async renderPaymentWidget(config: IRenderPaymentWidgetParams) {
+  public async renderPaymentWidget(config?: IRenderPaymentWidgetParams) {
     ReactDOM.render(
       await this.bootstrapComponent(
         <PaymentWidget
-          counterPartyAccount={config.counterPartyAccount}
-          amount={config.amount}
-          expirationDate={config.expirationDate}
-          requiredStake={config.requiredStake}
-          paymentToken={config.paymentToken}
-          disputeMediator={config.disputeMediator}
-          paymentType={config.paymentType}
+          counterPartyAccount={config?.counterPartyAccount}
+          amount={config?.amount}
+          expirationDate={config?.expirationDate}
+          requiredStake={config?.requiredStake}
+          paymentToken={config?.paymentToken}
+          disputeMediator={config?.disputeMediator}
+          paymentType={config?.paymentType}
         />,
         true,
       ),
