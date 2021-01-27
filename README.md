@@ -1,5 +1,5 @@
 
-![alt](https://github.com/GoHypernet/hypernet-protocol/tree/dev/documentation/images/Hypernet_Logo.jpg)
+![alt](documentation/images/Hypernet_Logo.jpg)
 
 # The Hypernet Protocol
 
