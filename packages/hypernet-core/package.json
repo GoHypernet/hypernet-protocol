@@ -66,6 +66,7 @@
     "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
   },
   "scripts": {
+    "test": "jest --coverage --detectOpenHandles",
     "test:ci": "jest --runInBand --coverage",
     "test:watch": "jest --watch --detectOpenHandles",
     "build": "npm run clean && npm run compile",
