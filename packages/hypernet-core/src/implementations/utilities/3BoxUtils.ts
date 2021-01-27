@@ -1,172 +1,221 @@
-// import { BoxInstance, create, BoxSpace, BoxThread } from "3box";
-// import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
-// import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
-// import { EthereumAddress } from "@interfaces/objects";
-// import { IContextProvider } from "@interfaces/utilities/IContextProvider";
-// import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
+import { BoxInstance, create, BoxSpace, BoxThread } from "3box";
+import { IThreeBoxUtils, IBlockchainProvider, IContextProvider, IConfigProvider } from "@interfaces/utilities";
+import { EthereumAddress, HypernetConfig, InitializedHypernetContext, ResultAsync } from "@interfaces/objects";
+import { BlockchainUnavailableError, ThreeBoxError } from "@interfaces/objects/errors";
+import { okAsync } from "neverthrow";
+import { ResultUtils } from "@implementations/utilities";
 
-// export class ThreeBoxUtils implements IThreeBoxUtils {
-//   protected box: BoxInstance | null;
-//   protected privateSpace: BoxSpace | null;
-//   protected ethereumAccounts: string[];
-//   protected spaces: { [spaceName: string]: BoxSpace };
-//   protected threads: { [threadAddress: string]: BoxThread };
+export class ThreeBoxUtils implements IThreeBoxUtils {
+  protected box: BoxInstance | null;
+  protected privateSpace: BoxSpace | null;
+  protected ethereumAccounts: string[];
+  protected spaces: Map<string, BoxSpace>;
+  protected threads: Map<string, BoxThread>;
 
-//   public constructor(
-//     protected blockchainProvider: IBlockchainProvider,
-//     protected contextProvider: IContextProvider,
-//     protected configProvider: IConfigProvider,
-//   ) {
-//     this.box = null;
-//     this.privateSpace = null;
-//     this.ethereumAccounts = [];
-//     this.spaces = {};
-//     this.threads = {};
-//   }
+  public constructor(
+    protected blockchainProvider: IBlockchainProvider,
+    protected contextProvider: IContextProvider,
+    protected configProvider: IConfigProvider,
+  ) {
+    this.box = null;
+    this.privateSpace = null;
+    this.ethereumAccounts = [];
+    this.spaces = new Map<string, BoxSpace>();
+    this.threads = new Map<string, BoxThread>();
+  }
 
-//   public async getBox(): Promise<BoxInstance> {
-//     if (this.box != null) {
-//       return this.box;
-//     }
+  public getBox(): ResultAsync<BoxInstance, BlockchainUnavailableError | ThreeBoxError> {
+    if (this.box != null) {
+      return okAsync(this.box);
+    }
 
-//     const provider = await this.blockchainProvider.getProvider();
+    return this.blockchainProvider
+      .getProvider()
+      .andThen((provider) => {
+        return ResultAsync.fromPromise(create(provider), (e) => {
+          return new ThreeBoxError(e as Error);
+        });
+      })
+      .map((boxInstance) => {
+        // Don't do anything until the sync is complete
+        // await this.box.syncDone;
+        this.box = boxInstance;
+        return boxInstance;
+      });
+  }
 
-//     this.box = await create(provider);
+  public getSpaces(
+    spaceNames: string[],
+  ): ResultAsync<Map<string, BoxSpace>, BlockchainUnavailableError | ThreeBoxError> {
+    const returnSpaces = new Map<string, BoxSpace>();
+    const spacesToAuth = new Array<string>();
 
-//     // Don't do anything until the sync is complete
-//     // await this.box.syncDone;
+    for (const spaceName of spaceNames) {
+      const space = this.spaces.get(spaceName);
+      if (space == null) {
+        // Need to auth the space
+        spacesToAuth.push(spaceName);
+      } else {
+        returnSpaces.set(spaceName, space);
+      }
+    }
 
-//     return this.box;
-//   }
+    if (spacesToAuth.length === 0) {
+      // All the spaces are already authed and in the cache.
+      return okAsync(returnSpaces);
+    }
 
-//   public async getSpaces(spaceNames: string[]): Promise<{ [spaceName: string]: BoxSpace }> {
-//     const returnSpaces: { [spaceName: string]: BoxSpace } = {};
-//     const spacesToAuth = new Array<string>();
+    // We need to authorize at least some of the spaces
+    let context: InitializedHypernetContext;
+    let box: BoxInstance;
+    return ResultUtils.combine([this.contextProvider.getInitializedContext(), this.getBox()])
+      .andThen((vals) => {
+        [context, box] = vals;
 
-//     for (const spaceName of spaceNames) {
-//       if (this.spaces[spaceName] == null) {
-//         // Need to auth the space
-//         spacesToAuth.push(spaceName);
-//       } else {
-//         returnSpaces[spaceName] = this.spaces[spaceName];
-//       }
-//     }
+        // Authenticate the spaces
+        return ResultAsync.fromPromise(box.auth(spacesToAuth, { address: context.account }), (e) => {
+          return new ThreeBoxError(e as Error);
+        });
+      })
+      .andThen(() => {
+        const newSpaceResults = new Array<ResultAsync<{ spaceName: string; space: BoxSpace }, ThreeBoxError>>();
 
-//     if (spacesToAuth.length === 0) {
-//       // All the spaces are already authed and in the cache.
-//       return returnSpaces;
-//     }
+        for (const spaceName of spacesToAuth) {
+          newSpaceResults.push(this._authSpace(box, spaceName));
+        }
 
-//     const context = await this.contextProvider.getContext();
+        return ResultUtils.combine(newSpaceResults);
+      })
+      .andThen((authedSpaces) => {
+        // Loop over the spaces we just opened, we're going to await them individually
+        for (const authedSpace of authedSpaces) {
+          // Add it to the cache
+          this.spaces.set(authedSpace.spaceName, authedSpace.space);
 
-//     // Need to auth some more spaces
-//     if (context.account == null) {
-//       throw new Error("Must have an established account!");
-//     }
+          // Add it to the return
+          returnSpaces.set(authedSpace.spaceName, authedSpace.space);
+        }
 
-//     const box = await this.getBox();
+        return okAsync(returnSpaces);
+      });
+  }
 
-//     await box.auth(spacesToAuth, { address: context.account });
+  public getHypernetProtocolSpace(): ResultAsync<BoxSpace, ThreeBoxError | BlockchainUnavailableError> {
+    let config: HypernetConfig;
 
-//     // Now start the process of opening each of the spaces
-//     const newSpacePromises: { [spaceName: string]: Promise<BoxSpace> } = {};
+    return this.configProvider
+      .getConfig()
+      .andThen((myConfig) => {
+        config = myConfig;
 
-//     // Start the process of opening all the spaces.
-//     for (const spaceName of spacesToAuth) {
-//       newSpacePromises[spaceName] = box.openSpace(spaceName);
-//     }
+        // Get the main space, the list of channels is here.
+        return this.getSpaces([config.hypernetProtocolSpace]);
+      })
+      .map((spaces) => {
+        return spaces.get(config.hypernetProtocolSpace) as BoxSpace;
+      });
+  }
 
-//     // Loop over the spaces
-//     for (const [key, value] of Object.entries(newSpacePromises)) {
-//       const space = await value;
+  public getThreads(
+    threadAddresses: string[],
+  ): ResultAsync<Map<string, BoxThread>, BlockchainUnavailableError | ThreeBoxError> {
+    const returnThreads = new Map<string, BoxThread>();
+    const threadsToJoin = new Array<EthereumAddress>();
 
-//       // Add it to the cache
-//       this.spaces[key] = space;
+    for (const threadAddress of threadAddresses) {
+      const thread = this.threads.get(threadAddress);
+      if (thread == null) {
+        // Need to join the thread
+        threadsToJoin.push(threadAddress);
+      } else {
+        returnThreads.set(threadAddress, thread);
+      }
+    }
 
-//       // Add it to the return
-//       returnSpaces[key] = space;
-//     }
+    if (threadsToJoin.length === 0) {
+      // All the threads are already joined
+      return okAsync(returnThreads);
+    }
 
-//     return returnSpaces;
-//   }
+    // Need to join some more threads
+    return this.getHypernetProtocolSpace()
+      .andThen((space) => {
+        // Now start the process of joining each of the threads
+        const newThreadresults = new Array<ResultAsync<{ threadAddress: string; thread: BoxThread }, ThreeBoxError>>();
 
-//   public async getHypernetProtocolSpace(): Promise<BoxSpace> {
-//     const config = await this.configProvider.getConfig();
+        for (const threadAddress of threadsToJoin) {
+          newThreadresults.push(this._joinThread(threadAddress, space));
+        }
 
-//     // Get the main space, the list of channels is here.
-//     const spaces = await this.getSpaces(["config.spaceName"]);
-//     return spaces["config.spaceName"];
-//   }
+        return ResultUtils.combine(newThreadresults);
+      })
+      .map((joinedThreads) => {
+        // Loop over the threads
+        for (const joinedThread of joinedThreads) {
+          // Add it to the cache
+          this.threads.set(joinedThread.threadAddress, joinedThread.thread);
 
-//   public async getThreads(threadAddresses: string[]): Promise<{ [threadAddress: string]: BoxThread }> {
-//     const returnThreads: { [threadAddress: string]: BoxThread } = {};
-//     const threadsToJoin = new Array<EthereumAddress>();
+          // Add it to the return
+          returnThreads.set(joinedThread.threadAddress, joinedThread.thread);
+        }
 
-//     for (const threadAddress of threadAddresses) {
-//       if (this.threads[threadAddress] == null) {
-//         // Need to join the thread
-//         threadsToJoin.push(threadAddress);
-//       } else {
-//         returnThreads[threadAddress] = this.threads[threadAddress];
-//       }
-//     }
+        return returnThreads;
+      });
+  }
 
-//     if (threadsToJoin.length === 0) {
-//       // All the threads are already joined
-//       return returnThreads;
-//     }
+  public getDiscoveryThread(): ResultAsync<BoxThread, ThreeBoxError | BlockchainUnavailableError> {
+    return this.getHypernetProtocolSpace().andThen((space) => {
+      return ResultAsync.fromPromise(
+        space.joinThread("config.discoveryThreadName", {
+          ghost: true,
+          ghostBacklogLimit: 50,
+        }),
+        (e) => {
+          return new ThreeBoxError(e as Error);
+        },
+      );
+    });
+  }
 
-//     // Need to join some more threads
-//     const config = await this.configProvider.getConfig();
-//     const spaces = await this.getSpaces(["config.spaceName"]);
-//     const space = spaces["config.spaceName"];
+  public getControlThread(): ResultAsync<BoxThread, ThreeBoxError | BlockchainUnavailableError> {
+    return this.getHypernetProtocolSpace().andThen((space) => {
+      return ResultAsync.fromPromise(
+        space.joinThread("config.controlThreadName", {
+          ghost: true,
+          ghostBacklogLimit: 0,
+        }),
+        (e) => {
+          return new ThreeBoxError(e as Error);
+        },
+      );
+    });
+  }
 
-//     // Now start the process of joining each of the threads
-//     const newThreadPromises: { [threadAddress: string]: Promise<BoxThread> } = {};
+  public getDID(): ResultAsync<string, ThreeBoxError | BlockchainUnavailableError> {
+    return this.getBox().map((box) => {
+      return box.DID;
+    });
+  }
 
-//     for (const threadAddress of threadsToJoin) {
-//       newThreadPromises[threadAddress] = space.joinThreadByAddress(threadAddress);
-//     }
+  protected _authSpace(
+    box: BoxInstance,
+    spaceName: string,
+  ): ResultAsync<{ spaceName: string; space: BoxSpace }, ThreeBoxError> {
+    return ResultAsync.fromPromise(box.openSpace(spaceName), (e) => {
+      return new ThreeBoxError(e as Error);
+    }).map((space) => {
+      return { spaceName, space };
+    });
+  }
 
-//     // Loop over the threads
-//     for (const [threadAddress, threadPromise] of Object.entries(newThreadPromises)) {
-//       const thread = await threadPromise;
-
-//       // Add it to the cache
-//       this.threads[threadAddress] = thread;
-
-//       // Add it to the return
-//       returnThreads[threadAddress] = thread;
-//     }
-
-//     return returnThreads;
-//   }
-
-//   public async getDiscoveryThread(): Promise<BoxThread> {
-//     const config = await this.configProvider.getConfig();
-//     const spaces = await this.getSpaces(["config.spaceName"]);
-//     const space = spaces["config.spaceName"];
-
-//     return space.joinThread("config.discoveryThreadName", {
-//       ghost: true,
-//       ghostBacklogLimit: 50,
-//     });
-//   }
-
-//   public async getControlThread(): Promise<BoxThread> {
-//     const config = await this.configProvider.getConfig();
-//     const spaces = await this.getSpaces(["config.spaceName"]);
-//     const space = spaces["config.spaceName"];
-
-//     return space.joinThread("config.controlThreadName", {
-//       ghost: true,
-//       ghostBacklogLimit: 0,
-//     });
-//   }
-
-//   public async getDID(): Promise<string> {
-//     const box = await this.getBox();
-
-//     return box.DID;
-//   }
-// }
+  protected _joinThread(
+    threadAddress: string,
+    space: BoxSpace,
+  ): ResultAsync<{ threadAddress: string; thread: BoxThread }, ThreeBoxError> {
+    return ResultAsync.fromPromise(space.joinThreadByAddress(threadAddress), (e) => {
+      return new ThreeBoxError(e as Error);
+    }).map((thread) => {
+      return { threadAddress, thread };
+    });
+  }
+}

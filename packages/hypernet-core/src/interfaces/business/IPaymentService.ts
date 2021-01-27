@@ -67,7 +67,9 @@ export interface IPaymentService {
    * Notify the service that a stake has been created/posted.
    * @param paymentId
    */
-  stakePosted(paymentId: string): ResultAsync<void, CoreUninitializedError | OfferMismatchError | InvalidParametersError>;
+  stakePosted(
+    paymentId: string,
+  ): ResultAsync<void, CoreUninitializedError | OfferMismatchError | InvalidParametersError>;
 
   /**
    * Notify the service that an offer has been made.

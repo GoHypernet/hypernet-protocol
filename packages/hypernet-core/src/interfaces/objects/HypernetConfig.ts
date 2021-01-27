@@ -12,5 +12,6 @@ export class HypernetConfig {
     public hypernetProtocolDomain: string,
     public defaultPaymentExpiryLength: number,
     public chainProviders: ChainProviders,
+    public hypernetProtocolSpace: string,
   ) {}
 }

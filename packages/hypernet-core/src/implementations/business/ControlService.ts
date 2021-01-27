@@ -1,79 +1,82 @@
-// import { IContextProvider } from "@interfaces/utilities/IContextProvider";
-// import { ControlClaim } from "@interfaces/objects";
-// import { IControlService } from "@interfaces/business/IControlService";
+import { IContextProvider } from "@interfaces/utilities/IContextProvider";
+import { ControlClaim, InitializedHypernetContext, ResultAsync } from "@interfaces/objects";
+import { IControlService } from "@interfaces/business/IControlService";
+import { LogicalError } from "@interfaces/objects/errors";
 
-// export class ControlService implements IControlService {
-//   protected claimPeriod = 1000 * 60 * 5; // 5 minutes
-//   protected timeout: NodeJS.Timeout | null;
-//   protected lastControlClaim: ControlClaim | null;
-//   protected checkControlInterval: NodeJS.Timeout | null;
+export class ControlService implements IControlService {
+  protected claimPeriod = 1000 * 60 * 5; // 5 minutes
+  protected timeout: NodeJS.Timeout | null;
+  protected lastControlClaim: ControlClaim | null;
+  protected checkControlInterval: NodeJS.Timeout | null;
 
-//   constructor(protected contextProvider: IContextProvider) {
-//     this.timeout = null;
-//     this.lastControlClaim = null;
-//     this.checkControlInterval = null;
-//   }
+  constructor(protected contextProvider: IContextProvider, protected messagingRepo: IMessagingRepository) {
+    this.timeout = null;
+    this.lastControlClaim = null;
+    this.checkControlInterval = null;
+  }
 
-//   public async claimControl(): Promise<void> {
-//     const context = await this.contextProvider.getContext();
+  public claimControl(): ResultAsync<void, LogicalError> {
+    let context: InitializedHypernetContext;
+    let controlClaim: ControlClaim;
 
-//     // Check to make sure we even have an account to take control of.
-//     if (context.account == null) {
-//       throw new Error("Can not claim control until an account is set. Call HypernetCore.initialize() first!");
-//     }
+    return this.contextProvider
+      .getInitializedContext()
+      .andThen((myContext) => {
+        context = myContext;
+        // Create a new claim
+        controlClaim = new ControlClaim(context.account, new Date().getTime());
 
-//     // Create a new claim
-//     const controlClaim = new ControlClaim(context.account, new Date().getTime());
+        // Send the claim out to the other cores
+        // await this.messagingRepo.sendControlClaim(controlClaim);
 
-//     // Send the claim out to the other corese
-//     // await this.messagingRepo.sendControlClaim(controlClaim);
+        // Update the context
+        context.inControl = true;
+        return this.contextProvider.setContext(context);
+      })
+      .map(() => {
+        // We will continue to send control claims every 5 minutes
+        this.timeout = setInterval(() => {
+          // this.messagingRepo.sendControlClaim(controlClaim);
+        }, this.claimPeriod);
 
-//     // Update the context
-//     context.inControl = true;
-//     this.contextProvider.setContext(context);
+        // Notify the world.
+        context.onControlClaimed.next(controlClaim);
+      });
+  }
 
-//     // We will continue to send control claims every 5 minutes
-//     this.timeout = setInterval(() => {
-//       // this.messagingRepo.sendControlClaim(controlClaim);
-//     }, this.claimPeriod);
+  /**
+   * Processes an incoming control claim. Basically, if we get one,
+   * SHUT DOWN EVERYTHING
+   * @param controlClaim
+   */
+  public async processControlClaim(controlClaim: ControlClaim): Promise<void> {
+    const context = await this.contextProvider.getContext();
 
-//     // Notify the world.
-//     context.onControlClaimed.next(controlClaim);
-//   }
+    // set the last control claim time
+    this.lastControlClaim = controlClaim;
 
-//   /**
-//    * Processes an incoming control claim. Basically, if we get one,
-//    * SHUT DOWN EVERYTHING
-//    * @param controlClaim
-//    */
-//   public async processControlClaim(controlClaim: ControlClaim): Promise<void> {
-//     const context = await this.contextProvider.getContext();
+    // Update the context
+    context.inControl = false;
+    this.contextProvider.setContext(context);
 
-//     // set the last control claim time
-//     this.lastControlClaim = controlClaim;
+    // Cancel any notifications
+    if (this.timeout != null) {
+      clearInterval(this.timeout);
+    }
 
-//     // Update the context
-//     context.inControl = false;
-//     this.contextProvider.setContext(context);
+    // While we are not in control, we are going to set a timeout
+    // to try and regain control. If whoever is in control stops posting,
+    // if we haven't heard from them after claimPeriod, then we will try
+    // and take control
+    const now = new Date().getTime();
 
-//     // Cancel any notifications
-//     if (this.timeout != null) {
-//       clearInterval(this.timeout);
-//     }
+    this.checkControlInterval = setInterval(() => {
+      if (this.lastControlClaim != null && now - (this.lastControlClaim.timestamp + this.claimPeriod) > 5000) {
+        // TODO: take control of our lives
+      }
+    }, this.claimPeriod);
 
-//     // While we are not in control, we are going to set a timeout
-//     // to try and regain control. If whoever is in control stops posting,
-//     // if we haven't heard from them after claimPeriod, then we will try
-//     // and take control
-//     const now = new Date().getTime();
-
-//     this.checkControlInterval = setInterval(() => {
-//       if (this.lastControlClaim != null && now - (this.lastControlClaim.timestamp + this.claimPeriod) > 5000) {
-//         // TODO: take control of our lives
-//       }
-//     }, this.claimPeriod);
-
-//     // Notify the world.
-//     context.onControlYielded.next(controlClaim);
-//   }
-// }
+    // Notify the world.
+    context.onControlYielded.next(controlClaim);
+  }
+}

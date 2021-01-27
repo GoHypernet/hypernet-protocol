@@ -200,7 +200,9 @@ export class PaymentService implements IPaymentService {
    * then provides assets to the counterparty (ie a parameterizedPayment)
    * @param paymentId the paymentId for the stake
    */
-  public stakePosted(paymentId: string): ResultAsync<void, CoreUninitializedError | OfferMismatchError | InvalidParametersError> {
+  public stakePosted(
+    paymentId: string,
+  ): ResultAsync<void, CoreUninitializedError | OfferMismatchError | InvalidParametersError> {
     const prerequisites = ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -209,49 +211,48 @@ export class PaymentService implements IPaymentService {
     let payments: Map<string, Payment>;
     let context: InitializedHypernetContext;
 
-    return prerequisites
-      .andThen((vals) => {
-        [payments, context] = vals;
+    return prerequisites.andThen((vals) => {
+      [payments, context] = vals;
 
-        const payment = payments.get(paymentId);
+      const payment = payments.get(paymentId);
 
-        if (payment == null) {
-          return errAsync(new InvalidParametersError("Invalid payment ID!"));
+      if (payment == null) {
+        return errAsync(new InvalidParametersError("Invalid payment ID!"));
+      }
+
+      // Make sure the stake is legit
+      if (!payment.requiredStake.eq(payment.amountStaked)) {
+        // TODO: We should be doing more here. The whole payment should be aborted.
+        return errAsync(new OfferMismatchError(`Invalid stake provided for payment ${paymentId}`));
+      }
+
+      // Payment state must be in "staked" in order to progress
+      if (payment.state !== EPaymentState.Staked) {
+        return errAsync(
+          new InvalidParametersError(
+            `Invalid payment ${paymentId}, it must be in the staked status. Cannot provide payment!`,
+          ),
+        );
+      }
+
+      // If we created the stake, we can ignore this
+      if (payment.from !== context.publicIdentifier) {
+        this.logUtils.log("Not providing asset since payment is not from us!");
+        return okAsync(undefined);
+      }
+
+      // If the payment state is staked, we know that the proper
+      // insurance has been posted.
+      return this.paymentRepository.provideAsset(paymentId).andThen((updatedPayment) => {
+        if (updatedPayment instanceof PushPayment) {
+          context.onPushPaymentUpdated.next(updatedPayment);
         }
-
-        // Make sure the stake is legit
-        if (!payment.requiredStake.eq(payment.amountStaked)) {
-          // TODO: We should be doing more here. The whole payment should be aborted.
-          return errAsync(new OfferMismatchError(`Invalid stake provided for payment ${paymentId}`));
+        if (updatedPayment instanceof PullPayment) {
+          context.onPullPaymentUpdated.next(updatedPayment);
         }
-
-        // Payment state must be in "staked" in order to progress
-        if (payment.state !== EPaymentState.Staked) {
-          return errAsync(
-            new InvalidParametersError(
-              `Invalid payment ${paymentId}, it must be in the staked status. Cannot provide payment!`,
-            ),
-          );
-        }
-
-        // If we created the stake, we can ignore this
-        if (payment.from !== context.publicIdentifier) {
-          this.logUtils.log("Not providing asset since payment is not from us!");
-          return okAsync(undefined);
-        }
-
-        // If the payment state is staked, we know that the proper
-        // insurance has been posted.
-        return this.paymentRepository.provideAsset(paymentId).andThen((updatedPayment) => {
-          if (updatedPayment instanceof PushPayment) {
-            context.onPushPaymentUpdated.next(updatedPayment);
-          }
-          if (updatedPayment instanceof PullPayment) {
-            context.onPullPaymentUpdated.next(updatedPayment);
-          }
-          return okAsync(undefined);
-        });
+        return okAsync(undefined);
       });
+    });
   }
 
   /**
@@ -269,48 +270,49 @@ export class PaymentService implements IPaymentService {
     let payments: Map<string, Payment>;
     let context: InitializedHypernetContext;
 
-    return prerequisites
-      .andThen((vals) => {
-        [payments, context] = vals;
-        const payment = payments.get(paymentId);
+    return prerequisites.andThen((vals) => {
+      [payments, context] = vals;
+      const payment = payments.get(paymentId);
 
-        if (payment == null) {
-          return errAsync(new InvalidParametersError("Invalid payment ID!"));
-        }
+      if (payment == null) {
+        return errAsync(new InvalidParametersError("Invalid payment ID!"));
+      }
 
-        // Payment state must be in "approved" to finalize
-        if (payment.state !== EPaymentState.Approved) {
-          return errAsync(
-            new InvalidParametersError(
-              `Invalid payment ${paymentId}, it must be in the approved status. Cannot provide payment!`,
-            ),
-          );
-        }
+      // Payment state must be in "approved" to finalize
+      if (payment.state !== EPaymentState.Approved) {
+        return errAsync(
+          new InvalidParametersError(
+            `Invalid payment ${paymentId}, it must be in the approved status. Cannot provide payment!`,
+          ),
+        );
+      }
 
-        // Make sure the stake is legit
-        // if (!payment.requiredStake.eq(payment.amountStaked)) {
-        //   // TODO: We should be doing more here. The whole payment should be aborted.
-        //   return errAsync(new OfferMismatchError(`Invalid stake provided for payment ${paymentId}`));
-        // }
+      // Make sure the stake is legit
+      // if (!payment.requiredStake.eq(payment.amountStaked)) {
+      //   // TODO: We should be doing more here. The whole payment should be aborted.
+      //   return errAsync(new OfferMismatchError(`Invalid stake provided for payment ${paymentId}`));
+      // }
 
-        // If we're the ones that *sent* the payment, we can ignore this
-        if (payment.from === context.publicIdentifier) {
-          this.logUtils.log("Doing nothing in paymentPosted because we are the ones that posted the payment!");
-          return okAsync(undefined);
-        }
+      // If we're the ones that *sent* the payment, we can ignore this
+      if (payment.from === context.publicIdentifier) {
+        this.logUtils.log("Doing nothing in paymentPosted because we are the ones that posted the payment!");
+        return okAsync(undefined);
+      }
 
-        // If the payment state is approved, we know that it matches our insurance payment
-        if (payment instanceof PushPayment) {
-          // Resolve the parameterized payment immediately for the full balnce
-          return this.paymentRepository.finalizePayment(paymentId, payment.paymentAmount.toString()).map((finalizedPayment) => {
+      // If the payment state is approved, we know that it matches our insurance payment
+      if (payment instanceof PushPayment) {
+        // Resolve the parameterized payment immediately for the full balnce
+        return this.paymentRepository
+          .finalizePayment(paymentId, payment.paymentAmount.toString())
+          .map((finalizedPayment) => {
             context.onPushPaymentUpdated.next(finalizedPayment as PushPayment);
           });
-        } else if (payment instanceof PullPayment) {
-          // Notify the user that the funds have been approved.
-          context.onPullPaymentApproved.next(payment);
-        }
-        return okAsync(undefined);
-      });
+      } else if (payment instanceof PullPayment) {
+        // Notify the user that the funds have been approved.
+        context.onPullPaymentApproved.next(payment);
+      }
+      return okAsync(undefined);
+    });
   }
 
   /**
@@ -326,24 +328,23 @@ export class PaymentService implements IPaymentService {
     let payments: Map<string, Payment>;
     let context: InitializedHypernetContext;
 
-    return prerequisites
-      .andThen((vals) => {
-        [payments, context] = vals;
-        const payment = payments.get(paymentId);
+    return prerequisites.andThen((vals) => {
+      [payments, context] = vals;
+      const payment = payments.get(paymentId);
 
-        if (payment == null) {
-          return errAsync(new InvalidParametersError("Invalid payment ID!"));
-        }
+      if (payment == null) {
+        return errAsync(new InvalidParametersError("Invalid payment ID!"));
+      }
 
-        // @todo: check that the payment is TO us
-        // @todo add some additional checking here
-        // @todo add in a way to grab the resolved transfer
-        // @todo probably resolve the offer and/or insurance transfer as well?
-        // @todo probably genericize this so that it doesn't have to be a pushPayment
-        context.onPushPaymentReceived.next(payment as PushPayment);
+      // @todo: check that the payment is TO us
+      // @todo add some additional checking here
+      // @todo add in a way to grab the resolved transfer
+      // @todo probably resolve the offer and/or insurance transfer as well?
+      // @todo probably genericize this so that it doesn't have to be a pushPayment
+      context.onPushPaymentReceived.next(payment as PushPayment);
 
-        return okAsync(undefined);
-      });
+      return okAsync(undefined);
+    });
   }
 
   /**
