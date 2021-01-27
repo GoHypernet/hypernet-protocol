@@ -23,11 +23,11 @@ used a traditional payment service provider sdk.
 This monorepo contains several packages:  
 
 - [developer-ui](packages/developer-ui): An example package demonstrating how to consume the Hypernet Core SDK. 
-- hypernet-contracts: A package containing the Hypernet Protocol smart contracts.
-- iframe: A package for running an iframe process in the browser which connects to a merchant service.
-- web-demo: An example package demonstrating how to consume the Hypernet Core SDK.  
-- web-integration: 
-- web-ui: 
+- [hypernet-contracts](packages/hypernet-contracts): A package containing the Hypernet Protocol smart contracts.
+- [iframe](packages/iframe): A package for running an iframe process in the browser which connects to a merchant service.
+- [web-demo](packages/web-demo): An example package demonstrating how to consume the Hypernet Core SDK.  
+- [web-integration](packages/web-integrations): 
+- [web-ui](packages/web-ui): 
 
 
 ## Prerequisites
