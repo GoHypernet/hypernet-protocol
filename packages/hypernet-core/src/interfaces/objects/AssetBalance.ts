@@ -11,6 +11,9 @@ import { BigNumber, EthereumAddress } from "@interfaces/objects";
 export class AssetBalance {
   constructor(
     public assetAddresss: EthereumAddress,
+    public name: string,
+    public symbol: string,
+    public decimals: number,
     public totalAmount: BigNumber,
     public lockedAmount: BigNumber,
     public freeAmount: BigNumber,
