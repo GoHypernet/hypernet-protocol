@@ -22,8 +22,10 @@ const TokenSelector: React.FC<TokenSelectorProps> = (props: TokenSelectorProps) 
         Token Selector:
         <select value={selectedPaymentToken?.address} onChange={handleChange}>
           <option value="">Choose...</option>
-          {tokenSelectorOptions?.map((option) => (
-            <option value={option?.address}>{option?.tokenName}</option>
+          {tokenSelectorOptions?.map((option, index) => (
+            <option key={index} value={option?.address}>
+              {option?.tokenName}
+            </option>
           ))}
         </select>
       </label>

@@ -11,7 +11,7 @@ const BalanceList: React.FC<BalanceListProps> = (props: BalanceListProps) => {
   return (
     <div>
       {balances?.map((balance, index) => (
-        <div>
+        <div key={index}>
           <h3>balance {index + 1}: </h3>
           <ul>
             <li>assetAddress: {balance.assetAddress}</li>

@@ -1,4 +1,5 @@
 import React from "react";
+import { LinkList } from "@hypernetlabs/web-ui";
 import { useLinks } from "../../hooks";
 
 const LinksWidget: React.FC = () => {
@@ -10,6 +11,7 @@ const LinksWidget: React.FC = () => {
   return (
     <div>
       <h2>here is your LinksWidget: </h2>
+      <LinkList links={links} />
     </div>
   );
 };

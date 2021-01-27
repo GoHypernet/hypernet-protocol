@@ -1,18 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import { TransactionList } from "@hypernetlabs/web-ui";
 import MainContainer from "../containers/MainContainer";
 import BalancesWidget from "../widgets/BalancesWidget";
 import LinksWidget from "../widgets/LinksWidget";
 import { IHypernetWebIntegration } from "./HypernetWebIntegration.interface";
 import { StoreProvider } from "../contexts";
-import {
-  TRANSACTION_LIST_ID_SELECTOR,
-  BALANCES_WIDGET_ID_SELECTOR,
-  FUND_WIDGET_ID_SELECTOR,
-  LINKS_WIDGET_ID_SELECTOR,
-} from "../constants";
+import { BALANCES_WIDGET_ID_SELECTOR, FUND_WIDGET_ID_SELECTOR, LINKS_WIDGET_ID_SELECTOR } from "../constants";
 import IHypernetIFrameProxy from "../proxy/IHypernetIFrameProxy";
 import HypernetIFrameProxy from "../proxy/HypernetIFrameProxy";
 import FundWidget from "../widgets/FundWidget";
@@ -100,10 +94,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
   public async renderBalancesWidget(selector: string = BALANCES_WIDGET_ID_SELECTOR) {
     ReactDOM.render(await this.bootstrapComponent(<BalancesWidget />, true), this.generateDomElement(selector));
-  }
-
-  public async renderTransactionList(selector: string = TRANSACTION_LIST_ID_SELECTOR) {
-    ReactDOM.render(await this.bootstrapComponent(<TransactionList />), this.generateDomElement(selector));
   }
 
   public async renderFundWidget(selector: string = FUND_WIDGET_ID_SELECTOR) {
