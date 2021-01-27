@@ -1,10 +1,31 @@
+import { PublicIdentifier, EthereumAddress, PublicKey, EPaymentType } from "@hypernetlabs/hypernet-core";
 import IHypernetIFrameProxy from "../proxy/IHypernetIFrameProxy";
+
+export interface IRenderParams {
+  selector: string;
+}
+
+export interface IConnectorRenderParams {
+  connector: string;
+}
+
+export interface IRenderPaymentWidgetParams {
+  selector: string;
+  counterPartyAccount: PublicIdentifier;
+  amount: string;
+  expirationDate: moment.Moment;
+  requiredStake: string;
+  paymentToken: EthereumAddress;
+  disputeMediator: PublicKey;
+  paymentType: EPaymentType;
+}
 
 export interface IHypernetWebIntegration {
   getReady: () => Promise<IHypernetIFrameProxy>;
   proxy: IHypernetIFrameProxy;
-  renderBalancesWidget(selector?: string): void;
-  renderFundWidget(selector?: string): void;
-  renderLinksWidget(selector?: string): void;
-  startConnectorFlow(connector?: string): void;
+  renderBalancesWidget(params?: IRenderParams): void;
+  renderFundWidget(params?: IRenderParams): void;
+  renderLinksWidget(params?: IRenderParams): void;
+  renderPaymentWidget(params: IRenderPaymentWidgetParams): void;
+  startConnectorFlow(params?: IConnectorRenderParams): void;
 }

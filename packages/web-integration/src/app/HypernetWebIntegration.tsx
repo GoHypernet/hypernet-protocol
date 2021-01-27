@@ -4,9 +4,20 @@ import ReactDOM from "react-dom";
 import MainContainer from "../containers/MainContainer";
 import BalancesWidget from "../widgets/BalancesWidget";
 import LinksWidget from "../widgets/LinksWidget";
-import { IHypernetWebIntegration } from "./HypernetWebIntegration.interface";
+import PaymentWidget from "../widgets/PaymentWidget";
+import {
+  IConnectorRenderParams,
+  IHypernetWebIntegration,
+  IRenderParams,
+  IRenderPaymentWidgetParams,
+} from "./HypernetWebIntegration.interface";
 import { StoreProvider } from "../contexts";
-import { BALANCES_WIDGET_ID_SELECTOR, FUND_WIDGET_ID_SELECTOR, LINKS_WIDGET_ID_SELECTOR } from "../constants";
+import {
+  BALANCES_WIDGET_ID_SELECTOR,
+  FUND_WIDGET_ID_SELECTOR,
+  LINKS_WIDGET_ID_SELECTOR,
+  PAYMENT_WIDGET_ID_SELECTOR,
+} from "../constants";
 import IHypernetIFrameProxy from "../proxy/IHypernetIFrameProxy";
 import HypernetIFrameProxy from "../proxy/HypernetIFrameProxy";
 import FundWidget from "../widgets/FundWidget";
@@ -92,21 +103,48 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     );
   }
 
-  public async renderBalancesWidget(selector: string = BALANCES_WIDGET_ID_SELECTOR) {
-    ReactDOM.render(await this.bootstrapComponent(<BalancesWidget />, true), this.generateDomElement(selector));
+  public async renderBalancesWidget(config?: IRenderParams) {
+    ReactDOM.render(
+      await this.bootstrapComponent(<BalancesWidget />),
+      this.generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
+    );
   }
 
-  public async renderFundWidget(selector: string = FUND_WIDGET_ID_SELECTOR) {
-    ReactDOM.render(await this.bootstrapComponent(<FundWidget />), this.generateDomElement(selector));
+  public async renderFundWidget(config?: IRenderParams) {
+    ReactDOM.render(
+      await this.bootstrapComponent(<FundWidget />),
+      this.generateDomElement(config?.selector || FUND_WIDGET_ID_SELECTOR),
+    );
   }
 
-  public async renderLinksWidget(selector: string = LINKS_WIDGET_ID_SELECTOR) {
-    ReactDOM.render(await this.bootstrapComponent(<LinksWidget />), this.generateDomElement(selector));
+  public async renderLinksWidget(config?: IRenderParams) {
+    ReactDOM.render(
+      await this.bootstrapComponent(<LinksWidget />),
+      this.generateDomElement(config?.selector || LINKS_WIDGET_ID_SELECTOR),
+    );
   }
 
-  public async startConnectorFlow(connector?: string) {
+  public async renderPaymentWidget(config: IRenderPaymentWidgetParams) {
+    ReactDOM.render(
+      await this.bootstrapComponent(
+        <PaymentWidget
+          counterPartyAccount={config.counterPartyAccount}
+          amount={config.amount}
+          expirationDate={config.expirationDate}
+          requiredStake={config.requiredStake}
+          paymentToken={config.paymentToken}
+          disputeMediator={config.disputeMediator}
+          paymentType={config.paymentType}
+        />,
+        true,
+      ),
+      this.generateDomElement(config?.selector || PAYMENT_WIDGET_ID_SELECTOR),
+    );
+  }
+
+  public async startConnectorFlow(config?: IConnectorRenderParams) {
     this.iframeContainer.setAttribute("style", "display: block;");
-    this.proxy.startConnectorFlow(connector);
+    this.proxy.startConnectorFlow(config?.connector);
   }
 }
 
