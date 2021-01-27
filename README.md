@@ -37,7 +37,8 @@ This monorepo contains several packages:
 	- Windows 10: [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10)
  - [nvm](https://github.com/nvm-sh/nvm#install--update-script)
  - [yarn](https://classic.yarnpkg.com/en/docs/install/#debian-stable)
- - [Docker](https://www.docker.com/products/docker-desktop), if on Windows, docker-desktop + enable the wsl integration.
+ - [Docker](https://www.docker.com/products/docker-desktop): If you are developeing on a Windows platform, 
+   enable WSL intagration when you install Docker-Desktop.
 
 ## Installing
 1) Switch to correct version of Node:
@@ -47,17 +48,3 @@ This monorepo contains several packages:
 2) Install packages:
 
     `yarn`
-
-## Packages
-
-### hypernet-core
-
-Contains the bulk of the code in the monorepo; consumes the Connext SDK and exposes the concept of (and an SDK for) a "Hypernet Link". See package readme for more details on how this works exactly.
-
-### Hypernet-Contracts
-
-Contains the smart contracts needed for Hypernet Links to function, including Hypertoken.
-
-### developer-ui
-
-A minimal demo that demonstrates consumption of the Hypernet Core SDK, as well as usage of both of the custom transfer definitions that Hypernet created (and pr'd into the Connext Vector repo).
