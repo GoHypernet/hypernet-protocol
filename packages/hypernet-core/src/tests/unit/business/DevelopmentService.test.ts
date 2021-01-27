@@ -1,8 +1,8 @@
 import { when } from "ts-mockito";
 
 import { BigNumber } from "@interfaces/objects";
-import DevelopmentServiceMocks from "../../mock/business/DevelopmentServiceMocks";
-import { mockUtils } from "../../mock/utils";
+import DevelopmentServiceMocks from "@mock/business/DevelopmentServiceMocks";
+import { mockUtils } from "@mock/mocks";
 import { okAsync } from "neverthrow";
 
 describe("DevelopmentService tests", () => {

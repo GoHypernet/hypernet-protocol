@@ -4,9 +4,9 @@ import moment from "moment";
 
 import { BigNumber, PushPayment, Payment, HypernetConfig, AssetBalance, PullPayment } from "@interfaces/objects";
 import { EPaymentState } from "@interfaces/types";
-import PaymentServiceMocks from "../../mock/business/PaymentServiceMocks";
+import PaymentServiceMocks from "@mock/business/PaymentServiceMocks";
 import { mkPublicIdentifier } from "@connext/vector-utils";
-import { mockUtils } from "../../mock/utils";
+import { mockUtils } from "@mock/mocks";
 import { constants } from "ethers";
 import { ChainProviders } from "@connext/vector-types";
 import { okAsync, ok, err } from "neverthrow";
@@ -127,7 +127,7 @@ describe("PaymentService tests", () => {
         .mockReturnValue(okAsync(payment));
     }
     // Act
-    const result = await paymentServiceMock.factoryService().acceptFunds(paymentIds)
+    const result = await paymentServiceMock.factoryService().acceptFunds(paymentIds);
 
     // Assert
     const paym = result._unsafeUnwrap();

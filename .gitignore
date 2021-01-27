@@ -12,6 +12,7 @@ packages/hypernet-core/temp.txt
 packages/developer-ui/debug.log
 packages/*/src/*.d.ts
 packages/*/coverage
+packages/*/yarn-error.log
 *.swp
 *.swo
 */yarn-error.log

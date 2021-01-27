@@ -67,7 +67,7 @@ export class ConfigProvider implements IConfigProvider {
     }
   }
 
-  public getConfig(): ResultAsync<HypernetConfig, Error> {
+  public getConfig(): ResultAsync<HypernetConfig, never> {
     return okAsync(this.config);
   }
 }

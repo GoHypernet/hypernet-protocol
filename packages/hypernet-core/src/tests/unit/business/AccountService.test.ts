@@ -3,8 +3,8 @@ import { mkPublicIdentifier } from "@connext/vector-utils";
 import { Subject } from "rxjs";
 
 import { Balances, BigNumber, AssetBalance } from "@interfaces/objects";
-import AccountServiceMocks from "../../mock/business/AccountServiceMocks";
-import { mockUtils } from "../../mock/utils";
+import AccountServiceMocks from "@mock/business/AccountServiceMocks";
+import { mockUtils } from "@mock/mocks";
 import { okAsync } from "neverthrow";
 
 describe("AccountService tests", () => {

@@ -16,7 +16,7 @@ import {
   PublicKey,
   PullPayment,
 } from "@interfaces/objects";
-import { mockUtils } from "../../mock/utils";
+import { mockUtils } from "@mock/mocks";
 import moment from "moment";
 import { PublicIdentifier } from "@connext/vector-types";
 
