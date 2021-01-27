@@ -16,12 +16,3 @@ export class BlockchainProviderMock implements IBlockchainProvider {
     return okAsync(this.provider);
   }
 }
-
-export function createBlockchainProviderMock() {
-  const blockchainProviderMock = td.object<IBlockchainProvider>();
-  const signerMock =  td.object<ethers.providers.JsonRpcSigner>();
-  const providerMock = td.object<ethers.providers.Web3Provider>();
-
-  td.when(blockchainProviderMock.getProvider()).thenReturn(okAsync(providerMock));
-  td.when(blockchainProviderMock.getSigner()).thenReturn(okAsync(signerMock));
-}

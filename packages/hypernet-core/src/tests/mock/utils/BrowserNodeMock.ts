@@ -1,18 +1,9 @@
-import { VectorError } from "@interfaces/objects/errors";
-import { ParameterizedResolver } from "@interfaces/types";
 import {
-  IBasicChannelResponse,
-  IBasicTransferResponse,
   IBrowserNode,
-  IConditionalTransferCreatedPayload,
-  IConditionalTransferResolvedPayload,
   IFullChannelState,
-  IFullTransferState,
-  IRegisteredTransfer,
-  IWithdrawResponse,
 } from "@interfaces/utilities";
-import { publicIdentifier, routerChannelAddress } from "@mock/mocks";
-import { okAsync, ResultAsync } from "neverthrow";
+import { chainId, routerChannelAddress, routerPublicIdentifier } from "@mock/mocks";
+import { okAsync } from "neverthrow";
 import td from "testdouble";
 
 export function createBrowserNodeMock(stateChannels: IFullChannelState[] | null = null): IBrowserNode {
@@ -30,7 +21,7 @@ export function createBrowserNodeMock(stateChannels: IFullChannelState[] | null 
       processedDepositsA: [],
       processedDepositsB: [],
       timeout: "timeout",
-      aliceIdentifier: "routerPublicIdentifier",
+      aliceIdentifier: routerPublicIdentifier,
       bobIdentifier: "bobIdentifier",
       latestUpdate: {
         channelAddress: "channelAddress",
@@ -43,7 +34,7 @@ export function createBrowserNodeMock(stateChannels: IFullChannelState[] | null 
         details: {},
       },
       networkContext: {
-        chainId: 1337,
+        chainId: chainId,
         channelFactoryAddress: "channelFactoryAddress",
         transferRegistryAddress: "transferRegistryAddress",
         providerUrl: "providerUrl",

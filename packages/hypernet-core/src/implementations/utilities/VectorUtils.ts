@@ -335,14 +335,11 @@ export class VectorUtils implements IVectorUtils {
       return this.getRouterChannelAddressSetup;
     }
 
-    const prerequisites = (ResultUtils.combine([
-      this.configProvider.getConfig() as ResultAsync<any, any>,
+    const prerequisites = ResultUtils.combine([
+      this.configProvider.getConfig(),
       this.contextProvider.getInitializedContext(),
       this.browserNodeProvider.getBrowserNode(),
-    ]) as unknown) as ResultAsync<
-      [HypernetConfig, InitializedHypernetContext, IBrowserNode],
-      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
-    >;
+    ]);
 
     let config: HypernetConfig;
     let context: InitializedHypernetContext;
@@ -387,7 +384,7 @@ export class VectorUtils implements IVectorUtils {
     browserNode: IBrowserNode,
     config: HypernetConfig,
   ): ResultAsync<IBasicChannelResponse, VectorError> {
-    return browserNode.setup(config.routerPublicIdentifier, 1337, DEFAULT_CHANNEL_TIMEOUT.toString());
+    return browserNode.setup(config.routerPublicIdentifier, config.chainId, DEFAULT_CHANNEL_TIMEOUT.toString());
   }
 
   protected _getStateChannel(

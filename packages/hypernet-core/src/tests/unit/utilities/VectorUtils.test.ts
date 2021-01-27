@@ -5,10 +5,11 @@ import {
   BlockchainProviderMock,
   createBrowserNodeMock,
 } from "@mock/utils";
-import { routerChannelAddress } from "@mock/mocks";
+import { chainId, routerChannelAddress, routerPublicIdentifier } from "@mock/mocks";
 import td from "testdouble";
-import { IBrowserNodeProvider, ILogUtils, IPaymentIdUtils } from "@interfaces/utilities";
+import { IBrowserNode, IBrowserNodeProvider, ILogUtils, IPaymentIdUtils } from "@interfaces/utilities";
 import { okAsync } from "neverthrow";
+import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
 
 class VectorUtilsMocks {
   public configProvider = new ConfigProviderMock();
@@ -17,10 +18,11 @@ class VectorUtilsMocks {
   public blockchainProvider = new BlockchainProviderMock();
   public paymentIdUtils = td.object<IPaymentIdUtils>();
   public logUtils = td.object<ILogUtils>();
+  public browserNodeMock: IBrowserNode;
 
   constructor(includeExistingStateChannels: boolean = true) {
-    const browserNode = createBrowserNodeMock(includeExistingStateChannels ? null : []);
-    td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(browserNode));
+    this.browserNodeMock = createBrowserNodeMock(includeExistingStateChannels ? null : []);
+    td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(this.browserNodeMock));
 
   }
 
@@ -67,5 +69,6 @@ describe("VectorUtils tests", () => {
     const retRouterChannelAddress = result._unsafeUnwrap();
 
     expect(retRouterChannelAddress).toBe(routerChannelAddress);
+    td.verify(vectorUtilsMocks.browserNodeMock.setup(routerPublicIdentifier, chainId, DEFAULT_CHANNEL_TIMEOUT.toString()))
   });
 });

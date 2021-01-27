@@ -46,8 +46,6 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
     // If we were not provided with a specific browser node, set up a mock one.
     if (browserNode == null) {
       this.browserNode = td.object<IBrowserNode>();
-      console.log("In mock, browserNode=");
-      console.log(this.browserNode);
       td.when(this.browserNode.getStateChannels()).thenReturn(okAsync(Array.from(this.stateChannels.keys())));
       td.when(this.browserNode.getStateChannel(routerChannelAddress)).thenReturn(okAsync(this.stateChannels.get(routerChannelAddress)));
     }
@@ -57,10 +55,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
   }
 
   getBrowserNode(): ResultAsync<IBrowserNode, VectorError | Error> {
-    console.log(this.browserNode);
-
     const result = okAsync<IBrowserNode, VectorError | Error>(this.browserNode);
-    console.log(result);
     return result;
   }
 }

@@ -10,9 +10,9 @@ import { CoreUninitializedError } from "@interfaces/objects/errors";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { okAsync, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
-import { HyperMock, account, publicIdentifier } from "@mock/mocks";
+import { account, publicIdentifier } from "@mock/mocks";
 
-export class ContextProviderMock extends HyperMock implements IContextProvider {
+export class ContextProviderMock implements IContextProvider {
   protected context: HypernetContext;
   protected initializedContext: InitializedHypernetContext;
 
@@ -27,8 +27,6 @@ export class ContextProviderMock extends HyperMock implements IContextProvider {
   protected onBalancesChanged: Subject<Balances>;
 
   constructor(context: HypernetContext | null = null, initializedContext: InitializedHypernetContext | null = null) {
-    super();
-
     this.onControlClaimed = new Subject<ControlClaim>();
     this.onControlYielded = new Subject<ControlClaim>();
     this.onPushPaymentProposed = new Subject<PushPayment>();
@@ -79,20 +77,14 @@ export class ContextProviderMock extends HyperMock implements IContextProvider {
   }
 
   public getContext(): ResultAsync<HypernetContext, never> {
-    this.recordCall("getContext", arguments);
-
     return okAsync(this.context);
   }
 
   public getInitializedContext(): ResultAsync<InitializedHypernetContext, CoreUninitializedError> {
-    this.recordCall("getInitializedContext", arguments);
-
     return okAsync(this.initializedContext);
   }
 
   public setContext(context: HypernetContext): ResultAsync<void, never> {
-    this.recordCall("setContext", arguments);
-
-    return this.voidResult();
+    return okAsync<null, never>(null).map(() => {});
   }
 }
