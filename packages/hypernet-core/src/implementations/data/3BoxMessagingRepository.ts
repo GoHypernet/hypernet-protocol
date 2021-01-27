@@ -7,135 +7,176 @@ import {
   EstablishLinkRequest,
   MessagePayload,
   ControlClaim,
+  ResultAsync,
 } from "@interfaces/objects";
 import { IThreeBoxUtils, IContextProvider, IConfigProvider } from "@interfaces/utilities";
-import { ELinkRole, EMessageType } from "@interfaces/types";
+import { EMessageType } from "@interfaces/types";
 import { plainToClass, serialize } from "class-transformer";
+import { BlockchainUnavailableError, LogicalError, ThreeBoxError } from "@interfaces/objects/errors";
+import { ResultUtils } from "@implementations/utilities";
+import { errAsync, okAsync } from "neverthrow";
+import { BoxSpace, BoxThread } from "3box";
 
 export class ThreeBoxMessagingRepository implements IMessagingRepository {
+  protected toThreeboxError: (e: unknown) => ThreeBoxError;
   constructor(
     protected boxUtils: IThreeBoxUtils,
     protected contextProvider: IContextProvider,
     protected configProvider: IConfigProvider,
-  ) {}
+  ) {
+    this.toThreeboxError = (e) => {
+      return new ThreeBoxError(e as Error);
+    };
+  }
 
-  public async createMessageThread(
+  public createMessageThread(
     threadName: string,
     localUser: EthereumAddress,
     remoteUser: EthereumAddress,
-  ): Promise<MessageThread> {
-    const openThreads = await this.getThreadMetadata();
-    const existingThread = await this.getExistingThread(openThreads, remoteUser);
-    if (existingThread != null) {
-      return existingThread;
-    }
+  ): ResultAsync<MessageThread, BlockchainUnavailableError | ThreeBoxError> {
+    let openThreads: ThreadMetadata[];
 
-    // No existing thread between these two users.
-    // We're doing a Members Confidential thread, so other people can't
-    // see what we're sending
-    const config = await this.configProvider.getConfig();
-    const space = await this.boxUtils.getHypernetProtocolSpace();
-    const thread = await space.createConfidentialThread(threadName);
+    return this.getThreadMetadata()
+      .andThen((myOpenThreads) => {
+        openThreads = myOpenThreads;
+        return this.getExistingThread(openThreads, remoteUser);
+      })
+      .andThen((existingThread) => {
+        if (existingThread != null) {
+          return okAsync(existingThread);
+        }
 
-    // Current user is one part of the thread, need to add the other user
-    await thread.addMember(remoteUser);
-
-    // Store the new thread metadata
-    openThreads.push(new ThreadMetadata(thread.address, remoteUser));
-    space.private.set("config.openThreadKey", serialize(openThreads));
-
-    return new MessageThread(thread.address, localUser, remoteUser, []);
+        return this._createMessageThread(threadName, localUser, remoteUser, openThreads);
+      });
   }
 
-  public async getMessageThread(address: string): Promise<MessageThread> {
+  public getMessageThread(address: string): ResultAsync<MessageThread, BlockchainUnavailableError | ThreeBoxError> {
     // Get the list of open threads
-    const threadMetadata = await this.getThreadMetadata();
-
-    // If the requested thread is not in the list, then that's a problem
-    const existingThreadMetadata = threadMetadata.filter((val) => {
-      return val.address === address;
-    });
-
-    if (existingThreadMetadata.length < 1) {
-      throw new Error(`Thread ${address} does not exist!`);
-    }
-
     // Threads exist in the basic hypernet protocol space
-    const space = await this.boxUtils.getHypernetProtocolSpace();
+    let existingThreadMetadata: ThreadMetadata[];
 
-    // Join the thread
-    const thread = await space.joinThreadByAddress(address);
+    return ResultUtils.combine([this.getThreadMetadata(), this.boxUtils.getHypernetProtocolSpace()])
+      .andThen((vals) => {
+        const [threadMetadata, space] = vals;
 
-    // Get all the posts in the thread
-    const posts = await thread.getPosts();
+        // If the requested thread is not in the list, then that's a problem
+        existingThreadMetadata = threadMetadata.filter((val) => {
+          return val.address === address;
+        });
 
-    // Convert the remaining posts to messages
-    const messages = posts.map((post) => {
-      // TODO: Determine if we need to convert the message to an object or something else.
-      // We might be able to strongly type the data for a Message.
-      return new Message(post.author, post.timestamp, post.message);
-    });
+        if (existingThreadMetadata.length < 1) {
+          return errAsync(new LogicalError(`Thread ${address} does not exist!`));
+        }
 
-    const context = await this.contextProvider.getContext();
-    if (context.account == null) {
-      throw new Error("Can not get message threads until we know who we are!");
-    }
+        // Join the thread
+        return ResultAsync.fromPromise(space.joinThreadByAddress(address), this.toThreeboxError);
+      })
+      .andThen((threadUnk) => {
+        const thread = threadUnk as BoxThread;
+        // Get all the posts in the thread
+        const postsResult = ResultAsync.fromPromise(thread.getPosts(), this.toThreeboxError);
+        return ResultUtils.combine([postsResult, this.contextProvider.getInitializedContext()]);
+      })
+      .map((vals) => {
+        const [posts, context] = vals;
 
-    return new MessageThread(address, context.account, existingThreadMetadata[0].userAddress, messages);
+        // Convert the remaining posts to messages
+        const messages = posts.map((post) => {
+          // TODO: Determine if we need to convert the message to an object or something else.
+          // We might be able to strongly type the data for a Message.
+          return new Message(post.author, post.timestamp, post.message);
+        });
+
+        return new MessageThread(address, context.account, existingThreadMetadata[0].userAddress, messages);
+      });
   }
 
-  public async getMessageThreadAddresses(): Promise<string[]> {
+  public getMessageThreadAddresses(): ResultAsync<string[], BlockchainUnavailableError | ThreeBoxError> {
     // Threads exist in the basic hypernet protocol space
-    const space = await this.boxUtils.getHypernetProtocolSpace();
-
-    return space.subscribedThreads();
+    return this.boxUtils.getHypernetProtocolSpace().andThen((space) => {
+      return ResultAsync.fromPromise(space.subscribedThreads(), this.toThreeboxError);
+    });
   }
 
-  public async sendMessage(destination: EthereumAddress, payload: MessagePayload): Promise<void> {
+  public sendMessage(
+    destination: EthereumAddress,
+    payload: MessagePayload,
+  ): ResultAsync<void, BlockchainUnavailableError | ThreeBoxError | LogicalError> {
+    let threadMetadataToUse: ThreadMetadata;
+
     // Get the message thread the user wants to use
-    const metadata = await this.getThreadMetadata();
+    return this.getThreadMetadata()
+      .andThen((metadata) => {
+        const existingThreadMetadata = metadata.filter((val) => {
+          return val.userAddress === destination;
+        });
+        if (existingThreadMetadata.length < 1) {
+          return errAsync(new LogicalError(`No existing thread established to reach destination ${destination}`));
+        }
+        const threadMetadataToUse = existingThreadMetadata[0];
+        return this.boxUtils.getThreads([threadMetadataToUse.address]);
+      })
+      .andThen((threadsUnk) => {
+        const threads = threadsUnk as Map<string, BoxThread>;
+        const thread = threads.get(threadMetadataToUse.address);
 
-    const existingThreadMetadata = metadata.filter((val) => {
-      return val.userAddress === destination;
-    });
-    if (existingThreadMetadata.length < 1) {
-      throw new Error(`No existing thread established to reach destination ${destination}`);
-    }
-    const threadMetadataToUse = existingThreadMetadata[0];
-    const threads = await this.boxUtils.getThreads([threadMetadataToUse.address]);
-    const thread = threads[threadMetadataToUse.address];
+        if (thread == null) {
+          return errAsync(
+            new LogicalError(`Thread not returned even though it was in the metadata, ${threadMetadataToUse.address}`),
+          );
+        }
 
-    // Send the payload
-    await thread.post(serialize(payload));
+        // Send the payload
+        return ResultAsync.fromPromise(thread.post(serialize(payload)), this.toThreeboxError);
+      })
+      .map(() => {});
   }
 
-  public async sendEstablishLinkRequest(request: EstablishLinkRequest): Promise<void> {
+  public sendEstablishLinkRequest(
+    request: EstablishLinkRequest,
+  ): ResultAsync<void, ThreeBoxError | BlockchainUnavailableError> {
     // We just need to post into the discovery thread
-    const discoveryThread = await this.boxUtils.getDiscoveryThread();
-
-    await discoveryThread.post(serialize(request));
+    return this.boxUtils
+      .getDiscoveryThread()
+      .andThen((discoveryThread) => {
+        return ResultAsync.fromPromise(discoveryThread.post(serialize(request)), this.toThreeboxError);
+      })
+      .map(() => {});
   }
 
-  public async sendDenyLinkResponse(linkRequest: EstablishLinkRequest): Promise<void> {
+  public sendDenyLinkResponse(
+    linkRequest: EstablishLinkRequest,
+  ): ResultAsync<void, ThreeBoxError | BlockchainUnavailableError> {
     // Get the message thread the user wants to user
-    const threads = await this.boxUtils.getThreads([linkRequest.threadAddress]);
-    const thread = threads[linkRequest.threadAddress];
+    return this.boxUtils
+      .getThreads([linkRequest.threadAddress])
+      .andThen((threads) => {
+        const thread = threads.get(linkRequest.threadAddress);
 
-    // Send a deny message
-    const payload = new MessagePayload(EMessageType.DENY_LINK, serialize(linkRequest));
-    await thread.post(serialize(payload));
+        if (thread == null) {
+          return errAsync(new Error());
+        }
+
+        // Send a deny message
+        const payload = new MessagePayload(EMessageType.DENY_LINK, serialize(linkRequest));
+        return ResultAsync.fromPromise(thread.post(serialize(payload)), this.toThreeboxError);
+      })
+      .map(() => {});
   }
 
-  public async sendControlClaim(controlClaim: ControlClaim): Promise<void> {
-    const controlThread = await this.boxUtils.getControlThread();
-
-    await controlThread.post(serialize(controlClaim));
+  public sendControlClaim(controlClaim: ControlClaim): ResultAsync<void, ThreeBoxError | BlockchainUnavailableError> {
+    return this.boxUtils
+      .getControlThread()
+      .andThen((controlThread) => {
+        return ResultAsync.fromPromise(controlThread.post(serialize(controlClaim)), this.toThreeboxError);
+      })
+      .map(() => {});
   }
 
-  protected async getExistingThread(
+  protected getExistingThread(
     openThreads: ThreadMetadata[],
     remoteUser: EthereumAddress,
-  ): Promise<MessageThread | null> {
+  ): ResultAsync<MessageThread | null, BlockchainUnavailableError | ThreeBoxError> {
     const existingThreads = openThreads.filter((val) => {
       return val.userAddress === remoteUser;
     });
@@ -145,24 +186,67 @@ export class ThreeBoxMessagingRepository implements IMessagingRepository {
       return this.getMessageThread(existingThreads[0].address);
     }
 
-    return null;
+    return okAsync(null);
   }
 
-  protected async getThreadMetadata(): Promise<ThreadMetadata[]> {
+  protected getThreadMetadata(): ResultAsync<ThreadMetadata[], BlockchainUnavailableError | ThreeBoxError> {
     // The thread metadata exists in the basic space
-    const space = await this.boxUtils.getHypernetProtocolSpace();
+    return ResultUtils.combine([this.boxUtils.getHypernetProtocolSpace(), this.configProvider.getConfig()])
+      .andThen((vals) => {
+        const [space, config] = vals;
 
-    // Check if we already have a thread created between these two people.
-    const config = await this.configProvider.getConfig();
-    const openThreadString = await space.private.get("config.openThreadKey");
-    if (openThreadString == null || openThreadString === "") {
-      return [];
-    }
+        // Check if we already have a thread created between these two people.
 
-    const openThreadObjects = JSON.parse(openThreadString) as object[];
+        return ResultAsync.fromPromise(space.private.get(config.openThreadKey), this.toThreeboxError);
+      })
+      .map((openThreadString) => {
+        if (openThreadString == null || openThreadString === "") {
+          return [];
+        }
 
-    return openThreadObjects.map((plainLink) => {
-      return plainToClass(ThreadMetadata, plainLink);
-    });
+        const openThreadObjects = JSON.parse(openThreadString) as object[];
+
+        return openThreadObjects.map((plainLink) => {
+          return plainToClass(ThreadMetadata, plainLink);
+        });
+      });
+  }
+
+  protected _createMessageThread(
+    threadName: string,
+    localUser: EthereumAddress,
+    remoteUser: EthereumAddress,
+    openThreads: ThreadMetadata[],
+  ): ResultAsync<MessageThread, BlockchainUnavailableError | ThreeBoxError> {
+    let thread: BoxThread;
+    let space: BoxSpace;
+    // No existing thread between these two users.
+    // We're doing a Members Confidential thread, so other people can't
+    // see what we're sending
+    return this.boxUtils
+      .getHypernetProtocolSpace()
+      .andThen((mySpace) => {
+        space = mySpace;
+        return ResultAsync.fromPromise(space.createConfidentialThread(threadName), this.toThreeboxError);
+      })
+      .andThen((thread) => {
+        // Current user is one part of the thread, need to add the other user
+        const addMemberResult = ResultAsync.fromPromise(thread.addMember(remoteUser), this.toThreeboxError);
+
+        return ResultUtils.combine([this.configProvider.getConfig(), addMemberResult]);
+      })
+      .andThen((vals) => {
+        const [config] = vals;
+
+        // Store the new thread metadata
+        openThreads.push(new ThreadMetadata(thread.address, remoteUser));
+        return ResultAsync.fromPromise(
+          space.private.set(config.openThreadKey, serialize(openThreads)),
+          this.toThreeboxError,
+        );
+      })
+      .map(() => {
+        return new MessageThread(thread.address, localUser, remoteUser, []);
+      });
   }
 }

@@ -1,5 +1,16 @@
-import { AccountService, DevelopmentService, LinkService, PaymentService } from "@implementations/business";
-import { AccountsRepository, PaymentRepository, VectorLinkRepository } from "@implementations/data";
+import {
+  AccountService,
+  ControlService,
+  DevelopmentService,
+  LinkService,
+  PaymentService,
+} from "@implementations/business";
+import {
+  AccountsRepository,
+  PaymentRepository,
+  ThreeBoxMessagingRepository,
+  VectorLinkRepository,
+} from "@implementations/data";
 import {
   BrowserNodeProvider,
   ConfigProvider,
@@ -10,8 +21,14 @@ import {
   PaymentUtils,
   VectorUtils,
 } from "@implementations/utilities";
-import { IAccountService, IDevelopmentService, ILinkService, IPaymentService } from "@interfaces/business";
-import { IAccountsRepository, ILinkRepository, IPaymentRepository } from "@interfaces/data";
+import {
+  IAccountService,
+  IControlService,
+  IDevelopmentService,
+  ILinkService,
+  IPaymentService,
+} from "@interfaces/business";
+import { IAccountsRepository, ILinkRepository, IMessagingRepository, IPaymentRepository } from "@interfaces/data";
 import { IHypernetCore } from "@interfaces/IHypernetCore";
 import {
   Balances,
@@ -48,14 +65,17 @@ import {
   ILogUtils,
   IPaymentIdUtils,
   IPaymentUtils,
+  IThreeBoxUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
-import { IVectorListener } from "@interfaces/api";
+import { IMessagingListener, IVectorListener } from "@interfaces/api";
 import { Subject } from "rxjs";
 import { VectorAPIListener } from "./api";
 import { PaymentIdUtils } from "./utilities/PaymentIdUtils";
 import { NodeError } from "@connext/vector-types";
 import { errAsync, ok, okAsync } from "neverthrow";
+import { ThreeBoxMessagingListener } from "./api/ThreeBoxMessagingListener";
+import { ThreeBoxUtils } from "./utilities/3BoxUtils";
 
 /**
  * The top-level class-definition for Hypernet Core.
@@ -74,6 +94,7 @@ export class HypernetCore implements IHypernetCore {
 
   // Utils Layer Stuff
   protected blockchainProvider: IBlockchainProvider;
+  protected boxUtils: IThreeBoxUtils;
   protected configProvider: IConfigProvider;
   protected contextProvider: IContextProvider;
   protected browserNodeProvider: IBrowserNodeProvider;
@@ -87,15 +108,18 @@ export class HypernetCore implements IHypernetCore {
   protected accountRepository: IAccountsRepository;
   protected linkRepository: ILinkRepository;
   protected paymentRepository: IPaymentRepository;
+  protected threeboxMessagingRepository: IMessagingRepository;
 
   // Business Layer Stuff
   protected accountService: IAccountService;
+  protected controlService: IControlService;
   protected paymentService: IPaymentService;
   protected linkService: ILinkService;
   protected developmentService: IDevelopmentService;
 
   // API
   protected vectorAPIListener: IVectorListener;
+  protected threeboxMessagingListener: IMessagingListener;
 
   protected _initializeResult: ResultAsync<void, LogicalError> | null;
   protected _initialized: boolean;
@@ -134,12 +158,6 @@ export class HypernetCore implements IHypernetCore {
     });
 
     this.logUtils = new LogUtils();
-    this.blockchainProvider = new EthersBlockchainProvider();
-    this.paymentIdUtils = new PaymentIdUtils();
-    this.configProvider = new ConfigProvider(network, this.logUtils, config);
-    this.paymentUtils = new PaymentUtils(this.configProvider, this.logUtils, this.paymentIdUtils);
-    this.linkUtils = new LinkUtils();
-
     this.contextProvider = new ContextProvider(
       this.onControlClaimed,
       this.onControlYielded,
@@ -151,6 +169,12 @@ export class HypernetCore implements IHypernetCore {
       this.onPullPaymentUpdated,
       this.onBalancesChanged,
     );
+    this.blockchainProvider = new EthersBlockchainProvider();
+    this.paymentIdUtils = new PaymentIdUtils();
+    this.configProvider = new ConfigProvider(network, this.logUtils, config);
+    this.paymentUtils = new PaymentUtils(this.configProvider, this.logUtils, this.paymentIdUtils);
+    this.linkUtils = new LinkUtils();
+    this.boxUtils = new ThreeBoxUtils(this.blockchainProvider, this.contextProvider, this.configProvider);
 
     this.browserNodeProvider = new BrowserNodeProvider(this.configProvider, this.contextProvider, this.logUtils);
     this.vectorUtils = new VectorUtils(
@@ -187,6 +211,12 @@ export class HypernetCore implements IHypernetCore {
       this.linkUtils,
     );
 
+    this.threeboxMessagingRepository = new ThreeBoxMessagingRepository(
+      this.boxUtils,
+      this.contextProvider,
+      this.configProvider,
+    );
+
     this.paymentService = new PaymentService(
       this.linkRepository,
       this.accountRepository,
@@ -197,6 +227,7 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.accountService = new AccountService(this.accountRepository, this.contextProvider, this.logUtils);
+    this.controlService = new ControlService(this.contextProvider, this.threeboxMessagingRepository);
     this.linkService = new LinkService(this.linkRepository);
     this.developmentService = new DevelopmentService(this.accountRepository);
 
@@ -207,6 +238,12 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.paymentUtils,
       this.logUtils,
+    );
+    this.threeboxMessagingListener = new ThreeBoxMessagingListener(
+      this.controlService,
+      this.boxUtils,
+      this.configProvider,
+      this.contextProvider,
     );
 
     // This whole rigamarole is to make sure it can only be initialized a single time, and that you can call waitInitialized()

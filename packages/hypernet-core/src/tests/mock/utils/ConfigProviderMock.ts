@@ -21,6 +21,8 @@ export class ConfigProviderMock implements IConfigProvider {
         {
           [1337]: "http://localhost:8545",
         },
+        "hypernetProtocolSpace",
+        "openThreadKey",
       );
   }
 

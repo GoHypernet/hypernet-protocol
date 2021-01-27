@@ -1,7 +1,13 @@
-import { IContextProvider } from "@interfaces/utilities/IContextProvider";
+import { IContextProvider } from "@interfaces/utilities";
 import { ControlClaim, InitializedHypernetContext, ResultAsync } from "@interfaces/objects";
-import { IControlService } from "@interfaces/business/IControlService";
-import { LogicalError } from "@interfaces/objects/errors";
+import { IControlService } from "@interfaces/business";
+import {
+  BlockchainUnavailableError,
+  CoreUninitializedError,
+  LogicalError,
+  ThreeBoxError,
+} from "@interfaces/objects/errors";
+import { IMessagingRepository } from "@interfaces/data";
 
 export class ControlService implements IControlService {
   protected claimPeriod = 1000 * 60 * 5; // 5 minutes
@@ -15,7 +21,10 @@ export class ControlService implements IControlService {
     this.checkControlInterval = null;
   }
 
-  public claimControl(): ResultAsync<void, LogicalError> {
+  public claimControl(): ResultAsync<
+    void,
+    CoreUninitializedError | BlockchainUnavailableError | ThreeBoxError | LogicalError
+  > {
     let context: InitializedHypernetContext;
     let controlClaim: ControlClaim;
 
@@ -27,8 +36,9 @@ export class ControlService implements IControlService {
         controlClaim = new ControlClaim(context.account, new Date().getTime());
 
         // Send the claim out to the other cores
-        // await this.messagingRepo.sendControlClaim(controlClaim);
-
+        return this.messagingRepo.sendControlClaim(controlClaim);
+      })
+      .andThen(() => {
         // Update the context
         context.inControl = true;
         return this.contextProvider.setContext(context);
@@ -49,34 +59,40 @@ export class ControlService implements IControlService {
    * SHUT DOWN EVERYTHING
    * @param controlClaim
    */
-  public async processControlClaim(controlClaim: ControlClaim): Promise<void> {
-    const context = await this.contextProvider.getContext();
+  public processControlClaim(controlClaim: ControlClaim): ResultAsync<void, CoreUninitializedError> {
+    let context: InitializedHypernetContext;
 
-    // set the last control claim time
-    this.lastControlClaim = controlClaim;
+    return this.contextProvider
+      .getInitializedContext()
+      .andThen((myContext) => {
+        context = myContext;
+        // set the last control claim time
+        this.lastControlClaim = controlClaim;
 
-    // Update the context
-    context.inControl = false;
-    this.contextProvider.setContext(context);
+        // Update the context
+        context.inControl = false;
+        return this.contextProvider.setContext(context);
+      })
+      .map(() => {
+        // Cancel any notifications
+        if (this.timeout != null) {
+          clearInterval(this.timeout);
+        }
 
-    // Cancel any notifications
-    if (this.timeout != null) {
-      clearInterval(this.timeout);
-    }
+        // While we are not in control, we are going to set a timeout
+        // to try and regain control. If whoever is in control stops posting,
+        // if we haven't heard from them after claimPeriod, then we will try
+        // and take control
+        const now = new Date().getTime();
 
-    // While we are not in control, we are going to set a timeout
-    // to try and regain control. If whoever is in control stops posting,
-    // if we haven't heard from them after claimPeriod, then we will try
-    // and take control
-    const now = new Date().getTime();
+        this.checkControlInterval = setInterval(() => {
+          if (this.lastControlClaim != null && now - (this.lastControlClaim.timestamp + this.claimPeriod) > 5000) {
+            // TODO: take control of our lives
+          }
+        }, this.claimPeriod);
 
-    this.checkControlInterval = setInterval(() => {
-      if (this.lastControlClaim != null && now - (this.lastControlClaim.timestamp + this.claimPeriod) > 5000) {
-        // TODO: take control of our lives
-      }
-    }, this.claimPeriod);
-
-    // Notify the world.
-    context.onControlYielded.next(controlClaim);
+        // Notify the world.
+        context.onControlYielded.next(controlClaim);
+      });
   }
 }

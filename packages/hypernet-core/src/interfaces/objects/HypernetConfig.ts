@@ -13,5 +13,6 @@ export class HypernetConfig {
     public defaultPaymentExpiryLength: number,
     public chainProviders: ChainProviders,
     public hypernetProtocolSpace: string,
+    public openThreadKey: string,
   ) {}
 }
