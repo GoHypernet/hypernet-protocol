@@ -47,9 +47,10 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
     if (browserNode == null) {
       this.browserNode = td.object<IBrowserNode>();
       td.when(this.browserNode.getStateChannels()).thenReturn(okAsync(Array.from(this.stateChannels.keys())));
-      td.when(this.browserNode.getStateChannel(routerChannelAddress)).thenReturn(okAsync(this.stateChannels.get(routerChannelAddress)));
-    }
-    else {
+      td.when(this.browserNode.getStateChannel(routerChannelAddress)).thenReturn(
+        okAsync(this.stateChannels.get(routerChannelAddress)),
+      );
+    } else {
       this.browserNode = browserNode;
     }
   }

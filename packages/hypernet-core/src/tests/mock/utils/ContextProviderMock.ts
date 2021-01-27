@@ -13,18 +13,18 @@ import { Subject } from "rxjs";
 import { account, publicIdentifier } from "@mock/mocks";
 
 export class ContextProviderMock implements IContextProvider {
-  protected context: HypernetContext;
-  protected initializedContext: InitializedHypernetContext;
+  public context: HypernetContext;
+  public initializedContext: InitializedHypernetContext;
 
-  protected onControlClaimed: Subject<ControlClaim>;
-  protected onControlYielded: Subject<ControlClaim>;
-  protected onPushPaymentProposed: Subject<PushPayment>;
-  protected onPullPaymentProposed: Subject<PullPayment>;
-  protected onPushPaymentReceived: Subject<PushPayment>;
-  protected onPullPaymentApproved: Subject<PullPayment>;
-  protected onPushPaymentUpdated: Subject<PushPayment>;
-  protected onPullPaymentUpdated: Subject<PullPayment>;
-  protected onBalancesChanged: Subject<Balances>;
+  public onControlClaimed: Subject<ControlClaim>;
+  public onControlYielded: Subject<ControlClaim>;
+  public onPushPaymentProposed: Subject<PushPayment>;
+  public onPullPaymentProposed: Subject<PullPayment>;
+  public onPushPaymentReceived: Subject<PushPayment>;
+  public onPullPaymentApproved: Subject<PullPayment>;
+  public onPushPaymentUpdated: Subject<PushPayment>;
+  public onPullPaymentUpdated: Subject<PullPayment>;
+  public onBalancesChanged: Subject<Balances>;
 
   constructor(context: HypernetContext | null = null, initializedContext: InitializedHypernetContext | null = null) {
     this.onControlClaimed = new Subject<ControlClaim>();

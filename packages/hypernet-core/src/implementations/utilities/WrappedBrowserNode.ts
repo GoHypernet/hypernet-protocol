@@ -22,7 +22,7 @@ import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 export class WrappedBrowserNode implements IBrowserNode {
   constructor(protected browserNode: BrowserNode) {}
-  
+
   public init(): ResultAsync<void, VectorError> {
     return ResultAsync.fromPromise(this.browserNode.init(), (e) => {
       return new VectorError(e as Error);

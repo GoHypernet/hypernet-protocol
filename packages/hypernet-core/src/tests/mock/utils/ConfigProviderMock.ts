@@ -1,19 +1,21 @@
 import { HypernetConfig } from "@interfaces/objects";
 import { IConfigProvider } from "@interfaces/utilities";
-import { chainId, routerPublicIdentifier } from "@mock/mocks";
+import { chainId, hyperTokenAddress, routerPublicIdentifier } from "@mock/mocks";
 import { okAsync, ResultAsync } from "neverthrow";
 
 export class ConfigProviderMock implements IConfigProvider {
   public config: HypernetConfig;
-  
-    constructor(config: HypernetConfig | null = null) {
-    this.config = config ?? new HypernetConfig(
+
+  constructor(config: HypernetConfig | null = null) {
+    this.config =
+      config ??
+      new HypernetConfig(
         "iframeSource",
         "routerMnemonic",
         routerPublicIdentifier,
         chainId,
         "routerUrl",
-        "hypertokenAddress",
+        hyperTokenAddress,
         "hypernetProtocolDomain",
         5000,
         {
@@ -21,8 +23,8 @@ export class ConfigProviderMock implements IConfigProvider {
         },
       );
   }
-  
-    getConfig(): ResultAsync<HypernetConfig, never> {
+
+  getConfig(): ResultAsync<HypernetConfig, never> {
     return okAsync(this.config);
   }
 }

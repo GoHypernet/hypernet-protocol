@@ -1,7 +1,4 @@
-import {
-  IBrowserNode,
-  IFullChannelState,
-} from "@interfaces/utilities";
+import { IBrowserNode, IFullChannelState } from "@interfaces/utilities";
 import { chainId, routerChannelAddress, routerPublicIdentifier } from "@mock/mocks";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
@@ -42,22 +39,24 @@ export function createBrowserNodeMock(stateChannels: IFullChannelState[] | null 
       defundNonces: [],
       inDispute: false,
     });
-  }
-  else {
+  } else {
     for (const channelState of stateChannels) {
       stateChannelsMap.set(channelState.channelAddress, channelState);
     }
   }
-  
+
   const browserNode = td.object<IBrowserNode>();
-  
-  td.when(browserNode.setup(td.matchers.anything(), td.matchers.anything(), td.matchers.anything())).thenReturn(okAsync({channelAddress: routerChannelAddress}));
+
+  td.when(browserNode.setup(td.matchers.anything(), td.matchers.anything(), td.matchers.anything())).thenReturn(
+    okAsync({ channelAddress: routerChannelAddress }),
+  );
   td.when(browserNode.getStateChannels()).thenReturn(okAsync(Array.from(stateChannelsMap.keys())));
 
   for (const stateChannel of stateChannelsMap.values()) {
-    td.when(browserNode.getStateChannel(stateChannel.channelAddress)).thenReturn(okAsync(stateChannelsMap.get(stateChannel.channelAddress)));
-  
+    td.when(browserNode.getStateChannel(stateChannel.channelAddress)).thenReturn(
+      okAsync(stateChannelsMap.get(stateChannel.channelAddress)),
+    );
   }
-  
+
   return browserNode;
 }
