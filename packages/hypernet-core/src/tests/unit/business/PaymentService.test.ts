@@ -50,6 +50,9 @@ class PaymentServiceMocks {
     
     this.assetBalance = new AssetBalance(
       hyperTokenAddress,
+      "PhoebeCoin",
+      "BEEP",
+      4,
       BigNumber.from(hypertokenBalance),
       BigNumber.from(0),
       BigNumber.from(hypertokenBalance),
@@ -124,6 +127,9 @@ class PaymentServiceMocks {
     );
   }
 }
+
+const assetName = "PhoebeCoin";
+const assetSymbol = ":P";
 
 describe("PaymentService tests", () => {
   test("sendFunds returns payment", async () => {

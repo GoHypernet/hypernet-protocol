@@ -19,7 +19,7 @@ class AccountServiceMocks {
   public balances: Balances;
 
   constructor() {
-    this.balances = new Balances([new AssetBalance(assetAddress, amount, amount, amount)]);
+    this.balances = new Balances([new AssetBalance(assetAddress, "PhoebeCoin", "BEEP", 4, amount, amount, amount)]);
 
     td.when(this.accountRepository.getPublicIdentifier()).thenReturn(okAsync(publicIdentifier));
     td.when(this.accountRepository.depositFunds(td.matchers.anything(), td.matchers.anything())).thenReturn(
@@ -35,6 +35,9 @@ class AccountServiceMocks {
     return new AccountService(this.accountRepository, this.contextProvider, this.logUtils);
   }
 }
+
+const assetName = "PhoebeCoin";
+const assetSymbol = ":P";
 
 describe("AccountService tests", () => {
   test("Should getPublicIdentifier return publicIdentifier", async () => {
