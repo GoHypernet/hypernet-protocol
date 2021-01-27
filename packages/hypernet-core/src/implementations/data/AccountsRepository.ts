@@ -303,7 +303,7 @@ export class AccountsRepository implements IAccountsRepository {
           });
         })
         .andThen((myName) => {
-          if (myName == null || myName == "0x") {
+          if (myName == null || myName == "") {
             name = `Unknown Token (${assetAddress})`;
           } else {
             name = myName;
@@ -314,7 +314,7 @@ export class AccountsRepository implements IAccountsRepository {
           });
         })
         .andThen((mySymbol) => {
-          if (mySymbol == null || mySymbol == "0x") {
+          if (mySymbol == null || mySymbol == "") {
             symbol = "Unk";
           } else {
             symbol = mySymbol;
@@ -325,7 +325,7 @@ export class AccountsRepository implements IAccountsRepository {
           });
         })
         .map((myDecimals) => {
-          const decimals = myDecimals ?? 18;
+          const decimals = myDecimals ?? 0;
           const assetInfo = new AssetInfo(assetAddress, name, symbol, decimals);
 
           // Store the cached info
