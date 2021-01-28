@@ -29,7 +29,6 @@
     "jest-when": "^3.0.1",
     "prettier": "^2.1.1",
     "randomstring": "^1.1.5",
-    "scrypt": "git@github.com:barrysteyn/node-scrypt.git",
     "ts-jest": "^26.3.0",
     "ts-mockito": "^2.6.1",
     "tslint": "^6.1.3",
