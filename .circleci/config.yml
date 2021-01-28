@@ -6,9 +6,9 @@ jobs:
         auth:
           username: mydockerhub-user
           password: $DOCKERHUB_PASSWORD # context / project UI env-var reference
-    pre:
-      - echo "registry=https://registry.npmjs.org/" > ~/.npmrc
-      - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
+    #pre:
+    #  - echo "registry=https://registry.npmjs.org/" > ~/.npmrc
+    #  - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
     steps:
       - checkout
       - run: cd packages/hypernet-core && npm install
