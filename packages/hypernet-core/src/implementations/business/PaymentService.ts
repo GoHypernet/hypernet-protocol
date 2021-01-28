@@ -1,11 +1,10 @@
-import { NodeError } from "@connext/vector-types";
+import { ResultUtils } from "@implementations/utilities";
 import { IPaymentService } from "@interfaces/business";
 import { IAccountsRepository, ILinkRepository } from "@interfaces/data";
 import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
 import {
   BigNumber,
   EthereumAddress,
-  InitializedHypernetContext,
   Payment,
   PublicIdentifier,
   PublicKey,
@@ -15,6 +14,7 @@ import {
   Result,
   HypernetConfig,
   HypernetContext,
+  InitializedHypernetContext,
 } from "@interfaces/objects";
 import {
   AcceptPaymentError,
@@ -25,10 +25,11 @@ import {
   LogicalError,
   OfferMismatchError,
   RouterChannelUnknownError,
+  VectorError,
 } from "@interfaces/objects/errors";
 import { EPaymentState } from "@interfaces/types";
 import { IConfigProvider, IContextProvider, ILogUtils } from "@interfaces/utilities";
-import { combine, Err, err, errAsync, Ok, ok, okAsync } from "neverthrow";
+import { err, errAsync, ok, okAsync } from "neverthrow";
 
 /**
  * PaymentService uses Vector internally to send payments on the requested channel.
@@ -93,49 +94,42 @@ export class PaymentService implements IPaymentService {
    */
   public offerReceived(
     paymentId: string,
-  ): ResultAsync<void, LogicalError | RouterChannelUnknownError | CoreUninitializedError | NodeError | Error> {
-    const prerequisites = (combine([
+  ): ResultAsync<void, LogicalError | RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+    const prerequisites = ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
-      this.contextProvider.getInitializedContext() as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [Map<string, Payment>, InitializedHypernetContext],
-      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
-    >;
+      this.contextProvider.getInitializedContext(),
+    ]);
 
-    return prerequisites
-      .andThen((vals) => {
-        const [payments, context] = vals;
+    return prerequisites.andThen((vals) => {
+      const [payments, context] = vals;
 
-        const payment = payments.get(paymentId);
+      const payment = payments.get(paymentId);
 
-        if (payment == null) {
-          return errAsync(new LogicalError(`PaymentService:offerReceived():Could not get payment!`));
-        }
+      if (payment == null) {
+        return errAsync(new LogicalError(`PaymentService:offerReceived():Could not get payment!`));
+      }
 
-        if (payment.state !== EPaymentState.Proposed) {
-          // The payment has already moved forward, somehow.
-          // We don't need to do anything, we probably got called
-          // by another instance of the core.
-          return okAsync(null);
-        }
+      if (payment.state !== EPaymentState.Proposed) {
+        // The payment has already moved forward, somehow.
+        // We don't need to do anything, we probably got called
+        // by another instance of the core.
+        return okAsync(undefined);
+      }
 
-        // Payment state is 'Proposed', continue to handle
+      // Payment state is 'Proposed', continue to handle
 
-        if (payment instanceof PushPayment) {
-          // Someone wants to send us a pushPayment, emit up to the api
-          context.onPushPaymentProposed.next(payment);
-        } else if (payment instanceof PullPayment) {
-          // Someone wants to send us a pullPayment, emit up to the api
-          context.onPullPaymentProposed.next(payment);
-        } else {
-          throw new Error("Unknown payment type!");
-        }
+      if (payment instanceof PushPayment) {
+        // Someone wants to send us a pushPayment, emit up to the api
+        context.onPushPaymentProposed.next(payment);
+      } else if (payment instanceof PullPayment) {
+        // Someone wants to send us a pullPayment, emit up to the api
+        context.onPullPaymentProposed.next(payment);
+      } else {
+        throw new Error("Unknown payment type!");
+      }
 
-        return okAsync(null);
-      })
-      .map(() => {
-        return;
-      });
+      return okAsync(undefined);
+    });
   }
 
   /**
@@ -145,13 +139,10 @@ export class PaymentService implements IPaymentService {
   public acceptFunds(
     paymentIds: string[],
   ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
-    const prerequisites = (combine([
+    const prerequisites = ResultUtils.combine([
       this.configProvider.getConfig(),
-      this.paymentRepository.getPaymentsByIds(paymentIds) as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [HypernetConfig, Map<string, Payment>],
-      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
-    >;
+      this.paymentRepository.getPaymentsByIds(paymentIds),
+    ]);
 
     let config: HypernetConfig;
     let payments: Map<string, Payment>;
@@ -178,12 +169,12 @@ export class PaymentService implements IPaymentService {
         }
 
         // Check the balance and make sure you have enough HyperToken to cover it
-        if (hypertokenBalance.freeAmount < totalStakeRequired) {
+        if (hypertokenBalance.freeAmount.lt(totalStakeRequired)) {
           return errAsync(new InsufficientBalanceError("Not enough Hypertoken to cover provided payments."));
         }
 
         // Now that we know we can (probably) make the payments, let's try
-        const stakeAttempts = [];
+        const stakeAttempts = new Array<Promise<Result<Payment, AcceptPaymentError>>>();
         for (const paymentId of paymentIds) {
           this.logUtils.log(`PaymentService:acceptFunds: attempting to provide stake for payment ${paymentId}`);
 
@@ -209,17 +200,14 @@ export class PaymentService implements IPaymentService {
    * then provides assets to the counterparty (ie a parameterizedPayment)
    * @param paymentId the paymentId for the stake
    */
-  public stakePosted(paymentId: string): ResultAsync<void, OfferMismatchError | InvalidParametersError> {
-    const prerequisites = (combine([
+  public stakePosted(paymentId: string): ResultAsync<void, CoreUninitializedError | OfferMismatchError | InvalidParametersError> {
+    const prerequisites = ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
-      this.contextProvider.getContext() as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [Map<string, Payment>, HypernetContext],
-      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
-    >;
+      this.contextProvider.getInitializedContext(),
+    ]);
 
     let payments: Map<string, Payment>;
-    let context: HypernetContext;
+    let context: InitializedHypernetContext;
 
     return prerequisites
       .andThen((vals) => {
@@ -249,7 +237,7 @@ export class PaymentService implements IPaymentService {
         // If we created the stake, we can ignore this
         if (payment.from !== context.publicIdentifier) {
           this.logUtils.log("Not providing asset since payment is not from us!");
-          return okAsync(null);
+          return okAsync(undefined);
         }
 
         // If the payment state is staked, we know that the proper
@@ -261,11 +249,8 @@ export class PaymentService implements IPaymentService {
           if (updatedPayment instanceof PullPayment) {
             context.onPullPaymentUpdated.next(updatedPayment);
           }
-          return okAsync(null);
+          return okAsync(undefined);
         });
-      })
-      .map(() => {
-        return;
       });
   }
 
@@ -276,16 +261,13 @@ export class PaymentService implements IPaymentService {
    * @param paymentId the payment ID to accept/resolve
    */
   public paymentPosted(paymentId: string): ResultAsync<void, InvalidParametersError> {
-    const prerequisites = (combine([
+    const prerequisites = ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
-      this.contextProvider.getContext() as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [Map<string, Payment>, HypernetContext],
-      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
-    >;
+      this.contextProvider.getInitializedContext(),
+    ]);
 
     let payments: Map<string, Payment>;
-    let context: HypernetContext;
+    let context: InitializedHypernetContext;
 
     return prerequisites
       .andThen((vals) => {
@@ -314,23 +296,20 @@ export class PaymentService implements IPaymentService {
         // If we're the ones that *sent* the payment, we can ignore this
         if (payment.from === context.publicIdentifier) {
           this.logUtils.log("Doing nothing in paymentPosted because we are the ones that posted the payment!");
-          return okAsync(null);
+          return okAsync(undefined);
         }
 
         // If the payment state is approved, we know that it matches our insurance payment
         if (payment instanceof PushPayment) {
           // Resolve the parameterized payment immediately for the full balnce
-          return this.paymentRepository.finalizePayment(paymentId, payment.paymentAmount.toString()).map(() => {
-            return null;
+          return this.paymentRepository.finalizePayment(paymentId, payment.paymentAmount.toString()).map((finalizedPayment) => {
+            context.onPushPaymentUpdated.next(finalizedPayment as PushPayment);
           });
         } else if (payment instanceof PullPayment) {
           // Notify the user that the funds have been approved.
           context.onPullPaymentApproved.next(payment);
         }
-        return okAsync(null);
-      })
-      .map(() => {
-        return;
+        return okAsync(undefined);
       });
   }
 
@@ -339,16 +318,13 @@ export class PaymentService implements IPaymentService {
    * @param paymentId the payment id that has been resolved.
    */
   public paymentCompleted(paymentId: string): ResultAsync<void, InvalidParametersError> {
-    const prerequisites = (combine([
+    const prerequisites = ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
-      this.contextProvider.getContext() as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [Map<string, Payment>, HypernetContext],
-      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
-    >;
+      this.contextProvider.getInitializedContext(),
+    ]);
 
     let payments: Map<string, Payment>;
-    let context: HypernetContext;
+    let context: InitializedHypernetContext;
 
     return prerequisites
       .andThen((vals) => {
@@ -359,16 +335,14 @@ export class PaymentService implements IPaymentService {
           return errAsync(new InvalidParametersError("Invalid payment ID!"));
         }
 
+        // @todo: check that the payment is TO us
         // @todo add some additional checking here
         // @todo add in a way to grab the resolved transfer
         // @todo probably resolve the offer and/or insurance transfer as well?
         // @todo probably genericize this so that it doesn't have to be a pushPayment
         context.onPushPaymentReceived.next(payment as PushPayment);
 
-        return okAsync(null);
-      })
-      .map(() => {
-        return;
+        return okAsync(undefined);
       });
   }
 
@@ -377,13 +351,10 @@ export class PaymentService implements IPaymentService {
    * @param paymentId the paymentId for the pull-payment
    */
   public pullRecorded(paymentId: string): ResultAsync<void, InvalidParametersError> {
-    const prerequisites = (combine([
+    const prerequisites = ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
-      this.contextProvider.getContext() as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [Map<string, Payment>, HypernetContext],
-      RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
-    >;
+      this.contextProvider.getContext(),
+    ]);
 
     let payments: Map<string, Payment>;
     let context: HypernetContext;

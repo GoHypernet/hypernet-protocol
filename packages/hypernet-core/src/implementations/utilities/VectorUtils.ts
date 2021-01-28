@@ -1,4 +1,4 @@
-import { NodeParams, OptionalPublicIdentifier, NodeResponses, DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
+import { NodeParams, OptionalPublicIdentifier, DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
 import {
   BigNumber,
   HypernetConfig,
@@ -34,7 +34,8 @@ import {
   TransferResolutionError,
   VectorError,
 } from "@interfaces/objects/errors";
-import { combine, errAsync, okAsync } from "neverthrow";
+import { errAsync, okAsync } from "neverthrow";
+import { ResultUtils } from "@implementations/utilities";
 
 /**
  * VectorUtils contains methods for interacting directly with the core Vector stuff -
@@ -74,7 +75,7 @@ export class VectorUtils implements IVectorUtils {
     paymentId: string,
     amount: string,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
-    const prerequisites = (combine([
+    const prerequisites = (ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.getRouterChannelAddress() as ResultAsync<any, any>,
     ]) as unknown) as ResultAsync<
@@ -139,7 +140,7 @@ export class VectorUtils implements IVectorUtils {
       }
     }
 
-    const prerequisites = (combine([
+    const prerequisites = (ResultUtils.combine([
       this.configProvider.getConfig() as ResultAsync<any, any>,
       this.getRouterChannelAddress(),
       this.browserNodeProvider.getBrowserNode(),
@@ -217,7 +218,7 @@ export class VectorUtils implements IVectorUtils {
       }
     }
 
-    const prerequisites = (combine([
+    const prerequisites = (ResultUtils.combine([
       this.getRouterChannelAddress() as ResultAsync<any, any>,
       this.browserNodeProvider.getBrowserNode(),
     ]) as unknown) as ResultAsync<
@@ -287,7 +288,7 @@ export class VectorUtils implements IVectorUtils {
       }
     }
 
-    const prerequisites = (combine([
+    const prerequisites = (ResultUtils.combine([
       this.configProvider.getConfig() as ResultAsync<any, any>,
       this.getRouterChannelAddress(),
       this.browserNodeProvider.getBrowserNode(),
@@ -334,14 +335,11 @@ export class VectorUtils implements IVectorUtils {
       return this.getRouterChannelAddressSetup;
     }
 
-    const prerequisites = (combine([
-      this.configProvider.getConfig() as ResultAsync<any, any>,
+    const prerequisites = ResultUtils.combine([
+      this.configProvider.getConfig(),
       this.contextProvider.getInitializedContext(),
       this.browserNodeProvider.getBrowserNode(),
-    ]) as unknown) as ResultAsync<
-      [HypernetConfig, InitializedHypernetContext, IBrowserNode],
-      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
-    >;
+    ]);
 
     let config: HypernetConfig;
     let context: InitializedHypernetContext;
@@ -350,9 +348,6 @@ export class VectorUtils implements IVectorUtils {
     return prerequisites
       .andThen((vals) => {
         [config, context, browserNode] = vals;
-        console.log(config);
-        console.log(context);
-        console.log(browserNode);
 
         this.logUtils.log(`Core publicIdentifier: ${context.publicIdentifier}`);
         this.logUtils.log(`Router publicIdentifier: ${config.routerPublicIdentifier}`);
@@ -365,11 +360,9 @@ export class VectorUtils implements IVectorUtils {
           channelResults.push(this._getStateChannel(channelAddress, browserNode));
         }
 
-        return combine(channelResults);
+        return ResultUtils.combine(channelResults);
       })
-      .andThen((channelsVal) => {
-        const channels = channelsVal as NodeResponses.GetChannelState[];
-
+      .andThen((channels) => {
         for (const channel of channels) {
           if (!channel) {
             continue;
@@ -391,7 +384,7 @@ export class VectorUtils implements IVectorUtils {
     browserNode: IBrowserNode,
     config: HypernetConfig,
   ): ResultAsync<IBasicChannelResponse, VectorError> {
-    return browserNode.setup(config.routerPublicIdentifier, 1337, DEFAULT_CHANNEL_TIMEOUT.toString());
+    return browserNode.setup(config.routerPublicIdentifier, config.chainId, DEFAULT_CHANNEL_TIMEOUT.toString());
   }
 
   protected _getStateChannel(

@@ -6,4 +6,6 @@ export * from "./ContextProvider";
 export * from "./LinkUtils";
 export * from "./LogUtils";
 export * from "./PaymentUtils";
+export * from "./ResultUtils";
 export * from "./VectorUtils";
+export * from "./WrappedBrowserNode";
