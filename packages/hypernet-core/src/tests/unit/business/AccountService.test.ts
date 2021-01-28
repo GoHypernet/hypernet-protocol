@@ -7,6 +7,9 @@ import AccountServiceMocks from "../../mock/business/AccountServiceMocks";
 import { mockUtils } from "../../mock/utils";
 import { okAsync } from "neverthrow";
 
+const assetName = "PhoebeCoin";
+const assetSymbol = ":P";
+
 describe("AccountService tests", () => {
   test("Should getPublicIdentifier return publicIdentifier", async () => {
     // Arrange
@@ -46,7 +49,7 @@ describe("AccountService tests", () => {
     const accountServiceFactory = accountServiceMock.factoryService();
     const assetAddress = mockUtils.generateRandomEtherAdress();
     const amount = BigNumber.from("42");
-    const balances = new Balances([new AssetBalance(assetAddress, amount, amount, amount)]);
+    const balances = new Balances([new AssetBalance(assetAddress, assetName, assetSymbol, 0, amount, amount, amount)]);
 
     when(accountServiceMock.accountRepository.getBalances()).thenReturn(okAsync(balances));
 
@@ -65,7 +68,7 @@ describe("AccountService tests", () => {
     const accountServiceFactory = accountServiceMock.factoryService();
     const assetAddress = mockUtils.generateRandomEtherAdress();
     const amount = BigNumber.from("42");
-    const balances = new Balances([new AssetBalance(assetAddress, amount, amount, amount)]);
+    const balances = new Balances([new AssetBalance(assetAddress, assetName, assetSymbol, 0, amount, amount, amount)]);
 
     const hypernetContext = accountServiceMock.getHypernetContextFactory();
     hypernetContext.onBalancesChanged = new Subject<Balances>();
@@ -92,7 +95,7 @@ describe("AccountService tests", () => {
     const assetAddress = mockUtils.generateRandomEtherAdress();
     const destinationAddress = mockUtils.generateRandomEtherAdress();
     const amount = BigNumber.from("42");
-    const balances = new Balances([new AssetBalance(assetAddress, amount, amount, amount)]);
+    const balances = new Balances([new AssetBalance(assetAddress, assetName, assetSymbol, 0, amount, amount, amount)]);
 
     when(accountServiceMock.accountRepository.getBalances()).thenReturn(okAsync(balances));
     when(accountServiceMock.contextProvider.getInitializedContext()).thenReturn(
