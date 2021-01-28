@@ -1,5 +1,6 @@
 import React from "react";
 import { ITokenSelectorOption } from "../../interfaces";
+import SelectInput from "../SelectInput";
 
 interface TokenSelectorProps {
   tokenSelectorOptions: ITokenSelectorOption[];
@@ -18,17 +19,13 @@ const TokenSelector: React.FC<TokenSelectorProps> = (props: TokenSelectorProps) 
 
   return (
     <div>
-      <label>
-        Token Selector:
-        <select value={selectedPaymentToken?.address} onChange={handleChange}>
-          <option value="">Choose...</option>
-          {tokenSelectorOptions?.map((option, index) => (
-            <option key={index} value={option?.address}>
-              {option?.tokenName}
-            </option>
-          ))}
-        </select>
-      </label>
+      <SelectInput
+        options={tokenSelectorOptions}
+        label="Token Selector:"
+        onChange={handleChange}
+        optionLabelKey="tokenName"
+        optionValueKey="address"
+      />
     </div>
   );
 };

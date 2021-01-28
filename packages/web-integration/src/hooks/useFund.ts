@@ -43,16 +43,12 @@ export function useFund(): IReducerStateReducer {
     switch (action.type) {
       case EActionTypes.FETCHING:
         return { ...state, loading: true };
-        break;
       case EActionTypes.FETCHED:
         return { ...state, loading: false, tokenSelectorOptions: action.payload };
-        break;
       case EActionTypes.ERROR:
         return { ...state, loading: false, error: action.payload };
-        break;
       case EActionTypes.TOKEN_SELECTED:
         return { ...state, loading: false, selectedPaymentToken: action.payload };
-        break;
       default:
         return { ...state };
     }

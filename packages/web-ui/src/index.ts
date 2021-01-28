@@ -5,3 +5,5 @@ export { default as Button } from "./components/Button";
 export { default as Modal } from "./components/Modal";
 export { default as renderConnectorAuthenticatorScreen } from "./screens/ConnectorAuthenticator";
 export { default as LinkList } from "./components/LinkList";
+export { default as TextInput } from "./components/TextInput";
+export { default as SelectInput } from "./components/SelectInput";

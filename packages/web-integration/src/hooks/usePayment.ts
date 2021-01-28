@@ -1,93 +1,121 @@
 import { useEffect, useReducer, useContext } from "react";
+import Web3 from "web3";
 import { StoreContext } from "../contexts";
 import moment from "moment";
 import { ITokenSelectorOption } from "@hypernetlabs/web-ui/src/interfaces";
-import {
-  Payment,
-  Balances,
-  PublicIdentifier,
-  EthereumAddress,
-  PublicKey,
-  EPaymentType,
-} from "@hypernetlabs/hypernet-core";
-import { ResultAsync } from "neverthrow";
-import { PaymentTokenOptionViewModel } from "../viewModel";
+import { Balances, PublicIdentifier, EthereumAddress, PublicKey, EPaymentType } from "@hypernetlabs/hypernet-core";
+import { PaymentTokenOptionViewModel, EResultStatus, ResultMessage } from "../viewModel";
+
+class PaymentTypeOption {
+  constructor(public typeName: string, public type: EPaymentType) {}
+}
 
 enum EActionTypes {
   FETCHING = "FETCHING",
   FETCHED = "FETCHED",
   ERROR = "ERROR",
   TOKEN_SELECTED = "TOKEN_SELECTED",
+  COUNTER_PARTY_CHANGED = "COUNTER_PARTY_CHANGED",
+  AMOUNT_CHANGED = "AMOUNT_CHANGED",
+  EXPIRATION_DATE_CHANGED = "EXPIRATION_DATE_CHANGED",
+  REQUIRED_STACK_CHANGED = "REQUIRED_STACK_CHANGED",
+  PAYMENT_TYPE_SELECTED = "PAYMENT_TYPE_SELECTED",
+  SUCCESS = "SUCCESS",
 }
 
 interface IReducerStateReducer {
   loading: boolean;
-  error: any;
+  error: boolean;
+  resultMessage: ResultMessage;
   tokenSelectorOptions: ITokenSelectorOption[];
   selectedPaymentToken?: ITokenSelectorOption;
-  setSelectedPaymentToken: (selectedOption?: ITokenSelectorOption) => void;
+  setSelectedPaymentToken: (param?: ITokenSelectorOption) => void;
   counterPartyAccount: PublicIdentifier;
-  setCounterPartyAccount: (counterPartyAccount?: PublicIdentifier) => void;
+  setCounterPartyAccount: (param?: PublicIdentifier) => void;
   amount: string;
-  setAmount: (amount?: string) => void;
+  setAmount: (param?: string) => void;
   expirationDate: string;
-  setExpirationDate: (expirationDate?: string) => void;
+  setExpirationDate: (param?: string) => void;
   requiredStake: string;
-  setRequiredStake: (requiredStake?: string) => void;
-  paymentToken: EthereumAddress;
-  setPaymentToken: (paymentToken?: EthereumAddress) => void;
+  setRequiredStake: (param?: string) => void;
   paymentType: EPaymentType;
-  setPaymentType: (paymentType?: EPaymentType) => void;
+  setPaymentType: (param?: EPaymentType) => void;
   disputeMediator: PublicKey;
-  sendFunds: () => ResultAsync<Payment, Error>;
+  sendFunds: () => void;
+  paymentTypeOptions: PaymentTypeOption[];
 }
 
 interface IReducerState {
   loading: boolean;
-  error: any;
+  error: boolean;
+  resultMessage: ResultMessage;
   tokenSelectorOptions: ITokenSelectorOption[];
   selectedPaymentToken?: ITokenSelectorOption;
   counterPartyAccount: PublicIdentifier;
   amount: string;
   expirationDate: string;
   requiredStake: string;
-  paymentToken: EthereumAddress;
   disputeMediator: PublicKey;
   paymentType: EPaymentType;
+  paymentTypeOptions: PaymentTypeOption[];
 }
 
 // export function usePayment(): IReducerStateReducer {
-export function usePayment(): any {
+export function usePayment(initialParams: any): IReducerStateReducer {
   const { proxy } = useContext(StoreContext);
 
   const initialState: IReducerState = {
     loading: true,
-    error: null,
-    tokenSelectorOptions: [],
-    selectedPaymentToken: undefined,
-    counterPartyAccount: "",
-    amount: "0",
-    expirationDate: "",
-    requiredStake: "0",
-    paymentToken: "",
-    disputeMediator: "0x0000000000000000000000000000000000000001", // @todo replace with an actual mediator address!,
-    paymentType: EPaymentType.Push,
+    error: false,
+    resultMessage: new ResultMessage(EResultStatus.IDLE, ""),
+    tokenSelectorOptions: initialParams?.tokenSelectorOptions || [],
+    selectedPaymentToken:
+      initialParams?.tokenSelectorOptions?.find((option: any) => option?.address === initialParams?.paymentTokenAddress)
+        ?.address || undefined,
+    counterPartyAccount: initialParams?.counterPartyAccount || "",
+    amount: initialParams?.amount || "0",
+    expirationDate: initialParams?.expirationDate || "",
+    requiredStake: initialParams?.requiredStake || "0",
+    disputeMediator: initialParams?.disputeMediator || "0x0000000000000000000000000000000000000001", // @todo replace with an actual mediator address!,
+    paymentType: initialParams?.paymentType || EPaymentType.Push,
+    paymentTypeOptions: [
+      new PaymentTypeOption("Push", EPaymentType.Push),
+      new PaymentTypeOption("Pull", EPaymentType.Pull),
+    ],
   };
 
   const [state, dispatch] = useReducer((state: IReducerState, action: any) => {
     switch (action.type) {
       case EActionTypes.FETCHING:
         return { ...state, loading: true };
-        break;
       case EActionTypes.FETCHED:
         return { ...state, loading: false, tokenSelectorOptions: action.payload };
-        break;
       case EActionTypes.ERROR:
-        return { ...state, loading: false, error: action.payload };
-        break;
+        return {
+          ...state,
+          loading: false,
+          error: true,
+          resultMessage: new ResultMessage(EResultStatus.FAILURE, action.payload),
+        };
+      case EActionTypes.SUCCESS:
+        return {
+          ...state,
+          loading: false,
+          error: false,
+          resultMessage: new ResultMessage(EResultStatus.SUCCESS, action.payload),
+        };
       case EActionTypes.TOKEN_SELECTED:
         return { ...state, loading: false, selectedPaymentToken: action.payload };
-        break;
+      case EActionTypes.COUNTER_PARTY_CHANGED:
+        return { ...state, loading: false, counterPartyAccount: action.payload };
+      case EActionTypes.AMOUNT_CHANGED:
+        return { ...state, loading: false, amount: action.payload };
+      case EActionTypes.EXPIRATION_DATE_CHANGED:
+        return { ...state, loading: false, expirationDate: action.payload };
+      case EActionTypes.REQUIRED_STACK_CHANGED:
+        return { ...state, loading: false, requiredStake: action.payload };
+      case EActionTypes.PAYMENT_TYPE_SELECTED:
+        return { ...state, loading: false, paymentType: action.payload };
       default:
         return { ...state };
     }
@@ -132,26 +160,83 @@ export function usePayment(): any {
     }, new Array<PaymentTokenOptionViewModel>());
   };
 
-  const setSelectedPaymentToken = (selectedOption?: ITokenSelectorOption) => {
+  const setSelectedPaymentToken = (param?: ITokenSelectorOption) => {
     dispatch({
       type: EActionTypes.TOKEN_SELECTED,
-      payload: selectedOption,
+      payload: param,
     });
   };
 
-  const sendFunds: () => ResultAsync<Payment, Error> = () => {
-    //const expirationDate = moment(this.expirationDate());
-    //const amount = Web3.utils.toWei(this.amount());
-    //const requiredStake = Web3.utils.toWei(this.requiredStake());
-    return proxy.sendFunds(
-      state.counterPartyAccount,
-      state.amount,
-      moment(state.expirationDate),
-      state.requiredStake,
-      state.paymentToken,
-      state.disputeMediator,
-    );
+  const setCounterPartyAccount = (param?: PublicIdentifier) => {
+    dispatch({
+      type: EActionTypes.COUNTER_PARTY_CHANGED,
+      payload: param,
+    });
   };
 
-  return { ...state, setSelectedPaymentToken, sendFunds };
+  const setAmount = (param?: string) => {
+    dispatch({
+      type: EActionTypes.AMOUNT_CHANGED,
+      payload: param,
+    });
+  };
+
+  const setExpirationDate = (param?: string) => {
+    dispatch({
+      type: EActionTypes.EXPIRATION_DATE_CHANGED,
+      payload: param,
+    });
+  };
+
+  const setRequiredStake = (param?: string) => {
+    dispatch({
+      type: EActionTypes.REQUIRED_STACK_CHANGED,
+      payload: param,
+    });
+  };
+
+  const setPaymentType = (param?: EPaymentType) => {
+    dispatch({
+      type: EActionTypes.PAYMENT_TYPE_SELECTED,
+      payload: param,
+    });
+  };
+
+  const sendFunds = () => {
+    proxy
+      .sendFunds(
+        state.counterPartyAccount,
+        Web3.utils.toWei(`${state.amount}`),
+        moment(state.expirationDate),
+        Web3.utils.toWei(`${state.requiredStake}`),
+        state.selectedPaymentToken?.address,
+        state.disputeMediator,
+      )
+      .match(
+        (balances) => {
+          dispatch({
+            type: EActionTypes.SUCCESS,
+            payload: "you fund has succeeded",
+          });
+        },
+        (err) => {
+          console.log("err: ", err);
+          dispatch({
+            type: EActionTypes.ERROR,
+            payload: err.message || "you fund has failed",
+          });
+        },
+      );
+  };
+
+  return {
+    ...state,
+    setSelectedPaymentToken,
+    setCounterPartyAccount,
+    setAmount,
+    setExpirationDate,
+    setRequiredStake,
+    setPaymentType,
+    sendFunds,
+  };
 }

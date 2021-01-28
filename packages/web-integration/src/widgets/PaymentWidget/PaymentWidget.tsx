@@ -1,74 +1,104 @@
-import React, { useState } from "react";
-import { TokenSelector, Button } from "@hypernetlabs/web-ui";
+import React from "react";
+import { TokenSelector, Button, TextInput, SelectInput } from "@hypernetlabs/web-ui";
 import { PublicIdentifier, EthereumAddress, PublicKey, EPaymentType } from "@hypernetlabs/hypernet-core";
-import { useFund } from "../../hooks";
+import { EResultStatus } from "../../viewModel";
+import { usePayment } from "../../hooks";
+import { ITokenSelectorOption } from "@hypernetlabs/web-ui/src/interfaces";
 
 interface PaymentWidgetProps {
   counterPartyAccount?: PublicIdentifier;
   amount?: string;
   expirationDate?: moment.Moment;
   requiredStake?: string;
-  paymentToken?: EthereumAddress;
+  paymentTokenAddress?: EthereumAddress;
   disputeMediator?: PublicKey;
   paymentType?: EPaymentType;
 }
 
-interface IResultMessage {
-  status?: string;
-  message?: string;
-}
-
 const PaymentWidget: React.FC<PaymentWidgetProps> = (props: PaymentWidgetProps) => {
   const {
+    tokenSelectorOptions,
+    selectedPaymentToken,
+    setSelectedPaymentToken,
+    sendFunds,
+    setCounterPartyAccount,
     counterPartyAccount,
-    amount,
-    expirationDate,
-    requiredStake,
-    paymentToken,
-    disputeMediator,
     paymentType,
-  } = props;
-  const { tokenSelectorOptions, selectedPaymentToken, setSelectedPaymentToken, depositFunds } = useFund();
-  const [resultMessage, setResultMessage] = useState<IResultMessage>();
+    setExpirationDate,
+    setAmount,
+    setPaymentType,
+    setRequiredStake,
+    paymentTypeOptions,
+    amount,
+    requiredStake,
+    expirationDate,
+    resultMessage,
+  } = usePayment({ ...props });
 
   const submitPaymentClick = () => {
-    depositFunds().match(
-      (balances) => {
-        // show success message
-        setResultMessage({
-          status: "success",
-          message: "you fund has succeeded",
-        });
-      },
-      (err) => {
-        console.log("err: ", err);
-        //handle error
-        setResultMessage({
-          status: "failure",
-          message: err.message || "you fund has failed",
-        });
-      },
-    );
+    sendFunds();
   };
 
-  if (resultMessage?.status === "success") {
+  if (resultMessage?.status === EResultStatus.SUCCESS) {
     return (
       <div>
         <h3>{resultMessage.message}</h3>
       </div>
     );
   }
-
   return (
     <div>
-      <h4>PaymentWidget</h4>
-      <TokenSelector
-        tokenSelectorOptions={tokenSelectorOptions}
-        selectedPaymentToken={selectedPaymentToken}
-        setSelectedPaymentToken={setSelectedPaymentToken}
+      <h3>Create Payment</h3>
+      <br />
+      <TextInput
+        value={counterPartyAccount}
+        onChange={(event) => setCounterPartyAccount(event.target.value)}
+        label="public identifier"
+        placeholder="Enter public identifier"
       />
       <br />
-      <Button onClick={submitPaymentClick} disabled={!selectedPaymentToken?.address} label="Submit Payment" />
+      <SelectInput
+        value={paymentType}
+        onChange={(event) => setPaymentType(event.target.value as EPaymentType)}
+        options={paymentTypeOptions}
+        optionValueKey="type"
+        optionLabelKey="typeName"
+      />
+      <br />
+      {paymentType === EPaymentType.Push && (
+        <div>
+          <TextInput
+            value={requiredStake}
+            onChange={(event) => setRequiredStake(event.target.value)}
+            label="Required Stake:"
+            placeholder="Enter Required Stake"
+          />
+          <br />
+          <TokenSelector
+            tokenSelectorOptions={tokenSelectorOptions}
+            selectedPaymentToken={selectedPaymentToken}
+            setSelectedPaymentToken={setSelectedPaymentToken}
+          />
+          <br />
+          <TextInput
+            value={amount}
+            onChange={(event) => setAmount(event.target.value)}
+            label="Amount:"
+            placeholder="Enter Amount"
+          />
+          <br />
+          <TextInput
+            value={expirationDate}
+            onChange={(event) => setExpirationDate(event.target.value)}
+            label="Expiration Date:"
+            placeholder="Enter Expiration Date"
+          />
+          <br />
+        </div>
+      )}
+      {paymentType && (
+        <Button onClick={submitPaymentClick} disabled={!selectedPaymentToken?.address} label="Submit Payment" />
+      )}
       <br />
       <h3>{resultMessage?.message}</h3>
     </div>
