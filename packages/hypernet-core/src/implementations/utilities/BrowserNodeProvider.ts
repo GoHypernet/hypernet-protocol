@@ -5,6 +5,7 @@ import { IBrowserNode, IContextProvider, ILogUtils } from "@interfaces/utilities
 import { ResultAsync } from "neverthrow";
 import { WrappedBrowserNode } from "./WrappedBrowserNode";
 import { VectorError } from "@interfaces/objects/errors";
+import { HypernetConfig } from "@interfaces/objects";
 
 export class BrowserNodeProvider implements IBrowserNodeProvider {
   protected browserNodeResult: ResultAsync<IBrowserNode, VectorError | Error> | null;
@@ -17,7 +18,7 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
     this.browserNodeResult = null;
     this.browserNode = null;
   }
-  protected initialize(): ResultAsync<IBrowserNode, VectorError | Error> {
+  protected initialize(): ResultAsync<IBrowserNode, VectorError> {
     if (this.browserNodeResult == null) {
       this.browserNodeResult = this.configProvider
         .getConfig()

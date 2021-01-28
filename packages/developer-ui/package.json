@@ -39,7 +39,8 @@
     "verify-backend": "docker ps -f status=running -f name=developer-ui | grep connextproject | if [ `wc -l` -ne 8 ]; then echo 'Error: did not detect 8 running docker containers!' && `exit 1`; fi",
     "deploy-custom-transfers": "yarn ts-node scripts/deploy.ts",
     "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "tslint -p tsconfig.json"
+    "lint": "tslint -p tsconfig.json",
+    "webpack": "webpack"
   },
   "bugs": {
     "url": "https://github.com/GoHypernet/hypernet-protocol/issues"

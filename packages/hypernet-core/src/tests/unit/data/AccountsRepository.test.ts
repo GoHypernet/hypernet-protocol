@@ -1,43 +1,41 @@
-// import { when } from "ts-mockito";
-// import { errAsync, okAsync } from "neverthrow";
+import td from "testdouble";
+import { publicIdentifier } from "@mock/mocks";
+import { BlockchainProviderMock, BrowserNodeProviderMock } from "@mock/utils";
+import { ILogUtils, IVectorUtils } from "@interfaces/utilities";
+import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
+import { AccountsRepository } from "@implementations/data/AccountsRepository";
 
-// import { Balances, BigNumber, AssetBalance } from "@interfaces/objects";
-// import AccountsRepositoryMocks from "../../mock/data/AccountsRepositoryMocks";
-// import { BrowserNode } from "@connext/vector-browser-node";
-// import { mockUtils } from "../../mock/utils";
-// import {
-//   BalancesUnavailableError,
-//   BlockchainUnavailableError,
-//   RouterChannelUnknownError,
-// } from "@interfaces/objects/errors";
-// import { NodeResponses } from "@connext/vector-types";
-// import { CoreChannelState, Result } from "@connext/vector-types";
-// const { when: jestWhen } = require("jest-when");
+class AccountsRepositoryMocks {
+    public blockchainProvider = new BlockchainProviderMock();
+    public vectorUtils = td.object<IVectorUtils>();
+    public browserNodeProvider = new BrowserNodeProviderMock();
+    public logUtils = td.object<ILogUtils>();
+  
+    public factoryAccountsRepository(): IAccountsRepository {
+      return new AccountsRepository(
+        this.blockchainProvider,
+        this.vectorUtils,
+        this.browserNodeProvider,
+        this.logUtils
+      );
+    }
+  }
 
-// describe("AccountsRepository tests", () => {
-//   test("Should getPublicIdentifier return publicIdentifier", async () => {
-//     // Arrange
-//     const accountsRepositoryMocks = new AccountsRepositoryMocks();
-//     const publicIdentifier = mockUtils.generateRandomPublicIdentifier();
-//     const routerPublicIdentifier = mockUtils.generateRandomPublicIdentifier();
-//     const supportedChains = [2323];
+describe("AccountsRepository tests", () => {
+  test("Should getPublicIdentifier return publicIdentifier", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryMocks();
 
-//     const browserNode = new BrowserNode({
-//       routerPublicIdentifier,
-//       supportedChains,
-//       chainProviders: {
-//         [supportedChains[0]]: "asdad",
-//       },
-//     });
-//     browserNode.publicIdentifier = publicIdentifier;
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-//     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(browserNode));
-
-//     // Assert
-//     expect((await accountsRepositoryMocks.factoryService().getPublicIdentifier())._unsafeUnwrap()).toStrictEqual(
-//       publicIdentifier,
-//     );
-//   });
+    // Act
+    const response = await repo.getPublicIdentifier();
+    
+    // Assert
+    expect(response).toBeDefined();
+    expect(response.isErr()).toBeFalsy();
+    expect(response._unsafeUnwrap()).toBe(publicIdentifier);
+  });
 
 //   test("Should getPublicIdentifier throw error", async () => {
 //     // Arrange
@@ -375,4 +373,4 @@
 //       throwenError,
 //     );
 //   });
-// });
+});

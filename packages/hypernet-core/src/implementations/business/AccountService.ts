@@ -1,4 +1,3 @@
-import { NodeError } from "@connext/vector-types";
 import { IAccountService } from "@interfaces/business";
 import { IAccountsRepository } from "@interfaces/data";
 import {
@@ -15,9 +14,10 @@ import {
   BlockchainUnavailableError,
   CoreUninitializedError,
   LogicalError,
+  VectorError,
 } from "@interfaces/objects/errors";
 import { IContextProvider, ILogUtils } from "@interfaces/utilities";
-import { combine, okAsync } from "neverthrow";
+import { okAsync } from "neverthrow";
 
 /**
  *
@@ -29,7 +29,7 @@ export class AccountService implements IAccountService {
     protected logUtils: ILogUtils,
   ) {}
 
-  public getPublicIdentifier(): ResultAsync<PublicIdentifier, NodeError | LogicalError> {
+  public getPublicIdentifier(): ResultAsync<PublicIdentifier, VectorError | LogicalError> {
     return this.accountRepository.getPublicIdentifier();
   }
 
@@ -46,23 +46,16 @@ export class AccountService implements IAccountService {
     amount: BigNumber,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | NodeError | Error
+    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
   > {
     this.logUtils.log(`HypernetCore:depositFunds: assetAddress: ${assetAddress}`);
 
-    const prerequisites = (combine([
-      this.contextProvider.getContext(),
-      this.accountRepository.depositFunds(assetAddress, amount) as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [HypernetContext, null],
-      BlockchainUnavailableError | CoreUninitializedError | NodeError | Error
-    >;
-
     let context: HypernetContext;
 
-    return prerequisites
-      .andThen((vals) => {
-        [context] = vals;
+    return this.contextProvider
+      .getContext()
+      .andThen((contextVal) => {
+        context = contextVal;
 
         return this.accountRepository.depositFunds(assetAddress, amount);
       })
@@ -82,21 +75,14 @@ export class AccountService implements IAccountService {
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | NodeError | Error
+    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
   > {
-    const prerequisites = (combine([
-      this.contextProvider.getInitializedContext(),
-      this.accountRepository.depositFunds(assetAddress, amount) as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [InitializedHypernetContext, null],
-      BlockchainUnavailableError | CoreUninitializedError | NodeError | Error
-    >;
-
     let context: InitializedHypernetContext;
 
-    return prerequisites
-      .andThen((vals) => {
-        [context] = vals;
+    return this.contextProvider
+      .getInitializedContext()
+      .andThen((contextVal) => {
+        context = contextVal;
         return this.accountRepository.withdrawFunds(assetAddress, amount, destinationAddress);
       })
       .andThen(() => {
