@@ -6,16 +6,17 @@ jobs:
         auth:
           username: mydockerhub-user
           password: $DOCKERHUB_PASSWORD # context / project UI env-var reference
-    pre:
-      - echo "registry=https://registry.npmjs.org/" > ~/.npmrc
-      - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
     steps:
       - checkout
-      - run: cd packages/hypernet-core && npm install
-      - run: cd packages/hypernet-core && npm run test
+      # Should be using pre steps instead.
+      - run: echo "registry=https://registry.npmjs.org/" > ~/.npmrc
+      - run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
+      - run: yarn install
+      - run: yarn test
 
 # Orchestrate our job run sequence
 workflows:
   test:
     jobs:
       - test
+        context: Hypernet Protocol
