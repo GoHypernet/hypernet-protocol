@@ -19,7 +19,7 @@ module.exports = {
     // "<rootDir>/src/**/*.ts",
 
     // Add other allowed folders to the list below.
-    "<rootDir>/tests/**/*.ts",
+    "<rootDir>/src/implementations/**/*.ts",
 
     // Disabled because we don't want it to end up in coverage report,
     // "<rootDir>/src/tests/**/*.ts",

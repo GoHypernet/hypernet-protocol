@@ -1,21 +1,36 @@
+import { LinkService } from "@implementations/business/LinkService";
+import { ILinkService } from "@interfaces/business/ILinkService";
+import { ILinkRepository } from "@interfaces/data";
+import { HypernetLink } from "@interfaces/objects";
 import { okAsync } from "neverthrow";
-import { verify, when } from "ts-mockito";
+import td from "testdouble";
 
-import LinkServiceMocks from "../../mock/business/LinkServiceMocks";
+class LinkServiceMocks {
+  public linkRepository = td.object<ILinkRepository>();
+  public hypernetLinks = new Array<HypernetLink>();
+
+  constructor() {
+    td.when(this.linkRepository.getHypernetLinks()).thenReturn(okAsync(this.hypernetLinks));
+  }
+
+  public factoryLinkService(): ILinkService {
+    return new LinkService(this.linkRepository);
+  }
+}
 
 describe("LinkService tests", () => {
   test("Should getLinks return links without errors", async () => {
     // Arrange
     const linkServiceMock = new LinkServiceMocks();
-    when(linkServiceMock.linkRepository.getHypernetLinks()).thenReturn(
-      okAsync([linkServiceMock.getHypernetLinkFactory()]),
-    );
+
+    const linkService = linkServiceMock.factoryLinkService();
 
     // Act
-    const getLinksResponse = await linkServiceMock.factoryService().getLinks();
+    const response = await linkService.getLinks();
 
     // Assert
-    verify(linkServiceMock.linkRepository.getHypernetLinks()).once();
-    expect(getLinksResponse._unsafeUnwrap()).toStrictEqual([linkServiceMock.getHypernetLinkFactory()]);
+    expect(response).toBeDefined();
+    expect(response.isErr()).toBeFalsy();
+    expect(response._unsafeUnwrap()).toBe(linkServiceMock.hypernetLinks);
   });
 });
