@@ -16,6 +16,7 @@
     "start": "cd packages/developer-ui && yarn start",
     "format": "lerna run format",
     "lint": "lerna run lint",
+    "test": "lerna run test",
     "compile": "lerna run compile",
     "generate-docs": "lerna run generate-docs"
   },

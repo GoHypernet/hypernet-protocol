@@ -67,7 +67,8 @@
   },
   "scripts": {
     "test:ci": "jest --runInBand --coverage",
-    "test:watch": "jest --watch --detectOpenHandles",
+    "test": "npm run test:ci",
+    "test:watch": "jest --watch --color --detectOpenHandles",
     "build": "npm run clean && npm run compile",
     "clean": "",
     "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",

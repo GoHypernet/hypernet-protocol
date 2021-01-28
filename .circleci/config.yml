@@ -11,8 +11,8 @@ jobs:
       - echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
     steps:
       - checkout
-      - run: cd packages/hypernet-core && npm install
-      - run: cd packages/hypernet-core && npm run test
+      - run: yarn install
+      - run: yarn test
 
 # Orchestrate our job run sequence
 workflows:
