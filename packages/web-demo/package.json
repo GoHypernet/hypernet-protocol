@@ -75,7 +75,6 @@
     "@ethereum-waffle/chai": "^3.1.2",
     "@hypernetlabs/web-integration": "^0.0.1",
     "@hypernetlabs/web-ui": "^0.0.1",
-    "@hypernetwork/galileo-frontend": "^1.6.2",
     "bootstrap": "^4.5.3",
     "jquery": "^3.5.1",
     "node-sass": "4.13.0",
