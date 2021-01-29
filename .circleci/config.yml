@@ -11,6 +11,7 @@ jobs:
       # Should be using pre steps instead.
       - run: echo "registry=https://registry.npmjs.org/" > ~/.npmrc
       - run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
+      - run: sudo apt update && sudo apt install -y python
       - run: yarn install
       - run: yarn test
 
