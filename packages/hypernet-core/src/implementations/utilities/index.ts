@@ -1,3 +1,4 @@
+export * from "./3BoxUtils";
 export * from "./BlockchainProvider";
 export * from "./BrowserNodeProvider";
 export * from "./ChannelUtils";
@@ -5,6 +6,7 @@ export * from "./ConfigProvider";
 export * from "./ContextProvider";
 export * from "./LinkUtils";
 export * from "./LogUtils";
+export * from "./PaymentIdUtils";
 export * from "./PaymentUtils";
 export * from "./ResultUtils";
 export * from "./VectorUtils";

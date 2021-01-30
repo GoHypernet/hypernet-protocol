@@ -19,8 +19,12 @@ import {
   LinkUtils,
   LogUtils,
   PaymentUtils,
+  PaymentIdUtils,
+  ThreeBoxUtils,
   VectorUtils,
+  ResultUtils,
 } from "@implementations/utilities";
+import { ThreeBoxMessagingListener, VectorAPIListener } from "@implementations/api";
 import {
   IAccountService,
   IControlService,
@@ -54,6 +58,7 @@ import {
   InsufficientBalanceError,
   LogicalError,
   RouterChannelUnknownError,
+  VectorError,
 } from "@interfaces/objects/errors";
 import { EBlockchainNetwork } from "@interfaces/types";
 import {
@@ -70,12 +75,7 @@ import {
 } from "@interfaces/utilities";
 import { IMessagingListener, IVectorListener } from "@interfaces/api";
 import { Subject } from "rxjs";
-import { VectorAPIListener } from "./api";
-import { PaymentIdUtils } from "./utilities/PaymentIdUtils";
-import { NodeError } from "@connext/vector-types";
 import { errAsync, ok, okAsync } from "neverthrow";
-import { ThreeBoxMessagingListener } from "./api/ThreeBoxMessagingListener";
-import { ThreeBoxUtils } from "./utilities/3BoxUtils";
 
 /**
  * The top-level class-definition for Hypernet Core.
@@ -302,7 +302,7 @@ export class HypernetCore implements IHypernetCore {
     amount: BigNumber,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | NodeError | Error
+    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
   > {
     // console.log(`HypernetCore:depositFunds:assetAddress:${assetAddress}`)
     return this.accountService.depositFunds(assetAddress, amount);
@@ -320,7 +320,7 @@ export class HypernetCore implements IHypernetCore {
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | NodeError | Error
+    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
   > {
     return this.accountService.withdrawFunds(assetAddress, amount, destinationAddress);
   }
@@ -337,7 +337,7 @@ export class HypernetCore implements IHypernetCore {
    */
   public getLinks(): ResultAsync<
     HypernetLink[],
-    RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
   > {
     return this.linkService.getLinks();
   }
@@ -347,7 +347,7 @@ export class HypernetCore implements IHypernetCore {
    */
   public getActiveLinks(): ResultAsync<
     HypernetLink[],
-    RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
   > {
     return this.linkService.getLinks();
   }
@@ -361,7 +361,7 @@ export class HypernetCore implements IHypernetCore {
   }
 
   /**
-   * Sends funds on a provided link.
+   * Sends funds to a counterparty.
    * Internally, this is a three-step process. First, the consumer will notify the provider of the
    * proposed terms of the payment (amount, required stake, and payment token). If the provider
    * accepts these terms, they will create an insurance payment for the stake, and then the consumer
@@ -379,7 +379,7 @@ export class HypernetCore implements IHypernetCore {
     requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error> {
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     // Send payment terms to provider & request provider make insurance payment
     return this.paymentService.sendFunds(
       counterPartyAccount,
@@ -398,7 +398,6 @@ export class HypernetCore implements IHypernetCore {
   public acceptFunds(
     paymentIds: string[],
   ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
-    // console.log(`HypernetCore:acceptFunds: attempting to accept funds for paymentIds: ${paymentIds}`)
     return this.paymentService.acceptFunds(paymentIds);
   }
 
@@ -439,16 +438,7 @@ export class HypernetCore implements IHypernetCore {
   }
 
   /**
-   * Finalize a push-payment; internally, resolves the ParameterizedPayment transfer
-   * @param paymentId the payment to finalize
-   */
-  public async finalizePushPayment(paymentId: string): Promise<void> {
-    await this.paymentService.paymentPosted(paymentId);
-    // @todo change return type to Promise<HypernetLink>
-  }
-
-  /**
-   * Initiat a dispute for a particular payment.
+   * Initiate a dispute for a particular payment.
    * @param paymentId the payment for which to dispute
    * @param metadata the data provided to the dispute mediator about this dispute
    */
@@ -464,20 +454,23 @@ export class HypernetCore implements IHypernetCore {
     if (this._initializeResult != null) {
       return this._initializeResult;
     }
-    let context: HypernetContext;
-    this._initializeResult = this.contextProvider
-      .getContext()
-      .andThen((myContext) => {
-        context = myContext;
-        return this.accountService.getPublicIdentifier();
-      })
-      .andThen((publicIdentifier) => {
+    this._initializeResult = ResultUtils.combine([
+      this.contextProvider.getContext(),
+      this.accountService.getPublicIdentifier(),
+    ])
+      .andThen((vals) => {
+        const [context, publicIdentifier] = vals;
         context.account = account;
         context.publicIdentifier = publicIdentifier;
         return this.contextProvider.setContext(context);
       })
       .andThen(() => {
-        return this.vectorAPIListener.setup();
+        // Initialize anything that wants an initialized context
+        return ResultUtils.combine([this.vectorAPIListener.setup(), this.threeboxMessagingListener.initialize()]);
+      })
+      .andThen(() => {
+        // Claim control
+        return this.controlService.claimControl();
       })
       .map(() => {
         if (this._initializePromiseResolve != null) {

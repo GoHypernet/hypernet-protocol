@@ -2,7 +2,7 @@ import { EMessageType } from "@interfaces/types";
 import { Transform, Type } from "class-transformer";
 
 export class MessagePayload {
-  @Transform(input => EMessageType[input.value])
+  @Transform((input) => EMessageType[input.value])
   public type: EMessageType;
 
   @Type(() => String)

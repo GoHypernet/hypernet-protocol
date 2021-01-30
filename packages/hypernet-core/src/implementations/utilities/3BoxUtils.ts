@@ -1,4 +1,4 @@
-import { BoxInstance, create, BoxSpace, BoxThread } from "3box";
+import { BoxInstance, BoxSpace, BoxThread, openBox } from "3box";
 import { IThreeBoxUtils, IBlockchainProvider, IContextProvider, IConfigProvider } from "@interfaces/utilities";
 import { EthereumAddress, HypernetConfig, InitializedHypernetContext, ResultAsync } from "@interfaces/objects";
 import { BlockchainUnavailableError, ThreeBoxError } from "@interfaces/objects/errors";
@@ -6,7 +6,7 @@ import { okAsync } from "neverthrow";
 import { ResultUtils } from "@implementations/utilities";
 
 export class ThreeBoxUtils implements IThreeBoxUtils {
-  protected box: BoxInstance | null;
+  protected boxResult: ResultAsync<BoxInstance, BlockchainUnavailableError | ThreeBoxError> | null;
   protected privateSpace: BoxSpace | null;
   protected ethereumAccounts: string[];
   protected spaces: Map<string, BoxSpace>;
@@ -17,7 +17,7 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
     protected contextProvider: IContextProvider,
     protected configProvider: IConfigProvider,
   ) {
-    this.box = null;
+    this.boxResult = null;
     this.privateSpace = null;
     this.ethereumAccounts = [];
     this.spaces = new Map<string, BoxSpace>();
@@ -25,23 +25,25 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
   }
 
   public getBox(): ResultAsync<BoxInstance, BlockchainUnavailableError | ThreeBoxError> {
-    if (this.box != null) {
-      return okAsync(this.box);
+    if (this.boxResult != null) {
+      return this.boxResult;
     }
 
-    return this.blockchainProvider
-      .getProvider()
-      .andThen((provider) => {
-        return ResultAsync.fromPromise(create(provider), (e) => {
+    this.boxResult = ResultUtils.combine([this.blockchainProvider.getProvider(),
+      this.contextProvider.getInitializedContext()])
+      .andThen((vals) => {
+        const [provider, context] = vals;
+        return ResultAsync.fromPromise(openBox(context.account, provider), (e) => {
           return new ThreeBoxError(e as Error);
         });
       })
       .map((boxInstance) => {
         // Don't do anything until the sync is complete
         // await this.box.syncDone;
-        this.box = boxInstance;
         return boxInstance;
       });
+
+    return this.boxResult;
   }
 
   public getSpaces(
