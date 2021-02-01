@@ -1,8 +1,15 @@
 import { VectorError } from "@interfaces/objects/errors";
-import { IBrowserNode, IBrowserNodeProvider, IFullChannelState } from "@interfaces/utilities";
+import { IBrowserNode, IBrowserNodeProvider, IFullChannelState, IWithdrawResponse } from "@interfaces/utilities";
 import { okAsync, ResultAsync } from "neverthrow";
 import td from "testdouble";
-import { publicIdentifier, routerChannelAddress } from "@mock/mocks";
+import {
+  publicIdentifier,
+  routerChannelAddress,
+  ethereumAddress,
+  erc20AssetAddress,
+  commonAmount,
+  destinationAddress,
+} from "@mock/mocks";
 
 export class BrowserNodeProviderMock implements IBrowserNodeProvider {
   public browserNode: IBrowserNode;
@@ -11,8 +18,13 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
   constructor(browserNode: IBrowserNode | null = null) {
     // Create the default set of state channels
     this.stateChannels.set(routerChannelAddress, {
-      assetIds: [""],
-      balances: [{ to: [""], amount: [] }],
+      assetIds: [erc20AssetAddress],
+      balances: [
+        {
+          amount: ["43", "43"],
+          to: [destinationAddress],
+        },
+      ],
       channelAddress: routerChannelAddress,
       alice: "aliceAddress",
       bob: "bobAddress",
@@ -50,9 +62,36 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       td.when(this.browserNode.getStateChannel(routerChannelAddress)).thenReturn(
         okAsync(this.stateChannels.get(routerChannelAddress)),
       );
-      
+
       // @todo: Figure out if there is a better way to stub get properties
       (this.browserNode as any).publicIdentifier = publicIdentifier;
+
+      td.when(this.browserNode.reconcileDeposit(ethereumAddress, routerChannelAddress)).thenReturn(
+        okAsync(routerChannelAddress),
+      );
+      td.when(this.browserNode.reconcileDeposit(erc20AssetAddress, routerChannelAddress)).thenReturn(
+        okAsync(routerChannelAddress),
+      );
+
+      td.when(
+        this.browserNode.withdraw(
+          routerChannelAddress,
+          commonAmount.toString(),
+          ethereumAddress,
+          destinationAddress,
+          "0",
+        ),
+      ).thenReturn(okAsync({} as IWithdrawResponse));
+
+      td.when(
+        this.browserNode.withdraw(
+          routerChannelAddress,
+          commonAmount.toString(),
+          erc20AssetAddress,
+          destinationAddress,
+          "0",
+        ),
+      ).thenReturn(okAsync({} as IWithdrawResponse));
     } else {
       this.browserNode = browserNode;
     }

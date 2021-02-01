@@ -1,376 +1,282 @@
 import td from "testdouble";
-import { publicIdentifier } from "@mock/mocks";
+require("testdouble-jest")(td, jest);
+import {
+  commonAmount,
+  ethereumAddress,
+  routerChannelAddress,
+  erc20AssetAddress,
+  destinationAddress,
+  publicIdentifier,
+} from "@mock/mocks";
 import { BlockchainProviderMock, BrowserNodeProviderMock } from "@mock/utils";
-import { ILogUtils, IVectorUtils } from "@interfaces/utilities";
+import { AssetBalance, BigNumber, Balances } from "@interfaces/objects";
+import { ILogUtils, IVectorUtils, IBrowserNodeProvider, IBlockchainProvider } from "@interfaces/utilities";
+import { VectorError, RouterChannelUnknownError, BlockchainUnavailableError } from "@interfaces/objects/errors";
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
+import { okAsync, errAsync } from "neverthrow";
+
+td.replace("ethers", {
+  Contract: class {
+    public transfer = () =>
+      new Promise((resolve) =>
+        resolve({
+          wait: () => new Promise((resolve) => resolve({})),
+        }),
+      );
+    public mint = () =>
+      new Promise((resolve) =>
+        resolve({
+          wait: () => new Promise((resolve) => resolve({})),
+        }),
+      );
+  },
+  constants: {
+    AddressZero: ethereumAddress,
+  },
+});
 import { AccountsRepository } from "@implementations/data/AccountsRepository";
 
 class AccountsRepositoryMocks {
-    public blockchainProvider = new BlockchainProviderMock();
-    public vectorUtils = td.object<IVectorUtils>();
-    public browserNodeProvider = new BrowserNodeProviderMock();
-    public logUtils = td.object<ILogUtils>();
-  
-    public factoryAccountsRepository(): IAccountsRepository {
-      return new AccountsRepository(
-        this.blockchainProvider,
-        this.vectorUtils,
-        this.browserNodeProvider,
-        this.logUtils
-      );
-    }
+  public blockchainProvider = new BlockchainProviderMock();
+  public vectorUtils = td.object<IVectorUtils>();
+  public browserNodeProvider = new BrowserNodeProviderMock();
+  public logUtils = td.object<ILogUtils>();
+
+  constructor() {
+    td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
   }
+
+  public factoryAccountsRepository(): IAccountsRepository {
+    return new AccountsRepository(this.blockchainProvider, this.vectorUtils, this.browserNodeProvider, this.logUtils);
+  }
+}
+
+class AccountsRepositoryErrorMocks {
+  public blockchainProvider = td.object<IBlockchainProvider>();
+  public vectorUtils = td.object<IVectorUtils>();
+  public browserNodeProvider = td.object<IBrowserNodeProvider>();
+  public logUtils = td.object<ILogUtils>();
+
+  constructor() {
+    td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(errAsync(new VectorError()));
+    td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(errAsync(new RouterChannelUnknownError()));
+    td.when(this.blockchainProvider.getSigner()).thenReturn(errAsync(new BlockchainUnavailableError()));
+  }
+
+  public factoryAccountsRepository(): IAccountsRepository {
+    return new AccountsRepository(this.blockchainProvider, this.vectorUtils, this.browserNodeProvider, this.logUtils);
+  }
+}
 
 describe("AccountsRepository tests", () => {
   test("Should getPublicIdentifier return publicIdentifier", async () => {
     // Arrange
     const accountsRepositoryMocks = new AccountsRepositoryMocks();
-
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
     // Act
-    const response = await repo.getPublicIdentifier();
-    
+    const result = await repo.getPublicIdentifier();
+
     // Assert
-    expect(response).toBeDefined();
-    expect(response.isErr()).toBeFalsy();
-    expect(response._unsafeUnwrap()).toBe(publicIdentifier);
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toBe(publicIdentifier);
   });
 
-//   test("Should getPublicIdentifier throw error", async () => {
-//     // Arrange
-//     const accountsRepositoryMocks = new AccountsRepositoryMocks();
-//     const err = new Error();
+  test("Should getPublicIdentifier throw error", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryErrorMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-//     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(errAsync(err));
+    // Act
+    const result = await repo.getPublicIdentifier();
+    const error = result._unsafeUnwrapErr();
 
-//     // Assert
-//     expect((await accountsRepositoryMocks.factoryService().getPublicIdentifier())._unsafeUnwrapErr()).toStrictEqual(
-//       err,
-//     );
-//   });
+    // Assert
+    expect(result.isErr()).toBeTruthy();
+    expect(error).toBeInstanceOf(VectorError);
+  });
 
-//   test("Should getAccounts return accounts", async () => {
-//     // Arrange
-//     const accountsRepositoryMocks = new AccountsRepositoryMocks();
-//     const provider = mockUtils.generateMockProvider();
-//     const accounts = await provider.listAccounts();
+  test("Should getAccounts return accounts", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-//     when(accountsRepositoryMocks.blockchainProvider.getProvider()).thenReturn(okAsync(provider));
+    // Act
+    const accounts = await accountsRepositoryMocks.blockchainProvider.provider.listAccounts();
+    const result = await repo.getAccounts();
 
-//     // Assert
-//     expect((await accountsRepositoryMocks.factoryService().getAccounts())._unsafeUnwrap()).toStrictEqual(accounts);
-//   });
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toBe(accounts);
+  });
 
-//   test("Should getBalances return balances", async () => {
-//     // Arrange
-//     const accountsRepositoryMocks = new AccountsRepositoryMocks();
-//     const routerChannelAddress = mockUtils.generateRandomEtherAdress();
-//     const balanceAmount = "43";
-//     const channelStateMock: CoreChannelState = {
-//       channelAddress: routerChannelAddress,
-//       assetIds: [mockUtils.generateRandomEtherAdress()],
-//       balances: [
-//         {
-//           amount: [balanceAmount, balanceAmount],
-//           to: [mockUtils.generateRandomEtherAdress()],
-//         },
-//       ],
-//       alice: mockUtils.generateRandomEtherAdress(),
-//       bob: mockUtils.generateRandomEtherAdress(),
-//       processedDepositsA: ["0"],
-//       processedDepositsB: ["0"],
-//       defundNonces: ["0"],
-//       timeout: "",
-//       nonce: 23,
-//       merkleRoot: "",
-//     };
-//     const stateChannelRes = Result.ok(channelStateMock);
-//     const balances: Balances = {
-//       assets: [
-//         new AssetBalance(
-//           channelStateMock.assetIds[0],
-//           BigNumber.from(channelStateMock.balances[0].amount[1]),
-//           BigNumber.from(0),
-//           BigNumber.from(channelStateMock.balances[0].amount[1]),
-//         ),
-//       ],
-//     };
+  // TODO: there is a bug in getBalances related to contract token names, refactor this test when it fixed
+  test("Should getBalances return balances", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-//     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
-//     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(
-//       okAsync(accountsRepositoryMocks.getBrowserNodeFactory()),
-//     );
-//     jestWhen(accountsRepositoryMocks.browserNode.prototype.getStateChannel)
-//       .calledWith({ channelAddress: routerChannelAddress })
-//       .mockResolvedValue(stateChannelRes);
+    const stateChannel = accountsRepositoryMocks.browserNodeProvider.stateChannels.get(routerChannelAddress);
+    const balances: Balances = {
+      assets: [
+        new AssetBalance(
+          stateChannel?.assetIds[0] as string,
+          "",
+          "",
+          0,
+          BigNumber.from(stateChannel?.balances[0].amount[1]),
+          BigNumber.from(0),
+          BigNumber.from(stateChannel?.balances[0].amount[1]),
+        ),
+      ],
+    };
 
-//     // Assert
-//     expect((await accountsRepositoryMocks.factoryService().getBalances())._unsafeUnwrap()).toEqual(balances);
-//   });
+    // Act
+    const result = await repo.getBalances();
 
-//   test("Should getBalances throw error when getRouterChannelAddress fails", async () => {
-//     // Arrange
-//     const accountsRepositoryMocks = new AccountsRepositoryMocks();
-//     const throwenError = new RouterChannelUnknownError();
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toEqual(balances);
+  });
 
-//     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(
-//       errAsync(new RouterChannelUnknownError()),
-//     );
+  test("Should getBalances throw error when getRouterChannelAddress fails", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryErrorMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-//     // Assert
-//     expect((await accountsRepositoryMocks.factoryService().getBalances())._unsafeUnwrapErr()).toStrictEqual(
-//       throwenError,
-//     );
-//   });
+    // Act
+    const result = await repo.getBalances();
+    const error = result._unsafeUnwrapErr();
 
-//   test("Should getBalances throw error when getBrowserNode fails", async () => {
-//     // Arrange
-//     const accountsRepositoryMocks = new AccountsRepositoryMocks();
-//     const routerChannelAddress = mockUtils.generateRandomEtherAdress();
-//     const throwenError = new BalancesUnavailableError("Channel not found");
+    // Assert
+    expect(result.isErr()).toBeTruthy();
+    expect(error).toBeInstanceOf(RouterChannelUnknownError);
+  });
 
-//     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
-//     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(errAsync(throwenError));
+  test("Should getBalanceByAsset return balances by asset", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-//     // Assert
-//     expect((await accountsRepositoryMocks.factoryService().getBalances())._unsafeUnwrapErr()).toStrictEqual(
-//       throwenError,
-//     );
-//   });
+    const stateChannel = accountsRepositoryMocks.browserNodeProvider.stateChannels.get(routerChannelAddress);
+    const assetId = stateChannel?.assetIds[0] as string;
+    const assetBalance = new AssetBalance(
+      assetId,
+      "",
+      "",
+      0,
+      BigNumber.from(stateChannel?.balances[0].amount[1]),
+      BigNumber.from(0),
+      BigNumber.from(stateChannel?.balances[0].amount[1]),
+    );
 
-//   test("Should getBalanceByAsset return balances by asset", async () => {
-//     // Arrange
-//     const accountsRepositoryMocks = new AccountsRepositoryMocks();
-//     const routerChannelAddress = mockUtils.generateRandomEtherAdress();
-//     const byAssetAddress = mockUtils.generateRandomEtherAdress();
-//     const balanceAmount = "43";
-//     const channelStateMock: CoreChannelState = {
-//       channelAddress: routerChannelAddress,
-//       assetIds: [byAssetAddress],
-//       balances: [
-//         {
-//           amount: [balanceAmount, balanceAmount],
-//           to: [mockUtils.generateRandomEtherAdress()],
-//         },
-//       ],
-//       alice: mockUtils.generateRandomEtherAdress(),
-//       bob: mockUtils.generateRandomEtherAdress(),
-//       processedDepositsA: ["0"],
-//       processedDepositsB: ["0"],
-//       defundNonces: ["0"],
-//       timeout: "",
-//       nonce: 23,
-//       merkleRoot: "",
-//     };
-//     const stateChannelRes = Result.ok(channelStateMock);
-//     const assetBalance: AssetBalance = new AssetBalance(
-//       channelStateMock.assetIds[0],
-//       BigNumber.from(channelStateMock.balances[0].amount[1]),
-//       BigNumber.from(0),
-//       BigNumber.from(channelStateMock.balances[0].amount[1]),
-//     );
+    // Act
+    const result = await repo.getBalanceByAsset(assetId);
 
-//     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
-//     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(
-//       okAsync(accountsRepositoryMocks.getBrowserNodeFactory()),
-//     );
-//     jestWhen(accountsRepositoryMocks.browserNode.prototype.getStateChannel)
-//       .calledWith({ channelAddress: routerChannelAddress })
-//       .mockResolvedValue(stateChannelRes);
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toStrictEqual(assetBalance);
+  });
 
-//     // Assert
-//     expect((await accountsRepositoryMocks.factoryService().getBalanceByAsset(byAssetAddress))._unsafeUnwrap()).toEqual(
-//       assetBalance,
-//     );
-//   });
+  test("Should depositFunds with ether address without errors", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-//   test("Should depositFunds without errors", async () => {
-//     // Arrange
-//     const accountsRepositoryMocks = new AccountsRepositoryMocks();
-//     const assetAddress = mockUtils.generateRandomEtherAdress();
-//     const amount = BigNumber.from("43");
-//     const routerChannelAddress = mockUtils.generateRandomEtherAdress();
-//     const provider = mockUtils.generateMockProvider();
-//     const signer = await provider.getSigner();
-//     const routerPublicIdentifier = mockUtils.generateRandomPublicIdentifier();
-//     const supportedChains = [2323];
-//     const browserNode = new BrowserNode({
-//       routerPublicIdentifier,
-//       supportedChains,
-//       chainProviders: {
-//         [supportedChains[0]]: "asdad",
-//       },
-//     });
-//     const depositRes: Result<NodeResponses.Deposit, Error> = Result.ok({
-//       channelAddress: routerChannelAddress,
-//     });
+    // Act
+    const result = await repo.depositFunds(ethereumAddress, commonAmount);
 
-//     when(accountsRepositoryMocks.blockchainProvider.getSigner()).thenReturn(okAsync(signer));
-//     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
-//     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(browserNode));
-//     jestWhen(accountsRepositoryMocks.browserNode.prototype.reconcileDeposit)
-//       .calledWith({
-//         assetId: assetAddress,
-//         channelAddress: routerChannelAddress,
-//       })
-//       .mockResolvedValue(depositRes);
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toBe(null);
+  });
 
-//     // Assert
-//     expect((await accountsRepositoryMocks.factoryService().depositFunds(assetAddress, amount))._unsafeUnwrap()).toEqual(
-//       null,
-//     );
-//   });
+  test("Should depositFunds with erc20 address without errors", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-//   test("Should depositFunds throw error when deposit channelAddress is different from routerChannelAddress", async () => {
-//     // Arrange
-//     const accountsRepositoryMocks = new AccountsRepositoryMocks();
-//     const assetAddress = mockUtils.generateRandomEtherAdress();
-//     const amount = BigNumber.from("43");
-//     const routerChannelAddress = mockUtils.generateRandomEtherAdress();
-//     const depositChannelAddress = mockUtils.generateRandomEtherAdress();
-//     const provider = mockUtils.generateMockProvider();
-//     const signer = await provider.getSigner();
-//     const routerPublicIdentifier = mockUtils.generateRandomPublicIdentifier();
-//     const supportedChains = [2323];
-//     const browserNode = new BrowserNode({
-//       routerPublicIdentifier,
-//       supportedChains,
-//       chainProviders: {
-//         [supportedChains[0]]: "asdad",
-//       },
-//     });
-//     const depositRes: Result<NodeResponses.Deposit, Error> = Result.ok({
-//       channelAddress: depositChannelAddress,
-//     });
-//     const throwenError = new Error("Something has gone horribly wrong!");
+    // Act
+    const result = await repo.depositFunds(erc20AssetAddress, commonAmount);
 
-//     when(accountsRepositoryMocks.blockchainProvider.getSigner()).thenReturn(okAsync(signer));
-//     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
-//     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(browserNode));
-//     jestWhen(accountsRepositoryMocks.browserNode.prototype.reconcileDeposit)
-//       .calledWith({
-//         assetId: assetAddress,
-//         channelAddress: routerChannelAddress,
-//       })
-//       .mockResolvedValue(depositRes);
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toBe(null);
+  });
 
-//     // Assert
-//     expect(
-//       (await accountsRepositoryMocks.factoryService().depositFunds(assetAddress, amount))._unsafeUnwrapErr(),
-//     ).toStrictEqual(throwenError);
-//   });
+  test("Should withdrawFunds with ether address without errors", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-//   test("Should withdrawFunds without errors", async () => {
-//     // Arrange
-//     const accountsRepositoryMocks = new AccountsRepositoryMocks();
-//     const assetAddress = mockUtils.generateRandomEtherAdress();
-//     const amount = BigNumber.from("43");
-//     const destinationAddress = mockUtils.generateRandomEtherAdress();
-//     const routerChannelAddress = mockUtils.generateRandomEtherAdress();
-//     const routerPublicIdentifier = mockUtils.generateRandomPublicIdentifier();
-//     const supportedChains = [2323];
-//     const browserNode = new BrowserNode({
-//       routerPublicIdentifier,
-//       supportedChains,
-//       chainProviders: {
-//         [supportedChains[0]]: "asdad",
-//       },
-//     });
-//     const withdrawRes: Result<NodeResponses.Withdraw, Error> = Result.ok({
-//       channelAddress: routerChannelAddress,
-//       transferId: mockUtils.generateRandomPaymentId(),
-//     });
+    // Act
+    const result = await repo.withdrawFunds(ethereumAddress, commonAmount, destinationAddress);
 
-//     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(browserNode));
-//     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toBe(undefined);
+  });
 
-//     jestWhen(accountsRepositoryMocks.browserNode.prototype.withdraw)
-//       .calledWith({
-//         channelAddress: routerChannelAddress,
-//         amount: amount.toString(),
-//         assetId: assetAddress,
-//         recipient: destinationAddress,
-//         fee: "0",
-//       })
-//       .mockResolvedValue(withdrawRes);
+  test("Should withdrawFunds with erc20 address without errors", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-//     // Assert
-//     expect(
-//       (
-//         await accountsRepositoryMocks.factoryService().withdrawFunds(assetAddress, amount, destinationAddress)
-//       )._unsafeUnwrap(),
-//     ).toEqual(undefined);
-//   });
+    // Act
+    const result = await repo.withdrawFunds(erc20AssetAddress, commonAmount, destinationAddress);
 
-//   test("Should withdrawFunds throw error if withdraw fails", async () => {
-//     // Arrange
-//     const accountsRepositoryMocks = new AccountsRepositoryMocks();
-//     const assetAddress = mockUtils.generateRandomEtherAdress();
-//     const amount = BigNumber.from("43");
-//     const destinationAddress = mockUtils.generateRandomEtherAdress();
-//     const routerChannelAddress = mockUtils.generateRandomEtherAdress();
-//     const routerPublicIdentifier = mockUtils.generateRandomPublicIdentifier();
-//     const supportedChains = [2323];
-//     const browserNode = new BrowserNode({
-//       routerPublicIdentifier,
-//       supportedChains,
-//       chainProviders: {
-//         [supportedChains[0]]: "asdad",
-//       },
-//     });
-//     const throwenError = new RouterChannelUnknownError("Timeout");
-//     const withdrawRes: Result<NodeResponses.Withdraw, RouterChannelUnknownError> = Result.fail(throwenError);
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toBe(undefined);
+  });
 
-//     when(accountsRepositoryMocks.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(browserNode));
-//     when(accountsRepositoryMocks.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
+  test("Should withdrawFunds throw error if withdraw fails", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryErrorMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-//     jestWhen(accountsRepositoryMocks.browserNode.prototype.withdraw)
-//       .calledWith({
-//         channelAddress: routerChannelAddress,
-//         amount: amount.toString(),
-//         assetId: assetAddress,
-//         recipient: destinationAddress,
-//         fee: "0",
-//       })
-//       .mockResolvedValue(withdrawRes);
+    // Act
+    const result = await repo.withdrawFunds(erc20AssetAddress, commonAmount, destinationAddress);
+    const error = result._unsafeUnwrapErr();
 
-//     // Assert
-//     expect(
-//       (
-//         await accountsRepositoryMocks.factoryService().withdrawFunds(assetAddress, amount, destinationAddress)
-//       )._unsafeUnwrapErr(),
-//     ).toStrictEqual(throwenError);
-//   });
+    // Assert
+    expect(result.isErr()).toBeTruthy();
+    expect(error).toBeInstanceOf(VectorError);
+  });
 
-//   test("Should mintTestToken without errors", async () => {
-//     // Arrange
-//     const accountsRepositoryMocks = new AccountsRepositoryMocks();
-//     const amount = BigNumber.from("43");
-//     const to = mockUtils.generateRandomEtherAdress();
-//     const provider = mockUtils.generateMockProvider();
-//     const signer = await provider.getSigner();
+  test("Should mintTestToken without errors", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-//     when(accountsRepositoryMocks.blockchainProvider.getSigner()).thenReturn(okAsync(signer));
+    // Act
+    const result = await repo.mintTestToken(commonAmount, ethereumAddress);
 
-//     // Assert
-//     expect((await accountsRepositoryMocks.factoryService().mintTestToken(amount, to))._unsafeUnwrap()).toEqual(
-//       undefined,
-//     );
-//   });
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toBe(undefined);
+  });
 
-//   test("Should mintTestToken throw error if getSigner fails", async () => {
-//     // Arrange
-//     const accountsRepositoryMocks = new AccountsRepositoryMocks();
-//     const amount = BigNumber.from("43");
-//     const to = mockUtils.generateRandomEtherAdress();
-//     const throwenError = new BlockchainUnavailableError();
+  test("Should mintTestToken throw error if getSigner fails", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryErrorMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-//     when(accountsRepositoryMocks.blockchainProvider.getSigner()).thenReturn(errAsync(throwenError));
+    // Act
+    const result = await repo.mintTestToken(commonAmount, ethereumAddress);
+    const error = result._unsafeUnwrapErr();
 
-//     // Assert
-//     expect((await accountsRepositoryMocks.factoryService().mintTestToken(amount, to))._unsafeUnwrapErr()).toEqual(
-//       throwenError,
-//     );
-//   });
+    // Assert
+    expect(result.isErr()).toBeTruthy();
+    expect(error).toBeInstanceOf(BlockchainUnavailableError);
+  });
 });

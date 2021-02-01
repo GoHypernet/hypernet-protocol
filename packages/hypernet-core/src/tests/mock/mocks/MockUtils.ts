@@ -4,14 +4,16 @@ import Ganache from "ganache-core";
 var randomstring = require("randomstring");
 
 class MockUtils {
-  private generateRandomAccounts({
-    mnemonic = this.defaultMnemonic,
-    total_accounts = 1,
-    default_balance_ether = 100,
-  }): any {
-    return [...new Array(total_accounts)].map((el, idx) => ({
-      balance: `${default_balance_ether}000000000000000000`,
-      secretKey: ethers.Wallet.fromMnemonic(mnemonic, `m/44'/60'/0'/0/${idx}`).privateKey,
+  public generateRandomAccounts(
+    options = {
+      mnemonic: this.defaultMnemonic,
+      total_accounts: 1,
+      default_balance_ether: 100,
+    },
+  ): any {
+    return [...new Array(options.total_accounts)].map((el, idx) => ({
+      balance: `${options.default_balance_ether}000000000000000000`,
+      secretKey: ethers.Wallet.fromMnemonic(options.mnemonic, `m/44'/60'/0'/0/${idx}`).privateKey,
     }));
   }
 
