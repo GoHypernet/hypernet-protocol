@@ -30,6 +30,7 @@ import {
 } from "@interfaces/utilities";
 import moment from "moment";
 import { combine, errAsync, okAsync } from "neverthrow";
+import { ResultUtils } from "@implementations/utilities";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -269,8 +270,7 @@ export class PaymentUtils implements IPaymentUtils {
       transferTypeResults.push(this.getTransferTypeWithTransfer(transfer, browserNode));
     }
 
-    // @ts-ignore
-    return combine(transferTypeResults).andThen((transferTypesWithTransfers) => {
+    return ResultUtils.combine(transferTypeResults).andThen((transferTypesWithTransfers) => {
       const transfersByPaymentId = new Map<string, IFullTransferState[]>();
       for (const { transferType, transfer } of transferTypesWithTransfers) {
         let paymentId: string;
@@ -403,8 +403,7 @@ export class PaymentUtils implements IPaymentUtils {
       transferTypeResults.push(this.getTransferTypeWithTransfer(transfer, browserNode));
     }
 
-    // @ts-ignore
-    return combine(transferTypeResults).andThen((transferTypesWithTransfers) => {
+    return ResultUtils.combine(transferTypeResults).andThen((transferTypesWithTransfers) => {
       for (const { transferType, transfer } of transferTypesWithTransfers) {
         if (transferType === ETransferType.Offer) {
           offerTransfers.push(transfer);
