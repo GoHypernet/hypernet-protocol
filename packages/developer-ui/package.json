@@ -60,7 +60,6 @@
     "postcss": "^8.1.0",
     "postcss-loader": "^4.0.2",
     "prettier": "^2.1.0",
-    "scrypt": "https://github.com/barrysteyn/node-scrypt/",
     "style-loader": "^2.0.0",
     "ts-loader": "^8.0.3",
     "tsconfig-paths-webpack-plugin": "^3.3.0",
