@@ -9,7 +9,7 @@ import {
   IBrowserNode,
   IFullChannelState,
 } from "@interfaces/utilities";
-import { Contract, ethers } from "ethers";
+import { Contract, ethers, constants } from "ethers";
 import { artifacts } from "@connext/vector-contracts";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import {
@@ -20,7 +20,6 @@ import {
   VectorError,
 } from "@interfaces/objects/errors";
 import { combine, errAsync, okAsync } from "neverthrow";
-import { constants } from "ethers";
 import { ResultUtils } from "@implementations/utilities";
 
 class AssetInfo {

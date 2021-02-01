@@ -1,19 +1,40 @@
 import td from "testdouble";
+require("testdouble-jest")(td, jest);
 import {
   commonAmount,
-  destinationAddress,
-  erc20AssetAddress,
   ethereumAddress,
-  publicIdentifier,
   routerChannelAddress,
+  erc20AssetAddress,
+  destinationAddress,
+  publicIdentifier,
 } from "@mock/mocks";
 import { BlockchainProviderMock, BrowserNodeProviderMock } from "@mock/utils";
-import { ILogUtils, IVectorUtils, IBrowserNodeProvider } from "@interfaces/utilities";
 import { AssetBalance, BigNumber, Balances } from "@interfaces/objects";
+import { ILogUtils, IVectorUtils, IBrowserNodeProvider, IBlockchainProvider } from "@interfaces/utilities";
 import { VectorError, RouterChannelUnknownError, BlockchainUnavailableError } from "@interfaces/objects/errors";
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
+import { okAsync, errAsync } from "neverthrow";
+
+td.replace("ethers", {
+  Contract: class {
+    public transfer = () =>
+      new Promise((resolve) =>
+        resolve({
+          wait: () => new Promise((resolve) => resolve({})),
+        }),
+      );
+    public mint = () =>
+      new Promise((resolve) =>
+        resolve({
+          wait: () => new Promise((resolve) => resolve({})),
+        }),
+      );
+  },
+  constants: {
+    AddressZero: ethereumAddress,
+  },
+});
 import { AccountsRepository } from "@implementations/data/AccountsRepository";
-import { okAsync, ok, err, errAsync } from "neverthrow";
 
 class AccountsRepositoryMocks {
   public blockchainProvider = new BlockchainProviderMock();
@@ -31,7 +52,7 @@ class AccountsRepositoryMocks {
 }
 
 class AccountsRepositoryErrorMocks {
-  public blockchainProvider = new BlockchainProviderMock();
+  public blockchainProvider = td.object<IBlockchainProvider>();
   public vectorUtils = td.object<IVectorUtils>();
   public browserNodeProvider = td.object<IBrowserNodeProvider>();
   public logUtils = td.object<ILogUtils>();
@@ -39,6 +60,7 @@ class AccountsRepositoryErrorMocks {
   constructor() {
     td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(errAsync(new VectorError()));
     td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(errAsync(new RouterChannelUnknownError()));
+    td.when(this.blockchainProvider.getSigner()).thenReturn(errAsync(new BlockchainUnavailableError()));
   }
 
   public factoryAccountsRepository(): IAccountsRepository {
@@ -174,8 +196,7 @@ describe("AccountsRepository tests", () => {
     expect(result._unsafeUnwrap()).toBe(null);
   });
 
-  // TODO: this test is failing because Contract cannot be mocked in accountsRepository, Contract needs to be as class provider
-  /* test("Should depositFunds with erc20 address without errors", async () => {
+  test("Should depositFunds with erc20 address without errors", async () => {
     // Arrange
     const accountsRepositoryMocks = new AccountsRepositoryMocks();
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
@@ -187,7 +208,7 @@ describe("AccountsRepository tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
     expect(result._unsafeUnwrap()).toBe(null);
-  }); */
+  });
 
   test("Should withdrawFunds with ether address without errors", async () => {
     // Arrange
@@ -231,8 +252,7 @@ describe("AccountsRepository tests", () => {
     expect(error).toBeInstanceOf(VectorError);
   });
 
-  // TODO: this test is failing because Contract cannot be mocked in accountsRepository, Contract needs to be as class provider
-  /* test("Should mintTestToken without errors", async () => {
+  test("Should mintTestToken without errors", async () => {
     // Arrange
     const accountsRepositoryMocks = new AccountsRepositoryMocks();
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
@@ -244,8 +264,8 @@ describe("AccountsRepository tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
     expect(result._unsafeUnwrap()).toBe(undefined);
-  }); 
-  
+  });
+
   test("Should mintTestToken throw error if getSigner fails", async () => {
     // Arrange
     const accountsRepositoryMocks = new AccountsRepositoryErrorMocks();
@@ -258,5 +278,5 @@ describe("AccountsRepository tests", () => {
     // Assert
     expect(result.isErr()).toBeTruthy();
     expect(error).toBeInstanceOf(BlockchainUnavailableError);
-  });*/
+  });
 });
