@@ -27,7 +27,7 @@
     "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
   },
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1",
+    "test": "echo \"Error: run tests from root\" && exit 0",
     "build": "webpack",
     "compile": "tsc -b tsconfig.json",
     "clean-docker": "docker-compose down",
