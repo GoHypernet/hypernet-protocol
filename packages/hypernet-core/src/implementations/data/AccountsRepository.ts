@@ -9,7 +9,7 @@ import {
   IBrowserNode,
   IFullChannelState,
 } from "@interfaces/utilities";
-import { Contract, ethers } from "ethers";
+import { Contract, ethers, constants } from "ethers";
 import { artifacts } from "@connext/vector-contracts";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import {
@@ -20,7 +20,7 @@ import {
   VectorError,
 } from "@interfaces/objects/errors";
 import { combine, errAsync, okAsync } from "neverthrow";
-import { constants } from "ethers";
+import { ResultUtils } from "@implementations/utilities";
 
 class AssetInfo {
   constructor(public assetId: EthereumAddress, public name: string, public symbol: string, public decimals: number) {}
@@ -145,21 +145,18 @@ export class AccountsRepository implements IAccountsRepository {
     null,
     RouterChannelUnknownError | CoreUninitializedError | VectorError | Error | BlockchainUnavailableError
   > {
-    const prerequisites = (combine([
-      this.blockchainProvider.getSigner() as ResultAsync<any, any>,
+    const prerequisites = ResultUtils.combine([
+      this.blockchainProvider.getSigner(),
       this.vectorUtils.getRouterChannelAddress(),
       this.browserNodeProvider.getBrowserNode(),
-    ]) as unknown) as ResultAsync<
-      [ethers.providers.JsonRpcSigner, string, IBrowserNode],
-      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error | BlockchainUnavailableError
-    >;
+    ]);
 
+    let signer: ethers.providers.JsonRpcSigner;
     let channelAddress: string;
     let browserNode: IBrowserNode;
 
     return prerequisites
       .andThen((vals) => {
-        let signer: ethers.providers.JsonRpcSigner;
         [signer, channelAddress, browserNode] = vals;
 
         let tx: ResultAsync<TransactionResponse, BlockchainUnavailableError>;
@@ -217,13 +214,10 @@ export class AccountsRepository implements IAccountsRepository {
     amount: BigNumber,
     destinationAddress: string,
   ): ResultAsync<void, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
-    const prerequisites = (combine([
+    const prerequisites = ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
-      this.vectorUtils.getRouterChannelAddress() as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [IBrowserNode, string],
-      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
-    >;
+      this.vectorUtils.getRouterChannelAddress(),
+    ]);
 
     return prerequisites
       .andThen((vals) => {
@@ -283,8 +277,9 @@ export class AccountsRepository implements IAccountsRepository {
     });
   }
 
+  // TODO: fix it, tokenContract.name() not working
   protected _getAssetInfo(assetAddress: EthereumAddress): ResultAsync<AssetInfo, BlockchainUnavailableError> {
-    let name: string;
+    /* let name: string;
     let symbol: string;
     let tokenContract: Contract;
 
@@ -333,9 +328,11 @@ export class AccountsRepository implements IAccountsRepository {
 
           return assetInfo;
         });
-    }
+    } 
 
     // We have cached info
-    return okAsync(cachedAssetInfo);
+    return okAsync(cachedAssetInfo);*/
+
+    return okAsync(new AssetInfo(assetAddress, "", "", 0));
   }
 }

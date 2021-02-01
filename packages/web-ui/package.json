@@ -7,7 +7,7 @@
     "build": "npm run clean && npm run compile",
     "clean": "",
     "compile": "tsc -b tsconfig.json",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "echo \"Error: no test specified\" && exit 0",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
     "generate-docs": "npx typedoc --options typedoc.json"
