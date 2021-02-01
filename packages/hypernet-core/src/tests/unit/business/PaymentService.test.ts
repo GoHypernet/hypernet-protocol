@@ -35,7 +35,7 @@ class PaymentServiceMocks {
   public logUtils = td.object<ILogUtils>();
   public paymentRepository = td.object<IPaymentRepository>();
 
-  public pushPayment: PushPayment; 
+  public pushPayment: PushPayment;
   public stakedPushPayment: PushPayment;
   public paidPushPayment: PushPayment;
   public finalizedPushPayment: PushPayment;
@@ -44,10 +44,25 @@ class PaymentServiceMocks {
 
   constructor(hypertokenBalance: string = amount) {
     this.pushPayment = this.factoryPushPayment();
-    this.stakedPushPayment = this.factoryPushPayment(publicIdentifier2, publicIdentifier, EPaymentState.Staked, requiredStake);
-    this.paidPushPayment = this.factoryPushPayment(publicIdentifier2, publicIdentifier, EPaymentState.Approved, requiredStake);
-    this.finalizedPushPayment = this.factoryPushPayment(publicIdentifier, publicIdentifier2, EPaymentState.Finalized, requiredStake);
-    
+    this.stakedPushPayment = this.factoryPushPayment(
+      publicIdentifier2,
+      publicIdentifier,
+      EPaymentState.Staked,
+      requiredStake,
+    );
+    this.paidPushPayment = this.factoryPushPayment(
+      publicIdentifier2,
+      publicIdentifier,
+      EPaymentState.Approved,
+      requiredStake,
+    );
+    this.finalizedPushPayment = this.factoryPushPayment(
+      publicIdentifier,
+      publicIdentifier2,
+      EPaymentState.Finalized,
+      requiredStake,
+    );
+
     this.assetBalance = new AssetBalance(
       hyperTokenAddress,
       "PhoebeCoin",
@@ -91,7 +106,6 @@ class PaymentServiceMocks {
   }
 
   public setExistingPayments(payments: (PushPayment | PullPayment)[]) {
-
     const returnedPaymentsMap = new Map<string, Payment>();
     const paymentIds = new Array<string>();
 
@@ -105,10 +119,12 @@ class PaymentServiceMocks {
     );
   }
 
-  public factoryPushPayment(to: PublicIdentifier = publicIdentifier2,
+  public factoryPushPayment(
+    to: PublicIdentifier = publicIdentifier2,
     from: PublicIdentifier = publicIdentifier,
     state: EPaymentState = EPaymentState.Proposed,
-    amountStaked: string = "0"): PushPayment {
+    amountStaked: string = "0",
+  ): PushPayment {
     return new PushPayment(
       paymentId,
       to,
@@ -119,8 +135,8 @@ class PaymentServiceMocks {
       BigNumber.from(amountStaked),
       expirationDate.unix(),
       false,
-      now,
-      now,
+      now.unix(),
+      now.unix(),
       BigNumber.from(0),
       disputeMediator,
       BigNumber.from(amount),
@@ -257,11 +273,16 @@ describe("PaymentService tests", () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
-    const payment = paymentServiceMock.factoryPushPayment(publicIdentifier2, publicIdentifier, EPaymentState.Staked, requiredStake);
+    const payment = paymentServiceMock.factoryPushPayment(
+      publicIdentifier2,
+      publicIdentifier,
+      EPaymentState.Staked,
+      requiredStake,
+    );
     paymentServiceMock.setExistingPayments([payment]);
 
     let updatedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val) => {
+    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val: PushPayment) => {
       updatedPushPayments.push(val);
     });
 
@@ -296,7 +317,12 @@ describe("PaymentService tests", () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
-    const payment = paymentServiceMock.factoryPushPayment(publicIdentifier2, publicIdentifier, EPaymentState.Staked, "13");
+    const payment = paymentServiceMock.factoryPushPayment(
+      publicIdentifier2,
+      publicIdentifier,
+      EPaymentState.Staked,
+      "13",
+    );
     paymentServiceMock.setExistingPayments([payment]);
 
     const paymentService = paymentServiceMock.factoryPaymentService();
@@ -314,7 +340,12 @@ describe("PaymentService tests", () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
-    const payment = paymentServiceMock.factoryPushPayment(publicIdentifier2, publicIdentifier, EPaymentState.Proposed, requiredStake);
+    const payment = paymentServiceMock.factoryPushPayment(
+      publicIdentifier2,
+      publicIdentifier,
+      EPaymentState.Proposed,
+      requiredStake,
+    );
     paymentServiceMock.setExistingPayments([payment]);
 
     const paymentService = paymentServiceMock.factoryPaymentService();
@@ -332,11 +363,16 @@ describe("PaymentService tests", () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
-    const payment = paymentServiceMock.factoryPushPayment(publicIdentifier, publicIdentifier2, EPaymentState.Staked, requiredStake);
+    const payment = paymentServiceMock.factoryPushPayment(
+      publicIdentifier,
+      publicIdentifier2,
+      EPaymentState.Staked,
+      requiredStake,
+    );
     paymentServiceMock.setExistingPayments([payment]);
 
     let updatedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val) => {
+    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val: PushPayment) => {
       updatedPushPayments.push(val);
     });
 
@@ -360,7 +396,7 @@ describe("PaymentService tests", () => {
     paymentServiceMock.setExistingPayments([payment]);
 
     let updatedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val) => {
+    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val: PushPayment) => {
       updatedPushPayments.push(val);
     });
 
@@ -385,10 +421,10 @@ describe("PaymentService tests", () => {
     paymentServiceMock.setExistingPayments([payment]);
 
     let updatedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val) => {
+    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val: PushPayment) => {
       updatedPushPayments.push(val);
     });
-    
+
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
@@ -428,10 +464,9 @@ describe("PaymentService tests", () => {
     const paymentServiceMock = new PaymentServiceMocks();
 
     let updatedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val) => {
+    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val: PushPayment) => {
       updatedPushPayments.push(val);
     });
-
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 
@@ -453,7 +488,7 @@ describe("PaymentService tests", () => {
     paymentServiceMock.setExistingPayments([payment]);
 
     let updatedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val) => {
+    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val: PushPayment) => {
       updatedPushPayments.push(val);
     });
 
@@ -474,7 +509,7 @@ describe("PaymentService tests", () => {
     const paymentServiceMock = new PaymentServiceMocks();
 
     let receivedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentReceived.subscribe((val) => {
+    paymentServiceMock.contextProvider.onPushPaymentReceived.subscribe((val: PushPayment) => {
       receivedPushPayments.push(val);
     });
 
@@ -496,10 +531,9 @@ describe("PaymentService tests", () => {
     const paymentServiceMock = new PaymentServiceMocks();
 
     let receivedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentReceived.subscribe((val) => {
+    paymentServiceMock.contextProvider.onPushPaymentReceived.subscribe((val: PushPayment) => {
       receivedPushPayments.push(val);
     });
-
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 

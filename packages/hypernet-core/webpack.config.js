@@ -33,6 +33,8 @@ module.exports = {
       // we are actually compiling hypernet-core
       "@interfaces": path.resolve(__dirname, ".src/interfaces"),
       "@implementations": path.resolve(__dirname, ".src/implementations"),
+      "@mock": path.resolve(__dirname, ".src/tests/mock"),
+      "@tests": path.resolve(__dirname, ".src/tests"),
     },
   },
   devtool: "inline-source-map",
