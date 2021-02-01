@@ -145,14 +145,11 @@ export class AccountsRepository implements IAccountsRepository {
     null,
     RouterChannelUnknownError | CoreUninitializedError | VectorError | Error | BlockchainUnavailableError
   > {
-    const prerequisites = (ResultUtils.combine([
+    const prerequisites = ResultUtils.combine([
       this.blockchainProvider.getSigner(),
       this.vectorUtils.getRouterChannelAddress(),
       this.browserNodeProvider.getBrowserNode(),
-    ]) as unknown) as ResultAsync<
-      [ethers.providers.JsonRpcSigner, string, IBrowserNode],
-      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error | BlockchainUnavailableError
-    >;
+    ]);
 
     let signer: ethers.providers.JsonRpcSigner;
     let channelAddress: string;
@@ -217,13 +214,10 @@ export class AccountsRepository implements IAccountsRepository {
     amount: BigNumber,
     destinationAddress: string,
   ): ResultAsync<void, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
-    const prerequisites = (ResultUtils.combine([
+    const prerequisites = ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
-      this.vectorUtils.getRouterChannelAddress() as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [IBrowserNode, string],
-      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
-    >;
+      this.vectorUtils.getRouterChannelAddress(),
+    ]);
 
     return prerequisites
       .andThen((vals) => {
