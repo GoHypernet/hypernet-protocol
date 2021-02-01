@@ -8,7 +8,15 @@ module.exports = {
   devtool: 'source-map',
 
   resolve: {
-    extensions: ['.ts', '.tsx', '.js'],
+    extensions: [".ts", ".tsx", ".js"],
+    alias: {
+      // These are copied from hypernet-core, because for local compilation
+      // we are actually compiling hypernet-core
+      "@interfaces": path.resolve(__dirname, "../hypernet-core/src/interfaces"),
+      "@implementations": path.resolve(__dirname, "../hypernet-core/src/implementations"),
+      "@mock": path.resolve(__dirname, "../hypernet-core/src/tests/mock"),
+      "@tests": path.resolve(__dirname, "../hypernet-core/src/tests"),
+    },
   },
 
   module: {
