@@ -269,6 +269,7 @@ export class PaymentUtils implements IPaymentUtils {
       transferTypeResults.push(this.getTransferTypeWithTransfer(transfer, browserNode));
     }
 
+    // @ts-ignore
     return combine(transferTypeResults).andThen((transferTypesWithTransfers) => {
       const transfersByPaymentId = new Map<string, IFullTransferState[]>();
       for (const { transferType, transfer } of transferTypesWithTransfers) {
@@ -402,6 +403,7 @@ export class PaymentUtils implements IPaymentUtils {
       transferTypeResults.push(this.getTransferTypeWithTransfer(transfer, browserNode));
     }
 
+    // @ts-ignore
     return combine(transferTypeResults).andThen((transferTypesWithTransfers) => {
       for (const { transferType, transfer } of transferTypesWithTransfers) {
         if (transferType === ETransferType.Offer) {
