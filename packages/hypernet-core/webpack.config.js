@@ -20,8 +20,8 @@ module.exports = {
         exclude: /node_modules/,
         options: {
           configFile,
-          projectReferences: true
-        }
+          projectReferences: true,
+        },
       },
     ],
   },
@@ -29,12 +29,13 @@ module.exports = {
     extensions: [".tsx", ".ts", ".js", ".html"],
     plugins: [new TsconfigPathsPlugin({})],
     alias: {
-      // These are copied from hypernet-core, because for local compilation
-      // we are actually compiling hypernet-core
+      // These are copied from other packages, because for local compilation
+      // we are actually compiling hypernet-core and other mapped packages
       "@interfaces": path.resolve(__dirname, ".src/interfaces"),
       "@implementations": path.resolve(__dirname, ".src/implementations"),
       "@mock": path.resolve(__dirname, ".src/tests/mock"),
       "@tests": path.resolve(__dirname, ".src/tests"),
+      "@web-integration": path.resolve(__dirname, "../web-integration/src"),
     },
     fallback: {
       "crypto": require.resolve("crypto-browserify"),

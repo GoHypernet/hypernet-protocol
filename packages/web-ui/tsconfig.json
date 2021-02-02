@@ -6,11 +6,15 @@
     "rootDir": "./src",
     "target": "es6",
     "jsx": "react",
-    "baseUrl": "./"
+    "baseUrl": "./",
+    "paths": {
+      "@hypernetlabs/hypernet-core": ["../hypernet-core/src"]
+    }
   },
-  "include": [
-    "./src/**/*",
-    "./typings/**/*",
-    "**/__tests__/**/*"
+  "include": ["./src/**/*", "./typings/**/*", "**/__tests__/**/*"],
+  "references": [
+    {
+      "path": "../hypernet-core/tsconfig.json"
+    }
   ]
 }
