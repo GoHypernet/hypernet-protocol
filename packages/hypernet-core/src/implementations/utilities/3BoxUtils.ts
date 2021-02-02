@@ -29,8 +29,10 @@ export class ThreeBoxUtils implements IThreeBoxUtils {
       return this.boxResult;
     }
 
-    this.boxResult = ResultUtils.combine([this.blockchainProvider.getProvider(),
-      this.contextProvider.getInitializedContext()])
+    this.boxResult = ResultUtils.combine([
+      this.blockchainProvider.getProvider(),
+      this.contextProvider.getInitializedContext(),
+    ])
       .andThen((vals) => {
         const [provider, context] = vals;
         return ResultAsync.fromPromise(openBox(context.account, provider), (e) => {
