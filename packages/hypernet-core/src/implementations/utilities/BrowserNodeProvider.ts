@@ -1,11 +1,14 @@
-import { IBrowserNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider";
-import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 import { BrowserNode } from "@connext/vector-browser-node";
-import { IBrowserNode, IContextProvider, ILogUtils } from "@interfaces/utilities";
-import { ResultAsync } from "neverthrow";
+import {
+  IBrowserNode,
+  IContextProvider,
+  ILogUtils,
+  IBrowserNodeProvider,
+  IConfigProvider,
+} from "@interfaces/utilities";
 import { WrappedBrowserNode } from "./WrappedBrowserNode";
 import { VectorError } from "@interfaces/objects/errors";
-import { HypernetConfig } from "@interfaces/objects";
+import { ResultAsync } from "@interfaces/objects";
 
 export class BrowserNodeProvider implements IBrowserNodeProvider {
   protected browserNodeResult: ResultAsync<IBrowserNode, VectorError | Error> | null;
@@ -37,7 +40,7 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
           return this.browserNode as IBrowserNode;
         });
     }
-    return this.browserNodeResult;
+    return this.browserNodeResult as ResultAsync<IBrowserNode, VectorError>;
   }
   public getBrowserNode(): ResultAsync<IBrowserNode, VectorError | Error> {
     return this.initialize();

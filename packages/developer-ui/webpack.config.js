@@ -6,7 +6,7 @@ module.exports = {
   entry: path.join(__dirname, "src/index.ts"),
   output: {
     filename: "index.js",
-    path: path.join(__dirname, "/dist"),
+    path: path.join(__dirname, "/dist/bundle"),
   },  
   devServer: {
     contentBase: path.join(__dirname, "src"),

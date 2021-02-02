@@ -2,16 +2,20 @@ const { pathsToModuleNameMapper } = require('ts-jest/utils');
 
 // In the following statement, replace `./tsconfig` with the path to your `tsconfig` file
 // which contains the path mapping (ie the `compilerOptions.paths` option):
-const { compilerOptions } = require('./tsconfig');
+const { compilerOptions } = require('./test/tsconfig');
 
+const moduleNames = pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' } );
+
+console.log(moduleNames);
 
 module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   // Ignore lib folder, use this or root property include paths but not both https://medium.com/swlh/jest-with-typescript-446ea996cc68
   modulePathIgnorePatterns: [
-    "<rootDir>/lib/"
+    "<rootDir>/dist/"
   ],
+
   // This does not seem to support blacklisting any folder which means we can't enable parent directory and disable child
   // We should be using peer directories for coverage and non-coverage tests.
   collectCoverageFrom: [
@@ -24,5 +28,10 @@ module.exports = {
     // Disabled because we don't want it to end up in coverage report,
     // "<rootDir>/src/tests/**/*.ts",
   ],
-  moduleNameMapper: pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' } )
+  moduleNameMapper: moduleNames,
+  globals: {
+    'ts-jest': {
+      tsconfig: 'test/tsconfig.json',
+    },
+  },
 };

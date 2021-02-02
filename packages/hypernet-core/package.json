@@ -29,8 +29,8 @@
   ],
   "scripts": {
     "build": "yarn clean && yarn compile",
-    "clean": "",
-
+    "clean": "rimraf dist",
+    "compile": "tsc --build src",
     "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",
     "format": "prettier --write \"src/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",

@@ -2,6 +2,7 @@ const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 
+/** @type import('webpack').Configuration */
 module.exports = {
   context: __dirname,
   mode: "development",
@@ -13,7 +14,7 @@ module.exports = {
         exclude: /node_modules/,
         options: {
           projectReferences: true,
-          configFile: require.resolve('./tsconfig.json'),
+          configFile: path.resolve(__dirname, "./tsconfig.json"),
           compilerOptions: {
             // build still catches these. avoid them during bunding time for a nicer dev experience.
             noUnusedLocals: false,
@@ -41,20 +42,14 @@ module.exports = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".html"],
-    plugins: [new TsconfigPathsPlugin({})],
-    alias: {
-      // These are copied from hypernet-core, because for local compilation
-      // we are actually compiling hypernet-core
-      "@interfaces": path.resolve(__dirname, "../../packages/hypernet-core/src/interfaces"),
-      "@implementations": path.resolve(__dirname, "../../packages/hypernet-core/src/implementations"),
-      "@mock": path.resolve(__dirname, "../../packages/hypernet-core/src/tests/mock"),
-      "@tests": path.resolve(__dirname, "../../packages/hypernet-core/src/tests"),
-    },
+    plugins: [new TsconfigPathsPlugin({configFile: path.resolve(__dirname, "./packages/hypernet-core/src/tsconfig.json")})],
     fallback: {
       "crypto": require.resolve("crypto-browserify"),
       "path": require.resolve("path-browserify"),
       "stream": require.resolve("stream-browserify"),
       "http": require.resolve("stream-http"),
+      "https": require.resolve("https-browserify"),
+      "os": require.resolve("os-browserify/browser"),
       "net": false,
       "tls": false,
       "fs": false
