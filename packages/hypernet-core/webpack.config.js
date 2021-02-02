@@ -36,6 +36,14 @@ module.exports = {
       "@mock": path.resolve(__dirname, ".src/tests/mock"),
       "@tests": path.resolve(__dirname, ".src/tests"),
     },
+    fallback: {
+      "crypto": require.resolve("crypto-browserify"),
+      "path": require.resolve("path-browserify"),
+      "stream": require.resolve("stream-browserify"),
+      "net": false,
+      "tls": false,
+      "fs": false
+    }
   },
   devtool: "inline-source-map",
   devServer: {
@@ -47,10 +55,5 @@ module.exports = {
   },
   plugins: [
     new CleanWebpackPlugin(),
-  ],
-  node: {
-    net: "empty",
-    tls: "empty",
-    fs: "empty",
-  },
+  ]
 };

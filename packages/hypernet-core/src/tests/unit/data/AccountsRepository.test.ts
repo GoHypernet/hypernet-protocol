@@ -62,6 +62,10 @@ class AccountsRepositoryErrorMocks {
     td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(errAsync(new RouterChannelUnknownError()));
     td.when(this.blockchainProvider.getSigner()).thenReturn(errAsync(new BlockchainUnavailableError()));
   }
+
+  public factoryAccountsRepository(): IAccountsRepository {
+    return new AccountsRepository(this.blockchainProvider, this.vectorUtils, this.browserNodeProvider, this.logUtils);
+  }
 }
 
 describe("AccountsRepository tests", () => {

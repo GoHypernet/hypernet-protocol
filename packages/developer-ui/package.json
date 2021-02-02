@@ -2,6 +2,16 @@
   "name": "@hypernetlabs/developer-ui",
   "version": "1.0.0",
   "description": "Simple, complete UI that wraps hypernet-core, intended for developer use.",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/developer-ui#readme",
+  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
   "keywords": [
     "Typescript",
     "Hypernet",
@@ -10,66 +20,31 @@
     "Hypernet",
     "Core"
   ],
-  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
-  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/developer-ui#readme",
-  "license": "ISC",
   "main": "lib/developer-ui.js",
-  "types": "lib/developer-ui.d.ts",
+  "files": [
+    "lib"
+  ],
   "directories": {
     "lib": "lib",
     "test": "__tests__"
   },
-  "files": [
-    "lib"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
-  },
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 0",
-    "build": "webpack",
-    "compile": "tsc -b tsconfig.json",
-    "clean-docker": "docker-compose down",
-    "start": "yarn start-backend && yarn verify-backend && yarn deploy-custom-transfers && yarn start-web",
-    "quick-start": "yarn start-web",
     "Start-windows": "yarn start-backend && yarn deploy-custom-transfers && yarn start-web",
-    "start-web": "webpack serve --config webpack.config.js --mode development --open",
-    "start-backend": "docker-compose down && docker-compose pull && docker-compose up -d && wait-on -l -d 15000 tsconfig.json && docker-compose up -d",
-    "verify-backend": "docker ps -f status=running -f name=developer-ui | grep connextproject | if [ `wc -l` -ne 8 ]; then echo 'Error: did not detect 8 running docker containers!' && `exit 1`; fi",
+    "build": "webpack",
+    "clean-docker": "docker-compose down",
+    "compile": "tsc -b tsconfig.json",
     "deploy-custom-transfers": "yarn ts-node scripts/deploy.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
+    "quick-start": "yarn start-web",
+    "start": "yarn start-backend && yarn verify-backend && yarn deploy-custom-transfers && yarn start-web",
+    "start-backend": "docker-compose down && docker-compose pull && docker-compose up -d && wait-on -l -d 15000 tsconfig.json && docker-compose up -d",
+    "start-web": "webpack serve --config webpack.config.js --mode development --open",
+    "test": "echo \"Error: run tests from root\" && exit 0",
+    "verify-backend": "docker ps -f status=running -f name=developer-ui | grep connextproject | if [ `wc -l` -ne 8 ]; then echo 'Error: did not detect 8 running docker containers!' && `exit 1`; fi",
     "webpack": "webpack"
   },
-  "bugs": {
-    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
-  },
-  "devDependencies": {
-    "@types/knockout": "^3.4.68",
-    "@webpack-cli/serve": "^1.2.1",
-    "case-sensitive-paths-webpack-plugin": "^2.3.0",
-    "clean-webpack-plugin": "^3.0.0",
-    "concurrently": "^5.3.0",
-    "css-loader": "^5.0.1",
-    "env-cmd": "^10.1.0",
-    "file-loader": "^6.2.0",
-    "ganache-cli": "^6.10.1",
-    "html-loader": "^1.3.0",
-    "html-webpack-plugin": "^4.4.1",
-    "postcss": "^8.1.0",
-    "postcss-loader": "^4.0.2",
-    "prettier": "^2.2.1",
-    "style-loader": "^2.0.0",
-    "ts-loader": "^8.0.3",
-    "tsconfig-paths-webpack-plugin": "^3.3.0",
-    "tslint": "^6.1.3",
-    "tslint-config-prettier": "^1.18.0",
-    "typescript": "^4.0.2",
-    "webpack": "^5.19.0",
-    "webpack-cli": "^4.4.0",
-    "webpack-dev-server": "^3.11.2"
-  },
+  "types": "lib/developer-ui.d.ts",
   "dependencies": {
     "@ethereum-waffle/chai": "^3.1.2",
     "@hypernetlabs/hypernet-core": "^0.0.1",
