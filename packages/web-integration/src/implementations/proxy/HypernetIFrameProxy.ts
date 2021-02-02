@@ -22,7 +22,7 @@ import {
 } from "@hypernetlabs/hypernet-core";
 import Postmate from "postmate";
 import { Subject } from "rxjs";
-import IHypernetIFrameProxy from "./IHypernetIFrameProxy";
+import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 import { ok } from "neverthrow";
 
 interface IIFrameCallData<T> {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { TokenSelector, Button } from "@hypernetlabs/web-ui";
-import { useFund } from "../../hooks";
+import { useFund } from "@web-integration/hooks";
 
 interface IResultMessage {
   status?: string;

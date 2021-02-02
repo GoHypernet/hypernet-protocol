@@ -1,9 +1,8 @@
 import React from "react";
 import { TokenSelector, Button, TextInput, SelectInput } from "@hypernetlabs/web-ui";
 import { PublicIdentifier, EthereumAddress, PublicKey, EPaymentType } from "@hypernetlabs/hypernet-core";
-import { EResultStatus } from "../../viewModel";
-import { usePayment } from "../../hooks";
-import { ITokenSelectorOption } from "@hypernetlabs/web-ui/src/interfaces";
+import { EResultStatus } from "@web-integration/interfaces/objects";
+import { usePayment } from "@web-integration/hooks";
 
 interface PaymentWidgetProps {
   counterPartyAccount?: PublicIdentifier;

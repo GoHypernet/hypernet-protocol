@@ -10,12 +10,13 @@ module.exports = {
   resolve: {
     extensions: [".ts", ".tsx", ".js"],
     alias: {
-      // These are copied from hypernet-core, because for local compilation
-      // we are actually compiling hypernet-core
+      // These are copied from other packages, because for local compilation
+      // we are actually compiling hypernet-core and other mapped packages
       "@interfaces": path.resolve(__dirname, "../hypernet-core/src/interfaces"),
       "@implementations": path.resolve(__dirname, "../hypernet-core/src/implementations"),
       "@mock": path.resolve(__dirname, "../hypernet-core/src/tests/mock"),
       "@tests": path.resolve(__dirname, "../hypernet-core/src/tests"),
+      "@web-integration": path.resolve(__dirname, "../web-integration/src"),
     },
   },
 

@@ -1,10 +1,10 @@
 import { useEffect, useReducer, useContext } from "react";
 import Web3 from "web3";
-import { StoreContext } from "../contexts";
+import { StoreContext } from "@web-integration/contexts";
 import moment from "moment";
 import { ITokenSelectorOption } from "@hypernetlabs/web-ui/src/interfaces";
 import { Balances, PublicIdentifier, EthereumAddress, PublicKey, EPaymentType } from "@hypernetlabs/hypernet-core";
-import { PaymentTokenOptionViewModel, EResultStatus, ResultMessage } from "../viewModel";
+import { PaymentTokenOptionViewModel, EResultStatus, ResultMessage } from "@web-integration/interfaces/objects";
 
 class PaymentTypeOption {
   constructor(public typeName: string, public type: EPaymentType) {}
