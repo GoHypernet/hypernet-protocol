@@ -16,7 +16,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "react": "^17.0.1"
+    "react": "^17.0.1",
+    "@hypernetlabs/hypernet-core": "^0.0.1"
   },
   "devDependencies": {
     "@types/react": "^17.0.0",
