@@ -12,6 +12,7 @@ export * from "./PaymentFinalizeError";
 export * from "./PaymentStakeError";
 export * from "./RouterChannelUnknownError";
 export * from "./RouterUnavailableError";
+export * from "./ThreeBoxError";
 export * from "./TransferCreationError";
 export * from "./TransferResolutionError";
 export * from "./VectorError";

@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
@@ -53,6 +54,18 @@ module.exports = {
       "@tests": path.resolve(__dirname, "../hypernet-core/src/tests"),
       "@web-integration": path.resolve(__dirname, "../web-integration/src"),
     },
+    fallback: {
+      "crypto": require.resolve("crypto-browserify"),
+      "path": require.resolve("path-browserify"),
+      "stream": require.resolve("stream-browserify"),
+      "http": require.resolve("stream-http"),
+      "https": require.resolve("https-browserify"),
+      "os": require.resolve("os-browserify/browser"),
+      "Buffer": require.resolve("buffer"),
+      "net": false,
+      "tls": false,
+      "fs": false
+    }
   },
   devtool: "inline-source-map",
   devServer: {
@@ -62,10 +75,9 @@ module.exports = {
     publicPath: "/",
     port: 8080,
   },
-  plugins: [new CleanWebpackPlugin()],
-  node: {
-    net: "empty",
-    tls: "empty",
-    fs: "empty",
-  },
+  plugins: [new CleanWebpackPlugin(),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+      process: 'process/browser',
+    })]
 };

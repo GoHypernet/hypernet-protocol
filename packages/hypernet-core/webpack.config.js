@@ -37,6 +37,14 @@ module.exports = {
       "@tests": path.resolve(__dirname, ".src/tests"),
       "@web-integration": path.resolve(__dirname, "../web-integration/src"),
     },
+    fallback: {
+      "crypto": require.resolve("crypto-browserify"),
+      "path": require.resolve("path-browserify"),
+      "stream": require.resolve("stream-browserify"),
+      "net": false,
+      "tls": false,
+      "fs": false
+    }
   },
   devtool: "inline-source-map",
   devServer: {
@@ -46,10 +54,7 @@ module.exports = {
     publicPath: "/",
     port: 8080,
   },
-  plugins: [new CleanWebpackPlugin()],
-  node: {
-    net: "empty",
-    tls: "empty",
-    fs: "empty",
-  },
+  plugins: [
+    new CleanWebpackPlugin(),
+  ]
 };

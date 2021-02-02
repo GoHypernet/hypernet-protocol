@@ -1,3 +1,6 @@
+import { ResultAsync } from "@interfaces/objects";
+import { BlockchainUnavailableError, ThreeBoxError } from "@interfaces/objects/errors";
+
 export interface IMessagingListener {
-  initialize(): Promise<void>;
+  initialize(): ResultAsync<void, ThreeBoxError | BlockchainUnavailableError>;
 }
