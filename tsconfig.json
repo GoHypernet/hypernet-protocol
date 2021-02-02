@@ -1,36 +1,27 @@
 {
   "extends": "./tsconfig.build.json",
-  "compilerOptions": {
-    "baseUrl": "./packages",
-    "paths": {
-      "@hypernetlabs/hypernet-contracts/*": ["hypernet-contracts/src"],
-      "@hypernetlabs/hypernet-core": ["hypernet-core/src"],
-      "@hypernetlabs/web-integration": ["web-integration/src"],
-      "@hypernetlabs/web-ui": ["web-ui/src"],
-      "@hypernetlabs/iframe": ["iframe/src"],
-      "@hypernetlabs/developer-ui": ["developer-ui/src"],
-      "@hypernetlabs/web-demo": ["web-demo/src"]
-    }
-  },
   "files": [],
   "references": [
     {
-      "path": "packages/hypernet-core"
+      "path": "packages/hypernet-core/src"
     },
     {
-      "path": "packages/web-integration"
+      "path": "packages/hypernet-core/test"
     },
     {
-      "path": "packages/web-ui"
+      "path": "packages/web-integration/src"
     },
     {
-      "path": "packages/iframe"
+      "path": "packages/web-ui/src"
     },
     {
-      "path": "packages/developer-ui"
+      "path": "packages/iframe/src"
     },
     {
-      "path": "packages/web-demo"
+      "path": "packages/developer-ui/src"
+    },
+    {
+      "path": "packages/web-demo/src"
     }
   ]
 }

@@ -19,18 +19,18 @@
     "Nitro",
     "Ethereum"
   ],
-  "main": "lib/index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
     "dist",
     "src",
-    "!src/tests",
     "!dist/test",
     "!dist/tsconfig.tsbuildinfo"
   ],
   "scripts": {
     "build": "yarn clean && yarn compile",
     "clean": "",
-    "compile": "tsc -p tsconfig.json",
+
     "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",
     "format": "prettier --write \"src/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
@@ -45,7 +45,6 @@
     "postversion": "git push && git push --tags",
     "webpack": "webpack"
   },
-  "typings": "lib/index.d.ts",
   "dependencies": {
     "3box": "^1.22.2",
     "@ceramicnetwork/http-client": "^0.9.5",

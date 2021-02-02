@@ -265,7 +265,7 @@ export class PaymentUtils implements IPaymentUtils {
     browserNode: IBrowserNode,
   ): ResultAsync<Payment[], InvalidPaymentError> {
     // First step, get the transfer types for all the transfers
-    const transferTypeResults = [];
+    const transferTypeResults = new Array<ResultAsync<{ transferType: ETransferType; transfer: IFullTransferState }, VectorError | Error>>();
     for (const transfer of transfers) {
       transferTypeResults.push(this.getTransferTypeWithTransfer(transfer, browserNode));
     }

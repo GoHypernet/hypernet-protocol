@@ -12,6 +12,7 @@
     "preserveConstEnums": true,
     "sourceMap": true,
     "strict": true,
+    "noImplicitAny": false,
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "declarationMap": true,
@@ -20,5 +21,6 @@
     "allowSyntheticDefaultImports": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
+    "resolveJsonModule": true
   },
 }

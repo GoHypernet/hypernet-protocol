@@ -1,0 +1,15 @@
+{
+  "extends": "../../../tsconfig.build.json",
+  "compilerOptions": {
+    "outDir": "../dist",
+    "jsx": "react",
+  },
+  "references": [
+    {
+      "path": "../../hypernet-core/src"
+    },
+    {
+      "path": "../../web-ui/src"
+    }
+  ]
+}

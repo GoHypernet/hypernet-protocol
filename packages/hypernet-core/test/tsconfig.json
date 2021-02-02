@@ -1,0 +1,13 @@
+{
+    "extends": "../../../tsconfig.build.json",
+    "compilerOptions": {
+      "outDir": "../dist/test",
+      "paths": {
+        "@interfaces/*": ["./packages/hypernet-core/src/interfaces/*"],
+        "@implementations/*": ["./packages/hypernet-core/src/implementations/*"],
+        "@tests/*": ["./packages/hypernet-core/test/*"],
+        "@mock/*": ["./packages/hypernet-core/test/mock/*"]
+    },
+    },
+    "references": [{ "path": "../src" }]
+  }

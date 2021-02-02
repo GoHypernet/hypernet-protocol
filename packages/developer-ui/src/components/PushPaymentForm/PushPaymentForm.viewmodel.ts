@@ -1,9 +1,8 @@
 import ko from "knockout";
-import { EthereumAddress, IHypernetCore } from "@hypernetlabs/hypernet-core";
+import { BigNumber, EthereumAddress, IHypernetCore, PublicIdentifier } from "@hypernetlabs/hypernet-core";
 import html from "./PushPaymentForm.template.html";
 import moment from "moment";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
-import { BigNumber, PublicIdentifier } from "@hypernetlabs/hypernet-core/lib/interfaces/objects";
 import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
 import Web3 from "web3";
 

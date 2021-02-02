@@ -5,7 +5,8 @@
   "license": "ISC",
   "author": "",
   "keywords": [],
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "npx webpack",
     "compile": "tsc -b tsconfig.json",

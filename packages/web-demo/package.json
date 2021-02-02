@@ -20,7 +20,8 @@
     "Hypernet",
     "Core"
   ],
-  "main": "lib/web-demo.js",
+  "main": "dist/index.ts",
+  "types": "dist/index.d.ts",
   "files": [
     "lib"
   ],

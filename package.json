@@ -30,7 +30,8 @@
   ],
   "scripts": {
     "bootstrap": "yarn install && lerna init",
-    "compile": "lerna run compile",
+    "clean": "rimraf ./packages/*/dist",
+    "build": "tsc --build",
     "format": "lerna run format && yarn format:pkg",
     "format:pkg": "format-package -w",
     "generate-docs": "lerna run generate-docs",
@@ -72,6 +73,7 @@
     "postcss-loader": "^4.2.0",
     "prettier": "^2.2.1",
     "randomstring": "^1.1.5",
+    "rimraf": "^3.0.2",
     "sass-loader": "8.0.0",
     "source-map-loader": "^2.0.0",
     "stream-http": "^3.1.1",

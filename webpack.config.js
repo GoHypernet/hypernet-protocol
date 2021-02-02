@@ -10,6 +10,7 @@ module.exports = {
       {
         test: /\.tsx?$/,
         loader: 'ts-loader',
+        exclude: /node_modules/,
         options: {
           projectReferences: true,
           configFile: require.resolve('./tsconfig.json'),

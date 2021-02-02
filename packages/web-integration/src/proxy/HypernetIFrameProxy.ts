@@ -24,6 +24,7 @@ import Postmate from "postmate";
 import { Subject } from "rxjs";
 import IHypernetIFrameProxy from "./IHypernetIFrameProxy";
 import { ok } from "neverthrow";
+import moment from "moment";
 
 interface IIFrameCallData<T> {
   callId: number;
