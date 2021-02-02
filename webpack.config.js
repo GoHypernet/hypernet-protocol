@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
@@ -42,7 +43,11 @@ module.exports = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".html"],
-    plugins: [new TsconfigPathsPlugin({configFile: path.resolve(__dirname, "./packages/hypernet-core/src/tsconfig.json")})],
+    plugins: [new TsconfigPathsPlugin({configFile: path.resolve(__dirname, "./packages/hypernet-core/src/tsconfig.json")}),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+      process: 'process/browser',
+    })],
     fallback: {
       "crypto": require.resolve("crypto-browserify"),
       "path": require.resolve("path-browserify"),

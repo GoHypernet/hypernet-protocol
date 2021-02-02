@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@hypernetlabs/hypernet-core": "^0.0.1",
+    "@hypernetlabs/web-ui": "^0.0.1",
     "moment": "^2.29.1",
     "neverthrow": "^3.2.0",
     "postmate": "^1.5.2"
