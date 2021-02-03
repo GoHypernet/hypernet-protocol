@@ -1,7 +1,6 @@
 import { useEffect, useReducer, useContext } from "react";
 import { StoreContext } from "@web-integration/contexts";
-import { IBalanceList } from "@hypernetlabs/web-ui/src/interfaces";
-import { Balances } from "@hypernetlabs/hypernet-core";
+import { AssetBalance, Balances } from "@hypernetlabs/hypernet-core";
 import { AssetBalanceParams, AssetBalanceViewModel } from "@web-integration/interfaces/objects";
 
 enum EActionTypes {
@@ -13,7 +12,7 @@ enum EActionTypes {
 interface IState {
   loading: boolean;
   error: any;
-  balances: IBalanceList[];
+  balances: AssetBalance[];
 }
 
 export function useBalances() {

@@ -1,3 +1,4 @@
+import "../../typings/3box";
 import { BoxInstance, BoxSpace, BoxThread } from "3box";
 import { ResultAsync } from "@interfaces/objects";
 import { BlockchainUnavailableError, ThreeBoxError } from "@interfaces/objects/errors";

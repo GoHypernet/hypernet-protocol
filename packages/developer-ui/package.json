@@ -20,9 +20,12 @@
     "Hypernet",
     "Core"
   ],
-  "main": "lib/developer-ui.js",
+  "main": "dist/index.js",
   "files": [
-    "lib"
+    "dist",
+    "src",
+    "!dist/test",
+    "!dist/tsconfig.tsbuildinfo"
   ],
   "directories": {
     "lib": "lib",
@@ -32,19 +35,18 @@
     "Start-windows": "yarn start-backend && yarn deploy-custom-transfers && yarn start-web",
     "build": "webpack",
     "clean-docker": "docker-compose down",
-    "compile": "tsc -b tsconfig.json",
+    "compile": "tsc -b src/tsconfig.json",
     "deploy-custom-transfers": "yarn ts-node scripts/deploy.ts",
     "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "tslint -p tsconfig.json",
+    "lint": "tslint -p src/tsconfig.json",
     "quick-start": "yarn start-web",
     "start": "yarn start-backend && yarn verify-backend && yarn deploy-custom-transfers && yarn start-web",
-    "start-backend": "docker-compose down && docker-compose pull && docker-compose up -d && wait-on -l -d 15000 tsconfig.json && docker-compose up -d",
+    "start-backend": "docker-compose down && docker-compose pull && docker-compose up -d && wait-on -l -d 15000 package.json && docker-compose up -d",
     "start-web": "webpack serve --config webpack.config.js --mode development --open",
     "test": "echo \"Error: run tests from root\" && exit 0",
-    "verify-backend": "docker ps -f status=running -f name=developer-ui | grep connextproject | if [ `wc -l` -ne 8 ]; then echo 'Error: did not detect 8 running docker containers!' && `exit 1`; fi",
-    "webpack": "webpack"
+    "verify-backend": "docker ps -f status=running -f name=developer-ui | grep connextproject | if [ `wc -l` -ne 8 ]; then echo 'Error: did not detect 8 running docker containers!' && `exit 1`; fi"
   },
-  "types": "lib/developer-ui.d.ts",
+  "types": "dist/index.d.ts",
   "dependencies": {
     "@ethereum-waffle/chai": "^3.1.2",
     "@hypernetlabs/hypernet-core": "^0.0.1",

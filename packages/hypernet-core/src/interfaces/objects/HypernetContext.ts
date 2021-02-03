@@ -1,9 +1,9 @@
 import { Subject } from "rxjs";
 import { ControlClaim } from "./ControlClaim";
-import { EthereumAddress } from "3box";
 import { PublicIdentifier } from "./PublicIdentifier";
 import { PullPayment, PushPayment } from "./Payment";
 import { Balances } from "./Balances";
+import { EthereumAddress } from "./EthereumAddress";
 
 export class HypernetContext {
   constructor(

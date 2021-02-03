@@ -1,72 +1,17 @@
 const path = require("path");
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
-const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
-
-const configFile = path.resolve(__dirname, "./tsconfig.json");
-
+const rootWebpackConfig = require("../../webpack.config");
 module.exports = {
-  context: path.resolve(__dirname),
+  ...rootWebpackConfig,
   entry: path.join(__dirname, "src/index.ts"),
   output: {
     filename: "index.js",
-    path: path.join(__dirname, "/dist"),
+    path: path.join(__dirname, "/dist/bundle"),
   },
-  mode: "development",
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        loader: "ts-loader",
-        exclude: /node_modules/,
-        options: {
-          configFile,
-          projectReferences: true,
-        },
-      },
-      {
-        enforce: "pre",
-        test: /\.html$/,
-        loader: "html-loader",
-      },
-      {
-        test: /\.css$/,
-        use: ["style-loader", "css-loader"],
-      },
-      {
-        test: /\.(png|jpe?g|gif)$/i,
-        loader: "file-loader",
-        options: {
-          name: "[path][name].[ext]",
-        },
-      },
-    ],
-  },
-  resolve: {
-    extensions: [".tsx", ".ts", ".js", ".html"],
-    plugins: [new TsconfigPathsPlugin({})],
-    alias: {
-      // These are copied from other packages, because for local compilation
-      // we are actually compiling hypernet-core and other mapped packages
-      "@interfaces": path.resolve(__dirname, "../hypernet-core/src/interfaces"),
-      "@implementations": path.resolve(__dirname, "../hypernet-core/src/implementations"),
-      "@mock": path.resolve(__dirname, "../hypernet-core/src/tests/mock"),
-      "@tests": path.resolve(__dirname, "../hypernet-core/src/tests"),
-      "@web-integration": path.resolve(__dirname, "../web-integration/src"),
-      react: path.resolve(__dirname, "../../node_modules/react"),
-    },
-  },
-  devtool: "inline-source-map",
   devServer: {
     contentBase: path.join(__dirname, "src"),
     liveReload: true,
     compress: true,
     publicPath: "/",
     port: 8090,
-  },
-  plugins: [new CleanWebpackPlugin()],
-  node: {
-    net: "empty",
-    tls: "empty",
-    fs: "empty",
   },
 };

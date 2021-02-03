@@ -11,6 +11,7 @@ import {
 } from "@interfaces/objects";
 import { IThreeBoxUtils, IContextProvider, IConfigProvider } from "@interfaces/utilities";
 import { EMessageType } from "@interfaces/types";
+import "reflect-metadata";
 import { plainToClass, serialize } from "class-transformer";
 import { BlockchainUnavailableError, LogicalError, ThreeBoxError } from "@interfaces/objects/errors";
 import { ResultUtils } from "@implementations/utilities";

@@ -1,8 +1,8 @@
 import React from "react";
-import { IBalanceList } from "../../interfaces";
+import { AssetBalance } from "@hypernetlabs/hypernet-core";
 
 interface BalanceListProps {
-  balances?: IBalanceList[];
+  balances?: AssetBalance[];
 }
 
 const BalanceList: React.FC<BalanceListProps> = (props: BalanceListProps) => {
@@ -14,7 +14,7 @@ const BalanceList: React.FC<BalanceListProps> = (props: BalanceListProps) => {
         <div key={index}>
           <h3>balance {index + 1}: </h3>
           <ul>
-            <li>assetAddress: {balance.assetAddress}</li>
+            <li>assetAddress: {balance.assetAddresss}</li>
             <li>freeAmount: {balance.freeAmount}</li>
             <li>lockedAmount: {balance.lockedAmount}</li>
             <li>totalAmount: {balance.totalAmount}</li>

@@ -5,16 +5,17 @@
   "license": "ISC",
   "author": "",
   "keywords": [],
-  "main": "src/index.ts",
+  "main": "dist/index.js",
   "scripts": {
     "build": "npm run clean && npm run compile",
     "clean": "",
-    "compile": "tsc -b tsconfig.json",
+    "compile": "tsc -b src/tsconfig.json",
     "format": "prettier --write \"src/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
-    "lint": "tslint -p tsconfig.json",
+    "lint": "tslint -p src/tsconfig.json",
     "test": "echo \"Error: no test specified\" && exit 0"
   },
+  "types": "dist/index.d.ts",
   "dependencies": {
     "react": "^17.0.1"
   }

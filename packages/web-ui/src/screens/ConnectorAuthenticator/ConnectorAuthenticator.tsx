@@ -1,15 +1,14 @@
 import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
-import { IBalanceList } from "../../interfaces";
 import Button from "../../components/Button";
-import BalanceList from "../../components/BalanceList";
+import {AssetBalance} from "@hypernetlabs/hypernet-core";
 
 const modalRoot: HTMLElement = document.createElement("div");
 modalRoot.id = "__hypernet-protocol-modal-root__";
 document.body.appendChild(modalRoot);
 
 interface IConnectorAuthenticator {
-  balances: IBalanceList[];
+  balances: AssetBalance[];
   confirmCallback: () => void;
 }
 
@@ -26,8 +25,8 @@ const ConnectorAuthenticator: React.FC<IConnectorAuthenticator> = (props: IConne
 };
 
 export const renderConnectorAuthenticatorScreen = (
-  connector: string,
-  balances: IBalanceList[],
+  connector: string | null | undefined,
+  balances: AssetBalance[],
   confirmCallback: () => void,
 ) => {
   const element = document.getElementById("__hypernet-protocol-iframe-connector-authentication__");

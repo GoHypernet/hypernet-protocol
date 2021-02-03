@@ -8,7 +8,7 @@ import {
   RouterChannelUnknownError,
   HypernetLink,
   BlockchainUnavailableError,
-  NodeError,
+  VectorError,
   LogicalError,
   PublicIdentifier,
   BalancesUnavailableError,
@@ -24,6 +24,7 @@ import Postmate from "postmate";
 import { Subject } from "rxjs";
 import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 import { ok } from "neverthrow";
+import moment from "moment";
 
 interface IIFrameCallData<T> {
   callId: number;
@@ -254,7 +255,7 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
     amount: BigNumber,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | NodeError | Error
+    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
   > {
     const call = this._createCall("depositFunds", { assetAddress, amount: amount.toString() });
 
@@ -267,7 +268,7 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | NodeError | Error
+    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
   > {
     const call = this._createCall("withdrawFunds", { assetAddress, amount: amount.toString(), destinationAddress });
 
@@ -282,7 +283,7 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
 
   public getLinks(): ResultAsync<
     HypernetLink[],
-    RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
   > {
     const call = this._createCall("getLinks", null);
 
@@ -291,7 +292,7 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
 
   public getActiveLinks(): ResultAsync<
     HypernetLink[],
-    RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
   > {
     const call = this._createCall("getActiveLinks", null);
 
@@ -309,7 +310,7 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
     requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error> {
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     const call = this._createCall("sendFunds", {
       counterPartyAccount,
       amount,

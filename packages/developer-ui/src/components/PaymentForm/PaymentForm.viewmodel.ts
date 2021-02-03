@@ -3,7 +3,6 @@ import { EPaymentType, IHypernetCore } from "@hypernetlabs/hypernet-core";
 import html from "./PaymentForm.template.html";
 import { PushPaymentFormParams } from "../PushPaymentForm/PushPaymentForm.viewmodel";
 import { PullPaymentFormParams } from "../PullPaymentForm/PullPaymentForm.viewmodel";
-import { PublicIdentifier } from "@hypernetlabs/hypernet-core/lib/interfaces/objects";
 
 export class PaymentFormParams {
   constructor(public core: IHypernetCore) {}

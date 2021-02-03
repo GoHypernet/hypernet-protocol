@@ -20,7 +20,7 @@
     "Hypernet",
     "Core"
   ],
-  "main": "lib/web-demo.js",
+  "main": "dist/index.ts",
   "files": [
     "lib"
   ],
@@ -30,23 +30,20 @@
   },
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "compile": "tsc -b tsconfig.json",
+    "compile": "tsc -b src/tsconfig.json",
     "deploy-custom-transfers": "yarn ts-node scripts/deploy.ts",
     "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "tslint -p tsconfig.json",
+    "lint": "tslint -p src/tsconfig.json",
     "start": "webpack serve --config webpack.config.js --mode development --open",
     "test": "echo \"Error: run tests from root\" && exit 0"
   },
-  "types": "lib/web-demo.d.ts",
+  "types": "dist/index.d.ts",
   "dependencies": {
     "@ethereum-waffle/chai": "^3.1.2",
     "@hypernetlabs/web-integration": "^0.0.1",
     "@hypernetlabs/web-ui": "^0.0.1",
     "bootstrap": "^4.5.3",
-    "jquery": "^3.5.1",
-    "node-sass": "4.13.0",
-    "ts-node": "^9.0.0",
-    "wait-on": "^5.2.0"
+    "jquery": "^3.5.1"
   },
   "peerDependencies": {
     "react": "16.12.0",

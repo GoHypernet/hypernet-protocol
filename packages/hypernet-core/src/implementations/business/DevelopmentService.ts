@@ -1,7 +1,6 @@
-import { EthereumAddress } from "3box";
 import { IDevelopmentService } from "@interfaces/business";
 import { IAccountsRepository } from "@interfaces/data";
-import { BigNumber, ResultAsync } from "@interfaces/objects";
+import { BigNumber, EthereumAddress, ResultAsync } from "@interfaces/objects";
 import { BlockchainUnavailableError } from "@interfaces/objects/errors";
 
 export class DevelopmentService implements IDevelopmentService {
