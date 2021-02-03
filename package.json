@@ -8,8 +8,9 @@
     "lib": "lib"
   },
   "devDependencies": {
-    "lerna": "^3.22.1",
-    "@octokit/core": "^3.2.4"
+    "@octokit/core": "^3.2.4",
+    "husky": "^5.0.0",
+    "lerna": "^3.22.1"
   },
   "scripts": {
     "bootstrap": "yarn install && lerna init",
@@ -18,7 +19,8 @@
     "lint": "lerna run lint",
     "test": "lerna run test",
     "compile": "lerna run compile",
-    "generate-docs": "lerna run generate-docs"
+    "generate-docs": "lerna run generate-docs",
+    "postinstall": "husky install"
   },
   "repository": {
     "type": "git",

@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+## Use && format so that the commit fails if any of the following fail
+yarn format && \
+yarn lint && \
+yarn test
