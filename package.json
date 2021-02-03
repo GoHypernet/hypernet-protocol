@@ -30,14 +30,22 @@
   ],
   "scripts": {
     "bootstrap": "yarn install && lerna init",
-    "clean": "rimraf ./packages/*/dist",
     "build": "tsc --build",
+    "clean": "rimraf ./packages/*/dist",
     "format": "lerna run format && yarn format:pkg",
     "format:pkg": "format-package -w",
     "generate-docs": "lerna run generate-docs",
     "lint": "lerna run lint",
     "start": "cd packages/developer-ui && yarn start",
     "test": "lerna run test"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.format:pkg": "prettier --write"
   },
   "devDependencies": {
     "@octokit/core": "^3.2.4",
@@ -101,13 +109,5 @@
     "webpack": "^5.19.0",
     "webpack-cli": "^4.4.0",
     "webpack-dev-server": "^3.11.2"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "*.format:pkg": "prettier --write"
   }
 }

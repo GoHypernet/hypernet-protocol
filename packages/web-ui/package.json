@@ -6,7 +6,6 @@
   "author": "",
   "keywords": [],
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
   "scripts": {
     "build": "npm run clean && npm run compile",
     "clean": "",
@@ -16,6 +15,7 @@
     "lint": "tslint -p src/tsconfig.json",
     "test": "echo \"Error: no test specified\" && exit 0"
   },
+  "types": "dist/index.d.ts",
   "dependencies": {
     "react": "^17.0.1"
   }

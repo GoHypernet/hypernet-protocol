@@ -20,7 +20,7 @@
     "Hypernet",
     "Core"
   ],
-  "main": "lib/developer-ui.js",
+  "main": "dist/index.js",
   "files": [
     "dist",
     "src",
@@ -46,7 +46,7 @@
     "test": "echo \"Error: run tests from root\" && exit 0",
     "verify-backend": "docker ps -f status=running -f name=developer-ui | grep connextproject | if [ `wc -l` -ne 8 ]; then echo 'Error: did not detect 8 running docker containers!' && `exit 1`; fi"
   },
-  "types": "lib/developer-ui.d.ts",
+  "types": "dist/index.d.ts",
   "dependencies": {
     "@ethereum-waffle/chai": "^3.1.2",
     "@hypernetlabs/hypernet-core": "^0.0.1",
