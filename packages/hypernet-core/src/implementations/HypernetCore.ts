@@ -466,12 +466,12 @@ export class HypernetCore implements IHypernetCore {
       })
       .andThen(() => {
         // Initialize anything that wants an initialized context
-        return ResultUtils.combine([this.vectorAPIListener.setup(), this.threeboxMessagingListener.initialize()]);
+        return ResultUtils.combine([this.vectorAPIListener.setup()]);// , this.threeboxMessagingListener.initialize()]);
       })
-      .andThen(() => {
-        // Claim control
-        return this.controlService.claimControl();
-      })
+      // .andThen(() => {
+      //   // Claim control
+      //   return this.controlService.claimControl();
+      // })
       .map(() => {
         if (this._initializePromiseResolve != null) {
           this._initializePromiseResolve();
