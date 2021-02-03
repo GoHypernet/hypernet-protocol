@@ -48,3 +48,14 @@ This monorepo contains several packages:
 2) Install packages:
 
     `yarn`
+
+## Structure
+This is organized as a monorepo, using [this](https://github.com/wixplosives/sample-monorepo) as an example.
+
+## Maintenance
+### Adding dependencies
+Dev dependencies should be added to the root of the repository, via 
+
+`yarn add <package name> --dev -W`
+
+Normal dependencies and peer dependencies should be added via yarn to the actual pacakge. Refer to the example monorepo above for more examples.

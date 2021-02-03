@@ -2,39 +2,37 @@
   "name": "@hypernetlabs/hypernet-contracts",
   "version": "0.0.1",
   "description": "Solidity smart contracts for the Hypernet Protocol",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/contracts#readme",
+  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
   "keywords": [
     "Solidity",
     "Hypernet",
     "Blockchain",
     "Ethereum"
   ],
-  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
-  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/contracts#readme",
-  "license": "ISC",
   "main": "lib/index.js",
+  "files": [
+    "lib/**/*"
+  ],
   "directories": {
     "lib": "lib",
     "test": "__tests__"
   },
-  "devDependencies": {
-    "@types/express-serve-static-core": "4.0.53"
-  },
+  "scripts": {},
   "dependencies": {
     "concurrently": "^5.3.0",
     "ethers": "^5.0.8",
     "wait-on": "^5.2.0"
   },
-  "files": [
-    "lib/**/*"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
-  },
-  "scripts": {
-
-  },
-  "bugs": {
-    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  "devDependencies": {
+    "@types/express-serve-static-core": "4.0.53"
   }
 }

@@ -1,3 +1,4 @@
+const webpack = require('webpack');
 const path = require("path");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
@@ -20,8 +21,8 @@ module.exports = {
         exclude: /node_modules/,
         options: {
           configFile,
-          projectReferences: true
-        }
+          projectReferences: true,
+        },
       },
       {
         enforce: "pre",
@@ -30,13 +31,13 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader']
+        use: ["style-loader", "css-loader"],
       },
       {
         test: /\.(png|jpe?g|gif)$/i,
-        loader: 'file-loader',
+        loader: "file-loader",
         options: {
-            name: '[path][name].[ext]',
+          name: "[path][name].[ext]",
         },
       },
     ],
@@ -45,13 +46,26 @@ module.exports = {
     extensions: [".tsx", ".ts", ".js", ".html"],
     plugins: [new TsconfigPathsPlugin({})],
     alias: {
-      // These are copied from hypernet-core, because for local compilation
-      // we are actually compiling hypernet-core
+      // These are copied from other packages, because for local compilation
+      // we are actually compiling hypernet-core and other mapped packages
       "@interfaces": path.resolve(__dirname, "../hypernet-core/src/interfaces"),
       "@implementations": path.resolve(__dirname, "../hypernet-core/src/implementations"),
       "@mock": path.resolve(__dirname, "../hypernet-core/src/tests/mock"),
       "@tests": path.resolve(__dirname, "../hypernet-core/src/tests"),
+      "@web-integration": path.resolve(__dirname, "../web-integration/src"),
     },
+    fallback: {
+      "crypto": require.resolve("crypto-browserify"),
+      "path": require.resolve("path-browserify"),
+      "stream": require.resolve("stream-browserify"),
+      "http": require.resolve("stream-http"),
+      "https": require.resolve("https-browserify"),
+      "os": require.resolve("os-browserify/browser"),
+      "Buffer": require.resolve("buffer"),
+      "net": false,
+      "tls": false,
+      "fs": false
+    }
   },
   devtool: "inline-source-map",
   devServer: {
@@ -61,12 +75,9 @@ module.exports = {
     publicPath: "/",
     port: 8080,
   },
-  plugins: [
-    new CleanWebpackPlugin(),
-  ],
-  node: {
-    net: "empty",
-    tls: "empty",
-    fs: "empty",
-  },
+  plugins: [new CleanWebpackPlugin(),
+    new webpack.ProvidePlugin({
+      Buffer: ['buffer', 'Buffer'],
+      process: 'process/browser',
+    })]
 };

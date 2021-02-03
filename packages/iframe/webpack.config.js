@@ -20,8 +20,8 @@ module.exports = {
         exclude: /node_modules/,
         options: {
           configFile,
-          projectReferences: true
-        }
+          projectReferences: true,
+        },
       },
       {
         enforce: "pre",
@@ -30,13 +30,13 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ['style-loader', 'css-loader']
+        use: ["style-loader", "css-loader"],
       },
       {
         test: /\.(png|jpe?g|gif)$/i,
-        loader: 'file-loader',
+        loader: "file-loader",
         options: {
-            name: '[path][name].[ext]',
+          name: "[path][name].[ext]",
         },
       },
     ],
@@ -45,12 +45,13 @@ module.exports = {
     extensions: [".tsx", ".ts", ".js", ".html"],
     plugins: [new TsconfigPathsPlugin({})],
     alias: {
-      // These are copied from hypernet-core, because for local compilation
-      // we are actually compiling hypernet-core
+      // These are copied from other packages, because for local compilation
+      // we are actually compiling hypernet-core and other mapped packages
       "@interfaces": path.resolve(__dirname, "../hypernet-core/src/interfaces"),
       "@implementations": path.resolve(__dirname, "../hypernet-core/src/implementations"),
       "@mock": path.resolve(__dirname, "../hypernet-core/src/tests/mock"),
       "@tests": path.resolve(__dirname, "../hypernet-core/src/tests"),
+      "@web-integration": path.resolve(__dirname, "../web-integration/src"),
       react: path.resolve(__dirname, "../../node_modules/react"),
     },
   },
@@ -62,9 +63,7 @@ module.exports = {
     publicPath: "/",
     port: 8090,
   },
-  plugins: [
-    new CleanWebpackPlugin(),
-  ],
+  plugins: [new CleanWebpackPlugin()],
   node: {
     net: "empty",
     tls: "empty",

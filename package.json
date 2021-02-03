@@ -2,28 +2,17 @@
   "name": "hypernetlabs",
   "version": "0.0.1",
   "description": "Hypernet Protocol contracts and SDK",
-  "main": "index.js",
+  "license": "ISC",
   "private": true,
-  "directories": {
-    "lib": "lib"
-  },
-  "devDependencies": {
-    "lerna": "^3.22.1",
-    "@octokit/core": "^3.2.4"
-  },
-  "scripts": {
-    "bootstrap": "yarn install && lerna init",
-    "start": "cd packages/developer-ui && yarn start",
-    "format": "lerna run format",
-    "lint": "lerna run lint",
-    "test": "lerna run test",
-    "compile": "lerna run compile",
-    "generate-docs": "lerna run generate-docs"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
   },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol#readme",
+  "author": "Hypernet Labs",
   "keywords": [
     "Hypernet",
     "Blockchain",
@@ -32,13 +21,74 @@
     "Galileo",
     "Vector"
   ],
-  "author": "Hypernet Labs",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
   },
-  "homepage": "https://github.com/GoHypernet/hypernet-protocol#readme",
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "scripts": {
+    "bootstrap": "yarn install && lerna init",
+    "compile": "lerna run compile",
+    "format": "lerna run format && yarn format:pkg",
+    "format:pkg": "format-package -w",
+    "generate-docs": "lerna run generate-docs",
+    "lint": "lerna run lint",
+    "start": "cd packages/developer-ui && yarn start",
+    "test": "lerna run test"
+  },
+  "devDependencies": {
+    "@octokit/core": "^3.2.4",
+    "@types/knockout": "^3.4.69",
+    "@types/pino": "^6.3.2",
+    "@types/postmate": "^1.5.1",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
+    "@types/react-router-dom": "5.1.3",
+    "@types/reflect-metadata": "^0.1.0",
+    "@types/sjcl": "^1.0.29",
+    "@types/uuid": "^8.3.0",
+    "@types/web3": "^1.2.2",
+    "@webpack-cli/serve": "^1.2.2",
+    "buffer": "^6.0.3",
+    "case-sensitive-paths-webpack-plugin": "^2.3.0",
+    "clean-webpack-plugin": "^3.0.0",
+    "concurrently": "^5.3.0",
+    "copyfiles": "^2.3.0",
+    "css-loader": "^5.0.1",
+    "env-cmd": "^10.1.0",
+    "ethereum-waffle": "^3.2.1",
+    "file-loader": "^6.2.0",
+    "format-package": "^6.1.0",
+    "ganache-cli": "^6.10.1",
+    "html-loader": "^1.3.2",
+    "html-webpack-plugin": "^4.5.1",
+    "http-server": "^0.12.3",
+    "jest": "^26.4.2",
+    "jest-when": "^3.0.1",
+    "lerna": "^3.22.1",
+    "monaco-editor-webpack-plugin": "2.0.0",
+    "postcss": "^8.2.4",
+    "postcss-loader": "^4.2.0",
+    "prettier": "^2.2.1",
+    "process": "^0.11.10",
+    "randomstring": "^1.1.5",
+    "sass-loader": "8.0.0",
+    "source-map-loader": "^2.0.0",
+    "style-loader": "^2.0.0",
+    "testdouble": "^3.16.1",
+    "testdouble-jest": "^2.0.0",
+    "ts-jest": "^26.3.0",
+    "ts-loader": "^8.0.14",
+    "tsconfig-paths-webpack-plugin": "^3.3.0",
+    "tslint": "^6.1.3",
+    "tslint-config-prettier": "^1.18.0",
+    "typedoc": "^0.20.16",
+    "typescript": "^4.1.3",
+    "url-loader": "3.0.0",
+    "webpack": "^5.19.0",
+    "webpack-cli": "^4.4.0",
+    "webpack-dev-server": "^3.11.2"
+  }
 }

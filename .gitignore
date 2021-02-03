@@ -17,3 +17,4 @@ packages/*/yarn-error.log
 *.swo
 */yarn-error.log
 /lib
+yarn-error.log
