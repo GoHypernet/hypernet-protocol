@@ -149,6 +149,8 @@ export interface IBrowserNode {
 
   getActiveTransfers(channelAddress: string): ResultAsync<IFullTransferState[], VectorError>;
 
+  getTransfers(): ResultAsync<IFullTransferState[], VectorError>;
+
   init(): ResultAsync<void, VectorError>;
 
   getRegisteredTransfers(chainId: number): ResultAsync<IRegisteredTransfer[], VectorError>;

@@ -107,6 +107,10 @@ export class WrappedBrowserNode implements IBrowserNode {
     });
   }
 
+  public getTransfers(): ResultAsync<IFullTransferState[], VectorError> {
+    return ResultAsync.fromPromise(this.browserNode.getTransfers())
+  }
+
   public signUtilityMessage(message: string): ResultAsync<string, VectorError> {
     return ResultAsync.fromPromise(this.browserNode.signUtilityMessage({ message }), (e) => {
       return new VectorError(e as Error);
