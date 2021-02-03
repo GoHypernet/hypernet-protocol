@@ -1,4 +1,4 @@
-# `core`	# `web-demo`
+# `core`
 
 ## Purpose	
 
