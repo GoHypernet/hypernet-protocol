@@ -2,20 +2,6 @@
   "extends": "../../../tsconfig.build.json",
   "compilerOptions": {
     "outDir": "../dist/test",
-    "paths": {
-      "@interfaces/*": [
-        "src/interfaces/*"
-      ],
-      "@implementations/*": [
-        "src/implementations/*"
-      ],
-      "@tests/*": [
-        "test/*"
-      ],
-      "@mock/*": [
-        "test/mock/*"
-      ]
-    }
   },
   "references": [
     {

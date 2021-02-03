@@ -1,11 +1,7 @@
 {
     "extends": "../../../tsconfig.build.json",
     "compilerOptions": {
-        "outDir": "../dist",
-        "paths": {
-            "@interfaces/*": ["./packages/hypernet-core/src/interfaces/*"],
-            "@implementations/*": ["./packages/hypernet-core/src/implementations/*"],
-        },
+        "outDir": "../dist"
     },
-    "references": [],
+    "references": []
 }
