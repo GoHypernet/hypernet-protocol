@@ -239,7 +239,7 @@ export class AccountsRepository implements IAccountsRepository {
       .getSigner()
       .andThen((signer) => {
         const testTokenContract = new Contract(
-          "0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0",
+          "0x9FBDa871d559710256a2502A2517b794B482Db40",
           artifacts.TestToken.abi,
           signer,
         );

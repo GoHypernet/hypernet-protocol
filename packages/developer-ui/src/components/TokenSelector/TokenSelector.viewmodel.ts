@@ -88,7 +88,7 @@ export class TokenSelectorViewModel {
         });
     } else {
       const eth = new PaymentTokenOption("ETH", "0x0000000000000000000000000000000000000000");
-      const test = new PaymentTokenOption("Test Token", "0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0");
+      const test = new PaymentTokenOption("Test Token", "0x9FBDa871d559710256a2502A2517b794B482Db40");
       this.paymentTokens([eth, test]);
     }
   }
