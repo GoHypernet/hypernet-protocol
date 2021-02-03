@@ -22,8 +22,8 @@ import {
   InsufficientBalanceError,
   LogicalError,
   RouterChannelUnknownError,
-} from "./objects/errors";
-import { NodeError } from "@connext/vector-types";
+  VectorError,
+} from "@interfaces/objects/errors";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -71,7 +71,7 @@ export interface IHypernetCore {
     amount: BigNumber,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | NodeError | Error
+    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
   >;
 
   /**
@@ -86,7 +86,7 @@ export interface IHypernetCore {
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | NodeError | Error
+    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
   >;
 
   /**
@@ -98,13 +98,16 @@ export interface IHypernetCore {
   /**
    * Returns all Hypernet Ledger for the user
    */
-  getLinks(): ResultAsync<HypernetLink[], RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
+  getLinks(): ResultAsync<HypernetLink[], RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**
    * Returns all active Hypernet Ledgers for the user
    * An active link contains an incomplete/non-finalized transfer.
    */
-  getActiveLinks(): ResultAsync<HypernetLink[], RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
+  getActiveLinks(): ResultAsync<
+    HypernetLink[],
+    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
+  >;
 
   /**
    * Returns the Hypernet Ledger for the user with the specified counterparty
@@ -130,7 +133,7 @@ export interface IHypernetCore {
     requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**
    * authorizeFunds() sets up a pull payment.
@@ -166,12 +169,6 @@ export interface IHypernetCore {
    * @param finalAmount the total payment amount to pull
    */
   finalizePullPayment(paymentId: string, finalAmount: BigNumber): Promise<HypernetLink>;
-
-  /**
-   * Finalize a push-payment; internally, resolves the ParameterizedPayment transfer
-   * @param paymentId the payment to finalize
-   */
-  finalizePushPayment(paymentId: string): Promise<void>;
 
   /**
    * Called by the consumer to attempt to claim some or all of the stake within a particular insurance payment.

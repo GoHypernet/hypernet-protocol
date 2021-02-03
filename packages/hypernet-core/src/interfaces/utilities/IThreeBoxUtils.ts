@@ -1,15 +1,19 @@
 import { BoxInstance, BoxSpace, BoxThread } from "3box";
+import { ResultAsync } from "@interfaces/objects";
+import { BlockchainUnavailableError, ThreeBoxError } from "@interfaces/objects/errors";
 
 /**
- * @todo What is the main role/purpose of this class? Description here
- * @todo Do we need this anymore? Maybe remove?
+ * These utilities wrap up interactions with 3Box, but does not provide complete isolation. It still deals with
+ * native 3Box objects, but does make the 3Box API easier to work with and wraps it up with neverthrow.
  */
 export interface IThreeBoxUtils {
-  getBox(): Promise<BoxInstance>;
-  getSpaces(spaceNames: string[]): Promise<{ [spaceName: string]: BoxSpace }>;
-  getHypernetProtocolSpace(): Promise<BoxSpace>;
-  getThreads(threadAddresses: string[]): Promise<{ [threadAddress: string]: BoxThread }>;
-  getDiscoveryThread(): Promise<BoxThread>;
-  getControlThread(): Promise<BoxThread>;
-  getDID(): Promise<string>;
+  getBox(): ResultAsync<BoxInstance, BlockchainUnavailableError | ThreeBoxError>;
+  getSpaces(spaceNames: string[]): ResultAsync<Map<string, BoxSpace>, BlockchainUnavailableError | ThreeBoxError>;
+  getHypernetProtocolSpace(): ResultAsync<BoxSpace, ThreeBoxError | BlockchainUnavailableError>;
+  getThreads(
+    threadAddresses: string[],
+  ): ResultAsync<Map<string, BoxThread>, BlockchainUnavailableError | ThreeBoxError>;
+  getDiscoveryThread(): ResultAsync<BoxThread, ThreeBoxError | BlockchainUnavailableError>;
+  getControlThread(): ResultAsync<BoxThread, ThreeBoxError | BlockchainUnavailableError>;
+  getDID(): ResultAsync<string, ThreeBoxError | BlockchainUnavailableError>;
 }

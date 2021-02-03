@@ -6,21 +6,15 @@
     "rootDir": "./src",
     "target": "es6",
     "jsx": "react",
-    "baseUrl": "./",
+    "baseUrl": ".",
     "paths": {
-      "@hypernetlabs/hypernet-core": [
-        "../hypernet-core/src"
-      ],
-      "@hypernetlabs/web-ui": [
-        "../web-ui/src"
-      ]
-    }
+      "@hypernetlabs/hypernet-core": ["../hypernet-core/src"],
+      "@hypernetlabs/web-ui": ["../web-ui/src"],
+      "@web-integration/*": ["./src/*"]
+    },
+    "resolveJsonModule": true
   },
-  "include": [
-    "./src/**/*",
-    "./typings/**/*",
-    "**/__tests__/**/*"
-  ],
+  "include": ["./src/**/*"],
   "references": [
     {
       "path": "../hypernet-core/tsconfig.json"

@@ -31,7 +31,6 @@ export class PushPaymentViewModel {
   public showAcceptButton: ko.PureComputed<boolean>;
   public sendButton: ButtonParams;
   public showSendButton: ko.PureComputed<boolean>;
-  public finalizeButton: ButtonParams;
   public showFinalizeButton: ko.PureComputed<boolean>;
 
   protected core: IHypernetCore;
@@ -53,8 +52,8 @@ export class PushPaymentViewModel {
     const mdate = moment.unix(params.payment.expirationDate);
     this.expirationDate = ko.observable(mdate.format());
     this.finalized = ko.observable(params.payment.finalized);
-    this.createdTimestamp = ko.observable(params.payment.createdTimestamp.format());
-    this.updatedTimestamp = ko.observable(params.payment.updatedTimestamp.format());
+    this.createdTimestamp = ko.observable(params.payment.createdTimestamp.toString());
+    this.updatedTimestamp = ko.observable(params.payment.updatedTimestamp.toString());
     this.collateralRecovered = ko.observable(params.payment.collateralRecovered.toString());
     this.disputeMediator = ko.observable(params.payment.disputeMediator);
     this.paymentAmount = ko.observable(Web3.utils.fromWei(params.payment.paymentAmount.toString()));
@@ -117,11 +116,6 @@ export class PushPaymentViewModel {
 
     this.showSendButton = ko.pureComputed(() => {
       return this.state().state === EPaymentState.Staked;
-    });
-
-    this.finalizeButton = new ButtonParams("Finalize", async () => {
-      await this.core.finalizePushPayment(this.paymentId);
-      // @todo change return type of this after we change internal return types of core
     });
 
     this.showFinalizeButton = ko.pureComputed(() => {

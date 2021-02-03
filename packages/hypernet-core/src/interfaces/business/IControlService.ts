@@ -1,4 +1,10 @@
-import { ControlClaim } from "@interfaces/objects";
+import { ControlClaim, ResultAsync } from "@interfaces/objects";
+import {
+  BlockchainUnavailableError,
+  CoreUninitializedError,
+  LogicalError,
+  ThreeBoxError,
+} from "@interfaces/objects/errors";
 
 /**
  * @todo What is the main role/purpose of this class? Description here.
@@ -9,10 +15,10 @@ export interface IControlService {
    * of an account.
    * @todo Describe the purpose of this function - what does it do?
    */
-  claimControl(): Promise<void>;
+  claimControl(): ResultAsync<void, CoreUninitializedError | BlockchainUnavailableError | ThreeBoxError | LogicalError>;
 
   /**
    * Processes an incoming control claim. Basically just yields control.
    */
-  processControlClaim(controlClaim: ControlClaim): Promise<void>;
+  processControlClaim(controlClaim: ControlClaim): ResultAsync<void, CoreUninitializedError>;
 }

@@ -1,15 +1,21 @@
 import React from "react";
-import { StoreContext } from "../../contexts";
+import { Modal } from "@hypernetlabs/web-ui";
 
 interface IMainContainer {
   children: React.ReactNode;
+  withModal?: boolean;
 }
 
-function MainContainer({ children }: IMainContainer) {
-  const { etherAddress } = React.useContext(StoreContext);
-  console.log("etherAddress from MainContainer: ", etherAddress);
+function MainContainer({ children, withModal }: IMainContainer) {
+  if (withModal) {
+    return (
+      <Modal isOpen={true}>
+        <div>{children}</div>
+      </Modal>
+    );
+  }
 
-  return <div id="fffff-f">{children}</div>;
+  return <div>{children}</div>;
 }
 
 export default MainContainer;

@@ -33,6 +33,8 @@ export class ConfigProvider implements IConfigProvider {
         "Hypernet", // Hypernet Protocol Domain for Transfers
         5 * 24 * 60 * 60, // 5 days as the default payment expiration time
         chainProvider,
+        "hypernetProtocolSpace",
+        "openThreadKey",
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
@@ -58,6 +60,8 @@ export class ConfigProvider implements IConfigProvider {
         "Hypernet", // Hypernet Protocol Domain for Transfers
         5 * 24 * 60 * 60, // 5 days as the default payment expiration time
         chainProvider,
+        "hypernetProtocolSpace",
+        "openThreadKey",
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);

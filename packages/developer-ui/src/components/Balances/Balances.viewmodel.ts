@@ -36,6 +36,7 @@ export class BalancesViewModel {
 
   protected updateBalances(balances: Balances) {
     const params = balances.assets.map((val: AssetBalance) => {
+      console.log("val assetBalance: ", val);
       return new AssetBalanceParams(val);
     });
 
