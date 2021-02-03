@@ -1,4 +1,5 @@
 import { EMessageType } from "@interfaces/types";
+import "reflect-metadata";
 import { Transform, Type } from "class-transformer";
 
 export class MessagePayload {

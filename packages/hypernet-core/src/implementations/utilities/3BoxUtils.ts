@@ -1,3 +1,4 @@
+import "../../typings/3box";
 import { BoxInstance, BoxSpace, BoxThread, openBox } from "3box";
 import { IThreeBoxUtils, IBlockchainProvider, IContextProvider, IConfigProvider } from "@interfaces/utilities";
 import { EthereumAddress, HypernetConfig, InitializedHypernetContext, ResultAsync } from "@interfaces/objects";

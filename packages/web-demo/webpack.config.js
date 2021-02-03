@@ -19,4 +19,7 @@ module.exports = {
     },
     historyApiFallback: true,
   },
+  plugins: [...rootWebpackConfig.plugins, 
+    //new HtmlWebpackPlugin({ title: 'Sample Monorepo App' })
+  ],
 };

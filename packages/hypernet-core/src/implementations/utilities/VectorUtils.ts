@@ -21,6 +21,7 @@ import {
   IFullChannelState,
 } from "@interfaces/utilities";
 import { EPaymentType, InsuranceState, MessageState, Parameterized, ParameterizedState } from "@interfaces/types";
+import "reflect-metadata";
 import { serialize } from "class-transformer";
 import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@interfaces/types/typechain/ParameterizedTypes";
 import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils/dist/identifiers";

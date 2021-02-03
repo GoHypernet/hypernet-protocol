@@ -1,5 +1,6 @@
 import { EthereumAddress } from "./EthereumAddress";
 import { PublicKey } from "./PublicKey";
+import "reflect-metadata";
 import { Type } from "class-transformer";
 
 // tslint:disable: max-classes-per-file

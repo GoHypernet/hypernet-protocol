@@ -2,9 +2,11 @@ const { pathsToModuleNameMapper } = require('ts-jest/utils');
 
 // In the following statement, replace `./tsconfig` with the path to your `tsconfig` file
 // which contains the path mapping (ie the `compilerOptions.paths` option):
-const { compilerOptions } = require('./test/tsconfig');
+const { compilerOptions } = require('../../tsconfig.build');
 
-const moduleNames = pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/' } );
+console.log(compilerOptions);
+
+const moduleNames = pathsToModuleNameMapper(compilerOptions.paths, { prefix: '<rootDir>/../../' } );
 
 console.log(moduleNames);
 

@@ -1,6 +1,8 @@
+import "../../typings/3box";
 import { IMessagingListener } from "@interfaces/api";
 import { BoxThread } from "3box";
 import { IConfigProvider, IContextProvider, IThreeBoxUtils } from "@interfaces/utilities";
+import "reflect-metadata";
 import { plainToClass } from "class-transformer";
 import { IControlService } from "@interfaces/business";
 import { BlockchainUnavailableError, ThreeBoxError } from "@interfaces/objects/errors";
