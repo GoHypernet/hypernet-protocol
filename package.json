@@ -25,9 +25,21 @@
   "directories": {
     "lib": "lib"
   },
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ],
+    "nohoist": [
+      "react-native",
+      "**/react-native",
+      "**/react-native/**",
+      "**react-native**",
+      "@react-native-community",
+      "**/@react-native-community",
+      "**/@react-native-community/**",
+      "**@react-native-community**"
+    ]
+  },
   "scripts": {
     "bootstrap": "yarn install && lerna init",
     "build": "tsc --build",
