@@ -30,11 +30,11 @@
   "scripts": {
     "build": "yarn clean && yarn compile",
     "clean": "rimraf dist",
-    "compile": "tsc --build src",
+    "compile": "tsc --build src/tsconfig.json",
     "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",
     "format": "prettier --write \"src/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
-    "lint": "tslint -p tsconfig.json",
+    "lint": "tslint -p src/tsconfig.json",
     "prepare": "yarn build",
     "prepublishOnly": "npm test && npm run lint",
     "test": "yarn test:ci",

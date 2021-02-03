@@ -9,9 +9,9 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "npx webpack",
-    "compile": "tsc -b tsconfig.json",
+    "compile": "tsc -b src/tsconfig.json",
     "format": "prettier --write \"src/**/*.{js,ts,tsx,json,md}\"",
-    "lint": "tslint -p tsconfig.json",
+    "lint": "tslint -p src/tsconfig.json",
     "prepublish": "yarn build",
     "start": "webpack serve --config webpack.config.js --mode development --open",
     "test": "echo \"Error: no test specified\" && exit 0"
