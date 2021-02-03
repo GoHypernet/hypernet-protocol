@@ -1,4 +1,3 @@
-import "../../typings/3box";
 import { IMessagingRepository } from "@interfaces/data";
 import {
   Message,

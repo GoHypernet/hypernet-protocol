@@ -1,4 +1,3 @@
-import "../../typings/3box";
 import { IMessagingListener } from "@interfaces/api";
 import { BoxThread } from "3box";
 import { IConfigProvider, IContextProvider, IThreeBoxUtils } from "@interfaces/utilities";
