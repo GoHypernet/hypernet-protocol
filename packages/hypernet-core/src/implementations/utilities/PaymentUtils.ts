@@ -19,7 +19,7 @@ import {
   LogicalError,
   VectorError,
 } from "@interfaces/objects/errors";
-import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
+import { EPaymentState, EPaymentType, ETransferState, ETransferType } from "@interfaces/types";
 import {
   IBrowserNode,
   IConfigProvider,
@@ -211,19 +211,9 @@ export class PaymentUtils implements IPaymentUtils {
       return errAsync(idRes.error);
     }
 
-    return this.sortTransfers(paymentId, transfers, browserNode).andThen((sortedTransfers) => {
-      // Determine the state of the payment. All transfers we've been given are
-      // "Active", therefore, not resolved. So we don't need to figure out if
-      // the transfer is resolved, we know it's not.
-      // Given that info, the payment state is never going to be Finalized,
-      // because those transfers disappear.
-
-      let paymentState = EPaymentState.Proposed;
-      if (sortedTransfers.insuranceTransfer != null && sortedTransfers.parameterizedTransfer == null) {
-        paymentState = EPaymentState.Staked;
-      } else if (sortedTransfers.insuranceTransfer != null && sortedTransfers.parameterizedTransfer != null) {
-        paymentState = EPaymentState.Approved;
-      }
+    return this.sortTransfers(paymentId, transfers, browserNode)
+    .andThen((sortedTransfers) => {
+      const paymentState = this.getPaymentState(sortedTransfers);
 
       // TODO: Figure out how to determine if the payment is Disputed
 
@@ -249,6 +239,58 @@ export class PaymentUtils implements IPaymentUtils {
 
       return errAsync(new InvalidPaymentError(`Payment type ${paymentTypeRes.value} is unsupported!`));
     });
+  }
+
+  public getPaymentState(sortedTransfers: SortedTransfers): EPaymentState {
+    // Determine the state of the payment. There is really a flowchart for doing this,
+      // payments move through a set of states, we just need to figure out that state.
+      // Interestingly, the existence or status of the offer transfer is immaterial
+      // To the state of the payment, other than the initial state
+
+      let paymentState = EPaymentState.Proposed;
+      if (sortedTransfers.offerTransfer != null
+        && this.getTransferState(sortedTransfers.offerTransfer) == ETransferState.Active 
+        && sortedTransfers.insuranceTransfer == null
+        && sortedTransfers.parameterizedTransfer == null) {
+          // Valid, active offer, no follow ons, this is a proposed payment
+          return EPaymentState.Proposed;
+        }
+        if (sortedTransfers.offerTransfer != null
+          && this.getTransferState(sortedTransfers.offerTransfer) == ETransferState.Resolved 
+          && sortedTransfers.insuranceTransfer == null
+          && sortedTransfers.parameterizedTransfer == null) {
+            // Valid, resolved offer, no follow ons, this is a rejected payment
+            return EPaymentState.Rejected;
+          }
+      if (sortedTransfers.insuranceTransfer != null
+        && this.getTransferState(sortedTransfers.insuranceTransfer) == ETransferState.Active 
+        && sortedTransfers.parameterizedTransfer == null) {
+          // Active offer and insurance, no parameterized, this is a staked payment
+        paymentState = EPaymentState.Staked;
+      } 
+      else if (sortedTransfers.insuranceTransfer != null 
+        && this.getTransferState(sortedTransfers.insuranceTransfer) == ETransferState.Active
+        && sortedTransfers.parameterizedTransfer != null
+        && this.getTransferState(sortedTransfers.parameterizedTransfer) == ETransferState.Active) {
+          // Valid and active transfers of all three types, this is an approved payment
+        paymentState = EPaymentState.Approved;
+      }
+      else if (sortedTransfers.insuranceTransfer != null 
+        && this.getTransferState(sortedTransfers.insuranceTransfer) == ETransferState.Active
+        && sortedTransfers.parameterizedTransfer != null
+        && this.getTransferState(sortedTransfers.parameterizedTransfer) == ETransferState.Resolved) {
+          // Parameterized payment has been resolved but no the insurance payment, this is an Accepted payment
+        paymentState = EPaymentState.Accepted;
+      }
+      else if (sortedTransfers.insuranceTransfer != null 
+        && this.getTransferState(sortedTransfers.insuranceTransfer) == ETransferState.Active
+        && sortedTransfers.parameterizedTransfer != null
+        && this.getTransferState(sortedTransfers.parameterizedTransfer) == ETransferState.Resolved) {
+          // Parameterized and insurance payments have been resolved, this is a Finalized payment
+        paymentState = EPaymentState.Finalized;
+      }
+
+      return EPaymentState.
   }
 
   /**
@@ -308,7 +350,7 @@ export class PaymentUtils implements IPaymentUtils {
         paymentResults.push(paymentResult);
       });
 
-      return combine(paymentResults);
+      return ResultUtils.combine(paymentResults);
     });
   }
 
@@ -462,5 +504,10 @@ export class PaymentUtils implements IPaymentUtils {
         new SortedTransfers(offerTransfer, insuranceTransfer, parameterizedTransfer, pullTransfers, offerTransfer.meta),
       );
     });
+  }
+  
+  protected getTransferState(transfer: IFullTransferState): ETransferState {
+    // TODO
+    return ETransferState.Active;
   }
 }

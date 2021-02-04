@@ -324,9 +324,11 @@ export class VectorUtils implements IVectorUtils {
     if (this.getRouterChannelAddressSetup != null) {
       return this.getRouterChannelAddressSetup;
     }
+
     let config: HypernetConfig;
     let context: InitializedHypernetContext;
     let browserNode: IBrowserNode;
+
     this.getRouterChannelAddressSetup = ResultUtils.combine([
       this.configProvider.getConfig(),
       this.contextProvider.getInitializedContext(),
