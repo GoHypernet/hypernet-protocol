@@ -335,24 +335,18 @@ export class VectorUtils implements IVectorUtils {
     if (this.getRouterChannelAddressSetup != null) {
       return this.getRouterChannelAddressSetup;
     }
-
-    const prerequisites = ResultUtils.combine([
-      this.configProvider.getConfig(),
-      this.contextProvider.getInitializedContext(),
-      this.browserNodeProvider.getBrowserNode(),
-    ]);
-
     let config: HypernetConfig;
     let context: InitializedHypernetContext;
     let browserNode: IBrowserNode;
-
-    return prerequisites
+    this.getRouterChannelAddressSetup = ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getInitializedContext(),
+      this.browserNodeProvider.getBrowserNode(),
+    ])
       .andThen((vals) => {
         [config, context, browserNode] = vals;
-
         this.logUtils.log(`Core publicIdentifier: ${context.publicIdentifier}`);
         this.logUtils.log(`Router publicIdentifier: ${config.routerPublicIdentifier}`);
-
         return browserNode.getStateChannels();
       })
       .andThen((channelAddresses) => {
@@ -360,7 +354,6 @@ export class VectorUtils implements IVectorUtils {
         for (const channelAddress of channelAddresses) {
           channelResults.push(this._getStateChannel(channelAddress, browserNode));
         }
-
         return ResultUtils.combine(channelResults);
       })
       .andThen((channels) => {
@@ -373,13 +366,14 @@ export class VectorUtils implements IVectorUtils {
           }
           return okAsync(channel.channelAddress as string);
         }
-
         // If a channel does not exist with the router, we need to create it.
         return this._createRouterStateChannel(browserNode, config).map((routerChannel) => {
           return routerChannel.channelAddress;
         });
       });
+    return this.getRouterChannelAddressSetup;
   }
+
 
   protected _createRouterStateChannel(
     browserNode: IBrowserNode,
