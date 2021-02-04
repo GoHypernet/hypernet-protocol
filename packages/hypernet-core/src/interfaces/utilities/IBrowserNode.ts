@@ -1,5 +1,5 @@
-import { Address, Balance, FullTransferState, NodeResponses, TransferName } from "@connext/vector-types";
-import { EthereumAddress, PublicIdentifier, ResultAsync } from "@interfaces/objects";
+import { Address, Balance, FullTransferState, TransferName } from "@connext/vector-types";
+import { EthereumAddress, IHypernetTransferMetadata, PublicIdentifier, ResultAsync } from "@interfaces/objects";
 import { VectorError } from "@interfaces/objects/errors";
 import { ParameterizedResolver } from "@interfaces/types/typechain";
 
@@ -70,7 +70,7 @@ export interface IFullTransferState {
   transferEncodings: string[]; // Initial state encoding, resolver encoding
   transferState: any;
   transferResolver?: any; // undefined iff not resolved
-  meta?: any;
+  meta?: IHypernetTransferMetadata;
   channelNonce: number;
   initiatorIdentifier: PublicIdentifier;
   responderIdentifier: PublicIdentifier;
@@ -149,7 +149,7 @@ export interface IBrowserNode {
 
   getActiveTransfers(channelAddress: string): ResultAsync<IFullTransferState[], VectorError>;
 
-  getTransfers(): ResultAsync<IFullTransferState[], VectorError>;
+  getTransfers(startDate: number, endDate: number): ResultAsync<IFullTransferState[], VectorError>;
 
   init(): ResultAsync<void, VectorError>;
 

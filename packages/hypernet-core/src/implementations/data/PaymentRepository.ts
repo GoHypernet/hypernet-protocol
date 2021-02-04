@@ -138,6 +138,14 @@ export class PaymentRepository implements IPaymentRepository {
         return browserNode.getActiveTransfers(channelAddress);
       })
       .andThen((activeTransfers) => {
+        // We also need to look for potentially resolved transfers
+        const earliestDate = this.getEarliestDateFromTransfers(activeTransfers);
+
+        return browserNode.getTransfers(earliestDate, moment().unix());
+      })
+      .andThen((transfers) => {
+        // This new list is complete- it should include active and inactive transfers
+        // after the earliest active transfer
         const transferTypeResults = new Array<
           ResultAsync<
             {
@@ -147,7 +155,7 @@ export class PaymentRepository implements IPaymentRepository {
             VectorError | Error
           >
         >();
-        for (const transfer of activeTransfers) {
+        for (const transfer of transfers) {
           transferTypeResults.push(this.paymentUtils.getTransferTypeWithTransfer(transfer, browserNode));
         }
 
@@ -184,6 +192,34 @@ export class PaymentRepository implements IPaymentRepository {
       });
   }
 
+  protected getEarliestDateFromTransfers(transfers: IFullTransferState[]): number {
+    // If there are no transfers, the earliest transfer would be now
+    if (transfers.length == 0) {
+      return moment().unix();
+    }
+
+    // The earliest date should be a message transfer. We put the creation date
+    // in each transfer's metadata to make this easier though. 
+    transfers.sort((a, b) => {
+      const aTime = this.getTimestampFromTransfer(a);
+      const bTime = this.getTimestampFromTransfer(b);
+      
+      return aTime > bTime ? 1 : -1;
+    });
+
+    return this.getTimestampFromTransfer(transfers[0]);
+  }
+  
+  protected getTimestampFromTransfer(transfer: IFullTransferState): number {
+    if (transfer.meta == null) {
+      // We need to figure out the transfer type, I think; but for now we'll just say
+      // that the transfer is right now
+      return moment().unix();
+    }
+
+    return transfer.meta.creationDate;
+  }
+
   /**
    * Given a list of payment Ids, return the associated payments.
    * @param paymentIds the list of payments to get
@@ -208,6 +244,12 @@ export class PaymentRepository implements IPaymentRepository {
         return browserNode.getActiveTransfers(channelAddress);
       })
       .andThen((activeTransfers) => {
+        // We also need to look for potentially resolved transfers
+        const earliestDate = this.getEarliestDateFromTransfers(activeTransfers);
+
+        return browserNode.getTransfers(earliestDate, moment().unix());
+      })
+      .andThen((transfers) => {
         const transferTypeResults = new Array<
           ResultAsync<
             {
@@ -217,7 +259,7 @@ export class PaymentRepository implements IPaymentRepository {
             VectorError | Error
           >
         >();
-        for (const transfer of activeTransfers) {
+        for (const transfer of transfers) {
           transferTypeResults.push(this.paymentUtils.getTransferTypeWithTransfer(transfer, browserNode));
         }
 

@@ -157,17 +157,6 @@ export class VectorUtils implements IVectorUtils {
         message: serialize(message),
       };
 
-      // Create transfer params
-      const transferParams = {
-        recipient: toAddress,
-        channelAddress,
-        amount: "0",
-        assetId: config.hypertokenAddress,
-        type: "MessageTransfer",
-        details: initialState,
-        meta: message,
-      } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
-
       return browserNode.conditionalTransfer(
         channelAddress,
         "0",
@@ -189,7 +178,7 @@ export class VectorUtils implements IVectorUtils {
    * @param toAddress the public identifier of the intended recipient of this transfer
    * @param amount the amount of tokens to commit to this transfer
    * @param assetAddress the address of the ERC20-token to transfer; zero-address for ETH
-   * @param paymentIda length-64 hexadecimal string; this becomes the UUID component of the InsuranceState
+   * @param paymentId length-64 hexadecimal string; this becomes the UUID component of the InsuranceState
    * @param start the start time of this transfer (UNIX timestamp)
    * @param expiration the expiration time of this transfer (UNIX timestamp)
    * @param rate the maximum allowed rate of this transfer (deltaAmount/deltaTime)
