@@ -9,7 +9,14 @@ import {
   publicIdentifier2,
 } from "@mock/mocks";
 import { BlockchainProviderMock, BrowserNodeProviderMock, ConfigProviderMock, ContextProviderMock } from "@mock/utils";
-import { BigNumber, IHypernetTransferMetadata, PushPayment, Payment, SortedTransfers } from "@interfaces/objects";
+import {
+  BigNumber,
+  IHypernetTransferMetadata,
+  PushPayment,
+  Payment,
+  SortedTransfers,
+  PublicIdentifier,
+} from "@interfaces/objects";
 import { ILogUtils, IVectorUtils, IBrowserNodeProvider, IPaymentUtils } from "@interfaces/utilities";
 import { VectorError } from "@interfaces/objects/errors";
 import { IPaymentRepository } from "@interfaces/data";
@@ -27,7 +34,6 @@ const moment = td.replace("moment", () => {
 });
 import { PaymentRepository } from "@implementations/data/PaymentRepository";
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
-import { PublicIdentifier } from "@connext/vector-types";
 
 const paymentToken = mockUtils.generateRandomPaymentToken();
 const disputeMediator = mockUtils.generateRandomEtherAdress();
@@ -56,9 +62,11 @@ class PaymentRepositoryMocks {
   public browserNodeProvider = new BrowserNodeProviderMock();
   public paymentUtils = td.object<IPaymentUtils>();
   public logUtils = td.object<ILogUtils>();
+  public createdPushPayment: PushPayment;
 
   constructor() {
-    const pushPayment = this.factoryPushPayment();
+    this.createdPushPayment = this.factoryPushPayment();
+
     td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
     td.when(this.vectorUtils.createMessageTransfer(counterPartyAccount, transferMetadata)).thenReturn(
       okAsync({ channelAddress: routerChannelAddress, transferId: paymentId }),
@@ -77,11 +85,11 @@ class PaymentRepositoryMocks {
     );
     td.when(
       this.vectorUtils.createInsuranceTransfer(
-        pushPayment.from,
-        pushPayment.disputeMediator,
-        pushPayment.requiredStake,
+        this.createdPushPayment.from,
+        this.createdPushPayment.disputeMediator,
+        this.createdPushPayment.requiredStake,
         `${`${moment().unix()}` + this.configProvider.config.defaultPaymentExpiryLength}`,
-        pushPayment.id,
+        this.createdPushPayment.id,
       ),
     ).thenReturn(
       okAsync({
@@ -92,10 +100,10 @@ class PaymentRepositoryMocks {
     td.when(
       this.vectorUtils.createPaymentTransfer(
         EPaymentType.Push,
-        pushPayment.to,
-        pushPayment.paymentAmount,
-        pushPayment.paymentToken,
-        pushPayment.id,
+        this.createdPushPayment.to,
+        this.createdPushPayment.paymentAmount,
+        this.createdPushPayment.paymentToken,
+        this.createdPushPayment.id,
         `${moment().unix()}`,
         `${`${moment().unix()}` + this.configProvider.config.defaultPaymentExpiryLength}`,
       ),
@@ -114,7 +122,7 @@ class PaymentRepositoryMocks {
         this.configProvider.config,
         this.browserNodeProvider.browserNode,
       ),
-    ).thenReturn(okAsync(pushPayment));
+    ).thenReturn(okAsync(this.createdPushPayment));
     td.when(
       this.paymentUtils.transfersToPayment(
         paymentId,
@@ -122,7 +130,7 @@ class PaymentRepositoryMocks {
         this.configProvider.config,
         this.browserNodeProvider.browserNode,
       ),
-    ).thenReturn(okAsync({ ...pushPayment, state: EPaymentState.Approved }));
+    ).thenReturn(okAsync({ ...this.createdPushPayment, state: EPaymentState.Approved }));
     td.when(
       this.paymentUtils.getTransferTypeWithTransfer(
         this.browserNodeProvider.fullTransferState,
@@ -138,7 +146,7 @@ class PaymentRepositoryMocks {
         this.contextProvider.initializedContext,
         this.browserNodeProvider.browserNode,
       ),
-    ).thenReturn(okAsync([pushPayment]));
+    ).thenReturn(okAsync([this.createdPushPayment]));
     td.when(
       this.paymentUtils.sortTransfers(
         commonPaymentId,
@@ -233,7 +241,7 @@ describe("PaymentRepository tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toStrictEqual(paymentRepositoryMocks.factoryPushPayment());
+    expect(result._unsafeUnwrap()).toStrictEqual(paymentRepositoryMocks.createdPushPayment);
   });
 
   test("Should createPushPayment return error if getBrowserNode failed", async () => {
@@ -263,16 +271,7 @@ describe("PaymentRepository tests", () => {
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    // First create new push payment
-    const pushPaymentResult = await repo.createPushPayment(
-      counterPartyAccount,
-      commonAmount.toString(),
-      expirationDate,
-      commonAmount.toString(),
-      paymentToken,
-      disputeMediator,
-    );
-    const returnedPaymentsMap = new Map<string, Payment>([[paymentId, pushPaymentResult._unsafeUnwrap()]]);
+    const returnedPaymentsMap = new Map<string, Payment>([[paymentId, paymentRepositoryMocks.createdPushPayment]]);
 
     // get payments of created push payment id
     const result = await repo.getPaymentsByIds([paymentId]);
@@ -308,7 +307,7 @@ describe("PaymentRepository tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toStrictEqual(paymentRepositoryMocks.factoryPushPayment());
+    expect(result._unsafeUnwrap()).toStrictEqual(paymentRepositoryMocks.createdPushPayment);
   });
 
   test("Should finalizePayment return error if getBrowserNode failed", async () => {
@@ -337,7 +336,7 @@ describe("PaymentRepository tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
     expect(result._unsafeUnwrap()).toStrictEqual({
-      ...paymentRepositoryMocks.factoryPushPayment(),
+      ...paymentRepositoryMocks.createdPushPayment,
       state: EPaymentState.Approved,
     });
   });
@@ -368,7 +367,7 @@ describe("PaymentRepository tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
     expect(result._unsafeUnwrap()).toStrictEqual({
-      ...paymentRepositoryMocks.factoryPushPayment(),
+      ...paymentRepositoryMocks.createdPushPayment,
       state: EPaymentState.Approved,
     });
   });
