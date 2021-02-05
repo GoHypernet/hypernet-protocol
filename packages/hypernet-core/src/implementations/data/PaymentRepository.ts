@@ -1,4 +1,5 @@
 import { NodeResponses } from "@connext/vector-types";
+import { ResultUtils } from "@implementations/utilities";
 import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
 import {
   BigNumber,
@@ -72,14 +73,11 @@ export class PaymentRepository implements IPaymentRepository {
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
-    const prerequisites = (combine([
+    const prerequisites = ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.configProvider.getConfig(),
-      this.contextProvider.getInitializedContext() as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [IBrowserNode, HypernetConfig, InitializedHypernetContext],
-      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
-    >;
+      this.contextProvider.getInitializedContext(),
+    ]);
 
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
@@ -122,15 +120,12 @@ export class PaymentRepository implements IPaymentRepository {
    * @param paymentId the payment to get transfers for
    */
   protected _getTransfersByPaymentId(paymentId: string): ResultAsync<IFullTransferState[], Error> {
-    const prerequisites = (combine([
+    const prerequisites = ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.vectorUtils.getRouterChannelAddress(),
       this.configProvider.getConfig(),
-      this.contextProvider.getInitializedContext() as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [IBrowserNode, string, HypernetConfig, InitializedHypernetContext],
-      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
-    >;
+      this.contextProvider.getInitializedContext(),
+    ]);
 
     let browserNode: IBrowserNode;
     let channelAddress: string;
@@ -194,15 +189,12 @@ export class PaymentRepository implements IPaymentRepository {
    * @param paymentIds the list of payments to get
    */
   public getPaymentsByIds(paymentIds: string[]): ResultAsync<Map<string, Payment>, Error> {
-    const prerequisites = (combine([
+    const prerequisites = ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.vectorUtils.getRouterChannelAddress(),
       this.configProvider.getConfig(),
-      this.contextProvider.getInitializedContext() as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [IBrowserNode, string, HypernetConfig, InitializedHypernetContext],
-      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
-    >;
+      this.contextProvider.getInitializedContext(),
+    ]);
 
     let browserNode: IBrowserNode;
     let channelAddress: string;
@@ -282,19 +274,11 @@ export class PaymentRepository implements IPaymentRepository {
     paymentId: string,
     amount: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
-    const prerequisites = (combine([
+    const prerequisites = ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.configProvider.getConfig(),
-      this._getTransfersByPaymentId(paymentId) as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [IBrowserNode, HypernetConfig, IFullTransferState[]],
-      | PaymentFinalizeError
-      | TransferResolutionError
-      | RouterChannelUnknownError
-      | CoreUninitializedError
-      | VectorError
-      | Error
-    >;
+      this._getTransfersByPaymentId(paymentId),
+    ]);
 
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
@@ -355,19 +339,11 @@ export class PaymentRepository implements IPaymentRepository {
     | VectorError
     | Error
   > {
-    const prerequisites = (combine([
+    const prerequisites = ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.configProvider.getConfig(),
-      this._getTransfersByPaymentId(paymentId) as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [IBrowserNode, HypernetConfig, IFullTransferState[]],
-      | PaymentFinalizeError
-      | TransferResolutionError
-      | RouterChannelUnknownError
-      | CoreUninitializedError
-      | VectorError
-      | Error
-    >;
+      this._getTransfersByPaymentId(paymentId),
+    ]);
 
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
@@ -383,7 +359,7 @@ export class PaymentRepository implements IPaymentRepository {
         const paymentMediator = payment.disputeMediator;
         const paymentSender = payment.from;
         const paymentID = payment.id;
-        const paymentStart = `${Math.floor(moment.now() / 1000)}`;
+        const paymentStart = `${moment().unix()}`;
         const paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`;
 
         // TODO: There are probably some logical times when you should not provide a stake
@@ -421,19 +397,11 @@ export class PaymentRepository implements IPaymentRepository {
   public provideAsset(
     paymentId: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | LogicalError> {
-    const prerequisites = (combine([
+    const prerequisites = ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.configProvider.getConfig(),
-      this._getTransfersByPaymentId(paymentId) as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [IBrowserNode, HypernetConfig, IFullTransferState[]],
-      | PaymentFinalizeError
-      | TransferResolutionError
-      | RouterChannelUnknownError
-      | CoreUninitializedError
-      | VectorError
-      | LogicalError
-    >;
+      this._getTransfersByPaymentId(paymentId),
+    ]);
 
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
@@ -457,7 +425,7 @@ export class PaymentRepository implements IPaymentRepository {
         }
         const paymentRecipient = payment.to;
         const paymentID = payment.id;
-        const paymentStart = `${Math.floor(moment.now() / 1000)}`;
+        const paymentStart = `${moment().unix()}`;
         const paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`;
 
         // Use vectorUtils to create the parameterizedPayment
