@@ -80,7 +80,7 @@ export class PaymentRepository implements IPaymentRepository {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
-      this.paymentUtils.createPaymentId(EPaymentType.Push)
+      this.paymentUtils.createPaymentId(EPaymentType.Push),
     ])
       .andThen((vals) => {
         [browserNode, context, paymentId] = vals;
@@ -116,17 +116,14 @@ export class PaymentRepository implements IPaymentRepository {
     let browserNode: IBrowserNode;
     let channelAddress: string;
 
-    return ResultUtils.combine([
-      this.browserNodeProvider.getBrowserNode(),
-      this.vectorUtils.getRouterChannelAddress()
-    ])
+    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.vectorUtils.getRouterChannelAddress()])
       .andThen((vals) => {
         [browserNode, channelAddress] = vals;
         return browserNode.getActiveTransfers(channelAddress);
       })
       .andThen((activeTransfers) => {
         // We also need to look for potentially resolved transfers
-        const earliestDate = this.getEarliestDateFromTransfers(activeTransfers);
+        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
 
         return browserNode.getTransfers(earliestDate, moment().unix());
       })
@@ -183,24 +180,6 @@ export class PaymentRepository implements IPaymentRepository {
       });
   }
 
-  protected getEarliestDateFromTransfers(transfers: IFullTransferState[]): number {
-    // If there are no transfers, the earliest transfer would be now
-    if (transfers.length == 0) {
-      return moment().unix();
-    }
-
-    // The earliest date should be a message transfer. We put the creation date
-    // in each transfer's metadata to make this easier though.
-    transfers.sort((a, b) => {
-      const aTime = this.vectorUtils.getTimestampFromTransfer(a);
-      const bTime = this.vectorUtils.getTimestampFromTransfer(b);
-
-      return aTime > bTime ? 1 : -1;
-    });
-
-    return this.vectorUtils.getTimestampFromTransfer(transfers[0]);
-  }
-
   /**
    * Given a list of payment Ids, return the associated payments.
    * @param paymentIds the list of payments to get
@@ -209,10 +188,7 @@ export class PaymentRepository implements IPaymentRepository {
     let browserNode: IBrowserNode;
     let channelAddress: string;
 
-    return ResultUtils.combine([
-      this.browserNodeProvider.getBrowserNode(),
-      this.vectorUtils.getRouterChannelAddress(),
-    ])
+    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.vectorUtils.getRouterChannelAddress()])
       .andThen((vals) => {
         [browserNode, channelAddress] = vals;
 
@@ -220,7 +196,7 @@ export class PaymentRepository implements IPaymentRepository {
       })
       .andThen((activeTransfers) => {
         // We also need to look for potentially resolved transfers
-        const earliestDate = this.getEarliestDateFromTransfers(activeTransfers);
+        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
 
         return browserNode.getTransfers(earliestDate, moment().unix());
       })
@@ -298,10 +274,7 @@ export class PaymentRepository implements IPaymentRepository {
     let existingTransfers: IFullTransferState[];
     let parameterizedTransferId: string;
 
-    return ResultUtils.combine([
-      this.browserNodeProvider.getBrowserNode(),
-      this._getTransfersByPaymentId(paymentId),
-    ])
+    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this._getTransfersByPaymentId(paymentId)])
       .andThen((vals) => {
         [browserNode, existingTransfers] = vals;
 
@@ -355,7 +328,6 @@ export class PaymentRepository implements IPaymentRepository {
     | VectorError
     | Error
   > {
-
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
     let existingTransfers: IFullTransferState[];

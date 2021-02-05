@@ -85,4 +85,12 @@ export interface IPaymentUtils {
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
   ): ResultAsync<PushPayment, Error>;
+
+  /**
+   * Given an unsorted list of transfers, it will give you the timestamp of the
+   * earliest one.
+   * @param transfers an unsorted list of transfers
+   * @returns the unix timestamp of the earliest transfer
+   */
+  getEarliestDateFromTransfers(transfers: IFullTransferState[]): number;
 }

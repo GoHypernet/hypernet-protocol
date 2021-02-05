@@ -602,4 +602,22 @@ export class PaymentUtils implements IPaymentUtils {
       );
     });
   }
+
+  public getEarliestDateFromTransfers(transfers: IFullTransferState[]): number {
+    // If there are no transfers, the earliest transfer would be now
+    if (transfers.length == 0) {
+      return moment().unix();
+    }
+
+    // The earliest date should be a message transfer. We put the creation date
+    // in each transfer's metadata to make this easier though.
+    transfers.sort((a, b) => {
+      const aTime = this.vectorUtils.getTimestampFromTransfer(a);
+      const bTime = this.vectorUtils.getTimestampFromTransfer(b);
+
+      return aTime > bTime ? 1 : -1;
+    });
+
+    return this.vectorUtils.getTimestampFromTransfer(transfers[0]);
+  }
 }
