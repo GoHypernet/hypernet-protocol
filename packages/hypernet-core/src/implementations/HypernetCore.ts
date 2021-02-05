@@ -172,8 +172,7 @@ export class HypernetCore implements IHypernetCore {
     this.blockchainProvider = new EthersBlockchainProvider();
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(network, this.logUtils, config);
-    this.paymentUtils = new PaymentUtils(this.configProvider, this.logUtils, this.paymentIdUtils);
-    this.linkUtils = new LinkUtils();
+    this.linkUtils = new LinkUtils(this.contextProvider);
     this.boxUtils = new ThreeBoxUtils(this.blockchainProvider, this.contextProvider, this.configProvider);
 
     this.browserNodeProvider = new BrowserNodeProvider(this.configProvider, this.contextProvider, this.logUtils);
@@ -184,6 +183,13 @@ export class HypernetCore implements IHypernetCore {
       this.blockchainProvider,
       this.paymentIdUtils,
       this.logUtils,
+    );
+    this.paymentUtils = new PaymentUtils(
+      this.configProvider,
+      this.logUtils,
+      this.paymentIdUtils,
+      this.vectorUtils,
+      this.browserNodeProvider,
     );
 
     this.accountRepository = new AccountsRepository(

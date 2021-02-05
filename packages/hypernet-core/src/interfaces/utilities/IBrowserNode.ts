@@ -1,5 +1,5 @@
 import { Address, Balance, FullTransferState, TransferName } from "@connext/vector-types";
-import { EthereumAddress, IHypernetTransferMetadata, PublicIdentifier, ResultAsync } from "@interfaces/objects";
+import { EthereumAddress, IHypernetOfferDetails, PublicIdentifier, ResultAsync } from "@interfaces/objects";
 import { VectorError } from "@interfaces/objects/errors";
 import { ParameterizedResolver } from "@interfaces/types/typechain";
 
@@ -54,7 +54,7 @@ export interface INetworkContext {
   providerUrl: string;
 }
 
-export interface IFullTransferState {
+export interface IFullTransferState<TTransferState = any> {
   balance: IBalance;
   assetId: EthereumAddress;
   channelAddress: EthereumAddress;
@@ -68,9 +68,9 @@ export interface IFullTransferState {
   channelFactoryAddress: EthereumAddress; // networkContext?
   chainId: number;
   transferEncodings: string[]; // Initial state encoding, resolver encoding
-  transferState: any;
+  transferState: TTransferState;
   transferResolver?: any; // undefined iff not resolved
-  meta?: IHypernetTransferMetadata;
+  meta?: any;
   channelNonce: number;
   initiatorIdentifier: PublicIdentifier;
   responderIdentifier: PublicIdentifier;

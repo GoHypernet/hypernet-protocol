@@ -11,7 +11,7 @@ import {
 import { BlockchainProviderMock, BrowserNodeProviderMock, ConfigProviderMock, ContextProviderMock } from "@mock/utils";
 import {
   BigNumber,
-  IHypernetTransferMetadata,
+  IHypernetOfferDetails,
   PushPayment,
   Payment,
   SortedTransfers,
@@ -42,7 +42,7 @@ const expirationDate = moment(now.format());
 const paymentId = commonPaymentId;
 const counterPartyAccount = publicIdentifier2;
 const fromAccount = publicIdentifier;
-const transferMetadata: IHypernetTransferMetadata = {
+const transferMetadata: IHypernetOfferDetails = {
   paymentId,
   creationDate: now.unix(),
   to: counterPartyAccount,
@@ -118,40 +118,31 @@ class PaymentRepositoryMocks {
     td.when(
       this.paymentUtils.transfersToPayment(
         paymentId,
-        [this.browserNodeProvider.fullTransferState],
-        this.configProvider.config,
-        this.browserNodeProvider.browserNode,
+        [this.browserNodeProvider.fullTransferState]
       ),
     ).thenReturn(okAsync(this.createdPushPayment));
     td.when(
       this.paymentUtils.transfersToPayment(
         paymentId,
         [this.browserNodeProvider.fullTransferState, this.browserNodeProvider.fullTransferState],
-        this.configProvider.config,
-        this.browserNodeProvider.browserNode,
       ),
     ).thenReturn(okAsync({ ...this.createdPushPayment, state: EPaymentState.Approved }));
     td.when(
       this.paymentUtils.getTransferTypeWithTransfer(
-        this.browserNodeProvider.fullTransferState,
-        this.browserNodeProvider.browserNode,
+        this.browserNodeProvider.fullTransferState
       ),
     ).thenReturn(
       okAsync({ transferType: ETransferType.Insurance, transfer: this.browserNodeProvider.fullTransferState }),
     );
     td.when(
       this.paymentUtils.transfersToPayments(
-        [this.browserNodeProvider.fullTransferState],
-        this.configProvider.config,
-        this.contextProvider.initializedContext,
-        this.browserNodeProvider.browserNode,
+        [this.browserNodeProvider.fullTransferState]
       ),
     ).thenReturn(okAsync([this.createdPushPayment]));
     td.when(
       this.paymentUtils.sortTransfers(
         commonPaymentId,
         [this.browserNodeProvider.fullTransferState],
-        this.browserNodeProvider.browserNode,
       ),
     ).thenReturn(
       okAsync(

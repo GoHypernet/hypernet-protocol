@@ -1,8 +1,8 @@
 import { IVectorListener } from "@interfaces/api";
 import { IPaymentService } from "@interfaces/business";
-import { IHypernetTransferMetadata, ResultAsync } from "@interfaces/objects";
+import { IHypernetOfferDetails, ResultAsync } from "@interfaces/objects";
 import { LogicalError } from "@interfaces/objects/errors";
-import { ETransferType } from "@interfaces/types";
+import { ETransferType, MessageState } from "@interfaces/types";
 import {
   IBrowserNodeProvider,
   IConditionalTransferCreatedPayload,
@@ -39,14 +39,14 @@ export class VectorAPIListener implements IVectorListener {
         // Filter out any transfer not containing a transfer with a UUID in the transferState (insurance & parameterized transfer types)
         // or a UUID as part of transferState.message (message transfer type)
 
-        this.paymentUtils.getTransferType(payload.transfer, browserNode).andThen((transferType) => {
+        this.paymentUtils.getTransferType(payload.transfer).andThen((transferType) => {
           let paymentId: string;
           const transfer = payload.transfer;
 
           if (transferType === ETransferType.Offer) {
             // @todo also add in PullRecord type)
-            const metadata: IHypernetTransferMetadata = JSON.parse(transfer.transferState.message);
-            paymentId = metadata.paymentId;
+            const offerDetails: IHypernetOfferDetails = JSON.parse((transfer.transferState as MessageState).message);
+            paymentId = offerDetails.paymentId;
           } else if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
             paymentId = transfer.transferState.UUID;
           } else {
@@ -93,13 +93,13 @@ export class VectorAPIListener implements IVectorListener {
         // Filter out any transfer not containing a transfer with a UUID in the transferState (insurance & parameterized transfer types)
         // or a UUID as part of transferState.message (message transfer type)
 
-        this.paymentUtils.getTransferType(payload.transfer, browserNode).andThen((transferType) => {
+        this.paymentUtils.getTransferType(payload.transfer).andThen((transferType) => {
           let paymentId: string;
           const transfer = payload.transfer;
 
           if (transferType === ETransferType.Offer) {
             // @todo also add in PullRecord type)
-            const metadata: IHypernetTransferMetadata = JSON.parse(transfer.transferState.message);
+            const metadata: IHypernetOfferDetails = JSON.parse(transfer.transferState.message);
             paymentId = metadata.paymentId;
           } else if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
             paymentId = transfer.transferState.UUID;

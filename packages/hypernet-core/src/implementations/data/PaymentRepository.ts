@@ -5,7 +5,7 @@ import {
   BigNumber,
   EthereumAddress,
   HypernetConfig,
-  IHypernetTransferMetadata,
+  IHypernetOfferDetails,
   InitializedHypernetContext,
   Payment,
   PublicIdentifier,
@@ -23,7 +23,7 @@ import {
   TransferResolutionError,
   VectorError,
 } from "@interfaces/objects/errors";
-import { EPaymentType, ETransferType } from "@interfaces/types";
+import { EPaymentType, ETransferType, MessageState } from "@interfaces/types";
 import {
   IBrowserNode,
   IBrowserNodeProvider,
@@ -73,25 +73,18 @@ export class PaymentRepository implements IPaymentRepository {
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
-    const prerequisites = ResultUtils.combine([
-      this.browserNodeProvider.getBrowserNode(),
-      this.configProvider.getConfig(),
-      this.contextProvider.getInitializedContext(),
-    ]);
-
     let browserNode: IBrowserNode;
-    let config: HypernetConfig;
     let context: InitializedHypernetContext;
     let paymentId: string;
 
-    return prerequisites
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.contextProvider.getInitializedContext(),
+      this.paymentUtils.createPaymentId(EPaymentType.Push)
+    ])
       .andThen((vals) => {
-        [browserNode, config, context] = vals;
-        return this.paymentUtils.createPaymentId(EPaymentType.Push);
-      })
-      .andThen((myPaymentId) => {
-        paymentId = myPaymentId;
-        const message: IHypernetTransferMetadata = {
+        [browserNode, context, paymentId] = vals;
+        const message: IHypernetOfferDetails = {
           paymentId,
           creationDate: moment().unix(),
           to: counterPartyAccount,
@@ -111,7 +104,7 @@ export class PaymentRepository implements IPaymentRepository {
       })
       .andThen((transfer) => {
         // Return the payment
-        return this.paymentUtils.transfersToPayment(paymentId, [transfer], config, browserNode);
+        return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
       });
   }
 
@@ -120,21 +113,15 @@ export class PaymentRepository implements IPaymentRepository {
    * @param paymentId the payment to get transfers for
    */
   protected _getTransfersByPaymentId(paymentId: string): ResultAsync<IFullTransferState[], Error> {
-    const prerequisites = ResultUtils.combine([
-      this.browserNodeProvider.getBrowserNode(),
-      this.vectorUtils.getRouterChannelAddress(),
-      this.configProvider.getConfig(),
-      this.contextProvider.getInitializedContext(),
-    ]);
-
     let browserNode: IBrowserNode;
     let channelAddress: string;
-    let config: HypernetConfig;
-    let context: InitializedHypernetContext;
 
-    return prerequisites
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.vectorUtils.getRouterChannelAddress()
+    ])
       .andThen((vals) => {
-        [browserNode, channelAddress, config, context] = vals;
+        [browserNode, channelAddress] = vals;
         return browserNode.getActiveTransfers(channelAddress);
       })
       .andThen((activeTransfers) => {
@@ -156,7 +143,7 @@ export class PaymentRepository implements IPaymentRepository {
           >
         >();
         for (const transfer of transfers) {
-          transferTypeResults.push(this.paymentUtils.getTransferTypeWithTransfer(transfer, browserNode));
+          transferTypeResults.push(this.paymentUtils.getTransferTypeWithTransfer(transfer));
         }
 
         return combine(transferTypeResults);
@@ -173,8 +160,12 @@ export class PaymentRepository implements IPaymentRepository {
         for (const transferTypeWithTransfer of tranferTypesWithTransfers) {
           const { transferType, transfer } = transferTypeWithTransfer;
 
-          if (transfer.meta && paymentId === transfer.meta.paymentId) {
-            relevantTransfers.push(transfer);
+          if (transferType === ETransferType.Offer) {
+            const offerDetails: IHypernetOfferDetails = JSON.parse((transfer.transferState as MessageState).message);
+
+            if (offerDetails.paymentId === paymentId) {
+              relevantTransfers.push(transfer);
+            }
           } else {
             if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
               if (paymentId === transfer.transferState.UUID) {
@@ -199,25 +190,15 @@ export class PaymentRepository implements IPaymentRepository {
     }
 
     // The earliest date should be a message transfer. We put the creation date
-    // in each transfer's metadata to make this easier though. 
+    // in each transfer's metadata to make this easier though.
     transfers.sort((a, b) => {
-      const aTime = this.getTimestampFromTransfer(a);
-      const bTime = this.getTimestampFromTransfer(b);
-      
+      const aTime = this.vectorUtils.getTimestampFromTransfer(a);
+      const bTime = this.vectorUtils.getTimestampFromTransfer(b);
+
       return aTime > bTime ? 1 : -1;
     });
 
-    return this.getTimestampFromTransfer(transfers[0]);
-  }
-  
-  protected getTimestampFromTransfer(transfer: IFullTransferState): number {
-    if (transfer.meta == null) {
-      // We need to figure out the transfer type, I think; but for now we'll just say
-      // that the transfer is right now
-      return moment().unix();
-    }
-
-    return transfer.meta.creationDate;
+    return this.vectorUtils.getTimestampFromTransfer(transfers[0]);
   }
 
   /**
@@ -225,21 +206,15 @@ export class PaymentRepository implements IPaymentRepository {
    * @param paymentIds the list of payments to get
    */
   public getPaymentsByIds(paymentIds: string[]): ResultAsync<Map<string, Payment>, Error> {
-    const prerequisites = ResultUtils.combine([
-      this.browserNodeProvider.getBrowserNode(),
-      this.vectorUtils.getRouterChannelAddress(),
-      this.configProvider.getConfig(),
-      this.contextProvider.getInitializedContext(),
-    ]);
-
     let browserNode: IBrowserNode;
     let channelAddress: string;
-    let config: HypernetConfig;
-    let context: InitializedHypernetContext;
 
-    return prerequisites
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.vectorUtils.getRouterChannelAddress(),
+    ])
       .andThen((vals) => {
-        [browserNode, channelAddress, config, context] = vals;
+        [browserNode, channelAddress] = vals;
 
         return browserNode.getActiveTransfers(channelAddress);
       })
@@ -260,7 +235,7 @@ export class PaymentRepository implements IPaymentRepository {
           >
         >();
         for (const transfer of transfers) {
-          transferTypeResults.push(this.paymentUtils.getTransferTypeWithTransfer(transfer, browserNode));
+          transferTypeResults.push(this.paymentUtils.getTransferTypeWithTransfer(transfer));
         }
 
         return combine(transferTypeResults);
@@ -277,8 +252,11 @@ export class PaymentRepository implements IPaymentRepository {
         for (const transferTypeWithTransfer of tranferTypesWithTransfers) {
           const { transferType, transfer } = transferTypeWithTransfer;
 
-          if (transfer.meta && paymentIds.includes(transfer.meta.paymentId)) {
-            relevantTransfers.push(transfer);
+          if (transferType === ETransferType.Offer) {
+            const offerDetails: IHypernetOfferDetails = JSON.parse((transfer.transferState as MessageState).message);
+            if (paymentIds.includes(offerDetails.paymentId)) {
+              relevantTransfers.push(transfer);
+            }
           } else {
             if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
               if (paymentIds.includes(transfer.transferState.UUID)) {
@@ -295,7 +273,7 @@ export class PaymentRepository implements IPaymentRepository {
         return okAsync(relevantTransfers);
       })
       .andThen((relevantTransfers) => {
-        return this.paymentUtils.transfersToPayments(relevantTransfers, config, context, browserNode);
+        return this.paymentUtils.transfersToPayments(relevantTransfers);
       })
       .map((payments) => {
         return payments.reduce((map, obj) => {
@@ -316,26 +294,22 @@ export class PaymentRepository implements IPaymentRepository {
     paymentId: string,
     amount: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
-    const prerequisites = ResultUtils.combine([
-      this.browserNodeProvider.getBrowserNode(),
-      this.configProvider.getConfig(),
-      this._getTransfersByPaymentId(paymentId),
-    ]);
-
     let browserNode: IBrowserNode;
-    let config: HypernetConfig;
     let existingTransfers: IFullTransferState[];
     let parameterizedTransferId: string;
 
-    return prerequisites
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this._getTransfersByPaymentId(paymentId),
+    ])
       .andThen((vals) => {
-        [browserNode, config, existingTransfers] = vals;
+        [browserNode, existingTransfers] = vals;
 
         this.logUtils.log(`Finalizing payment ${paymentId}`);
 
         // get the transfer id from the paymentId
         // use payment utils for this
-        return this.paymentUtils.sortTransfers(paymentId, existingTransfers, browserNode);
+        return this.paymentUtils.sortTransfers(paymentId, existingTransfers);
       })
       .andThen((sortedTransfers) => {
         if (sortedTransfers.parameterizedTransfer == null) {
@@ -359,7 +333,7 @@ export class PaymentRepository implements IPaymentRepository {
         existingTransfers.push(transfer);
 
         // Transfer has been resolved successfully; return the updated payment.
-        const updatedPayment = this.paymentUtils.transfersToPayment(paymentId, existingTransfers, config, browserNode);
+        const updatedPayment = this.paymentUtils.transfersToPayment(paymentId, existingTransfers);
 
         return updatedPayment;
       });
@@ -381,21 +355,20 @@ export class PaymentRepository implements IPaymentRepository {
     | VectorError
     | Error
   > {
-    const prerequisites = ResultUtils.combine([
-      this.browserNodeProvider.getBrowserNode(),
-      this.configProvider.getConfig(),
-      this._getTransfersByPaymentId(paymentId),
-    ]);
 
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
     let existingTransfers: IFullTransferState[];
 
-    return prerequisites
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.configProvider.getConfig(),
+      this._getTransfersByPaymentId(paymentId),
+    ])
       .andThen((vals) => {
         [browserNode, config, existingTransfers] = vals;
 
-        return this.paymentUtils.transfersToPayment(paymentId, existingTransfers, config, browserNode);
+        return this.paymentUtils.transfersToPayment(paymentId, existingTransfers);
       })
       .andThen((payment) => {
         const paymentMediator = payment.disputeMediator;
@@ -426,7 +399,7 @@ export class PaymentRepository implements IPaymentRepository {
         const allTransfers = [transfer, ...existingTransfers];
 
         // Transfer has been created successfully; return the updated payment.
-        return this.paymentUtils.transfersToPayment(paymentId, allTransfers, config, browserNode);
+        return this.paymentUtils.transfersToPayment(paymentId, allTransfers);
       });
   }
 
@@ -439,21 +412,19 @@ export class PaymentRepository implements IPaymentRepository {
   public provideAsset(
     paymentId: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | LogicalError> {
-    const prerequisites = ResultUtils.combine([
-      this.browserNodeProvider.getBrowserNode(),
-      this.configProvider.getConfig(),
-      this._getTransfersByPaymentId(paymentId),
-    ]);
-
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
     let existingTransfers: IFullTransferState[];
 
-    return prerequisites
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.configProvider.getConfig(),
+      this._getTransfersByPaymentId(paymentId),
+    ])
       .andThen((vals) => {
         [browserNode, config, existingTransfers] = vals;
 
-        return this.paymentUtils.transfersToPayment(paymentId, existingTransfers, config, browserNode);
+        return this.paymentUtils.transfersToPayment(paymentId, existingTransfers);
       })
       .andThen((payment) => {
         const paymentTokenAddress = payment.paymentToken;
@@ -489,7 +460,7 @@ export class PaymentRepository implements IPaymentRepository {
         const allTransfers = [transfer, ...existingTransfers];
 
         // Transfer has been created successfully; return the updated payment.
-        return this.paymentUtils.transfersToPayment(paymentId, allTransfers, config, browserNode);
+        return this.paymentUtils.transfersToPayment(paymentId, allTransfers);
       });
   }
 }

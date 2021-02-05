@@ -1,6 +1,5 @@
 export enum ETransferState {
-    Active,
-    Resolved,
-    Disputed
-  }
-  
+  Active,
+  Resolved,
+  Disputed,
+}

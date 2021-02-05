@@ -8,7 +8,7 @@ export * from "./HexString";
 export * from "./HypernetConfig";
 export * from "./HypernetContext";
 export * from "./HypernetLink";
-export * from "./HypernetTransferMetadata";
+export * from "./HypernetOfferDetails";
 export * from "./Message";
 export * from "./MessagePayload";
 export * from "./MessageThread";

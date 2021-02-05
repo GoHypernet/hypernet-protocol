@@ -1,8 +1,8 @@
-import { NodeParams, OptionalPublicIdentifier, DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
+import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
 import {
   BigNumber,
   HypernetConfig,
-  IHypernetTransferMetadata,
+  IHypernetOfferDetails,
   InitializedHypernetContext,
   PublicIdentifier,
   ResultAsync,
@@ -19,8 +19,9 @@ import {
   IBasicTransferResponse,
   IBasicChannelResponse,
   IFullChannelState,
+  IFullTransferState,
 } from "@interfaces/utilities";
-import { EPaymentType, InsuranceState, MessageState, Parameterized, ParameterizedState } from "@interfaces/types";
+import { EPaymentType, ETransferState, InsuranceState, MessageState, ParameterizedState } from "@interfaces/types";
 import "reflect-metadata";
 import { serialize } from "class-transformer";
 import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@interfaces/types/typechain/ParameterizedTypes";
@@ -37,6 +38,7 @@ import {
 } from "@interfaces/objects/errors";
 import { errAsync, okAsync } from "neverthrow";
 import { ResultUtils } from "@implementations/utilities";
+import moment from "moment";
 
 /**
  * VectorUtils contains methods for interacting directly with the core Vector stuff -
@@ -125,11 +127,11 @@ export class VectorUtils implements IVectorUtils {
   /**
    * Creates a "Message" transfer with Vector.
    * @param toAddress the public identifier (not eth address!) of the intended recipient
-   * @param message the message to send as IHypernetTransferMetadata
+   * @param message the message to send as IHypernetOfferDetails
    */
   public createMessageTransfer(
     toAddress: string,
-    message: IHypernetTransferMetadata,
+    message: IHypernetOfferDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // Sanity check - make sure the paymentId is valid:
     const validPayment = this.paymentIdUtils.isValidPaymentId(message.paymentId);
@@ -167,7 +169,7 @@ export class VectorUtils implements IVectorUtils {
         null,
         null,
         null,
-        message,
+        {},
       );
     });
   }
@@ -365,6 +367,25 @@ export class VectorUtils implements IVectorUtils {
     return this.getRouterChannelAddressSetup;
   }
 
+  public getTimestampFromTransfer(transfer: IFullTransferState): number {
+    if (transfer.meta == null) {
+      // We need to figure out the transfer type, I think; but for now we'll just say
+      // that the transfer is right now
+      return moment().unix();
+    }
+
+    return transfer.meta.creationDate;
+  }
+
+  public getTransferStateFromTransfer(transfer: IFullTransferState): ETransferState {
+    if (transfer.inDispute) {
+      return ETransferState.Disputed;
+    }
+    if (transfer.transferResolver != null) {
+      return ETransferState.Resolved;
+    }
+    return ETransferState.Active;
+  }
 
   protected _createRouterStateChannel(
     browserNode: IBrowserNode,
