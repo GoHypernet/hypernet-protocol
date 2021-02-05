@@ -5,7 +5,16 @@
  * @format
  */
 
+const path = require('path');
+
+const watchFolders = [
+  //Relative path to packages directory
+  path.resolve(__dirname + '/..'),
+];
+
+
 module.exports = {
+  resetCache: true,
   transformer: {
     getTransformOptions: async () => ({
       transform: {
@@ -14,4 +23,5 @@ module.exports = {
       },
     }),
   },
+  watchFolders,
 };

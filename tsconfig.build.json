@@ -20,7 +20,7 @@
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "resolveJsonModule": true,
-    "jsx": "react-jsx",
+    "jsx": "react",
     "typeRoots": ["./packages/hypernet-core/src/typings", "./node_modules/@types"],
     "paths": {
       "@interfaces/*": [
