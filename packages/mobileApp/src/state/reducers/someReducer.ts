@@ -1,4 +1,4 @@
-import { SomeActionType, ISomeReducerState, SomeAction } from "interfaces/state/IsomeReducer";
+import { SomeActionType, ISomeReducerState, SomeAction } from "@mobileApp/interfaces/state/IsomeReducer";
 
 export const someReducer = (state: ISomeReducerState, action: SomeAction) => {
   switch (action.type) {

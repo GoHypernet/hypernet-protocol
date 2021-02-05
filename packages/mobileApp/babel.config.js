@@ -6,10 +6,7 @@ module.exports = {
       {
         root: ["./src"],
         alias: {
-          containers: "./src/containers",
-          interfaces: "./src/interfaces",
-          screens: "./src/screens",
-          state: "./src/state",
+          "@mobileApp": "./src",
         },
       },
     ],

@@ -1,9 +1,9 @@
 import React from "react";
 import { Text, View } from "react-native";
-import { useStateContext } from "state/store";
-import { SomeActionType } from "interfaces/state/IsomeReducer";
+import { useStateContext } from "@mobileApp/state/store";
+import { SomeActionType } from "@mobileApp/interfaces/state/IsomeReducer";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import { NavigationProps } from "interfaces/containers/IRouter";
+import { NavigationProps } from "@mobileApp/interfaces/containers/IRouter";
 
 interface MainHomeProps {
   navigation: NavigationProps;

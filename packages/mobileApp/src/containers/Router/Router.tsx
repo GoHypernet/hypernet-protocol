@@ -1,9 +1,9 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import MainHome from "screens/MainHome";
-import { RootStackParamList, RouterProps } from "interfaces/containers/IRouter";
-import Login from "screens/Login";
+import MainHome from "@mobileApp/screens/MainHome";
+import { RootStackParamList, RouterProps } from "@mobileApp/interfaces/containers/IRouter";
+import Login from "@mobileApp/screens/Login";
 
 const Stack = createStackNavigator<RootStackParamList>();
 

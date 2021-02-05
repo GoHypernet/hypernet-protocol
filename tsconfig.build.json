@@ -37,7 +37,8 @@
       ],
       "@web-integration/*": [
         "./packages/web-integration/src/*"
-      ]
+      ],
+      "@mobileApp/*": ["./packages/mobileApp/src/*"]
     }
   }
 }

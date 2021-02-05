@@ -1,6 +1,6 @@
 import React from "react";
 import Router from "../Router";
-import { StoreProvider } from "state/store";
+import { StoreProvider } from "@mobileApp/state/store";
 
 interface AppContainerProps {}
 
