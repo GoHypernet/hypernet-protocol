@@ -54,13 +54,13 @@ services:
       VECTOR_MNEMONIC: "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"
       VECTOR_MNEMONIC_FILE: ""
       VECTOR_PG_DATABASE: "vector"
-      VECTOR_PG_HOST: "database"
+      VECTOR_PG_HOST: "database-node"
       VECTOR_PG_PASSWORD: "vector"
       VECTOR_PG_PASSWORD_FILE: ""
       VECTOR_PG_PORT: "5432"
       VECTOR_PG_USERNAME: "vector"
     depends_on:
-      - database
+      - database-node
       - blockchain
       - messaging
 
@@ -113,8 +113,9 @@ services:
       VECTOR_ENV: "dev"
       VECTOR_PROD: "true"
       VECTOR_NODE_URL: "http://node:8000"
+      VECTOR_MNEMONIC: "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"
       VECTOR_PG_DATABASE: "vector"
-      VECTOR_PG_HOST: "database"
+      VECTOR_PG_HOST: "database-router"
       VECTOR_PG_PASSWORD: "vector"
       VECTOR_PG_PASSWORD_FILE: ""
       VECTOR_PG_PORT: "5432"
@@ -122,11 +123,26 @@ services:
       VECTOR_PORT: "8008"
     depends_on:
       - node
+      - database-router
 
-  database:
+  database-node:
     image: connextproject/vector_database:0.1.15-beta.2
     ports:
       - 5434:5432
+    environment:
+      AWS_ACCESS_KEY_ID: ""
+      AWS_SECRET_ACCESS_KEY: ""
+      POSTGRES_DB: "vector"
+      POSTGRES_PASSWORD: "vector"
+      POSTGRES_PASSWORD_FILE: ""
+      POSTGRES_USER: "vector"
+      VECTOR_ADMIN_TOKEN: "cxt1234"
+      VECTOR_ENV: "dev"
+
+  database-router:
+    image: connextproject/vector_database:0.1.15-beta.2
+    ports:
+      - 5435:5432
     environment:
       AWS_ACCESS_KEY_ID: ""
       AWS_SECRET_ACCESS_KEY: ""
