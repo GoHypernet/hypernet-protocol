@@ -94,7 +94,7 @@ module.exports = {
   },
   devtool: "inline-source-map",
   plugins: [
-    new CleanWebpackPlugin(),
+    new CleanWebpackPlugin({ dangerouslyAllowCleanPatternsOutsideProject: false }),
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
       process: 'process/browser',

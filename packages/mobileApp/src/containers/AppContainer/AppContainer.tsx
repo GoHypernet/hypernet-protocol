@@ -1,6 +1,11 @@
 import React from "react";
 import Router from "../Router";
 import { StoreProvider } from "@mobileApp/state/store";
+/* import { IHypernetCore, HypernetCore, EBlockchainNetwork } from "@hypernetlabs/hypernet-core";
+
+// Instantiate the hypernet core.
+const core: IHypernetCore = new HypernetCore(EBlockchainNetwork.Localhost);
+console.log("core: ", core); */
 
 interface AppContainerProps {}
 
