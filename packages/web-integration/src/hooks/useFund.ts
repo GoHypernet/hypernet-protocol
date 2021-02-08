@@ -3,30 +3,37 @@ import { StoreContext } from "@web-integration/contexts";
 import { ITokenSelectorOption } from "@hypernetlabs/web-ui/src/interfaces";
 import { Balances } from "@hypernetlabs/hypernet-core";
 import { ethers } from "ethers";
-import { errAsync, ResultAsync } from "neverthrow";
-import { PaymentTokenOptionViewModel } from "@web-integration/interfaces/objects";
+import { PaymentTokenOptionViewModel, EResultStatus, ResultMessage } from "@web-integration/interfaces/objects";
 
 enum EActionTypes {
   FETCHING = "FETCHING",
   FETCHED = "FETCHED",
-  ERROR = "ERROR",
   TOKEN_SELECTED = "TOKEN_SELECTED",
+  SUCCESS = "SUCCESS",
+  ERROR = "ERROR",
+  AMOUNT_CHANGED = "AMOUNT_CHANGED",
 }
 
 interface IReducerStateReducer {
   loading: boolean;
   error: any;
+  resultMessage: ResultMessage;
   tokenSelectorOptions: ITokenSelectorOption[];
   selectedPaymentToken?: ITokenSelectorOption;
   setSelectedPaymentToken: (selectedOption?: ITokenSelectorOption) => void;
-  depositFunds: () => ResultAsync<Balances, Error>;
+  amount: string;
+  setAmount: (amount: string) => void;
+  depositFunds: () => void;
+  mintTokens: () => void;
 }
 
 interface IReducerState {
   loading: boolean;
   error: any;
   tokenSelectorOptions: ITokenSelectorOption[];
+  amount: string;
   selectedPaymentToken?: ITokenSelectorOption;
+  resultMessage: ResultMessage;
 }
 
 export function useFund(): IReducerStateReducer {
@@ -37,6 +44,8 @@ export function useFund(): IReducerStateReducer {
     error: null,
     tokenSelectorOptions: [],
     selectedPaymentToken: undefined,
+    resultMessage: new ResultMessage(EResultStatus.IDLE, ""),
+    amount: "1",
   };
 
   const [state, dispatch] = useReducer((state: IReducerState, action: any) => {
@@ -49,6 +58,22 @@ export function useFund(): IReducerStateReducer {
         return { ...state, loading: false, error: action.payload };
       case EActionTypes.TOKEN_SELECTED:
         return { ...state, loading: false, selectedPaymentToken: action.payload };
+      case EActionTypes.AMOUNT_CHANGED:
+        return { ...state, loading: false, amount: action.payload };
+      case EActionTypes.ERROR:
+        return {
+          ...state,
+          loading: false,
+          error: true,
+          resultMessage: new ResultMessage(EResultStatus.FAILURE, action.payload),
+        };
+      case EActionTypes.SUCCESS:
+        return {
+          ...state,
+          loading: false,
+          error: false,
+          resultMessage: new ResultMessage(EResultStatus.SUCCESS, action.payload),
+        };
       default:
         return { ...state };
     }
@@ -100,13 +125,52 @@ export function useFund(): IReducerStateReducer {
     });
   };
 
-  const depositFunds: () => ResultAsync<Balances, Error> = () => {
-    if (state.selectedPaymentToken?.address) {
-      return proxy.depositFunds(state.selectedPaymentToken?.address, ethers.utils.parseEther("1"));
-    } else {
-      return errAsync(new Error("address not fownd"));
-    }
+  const setAmount = (enteredAmount?: string) => {
+    dispatch({
+      type: EActionTypes.AMOUNT_CHANGED,
+      payload: enteredAmount,
+    });
   };
 
-  return { ...state, setSelectedPaymentToken, depositFunds };
+  const depositFunds = () => {
+    if (!state.selectedPaymentToken?.address) {
+      dispatch({
+        type: EActionTypes.ERROR,
+        payload: "Token address not selected",
+      });
+    }
+    proxy.depositFunds(state.selectedPaymentToken?.address, ethers.utils.parseEther("1")).match(
+      (balances) => {
+        dispatch({
+          type: EActionTypes.SUCCESS,
+          payload: "your deposit has succeeded",
+        });
+      },
+      (err) => {
+        dispatch({
+          type: EActionTypes.ERROR,
+          payload: err.message || "your deposit has failed",
+        });
+      },
+    );
+  };
+
+  const mintTokens = () => {
+    proxy.mintTestToken(ethers.utils.parseEther(state.amount || "1")).match(
+      () => {
+        dispatch({
+          type: EActionTypes.SUCCESS,
+          payload: "mint tokens has succeeded",
+        });
+      },
+      (err) => {
+        dispatch({
+          type: EActionTypes.ERROR,
+          payload: err.message || "mint tokens has failed",
+        });
+      },
+    );
+  };
+
+  return { ...state, setSelectedPaymentToken, depositFunds, mintTokens, setAmount };
 }
