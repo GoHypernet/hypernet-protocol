@@ -51,7 +51,7 @@ const PaymentWidget: React.FC<PaymentWidgetProps> = (props: PaymentWidgetProps) 
       <br />
       <TextInput
         value={counterPartyAccount}
-        onChange={(event) => setCounterPartyAccount(event.target.value)}
+        onChange={setCounterPartyAccount}
         label="public identifier"
         placeholder="Enter public identifier"
       />
@@ -68,7 +68,7 @@ const PaymentWidget: React.FC<PaymentWidgetProps> = (props: PaymentWidgetProps) 
         <div>
           <TextInput
             value={requiredStake}
-            onChange={(event) => setRequiredStake(event.target.value)}
+            onChange={setRequiredStake}
             label="Required Stake:"
             placeholder="Enter Required Stake"
           />
@@ -79,16 +79,11 @@ const PaymentWidget: React.FC<PaymentWidgetProps> = (props: PaymentWidgetProps) 
             setSelectedPaymentToken={setSelectedPaymentToken}
           />
           <br />
-          <TextInput
-            value={amount}
-            onChange={(event) => setAmount(event.target.value)}
-            label="Amount:"
-            placeholder="Enter Amount"
-          />
+          <TextInput value={amount} onChange={setAmount} label="Amount:" placeholder="Enter Amount" />
           <br />
           <TextInput
             value={expirationDate}
-            onChange={(event) => setExpirationDate(event.target.value)}
+            onChange={setExpirationDate}
             label="Expiration Date:"
             placeholder="Enter Expiration Date"
           />

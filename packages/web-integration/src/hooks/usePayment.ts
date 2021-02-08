@@ -216,14 +216,14 @@ export function usePayment(initialParams: any): IReducerStateReducer {
         (balances) => {
           dispatch({
             type: EActionTypes.SUCCESS,
-            payload: "you fund has succeeded",
+            payload: "your fund has succeeded",
           });
         },
         (err) => {
           console.log("err: ", err);
           dispatch({
             type: EActionTypes.ERROR,
-            payload: err.message || "you fund has failed",
+            payload: err.message || "your fund has failed",
           });
         },
       );
