@@ -13,7 +13,6 @@ const FundWidget: React.FC = () => {
     amount,
     setAmount,
   } = useFund();
-  console.log("amountamountamount", amount);
 
   return (
     <div>
