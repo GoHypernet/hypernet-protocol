@@ -191,8 +191,8 @@ export class VectorUtils implements IVectorUtils {
     amount: BigNumber,
     assetAddress: string,
     paymentId: string,
-    start: string,
-    expiration: string,
+    start: number,
+    expiration: number,
     rate?: Rate,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // Sanity check
@@ -234,8 +234,8 @@ export class VectorUtils implements IVectorUtils {
 
       const initialState: ParameterizedState = {
         receiver: toEthAddress,
-        start,
-        expiration,
+        start: start.toString(),
+        expiration: expiration.toString(),
         UUID: paymentId,
         rate: type === EPaymentType.Push ? infiniteRate : (rate as Rate),
       };
@@ -267,7 +267,7 @@ export class VectorUtils implements IVectorUtils {
     toAddress: PublicIdentifier,
     mediatorAddress: string,
     amount: BigNumber,
-    expiration: string,
+    expiration: number,
     paymentId: string,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // Sanity check - make sure the paymentId is valid:
@@ -298,7 +298,7 @@ export class VectorUtils implements IVectorUtils {
         receiver: toEthAddress,
         mediator: mediatorAddress,
         collateral: amount.toString(),
-        expiration,
+        expiration: expiration.toString(),
         UUID: paymentId,
       };
 

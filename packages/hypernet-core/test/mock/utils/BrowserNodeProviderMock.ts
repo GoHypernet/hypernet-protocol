@@ -131,6 +131,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       td.when(this.browserNode.getTransfer(commonPaymentId)).thenReturn(okAsync(this.fullTransferState));
 
       td.when(this.browserNode.getActiveTransfers(routerChannelAddress)).thenReturn(okAsync([this.fullTransferState]));
+      td.when(this.browserNode.getTransfers(td.matchers.isA(Number), td.matchers.isA(Number))).thenReturn(okAsync([this.fullTransferState]));
 
       td.when(this.browserNode.getRegisteredTransfers(this.fullTransferState.chainId)).thenReturn(
         okAsync([

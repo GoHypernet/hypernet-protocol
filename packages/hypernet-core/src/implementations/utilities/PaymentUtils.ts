@@ -1,9 +1,7 @@
 import {
   BigNumber,
   EthereumAddress,
-  HypernetConfig,
   IHypernetOfferDetails,
-  InitializedHypernetContext,
   Payment,
   PublicIdentifier,
   PullAmount,
@@ -29,7 +27,6 @@ import {
   ParameterizedState,
 } from "@interfaces/types";
 import {
-  IBrowserNode,
   IBrowserNodeProvider,
   IConfigProvider,
   IFullTransferState,

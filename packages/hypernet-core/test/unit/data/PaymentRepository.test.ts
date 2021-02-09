@@ -7,6 +7,9 @@ import {
   commonPaymentId,
   mockUtils,
   publicIdentifier2,
+  unixNow,
+  nowFormatted,
+  defaultExpirationLength,
 } from "@mock/mocks";
 import { BlockchainProviderMock, BrowserNodeProviderMock, ConfigProviderMock, ContextProviderMock } from "@mock/utils";
 import {
@@ -21,35 +24,34 @@ import { ILogUtils, IVectorUtils, IBrowserNodeProvider, IPaymentUtils } from "@i
 import { VectorError } from "@interfaces/objects/errors";
 import { IPaymentRepository } from "@interfaces/data";
 import { okAsync, errAsync } from "neverthrow";
+import { PaymentRepository } from "@implementations/data/PaymentRepository";
+import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
 
 const moment = td.replace("moment", () => {
   return {
     format: () => {
-      return "2021-02-03T04:28:09+03:00";
+      return nowFormatted;
     },
     unix: () => {
-      return 1318874398;
+      return unixNow;
     },
   };
 });
-import { PaymentRepository } from "@implementations/data/PaymentRepository";
-import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
 
 const paymentToken = mockUtils.generateRandomPaymentToken();
 const disputeMediator = mockUtils.generateRandomEtherAdress();
-const now = moment();
-const expirationDate = moment(now.format());
+const expirationDate = unixNow + defaultExpirationLength;
 const paymentId = commonPaymentId;
 const counterPartyAccount = publicIdentifier2;
 const fromAccount = publicIdentifier;
 const transferMetadata: IHypernetOfferDetails = {
   paymentId,
-  creationDate: now.unix(),
+  creationDate: unixNow,
   to: counterPartyAccount,
   from: fromAccount,
   requiredStake: commonAmount.toString(),
   paymentAmount: commonAmount.toString(),
-  expirationDate: expirationDate.unix(),
+  expirationDate: expirationDate,
   paymentToken,
   disputeMediator,
 };
@@ -88,7 +90,7 @@ class PaymentRepositoryMocks {
         this.createdPushPayment.from,
         this.createdPushPayment.disputeMediator,
         this.createdPushPayment.requiredStake,
-        `${`${moment().unix()}` + this.configProvider.config.defaultPaymentExpiryLength}`,
+        expirationDate,
         this.createdPushPayment.id,
       ),
     ).thenReturn(
@@ -97,6 +99,7 @@ class PaymentRepositoryMocks {
         transferId: commonPaymentId,
       }),
     );
+    
     td.when(
       this.vectorUtils.createPaymentTransfer(
         EPaymentType.Push,
@@ -104,8 +107,8 @@ class PaymentRepositoryMocks {
         this.createdPushPayment.paymentAmount,
         this.createdPushPayment.paymentToken,
         this.createdPushPayment.id,
-        `${moment().unix()}`,
-        `${`${moment().unix()}` + this.configProvider.config.defaultPaymentExpiryLength}`,
+        unixNow,
+        expirationDate,
       ),
     ).thenReturn(
       okAsync({
@@ -115,18 +118,21 @@ class PaymentRepositoryMocks {
     );
 
     td.when(this.paymentUtils.createPaymentId(EPaymentType.Push)).thenReturn(okAsync(paymentId));
+    
     td.when(
       this.paymentUtils.transfersToPayment(
         paymentId,
         [this.browserNodeProvider.fullTransferState]
       ),
     ).thenReturn(okAsync(this.createdPushPayment));
+    
     td.when(
       this.paymentUtils.transfersToPayment(
         paymentId,
         [this.browserNodeProvider.fullTransferState, this.browserNodeProvider.fullTransferState],
       ),
     ).thenReturn(okAsync({ ...this.createdPushPayment, state: EPaymentState.Approved }));
+    
     td.when(
       this.paymentUtils.getTransferTypeWithTransfer(
         this.browserNodeProvider.fullTransferState
@@ -134,11 +140,13 @@ class PaymentRepositoryMocks {
     ).thenReturn(
       okAsync({ transferType: ETransferType.Insurance, transfer: this.browserNodeProvider.fullTransferState }),
     );
+    
     td.when(
       this.paymentUtils.transfersToPayments(
         [this.browserNodeProvider.fullTransferState]
       ),
     ).thenReturn(okAsync([this.createdPushPayment]));
+    
     td.when(
       this.paymentUtils.sortTransfers(
         commonPaymentId,
@@ -155,6 +163,9 @@ class PaymentRepositoryMocks {
         ),
       ),
     );
+
+    td.when(this.paymentUtils.getEarliestDateFromTransfers(td.matchers.contains(this.browserNodeProvider.fullTransferState)))
+    .thenReturn(unixNow);
   }
 
   public factoryPaymentRepository(): IPaymentRepository {
@@ -182,10 +193,10 @@ class PaymentRepositoryMocks {
       paymentToken,
       BigNumber.from(commonAmount.toString()),
       BigNumber.from(amountStaked),
-      expirationDate.unix(),
+      expirationDate,
       false,
-      now.unix(),
-      now.unix(),
+      unixNow,
+      unixNow,
       BigNumber.from(0),
       disputeMediator,
       BigNumber.from(commonAmount.toString()),

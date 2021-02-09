@@ -55,8 +55,8 @@ export interface IVectorUtils {
     amount: BigNumber,
     assetAddress: string,
     UUID: string,
-    start: string,
-    expiration: string,
+    start: number,
+    expiration: number,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
 
   /**
@@ -68,7 +68,7 @@ export interface IVectorUtils {
     toAddress: string,
     mediatorAddress: string,
     amount: BigNumber,
-    expiration: string,
+    expiration: number,
     UUID: string,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
 

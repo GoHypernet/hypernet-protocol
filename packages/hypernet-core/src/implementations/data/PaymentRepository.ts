@@ -68,7 +68,7 @@ export class PaymentRepository implements IPaymentRepository {
   public createPushPayment(
     counterPartyAccount: PublicIdentifier,
     amount: string,
-    expirationDate: moment.Moment,
+    expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
@@ -91,7 +91,7 @@ export class PaymentRepository implements IPaymentRepository {
           from: context.publicIdentifier,
           requiredStake: requiredStake.toString(),
           paymentAmount: amount.toString(),
-          expirationDate: expirationDate.unix(),
+          expirationDate: expirationDate,
           paymentToken,
           disputeMediator,
         };
@@ -346,8 +346,8 @@ export class PaymentRepository implements IPaymentRepository {
         const paymentMediator = payment.disputeMediator;
         const paymentSender = payment.from;
         const paymentID = payment.id;
-        const paymentStart = `${moment().unix()}`;
-        const paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`;
+        const paymentStart = moment().unix();
+        const paymentExpiration = paymentStart + config.defaultPaymentExpiryLength;
 
         // TODO: There are probably some logical times when you should not provide a stake
         if (false) {
@@ -410,8 +410,8 @@ export class PaymentRepository implements IPaymentRepository {
         }
         const paymentRecipient = payment.to;
         const paymentID = payment.id;
-        const paymentStart = `${moment().unix()}`;
-        const paymentExpiration = `${paymentStart + config.defaultPaymentExpiryLength}`;
+        const paymentStart = moment().unix();
+        const paymentExpiration = paymentStart + config.defaultPaymentExpiryLength;
 
         // Use vectorUtils to create the parameterizedPayment
         return this.vectorUtils.createPaymentTransfer(
