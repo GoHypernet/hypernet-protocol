@@ -203,3 +203,45 @@ services:
     image: connextproject/vector_iframe_app:0.1.15-beta.9
     ports:
       - 5000:5000
+    environment:
+      VECTOR_CONFIG: '{
+        "adminToken": "cxt1234",
+        "messagingUrl": "",
+        "logLevel": "debug",
+        "chainAddresses": { 
+          "1337": { 
+            "channelMastercopyAddress": "0x8CdaF0CD259887258Bc13a92C0a6dA92698644C0", 
+            "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", 
+            "hashlockTransferAddress": "0x345cA3e014Aaf5dcA488057592ee47305D9B3e10", 
+            "withdrawAddress": "0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF", 
+            "testTokenAddress": "0x9FBDa871d559710256a2502A2517b794B482Db40",
+            "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F" 
+          } 
+        }, 
+        "chainProviders": { 
+          "1337": "http://blockchain:8545" 
+        }, 
+        "port": 3001, 
+        "redisUrl": "redis://redis:6379", 
+        "allowedSwaps": [ ], 
+        "nodeUrl": "http://node:8000", 
+        "rebalanceProfiles": [ 
+          { 
+            "chainId": 1337, 
+            "assetId": "0x0000000000000000000000000000000000000000",
+            "reclaimThreshold": "200000000000000000", 
+            "target": "100000000000000000", 
+            "collateralizeThreshold": "50000000000000000" 
+          },{ 
+            "chainId": 1337, 
+            "assetId": "0x9FBDa871d559710256a2502A2517b794B482Db40", 
+            "reclaimThreshold": "2000000000000000000", 
+            "target": "1000000000000000000", 
+            "collateralizeThreshold": "500000000000000000" 
+          }
+        ], 
+        "awsAccessId": "", 
+        "awsAccessKey": "", 
+        "domainName": "", 
+        "production": false        
+      }' 
