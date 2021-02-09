@@ -175,9 +175,9 @@ export class VectorUtils implements IVectorUtils {
         "MessageTransfer",
         initialState,
         toAddress,
-        null,
-        null,
-        null,
+        undefined,
+        undefined,
+        undefined,
         message,
       );
     });
