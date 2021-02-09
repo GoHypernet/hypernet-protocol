@@ -1,3 +1,4 @@
+import { ResultUtils } from "@implementations/utilities";
 import { ILinkRepository } from "@interfaces/data";
 import {
   HypernetConfig,
@@ -42,15 +43,12 @@ export class VectorLinkRepository implements ILinkRepository {
     HypernetLink[],
     RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
   > {
-    const prerequisites = (combine([
+    const prerequisites = ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.configProvider.getConfig(),
       this.contextProvider.getInitializedContext(),
-      this.vectorUtils.getRouterChannelAddress() as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [IBrowserNode, HypernetConfig, InitializedHypernetContext, string],
-      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
-    >;
+      this.vectorUtils.getRouterChannelAddress(),
+    ]);
 
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
@@ -81,15 +79,12 @@ export class VectorLinkRepository implements ILinkRepository {
   public getHypernetLink(
     counterpartyId: PublicIdentifier,
   ): ResultAsync<HypernetLink, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
-    const prerequisites = (combine([
+    const prerequisites = ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.configProvider.getConfig(),
       this.contextProvider.getInitializedContext(),
-      this.vectorUtils.getRouterChannelAddress() as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [IBrowserNode, HypernetConfig, InitializedHypernetContext, string],
-      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
-    >;
+      this.vectorUtils.getRouterChannelAddress(),
+    ]);
 
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
