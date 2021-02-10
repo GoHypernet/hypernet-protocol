@@ -9,7 +9,7 @@ const AppContainer: React.FC<AppContainerProps> = (props: AppContainerProps) => 
   return (
     <StoreProvider>
       <WebViewBridge />
-      <Router initialRouteName="MainHome" />
+      <Router initialRouteName="Splash" />
     </StoreProvider>
   );
 };
