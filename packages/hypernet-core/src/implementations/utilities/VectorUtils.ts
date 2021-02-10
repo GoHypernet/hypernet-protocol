@@ -168,10 +168,10 @@ export class VectorUtils implements IVectorUtils {
         "MessageTransfer",
         initialState,
         toAddress,
-        null,
-        null,
-        null,
-        {},
+        undefined, // CRITICAL- must be undefined
+        undefined,
+        undefined,
+        message,
       );
     });
   }
@@ -249,9 +249,9 @@ export class VectorUtils implements IVectorUtils {
         "ParameterizedTransfer",
         initialState,
         toAddress,
-        null,
-        null,
-        null,
+        undefined,
+        undefined,
+        undefined,
         {}, // intentially left blank!
       );
     });
@@ -311,9 +311,9 @@ export class VectorUtils implements IVectorUtils {
         "Insurance",
         initialState,
         toAddress,
-        null,
-        null,
-        null,
+        undefined,
+        undefined,
+        undefined,
         {}, // left intentionally blank!
       );
     });
@@ -380,9 +380,9 @@ export class VectorUtils implements IVectorUtils {
   }
 
   public getTransferStateFromTransfer(transfer: IFullTransferState): ETransferState {
-    if (transfer.inDispute) {
-      return ETransferState.Challenged;
-    }
+    // if (transfer.inDispute) {
+    //   return ETransferState.Challenged;
+    // }
     if (transfer.transferResolver != null) {
       return ETransferState.Resolved;
     }
