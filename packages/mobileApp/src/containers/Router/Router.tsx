@@ -6,6 +6,7 @@ import LinearGradient from "react-native-linear-gradient";
 import MainHome from "@mobileApp/screens/MainHome";
 import Login from "@mobileApp/screens/Login";
 import Splash from "@mobileApp/screens/Splash";
+import Start from "@mobileApp/screens/Start";
 import { RootStackParamList, RouterProps } from "@mobileApp/interfaces/containers/IRouter";
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -19,6 +20,7 @@ const mainTheme = {
   },
 };
 
+// TODO: map screens from an array
 const Router: React.FC<RouterProps> = (props: RouterProps) => {
   return (
     <LinearGradient
@@ -28,16 +30,48 @@ const Router: React.FC<RouterProps> = (props: RouterProps) => {
       style={styles.container}
     >
       <NavigationContainer theme={mainTheme}>
-        <Stack.Navigator initialRouteName={props?.initialRouteName} headerMode="none">
+        <Stack.Navigator
+          initialRouteName={props?.initialRouteName}
+          screenOptions={{
+            headerShown: false,
+            cardStyleInterpolator: ({ current: { progress }, next, layouts }) => ({
+              cardStyle: {
+                transform: [
+                  {
+                    translateX: progress.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [layouts.screen.width, 0],
+                    }),
+                  },
+                  {
+                    translateX: next
+                      ? next.progress.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [0, -layouts.screen.width],
+                        })
+                      : 1,
+                  },
+                ],
+              },
+            }),
+          }}
+        >
           <Stack.Screen name="Splash" component={Splash} />
-          <Stack.Screen name="MainHome" component={MainHome} />
           <Stack.Screen
-            name="Login"
-            component={Login}
+            name="Start"
+            component={Start}
             options={{
               animationEnabled: false,
             }}
           />
+          <Stack.Screen
+            name="MainHome"
+            component={MainHome}
+            options={{
+              animationEnabled: false,
+            }}
+          />
+          <Stack.Screen name="Login" component={Login} />
         </Stack.Navigator>
       </NavigationContainer>
     </LinearGradient>
