@@ -1,8 +1,8 @@
 import { VectorUtils } from "@implementations/utilities/VectorUtils";
 import { ConfigProviderMock, ContextProviderMock, BlockchainProviderMock, createBrowserNodeMock } from "@mock/utils";
-import { chainId, routerChannelAddress, routerPublicIdentifier } from "@mock/mocks";
+import { chainId, routerChannelAddress, routerPublicIdentifier, unixNow } from "@mock/mocks";
 import td from "testdouble";
-import { IBrowserNode, IBrowserNodeProvider, ILogUtils, IPaymentIdUtils } from "@interfaces/utilities";
+import { IBrowserNode, IBrowserNodeProvider, ILogUtils, IPaymentIdUtils, ITimeUtils } from "@interfaces/utilities";
 import { okAsync } from "neverthrow";
 import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
 
@@ -14,10 +14,13 @@ class VectorUtilsMocks {
   public paymentIdUtils = td.object<IPaymentIdUtils>();
   public logUtils = td.object<ILogUtils>();
   public browserNodeMock: IBrowserNode;
+  public timeUtils = td.object<ITimeUtils>();
 
   constructor(includeExistingStateChannels: boolean = true) {
     this.browserNodeMock = createBrowserNodeMock(includeExistingStateChannels ? null : []);
     td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(this.browserNodeMock));
+
+    td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow);
   }
 
   public factoryVectorUtils(): VectorUtils {
@@ -28,6 +31,7 @@ class VectorUtilsMocks {
       this.blockchainProvider,
       this.paymentIdUtils,
       this.logUtils,
+      this.timeUtils,
     );
   }
 }

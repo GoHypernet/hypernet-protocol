@@ -68,14 +68,20 @@ class VectorLinkRepositoryMocks {
 
     td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
 
-    td.when(this.linkUtils.paymentsToHypernetLinks(td.matchers.argThat((val: Payment[]) => {
-      return val.length > 0;
-    }))).thenReturn(
-      okAsync([this.createdLink]),
-    );
-    td.when(this.linkUtils.paymentsToHypernetLinks(td.matchers.argThat((val: Payment[]) => {
-      return val.length == 0;
-    }))).thenReturn(okAsync([]));
+    td.when(
+      this.linkUtils.paymentsToHypernetLinks(
+        td.matchers.argThat((val: Payment[]) => {
+          return val.length > 0;
+        }),
+      ),
+    ).thenReturn(okAsync([this.createdLink]));
+    td.when(
+      this.linkUtils.paymentsToHypernetLinks(
+        td.matchers.argThat((val: Payment[]) => {
+          return val.length == 0;
+        }),
+      ),
+    ).thenReturn(okAsync([]));
 
     td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow);
   }

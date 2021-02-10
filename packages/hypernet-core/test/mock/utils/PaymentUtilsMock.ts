@@ -57,12 +57,12 @@ export class PaymentUtilsMockFactory {
     );
 
     td.when(
-        paymentUtils.transfersToPayments(
-          td.matchers.argThat((arr: IFullTransferState[]) => {
-            return arr.length == 0;
-          }),
-        ),
-      ).thenReturn(okAsync([]));
+      paymentUtils.transfersToPayments(
+        td.matchers.argThat((arr: IFullTransferState[]) => {
+          return arr.length == 0;
+        }),
+      ),
+    ).thenReturn(okAsync([]));
 
     td.when(
       paymentUtils.transfersToPayments(

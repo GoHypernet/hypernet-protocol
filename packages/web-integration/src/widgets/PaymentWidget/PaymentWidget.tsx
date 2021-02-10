@@ -7,7 +7,7 @@ import { usePayment } from "@web-integration/hooks";
 interface PaymentWidgetProps {
   counterPartyAccount?: PublicIdentifier;
   amount?: string;
-  expirationDate?: moment.Moment;
+  expirationDate?: number;
   requiredStake?: string;
   paymentTokenAddress?: EthereumAddress;
   disputeMediator?: PublicKey;

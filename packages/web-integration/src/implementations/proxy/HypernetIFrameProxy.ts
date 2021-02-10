@@ -24,7 +24,6 @@ import Postmate from "postmate";
 import { Subject } from "rxjs";
 import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 import { ok } from "neverthrow";
-import moment from "moment";
 
 interface IIFrameCallData<T> {
   callId: number;
@@ -306,7 +305,7 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
     amount: string,
-    expirationDate: moment.Moment,
+    expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
@@ -314,7 +313,7 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
     const call = this._createCall("sendFunds", {
       counterPartyAccount,
       amount,
-      expirationDate: expirationDate.toISOString(),
+      expirationDate,
       requiredStake,
       paymentToken,
       disputeMediator,
@@ -326,7 +325,7 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
   public authorizeFunds(
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumber,
-    expirationDate: moment.Moment,
+    expirationDate: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
