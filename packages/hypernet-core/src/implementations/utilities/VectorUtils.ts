@@ -381,7 +381,7 @@ export class VectorUtils implements IVectorUtils {
 
   public getTransferStateFromTransfer(transfer: IFullTransferState): ETransferState {
     if (transfer.inDispute) {
-      return ETransferState.Disputed;
+      return ETransferState.Challenged;
     }
     if (transfer.transferResolver != null) {
       return ETransferState.Resolved;

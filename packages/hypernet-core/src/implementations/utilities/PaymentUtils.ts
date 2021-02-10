@@ -234,7 +234,7 @@ export class PaymentUtils implements IPaymentUtils {
         const sortedTransfers = sortedTransfersUnk as SortedTransfers;
         const paymentState = this.getPaymentState(sortedTransfers);
 
-        // TODO: Figure out how to determine if the payment is Disputed
+        // TODO: Figure out how to determine if the payment is Challenged
 
         if (paymentType === EPaymentType.Pull) {
           return this.transfersToPullPayment(

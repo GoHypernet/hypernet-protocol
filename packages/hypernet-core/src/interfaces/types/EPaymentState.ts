@@ -9,6 +9,6 @@ export enum EPaymentState {
   Accepted, // Payment resolved
   InsuranceReleased, // Insurance resolved
   Finalized, // Offer resolved
-  Disputed, // In dispute; will be resolved by disputeMediator
+  Challenged, // In dispute; will be resolved by disputeMediator
   Borked, // Unknown or broken state. Recovery will be attempted.
 }
