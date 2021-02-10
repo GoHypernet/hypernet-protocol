@@ -175,9 +175,9 @@ export class VectorUtils implements IVectorUtils {
         "MessageTransfer",
         initialState,
         toAddress,
-        null,
-        null,
-        null,
+        undefined,
+        undefined,
+        undefined,
         message,
       );
     });
@@ -256,9 +256,9 @@ export class VectorUtils implements IVectorUtils {
         "ParameterizedTransfer",
         initialState,
         toAddress,
-        null,
-        null,
-        null,
+        undefined,
+        undefined,
+        undefined,
         {}, // intentially left blank!
       );
     });
@@ -318,9 +318,9 @@ export class VectorUtils implements IVectorUtils {
         "Insurance",
         initialState,
         toAddress,
-        null,
-        null,
-        null,
+        undefined,
+        undefined,
+        undefined,
         {}, // left intentionally blank!
       );
     });
