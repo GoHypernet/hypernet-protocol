@@ -1,4 +1,4 @@
-import { BigNumber, IHypernetTransferMetadata, ResultAsync } from "@interfaces/objects";
+import { BigNumber, IHypernetOfferDetails, ResultAsync } from "@interfaces/objects";
 import {
   CoreUninitializedError,
   InvalidParametersError,
@@ -6,8 +6,8 @@ import {
   TransferCreationError,
   TransferResolutionError,
 } from "@interfaces/objects/errors";
-import { EPaymentType } from "@interfaces/types";
-import { IBasicTransferResponse } from "./IBrowserNode";
+import { EPaymentType, ETransferState } from "@interfaces/types";
+import { IBasicTransferResponse, IFullTransferState } from "./IBrowserNode";
 
 /**
  *
@@ -41,7 +41,7 @@ export interface IVectorUtils {
    */
   createMessageTransfer(
     toAddress: string,
-    message: IHypernetTransferMetadata,
+    message: IHypernetOfferDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError>;
 
   /**
@@ -55,8 +55,8 @@ export interface IVectorUtils {
     amount: BigNumber,
     assetAddress: string,
     UUID: string,
-    start: string,
-    expiration: string,
+    start: number,
+    expiration: number,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
 
   /**
@@ -68,7 +68,10 @@ export interface IVectorUtils {
     toAddress: string,
     mediatorAddress: string,
     amount: BigNumber,
-    expiration: string,
+    expiration: number,
     UUID: string,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
+
+  getTimestampFromTransfer(transfer: IFullTransferState): number;
+  getTransferStateFromTransfer(transfer: IFullTransferState): ETransferState;
 }

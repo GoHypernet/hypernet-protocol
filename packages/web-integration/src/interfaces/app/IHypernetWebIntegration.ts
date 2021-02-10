@@ -13,7 +13,7 @@ export interface IRenderPaymentWidgetParams {
   selector: string;
   counterPartyAccount: PublicIdentifier;
   amount: string;
-  expirationDate: moment.Moment;
+  expirationDate: number;
   requiredStake: string;
   paymentTokenAddress: EthereumAddress;
   disputeMediator: PublicKey;

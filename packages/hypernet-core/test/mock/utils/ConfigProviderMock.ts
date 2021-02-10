@@ -1,6 +1,6 @@
 import { HypernetConfig } from "@interfaces/objects";
 import { IConfigProvider } from "@interfaces/utilities";
-import { chainId, hyperTokenAddress, routerPublicIdentifier } from "@mock/mocks";
+import { chainId, defaultExpirationLength, hyperTokenAddress, routerPublicIdentifier } from "@mock/mocks";
 import { okAsync, ResultAsync } from "neverthrow";
 
 export class ConfigProviderMock implements IConfigProvider {
@@ -17,7 +17,7 @@ export class ConfigProviderMock implements IConfigProvider {
         "routerUrl",
         hyperTokenAddress,
         "hypernetProtocolDomain",
-        5000,
+        defaultExpirationLength,
         {
           [1337]: "http://localhost:8545",
         },

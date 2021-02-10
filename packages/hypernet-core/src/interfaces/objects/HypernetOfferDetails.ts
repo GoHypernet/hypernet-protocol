@@ -1,7 +1,7 @@
 import { EthereumAddress } from "./EthereumAddress";
 import { PublicIdentifier } from "./PublicIdentifier";
 
-export interface IHypernetTransferMetadata {
+export interface IHypernetOfferDetails {
   paymentId: string;
   creationDate: number;
   to: PublicIdentifier;

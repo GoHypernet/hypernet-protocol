@@ -18,14 +18,31 @@ import {
   destinationAddress,
   commonPaymentId,
   publicIdentifier2,
+  offerTransferId,
+  insuranceTransferId,
+  parameterizedTransferId,
+  defaultExpirationLength,
+  unixNow,
+  disputeMediatorPublicKey,
+  unixPast,
 } from "@mock/mocks";
+import { InsuranceState, ParameterizedState, MessageState } from "@interfaces/types";
+import { IHypernetOfferDetails } from "@interfaces/objects";
 
 export class BrowserNodeProviderMock implements IBrowserNodeProvider {
   public browserNode: IBrowserNode;
   public stateChannels = new Map<string, IFullChannelState>();
-  public fullTransferState: IFullTransferState;
+  public offerTransfer: IFullTransferState<MessageState>;
+  public insuranceTransfer: IFullTransferState<InsuranceState>;
+  public parameterizedTransfer: IFullTransferState<ParameterizedState>;
+  public offerDetails: IHypernetOfferDetails;
 
-  constructor(browserNode: IBrowserNode | null = null) {
+  constructor(
+    includeOfferTransfer: boolean = true,
+    includeInsuranceTransfer: boolean = true,
+    includeParameterizedTransfer: boolean = true,
+    browserNode: IBrowserNode | null = null,
+  ) {
     // Create the default set of state channels
     this.stateChannels.set(routerChannelAddress, {
       assetIds: [erc20AssetAddress],
@@ -65,7 +82,19 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       inDispute: false,
     });
 
-    this.fullTransferState = {
+    this.offerDetails = {
+      paymentId: commonPaymentId,
+      creationDate: unixPast,
+      to: publicIdentifier2,
+      from: publicIdentifier,
+      requiredStake: commonAmount.toString(),
+      paymentAmount: commonAmount.toString(),
+      disputeMediator: disputeMediatorPublicKey,
+      paymentToken: erc20AssetAddress,
+      expirationDate: unixPast + defaultExpirationLength,
+    };
+
+    this.offerTransfer = {
       balance: {
         amount: ["43", "43"],
         to: [destinationAddress],
@@ -73,7 +102,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       assetId: erc20AssetAddress,
       channelAddress: routerChannelAddress,
       inDispute: false,
-      transferId: commonPaymentId,
+      transferId: offerTransferId,
       transferDefinition: destinationAddress,
       transferTimeout: "string",
       initialStateHash: "string",
@@ -83,7 +112,68 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       chainId: 1337,
       transferEncodings: ["string"],
       transferState: {
+        message: JSON.stringify(this.offerDetails),
+      },
+      channelNonce: 1,
+      initiatorIdentifier: publicIdentifier,
+      responderIdentifier: publicIdentifier2,
+    };
+
+    this.insuranceTransfer = {
+      balance: {
+        amount: ["43", "43"],
+        to: [destinationAddress],
+      },
+      assetId: erc20AssetAddress,
+      channelAddress: routerChannelAddress,
+      inDispute: false,
+      transferId: insuranceTransferId,
+      transferDefinition: destinationAddress,
+      transferTimeout: "string",
+      initialStateHash: "string",
+      initiator: publicIdentifier,
+      responder: publicIdentifier2,
+      channelFactoryAddress: "channelFactoryAddress",
+      chainId: 1337,
+      transferEncodings: ["string"],
+      transferState: {
+        receiver: publicIdentifier,
+        mediator: disputeMediatorPublicKey,
+        collateral: "1",
+        expiration: (unixPast + defaultExpirationLength).toString(),
         UUID: commonPaymentId,
+      },
+      channelNonce: 1,
+      initiatorIdentifier: publicIdentifier,
+      responderIdentifier: publicIdentifier2,
+    };
+
+    this.parameterizedTransfer = {
+      balance: {
+        amount: ["43", "43"],
+        to: [destinationAddress],
+      },
+      assetId: erc20AssetAddress,
+      channelAddress: routerChannelAddress,
+      inDispute: false,
+      transferId: parameterizedTransferId,
+      transferDefinition: destinationAddress,
+      transferTimeout: "string",
+      initialStateHash: "string",
+      initiator: publicIdentifier,
+      responder: publicIdentifier2,
+      channelFactoryAddress: "channelFactoryAddress",
+      chainId: 1337,
+      transferEncodings: ["string"],
+      transferState: {
+        receiver: publicIdentifier2,
+        start: unixPast.toString(),
+        expiration: (unixPast + defaultExpirationLength).toString(),
+        UUID: commonPaymentId,
+        rate: {
+          deltaAmount: "1",
+          deltaTime: "1",
+        },
       },
       channelNonce: 1,
       initiatorIdentifier: publicIdentifier,
@@ -128,17 +218,32 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
         ),
       ).thenReturn(okAsync({} as IWithdrawResponse));
 
-      td.when(this.browserNode.getTransfer(commonPaymentId)).thenReturn(okAsync(this.fullTransferState));
+      td.when(this.browserNode.getTransfer(offerTransferId)).thenReturn(okAsync(this.offerTransfer));
+      td.when(this.browserNode.getTransfer(insuranceTransferId)).thenReturn(okAsync(this.insuranceTransfer));
+      td.when(this.browserNode.getTransfer(parameterizedTransferId)).thenReturn(okAsync(this.parameterizedTransfer));
 
-      td.when(this.browserNode.getActiveTransfers(routerChannelAddress)).thenReturn(okAsync([this.fullTransferState]));
+      const transfers = new Array<IFullTransferState>();
+      if (includeOfferTransfer) {
+        transfers.push(this.offerTransfer);
+      }
+      if (includeInsuranceTransfer) {
+        transfers.push(this.insuranceTransfer);
+      }
+      if (includeParameterizedTransfer) {
+        transfers.push(this.parameterizedTransfer);
+      }
+      td.when(this.browserNode.getActiveTransfers(routerChannelAddress)).thenReturn(okAsync(transfers));
+      td.when(this.browserNode.getTransfers(td.matchers.isA(Number), td.matchers.isA(Number))).thenReturn(
+        okAsync(transfers),
+      );
 
-      td.when(this.browserNode.getRegisteredTransfers(this.fullTransferState.chainId)).thenReturn(
+      td.when(this.browserNode.getRegisteredTransfers(this.offerTransfer.chainId)).thenReturn(
         okAsync([
           {
             name: "Insurance",
             stateEncoding: "stateEncoding",
             resolverEncoding: "resolverEncoding",
-            definition: this.fullTransferState.transferDefinition,
+            definition: this.offerTransfer.transferDefinition,
             encodedCancel: "encodedCancel",
           } as IRegisteredTransfer,
         ]),

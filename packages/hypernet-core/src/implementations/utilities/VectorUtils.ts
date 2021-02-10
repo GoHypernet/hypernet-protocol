@@ -1,8 +1,8 @@
-import { NodeParams, OptionalPublicIdentifier, DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
+import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
 import {
   BigNumber,
   HypernetConfig,
-  IHypernetTransferMetadata,
+  IHypernetOfferDetails,
   InitializedHypernetContext,
   PublicIdentifier,
   ResultAsync,
@@ -19,8 +19,10 @@ import {
   IBasicTransferResponse,
   IBasicChannelResponse,
   IFullChannelState,
+  IFullTransferState,
+  ITimeUtils,
 } from "@interfaces/utilities";
-import { EPaymentType, InsuranceState, MessageState, Parameterized, ParameterizedState } from "@interfaces/types";
+import { EPaymentType, ETransferState, InsuranceState, MessageState, ParameterizedState } from "@interfaces/types";
 import "reflect-metadata";
 import { serialize } from "class-transformer";
 import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@interfaces/types/typechain/ParameterizedTypes";
@@ -37,6 +39,7 @@ import {
 } from "@interfaces/objects/errors";
 import { errAsync, okAsync } from "neverthrow";
 import { ResultUtils } from "@implementations/utilities";
+import moment from "moment";
 
 /**
  * VectorUtils contains methods for interacting directly with the core Vector stuff -
@@ -55,6 +58,7 @@ export class VectorUtils implements IVectorUtils {
     protected blockchainProvider: IBlockchainProvider,
     protected paymentIdUtils: IPaymentIdUtils,
     protected logUtils: ILogUtils,
+    protected timeUtils: ITimeUtils,
   ) {
     this.getRouterChannelAddressSetup = null;
   }
@@ -125,11 +129,11 @@ export class VectorUtils implements IVectorUtils {
   /**
    * Creates a "Message" transfer with Vector.
    * @param toAddress the public identifier (not eth address!) of the intended recipient
-   * @param message the message to send as IHypernetTransferMetadata
+   * @param message the message to send as IHypernetOfferDetails
    */
   public createMessageTransfer(
     toAddress: string,
-    message: IHypernetTransferMetadata,
+    message: IHypernetOfferDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // Sanity check - make sure the paymentId is valid:
     const validPayment = this.paymentIdUtils.isValidPaymentId(message.paymentId);
@@ -157,17 +161,6 @@ export class VectorUtils implements IVectorUtils {
         message: serialize(message),
       };
 
-      // Create transfer params
-      const transferParams = {
-        recipient: toAddress,
-        channelAddress,
-        amount: "0",
-        assetId: config.hypertokenAddress,
-        type: "MessageTransfer",
-        details: initialState,
-        meta: message,
-      } as OptionalPublicIdentifier<NodeParams.ConditionalTransfer>;
-
       return browserNode.conditionalTransfer(
         channelAddress,
         "0",
@@ -175,7 +168,7 @@ export class VectorUtils implements IVectorUtils {
         "MessageTransfer",
         initialState,
         toAddress,
-        undefined,
+        undefined, // CRITICAL- must be undefined
         undefined,
         undefined,
         message,
@@ -189,7 +182,7 @@ export class VectorUtils implements IVectorUtils {
    * @param toAddress the public identifier of the intended recipient of this transfer
    * @param amount the amount of tokens to commit to this transfer
    * @param assetAddress the address of the ERC20-token to transfer; zero-address for ETH
-   * @param paymentIda length-64 hexadecimal string; this becomes the UUID component of the InsuranceState
+   * @param paymentId length-64 hexadecimal string; this becomes the UUID component of the InsuranceState
    * @param start the start time of this transfer (UNIX timestamp)
    * @param expiration the expiration time of this transfer (UNIX timestamp)
    * @param rate the maximum allowed rate of this transfer (deltaAmount/deltaTime)
@@ -200,8 +193,8 @@ export class VectorUtils implements IVectorUtils {
     amount: BigNumber,
     assetAddress: string,
     paymentId: string,
-    start: string,
-    expiration: string,
+    start: number,
+    expiration: number,
     rate?: Rate,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // Sanity check
@@ -243,8 +236,8 @@ export class VectorUtils implements IVectorUtils {
 
       const initialState: ParameterizedState = {
         receiver: toEthAddress,
-        start,
-        expiration,
+        start: start.toString(),
+        expiration: expiration.toString(),
         UUID: paymentId,
         rate: type === EPaymentType.Push ? infiniteRate : (rate as Rate),
       };
@@ -276,7 +269,7 @@ export class VectorUtils implements IVectorUtils {
     toAddress: PublicIdentifier,
     mediatorAddress: string,
     amount: BigNumber,
-    expiration: string,
+    expiration: number,
     paymentId: string,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // Sanity check - make sure the paymentId is valid:
@@ -307,7 +300,7 @@ export class VectorUtils implements IVectorUtils {
         receiver: toEthAddress,
         mediator: mediatorAddress,
         collateral: amount.toString(),
-        expiration,
+        expiration: expiration.toString(),
         UUID: paymentId,
       };
 
@@ -335,9 +328,11 @@ export class VectorUtils implements IVectorUtils {
     if (this.getRouterChannelAddressSetup != null) {
       return this.getRouterChannelAddressSetup;
     }
+
     let config: HypernetConfig;
     let context: InitializedHypernetContext;
     let browserNode: IBrowserNode;
+
     this.getRouterChannelAddressSetup = ResultUtils.combine([
       this.configProvider.getConfig(),
       this.contextProvider.getInitializedContext(),
@@ -374,6 +369,25 @@ export class VectorUtils implements IVectorUtils {
     return this.getRouterChannelAddressSetup;
   }
 
+  public getTimestampFromTransfer(transfer: IFullTransferState): number {
+    if (transfer.meta == null) {
+      // We need to figure out the transfer type, I think; but for now we'll just say
+      // that the transfer is right now
+      return this.timeUtils.getUnixNow();
+    }
+
+    return transfer.meta.creationDate;
+  }
+
+  public getTransferStateFromTransfer(transfer: IFullTransferState): ETransferState {
+    // if (transfer.inDispute) {
+    //   return ETransferState.Challenged;
+    // }
+    if (transfer.transferResolver != null) {
+      return ETransferState.Resolved;
+    }
+    return ETransferState.Active;
+  }
 
   protected _createRouterStateChannel(
     browserNode: IBrowserNode,

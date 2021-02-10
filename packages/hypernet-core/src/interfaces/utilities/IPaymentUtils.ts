@@ -1,17 +1,7 @@
-import {
-  HypernetConfig,
-  IHypernetTransferMetadata,
-  InitializedHypernetContext,
-  Payment,
-  PublicIdentifier,
-  PullPayment,
-  PushPayment,
-  SortedTransfers,
-  ResultAsync,
-} from "@interfaces/objects";
+import { Payment, PublicIdentifier, PullPayment, PushPayment, SortedTransfers, ResultAsync } from "@interfaces/objects";
 import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
 import { InvalidParametersError, InvalidPaymentError, LogicalError, VectorError } from "@interfaces/objects/errors";
-import { IBrowserNode, IFullTransferState } from "./IBrowserNode";
+import { IFullTransferState } from "./IBrowserNode";
 
 export interface IPaymentUtils {
   /**
@@ -29,7 +19,6 @@ export interface IPaymentUtils {
   sortTransfers(
     _paymentId: string,
     transfers: IFullTransferState[],
-    browserNode: IBrowserNode,
   ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError | Error>;
 
   /**
@@ -39,12 +28,7 @@ export interface IPaymentUtils {
    * @param context
    * @param browserNode
    */
-  transfersToPayments(
-    transfers: IFullTransferState[],
-    config: HypernetConfig,
-    context: InitializedHypernetContext,
-    browserNode: IBrowserNode,
-  ): ResultAsync<Payment[], InvalidPaymentError>;
+  transfersToPayments(transfers: IFullTransferState[]): ResultAsync<Payment[], InvalidPaymentError>;
 
   /**
    *
@@ -56,22 +40,16 @@ export interface IPaymentUtils {
   transfersToPayment(
     fullPaymentId: string,
     transfers: IFullTransferState[],
-    config: HypernetConfig,
-    browserNode: IBrowserNode,
   ): ResultAsync<Payment, InvalidPaymentError | InvalidParametersError>;
 
   /**
    *
    * @param transfer
    */
-  getTransferType(
-    transfer: IFullTransferState,
-    browserNode: IBrowserNode,
-  ): ResultAsync<ETransferType, LogicalError | VectorError>;
+  getTransferType(transfer: IFullTransferState): ResultAsync<ETransferType, LogicalError | VectorError>;
 
   getTransferTypeWithTransfer(
     transfer: IFullTransferState,
-    browserNode: IBrowserNode,
   ): ResultAsync<{ transferType: ETransferType; transfer: IFullTransferState }, VectorError | Error>;
 
   /**
@@ -89,7 +67,6 @@ export interface IPaymentUtils {
     from: PublicIdentifier,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
-    metadata: IHypernetTransferMetadata,
   ): ResultAsync<PullPayment, Error>;
 
   /**
@@ -107,6 +84,13 @@ export interface IPaymentUtils {
     from: PublicIdentifier,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
-    metadata: IHypernetTransferMetadata,
   ): ResultAsync<PushPayment, Error>;
+
+  /**
+   * Given an unsorted list of transfers, it will give you the timestamp of the
+   * earliest one.
+   * @param transfers an unsorted list of transfers
+   * @returns the unix timestamp of the earliest transfer
+   */
+  getEarliestDateFromTransfers(transfers: IFullTransferState[]): number;
 }

@@ -71,11 +71,13 @@ import {
   IPaymentIdUtils,
   IPaymentUtils,
   IThreeBoxUtils,
+  ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
 import { IMessagingListener, IVectorListener } from "@interfaces/api";
 import { Subject } from "rxjs";
 import { errAsync, ok, okAsync } from "neverthrow";
+import { TimeUtils } from "./utilities/TimeUtils";
 
 /**
  * The top-level class-definition for Hypernet Core.
@@ -93,6 +95,7 @@ export class HypernetCore implements IHypernetCore {
   public onBalancesChanged: Subject<Balances>;
 
   // Utils Layer Stuff
+  protected timeUtils: ITimeUtils;
   protected blockchainProvider: IBlockchainProvider;
   protected boxUtils: IThreeBoxUtils;
   protected configProvider: IConfigProvider;
@@ -158,6 +161,7 @@ export class HypernetCore implements IHypernetCore {
     });
 
     this.logUtils = new LogUtils();
+    this.timeUtils = new TimeUtils();
     this.contextProvider = new ContextProvider(
       this.onControlClaimed,
       this.onControlYielded,
@@ -172,8 +176,7 @@ export class HypernetCore implements IHypernetCore {
     this.blockchainProvider = new EthersBlockchainProvider();
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(network, this.logUtils, config);
-    this.paymentUtils = new PaymentUtils(this.configProvider, this.logUtils, this.paymentIdUtils);
-    this.linkUtils = new LinkUtils();
+    this.linkUtils = new LinkUtils(this.contextProvider);
     this.boxUtils = new ThreeBoxUtils(this.blockchainProvider, this.contextProvider, this.configProvider);
 
     this.browserNodeProvider = new BrowserNodeProvider(this.configProvider, this.contextProvider, this.logUtils);
@@ -184,6 +187,15 @@ export class HypernetCore implements IHypernetCore {
       this.blockchainProvider,
       this.paymentIdUtils,
       this.logUtils,
+      this.timeUtils,
+    );
+    this.paymentUtils = new PaymentUtils(
+      this.configProvider,
+      this.logUtils,
+      this.paymentIdUtils,
+      this.vectorUtils,
+      this.browserNodeProvider,
+      this.timeUtils,
     );
 
     this.accountRepository = new AccountsRepository(
@@ -200,6 +212,7 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.paymentUtils,
       this.logUtils,
+      this.timeUtils,
     );
 
     this.linkRepository = new VectorLinkRepository(
@@ -209,6 +222,7 @@ export class HypernetCore implements IHypernetCore {
       this.vectorUtils,
       this.paymentUtils,
       this.linkUtils,
+      this.timeUtils,
     );
 
     this.threeboxMessagingRepository = new ThreeBoxMessagingRepository(
@@ -375,7 +389,7 @@ export class HypernetCore implements IHypernetCore {
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
     amount: string,
-    expirationDate: moment.Moment,
+    expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
@@ -413,7 +427,7 @@ export class HypernetCore implements IHypernetCore {
   public async authorizeFunds(
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumber,
-    expirationDate: moment.Moment,
+    expirationDate: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
@@ -466,7 +480,7 @@ export class HypernetCore implements IHypernetCore {
       })
       .andThen(() => {
         // Initialize anything that wants an initialized context
-        return ResultUtils.combine([this.vectorAPIListener.setup()]);// , this.threeboxMessagingListener.initialize()]);
+        return ResultUtils.combine([this.vectorAPIListener.setup()]); // , this.threeboxMessagingListener.initialize()]);
       })
       // .andThen(() => {
       //   // Claim control

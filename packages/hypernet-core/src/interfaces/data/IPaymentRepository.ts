@@ -1,4 +1,3 @@
-import moment from "moment";
 import { EthereumAddress, PublicKey, ResultAsync } from "@interfaces/objects";
 import { Payment, PublicIdentifier } from "@interfaces/objects";
 import {
@@ -25,7 +24,7 @@ export interface IPaymentRepository {
   createPushPayment(
     counterPartyAccount: PublicIdentifier,
     amount: string,
-    expirationDate: moment.Moment,
+    expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,

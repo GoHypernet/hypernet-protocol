@@ -1,5 +1,5 @@
-import { Address, Balance, FullTransferState, NodeResponses, TransferName } from "@connext/vector-types";
-import { EthereumAddress, PublicIdentifier, ResultAsync } from "@interfaces/objects";
+import { Address, Balance, FullTransferState, TransferName } from "@connext/vector-types";
+import { EthereumAddress, IHypernetOfferDetails, PublicIdentifier, ResultAsync } from "@interfaces/objects";
 import { VectorError } from "@interfaces/objects/errors";
 import { ParameterizedResolver } from "@interfaces/types/typechain";
 
@@ -54,7 +54,7 @@ export interface INetworkContext {
   providerUrl: string;
 }
 
-export interface IFullTransferState {
+export interface IFullTransferState<TTransferState = any> {
   balance: IBalance;
   assetId: EthereumAddress;
   channelAddress: EthereumAddress;
@@ -68,7 +68,7 @@ export interface IFullTransferState {
   channelFactoryAddress: EthereumAddress; // networkContext?
   chainId: number;
   transferEncodings: string[]; // Initial state encoding, resolver encoding
-  transferState: any;
+  transferState: TTransferState;
   transferResolver?: any; // undefined iff not resolved
   meta?: any;
   channelNonce: number;
@@ -149,6 +149,8 @@ export interface IBrowserNode {
 
   getActiveTransfers(channelAddress: string): ResultAsync<IFullTransferState[], VectorError>;
 
+  getTransfers(startDate: number, endDate: number): ResultAsync<IFullTransferState[], VectorError>;
+
   init(): ResultAsync<void, VectorError>;
 
   getRegisteredTransfers(chainId: number): ResultAsync<IRegisteredTransfer[], VectorError>;
@@ -167,10 +169,10 @@ export interface IBrowserNode {
     assetId: EthereumAddress,
     type: string,
     details: any,
-    recipient: PublicIdentifier | null | undefined,
-    recipientChainId: number | null | undefined,
-    recipientAssetId: EthereumAddress | null | undefined,
-    timeout: string | null | undefined,
+    recipient: PublicIdentifier | undefined,
+    recipientChainId: number | undefined,
+    recipientAssetId: EthereumAddress | undefined,
+    timeout: string | undefined,
     meta: any | null | undefined,
   ): ResultAsync<IBasicTransferResponse, VectorError>;
 

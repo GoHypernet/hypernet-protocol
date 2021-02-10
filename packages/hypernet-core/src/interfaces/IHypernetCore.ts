@@ -13,7 +13,6 @@ import {
   Result,
 } from "@interfaces/objects";
 import { Subject } from "rxjs";
-import moment from "moment";
 import {
   AcceptPaymentError,
   BalancesUnavailableError,
@@ -129,7 +128,7 @@ export interface IHypernetCore {
   sendFunds(
     counterPartyAccount: PublicIdentifier,
     amount: string,
-    expirationDate: moment.Moment,
+    expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
@@ -142,7 +141,7 @@ export interface IHypernetCore {
   authorizeFunds(
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumber,
-    expirationDate: moment.Moment,
+    expirationDate: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,

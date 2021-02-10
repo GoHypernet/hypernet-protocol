@@ -57,7 +57,7 @@ export class PushPaymentFormViewModel {
           return await this.core.sendFunds(
             this.counterparty(),
             amount,
-            expirationDate,
+            expirationDate.unix(),
             requiredStake,
             selectedPaymentTokenAddress,
             "0x0000000000000000000000000000000000000001", // @todo replace with an actual mediator address!

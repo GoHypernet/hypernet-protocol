@@ -1,9 +1,15 @@
 import td from "testdouble";
-import moment from "moment";
 
 import { BigNumber, PushPayment, Payment, AssetBalance, PullPayment, PublicIdentifier } from "@interfaces/objects";
 import { EPaymentState } from "@interfaces/types";
-import { hyperTokenAddress, mockUtils, publicIdentifier, publicIdentifier2 } from "@mock/mocks";
+import {
+  defaultExpirationLength,
+  hyperTokenAddress,
+  mockUtils,
+  publicIdentifier,
+  publicIdentifier2,
+  unixNow,
+} from "@mock/mocks";
 import { okAsync, ok, err, errAsync } from "neverthrow";
 import {
   AcceptPaymentError,
@@ -22,10 +28,9 @@ const requiredStake = "42";
 const paymentToken = mockUtils.generateRandomPaymentToken();
 const disputeMediator = mockUtils.generateRandomEtherAdress();
 const amount = "42";
-const expirationDate = moment(moment().format());
+const expirationDate = unixNow + defaultExpirationLength;
 const paymentId = "See, this doesn't have to be legit data if it's never checked!";
 const nonExistentPaymentId = "This payment is not mocked";
-const now = moment();
 
 class PaymentServiceMocks {
   public vectorLinkRepository = td.object<ILinkRepository>();
@@ -133,10 +138,10 @@ class PaymentServiceMocks {
       paymentToken,
       BigNumber.from(requiredStake),
       BigNumber.from(amountStaked),
-      expirationDate.unix(),
+      expirationDate,
       false,
-      now.unix(),
-      now.unix(),
+      unixNow,
+      unixNow,
       BigNumber.from(0),
       disputeMediator,
       BigNumber.from(amount),

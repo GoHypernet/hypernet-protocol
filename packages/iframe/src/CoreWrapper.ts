@@ -80,7 +80,7 @@ export default class CoreWrapper {
         data: IIFrameCallData<{
           counterPartyAccount: PublicIdentifier;
           amount: string;
-          expirationDate: string;
+          expirationDate: number;
           requiredStake: string;
           paymentToken: EthereumAddress;
           disputeMediator: PublicKey;
@@ -90,7 +90,7 @@ export default class CoreWrapper {
           return core.sendFunds(
             data.data.counterPartyAccount,
             data.data.amount,
-            moment(data.data.expirationDate),
+            data.data.expirationDate,
             data.data.requiredStake,
             data.data.paymentToken,
             data.data.disputeMediator,
