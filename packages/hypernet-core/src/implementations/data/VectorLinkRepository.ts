@@ -8,10 +8,10 @@ import {
   IConfigProvider,
   IContextProvider,
   IPaymentUtils,
+  ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
-import moment from "moment";
 import { okAsync } from "neverthrow";
 
 /**
@@ -28,6 +28,7 @@ export class VectorLinkRepository implements ILinkRepository {
     protected vectorUtils: IVectorUtils,
     protected paymentUtils: IPaymentUtils,
     protected linkUtils: ILinkUtils,
+    protected timeUtils: ITimeUtils,
   ) {}
 
   /**
@@ -49,7 +50,7 @@ export class VectorLinkRepository implements ILinkRepository {
         // We also need to look for potentially resolved transfers
         const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
 
-        return browserNode.getTransfers(earliestDate, moment().unix());
+        return browserNode.getTransfers(earliestDate, this.timeUtils.getUnixNow());
       })
       .andThen((transfers) => {
         if (transfers.length === 0) {
@@ -81,7 +82,7 @@ export class VectorLinkRepository implements ILinkRepository {
         // We also need to look for potentially resolved transfers
         const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
 
-        return browserNode.getTransfers(earliestDate, moment().unix());
+        return browserNode.getTransfers(earliestDate, this.timeUtils.getUnixNow());
       })
       .andThen((transfers) => {
         const filteredActiveTransfers = transfers.filter((val) => {

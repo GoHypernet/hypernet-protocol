@@ -31,7 +31,7 @@
     "clean": "rimraf dist",
     "compile": "tsc --build src/tsconfig.json",
     "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",
-    "format": "prettier --write \"src/**/*.ts\"",
+    "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",
     "prepare": "yarn build",

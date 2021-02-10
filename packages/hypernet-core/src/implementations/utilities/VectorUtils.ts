@@ -20,6 +20,7 @@ import {
   IBasicChannelResponse,
   IFullChannelState,
   IFullTransferState,
+  ITimeUtils,
 } from "@interfaces/utilities";
 import { EPaymentType, ETransferState, InsuranceState, MessageState, ParameterizedState } from "@interfaces/types";
 import "reflect-metadata";
@@ -57,6 +58,7 @@ export class VectorUtils implements IVectorUtils {
     protected blockchainProvider: IBlockchainProvider,
     protected paymentIdUtils: IPaymentIdUtils,
     protected logUtils: ILogUtils,
+    protected timeUtils: ITimeUtils,
   ) {
     this.getRouterChannelAddressSetup = null;
   }
@@ -371,7 +373,7 @@ export class VectorUtils implements IVectorUtils {
     if (transfer.meta == null) {
       // We need to figure out the transfer type, I think; but for now we'll just say
       // that the transfer is right now
-      return moment().unix();
+      return this.timeUtils.getUnixNow();
     }
 
     return transfer.meta.creationDate;

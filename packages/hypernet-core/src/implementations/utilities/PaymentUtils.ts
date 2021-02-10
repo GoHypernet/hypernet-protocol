@@ -33,9 +33,9 @@ import {
   ILogUtils,
   IPaymentIdUtils,
   IPaymentUtils,
+  ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
-import moment from "moment";
 import { errAsync, okAsync } from "neverthrow";
 import { ResultUtils } from "@implementations/utilities";
 import { v4 as uuidv4 } from "uuid";
@@ -54,6 +54,7 @@ export class PaymentUtils implements IPaymentUtils {
     protected paymentIdUtils: IPaymentIdUtils,
     protected vectorUtils: IVectorUtils,
     protected browserNodeProvider: IBrowserNodeProvider,
+    protected timeUtils: ITimeUtils,
   ) {}
 
   /**
@@ -129,7 +130,7 @@ export class PaymentUtils implements IPaymentUtils {
         sortedTransfers.offerDetails.expirationDate,
         state == EPaymentState.Finalized,
         sortedTransfers.offerDetails.creationDate,
-        moment().unix(),
+        this.timeUtils.getUnixNow(),
         BigNumber.from(0),
         sortedTransfers.offerDetails.disputeMediator,
         BigNumber.from(amount),
@@ -174,10 +175,10 @@ export class PaymentUtils implements IPaymentUtils {
         sortedTransfers.offerTransfer.assetId,
         BigNumber.from(sortedTransfers.offerDetails.requiredStake),
         BigNumber.from(amountStaked),
-        moment().unix() + 60 * 60,
+        this.timeUtils.getUnixNow() + 60 * 60, // 1 hour
         false,
-        moment.unix(sortedTransfers.offerDetails.creationDate).unix(),
-        moment().unix(),
+        sortedTransfers.offerDetails.creationDate,
+        this.timeUtils.getUnixNow(),
         BigNumber.from(0),
         sortedTransfers.offerDetails.disputeMediator,
         BigNumber.from(sortedTransfers.offerDetails.paymentAmount),
@@ -603,7 +604,7 @@ export class PaymentUtils implements IPaymentUtils {
   public getEarliestDateFromTransfers(transfers: IFullTransferState[]): number {
     // If there are no transfers, the earliest transfer would be now
     if (transfers.length == 0) {
-      return moment().unix();
+      return this.timeUtils.getUnixNow();
     }
 
     // The earliest date should be a message transfer. We put the creation date

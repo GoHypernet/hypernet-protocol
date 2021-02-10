@@ -25,6 +25,7 @@ import {
 } from "@interfaces/objects/errors";
 import { EPaymentType, ETransferType, MessageState } from "@interfaces/types";
 import {
+  IBasicTransferResponse,
   IBrowserNode,
   IBrowserNodeProvider,
   IConfigProvider,
@@ -32,9 +33,9 @@ import {
   IFullTransferState,
   ILogUtils,
   IPaymentUtils,
+  ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
-import moment from "moment";
 import { combine, errAsync, okAsync } from "neverthrow";
 
 /**
@@ -52,6 +53,7 @@ export class PaymentRepository implements IPaymentRepository {
     protected contextProvider: IContextProvider,
     protected paymentUtils: IPaymentUtils,
     protected logUtils: ILogUtils,
+    protected timeUtils: ITimeUtils,
   ) {}
 
   /**
@@ -84,9 +86,10 @@ export class PaymentRepository implements IPaymentRepository {
     ])
       .andThen((vals) => {
         [browserNode, context, paymentId] = vals;
+
         const message: IHypernetOfferDetails = {
           paymentId,
-          creationDate: moment().unix(),
+          creationDate: this.timeUtils.getUnixNow(),
           to: counterPartyAccount,
           from: context.publicIdentifier,
           requiredStake: requiredStake.toString(),
@@ -125,7 +128,7 @@ export class PaymentRepository implements IPaymentRepository {
         // We also need to look for potentially resolved transfers
         const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
 
-        return browserNode.getTransfers(earliestDate, moment().unix());
+        return browserNode.getTransfers(earliestDate, this.timeUtils.getUnixNow());
       })
       .andThen((transfers) => {
         // This new list is complete- it should include active and inactive transfers
@@ -145,11 +148,7 @@ export class PaymentRepository implements IPaymentRepository {
 
         return combine(transferTypeResults);
       })
-      .andThen((tranferTypesWithTransfersRes) => {
-        const tranferTypesWithTransfers = tranferTypesWithTransfersRes as {
-          transferType: ETransferType;
-          transfer: IFullTransferState;
-        }[];
+      .andThen((tranferTypesWithTransfers) => {
         // For each transfer, we are either just going to know it's relevant
         // from the data in the metadata, or we are going to check if it's an
         // insurance payment and we have more bulletproof ways to check
@@ -198,7 +197,7 @@ export class PaymentRepository implements IPaymentRepository {
         // We also need to look for potentially resolved transfers
         const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
 
-        return browserNode.getTransfers(earliestDate, moment().unix());
+        return browserNode.getTransfers(earliestDate, this.timeUtils.getUnixNow());
       })
       .andThen((transfers) => {
         const transferTypeResults = new Array<
@@ -216,11 +215,7 @@ export class PaymentRepository implements IPaymentRepository {
 
         return combine(transferTypeResults);
       })
-      .andThen((tranferTypesWithTransfersRes) => {
-        const tranferTypesWithTransfers = tranferTypesWithTransfersRes as {
-          transferType: ETransferType;
-          transfer: IFullTransferState;
-        }[];
+      .andThen((tranferTypesWithTransfers) => {
         // For each transfer, we are either just going to know it's relevant
         // from the data in the metadata, or we are going to check if it's an
         // insurance payment and we have more bulletproof ways to check
@@ -246,9 +241,6 @@ export class PaymentRepository implements IPaymentRepository {
           }
         }
 
-        return okAsync(relevantTransfers);
-      })
-      .andThen((relevantTransfers) => {
         return this.paymentUtils.transfersToPayments(relevantTransfers);
       })
       .map((payments) => {
@@ -301,7 +293,8 @@ export class PaymentRepository implements IPaymentRepository {
         return browserNode.getTransfer(parameterizedTransferId);
       })
       .andThen((transfer) => {
-        // Remove the parameterized payment
+        // Remove the parameterized transfer, and replace it
+        // with this latest transfer
         existingTransfers = existingTransfers.filter((obj) => obj.transferId !== parameterizedTransferId);
         existingTransfers.push(transfer);
 
@@ -346,7 +339,7 @@ export class PaymentRepository implements IPaymentRepository {
         const paymentMediator = payment.disputeMediator;
         const paymentSender = payment.from;
         const paymentID = payment.id;
-        const paymentStart = moment().unix();
+        const paymentStart = this.timeUtils.getUnixNow();
         const paymentExpiration = paymentStart + config.defaultPaymentExpiryLength;
 
         // TODO: There are probably some logical times when you should not provide a stake
@@ -364,7 +357,7 @@ export class PaymentRepository implements IPaymentRepository {
         );
       })
       .andThen((transferInfoUnk) => {
-        const transferInfo = transferInfoUnk as NodeResponses.ConditionalTransfer;
+        const transferInfo = transferInfoUnk as IBasicTransferResponse;
         return browserNode.getTransfer(transferInfo.transferId);
       })
       .andThen((transfer) => {
@@ -410,7 +403,7 @@ export class PaymentRepository implements IPaymentRepository {
         }
         const paymentRecipient = payment.to;
         const paymentID = payment.id;
-        const paymentStart = moment().unix();
+        const paymentStart = this.timeUtils.getUnixNow();
         const paymentExpiration = paymentStart + config.defaultPaymentExpiryLength;
 
         // Use vectorUtils to create the parameterizedPayment
