@@ -204,14 +204,14 @@ describe("PaymentService tests", () => {
     expect(result._unsafeUnwrapErr()).toBeInstanceOf(LogicalError);
   });
 
-  test("Should acceptFunds return Payment without errors", async () => {
+  test("Should acceptOffers return Payment without errors", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.acceptFunds([paymentId]);
+    const result = await paymentService.acceptOffers([paymentId]);
 
     // Assert
     expect(result).toBeDefined();
@@ -222,7 +222,7 @@ describe("PaymentService tests", () => {
     expect(payments[0]._unsafeUnwrap()).toBe(paymentServiceMock.stakedPushPayment);
   });
 
-  test("Should acceptFunds return error if payment state is not Proposed", async () => {
+  test("Should acceptOffers return error if payment state is not Proposed", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
@@ -232,7 +232,7 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.acceptFunds([paymentId]);
+    const result = await paymentService.acceptOffers([paymentId]);
 
     // Assert
     expect(result).toBeDefined();
@@ -240,7 +240,7 @@ describe("PaymentService tests", () => {
     expect(result._unsafeUnwrapErr()).toBeInstanceOf(AcceptPaymentError);
   });
 
-  test("Should acceptFunds return error if freeAmount is less than totalStakeRequired", async () => {
+  test("Should acceptOffers return error if freeAmount is less than totalStakeRequired", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks("13");
     const paymentService = paymentServiceMock.factoryPaymentService();

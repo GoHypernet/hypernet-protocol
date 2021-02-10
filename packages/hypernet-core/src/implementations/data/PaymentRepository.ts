@@ -23,7 +23,10 @@ import {
   TransferResolutionError,
   VectorError,
 } from "@interfaces/objects/errors";
+import { IHypernetPullPaymentDetails } from "@interfaces/objects/HypernetPullPaymentDetails";
+import { IRate } from "@interfaces/objects/Rate";
 import { EPaymentType, ETransferType, MessageState } from "@interfaces/types";
+import { EMessageTransferType } from "@interfaces/types/EMessageTransferType";
 import {
   IBasicTransferResponse,
   IBrowserNode,
@@ -55,6 +58,99 @@ export class PaymentRepository implements IPaymentRepository {
     protected logUtils: ILogUtils,
     protected timeUtils: ITimeUtils,
   ) {}
+
+  createPullRecord(
+    paymentId: string,
+    amount: string
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+    let transfers: IFullTransferState[];
+    let browserNode: IBrowserNode;
+
+    return ResultUtils.combine([
+      this._getTransfersByPaymentId(paymentId), 
+      this.browserNodeProvider.getBrowserNode()])
+    .andThen((vals) => {
+      [transfers, browserNode] = vals;
+      return this.paymentUtils.transfersToPayment(paymentId, transfers);
+    })
+    .andThen((payment) => {
+      const message: IHypernetPullPaymentDetails = {
+        messageType: EMessageTransferType.PULLPAYMENT,
+        paymentId: paymentId,
+        to: payment.to,
+        from: payment.from,
+        paymentToken: payment.paymentToken,
+        pullPaymentAmount: amount
+      }
+  
+      return this.vectorUtils.createPullNotificationTransfer(
+        payment.to,
+        message
+      );
+    })
+    .andThen((transferResponse) => {
+      // Get the newly minted transfer
+      return browserNode.getTransfer(transferResponse.transferId);
+    })
+    .andThen((newTransfer) => {
+      // Add the new transfer to the list
+      transfers.push(newTransfer);
+
+      // Convert the list of transfers to a payment (again)
+      return this.paymentUtils.transfersToPayment(paymentId, transfers);
+    });
+  }
+
+  public createPullPayment(
+    counterPartyAccount: PublicIdentifier,
+    maximumAmount: string, // TODO: amounts should be consistently use BigNumber
+    deltaTime: number,
+    deltaAmount: string, // TODO: amounts should be consistently use BigNumber
+    expirationDate: number,
+    requiredStake: string, // TODO: amounts should be consistently use BigNumber
+    paymentToken: EthereumAddress,
+    disputeMediator: PublicKey,
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+    let browserNode: IBrowserNode;
+    let context: InitializedHypernetContext;
+    let paymentId: string;
+    
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.contextProvider.getInitializedContext(),
+      this.paymentUtils.createPaymentId(EPaymentType.Push),
+    ])
+    .andThen((vals) => {
+      [browserNode, context, paymentId] = vals;
+
+      const message: IHypernetOfferDetails = {
+        messageType: EMessageTransferType.OFFER,
+        paymentId,
+        creationDate: this.timeUtils.getUnixNow(),
+        to: counterPartyAccount,
+        from: context.publicIdentifier,
+        requiredStake,
+        paymentAmount: maximumAmount,
+        expirationDate,
+        paymentToken,
+        disputeMediator,
+        rate: {
+          deltaAmount,
+          deltaTime
+        }
+      };
+
+      // Create a message transfer, with the terms of the payment in the metadata.
+      return this.vectorUtils.createOfferTransfer(counterPartyAccount, message);
+    })
+    .andThen((transferInfo) => {
+      return browserNode.getTransfer(transferInfo.transferId);
+    })
+    .andThen((transfer) => {
+      // Return the payment
+      return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
+    });
+  }
 
   /**
    * Creates a push payment and returns it. Nothing moves until
@@ -88,6 +184,7 @@ export class PaymentRepository implements IPaymentRepository {
         [browserNode, context, paymentId] = vals;
 
         const message: IHypernetOfferDetails = {
+          messageType: EMessageTransferType.OFFER,
           paymentId,
           creationDate: this.timeUtils.getUnixNow(),
           to: counterPartyAccount,
@@ -100,7 +197,7 @@ export class PaymentRepository implements IPaymentRepository {
         };
 
         // Create a message transfer, with the terms of the payment in the metadata.
-        return this.vectorUtils.createMessageTransfer(counterPartyAccount, message);
+        return this.vectorUtils.createOfferTransfer(counterPartyAccount, message);
       })
       .andThen((transferInfo) => {
         return browserNode.getTransfer(transferInfo.transferId);
@@ -415,6 +512,8 @@ export class PaymentRepository implements IPaymentRepository {
           paymentID,
           paymentStart,
           paymentExpiration,
+          payment instanceof PullPayment ? payment.deltaTime : undefined,
+          payment instanceof PullPayment ? payment.deltaAmount.toString() : undefined
         );
       })
       .andThen((transferInfoUnk) => {

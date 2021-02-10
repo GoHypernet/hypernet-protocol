@@ -6,6 +6,7 @@ import {
   TransferCreationError,
   TransferResolutionError,
 } from "@interfaces/objects/errors";
+import { IHypernetPullPaymentDetails } from "@interfaces/objects/HypernetPullPaymentDetails";
 import { EPaymentType, ETransferState } from "@interfaces/types";
 import { IBasicTransferResponse, IFullTransferState } from "./IBrowserNode";
 
@@ -39,10 +40,16 @@ export interface IVectorUtils {
   /**
    *
    */
-  createMessageTransfer(
+  createOfferTransfer(
     toAddress: string,
     message: IHypernetOfferDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError>;
+
+
+  createPullNotificationTransfer(
+    toAddress: string,
+    message: IHypernetPullPaymentDetails
+  ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
 
   /**
    *
@@ -57,6 +64,8 @@ export interface IVectorUtils {
     UUID: string,
     start: number,
     expiration: number,
+    deltaTime?: number,
+    deltaAmount?: string
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
 
   /**

@@ -40,6 +40,9 @@ import {
 import { errAsync, okAsync } from "neverthrow";
 import { ResultUtils } from "@implementations/utilities";
 import moment from "moment";
+import { IHypernetPullPaymentDetails } from "../../interfaces/objects/HypernetPullPaymentDetails";
+import { EMessageTransferType } from "@interfaces/types/EMessageTransferType";
+import { IRate } from "@interfaces/objects/Rate";
 
 /**
  * VectorUtils contains methods for interacting directly with the core Vector stuff -
@@ -127,21 +130,77 @@ export class VectorUtils implements IVectorUtils {
   }
 
   /**
-   * Creates a "Message" transfer with Vector.
+   * Creates a "Message" transfer with Vector, to notify the other party of a pull payment
    * @param toAddress the public identifier (not eth address!) of the intended recipient
    * @param message the message to send as IHypernetOfferDetails
    */
-  public createMessageTransfer(
+  public createPullNotificationTransfer(
     toAddress: string,
-    message: IHypernetOfferDetails,
+    message: IHypernetPullPaymentDetails
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
+    // The message type has to be PULLPAYMENT
+    message.messageType = EMessageTransferType.PULLPAYMENT;
+
     // Sanity check - make sure the paymentId is valid:
     const validPayment = this.paymentIdUtils.isValidPaymentId(message.paymentId);
     if (validPayment.isErr()) {
       return errAsync(validPayment.error);
     } else {
       if (!validPayment.value) {
-        return errAsync(new InvalidParametersError(`CreateMessageTransfer: Invalid paymentId: '${message.paymentId}'`));
+        return errAsync(new InvalidParametersError(`CreatePullNotificationTransfer: Invalid paymentId: '${message.paymentId}'`));
+      }
+    }
+
+    const prerequisites = (ResultUtils.combine([
+      this.configProvider.getConfig() as ResultAsync<any, any>,
+      this.getRouterChannelAddress(),
+      this.browserNodeProvider.getBrowserNode(),
+    ]) as unknown) as ResultAsync<
+      [HypernetConfig, string, IBrowserNode],
+      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
+    >;
+
+    return prerequisites.andThen((vals) => {
+      const [config, channelAddress, browserNode] = vals;
+
+      const initialState: MessageState = {
+        message: serialize(message),
+      };
+
+      return browserNode.conditionalTransfer(
+        channelAddress,
+        "0",
+        config.hypertokenAddress,
+        "MessageTransfer",
+        initialState,
+        toAddress,
+        undefined, // CRITICAL- must be undefined
+        undefined,
+        undefined,
+        message,
+      );
+    });
+  }
+
+  /**
+   * Creates a "Message" transfer with Vector, to notify the other party of a payment creation
+   * @param toAddress the public identifier (not eth address!) of the intended recipient
+   * @param message the message to send as IHypernetOfferDetails
+   */
+  public createOfferTransfer(
+    toAddress: string,
+    message: IHypernetOfferDetails,
+  ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
+    // The message type has to be OFFER
+    message.messageType = EMessageTransferType.OFFER;
+    
+    // Sanity check - make sure the paymentId is valid:
+    const validPayment = this.paymentIdUtils.isValidPaymentId(message.paymentId);
+    if (validPayment.isErr()) {
+      return errAsync(validPayment.error);
+    } else {
+      if (!validPayment.value) {
+        return errAsync(new InvalidParametersError(`CreateOfferTransfer: Invalid paymentId: '${message.paymentId}'`));
       }
     }
 
@@ -195,11 +254,16 @@ export class VectorUtils implements IVectorUtils {
     paymentId: string,
     start: number,
     expiration: number,
-    rate?: Rate,
+    deltaTime?: number,
+    deltaAmount?: string
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // Sanity check
-    if (type === EPaymentType.Pull && rate == null) {
-      return errAsync(new InvalidParametersError("Must provide rate for Pull payments"));
+    if (type === EPaymentType.Pull && (deltaTime === undefined)) {
+      return errAsync(new InvalidParametersError("Must provide deltaTime for Pull payments"));
+    }
+
+    if (type === EPaymentType.Pull && (deltaAmount === undefined)) {
+      return errAsync(new InvalidParametersError("Must provide deltaAmount for Pull payments"));
     }
 
     // Make sure the paymentId is valid:
@@ -234,12 +298,23 @@ export class VectorUtils implements IVectorUtils {
         deltaTime: "1",
       };
 
+      // Have to throw this error, or the ourRate object below will complain that one
+      // of the params is possibly undefined.
+      if (!deltaTime || !deltaAmount) {
+        return errAsync(new InvalidParametersError('Somehow, deltaTime or deltaAmount were not set!'));
+      }
+
+      const ourRate: Rate = type === EPaymentType.Pull ? {
+          deltaTime: deltaTime.toString(),
+          deltaAmount: deltaAmount.toString() }
+        : infiniteRate
+
       const initialState: ParameterizedState = {
         receiver: toEthAddress,
         start: start.toString(),
         expiration: expiration.toString(),
         UUID: paymentId,
-        rate: type === EPaymentType.Push ? infiniteRate : (rate as Rate),
+        rate: ourRate
       };
 
       return browserNode.conditionalTransfer(

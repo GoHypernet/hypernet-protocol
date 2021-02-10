@@ -75,6 +75,9 @@ export class PullPayment extends Payment {
     disputeMediator: PublicKey,
     public authorizedAmount: BigNumber,
     public transferedAmount: BigNumber,
+    public vestedAmount: BigNumber,
+    public deltaTime: number,
+    public deltaAmount: BigNumber,
     public ledger: PullAmount[],
   ) {
     super(

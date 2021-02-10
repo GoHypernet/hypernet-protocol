@@ -1,5 +1,5 @@
-import { Payment, EthereumAddress, PublicKey, PublicIdentifier, ResultAsync, Result } from "@interfaces/objects";
-import { NodeError } from "@connext/vector-types";
+import { Payment, EthereumAddress, PublicKey, PublicIdentifier, ResultAsync, Result, BigNumber } from "@interfaces/objects";
+import { NodeError, VectorError } from "@connext/vector-types";
 import {
   AcceptPaymentError,
   CoreUninitializedError,
@@ -12,6 +12,37 @@ import {
 } from "@interfaces/objects/errors";
 
 export interface IPaymentService {
+  /**
+   * Authorizes funds to a specified counterparty, with an amount, rate, & expiration date.
+   * @param counterPartyAccount the public identifier of the counterparty to authorize funds to
+   * @param totalAuthorized the total amount the counterparty is allowed to "pull"
+   * @param expirationDate the latest time in which the counterparty can pull funds. This must be after the full maturation date of totalAuthorized, as calculated via deltaAmount and deltaTime.
+   * @param deltaAmount The amount per deltaTime to authorize
+   * @param deltaTime the number of seconds after which deltaAmount will be authorized, up to the limit of totalAuthorized.
+   * @param requiredStake the amount of stake the counterparyt must put up as insurance
+   * @param paymentToken the (Ethereum) address of the payment token
+   * @param disputeMediator the (Ethereum) address of the dispute mediator
+   */
+  authorizeFunds(
+    counterPartyAccount: PublicIdentifier,
+    totalAuthorized: BigNumber,
+    expirationDate: number,
+    deltaAmount: string,
+    deltaTime: number,
+    requiredStake: BigNumber,
+    paymentToken: EthereumAddress,
+    disputeMediator: PublicKey,
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+
+  /**
+   * Record a pull against a Pull Payment's authorized funds. Doesn't actually
+   * move any money.
+   */
+  pullFunds(
+    paymentId: string, 
+    amount: BigNumber
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+
   /**
    * Send funds to another person.
    * @param counterPartyAccount the account we wish to send funds to
@@ -34,7 +65,7 @@ export interface IPaymentService {
    * Called by the person on the receiving end of a push payment,
    * to accept the terms of the payment and put up the stake.
    */
-  acceptFunds(
+  acceptOffers(
     paymentIds: string[],
   ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError>;
 

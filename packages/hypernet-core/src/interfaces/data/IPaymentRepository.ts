@@ -30,6 +30,22 @@ export interface IPaymentRepository {
     disputeMediator: PublicKey,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
+  createPullPayment(
+    counterPartyAccount: PublicIdentifier,
+    maximumAmount: string, // TODO: amounts should be consistently use BigNumber
+    deltaTime: number,
+    deltaAmount: string, // TODO: amounts should be consistently use BigNumber
+    expirationDate: number,
+    requiredStake: string, // TODO: amounts should be consistently use BigNumber
+    paymentToken: EthereumAddress,
+    disputeMediator: PublicKey,
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+
+  createPullRecord(
+    paymentId: string,
+    amount: string
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+
   /**
    * Provides assets for a given list of payment ids.
    * Internally, this is what actually creates the ParameterizedPayment with Vector.

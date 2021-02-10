@@ -7,7 +7,7 @@ export class SortedTransfers {
     public offerTransfer: IFullTransferState<MessageState>,
     public insuranceTransfer: IFullTransferState<InsuranceState> | null,
     public parameterizedTransfer: IFullTransferState<ParameterizedState> | null,
-    public pullRecordTransfers: IFullTransferState[],
+    public pullRecordTransfers: IFullTransferState<MessageState>[],
     public offerDetails: IHypernetOfferDetails,
   ) {}
 }
