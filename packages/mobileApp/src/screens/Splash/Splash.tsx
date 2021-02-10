@@ -23,7 +23,7 @@ const Splash: React.FC<MainHomeProps> = (props: MainHomeProps) => {
           autoPlay
           loop={false}
           onAnimationFinish={() => {
-            navigation.navigate('Login');
+            navigation.navigate('Start');
             setShowAnimation(false);
           }}
         />

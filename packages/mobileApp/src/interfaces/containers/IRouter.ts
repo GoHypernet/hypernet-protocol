@@ -2,6 +2,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 
 export type RootStackParamList = {
   Splash: any;
+  Start: any;
   MainHome: any;
   Login: any;
 };
