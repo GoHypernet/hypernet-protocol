@@ -17,6 +17,7 @@ import {
   commonAmount,
   destinationAddress,
   commonPaymentId,
+  publicIdentifier2,
 } from "@mock/mocks";
 
 export class BrowserNodeProviderMock implements IBrowserNodeProvider {
@@ -76,8 +77,8 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       transferDefinition: destinationAddress,
       transferTimeout: "string",
       initialStateHash: "string",
-      initiator: erc20AssetAddress,
-      responder: erc20AssetAddress,
+      initiator: publicIdentifier,
+      responder: publicIdentifier2,
       channelFactoryAddress: "channelFactoryAddress",
       chainId: 1337,
       transferEncodings: ["string"],
@@ -86,7 +87,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       },
       channelNonce: 1,
       initiatorIdentifier: publicIdentifier,
-      responderIdentifier: publicIdentifier,
+      responderIdentifier: publicIdentifier2,
     };
 
     // If we were not provided with a specific browser node, set up a mock one.
