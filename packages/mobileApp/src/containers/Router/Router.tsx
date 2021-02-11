@@ -1,87 +1,68 @@
 import React from "react";
-import { StyleSheet } from "react-native";
-import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
+import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import LinearGradient from "react-native-linear-gradient";
-import MainHome from "@mobileApp/screens/MainHome";
-import Login from "@mobileApp/screens/Login";
-import Splash from "@mobileApp/screens/Splash";
-import Start from "@mobileApp/screens/Start";
-import { RootStackParamList, RouterProps } from "@mobileApp/interfaces/containers/IRouter";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
-const Stack = createStackNavigator<RootStackParamList>();
+import { ENavigatorType, RouterProps } from "@mobileApp/interfaces/containers/IRouter";
 
-const mainTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    background: "transparent",
-    gradient: ["#262F3F", "#1B202A"],
-  },
-};
+import { cardStyleInterpolator } from "./Router.utils";
+import { navigationTheme } from "@mobileApp/constants/theme";
+import { NAVIGATION_SCREENS } from "@mobileApp/constants/router";
 
-// TODO: map screens from an array
+const Stack = createStackNavigator();
+const Tab = createBottomTabNavigator();
+
 const Router: React.FC<RouterProps> = (props: RouterProps) => {
+  const tabScreens = NAVIGATION_SCREENS.filter((screen) => screen.type === ENavigatorType.TAB);
+  const stackScreens = NAVIGATION_SCREENS.filter((screen) => screen.type === ENavigatorType.STACK);
+
+  const TabNavigator = () => {
+    // TODO: add custom navigator & move colors to constants
+    return (
+      <Tab.Navigator
+        tabBarOptions={{
+          activeTintColor: "#FFFFFF",
+          inactiveTintColor: "#6D778B",
+          style: {
+            backgroundColor: "#111622",
+            borderTopColor: "#111622",
+          },
+          
+        }}
+        lazy
+      >
+        {tabScreens.map(({ name, component, icon }) => (
+          <Tab.Screen key={name} name={name} component={component} options={{ tabBarIcon: () => icon }} />
+        ))}
+      </Tab.Navigator>
+    );
+  };
+
   return (
-    <LinearGradient
-      colors={mainTheme.colors.gradient}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.container}
-    >
-      <NavigationContainer theme={mainTheme}>
-        <Stack.Navigator
-          initialRouteName={props?.initialRouteName}
-          screenOptions={{
-            headerShown: false,
-            cardStyleInterpolator: ({ current: { progress }, next, layouts }) => ({
-              cardStyle: {
-                transform: [
-                  {
-                    translateX: progress.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [layouts.screen.width, 0],
-                    }),
-                  },
-                  {
-                    translateX: next
-                      ? next.progress.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [0, -layouts.screen.width],
-                        })
-                      : 1,
-                  },
-                ],
-              },
-            }),
-          }}
-        >
-          <Stack.Screen name="Splash" component={Splash} />
-          <Stack.Screen
-            name="Start"
-            component={Start}
-            options={{
-              animationEnabled: false,
-            }}
-          />
-          <Stack.Screen
-            name="MainHome"
-            component={MainHome}
-            options={{
-              animationEnabled: false,
-            }}
-          />
-          <Stack.Screen name="Login" component={Login} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </LinearGradient>
+    <NavigationContainer theme={navigationTheme}>
+      <Stack.Navigator
+        initialRouteName={props?.initialRouteName}
+        screenOptions={{
+          headerShown: false,
+          cardStyleInterpolator,
+        }}
+      >
+        {stackScreens.map(
+          ({ name, component, disableAnimation }) => (
+            <Stack.Screen
+              key={name}
+              name={name}
+              component={component}
+              options={{
+                animationEnabled: !disableAnimation,
+              }}
+            />
+          ),
+        )}
+        <Stack.Screen name={tabScreens[0].name} component={TabNavigator} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
 
 export default Router;

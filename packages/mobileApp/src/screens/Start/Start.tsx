@@ -3,7 +3,7 @@ import { StyleSheet, View, Animated, Easing, Dimensions } from "react-native";
 import { Button, CheckBox, Text } from "react-native-elements";
 
 import HypernetLogo from "@mobileApp/components/HypernetLogo";
-import { NavigationProps } from "@mobileApp/interfaces/containers/IRouter";
+import { ENavigationScreenName, NavigationProps } from "@mobileApp/interfaces/containers/IRouter";
 
 const moveTop = (value: Animated.Value) => {
   Animated.timing(value, {
@@ -65,7 +65,7 @@ const Start: React.FC<StartProps> = (props: StartProps) => {
           type="outline"
           titleStyle={styles.text}
           buttonStyle={styles.startButton}
-          onPress={() => navigation.navigate("MainHome")}
+          onPress={() => navigation.navigate(ENavigationScreenName.BALANCE)}
         />
         <CheckBox
           title={
