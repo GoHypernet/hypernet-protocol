@@ -1,0 +1,21 @@
+{
+  "name": "hypernet-protocol-web-instance",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "keywords": [],
+  "main": "dist/index.js",
+  "scripts": {
+    "compile": "tsc -b src/tsconfig.json",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "lint": "tslint -p src/tsconfig.json",
+    "start": "webpack serve --config webpack.config.js --mode development --open",
+    "test": "echo \"Error: no test specified\" && exit 0"
+  },
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@hypernetlabs/hypernet-core": "^0.0.1",
+    "flatted": "^3.1.1"
+  }
+}

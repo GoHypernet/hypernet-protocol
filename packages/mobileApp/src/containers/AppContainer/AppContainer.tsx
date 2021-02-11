@@ -1,17 +1,14 @@
 import React from "react";
 import Router from "../Router";
 import { StoreProvider } from "@mobileApp/state/store";
-/* import { IHypernetCore, HypernetCore, EBlockchainNetwork } from "@hypernetlabs/hypernet-core";
-
-// Instantiate the hypernet core.
-const core: IHypernetCore = new HypernetCore(EBlockchainNetwork.Localhost);
-console.log("core: ", core); */
+import WebViewBridge from "@mobileApp/components/WebViewBridge";
 
 interface AppContainerProps {}
 
 const AppContainer: React.FC<AppContainerProps> = (props: AppContainerProps) => {
   return (
     <StoreProvider>
+      <WebViewBridge />
       <Router initialRouteName="MainHome" />
     </StoreProvider>
   );

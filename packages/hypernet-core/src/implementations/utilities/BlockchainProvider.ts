@@ -9,6 +9,15 @@ declare global {
   }
 }
 
+// This is just a code of avoiding errors in mobile app.
+// An actuall non metamask provider set up should be implemented in this class.
+// TODO: Remove this code block when provider implementation is done for the mobile.
+if (!global.window?.ethereum && !window?.ethereum) {
+  global.window.ethereum = {
+    enable: () => {},
+  };
+}
+
 export class EthersBlockchainProvider implements IBlockchainProvider {
   protected provider: ethers.providers.Web3Provider | null;
   protected signer: ethers.providers.JsonRpcSigner | null;

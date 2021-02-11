@@ -12,6 +12,6 @@ module.exports = {
     liveReload: true,
     compress: true,
     publicPath: "/",
-    port: 9001,
+    port: 8091,
   },
 };

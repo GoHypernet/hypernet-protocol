@@ -1,5 +1,6 @@
 import { ISomeReducerState } from "./IsomeReducer";
 import { IUserData } from "./IuserReducer";
+import { ICoreData } from "./IcoreReducer";
 
 export interface IStore {
   state: RootState;
@@ -13,11 +14,12 @@ export interface IStoreProvider {
 export type RootState = {
   userReducer: IUserData;
   someReducer: ISomeReducerState;
+  coreReducer: ICoreData;
 };
 
 export type Action = {
   type: string;
-  payload: any;
+  payload?: any;
 };
 
 export type RootReducer = (state: RootState, action: Action) => RootState;
