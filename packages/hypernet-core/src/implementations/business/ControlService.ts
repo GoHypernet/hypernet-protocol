@@ -47,7 +47,7 @@ export class ControlService implements IControlService {
         // We will continue to send control claims every 5 minutes
         this.timeout = setInterval(() => {
           // this.messagingRepo.sendControlClaim(controlClaim);
-        }, this.claimPeriod);
+        }, this.claimPeriod) as unknown as NodeJS.Timeout;
 
         // Notify the world.
         context.onControlClaimed.next(controlClaim);
@@ -89,7 +89,7 @@ export class ControlService implements IControlService {
           if (this.lastControlClaim != null && now - (this.lastControlClaim.timestamp + this.claimPeriod) > 5000) {
             // TODO: take control of our lives
           }
-        }, this.claimPeriod);
+        }, this.claimPeriod) as unknown as NodeJS.Timeout;
 
         // Notify the world.
         context.onControlYielded.next(controlClaim);

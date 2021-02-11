@@ -36,7 +36,7 @@ import { err, errAsync, ok, okAsync } from "neverthrow";
  * The order of operations for sending funds is as follows:
  * sendFunds() is called by sender, which creates a Message transfer with Vector, which triggers
  * offerReceived() on the recipient side, which tosses an event up to the user, who then calls
- * acceptFunds() to accept the sender's funds, which creates an Insurance transfer with Vector, which triggers
+ * acceptOffers() to accept the sender's funds, which creates an Insurance transfer with Vector, which triggers
  * stakePosted() on the sender's side, which finally creates the Parameterized transfer with Vector, which triggers
  * paymentPosted() on the recipient's side, which finalizes/resolves the vector parameterized transfer.
  *
@@ -58,6 +58,73 @@ export class PaymentService implements IPaymentService {
   ) {}
 
   /**
+   * Authorizes funds to a specified counterparty, with an amount, rate, & expiration date.
+   * @param counterPartyAccount the public identifier of the counterparty to authorize funds to
+   * @param totalAuthorized the total amount the counterparty is allowed to "pull"
+   * @param expirationDate the latest time in which the counterparty can pull funds. This must be after the full maturation date of totalAuthorized, as calculated via deltaAmount and deltaTime.
+   * @param deltaAmount The amount per deltaTime to authorize
+   * @param deltaTime the number of seconds after which deltaAmount will be authorized, up to the limit of totalAuthorized.
+   * @param requiredStake the amount of stake the counterparyt must put up as insurance
+   * @param paymentToken the (Ethereum) address of the payment token
+   * @param disputeMediator the (Ethereum) address of the dispute mediator
+   */
+  public authorizeFunds(
+    counterPartyAccount: PublicIdentifier,
+    totalAuthorized: BigNumber,
+    expirationDate: number,
+    deltaAmount: string,
+    deltaTime: number,
+    requiredStake: BigNumber,
+    paymentToken: EthereumAddress,
+    disputeMediator: PublicKey,
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+    // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
+    // totalAuthorized / (deltaAmount/deltaTime) > ((expiration date - now) + someMinimumNumDays)
+    
+    return this.paymentRepository.createPullPayment(counterPartyAccount,
+      totalAuthorized.toString(),
+      deltaTime,
+      deltaAmount,
+      expirationDate,
+      requiredStake.toString(),
+      paymentToken,
+      disputeMediator
+    );
+  }
+
+  public pullFunds(
+    paymentId: string, 
+    amount: BigNumber
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+    // Pull the up the payment
+    return this.paymentRepository.getPaymentsByIds([paymentId])
+    .andThen((payments) => {
+      const payment = payments.get(paymentId);
+
+      // Verify that it is indeed a pull payment
+      if (payment instanceof PullPayment) {
+        // Verify that we're not pulling too quickly (greater than the average rate)
+        if (payment.transferedAmount.add(amount).gt(payment.vestedAmount)) {
+          return errAsync(new InvalidParametersError(`Amount of ${amount} exceeds the vested payment amount of ${payment.vestedAmount}`))
+        }
+
+        // Verify that the amount we're trying to pull does not exceed the total authorized amount
+        if (payment.transferedAmount.add(amount).gt(payment.authorizedAmount)) {
+          return errAsync(new InvalidParametersError(`Amount of ${amount} exceeds the total authorized amount of ${payment.authorizedAmount}`))
+        }
+
+        // Create the PullRecord
+        return this.paymentRepository.createPullRecord(
+          paymentId,
+          amount.toString()
+        );
+      } else {
+        return errAsync(new InvalidParametersError("Can not pull funds from a non pull payment"));
+      }
+    });
+  }
+
+  /**
    * Sends a payment to the specified recipient.
    * Internally, creates a null/message/offer transfer to communicate
    * with the counterparty and signal a request for a stake.
@@ -76,6 +143,7 @@ export class PaymentService implements IPaymentService {
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
   ): ResultAsync<Payment, Error> {
+    // TODO: Sanity checking on the values
     return this.paymentRepository.createPushPayment(
       counterPartyAccount,
       amount,
@@ -136,7 +204,7 @@ export class PaymentService implements IPaymentService {
    * For each paymentID provided, attempts to accept funds (ie: provide a stake) for that payment.
    * @param paymentIds a list of paymentIds for which to accept funds for
    */
-  public acceptFunds(
+  public acceptOffers(
     paymentIds: string[],
   ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
     const prerequisites = ResultUtils.combine([
@@ -154,7 +222,7 @@ export class PaymentService implements IPaymentService {
         return this.accountRepository.getBalanceByAsset(config.hypertokenAddress);
       })
       .andThen((hypertokenBalance) => {
-        // For each payment ID, call the singular version of acceptFunds
+        // For each payment ID, call the singular version of acceptOffers
         // Wrap each one as a Result object, and return an array of Results
         let totalStakeRequired = BigNumber.from(0);
         // First, verify to make sure that we have enough hypertoken to cover the insurance collectively
@@ -176,7 +244,7 @@ export class PaymentService implements IPaymentService {
         // Now that we know we can (probably) make the payments, let's try
         const stakeAttempts = new Array<Promise<Result<Payment, AcceptPaymentError>>>();
         for (const paymentId of paymentIds) {
-          this.logUtils.log(`PaymentService:acceptFunds: attempting to provide stake for payment ${paymentId}`);
+          this.logUtils.log(`PaymentService:acceptOffers: attempting to provide stake for payment ${paymentId}`);
 
           const stakeAttempt = this.paymentRepository.provideStake(paymentId).match(
             (payment) => {
@@ -216,18 +284,25 @@ export class PaymentService implements IPaymentService {
 
       const payment = payments.get(paymentId);
 
+      this.logUtils.log(`${paymentId}: ${JSON.stringify(payment)}`)
+
       if (payment == null) {
+        this.logUtils.error(`Invalid payment ID: ${paymentId}`)
         return errAsync(new InvalidParametersError("Invalid payment ID!"));
       }
 
-      // Make sure the stake is legit
-      if (!payment.requiredStake.eq(payment.amountStaked)) {
-        // TODO: We should be doing more here. The whole payment should be aborted.
-        return errAsync(new OfferMismatchError(`Invalid stake provided for payment ${paymentId}`));
+      // Let the UI know we got an insurance transfer
+      if (payment instanceof PushPayment) {
+        context.onPushPaymentUpdated.next(payment);
+      }
+      if (payment instanceof PullPayment) {
+        context.onPullPaymentUpdated.next(payment);
       }
 
+      // Notified the UI, move on to advancing the state of the payment.
       // Payment state must be in "staked" in order to progress
       if (payment.state !== EPaymentState.Staked) {
+        this.logUtils.error(`Invalid payment ${paymentId}, it must be in the staked status. Cannot provide payment!`)
         return errAsync(
           new InvalidParametersError(
             `Invalid payment ${paymentId}, it must be in the staked status. Cannot provide payment!`,
@@ -243,11 +318,14 @@ export class PaymentService implements IPaymentService {
 
       // If the payment state is staked, we know that the proper
       // insurance has been posted.
+      this.logUtils.log(`Providing asset for paymentId ${paymentId}`)
       return this.paymentRepository.provideAsset(paymentId).andThen((updatedPayment) => {
         if (updatedPayment instanceof PushPayment) {
+          this.logUtils.log('Providing asset for pushpayment.')
           context.onPushPaymentUpdated.next(updatedPayment);
         }
         if (updatedPayment instanceof PullPayment) {
+          this.logUtils.log('Providing asset for pullpayment.')
           context.onPullPaymentUpdated.next(updatedPayment);
         }
         return okAsync(undefined);
@@ -368,7 +446,12 @@ export class PaymentService implements IPaymentService {
         return errAsync(new InvalidParametersError("Invalid payment ID!"));
       }
 
-      return errAsync(new Error("Method not yet implemented"));
+      // Notify the world that this pull payment was updated
+      if (payment instanceof PullPayment) {
+        context.onPullPaymentUpdated.next(payment);
+      }
+
+      return okAsync(undefined);
     });
   }
 

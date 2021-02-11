@@ -1,7 +1,9 @@
 import {
   BigNumber,
   EthereumAddress,
+  HexString,
   IHypernetOfferDetails,
+  IMessageTransferData,
   Payment,
   PublicIdentifier,
   PullAmount,
@@ -39,6 +41,8 @@ import {
 import { errAsync, okAsync } from "neverthrow";
 import { ResultUtils } from "@implementations/utilities";
 import { v4 as uuidv4 } from "uuid";
+import { EMessageTransferType } from "@interfaces/types/EMessageTransferType";
+import { IHypernetPullPaymentDetails } from "@interfaces/objects/HypernetPullPaymentDetails";
 
 /**
  * A class for creating Hypernet-Payment objects from Vector transfers, verifying information
@@ -61,7 +65,7 @@ export class PaymentUtils implements IPaymentUtils {
    * Verifies that the paymentId provided has domain matching Hypernet's domain name.
    * @param paymentId the payment ID to check
    */
-  public isHypernetDomain(paymentId: string): ResultAsync<boolean, InvalidPaymentIdError> {
+  public isHypernetDomain(paymentId: HexString): ResultAsync<boolean, InvalidPaymentIdError> {
     return this.configProvider.getConfig().andThen((config) => {
       const domainRes = this.paymentIdUtils.getDomain(paymentId);
 
@@ -153,18 +157,41 @@ export class PaymentUtils implements IPaymentUtils {
     from: PublicIdentifier,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<PullPayment, Error> {
+  ): ResultAsync<PullPayment, LogicalError> {
     /**
-     * Push payments consist of 3 transfers, a null transfer for 0 value that represents the
+     * Pull payments consist of 3+ transfers, a null transfer for 0 value that represents the
      * offer, an insurance payment, and a parameterized payment.
      */
-
-    if (sortedTransfers.pullRecordTransfers.length > 0) {
-      throw new Error("Push payment has pull transfers!");
-    }
-
+  
     const amountStaked =
       sortedTransfers.insuranceTransfer != null ? sortedTransfers.insuranceTransfer.balance.amount[0] : 0;
+
+    // Get deltaAmount & deltaTime from the parameterized payment
+    if (sortedTransfers.offerDetails.rate == null) {
+      return errAsync(new LogicalError('These transfers are not for a pull payment.'))
+    }
+
+    const deltaAmount = BigNumber.from(sortedTransfers.offerDetails.rate.deltaAmount);
+    const deltaTime = sortedTransfers.offerDetails.rate.deltaTime;
+    let vestedAmount: BigNumber;
+
+    if (sortedTransfers.parameterizedTransfer == null) {
+      // No paramterized transfer, no vested amount!
+      vestedAmount = BigNumber.from(0);
+    } else {
+      // Calculate vestedAmount
+      const now = this.timeUtils.getUnixNow();
+      const timePassed = Number(sortedTransfers.parameterizedTransfer.transferState.start) - now;
+      vestedAmount = deltaAmount.div(deltaTime).mul(timePassed);
+    }
+
+    // Convert the PullRecords to PullAmounts
+    const pullAmounts = new Array<PullAmount>();
+
+    for (const pullRecord of sortedTransfers.pullRecordTransfers) {
+      let message = JSON.parse(pullRecord.transferState.message) as IHypernetPullPaymentDetails;
+      pullAmounts.push(new PullAmount(BigNumber.from(message.pullPaymentAmount), this.vectorUtils.getTimestampFromTransfer(pullRecord)))
+    }
 
     return okAsync(
       new PullPayment(
@@ -183,7 +210,10 @@ export class PaymentUtils implements IPaymentUtils {
         sortedTransfers.offerDetails.disputeMediator,
         BigNumber.from(sortedTransfers.offerDetails.paymentAmount),
         BigNumber.from(0),
-        new Array<PullAmount>(),
+        vestedAmount,
+        deltaTime,
+        deltaAmount,
+        pullAmounts,
       ),
     );
   }
@@ -375,7 +405,9 @@ export class PaymentUtils implements IPaymentUtils {
     transfer: IFullTransferState<InsuranceState>,
     offerDetails: IHypernetOfferDetails,
   ): boolean {
-    return BigNumber.from(transfer.transferState.collateral) == BigNumber.from(offerDetails.requiredStake);
+    console.log(transfer);
+    console.log(offerDetails);
+    return BigNumber.from(transfer.transferState.collateral).eq(BigNumber.from(offerDetails.requiredStake));
   }
 
   protected validatePaymentTransfer(
@@ -387,7 +419,7 @@ export class PaymentUtils implements IPaymentUtils {
       total = total.add(amount);
     }
 
-    return total === BigNumber.from(offerDetails.paymentAmount);
+    return total.eq(BigNumber.from(offerDetails.paymentAmount));
 
     // TODO: Validate the rate is set correctly
     // && transfer.transferState.rate == offerDetails.;
@@ -491,8 +523,14 @@ export class PaymentUtils implements IPaymentUtils {
           } else if (thisTransfer === "Parameterized") {
             return okAsync(ETransferType.Parameterized);
           } else if (thisTransfer === "MessageTransfer") {
-            // @todo check if this is a PullRecord vs an Offer subtype!
-            return okAsync(ETransferType.Offer);
+            const message: IMessageTransferData = JSON.parse(transfer.transferState.message);
+            if (message.messageType == EMessageTransferType.OFFER) {
+              return okAsync(ETransferType.Offer);
+            } else if (message.messageType == EMessageTransferType.PULLPAYMENT) {
+              return okAsync(ETransferType.PullRecord)
+            } else {
+              return errAsync(new LogicalError(`Message transfer was not of type OFFER or PULLPAYMENT, got: ${message.messageType}`));
+            }
           } else {
             return errAsync(new LogicalError("Unreachable code was not unreachable!"));
           }

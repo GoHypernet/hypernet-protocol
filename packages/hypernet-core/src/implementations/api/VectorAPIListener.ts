@@ -2,6 +2,7 @@ import { IVectorListener } from "@interfaces/api";
 import { IPaymentService } from "@interfaces/business";
 import { IHypernetOfferDetails, ResultAsync } from "@interfaces/objects";
 import { LogicalError } from "@interfaces/objects/errors";
+import { IHypernetPullPaymentDetails } from "@interfaces/objects/HypernetPullPaymentDetails";
 import { ETransferType, MessageState } from "@interfaces/types";
 import {
   IBrowserNodeProvider,
@@ -98,9 +99,11 @@ export class VectorAPIListener implements IVectorListener {
           const transfer = payload.transfer;
 
           if (transferType === ETransferType.Offer) {
-            // @todo also add in PullRecord type)
-            const metadata: IHypernetOfferDetails = JSON.parse(transfer.transferState.message);
-            paymentId = metadata.paymentId;
+            const message: IHypernetOfferDetails = JSON.parse(transfer.transferState.message);
+            paymentId = message.paymentId;
+          } else if (transferType === ETransferType.PullRecord) {
+            const message: IHypernetPullPaymentDetails = JSON.parse(transfer.transferState.message);
+            paymentId = message.paymentId;
           } else if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
             paymentId = transfer.transferState.UUID;
           } else {
@@ -116,9 +119,22 @@ export class VectorAPIListener implements IVectorListener {
               return okAsync(null);
             }
 
-            // TODO: We should be advancing the state here
+            // Notify the service to process the event
+            if (transferType === ETransferType.PullRecord) {
+              return this.paymentService.pullRecorded(paymentId);
+            } else if (transferType === ETransferType.Offer) {
+              return this.paymentService.offerReceived(paymentId);
+            } else if (transferType === ETransferType.Parameterized) {
+              return this.paymentService.paymentPosted(paymentId);
+            } else if (transferType === ETransferType.Insurance) {
+              return this.paymentService.stakePosted(paymentId);
+            }
+
             return okAsync(null);
           });
+        })
+        .mapErr((e) => {
+          this.logUtils.error(e);
         });
 
         // Convert a Vector event into an external event for publishing

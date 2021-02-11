@@ -117,7 +117,7 @@ export default class CoreWrapper {
 
       acceptFunds: (data: IIFrameCallData<string[]>) => {
         this.returnForModel(() => {
-          return core.acceptFunds(data.data);
+          return core.acceptOffers(data.data);
         }, data.callId);
       },
 

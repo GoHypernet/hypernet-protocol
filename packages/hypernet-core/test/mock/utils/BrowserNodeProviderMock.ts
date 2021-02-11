@@ -28,6 +28,7 @@ import {
 } from "@mock/mocks";
 import { InsuranceState, ParameterizedState, MessageState } from "@interfaces/types";
 import { IHypernetOfferDetails } from "@interfaces/objects";
+import { EMessageTransferType } from "@interfaces/types/EMessageTransferType";
 
 export class BrowserNodeProviderMock implements IBrowserNodeProvider {
   public browserNode: IBrowserNode;
@@ -83,6 +84,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
     });
 
     this.offerDetails = {
+      messageType: EMessageTransferType.OFFER,
       paymentId: commonPaymentId,
       creationDate: unixPast,
       to: publicIdentifier2,

@@ -73,7 +73,7 @@ class PaymentRepositoryMocks {
     td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
 
     td.when(
-      this.vectorUtils.createMessageTransfer(
+      this.vectorUtils.createOfferTransfer(
         counterPartyAccount,
         td.matchers.contains({
           paymentId: commonPaymentId,

@@ -12,6 +12,7 @@ export * from "./HypernetOfferDetails";
 export * from "./Message";
 export * from "./MessagePayload";
 export * from "./MessageThread";
+export * from "./MessageTransferData";
 export * from "./Payment";
 export * from "./PublicIdentifier";
 export * from "./PublicKey";

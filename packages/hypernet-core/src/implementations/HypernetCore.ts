@@ -409,10 +409,10 @@ export class HypernetCore implements IHypernetCore {
    * Accepts the terms of a push payment, and puts up the stake/insurance transfer.
    * @param paymentId
    */
-  public acceptFunds(
+  public acceptOffers(
     paymentIds: string[],
   ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
-    return this.paymentService.acceptFunds(paymentIds);
+    return this.paymentService.acceptOffers(paymentIds);
   }
 
   /**
@@ -424,15 +424,25 @@ export class HypernetCore implements IHypernetCore {
    * @param paymentToken the (Ethereum) address of the payment token
    * @param disputeMediator the (Ethereum) address of the dispute mediator
    */
-  public async authorizeFunds(
+  public authorizeFunds(
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumber,
     expirationDate: number,
+    deltaAmount: string,
+    deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
-  ): Promise<Payment> {
-    throw new Error("Method not yet implemented.");
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+    return this.paymentService.authorizeFunds(counterPartyAccount,
+      totalAuthorized,
+      expirationDate,
+      deltaAmount,
+      deltaTime,
+      requiredStake,
+      paymentToken,
+      disputeMediator
+    );
   }
 
   /**
@@ -440,8 +450,8 @@ export class HypernetCore implements IHypernetCore {
    * @param paymentId the payment for which to pull funds from
    * @param amount the amount of funds to pull
    */
-  public async pullFunds(paymentId: string, amount: BigNumber): Promise<Payment> {
-    throw new Error("Method not yet implemented.");
+  public pullFunds(paymentId: string, amount: BigNumber): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+    return this.paymentService.pullFunds(paymentId, amount);
   }
 
   /**

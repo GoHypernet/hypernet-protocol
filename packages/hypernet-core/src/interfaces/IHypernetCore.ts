@@ -135,23 +135,32 @@ export interface IHypernetCore {
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**
-   * authorizeFunds() sets up a pull payment.
-   * @param
+   * Authorizes funds to a specified counterparty, with an amount, rate, & expiration date.
+   * @param counterPartyAccount the public identifier of the counterparty to authorize funds to
+   * @param totalAuthorized the total amount the counterparty is allowed to "pull"
+   * @param expirationDate the latest time in which the counterparty can pull funds. This must be after the full maturation date of totalAuthorized, as calculated via deltaAmount and deltaTime.
+   * @param deltaAmount The amount per deltaTime to authorize
+   * @param deltaTime the number of seconds after which deltaAmount will be authorized, up to the limit of totalAuthorized.
+   * @param requiredStake the amount of stake the counterparyt must put up as insurance
+   * @param paymentToken the (Ethereum) address of the payment token
+   * @param disputeMediator the (Ethereum) address of the dispute mediator
    */
   authorizeFunds(
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumber,
     expirationDate: number,
+    deltaAmount: string,
+    deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
-  ): Promise<Payment>;
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**
    * For a specified payment, puts up stake to accept the payment
    * @param paymentId the payment ID to accept funds
    */
-  acceptFunds(
+  acceptOffers(
     paymentIds: string[],
   ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError>;
 
@@ -160,7 +169,7 @@ export interface IHypernetCore {
    * @param paymentId: The authorized payment ID to pull from.
    * @param amount: The amount to pull. The token type has already been baked in.
    */
-  pullFunds(paymentId: string, amount: BigNumber): Promise<Payment>;
+  pullFunds(paymentId: string, amount: BigNumber): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**
    * Finalized an authorized payment with the final payment amount.
