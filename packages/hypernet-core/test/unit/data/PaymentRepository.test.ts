@@ -165,6 +165,7 @@ class PaymentRepositoryMocks {
       BigNumber.from(0),
       disputeMediatorPublicKey,
       BigNumber.from(commonAmount.toString()),
+      BigNumber.from(0)
     );
   }
 }

@@ -24,7 +24,7 @@ export class PullPaymentViewModel {
   public collateralRecovered: ko.Observable<string>;
   public disputeMediator: ko.Observable<string>;
   public authorizedAmount: ko.Observable<string>;
-  public transferedAmount: ko.Observable<string>;
+  public amountTransferred: ko.Observable<string>;
   // public ledger: PullAmount[];
   public acceptButton: ButtonParams;
   public showAcceptButton: ko.PureComputed<boolean>;
@@ -50,7 +50,7 @@ export class PullPaymentViewModel {
     this.collateralRecovered = ko.observable(params.payment.collateralRecovered.toString());
     this.disputeMediator = ko.observable(params.payment.disputeMediator);
     this.authorizedAmount = ko.observable(params.payment.authorizedAmount.toString());
-    this.transferedAmount = ko.observable(params.payment.transferedAmount.toString());
+    this.amountTransferred = ko.observable(params.payment.amountTransferred.toString());
 
     this.core.onPushPaymentReceived.subscribe({
       next: (payment) => {

@@ -104,12 +104,12 @@ export class PaymentService implements IPaymentService {
       // Verify that it is indeed a pull payment
       if (payment instanceof PullPayment) {
         // Verify that we're not pulling too quickly (greater than the average rate)
-        if (payment.transferedAmount.add(amount).gt(payment.vestedAmount)) {
+        if (payment.amountTransferred.add(amount).gt(payment.vestedAmount)) {
           return errAsync(new InvalidParametersError(`Amount of ${amount} exceeds the vested payment amount of ${payment.vestedAmount}`))
         }
 
         // Verify that the amount we're trying to pull does not exceed the total authorized amount
-        if (payment.transferedAmount.add(amount).gt(payment.authorizedAmount)) {
+        if (payment.amountTransferred.add(amount).gt(payment.authorizedAmount)) {
           return errAsync(new InvalidParametersError(`Amount of ${amount} exceeds the total authorized amount of ${payment.authorizedAmount}`))
         }
 

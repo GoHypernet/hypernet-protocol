@@ -144,6 +144,7 @@ class PaymentServiceMocks {
       BigNumber.from(0),
       disputeMediator,
       BigNumber.from(amount),
+      BigNumber.from(0)
     );
   }
 }

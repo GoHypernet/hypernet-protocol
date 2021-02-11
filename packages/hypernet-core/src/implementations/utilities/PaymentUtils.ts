@@ -117,7 +117,9 @@ export class PaymentUtils implements IPaymentUtils {
     const amountStaked =
       sortedTransfers.insuranceTransfer != null ? sortedTransfers.insuranceTransfer.transferState.collateral : 0;
 
-    const amount =
+    const paymentAmount = sortedTransfers.offerDetails.paymentAmount;
+
+    const amountTransferred =
       sortedTransfers.parameterizedTransfer != null
         ? sortedTransfers.offerDetails.paymentAmount // @todo fix later? sortedTransfers.parameterizedTransfer.transferState.rate.deltaAmount
         : sortedTransfers.offerDetails.paymentAmount
@@ -140,7 +142,8 @@ export class PaymentUtils implements IPaymentUtils {
         this.timeUtils.getUnixNow(),
         BigNumber.from(0),
         sortedTransfers.offerDetails.disputeMediator,
-        BigNumber.from(amount),
+        BigNumber.from(paymentAmount),
+        BigNumber.from(amountTransferred)
       ),
     );
   }
