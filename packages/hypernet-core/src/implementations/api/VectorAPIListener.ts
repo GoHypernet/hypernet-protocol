@@ -132,6 +132,9 @@ export class VectorAPIListener implements IVectorListener {
 
             return okAsync(null);
           });
+        })
+        .mapErr((e) => {
+          this.logUtils.error(e);
         });
 
         // Convert a Vector event into an external event for publishing

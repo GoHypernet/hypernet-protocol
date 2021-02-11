@@ -71,7 +71,7 @@ export class PullPaymentViewModel {
     });
 
     this.acceptButton = new ButtonParams("Accept", async () => {
-      return await this.core.acceptFunds([this.paymentId]).map((results) => {
+      return await this.core.acceptOffers([this.paymentId]).map((results) => {
         const result = results[0];
 
         return result.match(

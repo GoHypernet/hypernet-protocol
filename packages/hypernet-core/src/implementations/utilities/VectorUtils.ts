@@ -259,19 +259,23 @@ export class VectorUtils implements IVectorUtils {
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // Sanity check
     if (type === EPaymentType.Pull && (deltaTime === undefined)) {
+      this.logUtils.error("Must provide deltaTime for Pull payments")
       return errAsync(new InvalidParametersError("Must provide deltaTime for Pull payments"));
     }
 
     if (type === EPaymentType.Pull && (deltaAmount === undefined)) {
+      this.logUtils.error("Must provide deltaAmount for Pull payments")
       return errAsync(new InvalidParametersError("Must provide deltaAmount for Pull payments"));
     }
 
     // Make sure the paymentId is valid:
     const validPayment = this.paymentIdUtils.isValidPaymentId(paymentId);
     if (validPayment.isErr()) {
+      this.logUtils.error(validPayment.error)
       return errAsync(validPayment.error);
     } else {
       if (!validPayment.value) {
+        this.logUtils.error(`CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`)
         return errAsync(new InvalidParametersError(`CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`));
       }
     }
@@ -298,16 +302,22 @@ export class VectorUtils implements IVectorUtils {
         deltaTime: "1",
       };
 
+      let ourRate: Rate
       // Have to throw this error, or the ourRate object below will complain that one
       // of the params is possibly undefined.
-      if (!deltaTime || !deltaAmount) {
-        return errAsync(new InvalidParametersError('Somehow, deltaTime or deltaAmount were not set!'));
+      if (type == EPaymentType.Pull) {
+        if (deltaTime == null || deltaAmount == null) {
+          this.logUtils.error('Somehow, deltaTime or deltaAmount were not set!')
+          return errAsync(new InvalidParametersError('Somehow, deltaTime or deltaAmount were not set!'));
+        }
+        ourRate = {
+          deltaTime: deltaTime?.toString(),
+          deltaAmount: deltaAmount?.toString()
+        }
       }
-
-      const ourRate: Rate = type === EPaymentType.Pull ? {
-          deltaTime: deltaTime.toString(),
-          deltaAmount: deltaAmount.toString() }
-        : infiniteRate
+      else {
+        ourRate = infiniteRate;
+      }
 
       const initialState: ParameterizedState = {
         receiver: toEthAddress,

@@ -1,6 +1,7 @@
 import {
   BigNumber,
   EthereumAddress,
+  HexString,
   IHypernetOfferDetails,
   IMessageTransferData,
   Payment,
@@ -64,7 +65,7 @@ export class PaymentUtils implements IPaymentUtils {
    * Verifies that the paymentId provided has domain matching Hypernet's domain name.
    * @param paymentId the payment ID to check
    */
-  public isHypernetDomain(paymentId: string): ResultAsync<boolean, InvalidPaymentIdError> {
+  public isHypernetDomain(paymentId: HexString): ResultAsync<boolean, InvalidPaymentIdError> {
     return this.configProvider.getConfig().andThen((config) => {
       const domainRes = this.paymentIdUtils.getDomain(paymentId);
 
@@ -404,7 +405,9 @@ export class PaymentUtils implements IPaymentUtils {
     transfer: IFullTransferState<InsuranceState>,
     offerDetails: IHypernetOfferDetails,
   ): boolean {
-    return BigNumber.from(transfer.transferState.collateral) == BigNumber.from(offerDetails.requiredStake);
+    console.log(transfer);
+    console.log(offerDetails);
+    return BigNumber.from(transfer.transferState.collateral).eq(BigNumber.from(offerDetails.requiredStake));
   }
 
   protected validatePaymentTransfer(
@@ -416,7 +419,7 @@ export class PaymentUtils implements IPaymentUtils {
       total = total.add(amount);
     }
 
-    return total === BigNumber.from(offerDetails.paymentAmount);
+    return total.eq(BigNumber.from(offerDetails.paymentAmount));
 
     // TODO: Validate the rate is set correctly
     // && transfer.transferState.rate == offerDetails.;

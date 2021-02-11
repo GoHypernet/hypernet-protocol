@@ -246,7 +246,7 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.acceptFunds([paymentId]);
+    const result = await paymentService.acceptOffers([paymentId]);
 
     // Assert
     expect(result).toBeDefined();
@@ -263,7 +263,7 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.acceptFunds([paymentId]);
+    const result = await paymentService.acceptOffers([paymentId]);
 
     // Assert
     expect(result).toBeDefined();

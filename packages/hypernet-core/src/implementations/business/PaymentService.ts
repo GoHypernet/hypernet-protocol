@@ -284,18 +284,25 @@ export class PaymentService implements IPaymentService {
 
       const payment = payments.get(paymentId);
 
+      this.logUtils.log(`${paymentId}: ${JSON.stringify(payment)}`)
+
       if (payment == null) {
+        this.logUtils.error(`Invalid payment ID: ${paymentId}`)
         return errAsync(new InvalidParametersError("Invalid payment ID!"));
       }
 
-      // Make sure the stake is legit
-      if (!payment.requiredStake.eq(payment.amountStaked)) {
-        // TODO: We should be doing more here. The whole payment should be aborted.
-        return errAsync(new OfferMismatchError(`Invalid stake provided for payment ${paymentId}`));
+      // Let the UI know we got an insurance transfer
+      if (payment instanceof PushPayment) {
+        context.onPushPaymentUpdated.next(payment);
+      }
+      if (payment instanceof PullPayment) {
+        context.onPullPaymentUpdated.next(payment);
       }
 
+      // Notified the UI, move on to advancing the state of the payment.
       // Payment state must be in "staked" in order to progress
       if (payment.state !== EPaymentState.Staked) {
+        this.logUtils.error(`Invalid payment ${paymentId}, it must be in the staked status. Cannot provide payment!`)
         return errAsync(
           new InvalidParametersError(
             `Invalid payment ${paymentId}, it must be in the staked status. Cannot provide payment!`,
@@ -311,11 +318,14 @@ export class PaymentService implements IPaymentService {
 
       // If the payment state is staked, we know that the proper
       // insurance has been posted.
+      this.logUtils.log(`Providing asset for paymentId ${paymentId}`)
       return this.paymentRepository.provideAsset(paymentId).andThen((updatedPayment) => {
         if (updatedPayment instanceof PushPayment) {
+          this.logUtils.log('Providing asset for pushpayment.')
           context.onPushPaymentUpdated.next(updatedPayment);
         }
         if (updatedPayment instanceof PullPayment) {
+          this.logUtils.log('Providing asset for pullpayment.')
           context.onPullPaymentUpdated.next(updatedPayment);
         }
         return okAsync(undefined);

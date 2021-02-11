@@ -496,6 +496,7 @@ export class PaymentRepository implements IPaymentRepository {
         } else if (payment instanceof PullPayment) {
           paymentTokenAmount = payment.authorizedAmount;
         } else {
+          this.logUtils.error(`Payment was not instance of push or pull payment!`)
           return errAsync(new LogicalError());
         }
         const paymentRecipient = payment.to;

@@ -22,9 +22,6 @@
     },
     {
       "path": "packages/web-demo/src"
-    },
-    {
-      "path": "packages/mobileApp/src"
     }
   ]
 }

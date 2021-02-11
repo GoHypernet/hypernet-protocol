@@ -31,7 +31,7 @@ interface IIFrameCallData<T> {
 }
 
 class IFrameCallData<T> implements IIFrameCallData<T> {
-  constructor(public callId: number, public data: T) {}
+  constructor(public callId: number, public data: T) { }
 }
 
 class IFrameCall<T, E> {
@@ -326,14 +326,27 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumber,
     expirationDate: number,
+    deltaAmount: string,
+    deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
-  ): Promise<Payment> {
-    throw new Error("Unimplemented");
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+    const call = this._createCall("authorizeFunds", {
+      counterPartyAccount,
+      totalAuthorized,
+      expirationDate,
+      deltaAmount,
+      deltaTime,
+      requiredStake,
+      paymentToken,
+      disputeMediator,
+    });
+
+    return call.getResult();
   }
 
-  public acceptFunds(
+  public acceptOffers(
     paymentIds: string[],
   ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
     const call = this._createCall("acceptFunds", paymentIds);
@@ -341,8 +354,13 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
     return call.getResult();
   }
 
-  public pullFunds(paymentId: string, amount: BigNumber): Promise<Payment> {
-    throw new Error("Unimplemented");
+  public pullFunds(paymentId: string, amount: BigNumber): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+    const call = this._createCall("pullFunds", {
+      paymentId,
+      amount: amount.toString()
+    });
+
+    return call.getResult();
   }
 
   public finalizePullPayment(paymentId: string, finalAmount: BigNumber): Promise<HypernetLink> {
