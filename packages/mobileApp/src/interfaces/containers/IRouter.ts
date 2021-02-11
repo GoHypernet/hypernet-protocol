@@ -10,15 +10,16 @@ export enum ENavigationScreenName {
   START = "Start",
   BALANCE = "Balance",
   SERVICE = "Service",
+  SUMMARY = "Summary",
 }
 
+type TabBarIcon = (props: { focused: boolean; color: string; size: number }) => React.ReactNode | undefined;
 export interface INavigationScreens {
   name: ENavigationScreenName;
   component: React.FC<any>;
   type: ENavigatorType;
   disableAnimation?: boolean;
-  icon?: any;
-  isFirstTab?: boolean;
+  tabBarIcon?: TabBarIcon;
 }
 
 export interface RouterProps {

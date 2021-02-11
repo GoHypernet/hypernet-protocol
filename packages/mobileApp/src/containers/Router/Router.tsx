@@ -8,6 +8,7 @@ import { ENavigatorType, RouterProps } from "@mobileApp/interfaces/containers/IR
 import { cardStyleInterpolator } from "./Router.utils";
 import { navigationTheme } from "@mobileApp/constants/theme";
 import { NAVIGATION_SCREENS } from "@mobileApp/constants/router";
+import CustomBottomTabBar from "@mobileApp/components/CustomBottomTabBar";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -17,23 +18,22 @@ const Router: React.FC<RouterProps> = (props: RouterProps) => {
   const stackScreens = NAVIGATION_SCREENS.filter((screen) => screen.type === ENavigatorType.STACK);
 
   const TabNavigator = () => {
-    // TODO: add custom navigator & move colors to constants
     return (
-      <Tab.Navigator
-        tabBarOptions={{
-          activeTintColor: "#FFFFFF",
-          inactiveTintColor: "#6D778B",
-          style: {
-            backgroundColor: "#111622",
-            borderTopColor: "#111622",
-          },
-          
-        }}
-        lazy
-      >
-        {tabScreens.map(({ name, component, icon }) => (
-          <Tab.Screen key={name} name={name} component={component} options={{ tabBarIcon: () => icon }} />
-        ))}
+      <Tab.Navigator tabBar={(props) => <CustomBottomTabBar {...props} />} lazy>
+        {tabScreens.map(({ name, component, tabBarIcon }) => {
+          return (
+            <Tab.Screen
+              key={name}
+              name={name}
+              component={component}
+              options={
+                tabBarIcon && {
+                  tabBarIcon,
+                }
+              }
+            />
+          );
+        })}
       </Tab.Navigator>
     );
   };
@@ -47,18 +47,16 @@ const Router: React.FC<RouterProps> = (props: RouterProps) => {
           cardStyleInterpolator,
         }}
       >
-        {stackScreens.map(
-          ({ name, component, disableAnimation }) => (
-            <Stack.Screen
-              key={name}
-              name={name}
-              component={component}
-              options={{
-                animationEnabled: !disableAnimation,
-              }}
-            />
-          ),
-        )}
+        {stackScreens.map(({ name, component, disableAnimation }) => (
+          <Stack.Screen
+            key={name}
+            name={name}
+            component={component}
+            options={{
+              animationEnabled: !disableAnimation,
+            }}
+          />
+        ))}
         <Stack.Screen name={tabScreens[0].name} component={TabNavigator} />
       </Stack.Navigator>
     </NavigationContainer>

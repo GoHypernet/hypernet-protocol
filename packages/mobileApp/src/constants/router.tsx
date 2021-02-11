@@ -1,11 +1,10 @@
+import React from "react";
+
 import Login from "@mobileApp/screens/Login";
 import Splash from "@mobileApp/screens/Splash";
 import Start from "@mobileApp/screens/Start";
-import {
-  ENavigationScreenName,
-  ENavigatorType,
-  INavigationScreens,
-} from "@mobileApp/interfaces/containers/IRouter";
+import { ENavigationScreenName, ENavigatorType, INavigationScreens } from "@mobileApp/interfaces/containers/IRouter";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 export const NAVIGATION_SCREENS: INavigationScreens[] = [
   {
@@ -23,13 +22,18 @@ export const NAVIGATION_SCREENS: INavigationScreens[] = [
     name: ENavigationScreenName.BALANCE,
     component: Login,
     type: ENavigatorType.TAB,
-    icon: null,
-    isFirstTab: true,
+    tabBarIcon: ({ color }) => <Icon name="google-wallet" color={color} />,
   },
   {
     name: ENavigationScreenName.SERVICE,
     component: Start,
     type: ENavigatorType.TAB,
-    icon: null,
+    tabBarIcon: ({ color }) => <Icon name="key" color={color} />,
+  },
+  {
+    name: ENavigationScreenName.SUMMARY,
+    component: Login,
+    type: ENavigatorType.TAB,
+    tabBarIcon: ({ color }) => <Icon name="file" color={color} />,
   },
 ];
