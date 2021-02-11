@@ -65,7 +65,7 @@ export class PullPaymentViewModel {
     this.core.onPullPaymentUpdated.subscribe({
       next: (payment) => {
         if (payment.id === this.paymentId) {
-          this.state(new PaymentStatusParams(params.payment.state));
+          this.state(new PaymentStatusParams(payment.state));
         }
       },
     });
