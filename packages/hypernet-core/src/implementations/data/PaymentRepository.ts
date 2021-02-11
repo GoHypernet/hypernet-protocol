@@ -499,10 +499,13 @@ export class PaymentRepository implements IPaymentRepository {
           this.logUtils.error(`Payment was not instance of push or pull payment!`)
           return errAsync(new LogicalError());
         }
+        
         const paymentRecipient = payment.to;
         const paymentID = payment.id;
         const paymentStart = this.timeUtils.getUnixNow();
         const paymentExpiration = paymentStart + config.defaultPaymentExpiryLength;
+
+        this.logUtils.log(`Providing a payment amount of ${paymentTokenAmount}`)
 
         // Use vectorUtils to create the parameterizedPayment
         return this.vectorUtils.createPaymentTransfer(

@@ -268,6 +268,11 @@ export class VectorUtils implements IVectorUtils {
       return errAsync(new InvalidParametersError("Must provide deltaAmount for Pull payments"));
     }
 
+    if (amount.isZero()) {
+      this.logUtils.error("Amount cannot be zero.")
+      return errAsync(new InvalidParametersError("Amount cannot be zero."));
+    }
+
     // Make sure the paymentId is valid:
     const validPayment = this.paymentIdUtils.isValidPaymentId(paymentId);
     if (validPayment.isErr()) {
@@ -310,6 +315,12 @@ export class VectorUtils implements IVectorUtils {
           this.logUtils.error('Somehow, deltaTime or deltaAmount were not set!')
           return errAsync(new InvalidParametersError('Somehow, deltaTime or deltaAmount were not set!'));
         }
+
+        if (deltaTime == 0 || deltaAmount == '0') {
+          this.logUtils.error('deltatime & deltaAmount cannot be zero!')
+          return errAsync(new InvalidParametersError('deltatime & deltaAmount cannot be zero!'));
+        }
+
         ourRate = {
           deltaTime: deltaTime?.toString(),
           deltaAmount: deltaAmount?.toString()
@@ -331,7 +342,7 @@ export class VectorUtils implements IVectorUtils {
         channelAddress,
         amount.toString(),
         assetAddress,
-        "ParameterizedTransfer",
+        "Parameterized",
         initialState,
         toAddress,
         undefined,

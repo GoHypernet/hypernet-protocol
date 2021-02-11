@@ -119,8 +119,8 @@ export class PaymentUtils implements IPaymentUtils {
 
     const amount =
       sortedTransfers.parameterizedTransfer != null
-        ? sortedTransfers.parameterizedTransfer.transferState.rate.deltaAmount
-        : 0;
+        ? sortedTransfers.offerDetails.paymentAmount // @todo fix later? sortedTransfers.parameterizedTransfer.transferState.rate.deltaAmount
+        : sortedTransfers.offerDetails.paymentAmount
 
     return okAsync(
       new PushPayment(
