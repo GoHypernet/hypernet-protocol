@@ -12,7 +12,7 @@ declare global {
 // This is just a code of avoiding errors in mobile app.
 // An actuall non metamask provider set up should be implemented in this class.
 // TODO: Remove this code block when provider implementation is done for the mobile.
-if (!global.window?.ethereum && !window?.ethereum) {
+if (!global.window?.ethereum) {
   global.window.ethereum = {
     enable: () => {},
   };
