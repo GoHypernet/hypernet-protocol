@@ -10,7 +10,7 @@ interface AppContainerProps {}
 const AppContainer: React.FC<AppContainerProps> = (props: AppContainerProps) => {
   return (
     <StoreProvider>
-      <WebViewBridge />
+      {/* <WebViewBridge /> */}
       <LinearGradient
         colors={appBackgroundGradientColors}
         start={{ x: 0, y: 0 }}

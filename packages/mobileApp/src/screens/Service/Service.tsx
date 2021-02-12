@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "column",
-    marginTop: hp(11),
+    marginTop: hp(9),
     paddingLeft: wp(6),
     paddingRight: wp(6),
   },

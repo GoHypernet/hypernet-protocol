@@ -1,9 +1,9 @@
 import React from "react";
-import { View, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { heightPercentageToDP as hp } from "react-native-responsive-screen";
+import { colors } from "@mobileApp/constants";
 
-// TODO: refactor style
 const CustomBottomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
   const focusedOptions = descriptors[state.routes[state.index].key].options;
 
@@ -12,16 +12,7 @@ const CustomBottomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, n
   }
 
   return (
-    <View
-      style={{
-        display: "flex",
-        flexDirection: "row",
-        backgroundColor: "##111622",
-        height: hp(16),
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
+    <View style={styles.container}>
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
         const label =
@@ -62,21 +53,39 @@ const CustomBottomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, n
             onPress={onPress}
             onLongPress={onLongPress}
             style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              borderTopWidth: 1,
-              borderTopColor: isFocused ? "#2852ff" : "transparent",
-              paddingTop: 24,
+              ...styles.touchableOpacityStyle,
+              borderTopColor: isFocused ? colors.borderBlue : colors.transparent,
             }}
           >
             {options?.tabBarIcon &&
-              options.tabBarIcon({ focused: isFocused, color: isFocused ? "#FFFFFF" : "#6D778B", size: 24 })}
+              options.tabBarIcon({
+                focused: isFocused,
+                color: isFocused ? colors.white : colors.inActiveGrey,
+                size: 24,
+              })}
           </TouchableOpacity>
         );
       })}
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    display: "flex",
+    flexDirection: "row",
+    backgroundColor: colors.appBackground,
+    height: hp(16),
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  touchableOpacityStyle: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    borderTopWidth: 1,
+    paddingTop: 24,
+  },
+});
 
 export default CustomBottomTabBar;

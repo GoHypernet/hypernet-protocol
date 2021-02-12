@@ -6,8 +6,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { ENavigatorType, RouterProps } from "@mobileApp/interfaces/containers/IRouter";
 
 import { cardStyleInterpolator } from "./Router.utils";
-import { navigationTheme } from "@mobileApp/constants/theme";
-import { NAVIGATION_SCREENS } from "@mobileApp/constants/router";
+import { getNavigationTheme, NAVIGATION_SCREENS } from "@mobileApp/constants";
 import CustomBottomTabBar from "@mobileApp/components/CustomBottomTabBar";
 
 const Stack = createStackNavigator();
@@ -19,27 +18,29 @@ const Router: React.FC<RouterProps> = (props: RouterProps) => {
 
   const TabNavigator = () => {
     return (
-      <Tab.Navigator tabBar={(props) => <CustomBottomTabBar {...props} />} lazy>
-        {tabScreens.map(({ name, component, tabBarIcon }) => {
-          return (
-            <Tab.Screen
-              key={name}
-              name={name}
-              component={component}
-              options={
-                tabBarIcon && {
-                  tabBarIcon,
+      <NavigationContainer theme={getNavigationTheme()} independent={true}>
+        <Tab.Navigator tabBar={(props) => <CustomBottomTabBar {...props} />} lazy>
+          {tabScreens.map(({ name, component, tabBarIcon }) => {
+            return (
+              <Tab.Screen
+                key={name}
+                name={name}
+                component={component}
+                options={
+                  tabBarIcon && {
+                    tabBarIcon,
+                  }
                 }
-              }
-            />
-          );
-        })}
-      </Tab.Navigator>
+              />
+            );
+          })}
+        </Tab.Navigator>
+      </NavigationContainer>
     );
   };
 
   return (
-    <NavigationContainer theme={navigationTheme}>
+    <NavigationContainer theme={getNavigationTheme(true)}>
       <Stack.Navigator
         initialRouteName={props?.initialRouteName}
         screenOptions={{
