@@ -94,7 +94,7 @@
     "html-webpack-plugin": "^4.5.1",
     "http-server": "^0.12.3",
     "https-browserify": "^1.0.0",
-    "husky": ">=4",
+    "husky": "^5.0.9",
     "image-webpack-loader": "^7.0.1",
     "jest": "^26.4.2",
     "jest-when": "^3.0.1",
