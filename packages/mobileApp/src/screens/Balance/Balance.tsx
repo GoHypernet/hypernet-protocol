@@ -1,12 +1,19 @@
 import React from "react";
-import { View, Image, StyleSheet } from "react-native";
+import { View, StyleSheet, Image } from "react-native";
 import { Button, Text } from "react-native-elements";
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import Icon from "react-native-vector-icons/FontAwesome";
+
+import BalanceCard from "./components/BalanceCard";
 
 interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = (props: BalanceProps) => {
   return (
     <View style={styles.container}>
+      <View style={styles.filterContainer}>
+        <Icon name="filter" color="white" size={hp(2.5)} />
+      </View>
       <View style={styles.headerContainer}>
         <Text style={styles.title}>Balance</Text>
         <Button
@@ -18,9 +25,28 @@ const Balance: React.FC<BalanceProps> = (props: BalanceProps) => {
         />
       </View>
       <View style={styles.cardListContainer}>
-        <Image style={styles.img} source={require("@mobileApp/assets/images/balance_card_1.png")} />
-        <Image style={styles.img} source={require("@mobileApp/assets/images/balance_card_1.png")} />
-        <Image style={styles.img} source={require("@mobileApp/assets/images/balance_card_1.png")} />
+        <BalanceCard
+          primaryTitle="Wrapped Bitcoin"
+          primaryValue="1.00043"
+          secondaryTitle="WBTC"
+          secondaryValue="5750,70"
+          renderIcon={() => <Image source={require("@mobileApp/assets/images/wbtc.png")} />}
+        />
+
+        <BalanceCard
+          primaryTitle="Hypercoin"
+          primaryValue="831,54"
+          secondaryTitle="HC"
+          secondaryValue="831,54"
+          renderIcon={() => <Image source={require("@mobileApp/assets/images/hc.png")} />}
+        />
+        <BalanceCard
+          primaryTitle="United States Dist."
+          primaryValue="24.923"
+          secondaryTitle="USDC"
+          secondaryValue="1390,10"
+          renderIcon={() => <Image source={require("@mobileApp/assets/images/usdc.png")} />}
+        />
       </View>
     </View>
   );
@@ -30,13 +56,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "column",
-    marginTop: 100,
+    marginTop: hp(11),
+    paddingLeft: wp(6),
+    paddingRight: wp(6),
+  },
+  filterContainer: {
+    flexDirection: "row-reverse",
   },
   headerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginLeft: 30,
-    marginRight: 30,
+    marginTop: hp(5),
+    marginBottom: hp(2),
   },
   title: {
     color: "white",
@@ -50,7 +81,6 @@ const styles = StyleSheet.create({
   cardListContainer: {
     flex: 1,
     flexDirection: "column",
-    alignItems: "center",
   },
   actionButton: {
     backgroundColor: "#2E3546",
