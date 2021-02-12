@@ -1,6 +1,7 @@
 import React from "react";
 import { View, TouchableOpacity } from "react-native";
 import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 
 // TODO: refactor style
 const CustomBottomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
@@ -16,7 +17,7 @@ const CustomBottomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, n
         display: "flex",
         flexDirection: "row",
         backgroundColor: "##111622",
-        paddingBottom: 32,
+        height: hp(16),
         justifyContent: "center",
         alignItems: "center",
       }}
@@ -64,8 +65,8 @@ const CustomBottomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, n
               flex: 1,
               justifyContent: "center",
               alignItems: "center",
-              borderTopWidth: 2,
-              borderTopColor: isFocused ? "#7E00FF" : "transparent",
+              borderTopWidth: 1,
+              borderTopColor: isFocused ? "#2852ff" : "transparent",
               paddingTop: 24,
             }}
           >
