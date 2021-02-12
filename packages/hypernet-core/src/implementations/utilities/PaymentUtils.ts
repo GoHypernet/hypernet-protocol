@@ -532,7 +532,8 @@ export class PaymentUtils implements IPaymentUtils {
               return errAsync(new LogicalError(`Message transfer was not of type OFFER or PULLPAYMENT, got: ${message.messageType}`));
             }
           } else {
-            return errAsync(new LogicalError("Unreachable code was not unreachable!"));
+            // It's a recognized transfer type- like Withdraw- that we just don't care about
+            return okAsync(ETransferType.Unrecognized);
           }
         }
       });
