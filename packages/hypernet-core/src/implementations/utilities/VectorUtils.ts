@@ -193,7 +193,7 @@ export class VectorUtils implements IVectorUtils {
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // The message type has to be OFFER
     message.messageType = EMessageTransferType.OFFER;
-    
+
     // Sanity check - make sure the paymentId is valid:
     const validPayment = this.paymentIdUtils.isValidPaymentId(message.paymentId);
     if (validPayment.isErr()) {
@@ -204,17 +204,11 @@ export class VectorUtils implements IVectorUtils {
       }
     }
 
-    const prerequisites = (ResultUtils.combine([
-      this.configProvider.getConfig() as ResultAsync<any, any>,
+    return ResultUtils.combine([
       this.getRouterChannelAddress(),
       this.browserNodeProvider.getBrowserNode(),
-    ]) as unknown) as ResultAsync<
-      [HypernetConfig, string, IBrowserNode],
-      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
-    >;
-
-    return prerequisites.andThen((vals) => {
-      const [config, channelAddress, browserNode] = vals;
+    ]).andThen((vals) => {
+      const [channelAddress, browserNode] = vals;
 
       const initialState: MessageState = {
         message: serialize(message),
@@ -223,7 +217,7 @@ export class VectorUtils implements IVectorUtils {
       return browserNode.conditionalTransfer(
         channelAddress,
         "0",
-        config.hypertokenAddress,
+        message.paymentToken, // The offer is always for 0, so we will make the asset ID in the payment token type, because why not?
         "MessageTransfer",
         initialState,
         toAddress,

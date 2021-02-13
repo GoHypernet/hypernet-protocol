@@ -111,7 +111,6 @@ class VectorLinkRepositoryMocks {
       BigNumber.from(commonAmount.toString()),
       BigNumber.from(amountStaked),
       expirationDate,
-      false,
       unixNow,
       unixNow,
       BigNumber.from(0),

@@ -4,8 +4,7 @@ import html from "./PushPayment.template.html";
 import moment from "moment";
 import { PaymentStatusParams } from "../PaymentStatus/PaymentStatus.viewmodel";
 import { ButtonParams } from "../Button/Button.viewmodel";
-import Web3 from "web3";
-import { errAsync, okAsync } from "neverthrow";
+import {utils} from "ethers";
 
 export class PushPaymentParams {
   constructor(public core: IHypernetCore, public payment: PushPayment) {}
@@ -21,7 +20,6 @@ export class PushPaymentViewModel {
   public requiredStake: ko.Observable<string>;
   public amountStaked: ko.Observable<string>;
   public expirationDate: ko.Observable<string>;
-  public finalized: ko.Observable<boolean>;
   public createdTimestamp: ko.Observable<string>;
   public updatedTimestamp: ko.Observable<string>;
   public collateralRecovered: ko.Observable<string>;
@@ -47,16 +45,15 @@ export class PushPaymentViewModel {
     this.from = ko.observable(params.payment.from);
     this.state = ko.observable(new PaymentStatusParams(params.payment.state));
     this.paymentToken = ko.observable(params.payment.paymentToken);
-    this.requiredStake = ko.observable(Web3.utils.fromWei(params.payment.requiredStake.toString()));
-    this.amountStaked = ko.observable(Web3.utils.fromWei(params.payment.amountStaked.toString()));
+    this.requiredStake = ko.observable(utils.formatUnits(params.payment.requiredStake, "wei"));
+    this.amountStaked = ko.observable(utils.formatUnits(params.payment.amountStaked, "wei"));
     const mdate = moment.unix(params.payment.expirationDate);
     this.expirationDate = ko.observable(mdate.format());
-    this.finalized = ko.observable(params.payment.finalized);
     this.createdTimestamp = ko.observable(params.payment.createdTimestamp.toString());
     this.updatedTimestamp = ko.observable(params.payment.updatedTimestamp.toString());
     this.collateralRecovered = ko.observable(params.payment.collateralRecovered.toString());
     this.disputeMediator = ko.observable(params.payment.disputeMediator);
-    this.paymentAmount = ko.observable(Web3.utils.fromWei(params.payment.paymentAmount.toString()));
+    this.paymentAmount = ko.observable(utils.formatUnits(params.payment.paymentAmount, "wei"));
 
     this.core.onPushPaymentReceived.subscribe({
       next: (payment) => {
