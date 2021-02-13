@@ -262,9 +262,7 @@ export class AccountsRepository implements IAccountsRepository {
     const assetAddress = channelState.assetIds[i];
 
     return this._getAssetInfo(assetAddress).map((assetInfo) => {
-      const amount = channelState.balances[i].amount.reduce((prev, curr) => {
-        return prev.add(BigNumber.from(curr));
-      }, BigNumber.from(0));
+      const amount = BigNumber.from(channelState.balances[i].amount[1]);
 
       // Return the asset balance
       const assetBalance = new AssetBalance(
