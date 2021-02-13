@@ -4,7 +4,7 @@ import html from "./PushPaymentForm.template.html";
 import moment from "moment";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
 import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
-import Web3 from "web3";
+import { utils } from "ethers"
 
 export class PushPaymentFormParams {
   constructor(
@@ -51,14 +51,14 @@ export class PushPaymentFormViewModel {
 
         try {
           const expirationDate = moment(this.expirationDate());
-          const amount = Web3.utils.toWei(this.amount());
-          const requiredStake = Web3.utils.toWei(this.requiredStake());
+          const amount = utils.parseUnits(this.amount(), "wei");
+          const requiredStake = utils.parseUnits(this.requiredStake(), "wei");
 
           return await this.core.sendFunds(
             this.counterparty(),
-            amount,
+            amount.toString(),
             expirationDate.unix(),
-            requiredStake,
+            requiredStake.toString(),
             selectedPaymentTokenAddress,
             "0x0000000000000000000000000000000000000001", // @todo replace with an actual mediator address!
           );
