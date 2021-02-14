@@ -1,8 +1,8 @@
 import React from "react";
-import Web3 from "web3";
 import moment from "moment";
 import { EPaymentState } from "@hypernetlabs/hypernet-core";
 import { ILinkList } from "../../interfaces";
+import {utils} from "ethers";
 
 interface LinkListProps {
   links?: ILinkList[];
@@ -38,16 +38,13 @@ const LinkList: React.FC<LinkListProps> = (props: LinkListProps) => {
                 <b>Payment Token: </b> {pushPayment.paymentToken}
               </p>
               <p>
-                <b>Required Stake: </b> {Web3.utils.fromWei(pushPayment.requiredStake._hex)}
+                <b>Required Stake: </b> {utils.formatUnits(pushPayment.requiredStake, "wei")}
               </p>
               <p>
-                <b>Amount Staked: </b> {Web3.utils.fromWei(pushPayment.amountStaked._hex)}
+                <b>Amount Staked: </b> {utils.formatUnits(pushPayment.amountStaked, "wei")}
               </p>
               <p>
                 <b>Expiration Date: </b> {moment.unix(pushPayment.expirationDate).format()}
-              </p>
-              <p>
-                <b>Finalized: </b> {pushPayment.finalized ? "true" : "false"}
               </p>
               <p>
                 <b>Created: </b> {pushPayment.createdTimestamp.toString()}
@@ -56,13 +53,13 @@ const LinkList: React.FC<LinkListProps> = (props: LinkListProps) => {
                 <b>Updated: </b> {pushPayment.updatedTimestamp.toString()}
               </p>
               <p>
-                <b>Collateral Recovered: </b> {Web3.utils.fromWei(pushPayment.collateralRecovered._hex)}
+                <b>Collateral Recovered: </b> {utils.formatUnits(pushPayment.collateralRecovered, "wei")}
               </p>
               <p>
                 <b>Dispute Mediator: </b> {pushPayment.disputeMediator}
               </p>
               <p>
-                <b>Payment Amount: </b> {Web3.utils.fromWei(pushPayment.paymentAmount._hex)}
+                <b>Payment Amount: </b> {utils.formatUnits(pushPayment.paymentAmount, "wei")}
               </p>
             </div>
           ))}

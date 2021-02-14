@@ -23,6 +23,12 @@ export class ConfigProviderMock implements IConfigProvider {
         },
         "hypernetProtocolSpace",
         "openThreadKey",
+        {
+          [1337]: {
+            channelFactoryAddress: '0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da',
+            transferRegistryAddress: '0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F'
+          }
+        }
       );
   }
 

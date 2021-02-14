@@ -1,9 +1,9 @@
 import { useEffect, useReducer, useContext } from "react";
-import Web3 from "web3";
 import { StoreContext } from "@web-integration/contexts";
 import { ITokenSelectorOption } from "@hypernetlabs/web-ui/src/interfaces";
 import { Balances, PublicIdentifier, PublicKey, EPaymentType } from "@hypernetlabs/hypernet-core";
 import { PaymentTokenOptionViewModel, EResultStatus, ResultMessage } from "@web-integration/interfaces/objects";
+import {utils} from "ethers";
 
 class PaymentTypeOption {
   constructor(public typeName: string, public type: EPaymentType) {}
@@ -205,9 +205,9 @@ export function usePayment(initialParams: any): IReducerStateReducer {
     proxy
       .sendFunds(
         state.counterPartyAccount,
-        Web3.utils.toWei(`${state.amount}`),
+        utils.parseUnits(state.amount, "wei").toString(),
         state.expirationDate,
-        Web3.utils.toWei(`${state.requiredStake}`),
+        utils.parseUnits(state.requiredStake, "wei").toString(),
         state.selectedPaymentToken?.address,
         state.disputeMediator,
       )

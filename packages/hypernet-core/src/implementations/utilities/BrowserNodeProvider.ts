@@ -30,6 +30,8 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
             logger: this.logUtils.getPino(),
             iframeSrc: config.iframeSource,
             chainProviders: config.chainProviders,
+            chainAddresses: config.chainAddresses,
+            //messagingUrl: 'localhost:80'
           });
 
           this.browserNode = new WrappedBrowserNode(vectorBrowserNode);

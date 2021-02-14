@@ -119,8 +119,12 @@ export class PaymentUtils implements IPaymentUtils {
 
     const amount =
       sortedTransfers.parameterizedTransfer != null
-        ? sortedTransfers.parameterizedTransfer.transferState.rate.deltaAmount
-        : 0;
+        ? sortedTransfers.offerDetails.paymentAmount // @todo fix later? sortedTransfers.parameterizedTransfer.transferState.rate.deltaAmount
+        : sortedTransfers.offerDetails.paymentAmount
+
+    const paymentToken = sortedTransfers.parameterizedTransfer != null
+    ? sortedTransfers.parameterizedTransfer.assetId
+    : sortedTransfers.offerDetails.paymentToken;
 
     return okAsync(
       new PushPayment(
@@ -128,11 +132,10 @@ export class PaymentUtils implements IPaymentUtils {
         to,
         from,
         state,
-        sortedTransfers.offerTransfer.assetId,
+        paymentToken,
         BigNumber.from(sortedTransfers.offerDetails.requiredStake),
         BigNumber.from(amountStaked),
         sortedTransfers.offerDetails.expirationDate,
-        state == EPaymentState.Finalized,
         sortedTransfers.offerDetails.creationDate,
         this.timeUtils.getUnixNow(),
         BigNumber.from(0),
@@ -193,17 +196,20 @@ export class PaymentUtils implements IPaymentUtils {
       pullAmounts.push(new PullAmount(BigNumber.from(message.pullPaymentAmount), this.vectorUtils.getTimestampFromTransfer(pullRecord)))
     }
 
+    const paymentToken = sortedTransfers.parameterizedTransfer != null
+    ? sortedTransfers.parameterizedTransfer.assetId
+    : sortedTransfers.offerDetails.paymentToken;
+
     return okAsync(
       new PullPayment(
         paymentId,
         to,
         from,
         state,
-        sortedTransfers.offerTransfer.assetId,
+        paymentToken,
         BigNumber.from(sortedTransfers.offerDetails.requiredStake),
         BigNumber.from(amountStaked),
         this.timeUtils.getUnixNow() + 60 * 60, // 1 hour
-        false,
         sortedTransfers.offerDetails.creationDate,
         this.timeUtils.getUnixNow(),
         BigNumber.from(0),
@@ -532,7 +538,8 @@ export class PaymentUtils implements IPaymentUtils {
               return errAsync(new LogicalError(`Message transfer was not of type OFFER or PULLPAYMENT, got: ${message.messageType}`));
             }
           } else {
-            return errAsync(new LogicalError("Unreachable code was not unreachable!"));
+            // It's a recognized transfer type- like Withdraw- that we just don't care about
+            return okAsync(ETransferType.Unrecognized);
           }
         }
       });

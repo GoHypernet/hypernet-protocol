@@ -139,7 +139,6 @@ class PaymentServiceMocks {
       BigNumber.from(requiredStake),
       BigNumber.from(amountStaked),
       expirationDate,
-      false,
       unixNow,
       unixNow,
       BigNumber.from(0),
