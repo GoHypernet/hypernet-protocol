@@ -13,12 +13,8 @@ declare global {
 // An actuall non metamask provider set up should be implemented in this class.
 // TODO: Remove this code block when provider implementation is done for the mobile.
 if (!global.window?.ethereum) {
-  // @ts-ignore
-  global.window = {
-    ...global.window,
-    ethereum: {
-      enable: () => {},
-    },
+  global.window.ethereum = {
+    enable: () => new Promise(() => ""),
   };
 }
 

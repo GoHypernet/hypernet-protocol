@@ -1,5 +1,5 @@
 {
-  "name": "hypernet-protocol-web-instance",
+  "name": "hypernet-protocol-mobile-integration",
   "version": "1.0.0",
   "description": "",
   "license": "ISC",
@@ -15,7 +15,6 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/hypernet-core": "^0.0.1",
-    "flatted": "^3.1.1"
+    "@hypernetlabs/hypernet-core": "^0.0.1"
   }
 }

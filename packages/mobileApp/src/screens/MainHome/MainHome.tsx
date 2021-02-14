@@ -18,8 +18,6 @@ const MainHome: React.FC<MainHomeProps> = (props: MainHomeProps) => {
     coreReducer,
   } = state;
 
-  console.log("coreReducer", coreReducer);
-
   return (
     <View>
       <Text>MainHome state: {contacts} </Text>
