@@ -15,6 +15,7 @@ const MainHome: React.FC<MainHomeProps> = (props: MainHomeProps) => {
   const {
     someReducer: { contacts },
     userReducer: { name, id } = {},
+    coreReducer,
   } = state;
 
   return (

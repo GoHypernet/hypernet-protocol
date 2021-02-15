@@ -21,23 +21,17 @@
     "noImplicitReturns": true,
     "resolveJsonModule": true,
     "jsx": "react",
-    "typeRoots": ["./packages/hypernet-core/src/typings", "./node_modules/@types"],
+    "typeRoots": [
+      "./packages/hypernet-core/src/typings",
+      "./node_modules/@types"
+    ],
     "paths": {
-      "@interfaces/*": [
-        "./packages/hypernet-core/src/interfaces/*"
-      ],
-      "@implementations/*": [
-        "./packages/hypernet-core/src/implementations/*"
-      ],
-      "@tests/*": [
-        "./packages/hypernet-core/test/*"
-      ],
-      "@mock/*": [
-        "./packages/hypernet-core/test/mock/*"
-      ],
-      "@web-integration/*": [
-        "./packages/web-integration/src/*"
-      ],
+      "@interfaces/*": ["./packages/hypernet-core/src/interfaces/*"],
+      "@implementations/*": ["./packages/hypernet-core/src/implementations/*"],
+      "@tests/*": ["./packages/hypernet-core/test/*"],
+      "@mock/*": ["./packages/hypernet-core/test/mock/*"],
+      "@web-integration/*": ["./packages/web-integration/src/*"],
+      "@mobile-integration/*": ["./packages/mobile-integration/src/*"],
       "@mobileApp/*": ["./packages/mobileApp/src/*"]
     }
   }
