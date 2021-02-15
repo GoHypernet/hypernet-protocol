@@ -6,6 +6,9 @@
     "references": [
         {
             "path": "../../hypernet-core/src"
+        },
+        {
+            "path": "../../web-integration/src"
         }
     ]
 }

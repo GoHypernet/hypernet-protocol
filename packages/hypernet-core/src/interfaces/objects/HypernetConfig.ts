@@ -1,4 +1,4 @@
-import { ChainProviders, PublicIdentifier } from "@connext/vector-types";
+import { ChainAddresses, ChainProviders, PublicIdentifier } from "@connext/vector-types";
 import { EthereumAddress } from "./EthereumAddress";
 
 export class HypernetConfig {
@@ -14,5 +14,6 @@ export class HypernetConfig {
     public chainProviders: ChainProviders,
     public hypernetProtocolSpace: string,
     public openThreadKey: string,
+    public chainAddresses: ChainAddresses
   ) {}
 }

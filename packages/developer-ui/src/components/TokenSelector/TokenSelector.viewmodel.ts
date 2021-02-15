@@ -46,7 +46,8 @@ export class TokenSelectorViewModel {
 
         for (const option of options) {
           if (option.address === selectedToken) {
-            // console.log(`Selected token: ${option.address}`)
+            // tslint:disable-next-line: no-console
+            console.log(`Selected token: ${option.address}`)
             return option;
           }
         }

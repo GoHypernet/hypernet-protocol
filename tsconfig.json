@@ -24,7 +24,7 @@
       "path": "packages/web-demo/src"
     },
     {
-      "path": "packages/web-instance/src"
+      "path": "packages/mobile-integration/src"
     }
   ]
 }
