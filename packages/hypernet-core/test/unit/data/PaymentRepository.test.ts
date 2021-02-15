@@ -193,7 +193,7 @@ class PaymentRepositoryErrorMocks {
 }
 
 describe("PaymentRepository tests", () => {
-  /* test("Should createPushPayment and return payment without errors", async () => {
+  test("Should createPushPayment and return payment without errors", async () => {
     // Arrange
     const paymentRepositoryMocks = new PaymentRepositoryMocks();
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
@@ -322,7 +322,7 @@ describe("PaymentRepository tests", () => {
     // Assert
     expect(result.isErr()).toBeTruthy();
     expect(error).toBeInstanceOf(VectorError);
-  }); */
+  });
 
   test("Should provideAsset work and return Payment without any errors", async () => {
     // Arrange
