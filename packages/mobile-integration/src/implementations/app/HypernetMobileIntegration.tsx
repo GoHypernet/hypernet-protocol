@@ -1,6 +1,7 @@
 import { IHypernetMobileIntegration } from "@mobile-integration/interfaces/app/IHypernetMobileIntegration";
 import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { IHypernetCore } from "@hypernetlabs/hypernet-core";
+import { stringify } from "flatted";
 
 declare global {
   interface Window {
@@ -17,11 +18,8 @@ export default class HypernetMobileIntegration implements IHypernetMobileIntegra
 
   // wait for the core to be intialized
   public getCoreReadyForWebView(): Promise<IHypernetCore> {
-    // TODO: remove this line when provider part is solved.
-    this.postCoreInstanceToReactNativeWebView(this.webIntegrationInstance.proxy);
-
     return new Promise((resolve) => {
-      this.webIntegrationInstance.getReady().then(async (coreProxy) => {
+      this.webIntegrationInstance.getReady().then((coreProxy) => {
         this.postCoreInstanceToReactNativeWebView(coreProxy);
         resolve(coreProxy);
       });
@@ -29,9 +27,8 @@ export default class HypernetMobileIntegration implements IHypernetMobileIntegra
   }
 
   private postCoreInstanceToReactNativeWebView(coreInstance: IHypernetCore) {
-    // TODO: we may need to serilize coreInstance in s different way to get the prototype methods stringified as well.
     if (window.ReactNativeWebView) {
-      window.ReactNativeWebView.postMessage(JSON.stringify(coreInstance));
+      window.ReactNativeWebView.postMessage(stringify(coreInstance));
     }
   }
 }

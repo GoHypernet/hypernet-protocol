@@ -1,6 +1,7 @@
 import React from "react";
 import { View, StyleSheet, Image } from "react-native";
 import { Button, Text } from "react-native-elements";
+import { useStateContext } from "@mobileApp/state/store";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 import Icon from "react-native-vector-icons/FontAwesome";
 
@@ -9,6 +10,12 @@ import BalanceCard from "./components/BalanceCard";
 interface BalanceProps {}
 
 const Balance: React.FC<BalanceProps> = (props: BalanceProps) => {
+  const { state } = useStateContext();
+
+  const { coreReducer } = state;
+
+  console.log("coreReducer1", coreReducer);
+
   return (
     <View style={styles.container}>
       <View style={styles.filterContainer}>

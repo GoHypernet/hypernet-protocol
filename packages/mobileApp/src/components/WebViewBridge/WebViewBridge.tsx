@@ -3,6 +3,7 @@ import { WebView } from "react-native-webview";
 import { View } from "react-native";
 import { useStateContext } from "@mobileApp/state/store";
 import { CoreActionType } from "@mobileApp/interfaces/state/IcoreReducer";
+import { parse } from "flatted";
 
 interface WebViewBridgeProps {
   sourceUrl?: string;
@@ -23,7 +24,7 @@ const WebViewBridge: React.FC<WebViewBridgeProps> = (props: WebViewBridgeProps) 
   }, []);
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ width: 0, height: 0 }}>
       <WebView
         ref={webViewRef}
         source={{ uri: sourceUrl }}
@@ -32,7 +33,7 @@ const WebViewBridge: React.FC<WebViewBridgeProps> = (props: WebViewBridgeProps) 
         domStorageEnabled={true}
         mixedContentMode="always"
         onMessage={(event) => {
-          const parsedData = JSON.parse(event.nativeEvent.data);
+          const parsedData = parse(event.nativeEvent.data);
           dispatch({ type: CoreActionType.INITIATE_CORE, payload: parsedData });
           dispatch({ type: CoreActionType.LOADING, payload: false });
         }}

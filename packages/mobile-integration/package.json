@@ -15,6 +15,7 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/hypernet-core": "^0.0.1"
+    "@hypernetlabs/hypernet-core": "^0.0.1",
+    "flatted": "^3.1.1"
   }
 }

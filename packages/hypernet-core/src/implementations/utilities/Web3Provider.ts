@@ -19,7 +19,9 @@ export class Web3Provider implements IWeb3Provider {
     this.web3Provider = null;
     this.signer = null;
     this.initializationPromise = null;
-    window.ethereum.autoRefreshOnNetworkChange = false;
+    if (window.ethereum) {
+      window.ethereum.autoRefreshOnNetworkChange = false;
+    }
   }
 
   protected initialize(): ResultAsync<void, BlockchainUnavailableError> {
