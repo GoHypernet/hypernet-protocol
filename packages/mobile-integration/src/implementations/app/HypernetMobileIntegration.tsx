@@ -27,6 +27,7 @@ export default class HypernetMobileIntegration implements IHypernetMobileIntegra
   }
 
   private postCoreInstanceToReactNativeWebView(coreInstance: IHypernetCore) {
+    // TODO: cors same origin issue with an iframe is detected here, need to be resolved. 
     if (window.ReactNativeWebView) {
       window.ReactNativeWebView.postMessage(stringify(coreInstance));
     }

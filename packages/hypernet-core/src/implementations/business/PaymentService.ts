@@ -292,12 +292,12 @@ export class PaymentService implements IPaymentService {
       }
 
       // Let the UI know we got an insurance transfer
-      if (payment instanceof PushPayment) {
+      /* if (payment instanceof PushPayment) {
         context.onPushPaymentUpdated.next(payment);
       }
       if (payment instanceof PullPayment) {
         context.onPullPaymentUpdated.next(payment);
-      }
+      } */
 
       // Notified the UI, move on to advancing the state of the payment.
       // Payment state must be in "staked" in order to progress
