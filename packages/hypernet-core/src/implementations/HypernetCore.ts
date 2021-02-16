@@ -15,6 +15,7 @@ import {
   BrowserNodeProvider,
   ConfigProvider,
   ContextProvider,
+  Web3Provider,
   EthersBlockchainProvider,
   LinkUtils,
   LogUtils,
@@ -62,6 +63,7 @@ import {
 } from "@interfaces/objects/errors";
 import { EBlockchainNetwork } from "@interfaces/types";
 import {
+  IWeb3Provider,
   IBlockchainProvider,
   IBrowserNodeProvider,
   IConfigProvider,
@@ -96,6 +98,7 @@ export class HypernetCore implements IHypernetCore {
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
+  protected web3Provider: IWeb3Provider;
   protected blockchainProvider: IBlockchainProvider;
   protected boxUtils: IThreeBoxUtils;
   protected configProvider: IConfigProvider;
@@ -173,7 +176,8 @@ export class HypernetCore implements IHypernetCore {
       this.onPullPaymentUpdated,
       this.onBalancesChanged,
     );
-    this.blockchainProvider = new EthersBlockchainProvider();
+    this.web3Provider = new Web3Provider();
+    this.blockchainProvider = new EthersBlockchainProvider(this.web3Provider);
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(network, this.logUtils, config);
     this.linkUtils = new LinkUtils(this.contextProvider);
@@ -434,14 +438,15 @@ export class HypernetCore implements IHypernetCore {
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
-    return this.paymentService.authorizeFunds(counterPartyAccount,
+    return this.paymentService.authorizeFunds(
+      counterPartyAccount,
       totalAuthorized,
       expirationDate,
       deltaAmount,
       deltaTime,
       requiredStake,
       paymentToken,
-      disputeMediator
+      disputeMediator,
     );
   }
 
@@ -450,7 +455,10 @@ export class HypernetCore implements IHypernetCore {
    * @param paymentId the payment for which to pull funds from
    * @param amount the amount of funds to pull
    */
-  public pullFunds(paymentId: string, amount: BigNumber): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  public pullFunds(
+    paymentId: string,
+    amount: BigNumber,
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     return this.paymentService.pullFunds(paymentId, amount);
   }
 

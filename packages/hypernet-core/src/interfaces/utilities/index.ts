@@ -1,3 +1,4 @@
+export * from "./IWeb3Provider";
 export * from "./IBlockchainProvider";
 export * from "./IBrowserNode";
 export * from "./IBrowserNodeProvider";

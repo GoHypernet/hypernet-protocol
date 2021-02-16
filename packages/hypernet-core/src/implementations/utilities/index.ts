@@ -11,3 +11,4 @@ export * from "./PaymentUtils";
 export * from "./ResultUtils";
 export * from "./VectorUtils";
 export * from "./WrappedBrowserNode";
+export * from "./Web3Provider";
