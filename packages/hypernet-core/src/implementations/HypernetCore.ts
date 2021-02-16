@@ -176,10 +176,10 @@ export class HypernetCore implements IHypernetCore {
       this.onPullPaymentUpdated,
       this.onBalancesChanged,
     );
-    this.web3Provider = new Web3Provider();
+    this.configProvider = new ConfigProvider(network, this.logUtils, config);
+    this.web3Provider = new Web3Provider(this.configProvider);
     this.blockchainProvider = new EthersBlockchainProvider(this.web3Provider);
     this.paymentIdUtils = new PaymentIdUtils();
-    this.configProvider = new ConfigProvider(network, this.logUtils, config);
     this.linkUtils = new LinkUtils(this.contextProvider);
     this.boxUtils = new ThreeBoxUtils(this.blockchainProvider, this.contextProvider, this.configProvider);
 

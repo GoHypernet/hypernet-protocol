@@ -1,5 +1,6 @@
 import { ResultAsync } from "@interfaces/objects";
 import { BlockchainUnavailableError } from "@interfaces/objects/errors";
+import { IConfigProvider } from "@interfaces/utilities";
 import { IWeb3Provider } from "@interfaces/utilities/IWeb3Provider";
 import { Wallet, ethers } from "ethers";
 import { okAsync } from "neverthrow";
@@ -15,7 +16,7 @@ export class Web3Provider implements IWeb3Provider {
   protected signer: ethers.providers.JsonRpcSigner | null;
   protected initializationPromise: ResultAsync<void, BlockchainUnavailableError> | null;
 
-  constructor() {
+  constructor(protected configProvider: IConfigProvider) {
     this.web3Provider = null;
     this.signer = null;
     this.initializationPromise = null;
@@ -44,16 +45,15 @@ export class Web3Provider implements IWeb3Provider {
     // if metamask is not installed, use the wallet mnemonic to get the signer
     else {
       // get provider from JsonRpcProvider
-      this.web3Provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
+      this.initializationPromise = this.configProvider.getConfig().map((config) => {
+        this.web3Provider = new ethers.providers.JsonRpcProvider(config.chainProviders[config.chainId]);
 
-      // connect to a wallet to get the signer from.
-      const owner = Wallet.fromMnemonic(
-        "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat",
-      ).connect(this.web3Provider);
+        // connect to a wallet to get the signer from.
+        const owner = Wallet.fromMnemonic(config.routerMnemonic).connect(this.web3Provider);
 
-      this.signer = this.web3Provider.getSigner(owner.address);
-
-      this.initializationPromise = okAsync(undefined);
+        this.signer = this.web3Provider.getSigner(owner.address);
+        return;
+      });
     }
 
     //this.initializationPromise = okAsync(this.web3Provider);
