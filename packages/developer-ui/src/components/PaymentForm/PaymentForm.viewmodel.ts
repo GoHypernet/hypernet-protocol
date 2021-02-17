@@ -46,7 +46,7 @@ export class PaymentFormViewModel {
     });
 
     this.pushPayment = new PushPaymentFormParams(this.core, this.remoteAccount);
-    this.pullPayment = new PullPaymentFormParams(this.core);
+    this.pullPayment = new PullPaymentFormParams(this.core, this.remoteAccount);
   }
 }
 

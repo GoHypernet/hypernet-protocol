@@ -318,29 +318,6 @@ describe("PaymentService tests", () => {
     expect(result._unsafeUnwrapErr()).toBeInstanceOf(InvalidParametersError);
   });
 
-  test("Should stakePosted return error if requiredStake is  not equal to the amountStaked", async () => {
-    // Arrange
-    const paymentServiceMock = new PaymentServiceMocks();
-
-    const payment = paymentServiceMock.factoryPushPayment(
-      publicIdentifier2,
-      publicIdentifier,
-      EPaymentState.Staked,
-      "13",
-    );
-    paymentServiceMock.setExistingPayments([payment]);
-
-    const paymentService = paymentServiceMock.factoryPaymentService();
-
-    // Act
-    const result = await paymentService.stakePosted(paymentId);
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    expect(result._unsafeUnwrapErr()).toBeInstanceOf(OfferMismatchError);
-  });
-
   test("Should stakePosted return error if payment state is not Staked", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();

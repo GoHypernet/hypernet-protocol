@@ -126,6 +126,8 @@ class PaymentRepositoryMocks {
         commonPaymentId,
         unixNow,
         expirationDate,
+        undefined,
+        undefined,
       ),
     ).thenReturn(
       okAsync({
@@ -330,6 +332,7 @@ describe("PaymentRepository tests", () => {
 
     // Act
     const result = await repo.provideAsset(commonPaymentId);
+    console.log("result: ", result);
 
     // Assert
     expect(result).toBeDefined();

@@ -1,5 +1,5 @@
 import ko from "knockout";
-import { EPaymentState, IHypernetCore, PullPayment } from "@hypernetlabs/hypernet-core";
+import { BigNumber, EPaymentState, IHypernetCore, PullPayment } from "@hypernetlabs/hypernet-core";
 import html from "./PullPayment.template.html";
 import moment from "moment";
 import { PaymentStatusParams } from "../PaymentStatus/PaymentStatus.viewmodel";
@@ -24,13 +24,19 @@ export class PullPaymentViewModel {
   public collateralRecovered: ko.Observable<string>;
   public disputeMediator: ko.Observable<string>;
   public authorizedAmount: ko.Observable<string>;
-  public amountTransferred: ko.Observable<string>;
+  public transferedAmount: ko.Observable<string>;
+  public deltaAmount: ko.Observable<string>;
+  public deltaTime: ko.Observable<number>;
+
   // public ledger: PullAmount[];
   public acceptButton: ButtonParams;
   public showAcceptButton: ko.PureComputed<boolean>;
+  public pullButton: ButtonParams;
+  public showPullButton: ko.PureComputed<boolean>;
 
   protected core: IHypernetCore;
   protected paymentId: string;
+  protected publicIdentifier: ko.Observable<string | null>;
 
   constructor(params: PullPaymentParams) {
     this.core = params.core;
@@ -50,7 +56,9 @@ export class PullPaymentViewModel {
     this.collateralRecovered = ko.observable(params.payment.collateralRecovered.toString());
     this.disputeMediator = ko.observable(params.payment.disputeMediator);
     this.authorizedAmount = ko.observable(params.payment.authorizedAmount.toString());
-    this.amountTransferred = ko.observable(params.payment.amountTransferred.toString());
+    this.transferedAmount = ko.observable(params.payment.transferedAmount.toString());
+    this.deltaAmount = ko.observable(params.payment.deltaAmount.toString());
+    this.deltaTime = ko.observable(params.payment.deltaTime);
 
     this.core.onPushPaymentReceived.subscribe({
       next: (payment) => {
@@ -86,6 +94,24 @@ export class PullPaymentViewModel {
 
     this.showAcceptButton = ko.pureComputed(() => {
       return this.state().state === EPaymentState.Proposed;
+    });
+
+    this.pullButton = new ButtonParams("Pull", async () => {
+      return await this.core.pullFunds(this.paymentId, BigNumber.from(1))
+      .mapErr((e) => {
+        alert("Unable to pull funds!");
+        console.error(e);
+      });
+    });
+
+    this.showPullButton = ko.pureComputed(() => {
+      const state = this.state();
+      return state.state === EPaymentState.Approved && this.publicIdentifier() == this.to();
+    });
+
+    this.publicIdentifier = ko.observable(null);
+    this.core.getPublicIdentifier().map((pi) => {
+      this.publicIdentifier(pi);
     });
   }
 }

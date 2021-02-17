@@ -44,5 +44,8 @@
     {
       "path": "packages/utils/src"
     },
+    {
+      "path": "packages/mobile-integration/src"
+    }
   ]
 }

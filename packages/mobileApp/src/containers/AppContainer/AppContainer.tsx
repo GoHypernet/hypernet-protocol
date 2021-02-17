@@ -1,18 +1,24 @@
 import React from "react";
 import Router from "../Router";
+import LinearGradient from "react-native-linear-gradient";
 import { StoreProvider } from "@mobileApp/state/store";
-/* import { IHypernetCore, HypernetCore, EBlockchainNetwork } from "@hypernetlabs/hypernet-core";
-
-// Instantiate the hypernet core.
-const core: IHypernetCore = new HypernetCore(EBlockchainNetwork.Localhost);
-console.log("core: ", core); */
+import { appBackgroundGradientColors } from "@mobileApp/constants/theme";
+import WebViewBridge from "@mobileApp/components/WebViewBridge";
 
 interface AppContainerProps {}
 
 const AppContainer: React.FC<AppContainerProps> = (props: AppContainerProps) => {
   return (
     <StoreProvider>
-      <Router initialRouteName="MainHome" />
+      {/* <WebViewBridge /> */}
+      <LinearGradient
+        colors={appBackgroundGradientColors}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1 }}
+      >
+        <Router initialRouteName="Splash" />
+      </LinearGradient>
     </StoreProvider>
   );
 };

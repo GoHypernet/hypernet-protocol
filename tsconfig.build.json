@@ -21,7 +21,10 @@
     "noImplicitReturns": true,
     "resolveJsonModule": true,
     "jsx": "react",
-    "typeRoots": ["./packages/hypernet-core/src/typings", "./node_modules/@types"],
+    "typeRoots": [
+      "./packages/hypernet-core/src/typings",
+      "./node_modules/@types"
+    ],
     "paths": {
       "@interfaces/*": [
         "./packages/hypernet-core/src/interfaces/*"
@@ -38,6 +41,7 @@
       "@web-integration/*": [
         "./packages/web-integration/src/*"
       ],
+      "@mobile-integration/*": ["./packages/mobile-integration/src/*"],
       "@mobileApp/*": ["./packages/mobileApp/src/*"],
       "@merchant-connector/*": ["./packages/merchant-connector/src/*"],
       "@merchant-iframe/*": ["./packages/merchant-iframe/src/*"],
