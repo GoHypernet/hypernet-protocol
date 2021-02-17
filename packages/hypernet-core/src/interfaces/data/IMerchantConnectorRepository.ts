@@ -19,4 +19,6 @@ export interface IMerchantConnectorRepository {
    * @param signature
    */
   addAuthorizedMerchant(merchantUrl: URL, signature: string): ResultAsync<void, PersistenceError>;
+
+  getAuthorizedMerchants(): ResultAsync<URL[], PersistenceError>;
 }

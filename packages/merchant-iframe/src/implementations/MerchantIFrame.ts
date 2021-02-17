@@ -6,7 +6,7 @@ import { ContextProvider } from "@merchant-iframe/implementations/utils";
 import { MerchantService } from "@merchant-iframe/implementations/business/MerchantService";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { IMerchantIFrameApi } from "@merchant-iframe/interfaces/api";
-import {IAjaxUtils, AxiosAjaxUtils} from "@hypernetlabs/utils";
+import { IAjaxUtils, AxiosAjaxUtils } from "@hypernetlabs/utils";
 
 export class MerchantIframe {
   public contextProvider: IContextProvider;

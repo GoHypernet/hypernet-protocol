@@ -43,8 +43,7 @@ interface IAuthorizedMerchantEntry {
 export class MerchantConnectorRepository implements IMerchantConnectorRepository {
   protected activatedMerchants: Map<URL, MerchantConnectorProxy>;
 
-  constructor(protected blockchainProvider: IBlockchainProvider,
-    protected ajaxUtils: IAjaxUtils) {
+  constructor(protected blockchainProvider: IBlockchainProvider, protected ajaxUtils: IAjaxUtils) {
     this.activatedMerchants = new Map();
   }
 
@@ -63,37 +62,36 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     });
   }
 
-
   public addAuthorizedMerchant(merchantUrl: URL, merchantSignature: string): ResultAsync<void, PersistenceError> {
     // First, we will create the proxy
     const proxy = new MerchantConnectorProxy(null, merchantUrl.toString());
 
-    return proxy.activate()
-    .andThen((vals) => {
-      // With the proxy activated, we can get the validated merchant signature
-      return ResultUtils.combine([proxy.getValidatedSignature(), this.blockchainProvider.getSigner()])
-    })
-    .andThen((vals) => {
-      const [merchantSignature, signer] = vals;
+    return proxy
+      .activate()
+      .andThen((vals) => {
+        // With the proxy activated, we can get the validated merchant signature
+        return ResultUtils.combine([proxy.getValidatedSignature(), this.blockchainProvider.getSigner()]);
+      })
+      .andThen((vals) => {
+        const [merchantSignature, signer] = vals;
 
-      // merchantSignature has been validated by the iframe, so this is already confirmed.
-      // Now we need to get an authorization signature
-      return ResultAsync.fromPromise(signer.signMessage(merchantSignature),
-      e => e as MerchantConnectorError);
-    })
-    .andThen((authorizationSignature) => {
-      const authorizedMerchants = this._getAuthorizedMerchants();
-      
-      authorizedMerchants.set(merchantUrl, authorizationSignature);
+        // merchantSignature has been validated by the iframe, so this is already confirmed.
+        // Now we need to get an authorization signature
+        return ResultAsync.fromPromise(signer.signMessage(merchantSignature), (e) => e as MerchantConnectorError);
+      })
+      .andThen((authorizationSignature) => {
+        const authorizedMerchants = this._getAuthorizedMerchants();
 
-      this._setAuthorizedMerchants(authorizedMerchants);
-      
-      // Activate the merchant connector
-      return proxy.activateConnector();
-    })
-    .map(() => {
-      this.activatedMerchants.set(merchantUrl, proxy);
-    })
+        authorizedMerchants.set(merchantUrl, authorizationSignature);
+
+        this._setAuthorizedMerchants(authorizedMerchants);
+
+        // Activate the merchant connector
+        return proxy.activateConnector();
+      })
+      .map(() => {
+        this.activatedMerchants.set(merchantUrl, proxy);
+      });
   }
 
   public getAuthorizedMerchants(): ResultAsync<URL[], PersistenceError> {
@@ -121,8 +119,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
     const authorizedMerchants = new Map<URL, string>();
     for (const authorizedMerchantEntry of authorizedMerchantEntries) {
-      authorizedMerchants.set(new URL(authorizedMerchantEntry.merchantUrl), 
-      authorizedMerchantEntry.authorizationSignature);
+      authorizedMerchants.set(
+        new URL(authorizedMerchantEntry.merchantUrl),
+        authorizedMerchantEntry.authorizationSignature,
+      );
     }
     return authorizedMerchants;
   }
@@ -133,14 +133,13 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
   public activateAuthorizedMerchants(merchantUrls: URL[]): ResultAsync<void, MerchantConnectorError> {
     const activationResults = new Array<ResultAsync<void, Error>>();
-    
+
     for (const merchantUrl of merchantUrls) {
       const proxy = new MerchantConnectorProxy(null, merchantUrl.toString());
       this.activatedMerchants.set(merchantUrl, proxy);
       activationResults.push(proxy.activate());
     }
 
-    return ResultUtils.combine(activationResults)
-    .map(() => {});
+    return ResultUtils.combine(activationResults).map(() => {});
   }
 }

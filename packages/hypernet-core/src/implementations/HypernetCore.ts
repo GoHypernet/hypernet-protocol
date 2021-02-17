@@ -8,6 +8,7 @@ import {
 } from "@implementations/business";
 import {
   AccountsRepository,
+  MerchantConnectorRepository,
   PaymentRepository,
   ThreeBoxMessagingRepository,
   VectorLinkRepository,
@@ -34,7 +35,13 @@ import {
   IMerchantService,
   IPaymentService,
 } from "@interfaces/business";
-import { IAccountsRepository, ILinkRepository, IMessagingRepository, IPaymentRepository } from "@interfaces/data";
+import {
+  IAccountsRepository,
+  ILinkRepository,
+  IMerchantConnectorRepository,
+  IMessagingRepository,
+  IPaymentRepository,
+} from "@interfaces/data";
 import { IHypernetCore } from "@interfaces/IHypernetCore";
 import {
   Balances,
@@ -57,6 +64,7 @@ import {
   InsufficientBalanceError,
   LogicalError,
   MerchantValidationError,
+  PersistenceError,
   RouterChannelUnknownError,
   VectorError,
 } from "@interfaces/objects/errors";
@@ -77,7 +85,7 @@ import {
 import { IMessagingListener, IVectorListener } from "@interfaces/api";
 import { Subject } from "rxjs";
 import { errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
-import { ResultUtils } from "@hypernetlabs/utils";
+import { AxiosAjaxUtils, IAjaxUtils, ResultUtils } from "@hypernetlabs/utils";
 
 /**
  * The top-level class-definition for Hypernet Core.
@@ -93,6 +101,7 @@ export class HypernetCore implements IHypernetCore {
   public onPullPaymentUpdated: Subject<PullPayment>;
   public onPullPaymentApproved: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
+  public onMerchantAuthorized: Subject<URL>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -106,12 +115,14 @@ export class HypernetCore implements IHypernetCore {
   protected linkUtils: ILinkUtils;
   protected paymentIdUtils: IPaymentIdUtils;
   protected logUtils: ILogUtils;
+  protected ajaxUtils: IAjaxUtils;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
   protected linkRepository: ILinkRepository;
   protected paymentRepository: IPaymentRepository;
   protected threeboxMessagingRepository: IMessagingRepository;
+  protected merchantConnectorRepository: IMerchantConnectorRepository;
 
   // Business Layer Stuff
   protected accountService: IAccountService;
@@ -148,6 +159,7 @@ export class HypernetCore implements IHypernetCore {
     this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onPullPaymentApproved = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
+    this.onMerchantAuthorized = new Subject<URL>();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -173,6 +185,7 @@ export class HypernetCore implements IHypernetCore {
       this.onPushPaymentUpdated,
       this.onPullPaymentUpdated,
       this.onBalancesChanged,
+      this.onMerchantAuthorized,
     );
     this.blockchainProvider = new EthersBlockchainProvider();
     this.paymentIdUtils = new PaymentIdUtils();
@@ -198,6 +211,7 @@ export class HypernetCore implements IHypernetCore {
       this.browserNodeProvider,
       this.timeUtils,
     );
+    this.ajaxUtils = new AxiosAjaxUtils();
 
     this.accountRepository = new AccountsRepository(
       this.blockchainProvider,
@@ -232,6 +246,8 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
     );
 
+    this.merchantConnectorRepository = new MerchantConnectorRepository(this.blockchainProvider, this.ajaxUtils);
+
     this.paymentService = new PaymentService(
       this.linkRepository,
       this.accountRepository,
@@ -245,7 +261,7 @@ export class HypernetCore implements IHypernetCore {
     this.controlService = new ControlService(this.contextProvider, this.threeboxMessagingRepository);
     this.linkService = new LinkService(this.linkRepository);
     this.developmentService = new DevelopmentService(this.accountRepository);
-    this.merchantService = new MerchantService(this.blockchainProvider);
+    this.merchantService = new MerchantService(this.merchantConnectorRepository, this.contextProvider);
 
     this.vectorAPIListener = new VectorAPIListener(
       this.browserNodeProvider,
@@ -525,5 +541,9 @@ export class HypernetCore implements IHypernetCore {
 
   public authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MerchantValidationError> {
     return this.merchantService.authorizeMerchant(merchantUrl);
+  }
+
+  public getAuthorizedMerchants(): ResultAsync<URL[], PersistenceError> {
+    return this.merchantService.getAuthorizedMerchants();
   }
 }

@@ -20,6 +20,7 @@ import {
   CoreUninitializedError,
   InsufficientBalanceError,
   LogicalError,
+  PersistenceError,
   RouterChannelUnknownError,
   VectorError,
 } from "@interfaces/objects/errors";
@@ -197,6 +198,7 @@ export interface IHypernetCore {
 
   authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MerchantValidationError>;
 
+  getAuthorizedMerchants(): ResultAsync<URL[], PersistenceError>;
   /**
    * Observables for seeing what's going on
    */
@@ -209,4 +211,5 @@ export interface IHypernetCore {
   onPushPaymentReceived: Subject<PushPayment>;
   onPullPaymentApproved: Subject<PullPayment>;
   onBalancesChanged: Subject<Balances>;
+  onMerchantAuthorized: Subject<URL>;
 }

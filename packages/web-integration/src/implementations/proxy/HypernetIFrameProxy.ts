@@ -20,6 +20,7 @@ import {
   Result,
   ResultAsync,
   MerchantValidationError,
+  PersistenceError,
 } from "@hypernetlabs/hypernet-core";
 import { Subject } from "rxjs";
 import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
@@ -46,6 +47,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     this.onPushPaymentUpdated = new Subject<PushPayment>();
     this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
+    this.onMerchantAuthorized = new Subject<URL>();
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -90,6 +92,10 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
 
         child.on("onBalancesChanged", (data: Balances) => {
           this.onBalancesChanged.next(data);
+        });
+
+        child.on("onMerchantAuthorized", (data: string) => {
+          this.onMerchantAuthorized.next(new URL(data));
         });
 
         // Setup a listener for the "initialized" event.
@@ -303,6 +309,12 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return call.getResult();
   }
 
+  public getAuthorizedMerchants(): ResultAsync<URL[], PersistenceError> {
+    const call = this._createCall("getAuthorizedMerchants", null);
+
+    return call.getResult();
+  }
+
   /**
    * Observables for seeing what's going on
    */
@@ -315,4 +327,5 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   public onPushPaymentReceived: Subject<PushPayment>;
   public onPullPaymentApproved: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
+  public onMerchantAuthorized: Subject<URL>;
 }

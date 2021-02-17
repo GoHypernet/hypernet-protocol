@@ -4,7 +4,8 @@ import html from "./PullPaymentForm.template.html";
 import moment from "moment";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
 import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
-import { utils } from "ethers"
+import { utils } from "ethers";
+import { AuthorizedMerchantSelectorParams } from "../AuthorizedMerchantSelector/AuthorizedMerchantSelector.viewmodel";
 
 export class PullPaymentFormParams {
   constructor(
@@ -26,6 +27,7 @@ export class PullPaymentFormViewModel {
   public deltaAmount: ko.Observable<string>;
   public deltaTime: ko.Observable<string>;
   public tokenSelector: TokenSelectorParams;
+  public merchantSelector: AuthorizedMerchantSelectorParams;
 
   public submitButton: ButtonParams;
 
@@ -43,6 +45,7 @@ export class PullPaymentFormViewModel {
     this.deltaTime = ko.observable("0");
 
     this.tokenSelector = new TokenSelectorParams(this.core, ko.observable(null), true);
+    this.merchantSelector = new AuthorizedMerchantSelectorParams(this.core, ko.observable(null));
 
     this.submitButton = new ButtonParams(
       "Submit Payment",
@@ -50,6 +53,12 @@ export class PullPaymentFormViewModel {
         const selectedPaymentTokenAddress = this.tokenSelector.selectedToken();
 
         if (selectedPaymentTokenAddress == null) {
+          return null;
+        }
+
+        const selectedMerchantUrl = this.merchantSelector.selectedAuthorizedMerchant();
+
+        if (selectedMerchantUrl == null) {
           return null;
         }
 
@@ -68,7 +77,7 @@ export class PullPaymentFormViewModel {
             deltaTime,
             requiredStake,
             selectedPaymentTokenAddress,
-            "0x0000000000000000000000000000000000000001", // @todo replace with an actual mediator address!
+            selectedMerchantUrl,
           );
         } catch {
           return null;
@@ -83,7 +92,7 @@ export class PullPaymentFormViewModel {
         }
 
         try {
-          moment(this.expirationDate())
+          moment(this.expirationDate());
           utils.parseUnits(this.amount(), "wei");
           utils.parseUnits(this.requiredStake(), "wei");
           utils.parseUnits(this.deltaAmount(), "wei");

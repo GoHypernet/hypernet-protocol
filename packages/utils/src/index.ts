@@ -1,4 +1,4 @@
-export * from "./AxiosAjaxUtils"
+export * from "./AxiosAjaxUtils";
 export * from "./ResultUtils";
 export * from "./ChildProxy";
 export * from "./IAjaxUtils";
