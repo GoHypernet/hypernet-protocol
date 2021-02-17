@@ -41,6 +41,8 @@
     {
       "path": "packages/web-demo/src"
     },
-    
+    {
+      "path": "packages/utils/src"
+    },
   ]
 }

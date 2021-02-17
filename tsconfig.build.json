@@ -41,7 +41,8 @@
       "@mobileApp/*": ["./packages/mobileApp/src/*"],
       "@merchant-connector/*": ["./packages/merchant-connector/src/*"],
       "@merchant-iframe/*": ["./packages/merchant-iframe/src/*"],
-      "@test-merchant-connector/*": ["./packages/test-merchant-connector/src/*"]
+      "@test-merchant-connector/*": ["./packages/test-merchant-connector/src/*"],
+      "@utils/*": ["./packages/utils/src/*"]
     }
   }
 }

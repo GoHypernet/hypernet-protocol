@@ -8,6 +8,6 @@ export * from "./LinkUtils";
 export * from "./LogUtils";
 export * from "./PaymentIdUtils";
 export * from "./PaymentUtils";
-export * from "./ResultUtils";
+export * from "./TimeUtils";
 export * from "./VectorUtils";
 export * from "./WrappedBrowserNode";

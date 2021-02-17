@@ -38,7 +38,7 @@ import {
   VectorError,
 } from "@interfaces/objects/errors";
 import { errAsync, okAsync } from "neverthrow";
-import { ResultUtils } from "@implementations/utilities";
+import {ResultUtils} from "@hypernetlabs/utils";
 import moment from "moment";
 import { IHypernetPullPaymentDetails } from "../../interfaces/objects/HypernetPullPaymentDetails";
 import { EMessageTransferType } from "@interfaces/types/EMessageTransferType";

@@ -1,7 +1,7 @@
 {
-  "name": "@hypernetlabs/merchant-iframe",
+  "name": "@hypernetlabs/utils",
   "version": "0.0.1",
-  "description": "Mediator iFrame package. This is used to sandbox the connector code away from the running hypernet core.",
+  "description": "Utilities used by Hypernet Labs packages",
   "license": "ISC",
   "repository": {
     "type": "git",
@@ -16,9 +16,8 @@
     "Blockchain",
     "Hypernet",
     "SDK",
-    "Ethereum",
-    "Vector",
-    "Connext"
+    "Nitro",
+    "Ethereum"
   ],
   "main": "dist/index.js",
   "files": [
@@ -31,7 +30,6 @@
     "build": "yarn clean && yarn compile",
     "clean": "rimraf dist",
     "compile": "tsc --build src/tsconfig.json",
-    "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",
     "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",
@@ -42,18 +40,11 @@
     "test:watch": "jest --watch --color --detectOpenHandles",
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags",
-    "webpack": "webpack"
+    "postversion": "git push && git push --tags"
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/utils": "^0.0.1",
-    "@hypernetlabs/hypernet-core": "^0.0.1",
-    "@hypernetlabs/merchant-connector": "^0.0.1",
-    "axios": "^0.21.1",
-    "ethers": "^5.0.31",
     "neverthrow": "^4.1.0",
-    "postmate": "^1.5.2",
-    "rxjs": "^6.6.2"
+    "postmate": "^1.5.2"
   }
 }

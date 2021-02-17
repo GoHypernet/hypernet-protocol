@@ -22,8 +22,8 @@ import {
   PaymentUtils,
   PaymentIdUtils,
   ThreeBoxUtils,
+  TimeUtils,
   VectorUtils,
-  ResultUtils,
 } from "@implementations/utilities";
 import { ThreeBoxMessagingListener, VectorAPIListener } from "@implementations/api";
 import {
@@ -77,7 +77,8 @@ import {
 import { IMessagingListener, IVectorListener } from "@interfaces/api";
 import { Subject } from "rxjs";
 import { errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
-import { TimeUtils } from "./utilities/TimeUtils";
+import {ResultUtils} from "@hypernetlabs/utils";
+
 
 /**
  * The top-level class-definition for Hypernet Core.

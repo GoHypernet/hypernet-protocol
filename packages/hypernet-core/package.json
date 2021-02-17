@@ -46,6 +46,7 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
+    "@hypernetlabs/utils": "^0.0.1",
     "3box": "^1.22.2",
     "@ceramicnetwork/http-client": "^0.9.5",
     "@connext/vector-browser-node": "^0.1.15-beta.12",

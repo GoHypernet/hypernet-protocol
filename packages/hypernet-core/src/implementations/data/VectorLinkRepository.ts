@@ -1,4 +1,4 @@
-import { ResultUtils } from "@implementations/utilities";
+import {ResultUtils} from "@hypernetlabs/utils";
 import { ILinkRepository } from "@interfaces/data";
 import { HypernetLink, Payment, PublicIdentifier, ResultAsync } from "@interfaces/objects";
 import {

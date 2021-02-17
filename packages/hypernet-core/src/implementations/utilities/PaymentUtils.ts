@@ -39,7 +39,7 @@ import {
   IVectorUtils,
 } from "@interfaces/utilities";
 import { errAsync, okAsync } from "neverthrow";
-import { ResultUtils } from "@implementations/utilities";
+import {ResultUtils} from "@hypernetlabs/utils";
 import { v4 as uuidv4 } from "uuid";
 import { EMessageTransferType } from "@interfaces/types/EMessageTransferType";
 import { IHypernetPullPaymentDetails } from "@interfaces/objects/HypernetPullPaymentDetails";

@@ -1,4 +1,4 @@
-import { ResultUtils } from "@implementations/utilities";
+import {ResultUtils} from "@hypernetlabs/utils";
 import { IMerchantService } from "@interfaces/business";
 import { PublicKey, ResultAsync } from "@interfaces/objects";
 import { CoreUninitializedError, MediatorValidationError, PersistenceError } from "@interfaces/objects/errors";

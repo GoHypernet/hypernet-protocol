@@ -1,5 +1,5 @@
 import { NodeResponses } from "@connext/vector-types";
-import { ResultUtils } from "@implementations/utilities";
+import {ResultUtils} from "@hypernetlabs/utils";
 import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
 import {
   BigNumber,
