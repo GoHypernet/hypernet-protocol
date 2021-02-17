@@ -19,6 +19,7 @@ import {
   Payment,
   Result,
   ResultAsync,
+  MerchantValidationError,
 } from "@hypernetlabs/hypernet-core";
 import { Subject } from "rxjs";
 import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
@@ -290,13 +291,13 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return call.getResult();
   }
 
-  public authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MediatorValidationError> {
+  public authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MerchantValidationError> {
     const call = this._createCall("authorizeMerchant", merchantUrl);
 
     return call.getResult();
   }
 
-  public startConnectorFlow(connector?: string): ResultAsync<void, CoreUninitializedError | MediatorValidationError> {
+  public startConnectorFlow(connector?: string): ResultAsync<void, CoreUninitializedError | MerchantValidationError> {
     const call = this._createCall("startConnectorFlow", connector);
 
     return call.getResult();

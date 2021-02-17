@@ -44,6 +44,7 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
+    "axios": "^0.21.1",
     "neverthrow": "^4.1.0",
     "postmate": "^1.5.2"
   }

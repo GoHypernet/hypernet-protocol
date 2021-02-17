@@ -1,8 +1,8 @@
 import { IMerchantConnectorRepository } from "@interfaces/data";
 import { HexString, PublicKey } from "@interfaces/objects";
-import { MerchantConnectorError, PersistenceError } from "@interfaces/objects/errors";
+import { MerchantConnectorError, MerchantValidationError, PersistenceError } from "@interfaces/objects/errors";
 import { okAsync, ResultAsync } from "neverthrow";
-import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
+import { ParentProxy, ResultUtils, IAjaxUtils } from "@hypernetlabs/utils";
 import { IBlockchainProvider } from "@interfaces/utilities";
 
 class MerchantConnectorProxy extends ParentProxy {
@@ -27,6 +27,12 @@ class MerchantConnectorProxy extends ParentProxy {
 
     return call.getResult();
   }
+
+  public getValidatedSignature(): ResultAsync<string, MerchantValidationError> {
+    const call = this._createCall("getValidatedSignature", null);
+
+    return call.getResult();
+  }
 }
 
 interface IAuthorizedMerchantEntry {
@@ -37,31 +43,57 @@ interface IAuthorizedMerchantEntry {
 export class MerchantConnectorRepository implements IMerchantConnectorRepository {
   protected activatedMerchants: Map<URL, MerchantConnectorProxy>;
 
-  constructor(protected blockchainProvider: IBlockchainProvider) {
+  constructor(protected blockchainProvider: IBlockchainProvider,
+    protected ajaxUtils: IAjaxUtils) {
     this.activatedMerchants = new Map();
   }
 
   public getMerchantConnectorSignature(merchantUrl: URL): ResultAsync<string, Error> {
-    throw new Error("Method not implemented.");
+    const url = new URL(merchantUrl.toString());
+    url.pathname = "signature";
+    return this.ajaxUtils.get<string, Error>(url).andThen((response) => {
+      return okAsync(response);
+    });
+  }
+  public getMerchantPublicKey(merchantUrl: URL): ResultAsync<PublicKey, Error> {
+    const url = new URL(merchantUrl.toString());
+    url.pathname = "publicKey";
+    return this.ajaxUtils.get<string, Error>(url).andThen((response) => {
+      return okAsync(response);
+    });
   }
 
-  public getMerchantPublicKey(merchantUrl: URL): ResultAsync<PublicKey, Error> {
-    throw new Error("Method not implemented.");
-  }
 
   public addAuthorizedMerchant(merchantUrl: URL, merchantSignature: string): ResultAsync<void, PersistenceError> {
-    return this.blockchainProvider.getSigner()
-    .andThen((signer) => {
+    // First, we will create the proxy
+    const proxy = new MerchantConnectorProxy(null, merchantUrl.toString());
+
+    return proxy.activate()
+    .andThen((vals) => {
+      // With the proxy activated, we can get the validated merchant signature
+      return ResultUtils.combine([proxy.getValidatedSignature(), this.blockchainProvider.getSigner()])
+    })
+    .andThen((vals) => {
+      const [merchantSignature, signer] = vals;
+
+      // merchantSignature has been validated by the iframe, so this is already confirmed.
+      // Now we need to get an authorization signature
       return ResultAsync.fromPromise(signer.signMessage(merchantSignature),
       e => e as MerchantConnectorError);
     })
-    .map((authorizationSignature) => {
+    .andThen((authorizationSignature) => {
       const authorizedMerchants = this._getAuthorizedMerchants();
       
       authorizedMerchants.set(merchantUrl, authorizationSignature);
 
       this._setAuthorizedMerchants(authorizedMerchants);
-    });
+      
+      // Activate the merchant connector
+      return proxy.activateConnector();
+    })
+    .map(() => {
+      this.activatedMerchants.set(merchantUrl, proxy);
+    })
   }
 
   public getAuthorizedMerchants(): ResultAsync<URL[], PersistenceError> {
@@ -99,7 +131,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
   // }
 
-  public activateMerchants(merchantUrls: URL[]): ResultAsync<void, MerchantConnectorError> {
+  public activateAuthorizedMerchants(merchantUrls: URL[]): ResultAsync<void, MerchantConnectorError> {
     const activationResults = new Array<ResultAsync<void, Error>>();
     
     for (const merchantUrl of merchantUrls) {

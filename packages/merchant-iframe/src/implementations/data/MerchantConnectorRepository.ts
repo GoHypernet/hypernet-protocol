@@ -1,5 +1,5 @@
 import { IMerchantConnectorRepository } from "@merchant-iframe/interfaces/data";
-import { IAjaxUtils } from "@merchant-iframe/interfaces/utils";
+import { IAjaxUtils } from "@hypernetlabs/utils";
 import { PublicKey } from "@hypernetlabs/hypernet-core";
 import { okAsync, ResultAsync } from "neverthrow";
 

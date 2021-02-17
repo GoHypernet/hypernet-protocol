@@ -50,7 +50,6 @@
     "@hypernetlabs/hypernet-core": "^0.0.1",
     "@hypernetlabs/merchant-connector": "^0.0.1",
     "@hypernetlabs/utils": "^0.0.1",
-    "axios": "^0.21.1",
     "ethers": "^5.0.31",
     "neverthrow": "^4.1.0",
     "postmate": "^1.5.2",

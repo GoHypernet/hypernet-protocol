@@ -20,10 +20,10 @@ import {
   CoreUninitializedError,
   InsufficientBalanceError,
   LogicalError,
-  MediatorValidationError,
   RouterChannelUnknownError,
   VectorError,
 } from "@interfaces/objects/errors";
+import { MerchantValidationError } from "./objects/errors/MerchantValidationError";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -195,7 +195,7 @@ export interface IHypernetCore {
    */
   mintTestToken(amount: BigNumber): ResultAsync<void, CoreUninitializedError>;
 
-  authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MediatorValidationError>;
+  authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MerchantValidationError>;
 
   /**
    * Observables for seeing what's going on

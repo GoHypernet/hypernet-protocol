@@ -1,6 +1,6 @@
 import { ResultAsync } from "@interfaces/objects";
-import { CoreUninitializedError, MediatorValidationError } from "@interfaces/objects/errors";
+import { CoreUninitializedError, MerchantValidationError } from "@interfaces/objects/errors";
 
 export interface IMerchantService {
-  authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MediatorValidationError>;
+  authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MerchantValidationError>;
 }

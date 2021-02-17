@@ -1,11 +1,12 @@
 import PostmateApi from "@merchant-iframe/implementations/api/PostmateApi";
 import { IMerchantConnectorRepository } from "@merchant-iframe/interfaces/data";
-import { IAjaxUtils, IContextProvider } from "@merchant-iframe/interfaces/utils";
+import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 import { MerchantConnectorRepository } from "@merchant-iframe/implementations/data";
-import { AxiosAjaxUtils, ContextProvider } from "@merchant-iframe/implementations/utils";
+import { ContextProvider } from "@merchant-iframe/implementations/utils";
 import { MerchantService } from "@merchant-iframe/implementations/business/MerchantService";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { IMerchantIFrameApi } from "@merchant-iframe/interfaces/api";
+import {IAjaxUtils, AxiosAjaxUtils} from "@hypernetlabs/utils";
 
 export class MerchantIframe {
   public contextProvider: IContextProvider;

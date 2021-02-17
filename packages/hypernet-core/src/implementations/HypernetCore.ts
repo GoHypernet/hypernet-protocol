@@ -56,7 +56,7 @@ import {
   CoreUninitializedError,
   InsufficientBalanceError,
   LogicalError,
-  MediatorValidationError,
+  MerchantValidationError,
   RouterChannelUnknownError,
   VectorError,
 } from "@interfaces/objects/errors";
@@ -523,7 +523,7 @@ export class HypernetCore implements IHypernetCore {
     });
   }
 
-  public authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MediatorValidationError> {
+  public authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MerchantValidationError> {
     return this.merchantService.authorizeMerchant(merchantUrl);
   }
 }

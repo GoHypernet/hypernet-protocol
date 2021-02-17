@@ -1,4 +1,4 @@
-import { IAjaxUtils } from "@merchant-iframe/interfaces/utils";
+import { IAjaxUtils } from "./IAjaxUtils";
 import axios from "axios";
 import { ResultAsync } from "neverthrow";
 
