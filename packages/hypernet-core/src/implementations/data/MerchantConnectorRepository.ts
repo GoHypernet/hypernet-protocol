@@ -3,7 +3,7 @@ import { HexString, PublicKey } from "@interfaces/objects";
 import { MerchantConnectorError, MerchantValidationError, PersistenceError } from "@interfaces/objects/errors";
 import { okAsync, ResultAsync } from "neverthrow";
 import { ParentProxy, ResultUtils, IAjaxUtils } from "@hypernetlabs/utils";
-import { IBlockchainProvider } from "@interfaces/utilities";
+import { IBlockchainProvider, IConfigProvider } from "@interfaces/utilities";
 
 class MerchantConnectorProxy extends ParentProxy {
   constructor(element: HTMLElement | null, iframeUrl: string) {
@@ -43,7 +43,11 @@ interface IAuthorizedMerchantEntry {
 export class MerchantConnectorRepository implements IMerchantConnectorRepository {
   protected activatedMerchants: Map<URL, MerchantConnectorProxy>;
 
-  constructor(protected blockchainProvider: IBlockchainProvider, protected ajaxUtils: IAjaxUtils) {
+  constructor(
+    protected blockchainProvider: IBlockchainProvider,
+    protected ajaxUtils: IAjaxUtils,
+    protected configProvider: IConfigProvider,
+  ) {
     this.activatedMerchants = new Map();
   }
 
@@ -62,13 +66,17 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     });
   }
 
-  public addAuthorizedMerchant(merchantUrl: URL, merchantSignature: string): ResultAsync<void, PersistenceError> {
-    // First, we will create the proxy
-    const proxy = new MerchantConnectorProxy(null, merchantUrl.toString());
+  public addAuthorizedMerchant(merchantUrl: URL): ResultAsync<void, PersistenceError> {
+    let proxy: MerchantConnectorProxy;
+    return this.configProvider
+      .getConfig()
+      .andThen((config) => {
+        // First, we will create the proxy
+        proxy = this._factoryProxy(config.merchantIframeUrl, merchantUrl);
 
-    return proxy
-      .activate()
-      .andThen((vals) => {
+        return proxy.activate();
+      })
+      .andThen(() => {
         // With the proxy activated, we can get the validated merchant signature
         return ResultUtils.combine([proxy.getValidatedSignature(), this.blockchainProvider.getSigner()]);
       })
@@ -132,14 +140,23 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   // }
 
   public activateAuthorizedMerchants(merchantUrls: URL[]): ResultAsync<void, MerchantConnectorError> {
-    const activationResults = new Array<ResultAsync<void, Error>>();
+    return this.configProvider.getConfig().andThen((config) => {
+      const activationResults = new Array<ResultAsync<void, Error>>();
 
-    for (const merchantUrl of merchantUrls) {
-      const proxy = new MerchantConnectorProxy(null, merchantUrl.toString());
-      this.activatedMerchants.set(merchantUrl, proxy);
-      activationResults.push(proxy.activate());
-    }
+      for (const merchantUrl of merchantUrls) {
+        const proxy = this._factoryProxy(config.merchantIframeUrl, merchantUrl);
+        this.activatedMerchants.set(merchantUrl, proxy);
+        activationResults.push(proxy.activate());
+      }
 
-    return ResultUtils.combine(activationResults).map(() => {});
+      return ResultUtils.combine(activationResults).map(() => {});
+    });
+  }
+
+  protected _factoryProxy(merchantIFrameUrl: string, merchantUrl: URL): MerchantConnectorProxy {
+    const iframeUrl = new URL(merchantIFrameUrl);
+    iframeUrl.searchParams.set("merchantUrl", merchantUrl.toString());
+    const proxy = new MerchantConnectorProxy(null, merchantUrl.toString());
+    return proxy;
   }
 }

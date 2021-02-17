@@ -45,6 +45,7 @@ export class ConfigProvider implements IConfigProvider {
         "hypernetProtocolSpace",
         "openThreadKey",
         chainAddresses,
+        "http://localhost:5005", // merchantIframeUrl
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
@@ -83,6 +84,7 @@ export class ConfigProvider implements IConfigProvider {
         "hypernetProtocolSpace",
         "openThreadKey",
         chainAddresses,
+        "http://localhost:5005", // merchantIframeUrl
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);

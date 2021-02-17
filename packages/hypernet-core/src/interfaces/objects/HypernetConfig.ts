@@ -15,5 +15,6 @@ export class HypernetConfig {
     public hypernetProtocolSpace: string,
     public openThreadKey: string,
     public chainAddresses: ChainAddresses,
+    public merchantIframeUrl: string,
   ) {}
 }

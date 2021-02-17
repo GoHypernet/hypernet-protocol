@@ -1,6 +1,7 @@
 import { ResultAsync } from "neverthrow";
 import { PublicKey } from "@interfaces/objects";
 import { PersistenceError } from "@interfaces/objects/errors/PersistenceError";
+import { MerchantConnectorError } from "@interfaces/objects/errors";
 
 export interface IMerchantConnectorRepository {
   /**
@@ -18,7 +19,9 @@ export interface IMerchantConnectorRepository {
    * @param merchantUrl
    * @param signature
    */
-  addAuthorizedMerchant(merchantUrl: URL, signature: string): ResultAsync<void, PersistenceError>;
+  addAuthorizedMerchant(merchantUrl: URL): ResultAsync<void, PersistenceError>;
 
   getAuthorizedMerchants(): ResultAsync<URL[], PersistenceError>;
+
+  activateAuthorizedMerchants(merchantUrls: URL[]): ResultAsync<void, MerchantConnectorError>;
 }

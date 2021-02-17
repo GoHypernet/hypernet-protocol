@@ -246,7 +246,11 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
     );
 
-    this.merchantConnectorRepository = new MerchantConnectorRepository(this.blockchainProvider, this.ajaxUtils);
+    this.merchantConnectorRepository = new MerchantConnectorRepository(
+      this.blockchainProvider,
+      this.ajaxUtils,
+      this.configProvider,
+    );
 
     this.paymentService = new PaymentService(
       this.linkRepository,
@@ -512,7 +516,10 @@ export class HypernetCore implements IHypernetCore {
       })
       .andThen(() => {
         // Initialize anything that wants an initialized context
-        return ResultUtils.combine([this.vectorAPIListener.setup()]); // , this.threeboxMessagingListener.initialize()]);
+        return ResultUtils.combine([
+          this.vectorAPIListener.setup(),
+          this.merchantService.activateAuthorizedMerchants(),
+        ]); // , this.threeboxMessagingListener.initialize()]);
       })
       // .andThen(() => {
       //   // Claim control
