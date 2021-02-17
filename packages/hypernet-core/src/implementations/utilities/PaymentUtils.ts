@@ -122,11 +122,12 @@ export class PaymentUtils implements IPaymentUtils {
     const amountTransferred =
       sortedTransfers.parameterizedTransfer != null
         ? sortedTransfers.offerDetails.paymentAmount // @todo fix later? sortedTransfers.parameterizedTransfer.transferState.rate.deltaAmount
-        : sortedTransfers.offerDetails.paymentAmount
+        : sortedTransfers.offerDetails.paymentAmount;
 
-    const paymentToken = sortedTransfers.parameterizedTransfer != null
-    ? sortedTransfers.parameterizedTransfer.assetId
-    : sortedTransfers.offerDetails.paymentToken;
+    const paymentToken =
+      sortedTransfers.parameterizedTransfer != null
+        ? sortedTransfers.parameterizedTransfer.assetId
+        : sortedTransfers.offerDetails.paymentToken;
 
     return okAsync(
       new PushPayment(
@@ -143,7 +144,7 @@ export class PaymentUtils implements IPaymentUtils {
         BigNumber.from(0),
         sortedTransfers.offerDetails.disputeMediator,
         BigNumber.from(paymentAmount),
-        BigNumber.from(amountTransferred)
+        BigNumber.from(amountTransferred),
       ),
     );
   }
@@ -168,13 +169,13 @@ export class PaymentUtils implements IPaymentUtils {
      * Pull payments consist of 3+ transfers, a null transfer for 0 value that represents the
      * offer, an insurance payment, and a parameterized payment.
      */
-  
+
     const amountStaked =
       sortedTransfers.insuranceTransfer != null ? sortedTransfers.insuranceTransfer.balance.amount[0] : 0;
 
     // Get deltaAmount & deltaTime from the parameterized payment
     if (sortedTransfers.offerDetails.rate == null) {
-      return errAsync(new LogicalError('These transfers are not for a pull payment.'))
+      return errAsync(new LogicalError("These transfers are not for a pull payment."));
     }
 
     const deltaAmount = BigNumber.from(sortedTransfers.offerDetails.rate.deltaAmount);
@@ -196,12 +197,18 @@ export class PaymentUtils implements IPaymentUtils {
 
     for (const pullRecord of sortedTransfers.pullRecordTransfers) {
       let message = JSON.parse(pullRecord.transferState.message) as IHypernetPullPaymentDetails;
-      pullAmounts.push(new PullAmount(BigNumber.from(message.pullPaymentAmount), this.vectorUtils.getTimestampFromTransfer(pullRecord)))
+      pullAmounts.push(
+        new PullAmount(
+          BigNumber.from(message.pullPaymentAmount),
+          this.vectorUtils.getTimestampFromTransfer(pullRecord),
+        ),
+      );
     }
 
-    const paymentToken = sortedTransfers.parameterizedTransfer != null
-    ? sortedTransfers.parameterizedTransfer.assetId
-    : sortedTransfers.offerDetails.paymentToken;
+    const paymentToken =
+      sortedTransfers.parameterizedTransfer != null
+        ? sortedTransfers.parameterizedTransfer.assetId
+        : sortedTransfers.offerDetails.paymentToken;
 
     return okAsync(
       new PullPayment(
@@ -536,9 +543,11 @@ export class PaymentUtils implements IPaymentUtils {
             if (message.messageType == EMessageTransferType.OFFER) {
               return okAsync(ETransferType.Offer);
             } else if (message.messageType == EMessageTransferType.PULLPAYMENT) {
-              return okAsync(ETransferType.PullRecord)
+              return okAsync(ETransferType.PullRecord);
             } else {
-              return errAsync(new LogicalError(`Message transfer was not of type OFFER or PULLPAYMENT, got: ${message.messageType}`));
+              return errAsync(
+                new LogicalError(`Message transfer was not of type OFFER or PULLPAYMENT, got: ${message.messageType}`),
+              );
             }
           } else {
             // It's a recognized transfer type- like Withdraw- that we just don't care about

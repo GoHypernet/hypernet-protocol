@@ -116,7 +116,7 @@ class VectorLinkRepositoryMocks {
       BigNumber.from(0),
       disputeMediatorPublicKey,
       BigNumber.from(commonAmount.toString()),
-      BigNumber.from(0)
+      BigNumber.from(0),
     );
   }
 }

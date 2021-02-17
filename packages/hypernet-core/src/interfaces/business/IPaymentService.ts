@@ -1,4 +1,12 @@
-import { Payment, EthereumAddress, PublicKey, PublicIdentifier, ResultAsync, Result, BigNumber } from "@interfaces/objects";
+import {
+  Payment,
+  EthereumAddress,
+  PublicKey,
+  PublicIdentifier,
+  ResultAsync,
+  Result,
+  BigNumber,
+} from "@interfaces/objects";
 import { NodeError, VectorError } from "@connext/vector-types";
 import {
   AcceptPaymentError,
@@ -39,8 +47,8 @@ export interface IPaymentService {
    * move any money.
    */
   pullFunds(
-    paymentId: string, 
-    amount: BigNumber
+    paymentId: string,
+    amount: BigNumber,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**

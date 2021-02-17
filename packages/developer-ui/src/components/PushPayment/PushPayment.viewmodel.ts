@@ -4,7 +4,7 @@ import html from "./PushPayment.template.html";
 import moment from "moment";
 import { PaymentStatusParams } from "../PaymentStatus/PaymentStatus.viewmodel";
 import { ButtonParams } from "../Button/Button.viewmodel";
-import {utils} from "ethers";
+import { utils } from "ethers";
 
 export class PushPaymentParams {
   constructor(public core: IHypernetCore, public payment: PushPayment) {}

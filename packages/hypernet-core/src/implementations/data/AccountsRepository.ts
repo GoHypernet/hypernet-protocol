@@ -180,7 +180,7 @@ export class AccountsRepository implements IAccountsRepository {
       })
       .andThen((tx) => {
         // TODO: Wait on this, break it up, this could take a while
-        return ResultAsync.fromPromise(tx.wait());
+        return ResultAsync.fromPromise(tx.wait(), (e) => e as BlockchainUnavailableError);
       })
       .andThen((receipt) => {
         if (browserNode == null || channelAddress == null) {

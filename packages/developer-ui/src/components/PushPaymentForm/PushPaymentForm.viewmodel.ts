@@ -4,7 +4,7 @@ import html from "./PushPaymentForm.template.html";
 import moment from "moment";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
 import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
-import { utils } from "ethers"
+import { utils } from "ethers";
 
 export class PushPaymentFormParams {
   constructor(

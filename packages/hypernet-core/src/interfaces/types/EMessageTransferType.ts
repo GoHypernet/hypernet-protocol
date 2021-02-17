@@ -1,4 +1,4 @@
 export enum EMessageTransferType {
-    OFFER = 0,
-    PULLPAYMENT = 1
+  OFFER = 0,
+  PULLPAYMENT = 1,
 }

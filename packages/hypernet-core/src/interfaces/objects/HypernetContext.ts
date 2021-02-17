@@ -37,5 +37,6 @@ export class InitializedHypernetContext {
     public onPushPaymentUpdated: Subject<PushPayment>,
     public onPullPaymentUpdated: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
+    public authorizedMediators: Map<URL, string>,
   ) {}
 }

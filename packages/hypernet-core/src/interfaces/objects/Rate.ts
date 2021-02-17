@@ -1,4 +1,4 @@
 export interface IRate {
-    deltaAmount: string,
-    deltaTime: number
+  deltaAmount: string;
+  deltaTime: number;
 }

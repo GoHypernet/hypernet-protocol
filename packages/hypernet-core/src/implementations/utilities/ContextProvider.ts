@@ -62,6 +62,7 @@ export class ContextProvider implements IContextProvider {
         this.context.onPushPaymentUpdated,
         this.context.onPullPaymentUpdated,
         this.context.onBalancesChanged,
+        new Map<URL, string>(),
       ),
     );
   }

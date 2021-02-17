@@ -1,7 +1,12 @@
 import { ResultUtils } from "@implementations/utilities";
 import { ILinkRepository } from "@interfaces/data";
 import { HypernetLink, Payment, PublicIdentifier, ResultAsync } from "@interfaces/objects";
-import { CoreUninitializedError, RouterChannelUnknownError, VectorError } from "@interfaces/objects/errors";
+import {
+  CoreUninitializedError,
+  InvalidParametersError,
+  RouterChannelUnknownError,
+  VectorError,
+} from "@interfaces/objects/errors";
 import {
   IBrowserNode,
   IBrowserNodeProvider,
@@ -36,7 +41,7 @@ export class VectorLinkRepository implements ILinkRepository {
    */
   public getHypernetLinks(): ResultAsync<
     HypernetLink[],
-    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
+    RouterChannelUnknownError | CoreUninitializedError | VectorError | InvalidParametersError
   > {
     let browserNode: IBrowserNode;
 
@@ -54,7 +59,7 @@ export class VectorLinkRepository implements ILinkRepository {
       })
       .andThen((transfers) => {
         if (transfers.length === 0) {
-          return okAsync([] as Payment[]);
+          return okAsync<Payment[], InvalidParametersError>([]);
         }
 
         return this.paymentUtils.transfersToPayments(transfers);

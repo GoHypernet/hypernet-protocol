@@ -26,12 +26,12 @@
     "lib": "lib"
   },
   "workspaces": {
-    "packages": [
-      "packages/*"
-    ],
     "nohoist": [
       "**/mobileApp",
       "**/mobileApp/**"
+    ],
+    "packages": [
+      "packages/*"
     ]
   },
   "scripts": {

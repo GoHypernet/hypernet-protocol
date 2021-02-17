@@ -19,6 +19,7 @@ import {
   Payment,
   Result,
   ResultAsync,
+  MediatorValidationError,
 } from "@hypernetlabs/hypernet-core";
 import Postmate from "postmate";
 import { Subject } from "rxjs";
@@ -31,7 +32,7 @@ interface IIFrameCallData<T> {
 }
 
 class IFrameCallData<T> implements IIFrameCallData<T> {
-  constructor(public callId: number, public data: T) { }
+  constructor(public callId: number, public data: T) {}
 }
 
 class IFrameCall<T, E> {
@@ -354,10 +355,13 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
     return call.getResult();
   }
 
-  public pullFunds(paymentId: string, amount: BigNumber): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  public pullFunds(
+    paymentId: string,
+    amount: BigNumber,
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     const call = this._createCall("pullFunds", {
       paymentId,
-      amount: amount.toString()
+      amount: amount.toString(),
     });
 
     return call.getResult();
@@ -381,11 +385,16 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
     return call.getResult();
   }
 
-  public startConnectorFlow(connector?: string): void {
-    // call iframe where it's gonna render the connector screen
+  public authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MediatorValidationError> {
+    const call = this._createCall("authorizeMerchant", merchantUrl);
+
+    return call.getResult();
+  }
+
+  public startConnectorFlow(connector?: string): ResultAsync<void, CoreUninitializedError | MediatorValidationError> {
     const call = this._createCall("startConnectorFlow", connector);
 
-    //return call.getResult();
+    return call.getResult();
   }
 
   /**

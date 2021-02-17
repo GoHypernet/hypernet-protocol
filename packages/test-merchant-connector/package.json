@@ -1,0 +1,52 @@
+{
+  "name": "@hypernetlabs/test-merchant-connector",
+  "version": "0.0.1",
+  "description": "An example dispute mediator for testing, which always resolve's in the sender's favor.",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/core#readme",
+  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
+  "keywords": [
+    "Blockchain",
+    "Hypernet",
+    "SDK",
+    "Ethereum",
+    "Vector",
+    "Connext"
+  ],
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src",
+    "!dist/test",
+    "!dist/tsconfig.tsbuildinfo"
+  ],
+  "scripts": {
+    "build": "yarn clean && yarn compile",
+    "clean": "rimraf dist",
+    "compile": "tsc --build src/tsconfig.json",
+    "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",
+    "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
+    "generate-docs": "npx typedoc --options typedoc.json",
+    "lint": "tslint -p src/tsconfig.json",
+    "prepare": "yarn build",
+    "prepublishOnly": "npm test && npm run lint",
+    "test": "yarn test:ci",
+    "test:ci": "jest --runInBand --coverage",
+    "test:watch": "jest --watch --color --detectOpenHandles",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags",
+    "webpack": "webpack"
+  },
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@hypernetlabs/merchant-connector": "^0.0.1"
+  }
+}

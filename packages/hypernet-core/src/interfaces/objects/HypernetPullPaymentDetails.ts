@@ -7,5 +7,5 @@ export interface IHypernetPullPaymentDetails extends IMessageTransferData {
   to: PublicIdentifier;
   from: PublicIdentifier;
   paymentToken: EthereumAddress;
-  pullPaymentAmount: string
+  pullPaymentAmount: string;
 }

@@ -3,6 +3,7 @@ import {
   ControlService,
   DevelopmentService,
   LinkService,
+  MerchantService,
   PaymentService,
 } from "@implementations/business";
 import {
@@ -30,6 +31,7 @@ import {
   IControlService,
   IDevelopmentService,
   ILinkService,
+  IMerchantService,
   IPaymentService,
 } from "@interfaces/business";
 import { IAccountsRepository, ILinkRepository, IMessagingRepository, IPaymentRepository } from "@interfaces/data";
@@ -46,9 +48,6 @@ import {
   PublicKey,
   PullPayment,
   PushPayment,
-  ResultAsync,
-  Result,
-  HypernetContext,
 } from "@interfaces/objects";
 import {
   AcceptPaymentError,
@@ -57,6 +56,7 @@ import {
   CoreUninitializedError,
   InsufficientBalanceError,
   LogicalError,
+  MediatorValidationError,
   RouterChannelUnknownError,
   VectorError,
 } from "@interfaces/objects/errors";
@@ -76,7 +76,7 @@ import {
 } from "@interfaces/utilities";
 import { IMessagingListener, IVectorListener } from "@interfaces/api";
 import { Subject } from "rxjs";
-import { errAsync, ok, okAsync } from "neverthrow";
+import { errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
 import { TimeUtils } from "./utilities/TimeUtils";
 
 /**
@@ -119,6 +119,7 @@ export class HypernetCore implements IHypernetCore {
   protected paymentService: IPaymentService;
   protected linkService: ILinkService;
   protected developmentService: IDevelopmentService;
+  protected merchantService: IMerchantService;
 
   // API
   protected vectorAPIListener: IVectorListener;
@@ -244,6 +245,7 @@ export class HypernetCore implements IHypernetCore {
     this.controlService = new ControlService(this.contextProvider, this.threeboxMessagingRepository);
     this.linkService = new LinkService(this.linkRepository);
     this.developmentService = new DevelopmentService(this.accountRepository);
+    this.merchantService = new MerchantService(this.blockchainProvider);
 
     this.vectorAPIListener = new VectorAPIListener(
       this.browserNodeProvider,
@@ -434,14 +436,15 @@ export class HypernetCore implements IHypernetCore {
     paymentToken: EthereumAddress,
     disputeMediator: PublicKey,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
-    return this.paymentService.authorizeFunds(counterPartyAccount,
+    return this.paymentService.authorizeFunds(
+      counterPartyAccount,
       totalAuthorized,
       expirationDate,
       deltaAmount,
       deltaTime,
       requiredStake,
       paymentToken,
-      disputeMediator
+      disputeMediator,
     );
   }
 
@@ -450,7 +453,10 @@ export class HypernetCore implements IHypernetCore {
    * @param paymentId the payment for which to pull funds from
    * @param amount the amount of funds to pull
    */
-  public pullFunds(paymentId: string, amount: BigNumber): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  public pullFunds(
+    paymentId: string,
+    amount: BigNumber,
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     return this.paymentService.pullFunds(paymentId, amount);
   }
 
@@ -515,5 +521,9 @@ export class HypernetCore implements IHypernetCore {
     return this.contextProvider.getInitializedContext().andThen((context) => {
       return this.developmentService.mintTestToken(amount, context.account);
     });
+  }
+
+  public authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MediatorValidationError> {
+    return this.merchantService.authorizeMerchant(merchantUrl);
   }
 }

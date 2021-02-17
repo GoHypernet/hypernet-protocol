@@ -20,6 +20,7 @@ import {
   CoreUninitializedError,
   InsufficientBalanceError,
   LogicalError,
+  MediatorValidationError,
   RouterChannelUnknownError,
   VectorError,
 } from "@interfaces/objects/errors";
@@ -169,7 +170,10 @@ export interface IHypernetCore {
    * @param paymentId: The authorized payment ID to pull from.
    * @param amount: The amount to pull. The token type has already been baked in.
    */
-  pullFunds(paymentId: string, amount: BigNumber): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  pullFunds(
+    paymentId: string,
+    amount: BigNumber,
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**
    * Finalized an authorized payment with the final payment amount.
@@ -190,6 +194,8 @@ export interface IHypernetCore {
    * @param amount
    */
   mintTestToken(amount: BigNumber): ResultAsync<void, CoreUninitializedError>;
+
+  authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MediatorValidationError>;
 
   /**
    * Observables for seeing what's going on
