@@ -20,7 +20,7 @@ import {
   VectorError,
 } from "@interfaces/objects/errors";
 import { combine, errAsync, okAsync } from "neverthrow";
-import {ResultUtils} from "@hypernetlabs/utils";
+import { ResultUtils } from "@hypernetlabs/utils";
 
 class AssetInfo {
   constructor(public assetId: EthereumAddress, public name: string, public symbol: string, public decimals: number) {}

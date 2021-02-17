@@ -1,4 +1,4 @@
-import {ResultUtils} from "@hypernetlabs/utils";
+import { ResultUtils } from "@hypernetlabs/utils";
 import { IPaymentService } from "@interfaces/business";
 import { IAccountsRepository, ILinkRepository } from "@interfaces/data";
 import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";

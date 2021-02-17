@@ -3,6 +3,6 @@ import { MerchantConnectorError, MerchantValidationError } from "@merchant-ifram
 import { IMerchantConnector } from "@hypernetlabs/merchant-connector";
 
 export interface IMerchantService {
-    validateMerchantConnector(): ResultAsync<string, MerchantValidationError>;
-    activateMerchantConnector(): ResultAsync<IMerchantConnector, MerchantConnectorError | MerchantValidationError>
+  validateMerchantConnector(): ResultAsync<string, MerchantValidationError>;
+  activateMerchantConnector(): ResultAsync<IMerchantConnector, MerchantConnectorError | MerchantValidationError>;
 }

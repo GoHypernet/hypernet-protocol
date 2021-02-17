@@ -8,37 +8,37 @@ import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { IMerchantIFrameApi } from "@merchant-iframe/interfaces/api";
 
 export class MerchantIframe {
-    public contextProvider: IContextProvider;
-    public ajaxUtils: IAjaxUtils;
+  public contextProvider: IContextProvider;
+  public ajaxUtils: IAjaxUtils;
 
-    public merchantConnectorRepository: IMerchantConnectorRepository;
+  public merchantConnectorRepository: IMerchantConnectorRepository;
 
-    public merchantService: IMerchantService;
+  public merchantService: IMerchantService;
 
-    public merchantIframeApi: IMerchantIFrameApi;
+  public merchantIframeApi: IMerchantIFrameApi;
 
-    constructor() {
-        // First step, get the mediator URL from the iframe params
-        const urlParams = new URLSearchParams(window.location.search);
-        const merchantUrl = urlParams.get("merchantUrl");
+  constructor() {
+    // First step, get the mediator URL from the iframe params
+    const urlParams = new URLSearchParams(window.location.search);
+    const merchantUrl = urlParams.get("merchantUrl");
 
-        if (merchantUrl == null) {
-            throw new Error("Must provide merchantURL parameter!");
-        }
-
-        // Instantiate all the pieces
-        this.contextProvider = new ContextProvider(new URL(merchantUrl));
-        this.ajaxUtils = new AxiosAjaxUtils();
-
-        this.merchantConnectorRepository = new MerchantConnectorRepository(this.ajaxUtils);
-
-        this.merchantService = new MerchantService(this.merchantConnectorRepository, this.contextProvider);
-
-        this.merchantIframeApi = new PostmateApi(this.merchantService, this.contextProvider);
-
-        // Since this iframe is supposed to host a merchant connector, first things first, let's validate the merchant's connector
-        this.merchantService.validateMerchantConnector();
-
-        this.merchantIframeApi.activateModel();
+    if (merchantUrl == null) {
+      throw new Error("Must provide merchantURL parameter!");
     }
+
+    // Instantiate all the pieces
+    this.contextProvider = new ContextProvider(new URL(merchantUrl));
+    this.ajaxUtils = new AxiosAjaxUtils();
+
+    this.merchantConnectorRepository = new MerchantConnectorRepository(this.ajaxUtils);
+
+    this.merchantService = new MerchantService(this.merchantConnectorRepository, this.contextProvider);
+
+    this.merchantIframeApi = new PostmateApi(this.merchantService, this.contextProvider);
+
+    // Since this iframe is supposed to host a merchant connector, first things first, let's validate the merchant's connector
+    this.merchantService.validateMerchantConnector();
+
+    this.merchantIframeApi.activateModel();
+  }
 }

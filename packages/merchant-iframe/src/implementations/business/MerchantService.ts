@@ -1,5 +1,5 @@
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
-import {ResultUtils} from "@hypernetlabs/utils";
+import { ResultUtils } from "@hypernetlabs/utils";
 import { ethers } from "ethers";
 import { IMerchantConnectorRepository } from "@merchant-iframe/interfaces/data";
 import { MerchantConnectorError, MerchantValidationError } from "@merchant-iframe/interfaces/objects/errors";
@@ -8,10 +8,15 @@ import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { IMerchantConnector } from "@hypernetlabs/merchant-connector";
 
 export class MerchantService implements IMerchantService {
-  constructor(protected merchantConnectorRepository: IMerchantConnectorRepository,
-    protected contextProvider: IContextProvider) {}
+  constructor(
+    protected merchantConnectorRepository: IMerchantConnectorRepository,
+    protected contextProvider: IContextProvider,
+  ) {}
 
-  public activateMerchantConnector(): ResultAsync<IMerchantConnector, MerchantConnectorError | MerchantValidationError> {
+  public activateMerchantConnector(): ResultAsync<
+    IMerchantConnector,
+    MerchantConnectorError | MerchantValidationError
+  > {
     const context = this.contextProvider.getMerchantContext();
 
     // If we don't have validated code, that's a problem.

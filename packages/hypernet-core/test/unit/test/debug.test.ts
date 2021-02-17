@@ -1,6 +1,6 @@
 import td from "testdouble";
 import { okAsync, ResultAsync, combine, ok, err, Result } from "neverthrow";
-import {ResultUtils} from "@hypernetlabs/utils";
+import { ResultUtils } from "@hypernetlabs/utils";
 
 interface ITestInterface {
   getName(): string;

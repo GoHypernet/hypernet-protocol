@@ -77,8 +77,7 @@ import {
 import { IMessagingListener, IVectorListener } from "@interfaces/api";
 import { Subject } from "rxjs";
 import { errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
-import {ResultUtils} from "@hypernetlabs/utils";
-
+import { ResultUtils } from "@hypernetlabs/utils";
 
 /**
  * The top-level class-definition for Hypernet Core.

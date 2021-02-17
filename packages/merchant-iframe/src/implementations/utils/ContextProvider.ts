@@ -4,21 +4,17 @@ import { IMerchantConnector } from "packages/merchant-connector/dist";
 import { Subject } from "rxjs";
 
 export class ContextProvider implements IContextProvider {
-    protected context: MerchantContext;
-    
-    constructor(merchantUrl: URL) {
-        this.context = new MerchantContext(merchantUrl, 
-            new Subject<IMerchantConnector>(),
-            null,
-            null,
-            null);
-    }
+  protected context: MerchantContext;
 
-    getMerchantContext(): MerchantContext {
-        return this.context;
-    }
+  constructor(merchantUrl: URL) {
+    this.context = new MerchantContext(merchantUrl, new Subject<IMerchantConnector>(), null, null, null);
+  }
 
-    setMerchantContext(context: MerchantContext): void {
-        this.context = context;
-    }
+  getMerchantContext(): MerchantContext {
+    return this.context;
+  }
+
+  setMerchantContext(context: MerchantContext): void {
+    this.context = context;
+  }
 }

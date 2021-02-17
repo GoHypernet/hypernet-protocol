@@ -1,59 +1,45 @@
-import {
-  BigNumber,
-  EthereumAddress,
-  IHypernetCore,
-  PublicIdentifier,
-  PublicKey,
-  ResultAsync,
-} from "@hypernetlabs/hypernet-core";
+import { BigNumber, EthereumAddress, IHypernetCore, PublicIdentifier, PublicKey } from "@hypernetlabs/hypernet-core";
 import { renderConnectorAuthenticatorScreen } from "@hypernetlabs/web-ui";
-import moment from "moment";
+import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import Postmate from "postmate";
 
-interface IIFrameCallData<T> {
-  callId: number;
-  data: T;
-}
-
-class IFrameCallData<T> implements IIFrameCallData<T> {
-  constructor(public callId: number, public data: T) {}
-}
-
-export default class CoreWrapper {
-  protected parent: Postmate.ChildAPI | undefined;
-
+export default class CoreWrapper extends ChildProxy {
   constructor(protected core: IHypernetCore) {
+    super();
+  }
+
+  protected getModel(): Postmate.Model {
     // Fire up the Postmate model, and wrap up the core as the model
-    const handshake = new Postmate.Model({
+    return new Postmate.Model({
       initialize: (data: IIFrameCallData<string>) => {
         this.returnForModel(() => {
-          return core.initialize(data.data);
+          return this.core.initialize(data.data);
         }, data.callId);
       },
       waitInitialized: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return core.waitInitialized();
+          return this.core.waitInitialized();
         }, data.callId);
       },
       getEthereumAccounts: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return core.getEthereumAccounts();
+          return this.core.getEthereumAccounts();
         }, data.callId);
       },
       getPublicIdentifier: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return core.getPublicIdentifier();
+          return this.core.getPublicIdentifier();
         }, data.callId);
       },
       depositFunds: (data: IIFrameCallData<{ assetAddress: string; amount: string }>) => {
         this.returnForModel(() => {
-          return core.depositFunds(data.data.assetAddress, BigNumber.from(data.data.amount));
+          return this.core.depositFunds(data.data.assetAddress, BigNumber.from(data.data.amount));
         }, data.callId);
       },
 
       withdrawFunds: (data: IIFrameCallData<{ assetAddress: string; amount: string; destinationAddress: string }>) => {
         this.returnForModel(() => {
-          return core.withdrawFunds(
+          return this.core.withdrawFunds(
             data.data.assetAddress,
             BigNumber.from(data.data.amount),
             data.data.destinationAddress,
@@ -63,17 +49,17 @@ export default class CoreWrapper {
 
       getBalances: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return core.getBalances();
+          return this.core.getBalances();
         }, data.callId);
       },
       getLinks: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return core.getLinks();
+          return this.core.getLinks();
         }, data.callId);
       },
       getActiveLinks: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return core.getActiveLinks();
+          return this.core.getActiveLinks();
         }, data.callId);
       },
       sendFunds: (
@@ -87,7 +73,7 @@ export default class CoreWrapper {
         }>,
       ) => {
         this.returnForModel(() => {
-          return core.sendFunds(
+          return this.core.sendFunds(
             data.data.counterPartyAccount,
             data.data.amount,
             data.data.expirationDate,
@@ -117,7 +103,7 @@ export default class CoreWrapper {
 
       acceptFunds: (data: IIFrameCallData<string[]>) => {
         this.returnForModel(() => {
-          return core.acceptOffers(data.data);
+          return this.core.acceptOffers(data.data);
         }, data.callId);
       },
 
@@ -131,7 +117,7 @@ export default class CoreWrapper {
 
       mintTestToken: (data: IIFrameCallData<string>) => {
         this.returnForModel(() => {
-          return core.mintTestToken(BigNumber.from(data.data));
+          return this.core.mintTestToken(BigNumber.from(data.data));
         }, data.callId);
       },
       startConnectorFlow: (connector?: string) => {
@@ -145,67 +131,50 @@ export default class CoreWrapper {
         });
       },
     });
-
-    handshake.then((initializedParent) => {
-      this.parent = initializedParent;
-
-      // We are going to just call waitInitialized() on the core, and emit an event
-      // to the parent when it is initialized; combining a few functions.
-      this.core.waitInitialized().map(() => {
-        this.parent?.emit("initialized");
-      });
-
-      // We are going to relay the RXJS events
-      this.core.onControlClaimed.subscribe((val) => {
-        this.parent?.emit("onControlClaimed", val);
-      });
-
-      this.core.onControlYielded.subscribe((val) => {
-        this.parent?.emit("onControlYielded", val);
-      });
-
-      this.core.onPushPaymentProposed.subscribe((val) => {
-        this.parent?.emit("onPushPaymentProposed", val);
-      });
-
-      this.core.onPullPaymentProposed.subscribe((val) => {
-        this.parent?.emit("onPullPaymentProposed", val);
-      });
-
-      this.core.onPushPaymentUpdated.subscribe((val) => {
-        this.parent?.emit("onPushPaymentUpdated", val);
-      });
-
-      this.core.onPullPaymentUpdated.subscribe((val) => {
-        this.parent?.emit("onPullPaymentUpdated", val);
-      });
-
-      this.core.onPushPaymentReceived.subscribe((val) => {
-        this.parent?.emit("onPushPaymentReceived", val);
-      });
-
-      this.core.onPullPaymentApproved.subscribe((val) => {
-        this.parent?.emit("onPullPaymentApproved", val);
-      });
-
-      this.core.onBalancesChanged.subscribe((val) => {
-        this.parent?.emit("onBalancesChanged", val);
-      });
-    });
   }
 
-  protected returnForModel<T, E>(func: () => ResultAsync<T, E>, callId: number) {
-    func().match(
-      (result) => {
-        if (this.parent != null) {
-          this.parent.emit("callSuccess", new IFrameCallData(callId, result));
-        }
-      },
-      (e) => {
-        if (this.parent != null) {
-          this.parent.emit("callError", new IFrameCallData(callId, e));
-        }
-      },
-    );
+  protected onModelActivated(parent: Postmate.ChildAPI): void {
+    // We are going to just call waitInitialized() on the core, and emit an event
+    // to the parent when it is initialized; combining a few functions.
+    this.core.waitInitialized().map(() => {
+      parent.emit("initialized");
+    });
+
+    // We are going to relay the RXJS events
+    this.core.onControlClaimed.subscribe((val) => {
+      parent.emit("onControlClaimed", val);
+    });
+
+    this.core.onControlYielded.subscribe((val) => {
+      parent.emit("onControlYielded", val);
+    });
+
+    this.core.onPushPaymentProposed.subscribe((val) => {
+      parent.emit("onPushPaymentProposed", val);
+    });
+
+    this.core.onPullPaymentProposed.subscribe((val) => {
+      parent.emit("onPullPaymentProposed", val);
+    });
+
+    this.core.onPushPaymentUpdated.subscribe((val) => {
+      parent.emit("onPushPaymentUpdated", val);
+    });
+
+    this.core.onPullPaymentUpdated.subscribe((val) => {
+      parent.emit("onPullPaymentUpdated", val);
+    });
+
+    this.core.onPushPaymentReceived.subscribe((val) => {
+      parent.emit("onPushPaymentReceived", val);
+    });
+
+    this.core.onPullPaymentApproved.subscribe((val) => {
+      parent.emit("onPullPaymentApproved", val);
+    });
+
+    this.core.onBalancesChanged.subscribe((val) => {
+      parent.emit("onBalancesChanged", val);
+    });
   }
 }

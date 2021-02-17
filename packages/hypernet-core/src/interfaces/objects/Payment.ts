@@ -1,4 +1,3 @@
-import moment from "moment";
 import { BigNumber, EthereumAddress, PublicKey } from "@interfaces/objects";
 import { EPaymentState } from "@interfaces/types";
 import { PublicIdentifier } from "@connext/vector-types";

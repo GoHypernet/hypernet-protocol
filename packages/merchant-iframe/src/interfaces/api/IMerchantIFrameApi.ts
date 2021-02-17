@@ -1,4 +1,3 @@
-import { PostmateProxy } from "@hypernetlabs/utils";
+import { ChildProxy } from "@hypernetlabs/utils";
 
-export interface IMerchantIFrameApi extends PostmateProxy {
-}
+export interface IMerchantIFrameApi extends ChildProxy {}

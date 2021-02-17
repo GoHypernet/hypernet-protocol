@@ -6,7 +6,7 @@ import { plainToClass } from "class-transformer";
 import { IControlService } from "@interfaces/business";
 import { BlockchainUnavailableError, ThreeBoxError } from "@interfaces/objects/errors";
 import { ControlClaim, ResultAsync } from "@interfaces/objects";
-import {ResultUtils} from "@hypernetlabs/utils";
+import { ResultUtils } from "@hypernetlabs/utils";
 
 export class ThreeBoxMessagingListener implements IMessagingListener {
   constructor(

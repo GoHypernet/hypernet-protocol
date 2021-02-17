@@ -3,27 +3,32 @@ import Postmate from "postmate";
 import { PostmateError } from "./errors/PostmateError";
 
 export interface IIFrameCallData<T> {
-    callId: number;
-    data: T;
-  }
-  
-class IFrameCallData<T> implements IIFrameCallData<T> {
-    constructor(public callId: number, public data: T) {}
-  }
-  
+  callId: number;
+  data: T;
+}
 
-export abstract class PostmateProxy {
+class IFrameCallData<T> implements IIFrameCallData<T> {
+  constructor(public callId: number, public data: T) {}
+}
+
+export abstract class ChildProxy {
   protected parent: Postmate.ChildAPI | undefined;
 
   protected abstract getModel(): Postmate.Model;
 
-  public activateModel(): ResultAsync<void, PostmateError> {
-    const handshake = this.getModel()
+  protected abstract onModelActivated(parent: Postmate.ChildAPI): void;
 
-    return ResultAsync.fromPromise(handshake.then((initializedParent) => {
-      this.parent = initializedParent;
-    }), 
-    e => e as PostmateError);
+  public activateModel(): ResultAsync<Postmate.ChildAPI, PostmateError> {
+    const handshake = this.getModel();
+
+    return ResultAsync.fromPromise(
+      handshake.then((initializedParent) => {
+        this.parent = initializedParent;
+        this.onModelActivated(initializedParent);
+        return initializedParent;
+      }),
+      (e) => e as PostmateError,
+    );
   }
 
   protected returnForModel<T, E>(func: () => ResultAsync<T, E>, callId: number) {
