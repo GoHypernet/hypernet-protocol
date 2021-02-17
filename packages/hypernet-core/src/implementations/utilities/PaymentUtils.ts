@@ -184,7 +184,7 @@ export class PaymentUtils implements IPaymentUtils {
     } else {
       // Calculate vestedAmount
       const now = this.timeUtils.getUnixNow();
-      const timePassed = Number(sortedTransfers.parameterizedTransfer.transferState.start) - now;
+      const timePassed = now - Number(sortedTransfers.parameterizedTransfer.transferState.start);
       vestedAmount = deltaAmount.div(deltaTime).mul(timePassed);
     }
 

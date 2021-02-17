@@ -118,7 +118,7 @@ export class PaymentRepository implements IPaymentRepository {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
-      this.paymentUtils.createPaymentId(EPaymentType.Push),
+      this.paymentUtils.createPaymentId(EPaymentType.Pull),
     ])
     .andThen((vals) => {
       [browserNode, context, paymentId] = vals;
