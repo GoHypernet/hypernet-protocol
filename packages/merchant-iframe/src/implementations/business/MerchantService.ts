@@ -8,7 +8,9 @@ import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { IMerchantConnector } from "@hypernetlabs/merchant-connector";
 
 declare global {
-  interface Window { connector: IMerchantConnector; }
+  interface Window {
+    connector: IMerchantConnector;
+  }
 }
 
 export class MerchantService implements IMerchantService {
@@ -33,7 +35,7 @@ export class MerchantService implements IMerchantService {
 
     var newScript = document.createElement("script");
     var inlineScript = document.createTextNode(context.validatedMerchantCode);
-    newScript.appendChild(inlineScript); 
+    newScript.appendChild(inlineScript);
     document.head.appendChild(newScript);
 
     const merchantConnector = window.connector;

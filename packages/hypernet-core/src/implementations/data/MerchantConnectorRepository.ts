@@ -1,10 +1,15 @@
 import { IMerchantConnectorRepository } from "@interfaces/data";
 import { HexString, PublicKey } from "@interfaces/objects";
-import { CoreUninitializedError, MerchantConnectorError, MerchantValidationError, PersistenceError } from "@interfaces/objects/errors";
+import {
+  CoreUninitializedError,
+  MerchantConnectorError,
+  MerchantValidationError,
+  PersistenceError,
+} from "@interfaces/objects/errors";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { ParentProxy, ResultUtils, IAjaxUtils } from "@hypernetlabs/utils";
 import { IBlockchainProvider, IConfigProvider, IContextProvider } from "@interfaces/utilities";
-import {ethers} from "ethers";
+import { ethers } from "ethers";
 
 class MerchantConnectorProxy extends ParentProxy {
   constructor(element: HTMLElement | null, iframeUrl: string) {
@@ -118,8 +123,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   protected _setAuthorizedMerchants(authorizedMerchantMap: Map<URL, string>) {
     const authorizedMerchantEntries = new Array<IAuthorizedMerchantEntry>();
     for (const keyval of authorizedMerchantMap) {
-      authorizedMerchantEntries.push({merchantUrl: keyval[0].toString(), 
-        authorizationSignature: keyval[1]});
+      authorizedMerchantEntries.push({ merchantUrl: keyval[0].toString(), authorizationSignature: keyval[1] });
     }
     window.localStorage.setItem("AuthorizedMerchants", JSON.stringify(authorizedMerchantEntries));
   }
@@ -146,43 +150,55 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
   // }
 
-  public activateAuthorizedMerchants(): ResultAsync<void, MerchantConnectorError | MerchantValidationError | CoreUninitializedError> {
-    return ResultUtils.combine([this.configProvider.getConfig(),
+  public activateAuthorizedMerchants(): ResultAsync<
+    void,
+    MerchantConnectorError | MerchantValidationError | CoreUninitializedError
+  > {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
       this.contextProvider.getInitializedContext(),
-      this.getAuthorizedMerchants()]).andThen((vals) => {
-        const [config, context, authorizedMerchants] = vals;
+      this.getAuthorizedMerchants(),
+    ]).andThen((vals) => {
+      const [config, context, authorizedMerchants] = vals;
       const activationResults = new Array<ResultAsync<void, Error>>();
 
       for (const keyval of authorizedMerchants) {
-        activationResults.push(this._activateAuthorizedMerchant(context.account, 
-          keyval[0], 
-          keyval[1], 
-          config.merchantIframeUrl));
+        activationResults.push(
+          this._activateAuthorizedMerchant(context.account, keyval[0], keyval[1], config.merchantIframeUrl),
+        );
       }
 
       return ResultUtils.combine(activationResults).map(() => {});
     });
   }
 
-  protected _activateAuthorizedMerchant(address: string,
-    merchantUrl: URL, 
+  protected _activateAuthorizedMerchant(
+    address: string,
+    merchantUrl: URL,
     authorizationSignature: string,
-     merchantIFrameUrl: string): ResultAsync<void, MerchantConnectorError | MerchantValidationError> {
+    merchantIFrameUrl: string,
+  ): ResultAsync<void, MerchantConnectorError | MerchantValidationError> {
     const proxy = this._factoryProxy(merchantIFrameUrl, merchantUrl);
-    return proxy.activate().andThen(() => {
-      // Once the proxy is activated, we need to get the validated signature
-      return proxy.getValidatedSignature();
-    })
-    .andThen((validatedSignature) => {
-      const validationAddress = ethers.utils.verifyMessage(validatedSignature, authorizationSignature);
+    return proxy
+      .activate()
+      .andThen(() => {
+        // Once the proxy is activated, we need to get the validated signature
+        return proxy.getValidatedSignature();
+      })
+      .andThen((validatedSignature) => {
+        const validationAddress = ethers.utils.verifyMessage(validatedSignature, authorizationSignature);
 
-      if (validationAddress !== address) {
-        // TODO: this is recoverable, we just need a new signature
-        return errAsync(new MerchantValidationError("Validated signature of merchant connector does not match signature on file. Need to re-authorized the connector!"));
-      }
+        if (validationAddress !== address) {
+          // TODO: this is recoverable, we just need a new signature
+          return errAsync(
+            new MerchantValidationError(
+              "Validated signature of merchant connector does not match signature on file. Need to re-authorized the connector!",
+            ),
+          );
+        }
 
-      return proxy.activateConnector();
-    });
+        return proxy.activateConnector();
+      });
   }
 
   protected _factoryProxy(merchantIFrameUrl: string, merchantUrl: URL): MerchantConnectorProxy {

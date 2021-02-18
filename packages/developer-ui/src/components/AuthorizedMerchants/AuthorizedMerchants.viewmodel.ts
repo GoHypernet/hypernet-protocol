@@ -29,9 +29,8 @@ export class AuthorizedMerchantsViewModel {
         return this.core.getAuthorizedMerchants();
       })
       .map((merchants) => {
-
         const merchantStrings = new Array<string>();
-        for(const keyval of merchants) {
+        for (const keyval of merchants) {
           merchantStrings.push(keyval[0].toString());
         }
         this.authorizedMerchants(merchantStrings);
