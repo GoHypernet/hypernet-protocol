@@ -198,7 +198,7 @@ export interface IHypernetCore {
 
   authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MerchantValidationError>;
 
-  getAuthorizedMerchants(): ResultAsync<URL[], PersistenceError>;
+  getAuthorizedMerchants(): ResultAsync<Map<URL, string>, PersistenceError>;
   /**
    * Observables for seeing what's going on
    */

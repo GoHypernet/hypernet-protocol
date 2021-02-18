@@ -28,13 +28,11 @@ export class MerchantService implements IMerchantService {
       });
   }
 
-  public getAuthorizedMerchants(): ResultAsync<URL[], PersistenceError> {
+  public getAuthorizedMerchants(): ResultAsync<Map<URL, string>, PersistenceError> {
     return this.merchantConnectorRepository.getAuthorizedMerchants();
   }
 
   public activateAuthorizedMerchants(): ResultAsync<void, MerchantConnectorError | PersistenceError> {
-    return this.merchantConnectorRepository.getAuthorizedMerchants().andThen((authorizedMerchants) => {
-      return this.merchantConnectorRepository.activateAuthorizedMerchants(authorizedMerchants);
-    });
+    return this.merchantConnectorRepository.activateAuthorizedMerchants();
   }
 }

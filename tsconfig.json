@@ -36,6 +36,9 @@
       "path": "packages/test-merchant-connector/src"
     },
     {
+      "path": "packages/test-merchant-connector/server"
+    },
+    {
       "path": "packages/test-merchant-connector/test"
     },
     {

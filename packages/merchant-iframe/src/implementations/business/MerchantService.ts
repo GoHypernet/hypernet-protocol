@@ -7,6 +7,10 @@ import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { IMerchantConnector } from "@hypernetlabs/merchant-connector";
 
+declare global {
+  interface Window { connector: IMerchantConnector; }
+}
+
 export class MerchantService implements IMerchantService {
   constructor(
     protected merchantConnectorRepository: IMerchantConnectorRepository,
@@ -18,15 +22,23 @@ export class MerchantService implements IMerchantService {
     MerchantConnectorError | MerchantValidationError
   > {
     const context = this.contextProvider.getMerchantContext();
-
+    console.log("activateMerchantConnector");
     // If we don't have validated code, that's a problem.
     if (context.validatedMerchantCode == null) {
       return errAsync(new MerchantValidationError("Cannot activate merchant connector, no validated code available!"));
     }
 
     // Now we eval the connector code, which is supposed to return an IMerchantConnector
-    const merchantConnector = eval(context.validatedMerchantCode) as IMerchantConnector;
+    //const merchantConnector = eval(context.validatedMerchantCode) as IMerchantConnector;
 
+    var newScript = document.createElement("script");
+    var inlineScript = document.createTextNode(context.validatedMerchantCode);
+    newScript.appendChild(inlineScript); 
+    document.head.appendChild(newScript);
+
+    const merchantConnector = window.connector;
+
+    console.log(merchantConnector);
     if (merchantConnector == null) {
       return errAsync(new MerchantConnectorError("Validated code does not evaluate to an object"));
     }
@@ -59,6 +71,7 @@ export class MerchantService implements IMerchantService {
       }
 
       // Merchant's code passes muster. Store the merchant code in the context as validated.
+      console.log("Connector validated!");
       const context = this.contextProvider.getMerchantContext();
       context.validatedMerchantCode = merchantCode;
       context.validatedMerchantSignature = signature;

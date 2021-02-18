@@ -40,6 +40,7 @@ export abstract class ChildProxy {
       },
       (e) => {
         if (this.parent != null) {
+          console.error(e);
           this.parent.emit("callError", new IFrameCallData(callId, e));
         }
       },

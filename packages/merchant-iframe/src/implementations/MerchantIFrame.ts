@@ -38,8 +38,11 @@ export class MerchantIframe {
     this.merchantIframeApi = new PostmateApi(this.merchantService, this.contextProvider);
 
     // Since this iframe is supposed to host a merchant connector, first things first, let's validate the merchant's connector
-    this.merchantService.validateMerchantConnector();
-
-    this.merchantIframeApi.activateModel();
+    this.merchantService.validateMerchantConnector().andThen(() => {
+      // We're ready to answer questions about the connector, we can activate the API
+      // Note, it would be better to have a waitForValidated() function down lower so that the API
+      // can be activated immediately.
+      return this.merchantIframeApi.activateModel();
+    });
   }
 }

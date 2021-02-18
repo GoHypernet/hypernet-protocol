@@ -250,6 +250,7 @@ export class HypernetCore implements IHypernetCore {
       this.blockchainProvider,
       this.ajaxUtils,
       this.configProvider,
+      this.contextProvider,
     );
 
     this.paymentService = new PaymentService(
@@ -550,7 +551,7 @@ export class HypernetCore implements IHypernetCore {
     return this.merchantService.authorizeMerchant(merchantUrl);
   }
 
-  public getAuthorizedMerchants(): ResultAsync<URL[], PersistenceError> {
+  public getAuthorizedMerchants(): ResultAsync<Map<URL, string>, PersistenceError> {
     return this.merchantService.getAuthorizedMerchants();
   }
 }

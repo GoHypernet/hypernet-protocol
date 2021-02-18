@@ -30,11 +30,11 @@
   "scripts": {
     "build": "yarn clean && yarn compile",
     "clean": "rimraf dist",
-    "compile": "tsc --build src/tsconfig.json",
-    "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",
+    "compile": "tsc --build src/tsconfig.json && tsc --build server/tsconfig.json",
     "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",
+    "start": "webpack && ts-node server/index.ts",
     "prepare": "yarn build",
     "prepublishOnly": "npm test && npm run lint",
     "test": "yarn test:ci",
@@ -47,6 +47,9 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/merchant-connector": "^0.0.1"
+    "@hypernetlabs/merchant-connector": "^0.0.1",
+    "cors": "^2.8.5",
+    "ethers": "^5.0.31",
+    "express": "^4.17.1"
   }
 }

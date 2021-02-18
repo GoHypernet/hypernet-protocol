@@ -1,4 +1,4 @@
-import { errAsync, ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import Postmate from "postmate";
 import { ChildProxy, IIFrameCallData } from "@hypernetlabs/utils";
 import { IContextProvider } from "@merchant-iframe/interfaces/utils";
@@ -37,6 +37,7 @@ export default class PostmateApi extends ChildProxy implements IMerchantIFrameAp
     return new Postmate.Model({
       activateConnector: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
+          console.log("activateConnector!");
           return this.merchantService.activateMerchantConnector().map(() => {});
         }, data.callId);
       },
@@ -55,6 +56,15 @@ export default class PostmateApi extends ChildProxy implements IMerchantIFrameAp
             return errAsync(new Error("No merchant connector available!"));
           }
           return ResultAsync.fromPromise(this.merchantConnector.getPublicKey(), (e) => e);
+        }, data.callId);
+      },
+      getValidatedSignature: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          const context = this.contextProvider.getMerchantContext();
+
+          console.log(`In iframe, validatedMerchantSignature = ${context.validatedMerchantSignature}`);
+
+          return okAsync(context.validatedMerchantSignature);
         }, data.callId);
       },
     });

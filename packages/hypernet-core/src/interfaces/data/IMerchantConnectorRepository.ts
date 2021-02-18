@@ -21,7 +21,7 @@ export interface IMerchantConnectorRepository {
    */
   addAuthorizedMerchant(merchantUrl: URL): ResultAsync<void, PersistenceError>;
 
-  getAuthorizedMerchants(): ResultAsync<URL[], PersistenceError>;
+  getAuthorizedMerchants(): ResultAsync<Map<URL, string>, PersistenceError>;
 
-  activateAuthorizedMerchants(merchantUrls: URL[]): ResultAsync<void, MerchantConnectorError>;
+  activateAuthorizedMerchants(): ResultAsync<void, MerchantConnectorError>;
 }
