@@ -41,6 +41,7 @@ class TestMerchantConnector implements IMerchantConnector {
     const hashedData = keccak256(encodedData);
 
     // 5) Sign the hash of the data so that people know we sent it
+    // Note, it is assumed this is being done on the Merchant's server, and this private key is protected.
     const privateKey = "0x0123456789012345678901234567890123456789012345678901234567890123";
     let mediator = new ChannelSigner(privateKey);
     const mediatorSignature = await mediator.signUtilityMessage(hashedData);
@@ -53,7 +54,7 @@ class TestMerchantConnector implements IMerchantConnector {
   }
   getPublicKey(): Promise<string> {
     return Promise.resolve(
-      "0x046655feed4d214c261e0a6b554395596f1f1476a77d999560e5a8df9b8a1a3515217e88dd05e938efdd71b2cce322bf01da96cd42087b236e8f5043157a9c068e",
+      "0x14791697260E4c9A71f18484C9f997B308e59325",
     );
   }
 

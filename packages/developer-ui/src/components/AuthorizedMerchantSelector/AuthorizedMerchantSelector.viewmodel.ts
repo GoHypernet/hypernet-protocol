@@ -27,6 +27,10 @@ export class AuthorizedMerchantSelectorViewModel {
     this.merchants = ko.observable(null);
     this.authorizedMerchantOptions = ko.observableArray<AuthorizedMerchantOption>();
 
+    this.core.onMerchantAuthorized.subscribe((merchant) => {
+
+    });
+
     this.selectedAuthorizedMerchantOption = ko.pureComputed({
       read: () => {
         const selectedAuthorizedMerchant = this.selectedAuthorizedMerchant();
