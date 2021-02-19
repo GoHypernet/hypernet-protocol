@@ -1,6 +1,5 @@
-import { IHypernetMobileIntegration } from "@mobile-integration/interfaces/app/IHypernetMobileIntegration";
 import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import { IHypernetCore } from "@hypernetlabs/hypernet-core";
+import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 
 declare global {
   interface Window {
@@ -8,30 +7,100 @@ declare global {
   }
 }
 
-export default class HypernetMobileIntegration implements IHypernetMobileIntegration {
+export enum ECoreViewDataKeys {
+  accounts = "accounts",
+  balances = "balances",
+  links = "links",
+  activeLinks = "activeLinks",
+  authorizedMerchants = "authorizedMerchants",
+}
+
+export default class HypernetMobileIntegration {
   private webIntegrationInstance: IHypernetWebIntegration;
+  public coreProxy: IHypernetIFrameProxy = {} as IHypernetIFrameProxy;
 
   constructor() {
     this.webIntegrationInstance = new HypernetWebIntegration();
-  }
+    this.webIntegrationInstance.getReady().map((coreProxy) => {
+      this.coreProxy = coreProxy;
+      if (window.ReactNativeWebView) {
+        this.postAccounts();
+        this.postBalances();
+        this.postLinks();
+        this.postActiveLinks();
+        this.postAuthorizedMerchants();
+      }
 
-  // wait for the core to be intialized
-  public getCoreReadyForWebView(): Promise<IHypernetCore> {
-    // TODO: remove this line when provider part is solved.
-    this.postCoreInstanceToReactNativeWebView(this.webIntegrationInstance.proxy);
-
-    return new Promise((resolve) => {
-      this.webIntegrationInstance.getReady().then(async (coreProxy) => {
-        this.postCoreInstanceToReactNativeWebView(coreProxy);
-        resolve(coreProxy);
+      coreProxy.onBalancesChanged.subscribe(() => {
+        this.postBalances();
+      });
+      coreProxy.onPullPaymentApproved.subscribe(() => {
+        this.postLinks();
+        this.postActiveLinks();
+      });
+      coreProxy.onPullPaymentProposed.subscribe(() => {
+        this.postLinks();
+        this.postActiveLinks();
+      });
+      coreProxy.onPullPaymentUpdated.subscribe(() => {
+        this.postLinks();
+        this.postActiveLinks();
+      });
+      coreProxy.onPushPaymentReceived.subscribe(() => {
+        this.postLinks();
+        this.postActiveLinks();
+      });
+      coreProxy.onPushPaymentProposed.subscribe(() => {
+        this.postLinks();
+        this.postActiveLinks();
+      });
+      coreProxy.onPushPaymentUpdated.subscribe(() => {
+        this.postLinks();
+        this.postActiveLinks();
+      });
+      coreProxy.onMerchantAuthorized.subscribe(() => {
+        this.postAuthorizedMerchants();
       });
     });
   }
 
-  private postCoreInstanceToReactNativeWebView(coreInstance: IHypernetCore) {
-    // TODO: we may need to serilize coreInstance in s different way to get the prototype methods stringified as well.
-    if (window.ReactNativeWebView) {
-      window.ReactNativeWebView.postMessage(JSON.stringify(coreInstance));
-    }
+  private postAccounts() {
+    this.coreProxy.getEthereumAccounts().map((accounts) => {
+      this.postDataToRN(ECoreViewDataKeys.accounts, accounts);
+    });
+  }
+
+  private postBalances() {
+    this.coreProxy.getBalances().map((balances) => {
+      this.postDataToRN(ECoreViewDataKeys.balances, balances);
+    });
+  }
+
+  private postLinks() {
+    this.coreProxy.getLinks().map((links) => {
+      this.postDataToRN(ECoreViewDataKeys.links, links);
+    });
+  }
+
+  private postActiveLinks() {
+    this.coreProxy.getActiveLinks().map((links) => {
+      this.postDataToRN(ECoreViewDataKeys.activeLinks, links);
+    });
+  }
+
+  private postAuthorizedMerchants() {
+    this.coreProxy.getAuthorizedMerchants().map((merchants) => {
+      //const merchantList = [...merchants].map(([name, value]) => ({ name, value }));
+      this.postDataToRN(ECoreViewDataKeys.authorizedMerchants, merchants);
+    });
+  }
+
+  private postDataToRN(dataKey: string, data: any) {
+    window.ReactNativeWebView.postMessage(
+      JSON.stringify({
+        keyName: dataKey,
+        keyValue: data,
+      }),
+    );
   }
 }

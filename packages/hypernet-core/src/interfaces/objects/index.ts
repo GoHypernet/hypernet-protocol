@@ -20,4 +20,4 @@ export * from "./SortedTransfers";
 export * from "./ThreadMetadata";
 export * from "./Token";
 export * from "./ExternalProvider";
-export { ResultAsync, Result } from "neverthrow";
+export { ResultAsync, Result, okAsync, errAsync, ok, err } from "neverthrow";

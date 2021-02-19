@@ -6,7 +6,7 @@ import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/w
 
 const client: IHypernetWebIntegration = new HypernetWebIntegration();
 
-client.getReady().then(async (proxy) => {
+client.getReady().map(async (proxy) => {
   // client wants to get the balances and show it in a design of his design
   proxy.getBalances().map((balances) => {
     console.log("get balances from proxy inside ready: ", balances.assets);
