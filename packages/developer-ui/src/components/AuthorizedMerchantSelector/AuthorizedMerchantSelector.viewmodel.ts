@@ -28,7 +28,8 @@ export class AuthorizedMerchantSelectorViewModel {
     this.authorizedMerchantOptions = ko.observableArray<AuthorizedMerchantOption>();
 
     this.core.onMerchantAuthorized.subscribe((merchant) => {
-
+      const url = merchant.toString();
+      this.authorizedMerchantOptions.push(new AuthorizedMerchantOption(url, url));
     });
 
     this.selectedAuthorizedMerchantOption = ko.pureComputed({
