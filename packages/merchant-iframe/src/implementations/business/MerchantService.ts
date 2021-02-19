@@ -61,12 +61,11 @@ export class MerchantService implements IMerchantService {
     return ResultUtils.combine([
       this.merchantConnectorRepository.getMerchantCode(context.merchantUrl),
       this.merchantConnectorRepository.getMerchantSignature(context.merchantUrl),
-      this.merchantConnectorRepository.getMerchantPublicKey(context.merchantUrl),
+      this.merchantConnectorRepository.getMerchantAddress(context.merchantUrl),
     ]).andThen((vals) => {
-      const [merchantCode, signature, publicKey] = vals;
+      const [merchantCode, signature, address] = vals;
 
       const calculatedAddress = ethers.utils.verifyMessage(merchantCode, signature);
-      const address = ethers.utils.computeAddress(publicKey);
 
       if (calculatedAddress !== address) {
         return errAsync(new MerchantValidationError("Merchant code does not match signature!"));
