@@ -48,6 +48,7 @@ import {
   BigNumber,
   ControlClaim,
   EthereumAddress,
+  ExternalProvider,
   HypernetConfig,
   HypernetLink,
   Payment,
@@ -147,7 +148,11 @@ export class HypernetCore implements IHypernetCore {
    * @param network the network to attach to
    * @param config optional config, defaults to localhost/dev config
    */
-  constructor(network: EBlockchainNetwork = EBlockchainNetwork.Main, config?: HypernetConfig) {
+  constructor(
+    network: EBlockchainNetwork = EBlockchainNetwork.Main,
+    config?: HypernetConfig,
+    externalProvider?: ExternalProvider,
+  ) {
     this._inControl = false;
 
     this.onControlClaimed = new Subject<ControlClaim>();
@@ -187,7 +192,7 @@ export class HypernetCore implements IHypernetCore {
       this.onBalancesChanged,
       this.onMerchantAuthorized,
     );
-    this.blockchainProvider = new EthersBlockchainProvider();
+    this.blockchainProvider = new EthersBlockchainProvider(externalProvider);
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(network, this.logUtils, config);
     this.linkUtils = new LinkUtils(this.contextProvider);

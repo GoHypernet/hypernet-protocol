@@ -7,5 +7,8 @@ import { ethers } from "ethers";
  */
 export interface IBlockchainProvider {
   getSigner(): ResultAsync<ethers.providers.JsonRpcSigner, BlockchainUnavailableError>;
-  getProvider(): ResultAsync<ethers.providers.Web3Provider, BlockchainUnavailableError>;
+  getProvider(): ResultAsync<
+    ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
+    BlockchainUnavailableError
+  >;
 }

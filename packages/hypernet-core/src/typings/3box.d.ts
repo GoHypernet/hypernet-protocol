@@ -163,7 +163,7 @@ declare module "3box" {
   export function getVerifiedAccounts(profile: any): undefined;
   export function openBox(
     address: string,
-    ethereumProvider: ethers.providers.Web3Provider,
+    ethereumProvider: ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
     opts?: BoxObjectOpts_openBox,
   ): Promise<BoxInstance>;
   export function isLoggedIn(address: any): boolean;

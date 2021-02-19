@@ -19,4 +19,5 @@ export * from "./PublicKey";
 export * from "./SortedTransfers";
 export * from "./ThreadMetadata";
 export * from "./Token";
+export * from "./ExternalProvider";
 export { ResultAsync, Result } from "neverthrow";
