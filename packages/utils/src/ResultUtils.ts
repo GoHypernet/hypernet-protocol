@@ -1,5 +1,4 @@
-import { Result, ResultAsync } from "@interfaces/objects";
-import { err, ok } from "neverthrow";
+import { err, ok, ResultAsync, Result } from "neverthrow";
 
 export class ResultUtils {
   static combine<T, T2, T3, T4, E, E2, E3, E4>(

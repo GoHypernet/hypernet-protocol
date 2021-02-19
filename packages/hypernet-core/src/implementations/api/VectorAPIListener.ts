@@ -94,48 +94,50 @@ export class VectorAPIListener implements IVectorListener {
         // Filter out any transfer not containing a transfer with a UUID in the transferState (insurance & parameterized transfer types)
         // or a UUID as part of transferState.message (message transfer type)
 
-        this.paymentUtils.getTransferType(payload.transfer).andThen((transferType) => {
-          let paymentId: string;
-          const transfer = payload.transfer;
+        this.paymentUtils
+          .getTransferType(payload.transfer)
+          .andThen((transferType) => {
+            let paymentId: string;
+            const transfer = payload.transfer;
 
-          if (transferType === ETransferType.Offer) {
-            const message: IHypernetOfferDetails = JSON.parse(transfer.transferState.message);
-            paymentId = message.paymentId;
-          } else if (transferType === ETransferType.PullRecord) {
-            const message: IHypernetPullPaymentDetails = JSON.parse(transfer.transferState.message);
-            paymentId = message.paymentId;
-          } else if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
-            paymentId = transfer.transferState.UUID;
-          } else {
-            this.logUtils.log(`Transfer type was not recognized, doing nothing. TransferType: '${transferType}'`);
-            return okAsync(null);
-          }
-
-          return this.paymentUtils.isHypernetDomain(paymentId).andThen((isHypernetDomain) => {
-            if (!isHypernetDomain) {
-              this.logUtils.log(
-                `Ignoring transfer that is not in the Hypernet Domain: transferID of ${transfer.transferId}, initiator: ${transfer.initiator}`,
-              );
+            if (transferType === ETransferType.Offer) {
+              const message: IHypernetOfferDetails = JSON.parse(transfer.transferState.message);
+              paymentId = message.paymentId;
+            } else if (transferType === ETransferType.PullRecord) {
+              const message: IHypernetPullPaymentDetails = JSON.parse(transfer.transferState.message);
+              paymentId = message.paymentId;
+            } else if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
+              paymentId = transfer.transferState.UUID;
+            } else {
+              this.logUtils.log(`Transfer type was not recognized, doing nothing. TransferType: '${transferType}'`);
               return okAsync(null);
             }
 
-            // Notify the service to process the event
-            if (transferType === ETransferType.PullRecord) {
-              return this.paymentService.pullRecorded(paymentId);
-            } else if (transferType === ETransferType.Offer) {
-              return this.paymentService.offerReceived(paymentId);
-            } else if (transferType === ETransferType.Parameterized) {
-              return this.paymentService.paymentPosted(paymentId);
-            } else if (transferType === ETransferType.Insurance) {
-              return this.paymentService.stakePosted(paymentId);
-            }
+            return this.paymentUtils.isHypernetDomain(paymentId).andThen((isHypernetDomain) => {
+              if (!isHypernetDomain) {
+                this.logUtils.log(
+                  `Ignoring transfer that is not in the Hypernet Domain: transferID of ${transfer.transferId}, initiator: ${transfer.initiator}`,
+                );
+                return okAsync(null);
+              }
 
-            return okAsync(null);
+              // Notify the service to process the event
+              if (transferType === ETransferType.PullRecord) {
+                return this.paymentService.pullRecorded(paymentId);
+              } else if (transferType === ETransferType.Offer) {
+                return this.paymentService.offerReceived(paymentId);
+              } else if (transferType === ETransferType.Parameterized) {
+                return this.paymentService.paymentPosted(paymentId);
+              } else if (transferType === ETransferType.Insurance) {
+                return this.paymentService.stakePosted(paymentId);
+              }
+
+              return okAsync(null);
+            });
+          })
+          .mapErr((e) => {
+            this.logUtils.error(e);
           });
-        })
-        .mapErr((e) => {
-          this.logUtils.error(e);
-        });
 
         // Convert a Vector event into an external event for publishing
         /*return new Observable(subscriber => {

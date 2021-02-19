@@ -45,10 +45,9 @@ export interface IVectorUtils {
     message: IHypernetOfferDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError>;
 
-
   createPullNotificationTransfer(
     toAddress: string,
-    message: IHypernetPullPaymentDetails
+    message: IHypernetPullPaymentDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
 
   /**
@@ -65,7 +64,7 @@ export interface IVectorUtils {
     start: number,
     expiration: number,
     deltaTime?: number,
-    deltaAmount?: string
+    deltaAmount?: string,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
 
   /**

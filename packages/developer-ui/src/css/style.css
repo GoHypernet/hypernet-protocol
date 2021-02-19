@@ -1,12 +1,12 @@
 body{
     background: #f0f0f0 !important;
 }
-.coustom-btn-primary{
+.custom-btn-primary{
     background: #4dc1ac !important;
     border: none !important;
     box-shadow: 0px 3px 1px -2px rgba(0,0,0,0.2), 0px 2px 2px 0px rgba(0,0,0,0.14), 0px 1px 5px 0px rgba(0,0,0,0.12) !important;
 }
-.coustom-btn-primary:hover{
+.custom-btn-primary:hover{
     background: #38816f !important;
 }
 
@@ -15,7 +15,7 @@ body{
     background: #ffffff !important;
     margin: 10px;
 }
-.coustom-border-bottom{
+.custom-border-bottom{
     border-bottom: 1px solid #c9c9c9 !important;
     padding-bottom: 8px;
 
@@ -26,12 +26,12 @@ body{
 .form-control-margin{
     margin-bottom: 10px !important;
 }
-.coustom-tow-coloumn{
+.custom-tow-column{
     display: grid;
     grid-column-gap: 10px;
     grid-template-columns: 70% 28%;
 }
-.coustom-three-coloumn{
+.custom-three-column{
     display: grid;
     grid-column-gap: 10px;
     grid-template-columns: 35% 35% 28%;

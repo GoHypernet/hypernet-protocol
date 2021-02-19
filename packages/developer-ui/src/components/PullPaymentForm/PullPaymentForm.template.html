@@ -7,6 +7,9 @@
     <div>Delta Amount: <input class="form-control" data-bind="textInput: deltaAmount"></div>
     <div>Delta Time: <input class="form-control" data-bind="textInput: deltaTime"></div>
     <div>Expiration Date: <input class="form-control" data-bind="textInput: expirationDate"></div>
+    <div data-bind='component: {
+        name: "authorized-merchant-selector",
+        params: merchantSelector}'></div>
     <span data-bind='component: {
         name: "button",
         params: submitButton}'></span>

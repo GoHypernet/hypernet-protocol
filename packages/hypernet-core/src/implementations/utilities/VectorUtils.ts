@@ -38,7 +38,7 @@ import {
   VectorError,
 } from "@interfaces/objects/errors";
 import { errAsync, okAsync } from "neverthrow";
-import { ResultUtils } from "@implementations/utilities";
+import { ResultUtils } from "@hypernetlabs/utils";
 import moment from "moment";
 import { IHypernetPullPaymentDetails } from "../../interfaces/objects/HypernetPullPaymentDetails";
 import { EMessageTransferType } from "@interfaces/types/EMessageTransferType";
@@ -136,7 +136,7 @@ export class VectorUtils implements IVectorUtils {
    */
   public createPullNotificationTransfer(
     toAddress: string,
-    message: IHypernetPullPaymentDetails
+    message: IHypernetPullPaymentDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // The message type has to be PULLPAYMENT
     message.messageType = EMessageTransferType.PULLPAYMENT;
@@ -147,7 +147,9 @@ export class VectorUtils implements IVectorUtils {
       return errAsync(validPayment.error);
     } else {
       if (!validPayment.value) {
-        return errAsync(new InvalidParametersError(`CreatePullNotificationTransfer: Invalid paymentId: '${message.paymentId}'`));
+        return errAsync(
+          new InvalidParametersError(`CreatePullNotificationTransfer: Invalid paymentId: '${message.paymentId}'`),
+        );
       }
     }
 
@@ -204,29 +206,28 @@ export class VectorUtils implements IVectorUtils {
       }
     }
 
-    return ResultUtils.combine([
-      this.getRouterChannelAddress(),
-      this.browserNodeProvider.getBrowserNode(),
-    ]).andThen((vals) => {
-      const [channelAddress, browserNode] = vals;
+    return ResultUtils.combine([this.getRouterChannelAddress(), this.browserNodeProvider.getBrowserNode()]).andThen(
+      (vals) => {
+        const [channelAddress, browserNode] = vals;
 
-      const initialState: MessageState = {
-        message: serialize(message),
-      };
+        const initialState: MessageState = {
+          message: serialize(message),
+        };
 
-      return browserNode.conditionalTransfer(
-        channelAddress,
-        "0",
-        message.paymentToken, // The offer is always for 0, so we will make the asset ID in the payment token type, because why not?
-        "MessageTransfer",
-        initialState,
-        toAddress,
-        undefined, // CRITICAL- must be undefined
-        undefined,
-        undefined,
-        message,
-      );
-    });
+        return browserNode.conditionalTransfer(
+          channelAddress,
+          "0",
+          message.paymentToken, // The offer is always for 0, so we will make the asset ID in the payment token type, because why not?
+          "MessageTransfer",
+          initialState,
+          toAddress,
+          undefined, // CRITICAL- must be undefined
+          undefined,
+          undefined,
+          message,
+        );
+      },
+    );
   }
 
   /**
@@ -249,32 +250,32 @@ export class VectorUtils implements IVectorUtils {
     start: number,
     expiration: number,
     deltaTime?: number,
-    deltaAmount?: string
+    deltaAmount?: string,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // Sanity check
-    if (type === EPaymentType.Pull && (deltaTime === undefined)) {
-      this.logUtils.error("Must provide deltaTime for Pull payments")
+    if (type === EPaymentType.Pull && deltaTime === undefined) {
+      this.logUtils.error("Must provide deltaTime for Pull payments");
       return errAsync(new InvalidParametersError("Must provide deltaTime for Pull payments"));
     }
 
-    if (type === EPaymentType.Pull && (deltaAmount === undefined)) {
-      this.logUtils.error("Must provide deltaAmount for Pull payments")
+    if (type === EPaymentType.Pull && deltaAmount === undefined) {
+      this.logUtils.error("Must provide deltaAmount for Pull payments");
       return errAsync(new InvalidParametersError("Must provide deltaAmount for Pull payments"));
     }
 
     if (amount.isZero()) {
-      this.logUtils.error("Amount cannot be zero.")
+      this.logUtils.error("Amount cannot be zero.");
       return errAsync(new InvalidParametersError("Amount cannot be zero."));
     }
 
     // Make sure the paymentId is valid:
     const validPayment = this.paymentIdUtils.isValidPaymentId(paymentId);
     if (validPayment.isErr()) {
-      this.logUtils.error(validPayment.error)
+      this.logUtils.error(validPayment.error);
       return errAsync(validPayment.error);
     } else {
       if (!validPayment.value) {
-        this.logUtils.error(`CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`)
+        this.logUtils.error(`CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`);
         return errAsync(new InvalidParametersError(`CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`));
       }
     }
@@ -301,26 +302,25 @@ export class VectorUtils implements IVectorUtils {
         deltaTime: "1",
       };
 
-      let ourRate: Rate
+      let ourRate: Rate;
       // Have to throw this error, or the ourRate object below will complain that one
       // of the params is possibly undefined.
       if (type == EPaymentType.Pull) {
         if (deltaTime == null || deltaAmount == null) {
-          this.logUtils.error('Somehow, deltaTime or deltaAmount were not set!')
-          return errAsync(new InvalidParametersError('Somehow, deltaTime or deltaAmount were not set!'));
+          this.logUtils.error("Somehow, deltaTime or deltaAmount were not set!");
+          return errAsync(new InvalidParametersError("Somehow, deltaTime or deltaAmount were not set!"));
         }
 
-        if (deltaTime == 0 || deltaAmount == '0') {
-          this.logUtils.error('deltatime & deltaAmount cannot be zero!')
-          return errAsync(new InvalidParametersError('deltatime & deltaAmount cannot be zero!'));
+        if (deltaTime == 0 || deltaAmount == "0") {
+          this.logUtils.error("deltatime & deltaAmount cannot be zero!");
+          return errAsync(new InvalidParametersError("deltatime & deltaAmount cannot be zero!"));
         }
 
         ourRate = {
           deltaTime: deltaTime?.toString(),
-          deltaAmount: deltaAmount?.toString()
-        }
-      }
-      else {
+          deltaAmount: deltaAmount?.toString(),
+        };
+      } else {
         ourRate = infiniteRate;
       }
 
@@ -329,7 +329,7 @@ export class VectorUtils implements IVectorUtils {
         start: start.toString(),
         expiration: expiration.toString(),
         UUID: paymentId,
-        rate: ourRate
+        rate: ourRate,
       };
 
       return browserNode.conditionalTransfer(

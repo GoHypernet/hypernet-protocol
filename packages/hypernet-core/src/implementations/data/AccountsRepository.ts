@@ -20,7 +20,7 @@ import {
   VectorError,
 } from "@interfaces/objects/errors";
 import { combine, errAsync, okAsync } from "neverthrow";
-import { ResultUtils } from "@implementations/utilities";
+import { ResultUtils } from "@hypernetlabs/utils";
 
 class AssetInfo {
   constructor(public assetId: EthereumAddress, public name: string, public symbol: string, public decimals: number) {}
@@ -180,7 +180,7 @@ export class AccountsRepository implements IAccountsRepository {
       })
       .andThen((tx) => {
         // TODO: Wait on this, break it up, this could take a while
-        return ResultAsync.fromPromise(tx.wait());
+        return ResultAsync.fromPromise(tx.wait(), (e) => e as BlockchainUnavailableError);
       })
       .andThen((receipt) => {
         if (browserNode == null || channelAddress == null) {

@@ -1,5 +1,5 @@
 import { NodeResponses } from "@connext/vector-types";
-import { ResultUtils } from "@implementations/utilities";
+import { ResultUtils } from "@hypernetlabs/utils";
 import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
 import {
   BigNumber,
@@ -61,44 +61,39 @@ export class PaymentRepository implements IPaymentRepository {
 
   createPullRecord(
     paymentId: string,
-    amount: string
+    amount: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     let transfers: IFullTransferState[];
     let browserNode: IBrowserNode;
 
-    return ResultUtils.combine([
-      this._getTransfersByPaymentId(paymentId), 
-      this.browserNodeProvider.getBrowserNode()])
-    .andThen((vals) => {
-      [transfers, browserNode] = vals;
-      return this.paymentUtils.transfersToPayment(paymentId, transfers);
-    })
-    .andThen((payment) => {
-      const message: IHypernetPullPaymentDetails = {
-        messageType: EMessageTransferType.PULLPAYMENT,
-        paymentId: paymentId,
-        to: payment.to,
-        from: payment.from,
-        paymentToken: payment.paymentToken,
-        pullPaymentAmount: amount
-      }
-  
-      return this.vectorUtils.createPullNotificationTransfer(
-        payment.to,
-        message
-      );
-    })
-    .andThen((transferResponse) => {
-      // Get the newly minted transfer
-      return browserNode.getTransfer(transferResponse.transferId);
-    })
-    .andThen((newTransfer) => {
-      // Add the new transfer to the list
-      transfers.push(newTransfer);
+    return ResultUtils.combine([this._getTransfersByPaymentId(paymentId), this.browserNodeProvider.getBrowserNode()])
+      .andThen((vals) => {
+        [transfers, browserNode] = vals;
+        return this.paymentUtils.transfersToPayment(paymentId, transfers);
+      })
+      .andThen((payment) => {
+        const message: IHypernetPullPaymentDetails = {
+          messageType: EMessageTransferType.PULLPAYMENT,
+          paymentId: paymentId,
+          to: payment.to,
+          from: payment.from,
+          paymentToken: payment.paymentToken,
+          pullPaymentAmount: amount,
+        };
 
-      // Convert the list of transfers to a payment (again)
-      return this.paymentUtils.transfersToPayment(paymentId, transfers);
-    });
+        return this.vectorUtils.createPullNotificationTransfer(payment.to, message);
+      })
+      .andThen((transferResponse) => {
+        // Get the newly minted transfer
+        return browserNode.getTransfer(transferResponse.transferId);
+      })
+      .andThen((newTransfer) => {
+        // Add the new transfer to the list
+        transfers.push(newTransfer);
+
+        // Convert the list of transfers to a payment (again)
+        return this.paymentUtils.transfersToPayment(paymentId, transfers);
+      });
   }
 
   public createPullPayment(
@@ -114,42 +109,42 @@ export class PaymentRepository implements IPaymentRepository {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
     let paymentId: string;
-    
+
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
       this.paymentUtils.createPaymentId(EPaymentType.Pull),
     ])
-    .andThen((vals) => {
-      [browserNode, context, paymentId] = vals;
+      .andThen((vals) => {
+        [browserNode, context, paymentId] = vals;
 
-      const message: IHypernetOfferDetails = {
-        messageType: EMessageTransferType.OFFER,
-        paymentId,
-        creationDate: this.timeUtils.getUnixNow(),
-        to: counterPartyAccount,
-        from: context.publicIdentifier,
-        requiredStake,
-        paymentAmount: maximumAmount,
-        expirationDate,
-        paymentToken,
-        disputeMediator,
-        rate: {
-          deltaAmount,
-          deltaTime
-        }
-      };
+        const message: IHypernetOfferDetails = {
+          messageType: EMessageTransferType.OFFER,
+          paymentId,
+          creationDate: this.timeUtils.getUnixNow(),
+          to: counterPartyAccount,
+          from: context.publicIdentifier,
+          requiredStake,
+          paymentAmount: maximumAmount,
+          expirationDate,
+          paymentToken,
+          disputeMediator,
+          rate: {
+            deltaAmount,
+            deltaTime,
+          },
+        };
 
-      // Create a message transfer, with the terms of the payment in the metadata.
-      return this.vectorUtils.createOfferTransfer(counterPartyAccount, message);
-    })
-    .andThen((transferInfo) => {
-      return browserNode.getTransfer(transferInfo.transferId);
-    })
-    .andThen((transfer) => {
-      // Return the payment
-      return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
-    });
+        // Create a message transfer, with the terms of the payment in the metadata.
+        return this.vectorUtils.createOfferTransfer(counterPartyAccount, message);
+      })
+      .andThen((transferInfo) => {
+        return browserNode.getTransfer(transferInfo.transferId);
+      })
+      .andThen((transfer) => {
+        // Return the payment
+        return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
+      });
   }
 
   /**
@@ -496,16 +491,16 @@ export class PaymentRepository implements IPaymentRepository {
         } else if (payment instanceof PullPayment) {
           paymentTokenAmount = payment.authorizedAmount;
         } else {
-          this.logUtils.error(`Payment was not instance of push or pull payment!`)
+          this.logUtils.error(`Payment was not instance of push or pull payment!`);
           return errAsync(new LogicalError());
         }
-        
+
         const paymentRecipient = payment.to;
         const paymentID = payment.id;
         const paymentStart = this.timeUtils.getUnixNow();
         const paymentExpiration = paymentStart + config.defaultPaymentExpiryLength;
 
-        this.logUtils.log(`Providing a payment amount of ${paymentTokenAmount}`)
+        this.logUtils.log(`Providing a payment amount of ${paymentTokenAmount}`);
 
         // Use vectorUtils to create the parameterizedPayment
         return this.vectorUtils.createPaymentTransfer(
@@ -517,7 +512,7 @@ export class PaymentRepository implements IPaymentRepository {
           paymentStart,
           paymentExpiration,
           payment instanceof PullPayment ? payment.deltaTime : undefined,
-          payment instanceof PullPayment ? payment.deltaAmount.toString() : undefined
+          payment instanceof PullPayment ? payment.deltaAmount.toString() : undefined,
         );
       })
       .andThen((transferInfoUnk) => {

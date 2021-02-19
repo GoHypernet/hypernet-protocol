@@ -1,4 +1,4 @@
 export enum ETransferState {
   Active,
-  Resolved
+  Resolved,
 }

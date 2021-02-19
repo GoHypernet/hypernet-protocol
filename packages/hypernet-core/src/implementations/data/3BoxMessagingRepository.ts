@@ -14,7 +14,7 @@ import { EMessageType } from "@interfaces/types";
 import "reflect-metadata";
 import { plainToClass, serialize } from "class-transformer";
 import { BlockchainUnavailableError, LogicalError, ThreeBoxError } from "@interfaces/objects/errors";
-import { ResultUtils } from "@implementations/utilities";
+import { ResultUtils } from "@hypernetlabs/utils";
 import { errAsync, okAsync } from "neverthrow";
 import { BoxSpace, BoxThread } from "3box";
 

@@ -1,5 +1,5 @@
 import { Address, Balance, FullTransferState, TransferName } from "@connext/vector-types";
-import { EthereumAddress, IHypernetOfferDetails, PublicIdentifier, ResultAsync } from "@interfaces/objects";
+import { EthereumAddress, PublicIdentifier, ResultAsync } from "@interfaces/objects";
 import { VectorError } from "@interfaces/objects/errors";
 import { ParameterizedResolver } from "@interfaces/types/typechain";
 

@@ -1,4 +1,4 @@
-import { ResultUtils } from "@implementations/utilities";
+import { ResultUtils } from "@hypernetlabs/utils";
 import { IPaymentService } from "@interfaces/business";
 import { IAccountsRepository, ILinkRepository } from "@interfaces/data";
 import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
@@ -80,44 +80,49 @@ export class PaymentService implements IPaymentService {
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
     // totalAuthorized / (deltaAmount/deltaTime) > ((expiration date - now) + someMinimumNumDays)
-    
-    return this.paymentRepository.createPullPayment(counterPartyAccount,
+
+    return this.paymentRepository.createPullPayment(
+      counterPartyAccount,
       totalAuthorized.toString(),
       deltaTime,
       deltaAmount,
       expirationDate,
       requiredStake.toString(),
       paymentToken,
-      disputeMediator
+      disputeMediator,
     );
   }
 
   public pullFunds(
-    paymentId: string, 
-    amount: BigNumber
+    paymentId: string,
+    amount: BigNumber,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     // Pull the up the payment
-    return this.paymentRepository.getPaymentsByIds([paymentId])
-    .andThen((payments) => {
+    return this.paymentRepository.getPaymentsByIds([paymentId]).andThen((payments) => {
       const payment = payments.get(paymentId);
 
       // Verify that it is indeed a pull payment
       if (payment instanceof PullPayment) {
         // Verify that we're not pulling too quickly (greater than the average rate)
-        if (payment.transferedAmount.add(amount).gt(payment.vestedAmount)) {
-          return errAsync(new InvalidParametersError(`Amount of ${amount} exceeds the vested payment amount of ${payment.vestedAmount}`))
+        if (payment.amountTransferred.add(amount).gt(payment.vestedAmount)) {
+          return errAsync(
+            new InvalidParametersError(
+              `Amount of ${amount} exceeds the vested payment amount of ${payment.vestedAmount}`,
+            ),
+          );
         }
 
         // Verify that the amount we're trying to pull does not exceed the total authorized amount
-        if (payment.transferedAmount.add(amount).gt(payment.authorizedAmount)) {
-          return errAsync(new InvalidParametersError(`Amount of ${amount} exceeds the total authorized amount of ${payment.authorizedAmount}`))
+        if (payment.amountTransferred.add(amount).gt(payment.authorizedAmount)) {
+          return errAsync(
+            new InvalidParametersError(
+              `Amount of ${amount} exceeds the total authorized amount of ${payment.authorizedAmount}`,
+            ),
+          );
         }
 
         // Create the PullRecord
-        return this.paymentRepository.createPullRecord(
-          paymentId,
-          amount.toString()
-        );
+        return this.paymentRepository.createPullRecord(paymentId, amount.toString());
       } else {
         return errAsync(new InvalidParametersError("Can not pull funds from a non pull payment"));
       }
@@ -259,7 +264,7 @@ export class PaymentService implements IPaymentService {
 
           stakeAttempts.push(stakeAttempt);
         }
-        return ResultAsync.fromPromise(Promise.all(stakeAttempts));
+        return ResultAsync.fromPromise(Promise.all(stakeAttempts), (e) => e as AcceptPaymentError);
       });
   }
 
@@ -284,10 +289,10 @@ export class PaymentService implements IPaymentService {
 
       const payment = payments.get(paymentId);
 
-      this.logUtils.log(`${paymentId}: ${JSON.stringify(payment)}`)
+      this.logUtils.log(`${paymentId}: ${JSON.stringify(payment)}`);
 
       if (payment == null) {
-        this.logUtils.error(`Invalid payment ID: ${paymentId}`)
+        this.logUtils.error(`Invalid payment ID: ${paymentId}`);
         return errAsync(new InvalidParametersError("Invalid payment ID!"));
       }
 
@@ -302,7 +307,7 @@ export class PaymentService implements IPaymentService {
       // Notified the UI, move on to advancing the state of the payment.
       // Payment state must be in "staked" in order to progress
       if (payment.state !== EPaymentState.Staked) {
-        this.logUtils.error(`Invalid payment ${paymentId}, it must be in the staked status. Cannot provide payment!`)
+        this.logUtils.error(`Invalid payment ${paymentId}, it must be in the staked status. Cannot provide payment!`);
         return errAsync(
           new InvalidParametersError(
             `Invalid payment ${paymentId}, it must be in the staked status. Cannot provide payment!`,
@@ -318,14 +323,14 @@ export class PaymentService implements IPaymentService {
 
       // If the payment state is staked, we know that the proper
       // insurance has been posted.
-      this.logUtils.log(`Providing asset for paymentId ${paymentId}`)
+      this.logUtils.log(`Providing asset for paymentId ${paymentId}`);
       return this.paymentRepository.provideAsset(paymentId).andThen((updatedPayment) => {
         if (updatedPayment instanceof PushPayment) {
-          this.logUtils.log('Providing asset for pushpayment.')
+          this.logUtils.log("Providing asset for pushpayment.");
           context.onPushPaymentUpdated.next(updatedPayment);
         }
         if (updatedPayment instanceof PullPayment) {
-          this.logUtils.log('Providing asset for pullpayment.')
+          this.logUtils.log("Providing asset for pullpayment.");
           context.onPullPaymentUpdated.next(updatedPayment);
         }
         return okAsync(undefined);

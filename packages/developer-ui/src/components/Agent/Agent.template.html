@@ -2,7 +2,7 @@
   <img src="../../images/hypernet.png" style="margin:10px 0px;width: 280px"/>
 </div>
 <div class="container-fluid">
-  <div class="coustom-three-coloumn">
+  <div class="custom-three-column">
     <div class="col card card-wrapper" style="margin: 20px 10px 20px 0px">
       <div data-bind='component: {
         name: "account",
@@ -25,6 +25,12 @@
         params: balances}'></div>
     </div>
 
+    <div class="col card card-wrapper" style="margin: 20px 10px 20px 0px">
+      <div data-bind='component: {
+        name: "authorized-merchants",
+        params: authorizedMerchants}'></div>
+    </div>
+
 
     <div class="col card card-wrapper" style="margin: 20px 10px 20px 0px">
       <div data-bind='component: {
@@ -34,7 +40,7 @@
 
   </div>
 
-  <div class="coustom-tow-coloumn">
+  <div class="custom-tow-column">
 
     <div class="col card card-wrapper" style="margin: 0px">
       <div data-bind="component: {
@@ -56,6 +62,13 @@
           <h5 class="card-title">Messages</h5>
           <div data-bind="text: message"></div>
         </div>
+      </div>
+    </div>
+
+    <div class="col card card-wrapper">
+      <div data-bind="component: {
+        name: 'authorized-merchant-form',
+        params: merchantForm}">
       </div>
     </div>
   </div>

@@ -1,5 +1,5 @@
 import { AssetBalance } from "@hypernetlabs/hypernet-core";
-import {utils} from "ethers";
+import { utils } from "ethers";
 
 export class AssetBalanceParams {
   constructor(public assetBalance: AssetBalance) {}

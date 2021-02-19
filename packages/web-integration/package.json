@@ -18,6 +18,7 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@hypernetlabs/hypernet-core": "^0.0.1",
+    "@hypernetlabs/utils": "^0.0.1",
     "@hypernetlabs/web-ui": "^0.0.1",
     "postmate": "^1.5.2",
     "react": "^17.0.1",

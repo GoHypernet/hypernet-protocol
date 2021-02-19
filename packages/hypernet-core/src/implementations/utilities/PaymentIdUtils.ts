@@ -2,6 +2,7 @@ import { Result, HexString } from "@interfaces/objects";
 import { InvalidParametersError, InvalidPaymentIdError } from "@interfaces/objects/errors";
 import { EPaymentType } from "@interfaces/types";
 import { IPaymentIdUtils } from "@interfaces/utilities";
+import { ethers } from "ethers";
 import { err, ok } from "neverthrow";
 
 /**
@@ -75,6 +76,9 @@ export class PaymentIdUtils implements IPaymentIdUtils {
   public isValidPaymentId(paymentIdString: HexString): Result<boolean, InvalidParametersError> {
     const overallRegex = /^0x[0-9A-Fa-f]{64}$/;
     return ok(overallRegex.test(paymentIdString));
+
+    // TODO: Uses ethers library, may be better than regex
+    return ok(ethers.utils.isHexString(paymentIdString) && ethers.utils.hexDataLength(paymentIdString) == 64);
   }
 
   /**

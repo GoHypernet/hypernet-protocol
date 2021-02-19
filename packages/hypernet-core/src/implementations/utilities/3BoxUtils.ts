@@ -3,7 +3,7 @@ import { IThreeBoxUtils, IBlockchainProvider, IContextProvider, IConfigProvider 
 import { EthereumAddress, HypernetConfig, InitializedHypernetContext, ResultAsync } from "@interfaces/objects";
 import { BlockchainUnavailableError, ThreeBoxError } from "@interfaces/objects/errors";
 import { okAsync } from "neverthrow";
-import { ResultUtils } from "@implementations/utilities";
+import { ResultUtils } from "@hypernetlabs/utils";
 
 export class ThreeBoxUtils implements IThreeBoxUtils {
   protected boxResult: ResultAsync<BoxInstance, BlockchainUnavailableError | ThreeBoxError> | null;

@@ -25,6 +25,9 @@ export class ContextProviderMock implements IContextProvider {
   public onPushPaymentUpdated: Subject<PushPayment>;
   public onPullPaymentUpdated: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
+  public onMerchantAuthorized: Subject<URL>;
+
+  public authorizedMerchants: Map<URL, string>;
 
   constructor(context: HypernetContext | null = null, initializedContext: InitializedHypernetContext | null = null) {
     this.onControlClaimed = new Subject<ControlClaim>();
@@ -36,6 +39,9 @@ export class ContextProviderMock implements IContextProvider {
     this.onPushPaymentUpdated = new Subject<PushPayment>();
     this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
+    this.onMerchantAuthorized = new Subject<URL>();
+
+    this.authorizedMerchants = new Map<URL, string>();
 
     if (context != null) {
       this.context = context;
@@ -53,6 +59,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onPushPaymentUpdated,
         this.onPullPaymentUpdated,
         this.onBalancesChanged,
+        this.onMerchantAuthorized,
       );
     }
 
@@ -72,6 +79,8 @@ export class ContextProviderMock implements IContextProvider {
         this.onPushPaymentUpdated,
         this.onPullPaymentUpdated,
         this.onBalancesChanged,
+        this.onMerchantAuthorized,
+        this.authorizedMerchants,
       );
     }
   }

@@ -56,7 +56,7 @@ export class PullPaymentViewModel {
     this.collateralRecovered = ko.observable(params.payment.collateralRecovered.toString());
     this.disputeMediator = ko.observable(params.payment.disputeMediator);
     this.authorizedAmount = ko.observable(params.payment.authorizedAmount.toString());
-    this.transferedAmount = ko.observable(params.payment.transferedAmount.toString());
+    this.transferedAmount = ko.observable(params.payment.amountTransferred.toString());
     this.deltaAmount = ko.observable(params.payment.deltaAmount.toString());
     this.deltaTime = ko.observable(params.payment.deltaTime);
 
@@ -97,8 +97,7 @@ export class PullPaymentViewModel {
     });
 
     this.pullButton = new ButtonParams("Pull", async () => {
-      return await this.core.pullFunds(this.paymentId, BigNumber.from(1))
-      .mapErr((e) => {
+      return await this.core.pullFunds(this.paymentId, BigNumber.from(1)).mapErr((e) => {
         alert("Unable to pull funds!");
         console.error(e);
       });

@@ -19,6 +19,7 @@ export class HypernetContext {
     public onPushPaymentUpdated: Subject<PushPayment>,
     public onPullPaymentUpdated: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
+    public onMerchantAuthorized: Subject<URL>,
   ) {}
 }
 
@@ -37,5 +38,7 @@ export class InitializedHypernetContext {
     public onPushPaymentUpdated: Subject<PushPayment>,
     public onPullPaymentUpdated: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
+    public onMerchantAuthorized: Subject<URL>,
+    public authorizedMediators: Map<URL, string>,
   ) {}
 }

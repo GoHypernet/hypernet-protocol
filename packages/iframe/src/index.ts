@@ -5,5 +5,4 @@ import CoreWrapper from "./CoreWrapper";
 const core: IHypernetCore = new HypernetCore(EBlockchainNetwork.Localhost);
 
 const coreWrapper = new CoreWrapper(core);
-
-// Load connectors
+coreWrapper.activateModel();

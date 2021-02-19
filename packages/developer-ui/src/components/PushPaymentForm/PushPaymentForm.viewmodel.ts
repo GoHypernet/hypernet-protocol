@@ -4,7 +4,8 @@ import html from "./PushPaymentForm.template.html";
 import moment from "moment";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
 import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
-import { utils } from "ethers"
+import { utils } from "ethers";
+import { AuthorizedMerchantSelectorParams } from "../AuthorizedMerchantSelector/AuthorizedMerchantSelector.viewmodel";
 
 export class PushPaymentFormParams {
   constructor(
@@ -24,6 +25,7 @@ export class PushPaymentFormViewModel {
   public expirationDate: ko.Observable<string>;
   public amount: ko.Observable<string>;
   public tokenSelector: TokenSelectorParams;
+  public merchantSelector: AuthorizedMerchantSelectorParams;
 
   public submitButton: ButtonParams;
 
@@ -40,12 +42,20 @@ export class PushPaymentFormViewModel {
 
     this.tokenSelector = new TokenSelectorParams(this.core, ko.observable(null), true);
 
+    this.merchantSelector = new AuthorizedMerchantSelectorParams(this.core, ko.observable(null));
+
     this.submitButton = new ButtonParams(
       "Submit Payment",
       async () => {
         const selectedPaymentTokenAddress = this.tokenSelector.selectedToken();
 
         if (selectedPaymentTokenAddress == null) {
+          return null;
+        }
+
+        const selectedMerchantUrl = this.merchantSelector.selectedAuthorizedMerchant();
+
+        if (selectedMerchantUrl == null) {
           return null;
         }
 
@@ -60,7 +70,7 @@ export class PushPaymentFormViewModel {
             expirationDate.unix(),
             requiredStake.toString(),
             selectedPaymentTokenAddress,
-            "0x0000000000000000000000000000000000000001", // @todo replace with an actual mediator address!
+            selectedMerchantUrl,
           );
         } catch {
           return null;

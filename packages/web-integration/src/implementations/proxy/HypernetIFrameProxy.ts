@@ -19,67 +19,23 @@ import {
   Payment,
   Result,
   ResultAsync,
+  MerchantValidationError,
+  PersistenceError,
 } from "@hypernetlabs/hypernet-core";
-import Postmate from "postmate";
 import { Subject } from "rxjs";
 import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 import { ok } from "neverthrow";
+import { ParentProxy } from "@hypernetlabs/utils";
 
-interface IIFrameCallData<T> {
-  callId: number;
-  data: T;
-}
-
-class IFrameCallData<T> implements IIFrameCallData<T> {
-  constructor(public callId: number, public data: T) { }
-}
-
-class IFrameCall<T, E> {
-  protected promise: Promise<T>;
-  protected resolveFunc: ((result: T) => void) | null;
-  protected rejectFunc: ((error: E) => void) | null;
-
-  constructor(public callData: IIFrameCallData<any>) {
-    this.resolveFunc = null;
-    this.rejectFunc = null;
-
-    this.promise = new Promise((resolve, reject) => {
-      this.resolveFunc = resolve;
-      this.rejectFunc = reject;
-    });
-  }
-
-  public resolve(result: T): void {
-    if (this.resolveFunc != null) {
-      this.resolveFunc(result);
-    }
-  }
-
-  public reject(error: E): void {
-    if (this.rejectFunc != null) {
-      this.rejectFunc(error);
-    }
-  }
-
-  public getResult(): ResultAsync<T, E> {
-    return ResultAsync.fromPromise(this.promise, (e) => {
-      return e as E;
-    });
-  }
-}
-
-export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
-  protected handshake: Postmate;
-  protected child: Postmate.ParentAPI | null;
+export default class HypernetIFrameProxy extends ParentProxy implements IHypernetIFrameProxy {
   protected coreInitialized: boolean = false;
   protected isInControl: boolean = false;
   protected waitInitializedPromise: Promise<void>;
   protected _handshakePromise: Promise<void> | null;
-  protected callId: number = 0;
-  protected calls: IFrameCall<any, any>[] = [];
 
   constructor(element: HTMLElement | null, iframeUrl: string) {
-    this.child = null;
+    super(element, iframeUrl);
+
     this._handshakePromise = null;
 
     this.onControlClaimed = new Subject<ControlClaim>();
@@ -91,26 +47,13 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
     this.onPushPaymentUpdated = new Subject<PushPayment>();
     this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
-
-    if (element == null) {
-      element = document.body;
-    }
-
-    this.handshake = new Postmate({
-      container: element,
-      url: iframeUrl,
-      name: "hypernet-core-iframe",
-      classListArray: ["hypernet-core-iframe-style"], // Classes to add to the iframe
-    });
+    this.onMerchantAuthorized = new Subject<URL>();
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
     // once the core is initialized, we'll use that to resolve this promise.
     this.waitInitializedPromise = new Promise<void>((resolve) => {
       this._handshakePromise = this.handshake.then((child) => {
-        // Stash the API for future calls
-        this.child = child;
-
         // Subscribe to the message streams from the iframe,
         // and convert them back to RXJS Subjects.
         child.on("onControlClaimed", (data: ControlClaim) => {
@@ -151,6 +94,10 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
           this.onBalancesChanged.next(data);
         });
 
+        child.on("onMerchantAuthorized", (data: string) => {
+          this.onMerchantAuthorized.next(new URL(data));
+        });
+
         // Setup a listener for the "initialized" event.
         child.on("initialized", () => {
           // Resolve waitInitialized
@@ -158,40 +105,6 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
 
           // And mark us as initialized
           this.coreInitialized = true;
-        });
-
-        child.on("callSuccess", (data: IIFrameCallData<any>) => {
-          // Get the matching calls
-          const matchingCalls = this.calls.filter((val) => {
-            return val.callData.callId == data.callId;
-          });
-
-          // Remove the matching calls from the source array
-          this.calls = this.calls.filter((val) => {
-            return val.callData.callId != data.callId;
-          });
-
-          // Resolve the calls - should only ever be 1
-          for (const call of matchingCalls) {
-            call.resolve(data.data);
-          }
-        });
-
-        child.on("callError", (data: IIFrameCallData<any>) => {
-          // Get the matching calls
-          const matchingCalls = this.calls.filter((val) => {
-            return val.callData.callId == data.callId;
-          });
-
-          // Remove the matching calls from the source array
-          this.calls = this.calls.filter((val) => {
-            return val.callData.callId != data.callId;
-          });
-
-          // Reject the calls - should only ever be 1
-          for (const call of matchingCalls) {
-            call.reject(data.data);
-          }
         });
       });
     });
@@ -354,10 +267,13 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
     return call.getResult();
   }
 
-  public pullFunds(paymentId: string, amount: BigNumber): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  public pullFunds(
+    paymentId: string,
+    amount: BigNumber,
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     const call = this._createCall("pullFunds", {
       paymentId,
-      amount: amount.toString()
+      amount: amount.toString(),
     });
 
     return call.getResult();
@@ -381,11 +297,22 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
     return call.getResult();
   }
 
-  public startConnectorFlow(connector?: string): void {
-    // call iframe where it's gonna render the connector screen
+  public authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MerchantValidationError> {
+    const call = this._createCall("authorizeMerchant", merchantUrl);
+
+    return call.getResult();
+  }
+
+  public startConnectorFlow(connector?: string): ResultAsync<void, CoreUninitializedError | MerchantValidationError> {
     const call = this._createCall("startConnectorFlow", connector);
 
-    //return call.getResult();
+    return call.getResult();
+  }
+
+  public getAuthorizedMerchants(): ResultAsync<Map<URL, string>, PersistenceError> {
+    const call = this._createCall("getAuthorizedMerchants", null);
+
+    return call.getResult();
   }
 
   /**
@@ -400,16 +327,5 @@ export default class HypernetIFrameProxy implements IHypernetIFrameProxy {
   public onPushPaymentReceived: Subject<PushPayment>;
   public onPullPaymentApproved: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
-
-  protected _createCall(callName: string, data: any): IFrameCall<any, any> {
-    const callId = this.callId++;
-    const callData = new IFrameCallData(callId, data);
-
-    const call = new IFrameCall(callData);
-    this.calls.push(call);
-
-    this.child?.call(callName, callData);
-
-    return call;
-  }
+  public onMerchantAuthorized: Subject<URL>;
 }

@@ -1,0 +1,57 @@
+{
+  "name": "@hypernetlabs/merchant-iframe",
+  "version": "0.0.1",
+  "description": "Mediator iFrame package. This is used to sandbox the connector code away from the running hypernet core.",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/core#readme",
+  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
+  "keywords": [
+    "Blockchain",
+    "Hypernet",
+    "SDK",
+    "Ethereum",
+    "Vector",
+    "Connext"
+  ],
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src",
+    "!dist/test",
+    "!dist/tsconfig.tsbuildinfo"
+  ],
+  "scripts": {
+    "build": "yarn clean && yarn compile",
+    "clean": "rimraf dist",
+    "compile": "tsc --build src/tsconfig.json",
+    "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
+    "generate-docs": "npx typedoc --options typedoc.json",
+    "lint": "tslint -p src/tsconfig.json",
+    "prepare": "yarn build",
+    "prepublishOnly": "npm test && npm run lint",
+    "start": "webpack serve --config webpack.config.js --mode development --open",
+    "test": "yarn test:ci",
+    "test:ci": "jest --runInBand --coverage",
+    "test:watch": "jest --watch --color --detectOpenHandles",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags"
+  },
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@hypernetlabs/hypernet-core": "^0.0.1",
+    "@hypernetlabs/merchant-connector": "^0.0.1",
+    "@hypernetlabs/utils": "^0.0.1",
+    "ethers": "^5.0.31",
+    "neverthrow": "^4.1.0",
+    "postmate": "^1.5.2",
+    "rxjs": "^6.6.2"
+  }
+}

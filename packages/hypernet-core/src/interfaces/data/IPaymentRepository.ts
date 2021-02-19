@@ -43,7 +43,7 @@ export interface IPaymentRepository {
 
   createPullRecord(
     paymentId: string,
-    amount: string
+    amount: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**

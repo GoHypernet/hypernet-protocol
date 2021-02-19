@@ -24,13 +24,13 @@ export class ConfigProvider implements IConfigProvider {
       };
 
       const contractAddresses: ContractAddresses = {
-        channelFactoryAddress: '0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da',
-        transferRegistryAddress: '0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F'
-      }
+        channelFactoryAddress: "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
+        transferRegistryAddress: "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F",
+      };
 
       const chainAddresses: ChainAddresses = {
-        [1337]: contractAddresses
-      }
+        [1337]: contractAddresses,
+      };
 
       this.config = new HypernetConfig(
         "http://localhost:5000", // iframeSource
@@ -44,7 +44,8 @@ export class ConfigProvider implements IConfigProvider {
         chainProvider,
         "hypernetProtocolSpace",
         "openThreadKey",
-        chainAddresses
+        chainAddresses,
+        "http://localhost:5005", // merchantIframeUrl
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
@@ -62,13 +63,13 @@ export class ConfigProvider implements IConfigProvider {
 
       // @todo fix later
       const contractAddresses: ContractAddresses = {
-        transferRegistryAddress: '',
-        channelFactoryAddress: ''
-      }
+        transferRegistryAddress: "",
+        channelFactoryAddress: "",
+      };
 
       const chainAddresses: ChainAddresses = {
-        [1]: contractAddresses
-      }
+        [1]: contractAddresses,
+      };
 
       this.config = new HypernetConfig(
         "http://localhost:5000", // iframeSource
@@ -82,7 +83,8 @@ export class ConfigProvider implements IConfigProvider {
         chainProvider,
         "hypernetProtocolSpace",
         "openThreadKey",
-        chainAddresses
+        chainAddresses,
+        "http://localhost:5005", // merchantIframeUrl
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
