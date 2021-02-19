@@ -59,7 +59,7 @@ export class PaymentRepository implements IPaymentRepository {
     protected timeUtils: ITimeUtils,
   ) {}
 
-  createPullRecord(
+  public createPullRecord(
     paymentId: string,
     amount: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {

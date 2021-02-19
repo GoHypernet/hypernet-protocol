@@ -72,6 +72,7 @@ export class VectorAPIListener implements IVectorListener {
               // if the transfer is an insurance transfer, we need to notify the payment service
               // that stake has been resolved.
               // @todo create methods in payment service
+              return this.paymentService.insuranceResolved(paymentId);
               return errAsync(new LogicalError("Method not yet implemented!"));
             } else if (transferType === ETransferType.Parameterized) {
               // if the transfer is the parameterized transfer, we need to notify the payment service

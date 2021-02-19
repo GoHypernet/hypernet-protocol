@@ -22,7 +22,16 @@ import {
   IFullTransferState,
   ITimeUtils,
 } from "@interfaces/utilities";
-import { EPaymentType, ETransferState, InsuranceState, MessageState, ParameterizedState } from "@interfaces/types";
+import {
+  EPaymentType,
+  ETransferState,
+  InsuranceResolver,
+  InsuranceResolverData,
+  InsuranceState,
+  MessageResolver,
+  MessageState,
+  ParameterizedState,
+} from "@interfaces/types";
 import "reflect-metadata";
 import { serialize } from "class-transformer";
 import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@interfaces/types/typechain/ParameterizedTypes";
@@ -39,10 +48,8 @@ import {
 } from "@interfaces/objects/errors";
 import { errAsync, okAsync } from "neverthrow";
 import { ResultUtils } from "@hypernetlabs/utils";
-import moment from "moment";
 import { IHypernetPullPaymentDetails } from "../../interfaces/objects/HypernetPullPaymentDetails";
 import { EMessageTransferType } from "@interfaces/types/EMessageTransferType";
-import { IRate } from "@interfaces/objects/Rate";
 
 /**
  * VectorUtils contains methods for interacting directly with the core Vector stuff -
@@ -71,7 +78,14 @@ export class VectorUtils implements IVectorUtils {
    * @param transferId the ID of the transfer to resolve
    */
   public resolveMessageTransfer(transferId: string): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
-    return errAsync(new TransferResolutionError());
+    let channelAddress: string;
+    let browserNode: IBrowserNode;
+
+    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.getRouterChannelAddress()]).andThen(
+      () => {
+        return browserNode.resolveTransfer(channelAddress, transferId, { message: "" } as MessageResolver);
+      },
+    );
   }
 
   /**
@@ -83,14 +97,6 @@ export class VectorUtils implements IVectorUtils {
     paymentId: string,
     amount: string,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
-    const prerequisites = (ResultUtils.combine([
-      this.browserNodeProvider.getBrowserNode(),
-      this.getRouterChannelAddress() as ResultAsync<any, any>,
-    ]) as unknown) as ResultAsync<
-      [IBrowserNode, string],
-      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
-    >;
-
     const resolverData: ParameterizedResolverData = {
       UUID: paymentId,
       paymentAmountTaken: amount,
@@ -99,7 +105,7 @@ export class VectorUtils implements IVectorUtils {
     let channelAddress: string;
     let browserNode: IBrowserNode;
 
-    return prerequisites
+    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.getRouterChannelAddress()])
       .andThen((vals) => {
         const [browserNodeVal, channelAddressVal] = vals;
         browserNode = browserNodeVal;
@@ -125,8 +131,48 @@ export class VectorUtils implements IVectorUtils {
    * Resolves an insurance transfer with Vector.
    * @param transferId the ID of the tarnsfer to resolve
    */
-  public resolveInsuranceTransfer(transferId: string): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
-    return errAsync(new TransferResolutionError());
+  public resolveInsuranceTransfer(
+    transferId: string,
+    paymentId: string,
+    mediatorSignature?: string,
+    amount?: BigNumber,
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
+    // If you do not provide an actual amount, then it resolves for nothing
+    if (amount == null) {
+      amount = BigNumber.from(0);
+    }
+
+    const resolverData: InsuranceResolverData = {
+      amount: amount.toString(),
+      UUID: paymentId,
+    };
+
+    let channelAddress: string;
+    let browserNode: IBrowserNode;
+
+    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.getRouterChannelAddress()])
+      .andThen((vals) => {
+        const [browserNodeVal, channelAddressVal] = vals;
+        browserNode = browserNodeVal;
+        channelAddress = channelAddressVal;
+
+        if (mediatorSignature == null) {
+          const resolverDataEncoding = ["tuple(uint256 amount, bytes32 UUID)"];
+          const encodedResolverData = defaultAbiCoder.encode(resolverDataEncoding, [resolverData]);
+          const hashedResolverData = keccak256(encodedResolverData);
+
+          return browserNode.signUtilityMessage(hashedResolverData);
+        }
+        return okAsync<string, TransferResolutionError>(mediatorSignature);
+      })
+      .andThen((signature) => {
+        const resolver: InsuranceResolver = {
+          data: resolverData,
+          signature: signature,
+        };
+
+        return browserNode.resolveTransfer(channelAddress, transferId, resolver);
+      });
   }
 
   /**

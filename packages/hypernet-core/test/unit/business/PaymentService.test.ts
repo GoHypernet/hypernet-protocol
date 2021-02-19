@@ -1,24 +1,27 @@
 import td from "testdouble";
 
-import { BigNumber, PushPayment, Payment, AssetBalance, PullPayment, PublicIdentifier } from "@interfaces/objects";
+import { BigNumber, PushPayment, Payment, AssetBalance, PullPayment, PublicIdentifier, PaymentInternalDetails } from "@interfaces/objects";
 import { EPaymentState } from "@interfaces/types";
 import {
   defaultExpirationLength,
+  disputeMediatorUrl,
   hyperTokenAddress,
+  insuranceTransferId,
   mockUtils,
+  offerTransferId,
+  parameterizedTransferId,
   publicIdentifier,
   publicIdentifier2,
   unixNow,
 } from "@mock/mocks";
-import { okAsync, ok, err, errAsync } from "neverthrow";
+import { okAsync, errAsync } from "neverthrow";
 import {
   AcceptPaymentError,
   InsufficientBalanceError,
   InvalidParametersError,
   LogicalError,
-  OfferMismatchError,
 } from "@interfaces/objects/errors";
-import { IAccountsRepository, ILinkRepository, IPaymentRepository } from "@interfaces/data";
+import { IAccountsRepository, ILinkRepository, IMerchantConnectorRepository, IPaymentRepository } from "@interfaces/data";
 import { ConfigProviderMock, ContextProviderMock } from "@tests/mock/utils";
 import { ILogUtils } from "@interfaces/utilities";
 import { IPaymentService } from "@interfaces/business/IPaymentService";
@@ -26,11 +29,13 @@ import { PaymentService } from "@implementations/business/PaymentService";
 
 const requiredStake = "42";
 const paymentToken = mockUtils.generateRandomPaymentToken();
-const disputeMediator = mockUtils.generateRandomEtherAdress();
 const amount = "42";
 const expirationDate = unixNow + defaultExpirationLength;
 const paymentId = "See, this doesn't have to be legit data if it's never checked!";
 const nonExistentPaymentId = "This payment is not mocked";
+const paymentDetails = new PaymentInternalDetails(offerTransferId, insuranceTransferId,
+  parameterizedTransferId,
+  []);
 
 class PaymentServiceMocks {
   public vectorLinkRepository = td.object<ILinkRepository>();
@@ -39,6 +44,7 @@ class PaymentServiceMocks {
   public configProvider = new ConfigProviderMock();
   public logUtils = td.object<ILogUtils>();
   public paymentRepository = td.object<IPaymentRepository>();
+  public merchantConnectorRepository = td.object<IMerchantConnectorRepository>();
 
   public pushPayment: PushPayment;
   public stakedPushPayment: PushPayment;
@@ -85,7 +91,7 @@ class PaymentServiceMocks {
         expirationDate,
         requiredStake,
         paymentToken,
-        disputeMediator,
+        disputeMediatorUrl,
       ),
     ).thenReturn(okAsync(this.pushPayment));
 
@@ -106,6 +112,7 @@ class PaymentServiceMocks {
       this.contextProvider,
       this.configProvider,
       this.paymentRepository,
+      this.merchantConnectorRepository,
       this.logUtils,
     );
   }
@@ -142,7 +149,8 @@ class PaymentServiceMocks {
       unixNow,
       unixNow,
       BigNumber.from(0),
-      disputeMediator,
+      disputeMediatorUrl,
+      paymentDetails,
       BigNumber.from(amount),
       BigNumber.from(0),
     );
@@ -166,7 +174,7 @@ describe("PaymentService tests", () => {
       expirationDate,
       requiredStake,
       paymentToken,
-      disputeMediator,
+      disputeMediatorUrl,
     );
 
     // Assert
@@ -300,7 +308,7 @@ describe("PaymentService tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
     expect(result._unsafeUnwrap()).toBeUndefined();
-    expect(updatedPushPayments.length).toBe(1);
+    expect(updatedPushPayments.length).toBe(2);
   });
 
   test("Should stakePosted return error if payment is null", async () => {
@@ -367,7 +375,7 @@ describe("PaymentService tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
     expect(result._unsafeUnwrap()).toBeUndefined();
-    expect(updatedPushPayments.length).toBe(0);
+    expect(updatedPushPayments.length).toBe(1);
   });
 
   test("Should paymentPosted run without errors when payment from is equal to publicIdentifier", async () => {
@@ -491,7 +499,7 @@ describe("PaymentService tests", () => {
     const paymentServiceMock = new PaymentServiceMocks();
 
     let receivedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentReceived.subscribe((val: PushPayment) => {
+    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val: PushPayment) => {
       receivedPushPayments.push(val);
     });
 

@@ -1,6 +1,6 @@
 import { ResultUtils } from "@hypernetlabs/utils";
 import { IPaymentService } from "@interfaces/business";
-import { IAccountsRepository, ILinkRepository } from "@interfaces/data";
+import { IAccountsRepository, ILinkRepository, IMerchantConnectorRepository } from "@interfaces/data";
 import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
 import {
   BigNumber,
@@ -15,6 +15,7 @@ import {
   HypernetConfig,
   HypernetContext,
   InitializedHypernetContext,
+  HexString,
 } from "@interfaces/objects";
 import {
   AcceptPaymentError,
@@ -23,6 +24,8 @@ import {
   InvalidParametersError,
   InvalidPaymentError,
   LogicalError,
+  MerchantConnectorError,
+  MerchantValidationError,
   OfferMismatchError,
   RouterChannelUnknownError,
   VectorError,
@@ -54,8 +57,9 @@ export class PaymentService implements IPaymentService {
     protected contextProvider: IContextProvider,
     protected configProvider: IConfigProvider,
     protected paymentRepository: IPaymentRepository,
+    protected merchantConnectorRepository: IMerchantConnectorRepository,
     protected logUtils: ILogUtils,
-  ) {}
+  ) { }
 
   /**
    * Authorizes funds to a specified counterparty, with an amount, rate, & expiration date.
@@ -402,16 +406,14 @@ export class PaymentService implements IPaymentService {
    * Notifies the service that the parameterized payment has been resolved.
    * @param paymentId the payment id that has been resolved.
    */
-  public paymentCompleted(paymentId: string): ResultAsync<void, InvalidParametersError> {
-    const prerequisites = ResultUtils.combine([
-      this.paymentRepository.getPaymentsByIds([paymentId]),
-      this.contextProvider.getInitializedContext(),
-    ]);
-
+  public paymentCompleted(paymentId: HexString): ResultAsync<void, InvalidParametersError | RouterChannelUnknownError | CoreUninitializedError | VectorError> {
     let payments: Map<string, Payment>;
-    let context: InitializedHypernetContext;
+    let context: HypernetContext;
 
-    return prerequisites.andThen((vals) => {
+    return ResultUtils.combine([
+      this.paymentRepository.getPaymentsByIds([paymentId]),
+      this.contextProvider.getContext(),
+    ]).andThen((vals) => {
       [payments, context] = vals;
       const payment = payments.get(paymentId);
 
@@ -419,12 +421,47 @@ export class PaymentService implements IPaymentService {
         return errAsync(new InvalidParametersError("Invalid payment ID!"));
       }
 
-      // @todo: check that the payment is TO us
       // @todo add some additional checking here
-      // @todo add in a way to grab the resolved transfer
-      // @todo probably resolve the offer and/or insurance transfer as well?
-      // @todo probably genericize this so that it doesn't have to be a pushPayment
-      context.onPushPaymentReceived.next(payment as PushPayment);
+      if (payment instanceof PushPayment) {
+        context.onPushPaymentUpdated.next(payment);
+      }
+      if (payment instanceof PullPayment) {
+        context.onPullPaymentUpdated.next(payment);
+      }
+      
+
+      return okAsync(undefined);
+    });
+  }
+
+  /**
+   * Right now, if the insurance is resolved, all we need to do is generate an update event.
+   * 
+   * @param paymentId
+   */
+  public insuranceResolved(paymentId: HexString): ResultAsync<void, InvalidParametersError> {
+    let payments: Map<string, Payment>;
+    let context: HypernetContext;
+
+    return ResultUtils.combine([
+      this.paymentRepository.getPaymentsByIds([paymentId]),
+      this.contextProvider.getContext(),
+    ]).andThen((vals) => {
+      [payments, context] = vals;
+      const payment = payments.get(paymentId);
+
+      if (payment == null) {
+        return errAsync(new InvalidParametersError("Invalid payment ID!"));
+      }
+
+      // @todo add some additional checking here
+      if (payment instanceof PushPayment) {
+        context.onPushPaymentUpdated.next(payment);
+      }
+      if (payment instanceof PullPayment) {
+        context.onPullPaymentUpdated.next(payment);
+      }
+      
 
       return okAsync(undefined);
     });
@@ -460,12 +497,37 @@ export class PaymentService implements IPaymentService {
     });
   }
 
-  /**
-   * Requests a payment on the specified channel.
-   * @param channelId the (Vector) channelId to request the payment on
-   * @param amount the amount of payment to request
-   */
-  requestPayment(channelId: string, amount: string): Promise<Payment> {
-    throw new Error("Method not implemented.");
+  public initiateDispute(paymentId: string): ResultAsync<Payment, InvalidParametersError | CoreUninitializedError | MerchantConnectorError | RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+    // Get the payment
+    return this.paymentRepository.getPaymentsByIds([paymentId])
+      .andThen((payments) => {
+        const payment = payments.get(paymentId);
+
+        if (payment == null) {
+          return errAsync<void, InvalidParametersError>(new InvalidParametersError("Invalid payment ID"));
+        }
+
+        // You can only dispute payments that are in the accepted state- the reciever has taken their money.
+        // The second condition can't happen if it's in Accepted unless something is very, very badly wrong,
+        // but it keeps typescript happy
+        if (payment.state != EPaymentState.Accepted || payment.details.insuranceTransferId == null) {
+          return errAsync<void, InvalidParametersError>(new InvalidParametersError("Can not dispute a payment that is not in the Accepted state"));
+        }
+
+        // Resolve the dispute
+        return this.merchantConnectorRepository.resolveChallenge(new URL(payment.disputeMediator),
+          paymentId,
+          payment.details.insuranceTransferId)
+      })
+      .andThen(() => {
+        return this.paymentRepository.getPaymentsByIds([paymentId]);
+      })
+      .andThen((payments) => {
+        const payment = payments.get(paymentId);
+        if (payment == null) {
+          return errAsync(new InvalidParametersError("Invalid payment ID"));
+        }
+        return okAsync(payment);
+      });
   }
 }

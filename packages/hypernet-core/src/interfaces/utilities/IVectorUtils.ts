@@ -34,8 +34,16 @@ export interface IVectorUtils {
   /**
    *
    * @param transferId
+   * @param paymentId
+   * @param mediatorSignature
+   * @param amount
    */
-  resolveInsuranceTransfer(transferId: string): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
+  resolveInsuranceTransfer(
+    transferId: string,
+    paymentId: string,
+    mediatorSignature?: string,
+    amount?: BigNumber,
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
   /**
    *

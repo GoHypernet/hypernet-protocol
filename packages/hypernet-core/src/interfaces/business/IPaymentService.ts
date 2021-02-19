@@ -6,6 +6,7 @@ import {
   ResultAsync,
   Result,
   BigNumber,
+  HexString,
 } from "@interfaces/objects";
 import { NodeError, VectorError } from "@connext/vector-types";
 import {
@@ -13,8 +14,9 @@ import {
   CoreUninitializedError,
   InsufficientBalanceError,
   InvalidParametersError,
-  InvalidPaymentError,
   LogicalError,
+  MerchantConnectorError,
+  MerchantValidationError,
   OfferMismatchError,
   RouterChannelUnknownError,
 } from "@interfaces/objects/errors";
@@ -78,17 +80,15 @@ export interface IPaymentService {
   ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError>;
 
   /**
-   *
-   * @param channelId
-   * @param amount
-   */
-  requestPayment(channelId: string, amount: string): Promise<Payment>;
-
-  /**
    * Notify the service that a payment has been posted.
    * @param paymentId
    */
-  paymentPosted(paymentId: string): ResultAsync<void, InvalidParametersError>;
+  paymentPosted(paymentId: HexString): ResultAsync<void, InvalidParametersError | RouterChannelUnknownError | CoreUninitializedError | VectorError>;
+
+  /** Notify the service that an insurance payment has resolved 
+   * @param paymentId
+  */
+  insuranceResolved(paymentId: HexString): ResultAsync<void, InvalidParametersError | RouterChannelUnknownError | CoreUninitializedError | VectorError>;
 
   /**
    * Notify the service that a payment has been completed.
@@ -118,4 +118,15 @@ export interface IPaymentService {
   offerReceived(
     paymentId: string,
   ): ResultAsync<void, LogicalError | RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
+
+  /**
+   * A payment that is in the Accepted state may be disputed up to the expiration date.
+   * If the payment is disputed, it is sent to the dispute mediator, who will determine
+   * if the payment was proper. The dispute mediator can provide a signature to resolve
+   * the insurance transfer for an amount from 0 to the full value of Hypertoken.
+   * The method by which the mediator makes this determination is entirely up to the
+   * merchant. 
+   * @param paymentId 
+   */
+  initiateDispute(paymentId: string): ResultAsync<Payment, InvalidParametersError | CoreUninitializedError | MerchantValidationError | MerchantConnectorError>;
 }

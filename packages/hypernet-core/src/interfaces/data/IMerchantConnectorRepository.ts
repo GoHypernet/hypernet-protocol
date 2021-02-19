@@ -1,7 +1,7 @@
 import { ResultAsync } from "neverthrow";
-import { PublicKey } from "@interfaces/objects";
+import { Payment, PublicKey } from "@interfaces/objects";
 import { PersistenceError } from "@interfaces/objects/errors/PersistenceError";
-import { MerchantConnectorError } from "@interfaces/objects/errors";
+import { CoreUninitializedError, MerchantConnectorError, MerchantValidationError } from "@interfaces/objects/errors";
 
 export interface IMerchantConnectorRepository {
   /**
@@ -24,4 +24,10 @@ export interface IMerchantConnectorRepository {
   getAuthorizedMerchants(): ResultAsync<Map<URL, string>, PersistenceError>;
 
   activateAuthorizedMerchants(): ResultAsync<void, MerchantConnectorError>;
+
+  resolveChallenge(
+    merchantUrl: URL,
+    paymentId: string,
+    transferId: string,
+  ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | CoreUninitializedError>;
 }

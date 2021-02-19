@@ -1,6 +1,7 @@
 import { Subject } from "rxjs";
+import { IResolutionResult } from "./IResolutionResult";
 export interface IMerchantConnector {
-  resolveChallenge(paymentId: string): Promise<string>;
+  resolveChallenge(paymentId: string): Promise<IResolutionResult>;
   getPublicKey(): Promise<string>;
 
   onSendFundsRequested: Subject<ISendFundsRequest>;

@@ -287,12 +287,14 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     throw new Error("Unimplemented");
   }
 
-  public initiateDispute(paymentId: string, metadata: string): Promise<HypernetLink> {
-    throw new Error("Unimplemented");
+  public initiateDispute(paymentId: string): ResultAsync<Payment, CoreUninitializedError> {
+    const call = this._createCall("initiateDispute", paymentId);
+
+    return call.getResult();
   }
 
   public mintTestToken(amount: BigNumber): ResultAsync<void, CoreUninitializedError> {
-    const call = this._createCall("acceptFunds", amount.toString());
+    const call = this._createCall("mintTestToken", amount.toString());
 
     return call.getResult();
   }

@@ -186,9 +186,8 @@ export interface IHypernetCore {
   /**
    * Called by the consumer to attempt to claim some or all of the stake within a particular insurance payment.
    * @param paymentId the payment ID to dispute
-   * @metadata the mediator-specific metadata to provide
    */
-  initiateDispute(paymentId: string, metadata: string): Promise<HypernetLink>;
+  initiateDispute(paymentId: string): ResultAsync<Payment, CoreUninitializedError>;
 
   /**
    * Only used for development purposes!

@@ -5,6 +5,7 @@ import {
   IHypernetOfferDetails,
   IMessageTransferData,
   Payment,
+  PaymentInternalDetails,
   PublicIdentifier,
   PullAmount,
   PullPayment,
@@ -129,6 +130,12 @@ export class PaymentUtils implements IPaymentUtils {
         ? sortedTransfers.parameterizedTransfer.assetId
         : sortedTransfers.offerDetails.paymentToken;
 
+    
+    const details = new PaymentInternalDetails(sortedTransfers.offerTransfer.transferId,
+      sortedTransfers.insuranceTransfer?.transferId,
+      sortedTransfers.parameterizedTransfer?.transferId,
+      sortedTransfers.pullRecordTransfers.map((val) => {return val.transferId}));
+
     return okAsync(
       new PushPayment(
         paymentId,
@@ -143,6 +150,7 @@ export class PaymentUtils implements IPaymentUtils {
         this.timeUtils.getUnixNow(),
         BigNumber.from(0),
         sortedTransfers.offerDetails.disputeMediator,
+        details,
         BigNumber.from(paymentAmount),
         BigNumber.from(amountTransferred),
       ),
@@ -210,6 +218,11 @@ export class PaymentUtils implements IPaymentUtils {
         ? sortedTransfers.parameterizedTransfer.assetId
         : sortedTransfers.offerDetails.paymentToken;
 
+    const details = new PaymentInternalDetails(sortedTransfers.offerTransfer.transferId,
+      sortedTransfers.insuranceTransfer?.transferId,
+      sortedTransfers.parameterizedTransfer?.transferId,
+      sortedTransfers.pullRecordTransfers.map((val) => {return val.transferId}));
+
     return okAsync(
       new PullPayment(
         paymentId,
@@ -224,6 +237,7 @@ export class PaymentUtils implements IPaymentUtils {
         this.timeUtils.getUnixNow(),
         BigNumber.from(0),
         sortedTransfers.offerDetails.disputeMediator,
+        details,
         BigNumber.from(sortedTransfers.offerDetails.paymentAmount),
         BigNumber.from(0),
         vestedAmount,

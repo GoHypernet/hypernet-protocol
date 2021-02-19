@@ -251,6 +251,7 @@ export class HypernetCore implements IHypernetCore {
       this.ajaxUtils,
       this.configProvider,
       this.contextProvider,
+      this.vectorUtils,
     );
 
     this.paymentService = new PaymentService(
@@ -259,6 +260,7 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.configProvider,
       this.paymentRepository,
+      this.merchantConnectorRepository,
       this.logUtils,
     );
 
@@ -493,8 +495,8 @@ export class HypernetCore implements IHypernetCore {
    * @param paymentId the payment for which to dispute
    * @param metadata the data provided to the dispute mediator about this dispute
    */
-  public async initiateDispute(paymentId: string, metadata: string): Promise<HypernetLink> {
-    throw new Error("Method not yet implemented.");
+  public initiateDispute(paymentId: string): ResultAsync<Payment, CoreUninitializedError> {
+    return this.paymentService.initiateDispute(paymentId);
   }
 
   /**

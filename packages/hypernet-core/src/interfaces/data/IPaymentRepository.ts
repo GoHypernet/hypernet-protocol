@@ -14,7 +14,7 @@ export interface IPaymentRepository {
    */
   getPaymentsByIds(
     paymentIds: string[],
-  ): ResultAsync<Map<string, Payment>, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<Map<string, Payment>, RouterChannelUnknownError | CoreUninitializedError | VectorError>;
 
   /**
    * Creates a push payment and returns it. Nothing moves until

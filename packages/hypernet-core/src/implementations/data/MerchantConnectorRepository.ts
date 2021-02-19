@@ -1,5 +1,5 @@
 import { IMerchantConnectorRepository } from "@interfaces/data";
-import { HexString, PublicKey } from "@interfaces/objects";
+import { HexString, PublicKey, BigNumber } from "@interfaces/objects";
 import {
   CoreUninitializedError,
   MerchantConnectorError,
@@ -8,7 +8,7 @@ import {
 } from "@interfaces/objects/errors";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { ParentProxy, ResultUtils, IAjaxUtils } from "@hypernetlabs/utils";
-import { IBlockchainProvider, IConfigProvider, IContextProvider } from "@interfaces/utilities";
+import { IBlockchainProvider, IConfigProvider, IContextProvider, IVectorUtils } from "@interfaces/utilities";
 import { ethers } from "ethers";
 
 class MerchantConnectorProxy extends ParentProxy {
@@ -22,7 +22,7 @@ class MerchantConnectorProxy extends ParentProxy {
     return call.getResult();
   }
 
-  public resolveChallenge(paymentId: HexString): ResultAsync<void, MerchantConnectorError> {
+  public resolveChallenge(paymentId: HexString): ResultAsync<IResolutionResult, MerchantConnectorError> {
     const call = this._createCall("resolveChallenge", null);
 
     return call.getResult();
@@ -46,6 +46,11 @@ interface IAuthorizedMerchantEntry {
   authorizationSignature: string;
 }
 
+interface IResolutionResult {
+  mediatorSignature: string;
+  amount: string;
+}
+
 export class MerchantConnectorRepository implements IMerchantConnectorRepository {
   protected activatedMerchants: Map<URL, MerchantConnectorProxy>;
 
@@ -54,6 +59,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     protected ajaxUtils: IAjaxUtils,
     protected configProvider: IConfigProvider,
     protected contextProvider: IContextProvider,
+    protected vectorUtils: IVectorUtils,
   ) {
     this.activatedMerchants = new Map();
   }
@@ -118,6 +124,27 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     const authorizedMerchants = this._getAuthorizedMerchants();
 
     return okAsync(authorizedMerchants);
+  }
+
+  public resolveChallenge(
+    merchantUrl: URL,
+    paymentId: string,
+    transferId: string,
+  ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | CoreUninitializedError> {
+    const proxy = this.activatedMerchants.get(merchantUrl);
+
+    if (proxy == null) {
+      return errAsync(new MerchantValidationError(`No existing merchant connector for ${merchantUrl}`));
+    }
+
+    return proxy
+      .resolveChallenge(paymentId)
+      .andThen((result) => {
+        const { mediatorSignature, amount } = result;
+
+        return this.vectorUtils.resolveInsuranceTransfer(transferId, paymentId, mediatorSignature, BigNumber.from(amount));
+      })
+      .map(() => {});
   }
 
   protected _setAuthorizedMerchants(authorizedMerchantMap: Map<URL, string>) {

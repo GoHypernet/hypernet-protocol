@@ -11,7 +11,7 @@ import {
   parameterizedTransferId,
   offerTransferId,
   insuranceTransferId,
-  disputeMediatorPublicKey,
+  disputeMediatorUrl,
   erc20AssetAddress,
 } from "@mock/mocks";
 import {
@@ -21,7 +21,7 @@ import {
   ContextProviderMock,
   PaymentUtilsMockFactory,
 } from "@mock/utils";
-import { BigNumber, PushPayment } from "@interfaces/objects";
+import { BigNumber, PaymentInternalDetails, PushPayment } from "@interfaces/objects";
 import { ILogUtils, IVectorUtils, IBrowserNodeProvider, IPaymentUtils, ITimeUtils } from "@interfaces/utilities";
 import { VectorError } from "@interfaces/objects/errors";
 import { IPaymentRepository } from "@interfaces/data";
@@ -32,6 +32,9 @@ import { EPaymentState, EPaymentType } from "@interfaces/types";
 const expirationDate = unixNow + defaultExpirationLength;
 const counterPartyAccount = publicIdentifier2;
 const fromAccount = publicIdentifier;
+const paymentDetails = new PaymentInternalDetails(offerTransferId, insuranceTransferId,
+  parameterizedTransferId,
+  []);
 
 class PaymentRepositoryMocks {
   public timeUtils = td.object<ITimeUtils>();
@@ -84,7 +87,7 @@ class PaymentRepositoryMocks {
           paymentAmount: commonAmount.toString(),
           expirationDate,
           paymentToken: erc20AssetAddress,
-          disputeMediator: disputeMediatorPublicKey,
+          disputeMediator: disputeMediatorUrl,
         }),
       ),
     ).thenReturn(okAsync({ channelAddress: routerChannelAddress, transferId: offerTransferId }));
@@ -101,7 +104,7 @@ class PaymentRepositoryMocks {
     td.when(
       this.vectorUtils.createInsuranceTransfer(
         publicIdentifier,
-        disputeMediatorPublicKey,
+        disputeMediatorUrl,
         td.matchers.argThat((val: BigNumber) => {
           return val.eq(commonAmount);
         }),
@@ -165,7 +168,8 @@ class PaymentRepositoryMocks {
       unixNow,
       unixNow,
       BigNumber.from(0),
-      disputeMediatorPublicKey,
+      disputeMediatorUrl,
+      paymentDetails,
       BigNumber.from(commonAmount.toString()),
       BigNumber.from(0),
     );
@@ -206,7 +210,7 @@ describe("PaymentRepository tests", () => {
       expirationDate,
       commonAmount.toString(),
       erc20AssetAddress,
-      disputeMediatorPublicKey,
+      disputeMediatorUrl,
     );
 
     // Assert
@@ -228,7 +232,7 @@ describe("PaymentRepository tests", () => {
       expirationDate,
       commonAmount.toString(),
       erc20AssetAddress,
-      disputeMediatorPublicKey,
+      disputeMediatorUrl,
     );
     const error = result._unsafeUnwrapErr();
 
