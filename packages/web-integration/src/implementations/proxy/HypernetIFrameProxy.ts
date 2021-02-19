@@ -311,7 +311,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return call.getResult();
   }
 
-  public getAuthorizedMerchants(): ResultAsync<Map<URL, string>, PersistenceError> {
+  public getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError> {
     const call = this._createCall("getAuthorizedMerchants", null);
 
     return call.getResult();

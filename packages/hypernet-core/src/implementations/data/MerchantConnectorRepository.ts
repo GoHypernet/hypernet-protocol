@@ -52,7 +52,7 @@ interface IResolutionResult {
 }
 
 export class MerchantConnectorRepository implements IMerchantConnectorRepository {
-  protected activatedMerchants: Map<URL, MerchantConnectorProxy>;
+  protected activatedMerchants: Map<string, MerchantConnectorProxy>;
 
   constructor(
     protected blockchainProvider: IBlockchainProvider,
@@ -71,11 +71,34 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       return okAsync(response);
     });
   }
-  public getMerchantPublicKey(merchantUrl: URL): ResultAsync<PublicKey, Error> {
-    const url = new URL(merchantUrl.toString());
-    url.pathname = "publicKey";
-    return this.ajaxUtils.get<string, Error>(url).andThen((response) => {
-      return okAsync(response);
+  public getMerchantPublicKeys(merchantUrls: string[]): ResultAsync<Map<string, PublicKey>, Error> {
+    // TODO: right now, the merchant will publish a URL with their public key; eventually, they should be held in a smart contract
+
+    // For merchants that are already authorized, we can just go to their connector for the
+    // public key.
+    const publicKeyRequests = new Array<ResultAsync<{merchantUrl: string, publicKey: PublicKey}, MerchantConnectorError | Error>>();
+    for (const merchantUrl of merchantUrls) {
+      const merchantProxy = this.activatedMerchants.get(merchantUrl);
+
+      if (merchantProxy != null) {
+        publicKeyRequests.push(merchantProxy.getPublicKey().map((publicKey) => {return {merchantUrl, publicKey};}));
+      }
+      else {
+        // Need to get it from the source
+        const url = new URL(merchantUrl.toString());
+      url.pathname = "publicKey";
+      publicKeyRequests.push(this.ajaxUtils.get<string, Error>(url).map((publicKey) => {return {merchantUrl, publicKey};}));
+      }
+    }
+
+    return ResultUtils.combine(publicKeyRequests)
+    .map((vals) => {
+      const returnMap = new Map<string, PublicKey>();
+      for (const val of vals) {
+        returnMap.set(val.merchantUrl.toString(), val.publicKey);
+      }
+
+      return returnMap;
     });
   }
 
@@ -108,7 +131,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       .andThen((authorizationSignature) => {
         const authorizedMerchants = this._getAuthorizedMerchants();
 
-        authorizedMerchants.set(merchantUrl, authorizationSignature);
+        authorizedMerchants.set(merchantUrl.toString(), authorizationSignature);
 
         this._setAuthorizedMerchants(authorizedMerchants);
 
@@ -116,11 +139,11 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         return proxy.activateConnector();
       })
       .map(() => {
-        this.activatedMerchants.set(merchantUrl, proxy);
+        this.activatedMerchants.set(merchantUrl.toString(), proxy);
       });
   }
 
-  public getAuthorizedMerchants(): ResultAsync<Map<URL, string>, PersistenceError> {
+  public getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError> {
     const authorizedMerchants = this._getAuthorizedMerchants();
 
     return okAsync(authorizedMerchants);
@@ -131,7 +154,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     paymentId: string,
     transferId: string,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | CoreUninitializedError> {
-    const proxy = this.activatedMerchants.get(merchantUrl);
+    const proxy = this.activatedMerchants.get(merchantUrl.toString());
 
     if (proxy == null) {
       return errAsync(new MerchantValidationError(`No existing merchant connector for ${merchantUrl}`));
@@ -147,7 +170,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       .map(() => {});
   }
 
-  protected _setAuthorizedMerchants(authorizedMerchantMap: Map<URL, string>) {
+  protected _setAuthorizedMerchants(authorizedMerchantMap: Map<string, string>) {
     const authorizedMerchantEntries = new Array<IAuthorizedMerchantEntry>();
     for (const keyval of authorizedMerchantMap) {
       authorizedMerchantEntries.push({ merchantUrl: keyval[0].toString(), authorizationSignature: keyval[1] });
@@ -155,7 +178,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     window.localStorage.setItem("AuthorizedMerchants", JSON.stringify(authorizedMerchantEntries));
   }
 
-  protected _getAuthorizedMerchants(): Map<URL, string> {
+  protected _getAuthorizedMerchants(): Map<string, string> {
     let authorizedMerchantStr = window.localStorage.getItem("AuthorizedMerchants");
 
     if (authorizedMerchantStr == null) {
@@ -163,10 +186,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     }
     const authorizedMerchantEntries = JSON.parse(authorizedMerchantStr) as IAuthorizedMerchantEntry[];
 
-    const authorizedMerchants = new Map<URL, string>();
+    const authorizedMerchants = new Map<string, string>();
     for (const authorizedMerchantEntry of authorizedMerchantEntries) {
       authorizedMerchants.set(
-        new URL(authorizedMerchantEntry.merchantUrl),
+        authorizedMerchantEntry.merchantUrl,
         authorizedMerchantEntry.authorizationSignature,
       );
     }
@@ -191,7 +214,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
       for (const keyval of authorizedMerchants) {
         activationResults.push(
-          this._activateAuthorizedMerchant(context.account, keyval[0], keyval[1], config.merchantIframeUrl),
+          this._activateAuthorizedMerchant(context.account, new URL(keyval[0]), keyval[1], config.merchantIframeUrl),
         );
       }
 

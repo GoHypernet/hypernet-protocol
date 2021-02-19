@@ -28,7 +28,7 @@ export class MerchantService implements IMerchantService {
       });
   }
 
-  public getAuthorizedMerchants(): ResultAsync<Map<URL, string>, PersistenceError> {
+  public getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError> {
     return this.merchantConnectorRepository.getAuthorizedMerchants();
   }
 

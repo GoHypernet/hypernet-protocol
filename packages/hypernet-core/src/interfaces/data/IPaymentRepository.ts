@@ -62,6 +62,7 @@ export interface IPaymentRepository {
    */
   provideStake(
     paymentId: string,
+    merchantPublicKey: PublicKey
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**

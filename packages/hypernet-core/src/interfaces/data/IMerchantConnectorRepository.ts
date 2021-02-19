@@ -12,7 +12,7 @@ export interface IMerchantConnectorRepository {
   /**
    * Returns the PublicKey for a merchant
    */
-  getMerchantPublicKey(merchantUrl: URL): ResultAsync<PublicKey, Error>;
+  getMerchantPublicKeys(merchantUrl: string[]): ResultAsync<Map<string, PublicKey>, Error>;
 
   /**
    * Adds the merchant url as authorized with a particular signature
@@ -21,7 +21,7 @@ export interface IMerchantConnectorRepository {
    */
   addAuthorizedMerchant(merchantUrl: URL): ResultAsync<void, PersistenceError>;
 
-  getAuthorizedMerchants(): ResultAsync<Map<URL, string>, PersistenceError>;
+  getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError>;
 
   activateAuthorizedMerchants(): ResultAsync<void, MerchantConnectorError>;
 

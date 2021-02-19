@@ -69,9 +69,9 @@ export class AuthorizedMerchantSelectorViewModel {
       })
       .map((authorizedMerchants) => {
         const authorizedMerchantOptions = new Array<AuthorizedMerchantOption>();
-        for (const authorizedMerchant of authorizedMerchants) {
+        for (const keyVal of authorizedMerchants) {
           // TODO: Convert the URL to a comercial name
-          const url = authorizedMerchant.toString();
+          const url = keyVal[0].toString();
           authorizedMerchantOptions.push(new AuthorizedMerchantOption(url, url));
         }
 

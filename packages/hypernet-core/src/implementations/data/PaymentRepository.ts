@@ -404,6 +404,7 @@ export class PaymentRepository implements IPaymentRepository {
    */
   public provideStake(
     paymentId: string,
+    merchantPublicKey: PublicKey
   ): ResultAsync<
     Payment,
     | PaymentStakeError
@@ -428,7 +429,6 @@ export class PaymentRepository implements IPaymentRepository {
         return this.paymentUtils.transfersToPayment(paymentId, existingTransfers);
       })
       .andThen((payment) => {
-        const paymentMediator = payment.disputeMediator;
         const paymentSender = payment.from;
         const paymentID = payment.id;
         const paymentStart = this.timeUtils.getUnixNow();
@@ -442,7 +442,7 @@ export class PaymentRepository implements IPaymentRepository {
         this.logUtils.log(`PaymentRepository:provideStake: Creating insurance transfer for paymentId: ${paymentId}`);
         return this.vectorUtils.createInsuranceTransfer(
           paymentSender,
-          paymentMediator,
+          merchantPublicKey,
           payment.requiredStake,
           paymentExpiration,
           paymentID,

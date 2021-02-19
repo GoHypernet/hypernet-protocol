@@ -8,6 +8,6 @@ import {
 
 export interface IMerchantService {
   authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MerchantValidationError>;
-  getAuthorizedMerchants(): ResultAsync<Map<URL, string>, PersistenceError>;
+  getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError>;
   activateAuthorizedMerchants(): ResultAsync<void, MerchantConnectorError | PersistenceError>;
 }

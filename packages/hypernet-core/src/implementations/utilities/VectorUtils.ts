@@ -5,6 +5,7 @@ import {
   IHypernetOfferDetails,
   InitializedHypernetContext,
   PublicIdentifier,
+  PublicKey,
   ResultAsync,
 } from "@interfaces/objects";
 import {
@@ -403,7 +404,7 @@ export class VectorUtils implements IVectorUtils {
    */
   public createInsuranceTransfer(
     toAddress: PublicIdentifier,
-    mediatorAddress: string,
+    mediatorPublicKey: PublicKey,
     amount: BigNumber,
     expiration: number,
     paymentId: string,
@@ -434,7 +435,7 @@ export class VectorUtils implements IVectorUtils {
 
       const initialState: InsuranceState = {
         receiver: toEthAddress,
-        mediator: mediatorAddress,
+        mediator: mediatorPublicKey,
         collateral: amount.toString(),
         expiration: expiration.toString(),
         UUID: paymentId,

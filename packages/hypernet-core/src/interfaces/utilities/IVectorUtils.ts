@@ -1,4 +1,4 @@
-import { BigNumber, IHypernetOfferDetails, ResultAsync } from "@interfaces/objects";
+import { BigNumber, IHypernetOfferDetails, PublicKey, ResultAsync } from "@interfaces/objects";
 import {
   CoreUninitializedError,
   InvalidParametersError,
@@ -82,7 +82,7 @@ export interface IVectorUtils {
    */
   createInsuranceTransfer(
     toAddress: string,
-    mediatorAddress: string,
+    mediatorPublicKey: PublicKey,
     amount: BigNumber,
     expiration: number,
     UUID: string,

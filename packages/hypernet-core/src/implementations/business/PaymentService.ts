@@ -216,21 +216,34 @@ export class PaymentService implements IPaymentService {
   public acceptOffers(
     paymentIds: string[],
   ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
-    const prerequisites = ResultUtils.combine([
-      this.configProvider.getConfig(),
-      this.paymentRepository.getPaymentsByIds(paymentIds),
-    ]);
-
     let config: HypernetConfig;
     let payments: Map<string, Payment>;
+    const merchantUrls = new Set<string>();
 
-    return prerequisites
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.paymentRepository.getPaymentsByIds(paymentIds),
+    ])
       .andThen((vals) => {
         [config, payments] = vals;
 
-        return this.accountRepository.getBalanceByAsset(config.hypertokenAddress);
+        // Iterate over the payments, and find all the merchant URLs.
+        
+        for (const keyval of payments) {
+          merchantUrls.add(keyval[1].disputeMediator);
+        }
+
+        return ResultUtils.combine([this.accountRepository.getBalanceByAsset(config.hypertokenAddress),
+          this.merchantConnectorRepository.getMerchantPublicKeys(Array.from(merchantUrls))]);
       })
-      .andThen((hypertokenBalance) => {
+      .andThen((vals) => {
+        const [hypertokenBalance, publicKeys] = vals;
+
+        // If we don't have a public key for each merchant, then we should not proceed.
+        if (merchantUrls.size != publicKeys.size) {
+          return errAsync(new MerchantValidationError("Not all merchants are authorized!"))
+        }
+
         // For each payment ID, call the singular version of acceptOffers
         // Wrap each one as a Result object, and return an array of Results
         let totalStakeRequired = BigNumber.from(0);
@@ -252,10 +265,16 @@ export class PaymentService implements IPaymentService {
 
         // Now that we know we can (probably) make the payments, let's try
         const stakeAttempts = new Array<Promise<Result<Payment, AcceptPaymentError>>>();
-        for (const paymentId of paymentIds) {
+        for (const keyval of payments) {
+          const [paymentId, payment] = keyval;
           this.logUtils.log(`PaymentService:acceptOffers: attempting to provide stake for payment ${paymentId}`);
 
-          const stakeAttempt = this.paymentRepository.provideStake(paymentId).match(
+          // We need to get the public key of the merchant for the payment
+          const merchantPublicKey = publicKeys.get(payment.disputeMediator);
+
+          if (merchantPublicKey != null) {
+
+          const stakeAttempt = this.paymentRepository.provideStake(paymentId, merchantPublicKey).match(
             (payment) => {
               return ok(payment) as Result<Payment, AcceptPaymentError>;
             },
@@ -267,6 +286,10 @@ export class PaymentService implements IPaymentService {
           );
 
           stakeAttempts.push(stakeAttempt);
+          }
+          else {
+            throw new Error("Merchant does not have a public key; are they ")
+          }
         }
         return ResultAsync.fromPromise(Promise.all(stakeAttempts), (e) => e as AcceptPaymentError);
       });

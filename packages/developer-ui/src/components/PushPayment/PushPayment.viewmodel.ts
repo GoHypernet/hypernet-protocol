@@ -25,11 +25,13 @@ export class PushPaymentViewModel {
   public collateralRecovered: ko.Observable<string>;
   public disputeMediator: ko.Observable<string>;
   public paymentAmount: ko.Observable<string>;
+
   public acceptButton: ButtonParams;
   public showAcceptButton: ko.PureComputed<boolean>;
   public sendButton: ButtonParams;
   public showSendButton: ko.PureComputed<boolean>;
-  public showFinalizeButton: ko.PureComputed<boolean>;
+  public disputeButton: ButtonParams;
+  public showDisputeButton: ko.PureComputed<boolean>;
 
   protected core: IHypernetCore;
   protected paymentId: string;
@@ -116,8 +118,15 @@ export class PushPaymentViewModel {
       return this.state().state === EPaymentState.Staked;
     });
 
-    this.showFinalizeButton = ko.pureComputed(() => {
-      return this.state().state === EPaymentState.Approved;
+    this.disputeButton = new ButtonParams("Dispute", async () => {
+      return await this.core.initiateDispute(this.paymentId).mapErr((e) => {
+        alert("Error during dispute!");
+        console.error(e);
+      });
+    });
+
+    this.showDisputeButton = ko.pureComputed(() => {
+      return this.state().state === EPaymentState.Accepted;
     });
 
     this.core.getPublicIdentifier().map((publicIdentifier) => {
