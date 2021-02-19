@@ -8,8 +8,8 @@ declare global {
   }
 }
 
-let externalProvider: ExternalProvider;
-if (true) {
+let externalProvider: ExternalProvider | undefined;
+if (!window?.ethereum) {
   const externalProviderUtils = new ExternalProviderUtils();
   externalProvider = externalProviderUtils.getExternalProviderForDevelopment();
 }
