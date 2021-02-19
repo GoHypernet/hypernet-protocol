@@ -126,7 +126,7 @@ export class PushPaymentViewModel {
     });
 
     this.showDisputeButton = ko.pureComputed(() => {
-      return this.state().state === EPaymentState.Accepted;
+      return this.state().state === EPaymentState.Accepted && this.publicIdentifier() === this.from();
     });
 
     this.core.getPublicIdentifier().map((publicIdentifier) => {

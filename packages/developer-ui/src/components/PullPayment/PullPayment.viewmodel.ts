@@ -118,7 +118,7 @@ export class PullPaymentViewModel {
     });
 
     this.showDisputeButton = ko.pureComputed(() => {
-      return this.state().state === EPaymentState.Accepted;
+      return this.state().state === EPaymentState.Accepted && this.publicIdentifier() === this.from();
     });
 
     this.publicIdentifier = ko.observable(null);

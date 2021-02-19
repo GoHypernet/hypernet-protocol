@@ -23,7 +23,7 @@ class MerchantConnectorProxy extends ParentProxy {
   }
 
   public resolveChallenge(paymentId: HexString): ResultAsync<IResolutionResult, MerchantConnectorError> {
-    const call = this._createCall("resolveChallenge", null);
+    const call = this._createCall("resolveChallenge", paymentId);
 
     return call.getResult();
   }
