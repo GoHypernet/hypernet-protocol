@@ -51,19 +51,21 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   public getReady(): Promise<IHypernetIFrameProxy> {
     return new Promise((resolve, reject) => {
       this.proxy.proxyReady().then(() => {
-        this.proxy
-          .getEthereumAccounts()
-          .andThen((accounts: any) => this.proxy.initialize(accounts[0]))
-          .match(
-            () => {
-              resolve(this.proxy);
-            },
-            (err: any) => {
-              // handle error
-              console.log("err", err);
-              reject(err);
-            },
-          );
+        this.proxy.activate().map(() => {
+          this.proxy
+            .getEthereumAccounts()
+            .andThen((accounts: any) => this.proxy.initialize(accounts[0]))
+            .match(
+              () => {
+                resolve(this.proxy);
+              },
+              (err: any) => {
+                // handle error
+                console.log("err", err);
+                reject(err);
+              },
+            );
+        });
       });
     });
   }
