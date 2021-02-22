@@ -1,7 +1,7 @@
 import { Address, Balance, FullTransferState, TransferName } from "@connext/vector-types";
 import { EthereumAddress, PublicIdentifier, ResultAsync } from "@interfaces/objects";
 import { VectorError } from "@interfaces/objects/errors";
-import { ParameterizedResolver } from "@interfaces/types/typechain";
+import { MessageResolver, InsuranceResolver, ParameterizedResolver } from "@interfaces/types/typechain";
 
 export interface IConditionalTransferResolvedPayload {
   aliceIdentifier: string;
@@ -160,7 +160,7 @@ export interface IBrowserNode {
   resolveTransfer(
     channelAddress: EthereumAddress,
     transferId: string,
-    transferResolver: ParameterizedResolver,
+    transferResolver: MessageResolver | ParameterizedResolver | InsuranceResolver,
   ): ResultAsync<IBasicTransferResponse, VectorError>;
 
   conditionalTransfer(

@@ -20,7 +20,7 @@ const wallet = new ethers.Wallet(privateKey, provider);
 
 let connector: string = "";
 let signature: string = "unknown";
-let publicKey: string = wallet.publicKey;
+let address: string = wallet.address;
 
 // Read the webpacked connector file. 
 const filename = __dirname + "/../dist/connector-bundle/index.js";
@@ -45,7 +45,7 @@ app.get('/signature', (req, res) => {
 });
 
 app.get('/publicKey', (req, res) => {
-   res.end(publicKey);
+   res.end(address);
 })
 
 const server = app.listen(5010, () => {

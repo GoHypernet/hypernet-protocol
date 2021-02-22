@@ -9,8 +9,11 @@ import {
   unixNow,
   defaultExpirationLength,
   erc20AssetAddress,
-  disputeMediatorPublicKey,
+  merchantUrl,
   publicIdentifier3,
+  offerTransferId,
+  insuranceTransferId,
+  parameterizedTransferId,
 } from "@mock/mocks";
 import {
   BlockchainProviderMock,
@@ -19,7 +22,7 @@ import {
   ContextProviderMock,
   PaymentUtilsMockFactory,
 } from "@mock/utils";
-import { BigNumber, PushPayment, HypernetLink, Payment } from "@interfaces/objects";
+import { BigNumber, PushPayment, HypernetLink, Payment, PaymentInternalDetails } from "@interfaces/objects";
 import { IVectorUtils, IBrowserNodeProvider, IPaymentUtils, ILinkUtils, ITimeUtils } from "@interfaces/utilities";
 import { VectorError } from "@interfaces/objects/errors";
 import { ILinkRepository } from "@interfaces/data";
@@ -30,6 +33,7 @@ import { EPaymentState } from "@interfaces/types";
 const expirationDate = unixNow + defaultExpirationLength;
 const counterPartyAccount = publicIdentifier2;
 const fromAccount = publicIdentifier;
+const paymentDetails = new PaymentInternalDetails(offerTransferId, insuranceTransferId, parameterizedTransferId, []);
 
 class VectorLinkRepositoryMocks {
   public blockchainProvider = new BlockchainProviderMock();
@@ -114,7 +118,8 @@ class VectorLinkRepositoryMocks {
       unixNow,
       unixNow,
       BigNumber.from(0),
-      disputeMediatorPublicKey,
+      merchantUrl,
+      paymentDetails,
       BigNumber.from(commonAmount.toString()),
       BigNumber.from(0),
     );

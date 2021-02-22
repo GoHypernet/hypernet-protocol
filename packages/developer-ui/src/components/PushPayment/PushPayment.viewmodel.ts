@@ -23,13 +23,15 @@ export class PushPaymentViewModel {
   public createdTimestamp: ko.Observable<string>;
   public updatedTimestamp: ko.Observable<string>;
   public collateralRecovered: ko.Observable<string>;
-  public disputeMediator: ko.Observable<string>;
+  public merchantUrl: ko.Observable<string>;
   public paymentAmount: ko.Observable<string>;
+
   public acceptButton: ButtonParams;
   public showAcceptButton: ko.PureComputed<boolean>;
   public sendButton: ButtonParams;
   public showSendButton: ko.PureComputed<boolean>;
-  public showFinalizeButton: ko.PureComputed<boolean>;
+  public disputeButton: ButtonParams;
+  public showDisputeButton: ko.PureComputed<boolean>;
 
   protected core: IHypernetCore;
   protected paymentId: string;
@@ -52,7 +54,7 @@ export class PushPaymentViewModel {
     this.createdTimestamp = ko.observable(params.payment.createdTimestamp.toString());
     this.updatedTimestamp = ko.observable(params.payment.updatedTimestamp.toString());
     this.collateralRecovered = ko.observable(params.payment.collateralRecovered.toString());
-    this.disputeMediator = ko.observable(params.payment.disputeMediator);
+    this.merchantUrl = ko.observable(params.payment.merchantUrl);
     this.paymentAmount = ko.observable(utils.formatUnits(params.payment.paymentAmount, "wei"));
 
     this.core.onPushPaymentReceived.subscribe({
@@ -116,8 +118,15 @@ export class PushPaymentViewModel {
       return this.state().state === EPaymentState.Staked;
     });
 
-    this.showFinalizeButton = ko.pureComputed(() => {
-      return this.state().state === EPaymentState.Approved;
+    this.disputeButton = new ButtonParams("Dispute", async () => {
+      return await this.core.initiateDispute(this.paymentId).mapErr((e) => {
+        alert("Error during dispute!");
+        console.error(e);
+      });
+    });
+
+    this.showDisputeButton = ko.pureComputed(() => {
+      return this.state().state === EPaymentState.Accepted && this.publicIdentifier() === this.from();
     });
 
     this.core.getPublicIdentifier().map((publicIdentifier) => {

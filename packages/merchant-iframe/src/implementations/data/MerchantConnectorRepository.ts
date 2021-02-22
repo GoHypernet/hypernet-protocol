@@ -13,7 +13,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       return okAsync(response);
     });
   }
-  public getMerchantPublicKey(merchantUrl: URL): ResultAsync<PublicKey, Error> {
+  public getMerchantAddress(merchantUrl: URL): ResultAsync<string, Error> {
     const url = new URL(merchantUrl.toString());
     url.pathname = "publicKey";
     return this.ajaxUtils.get<string, Error>(url).andThen((response) => {

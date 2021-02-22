@@ -39,7 +39,7 @@ interface IReducerStateReducer {
   setRequiredStake: (param?: string) => void;
   paymentType: EPaymentType;
   setPaymentType: (param?: EPaymentType) => void;
-  disputeMediator: PublicKey;
+  merchantUrl: string;
   sendFunds: () => void;
   paymentTypeOptions: PaymentTypeOption[];
 }
@@ -54,7 +54,7 @@ interface IReducerState {
   amount: string;
   expirationDate: string;
   requiredStake: string;
-  disputeMediator: PublicKey;
+  merchantUrl: string;
   paymentType: EPaymentType;
   paymentTypeOptions: PaymentTypeOption[];
 }
@@ -75,7 +75,7 @@ export function usePayment(initialParams: any): IReducerStateReducer {
     amount: initialParams?.amount || "0",
     expirationDate: initialParams?.expirationDate || "",
     requiredStake: initialParams?.requiredStake || "0",
-    disputeMediator: initialParams?.disputeMediator || "0x0000000000000000000000000000000000000001", // @todo replace with an actual mediator address!,
+    merchantUrl: initialParams?.merchantUrl || "http://localhost:5010/", // @todo replace with an actual mediator address!,
     paymentType: initialParams?.paymentType || EPaymentType.Push,
     paymentTypeOptions: [
       new PaymentTypeOption("Push", EPaymentType.Push),
@@ -209,7 +209,7 @@ export function usePayment(initialParams: any): IReducerStateReducer {
         state.expirationDate,
         utils.parseUnits(state.requiredStake, "wei").toString(),
         state.selectedPaymentToken?.address,
-        state.disputeMediator,
+        state.merchantUrl,
       )
       .match(
         (balances) => {

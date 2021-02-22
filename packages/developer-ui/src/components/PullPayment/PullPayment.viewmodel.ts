@@ -22,7 +22,7 @@ export class PullPaymentViewModel {
   public createdTimestamp: ko.Observable<string>;
   public updatedTimestamp: ko.Observable<string>;
   public collateralRecovered: ko.Observable<string>;
-  public disputeMediator: ko.Observable<string>;
+  public merchantUrl: ko.Observable<string>;
   public authorizedAmount: ko.Observable<string>;
   public transferedAmount: ko.Observable<string>;
   public deltaAmount: ko.Observable<string>;
@@ -33,6 +33,8 @@ export class PullPaymentViewModel {
   public showAcceptButton: ko.PureComputed<boolean>;
   public pullButton: ButtonParams;
   public showPullButton: ko.PureComputed<boolean>;
+  public disputeButton: ButtonParams;
+  public showDisputeButton: ko.PureComputed<boolean>;
 
   protected core: IHypernetCore;
   protected paymentId: string;
@@ -54,7 +56,7 @@ export class PullPaymentViewModel {
     this.createdTimestamp = ko.observable(params.payment.createdTimestamp.toString());
     this.updatedTimestamp = ko.observable(params.payment.updatedTimestamp.toString());
     this.collateralRecovered = ko.observable(params.payment.collateralRecovered.toString());
-    this.disputeMediator = ko.observable(params.payment.disputeMediator);
+    this.merchantUrl = ko.observable(params.payment.merchantUrl);
     this.authorizedAmount = ko.observable(params.payment.authorizedAmount.toString());
     this.transferedAmount = ko.observable(params.payment.amountTransferred.toString());
     this.deltaAmount = ko.observable(params.payment.deltaAmount.toString());
@@ -106,6 +108,17 @@ export class PullPaymentViewModel {
     this.showPullButton = ko.pureComputed(() => {
       const state = this.state();
       return state.state === EPaymentState.Approved && this.publicIdentifier() == this.to();
+    });
+
+    this.disputeButton = new ButtonParams("Dispute", async () => {
+      return await this.core.initiateDispute(this.paymentId).mapErr((e) => {
+        alert("Error during dispute!");
+        console.error(e);
+      });
+    });
+
+    this.showDisputeButton = ko.pureComputed(() => {
+      return this.state().state === EPaymentState.Accepted && this.publicIdentifier() === this.from();
     });
 
     this.publicIdentifier = ko.observable(null);

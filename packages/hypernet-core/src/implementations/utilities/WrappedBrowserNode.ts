@@ -6,7 +6,7 @@ import {
 } from "@connext/vector-types";
 import { EthereumAddress, PublicIdentifier, ResultAsync } from "@interfaces/objects";
 import { VectorError } from "@interfaces/objects/errors";
-import { ParameterizedResolver } from "@interfaces/types/typechain";
+import { InsuranceResolver, MessageResolver, ParameterizedResolver } from "@interfaces/types/typechain";
 import {
   IBasicChannelResponse,
   IBasicTransferResponse,
@@ -142,7 +142,7 @@ export class WrappedBrowserNode implements IBrowserNode {
   public resolveTransfer(
     channelAddress: EthereumAddress,
     transferId: string,
-    transferResolver: ParameterizedResolver,
+    transferResolver: MessageResolver | ParameterizedResolver | InsuranceResolver,
   ): ResultAsync<IBasicTransferResponse, VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.resolveTransfer({

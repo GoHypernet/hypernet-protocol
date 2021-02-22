@@ -59,7 +59,7 @@ export class PaymentRepository implements IPaymentRepository {
     protected timeUtils: ITimeUtils,
   ) {}
 
-  createPullRecord(
+  public createPullRecord(
     paymentId: string,
     amount: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
@@ -104,7 +104,7 @@ export class PaymentRepository implements IPaymentRepository {
     expirationDate: number,
     requiredStake: string, // TODO: amounts should be consistently use BigNumber
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
@@ -128,7 +128,7 @@ export class PaymentRepository implements IPaymentRepository {
           paymentAmount: maximumAmount,
           expirationDate,
           paymentToken,
-          disputeMediator,
+          merchantUrl,
           rate: {
             deltaAmount,
             deltaTime,
@@ -156,7 +156,7 @@ export class PaymentRepository implements IPaymentRepository {
    * @param expirationDate the date (in unix time) at which point the payment will expire & revert
    * @param requiredStake the amount of insurance the counterparty must put up for this payment
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param disputeMediator the (Ethereum) address of the dispute mediator
+   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
    */
   public createPushPayment(
     counterPartyAccount: PublicIdentifier,
@@ -164,7 +164,7 @@ export class PaymentRepository implements IPaymentRepository {
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
@@ -188,7 +188,7 @@ export class PaymentRepository implements IPaymentRepository {
           paymentAmount: amount.toString(),
           expirationDate: expirationDate,
           paymentToken,
-          disputeMediator,
+          merchantUrl,
         };
 
         // Create a message transfer, with the terms of the payment in the metadata.
@@ -404,6 +404,7 @@ export class PaymentRepository implements IPaymentRepository {
    */
   public provideStake(
     paymentId: string,
+    merchantPublicKey: PublicKey,
   ): ResultAsync<
     Payment,
     | PaymentStakeError
@@ -428,7 +429,6 @@ export class PaymentRepository implements IPaymentRepository {
         return this.paymentUtils.transfersToPayment(paymentId, existingTransfers);
       })
       .andThen((payment) => {
-        const paymentMediator = payment.disputeMediator;
         const paymentSender = payment.from;
         const paymentID = payment.id;
         const paymentStart = this.timeUtils.getUnixNow();
@@ -442,7 +442,7 @@ export class PaymentRepository implements IPaymentRepository {
         this.logUtils.log(`PaymentRepository:provideStake: Creating insurance transfer for paymentId: ${paymentId}`);
         return this.vectorUtils.createInsuranceTransfer(
           paymentSender,
-          paymentMediator,
+          merchantPublicKey,
           payment.requiredStake,
           paymentExpiration,
           paymentID,

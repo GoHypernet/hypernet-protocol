@@ -221,7 +221,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     const call = this._createCall("sendFunds", {
       counterPartyAccount,
@@ -229,7 +229,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
       expirationDate,
       requiredStake,
       paymentToken,
-      disputeMediator,
+      merchantUrl,
     });
 
     return call.getResult();
@@ -243,7 +243,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     const call = this._createCall("authorizeFunds", {
       counterPartyAccount,
@@ -253,7 +253,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
       deltaTime,
       requiredStake,
       paymentToken,
-      disputeMediator,
+      merchantUrl,
     });
 
     return call.getResult();
@@ -287,12 +287,14 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     throw new Error("Unimplemented");
   }
 
-  public initiateDispute(paymentId: string, metadata: string): Promise<HypernetLink> {
-    throw new Error("Unimplemented");
+  public initiateDispute(paymentId: string): ResultAsync<Payment, CoreUninitializedError> {
+    const call = this._createCall("initiateDispute", paymentId);
+
+    return call.getResult();
   }
 
   public mintTestToken(amount: BigNumber): ResultAsync<void, CoreUninitializedError> {
-    const call = this._createCall("acceptFunds", amount.toString());
+    const call = this._createCall("mintTestToken", amount.toString());
 
     return call.getResult();
   }
@@ -309,7 +311,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return call.getResult();
   }
 
-  public getAuthorizedMerchants(): ResultAsync<Map<URL, string>, PersistenceError> {
+  public getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError> {
     const call = this._createCall("getAuthorizedMerchants", null);
 
     return call.getResult();

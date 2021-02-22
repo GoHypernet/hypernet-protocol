@@ -14,7 +14,7 @@ export interface IPaymentRepository {
    */
   getPaymentsByIds(
     paymentIds: string[],
-  ): ResultAsync<Map<string, Payment>, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<Map<string, Payment>, RouterChannelUnknownError | CoreUninitializedError | VectorError>;
 
   /**
    * Creates a push payment and returns it. Nothing moves until
@@ -27,7 +27,7 @@ export interface IPaymentRepository {
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   createPullPayment(
@@ -38,7 +38,7 @@ export interface IPaymentRepository {
     expirationDate: number,
     requiredStake: string, // TODO: amounts should be consistently use BigNumber
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   createPullRecord(
@@ -62,6 +62,7 @@ export interface IPaymentRepository {
    */
   provideStake(
     paymentId: string,
+    merchantPublicKey: PublicKey,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**

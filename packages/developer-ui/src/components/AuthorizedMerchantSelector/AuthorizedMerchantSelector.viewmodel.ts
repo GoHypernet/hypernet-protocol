@@ -27,6 +27,11 @@ export class AuthorizedMerchantSelectorViewModel {
     this.merchants = ko.observable(null);
     this.authorizedMerchantOptions = ko.observableArray<AuthorizedMerchantOption>();
 
+    this.core.onMerchantAuthorized.subscribe((merchant) => {
+      const url = merchant.toString();
+      this.authorizedMerchantOptions.push(new AuthorizedMerchantOption(url, url));
+    });
+
     this.selectedAuthorizedMerchantOption = ko.pureComputed({
       read: () => {
         const selectedAuthorizedMerchant = this.selectedAuthorizedMerchant();
@@ -69,9 +74,9 @@ export class AuthorizedMerchantSelectorViewModel {
       })
       .map((authorizedMerchants) => {
         const authorizedMerchantOptions = new Array<AuthorizedMerchantOption>();
-        for (const authorizedMerchant of authorizedMerchants) {
+        for (const keyVal of authorizedMerchants) {
           // TODO: Convert the URL to a comercial name
-          const url = authorizedMerchant.toString();
+          const url = keyVal[0].toString();
           authorizedMerchantOptions.push(new AuthorizedMerchantOption(url, url));
         }
 

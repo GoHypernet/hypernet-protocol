@@ -69,7 +69,7 @@ export default class CoreWrapper extends ChildProxy {
           expirationDate: number;
           requiredStake: string;
           paymentToken: EthereumAddress;
-          disputeMediator: PublicKey;
+          merchantUrl: string;
         }>,
       ) => {
         this.returnForModel(() => {
@@ -79,7 +79,7 @@ export default class CoreWrapper extends ChildProxy {
             data.data.expirationDate,
             data.data.requiredStake,
             data.data.paymentToken,
-            data.data.disputeMediator,
+            data.data.merchantUrl,
           );
         }, data.callId);
       },
@@ -89,7 +89,7 @@ export default class CoreWrapper extends ChildProxy {
       //     expirationDate: string,
       //     requiredStake: string,
       //     paymentToken: EthereumAddress,
-      //     disputeMediator: PublicKey,
+      //     merchantUrl: string,
       //   }>) => {
       //     this.returnForModel(() => {
       //       return core.authorizeFunds(data.data.counterPartyAccount,
@@ -97,7 +97,7 @@ export default class CoreWrapper extends ChildProxy {
       //         moment(data.data.expirationDate),
       //         BigNumber.from(data.data.requiredStake),
       //         data.data.paymentToken,
-      //         data.data.disputeMediator);
+      //         data.data.merchantUrl);
       //     }, data.callId);
       //   },
 

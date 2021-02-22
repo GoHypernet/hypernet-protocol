@@ -11,8 +11,9 @@ import {
   parameterizedTransferId,
   offerTransferId,
   insuranceTransferId,
-  disputeMediatorPublicKey,
+  merchantUrl,
   erc20AssetAddress,
+  disputeMediatorPublicKey,
 } from "@mock/mocks";
 import {
   BlockchainProviderMock,
@@ -21,7 +22,7 @@ import {
   ContextProviderMock,
   PaymentUtilsMockFactory,
 } from "@mock/utils";
-import { BigNumber, PushPayment } from "@interfaces/objects";
+import { BigNumber, PaymentInternalDetails, PushPayment } from "@interfaces/objects";
 import { ILogUtils, IVectorUtils, IBrowserNodeProvider, IPaymentUtils, ITimeUtils } from "@interfaces/utilities";
 import { VectorError } from "@interfaces/objects/errors";
 import { IPaymentRepository } from "@interfaces/data";
@@ -32,6 +33,7 @@ import { EPaymentState, EPaymentType } from "@interfaces/types";
 const expirationDate = unixNow + defaultExpirationLength;
 const counterPartyAccount = publicIdentifier2;
 const fromAccount = publicIdentifier;
+const paymentDetails = new PaymentInternalDetails(offerTransferId, insuranceTransferId, parameterizedTransferId, []);
 
 class PaymentRepositoryMocks {
   public timeUtils = td.object<ITimeUtils>();
@@ -84,7 +86,7 @@ class PaymentRepositoryMocks {
           paymentAmount: commonAmount.toString(),
           expirationDate,
           paymentToken: erc20AssetAddress,
-          disputeMediator: disputeMediatorPublicKey,
+          merchantUrl: merchantUrl,
         }),
       ),
     ).thenReturn(okAsync({ channelAddress: routerChannelAddress, transferId: offerTransferId }));
@@ -165,7 +167,8 @@ class PaymentRepositoryMocks {
       unixNow,
       unixNow,
       BigNumber.from(0),
-      disputeMediatorPublicKey,
+      merchantUrl,
+      paymentDetails,
       BigNumber.from(commonAmount.toString()),
       BigNumber.from(0),
     );
@@ -206,7 +209,7 @@ describe("PaymentRepository tests", () => {
       expirationDate,
       commonAmount.toString(),
       erc20AssetAddress,
-      disputeMediatorPublicKey,
+      merchantUrl,
     );
 
     // Assert
@@ -228,7 +231,7 @@ describe("PaymentRepository tests", () => {
       expirationDate,
       commonAmount.toString(),
       erc20AssetAddress,
-      disputeMediatorPublicKey,
+      merchantUrl,
     );
     const error = result._unsafeUnwrapErr();
 
@@ -302,7 +305,7 @@ describe("PaymentRepository tests", () => {
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    const result = await repo.provideStake(commonPaymentId);
+    const result = await repo.provideStake(commonPaymentId, disputeMediatorPublicKey);
 
     // Assert
     expect(result).toBeDefined();
@@ -317,7 +320,7 @@ describe("PaymentRepository tests", () => {
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    const result = await repo.provideStake(commonPaymentId);
+    const result = await repo.provideStake(commonPaymentId, disputeMediatorPublicKey);
     const error = result._unsafeUnwrapErr();
 
     // Assert

@@ -126,6 +126,7 @@ export interface IHypernetCore {
    * @param amount
    * @param requiredStake the amount of stake that the provider must put up as part of the insurancepayment
    * @param paymentToken
+   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
    */
   sendFunds(
     counterPartyAccount: PublicIdentifier,
@@ -133,7 +134,7 @@ export interface IHypernetCore {
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**
@@ -145,7 +146,7 @@ export interface IHypernetCore {
    * @param deltaTime the number of seconds after which deltaAmount will be authorized, up to the limit of totalAuthorized.
    * @param requiredStake the amount of stake the counterparyt must put up as insurance
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param disputeMediator the (Ethereum) address of the dispute mediator
+   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
    */
   authorizeFunds(
     counterPartyAccount: PublicIdentifier,
@@ -155,7 +156,7 @@ export interface IHypernetCore {
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**
@@ -186,9 +187,8 @@ export interface IHypernetCore {
   /**
    * Called by the consumer to attempt to claim some or all of the stake within a particular insurance payment.
    * @param paymentId the payment ID to dispute
-   * @metadata the mediator-specific metadata to provide
    */
-  initiateDispute(paymentId: string, metadata: string): Promise<HypernetLink>;
+  initiateDispute(paymentId: string): ResultAsync<Payment, CoreUninitializedError>;
 
   /**
    * Only used for development purposes!
@@ -198,7 +198,7 @@ export interface IHypernetCore {
 
   authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MerchantValidationError>;
 
-  getAuthorizedMerchants(): ResultAsync<Map<URL, string>, PersistenceError>;
+  getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError>;
   /**
    * Observables for seeing what's going on
    */

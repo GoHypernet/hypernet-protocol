@@ -133,7 +133,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
           expirationDate={config?.expirationDate}
           requiredStake={config?.requiredStake}
           paymentTokenAddress={config?.paymentTokenAddress}
-          disputeMediator={config?.disputeMediator}
+          merchantUrl={config?.merchantUrl}
           paymentType={config?.paymentType}
         />,
         true,

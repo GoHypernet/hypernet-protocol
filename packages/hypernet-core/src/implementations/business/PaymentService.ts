@@ -1,6 +1,6 @@
 import { ResultUtils } from "@hypernetlabs/utils";
 import { IPaymentService } from "@interfaces/business";
-import { IAccountsRepository, ILinkRepository } from "@interfaces/data";
+import { IAccountsRepository, ILinkRepository, IMerchantConnectorRepository } from "@interfaces/data";
 import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
 import {
   BigNumber,
@@ -15,6 +15,7 @@ import {
   HypernetConfig,
   HypernetContext,
   InitializedHypernetContext,
+  HexString,
 } from "@interfaces/objects";
 import {
   AcceptPaymentError,
@@ -23,6 +24,8 @@ import {
   InvalidParametersError,
   InvalidPaymentError,
   LogicalError,
+  MerchantConnectorError,
+  MerchantValidationError,
   OfferMismatchError,
   RouterChannelUnknownError,
   VectorError,
@@ -54,6 +57,7 @@ export class PaymentService implements IPaymentService {
     protected contextProvider: IContextProvider,
     protected configProvider: IConfigProvider,
     protected paymentRepository: IPaymentRepository,
+    protected merchantConnectorRepository: IMerchantConnectorRepository,
     protected logUtils: ILogUtils,
   ) {}
 
@@ -66,7 +70,7 @@ export class PaymentService implements IPaymentService {
    * @param deltaTime the number of seconds after which deltaAmount will be authorized, up to the limit of totalAuthorized.
    * @param requiredStake the amount of stake the counterparyt must put up as insurance
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param disputeMediator the (Ethereum) address of the dispute mediator
+   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
    */
   public authorizeFunds(
     counterPartyAccount: PublicIdentifier,
@@ -76,7 +80,7 @@ export class PaymentService implements IPaymentService {
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
     // totalAuthorized / (deltaAmount/deltaTime) > ((expiration date - now) + someMinimumNumDays)
@@ -89,7 +93,7 @@ export class PaymentService implements IPaymentService {
       expirationDate,
       requiredStake.toString(),
       paymentToken,
-      disputeMediator,
+      merchantUrl,
     );
   }
 
@@ -138,7 +142,7 @@ export class PaymentService implements IPaymentService {
    * @param expirationDate the expiration date at which point this payment will revert
    * @param requiredStake the amount of insurance the counterparty should put up
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param disputeMediator the (Ethereum) address of the dispute mediator
+   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
    */
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
@@ -146,7 +150,7 @@ export class PaymentService implements IPaymentService {
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
   ): ResultAsync<Payment, Error> {
     // TODO: Sanity checking on the values
     return this.paymentRepository.createPushPayment(
@@ -155,7 +159,7 @@ export class PaymentService implements IPaymentService {
       expirationDate,
       requiredStake,
       paymentToken,
-      disputeMediator,
+      merchantUrl,
     );
   }
 
@@ -212,21 +216,33 @@ export class PaymentService implements IPaymentService {
   public acceptOffers(
     paymentIds: string[],
   ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
-    const prerequisites = ResultUtils.combine([
-      this.configProvider.getConfig(),
-      this.paymentRepository.getPaymentsByIds(paymentIds),
-    ]);
-
     let config: HypernetConfig;
     let payments: Map<string, Payment>;
+    const merchantUrls = new Set<string>();
 
-    return prerequisites
+    return ResultUtils.combine([this.configProvider.getConfig(), this.paymentRepository.getPaymentsByIds(paymentIds)])
       .andThen((vals) => {
         [config, payments] = vals;
 
-        return this.accountRepository.getBalanceByAsset(config.hypertokenAddress);
+        // Iterate over the payments, and find all the merchant URLs.
+
+        for (const keyval of payments) {
+          merchantUrls.add(keyval[1].merchantUrl);
+        }
+
+        return ResultUtils.combine([
+          this.accountRepository.getBalanceByAsset(config.hypertokenAddress),
+          this.merchantConnectorRepository.getMerchantPublicKeys(Array.from(merchantUrls)),
+        ]);
       })
-      .andThen((hypertokenBalance) => {
+      .andThen((vals) => {
+        const [hypertokenBalance, publicKeys] = vals;
+
+        // If we don't have a public key for each merchant, then we should not proceed.
+        if (merchantUrls.size != publicKeys.size) {
+          return errAsync(new MerchantValidationError("Not all merchants are authorized!"));
+        }
+
         // For each payment ID, call the singular version of acceptOffers
         // Wrap each one as a Result object, and return an array of Results
         let totalStakeRequired = BigNumber.from(0);
@@ -248,21 +264,29 @@ export class PaymentService implements IPaymentService {
 
         // Now that we know we can (probably) make the payments, let's try
         const stakeAttempts = new Array<Promise<Result<Payment, AcceptPaymentError>>>();
-        for (const paymentId of paymentIds) {
+        for (const keyval of payments) {
+          const [paymentId, payment] = keyval;
           this.logUtils.log(`PaymentService:acceptOffers: attempting to provide stake for payment ${paymentId}`);
 
-          const stakeAttempt = this.paymentRepository.provideStake(paymentId).match(
-            (payment) => {
-              return ok(payment) as Result<Payment, AcceptPaymentError>;
-            },
-            (e) => {
-              return err(
-                new AcceptPaymentError(`Payment ${paymentId} could not be staked! Source exception: ${e}`),
-              ) as Result<Payment, AcceptPaymentError>;
-            },
-          );
+          // We need to get the public key of the merchant for the payment
+          const merchantPublicKey = publicKeys.get(payment.merchantUrl);
 
-          stakeAttempts.push(stakeAttempt);
+          if (merchantPublicKey != null) {
+            const stakeAttempt = this.paymentRepository.provideStake(paymentId, merchantPublicKey).match(
+              (payment) => {
+                return ok(payment) as Result<Payment, AcceptPaymentError>;
+              },
+              (e) => {
+                return err(
+                  new AcceptPaymentError(`Payment ${paymentId} could not be staked! Source exception: ${e}`),
+                ) as Result<Payment, AcceptPaymentError>;
+              },
+            );
+
+            stakeAttempts.push(stakeAttempt);
+          } else {
+            throw new Error("Merchant does not have a public key; are they ");
+          }
         }
         return ResultAsync.fromPromise(Promise.all(stakeAttempts), (e) => e as AcceptPaymentError);
       });
@@ -402,16 +426,16 @@ export class PaymentService implements IPaymentService {
    * Notifies the service that the parameterized payment has been resolved.
    * @param paymentId the payment id that has been resolved.
    */
-  public paymentCompleted(paymentId: string): ResultAsync<void, InvalidParametersError> {
-    const prerequisites = ResultUtils.combine([
-      this.paymentRepository.getPaymentsByIds([paymentId]),
-      this.contextProvider.getInitializedContext(),
-    ]);
-
+  public paymentCompleted(
+    paymentId: HexString,
+  ): ResultAsync<void, InvalidParametersError | RouterChannelUnknownError | CoreUninitializedError | VectorError> {
     let payments: Map<string, Payment>;
-    let context: InitializedHypernetContext;
+    let context: HypernetContext;
 
-    return prerequisites.andThen((vals) => {
+    return ResultUtils.combine([
+      this.paymentRepository.getPaymentsByIds([paymentId]),
+      this.contextProvider.getContext(),
+    ]).andThen((vals) => {
       [payments, context] = vals;
       const payment = payments.get(paymentId);
 
@@ -419,12 +443,45 @@ export class PaymentService implements IPaymentService {
         return errAsync(new InvalidParametersError("Invalid payment ID!"));
       }
 
-      // @todo: check that the payment is TO us
       // @todo add some additional checking here
-      // @todo add in a way to grab the resolved transfer
-      // @todo probably resolve the offer and/or insurance transfer as well?
-      // @todo probably genericize this so that it doesn't have to be a pushPayment
-      context.onPushPaymentReceived.next(payment as PushPayment);
+      if (payment instanceof PushPayment) {
+        context.onPushPaymentUpdated.next(payment);
+      }
+      if (payment instanceof PullPayment) {
+        context.onPullPaymentUpdated.next(payment);
+      }
+
+      return okAsync(undefined);
+    });
+  }
+
+  /**
+   * Right now, if the insurance is resolved, all we need to do is generate an update event.
+   *
+   * @param paymentId
+   */
+  public insuranceResolved(paymentId: HexString): ResultAsync<void, InvalidParametersError> {
+    let payments: Map<string, Payment>;
+    let context: HypernetContext;
+
+    return ResultUtils.combine([
+      this.paymentRepository.getPaymentsByIds([paymentId]),
+      this.contextProvider.getContext(),
+    ]).andThen((vals) => {
+      [payments, context] = vals;
+      const payment = payments.get(paymentId);
+
+      if (payment == null) {
+        return errAsync(new InvalidParametersError("Invalid payment ID!"));
+      }
+
+      // @todo add some additional checking here
+      if (payment instanceof PushPayment) {
+        context.onPushPaymentUpdated.next(payment);
+      }
+      if (payment instanceof PullPayment) {
+        context.onPullPaymentUpdated.next(payment);
+      }
 
       return okAsync(undefined);
     });
@@ -460,12 +517,53 @@ export class PaymentService implements IPaymentService {
     });
   }
 
-  /**
-   * Requests a payment on the specified channel.
-   * @param channelId the (Vector) channelId to request the payment on
-   * @param amount the amount of payment to request
-   */
-  requestPayment(channelId: string, amount: string): Promise<Payment> {
-    throw new Error("Method not implemented.");
+  public initiateDispute(
+    paymentId: string,
+  ): ResultAsync<
+    Payment,
+    | InvalidParametersError
+    | CoreUninitializedError
+    | MerchantConnectorError
+    | RouterChannelUnknownError
+    | CoreUninitializedError
+    | VectorError
+    | Error
+  > {
+    // Get the payment
+    return this.paymentRepository
+      .getPaymentsByIds([paymentId])
+      .andThen((payments) => {
+        const payment = payments.get(paymentId);
+
+        if (payment == null) {
+          return errAsync<void, InvalidParametersError>(new InvalidParametersError("Invalid payment ID"));
+        }
+
+        // You can only dispute payments that are in the accepted state- the reciever has taken their money.
+        // The second condition can't happen if it's in Accepted unless something is very, very badly wrong,
+        // but it keeps typescript happy
+        if (payment.state != EPaymentState.Accepted || payment.details.insuranceTransferId == null) {
+          return errAsync<void, InvalidParametersError>(
+            new InvalidParametersError("Can not dispute a payment that is not in the Accepted state"),
+          );
+        }
+
+        // Resolve the dispute
+        return this.merchantConnectorRepository.resolveChallenge(
+          new URL(payment.merchantUrl),
+          paymentId,
+          payment.details.insuranceTransferId,
+        );
+      })
+      .andThen(() => {
+        return this.paymentRepository.getPaymentsByIds([paymentId]);
+      })
+      .andThen((payments) => {
+        const payment = payments.get(paymentId);
+        if (payment == null) {
+          return errAsync(new InvalidParametersError("Invalid payment ID"));
+        }
+        return okAsync(payment);
+      });
   }
 }

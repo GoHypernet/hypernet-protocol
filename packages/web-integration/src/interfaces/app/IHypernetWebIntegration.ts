@@ -16,7 +16,7 @@ export interface IRenderPaymentWidgetParams {
   expirationDate: number;
   requiredStake: string;
   paymentTokenAddress: EthereumAddress;
-  disputeMediator: PublicKey;
+  merchantUrl: string;
   paymentType: EPaymentType;
 }
 

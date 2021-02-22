@@ -56,7 +56,7 @@ const LinkList: React.FC<LinkListProps> = (props: LinkListProps) => {
                 <b>Collateral Recovered: </b> {utils.formatUnits(pushPayment.collateralRecovered, "wei")}
               </p>
               <p>
-                <b>Dispute Mediator: </b> {pushPayment.disputeMediator}
+                <b>Dispute Mediator: </b> {pushPayment.merchantUrl}
               </p>
               <p>
                 <b>Payment Amount: </b> {utils.formatUnits(pushPayment.paymentAmount, "wei")}

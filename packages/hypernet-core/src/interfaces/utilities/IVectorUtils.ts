@@ -1,4 +1,4 @@
-import { BigNumber, IHypernetOfferDetails, ResultAsync } from "@interfaces/objects";
+import { BigNumber, IHypernetOfferDetails, PublicKey, ResultAsync } from "@interfaces/objects";
 import {
   CoreUninitializedError,
   InvalidParametersError,
@@ -34,8 +34,16 @@ export interface IVectorUtils {
   /**
    *
    * @param transferId
+   * @param paymentId
+   * @param mediatorSignature
+   * @param amount
    */
-  resolveInsuranceTransfer(transferId: string): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
+  resolveInsuranceTransfer(
+    transferId: string,
+    paymentId: string,
+    mediatorSignature?: string,
+    amount?: BigNumber,
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
   /**
    *
@@ -74,7 +82,7 @@ export interface IVectorUtils {
    */
   createInsuranceTransfer(
     toAddress: string,
-    mediatorAddress: string,
+    mediatorPublicKey: PublicKey,
     amount: BigNumber,
     expiration: number,
     UUID: string,

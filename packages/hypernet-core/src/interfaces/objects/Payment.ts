@@ -2,6 +2,16 @@ import { BigNumber, EthereumAddress, PublicKey } from "@interfaces/objects";
 import { EPaymentState } from "@interfaces/types";
 import { PublicIdentifier } from "@connext/vector-types";
 
+export class PaymentInternalDetails {
+  constructor(
+    public offerTransferId: string,
+    public insuranceTransferId: string | null | undefined,
+    public parameterizedTransferId: string | null | undefined,
+    public pullTransferIds: string[],
+  ) {}
+}
+
+// tslint:disable-next-line: max-classes-per-file
 export abstract class Payment {
   constructor(
     public id: string,
@@ -15,7 +25,8 @@ export abstract class Payment {
     public createdTimestamp: number,
     public updatedTimestamp: number,
     public collateralRecovered: BigNumber,
-    public disputeMediator: PublicKey,
+    public merchantUrl: string,
+    public details: PaymentInternalDetails,
   ) {}
 }
 
@@ -33,7 +44,8 @@ export class PushPayment extends Payment {
     createdTimestamp: number,
     updatedTimestamp: number,
     collateralRecovered: BigNumber,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
+    details: PaymentInternalDetails,
     public paymentAmount: BigNumber,
     public amountTransferred: BigNumber,
   ) {
@@ -49,7 +61,8 @@ export class PushPayment extends Payment {
       createdTimestamp,
       updatedTimestamp,
       collateralRecovered,
-      disputeMediator,
+      merchantUrl,
+      details,
     );
   }
 }
@@ -68,7 +81,8 @@ export class PullPayment extends Payment {
     createdTimestamp: number,
     updatedTimestamp: number,
     collateralRecovered: BigNumber,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
+    details: PaymentInternalDetails,
     public authorizedAmount: BigNumber,
     public amountTransferred: BigNumber,
     public vestedAmount: BigNumber,
@@ -88,7 +102,8 @@ export class PullPayment extends Payment {
       createdTimestamp,
       updatedTimestamp,
       collateralRecovered,
-      disputeMediator,
+      merchantUrl,
+      details,
     );
   }
 }

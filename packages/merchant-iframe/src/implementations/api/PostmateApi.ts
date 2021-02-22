@@ -38,7 +38,9 @@ export default class PostmateApi extends ChildProxy implements IMerchantIFrameAp
       activateConnector: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           console.log("activateConnector!");
-          return this.merchantService.activateMerchantConnector().map(() => {});
+          return this.merchantService.activateMerchantConnector().map((merchantConnector) => {
+            this.merchantConnector = merchantConnector;
+          });
         }, data.callId);
       },
       resolveChallenge: (data: IIFrameCallData<string>) => {
