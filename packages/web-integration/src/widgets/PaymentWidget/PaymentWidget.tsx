@@ -10,7 +10,7 @@ interface PaymentWidgetProps {
   expirationDate?: number;
   requiredStake?: string;
   paymentTokenAddress?: EthereumAddress;
-  disputeMediator?: PublicKey;
+  merchantUrl?: PublicKey;
   paymentType?: EPaymentType;
 }
 

@@ -18,7 +18,7 @@ export class EstablishLinkRequest {
   public paymentToken: EthereumAddress;
 
   @Type(() => String)
-  public disputeMediator: PublicKey;
+  public merchantUrl: string;
 
   @Type(() => String)
   public threadAddress: string;
@@ -28,14 +28,14 @@ export class EstablishLinkRequest {
     consumer: string,
     provider: string,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
     threadAddress: string,
   ) {
     this.linkId = linkId;
     this.consumer = consumer;
     this.provider = provider;
     this.paymentToken = paymentToken;
-    this.disputeMediator = disputeMediator;
+    this.merchantUrl = merchantUrl;
     this.threadAddress = threadAddress;
   }
 }
@@ -47,7 +47,7 @@ export class EstablishLinkRequestWithApproval extends EstablishLinkRequest {
       establishLinkRequest.consumer,
       establishLinkRequest.provider,
       establishLinkRequest.paymentToken,
-      establishLinkRequest.disputeMediator,
+      establishLinkRequest.merchantUrl,
       establishLinkRequest.threadAddress,
     );
   }

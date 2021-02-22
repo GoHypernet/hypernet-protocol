@@ -23,7 +23,7 @@ export class PushPaymentViewModel {
   public createdTimestamp: ko.Observable<string>;
   public updatedTimestamp: ko.Observable<string>;
   public collateralRecovered: ko.Observable<string>;
-  public disputeMediator: ko.Observable<string>;
+  public merchantUrl: ko.Observable<string>;
   public paymentAmount: ko.Observable<string>;
 
   public acceptButton: ButtonParams;
@@ -54,7 +54,7 @@ export class PushPaymentViewModel {
     this.createdTimestamp = ko.observable(params.payment.createdTimestamp.toString());
     this.updatedTimestamp = ko.observable(params.payment.updatedTimestamp.toString());
     this.collateralRecovered = ko.observable(params.payment.collateralRecovered.toString());
-    this.disputeMediator = ko.observable(params.payment.disputeMediator);
+    this.merchantUrl = ko.observable(params.payment.merchantUrl);
     this.paymentAmount = ko.observable(utils.formatUnits(params.payment.paymentAmount, "wei"));
 
     this.core.onPushPaymentReceived.subscribe({

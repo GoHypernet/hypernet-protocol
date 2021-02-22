@@ -31,7 +31,7 @@ export interface IPaymentService {
    * @param deltaTime the number of seconds after which deltaAmount will be authorized, up to the limit of totalAuthorized.
    * @param requiredStake the amount of stake the counterparyt must put up as insurance
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param disputeMediator the (Ethereum) address of the dispute mediator
+   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
    */
   authorizeFunds(
     counterPartyAccount: PublicIdentifier,
@@ -41,7 +41,7 @@ export interface IPaymentService {
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**
@@ -60,7 +60,7 @@ export interface IPaymentService {
    * @param expirationDate the date at which, if not accepted, this payment will expire/cancel
    * @param requiredStake the amount of stake (in Hypertoken) required for the recipient to put up
    * @param paymentToken the address of the payment token we are sending
-   * @param disputeMediator the address of the mediator for the staked Hypertoken
+   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
    */
   sendFunds(
     counterPartyAccount: PublicIdentifier,
@@ -68,7 +68,7 @@ export interface IPaymentService {
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
 
   /**
@@ -83,12 +83,16 @@ export interface IPaymentService {
    * Notify the service that a payment has been posted.
    * @param paymentId
    */
-  paymentPosted(paymentId: HexString): ResultAsync<void, InvalidParametersError | RouterChannelUnknownError | CoreUninitializedError | VectorError>;
+  paymentPosted(
+    paymentId: HexString,
+  ): ResultAsync<void, InvalidParametersError | RouterChannelUnknownError | CoreUninitializedError | VectorError>;
 
-  /** Notify the service that an insurance payment has resolved 
+  /** Notify the service that an insurance payment has resolved
    * @param paymentId
-  */
-  insuranceResolved(paymentId: HexString): ResultAsync<void, InvalidParametersError | RouterChannelUnknownError | CoreUninitializedError | VectorError>;
+   */
+  insuranceResolved(
+    paymentId: HexString,
+  ): ResultAsync<void, InvalidParametersError | RouterChannelUnknownError | CoreUninitializedError | VectorError>;
 
   /**
    * Notify the service that a payment has been completed.
@@ -125,8 +129,13 @@ export interface IPaymentService {
    * if the payment was proper. The dispute mediator can provide a signature to resolve
    * the insurance transfer for an amount from 0 to the full value of Hypertoken.
    * The method by which the mediator makes this determination is entirely up to the
-   * merchant. 
-   * @param paymentId 
+   * merchant.
+   * @param paymentId
    */
-  initiateDispute(paymentId: string): ResultAsync<Payment, InvalidParametersError | CoreUninitializedError | MerchantValidationError | MerchantConnectorError>;
+  initiateDispute(
+    paymentId: string,
+  ): ResultAsync<
+    Payment,
+    InvalidParametersError | CoreUninitializedError | MerchantValidationError | MerchantConnectorError
+  >;
 }

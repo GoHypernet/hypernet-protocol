@@ -25,7 +25,7 @@ export abstract class Payment {
     public createdTimestamp: number,
     public updatedTimestamp: number,
     public collateralRecovered: BigNumber,
-    public disputeMediator: string,
+    public merchantUrl: string,
     public details: PaymentInternalDetails,
   ) {}
 }
@@ -44,7 +44,7 @@ export class PushPayment extends Payment {
     createdTimestamp: number,
     updatedTimestamp: number,
     collateralRecovered: BigNumber,
-    disputeMediator: string,
+    merchantUrl: string,
     details: PaymentInternalDetails,
     public paymentAmount: BigNumber,
     public amountTransferred: BigNumber,
@@ -61,7 +61,7 @@ export class PushPayment extends Payment {
       createdTimestamp,
       updatedTimestamp,
       collateralRecovered,
-      disputeMediator,
+      merchantUrl,
       details,
     );
   }
@@ -81,7 +81,7 @@ export class PullPayment extends Payment {
     createdTimestamp: number,
     updatedTimestamp: number,
     collateralRecovered: BigNumber,
-    disputeMediator: string,
+    merchantUrl: string,
     details: PaymentInternalDetails,
     public authorizedAmount: BigNumber,
     public amountTransferred: BigNumber,
@@ -102,7 +102,7 @@ export class PullPayment extends Payment {
       createdTimestamp,
       updatedTimestamp,
       collateralRecovered,
-      disputeMediator,
+      merchantUrl,
       details,
     );
   }

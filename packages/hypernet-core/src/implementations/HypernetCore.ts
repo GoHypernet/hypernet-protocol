@@ -410,6 +410,7 @@ export class HypernetCore implements IHypernetCore {
    * @param amount
    * @param requiredStake the amount of stake that the provider must put up as part of the insurancepayment
    * @param paymentToken
+   * @param merchantURL the registered URL for the merchant that will resolve any disputes.
    */
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
@@ -417,7 +418,7 @@ export class HypernetCore implements IHypernetCore {
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     // Send payment terms to provider & request provider make insurance payment
     return this.paymentService.sendFunds(
@@ -426,7 +427,7 @@ export class HypernetCore implements IHypernetCore {
       expirationDate,
       requiredStake,
       paymentToken,
-      disputeMediator,
+      merchantUrl,
     );
   }
 
@@ -447,7 +448,7 @@ export class HypernetCore implements IHypernetCore {
    * @param expirationDate the latest time in which the counterparty can pull funds
    * @param requiredStake the amount of stake the counterparyt must put up as insurance
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param disputeMediator the (Ethereum) address of the dispute mediator
+   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
    */
   public authorizeFunds(
     counterPartyAccount: PublicIdentifier,
@@ -457,7 +458,7 @@ export class HypernetCore implements IHypernetCore {
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     return this.paymentService.authorizeFunds(
       counterPartyAccount,
@@ -467,7 +468,7 @@ export class HypernetCore implements IHypernetCore {
       deltaTime,
       requiredStake,
       paymentToken,
-      disputeMediator,
+      merchantUrl,
     );
   }
 

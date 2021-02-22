@@ -9,7 +9,7 @@ import {
   unixNow,
   defaultExpirationLength,
   erc20AssetAddress,
-  disputeMediatorUrl,
+  merchantUrl,
   publicIdentifier3,
   offerTransferId,
   insuranceTransferId,
@@ -33,9 +33,7 @@ import { EPaymentState } from "@interfaces/types";
 const expirationDate = unixNow + defaultExpirationLength;
 const counterPartyAccount = publicIdentifier2;
 const fromAccount = publicIdentifier;
-const paymentDetails = new PaymentInternalDetails(offerTransferId, insuranceTransferId,
-  parameterizedTransferId,
-  []);
+const paymentDetails = new PaymentInternalDetails(offerTransferId, insuranceTransferId, parameterizedTransferId, []);
 
 class VectorLinkRepositoryMocks {
   public blockchainProvider = new BlockchainProviderMock();
@@ -120,7 +118,7 @@ class VectorLinkRepositoryMocks {
       unixNow,
       unixNow,
       BigNumber.from(0),
-      disputeMediatorUrl,
+      merchantUrl,
       paymentDetails,
       BigNumber.from(commonAmount.toString()),
       BigNumber.from(0),

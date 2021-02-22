@@ -76,23 +76,31 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
     // For merchants that are already authorized, we can just go to their connector for the
     // public key.
-    const publicKeyRequests = new Array<ResultAsync<{merchantUrl: string, publicKey: PublicKey}, MerchantConnectorError | Error>>();
+    const publicKeyRequests = new Array<
+      ResultAsync<{ merchantUrl: string; publicKey: PublicKey }, MerchantConnectorError | Error>
+    >();
     for (const merchantUrl of merchantUrls) {
       const merchantProxy = this.activatedMerchants.get(merchantUrl);
 
       if (merchantProxy != null) {
-        publicKeyRequests.push(merchantProxy.getPublicKey().map((publicKey) => {return {merchantUrl, publicKey};}));
-      }
-      else {
+        publicKeyRequests.push(
+          merchantProxy.getPublicKey().map((publicKey) => {
+            return { merchantUrl, publicKey };
+          }),
+        );
+      } else {
         // Need to get it from the source
         const url = new URL(merchantUrl.toString());
-      url.pathname = "publicKey";
-      publicKeyRequests.push(this.ajaxUtils.get<string, Error>(url).map((publicKey) => {return {merchantUrl, publicKey};}));
+        url.pathname = "publicKey";
+        publicKeyRequests.push(
+          this.ajaxUtils.get<string, Error>(url).map((publicKey) => {
+            return { merchantUrl, publicKey };
+          }),
+        );
       }
     }
 
-    return ResultUtils.combine(publicKeyRequests)
-    .map((vals) => {
+    return ResultUtils.combine(publicKeyRequests).map((vals) => {
       const returnMap = new Map<string, PublicKey>();
       for (const val of vals) {
         returnMap.set(val.merchantUrl.toString(), val.publicKey);
@@ -160,7 +168,12 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       .andThen((result) => {
         const { mediatorSignature, amount } = result;
 
-        return this.vectorUtils.resolveInsuranceTransfer(transferId, paymentId, mediatorSignature, BigNumber.from(amount));
+        return this.vectorUtils.resolveInsuranceTransfer(
+          transferId,
+          paymentId,
+          mediatorSignature,
+          BigNumber.from(amount),
+        );
       })
       .map(() => {});
   }
@@ -183,10 +196,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
     const authorizedMerchants = new Map<string, string>();
     for (const authorizedMerchantEntry of authorizedMerchantEntries) {
-      authorizedMerchants.set(
-        authorizedMerchantEntry.merchantUrl,
-        authorizedMerchantEntry.authorizationSignature,
-      );
+      authorizedMerchants.set(authorizedMerchantEntry.merchantUrl, authorizedMerchantEntry.authorizationSignature);
     }
     return authorizedMerchants;
   }

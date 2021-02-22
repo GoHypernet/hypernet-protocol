@@ -10,7 +10,7 @@ export interface IHypernetOfferDetails extends IMessageTransferData {
   from: PublicIdentifier;
   requiredStake: string;
   paymentAmount: string;
-  disputeMediator: EthereumAddress;
+  merchantUrl: string;
   paymentToken: EthereumAddress;
   expirationDate: number;
   rate?: IRate;

@@ -221,7 +221,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     const call = this._createCall("sendFunds", {
       counterPartyAccount,
@@ -229,7 +229,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
       expirationDate,
       requiredStake,
       paymentToken,
-      disputeMediator,
+      merchantUrl,
     });
 
     return call.getResult();
@@ -243,7 +243,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    disputeMediator: PublicKey,
+    merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     const call = this._createCall("authorizeFunds", {
       counterPartyAccount,
@@ -253,7 +253,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
       deltaTime,
       requiredStake,
       paymentToken,
-      disputeMediator,
+      merchantUrl,
     });
 
     return call.getResult();

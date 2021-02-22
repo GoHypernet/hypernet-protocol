@@ -1,11 +1,19 @@
 import td from "testdouble";
 
-import { BigNumber, PushPayment, Payment, AssetBalance, PullPayment, PublicIdentifier, PaymentInternalDetails } from "@interfaces/objects";
+import {
+  BigNumber,
+  PushPayment,
+  Payment,
+  AssetBalance,
+  PullPayment,
+  PublicIdentifier,
+  PaymentInternalDetails,
+} from "@interfaces/objects";
 import { EPaymentState } from "@interfaces/types";
 import {
   defaultExpirationLength,
   disputeMediatorPublicKey,
-  disputeMediatorUrl,
+  merchantUrl,
   hyperTokenAddress,
   insuranceTransferId,
   mockUtils,
@@ -22,7 +30,12 @@ import {
   InvalidParametersError,
   LogicalError,
 } from "@interfaces/objects/errors";
-import { IAccountsRepository, ILinkRepository, IMerchantConnectorRepository, IPaymentRepository } from "@interfaces/data";
+import {
+  IAccountsRepository,
+  ILinkRepository,
+  IMerchantConnectorRepository,
+  IPaymentRepository,
+} from "@interfaces/data";
 import { ConfigProviderMock, ContextProviderMock } from "@tests/mock/utils";
 import { ILogUtils } from "@interfaces/utilities";
 import { IPaymentService } from "@interfaces/business/IPaymentService";
@@ -34,9 +47,7 @@ const amount = "42";
 const expirationDate = unixNow + defaultExpirationLength;
 const paymentId = "See, this doesn't have to be legit data if it's never checked!";
 const nonExistentPaymentId = "This payment is not mocked";
-const paymentDetails = new PaymentInternalDetails(offerTransferId, insuranceTransferId,
-  parameterizedTransferId,
-  []);
+const paymentDetails = new PaymentInternalDetails(offerTransferId, insuranceTransferId, parameterizedTransferId, []);
 
 class PaymentServiceMocks {
   public vectorLinkRepository = td.object<ILinkRepository>();
@@ -92,7 +103,7 @@ class PaymentServiceMocks {
         expirationDate,
         requiredStake,
         paymentToken,
-        disputeMediatorUrl,
+        merchantUrl,
       ),
     ).thenReturn(okAsync(this.pushPayment));
 
@@ -101,7 +112,9 @@ class PaymentServiceMocks {
       okAsync(new Map<string, Payment>()),
     );
     td.when(this.accountRepository.getBalanceByAsset(hyperTokenAddress)).thenReturn(okAsync(this.assetBalance));
-    td.when(this.paymentRepository.provideStake(paymentId, disputeMediatorPublicKey)).thenReturn(okAsync(this.stakedPushPayment));
+    td.when(this.paymentRepository.provideStake(paymentId, disputeMediatorPublicKey)).thenReturn(
+      okAsync(this.stakedPushPayment),
+    );
     td.when(this.paymentRepository.provideAsset(paymentId)).thenReturn(okAsync(this.paidPushPayment));
     td.when(this.paymentRepository.finalizePayment(paymentId, amount)).thenReturn(okAsync(this.finalizedPushPayment));
   }
@@ -150,7 +163,7 @@ class PaymentServiceMocks {
       unixNow,
       unixNow,
       BigNumber.from(0),
-      disputeMediatorUrl,
+      merchantUrl,
       paymentDetails,
       BigNumber.from(amount),
       BigNumber.from(0),
@@ -175,7 +188,7 @@ describe("PaymentService tests", () => {
       expirationDate,
       requiredStake,
       paymentToken,
-      disputeMediatorUrl,
+      merchantUrl,
     );
 
     // Assert
@@ -267,7 +280,9 @@ describe("PaymentService tests", () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
-    td.when(paymentServiceMock.paymentRepository.provideStake(paymentId, disputeMediatorPublicKey)).thenReturn(errAsync(new Error("test error")));
+    td.when(paymentServiceMock.paymentRepository.provideStake(paymentId, disputeMediatorPublicKey)).thenReturn(
+      errAsync(new Error("test error")),
+    );
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 

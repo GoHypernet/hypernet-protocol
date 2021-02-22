@@ -11,7 +11,7 @@ import {
   parameterizedTransferId,
   offerTransferId,
   insuranceTransferId,
-  disputeMediatorUrl,
+  merchantUrl,
   erc20AssetAddress,
   disputeMediatorPublicKey,
 } from "@mock/mocks";
@@ -33,9 +33,7 @@ import { EPaymentState, EPaymentType } from "@interfaces/types";
 const expirationDate = unixNow + defaultExpirationLength;
 const counterPartyAccount = publicIdentifier2;
 const fromAccount = publicIdentifier;
-const paymentDetails = new PaymentInternalDetails(offerTransferId, insuranceTransferId,
-  parameterizedTransferId,
-  []);
+const paymentDetails = new PaymentInternalDetails(offerTransferId, insuranceTransferId, parameterizedTransferId, []);
 
 class PaymentRepositoryMocks {
   public timeUtils = td.object<ITimeUtils>();
@@ -88,7 +86,7 @@ class PaymentRepositoryMocks {
           paymentAmount: commonAmount.toString(),
           expirationDate,
           paymentToken: erc20AssetAddress,
-          disputeMediator: disputeMediatorUrl,
+          merchantUrl: merchantUrl,
         }),
       ),
     ).thenReturn(okAsync({ channelAddress: routerChannelAddress, transferId: offerTransferId }));
@@ -169,7 +167,7 @@ class PaymentRepositoryMocks {
       unixNow,
       unixNow,
       BigNumber.from(0),
-      disputeMediatorUrl,
+      merchantUrl,
       paymentDetails,
       BigNumber.from(commonAmount.toString()),
       BigNumber.from(0),
@@ -211,7 +209,7 @@ describe("PaymentRepository tests", () => {
       expirationDate,
       commonAmount.toString(),
       erc20AssetAddress,
-      disputeMediatorUrl,
+      merchantUrl,
     );
 
     // Assert
@@ -233,7 +231,7 @@ describe("PaymentRepository tests", () => {
       expirationDate,
       commonAmount.toString(),
       erc20AssetAddress,
-      disputeMediatorUrl,
+      merchantUrl,
     );
     const error = result._unsafeUnwrapErr();
 

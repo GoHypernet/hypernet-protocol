@@ -53,9 +53,7 @@ class TestMerchantConnector implements IMerchantConnector {
     });
   }
   getPublicKey(): Promise<string> {
-    return Promise.resolve(
-      "0x14791697260E4c9A71f18484C9f997B308e59325",
-    );
+    return Promise.resolve("0x14791697260E4c9A71f18484C9f997B308e59325");
   }
 
   //   paymentCreated(payment: Payment) {

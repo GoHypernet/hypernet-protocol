@@ -22,7 +22,7 @@ export class PullPaymentViewModel {
   public createdTimestamp: ko.Observable<string>;
   public updatedTimestamp: ko.Observable<string>;
   public collateralRecovered: ko.Observable<string>;
-  public disputeMediator: ko.Observable<string>;
+  public merchantUrl: ko.Observable<string>;
   public authorizedAmount: ko.Observable<string>;
   public transferedAmount: ko.Observable<string>;
   public deltaAmount: ko.Observable<string>;
@@ -56,7 +56,7 @@ export class PullPaymentViewModel {
     this.createdTimestamp = ko.observable(params.payment.createdTimestamp.toString());
     this.updatedTimestamp = ko.observable(params.payment.updatedTimestamp.toString());
     this.collateralRecovered = ko.observable(params.payment.collateralRecovered.toString());
-    this.disputeMediator = ko.observable(params.payment.disputeMediator);
+    this.merchantUrl = ko.observable(params.payment.merchantUrl);
     this.authorizedAmount = ko.observable(params.payment.authorizedAmount.toString());
     this.transferedAmount = ko.observable(params.payment.amountTransferred.toString());
     this.deltaAmount = ko.observable(params.payment.deltaAmount.toString());
