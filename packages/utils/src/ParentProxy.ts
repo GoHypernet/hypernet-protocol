@@ -1,5 +1,6 @@
 import Postmate from "postmate";
-import { ResultAsync } from "neverthrow";
+import { errAsync, ResultAsync } from "neverthrow";
+import { ProxyError } from "./errors";
 
 interface IIFrameCallData<T> {
   callId: number;
@@ -49,9 +50,11 @@ export abstract class ParentProxy {
   protected child: Postmate.ParentAPI | null;
   protected callId: number = 0;
   protected calls: IFrameCall<any, any>[] = [];
+  protected active: boolean;
 
   constructor(element: HTMLElement | null, iframeUrl: string) {
     this.child = null;
+    this.active = false;
 
     if (element == null) {
       element = document.body;
@@ -60,7 +63,7 @@ export abstract class ParentProxy {
     this.handshake = new Postmate({
       container: element,
       url: iframeUrl,
-      name: "hypernet-core-iframe",
+      name: "hypernet-core-merchant-connector-iframe",
       classListArray: ["hypernet-core-iframe-style"], // Classes to add to the iframe
     });
   }
@@ -103,18 +106,28 @@ export abstract class ParentProxy {
           call.reject(data.data);
         }
       });
+
+      this.active = true;
     });
   }
 
-  protected _createCall(callName: string, data: any): IFrameCall<any, any> {
+  public destroy() {
+    this.child?.destroy();
+    this.active = false;
+  }
+
+  protected _createCall<T, E>(callName: string, data: any): ResultAsync<T, E | ProxyError> {
+    if (!this.active) {
+      return errAsync(new ProxyError("Proxy is not activated or has been destroyed, cannot make a call to the iframe!"));
+    }
     const callId = this.callId++;
     const callData = new IFrameCallData(callId, data);
 
-    const call = new IFrameCall(callData);
+    const call = new IFrameCall<T, E>(callData);
     this.calls.push(call);
 
     this.child?.call(callName, callData);
 
-    return call;
+    return call.getResult();
   }
 }

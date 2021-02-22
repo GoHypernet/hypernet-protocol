@@ -12,7 +12,6 @@ import {
   LogicalError,
   PublicIdentifier,
   BalancesUnavailableError,
-  PublicKey,
   PullPayment,
   PushPayment,
   InsufficientBalanceError,
@@ -129,9 +128,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   }
 
   public waitInitialized(): ResultAsync<void, LogicalError> {
-    const call = this._createCall("waitInitialized", null);
-
-    return call.getResult();
+    return this._createCall("waitInitialized", null);
   }
 
   public inControl(): Result<boolean, LogicalError> {
@@ -145,21 +142,15 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   }
 
   public getEthereumAccounts(): ResultAsync<string[], BlockchainUnavailableError> {
-    const call = this._createCall("getEthereumAccounts", null);
-
-    return call.getResult();
+    return this._createCall("getEthereumAccounts", null);
   }
 
   public initialize(account: PublicIdentifier): ResultAsync<void, LogicalError> {
-    const call = this._createCall("initialize", account);
-
-    return call.getResult();
+    return this._createCall("initialize", account);
   }
 
   public getPublicIdentifier(): ResultAsync<PublicIdentifier, CoreUninitializedError> {
-    const call = this._createCall("getPublicIdentifier", null);
-
-    return call.getResult();
+    return this._createCall("getPublicIdentifier", null);
   }
 
   public depositFunds(
@@ -169,9 +160,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     Balances,
     BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
   > {
-    const call = this._createCall("depositFunds", { assetAddress, amount: amount.toString() });
-
-    return call.getResult();
+    return this._createCall("depositFunds", { assetAddress, amount: amount.toString() });
   }
 
   public withdrawFunds(
@@ -182,33 +171,25 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     Balances,
     BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
   > {
-    const call = this._createCall("withdrawFunds", { assetAddress, amount: amount.toString(), destinationAddress });
-
-    return call.getResult();
+    return this._createCall("withdrawFunds", { assetAddress, amount: amount.toString(), destinationAddress });
   }
 
   public getBalances(): ResultAsync<Balances, BalancesUnavailableError | CoreUninitializedError> {
-    const call = this._createCall("getBalances", null);
-
-    return call.getResult();
+    return this._createCall("getBalances", null);
   }
 
   public getLinks(): ResultAsync<
     HypernetLink[],
     RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
   > {
-    const call = this._createCall("getLinks", null);
-
-    return call.getResult();
+    return this._createCall("getLinks", null);
   }
 
   public getActiveLinks(): ResultAsync<
     HypernetLink[],
     RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
   > {
-    const call = this._createCall("getActiveLinks", null);
-
-    return call.getResult();
+    return this._createCall("getActiveLinks", null);
   }
 
   public getLinkByCounterparty(counterPartyAccount: PublicIdentifier): Promise<HypernetLink> {
@@ -223,7 +204,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     paymentToken: EthereumAddress,
     merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
-    const call = this._createCall("sendFunds", {
+    return this._createCall("sendFunds", {
       counterPartyAccount,
       amount,
       expirationDate,
@@ -231,8 +212,6 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
       paymentToken,
       merchantUrl,
     });
-
-    return call.getResult();
   }
 
   public authorizeFunds(
@@ -245,7 +224,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     paymentToken: EthereumAddress,
     merchantUrl: string,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
-    const call = this._createCall("authorizeFunds", {
+    return this._createCall("authorizeFunds", {
       counterPartyAccount,
       totalAuthorized,
       expirationDate,
@@ -255,28 +234,22 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
       paymentToken,
       merchantUrl,
     });
-
-    return call.getResult();
   }
 
   public acceptOffers(
     paymentIds: string[],
   ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
-    const call = this._createCall("acceptFunds", paymentIds);
-
-    return call.getResult();
+    return this._createCall("acceptFunds", paymentIds);
   }
 
   public pullFunds(
     paymentId: string,
     amount: BigNumber,
   ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
-    const call = this._createCall("pullFunds", {
+    return this._createCall("pullFunds", {
       paymentId,
       amount: amount.toString(),
     });
-
-    return call.getResult();
   }
 
   public finalizePullPayment(paymentId: string, finalAmount: BigNumber): Promise<HypernetLink> {
@@ -288,33 +261,23 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   }
 
   public initiateDispute(paymentId: string): ResultAsync<Payment, CoreUninitializedError> {
-    const call = this._createCall("initiateDispute", paymentId);
-
-    return call.getResult();
+    return this._createCall("initiateDispute", paymentId);
   }
 
   public mintTestToken(amount: BigNumber): ResultAsync<void, CoreUninitializedError> {
-    const call = this._createCall("mintTestToken", amount.toString());
-
-    return call.getResult();
+    return this._createCall("mintTestToken", amount.toString());
   }
 
   public authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MerchantValidationError> {
-    const call = this._createCall("authorizeMerchant", merchantUrl);
-
-    return call.getResult();
+    return this._createCall("authorizeMerchant", merchantUrl);
   }
 
   public startConnectorFlow(connector?: string): ResultAsync<void, CoreUninitializedError | MerchantValidationError> {
-    const call = this._createCall("startConnectorFlow", connector);
-
-    return call.getResult();
+    return this._createCall("startConnectorFlow", connector);
   }
 
   public getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError> {
-    const call = this._createCall("getAuthorizedMerchants", null);
-
-    return call.getResult();
+    return this._createCall("getAuthorizedMerchants", null);
   }
 
   /**

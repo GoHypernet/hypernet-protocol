@@ -7,6 +7,5 @@ export * from "./ILinkUtils";
 export * from "./ILogUtils";
 export * from "./IPaymentIdUtils";
 export * from "./IPaymentUtils";
-export * from "./IThreeBoxUtils";
 export * from "./ITimeUtils";
 export * from "./IVectorUtils";

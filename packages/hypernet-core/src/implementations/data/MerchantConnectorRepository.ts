@@ -10,6 +10,8 @@ import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { ParentProxy, ResultUtils, IAjaxUtils } from "@hypernetlabs/utils";
 import { IBlockchainProvider, IConfigProvider, IContextProvider, IVectorUtils } from "@interfaces/utilities";
 import { ethers } from "ethers";
+import {TypedDataDomain, TypedDataField} from "@ethersproject/abstract-signer";
+import { IResolutionResult } from "@hypernetlabs/merchant-connector";
 
 class MerchantConnectorProxy extends ParentProxy {
   constructor(element: HTMLElement | null, iframeUrl: string) {
@@ -17,27 +19,19 @@ class MerchantConnectorProxy extends ParentProxy {
   }
 
   public activateConnector(): ResultAsync<void, MerchantConnectorError> {
-    const call = this._createCall("activateConnector", null);
-
-    return call.getResult();
+    return this._createCall("activateConnector", null);
   }
 
   public resolveChallenge(paymentId: HexString): ResultAsync<IResolutionResult, MerchantConnectorError> {
-    const call = this._createCall("resolveChallenge", paymentId);
-
-    return call.getResult();
+    return this._createCall("resolveChallenge", paymentId);
   }
 
   public getPublicKey(): ResultAsync<PublicKey, MerchantConnectorError> {
-    const call = this._createCall("getPublicKey", null);
-
-    return call.getResult();
+    return this._createCall("getPublicKey", null);
   }
 
   public getValidatedSignature(): ResultAsync<string, MerchantValidationError> {
-    const call = this._createCall("getValidatedSignature", null);
-
-    return call.getResult();
+    return this._createCall("getValidatedSignature", null);
   }
 }
 
@@ -46,13 +40,10 @@ interface IAuthorizedMerchantEntry {
   authorizationSignature: string;
 }
 
-interface IResolutionResult {
-  mediatorSignature: string;
-  amount: string;
-}
-
 export class MerchantConnectorRepository implements IMerchantConnectorRepository {
   protected activatedMerchants: Map<string, MerchantConnectorProxy>;
+  protected domain: TypedDataDomain;
+  protected types: Record<string, TypedDataField[]>;
 
   constructor(
     protected blockchainProvider: IBlockchainProvider,
@@ -62,6 +53,16 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     protected vectorUtils: IVectorUtils,
   ) {
     this.activatedMerchants = new Map();
+    this.domain = {
+      name: "Hypernet Protocol",
+      version: "1",
+    };
+    this.types = {
+      AuthorizedMerchant: [
+        { name: "authorizedMerchantUrl", type: "string"},
+        { name: "merchantValidatedSignature", type: "string"}
+      ]
+    };
   }
 
   public getMerchantConnectorSignature(merchantUrl: URL): ResultAsync<string, Error> {
@@ -122,14 +123,22 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       })
       .andThen(() => {
         // With the proxy activated, we can get the validated merchant signature
-        return ResultUtils.combine([proxy.getValidatedSignature(), this.blockchainProvider.getSigner()]);
+        return ResultUtils.combine([proxy.getValidatedSignature(), 
+          this.blockchainProvider.getSigner()]);
       })
       .andThen((vals) => {
         const [merchantSignature, signer] = vals;
 
         // merchantSignature has been validated by the iframe, so this is already confirmed.
         // Now we need to get an authorization signature
-        return ResultAsync.fromPromise(signer.signMessage(merchantSignature), (e) => e as MerchantConnectorError);
+        //return ResultAsync.fromPromise(signer.signMessage(merchantSignature), (e) => e as MerchantConnectorError);
+        const value = {
+          authorizedMerchantUrl: merchantUrl.toString(),
+          merchantValidatedSignature: merchantSignature
+        } as Record<string, any>;
+        const signerPromise = signer._signTypedData(this.domain, this.types, value);
+
+        return ResultAsync.fromPromise(signerPromise, (e) => e as MerchantConnectorError);
       })
       .andThen((authorizationSignature) => {
         const authorizedMerchants = this._getAuthorizedMerchants();
@@ -143,7 +152,12 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       })
       .map(() => {
         this.activatedMerchants.set(merchantUrl.toString(), proxy);
-      });
+      })
+      .mapErr((e) => {
+        // If we encounter a problem, destroy the proxy so we can start afresh.
+        proxy.destroy();
+        return e;
+      })
   }
 
   public getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError> {
@@ -201,10 +215,6 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     return authorizedMerchants;
   }
 
-  // public initialize(): ResultAsync<void, MerchantConnectorError> {
-
-  // }
-
   public activateAuthorizedMerchants(): ResultAsync<
     void,
     MerchantConnectorError | MerchantValidationError | CoreUninitializedError
@@ -241,7 +251,12 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         return proxy.getValidatedSignature();
       })
       .andThen((validatedSignature) => {
-        const validationAddress = ethers.utils.verifyMessage(validatedSignature, authorizationSignature);
+        //const validationAddress = ethers.utils.verifyMessage(validatedSignature, authorizationSignature);
+        const value = {
+          authorizedMerchantUrl: merchantUrl,
+          merchantValidatedSignature: validatedSignature
+        } as Record<string, any>
+        const validationAddress = ethers.utils.verifyTypedData(this.domain, this.types, value, authorizationSignature);
 
         if (validationAddress !== address) {
           // TODO: this is recoverable, we just need a new signature

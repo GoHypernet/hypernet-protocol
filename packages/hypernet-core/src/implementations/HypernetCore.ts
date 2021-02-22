@@ -10,7 +10,6 @@ import {
   AccountsRepository,
   MerchantConnectorRepository,
   PaymentRepository,
-  ThreeBoxMessagingRepository,
   VectorLinkRepository,
 } from "@implementations/data";
 import {
@@ -22,11 +21,10 @@ import {
   LogUtils,
   PaymentUtils,
   PaymentIdUtils,
-  ThreeBoxUtils,
   TimeUtils,
   VectorUtils,
 } from "@implementations/utilities";
-import { ThreeBoxMessagingListener, VectorAPIListener } from "@implementations/api";
+import { VectorAPIListener } from "@implementations/api";
 import {
   IAccountService,
   IControlService,
@@ -79,7 +77,6 @@ import {
   ILogUtils,
   IPaymentIdUtils,
   IPaymentUtils,
-  IThreeBoxUtils,
   ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
@@ -107,7 +104,6 @@ export class HypernetCore implements IHypernetCore {
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
   protected blockchainProvider: IBlockchainProvider;
-  protected boxUtils: IThreeBoxUtils;
   protected configProvider: IConfigProvider;
   protected contextProvider: IContextProvider;
   protected browserNodeProvider: IBrowserNodeProvider;
@@ -122,12 +118,11 @@ export class HypernetCore implements IHypernetCore {
   protected accountRepository: IAccountsRepository;
   protected linkRepository: ILinkRepository;
   protected paymentRepository: IPaymentRepository;
-  protected threeboxMessagingRepository: IMessagingRepository;
   protected merchantConnectorRepository: IMerchantConnectorRepository;
 
   // Business Layer Stuff
   protected accountService: IAccountService;
-  protected controlService: IControlService;
+  //protected controlService: IControlService;
   protected paymentService: IPaymentService;
   protected linkService: ILinkService;
   protected developmentService: IDevelopmentService;
@@ -135,7 +130,6 @@ export class HypernetCore implements IHypernetCore {
 
   // API
   protected vectorAPIListener: IVectorListener;
-  protected threeboxMessagingListener: IMessagingListener;
 
   protected _initializeResult: ResultAsync<void, LogicalError> | null;
   protected _initialized: boolean;
@@ -196,8 +190,7 @@ export class HypernetCore implements IHypernetCore {
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(network, this.logUtils, config);
     this.linkUtils = new LinkUtils(this.contextProvider);
-    this.boxUtils = new ThreeBoxUtils(this.blockchainProvider, this.contextProvider, this.configProvider);
-
+    
     this.browserNodeProvider = new BrowserNodeProvider(this.configProvider, this.contextProvider, this.logUtils);
     this.vectorUtils = new VectorUtils(
       this.configProvider,
@@ -245,12 +238,6 @@ export class HypernetCore implements IHypernetCore {
       this.timeUtils,
     );
 
-    this.threeboxMessagingRepository = new ThreeBoxMessagingRepository(
-      this.boxUtils,
-      this.contextProvider,
-      this.configProvider,
-    );
-
     this.merchantConnectorRepository = new MerchantConnectorRepository(
       this.blockchainProvider,
       this.ajaxUtils,
@@ -270,7 +257,7 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.accountService = new AccountService(this.accountRepository, this.contextProvider, this.logUtils);
-    this.controlService = new ControlService(this.contextProvider, this.threeboxMessagingRepository);
+    //this.controlService = new ControlService(this.contextProvider, this.threeboxMessagingRepository);
     this.linkService = new LinkService(this.linkRepository);
     this.developmentService = new DevelopmentService(this.accountRepository);
     this.merchantService = new MerchantService(this.merchantConnectorRepository, this.contextProvider);
@@ -282,12 +269,6 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.paymentUtils,
       this.logUtils,
-    );
-    this.threeboxMessagingListener = new ThreeBoxMessagingListener(
-      this.controlService,
-      this.boxUtils,
-      this.configProvider,
-      this.contextProvider,
     );
 
     // This whole rigamarole is to make sure it can only be initialized a single time, and that you can call waitInitialized()
