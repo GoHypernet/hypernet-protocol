@@ -190,7 +190,7 @@ export class HypernetCore implements IHypernetCore {
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(network, this.logUtils, config);
     this.linkUtils = new LinkUtils(this.contextProvider);
-    
+
     this.browserNodeProvider = new BrowserNodeProvider(this.configProvider, this.contextProvider, this.logUtils);
     this.vectorUtils = new VectorUtils(
       this.configProvider,

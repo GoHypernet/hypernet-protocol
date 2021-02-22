@@ -118,7 +118,9 @@ export abstract class ParentProxy {
 
   protected _createCall<T, E>(callName: string, data: any): ResultAsync<T, E | ProxyError> {
     if (!this.active) {
-      return errAsync(new ProxyError("Proxy is not activated or has been destroyed, cannot make a call to the iframe!"));
+      return errAsync(
+        new ProxyError("Proxy is not activated or has been destroyed, cannot make a call to the iframe!"),
+      );
     }
     const callId = this.callId++;
     const callData = new IFrameCallData(callId, data);

@@ -22,4 +22,4 @@ export const unixNow = 1318874398;
 export const nowFormatted = "2021-02-03T04:28:09+03:00";
 export const defaultExpirationLength = 5000;
 export const merchantUrl = "https://example.merchant.com";
-export const disputeMediatorPublicKey = "0xMediatorPublicKey";
+export const merchantPublicKey = "0xMediatorPublicKey";
