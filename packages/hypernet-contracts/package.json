@@ -29,7 +29,7 @@
   "scripts": {},
   "dependencies": {
     "concurrently": "^5.3.0",
-    "ethers": "^5.0.8",
+    "ethers": "5.0.31",
     "wait-on": "^5.2.0"
   },
   "devDependencies": {

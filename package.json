@@ -36,7 +36,8 @@
   },
   "scripts": {
     "bootstrap": "yarn install && lerna init",
-    "build": "tsc --build",
+    "compile": "tsc --build",
+    "build": "lerna run build",
     "clean": "rimraf ./packages/*/dist",
     "format": "lerna run format && yarn format:pkg",
     "format:pkg": "format-package -w",
@@ -133,5 +134,8 @@
     "webpack": "^5.19.0",
     "webpack-cli": "^4.4.0",
     "webpack-dev-server": "^3.11.2"
+  },
+  "dependencies": {
+    "browserify-zlib": "^0.2.0"
   }
 }

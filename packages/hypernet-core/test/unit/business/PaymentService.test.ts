@@ -12,7 +12,7 @@ import {
 import { EPaymentState } from "@interfaces/types";
 import {
   defaultExpirationLength,
-  disputeMediatorPublicKey,
+  merchantPublicKey,
   merchantUrl,
   hyperTokenAddress,
   insuranceTransferId,
@@ -64,6 +64,7 @@ class PaymentServiceMocks {
   public finalizedPushPayment: PushPayment;
 
   public assetBalance: AssetBalance;
+  public merchantPublicKeys: Map<string, string>;
 
   constructor(hypertokenBalance: string = amount) {
     this.pushPayment = this.factoryPushPayment();
@@ -112,11 +113,17 @@ class PaymentServiceMocks {
       okAsync(new Map<string, Payment>()),
     );
     td.when(this.accountRepository.getBalanceByAsset(hyperTokenAddress)).thenReturn(okAsync(this.assetBalance));
-    td.when(this.paymentRepository.provideStake(paymentId, disputeMediatorPublicKey)).thenReturn(
+    td.when(this.paymentRepository.provideStake(paymentId, merchantPublicKey)).thenReturn(
       okAsync(this.stakedPushPayment),
     );
     td.when(this.paymentRepository.provideAsset(paymentId)).thenReturn(okAsync(this.paidPushPayment));
     td.when(this.paymentRepository.finalizePayment(paymentId, amount)).thenReturn(okAsync(this.finalizedPushPayment));
+
+    this.merchantPublicKeys = new Map();
+    this.merchantPublicKeys.set(merchantUrl, merchantPublicKey);
+    td.when(this.merchantConnectorRepository.getMerchantPublicKeys(td.matchers.contains(merchantUrl))).thenReturn(
+      okAsync(this.merchantPublicKeys),
+    );
   }
 
   public factoryPaymentService(): IPaymentService {
@@ -280,7 +287,7 @@ describe("PaymentService tests", () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
-    td.when(paymentServiceMock.paymentRepository.provideStake(paymentId, disputeMediatorPublicKey)).thenReturn(
+    td.when(paymentServiceMock.paymentRepository.provideStake(paymentId, merchantPublicKey)).thenReturn(
       errAsync(new Error("test error")),
     );
 

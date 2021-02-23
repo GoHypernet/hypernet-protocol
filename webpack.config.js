@@ -87,6 +87,7 @@ module.exports = {
       "http": require.resolve("stream-http"),
       "https": require.resolve("https-browserify"),
       "os": require.resolve("os-browserify/browser"),
+      "zlib": require.resolve("browserify-zlib"),
       "net": false,
       "tls": false,
       "fs": false

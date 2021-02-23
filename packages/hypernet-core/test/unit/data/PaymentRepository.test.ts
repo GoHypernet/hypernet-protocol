@@ -13,7 +13,7 @@ import {
   insuranceTransferId,
   merchantUrl,
   erc20AssetAddress,
-  disputeMediatorPublicKey,
+  merchantPublicKey,
 } from "@mock/mocks";
 import {
   BlockchainProviderMock,
@@ -103,7 +103,7 @@ class PaymentRepositoryMocks {
     td.when(
       this.vectorUtils.createInsuranceTransfer(
         publicIdentifier,
-        disputeMediatorPublicKey,
+        merchantPublicKey,
         td.matchers.argThat((val: BigNumber) => {
           return val.eq(commonAmount);
         }),
@@ -305,7 +305,7 @@ describe("PaymentRepository tests", () => {
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    const result = await repo.provideStake(commonPaymentId, disputeMediatorPublicKey);
+    const result = await repo.provideStake(commonPaymentId, merchantPublicKey);
 
     // Assert
     expect(result).toBeDefined();
@@ -320,7 +320,7 @@ describe("PaymentRepository tests", () => {
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    const result = await repo.provideStake(commonPaymentId, disputeMediatorPublicKey);
+    const result = await repo.provideStake(commonPaymentId, merchantPublicKey);
     const error = result._unsafeUnwrapErr();
 
     // Assert

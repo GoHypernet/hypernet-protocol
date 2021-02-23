@@ -24,6 +24,8 @@ export class ContextProvider implements IContextProvider {
     onPullPaymentUpdated: Subject<PullPayment>,
     onBalancesChanged: Subject<Balances>,
     onMerchantAuthorized: Subject<URL>,
+    onAuthorizedMerchantUpdated: Subject<URL>,
+    onAuthorizedMerchantActivationFailed: Subject<URL>,
   ) {
     this.context = new HypernetContext(
       null,
@@ -39,6 +41,8 @@ export class ContextProvider implements IContextProvider {
       onPullPaymentUpdated,
       onBalancesChanged,
       onMerchantAuthorized,
+      onAuthorizedMerchantUpdated,
+      onAuthorizedMerchantActivationFailed
     );
   }
   public getContext(): ResultAsync<HypernetContext, never> {
@@ -65,6 +69,8 @@ export class ContextProvider implements IContextProvider {
         this.context.onPullPaymentUpdated,
         this.context.onBalancesChanged,
         this.context.onMerchantAuthorized,
+        this.context.onAuthorizedMerchantUpdated,
+        this.context.onAuthorizedMerchantActivationFailed,
         new Map<URL, string>(),
       ),
     );

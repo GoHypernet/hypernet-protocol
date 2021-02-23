@@ -20,6 +20,8 @@ export class HypernetContext {
     public onPullPaymentUpdated: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
     public onMerchantAuthorized: Subject<URL>,
+    public onAuthorizedMerchantUpdated: Subject<URL>,
+    public onAuthorizedMerchantActivationFailed: Subject<URL>,
   ) {}
 }
 
@@ -39,6 +41,8 @@ export class InitializedHypernetContext {
     public onPullPaymentUpdated: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
     public onMerchantAuthorized: Subject<URL>,
+    public onAuthorizedMerchantUpdated: Subject<URL>,
+    public onAuthorizedMerchantActivationFailed: Subject<URL>,
     public authorizedMediators: Map<URL, string>,
   ) {}
 }

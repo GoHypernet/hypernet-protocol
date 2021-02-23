@@ -212,4 +212,6 @@ export interface IHypernetCore {
   onPullPaymentApproved: Subject<PullPayment>;
   onBalancesChanged: Subject<Balances>;
   onMerchantAuthorized: Subject<URL>;
+  onAuthorizedMerchantUpdated: Subject<URL>;
+  onAuthorizedMerchantActivationFailed: Subject<URL>;
 }

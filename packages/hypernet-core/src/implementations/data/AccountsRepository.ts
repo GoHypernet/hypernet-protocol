@@ -145,17 +145,15 @@ export class AccountsRepository implements IAccountsRepository {
     null,
     RouterChannelUnknownError | CoreUninitializedError | VectorError | Error | BlockchainUnavailableError
   > {
-    const prerequisites = ResultUtils.combine([
-      this.blockchainProvider.getSigner(),
-      this.vectorUtils.getRouterChannelAddress(),
-      this.browserNodeProvider.getBrowserNode(),
-    ]);
-
     let signer: ethers.providers.JsonRpcSigner;
     let channelAddress: string;
     let browserNode: IBrowserNode;
 
-    return prerequisites
+    return ResultUtils.combine([
+      this.blockchainProvider.getSigner(),
+      this.vectorUtils.getRouterChannelAddress(),
+      this.browserNodeProvider.getBrowserNode(),
+    ])
       .andThen((vals) => {
         [signer, channelAddress, browserNode] = vals;
 
@@ -163,12 +161,14 @@ export class AccountsRepository implements IAccountsRepository {
 
         if (assetAddress === "0x0000000000000000000000000000000000000000") {
           this.logUtils.log("Transferring ETH.");
+          console.log("Transferring ETH.");
           // send eth
           tx = ResultAsync.fromPromise(signer.sendTransaction({ to: channelAddress, value: amount }), (err) => {
             return err as BlockchainUnavailableError;
           });
         } else {
           this.logUtils.log("Transferring an ERC20 asset.");
+          console.log("Transferring an ERC20 asset.");
           // send an actual erc20 token
           const tokenContract = new Contract(assetAddress, this.erc20Abi, signer);
           tx = ResultAsync.fromPromise(tokenContract.transfer(channelAddress, amount), (err) => {
@@ -179,23 +179,26 @@ export class AccountsRepository implements IAccountsRepository {
         return tx;
       })
       .andThen((tx) => {
+        console.log("Waiting");
         // TODO: Wait on this, break it up, this could take a while
         return ResultAsync.fromPromise(tx.wait(), (e) => e as BlockchainUnavailableError);
       })
-      .andThen((receipt) => {
+      .andThen(() => {
         if (browserNode == null || channelAddress == null) {
+          console.log("really screwed up");
           return errAsync(new Error("Really screwed up!"));
         }
-
+        console.log("reconciling");
         return browserNode.reconcileDeposit(assetAddress, channelAddress);
       })
       .andThen((depositRes) => {
         // I can not for the life of me figure out why depositRes is coming back
         // as "unknown"
-        const channelAddress = depositRes as string;
+        const depositChannelAddress = depositRes as string;
 
         // Sanity check, the deposit was for the channel we tried to deposit into.
-        if (channelAddress !== channelAddress) {
+        if (depositChannelAddress !== channelAddress) {
+          console.log("depositChannelAddress !== channelAddress");
           return errAsync(new Error("Something has gone horribly wrong!"));
         }
 

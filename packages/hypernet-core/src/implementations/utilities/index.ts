@@ -1,4 +1,3 @@
-export * from "./3BoxUtils";
 export * from "./BlockchainProvider";
 export * from "./BrowserNodeProvider";
 export * from "./ChannelUtils";
