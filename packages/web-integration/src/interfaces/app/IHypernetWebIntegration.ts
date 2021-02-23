@@ -1,4 +1,4 @@
-import { PublicIdentifier, EthereumAddress, PublicKey, EPaymentType } from "@hypernetlabs/hypernet-core";
+import { PublicIdentifier, EthereumAddress, PublicKey, EPaymentType, ResultAsync } from "@hypernetlabs/hypernet-core";
 import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 
 export interface IRenderParams {
@@ -21,7 +21,7 @@ export interface IRenderPaymentWidgetParams {
 }
 
 export interface IHypernetWebIntegration {
-  getReady: () => Promise<IHypernetIFrameProxy>;
+  getReady: () => ResultAsync<IHypernetIFrameProxy, Error>;
   proxy: IHypernetIFrameProxy;
   renderBalancesWidget(params?: IRenderParams): void;
   renderFundWidget(params?: IRenderParams): void;

@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { ResultAsync } from "@hypernetlabs/hypernet-core";
 
 import MainContainer from "@web-integration/containers/MainContainer";
 import BalancesWidget from "@web-integration/widgets/BalancesWidget";
@@ -37,7 +38,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     this.iframeContainer = document.createElement("div");
     this.iframeContainer.id = "__hypernet-protocol-iframe-container__";
     this.iframeContainer.tabIndex = -1;
-    // TODO: add window popup like style and set it to display block whenever we want to show the iframe popup,
     this.iframeContainer.setAttribute("style", "display: none;");
 
     // Attach it to the body
@@ -48,24 +48,13 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   // wait for the core to be intialized
-  public getReady(): Promise<IHypernetIFrameProxy> {
-    return new Promise((resolve, reject) => {
-      this.proxy.proxyReady().then(() => {
-        this.proxy.activate().map(() => {
-          this.proxy
-            .getEthereumAccounts()
-            .andThen((accounts: any) => this.proxy.initialize(accounts[0]))
-            .match(
-              () => {
-                resolve(this.proxy);
-              },
-              (err: any) => {
-                // handle error
-                console.log("err", err);
-                reject(err);
-              },
-            );
-        });
+  public getReady(): ResultAsync<IHypernetIFrameProxy, Error> {
+    return this.proxy.proxyReady().andThen(() => {
+      return this.proxy.activate().andThen(() => {
+        return this.proxy
+          .getEthereumAccounts()
+          .andThen((accounts: any) => this.proxy.initialize(accounts[0]))
+          .map(() => this.proxy);
       });
     });
   }

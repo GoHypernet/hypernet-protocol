@@ -19,12 +19,12 @@ import {
   Payment,
   Result,
   ResultAsync,
+  ok,
   MerchantValidationError,
   PersistenceError,
 } from "@hypernetlabs/hypernet-core";
 import { Subject } from "rxjs";
 import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
-import { ok } from "neverthrow";
 import { ParentProxy } from "@hypernetlabs/utils";
 
 export default class HypernetIFrameProxy extends ParentProxy implements IHypernetIFrameProxy {
@@ -110,11 +110,11 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     });
   }
 
-  public proxyReady(): Promise<void> {
+  public proxyReady(): ResultAsync<void, LogicalError> {
     if (this._handshakePromise == null) {
       throw new Error("proxy really, really not ready!");
     }
-    return this._handshakePromise;
+    return ResultAsync.fromPromise(this._handshakePromise, (err) => new LogicalError());
   }
 
   public initialized(): Result<boolean, LogicalError> {
