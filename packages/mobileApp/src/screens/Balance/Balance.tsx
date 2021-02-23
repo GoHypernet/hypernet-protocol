@@ -1,11 +1,10 @@
 import React from "react";
 import { View, StyleSheet, Image } from "react-native";
-import { Button, Text } from "react-native-elements";
 import { useStateContext } from "@mobileApp/state/store";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
-import Icon from "react-native-vector-icons/FontAwesome";
 
 import BalanceCard from "./components/BalanceCard";
+import ScreenHeader from "@mobileApp/components/ScreenHeader";
 
 interface BalanceProps {}
 
@@ -16,19 +15,15 @@ const Balance: React.FC<BalanceProps> = (props: BalanceProps) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.filterContainer}>
-        <Icon name="filter" color="white" size={hp(2.5)} />
-      </View>
-      <View style={styles.headerContainer}>
-        <Text style={styles.title}>Balance</Text>
-        <Button
-          title="Action"
-          type="outline"
-          titleStyle={styles.text}
-          buttonStyle={styles.actionButton}
-          onPress={() => console.log("pressed")}
-        />
-      </View>
+      <ScreenHeader
+        screenLabel="Balance"
+        onActionClick={() => {
+          console.log("action clicked");
+        }}
+        onFilterClick={() => {
+          console.log("filter clicked");
+        }}
+      />
       <View style={styles.cardListContainer}>
         <BalanceCard
           primaryTitle="Wrapped Bitcoin"
@@ -65,21 +60,6 @@ const styles = StyleSheet.create({
     paddingLeft: wp(6),
     paddingRight: wp(6),
   },
-  filterContainer: {
-    flexDirection: "row-reverse",
-  },
-  headerContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: hp(5),
-    marginBottom: hp(2),
-  },
-  title: {
-    color: "white",
-    marginBottom: 24,
-    fontSize: 28,
-    fontWeight: "800",
-  },
   img: {
     marginBottom: 10,
   },
@@ -87,14 +67,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
   },
-  actionButton: {
-    backgroundColor: "#2E3546",
-    width: 100,
-    height: 30,
-    borderRadius: 15,
-    borderColor: "#2E3546",
-  },
-  text: { color: "#FFFFFF", fontWeight: "800", fontSize: 11 },
 });
 
 export default Balance;

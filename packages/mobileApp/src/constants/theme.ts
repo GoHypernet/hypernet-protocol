@@ -6,6 +6,7 @@ export const colors = {
   borderBlue: "#2852ff",
   transparent: "transparent",
   inActiveGrey: "#6D778B",
+  actionButtonBgColor: "#2E3546",
 };
 
 export const getNavigationTheme = (forSplashScreens?: boolean) => ({
