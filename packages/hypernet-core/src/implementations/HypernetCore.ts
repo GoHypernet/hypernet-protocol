@@ -100,6 +100,8 @@ export class HypernetCore implements IHypernetCore {
   public onPullPaymentApproved: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
   public onMerchantAuthorized: Subject<URL>;
+  public onAuthorizedMerchantUpdated: Subject<URL>;
+  public onAuthorizedMerchantActivationFailed: Subject<URL>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -159,6 +161,8 @@ export class HypernetCore implements IHypernetCore {
     this.onPullPaymentApproved = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
     this.onMerchantAuthorized = new Subject<URL>();
+    this.onAuthorizedMerchantUpdated = new Subject<URL>();
+    this.onAuthorizedMerchantActivationFailed = new Subject<URL>();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -185,6 +189,8 @@ export class HypernetCore implements IHypernetCore {
       this.onPullPaymentUpdated,
       this.onBalancesChanged,
       this.onMerchantAuthorized,
+      this.onAuthorizedMerchantUpdated,
+      this.onAuthorizedMerchantActivationFailed
     );
     this.blockchainProvider = new EthersBlockchainProvider(externalProvider);
     this.paymentIdUtils = new PaymentIdUtils();

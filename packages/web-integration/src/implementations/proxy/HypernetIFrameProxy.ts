@@ -47,6 +47,8 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
     this.onMerchantAuthorized = new Subject<URL>();
+    this.onAuthorizedMerchantUpdated = new Subject<URL>();
+    this.onAuthorizedMerchantActivationFailed = new Subject<URL>();
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -95,6 +97,14 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
 
         child.on("onMerchantAuthorized", (data: string) => {
           this.onMerchantAuthorized.next(new URL(data));
+        });
+
+        child.on("onAuthorizedMerchantUpdated", (data: string) => {
+          this.onAuthorizedMerchantUpdated.next(new URL(data));
+        });
+
+        child.on("onAuthorizedMerchantActivationFailed", (data: string) => {
+          this.onAuthorizedMerchantActivationFailed.next(new URL(data));
         });
 
         // Setup a listener for the "initialized" event.
@@ -293,4 +303,6 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   public onPullPaymentApproved: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
   public onMerchantAuthorized: Subject<URL>;
+  public onAuthorizedMerchantUpdated: Subject<URL>;
+  public onAuthorizedMerchantActivationFailed: Subject<URL>;
 }
