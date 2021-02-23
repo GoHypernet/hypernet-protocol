@@ -28,22 +28,22 @@
     "!dist/tsconfig.tsbuildinfo"
   ],
   "scripts": {
-    "build": "yarn clean && yarn compile",
+    "build": "yarn clean && yarn build-connector && yarn build-server",
     "clean": "rimraf dist",
-    "compile": "tsc --build src/tsconfig.json && tsc --build server/tsconfig.json",
+    "build-connector": "webpack --config src/webpack.config.js",
+    "build-server": "webpack --config server/webpack.config.js",
     "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",
     "prepare": "yarn build",
     "prepublishOnly": "npm test && npm run lint",
-    "start": "webpack && ts-node server/index.ts",
+    "start": "compile-connector && ts-node server/index.ts",
     "test": "yarn test:ci",
     "test:ci": "jest --runInBand --coverage",
     "test:watch": "jest --watch --color --detectOpenHandles",
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags",
-    "webpack": "webpack"
+    "postversion": "git push && git push --tags"
   },
   "types": "dist/index.d.ts",
   "dependencies": {

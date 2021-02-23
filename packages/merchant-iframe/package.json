@@ -30,7 +30,7 @@
   "scripts": {
     "build": "yarn clean && yarn compile",
     "clean": "rimraf dist",
-    "compile": "tsc --build src/tsconfig.json",
+    "compile": "webpack",
     "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",

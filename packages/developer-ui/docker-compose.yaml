@@ -245,3 +245,20 @@ services:
         "domainName": "", 
         "production": false        
       }' 
+
+  merchant-iframe:
+    image: nginx:latest
+    ports:
+      - 5005:80
+    volumes:
+      - ../merchant-iframe/dist/bundle:/usr/share/nginx/html
+
+  test-merchant:
+    image: node:14
+    ports:
+      - 5010:5010
+    volumes:
+      - ../test-merchant-connector/dist/server-bundle:/app
+      - ../test-merchant-connector/dist/connector-bundle:/app/connector
+    command:
+      node /app/index.js

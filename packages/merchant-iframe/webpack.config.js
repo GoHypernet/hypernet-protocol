@@ -1,5 +1,6 @@
 const path = require("path");
 const rootWebpackConfig = require('../../webpack.config');
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   ...rootWebpackConfig,
@@ -14,5 +15,8 @@ module.exports = {
     compress: true,
     publicPath: "/",
     port: 5005,
-  }
+  },
+  plugins: [
+    new HtmlWebpackPlugin({})
+  ]
 };

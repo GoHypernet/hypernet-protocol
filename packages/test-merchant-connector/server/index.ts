@@ -23,7 +23,7 @@ let signature: string = "unknown";
 let address: string = wallet.address;
 
 // Read the webpacked connector file. 
-const filename = __dirname + "/../dist/connector-bundle/index.js";
+const filename = __dirname + "/connector/index.js";
 
 fs.readFile(filename, 'utf8', (err, data) => {
    connector = data;
