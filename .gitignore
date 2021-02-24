@@ -18,3 +18,8 @@ packages/*/yarn-error.log
 */yarn-error.log
 /lib
 yarn-error.log
+<<<<<<< Updated upstream
+=======
+.DS_Store
+build/
+>>>>>>> Stashed changes
