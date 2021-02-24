@@ -2,7 +2,7 @@ version: 2.1
 jobs:
   test:
     docker:
-      - image: "cimg/node:12.14.1"
+      - image: 'cimg/node:12.14.1'
         auth:
           username: mydockerhub-user
           password: $DOCKERHUB_PASSWORD # context / project UI env-var reference
@@ -13,7 +13,7 @@ jobs:
       - run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
       - run: sudo apt update && sudo apt install -y python
       - run: yarn install
-      - run: yarn test
+      - run: cd packages/hypernet-core && yarn test
 
 # Orchestrate our job run sequence
 workflows:
