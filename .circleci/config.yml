@@ -13,7 +13,7 @@ jobs:
       - run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
       - run: sudo apt update && sudo apt install -y python
       - run: yarn install
-      - run: cd packages/hypernet-core && yarn test
+      - run: yarn test
 
 # Orchestrate our job run sequence
 workflows:
