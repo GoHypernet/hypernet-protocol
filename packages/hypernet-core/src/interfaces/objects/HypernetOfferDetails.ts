@@ -1,4 +1,4 @@
-import { EthereumAddress } from "./EthereumAddress";
+import { EthereumAddress } from "@hypernetlabs/utils/src/objects/EthereumAddress";
 import { IMessageTransferData } from "./MessageTransferData";
 import { PublicIdentifier } from "./PublicIdentifier";
 import { IRate } from "./Rate";

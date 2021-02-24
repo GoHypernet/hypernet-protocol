@@ -29,9 +29,9 @@
   ],
   "scripts": {
     "build": "yarn clean && yarn build-connector && yarn build-server",
-    "clean": "rimraf dist",
     "build-connector": "webpack --config src/webpack.config.js",
     "build-server": "webpack --config server/webpack.config.js",
+    "clean": "rimraf dist",
     "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",

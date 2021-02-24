@@ -5,11 +5,6 @@ import { CoreUninitializedError, MerchantConnectorError, MerchantValidationError
 
 export interface IMerchantConnectorRepository {
   /**
-   * Returns the verified signature from the merchant iframe; IE, the signature of the code actually running for the merchantURL
-   */
-  getMerchantConnectorSignature(merchantUrl: URL): ResultAsync<string, Error>;
-
-  /**
    * Returns the PublicKey for a merchant
    */
   getMerchantPublicKeys(merchantUrl: string[]): ResultAsync<Map<string, PublicKey>, Error>;

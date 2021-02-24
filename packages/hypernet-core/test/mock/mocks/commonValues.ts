@@ -2,6 +2,7 @@ import { constants } from "ethers";
 import { BigNumber } from "@interfaces/objects";
 
 export const account = "0xDEADBEEF";
+export const account2 = "0xBEEFDEAD";
 export const publicIdentifier = "vectorDEADBEEF";
 export const publicIdentifier2 = "vectorBEEFDEAD";
 export const publicIdentifier3 = "vectorDEADPORK";
@@ -21,5 +22,5 @@ export const unixPast = 1318870398; // Less that defaultExpirationlength before 
 export const unixNow = 1318874398;
 export const nowFormatted = "2021-02-03T04:28:09+03:00";
 export const defaultExpirationLength = 5000;
-export const merchantUrl = "https://example.merchant.com";
+export const merchantUrl = "https://example.merchant.com/";
 export const merchantPublicKey = "0xMediatorPublicKey";

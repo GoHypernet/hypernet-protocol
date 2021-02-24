@@ -42,7 +42,7 @@ export class ContextProvider implements IContextProvider {
       onBalancesChanged,
       onMerchantAuthorized,
       onAuthorizedMerchantUpdated,
-      onAuthorizedMerchantActivationFailed
+      onAuthorizedMerchantActivationFailed,
     );
   }
   public getContext(): ResultAsync<HypernetContext, never> {

@@ -89,7 +89,6 @@ export class ContextProviderMock implements IContextProvider {
         this.onAuthorizedMerchantUpdated,
         this.onAuthorizedMerchantActivationFailed,
         this.authorizedMerchants,
-
       );
     }
   }

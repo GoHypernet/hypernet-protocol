@@ -3,7 +3,7 @@ import { ControlClaim } from "./ControlClaim";
 import { PublicIdentifier } from "./PublicIdentifier";
 import { PullPayment, PushPayment } from "./Payment";
 import { Balances } from "./Balances";
-import { EthereumAddress } from "./EthereumAddress";
+import { EthereumAddress } from "@hypernetlabs/utils/src/objects/EthereumAddress";
 
 export class HypernetContext {
   constructor(

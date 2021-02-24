@@ -23,6 +23,7 @@ import {
   PaymentIdUtils,
   TimeUtils,
   VectorUtils,
+  EthersBlockchainUtils,
 } from "@implementations/utilities";
 import { VectorAPIListener } from "@implementations/api";
 import {
@@ -70,10 +71,12 @@ import {
 import { EBlockchainNetwork } from "@interfaces/types";
 import {
   IBlockchainProvider,
+  IBlockchainUtils,
   IBrowserNodeProvider,
   IConfigProvider,
   IContextProvider,
   ILinkUtils,
+  ILocalStorageUtils,
   ILogUtils,
   IPaymentIdUtils,
   IPaymentUtils,
@@ -84,6 +87,9 @@ import { IMessagingListener, IVectorListener } from "@interfaces/api";
 import { Subject } from "rxjs";
 import { errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
 import { AxiosAjaxUtils, IAjaxUtils, ResultUtils } from "@hypernetlabs/utils";
+import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
+import { MerchantConnectorProxyFactory } from "@implementations/utilities/factory";
+import { LocalStorageUtils } from "./utilities/LocalStorageUtils";
 
 /**
  * The top-level class-definition for Hypernet Core.
@@ -115,6 +121,9 @@ export class HypernetCore implements IHypernetCore {
   protected paymentIdUtils: IPaymentIdUtils;
   protected logUtils: ILogUtils;
   protected ajaxUtils: IAjaxUtils;
+  protected blockchainUtils: IBlockchainUtils;
+  protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory;
+  protected localStorageUtils: ILocalStorageUtils;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
@@ -190,7 +199,7 @@ export class HypernetCore implements IHypernetCore {
       this.onBalancesChanged,
       this.onMerchantAuthorized,
       this.onAuthorizedMerchantUpdated,
-      this.onAuthorizedMerchantActivationFailed
+      this.onAuthorizedMerchantActivationFailed,
     );
     this.blockchainProvider = new EthersBlockchainProvider(externalProvider);
     this.paymentIdUtils = new PaymentIdUtils();
@@ -216,12 +225,16 @@ export class HypernetCore implements IHypernetCore {
       this.timeUtils,
     );
     this.ajaxUtils = new AxiosAjaxUtils();
+    this.blockchainUtils = new EthersBlockchainUtils(this.blockchainProvider);
+    this.merchantConnectorProxyFactory = new MerchantConnectorProxyFactory(this.configProvider);
+    this.localStorageUtils = new LocalStorageUtils();
 
     this.accountRepository = new AccountsRepository(
       this.blockchainProvider,
       this.vectorUtils,
       this.browserNodeProvider,
       this.logUtils,
+      this.blockchainUtils,
     );
 
     this.paymentRepository = new PaymentRepository(
@@ -250,6 +263,9 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
       this.contextProvider,
       this.vectorUtils,
+      this.localStorageUtils,
+      this.merchantConnectorProxyFactory,
+      this.blockchainUtils,
     );
 
     this.paymentService = new PaymentService(
