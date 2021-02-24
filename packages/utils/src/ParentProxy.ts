@@ -1,6 +1,7 @@
 import Postmate from "postmate";
 import { errAsync, ResultAsync } from "neverthrow";
 import { ProxyError } from "./errors";
+import { IFrameContainer } from "./IFrameContainer";
 
 interface IIFrameCallData<T> {
   callId: number;
@@ -52,13 +53,15 @@ export abstract class ParentProxy {
   protected calls: IFrameCall<any, any>[] = [];
   protected active: boolean;
 
-  constructor(element: HTMLElement | null, iframeUrl: string) {
+  constructor(iFrameContainer: IFrameContainer | null, iframeUrl: string) {
     this.child = null;
     this.active = false;
 
-    if (element == null) {
-      element = document.body;
+    if (iFrameContainer?.containerElement?.hasChildNodes()) {
+      iFrameContainer.destroyChildrens();
     }
+
+    const element = iFrameContainer?.containerElement || document.body;
 
     this.handshake = new Postmate({
       container: element,

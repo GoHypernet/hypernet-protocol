@@ -4,4 +4,5 @@ export * from "./ChildProxy";
 export * from "./IAjaxUtils";
 export * from "./ParentProxy";
 export * from "./ExternalProviderUtils";
+export * from "./IFrameContainer";
 export * from "./errors";

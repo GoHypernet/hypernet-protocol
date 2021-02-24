@@ -22,29 +22,24 @@ import {
 } from "@web-integration/constants";
 import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
+import { IFrameContainer } from "packages/utils/dist";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
 
   protected iframeURL: string = "http://localhost:8090";
-  protected iframeContainer: HTMLElement;
+  protected iframeContainer: HTMLElement | null;
 
   public proxy: IHypernetIFrameProxy;
 
   constructor(iframeURL?: string) {
     this.iframeURL = iframeURL || this.iframeURL;
 
-    // Create a container element for the iframe proxy
-    this.iframeContainer = document.createElement("div");
-    this.iframeContainer.id = "__hypernet-protocol-iframe-container__";
-    this.iframeContainer.tabIndex = -1;
-    this.iframeContainer.setAttribute("style", "display: none;");
-
-    // Attach it to the body
-    document.body.appendChild(this.iframeContainer);
+    const iFrameContainer = new IFrameContainer("__hypernet-protocol-iframe-container__");
+    this.iframeContainer = iFrameContainer.containerElement;
 
     // Create a proxy connection to the iframe
-    this.proxy = new HypernetIFrameProxy(this.iframeContainer, this.iframeURL);
+    this.proxy = new HypernetIFrameProxy(iFrameContainer, this.iframeURL);
   }
 
   // wait for the core to be intialized
@@ -134,7 +129,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   public async startConnectorFlow(config?: IConnectorRenderParams) {
-    this.iframeContainer.setAttribute("style", "display: block;");
+    this.iframeContainer?.setAttribute("style", "display: block;");
     this.proxy.startConnectorFlow(config?.connector);
   }
 }

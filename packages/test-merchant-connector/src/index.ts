@@ -56,6 +56,15 @@ class TestMerchantConnector implements IMerchantConnector {
     return Promise.resolve("0x14791697260E4c9A71f18484C9f997B308e59325");
   }
 
+  private _renderContent(someShit?: string) {
+    const element = window.document.createElement("div");
+    var textnode = window.document.createTextNode("Hey! here is content from test merchant"); // Create a text node
+    element.appendChild(textnode);
+    window.document.body.appendChild(element);
+
+    //TODO: implement react rendering
+  }
+
   //   paymentCreated(payment: Payment) {
   //       // Send the payment details to galileo
   //   }
@@ -68,6 +77,12 @@ class TestMerchantConnector implements IMerchantConnector {
     this.onSendFundsRequested = new Subject<ISendFundsRequest>();
     this.onAuthorizeFundsRequested = new Subject<IAuthorizeFundsRequest>();
     this.onDisplayRequested = new Subject<void>();
+
+    this.onDisplayRequested.subscribe({
+      next: () => {
+        this._renderContent();
+      },
+    });
   }
 }
 

@@ -27,6 +27,8 @@ export default class PostmateApi extends ChildProxy implements IMerchantIFrameAp
         merchantConnector.onDisplayRequested.subscribe((val) => {
           this.parent?.emit("onDisplayRequested", val);
         });
+
+        merchantConnector.onDisplayRequested.next();
       },
     });
   }

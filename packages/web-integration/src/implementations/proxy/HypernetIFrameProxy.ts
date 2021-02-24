@@ -24,7 +24,7 @@ import {
 } from "@hypernetlabs/hypernet-core";
 import { Subject } from "rxjs";
 import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
-import { ParentProxy } from "@hypernetlabs/utils";
+import { IFrameContainer, ParentProxy } from "@hypernetlabs/utils";
 
 export default class HypernetIFrameProxy extends ParentProxy implements IHypernetIFrameProxy {
   protected coreInitialized: boolean = false;
@@ -32,8 +32,8 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   protected waitInitializedPromise: Promise<void>;
   protected _handshakePromise: Promise<void> | null;
 
-  constructor(element: HTMLElement | null, iframeUrl: string) {
-    super(element, iframeUrl);
+  constructor(iFrameContainer: IFrameContainer | null, iframeUrl: string) {
+    super(iFrameContainer, iframeUrl);
 
     this._handshakePromise = null;
 

@@ -7,18 +7,19 @@ import {
   PersistenceError,
 } from "@interfaces/objects/errors";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
-import { ParentProxy, ResultUtils, IAjaxUtils } from "@hypernetlabs/utils";
+import { ParentProxy, ResultUtils, IAjaxUtils, IFrameContainer } from "@hypernetlabs/utils";
 import { IBlockchainProvider, IConfigProvider, IContextProvider, IVectorUtils } from "@interfaces/utilities";
 import { ethers } from "ethers";
 import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
 
 class MerchantConnectorProxy extends ParentProxy {
-  constructor(element: HTMLElement | null, iframeUrl: string) {
-    super(element, iframeUrl);
+  constructor(public iFrameContainer: IFrameContainer | null, iframeUrl: string) {
+    super(iFrameContainer, iframeUrl);
   }
 
   public activateConnector(): ResultAsync<void, MerchantConnectorError> {
+    this.iFrameContainer?.showIFrame();
     return this._createCall("activateConnector", null);
   }
 
@@ -115,8 +116,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     let proxy: MerchantConnectorProxy;
     let config: HypernetConfig;
     let context: HypernetContext;
-    return ResultUtils.combine([this.configProvider.getConfig(),
-      this.contextProvider.getContext()])
+    return ResultUtils.combine([this.configProvider.getConfig(), this.contextProvider.getContext()])
       .andThen((vals) => {
         [config, context] = vals;
 
@@ -232,19 +232,21 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       this.configProvider.getConfig(),
       this.contextProvider.getInitializedContext(),
       this.getAuthorizedMerchants(),
-      this.blockchainProvider.getSigner()
+      this.blockchainProvider.getSigner(),
     ]).andThen((vals) => {
       const [config, context, authorizedMerchants, signer] = vals;
       const activationResults = new Array<ResultAsync<void, Error>>();
 
       for (const keyval of authorizedMerchants) {
         activationResults.push(
-          this._activateAuthorizedMerchant(context.account, 
+          this._activateAuthorizedMerchant(
+            context.account,
             keyval[0], // URL
-            keyval[1], 
+            keyval[1],
             config.merchantIframeUrl,
             context,
-            signer),
+            signer,
+          ),
         );
       }
 
@@ -258,7 +260,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     authorizationSignature: string,
     merchantIFrameUrl: string,
     context: HypernetContext,
-    signer: ethers.providers.JsonRpcSigner
+    signer: ethers.providers.JsonRpcSigner,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError> {
     const proxy = this._factoryProxy(merchantIFrameUrl, merchantUrl);
     return proxy
@@ -282,9 +284,9 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
           // Get a new signature
           // validatedSignature means the code is signed by the provider, so we just need
           // to sign this new version.
-        const signerPromise = signer._signTypedData(this.domain, this.types, value);
+          const signerPromise = signer._signTypedData(this.domain, this.types, value);
 
-        return ResultAsync.fromPromise(signerPromise, (e) => e as MerchantConnectorError);
+          return ResultAsync.fromPromise(signerPromise, (e) => e as MerchantConnectorError);
         }
 
         return okAsync<string, MerchantValidationError>(validationAddress);
@@ -303,13 +305,14 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         context.onAuthorizedMerchantActivationFailed.next(new URL(merchantUrl));
 
         return e;
-      })
+      });
   }
 
   protected _factoryProxy(merchantIFrameUrl: string, merchantUrl: string): MerchantConnectorProxy {
     const iframeUrl = new URL(merchantIFrameUrl);
     iframeUrl.searchParams.set("merchantUrl", merchantUrl);
-    const proxy = new MerchantConnectorProxy(null, iframeUrl.toString());
+    const iFrameContainer = new IFrameContainer(merchantUrl);
+    const proxy = new MerchantConnectorProxy(iFrameContainer, iframeUrl.toString());
     return proxy;
   }
 }
