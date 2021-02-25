@@ -30,7 +30,7 @@ This monorepo contains several packages:
 - [web-demo](packages/web-demo): An example package demonstrating how to consume the Hypernet Core SDK.  
 - [web-integration](packages/web-integrations): This is the package that merchants would include on their actual website if they want to support HNP. This package will instantiate HNC in an iframe and provides a proxy interface to it for the merchant to interface with; from the merchant's POV it should be like working directly with a HypernetCore object. It also provides a number of pre-built UI widgets, along with easy utility functions, that make it trivial to display information from HNC on the merchant's website.
 - [mobile-integration](packages/mobile-integration): This is the mobile variant of web-integration. It is designed to run HNC in a WebView, and provides a proxy object for the host to work with. 
-- [web-ui](packages/web-ui): The web-ui package contains all the widgets used by web-integration and mobile-integration when using React Native.
+- [web-ui](packages/web-ui): The web-ui package contains all the ui components used by web-integration when using React.
 - [test-merchant-connector](packages/test-merchant-connector): This is an example of a merchant integration. It contains two parts- an example implementation of IMerchantConnector, and a simple NodeJS/Express server that hosts the required merchant API. This particular merchant connector implementation is used for integration testing of the overall system. Merchants looking to support the Hypernet Protocol should look closely at this package.
 
 
