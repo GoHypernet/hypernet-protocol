@@ -5,3 +5,4 @@ export * from "./IAjaxUtils";
 export * from "./ParentProxy";
 export * from "./ExternalProviderUtils";
 export * from "./errors";
+export * from "./objects";

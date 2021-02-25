@@ -188,6 +188,5 @@ export default class CoreWrapper extends ChildProxy {
     this.core.onAuthorizedMerchantActivationFailed.subscribe((val) => {
       parent.emit("onAuthorizedMerchantActivationFailed", val.toString());
     });
-
   }
 }

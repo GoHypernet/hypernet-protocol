@@ -196,7 +196,7 @@ export interface IHypernetCore {
    */
   mintTestToken(amount: BigNumber): ResultAsync<void, CoreUninitializedError>;
 
-  authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MerchantValidationError>;
+  authorizeMerchant(merchantUrl: string): ResultAsync<void, CoreUninitializedError | MerchantValidationError>;
 
   getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError>;
   /**
@@ -211,7 +211,7 @@ export interface IHypernetCore {
   onPushPaymentReceived: Subject<PushPayment>;
   onPullPaymentApproved: Subject<PullPayment>;
   onBalancesChanged: Subject<Balances>;
-  onMerchantAuthorized: Subject<URL>;
-  onAuthorizedMerchantUpdated: Subject<URL>;
-  onAuthorizedMerchantActivationFailed: Subject<URL>;
+  onMerchantAuthorized: Subject<string>;
+  onAuthorizedMerchantUpdated: Subject<string>;
+  onAuthorizedMerchantActivationFailed: Subject<string>;
 }

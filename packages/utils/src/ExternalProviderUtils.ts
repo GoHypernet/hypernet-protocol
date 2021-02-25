@@ -1,11 +1,5 @@
 import { ethers } from "ethers";
-
-export class ExternalProvider {
-  constructor(
-    public provider: ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
-    public address: string,
-  ) {}
-}
+import { ExternalProvider } from "./objects";
 
 export class ExternalProviderUtils {
   getExternalProviderForDevelopment(): ExternalProvider {

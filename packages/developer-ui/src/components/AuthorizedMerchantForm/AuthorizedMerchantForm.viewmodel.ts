@@ -21,7 +21,7 @@ export class AuthorizedMerchantFormViewModel {
     this.submitButton = new ButtonParams(
       "Authorize Merchant",
       async () => {
-        return await this.core.authorizeMerchant(new URL(this.merchantUrl()));
+        return await this.core.authorizeMerchant(this.merchantUrl());
       },
       EButtonType.Normal,
       ko.pureComputed(() => {

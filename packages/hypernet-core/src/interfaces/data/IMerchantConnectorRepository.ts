@@ -5,11 +5,6 @@ import { CoreUninitializedError, MerchantConnectorError, MerchantValidationError
 
 export interface IMerchantConnectorRepository {
   /**
-   * Returns the verified signature from the merchant iframe; IE, the signature of the code actually running for the merchantURL
-   */
-  getMerchantConnectorSignature(merchantUrl: URL): ResultAsync<string, Error>;
-
-  /**
    * Returns the PublicKey for a merchant
    */
   getMerchantPublicKeys(merchantUrl: string[]): ResultAsync<Map<string, PublicKey>, Error>;
@@ -19,14 +14,14 @@ export interface IMerchantConnectorRepository {
    * @param merchantUrl
    * @param signature
    */
-  addAuthorizedMerchant(merchantUrl: URL): ResultAsync<void, PersistenceError>;
+  addAuthorizedMerchant(merchantUrl: string): ResultAsync<void, PersistenceError>;
 
   getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError>;
 
   activateAuthorizedMerchants(): ResultAsync<void, MerchantConnectorError>;
 
   resolveChallenge(
-    merchantUrl: URL,
+    merchantUrl: string,
     paymentId: string,
     transferId: string,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | CoreUninitializedError>;
