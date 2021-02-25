@@ -83,9 +83,9 @@ import {
   ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
-import { IMessagingListener, IVectorListener } from "@interfaces/api";
+import { IVectorListener } from "@interfaces/api";
 import { Subject } from "rxjs";
-import { errAsync, ok, okAsync, Result, ResultAsync } from "neverthrow";
+import { ok, Result, ResultAsync } from "neverthrow";
 import { AxiosAjaxUtils, IAjaxUtils, ResultUtils } from "@hypernetlabs/utils";
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 import { MerchantConnectorProxyFactory } from "@implementations/utilities/factory";
@@ -105,9 +105,9 @@ export class HypernetCore implements IHypernetCore {
   public onPullPaymentUpdated: Subject<PullPayment>;
   public onPullPaymentApproved: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
-  public onMerchantAuthorized: Subject<URL>;
-  public onAuthorizedMerchantUpdated: Subject<URL>;
-  public onAuthorizedMerchantActivationFailed: Subject<URL>;
+  public onMerchantAuthorized: Subject<string>;
+  public onAuthorizedMerchantUpdated: Subject<string>;
+  public onAuthorizedMerchantActivationFailed: Subject<string>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -169,9 +169,9 @@ export class HypernetCore implements IHypernetCore {
     this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onPullPaymentApproved = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
-    this.onMerchantAuthorized = new Subject<URL>();
-    this.onAuthorizedMerchantUpdated = new Subject<URL>();
-    this.onAuthorizedMerchantActivationFailed = new Subject<URL>();
+    this.onMerchantAuthorized = new Subject<string>();
+    this.onAuthorizedMerchantUpdated = new Subject<string>();
+    this.onAuthorizedMerchantActivationFailed = new Subject<string>();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -558,7 +558,7 @@ export class HypernetCore implements IHypernetCore {
     });
   }
 
-  public authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MerchantValidationError> {
+  public authorizeMerchant(merchantUrl: string): ResultAsync<void, CoreUninitializedError | MerchantValidationError> {
     return this.merchantService.authorizeMerchant(merchantUrl);
   }
 

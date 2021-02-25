@@ -23,4 +23,7 @@ export const unixNow = 1318874398;
 export const nowFormatted = "2021-02-03T04:28:09+03:00";
 export const defaultExpirationLength = 5000;
 export const merchantUrl = "https://example.merchant.com/";
+export const merchantUrl2 = "https://example2.merchant.com/";
 export const merchantPublicKey = "0xMediatorPublicKey";
+export const merchantPublicKey2 = "0xMediatorPublicKey2";
+export const mediatorSignature = "0xMediatorSignature";

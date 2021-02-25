@@ -39,7 +39,7 @@
     "prepublishOnly": "npm test && npm run lint",
     "start": "compile-connector && ts-node server/index.ts",
     "test": "yarn test:ci",
-    "test:ci": "jest --runInBand --coverage",
+    "test:ci": "jest --runInBand --coverage --passWithNoTests",
     "test:watch": "jest --watch --color --detectOpenHandles",
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",

@@ -93,17 +93,18 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     });
   }
 
-  public addAuthorizedMerchant(merchantUrl: URL): ResultAsync<void, PersistenceError> {
+  public addAuthorizedMerchant(merchantUrl: string): ResultAsync<void, PersistenceError> {
     let proxy: IMerchantConnectorProxy;
     let context: HypernetContext;
 
     // First, we will create the proxy
-    return ResultUtils.combine([
-      this.contextProvider.getContext(),
-      this.merchantConnectorProxyFactory.factoryProxy(merchantUrl.toString()),
-    ])
-      .andThen((vals) => {
-        [context, proxy] = vals;
+    return this.contextProvider.getContext()
+    .andThen((myContext) => {
+      context = myContext;
+      return this.merchantConnectorProxyFactory.factoryProxy(merchantUrl)
+    })
+      .andThen((myProxy) => {
+        proxy = myProxy;
 
         // With the proxy activated, we can get the validated merchant signature
         return ResultUtils.combine([proxy.getValidatedSignature(), this.blockchainProvider.getSigner()]);
@@ -114,17 +115,17 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         // merchantSignature has been validated by the iframe, so this is already confirmed.
         // Now we need to get an authorization signature
         const value = {
-          authorizedMerchantUrl: merchantUrl.toString(),
+          authorizedMerchantUrl: merchantUrl,
           merchantValidatedSignature: merchantSignature,
         } as Record<string, any>;
         const signerPromise = signer._signTypedData(this.domain, this.types, value);
 
-        return ResultAsync.fromPromise(signerPromise, (e) => e as MerchantConnectorError);
+        return ResultAsync.fromPromise(signerPromise, (e) => e as MerchantValidationError);
       })
       .andThen((authorizationSignature) => {
         const authorizedMerchants = this._getAuthorizedMerchants();
 
-        authorizedMerchants.set(merchantUrl.toString(), authorizationSignature);
+        authorizedMerchants.set(merchantUrl, authorizationSignature);
 
         this._setAuthorizedMerchants(authorizedMerchants);
 
@@ -133,14 +134,18 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       })
       .map(() => {
         // Only if the merchant is successfully activated do we stick it in the list.
-        this.activatedMerchants.set(merchantUrl.toString(), proxy);
+        this.activatedMerchants.set(merchantUrl, proxy);
       })
       .mapErr((e) => {
         // If we encounter a problem, destroy the proxy so we can start afresh.
-        proxy.destroy();
+        if (proxy != null) {
+          proxy.destroy();
+        }
 
         // Notify the world
-        context.onAuthorizedMerchantActivationFailed.next(merchantUrl);
+        if (context != null) {
+          context.onAuthorizedMerchantActivationFailed.next(merchantUrl);
+        }
 
         return e;
       });
@@ -156,11 +161,11 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   }
 
   public resolveChallenge(
-    merchantUrl: URL,
+    merchantUrl: string,
     paymentId: string,
     transferId: string,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | CoreUninitializedError> {
-    const proxy = this.activatedMerchants.get(merchantUrl.toString());
+    const proxy = this.activatedMerchants.get(merchantUrl);
 
     if (proxy == null) {
       return errAsync(new MerchantValidationError(`No existing merchant connector for ${merchantUrl}`));
@@ -261,7 +266,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
         if (validationAddress !== accountAddress) {
           // Notify the user that one of their authorized merchants has changed their code
-          context.onAuthorizedMerchantUpdated.next(new URL(merchantUrl));
+          context.onAuthorizedMerchantUpdated.next(merchantUrl);
 
           // Get a new signature
           // validatedSignature means the code is signed by the provider, so we just need
@@ -294,7 +299,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         }
 
         // Notify the world
-        context.onAuthorizedMerchantActivationFailed.next(new URL(merchantUrl));
+        context.onAuthorizedMerchantActivationFailed.next(merchantUrl);
 
         return e;
       });

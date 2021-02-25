@@ -14,14 +14,14 @@ export interface IMerchantConnectorRepository {
    * @param merchantUrl
    * @param signature
    */
-  addAuthorizedMerchant(merchantUrl: URL): ResultAsync<void, PersistenceError>;
+  addAuthorizedMerchant(merchantUrl: string): ResultAsync<void, PersistenceError>;
 
   getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError>;
 
   activateAuthorizedMerchants(): ResultAsync<void, MerchantConnectorError>;
 
   resolveChallenge(
-    merchantUrl: URL,
+    merchantUrl: string,
     paymentId: string,
     transferId: string,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | CoreUninitializedError>;

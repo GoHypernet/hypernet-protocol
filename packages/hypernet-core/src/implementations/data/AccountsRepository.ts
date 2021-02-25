@@ -157,7 +157,6 @@ export class AccountsRepository implements IAccountsRepository {
 
         if (assetAddress === "0x0000000000000000000000000000000000000000") {
           this.logUtils.log("Transferring ETH.");
-          console.log("Transferring ETH.");
           // send eth
           tx = ResultAsync.fromPromise(signer.sendTransaction({ to: channelAddress, value: amount }), (err) => {
             return err as BlockchainUnavailableError;
@@ -171,16 +170,13 @@ export class AccountsRepository implements IAccountsRepository {
         return tx;
       })
       .andThen((tx) => {
-        console.log("Waiting");
         // TODO: Wait on this, break it up, this could take a while
         return ResultAsync.fromPromise(tx.wait(), (e) => e as BlockchainUnavailableError);
       })
       .andThen(() => {
         if (browserNode == null || channelAddress == null) {
-          console.log("really screwed up");
           return errAsync(new Error("Really screwed up!"));
         }
-        console.log("reconciling");
         return browserNode.reconcileDeposit(assetAddress, channelAddress);
       })
       .andThen((depositRes) => {
@@ -190,7 +186,6 @@ export class AccountsRepository implements IAccountsRepository {
 
         // Sanity check, the deposit was for the channel we tried to deposit into.
         if (depositChannelAddress !== channelAddress) {
-          console.log("depositChannelAddress !== channelAddress");
           return errAsync(new Error("Something has gone horribly wrong!"));
         }
 
@@ -231,8 +226,6 @@ export class AccountsRepository implements IAccountsRepository {
    */
   public mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<void, BlockchainUnavailableError> {
     const resp = this.blockchainUtils.mintToken(amount, to);
-
-    console.log(resp);
 
     return resp
       .andThen((mintTx) => {
