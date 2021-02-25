@@ -1,53 +1,139 @@
 import td from "testdouble";
 require("testdouble-jest")(td, jest);
 import {
+  account,
+  account2,
+  chainId,
   commonAmount,
-  ethereumAddress,
-  routerChannelAddress,
-  erc20AssetAddress,
   destinationAddress,
+  erc20AssetAddress,
+  ethereumAddress,
   publicIdentifier,
+  routerChannelAddress,
 } from "@mock/mocks";
 import { BlockchainProviderMock, BrowserNodeProviderMock } from "@mock/utils";
-import { AssetBalance, BigNumber, Balances } from "@interfaces/objects";
-import { ILogUtils, IVectorUtils, IBrowserNodeProvider, IBlockchainProvider } from "@interfaces/utilities";
+import {
+  ILogUtils,
+  IVectorUtils,
+  IBrowserNodeProvider,
+  IBlockchainProvider,
+  IBlockchainUtils,
+} from "@interfaces/utilities";
 import { VectorError, RouterChannelUnknownError, BlockchainUnavailableError } from "@interfaces/objects/errors";
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
 import { okAsync, errAsync } from "neverthrow";
-
-td.replace("ethers", {
-  Contract: class {
-    public transfer = () =>
-      new Promise((resolve) =>
-        resolve({
-          wait: () => new Promise((resolve) => resolve({})),
-        }),
-      );
-    public mint = () =>
-      new Promise((resolve) =>
-        resolve({
-          wait: () => new Promise((resolve) => resolve({})),
-        }),
-      );
-  },
-  constants: {
-    AddressZero: ethereumAddress,
-  },
-});
+import { Log, TransactionReceipt, TransactionResponse } from "@ethersproject/abstract-provider";
 import { AccountsRepository } from "@implementations/data/AccountsRepository";
+import { BigNumber } from "ethers";
+import { AssetBalance, Balances } from "@interfaces/objects";
+
+class TransacationReceiptMock implements TransactionReceipt {
+  public to: string;
+  public from: string;
+  public contractAddress: string;
+  public transactionIndex: number;
+  public root?: string | undefined;
+  public gasUsed: BigNumber;
+  public logsBloom: string;
+  public blockHash: string;
+  public transactionHash: string;
+  public logs: Log[];
+  public blockNumber: number;
+  public confirmations: number;
+  public cumulativeGasUsed: BigNumber;
+  public byzantium: boolean;
+  public status?: number | undefined;
+
+  constructor() {
+    this.to = account2;
+    this.from = account;
+    this.contractAddress = ethereumAddress;
+    this.transactionIndex = 1;
+    this.gasUsed = BigNumber.from(1);
+    this.logsBloom = "logsBloom";
+    this.blockHash = "blockHash";
+    this.transactionHash = "transactionHash";
+    this.logs = [];
+    this.blockNumber = 1;
+    this.confirmations = 1;
+    this.cumulativeGasUsed = BigNumber.from(1);
+    this.byzantium = false;
+  }
+}
+
+class TransactionResponseMock implements TransactionResponse {
+  public hash: string;
+  public blockNumber?: number | undefined;
+  public blockHash?: string | undefined;
+  public timestamp?: number | undefined;
+  public confirmations: number;
+  public from: string;
+  public raw?: string | undefined;
+  public to?: string | undefined;
+  public nonce: number;
+  public gasLimit: BigNumber;
+  public gasPrice: BigNumber;
+  public data: string;
+  public value: BigNumber;
+  public chainId: number;
+  public r?: string | undefined;
+  public s?: string | undefined;
+  public v?: number | undefined;
+
+  constructor() {
+    this.hash = "hash";
+    this.confirmations = 1;
+    this.from = account;
+    this.nonce = 0;
+    this.gasLimit = BigNumber.from(1);
+    this.gasPrice = BigNumber.from(1);
+    this.data = "data";
+    this.value = BigNumber.from(1);
+    this.chainId = chainId;
+  }
+
+  public wait(confirmations?: number | undefined): Promise<TransactionReceipt> {
+    return Promise.resolve(new TransacationReceiptMock());
+  }
+}
 
 class AccountsRepositoryMocks {
   public blockchainProvider = new BlockchainProviderMock();
   public vectorUtils = td.object<IVectorUtils>();
   public browserNodeProvider = new BrowserNodeProviderMock();
   public logUtils = td.object<ILogUtils>();
+  public blockchainUtils = td.object<IBlockchainUtils>();
 
   constructor() {
     td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
+
+    td.when(
+      this.blockchainUtils.erc20Transfer(
+        erc20AssetAddress,
+        routerChannelAddress,
+        td.matchers.argThat((arg: BigNumber) => {
+          return commonAmount.eq(arg);
+        }),
+      ),
+    ).thenReturn(okAsync(new TransactionResponseMock()));
+    td.when(
+      this.blockchainUtils.mintToken(
+        td.matchers.argThat((arg: BigNumber) => {
+          return commonAmount.eq(arg);
+        }),
+        account,
+      ),
+    ).thenReturn(okAsync(new TransactionResponseMock()));
   }
 
   public factoryAccountsRepository(): IAccountsRepository {
-    return new AccountsRepository(this.blockchainProvider, this.vectorUtils, this.browserNodeProvider, this.logUtils);
+    return new AccountsRepository(
+      this.blockchainProvider,
+      this.vectorUtils,
+      this.browserNodeProvider,
+      this.logUtils,
+      this.blockchainUtils,
+    );
   }
 }
 
@@ -56,15 +142,30 @@ class AccountsRepositoryErrorMocks {
   public vectorUtils = td.object<IVectorUtils>();
   public browserNodeProvider = td.object<IBrowserNodeProvider>();
   public logUtils = td.object<ILogUtils>();
+  public blockchainUtils = td.object<IBlockchainUtils>();
 
   constructor() {
     td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(errAsync(new VectorError()));
     td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(errAsync(new RouterChannelUnknownError()));
     td.when(this.blockchainProvider.getSigner()).thenReturn(errAsync(new BlockchainUnavailableError()));
+    td.when(
+      this.blockchainUtils.mintToken(
+        td.matchers.argThat((arg: BigNumber) => {
+          return commonAmount.eq(arg);
+        }),
+        account,
+      ),
+    ).thenReturn(errAsync(new BlockchainUnavailableError()));
   }
 
   public factoryAccountsRepository(): IAccountsRepository {
-    return new AccountsRepository(this.blockchainProvider, this.vectorUtils, this.browserNodeProvider, this.logUtils);
+    return new AccountsRepository(
+      this.blockchainProvider,
+      this.vectorUtils,
+      this.browserNodeProvider,
+      this.logUtils,
+      this.blockchainUtils,
+    );
   }
 }
 
@@ -258,7 +359,7 @@ describe("AccountsRepository tests", () => {
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
     // Act
-    const result = await repo.mintTestToken(commonAmount, ethereumAddress);
+    const result = await repo.mintTestToken(commonAmount, account);
 
     // Assert
     expect(result).toBeDefined();
@@ -272,7 +373,7 @@ describe("AccountsRepository tests", () => {
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
     // Act
-    const result = await repo.mintTestToken(commonAmount, ethereumAddress);
+    const result = await repo.mintTestToken(commonAmount, account);
     const error = result._unsafeUnwrapErr();
 
     // Assert

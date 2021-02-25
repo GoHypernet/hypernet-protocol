@@ -1,4 +1,4 @@
-import { EthereumAddress } from "./EthereumAddress";
+import { EthereumAddress } from "@hypernetlabs/utils/src/objects/EthereumAddress";
 import { PublicKey } from "./PublicKey";
 import "reflect-metadata";
 import { Type } from "class-transformer";

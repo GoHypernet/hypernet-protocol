@@ -550,7 +550,7 @@ export class PaymentService implements IPaymentService {
 
         // Resolve the dispute
         return this.merchantConnectorRepository.resolveChallenge(
-          new URL(payment.merchantUrl),
+          payment.merchantUrl,
           paymentId,
           payment.details.insuranceTransferId,
         );
