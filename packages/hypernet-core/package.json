@@ -40,7 +40,7 @@
     "test-integration": "cucumber-js --require-module ts-node/register --require-module tsconfig-paths/register --require 'test/integration/**/*.ts' test/integration/features/**/*.feature",
     "test:ci": "jest --runInBand --coverage --passWithNoTests",
     "test:watch": "jest --watch --color --detectOpenHandles",
-    "compile-necessary": "cd ../utils && yarn compile",
+    "compile-necessary": "cd ../merchant-connector && yarn compile && cd ../utils && yarn compile",
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",
     "postversion": "git push && git push --tags",
