@@ -1,8 +1,25 @@
 import td, { verify } from "testdouble";
 require("testdouble-jest")(td, jest);
-import { merchantUrl, account, account2, routerChannelAddress, insuranceTransferId, commonPaymentId, mediatorSignature, merchantPublicKey, merchantUrl2, merchantPublicKey2 } from "@mock/mocks";
+import {
+  merchantUrl,
+  account,
+  account2,
+  routerChannelAddress,
+  insuranceTransferId,
+  commonPaymentId,
+  mediatorSignature,
+  merchantPublicKey,
+  merchantUrl2,
+  merchantPublicKey2,
+} from "@mock/mocks";
 import { BlockchainProviderMock, ConfigProviderMock, ContextProviderMock } from "@mock/utils";
-import { IVectorUtils, ILocalStorageUtils, IMerchantConnectorProxy, IBlockchainUtils, IBasicTransferResponse } from "@interfaces/utilities";
+import {
+  IVectorUtils,
+  ILocalStorageUtils,
+  IMerchantConnectorProxy,
+  IBlockchainUtils,
+  IBasicTransferResponse,
+} from "@interfaces/utilities";
 import { MerchantConnectorError, MerchantValidationError, TransferResolutionError } from "@interfaces/objects/errors";
 import { IMerchantConnectorRepository } from "@interfaces/data/IMerchantConnectorRepository";
 import { okAsync, errAsync } from "neverthrow";
@@ -48,12 +65,14 @@ class MerchantConnectorRepositoryMocks {
 
   constructor() {
     td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
-    td.when(this.vectorUtils.resolveInsuranceTransfer(
-      insuranceTransferId,
-      commonPaymentId,
-      mediatorSignature,
-      BigNumber.from(resolutionAmount),
-    )).thenReturn(okAsync({} as IBasicTransferResponse));
+    td.when(
+      this.vectorUtils.resolveInsuranceTransfer(
+        insuranceTransferId,
+        commonPaymentId,
+        mediatorSignature,
+        BigNumber.from(resolutionAmount),
+      ),
+    ).thenReturn(okAsync({} as IBasicTransferResponse));
 
     td.when(this.localStorageUtils.getItem("AuthorizedMerchants")).thenReturn(
       `[{"merchantUrl":"${merchantUrl}","authorizationSignature":"${authorizationSignature}"}]`,
@@ -65,8 +84,9 @@ class MerchantConnectorRepositoryMocks {
 
     td.when(this.merchantConnectorProxy.getValidatedSignature()).thenReturn(okAsync(validatedSignature));
     td.when(this.merchantConnectorProxy.activateConnector()).thenReturn(okAsync(undefined));
-    td.when(this.merchantConnectorProxy.resolveChallenge(commonPaymentId))
-      .thenReturn(okAsync({ mediatorSignature, amount: resolutionAmount } as IResolutionResult));
+    td.when(this.merchantConnectorProxy.resolveChallenge(commonPaymentId)).thenReturn(
+      okAsync({ mediatorSignature, amount: resolutionAmount } as IResolutionResult),
+    );
     td.when(this.merchantConnectorProxy.getPublicKey()).thenReturn(okAsync(merchantPublicKey));
 
     td.when(
@@ -268,9 +288,9 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await (repo.activateAuthorizedMerchants().andThen(() => {
+    const result = await repo.activateAuthorizedMerchants().andThen(() => {
       return repo.resolveChallenge(merchantUrl, commonPaymentId, insuranceTransferId);
-    }));
+    });
 
     // Assert
     expect(result).toBeDefined();
@@ -295,14 +315,15 @@ describe("MerchantConnectorRepository tests", () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
-    td.when(mocks.merchantConnectorProxy.resolveChallenge(commonPaymentId))
-      .thenReturn(errAsync(new MerchantConnectorError()));
+    td.when(mocks.merchantConnectorProxy.resolveChallenge(commonPaymentId)).thenReturn(
+      errAsync(new MerchantConnectorError()),
+    );
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await (repo.activateAuthorizedMerchants().andThen(() => {
+    const result = await repo.activateAuthorizedMerchants().andThen(() => {
       return repo.resolveChallenge(merchantUrl, commonPaymentId, insuranceTransferId);
-    }));
+    });
 
     // Assert
     expect(result).toBeDefined();
@@ -314,19 +335,21 @@ describe("MerchantConnectorRepository tests", () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
-    td.when(mocks.vectorUtils.resolveInsuranceTransfer(
-      insuranceTransferId,
-      commonPaymentId,
-      mediatorSignature,
-      BigNumber.from(resolutionAmount),
-    )).thenReturn(errAsync(new TransferResolutionError()));
+    td.when(
+      mocks.vectorUtils.resolveInsuranceTransfer(
+        insuranceTransferId,
+        commonPaymentId,
+        mediatorSignature,
+        BigNumber.from(resolutionAmount),
+      ),
+    ).thenReturn(errAsync(new TransferResolutionError()));
 
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await (repo.activateAuthorizedMerchants().andThen(() => {
+    const result = await repo.activateAuthorizedMerchants().andThen(() => {
       return repo.resolveChallenge(merchantUrl, commonPaymentId, insuranceTransferId);
-    }));
+    });
 
     // Assert
     expect(result).toBeDefined();
@@ -388,7 +411,7 @@ describe("MerchantConnectorRepository tests", () => {
     const mocks = new MerchantConnectorRepositoryMocks();
 
     td.when(mocks.localStorageUtils.getItem("AuthorizedMerchants")).thenReturn(null);
-    
+
     const error = new MerchantValidationError();
     td.when(mocks.merchantConnectorProxy.getValidatedSignature()).thenReturn(errAsync(error));
 
@@ -416,7 +439,7 @@ describe("MerchantConnectorRepository tests", () => {
     const mocks = new MerchantConnectorRepositoryMocks();
 
     td.when(mocks.localStorageUtils.getItem("AuthorizedMerchants")).thenReturn(null);
-    
+
     const error = new MerchantValidationError();
     td.when(
       mocks.blockchainProvider.signer._signTypedData(
@@ -450,7 +473,7 @@ describe("MerchantConnectorRepository tests", () => {
     const mocks = new MerchantConnectorRepositoryMocks();
 
     td.when(mocks.localStorageUtils.getItem("AuthorizedMerchants")).thenReturn(null);
-    
+
     const error = new MerchantConnectorError();
     td.when(mocks.merchantConnectorProxy.activateConnector()).thenReturn(errAsync(error));
 
@@ -479,9 +502,9 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await (repo.activateAuthorizedMerchants().andThen(() => {
+    const result = await repo.activateAuthorizedMerchants().andThen(() => {
       return repo.getMerchantPublicKeys([merchantUrl]);
-    }));
+    });
 
     // Assert
     expect(result).toBeDefined();
@@ -495,7 +518,13 @@ describe("MerchantConnectorRepository tests", () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
-    td.when(mocks.ajaxUtils.get(td.matchers.argThat((arg: URL) => {return arg.toString() == `${merchantUrl}publicKey`}))).thenReturn(okAsync(merchantPublicKey));
+    td.when(
+      mocks.ajaxUtils.get(
+        td.matchers.argThat((arg: URL) => {
+          return arg.toString() == `${merchantUrl}publicKey`;
+        }),
+      ),
+    ).thenReturn(okAsync(merchantPublicKey));
 
     const repo = mocks.factoryRepository();
 
@@ -514,14 +543,20 @@ describe("MerchantConnectorRepository tests", () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
-    td.when(mocks.ajaxUtils.get(td.matchers.argThat((arg: URL) => {return arg.toString() == `${merchantUrl2}publicKey`}))).thenReturn(okAsync(merchantPublicKey2));
+    td.when(
+      mocks.ajaxUtils.get(
+        td.matchers.argThat((arg: URL) => {
+          return arg.toString() == `${merchantUrl2}publicKey`;
+        }),
+      ),
+    ).thenReturn(okAsync(merchantPublicKey2));
 
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await (repo.activateAuthorizedMerchants().andThen(() => {
+    const result = await repo.activateAuthorizedMerchants().andThen(() => {
       return repo.getMerchantPublicKeys([merchantUrl, merchantUrl2]);
-    }));
+    });
 
     // Assert
     expect(result).toBeDefined();
@@ -536,15 +571,21 @@ describe("MerchantConnectorRepository tests", () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
-    const error = new Error()
-    td.when(mocks.ajaxUtils.get(td.matchers.argThat((arg: URL) => {return arg.toString() == `${merchantUrl2}publicKey`}))).thenReturn(errAsync(error));
+    const error = new Error();
+    td.when(
+      mocks.ajaxUtils.get(
+        td.matchers.argThat((arg: URL) => {
+          return arg.toString() == `${merchantUrl2}publicKey`;
+        }),
+      ),
+    ).thenReturn(errAsync(error));
 
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await (repo.activateAuthorizedMerchants().andThen(() => {
+    const result = await repo.activateAuthorizedMerchants().andThen(() => {
       return repo.getMerchantPublicKeys([merchantUrl, merchantUrl2]);
-    }));
+    });
 
     // Assert
     expect(result).toBeDefined();

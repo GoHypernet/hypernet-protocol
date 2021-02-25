@@ -98,11 +98,12 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     let context: HypernetContext;
 
     // First, we will create the proxy
-    return this.contextProvider.getContext()
-    .andThen((myContext) => {
-      context = myContext;
-      return this.merchantConnectorProxyFactory.factoryProxy(merchantUrl)
-    })
+    return this.contextProvider
+      .getContext()
+      .andThen((myContext) => {
+        context = myContext;
+        return this.merchantConnectorProxyFactory.factoryProxy(merchantUrl);
+      })
       .andThen((myProxy) => {
         proxy = myProxy;
 
