@@ -1,5 +1,11 @@
 import { ethers } from "ethers";
-import { ExternalProvider } from "@hypernetlabs/hypernet-core";
+
+class ExternalProvider {
+  constructor(
+    public provider: ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
+    public address: string,
+  ) {}
+}
 
 export class ExternalProviderUtils {
   getExternalProviderForDevelopment(): ExternalProvider {

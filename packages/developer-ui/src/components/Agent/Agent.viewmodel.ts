@@ -9,6 +9,13 @@ import { ActionsParams } from "../Actions/Actions.viewmodel";
 import { StatusParams } from "../Status/Status.viewmodel";
 import { AuthorizedMerchantFormParams } from "../AuthorizedMerchantForm/AuthorizedMerchantForm.viewmodel";
 import { AuthorizedMerchantsParams } from "../AuthorizedMerchants/AuthorizedMerchants.viewmodel";
+import { ExternalProviderUtils } from "packages/utils";
+
+declare global {
+  interface Window {
+    ethereum: any;
+  }
+}
 
 export class AgentViewModel {
   public account: AccountParams;
@@ -25,7 +32,14 @@ export class AgentViewModel {
   protected core: IHypernetCore;
 
   constructor() {
-    this.core = new HypernetCore(EBlockchainNetwork.Localhost);
+    if (!window.ethereum) {
+      const externalProviderUtils = new ExternalProviderUtils();
+      const externalProvider = externalProviderUtils.getExternalProviderForDevelopment();
+      this.core = new HypernetCore(EBlockchainNetwork.Localhost, undefined, externalProvider);
+    } else {
+      this.core = new HypernetCore(EBlockchainNetwork.Localhost);
+    }
+
     this.status = new StatusParams(this.core);
 
     this.account = new AccountParams(this.core);
