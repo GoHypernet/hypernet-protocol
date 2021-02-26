@@ -8,7 +8,7 @@ import LinksWidget from "@web-integration/widgets/LinksWidget";
 import PaymentWidget from "@web-integration/widgets/PaymentWidget";
 import FundWidget from "@web-integration/widgets/FundWidget";
 import {
-  IConnectorRenderParams,
+  IConnectorAuthorizationFlowParams,
   IHypernetWebIntegration,
   IRenderParams,
   IRenderPaymentWidgetParams,
@@ -22,6 +22,7 @@ import {
 } from "@web-integration/constants";
 import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
+import ConnectorAuthorizationFlow from "@web-integration/flows/ConnectorAuthorizationFlow";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
@@ -133,9 +134,18 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     );
   }
 
-  public async startConnectorFlow(config?: IConnectorRenderParams) {
-    this.iframeContainer.setAttribute("style", "display: block;");
-    this.proxy.startConnectorFlow(config?.connector);
+  public async renderConnectorAuthorizationFlow(config: IConnectorAuthorizationFlowParams) {
+    ReactDOM.render(
+      await this.bootstrapComponent(
+        <ConnectorAuthorizationFlow
+          connectorUrl={config.connectorUrl}
+          connectorName={config.connectorName}
+          connectorLogoUrl={config.connectorLogoUrl}
+        />,
+        config.showInModal,
+      ),
+      this.generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
+    );
   }
 }
 

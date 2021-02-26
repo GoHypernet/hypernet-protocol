@@ -2,11 +2,14 @@ import { PublicIdentifier, EthereumAddress, PublicKey, EPaymentType, ResultAsync
 import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 
 export interface IRenderParams {
-  selector: string;
+  selector?: string;
+  showInModal?: boolean;
 }
 
-export interface IConnectorRenderParams {
-  connector: string;
+export interface IConnectorAuthorizationFlowParams extends IRenderParams {
+  connectorUrl: string;
+  connectorName?: string;
+  connectorLogoUrl?: string;
 }
 
 export interface IRenderPaymentWidgetParams {
@@ -27,5 +30,5 @@ export interface IHypernetWebIntegration {
   renderFundWidget(params?: IRenderParams): void;
   renderLinksWidget(params?: IRenderParams): void;
   renderPaymentWidget(params?: IRenderPaymentWidgetParams): void;
-  startConnectorFlow(params?: IConnectorRenderParams): void;
+  renderConnectorAuthorizationFlow(params: IConnectorAuthorizationFlowParams): void;
 }
