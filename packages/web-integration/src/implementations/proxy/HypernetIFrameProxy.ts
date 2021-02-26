@@ -282,10 +282,6 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return this._createCall("authorizeMerchant", merchantUrl);
   }
 
-  public startConnectorFlow(connector?: string): ResultAsync<void, CoreUninitializedError | MerchantValidationError> {
-    return this._createCall("startConnectorFlow", connector);
-  }
-
   public getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError> {
     return this._createCall("getAuthorizedMerchants", null);
   }

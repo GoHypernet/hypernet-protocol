@@ -1,5 +1,6 @@
 import ko from "knockout";
-import { BigNumber, EthereumAddress, IHypernetCore, PublicIdentifier } from "@hypernetlabs/hypernet-core";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import { BigNumber, EthereumAddress, PublicIdentifier } from "@hypernetlabs/hypernet-core";
 import html from "./PushPaymentForm.template.html";
 import moment from "moment";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
@@ -9,7 +10,7 @@ import { AuthorizedMerchantSelectorParams } from "../AuthorizedMerchantSelector/
 
 export class PushPaymentFormParams {
   constructor(
-    public core: IHypernetCore,
+    public core: IHypernetWebIntegration,
     public counterparty: ko.Observable<PublicIdentifier> | ko.Computed<PublicIdentifier>,
   ) {}
 }
@@ -29,7 +30,7 @@ export class PushPaymentFormViewModel {
 
   public submitButton: ButtonParams;
 
-  protected core: IHypernetCore;
+  protected core: IHypernetWebIntegration;
   protected counterparty: ko.Observable<PublicIdentifier> | ko.Computed<PublicIdentifier>;
 
   constructor(params: PushPaymentFormParams) {
@@ -64,7 +65,7 @@ export class PushPaymentFormViewModel {
           const amount = utils.parseUnits(this.amount(), "wei");
           const requiredStake = utils.parseUnits(this.requiredStake(), "wei");
 
-          return await this.core.sendFunds(
+          return await this.core.proxy.sendFunds(
             this.counterparty(),
             amount.toString(),
             expirationDate.unix(),

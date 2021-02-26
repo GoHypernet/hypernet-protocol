@@ -1,14 +1,14 @@
-import { IHypernetCore } from "@hypernetlabs/hypernet-core";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import ko from "knockout";
 import html from "./Status.template.html";
 
 export class StatusParams {
-  constructor(public core: IHypernetCore) {}
+  constructor(public core: IHypernetWebIntegration) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
 export class StatusViewModel {
-  public core: IHypernetCore;
+  public core: IHypernetWebIntegration;
   public startupComplete: ko.Observable<boolean>;
   public inControl: ko.Observable<boolean>;
 
@@ -17,13 +17,13 @@ export class StatusViewModel {
     this.startupComplete = ko.observable(true);
     this.inControl = ko.observable(false);
 
-    this.core.onControlClaimed.subscribe({
+    this.core.proxy.onControlClaimed.subscribe({
       next: () => {
         this.inControl(true);
       },
     });
 
-    this.core.onControlYielded.subscribe({
+    this.core.proxy.onControlYielded.subscribe({
       next: () => {
         this.inControl(false);
       },

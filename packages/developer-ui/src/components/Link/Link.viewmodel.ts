@@ -1,11 +1,12 @@
 import ko from "knockout";
-import { HypernetLink, IHypernetCore } from "@hypernetlabs/hypernet-core";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import { HypernetLink } from "@hypernetlabs/hypernet-core";
 import html from "./Link.template.html";
 import { PushPaymentParams } from "../PushPayment/PushPayment.viewmodel";
 import { PullPaymentParams } from "../PullPayment/PullPayment.viewmodel";
 
 export class LinkParams {
-  constructor(public core: IHypernetCore, public link: HypernetLink) {}
+  constructor(public core: IHypernetWebIntegration, public link: HypernetLink) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -15,7 +16,7 @@ export class LinkViewModel {
   public pullPayments: ko.ObservableArray<PullPaymentParams>;
 
   protected counterParty: string;
-  protected core: IHypernetCore;
+  protected core: IHypernetWebIntegration;
 
   constructor(params: LinkParams) {
     this.core = params.core;
@@ -40,7 +41,7 @@ export class LinkViewModel {
     // tslint:disable-next-line: no-console
     console.log(`Pushed ${pullPaymentParams.length} pull payment params`);
 
-    this.core.onPullPaymentProposed.subscribe({
+    this.core.proxy.onPullPaymentProposed.subscribe({
       next: (payment) => {
         if (payment.to === this.counterParty || payment.from === this.counterParty) {
           // It's for us, we'll need to add it to the payments for the link
@@ -49,7 +50,7 @@ export class LinkViewModel {
       },
     });
 
-    this.core.onPushPaymentProposed.subscribe({
+    this.core.proxy.onPushPaymentProposed.subscribe({
       next: (payment) => {
         if (payment.to === this.counterParty || payment.from === this.counterParty) {
           // It's for us, we'll need to add it to the payments for the link

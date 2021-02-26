@@ -132,11 +132,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       this.generateDomElement(config?.selector || PAYMENT_WIDGET_ID_SELECTOR),
     );
   }
-
-  public async startConnectorFlow(config?: IConnectorRenderParams) {
-    this.iframeContainer.setAttribute("style", "display: block;");
-    this.proxy.startConnectorFlow(config?.connector);
-  }
 }
 
 declare let window: any;

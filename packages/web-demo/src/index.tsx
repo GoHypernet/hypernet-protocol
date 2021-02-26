@@ -17,8 +17,6 @@ client.getReady().map(async (proxy) => {
 
   client.renderFundWidget();
 
-  client.startConnectorFlow();
-
   client.renderLinksWidget();
 
   client.renderPaymentWidget();

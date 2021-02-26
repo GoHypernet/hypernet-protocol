@@ -1,5 +1,4 @@
 import { BigNumber, EthereumAddress, IHypernetCore, PublicIdentifier, PublicKey } from "@hypernetlabs/hypernet-core";
-import { renderConnectorAuthenticatorScreen } from "@hypernetlabs/web-ui";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import Postmate from "postmate";
 
@@ -120,15 +119,10 @@ export default class CoreWrapper extends ChildProxy {
           return this.core.mintTestToken(BigNumber.from(data.data));
         }, data.callId);
       },
-      startConnectorFlow: (connector?: string) => {
-        // get balances first then render modal with connect button
-        // TODO: balances need viewModel class just like the one in web-integration store
-        this.core.getBalances().map((balances) => {
-          renderConnectorAuthenticatorScreen(connector, balances.assets, () => {
-            // user clicked connect confirm button
-            console.log("hello from callback");
-          });
-        });
+      authorizeMerchant: (data: IIFrameCallData<string>) => {
+        this.returnForModel(() => {
+          return this.core.authorizeMerchant(data.data);
+        }, data.callId);
       },
     });
   }

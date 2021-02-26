@@ -1,11 +1,12 @@
 import ko from "knockout";
-import { EPaymentType, IHypernetCore } from "@hypernetlabs/hypernet-core";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import { EPaymentType } from "@hypernetlabs/hypernet-core";
 import html from "./PaymentForm.template.html";
 import { PushPaymentFormParams } from "../PushPaymentForm/PushPaymentForm.viewmodel";
 import { PullPaymentFormParams } from "../PullPaymentForm/PullPaymentForm.viewmodel";
 
 export class PaymentFormParams {
-  constructor(public core: IHypernetCore) {}
+  constructor(public core: IHypernetWebIntegration) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -23,7 +24,7 @@ export class PaymentFormViewModel {
   public pushPayment: PushPaymentFormParams;
   public pullPayment: PullPaymentFormParams;
 
-  protected core: IHypernetCore;
+  protected core: IHypernetWebIntegration;
 
   constructor(params: PaymentFormParams) {
     this.core = params.core;

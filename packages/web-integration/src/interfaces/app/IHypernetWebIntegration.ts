@@ -27,5 +27,4 @@ export interface IHypernetWebIntegration {
   renderFundWidget(params?: IRenderParams): void;
   renderLinksWidget(params?: IRenderParams): void;
   renderPaymentWidget(params?: IRenderPaymentWidgetParams): void;
-  startConnectorFlow(params?: IConnectorRenderParams): void;
 }
