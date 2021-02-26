@@ -1,32 +1,32 @@
 import ko from "knockout";
-import { IHypernetCore } from "@hypernetlabs/hypernet-core";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import html from "./AuthorizedMerchants.template.html";
 
 export class AuthorizedMerchantsParams {
-  constructor(public core: IHypernetCore) {}
+  constructor(public core: IHypernetWebIntegration) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
 export class AuthorizedMerchantsViewModel {
   public authorizedMerchants: ko.ObservableArray<string>;
 
-  protected core: IHypernetCore;
+  protected core: IHypernetWebIntegration;
 
   constructor(params: AuthorizedMerchantsParams) {
     this.core = params.core;
 
     this.authorizedMerchants = ko.observableArray();
 
-    this.core.onMerchantAuthorized.subscribe({
+    this.core.proxy.onMerchantAuthorized.subscribe({
       next: (val) => {
         this.authorizedMerchants.push(val.toString());
       },
     });
 
     this.core
-      .waitInitialized()
+      .getReady()
       .andThen(() => {
-        return this.core.getAuthorizedMerchants();
+        return this.core.proxy.getAuthorizedMerchants();
       })
       .map((merchants) => {
         const merchantStrings = new Array<string>();

@@ -1,25 +1,24 @@
-import { IHypernetCore } from "@hypernetlabs/hypernet-core";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import ko from "knockout";
 import html from "./Account.template.html";
 
 export class AccountParams {
-  constructor(public core: IHypernetCore) {}
+  constructor(public core: IHypernetWebIntegration) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
 export class AccountViewModel {
   public publicIdentifier: ko.Observable<string>;
 
-  protected core: IHypernetCore;
+  protected core: IHypernetWebIntegration;
 
   constructor(params: AccountParams) {
     this.core = params.core;
     this.publicIdentifier = ko.observable("");
-
     this.core
-      .waitInitialized()
+      .getReady()
       .andThen(() => {
-        return this.core.getPublicIdentifier();
+        return this.core.proxy.getPublicIdentifier();
       })
       .map((publicIdentifier) => {
         this.publicIdentifier(publicIdentifier);

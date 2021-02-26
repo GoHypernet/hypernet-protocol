@@ -7,6 +7,7 @@ import { LinksParams } from "../Links/Links.viewmodel";
 import { AccountParams } from "../Account/Account.viewmodel";
 import { ActionsParams } from "../Actions/Actions.viewmodel";
 import { StatusParams } from "../Status/Status.viewmodel";
+import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { AuthorizedMerchantFormParams } from "../AuthorizedMerchantForm/AuthorizedMerchantForm.viewmodel";
 import { AuthorizedMerchantsParams } from "../AuthorizedMerchants/AuthorizedMerchants.viewmodel";
 
@@ -22,10 +23,10 @@ export class AgentViewModel {
   public paymentForm: PaymentFormParams;
   public merchantForm: AuthorizedMerchantFormParams;
 
-  protected core: IHypernetCore;
+  protected core: IHypernetWebIntegration;
 
   constructor() {
-    this.core = new HypernetCore(EBlockchainNetwork.Localhost);
+    this.core = new HypernetWebIntegration();
     this.status = new StatusParams(this.core);
 
     this.account = new AccountParams(this.core);
@@ -42,23 +43,28 @@ export class AgentViewModel {
   }
 
   protected startup(): Promise<void> {
-    return this.core
-      .getEthereumAccounts()
-      .andThen((accounts) => {
-        return this.core.initialize(accounts[0]);
-      })
-      .match(
-        () => {
-          this.message("Startup Complete");
-        },
-        (e) => {
-          this.message("Startup failed!");
-          // tslint:disable-next-line: no-console
-          console.log("Startup failed!");
-          // tslint:disable-next-line: no-console
-          console.log(e);
-        },
-      );
+    return this.core.getReady().match(
+      () => {
+        this.core.proxy
+          .getEthereumAccounts()
+          .andThen((accounts) => {
+            return this.core.proxy.initialize(accounts[0]);
+          })
+          .match(
+            () => {
+              this.message("Startup Complete");
+            },
+            (e) => {
+              this.message("Startup failed!");
+              console.log(e);
+            },
+          );
+      },
+      (e) => {
+        this.message("Startup failed!");
+        console.log(e);
+      },
+    );
   }
 }
 

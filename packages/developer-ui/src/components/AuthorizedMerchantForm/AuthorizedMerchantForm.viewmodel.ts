@@ -1,10 +1,10 @@
 import ko from "knockout";
-import { IHypernetCore } from "@hypernetlabs/hypernet-core";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import html from "./AuthorizedMerchantForm.template.html";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
 
 export class AuthorizedMerchantFormParams {
-  constructor(public core: IHypernetCore) {}
+  constructor(public core: IHypernetWebIntegration) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -12,7 +12,7 @@ export class AuthorizedMerchantFormViewModel {
   public merchantUrl: ko.Observable<string>;
   public submitButton: ButtonParams;
 
-  protected core: IHypernetCore;
+  protected core: IHypernetWebIntegration;
 
   constructor(params: AuthorizedMerchantFormParams) {
     this.core = params.core;
@@ -21,7 +21,7 @@ export class AuthorizedMerchantFormViewModel {
     this.submitButton = new ButtonParams(
       "Authorize Merchant",
       async () => {
-        return await this.core.authorizeMerchant(this.merchantUrl());
+        return await this.core.proxy.authorizeMerchant(this.merchantUrl());
       },
       EButtonType.Normal,
       ko.pureComputed(() => {
