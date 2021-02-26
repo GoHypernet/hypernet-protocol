@@ -1,30 +1,25 @@
 import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-
-// Just an implementation to have the front end galileo package for development purposes
-// do npm login and yarn install @hypernetwork/galileo-frontend to make it work in your local
-/* import "./GalileoFrontend"; */
+import Spinner from "./assets/loading-spinner";
 
 const client: IHypernetWebIntegration = new HypernetWebIntegration();
 
+// set image background styles
+var style = document.createElement("style");
+style.innerHTML = `body {
+  background-image: url(https://res.cloudinary.com/dqueufbs7/image/upload/v1614304492/images/Screen_Shot_2021-02-26_at_04.53.40.png);
+  height: 100%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-color: #F9F9F9;
+}`;
+
+// Get the first script tag
+var ref = document.querySelector("script");
+ref?.parentNode?.insertBefore(style, ref);
+
+Spinner();
+Spinner.show();
 client.getReady().map(async (proxy) => {
-  // client wants to get the balances and show it in a design of his design
-  proxy.getBalances().map((balances) => {
-    console.log("get balances from proxy inside ready: ", balances.assets);
-  });
-
-  // client wants to get the widget component ready with the data
-  client.renderBalancesWidget();
-
-  client.renderFundWidget();
-
-  client.renderLinksWidget();
-
-  client.renderPaymentWidget();
+  Spinner.hide();
+  client.renderConnectorAuthorizationFlow({ connectorUrl: "http://localhost:5010", showInModal: true });
 });
-
-// try to call the proxy not just in ready but after some time in an async way
-setTimeout(() => {
-  //client.renderBalancesWidget();
-}, 10000);
-
-declare let window: any;

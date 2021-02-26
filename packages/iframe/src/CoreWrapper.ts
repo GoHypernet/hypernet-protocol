@@ -1,4 +1,4 @@
-import { BigNumber, EthereumAddress, IHypernetCore, PublicIdentifier, PublicKey } from "@hypernetlabs/hypernet-core";
+import { BigNumber, EthereumAddress, IHypernetCore, PublicIdentifier } from "@hypernetlabs/hypernet-core";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import Postmate from "postmate";
 
@@ -105,6 +105,11 @@ export default class CoreWrapper extends ChildProxy {
           return this.core.acceptOffers(data.data);
         }, data.callId);
       },
+      authorizeMerchant: (data: IIFrameCallData<string>) => {
+        this.returnForModel(() => {
+          return this.core.authorizeMerchant(data.data);
+        }, data.callId);
+      },
 
       //   pullFunds(paymentId: string, amount: BigNumber): Promise<Payment>;
 
@@ -117,11 +122,6 @@ export default class CoreWrapper extends ChildProxy {
       mintTestToken: (data: IIFrameCallData<string>) => {
         this.returnForModel(() => {
           return this.core.mintTestToken(BigNumber.from(data.data));
-        }, data.callId);
-      },
-      authorizeMerchant: (data: IIFrameCallData<string>) => {
-        this.returnForModel(() => {
-          return this.core.authorizeMerchant(data.data);
         }, data.callId);
       },
     });
