@@ -88,9 +88,10 @@ import { IVectorListener } from "@interfaces/api";
 import { Subject } from "rxjs";
 import { ok, Result, ResultAsync } from "neverthrow";
 import { AxiosAjaxUtils, IAjaxUtils, ResultUtils } from "@hypernetlabs/utils";
-import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
+import { IBrowserNodeFactory, IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 import { MerchantConnectorProxyFactory } from "@implementations/utilities/factory";
 import { LocalStorageUtils } from "./utilities/LocalStorageUtils";
+import { BrowserNodeFactory } from "./utilities/factory/BrowserNodeFactory";
 
 /**
  * The top-level class-definition for Hypernet Core.
@@ -123,8 +124,11 @@ export class HypernetCore implements IHypernetCore {
   protected logUtils: ILogUtils;
   protected ajaxUtils: IAjaxUtils;
   protected blockchainUtils: IBlockchainUtils;
-  protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory;
   protected localStorageUtils: ILocalStorageUtils;
+
+  // Factories
+  protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory;
+  protected browserNodeFactory: IBrowserNodeFactory;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
@@ -208,11 +212,15 @@ export class HypernetCore implements IHypernetCore {
     this.configProvider = new ConfigProvider(network, this.logUtils, config);
     this.linkUtils = new LinkUtils(this.contextProvider);
 
+    this.merchantConnectorProxyFactory = new MerchantConnectorProxyFactory(this.configProvider);
+    this.browserNodeFactory = new BrowserNodeFactory(this.configProvider, this.logUtils);
+
     this.browserNodeProvider = new BrowserNodeProvider(this.configProvider,
       this.contextProvider,
       this.blockchainProvider,
       this.logUtils,
-      this.localStorageUtils);
+      this.localStorageUtils,
+      this.browserNodeFactory);
     this.vectorUtils = new VectorUtils(
       this.configProvider,
       this.contextProvider,
@@ -232,7 +240,6 @@ export class HypernetCore implements IHypernetCore {
     );
     this.ajaxUtils = new AxiosAjaxUtils();
     this.blockchainUtils = new EthersBlockchainUtils(this.blockchainProvider);
-    this.merchantConnectorProxyFactory = new MerchantConnectorProxyFactory(this.configProvider);
     
     this.accountRepository = new AccountsRepository(
       this.blockchainProvider,

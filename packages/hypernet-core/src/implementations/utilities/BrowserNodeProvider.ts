@@ -1,4 +1,4 @@
-import { BrowserNode, NonEIP712Message  } from "@connext/vector-browser-node";
+import { NonEIP712Message  } from "@connext/vector-browser-node";
 import {
   IBrowserNode,
   IContextProvider,
@@ -7,12 +7,12 @@ import {
   IConfigProvider,
   IBlockchainProvider,
   ILocalStorageUtils,
-} from "@interfaces/utilities";
-import { WrappedBrowserNode } from "./WrappedBrowserNode";
+} from "@interfaces/utilities";=
 import { BlockchainUnavailableError, CoreUninitializedError, VectorError } from "@interfaces/objects/errors";
 import { errAsync, HypernetConfig, HypernetContext, okAsync, ResultAsync } from "@interfaces/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
 import { ethers} from "ethers";
+import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
 
 export class BrowserNodeProvider implements IBrowserNodeProvider {
   protected browserNodeResult: ResultAsync<IBrowserNode, VectorError | Error> | null;
@@ -23,6 +23,7 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
     protected blockchainProvider: IBlockchainProvider,
     protected logUtils: ILogUtils,
     protected storageUtils: ILocalStorageUtils, 
+    protected browserNodeFactory: IBrowserNodeFactory,
   ) {
     this.browserNodeResult = null;
     this.browserNode = null;
@@ -35,9 +36,10 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
 
       this.browserNodeResult = ResultUtils.combine([this.configProvider.getConfig(),
         this.blockchainProvider.getSigner(),
-      this.contextProvider.getContext()])
+      this.contextProvider.getContext(),
+    this.browserNodeFactory.factoryBrowserNode()])
         .andThen((vals) => {
-          [config, signer, context] = vals;
+          [config, signer, context, this.browserNode] = vals;
 
           // If no account is set in the context, then we have to error out.
           // Normally we would use getInitializedContext, but in this case, you need
@@ -63,23 +65,13 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
         .andThen((vals) => {
           const [account, signature] = vals;
 
-          // Create the browser node
-          const vectorBrowserNode = new BrowserNode({
-            routerPublicIdentifier: config.routerPublicIdentifier,
-            logger: this.logUtils.getPino(),
-            iframeSrc: config.iframeSource,
-            chainProviders: config.chainProviders,
-            chainAddresses: config.chainAddresses,
-            //messagingUrl: 'localhost:80'
-          });
-
-          // Stick it in a wrapper
-          this.browserNode = new WrappedBrowserNode(vectorBrowserNode);
-
           // Store the signature so you don't have to sign again
           this.storageUtils.setSessionItem(`account-${account}-signature`, signature);
 
           // Initialize the browser node
+          if (this.browserNode == null) {
+            throw new Error("Something is badly broken");
+          }
           return this.browserNode.init(signature, account);
         })
         .orElse((e) => {

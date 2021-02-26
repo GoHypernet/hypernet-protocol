@@ -22,11 +22,11 @@ class AccountServiceMocks {
     this.balances = new Balances([new AssetBalance(assetAddress, "PhoebeCoin", "BEEP", 4, amount, amount, amount)]);
 
     td.when(this.accountRepository.getPublicIdentifier()).thenReturn(okAsync(publicIdentifier));
-    td.when(this.accountRepository.depositFunds(td.matchers.anything(), td.matchers.anything())).thenReturn(
+    td.when(this.accountRepository.depositFunds(assetAddress, amount)).thenReturn(
       okAsync(null),
     );
     td.when(
-      this.accountRepository.withdrawFunds(td.matchers.anything(), td.matchers.anything(), td.matchers.anything()),
+      this.accountRepository.withdrawFunds(assetAddress, amount, destinationAddress),
     ).thenReturn(okAsync(undefined));
     td.when(this.accountRepository.getBalances()).thenReturn(okAsync(this.balances));
   }
@@ -96,7 +96,6 @@ describe("AccountService tests", () => {
     const response = await accountService.depositFunds(assetAddress, amount);
 
     // Assert
-    td.verify(accountServiceMock.accountRepository.depositFunds(assetAddress, amount));
     expect(response.isErr()).toBeFalsy();
     expect(response._unsafeUnwrap()).toBe(accountServiceMock.balances);
     expect(publishedBalances.length).toBe(1);
@@ -117,7 +116,6 @@ describe("AccountService tests", () => {
     const response = await accountService.withdrawFunds(assetAddress, amount, destinationAddress);
 
     // Assert
-    td.verify(accountServiceMock.accountRepository.withdrawFunds(assetAddress, amount, destinationAddress));
     expect(response.isErr()).toBeFalsy();
     expect(response._unsafeUnwrap()).toBe(accountServiceMock.balances);
     expect(publishedBalances.length).toBe(1);

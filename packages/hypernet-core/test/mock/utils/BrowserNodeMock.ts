@@ -2,6 +2,7 @@ import { IBrowserNode, IFullChannelState } from "@interfaces/utilities";
 import { chainId, routerChannelAddress, routerPublicIdentifier } from "@mock/mocks";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
+import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
 
 export function createBrowserNodeMock(stateChannels: IFullChannelState[] | null = null): IBrowserNode {
   const stateChannelsMap = new Map<string, IFullChannelState>();
@@ -47,7 +48,7 @@ export function createBrowserNodeMock(stateChannels: IFullChannelState[] | null 
 
   const browserNode = td.object<IBrowserNode>();
 
-  td.when(browserNode.setup(td.matchers.anything(), td.matchers.anything(), td.matchers.anything())).thenReturn(
+  td.when(browserNode.setup(routerPublicIdentifier, chainId, DEFAULT_CHANNEL_TIMEOUT.toString())).thenReturn(
     okAsync({ channelAddress: routerChannelAddress }),
   );
   td.when(browserNode.getStateChannels()).thenReturn(okAsync(Array.from(stateChannelsMap.keys())));
