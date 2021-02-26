@@ -151,7 +151,7 @@ export interface IBrowserNode {
 
   getTransfers(startDate: number, endDate: number): ResultAsync<IFullTransferState[], VectorError>;
 
-  init(): ResultAsync<void, VectorError>;
+  init(signature: string, account: string): ResultAsync<void, VectorError>;
 
   getRegisteredTransfers(chainId: number): ResultAsync<IRegisteredTransfer[], VectorError>;
 
@@ -180,10 +180,15 @@ export interface IBrowserNode {
 
   getStateChannel(channelAddress: EthereumAddress): ResultAsync<IFullChannelState | undefined, VectorError>;
 
+  getStateChannelByParticipants(counterparty: PublicIdentifier, chainId: number): ResultAsync<IFullChannelState | undefined, VectorError>;
+
   setup(
     counterpartyIdentifier: PublicIdentifier,
     chainId: number,
     timeout: string,
     meta?: any,
   ): ResultAsync<IBasicChannelResponse, VectorError>;
+
+  restoreState(counterpartyIdentifier: PublicIdentifier,
+    chainId: number): ResultAsync<void, VectorError>;
 }
