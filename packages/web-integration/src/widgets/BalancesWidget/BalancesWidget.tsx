@@ -8,12 +8,7 @@ const BalancesWidget: React.FC = () => {
 
   // put some logic if needed
 
-  return (
-    <div>
-      <h2>here are your balances: </h2>
-      <BalanceList balances={balances} />
-    </div>
-  );
+  return <BalanceList balances={balances} />;
 };
 
 export default BalancesWidget;

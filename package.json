@@ -44,6 +44,7 @@
     "generate-docs": "lerna run generate-docs",
     "lint": "lerna run lint",
     "start": "yarn clean && yarn compile-necessary && cd packages/developer-ui && yarn start",
+    "start-web-demo": "cd packages/web-demo && yarn start",
     "compile-necessary": "cd packages/merchant-connector && yarn compile && cd ../utils && yarn compile && cd ../test-merchant-connector && yarn build && cd ../iframe && yarn build && cd ../merchant-iframe && yarn build && cd ../",
     "test": "cd packages/hypernet-core && yarn test"
   },

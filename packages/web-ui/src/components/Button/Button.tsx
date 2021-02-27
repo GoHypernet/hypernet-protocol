@@ -1,5 +1,6 @@
 import React from "react";
-import { colors, EStatusColor, getColorFromStatus } from "../../theme";
+import { EStatusColor, getColorFromStatus } from "../../theme";
+import styles from "./Button.style";
 
 interface ButtonProps {
   onClick?: () => void;
@@ -7,22 +8,17 @@ interface ButtonProps {
   disabled?: boolean;
   status?: EStatusColor;
   fullWidth?: boolean;
+  bgColor?: string;
 }
 
 const Button: React.FC<ButtonProps> = (props: ButtonProps) => {
-  const { onClick, label, disabled, status = EStatusColor.SUCCESS, fullWidth } = props;
+  const { onClick, label, disabled, status = EStatusColor.PRIMARY, fullWidth, bgColor } = props;
 
   return (
     <button
       style={{
-        padding: "9px 26px",
-        color: colors.WHITE,
-        textAlign: "center",
-        fontSize: 15,
-        background: `${getColorFromStatus(status)} 0% 0% no-repeat padding-box`,
-        borderRadius: 4,
-        border: "none",
-        cursor: "pointer",
+        ...styles.button,
+        background: bgColor || `${getColorFromStatus(status)} 0% 0% no-repeat padding-box`,
         width: fullWidth ? "100%" : "auto",
       }}
       onClick={onClick}

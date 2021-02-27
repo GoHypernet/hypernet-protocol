@@ -1,5 +1,5 @@
 import React from "react";
-import { Modal } from "@hypernetlabs/web-ui";
+import Modal from "../Modal";
 
 interface IMainContainer {
   children: React.ReactNode;
@@ -8,14 +8,10 @@ interface IMainContainer {
 
 function MainContainer({ children, withModal }: IMainContainer) {
   if (withModal) {
-    return (
-      <Modal isOpen={true}>
-        <div>{children}</div>
-      </Modal>
-    );
+    return <Modal isOpen={true}>{children}</Modal>;
   }
 
-  return <div>{children}</div>;
+  return <>{children}</>;
 }
 
 export default MainContainer;
