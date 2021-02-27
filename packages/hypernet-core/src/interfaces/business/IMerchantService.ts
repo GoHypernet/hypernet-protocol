@@ -7,7 +7,7 @@ import {
 } from "@interfaces/objects/errors";
 
 export interface IMerchantService {
-  authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MerchantValidationError>;
+  authorizeMerchant(merchantUrl: string): ResultAsync<void, CoreUninitializedError | MerchantValidationError>;
   getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError>;
   activateAuthorizedMerchants(): ResultAsync<void, MerchantConnectorError | PersistenceError>;
 }

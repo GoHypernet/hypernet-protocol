@@ -16,7 +16,7 @@ export class MerchantService implements IMerchantService {
   ) {}
 
   public authorizeMerchant(
-    merchantUrl: URL,
+    merchantUrl: string,
   ): ResultAsync<void, CoreUninitializedError | MerchantValidationError | PersistenceError> {
     return this.merchantConnectorRepository
       .addAuthorizedMerchant(merchantUrl)

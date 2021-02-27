@@ -36,15 +36,16 @@
   },
   "scripts": {
     "bootstrap": "yarn install && lerna init",
-    "compile": "tsc --build",
     "build": "lerna run build",
     "clean": "rimraf ./packages/*/dist",
+    "compile": "tsc --build",
     "format": "lerna run format && yarn format:pkg",
     "format:pkg": "format-package -w",
     "generate-docs": "lerna run generate-docs",
     "lint": "lerna run lint",
-    "start": "cd packages/developer-ui && yarn start",
-    "test": "lerna run test"
+    "start": "yarn clean && yarn compile-necessary && cd packages/developer-ui && yarn start",
+    "compile-necessary": "cd packages/merchant-connector && yarn compile && cd ../utils && yarn compile && cd ../test-merchant-connector && yarn build && cd ../iframe && yarn build && cd ../merchant-iframe && yarn build && cd ../",
+    "test": "cd packages/hypernet-core && yarn test"
   },
   "husky": {
     "hooks": {
@@ -53,6 +54,9 @@
   },
   "lint-staged": {
     "*.format:pkg": "prettier --write"
+  },
+  "dependencies": {
+    "browserify-zlib": "^0.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",
@@ -136,8 +140,5 @@
     "webpack": "^5.19.0",
     "webpack-cli": "^4.4.0",
     "webpack-dev-server": "^3.11.2"
-  },
-  "dependencies": {
-    "browserify-zlib": "^0.2.0"
   }
 }

@@ -1,10 +1,11 @@
 import ko from "knockout";
-import { Balances, EthereumAddress, IHypernetCore } from "@hypernetlabs/hypernet-core";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import { Balances, EthereumAddress } from "@hypernetlabs/hypernet-core";
 import html from "./TokenSelector.template.html";
 
 export class TokenSelectorParams {
   constructor(
-    public core: IHypernetCore,
+    public core: IHypernetWebIntegration,
     public selectedToken: ko.Observable<EthereumAddress | null>,
     public onlyWithBalance: boolean,
   ) {}
@@ -20,7 +21,7 @@ export class TokenSelectorViewModel {
   public paymentTokens: ko.ObservableArray<PaymentTokenOption>;
   public selectedPaymentTokenOption: ko.Computed<PaymentTokenOption | null>;
 
-  protected core: IHypernetCore;
+  protected core: IHypernetWebIntegration;
   protected selectedToken: ko.Observable<EthereumAddress | null>;
   protected balances: ko.Observable<Balances | null>;
   protected onlyWithBalance: boolean;
@@ -70,9 +71,9 @@ export class TokenSelectorViewModel {
   protected getBalances() {
     if (this.onlyWithBalance) {
       this.core
-        .waitInitialized()
+        .getReady()
         .andThen(() => {
-          return this.core.getBalances();
+          return this.core.proxy.getBalances();
         })
         .map((balances) => {
           const paymentTokens = new Array<PaymentTokenOption>();

@@ -38,7 +38,7 @@
     "prepublishOnly": "npm test && npm run lint",
     "start": "webpack serve --config webpack.config.js --mode development --open",
     "test": "yarn test:ci",
-    "test:ci": "jest --runInBand --coverage",
+    "test:ci": "jest --runInBand --coverage --passWithNoTests",
     "test:watch": "jest --watch --color --detectOpenHandles",
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",

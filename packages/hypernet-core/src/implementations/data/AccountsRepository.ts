@@ -1,4 +1,3 @@
-import { ERC20Abi } from "@connext/vector-types";
 import { IAccountsRepository } from "@interfaces/data";
 import { AssetBalance, Balances, BigNumber, EthereumAddress, PublicIdentifier, ResultAsync } from "@interfaces/objects";
 import {
@@ -8,9 +7,9 @@ import {
   ILogUtils,
   IBrowserNode,
   IFullChannelState,
+  IBlockchainUtils,
 } from "@interfaces/utilities";
-import { Contract, ethers, constants } from "ethers";
-import { artifacts } from "@connext/vector-contracts";
+import { ethers, constants } from "ethers";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import {
   BalancesUnavailableError,
@@ -35,17 +34,14 @@ export class AccountsRepository implements IAccountsRepository {
    * Retrieves an instances of the AccountsRepository.
    */
   protected assetInfo: Map<EthereumAddress, AssetInfo>;
-  protected erc20Abi: string[];
+
   constructor(
     protected blockchainProvider: IBlockchainProvider,
     protected vectorUtils: IVectorUtils,
     protected browserNodeProvider: IBrowserNodeProvider,
     protected logUtils: ILogUtils,
+    protected blockchainUtils: IBlockchainUtils,
   ) {
-    // The ERC20Abi from Vector does not include the name() function, so we will roll our own
-    this.erc20Abi = Object.assign([], ERC20Abi);
-    this.erc20Abi.push("function name() view returns (string)");
-
     // We will cache the info about each asset type, so we only have to look it up once.
     this.assetInfo = new Map();
 
@@ -161,34 +157,26 @@ export class AccountsRepository implements IAccountsRepository {
 
         if (assetAddress === "0x0000000000000000000000000000000000000000") {
           this.logUtils.log("Transferring ETH.");
-          console.log("Transferring ETH.");
           // send eth
           tx = ResultAsync.fromPromise(signer.sendTransaction({ to: channelAddress, value: amount }), (err) => {
             return err as BlockchainUnavailableError;
           });
         } else {
           this.logUtils.log("Transferring an ERC20 asset.");
-          console.log("Transferring an ERC20 asset.");
           // send an actual erc20 token
-          const tokenContract = new Contract(assetAddress, this.erc20Abi, signer);
-          tx = ResultAsync.fromPromise(tokenContract.transfer(channelAddress, amount), (err) => {
-            return err as BlockchainUnavailableError;
-          });
+          return this.blockchainUtils.erc20Transfer(assetAddress, channelAddress, amount);
         }
 
         return tx;
       })
       .andThen((tx) => {
-        console.log("Waiting");
         // TODO: Wait on this, break it up, this could take a while
         return ResultAsync.fromPromise(tx.wait(), (e) => e as BlockchainUnavailableError);
       })
       .andThen(() => {
         if (browserNode == null || channelAddress == null) {
-          console.log("really screwed up");
           return errAsync(new Error("Really screwed up!"));
         }
-        console.log("reconciling");
         return browserNode.reconcileDeposit(assetAddress, channelAddress);
       })
       .andThen((depositRes) => {
@@ -198,7 +186,6 @@ export class AccountsRepository implements IAccountsRepository {
 
         // Sanity check, the deposit was for the channel we tried to deposit into.
         if (depositChannelAddress !== channelAddress) {
-          console.log("depositChannelAddress !== channelAddress");
           return errAsync(new Error("Something has gone horribly wrong!"));
         }
 
@@ -238,19 +225,9 @@ export class AccountsRepository implements IAccountsRepository {
    * @param to the (Ethereum) address to mint the test token to
    */
   public mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<void, BlockchainUnavailableError> {
-    return this.blockchainProvider
-      .getSigner()
-      .andThen((signer) => {
-        const testTokenContract = new Contract(
-          "0x9FBDa871d559710256a2502A2517b794B482Db40",
-          artifacts.TestToken.abi,
-          signer,
-        );
+    const resp = this.blockchainUtils.mintToken(amount, to);
 
-        return ResultAsync.fromPromise(testTokenContract.mint(to, amount) as Promise<TransactionResponse>, (e) => {
-          return e as BlockchainUnavailableError;
-        });
-      })
+    return resp
       .andThen((mintTx) => {
         return ResultAsync.fromPromise(mintTx.wait(), (e) => {
           return e as BlockchainUnavailableError;
