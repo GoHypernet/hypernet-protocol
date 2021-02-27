@@ -22,12 +22,10 @@ class AccountServiceMocks {
     this.balances = new Balances([new AssetBalance(assetAddress, "PhoebeCoin", "BEEP", 4, amount, amount, amount)]);
 
     td.when(this.accountRepository.getPublicIdentifier()).thenReturn(okAsync(publicIdentifier));
-    td.when(this.accountRepository.depositFunds(assetAddress, amount)).thenReturn(
-      okAsync(null),
+    td.when(this.accountRepository.depositFunds(assetAddress, amount)).thenReturn(okAsync(null));
+    td.when(this.accountRepository.withdrawFunds(assetAddress, amount, destinationAddress)).thenReturn(
+      okAsync(undefined),
     );
-    td.when(
-      this.accountRepository.withdrawFunds(assetAddress, amount, destinationAddress),
-    ).thenReturn(okAsync(undefined));
     td.when(this.accountRepository.getBalances()).thenReturn(okAsync(this.balances));
   }
 

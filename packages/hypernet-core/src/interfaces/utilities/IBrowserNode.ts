@@ -180,7 +180,10 @@ export interface IBrowserNode {
 
   getStateChannel(channelAddress: EthereumAddress): ResultAsync<IFullChannelState | undefined, VectorError>;
 
-  getStateChannelByParticipants(counterparty: PublicIdentifier, chainId: number): ResultAsync<IFullChannelState | undefined, VectorError>;
+  getStateChannelByParticipants(
+    counterparty: PublicIdentifier,
+    chainId: number,
+  ): ResultAsync<IFullChannelState | undefined, VectorError>;
 
   setup(
     counterpartyIdentifier: PublicIdentifier,
@@ -189,6 +192,5 @@ export interface IBrowserNode {
     meta?: any,
   ): ResultAsync<IBasicChannelResponse, VectorError>;
 
-  restoreState(counterpartyIdentifier: PublicIdentifier,
-    chainId: number): ResultAsync<void, VectorError>;
+  restoreState(counterpartyIdentifier: PublicIdentifier, chainId: number): ResultAsync<void, VectorError>;
 }

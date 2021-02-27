@@ -30,7 +30,7 @@ import { IAjaxUtils } from "@hypernetlabs/utils";
 import { IBrowserNodeFactory, IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
 import { BigNumber } from "@interfaces/objects";
-import { NonEIP712Message  } from "@connext/vector-browser-node";
+import { NonEIP712Message } from "@connext/vector-browser-node";
 
 const validatedSignature = "0xValidatedSignature";
 const newAuthorizationSignature = "0xNewAuthorizationSignature";
@@ -71,20 +71,22 @@ class BrowserNodeProviderMocks {
     td.when(this.browserNodeFactory.factoryBrowserNode()).thenReturn(okAsync(this.browserNode));
 
     if (stubSigner) {
-        td.when(this.blockchainProvider.signer.getAddress()).thenResolve(account);
-        td.when(this.blockchainProvider.signer.signMessage(NonEIP712Message)).thenResolve(authorizationSignature);
+      td.when(this.blockchainProvider.signer.getAddress()).thenResolve(account);
+      td.when(this.blockchainProvider.signer.signMessage(NonEIP712Message)).thenResolve(authorizationSignature);
     }
-    
+
     td.when(this.browserNode.init(authorizationSignature, account)).thenReturn(okAsync(undefined));
   }
 
   public factoryProvider(): IBrowserNodeProvider {
-    return new BrowserNodeProvider(this.configProvider,
-        this.contextProvider,
-        this.blockchainProvider,
-        this.logUtils,
-        this.localStorageUtils,
-        this.browserNodeFactory);
+    return new BrowserNodeProvider(
+      this.configProvider,
+      this.contextProvider,
+      this.blockchainProvider,
+      this.logUtils,
+      this.localStorageUtils,
+      this.browserNodeFactory,
+    );
   }
 }
 
@@ -122,7 +124,7 @@ describe("BrowserNodeProvider tests", () => {
     const node = result._unsafeUnwrap();
     expect(node).toBe(mocks.browserNode);
     td.verify(mocks.localStorageUtils.setSessionItem(`account-${account}-signature`, authorizationSignature));
-    td.verify(mocks.blockchainProvider.signer.signMessage(NonEIP712Message), {times: 0});
+    td.verify(mocks.blockchainProvider.signer.signMessage(NonEIP712Message), { times: 0 });
   });
 
   test("getBrowserNode returns the same browser node and only initializes once if called twice", async () => {

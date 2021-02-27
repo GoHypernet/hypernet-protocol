@@ -215,12 +215,14 @@ export class HypernetCore implements IHypernetCore {
     this.merchantConnectorProxyFactory = new MerchantConnectorProxyFactory(this.configProvider);
     this.browserNodeFactory = new BrowserNodeFactory(this.configProvider, this.logUtils);
 
-    this.browserNodeProvider = new BrowserNodeProvider(this.configProvider,
+    this.browserNodeProvider = new BrowserNodeProvider(
+      this.configProvider,
       this.contextProvider,
       this.blockchainProvider,
       this.logUtils,
       this.localStorageUtils,
-      this.browserNodeFactory);
+      this.browserNodeFactory,
+    );
     this.vectorUtils = new VectorUtils(
       this.configProvider,
       this.contextProvider,
@@ -240,7 +242,7 @@ export class HypernetCore implements IHypernetCore {
     );
     this.ajaxUtils = new AxiosAjaxUtils();
     this.blockchainUtils = new EthersBlockchainUtils(this.blockchainProvider);
-    
+
     this.accountRepository = new AccountsRepository(
       this.blockchainProvider,
       this.vectorUtils,
@@ -530,7 +532,8 @@ export class HypernetCore implements IHypernetCore {
     }
 
     let context: HypernetContext;
-    this._initializeResult = this.contextProvider.getContext()
+    this._initializeResult = this.contextProvider
+      .getContext()
       .andThen((val) => {
         context = val;
         context.account = account;
@@ -539,7 +542,7 @@ export class HypernetCore implements IHypernetCore {
       .andThen(() => {
         return this.accountService.getPublicIdentifier();
       })
-      .andThen((publicIdentifier) => {     
+      .andThen((publicIdentifier) => {
         context.publicIdentifier = publicIdentifier;
         return this.contextProvider.setContext(context);
       })

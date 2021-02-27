@@ -8,7 +8,7 @@ export class LocalStorageUtils implements ILocalStorageUtils {
   public setItem(key: string, value: string): void {
     window.localStorage.setItem(key, value);
   }
-  
+
   public getSessionItem(key: string): string | null {
     return window.sessionStorage.getItem(key);
   }

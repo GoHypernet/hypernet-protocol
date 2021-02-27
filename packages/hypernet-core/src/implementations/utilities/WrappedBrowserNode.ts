@@ -29,10 +29,13 @@ export class WrappedBrowserNode implements IBrowserNode {
   }
 
   public init(signature: string, account: string): ResultAsync<void, VectorError> {
-    return ResultAsync.fromPromise(this.browserNode.init({
-      signature,
-      signer: account
-    }), this.toVectorError);
+    return ResultAsync.fromPromise(
+      this.browserNode.init({
+        signature,
+        signer: account,
+      }),
+      this.toVectorError,
+    );
   }
 
   public reconcileDeposit(assetId: EthereumAddress, channelAddress: EthereumAddress): ResultAsync<string, VectorError> {
@@ -220,16 +223,20 @@ export class WrappedBrowserNode implements IBrowserNode {
     );
   }
 
-  public getStateChannelByParticipants(counterparty: PublicIdentifier, chainId: number): ResultAsync<IFullChannelState | undefined, VectorError> {
-    return ResultAsync.fromPromise(this.browserNode.getStateChannelByParticipants({ counterparty, chainId }), this.toVectorError).andThen(
-      (result) => {
-        if (result.isError) {
-          return errAsync(new VectorError(result.getError() as NodeError));
-        } else {
-          return okAsync(result.getValue());
-        }
-      },
-    );
+  public getStateChannelByParticipants(
+    counterparty: PublicIdentifier,
+    chainId: number,
+  ): ResultAsync<IFullChannelState | undefined, VectorError> {
+    return ResultAsync.fromPromise(
+      this.browserNode.getStateChannelByParticipants({ counterparty, chainId }),
+      this.toVectorError,
+    ).andThen((result) => {
+      if (result.isError) {
+        return errAsync(new VectorError(result.getError() as NodeError));
+      } else {
+        return okAsync(result.getValue());
+      }
+    });
   }
 
   public setup(
@@ -250,10 +257,11 @@ export class WrappedBrowserNode implements IBrowserNode {
     });
   }
 
-  public restoreState(counterpartyIdentifier: PublicIdentifier,
-    chainId: number): ResultAsync<void, VectorError> {
-    return ResultAsync.fromPromise(this.browserNode.restoreState({ counterpartyIdentifier, chainId }),
-      this.toVectorError).map(() => { });
+  public restoreState(counterpartyIdentifier: PublicIdentifier, chainId: number): ResultAsync<void, VectorError> {
+    return ResultAsync.fromPromise(
+      this.browserNode.restoreState({ counterpartyIdentifier, chainId }),
+      this.toVectorError,
+    ).map(() => {});
   }
 
   public onConditionalTransferResolved(

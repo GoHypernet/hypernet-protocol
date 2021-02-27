@@ -1,4 +1,4 @@
-import { NonEIP712Message  } from "@connext/vector-browser-node";
+import { NonEIP712Message } from "@connext/vector-browser-node";
 import {
   IBrowserNode,
   IContextProvider,
@@ -7,11 +7,11 @@ import {
   IConfigProvider,
   IBlockchainProvider,
   ILocalStorageUtils,
-} from "@interfaces/utilities";=
+} from "@interfaces/utilities";
 import { BlockchainUnavailableError, CoreUninitializedError, VectorError } from "@interfaces/objects/errors";
 import { errAsync, HypernetConfig, HypernetContext, okAsync, ResultAsync } from "@interfaces/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
-import { ethers} from "ethers";
+import { ethers } from "ethers";
 import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
 
 export class BrowserNodeProvider implements IBrowserNodeProvider {
@@ -22,7 +22,7 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
     protected contextProvider: IContextProvider,
     protected blockchainProvider: IBlockchainProvider,
     protected logUtils: ILogUtils,
-    protected storageUtils: ILocalStorageUtils, 
+    protected storageUtils: ILocalStorageUtils,
     protected browserNodeFactory: IBrowserNodeFactory,
   ) {
     this.browserNodeResult = null;
@@ -34,10 +34,12 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
       let signer: ethers.providers.JsonRpcSigner;
       let context: HypernetContext;
 
-      this.browserNodeResult = ResultUtils.combine([this.configProvider.getConfig(),
+      this.browserNodeResult = ResultUtils.combine([
+        this.configProvider.getConfig(),
         this.blockchainProvider.getSigner(),
-      this.contextProvider.getContext(),
-    this.browserNodeFactory.factoryBrowserNode()])
+        this.contextProvider.getContext(),
+        this.browserNodeFactory.factoryBrowserNode(),
+      ])
         .andThen((vals) => {
           [config, signer, context, this.browserNode] = vals;
 
@@ -47,7 +49,9 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
           // is part of what qualifies for getInitializedContext. I do not see
           // a better way that doesn't involve a huge refactor.
           if (context.account == null) {
-            return errAsync<string[], CoreUninitializedError>(new CoreUninitializedError("Account is not set in BrowserNodeProvider.initialize"));
+            return errAsync<string[], CoreUninitializedError>(
+              new CoreUninitializedError("Account is not set in BrowserNodeProvider.initialize"),
+            );
           }
 
           // Check if the user has a signature in local storage for this account
@@ -57,10 +61,14 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
             return okAsync<string[], BlockchainUnavailableError>([context.account, storedSignature]);
           }
 
-          return ResultUtils.combine([ResultAsync.fromPromise(signer.getAddress(),
-          (e) => {return e as BlockchainUnavailableError}),
-          ResultAsync.fromPromise(signer.signMessage(NonEIP712Message),
-          (e) => {return e as BlockchainUnavailableError})]);
+          return ResultUtils.combine([
+            ResultAsync.fromPromise(signer.getAddress(), (e) => {
+              return e as BlockchainUnavailableError;
+            }),
+            ResultAsync.fromPromise(signer.signMessage(NonEIP712Message), (e) => {
+              return e as BlockchainUnavailableError;
+            }),
+          ]);
         })
         .andThen((vals) => {
           const [account, signature] = vals;
@@ -76,19 +84,18 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
         })
         .orElse((e) => {
           console.log(e);
-          const shouldAttemptRestore = ((e as any).context?.validationError ?? '').includes(
-            'Channel is already setup');
+          const shouldAttemptRestore = ((e as any).context?.validationError ?? "").includes("Channel is already setup");
 
           if (shouldAttemptRestore && this.browserNode != null) {
-            return this.browserNode.getStateChannelByParticipants(config.routerPublicIdentifier, config.chainId)
-            .andThen((channelState) => {
-              if (channelState == null && this.browserNode != null) {
-                return this.browserNode.restoreState(config.routerPublicIdentifier, config.chainId);
-              }
-              return okAsync<void, VectorError>(undefined);
-            })
-          }
-          else {
+            return this.browserNode
+              .getStateChannelByParticipants(config.routerPublicIdentifier, config.chainId)
+              .andThen((channelState) => {
+                if (channelState == null && this.browserNode != null) {
+                  return this.browserNode.restoreState(config.routerPublicIdentifier, config.chainId);
+                }
+                return okAsync<void, VectorError>(undefined);
+              });
+          } else {
             return errAsync(e);
           }
         })
