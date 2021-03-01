@@ -1,6 +1,5 @@
 import ko from "knockout";
 import html from "./Agent.template.html";
-import { HypernetCore, IHypernetCore, EBlockchainNetwork } from "@hypernetlabs/hypernet-core";
 import { BalancesParams } from "../Balances/Balances.viewmodel";
 import { PaymentFormParams } from "../PaymentForm/PaymentForm.viewmodel";
 import { LinksParams } from "../Links/Links.viewmodel";
@@ -30,41 +29,40 @@ export class AgentViewModel {
   public paymentForm: PaymentFormParams;
   public merchantForm: AuthorizedMerchantFormParams;
 
-  protected core: IHypernetWebIntegration;
+  protected integration: IHypernetWebIntegration;
 
   constructor() {
     if (!window.ethereum) {
       const externalProviderUtils = new ExternalProviderUtils();
-      const externalProvider = externalProviderUtils.getExternalProviderForDevelopment();
-      //this.core = new HypernetCore(EBlockchainNetwork.Localhost, undefined, externalProvider);
-      this.core = new HypernetWebIntegration();
+      
+      //this.integration = new HypernetCore(EBlockchainNetwork.Localhost, undefined, externalProvider);
+      this.integration = new HypernetWebIntegration();
     } else {
-      //this.core = new HypernetCore(EBlockchainNetwork.Localhost);
-      this.core = new HypernetWebIntegration();
+      //this.integration = new HypernetCore(EBlockchainNetwork.Localhost);
+      this.integration = new HypernetWebIntegration();
     }
 
-    this.status = new StatusParams(this.core);
+    this.status = new StatusParams(this.integration);
 
-    this.account = new AccountParams(this.core);
+    this.account = new AccountParams(this.integration);
     this.message = ko.observable<string>("Starting");
 
     this.startup();
 
-    this.links = new LinksParams(this.core);
-    this.actions = new ActionsParams(this.core);
-    this.balances = new BalancesParams(this.core);
-    this.authorizedMerchants = new AuthorizedMerchantsParams(this.core);
-    this.paymentForm = new PaymentFormParams(this.core);
-    this.merchantForm = new AuthorizedMerchantFormParams(this.core);
+    this.links = new LinksParams(this.integration);
+    this.actions = new ActionsParams(this.integration);
+    this.balances = new BalancesParams(this.integration);
+    this.authorizedMerchants = new AuthorizedMerchantsParams(this.integration);
+    this.paymentForm = new PaymentFormParams(this.integration);
+    this.merchantForm = new AuthorizedMerchantFormParams(this.integration);
   }
 
   protected startup(): Promise<void> {
-    return this.core.getReady().match(
+    return this.integration.getReady().match(
       () => {
-        this.core.proxy.
-          ()
+        this.integration.core.getEthereumAccounts()
           .andThen((accounts) => {
-            return this.core.proxy.initialize(accounts[0]);
+            return this.integration.core.initialize(accounts[0]);
           })
           .match(
             () => {

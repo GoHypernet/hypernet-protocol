@@ -3,7 +3,7 @@ import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import html from "./AuthorizedMerchantSelector.template.html";
 
 export class AuthorizedMerchantSelectorParams {
-  constructor(public core: IHypernetWebIntegration, public selectedAuthorizedMerchant: ko.Observable<string | null>) {}
+  constructor(public integration: IHypernetWebIntegration, public selectedAuthorizedMerchant: ko.Observable<string | null>) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -16,18 +16,18 @@ export class AuthorizedMerchantSelectorViewModel {
   public authorizedMerchantOptions: ko.ObservableArray<AuthorizedMerchantOption>;
   public selectedAuthorizedMerchantOption: ko.Computed<AuthorizedMerchantOption | null>;
 
-  protected core: IHypernetWebIntegration;
+  protected integration: IHypernetWebIntegration;
   protected selectedAuthorizedMerchant: ko.Observable<string | null>;
   protected merchants: ko.Observable<string[] | null>;
 
   constructor(params: AuthorizedMerchantSelectorParams) {
-    this.core = params.core;
+    this.integration = params.integration;
     this.selectedAuthorizedMerchant = params.selectedAuthorizedMerchant;
 
     this.merchants = ko.observable(null);
     this.authorizedMerchantOptions = ko.observableArray<AuthorizedMerchantOption>();
 
-    this.core.proxy.onMerchantAuthorized.subscribe((merchant) => {
+    this.integration.core.onMerchantAuthorized.subscribe((merchant) => {
       const url = merchant.toString();
       this.authorizedMerchantOptions.push(new AuthorizedMerchantOption(url, url));
     });
@@ -67,10 +67,10 @@ export class AuthorizedMerchantSelectorViewModel {
   }
 
   protected getAuthorizedMerchants() {
-    this.core
+    this.integration
       .getReady()
       .andThen(() => {
-        return this.core.proxy.getAuthorizedMerchants();
+        return this.integration.core.getAuthorizedMerchants();
       })
       .map((authorizedMerchants) => {
         const authorizedMerchantOptions = new Array<AuthorizedMerchantOption>();

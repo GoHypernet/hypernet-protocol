@@ -39,7 +39,8 @@
       "@test-merchant-connector/*": [
         "./packages/test-merchant-connector/src/*"
       ],
-      "@utils/*": ["./packages/utils/src/*"]
+      "@utils/*": ["./packages/utils/src/*"],
+      "@developer-ui/*": ["./packages/developer-ui/src/*"]
     }
   }
 }

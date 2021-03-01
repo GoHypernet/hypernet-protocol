@@ -5,17 +5,11 @@ class PageUtils {
   public browser: Browser = {} as Browser;
   public isReady: boolean = false;
 
-  public getPageUtilsReady(): Promise<any> {
-    return new Promise((resolve, reject) => {
-      puppeteer.launch({ headless: false }).then((browser) => {
-        this.browser = browser;
-        browser.newPage().then((page: Page) => {
-          this.page = page;
-          this.isReady = true;
-          resolve(page);
-        });
-      });
-    });
+  public async getPageUtilsReady(): Promise<void> {
+    console.log("Initialize");
+    this.browser = await puppeteer.launch({ headless: true });
+    this.page = await this.browser.newPage();
+    this.isReady = true;
   }
 
   public async openPage(url: string) {

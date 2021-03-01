@@ -1,30 +1,19 @@
-import { setWorldConstructor, Before, After } from "@cucumber/cucumber";
-import PageUtils from "../utils/PageUtils";
+import {binding, before, after} from "cucumber-tsflow";
+import PageUtils from "@integration-tests/utils/PageUtils";
 
-class CucumberGlobal {
-  public pageUtils: PageUtils;
-
-  constructor() {
-    this.pageUtils = new PageUtils();
+@binding([PageUtils])
+class Hooks {
+  constructor(protected pageUtils: PageUtils) {}
+  @before()
+  public beforeAllScenarios() {
+    return this.pageUtils.getPageUtilsReady()
+  }
+  
+  
+  @after()
+  public afterAllScenarios() {
+    return this.pageUtils.browser.close();
   }
 }
 
-setWorldConstructor(CucumberGlobal);
-
-//@ts-ignore
-Before(function (testCase, done) {
-  //@ts-ignore
-  const _this: CucumberWorld = this;
-  const pageUtils: PageUtils = _this.pageUtils;
-  pageUtils.getPageUtilsReady().then((page) => {
-    done();
-  });
-});
-
-//@ts-ignore
-After(function (testCase, done) {
-  //@ts-ignore
-  const pageUtils: PageUtils = this.pageUtils;
-  pageUtils.browser.close();
-  done();
-});
+export = Hooks;

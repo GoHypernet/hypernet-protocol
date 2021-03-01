@@ -5,30 +5,30 @@ import html from "./Balances.template.html";
 import { AssetBalanceParams } from "../AssetBalance/AssetBalance.viewmodel";
 
 export class BalancesParams {
-  constructor(public core: IHypernetWebIntegration) {}
+  constructor(public integration: IHypernetWebIntegration) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
 export class BalancesViewModel {
   public balances: ko.ObservableArray<AssetBalanceParams>;
 
-  protected core: IHypernetWebIntegration;
+  protected integration: IHypernetWebIntegration;
 
   constructor(params: BalancesParams) {
-    this.core = params.core;
+    this.integration = params.integration;
 
     this.balances = ko.observableArray();
 
-    this.core.proxy.onBalancesChanged.subscribe({
+    this.integration.core.onBalancesChanged.subscribe({
       next: (val) => {
         this.updateBalances(val);
       },
     });
 
-    this.core
+    this.integration
       .getReady()
       .andThen(() => {
-        return this.core.proxy.getBalances();
+        return this.integration.core.getBalances();
       })
       .map((balances) => {
         this.updateBalances(balances);

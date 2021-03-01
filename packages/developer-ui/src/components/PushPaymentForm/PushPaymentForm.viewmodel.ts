@@ -10,7 +10,7 @@ import { AuthorizedMerchantSelectorParams } from "../AuthorizedMerchantSelector/
 
 export class PushPaymentFormParams {
   constructor(
-    public core: IHypernetWebIntegration,
+    public integration: IHypernetWebIntegration,
     public counterparty: ko.Observable<PublicIdentifier> | ko.Computed<PublicIdentifier>,
   ) {}
 }
@@ -30,20 +30,20 @@ export class PushPaymentFormViewModel {
 
   public submitButton: ButtonParams;
 
-  protected core: IHypernetWebIntegration;
+  protected integration: IHypernetWebIntegration;
   protected counterparty: ko.Observable<PublicIdentifier> | ko.Computed<PublicIdentifier>;
 
   constructor(params: PushPaymentFormParams) {
-    this.core = params.core;
+    this.integration = params.integration;
     this.counterparty = params.counterparty;
 
     this.requiredStake = ko.observable("0");
     this.expirationDate = ko.observable(moment().format());
     this.amount = ko.observable("0");
 
-    this.tokenSelector = new TokenSelectorParams(this.core, ko.observable(null), true);
+    this.tokenSelector = new TokenSelectorParams(this.integration, ko.observable(null), true);
 
-    this.merchantSelector = new AuthorizedMerchantSelectorParams(this.core, ko.observable(null));
+    this.merchantSelector = new AuthorizedMerchantSelectorParams(this.integration, ko.observable(null));
 
     this.submitButton = new ButtonParams(
       "Submit Payment",
@@ -65,7 +65,7 @@ export class PushPaymentFormViewModel {
           const amount = utils.parseUnits(this.amount(), "wei");
           const requiredStake = utils.parseUnits(this.requiredStake(), "wei");
 
-          return await this.core.proxy.sendFunds(
+          return await this.integration.core.sendFunds(
             this.counterparty(),
             amount.toString(),
             expirationDate.unix(),

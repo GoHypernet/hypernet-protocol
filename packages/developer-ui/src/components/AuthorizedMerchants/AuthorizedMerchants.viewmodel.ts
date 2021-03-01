@@ -3,30 +3,30 @@ import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import html from "./AuthorizedMerchants.template.html";
 
 export class AuthorizedMerchantsParams {
-  constructor(public core: IHypernetWebIntegration) {}
+  constructor(public integration: IHypernetWebIntegration) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
 export class AuthorizedMerchantsViewModel {
   public authorizedMerchants: ko.ObservableArray<string>;
 
-  protected core: IHypernetWebIntegration;
+  protected integration: IHypernetWebIntegration;
 
   constructor(params: AuthorizedMerchantsParams) {
-    this.core = params.core;
+    this.integration = params.integration;
 
     this.authorizedMerchants = ko.observableArray();
 
-    this.core.proxy.onMerchantAuthorized.subscribe({
+    this.integration.core.onMerchantAuthorized.subscribe({
       next: (val) => {
         this.authorizedMerchants.push(val.toString());
       },
     });
 
-    this.core
+    this.integration
       .getReady()
       .andThen(() => {
-        return this.core.proxy.getAuthorizedMerchants();
+        return this.integration.core.getAuthorizedMerchants();
       })
       .map((merchants) => {
         const merchantStrings = new Array<string>();
