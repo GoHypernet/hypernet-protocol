@@ -68,7 +68,7 @@ export abstract class ParentProxy {
     });
   }
 
-  public activate(): ResultAsync<void, Error> {
+  public activate(): ResultAsync<Postmate.ParentAPI, Error> {
     return ResultAsync.fromPromise(this.handshake, (e) => e as Error).map((child) => {
       // Stash the API for future calls
       this.child = child;
@@ -108,6 +108,8 @@ export abstract class ParentProxy {
       });
 
       this.active = true;
+
+      return child;
     });
   }
 

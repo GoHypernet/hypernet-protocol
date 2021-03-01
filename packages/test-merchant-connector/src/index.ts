@@ -56,6 +56,23 @@ class TestMerchantConnector implements IMerchantConnector {
     return Promise.resolve("0x14791697260E4c9A71f18484C9f997B308e59325");
   }
 
+  private _renderContent() {
+    const element = window.document.createElement("div");
+    const textnode = window.document.createTextNode("Hey! here is a content from test merchant");
+    element.appendChild(textnode);
+    window.document.body.appendChild(element);
+
+    // connector did all the rendering stuff, now he is asking merchant-iframe to show his stuff
+    setTimeout(() => {
+      this.onDisplayRequested.next();
+    }, 100);
+
+    // connector done with the UI he rendered previously, now he want to ask the merchant-iframe to close everything.
+    /* setTimeout(() => {
+      this.onCloseRequested.next();
+    }, 10000); */
+  }
+
   //   paymentCreated(payment: Payment) {
   //       // Send the payment details to galileo
   //   }
@@ -68,6 +85,8 @@ class TestMerchantConnector implements IMerchantConnector {
     this.onSendFundsRequested = new Subject<ISendFundsRequest>();
     this.onAuthorizeFundsRequested = new Subject<IAuthorizeFundsRequest>();
     this.onDisplayRequested = new Subject<void>();
+    //this.onCloseRequested = new Subject<void>();
+    this._renderContent();
   }
 }
 

@@ -1,17 +1,22 @@
-import { IConfigProvider, IMerchantConnectorProxy } from "@interfaces/utilities";
+import { IConfigProvider, IContextProvider, IMerchantConnectorProxy } from "@interfaces/utilities";
+import { ResultAsync, HypernetContext, HypernetConfig } from "@interfaces/objects";
+import { ResultUtils } from "@hypernetlabs/utils";
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 import { MerchantConnectorProxy } from "@implementations/utilities/MerchantConnectorProxy";
-import { ResultAsync } from "neverthrow";
 import { MerchantConnectorError } from "@interfaces/objects/errors";
 
 export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFactory {
-  constructor(protected configProvider: IConfigProvider) {}
+  constructor(protected configProvider: IConfigProvider, protected contextProvider: IContextProvider) {}
 
   factoryProxy(merchantUrl: string): ResultAsync<IMerchantConnectorProxy, MerchantConnectorError> {
     let proxy: IMerchantConnectorProxy;
-    return this.configProvider
-      .getConfig()
-      .andThen((config) => {
+    let config: HypernetConfig;
+    let context: HypernetContext;
+
+    return ResultUtils.combine([this.configProvider.getConfig(), this.contextProvider.getContext()])
+      .andThen((vals) => {
+        [config, context] = vals;
+
         const iframeUrl = new URL(config.merchantIframeUrl);
         iframeUrl.searchParams.set("merchantUrl", merchantUrl);
         proxy = new MerchantConnectorProxy(null, iframeUrl.toString());
@@ -23,7 +28,11 @@ export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFac
         // connector code is properly signed and valid.
         return proxy.activate();
       })
-      .map(() => {
+      .map((child) => {
+        child.on("onDisplayRequested", () => {
+          context.onMerchantIFrameDisplayRequested.next();
+        });
+
         return proxy;
       });
   }

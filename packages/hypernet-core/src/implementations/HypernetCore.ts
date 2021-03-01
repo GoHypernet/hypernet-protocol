@@ -108,6 +108,7 @@ export class HypernetCore implements IHypernetCore {
   public onMerchantAuthorized: Subject<string>;
   public onAuthorizedMerchantUpdated: Subject<string>;
   public onAuthorizedMerchantActivationFailed: Subject<string>;
+  public onMerchantIFrameDisplayRequested: Subject<void>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -172,6 +173,7 @@ export class HypernetCore implements IHypernetCore {
     this.onMerchantAuthorized = new Subject<string>();
     this.onAuthorizedMerchantUpdated = new Subject<string>();
     this.onAuthorizedMerchantActivationFailed = new Subject<string>();
+    this.onMerchantIFrameDisplayRequested = new Subject<void>();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -200,6 +202,7 @@ export class HypernetCore implements IHypernetCore {
       this.onMerchantAuthorized,
       this.onAuthorizedMerchantUpdated,
       this.onAuthorizedMerchantActivationFailed,
+      this.onMerchantIFrameDisplayRequested,
     );
     this.blockchainProvider = new EthersBlockchainProvider(externalProvider);
     this.paymentIdUtils = new PaymentIdUtils();
@@ -226,7 +229,7 @@ export class HypernetCore implements IHypernetCore {
     );
     this.ajaxUtils = new AxiosAjaxUtils();
     this.blockchainUtils = new EthersBlockchainUtils(this.blockchainProvider);
-    this.merchantConnectorProxyFactory = new MerchantConnectorProxyFactory(this.configProvider);
+    this.merchantConnectorProxyFactory = new MerchantConnectorProxyFactory(this.configProvider, this.contextProvider);
     this.localStorageUtils = new LocalStorageUtils();
 
     this.accountRepository = new AccountsRepository(

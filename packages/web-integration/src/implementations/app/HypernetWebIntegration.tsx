@@ -39,7 +39,11 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     this.iframeContainer = document.createElement("div");
     this.iframeContainer.id = "__hypernet-protocol-iframe-container__";
     this.iframeContainer.tabIndex = -1;
-    this.iframeContainer.setAttribute("style", "display: none;");
+
+    // hide child iframe
+    const style = document.createElement("style");
+    style.appendChild(document.createTextNode("iframe { display: none;}"));
+    this.iframeContainer.appendChild(style);
 
     // Attach it to the body
     document.body.appendChild(this.iframeContainer);

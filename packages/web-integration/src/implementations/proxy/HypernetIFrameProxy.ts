@@ -49,6 +49,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     this.onMerchantAuthorized = new Subject<string>();
     this.onAuthorizedMerchantUpdated = new Subject<string>();
     this.onAuthorizedMerchantActivationFailed = new Subject<string>();
+    this.onMerchantIFrameDisplayRequested = new Subject<void>();
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -114,6 +115,10 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
 
           // And mark us as initialized
           this.coreInitialized = true;
+        });
+
+        child.on("onMerchantIFrameDisplayRequested", (data: string) => {
+          child.frame.style.display = "block";
         });
       });
     });
@@ -301,4 +306,5 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   public onMerchantAuthorized: Subject<string>;
   public onAuthorizedMerchantUpdated: Subject<string>;
   public onAuthorizedMerchantActivationFailed: Subject<string>;
+  public onMerchantIFrameDisplayRequested: Subject<void>;
 }
