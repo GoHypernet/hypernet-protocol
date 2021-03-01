@@ -1,10 +1,6 @@
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
 
-const modalRoot: HTMLElement = document.createElement("div");
-modalRoot.id = "__hypernet-protocol-modal-root__";
-document.body.appendChild(modalRoot);
-
 interface IModal {
   isOpen: boolean;
   children: React.ReactNode;
@@ -15,6 +11,14 @@ const Modal: React.FC<IModal> = (props: IModal) => {
 
   // element to which the modal will be rendered
   const el = document.createElement("div");
+  let modalRoot: HTMLElement;
+
+  useEffect(() => {
+    // initiate modal container
+    modalRoot = document.createElement("div");
+    modalRoot.id = "__hypernet-protocol-modal-root__";
+    document.body.appendChild(modalRoot);
+  }, []);
 
   useEffect(() => {
     // append to root when the children of Modal are mounted

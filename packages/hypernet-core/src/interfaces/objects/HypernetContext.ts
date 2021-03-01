@@ -3,7 +3,7 @@ import { ControlClaim } from "./ControlClaim";
 import { PublicIdentifier } from "./PublicIdentifier";
 import { PullPayment, PushPayment } from "./Payment";
 import { Balances } from "./Balances";
-import { EthereumAddress } from "./EthereumAddress";
+import { EthereumAddress } from "@hypernetlabs/utils/src/objects/EthereumAddress";
 
 export class HypernetContext {
   constructor(
@@ -19,9 +19,9 @@ export class HypernetContext {
     public onPushPaymentUpdated: Subject<PushPayment>,
     public onPullPaymentUpdated: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
-    public onMerchantAuthorized: Subject<URL>,
-    public onAuthorizedMerchantUpdated: Subject<URL>,
-    public onAuthorizedMerchantActivationFailed: Subject<URL>,
+    public onMerchantAuthorized: Subject<string>,
+    public onAuthorizedMerchantUpdated: Subject<string>,
+    public onAuthorizedMerchantActivationFailed: Subject<string>,
   ) {}
 }
 
@@ -40,9 +40,9 @@ export class InitializedHypernetContext {
     public onPushPaymentUpdated: Subject<PushPayment>,
     public onPullPaymentUpdated: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
-    public onMerchantAuthorized: Subject<URL>,
-    public onAuthorizedMerchantUpdated: Subject<URL>,
-    public onAuthorizedMerchantActivationFailed: Subject<URL>,
-    public authorizedMediators: Map<URL, string>,
+    public onMerchantAuthorized: Subject<string>,
+    public onAuthorizedMerchantUpdated: Subject<string>,
+    public onAuthorizedMerchantActivationFailed: Subject<string>,
+    public authorizedMediators: Map<string, string>,
   ) {}
 }

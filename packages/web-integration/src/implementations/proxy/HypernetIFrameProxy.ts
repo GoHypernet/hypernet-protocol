@@ -46,9 +46,9 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     this.onPushPaymentUpdated = new Subject<PushPayment>();
     this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
-    this.onMerchantAuthorized = new Subject<URL>();
-    this.onAuthorizedMerchantUpdated = new Subject<URL>();
-    this.onAuthorizedMerchantActivationFailed = new Subject<URL>();
+    this.onMerchantAuthorized = new Subject<string>();
+    this.onAuthorizedMerchantUpdated = new Subject<string>();
+    this.onAuthorizedMerchantActivationFailed = new Subject<string>();
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -96,15 +96,15 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
         });
 
         child.on("onMerchantAuthorized", (data: string) => {
-          this.onMerchantAuthorized.next(new URL(data));
+          this.onMerchantAuthorized.next(data);
         });
 
         child.on("onAuthorizedMerchantUpdated", (data: string) => {
-          this.onAuthorizedMerchantUpdated.next(new URL(data));
+          this.onAuthorizedMerchantUpdated.next(data);
         });
 
         child.on("onAuthorizedMerchantActivationFailed", (data: string) => {
-          this.onAuthorizedMerchantActivationFailed.next(new URL(data));
+          this.onAuthorizedMerchantActivationFailed.next(data);
         });
 
         // Setup a listener for the "initialized" event.
@@ -278,12 +278,8 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return this._createCall("mintTestToken", amount.toString());
   }
 
-  public authorizeMerchant(merchantUrl: URL): ResultAsync<void, CoreUninitializedError | MerchantValidationError> {
+  public authorizeMerchant(merchantUrl: string): ResultAsync<void, CoreUninitializedError | MerchantValidationError> {
     return this._createCall("authorizeMerchant", merchantUrl);
-  }
-
-  public startConnectorFlow(connector?: string): ResultAsync<void, CoreUninitializedError | MerchantValidationError> {
-    return this._createCall("startConnectorFlow", connector);
   }
 
   public getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError> {
@@ -302,7 +298,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   public onPushPaymentReceived: Subject<PushPayment>;
   public onPullPaymentApproved: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
-  public onMerchantAuthorized: Subject<URL>;
-  public onAuthorizedMerchantUpdated: Subject<URL>;
-  public onAuthorizedMerchantActivationFailed: Subject<URL>;
+  public onMerchantAuthorized: Subject<string>;
+  public onAuthorizedMerchantUpdated: Subject<string>;
+  public onAuthorizedMerchantActivationFailed: Subject<string>;
 }

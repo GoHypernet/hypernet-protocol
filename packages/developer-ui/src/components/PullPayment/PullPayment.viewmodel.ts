@@ -1,12 +1,13 @@
 import ko from "knockout";
-import { BigNumber, EPaymentState, IHypernetCore, PullPayment } from "@hypernetlabs/hypernet-core";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import { BigNumber, EPaymentState, PullPayment } from "@hypernetlabs/hypernet-core";
 import html from "./PullPayment.template.html";
 import moment from "moment";
 import { PaymentStatusParams } from "../PaymentStatus/PaymentStatus.viewmodel";
 import { ButtonParams } from "../Button/Button.viewmodel";
 
 export class PullPaymentParams {
-  constructor(public core: IHypernetCore, public payment: PullPayment) {}
+  constructor(public core: IHypernetWebIntegration, public payment: PullPayment) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -36,7 +37,7 @@ export class PullPaymentViewModel {
   public disputeButton: ButtonParams;
   public showDisputeButton: ko.PureComputed<boolean>;
 
-  protected core: IHypernetCore;
+  protected core: IHypernetWebIntegration;
   protected paymentId: string;
   protected publicIdentifier: ko.Observable<string | null>;
 
@@ -62,7 +63,7 @@ export class PullPaymentViewModel {
     this.deltaAmount = ko.observable(params.payment.deltaAmount.toString());
     this.deltaTime = ko.observable(params.payment.deltaTime);
 
-    this.core.onPushPaymentReceived.subscribe({
+    this.core.proxy.onPushPaymentReceived.subscribe({
       next: (payment) => {
         if (payment.id === this.paymentId) {
           this.state(new PaymentStatusParams(params.payment.state));
@@ -70,7 +71,7 @@ export class PullPaymentViewModel {
       },
     });
 
-    this.core.onPullPaymentUpdated.subscribe({
+    this.core.proxy.onPullPaymentUpdated.subscribe({
       next: (payment) => {
         if (payment.id === this.paymentId) {
           this.state(new PaymentStatusParams(payment.state));
@@ -79,7 +80,7 @@ export class PullPaymentViewModel {
     });
 
     this.acceptButton = new ButtonParams("Accept", async () => {
-      return await this.core.acceptOffers([this.paymentId]).map((results) => {
+      return await this.core.proxy.acceptOffers([this.paymentId]).map((results) => {
         const result = results[0];
 
         return result.match(
@@ -99,7 +100,7 @@ export class PullPaymentViewModel {
     });
 
     this.pullButton = new ButtonParams("Pull", async () => {
-      return await this.core.pullFunds(this.paymentId, BigNumber.from(1)).mapErr((e) => {
+      return await this.core.proxy.pullFunds(this.paymentId, BigNumber.from(1)).mapErr((e) => {
         alert("Unable to pull funds!");
         console.error(e);
       });
@@ -111,7 +112,7 @@ export class PullPaymentViewModel {
     });
 
     this.disputeButton = new ButtonParams("Dispute", async () => {
-      return await this.core.initiateDispute(this.paymentId).mapErr((e) => {
+      return await this.core.proxy.initiateDispute(this.paymentId).mapErr((e) => {
         alert("Error during dispute!");
         console.error(e);
       });
@@ -122,7 +123,7 @@ export class PullPaymentViewModel {
     });
 
     this.publicIdentifier = ko.observable(null);
-    this.core.getPublicIdentifier().map((pi) => {
+    this.core.proxy.getPublicIdentifier().map((pi) => {
       this.publicIdentifier(pi);
     });
   }

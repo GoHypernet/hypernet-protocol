@@ -245,6 +245,13 @@ services:
         "domainName": "", 
         "production": false        
       }' 
+  
+  core-iframe:
+    image: nginx:latest
+    ports:
+      - 8090:80
+    volumes:
+      - ../iframe/dist/bundle:/usr/share/nginx/html
 
   merchant-iframe:
     image: nginx:latest

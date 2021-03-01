@@ -1,5 +1,8 @@
 const path = require("path");
+const webpack = require("webpack");
 const rootWebpackConfig = require("../../webpack.config");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
 module.exports = {
   ...rootWebpackConfig,
   entry: path.join(__dirname, "src/index.ts"),
@@ -14,4 +17,11 @@ module.exports = {
     publicPath: "/",
     port: 8090,
   },
+  plugins: [
+    new HtmlWebpackPlugin({}),
+    new webpack.ProvidePlugin({
+      Buffer: ["buffer", "Buffer"],
+      process: "process/browser",
+    }),
+  ],
 };

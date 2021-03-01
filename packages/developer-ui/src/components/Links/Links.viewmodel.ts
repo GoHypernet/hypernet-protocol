@@ -1,17 +1,18 @@
 import ko from "knockout";
-import { HypernetLink, IHypernetCore, PublicIdentifier } from "@hypernetlabs/hypernet-core";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import { HypernetLink, PublicIdentifier } from "@hypernetlabs/hypernet-core";
 import html from "./Links.template.html";
 import { LinkParams } from "../Link/Link.viewmodel";
 
 export class LinksParams {
-  constructor(public core: IHypernetCore) {}
+  constructor(public core: IHypernetWebIntegration) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
 export class LinksViewModel {
   public links: ko.ObservableArray<LinkParams>;
 
-  protected core: IHypernetCore;
+  protected core: IHypernetWebIntegration;
   protected publicIdentifier: ko.Observable<PublicIdentifier>;
 
   constructor(params: LinksParams) {
@@ -19,7 +20,7 @@ export class LinksViewModel {
     this.publicIdentifier = ko.observable("");
     this.links = ko.observableArray<LinkParams>();
 
-    this.core.onPullPaymentProposed.subscribe({
+    this.core.proxy.onPullPaymentProposed.subscribe({
       next: (payment) => {
         // Check if there is a link for this counterparty already
         const links = this.links().filter((val) => {
@@ -38,7 +39,7 @@ export class LinksViewModel {
       },
     });
 
-    this.core.onPushPaymentProposed.subscribe({
+    this.core.proxy.onPushPaymentProposed.subscribe({
       next: (payment) => {
         // Check if there is a link for this counterparty already
         const links = this.links().filter((val) => {
@@ -62,14 +63,14 @@ export class LinksViewModel {
 
   protected async init() {
     this.core
-      .waitInitialized()
+      .getReady()
       .andThen(() => {
-        return this.core.getPublicIdentifier();
+        return this.core.proxy.getPublicIdentifier();
       })
       .andThen((publicIdentifier) => {
         this.publicIdentifier(publicIdentifier);
 
-        return this.core.getActiveLinks();
+        return this.core.proxy.getActiveLinks();
       })
       .map((links) => {
         const linkParams = links.map((link: HypernetLink) => new LinkParams(this.core, link));

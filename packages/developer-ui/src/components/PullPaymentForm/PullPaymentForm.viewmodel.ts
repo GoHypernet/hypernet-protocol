@@ -1,5 +1,6 @@
 import ko from "knockout";
-import { BigNumber, EthereumAddress, IHypernetCore, PublicIdentifier } from "@hypernetlabs/hypernet-core";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import { BigNumber, EthereumAddress, PublicIdentifier } from "@hypernetlabs/hypernet-core";
 import html from "./PullPaymentForm.template.html";
 import moment from "moment";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
@@ -9,7 +10,7 @@ import { AuthorizedMerchantSelectorParams } from "../AuthorizedMerchantSelector/
 
 export class PullPaymentFormParams {
   constructor(
-    public core: IHypernetCore,
+    public core: IHypernetWebIntegration,
     public counterparty: ko.Observable<PublicIdentifier> | ko.Computed<PublicIdentifier>,
   ) {}
 }
@@ -31,7 +32,7 @@ export class PullPaymentFormViewModel {
 
   public submitButton: ButtonParams;
 
-  protected core: IHypernetCore;
+  protected core: IHypernetWebIntegration;
   protected counterparty: ko.Observable<PublicIdentifier> | ko.Computed<PublicIdentifier>;
 
   constructor(params: PullPaymentFormParams) {
@@ -69,7 +70,7 @@ export class PullPaymentFormViewModel {
           const deltaAmount = utils.parseUnits(this.deltaAmount(), "wei");
           const deltaTime = Number(this.deltaTime());
 
-          return await this.core.authorizeFunds(
+          return await this.core.proxy.authorizeFunds(
             this.counterparty(),
             amount,
             expirationDate,

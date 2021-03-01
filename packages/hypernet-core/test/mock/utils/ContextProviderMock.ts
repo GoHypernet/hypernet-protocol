@@ -25,11 +25,11 @@ export class ContextProviderMock implements IContextProvider {
   public onPushPaymentUpdated: Subject<PushPayment>;
   public onPullPaymentUpdated: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
-  public onMerchantAuthorized: Subject<URL>;
-  public onAuthorizedMerchantUpdated: Subject<URL>;
-  public onAuthorizedMerchantActivationFailed: Subject<URL>;
+  public onMerchantAuthorized: Subject<string>;
+  public onAuthorizedMerchantUpdated: Subject<string>;
+  public onAuthorizedMerchantActivationFailed: Subject<string>;
 
-  public authorizedMerchants: Map<URL, string>;
+  public authorizedMerchants: Map<string, string>;
 
   constructor(context: HypernetContext | null = null, initializedContext: InitializedHypernetContext | null = null) {
     this.onControlClaimed = new Subject<ControlClaim>();
@@ -41,11 +41,11 @@ export class ContextProviderMock implements IContextProvider {
     this.onPushPaymentUpdated = new Subject<PushPayment>();
     this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
-    this.onMerchantAuthorized = new Subject<URL>();
-    this.onAuthorizedMerchantUpdated = new Subject<URL>();
-    this.onAuthorizedMerchantActivationFailed = new Subject<URL>();
+    this.onMerchantAuthorized = new Subject<string>();
+    this.onAuthorizedMerchantUpdated = new Subject<string>();
+    this.onAuthorizedMerchantActivationFailed = new Subject<string>();
 
-    this.authorizedMerchants = new Map<URL, string>();
+    this.authorizedMerchants = new Map<string, string>();
 
     if (context != null) {
       this.context = context;
@@ -89,7 +89,6 @@ export class ContextProviderMock implements IContextProvider {
         this.onAuthorizedMerchantUpdated,
         this.onAuthorizedMerchantActivationFailed,
         this.authorizedMerchants,
-
       );
     }
   }

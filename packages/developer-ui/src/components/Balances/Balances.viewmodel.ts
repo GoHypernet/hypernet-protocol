@@ -1,33 +1,34 @@
 import ko from "knockout";
-import { AssetBalance, Balances, IHypernetCore } from "@hypernetlabs/hypernet-core";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import { AssetBalance, Balances } from "@hypernetlabs/hypernet-core";
 import html from "./Balances.template.html";
 import { AssetBalanceParams } from "../AssetBalance/AssetBalance.viewmodel";
 
 export class BalancesParams {
-  constructor(public core: IHypernetCore) {}
+  constructor(public core: IHypernetWebIntegration) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
 export class BalancesViewModel {
   public balances: ko.ObservableArray<AssetBalanceParams>;
 
-  protected core: IHypernetCore;
+  protected core: IHypernetWebIntegration;
 
   constructor(params: BalancesParams) {
     this.core = params.core;
 
     this.balances = ko.observableArray();
 
-    this.core.onBalancesChanged.subscribe({
+    this.core.proxy.onBalancesChanged.subscribe({
       next: (val) => {
         this.updateBalances(val);
       },
     });
 
     this.core
-      .waitInitialized()
+      .getReady()
       .andThen(() => {
-        return this.core.getBalances();
+        return this.core.proxy.getBalances();
       })
       .map((balances) => {
         this.updateBalances(balances);
