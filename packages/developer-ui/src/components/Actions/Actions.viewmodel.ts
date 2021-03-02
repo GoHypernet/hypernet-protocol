@@ -6,7 +6,7 @@ import { ethers } from "ethers";
 import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
 
 export class ActionsParams {
-  constructor(public core: IHypernetWebIntegration) {}
+  constructor(public integration: IHypernetWebIntegration) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -17,14 +17,14 @@ export class ActionsViewModel {
   public tokenSelector: TokenSelectorParams;
   public tokenSelected: ko.PureComputed<boolean>;
 
-  protected core: IHypernetWebIntegration;
+  protected integration: IHypernetWebIntegration;
 
   constructor(params: ActionsParams) {
-    this.core = params.core;
+    this.integration = params.integration;
 
     this.startupComplete = ko.observable(false);
 
-    this.tokenSelector = new TokenSelectorParams(this.core, ko.observable(null), false);
+    this.tokenSelector = new TokenSelectorParams(this.integration, ko.observable(null), false);
 
     this.tokenSelected = ko.pureComputed(() => {
       return this.tokenSelector.selectedToken() != null;
@@ -39,7 +39,7 @@ export class ActionsViewModel {
 
       // tslint:disable-next-line: no-console
       console.log(`Selected token for deposit: ${selectedToken}`);
-      await this.core.proxy.depositFunds(selectedToken, ethers.utils.parseEther("1"));
+      await this.integration.core.depositFunds(selectedToken, ethers.utils.parseEther("1"));
     });
 
     this.mintTestTokenButton = new ButtonParams("Mint Test Token", async () => {
@@ -49,10 +49,10 @@ export class ActionsViewModel {
         return;
       }
 
-      await this.core.proxy.mintTestToken(ethers.utils.parseEther("1"));
+      await this.integration.core.mintTestToken(ethers.utils.parseEther("1"));
     });
 
-    this.core.getReady().map(() => {
+    this.integration.core.waitInitialized().map(() => {
       this.startupComplete(true);
     });
   }

@@ -119,13 +119,6 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     });
   }
 
-  public proxyReady(): ResultAsync<void, LogicalError> {
-    if (this._handshakePromise == null) {
-      throw new Error("proxy really, really not ready!");
-    }
-    return ResultAsync.fromPromise(this._handshakePromise, (err) => new LogicalError());
-  }
-
   public initialized(): Result<boolean, LogicalError> {
     // If the child is not initialized, there is no way the core can be.
     if (this.child == null) {
@@ -138,7 +131,9 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   }
 
   public waitInitialized(): ResultAsync<void, LogicalError> {
-    return this._createCall("waitInitialized", null);
+    return this.activate().andThen(() => {
+      return this._createCall("waitInitialized", null);
+    });
   }
 
   public inControl(): Result<boolean, LogicalError> {

@@ -5,22 +5,22 @@ import html from "./Links.template.html";
 import { LinkParams } from "../Link/Link.viewmodel";
 
 export class LinksParams {
-  constructor(public core: IHypernetWebIntegration) {}
+  constructor(public integration: IHypernetWebIntegration) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
 export class LinksViewModel {
   public links: ko.ObservableArray<LinkParams>;
 
-  protected core: IHypernetWebIntegration;
+  protected integration: IHypernetWebIntegration;
   protected publicIdentifier: ko.Observable<PublicIdentifier>;
 
   constructor(params: LinksParams) {
-    this.core = params.core;
+    this.integration = params.integration;
     this.publicIdentifier = ko.observable("");
     this.links = ko.observableArray<LinkParams>();
 
-    this.core.proxy.onPullPaymentProposed.subscribe({
+    this.integration.core.onPullPaymentProposed.subscribe({
       next: (payment) => {
         // Check if there is a link for this counterparty already
         const links = this.links().filter((val) => {
@@ -32,14 +32,14 @@ export class LinksViewModel {
           // We need to create a new link for the counterparty
           const counterPartyAccount = payment.to === this.publicIdentifier() ? payment.from : payment.to;
           const link = new HypernetLink(counterPartyAccount, [payment], [], [payment], [], [payment]);
-          this.links.push(new LinkParams(this.core, link));
+          this.links.push(new LinkParams(this.integration, link));
         }
 
         // A link already exists for this counterparty, the link component will handle this
       },
     });
 
-    this.core.proxy.onPushPaymentProposed.subscribe({
+    this.integration.core.onPushPaymentProposed.subscribe({
       next: (payment) => {
         // Check if there is a link for this counterparty already
         const links = this.links().filter((val) => {
@@ -51,7 +51,7 @@ export class LinksViewModel {
           // We need to create a new link for the counterparty
           const counterPartyAccount = payment.to === this.publicIdentifier() ? payment.from : payment.to;
           const link = new HypernetLink(counterPartyAccount, [payment], [payment], [], [payment], []);
-          this.links.push(new LinkParams(this.core, link));
+          this.links.push(new LinkParams(this.integration, link));
         }
 
         // A link already exists for this counterparty, the link component will handle this
@@ -62,18 +62,17 @@ export class LinksViewModel {
   }
 
   protected async init() {
-    this.core
-      .getReady()
+    this.integration.core.waitInitialized()
       .andThen(() => {
-        return this.core.proxy.getPublicIdentifier();
+        return this.integration.core.getPublicIdentifier();
       })
       .andThen((publicIdentifier) => {
         this.publicIdentifier(publicIdentifier);
 
-        return this.core.proxy.getActiveLinks();
+        return this.integration.core.getActiveLinks();
       })
       .map((links) => {
-        const linkParams = links.map((link: HypernetLink) => new LinkParams(this.core, link));
+        const linkParams = links.map((link: HypernetLink) => new LinkParams(this.integration, link));
         this.links.push(...linkParams);
       });
   }

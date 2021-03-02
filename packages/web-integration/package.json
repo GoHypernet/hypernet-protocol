@@ -7,8 +7,9 @@
   "keywords": [],
   "main": "dist/index.js",
   "scripts": {
-    "build": "npx webpack",
-    "compile": "tsc -b src/tsconfig.json",
+    "build": "yarn clean && yarn compile",
+    "clean": "rimraf dist",
+    "compile": "tsc --build src/tsconfig.json",
     "format": "prettier --write \"src/**/*.{js,ts,tsx,json,md}\"",
     "lint": "tslint -p src/tsconfig.json",
     "prepublish": "yarn build",

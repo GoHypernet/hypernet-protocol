@@ -3,22 +3,21 @@ import ko from "knockout";
 import html from "./Account.template.html";
 
 export class AccountParams {
-  constructor(public core: IHypernetWebIntegration) {}
+  constructor(public integration: IHypernetWebIntegration) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
 export class AccountViewModel {
   public publicIdentifier: ko.Observable<string>;
 
-  protected core: IHypernetWebIntegration;
+  protected integration: IHypernetWebIntegration;
 
   constructor(params: AccountParams) {
-    this.core = params.core;
+    this.integration = params.integration;
     this.publicIdentifier = ko.observable("");
-    this.core
-      .getReady()
+    this.integration.core.waitInitialized()
       .andThen(() => {
-        return this.core.proxy.getPublicIdentifier();
+        return this.integration.core.getPublicIdentifier();
       })
       .map((publicIdentifier) => {
         this.publicIdentifier(publicIdentifier);

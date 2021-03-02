@@ -10,7 +10,7 @@ import { AuthorizedMerchantSelectorParams } from "../AuthorizedMerchantSelector/
 
 export class PullPaymentFormParams {
   constructor(
-    public core: IHypernetWebIntegration,
+    public integration: IHypernetWebIntegration,
     public counterparty: ko.Observable<PublicIdentifier> | ko.Computed<PublicIdentifier>,
   ) {}
 }
@@ -32,11 +32,11 @@ export class PullPaymentFormViewModel {
 
   public submitButton: ButtonParams;
 
-  protected core: IHypernetWebIntegration;
+  protected integration: IHypernetWebIntegration;
   protected counterparty: ko.Observable<PublicIdentifier> | ko.Computed<PublicIdentifier>;
 
   constructor(params: PullPaymentFormParams) {
-    this.core = params.core;
+    this.integration = params.integration;
     this.counterparty = params.counterparty;
 
     this.requiredStake = ko.observable("0");
@@ -45,8 +45,8 @@ export class PullPaymentFormViewModel {
     this.deltaAmount = ko.observable("0");
     this.deltaTime = ko.observable("0");
 
-    this.tokenSelector = new TokenSelectorParams(this.core, ko.observable(null), true);
-    this.merchantSelector = new AuthorizedMerchantSelectorParams(this.core, ko.observable(null));
+    this.tokenSelector = new TokenSelectorParams(this.integration, ko.observable(null), true);
+    this.merchantSelector = new AuthorizedMerchantSelectorParams(this.integration, ko.observable(null));
 
     this.submitButton = new ButtonParams(
       "Submit Payment",
@@ -70,7 +70,7 @@ export class PullPaymentFormViewModel {
           const deltaAmount = utils.parseUnits(this.deltaAmount(), "wei");
           const deltaTime = Number(this.deltaTime());
 
-          return await this.core.proxy.authorizeFunds(
+          return await this.integration.core.authorizeFunds(
             this.counterparty(),
             amount,
             expirationDate,

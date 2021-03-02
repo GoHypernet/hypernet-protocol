@@ -29,7 +29,7 @@
   ],
   "directories": {
     "lib": "lib",
-    "test": "__tests__"
+    "test": "test"
   },
   "scripts": {
     "Start-windows": "yarn start-backend && yarn deploy-custom-transfers && yarn start-web",
@@ -45,6 +45,7 @@
     "start-backend": "docker-compose up -d && yarn verify-backend",
     "start-web": "webpack serve --config webpack.config.js --mode development --open",
     "test": "echo \"Error: run tests from root\" && exit 0",
+    "test-integration": "cucumber-js --require-module ts-node/register --require-module tsconfig-paths/register --require 'test/integration/**/*.ts' test/integration/features/**/*.feature",
     "verify-backend": "docker ps -f status=running -f name=developer-ui | grep connextproject | if [ `wc -l` -ne 9 ]; then echo 'Error: did not detect 9 running docker containers!' && `exit 1`; fi"
   },
   "types": "dist/index.d.ts",

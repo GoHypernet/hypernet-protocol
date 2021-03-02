@@ -30,7 +30,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   protected iframeURL: string = "http://localhost:8090";
   protected iframeContainer: HTMLElement;
 
-  public proxy: IHypernetIFrameProxy;
+  public core: IHypernetIFrameProxy;
 
   constructor(iframeURL?: string) {
     this.iframeURL = iframeURL || this.iframeURL;
@@ -45,19 +45,27 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     document.body.appendChild(this.iframeContainer);
 
     // Create a proxy connection to the iframe
-    this.proxy = new HypernetIFrameProxy(this.iframeContainer, this.iframeURL);
+    this.core = new HypernetIFrameProxy(this.iframeContainer, this.iframeURL);
   }
 
   // wait for the core to be intialized
+  protected getReadyResult: ResultAsync<IHypernetIFrameProxy, Error> | undefined;
   public getReady(): ResultAsync<IHypernetIFrameProxy, Error> {
-    return this.proxy.proxyReady().andThen(() => {
-      return this.proxy.activate().andThen(() => {
-        return this.proxy
-          .getEthereumAccounts()
-          .andThen((accounts: any) => this.proxy.initialize(accounts[0]))
-          .map(() => this.proxy);
-      });
-    });
+    if (this.getReadyResult != null) {
+      return this.getReadyResult;
+    }
+    this.getReadyResult = this.core
+      .activate()
+      .andThen(() => {
+        return this.core.activate();
+      })
+      .andThen(() => {
+        return this.core.getEthereumAccounts();
+      })
+      .andThen((accounts: any) => this.core.initialize(accounts[0]))
+      .map(() => this.core);
+
+    return this.getReadyResult;
   }
 
   // This class must be used as a singleton, this enforces that restriction.
@@ -89,7 +97,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
   private async bootstrapComponent(component: React.ReactNode, withModal: boolean = false) {
     return (
-      <StoreProvider proxy={this.proxy}>
+      <StoreProvider proxy={this.core}>
         <LayoutProvider>
           <MainContainer withModal={withModal}>{component}</MainContainer>
         </LayoutProvider>

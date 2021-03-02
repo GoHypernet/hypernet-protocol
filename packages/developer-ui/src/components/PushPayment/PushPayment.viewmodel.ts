@@ -8,7 +8,7 @@ import { ButtonParams } from "../Button/Button.viewmodel";
 import { utils } from "ethers";
 
 export class PushPaymentParams {
-  constructor(public core: IHypernetWebIntegration, public payment: PushPayment) {}
+  constructor(public integration: IHypernetWebIntegration, public payment: PushPayment) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -34,12 +34,12 @@ export class PushPaymentViewModel {
   public disputeButton: ButtonParams;
   public showDisputeButton: ko.PureComputed<boolean>;
 
-  protected core: IHypernetWebIntegration;
+  protected integration: IHypernetWebIntegration;
   protected paymentId: string;
   protected publicIdentifier: ko.Observable<PublicIdentifier | null>;
 
   constructor(params: PushPaymentParams) {
-    this.core = params.core;
+    this.integration = params.integration;
     this.publicIdentifier = ko.observable(null);
 
     this.id = `Payment ${params.payment.id}`;
@@ -58,7 +58,7 @@ export class PushPaymentViewModel {
     this.merchantUrl = ko.observable(params.payment.merchantUrl);
     this.paymentAmount = ko.observable(utils.formatUnits(params.payment.paymentAmount, "wei"));
 
-    this.core.proxy.onPushPaymentReceived.subscribe({
+    this.integration.core.onPushPaymentReceived.subscribe({
       next: (payment) => {
         if (payment.id === this.paymentId) {
           const paymentStatusParams = new PaymentStatusParams(EPaymentState.Finalized);
@@ -71,7 +71,7 @@ export class PushPaymentViewModel {
       },
     });
 
-    this.core.proxy.onPushPaymentUpdated.subscribe({
+    this.integration.core.onPushPaymentUpdated.subscribe({
       next: (payment) => {
         console.log(`In PushPayment, this.paymentId = ${this.paymentId}, updated payment = ${payment}`);
         if (payment.id === this.paymentId) {
@@ -81,7 +81,7 @@ export class PushPaymentViewModel {
     });
 
     this.acceptButton = new ButtonParams("Accept", async () => {
-      return await this.core.proxy.acceptOffers([this.paymentId]).map((results) => {
+      return await this.integration.core.acceptOffers([this.paymentId]).map((results) => {
         const result = results[0];
 
         return result.match(
@@ -103,8 +103,8 @@ export class PushPaymentViewModel {
     this.sendButton = new ButtonParams("Send", async () => {
       // tslint:disable-next-line: no-console
       console.log(`Attempting to send funds for payment ${this.paymentId}`);
-      // await this.core.completePayments([this.paymentId]);
-      // const payments = await this.core.completePayments([this.paymentId])
+      // await this.integration.completePayments([this.paymentId]);
+      // const payments = await this.integration.completePayments([this.paymentId])
 
       // @todo changge this after we change the return type of completePayments & stakePosted
       /*const payment = payments[0];
@@ -120,7 +120,7 @@ export class PushPaymentViewModel {
     });
 
     this.disputeButton = new ButtonParams("Dispute", async () => {
-      return await this.core.proxy.initiateDispute(this.paymentId).mapErr((e) => {
+      return await this.integration.core.initiateDispute(this.paymentId).mapErr((e) => {
         alert("Error during dispute!");
         console.error(e);
       });
@@ -130,7 +130,7 @@ export class PushPaymentViewModel {
       return this.state().state === EPaymentState.Accepted && this.publicIdentifier() === this.from();
     });
 
-    this.core.proxy.getPublicIdentifier().map((publicIdentifier) => {
+    this.integration.core.getPublicIdentifier().map((publicIdentifier) => {
       this.publicIdentifier(publicIdentifier);
     });
   }
