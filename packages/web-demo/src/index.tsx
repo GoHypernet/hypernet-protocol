@@ -6,7 +6,7 @@ const client: IHypernetWebIntegration = new HypernetWebIntegration();
 // set image background styles
 var style = document.createElement("style");
 style.innerHTML = `body {
-  background-image: url(https://res.cloudinary.com/dqueufbs7/image/upload/v1614304492/images/Screen_Shot_2021-02-26_at_04.53.40.png);
+  background-image: url(https://res.cloudinary.com/dqueufbs7/image/upload/v1614365921/images/Artboard_3_1.png);
   height: 100%;
   background-repeat: no-repeat;
   background-size: cover;
@@ -19,7 +19,7 @@ ref?.parentNode?.insertBefore(style, ref);
 
 Spinner();
 Spinner.show();
-client.getReady().map(async (proxy) => {
+client.getReady().map(() => {
   Spinner.hide();
   client.renderConnectorAuthorizationFlow({ connectorUrl: "http://localhost:5010", showInModal: true });
 });

@@ -6,7 +6,7 @@ import { PushPaymentFormParams } from "../PushPaymentForm/PushPaymentForm.viewmo
 import { PullPaymentFormParams } from "../PullPaymentForm/PullPaymentForm.viewmodel";
 
 export class PaymentFormParams {
-  constructor(public core: IHypernetWebIntegration) {}
+  constructor(public integration: IHypernetWebIntegration) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -24,10 +24,10 @@ export class PaymentFormViewModel {
   public pushPayment: PushPaymentFormParams;
   public pullPayment: PullPaymentFormParams;
 
-  protected core: IHypernetWebIntegration;
+  protected integration: IHypernetWebIntegration;
 
   constructor(params: PaymentFormParams) {
-    this.core = params.core;
+    this.integration = params.integration;
 
     this.remoteAccount = ko.observable("Enter public identifier");
 
@@ -46,8 +46,8 @@ export class PaymentFormViewModel {
       return this.selectedPaymentType()?.type === EPaymentType.Pull;
     });
 
-    this.pushPayment = new PushPaymentFormParams(this.core, this.remoteAccount);
-    this.pullPayment = new PullPaymentFormParams(this.core, this.remoteAccount);
+    this.pushPayment = new PushPaymentFormParams(this.integration, this.remoteAccount);
+    this.pullPayment = new PullPaymentFormParams(this.integration, this.remoteAccount);
   }
 }
 

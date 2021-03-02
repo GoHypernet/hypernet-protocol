@@ -49,6 +49,7 @@ import {
   EthereumAddress,
   ExternalProvider,
   HypernetConfig,
+  HypernetContext,
   HypernetLink,
   Payment,
   PublicIdentifier,
@@ -87,9 +88,10 @@ import { IVectorListener } from "@interfaces/api";
 import { Subject } from "rxjs";
 import { ok, Result, ResultAsync } from "neverthrow";
 import { AxiosAjaxUtils, IAjaxUtils, ResultUtils } from "@hypernetlabs/utils";
-import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
+import { IBrowserNodeFactory, IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 import { MerchantConnectorProxyFactory } from "@implementations/utilities/factory";
 import { LocalStorageUtils } from "./utilities/LocalStorageUtils";
+import { BrowserNodeFactory } from "./utilities/factory/BrowserNodeFactory";
 
 /**
  * The top-level class-definition for Hypernet Core.
@@ -125,8 +127,11 @@ export class HypernetCore implements IHypernetCore {
   protected logUtils: ILogUtils;
   protected ajaxUtils: IAjaxUtils;
   protected blockchainUtils: IBlockchainUtils;
-  protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory;
   protected localStorageUtils: ILocalStorageUtils;
+
+  // Factories
+  protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory;
+  protected browserNodeFactory: IBrowserNodeFactory;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
@@ -193,6 +198,7 @@ export class HypernetCore implements IHypernetCore {
 
     this.logUtils = new LogUtils();
     this.timeUtils = new TimeUtils();
+    this.localStorageUtils = new LocalStorageUtils();
     this.contextProvider = new ContextProvider(
       this.onControlClaimed,
       this.onControlYielded,
@@ -215,7 +221,17 @@ export class HypernetCore implements IHypernetCore {
     this.configProvider = new ConfigProvider(network, this.logUtils, config);
     this.linkUtils = new LinkUtils(this.contextProvider);
 
-    this.browserNodeProvider = new BrowserNodeProvider(this.configProvider, this.contextProvider, this.logUtils);
+    this.merchantConnectorProxyFactory = new MerchantConnectorProxyFactory(this.configProvider, this.contextProvider);
+    this.browserNodeFactory = new BrowserNodeFactory(this.configProvider, this.logUtils);
+
+    this.browserNodeProvider = new BrowserNodeProvider(
+      this.configProvider,
+      this.contextProvider,
+      this.blockchainProvider,
+      this.logUtils,
+      this.localStorageUtils,
+      this.browserNodeFactory,
+    );
     this.vectorUtils = new VectorUtils(
       this.configProvider,
       this.contextProvider,
@@ -235,8 +251,6 @@ export class HypernetCore implements IHypernetCore {
     );
     this.ajaxUtils = new AxiosAjaxUtils();
     this.blockchainUtils = new EthersBlockchainUtils(this.blockchainProvider);
-    this.merchantConnectorProxyFactory = new MerchantConnectorProxyFactory(this.configProvider, this.contextProvider);
-    this.localStorageUtils = new LocalStorageUtils();
 
     this.accountRepository = new AccountsRepository(
       this.blockchainProvider,
@@ -525,13 +539,19 @@ export class HypernetCore implements IHypernetCore {
     if (this._initializeResult != null) {
       return this._initializeResult;
     }
-    this._initializeResult = ResultUtils.combine([
-      this.contextProvider.getContext(),
-      this.accountService.getPublicIdentifier(),
-    ])
-      .andThen((vals) => {
-        const [context, publicIdentifier] = vals;
+
+    let context: HypernetContext;
+    this._initializeResult = this.contextProvider
+      .getContext()
+      .andThen((val) => {
+        context = val;
         context.account = account;
+        return this.contextProvider.setContext(context);
+      })
+      .andThen(() => {
+        return this.accountService.getPublicIdentifier();
+      })
+      .andThen((publicIdentifier) => {
         context.publicIdentifier = publicIdentifier;
         return this.contextProvider.setContext(context);
       })

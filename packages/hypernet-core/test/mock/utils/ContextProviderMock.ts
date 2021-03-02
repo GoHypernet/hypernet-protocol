@@ -34,7 +34,11 @@ export class ContextProviderMock implements IContextProvider {
 
   public authorizedMerchants: Map<string, string>;
 
-  constructor(context: HypernetContext | null = null, initializedContext: InitializedHypernetContext | null = null) {
+  constructor(
+    context: HypernetContext | null = null,
+    initializedContext: InitializedHypernetContext | null = null,
+    uninitializedAccount: string | null = null,
+  ) {
     this.onControlClaimed = new Subject<ControlClaim>();
     this.onControlYielded = new Subject<ControlClaim>();
     this.onPushPaymentProposed = new Subject<PushPayment>();
@@ -57,7 +61,7 @@ export class ContextProviderMock implements IContextProvider {
       this.context = context;
     } else {
       this.context = new HypernetContext(
-        null,
+        uninitializedAccount,
         null,
         false,
         this.onControlClaimed,

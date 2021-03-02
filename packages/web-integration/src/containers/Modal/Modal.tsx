@@ -1,5 +1,7 @@
-import React, { useEffect } from "react";
+import { LayoutContext } from "@web-integration/contexts";
+import React, { useEffect, useContext } from "react";
 import { createPortal } from "react-dom";
+import styles from "./Modal.style";
 
 interface IModal {
   isOpen: boolean;
@@ -8,17 +10,24 @@ interface IModal {
 
 const Modal: React.FC<IModal> = (props: IModal) => {
   const { isOpen, children } = props;
+  const { modalWidth, modalStatus } = useContext(LayoutContext);
 
   // element to which the modal will be rendered
+  const modalId = "__hypernet-protocol-modal-root__";
   const el = document.createElement("div");
   let modalRoot: HTMLElement;
 
   useEffect(() => {
+    const modalElm = document.getElementById(modalId);
+    //remove if there is already a modal opened
+    if (modalElm) {
+      modalElm.remove();
+    }
     // initiate modal container
     modalRoot = document.createElement("div");
-    modalRoot.id = "__hypernet-protocol-modal-root__";
+    modalRoot.id = modalId;
     document.body.appendChild(modalRoot);
-  }, []);
+  }, [modalWidth, modalStatus]);
 
   useEffect(() => {
     // append to root when the children of Modal are mounted
@@ -28,46 +37,20 @@ const Modal: React.FC<IModal> = (props: IModal) => {
     return () => {
       modalRoot.removeChild(el);
     };
-  }, [el]);
+  }, [el, modalWidth, modalStatus]);
 
   return (
     <>
       {isOpen &&
         createPortal(
-          <div
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              height: "100%",
-              width: "100%",
-              backgroundColor: "rgba(0,0,0,0.6)",
-            }}
-          >
+          <div style={styles.container}>
             <div
               style={{
-                position: "absolute",
-                width: 400,
-                background: "white",
-                padding: "30px 20px",
-                textAlign: "center",
-                top: "50%",
-                left: "50%",
-                display: "flex",
-                justifyContent: "center",
-                transform: "translate(-50%, -50%)",
+                ...styles.wrapper,
+                width: modalWidth,
               }}
             >
-              <div
-                style={{
-                  position: "absolute",
-                  right: 0,
-                  marginRight: 10,
-                  cursor: "pointer",
-                  top: 10,
-                }}
-                onClick={() => modalRoot.removeChild(el)}
-              >
+              <div style={styles.closeIcon} onClick={() => modalRoot.removeChild(el)}>
                 <img
                   src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png"
                   width="20"

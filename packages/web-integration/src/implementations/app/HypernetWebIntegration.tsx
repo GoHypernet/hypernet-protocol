@@ -13,7 +13,7 @@ import {
   IRenderParams,
   IRenderPaymentWidgetParams,
 } from "@web-integration/interfaces/app/IHypernetWebIntegration";
-import { StoreProvider } from "@web-integration/contexts";
+import { LayoutProvider, StoreProvider } from "@web-integration/contexts";
 import {
   BALANCES_WIDGET_ID_SELECTOR,
   FUND_WIDGET_ID_SELECTOR,
@@ -29,25 +29,33 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
   protected iframeURL: string = "http://localhost:8090";
 
-  public proxy: IHypernetIFrameProxy;
+  public core: IHypernetIFrameProxy;
 
   constructor(iframeURL?: string) {
     this.iframeURL = iframeURL || this.iframeURL;
 
     // Create a proxy connection to the iframe
-    this.proxy = new HypernetIFrameProxy(this._prepareIFrameContainer(), this.iframeURL);
+    this.core = new HypernetIFrameProxy(this._prepareIFrameContainer(), this.iframeURL);
   }
 
   // wait for the core to be intialized
+  protected getReadyResult: ResultAsync<IHypernetIFrameProxy, Error> | undefined;
   public getReady(): ResultAsync<IHypernetIFrameProxy, Error> {
-    return this.proxy.proxyReady().andThen(() => {
-      return this.proxy.activate().andThen(() => {
-        return this.proxy
-          .getEthereumAccounts()
-          .andThen((accounts: any) => this.proxy.initialize(accounts[0]))
-          .map(() => this.proxy);
-      });
-    });
+    if (this.getReadyResult != null) {
+      return this.getReadyResult;
+    }
+    this.getReadyResult = this.core
+      .activate()
+      .andThen(() => {
+        return this.core.activate();
+      })
+      .andThen(() => {
+        return this.core.getEthereumAccounts();
+      })
+      .andThen((accounts: any) => this.core.initialize(accounts[0]))
+      .map(() => this.core);
+
+    return this.getReadyResult;
   }
 
   // This class must be used as a singleton, this enforces that restriction.
@@ -79,8 +87,10 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
   private async bootstrapComponent(component: React.ReactNode, withModal: boolean = false) {
     return (
-      <StoreProvider proxy={this.proxy}>
-        <MainContainer withModal={withModal}>{component}</MainContainer>
+      <StoreProvider proxy={this.core}>
+        <LayoutProvider>
+          <MainContainer withModal={withModal}>{component}</MainContainer>
+        </LayoutProvider>
       </StoreProvider>
     );
   }
@@ -102,7 +112,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     closeButton.addEventListener(
       "click",
       (e) => {
-        this.proxy.onMerchantIFrameClosed.next();
+        this.core.onMerchantIFrameClosed.next();
       },
       false,
     );

@@ -5,7 +5,7 @@ import html from "./TokenSelector.template.html";
 
 export class TokenSelectorParams {
   constructor(
-    public core: IHypernetWebIntegration,
+    public integration: IHypernetWebIntegration,
     public selectedToken: ko.Observable<EthereumAddress | null>,
     public onlyWithBalance: boolean,
   ) {}
@@ -21,13 +21,13 @@ export class TokenSelectorViewModel {
   public paymentTokens: ko.ObservableArray<PaymentTokenOption>;
   public selectedPaymentTokenOption: ko.Computed<PaymentTokenOption | null>;
 
-  protected core: IHypernetWebIntegration;
+  protected integration: IHypernetWebIntegration;
   protected selectedToken: ko.Observable<EthereumAddress | null>;
   protected balances: ko.Observable<Balances | null>;
   protected onlyWithBalance: boolean;
 
   constructor(params: TokenSelectorParams) {
-    this.core = params.core;
+    this.integration = params.integration;
     this.selectedToken = params.selectedToken;
     this.onlyWithBalance = params.onlyWithBalance;
 
@@ -70,10 +70,9 @@ export class TokenSelectorViewModel {
 
   protected getBalances() {
     if (this.onlyWithBalance) {
-      this.core
-        .getReady()
+      this.integration.core.waitInitialized()
         .andThen(() => {
-          return this.core.proxy.getBalances();
+          return this.integration.core.getBalances();
         })
         .map((balances) => {
           const paymentTokens = new Array<PaymentTokenOption>();
