@@ -1,10 +1,9 @@
 import { VectorUtils } from "@implementations/utilities/VectorUtils";
 import { ConfigProviderMock, ContextProviderMock, BlockchainProviderMock, createBrowserNodeMock } from "@mock/utils";
-import { chainId, routerChannelAddress, routerPublicIdentifier, unixNow } from "@mock/mocks";
+import { routerChannelAddress, unixNow } from "@mock/mocks";
 import td from "testdouble";
 import { IBrowserNode, IBrowserNodeProvider, ILogUtils, IPaymentIdUtils, ITimeUtils } from "@interfaces/utilities";
 import { okAsync } from "neverthrow";
-import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
 
 class VectorUtilsMocks {
   public configProvider = new ConfigProviderMock();
@@ -67,8 +66,5 @@ describe("VectorUtils tests", () => {
     const retRouterChannelAddress = result._unsafeUnwrap();
 
     expect(retRouterChannelAddress).toBe(routerChannelAddress);
-    td.verify(
-      vectorUtilsMocks.browserNodeMock.setup(routerPublicIdentifier, chainId, DEFAULT_CHANNEL_TIMEOUT.toString()),
-    );
   });
 });
