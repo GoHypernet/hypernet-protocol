@@ -25,8 +25,7 @@ export class BalancesViewModel {
       },
     });
 
-    this.integration
-      .getReady()
+    this.integration.core.waitInitialized()
       .andThen(() => {
         return this.integration.core.getBalances();
       })

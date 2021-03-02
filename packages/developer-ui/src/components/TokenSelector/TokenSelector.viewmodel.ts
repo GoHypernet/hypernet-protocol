@@ -70,8 +70,7 @@ export class TokenSelectorViewModel {
 
   protected getBalances() {
     if (this.onlyWithBalance) {
-      this.integration
-        .getReady()
+      this.integration.core.waitInitialized()
         .andThen(() => {
           return this.integration.core.getBalances();
         })

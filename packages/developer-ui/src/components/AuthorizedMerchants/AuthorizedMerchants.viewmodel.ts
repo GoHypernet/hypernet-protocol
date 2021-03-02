@@ -23,8 +23,7 @@ export class AuthorizedMerchantsViewModel {
       },
     });
 
-    this.integration
-      .getReady()
+    this.integration.core.waitInitialized()
       .andThen(() => {
         return this.integration.core.getAuthorizedMerchants();
       })

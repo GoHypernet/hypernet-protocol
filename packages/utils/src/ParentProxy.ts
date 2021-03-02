@@ -68,8 +68,12 @@ export abstract class ParentProxy {
     });
   }
 
+  protected activateResult: ResultAsync<void, Error> | undefined;
   public activate(): ResultAsync<void, Error> {
-    return ResultAsync.fromPromise(this.handshake, (e) => e as Error).map((child) => {
+    if (this.activateResult != null) {
+      return this.activateResult;
+    }
+    this.activateResult = ResultAsync.fromPromise(this.handshake, (e) => e as Error).map((child) => {
       // Stash the API for future calls
       this.child = child;
 
@@ -109,6 +113,8 @@ export abstract class ParentProxy {
 
       this.active = true;
     });
+
+    return this.activateResult;
   }
 
   public destroy() {

@@ -67,8 +67,7 @@ export class AuthorizedMerchantSelectorViewModel {
   }
 
   protected getAuthorizedMerchants() {
-    this.integration
-      .getReady()
+    this.integration.core.waitInitialized()
       .andThen(() => {
         return this.integration.core.getAuthorizedMerchants();
       })

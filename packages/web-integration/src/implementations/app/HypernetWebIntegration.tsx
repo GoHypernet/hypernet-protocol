@@ -49,15 +49,23 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   // wait for the core to be intialized
+  protected getReadyResult: ResultAsync<IHypernetIFrameProxy, Error> | undefined;
   public getReady(): ResultAsync<IHypernetIFrameProxy, Error> {
-    return this.core.proxyReady().andThen(() => {
-      return this.core.activate().andThen(() => {
-        return this.core
-          .getEthereumAccounts()
-          .andThen((accounts: any) => this.core.initialize(accounts[0]))
-          .map(() => this.core);
-      });
-    });
+    if (this.getReadyResult != null) {
+      return this.getReadyResult;
+    }
+    this.getReadyResult = this.core
+      .activate()
+      .andThen(() => {
+        return this.core.activate();
+      })
+      .andThen(() => {
+        return this.core.getEthereumAccounts();
+      })
+      .andThen((accounts: any) => this.core.initialize(accounts[0]))
+      .map(() => this.core);
+
+    return this.getReadyResult;
   }
 
   // This class must be used as a singleton, this enforces that restriction.

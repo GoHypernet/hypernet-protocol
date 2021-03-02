@@ -32,16 +32,7 @@ export class AgentViewModel {
   protected integration: IHypernetWebIntegration;
 
   constructor() {
-    if (!window.ethereum) {
-      const externalProviderUtils = new ExternalProviderUtils();
-      
-      //this.integration = new HypernetCore(EBlockchainNetwork.Localhost, undefined, externalProvider);
-      this.integration = new HypernetWebIntegration();
-    } else {
-      //this.integration = new HypernetCore(EBlockchainNetwork.Localhost);
-      this.integration = new HypernetWebIntegration();
-    }
-
+    this.integration = new HypernetWebIntegration();
     this.status = new StatusParams(this.integration);
 
     this.account = new AccountParams(this.integration);
@@ -60,19 +51,7 @@ export class AgentViewModel {
   protected startup(): Promise<void> {
     return this.integration.getReady().match(
       () => {
-        this.integration.core.getEthereumAccounts()
-          .andThen((accounts) => {
-            return this.integration.core.initialize(accounts[0]);
-          })
-          .match(
-            () => {
-              this.message("Startup Complete");
-            },
-            (e) => {
-              this.message("Startup failed!");
-              console.log(e);
-            },
-          );
+        this.message("Startup Complete");
       },
       (e) => {
         this.message("Startup failed!");

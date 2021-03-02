@@ -52,7 +52,7 @@ export class ActionsViewModel {
       await this.integration.core.mintTestToken(ethers.utils.parseEther("1"));
     });
 
-    this.integration.getReady().map(() => {
+    this.integration.core.waitInitialized().map(() => {
       this.startupComplete(true);
     });
   }
