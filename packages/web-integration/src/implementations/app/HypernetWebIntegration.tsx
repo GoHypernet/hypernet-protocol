@@ -67,8 +67,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     return HypernetWebIntegration.instance;
   }
 
-  private generateDomElement(selector: string) {
-    this.removeExistedElement(selector);
+  private _generateDomElement(selector: string) {
+    this._removeExistedElement(selector);
 
     const element = document.createElement("div");
     element.setAttribute("id", selector);
@@ -78,14 +78,14 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     return element;
   }
 
-  private removeExistedElement(selector: string) {
+  private _removeExistedElement(selector: string) {
     const element = document.getElementById(selector);
     if (element) {
       element.remove();
     }
   }
 
-  private async bootstrapComponent(component: React.ReactNode, withModal: boolean = false) {
+  private _bootstrapComponent(component: React.ReactNode, withModal: boolean = false) {
     return (
       <StoreProvider proxy={this.core}>
         <LayoutProvider>
@@ -95,7 +95,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     );
   }
 
-  private _prepareIFrameContainer() {
+  private _prepareIFrameContainer(): HTMLElement {
     // Create a container element for the iframe proxy
     const iframeContainer = document.createElement("div");
     iframeContainer.id = "__hypernet-protocol-iframe-container__";
@@ -166,28 +166,28 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
   public async renderBalancesWidget(config?: IRenderParams) {
     ReactDOM.render(
-      await this.bootstrapComponent(<BalancesWidget />),
-      this.generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
+      await this._bootstrapComponent(<BalancesWidget />),
+      this._generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
     );
   }
 
   public async renderFundWidget(config?: IRenderParams) {
     ReactDOM.render(
-      await this.bootstrapComponent(<FundWidget />),
-      this.generateDomElement(config?.selector || FUND_WIDGET_ID_SELECTOR),
+      await this._bootstrapComponent(<FundWidget />),
+      this._generateDomElement(config?.selector || FUND_WIDGET_ID_SELECTOR),
     );
   }
 
   public async renderLinksWidget(config?: IRenderParams) {
     ReactDOM.render(
-      await this.bootstrapComponent(<LinksWidget />),
-      this.generateDomElement(config?.selector || LINKS_WIDGET_ID_SELECTOR),
+      await this._bootstrapComponent(<LinksWidget />),
+      this._generateDomElement(config?.selector || LINKS_WIDGET_ID_SELECTOR),
     );
   }
 
   public async renderPaymentWidget(config?: IRenderPaymentWidgetParams) {
     ReactDOM.render(
-      await this.bootstrapComponent(
+      await this._bootstrapComponent(
         <PaymentWidget
           counterPartyAccount={config?.counterPartyAccount}
           amount={config?.amount}
@@ -199,13 +199,13 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
         />,
         true,
       ),
-      this.generateDomElement(config?.selector || PAYMENT_WIDGET_ID_SELECTOR),
+      this._generateDomElement(config?.selector || PAYMENT_WIDGET_ID_SELECTOR),
     );
   }
 
   public async renderConnectorAuthorizationFlow(config: IConnectorAuthorizationFlowParams) {
     ReactDOM.render(
-      await this.bootstrapComponent(
+      await this._bootstrapComponent(
         <ConnectorAuthorizationFlow
           connectorUrl={config.connectorUrl}
           connectorName={config.connectorName}
@@ -213,7 +213,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
         />,
         config.showInModal,
       ),
-      this.generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
+      this._generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
     );
   }
 }
