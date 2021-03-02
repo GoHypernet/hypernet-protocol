@@ -1,20 +1,27 @@
 import React, { useContext } from "react";
-import { ConnectorAuthorization } from "@hypernetlabs/web-ui";
+import { ConnectorAuthorization, SucessContent } from "@hypernetlabs/web-ui";
+import { EStatusColor } from "@hypernetlabs/web-ui/src/theme";
 import { useBalances } from "@web-integration/hooks";
-import { StoreContext } from "@web-integration/contexts";
+import { LayoutContext, StoreContext } from "@web-integration/contexts";
 import { IConnectorAuthorizationFlowParams } from "@web-integration/interfaces/app/IHypernetWebIntegration";
 
 const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> = (
   props: IConnectorAuthorizationFlowParams,
 ) => {
-  const { connectorUrl, connectorName, connectorLogoUrl } = props;
+  const {
+    connectorUrl,
+    connectorName = "Hypernet",
+    connectorLogoUrl = "https://res.cloudinary.com/dqueufbs7/image/upload/v1614369421/images/Screen_Shot_2021-02-26_at_22.56.34.png",
+  } = props;
   const { balances } = useBalances();
   const { proxy } = useContext(StoreContext);
+  const { setModalWidth, setModalStatus, modalStatus, closeModal } = useContext(LayoutContext);
 
   const handleMerchantAuthorization = () => {
     proxy.authorizeMerchant(connectorUrl).match(
       () => {
-        console.log("yo, all good show the success alert");
+        setModalWidth(565);
+        setModalStatus(EStatusColor.SUCCESS);
       },
       (err) => {
         console.log("yo stop, we have some error");
@@ -22,15 +29,21 @@ const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> = 
     );
   };
 
-  return (
-    <div>
-      <ConnectorAuthorization
-        balances={balances}
-        connectorName={connectorName}
-        connectorLogoUrl={connectorLogoUrl}
-        onAuthorizeClick={handleMerchantAuthorization}
-      />
-    </div>
+  return modalStatus === EStatusColor.SUCCESS ? (
+    <SucessContent
+      label="Success!"
+      info="You have successfully connected to Galileo.
+    You can now start making payments and
+    transactions."
+      onOkay={() => closeModal()}
+    />
+  ) : (
+    <ConnectorAuthorization
+      balances={balances}
+      connectorName={connectorName}
+      connectorLogoUrl={connectorLogoUrl}
+      onAuthorizeClick={handleMerchantAuthorization}
+    />
   );
 };
 

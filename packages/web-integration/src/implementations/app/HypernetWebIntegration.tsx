@@ -13,7 +13,7 @@ import {
   IRenderParams,
   IRenderPaymentWidgetParams,
 } from "@web-integration/interfaces/app/IHypernetWebIntegration";
-import { StoreProvider } from "@web-integration/contexts";
+import { LayoutProvider, StoreProvider } from "@web-integration/contexts";
 import {
   BALANCES_WIDGET_ID_SELECTOR,
   FUND_WIDGET_ID_SELECTOR,
@@ -98,7 +98,9 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private async bootstrapComponent(component: React.ReactNode, withModal: boolean = false) {
     return (
       <StoreProvider proxy={this.core}>
-        <MainContainer withModal={withModal}>{component}</MainContainer>
+        <LayoutProvider>
+          <MainContainer withModal={withModal}>{component}</MainContainer>
+        </LayoutProvider>
       </StoreProvider>
     );
   }
