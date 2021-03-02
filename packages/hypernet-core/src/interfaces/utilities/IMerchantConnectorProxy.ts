@@ -16,4 +16,6 @@ export interface IMerchantConnectorProxy extends ParentProxy {
   getPublicKey(): ResultAsync<PublicKey, MerchantConnectorError>;
 
   getValidatedSignature(): ResultAsync<string, MerchantValidationError>;
+
+  activateProxy(): ResultAsync<void, MerchantValidationError>;
 }

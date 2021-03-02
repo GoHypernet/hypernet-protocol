@@ -81,9 +81,9 @@ export abstract class ParentProxy {
     });
   }
 
-  protected activateResult: ResultAsync<Postmate.ParentAPI, Error> | undefined;
+  protected activateResult: ResultAsync<void, Error> | undefined;
 
-  public activate(): ResultAsync<Postmate.ParentAPI, Error> {
+  public activate(): ResultAsync<void, Error> {
     if (this.activateResult != null) {
       return this.activateResult;
     }
@@ -126,8 +126,6 @@ export abstract class ParentProxy {
       });
 
       this.active = true;
-
-      return child;
     });
 
     return this.activateResult;
