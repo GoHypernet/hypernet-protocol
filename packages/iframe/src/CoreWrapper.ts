@@ -110,6 +110,9 @@ export default class CoreWrapper extends ChildProxy {
           return this.core.authorizeMerchant(data.data);
         }, data.callId);
       },
+      onMerchantIFrameClosed: (data: IIFrameCallData<string>) => {
+        this.core.onMerchantIFrameClosed.next();
+      },
 
       //   pullFunds(paymentId: string, amount: BigNumber): Promise<Payment>;
 
@@ -185,6 +188,10 @@ export default class CoreWrapper extends ChildProxy {
 
     this.core.onMerchantIFrameDisplayRequested.subscribe(() => {
       parent.emit("onMerchantIFrameDisplayRequested");
+    });
+
+    this.core.onMerchantIFrameCloseRequested.subscribe(() => {
+      parent.emit("onMerchantIFrameCloseRequested");
     });
   }
 }

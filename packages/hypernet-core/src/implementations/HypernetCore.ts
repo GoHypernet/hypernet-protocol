@@ -109,6 +109,8 @@ export class HypernetCore implements IHypernetCore {
   public onAuthorizedMerchantUpdated: Subject<string>;
   public onAuthorizedMerchantActivationFailed: Subject<string>;
   public onMerchantIFrameDisplayRequested: Subject<void>;
+  public onMerchantIFrameCloseRequested: Subject<void>;
+  public onMerchantIFrameClosed: Subject<void>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -174,6 +176,8 @@ export class HypernetCore implements IHypernetCore {
     this.onAuthorizedMerchantUpdated = new Subject<string>();
     this.onAuthorizedMerchantActivationFailed = new Subject<string>();
     this.onMerchantIFrameDisplayRequested = new Subject<void>();
+    this.onMerchantIFrameCloseRequested = new Subject<void>();
+    this.onMerchantIFrameClosed = new Subject<void>();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -203,6 +207,8 @@ export class HypernetCore implements IHypernetCore {
       this.onAuthorizedMerchantUpdated,
       this.onAuthorizedMerchantActivationFailed,
       this.onMerchantIFrameDisplayRequested,
+      this.onMerchantIFrameCloseRequested,
+      this.onMerchantIFrameClosed,
     );
     this.blockchainProvider = new EthersBlockchainProvider(externalProvider);
     this.paymentIdUtils = new PaymentIdUtils();

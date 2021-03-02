@@ -215,4 +215,6 @@ export interface IHypernetCore {
   onAuthorizedMerchantUpdated: Subject<string>;
   onAuthorizedMerchantActivationFailed: Subject<string>;
   onMerchantIFrameDisplayRequested: Subject<void>;
+  onMerchantIFrameCloseRequested: Subject<void>;
+  onMerchantIFrameClosed: Subject<void>;
 }

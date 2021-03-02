@@ -58,19 +58,24 @@ class TestMerchantConnector implements IMerchantConnector {
 
   private _renderContent() {
     const element = window.document.createElement("div");
-    const textnode = window.document.createTextNode("Hey! here is a content from test merchant");
-    element.appendChild(textnode);
+    element.innerHTML = `
+      <div style="text-align: center; display: flex; justify-content: center; flex-direction: column;">
+        <img src="https://res.cloudinary.com/dqueufbs7/image/upload/v1614648372/images/Screen_Shot_2021-03-02_at_04.14.05.png" width="100%" />
+        <h2>Galileo merchant connector</h2>
+      </div>
+    `;
     window.document.body.appendChild(element);
 
     // connector did all the rendering stuff, now he is asking merchant-iframe to show his stuff
+    // Merchant iframe Postmate model is running after the connector code get compiled in MerchantService.activateMerchantConnector so we need a small delay to wait for the Postmate model to get initialized.
     setTimeout(() => {
       this.onDisplayRequested.next();
     }, 100);
 
     // connector done with the UI he rendered previously, now he want to ask the merchant-iframe to close everything.
-    /* setTimeout(() => {
-      this.onCloseRequested.next();
-    }, 10000); */
+    setTimeout(() => {
+      //this.onCloseRequested.next();
+    }, 10000);
   }
 
   //   paymentCreated(payment: Payment) {
@@ -80,13 +85,22 @@ class TestMerchantConnector implements IMerchantConnector {
   onSendFundsRequested: Subject<ISendFundsRequest>;
   onAuthorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
   onDisplayRequested: Subject<void>;
+  onCloseRequested: Subject<void>;
+  onIFrameClosed: Subject<void>;
 
   constructor() {
     this.onSendFundsRequested = new Subject<ISendFundsRequest>();
     this.onAuthorizeFundsRequested = new Subject<IAuthorizeFundsRequest>();
     this.onDisplayRequested = new Subject<void>();
-    //this.onCloseRequested = new Subject<void>();
+    this.onCloseRequested = new Subject<void>();
+    this.onIFrameClosed = new Subject<void>();
+
     this._renderContent();
+
+    // User closed merchant iframe and here is the connector getting notified that the iframe got closed manually by the user
+    this.onIFrameClosed.subscribe(() => {
+      console.log("Hey, user just closed merchant iframe");
+    });
   }
 }
 

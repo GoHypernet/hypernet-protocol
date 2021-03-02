@@ -28,28 +28,14 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
 
   protected iframeURL: string = "http://localhost:8090";
-  protected iframeContainer: HTMLElement;
 
   public proxy: IHypernetIFrameProxy;
 
   constructor(iframeURL?: string) {
     this.iframeURL = iframeURL || this.iframeURL;
 
-    // Create a container element for the iframe proxy
-    this.iframeContainer = document.createElement("div");
-    this.iframeContainer.id = "__hypernet-protocol-iframe-container__";
-    this.iframeContainer.tabIndex = -1;
-
-    // hide child iframe
-    const style = document.createElement("style");
-    style.appendChild(document.createTextNode("iframe { display: none;}"));
-    this.iframeContainer.appendChild(style);
-
-    // Attach it to the body
-    document.body.appendChild(this.iframeContainer);
-
     // Create a proxy connection to the iframe
-    this.proxy = new HypernetIFrameProxy(this.iframeContainer, this.iframeURL);
+    this.proxy = new HypernetIFrameProxy(this._prepareIFrameContainer(), this.iframeURL);
   }
 
   // wait for the core to be intialized
@@ -97,6 +83,75 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
         <MainContainer withModal={withModal}>{component}</MainContainer>
       </StoreProvider>
     );
+  }
+
+  private _prepareIFrameContainer() {
+    // Create a container element for the iframe proxy
+    const iframeContainer = document.createElement("div");
+    iframeContainer.id = "__hypernet-protocol-iframe-container__";
+
+    // Add close modal icon to iframe container
+    const closeButton = document.createElement("div");
+    closeButton.id = "__hypernet-protocol-iframe-close-icon__";
+    //@ts-ignore
+    closeButton.innerHTML = `
+      <img src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png" width="20" />
+    `;
+    iframeContainer.appendChild(closeButton);
+
+    closeButton.addEventListener(
+      "click",
+      (e) => {
+        this.proxy.onMerchantIFrameClosed.next();
+      },
+      false,
+    );
+
+    // Add iframe modal style
+    // TODO: Close button style is not responsive with the content height, need to be fixed.
+    const style = document.createElement("style");
+    style.appendChild(
+      document.createTextNode(`
+        iframe {
+          position: absolute;
+          display: none;
+          border: none;
+          width: 400px;
+          max-height: 500px;
+          min-height: 200px;
+          background-color: white;
+          top: 50%;
+          left: 50%;
+          box-shadow: 0px 4px 20px #000000;
+          border-radius: 4px;
+          transform: translate(-50%, -50%);
+          padding: 15px;
+        }
+        #__hypernet-protocol-iframe-container__ {
+          position: absolute;
+          display: none;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 100%;
+          background-color: rgba(0,0,0,0.6);
+        }
+        #__hypernet-protocol-iframe-close-icon__ {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(calc(-50% + 180px), calc(-50% - 84px));
+          z-index: 2;
+          cursor: pointer;
+        }
+    `),
+    );
+    document.head.appendChild(style);
+
+    // Attach everything to the body
+    document.body.appendChild(iframeContainer);
+
+    return iframeContainer;
   }
 
   public async renderBalancesWidget(config?: IRenderParams) {

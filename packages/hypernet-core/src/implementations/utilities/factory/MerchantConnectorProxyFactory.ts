@@ -19,7 +19,7 @@ export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFac
 
         const iframeUrl = new URL(config.merchantIframeUrl);
         iframeUrl.searchParams.set("merchantUrl", merchantUrl);
-        proxy = new MerchantConnectorProxy(null, iframeUrl.toString());
+        proxy = new MerchantConnectorProxy(null, iframeUrl.toString(), context);
 
         // The proxy needs to be activated to do anything. NOTE: this is different
         // from activating the connector itself; this just activates the proxy
@@ -29,8 +29,14 @@ export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFac
         return proxy.activate();
       })
       .map((child) => {
+        // We need to make sure to have the listeners after postmate model gets activated
         child.on("onDisplayRequested", () => {
           context.onMerchantIFrameDisplayRequested.next();
+        });
+
+        child.on("onCloseRequested", () => {
+          console.log("onCloseRequested: ");
+          context.onMerchantIFrameCloseRequested.next();
         });
 
         return proxy;

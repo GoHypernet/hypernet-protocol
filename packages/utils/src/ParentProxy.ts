@@ -58,6 +58,19 @@ export abstract class ParentProxy {
 
     if (element == null) {
       element = document.body;
+      const style = document.createElement("style");
+      style.appendChild(
+        document.createTextNode(`
+          iframe {
+            border: none;
+            width: 100%;
+          }
+          html {
+            overflow-y: hidden;
+          }
+        `),
+      );
+      document.head.appendChild(style);
     }
 
     this.handshake = new Postmate({
