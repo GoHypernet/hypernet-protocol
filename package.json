@@ -39,6 +39,7 @@
     "build": "lerna run build",
     "clean": "rimraf ./packages/*/dist",
     "compile": "tsc --build",
+    "compile-necessary": "cd packages/merchant-connector && yarn compile && cd ../utils && yarn compile && cd ../test-merchant-connector && yarn build && cd ../iframe && yarn build && cd ../merchant-iframe && yarn build && cd ../",
     "format": "lerna run format && yarn format:pkg",
     "format:pkg": "format-package -w",
     "generate-docs": "lerna run generate-docs",
