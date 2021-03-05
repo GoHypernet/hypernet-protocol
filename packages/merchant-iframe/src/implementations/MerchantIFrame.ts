@@ -28,7 +28,7 @@ export class MerchantIframe {
     }
 
     // Instantiate all the pieces
-    this.contextProvider = new ContextProvider(new URL(merchantUrl));
+    this.contextProvider = new ContextProvider(merchantUrl);
     this.ajaxUtils = new AxiosAjaxUtils();
 
     this.merchantConnectorRepository = new MerchantConnectorRepository(this.ajaxUtils);
@@ -43,6 +43,9 @@ export class MerchantIframe {
       // Note, it would be better to have a waitForValidated() function down lower so that the API
       // can be activated immediately.
       return this.merchantIframeApi.activateModel();
-    });
+    })
+    .mapErr((e) => {
+      console.error(e);
+    })
   }
 }
