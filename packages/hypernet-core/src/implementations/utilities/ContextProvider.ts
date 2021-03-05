@@ -26,6 +26,9 @@ export class ContextProvider implements IContextProvider {
     onMerchantAuthorized: Subject<string>,
     onAuthorizedMerchantUpdated: Subject<string>,
     onAuthorizedMerchantActivationFailed: Subject<string>,
+    onMerchantIFrameDisplayRequested: Subject<void>,
+    onMerchantIFrameCloseRequested: Subject<void>,
+    onMerchantIFrameClosed: Subject<void>,
   ) {
     this.context = new HypernetContext(
       null,
@@ -43,6 +46,9 @@ export class ContextProvider implements IContextProvider {
       onMerchantAuthorized,
       onAuthorizedMerchantUpdated,
       onAuthorizedMerchantActivationFailed,
+      onMerchantIFrameDisplayRequested,
+      onMerchantIFrameCloseRequested,
+      onMerchantIFrameClosed,
     );
   }
   public getContext(): ResultAsync<HypernetContext, never> {
@@ -71,6 +77,9 @@ export class ContextProvider implements IContextProvider {
         this.context.onMerchantAuthorized,
         this.context.onAuthorizedMerchantUpdated,
         this.context.onAuthorizedMerchantActivationFailed,
+        this.context.onMerchantIFrameDisplayRequested,
+        this.context.onMerchantIFrameCloseRequested,
+        this.context.onMerchantIFrameClosed,
         new Map<string, string>(),
       ),
     );

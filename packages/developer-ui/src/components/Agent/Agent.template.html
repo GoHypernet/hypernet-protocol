@@ -1,15 +1,23 @@
-<div style="background: #ffffff;padding: 10px 20px">
-  <img src="../../images/hypernet.png" style="margin:10px 0px;width: 280px"/>
+<div style="background: #ffffff; padding: 10px 20px">
+  <!-- TODO: Figure out why image src is not working here -->
+  <!-- <img src="../../images/hypernet.png" style="margin:10px 0px;width: 280px"/> -->
+  <img
+    src="https://res.cloudinary.com/dqueufbs7/image/upload/v1614649450/images/hypernet.jpg"
+    style="margin: 10px 0px; width: 150px"
+  />
 </div>
 <div class="container-fluid">
-  <div class="custom-three-column">
-    <div class="col card card-wrapper" style="margin: 20px 10px 20px 0px">
-      <div data-bind='component: {
+  <div class="custom-one-column">
+    <div class="col card card-wrapper" style="margin: 20px 10px 0px 0px">
+      <div
+        data-bind='component: {
         name: "account",
-        params: account}'>
-      </div>
+        params: account}'
+      ></div>
     </div>
+  </div>
 
+  <div class="custom-three-column">
     <!--
     <div class="col">
       <div data-bind='component: {
@@ -20,41 +28,51 @@
     -->
 
     <div class="col card card-wrapper" style="margin: 20px 10px 20px 0px">
-      <div data-bind='component: {
+      <div
+        data-bind='component: {
         name: "balances",
-        params: balances}'></div>
+        params: balances}'
+      ></div>
     </div>
 
     <div class="col card card-wrapper" style="margin: 20px 10px 20px 0px">
-      <div data-bind='component: {
-        name: "authorized-merchants",
-        params: authorizedMerchants}'></div>
-    </div>
-
-
-    <div class="col card card-wrapper" style="margin: 20px 10px 20px 0px">
-      <div data-bind='component: {
+      <div
+        data-bind='component: {
         name: "actions",
-       params: actions}'></div>
+       params: actions}'
+      ></div>
     </div>
 
+    <div class="col card card-wrapper" style="margin: 20px 10px 20px 0px">
+      <div
+        data-bind='component: {
+        name: "authorized-merchants",
+        params: authorizedMerchants}'
+      ></div>
+
+      <div
+        data-bind="component: {
+          name: 'authorized-merchant-form',
+          params: merchantForm}"
+      ></div>
+    </div>
   </div>
 
   <div class="custom-tow-column">
-
     <div class="col card card-wrapper" style="margin: 0px">
-      <div data-bind="component: {
+      <div
+        data-bind="component: {
         name: 'links',
-        params: links}">
-      </div>
+        params: links}"
+      ></div>
     </div>
     <div>
-
-      <div class="col card card-wrapper" style="margin-top:0px">
-        <div data-bind='component: {
+      <div class="col card card-wrapper" style="margin-top: 0px">
+        <div
+          data-bind='component: {
         name: "payment-form",
-        params: paymentForm}'>
-        </div>
+        params: paymentForm}'
+        ></div>
       </div>
 
       <div class="col card card-wrapper">
@@ -64,14 +82,5 @@
         </div>
       </div>
     </div>
-
-    <div class="col card card-wrapper">
-      <div data-bind="component: {
-        name: 'authorized-merchant-form',
-        params: merchantForm}">
-      </div>
-    </div>
   </div>
-
-
 </div>

@@ -27,7 +27,7 @@ const FundWidget: React.FC = () => {
       <Button onClick={depositFunds} disabled={!selectedPaymentToken?.address} label="Fund" />
       <br />
       <br />
-      <Button onClick={mintTokens} label="Mint test tokens" />
+      <Button onClick={mintTokens} label="Mint HyperToken" />
       <br />
       <h3>{resultMessage?.message}</h3>
     </div>

@@ -1,12 +1,17 @@
-import { ParentProxy } from "@hypernetlabs/utils";
-import { ResultAsync } from "neverthrow";
+import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
+import Postmate from "postmate";
+import { okAsync, ResultAsync } from "neverthrow";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
 import { MerchantConnectorError, MerchantValidationError } from "@interfaces/objects/errors";
-import { HexString, PublicKey } from "@interfaces/objects";
-import { IMerchantConnectorProxy } from "@interfaces/utilities";
+import { HexString, HypernetContext, PublicKey } from "@interfaces/objects";
+import { IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
 
 export class MerchantConnectorProxy extends ParentProxy implements IMerchantConnectorProxy {
-  constructor(element: HTMLElement | null, iframeUrl: string) {
+  constructor(
+    protected element: HTMLElement | null,
+    protected iframeUrl: string,
+    protected contextProvider: IContextProvider,
+  ) {
     super(element, iframeUrl);
   }
 
@@ -24,5 +29,30 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
 
   public getValidatedSignature(): ResultAsync<string, MerchantValidationError> {
     return this._createCall("getValidatedSignature", null);
+  }
+
+  public activateProxy(): ResultAsync<void, MerchantValidationError> {
+    let context: HypernetContext;
+
+    return ResultUtils.combine([this.contextProvider.getContext(), this.activate()])
+      .andThen((vals) => {
+        [context] = vals;
+
+        return this.activate();
+      })
+      .map(() => {
+        // We need to make sure to have the listeners after postmate model gets activated
+        this.child?.on("onDisplayRequested", () => {
+          context.onMerchantIFrameDisplayRequested.next();
+        });
+        this.child?.on("onCloseRequested", () => {
+          context.onMerchantIFrameCloseRequested.next();
+        });
+
+        // Listen for iframe close event and pass it down to the child proxy.
+        context.onMerchantIFrameClosed.subscribe(() => {
+          this._createCall("onMerchantIFrameClosed", null);
+        });
+      });
   }
 }

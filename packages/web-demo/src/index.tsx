@@ -6,7 +6,7 @@ const client: IHypernetWebIntegration = new HypernetWebIntegration();
 // set image background styles
 var style = document.createElement("style");
 style.innerHTML = `body {
-  background-image: url(https://res.cloudinary.com/dqueufbs7/image/upload/v1614365921/images/Artboard_3_1.png);
+  background-image: url(https://res.cloudinary.com/dqueufbs7/image/upload/v1614731973/images/image.png);
   height: 100%;
   background-repeat: no-repeat;
   background-size: cover;

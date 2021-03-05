@@ -24,8 +24,12 @@ export default class PostmateApi extends ChildProxy implements IMerchantIFrameAp
           this.parent?.emit("onAuthorizeFundsRequested", val);
         });
 
-        merchantConnector.onDisplayRequested.subscribe((val) => {
-          this.parent?.emit("onDisplayRequested", val);
+        merchantConnector.onDisplayRequested.subscribe(() => {
+          this.parent?.emit("onDisplayRequested");
+        });
+
+        merchantConnector.onCloseRequested.subscribe(() => {
+          this.parent?.emit("onCloseRequested");
         });
       },
     });
@@ -68,6 +72,10 @@ export default class PostmateApi extends ChildProxy implements IMerchantIFrameAp
 
           return okAsync(context.validatedMerchantSignature);
         }, data.callId);
+      },
+      onMerchantIFrameClosed: (data: IIFrameCallData<void>) => {
+        const context = this.contextProvider.getMerchantContext();
+        context.merchantConnector?.onIFrameClosed.next();
       },
     });
   }
