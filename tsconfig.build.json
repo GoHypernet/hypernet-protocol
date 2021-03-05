@@ -19,6 +19,7 @@
     "allowSyntheticDefaultImports": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
+    "noImplicitAny": false,
     "resolveJsonModule": true,
     "jsx": "react",
     "typeRoots": [
