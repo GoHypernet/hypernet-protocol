@@ -42,7 +42,7 @@ export class ActionsViewModel {
       await this.integration.core.depositFunds(selectedToken, ethers.utils.parseEther("1"));
     });
 
-    this.mintTestTokenButton = new ButtonParams("Mint Test Token", async () => {
+    this.mintTestTokenButton = new ButtonParams("Mint HyperToken", async () => {
       const selectedToken = this.tokenSelector.selectedToken();
 
       if (selectedToken == null) {

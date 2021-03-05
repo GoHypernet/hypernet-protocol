@@ -28,24 +28,14 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
 
   protected iframeURL: string = "http://localhost:8090";
-  protected iframeContainer: HTMLElement;
 
   public core: IHypernetIFrameProxy;
 
   constructor(iframeURL?: string) {
     this.iframeURL = iframeURL || this.iframeURL;
 
-    // Create a container element for the iframe proxy
-    this.iframeContainer = document.createElement("div");
-    this.iframeContainer.id = "__hypernet-protocol-iframe-container__";
-    this.iframeContainer.tabIndex = -1;
-    this.iframeContainer.setAttribute("style", "display: none;");
-
-    // Attach it to the body
-    document.body.appendChild(this.iframeContainer);
-
     // Create a proxy connection to the iframe
-    this.core = new HypernetIFrameProxy(this.iframeContainer, this.iframeURL);
+    this.core = new HypernetIFrameProxy(this._prepareIFrameContainer(), this.iframeURL);
   }
 
   // wait for the core to be intialized
@@ -77,8 +67,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     return HypernetWebIntegration.instance;
   }
 
-  private generateDomElement(selector: string) {
-    this.removeExistedElement(selector);
+  private _generateDomElement(selector: string) {
+    this._removeExistedElement(selector);
 
     const element = document.createElement("div");
     element.setAttribute("id", selector);
@@ -88,14 +78,14 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     return element;
   }
 
-  private removeExistedElement(selector: string) {
+  private _removeExistedElement(selector: string) {
     const element = document.getElementById(selector);
     if (element) {
       element.remove();
     }
   }
 
-  private async bootstrapComponent(component: React.ReactNode, withModal: boolean = false) {
+  private _bootstrapComponent(component: React.ReactNode, withModal: boolean = false) {
     return (
       <StoreProvider proxy={this.core}>
         <LayoutProvider>
@@ -105,30 +95,99 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     );
   }
 
+  private _prepareIFrameContainer(): HTMLElement {
+    // Create a container element for the iframe proxy
+    const iframeContainer = document.createElement("div");
+    iframeContainer.id = "__hypernet-protocol-iframe-container__";
+
+    // Add close modal icon to iframe container
+    const closeButton = document.createElement("div");
+    closeButton.id = "__hypernet-protocol-iframe-close-icon__";
+    //@ts-ignore
+    closeButton.innerHTML = `
+      <img src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png" width="20" />
+    `;
+    iframeContainer.appendChild(closeButton);
+
+    closeButton.addEventListener(
+      "click",
+      (e) => {
+        this.core.onMerchantIFrameClosed.next();
+      },
+      false,
+    );
+
+    // Add iframe modal style
+    // TODO: Close button style is not responsive with the content height, need to be fixed.
+    const style = document.createElement("style");
+    style.appendChild(
+      document.createTextNode(`
+        iframe {
+          position: absolute;
+          display: none;
+          border: none;
+          width: 400px;
+          max-height: 500px;
+          min-height: 200px;
+          background-color: white;
+          top: 50%;
+          left: 50%;
+          box-shadow: 0px 4px 20px #000000;
+          border-radius: 4px;
+          transform: translate(-50%, -50%);
+          padding: 15px;
+        }
+        #__hypernet-protocol-iframe-container__ {
+          position: absolute;
+          display: none;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 100%;
+          background-color: rgba(0,0,0,0.6);
+        }
+        #__hypernet-protocol-iframe-close-icon__ {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(calc(-50% + 180px), calc(-50% - 84px));
+          z-index: 2;
+          cursor: pointer;
+        }
+    `),
+    );
+    document.head.appendChild(style);
+
+    // Attach everything to the body
+    document.body.appendChild(iframeContainer);
+
+    return iframeContainer;
+  }
+
   public async renderBalancesWidget(config?: IRenderParams) {
     ReactDOM.render(
-      await this.bootstrapComponent(<BalancesWidget />),
-      this.generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
+      await this._bootstrapComponent(<BalancesWidget />),
+      this._generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
     );
   }
 
   public async renderFundWidget(config?: IRenderParams) {
     ReactDOM.render(
-      await this.bootstrapComponent(<FundWidget />),
-      this.generateDomElement(config?.selector || FUND_WIDGET_ID_SELECTOR),
+      await this._bootstrapComponent(<FundWidget />),
+      this._generateDomElement(config?.selector || FUND_WIDGET_ID_SELECTOR),
     );
   }
 
   public async renderLinksWidget(config?: IRenderParams) {
     ReactDOM.render(
-      await this.bootstrapComponent(<LinksWidget />),
-      this.generateDomElement(config?.selector || LINKS_WIDGET_ID_SELECTOR),
+      await this._bootstrapComponent(<LinksWidget />),
+      this._generateDomElement(config?.selector || LINKS_WIDGET_ID_SELECTOR),
     );
   }
 
   public async renderPaymentWidget(config?: IRenderPaymentWidgetParams) {
     ReactDOM.render(
-      await this.bootstrapComponent(
+      await this._bootstrapComponent(
         <PaymentWidget
           counterPartyAccount={config?.counterPartyAccount}
           amount={config?.amount}
@@ -140,13 +199,13 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
         />,
         true,
       ),
-      this.generateDomElement(config?.selector || PAYMENT_WIDGET_ID_SELECTOR),
+      this._generateDomElement(config?.selector || PAYMENT_WIDGET_ID_SELECTOR),
     );
   }
 
   public async renderConnectorAuthorizationFlow(config: IConnectorAuthorizationFlowParams) {
     ReactDOM.render(
-      await this.bootstrapComponent(
+      await this._bootstrapComponent(
         <ConnectorAuthorizationFlow
           connectorUrl={config.connectorUrl}
           connectorName={config.connectorName}
@@ -154,7 +213,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
         />,
         config.showInModal,
       ),
-      this.generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
+      this._generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
     );
   }
 }

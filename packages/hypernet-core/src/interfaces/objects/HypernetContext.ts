@@ -22,6 +22,9 @@ export class HypernetContext {
     public onMerchantAuthorized: Subject<string>,
     public onAuthorizedMerchantUpdated: Subject<string>,
     public onAuthorizedMerchantActivationFailed: Subject<string>,
+    public onMerchantIFrameDisplayRequested: Subject<void>,
+    public onMerchantIFrameCloseRequested: Subject<void>,
+    public onMerchantIFrameClosed: Subject<void>,
   ) {}
 }
 
@@ -43,6 +46,9 @@ export class InitializedHypernetContext {
     public onMerchantAuthorized: Subject<string>,
     public onAuthorizedMerchantUpdated: Subject<string>,
     public onAuthorizedMerchantActivationFailed: Subject<string>,
+    public onMerchantIFrameDisplayRequested: Subject<void>,
+    public onMerchantIFrameCloseRequested: Subject<void>,
+    public onMerchantIFrameClosed: Subject<void>,
     public authorizedMediators: Map<string, string>,
   ) {}
 }

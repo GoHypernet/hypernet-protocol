@@ -1,6 +1,9 @@
 body{
     background: #f0f0f0 !important;
 }
+td {
+    word-break: break-word;
+}
 .custom-btn-primary{
     background: #4dc1ac !important;
     border: none !important;
@@ -25,6 +28,11 @@ body{
 }
 .form-control-margin{
     margin-bottom: 10px !important;
+}
+.custom-one-column{
+    display: grid;
+    grid-column-gap: 10px;
+    grid-template-columns: 100%;
 }
 .custom-tow-column{
     display: grid;
