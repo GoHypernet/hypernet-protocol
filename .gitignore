@@ -18,3 +18,5 @@ packages/*/yarn-error.log
 */yarn-error.log
 /lib
 yarn-error.log
+.DS_Store
+build/
