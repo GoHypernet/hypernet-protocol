@@ -84,22 +84,30 @@ class TestMerchantConnector implements IMerchantConnector {
 
   onSendFundsRequested: Subject<ISendFundsRequest>;
   onAuthorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
-  onDisplayRequested: Subject<void>;
-  onCloseRequested: Subject<void>;
-  onIFrameClosed: Subject<void>;
+  onDisplayRequested: Subject<string>;
+  onCloseRequested: Subject<string>;
+  onIFrameClosed: Subject<string>;
+  onIFrameDisplayed: Subject<string>;
 
   constructor() {
     this.onSendFundsRequested = new Subject<ISendFundsRequest>();
     this.onAuthorizeFundsRequested = new Subject<IAuthorizeFundsRequest>();
-    this.onDisplayRequested = new Subject<void>();
-    this.onCloseRequested = new Subject<void>();
-    this.onIFrameClosed = new Subject<void>();
+    this.onDisplayRequested = new Subject<string>();
+    this.onCloseRequested = new Subject<string>();
+    this.onIFrameClosed = new Subject<string>();
+    this.onIFrameDisplayed = new Subject<string>();
 
     this._renderContent();
 
     // User closed merchant iframe and here is the connector getting notified that the iframe got closed manually by the user
-    this.onIFrameClosed.subscribe(() => {
+    this.onIFrameClosed.subscribe((data: string) => {
+      console.log("data: ", data);
       console.log("Hey, user just closed merchant iframe");
+    });
+
+    this.onIFrameDisplayed.subscribe((data: string) => {
+      console.log("data: ", data);
+      console.log("Hey, user just opened merchant iframe");
     });
   }
 }

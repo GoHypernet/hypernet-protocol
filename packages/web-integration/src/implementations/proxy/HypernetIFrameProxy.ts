@@ -49,9 +49,10 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     this.onMerchantAuthorized = new Subject<string>();
     this.onAuthorizedMerchantUpdated = new Subject<string>();
     this.onAuthorizedMerchantActivationFailed = new Subject<string>();
-    this.onMerchantIFrameDisplayRequested = new Subject<void>();
-    this.onMerchantIFrameCloseRequested = new Subject<void>();
-    this.onMerchantIFrameClosed = new Subject<void>();
+    this.onMerchantIFrameDisplayRequested = new Subject<string>();
+    this.onMerchantIFrameCloseRequested = new Subject<string>();
+    this.onMerchantIFrameClosed = new Subject<string>();
+    this.onMerchantIFrameDisplayed = new Subject<string>();
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -137,12 +138,20 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
           }
         });
 
-        this.onMerchantIFrameClosed.subscribe(() => {
+        this.onMerchantIFrameClosed.subscribe((data: string) => {
           child.frame.style.display = "none";
           if (element) {
             element.style.display = "none";
           }
-          this._createCall("onMerchantIFrameClosed", null);
+          this._createCall("onMerchantIFrameClosed", data);
+        });
+
+        this.onMerchantIFrameDisplayed.subscribe((data: string) => {
+          child.frame.style.display = "block";
+          if (element) {
+            element.style.display = "block";
+          }
+          this._createCall("onMerchantIFrameDisplayed", data);
         });
       });
     });
@@ -325,7 +334,8 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   public onMerchantAuthorized: Subject<string>;
   public onAuthorizedMerchantUpdated: Subject<string>;
   public onAuthorizedMerchantActivationFailed: Subject<string>;
-  public onMerchantIFrameDisplayRequested: Subject<void>;
-  public onMerchantIFrameCloseRequested: Subject<void>;
-  public onMerchantIFrameClosed: Subject<void>;
+  public onMerchantIFrameDisplayRequested: Subject<string>;
+  public onMerchantIFrameCloseRequested: Subject<string>;
+  public onMerchantIFrameClosed: Subject<string>;
+  public onMerchantIFrameDisplayed: Subject<string>;
 }

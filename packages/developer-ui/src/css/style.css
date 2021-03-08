@@ -44,4 +44,20 @@ td {
     grid-column-gap: 10px;
     grid-template-columns: 35% 35% 28%;
 }
-
+.flex-row {
+    display: flex !important;
+    flex-direction: row;
+}
+.flex-column {
+    display: flex !important;
+    flex-direction: column;
+}
+.space-between {
+    justify-content: space-between;
+}
+.m-0 {
+    margin: 0;
+}
+.pointer{
+    cursor: pointer;
+}
