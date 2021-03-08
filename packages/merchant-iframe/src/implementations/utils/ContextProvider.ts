@@ -6,7 +6,7 @@ import { Subject } from "rxjs";
 export class ContextProvider implements IContextProvider {
   protected context: MerchantContext;
 
-  constructor(merchantUrl: URL) {
+  constructor(merchantUrl: string) {
     this.context = new MerchantContext(merchantUrl, new Subject<IMerchantConnector>(), null, null, null);
   }
 

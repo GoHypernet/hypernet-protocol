@@ -18,8 +18,5 @@ module.exports = {
       "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization",
     },
     historyApiFallback: true,
-  },
-  plugins: [...rootWebpackConfig.plugins, 
-    //new HtmlWebpackPlugin({ title: 'Sample Monorepo App' })
-  ],
+  }
 };

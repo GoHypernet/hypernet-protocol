@@ -3,7 +3,10 @@ import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import html from "./AuthorizedMerchantSelector.template.html";
 
 export class AuthorizedMerchantSelectorParams {
-  constructor(public integration: IHypernetWebIntegration, public selectedAuthorizedMerchant: ko.Observable<string | null>) {}
+  constructor(
+    public integration: IHypernetWebIntegration,
+    public selectedAuthorizedMerchant: ko.Observable<string | null>,
+  ) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -67,7 +70,8 @@ export class AuthorizedMerchantSelectorViewModel {
   }
 
   protected getAuthorizedMerchants() {
-    this.integration.core.waitInitialized()
+    this.integration.core
+      .waitInitialized()
       .andThen(() => {
         return this.integration.core.getAuthorizedMerchants();
       })

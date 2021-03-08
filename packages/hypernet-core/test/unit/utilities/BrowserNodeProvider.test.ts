@@ -1,42 +1,18 @@
-import td, { verify } from "testdouble";
+import td from "testdouble";
 require("testdouble-jest")(td, jest);
-import {
-  merchantUrl,
-  account,
-  account2,
-  routerChannelAddress,
-  insuranceTransferId,
-  commonPaymentId,
-  mediatorSignature,
-  merchantPublicKey,
-  merchantUrl2,
-  merchantPublicKey2,
-} from "@mock/mocks";
+import { merchantUrl, account } from "@mock/mocks";
 import { BlockchainProviderMock, ConfigProviderMock, ContextProviderMock } from "@mock/utils";
-import {
-  IVectorUtils,
-  ILocalStorageUtils,
-  IMerchantConnectorProxy,
-  IBlockchainUtils,
-  IBasicTransferResponse,
-  ILogUtils,
-  IBrowserNode,
-} from "@interfaces/utilities";
-import { MerchantConnectorError, MerchantValidationError, TransferResolutionError } from "@interfaces/objects/errors";
+import { ILogUtils, IBrowserNode } from "@interfaces/utilities";
 import { IBrowserNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider";
-import { okAsync, errAsync } from "neverthrow";
+import { okAsync } from "neverthrow";
 import { BrowserNodeProvider } from "@implementations/utilities/BrowserNodeProvider";
-import { IAjaxUtils } from "@hypernetlabs/utils";
-import { IBrowserNodeFactory, IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
-import { IResolutionResult } from "@hypernetlabs/merchant-connector";
-import { BigNumber } from "@interfaces/objects";
+import { ILocalStorageUtils } from "@hypernetlabs/utils";
+import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
 import { NonEIP712Message } from "@connext/vector-browser-node";
 
 const validatedSignature = "0xValidatedSignature";
-const newAuthorizationSignature = "0xNewAuthorizationSignature";
 const authorizationSignature =
   "0x1e866e66e7f3a68658bd186bafbdc534d4a5022e14022fddfe8865e2236dc67d64eee05b4d8f340dffa1928efa517784b63cad6a3fb35d999cb9d722b34075071b";
-const resolutionAmount = "1";
 
 class BrowserNodeProviderMocks {
   public blockchainProvider = new BlockchainProviderMock();

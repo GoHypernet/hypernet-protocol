@@ -62,7 +62,8 @@ export class LinksViewModel {
   }
 
   protected async init() {
-    this.integration.core.waitInitialized()
+    this.integration.core
+      .waitInitialized()
       .andThen(() => {
         return this.integration.core.getPublicIdentifier();
       })
