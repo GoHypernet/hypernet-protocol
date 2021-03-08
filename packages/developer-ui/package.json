@@ -34,6 +34,7 @@
   "scripts": {
     "Start-windows": "yarn start-backend && yarn deploy-custom-transfers && yarn start-web",
     "bootstrap": "docker-compose down && docker-compose pull && docker-compose up -d && wait-on -l -d 15000 package.json && docker-compose up -d && yarn verify-backend && yarn deploy-custom-transfers",
+    "bootstrap-backend": "docker-compose down && docker-compose pull && docker-compose up -d && wait-on -l -d 15000 package.json && docker-compose up -d && yarn verify-backend && yarn deploy-custom-transfers",
     "build": "webpack",
     "clean-docker": "docker-compose down",
     "compile": "tsc -b src/tsconfig.json",
@@ -43,7 +44,6 @@
     "quick-start": "yarn start-web",
     "start": "yarn start-backend && yarn start-web",
     "start-backend": "docker-compose up -d && yarn verify-backend",
-    "bootstrap-backend": "docker-compose down && docker-compose pull && docker-compose up -d && wait-on -l -d 15000 package.json && docker-compose up -d && yarn verify-backend && yarn deploy-custom-transfers",
     "start-vector": "docker run -d -p 3001:80 vector-unit:latest",
     "start-web": "webpack serve --config webpack.config.js --mode development --open",
     "test": "echo \"Error: run tests from root\" && exit 0",

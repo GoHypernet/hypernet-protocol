@@ -15,7 +15,8 @@ export class AccountViewModel {
   constructor(params: AccountParams) {
     this.integration = params.integration;
     this.publicIdentifier = ko.observable("");
-    this.integration.core.waitInitialized()
+    this.integration.core
+      .waitInitialized()
       .andThen(() => {
         return this.integration.core.getPublicIdentifier();
       })

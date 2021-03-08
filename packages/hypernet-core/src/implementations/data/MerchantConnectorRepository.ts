@@ -1,5 +1,5 @@
 import { IMerchantConnectorRepository } from "@interfaces/data";
-import { PublicKey, BigNumber, HypernetContext, HypernetConfig } from "@interfaces/objects";
+import { PublicKey, BigNumber, HypernetContext } from "@interfaces/objects";
 import {
   CoreUninitializedError,
   MerchantConnectorError,
@@ -7,13 +7,12 @@ import {
   PersistenceError,
 } from "@interfaces/objects/errors";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
-import { ResultUtils, IAjaxUtils } from "@hypernetlabs/utils";
+import { ResultUtils, IAjaxUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
 import {
   IBlockchainProvider,
   IBlockchainUtils,
   IConfigProvider,
   IContextProvider,
-  ILocalStorageUtils,
   IMerchantConnectorProxy,
   IVectorUtils,
 } from "@interfaces/utilities";

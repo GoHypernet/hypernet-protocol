@@ -3,6 +3,7 @@ import {
   IMerchantConnector,
   ISendFundsRequest,
   IResolutionResult,
+  IRedirectInfo,
 } from "@hypernetlabs/merchant-connector";
 import { Subject } from "rxjs";
 import { Bytes32 } from "@connext/vector-types";
@@ -87,6 +88,7 @@ class TestMerchantConnector implements IMerchantConnector {
   onDisplayRequested: Subject<void>;
   onCloseRequested: Subject<void>;
   onIFrameClosed: Subject<void>;
+  onPreRedirect: Subject<IRedirectInfo>;
 
   constructor() {
     this.onSendFundsRequested = new Subject<ISendFundsRequest>();
@@ -94,6 +96,8 @@ class TestMerchantConnector implements IMerchantConnector {
     this.onDisplayRequested = new Subject<void>();
     this.onCloseRequested = new Subject<void>();
     this.onIFrameClosed = new Subject<void>();
+    this.onPreRedirect = new Subject<IRedirectInfo>();
+
 
     this._renderContent();
 

@@ -77,7 +77,6 @@ import {
   IConfigProvider,
   IContextProvider,
   ILinkUtils,
-  ILocalStorageUtils,
   ILogUtils,
   IPaymentIdUtils,
   IPaymentUtils,
@@ -87,10 +86,9 @@ import {
 import { IVectorListener } from "@interfaces/api";
 import { Subject } from "rxjs";
 import { ok, Result, ResultAsync } from "neverthrow";
-import { AxiosAjaxUtils, IAjaxUtils, ResultUtils } from "@hypernetlabs/utils";
+import { AxiosAjaxUtils, IAjaxUtils, ResultUtils, ILocalStorageUtils, LocalStorageUtils } from "@hypernetlabs/utils";
 import { IBrowserNodeFactory, IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 import { MerchantConnectorProxyFactory } from "@implementations/utilities/factory";
-import { LocalStorageUtils } from "./utilities/LocalStorageUtils";
 import { BrowserNodeFactory } from "./utilities/factory/BrowserNodeFactory";
 
 /**
