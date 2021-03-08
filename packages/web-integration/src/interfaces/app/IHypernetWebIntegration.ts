@@ -1,5 +1,5 @@
 import { PublicIdentifier, EthereumAddress, EPaymentType, ResultAsync } from "@hypernetlabs/hypernet-core";
-import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
+import { HypernetIFrameProxy } from "@web-integration-implementations/proxy/HypernetIFrameProxy";
 
 export interface IRenderParams {
   selector?: string;

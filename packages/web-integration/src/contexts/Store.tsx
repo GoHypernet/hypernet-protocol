@@ -1,5 +1,5 @@
 import React from "react";
-import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
+import { HypernetIFrameProxy } from "@web-integration-implementations/proxy/HypernetIFrameProxy";
 
 interface IStore {
   proxy: HypernetIFrameProxy;

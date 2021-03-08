@@ -18,6 +18,7 @@ module.exports = {
         options: {
           projectReferences: true,
           configFile: configFilePath,
+          allowTsInNodeModules: true,
           compilerOptions: {
             // build still catches these. avoid them during bunding time for a nicer dev experience.
             noUnusedLocals: false,

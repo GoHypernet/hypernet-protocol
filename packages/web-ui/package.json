@@ -1,11 +1,16 @@
 {
   "name": "@hypernetlabs/web-ui",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "",
   "license": "ISC",
   "author": "",
   "keywords": [],
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "!dist/test",
+    "!dist/tsconfig.tsbuildinfo"
+  ],
   "scripts": {
     "build": "yarn clean && yarn compile",
     "clean": "rimraf dist",

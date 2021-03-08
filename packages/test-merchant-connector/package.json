@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/test-merchant-connector",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "An example dispute mediator for testing, which always resolve's in the sender's favor.",
   "license": "ISC",
   "repository": {

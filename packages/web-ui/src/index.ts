@@ -7,3 +7,4 @@ export { default as LinkList } from "./components/LinkList";
 export { default as TextInput } from "./components/TextInput";
 export { default as SelectInput } from "./components/SelectInput";
 export { default as SucessContent } from "./components/SucessContent";
+export * from "./theme";

@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/web-demo",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Demonstrates loading Hypernet Core on a page and connecting it to MetaMask.",
   "license": "ISC",
   "repository": {
@@ -40,7 +40,7 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@ethereum-waffle/chai": "^3.1.2",
-    "@hypernetlabs/web-integration": "^0.0.1",
+    "@hypernetlabs/web-integration": "^0.1.0",
     "@hypernetlabs/web-ui": "^0.0.1",
     "bootstrap": "^4.5.3",
     "jquery": "^3.5.1"

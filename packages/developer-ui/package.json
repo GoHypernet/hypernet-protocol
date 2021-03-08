@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/developer-ui",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Simple, complete UI that wraps hypernet-core, intended for developer use.",
   "license": "ISC",
   "repository": {
@@ -54,7 +54,7 @@
   "dependencies": {
     "@ethereum-waffle/chai": "^3.1.2",
     "@hypernetlabs/hypernet-core": "^0.0.1",
-    "@hypernetlabs/web-integration": "^0.0.1",
+    "@hypernetlabs/web-integration": "^0.1.0",
     "bootstrap": "^4.5.3",
     "jquery": "^3.5.1",
     "knockout": "^3.5.1",

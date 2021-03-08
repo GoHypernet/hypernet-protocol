@@ -1,26 +1,30 @@
 {
   "name": "@hypernetlabs/web-integration",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "",
   "license": "ISC",
   "author": "",
   "keywords": [],
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "!dist/test",
+    "!dist/tsconfig.tsbuildinfo"
+  ],
   "scripts": {
     "build": "yarn clean && yarn compile",
     "clean": "rimraf dist",
     "compile": "tsc --build src/tsconfig.json && npx tsc-alias -p src/tsconfig.json",
     "format": "prettier --write \"src/**/*.{js,ts,tsx,json,md}\"",
     "lint": "tslint -p src/tsconfig.json",
-    "prepublish": "yarn build",
     "start": "webpack serve --config webpack.config.js --mode development --open",
     "test": "echo \"Error: no test specified\" && exit 0"
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/hypernet-core": "^0.0.1",
-    "@hypernetlabs/utils": "^0.0.1",
-    "@hypernetlabs/web-ui": "^0.0.1",
+    "@hypernetlabs/hypernet-core": "^0.1.0",
+    "@hypernetlabs/utils": "^0.1.0",
+    "@hypernetlabs/web-ui": "^0.1.0",
     "postmate": "^1.5.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",

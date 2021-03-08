@@ -1,4 +1,4 @@
-import { LayoutContext } from "@web-integration/contexts";
+import { LayoutContext } from "@web-integration-contexts";
 import React, { useEffect, useContext } from "react";
 import { createPortal } from "react-dom";
 import styles from "./Modal.style";

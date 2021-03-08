@@ -2,28 +2,28 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { ResultAsync } from "@hypernetlabs/hypernet-core";
 
-import MainContainer from "@web-integration/containers/MainContainer";
-import BalancesWidget from "@web-integration/widgets/BalancesWidget";
-import LinksWidget from "@web-integration/widgets/LinksWidget";
-import PaymentWidget from "@web-integration/widgets/PaymentWidget";
-import FundWidget from "@web-integration/widgets/FundWidget";
+import MainContainer from "@web-integration-containers/MainContainer";
+import BalancesWidget from "@web-integration-widgets/BalancesWidget";
+import LinksWidget from "@web-integration-widgets/LinksWidget";
+import PaymentWidget from "@web-integration-widgets/PaymentWidget";
+import FundWidget from "@web-integration-widgets/FundWidget";
 import {
   IConnectorAuthorizationFlowParams,
   IHypernetWebIntegration,
   IRenderParams,
   IRenderPaymentWidgetParams,
-} from "@web-integration/interfaces/app/IHypernetWebIntegration";
-import { LayoutProvider, StoreProvider } from "@web-integration/contexts";
+} from "@web-integration-interfaces/app/IHypernetWebIntegration";
+import { LayoutProvider, StoreProvider } from "@web-integration-contexts";
 import {
   BALANCES_WIDGET_ID_SELECTOR,
   FUND_WIDGET_ID_SELECTOR,
   LINKS_WIDGET_ID_SELECTOR,
   PAYMENT_WIDGET_ID_SELECTOR,
-} from "@web-integration/constants";
-import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
-import ConnectorAuthorizationFlow from "@web-integration/flows/ConnectorAuthorizationFlow";
+} from "@web-integration-constants";
+import { HypernetIFrameProxy } from "@web-integration-implementations/proxy/HypernetIFrameProxy";
+import ConnectorAuthorizationFlow from "@web-integration-flows/ConnectorAuthorizationFlow";
 
-export default class HypernetWebIntegration implements IHypernetWebIntegration {
+export class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
 
   protected iframeURL: string = "http://localhost:8090";

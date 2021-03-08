@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/utils",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "Utilities used by Hypernet Labs packages",
   "license": "ISC",
   "repository": {

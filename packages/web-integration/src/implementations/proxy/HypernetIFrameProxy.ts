@@ -26,7 +26,7 @@ import {
 import { Subject } from "rxjs";
 import { ParentProxy } from "@hypernetlabs/utils";
 
-export default class HypernetIFrameProxy extends ParentProxy {
+export class HypernetIFrameProxy extends ParentProxy {
   protected coreInitialized: boolean = false;
   protected isInControl: boolean = false;
   protected waitInitializedPromise: Promise<void>;

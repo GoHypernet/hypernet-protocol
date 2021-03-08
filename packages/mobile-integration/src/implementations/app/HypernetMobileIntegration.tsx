@@ -1,5 +1,4 @@
-import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
+import { HypernetWebIntegration, IHypernetWebIntegration, HypernetIFrameProxy } from "@hypernetlabs/web-integration";
 
 declare global {
   interface Window {

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Packages that we want to publish
-declare -a Packages=("merchant-connector" "utils" "hypernet-core" "iframe" "merchant-iframe" "web-ui" "web-integration" "mobile-integration" "test-merchant-connector")
+declare -a Packages=("merchant-connector" "utils" "hypernet-core" "web-ui" "web-integration")
 
 # Iterate through the packages
 for packageName in ${Packages[@]}; do
