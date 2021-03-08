@@ -111,7 +111,10 @@ export default class CoreWrapper extends ChildProxy {
         }, data.callId);
       },
       onMerchantIFrameClosed: (data: IIFrameCallData<string>) => {
-        this.core.onMerchantIFrameClosed.next();
+        this.core.onMerchantIFrameClosed.next(data.data);
+      },
+      onMerchantIFrameDisplayed: (data: IIFrameCallData<string>) => {
+        this.core.onMerchantIFrameDisplayed.next(data.data);
       },
 
       //   pullFunds(paymentId: string, amount: BigNumber): Promise<Payment>;
@@ -125,6 +128,11 @@ export default class CoreWrapper extends ChildProxy {
       mintTestToken: (data: IIFrameCallData<string>) => {
         this.returnForModel(() => {
           return this.core.mintTestToken(BigNumber.from(data.data));
+        }, data.callId);
+      },
+      getAuthorizedMerchants: (data: IIFrameCallData<string>) => {
+        this.returnForModel(() => {
+          return this.core.getAuthorizedMerchants();
         }, data.callId);
       },
     });
