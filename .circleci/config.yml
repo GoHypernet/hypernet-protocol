@@ -44,7 +44,7 @@ jobs:
           command: yarn build-for-publish
       - run:
           name: Run publish script
-          command: ./scripts/npmVersion.sh
+          command: chmod 755 ./scripts/npmVersion.sh && ./scripts/npmVersion.sh
 
 # Orchestrate our job run sequence
 workflows:
