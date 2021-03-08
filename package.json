@@ -48,7 +48,7 @@
     "start-web-demo": "cd packages/web-demo && yarn start",
     "compile-necessary": "cd packages/merchant-connector && yarn build && cd ../utils && yarn compile && cd ../test-merchant-connector && yarn build && cd ../iframe && yarn build && cd ../merchant-iframe && yarn build && cd ../",
     "clean-docker": "cd packages/developer-ui && yarn clean-docker",
-    "build-for-publish": "cd packages/merchant-connector && yarn build && cd ../utils && yarn build && cd ../hypernet-core && yarn build && cd ../iframe && yarn build && cd ../merchant-iframe && yarn build && cd ../web-ui && yarn build && cd ../web-integration && yarn build && cd ../test-merchant-connector && yarn build && cd ../",
+    "prepare-for-publish": "yarn clean && yarn cache clean && cd packages/merchant-connector && yarn build && cd ../utils && yarn build && cd ../hypernet-core && yarn build && cd ../web-ui && yarn build && cd ../web-integration && yarn build && cd ../mobile-integration && yarn build && cd ../",
     "test": "cd packages/hypernet-core && yarn test"
   },
   "husky": {

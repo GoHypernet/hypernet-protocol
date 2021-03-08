@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/developer-ui",
-  "version": "1.0.0",
+  "version": "0.0.3",
   "description": "Simple, complete UI that wraps hypernet-core, intended for developer use.",
   "license": "ISC",
   "repository": {
@@ -36,7 +36,7 @@
     "bootstrap": "docker-compose down && docker-compose pull && docker-compose up -d && wait-on -l -d 15000 package.json && docker-compose up -d && yarn verify-backend && yarn deploy-custom-transfers",
     "build": "webpack",
     "clean-docker": "docker-compose down",
-    "compile": "tsc -b src/tsconfig.json",
+    "compile": "tsc --build src/tsconfig.json && npx tsc-alias -p src/tsconfig.json",
     "deploy-custom-transfers": "yarn ts-node scripts/deploy.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p src/tsconfig.json",

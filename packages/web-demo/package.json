@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/web-demo",
-  "version": "1.0.0",
+  "version": "0.0.3",
   "description": "Demonstrates loading Hypernet Core on a page and connecting it to MetaMask.",
   "license": "ISC",
   "repository": {
@@ -30,7 +30,7 @@
   },
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "compile": "tsc -b src/tsconfig.json",
+    "compile": "tsc --build src/tsconfig.json && npx tsc-alias -p src/tsconfig.json",
     "deploy-custom-transfers": "yarn ts-node scripts/deploy.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p src/tsconfig.json",

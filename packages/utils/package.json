@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/utils",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Utilities used by Hypernet Labs packages",
   "license": "ISC",
   "repository": {
@@ -29,7 +29,7 @@
   "scripts": {
     "build": "yarn clean && yarn compile",
     "clean": "rimraf dist",
-    "compile": "tsc --build src/tsconfig.json",
+    "compile": "tsc --build src/tsconfig.json && npx tsc-alias -p src/tsconfig.json",
     "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",

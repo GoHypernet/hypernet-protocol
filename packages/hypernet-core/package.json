@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/hypernet-core",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Hypernet Core. Represents the SDK for running the Hypernet Protocol.",
   "license": "ISC",
   "repository": {

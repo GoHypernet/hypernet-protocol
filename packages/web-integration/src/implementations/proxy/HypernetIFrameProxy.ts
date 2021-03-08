@@ -21,12 +21,12 @@ import {
   ok,
   MerchantValidationError,
   PersistenceError,
+  IHypernetCore,
 } from "@hypernetlabs/hypernet-core";
 import { Subject } from "rxjs";
-import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 import { ParentProxy } from "@hypernetlabs/utils";
 
-export default class HypernetIFrameProxy extends ParentProxy implements IHypernetIFrameProxy {
+export default class HypernetIFrameProxy extends ParentProxy {
   protected coreInitialized: boolean = false;
   protected isInControl: boolean = false;
   protected waitInitializedPromise: Promise<void>;

@@ -20,7 +20,6 @@ import {
   LINKS_WIDGET_ID_SELECTOR,
   PAYMENT_WIDGET_ID_SELECTOR,
 } from "@web-integration/constants";
-import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
 import ConnectorAuthorizationFlow from "@web-integration/flows/ConnectorAuthorizationFlow";
 
@@ -29,7 +28,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
   protected iframeURL: string = "http://localhost:8090";
 
-  public core: IHypernetIFrameProxy;
+  public core: HypernetIFrameProxy;
 
   constructor(iframeURL?: string) {
     this.iframeURL = iframeURL || this.iframeURL;
@@ -39,8 +38,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   // wait for the core to be intialized
-  protected getReadyResult: ResultAsync<IHypernetIFrameProxy, Error> | undefined;
-  public getReady(): ResultAsync<IHypernetIFrameProxy, Error> {
+  protected getReadyResult: ResultAsync<HypernetIFrameProxy, Error> | undefined;
+  public getReady(): ResultAsync<HypernetIFrameProxy, Error> {
     if (this.getReadyResult != null) {
       return this.getReadyResult;
     }

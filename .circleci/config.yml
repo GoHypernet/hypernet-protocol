@@ -41,7 +41,7 @@ jobs:
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TEST_TOKEN" > ~/.npmrc
       - run:
           name: Prepare builds for publish
-          command: yarn build-for-publish
+          command: yarn prepare-for-publish
       - run:
           name: Run publish script
           command: chmod 755 ./scripts/npmVersion.sh && ./scripts/npmVersion.sh

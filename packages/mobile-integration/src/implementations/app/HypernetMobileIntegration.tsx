@@ -1,5 +1,5 @@
 import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
+import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
 
 declare global {
   interface Window {
@@ -17,7 +17,7 @@ export enum ECoreViewDataKeys {
 
 export default class HypernetMobileIntegration {
   private webIntegrationInstance: IHypernetWebIntegration;
-  public coreProxy: IHypernetIFrameProxy = {} as IHypernetIFrameProxy;
+  public coreProxy: HypernetIFrameProxy = {} as HypernetIFrameProxy;
 
   constructor() {
     this.webIntegrationInstance = new HypernetWebIntegration();

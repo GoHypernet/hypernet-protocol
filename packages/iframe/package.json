@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/iframe",
-  "version": "1.0.0",
+  "version": "0.0.3",
   "description": "",
   "license": "ISC",
   "author": "",
@@ -9,7 +9,7 @@
   "scripts": {
     "build": "yarn clean && yarn compile",
     "clean": "rimraf dist",
-    "compile": "webpack",
+    "compile": "tsc --build src/tsconfig.json && npx tsc-alias -p src/tsconfig.json",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p src/tsconfig.json",
     "prepare": "yarn build",

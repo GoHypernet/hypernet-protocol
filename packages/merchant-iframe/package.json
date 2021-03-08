@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/merchant-iframe",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Mediator iFrame package. This is used to sandbox the connector code away from the running hypernet core.",
   "license": "ISC",
   "repository": {
@@ -30,7 +30,7 @@
   "scripts": {
     "build": "yarn clean && yarn compile",
     "clean": "rimraf dist",
-    "compile": "webpack",
+    "compile": "tsc --build src/tsconfig.json && npx tsc-alias -p src/tsconfig.json",
     "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",

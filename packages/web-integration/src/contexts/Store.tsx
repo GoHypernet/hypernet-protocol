@@ -1,13 +1,13 @@
 import React from "react";
-import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
+import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
 
 interface IStore {
-  proxy: IHypernetIFrameProxy;
+  proxy: HypernetIFrameProxy;
 }
 
 interface IStoreProps {
   children: any;
-  proxy: IHypernetIFrameProxy;
+  proxy: HypernetIFrameProxy;
 }
 
 const StoreContext = React.createContext<IStore>(undefined!);
