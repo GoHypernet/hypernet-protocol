@@ -43,15 +43,19 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
       .map(() => {
         // We need to make sure to have the listeners after postmate model gets activated
         this.child?.on("onDisplayRequested", () => {
-          context.onMerchantIFrameDisplayRequested.next();
+          context.onMerchantIFrameDisplayRequested.next("");
         });
         this.child?.on("onCloseRequested", () => {
           context.onMerchantIFrameCloseRequested.next();
         });
 
-        // Listen for iframe close event and pass it down to the child proxy.
-        context.onMerchantIFrameClosed.subscribe(() => {
-          this._createCall("onMerchantIFrameClosed", null);
+        // Listen for iframe close and open events and pass them down to the child proxy.
+        context.onMerchantIFrameClosed.subscribe((data: string) => {
+          this._createCall("onMerchantIFrameClosed", data);
+        });
+
+        context.onMerchantIFrameDisplayed.subscribe((data: string) => {
+          this._createCall("onMerchantIFrameDisplayed", data);
         });
       });
   }

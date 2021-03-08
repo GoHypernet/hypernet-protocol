@@ -74,9 +74,13 @@ export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
           return okAsync(context.validatedMerchantSignature);
         }, data.callId);
       },
-      onMerchantIFrameClosed: (data: IIFrameCallData<void>) => {
+      onMerchantIFrameClosed: (data: IIFrameCallData<string>) => {
         const context = this.contextProvider.getMerchantContext();
-        context.merchantConnector?.onIFrameClosed.next();
+        context.merchantConnector?.onIFrameClosed.next(data.data);
+      },
+      onMerchantIFrameDisplayed: (data: IIFrameCallData<string>) => {
+        const context = this.contextProvider.getMerchantContext();
+        context.merchantConnector?.onIFrameDisplayed.next(data.data);
       },
     });
   }

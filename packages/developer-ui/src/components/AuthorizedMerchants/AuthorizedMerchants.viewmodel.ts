@@ -36,6 +36,12 @@ export class AuthorizedMerchantsViewModel {
         this.authorizedMerchants(merchantStrings);
       });
   }
+
+  openMerchantIFrameClick = (merchantUrl: string) => {
+    this.integration.core.waitInitialized().map(() => {
+      this.integration.core.onMerchantIFrameDisplayed.next(merchantUrl);
+    });
+  };
 }
 
 ko.components.register("authorized-merchants", {

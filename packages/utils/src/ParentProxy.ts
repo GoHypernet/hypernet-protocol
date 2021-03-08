@@ -64,9 +64,14 @@ export abstract class ParentProxy {
           iframe {
             border: none;
             width: 100%;
+            height: 100%;
           }
           html {
             overflow-y: hidden;
+            height: 100%;
+          }
+          body {
+            height: 100%;
           }
         `),
       );
