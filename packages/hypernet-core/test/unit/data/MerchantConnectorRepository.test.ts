@@ -13,18 +13,12 @@ import {
   merchantPublicKey2,
 } from "@mock/mocks";
 import { BlockchainProviderMock, ConfigProviderMock, ContextProviderMock } from "@mock/utils";
-import {
-  IVectorUtils,
-  ILocalStorageUtils,
-  IMerchantConnectorProxy,
-  IBlockchainUtils,
-  IBasicTransferResponse,
-} from "@interfaces/utilities";
+import { IVectorUtils, IMerchantConnectorProxy, IBlockchainUtils, IBasicTransferResponse } from "@interfaces/utilities";
 import { MerchantConnectorError, MerchantValidationError, TransferResolutionError } from "@interfaces/objects/errors";
 import { IMerchantConnectorRepository } from "@interfaces/data/IMerchantConnectorRepository";
 import { okAsync, errAsync } from "neverthrow";
 import { MerchantConnectorRepository } from "@implementations/data/MerchantConnectorRepository";
-import { IAjaxUtils } from "@hypernetlabs/utils";
+import { IAjaxUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
 import { BigNumber } from "@interfaces/objects";

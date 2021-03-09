@@ -1,4 +1,4 @@
-import { ILocalStorageUtils } from "@interfaces/utilities";
+import { ILocalStorageUtils } from "./ILocalStorageUtils";
 
 export class LocalStorageUtils implements ILocalStorageUtils {
   public getItem(key: string): string | null {

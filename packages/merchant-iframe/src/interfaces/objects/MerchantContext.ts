@@ -3,7 +3,7 @@ import { Subject } from "rxjs";
 
 export class MerchantContext {
   constructor(
-    public merchantUrl: URL,
+    public merchantUrl: string,
     public onMerchantConnectorActivated: Subject<IMerchantConnector>,
     public validatedMerchantCode: string | null,
     public validatedMerchantSignature: string | null,

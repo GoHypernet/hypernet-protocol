@@ -6,11 +6,10 @@ import {
   IBrowserNodeProvider,
   IConfigProvider,
   IBlockchainProvider,
-  ILocalStorageUtils,
 } from "@interfaces/utilities";
 import { BlockchainUnavailableError, CoreUninitializedError, VectorError } from "@interfaces/objects/errors";
 import { errAsync, HypernetConfig, HypernetContext, okAsync, ResultAsync } from "@interfaces/objects";
-import { ResultUtils } from "@hypernetlabs/utils";
+import { ResultUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
 import { ethers } from "ethers";
 import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
 

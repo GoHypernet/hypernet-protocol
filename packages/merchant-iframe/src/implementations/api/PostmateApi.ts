@@ -6,7 +6,7 @@ import { IMerchantConnector } from "@hypernetlabs/merchant-connector";
 import { IMerchantIFrameApi } from "@merchant-iframe/interfaces/api";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 
-export default class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
+export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
   protected merchantConnector: IMerchantConnector | undefined;
   constructor(protected merchantService: IMerchantService, protected contextProvider: IContextProvider) {
     super();
@@ -42,6 +42,7 @@ export default class PostmateApi extends ChildProxy implements IMerchantIFrameAp
       activateConnector: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           console.log("activateConnector!");
+
           return this.merchantService.activateMerchantConnector().map((merchantConnector) => {
             this.merchantConnector = merchantConnector;
           });
@@ -73,9 +74,13 @@ export default class PostmateApi extends ChildProxy implements IMerchantIFrameAp
           return okAsync(context.validatedMerchantSignature);
         }, data.callId);
       },
-      onMerchantIFrameClosed: (data: IIFrameCallData<void>) => {
+      onMerchantIFrameClosed: (data: IIFrameCallData<string>) => {
         const context = this.contextProvider.getMerchantContext();
-        context.merchantConnector?.onIFrameClosed.next();
+        context.merchantConnector?.onIFrameClosed.next(data.data);
+      },
+      onMerchantIFrameDisplayed: (data: IIFrameCallData<string>) => {
+        const context = this.contextProvider.getMerchantContext();
+        context.merchantConnector?.onIFrameDisplayed.next(data.data);
       },
     });
   }

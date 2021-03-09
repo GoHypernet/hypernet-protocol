@@ -126,8 +126,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
           position: absolute;
           display: none;
           border: none;
-          width: 400px;
-          max-height: 500px;
+          width: 700px;
+          height: 800px;
           min-height: 200px;
           background-color: white;
           top: 50%;
@@ -150,7 +150,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
           position: absolute;
           top: 50%;
           left: 50%;
-          transform: translate(calc(-50% + 180px), calc(-50% - 84px));
+          transform: translate(calc(-50% + 335px), calc(-50% - 385px));
           z-index: 2;
           cursor: pointer;
         }
