@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/merchant-iframe",
-  "version": "0.1.2",
+  "version": "0.0.1",
   "description": "Mediator iFrame package. This is used to sandbox the connector code away from the running hypernet core.",
   "license": "ISC",
   "repository": {
@@ -45,9 +45,9 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/hypernet-core": "^0.1.2",
-    "@hypernetlabs/merchant-connector": "^0.1.2",
-    "@hypernetlabs/utils": "^0.1.2",
+    "@hypernetlabs/hypernet-core": "^0.0.1",
+    "@hypernetlabs/merchant-connector": "^0.0.1",
+    "@hypernetlabs/utils": "^0.0.1",
     "ethers": "^5.0.31",
     "neverthrow": "^4.1.0",
     "postmate": "^1.5.2",

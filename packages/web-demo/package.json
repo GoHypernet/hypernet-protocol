@@ -40,8 +40,8 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "@ethereum-waffle/chai": "^3.1.2",
-    "@hypernetlabs/web-integration": "^0.1.2",
-    "@hypernetlabs/web-ui": "^0.1.2",
+    "@hypernetlabs/web-integration": "^0.0.1",
+    "@hypernetlabs/web-ui": "^0.0.1",
     "bootstrap": "^4.5.3",
     "jquery": "^3.5.1"
   },

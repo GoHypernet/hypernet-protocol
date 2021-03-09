@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/hypernet-core",
-  "version": "0.1.2",
+  "version": "0.0.1",
   "description": "Hypernet Core. Represents the SDK for running the Hypernet Protocol.",
   "license": "ISC",
   "repository": {
@@ -52,8 +52,8 @@
     "@connext/vector-contracts": "^0.1.18-beta.1",
     "@connext/vector-types": "^0.1.18-beta.1",
     "@connext/vector-utils": "^0.1.18-beta.1",
-    "@hypernetlabs/merchant-connector": "^0.1.2",
-    "@hypernetlabs/utils": "^0.1.2",
+    "@hypernetlabs/merchant-connector": "^0.0.1",
+    "@hypernetlabs/utils": "^0.0.1",
     "@metamask/detect-provider": "^1.1.0",
     "@types/pino": "^6.3.2",
     "class-transformer": "^0.3.2",
