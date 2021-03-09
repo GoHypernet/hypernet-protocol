@@ -1,7 +1,7 @@
 import { useEffect, useReducer, useContext } from "react";
-import { StoreContext } from "@web-integration/contexts";
+import { StoreContext } from "@web-integration-contexts";
 import { AssetBalance, Balances } from "@hypernetlabs/hypernet-core";
-import { AssetBalanceParams, AssetBalanceViewModel } from "@web-integration/interfaces/objects";
+import { AssetBalanceParams, AssetBalanceViewModel } from "@web-integration-interfaces/objects";
 
 enum EActionTypes {
   FETCHING = "FETCHING",

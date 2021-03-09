@@ -41,10 +41,10 @@ jobs:
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
       - run:
           name: Prepare builds for publish
-          command: yarn build-for-publish
+          command: yarn prepare-for-publish
       - run:
           name: Run publish script
-          command: ./scripts/npmVersion.sh
+          command: chmod 755 ./scripts/npmVersion.sh && ./scripts/npmVersion.sh
 
 # Orchestrate our job run sequence
 workflows:

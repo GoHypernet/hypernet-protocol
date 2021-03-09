@@ -1,9 +1,9 @@
 import { useEffect, useReducer, useContext } from "react";
-import { StoreContext } from "@web-integration/contexts";
+import { StoreContext } from "@web-integration-contexts";
 import { ITokenSelectorOption } from "@hypernetlabs/web-ui/src/interfaces";
 import { Balances } from "@hypernetlabs/hypernet-core";
 import { ethers } from "ethers";
-import { PaymentTokenOptionViewModel, EResultStatus, ResultMessage } from "@web-integration/interfaces/objects";
+import { PaymentTokenOptionViewModel, EResultStatus, ResultMessage } from "@web-integration-interfaces/objects";
 
 enum EActionTypes {
   FETCHING = "FETCHING",

@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useContext } from "react";
-import { StoreContext } from "@web-integration/contexts";
+import { StoreContext } from "@web-integration-contexts";
 import { ILinkList } from "@hypernetlabs/web-ui/src/interfaces";
 import { HypernetLink } from "@hypernetlabs/hypernet-core";
 
