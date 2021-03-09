@@ -1,15 +1,21 @@
 {
   "name": "@hypernetlabs/web-ui",
-  "version": "0.0.1",
+  "version": "0.1.2",
   "description": "",
   "license": "ISC",
   "author": "",
   "keywords": [],
   "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src",
+    "!dist/test",
+    "!dist/tsconfig.tsbuildinfo"
+  ],
   "scripts": {
-    "build": "npm run clean && npm run compile",
-    "clean": "",
-    "compile": "tsc -b src/tsconfig.json",
+    "build": "yarn clean && yarn compile",
+    "clean": "rimraf dist",
+    "compile": "tsc --build src/tsconfig.json && npx tsc-alias -p src/tsconfig.json",
     "format": "prettier --write \"src/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",

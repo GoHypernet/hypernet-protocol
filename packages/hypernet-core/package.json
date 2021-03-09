@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/hypernet-core",
-  "version": "0.0.1",
+  "version": "0.1.2",
   "description": "Hypernet Core. Represents the SDK for running the Hypernet Protocol.",
   "license": "ISC",
   "repository": {
@@ -29,7 +29,7 @@
   "scripts": {
     "build": "yarn clean && yarn compile",
     "clean": "rimraf dist",
-    "compile": "tsc --build src/tsconfig.json",
+    "compile": "tsc --build src/tsconfig.json && npx tsc-alias -p src/tsconfig.json",
     "compile-necessary": "cd ../merchant-connector && yarn compile && cd ../utils && yarn compile",
     "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",
     "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
@@ -52,8 +52,8 @@
     "@connext/vector-contracts": "^0.1.18-beta.1",
     "@connext/vector-types": "^0.1.18-beta.1",
     "@connext/vector-utils": "^0.1.18-beta.1",
-    "@hypernetlabs/merchant-connector": "^0.0.1",
-    "@hypernetlabs/utils": "^0.0.1",
+    "@hypernetlabs/merchant-connector": "^0.1.2",
+    "@hypernetlabs/utils": "^0.1.2",
     "@metamask/detect-provider": "^1.1.0",
     "@types/pino": "^6.3.2",
     "class-transformer": "^0.3.2",

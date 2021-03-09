@@ -1,5 +1,5 @@
 {
-  "name": "hypernet-protocol-iframe",
+  "name": "@hypernetlabs/iframe",
   "version": "1.0.0",
   "description": "",
   "license": "ISC",
@@ -18,9 +18,9 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/hypernet-core": "^0.0.1",
-    "@hypernetlabs/utils": "^0.0.1",
-    "@hypernetlabs/web-ui": "^0.0.1",
+    "@hypernetlabs/hypernet-core": "^0.1.2",
+    "@hypernetlabs/utils": "^0.1.2",
+    "@hypernetlabs/web-ui": "^0.1.2",
     "neverthrow": "^4.1.0",
     "postmate": "^1.5.2"
   }

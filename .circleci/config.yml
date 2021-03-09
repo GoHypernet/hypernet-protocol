@@ -38,13 +38,13 @@ jobs:
           at: ~/repo
       - run:
           name: Authenticate with test npm registry
-          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TEST_TOKEN" > ~/.npmrc
       - run:
           name: Prepare builds for publish
-          command: yarn build-for-publish
+          command: yarn prepare-for-publish
       - run:
           name: Run publish script
-          command: ./scripts/npmVersion.sh
+          command: chmod 755 ./scripts/npmVersion.sh && ./scripts/npmVersion.sh
 
 # Orchestrate our job run sequence
 workflows:
@@ -56,6 +56,6 @@ workflows:
           context: Hypernet Protocol
           filters:
             branches:
-              only: master
+              only: PAYM-83/npm-publish-compiling-errors
           requires:
             - test

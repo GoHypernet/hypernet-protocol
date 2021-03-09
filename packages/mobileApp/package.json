@@ -1,6 +1,6 @@
 {
   "name": "mobileApp",
-  "version": "0.0.1",
+  "version": "0.1.2",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -21,7 +21,7 @@
     "preset": "react-native"
   },
   "dependencies": {
-    "@hypernetlabs/hypernet-core": "^0.0.1",
+    "@hypernetlabs/hypernet-core": "^0.1.2",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-navigation/bottom-tabs": "^5.11.7",
     "@react-navigation/native": "^5.9.2",
