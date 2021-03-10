@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import { ConnectorAuthorization, SucessContent } from "@hypernetlabs/web-ui";
 import { EStatusColor } from "@hypernetlabs/web-ui/src/theme";
 import { useBalances } from "@web-integration/hooks";
@@ -16,6 +16,23 @@ const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> = 
   const { balances } = useBalances();
   const { proxy } = useContext(StoreContext);
   const { setModalWidth, setModalStatus, modalStatus, closeModal } = useContext(LayoutContext);
+
+  useEffect(() => {
+    proxy.onMerchantAuthorized.subscribe(() => {
+      closeModal();
+    });
+
+    // Destroy self modal if merchant modal is visible.
+    const iframeElements = document.getElementsByName("hypernet-core-merchant-connector-iframe");
+    if (iframeElements.length && iframeElements[0].style.display === "block") {
+      closeModal();
+    }
+
+    proxy.onAuthorizedMerchantActivationFailed.subscribe(() => {
+      // show some error
+      console.log("onAuthorizedMerchantActivationFailed");
+    });
+  }, []);
 
   const handleMerchantAuthorization = () => {
     proxy.authorizeMerchant(connectorUrl).match(

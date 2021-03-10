@@ -1,6 +1,6 @@
-import { IStylesDictionary } from "../../interfaces";
+import { createUseStyles } from "react-jss";
 
-const styles: IStylesDictionary = {
+const useStyles = createUseStyles({
   container: {
     width: "100%",
   },
@@ -39,6 +39,6 @@ const styles: IStylesDictionary = {
   accountLink: {
     color: "#2539DE",
   },
-};
+});
 
-export default styles;
+export default useStyles;

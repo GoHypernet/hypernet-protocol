@@ -37,7 +37,7 @@
     "lint": "tslint -p src/tsconfig.json",
     "prepare": "yarn build",
     "prepublishOnly": "npm test && npm run lint",
-    "start": "compile-connector && ts-node server/index.ts",
+    "start": "yarn build-connector && ts-node server/index.ts",
     "test": "yarn test:ci",
     "test:ci": "jest --runInBand --coverage --passWithNoTests",
     "test:watch": "jest --watch --color --detectOpenHandles",

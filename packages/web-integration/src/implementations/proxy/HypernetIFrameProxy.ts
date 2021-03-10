@@ -121,9 +121,6 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
         });
 
         child.on("onMerchantIFrameDisplayRequested", (data: string) => {
-          // Remove it later, this is just for the purpose of the demo, we dont need to show merchant-iframe modal if the core modal is opened
-          const coreModal = document.getElementById("__hypernet-protocol-modal-root__");
-          if (coreModal) return;
 
           child.frame.style.display = "block";
           if (element) {

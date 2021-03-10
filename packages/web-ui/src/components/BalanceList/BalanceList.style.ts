@@ -1,6 +1,6 @@
-import { IStylesDictionary } from "../../interfaces";
+import { createUseStyles } from "react-jss";
 
-const styles: IStylesDictionary = {
+const useStyles = createUseStyles({
   container: {
     width: "100%",
     border: "1px solid #F2F2F2",
@@ -22,6 +22,6 @@ const styles: IStylesDictionary = {
     fontSize: 16,
     opacity: 0.3,
   },
-};
+});
 
-export default styles;
+export default useStyles;

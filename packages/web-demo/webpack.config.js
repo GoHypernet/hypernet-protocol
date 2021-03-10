@@ -10,7 +10,7 @@ module.exports = {
   },  
   devServer: {
     contentBase: path.join(__dirname, "src"),
-    port: 9000,
+    port: 9001,
     watchContentBase: true,
     headers: {
       "Access-Control-Allow-Origin": "*",

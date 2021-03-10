@@ -7,8 +7,8 @@
   "keywords": [],
   "main": "dist/index.js",
   "scripts": {
-    "build": "npm run clean && npm run compile",
-    "clean": "",
+    "build": "yarn clean && yarn compile",
+    "clean": "rimraf dist",
     "compile": "tsc -b src/tsconfig.json",
     "format": "prettier --write \"src/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
@@ -18,6 +18,7 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "react-jss": "^10.5.1"
   }
 }
