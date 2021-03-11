@@ -53,39 +53,39 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     };
   }
 
-  public getMerchantPublicKeys(merchantUrls: string[]): ResultAsync<Map<string, PublicKey>, Error> {
-    // TODO: right now, the merchant will publish a URL with their public key; eventually, they should be held in a smart contract
+  public getMerchantAddresses(merchantUrls: string[]): ResultAsync<Map<string, PublicKey>, Error> {
+    // TODO: right now, the merchant will publish a URL with their address; eventually, they should be held in a smart contract
 
     // For merchants that are already authorized, we can just go to their connector for the
     // public key.
-    const publicKeyRequests = new Array<
-      ResultAsync<{ merchantUrl: string; publicKey: PublicKey }, MerchantConnectorError | Error>
+    const addressRequests = new Array<
+      ResultAsync<{ merchantUrl: string; address: string }, MerchantConnectorError | Error>
     >();
     for (const merchantUrl of merchantUrls) {
       const merchantProxy = this.activatedMerchants.get(merchantUrl);
 
       if (merchantProxy != null) {
-        publicKeyRequests.push(
-          merchantProxy.getPublicKey().map((publicKey) => {
-            return { merchantUrl, publicKey };
+        addressRequests.push(
+          merchantProxy.getAddress().map((address) => {
+            return { merchantUrl, address };
           }),
         );
       } else {
         // Need to get it from the source
         const url = new URL(merchantUrl.toString());
-        url.pathname = "publicKey";
-        publicKeyRequests.push(
-          this.ajaxUtils.get<string, Error>(url).map((publicKey) => {
-            return { merchantUrl, publicKey };
+        url.pathname = "address";
+        addressRequests.push(
+          this.ajaxUtils.get<string, Error>(url).map((address) => {
+            return { merchantUrl, address };
           }),
         );
       }
     }
 
-    return ResultUtils.combine(publicKeyRequests).map((vals) => {
-      const returnMap = new Map<string, PublicKey>();
+    return ResultUtils.combine(addressRequests).map((vals) => {
+      const returnMap = new Map<string, string>();
       for (const val of vals) {
-        returnMap.set(val.merchantUrl.toString(), val.publicKey);
+        returnMap.set(val.merchantUrl.toString(), val.address);
       }
 
       return returnMap;
@@ -217,23 +217,40 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       this.contextProvider.getInitializedContext(),
       this.getAuthorizedMerchants(),
       this.blockchainProvider.getSigner(),
-    ]).andThen((vals) => {
+    ]).map(async (vals) => {
       const [context, authorizedMerchants, signer] = vals;
-      const activationResults = new Array<ResultAsync<void, Error>>();
+      // const activationResults = new Array<ResultAsync<void, Error>>();
+
+      // for (const keyval of authorizedMerchants) {
+      //   activationResults.push(
+      //     this._activateAuthorizedMerchant(
+      //       context.account,
+      //       keyval[0], // URL
+      //       keyval[1],
+      //       context,
+      //       signer,
+      //     ),
+      //   );
+      // }
+
+      // return ResultUtils.combine(activationResults).map(() => {});
 
       for (const keyval of authorizedMerchants) {
-        activationResults.push(
-          this._activateAuthorizedMerchant(
+        console.log(`Activating connector for ${keyval[0]}`)
+        const result = await this._activateAuthorizedMerchant(
             context.account,
             keyval[0], // URL
             keyval[1],
             context,
             signer,
-          ),
-        );
+          );
+
+        // if (result.isErr()) {
+        //   return errAsync(new MerchantConnectorError(`Can not activate merchant connector for ${keyval[0]}`));
+        // }
       }
 
-      return ResultUtils.combine(activationResults).map(() => {});
+      // return okAsync<void, MerchantConnectorError>(undefined);
     });
   }
 

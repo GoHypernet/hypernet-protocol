@@ -49,11 +49,13 @@ class TestMerchantConnector implements IMerchantConnector {
 
     // 6) Return both the signature of the hash of the data & the data itself
     return Promise.resolve({
+      paymentId,
       mediatorSignature,
       amount: resolutionAmount,
     });
   }
-  getPublicKey(): Promise<string> {
+
+  public async getAddress(): Promise<string> {
     return Promise.resolve("0x14791697260E4c9A71f18484C9f997B308e59325");
   }
 
@@ -70,7 +72,7 @@ class TestMerchantConnector implements IMerchantConnector {
     // connector did all the rendering stuff, now he is asking merchant-iframe to show his stuff
     // Merchant iframe Postmate model is running after the connector code get compiled in MerchantService.activateMerchantConnector so we need a small delay to wait for the Postmate model to get initialized.
     setTimeout(() => {
-      this.onDisplayRequested.next();
+      //this.onDisplayRequested.next();
     }, 100);
 
     // connector done with the UI he rendered previously, now he want to ask the merchant-iframe to close everything.
@@ -92,6 +94,7 @@ class TestMerchantConnector implements IMerchantConnector {
   onPreRedirect: Subject<IRedirectInfo>;
 
   constructor() {
+    console.log("Instantiating TestMerchantConnector");
     this.onSendFundsRequested = new Subject<ISendFundsRequest>();
     this.onAuthorizeFundsRequested = new Subject<IAuthorizeFundsRequest>();
     this.onDisplayRequested = new Subject<string>();

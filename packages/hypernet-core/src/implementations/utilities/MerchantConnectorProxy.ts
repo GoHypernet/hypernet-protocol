@@ -1,9 +1,8 @@
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
-import Postmate from "postmate";
-import { okAsync, ResultAsync } from "neverthrow";
+import { ResultAsync } from "neverthrow";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
 import { MerchantConnectorError, MerchantValidationError } from "@interfaces/objects/errors";
-import { HexString, HypernetContext, PublicKey } from "@interfaces/objects";
+import { HexString, HypernetContext } from "@interfaces/objects";
 import { IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
 
 export class MerchantConnectorProxy extends ParentProxy implements IMerchantConnectorProxy {
@@ -11,8 +10,9 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     protected element: HTMLElement | null,
     protected iframeUrl: string,
     protected contextProvider: IContextProvider,
+    protected debug: boolean = false
   ) {
-    super(element, iframeUrl);
+    super(element, iframeUrl, debug);
   }
 
   public activateConnector(): ResultAsync<void, MerchantConnectorError> {
@@ -23,8 +23,8 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     return this._createCall("resolveChallenge", paymentId);
   }
 
-  public getPublicKey(): ResultAsync<PublicKey, MerchantConnectorError> {
-    return this._createCall("getPublicKey", null);
+  public getAddress(): ResultAsync<HexString, MerchantConnectorError> {
+    return this._createCall("getAddress", null);
   }
 
   public getValidatedSignature(): ResultAsync<string, MerchantValidationError> {
@@ -32,15 +32,10 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
   }
 
   public activate(): ResultAsync<void, MerchantValidationError> {
-    let context: HypernetContext;
-
     return ResultUtils.combine([this.contextProvider.getContext(), super.activate()])
-      .andThen((vals) => {
-        [context] = vals;
+      .map((vals) => {
+        const [context] = vals;
 
-        return super.activate();
-      })
-      .map(() => {
         // We need to make sure to have the listeners after postmate model gets activated
         this.child?.on("onDisplayRequested", () => {
           context.onMerchantIFrameDisplayRequested.next("");

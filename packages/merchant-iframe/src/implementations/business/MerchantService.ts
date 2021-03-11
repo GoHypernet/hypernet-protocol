@@ -26,7 +26,7 @@ export class MerchantService implements IMerchantService {
     MerchantConnectorError | MerchantValidationError
   > {
     const context = this.contextProvider.getMerchantContext();
-    console.log("activateMerchantConnector");
+    console.log(`Activating merchant connector for ${context.merchantUrl}`);
     // If we don't have validated code, that's a problem.
     if (context.validatedMerchantCode == null || context.validatedMerchantSignature == null) {
       return errAsync(new MerchantValidationError("Cannot activate merchant connector, no validated code available!"));
@@ -82,8 +82,8 @@ export class MerchantService implements IMerchantService {
       }
 
       // Merchant's code passes muster. Store the merchant code in the context as validated.
-      console.log("Connector validated!");
       const context = this.contextProvider.getMerchantContext();
+      console.log(`Merchant connector for ${context.merchantUrl} validated!`);
       context.validatedMerchantCode = merchantCode;
       context.validatedMerchantSignature = signature;
       this.contextProvider.setMerchantContext(context);

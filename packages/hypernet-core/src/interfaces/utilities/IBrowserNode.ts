@@ -29,6 +29,15 @@ export interface IWithdrawResponse {
   transactionHash?: string;
 }
 
+export interface IWithdrawQuote {
+  channelAddress: EthereumAddress;
+  amount: string;
+  assetId: EthereumAddress;
+  fee: string;
+  expiry: string;
+  signature?: string;
+}
+
 export interface IBalance {
   to: string[];
   amount: string[];
@@ -51,7 +60,6 @@ export interface INetworkContext {
   channelFactoryAddress: EthereumAddress;
   transferRegistryAddress: EthereumAddress;
   chainId: number;
-  providerUrl: string;
 }
 
 export interface IFullTransferState<TTransferState = any> {
@@ -133,13 +141,13 @@ export interface IBrowserNode {
    * @returns channelAddress
    */
   reconcileDeposit(assetId: EthereumAddress, channelAddress: EthereumAddress): ResultAsync<string, VectorError>;
-
+  
   withdraw(
     channelAddress: EthereumAddress,
     amount: string,
-    assetId: EthereumAddress,
+    assetId: string,
     recipient: EthereumAddress,
-    fee: string,
+    quote?: IWithdrawQuote,
     callTo?: string,
     callData?: string,
     meta?: any,

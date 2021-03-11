@@ -30,6 +30,7 @@ export class ConfigProviderMock implements IConfigProvider {
           },
         },
         "merchantIframeUrl",
+        false, // debug is off for testing
       );
   }
 

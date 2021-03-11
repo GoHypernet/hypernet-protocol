@@ -110,6 +110,11 @@ export default class CoreWrapper extends ChildProxy {
           return this.core.authorizeMerchant(data.data);
         }, data.callId);
       },
+      initiateDispute: (data: IIFrameCallData<string>) => {
+        this.returnForModel(() => {
+          return this.core.initiateDispute(data.data);
+        }, data.callId);
+      },
       onMerchantIFrameClosed: (data: IIFrameCallData<string>) => {
         this.core.onMerchantIFrameClosed.next(data.data);
       },
@@ -122,8 +127,6 @@ export default class CoreWrapper extends ChildProxy {
       // finalizePullPayment(paymentId: string, finalAmount: BigNumber): Promise<HypernetLink>;
 
       // finalizePushPayment(paymentId: string): Promise<void>;
-
-      // initiateDispute(paymentId: string, metadata: string): Promise<HypernetLink>;
 
       mintTestToken: (data: IIFrameCallData<string>) => {
         this.returnForModel(() => {

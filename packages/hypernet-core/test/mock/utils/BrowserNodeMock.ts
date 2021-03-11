@@ -35,7 +35,6 @@ export function createBrowserNodeMock(stateChannels: IFullChannelState[] | null 
         chainId: chainId,
         channelFactoryAddress: "channelFactoryAddress",
         transferRegistryAddress: "transferRegistryAddress",
-        providerUrl: "providerUrl",
       },
       defundNonces: [],
       inDispute: false,

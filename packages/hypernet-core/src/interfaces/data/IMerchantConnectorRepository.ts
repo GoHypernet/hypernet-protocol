@@ -1,13 +1,12 @@
 import { ResultAsync } from "neverthrow";
-import { Payment, PublicKey } from "@interfaces/objects";
 import { PersistenceError } from "@interfaces/objects/errors/PersistenceError";
 import { CoreUninitializedError, MerchantConnectorError, MerchantValidationError } from "@interfaces/objects/errors";
 
 export interface IMerchantConnectorRepository {
   /**
-   * Returns the PublicKey for a merchant
+   * Returns a map of merchant URLs to their address
    */
-  getMerchantPublicKeys(merchantUrl: string[]): ResultAsync<Map<string, PublicKey>, Error>;
+  getMerchantAddresses(merchantUrl: string[]): ResultAsync<Map<string, string>, Error>;
 
   /**
    * Adds the merchant url as authorized with a particular signature

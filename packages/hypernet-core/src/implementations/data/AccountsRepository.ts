@@ -212,7 +212,7 @@ export class AccountsRepository implements IAccountsRepository {
     return prerequisites
       .andThen((vals) => {
         const [browserNode, channelAddress] = vals;
-        return browserNode.withdraw(channelAddress, amount.toString(), assetAddress, destinationAddress, "0");
+        return browserNode.withdraw(channelAddress, amount.toString(), assetAddress, destinationAddress);
       })
       .map(() => {
         return;
