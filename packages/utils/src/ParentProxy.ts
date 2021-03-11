@@ -46,13 +46,14 @@ class IFrameCall<T, E> {
 }
 
 export abstract class ParentProxy {
+  protected static proxyCount: number = 0;
   protected handshake: Postmate;
   protected child: Postmate.ParentAPI | null;
   protected callId: number = 0;
   protected calls: IFrameCall<any, any>[] = [];
   protected active: boolean;
 
-  constructor(element: HTMLElement | null, iframeUrl: string) {
+  constructor(element: HTMLElement | null, iframeUrl: string, protected debug: boolean = false) {
     this.child = null;
     this.active = false;
 
@@ -60,10 +61,11 @@ export abstract class ParentProxy {
       element = document.body;
     }
 
+    Postmate.debug = debug;
     this.handshake = new Postmate({
       container: element,
       url: iframeUrl,
-      name: "hypernet-core-merchant-connector-iframe",
+      name: `hypernet-core-merchant-connector-iframe-${ParentProxy.proxyCount++}`,
       classListArray: ["hypernet-core-iframe-style"], // Classes to add to the iframe
     });
   }

@@ -81,7 +81,7 @@ class MerchantConnectorRepositoryMocks {
     td.when(this.merchantConnectorProxy.resolveChallenge(commonPaymentId)).thenReturn(
       okAsync({ mediatorSignature, amount: resolutionAmount } as IResolutionResult),
     );
-    td.when(this.merchantConnectorProxy.getPublicKey()).thenReturn(okAsync(merchantPublicKey));
+    td.when(this.merchantConnectorProxy.getAddress()).thenReturn(okAsync(account));
 
     td.when(
       this.blockchainUtils.verifyTypedData(
@@ -490,14 +490,14 @@ describe("MerchantConnectorRepository tests", () => {
     expect(onAuthorizedMerchantActivationFailedVal).toBe(merchantUrl);
   });
 
-  test("getMerchantPublicKeys returns successfully from activated merchants", async () => {
+  test("getMerchantAddresses returns successfully from activated merchants", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
     const repo = mocks.factoryRepository();
 
     // Act
     const result = await repo.activateAuthorizedMerchants().andThen(() => {
-      return repo.getMerchantPublicKeys([merchantUrl]);
+      return repo.getMerchantAddresses([merchantUrl]);
     });
 
     // Assert
@@ -508,7 +508,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(value.get(merchantUrl)).toBe(merchantPublicKey);
   });
 
-  test("getMerchantPublicKeys returns successfully from non-activated merchants", async () => {
+  test("getMerchantAddresses returns successfully from non-activated merchants", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
@@ -523,7 +523,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.getMerchantPublicKeys([merchantUrl]);
+    const result = await repo.getMerchantAddresses([merchantUrl]);
 
     // Assert
     expect(result).toBeDefined();
@@ -533,7 +533,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(value.get(merchantUrl)).toBe(merchantPublicKey);
   });
 
-  test("getMerchantPublicKeys returns successfully from both types of merchants", async () => {
+  test("getMerchantAddresses returns successfully from both types of merchants", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
@@ -549,7 +549,7 @@ describe("MerchantConnectorRepository tests", () => {
 
     // Act
     const result = await repo.activateAuthorizedMerchants().andThen(() => {
-      return repo.getMerchantPublicKeys([merchantUrl, merchantUrl2]);
+      return repo.getMerchantAddresses([merchantUrl, merchantUrl2]);
     });
 
     // Assert
@@ -561,7 +561,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(value.get(merchantUrl2)).toBe(merchantPublicKey2);
   });
 
-  test("getMerchantPublicKeys returns an error if a single merchant has an error", async () => {
+  test("getMerchantAddresses returns an error if a single merchant has an error", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
@@ -578,7 +578,7 @@ describe("MerchantConnectorRepository tests", () => {
 
     // Act
     const result = await repo.activateAuthorizedMerchants().andThen(() => {
-      return repo.getMerchantPublicKeys([merchantUrl, merchantUrl2]);
+      return repo.getMerchantAddresses([merchantUrl, merchantUrl2]);
     });
 
     // Assert

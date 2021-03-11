@@ -2,7 +2,7 @@ import { ParentProxy } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
 import { MerchantConnectorError, MerchantValidationError } from "@interfaces/objects/errors";
-import { HexString, PublicKey } from "@interfaces/objects";
+import { HexString } from "@interfaces/objects";
 
 export interface IMerchantConnectorProxy extends ParentProxy {
   /**
@@ -13,7 +13,7 @@ export interface IMerchantConnectorProxy extends ParentProxy {
 
   resolveChallenge(paymentId: HexString): ResultAsync<IResolutionResult, MerchantConnectorError>;
 
-  getPublicKey(): ResultAsync<PublicKey, MerchantConnectorError>;
+  getAddress(): ResultAsync<HexString, MerchantConnectorError>;
 
   getValidatedSignature(): ResultAsync<string, MerchantValidationError>;
 }

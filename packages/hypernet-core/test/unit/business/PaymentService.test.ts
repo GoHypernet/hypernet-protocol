@@ -64,7 +64,7 @@ class PaymentServiceMocks {
   public finalizedPushPayment: PushPayment;
 
   public assetBalance: AssetBalance;
-  public merchantPublicKeys: Map<string, string>;
+  public merchantAddresses: Map<string, string>;
 
   constructor(hypertokenBalance: string = amount) {
     this.pushPayment = this.factoryPushPayment();
@@ -119,10 +119,10 @@ class PaymentServiceMocks {
     td.when(this.paymentRepository.provideAsset(paymentId)).thenReturn(okAsync(this.paidPushPayment));
     td.when(this.paymentRepository.finalizePayment(paymentId, amount)).thenReturn(okAsync(this.finalizedPushPayment));
 
-    this.merchantPublicKeys = new Map();
-    this.merchantPublicKeys.set(merchantUrl, merchantPublicKey);
-    td.when(this.merchantConnectorRepository.getMerchantPublicKeys(td.matchers.contains(merchantUrl))).thenReturn(
-      okAsync(this.merchantPublicKeys),
+    this.merchantAddresses = new Map();
+    this.merchantAddresses.set(merchantUrl, merchantPublicKey);
+    td.when(this.merchantConnectorRepository.getMerchantAddresses(td.matchers.contains(merchantUrl))).thenReturn(
+      okAsync(this.merchantAddresses),
     );
   }
 

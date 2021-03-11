@@ -7,6 +7,8 @@ export interface IMerchantService {
   activateMerchantConnector(): ResultAsync<IMerchantConnector, MerchantConnectorError | MerchantValidationError>;
   prepareForRedirect(redirectInfo: IRedirectInfo): ResultAsync<void, Error>;
   getMerchantUrl(): ResultAsync<string, MerchantValidationError>;
-  autoActivateMerchantConnector(): ResultAsync<IMerchantConnector | null,
-  MerchantConnectorError | MerchantValidationError> ;
+  autoActivateMerchantConnector(): ResultAsync<
+    IMerchantConnector | null,
+    MerchantConnectorError | MerchantValidationError
+  >;
 }

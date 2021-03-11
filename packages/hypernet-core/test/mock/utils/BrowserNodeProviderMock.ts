@@ -77,7 +77,6 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
         chainId: 1337,
         channelFactoryAddress: "channelFactoryAddress",
         transferRegistryAddress: "transferRegistryAddress",
-        providerUrl: "providerUrl",
       },
       defundNonces: [],
       inDispute: false,
@@ -201,23 +200,11 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       );
 
       td.when(
-        this.browserNode.withdraw(
-          routerChannelAddress,
-          commonAmount.toString(),
-          ethereumAddress,
-          destinationAddress,
-          "0",
-        ),
+        this.browserNode.withdraw(routerChannelAddress, commonAmount.toString(), ethereumAddress, destinationAddress),
       ).thenReturn(okAsync({} as IWithdrawResponse));
 
       td.when(
-        this.browserNode.withdraw(
-          routerChannelAddress,
-          commonAmount.toString(),
-          erc20AssetAddress,
-          destinationAddress,
-          "0",
-        ),
+        this.browserNode.withdraw(routerChannelAddress, commonAmount.toString(), erc20AssetAddress, destinationAddress),
       ).thenReturn(okAsync({} as IWithdrawResponse));
 
       td.when(this.browserNode.getTransfer(offerTransferId)).thenReturn(okAsync(this.offerTransfer));

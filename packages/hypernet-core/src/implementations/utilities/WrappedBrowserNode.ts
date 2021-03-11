@@ -16,6 +16,7 @@ import {
   IFullChannelState,
   IFullTransferState,
   IRegisteredTransfer,
+  IWithdrawQuote,
   IWithdrawResponse,
 } from "@interfaces/utilities";
 import { errAsync, okAsync } from "neverthrow";
@@ -55,8 +56,8 @@ export class WrappedBrowserNode implements IBrowserNode {
     channelAddress: EthereumAddress,
     amount: string,
     assetId: string,
-    recipient: string,
-    fee: string,
+    recipient: EthereumAddress,
+    quote?: IWithdrawQuote,
     callTo?: string,
     callData?: string,
     meta?: any,
@@ -67,7 +68,7 @@ export class WrappedBrowserNode implements IBrowserNode {
         amount,
         assetId,
         recipient,
-        fee,
+        quote,
         callTo,
         callData,
         meta,

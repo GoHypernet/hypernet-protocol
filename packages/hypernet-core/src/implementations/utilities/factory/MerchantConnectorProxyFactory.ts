@@ -14,7 +14,12 @@ export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFac
       .andThen((config) => {
         const iframeUrl = new URL(config.merchantIframeUrl);
         iframeUrl.searchParams.set("merchantUrl", merchantUrl);
-        proxy = new MerchantConnectorProxy(this._prepareIFrameContainer(), iframeUrl.toString(), this.contextProvider);
+        proxy = new MerchantConnectorProxy(
+          this._prepareIFrameContainer(),
+          iframeUrl.toString(),
+          this.contextProvider,
+          config.debug,
+        );
 
         // The proxy needs to be activated to do anything. NOTE: this is different
         // from activating the connector itself; this just activates the proxy

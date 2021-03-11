@@ -19,14 +19,14 @@ export class MerchantService implements IMerchantService {
     protected merchantConnectorRepository: IMerchantConnectorRepository,
     protected persistenceRepository: IPersistenceRepository,
     protected contextProvider: IContextProvider,
-  ) { }
+  ) {}
 
   public activateMerchantConnector(): ResultAsync<
     IMerchantConnector,
     MerchantConnectorError | MerchantValidationError
   > {
     const context = this.contextProvider.getMerchantContext();
-    console.log("activateMerchantConnector");
+    console.log(`Activating merchant connector for ${context.merchantUrl}`);
     // If we don't have validated code, that's a problem.
     if (context.validatedMerchantCode == null || context.validatedMerchantSignature == null) {
       return errAsync(new MerchantValidationError("Cannot activate merchant connector, no validated code available!"));
@@ -82,8 +82,8 @@ export class MerchantService implements IMerchantService {
       }
 
       // Merchant's code passes muster. Store the merchant code in the context as validated.
-      console.log("Connector validated!");
       const context = this.contextProvider.getMerchantContext();
+      console.log(`Merchant connector for ${context.merchantUrl} validated!`);
       context.validatedMerchantCode = merchantCode;
       context.validatedMerchantSignature = signature;
       this.contextProvider.setMerchantContext(context);
@@ -94,10 +94,12 @@ export class MerchantService implements IMerchantService {
   }
 
   public prepareForRedirect(redirectInfo: IRedirectInfo): ResultAsync<void, Error> {
-    const context = this.contextProvider.getMerchantContext()
+    const context = this.contextProvider.getMerchantContext();
 
-    // Register the redirect 
-    this.persistenceRepository.setExpectedRedirect(new ExpectedRedirect(context.merchantUrl, redirectInfo.redirectParam, redirectInfo.redirectValue));
+    // Register the redirect
+    this.persistenceRepository.setExpectedRedirect(
+      new ExpectedRedirect(context.merchantUrl, redirectInfo.redirectParam, redirectInfo.redirectValue),
+    );
 
     // Let the connector know it can move forward
     redirectInfo.readyFunction();
@@ -106,8 +108,10 @@ export class MerchantService implements IMerchantService {
     return okAsync(undefined);
   }
 
-  public autoActivateMerchantConnector(): ResultAsync<IMerchantConnector | null,
-  MerchantConnectorError | MerchantValidationError> {
+  public autoActivateMerchantConnector(): ResultAsync<
+    IMerchantConnector | null,
+    MerchantConnectorError | MerchantValidationError
+  > {
     const context = this.contextProvider.getMerchantContext();
 
     // We can auto-activate the merchant connector if the connector

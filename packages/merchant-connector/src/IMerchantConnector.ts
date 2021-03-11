@@ -2,7 +2,7 @@ import { Subject } from "rxjs";
 import { IResolutionResult } from "./IResolutionResult";
 export interface IMerchantConnector {
   resolveChallenge(paymentId: string): Promise<IResolutionResult>;
-  getPublicKey(): Promise<string>;
+  getAddress(): Promise<string>;
 
   onSendFundsRequested: Subject<ISendFundsRequest>;
   onAuthorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
@@ -35,5 +35,5 @@ export interface IRedirectInfo {
   redirectValue: string;
 
   // This callback will be called by the frame when it is ready for the redirect.
-  readyFunction: () => void; 
+  readyFunction: () => void;
 }

@@ -38,6 +38,7 @@ export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
   protected getModel(): Postmate.Model {
     // Fire up the Postmate model. The merchant iframe has two halves- the parts that work before the merchant connector has been activated
     // and the parts that work afterward. Postmate only supports a single model, so you have to have all the functions defined up front.
+    Postmate.debug = true;
     return new Postmate.Model({
       activateConnector: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
@@ -57,12 +58,12 @@ export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
           return ResultAsync.fromPromise(this.merchantConnector.resolveChallenge(data.data), (e) => e);
         }, data.callId);
       },
-      getPublicKey: (data: IIFrameCallData<void>) => {
+      getAddress: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           if (this.merchantConnector == null) {
             return errAsync(new Error("No merchant connector available!"));
           }
-          return ResultAsync.fromPromise(this.merchantConnector.getPublicKey(), (e) => e);
+          return ResultAsync.fromPromise(this.merchantConnector.getAddress(), (e) => e);
         }, data.callId);
       },
       getValidatedSignature: (data: IIFrameCallData<void>) => {

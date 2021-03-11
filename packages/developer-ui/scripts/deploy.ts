@@ -4,7 +4,6 @@ import { keccak256 } from "@ethersproject/keccak256";
 import { Wallet, providers, ContractFactory, BigNumber, utils } from "ethers"
 import { TransferAbis } from "@hypernetlabs/hypernet-core/src/interfaces/types"
 import { artifacts } from "@connext/vector-contracts";
-import { tidy } from "@connext/vector-types"
 
 const provider = new providers.JsonRpcProvider("http://localhost:8545");
 const owner = Wallet.fromMnemonic("candy maple cake sugar pudding cream honey rich smooth crumble sweet treat").connect(provider);

@@ -232,14 +232,14 @@ export class PaymentService implements IPaymentService {
 
         return ResultUtils.combine([
           this.accountRepository.getBalanceByAsset(config.hypertokenAddress),
-          this.merchantConnectorRepository.getMerchantPublicKeys(Array.from(merchantUrls)),
+          this.merchantConnectorRepository.getMerchantAddresses(Array.from(merchantUrls)),
         ]);
       })
       .andThen((vals) => {
-        const [hypertokenBalance, publicKeys] = vals;
+        const [hypertokenBalance, addresses] = vals;
 
         // If we don't have a public key for each merchant, then we should not proceed.
-        if (merchantUrls.size != publicKeys.size) {
+        if (merchantUrls.size != addresses.size) {
           return errAsync(new MerchantValidationError("Not all merchants are authorized!"));
         }
 
@@ -269,10 +269,10 @@ export class PaymentService implements IPaymentService {
           this.logUtils.log(`PaymentService:acceptOffers: attempting to provide stake for payment ${paymentId}`);
 
           // We need to get the public key of the merchant for the payment
-          const merchantPublicKey = publicKeys.get(payment.merchantUrl);
+          const merchantAddress = addresses.get(payment.merchantUrl);
 
-          if (merchantPublicKey != null) {
-            const stakeAttempt = this.paymentRepository.provideStake(paymentId, merchantPublicKey).match(
+          if (merchantAddress != null) {
+            const stakeAttempt = this.paymentRepository.provideStake(paymentId, merchantAddress).match(
               (payment) => {
                 return ok(payment) as Result<Payment, AcceptPaymentError>;
               },

@@ -46,6 +46,7 @@ export class ConfigProvider implements IConfigProvider {
         "openThreadKey",
         chainAddresses,
         "http://localhost:5005", // merchantIframeUrl
+        true, // debug
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
@@ -85,6 +86,7 @@ export class ConfigProvider implements IConfigProvider {
         "openThreadKey",
         chainAddresses,
         "http://localhost:5005", // merchantIframeUrl
+        true, // debug
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
