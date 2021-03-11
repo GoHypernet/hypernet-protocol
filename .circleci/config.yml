@@ -1,23 +1,61 @@
 version: 2.1
+
+defaults: &defaults
+  working_directory: ~/repo
+  docker:
+    - image: 'cimg/node:12.14.1'
+      auth:
+        username: mydockerhub-user
+        password: $DOCKERHUB_PASSWORD
+
 jobs:
   test:
-    docker:
-      - image: 'cimg/node:12.14.1'
-        auth:
-          username: mydockerhub-user
-          password: $DOCKERHUB_PASSWORD # context / project UI env-var reference
+    <<: *defaults
     steps:
       - checkout
-      # Should be using pre steps instead.
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-
       - run: echo "registry=https://registry.npmjs.org/" > ~/.npmrc
       - run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
       - run: sudo apt update && sudo apt install -y python
       - run: yarn install
       - run: yarn test
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+      - persist_to_workspace:
+          root: ~/repo
+          paths:
+            - .
+
+  publish:
+    <<: *defaults
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Authenticate with test npm registry
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/.npmrc
+      - run:
+          name: Prepare builds for publish
+          command: yarn prepare-for-publish
+      - run:
+          name: Run publish script
+          command: chmod 755 ./scripts/npmVersion.sh && ./scripts/npmVersion.sh
 
 # Orchestrate our job run sequence
 workflows:
-  test:
+  test_and_publish:
     jobs:
       - test:
           context: Hypernet Protocol
+      - publish:
+          context: Hypernet Protocol
+          filters:
+            branches:
+              only: master
+          requires:
+            - test
