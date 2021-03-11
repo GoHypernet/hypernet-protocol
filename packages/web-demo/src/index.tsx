@@ -21,5 +21,5 @@ Spinner();
 Spinner.show();
 client.getReady().map(() => {
   Spinner.hide();
-  client.renderConnectorAuthorizationFlow({ connectorUrl: "http://localhost:5010", showInModal: true });
+  client.renderConnectorAuthorizationFlow({ connectorUrl: "http://localhost:8080/hypernet_protocol/v0", showInModal: true });
 });

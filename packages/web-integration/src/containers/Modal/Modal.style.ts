@@ -1,6 +1,6 @@
-import { IStylesDictionary } from "@hypernetlabs/web-ui/src/interfaces";
+import { createUseStyles } from "react-jss";
 
-const styles: IStylesDictionary = {
+const useStyles = createUseStyles({
   container: {
     position: "absolute",
     top: 0,
@@ -23,6 +23,7 @@ const styles: IStylesDictionary = {
     borderRadius: 4,
     transform: "translate(-50%, -50%)",
     boxShadow: "0px 4px 20px #000000",
+    width: (props) => props.modalWidth,
   },
   closeIcon: {
     position: "absolute",
@@ -31,6 +32,6 @@ const styles: IStylesDictionary = {
     cursor: "pointer",
     top: 37,
   },
-};
+});
 
-export default styles;
+export default useStyles;

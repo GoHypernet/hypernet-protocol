@@ -1,6 +1,6 @@
-import { IStylesDictionary } from "../../interfaces";
+import { createUseStyles } from "react-jss";
 
-const styles: IStylesDictionary = {
+const useStyles = createUseStyles({
   container: {
     display: "flex",
   },
@@ -41,6 +41,6 @@ const styles: IStylesDictionary = {
     cursor: "pointer",
     width: 100,
   },
-};
+});
 
-export default styles;
+export default useStyles;

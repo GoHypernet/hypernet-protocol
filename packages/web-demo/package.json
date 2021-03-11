@@ -30,6 +30,7 @@
   },
   "scripts": {
     "build": "webpack --config webpack.config.js",
+    "clean": "rimraf dist",
     "compile": "tsc -b src/tsconfig.json",
     "deploy-custom-transfers": "yarn ts-node scripts/deploy.ts",
     "format": "prettier --write \"src/**/*.ts\"",
@@ -41,7 +42,6 @@
   "dependencies": {
     "@ethereum-waffle/chai": "^3.1.2",
     "@hypernetlabs/web-integration": "^0.0.1",
-    "@hypernetlabs/web-ui": "^0.0.1",
     "bootstrap": "^4.5.3",
     "jquery": "^3.5.1"
   },

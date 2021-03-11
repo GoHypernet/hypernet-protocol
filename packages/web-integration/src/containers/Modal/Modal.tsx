@@ -1,7 +1,7 @@
 import { LayoutContext } from "@web-integration-contexts";
 import React, { useEffect, useContext } from "react";
 import { createPortal } from "react-dom";
-import styles from "./Modal.style";
+import useStyles from "./Modal.style";
 
 interface IModal {
   isOpen: boolean;
@@ -11,6 +11,9 @@ interface IModal {
 const Modal: React.FC<IModal> = (props: IModal) => {
   const { isOpen, children } = props;
   const { modalWidth, modalStatus } = useContext(LayoutContext);
+  const classes = useStyles({
+    modalWidth,
+  });
 
   // element to which the modal will be rendered
   const modalId = "__hypernet-protocol-modal-root__";
@@ -43,14 +46,9 @@ const Modal: React.FC<IModal> = (props: IModal) => {
     <>
       {isOpen &&
         createPortal(
-          <div style={styles.container}>
-            <div
-              style={{
-                ...styles.wrapper,
-                width: modalWidth,
-              }}
-            >
-              <div style={styles.closeIcon} onClick={() => modalRoot.removeChild(el)}>
+          <div className={classes.container}>
+            <div className={classes.wrapper}>
+              <div className={classes.closeIcon} onClick={() => modalRoot.removeChild(el)}>
                 <img
                   src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png"
                   width="20"
