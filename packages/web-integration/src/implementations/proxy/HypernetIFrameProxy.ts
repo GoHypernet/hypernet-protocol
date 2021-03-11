@@ -121,7 +121,6 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
         });
 
         child.on("onMerchantIFrameDisplayRequested", (data: string) => {
-
           child.frame.style.display = "block";
           if (element) {
             element.style.display = "block";

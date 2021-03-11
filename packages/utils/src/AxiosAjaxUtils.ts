@@ -11,7 +11,11 @@ export class AxiosAjaxUtils implements IAjaxUtils {
       },
     );
   }
-  post<T, E>(url: URL, data: string | object | ArrayBuffer | ArrayBufferView | URLSearchParams, config?: IRequestConfig): ResultAsync<T, E> {
+  post<T, E>(
+    url: URL,
+    data: string | object | ArrayBuffer | ArrayBufferView | URLSearchParams,
+    config?: IRequestConfig,
+  ): ResultAsync<T, E> {
     return ResultAsync.fromPromise(axios.post(url.toString(), data, config), (e) => e as E).map(
       (response: AxiosResponse<T>) => {
         return response.data;

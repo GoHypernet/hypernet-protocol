@@ -24,9 +24,8 @@ export class PersistenceRepository implements IPersistenceRepository {
 
     let activatedSignatures: string[];
     if (activatedSignatureJson == null) {
-      activatedSignatures = []
-    }
-    else {
+      activatedSignatures = [];
+    } else {
       activatedSignatures = JSON.parse(activatedSignatureJson);
     }
 
@@ -39,7 +38,7 @@ export class PersistenceRepository implements IPersistenceRepository {
     this.localStorageUtils.setSessionItem(this.expectedRedirectKey, JSON.stringify(redirect));
   }
   public getExpectedRedirect(): ExpectedRedirect | null {
-    const redirectStr = this.localStorageUtils.getSessionItem(this.expectedRedirectKey)
+    const redirectStr = this.localStorageUtils.getSessionItem(this.expectedRedirectKey);
 
     if (redirectStr == null) {
       return null;

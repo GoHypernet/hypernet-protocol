@@ -220,8 +220,7 @@ export class PaymentService implements IPaymentService {
     let payments: Map<string, Payment>;
     const merchantUrls = new Set<string>();
 
-    return ResultUtils.combine([this.configProvider.getConfig(), 
-      this.paymentRepository.getPaymentsByIds(paymentIds)])
+    return ResultUtils.combine([this.configProvider.getConfig(), this.paymentRepository.getPaymentsByIds(paymentIds)])
       .andThen((vals) => {
         [config, payments] = vals;
 

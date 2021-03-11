@@ -141,7 +141,7 @@ export interface IBrowserNode {
    * @returns channelAddress
    */
   reconcileDeposit(assetId: EthereumAddress, channelAddress: EthereumAddress): ResultAsync<string, VectorError>;
-  
+
   withdraw(
     channelAddress: EthereumAddress,
     amount: string,

@@ -200,21 +200,11 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       );
 
       td.when(
-        this.browserNode.withdraw(
-          routerChannelAddress,
-          commonAmount.toString(),
-          ethereumAddress,
-          destinationAddress
-        ),
+        this.browserNode.withdraw(routerChannelAddress, commonAmount.toString(), ethereumAddress, destinationAddress),
       ).thenReturn(okAsync({} as IWithdrawResponse));
 
       td.when(
-        this.browserNode.withdraw(
-          routerChannelAddress,
-          commonAmount.toString(),
-          erc20AssetAddress,
-          destinationAddress
-        ),
+        this.browserNode.withdraw(routerChannelAddress, commonAmount.toString(), erc20AssetAddress, destinationAddress),
       ).thenReturn(okAsync({} as IWithdrawResponse));
 
       td.when(this.browserNode.getTransfer(offerTransferId)).thenReturn(okAsync(this.offerTransfer));

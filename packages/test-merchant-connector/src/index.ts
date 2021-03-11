@@ -103,7 +103,6 @@ class TestMerchantConnector implements IMerchantConnector {
     this.onIFrameDisplayed = new Subject<string>();
     this.onPreRedirect = new Subject<IRedirectInfo>();
 
-
     this._renderContent();
 
     // User closed merchant iframe and here is the connector getting notified that the iframe got closed manually by the user

@@ -40,10 +40,11 @@ export class MerchantIframe {
     this.merchantConnectorListener = new MerchantConnectorListener(this.contextProvider, this.merchantService);
 
     const context = this.contextProvider.getMerchantContext();
-    this.merchantConnectorListener.initialize()
-    .andThen(() => {
-      return this.merchantService.getMerchantUrl();
-    })
+    this.merchantConnectorListener
+      .initialize()
+      .andThen(() => {
+        return this.merchantService.getMerchantUrl();
+      })
       .andThen((merchantUrl) => {
         // Set the merchant url
         const context = this.contextProvider.getMerchantContext();
@@ -51,12 +52,12 @@ export class MerchantIframe {
         this.contextProvider.setMerchantContext(context);
 
         // Now that we have a merchant URL, let's validate the merchant's connector
-        return this.merchantService.validateMerchantConnector(); 
+        return this.merchantService.validateMerchantConnector();
       })
       .andThen(() => {
-         // Regardless of validation, we will try to auto-activate
-         // the connector if it's eligible.
-         return this.merchantService.autoActivateMerchantConnector();
+        // Regardless of validation, we will try to auto-activate
+        // the connector if it's eligible.
+        return this.merchantService.autoActivateMerchantConnector();
       })
       .andThen(() => {
         // We're ready to answer questions about the connector, we can activate the API

@@ -53,9 +53,7 @@ export abstract class ParentProxy {
   protected calls: IFrameCall<any, any>[] = [];
   protected active: boolean;
 
-  constructor(element: HTMLElement | null, 
-    iframeUrl: string, 
-    protected debug: boolean = false) {
+  constructor(element: HTMLElement | null, iframeUrl: string, protected debug: boolean = false) {
     this.child = null;
     this.active = false;
 
@@ -78,8 +76,7 @@ export abstract class ParentProxy {
     if (this.activateResult != null) {
       return this.activateResult;
     }
-    this.activateResult = ResultAsync.fromPromise(this.handshake, (e) => e as Error)
-    .map((child) => {
+    this.activateResult = ResultAsync.fromPromise(this.handshake, (e) => e as Error).map((child) => {
       // Stash the API for future calls
       this.child = child;
 

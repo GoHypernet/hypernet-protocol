@@ -19,7 +19,7 @@ export class MerchantService implements IMerchantService {
     protected merchantConnectorRepository: IMerchantConnectorRepository,
     protected persistenceRepository: IPersistenceRepository,
     protected contextProvider: IContextProvider,
-  ) { }
+  ) {}
 
   public activateMerchantConnector(): ResultAsync<
     IMerchantConnector,
@@ -94,10 +94,12 @@ export class MerchantService implements IMerchantService {
   }
 
   public prepareForRedirect(redirectInfo: IRedirectInfo): ResultAsync<void, Error> {
-    const context = this.contextProvider.getMerchantContext()
+    const context = this.contextProvider.getMerchantContext();
 
-    // Register the redirect 
-    this.persistenceRepository.setExpectedRedirect(new ExpectedRedirect(context.merchantUrl, redirectInfo.redirectParam, redirectInfo.redirectValue));
+    // Register the redirect
+    this.persistenceRepository.setExpectedRedirect(
+      new ExpectedRedirect(context.merchantUrl, redirectInfo.redirectParam, redirectInfo.redirectValue),
+    );
 
     // Let the connector know it can move forward
     redirectInfo.readyFunction();
@@ -106,8 +108,10 @@ export class MerchantService implements IMerchantService {
     return okAsync(undefined);
   }
 
-  public autoActivateMerchantConnector(): ResultAsync<IMerchantConnector | null,
-  MerchantConnectorError | MerchantValidationError> {
+  public autoActivateMerchantConnector(): ResultAsync<
+    IMerchantConnector | null,
+    MerchantConnectorError | MerchantValidationError
+  > {
     const context = this.contextProvider.getMerchantContext();
 
     // We can auto-activate the merchant connector if the connector

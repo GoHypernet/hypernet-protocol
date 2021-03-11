@@ -10,7 +10,7 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     protected element: HTMLElement | null,
     protected iframeUrl: string,
     protected contextProvider: IContextProvider,
-    protected debug: boolean = false
+    protected debug: boolean = false,
   ) {
     super(element, iframeUrl, debug);
   }
@@ -32,26 +32,25 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
   }
 
   public activate(): ResultAsync<void, MerchantValidationError> {
-    return ResultUtils.combine([this.contextProvider.getContext(), super.activate()])
-      .map((vals) => {
-        const [context] = vals;
+    return ResultUtils.combine([this.contextProvider.getContext(), super.activate()]).map((vals) => {
+      const [context] = vals;
 
-        // We need to make sure to have the listeners after postmate model gets activated
-        this.child?.on("onDisplayRequested", () => {
-          context.onMerchantIFrameDisplayRequested.next("");
-        });
-        this.child?.on("onCloseRequested", () => {
-          context.onMerchantIFrameCloseRequested.next();
-        });
-
-        // Listen for iframe close and open events and pass them down to the child proxy.
-        context.onMerchantIFrameClosed.subscribe((data: string) => {
-          this._createCall("onMerchantIFrameClosed", data);
-        });
-
-        context.onMerchantIFrameDisplayed.subscribe((data: string) => {
-          this._createCall("onMerchantIFrameDisplayed", data);
-        });
+      // We need to make sure to have the listeners after postmate model gets activated
+      this.child?.on("onDisplayRequested", () => {
+        context.onMerchantIFrameDisplayRequested.next("");
       });
+      this.child?.on("onCloseRequested", () => {
+        context.onMerchantIFrameCloseRequested.next();
+      });
+
+      // Listen for iframe close and open events and pass them down to the child proxy.
+      context.onMerchantIFrameClosed.subscribe((data: string) => {
+        this._createCall("onMerchantIFrameClosed", data);
+      });
+
+      context.onMerchantIFrameDisplayed.subscribe((data: string) => {
+        this._createCall("onMerchantIFrameDisplayed", data);
+      });
+    });
   }
 }

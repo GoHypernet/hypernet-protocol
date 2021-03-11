@@ -35,5 +35,5 @@ export interface IRedirectInfo {
   redirectValue: string;
 
   // This callback will be called by the frame when it is ready for the redirect.
-  readyFunction: () => void; 
+  readyFunction: () => void;
 }

@@ -236,14 +236,14 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       // return ResultUtils.combine(activationResults).map(() => {});
 
       for (const keyval of authorizedMerchants) {
-        console.log(`Activating connector for ${keyval[0]}`)
+        console.log(`Activating connector for ${keyval[0]}`);
         const result = await this._activateAuthorizedMerchant(
-            context.account,
-            keyval[0], // URL
-            keyval[1],
-            context,
-            signer,
-          );
+          context.account,
+          keyval[0], // URL
+          keyval[1],
+          context,
+          signer,
+        );
 
         // if (result.isErr()) {
         //   return errAsync(new MerchantConnectorError(`Can not activate merchant connector for ${keyval[0]}`));
