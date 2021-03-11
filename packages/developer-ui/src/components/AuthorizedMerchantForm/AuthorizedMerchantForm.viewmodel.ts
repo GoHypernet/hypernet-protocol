@@ -16,7 +16,7 @@ export class AuthorizedMerchantFormViewModel {
 
   constructor(params: AuthorizedMerchantFormParams) {
     this.integration = params.integration;
-    this.merchantUrl = ko.observable("http://localhost:5010");
+    this.merchantUrl = ko.observable("http://localhost:8080/hypernet_protocol/v0");
 
     this.submitButton = new ButtonParams(
       "Authorize Merchant",

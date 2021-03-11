@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import Button from "../../components/Button";
 import { AssetBalance } from "@hypernetlabs/hypernet-core";
 import BalanceList from "../../components/BalanceList";
-import styles from "./ConnectorAuthorization.style";
+import useStyles from "./ConnectorAuthorization.style";
 
 interface IConnectorAuthorization {
   balances: AssetBalance[];
@@ -13,17 +13,17 @@ interface IConnectorAuthorization {
 
 const ConnectorAuthorization: React.FC<IConnectorAuthorization> = (props: IConnectorAuthorization) => {
   const { balances, onAuthorizeClick, connectorName, connectorLogoUrl } = props;
-
+  const classes = useStyles();
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <div style={styles.imageContainer}>
+    <div className={classes.container}>
+      <div className={classes.header}>
+        <div className={classes.imageContainer}>
           <img width="40" src={connectorLogoUrl} />
-          <div style={styles.connectorName}>{connectorName}</div>
+          <div className={classes.connectorName}>{connectorName}</div>
         </div>
       </div>
-      <div style={styles.balancesWrapper}>
-        <div style={styles.balancesLabel}>Your Balances</div>
+      <div className={classes.balancesWrapper}>
+        <div className={classes.balancesLabel}>Your Balances</div>
         <BalanceList balances={balances} />
       </div>
       <Button
@@ -32,8 +32,8 @@ const ConnectorAuthorization: React.FC<IConnectorAuthorization> = (props: IConne
         fullWidth={true}
         bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
       />
-      <div style={styles.account}>
-        <a style={styles.accountLink} href="https://hypernetlabs.io/" target="_blank">
+      <div className={classes.account}>
+        <a className={classes.accountLink} href="https://hypernetlabs.io/" target="_blank">
           View your Hypernet account.
         </a>
       </div>

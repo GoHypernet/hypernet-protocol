@@ -44,7 +44,7 @@ app.get('/signature', (req, res) => {
    res.end(signature);
 });
 
-app.get('/publicKey', (req, res) => {
+app.get('/address', (req, res) => {
    res.end(address);
 })
 

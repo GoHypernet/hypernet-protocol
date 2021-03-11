@@ -31,14 +31,14 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     return this._createCall("getValidatedSignature", null);
   }
 
-  public activateProxy(): ResultAsync<void, MerchantValidationError> {
+  public activate(): ResultAsync<void, MerchantValidationError> {
     let context: HypernetContext;
 
-    return ResultUtils.combine([this.contextProvider.getContext(), this.activate()])
+    return ResultUtils.combine([this.contextProvider.getContext(), super.activate()])
       .andThen((vals) => {
         [context] = vals;
 
-        return this.activate();
+        return super.activate();
       })
       .map(() => {
         // We need to make sure to have the listeners after postmate model gets activated
