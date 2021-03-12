@@ -8,6 +8,7 @@ import {
 } from "@interfaces/objects/errors";
 import { IMerchantConnectorRepository } from "@interfaces/data";
 import { IContextProvider } from "@interfaces/utilities";
+import { ResultUtils } from "@hypernetlabs/utils";
 
 export class MerchantService implements IMerchantService {
   constructor(
@@ -18,14 +19,18 @@ export class MerchantService implements IMerchantService {
   public authorizeMerchant(
     merchantUrl: string,
   ): ResultAsync<void, CoreUninitializedError | MerchantValidationError | PersistenceError> {
-    return this.merchantConnectorRepository
-      .addAuthorizedMerchant(merchantUrl)
-      .andThen(() => {
-        return this.contextProvider.getContext();
-      })
-      .map((context) => {
+    return ResultUtils.combine([this.contextProvider.getContext(), this.getAuthorizedMerchants()]).map(async (vals) => {
+      const [context, authorizedMerchantsMap] = vals;
+
+      // Remove the merchant iframe proxy related to that merchantUrl if there is any activated ones.
+      if (authorizedMerchantsMap.get(merchantUrl)) {
+        this.merchantConnectorRepository.removeAuthorizedMerchant(merchantUrl);
+      }
+
+      this.merchantConnectorRepository.addAuthorizedMerchant(merchantUrl).map(() => {
         context.onMerchantAuthorized.next(merchantUrl);
       });
+    });
   }
 
   public getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError> {

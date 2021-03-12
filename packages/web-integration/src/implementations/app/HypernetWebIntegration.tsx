@@ -35,7 +35,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     this.iframeURL = iframeURL || this.iframeURL;
 
     // Create a proxy connection to the iframe
-    this.core = new HypernetIFrameProxy(this._prepareIFrameContainer(), this.iframeURL);
+    this.core = new HypernetIFrameProxy(this._prepareIFrameContainer(), this.iframeURL, "hypernet-core-iframe");
   }
 
   // wait for the core to be intialized

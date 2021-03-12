@@ -25,11 +25,11 @@ export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
         });
 
         merchantConnector.onDisplayRequested.subscribe(() => {
-          this.parent?.emit("onDisplayRequested");
+          this.parent?.emit("onDisplayRequested", context.merchantUrl);
         });
 
         merchantConnector.onCloseRequested.subscribe(() => {
-          this.parent?.emit("onCloseRequested");
+          this.parent?.emit("onCloseRequested", context.merchantUrl);
         });
       },
     });
