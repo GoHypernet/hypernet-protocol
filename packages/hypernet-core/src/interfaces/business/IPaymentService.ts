@@ -18,6 +18,7 @@ import {
   MerchantConnectorError,
   MerchantValidationError,
   OfferMismatchError,
+  PaymentFinalizeError,
   RouterChannelUnknownError,
 } from "@interfaces/objects/errors";
 
@@ -85,20 +86,20 @@ export interface IPaymentService {
    */
   paymentPosted(
     paymentId: HexString,
-  ): ResultAsync<void, InvalidParametersError | RouterChannelUnknownError | CoreUninitializedError | VectorError>;
+  ): ResultAsync<Payment, InvalidParametersError | RouterChannelUnknownError | CoreUninitializedError | VectorError>;
 
   /** Notify the service that an insurance payment has resolved
    * @param paymentId
    */
   insuranceResolved(
     paymentId: HexString,
-  ): ResultAsync<void, InvalidParametersError | RouterChannelUnknownError | CoreUninitializedError | VectorError>;
+  ): ResultAsync<Payment, InvalidParametersError | RouterChannelUnknownError | CoreUninitializedError | VectorError>;
 
   /**
    * Notify the service that a payment has been completed.
    * @param paymentId
    */
-  paymentCompleted(paymentId: string): ResultAsync<void, InvalidParametersError>;
+  paymentCompleted(paymentId: string): ResultAsync<Payment, InvalidParametersError>;
 
   /**
    * Notify the service that a pull payment has been posted.
@@ -112,7 +113,7 @@ export interface IPaymentService {
    */
   stakePosted(
     paymentId: string,
-  ): ResultAsync<void, CoreUninitializedError | OfferMismatchError | InvalidParametersError>;
+  ): ResultAsync<Payment, CoreUninitializedError | OfferMismatchError | InvalidParametersError>;
 
   /**
    * Notify the service that an offer has been made.
@@ -137,5 +138,20 @@ export interface IPaymentService {
   ): ResultAsync<
     Payment,
     InvalidParametersError | CoreUninitializedError | MerchantValidationError | MerchantConnectorError
+  >;
+
+  /**
+   * This function will advance the state of the payments if they can or should be.
+   * It will provide funds for a staked payment, accept the funds for a paid push payment,
+   * and resolve an offer once the insurance has been released.
+   * This is used to catch up payments in case an error occurred, or more likely if
+   * something happened while you were offline.
+   * @param paymentIds
+   */
+  advancePayments(
+    paymentIds: HexString[],
+  ): ResultAsync<
+    Payment[],
+    PaymentFinalizeError | RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
   >;
 }

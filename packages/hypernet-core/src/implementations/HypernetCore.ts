@@ -48,6 +48,7 @@ import {
   ControlClaim,
   EthereumAddress,
   ExternalProvider,
+  HexString,
   HypernetConfig,
   HypernetContext,
   HypernetLink,
@@ -567,6 +568,19 @@ export class HypernetCore implements IHypernetCore {
       //   // Claim control
       //   return this.controlService.claimControl();
       // })
+      .andThen(() => {
+        // Get all the existing payments and try to catch them up
+        return this.linkService.getLinks();
+      })
+      .andThen((links) => {
+        const paymentIds = new Array<HexString>();
+        for (const link of links) {
+          for (const payment of link.payments) {
+            paymentIds.push(payment.id);
+          }
+        }
+        return this.paymentService.advancePayments(paymentIds);
+      })
       .map(() => {
         if (this._initializePromiseResolve != null) {
           this._initializePromiseResolve();
