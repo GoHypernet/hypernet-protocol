@@ -254,16 +254,14 @@ export class PaymentRepository implements IPaymentRepository {
             if (offerDetails.paymentId === paymentId) {
               relevantTransfers.push(transfer);
             }
-          } else {
-            if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
+          } else if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
               if (paymentId === transfer.transferState.UUID) {
                 relevantTransfers.push(transfer);
               } else {
-                this.logUtils.log(`Transfer not relevant in PaymentRepository, transferId: ${transfer.transferId}`);
+                this.logUtils.debug(`Transfer not relevant to payment ${paymentId}, transferId: ${transfer.transferId}`);
               }
-            } else {
-              this.logUtils.log(`Unrecognized transfer in PaymentRepository, transferId: ${transfer.transferId}`);
-            }
+          } else {
+            this.logUtils.debug(`Unrecognized transfer in PaymentRepository, transferId: ${transfer.transferId}`);
           }
         }
 
