@@ -3,6 +3,7 @@
         <select id="paymentToken" class="form-control" data-bind="options: paymentTokens,
         optionsText: 'tokenName',
         value: selectedPaymentTokenOption,
+        optionsAfterRender: setPaymentTokenOptionValue, 
         optionsCaption: 'Choose...'">
         </select>
 </div>
