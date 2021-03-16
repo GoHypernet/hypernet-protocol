@@ -68,6 +68,10 @@ export class TokenSelectorViewModel {
     this.getBalances();
   }
 
+  public setPaymentTokenOptionValue(option: any, item: any) {
+    ko.applyBindingsToNode(option, { attr: { value: item?.tokenName } }, item);
+  }
+
   protected getBalances() {
     if (this.onlyWithBalance) {
       this.integration.core
