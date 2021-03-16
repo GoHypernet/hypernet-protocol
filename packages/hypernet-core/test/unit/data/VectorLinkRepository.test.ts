@@ -88,6 +88,7 @@ class VectorLinkRepositoryMocks {
     ).thenReturn(okAsync([]));
 
     td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow);
+    td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(okAsync(unixNow));
   }
 
   public factoryVectorLinkRepository(): ILinkRepository {

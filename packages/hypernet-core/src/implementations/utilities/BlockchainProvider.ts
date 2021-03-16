@@ -80,4 +80,10 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
       return this.signer;
     });
   }
+
+  public getLatestBlock(): ResultAsync<ethers.providers.Block, BlockchainUnavailableError> {
+    return this.getProvider().map(async(provider) => {
+      return await provider.getBlock("latest");
+    });
+  }
 }

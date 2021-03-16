@@ -28,4 +28,8 @@ export class BlockchainProviderMock implements IBlockchainProvider {
   public getProvider(): ResultAsync<ethers.providers.Web3Provider, BlockchainUnavailableError> {
     return okAsync(this.provider);
   }
+
+  public getLatestBlock(): ResultAsync<ethers.providers.Block, BlockchainUnavailableError> {
+    return okAsync({} as ethers.providers.Block);
+  }
 }

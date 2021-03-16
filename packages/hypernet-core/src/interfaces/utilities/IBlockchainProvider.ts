@@ -11,4 +11,5 @@ export interface IBlockchainProvider {
     ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
     BlockchainUnavailableError
   >;
+  getLatestBlock(): ResultAsync<ethers.providers.Block, BlockchainUnavailableError>;
 }
