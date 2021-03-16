@@ -73,7 +73,6 @@ export class VectorAPIListener implements IVectorListener {
               // that stake has been resolved.
               // @todo create methods in payment service
               return this.paymentService.insuranceResolved(paymentId);
-              return errAsync(new LogicalError("Method not yet implemented!"));
             } else if (transferType === ETransferType.Parameterized) {
               // if the transfer is the parameterized transfer, we need to notify the payment service
               // that the parameterized payment has been resolved.
@@ -128,9 +127,9 @@ export class VectorAPIListener implements IVectorListener {
               } else if (transferType === ETransferType.Offer) {
                 return this.paymentService.offerReceived(paymentId);
               } else if (transferType === ETransferType.Parameterized) {
-                return this.paymentService.paymentPosted(paymentId);
+                return this.paymentService.paymentPosted(paymentId).map(() => {});
               } else if (transferType === ETransferType.Insurance) {
-                return this.paymentService.stakePosted(paymentId);
+                return this.paymentService.stakePosted(paymentId).map(() => {});
               }
 
               return okAsync(null);
@@ -139,15 +138,6 @@ export class VectorAPIListener implements IVectorListener {
           .mapErr((e) => {
             this.logUtils.error(e);
           });
-
-        // Convert a Vector event into an external event for publishing
-        /*return new Observable(subscriber => {
-                  .then((browserNode) => {
-                      browserNode.on(EngineEvents.SETUP, (payload: SetupPayload) => {
-                          subscriber.next(payload);
-                      });
-                  });
-              });*/
       });
     });
   }
