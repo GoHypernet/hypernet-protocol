@@ -11,11 +11,11 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
   constructor(
     protected element: HTMLElement | null,
     protected iframeUrl: string,
+    protected iframeName: string,
     protected contextProvider: IContextProvider,
     protected debug: boolean = false,
-    protected iframeName: string,
   ) {
-    super(element, iframeUrl, debug, iframeName);
+    super(element, iframeUrl, iframeName, debug);
   }
 
   public activateConnector(): ResultAsync<void, MerchantConnectorError> {

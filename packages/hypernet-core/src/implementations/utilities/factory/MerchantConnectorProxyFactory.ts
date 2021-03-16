@@ -19,9 +19,9 @@ export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFac
         proxy = new MerchantConnectorProxy(
           this._prepareIFrameContainer(),
           iframeUrl.toString(),
+          `hypernet-core-merchant-connector-iframe-${merchantUrl}`,
           this.contextProvider,
           config.debug,
-          `hypernet-core-merchant-connector-iframe-${merchantUrl}`,
         );
 
         // The proxy needs to be activated to do anything. NOTE: this is different

@@ -52,7 +52,7 @@ export abstract class ParentProxy {
   protected calls: IFrameCall<any, any>[] = [];
   protected active: boolean;
 
-  constructor(element: HTMLElement | null, iframeUrl: string, protected debug: boolean = false, iframeName: string) {
+  constructor(element: HTMLElement | null, iframeUrl: string, iframeName: string, protected debug: boolean = false) {
     this.child = null;
     this.active = false;
 
