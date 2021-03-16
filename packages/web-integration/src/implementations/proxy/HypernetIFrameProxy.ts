@@ -32,8 +32,8 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   protected waitInitializedPromise: Promise<void>;
   protected _handshakePromise: Promise<void> | null;
 
-  constructor(element: HTMLElement | null, iframeUrl: string) {
-    super(element, iframeUrl);
+  constructor(element: HTMLElement | null, iframeUrl: string, iframeName: string) {
+    super(element, iframeUrl, iframeName);
 
     this._handshakePromise = null;
 

@@ -1,10 +1,12 @@
 import { IConfigProvider, IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 import { MerchantConnectorProxy } from "@implementations/utilities/MerchantConnectorProxy";
-import { ResultAsync } from "neverthrow";
+import { ok, okAsync, ResultAsync } from "neverthrow";
 import { MerchantConnectorError } from "@interfaces/objects/errors";
 
 export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFactory {
+  protected static proxyMap: Map<string, IMerchantConnectorProxy> = new Map();
+
   constructor(protected configProvider: IConfigProvider, protected contextProvider: IContextProvider) {}
 
   factoryProxy(merchantUrl: string): ResultAsync<IMerchantConnectorProxy, MerchantConnectorError> {
@@ -17,6 +19,7 @@ export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFac
         proxy = new MerchantConnectorProxy(
           this._prepareIFrameContainer(),
           iframeUrl.toString(),
+          `hypernet-core-merchant-connector-iframe-${merchantUrl}`,
           this.contextProvider,
           config.debug,
         );
@@ -29,8 +32,15 @@ export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFac
         return proxy.activate();
       })
       .map(() => {
+        MerchantConnectorProxyFactory.proxyMap.set(merchantUrl, proxy);
         return proxy;
       });
+  }
+
+  destroyMerchantConnectorProxy(merchantUrl: string) {
+    const proxy = MerchantConnectorProxyFactory.proxyMap.get(merchantUrl);
+    proxy?.destroy();
+    MerchantConnectorProxyFactory.proxyMap.delete(merchantUrl);
   }
 
   private _prepareIFrameContainer(): HTMLElement {
@@ -40,6 +50,7 @@ export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFac
     style.appendChild(
       document.createTextNode(`
           iframe {
+            display: none;
             border: none;
             width: 100%;
             height: 100%;

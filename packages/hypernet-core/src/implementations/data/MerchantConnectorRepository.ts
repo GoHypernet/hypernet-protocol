@@ -151,6 +151,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       });
   }
 
+  public removeAuthorizedMerchant(merchantUrl: string) {
+    this.merchantConnectorProxyFactory.destroyMerchantConnectorProxy(merchantUrl);
+  }
+
   /**
    * Returns a map of merchant URLs with their authorization signatures.
    */

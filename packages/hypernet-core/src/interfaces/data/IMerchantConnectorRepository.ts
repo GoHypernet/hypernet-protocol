@@ -15,6 +15,12 @@ export interface IMerchantConnectorRepository {
    */
   addAuthorizedMerchant(merchantUrl: string): ResultAsync<void, PersistenceError>;
 
+  /**
+   * Destroy merchant connector proxy
+   * @param merchantUrl
+   */
+  removeAuthorizedMerchant(merchantUrl: string): void;
+
   getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError>;
 
   activateAuthorizedMerchants(): ResultAsync<void, MerchantConnectorError>;
