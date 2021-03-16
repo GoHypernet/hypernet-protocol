@@ -18,7 +18,6 @@ import {
   IPaymentIdUtils,
   IBrowserNode,
   IBasicTransferResponse,
-  IBasicChannelResponse,
   IFullChannelState,
   IFullTransferState,
   ITimeUtils,
@@ -106,11 +105,13 @@ export class VectorUtils implements IVectorUtils {
     let channelAddress: string;
     let browserNode: IBrowserNode;
 
-    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.getRouterChannelAddress()])
+    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.getRouterChannelAddress(), this.blockchainProvider.getLatestBlock()])
       .andThen((vals) => {
-        const [browserNodeVal, channelAddressVal] = vals;
+        const [browserNodeVal, channelAddressVal, block] = vals;
         browserNode = browserNodeVal;
         channelAddress = channelAddressVal;
+
+        this.logUtils.debug(`Current block timestamp: ${block.timestamp}`);
 
         const resolverDataEncoding = ["tuple(bytes32 UUID, uint256 paymentAmountTaken)"];
         const encodedResolverData = defaultAbiCoder.encode(resolverDataEncoding, [resolverData]);

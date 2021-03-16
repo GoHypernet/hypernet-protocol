@@ -198,7 +198,6 @@ export class HypernetCore implements IHypernetCore {
     });
 
     this.logUtils = new LogUtils();
-    this.timeUtils = new TimeUtils();
     this.localStorageUtils = new LocalStorageUtils();
     this.contextProvider = new ContextProvider(
       this.onControlClaimed,
@@ -219,6 +218,7 @@ export class HypernetCore implements IHypernetCore {
       this.onMerchantIFrameDisplayed,
     );
     this.blockchainProvider = new EthersBlockchainProvider(externalProvider);
+    this.timeUtils = new TimeUtils(this.blockchainProvider);
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(network, this.logUtils, config);
     this.linkUtils = new LinkUtils(this.contextProvider);

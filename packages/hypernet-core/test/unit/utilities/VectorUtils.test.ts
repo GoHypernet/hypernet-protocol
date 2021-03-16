@@ -20,6 +20,7 @@ class VectorUtilsMocks {
     td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(this.browserNodeMock));
 
     td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow);
+    td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(okAsync(unixNow));
   }
 
   public factoryVectorUtils(): VectorUtils {

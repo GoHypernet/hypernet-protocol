@@ -109,19 +109,21 @@ export class PaymentRepository implements IPaymentRepository {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
     let paymentId: string;
+    let timestamp: number;
 
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
       this.paymentUtils.createPaymentId(EPaymentType.Pull),
+      this.timeUtils.getBlockchainTimestamp(),
     ])
       .andThen((vals) => {
-        [browserNode, context, paymentId] = vals;
+        [browserNode, context, paymentId, timestamp] = vals;
 
         const message: IHypernetOfferDetails = {
           messageType: EMessageTransferType.OFFER,
           paymentId,
-          creationDate: this.timeUtils.getUnixNow(),
+          creationDate: timestamp,
           to: counterPartyAccount,
           from: context.publicIdentifier,
           requiredStake,
@@ -169,19 +171,21 @@ export class PaymentRepository implements IPaymentRepository {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
     let paymentId: string;
+    let timestamp: number
 
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
       this.paymentUtils.createPaymentId(EPaymentType.Push),
+      this.timeUtils.getBlockchainTimestamp(),
     ])
       .andThen((vals) => {
-        [browserNode, context, paymentId] = vals;
+        [browserNode, context, paymentId, timestamp] = vals;
 
         const message: IHypernetOfferDetails = {
           messageType: EMessageTransferType.OFFER,
           paymentId,
-          creationDate: this.timeUtils.getUnixNow(),
+          creationDate: timestamp,
           to: counterPartyAccount,
           from: context.publicIdentifier,
           requiredStake: requiredStake.toString(),
@@ -415,21 +419,23 @@ export class PaymentRepository implements IPaymentRepository {
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
     let existingTransfers: IFullTransferState[];
+    let timestamp: number;
 
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.configProvider.getConfig(),
       this._getTransfersByPaymentId(paymentId),
+      this.timeUtils.getBlockchainTimestamp(),
     ])
       .andThen((vals) => {
-        [browserNode, config, existingTransfers] = vals;
+        [browserNode, config, existingTransfers, timestamp] = vals;
 
         return this.paymentUtils.transfersToPayment(paymentId, existingTransfers);
       })
       .andThen((payment) => {
         const paymentSender = payment.from;
         const paymentID = payment.id;
-        const paymentStart = this.timeUtils.getUnixNow();
+        const paymentStart = timestamp;
         const paymentExpiration = paymentStart + config.defaultPaymentExpiryLength;
 
         // TODO: There are probably some logical times when you should not provide a stake
@@ -470,14 +476,16 @@ export class PaymentRepository implements IPaymentRepository {
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
     let existingTransfers: IFullTransferState[];
+    let timestamp: number;
 
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.configProvider.getConfig(),
       this._getTransfersByPaymentId(paymentId),
+      this.timeUtils.getBlockchainTimestamp(),
     ])
       .andThen((vals) => {
-        [browserNode, config, existingTransfers] = vals;
+        [browserNode, config, existingTransfers, timestamp] = vals;
 
         return this.paymentUtils.transfersToPayment(paymentId, existingTransfers);
       })
@@ -495,7 +503,14 @@ export class PaymentRepository implements IPaymentRepository {
 
         const paymentRecipient = payment.to;
         const paymentID = payment.id;
-        const paymentStart = this.timeUtils.getUnixNow();
+
+        // The -1 here is critical to avoiding resolution errors down the road.
+        // The way that a parameterized payment's value is calculated, is the blocktime
+        // minus the start time. If this is 0, then you have big issues (according to 
+        // "mathematicians", you can't divide by 0. What do they know?).
+        // Since we don't have any assurance that a block has passed between creating the
+        // transfer and resolving it, this offset assures this will never happen.
+        const paymentStart = timestamp - 1; 
         const paymentExpiration = paymentStart + config.defaultPaymentExpiryLength;
 
         this.logUtils.log(`Providing a payment amount of ${paymentTokenAmount}`);

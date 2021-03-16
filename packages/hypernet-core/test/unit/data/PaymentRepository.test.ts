@@ -54,6 +54,7 @@ class PaymentRepositoryMocks {
     includeParameterizedTransfer: boolean = true,
   ) {
     td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow);
+    td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(okAsync(unixNow));
 
     this.browserNodeProvider = new BrowserNodeProviderMock(
       includeOfferTransfer,
