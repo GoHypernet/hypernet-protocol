@@ -499,9 +499,7 @@ export class VectorUtils implements IVectorUtils {
           return okAsync(channel.channelAddress as string);
         }
         // If a channel does not exist with the router, we need to create it.
-        return this._createRouterStateChannel(browserNode, config).map((routerChannel) => {
-          return routerChannel.channelAddress;
-        });
+        return this._createRouterStateChannel(browserNode, config);
       });
     return this.getRouterChannelAddressSetup;
   }
@@ -513,7 +511,7 @@ export class VectorUtils implements IVectorUtils {
       return this.timeUtils.getUnixNow();
     }
 
-    return transfer.meta.creationDate;
+    return transfer.meta.createdAt;
   }
 
   public getTransferStateFromTransfer(transfer: IFullTransferState): ETransferState {
@@ -526,11 +524,34 @@ export class VectorUtils implements IVectorUtils {
     return ETransferState.Active;
   }
 
+  /**
+   * 
+   * @param browserNode 
+   * @param config 
+   * @returns 
+   */
   protected _createRouterStateChannel(
     browserNode: IBrowserNode,
     config: HypernetConfig,
-  ): ResultAsync<IBasicChannelResponse, VectorError> {
-    return browserNode.setup(config.routerPublicIdentifier, config.chainId, DEFAULT_CHANNEL_TIMEOUT.toString());
+  ): ResultAsync<string, VectorError> {
+    return browserNode.setup(config.routerPublicIdentifier, config.chainId, DEFAULT_CHANNEL_TIMEOUT.toString())
+    .map((response) => {
+      return response.channelAddress;
+    })
+    .orElse((e) => {
+      // Channel could be already set up, so we should try restoring the state
+      this.logUtils.log("Channel setup with router failed, attempting to restore state and retry");
+      return browserNode.restoreState(config.routerPublicIdentifier, config.chainId)
+      .andThen(() => {
+        return browserNode.getStateChannelByParticipants(config.routerPublicIdentifier, config.chainId);
+      })
+      .andThen((channel) => {
+        if (channel == null) {
+          return errAsync(e);
+        }
+        return okAsync(channel.channelAddress);
+      });
+    });
   }
 
   protected _getStateChannel(
