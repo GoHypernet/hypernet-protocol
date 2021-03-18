@@ -1,7 +1,7 @@
 import { DevelopmentService } from "@implementations/business/DevelopmentService";
 import { IDevelopmentService } from "@interfaces/business/IDevelopmentService";
 import { IAccountsRepository } from "@interfaces/data";
-import { BigNumber } from "@interfaces/objects";
+import { BigNumber } from "ethers";
 import { mockUtils } from "@mock/mocks";
 import { okAsync } from "neverthrow";
 import td from "testdouble";

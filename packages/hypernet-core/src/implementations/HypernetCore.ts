@@ -1,6 +1,5 @@
 import {
   AccountService,
-  ControlService,
   DevelopmentService,
   LinkService,
   MerchantService,
@@ -28,7 +27,6 @@ import {
 import { VectorAPIListener } from "@implementations/api";
 import {
   IAccountService,
-  IControlService,
   IDevelopmentService,
   ILinkService,
   IMerchantService,
@@ -38,13 +36,10 @@ import {
   IAccountsRepository,
   ILinkRepository,
   IMerchantConnectorRepository,
-  IMessagingRepository,
   IPaymentRepository,
 } from "@interfaces/data";
-import { IHypernetCore } from "@interfaces/IHypernetCore";
 import {
   Balances,
-  BigNumber,
   ControlClaim,
   EthereumAddress,
   ExternalProvider,
@@ -54,10 +49,10 @@ import {
   HypernetLink,
   Payment,
   PublicIdentifier,
-  PublicKey,
   PullPayment,
   PushPayment,
-} from "@interfaces/objects";
+  IHypernetCore,
+} from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
   BalancesUnavailableError,
@@ -69,8 +64,8 @@ import {
   PersistenceError,
   RouterChannelUnknownError,
   VectorError,
-} from "@interfaces/objects/errors";
-import { EBlockchainNetwork } from "@interfaces/types";
+} from "@hypernetlabs/objects/errors";
+import { EBlockchainNetwork } from "@hypernetlabs/objects/types";
 import {
   IBlockchainProvider,
   IBlockchainUtils,
@@ -89,8 +84,8 @@ import { Subject } from "rxjs";
 import { ok, Result, ResultAsync } from "neverthrow";
 import { AxiosAjaxUtils, IAjaxUtils, ResultUtils, ILocalStorageUtils, LocalStorageUtils } from "@hypernetlabs/utils";
 import { IBrowserNodeFactory, IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
-import { MerchantConnectorProxyFactory } from "@implementations/utilities/factory";
-import { BrowserNodeFactory } from "./utilities/factory/BrowserNodeFactory";
+import { MerchantConnectorProxyFactory, BrowserNodeFactory } from "@implementations/utilities/factory";
+import { BigNumber } from "ethers";
 
 /**
  * The top-level class-definition for Hypernet Core.

@@ -23,9 +23,16 @@ export interface IMerchantConnector {
   onIFrameDisplayed: Subject<string>;
 }
 
-export interface ISendFundsRequest {}
+export interface ISendFundsRequest {
+  recipientPublicIdentifier: string;
+  amount: string;
+}
 
-export interface IAuthorizeFundsRequest {}
+export interface IAuthorizeFundsRequest {
+  recipientPublicIdentifier: string;
+  total: string;
+  expirationDate: number;
+}
 
 export interface IRedirectInfo {
   // This is a query string parameter that the iframe will look for

@@ -1,5 +1,5 @@
-import { ResultAsync } from "@interfaces/objects";
-import { LogicalError } from "@interfaces/objects/errors";
+import { ResultAsync } from "neverthrow";
+import { LogicalError } from "@hypernetlabs/objects/errors";
 
 export interface IVectorListener {
   setup(): ResultAsync<void, LogicalError>;

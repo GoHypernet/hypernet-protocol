@@ -1,6 +1,6 @@
-import { ResultAsync } from "@interfaces/objects";
-import { LogicalError } from "@interfaces/objects/errors";
-import { HypernetConfig } from "@interfaces/objects/HypernetConfig";
+import { ResultAsync } from "neverthrow";
+import { LogicalError } from "@hypernetlabs/objects/errors";
+import { HypernetConfig } from "@hypernetlabs/objects";
 
 /**
  * @todo What is the main role/purpose of this class? Description here.

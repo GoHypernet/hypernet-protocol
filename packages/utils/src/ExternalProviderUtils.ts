@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { ExternalProvider } from "./objects";
+import { ExternalProvider } from "@hypernetlabs/objects";
 
 export class ExternalProviderUtils {
   getExternalProviderForDevelopment(): ExternalProvider {

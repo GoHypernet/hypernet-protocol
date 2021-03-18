@@ -1,5 +1,5 @@
-import { ResultAsync } from "@interfaces/objects";
-import { BlockchainUnavailableError, ThreeBoxError } from "@interfaces/objects/errors";
+import { ResultAsync } from "neverthrow";
+import { BlockchainUnavailableError, ThreeBoxError } from "@hypernetlabs/objects/errors";
 
 export interface IMessagingListener {
   initialize(): ResultAsync<void, ThreeBoxError | BlockchainUnavailableError>;

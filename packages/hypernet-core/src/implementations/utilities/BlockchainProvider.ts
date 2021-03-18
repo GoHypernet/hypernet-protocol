@@ -1,8 +1,8 @@
-import { ExternalProvider, ResultAsync } from "@interfaces/objects";
-import { BlockchainUnavailableError } from "@interfaces/objects/errors";
+import { ExternalProvider } from "@hypernetlabs/objects";
+import { BlockchainUnavailableError } from "@hypernetlabs/objects/errors";
 import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
 import { ethers } from "ethers";
-import { okAsync } from "neverthrow";
+import { okAsync, ResultAsync } from "neverthrow";
 
 declare global {
   interface Window {
@@ -82,7 +82,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
   }
 
   public getLatestBlock(): ResultAsync<ethers.providers.Block, BlockchainUnavailableError> {
-    return this.getProvider().map(async(provider) => {
+    return this.getProvider().map(async (provider) => {
       return await provider.getBlock("latest");
     });
   }

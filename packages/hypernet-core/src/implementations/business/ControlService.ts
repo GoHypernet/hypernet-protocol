@@ -1,13 +1,14 @@
 import { IContextProvider } from "@interfaces/utilities";
-import { ControlClaim, InitializedHypernetContext, ResultAsync } from "@interfaces/objects";
+import { ControlClaim, InitializedHypernetContext } from "@hypernetlabs/objects";
 import { IControlService } from "@interfaces/business";
 import {
   BlockchainUnavailableError,
   CoreUninitializedError,
   LogicalError,
   ThreeBoxError,
-} from "@interfaces/objects/errors";
+} from "@hypernetlabs/objects/errors";
 import { IMessagingRepository } from "@interfaces/data";
+import { ResultAsync } from "neverthrow";
 
 export class ControlService implements IControlService {
   protected claimPeriod = 1000 * 60 * 5; // 5 minutes

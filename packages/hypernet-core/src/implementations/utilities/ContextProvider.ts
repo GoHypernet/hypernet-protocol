@@ -5,8 +5,8 @@ import {
   PushPayment,
   PullPayment,
   Balances,
-} from "@interfaces/objects";
-import { CoreUninitializedError } from "@interfaces/objects/errors";
+} from "@hypernetlabs/objects";
+import { CoreUninitializedError } from "@hypernetlabs/objects/errors";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { Subject } from "rxjs";
 import { okAsync, errAsync, ResultAsync } from "neverthrow";

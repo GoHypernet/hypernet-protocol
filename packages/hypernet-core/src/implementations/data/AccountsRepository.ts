@@ -1,24 +1,23 @@
 import { IAccountsRepository } from "@interfaces/data";
-import { AssetBalance, Balances, BigNumber, EthereumAddress, PublicIdentifier, ResultAsync } from "@interfaces/objects";
+import { AssetBalance, Balances, EthereumAddress, PublicIdentifier, IFullChannelState } from "@hypernetlabs/objects";
+import { BigNumber } from "ethers";
 import {
   IVectorUtils,
   IBlockchainProvider,
   IBrowserNodeProvider,
   ILogUtils,
   IBrowserNode,
-  IFullChannelState,
   IBlockchainUtils,
 } from "@interfaces/utilities";
 import { ethers, constants } from "ethers";
-import { TransactionResponse } from "@ethersproject/abstract-provider";
 import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
   CoreUninitializedError,
   RouterChannelUnknownError,
   VectorError,
-} from "@interfaces/objects/errors";
-import { combine, errAsync, okAsync } from "neverthrow";
+} from "@hypernetlabs/objects/errors";
+import { combine, errAsync, okAsync, ResultAsync } from "neverthrow";
 import { ResultUtils } from "@hypernetlabs/utils";
 
 class AssetInfo {
@@ -153,12 +152,10 @@ export class AccountsRepository implements IAccountsRepository {
       .andThen((vals) => {
         [signer, channelAddress, browserNode] = vals;
 
-        let tx: ResultAsync<TransactionResponse, BlockchainUnavailableError>;
-
         if (assetAddress === "0x0000000000000000000000000000000000000000") {
           this.logUtils.log("Transferring ETH.");
           // send eth
-          tx = ResultAsync.fromPromise(signer.sendTransaction({ to: channelAddress, value: amount }), (err) => {
+          return ResultAsync.fromPromise(signer.sendTransaction({ to: channelAddress, value: amount }), (err) => {
             return err as BlockchainUnavailableError;
           });
         } else {
@@ -166,8 +163,6 @@ export class AccountsRepository implements IAccountsRepository {
           // send an actual erc20 token
           return this.blockchainUtils.erc20Transfer(assetAddress, channelAddress, amount);
         }
-
-        return tx;
       })
       .andThen((tx) => {
         // TODO: Wait on this, break it up, this could take a while

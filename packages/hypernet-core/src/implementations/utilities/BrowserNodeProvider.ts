@@ -7,11 +7,12 @@ import {
   IConfigProvider,
   IBlockchainProvider,
 } from "@interfaces/utilities";
-import { BlockchainUnavailableError, CoreUninitializedError, VectorError } from "@interfaces/objects/errors";
-import { errAsync, HypernetConfig, HypernetContext, okAsync, ResultAsync } from "@interfaces/objects";
+import { BlockchainUnavailableError, CoreUninitializedError, VectorError } from "@hypernetlabs/objects/errors";
+import { HypernetConfig, HypernetContext } from "@hypernetlabs/objects";
 import { ResultUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
 import { ethers } from "ethers";
 import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 export class BrowserNodeProvider implements IBrowserNodeProvider {
   protected browserNodeResult: ResultAsync<IBrowserNode, VectorError | Error> | null;

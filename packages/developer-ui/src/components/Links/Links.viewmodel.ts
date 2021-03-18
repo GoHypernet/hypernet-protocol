@@ -1,6 +1,6 @@
 import ko from "knockout";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import { HypernetLink, PublicIdentifier } from "@hypernetlabs/hypernet-core";
+import { HypernetLink, PublicIdentifier } from "@hypernetlabs/objects";
 import html from "./Links.template.html";
 import { LinkParams } from "../Link/Link.viewmodel";
 

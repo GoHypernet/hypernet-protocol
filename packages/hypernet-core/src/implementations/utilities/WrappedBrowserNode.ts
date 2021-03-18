@@ -4,13 +4,11 @@ import {
   CONDITIONAL_TRANSFER_RESOLVED_EVENT,
   NodeError,
 } from "@connext/vector-types";
-import { EthereumAddress, PublicIdentifier, ResultAsync } from "@interfaces/objects";
-import { VectorError } from "@interfaces/objects/errors";
-import { InsuranceResolver, MessageResolver, ParameterizedResolver } from "@interfaces/types/typechain";
 import {
+  EthereumAddress,
+  PublicIdentifier,
   IBasicChannelResponse,
   IBasicTransferResponse,
-  IBrowserNode,
   IConditionalTransferCreatedPayload,
   IConditionalTransferResolvedPayload,
   IFullChannelState,
@@ -18,8 +16,11 @@ import {
   IRegisteredTransfer,
   IWithdrawQuote,
   IWithdrawResponse,
-} from "@interfaces/utilities";
-import { errAsync, okAsync } from "neverthrow";
+} from "@hypernetlabs/objects";
+import { VectorError } from "@hypernetlabs/objects/errors";
+import { InsuranceResolver, MessageResolver, ParameterizedResolver } from "@hypernetlabs/objects/types/typechain";
+import { IBrowserNode } from "@interfaces/utilities";
+import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
 export class WrappedBrowserNode implements IBrowserNode {
   protected toVectorError: (e: unknown) => VectorError;

@@ -1,5 +1,5 @@
+import { BigNumber } from "ethers";
 import {
-  BigNumber,
   EthereumAddress,
   HexString,
   IHypernetOfferDetails,
@@ -10,16 +10,17 @@ import {
   PullAmount,
   PullPayment,
   PushPayment,
-  ResultAsync,
   SortedTransfers,
-} from "@interfaces/objects";
+  IFullTransferState,
+  IHypernetPullPaymentDetails,
+} from "@hypernetlabs/objects";
 import {
   InvalidParametersError,
   InvalidPaymentError,
   InvalidPaymentIdError,
   LogicalError,
   VectorError,
-} from "@interfaces/objects/errors";
+} from "@hypernetlabs/objects/errors";
 import {
   EPaymentState,
   EPaymentType,
@@ -28,22 +29,20 @@ import {
   InsuranceState,
   MessageState,
   ParameterizedState,
-} from "@interfaces/types";
+  EMessageTransferType,
+} from "@hypernetlabs/objects/types";
 import {
   IBrowserNodeProvider,
   IConfigProvider,
-  IFullTransferState,
   ILogUtils,
   IPaymentIdUtils,
   IPaymentUtils,
   ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
-import { errAsync, okAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { ResultUtils } from "@hypernetlabs/utils";
 import { v4 as uuidv4 } from "uuid";
-import { EMessageTransferType } from "@interfaces/types/EMessageTransferType";
-import { IHypernetPullPaymentDetails } from "@interfaces/objects/HypernetPullPaymentDetails";
 
 /**
  * A class for creating Hypernet-Payment objects from Vector transfers, verifying information

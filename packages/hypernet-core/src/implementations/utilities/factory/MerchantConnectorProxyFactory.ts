@@ -2,7 +2,7 @@ import { IConfigProvider, IMerchantConnectorProxy, IContextProvider } from "@int
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 import { MerchantConnectorProxy } from "@implementations/utilities/MerchantConnectorProxy";
 import { ok, okAsync, ResultAsync } from "neverthrow";
-import { MerchantConnectorError } from "@interfaces/objects/errors";
+import { MerchantConnectorError } from "@hypernetlabs/objects/errors";
 
 export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFactory {
   protected static proxyMap: Map<string, IMerchantConnectorProxy> = new Map();

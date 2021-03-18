@@ -1,5 +1,5 @@
 import ko from "knockout";
-import { AssetBalance } from "@hypernetlabs/hypernet-core";
+import { AssetBalance } from "@hypernetlabs/objects";
 import html from "./AssetBalance.template.html";
 import { utils } from "ethers";
 

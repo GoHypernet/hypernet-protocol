@@ -1,7 +1,9 @@
 import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
-import { BigNumber, EthereumAddress, ResultAsync } from "@interfaces/objects";
+import { EthereumAddress } from "@hypernetlabs/objects";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
-import { BlockchainUnavailableError } from "@interfaces/objects/errors/BlockchainUnavailableError";
+import { BlockchainUnavailableError } from "@hypernetlabs/objects/errors";
+import { BigNumber } from "ethers";
+import { ResultAsync } from "neverthrow";
 
 export interface IBlockchainUtils {
   verifyTypedData(

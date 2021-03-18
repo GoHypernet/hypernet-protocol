@@ -1,9 +1,9 @@
 import td from "testdouble";
-import { IFullTransferState, IPaymentUtils } from "@interfaces/utilities";
-import { EPaymentType, ETransferType } from "@interfaces/types";
+import { IPaymentUtils } from "@interfaces/utilities";
+import { EPaymentType, ETransferType } from "@hypernetlabs/objects/types";
 import { okAsync } from "neverthrow";
 import { commonPaymentId, insuranceTransferId, offerTransferId, parameterizedTransferId, unixPast } from "@mock/mocks";
-import { PushPayment, SortedTransfers } from "@interfaces/objects";
+import { PushPayment, SortedTransfers, IFullTransferState } from "@hypernetlabs/objects";
 import { BrowserNodeProviderMock } from "./BrowserNodeProviderMock";
 
 export class PaymentUtilsMockFactory {

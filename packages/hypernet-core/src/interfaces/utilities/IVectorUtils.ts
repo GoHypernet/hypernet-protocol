@@ -1,14 +1,20 @@
-import { BigNumber, IHypernetOfferDetails, PublicKey, ResultAsync } from "@interfaces/objects";
+import {
+  IHypernetOfferDetails,
+  PublicKey,
+  IHypernetPullPaymentDetails,
+  IBasicTransferResponse,
+  IFullTransferState,
+} from "@hypernetlabs/objects";
 import {
   CoreUninitializedError,
   InvalidParametersError,
   RouterChannelUnknownError,
   TransferCreationError,
   TransferResolutionError,
-} from "@interfaces/objects/errors";
-import { IHypernetPullPaymentDetails } from "@interfaces/objects/HypernetPullPaymentDetails";
-import { EPaymentType, ETransferState } from "@interfaces/types";
-import { IBasicTransferResponse, IFullTransferState } from "./IBrowserNode";
+} from "@hypernetlabs/objects/errors";
+import { EPaymentType, ETransferState } from "@hypernetlabs/objects/types";
+import { BigNumber } from "ethers";
+import { ResultAsync } from "neverthrow";
 
 /**
  *

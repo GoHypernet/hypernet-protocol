@@ -1,7 +1,7 @@
 import { useEffect, useReducer, useContext } from "react";
 import { StoreContext } from "@web-integration-contexts";
 import { ILinkList } from "@hypernetlabs/web-ui/src/interfaces";
-import { HypernetLink } from "@hypernetlabs/hypernet-core";
+import { HypernetLink } from "@hypernetlabs/objects";
 
 enum EActionTypes {
   FETCHING = "FETCHING",

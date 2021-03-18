@@ -1,7 +1,9 @@
 import { IDevelopmentService } from "@interfaces/business";
 import { IAccountsRepository } from "@interfaces/data";
-import { BigNumber, EthereumAddress, ResultAsync } from "@interfaces/objects";
-import { BlockchainUnavailableError } from "@interfaces/objects/errors";
+import { EthereumAddress } from "@hypernetlabs/objects";
+import { BlockchainUnavailableError } from "@hypernetlabs/objects/errors";
+import { ResultAsync } from "neverthrow";
+import { BigNumber } from "ethers";
 
 export class DevelopmentService implements IDevelopmentService {
   constructor(protected accountRepo: IAccountsRepository) {}

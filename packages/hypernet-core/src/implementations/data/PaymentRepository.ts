@@ -1,8 +1,7 @@
 import { NodeResponses } from "@connext/vector-types";
 import { ResultUtils } from "@hypernetlabs/utils";
-import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
+import { IPaymentRepository } from "@interfaces/data";
 import {
-  BigNumber,
   EthereumAddress,
   HypernetConfig,
   IHypernetOfferDetails,
@@ -12,8 +11,10 @@ import {
   PublicKey,
   PullPayment,
   PushPayment,
-  ResultAsync,
-} from "@interfaces/objects";
+  IHypernetPullPaymentDetails,
+  IFullTransferState,
+  IBasicTransferResponse,
+} from "@hypernetlabs/objects";
 import {
   CoreUninitializedError,
   LogicalError,
@@ -22,24 +23,20 @@ import {
   RouterChannelUnknownError,
   TransferResolutionError,
   VectorError,
-} from "@interfaces/objects/errors";
-import { IHypernetPullPaymentDetails } from "@interfaces/objects/HypernetPullPaymentDetails";
-import { IRate } from "@interfaces/objects/Rate";
-import { EPaymentType, ETransferType, MessageState } from "@interfaces/types";
-import { EMessageTransferType } from "@interfaces/types/EMessageTransferType";
+} from "@hypernetlabs/objects/errors";
+import { EPaymentType, ETransferType, MessageState, EMessageTransferType } from "@hypernetlabs/objects/types";
 import {
-  IBasicTransferResponse,
   IBrowserNode,
   IBrowserNodeProvider,
   IConfigProvider,
   IContextProvider,
-  IFullTransferState,
   ILogUtils,
   IPaymentUtils,
   ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
-import { combine, errAsync, okAsync } from "neverthrow";
+import { ResultAsync, errAsync, okAsync } from "neverthrow";
+import { BigNumber } from "ethers";
 
 /**
  * Contains methods for creating push, pull, etc payments,
@@ -171,7 +168,7 @@ export class PaymentRepository implements IPaymentRepository {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
     let paymentId: string;
-    let timestamp: number
+    let timestamp: number;
 
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
@@ -242,7 +239,7 @@ export class PaymentRepository implements IPaymentRepository {
           transferTypeResults.push(this.paymentUtils.getTransferTypeWithTransfer(transfer));
         }
 
-        return combine(transferTypeResults);
+        return ResultUtils.combine(transferTypeResults);
       })
       .andThen((tranferTypesWithTransfers) => {
         // For each transfer, we are either just going to know it's relevant
@@ -259,11 +256,11 @@ export class PaymentRepository implements IPaymentRepository {
               relevantTransfers.push(transfer);
             }
           } else if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
-              if (paymentId === transfer.transferState.UUID) {
-                relevantTransfers.push(transfer);
-              } else {
-                this.logUtils.debug(`Transfer not relevant to payment ${paymentId}, transferId: ${transfer.transferId}`);
-              }
+            if (paymentId === transfer.transferState.UUID) {
+              relevantTransfers.push(transfer);
+            } else {
+              this.logUtils.debug(`Transfer not relevant to payment ${paymentId}, transferId: ${transfer.transferId}`);
+            }
           } else {
             this.logUtils.debug(`Unrecognized transfer in PaymentRepository, transferId: ${transfer.transferId}`);
           }
@@ -307,7 +304,7 @@ export class PaymentRepository implements IPaymentRepository {
           transferTypeResults.push(this.paymentUtils.getTransferTypeWithTransfer(transfer));
         }
 
-        return combine(transferTypeResults);
+        return ResultUtils.combine(transferTypeResults);
       })
       .andThen((tranferTypesWithTransfers) => {
         // For each transfer, we are either just going to know it's relevant
@@ -506,12 +503,12 @@ export class PaymentRepository implements IPaymentRepository {
 
         // The -1 here is critical to avoiding resolution errors down the road.
         // The way that a parameterized payment's value is calculated, is the blocktime
-        // minus the start time. If this is 0, then you have big issues (according to 
+        // minus the start time. If this is 0, then you have big issues (according to
         // "mathematicians", you can't divide by 0. What do they know?).
         // Since we don't have any assurance that a block has passed between creating the
         // transfer and resolving it, this offset assures this will never happen.
-        const paymentStart = timestamp - 1; 
-        const paymentExpiration = paymentStart + config.defaultPaymentExpiryLength;
+        const paymentStart = timestamp - 1;
+        const paymentExpiration = timestamp + config.defaultPaymentExpiryLength;
 
         this.logUtils.log(`Providing a payment amount of ${paymentTokenAmount}`);
 

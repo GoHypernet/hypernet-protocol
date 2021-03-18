@@ -1,11 +1,11 @@
 import { IMerchantConnectorRepository } from "@interfaces/data";
-import { PublicKey, BigNumber, HypernetContext } from "@interfaces/objects";
+import { PublicKey, HypernetContext } from "@hypernetlabs/objects";
 import {
   CoreUninitializedError,
   MerchantConnectorError,
   MerchantValidationError,
   PersistenceError,
-} from "@interfaces/objects/errors";
+} from "@hypernetlabs/objects/errors";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { ResultUtils, IAjaxUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
 import {
@@ -16,7 +16,7 @@ import {
   IMerchantConnectorProxy,
   IVectorUtils,
 } from "@interfaces/utilities";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 
@@ -221,40 +221,23 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       this.contextProvider.getInitializedContext(),
       this.getAuthorizedMerchants(),
       this.blockchainProvider.getSigner(),
-    ]).map(async (vals) => {
+    ]).andThen((vals) => {
       const [context, authorizedMerchants, signer] = vals;
-      // const activationResults = new Array<ResultAsync<void, Error>>();
-
-      // for (const keyval of authorizedMerchants) {
-      //   activationResults.push(
-      //     this._activateAuthorizedMerchant(
-      //       context.account,
-      //       keyval[0], // URL
-      //       keyval[1],
-      //       context,
-      //       signer,
-      //     ),
-      //   );
-      // }
-
-      // return ResultUtils.combine(activationResults).map(() => {});
+      const activationResults = new Array<() => ResultAsync<void, Error>>();
 
       for (const keyval of authorizedMerchants) {
-        console.log(`Activating connector for ${keyval[0]}`);
-        const result = await this._activateAuthorizedMerchant(
-          context.account,
-          keyval[0], // URL
-          keyval[1],
-          context,
-          signer,
-        );
-
-        // if (result.isErr()) {
-        //   return errAsync(new MerchantConnectorError(`Can not activate merchant connector for ${keyval[0]}`));
-        // }
+        activationResults.push(() => {
+          return this._activateAuthorizedMerchant(
+            context.account,
+            keyval[0], // URL
+            keyval[1],
+            context,
+            signer,
+          );
+        });
       }
 
-      // return okAsync<void, MerchantConnectorError>(undefined);
+      return ResultUtils.executeSerially(activationResults).map(() => {});
     });
   }
 

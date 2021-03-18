@@ -1,4 +1,4 @@
-import { HypernetConfig } from "@interfaces/objects";
+import { HypernetConfig } from "@hypernetlabs/objects";
 import { IConfigProvider } from "@interfaces/utilities";
 import { chainId, defaultExpirationLength, hyperTokenAddress, routerPublicIdentifier } from "@mock/mocks";
 import { okAsync, ResultAsync } from "neverthrow";

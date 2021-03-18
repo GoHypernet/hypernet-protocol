@@ -1,11 +1,11 @@
 import { IMerchantService } from "@interfaces/business";
-import { ResultAsync } from "@interfaces/objects";
+import { ResultAsync } from "neverthrow";
 import {
   CoreUninitializedError,
   MerchantConnectorError,
   MerchantValidationError,
   PersistenceError,
-} from "@interfaces/objects/errors";
+} from "@hypernetlabs/objects/errors";
 import { IMerchantConnectorRepository } from "@interfaces/data";
 import { IContextProvider } from "@interfaces/utilities";
 import { ResultUtils } from "@hypernetlabs/utils";

@@ -1,4 +1,4 @@
-import { VectorError } from "@interfaces/objects/errors";
+import { VectorError } from "@hypernetlabs/objects/errors";
 import { IBrowserNode } from "@interfaces/utilities";
 import { ResultAsync } from "neverthrow";
 

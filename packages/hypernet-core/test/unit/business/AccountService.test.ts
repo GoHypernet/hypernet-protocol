@@ -1,4 +1,4 @@
-import { Balances, BigNumber, AssetBalance } from "@interfaces/objects";
+import { Balances, AssetBalance } from "@hypernetlabs/objects";
 import { account, mockUtils, publicIdentifier } from "@mock/mocks";
 import { okAsync } from "neverthrow";
 import { IAccountsRepository } from "@interfaces/data";
@@ -6,7 +6,8 @@ import td from "testdouble";
 import { ContextProviderMock } from "@mock/utils";
 import { ILogUtils } from "@interfaces/utilities";
 import { AccountService } from "@implementations/business/AccountService";
-import { IAccountService } from "@interfaces/business/IAccountService";
+import { IAccountService } from "@interfaces/business";
+import { BigNumber } from "ethers";
 
 const assetAddress = mockUtils.generateRandomEtherAdress();
 const destinationAddress = mockUtils.generateRandomEtherAdress();

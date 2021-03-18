@@ -1,6 +1,6 @@
 import ko from "knockout";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import { HypernetLink } from "@hypernetlabs/hypernet-core";
+import { HypernetLink } from "@hypernetlabs/objects";
 import html from "./Link.template.html";
 import { PushPaymentParams } from "../PushPayment/PushPayment.viewmodel";
 import { PullPaymentParams } from "../PullPayment/PullPayment.viewmodel";

@@ -1,7 +1,7 @@
 /* import { mock, instance } from "ts-mockito";
 
 import { IControlService } from "@interfaces/business";
-import { HypernetContext } from "@interfaces/objects";
+import { HypernetContext } from "@hypernetlabs/objects";
 import { ControlService } from "@implementations/business";
 import { IContextProvider } from "@interfaces/utilities";
 

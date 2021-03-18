@@ -1,7 +1,7 @@
 /* import { verify, when } from "ts-mockito";
 import { Subject } from "rxjs";
 
-import { ControlClaim } from "@interfaces/objects";
+import { ControlClaim } from "@hypernetlabs/objects";
 import ControlServiceMocks from "../../mock/business/ControlServiceMocks";
 
 describe("ControlService tests", () => {

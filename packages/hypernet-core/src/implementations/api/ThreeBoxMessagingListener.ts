@@ -4,8 +4,8 @@
 // import "reflect-metadata";
 // import { plainToClass } from "class-transformer";
 // import { IControlService } from "@interfaces/business";
-// import { BlockchainUnavailableError, ThreeBoxError } from "@interfaces/objects/errors";
-// import { ControlClaim, ResultAsync } from "@interfaces/objects";
+// import { BlockchainUnavailableError, ThreeBoxError } from "@hypernetlabs/objects/errors";
+// import { ControlClaim, ResultAsync } from "@hypernetlabs/objects";
 // import { ResultUtils } from "@hypernetlabs/utils";
 
 // export class ThreeBoxMessagingListener implements IMessagingListener {

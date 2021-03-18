@@ -1,11 +1,11 @@
-import { EthereumAddress, PublicKey, ResultAsync } from "@interfaces/objects";
-import { Payment, PublicIdentifier } from "@interfaces/objects";
+import { EthereumAddress, Payment, PublicIdentifier } from "@hypernetlabs/objects";
 import {
   CoreUninitializedError,
   PaymentFinalizeError,
   RouterChannelUnknownError,
   VectorError,
-} from "@interfaces/objects/errors";
+} from "@hypernetlabs/objects/errors";
+import { ResultAsync } from "neverthrow";
 
 export interface IPaymentRepository {
   /**

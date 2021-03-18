@@ -1,14 +1,4 @@
-import {
-  Payment,
-  EthereumAddress,
-  PublicKey,
-  PublicIdentifier,
-  ResultAsync,
-  Result,
-  BigNumber,
-  HexString,
-} from "@interfaces/objects";
-import { NodeError, VectorError } from "@connext/vector-types";
+import { Payment, EthereumAddress, PublicIdentifier, HexString } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
   CoreUninitializedError,
@@ -20,7 +10,10 @@ import {
   OfferMismatchError,
   PaymentFinalizeError,
   RouterChannelUnknownError,
-} from "@interfaces/objects/errors";
+  VectorError,
+} from "@hypernetlabs/objects/errors";
+import { ResultAsync, Result } from "neverthrow";
+import { BigNumber } from "ethers";
 
 export interface IPaymentService {
   /**
@@ -70,7 +63,7 @@ export interface IPaymentService {
     requiredStake: string,
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
+  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**
    * Called by the person on the receiving end of a push payment,
@@ -122,7 +115,7 @@ export interface IPaymentService {
    */
   offerReceived(
     paymentId: string,
-  ): ResultAsync<void, LogicalError | RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
+  ): ResultAsync<void, LogicalError | RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   /**
    * A payment that is in the Accepted state may be disputed up to the expiration date.

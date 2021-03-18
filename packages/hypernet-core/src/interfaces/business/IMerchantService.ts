@@ -1,10 +1,10 @@
-import { ResultAsync } from "@interfaces/objects";
+import { ResultAsync } from "neverthrow";
 import {
   CoreUninitializedError,
   MerchantConnectorError,
   MerchantValidationError,
   PersistenceError,
-} from "@interfaces/objects/errors";
+} from "@hypernetlabs/objects/errors";
 
 export interface IMerchantService {
   authorizeMerchant(merchantUrl: string): ResultAsync<void, CoreUninitializedError | MerchantValidationError>;

@@ -1,7 +1,7 @@
 // import { BoxInstance, BoxSpace, BoxThread, openBox } from "3box";
 // import { IThreeBoxUtils, IBlockchainProvider, IContextProvider, IConfigProvider } from "@interfaces/utilities";
-// import { EthereumAddress, HypernetConfig, InitializedHypernetContext, ResultAsync } from "@interfaces/objects";
-// import { BlockchainUnavailableError, ThreeBoxError } from "@interfaces/objects/errors";
+// import { EthereumAddress, HypernetConfig, InitializedHypernetContext, ResultAsync } from "@hypernetlabs/objects";
+// import { BlockchainUnavailableError, ThreeBoxError } from "@hypernetlabs/objects/errors";
 // import { okAsync } from "neverthrow";
 // import { ResultUtils } from "@hypernetlabs/utils";
 

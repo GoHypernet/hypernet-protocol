@@ -1,6 +1,10 @@
 import { ResultAsync } from "neverthrow";
-import { PersistenceError } from "@interfaces/objects/errors/PersistenceError";
-import { CoreUninitializedError, MerchantConnectorError, MerchantValidationError } from "@interfaces/objects/errors";
+import {
+  CoreUninitializedError,
+  MerchantConnectorError,
+  MerchantValidationError,
+  PersistenceError,
+} from "@hypernetlabs/objects/errors";
 
 export interface IMerchantConnectorRepository {
   /**

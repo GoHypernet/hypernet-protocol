@@ -1,6 +1,7 @@
 import ko from "knockout";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import { EPaymentState, Payment, PublicIdentifier, PushPayment } from "@hypernetlabs/hypernet-core";
+import { PublicIdentifier, PushPayment } from "@hypernetlabs/objects";
+import { EPaymentState } from "@hypernetlabs/objects/types";
 import html from "./PushPayment.template.html";
 import moment from "moment";
 import { PaymentStatusParams } from "../PaymentStatus/PaymentStatus.viewmodel";
