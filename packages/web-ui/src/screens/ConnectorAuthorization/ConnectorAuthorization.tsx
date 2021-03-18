@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import Button from "../../components/Button";
-import { AssetBalance } from "@hypernetlabs/hypernet-core";
+import { AssetBalance } from "@hypernetlabs/objects";
 import BalanceList from "../../components/BalanceList";
 import useStyles from "./ConnectorAuthorization.style";
 

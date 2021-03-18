@@ -1,10 +1,11 @@
-import { ControlClaim, ResultAsync } from "@interfaces/objects";
+import { ControlClaim } from "@hypernetlabs/objects";
 import {
   BlockchainUnavailableError,
   CoreUninitializedError,
   LogicalError,
   ThreeBoxError,
-} from "@interfaces/objects/errors";
+} from "@hypernetlabs/objects/errors";
+import { ResultAsync } from "neverthrow";
 
 /**
  * @todo What is the main role/purpose of this class? Description here.

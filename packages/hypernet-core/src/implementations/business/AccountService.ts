@@ -2,22 +2,21 @@ import { IAccountService } from "@interfaces/business";
 import { IAccountsRepository } from "@interfaces/data";
 import {
   Balances,
-  BigNumber,
   EthereumAddress,
   HypernetContext,
   InitializedHypernetContext,
   PublicIdentifier,
-  ResultAsync,
-} from "@interfaces/objects";
+} from "@hypernetlabs/objects";
 import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
   CoreUninitializedError,
   LogicalError,
   VectorError,
-} from "@interfaces/objects/errors";
+} from "@hypernetlabs/objects/errors";
 import { IContextProvider, ILogUtils } from "@interfaces/utilities";
-import { okAsync } from "neverthrow";
+import { okAsync, ResultAsync } from "neverthrow";
+import { BigNumber } from "ethers";
 
 /**
  *

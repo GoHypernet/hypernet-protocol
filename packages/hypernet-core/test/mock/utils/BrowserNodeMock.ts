@@ -1,8 +1,9 @@
-import { IBrowserNode, IFullChannelState } from "@interfaces/utilities";
+import { IBrowserNode } from "@interfaces/utilities";
 import { chainId, routerChannelAddress, routerPublicIdentifier } from "@mock/mocks";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
 import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
+import { IFullChannelState } from "@hypernetlabs/objects";
 
 export function createBrowserNodeMock(stateChannels: IFullChannelState[] | null = null): IBrowserNode {
   const stateChannelsMap = new Map<string, IFullChannelState>();

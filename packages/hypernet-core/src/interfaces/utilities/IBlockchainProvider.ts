@@ -1,5 +1,5 @@
-import { ResultAsync } from "@interfaces/objects";
-import { BlockchainUnavailableError } from "@interfaces/objects/errors";
+import { ResultAsync } from "neverthrow";
+import { BlockchainUnavailableError } from "@hypernetlabs/objects/errors";
 import { ethers } from "ethers";
 
 /**

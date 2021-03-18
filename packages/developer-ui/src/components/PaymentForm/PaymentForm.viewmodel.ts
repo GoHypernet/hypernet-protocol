@@ -1,6 +1,6 @@
 import ko from "knockout";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import { EPaymentType } from "@hypernetlabs/hypernet-core";
+import { EPaymentType } from "@hypernetlabs/objects/types";
 import html from "./PaymentForm.template.html";
 import { PushPaymentFormParams } from "../PushPaymentForm/PushPaymentForm.viewmodel";
 import { PullPaymentFormParams } from "../PullPaymentForm/PullPaymentForm.viewmodel";

@@ -8,12 +8,12 @@
 //   MessagePayload,
 //   ControlClaim,
 //   ResultAsync,
-// } from "@interfaces/objects";
+// } from "@hypernetlabs/objects";
 // import { IThreeBoxUtils, IContextProvider, IConfigProvider } from "@interfaces/utilities";
-// import { EMessageType } from "@interfaces/types";
+// import { EMessageType } from "@hypernetlabs/objects/types";
 // import "reflect-metadata";
 // import { plainToClass, serialize } from "class-transformer";
-// import { BlockchainUnavailableError, LogicalError, ThreeBoxError } from "@interfaces/objects/errors";
+// import { BlockchainUnavailableError, LogicalError, ThreeBoxError } from "@hypernetlabs/objects/errors";
 // import { ResultUtils } from "@hypernetlabs/utils";
 // import { errAsync, okAsync } from "neverthrow";
 // import { BoxSpace, BoxThread } from "3box";

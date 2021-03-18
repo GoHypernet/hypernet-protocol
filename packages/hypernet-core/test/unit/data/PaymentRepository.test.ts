@@ -22,13 +22,14 @@ import {
   ContextProviderMock,
   PaymentUtilsMockFactory,
 } from "@mock/utils";
-import { BigNumber, PaymentInternalDetails, PushPayment } from "@interfaces/objects";
+import { PaymentInternalDetails, PushPayment } from "@hypernetlabs/objects";
 import { ILogUtils, IVectorUtils, IBrowserNodeProvider, IPaymentUtils, ITimeUtils } from "@interfaces/utilities";
-import { VectorError } from "@interfaces/objects/errors";
+import { VectorError } from "@hypernetlabs/objects/errors";
 import { IPaymentRepository } from "@interfaces/data";
 import { okAsync, errAsync } from "neverthrow";
 import { PaymentRepository } from "@implementations/data/PaymentRepository";
-import { EPaymentState, EPaymentType } from "@interfaces/types";
+import { EPaymentState, EPaymentType } from "@hypernetlabs/objects/types";
+import { BigNumber } from "ethers";
 
 const expirationDate = unixNow + defaultExpirationLength;
 const counterPartyAccount = publicIdentifier2;
@@ -127,7 +128,7 @@ class PaymentRepositoryMocks {
         }),
         erc20AssetAddress,
         commonPaymentId,
-        unixNow,
+        unixNow - 1,
         expirationDate,
         undefined,
         undefined,

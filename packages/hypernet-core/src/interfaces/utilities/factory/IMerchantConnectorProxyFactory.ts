@@ -1,4 +1,4 @@
-import { MerchantConnectorError } from "@interfaces/objects/errors";
+import { MerchantConnectorError } from "@hypernetlabs/objects/errors";
 import { IMerchantConnectorProxy } from "@interfaces/utilities";
 import { ResultAsync } from "neverthrow";
 

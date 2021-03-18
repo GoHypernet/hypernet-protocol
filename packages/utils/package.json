@@ -34,8 +34,7 @@
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",
     "prepare": "yarn build",
-    "test": "yarn test:ci",
-    "test:ci": "jest --runInBand --coverage --passWithNoTests",
+    "test": "jest --runInBand --coverage",
     "test:watch": "jest --watch --color --detectOpenHandles",
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",
@@ -43,6 +42,7 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
+    "@hypernetlabs/objects": "^0.0.1",
     "axios": "^0.21.1",
     "neverthrow": "^4.1.0",
     "postmate": "^1.5.2"

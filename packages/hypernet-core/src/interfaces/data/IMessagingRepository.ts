@@ -4,9 +4,9 @@ import {
   EthereumAddress,
   MessagePayload,
   MessageThread,
-  ResultAsync,
-} from "@interfaces/objects";
-import { BlockchainUnavailableError, LogicalError, ThreeBoxError } from "@interfaces/objects/errors";
+} from "@hypernetlabs/objects";
+import { BlockchainUnavailableError, LogicalError, ThreeBoxError } from "@hypernetlabs/objects/errors";
+import { ResultAsync } from "neverthrow";
 
 export interface IMessagingRepository {
   createMessageThread(

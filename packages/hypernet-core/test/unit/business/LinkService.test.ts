@@ -1,7 +1,7 @@
 import { LinkService } from "@implementations/business/LinkService";
 import { ILinkService } from "@interfaces/business/ILinkService";
 import { ILinkRepository } from "@interfaces/data";
-import { HypernetLink } from "@interfaces/objects";
+import { HypernetLink } from "@hypernetlabs/objects";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
 

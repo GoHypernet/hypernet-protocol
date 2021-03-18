@@ -1,4 +1,4 @@
-import { PublicIdentifier, Payment, PullPayment, PushPayment } from "@hypernetlabs/hypernet-core";
+import { PublicIdentifier, Payment, PullPayment, PushPayment } from "@hypernetlabs/objects";
 
 export interface ILinkList {
   counterPartyAccount: PublicIdentifier;

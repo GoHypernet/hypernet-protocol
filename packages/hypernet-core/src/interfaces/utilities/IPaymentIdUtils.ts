@@ -1,6 +1,7 @@
-import { HexString, Result } from "@interfaces/objects";
-import { InvalidParametersError, InvalidPaymentIdError } from "@interfaces/objects/errors";
-import { EPaymentType } from "@interfaces/types";
+import { HexString } from "@hypernetlabs/objects";
+import { InvalidParametersError, InvalidPaymentIdError } from "@hypernetlabs/objects/errors";
+import { EPaymentType } from "@hypernetlabs/objects/types";
+import { Result } from "neverthrow";
 
 /**
  * An abstract class for creating & converting payment IDs, as well as verifying

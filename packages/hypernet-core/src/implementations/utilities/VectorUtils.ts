@@ -1,13 +1,16 @@
 import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
+import { BigNumber } from "ethers";
 import {
-  BigNumber,
   HypernetConfig,
   IHypernetOfferDetails,
   InitializedHypernetContext,
   PublicIdentifier,
   PublicKey,
-  ResultAsync,
-} from "@interfaces/objects";
+  IHypernetPullPaymentDetails,
+  IBasicTransferResponse,
+  IFullChannelState,
+  IFullTransferState,
+} from "@hypernetlabs/objects";
 import {
   IBrowserNodeProvider,
   IContextProvider,
@@ -17,9 +20,6 @@ import {
   ILogUtils,
   IPaymentIdUtils,
   IBrowserNode,
-  IBasicTransferResponse,
-  IFullChannelState,
-  IFullTransferState,
   ITimeUtils,
 } from "@interfaces/utilities";
 import {
@@ -31,10 +31,11 @@ import {
   MessageResolver,
   MessageState,
   ParameterizedState,
-} from "@interfaces/types";
+  EMessageTransferType,
+} from "@hypernetlabs/objects/types";
 import "reflect-metadata";
 import { serialize } from "class-transformer";
-import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@interfaces/types/typechain/ParameterizedTypes";
+import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@hypernetlabs/objects/types/typechain";
 import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils/dist/identifiers";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import {
@@ -45,11 +46,9 @@ import {
   TransferCreationError,
   TransferResolutionError,
   VectorError,
-} from "@interfaces/objects/errors";
-import { errAsync, okAsync } from "neverthrow";
+} from "@hypernetlabs/objects/errors";
+import { ResultAsync, errAsync, okAsync } from "neverthrow";
 import { ResultUtils } from "@hypernetlabs/utils";
-import { IHypernetPullPaymentDetails } from "../../interfaces/objects/HypernetPullPaymentDetails";
-import { EMessageTransferType } from "@interfaces/types/EMessageTransferType";
 
 /**
  * VectorUtils contains methods for interacting directly with the core Vector stuff -
@@ -105,7 +104,11 @@ export class VectorUtils implements IVectorUtils {
     let channelAddress: string;
     let browserNode: IBrowserNode;
 
-    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.getRouterChannelAddress(), this.blockchainProvider.getLatestBlock()])
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.getRouterChannelAddress(),
+      this.blockchainProvider.getLatestBlock(),
+    ])
       .andThen((vals) => {
         const [browserNodeVal, channelAddressVal, block] = vals;
         browserNode = browserNodeVal;
@@ -497,7 +500,7 @@ export class VectorUtils implements IVectorUtils {
           if (channel.aliceIdentifier !== config.routerPublicIdentifier) {
             continue;
           }
-          return okAsync(channel.channelAddress as string);
+          return okAsync<string, RouterChannelUnknownError | CoreUninitializedError>(channel.channelAddress as string);
         }
         // If a channel does not exist with the router, we need to create it.
         return this._createRouterStateChannel(browserNode, config);
@@ -526,33 +529,35 @@ export class VectorUtils implements IVectorUtils {
   }
 
   /**
-   * 
-   * @param browserNode 
-   * @param config 
-   * @returns 
+   *
+   * @param browserNode
+   * @param config
+   * @returns
    */
   protected _createRouterStateChannel(
     browserNode: IBrowserNode,
     config: HypernetConfig,
   ): ResultAsync<string, VectorError> {
-    return browserNode.setup(config.routerPublicIdentifier, config.chainId, DEFAULT_CHANNEL_TIMEOUT.toString())
-    .map((response) => {
-      return response.channelAddress;
-    })
-    .orElse((e) => {
-      // Channel could be already set up, so we should try restoring the state
-      this.logUtils.log("Channel setup with router failed, attempting to restore state and retry");
-      return browserNode.restoreState(config.routerPublicIdentifier, config.chainId)
-      .andThen(() => {
-        return browserNode.getStateChannelByParticipants(config.routerPublicIdentifier, config.chainId);
+    return browserNode
+      .setup(config.routerPublicIdentifier, config.chainId, DEFAULT_CHANNEL_TIMEOUT.toString())
+      .map((response) => {
+        return response.channelAddress;
       })
-      .andThen((channel) => {
-        if (channel == null) {
-          return errAsync(e);
-        }
-        return okAsync(channel.channelAddress);
+      .orElse((e) => {
+        // Channel could be already set up, so we should try restoring the state
+        this.logUtils.log("Channel setup with router failed, attempting to restore state and retry");
+        return browserNode
+          .restoreState(config.routerPublicIdentifier, config.chainId)
+          .andThen(() => {
+            return browserNode.getStateChannelByParticipants(config.routerPublicIdentifier, config.chainId);
+          })
+          .andThen((channel) => {
+            if (channel == null) {
+              return errAsync(e);
+            }
+            return okAsync(channel.channelAddress);
+          });
       });
-    });
   }
 
   protected _getStateChannel(

@@ -1,8 +1,8 @@
-import { HypernetLink, Payment, PublicIdentifier, PullPayment, PushPayment, ResultAsync } from "@interfaces/objects";
-import { CoreUninitializedError, InvalidParametersError } from "@interfaces/objects/errors";
+import { HypernetLink, Payment, PublicIdentifier, PullPayment, PushPayment } from "@hypernetlabs/objects";
+import { CoreUninitializedError, InvalidParametersError } from "@hypernetlabs/objects/errors";
 import { IContextProvider } from "@interfaces/utilities";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
-import { errAsync, okAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 /**
  * Provides functions to go from a set of payments into a set of HypernetLinks, and similar.

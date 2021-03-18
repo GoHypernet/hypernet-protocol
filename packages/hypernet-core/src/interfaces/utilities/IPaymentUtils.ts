@@ -1,7 +1,14 @@
-import { Payment, PublicIdentifier, PullPayment, PushPayment, SortedTransfers, ResultAsync } from "@interfaces/objects";
-import { EPaymentState, EPaymentType, ETransferType } from "@interfaces/types";
-import { InvalidParametersError, InvalidPaymentError, LogicalError, VectorError } from "@interfaces/objects/errors";
-import { IFullTransferState } from "./IBrowserNode";
+import {
+  Payment,
+  PublicIdentifier,
+  PullPayment,
+  PushPayment,
+  SortedTransfers,
+  IFullTransferState,
+} from "@hypernetlabs/objects";
+import { EPaymentState, EPaymentType, ETransferType } from "@hypernetlabs/objects/types";
+import { InvalidParametersError, InvalidPaymentError, LogicalError, VectorError } from "@hypernetlabs/objects/errors";
+import { ResultAsync } from "neverthrow";
 
 export interface IPaymentUtils {
   /**

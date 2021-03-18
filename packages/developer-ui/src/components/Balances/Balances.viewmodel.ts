@@ -1,6 +1,6 @@
 import ko from "knockout";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import { AssetBalance, Balances } from "@hypernetlabs/hypernet-core";
+import { AssetBalance, Balances } from "@hypernetlabs/objects";
 import html from "./Balances.template.html";
 import { AssetBalanceParams } from "../AssetBalance/AssetBalance.viewmodel";
 

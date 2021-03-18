@@ -1,8 +1,8 @@
-import { NodeError } from "@connext/vector-types";
 import { ILinkService } from "@interfaces/business";
 import { ILinkRepository } from "@interfaces/data";
-import { HypernetLink, ResultAsync } from "@interfaces/objects";
-import { CoreUninitializedError, RouterChannelUnknownError } from "@interfaces/objects/errors";
+import { HypernetLink } from "@hypernetlabs/objects";
+import { CoreUninitializedError, RouterChannelUnknownError, VectorError } from "@hypernetlabs/objects/errors";
+import { ResultAsync } from "neverthrow";
 
 export class LinkService implements ILinkService {
   constructor(protected linkRepository: ILinkRepository) {}
@@ -12,7 +12,7 @@ export class LinkService implements ILinkService {
    */
   public getLinks(): ResultAsync<
     HypernetLink[],
-    RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
   > {
     return this.linkRepository.getHypernetLinks();
   }

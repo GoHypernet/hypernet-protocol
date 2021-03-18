@@ -1,15 +1,14 @@
 import td from "testdouble";
 
 import {
-  BigNumber,
   PushPayment,
   Payment,
   AssetBalance,
   PullPayment,
   PublicIdentifier,
   PaymentInternalDetails,
-} from "@interfaces/objects";
-import { EPaymentState } from "@interfaces/types";
+} from "@hypernetlabs/objects";
+import { EPaymentState } from "@hypernetlabs/objects/types";
 import {
   defaultExpirationLength,
   merchantPublicKey,
@@ -29,7 +28,7 @@ import {
   InsufficientBalanceError,
   InvalidParametersError,
   LogicalError,
-} from "@interfaces/objects/errors";
+} from "@hypernetlabs/objects/errors";
 import {
   IAccountsRepository,
   ILinkRepository,
@@ -40,6 +39,7 @@ import { ConfigProviderMock, ContextProviderMock } from "@tests/mock/utils";
 import { ILogUtils } from "@interfaces/utilities";
 import { IPaymentService } from "@interfaces/business/IPaymentService";
 import { PaymentService } from "@implementations/business/PaymentService";
+import { BigNumber } from "ethers";
 
 const requiredStake = "42";
 const paymentToken = mockUtils.generateRandomPaymentToken();
@@ -330,7 +330,7 @@ describe("PaymentService tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toBeUndefined();
+    expect(result._unsafeUnwrap()).toBeDefined();
     expect(updatedPushPayments.length).toBe(2);
   });
 
@@ -342,29 +342,6 @@ describe("PaymentService tests", () => {
 
     // Act
     const result = await paymentService.stakePosted(nonExistentPaymentId);
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    expect(result._unsafeUnwrapErr()).toBeInstanceOf(InvalidParametersError);
-  });
-
-  test("Should stakePosted return error if payment state is not Staked", async () => {
-    // Arrange
-    const paymentServiceMock = new PaymentServiceMocks();
-
-    const payment = paymentServiceMock.factoryPushPayment(
-      publicIdentifier2,
-      publicIdentifier,
-      EPaymentState.Proposed,
-      requiredStake,
-    );
-    paymentServiceMock.setExistingPayments([payment]);
-
-    const paymentService = paymentServiceMock.factoryPaymentService();
-
-    // Act
-    const result = await paymentService.stakePosted(paymentId);
 
     // Assert
     expect(result).toBeDefined();
@@ -397,7 +374,7 @@ describe("PaymentService tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toBeUndefined();
+    expect(result._unsafeUnwrap()).toBeDefined();
     expect(updatedPushPayments.length).toBe(1);
   });
 
@@ -421,9 +398,9 @@ describe("PaymentService tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toBeUndefined();
-    expect(updatedPushPayments.length).toBe(1);
-    expect(updatedPushPayments[0]).toBe(paymentServiceMock.finalizedPushPayment);
+    expect(result._unsafeUnwrap()).toBeDefined();
+    expect(updatedPushPayments.length).toBe(2);
+    expect(updatedPushPayments[1]).toBe(paymentServiceMock.finalizedPushPayment);
   });
 
   test("Should paymentPosted run without errors when payment from is not equal to publicIdentifier and payment is PushPayment", async () => {
@@ -446,8 +423,8 @@ describe("PaymentService tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toBeUndefined();
-    expect(updatedPushPayments.length).toBe(0);
+    expect(result._unsafeUnwrap()).toBeDefined();
+    expect(updatedPushPayments.length).toBe(1);
   });
 
   // test("Should paymentPosted run without errors when payment from is not equal to publicIdentifier and payment is PullPayment", async () => {
@@ -493,30 +470,6 @@ describe("PaymentService tests", () => {
     expect(updatedPushPayments.length).toBe(0);
   });
 
-  test("Should paymentPosted return error if payment state is not Approved", async () => {
-    // Arrange
-    const paymentServiceMock = new PaymentServiceMocks();
-
-    const payment = paymentServiceMock.factoryPushPayment(publicIdentifier, publicIdentifier2, EPaymentState.Proposed);
-    paymentServiceMock.setExistingPayments([payment]);
-
-    let updatedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val: PushPayment) => {
-      updatedPushPayments.push(val);
-    });
-
-    const paymentService = paymentServiceMock.factoryPaymentService();
-
-    // Act
-    const result = await paymentService.paymentPosted(paymentId);
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    expect(result._unsafeUnwrapErr()).toBeInstanceOf(InvalidParametersError);
-    expect(updatedPushPayments.length).toBe(0);
-  });
-
   test("Should paymentCompleted run without errors", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
@@ -534,7 +487,7 @@ describe("PaymentService tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toBeUndefined();
+    expect(result._unsafeUnwrap()).toBeDefined();
     expect(receivedPushPayments.length).toBe(1);
     expect(receivedPushPayments[0]).toBe(paymentServiceMock.pushPayment);
   });

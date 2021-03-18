@@ -1,6 +1,6 @@
-import { NodeError } from "@connext/vector-types";
-import { HypernetLink, ResultAsync } from "@interfaces/objects";
-import { CoreUninitializedError, RouterChannelUnknownError } from "@interfaces/objects/errors";
+import { HypernetLink } from "@hypernetlabs/objects";
+import { CoreUninitializedError, RouterChannelUnknownError, VectorError } from "@hypernetlabs/objects/errors";
+import { ResultAsync } from "neverthrow";
 
 /**
  *
@@ -11,7 +11,7 @@ export interface ILinkRepository {
    */
   getHypernetLinks(): ResultAsync<
     HypernetLink[],
-    RouterChannelUnknownError | CoreUninitializedError | NodeError | Error
+    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
   >;
 
   /**
@@ -20,5 +20,5 @@ export interface ILinkRepository {
    */
   getHypernetLink(
     linkId: string,
-  ): ResultAsync<HypernetLink, RouterChannelUnknownError | CoreUninitializedError | NodeError | Error>;
+  ): ResultAsync<HypernetLink, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 }

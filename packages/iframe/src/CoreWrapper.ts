@@ -1,4 +1,5 @@
-import { BigNumber, EthereumAddress, IHypernetCore, PublicIdentifier } from "@hypernetlabs/hypernet-core";
+import { EthereumAddress, PublicIdentifier, IHypernetCore } from "@hypernetlabs/objects";
+import { BigNumber } from "ethers";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import Postmate from "postmate";
 

@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import { ResultAsync } from "@hypernetlabs/hypernet-core";
+import { ResultAsync } from "neverthrow";
 
 import MainContainer from "@web-integration-containers/MainContainer";
 import BalancesWidget from "@web-integration-widgets/BalancesWidget";

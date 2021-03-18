@@ -1,12 +1,10 @@
-import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
-import { HypernetConfig } from "@interfaces/objects/HypernetConfig";
+import { HypernetConfig } from "@hypernetlabs/objects";
 import { getPublicIdentifierFromPublicKey } from "@connext/vector-utils/dist/identifiers";
 import { getPublicKeyFromPrivateKey } from "@connext/vector-utils/dist/crypto";
 import { Wallet, constants } from "ethers";
-import { EBlockchainNetwork } from "@interfaces/types";
-import { ResultAsync } from "@interfaces/objects";
-import { okAsync } from "neverthrow";
-import { ILogUtils } from "@interfaces/utilities";
+import { EBlockchainNetwork } from "@hypernetlabs/objects/types";
+import { ResultAsync, okAsync } from "neverthrow";
+import { ILogUtils, IConfigProvider } from "@interfaces/utilities";
 import { ChainAddresses, ChainProviders, ContractAddresses } from "@connext/vector-types";
 
 export class ConfigProvider implements IConfigProvider {

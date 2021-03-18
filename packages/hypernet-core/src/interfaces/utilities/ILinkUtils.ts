@@ -1,5 +1,6 @@
-import { HypernetLink, Payment, ResultAsync } from "@interfaces/objects";
-import { CoreUninitializedError, InvalidParametersError } from "@interfaces/objects/errors";
+import { HypernetLink, Payment } from "@hypernetlabs/objects";
+import { CoreUninitializedError, InvalidParametersError } from "@hypernetlabs/objects/errors";
+import { ResultAsync } from "neverthrow";
 
 export interface ILinkUtils {
   paymentsToHypernetLinks(

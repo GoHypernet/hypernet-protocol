@@ -1,4 +1,4 @@
-import { EthereumAddress } from "@hypernetlabs/hypernet-core";
+import { EthereumAddress } from "@hypernetlabs/objects";
 
 export class PaymentTokenOptionViewModel {
   constructor(public tokenName: string, public address: EthereumAddress) {}

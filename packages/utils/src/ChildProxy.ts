@@ -1,6 +1,6 @@
 import { ResultAsync } from "neverthrow";
 import Postmate from "postmate";
-import { PostmateError } from "./errors/PostmateError";
+import { PostmateError } from "@hypernetlabs/objects/errors";
 
 export interface IIFrameCallData<T> {
   callId: number;

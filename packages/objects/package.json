@@ -1,0 +1,46 @@
+{
+  "name": "@hypernetlabs/objects",
+  "version": "0.0.1",
+  "description": "Objects and types shared by the Hypernet Protocol",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/objects#readme",
+  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
+  "keywords": [
+    "Blockchain",
+    "Hypernet",
+    "SDK",
+    "Ethereum",
+    "Vector"
+  ],
+  "main": "dist/src/index.js",
+  "files": [
+    "dist",
+    "src",
+    "!dist/test",
+    "!dist/tsconfig.tsbuildinfo"
+  ],
+  "scripts": {
+    "build": "yarn clean && yarn compile",
+    "clean": "rimraf dist",
+    "compile": "tsc --build && npx tsc-alias",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "generate-docs": "npx typedoc --options typedoc.json",
+    "lint": "tslint -p src/tsconfig.json",
+    "prepare": "yarn build",
+    "test": "yarn compile && jest --runInBand --coverage --passWithNoTests",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags"
+  },
+  "types": "dist/src/index.d.ts",
+  "dependencies": {
+    "ethers": "5.0.31"
+  }
+}

@@ -1,7 +1,7 @@
 import { useEffect, useReducer, useContext } from "react";
 import { StoreContext } from "@web-integration-contexts";
 import { ITokenSelectorOption } from "@hypernetlabs/web-ui/src/interfaces";
-import { Balances } from "@hypernetlabs/hypernet-core";
+import { Balances } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { PaymentTokenOptionViewModel, EResultStatus, ResultMessage } from "@web-integration-interfaces/objects";
 

@@ -1,12 +1,5 @@
-import { VectorError } from "@interfaces/objects/errors";
-import {
-  IBrowserNode,
-  IBrowserNodeProvider,
-  IFullChannelState,
-  IFullTransferState,
-  IRegisteredTransfer,
-  IWithdrawResponse,
-} from "@interfaces/utilities";
+import { VectorError } from "@hypernetlabs/objects/errors";
+import { IBrowserNode, IBrowserNodeProvider } from "@interfaces/utilities";
 import { okAsync, ResultAsync } from "neverthrow";
 import td from "testdouble";
 import {
@@ -22,13 +15,18 @@ import {
   insuranceTransferId,
   parameterizedTransferId,
   defaultExpirationLength,
-  unixNow,
   merchantUrl,
   unixPast,
 } from "@mock/mocks";
-import { InsuranceState, ParameterizedState, MessageState } from "@interfaces/types";
-import { IHypernetOfferDetails } from "@interfaces/objects";
-import { EMessageTransferType } from "@interfaces/types/EMessageTransferType";
+import { InsuranceState, ParameterizedState, MessageState } from "@hypernetlabs/objects/types";
+import {
+  IHypernetOfferDetails,
+  IFullChannelState,
+  IFullTransferState,
+  IRegisteredTransfer,
+  IWithdrawResponse,
+} from "@hypernetlabs/objects";
+import { EMessageTransferType } from "@hypernetlabs/objects/types";
 
 export class BrowserNodeProviderMock implements IBrowserNodeProvider {
   public browserNode: IBrowserNode;

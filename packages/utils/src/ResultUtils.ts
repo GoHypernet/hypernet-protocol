@@ -1,4 +1,4 @@
-import { err, ok, ResultAsync, Result } from "neverthrow";
+import { err, ok, ResultAsync, Result, okAsync, errAsync } from "neverthrow";
 
 export class ResultUtils {
   static combine<T, T2, T3, T4, E, E2, E3, E4>(
@@ -21,10 +21,56 @@ export class ResultUtils {
         ? result.isErr()
           ? err(result.error)
           : acc.map((values) => {
-              values.push(result.value);
-              return values;
-            })
+            values.push(result.value);
+            return values;
+          })
         : acc;
     }, ok([]));
+  }
+
+
+  static executeSerially<T, E>(funcList: (() => ResultAsync<T, E>)[]): ResultAsync<T[], E> {
+    // const results = new Array<T>();
+
+
+    // // for (const func of funcList) {
+    // //   func().map((val) => {})
+    // // }
+
+    // try {
+    //   funcList.reduce(
+    //     (p: ResultAsync<void, E>, x) =>
+    //       p.andThen(_ => {
+    //         return x()
+    //           .map((result) => {
+    //             results.push(result);
+    //           })
+    //           .mapErr((e) => {
+    //             throw e;
+    //           });
+    //       }),
+    //     okAsync<void, E>(undefined)
+    //   );
+    // }
+    // catch (e) {
+    //   return errAsync(e);
+    // }
+
+    const func = async () => {
+      const results = new Array<T>();
+      for (const func of funcList) {
+        const result = await func();
+        if (result.isErr()) {
+          throw result.error;
+        }
+        else {
+          results.push(result.value);
+        }
+      }
+      return results;
+    }
+
+    return ResultAsync.fromPromise(func(), 
+    (e) => {return e as E;})
   }
 }

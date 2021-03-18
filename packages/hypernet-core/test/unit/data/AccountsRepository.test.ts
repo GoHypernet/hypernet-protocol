@@ -19,13 +19,13 @@ import {
   IBlockchainProvider,
   IBlockchainUtils,
 } from "@interfaces/utilities";
-import { VectorError, RouterChannelUnknownError, BlockchainUnavailableError } from "@interfaces/objects/errors";
+import { VectorError, RouterChannelUnknownError, BlockchainUnavailableError } from "@hypernetlabs/objects/errors";
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
 import { okAsync, errAsync } from "neverthrow";
 import { Log, TransactionReceipt, TransactionResponse } from "@ethersproject/abstract-provider";
 import { AccountsRepository } from "@implementations/data/AccountsRepository";
 import { BigNumber } from "ethers";
-import { AssetBalance, Balances } from "@interfaces/objects";
+import { AssetBalance, Balances } from "@hypernetlabs/objects";
 
 class TransacationReceiptMock implements TransactionReceipt {
   public to: string;

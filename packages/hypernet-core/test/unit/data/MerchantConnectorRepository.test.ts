@@ -8,20 +8,19 @@ import {
   insuranceTransferId,
   commonPaymentId,
   mediatorSignature,
-  merchantPublicKey,
   merchantUrl2,
-  merchantPublicKey2,
 } from "@mock/mocks";
 import { BlockchainProviderMock, ConfigProviderMock, ContextProviderMock } from "@mock/utils";
-import { IVectorUtils, IMerchantConnectorProxy, IBlockchainUtils, IBasicTransferResponse } from "@interfaces/utilities";
-import { MerchantConnectorError, MerchantValidationError, TransferResolutionError } from "@interfaces/objects/errors";
+import { IVectorUtils, IMerchantConnectorProxy, IBlockchainUtils } from "@interfaces/utilities";
+import { MerchantConnectorError, MerchantValidationError, TransferResolutionError } from "@hypernetlabs/objects/errors";
 import { IMerchantConnectorRepository } from "@interfaces/data/IMerchantConnectorRepository";
 import { okAsync, errAsync } from "neverthrow";
 import { MerchantConnectorRepository } from "@implementations/data/MerchantConnectorRepository";
 import { IAjaxUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
-import { BigNumber } from "@interfaces/objects";
+import { BigNumber } from "ethers";
+import { IBasicTransferResponse } from "@hypernetlabs/objects";
 
 const validatedSignature = "0xValidatedSignature";
 const newAuthorizationSignature = "0xNewAuthorizationSignature";
@@ -505,7 +504,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(result.isErr()).toBeFalsy();
     const value = result._unsafeUnwrap();
     expect(value.size).toBe(1);
-    expect(value.get(merchantUrl)).toBe(merchantPublicKey);
+    expect(value.get(merchantUrl)).toBe(account);
   });
 
   test("getMerchantAddresses returns successfully from non-activated merchants", async () => {
@@ -515,10 +514,10 @@ describe("MerchantConnectorRepository tests", () => {
     td.when(
       mocks.ajaxUtils.get(
         td.matchers.argThat((arg: URL) => {
-          return arg.toString() == `${merchantUrl}publicKey`;
+          return arg.toString() == `${merchantUrl}address`;
         }),
       ),
-    ).thenReturn(okAsync(merchantPublicKey));
+    ).thenReturn(okAsync(account));
 
     const repo = mocks.factoryRepository();
 
@@ -530,7 +529,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(result.isErr()).toBeFalsy();
     const value = result._unsafeUnwrap();
     expect(value.size).toBe(1);
-    expect(value.get(merchantUrl)).toBe(merchantPublicKey);
+    expect(value.get(merchantUrl)).toBe(account);
   });
 
   test("getMerchantAddresses returns successfully from both types of merchants", async () => {
@@ -540,10 +539,10 @@ describe("MerchantConnectorRepository tests", () => {
     td.when(
       mocks.ajaxUtils.get(
         td.matchers.argThat((arg: URL) => {
-          return arg.toString() == `${merchantUrl2}publicKey`;
+          return arg.toString() == `${merchantUrl2}address`;
         }),
       ),
-    ).thenReturn(okAsync(merchantPublicKey2));
+    ).thenReturn(okAsync(account2));
 
     const repo = mocks.factoryRepository();
 
@@ -557,8 +556,8 @@ describe("MerchantConnectorRepository tests", () => {
     expect(result.isErr()).toBeFalsy();
     const value = result._unsafeUnwrap();
     expect(value.size).toBe(2);
-    expect(value.get(merchantUrl)).toBe(merchantPublicKey);
-    expect(value.get(merchantUrl2)).toBe(merchantPublicKey2);
+    expect(value.get(merchantUrl)).toBe(account);
+    expect(value.get(merchantUrl2)).toBe(account2);
   });
 
   test("getMerchantAddresses returns an error if a single merchant has an error", async () => {
@@ -569,7 +568,7 @@ describe("MerchantConnectorRepository tests", () => {
     td.when(
       mocks.ajaxUtils.get(
         td.matchers.argThat((arg: URL) => {
-          return arg.toString() == `${merchantUrl2}publicKey`;
+          return arg.toString() == `${merchantUrl2}address`;
         }),
       ),
     ).thenReturn(errAsync(error));

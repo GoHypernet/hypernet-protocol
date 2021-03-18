@@ -6,5 +6,3 @@ export * from "./ILocalStorageUtils";
 export * from "./LocalStorageUtils";
 export * from "./ParentProxy";
 export * from "./ExternalProviderUtils";
-export * from "./errors";
-export * from "./objects";

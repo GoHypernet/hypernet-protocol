@@ -1,9 +1,9 @@
 // import { IPersistenceRepository } from "@interfaces/data";
-// import { EthereumAddress, HypernetLink, LinkMetadata } from "@interfaces/objects";
+// import { EthereumAddress, HypernetLink, LinkMetadata } from "@hypernetlabs/objects";
 // import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
 // import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 // import { plainToClass, serialize } from "class-transformer";
-// import { ELinkRole } from "@interfaces/types";
+// import { ELinkRole } from "@hypernetlabs/objects/types";
 
 // export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
 //   constructor(protected boxUtils: IThreeBoxUtils, protected configProvider: IConfigProvider) {}

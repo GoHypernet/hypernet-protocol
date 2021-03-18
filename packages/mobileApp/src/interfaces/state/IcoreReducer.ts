@@ -1,4 +1,4 @@
-import { Balances, HypernetLink } from "@interfaces/objects";
+import { Balances, HypernetLink } from "@objects";
 import { ResultMessage } from "@mobileApp/interfaces/objects";
 
 export enum ECoreViewDataKeys {

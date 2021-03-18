@@ -1,4 +1,4 @@
-import { EthereumAddress } from "@interfaces/objects";
+import { EthereumAddress } from "@hypernetlabs/objects";
 import sjcl from "sjcl";
 
 export class ChannelUtils {

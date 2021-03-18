@@ -1,4 +1,4 @@
-import { EthereumAddress, BigNumber, Balances, AssetBalance, PublicIdentifier, ResultAsync } from "@interfaces/objects";
+import { EthereumAddress, Balances, AssetBalance, PublicIdentifier } from "@hypernetlabs/objects";
 import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
@@ -6,7 +6,9 @@ import {
   LogicalError,
   RouterChannelUnknownError,
   VectorError,
-} from "@interfaces/objects/errors";
+} from "@hypernetlabs/objects/errors";
+import { BigNumber } from "ethers";
+import { ResultAsync } from "neverthrow";
 
 /**
  * @todo What is the main role/purpose of this class? Description here.

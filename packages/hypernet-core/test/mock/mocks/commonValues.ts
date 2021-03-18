@@ -1,5 +1,4 @@
-import { constants } from "ethers";
-import { BigNumber } from "@interfaces/objects";
+import { BigNumber, constants } from "ethers";
 
 export const account = "0xDEADBEEF";
 export const account2 = "0xBEEFDEAD";

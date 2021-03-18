@@ -1,5 +1,5 @@
-import { ResultAsync } from "@interfaces/objects";
-import { VectorError } from "@interfaces/objects/errors";
+import { ResultAsync } from "neverthrow";
+import { VectorError } from "@hypernetlabs/objects/errors";
 import { IBrowserNode } from "./IBrowserNode";
 
 /**

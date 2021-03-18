@@ -1,19 +1,15 @@
 import { IVectorListener } from "@interfaces/api";
 import { IPaymentService } from "@interfaces/business";
-import { IHypernetOfferDetails, ResultAsync } from "@interfaces/objects";
-import { LogicalError } from "@interfaces/objects/errors";
-import { IHypernetPullPaymentDetails } from "@interfaces/objects/HypernetPullPaymentDetails";
-import { ETransferType, MessageState } from "@interfaces/types";
 import {
-  IBrowserNodeProvider,
+  IHypernetOfferDetails,
+  IHypernetPullPaymentDetails,
   IConditionalTransferCreatedPayload,
   IConditionalTransferResolvedPayload,
-  IContextProvider,
-  ILogUtils,
-  IPaymentUtils,
-  IVectorUtils,
-} from "@interfaces/utilities";
-import { errAsync, okAsync } from "neverthrow";
+} from "@hypernetlabs/objects";
+import { LogicalError } from "@hypernetlabs/objects/errors";
+import { ETransferType, MessageState } from "@hypernetlabs/objects/types";
+import { IBrowserNodeProvider, IContextProvider, ILogUtils, IPaymentUtils, IVectorUtils } from "@interfaces/utilities";
+import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
 /**
  *

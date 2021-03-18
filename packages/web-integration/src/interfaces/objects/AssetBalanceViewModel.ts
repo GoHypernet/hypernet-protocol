@@ -1,4 +1,4 @@
-import { AssetBalance } from "@hypernetlabs/hypernet-core";
+import { AssetBalance } from "@hypernetlabs/objects";
 import { utils } from "ethers";
 
 export class AssetBalanceParams {

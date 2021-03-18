@@ -1,12 +1,12 @@
 import { ResultUtils } from "@hypernetlabs/utils";
 import { ILinkRepository } from "@interfaces/data";
-import { HypernetLink, Payment, PublicIdentifier, ResultAsync } from "@interfaces/objects";
+import { HypernetLink, Payment, PublicIdentifier } from "@hypernetlabs/objects";
 import {
   CoreUninitializedError,
   InvalidParametersError,
   RouterChannelUnknownError,
   VectorError,
-} from "@interfaces/objects/errors";
+} from "@hypernetlabs/objects/errors";
 import {
   IBrowserNode,
   IBrowserNodeProvider,
@@ -15,9 +15,9 @@ import {
   IPaymentUtils,
   ITimeUtils,
   IVectorUtils,
+  ILinkUtils,
 } from "@interfaces/utilities";
-import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
-import { okAsync } from "neverthrow";
+import { okAsync, ResultAsync } from "neverthrow";
 
 /**
  * Provides methods for retrieving Hypernet Links.

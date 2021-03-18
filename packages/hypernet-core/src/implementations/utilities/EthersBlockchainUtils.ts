@@ -2,10 +2,10 @@ import { IBlockchainProvider, IBlockchainUtils } from "@interfaces/utilities";
 import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import { Contract, ethers, BigNumber } from "ethers";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
-import { BlockchainUnavailableError } from "@interfaces/objects/errors";
+import { BlockchainUnavailableError } from "@hypernetlabs/objects/errors";
 import { ResultAsync } from "neverthrow";
 import { ERC20Abi } from "@connext/vector-types";
-import { EthereumAddress } from "@interfaces/objects";
+import { EthereumAddress } from "@hypernetlabs/objects";
 import { artifacts } from "@connext/vector-contracts";
 
 export class EthersBlockchainUtils implements IBlockchainUtils {

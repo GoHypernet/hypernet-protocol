@@ -1,21 +1,21 @@
 import { ResultUtils } from "@hypernetlabs/utils";
 import { IPaymentService } from "@interfaces/business";
-import { IAccountsRepository, ILinkRepository, IMerchantConnectorRepository } from "@interfaces/data";
-import { IPaymentRepository } from "@interfaces/data/IPaymentRepository";
 import {
-  BigNumber,
+  IAccountsRepository,
+  ILinkRepository,
+  IMerchantConnectorRepository,
+  IPaymentRepository,
+} from "@interfaces/data";
+import {
   EthereumAddress,
   Payment,
   PublicIdentifier,
   PullPayment,
   PushPayment,
-  ResultAsync,
-  Result,
   HypernetConfig,
   HypernetContext,
-  InitializedHypernetContext,
   HexString,
-} from "@interfaces/objects";
+} from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
   CoreUninitializedError,
@@ -28,10 +28,11 @@ import {
   PaymentFinalizeError,
   RouterChannelUnknownError,
   VectorError,
-} from "@interfaces/objects/errors";
-import { EPaymentState } from "@interfaces/types";
+} from "@hypernetlabs/objects/errors";
+import { EPaymentState } from "@hypernetlabs/objects/types";
 import { IConfigProvider, IContextProvider, ILogUtils } from "@interfaces/utilities";
-import { err, errAsync, ok, okAsync } from "neverthrow";
+import { err, errAsync, ok, okAsync, ResultAsync, Result } from "neverthrow";
+import { BigNumber } from "ethers";
 
 /**
  * PaymentService uses Vector internally to send payments on the requested channel.
