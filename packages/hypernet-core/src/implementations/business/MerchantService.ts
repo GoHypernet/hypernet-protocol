@@ -40,4 +40,12 @@ export class MerchantService implements IMerchantService {
   public activateAuthorizedMerchants(): ResultAsync<void, MerchantConnectorError | PersistenceError> {
     return this.merchantConnectorRepository.activateAuthorizedMerchants();
   }
+
+  public merchantIFrameClosed(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+    return this.merchantConnectorRepository.merchantIFrameClosed(merchantUrl);
+  }
+  
+  public merchantIFrameDisplayed(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+    return this.merchantConnectorRepository.merchantIFrameDisplayed(merchantUrl);
+  }
 }

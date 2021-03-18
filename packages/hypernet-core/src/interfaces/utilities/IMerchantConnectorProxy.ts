@@ -16,4 +16,8 @@ export interface IMerchantConnectorProxy extends ParentProxy {
   getAddress(): ResultAsync<HexString, MerchantConnectorError>;
 
   getValidatedSignature(): ResultAsync<string, MerchantValidationError>;
+
+  merchantIFrameDisplayed(): ResultAsync<void, MerchantConnectorError>;
+
+  merchantIFrameClosed(): ResultAsync<void, MerchantConnectorError>;
 }

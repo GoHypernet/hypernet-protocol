@@ -19,6 +19,7 @@ import {
   InsufficientBalanceError,
   MerchantValidationError,
   PersistenceError,
+  MerchantConnectorError,
 } from "@hypernetlabs/objects/errors";
 import { BigNumber } from "ethers";
 import { Result, ResultAsync, ok } from "neverthrow";
@@ -51,8 +52,6 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     this.onAuthorizedMerchantActivationFailed = new Subject<string>();
     this.onMerchantIFrameDisplayRequested = new Subject<string>();
     this.onMerchantIFrameCloseRequested = new Subject<string>();
-    this.onMerchantIFrameClosed = new Subject<string>();
-    this.onMerchantIFrameDisplayed = new Subject<string>();
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -132,22 +131,6 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
           if (element) {
             element.style.display = "none";
           }
-        });
-
-        this.onMerchantIFrameClosed.subscribe((data: string) => {
-          child.frame.style.display = "none";
-          if (element) {
-            element.style.display = "none";
-          }
-          this._createCall("onMerchantIFrameClosed", data);
-        });
-
-        this.onMerchantIFrameDisplayed.subscribe((data: string) => {
-          child.frame.style.display = "block";
-          if (element) {
-            element.style.display = "block";
-          }
-          this._createCall("onMerchantIFrameDisplayed", data);
         });
       });
     });
@@ -315,6 +298,28 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return this._createCall("getAuthorizedMerchants", null);
   }
 
+  public merchantIFrameClosed(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+
+    if (this.child != null) {
+      this.child.frame.style.display = "none";
+    }
+    if (this.element != null) {
+      this.element.style.display = "none";
+    }
+    return this._createCall("merchantIFrameClosed", merchantUrl);
+  }
+
+  public merchantIFrameDisplayed(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+    if (this.child != null) {
+      this.child.frame.style.display = "none";
+    }
+    if (this.element != null) {
+      this.element.style.display = "block";
+    }
+
+    return this._createCall("merchantIFrameDisplayed", merchantUrl);
+  }
+
   /**
    * Observables for seeing what's going on
    */
@@ -332,6 +337,5 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   public onAuthorizedMerchantActivationFailed: Subject<string>;
   public onMerchantIFrameDisplayRequested: Subject<string>;
   public onMerchantIFrameCloseRequested: Subject<string>;
-  public onMerchantIFrameClosed: Subject<string>;
-  public onMerchantIFrameDisplayed: Subject<string>;
+
 }

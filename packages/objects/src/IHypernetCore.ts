@@ -20,6 +20,7 @@ import {
   RouterChannelUnknownError,
   VectorError,
   MerchantValidationError,
+  MerchantConnectorError,
 } from "@hypernetlabs/objects/errors";
 import { ResultAsync, Result } from "neverthrow";
 import { BigNumber } from "ethers";
@@ -197,6 +198,10 @@ export interface IHypernetCore {
   authorizeMerchant(merchantUrl: string): ResultAsync<void, CoreUninitializedError | MerchantValidationError>;
 
   getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError>;
+
+  merchantIFrameClosed(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
+  merchantIFrameDisplayed(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
+  
   /**
    * Observables for seeing what's going on
    */
@@ -214,6 +219,4 @@ export interface IHypernetCore {
   onAuthorizedMerchantActivationFailed: Subject<string>;
   onMerchantIFrameDisplayRequested: Subject<string>;
   onMerchantIFrameCloseRequested: Subject<string>;
-  onMerchantIFrameClosed: Subject<string>;
-  onMerchantIFrameDisplayed: Subject<string>;
 }

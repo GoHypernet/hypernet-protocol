@@ -30,8 +30,6 @@ export class ContextProviderMock implements IContextProvider {
   public onAuthorizedMerchantActivationFailed: Subject<string>;
   public onMerchantIFrameDisplayRequested: Subject<string>;
   public onMerchantIFrameCloseRequested: Subject<string>;
-  public onMerchantIFrameClosed: Subject<string>;
-  public onMerchantIFrameDisplayed: Subject<string>;
 
   public authorizedMerchants: Map<string, string>;
 
@@ -54,8 +52,6 @@ export class ContextProviderMock implements IContextProvider {
     this.onAuthorizedMerchantActivationFailed = new Subject<string>();
     this.onMerchantIFrameDisplayRequested = new Subject<string>();
     this.onMerchantIFrameCloseRequested = new Subject<string>();
-    this.onMerchantIFrameClosed = new Subject<string>();
-    this.onMerchantIFrameDisplayed = new Subject<string>();
 
     this.authorizedMerchants = new Map<string, string>();
 
@@ -79,9 +75,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onAuthorizedMerchantUpdated,
         this.onAuthorizedMerchantActivationFailed,
         this.onMerchantIFrameDisplayRequested,
-        this.onMerchantIFrameCloseRequested,
-        this.onMerchantIFrameClosed,
-        this.onMerchantIFrameDisplayed,
+        this.onMerchantIFrameCloseRequested
       );
     }
 
@@ -106,8 +100,6 @@ export class ContextProviderMock implements IContextProvider {
         this.onAuthorizedMerchantActivationFailed,
         this.onMerchantIFrameDisplayRequested,
         this.onMerchantIFrameCloseRequested,
-        this.onMerchantIFrameClosed,
-        this.onMerchantIFrameDisplayed,
         this.authorizedMerchants,
       );
     }

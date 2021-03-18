@@ -9,6 +9,7 @@ import { Subject } from "rxjs";
 import { Bytes32 } from "@connext/vector-types";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { ChannelSigner } from "@connext/vector-utils";
+import { PushPayment, PullPayment } from "@hypernetlabs/objects";
 
 declare global {
   interface Window {
@@ -59,6 +60,14 @@ class TestMerchantConnector implements IMerchantConnector {
     return Promise.resolve("0x14791697260E4c9A71f18484C9f997B308e59325");
   }
 
+  public onIFrameClosed() {
+    console.log("Hey, user just closed merchant iframe");
+  }
+
+  public onIFrameDisplayed() {
+    console.log("Hey, user just opened merchant iframe");
+  }
+
   private _renderContent() {
     const element = window.document.createElement("div");
     element.innerHTML = `
@@ -87,34 +96,44 @@ class TestMerchantConnector implements IMerchantConnector {
 
   onSendFundsRequested: Subject<ISendFundsRequest>;
   onAuthorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
-  onDisplayRequested: Subject<string>;
-  onCloseRequested: Subject<string>;
-  onIFrameClosed: Subject<string>;
-  onIFrameDisplayed: Subject<string>;
+  onDisplayRequested: Subject<void>;
+  onCloseRequested: Subject<void>;
   onPreRedirect: Subject<IRedirectInfo>;
 
   constructor() {
     console.log("Instantiating TestMerchantConnector");
     this.onSendFundsRequested = new Subject<ISendFundsRequest>();
     this.onAuthorizeFundsRequested = new Subject<IAuthorizeFundsRequest>();
-    this.onDisplayRequested = new Subject<string>();
-    this.onCloseRequested = new Subject<string>();
-    this.onIFrameClosed = new Subject<string>();
-    this.onIFrameDisplayed = new Subject<string>();
+    this.onDisplayRequested = new Subject<void>();
+    this.onCloseRequested = new Subject<void>();
     this.onPreRedirect = new Subject<IRedirectInfo>();
 
     this._renderContent();
+  }
 
-    // User closed merchant iframe and here is the connector getting notified that the iframe got closed manually by the user
-    this.onIFrameClosed.subscribe((data: string) => {
-      console.log("data: ", data);
-      console.log("Hey, user just closed merchant iframe");
-    });
-
-    this.onIFrameDisplayed.subscribe((data: string) => {
-      console.log("data: ", data);
-      console.log("Hey, user just opened merchant iframe");
-    });
+  onPushPaymentSent(payment: PushPayment): void {
+    console.log("Push Payment Sent");
+    console.log(payment);
+  }
+  onPushPaymentUpdated(payment: PushPayment): void {
+    console.log("Push Payment Updated");
+    console.log(payment);
+  }
+  onPushPaymentReceived(payment: PushPayment): void {
+    console.log("Push Payment Received");
+    console.log(payment);
+  }
+  onPullPaymentSent(payment: PullPayment): void {
+    console.log("Pull Payment Sent");
+    console.log(payment);
+  }
+  onPullPaymentUpdated(payment: PullPayment): void {
+    console.log("Pull Payment Updated");
+    console.log(payment);
+  }
+  onPullPaymentReceived(payment: PullPayment): void {
+    console.log("Pull Payment Received");
+    console.log(payment);
   }
 }
 

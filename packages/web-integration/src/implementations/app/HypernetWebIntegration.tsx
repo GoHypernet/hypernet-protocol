@@ -112,7 +112,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     closeButton.addEventListener(
       "click",
       (e) => {
-        this.core.onMerchantIFrameClosed.next();
+        // TODO: Figure out how to track which merchant we are showing
+        this.core.merchantIFrameClosed("TODO");
       },
       false,
     );

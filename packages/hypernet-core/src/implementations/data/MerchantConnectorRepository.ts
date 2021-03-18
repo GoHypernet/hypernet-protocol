@@ -190,27 +190,24 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       .map(() => {});
   }
 
-  protected _setAuthorizedMerchants(authorizedMerchantMap: Map<string, string>) {
-    const authorizedMerchantEntries = new Array<IAuthorizedMerchantEntry>();
-    for (const keyval of authorizedMerchantMap) {
-      authorizedMerchantEntries.push({ merchantUrl: keyval[0], authorizationSignature: keyval[1] });
+  public merchantIFrameClosed(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+    const proxy = this.activatedMerchants.get(merchantUrl);
+
+    if (proxy == null) {
+      return errAsync(new MerchantConnectorError(`No existing merchant connector for ${merchantUrl}`));
     }
-    this.localStorageUtils.setItem("AuthorizedMerchants", JSON.stringify(authorizedMerchantEntries));
+
+    return proxy.merchantIFrameClosed();
   }
+  
+  public merchantIFrameDisplayed(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+    const proxy = this.activatedMerchants.get(merchantUrl);
 
-  protected _getAuthorizedMerchants(): Map<string, string> {
-    let authorizedMerchantStr = this.localStorageUtils.getItem("AuthorizedMerchants");
-
-    if (authorizedMerchantStr == null) {
-      authorizedMerchantStr = "[]";
+    if (proxy == null) {
+      return errAsync(new MerchantConnectorError(`No existing merchant connector for ${merchantUrl}`));
     }
-    const authorizedMerchantEntries = JSON.parse(authorizedMerchantStr) as IAuthorizedMerchantEntry[];
 
-    const authorizedMerchants = new Map<string, string>();
-    for (const authorizedMerchantEntry of authorizedMerchantEntries) {
-      authorizedMerchants.set(authorizedMerchantEntry.merchantUrl, authorizedMerchantEntry.authorizationSignature);
-    }
-    return authorizedMerchants;
+    return proxy.merchantIFrameClosed();
   }
 
   public activateAuthorizedMerchants(): ResultAsync<
@@ -307,5 +304,28 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
         return e;
       });
+  }
+
+  protected _setAuthorizedMerchants(authorizedMerchantMap: Map<string, string>) {
+    const authorizedMerchantEntries = new Array<IAuthorizedMerchantEntry>();
+    for (const keyval of authorizedMerchantMap) {
+      authorizedMerchantEntries.push({ merchantUrl: keyval[0], authorizationSignature: keyval[1] });
+    }
+    this.localStorageUtils.setItem("AuthorizedMerchants", JSON.stringify(authorizedMerchantEntries));
+  }
+
+  protected _getAuthorizedMerchants(): Map<string, string> {
+    let authorizedMerchantStr = this.localStorageUtils.getItem("AuthorizedMerchants");
+
+    if (authorizedMerchantStr == null) {
+      authorizedMerchantStr = "[]";
+    }
+    const authorizedMerchantEntries = JSON.parse(authorizedMerchantStr) as IAuthorizedMerchantEntry[];
+
+    const authorizedMerchants = new Map<string, string>();
+    for (const authorizedMerchantEntry of authorizedMerchantEntries) {
+      authorizedMerchants.set(authorizedMerchantEntry.merchantUrl, authorizedMerchantEntry.authorizationSignature);
+    }
+    return authorizedMerchants;
   }
 }

@@ -60,6 +60,7 @@ import {
   CoreUninitializedError,
   InsufficientBalanceError,
   LogicalError,
+  MerchantConnectorError,
   MerchantValidationError,
   PersistenceError,
   RouterChannelUnknownError,
@@ -106,8 +107,6 @@ export class HypernetCore implements IHypernetCore {
   public onAuthorizedMerchantActivationFailed: Subject<string>;
   public onMerchantIFrameDisplayRequested: Subject<string>;
   public onMerchantIFrameCloseRequested: Subject<string>;
-  public onMerchantIFrameClosed: Subject<string>;
-  public onMerchantIFrameDisplayed: Subject<string>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -177,8 +176,6 @@ export class HypernetCore implements IHypernetCore {
     this.onAuthorizedMerchantActivationFailed = new Subject<string>();
     this.onMerchantIFrameDisplayRequested = new Subject<string>();
     this.onMerchantIFrameCloseRequested = new Subject<string>();
-    this.onMerchantIFrameClosed = new Subject<string>();
-    this.onMerchantIFrameDisplayed = new Subject<string>();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -209,8 +206,6 @@ export class HypernetCore implements IHypernetCore {
       this.onAuthorizedMerchantActivationFailed,
       this.onMerchantIFrameDisplayRequested,
       this.onMerchantIFrameCloseRequested,
-      this.onMerchantIFrameClosed,
-      this.onMerchantIFrameDisplayed,
     );
     this.blockchainProvider = new EthersBlockchainProvider(externalProvider);
     this.timeUtils = new TimeUtils(this.blockchainProvider);
@@ -603,5 +598,13 @@ export class HypernetCore implements IHypernetCore {
 
   public getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError> {
     return this.merchantService.getAuthorizedMerchants();
+  }
+
+  public merchantIFrameClosed(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+    return this.merchantService.merchantIFrameClosed(merchantUrl);
+  }
+  
+  public merchantIFrameDisplayed(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+    return this.merchantService.merchantIFrameDisplayed(merchantUrl);
   }
 }

@@ -34,4 +34,7 @@ export interface IMerchantConnectorRepository {
     paymentId: string,
     transferId: string,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | CoreUninitializedError>;
+
+  merchantIFrameClosed(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
+  merchantIFrameDisplayed(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
 }
