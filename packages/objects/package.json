@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/objects",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Objects and types shared by the Hypernet Protocol",
   "license": "ISC",
   "repository": {
