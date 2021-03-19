@@ -5,6 +5,7 @@ import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 import { IMerchantConnector } from "@hypernetlabs/merchant-connector";
 import { IMerchantIFrameApi } from "@merchant-iframe/interfaces/api";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
+import { PushPayment, PullPayment } from "@hypernetlabs/objects";
 
 export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
   protected merchantConnector: IMerchantConnector | undefined;
@@ -16,12 +17,12 @@ export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
     context.onMerchantConnectorActivated.subscribe({
       next: (merchantConnector) => {
         // We are going to relay the RXJS events
-        merchantConnector.onSendFundsRequested.subscribe((val) => {
-          this.parent?.emit("onSendFundsRequested", val);
+        merchantConnector.onSendFundsRequested.subscribe(() => {
+          this.parent?.emit("onSendFundsRequested");
         });
 
-        merchantConnector.onAuthorizeFundsRequested.subscribe((val) => {
-          this.parent?.emit("onAuthorizeFundsRequested", val);
+        merchantConnector.onAuthorizeFundsRequested.subscribe(() => {
+          this.parent?.emit("onAuthorizeFundsRequested");
         });
 
         merchantConnector.onDisplayRequested.subscribe(() => {
@@ -70,18 +71,40 @@ export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
         this.returnForModel(() => {
           const context = this.contextProvider.getMerchantContext();
 
-          console.log(`In iframe, validatedMerchantSignature = ${context.validatedMerchantSignature}`);
-
           return okAsync(context.validatedMerchantSignature);
         }, data.callId);
       },
-      onMerchantIFrameClosed: (data: IIFrameCallData<string>) => {
+      merchantIFrameClosed: (data: IIFrameCallData<void>) => {
         const context = this.contextProvider.getMerchantContext();
-        context.merchantConnector?.onIFrameClosed.next(data.data);
+        context.merchantConnector?.onIFrameClosed();
       },
-      onMerchantIFrameDisplayed: (data: IIFrameCallData<string>) => {
+      merchantIFrameDisplayed: (data: IIFrameCallData<void>) => {
         const context = this.contextProvider.getMerchantContext();
-        context.merchantConnector?.onIFrameDisplayed.next(data.data);
+        context.merchantConnector?.onIFrameClosed();
+      },
+      notifyPushPaymentSent: (data: IIFrameCallData<PushPayment>) => {
+        const context = this.contextProvider.getMerchantContext();
+        context.merchantConnector?.onPushPaymentSent(data.data);
+      },
+      notifyPushPaymentUpdated: (data: IIFrameCallData<PushPayment>) => {
+        const context = this.contextProvider.getMerchantContext();
+        context.merchantConnector?.onPushPaymentUpdated(data.data);
+      },
+      notifyPushPaymentReceived: (data: IIFrameCallData<PushPayment>) => {
+        const context = this.contextProvider.getMerchantContext();
+        context.merchantConnector?.onPushPaymentReceived(data.data);
+      },
+      notifyPullPaymentSent: (data: IIFrameCallData<PullPayment>) => {
+        const context = this.contextProvider.getMerchantContext();
+        context.merchantConnector?.onPullPaymentSent(data.data);
+      },
+      notifyPullPaymentUpdated: (data: IIFrameCallData<PullPayment>) => {
+        const context = this.contextProvider.getMerchantContext();
+        context.merchantConnector?.onPullPaymentUpdated(data.data);
+      },
+      notifyPullPaymentReceived: (data: IIFrameCallData<PullPayment>) => {
+        const context = this.contextProvider.getMerchantContext();
+        context.merchantConnector?.onPullPaymentReceived(data.data);
       },
     });
   }

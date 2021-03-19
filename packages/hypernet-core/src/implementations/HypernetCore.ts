@@ -60,6 +60,7 @@ import {
   CoreUninitializedError,
   InsufficientBalanceError,
   LogicalError,
+  MerchantConnectorError,
   MerchantValidationError,
   PersistenceError,
   RouterChannelUnknownError,
@@ -94,20 +95,18 @@ export class HypernetCore implements IHypernetCore {
   // RXJS Observables
   public onControlClaimed: Subject<ControlClaim>;
   public onControlYielded: Subject<ControlClaim>;
-  public onPushPaymentProposed: Subject<PushPayment>;
+  public onPushPaymentSent: Subject<PushPayment>;
   public onPushPaymentUpdated: Subject<PushPayment>;
-  public onPullPaymentProposed: Subject<PullPayment>;
+  public onPullPaymentSent: Subject<PullPayment>;
   public onPushPaymentReceived: Subject<PushPayment>;
   public onPullPaymentUpdated: Subject<PullPayment>;
-  public onPullPaymentApproved: Subject<PullPayment>;
+  public onPullPaymentReceived: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
   public onMerchantAuthorized: Subject<string>;
   public onAuthorizedMerchantUpdated: Subject<string>;
   public onAuthorizedMerchantActivationFailed: Subject<string>;
   public onMerchantIFrameDisplayRequested: Subject<string>;
   public onMerchantIFrameCloseRequested: Subject<string>;
-  public onMerchantIFrameClosed: Subject<string>;
-  public onMerchantIFrameDisplayed: Subject<string>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -165,20 +164,18 @@ export class HypernetCore implements IHypernetCore {
 
     this.onControlClaimed = new Subject<ControlClaim>();
     this.onControlYielded = new Subject<ControlClaim>();
-    this.onPushPaymentProposed = new Subject<PushPayment>();
+    this.onPushPaymentSent = new Subject<PushPayment>();
     this.onPushPaymentUpdated = new Subject<PushPayment>();
     this.onPushPaymentReceived = new Subject<PushPayment>();
-    this.onPullPaymentProposed = new Subject<PullPayment>();
+    this.onPullPaymentSent = new Subject<PullPayment>();
     this.onPullPaymentUpdated = new Subject<PullPayment>();
-    this.onPullPaymentApproved = new Subject<PullPayment>();
+    this.onPullPaymentReceived = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
     this.onMerchantAuthorized = new Subject<string>();
     this.onAuthorizedMerchantUpdated = new Subject<string>();
     this.onAuthorizedMerchantActivationFailed = new Subject<string>();
     this.onMerchantIFrameDisplayRequested = new Subject<string>();
     this.onMerchantIFrameCloseRequested = new Subject<string>();
-    this.onMerchantIFrameClosed = new Subject<string>();
-    this.onMerchantIFrameDisplayed = new Subject<string>();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -197,10 +194,10 @@ export class HypernetCore implements IHypernetCore {
     this.contextProvider = new ContextProvider(
       this.onControlClaimed,
       this.onControlYielded,
-      this.onPushPaymentProposed,
-      this.onPullPaymentProposed,
+      this.onPushPaymentSent,
+      this.onPullPaymentSent,
       this.onPushPaymentReceived,
-      this.onPullPaymentApproved,
+      this.onPullPaymentReceived,
       this.onPushPaymentUpdated,
       this.onPullPaymentUpdated,
       this.onBalancesChanged,
@@ -209,8 +206,6 @@ export class HypernetCore implements IHypernetCore {
       this.onAuthorizedMerchantActivationFailed,
       this.onMerchantIFrameDisplayRequested,
       this.onMerchantIFrameCloseRequested,
-      this.onMerchantIFrameClosed,
-      this.onMerchantIFrameDisplayed,
     );
     this.blockchainProvider = new EthersBlockchainProvider(externalProvider);
     this.timeUtils = new TimeUtils(this.blockchainProvider);
@@ -603,5 +598,13 @@ export class HypernetCore implements IHypernetCore {
 
   public getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError> {
     return this.merchantService.getAuthorizedMerchants();
+  }
+
+  public closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+    return this.merchantService.closeMerchantIFrame(merchantUrl);
+  }
+
+  public displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+    return this.merchantService.displayMerchantIFrame(merchantUrl);
   }
 }

@@ -13,6 +13,7 @@ import {
   SortedTransfers,
   IFullTransferState,
   IHypernetPullPaymentDetails,
+  IRegisteredTransfer,
 } from "@hypernetlabs/objects";
 import {
   InvalidParametersError,
@@ -694,5 +695,21 @@ export class PaymentUtils implements IPaymentUtils {
     });
 
     return this.vectorUtils.getTimestampFromTransfer(transfers[0]);
+  }
+
+  protected getRegisteredTransfersResponse: ResultAsync<IRegisteredTransfer[], VectorError> | undefined;
+  protected getRegisteredTransfers(): ResultAsync<IRegisteredTransfer[], VectorError> {
+    if (this.getRegisteredTransfersResponse == null) {
+      this.getRegisteredTransfersResponse = ResultUtils.combine([
+        this.browserNodeProvider.getBrowserNode(),
+        this.configProvider.getConfig(),
+      ]).andThen((vals) => {
+        const [browserNode, config] = vals;
+
+        return browserNode.getRegisteredTransfers(config.chainId);
+      });
+    }
+
+    return this.getRegisteredTransfersResponse;
   }
 }

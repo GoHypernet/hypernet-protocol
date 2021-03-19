@@ -116,11 +116,11 @@ export default class CoreWrapper extends ChildProxy {
           return this.core.initiateDispute(data.data);
         }, data.callId);
       },
-      onMerchantIFrameClosed: (data: IIFrameCallData<string>) => {
-        this.core.onMerchantIFrameClosed.next(data.data);
+      closeMerchantIFrame: (data: IIFrameCallData<string>) => {
+        this.core.closeMerchantIFrame(data.data);
       },
-      onMerchantIFrameDisplayed: (data: IIFrameCallData<string>) => {
-        this.core.onMerchantIFrameDisplayed.next(data.data);
+      displayMerchantIFrame: (data: IIFrameCallData<string>) => {
+        this.core.displayMerchantIFrame(data.data);
       },
 
       //   pullFunds(paymentId: string, amount: BigNumber): Promise<Payment>;
@@ -158,12 +158,12 @@ export default class CoreWrapper extends ChildProxy {
       parent.emit("onControlYielded", val);
     });
 
-    this.core.onPushPaymentProposed.subscribe((val) => {
-      parent.emit("onPushPaymentProposed", val);
+    this.core.onPushPaymentSent.subscribe((val) => {
+      parent.emit("onPushPaymentSent", val);
     });
 
-    this.core.onPullPaymentProposed.subscribe((val) => {
-      parent.emit("onPullPaymentProposed", val);
+    this.core.onPullPaymentSent.subscribe((val) => {
+      parent.emit("onPullPaymentSent", val);
     });
 
     this.core.onPushPaymentUpdated.subscribe((val) => {
@@ -178,8 +178,8 @@ export default class CoreWrapper extends ChildProxy {
       parent.emit("onPushPaymentReceived", val);
     });
 
-    this.core.onPullPaymentApproved.subscribe((val) => {
-      parent.emit("onPullPaymentApproved", val);
+    this.core.onPullPaymentReceived.subscribe((val) => {
+      parent.emit("onPullPaymentReceived", val);
     });
 
     this.core.onBalancesChanged.subscribe((val) => {
@@ -198,12 +198,12 @@ export default class CoreWrapper extends ChildProxy {
       parent.emit("onAuthorizedMerchantActivationFailed", val.toString());
     });
 
-    this.core.onMerchantIFrameDisplayRequested.subscribe(() => {
-      parent.emit("onMerchantIFrameDisplayRequested");
+    this.core.onMerchantIFrameDisplayRequested.subscribe((merchantUrl) => {
+      parent.emit("onMerchantIFrameDisplayRequested", merchantUrl);
     });
 
-    this.core.onMerchantIFrameCloseRequested.subscribe(() => {
-      parent.emit("onMerchantIFrameCloseRequested");
+    this.core.onMerchantIFrameCloseRequested.subscribe((merchantUrl) => {
+      parent.emit("onMerchantIFrameCloseRequested", merchantUrl);
     });
   }
 }

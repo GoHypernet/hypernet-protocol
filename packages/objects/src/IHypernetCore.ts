@@ -20,6 +20,7 @@ import {
   RouterChannelUnknownError,
   VectorError,
   MerchantValidationError,
+  MerchantConnectorError,
 } from "@hypernetlabs/objects/errors";
 import { ResultAsync, Result } from "neverthrow";
 import { BigNumber } from "ethers";
@@ -197,23 +198,25 @@ export interface IHypernetCore {
   authorizeMerchant(merchantUrl: string): ResultAsync<void, CoreUninitializedError | MerchantValidationError>;
 
   getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError>;
+
+  closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
+  displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
+
   /**
    * Observables for seeing what's going on
    */
   onControlClaimed: Subject<ControlClaim>;
   onControlYielded: Subject<ControlClaim>;
-  onPushPaymentProposed: Subject<PushPayment>;
-  onPullPaymentProposed: Subject<PullPayment>;
+  onPushPaymentSent: Subject<PushPayment>;
+  onPullPaymentSent: Subject<PullPayment>;
   onPushPaymentUpdated: Subject<PushPayment>;
   onPullPaymentUpdated: Subject<PullPayment>;
   onPushPaymentReceived: Subject<PushPayment>;
-  onPullPaymentApproved: Subject<PullPayment>;
+  onPullPaymentReceived: Subject<PullPayment>;
   onBalancesChanged: Subject<Balances>;
   onMerchantAuthorized: Subject<string>;
   onAuthorizedMerchantUpdated: Subject<string>;
   onAuthorizedMerchantActivationFailed: Subject<string>;
   onMerchantIFrameDisplayRequested: Subject<string>;
   onMerchantIFrameCloseRequested: Subject<string>;
-  onMerchantIFrameClosed: Subject<string>;
-  onMerchantIFrameDisplayed: Subject<string>;
 }

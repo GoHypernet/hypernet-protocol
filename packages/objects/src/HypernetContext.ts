@@ -13,10 +13,10 @@ export class HypernetContext {
     public inControl: boolean,
     public onControlClaimed: Subject<ControlClaim>,
     public onControlYielded: Subject<ControlClaim>,
-    public onPushPaymentProposed: Subject<PushPayment>,
-    public onPullPaymentProposed: Subject<PullPayment>,
+    public onPushPaymentSent: Subject<PushPayment>,
+    public onPullPaymentSent: Subject<PullPayment>,
     public onPushPaymentReceived: Subject<PushPayment>,
-    public onPullPaymentApproved: Subject<PullPayment>,
+    public onPullPaymentReceived: Subject<PullPayment>,
     public onPushPaymentUpdated: Subject<PushPayment>,
     public onPullPaymentUpdated: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
@@ -25,8 +25,6 @@ export class HypernetContext {
     public onAuthorizedMerchantActivationFailed: Subject<string>,
     public onMerchantIFrameDisplayRequested: Subject<string>,
     public onMerchantIFrameCloseRequested: Subject<string>,
-    public onMerchantIFrameClosed: Subject<string>,
-    public onMerchantIFrameDisplayed: Subject<string>,
   ) {}
 }
 
@@ -38,10 +36,10 @@ export class InitializedHypernetContext {
     public inControl: boolean,
     public onControlClaimed: Subject<ControlClaim>,
     public onControlYielded: Subject<ControlClaim>,
-    public onPushPaymentProposed: Subject<PushPayment>,
-    public onPullPaymentProposed: Subject<PullPayment>,
+    public onPushPaymentSent: Subject<PushPayment>,
+    public onPullPaymentSent: Subject<PullPayment>,
     public onPushPaymentReceived: Subject<PushPayment>,
-    public onPullPaymentApproved: Subject<PullPayment>,
+    public onPullPaymentReceived: Subject<PullPayment>,
     public onPushPaymentUpdated: Subject<PushPayment>,
     public onPullPaymentUpdated: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
@@ -50,8 +48,6 @@ export class InitializedHypernetContext {
     public onAuthorizedMerchantActivationFailed: Subject<string>,
     public onMerchantIFrameDisplayRequested: Subject<string>,
     public onMerchantIFrameCloseRequested: Subject<string>,
-    public onMerchantIFrameClosed: Subject<string>,
-    public onMerchantIFrameDisplayed: Subject<string>,
     public authorizedMediators: Map<string, string>,
   ) {}
 }

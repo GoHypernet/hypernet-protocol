@@ -23,11 +23,13 @@ import {
 import IHypernetIFrameProxy from "@web-integration-interfaces/proxy/IHypernetIFrameProxy";
 import HypernetIFrameProxy from "@web-integration-implementations/proxy/HypernetIFrameProxy";
 import ConnectorAuthorizationFlow from "@web-integration-flows/ConnectorAuthorizationFlow";
+import { ThemeProvider } from "theming";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
 
   protected iframeURL: string = "http://localhost:8090";
+  protected currentMerchantUrl: string | undefined | null;
 
   public core: IHypernetIFrameProxy;
 
@@ -36,6 +38,10 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
     // Create a proxy connection to the iframe
     this.core = new HypernetIFrameProxy(this._prepareIFrameContainer(), this.iframeURL, "hypernet-core-iframe");
+
+    this.core.onMerchantIFrameDisplayRequested.subscribe((merchantUrl) => {
+      this.currentMerchantUrl = merchantUrl;
+    });
   }
 
   // wait for the core to be intialized
@@ -112,7 +118,11 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     closeButton.addEventListener(
       "click",
       (e) => {
-        this.core.onMerchantIFrameClosed.next();
+        // TODO: Figure out how to track which merchant we are showing
+        if (this.currentMerchantUrl != null) {
+          this.core.closeMerchantIFrame(this.currentMerchantUrl);
+          this.currentMerchantUrl = null;
+        }
       },
       false,
     );
@@ -215,6 +225,14 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       ),
       this._generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
     );
+  }
+
+  public displayMerchantIFrame(merchantUrl: string): void {
+    this.core.displayMerchantIFrame(merchantUrl);
+  }
+
+  public closeMerchantIFrame(merchantUrl: string): void {
+    this.core.closeMerchantIFrame(merchantUrl);
   }
 }
 

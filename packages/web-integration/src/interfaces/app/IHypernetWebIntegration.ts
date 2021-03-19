@@ -33,4 +33,6 @@ export interface IHypernetWebIntegration {
   renderLinksWidget(params?: IRenderParams): void;
   renderPaymentWidget(params?: IRenderPaymentWidgetParams): void;
   renderConnectorAuthorizationFlow(params: IConnectorAuthorizationFlowParams): void;
+  displayMerchantIFrame(merchantUrl: string): void;
+  closeMerchantIFrame(merchantUrl: string): void;
 }

@@ -16,10 +16,10 @@ export class ContextProvider implements IContextProvider {
   constructor(
     onControlClaimed: Subject<ControlClaim>,
     onControlYielded: Subject<ControlClaim>,
-    onPushPaymentProposed: Subject<PushPayment>,
-    onPullPaymentProposed: Subject<PullPayment>,
+    onPushPaymentSent: Subject<PushPayment>,
+    onPullPaymentSent: Subject<PullPayment>,
     onPushPaymentReceived: Subject<PushPayment>,
-    onPullPaymentApproved: Subject<PullPayment>,
+    onPullPaymentReceived: Subject<PullPayment>,
     onPushPaymentUpdated: Subject<PushPayment>,
     onPullPaymentUpdated: Subject<PullPayment>,
     onBalancesChanged: Subject<Balances>,
@@ -28,8 +28,6 @@ export class ContextProvider implements IContextProvider {
     onAuthorizedMerchantActivationFailed: Subject<string>,
     onMerchantIFrameDisplayRequested: Subject<string>,
     onMerchantIFrameCloseRequested: Subject<string>,
-    onMerchantIFrameClosed: Subject<string>,
-    onMerchantIFrameDisplayed: Subject<string>,
   ) {
     this.context = new HypernetContext(
       null,
@@ -37,10 +35,10 @@ export class ContextProvider implements IContextProvider {
       false,
       onControlClaimed,
       onControlYielded,
-      onPushPaymentProposed,
-      onPullPaymentProposed,
+      onPushPaymentSent,
+      onPullPaymentSent,
       onPushPaymentReceived,
-      onPullPaymentApproved,
+      onPullPaymentReceived,
       onPushPaymentUpdated,
       onPullPaymentUpdated,
       onBalancesChanged,
@@ -49,8 +47,6 @@ export class ContextProvider implements IContextProvider {
       onAuthorizedMerchantActivationFailed,
       onMerchantIFrameDisplayRequested,
       onMerchantIFrameCloseRequested,
-      onMerchantIFrameClosed,
-      onMerchantIFrameDisplayed,
     );
   }
   public getContext(): ResultAsync<HypernetContext, never> {
@@ -69,10 +65,10 @@ export class ContextProvider implements IContextProvider {
         this.context.inControl,
         this.context.onControlClaimed,
         this.context.onControlYielded,
-        this.context.onPushPaymentProposed,
-        this.context.onPullPaymentProposed,
+        this.context.onPushPaymentSent,
+        this.context.onPullPaymentSent,
         this.context.onPushPaymentReceived,
-        this.context.onPullPaymentApproved,
+        this.context.onPullPaymentReceived,
         this.context.onPushPaymentUpdated,
         this.context.onPullPaymentUpdated,
         this.context.onBalancesChanged,
@@ -81,8 +77,6 @@ export class ContextProvider implements IContextProvider {
         this.context.onAuthorizedMerchantActivationFailed,
         this.context.onMerchantIFrameDisplayRequested,
         this.context.onMerchantIFrameCloseRequested,
-        this.context.onMerchantIFrameClosed,
-        this.context.onMerchantIFrameDisplayed,
         new Map<string, string>(),
       ),
     );

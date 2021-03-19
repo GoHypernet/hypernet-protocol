@@ -20,7 +20,7 @@ export class LinksViewModel {
     this.publicIdentifier = ko.observable("");
     this.links = ko.observableArray<LinkParams>();
 
-    this.integration.core.onPullPaymentProposed.subscribe({
+    this.integration.core.onPullPaymentSent.subscribe({
       next: (payment) => {
         // Check if there is a link for this counterparty already
         const links = this.links().filter((val) => {
@@ -39,7 +39,7 @@ export class LinksViewModel {
       },
     });
 
-    this.integration.core.onPushPaymentProposed.subscribe({
+    this.integration.core.onPushPaymentSent.subscribe({
       next: (payment) => {
         // Check if there is a link for this counterparty already
         const links = this.links().filter((val) => {

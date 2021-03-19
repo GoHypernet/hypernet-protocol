@@ -1,8 +1,8 @@
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
-import { IResolutionResult } from "@hypernetlabs/merchant-connector";
+import { IAuthorizeFundsRequest, IResolutionResult, ISendFundsRequest } from "@hypernetlabs/merchant-connector";
 import { MerchantConnectorError, MerchantValidationError } from "@hypernetlabs/objects/errors";
-import { HexString } from "@hypernetlabs/objects";
+import { HexString, HypernetContext, PullPayment, PushPayment } from "@hypernetlabs/objects";
 import { IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
 
 export class MerchantConnectorProxy extends ParentProxy implements IMerchantConnectorProxy {
@@ -11,6 +11,7 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
   constructor(
     protected element: HTMLElement | null,
     protected iframeUrl: string,
+    protected merchantUrl: string,
     protected iframeName: string,
     protected contextProvider: IContextProvider,
     protected debug: boolean = false,
@@ -39,64 +40,99 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
       const [context] = vals;
 
       // Events coming from merchant connector iframe
-      this.child?.on("onDisplayRequested", (merchantUrl) => {
-        this._pushOpenedMerchantIFrame(merchantUrl);
-        this._showMerchantIFrame();
-
-        context.onMerchantIFrameDisplayRequested.next(merchantUrl);
+      this.child?.on("onDisplayRequested", () => {
+        this._pushOpenedMerchantIFrame(this.merchantUrl);
+        this._showMerchantIFrame(context);
       });
 
-      this.child?.on("onCloseRequested", (merchantUrl) => {
+      this.child?.on("onCloseRequested", () => {
         // Only hide the merchant iframe if it's really displayed in the screen
-        if (MerchantConnectorProxy.openedIFramesQueue[0] === merchantUrl) {
+        if (MerchantConnectorProxy.openedIFramesQueue[0] === this.merchantUrl) {
           this._hideMerchantIFrame();
         }
 
         // Only close the core iframe if there isn't any merchant iframe left in the queue, otherwise show the next one in the line
         if (MerchantConnectorProxy.openedIFramesQueue.length === 0) {
-          context.onMerchantIFrameCloseRequested.next(merchantUrl);
+          context.onMerchantIFrameCloseRequested.next(this.merchantUrl);
         } else {
-          this._showMerchantIFrame();
+          this._showMerchantIFrame(context);
         }
       });
 
-      // Events coming from web integration and user interactions
-      context.onMerchantIFrameDisplayed.subscribe((merchantUrl: string) => {
-        this._pushOpenedMerchantIFrame(merchantUrl);
-        this._showMerchantIFrame();
+      // this.child?.on("onSendFundsRequested", (request: ISendFundsRequest) => {
+      //   context.onSendFundsRequested.next(request);
+      // });
 
-        this._createCall("onMerchantIFrameDisplayed", merchantUrl);
-      });
-
-      context.onMerchantIFrameClosed.subscribe((merchantUrl: string) => {
-        this._hideMerchantIFrame();
-
-        // Show the next merchant iframe (which is always the first merchant iframe in the queue) if there is any in the queue.
-        if (MerchantConnectorProxy.openedIFramesQueue.length > 0) {
-          this._showMerchantIFrame();
-          context.onMerchantIFrameDisplayRequested.next(MerchantConnectorProxy.openedIFramesQueue[0]);
-        }
-
-        // notify the child in merchant connector to tell him that the merchant iframe is going to close up.
-        this._createCall("onMerchantIFrameClosed", merchantUrl);
-      });
+      // this.child?.on("onAuthorizeFundsRequested", (request: IAuthorizeFundsRequest) => {
+      //   context.onAuthorizeFundsRequested.next(request);
+      // });
     });
+  }
+
+  // Events coming from web integration and user interactions
+  public displayMerchantIFrame(): ResultAsync<void, MerchantConnectorError> {
+    return this.contextProvider.getContext().andThen((context) => {
+      this._pushOpenedMerchantIFrame(this.merchantUrl);
+      this._showMerchantIFrame(context);
+
+      return this._createCall("merchantIFrameDisplayed", this.merchantUrl);
+    });
+  }
+
+  public closeMerchantIFrame(): ResultAsync<void, MerchantConnectorError> {
+    return this.contextProvider.getContext().andThen((context) => {
+      this._hideMerchantIFrame();
+
+      // Show the next merchant iframe (which is always the first merchant iframe in the queue) if there is any in the queue.
+      if (MerchantConnectorProxy.openedIFramesQueue.length > 0) {
+        this._showMerchantIFrame(context);
+      }
+
+      // notify the child in merchant connector to tell him that the merchant iframe is going to close up.
+      return this._createCall("merchantIFrameClosed", this.merchantUrl);
+    });
+  }
+
+  notifyPushPaymentSent(payment: PushPayment): ResultAsync<void, MerchantConnectorError> {
+    return this._createCall("notifyPushPaymentSent", payment);
+  }
+
+  notifyPushPaymentUpdated(payment: PushPayment): ResultAsync<void, MerchantConnectorError> {
+    return this._createCall("notifyPushPaymentUpdated", payment);
+  }
+
+  notifyPushPaymentReceived(payment: PushPayment): ResultAsync<void, MerchantConnectorError> {
+    return this._createCall("notifyPushPaymentReceived", payment);
+  }
+
+  notifyPullPaymentSent(payment: PullPayment): ResultAsync<void, MerchantConnectorError> {
+    return this._createCall("notifyPullPaymentSent", payment);
+  }
+
+  notifyPullPaymentUpdated(payment: PullPayment): ResultAsync<void, MerchantConnectorError> {
+    return this._createCall("notifyPullPaymentUpdated", payment);
+  }
+
+  notifyPullPaymentReceived(payment: PullPayment): ResultAsync<void, MerchantConnectorError> {
+    return this._createCall("notifyPullPaymentReceived", payment);
   }
 
   private _pushOpenedMerchantIFrame(merchantUrl: string) {
     // Check if there is merchantUrl in the queue
+    // If there is, don't re-add it.
     const index = MerchantConnectorProxy.openedIFramesQueue.indexOf(merchantUrl);
     if (index > -1) {
-      MerchantConnectorProxy.openedIFramesQueue.splice(index, 1);
+      return;
     }
     MerchantConnectorProxy.openedIFramesQueue.push(merchantUrl);
   }
 
-  private _showMerchantIFrame() {
+  private _showMerchantIFrame(context: HypernetContext) {
     // Show the first merchant iframe in the queue
     document.getElementsByName(
       `hypernet-core-merchant-connector-iframe-${MerchantConnectorProxy.openedIFramesQueue[0]}`,
     )[0].style.display = "block";
+    context.onMerchantIFrameDisplayRequested.next(MerchantConnectorProxy.openedIFramesQueue[0]);
   }
 
   private _hideMerchantIFrame() {
