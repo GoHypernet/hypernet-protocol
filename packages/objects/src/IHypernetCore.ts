@@ -199,8 +199,8 @@ export interface IHypernetCore {
 
   getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError>;
 
-  merchantIFrameClosed(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
-  merchantIFrameDisplayed(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
+  closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
+  displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
   
   /**
    * Observables for seeing what's going on

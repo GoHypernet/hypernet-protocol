@@ -600,11 +600,11 @@ export class HypernetCore implements IHypernetCore {
     return this.merchantService.getAuthorizedMerchants();
   }
 
-  public merchantIFrameClosed(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
-    return this.merchantService.merchantIFrameClosed(merchantUrl);
+  public closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+    return this.merchantService.closeMerchantIFrame(merchantUrl);
   }
   
-  public merchantIFrameDisplayed(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
-    return this.merchantService.merchantIFrameDisplayed(merchantUrl);
+  public displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+    return this.merchantService.displayMerchantIFrame(merchantUrl);
   }
 }

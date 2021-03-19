@@ -116,11 +116,11 @@ export default class CoreWrapper extends ChildProxy {
           return this.core.initiateDispute(data.data);
         }, data.callId);
       },
-      merchantIFrameClosed: (data: IIFrameCallData<string>) => {
-        this.core.merchantIFrameClosed(data.data);
+      closeMerchantIFrame: (data: IIFrameCallData<string>) => {
+        this.core.closeMerchantIFrame(data.data);
       },
-      merchantIFrameDisplayed: (data: IIFrameCallData<string>) => {
-        this.core.merchantIFrameDisplayed(data.data);
+      displayMerchantIFrame: (data: IIFrameCallData<string>) => {
+        this.core.displayMerchantIFrame(data.data);
       },
 
       //   pullFunds(paymentId: string, amount: BigNumber): Promise<Payment>;

@@ -11,6 +11,7 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
   constructor(
     protected element: HTMLElement | null,
     protected iframeUrl: string,
+    protected merchantUrl: string,
     protected iframeName: string,
     protected contextProvider: IContextProvider,
     protected debug: boolean = false,
@@ -40,19 +41,19 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
 
       // Events coming from merchant connector iframe
       this.child?.on("onDisplayRequested", () => {
-        this._pushOpenedMerchantIFrame(this.iframeUrl);
+        this._pushOpenedMerchantIFrame(this.merchantUrl);
         this._showMerchantIFrame(context);
       });
 
       this.child?.on("onCloseRequested", () => {
         // Only hide the merchant iframe if it's really displayed in the screen
-        if (MerchantConnectorProxy.openedIFramesQueue[0] === this.iframeUrl) {
+        if (MerchantConnectorProxy.openedIFramesQueue[0] === this.merchantUrl) {
           this._hideMerchantIFrame();
         }
 
         // Only close the core iframe if there isn't any merchant iframe left in the queue, otherwise show the next one in the line
         if (MerchantConnectorProxy.openedIFramesQueue.length === 0) {
-          context.onMerchantIFrameCloseRequested.next(this.iframeUrl);
+          context.onMerchantIFrameCloseRequested.next(this.merchantUrl);
         } else {
           this._showMerchantIFrame(context);
         }
@@ -69,17 +70,17 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
   }
 
   // Events coming from web integration and user interactions
-  public merchantIFrameDisplayed(): ResultAsync<void, MerchantConnectorError> {
+  public displayMerchantIFrame(): ResultAsync<void, MerchantConnectorError> {
     return this.contextProvider.getContext()
     .andThen((context) => {
-    this._pushOpenedMerchantIFrame(this.iframeUrl);
+    this._pushOpenedMerchantIFrame(this.merchantUrl);
     this._showMerchantIFrame(context);
 
-    return this._createCall("merchantIFrameDisplayed", this.iframeUrl);
+    return this._createCall("merchantIFrameDisplayed", this.merchantUrl);
     });
   }
 
-  public merchantIFrameClosed(): ResultAsync<void, MerchantConnectorError> {
+  public closeMerchantIFrame(): ResultAsync<void, MerchantConnectorError> {
     return this.contextProvider.getContext()
     .andThen((context) => {
     this._hideMerchantIFrame();
@@ -91,7 +92,7 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     }
 
     // notify the child in merchant connector to tell him that the merchant iframe is going to close up.
-    return this._createCall("merchantIFrameClosed", this.iframeUrl);
+    return this._createCall("merchantIFrameClosed", this.merchantUrl);
   });
   }
 

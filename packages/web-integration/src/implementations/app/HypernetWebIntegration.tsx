@@ -23,6 +23,7 @@ import {
 import IHypernetIFrameProxy from "@web-integration-interfaces/proxy/IHypernetIFrameProxy";
 import HypernetIFrameProxy from "@web-integration-implementations/proxy/HypernetIFrameProxy";
 import ConnectorAuthorizationFlow from "@web-integration-flows/ConnectorAuthorizationFlow";
+import { ThemeProvider } from "theming";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
@@ -113,7 +114,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       "click",
       (e) => {
         // TODO: Figure out how to track which merchant we are showing
-        this.core.merchantIFrameClosed("TODO");
+        this.core.closeMerchantIFrame("TODO");
       },
       false,
     );
@@ -216,6 +217,14 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       ),
       this._generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
     );
+  }
+
+  public displayMerchantIFrame(merchantUrl: string): void {
+    this.core.displayMerchantIFrame(merchantUrl);
+  }
+
+  public closeMerchantIFrame(merchantUrl: string): void {
+    this.core.closeMerchantIFrame(merchantUrl);
   }
 }
 

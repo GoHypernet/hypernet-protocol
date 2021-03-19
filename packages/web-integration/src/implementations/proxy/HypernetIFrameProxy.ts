@@ -298,7 +298,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return this._createCall("getAuthorizedMerchants", null);
   }
 
-  public merchantIFrameClosed(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+  public closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
 
     if (this.child != null) {
       this.child.frame.style.display = "none";
@@ -306,18 +306,18 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     if (this.element != null) {
       this.element.style.display = "none";
     }
-    return this._createCall("merchantIFrameClosed", merchantUrl);
+    return this._createCall("closeMerchantIFrame", merchantUrl);
   }
 
-  public merchantIFrameDisplayed(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+  public displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
     if (this.child != null) {
-      this.child.frame.style.display = "none";
+      this.child.frame.style.display = "block";
     }
     if (this.element != null) {
       this.element.style.display = "block";
     }
 
-    return this._createCall("merchantIFrameDisplayed", merchantUrl);
+    return this._createCall("displayMerchantIFrame", merchantUrl);
   }
 
   /**

@@ -41,11 +41,11 @@ export class MerchantService implements IMerchantService {
     return this.merchantConnectorRepository.activateAuthorizedMerchants();
   }
 
-  public merchantIFrameClosed(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
-    return this.merchantConnectorRepository.merchantIFrameClosed(merchantUrl);
+  public closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+    return this.merchantConnectorRepository.closeMerchantIFrame(merchantUrl);
   }
   
-  public merchantIFrameDisplayed(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
-    return this.merchantConnectorRepository.merchantIFrameDisplayed(merchantUrl);
+  public displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+    return this.merchantConnectorRepository.displayMerchantIFrame(merchantUrl);
   }
 }

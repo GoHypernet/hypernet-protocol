@@ -1,1 +1,1 @@
-export * from "@objects/types";
+export * from "../src/types";

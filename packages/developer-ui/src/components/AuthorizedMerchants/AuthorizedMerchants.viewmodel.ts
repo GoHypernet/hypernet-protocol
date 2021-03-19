@@ -39,7 +39,7 @@ export class AuthorizedMerchantsViewModel {
 
   openMerchantIFrameClick = (merchantUrl: string) => {
     this.integration.core.waitInitialized().map(() => {
-      this.integration.core.merchantIFrameDisplayed(merchantUrl);
+      this.integration.displayMerchantIFrame(merchantUrl);
     });
   };
 }

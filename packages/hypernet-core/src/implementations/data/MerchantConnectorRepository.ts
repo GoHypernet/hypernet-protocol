@@ -190,24 +190,24 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       .map(() => {});
   }
 
-  public merchantIFrameClosed(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+  public closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
     const proxy = this.activatedMerchants.get(merchantUrl);
 
     if (proxy == null) {
       return errAsync(new MerchantConnectorError(`No existing merchant connector for ${merchantUrl}`));
     }
 
-    return proxy.merchantIFrameClosed();
+    return proxy.closeMerchantIFrame();
   }
   
-  public merchantIFrameDisplayed(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+  public displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
     const proxy = this.activatedMerchants.get(merchantUrl);
 
     if (proxy == null) {
       return errAsync(new MerchantConnectorError(`No existing merchant connector for ${merchantUrl}`));
     }
 
-    return proxy.merchantIFrameClosed();
+    return proxy.displayMerchantIFrame();
   }
 
   public activateAuthorizedMerchants(): ResultAsync<

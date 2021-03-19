@@ -35,6 +35,6 @@ export interface IMerchantConnectorRepository {
     transferId: string,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | CoreUninitializedError>;
 
-  merchantIFrameClosed(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
-  merchantIFrameDisplayed(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
+  closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
+  displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
 }

@@ -13,6 +13,7 @@ import {
   SortedTransfers,
   IFullTransferState,
   IHypernetPullPaymentDetails,
+  IRegisteredTransfer,
 } from "@hypernetlabs/objects";
 import {
   InvalidParametersError,
@@ -59,7 +60,7 @@ export class PaymentUtils implements IPaymentUtils {
     protected vectorUtils: IVectorUtils,
     protected browserNodeProvider: IBrowserNodeProvider,
     protected timeUtils: ITimeUtils,
-  ) {}
+  ) { }
 
   /**
    * Verifies that the paymentId provided has domain matching Hypernet's domain name.
@@ -540,8 +541,7 @@ export class PaymentUtils implements IPaymentUtils {
         // If the transfer address is not one we know, we don't know what this is
         if (!transferMap.has(transfer.transferDefinition)) {
           this.logUtils.log(
-            `Transfer type not recognized. Transfer definition: ${
-              transfer.transferDefinition
+            `Transfer type not recognized. Transfer definition: ${transfer.transferDefinition
             }, transferMap: ${JSON.stringify(transferMap)}`,
           );
           return okAsync(ETransferType.Unrecognized);
@@ -694,5 +694,20 @@ export class PaymentUtils implements IPaymentUtils {
     });
 
     return this.vectorUtils.getTimestampFromTransfer(transfers[0]);
+  }
+
+  protected getRegisteredTransfersResponse: ResultAsync<IRegisteredTransfer[], VectorError> | undefined;
+  protected getRegisteredTransfers(): ResultAsync<IRegisteredTransfer[], VectorError> {
+    if (this.getRegisteredTransfersResponse == null) {
+      this.getRegisteredTransfersResponse = ResultUtils.combine([this.browserNodeProvider.getBrowserNode(),
+      this.configProvider.getConfig()])
+        .andThen((vals) => {
+          const [browserNode, config] = vals;
+
+          return browserNode.getRegisteredTransfers(config.chainId);
+        });
+    }
+    
+    return this.getRegisteredTransfersResponse;
   }
 }
