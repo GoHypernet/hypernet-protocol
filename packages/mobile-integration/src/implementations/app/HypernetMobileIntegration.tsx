@@ -34,11 +34,11 @@ export default class HypernetMobileIntegration {
       coreProxy.onBalancesChanged.subscribe(() => {
         this.postBalances();
       });
-      coreProxy.onPullPaymentApproved.subscribe(() => {
+      coreProxy.onPullPaymentReceived.subscribe(() => {
         this.postLinks();
         this.postActiveLinks();
       });
-      coreProxy.onPullPaymentProposed.subscribe(() => {
+      coreProxy.onPullPaymentSent.subscribe(() => {
         this.postLinks();
         this.postActiveLinks();
       });
@@ -50,7 +50,7 @@ export default class HypernetMobileIntegration {
         this.postLinks();
         this.postActiveLinks();
       });
-      coreProxy.onPushPaymentProposed.subscribe(() => {
+      coreProxy.onPushPaymentSent.subscribe(() => {
         this.postLinks();
         this.postActiveLinks();
       });

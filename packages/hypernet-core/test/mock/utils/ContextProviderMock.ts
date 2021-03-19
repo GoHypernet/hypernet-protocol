@@ -18,10 +18,10 @@ export class ContextProviderMock implements IContextProvider {
 
   public onControlClaimed: Subject<ControlClaim>;
   public onControlYielded: Subject<ControlClaim>;
-  public onPushPaymentProposed: Subject<PushPayment>;
-  public onPullPaymentProposed: Subject<PullPayment>;
+  public onPushPaymentSent: Subject<PushPayment>;
+  public onPullPaymentSent: Subject<PullPayment>;
   public onPushPaymentReceived: Subject<PushPayment>;
-  public onPullPaymentApproved: Subject<PullPayment>;
+  public onPullPaymentReceived: Subject<PullPayment>;
   public onPushPaymentUpdated: Subject<PushPayment>;
   public onPullPaymentUpdated: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
@@ -40,10 +40,10 @@ export class ContextProviderMock implements IContextProvider {
   ) {
     this.onControlClaimed = new Subject<ControlClaim>();
     this.onControlYielded = new Subject<ControlClaim>();
-    this.onPushPaymentProposed = new Subject<PushPayment>();
-    this.onPullPaymentProposed = new Subject<PullPayment>();
+    this.onPushPaymentSent = new Subject<PushPayment>();
+    this.onPullPaymentSent = new Subject<PullPayment>();
     this.onPushPaymentReceived = new Subject<PushPayment>();
-    this.onPullPaymentApproved = new Subject<PullPayment>();
+    this.onPullPaymentReceived = new Subject<PullPayment>();
     this.onPushPaymentUpdated = new Subject<PushPayment>();
     this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
@@ -64,10 +64,10 @@ export class ContextProviderMock implements IContextProvider {
         false,
         this.onControlClaimed,
         this.onControlYielded,
-        this.onPushPaymentProposed,
-        this.onPullPaymentProposed,
+        this.onPushPaymentSent,
+        this.onPullPaymentSent,
         this.onPushPaymentReceived,
-        this.onPullPaymentApproved,
+        this.onPullPaymentReceived,
         this.onPushPaymentUpdated,
         this.onPullPaymentUpdated,
         this.onBalancesChanged,
@@ -75,7 +75,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onAuthorizedMerchantUpdated,
         this.onAuthorizedMerchantActivationFailed,
         this.onMerchantIFrameDisplayRequested,
-        this.onMerchantIFrameCloseRequested
+        this.onMerchantIFrameCloseRequested,
       );
     }
 
@@ -88,10 +88,10 @@ export class ContextProviderMock implements IContextProvider {
         true,
         this.onControlClaimed,
         this.onControlYielded,
-        this.onPushPaymentProposed,
-        this.onPullPaymentProposed,
+        this.onPushPaymentSent,
+        this.onPullPaymentSent,
         this.onPushPaymentReceived,
-        this.onPullPaymentApproved,
+        this.onPullPaymentReceived,
         this.onPushPaymentUpdated,
         this.onPullPaymentUpdated,
         this.onBalancesChanged,

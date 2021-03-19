@@ -1,6 +1,6 @@
 import { Subject } from "rxjs";
 import { IResolutionResult } from "./IResolutionResult";
-import { PushPayment, PullPayment} from "@hypernetlabs/objects";
+import { PushPayment, PullPayment } from "@hypernetlabs/objects";
 
 export interface IMerchantConnector {
   resolveChallenge(paymentId: string): Promise<IResolutionResult>;

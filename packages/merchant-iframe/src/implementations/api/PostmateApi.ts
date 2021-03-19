@@ -82,27 +82,27 @@ export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
         const context = this.contextProvider.getMerchantContext();
         context.merchantConnector?.onIFrameClosed();
       },
-      onPushPaymentSent: (data: IIFrameCallData<PushPayment>) => {
+      notifyPushPaymentSent: (data: IIFrameCallData<PushPayment>) => {
         const context = this.contextProvider.getMerchantContext();
         context.merchantConnector?.onPushPaymentSent(data.data);
       },
-      onPushPaymentUpdated: (data: IIFrameCallData<PushPayment>) => {
+      notifyPushPaymentUpdated: (data: IIFrameCallData<PushPayment>) => {
         const context = this.contextProvider.getMerchantContext();
         context.merchantConnector?.onPushPaymentUpdated(data.data);
       },
-      onPushPaymentReceived: (data: IIFrameCallData<PushPayment>) => {
+      notifyPushPaymentReceived: (data: IIFrameCallData<PushPayment>) => {
         const context = this.contextProvider.getMerchantContext();
         context.merchantConnector?.onPushPaymentReceived(data.data);
       },
-      onPullPaymentSent: (data: IIFrameCallData<PullPayment>) => {
+      notifyPullPaymentSent: (data: IIFrameCallData<PullPayment>) => {
         const context = this.contextProvider.getMerchantContext();
         context.merchantConnector?.onPullPaymentSent(data.data);
       },
-      onPullPaymentUpdated: (data: IIFrameCallData<PullPayment>) => {
+      notifyPullPaymentUpdated: (data: IIFrameCallData<PullPayment>) => {
         const context = this.contextProvider.getMerchantContext();
         context.merchantConnector?.onPullPaymentUpdated(data.data);
       },
-      onPullPaymentReceived: (data: IIFrameCallData<PullPayment>) => {
+      notifyPullPaymentReceived: (data: IIFrameCallData<PullPayment>) => {
         const context = this.contextProvider.getMerchantContext();
         context.merchantConnector?.onPullPaymentReceived(data.data);
       },

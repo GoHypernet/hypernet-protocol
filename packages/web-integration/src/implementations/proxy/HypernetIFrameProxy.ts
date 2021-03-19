@@ -40,10 +40,10 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
 
     this.onControlClaimed = new Subject<ControlClaim>();
     this.onControlYielded = new Subject<ControlClaim>();
-    this.onPushPaymentProposed = new Subject<PushPayment>();
-    this.onPullPaymentProposed = new Subject<PullPayment>();
+    this.onPushPaymentSent = new Subject<PushPayment>();
+    this.onPullPaymentSent = new Subject<PullPayment>();
     this.onPushPaymentReceived = new Subject<PushPayment>();
-    this.onPullPaymentApproved = new Subject<PullPayment>();
+    this.onPullPaymentReceived = new Subject<PullPayment>();
     this.onPushPaymentUpdated = new Subject<PushPayment>();
     this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
@@ -70,20 +70,20 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
           this.onControlYielded.next(data);
         });
 
-        child.on("onPushPaymentProposed", (data: PushPayment) => {
-          this.onPushPaymentProposed.next(data);
+        child.on("onPushPaymentSent", (data: PushPayment) => {
+          this.onPushPaymentSent.next(data);
         });
 
-        child.on("onPullPaymentProposed", (data: PullPayment) => {
-          this.onPullPaymentProposed.next(data);
+        child.on("onPullPaymentSent", (data: PullPayment) => {
+          this.onPullPaymentSent.next(data);
         });
 
         child.on("onPushPaymentReceived", (data: PushPayment) => {
           this.onPushPaymentReceived.next(data);
         });
 
-        child.on("onPullPaymentApproved", (data: PullPayment) => {
-          this.onPullPaymentApproved.next(data);
+        child.on("onPullPaymentReceived", (data: PullPayment) => {
+          this.onPullPaymentReceived.next(data);
         });
 
         child.on("onPushPaymentUpdated", (data: PushPayment) => {
@@ -301,7 +301,6 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   }
 
   public closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
-
     if (this.child != null) {
       this.child.frame.style.display = "none";
     }
@@ -327,17 +326,16 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
    */
   public onControlClaimed: Subject<ControlClaim>;
   public onControlYielded: Subject<ControlClaim>;
-  public onPushPaymentProposed: Subject<PushPayment>;
-  public onPullPaymentProposed: Subject<PullPayment>;
+  public onPushPaymentSent: Subject<PushPayment>;
+  public onPullPaymentSent: Subject<PullPayment>;
   public onPushPaymentUpdated: Subject<PushPayment>;
   public onPullPaymentUpdated: Subject<PullPayment>;
   public onPushPaymentReceived: Subject<PushPayment>;
-  public onPullPaymentApproved: Subject<PullPayment>;
+  public onPullPaymentReceived: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
   public onMerchantAuthorized: Subject<string>;
   public onAuthorizedMerchantUpdated: Subject<string>;
   public onAuthorizedMerchantActivationFailed: Subject<string>;
   public onMerchantIFrameDisplayRequested: Subject<string>;
   public onMerchantIFrameCloseRequested: Subject<string>;
-
 }

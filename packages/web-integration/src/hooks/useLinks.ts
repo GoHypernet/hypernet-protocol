@@ -64,7 +64,7 @@ export function useLinks(): IState {
 
     fetchData();
 
-    proxy.onPullPaymentProposed.subscribe({
+    proxy.onPullPaymentSent.subscribe({
       next: (payment) => {
         const linksArr = [...state.links];
 
@@ -87,7 +87,7 @@ export function useLinks(): IState {
       },
     });
 
-    proxy.onPushPaymentProposed.subscribe({
+    proxy.onPushPaymentSent.subscribe({
       next: (payment) => {
         const linksArr = [...state.links];
 

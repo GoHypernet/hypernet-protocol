@@ -158,12 +158,12 @@ export default class CoreWrapper extends ChildProxy {
       parent.emit("onControlYielded", val);
     });
 
-    this.core.onPushPaymentProposed.subscribe((val) => {
-      parent.emit("onPushPaymentProposed", val);
+    this.core.onPushPaymentSent.subscribe((val) => {
+      parent.emit("onPushPaymentSent", val);
     });
 
-    this.core.onPullPaymentProposed.subscribe((val) => {
-      parent.emit("onPullPaymentProposed", val);
+    this.core.onPullPaymentSent.subscribe((val) => {
+      parent.emit("onPullPaymentSent", val);
     });
 
     this.core.onPushPaymentUpdated.subscribe((val) => {
@@ -178,8 +178,8 @@ export default class CoreWrapper extends ChildProxy {
       parent.emit("onPushPaymentReceived", val);
     });
 
-    this.core.onPullPaymentApproved.subscribe((val) => {
-      parent.emit("onPullPaymentApproved", val);
+    this.core.onPullPaymentReceived.subscribe((val) => {
+      parent.emit("onPullPaymentReceived", val);
     });
 
     this.core.onBalancesChanged.subscribe((val) => {

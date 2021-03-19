@@ -201,18 +201,18 @@ export interface IHypernetCore {
 
   closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
   displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
-  
+
   /**
    * Observables for seeing what's going on
    */
   onControlClaimed: Subject<ControlClaim>;
   onControlYielded: Subject<ControlClaim>;
-  onPushPaymentProposed: Subject<PushPayment>;
-  onPullPaymentProposed: Subject<PullPayment>;
+  onPushPaymentSent: Subject<PushPayment>;
+  onPullPaymentSent: Subject<PullPayment>;
   onPushPaymentUpdated: Subject<PushPayment>;
   onPullPaymentUpdated: Subject<PullPayment>;
   onPushPaymentReceived: Subject<PushPayment>;
-  onPullPaymentApproved: Subject<PullPayment>;
+  onPullPaymentReceived: Subject<PullPayment>;
   onBalancesChanged: Subject<Balances>;
   onMerchantAuthorized: Subject<string>;
   onAuthorizedMerchantUpdated: Subject<string>;

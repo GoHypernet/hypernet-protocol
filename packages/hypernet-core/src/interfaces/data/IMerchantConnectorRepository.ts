@@ -1,10 +1,12 @@
 import { ResultAsync } from "neverthrow";
 import {
   CoreUninitializedError,
+  LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
   PersistenceError,
 } from "@hypernetlabs/objects/errors";
+import { PullPayment, PushPayment } from "@hypernetlabs/objects";
 
 export interface IMerchantConnectorRepository {
   /**
@@ -37,4 +39,11 @@ export interface IMerchantConnectorRepository {
 
   closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
   displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
+
+  notifyPushPaymentSent(merchantUrl: string, payment: PushPayment): ResultAsync<void, LogicalError>;
+  notifyPushPaymentUpdated(merchantUrl: string, payment: PushPayment): ResultAsync<void, LogicalError>;
+  notifyPushPaymentReceived(merchantUrl: string, payment: PushPayment): ResultAsync<void, LogicalError>;
+  notifyPullPaymentSent(merchantUrl: string, payment: PullPayment): ResultAsync<void, LogicalError>;
+  notifyPullPaymentUpdated(merchantUrl: string, payment: PullPayment): ResultAsync<void, LogicalError>;
+  notifyPullPaymentReceived(merchantUrl: string, payment: PullPayment): ResultAsync<void, LogicalError>;
 }

@@ -438,7 +438,7 @@ describe("PaymentService tests", () => {
 
   //   const hypernetContext = paymentServiceMock.getHypernetContextFactory();
   //   hypernetContext.publicIdentifier = mockUtils.generateRandomEtherAdress();
-  //   hypernetContext.onPullPaymentApproved = new Subject<PullPayment>();
+  //   hypernetContext.onPullPaymentReceived = new Subject<PullPayment>();
 
   //   jestWhen(paymentServiceMock.paymentRepository.prototype.getPaymentsByIds)
   //     .calledWith([paymentId])

@@ -41,21 +41,17 @@ export class LinkViewModel {
     // tslint:disable-next-line: no-console
     console.log(`Pushed ${pullPaymentParams.length} pull payment params`);
 
-    this.integration.core.onPullPaymentProposed.subscribe({
+    this.integration.core.onPullPaymentReceived.subscribe({
       next: (payment) => {
-        if (payment.to === this.counterParty || payment.from === this.counterParty) {
-          // It's for us, we'll need to add it to the payments for the link
-          this.pullPayments.push(new PullPaymentParams(this.integration, payment));
-        }
+        // It's for us, we'll need to add it to the payments for the link
+        this.pullPayments.push(new PullPaymentParams(this.integration, payment));
       },
     });
 
-    this.integration.core.onPushPaymentProposed.subscribe({
+    this.integration.core.onPushPaymentReceived.subscribe({
       next: (payment) => {
-        if (payment.to === this.counterParty || payment.from === this.counterParty) {
-          // It's for us, we'll need to add it to the payments for the link
-          this.pushPayments.push(new PushPaymentParams(this.integration, payment));
-        }
+        // It's for us, we'll need to add it to the payments for the link
+        this.pushPayments.push(new PushPaymentParams(this.integration, payment));
       },
     });
   }

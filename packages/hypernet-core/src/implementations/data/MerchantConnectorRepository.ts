@@ -1,7 +1,8 @@
 import { IMerchantConnectorRepository } from "@interfaces/data";
-import { PublicKey, HypernetContext } from "@hypernetlabs/objects";
+import { PublicKey, HypernetContext, PullPayment, PushPayment } from "@hypernetlabs/objects";
 import {
   CoreUninitializedError,
+  LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
   PersistenceError,
@@ -199,7 +200,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
     return proxy.closeMerchantIFrame();
   }
-  
+
   public displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
     const proxy = this.activatedMerchants.get(merchantUrl);
 
@@ -236,6 +237,52 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
       return ResultUtils.executeSerially(activationResults).map(() => {});
     });
+  }
+
+  public notifyPushPaymentSent(merchantUrl: string, payment: PushPayment): ResultAsync<void, LogicalError> {
+    return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
+      return merchantConnector.notifyPushPaymentSent(payment);
+    });
+  }
+
+  public notifyPushPaymentUpdated(merchantUrl: string, payment: PushPayment): ResultAsync<void, LogicalError> {
+    return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
+      return merchantConnector.notifyPushPaymentUpdated(payment);
+    });
+  }
+
+  public notifyPushPaymentReceived(merchantUrl: string, payment: PushPayment): ResultAsync<void, LogicalError> {
+    return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
+      return merchantConnector.notifyPushPaymentReceived(payment);
+    });
+  }
+
+  public notifyPullPaymentSent(merchantUrl: string, payment: PullPayment): ResultAsync<void, LogicalError> {
+    return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
+      return merchantConnector.notifyPullPaymentSent(payment);
+    });
+  }
+
+  public notifyPullPaymentUpdated(merchantUrl: string, payment: PullPayment): ResultAsync<void, LogicalError> {
+    return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
+      return merchantConnector.notifyPullPaymentUpdated(payment);
+    });
+  }
+
+  public notifyPullPaymentReceived(merchantUrl: string, payment: PullPayment): ResultAsync<void, LogicalError> {
+    return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
+      return merchantConnector.notifyPullPaymentReceived(payment);
+    });
+  }
+
+  protected getMerchantConnector(merchantUrl: string): ResultAsync<IMerchantConnectorProxy, MerchantConnectorError> {
+    const proxy = this.activatedMerchants.get(merchantUrl);
+
+    if (proxy == null) {
+      return errAsync(new MerchantConnectorError(`No existing merchant connector for ${merchantUrl}`));
+    }
+
+    return okAsync(proxy);
   }
 
   protected _activateAuthorizedMerchant(

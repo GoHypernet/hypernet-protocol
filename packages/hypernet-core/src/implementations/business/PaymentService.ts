@@ -81,20 +81,30 @@ export class PaymentService implements IPaymentService {
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  ): ResultAsync<PullPayment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
     // totalAuthorized / (deltaAmount/deltaTime) > ((expiration date - now) + someMinimumNumDays)
 
-    return this.paymentRepository.createPullPayment(
-      counterPartyAccount,
-      totalAuthorized.toString(),
-      deltaTime,
-      deltaAmount,
-      expirationDate,
-      requiredStake.toString(),
-      paymentToken,
-      merchantUrl,
-    );
+    return ResultUtils.combine([
+      this.paymentRepository.createPullPayment(
+        counterPartyAccount,
+        totalAuthorized.toString(),
+        deltaTime,
+        deltaAmount,
+        expirationDate,
+        requiredStake.toString(),
+        paymentToken,
+        merchantUrl,
+      ),
+      this.contextProvider.getContext(),
+    ]).map((vals) => {
+      const [payment, context] = vals;
+
+      // Send an event
+      context.onPullPaymentSent.next(payment);
+
+      return payment;
+    });
   }
 
   public pullFunds(
@@ -151,16 +161,26 @@ export class PaymentService implements IPaymentService {
     requiredStake: string,
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<Payment, Error> {
+  ): ResultAsync<PushPayment, Error> {
     // TODO: Sanity checking on the values
-    return this.paymentRepository.createPushPayment(
-      counterPartyAccount,
-      amount,
-      expirationDate,
-      requiredStake,
-      paymentToken,
-      merchantUrl,
-    );
+    return ResultUtils.combine([
+      this.paymentRepository.createPushPayment(
+        counterPartyAccount,
+        amount,
+        expirationDate,
+        requiredStake,
+        paymentToken,
+        merchantUrl,
+      ),
+      this.contextProvider.getContext(),
+    ]).map((vals) => {
+      const [payment, context] = vals;
+
+      // Send an event
+      context.onPushPaymentSent.next(payment);
+
+      return payment;
+    });
   }
 
   /**
@@ -197,10 +217,10 @@ export class PaymentService implements IPaymentService {
 
       if (payment instanceof PushPayment) {
         // Someone wants to send us a pushPayment, emit up to the api
-        context.onPushPaymentProposed.next(payment);
+        context.onPushPaymentReceived.next(payment);
       } else if (payment instanceof PullPayment) {
         // Someone wants to send us a pullPayment, emit up to the api
-        context.onPullPaymentProposed.next(payment);
+        context.onPullPaymentReceived.next(payment);
       } else {
         throw new Error("Unknown payment type!");
       }
@@ -351,7 +371,7 @@ export class PaymentService implements IPaymentService {
         context.onPushPaymentUpdated.next(payment);
       }
       if (payment instanceof PullPayment) {
-        context.onPullPaymentApproved.next(payment);
+        context.onPullPaymentReceived.next(payment);
       }
 
       return this._advancePayment(payment, context);

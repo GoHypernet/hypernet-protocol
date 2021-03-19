@@ -2,13 +2,12 @@ import { errAsync, okAsync } from "neverthrow";
 import { ResultUtils } from "../src/ResultUtils";
 
 describe("ResultUtils tests", () => {
-  
   test("executeSerially executes resultAsyncs sequentially", async () => {
     // Arrange
     let value = 0;
     const asyncMethod = () => {
-        return okAsync<number, Error>(value++);
-    }
+      return okAsync<number, Error>(value++);
+    };
 
     // Act
     const result = await ResultUtils.executeSerially([asyncMethod, asyncMethod, asyncMethod]);
@@ -24,13 +23,13 @@ describe("ResultUtils tests", () => {
     // Arrange
     let value = 0;
     const asyncMethod = () => {
-        return okAsync<number, Error>(value++);
-    }
+      return okAsync<number, Error>(value++);
+    };
 
     const err = new Error("Error!");
     const asyncFailed = () => {
       return errAsync<number, Error>(err);
-  }
+    };
 
     // Act
     const result = await ResultUtils.executeSerially([asyncMethod, asyncFailed, asyncMethod]);

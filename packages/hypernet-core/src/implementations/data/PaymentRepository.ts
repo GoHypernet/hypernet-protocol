@@ -102,7 +102,7 @@ export class PaymentRepository implements IPaymentRepository {
     requiredStake: string, // TODO: amounts should be consistently use BigNumber
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  ): ResultAsync<PullPayment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
     let paymentId: string;
@@ -143,6 +143,9 @@ export class PaymentRepository implements IPaymentRepository {
       .andThen((transfer) => {
         // Return the payment
         return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
+      })
+      .map((payment) => {
+        return payment as PullPayment;
       });
   }
 
@@ -164,7 +167,7 @@ export class PaymentRepository implements IPaymentRepository {
     requiredStake: string,
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  ): ResultAsync<PushPayment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
     let paymentId: string;
@@ -201,6 +204,9 @@ export class PaymentRepository implements IPaymentRepository {
       .andThen((transfer) => {
         // Return the payment
         return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
+      })
+      .map((payment) => {
+        return payment as PushPayment;
       });
   }
 

@@ -1,4 +1,4 @@
-import { EthereumAddress, Payment, PublicIdentifier } from "@hypernetlabs/objects";
+import { EthereumAddress, Payment, PublicIdentifier, PullPayment, PushPayment } from "@hypernetlabs/objects";
 import {
   CoreUninitializedError,
   PaymentFinalizeError,
@@ -28,7 +28,7 @@ export interface IPaymentRepository {
     requiredStake: string,
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<PushPayment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   createPullPayment(
     counterPartyAccount: PublicIdentifier,
@@ -39,7 +39,7 @@ export interface IPaymentRepository {
     requiredStake: string, // TODO: amounts should be consistently use BigNumber
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<PullPayment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
 
   createPullRecord(
     paymentId: string,
