@@ -124,6 +124,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
           if (element) {
             element.style.display = "block";
           }
+          this.onMerchantIFrameDisplayRequested.next(data);
         });
 
         child.on("onMerchantIFrameCloseRequested", (data: string) => {
@@ -131,6 +132,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
           if (element) {
             element.style.display = "none";
           }
+          this.onMerchantIFrameCloseRequested.next(data);
         });
       });
     });

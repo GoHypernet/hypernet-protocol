@@ -98,9 +98,10 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
 
   private _pushOpenedMerchantIFrame(merchantUrl: string) {
     // Check if there is merchantUrl in the queue
+    // If there is, don't re-add it.
     const index = MerchantConnectorProxy.openedIFramesQueue.indexOf(merchantUrl);
     if (index > -1) {
-      MerchantConnectorProxy.openedIFramesQueue.splice(index, 1);
+      return;
     }
     MerchantConnectorProxy.openedIFramesQueue.push(merchantUrl);
   }

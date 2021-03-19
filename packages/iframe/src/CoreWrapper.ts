@@ -198,12 +198,12 @@ export default class CoreWrapper extends ChildProxy {
       parent.emit("onAuthorizedMerchantActivationFailed", val.toString());
     });
 
-    this.core.onMerchantIFrameDisplayRequested.subscribe(() => {
-      parent.emit("onMerchantIFrameDisplayRequested");
+    this.core.onMerchantIFrameDisplayRequested.subscribe((merchantUrl) => {
+      parent.emit("onMerchantIFrameDisplayRequested", merchantUrl);
     });
 
-    this.core.onMerchantIFrameCloseRequested.subscribe(() => {
-      parent.emit("onMerchantIFrameCloseRequested");
+    this.core.onMerchantIFrameCloseRequested.subscribe((merchantUrl) => {
+      parent.emit("onMerchantIFrameCloseRequested", merchantUrl);
     });
   }
 }

@@ -29,6 +29,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
 
   protected iframeURL: string = "http://localhost:8090";
+  protected currentMerchantUrl: string | undefined | null;
 
   public core: IHypernetIFrameProxy;
 
@@ -37,6 +38,10 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
     // Create a proxy connection to the iframe
     this.core = new HypernetIFrameProxy(this._prepareIFrameContainer(), this.iframeURL, "hypernet-core-iframe");
+
+    this.core.onMerchantIFrameDisplayRequested.subscribe((merchantUrl) => {
+      this.currentMerchantUrl = merchantUrl;
+    });
   }
 
   // wait for the core to be intialized
@@ -114,7 +119,10 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       "click",
       (e) => {
         // TODO: Figure out how to track which merchant we are showing
-        this.core.closeMerchantIFrame("TODO");
+        if (this.currentMerchantUrl != null) {
+          this.core.closeMerchantIFrame(this.currentMerchantUrl);
+          this.currentMerchantUrl = null;
+        }
       },
       false,
     );
