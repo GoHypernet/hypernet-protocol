@@ -1,1 +1,1 @@
-export * from "@objects/types/typechain";
+export * from "../../src/types/typechain";

@@ -1,1 +1,1 @@
-export * from "@objects/errors";
+export * from "../src/errors";
