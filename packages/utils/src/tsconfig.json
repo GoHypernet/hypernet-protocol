@@ -1,6 +1,7 @@
 {
   "extends": "../../../tsconfig.build.json",
   "compilerOptions": {
+    "noEmit": false,
     "outDir": "../dist"
   },
   "references": []

@@ -23,13 +23,15 @@
   "files": [
     "dist",
     "src",
+    "errors",
+    "types",
     "!dist/test",
     "!dist/tsconfig.tsbuildinfo"
   ],
   "scripts": {
     "build": "yarn clean && yarn compile",
     "clean": "rimraf dist",
-    "compile": "tsc --build && npx tsc-alias",
+    "compile": "tsc --build tsconfig.json && npx tsc-alias -p tsconfig.json",
     "format": "prettier --write \"src/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",
@@ -41,6 +43,8 @@
   },
   "types": "dist/src/index.d.ts",
   "dependencies": {
-    "ethers": "5.0.31"
+    "ethers": "5.0.31",
+    "class-transformer": "^0.3.2",
+    "reflect-metadata": "^0.1.13"
   }
 }
