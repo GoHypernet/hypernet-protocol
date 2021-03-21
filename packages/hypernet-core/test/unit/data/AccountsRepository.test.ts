@@ -19,7 +19,7 @@ import {
   IBlockchainProvider,
   IBlockchainUtils,
 } from "@interfaces/utilities";
-import { VectorError, RouterChannelUnknownError, BlockchainUnavailableError } from "@hypernetlabs/objects/errors";
+import { VectorError, RouterChannelUnknownError, BlockchainUnavailableError } from "@hypernetlabs/objects";
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
 import { okAsync, errAsync } from "neverthrow";
 import { Log, TransactionReceipt, TransactionResponse } from "@ethersproject/abstract-provider";

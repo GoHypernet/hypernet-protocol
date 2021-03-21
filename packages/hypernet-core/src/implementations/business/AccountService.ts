@@ -13,7 +13,7 @@ import {
   CoreUninitializedError,
   LogicalError,
   VectorError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 import { IContextProvider, ILogUtils } from "@interfaces/utilities";
 import { okAsync, ResultAsync } from "neverthrow";
 import { BigNumber } from "ethers";

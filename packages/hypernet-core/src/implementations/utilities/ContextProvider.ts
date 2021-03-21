@@ -6,7 +6,7 @@ import {
   PullPayment,
   Balances,
 } from "@hypernetlabs/objects";
-import { CoreUninitializedError } from "@hypernetlabs/objects/errors";
+import { CoreUninitializedError } from "@hypernetlabs/objects";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { Subject } from "rxjs";
 import { okAsync, errAsync, ResultAsync } from "neverthrow";

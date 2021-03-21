@@ -8,7 +8,7 @@ import {
   PublicIdentifier,
   PaymentInternalDetails,
 } from "@hypernetlabs/objects";
-import { EPaymentState } from "@hypernetlabs/objects/types";
+import { EPaymentState } from "@hypernetlabs/objects";
 import {
   defaultExpirationLength,
   merchantPublicKey,
@@ -28,7 +28,7 @@ import {
   InsufficientBalanceError,
   InvalidParametersError,
   LogicalError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 import {
   IAccountsRepository,
   ILinkRepository,

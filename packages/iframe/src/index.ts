@@ -1,7 +1,7 @@
 import { HypernetCore } from "@hypernetlabs/hypernet-core";
 import { ExternalProviderUtils } from "@hypernetlabs/utils";
 import { ExternalProvider, IHypernetCore } from "@hypernetlabs/objects";
-import { EBlockchainNetwork } from "@hypernetlabs/objects/types";
+import { EBlockchainNetwork } from "@hypernetlabs/objects";
 import CoreWrapper from "./CoreWrapper";
 
 declare global {

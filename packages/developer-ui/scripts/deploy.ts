@@ -2,7 +2,7 @@ import { stringify } from "@connext/vector-utils";
 import { Contract } from "@ethersproject/contracts";
 import { keccak256 } from "@ethersproject/keccak256";
 import { Wallet, providers, ContractFactory, BigNumber, utils } from "ethers"
-import { TransferAbis } from "@hypernetlabs/objects/types"
+import { TransferAbis } from "@hypernetlabs/objects"
 import { artifacts } from "@connext/vector-contracts";
 
 const provider = new providers.JsonRpcProvider("http://localhost:8545");

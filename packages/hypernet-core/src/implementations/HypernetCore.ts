@@ -65,8 +65,8 @@ import {
   PersistenceError,
   RouterChannelUnknownError,
   VectorError,
-} from "@hypernetlabs/objects/errors";
-import { EBlockchainNetwork } from "@hypernetlabs/objects/types";
+} from "@hypernetlabs/objects";
+import { EBlockchainNetwork } from "@hypernetlabs/objects";
 import {
   IBlockchainProvider,
   IBlockchainUtils,

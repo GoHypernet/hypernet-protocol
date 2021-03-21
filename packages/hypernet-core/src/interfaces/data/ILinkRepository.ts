@@ -1,5 +1,5 @@
 import { HypernetLink } from "@hypernetlabs/objects";
-import { CoreUninitializedError, RouterChannelUnknownError, VectorError } from "@hypernetlabs/objects/errors";
+import { CoreUninitializedError, RouterChannelUnknownError, VectorError } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 /**

@@ -1,6 +1,6 @@
-import { InvalidParametersError, InvalidPaymentIdError } from "@hypernetlabs/objects/errors";
+import { InvalidParametersError, InvalidPaymentIdError } from "@hypernetlabs/objects";
 import { PaymentIdUtils } from "@implementations/utilities/PaymentIdUtils";
-import { EPaymentType } from "@hypernetlabs/objects/types";
+import { EPaymentType } from "@hypernetlabs/objects";
 
 describe("PaymentIdUtils tests", () => {
   const validPaymentId = "0x48797065726e6574202050555348202037074ce539ff4b81b4cb43dcfe3f4513";

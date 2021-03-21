@@ -1,5 +1,5 @@
 import { HypernetContext, InitializedHypernetContext } from "@hypernetlabs/objects";
-import { CoreUninitializedError, LogicalError } from "@hypernetlabs/objects/errors";
+import { CoreUninitializedError, LogicalError } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 /**

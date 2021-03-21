@@ -21,7 +21,7 @@ import {
   VectorError,
   MerchantValidationError,
   MerchantConnectorError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 import { ResultAsync, Result } from "neverthrow";
 import { BigNumber } from "ethers";
 

@@ -1,6 +1,6 @@
 import Postmate from "postmate";
 import { errAsync, ResultAsync } from "neverthrow";
-import { ProxyError } from "@hypernetlabs/objects/errors";
+import { ProxyError } from "@hypernetlabs/objects";
 
 interface IIFrameCallData<T> {
   callId: number;

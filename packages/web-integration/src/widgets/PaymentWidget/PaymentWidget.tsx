@@ -1,7 +1,7 @@
 import React from "react";
 import { TokenSelector, Button, TextInput, SelectInput } from "@hypernetlabs/web-ui";
 import { PublicIdentifier, EthereumAddress, PublicKey } from "@hypernetlabs/objects";
-import { EPaymentType } from "@hypernetlabs/objects/types";
+import { EPaymentType } from "@hypernetlabs/objects";
 import { EResultStatus } from "@web-integration-interfaces/objects";
 import { usePayment } from "@web-integration-hooks";
 

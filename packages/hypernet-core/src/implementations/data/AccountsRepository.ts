@@ -16,7 +16,7 @@ import {
   CoreUninitializedError,
   RouterChannelUnknownError,
   VectorError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 import { combine, errAsync, okAsync, ResultAsync } from "neverthrow";
 import { ResultUtils } from "@hypernetlabs/utils";
 

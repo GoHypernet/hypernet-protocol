@@ -6,7 +6,7 @@ import {
   MerchantConnectorError,
   MerchantValidationError,
   PersistenceError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { ResultUtils, IAjaxUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
 import {

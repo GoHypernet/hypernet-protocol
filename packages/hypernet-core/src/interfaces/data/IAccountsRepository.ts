@@ -6,7 +6,7 @@ import {
   LogicalError,
   RouterChannelUnknownError,
   VectorError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 

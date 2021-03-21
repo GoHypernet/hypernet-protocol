@@ -10,10 +10,10 @@
 //   ResultAsync,
 // } from "@hypernetlabs/objects";
 // import { IThreeBoxUtils, IContextProvider, IConfigProvider } from "@interfaces/utilities";
-// import { EMessageType } from "@hypernetlabs/objects/types";
+// import { EMessageType } from "@hypernetlabs/objects";
 // import "reflect-metadata";
 // import { plainToClass, serialize } from "class-transformer";
-// import { BlockchainUnavailableError, LogicalError, ThreeBoxError } from "@hypernetlabs/objects/errors";
+// import { BlockchainUnavailableError, LogicalError, ThreeBoxError } from "@hypernetlabs/objects";
 // import { ResultUtils } from "@hypernetlabs/utils";
 // import { errAsync, okAsync } from "neverthrow";
 // import { BoxSpace, BoxThread } from "3box";

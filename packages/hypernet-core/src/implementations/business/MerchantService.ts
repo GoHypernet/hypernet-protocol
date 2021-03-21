@@ -6,7 +6,7 @@ import {
   MerchantConnectorError,
   MerchantValidationError,
   PersistenceError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 import { IMerchantConnectorRepository } from "@interfaces/data";
 import { IContextProvider } from "@interfaces/utilities";
 import { ResultUtils } from "@hypernetlabs/utils";

@@ -1,5 +1,5 @@
 import { ResultAsync } from "neverthrow";
-import { LogicalError } from "@hypernetlabs/objects/errors";
+import { LogicalError } from "@hypernetlabs/objects";
 import { HypernetConfig } from "@hypernetlabs/objects";
 
 /**

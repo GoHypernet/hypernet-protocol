@@ -11,7 +11,7 @@ import {
   PaymentFinalizeError,
   RouterChannelUnknownError,
   VectorError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 import { ResultAsync, Result } from "neverthrow";
 import { BigNumber } from "ethers";
 

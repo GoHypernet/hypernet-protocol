@@ -1,6 +1,6 @@
 import td from "testdouble";
 import { IPaymentUtils } from "@interfaces/utilities";
-import { EPaymentType, ETransferType } from "@hypernetlabs/objects/types";
+import { EPaymentType, ETransferType } from "@hypernetlabs/objects";
 import { okAsync } from "neverthrow";
 import { commonPaymentId, insuranceTransferId, offerTransferId, parameterizedTransferId, unixPast } from "@mock/mocks";
 import { PushPayment, SortedTransfers, IFullTransferState } from "@hypernetlabs/objects";

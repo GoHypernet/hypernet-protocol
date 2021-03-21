@@ -20,7 +20,7 @@ import {
   MerchantValidationError,
   PersistenceError,
   MerchantConnectorError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { Result, ResultAsync, ok } from "neverthrow";
 import { Subject } from "rxjs";

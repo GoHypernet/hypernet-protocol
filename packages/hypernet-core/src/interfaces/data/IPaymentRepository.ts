@@ -4,7 +4,7 @@ import {
   PaymentFinalizeError,
   RouterChannelUnknownError,
   VectorError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IPaymentRepository {

@@ -4,7 +4,7 @@
 // import "reflect-metadata";
 // import { plainToClass } from "class-transformer";
 // import { IControlService } from "@interfaces/business";
-// import { BlockchainUnavailableError, ThreeBoxError } from "@hypernetlabs/objects/errors";
+// import { BlockchainUnavailableError, ThreeBoxError } from "@hypernetlabs/objects";
 // import { ControlClaim, ResultAsync } from "@hypernetlabs/objects";
 // import { ResultUtils } from "@hypernetlabs/utils";
 

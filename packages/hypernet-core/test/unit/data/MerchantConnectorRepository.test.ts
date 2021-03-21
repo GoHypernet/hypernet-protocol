@@ -12,7 +12,7 @@ import {
 } from "@mock/mocks";
 import { BlockchainProviderMock, ConfigProviderMock, ContextProviderMock } from "@mock/utils";
 import { IVectorUtils, IMerchantConnectorProxy, IBlockchainUtils } from "@interfaces/utilities";
-import { MerchantConnectorError, MerchantValidationError, TransferResolutionError } from "@hypernetlabs/objects/errors";
+import { MerchantConnectorError, MerchantValidationError, TransferResolutionError } from "@hypernetlabs/objects";
 import { IMerchantConnectorRepository } from "@interfaces/data/IMerchantConnectorRepository";
 import { okAsync, errAsync } from "neverthrow";
 import { MerchantConnectorRepository } from "@implementations/data/MerchantConnectorRepository";

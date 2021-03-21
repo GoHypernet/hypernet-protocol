@@ -1,6 +1,6 @@
 import React from "react";
 import moment from "moment";
-import { EPaymentState } from "@hypernetlabs/objects/types";
+import { EPaymentState } from "@hypernetlabs/objects";
 import { ILinkList } from "../../interfaces";
 import {utils} from "ethers";
 

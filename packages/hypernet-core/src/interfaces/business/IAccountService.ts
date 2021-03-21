@@ -6,7 +6,7 @@ import {
   CoreUninitializedError,
   LogicalError,
   VectorError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 /**
