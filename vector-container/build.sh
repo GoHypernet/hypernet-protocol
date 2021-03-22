@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Run this file from the root of the project
-
+IMAGE=hamropatrorepo/vector:unit
 NODE_BASE=modules/server-node
 ROUTER_BASE=modules/router
 AUTH_BASE=modules/auth
@@ -9,12 +9,12 @@ ETH_BASE=modules/contracts
 
 ROOT=$(pwd)
 mkdir -p build; cd build;
-git clone --branch v0.1.15 --single-branch --depth 1 https://github.com/connext/vector
+git clone --single-branch --depth 1 https://github.com/GoHypernet/vector
 cd vector;
 make server-node-bundle router-bundle auth-bundle contracts-js messaging-proxy
 
 # Copy config files to the base of build dir
-cp $ROOT/vector-container/* ./
+cp -rf $ROOT/vector-container/* ./
 
 echo """
 **/node_modules/**
@@ -31,6 +31,16 @@ config-prod.json
 
 echo """
 # Generated dockerfile. Do not modify this file directly. Please use original script to generate this.
+
+## Build dashboard
+FROM ubuntu:20.04 AS dashboard
+WORKDIR /usr/src/app
+ENV DEBIAN_FRONTEND noninteractive
+RUN apt update && apt install -y nodejs npm git
+RUN git clone --single-branch --depth 1 https://github.com/GoHypernet/dashboard
+WORKDIR /usr/src/app/dashboard
+RUN npm install
+RUN npm run build
 
 FROM node:12 as base_builder
 WORKDIR /root
@@ -91,6 +101,7 @@ WORKDIR /root
 EXPOSE 80
 EXPOSE 443
 EXPOSE 4222
+ENV NODE_ENV=production
 ENV DEBIAN_FRONTEND=noninteractive
 ENV VECTOR_PROD true
 ENV VECTOR_ENV production
@@ -113,6 +124,11 @@ COPY --from=router_builder /root/router router
 COPY --from=auth_builder /root/auth auth
 COPY --from=eth_builder /root/eth eth
 COPY ops/proxy /root/proxy
+COPY http.cfg /root/proxy/http.cfg
+
+COPY --from=dashboard /usr/src/app/dashboard/package.json /root/dashboard/
+RUN npm install --only=prod
+COPY --from=dashboard /usr/src/app/dashboard dashboard
 
 ## Setup for postgres
 
@@ -131,8 +147,8 @@ COPY $ROUTER_BASE/dist/prisma-sqlite/schema.prisma /root/router/dist/schema.pris
 CMD supervisord --nodaemon
 """ > Dockerfile
 
-docker build -t vector-unit:latest .
-echo "Successfully built vector-unit:latest"
+docker build -t $IMAGE .
+echo "Successfully built $IMAGE"
 
 ### vector-container/build.sh && docker run -it -v `pwd`/vector-container/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf vector-unit:latest
 # docker run -it -p 8000:8000 vector-unit:latest
