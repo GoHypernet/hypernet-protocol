@@ -3,7 +3,7 @@
 // import { IThreeBoxUtils } from "@interfaces/utilities/IThreeBoxUtils";
 // import { IConfigProvider } from "@interfaces/utilities/IConfigProvider";
 // import { plainToClass, serialize } from "class-transformer";
-// import { ELinkRole } from "@hypernetlabs/objects/types";
+// import { ELinkRole } from "@hypernetlabs/objects";
 
 // export class ThreeBoxPersistenceRepository implements IPersistenceRepository {
 //   constructor(protected boxUtils: IThreeBoxUtils, protected configProvider: IConfigProvider) {}

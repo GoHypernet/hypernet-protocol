@@ -11,7 +11,7 @@ import {
   IWithdrawResponse,
   PublicIdentifier,
 } from "@hypernetlabs/objects";
-import { VectorError } from "@hypernetlabs/objects/errors";
+import { VectorError } from "@hypernetlabs/objects";
 import { MessageResolver, InsuranceResolver, ParameterizedResolver } from "@hypernetlabs/objects/types/typechain";
 import { ResultAsync } from "neverthrow";
 

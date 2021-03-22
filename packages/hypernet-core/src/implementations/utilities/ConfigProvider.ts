@@ -2,7 +2,7 @@ import { HypernetConfig } from "@hypernetlabs/objects";
 import { getPublicIdentifierFromPublicKey } from "@connext/vector-utils/dist/identifiers";
 import { getPublicKeyFromPrivateKey } from "@connext/vector-utils/dist/crypto";
 import { Wallet, constants } from "ethers";
-import { EBlockchainNetwork } from "@hypernetlabs/objects/types";
+import { EBlockchainNetwork } from "@hypernetlabs/objects";
 import { ResultAsync, okAsync } from "neverthrow";
 import { ILogUtils, IConfigProvider } from "@interfaces/utilities";
 import { ChainAddresses, ChainProviders, ContractAddresses } from "@connext/vector-types";

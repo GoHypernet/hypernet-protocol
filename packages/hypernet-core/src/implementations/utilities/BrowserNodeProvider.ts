@@ -7,7 +7,7 @@ import {
   IConfigProvider,
   IBlockchainProvider,
 } from "@interfaces/utilities";
-import { BlockchainUnavailableError, CoreUninitializedError, VectorError } from "@hypernetlabs/objects/errors";
+import { BlockchainUnavailableError, CoreUninitializedError, VectorError } from "@hypernetlabs/objects";
 import { HypernetConfig, HypernetContext } from "@hypernetlabs/objects";
 import { ResultUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
 import { ethers } from "ethers";

@@ -5,7 +5,7 @@ import {
   MerchantConnectorError,
   MerchantValidationError,
   PersistenceError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 
 export interface IMerchantService {
   initialize(): ResultAsync<void, LogicalError>;

@@ -1,7 +1,7 @@
 import { ParentProxy } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
-import { MerchantConnectorError, MerchantValidationError } from "@hypernetlabs/objects/errors";
+import { MerchantConnectorError, MerchantValidationError } from "@hypernetlabs/objects";
 import { HexString, PullPayment, PushPayment } from "@hypernetlabs/objects";
 
 export interface IMerchantConnectorProxy extends ParentProxy {

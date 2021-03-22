@@ -1,5 +1,5 @@
 import { okAsync, ResultAsync } from "neverthrow";
-import { BlockchainUnavailableError } from "@hypernetlabs/objects/errors";
+import { BlockchainUnavailableError } from "@hypernetlabs/objects";
 import { IBlockchainProvider, ITimeUtils } from "@interfaces/utilities";
 import moment from "moment";
 

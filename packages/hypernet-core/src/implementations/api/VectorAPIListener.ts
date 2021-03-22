@@ -6,8 +6,8 @@ import {
   IConditionalTransferCreatedPayload,
   IConditionalTransferResolvedPayload,
 } from "@hypernetlabs/objects";
-import { LogicalError } from "@hypernetlabs/objects/errors";
-import { ETransferType, MessageState } from "@hypernetlabs/objects/types";
+import { LogicalError } from "@hypernetlabs/objects";
+import { ETransferType, MessageState } from "@hypernetlabs/objects";
 import { IBrowserNodeProvider, IContextProvider, ILogUtils, IPaymentUtils, IVectorUtils } from "@interfaces/utilities";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 

@@ -5,7 +5,7 @@ import {
   MerchantConnectorError,
   MerchantValidationError,
   PersistenceError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 import { PullPayment, PushPayment } from "@hypernetlabs/objects";
 
 export interface IMerchantConnectorRepository {

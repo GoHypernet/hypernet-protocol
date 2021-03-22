@@ -6,8 +6,8 @@ import {
   SortedTransfers,
   IFullTransferState,
 } from "@hypernetlabs/objects";
-import { EPaymentState, EPaymentType, ETransferType } from "@hypernetlabs/objects/types";
-import { InvalidParametersError, InvalidPaymentError, LogicalError, VectorError } from "@hypernetlabs/objects/errors";
+import { EPaymentState, EPaymentType, ETransferType } from "@hypernetlabs/objects";
+import { InvalidParametersError, InvalidPaymentError, LogicalError, VectorError } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IPaymentUtils {

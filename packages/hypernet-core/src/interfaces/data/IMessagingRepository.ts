@@ -5,7 +5,7 @@ import {
   MessagePayload,
   MessageThread,
 } from "@hypernetlabs/objects";
-import { BlockchainUnavailableError, LogicalError, ThreeBoxError } from "@hypernetlabs/objects/errors";
+import { BlockchainUnavailableError, LogicalError, ThreeBoxError } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IMessagingRepository {

@@ -1,7 +1,7 @@
 // import "../../typings/3box";
 // import { BoxInstance, BoxSpace, BoxThread } from "3box";
 // import { ResultAsync } from "neverthrow";
-// import { BlockchainUnavailableError, ThreeBoxError } from "@hypernetlabs/objects/errors";
+// import { BlockchainUnavailableError, ThreeBoxError } from "@hypernetlabs/objects";
 
 // /**
 //  * These utilities wrap up interactions with 3Box, but does not provide complete isolation. It still deals with

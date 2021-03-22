@@ -32,7 +32,7 @@ import {
   MessageState,
   ParameterizedState,
   EMessageTransferType,
-} from "@hypernetlabs/objects/types";
+} from "@hypernetlabs/objects";
 import "reflect-metadata";
 import { serialize } from "class-transformer";
 import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@hypernetlabs/objects/types/typechain";
@@ -46,7 +46,7 @@ import {
   TransferCreationError,
   TransferResolutionError,
   VectorError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 import { ResultUtils } from "@hypernetlabs/utils";
 

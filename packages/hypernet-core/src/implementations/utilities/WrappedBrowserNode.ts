@@ -17,7 +17,7 @@ import {
   IWithdrawQuote,
   IWithdrawResponse,
 } from "@hypernetlabs/objects";
-import { VectorError } from "@hypernetlabs/objects/errors";
+import { VectorError } from "@hypernetlabs/objects";
 import { InsuranceResolver, MessageResolver, ParameterizedResolver } from "@hypernetlabs/objects/types/typechain";
 import { IBrowserNode } from "@interfaces/utilities";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";

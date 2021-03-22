@@ -6,7 +6,7 @@ import {
   InvalidParametersError,
   RouterChannelUnknownError,
   VectorError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 import {
   IBrowserNode,
   IBrowserNodeProvider,

@@ -6,7 +6,7 @@ import {
   CoreUninitializedError,
   LogicalError,
   ThreeBoxError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 import { IMessagingRepository } from "@interfaces/data";
 import { ResultAsync } from "neverthrow";
 

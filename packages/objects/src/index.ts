@@ -26,3 +26,5 @@ export * from "./SortedTransfers";
 export * from "./ThreadMetadata";
 export * from "./Token";
 export * from "./vector";
+export * from "./errors";
+export * from "./types";

@@ -1,5 +1,5 @@
 import { BrowserNode } from "@connext/vector-browser-node";
-import { VectorError } from "@hypernetlabs/objects/errors";
+import { VectorError } from "@hypernetlabs/objects";
 import { IBrowserNode, IConfigProvider, ILogUtils } from "@interfaces/utilities";
 import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
 import { WrappedBrowserNode } from "@implementations/utilities";

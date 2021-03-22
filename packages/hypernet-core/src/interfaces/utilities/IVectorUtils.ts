@@ -11,8 +11,8 @@ import {
   RouterChannelUnknownError,
   TransferCreationError,
   TransferResolutionError,
-} from "@hypernetlabs/objects/errors";
-import { EPaymentType, ETransferState } from "@hypernetlabs/objects/types";
+} from "@hypernetlabs/objects";
+import { EPaymentType, ETransferState } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 

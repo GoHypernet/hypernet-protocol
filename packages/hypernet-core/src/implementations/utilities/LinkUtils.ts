@@ -1,5 +1,5 @@
 import { HypernetLink, Payment, PublicIdentifier, PullPayment, PushPayment } from "@hypernetlabs/objects";
-import { CoreUninitializedError, InvalidParametersError } from "@hypernetlabs/objects/errors";
+import { CoreUninitializedError, InvalidParametersError } from "@hypernetlabs/objects";
 import { IContextProvider } from "@interfaces/utilities";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";

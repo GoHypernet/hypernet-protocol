@@ -1,5 +1,5 @@
 import { ResultAsync } from "neverthrow";
-import { BlockchainUnavailableError } from "@hypernetlabs/objects/errors";
+import { BlockchainUnavailableError } from "@hypernetlabs/objects";
 import { TransactionResponse, TransactionReceipt } from "@ethersproject/abstract-provider";
 import { IBlockchainProvider } from "@interfaces/utilities";
 import { ethers } from "ethers";

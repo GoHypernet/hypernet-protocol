@@ -28,8 +28,8 @@ import {
   PaymentFinalizeError,
   RouterChannelUnknownError,
   VectorError,
-} from "@hypernetlabs/objects/errors";
-import { EPaymentState } from "@hypernetlabs/objects/types";
+} from "@hypernetlabs/objects";
+import { EPaymentState } from "@hypernetlabs/objects";
 import { IConfigProvider, IContextProvider, ILogUtils } from "@interfaces/utilities";
 import { err, errAsync, ok, okAsync, ResultAsync, Result } from "neverthrow";
 import { BigNumber } from "ethers";

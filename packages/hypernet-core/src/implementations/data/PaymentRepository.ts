@@ -23,8 +23,8 @@ import {
   RouterChannelUnknownError,
   TransferResolutionError,
   VectorError,
-} from "@hypernetlabs/objects/errors";
-import { EPaymentType, ETransferType, MessageState, EMessageTransferType } from "@hypernetlabs/objects/types";
+} from "@hypernetlabs/objects";
+import { EPaymentType, ETransferType, MessageState, EMessageTransferType } from "@hypernetlabs/objects";
 import {
   IBrowserNode,
   IBrowserNodeProvider,

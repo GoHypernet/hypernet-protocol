@@ -1,5 +1,5 @@
 import { ResultAsync } from "neverthrow";
-import { VectorError } from "@hypernetlabs/objects/errors";
+import { VectorError } from "@hypernetlabs/objects";
 import { IBrowserNode } from "./IBrowserNode";
 
 /**

@@ -1,6 +1,6 @@
 import { HexString } from "@hypernetlabs/objects";
-import { InvalidParametersError, InvalidPaymentIdError } from "@hypernetlabs/objects/errors";
-import { EPaymentType } from "@hypernetlabs/objects/types";
+import { InvalidParametersError, InvalidPaymentIdError } from "@hypernetlabs/objects";
+import { EPaymentType } from "@hypernetlabs/objects";
 import { Result } from "neverthrow";
 
 /**

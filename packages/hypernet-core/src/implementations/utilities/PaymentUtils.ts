@@ -21,7 +21,7 @@ import {
   InvalidPaymentIdError,
   LogicalError,
   VectorError,
-} from "@hypernetlabs/objects/errors";
+} from "@hypernetlabs/objects";
 import {
   EPaymentState,
   EPaymentType,
@@ -31,7 +31,7 @@ import {
   MessageState,
   ParameterizedState,
   EMessageTransferType,
-} from "@hypernetlabs/objects/types";
+} from "@hypernetlabs/objects";
 import {
   IBrowserNodeProvider,
   IConfigProvider,

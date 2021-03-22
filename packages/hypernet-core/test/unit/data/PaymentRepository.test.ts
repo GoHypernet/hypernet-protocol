@@ -24,11 +24,11 @@ import {
 } from "@mock/utils";
 import { PaymentInternalDetails, PushPayment } from "@hypernetlabs/objects";
 import { ILogUtils, IVectorUtils, IBrowserNodeProvider, IPaymentUtils, ITimeUtils } from "@interfaces/utilities";
-import { VectorError } from "@hypernetlabs/objects/errors";
+import { VectorError } from "@hypernetlabs/objects";
 import { IPaymentRepository } from "@interfaces/data";
 import { okAsync, errAsync } from "neverthrow";
 import { PaymentRepository } from "@implementations/data/PaymentRepository";
-import { EPaymentState, EPaymentType } from "@hypernetlabs/objects/types";
+import { EPaymentState, EPaymentType } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 
 const expirationDate = unixNow + defaultExpirationLength;

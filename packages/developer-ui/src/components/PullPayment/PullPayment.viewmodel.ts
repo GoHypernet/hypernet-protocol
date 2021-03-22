@@ -1,7 +1,7 @@
 import ko from "knockout";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { PullPayment } from "@hypernetlabs/objects";
-import { EPaymentState } from "@hypernetlabs/objects/types";
+import { EPaymentState } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import html from "./PullPayment.template.html";
 import moment from "moment";

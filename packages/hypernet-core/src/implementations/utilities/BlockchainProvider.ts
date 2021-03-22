@@ -1,5 +1,5 @@
 import { ExternalProvider } from "@hypernetlabs/objects";
-import { BlockchainUnavailableError } from "@hypernetlabs/objects/errors";
+import { BlockchainUnavailableError } from "@hypernetlabs/objects";
 import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
 import { ethers } from "ethers";
 import { okAsync, ResultAsync } from "neverthrow";
