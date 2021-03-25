@@ -49,6 +49,10 @@ export class PaymentFormViewModel {
     this.pushPayment = new PushPaymentFormParams(this.integration, this.remoteAccount);
     this.pullPayment = new PullPaymentFormParams(this.integration, this.remoteAccount);
   }
+
+  public setPaymentTypeOptionValue(option: any, item: any) {
+    ko.applyBindingsToNode(option, { attr: { value: item?.typeName } }, item);
+  }
 }
 
 ko.components.register("payment-form", {

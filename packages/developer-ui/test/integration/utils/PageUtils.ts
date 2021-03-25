@@ -34,7 +34,7 @@ class PageUtils {
 
   public async clearInput(fieldSelector: string) {
     const field = await this.page.$(fieldSelector);
-    const valueLength = 10; //await this.page.$eval(fieldSelector, (el) => el.value.length);
+    const valueLength = await field?.evaluate((el) => el?.value?.length);
 
     await field?.focus();
     await this.page.keyboard.press("End");

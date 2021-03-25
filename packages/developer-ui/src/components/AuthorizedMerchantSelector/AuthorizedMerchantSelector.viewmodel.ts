@@ -90,6 +90,10 @@ export class AuthorizedMerchantSelectorViewModel {
         console.log("No balances.");
       });
   }
+
+  public setAuthorizedMerchantOptionValue(option: any, item: any) {
+    ko.applyBindingsToNode(option, { attr: { value: item?.merchantName } }, item);
+  }
 }
 
 ko.components.register("authorized-merchant-selector", {

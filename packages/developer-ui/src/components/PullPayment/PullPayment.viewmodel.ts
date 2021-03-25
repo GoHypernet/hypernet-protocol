@@ -50,7 +50,7 @@ export class PullPaymentViewModel {
     this.paymentId = params.payment.id;
     this.to = ko.observable(params.payment.to);
     this.from = ko.observable(params.payment.from);
-    this.state = ko.observable(new PaymentStatusParams(params.payment.state));
+    this.state = ko.observable(new PaymentStatusParams(params.payment.id,  params.payment.state));
     this.paymentToken = ko.observable(params.payment.paymentToken);
     this.requiredStake = ko.observable(params.payment.requiredStake.toString());
     this.amountStaked = ko.observable(params.payment.amountStaked.toString());
@@ -68,7 +68,7 @@ export class PullPaymentViewModel {
     this.integration.core.onPushPaymentReceived.subscribe({
       next: (payment) => {
         if (payment.id === this.paymentId) {
-          this.state(new PaymentStatusParams(params.payment.state));
+          this.state(new PaymentStatusParams(payment.id, params.payment.state));
         }
       },
     });
@@ -76,7 +76,7 @@ export class PullPaymentViewModel {
     this.integration.core.onPullPaymentUpdated.subscribe({
       next: (payment) => {
         if (payment.id === this.paymentId) {
-          this.state(new PaymentStatusParams(payment.state));
+          this.state(new PaymentStatusParams(payment.id, payment.state));
         }
       },
     });
@@ -87,7 +87,7 @@ export class PullPaymentViewModel {
 
         return result.match(
           (payment) => {
-            this.state(new PaymentStatusParams(payment.state));
+            this.state(new PaymentStatusParams(payment.id, payment.state));
           },
           (e) => {
             // tslint:disable-next-line: no-console

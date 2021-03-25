@@ -3,6 +3,7 @@
         <select id="authorizedMerchant" class="form-control" data-bind="options: authorizedMerchantOptions,
         optionsText: 'merchantName',
         value: selectedAuthorizedMerchantOption,
+        optionsAfterRender: setAuthorizedMerchantOptionValue,
         optionsCaption: 'Choose...'">
         </select>
 </div>

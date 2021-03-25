@@ -1,7 +1,7 @@
 <div class="card-body" style="padding: .75rem 0;">
     <h5 class="card-title">Actions</h5>
     <div class="form">
-        <div data-bind="component: {name:'token-selector', params:tokenSelector}"></div>
+        <div id="actionTokeSelector" data-bind="component: {name:'token-selector', params:tokenSelector}"></div>
         <div id="depositFunds" data-bind="component: {name:'button', params:depositFundsButton}, visible: tokenSelected"></div>
         <br>
         <div data-bind="component: {name:'button', params:mintTestTokenButton}"></div>

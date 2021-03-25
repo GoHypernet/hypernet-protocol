@@ -1,6 +1,6 @@
 <form>
     <div>Required Stake: <input class="form-control" data-bind="textInput: requiredStake"></div>
-    <div data-bind='component: {
+    <div id="paymentTokenSelector" data-bind='component: {
         name: "token-selector",
         params: tokenSelector}'></div>
     <div>Amount: <input class="form-control" data-bind="textInput: amount"></div>
@@ -8,7 +8,7 @@
     <div data-bind='component: {
         name: "authorized-merchant-selector",
         params: merchantSelector}'></div>
-    <span data-bind='component: {
+    <span id="submitPaymentButton" data-bind='component: {
         name: "button",
         params: submitButton}'></span>
     </form>

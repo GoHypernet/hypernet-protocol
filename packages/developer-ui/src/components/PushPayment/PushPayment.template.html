@@ -3,17 +3,17 @@
     <thead>
       <tr class="custom-border-bottom">
         <th>Push Payment</th>
-        <td data-bind="text: id"></td>
+        <td class="createdPaymentId" data-bind="text: id"></td>
       </tr>
     </thead>
     <tbody>
       <tr class="custom-border-bottom">
         <th>To</th>
-        <td data-bind="text: to"></td>
+        <td data-bind="text: to, attr: { 'data-payment-to': id }"></td>
       </tr>
       <tr class="custom-border-bottom">
         <th>From</th>
-        <td data-bind="text: from"></td>
+        <td data-bind="text: from, attr: { 'data-payment-from': id }"></td>
       </tr>
       <tr class="custom-border-bottom">
         <th>State</th>
@@ -27,7 +27,7 @@
       </tr>
       <tr class="custom-border-bottom">
         <th>Required Stake</th>
-        <td data-bind="text: requiredStake"></td>
+        <td data-bind="text: requiredStake, attr: { 'data-payment-required-staked': id }"></td>
       </tr>
       <tr class="custom-border-bottom">
         <th>Amount Staked</th>
@@ -51,11 +51,11 @@
       </tr>
       <tr class="custom-border-bottom">
         <th>Merchant URL</th>
-        <td data-bind="text: merchantUrl"></td>
+        <td data-bind="text: merchantUrl, attr: { 'data-payment-merchantUrl': id }"></td>
       </tr>
       <tr class="custom-border-bottom">
         <th>Payment Amount</th>
-        <td data-bind="text: paymentAmount"></td>
+        <td data-bind="text: paymentAmount, attr: { 'data-payment-amount': id }"></td>
       </tr>
       <tr>
         <td colspan="2" data-bind='component: {

@@ -47,7 +47,7 @@ export class PushPaymentViewModel {
     this.paymentId = params.payment.id;
     this.to = ko.observable(params.payment.to);
     this.from = ko.observable(params.payment.from);
-    this.state = ko.observable(new PaymentStatusParams(params.payment.state));
+    this.state = ko.observable(new PaymentStatusParams(params.payment.id, params.payment.state));
     this.paymentToken = ko.observable(params.payment.paymentToken);
     this.requiredStake = ko.observable(utils.formatUnits(params.payment.requiredStake, "wei"));
     this.amountStaked = ko.observable(utils.formatUnits(params.payment.amountStaked, "wei"));
@@ -62,7 +62,7 @@ export class PushPaymentViewModel {
     this.integration.core.onPushPaymentReceived.subscribe({
       next: (payment) => {
         if (payment.id === this.paymentId) {
-          const paymentStatusParams = new PaymentStatusParams(EPaymentState.Finalized);
+          const paymentStatusParams = new PaymentStatusParams(payment.id, EPaymentState.Finalized);
           this.state(paymentStatusParams);
           // @todo this is a manual override for now, since we don't yet have a way
           // to grab a finalized transfer in the core (and thus no way to correctly
@@ -76,7 +76,7 @@ export class PushPaymentViewModel {
       next: (payment) => {
         console.log(`In PushPayment, this.paymentId = ${this.paymentId}, updated payment = ${payment}`);
         if (payment.id === this.paymentId) {
-          this.state(new PaymentStatusParams(payment.state));
+          this.state(new PaymentStatusParams(payment.id, payment.state));
         }
       },
     });
@@ -87,7 +87,7 @@ export class PushPaymentViewModel {
 
         return result.match(
           (payment) => {
-            this.state(new PaymentStatusParams(payment.state));
+            this.state(new PaymentStatusParams(payment.id, payment.state));
           },
           (e) => {
             // tslint:disable-next-line: no-console
