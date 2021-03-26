@@ -6,5 +6,5 @@ import { HypernetConfig } from "@hypernetlabs/objects";
  * @todo What is the main role/purpose of this class? Description here.
  */
 export interface IConfigProvider {
-  getConfig(): ResultAsync<HypernetConfig, LogicalError>;
+  getConfig(): ResultAsync<HypernetConfig, never>;
 }
