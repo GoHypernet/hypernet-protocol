@@ -80,7 +80,6 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
           return this.browserNode.init(signature, account);
         })
         .orElse((e) => {
-          console.log(e);
           const shouldAttemptRestore = ((e as any).context?.validationError ?? "").includes("Channel is already setup");
 
           if (shouldAttemptRestore && this.browserNode != null) {
