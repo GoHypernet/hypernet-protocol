@@ -1,7 +1,7 @@
 import { IConfigProvider, IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 import { MerchantConnectorProxy } from "@implementations/utilities/MerchantConnectorProxy";
-import { ResultAsync } from "neverthrow";
+import { ok, Result, ResultAsync } from "neverthrow";
 import { LogicalError, MerchantConnectorError, MerchantValidationError, ProxyError } from "@hypernetlabs/objects";
 
 export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFactory {
@@ -41,10 +41,11 @@ export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFac
       });
   }
 
-  destroyMerchantConnectorProxy(merchantUrl: string) {
+  destroyMerchantConnectorProxy(merchantUrl: string): Result<void, never> {
     const proxy = MerchantConnectorProxyFactory.proxyMap.get(merchantUrl);
     proxy?.destroy();
     MerchantConnectorProxyFactory.proxyMap.delete(merchantUrl);
+    return ok(undefined);
   }
 
   private _prepareIFrameContainer(): HTMLElement {

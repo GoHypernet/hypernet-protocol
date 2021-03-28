@@ -14,22 +14,33 @@ import { ResultAsync } from "neverthrow";
  * @todo What is the main role/purpose of this class? Description here.
  */
 export interface IAccountsRepository {
-  getPublicIdentifier(): ResultAsync<PublicIdentifier, VectorError | LogicalError>;
+  getPublicIdentifier(): ResultAsync<
+    PublicIdentifier,
+    CoreUninitializedError | BlockchainUnavailableError | VectorError
+  >;
   getAccounts(): ResultAsync<string[], BlockchainUnavailableError>;
-  getBalances(): ResultAsync<Balances, BalancesUnavailableError | CoreUninitializedError>;
-  getBalanceByAsset(assetAddress: EthereumAddress): ResultAsync<AssetBalance, BalancesUnavailableError>;
+  getBalances(): ResultAsync<
+    Balances,
+    BalancesUnavailableError | VectorError | CoreUninitializedError | RouterChannelUnknownError
+  >;
+  getBalanceByAsset(
+    assetAddress: EthereumAddress,
+  ): ResultAsync<
+    AssetBalance,
+    BalancesUnavailableError | VectorError | CoreUninitializedError | RouterChannelUnknownError
+  >;
   depositFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
   ): ResultAsync<
     null,
-    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error | BlockchainUnavailableError
+    RouterChannelUnknownError | CoreUninitializedError | VectorError | LogicalError | BlockchainUnavailableError
   >;
   withdrawFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
     destinationAddress: EthereumAddress,
-  ): ResultAsync<void, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<void, RouterChannelUnknownError | CoreUninitializedError | VectorError | BlockchainUnavailableError>;
 
   mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<void, BlockchainUnavailableError>;
 }

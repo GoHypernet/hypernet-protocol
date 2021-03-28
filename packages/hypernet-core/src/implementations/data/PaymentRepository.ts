@@ -23,6 +23,11 @@ import {
   RouterChannelUnknownError,
   TransferResolutionError,
   VectorError,
+  InvalidParametersError,
+  TransferCreationError,
+  InvalidPaymentError,
+  PaymentCreationError,
+  BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
 import { EPaymentType, ETransferType, MessageState, EMessageTransferType } from "@hypernetlabs/objects";
 import {
@@ -56,10 +61,7 @@ export class PaymentRepository implements IPaymentRepository {
     protected timeUtils: ITimeUtils,
   ) {}
 
-  public createPullRecord(
-    paymentId: string,
-    amount: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  public createPullRecord(paymentId: string, amount: string): ResultAsync<Payment, PaymentCreationError> {
     let transfers: IFullTransferState[];
     let browserNode: IBrowserNode;
 
@@ -90,7 +92,8 @@ export class PaymentRepository implements IPaymentRepository {
 
         // Convert the list of transfers to a payment (again)
         return this.paymentUtils.transfersToPayment(paymentId, transfers);
-      });
+      })
+      .mapErr((err) => new PaymentCreationError(err, err?.message));
   }
 
   public createPullPayment(
@@ -102,7 +105,7 @@ export class PaymentRepository implements IPaymentRepository {
     requiredStake: string, // TODO: amounts should be consistently use BigNumber
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<PullPayment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  ): ResultAsync<PullPayment, PaymentCreationError> {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
     let paymentId: string;
@@ -146,7 +149,8 @@ export class PaymentRepository implements IPaymentRepository {
       })
       .map((payment) => {
         return payment as PullPayment;
-      });
+      })
+      .mapErr((err) => new PaymentCreationError(err, err?.message));
   }
 
   /**
@@ -167,7 +171,7 @@ export class PaymentRepository implements IPaymentRepository {
     requiredStake: string,
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<PushPayment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  ): ResultAsync<PushPayment, PaymentCreationError> {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
     let paymentId: string;
@@ -207,14 +211,20 @@ export class PaymentRepository implements IPaymentRepository {
       })
       .map((payment) => {
         return payment as PushPayment;
-      });
+      })
+      .mapErr((err) => new PaymentCreationError(err, err?.message));
   }
 
   /**
    * Given a paymentId, return the component transfers.
    * @param paymentId the payment to get transfers for
    */
-  protected _getTransfersByPaymentId(paymentId: string): ResultAsync<IFullTransferState[], Error> {
+  protected _getTransfersByPaymentId(
+    paymentId: string,
+  ): ResultAsync<
+    IFullTransferState[],
+    RouterChannelUnknownError | VectorError | CoreUninitializedError | BlockchainUnavailableError | LogicalError
+  > {
     let browserNode: IBrowserNode;
     let channelAddress: string;
 
@@ -238,7 +248,7 @@ export class PaymentRepository implements IPaymentRepository {
               transferType: ETransferType;
               transfer: IFullTransferState;
             },
-            VectorError | Error
+            VectorError | LogicalError
           >
         >();
         for (const transfer of transfers) {
@@ -280,7 +290,12 @@ export class PaymentRepository implements IPaymentRepository {
    * Given a list of payment Ids, return the associated payments.
    * @param paymentIds the list of payments to get
    */
-  public getPaymentsByIds(paymentIds: string[]): ResultAsync<Map<string, Payment>, Error> {
+  public getPaymentsByIds(
+    paymentIds: string[],
+  ): ResultAsync<
+    Map<string, Payment>,
+    RouterChannelUnknownError | VectorError | CoreUninitializedError | BlockchainUnavailableError | LogicalError
+  > {
     let browserNode: IBrowserNode;
     let channelAddress: string;
 
@@ -358,7 +373,18 @@ export class PaymentRepository implements IPaymentRepository {
   public finalizePayment(
     paymentId: string,
     amount: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  ): ResultAsync<
+    Payment,
+    | RouterChannelUnknownError
+    | VectorError
+    | CoreUninitializedError
+    | BlockchainUnavailableError
+    | LogicalError
+    | PaymentFinalizeError
+    | TransferResolutionError
+    | InvalidPaymentError
+    | InvalidParametersError
+  > {
     let browserNode: IBrowserNode;
     let existingTransfers: IFullTransferState[];
     let parameterizedTransferId: string;
@@ -412,12 +438,16 @@ export class PaymentRepository implements IPaymentRepository {
     merchantPublicKey: PublicKey,
   ): ResultAsync<
     Payment,
+    | BlockchainUnavailableError
     | PaymentStakeError
     | TransferResolutionError
     | RouterChannelUnknownError
     | CoreUninitializedError
     | VectorError
-    | Error
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
   > {
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
@@ -475,7 +505,19 @@ export class PaymentRepository implements IPaymentRepository {
    */
   public provideAsset(
     paymentId: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | LogicalError> {
+  ): ResultAsync<
+    Payment,
+    | BlockchainUnavailableError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | CoreUninitializedError
+    | VectorError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
+  > {
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
     let existingTransfers: IFullTransferState[];
@@ -501,7 +543,7 @@ export class PaymentRepository implements IPaymentRepository {
           paymentTokenAmount = payment.authorizedAmount;
         } else {
           this.logUtils.error(`Payment was not instance of push or pull payment!`);
-          return errAsync(new LogicalError());
+          return errAsync(new LogicalError("Payment was not instance of push or pull payment!"));
         }
 
         const paymentRecipient = payment.to;

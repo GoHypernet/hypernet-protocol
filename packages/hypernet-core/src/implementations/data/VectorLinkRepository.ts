@@ -1,6 +1,6 @@
 import { ResultUtils } from "@hypernetlabs/utils";
 import { ILinkRepository } from "@interfaces/data";
-import { HypernetLink, Payment, PublicIdentifier } from "@hypernetlabs/objects";
+import { BlockchainUnavailableError, HypernetLink, Payment, PublicIdentifier } from "@hypernetlabs/objects";
 import {
   CoreUninitializedError,
   InvalidParametersError,
@@ -41,7 +41,12 @@ export class VectorLinkRepository implements ILinkRepository {
    */
   public getHypernetLinks(): ResultAsync<
     HypernetLink[],
-    RouterChannelUnknownError | CoreUninitializedError | VectorError | InvalidParametersError
+    | RouterChannelUnknownError
+    | CoreUninitializedError
+    | VectorError
+    | InvalidParametersError
+    | CoreUninitializedError
+    | BlockchainUnavailableError
   > {
     let browserNode: IBrowserNode;
 
@@ -75,7 +80,15 @@ export class VectorLinkRepository implements ILinkRepository {
    */
   public getHypernetLink(
     counterpartyId: PublicIdentifier,
-  ): ResultAsync<HypernetLink, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  ): ResultAsync<
+    HypernetLink,
+    | RouterChannelUnknownError
+    | CoreUninitializedError
+    | VectorError
+    | InvalidParametersError
+    | CoreUninitializedError
+    | BlockchainUnavailableError
+  > {
     let browserNode: IBrowserNode;
     return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.vectorUtils.getRouterChannelAddress()])
       .andThen((vals) => {

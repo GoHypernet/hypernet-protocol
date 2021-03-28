@@ -21,12 +21,12 @@ export interface IPaymentUtils {
    * Creates a PaymentId by combining
    * @param paymentType
    */
-  createPaymentId(paymentType: EPaymentType): ResultAsync<string, Error>;
+  createPaymentId(paymentType: EPaymentType): ResultAsync<string, InvalidParametersError>;
 
   sortTransfers(
     _paymentId: string,
     transfers: IFullTransferState[],
-  ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError | Error>;
+  ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError | LogicalError>;
 
   /**
    *
@@ -57,7 +57,7 @@ export interface IPaymentUtils {
 
   getTransferTypeWithTransfer(
     transfer: IFullTransferState,
-  ): ResultAsync<{ transferType: ETransferType; transfer: IFullTransferState }, VectorError | Error>;
+  ): ResultAsync<{ transferType: ETransferType; transfer: IFullTransferState }, VectorError | LogicalError>;
 
   /**
    *
