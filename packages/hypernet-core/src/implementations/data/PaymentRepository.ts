@@ -294,7 +294,13 @@ export class PaymentRepository implements IPaymentRepository {
     paymentIds: string[],
   ): ResultAsync<
     Map<string, Payment>,
-    RouterChannelUnknownError | VectorError | CoreUninitializedError | BlockchainUnavailableError | LogicalError
+    | RouterChannelUnknownError
+    | VectorError
+    | CoreUninitializedError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
   > {
     let browserNode: IBrowserNode;
     let channelAddress: string;

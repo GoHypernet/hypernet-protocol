@@ -30,7 +30,13 @@ export interface IPaymentRepository {
     paymentIds: string[],
   ): ResultAsync<
     Map<string, Payment>,
-    RouterChannelUnknownError | VectorError | CoreUninitializedError | BlockchainUnavailableError | LogicalError
+    | RouterChannelUnknownError
+    | VectorError
+    | CoreUninitializedError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
   >;
 
   /**
@@ -67,7 +73,19 @@ export interface IPaymentRepository {
    */
   provideAsset(
     paymentId: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<
+    Payment,
+    | BlockchainUnavailableError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | CoreUninitializedError
+    | VectorError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
+  >;
 
   /**
    * Provides stake for a given payment id

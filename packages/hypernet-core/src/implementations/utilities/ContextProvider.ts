@@ -7,7 +7,7 @@ import {
   Balances,
 } from "@hypernetlabs/objects";
 import { CoreUninitializedError } from "@hypernetlabs/objects";
-import { IContextProvider } from "@interfaces/utilities/IContextProvider";
+import { IContextProvider } from "@interfaces/utilities";
 import { Subject } from "rxjs";
 import { okAsync, errAsync, ResultAsync } from "neverthrow";
 

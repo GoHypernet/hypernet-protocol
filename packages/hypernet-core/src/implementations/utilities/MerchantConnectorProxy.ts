@@ -93,27 +93,27 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     });
   }
 
-  notifyPushPaymentSent(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  public notifyPushPaymentSent(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPushPaymentSent", payment);
   }
 
-  notifyPushPaymentUpdated(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  public notifyPushPaymentUpdated(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPushPaymentUpdated", payment);
   }
 
-  notifyPushPaymentReceived(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  public notifyPushPaymentReceived(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPushPaymentReceived", payment);
   }
 
-  notifyPullPaymentSent(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  public notifyPullPaymentSent(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPullPaymentSent", payment);
   }
 
-  notifyPullPaymentUpdated(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  public notifyPullPaymentUpdated(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPullPaymentUpdated", payment);
   }
 
-  notifyPullPaymentReceived(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  public notifyPullPaymentReceived(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPullPaymentReceived", payment);
   }
 

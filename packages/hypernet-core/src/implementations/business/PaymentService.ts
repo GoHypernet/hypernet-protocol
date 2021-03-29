@@ -18,21 +18,36 @@ import {
 } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
-  CoreUninitializedError,
   InsufficientBalanceError,
   InvalidParametersError,
   LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
-  OfferMismatchError,
   PaymentFinalizeError,
+  PaymentCreationError,
+  InvalidPaymentError,
+  PaymentStakeError,
+  TransferCreationError,
+  TransferResolutionError,
+  BalancesUnavailableError,
   RouterChannelUnknownError,
   VectorError,
+  CoreUninitializedError,
+  BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
 import { EPaymentState } from "@hypernetlabs/objects";
 import { IConfigProvider, IContextProvider, ILogUtils } from "@interfaces/utilities";
 import { err, errAsync, ok, okAsync, ResultAsync, Result } from "neverthrow";
 import { BigNumber } from "ethers";
+
+type PaymentsByIdsErrors =
+  | RouterChannelUnknownError
+  | VectorError
+  | CoreUninitializedError
+  | BlockchainUnavailableError
+  | LogicalError
+  | InvalidPaymentError
+  | InvalidParametersError;
 
 /**
  * PaymentService uses Vector internally to send payments on the requested channel.
@@ -81,7 +96,7 @@ export class PaymentService implements IPaymentService {
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<PullPayment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  ): ResultAsync<PullPayment, PaymentCreationError | LogicalError> {
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
     // totalAuthorized / (deltaAmount/deltaTime) > ((expiration date - now) + someMinimumNumDays)
 
@@ -110,7 +125,7 @@ export class PaymentService implements IPaymentService {
   public pullFunds(
     paymentId: string,
     amount: BigNumber,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  ): ResultAsync<Payment, PaymentsByIdsErrors | PaymentCreationError> {
     // Pull the up the payment
     return this.paymentRepository.getPaymentsByIds([paymentId]).andThen((payments) => {
       const payment = payments.get(paymentId);
@@ -161,7 +176,7 @@ export class PaymentService implements IPaymentService {
     requiredStake: string,
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<PushPayment, Error> {
+  ): ResultAsync<PushPayment, PaymentCreationError | LogicalError> {
     // TODO: Sanity checking on the values
     return ResultUtils.combine([
       this.paymentRepository.createPushPayment(
@@ -189,9 +204,7 @@ export class PaymentService implements IPaymentService {
    * Then, publish an RXJS event to the user.
    * @param paymentId the paymentId for the offer
    */
-  public offerReceived(
-    paymentId: string,
-  ): ResultAsync<void, LogicalError | RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  public offerReceived(paymentId: string): ResultAsync<void, PaymentsByIdsErrors> {
     const prerequisites = ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -222,7 +235,7 @@ export class PaymentService implements IPaymentService {
         // Someone wants to send us a pullPayment, emit up to the api
         context.onPullPaymentReceived.next(payment);
       } else {
-        throw new Error("Unknown payment type!");
+        throw new LogicalError("Unknown payment type!");
       }
 
       return okAsync(undefined);
@@ -235,7 +248,14 @@ export class PaymentService implements IPaymentService {
    */
   public acceptOffers(
     paymentIds: string[],
-  ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
+  ): ResultAsync<
+    Result<Payment, AcceptPaymentError>[],
+    | InsufficientBalanceError
+    | AcceptPaymentError
+    | BalancesUnavailableError
+    | MerchantValidationError
+    | PaymentsByIdsErrors
+  > {
     let config: HypernetConfig;
     let payments: Map<string, Payment>;
     const merchantUrls = new Set<string>();
@@ -319,7 +339,10 @@ export class PaymentService implements IPaymentService {
    */
   public stakePosted(
     paymentId: string,
-  ): ResultAsync<Payment, CoreUninitializedError | OfferMismatchError | InvalidParametersError> {
+  ): ResultAsync<
+    Payment,
+    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+  > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -351,7 +374,12 @@ export class PaymentService implements IPaymentService {
    * and after the sender has created the Parameterized transfer
    * @param paymentId the payment ID to accept/resolve
    */
-  public paymentPosted(paymentId: string): ResultAsync<Payment, InvalidParametersError> {
+  public paymentPosted(
+    paymentId: string,
+  ): ResultAsync<
+    Payment,
+    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+  > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -384,7 +412,10 @@ export class PaymentService implements IPaymentService {
    */
   public paymentCompleted(
     paymentId: HexString,
-  ): ResultAsync<Payment, InvalidParametersError | RouterChannelUnknownError | CoreUninitializedError | VectorError> {
+  ): ResultAsync<
+    Payment,
+    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+  > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -415,7 +446,12 @@ export class PaymentService implements IPaymentService {
    *
    * @param paymentId
    */
-  public insuranceResolved(paymentId: HexString): ResultAsync<Payment, InvalidParametersError> {
+  public insuranceResolved(
+    paymentId: HexString,
+  ): ResultAsync<
+    Payment,
+    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+  > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -445,7 +481,7 @@ export class PaymentService implements IPaymentService {
    * Notifies the service that a pull-payment has been recorded.
    * @param paymentId the paymentId for the pull-payment
    */
-  public pullRecorded(paymentId: string): ResultAsync<void, InvalidParametersError> {
+  public pullRecorded(paymentId: string): ResultAsync<void, PaymentsByIdsErrors> {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getContext(),
@@ -470,13 +506,7 @@ export class PaymentService implements IPaymentService {
     paymentId: string,
   ): ResultAsync<
     Payment,
-    | InvalidParametersError
-    | CoreUninitializedError
-    | MerchantConnectorError
-    | RouterChannelUnknownError
-    | CoreUninitializedError
-    | VectorError
-    | Error
+    MerchantConnectorError | MerchantValidationError | PaymentsByIdsErrors | TransferResolutionError
   > {
     // Get the payment
     return this.paymentRepository
@@ -520,7 +550,7 @@ export class PaymentService implements IPaymentService {
     paymentIds: HexString[],
   ): ResultAsync<
     Payment[],
-    PaymentFinalizeError | RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
+    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds(paymentIds),
@@ -531,7 +561,11 @@ export class PaymentService implements IPaymentService {
       const paymentAdvancements = new Array<
         ResultAsync<
           Payment,
-          PaymentFinalizeError | RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
+          | PaymentFinalizeError
+          | PaymentStakeError
+          | TransferResolutionError
+          | PaymentsByIdsErrors
+          | TransferCreationError
         >
       >();
       for (const keyval of payments) {
@@ -547,7 +581,7 @@ export class PaymentService implements IPaymentService {
     context: HypernetContext,
   ): ResultAsync<
     Payment,
-    PaymentFinalizeError | RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
+    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
     // Notified the UI, move on to advancing the state of the payment.
     // Payment state must be in "staked" in order to progress

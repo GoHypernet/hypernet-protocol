@@ -469,7 +469,9 @@ export class PaymentUtils implements IPaymentUtils {
    * @param _context instance of HypernetContext
    * @param browserNode instance of the IBrowserNode
    */
-  public transfersToPayments(transfers: IFullTransferState[]): ResultAsync<Payment[], InvalidPaymentError> {
+  public transfersToPayments(
+    transfers: IFullTransferState[],
+  ): ResultAsync<Payment[], VectorError | LogicalError | InvalidPaymentError | InvalidParametersError> {
     // First step, get the transfer types for all the transfers
     const transferTypeResults = new Array<
       ResultAsync<{ transferType: ETransferType; transfer: IFullTransferState }, VectorError | Error>

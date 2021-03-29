@@ -1,12 +1,7 @@
 import { IContextProvider } from "@interfaces/utilities";
 import { ControlClaim, InitializedHypernetContext } from "@hypernetlabs/objects";
 import { IControlService } from "@interfaces/business";
-import {
-  BlockchainUnavailableError,
-  CoreUninitializedError,
-  LogicalError,
-  ThreeBoxError,
-} from "@hypernetlabs/objects";
+import { BlockchainUnavailableError, CoreUninitializedError, LogicalError, ThreeBoxError } from "@hypernetlabs/objects";
 import { IMessagingRepository } from "@interfaces/data";
 import { ResultAsync } from "neverthrow";
 
@@ -60,7 +55,7 @@ export class ControlService implements IControlService {
    * SHUT DOWN EVERYTHING
    * @param controlClaim
    */
-  public processControlClaim(controlClaim: ControlClaim): ResultAsync<void, CoreUninitializedError> {
+  public processControlClaim(controlClaim: ControlClaim): ResultAsync<void, CoreUninitializedError | LogicalError> {
     let context: InitializedHypernetContext;
 
     return this.contextProvider

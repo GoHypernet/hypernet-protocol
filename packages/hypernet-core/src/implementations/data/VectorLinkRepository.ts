@@ -6,6 +6,8 @@ import {
   InvalidParametersError,
   RouterChannelUnknownError,
   VectorError,
+  InvalidPaymentError,
+  LogicalError,
 } from "@hypernetlabs/objects";
 import {
   IBrowserNode,
@@ -45,8 +47,9 @@ export class VectorLinkRepository implements ILinkRepository {
     | CoreUninitializedError
     | VectorError
     | InvalidParametersError
-    | CoreUninitializedError
     | BlockchainUnavailableError
+    | InvalidPaymentError
+    | LogicalError
   > {
     let browserNode: IBrowserNode;
 
@@ -86,8 +89,9 @@ export class VectorLinkRepository implements ILinkRepository {
     | CoreUninitializedError
     | VectorError
     | InvalidParametersError
-    | CoreUninitializedError
     | BlockchainUnavailableError
+    | InvalidPaymentError
+    | LogicalError
   > {
     let browserNode: IBrowserNode;
     return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.vectorUtils.getRouterChannelAddress()])

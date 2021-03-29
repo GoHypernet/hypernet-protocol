@@ -7,7 +7,13 @@ import {
   IFullTransferState,
 } from "@hypernetlabs/objects";
 import { EPaymentState, EPaymentType, ETransferType } from "@hypernetlabs/objects";
-import { InvalidParametersError, InvalidPaymentError, LogicalError, VectorError } from "@hypernetlabs/objects";
+import {
+  InvalidParametersError,
+  InvalidPaymentError,
+  LogicalError,
+  VectorError,
+  InvalidPaymentIdError,
+} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IPaymentUtils {
@@ -15,7 +21,7 @@ export interface IPaymentUtils {
    *
    * @param paymentId
    */
-  isHypernetDomain(paymentId: string): ResultAsync<boolean, Error>;
+  isHypernetDomain(paymentId: string): ResultAsync<boolean, InvalidPaymentIdError>;
 
   /**
    * Creates a PaymentId by combining
@@ -35,7 +41,9 @@ export interface IPaymentUtils {
    * @param context
    * @param browserNode
    */
-  transfersToPayments(transfers: IFullTransferState[]): ResultAsync<Payment[], InvalidPaymentError>;
+  transfersToPayments(
+    transfers: IFullTransferState[],
+  ): ResultAsync<Payment[], VectorError | LogicalError | InvalidPaymentError | InvalidParametersError>;
 
   /**
    *
@@ -74,7 +82,7 @@ export interface IPaymentUtils {
     from: PublicIdentifier,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<PullPayment, Error>;
+  ): ResultAsync<PullPayment, LogicalError>;
 
   /**
    *
@@ -91,7 +99,7 @@ export interface IPaymentUtils {
     from: PublicIdentifier,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<PushPayment, Error>;
+  ): ResultAsync<PushPayment, LogicalError>;
 
   /**
    * Given an unsorted list of transfers, it will give you the timestamp of the
@@ -100,4 +108,5 @@ export interface IPaymentUtils {
    * @returns the unix timestamp of the earliest transfer
    */
   getEarliestDateFromTransfers(transfers: IFullTransferState[]): number;
+  getPaymentState(sortedTransfers: SortedTransfers): EPaymentState;
 }

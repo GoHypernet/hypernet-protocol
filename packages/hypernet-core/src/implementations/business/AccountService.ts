@@ -13,6 +13,7 @@ import {
   CoreUninitializedError,
   LogicalError,
   VectorError,
+  RouterChannelUnknownError,
 } from "@hypernetlabs/objects";
 import { IContextProvider, ILogUtils } from "@interfaces/utilities";
 import { okAsync, ResultAsync } from "neverthrow";
@@ -28,7 +29,10 @@ export class AccountService implements IAccountService {
     protected logUtils: ILogUtils,
   ) {}
 
-  public getPublicIdentifier(): ResultAsync<PublicIdentifier, VectorError | LogicalError> {
+  public getPublicIdentifier(): ResultAsync<
+    PublicIdentifier,
+    CoreUninitializedError | BlockchainUnavailableError | VectorError
+  > {
     return this.accountRepository.getPublicIdentifier();
   }
 
@@ -36,7 +40,10 @@ export class AccountService implements IAccountService {
     return this.accountRepository.getAccounts();
   }
 
-  public getBalances(): ResultAsync<Balances, BalancesUnavailableError | CoreUninitializedError> {
+  public getBalances(): ResultAsync<
+    Balances,
+    BalancesUnavailableError | VectorError | CoreUninitializedError | RouterChannelUnknownError
+  > {
     return this.accountRepository.getBalances();
   }
 
@@ -45,7 +52,12 @@ export class AccountService implements IAccountService {
     amount: BigNumber,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
+    | BalancesUnavailableError
+    | RouterChannelUnknownError
+    | CoreUninitializedError
+    | BlockchainUnavailableError
+    | VectorError
+    | LogicalError
   > {
     this.logUtils.log(`HypernetCore:depositFunds: assetAddress: ${assetAddress}`);
 
@@ -74,7 +86,11 @@ export class AccountService implements IAccountService {
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
+    | BalancesUnavailableError
+    | RouterChannelUnknownError
+    | CoreUninitializedError
+    | BlockchainUnavailableError
+    | VectorError
   > {
     let context: InitializedHypernetContext;
 
