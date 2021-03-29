@@ -313,19 +313,13 @@ export class PaymentService implements IPaymentService {
 
           if (merchantAddress != null) {
             const stakeAttempt = this.paymentRepository.provideStake(paymentId, merchantAddress).match(
-              (payment) => {
-                return ok(payment) as Result<Payment, AcceptPaymentError>;
-              },
-              (e) => {
-                return err(
-                  new AcceptPaymentError(`Payment ${paymentId} could not be staked! Source exception: ${e}`),
-                ) as Result<Payment, AcceptPaymentError>;
-              },
+              (payment) => ok(payment) as Result<Payment, AcceptPaymentError>,
+              (e) => err(new AcceptPaymentError(`Payment ${paymentId} could not be staked! Source exception: ${e}`)),
             );
 
             stakeAttempts.push(stakeAttempt);
           } else {
-            throw new Error("Merchant does not have a public key; are they ");
+            throw new LogicalError("Merchant does not have a public key; are they ");
           }
         }
         return ResultAsync.fromPromise(Promise.all(stakeAttempts), (e) => e as AcceptPaymentError);
