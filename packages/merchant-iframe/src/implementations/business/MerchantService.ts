@@ -20,6 +20,7 @@ export class MerchantService implements IMerchantService {
     protected persistenceRepository: IPersistenceRepository,
     protected contextProvider: IContextProvider,
   ) {}
+  private static merchantUrlCacheBusterUsed: boolean = false;
 
   public activateMerchantConnector(): ResultAsync<
     IMerchantConnector,
@@ -40,7 +41,6 @@ export class MerchantService implements IMerchantService {
 
     const merchantConnector = window.connector;
 
-    console.log(merchantConnector);
     if (merchantConnector == null) {
       return errAsync(new MerchantConnectorError("Validated code does not evaluate to an object"));
     }
@@ -72,25 +72,41 @@ export class MerchantService implements IMerchantService {
       this.merchantConnectorRepository.getMerchantCode(context.merchantUrl),
       this.merchantConnectorRepository.getMerchantSignature(context.merchantUrl),
       this.merchantConnectorRepository.getMerchantAddress(context.merchantUrl),
-    ]).andThen((vals) => {
-      const [merchantCode, signature, address] = vals;
+    ])
+      .andThen((vals) => {
+        const [merchantCode, signature, address] = vals;
 
-      const calculatedAddress = ethers.utils.verifyMessage(merchantCode, signature);
+        const calculatedAddress = ethers.utils.verifyMessage(merchantCode, signature);
 
-      if (calculatedAddress !== address) {
-        return errAsync(new MerchantValidationError("Merchant code does not match signature!"));
-      }
+        if (calculatedAddress !== address) {
+          return errAsync<string, MerchantValidationError>(
+            new MerchantValidationError("Merchant code does not match signature!"),
+          );
+        }
 
-      // Merchant's code passes muster. Store the merchant code in the context as validated.
-      const context = this.contextProvider.getMerchantContext();
-      console.log(`Merchant connector for ${context.merchantUrl} validated!`);
-      context.validatedMerchantCode = merchantCode;
-      context.validatedMerchantSignature = signature;
-      this.contextProvider.setMerchantContext(context);
+        // Merchant's code passes muster. Store the merchant code in the context as validated.
+        const context = this.contextProvider.getMerchantContext();
+        console.log(`Merchant connector for ${context.merchantUrl} validated!`);
+        context.validatedMerchantCode = merchantCode;
+        context.validatedMerchantSignature = signature;
+        this.contextProvider.setMerchantContext(context);
 
-      // Return the valid signature
-      return okAsync(signature);
-    });
+        // Return the valid signature
+        return okAsync(signature);
+      })
+      .orElse((e) => {
+        const err = e as MerchantValidationError;
+        if (!MerchantService.merchantUrlCacheBusterUsed) {
+          MerchantService.merchantUrlCacheBusterUsed = true;
+          const cacheBuster = `?v=${new Date().getTime()}`;
+          context.merchantUrl = context.merchantUrl + cacheBuster;
+          this.contextProvider.setMerchantContext(context);
+
+          return this.validateMerchantConnector();
+        } else {
+          return errAsync(err);
+        }
+      });
   }
 
   public prepareForRedirect(redirectInfo: IRedirectInfo): ResultAsync<void, Error> {
