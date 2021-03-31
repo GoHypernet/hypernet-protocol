@@ -11,6 +11,7 @@ import {
   RouterChannelUnknownError,
   TransferCreationError,
   TransferResolutionError,
+  VectorError,
 } from "@hypernetlabs/objects";
 import { EPaymentType, ETransferState } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
@@ -23,7 +24,7 @@ export interface IVectorUtils {
   /**
    *
    */
-  getRouterChannelAddress(): ResultAsync<string, RouterChannelUnknownError | CoreUninitializedError>;
+  getRouterChannelAddress(): ResultAsync<string, RouterChannelUnknownError | CoreUninitializedError | VectorError>;
 
   /**
    *

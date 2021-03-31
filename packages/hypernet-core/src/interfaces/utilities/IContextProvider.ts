@@ -9,7 +9,7 @@ export interface IContextProvider {
   /**
    *
    */
-  getContext(): ResultAsync<HypernetContext, LogicalError>;
+  getContext(): ResultAsync<HypernetContext, never>;
 
   /**
    *
@@ -19,5 +19,5 @@ export interface IContextProvider {
   /**
    *
    */
-  setContext(context: HypernetContext): ResultAsync<void, LogicalError>;
+  setContext(context: HypernetContext): ResultAsync<void, never>;
 }

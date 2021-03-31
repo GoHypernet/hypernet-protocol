@@ -1,7 +1,7 @@
 import { ParentProxy } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
-import { MerchantConnectorError, MerchantValidationError } from "@hypernetlabs/objects";
+import { MerchantConnectorError, MerchantValidationError, ProxyError } from "@hypernetlabs/objects";
 import { HexString, PullPayment, PushPayment } from "@hypernetlabs/objects";
 
 export interface IMerchantConnectorProxy extends ParentProxy {
@@ -9,22 +9,22 @@ export interface IMerchantConnectorProxy extends ParentProxy {
    * activateConnector() will actual cause the connector code to execute. This should only
    * be done if the user has authorized the connector.
    */
-  activateConnector(): ResultAsync<void, MerchantConnectorError>;
+  activateConnector(): ResultAsync<void, MerchantConnectorError | ProxyError>;
 
-  resolveChallenge(paymentId: HexString): ResultAsync<IResolutionResult, MerchantConnectorError>;
+  resolveChallenge(paymentId: HexString): ResultAsync<IResolutionResult, MerchantConnectorError | ProxyError>;
 
-  getAddress(): ResultAsync<HexString, MerchantConnectorError>;
+  getAddress(): ResultAsync<HexString, MerchantConnectorError | ProxyError>;
 
-  getValidatedSignature(): ResultAsync<string, MerchantValidationError>;
+  getValidatedSignature(): ResultAsync<string, MerchantValidationError | ProxyError>;
 
-  closeMerchantIFrame(): ResultAsync<void, MerchantConnectorError>;
+  closeMerchantIFrame(): ResultAsync<void, MerchantConnectorError | ProxyError>;
 
-  displayMerchantIFrame(): ResultAsync<void, MerchantConnectorError>;
+  displayMerchantIFrame(): ResultAsync<void, MerchantConnectorError | ProxyError>;
 
-  notifyPushPaymentSent(payment: PushPayment): ResultAsync<void, MerchantConnectorError>;
-  notifyPushPaymentUpdated(payment: PushPayment): ResultAsync<void, MerchantConnectorError>;
-  notifyPushPaymentReceived(payment: PushPayment): ResultAsync<void, MerchantConnectorError>;
-  notifyPullPaymentSent(payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
-  notifyPullPaymentUpdated(payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
-  notifyPullPaymentReceived(payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
+  notifyPushPaymentSent(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  notifyPushPaymentUpdated(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  notifyPushPaymentReceived(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  notifyPullPaymentSent(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  notifyPullPaymentUpdated(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  notifyPullPaymentReceived(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError>;
 }

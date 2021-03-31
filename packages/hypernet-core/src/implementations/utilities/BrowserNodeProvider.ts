@@ -14,9 +14,12 @@ import { ethers } from "ethers";
 import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
+type BrowserNodeInitializationError = VectorError | CoreUninitializedError | BlockchainUnavailableError;
+
 export class BrowserNodeProvider implements IBrowserNodeProvider {
-  protected browserNodeResult: ResultAsync<IBrowserNode, VectorError | Error> | null;
-  protected browserNode: IBrowserNode | null;
+  protected browserNodeResult: ResultAsync<IBrowserNode, BrowserNodeInitializationError> | null = null;
+  protected browserNode: IBrowserNode = {} as IBrowserNode;
+
   constructor(
     protected configProvider: IConfigProvider,
     protected contextProvider: IContextProvider,
@@ -24,11 +27,9 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
     protected logUtils: ILogUtils,
     protected storageUtils: ILocalStorageUtils,
     protected browserNodeFactory: IBrowserNodeFactory,
-  ) {
-    this.browserNodeResult = null;
-    this.browserNode = null;
-  }
-  protected initialize(): ResultAsync<IBrowserNode, VectorError | CoreUninitializedError> {
+  ) {}
+
+  protected initialize(): ResultAsync<IBrowserNode, BrowserNodeInitializationError> {
     if (this.browserNodeResult == null) {
       let config: HypernetConfig;
       let signer: ethers.providers.JsonRpcSigner;
@@ -76,14 +77,9 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
           // Store the signature so you don't have to sign again
           this.storageUtils.setSessionItem(`account-${account}-signature`, signature);
 
-          // Initialize the browser node
-          if (this.browserNode == null) {
-            throw new Error("Something is badly broken");
-          }
           return this.browserNode.init(signature, account);
         })
         .orElse((e) => {
-          console.log(e);
           const shouldAttemptRestore = ((e as any).context?.validationError ?? "").includes("Channel is already setup");
 
           if (shouldAttemptRestore && this.browserNode != null) {
@@ -99,13 +95,11 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
             return errAsync(e);
           }
         })
-        .map(() => {
-          return this.browserNode as IBrowserNode;
-        });
+        .map(() => this.browserNode);
     }
-    return this.browserNodeResult as ResultAsync<IBrowserNode, VectorError>;
+    return this.browserNodeResult as ResultAsync<IBrowserNode, BrowserNodeInitializationError>;
   }
-  public getBrowserNode(): ResultAsync<IBrowserNode, VectorError | Error> {
+  public getBrowserNode(): ResultAsync<IBrowserNode, BrowserNodeInitializationError> {
     return this.initialize();
   }
 }

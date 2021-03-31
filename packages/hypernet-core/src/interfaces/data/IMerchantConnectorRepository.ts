@@ -1,10 +1,13 @@
-import { ResultAsync } from "neverthrow";
+import { ResultAsync, Result } from "neverthrow";
 import {
   CoreUninitializedError,
   LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
   PersistenceError,
+  ProxyError,
+  BlockchainUnavailableError,
+  TransferResolutionError,
 } from "@hypernetlabs/objects";
 import { PullPayment, PushPayment } from "@hypernetlabs/objects";
 
@@ -12,38 +15,59 @@ export interface IMerchantConnectorRepository {
   /**
    * Returns a map of merchant URLs to their address
    */
-  getMerchantAddresses(merchantUrl: string[]): ResultAsync<Map<string, string>, Error>;
+  getMerchantAddresses(merchantUrl: string[]): ResultAsync<Map<string, string>, LogicalError>;
 
   /**
    * Adds the merchant url as authorized with a particular signature
    * @param merchantUrl
    * @param signature
    */
-  addAuthorizedMerchant(merchantUrl: string): ResultAsync<void, PersistenceError>;
+  addAuthorizedMerchant(
+    merchantUrl: string,
+  ): ResultAsync<
+    void,
+    | PersistenceError
+    | LogicalError
+    | MerchantValidationError
+    | ProxyError
+    | BlockchainUnavailableError
+    | MerchantConnectorError
+  >;
 
   /**
    * Destroy merchant connector proxy
    * @param merchantUrl
    */
-  removeAuthorizedMerchant(merchantUrl: string): void;
+  removeAuthorizedMerchant(merchantUrl: string): Result<void, never>;
 
-  getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError>;
+  getAuthorizedMerchants(): ResultAsync<Map<string, string>, never>;
 
-  activateAuthorizedMerchants(): ResultAsync<void, MerchantConnectorError>;
+  activateAuthorizedMerchants(): ResultAsync<
+    void,
+    | MerchantConnectorError
+    | MerchantValidationError
+    | CoreUninitializedError
+    | BlockchainUnavailableError
+    | LogicalError
+    | ProxyError
+  >;
 
   resolveChallenge(
     merchantUrl: string,
     paymentId: string,
     transferId: string,
-  ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | CoreUninitializedError>;
+  ): ResultAsync<
+    void,
+    MerchantConnectorError | MerchantValidationError | CoreUninitializedError | TransferResolutionError
+  >;
 
   closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
   displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
 
-  notifyPushPaymentSent(merchantUrl: string, payment: PushPayment): ResultAsync<void, LogicalError>;
-  notifyPushPaymentUpdated(merchantUrl: string, payment: PushPayment): ResultAsync<void, LogicalError>;
-  notifyPushPaymentReceived(merchantUrl: string, payment: PushPayment): ResultAsync<void, LogicalError>;
-  notifyPullPaymentSent(merchantUrl: string, payment: PullPayment): ResultAsync<void, LogicalError>;
-  notifyPullPaymentUpdated(merchantUrl: string, payment: PullPayment): ResultAsync<void, LogicalError>;
-  notifyPullPaymentReceived(merchantUrl: string, payment: PullPayment): ResultAsync<void, LogicalError>;
+  notifyPushPaymentSent(merchantUrl: string, payment: PushPayment): ResultAsync<void, MerchantConnectorError>;
+  notifyPushPaymentUpdated(merchantUrl: string, payment: PushPayment): ResultAsync<void, MerchantConnectorError>;
+  notifyPushPaymentReceived(merchantUrl: string, payment: PushPayment): ResultAsync<void, MerchantConnectorError>;
+  notifyPullPaymentSent(merchantUrl: string, payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
+  notifyPullPaymentUpdated(merchantUrl: string, payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
+  notifyPullPaymentReceived(merchantUrl: string, payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
 }
