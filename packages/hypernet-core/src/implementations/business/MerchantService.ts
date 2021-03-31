@@ -9,40 +9,53 @@ import {
   ProxyError,
 } from "@hypernetlabs/objects";
 import { IMerchantConnectorRepository } from "@interfaces/data";
-import { IContextProvider } from "@interfaces/utilities";
+import { IContextProvider, ILogUtils } from "@interfaces/utilities";
 import { ResultUtils } from "@hypernetlabs/utils";
 
 export class MerchantService implements IMerchantService {
   constructor(
     protected merchantConnectorRepository: IMerchantConnectorRepository,
     protected contextProvider: IContextProvider,
+    protected logUtils: ILogUtils,
   ) {}
 
   public initialize(): ResultAsync<void, LogicalError | MerchantConnectorError> {
     return this.contextProvider.getContext().map((context) => {
       // Subscribe to the various events, and sort them out for the merchant connector
       context.onPushPaymentSent.subscribe((payment) => {
-        this.merchantConnectorRepository.notifyPushPaymentSent(payment.merchantUrl, payment);
+        this.merchantConnectorRepository.notifyPushPaymentSent(payment.merchantUrl, payment).mapErr((e) => {
+          this.logUtils.debug(e);
+        });
       });
 
       context.onPushPaymentUpdated.subscribe((payment) => {
-        this.merchantConnectorRepository.notifyPushPaymentUpdated(payment.merchantUrl, payment);
+        this.merchantConnectorRepository.notifyPushPaymentUpdated(payment.merchantUrl, payment).mapErr((e) => {
+          this.logUtils.debug(e);
+        });
       });
 
       context.onPushPaymentReceived.subscribe((payment) => {
-        this.merchantConnectorRepository.notifyPushPaymentReceived(payment.merchantUrl, payment);
+        this.merchantConnectorRepository.notifyPushPaymentReceived(payment.merchantUrl, payment).mapErr((e) => {
+          this.logUtils.debug(e);
+        });
       });
 
       context.onPullPaymentSent.subscribe((payment) => {
-        this.merchantConnectorRepository.notifyPullPaymentSent(payment.merchantUrl, payment);
+        this.merchantConnectorRepository.notifyPullPaymentSent(payment.merchantUrl, payment).mapErr((e) => {
+          this.logUtils.debug(e);
+        });
       });
 
       context.onPullPaymentUpdated.subscribe((payment) => {
-        this.merchantConnectorRepository.notifyPullPaymentUpdated(payment.merchantUrl, payment);
+        this.merchantConnectorRepository.notifyPullPaymentUpdated(payment.merchantUrl, payment).mapErr((e) => {
+          this.logUtils.debug(e);
+        });
       });
 
       context.onPullPaymentReceived.subscribe((payment) => {
-        this.merchantConnectorRepository.notifyPullPaymentReceived(payment.merchantUrl, payment);
+        this.merchantConnectorRepository.notifyPullPaymentReceived(payment.merchantUrl, payment).mapErr((e) => {
+          this.logUtils.debug(e);
+        });
       });
     });
   }
