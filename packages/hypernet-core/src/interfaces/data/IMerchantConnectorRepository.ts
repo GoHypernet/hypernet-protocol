@@ -1,5 +1,6 @@
 import { ResultAsync } from "neverthrow";
 import {
+  Balances,
   CoreUninitializedError,
   LogicalError,
   MerchantConnectorError,
@@ -19,7 +20,7 @@ export interface IMerchantConnectorRepository {
    * @param merchantUrl
    * @param signature
    */
-  addAuthorizedMerchant(merchantUrl: string): ResultAsync<void, PersistenceError>;
+  addAuthorizedMerchant(merchantUrl: string, initialBalances: Balances): ResultAsync<void, CoreUninitializedError | PersistenceError | MerchantConnectorError>;
 
   /**
    * Destroy merchant connector proxy
@@ -29,7 +30,7 @@ export interface IMerchantConnectorRepository {
 
   getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError>;
 
-  activateAuthorizedMerchants(): ResultAsync<void, MerchantConnectorError>;
+  activateAuthorizedMerchants(balances: Balances): ResultAsync<void, CoreUninitializedError | PersistenceError | MerchantConnectorError>;
 
   resolveChallenge(
     merchantUrl: string,
@@ -46,4 +47,5 @@ export interface IMerchantConnectorRepository {
   notifyPullPaymentSent(merchantUrl: string, payment: PullPayment): ResultAsync<void, LogicalError>;
   notifyPullPaymentUpdated(merchantUrl: string, payment: PullPayment): ResultAsync<void, LogicalError>;
   notifyPullPaymentReceived(merchantUrl: string, payment: PullPayment): ResultAsync<void, LogicalError>;
+  notifyBalancesReceived(balances: Balances): ResultAsync<void, MerchantConnectorError>;
 }

@@ -1,7 +1,7 @@
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
 import { IAuthorizeFundsRequest, IResolutionResult, ISendFundsRequest } from "@hypernetlabs/merchant-connector";
-import { MerchantConnectorError, MerchantValidationError } from "@hypernetlabs/objects";
+import { Balances, MerchantConnectorError, MerchantValidationError, PublicIdentifier } from "@hypernetlabs/objects";
 import { HexString, HypernetContext, PullPayment, PushPayment } from "@hypernetlabs/objects";
 import { IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
 
@@ -19,8 +19,23 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     super(element, iframeUrl, iframeName, debug);
   }
 
-  public activateConnector(): ResultAsync<void, MerchantConnectorError> {
-    return this._createCall("activateConnector", null);
+  public activateConnector(publicIdentifier: PublicIdentifier, balances: Balances): ResultAsync<void, MerchantConnectorError> {
+    const assets = balances.assets.map((val) => {
+      return {
+        assetAddress: val.assetAddress,
+        name: val.name,
+        symbol: val.symbol,
+        decimals: val.decimals,
+        totalAmount: val.totalAmount.toString(),
+        lockedAmount: val.lockedAmount.toString(),
+        freeAmount: val.freeAmount.toString(),
+      }
+    })
+    const activateData = {
+      publicIdentifier, 
+      balances: {assets: assets}
+    }
+    return this._createCall("activateConnector", activateData);
   }
 
   public resolveChallenge(paymentId: HexString): ResultAsync<IResolutionResult, MerchantConnectorError> {
@@ -93,28 +108,36 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     });
   }
 
-  notifyPushPaymentSent(payment: PushPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPushPaymentSent(payment: PushPayment): ResultAsync<void, MerchantConnectorError> {
     return this._createCall("notifyPushPaymentSent", payment);
   }
 
-  notifyPushPaymentUpdated(payment: PushPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPushPaymentUpdated(payment: PushPayment): ResultAsync<void, MerchantConnectorError> {
     return this._createCall("notifyPushPaymentUpdated", payment);
   }
 
-  notifyPushPaymentReceived(payment: PushPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPushPaymentReceived(payment: PushPayment): ResultAsync<void, MerchantConnectorError> {
     return this._createCall("notifyPushPaymentReceived", payment);
   }
 
-  notifyPullPaymentSent(payment: PullPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPullPaymentSent(payment: PullPayment): ResultAsync<void, MerchantConnectorError> {
     return this._createCall("notifyPullPaymentSent", payment);
   }
 
-  notifyPullPaymentUpdated(payment: PullPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPullPaymentUpdated(payment: PullPayment): ResultAsync<void, MerchantConnectorError> {
     return this._createCall("notifyPullPaymentUpdated", payment);
   }
 
-  notifyPullPaymentReceived(payment: PullPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPullPaymentReceived(payment: PullPayment): ResultAsync<void, MerchantConnectorError> {
     return this._createCall("notifyPullPaymentReceived", payment);
+  }
+
+  public notifyPublicIdentifier(public_identifier: PublicIdentifier): ResultAsync<void, MerchantConnectorError> {
+    return this._createCall("notifyPublicIdentifier", public_identifier);
+  }
+
+  public notifyBalancesReceived(balances: Balances): ResultAsync<void, MerchantConnectorError> {
+    return this._createCall("notifyBalancesReceived", balances);
   }
 
   private _pushOpenedMerchantIFrame(merchantUrl: string) {

@@ -8,5 +8,6 @@ export class MerchantContext {
     public validatedMerchantCode: string | null,
     public validatedMerchantSignature: string | null,
     public merchantConnector: IMerchantConnector | null,
+    public publicIdentifier: string | null,
   ) {}
 }

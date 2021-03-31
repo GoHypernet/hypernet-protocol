@@ -1,7 +1,7 @@
 import { ParentProxy } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
-import { MerchantConnectorError, MerchantValidationError } from "@hypernetlabs/objects";
+import { Balances, MerchantConnectorError, MerchantValidationError, PublicIdentifier } from "@hypernetlabs/objects";
 import { HexString, PullPayment, PushPayment } from "@hypernetlabs/objects";
 
 export interface IMerchantConnectorProxy extends ParentProxy {
@@ -9,7 +9,7 @@ export interface IMerchantConnectorProxy extends ParentProxy {
    * activateConnector() will actual cause the connector code to execute. This should only
    * be done if the user has authorized the connector.
    */
-  activateConnector(): ResultAsync<void, MerchantConnectorError>;
+  activateConnector(publicIdentifier: PublicIdentifier, balances: Balances): ResultAsync<void, MerchantConnectorError>;
 
   resolveChallenge(paymentId: HexString): ResultAsync<IResolutionResult, MerchantConnectorError>;
 
@@ -27,4 +27,6 @@ export interface IMerchantConnectorProxy extends ParentProxy {
   notifyPullPaymentSent(payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
   notifyPullPaymentUpdated(payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
   notifyPullPaymentReceived(payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
+  notifyPublicIdentifier(publicIdentifier: PublicIdentifier): ResultAsync<void, MerchantConnectorError>;
+  notifyBalancesReceived(balances: Balances): ResultAsync<void, MerchantConnectorError>;
 }

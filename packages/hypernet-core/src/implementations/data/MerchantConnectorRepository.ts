@@ -1,5 +1,5 @@
 import { IMerchantConnectorRepository } from "@interfaces/data";
-import { PublicKey, HypernetContext, PullPayment, PushPayment } from "@hypernetlabs/objects";
+import { PublicKey, HypernetContext, PullPayment, PushPayment, Balances, InitializedHypernetContext } from "@hypernetlabs/objects";
 import {
   CoreUninitializedError,
   LogicalError,
@@ -93,13 +93,13 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     });
   }
 
-  public addAuthorizedMerchant(merchantUrl: string): ResultAsync<void, PersistenceError> {
+  public addAuthorizedMerchant(merchantUrl: string, initialBalances: Balances): ResultAsync<void, CoreUninitializedError | PersistenceError | MerchantConnectorError> {
     let proxy: IMerchantConnectorProxy;
-    let context: HypernetContext;
+    let context: InitializedHypernetContext;
 
     // First, we will create the proxy
     return this.contextProvider
-      .getContext()
+      .getInitializedContext()
       .andThen((myContext) => {
         context = myContext;
         return this.merchantConnectorProxyFactory.factoryProxy(merchantUrl);
@@ -131,7 +131,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         this._setAuthorizedMerchants(authorizedMerchants);
 
         // Activate the merchant connector
-        return proxy.activateConnector();
+        return proxy.activateConnector(context.publicIdentifier, initialBalances);
       })
       .map(() => {
         // Only if the merchant is successfully activated do we stick it in the list.
@@ -148,7 +148,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
           context.onAuthorizedMerchantActivationFailed.next(merchantUrl);
         }
 
-        return e;
+        return e as PersistenceError;
       });
   }
 
@@ -211,7 +211,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     return proxy.displayMerchantIFrame();
   }
 
-  public activateAuthorizedMerchants(): ResultAsync<
+  public activateAuthorizedMerchants(balances: Balances): ResultAsync<
     void,
     MerchantConnectorError | MerchantValidationError | CoreUninitializedError
   > {
@@ -227,6 +227,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         activationResults.push(() => {
           return this._activateAuthorizedMerchant(
             context.account,
+            balances,
             keyval[0], // URL
             keyval[1],
             context,
@@ -275,6 +276,16 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     });
   }
 
+  public notifyBalancesReceived(balances: Balances): ResultAsync<void, MerchantConnectorError> {
+    const results = new Array<ResultAsync<void, MerchantConnectorError>>();
+    
+    for (const [, merchantConnector] of this.activatedMerchants) {
+      results.push(merchantConnector.notifyBalancesReceived(balances));
+    }
+    
+    return ResultUtils.combine(results).map(() => {});
+  }
+
   protected getMerchantConnector(merchantUrl: string): ResultAsync<IMerchantConnectorProxy, MerchantConnectorError> {
     const proxy = this.activatedMerchants.get(merchantUrl);
 
@@ -287,9 +298,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
   protected _activateAuthorizedMerchant(
     accountAddress: string,
+    balances: Balances,
     merchantUrl: string,
     authorizationSignature: string,
-    context: HypernetContext,
+    context: InitializedHypernetContext,
     signer: ethers.providers.JsonRpcSigner,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError> {
     let proxy: IMerchantConnectorProxy;
@@ -297,6 +309,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       .factoryProxy(merchantUrl)
       .andThen((myProxy) => {
         proxy = myProxy;
+
         // We need to get the validated signature, so we can see if it was authorized
         return proxy.getValidatedSignature();
       })
@@ -335,7 +348,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         return okAsync<void, MerchantValidationError>(undefined);
       })
       .andThen(() => {
-        return proxy.activateConnector();
+        return proxy.activateConnector(context.publicIdentifier, balances);
       })
       .map(() => {
         this.activatedMerchants.set(merchantUrl, proxy);
@@ -349,7 +362,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         // Notify the world
         context.onAuthorizedMerchantActivationFailed.next(merchantUrl);
 
-        return e;
+        return e as MerchantConnectorError;
       });
   }
 

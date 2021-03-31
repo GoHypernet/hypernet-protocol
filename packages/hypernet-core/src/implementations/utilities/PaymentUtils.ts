@@ -442,8 +442,6 @@ export class PaymentUtils implements IPaymentUtils {
     transfer: IFullTransferState<InsuranceState>,
     offerDetails: IHypernetOfferDetails,
   ): boolean {
-    console.log(transfer);
-    console.log(offerDetails);
     return BigNumber.from(transfer.transferState.collateral).eq(BigNumber.from(offerDetails.requiredStake));
   }
 
@@ -634,7 +632,7 @@ export class PaymentUtils implements IPaymentUtils {
         }
       }
 
-      this.logUtils.log(`
+      this.logUtils.debug(`
         PaymentUtils:sortTransfers
   
         offerTransfers: ${offerTransfers.length}
