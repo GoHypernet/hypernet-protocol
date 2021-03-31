@@ -62,6 +62,9 @@ export class MerchantService implements IMerchantService {
     // That code is expected to be signed, with the public key available at merchantUrl/publicKey
     // The code will be cached in local storage but the signing key will be
     const context = this.contextProvider.getMerchantContext();
+    let signature: string = "";
+    let address: string = "";
+    let merchantCode: string = "";
 
     // If there is no merchant URL set, it's not an error
     if (context.merchantUrl == "") {
@@ -74,7 +77,7 @@ export class MerchantService implements IMerchantService {
       this.merchantConnectorRepository.getMerchantAddress(context.merchantUrl),
     ])
       .andThen((vals) => {
-        const [merchantCode, signature, address] = vals;
+        [merchantCode, signature, address] = vals;
 
         const calculatedAddress = ethers.utils.verifyMessage(merchantCode, signature);
 
@@ -98,14 +101,45 @@ export class MerchantService implements IMerchantService {
         const err = e as MerchantValidationError;
         if (!MerchantService.merchantUrlCacheBusterUsed) {
           MerchantService.merchantUrlCacheBusterUsed = true;
-          const cacheBuster = `?v=${new Date().getTime()}`;
-          context.merchantUrl = context.merchantUrl + cacheBuster;
-          this.contextProvider.setMerchantContext(context);
-
-          return this.validateMerchantConnector();
+          return this._validateMerchantConnectorCodeWithCasheBuster(signature, address);
         } else {
           return errAsync(err);
         }
+      });
+  }
+
+  private _validateMerchantConnectorCodeWithCasheBuster(
+    signature: string,
+    address: string,
+  ): ResultAsync<string, MerchantValidationError> {
+    const context = this.contextProvider.getMerchantContext();
+
+    // If there is no merchant URL set, it's not an error
+    if (context.merchantUrl == "") {
+      return okAsync("");
+    }
+
+    const cacheBuster: string = `?v=${new Date().getTime()}`;
+    return this.merchantConnectorRepository
+      .getMerchantCode(context.merchantUrl + cacheBuster)
+      .andThen((merchantCode) => {
+        const calculatedAddress = ethers.utils.verifyMessage(merchantCode, signature);
+
+        if (calculatedAddress !== address) {
+          return errAsync<string, MerchantValidationError>(
+            new MerchantValidationError("Merchant code does not match signature!"),
+          );
+        }
+
+        // Merchant's code passes muster. Store the merchant code in the context as validated.
+        const context = this.contextProvider.getMerchantContext();
+        console.log(`Merchant connector for ${context.merchantUrl} validated!`);
+        context.validatedMerchantCode = merchantCode;
+        context.validatedMerchantSignature = signature;
+        this.contextProvider.setMerchantContext(context);
+
+        // Return the valid signature
+        return okAsync(signature);
       });
   }
 
