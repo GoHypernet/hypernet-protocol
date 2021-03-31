@@ -1,5 +1,13 @@
 import { IMerchantConnectorRepository } from "@interfaces/data";
-import { PublicKey, HypernetContext, PullPayment, PushPayment } from "@hypernetlabs/objects";
+import {
+  PublicKey,
+  HypernetContext,
+  PullPayment,
+  PushPayment,
+  ProxyError,
+  BlockchainUnavailableError,
+  TransferResolutionError,
+} from "@hypernetlabs/objects";
 import {
   CoreUninitializedError,
   LogicalError,
@@ -7,7 +15,7 @@ import {
   MerchantValidationError,
   PersistenceError,
 } from "@hypernetlabs/objects";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync, Result } from "neverthrow";
 import { ResultUtils, IAjaxUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
 import {
   IBlockchainProvider,
@@ -54,13 +62,13 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     };
   }
 
-  public getMerchantAddresses(merchantUrls: string[]): ResultAsync<Map<string, PublicKey>, Error> {
+  public getMerchantAddresses(merchantUrls: string[]): ResultAsync<Map<string, PublicKey>, LogicalError> {
     // TODO: right now, the merchant will publish a URL with their address; eventually, they should be held in a smart contract
 
     // For merchants that are already authorized, we can just go to their connector for the
     // public key.
     const addressRequests = new Array<
-      ResultAsync<{ merchantUrl: string; address: string }, MerchantConnectorError | Error>
+      ResultAsync<{ merchantUrl: string; address: string }, MerchantConnectorError | LogicalError>
     >();
     for (const merchantUrl of merchantUrls) {
       const merchantProxy = this.activatedMerchants.get(merchantUrl);
@@ -76,7 +84,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         const url = new URL(merchantUrl.toString());
         url.pathname = "address";
         addressRequests.push(
-          this.ajaxUtils.get<string, Error>(url).map((address) => {
+          this.ajaxUtils.get<string, LogicalError>(url).map((address) => {
             return { merchantUrl, address };
           }),
         );
@@ -93,7 +101,17 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     });
   }
 
-  public addAuthorizedMerchant(merchantUrl: string): ResultAsync<void, PersistenceError> {
+  public addAuthorizedMerchant(
+    merchantUrl: string,
+  ): ResultAsync<
+    void,
+    | PersistenceError
+    | LogicalError
+    | MerchantValidationError
+    | ProxyError
+    | BlockchainUnavailableError
+    | MerchantConnectorError
+  > {
     let proxy: IMerchantConnectorProxy;
     let context: HypernetContext;
 
@@ -152,14 +170,14 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       });
   }
 
-  public removeAuthorizedMerchant(merchantUrl: string) {
-    this.merchantConnectorProxyFactory.destroyMerchantConnectorProxy(merchantUrl);
+  public removeAuthorizedMerchant(merchantUrl: string): Result<void, never> {
+    return this.merchantConnectorProxyFactory.destroyMerchantConnectorProxy(merchantUrl);
   }
 
   /**
    * Returns a map of merchant URLs with their authorization signatures.
    */
-  public getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError> {
+  public getAuthorizedMerchants(): ResultAsync<Map<string, string>, never> {
     const authorizedMerchants = this._getAuthorizedMerchants();
 
     return okAsync(authorizedMerchants);
@@ -169,7 +187,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     merchantUrl: string,
     paymentId: string,
     transferId: string,
-  ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | CoreUninitializedError> {
+  ): ResultAsync<
+    void,
+    MerchantConnectorError | MerchantValidationError | CoreUninitializedError | TransferResolutionError
+  > {
     const proxy = this.activatedMerchants.get(merchantUrl);
 
     if (proxy == null) {
@@ -213,7 +234,12 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
   public activateAuthorizedMerchants(): ResultAsync<
     void,
-    MerchantConnectorError | MerchantValidationError | CoreUninitializedError
+    | MerchantConnectorError
+    | MerchantValidationError
+    | CoreUninitializedError
+    | BlockchainUnavailableError
+    | LogicalError
+    | ProxyError
   > {
     return ResultUtils.combine([
       this.contextProvider.getInitializedContext(),
@@ -221,7 +247,9 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       this.blockchainProvider.getSigner(),
     ]).andThen((vals) => {
       const [context, authorizedMerchants, signer] = vals;
-      const activationResults = new Array<() => ResultAsync<void, Error>>();
+      const activationResults = new Array<
+        () => ResultAsync<void, MerchantConnectorError | MerchantValidationError | LogicalError | ProxyError>
+      >();
 
       for (const keyval of authorizedMerchants) {
         activationResults.push(() => {
@@ -239,37 +267,49 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     });
   }
 
-  public notifyPushPaymentSent(merchantUrl: string, payment: PushPayment): ResultAsync<void, LogicalError> {
+  public notifyPushPaymentSent(merchantUrl: string, payment: PushPayment): ResultAsync<void, MerchantConnectorError> {
     return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPushPaymentSent(payment);
     });
   }
 
-  public notifyPushPaymentUpdated(merchantUrl: string, payment: PushPayment): ResultAsync<void, LogicalError> {
+  public notifyPushPaymentUpdated(
+    merchantUrl: string,
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError> {
     return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPushPaymentUpdated(payment);
     });
   }
 
-  public notifyPushPaymentReceived(merchantUrl: string, payment: PushPayment): ResultAsync<void, LogicalError> {
+  public notifyPushPaymentReceived(
+    merchantUrl: string,
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError> {
     return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPushPaymentReceived(payment);
     });
   }
 
-  public notifyPullPaymentSent(merchantUrl: string, payment: PullPayment): ResultAsync<void, LogicalError> {
+  public notifyPullPaymentSent(merchantUrl: string, payment: PullPayment): ResultAsync<void, MerchantConnectorError> {
     return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPullPaymentSent(payment);
     });
   }
 
-  public notifyPullPaymentUpdated(merchantUrl: string, payment: PullPayment): ResultAsync<void, LogicalError> {
+  public notifyPullPaymentUpdated(
+    merchantUrl: string,
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError> {
     return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPullPaymentUpdated(payment);
     });
   }
 
-  public notifyPullPaymentReceived(merchantUrl: string, payment: PullPayment): ResultAsync<void, LogicalError> {
+  public notifyPullPaymentReceived(
+    merchantUrl: string,
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError> {
     return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPullPaymentReceived(payment);
     });
@@ -291,7 +331,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     authorizationSignature: string,
     context: HypernetContext,
     signer: ethers.providers.JsonRpcSigner,
-  ): ResultAsync<void, MerchantConnectorError | MerchantValidationError> {
+  ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | LogicalError | ProxyError> {
     let proxy: IMerchantConnectorProxy;
     return this.merchantConnectorProxyFactory
       .factoryProxy(merchantUrl)

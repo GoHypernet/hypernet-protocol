@@ -24,7 +24,7 @@ import {
 } from "@mock/utils";
 import { PaymentInternalDetails, PushPayment } from "@hypernetlabs/objects";
 import { ILogUtils, IVectorUtils, IBrowserNodeProvider, IPaymentUtils, ITimeUtils } from "@interfaces/utilities";
-import { VectorError } from "@hypernetlabs/objects";
+import { VectorError, PaymentCreationError } from "@hypernetlabs/objects";
 import { IPaymentRepository } from "@interfaces/data";
 import { okAsync, errAsync } from "neverthrow";
 import { PaymentRepository } from "@implementations/data/PaymentRepository";
@@ -240,7 +240,7 @@ describe("PaymentRepository tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeTruthy();
-    expect(error).toBeInstanceOf(VectorError);
+    expect(error).toBeInstanceOf(PaymentCreationError);
   });
 
   test("Should getPaymentsByIds return Payment without any errors", async () => {

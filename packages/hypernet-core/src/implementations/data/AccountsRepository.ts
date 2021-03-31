@@ -1,5 +1,12 @@
 import { IAccountsRepository } from "@interfaces/data";
-import { AssetBalance, Balances, EthereumAddress, PublicIdentifier, IFullChannelState } from "@hypernetlabs/objects";
+import {
+  AssetBalance,
+  Balances,
+  EthereumAddress,
+  PublicIdentifier,
+  IFullChannelState,
+  LogicalError,
+} from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import {
   IVectorUtils,
@@ -51,7 +58,10 @@ export class AccountsRepository implements IAccountsRepository {
   /**
    * Get the current public identifier for this instance.
    */
-  public getPublicIdentifier(): ResultAsync<PublicIdentifier, VectorError | Error> {
+  public getPublicIdentifier(): ResultAsync<
+    PublicIdentifier,
+    CoreUninitializedError | BlockchainUnavailableError | VectorError
+  > {
     return this.browserNodeProvider.getBrowserNode().map((browserNode) => {
       return browserNode.publicIdentifier;
     });
@@ -71,7 +81,10 @@ export class AccountsRepository implements IAccountsRepository {
   /**
    * Get all balances associated with this instance.
    */
-  public getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError> {
+  public getBalances(): ResultAsync<
+    Balances,
+    BalancesUnavailableError | VectorError | CoreUninitializedError | RouterChannelUnknownError
+  > {
     return this.vectorUtils.getRouterChannelAddress().andThen((channelAddress: string) => {
       return this.browserNodeProvider
         .getBrowserNode()
@@ -102,7 +115,12 @@ export class AccountsRepository implements IAccountsRepository {
    * Get balance for a particular asset for this instance
    * @param assetAddress the (Ethereum) address of the token to get the balance of
    */
-  public getBalanceByAsset(assetAddress: EthereumAddress): ResultAsync<AssetBalance, BalancesUnavailableError> {
+  public getBalanceByAsset(
+    assetAddress: EthereumAddress,
+  ): ResultAsync<
+    AssetBalance,
+    BalancesUnavailableError | VectorError | CoreUninitializedError | RouterChannelUnknownError
+  > {
     return this.getBalances().andThen((balances) => {
       for (const assetBalance of balances.assets) {
         if (assetBalance.assetAddresss === assetAddress) {
@@ -138,7 +156,7 @@ export class AccountsRepository implements IAccountsRepository {
     amount: BigNumber,
   ): ResultAsync<
     null,
-    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error | BlockchainUnavailableError
+    RouterChannelUnknownError | CoreUninitializedError | VectorError | LogicalError | BlockchainUnavailableError
   > {
     let signer: ethers.providers.JsonRpcSigner;
     let channelAddress: string;
@@ -170,7 +188,7 @@ export class AccountsRepository implements IAccountsRepository {
       })
       .andThen(() => {
         if (browserNode == null || channelAddress == null) {
-          return errAsync(new Error("Really screwed up!"));
+          return errAsync(new LogicalError("Really screwed up!"));
         }
         return browserNode.reconcileDeposit(assetAddress, channelAddress);
       })
@@ -181,7 +199,7 @@ export class AccountsRepository implements IAccountsRepository {
 
         // Sanity check, the deposit was for the channel we tried to deposit into.
         if (depositChannelAddress !== channelAddress) {
-          return errAsync(new Error("Something has gone horribly wrong!"));
+          return errAsync(new LogicalError("Something has gone horribly wrong!"));
         }
 
         return okAsync(null);
@@ -198,7 +216,7 @@ export class AccountsRepository implements IAccountsRepository {
     assetAddress: string,
     amount: BigNumber,
     destinationAddress: string,
-  ): ResultAsync<void, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  ): ResultAsync<void, RouterChannelUnknownError | CoreUninitializedError | VectorError | BlockchainUnavailableError> {
     const prerequisites = ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.vectorUtils.getRouterChannelAddress(),
@@ -233,7 +251,10 @@ export class AccountsRepository implements IAccountsRepository {
       });
   }
 
-  protected _getAssetBalance(i: number, channelState: IFullChannelState): ResultAsync<AssetBalance, VectorError> {
+  protected _getAssetBalance(
+    i: number,
+    channelState: IFullChannelState,
+  ): ResultAsync<AssetBalance, BlockchainUnavailableError> {
     const assetAddress = channelState.assetIds[i];
 
     return this._getAssetInfo(assetAddress).map((assetInfo) => {
@@ -308,7 +329,7 @@ export class AccountsRepository implements IAccountsRepository {
     } 
 
     // We have cached info
-    return okAsync(cachedAssetInfo);*/
+    return okAsync(cachedAssetInfo); */
 
     return okAsync(new AssetInfo(assetAddress, "", "", 0));
   }
