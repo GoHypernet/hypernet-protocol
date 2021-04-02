@@ -80,20 +80,20 @@ If you would like to see the Hypernetlabs Voting App in action, we recommend the
 
 ## How to run the Hypernetlabs Voting app locally
 
-For `contracts`:
+For `contracts` directory installation:
 
 ```sh
 yarn
 ```
 
-For `ui` directory.
+For `ui` directory installation and build ui package.
 
 ```sh
 cd app && yarn && yarn build
 ```
 
-Deploy a dao with Hypernetlabs Voting app installed on your local environment.
+Deploy a `dao` with Hypernetlabs Voting app installed on your local environment.
 
 ```sh
-yarn start
+cd .. && yarn start
 ```
