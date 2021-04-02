@@ -4,13 +4,11 @@
 
 Deployed audited version on APM: v1.1.0  
 
-Beware some changes have been made to the contract since this audit. Specifically the contract now implements the 
-[TokenManagerHook](https://github.com/1Hive/token-manager-app/blob/master/contracts/TokenManagerHook.sol) to enable the use
-of transferable tokens.
+Beware some changes have been made to the contract since this audit. Specifically the contract now implements the TokenManagerHook to enable the use of transferable tokens.
 
 #### 🚨 Security review status: Not audited
 
-The Hypernetlabs Voting app is a fork of the Original [Aragon Voting app](https://github.com/aragon/aragon-apps/tree/master/apps/voting).
+The Hypernetlabs Voting app is a fork of the Original Hypernet Voting app.
 It serves the same purpose as the original Voting app but also enables organizations to restrict actions to members who have expressed approval in recent votes. It basically means that by voting yes on a proposal you are committing to a decision in the Org.
 
 The main changes that have been implemented which differ from the original Voting app are:
@@ -82,41 +80,20 @@ If you would like to see the Hypernetlabs Voting App in action, we recommend the
 
 ## How to run the Hypernetlabs Voting app locally
 
-Git clone this repo.
+For `contracts`:
 
 ```sh
-git clone https://github.com/1Hive/hyp-connsign-voting.git
+yarn
 ```
 
-Navigate into the `hyp-connsign-voting` directory.
+For `ui` directory.
 
 ```sh
-cd hyp-connsign-voting
-```
-
-Install npm dependencies.
-
-```sh
-npm i
+cd app && yarn && yarn build
 ```
 
 Deploy a dao with Hypernetlabs Voting app installed on your local environment.
 
 ```sh
-npm run start:template
+yarn start
 ```
-
-## Aragon DAO Installation
-The Hypernetlabs voting app has been published to APM on Mainnet and Rinkeby at `hypernetlabs-voting.aragonpm.eth`
-
-To deploy to an organization you can use the [aragonCLI](https://hack.aragon.org/docs/cli-intro.html).
-
-```sh
-aragon dao install <dao-address> hypernetlabs-voting.aragonpm.eth --app-init-args <token-address> <supportRequiredPct> <minAcceptQuorumPct> <durationBlocks> <bufferBlocks> <executionDelayBlocks>
-```
-
-## Contributing
-
-We welcome community contributions!
-
-Please check out our [open Issues](https://github.com/oguzhankarahan/hyp-connsign-voting/issues) to get started.
