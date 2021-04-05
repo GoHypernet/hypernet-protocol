@@ -32,7 +32,6 @@ import {
   BalancesUnavailableError,
   RouterChannelUnknownError,
   VectorError,
-  CoreUninitializedError,
   BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
 import { EPaymentState } from "@hypernetlabs/objects";
@@ -43,7 +42,6 @@ import { BigNumber } from "ethers";
 type PaymentsByIdsErrors =
   | RouterChannelUnknownError
   | VectorError
-  | CoreUninitializedError
   | BlockchainUnavailableError
   | LogicalError
   | InvalidPaymentError

@@ -9,7 +9,6 @@ import {
 import {
   LogicalError,
   VectorError,
-  CoreUninitializedError,
   BlockchainUnavailableError,
   InvalidPaymentIdError,
   PaymentFinalizeError,
@@ -43,7 +42,6 @@ export class VectorAPIListener implements IVectorListener {
   public setup(): ResultAsync<
     void,
     | VectorError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | InvalidPaymentIdError

@@ -6,7 +6,6 @@ import {
   IFullTransferState,
 } from "@hypernetlabs/objects";
 import {
-  CoreUninitializedError,
   InvalidParametersError,
   RouterChannelUnknownError,
   TransferCreationError,
@@ -24,7 +23,7 @@ export interface IVectorUtils {
   /**
    *
    */
-  getRouterChannelAddress(): ResultAsync<string, RouterChannelUnknownError | CoreUninitializedError | VectorError>;
+  getRouterChannelAddress(): ResultAsync<string, RouterChannelUnknownError | VectorError>;
 
   /**
    *

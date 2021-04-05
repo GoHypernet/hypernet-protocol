@@ -8,13 +8,7 @@ import {
   BlockchainUnavailableError,
   TransferResolutionError,
 } from "@hypernetlabs/objects";
-import {
-  CoreUninitializedError,
-  LogicalError,
-  MerchantConnectorError,
-  MerchantValidationError,
-  PersistenceError,
-} from "@hypernetlabs/objects";
+import { LogicalError, MerchantConnectorError, MerchantValidationError, PersistenceError } from "@hypernetlabs/objects";
 import { errAsync, okAsync, ResultAsync, Result } from "neverthrow";
 import { ResultUtils, IAjaxUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
 import {
@@ -187,10 +181,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     merchantUrl: string,
     paymentId: string,
     transferId: string,
-  ): ResultAsync<
-    void,
-    MerchantConnectorError | MerchantValidationError | CoreUninitializedError | TransferResolutionError
-  > {
+  ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | TransferResolutionError> {
     const proxy = this.activatedMerchants.get(merchantUrl);
 
     if (proxy == null) {
@@ -234,12 +225,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
   public activateAuthorizedMerchants(): ResultAsync<
     void,
-    | MerchantConnectorError
-    | MerchantValidationError
-    | CoreUninitializedError
-    | BlockchainUnavailableError
-    | LogicalError
-    | ProxyError
+    MerchantConnectorError | MerchantValidationError | BlockchainUnavailableError | LogicalError | ProxyError
   > {
     return ResultUtils.combine([
       this.contextProvider.getInitializedContext(),

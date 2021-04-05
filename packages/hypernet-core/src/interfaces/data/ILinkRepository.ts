@@ -1,6 +1,5 @@
 import { HypernetLink } from "@hypernetlabs/objects";
 import {
-  CoreUninitializedError,
   RouterChannelUnknownError,
   VectorError,
   InvalidParametersError,
@@ -20,7 +19,6 @@ export interface ILinkRepository {
   getHypernetLinks(): ResultAsync<
     HypernetLink[],
     | RouterChannelUnknownError
-    | CoreUninitializedError
     | VectorError
     | InvalidParametersError
     | BlockchainUnavailableError
@@ -37,7 +35,6 @@ export interface ILinkRepository {
   ): ResultAsync<
     HypernetLink,
     | RouterChannelUnknownError
-    | CoreUninitializedError
     | VectorError
     | InvalidParametersError
     | BlockchainUnavailableError

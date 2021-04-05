@@ -2,7 +2,6 @@ import { ILinkService } from "@interfaces/business";
 import { ILinkRepository } from "@interfaces/data";
 import { HypernetLink } from "@hypernetlabs/objects";
 import {
-  CoreUninitializedError,
   RouterChannelUnknownError,
   VectorError,
   InvalidParametersError,
@@ -23,7 +22,6 @@ export class LinkService implements ILinkService {
     | InvalidPaymentError
     | InvalidParametersError
     | RouterChannelUnknownError
-    | CoreUninitializedError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError

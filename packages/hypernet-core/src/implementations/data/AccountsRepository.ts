@@ -20,7 +20,6 @@ import { ethers, constants } from "ethers";
 import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
-  CoreUninitializedError,
   RouterChannelUnknownError,
   VectorError,
 } from "@hypernetlabs/objects";
@@ -58,10 +57,7 @@ export class AccountsRepository implements IAccountsRepository {
   /**
    * Get the current public identifier for this instance.
    */
-  public getPublicIdentifier(): ResultAsync<
-    PublicIdentifier,
-    CoreUninitializedError | BlockchainUnavailableError | VectorError
-  > {
+  public getPublicIdentifier(): ResultAsync<PublicIdentifier, BlockchainUnavailableError | VectorError> {
     return this.browserNodeProvider.getBrowserNode().map((browserNode) => {
       return browserNode.publicIdentifier;
     });
@@ -83,7 +79,7 @@ export class AccountsRepository implements IAccountsRepository {
    */
   public getBalances(): ResultAsync<
     Balances,
-    BalancesUnavailableError | VectorError | CoreUninitializedError | RouterChannelUnknownError
+    BalancesUnavailableError | VectorError | RouterChannelUnknownError
   > {
     return this.vectorUtils.getRouterChannelAddress().andThen((channelAddress: string) => {
       return this.browserNodeProvider
@@ -119,7 +115,7 @@ export class AccountsRepository implements IAccountsRepository {
     assetAddress: EthereumAddress,
   ): ResultAsync<
     AssetBalance,
-    BalancesUnavailableError | VectorError | CoreUninitializedError | RouterChannelUnknownError
+    BalancesUnavailableError | VectorError  | RouterChannelUnknownError
   > {
     return this.getBalances().andThen((balances) => {
       for (const assetBalance of balances.assets) {
@@ -156,7 +152,7 @@ export class AccountsRepository implements IAccountsRepository {
     amount: BigNumber,
   ): ResultAsync<
     null,
-    RouterChannelUnknownError | CoreUninitializedError | VectorError | LogicalError | BlockchainUnavailableError
+    RouterChannelUnknownError | VectorError | LogicalError | BlockchainUnavailableError
   > {
     let signer: ethers.providers.JsonRpcSigner;
     let channelAddress: string;
@@ -216,7 +212,7 @@ export class AccountsRepository implements IAccountsRepository {
     assetAddress: string,
     amount: BigNumber,
     destinationAddress: string,
-  ): ResultAsync<void, RouterChannelUnknownError | CoreUninitializedError | VectorError | BlockchainUnavailableError> {
+  ): ResultAsync<void, RouterChannelUnknownError | VectorError | BlockchainUnavailableError> {
     const prerequisites = ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.vectorUtils.getRouterChannelAddress(),

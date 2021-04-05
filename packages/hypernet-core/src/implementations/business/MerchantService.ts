@@ -1,7 +1,6 @@
 import { IMerchantService } from "@interfaces/business";
 import { ResultAsync } from "neverthrow";
 import {
-  CoreUninitializedError,
   LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
@@ -60,7 +59,7 @@ export class MerchantService implements IMerchantService {
     });
   }
 
-  public authorizeMerchant(merchantUrl: string): ResultAsync<void, CoreUninitializedError | MerchantValidationError> {
+  public authorizeMerchant(merchantUrl: string): ResultAsync<void, MerchantValidationError> {
     return ResultUtils.combine([this.contextProvider.getContext(), this.getAuthorizedMerchants()]).map(async (vals) => {
       const [context, authorizedMerchantsMap] = vals;
 
@@ -83,7 +82,6 @@ export class MerchantService implements IMerchantService {
     void,
     | MerchantConnectorError
     | MerchantValidationError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | ProxyError

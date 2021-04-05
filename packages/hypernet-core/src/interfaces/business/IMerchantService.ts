@@ -1,6 +1,5 @@
 import { ResultAsync } from "neverthrow";
 import {
-  CoreUninitializedError,
   LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
@@ -10,16 +9,11 @@ import {
 
 export interface IMerchantService {
   initialize(): ResultAsync<void, LogicalError | MerchantConnectorError>;
-  authorizeMerchant(merchantUrl: string): ResultAsync<void, CoreUninitializedError | MerchantValidationError>;
+  authorizeMerchant(merchantUrl: string): ResultAsync<void, MerchantValidationError>;
   getAuthorizedMerchants(): ResultAsync<Map<string, string>, never>;
   activateAuthorizedMerchants(): ResultAsync<
     void,
-    | MerchantConnectorError
-    | MerchantValidationError
-    | CoreUninitializedError
-    | BlockchainUnavailableError
-    | LogicalError
-    | ProxyError
+    MerchantConnectorError | MerchantValidationError | BlockchainUnavailableError | LogicalError | ProxyError
   >;
   closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
   displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;

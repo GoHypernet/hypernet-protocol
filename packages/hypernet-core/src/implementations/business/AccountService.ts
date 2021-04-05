@@ -10,7 +10,6 @@ import {
 import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
-  CoreUninitializedError,
   LogicalError,
   VectorError,
   RouterChannelUnknownError,
@@ -29,10 +28,7 @@ export class AccountService implements IAccountService {
     protected logUtils: ILogUtils,
   ) {}
 
-  public getPublicIdentifier(): ResultAsync<
-    PublicIdentifier,
-    CoreUninitializedError | BlockchainUnavailableError | VectorError
-  > {
+  public getPublicIdentifier(): ResultAsync<PublicIdentifier, BlockchainUnavailableError | VectorError> {
     return this.accountRepository.getPublicIdentifier();
   }
 
@@ -40,10 +36,7 @@ export class AccountService implements IAccountService {
     return this.accountRepository.getAccounts();
   }
 
-  public getBalances(): ResultAsync<
-    Balances,
-    BalancesUnavailableError | VectorError | CoreUninitializedError | RouterChannelUnknownError
-  > {
+  public getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError | RouterChannelUnknownError> {
     return this.accountRepository.getBalances();
   }
 
@@ -52,12 +45,7 @@ export class AccountService implements IAccountService {
     amount: BigNumber,
   ): ResultAsync<
     Balances,
-    | BalancesUnavailableError
-    | RouterChannelUnknownError
-    | CoreUninitializedError
-    | BlockchainUnavailableError
-    | VectorError
-    | LogicalError
+    BalancesUnavailableError | RouterChannelUnknownError | BlockchainUnavailableError | VectorError | LogicalError
   > {
     this.logUtils.log(`HypernetCore:depositFunds: assetAddress: ${assetAddress}`);
 
@@ -86,11 +74,7 @@ export class AccountService implements IAccountService {
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    | BalancesUnavailableError
-    | RouterChannelUnknownError
-    | CoreUninitializedError
-    | BlockchainUnavailableError
-    | VectorError
+    BalancesUnavailableError | RouterChannelUnknownError | BlockchainUnavailableError | VectorError
   > {
     let context: InitializedHypernetContext;
 

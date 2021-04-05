@@ -14,7 +14,6 @@ import {
   IFullTransferState,
   IHypernetPullPaymentDetails,
   IRegisteredTransfer,
-  CoreUninitializedError,
   BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
 import {
@@ -527,7 +526,7 @@ export class PaymentUtils implements IPaymentUtils {
    */
   public getTransferType(
     transfer: IFullTransferState,
-  ): ResultAsync<ETransferType, VectorError | CoreUninitializedError | BlockchainUnavailableError | LogicalError> {
+  ): ResultAsync<ETransferType, VectorError | BlockchainUnavailableError | LogicalError> {
     // TransferDefinition here is the ETH address of the transfer
     // We need to get the registered transfer definitions as canonical by the browser node
     return this.browserNodeProvider
@@ -702,12 +701,9 @@ export class PaymentUtils implements IPaymentUtils {
   }
 
   protected getRegisteredTransfersResponse:
-    | ResultAsync<IRegisteredTransfer[], VectorError | CoreUninitializedError | BlockchainUnavailableError>
+    | ResultAsync<IRegisteredTransfer[], VectorError | BlockchainUnavailableError>
     | undefined;
-  protected getRegisteredTransfers(): ResultAsync<
-    IRegisteredTransfer[],
-    VectorError | CoreUninitializedError | BlockchainUnavailableError
-  > {
+  protected getRegisteredTransfers(): ResultAsync<IRegisteredTransfer[], VectorError | BlockchainUnavailableError> {
     if (this.getRegisteredTransfersResponse == null) {
       this.getRegisteredTransfersResponse = ResultUtils.combine([
         this.browserNodeProvider.getBrowserNode(),

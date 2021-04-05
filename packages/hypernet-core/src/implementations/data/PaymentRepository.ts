@@ -16,7 +16,6 @@ import {
   IBasicTransferResponse,
 } from "@hypernetlabs/objects";
 import {
-  CoreUninitializedError,
   LogicalError,
   PaymentFinalizeError,
   PaymentStakeError,
@@ -223,7 +222,7 @@ export class PaymentRepository implements IPaymentRepository {
     paymentId: string,
   ): ResultAsync<
     IFullTransferState[],
-    RouterChannelUnknownError | VectorError | CoreUninitializedError | BlockchainUnavailableError | LogicalError
+    RouterChannelUnknownError | VectorError | BlockchainUnavailableError | LogicalError
   > {
     let browserNode: IBrowserNode;
     let channelAddress: string;
@@ -296,7 +295,6 @@ export class PaymentRepository implements IPaymentRepository {
     Map<string, Payment>,
     | RouterChannelUnknownError
     | VectorError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | InvalidPaymentError
@@ -383,7 +381,6 @@ export class PaymentRepository implements IPaymentRepository {
     Payment,
     | RouterChannelUnknownError
     | VectorError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | PaymentFinalizeError
@@ -448,7 +445,6 @@ export class PaymentRepository implements IPaymentRepository {
     | PaymentStakeError
     | TransferResolutionError
     | RouterChannelUnknownError
-    | CoreUninitializedError
     | VectorError
     | LogicalError
     | InvalidPaymentError
@@ -517,7 +513,6 @@ export class PaymentRepository implements IPaymentRepository {
     | PaymentStakeError
     | TransferResolutionError
     | RouterChannelUnknownError
-    | CoreUninitializedError
     | VectorError
     | LogicalError
     | InvalidPaymentError

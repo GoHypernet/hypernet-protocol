@@ -39,7 +39,6 @@ import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@hyperne
 import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils/dist/identifiers";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import {
-  CoreUninitializedError,
   InvalidParametersError,
   RouterChannelUnknownError,
   RouterUnavailableError,
@@ -58,10 +57,7 @@ export class VectorUtils implements IVectorUtils {
   /**
    * Creates an instance of VectorUtils
    */
-  protected getRouterChannelAddressSetup: ResultAsync<
-    string,
-    RouterUnavailableError | CoreUninitializedError
-  > | null = null;
+  protected getRouterChannelAddressSetup: ResultAsync<string, RouterUnavailableError> | null = null;
 
   constructor(
     protected configProvider: IConfigProvider,
@@ -456,10 +452,7 @@ export class VectorUtils implements IVectorUtils {
    * Returns the address of the channel with the router, if exists.
    * Otherwise, attempts to create a channel with the router & return the address.
    */
-  public getRouterChannelAddress(): ResultAsync<
-    string,
-    RouterChannelUnknownError | CoreUninitializedError | VectorError
-  > {
+  public getRouterChannelAddress(): ResultAsync<string, RouterChannelUnknownError | VectorError> {
     // If we already have the address, no need to do the rest
     if (this.getRouterChannelAddressSetup != null) {
       return this.getRouterChannelAddressSetup;
@@ -495,7 +488,7 @@ export class VectorUtils implements IVectorUtils {
           if (channel.aliceIdentifier !== config.routerPublicIdentifier) {
             continue;
           }
-          return okAsync<string, RouterChannelUnknownError | CoreUninitializedError>(channel.channelAddress as string);
+          return okAsync<string, RouterChannelUnknownError>(channel.channelAddress as string);
         }
         // If a channel does not exist with the router, we need to create it.
         return this._createRouterStateChannel(browserNode, config);
