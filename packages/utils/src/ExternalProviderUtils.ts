@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { ExternalProvider } from "@hypernetlabs/objects";
+import { ExternalProvider, EthereumAddress } from "@hypernetlabs/objects";
 
 export class ExternalProviderUtils {
   getExternalProviderForDevelopment(): ExternalProvider {
@@ -8,7 +8,7 @@ export class ExternalProviderUtils {
       "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat",
     );
     const owner = wallet.connect(externaJsonRpcProvider);
-    const externalProvider = new ExternalProvider(externaJsonRpcProvider, owner.address);
+    const externalProvider = new ExternalProvider(externaJsonRpcProvider, EthereumAddress(owner.address));
     return externalProvider;
   }
 }
