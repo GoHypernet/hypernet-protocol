@@ -116,7 +116,7 @@ class PaymentServiceMocks {
       okAsync(new Map<PaymentId, Payment>()),
     );
     td.when(this.accountRepository.getBalanceByAsset(hyperTokenAddress)).thenReturn(okAsync(this.assetBalance));
-    td.when(this.paymentRepository.provideStake(paymentId, merchantUrl)).thenReturn(
+    td.when(this.paymentRepository.provideStake(paymentId, account)).thenReturn(
       okAsync(this.stakedPushPayment),
     );
     td.when(this.paymentRepository.provideAsset(paymentId)).thenReturn(okAsync(this.paidPushPayment));
@@ -290,7 +290,7 @@ describe("PaymentService tests", () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
-    td.when(paymentServiceMock.paymentRepository.provideStake(paymentId, merchantPublicKey)).thenReturn(
+    td.when(paymentServiceMock.paymentRepository.provideStake(paymentId, account)).thenReturn(
       errAsync(new Error("test error")),
     );
 

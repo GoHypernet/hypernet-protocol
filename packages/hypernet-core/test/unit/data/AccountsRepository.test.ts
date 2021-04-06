@@ -210,7 +210,7 @@ describe("AccountsRepository tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toBe(accounts);
+    expect(result._unsafeUnwrap()).toStrictEqual(accounts);
   });
 
   // TODO: there is a bug in getBalances related to contract token names, refactor this test when it fixed
@@ -223,7 +223,7 @@ describe("AccountsRepository tests", () => {
     if (stateChannel == null) {
       throw new Error();
     }
-    
+
     const balances: Balances = {
       assets: [
         new AssetBalance(
