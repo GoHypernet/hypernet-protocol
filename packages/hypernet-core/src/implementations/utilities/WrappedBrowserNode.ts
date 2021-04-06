@@ -25,7 +25,7 @@ export class WrappedBrowserNode implements IBrowserNode {
 
   constructor(protected browserNode: BrowserNode) {}
 
-  public init(signature: string, account: string): ResultAsync<void, VectorError> {
+  public init(signature: string, account: EthereumAddress): ResultAsync<void, VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.init({
         signature,
@@ -35,7 +35,7 @@ export class WrappedBrowserNode implements IBrowserNode {
     );
   }
 
-  public reconcileDeposit(assetId: EthereumAddress, channelAddress: EthereumAddress): ResultAsync<string, VectorError> {
+  public reconcileDeposit(assetId: EthereumAddress, channelAddress: EthereumAddress): ResultAsync<EthereumAddress, VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.reconcileDeposit({ assetId, channelAddress }),
       this.toVectorError,
@@ -43,7 +43,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       if (result.isError) {
         return errAsync(new VectorError(result.getError() as VectorError));
       } else {
-        return okAsync(result.getValue().channelAddress);
+        return okAsync(EthereumAddress(result.getValue().channelAddress));
       }
     });
   }
@@ -51,7 +51,7 @@ export class WrappedBrowserNode implements IBrowserNode {
   public withdraw(
     channelAddress: EthereumAddress,
     amount: string,
-    assetId: string,
+    assetId: EthereumAddress,
     recipient: EthereumAddress,
     quote?: IWithdrawQuote,
     callTo?: string,
@@ -74,7 +74,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       if (result.isError) {
         return errAsync(new VectorError(result.getError() as VectorError));
       } else {
-        return okAsync(result.getValue());
+        return okAsync(result.getValue() as IWithdrawResponse);
       }
     });
   }
@@ -90,13 +90,13 @@ export class WrappedBrowserNode implements IBrowserNode {
       },
     );
   }
-  public getActiveTransfers(channelAddress: string): ResultAsync<IFullTransferState[], VectorError> {
+  public getActiveTransfers(channelAddress: EthereumAddress): ResultAsync<IFullTransferState[], VectorError> {
     return ResultAsync.fromPromise(this.browserNode.getActiveTransfers({ channelAddress }), this.toVectorError).andThen(
       (result) => {
         if (result.isError) {
           return errAsync(new VectorError(result.getError() as VectorError));
         } else {
-          return okAsync(result.getValue());
+          return okAsync(result.getValue() as IFullTransferState[]);
         }
       },
     );
@@ -203,7 +203,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       if (result.isError) {
         return errAsync(new VectorError(result.getError() as VectorError));
       } else {
-        return okAsync(result.getValue());
+        return okAsync(result.getValue().map((val) => {return EthereumAddress(val);}));
       }
     });
   }
@@ -275,7 +275,7 @@ export class WrappedBrowserNode implements IBrowserNode {
     return this.browserNode.on(CONDITIONAL_TRANSFER_CREATED_EVENT, callback, filter);
   }
 
-  get publicIdentifier(): string {
-    return this.browserNode.publicIdentifier;
+  get publicIdentifier(): PublicIdentifier {
+    return PublicIdentifier(this.browserNode.publicIdentifier);
   }
 }

@@ -1,6 +1,6 @@
 import { ResultUtils } from "@hypernetlabs/utils";
 import { ILinkRepository } from "@interfaces/data";
-import { BlockchainUnavailableError, HypernetLink, Payment, PublicIdentifier } from "@hypernetlabs/objects";
+import { BlockchainUnavailableError, EthereumAddress, HypernetLink, Payment, PublicIdentifier } from "@hypernetlabs/objects";
 import {
   InvalidParametersError,
   RouterChannelUnknownError,
@@ -53,7 +53,7 @@ export class VectorLinkRepository implements ILinkRepository {
 
     return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.vectorUtils.getRouterChannelAddress()])
       .andThen((vals) => {
-        let channelAddress: string;
+        let channelAddress: EthereumAddress;
         [browserNode, channelAddress] = vals;
         return browserNode.getActiveTransfers(channelAddress);
       })
@@ -93,7 +93,7 @@ export class VectorLinkRepository implements ILinkRepository {
     let browserNode: IBrowserNode;
     return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.vectorUtils.getRouterChannelAddress()])
       .andThen((vals) => {
-        let channelAddress: string;
+        let channelAddress: EthereumAddress;
         [browserNode, channelAddress] = vals;
         return browserNode.getActiveTransfers(channelAddress);
       })

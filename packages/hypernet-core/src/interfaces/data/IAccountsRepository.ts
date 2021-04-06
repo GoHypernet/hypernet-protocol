@@ -14,7 +14,7 @@ import { ResultAsync } from "neverthrow";
  */
 export interface IAccountsRepository {
   getPublicIdentifier(): ResultAsync<PublicIdentifier, BlockchainUnavailableError | VectorError>;
-  getAccounts(): ResultAsync<string[], BlockchainUnavailableError>;
+  getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
   getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError | RouterChannelUnknownError>;
   getBalanceByAsset(
     assetAddress: EthereumAddress,

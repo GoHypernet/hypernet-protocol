@@ -1,7 +1,7 @@
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
 import { IAuthorizeFundsRequest, IResolutionResult, ISendFundsRequest } from "@hypernetlabs/merchant-connector";
-import { LogicalError, MerchantConnectorError, MerchantValidationError, ProxyError } from "@hypernetlabs/objects";
+import { EthereumAddress, LogicalError, MerchantConnectorError, MerchantValidationError, PaymentId, ProxyError } from "@hypernetlabs/objects";
 import { HexString, HypernetContext, PullPayment, PushPayment } from "@hypernetlabs/objects";
 import { IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
 
@@ -23,11 +23,11 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     return this._createCall("activateConnector", null);
   }
 
-  public resolveChallenge(paymentId: HexString): ResultAsync<IResolutionResult, MerchantConnectorError | ProxyError> {
+  public resolveChallenge(paymentId: PaymentId): ResultAsync<IResolutionResult, MerchantConnectorError | ProxyError> {
     return this._createCall("resolveChallenge", paymentId);
   }
 
-  public getAddress(): ResultAsync<HexString, MerchantConnectorError | ProxyError> {
+  public getAddress(): ResultAsync<EthereumAddress, MerchantConnectorError | ProxyError> {
     return this._createCall("getAddress", null);
   }
 

@@ -7,10 +7,7 @@ import {
   PullPayment,
   PushPayment,
   Payment,
-  ProxyError,
-  InvalidPaymentError,
-  InvalidParametersError,
-  TransferResolutionError,
+  PaymentId,
 } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
@@ -23,6 +20,10 @@ import {
   MerchantValidationError,
   PersistenceError,
   MerchantConnectorError,
+  ProxyError,
+  InvalidPaymentError,
+  InvalidParametersError,
+  TransferResolutionError,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { Result, ResultAsync, ok } from "neverthrow";
@@ -55,6 +56,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     this.onAuthorizedMerchantActivationFailed = new Subject<string>();
     this.onMerchantIFrameDisplayRequested = new Subject<string>();
     this.onMerchantIFrameCloseRequested = new Subject<string>();
+    this.onInitializationRequired = new Subject<void>();
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -137,8 +139,16 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
           }
           this.onMerchantIFrameCloseRequested.next(data);
         });
+
+        child.on("onInitializationRequired", () => {
+          this.onInitializationRequired.next();
+        });
       });
     });
+  }
+
+  public finalizePullPayment(paymentId: PaymentId, finalAmount: BigNumber): Promise<HypernetLink> {
+    throw new Error("Method not implemented.");
   }
 
   public initialized(): Result<boolean, LogicalError> {
@@ -168,11 +178,11 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return ok(this.isInControl);
   }
 
-  public getEthereumAccounts(): ResultAsync<string[], BlockchainUnavailableError> {
+  public getEthereumAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError> {
     return this._createCall("getEthereumAccounts", null);
   }
 
-  public initialize(account: PublicIdentifier): ResultAsync<void, LogicalError> {
+  public initialize(account: EthereumAddress): ResultAsync<void, LogicalError> {
     return this._createCall("initialize", account);
   }
 
@@ -252,13 +262,13 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   }
 
   public acceptOffers(
-    paymentIds: string[],
+    paymentIds: PaymentId[],
   ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
     return this._createCall("acceptFunds", paymentIds);
   }
 
   public pullFunds(
-    paymentId: string,
+    paymentId: PaymentId,
     amount: BigNumber,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this._createCall("pullFunds", {
@@ -267,16 +277,8 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     });
   }
 
-  public finalizePullPayment(paymentId: string, finalAmount: BigNumber): Promise<HypernetLink> {
-    throw new Error("Unimplemented");
-  }
-
-  public finalizePushPayment(paymentId: string): Promise<void> {
-    throw new Error("Unimplemented");
-  }
-
   public initiateDispute(
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<
     Payment,
     | MerchantConnectorError
@@ -342,4 +344,5 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   public onAuthorizedMerchantActivationFailed: Subject<string>;
   public onMerchantIFrameDisplayRequested: Subject<string>;
   public onMerchantIFrameCloseRequested: Subject<string>;
+  public onInitializationRequired: Subject<void>;
 }

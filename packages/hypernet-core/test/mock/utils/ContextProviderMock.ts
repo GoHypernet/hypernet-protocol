@@ -1,6 +1,7 @@
 import {
   Balances,
   ControlClaim,
+  EthereumAddress,
   HypernetContext,
   InitializedHypernetContext,
   PullPayment,
@@ -38,7 +39,7 @@ export class ContextProviderMock implements IContextProvider {
   constructor(
     context: HypernetContext | null = null,
     initializedContext: InitializedHypernetContext | null = null,
-    uninitializedAccount: string | null = null,
+    uninitializedAccount: EthereumAddress | null = null,
   ) {
     this.onControlClaimed = new Subject<ControlClaim>();
     this.onControlYielded = new Subject<ControlClaim>();

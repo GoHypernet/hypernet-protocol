@@ -10,6 +10,8 @@ import {
   IBasicTransferResponse,
   IFullChannelState,
   IFullTransferState,
+  EthereumAddress,
+  PaymentId,
 } from "@hypernetlabs/objects";
 import {
   IBrowserNodeProvider,
@@ -57,7 +59,7 @@ export class VectorUtils implements IVectorUtils {
   /**
    * Creates an instance of VectorUtils
    */
-  protected getRouterChannelAddressSetup: ResultAsync<string, RouterUnavailableError> | null = null;
+  protected getRouterChannelAddressSetup: ResultAsync<EthereumAddress, RouterUnavailableError> | null = null;
 
   constructor(
     protected configProvider: IConfigProvider,
@@ -74,7 +76,7 @@ export class VectorUtils implements IVectorUtils {
    * @param transferId the ID of the transfer to resolve
    */
   public resolveMessageTransfer(transferId: string): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
-    let channelAddress: string;
+    let channelAddress: EthereumAddress;
     let browserNode: IBrowserNode;
 
     return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.getRouterChannelAddress()])
@@ -98,7 +100,7 @@ export class VectorUtils implements IVectorUtils {
       paymentAmountTaken: amount,
     };
 
-    let channelAddress: string;
+    let channelAddress: EthereumAddress;
     let browserNode: IBrowserNode;
 
     return ResultUtils.combine([
@@ -150,7 +152,7 @@ export class VectorUtils implements IVectorUtils {
       UUID: paymentId,
     };
 
-    let channelAddress: string;
+    let channelAddress: EthereumAddress;
     let browserNode: IBrowserNode;
 
     return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.getRouterChannelAddress()])
@@ -185,7 +187,7 @@ export class VectorUtils implements IVectorUtils {
    * @param message the message to send as IHypernetOfferDetails
    */
   public createPullNotificationTransfer(
-    toAddress: string,
+    toAddress: PublicIdentifier,
     message: IHypernetPullPaymentDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // The message type has to be PULLPAYMENT
@@ -237,7 +239,7 @@ export class VectorUtils implements IVectorUtils {
    * @param message the message to send as IHypernetOfferDetails
    */
   public createOfferTransfer(
-    toAddress: string,
+    toAddress: PublicIdentifier,
     message: IHypernetOfferDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // The message type has to be OFFER
@@ -292,8 +294,8 @@ export class VectorUtils implements IVectorUtils {
     type: EPaymentType,
     toAddress: PublicIdentifier,
     amount: BigNumber,
-    assetAddress: string,
-    paymentId: string,
+    assetAddress: EthereumAddress,
+    paymentId: PaymentId,
     start: number,
     expiration: number,
     deltaTime?: number,
@@ -402,7 +404,7 @@ export class VectorUtils implements IVectorUtils {
     mediatorPublicKey: PublicKey,
     amount: BigNumber,
     expiration: number,
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // Sanity check - make sure the paymentId is valid:
     const validPayment = this.paymentIdUtils.isValidPaymentId(paymentId);
@@ -452,7 +454,7 @@ export class VectorUtils implements IVectorUtils {
    * Returns the address of the channel with the router, if exists.
    * Otherwise, attempts to create a channel with the router & return the address.
    */
-  public getRouterChannelAddress(): ResultAsync<string, RouterChannelUnknownError | VectorError> {
+  public getRouterChannelAddress(): ResultAsync<EthereumAddress, RouterChannelUnknownError | VectorError> {
     // If we already have the address, no need to do the rest
     if (this.getRouterChannelAddressSetup != null) {
       return this.getRouterChannelAddressSetup;
@@ -488,7 +490,7 @@ export class VectorUtils implements IVectorUtils {
           if (channel.aliceIdentifier !== config.routerPublicIdentifier) {
             continue;
           }
-          return okAsync<string, RouterChannelUnknownError>(channel.channelAddress as string);
+          return okAsync<EthereumAddress, RouterChannelUnknownError>(EthereumAddress(channel.channelAddress));
         }
         // If a channel does not exist with the router, we need to create it.
         return this._createRouterStateChannel(browserNode, config);
@@ -524,11 +526,11 @@ export class VectorUtils implements IVectorUtils {
   protected _createRouterStateChannel(
     browserNode: IBrowserNode,
     config: HypernetConfig,
-  ): ResultAsync<string, VectorError> {
+  ): ResultAsync<EthereumAddress, VectorError> {
     return browserNode
       .setup(config.routerPublicIdentifier, config.chainId, DEFAULT_CHANNEL_TIMEOUT.toString())
       .map((response) => {
-        return response.channelAddress;
+        return EthereumAddress(response.channelAddress);
       })
       .orElse((e) => {
         // Channel could be already set up, so we should try restoring the state
@@ -542,13 +544,13 @@ export class VectorUtils implements IVectorUtils {
             if (channel == null) {
               return errAsync(e);
             }
-            return okAsync(channel.channelAddress);
+            return okAsync(EthereumAddress(channel.channelAddress));
           });
       });
   }
 
   protected _getStateChannel(
-    channelAddress: string,
+    channelAddress: EthereumAddress,
     browserNode: IBrowserNode,
   ): ResultAsync<IFullChannelState, RouterChannelUnknownError | VectorError> {
     return browserNode.getStateChannel(channelAddress).andThen((channel) => {

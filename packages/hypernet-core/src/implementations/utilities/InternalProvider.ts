@@ -23,6 +23,6 @@ export class InternalProvider extends ethers.providers.JsonRpcProvider implement
   }
 
   public get address(): EthereumAddress {
-    return this._wallet.address;
+    return EthereumAddress(this._wallet.address);
   }
 }

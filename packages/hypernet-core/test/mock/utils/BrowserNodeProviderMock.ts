@@ -1,4 +1,4 @@
-import { BlockchainUnavailableError, VectorError } from "@hypernetlabs/objects";
+import { BlockchainUnavailableError, EthereumAddress, VectorError } from "@hypernetlabs/objects";
 import { IBrowserNode, IBrowserNodeProvider } from "@interfaces/utilities";
 import { okAsync, ResultAsync } from "neverthrow";
 import td from "testdouble";
@@ -30,7 +30,7 @@ import { EMessageTransferType } from "@hypernetlabs/objects";
 
 export class BrowserNodeProviderMock implements IBrowserNodeProvider {
   public browserNode: IBrowserNode;
-  public stateChannels = new Map<string, IFullChannelState>();
+  public stateChannels = new Map<EthereumAddress, IFullChannelState>();
   public offerTransfer: IFullTransferState<MessageState>;
   public insuranceTransfer: IFullTransferState<InsuranceState>;
   public parameterizedTransfer: IFullTransferState<ParameterizedState>;
