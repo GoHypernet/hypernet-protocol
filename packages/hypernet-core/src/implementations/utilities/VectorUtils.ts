@@ -41,7 +41,6 @@ import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@hyperne
 import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils/dist/identifiers";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import {
-  CoreUninitializedError,
   InvalidParametersError,
   RouterChannelUnknownError,
   RouterUnavailableError,
@@ -60,10 +59,7 @@ export class VectorUtils implements IVectorUtils {
   /**
    * Creates an instance of VectorUtils
    */
-  protected getRouterChannelAddressSetup: ResultAsync<
-    EthereumAddress,
-    RouterUnavailableError | CoreUninitializedError
-  > | null = null;
+  protected getRouterChannelAddressSetup: ResultAsync<EthereumAddress, RouterUnavailableError> | null = null;
 
   constructor(
     protected configProvider: IConfigProvider,
@@ -458,10 +454,7 @@ export class VectorUtils implements IVectorUtils {
    * Returns the address of the channel with the router, if exists.
    * Otherwise, attempts to create a channel with the router & return the address.
    */
-  public getRouterChannelAddress(): ResultAsync<
-    EthereumAddress,
-    RouterChannelUnknownError | CoreUninitializedError | VectorError
-  > {
+  public getRouterChannelAddress(): ResultAsync<EthereumAddress, RouterChannelUnknownError | VectorError> {
     // If we already have the address, no need to do the rest
     if (this.getRouterChannelAddressSetup != null) {
       return this.getRouterChannelAddressSetup;
@@ -497,7 +490,7 @@ export class VectorUtils implements IVectorUtils {
           if (channel.aliceIdentifier !== config.routerPublicIdentifier) {
             continue;
           }
-          return okAsync<EthereumAddress, RouterChannelUnknownError | CoreUninitializedError>(EthereumAddress(channel.channelAddress));
+          return okAsync<EthereumAddress, RouterChannelUnknownError>(EthereumAddress(channel.channelAddress));
         }
         // If a channel does not exist with the router, we need to create it.
         return this._createRouterStateChannel(browserNode, config);

@@ -1,6 +1,5 @@
 import { ResultAsync, Result } from "neverthrow";
 import {
-  CoreUninitializedError,
   LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
@@ -46,22 +45,14 @@ export interface IMerchantConnectorRepository {
 
   activateAuthorizedMerchants(): ResultAsync<
     void,
-    | MerchantConnectorError
-    | MerchantValidationError
-    | CoreUninitializedError
-    | BlockchainUnavailableError
-    | LogicalError
-    | ProxyError
+    MerchantConnectorError | MerchantValidationError | BlockchainUnavailableError | LogicalError | ProxyError
   >;
 
   resolveChallenge(
     merchantUrl: string,
     paymentId: PaymentId,
     transferId: string,
-  ): ResultAsync<
-    void,
-    MerchantConnectorError | MerchantValidationError | CoreUninitializedError | TransferResolutionError
-  >;
+  ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | TransferResolutionError>;
 
   closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
   displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;

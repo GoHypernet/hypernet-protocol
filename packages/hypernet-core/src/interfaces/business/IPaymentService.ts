@@ -1,7 +1,6 @@
 import { Payment, EthereumAddress, PublicIdentifier, HexString, PaymentId } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
-  CoreUninitializedError,
   InsufficientBalanceError,
   InvalidParametersError,
   LogicalError,
@@ -55,7 +54,6 @@ export interface IPaymentService {
     Payment,
     | RouterChannelUnknownError
     | VectorError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | InvalidPaymentError
@@ -95,7 +93,6 @@ export interface IPaymentService {
     | MerchantValidationError
     | RouterChannelUnknownError
     | VectorError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | InvalidPaymentError
@@ -115,7 +112,6 @@ export interface IPaymentService {
     | TransferResolutionError
     | RouterChannelUnknownError
     | VectorError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | InvalidPaymentError
@@ -135,7 +131,6 @@ export interface IPaymentService {
     | TransferResolutionError
     | RouterChannelUnknownError
     | VectorError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | InvalidPaymentError
@@ -156,7 +151,6 @@ export interface IPaymentService {
     | TransferResolutionError
     | RouterChannelUnknownError
     | VectorError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | InvalidPaymentError
@@ -174,7 +168,6 @@ export interface IPaymentService {
     void,
     | RouterChannelUnknownError
     | VectorError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | InvalidPaymentError
@@ -194,7 +187,6 @@ export interface IPaymentService {
     | TransferResolutionError
     | RouterChannelUnknownError
     | VectorError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | InvalidPaymentError
@@ -213,7 +205,6 @@ export interface IPaymentService {
     void,
     | RouterChannelUnknownError
     | VectorError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | InvalidPaymentError
@@ -237,7 +228,6 @@ export interface IPaymentService {
     | MerchantValidationError
     | RouterChannelUnknownError
     | VectorError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | InvalidPaymentError
@@ -262,7 +252,6 @@ export interface IPaymentService {
     | TransferResolutionError
     | RouterChannelUnknownError
     | VectorError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | InvalidPaymentError

@@ -2,7 +2,6 @@ import { ResultUtils } from "@hypernetlabs/utils";
 import { ILinkRepository } from "@interfaces/data";
 import { BlockchainUnavailableError, EthereumAddress, HypernetLink, Payment, PublicIdentifier } from "@hypernetlabs/objects";
 import {
-  CoreUninitializedError,
   InvalidParametersError,
   RouterChannelUnknownError,
   VectorError,
@@ -44,7 +43,6 @@ export class VectorLinkRepository implements ILinkRepository {
   public getHypernetLinks(): ResultAsync<
     HypernetLink[],
     | RouterChannelUnknownError
-    | CoreUninitializedError
     | VectorError
     | InvalidParametersError
     | BlockchainUnavailableError
@@ -86,7 +84,6 @@ export class VectorLinkRepository implements ILinkRepository {
   ): ResultAsync<
     HypernetLink,
     | RouterChannelUnknownError
-    | CoreUninitializedError
     | VectorError
     | InvalidParametersError
     | BlockchainUnavailableError

@@ -1,7 +1,6 @@
 import { ResultAsync } from "neverthrow";
 import {
   VectorError,
-  CoreUninitializedError,
   BlockchainUnavailableError,
   LogicalError,
   InvalidPaymentIdError,
@@ -18,7 +17,6 @@ export interface IVectorListener {
   setup(): ResultAsync<
     void,
     | VectorError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | InvalidPaymentIdError

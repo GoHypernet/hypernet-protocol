@@ -14,12 +14,7 @@ import {
   TransferCreationError,
   PaymentId,
 } from "@hypernetlabs/objects";
-import {
-  CoreUninitializedError,
-  PaymentFinalizeError,
-  RouterChannelUnknownError,
-  VectorError,
-} from "@hypernetlabs/objects";
+import { PaymentFinalizeError, RouterChannelUnknownError, VectorError } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IPaymentRepository {
@@ -33,7 +28,6 @@ export interface IPaymentRepository {
     Map<PaymentId, Payment>,
     | RouterChannelUnknownError
     | VectorError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | InvalidPaymentError
@@ -80,7 +74,6 @@ export interface IPaymentRepository {
     | PaymentStakeError
     | TransferResolutionError
     | RouterChannelUnknownError
-    | CoreUninitializedError
     | VectorError
     | LogicalError
     | InvalidPaymentError
@@ -102,7 +95,6 @@ export interface IPaymentRepository {
     | PaymentStakeError
     | TransferResolutionError
     | RouterChannelUnknownError
-    | CoreUninitializedError
     | VectorError
     | LogicalError
     | InvalidPaymentError
@@ -123,7 +115,6 @@ export interface IPaymentRepository {
     Payment,
     | RouterChannelUnknownError
     | VectorError
-    | CoreUninitializedError
     | BlockchainUnavailableError
     | LogicalError
     | PaymentFinalizeError

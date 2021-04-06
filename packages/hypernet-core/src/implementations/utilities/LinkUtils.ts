@@ -1,5 +1,5 @@
 import { HypernetLink, Payment, PublicIdentifier, PullPayment, PushPayment } from "@hypernetlabs/objects";
-import { CoreUninitializedError, InvalidParametersError } from "@hypernetlabs/objects";
+import { InvalidParametersError } from "@hypernetlabs/objects";
 import { IContextProvider } from "@interfaces/utilities";
 import { ILinkUtils } from "@interfaces/utilities/ILinkUtils";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
@@ -15,9 +15,7 @@ export class LinkUtils implements ILinkUtils {
    * @param payments the payments to get the associated Links for
    * @param context instance of HypernetContext
    */
-  public paymentsToHypernetLinks(
-    payments: Payment[],
-  ): ResultAsync<HypernetLink[], CoreUninitializedError | InvalidParametersError> {
+  public paymentsToHypernetLinks(payments: Payment[]): ResultAsync<HypernetLink[], InvalidParametersError> {
     return this.contextProvider.getInitializedContext().andThen((context) => {
       const linksByCounterpartyId = new Map<string, HypernetLink>();
 

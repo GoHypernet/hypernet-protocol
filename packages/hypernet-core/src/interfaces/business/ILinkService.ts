@@ -1,7 +1,6 @@
 import { ResultAsync } from "neverthrow";
 import { HypernetLink } from "@hypernetlabs/objects";
 import {
-  CoreUninitializedError,
   RouterChannelUnknownError,
   VectorError,
   InvalidParametersError,
@@ -19,7 +18,6 @@ export interface ILinkService {
     | InvalidPaymentError
     | InvalidParametersError
     | RouterChannelUnknownError
-    | CoreUninitializedError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError

@@ -1,4 +1,4 @@
-import { BlockchainUnavailableError, CoreUninitializedError, EthereumAddress, VectorError } from "@hypernetlabs/objects";
+import { BlockchainUnavailableError, EthereumAddress, VectorError } from "@hypernetlabs/objects";
 import { IBrowserNode, IBrowserNodeProvider } from "@interfaces/utilities";
 import { okAsync, ResultAsync } from "neverthrow";
 import td from "testdouble";
@@ -240,10 +240,8 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
     }
   }
 
-  getBrowserNode(): ResultAsync<IBrowserNode, VectorError | CoreUninitializedError | BlockchainUnavailableError> {
-    const result = okAsync<IBrowserNode, VectorError | CoreUninitializedError | BlockchainUnavailableError>(
-      this.browserNode,
-    );
+  getBrowserNode(): ResultAsync<IBrowserNode, VectorError | BlockchainUnavailableError> {
+    const result = okAsync<IBrowserNode, VectorError | BlockchainUnavailableError>(this.browserNode);
     return result;
   }
 }

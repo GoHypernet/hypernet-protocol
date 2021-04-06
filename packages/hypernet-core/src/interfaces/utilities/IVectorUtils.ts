@@ -9,7 +9,6 @@ import {
   PaymentId,
 } from "@hypernetlabs/objects";
 import {
-  CoreUninitializedError,
   InvalidParametersError,
   RouterChannelUnknownError,
   TransferCreationError,
@@ -27,7 +26,7 @@ export interface IVectorUtils {
   /**
    *
    */
-  getRouterChannelAddress(): ResultAsync<EthereumAddress, RouterChannelUnknownError | CoreUninitializedError | VectorError>;
+  getRouterChannelAddress(): ResultAsync<EthereumAddress, RouterChannelUnknownError | VectorError>;
 
   /**
    *

@@ -7,7 +7,6 @@ import {
   PullPayment,
   PushPayment,
 } from "@hypernetlabs/objects";
-import { CoreUninitializedError } from "@hypernetlabs/objects";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { okAsync, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
@@ -31,6 +30,7 @@ export class ContextProviderMock implements IContextProvider {
   public onAuthorizedMerchantActivationFailed: Subject<string>;
   public onMerchantIFrameDisplayRequested: Subject<string>;
   public onMerchantIFrameCloseRequested: Subject<string>;
+  public onInitializationRequired: Subject<void>;
 
   public authorizedMerchants: Map<string, string>;
 
@@ -53,6 +53,7 @@ export class ContextProviderMock implements IContextProvider {
     this.onAuthorizedMerchantActivationFailed = new Subject<string>();
     this.onMerchantIFrameDisplayRequested = new Subject<string>();
     this.onMerchantIFrameCloseRequested = new Subject<string>();
+    this.onInitializationRequired = new Subject<void>();
 
     this.authorizedMerchants = new Map<string, string>();
 
@@ -77,6 +78,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onAuthorizedMerchantActivationFailed,
         this.onMerchantIFrameDisplayRequested,
         this.onMerchantIFrameCloseRequested,
+        this.onInitializationRequired,
       );
     }
 
@@ -101,6 +103,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onAuthorizedMerchantActivationFailed,
         this.onMerchantIFrameDisplayRequested,
         this.onMerchantIFrameCloseRequested,
+        this.onInitializationRequired,
         this.authorizedMerchants,
       );
     }
@@ -110,7 +113,11 @@ export class ContextProviderMock implements IContextProvider {
     return okAsync(this.context);
   }
 
-  public getInitializedContext(): ResultAsync<InitializedHypernetContext, CoreUninitializedError> {
+  public getAccount(): ResultAsync<string, never> {
+    return okAsync(this.context.account || "");
+  }
+
+  public getInitializedContext(): ResultAsync<InitializedHypernetContext, never> {
     return okAsync(this.initializedContext);
   }
 

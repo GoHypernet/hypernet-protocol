@@ -14,7 +14,6 @@ import {
   AcceptPaymentError,
   BalancesUnavailableError,
   BlockchainUnavailableError,
-  CoreUninitializedError,
   InsufficientBalanceError,
   LogicalError,
   PersistenceError,
@@ -22,6 +21,10 @@ import {
   VectorError,
   MerchantValidationError,
   MerchantConnectorError,
+  InvalidPaymentError,
+  InvalidParametersError,
+  TransferResolutionError,
+  ProxyError,
 } from "@hypernetlabs/objects";
 import { ResultAsync, Result } from "neverthrow";
 import { BigNumber } from "ethers";
@@ -58,7 +61,7 @@ export interface IHypernetCore {
    * it will throw an error
    * @dev currently this matches the Vector pubId
    */
-  getPublicIdentifier(): ResultAsync<PublicIdentifier, CoreUninitializedError>;
+  getPublicIdentifier(): ResultAsync<PublicIdentifier, never | ProxyError>;
 
   /**
    * This function will load HypernetCore with funds. It should be called for each type of asset you want to use.
@@ -70,10 +73,7 @@ export interface IHypernetCore {
   depositFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
-  ): ResultAsync<
-    Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
-  >;
+  ): ResultAsync<Balances, BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error>;
 
   /**
    * This function will withdraw funds from Hypernet core into a specified Ethereum address.
@@ -85,30 +85,24 @@ export interface IHypernetCore {
     assetAddress: EthereumAddress,
     amount: BigNumber,
     destinationAddress: EthereumAddress,
-  ): ResultAsync<
-    Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
-  >;
+  ): ResultAsync<Balances, BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error>;
 
   /**
    * Returns the balance account, including funds within
    * the general channel, and funds locked inside transfers within the channel.
    */
-  getBalances(): ResultAsync<Balances, BalancesUnavailableError | CoreUninitializedError>;
+  getBalances(): ResultAsync<Balances, BalancesUnavailableError>;
 
   /**
    * Returns all Hypernet Ledger for the user
    */
-  getLinks(): ResultAsync<HypernetLink[], RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  getLinks(): ResultAsync<HypernetLink[], RouterChannelUnknownError | VectorError | Error>;
 
   /**
    * Returns all active Hypernet Ledgers for the user
    * An active link contains an incomplete/non-finalized transfer.
    */
-  getActiveLinks(): ResultAsync<
-    HypernetLink[],
-    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
-  >;
+  getActiveLinks(): ResultAsync<HypernetLink[], RouterChannelUnknownError | VectorError | Error>;
 
   /**
    * Returns the Hypernet Ledger for the user with the specified counterparty
@@ -135,7 +129,7 @@ export interface IHypernetCore {
     requiredStake: string,
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
 
   /**
    * Authorizes funds to a specified counterparty, with an amount, rate, & expiration date.
@@ -157,7 +151,7 @@ export interface IHypernetCore {
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
 
   /**
    * For a specified payment, puts up stake to accept the payment
@@ -175,7 +169,7 @@ export interface IHypernetCore {
   pullFunds(
     paymentId: PaymentId,
     amount: BigNumber,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
 
   /**
    * Finalized an authorized payment with the final payment amount.
@@ -188,15 +182,28 @@ export interface IHypernetCore {
    * Called by the consumer to attempt to claim some or all of the stake within a particular insurance payment.
    * @param paymentId the payment ID to dispute
    */
-  initiateDispute(paymentId: PaymentId): ResultAsync<Payment, CoreUninitializedError>;
+  initiateDispute(
+    paymentId: PaymentId,
+  ): ResultAsync<
+    Payment,
+    | MerchantConnectorError
+    | MerchantValidationError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
+  >;
 
   /**
    * Only used for development purposes!
    * @param amount
    */
-  mintTestToken(amount: BigNumber): ResultAsync<void, CoreUninitializedError>;
+  mintTestToken(amount: BigNumber): ResultAsync<void, BlockchainUnavailableError>;
 
-  authorizeMerchant(merchantUrl: string): ResultAsync<void, CoreUninitializedError | MerchantValidationError>;
+  authorizeMerchant(merchantUrl: string): ResultAsync<void, MerchantValidationError>;
 
   getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError>;
 
@@ -220,4 +227,5 @@ export interface IHypernetCore {
   onAuthorizedMerchantActivationFailed: Subject<string>;
   onMerchantIFrameDisplayRequested: Subject<string>;
   onMerchantIFrameCloseRequested: Subject<string>;
+  onInitializationRequired: Subject<void>;
 }
