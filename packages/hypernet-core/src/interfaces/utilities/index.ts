@@ -11,3 +11,4 @@ export * from "./IPaymentIdUtils";
 export * from "./IPaymentUtils";
 export * from "./ITimeUtils";
 export * from "./IVectorUtils";
+export * from "./IInternalProvider";

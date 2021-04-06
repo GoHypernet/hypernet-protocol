@@ -5,6 +5,7 @@ import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
 import { Balances } from "@objects/Balances";
 import { EthereumAddress } from "@objects/EthereumAddress";
+import { IPrivateCredentials } from "@objects/interfaces";
 
 export class HypernetContext {
   constructor(
@@ -26,6 +27,7 @@ export class HypernetContext {
     public onMerchantIFrameDisplayRequested: Subject<string>,
     public onMerchantIFrameCloseRequested: Subject<string>,
     public onInitializationRequired: Subject<void>,
+    public onPrivateCredentialsRequested: Subject<(privateCredentials: IPrivateCredentials) => void>,
   ) {}
 }
 
@@ -50,6 +52,7 @@ export class InitializedHypernetContext {
     public onMerchantIFrameDisplayRequested: Subject<string>,
     public onMerchantIFrameCloseRequested: Subject<string>,
     public onInitializationRequired: Subject<void>,
+    public onPrivateCredentialsRequested: Subject<(privateCredentials: IPrivateCredentials) => void>,
     public authorizedMediators: Map<string, string>,
   ) {}
 }

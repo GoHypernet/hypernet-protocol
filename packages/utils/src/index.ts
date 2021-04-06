@@ -5,4 +5,3 @@ export * from "./IAjaxUtils";
 export * from "./ILocalStorageUtils";
 export * from "./LocalStorageUtils";
 export * from "./ParentProxy";
-export * from "./ExternalProviderUtils";

@@ -9,7 +9,6 @@ import { StatusParams } from "../Status/Status.viewmodel";
 import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { AuthorizedMerchantFormParams } from "../AuthorizedMerchantForm/AuthorizedMerchantForm.viewmodel";
 import { AuthorizedMerchantsParams } from "../AuthorizedMerchants/AuthorizedMerchants.viewmodel";
-import { ExternalProviderUtils } from "packages/utils";
 
 declare global {
   interface Window {
