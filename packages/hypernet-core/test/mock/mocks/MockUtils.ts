@@ -1,6 +1,9 @@
 import { providers, ethers } from "ethers";
 import { MockProvider } from "ethereum-waffle";
 import Ganache from "ganache-core";
+import { EthereumAddress } from "@objects/EthereumAddress";
+import { PublicIdentifier } from "@objects/PublicIdentifier";
+import { PaymentId } from "@objects/PaymentId";
 var randomstring = require("randomstring");
 
 class MockUtils {
@@ -19,20 +22,20 @@ class MockUtils {
 
   public defaultMnemonic: string = "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
 
-  public generateRandomEtherAdress(): string {
-    return "0x" + randomstring.generate({ length: 40, charset: "hex" });
+  public generateRandomEtherAdress(): EthereumAddress {
+    return EthereumAddress("0x" + randomstring.generate({ length: 40, charset: "hex" }));
   }
 
-  public generateRandomPublicIdentifier(): string {
-    return "vector" + randomstring.generate({ length: 50, charset: "hex" });
+  public generateRandomPublicIdentifier(): PublicIdentifier {
+    return PublicIdentifier("vector" + randomstring.generate({ length: 50, charset: "hex" }));
   }
 
-  public generateRandomPaymentId(): string {
-    return "0x" + randomstring.generate({ length: 64, charset: "hex" });
+  public generateRandomPaymentId(): PaymentId {
+    return PaymentId("0x" + randomstring.generate({ length: 64, charset: "hex" }));
   }
 
-  public generateRandomPaymentToken(): string {
-    return "0x" + randomstring.generate({ length: 40, charset: "hex" });
+  public generateRandomPaymentToken(): EthereumAddress {
+    return EthereumAddress("0x" + randomstring.generate({ length: 40, charset: "hex" }));
   }
 
   public generateMockProvider(options?: Ganache.IProviderOptions): providers.Web3Provider {

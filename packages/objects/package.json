@@ -43,8 +43,9 @@
   },
   "types": "dist/src/index.d.ts",
   "dependencies": {
-    "ethers": "5.0.31",
     "class-transformer": "^0.3.2",
-    "reflect-metadata": "^0.1.13"
+    "ethers": "5.0.31",
+    "reflect-metadata": "^0.1.13",
+    "ts-brand": "^0.0.2"
   }
 }

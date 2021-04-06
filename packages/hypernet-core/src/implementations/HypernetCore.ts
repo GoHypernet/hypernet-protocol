@@ -52,9 +52,7 @@ import {
   PullPayment,
   PushPayment,
   IHypernetCore,
-  InvalidPaymentError,
-  InvalidParametersError,
-  TransferResolutionError,
+  PaymentId,
 } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
@@ -67,6 +65,9 @@ import {
   PersistenceError,
   RouterChannelUnknownError,
   VectorError,
+  InvalidPaymentError,
+  InvalidParametersError,
+  TransferResolutionError,
 } from "@hypernetlabs/objects";
 import { EBlockchainNetwork } from "@hypernetlabs/objects";
 import {
@@ -346,7 +347,7 @@ export class HypernetCore implements IHypernetCore {
   /**
    * Returns a list of Ethereum accounts associated with this instance of Hypernet Core.
    */
-  public getEthereumAccounts(): ResultAsync<string[], BlockchainUnavailableError> {
+  public getEthereumAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError> {
     return this.accountService.getAccounts();
   }
 
@@ -365,7 +366,7 @@ export class HypernetCore implements IHypernetCore {
    * @param amount the amount of the token to deposit
    */
   public depositFunds(
-    assetAddress: string,
+    assetAddress: EthereumAddress,
     amount: BigNumber,
   ): ResultAsync<Balances, BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error> {
     // console.log(`HypernetCore:depositFunds:assetAddress:${assetAddress}`)
@@ -452,7 +453,7 @@ export class HypernetCore implements IHypernetCore {
    * @param paymentId
    */
   public acceptOffers(
-    paymentIds: string[],
+    paymentIds: PaymentId[],
   ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
     return this.paymentService.acceptOffers(paymentIds);
   }
@@ -494,7 +495,7 @@ export class HypernetCore implements IHypernetCore {
    * @param amount the amount of funds to pull
    */
   public pullFunds(
-    paymentId: string,
+    paymentId: PaymentId,
     amount: BigNumber,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this.paymentService.pullFunds(paymentId, amount);
@@ -513,7 +514,7 @@ export class HypernetCore implements IHypernetCore {
    * @param metadata the data provided to the dispute mediator about this dispute
    */
   public initiateDispute(
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<
     Payment,
     | MerchantConnectorError
@@ -533,7 +534,7 @@ export class HypernetCore implements IHypernetCore {
    * Initialize this instance of Hypernet Core
    * @param account: the ethereum account to initialize with
    */
-  public initialize(account: string): ResultAsync<void, LogicalError> {
+  public initialize(account: EthereumAddress): ResultAsync<void, LogicalError> {
     if (this._initializeResult != null) {
       return this._initializeResult;
     }
@@ -569,7 +570,7 @@ export class HypernetCore implements IHypernetCore {
         return this.linkService.getLinks();
       })
       .andThen((links) => {
-        const paymentIds = new Array<HexString>();
+        const paymentIds = new Array<PaymentId>();
         for (const link of links) {
           for (const payment of link.payments) {
             paymentIds.push(payment.id);

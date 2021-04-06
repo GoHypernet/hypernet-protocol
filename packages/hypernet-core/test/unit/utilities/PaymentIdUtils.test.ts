@@ -1,15 +1,15 @@
-import { InvalidParametersError, InvalidPaymentIdError } from "@hypernetlabs/objects";
+import { InvalidParametersError, InvalidPaymentIdError, PaymentId, UUID } from "@hypernetlabs/objects";
 import { PaymentIdUtils } from "@implementations/utilities/PaymentIdUtils";
 import { EPaymentType } from "@hypernetlabs/objects";
 
 describe("PaymentIdUtils tests", () => {
-  const validPaymentId = "0x48797065726e6574202050555348202037074ce539ff4b81b4cb43dcfe3f4513";
-  const invalidPaymentId = "0x48797065726e6574202050555348202037074ce539ff4b81b4cb43dcfe3f4513Z";
-  const invalidPaymentIdWithBadType = "0x48797065726e6574202051555348202037074ce539ff4b81b4cb43dcfe3f4513";
+  const validPaymentId = PaymentId("0x48797065726e6574202050555348202037074ce539ff4b81b4cb43dcfe3f4513");
+  const invalidPaymentId = PaymentId("0x48797065726e6574202050555348202037074ce539ff4b81b4cb43dcfe3f4513Z");
+  const invalidPaymentIdWithBadType = PaymentId("0x48797065726e6574202051555348202037074ce539ff4b81b4cb43dcfe3f4513");
   const validDomain = "Hypernet";
   const invalidDomain = "BlahBlahBlah";
-  const validUuid = "37074ce5-39ff-4b81-b4cb-43dcfe3f4513";
-  const invalidUuid = "37074ce5-39ff-4b81-b4cb-43dcfe3f4513Z";
+  const validUuid = UUID("37074ce5-39ff-4b81-b4cb-43dcfe3f4513");
+  const invalidUuid = UUID("37074ce5-39ff-4b81-b4cb-43dcfe3f4513Z");
 
   test("makePaymentId creates a valid hex string", () => {
     // Arrange
@@ -42,7 +42,7 @@ describe("PaymentIdUtils tests", () => {
     const paymentIdUtils = new PaymentIdUtils();
 
     // Act
-    const result = paymentIdUtils.makePaymentId(validDomain, "1234567", validUuid);
+    const result = paymentIdUtils.makePaymentId(validDomain, "1234567" as EPaymentType, validUuid);
 
     // Assert
     expect(result.isErr()).toBeTruthy();

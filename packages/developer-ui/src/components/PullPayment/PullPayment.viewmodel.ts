@@ -1,6 +1,6 @@
 import ko from "knockout";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import { PullPayment } from "@hypernetlabs/objects";
+import { PaymentId, PullPayment } from "@hypernetlabs/objects";
 import { EPaymentState } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import html from "./PullPayment.template.html";
@@ -40,7 +40,7 @@ export class PullPaymentViewModel {
   public showDisputeButton: ko.PureComputed<boolean>;
 
   protected integration: IHypernetWebIntegration;
-  protected paymentId: string;
+  protected paymentId: PaymentId;
   protected publicIdentifier: ko.Observable<string | null>;
 
   constructor(params: PullPaymentParams) {

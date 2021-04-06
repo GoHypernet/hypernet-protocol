@@ -1,12 +1,13 @@
 import { EPaymentState } from "@objects/types";
 import { EthereumAddress } from "@objects/EthereumAddress";
+import { PaymentId } from "@objects/PaymentId";
 import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { BigNumber } from "ethers";
 
 export abstract class Payment {
   constructor(
-    public id: string,
+    public id: PaymentId,
     public to: PublicIdentifier,
     public from: PublicIdentifier,
     public state: EPaymentState,

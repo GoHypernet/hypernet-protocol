@@ -5,6 +5,8 @@ import {
   PushPayment,
   PullPayment,
   Balances,
+  EthereumAddress,
+  PublicIdentifier,
 } from "@hypernetlabs/objects";
 import { IContextProvider } from "@interfaces/utilities";
 import { Subject } from "rxjs";
@@ -80,8 +82,8 @@ export class ContextProvider implements IContextProvider {
     if (this.contextInitialized()) {
       this._initializePromiseResolve(
         new InitializedHypernetContext(
-          this.context.account || "",
-          this.context.publicIdentifier || "",
+          EthereumAddress(this.context.account || ""),
+          PublicIdentifier(this.context.publicIdentifier || ""),
           this.context.inControl,
           this.context.onControlClaimed,
           this.context.onControlYielded,

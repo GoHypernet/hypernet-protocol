@@ -1,7 +1,6 @@
 import { BigNumber } from "ethers";
 import {
   EthereumAddress,
-  HexString,
   IHypernetOfferDetails,
   IMessageTransferData,
   Payment,
@@ -15,6 +14,8 @@ import {
   IHypernetPullPaymentDetails,
   IRegisteredTransfer,
   BlockchainUnavailableError,
+  PaymentId,
+  UUID,
 } from "@hypernetlabs/objects";
 import {
   InvalidParametersError,
@@ -67,7 +68,7 @@ export class PaymentUtils implements IPaymentUtils {
    * Verifies that the paymentId provided has domain matching Hypernet's domain name.
    * @param paymentId the payment ID to check
    */
-  public isHypernetDomain(paymentId: HexString): ResultAsync<boolean, InvalidPaymentIdError> {
+  public isHypernetDomain(paymentId: PaymentId): ResultAsync<boolean, InvalidPaymentIdError> {
     return this.configProvider.getConfig().andThen((config) => {
       const domainRes = this.paymentIdUtils.getDomain(paymentId);
 
@@ -83,9 +84,9 @@ export class PaymentUtils implements IPaymentUtils {
    * <domain-10-bytes><payment-type-6-bytes><UUID-16-bytes>
    * @param paymentType the payment type for the id - PUSH or PULL
    */
-  public createPaymentId(paymentType: EPaymentType): ResultAsync<string, InvalidParametersError> {
+  public createPaymentId(paymentType: EPaymentType): ResultAsync<PaymentId, InvalidParametersError> {
     return this.configProvider.getConfig().andThen((config) => {
-      return this.paymentIdUtils.makePaymentId(config.hypernetProtocolDomain, paymentType, uuidv4());
+      return this.paymentIdUtils.makePaymentId(config.hypernetProtocolDomain, paymentType, UUID(uuidv4()));
     });
   }
 
@@ -99,7 +100,7 @@ export class PaymentUtils implements IPaymentUtils {
    * @param metadata the IHypernetOfferDetails for this payment
    */
   public transfersToPushPayment(
-    paymentId: string,
+    paymentId: PaymentId,
     to: PublicIdentifier,
     from: PublicIdentifier,
     state: EPaymentState,
@@ -128,7 +129,7 @@ export class PaymentUtils implements IPaymentUtils {
 
     const paymentToken =
       sortedTransfers.parameterizedTransfer != null
-        ? sortedTransfers.parameterizedTransfer.assetId
+        ? EthereumAddress(sortedTransfers.parameterizedTransfer.assetId)
         : sortedTransfers.offerDetails.paymentToken;
 
     const details = new PaymentInternalDetails(
@@ -171,7 +172,7 @@ export class PaymentUtils implements IPaymentUtils {
    * @param metadata the IHypernetOfferDetails for this payment
    */
   public transfersToPullPayment(
-    paymentId: string,
+    paymentId: PaymentId,
     to: PublicIdentifier,
     from: PublicIdentifier,
     state: EPaymentState,
@@ -219,7 +220,7 @@ export class PaymentUtils implements IPaymentUtils {
 
     const paymentToken =
       sortedTransfers.parameterizedTransfer != null
-        ? sortedTransfers.parameterizedTransfer.assetId
+        ? EthereumAddress(sortedTransfers.parameterizedTransfer.assetId)
         : sortedTransfers.offerDetails.paymentToken;
 
     const details = new PaymentInternalDetails(
@@ -265,7 +266,7 @@ export class PaymentUtils implements IPaymentUtils {
    * @param browserNode instance of IBrowserNode
    */
   public transfersToPayment(
-    paymentId: string,
+    paymentId: PaymentId,
     transfers: IFullTransferState[],
   ): ResultAsync<Payment, InvalidPaymentError | InvalidParametersError> {
     let paymentType: EPaymentType;
@@ -480,9 +481,9 @@ export class PaymentUtils implements IPaymentUtils {
     }
 
     return ResultUtils.combine(transferTypeResults).andThen((transferTypesWithTransfers) => {
-      const transfersByPaymentId = new Map<string, IFullTransferState[]>();
+      const transfersByPaymentId = new Map<PaymentId, IFullTransferState[]>();
       for (const { transferType, transfer } of transferTypesWithTransfers) {
-        let paymentId: string;
+        let paymentId: PaymentId;
         if (transferType === ETransferType.Offer) {
           // @todo also add in PullRecord type)
           const offerDetails: IHypernetOfferDetails = JSON.parse(transfer.transferState.message);
@@ -538,11 +539,11 @@ export class PaymentUtils implements IPaymentUtils {
         // registeredTransfers.name = 'Insurance', registeredTransfers.definition = <address>, transfer.transferDefinition = <address>
         const transferMap: Map<EthereumAddress, string> = new Map();
         for (const registeredTransfer of registeredTransfers) {
-          transferMap.set(registeredTransfer.definition, registeredTransfer.name);
+          transferMap.set(EthereumAddress(registeredTransfer.definition), registeredTransfer.name);
         }
 
         // If the transfer address is not one we know, we don't know what this is
-        if (!transferMap.has(transfer.transferDefinition)) {
+        if (!transferMap.has(EthereumAddress(transfer.transferDefinition))) {
           this.logUtils.log(
             `Transfer type not recognized. Transfer definition: ${
               transfer.transferDefinition
@@ -552,7 +553,7 @@ export class PaymentUtils implements IPaymentUtils {
         } else {
           // This is a transfer we know about, but not necessarily one we want.
           // Narrow down to insurance, parameterized, or  offer/messagetransfer
-          const thisTransfer = transferMap.get(transfer.transferDefinition);
+          const thisTransfer = transferMap.get(EthereumAddress(transfer.transferDefinition));
           if (thisTransfer == null) {
             return errAsync(new LogicalError("Transfer type not unrecognized, but not in transfer map!"));
           }

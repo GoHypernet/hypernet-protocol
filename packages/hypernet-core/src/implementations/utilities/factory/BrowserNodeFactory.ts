@@ -1,9 +1,8 @@
 import { BrowserNode } from "@connext/vector-browser-node";
-import { VectorError } from "@hypernetlabs/objects";
 import { IBrowserNode, IConfigProvider, ILogUtils } from "@interfaces/utilities";
 import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
 import { WrappedBrowserNode } from "@implementations/utilities";
-import { ResultAsync, okAsync } from "neverthrow";
+import { ResultAsync } from "neverthrow";
 
 export class BrowserNodeFactory implements IBrowserNodeFactory {
   constructor(protected configProvider: IConfigProvider, protected logUtils: ILogUtils) {}

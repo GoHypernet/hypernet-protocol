@@ -7,10 +7,7 @@ import {
   PullPayment,
   PushPayment,
   Payment,
-  ProxyError,
-  InvalidPaymentError,
-  InvalidParametersError,
-  TransferResolutionError,
+  PaymentId,
 } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
@@ -23,6 +20,10 @@ import {
   MerchantValidationError,
   PersistenceError,
   MerchantConnectorError,
+  ProxyError,
+  InvalidPaymentError,
+  InvalidParametersError,
+  TransferResolutionError,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { Result, ResultAsync, ok } from "neverthrow";
@@ -141,6 +142,10 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     });
   }
 
+  public finalizePullPayment(paymentId: PaymentId, finalAmount: BigNumber): Promise<HypernetLink> {
+    throw new Error("Method not implemented.");
+  }
+
   public initialized(): Result<boolean, LogicalError> {
     // If the child is not initialized, there is no way the core can be.
     if (this.child == null) {
@@ -168,11 +173,11 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return ok(this.isInControl);
   }
 
-  public getEthereumAccounts(): ResultAsync<string[], BlockchainUnavailableError> {
+  public getEthereumAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError> {
     return this._createCall("getEthereumAccounts", null);
   }
 
-  public initialize(account: PublicIdentifier): ResultAsync<void, LogicalError> {
+  public initialize(account: EthereumAddress): ResultAsync<void, LogicalError> {
     return this._createCall("initialize", account);
   }
 
@@ -252,13 +257,13 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   }
 
   public acceptOffers(
-    paymentIds: string[],
+    paymentIds: PaymentId[],
   ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
     return this._createCall("acceptFunds", paymentIds);
   }
 
   public pullFunds(
-    paymentId: string,
+    paymentId: PaymentId,
     amount: BigNumber,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this._createCall("pullFunds", {
@@ -267,16 +272,8 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     });
   }
 
-  public finalizePullPayment(paymentId: string, finalAmount: BigNumber): Promise<HypernetLink> {
-    throw new Error("Unimplemented");
-  }
-
-  public finalizePushPayment(paymentId: string): Promise<void> {
-    throw new Error("Unimplemented");
-  }
-
   public initiateDispute(
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<
     Payment,
     | MerchantConnectorError

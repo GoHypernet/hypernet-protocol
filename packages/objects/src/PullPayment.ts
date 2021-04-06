@@ -5,10 +5,11 @@ import { EthereumAddress } from "@objects/EthereumAddress";
 import { BigNumber } from "ethers";
 import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
 import { PullAmount } from "@objects/PullAmount";
+import { PaymentId } from "@objects/PaymentId";
 
 export class PullPayment extends Payment {
   constructor(
-    id: string,
+    id: PaymentId,
     to: PublicIdentifier,
     from: PublicIdentifier,
     state: EPaymentState,

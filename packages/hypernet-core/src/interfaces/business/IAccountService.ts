@@ -14,7 +14,7 @@ import { ResultAsync } from "neverthrow";
  */
 export interface IAccountService {
   getPublicIdentifier(): ResultAsync<PublicIdentifier, BlockchainUnavailableError | VectorError>;
-  getAccounts(): ResultAsync<string[], BlockchainUnavailableError>;
+  getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
   depositFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,

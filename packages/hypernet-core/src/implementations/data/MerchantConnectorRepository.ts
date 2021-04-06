@@ -1,12 +1,13 @@
 import { IMerchantConnectorRepository } from "@interfaces/data";
 import {
-  PublicKey,
   HypernetContext,
   PullPayment,
   PushPayment,
   ProxyError,
   BlockchainUnavailableError,
   TransferResolutionError,
+  PaymentId,
+  EthereumAddress,
 } from "@hypernetlabs/objects";
 import { LogicalError, MerchantConnectorError, MerchantValidationError, PersistenceError } from "@hypernetlabs/objects";
 import { errAsync, okAsync, ResultAsync, Result } from "neverthrow";
@@ -56,7 +57,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     };
   }
 
-  public getMerchantAddresses(merchantUrls: string[]): ResultAsync<Map<string, PublicKey>, LogicalError> {
+  public getMerchantAddresses(merchantUrls: string[]): ResultAsync<Map<string, EthereumAddress>, LogicalError> {
     // TODO: right now, the merchant will publish a URL with their address; eventually, they should be held in a smart contract
 
     // For merchants that are already authorized, we can just go to their connector for the
@@ -86,9 +87,9 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     }
 
     return ResultUtils.combine(addressRequests).map((vals) => {
-      const returnMap = new Map<string, string>();
+      const returnMap = new Map<string, EthereumAddress>();
       for (const val of vals) {
-        returnMap.set(val.merchantUrl.toString(), val.address);
+        returnMap.set(val.merchantUrl.toString(), EthereumAddress(val.address));
       }
 
       return returnMap;
@@ -179,7 +180,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
   public resolveChallenge(
     merchantUrl: string,
-    paymentId: string,
+    paymentId: PaymentId,
     transferId: string,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | TransferResolutionError> {
     const proxy = this.activatedMerchants.get(merchantUrl);

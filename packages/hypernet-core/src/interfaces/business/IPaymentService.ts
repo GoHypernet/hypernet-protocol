@@ -1,4 +1,4 @@
-import { Payment, EthereumAddress, PublicIdentifier, HexString } from "@hypernetlabs/objects";
+import { Payment, EthereumAddress, PublicIdentifier, HexString, PaymentId } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
   InsufficientBalanceError,
@@ -48,7 +48,7 @@ export interface IPaymentService {
    * move any money.
    */
   pullFunds(
-    paymentId: string,
+    paymentId: PaymentId,
     amount: BigNumber,
   ): ResultAsync<
     Payment,
@@ -84,7 +84,7 @@ export interface IPaymentService {
    * to accept the terms of the payment and put up the stake.
    */
   acceptOffers(
-    paymentIds: string[],
+    paymentIds: PaymentId[],
   ): ResultAsync<
     Result<Payment, AcceptPaymentError>[],
     | InsufficientBalanceError
@@ -104,7 +104,7 @@ export interface IPaymentService {
    * @param paymentId
    */
   paymentPosted(
-    paymentId: HexString,
+    paymentId: PaymentId,
   ): ResultAsync<
     Payment,
     | PaymentFinalizeError
@@ -123,7 +123,7 @@ export interface IPaymentService {
    * @param paymentId
    */
   insuranceResolved(
-    paymentId: HexString,
+    paymentId: PaymentId,
   ): ResultAsync<
     Payment,
     | PaymentFinalizeError
@@ -143,7 +143,7 @@ export interface IPaymentService {
    * @param paymentId
    */
   paymentCompleted(
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<
     Payment,
     | PaymentFinalizeError
@@ -163,7 +163,7 @@ export interface IPaymentService {
    * @param paymentId
    */
   pullRecorded(
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<
     void,
     | RouterChannelUnknownError
@@ -179,7 +179,7 @@ export interface IPaymentService {
    * @param paymentId
    */
   stakePosted(
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<
     Payment,
     | PaymentFinalizeError
@@ -200,7 +200,7 @@ export interface IPaymentService {
    * @param transferId
    */
   offerReceived(
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<
     void,
     | RouterChannelUnknownError
@@ -221,7 +221,7 @@ export interface IPaymentService {
    * @param paymentId
    */
   initiateDispute(
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<
     Payment,
     | MerchantConnectorError
@@ -244,7 +244,7 @@ export interface IPaymentService {
    * @param paymentIds
    */
   advancePayments(
-    paymentIds: HexString[],
+    paymentIds: PaymentId[],
   ): ResultAsync<
     Payment[],
     | PaymentFinalizeError

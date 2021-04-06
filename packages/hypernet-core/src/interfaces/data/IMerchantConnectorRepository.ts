@@ -7,6 +7,8 @@ import {
   ProxyError,
   BlockchainUnavailableError,
   TransferResolutionError,
+  EthereumAddress,
+  PaymentId,
 } from "@hypernetlabs/objects";
 import { PullPayment, PushPayment } from "@hypernetlabs/objects";
 
@@ -14,7 +16,7 @@ export interface IMerchantConnectorRepository {
   /**
    * Returns a map of merchant URLs to their address
    */
-  getMerchantAddresses(merchantUrl: string[]): ResultAsync<Map<string, string>, LogicalError>;
+  getMerchantAddresses(merchantUrl: string[]): ResultAsync<Map<string, EthereumAddress>, LogicalError>;
 
   /**
    * Adds the merchant url as authorized with a particular signature
@@ -48,7 +50,7 @@ export interface IMerchantConnectorRepository {
 
   resolveChallenge(
     merchantUrl: string,
-    paymentId: string,
+    paymentId: PaymentId,
     transferId: string,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | TransferResolutionError>;
 

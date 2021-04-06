@@ -1,2 +1,4 @@
-/// And EthereumAddress is an Ethereum (or other chain) address
-export type EthereumAddress = string;
+import {Brand, make} from "ts-brand";
+
+export type EthereumAddress = Brand<string, "EthereumAddress">;
+export const EthereumAddress = make<EthereumAddress>();

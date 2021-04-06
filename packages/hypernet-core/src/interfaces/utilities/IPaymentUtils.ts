@@ -5,6 +5,7 @@ import {
   PushPayment,
   SortedTransfers,
   IFullTransferState,
+  PaymentId,
 } from "@hypernetlabs/objects";
 import { EPaymentState, EPaymentType, ETransferType } from "@hypernetlabs/objects";
 import {
@@ -21,16 +22,16 @@ export interface IPaymentUtils {
    *
    * @param paymentId
    */
-  isHypernetDomain(paymentId: string): ResultAsync<boolean, InvalidPaymentIdError>;
+  isHypernetDomain(paymentId: PaymentId): ResultAsync<boolean, InvalidPaymentIdError>;
 
   /**
    * Creates a PaymentId by combining
    * @param paymentType
    */
-  createPaymentId(paymentType: EPaymentType): ResultAsync<string, InvalidParametersError>;
+  createPaymentId(paymentType: EPaymentType): ResultAsync<PaymentId, InvalidParametersError>;
 
   sortTransfers(
-    _paymentId: string,
+    _paymentId: PaymentId,
     transfers: IFullTransferState[],
   ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError | LogicalError>;
 
@@ -53,7 +54,7 @@ export interface IPaymentUtils {
    * @param browserNode
    */
   transfersToPayment(
-    fullPaymentId: string,
+    fullPaymentId: PaymentId,
     transfers: IFullTransferState[],
   ): ResultAsync<Payment, InvalidPaymentError | InvalidParametersError>;
 

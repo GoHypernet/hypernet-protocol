@@ -4,6 +4,9 @@ import {
   IHypernetPullPaymentDetails,
   IBasicTransferResponse,
   IFullTransferState,
+  EthereumAddress,
+  PublicIdentifier,
+  PaymentId,
 } from "@hypernetlabs/objects";
 import {
   InvalidParametersError,
@@ -23,7 +26,7 @@ export interface IVectorUtils {
   /**
    *
    */
-  getRouterChannelAddress(): ResultAsync<string, RouterChannelUnknownError | VectorError>;
+  getRouterChannelAddress(): ResultAsync<EthereumAddress, RouterChannelUnknownError | VectorError>;
 
   /**
    *
@@ -33,7 +36,7 @@ export interface IVectorUtils {
 
   resolvePaymentTransfer(
     transferId: string,
-    paymentId: string,
+    paymentId: PaymentId,
     amount: string,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
@@ -46,7 +49,7 @@ export interface IVectorUtils {
    */
   resolveInsuranceTransfer(
     transferId: string,
-    paymentId: string,
+    paymentId: PaymentId,
     mediatorSignature?: string,
     amount?: BigNumber,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
@@ -55,12 +58,12 @@ export interface IVectorUtils {
    *
    */
   createOfferTransfer(
-    toAddress: string,
+    toAddress: PublicIdentifier,
     message: IHypernetOfferDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError>;
 
   createPullNotificationTransfer(
-    toAddress: string,
+    toAddress: PublicIdentifier,
     message: IHypernetPullPaymentDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
 
@@ -71,9 +74,9 @@ export interface IVectorUtils {
    */
   createPaymentTransfer(
     type: EPaymentType,
-    toAddress: string,
+    toAddress: PublicIdentifier,
     amount: BigNumber,
-    assetAddress: string,
+    assetAddress: EthereumAddress,
     UUID: string,
     start: number,
     expiration: number,
@@ -87,7 +90,7 @@ export interface IVectorUtils {
    * @param amount
    */
   createInsuranceTransfer(
-    toAddress: string,
+    toAddress: PublicIdentifier,
     mediatorPublicKey: PublicKey,
     amount: BigNumber,
     expiration: number,
