@@ -18,7 +18,7 @@ export interface IAccountService {
     PublicIdentifier,
     CoreUninitializedError | BlockchainUnavailableError | VectorError
   >;
-  getAccounts(): ResultAsync<string[], BlockchainUnavailableError>;
+  getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
   depositFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,

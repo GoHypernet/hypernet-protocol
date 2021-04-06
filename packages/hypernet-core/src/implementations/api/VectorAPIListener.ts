@@ -5,6 +5,7 @@ import {
   IHypernetPullPaymentDetails,
   IConditionalTransferCreatedPayload,
   IConditionalTransferResolvedPayload,
+  PaymentId,
 } from "@hypernetlabs/objects";
 import {
   LogicalError,
@@ -64,7 +65,7 @@ export class VectorAPIListener implements IVectorListener {
         // or a UUID as part of transferState.message (message transfer type)
 
         this.paymentUtils.getTransferType(payload.transfer).andThen((transferType) => {
-          let paymentId: string;
+          let paymentId: PaymentId;
           const transfer = payload.transfer;
 
           if (transferType === ETransferType.Offer) {
@@ -120,7 +121,7 @@ export class VectorAPIListener implements IVectorListener {
         this.paymentUtils
           .getTransferType(payload.transfer)
           .andThen((transferType) => {
-            let paymentId: string;
+            let paymentId: PaymentId;
             const transfer = payload.transfer;
 
             if (transferType === ETransferType.Offer) {

@@ -18,7 +18,7 @@ export interface IAccountsRepository {
     PublicIdentifier,
     CoreUninitializedError | BlockchainUnavailableError | VectorError
   >;
-  getAccounts(): ResultAsync<string[], BlockchainUnavailableError>;
+  getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
   getBalances(): ResultAsync<
     Balances,
     BalancesUnavailableError | VectorError | CoreUninitializedError | RouterChannelUnknownError

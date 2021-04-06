@@ -12,6 +12,7 @@ import {
   InvalidParametersError,
   PaymentStakeError,
   TransferCreationError,
+  PaymentId,
 } from "@hypernetlabs/objects";
 import {
   CoreUninitializedError,
@@ -27,9 +28,9 @@ export interface IPaymentRepository {
    * @param paymentIds
    */
   getPaymentsByIds(
-    paymentIds: string[],
+    paymentIds: PaymentId[],
   ): ResultAsync<
-    Map<string, Payment>,
+    Map<PaymentId, Payment>,
     | RouterChannelUnknownError
     | VectorError
     | CoreUninitializedError
@@ -64,7 +65,7 @@ export interface IPaymentRepository {
     merchantUrl: string,
   ): ResultAsync<PullPayment, PaymentCreationError>;
 
-  createPullRecord(paymentId: string, amount: string): ResultAsync<Payment, PaymentCreationError>;
+  createPullRecord(paymentId: PaymentId, amount: string): ResultAsync<Payment, PaymentCreationError>;
 
   /**
    * Provides assets for a given list of payment ids.
@@ -72,7 +73,7 @@ export interface IPaymentRepository {
    * @param paymentId
    */
   provideAsset(
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<
     Payment,
     | BlockchainUnavailableError
@@ -93,7 +94,7 @@ export interface IPaymentRepository {
    * @param paymentId
    */
   provideStake(
-    paymentId: string,
+    paymentId: PaymentId,
     merchantAddress: string,
   ): ResultAsync<
     Payment,
@@ -116,7 +117,7 @@ export interface IPaymentRepository {
    * @param paymentId
    */
   finalizePayment(
-    paymentId: string,
+    paymentId: PaymentId,
     amount: string,
   ): ResultAsync<
     Payment,

@@ -7,7 +7,7 @@ import {
   IConfigProvider,
   IBlockchainProvider,
 } from "@interfaces/utilities";
-import { BlockchainUnavailableError, CoreUninitializedError, VectorError } from "@hypernetlabs/objects";
+import { BlockchainUnavailableError, CoreUninitializedError, EthereumAddress, VectorError } from "@hypernetlabs/objects";
 import { HypernetConfig, HypernetContext } from "@hypernetlabs/objects";
 import { ResultUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
 import { ethers } from "ethers";
@@ -77,7 +77,7 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
           // Store the signature so you don't have to sign again
           this.storageUtils.setSessionItem(`account-${account}-signature`, signature);
 
-          return this.browserNode.init(signature, account);
+          return this.browserNode.init(signature, EthereumAddress(account));
         })
         .orElse((e) => {
           const shouldAttemptRestore = ((e as any).context?.validationError ?? "").includes("Channel is already setup");

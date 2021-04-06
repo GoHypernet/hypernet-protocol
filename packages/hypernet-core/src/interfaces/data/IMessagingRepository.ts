@@ -1,6 +1,6 @@
 import {
   ControlClaim,
-  EstablishLinkRequest,
+  // EstablishLinkRequest,
   EthereumAddress,
   MessagePayload,
   MessageThread,
@@ -20,11 +20,11 @@ export interface IMessagingRepository {
     destination: EthereumAddress,
     payload: MessagePayload,
   ): ResultAsync<void, BlockchainUnavailableError | ThreeBoxError | LogicalError>;
-  sendEstablishLinkRequest(
-    request: EstablishLinkRequest,
-  ): ResultAsync<void, ThreeBoxError | BlockchainUnavailableError>;
-  sendDenyLinkResponse(
-    linkRequest: EstablishLinkRequest,
-  ): ResultAsync<void, ThreeBoxError | BlockchainUnavailableError>;
+  // sendEstablishLinkRequest(
+  //   request: EstablishLinkRequest,
+  // ): ResultAsync<void, ThreeBoxError | BlockchainUnavailableError>;
+  // sendDenyLinkResponse(
+  //   linkRequest: EstablishLinkRequest,
+  // ): ResultAsync<void, ThreeBoxError | BlockchainUnavailableError>;
   sendControlClaim(controlClaim: ControlClaim): ResultAsync<void, ThreeBoxError | BlockchainUnavailableError>;
 }

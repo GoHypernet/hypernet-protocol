@@ -7,6 +7,8 @@ import {
   PullPayment,
   PublicIdentifier,
   PaymentInternalDetails,
+  PaymentId,
+  EthereumAddress,
 } from "@hypernetlabs/objects";
 import { EPaymentState } from "@hypernetlabs/objects";
 import {
@@ -21,6 +23,7 @@ import {
   publicIdentifier,
   publicIdentifier2,
   unixNow,
+  account,
 } from "@mock/mocks";
 import { okAsync, errAsync } from "neverthrow";
 import {
@@ -45,8 +48,8 @@ const requiredStake = "42";
 const paymentToken = mockUtils.generateRandomPaymentToken();
 const amount = "42";
 const expirationDate = unixNow + defaultExpirationLength;
-const paymentId = "See, this doesn't have to be legit data if it's never checked!";
-const nonExistentPaymentId = "This payment is not mocked";
+const paymentId = PaymentId("See, this doesn't have to be legit data if it's never checked!");
+const nonExistentPaymentId = PaymentId("This payment is not mocked");
 const paymentDetails = new PaymentInternalDetails(offerTransferId, insuranceTransferId, parameterizedTransferId, []);
 
 class PaymentServiceMocks {
@@ -64,7 +67,7 @@ class PaymentServiceMocks {
   public finalizedPushPayment: PushPayment;
 
   public assetBalance: AssetBalance;
-  public merchantAddresses: Map<string, string>;
+  public merchantAddresses: Map<string, EthereumAddress>;
 
   constructor(hypertokenBalance: string = amount) {
     this.pushPayment = this.factoryPushPayment();
@@ -110,17 +113,17 @@ class PaymentServiceMocks {
 
     this.setExistingPayments([this.pushPayment]);
     td.when(this.paymentRepository.getPaymentsByIds(td.matchers.contains(nonExistentPaymentId))).thenReturn(
-      okAsync(new Map<string, Payment>()),
+      okAsync(new Map<PaymentId, Payment>()),
     );
     td.when(this.accountRepository.getBalanceByAsset(hyperTokenAddress)).thenReturn(okAsync(this.assetBalance));
-    td.when(this.paymentRepository.provideStake(paymentId, merchantPublicKey)).thenReturn(
+    td.when(this.paymentRepository.provideStake(paymentId, merchantUrl)).thenReturn(
       okAsync(this.stakedPushPayment),
     );
     td.when(this.paymentRepository.provideAsset(paymentId)).thenReturn(okAsync(this.paidPushPayment));
     td.when(this.paymentRepository.finalizePayment(paymentId, amount)).thenReturn(okAsync(this.finalizedPushPayment));
 
     this.merchantAddresses = new Map();
-    this.merchantAddresses.set(merchantUrl, merchantPublicKey);
+    this.merchantAddresses.set(merchantUrl, account);
     td.when(this.merchantConnectorRepository.getMerchantAddresses(td.matchers.contains(merchantUrl))).thenReturn(
       okAsync(this.merchantAddresses),
     );
@@ -139,7 +142,7 @@ class PaymentServiceMocks {
   }
 
   public setExistingPayments(payments: (PushPayment | PullPayment)[]) {
-    const returnedPaymentsMap = new Map<string, Payment>();
+    const returnedPaymentsMap = new Map<PaymentId, Payment>();
     const paymentIds = new Array<string>();
 
     for (const payment of payments) {

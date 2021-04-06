@@ -36,7 +36,7 @@ export class AccountService implements IAccountService {
     return this.accountRepository.getPublicIdentifier();
   }
 
-  public getAccounts(): ResultAsync<string[], BlockchainUnavailableError> {
+  public getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError> {
     return this.accountRepository.getAccounts();
   }
 

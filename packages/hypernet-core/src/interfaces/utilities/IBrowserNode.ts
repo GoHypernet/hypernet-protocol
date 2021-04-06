@@ -34,12 +34,12 @@ export interface IBrowserNode {
    * @param channelAddress
    * @returns channelAddress
    */
-  reconcileDeposit(assetId: EthereumAddress, channelAddress: EthereumAddress): ResultAsync<string, VectorError>;
+  reconcileDeposit(assetId: EthereumAddress, channelAddress: EthereumAddress): ResultAsync<EthereumAddress, VectorError>;
 
   withdraw(
     channelAddress: EthereumAddress,
     amount: string,
-    assetId: string,
+    assetId: EthereumAddress,
     recipient: EthereumAddress,
     quote?: IWithdrawQuote,
     callTo?: string,
@@ -49,11 +49,11 @@ export interface IBrowserNode {
 
   getTransfer(transferId: string): ResultAsync<IFullTransferState, VectorError>;
 
-  getActiveTransfers(channelAddress: string): ResultAsync<IFullTransferState[], VectorError>;
+  getActiveTransfers(channelAddress: EthereumAddress): ResultAsync<IFullTransferState[], VectorError>;
 
   getTransfers(startDate: number, endDate: number): ResultAsync<IFullTransferState[], VectorError>;
 
-  init(signature: string, account: string): ResultAsync<void, VectorError>;
+  init(signature: string, account: EthereumAddress): ResultAsync<void, VectorError>;
 
   getRegisteredTransfers(chainId: number): ResultAsync<IRegisteredTransfer[], VectorError>;
 

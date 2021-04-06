@@ -14,6 +14,7 @@ import {
   IHypernetPullPaymentDetails,
   IFullTransferState,
   IBasicTransferResponse,
+  PaymentId,
 } from "@hypernetlabs/objects";
 import {
   CoreUninitializedError,
@@ -61,7 +62,7 @@ export class PaymentRepository implements IPaymentRepository {
     protected timeUtils: ITimeUtils,
   ) {}
 
-  public createPullRecord(paymentId: string, amount: string): ResultAsync<Payment, PaymentCreationError> {
+  public createPullRecord(paymentId: PaymentId, amount: string): ResultAsync<Payment, PaymentCreationError> {
     let transfers: IFullTransferState[];
     let browserNode: IBrowserNode;
 
@@ -108,7 +109,7 @@ export class PaymentRepository implements IPaymentRepository {
   ): ResultAsync<PullPayment, PaymentCreationError> {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
-    let paymentId: string;
+    let paymentId: PaymentId;
     let timestamp: number;
 
     return ResultUtils.combine([
@@ -174,7 +175,7 @@ export class PaymentRepository implements IPaymentRepository {
   ): ResultAsync<PushPayment, PaymentCreationError> {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
-    let paymentId: string;
+    let paymentId: PaymentId;
     let timestamp: number;
 
     return ResultUtils.combine([
@@ -220,13 +221,13 @@ export class PaymentRepository implements IPaymentRepository {
    * @param paymentId the payment to get transfers for
    */
   protected _getTransfersByPaymentId(
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<
     IFullTransferState[],
     RouterChannelUnknownError | VectorError | CoreUninitializedError | BlockchainUnavailableError | LogicalError
   > {
     let browserNode: IBrowserNode;
-    let channelAddress: string;
+    let channelAddress: EthereumAddress;
 
     return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.vectorUtils.getRouterChannelAddress()])
       .andThen((vals) => {
@@ -291,9 +292,9 @@ export class PaymentRepository implements IPaymentRepository {
    * @param paymentIds the list of payments to get
    */
   public getPaymentsByIds(
-    paymentIds: string[],
+    paymentIds: PaymentId[],
   ): ResultAsync<
-    Map<string, Payment>,
+    Map<PaymentId, Payment>,
     | RouterChannelUnknownError
     | VectorError
     | CoreUninitializedError
@@ -303,7 +304,7 @@ export class PaymentRepository implements IPaymentRepository {
     | InvalidParametersError
   > {
     let browserNode: IBrowserNode;
-    let channelAddress: string;
+    let channelAddress: EthereumAddress;
 
     return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.vectorUtils.getRouterChannelAddress()])
       .andThen((vals) => {
@@ -365,7 +366,7 @@ export class PaymentRepository implements IPaymentRepository {
         return payments.reduce((map, obj) => {
           map.set(obj.id, obj);
           return map;
-        }, new Map<string, Payment>());
+        }, new Map<PaymentId, Payment>());
       });
   }
 
@@ -377,7 +378,7 @@ export class PaymentRepository implements IPaymentRepository {
    * @param amount the amount of the payment to finalize for
    */
   public finalizePayment(
-    paymentId: string,
+    paymentId: PaymentId,
     amount: string,
   ): ResultAsync<
     Payment,
@@ -440,7 +441,7 @@ export class PaymentRepository implements IPaymentRepository {
    * @param paymentId the payment for which to provide stake for
    */
   public provideStake(
-    paymentId: string,
+    paymentId: PaymentId,
     merchantPublicKey: PublicKey,
   ): ResultAsync<
     Payment,
@@ -510,7 +511,7 @@ export class PaymentRepository implements IPaymentRepository {
    * @param paymentId the payment for which to provide an asset for
    */
   public provideAsset(
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<
     Payment,
     | BlockchainUnavailableError

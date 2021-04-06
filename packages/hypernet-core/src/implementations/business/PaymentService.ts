@@ -15,6 +15,7 @@ import {
   HypernetConfig,
   HypernetContext,
   HexString,
+  PaymentId,
 } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
@@ -123,7 +124,7 @@ export class PaymentService implements IPaymentService {
   }
 
   public pullFunds(
-    paymentId: string,
+    paymentId: PaymentId,
     amount: BigNumber,
   ): ResultAsync<Payment, PaymentsByIdsErrors | PaymentCreationError> {
     // Pull the up the payment
@@ -204,7 +205,7 @@ export class PaymentService implements IPaymentService {
    * Then, publish an RXJS event to the user.
    * @param paymentId the paymentId for the offer
    */
-  public offerReceived(paymentId: string): ResultAsync<void, PaymentsByIdsErrors> {
+  public offerReceived(paymentId: PaymentId): ResultAsync<void, PaymentsByIdsErrors> {
     const prerequisites = ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -247,7 +248,7 @@ export class PaymentService implements IPaymentService {
    * @param paymentIds a list of paymentIds for which to accept funds for
    */
   public acceptOffers(
-    paymentIds: string[],
+    paymentIds: PaymentId[],
   ): ResultAsync<
     Result<Payment, AcceptPaymentError>[],
     | InsufficientBalanceError
@@ -257,7 +258,7 @@ export class PaymentService implements IPaymentService {
     | PaymentsByIdsErrors
   > {
     let config: HypernetConfig;
-    let payments: Map<string, Payment>;
+    let payments: Map<PaymentId, Payment>;
     const merchantUrls = new Set<string>();
 
     return ResultUtils.combine([this.configProvider.getConfig(), this.paymentRepository.getPaymentsByIds(paymentIds)])
@@ -332,7 +333,7 @@ export class PaymentService implements IPaymentService {
    * @param paymentId the paymentId for the stake
    */
   public stakePosted(
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<
     Payment,
     PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
@@ -369,7 +370,7 @@ export class PaymentService implements IPaymentService {
    * @param paymentId the payment ID to accept/resolve
    */
   public paymentPosted(
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<
     Payment,
     PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
@@ -405,7 +406,7 @@ export class PaymentService implements IPaymentService {
    * @param paymentId the payment id that has been resolved.
    */
   public paymentCompleted(
-    paymentId: HexString,
+    paymentId: PaymentId,
   ): ResultAsync<
     Payment,
     PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
@@ -441,7 +442,7 @@ export class PaymentService implements IPaymentService {
    * @param paymentId
    */
   public insuranceResolved(
-    paymentId: HexString,
+    paymentId: PaymentId,
   ): ResultAsync<
     Payment,
     PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
@@ -475,7 +476,7 @@ export class PaymentService implements IPaymentService {
    * Notifies the service that a pull-payment has been recorded.
    * @param paymentId the paymentId for the pull-payment
    */
-  public pullRecorded(paymentId: string): ResultAsync<void, PaymentsByIdsErrors> {
+  public pullRecorded(paymentId: PaymentId): ResultAsync<void, PaymentsByIdsErrors> {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getContext(),
@@ -497,7 +498,7 @@ export class PaymentService implements IPaymentService {
   }
 
   public initiateDispute(
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<
     Payment,
     MerchantConnectorError | MerchantValidationError | PaymentsByIdsErrors | TransferResolutionError
@@ -541,7 +542,7 @@ export class PaymentService implements IPaymentService {
   }
 
   public advancePayments(
-    paymentIds: HexString[],
+    paymentIds: PaymentId[],
   ): ResultAsync<
     Payment[],
     PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
