@@ -37,7 +37,9 @@ export default class CoreWrapper extends ChildProxy {
         }, data.callId);
       },
 
-      withdrawFunds: (data: IIFrameCallData<{ assetAddress: EthereumAddress; amount: string; destinationAddress: EthereumAddress }>) => {
+      withdrawFunds: (
+        data: IIFrameCallData<{ assetAddress: EthereumAddress; amount: string; destinationAddress: EthereumAddress }>,
+      ) => {
         this.returnForModel(() => {
           return this.core.withdrawFunds(
             data.data.assetAddress,
@@ -204,6 +206,10 @@ export default class CoreWrapper extends ChildProxy {
 
     this.core.onMerchantIFrameCloseRequested.subscribe((merchantUrl) => {
       parent.emit("onMerchantIFrameCloseRequested", merchantUrl);
+    });
+
+    this.core.onInitializationRequired.subscribe((merchantUrl) => {
+      parent.emit("onInitializationRequired", merchantUrl);
     });
   }
 }
