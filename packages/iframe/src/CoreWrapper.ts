@@ -1,4 +1,4 @@
-import { EthereumAddress, PublicIdentifier, IHypernetCore } from "@hypernetlabs/objects";
+import { EthereumAddress, PublicIdentifier, IHypernetCore, PaymentId } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import Postmate from "postmate";
@@ -11,7 +11,7 @@ export default class CoreWrapper extends ChildProxy {
   protected getModel(): Postmate.Model {
     // Fire up the Postmate model, and wrap up the core as the model
     return new Postmate.Model({
-      initialize: (data: IIFrameCallData<string>) => {
+      initialize: (data: IIFrameCallData<EthereumAddress>) => {
         this.returnForModel(() => {
           return this.core.initialize(data.data);
         }, data.callId);
@@ -31,13 +31,13 @@ export default class CoreWrapper extends ChildProxy {
           return this.core.getPublicIdentifier();
         }, data.callId);
       },
-      depositFunds: (data: IIFrameCallData<{ assetAddress: string; amount: string }>) => {
+      depositFunds: (data: IIFrameCallData<{ assetAddress: EthereumAddress; amount: string }>) => {
         this.returnForModel(() => {
           return this.core.depositFunds(data.data.assetAddress, BigNumber.from(data.data.amount));
         }, data.callId);
       },
 
-      withdrawFunds: (data: IIFrameCallData<{ assetAddress: string; amount: string; destinationAddress: string }>) => {
+      withdrawFunds: (data: IIFrameCallData<{ assetAddress: EthereumAddress; amount: string; destinationAddress: EthereumAddress }>) => {
         this.returnForModel(() => {
           return this.core.withdrawFunds(
             data.data.assetAddress,
@@ -101,7 +101,7 @@ export default class CoreWrapper extends ChildProxy {
       //     }, data.callId);
       //   },
 
-      acceptFunds: (data: IIFrameCallData<string[]>) => {
+      acceptFunds: (data: IIFrameCallData<PaymentId[]>) => {
         this.returnForModel(() => {
           return this.core.acceptOffers(data.data);
         }, data.callId);
@@ -111,7 +111,7 @@ export default class CoreWrapper extends ChildProxy {
           return this.core.authorizeMerchant(data.data);
         }, data.callId);
       },
-      initiateDispute: (data: IIFrameCallData<string>) => {
+      initiateDispute: (data: IIFrameCallData<PaymentId>) => {
         this.returnForModel(() => {
           return this.core.initiateDispute(data.data);
         }, data.callId);

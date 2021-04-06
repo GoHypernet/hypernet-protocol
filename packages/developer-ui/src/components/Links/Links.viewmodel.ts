@@ -17,7 +17,7 @@ export class LinksViewModel {
 
   constructor(params: LinksParams) {
     this.integration = params.integration;
-    this.publicIdentifier = ko.observable("");
+    this.publicIdentifier = ko.observable(PublicIdentifier(""));
     this.links = ko.observableArray<LinkParams>();
 
     this.integration.core.onPullPaymentSent.subscribe({

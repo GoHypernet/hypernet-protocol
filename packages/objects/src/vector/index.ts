@@ -22,15 +22,15 @@ export interface IConditionalTransferCreatedPayload {
 }
 
 export interface IWithdrawResponse {
-  channelAddress: EthereumAddress;
+  channelAddress: string; // EthereumAddress
   transferId: string;
   transactionHash?: string;
 }
 
 export interface IWithdrawQuote {
-  channelAddress: EthereumAddress;
+  channelAddress: string; // EthereumAddress
   amount: string;
-  assetId: EthereumAddress;
+  assetId: string; // EthereumAddress
   fee: string;
   expiry: string;
   signature?: string;
@@ -42,59 +42,59 @@ export interface IBalance {
 }
 
 export interface IChannelUpdate {
-  channelAddress: EthereumAddress;
-  fromIdentifier: PublicIdentifier;
-  toIdentifier: PublicIdentifier;
+  channelAddress: string; // EthereumAddress
+  fromIdentifier: string; // PublicIdentifier
+  toIdentifier: string; // PublicIdentifier
   type: string;
   nonce: number;
   balance: IBalance;
-  assetId: EthereumAddress;
+  assetId: string; // EthereumAddress
   details: any;
   aliceSignature?: string | null;
   bobSignature?: string | null;
 }
 
 export interface INetworkContext {
-  channelFactoryAddress: EthereumAddress;
-  transferRegistryAddress: EthereumAddress;
+  channelFactoryAddress: string; // EthereumAddress
+  transferRegistryAddress: string; // EthereumAddress
   chainId: number;
 }
 
 export interface IFullTransferState<TTransferState = any> {
   balance: IBalance;
-  assetId: EthereumAddress;
-  channelAddress: EthereumAddress;
+  assetId: string; // EthereumAddress
+  channelAddress: string; // EthereumAddress
   inDispute: boolean;
   transferId: string;
-  transferDefinition: EthereumAddress;
+  transferDefinition: string; // EthereumAddress
   transferTimeout: string;
   initialStateHash: string;
-  initiator: EthereumAddress; // either alice or bob
-  responder: EthereumAddress; // either alice or bob
-  channelFactoryAddress: EthereumAddress; // networkContext?
+  initiator: string; // EthereumAddress, either alice or bob
+  responder: string; // EthereumAddress, either alice or bob
+  channelFactoryAddress: string; // networkContext?
   chainId: number;
   transferEncodings: string[]; // Initial state encoding, resolver encoding
   transferState: TTransferState;
   transferResolver?: any; // undefined iff not resolved
   meta?: any;
   channelNonce: number;
-  initiatorIdentifier: PublicIdentifier;
-  responderIdentifier: PublicIdentifier;
+  initiatorIdentifier: string; // PublicIdentifier
+  responderIdentifier: string; // PublicIdentifier
 }
 
 export interface IFullChannelState {
-  assetIds: EthereumAddress[];
+  assetIds: string[]; // EthereumAddress[]
   balances: IBalance[];
-  channelAddress: EthereumAddress;
-  alice: EthereumAddress;
-  bob: EthereumAddress;
+  channelAddress: string; // EthereumAddress
+  alice: string; // EthereumAddress;
+  bob: string; // EthereumAddress;
   merkleRoot: string;
   nonce: number;
   processedDepositsA: string[];
   processedDepositsB: string[];
   timeout: string;
-  aliceIdentifier: PublicIdentifier;
-  bobIdentifier: PublicIdentifier;
+  aliceIdentifier: string; // PublicIdentifier;
+  bobIdentifier: string; // PublicIdentifier;
   latestUpdate: IChannelUpdate;
   networkContext: INetworkContext;
   defundNonces: string[];
@@ -105,16 +105,16 @@ export interface IRegisteredTransfer {
   name: string;
   stateEncoding: string;
   resolverEncoding: string;
-  definition: EthereumAddress;
+  definition: string; // EthereumAddress;
   encodedCancel: string;
 }
 
 export interface IBasicTransferResponse {
-  channelAddress: EthereumAddress;
+  channelAddress: string; // EthereumAddress;
   transferId: string;
   routingId?: string;
 }
 
 export interface IBasicChannelResponse {
-  channelAddress: EthereumAddress;
+  channelAddress: string; // EthereumAddress;
 }

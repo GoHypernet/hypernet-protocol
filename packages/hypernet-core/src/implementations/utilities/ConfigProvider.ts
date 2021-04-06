@@ -1,4 +1,4 @@
-import { HypernetConfig } from "@hypernetlabs/objects";
+import { EthereumAddress, HypernetConfig, PublicIdentifier } from "@hypernetlabs/objects";
 import { getPublicIdentifierFromPublicKey } from "@connext/vector-utils/dist/identifiers";
 import { getPublicKeyFromPrivateKey } from "@connext/vector-utils/dist/crypto";
 import { Wallet, constants } from "ethers";
@@ -33,10 +33,10 @@ export class ConfigProvider implements IConfigProvider {
       this.config = new HypernetConfig(
         "http://localhost:5000", // iframeSource
         "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat", // Router mnemonic
-        "", // routerPublicIdentifier
+        PublicIdentifier(""), // routerPublicIdentifier
         1337, // Chain ID
         "localhost:8008", // Router address
-        constants.AddressZero, // Hypertoken address,
+        EthereumAddress(constants.AddressZero), // Hypertoken address,
         "Hypernet", // Hypernet Protocol Domain for Transfers
         5 * 24 * 60 * 60, // 5 days as the default payment expiration time
         chainProvider,
@@ -48,9 +48,9 @@ export class ConfigProvider implements IConfigProvider {
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
-      this.config.routerPublicIdentifier = getPublicIdentifierFromPublicKey(
+      this.config.routerPublicIdentifier = PublicIdentifier(getPublicIdentifierFromPublicKey(
         getPublicKeyFromPrivateKey(wallet.privateKey),
-      );
+      ));
 
       this.logUtils.log("Wallet private key", wallet.privateKey);
       this.logUtils.log("Router publicIdentifier", this.config.routerPublicIdentifier);
@@ -73,10 +73,10 @@ export class ConfigProvider implements IConfigProvider {
       this.config = new HypernetConfig(
         "http://localhost:5000", // iframeSource
         "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat", // Router mnemonic
-        "", // routerPublicIdentifier
+        PublicIdentifier(""), // routerPublicIdentifier
         1, // Chain ID
         "localhost:8008", // Router address
-        constants.AddressZero, // Hypertoken address,
+        EthereumAddress(constants.AddressZero), // Hypertoken address,
         "Hypernet", // Hypernet Protocol Domain for Transfers
         5 * 24 * 60 * 60, // 5 days as the default payment expiration time
         chainProvider,
@@ -88,9 +88,9 @@ export class ConfigProvider implements IConfigProvider {
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
-      this.config.routerPublicIdentifier = getPublicIdentifierFromPublicKey(
+      this.config.routerPublicIdentifier = PublicIdentifier(getPublicIdentifierFromPublicKey(
         getPublicKeyFromPrivateKey(wallet.privateKey),
-      );
+      ));
     }
   }
 
