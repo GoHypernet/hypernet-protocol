@@ -9,6 +9,7 @@ import {
   TransferResolutionError,
   EthereumAddress,
   PaymentId,
+  Signature,
 } from "@hypernetlabs/objects";
 import { PullPayment, PushPayment } from "@hypernetlabs/objects";
 
@@ -41,7 +42,7 @@ export interface IMerchantConnectorRepository {
    */
   removeAuthorizedMerchant(merchantUrl: string): Result<void, never>;
 
-  getAuthorizedMerchants(): ResultAsync<Map<string, string>, never>;
+  getAuthorizedMerchants(): ResultAsync<Map<string, Signature>, never>;
 
   activateAuthorizedMerchants(): ResultAsync<
     void,

@@ -1,8 +1,8 @@
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
-import { IAuthorizeFundsRequest, IResolutionResult, ISendFundsRequest } from "@hypernetlabs/merchant-connector";
-import { EthereumAddress, LogicalError, MerchantConnectorError, MerchantValidationError, PaymentId, ProxyError } from "@hypernetlabs/objects";
-import { HexString, HypernetContext, PullPayment, PushPayment } from "@hypernetlabs/objects";
+import { IResolutionResult } from "@hypernetlabs/merchant-connector";
+import { EthereumAddress, LogicalError, MerchantConnectorError, MerchantValidationError, PaymentId, ProxyError, Signature } from "@hypernetlabs/objects";
+import { HypernetContext, PullPayment, PushPayment } from "@hypernetlabs/objects";
 import { IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
 
 export class MerchantConnectorProxy extends ParentProxy implements IMerchantConnectorProxy {
@@ -31,7 +31,7 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     return this._createCall("getAddress", null);
   }
 
-  public getValidatedSignature(): ResultAsync<string, MerchantValidationError | ProxyError> {
+  public getValidatedSignature(): ResultAsync<Signature, MerchantValidationError | ProxyError> {
     return this._createCall("getValidatedSignature", null);
   }
 
