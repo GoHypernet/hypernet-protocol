@@ -1,5 +1,5 @@
 import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
-import { EthereumAddress } from "@hypernetlabs/objects";
+import { EthereumAddress, Signature } from "@hypernetlabs/objects";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { BlockchainUnavailableError } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
@@ -10,8 +10,8 @@ export interface IBlockchainUtils {
     domain: TypedDataDomain,
     types: Record<string, Array<TypedDataField>>,
     value: Record<string, any>,
-    signature: string,
-  ): string;
+    signature: Signature,
+  ): EthereumAddress;
 
   erc20Transfer(
     assetAddress: EthereumAddress,

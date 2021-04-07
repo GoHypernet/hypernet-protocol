@@ -22,6 +22,7 @@ export * from "./PublicKey";
 export * from "./PullAmount";
 export * from "./PullPayment";
 export * from "./PushPayment";
+export * from "./Signature";
 export * from "./SortedTransfers";
 export * from "./ThreadMetadata";
 export * from "./Token";
