@@ -9,9 +9,7 @@ export class InternalProvider extends ethers.providers.JsonRpcProvider implement
 
   constructor(protected privateCredentials: IPrivateCredentials) {
     super();
-    this._provider = new ethers.providers.JsonRpcProvider(
-      this.privateCredentials.networkUrl || "http://localhost:8545",
-    );
+    this._provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
     this._wallet = ethers.Wallet.fromMnemonic(
       this.privateCredentials.mnemonic || "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat",
     );

@@ -5,6 +5,8 @@ import {
   EthereumAddress,
   HypernetContext,
   InitializedHypernetContext,
+  InvalidParametersError,
+  IPrivateCredentials,
   PublicIdentifier,
 } from "@hypernetlabs/objects";
 import {
@@ -15,7 +17,7 @@ import {
   RouterChannelUnknownError,
 } from "@hypernetlabs/objects";
 import { IContextProvider, ILogUtils } from "@interfaces/utilities";
-import { okAsync, ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { BigNumber } from "ethers";
 
 /**
@@ -92,5 +94,16 @@ export class AccountService implements IAccountService {
 
         return okAsync(balances);
       });
+  }
+
+  public providePrivateCredentials(privateCredentials: IPrivateCredentials): ResultAsync<void, InvalidParametersError> {
+    if (!privateCredentials.mnemonic && !privateCredentials.privateKey) {
+      return errAsync(new InvalidParametersError("You must provide a mnemonic or private key"));
+    }
+
+    return this.contextProvider.getContext().andThen((context) => {
+      context.onPrivateCredentialsSent.next(privateCredentials);
+      return okAsync(undefined);
+    });
   }
 }

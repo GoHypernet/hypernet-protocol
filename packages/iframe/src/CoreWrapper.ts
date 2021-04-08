@@ -1,4 +1,10 @@
-import { EthereumAddress, PublicIdentifier, IHypernetCore, PaymentId } from "@hypernetlabs/objects";
+import {
+  EthereumAddress,
+  PublicIdentifier,
+  IHypernetCore,
+  PaymentId,
+  IPrivateCredentials,
+} from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import Postmate from "postmate";
@@ -141,6 +147,11 @@ export default class CoreWrapper extends ChildProxy {
           return this.core.getAuthorizedMerchants();
         }, data.callId);
       },
+      providePrivateCredentials: (data: IIFrameCallData<IPrivateCredentials>) => {
+        this.returnForModel(() => {
+          return this.core.providePrivateCredentials(data.data);
+        }, data.callId);
+      },
     });
   }
 
@@ -208,8 +219,12 @@ export default class CoreWrapper extends ChildProxy {
       parent.emit("onMerchantIFrameCloseRequested", merchantUrl);
     });
 
-    this.core.onInitializationRequired.subscribe((merchantUrl) => {
-      parent.emit("onInitializationRequired", merchantUrl);
+    this.core.onInitializationRequired.subscribe(() => {
+      parent.emit("onInitializationRequired");
+    });
+
+    this.core.onPrivateCredentialsRequested.subscribe(() => {
+      parent.emit("onPrivateCredentialsRequested");
     });
   }
 }

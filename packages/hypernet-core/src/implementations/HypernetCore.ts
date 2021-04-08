@@ -118,7 +118,8 @@ export class HypernetCore implements IHypernetCore {
   public onMerchantIFrameDisplayRequested: Subject<string>;
   public onMerchantIFrameCloseRequested: Subject<string>;
   public onInitializationRequired: Subject<void>;
-  public onPrivateCredentialsRequested: Subject<(privateCredentials: IPrivateCredentials) => void>;
+  public onPrivateCredentialsRequested: Subject<void>;
+  public onPrivateCredentialsSent: Subject<IPrivateCredentials>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -186,7 +187,8 @@ export class HypernetCore implements IHypernetCore {
     this.onMerchantIFrameDisplayRequested = new Subject<string>();
     this.onMerchantIFrameCloseRequested = new Subject<string>();
     this.onInitializationRequired = new Subject<void>();
-    this.onPrivateCredentialsRequested = new Subject<(privateCredentials: IPrivateCredentials) => void>();
+    this.onPrivateCredentialsRequested = new Subject<void>();
+    this.onPrivateCredentialsSent = new Subject<IPrivateCredentials>();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -219,6 +221,7 @@ export class HypernetCore implements IHypernetCore {
       this.onMerchantIFrameCloseRequested,
       this.onInitializationRequired,
       this.onPrivateCredentialsRequested,
+      this.onPrivateCredentialsSent,
     );
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(network, this.logUtils, config);
@@ -622,5 +625,9 @@ export class HypernetCore implements IHypernetCore {
 
   public displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
     return this.merchantService.displayMerchantIFrame(merchantUrl);
+  }
+
+  public providePrivateCredentials(privateCredentials: IPrivateCredentials): ResultAsync<void, InvalidParametersError> {
+    return this.accountService.providePrivateCredentials(privateCredentials);
   }
 }

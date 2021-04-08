@@ -1,11 +1,12 @@
 import { BigNumber } from "ethers";
-import { Balances, EthereumAddress, PublicIdentifier } from "@hypernetlabs/objects";
+import { Balances, EthereumAddress, IPrivateCredentials, PublicIdentifier } from "@hypernetlabs/objects";
 import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
   LogicalError,
   VectorError,
   RouterChannelUnknownError,
+  InvalidParametersError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -31,4 +32,5 @@ export interface IAccountService {
     BalancesUnavailableError | RouterChannelUnknownError | BlockchainUnavailableError | VectorError
   >;
   getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError | RouterChannelUnknownError>;
+  providePrivateCredentials(privateCredentials: IPrivateCredentials): ResultAsync<void, InvalidParametersError>;
 }

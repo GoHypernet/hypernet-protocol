@@ -15,8 +15,12 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
   protected provider: ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider | null;
   protected signer: ethers.providers.JsonRpcSigner | null;
   protected initializationPromise: ResultAsync<void, BlockchainUnavailableError> | null;
-  protected privateCredentialsPromiseResolve: (privateCredentials: IPrivateCredentials) => void;
   protected address: string | undefined;
+  protected privateCredentialsPromiseResolve: (privateCredentials: IPrivateCredentials) => void;
+  private static providerResult: ResultAsync<
+    ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
+    BlockchainUnavailableError
+  >;
   constructor(
     protected contextProvider: IContextProvider,
     protected internalProviderFactory: IInternalProviderFactory,
@@ -28,48 +32,10 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
     this.address = undefined;
   }
   protected initialize(): ResultAsync<void, BlockchainUnavailableError> {
-    let providerResult: ResultAsync<
-      ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
-      BlockchainUnavailableError
-    >;
-    if (window.ethereum != null) {
-      window.ethereum.autoRefreshOnNetworkChange = false;
-      providerResult = ResultAsync.fromPromise(window.ethereum.enable(), (e: any) => {
-        return new BlockchainUnavailableError("Unable to initialize ethereum provider from the window");
-      }).map(() => {
-        // A Web3Provider wraps a standard Web3 provider, which is
-        // what Metamask injects as window.ethereum into each page
-        return new ethers.providers.Web3Provider(window.ethereum);
-      });
-    } else {
-      // Fire an onPrivateCredentialsRequested
-      const privateKeyPromise: Promise<IPrivateCredentials> = new Promise((resolve) => {
-        this.privateCredentialsPromiseResolve = resolve;
-      });
-      providerResult = this.contextProvider
-        .getContext()
-        .andThen((context) => {
-          // Emit an event that sends a callback to the user. The user can execute the callback to provide their private key or mnemonic._getAccountPromise
-          context.onPrivateCredentialsRequested.next((privateCredentials) => {
-            // Once we have their info, we can continue
-            this.privateCredentialsPromiseResolve(privateCredentials);
-          });
-          return ResultAsync.fromSafePromise(privateKeyPromise);
-        })
-        .andThen((privateCredentials) => {
-          // Inject a InternalProviderFactory to do this
-          return this.internalProviderFactory.factoryInternalProvider(privateCredentials);
-        })
-        .andThen((internalProvider) => {
-          this.address = internalProvider.address;
-          return internalProvider.provider;
-        })
-        .mapErr((e) => {
-          return e as BlockchainUnavailableError;
-        });
+    if (!EthersBlockchainProvider.providerResult) {
+      this._initializeProviderResult();
     }
-
-    this.initializationPromise = providerResult
+    this.initializationPromise = EthersBlockchainProvider.providerResult
       .map((provider) => {
         this.provider = provider;
         // The Metamask plugin also allows signing transactions to
@@ -110,5 +76,47 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
     return this.getProvider().map(async (provider) => {
       return await provider.getBlock("latest");
     });
+  }
+
+  private _initializeProviderResult() {
+    if (window.ethereum != null) {
+      window.ethereum.autoRefreshOnNetworkChange = false;
+      EthersBlockchainProvider.providerResult = ResultAsync.fromPromise(window.ethereum.enable(), (e: any) => {
+        return new BlockchainUnavailableError("Unable to initialize ethereum provider from the window");
+      }).map(() => {
+        // A Web3Provider wraps a standard Web3 provider, which is
+        // what Metamask injects as window.ethereum into each page
+        return new ethers.providers.Web3Provider(window.ethereum);
+      });
+    } else {
+      // Fire an onPrivateCredentialsRequested
+      const privateKeyPromise: Promise<IPrivateCredentials> = new Promise((resolve) => {
+        this.privateCredentialsPromiseResolve = resolve;
+      });
+      EthersBlockchainProvider.providerResult = this.contextProvider
+        .getContext()
+        .andThen((context) => {
+          // Emit an event that sends a callback to the user. The user can execute the callback to provide their private key or mnemonic._getAccountPromise
+          context.onPrivateCredentialsRequested.next();
+
+          context.onPrivateCredentialsSent.subscribe((privateCredentials: IPrivateCredentials) => {
+            // Once we have their info, we can continue
+            this.privateCredentialsPromiseResolve(privateCredentials);
+          });
+
+          return ResultAsync.fromSafePromise(privateKeyPromise);
+        })
+        .andThen((privateCredentials) => {
+          // Inject a InternalProviderFactory to do this
+          return this.internalProviderFactory.factoryInternalProvider(privateCredentials);
+        })
+        .andThen((internalProvider) => {
+          this.address = internalProvider.address;
+          return internalProvider.provider;
+        })
+        .mapErr((e) => {
+          return e as BlockchainUnavailableError;
+        });
+    }
   }
 }
