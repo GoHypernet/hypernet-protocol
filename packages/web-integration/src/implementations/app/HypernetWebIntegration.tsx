@@ -46,16 +46,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     });
 
     this.core.onPrivateCredentialsRequested.subscribe(() => {
-      console.log("Core requested private credintials...234");
       this._renderPrivateKeysModal();
     });
-
-    /* setTimeout(() => {
-      console.log("starttt send keyss222");
-      this.core.providePrivateCredentials({
-        mnemonic: "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat",
-      });
-    }, 15000); */
   }
 
   // wait for the core to be intialized

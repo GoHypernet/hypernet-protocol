@@ -12,7 +12,12 @@ import {
 } from "@mock/mocks";
 import { BlockchainProviderMock, ConfigProviderMock, ContextProviderMock } from "@mock/utils";
 import { IVectorUtils, IMerchantConnectorProxy, IBlockchainUtils } from "@interfaces/utilities";
-import { MerchantConnectorError, MerchantValidationError, TransferResolutionError } from "@hypernetlabs/objects";
+import {
+  MerchantConnectorError,
+  MerchantValidationError,
+  TransferResolutionError,
+  Signature,
+} from "@hypernetlabs/objects";
 import { IMerchantConnectorRepository } from "@interfaces/data/IMerchantConnectorRepository";
 import { okAsync, errAsync } from "neverthrow";
 import { MerchantConnectorRepository } from "@implementations/data/MerchantConnectorRepository";
@@ -75,7 +80,7 @@ class MerchantConnectorRepositoryMocks {
       okAsync(this.merchantConnectorProxy),
     );
 
-    td.when(this.merchantConnectorProxy.getValidatedSignature()).thenReturn(okAsync(validatedSignature));
+    td.when(this.merchantConnectorProxy.getValidatedSignature()).thenReturn(okAsync(Signature(validatedSignature)));
     td.when(this.merchantConnectorProxy.activateConnector()).thenReturn(okAsync(undefined));
     td.when(this.merchantConnectorProxy.resolveChallenge(commonPaymentId)).thenReturn(
       okAsync({ mediatorSignature, amount: resolutionAmount } as IResolutionResult),
@@ -87,9 +92,9 @@ class MerchantConnectorRepositoryMocks {
         td.matchers.contains(this.expectedSignerDomain),
         td.matchers.contains(this.expectedSignerTypes),
         td.matchers.contains(this.expectedSignerValue),
-        authorizationSignature,
+        Signature(authorizationSignature),
       ),
-    ).thenReturn(account);
+    ).thenReturn(account as never);
 
     td.when(
       this.blockchainProvider.signer._signTypedData(
@@ -171,9 +176,9 @@ describe("MerchantConnectorRepository tests", () => {
         td.matchers.contains(mocks.expectedSignerDomain),
         td.matchers.contains(mocks.expectedSignerTypes),
         td.matchers.contains(mocks.expectedSignerValue),
-        authorizationSignature,
+        Signature(authorizationSignature),
       ),
-    ).thenReturn(account2);
+    ).thenReturn(account2 as never);
 
     let onAuthorizedMerchantUpdatedVal: string | null = null;
     mocks.contextProvider.onAuthorizedMerchantUpdated.subscribe((val) => {
