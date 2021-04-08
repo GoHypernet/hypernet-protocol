@@ -10,6 +10,7 @@ import {
   IWithdrawQuote,
   IWithdrawResponse,
   PublicIdentifier,
+  TransferId,
 } from "@hypernetlabs/objects";
 import { VectorError } from "@hypernetlabs/objects";
 import { MessageResolver, InsuranceResolver, ParameterizedResolver } from "@hypernetlabs/objects/types/typechain";
@@ -34,7 +35,10 @@ export interface IBrowserNode {
    * @param channelAddress
    * @returns channelAddress
    */
-  reconcileDeposit(assetId: EthereumAddress, channelAddress: EthereumAddress): ResultAsync<EthereumAddress, VectorError>;
+  reconcileDeposit(
+    assetId: EthereumAddress,
+    channelAddress: EthereumAddress,
+  ): ResultAsync<EthereumAddress, VectorError>;
 
   withdraw(
     channelAddress: EthereumAddress,
@@ -47,7 +51,7 @@ export interface IBrowserNode {
     meta?: any,
   ): ResultAsync<IWithdrawResponse, VectorError>;
 
-  getTransfer(transferId: string): ResultAsync<IFullTransferState, VectorError>;
+  getTransfer(transferId: TransferId): ResultAsync<IFullTransferState, VectorError>;
 
   getActiveTransfers(channelAddress: EthereumAddress): ResultAsync<IFullTransferState[], VectorError>;
 
@@ -61,7 +65,7 @@ export interface IBrowserNode {
 
   resolveTransfer(
     channelAddress: EthereumAddress,
-    transferId: string,
+    transferId: TransferId,
     transferResolver: MessageResolver | ParameterizedResolver | InsuranceResolver,
   ): ResultAsync<IBasicTransferResponse, VectorError>;
 

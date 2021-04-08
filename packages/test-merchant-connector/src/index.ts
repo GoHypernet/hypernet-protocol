@@ -9,7 +9,7 @@ import { Subject } from "rxjs";
 import { Bytes32 } from "@connext/vector-types";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { ChannelSigner } from "@connext/vector-utils";
-import { PushPayment, PullPayment } from "@hypernetlabs/objects";
+import { PushPayment, PullPayment, PaymentId } from "@hypernetlabs/objects";
 
 declare global {
   interface Window {

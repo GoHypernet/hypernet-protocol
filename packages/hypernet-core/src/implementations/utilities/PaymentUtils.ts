@@ -16,6 +16,7 @@ import {
   BlockchainUnavailableError,
   PaymentId,
   UUID,
+  TransferId,
 } from "@hypernetlabs/objects";
 import {
   InvalidParametersError,
@@ -133,11 +134,11 @@ export class PaymentUtils implements IPaymentUtils {
         : sortedTransfers.offerDetails.paymentToken;
 
     const details = new PaymentInternalDetails(
-      sortedTransfers.offerTransfer.transferId,
-      sortedTransfers.insuranceTransfer?.transferId,
-      sortedTransfers.parameterizedTransfer?.transferId,
+      TransferId(sortedTransfers.offerTransfer.transferId),
+      TransferId(sortedTransfers.insuranceTransfer?.transferId || ""),
+      TransferId(sortedTransfers.parameterizedTransfer?.transferId || ""),
       sortedTransfers.pullRecordTransfers.map((val) => {
-        return val.transferId;
+        return TransferId(val.transferId);
       }),
     );
 
@@ -224,11 +225,11 @@ export class PaymentUtils implements IPaymentUtils {
         : sortedTransfers.offerDetails.paymentToken;
 
     const details = new PaymentInternalDetails(
-      sortedTransfers.offerTransfer.transferId,
-      sortedTransfers.insuranceTransfer?.transferId,
-      sortedTransfers.parameterizedTransfer?.transferId,
+      TransferId(sortedTransfers.offerTransfer.transferId),
+      TransferId(sortedTransfers.insuranceTransfer?.transferId || ""),
+      TransferId(sortedTransfers.parameterizedTransfer?.transferId || ""),
       sortedTransfers.pullRecordTransfers.map((val) => {
-        return val.transferId;
+        return TransferId(val.transferId);
       }),
     );
 

@@ -16,6 +16,7 @@ export * from "./MessageThread";
 export * from "./MessageTransferData";
 export * from "./Payment";
 export * from "./PaymentId";
+export * from "./TransferId";
 export * from "./PaymentInternalDetails";
 export * from "./PublicIdentifier";
 export * from "./PublicKey";

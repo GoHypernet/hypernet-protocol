@@ -7,6 +7,7 @@ import {
   BlockchainUnavailableError,
   TransferResolutionError,
   PaymentId,
+  TransferId,
   EthereumAddress,
   Signature,
   MerchantUrl,
@@ -185,7 +186,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   public resolveChallenge(
     merchantUrl: MerchantUrl,
     paymentId: PaymentId,
-    transferId: string,
+    transferId: TransferId,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | TransferResolutionError> {
     const proxy = this.activatedMerchants.get(merchantUrl);
 
@@ -201,7 +202,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         return this.vectorUtils.resolveInsuranceTransfer(
           transferId,
           paymentId,
-          mediatorSignature,
+          Signature(mediatorSignature),
           BigNumber.from(amount),
         );
       })

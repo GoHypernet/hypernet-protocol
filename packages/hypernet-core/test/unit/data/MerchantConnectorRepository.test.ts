@@ -68,7 +68,7 @@ class MerchantConnectorRepositoryMocks {
       this.vectorUtils.resolveInsuranceTransfer(
         insuranceTransferId,
         commonPaymentId,
-        mediatorSignature,
+        Signature(mediatorSignature),
         BigNumber.from(resolutionAmount),
       ),
     ).thenReturn(okAsync({} as IBasicTransferResponse));
@@ -338,7 +338,7 @@ describe("MerchantConnectorRepository tests", () => {
       mocks.vectorUtils.resolveInsuranceTransfer(
         insuranceTransferId,
         commonPaymentId,
-        mediatorSignature,
+        Signature(mediatorSignature),
         BigNumber.from(resolutionAmount),
       ),
     ).thenReturn(errAsync(new TransferResolutionError()));

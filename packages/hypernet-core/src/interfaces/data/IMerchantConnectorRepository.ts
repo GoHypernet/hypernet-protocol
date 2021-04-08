@@ -9,6 +9,7 @@ import {
   TransferResolutionError,
   EthereumAddress,
   PaymentId,
+  TransferId,
   Signature,
   MerchantUrl,
 } from "@hypernetlabs/objects";
@@ -53,7 +54,7 @@ export interface IMerchantConnectorRepository {
   resolveChallenge(
     merchantUrl: MerchantUrl,
     paymentId: PaymentId,
-    transferId: string,
+    transferId: TransferId,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | TransferResolutionError>;
 
   closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError>;
