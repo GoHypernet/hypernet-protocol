@@ -1,8 +1,8 @@
 import { ParentProxy } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
-import { EthereumAddress, MerchantConnectorError, MerchantValidationError, PaymentId, ProxyError } from "@hypernetlabs/objects";
-import { HexString, PullPayment, PushPayment } from "@hypernetlabs/objects";
+import { EthereumAddress, MerchantConnectorError, MerchantValidationError, PaymentId, ProxyError, Signature } from "@hypernetlabs/objects";
+import { PullPayment, PushPayment } from "@hypernetlabs/objects";
 
 export interface IMerchantConnectorProxy extends ParentProxy {
   /**
@@ -15,7 +15,7 @@ export interface IMerchantConnectorProxy extends ParentProxy {
 
   getAddress(): ResultAsync<EthereumAddress, MerchantConnectorError | ProxyError>;
 
-  getValidatedSignature(): ResultAsync<string, MerchantValidationError | ProxyError>;
+  getValidatedSignature(): ResultAsync<Signature, MerchantValidationError | ProxyError>;
 
   closeMerchantIFrame(): ResultAsync<void, MerchantConnectorError | ProxyError>;
 

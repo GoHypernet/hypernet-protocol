@@ -38,7 +38,7 @@ import {
 import "reflect-metadata";
 import { serialize } from "class-transformer";
 import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@hypernetlabs/objects/types/typechain";
-import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils/dist/identifiers";
+import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import {
   InvalidParametersError,
