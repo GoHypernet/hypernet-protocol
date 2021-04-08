@@ -4,6 +4,7 @@ import { MerchantService } from "@merchant-iframe/implementations/business";
 import { ContextProvider } from "@merchant-iframe/implementations/utils";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { MerchantValidationError } from "@merchant-iframe/interfaces/objects/errors";
+import { MerchantUrl, Signature } from "@hypernetlabs/objects";
 import { IMerchantConnectorRepository, IPersistenceRepository } from "@merchant-iframe/interfaces/data";
 
 jest.mock("ethers", () => {
@@ -21,10 +22,11 @@ jest.mock("ethers", () => {
 class MerchantServiceMocks {
   public merchantConnectorRepository = td.object<IMerchantConnectorRepository>();
   public persistenceRepository = td.object<IPersistenceRepository>();
-  public merchantUrl = "http://localhost:5010";
+  public merchantUrl = MerchantUrl("http://localhost:5010");
   public nowTime = 1487076708000;
-  public signature =
-    "0x236d12b38357dc30944bfe99ba9088f75b20caacb1f9166b680238f41968c02d44de2896897f116708a1317cec186a259166bf675a1fae85c85fcb5ec646ba5f1c";
+  public signature = Signature(
+    "0x236d12b38357dc30944bfe99ba9088f75b20caacb1f9166b680238f41968c02d44de2896897f116708a1317cec186a259166bf675a1fae85c85fcb5ec646ba5f1c",
+  );
   public address = "0x14791697260E4c9A71f18484C9f997B308e59325";
   public merchantCode = "some code";
   public contextProvider = new ContextProvider(this.merchantUrl);
@@ -50,9 +52,9 @@ class MerchantServiceMocks {
       okAsync(this.address + "1"),
     );
     td.when(this.merchantConnectorRepository.getMerchantCode(this.merchantUrl)).thenReturn(okAsync(this.merchantCode));
-    td.when(this.merchantConnectorRepository.getMerchantCode(this.merchantUrl + `?v=${this.nowTime}`)).thenReturn(
-      okAsync(this.merchantCode),
-    );
+    td.when(
+      this.merchantConnectorRepository.getMerchantCode(MerchantUrl(this.merchantUrl + `?v=${this.nowTime}`)),
+    ).thenReturn(okAsync(this.merchantCode));
   }
 
   public factoryMerchantService(): IMerchantService {

@@ -1,4 +1,4 @@
-import { EthereumAddress, PublicIdentifier, IHypernetCore, PaymentId } from "@hypernetlabs/objects";
+import { EthereumAddress, PublicIdentifier, IHypernetCore, PaymentId, MerchantUrl } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import Postmate from "postmate";
@@ -71,7 +71,7 @@ export default class CoreWrapper extends ChildProxy {
           expirationDate: number;
           requiredStake: string;
           paymentToken: EthereumAddress;
-          merchantUrl: string;
+          merchantUrl: MerchantUrl;
         }>,
       ) => {
         this.returnForModel(() => {
@@ -108,7 +108,7 @@ export default class CoreWrapper extends ChildProxy {
           return this.core.acceptOffers(data.data);
         }, data.callId);
       },
-      authorizeMerchant: (data: IIFrameCallData<string>) => {
+      authorizeMerchant: (data: IIFrameCallData<MerchantUrl>) => {
         this.returnForModel(() => {
           return this.core.authorizeMerchant(data.data);
         }, data.callId);
@@ -118,10 +118,10 @@ export default class CoreWrapper extends ChildProxy {
           return this.core.initiateDispute(data.data);
         }, data.callId);
       },
-      closeMerchantIFrame: (data: IIFrameCallData<string>) => {
+      closeMerchantIFrame: (data: IIFrameCallData<MerchantUrl>) => {
         this.core.closeMerchantIFrame(data.data);
       },
-      displayMerchantIFrame: (data: IIFrameCallData<string>) => {
+      displayMerchantIFrame: (data: IIFrameCallData<MerchantUrl>) => {
         this.core.displayMerchantIFrame(data.data);
       },
 

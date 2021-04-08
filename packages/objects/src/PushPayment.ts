@@ -5,6 +5,7 @@ import { EthereumAddress } from "@objects/EthereumAddress";
 import { BigNumber } from "ethers";
 import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
 import { PaymentId } from "@objects/PaymentId";
+import { MerchantUrl } from "@objects/MerchantUrl";
 
 export class PushPayment extends Payment {
   constructor(
@@ -19,7 +20,7 @@ export class PushPayment extends Payment {
     createdTimestamp: number,
     updatedTimestamp: number,
     collateralRecovered: BigNumber,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
     details: PaymentInternalDetails,
     public paymentAmount: BigNumber,
     public amountTransferred: BigNumber,

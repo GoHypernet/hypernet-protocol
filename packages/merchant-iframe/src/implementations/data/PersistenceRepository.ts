@@ -1,7 +1,7 @@
 import { ILocalStorageUtils } from "@hypernetlabs/utils";
 import { IPersistenceRepository } from "@merchant-iframe/interfaces/data";
 import { ExpectedRedirect } from "@merchant-iframe/interfaces/objects";
-
+import { MerchantUrl } from "@hypernetlabs/objects";
 export class PersistenceRepository implements IPersistenceRepository {
   protected activatedMerchantSignaturesKey = "activatedMerchantSignatures";
   protected expectedRedirectKey = "expectedRedirect";
@@ -46,6 +46,6 @@ export class PersistenceRepository implements IPersistenceRepository {
 
     const redirect = JSON.parse(redirectStr);
 
-    return new ExpectedRedirect(redirect.merchantUrl, redirect.redirectParam, redirect.paramValue);
+    return new ExpectedRedirect(redirect.merchantUrl as MerchantUrl, redirect.redirectParam, redirect.paramValue);
   }
 }

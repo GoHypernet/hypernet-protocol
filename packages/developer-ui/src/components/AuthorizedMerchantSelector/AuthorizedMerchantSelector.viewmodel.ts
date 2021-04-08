@@ -1,11 +1,12 @@
 import ko from "knockout";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import { MerchantUrl } from "@hypernetlabs/objects";
 import html from "./AuthorizedMerchantSelector.template.html";
 
 export class AuthorizedMerchantSelectorParams {
   constructor(
     public integration: IHypernetWebIntegration,
-    public selectedAuthorizedMerchant: ko.Observable<string | null>,
+    public selectedAuthorizedMerchant: ko.Observable<MerchantUrl | null>,
   ) {}
 }
 

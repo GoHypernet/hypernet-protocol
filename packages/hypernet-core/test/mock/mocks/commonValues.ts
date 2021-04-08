@@ -2,6 +2,7 @@ import { EthereumAddress } from "@objects/EthereumAddress";
 import { PaymentId } from "@objects/PaymentId";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PublicKey } from "@objects/PublicKey";
+import { MerchantUrl } from "@objects/MerchantUrl";
 import { BigNumber, constants } from "ethers";
 
 export const account = EthereumAddress("0xDEADBEEF");
@@ -25,8 +26,8 @@ export const unixPast = 1318870398; // Less that defaultExpirationlength before 
 export const unixNow = 1318874398;
 export const nowFormatted = "2021-02-03T04:28:09+03:00";
 export const defaultExpirationLength = 5000;
-export const merchantUrl = "https://example.merchant.com/";
-export const merchantUrl2 = "https://example2.merchant.com/";
+export const merchantUrl = MerchantUrl("https://example.merchant.com/");
+export const merchantUrl2 = MerchantUrl("https://example2.merchant.com/");
 export const merchantPublicKey = PublicKey("0xMediatorPublicKey");
 export const merchantPublicKey2 = PublicKey("0xMediatorPublicKey2");
 export const mediatorSignature = "0xMediatorSignature";

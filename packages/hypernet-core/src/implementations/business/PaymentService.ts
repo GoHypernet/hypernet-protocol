@@ -14,8 +14,9 @@ import {
   PushPayment,
   HypernetConfig,
   HypernetContext,
-  HexString,
   PaymentId,
+  MerchantUrl,
+  PublicKey,
 } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
@@ -94,7 +95,7 @@ export class PaymentService implements IPaymentService {
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<PullPayment, PaymentCreationError | LogicalError> {
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
     // totalAuthorized / (deltaAmount/deltaTime) > ((expiration date - now) + someMinimumNumDays)
@@ -174,7 +175,7 @@ export class PaymentService implements IPaymentService {
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<PushPayment, PaymentCreationError | LogicalError> {
     // TODO: Sanity checking on the values
     return ResultUtils.combine([
@@ -257,7 +258,7 @@ export class PaymentService implements IPaymentService {
   > {
     let config: HypernetConfig;
     let payments: Map<PaymentId, Payment>;
-    const merchantUrls = new Set<string>();
+    const merchantUrls = new Set<MerchantUrl>();
 
     return ResultUtils.combine([this.configProvider.getConfig(), this.paymentRepository.getPaymentsByIds(paymentIds)])
       .andThen((vals) => {
@@ -311,7 +312,7 @@ export class PaymentService implements IPaymentService {
           const merchantAddress = addresses.get(payment.merchantUrl);
 
           if (merchantAddress != null) {
-            const stakeAttempt = this.paymentRepository.provideStake(paymentId, merchantAddress).match(
+            const stakeAttempt = this.paymentRepository.provideStake(paymentId, PublicKey(merchantAddress)).match(
               (payment) => ok(payment) as Result<Payment, AcceptPaymentError>,
               (e) => err(new AcceptPaymentError(`Payment ${paymentId} could not be staked! Source exception: ${e}`)),
             );

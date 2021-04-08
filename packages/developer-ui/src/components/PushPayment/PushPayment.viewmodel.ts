@@ -1,6 +1,6 @@
 import ko from "knockout";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import { PaymentId, PublicIdentifier, PushPayment } from "@hypernetlabs/objects";
+import { PaymentId, PublicIdentifier, PushPayment, MerchantUrl } from "@hypernetlabs/objects";
 import { EPaymentState } from "@hypernetlabs/objects";
 import html from "./PushPayment.template.html";
 import moment from "moment";
@@ -25,7 +25,7 @@ export class PushPaymentViewModel {
   public createdTimestamp: ko.Observable<string>;
   public updatedTimestamp: ko.Observable<string>;
   public collateralRecovered: ko.Observable<string>;
-  public merchantUrl: ko.Observable<string>;
+  public merchantUrl: ko.Observable<MerchantUrl>;
   public paymentAmount: ko.Observable<string>;
 
   public acceptButton: ButtonParams;

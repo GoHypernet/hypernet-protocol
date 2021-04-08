@@ -53,6 +53,8 @@ import {
   PushPayment,
   IHypernetCore,
   PaymentId,
+  MerchantUrl,
+  Signature,
 } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
@@ -105,11 +107,11 @@ export class HypernetCore implements IHypernetCore {
   public onPullPaymentUpdated: Subject<PullPayment>;
   public onPullPaymentReceived: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
-  public onMerchantAuthorized: Subject<string>;
-  public onAuthorizedMerchantUpdated: Subject<string>;
-  public onAuthorizedMerchantActivationFailed: Subject<string>;
-  public onMerchantIFrameDisplayRequested: Subject<string>;
-  public onMerchantIFrameCloseRequested: Subject<string>;
+  public onMerchantAuthorized: Subject<MerchantUrl>;
+  public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
+  public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
+  public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
+  public onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
   public onInitializationRequired: Subject<void>;
 
   // Utils Layer Stuff
@@ -175,11 +177,11 @@ export class HypernetCore implements IHypernetCore {
     this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onPullPaymentReceived = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
-    this.onMerchantAuthorized = new Subject<string>();
-    this.onAuthorizedMerchantUpdated = new Subject<string>();
-    this.onAuthorizedMerchantActivationFailed = new Subject<string>();
-    this.onMerchantIFrameDisplayRequested = new Subject<string>();
-    this.onMerchantIFrameCloseRequested = new Subject<string>();
+    this.onMerchantAuthorized = new Subject<MerchantUrl>();
+    this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
+    this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
+    this.onMerchantIFrameDisplayRequested = new Subject<MerchantUrl>();
+    this.onMerchantIFrameCloseRequested = new Subject<MerchantUrl>();
     this.onInitializationRequired = new Subject<void>();
 
     this.onControlClaimed.subscribe({
@@ -435,7 +437,7 @@ export class HypernetCore implements IHypernetCore {
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     // Send payment terms to provider & request provider make insurance payment
     return this.paymentService.sendFunds(
@@ -475,7 +477,7 @@ export class HypernetCore implements IHypernetCore {
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this.paymentService.authorizeFunds(
       counterPartyAccount,
@@ -599,19 +601,19 @@ export class HypernetCore implements IHypernetCore {
     });
   }
 
-  public authorizeMerchant(merchantUrl: string): ResultAsync<void, MerchantValidationError> {
+  public authorizeMerchant(merchantUrl: MerchantUrl): ResultAsync<void, MerchantValidationError> {
     return this.merchantService.authorizeMerchant(merchantUrl);
   }
 
-  public getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError> {
+  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, PersistenceError> {
     return this.merchantService.getAuthorizedMerchants();
   }
 
-  public closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+  public closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError> {
     return this.merchantService.closeMerchantIFrame(merchantUrl);
   }
 
-  public displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+  public displayMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError> {
     return this.merchantService.displayMerchantIFrame(merchantUrl);
   }
 }

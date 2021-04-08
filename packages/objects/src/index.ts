@@ -28,5 +28,6 @@ export * from "./ThreadMetadata";
 export * from "./Token";
 export * from "./UUID";
 export * from "./vector";
+export * from "./MerchantUrl";
 export * from "./errors";
 export * from "./types";

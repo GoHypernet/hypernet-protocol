@@ -6,6 +6,7 @@ import { BigNumber } from "ethers";
 import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
 import { PullAmount } from "@objects/PullAmount";
 import { PaymentId } from "@objects/PaymentId";
+import { MerchantUrl } from "@objects/MerchantUrl";
 
 export class PullPayment extends Payment {
   constructor(
@@ -20,7 +21,7 @@ export class PullPayment extends Payment {
     createdTimestamp: number,
     updatedTimestamp: number,
     collateralRecovered: BigNumber,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
     details: PaymentInternalDetails,
     public authorizedAmount: BigNumber,
     public amountTransferred: BigNumber,

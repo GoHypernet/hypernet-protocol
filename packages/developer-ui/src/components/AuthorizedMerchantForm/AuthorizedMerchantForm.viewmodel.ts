@@ -2,6 +2,7 @@ import ko from "knockout";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import html from "./AuthorizedMerchantForm.template.html";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
+import { MerchantUrl } from "@hypernetlabs/objects";
 
 export class AuthorizedMerchantFormParams {
   constructor(public integration: IHypernetWebIntegration) {}
@@ -9,14 +10,14 @@ export class AuthorizedMerchantFormParams {
 
 // tslint:disable-next-line: max-classes-per-file
 export class AuthorizedMerchantFormViewModel {
-  public merchantUrl: ko.Observable<string>;
+  public merchantUrl: ko.Observable<MerchantUrl>;
   public submitButton: ButtonParams;
 
   protected integration: IHypernetWebIntegration;
 
   constructor(params: AuthorizedMerchantFormParams) {
     this.integration = params.integration;
-    this.merchantUrl = ko.observable("http://localhost:8080/hypernet_protocol/v0");
+    this.merchantUrl = ko.observable(MerchantUrl("http://localhost:8080/hypernet_protocol/v0"));
 
     this.submitButton = new ButtonParams(
       "Authorize Merchant",

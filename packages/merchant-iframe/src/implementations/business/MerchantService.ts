@@ -7,6 +7,7 @@ import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { IMerchantConnector, IRedirectInfo } from "@hypernetlabs/merchant-connector";
 import { ExpectedRedirect } from "@merchant-iframe/interfaces/objects";
+import { Signature, MerchantUrl } from "@hypernetlabs/objects";
 
 declare global {
   interface Window {
@@ -57,17 +58,17 @@ export class MerchantService implements IMerchantService {
     return okAsync(merchantConnector);
   }
 
-  public validateMerchantConnector(): ResultAsync<string, MerchantValidationError> {
+  public validateMerchantConnector(): ResultAsync<Signature, MerchantValidationError> {
     // This is going to connect to the merchantUrl/connector and pull down the connector code.
     // That code is expected to be signed, with the public key available at merchantUrl/publicKey
     // The code will be cached in local storage but the signing key will be
     const context = this.contextProvider.getMerchantContext();
-    let signature: string = "";
+    let signature: Signature = Signature("");
     let address: string = "";
 
     // If there is no merchant URL set, it's not an error
     if (context.merchantUrl == "") {
-      return okAsync("");
+      return okAsync(Signature(""));
     }
 
     return ResultUtils.combine([
@@ -91,14 +92,14 @@ export class MerchantService implements IMerchantService {
   }
 
   private _validateMerchantConnectorCode(
-    merchantUrl: string,
-    signature: string,
+    merchantUrl: MerchantUrl,
+    signature: Signature,
     address: string,
     useCacheBuster?: boolean,
-  ): ResultAsync<string, MerchantValidationError> {
+  ): ResultAsync<Signature, MerchantValidationError> {
     // If there is no merchant URL set, it's not an error
     if (merchantUrl == "") {
-      return okAsync("");
+      return okAsync(Signature(""));
     }
 
     let cacheBuster: string = "";
@@ -106,24 +107,26 @@ export class MerchantService implements IMerchantService {
       cacheBuster = `?v=${Date.now()}`;
     }
 
-    return this.merchantConnectorRepository.getMerchantCode(merchantUrl + cacheBuster).andThen((merchantCode) => {
-      const calculatedAddress = ethers.utils.verifyMessage(merchantCode, signature);
+    return this.merchantConnectorRepository
+      .getMerchantCode(MerchantUrl(merchantUrl + cacheBuster))
+      .andThen((merchantCode) => {
+        const calculatedAddress = ethers.utils.verifyMessage(merchantCode, signature);
 
-      if (calculatedAddress !== address) {
-        return errAsync<string, MerchantValidationError>(
-          new MerchantValidationError("Merchant code does not match signature!"),
-        );
-      }
+        if (calculatedAddress !== address) {
+          return errAsync<Signature, MerchantValidationError>(
+            new MerchantValidationError("Merchant code does not match signature!"),
+          );
+        }
 
-      // Merchant's code passes muster. Store the merchant code in the context as validated.
-      const context = this.contextProvider.getMerchantContext();
-      context.validatedMerchantCode = merchantCode;
-      context.validatedMerchantSignature = signature;
-      this.contextProvider.setMerchantContext(context);
+        // Merchant's code passes muster. Store the merchant code in the context as validated.
+        const context = this.contextProvider.getMerchantContext();
+        context.validatedMerchantCode = merchantCode;
+        context.validatedMerchantSignature = signature;
+        this.contextProvider.setMerchantContext(context);
 
-      // Return the valid signature
-      return okAsync(signature);
-    });
+        // Return the valid signature
+        return okAsync(signature);
+      });
   }
 
   public prepareForRedirect(redirectInfo: IRedirectInfo): ResultAsync<void, Error> {
@@ -158,14 +161,14 @@ export class MerchantService implements IMerchantService {
     return okAsync(null);
   }
 
-  public getMerchantUrl(): ResultAsync<string, MerchantValidationError> {
+  public getMerchantUrl(): ResultAsync<MerchantUrl, MerchantValidationError> {
     // First, see if this is going to be easy. Normally a merchantUrl
     // is provided as a param.
     const urlParams = new URLSearchParams(window.location.search);
     let merchantUrl = urlParams.get("merchantUrl");
 
     if (merchantUrl != null) {
-      return okAsync(merchantUrl);
+      return okAsync(MerchantUrl(merchantUrl));
     }
 
     // Can't do it the easy way; there is an alternative. If this is

@@ -1,4 +1,5 @@
 import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import { MerchantUrl } from "@hypernetlabs/objects";
 import Spinner from "./assets/loading-spinner";
 
 const client: IHypernetWebIntegration = new HypernetWebIntegration();
@@ -21,5 +22,8 @@ Spinner();
 Spinner.show();
 client.getReady().map(() => {
   Spinner.hide();
-  client.renderConnectorAuthorizationFlow({ connectorUrl: "http://localhost:8080/hypernet_protocol/v0", showInModal: true });
+  client.renderConnectorAuthorizationFlow({
+    connectorUrl: MerchantUrl("http://localhost:8080/hypernet_protocol/v0"),
+    showInModal: true,
+  });
 });

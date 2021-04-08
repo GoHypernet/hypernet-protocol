@@ -1,6 +1,7 @@
 import ko from "knockout";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import html from "./AuthorizedMerchants.template.html";
+import { MerchantUrl } from "@hypernetlabs/objects";
 
 export class AuthorizedMerchantsParams {
   constructor(public integration: IHypernetWebIntegration) {}
@@ -8,7 +9,7 @@ export class AuthorizedMerchantsParams {
 
 // tslint:disable-next-line: max-classes-per-file
 export class AuthorizedMerchantsViewModel {
-  public authorizedMerchants: ko.ObservableArray<string>;
+  public authorizedMerchants: ko.ObservableArray<MerchantUrl>;
 
   protected integration: IHypernetWebIntegration;
 
@@ -19,7 +20,7 @@ export class AuthorizedMerchantsViewModel {
 
     this.integration.core.onMerchantAuthorized.subscribe({
       next: (val) => {
-        this.authorizedMerchants.push(val.toString());
+        this.authorizedMerchants.push(MerchantUrl(val.toString()));
       },
     });
 
@@ -29,15 +30,15 @@ export class AuthorizedMerchantsViewModel {
         return this.integration.core.getAuthorizedMerchants();
       })
       .map((merchants) => {
-        const merchantStrings = new Array<string>();
+        const merchantStrings = new Array<MerchantUrl>();
         for (const keyval of merchants) {
-          merchantStrings.push(keyval[0].toString());
+          merchantStrings.push(MerchantUrl(keyval[0].toString()));
         }
         this.authorizedMerchants(merchantStrings);
       });
   }
 
-  openMerchantIFrameClick = (merchantUrl: string) => {
+  openMerchantIFrameClick = (merchantUrl: MerchantUrl) => {
     this.integration.core.waitInitialized().map(() => {
       this.integration.displayMerchantIFrame(merchantUrl);
     });

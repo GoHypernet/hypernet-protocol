@@ -1,6 +1,6 @@
 import React from "react";
 import { TokenSelector, Button, TextInput, SelectInput } from "@hypernetlabs/web-ui";
-import { PublicIdentifier, EthereumAddress } from "@hypernetlabs/objects";
+import { PublicIdentifier, EthereumAddress, MerchantUrl } from "@hypernetlabs/objects";
 import { EPaymentType } from "@hypernetlabs/objects";
 import { EResultStatus } from "@web-integration-interfaces/objects";
 import { usePayment } from "@web-integration-hooks";
@@ -11,7 +11,7 @@ interface PaymentWidgetProps {
   expirationDate?: number;
   requiredStake?: string;
   paymentTokenAddress?: EthereumAddress;
-  merchantUrl?: string;
+  merchantUrl?: MerchantUrl;
   paymentType?: EPaymentType;
 }
 
@@ -52,7 +52,9 @@ const PaymentWidget: React.FC<PaymentWidgetProps> = (props: PaymentWidgetProps) 
       <br />
       <TextInput
         value={counterPartyAccount}
-        onChange={(val) => {setCounterPartyAccount(PublicIdentifier(val));}}
+        onChange={(val) => {
+          setCounterPartyAccount(PublicIdentifier(val));
+        }}
         label="public identifier"
         placeholder="Enter public identifier"
       />

@@ -8,6 +8,8 @@ import {
   PushPayment,
   Payment,
   PaymentId,
+  MerchantUrl,
+  Signature,
 } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
@@ -51,11 +53,11 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     this.onPushPaymentUpdated = new Subject<PushPayment>();
     this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
-    this.onMerchantAuthorized = new Subject<string>();
-    this.onAuthorizedMerchantUpdated = new Subject<string>();
-    this.onAuthorizedMerchantActivationFailed = new Subject<string>();
-    this.onMerchantIFrameDisplayRequested = new Subject<string>();
-    this.onMerchantIFrameCloseRequested = new Subject<string>();
+    this.onMerchantAuthorized = new Subject<MerchantUrl>();
+    this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
+    this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
+    this.onMerchantIFrameDisplayRequested = new Subject<MerchantUrl>();
+    this.onMerchantIFrameCloseRequested = new Subject<MerchantUrl>();
     this.onInitializationRequired = new Subject<void>();
 
     // Initialize the promise that we'll use to monitor the core
@@ -103,15 +105,15 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
           this.onBalancesChanged.next(data);
         });
 
-        child.on("onMerchantAuthorized", (data: string) => {
+        child.on("onMerchantAuthorized", (data: MerchantUrl) => {
           this.onMerchantAuthorized.next(data);
         });
 
-        child.on("onAuthorizedMerchantUpdated", (data: string) => {
+        child.on("onAuthorizedMerchantUpdated", (data: MerchantUrl) => {
           this.onAuthorizedMerchantUpdated.next(data);
         });
 
-        child.on("onAuthorizedMerchantActivationFailed", (data: string) => {
+        child.on("onAuthorizedMerchantActivationFailed", (data: MerchantUrl) => {
           this.onAuthorizedMerchantActivationFailed.next(data);
         });
 
@@ -124,7 +126,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
           this.coreInitialized = true;
         });
 
-        child.on("onMerchantIFrameDisplayRequested", (data: string) => {
+        child.on("onMerchantIFrameDisplayRequested", (data: MerchantUrl) => {
           child.frame.style.display = "block";
           if (element) {
             element.style.display = "block";
@@ -132,7 +134,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
           this.onMerchantIFrameDisplayRequested.next(data);
         });
 
-        child.on("onMerchantIFrameCloseRequested", (data: string) => {
+        child.on("onMerchantIFrameCloseRequested", (data: MerchantUrl) => {
           child.frame.style.display = "none";
           if (element) {
             element.style.display = "none";
@@ -227,7 +229,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this._createCall("sendFunds", {
       counterPartyAccount,
@@ -247,7 +249,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this._createCall("authorizeFunds", {
       counterPartyAccount,
@@ -298,15 +300,15 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return this._createCall("mintTestToken", amount.toString());
   }
 
-  public authorizeMerchant(merchantUrl: string): ResultAsync<void, MerchantValidationError> {
+  public authorizeMerchant(merchantUrl: MerchantUrl): ResultAsync<void, MerchantValidationError> {
     return this._createCall("authorizeMerchant", merchantUrl);
   }
 
-  public getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError> {
+  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, PersistenceError> {
     return this._createCall("getAuthorizedMerchants", null);
   }
 
-  public closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+  public closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError> {
     if (this.child != null) {
       this.child.frame.style.display = "none";
     }
@@ -316,7 +318,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return this._createCall("closeMerchantIFrame", merchantUrl);
   }
 
-  public displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+  public displayMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError> {
     if (this.child != null) {
       this.child.frame.style.display = "block";
     }
@@ -339,10 +341,10 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   public onPushPaymentReceived: Subject<PushPayment>;
   public onPullPaymentReceived: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
-  public onMerchantAuthorized: Subject<string>;
-  public onAuthorizedMerchantUpdated: Subject<string>;
-  public onAuthorizedMerchantActivationFailed: Subject<string>;
-  public onMerchantIFrameDisplayRequested: Subject<string>;
-  public onMerchantIFrameCloseRequested: Subject<string>;
+  public onMerchantAuthorized: Subject<MerchantUrl>;
+  public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
+  public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
+  public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
+  public onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
   public onInitializationRequired: Subject<void>;
 }

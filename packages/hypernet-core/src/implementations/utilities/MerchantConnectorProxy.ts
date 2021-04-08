@@ -1,7 +1,16 @@
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
-import { EthereumAddress, LogicalError, MerchantConnectorError, MerchantValidationError, PaymentId, ProxyError, Signature } from "@hypernetlabs/objects";
+import {
+  EthereumAddress,
+  LogicalError,
+  MerchantConnectorError,
+  MerchantValidationError,
+  PaymentId,
+  ProxyError,
+  Signature,
+  MerchantUrl,
+} from "@hypernetlabs/objects";
 import { HypernetContext, PullPayment, PushPayment } from "@hypernetlabs/objects";
 import { IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
 
@@ -11,7 +20,7 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
   constructor(
     protected element: HTMLElement | null,
     protected iframeUrl: string,
-    protected merchantUrl: string,
+    protected merchantUrl: MerchantUrl,
     protected iframeName: string,
     protected contextProvider: IContextProvider,
     protected debug: boolean = false,
@@ -117,7 +126,7 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     return this._createCall("notifyPullPaymentReceived", payment);
   }
 
-  private _pushOpenedMerchantIFrame(merchantUrl: string) {
+  private _pushOpenedMerchantIFrame(merchantUrl: MerchantUrl) {
     // Check if there is merchantUrl in the queue
     // If there is, don't re-add it.
     const index = MerchantConnectorProxy.openedIFramesQueue.indexOf(merchantUrl);
@@ -132,7 +141,7 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     document.getElementsByName(
       `hypernet-core-merchant-connector-iframe-${MerchantConnectorProxy.openedIFramesQueue[0]}`,
     )[0].style.display = "block";
-    context.onMerchantIFrameDisplayRequested.next(MerchantConnectorProxy.openedIFramesQueue[0]);
+    context.onMerchantIFrameDisplayRequested.next(MerchantUrl(MerchantConnectorProxy.openedIFramesQueue[0]));
   }
 
   private _hideMerchantIFrame() {

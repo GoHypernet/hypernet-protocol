@@ -9,6 +9,8 @@ import {
   PaymentInternalDetails,
   PaymentId,
   EthereumAddress,
+  MerchantUrl,
+  PublicKey,
 } from "@hypernetlabs/objects";
 import { EPaymentState } from "@hypernetlabs/objects";
 import {
@@ -67,7 +69,7 @@ class PaymentServiceMocks {
   public finalizedPushPayment: PushPayment;
 
   public assetBalance: AssetBalance;
-  public merchantAddresses: Map<string, EthereumAddress>;
+  public merchantAddresses: Map<MerchantUrl, EthereumAddress>;
 
   constructor(hypertokenBalance: string = amount) {
     this.pushPayment = this.factoryPushPayment();
@@ -116,7 +118,7 @@ class PaymentServiceMocks {
       okAsync(new Map<PaymentId, Payment>()),
     );
     td.when(this.accountRepository.getBalanceByAsset(hyperTokenAddress)).thenReturn(okAsync(this.assetBalance));
-    td.when(this.paymentRepository.provideStake(paymentId, account)).thenReturn(
+    td.when(this.paymentRepository.provideStake(paymentId, PublicKey(account))).thenReturn(
       okAsync(this.stakedPushPayment),
     );
     td.when(this.paymentRepository.provideAsset(paymentId)).thenReturn(okAsync(this.paidPushPayment));
@@ -290,7 +292,7 @@ describe("PaymentService tests", () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
-    td.when(paymentServiceMock.paymentRepository.provideStake(paymentId, account)).thenReturn(
+    td.when(paymentServiceMock.paymentRepository.provideStake(paymentId, PublicKey(account))).thenReturn(
       errAsync(new Error("test error")),
     );
 

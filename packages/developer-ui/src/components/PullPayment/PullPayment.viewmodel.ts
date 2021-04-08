@@ -1,6 +1,6 @@
 import ko from "knockout";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import { PaymentId, PullPayment } from "@hypernetlabs/objects";
+import { MerchantUrl, PaymentId, PullPayment } from "@hypernetlabs/objects";
 import { EPaymentState } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import html from "./PullPayment.template.html";
@@ -25,7 +25,7 @@ export class PullPaymentViewModel {
   public createdTimestamp: ko.Observable<string>;
   public updatedTimestamp: ko.Observable<string>;
   public collateralRecovered: ko.Observable<string>;
-  public merchantUrl: ko.Observable<string>;
+  public merchantUrl: ko.Observable<MerchantUrl>;
   public authorizedAmount: ko.Observable<string>;
   public transferedAmount: ko.Observable<string>;
   public deltaAmount: ko.Observable<string>;

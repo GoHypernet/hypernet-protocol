@@ -8,6 +8,8 @@ import {
   PushPayment,
   PullPayment,
   PaymentId,
+  MerchantUrl,
+  Signature,
 } from "@hypernetlabs/objects";
 import { Subject } from "rxjs";
 import {
@@ -128,7 +130,7 @@ export interface IHypernetCore {
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
 
   /**
@@ -150,7 +152,7 @@ export interface IHypernetCore {
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
 
   /**
@@ -203,12 +205,12 @@ export interface IHypernetCore {
    */
   mintTestToken(amount: BigNumber): ResultAsync<void, BlockchainUnavailableError>;
 
-  authorizeMerchant(merchantUrl: string): ResultAsync<void, MerchantValidationError>;
+  authorizeMerchant(merchantUrl: MerchantUrl): ResultAsync<void, MerchantValidationError>;
 
-  getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError>;
+  getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, PersistenceError>;
 
-  closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
-  displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
+  closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError>;
+  displayMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError>;
 
   /**
    * Observables for seeing what's going on
@@ -222,10 +224,10 @@ export interface IHypernetCore {
   onPushPaymentReceived: Subject<PushPayment>;
   onPullPaymentReceived: Subject<PullPayment>;
   onBalancesChanged: Subject<Balances>;
-  onMerchantAuthorized: Subject<string>;
-  onAuthorizedMerchantUpdated: Subject<string>;
-  onAuthorizedMerchantActivationFailed: Subject<string>;
-  onMerchantIFrameDisplayRequested: Subject<string>;
-  onMerchantIFrameCloseRequested: Subject<string>;
+  onMerchantAuthorized: Subject<MerchantUrl>;
+  onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
+  onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
+  onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
+  onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
   onInitializationRequired: Subject<void>;
 }

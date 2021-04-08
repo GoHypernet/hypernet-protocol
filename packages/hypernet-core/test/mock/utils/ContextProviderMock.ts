@@ -4,8 +4,10 @@ import {
   EthereumAddress,
   HypernetContext,
   InitializedHypernetContext,
+  MerchantUrl,
   PullPayment,
   PushPayment,
+  Signature,
 } from "@hypernetlabs/objects";
 import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { okAsync, ResultAsync } from "neverthrow";
@@ -25,14 +27,14 @@ export class ContextProviderMock implements IContextProvider {
   public onPushPaymentUpdated: Subject<PushPayment>;
   public onPullPaymentUpdated: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
-  public onMerchantAuthorized: Subject<string>;
-  public onAuthorizedMerchantUpdated: Subject<string>;
-  public onAuthorizedMerchantActivationFailed: Subject<string>;
-  public onMerchantIFrameDisplayRequested: Subject<string>;
-  public onMerchantIFrameCloseRequested: Subject<string>;
+  public onMerchantAuthorized: Subject<MerchantUrl>;
+  public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
+  public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
+  public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
+  public onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
   public onInitializationRequired: Subject<void>;
 
-  public authorizedMerchants: Map<string, string>;
+  public authorizedMerchants: Map<MerchantUrl, Signature>;
 
   constructor(
     context: HypernetContext | null = null,
@@ -48,14 +50,14 @@ export class ContextProviderMock implements IContextProvider {
     this.onPushPaymentUpdated = new Subject<PushPayment>();
     this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
-    this.onMerchantAuthorized = new Subject<string>();
-    this.onAuthorizedMerchantUpdated = new Subject<string>();
-    this.onAuthorizedMerchantActivationFailed = new Subject<string>();
-    this.onMerchantIFrameDisplayRequested = new Subject<string>();
-    this.onMerchantIFrameCloseRequested = new Subject<string>();
+    this.onMerchantAuthorized = new Subject<MerchantUrl>();
+    this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
+    this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
+    this.onMerchantIFrameDisplayRequested = new Subject<MerchantUrl>();
+    this.onMerchantIFrameCloseRequested = new Subject<MerchantUrl>();
     this.onInitializationRequired = new Subject<void>();
 
-    this.authorizedMerchants = new Map<string, string>();
+    this.authorizedMerchants = new Map<MerchantUrl, Signature>();
 
     if (context != null) {
       this.context = context;

@@ -15,6 +15,7 @@ import {
   IFullTransferState,
   IBasicTransferResponse,
   PaymentId,
+  MerchantUrl,
 } from "@hypernetlabs/objects";
 import {
   LogicalError,
@@ -104,7 +105,7 @@ export class PaymentRepository implements IPaymentRepository {
     expirationDate: number,
     requiredStake: string, // TODO: amounts should be consistently use BigNumber
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<PullPayment, PaymentCreationError> {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
@@ -170,7 +171,7 @@ export class PaymentRepository implements IPaymentRepository {
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<PushPayment, PaymentCreationError> {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;

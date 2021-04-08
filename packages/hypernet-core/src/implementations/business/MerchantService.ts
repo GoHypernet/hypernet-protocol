@@ -7,6 +7,7 @@ import {
   BlockchainUnavailableError,
   ProxyError,
 } from "@hypernetlabs/objects";
+import { MerchantUrl, Signature } from "@hypernetlabs/objects";
 import { IMerchantConnectorRepository } from "@interfaces/data";
 import { IContextProvider, ILogUtils } from "@interfaces/utilities";
 import { ResultUtils } from "@hypernetlabs/utils";
@@ -59,7 +60,7 @@ export class MerchantService implements IMerchantService {
     });
   }
 
-  public authorizeMerchant(merchantUrl: string): ResultAsync<void, MerchantValidationError> {
+  public authorizeMerchant(merchantUrl: MerchantUrl): ResultAsync<void, MerchantValidationError> {
     return ResultUtils.combine([this.contextProvider.getContext(), this.getAuthorizedMerchants()]).map(async (vals) => {
       const [context, authorizedMerchantsMap] = vals;
 
@@ -74,26 +75,22 @@ export class MerchantService implements IMerchantService {
     });
   }
 
-  public getAuthorizedMerchants(): ResultAsync<Map<string, string>, never> {
+  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, never> {
     return this.merchantConnectorRepository.getAuthorizedMerchants();
   }
 
   public activateAuthorizedMerchants(): ResultAsync<
     void,
-    | MerchantConnectorError
-    | MerchantValidationError
-    | BlockchainUnavailableError
-    | LogicalError
-    | ProxyError
+    MerchantConnectorError | MerchantValidationError | BlockchainUnavailableError | LogicalError | ProxyError
   > {
     return this.merchantConnectorRepository.activateAuthorizedMerchants();
   }
 
-  public closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+  public closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError> {
     return this.merchantConnectorRepository.closeMerchantIFrame(merchantUrl);
   }
 
-  public displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+  public displayMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError> {
     return this.merchantConnectorRepository.displayMerchantIFrame(merchantUrl);
   }
 }

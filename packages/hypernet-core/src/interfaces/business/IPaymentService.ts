@@ -1,4 +1,4 @@
-import { Payment, EthereumAddress, PublicIdentifier, HexString, PaymentId } from "@hypernetlabs/objects";
+import { Payment, EthereumAddress, PublicIdentifier, MerchantUrl, PaymentId } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
   InsufficientBalanceError,
@@ -40,7 +40,7 @@ export interface IPaymentService {
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
 
   /**
@@ -76,7 +76,7 @@ export interface IPaymentService {
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
 
   /**
