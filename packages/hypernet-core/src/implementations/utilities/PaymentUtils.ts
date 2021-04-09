@@ -1,7 +1,6 @@
 import { BigNumber } from "ethers";
 import {
   EthereumAddress,
-  HexString,
   IHypernetOfferDetails,
   IMessageTransferData,
   Payment,
@@ -14,6 +13,9 @@ import {
   IFullTransferState,
   IHypernetPullPaymentDetails,
   IRegisteredTransfer,
+  BlockchainUnavailableError,
+  PaymentId,
+  UUID,
 } from "@hypernetlabs/objects";
 import {
   InvalidParametersError,
@@ -66,7 +68,7 @@ export class PaymentUtils implements IPaymentUtils {
    * Verifies that the paymentId provided has domain matching Hypernet's domain name.
    * @param paymentId the payment ID to check
    */
-  public isHypernetDomain(paymentId: HexString): ResultAsync<boolean, InvalidPaymentIdError> {
+  public isHypernetDomain(paymentId: PaymentId): ResultAsync<boolean, InvalidPaymentIdError> {
     return this.configProvider.getConfig().andThen((config) => {
       const domainRes = this.paymentIdUtils.getDomain(paymentId);
 
@@ -82,9 +84,9 @@ export class PaymentUtils implements IPaymentUtils {
    * <domain-10-bytes><payment-type-6-bytes><UUID-16-bytes>
    * @param paymentType the payment type for the id - PUSH or PULL
    */
-  public createPaymentId(paymentType: EPaymentType): ResultAsync<string, InvalidParametersError> {
+  public createPaymentId(paymentType: EPaymentType): ResultAsync<PaymentId, InvalidParametersError> {
     return this.configProvider.getConfig().andThen((config) => {
-      return this.paymentIdUtils.makePaymentId(config.hypernetProtocolDomain, paymentType, uuidv4());
+      return this.paymentIdUtils.makePaymentId(config.hypernetProtocolDomain, paymentType, UUID(uuidv4()));
     });
   }
 
@@ -98,12 +100,12 @@ export class PaymentUtils implements IPaymentUtils {
    * @param metadata the IHypernetOfferDetails for this payment
    */
   public transfersToPushPayment(
-    paymentId: string,
+    paymentId: PaymentId,
     to: PublicIdentifier,
     from: PublicIdentifier,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<PushPayment, Error> {
+  ): ResultAsync<PushPayment, LogicalError> {
     /**
      * Push payments consist of 3 transfers:
      * MessageTransfer - 0 value, represents an offer
@@ -112,7 +114,7 @@ export class PaymentUtils implements IPaymentUtils {
      */
 
     if (sortedTransfers.pullRecordTransfers.length > 0) {
-      throw new Error("Push payment has pull transfers!");
+      throw new LogicalError("Push payment has pull transfers!");
     }
 
     const amountStaked =
@@ -127,7 +129,7 @@ export class PaymentUtils implements IPaymentUtils {
 
     const paymentToken =
       sortedTransfers.parameterizedTransfer != null
-        ? sortedTransfers.parameterizedTransfer.assetId
+        ? EthereumAddress(sortedTransfers.parameterizedTransfer.assetId)
         : sortedTransfers.offerDetails.paymentToken;
 
     const details = new PaymentInternalDetails(
@@ -170,7 +172,7 @@ export class PaymentUtils implements IPaymentUtils {
    * @param metadata the IHypernetOfferDetails for this payment
    */
   public transfersToPullPayment(
-    paymentId: string,
+    paymentId: PaymentId,
     to: PublicIdentifier,
     from: PublicIdentifier,
     state: EPaymentState,
@@ -218,7 +220,7 @@ export class PaymentUtils implements IPaymentUtils {
 
     const paymentToken =
       sortedTransfers.parameterizedTransfer != null
-        ? sortedTransfers.parameterizedTransfer.assetId
+        ? EthereumAddress(sortedTransfers.parameterizedTransfer.assetId)
         : sortedTransfers.offerDetails.paymentToken;
 
     const details = new PaymentInternalDetails(
@@ -264,7 +266,7 @@ export class PaymentUtils implements IPaymentUtils {
    * @param browserNode instance of IBrowserNode
    */
   public transfersToPayment(
-    paymentId: string,
+    paymentId: PaymentId,
     transfers: IFullTransferState[],
   ): ResultAsync<Payment, InvalidPaymentError | InvalidParametersError> {
     let paymentType: EPaymentType;
@@ -467,7 +469,9 @@ export class PaymentUtils implements IPaymentUtils {
    * @param _context instance of HypernetContext
    * @param browserNode instance of the IBrowserNode
    */
-  public transfersToPayments(transfers: IFullTransferState[]): ResultAsync<Payment[], InvalidPaymentError> {
+  public transfersToPayments(
+    transfers: IFullTransferState[],
+  ): ResultAsync<Payment[], VectorError | LogicalError | InvalidPaymentError | InvalidParametersError> {
     // First step, get the transfer types for all the transfers
     const transferTypeResults = new Array<
       ResultAsync<{ transferType: ETransferType; transfer: IFullTransferState }, VectorError | Error>
@@ -477,9 +481,9 @@ export class PaymentUtils implements IPaymentUtils {
     }
 
     return ResultUtils.combine(transferTypeResults).andThen((transferTypesWithTransfers) => {
-      const transfersByPaymentId = new Map<string, IFullTransferState[]>();
+      const transfersByPaymentId = new Map<PaymentId, IFullTransferState[]>();
       for (const { transferType, transfer } of transferTypesWithTransfers) {
-        let paymentId: string;
+        let paymentId: PaymentId;
         if (transferType === ETransferType.Offer) {
           // @todo also add in PullRecord type)
           const offerDetails: IHypernetOfferDetails = JSON.parse(transfer.transferState.message);
@@ -521,7 +525,9 @@ export class PaymentUtils implements IPaymentUtils {
    * @param transfer the transfer to get the transfer type of
    * @param browserNode instance of a browserNode so that we can query for registered transfer addresses
    */
-  public getTransferType(transfer: IFullTransferState): ResultAsync<ETransferType, VectorError | LogicalError> {
+  public getTransferType(
+    transfer: IFullTransferState,
+  ): ResultAsync<ETransferType, VectorError | BlockchainUnavailableError | LogicalError> {
     // TransferDefinition here is the ETH address of the transfer
     // We need to get the registered transfer definitions as canonical by the browser node
     return this.browserNodeProvider
@@ -533,11 +539,11 @@ export class PaymentUtils implements IPaymentUtils {
         // registeredTransfers.name = 'Insurance', registeredTransfers.definition = <address>, transfer.transferDefinition = <address>
         const transferMap: Map<EthereumAddress, string> = new Map();
         for (const registeredTransfer of registeredTransfers) {
-          transferMap.set(registeredTransfer.definition, registeredTransfer.name);
+          transferMap.set(EthereumAddress(registeredTransfer.definition), registeredTransfer.name);
         }
 
         // If the transfer address is not one we know, we don't know what this is
-        if (!transferMap.has(transfer.transferDefinition)) {
+        if (!transferMap.has(EthereumAddress(transfer.transferDefinition))) {
           this.logUtils.log(
             `Transfer type not recognized. Transfer definition: ${
               transfer.transferDefinition
@@ -547,7 +553,7 @@ export class PaymentUtils implements IPaymentUtils {
         } else {
           // This is a transfer we know about, but not necessarily one we want.
           // Narrow down to insurance, parameterized, or  offer/messagetransfer
-          const thisTransfer = transferMap.get(transfer.transferDefinition);
+          const thisTransfer = transferMap.get(EthereumAddress(transfer.transferDefinition));
           if (thisTransfer == null) {
             return errAsync(new LogicalError("Transfer type not unrecognized, but not in transfer map!"));
           }
@@ -583,7 +589,7 @@ export class PaymentUtils implements IPaymentUtils {
    */
   public getTransferTypeWithTransfer(
     transfer: IFullTransferState,
-  ): ResultAsync<{ transferType: ETransferType; transfer: IFullTransferState }, VectorError | Error> {
+  ): ResultAsync<{ transferType: ETransferType; transfer: IFullTransferState }, VectorError | LogicalError> {
     return this.getTransferType(transfer).map((transferType) => {
       return { transferType, transfer };
     });
@@ -600,14 +606,14 @@ export class PaymentUtils implements IPaymentUtils {
   public sortTransfers(
     _paymentId: string,
     transfers: IFullTransferState[],
-  ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError | Error> {
+  ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError | LogicalError> {
     const offerTransfers: IFullTransferState[] = [];
     const insuranceTransfers: IFullTransferState[] = [];
     const parameterizedTransfers: IFullTransferState[] = [];
     const pullTransfers: IFullTransferState[] = [];
     const unrecognizedTransfers: IFullTransferState[] = [];
     const transferTypeResults = new Array<
-      ResultAsync<{ transferType: ETransferType; transfer: IFullTransferState }, VectorError | Error>
+      ResultAsync<{ transferType: ETransferType; transfer: IFullTransferState }, VectorError | LogicalError>
     >();
 
     for (const transfer of transfers) {
@@ -695,8 +701,10 @@ export class PaymentUtils implements IPaymentUtils {
     return this.vectorUtils.getTimestampFromTransfer(transfers[0]);
   }
 
-  protected getRegisteredTransfersResponse: ResultAsync<IRegisteredTransfer[], VectorError> | undefined;
-  protected getRegisteredTransfers(): ResultAsync<IRegisteredTransfer[], VectorError> {
+  protected getRegisteredTransfersResponse:
+    | ResultAsync<IRegisteredTransfer[], VectorError | BlockchainUnavailableError>
+    | undefined;
+  protected getRegisteredTransfers(): ResultAsync<IRegisteredTransfer[], VectorError | BlockchainUnavailableError> {
     if (this.getRegisteredTransfersResponse == null) {
       this.getRegisteredTransfersResponse = ResultUtils.combine([
         this.browserNodeProvider.getBrowserNode(),

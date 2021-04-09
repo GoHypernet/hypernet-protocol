@@ -1,8 +1,8 @@
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
-import { IAuthorizeFundsRequest, IResolutionResult, ISendFundsRequest } from "@hypernetlabs/merchant-connector";
-import { Balances, MerchantConnectorError, MerchantValidationError, PublicIdentifier } from "@hypernetlabs/objects";
-import { HexString, HypernetContext, PullPayment, PushPayment } from "@hypernetlabs/objects";
+import { IResolutionResult } from "@hypernetlabs/merchant-connector";
+import { Balances, EthereumAddress, LogicalError, MerchantConnectorError, MerchantValidationError, PaymentId, ProxyError, PublicIdentifier, Signature } from "@hypernetlabs/objects";
+import { HypernetContext, PullPayment, PushPayment } from "@hypernetlabs/objects";
 import { IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
 
 export class MerchantConnectorProxy extends ParentProxy implements IMerchantConnectorProxy {
@@ -19,7 +19,7 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     super(element, iframeUrl, iframeName, debug);
   }
 
-  public activateConnector(publicIdentifier: PublicIdentifier, balances: Balances): ResultAsync<void, MerchantConnectorError> {
+  public activateConnector(publicIdentifier: PublicIdentifier, balances: Balances): ResultAsync<void, MerchantConnectorError | ProxyError> {
     const assets = balances.assets.map((val) => {
       return {
         assetAddress: val.assetAddress,
@@ -38,19 +38,19 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     return this._createCall("activateConnector", activateData);
   }
 
-  public resolveChallenge(paymentId: HexString): ResultAsync<IResolutionResult, MerchantConnectorError> {
+  public resolveChallenge(paymentId: PaymentId): ResultAsync<IResolutionResult, MerchantConnectorError | ProxyError> {
     return this._createCall("resolveChallenge", paymentId);
   }
 
-  public getAddress(): ResultAsync<HexString, MerchantConnectorError> {
+  public getAddress(): ResultAsync<EthereumAddress, MerchantConnectorError | ProxyError> {
     return this._createCall("getAddress", null);
   }
 
-  public getValidatedSignature(): ResultAsync<string, MerchantValidationError> {
+  public getValidatedSignature(): ResultAsync<Signature, MerchantValidationError | ProxyError> {
     return this._createCall("getValidatedSignature", null);
   }
 
-  public activate(): ResultAsync<void, MerchantValidationError> {
+  public activate(): ResultAsync<void, MerchantValidationError | LogicalError | ProxyError> {
     return ResultUtils.combine([this.contextProvider.getContext(), super.activate()]).map((vals) => {
       const [context] = vals;
 
@@ -85,7 +85,7 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
   }
 
   // Events coming from web integration and user interactions
-  public displayMerchantIFrame(): ResultAsync<void, MerchantConnectorError> {
+  public displayMerchantIFrame(): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this.contextProvider.getContext().andThen((context) => {
       this._pushOpenedMerchantIFrame(this.merchantUrl);
       this._showMerchantIFrame(context);
@@ -94,7 +94,7 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     });
   }
 
-  public closeMerchantIFrame(): ResultAsync<void, MerchantConnectorError> {
+  public closeMerchantIFrame(): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this.contextProvider.getContext().andThen((context) => {
       this._hideMerchantIFrame();
 
@@ -108,27 +108,27 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     });
   }
 
-  public notifyPushPaymentSent(payment: PushPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPushPaymentSent(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPushPaymentSent", payment);
   }
 
-  public notifyPushPaymentUpdated(payment: PushPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPushPaymentUpdated(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPushPaymentUpdated", payment);
   }
 
-  public notifyPushPaymentReceived(payment: PushPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPushPaymentReceived(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPushPaymentReceived", payment);
   }
 
-  public notifyPullPaymentSent(payment: PullPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPullPaymentSent(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPullPaymentSent", payment);
   }
 
-  public notifyPullPaymentUpdated(payment: PullPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPullPaymentUpdated(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPullPaymentUpdated", payment);
   }
 
-  public notifyPullPaymentReceived(payment: PullPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPullPaymentReceived(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPullPaymentReceived", payment);
   }
 

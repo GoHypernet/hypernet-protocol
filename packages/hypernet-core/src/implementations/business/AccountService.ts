@@ -10,9 +10,9 @@ import {
 import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
-  CoreUninitializedError,
   LogicalError,
   VectorError,
+  RouterChannelUnknownError,
 } from "@hypernetlabs/objects";
 import { IContextProvider, ILogUtils } from "@interfaces/utilities";
 import { okAsync, ResultAsync } from "neverthrow";
@@ -28,15 +28,15 @@ export class AccountService implements IAccountService {
     protected logUtils: ILogUtils,
   ) {}
 
-  public getPublicIdentifier(): ResultAsync<PublicIdentifier, VectorError | LogicalError> {
+  public getPublicIdentifier(): ResultAsync<PublicIdentifier, BlockchainUnavailableError | VectorError> {
     return this.accountRepository.getPublicIdentifier();
   }
 
-  public getAccounts(): ResultAsync<string[], BlockchainUnavailableError> {
+  public getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError> {
     return this.accountRepository.getAccounts();
   }
 
-  public getBalances(): ResultAsync<Balances, BalancesUnavailableError | CoreUninitializedError> {
+  public getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError | RouterChannelUnknownError> {
     return this.accountRepository.getBalances();
   }
 
@@ -45,7 +45,7 @@ export class AccountService implements IAccountService {
     amount: BigNumber,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
+    BalancesUnavailableError | RouterChannelUnknownError | BlockchainUnavailableError | VectorError | LogicalError
   > {
     this.logUtils.log(`HypernetCore:depositFunds: assetAddress: ${assetAddress}`);
 
@@ -74,7 +74,7 @@ export class AccountService implements IAccountService {
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
+    BalancesUnavailableError | RouterChannelUnknownError | BlockchainUnavailableError | VectorError
   > {
     let context: InitializedHypernetContext;
 

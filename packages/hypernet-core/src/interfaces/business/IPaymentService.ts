@@ -1,16 +1,21 @@
-import { Payment, EthereumAddress, PublicIdentifier, HexString } from "@hypernetlabs/objects";
+import { Payment, EthereumAddress, PublicIdentifier, HexString, PaymentId } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
-  CoreUninitializedError,
   InsufficientBalanceError,
   InvalidParametersError,
   LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
-  OfferMismatchError,
   PaymentFinalizeError,
   RouterChannelUnknownError,
   VectorError,
+  BlockchainUnavailableError,
+  PaymentCreationError,
+  BalancesUnavailableError,
+  InvalidPaymentError,
+  PaymentStakeError,
+  TransferCreationError,
+  TransferResolutionError,
 } from "@hypernetlabs/objects";
 import { ResultAsync, Result } from "neverthrow";
 import { BigNumber } from "ethers";
@@ -36,16 +41,25 @@ export interface IPaymentService {
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
 
   /**
    * Record a pull against a Pull Payment's authorized funds. Doesn't actually
    * move any money.
    */
   pullFunds(
-    paymentId: string,
+    paymentId: PaymentId,
     amount: BigNumber,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<
+    Payment,
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | PaymentCreationError
+  >;
 
   /**
    * Send funds to another person.
@@ -63,50 +77,122 @@ export interface IPaymentService {
     requiredStake: string,
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
 
   /**
    * Called by the person on the receiving end of a push payment,
    * to accept the terms of the payment and put up the stake.
    */
   acceptOffers(
-    paymentIds: string[],
-  ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError>;
+    paymentIds: PaymentId[],
+  ): ResultAsync<
+    Result<Payment, AcceptPaymentError>[],
+    | InsufficientBalanceError
+    | AcceptPaymentError
+    | BalancesUnavailableError
+    | MerchantValidationError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+  >;
 
   /**
    * Notify the service that a payment has been posted.
    * @param paymentId
    */
   paymentPosted(
-    paymentId: HexString,
-  ): ResultAsync<Payment, InvalidParametersError | RouterChannelUnknownError | CoreUninitializedError | VectorError>;
+    paymentId: PaymentId,
+  ): ResultAsync<
+    Payment,
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
+  >;
 
   /** Notify the service that an insurance payment has resolved
    * @param paymentId
    */
   insuranceResolved(
-    paymentId: HexString,
-  ): ResultAsync<Payment, InvalidParametersError | RouterChannelUnknownError | CoreUninitializedError | VectorError>;
+    paymentId: PaymentId,
+  ): ResultAsync<
+    Payment,
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
+  >;
 
   /**
    * Notify the service that a payment has been completed.
    * @param paymentId
    */
-  paymentCompleted(paymentId: string): ResultAsync<Payment, InvalidParametersError>;
+  paymentCompleted(
+    paymentId: PaymentId,
+  ): ResultAsync<
+    Payment,
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
+  >;
 
   /**
    * Notify the service that a pull payment has been posted.
    * @param paymentId
    */
-  pullRecorded(paymentId: string): ResultAsync<void, InvalidParametersError>;
+  pullRecorded(
+    paymentId: PaymentId,
+  ): ResultAsync<
+    void,
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+  >;
 
   /**
    * Notify the service that a stake has been created/posted.
    * @param paymentId
    */
   stakePosted(
-    paymentId: string,
-  ): ResultAsync<Payment, CoreUninitializedError | OfferMismatchError | InvalidParametersError>;
+    paymentId: PaymentId,
+  ): ResultAsync<
+    Payment,
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
+  >;
 
   /**
    * Notify the service that an offer has been made.
@@ -114,8 +200,16 @@ export interface IPaymentService {
    * @param transferId
    */
   offerReceived(
-    paymentId: string,
-  ): ResultAsync<void, LogicalError | RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+    paymentId: PaymentId,
+  ): ResultAsync<
+    void,
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+  >;
 
   /**
    * A payment that is in the Accepted state may be disputed up to the expiration date.
@@ -127,10 +221,18 @@ export interface IPaymentService {
    * @param paymentId
    */
   initiateDispute(
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    InvalidParametersError | CoreUninitializedError | MerchantValidationError | MerchantConnectorError
+    | MerchantConnectorError
+    | MerchantValidationError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
   >;
 
   /**
@@ -142,9 +244,18 @@ export interface IPaymentService {
    * @param paymentIds
    */
   advancePayments(
-    paymentIds: HexString[],
+    paymentIds: PaymentId[],
   ): ResultAsync<
     Payment[],
-    PaymentFinalizeError | RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
   >;
 }

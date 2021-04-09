@@ -3,7 +3,7 @@ import { IMerchantConnectorRepository, IPersistenceRepository } from "@merchant-
 import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 import { MerchantConnectorRepository, PersistenceRepository } from "@merchant-iframe/implementations/data";
 import { ContextProvider } from "@merchant-iframe/implementations/utils";
-import { MerchantService } from "@merchant-iframe/implementations/business/MerchantService";
+import { MerchantService } from "@merchant-iframe/implementations/business";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { IMerchantConnectorListener, IMerchantIFrameApi } from "@merchant-iframe/interfaces/api";
 import { IAjaxUtils, AxiosAjaxUtils, LocalStorageUtils, ILocalStorageUtils } from "@hypernetlabs/utils";

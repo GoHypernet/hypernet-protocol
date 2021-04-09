@@ -1,5 +1,12 @@
 import { HypernetLink } from "@hypernetlabs/objects";
-import { CoreUninitializedError, RouterChannelUnknownError, VectorError } from "@hypernetlabs/objects";
+import {
+  RouterChannelUnknownError,
+  VectorError,
+  InvalidParametersError,
+  BlockchainUnavailableError,
+  InvalidPaymentError,
+  LogicalError,
+} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 /**
@@ -11,7 +18,12 @@ export interface ILinkRepository {
    */
   getHypernetLinks(): ResultAsync<
     HypernetLink[],
-    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
+    | RouterChannelUnknownError
+    | VectorError
+    | InvalidParametersError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | LogicalError
   >;
 
   /**
@@ -20,5 +32,13 @@ export interface ILinkRepository {
    */
   getHypernetLink(
     linkId: string,
-  ): ResultAsync<HypernetLink, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<
+    HypernetLink,
+    | RouterChannelUnknownError
+    | VectorError
+    | InvalidParametersError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | LogicalError
+  >;
 }

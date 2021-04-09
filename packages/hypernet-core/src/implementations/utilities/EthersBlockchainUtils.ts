@@ -2,7 +2,7 @@ import { IBlockchainProvider, IBlockchainUtils } from "@interfaces/utilities";
 import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import { Contract, ethers, BigNumber } from "ethers";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
-import { BlockchainUnavailableError } from "@hypernetlabs/objects";
+import { BlockchainUnavailableError, Signature } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 import { ERC20Abi } from "@connext/vector-types";
 import { EthereumAddress } from "@hypernetlabs/objects";
@@ -20,9 +20,9 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
     domain: TypedDataDomain,
     types: Record<string, Array<TypedDataField>>,
     value: Record<string, any>,
-    signature: string,
-  ): string {
-    return ethers.utils.verifyTypedData(domain, types, value, signature);
+    signature: Signature,
+  ): EthereumAddress {
+    return EthereumAddress(ethers.utils.verifyTypedData(domain, types, value, signature));
   }
 
   public erc20Transfer(

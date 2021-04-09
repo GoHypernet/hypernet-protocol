@@ -1,7 +1,6 @@
 export * from "./AcceptPaymentError";
 export * from "./BalancesUnavailableError";
 export * from "./BlockchainUnavailableError";
-export * from "./CoreUninitializedError";
 export * from "./InsufficientBalanceError";
 export * from "./InvalidParametersError";
 export * from "./InvalidPaymentError";
@@ -21,3 +20,4 @@ export * from "./ThreeBoxError";
 export * from "./TransferCreationError";
 export * from "./TransferResolutionError";
 export * from "./VectorError";
+export * from "./PaymentCreationError";

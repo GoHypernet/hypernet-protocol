@@ -1,5 +1,4 @@
 import { BrowserNode } from "@connext/vector-browser-node";
-import { VectorError } from "@hypernetlabs/objects";
 import { IBrowserNode, IConfigProvider, ILogUtils } from "@interfaces/utilities";
 import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
 import { WrappedBrowserNode } from "@implementations/utilities";
@@ -7,7 +6,8 @@ import { ResultAsync } from "neverthrow";
 
 export class BrowserNodeFactory implements IBrowserNodeFactory {
   constructor(protected configProvider: IConfigProvider, protected logUtils: ILogUtils) {}
-  public factoryBrowserNode(): ResultAsync<IBrowserNode, VectorError> {
+
+  public factoryBrowserNode(): ResultAsync<IBrowserNode, never> {
     return this.configProvider.getConfig().map((config) => {
       // Create the browser node
       const vectorBrowserNode = new BrowserNode({

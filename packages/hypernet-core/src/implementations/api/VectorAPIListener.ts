@@ -5,8 +5,21 @@ import {
   IHypernetPullPaymentDetails,
   IConditionalTransferCreatedPayload,
   IConditionalTransferResolvedPayload,
+  PaymentId,
 } from "@hypernetlabs/objects";
-import { LogicalError } from "@hypernetlabs/objects";
+import {
+  LogicalError,
+  VectorError,
+  BlockchainUnavailableError,
+  InvalidPaymentIdError,
+  PaymentFinalizeError,
+  PaymentStakeError,
+  TransferResolutionError,
+  RouterChannelUnknownError,
+  InvalidPaymentError,
+  InvalidParametersError,
+  TransferCreationError,
+} from "@hypernetlabs/objects";
 import { ETransferType, MessageState } from "@hypernetlabs/objects";
 import { IBrowserNodeProvider, IContextProvider, ILogUtils, IPaymentUtils, IVectorUtils } from "@interfaces/utilities";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
@@ -27,7 +40,20 @@ export class VectorAPIListener implements IVectorListener {
   /**
    *
    */
-  public setup(): ResultAsync<void, LogicalError> {
+  public setup(): ResultAsync<
+    void,
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentIdError
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
+  > {
     return this.browserNodeProvider.getBrowserNode().map((browserNode) => {
       // When the browser node notifies us that a conditional transfer has been *resolved,
       // (via Vector), this handles it. We call down into the appropriate method on the
@@ -37,7 +63,7 @@ export class VectorAPIListener implements IVectorListener {
         // or a UUID as part of transferState.message (message transfer type)
 
         this.paymentUtils.getTransferType(payload.transfer).andThen((transferType) => {
-          let paymentId: string;
+          let paymentId: PaymentId;
           const transfer = payload.transfer;
 
           if (transferType === ETransferType.Offer) {
@@ -93,7 +119,7 @@ export class VectorAPIListener implements IVectorListener {
         this.paymentUtils
           .getTransferType(payload.transfer)
           .andThen((transferType) => {
-            let paymentId: string;
+            let paymentId: PaymentId;
             const transfer = payload.transfer;
 
             if (transferType === ETransferType.Offer) {

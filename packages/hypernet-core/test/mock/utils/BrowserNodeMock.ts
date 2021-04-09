@@ -3,10 +3,10 @@ import { chainId, routerChannelAddress, routerPublicIdentifier } from "@mock/moc
 import { okAsync } from "neverthrow";
 import td from "testdouble";
 import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
-import { IFullChannelState } from "@hypernetlabs/objects";
+import { EthereumAddress, IFullChannelState } from "@hypernetlabs/objects";
 
 export function createBrowserNodeMock(stateChannels: IFullChannelState[] | null = null): IBrowserNode {
-  const stateChannelsMap = new Map<string, IFullChannelState>();
+  const stateChannelsMap = new Map<EthereumAddress, IFullChannelState>();
 
   if (stateChannels == null) {
     stateChannelsMap.set(routerChannelAddress, {
@@ -42,7 +42,7 @@ export function createBrowserNodeMock(stateChannels: IFullChannelState[] | null 
     });
   } else {
     for (const channelState of stateChannels) {
-      stateChannelsMap.set(channelState.channelAddress, channelState);
+      stateChannelsMap.set(EthereumAddress(channelState.channelAddress), channelState);
     }
   }
 
@@ -54,8 +54,8 @@ export function createBrowserNodeMock(stateChannels: IFullChannelState[] | null 
   td.when(browserNode.getStateChannels()).thenReturn(okAsync(Array.from(stateChannelsMap.keys())));
 
   for (const stateChannel of stateChannelsMap.values()) {
-    td.when(browserNode.getStateChannel(stateChannel.channelAddress)).thenReturn(
-      okAsync(stateChannelsMap.get(stateChannel.channelAddress)),
+    td.when(browserNode.getStateChannel(EthereumAddress(stateChannel.channelAddress))).thenReturn(
+      okAsync(stateChannelsMap.get(EthereumAddress(stateChannel.channelAddress))),
     );
   }
 

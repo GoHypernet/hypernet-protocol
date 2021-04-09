@@ -1,28 +1,38 @@
 import { IMerchantConnectorRepository } from "@merchant-iframe/interfaces/data";
 import { IAjaxUtils } from "@hypernetlabs/utils";
 import { okAsync, ResultAsync } from "neverthrow";
-import { urlJoin } from "url-join-ts";
+import { urlJoinP } from "url-join-ts";
 
 export class MerchantConnectorRepository implements IMerchantConnectorRepository {
   constructor(protected ajaxUtils: IAjaxUtils) {}
 
   public getMerchantSignature(merchantUrl: string): ResultAsync<string, Error> {
-    const url = new URL(urlJoin(merchantUrl, "signature"));
+    const url = this._prepareMerchantUrl(merchantUrl, "signature");
     return this.ajaxUtils.get<string, Error>(url).andThen((response) => {
       return okAsync(response);
     });
   }
   public getMerchantAddress(merchantUrl: string): ResultAsync<string, Error> {
-    const url = new URL(urlJoin(merchantUrl, "address"));
+    const url = this._prepareMerchantUrl(merchantUrl, "address");
     return this.ajaxUtils.get<string, Error>(url).andThen((response) => {
       return okAsync(response);
     });
   }
 
   public getMerchantCode(merchantUrl: string): ResultAsync<string, Error> {
-    const url = new URL(urlJoin(merchantUrl, "connector"));
+    const url = this._prepareMerchantUrl(merchantUrl, "connector");
     return this.ajaxUtils.get<string, Error>(url).andThen((response) => {
       return okAsync(response);
     });
+  }
+
+  private _prepareMerchantUrl(merchantUrl: string, path: string): URL {
+    const merchantUrlObject = new URL(merchantUrl);
+    const searchParams = {};
+    for (const [key, value] of new URLSearchParams(merchantUrlObject.search).entries()) {
+      searchParams[key] = value;
+    }
+    merchantUrlObject.search = "";
+    return new URL(urlJoinP(merchantUrlObject.toString(), [path], searchParams));
   }
 }

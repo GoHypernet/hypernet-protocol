@@ -2,7 +2,6 @@ import { EthereumAddress, Balances, AssetBalance, PublicIdentifier } from "@hype
 import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
-  CoreUninitializedError,
   LogicalError,
   RouterChannelUnknownError,
   VectorError,
@@ -14,22 +13,21 @@ import { ResultAsync } from "neverthrow";
  * @todo What is the main role/purpose of this class? Description here.
  */
 export interface IAccountsRepository {
-  getPublicIdentifier(): ResultAsync<PublicIdentifier, VectorError | LogicalError>;
-  getAccounts(): ResultAsync<string[], BlockchainUnavailableError>;
-  getBalances(): ResultAsync<Balances, BalancesUnavailableError | CoreUninitializedError>;
-  getBalanceByAsset(assetAddress: EthereumAddress): ResultAsync<AssetBalance, BalancesUnavailableError>;
+  getPublicIdentifier(): ResultAsync<PublicIdentifier, BlockchainUnavailableError | VectorError>;
+  getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
+  getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError | RouterChannelUnknownError>;
+  getBalanceByAsset(
+    assetAddress: EthereumAddress,
+  ): ResultAsync<AssetBalance, BalancesUnavailableError | VectorError | RouterChannelUnknownError>;
   depositFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
-  ): ResultAsync<
-    null,
-    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error | BlockchainUnavailableError
-  >;
+  ): ResultAsync<null, RouterChannelUnknownError | VectorError | LogicalError | BlockchainUnavailableError>;
   withdrawFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
     destinationAddress: EthereumAddress,
-  ): ResultAsync<void, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<void, RouterChannelUnknownError | VectorError | BlockchainUnavailableError>;
 
   mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<void, BlockchainUnavailableError>;
 }

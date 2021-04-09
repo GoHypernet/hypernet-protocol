@@ -1,6 +1,6 @@
 import ko from "knockout";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import { PublicIdentifier, PushPayment } from "@hypernetlabs/objects";
+import { PaymentId, PublicIdentifier, PushPayment } from "@hypernetlabs/objects";
 import { EPaymentState } from "@hypernetlabs/objects";
 import html from "./PushPayment.template.html";
 import moment from "moment";
@@ -36,7 +36,7 @@ export class PushPaymentViewModel {
   public showDisputeButton: ko.PureComputed<boolean>;
 
   protected integration: IHypernetWebIntegration;
-  protected paymentId: string;
+  protected paymentId: PaymentId;
   protected publicIdentifier: ko.Observable<PublicIdentifier | null>;
 
   constructor(params: PushPaymentParams) {

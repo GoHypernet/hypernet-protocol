@@ -19,7 +19,7 @@ import {
   IBlockchainProvider,
   IBlockchainUtils,
 } from "@interfaces/utilities";
-import { VectorError, RouterChannelUnknownError, BlockchainUnavailableError } from "@hypernetlabs/objects";
+import { VectorError, RouterChannelUnknownError, BlockchainUnavailableError, EthereumAddress } from "@hypernetlabs/objects";
 import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
 import { okAsync, errAsync } from "neverthrow";
 import { Log, TransactionReceipt, TransactionResponse } from "@ethersproject/abstract-provider";
@@ -210,7 +210,7 @@ describe("AccountsRepository tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toBe(accounts);
+    expect(result._unsafeUnwrap()).toStrictEqual(accounts);
   });
 
   // TODO: there is a bug in getBalances related to contract token names, refactor this test when it fixed
@@ -220,10 +220,14 @@ describe("AccountsRepository tests", () => {
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
     const stateChannel = accountsRepositoryMocks.browserNodeProvider.stateChannels.get(routerChannelAddress);
+    if (stateChannel == null) {
+      throw new Error();
+    }
+
     const balances: Balances = {
       assets: [
         new AssetBalance(
-          stateChannel?.assetIds[0] as string,
+          EthereumAddress(stateChannel?.assetIds[0]),
           "",
           "",
           0,
@@ -263,7 +267,10 @@ describe("AccountsRepository tests", () => {
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
     const stateChannel = accountsRepositoryMocks.browserNodeProvider.stateChannels.get(routerChannelAddress);
-    const assetId = stateChannel?.assetIds[0] as string;
+    if (stateChannel == null) {
+      throw new Error();
+    }
+    const assetId = EthereumAddress(stateChannel?.assetIds[0]);
     const assetBalance = new AssetBalance(
       assetId,
       "",

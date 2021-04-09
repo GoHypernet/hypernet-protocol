@@ -3,9 +3,9 @@ import { Balances, EthereumAddress, PublicIdentifier } from "@hypernetlabs/objec
 import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
-  CoreUninitializedError,
   LogicalError,
   VectorError,
+  RouterChannelUnknownError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -13,14 +13,14 @@ import { ResultAsync } from "neverthrow";
  * @todo What is the main role/purpose of this class? Description here.
  */
 export interface IAccountService {
-  getPublicIdentifier(): ResultAsync<PublicIdentifier, VectorError | LogicalError>;
-  getAccounts(): ResultAsync<string[], BlockchainUnavailableError>;
+  getPublicIdentifier(): ResultAsync<PublicIdentifier, BlockchainUnavailableError | VectorError>;
+  getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
   depositFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
+    BalancesUnavailableError | RouterChannelUnknownError | BlockchainUnavailableError | VectorError | LogicalError
   >;
   withdrawFunds(
     assetAddress: EthereumAddress,
@@ -28,7 +28,7 @@ export interface IAccountService {
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
+    BalancesUnavailableError | RouterChannelUnknownError | BlockchainUnavailableError | VectorError
   >;
-  getBalances(): ResultAsync<Balances, BalancesUnavailableError | CoreUninitializedError>;
+  getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError | RouterChannelUnknownError>;
 }

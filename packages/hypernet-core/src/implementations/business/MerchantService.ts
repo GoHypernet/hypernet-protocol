@@ -1,14 +1,14 @@
 import { IMerchantService } from "@interfaces/business";
 import { ResultAsync } from "neverthrow";
 import {
-  CoreUninitializedError,
   LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
-  PersistenceError,
+  BlockchainUnavailableError,
+  ProxyError,
 } from "@hypernetlabs/objects";
 import { IAccountsRepository, IMerchantConnectorRepository } from "@interfaces/data";
-import { IContextProvider } from "@interfaces/utilities";
+import { IContextProvider, ILogUtils } from "@interfaces/utilities";
 import { ResultUtils } from "@hypernetlabs/utils";
 
 export class MerchantService implements IMerchantService {
@@ -16,44 +16,45 @@ export class MerchantService implements IMerchantService {
     protected merchantConnectorRepository: IMerchantConnectorRepository,
     protected accountsRepository: IAccountsRepository,
     protected contextProvider: IContextProvider,
-  ) {}
+    protected logUtils: ILogUtils,
+  ) { }
 
-  public initialize(): ResultAsync<void, LogicalError> {
+  public initialize(): ResultAsync<void, LogicalError | MerchantConnectorError> {
     return this.contextProvider.getContext().map((context) => {
       // Subscribe to the various events, and sort them out for the merchant connector
       context.onPushPaymentSent.subscribe((payment) => {
         this.merchantConnectorRepository.notifyPushPaymentSent(payment.merchantUrl, payment).mapErr((e) => {
-          console.log(e);
+          this.logUtils.debug(e);
         });
       });
 
       context.onPushPaymentUpdated.subscribe((payment) => {
         this.merchantConnectorRepository.notifyPushPaymentUpdated(payment.merchantUrl, payment).mapErr((e) => {
-          console.log(e);
+          this.logUtils.debug(e);
         });
       });
 
       context.onPushPaymentReceived.subscribe((payment) => {
         this.merchantConnectorRepository.notifyPushPaymentReceived(payment.merchantUrl, payment).mapErr((e) => {
-          console.log(e);
+          this.logUtils.debug(e);
         });
       });
 
       context.onPullPaymentSent.subscribe((payment) => {
         this.merchantConnectorRepository.notifyPullPaymentSent(payment.merchantUrl, payment).mapErr((e) => {
-          console.log(e);
+          this.logUtils.debug(e);
         });
       });
 
       context.onPullPaymentUpdated.subscribe((payment) => {
         this.merchantConnectorRepository.notifyPullPaymentUpdated(payment.merchantUrl, payment).mapErr((e) => {
-          console.log(e);
+          this.logUtils.debug(e);
         });
       });
 
       context.onPullPaymentReceived.subscribe((payment) => {
         this.merchantConnectorRepository.notifyPullPaymentReceived(payment.merchantUrl, payment).mapErr((e) => {
-          console.log(e);
+          this.logUtils.debug(e);
         });
       });
 
@@ -65,13 +66,10 @@ export class MerchantService implements IMerchantService {
     });
   }
 
-  public authorizeMerchant(
-    merchantUrl: string,
-  ): ResultAsync<void, CoreUninitializedError | MerchantValidationError | PersistenceError> {
-    return ResultUtils.combine([this.contextProvider.getContext(), 
-      this.getAuthorizedMerchants(),
-    this.accountsRepository.getBalances()])
-    .map(async (vals) => {
+  public authorizeMerchant(merchantUrl: string): ResultAsync<void, MerchantValidationError> {
+    return ResultUtils.combine([this.contextProvider.getContext(),
+    this.getAuthorizedMerchants(),
+    this.accountsRepository.getBalances()]).map(async (vals) => {
       const [context, authorizedMerchantsMap, balances] = vals;
 
       // Remove the merchant iframe proxy related to that merchantUrl if there is any activated ones.
@@ -85,15 +83,22 @@ export class MerchantService implements IMerchantService {
     });
   }
 
-  public getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError> {
+  public getAuthorizedMerchants(): ResultAsync<Map<string, string>, never> {
     return this.merchantConnectorRepository.getAuthorizedMerchants();
   }
 
-  public activateAuthorizedMerchants(): ResultAsync<void, MerchantConnectorError | PersistenceError> {
+  public activateAuthorizedMerchants(): ResultAsync<
+    void,
+    | MerchantConnectorError
+    | MerchantValidationError
+    | BlockchainUnavailableError
+    | LogicalError
+    | ProxyError
+  > {
     return this.accountsRepository.getBalances()
-    .andThen((balances) => {
-      return this.merchantConnectorRepository.activateAuthorizedMerchants(balances);
-    });
+      .andThen((balances) => {
+        return this.merchantConnectorRepository.activateAuthorizedMerchants(balances);
+      });
   }
 
   public closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {

@@ -1,9 +1,5 @@
 import { BrowserNode } from "@connext/vector-browser-node";
-import {
-  CONDITIONAL_TRANSFER_CREATED_EVENT,
-  CONDITIONAL_TRANSFER_RESOLVED_EVENT,
-  NodeError,
-} from "@connext/vector-types";
+import { CONDITIONAL_TRANSFER_CREATED_EVENT, CONDITIONAL_TRANSFER_RESOLVED_EVENT } from "@connext/vector-types";
 import {
   EthereumAddress,
   PublicIdentifier,
@@ -23,14 +19,13 @@ import { IBrowserNode } from "@interfaces/utilities";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
 export class WrappedBrowserNode implements IBrowserNode {
-  protected toVectorError: (e: unknown) => VectorError;
-  constructor(protected browserNode: BrowserNode) {
-    this.toVectorError = (e) => {
-      return new VectorError(e as Error);
-    };
-  }
+  protected toVectorError: (e: unknown) => VectorError = (e) => {
+    return new VectorError(e as Error);
+  };
 
-  public init(signature: string, account: string): ResultAsync<void, VectorError> {
+  constructor(protected browserNode: BrowserNode) {}
+
+  public init(signature: string, account: EthereumAddress): ResultAsync<void, VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.init({
         signature,
@@ -40,15 +35,15 @@ export class WrappedBrowserNode implements IBrowserNode {
     );
   }
 
-  public reconcileDeposit(assetId: EthereumAddress, channelAddress: EthereumAddress): ResultAsync<string, VectorError> {
+  public reconcileDeposit(assetId: EthereumAddress, channelAddress: EthereumAddress): ResultAsync<EthereumAddress, VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.reconcileDeposit({ assetId, channelAddress }),
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as NodeError));
+        return errAsync(new VectorError(result.getError() as VectorError));
       } else {
-        return okAsync(result.getValue().channelAddress);
+        return okAsync(EthereumAddress(result.getValue().channelAddress));
       }
     });
   }
@@ -56,7 +51,7 @@ export class WrappedBrowserNode implements IBrowserNode {
   public withdraw(
     channelAddress: EthereumAddress,
     amount: string,
-    assetId: string,
+    assetId: EthereumAddress,
     recipient: EthereumAddress,
     quote?: IWithdrawQuote,
     callTo?: string,
@@ -77,9 +72,9 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as NodeError));
+        return errAsync(new VectorError(result.getError() as VectorError));
       } else {
-        return okAsync(result.getValue());
+        return okAsync(result.getValue() as IWithdrawResponse);
       }
     });
   }
@@ -88,20 +83,20 @@ export class WrappedBrowserNode implements IBrowserNode {
     return ResultAsync.fromPromise(this.browserNode.getTransfer({ transferId }), this.toVectorError).andThen(
       (result) => {
         if (result.isError) {
-          return errAsync(new VectorError(result.getError() as NodeError));
+          return errAsync(new VectorError(result.getError() as VectorError));
         } else {
           return okAsync(result.getValue() as IFullTransferState);
         }
       },
     );
   }
-  public getActiveTransfers(channelAddress: string): ResultAsync<IFullTransferState[], VectorError> {
+  public getActiveTransfers(channelAddress: EthereumAddress): ResultAsync<IFullTransferState[], VectorError> {
     return ResultAsync.fromPromise(this.browserNode.getActiveTransfers({ channelAddress }), this.toVectorError).andThen(
       (result) => {
         if (result.isError) {
-          return errAsync(new VectorError(result.getError() as NodeError));
+          return errAsync(new VectorError(result.getError() as VectorError));
         } else {
-          return okAsync(result.getValue());
+          return okAsync(result.getValue() as IFullTransferState[]);
         }
       },
     );
@@ -111,7 +106,7 @@ export class WrappedBrowserNode implements IBrowserNode {
     return ResultAsync.fromPromise(this.browserNode.getRegisteredTransfers({ chainId }), this.toVectorError).andThen(
       (result) => {
         if (result.isError) {
-          return errAsync(new VectorError(result.getError() as NodeError));
+          return errAsync(new VectorError(result.getError() as VectorError));
         } else {
           return okAsync(result.getValue());
         }
@@ -128,7 +123,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as NodeError));
+        return errAsync(new VectorError(result.getError() as VectorError));
       } else {
         return okAsync(result.getValue());
       }
@@ -139,7 +134,7 @@ export class WrappedBrowserNode implements IBrowserNode {
     return ResultAsync.fromPromise(this.browserNode.signUtilityMessage({ message }), this.toVectorError).andThen(
       (result) => {
         if (result.isError) {
-          return errAsync(new VectorError(result.getError() as NodeError));
+          return errAsync(new VectorError(result.getError() as VectorError));
         } else {
           return okAsync(result.getValue().signedMessage);
         }
@@ -161,7 +156,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as NodeError));
+        return errAsync(new VectorError(result.getError() as VectorError));
       } else {
         return okAsync(result.getValue());
       }
@@ -196,7 +191,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as NodeError));
+        return errAsync(new VectorError(result.getError() as VectorError));
       } else {
         return okAsync(result.getValue());
       }
@@ -206,9 +201,9 @@ export class WrappedBrowserNode implements IBrowserNode {
   public getStateChannels(): ResultAsync<EthereumAddress[], VectorError> {
     return ResultAsync.fromPromise(this.browserNode.getStateChannels(), this.toVectorError).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as NodeError));
+        return errAsync(new VectorError(result.getError() as VectorError));
       } else {
-        return okAsync(result.getValue());
+        return okAsync(result.getValue().map((val) => {return EthereumAddress(val);}));
       }
     });
   }
@@ -217,7 +212,7 @@ export class WrappedBrowserNode implements IBrowserNode {
     return ResultAsync.fromPromise(this.browserNode.getStateChannel({ channelAddress }), this.toVectorError).andThen(
       (result) => {
         if (result.isError) {
-          return errAsync(new VectorError(result.getError() as NodeError));
+          return errAsync(new VectorError(result.getError() as VectorError));
         } else {
           return okAsync(result.getValue());
         }
@@ -234,7 +229,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as NodeError));
+        return errAsync(new VectorError(result.getError() as VectorError));
       } else {
         return okAsync(result.getValue());
       }
@@ -252,7 +247,7 @@ export class WrappedBrowserNode implements IBrowserNode {
       this.toVectorError,
     ).andThen((result) => {
       if (result.isError) {
-        return errAsync(new VectorError(result.getError() as NodeError));
+        return errAsync(new VectorError(result.getError() as VectorError));
       } else {
         return okAsync(result.getValue());
       }
@@ -280,7 +275,7 @@ export class WrappedBrowserNode implements IBrowserNode {
     return this.browserNode.on(CONDITIONAL_TRANSFER_CREATED_EVENT, callback, filter);
   }
 
-  get publicIdentifier(): string {
-    return this.browserNode.publicIdentifier;
+  get publicIdentifier(): PublicIdentifier {
+    return PublicIdentifier(this.browserNode.publicIdentifier);
   }
 }

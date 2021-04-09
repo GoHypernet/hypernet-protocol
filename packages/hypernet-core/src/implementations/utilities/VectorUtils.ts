@@ -10,6 +10,8 @@ import {
   IBasicTransferResponse,
   IFullChannelState,
   IFullTransferState,
+  EthereumAddress,
+  PaymentId,
 } from "@hypernetlabs/objects";
 import {
   IBrowserNodeProvider,
@@ -36,10 +38,9 @@ import {
 import "reflect-metadata";
 import { serialize } from "class-transformer";
 import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@hypernetlabs/objects/types/typechain";
-import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils/dist/identifiers";
+import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import {
-  CoreUninitializedError,
   InvalidParametersError,
   RouterChannelUnknownError,
   RouterUnavailableError,
@@ -58,7 +59,7 @@ export class VectorUtils implements IVectorUtils {
   /**
    * Creates an instance of VectorUtils
    */
-  protected getRouterChannelAddressSetup: ResultAsync<string, RouterUnavailableError | CoreUninitializedError> | null;
+  protected getRouterChannelAddressSetup: ResultAsync<EthereumAddress, RouterUnavailableError> | null = null;
 
   constructor(
     protected configProvider: IConfigProvider,
@@ -68,23 +69,21 @@ export class VectorUtils implements IVectorUtils {
     protected paymentIdUtils: IPaymentIdUtils,
     protected logUtils: ILogUtils,
     protected timeUtils: ITimeUtils,
-  ) {
-    this.getRouterChannelAddressSetup = null;
-  }
+  ) {}
 
   /**
    * Resolves a message/offer/null transfer with Vector.
    * @param transferId the ID of the transfer to resolve
    */
   public resolveMessageTransfer(transferId: string): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
-    let channelAddress: string;
+    let channelAddress: EthereumAddress;
     let browserNode: IBrowserNode;
 
-    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.getRouterChannelAddress()]).andThen(
-      () => {
+    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.getRouterChannelAddress()])
+      .andThen(() => {
         return browserNode.resolveTransfer(channelAddress, transferId, { message: "" } as MessageResolver);
-      },
-    );
+      })
+      .mapErr((err) => new TransferResolutionError(err, err?.message));
   }
 
   /**
@@ -101,7 +100,7 @@ export class VectorUtils implements IVectorUtils {
       paymentAmountTaken: amount,
     };
 
-    let channelAddress: string;
+    let channelAddress: EthereumAddress;
     let browserNode: IBrowserNode;
 
     return ResultUtils.combine([
@@ -129,7 +128,8 @@ export class VectorUtils implements IVectorUtils {
         };
 
         return browserNode.resolveTransfer(channelAddress, transferId, resolver);
-      });
+      })
+      .mapErr((err) => new TransferResolutionError(err, err?.message));
   }
 
   /**
@@ -152,7 +152,7 @@ export class VectorUtils implements IVectorUtils {
       UUID: paymentId,
     };
 
-    let channelAddress: string;
+    let channelAddress: EthereumAddress;
     let browserNode: IBrowserNode;
 
     return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.getRouterChannelAddress()])
@@ -177,7 +177,8 @@ export class VectorUtils implements IVectorUtils {
         };
 
         return browserNode.resolveTransfer(channelAddress, transferId, resolver);
-      });
+      })
+      .mapErr((err) => new TransferResolutionError(err, err?.message));
   }
 
   /**
@@ -186,7 +187,7 @@ export class VectorUtils implements IVectorUtils {
    * @param message the message to send as IHypernetOfferDetails
    */
   public createPullNotificationTransfer(
-    toAddress: string,
+    toAddress: PublicIdentifier,
     message: IHypernetPullPaymentDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // The message type has to be PULLPAYMENT
@@ -204,35 +205,32 @@ export class VectorUtils implements IVectorUtils {
       }
     }
 
-    const prerequisites = (ResultUtils.combine([
-      this.configProvider.getConfig() as ResultAsync<any, any>,
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
       this.getRouterChannelAddress(),
       this.browserNodeProvider.getBrowserNode(),
-    ]) as unknown) as ResultAsync<
-      [HypernetConfig, string, IBrowserNode],
-      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
-    >;
+    ])
+      .andThen((vals) => {
+        const [config, channelAddress, browserNode] = vals;
 
-    return prerequisites.andThen((vals) => {
-      const [config, channelAddress, browserNode] = vals;
+        const initialState: MessageState = {
+          message: serialize(message),
+        };
 
-      const initialState: MessageState = {
-        message: serialize(message),
-      };
-
-      return browserNode.conditionalTransfer(
-        channelAddress,
-        "0",
-        config.hypertokenAddress,
-        "MessageTransfer",
-        initialState,
-        toAddress,
-        undefined, // CRITICAL- must be undefined
-        undefined,
-        undefined,
-        message,
-      );
-    });
+        return browserNode.conditionalTransfer(
+          channelAddress,
+          "0",
+          config.hypertokenAddress,
+          "MessageTransfer",
+          initialState,
+          toAddress,
+          undefined, // CRITICAL- must be undefined
+          undefined,
+          undefined,
+          message,
+        );
+      })
+      .mapErr((err) => new TransferCreationError(err, err?.message));
   }
 
   /**
@@ -241,7 +239,7 @@ export class VectorUtils implements IVectorUtils {
    * @param message the message to send as IHypernetOfferDetails
    */
   public createOfferTransfer(
-    toAddress: string,
+    toAddress: PublicIdentifier,
     message: IHypernetOfferDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // The message type has to be OFFER
@@ -257,8 +255,8 @@ export class VectorUtils implements IVectorUtils {
       }
     }
 
-    return ResultUtils.combine([this.getRouterChannelAddress(), this.browserNodeProvider.getBrowserNode()]).andThen(
-      (vals) => {
+    return ResultUtils.combine([this.getRouterChannelAddress(), this.browserNodeProvider.getBrowserNode()])
+      .andThen((vals) => {
         const [channelAddress, browserNode] = vals;
 
         const initialState: MessageState = {
@@ -277,8 +275,8 @@ export class VectorUtils implements IVectorUtils {
           undefined,
           message,
         );
-      },
-    );
+      })
+      .mapErr((err) => new TransferCreationError(err, err?.message));
   }
 
   /**
@@ -296,8 +294,8 @@ export class VectorUtils implements IVectorUtils {
     type: EPaymentType,
     toAddress: PublicIdentifier,
     amount: BigNumber,
-    assetAddress: string,
-    paymentId: string,
+    assetAddress: EthereumAddress,
+    paymentId: PaymentId,
     start: number,
     expiration: number,
     deltaTime?: number,
@@ -331,71 +329,66 @@ export class VectorUtils implements IVectorUtils {
       }
     }
 
-    const prerequisites = (ResultUtils.combine([
-      this.getRouterChannelAddress() as ResultAsync<any, any>,
-      this.browserNodeProvider.getBrowserNode(),
-    ]) as unknown) as ResultAsync<
-      [string, IBrowserNode],
-      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
-    >;
+    return ResultUtils.combine([this.getRouterChannelAddress(), this.browserNodeProvider.getBrowserNode()])
+      .andThen((vals) => {
+        const [channelAddress, browserNode] = vals;
 
-    return prerequisites.andThen((vals) => {
-      const [channelAddress, browserNode] = vals;
+        const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
 
-      const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
+        // @todo toEthAddress isn't really an eth address, it's the internal signing key
+        // therefore we need to actually do the signing of the payment transfer (on resolve)
+        // with this internal key!
 
-      // @todo toEthAddress isn't really an eth address, it's the internal signing key
-      // therefore we need to actually do the signing of the payment transfer (on resolve)
-      // with this internal key!
-
-      const infiniteRate = {
-        deltaAmount: amount.toString(),
-        deltaTime: "1",
-      };
-
-      let ourRate: Rate;
-      // Have to throw this error, or the ourRate object below will complain that one
-      // of the params is possibly undefined.
-      if (type == EPaymentType.Pull) {
-        if (deltaTime == null || deltaAmount == null) {
-          this.logUtils.error("Somehow, deltaTime or deltaAmount were not set!");
-          return errAsync(new InvalidParametersError("Somehow, deltaTime or deltaAmount were not set!"));
-        }
-
-        if (deltaTime == 0 || deltaAmount == "0") {
-          this.logUtils.error("deltatime & deltaAmount cannot be zero!");
-          return errAsync(new InvalidParametersError("deltatime & deltaAmount cannot be zero!"));
-        }
-
-        ourRate = {
-          deltaTime: deltaTime?.toString(),
-          deltaAmount: deltaAmount?.toString(),
+        const infiniteRate = {
+          deltaAmount: amount.toString(),
+          deltaTime: "1",
         };
-      } else {
-        ourRate = infiniteRate;
-      }
 
-      const initialState: ParameterizedState = {
-        receiver: toEthAddress,
-        start: start.toString(),
-        expiration: expiration.toString(),
-        UUID: paymentId,
-        rate: ourRate,
-      };
+        let ourRate: Rate;
+        // Have to throw this error, or the ourRate object below will complain that one
+        // of the params is possibly undefined.
+        if (type == EPaymentType.Pull) {
+          if (deltaTime == null || deltaAmount == null) {
+            this.logUtils.error("Somehow, deltaTime or deltaAmount were not set!");
+            return errAsync(new InvalidParametersError("Somehow, deltaTime or deltaAmount were not set!"));
+          }
 
-      return browserNode.conditionalTransfer(
-        channelAddress,
-        amount.toString(),
-        assetAddress,
-        "Parameterized",
-        initialState,
-        toAddress,
-        undefined,
-        undefined,
-        undefined,
-        {}, // intentially left blank!
-      );
-    });
+          if (deltaTime == 0 || deltaAmount == "0") {
+            this.logUtils.error("deltatime & deltaAmount cannot be zero!");
+            return errAsync(new InvalidParametersError("deltatime & deltaAmount cannot be zero!"));
+          }
+
+          ourRate = {
+            deltaTime: deltaTime?.toString(),
+            deltaAmount: deltaAmount?.toString(),
+          };
+        } else {
+          ourRate = infiniteRate;
+        }
+
+        const initialState: ParameterizedState = {
+          receiver: toEthAddress,
+          start: start.toString(),
+          expiration: expiration.toString(),
+          UUID: paymentId,
+          rate: ourRate,
+        };
+
+        return browserNode.conditionalTransfer(
+          channelAddress,
+          amount.toString(),
+          assetAddress,
+          "Parameterized",
+          initialState,
+          toAddress,
+          undefined,
+          undefined,
+          undefined,
+          {}, // intentially left blank!
+        );
+      })
+      .map((val) => val as IBasicTransferResponse)
+      .mapErr((err) => new TransferCreationError(err, err?.message));
   }
 
   /**
@@ -411,7 +404,7 @@ export class VectorUtils implements IVectorUtils {
     mediatorPublicKey: PublicKey,
     amount: BigNumber,
     expiration: number,
-    paymentId: string,
+    paymentId: PaymentId,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
     // Sanity check - make sure the paymentId is valid:
     const validPayment = this.paymentIdUtils.isValidPaymentId(paymentId);
@@ -423,48 +416,45 @@ export class VectorUtils implements IVectorUtils {
       }
     }
 
-    const prerequisites = (ResultUtils.combine([
+    return ResultUtils.combine([
       this.configProvider.getConfig() as ResultAsync<any, any>,
       this.getRouterChannelAddress(),
       this.browserNodeProvider.getBrowserNode(),
-    ]) as unknown) as ResultAsync<
-      [HypernetConfig, string, IBrowserNode],
-      RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
-    >;
+    ])
+      .andThen((vals) => {
+        const [config, channelAddress, browserNode] = vals;
 
-    return prerequisites.andThen((vals) => {
-      const [config, channelAddress, browserNode] = vals;
+        const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
 
-      const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
+        const initialState: InsuranceState = {
+          receiver: toEthAddress,
+          mediator: mediatorPublicKey,
+          collateral: amount.toString(),
+          expiration: expiration.toString(),
+          UUID: paymentId,
+        };
 
-      const initialState: InsuranceState = {
-        receiver: toEthAddress,
-        mediator: mediatorPublicKey,
-        collateral: amount.toString(),
-        expiration: expiration.toString(),
-        UUID: paymentId,
-      };
-
-      return browserNode.conditionalTransfer(
-        channelAddress,
-        amount.toString(),
-        config.hypertokenAddress,
-        "Insurance",
-        initialState,
-        toAddress,
-        undefined,
-        undefined,
-        undefined,
-        {}, // left intentionally blank!
-      );
-    });
+        return browserNode.conditionalTransfer(
+          channelAddress,
+          amount.toString(),
+          config.hypertokenAddress,
+          "Insurance",
+          initialState,
+          toAddress,
+          undefined,
+          undefined,
+          undefined,
+          {}, // left intentionally blank!
+        );
+      })
+      .mapErr((err) => new TransferCreationError(err, err?.message));
   }
 
   /**
    * Returns the address of the channel with the router, if exists.
    * Otherwise, attempts to create a channel with the router & return the address.
    */
-  public getRouterChannelAddress(): ResultAsync<string, RouterChannelUnknownError | CoreUninitializedError> {
+  public getRouterChannelAddress(): ResultAsync<EthereumAddress, RouterChannelUnknownError | VectorError> {
     // If we already have the address, no need to do the rest
     if (this.getRouterChannelAddressSetup != null) {
       return this.getRouterChannelAddressSetup;
@@ -474,7 +464,7 @@ export class VectorUtils implements IVectorUtils {
     let context: InitializedHypernetContext;
     let browserNode: IBrowserNode;
 
-    this.getRouterChannelAddressSetup = ResultUtils.combine([
+    return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.contextProvider.getInitializedContext(),
       this.browserNodeProvider.getBrowserNode(),
@@ -500,12 +490,11 @@ export class VectorUtils implements IVectorUtils {
           if (channel.aliceIdentifier !== config.routerPublicIdentifier) {
             continue;
           }
-          return okAsync<string, RouterChannelUnknownError | CoreUninitializedError>(channel.channelAddress as string);
+          return okAsync<EthereumAddress, RouterChannelUnknownError>(EthereumAddress(channel.channelAddress));
         }
         // If a channel does not exist with the router, we need to create it.
         return this._createRouterStateChannel(browserNode, config);
       });
-    return this.getRouterChannelAddressSetup;
   }
 
   public getTimestampFromTransfer(transfer: IFullTransferState): number {
@@ -537,11 +526,11 @@ export class VectorUtils implements IVectorUtils {
   protected _createRouterStateChannel(
     browserNode: IBrowserNode,
     config: HypernetConfig,
-  ): ResultAsync<string, VectorError> {
+  ): ResultAsync<EthereumAddress, VectorError> {
     return browserNode
       .setup(config.routerPublicIdentifier, config.chainId, DEFAULT_CHANNEL_TIMEOUT.toString())
       .map((response) => {
-        return response.channelAddress;
+        return EthereumAddress(response.channelAddress);
       })
       .orElse((e) => {
         // Channel could be already set up, so we should try restoring the state
@@ -555,13 +544,13 @@ export class VectorUtils implements IVectorUtils {
             if (channel == null) {
               return errAsync(e);
             }
-            return okAsync(channel.channelAddress);
+            return okAsync(EthereumAddress(channel.channelAddress));
           });
       });
   }
 
   protected _getStateChannel(
-    channelAddress: string,
+    channelAddress: EthereumAddress,
     browserNode: IBrowserNode,
   ): ResultAsync<IFullChannelState, RouterChannelUnknownError | VectorError> {
     return browserNode.getStateChannel(channelAddress).andThen((channel) => {

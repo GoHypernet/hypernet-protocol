@@ -1,10 +1,20 @@
-import { EthereumAddress, Payment, PublicIdentifier, PullPayment, PushPayment } from "@hypernetlabs/objects";
 import {
-  CoreUninitializedError,
-  PaymentFinalizeError,
-  RouterChannelUnknownError,
-  VectorError,
+  EthereumAddress,
+  Payment,
+  PublicIdentifier,
+  PullPayment,
+  PushPayment,
+  PaymentCreationError,
+  BlockchainUnavailableError,
+  LogicalError,
+  TransferResolutionError,
+  InvalidPaymentError,
+  InvalidParametersError,
+  PaymentStakeError,
+  TransferCreationError,
+  PaymentId,
 } from "@hypernetlabs/objects";
+import { PaymentFinalizeError, RouterChannelUnknownError, VectorError } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IPaymentRepository {
@@ -13,8 +23,16 @@ export interface IPaymentRepository {
    * @param paymentIds
    */
   getPaymentsByIds(
-    paymentIds: string[],
-  ): ResultAsync<Map<string, Payment>, RouterChannelUnknownError | CoreUninitializedError | VectorError>;
+    paymentIds: PaymentId[],
+  ): ResultAsync<
+    Map<PaymentId, Payment>,
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+  >;
 
   /**
    * Creates a push payment and returns it. Nothing moves until
@@ -28,7 +46,7 @@ export interface IPaymentRepository {
     requiredStake: string,
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<PushPayment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<PushPayment, PaymentCreationError>;
 
   createPullPayment(
     counterPartyAccount: PublicIdentifier,
@@ -39,12 +57,9 @@ export interface IPaymentRepository {
     requiredStake: string, // TODO: amounts should be consistently use BigNumber
     paymentToken: EthereumAddress,
     merchantUrl: string,
-  ): ResultAsync<PullPayment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<PullPayment, PaymentCreationError>;
 
-  createPullRecord(
-    paymentId: string,
-    amount: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  createPullRecord(paymentId: PaymentId, amount: string): ResultAsync<Payment, PaymentCreationError>;
 
   /**
    * Provides assets for a given list of payment ids.
@@ -52,8 +67,19 @@ export interface IPaymentRepository {
    * @param paymentId
    */
   provideAsset(
-    paymentId: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+    paymentId: PaymentId,
+  ): ResultAsync<
+    Payment,
+    | BlockchainUnavailableError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | VectorError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
+  >;
 
   /**
    * Provides stake for a given payment id
@@ -61,9 +87,20 @@ export interface IPaymentRepository {
    * @param paymentId
    */
   provideStake(
-    paymentId: string,
+    paymentId: PaymentId,
     merchantAddress: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<
+    Payment,
+    | BlockchainUnavailableError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | VectorError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
+  >;
 
   /**
    * Finalizes/confirms a payment
@@ -72,10 +109,17 @@ export interface IPaymentRepository {
    * @param paymentId
    */
   finalizePayment(
-    paymentId: string,
+    paymentId: PaymentId,
     amount: string,
   ): ResultAsync<
     Payment,
-    PaymentFinalizeError | RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | PaymentFinalizeError
+    | TransferResolutionError
+    | InvalidPaymentError
+    | InvalidParametersError
   >;
 }
