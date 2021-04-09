@@ -135,8 +135,10 @@ export class PaymentUtils implements IPaymentUtils {
 
     const details = new PaymentInternalDetails(
       TransferId(sortedTransfers.offerTransfer.transferId),
-      TransferId(sortedTransfers.insuranceTransfer?.transferId || ""),
-      TransferId(sortedTransfers.parameterizedTransfer?.transferId || ""),
+      sortedTransfers.insuranceTransfer?.transferId ? TransferId(sortedTransfers.insuranceTransfer?.transferId) : null,
+      sortedTransfers.parameterizedTransfer?.transferId
+        ? TransferId(sortedTransfers.parameterizedTransfer?.transferId)
+        : null,
       sortedTransfers.pullRecordTransfers.map((val) => {
         return TransferId(val.transferId);
       }),
