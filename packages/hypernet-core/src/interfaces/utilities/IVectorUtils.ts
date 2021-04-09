@@ -1,6 +1,5 @@
 import {
   IHypernetOfferDetails,
-  PublicKey,
   IHypernetPullPaymentDetails,
   IBasicTransferResponse,
   IFullTransferState,
@@ -93,7 +92,7 @@ export interface IVectorUtils {
    */
   createInsuranceTransfer(
     toAddress: PublicIdentifier,
-    mediatorPublicKey: PublicKey,
+    mediatorAddress: EthereumAddress,
     amount: BigNumber,
     expiration: number,
     UUID: string,

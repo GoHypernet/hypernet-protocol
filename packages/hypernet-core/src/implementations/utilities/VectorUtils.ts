@@ -5,7 +5,6 @@ import {
   IHypernetOfferDetails,
   InitializedHypernetContext,
   PublicIdentifier,
-  PublicKey,
   IHypernetPullPaymentDetails,
   IBasicTransferResponse,
   IFullChannelState,
@@ -403,7 +402,7 @@ export class VectorUtils implements IVectorUtils {
    */
   public createInsuranceTransfer(
     toAddress: PublicIdentifier,
-    mediatorPublicKey: PublicKey,
+    mediatorAddress: EthereumAddress,
     amount: BigNumber,
     expiration: number,
     paymentId: PaymentId,
@@ -430,7 +429,7 @@ export class VectorUtils implements IVectorUtils {
 
         const initialState: InsuranceState = {
           receiver: toEthAddress,
-          mediator: mediatorPublicKey,
+          mediator: mediatorAddress,
           collateral: amount.toString(),
           expiration: expiration.toString(),
           UUID: paymentId,

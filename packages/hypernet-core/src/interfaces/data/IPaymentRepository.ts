@@ -6,7 +6,6 @@ import {
   PushPayment,
   PaymentId,
   MerchantUrl,
-  PublicKey,
 } from "@hypernetlabs/objects";
 import {
   PaymentFinalizeError,
@@ -94,7 +93,7 @@ export interface IPaymentRepository {
    */
   provideStake(
     paymentId: PaymentId,
-    merchantAddress: PublicKey,
+    merchantAddress: EthereumAddress,
   ): ResultAsync<
     Payment,
     | BlockchainUnavailableError

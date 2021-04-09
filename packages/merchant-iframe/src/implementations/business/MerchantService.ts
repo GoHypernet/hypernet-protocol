@@ -60,7 +60,7 @@ export class MerchantService implements IMerchantService {
 
   public validateMerchantConnector(): ResultAsync<Signature, MerchantValidationError> {
     // This is going to connect to the merchantUrl/connector and pull down the connector code.
-    // That code is expected to be signed, with the public key available at merchantUrl/publicKey
+    // That code is expected to be signed, with the public key available at merchantUrl/address
     // The code will be cached in local storage but the signing key will be
     const context = this.contextProvider.getMerchantContext();
     let signature: Signature = Signature("");

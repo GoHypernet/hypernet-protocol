@@ -8,7 +8,6 @@ import {
   InitializedHypernetContext,
   Payment,
   PublicIdentifier,
-  PublicKey,
   PullPayment,
   PushPayment,
   IHypernetPullPaymentDetails,
@@ -441,7 +440,7 @@ export class PaymentRepository implements IPaymentRepository {
    */
   public provideStake(
     paymentId: PaymentId,
-    merchantPublicKey: PublicKey,
+    merchantAddress: EthereumAddress,
   ): ResultAsync<
     Payment,
     | BlockchainUnavailableError
@@ -484,7 +483,7 @@ export class PaymentRepository implements IPaymentRepository {
         this.logUtils.log(`PaymentRepository:provideStake: Creating insurance transfer for paymentId: ${paymentId}`);
         return this.vectorUtils.createInsuranceTransfer(
           paymentSender,
-          merchantPublicKey,
+          merchantAddress,
           payment.requiredStake,
           paymentExpiration,
           paymentID,

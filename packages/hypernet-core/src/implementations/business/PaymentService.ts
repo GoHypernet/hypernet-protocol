@@ -16,7 +16,6 @@ import {
   HypernetContext,
   PaymentId,
   MerchantUrl,
-  PublicKey,
 } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
@@ -312,7 +311,7 @@ export class PaymentService implements IPaymentService {
           const merchantAddress = addresses.get(payment.merchantUrl);
 
           if (merchantAddress != null) {
-            const stakeAttempt = this.paymentRepository.provideStake(paymentId, PublicKey(merchantAddress)).match(
+            const stakeAttempt = this.paymentRepository.provideStake(paymentId, merchantAddress).match(
               (payment) => ok(payment) as Result<Payment, AcceptPaymentError>,
               (e) => err(new AcceptPaymentError(`Payment ${paymentId} could not be staked! Source exception: ${e}`)),
             );
