@@ -4,7 +4,7 @@ import { MerchantService } from "@merchant-iframe/implementations/business";
 import { ContextProvider } from "@merchant-iframe/implementations/utils";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { MerchantValidationError } from "@merchant-iframe/interfaces/objects/errors";
-import { MerchantUrl, Signature } from "@hypernetlabs/objects";
+import { MerchantUrl, Signature, EthereumAddress } from "@hypernetlabs/objects";
 import { IMerchantConnectorRepository, IPersistenceRepository } from "@merchant-iframe/interfaces/data";
 
 jest.mock("ethers", () => {
@@ -37,19 +37,21 @@ class MerchantServiceMocks {
 
   public runSuccessScenarios() {
     td.when(this.merchantConnectorRepository.getMerchantSignature(this.merchantUrl)).thenReturn(
-      okAsync(this.signature),
+      okAsync(Signature(this.signature)),
     );
-    td.when(this.merchantConnectorRepository.getMerchantAddress(this.merchantUrl)).thenReturn(okAsync(this.address));
+    td.when(this.merchantConnectorRepository.getMerchantAddress(this.merchantUrl)).thenReturn(
+      okAsync(EthereumAddress(this.address)),
+    );
     td.when(this.merchantConnectorRepository.getMerchantCode(this.merchantUrl)).thenReturn(okAsync(this.merchantCode));
     td.when(this.persistenceRepository.addActivatedMerchantSignature(this.signature)).thenReturn(undefined);
   }
 
   public runFailureScenarios() {
     td.when(this.merchantConnectorRepository.getMerchantSignature(this.merchantUrl)).thenReturn(
-      okAsync(this.signature),
+      okAsync(Signature(this.signature)),
     );
     td.when(this.merchantConnectorRepository.getMerchantAddress(this.merchantUrl)).thenReturn(
-      okAsync(this.address + "1"),
+      okAsync(EthereumAddress(this.address + "1")),
     );
     td.when(this.merchantConnectorRepository.getMerchantCode(this.merchantUrl)).thenReturn(okAsync(this.merchantCode));
     td.when(

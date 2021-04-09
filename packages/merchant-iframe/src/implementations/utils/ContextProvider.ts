@@ -8,7 +8,14 @@ export class ContextProvider implements IContextProvider {
   protected context: MerchantContext;
 
   constructor(merchantUrl: MerchantUrl) {
-    this.context = new MerchantContext(merchantUrl, new Subject<IMerchantConnector>(), null, null, null);
+    this.context = new MerchantContext(
+      merchantUrl,
+      new Subject<IMerchantConnector>(),
+      null,
+      null,
+      null,
+      null, // Public Identifier
+    );
   }
 
   getMerchantContext(): MerchantContext {

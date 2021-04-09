@@ -10,6 +10,8 @@ import {
   ProxyError,
   Signature,
   MerchantUrl,
+  Balances,
+  PublicIdentifier,
 } from "@hypernetlabs/objects";
 import { HypernetContext, PullPayment, PushPayment } from "@hypernetlabs/objects";
 import { IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
@@ -28,8 +30,26 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     super(element, iframeUrl, iframeName, debug);
   }
 
-  public activateConnector(): ResultAsync<void, MerchantConnectorError | ProxyError> {
-    return this._createCall("activateConnector", null);
+  public activateConnector(
+    publicIdentifier: PublicIdentifier,
+    balances: Balances,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError> {
+    const assets = balances.assets.map((val) => {
+      return {
+        assetAddress: val.assetAddress,
+        name: val.name,
+        symbol: val.symbol,
+        decimals: val.decimals,
+        totalAmount: val.totalAmount.toString(),
+        lockedAmount: val.lockedAmount.toString(),
+        freeAmount: val.freeAmount.toString(),
+      };
+    });
+    const activateData = {
+      publicIdentifier,
+      balances: { assets: assets },
+    };
+    return this._createCall("activateConnector", activateData);
   }
 
   public resolveChallenge(paymentId: PaymentId): ResultAsync<IResolutionResult, MerchantConnectorError | ProxyError> {
@@ -124,6 +144,14 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
 
   public notifyPullPaymentReceived(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPullPaymentReceived", payment);
+  }
+
+  public notifyPublicIdentifier(public_identifier: PublicIdentifier): ResultAsync<void, MerchantConnectorError> {
+    return this._createCall("notifyPublicIdentifier", public_identifier);
+  }
+
+  public notifyBalancesReceived(balances: Balances): ResultAsync<void, MerchantConnectorError> {
+    return this._createCall("notifyBalancesReceived", balances);
   }
 
   private _pushOpenedMerchantIFrame(merchantUrl: MerchantUrl) {

@@ -639,7 +639,7 @@ export class PaymentUtils implements IPaymentUtils {
         }
       }
 
-      this.logUtils.log(`
+      this.logUtils.debug(`
         PaymentUtils:sortTransfers
   
         offerTransfers: ${offerTransfers.length}

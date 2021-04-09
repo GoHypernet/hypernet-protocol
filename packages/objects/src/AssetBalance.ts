@@ -11,7 +11,7 @@ import { BigNumber } from "ethers";
 
 export class AssetBalance {
   constructor(
-    public assetAddresss: EthereumAddress,
+    public assetAddress: EthereumAddress,
     public name: string,
     public symbol: string,
     public decimals: number,

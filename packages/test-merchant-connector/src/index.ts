@@ -9,7 +9,7 @@ import { Subject } from "rxjs";
 import { Bytes32 } from "@connext/vector-types";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { ChannelSigner } from "@connext/vector-utils";
-import { PushPayment, PullPayment, PaymentId } from "@hypernetlabs/objects";
+import { PushPayment, PullPayment, PublicIdentifier, Balances } from "@hypernetlabs/objects";
 
 declare global {
   interface Window {
@@ -131,9 +131,19 @@ class TestMerchantConnector implements IMerchantConnector {
     console.log("Pull Payment Updated");
     console.log(payment);
   }
-  onPullPaymentReceived(payment: PullPayment): void {
+  public onPullPaymentReceived(payment: PullPayment): void {
     console.log("Pull Payment Received");
     console.log(payment);
+  }
+
+  public onPublicIdentifierReceived(publicIdentifier: PublicIdentifier): void {
+    console.log("Public Identifier Received");
+    console.log(publicIdentifier);
+  }
+
+  public onBalancesReceived(balances: Balances): void {
+    console.log("Balances Received");
+    console.log(balances);
   }
 }
 

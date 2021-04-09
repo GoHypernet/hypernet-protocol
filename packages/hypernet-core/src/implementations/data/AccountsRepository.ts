@@ -123,7 +123,7 @@ export class AccountsRepository implements IAccountsRepository {
   > {
     return this.getBalances().andThen((balances) => {
       for (const assetBalance of balances.assets) {
-        if (assetBalance.assetAddresss === assetAddress) {
+        if (assetBalance.assetAddress === assetAddress) {
           // The user has a balance of the selected asset type, so we have an asset balance
           // to give back.
           return okAsync(assetBalance);

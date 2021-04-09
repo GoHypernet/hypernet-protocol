@@ -49,7 +49,7 @@ describe("EthersBlockchainUtils tests", () => {
 
     const wallet = new ethers.Wallet(privateKey);
 
-    let signature = await wallet._signTypedData(domain, types, value);
+    let signature = Signature(await wallet._signTypedData(domain, types, value));
 
     // Act
     const result = utils.verifyTypedData(domain, types, value, Signature(signature));
@@ -68,7 +68,7 @@ describe("EthersBlockchainUtils tests", () => {
 
     const wallet = new ethers.Wallet(privateKey);
 
-    let signature = await wallet._signTypedData(domain, types, value);
+    let signature = Signature(await wallet._signTypedData(domain, types, value));
 
     // Act
     const value2 = {

@@ -83,7 +83,7 @@ export class TokenSelectorViewModel {
           const paymentTokens = new Array<PaymentTokenOption>();
           for (const assetBalance of balances.assets) {
             // TODO: Convert the asset address to a readable name!
-            paymentTokens.push(new PaymentTokenOption(assetBalance.assetAddresss, assetBalance.assetAddresss));
+            paymentTokens.push(new PaymentTokenOption(assetBalance.assetAddress, assetBalance.assetAddress));
           }
 
           this.paymentTokens(paymentTokens);
