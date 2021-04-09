@@ -7,6 +7,7 @@ import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { IMerchantConnector, IRedirectInfo } from "@hypernetlabs/merchant-connector";
 import { ExpectedRedirect } from "@merchant-iframe/interfaces/objects";
+import { LogicalError, PublicIdentifier, Balances, EthereumAddress, Signature } from "@hypernetlabs/objects";
 
 declare global {
   interface Window {
@@ -22,7 +23,7 @@ export class MerchantService implements IMerchantService {
   ) {}
   private static merchantUrlCacheBusterUsed: boolean = false;
 
-  public activateMerchantConnector(): ResultAsync<
+  public activateMerchantConnector(publicIdentifier: PublicIdentifier, balances: Balances): ResultAsync<
     IMerchantConnector,
     MerchantConnectorError | MerchantValidationError
   > {
@@ -31,6 +32,10 @@ export class MerchantService implements IMerchantService {
     // If we don't have validated code, that's a problem.
     if (context.validatedMerchantCode == null || context.validatedMerchantSignature == null) {
       return errAsync(new MerchantValidationError("Cannot activate merchant connector, no validated code available!"));
+    }
+
+    if (publicIdentifier == null) {
+      return errAsync(new LogicalError("Cannot activate merchant connector, public identifier is unknown!"));
     }
 
     // We will now run the connector code. It needs to put an IMerchantConnector object in the window.connector
@@ -44,6 +49,12 @@ export class MerchantService implements IMerchantService {
     if (merchantConnector == null) {
       return errAsync(new MerchantConnectorError("Validated code does not evaluate to an object"));
     }
+
+    console.log(`CHARLIE, publicIdentifier=${publicIdentifier}, balances=${balances}`);
+
+    // Send some initial information to the merchant connector
+    merchantConnector.onPublicIdentifierReceived(publicIdentifier);
+    merchantConnector.onBalancesReceived(balances);
 
     // Store the merchant connector object and notify the world
     context.merchantConnector = merchantConnector;
@@ -62,8 +73,8 @@ export class MerchantService implements IMerchantService {
     // That code is expected to be signed, with the public key available at merchantUrl/publicKey
     // The code will be cached in local storage but the signing key will be
     const context = this.contextProvider.getMerchantContext();
-    let signature: string = "";
-    let address: string = "";
+    let signature = Signature("");
+    let address = EthereumAddress("");
 
     // If there is no merchant URL set, it's not an error
     if (context.merchantUrl == "") {
@@ -92,8 +103,8 @@ export class MerchantService implements IMerchantService {
 
   private _validateMerchantConnectorCode(
     merchantUrl: string,
-    signature: string,
-    address: string,
+    signature: Signature,
+    address: EthereumAddress,
     useCacheBuster?: boolean,
   ): ResultAsync<string, MerchantValidationError> {
     // If there is no merchant URL set, it's not an error
@@ -151,8 +162,8 @@ export class MerchantService implements IMerchantService {
     // had been previously activated in this session.
     const activatedMerchants = this.persistenceRepository.getActivatedMerchantSignatures();
 
-    if (context.validatedMerchantSignature != null && activatedMerchants.includes(context.validatedMerchantSignature)) {
-      return this.activateMerchantConnector();
+    if (context.validatedMerchantSignature != null && activatedMerchants.includes(context.validatedMerchantSignature) && context.publicIdentifier != null) {
+      return this.activateMerchantConnector(context.publicIdentifier, new Balances([]));
     }
 
     return okAsync(null);
@@ -187,5 +198,13 @@ export class MerchantService implements IMerchantService {
       }
     }
     return errAsync(new MerchantValidationError("merchantUrl can not be determined!"));
+  }
+
+  public publicIdentifierReceived(publicIdentifier: PublicIdentifier): ResultAsync<void, LogicalError> {
+    const context = this.contextProvider.getMerchantContext();
+    context.publicIdentifier = publicIdentifier;
+    this.contextProvider.setMerchantContext(context);
+    context.merchantConnector?.onPublicIdentifierReceived(publicIdentifier); 
+    return okAsync(undefined);
   }
 }

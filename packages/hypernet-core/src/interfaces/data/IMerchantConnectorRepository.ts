@@ -1,5 +1,6 @@
 import { ResultAsync, Result } from "neverthrow";
 import {
+  Balances,
   LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
@@ -25,7 +26,8 @@ export interface IMerchantConnectorRepository {
    * @param signature
    */
   addAuthorizedMerchant(
-    merchantUrl: string,
+    merchantUrl: string, 
+    initialBalances: Balances,
   ): ResultAsync<
     void,
     | PersistenceError
@@ -44,7 +46,7 @@ export interface IMerchantConnectorRepository {
 
   getAuthorizedMerchants(): ResultAsync<Map<string, Signature>, never>;
 
-  activateAuthorizedMerchants(): ResultAsync<
+  activateAuthorizedMerchants(balances: Balances): ResultAsync<
     void,
     MerchantConnectorError | MerchantValidationError | BlockchainUnavailableError | LogicalError | ProxyError
   >;
@@ -64,4 +66,5 @@ export interface IMerchantConnectorRepository {
   notifyPullPaymentSent(merchantUrl: string, payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
   notifyPullPaymentUpdated(merchantUrl: string, payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
   notifyPullPaymentReceived(merchantUrl: string, payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
+  notifyBalancesReceived(balances: Balances): ResultAsync<void, MerchantConnectorError>;
 }
