@@ -7,7 +7,7 @@ import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { IMerchantConnector, IRedirectInfo } from "@hypernetlabs/merchant-connector";
 import { ExpectedRedirect } from "@merchant-iframe/interfaces/objects";
-import { LogicalError, PublicIdentifier, Balances } from "@hypernetlabs/objects";
+import { LogicalError, PublicIdentifier, Balances, EthereumAddress, Signature } from "@hypernetlabs/objects";
 
 declare global {
   interface Window {
@@ -73,8 +73,8 @@ export class MerchantService implements IMerchantService {
     // That code is expected to be signed, with the public key available at merchantUrl/publicKey
     // The code will be cached in local storage but the signing key will be
     const context = this.contextProvider.getMerchantContext();
-    let signature: string = "";
-    let address: string = "";
+    let signature = Signature("");
+    let address = EthereumAddress("");
 
     // If there is no merchant URL set, it's not an error
     if (context.merchantUrl == "") {
@@ -103,8 +103,8 @@ export class MerchantService implements IMerchantService {
 
   private _validateMerchantConnectorCode(
     merchantUrl: string,
-    signature: string,
-    address: string,
+    signature: Signature,
+    address: EthereumAddress,
     useCacheBuster?: boolean,
   ): ResultAsync<string, MerchantValidationError> {
     // If there is no merchant URL set, it's not an error

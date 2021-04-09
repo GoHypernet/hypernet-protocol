@@ -46,7 +46,7 @@ export interface IMerchantConnectorRepository {
 
   getAuthorizedMerchants(): ResultAsync<Map<string, Signature>, never>;
 
-  activateAuthorizedMerchants(): ResultAsync<
+  activateAuthorizedMerchants(balances: Balances): ResultAsync<
     void,
     MerchantConnectorError | MerchantValidationError | BlockchainUnavailableError | LogicalError | ProxyError
   >;

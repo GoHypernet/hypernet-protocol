@@ -5,6 +5,7 @@ import { EthersBlockchainUtils } from "@implementations/utilities";
 import { merchantUrl } from "@mock/mocks";
 import { IBlockchainUtils } from "@interfaces/utilities";
 import { BlockchainProviderMock } from "@tests/mock/utils";
+import { Signature } from "@hypernetlabs/objects";
 
 const validatedSignature = "0xValidatedSignature";
 const validatedSignature2 = "0xInvalidatedSignature";
@@ -48,7 +49,7 @@ describe("EthersBlockchainUtils tests", () => {
 
     const wallet = new ethers.Wallet(privateKey);
 
-    let signature = await wallet._signTypedData(domain, types, value);
+    let signature = Signature(await wallet._signTypedData(domain, types, value));
 
     // Act
     const result = utils.verifyTypedData(domain, types, value, signature);
@@ -67,7 +68,7 @@ describe("EthersBlockchainUtils tests", () => {
 
     const wallet = new ethers.Wallet(privateKey);
 
-    let signature = await wallet._signTypedData(domain, types, value);
+    let signature = Signature(await wallet._signTypedData(domain, types, value));
 
     // Act
     const value2 = {

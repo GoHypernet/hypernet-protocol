@@ -332,7 +332,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     balances: Balances,
     merchantUrl: string,
     authorizationSignature: Signature,
-    context: HypernetContext,
+    context: InitializedHypernetContext,
     signer: ethers.providers.JsonRpcSigner,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | LogicalError | ProxyError> {
     let proxy: IMerchantConnectorProxy;
