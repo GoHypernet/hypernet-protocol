@@ -25,6 +25,7 @@ export * from "./SortedTransfers";
 export * from "./ThreadMetadata";
 export * from "./Token";
 export * from "./UUID";
+export * from "./PrivateCredentials";
 export * from "./vector";
 export * from "./errors";
 export * from "./interfaces";

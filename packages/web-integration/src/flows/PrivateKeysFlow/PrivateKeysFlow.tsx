@@ -10,18 +10,16 @@ const PrivateKeysFlow: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string>("");
 
   const handleSubmit = () => {
-    proxy
-      .providePrivateCredentials({
-        [privateKeyType]: inputValue,
-      })
-      .match(
-        () => {
-          closeModal();
-        },
-        (err) => {
-          setErrorMessage(err.message || "Err while providePrivateCredentials.");
-        },
-      );
+    const privateKey = privateKeyType === "privateKey" ? inputValue : null;
+    const mnemonic = privateKeyType === "mnemonic" ? inputValue : null;
+    proxy.providePrivateCredentials(privateKey, mnemonic).match(
+      () => {
+        closeModal();
+      },
+      (err) => {
+        setErrorMessage(err.message || "Err while providePrivateCredentials.");
+      },
+    );
   };
 
   const privateKeyTypes = [

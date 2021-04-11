@@ -1,26 +1,42 @@
 import { ethers } from "ethers";
 import { ResultAsync, okAsync } from "neverthrow";
-import { EthereumAddress, IPrivateCredentials } from "@hypernetlabs/objects";
-import { IInternalProvider } from "@interfaces/utilities";
+import { EthereumAddress, PrivateCredentials } from "@hypernetlabs/objects";
+import { IInternalProvider, IConfigProvider } from "@interfaces/utilities";
 
-export class InternalProvider extends ethers.providers.JsonRpcProvider implements IInternalProvider {
-  private _provider: ethers.providers.JsonRpcProvider;
-  private _wallet: ethers.Wallet;
+export class InternalProvider implements IInternalProvider {
+  protected providerInitializedPromiseResolve: () => void;
+  protected providerPromise: Promise<void>;
+  private _provider: ethers.providers.JsonRpcProvider | null = null;
+  private _wallet: ethers.Wallet | null = null;
 
-  constructor(protected privateCredentials: IPrivateCredentials) {
-    super();
-    this._provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
-    this._wallet = ethers.Wallet.fromMnemonic(
-      this.privateCredentials.mnemonic || "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat",
-    );
-    this._wallet.connect(this._provider);
+  constructor(protected configProvider: IConfigProvider, protected privateCredentials: PrivateCredentials) {
+    this.providerInitializedPromiseResolve = () => null;
+    this.providerPromise = new Promise((resolve) => {
+      this.providerInitializedPromiseResolve = resolve;
+    });
+
+    configProvider.getConfig().map((config) => {
+      this._provider = new ethers.providers.JsonRpcProvider(config.chainProviders[config.chainId]);
+      if (this.privateCredentials.mnemonic) {
+        this._wallet = ethers.Wallet.fromMnemonic(this.privateCredentials.mnemonic);
+      } else {
+        this._wallet = new ethers.Wallet(this.privateCredentials.privateKey as string, this._provider);
+      }
+
+      this._wallet.connect(this._provider);
+      this.providerInitializedPromiseResolve();
+    });
   }
 
-  public get provider(): ResultAsync<ethers.providers.JsonRpcProvider, never> {
-    return okAsync(this._provider);
+  public getProvider(): ResultAsync<ethers.providers.JsonRpcProvider, never> {
+    return ResultAsync.fromSafePromise<void, never>(this.providerPromise).andThen(() => {
+      return okAsync(this._provider as ethers.providers.JsonRpcProvider);
+    });
   }
 
-  public get address(): EthereumAddress {
-    return EthereumAddress(this._wallet.address);
+  public getAddress(): ResultAsync<EthereumAddress, never> {
+    return ResultAsync.fromSafePromise<void, never>(this.providerPromise).andThen(() => {
+      return okAsync(EthereumAddress(this._wallet?.address as string));
+    });
   }
 }

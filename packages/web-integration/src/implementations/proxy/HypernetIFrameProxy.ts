@@ -8,7 +8,6 @@ import {
   PushPayment,
   Payment,
   PaymentId,
-  IPrivateCredentials,
 } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
@@ -59,7 +58,6 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     this.onMerchantIFrameCloseRequested = new Subject<string>();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
-    this.onPrivateCredentialsSent = new Subject<IPrivateCredentials>();
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -334,8 +332,14 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return this._createCall("displayMerchantIFrame", merchantUrl);
   }
 
-  public providePrivateCredentials(privateCredentials: IPrivateCredentials): ResultAsync<void, InvalidParametersError> {
-    return this._createCall("providePrivateCredentials", privateCredentials);
+  public providePrivateCredentials(
+    privateKey: string | null,
+    mnemonic: string | null,
+  ): ResultAsync<void, InvalidParametersError> {
+    return this._createCall("providePrivateCredentials", {
+      privateKey,
+      mnemonic,
+    });
   }
 
   /**
@@ -357,5 +361,4 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   public onMerchantIFrameCloseRequested: Subject<string>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
-  public onPrivateCredentialsSent: Subject<IPrivateCredentials>;
 }

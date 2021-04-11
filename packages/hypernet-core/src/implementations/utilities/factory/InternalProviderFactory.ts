@@ -1,11 +1,19 @@
-import { IInternalProvider } from "@interfaces/utilities";
+import { IInternalProvider, IConfigProvider } from "@interfaces/utilities";
 import { IInternalProviderFactory } from "@interfaces/utilities/factory";
-import { okAsync, ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { InternalProvider } from "@implementations/utilities";
-import { IPrivateCredentials } from "@hypernetlabs/objects";
+import { PrivateCredentials } from "@hypernetlabs/objects";
+import { InvalidParametersError } from "@hypernetlabs/objects";
 
 export class InternalProviderFactory implements IInternalProviderFactory {
-  public factoryInternalProvider(privateCredentials: IPrivateCredentials): ResultAsync<IInternalProvider, never> {
-    return okAsync(new InternalProvider(privateCredentials));
+  constructor(protected configProvider: IConfigProvider) {}
+
+  public factoryInternalProvider(
+    privateCredentials: PrivateCredentials,
+  ): ResultAsync<IInternalProvider, InvalidParametersError> {
+    if (!privateCredentials.privateKey && !privateCredentials.mnemonic) {
+      return errAsync(new InvalidParametersError("You must provide a mnemonic or private key"));
+    }
+    return okAsync(new InternalProvider(this.configProvider, privateCredentials));
   }
 }

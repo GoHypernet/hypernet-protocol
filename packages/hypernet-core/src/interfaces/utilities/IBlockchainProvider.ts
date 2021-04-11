@@ -1,5 +1,6 @@
 import { ResultAsync } from "neverthrow";
-import { BlockchainUnavailableError } from "@hypernetlabs/objects";
+import { BlockchainUnavailableError, InvalidParametersError } from "@hypernetlabs/objects";
+import { PrivateCredentials } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 
 /**
@@ -12,4 +13,5 @@ export interface IBlockchainProvider {
     BlockchainUnavailableError
   >;
   getLatestBlock(): ResultAsync<ethers.providers.Block, BlockchainUnavailableError>;
+  supplyPrivateCredentials(privateCredentials: PrivateCredentials): ResultAsync<void, InvalidParametersError>;
 }

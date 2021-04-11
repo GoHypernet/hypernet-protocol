@@ -52,7 +52,7 @@ import {
   PushPayment,
   PaymentId,
 } from "@hypernetlabs/objects";
-import { IHypernetCore, IPrivateCredentials } from "@hypernetlabs/objects";
+import { IHypernetCore, PrivateCredentials } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
   BalancesUnavailableError,
@@ -119,7 +119,6 @@ export class HypernetCore implements IHypernetCore {
   public onMerchantIFrameCloseRequested: Subject<string>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
-  public onPrivateCredentialsSent: Subject<IPrivateCredentials>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -188,7 +187,6 @@ export class HypernetCore implements IHypernetCore {
     this.onMerchantIFrameCloseRequested = new Subject<string>();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
-    this.onPrivateCredentialsSent = new Subject<IPrivateCredentials>();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -221,7 +219,6 @@ export class HypernetCore implements IHypernetCore {
       this.onMerchantIFrameCloseRequested,
       this.onInitializationRequired,
       this.onPrivateCredentialsRequested,
-      this.onPrivateCredentialsSent,
     );
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(network, this.logUtils, config);
@@ -229,7 +226,7 @@ export class HypernetCore implements IHypernetCore {
 
     this.merchantConnectorProxyFactory = new MerchantConnectorProxyFactory(this.configProvider, this.contextProvider);
     this.browserNodeFactory = new BrowserNodeFactory(this.configProvider, this.logUtils);
-    this.internalProviderFactory = new InternalProviderFactory();
+    this.internalProviderFactory = new InternalProviderFactory(this.configProvider);
 
     this.blockchainProvider = new EthersBlockchainProvider(this.contextProvider, this.internalProviderFactory);
     this.timeUtils = new TimeUtils(this.blockchainProvider);
@@ -311,7 +308,12 @@ export class HypernetCore implements IHypernetCore {
       this.logUtils,
     );
 
-    this.accountService = new AccountService(this.accountRepository, this.contextProvider, this.logUtils);
+    this.accountService = new AccountService(
+      this.accountRepository,
+      this.contextProvider,
+      this.blockchainProvider,
+      this.logUtils,
+    );
     //this.controlService = new ControlService(this.contextProvider, this.threeboxMessagingRepository);
     this.linkService = new LinkService(this.linkRepository);
     this.developmentService = new DevelopmentService(this.accountRepository);
@@ -627,7 +629,10 @@ export class HypernetCore implements IHypernetCore {
     return this.merchantService.displayMerchantIFrame(merchantUrl);
   }
 
-  public providePrivateCredentials(privateCredentials: IPrivateCredentials): ResultAsync<void, InvalidParametersError> {
-    return this.accountService.providePrivateCredentials(privateCredentials);
+  public providePrivateCredentials(
+    privateKey: string | null,
+    mnemonic: string | null,
+  ): ResultAsync<void, InvalidParametersError> {
+    return this.accountService.providePrivateCredentials(new PrivateCredentials(privateKey, mnemonic));
   }
 }

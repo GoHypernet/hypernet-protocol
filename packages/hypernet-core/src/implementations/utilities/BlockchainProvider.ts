@@ -1,9 +1,10 @@
-import { BlockchainUnavailableError, IPrivateCredentials } from "@hypernetlabs/objects";
-import { IContextProvider } from "@interfaces/utilities";
+import { BlockchainUnavailableError, InvalidParametersError } from "@hypernetlabs/objects";
+import { PrivateCredentials, EthereumAddress } from "@hypernetlabs/objects";
+import { IContextProvider, IInternalProvider } from "@interfaces/utilities";
 import { IInternalProviderFactory } from "@interfaces/utilities/factory";
 import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
 import { ethers } from "ethers";
-import { ResultAsync } from "neverthrow";
+import { okAsync, ResultAsync, errAsync } from "neverthrow";
 declare global {
   interface Window {
     ethereum: any;
@@ -15,12 +16,12 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
   protected provider: ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider | null;
   protected signer: ethers.providers.JsonRpcSigner | null;
   protected initializationPromise: ResultAsync<void, BlockchainUnavailableError> | null;
-  protected address: string | undefined;
-  protected privateCredentialsPromiseResolve: (privateCredentials: IPrivateCredentials) => void;
-  private static providerResult: ResultAsync<
+  protected address: EthereumAddress | undefined;
+  protected privateCredentialsPromiseResolve: (privateCredentials: PrivateCredentials) => void;
+  protected providerResult: ResultAsync<
     ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
     BlockchainUnavailableError
-  >;
+  > | null;
   constructor(
     protected contextProvider: IContextProvider,
     protected internalProviderFactory: IInternalProviderFactory,
@@ -30,12 +31,10 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
     this.initializationPromise = null;
     this.privateCredentialsPromiseResolve = () => null;
     this.address = undefined;
+    this.providerResult = null;
   }
   protected initialize(): ResultAsync<void, BlockchainUnavailableError> {
-    if (!EthersBlockchainProvider.providerResult) {
-      this._initializeProviderResult();
-    }
-    this.initializationPromise = EthersBlockchainProvider.providerResult
+    this.initializationPromise = this._initializeProviderResult()
       .map((provider) => {
         this.provider = provider;
         // The Metamask plugin also allows signing transactions to
@@ -78,10 +77,24 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
     });
   }
 
-  private _initializeProviderResult() {
+  public supplyPrivateCredentials(privateCredentials: PrivateCredentials): ResultAsync<void, InvalidParametersError> {
+    if (!privateCredentials.privateKey && !privateCredentials.mnemonic) {
+      return errAsync(new InvalidParametersError("You must provide a mnemonic or private key"));
+    }
+    // Once we have keys info, we can resolve the promise
+    this.privateCredentialsPromiseResolve(privateCredentials);
+    return okAsync(undefined);
+  }
+
+  private _initializeProviderResult(): ResultAsync<
+    ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
+    BlockchainUnavailableError
+  > {
+    if (this.providerResult) return this.providerResult;
+
     if (window.ethereum != null) {
       window.ethereum.autoRefreshOnNetworkChange = false;
-      EthersBlockchainProvider.providerResult = ResultAsync.fromPromise(window.ethereum.enable(), (e: any) => {
+      this.providerResult = ResultAsync.fromPromise(window.ethereum.enable(), (e: any) => {
         return new BlockchainUnavailableError("Unable to initialize ethereum provider from the window");
       }).map(() => {
         // A Web3Provider wraps a standard Web3 provider, which is
@@ -89,34 +102,40 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
         return new ethers.providers.Web3Provider(window.ethereum);
       });
     } else {
-      // Fire an onPrivateCredentialsRequested
-      const privateKeyPromise: Promise<IPrivateCredentials> = new Promise((resolve) => {
-        this.privateCredentialsPromiseResolve = resolve;
-      });
-      EthersBlockchainProvider.providerResult = this.contextProvider
+      let internalProvider: IInternalProvider = {} as IInternalProvider;
+      this.providerResult = this.contextProvider
         .getContext()
         .andThen((context) => {
-          // Emit an event that sends a callback to the user. The user can execute the callback to provide their private key or mnemonic._getAccountPromise
-          context.onPrivateCredentialsRequested.next();
-
-          context.onPrivateCredentialsSent.subscribe((privateCredentials: IPrivateCredentials) => {
-            // Once we have their info, we can continue
-            this.privateCredentialsPromiseResolve(privateCredentials);
+          // Fire an onPrivateCredentialsRequested
+          const privateKeyPromise: Promise<PrivateCredentials> = new Promise((resolve) => {
+            this.privateCredentialsPromiseResolve = resolve;
           });
 
+          // Emit an event that sends a callback to the user. The user can execute the callback to provide their private key or mnemonic._getAccountPromise
+          context.onPrivateCredentialsRequested.next();
           return ResultAsync.fromSafePromise(privateKeyPromise);
         })
         .andThen((privateCredentials) => {
           // Inject a InternalProviderFactory to do this
           return this.internalProviderFactory.factoryInternalProvider(privateCredentials);
         })
-        .andThen((internalProvider) => {
-          this.address = internalProvider.address;
-          return internalProvider.provider;
+        .andThen((_internalProvider) => {
+          internalProvider = _internalProvider;
+          return internalProvider.getAddress();
+        })
+        .andThen((address) => {
+          this.address = address;
+          return internalProvider.getProvider();
+        })
+        .andThen((provider) => {
+          this.provider = provider;
+          return okAsync(this.provider);
         })
         .mapErr((e) => {
           return e as BlockchainUnavailableError;
         });
     }
+
+    return this.providerResult;
   }
 }

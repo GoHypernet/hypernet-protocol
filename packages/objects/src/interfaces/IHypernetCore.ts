@@ -8,7 +8,6 @@ import {
   PushPayment,
   PullPayment,
   PaymentId,
-  IPrivateCredentials,
 } from "@hypernetlabs/objects";
 import { Subject } from "rxjs";
 import {
@@ -211,7 +210,10 @@ export interface IHypernetCore {
   closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
   displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError>;
 
-  providePrivateCredentials(privateCredentials: IPrivateCredentials): ResultAsync<void, InvalidParametersError>;
+  providePrivateCredentials(
+    privateKey: string | null,
+    mnemonic: string | null,
+  ): ResultAsync<void, InvalidParametersError>;
 
   /**
    * Observables for seeing what's going on
@@ -232,5 +234,4 @@ export interface IHypernetCore {
   onMerchantIFrameCloseRequested: Subject<string>;
   onInitializationRequired: Subject<void>;
   onPrivateCredentialsRequested: Subject<void>;
-  onPrivateCredentialsSent: Subject<IPrivateCredentials>;
 }

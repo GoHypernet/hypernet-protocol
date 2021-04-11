@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { Balances, EthereumAddress, IPrivateCredentials, PublicIdentifier } from "@hypernetlabs/objects";
+import { Balances, EthereumAddress, PrivateCredentials, PublicIdentifier } from "@hypernetlabs/objects";
 import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
@@ -32,5 +32,5 @@ export interface IAccountService {
     BalancesUnavailableError | RouterChannelUnknownError | BlockchainUnavailableError | VectorError
   >;
   getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError | RouterChannelUnknownError>;
-  providePrivateCredentials(privateCredentials: IPrivateCredentials): ResultAsync<void, InvalidParametersError>;
+  providePrivateCredentials(privateCredentials: PrivateCredentials): ResultAsync<void, InvalidParametersError>;
 }

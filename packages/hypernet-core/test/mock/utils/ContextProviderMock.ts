@@ -6,7 +6,6 @@ import {
   InitializedHypernetContext,
   PullPayment,
   PushPayment,
-  IPrivateCredentials,
 } from "@hypernetlabs/objects";
 import { IContextProvider } from "@interfaces/utilities";
 import { okAsync, ResultAsync } from "neverthrow";
@@ -33,7 +32,6 @@ export class ContextProviderMock implements IContextProvider {
   public onMerchantIFrameCloseRequested: Subject<string>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
-  public onPrivateCredentialsSent: Subject<IPrivateCredentials>;
 
   public authorizedMerchants: Map<string, string>;
 
@@ -58,7 +56,6 @@ export class ContextProviderMock implements IContextProvider {
     this.onMerchantIFrameCloseRequested = new Subject<string>();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
-    this.onPrivateCredentialsSent = new Subject<IPrivateCredentials>();
 
     this.authorizedMerchants = new Map<string, string>();
 
@@ -85,7 +82,6 @@ export class ContextProviderMock implements IContextProvider {
         this.onMerchantIFrameCloseRequested,
         this.onInitializationRequired,
         this.onPrivateCredentialsRequested,
-        this.onPrivateCredentialsSent,
       );
     }
 
@@ -112,7 +108,6 @@ export class ContextProviderMock implements IContextProvider {
         this.onMerchantIFrameCloseRequested,
         this.onInitializationRequired,
         this.onPrivateCredentialsRequested,
-        this.onPrivateCredentialsSent,
         this.authorizedMerchants,
       );
     }

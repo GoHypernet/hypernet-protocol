@@ -4,7 +4,7 @@ import { okAsync } from "neverthrow";
 import { IAccountsRepository } from "@interfaces/data";
 import td from "testdouble";
 import { ContextProviderMock } from "@mock/utils";
-import { ILogUtils } from "@interfaces/utilities";
+import { ILogUtils, IBlockchainProvider } from "@interfaces/utilities";
 import { AccountService } from "@implementations/business/AccountService";
 import { IAccountService } from "@interfaces/business";
 import { BigNumber } from "ethers";
@@ -15,6 +15,7 @@ const amount = BigNumber.from("42");
 
 class AccountServiceMocks {
   public accountRepository = td.object<IAccountsRepository>();
+  public blockchainProvider = td.object<IBlockchainProvider>();
   public contextProvider = new ContextProviderMock();
   public logUtils = td.object<ILogUtils>();
   public balances: Balances;
@@ -31,7 +32,7 @@ class AccountServiceMocks {
   }
 
   public factoryAccountService(): IAccountService {
-    return new AccountService(this.accountRepository, this.contextProvider, this.logUtils);
+    return new AccountService(this.accountRepository, this.contextProvider, this.blockchainProvider, this.logUtils);
   }
 }
 

@@ -5,7 +5,6 @@ import {
   PushPayment,
   PullPayment,
   Balances,
-  IPrivateCredentials,
   EthereumAddress,
   PublicIdentifier,
 } from "@hypernetlabs/objects";
@@ -36,7 +35,6 @@ export class ContextProvider implements IContextProvider {
     onMerchantIFrameCloseRequested: Subject<string>,
     onInitializationRequired: Subject<void>,
     onPrivateCredentialsRequested: Subject<void>,
-    onPrivateCredentialsSent: Subject<IPrivateCredentials>,
   ) {
     this.context = new HypernetContext(
       null,
@@ -58,7 +56,6 @@ export class ContextProvider implements IContextProvider {
       onMerchantIFrameCloseRequested,
       onInitializationRequired,
       onPrivateCredentialsRequested,
-      onPrivateCredentialsSent,
     );
     this._initializePromiseResolve = () => null;
     this._initializePromise = new Promise((resolve) => {
@@ -106,7 +103,6 @@ export class ContextProvider implements IContextProvider {
           this.context.onMerchantIFrameCloseRequested,
           this.context.onInitializationRequired,
           this.context.onPrivateCredentialsRequested,
-          this.context.onPrivateCredentialsSent,
           new Map<string, string>(),
         ),
       );
