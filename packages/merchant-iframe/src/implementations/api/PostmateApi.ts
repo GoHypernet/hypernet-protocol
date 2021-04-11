@@ -5,7 +5,7 @@ import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 import { IMerchantConnector } from "@hypernetlabs/merchant-connector";
 import { IMerchantIFrameApi } from "@merchant-iframe/interfaces/api";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
-import { PushPayment, PullPayment, PublicIdentifier, Balances, AssetBalance } from "@hypernetlabs/objects";
+import { PushPayment, PullPayment, PublicIdentifier, Balances, AssetBalance, PaymentId } from "@hypernetlabs/objects";
 import { BigNumber} from "ethers";
 
 export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
@@ -66,28 +66,19 @@ export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
           });
         }, data.callId);
       },
-      resolveChallenge: (data: IIFrameCallData<string>) => {
+      resolveChallenge: (data: IIFrameCallData<PaymentId>) => {
         this.returnForModel(() => {
-          if (this.merchantConnector == null) {
-            return errAsync(new Error("No merchant connector available!"));
-          }
-
-          return ResultAsync.fromPromise(this.merchantConnector.resolveChallenge(data.data), (e) => e);
+          return this.merchantService.resolveChallenge(data.data);
         }, data.callId);
       },
       getAddress: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          if (this.merchantConnector == null) {
-            return errAsync(new Error("No merchant connector available!"));
-          }
-          return ResultAsync.fromPromise(this.merchantConnector.getAddress(), (e) => e);
+          return this.merchantService.getAddress();
         }, data.callId);
       },
       getValidatedSignature: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getMerchantContext();
-
-          return okAsync(context.validatedMerchantSignature);
+          return this.merchantService.getValidatedSignature();
         }, data.callId);
       },
       merchantIFrameClosed: (data: IIFrameCallData<void>) => {

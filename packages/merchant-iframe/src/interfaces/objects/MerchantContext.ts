@@ -1,6 +1,7 @@
 import { IMerchantConnector } from "@hypernetlabs/merchant-connector";
 import { Subject } from "rxjs";
-import {PublicIdentifier, Signature} from "@hypernetlabs/objects"
+import { MerchantValidationError, PublicIdentifier, Signature } from "@hypernetlabs/objects";
+import { ResultAsync } from "neverthrow";
 
 export class MerchantContext {
   constructor(
@@ -10,5 +11,6 @@ export class MerchantContext {
     public validatedMerchantSignature: Signature | null,
     public merchantConnector: IMerchantConnector | null,
     public publicIdentifier: PublicIdentifier | null,
-  ) {}
+    public merchantValidated: ResultAsync<void, MerchantValidationError>,
+  ) { }
 }

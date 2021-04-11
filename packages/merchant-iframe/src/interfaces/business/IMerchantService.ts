@@ -1,7 +1,7 @@
 import { ResultAsync } from "neverthrow";
 import { MerchantConnectorError, MerchantValidationError } from "@merchant-iframe/interfaces/objects/errors";
-import { IMerchantConnector, IRedirectInfo } from "@hypernetlabs/merchant-connector";
-import { Balances, LogicalError, PublicIdentifier } from "@hypernetlabs/objects";
+import { IMerchantConnector, IRedirectInfo, IResolutionResult } from "@hypernetlabs/merchant-connector";
+import { Balances, EthereumAddress, LogicalError, PaymentId, PublicIdentifier, Signature } from "@hypernetlabs/objects";
 
 export interface IMerchantService {
   validateMerchantConnector(): ResultAsync<string, MerchantValidationError>;
@@ -13,4 +13,7 @@ export interface IMerchantService {
     MerchantConnectorError | MerchantValidationError
   >;
   publicIdentifierReceived(publicIdentifier: PublicIdentifier): ResultAsync<void, LogicalError>;
+  getValidatedSignature(): ResultAsync<Signature, MerchantValidationError>;
+  getAddress(): ResultAsync<EthereumAddress, MerchantValidationError>;
+  resolveChallenge(paymentId: PaymentId): ResultAsync<IResolutionResult, MerchantConnectorError | MerchantValidationError>;
 }
