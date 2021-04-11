@@ -317,7 +317,10 @@ export class HypernetCore implements IHypernetCore {
     //this.controlService = new ControlService(this.contextProvider, this.threeboxMessagingRepository);
     this.linkService = new LinkService(this.linkRepository);
     this.developmentService = new DevelopmentService(this.accountRepository);
-    this.merchantService = new MerchantService(this.merchantConnectorRepository, this.contextProvider, this.logUtils);
+    this.merchantService = new MerchantService(this.merchantConnectorRepository, 
+      this.accountRepository, 
+      this.contextProvider, 
+      this.logUtils);
 
     this.vectorAPIListener = new VectorAPIListener(
       this.browserNodeProvider,

@@ -1,6 +1,6 @@
 import { Subject } from "rxjs";
 import { IResolutionResult } from "./IResolutionResult";
-import { PushPayment, PullPayment } from "@hypernetlabs/objects";
+import { PushPayment, PullPayment, Balances, PublicIdentifier } from "@hypernetlabs/objects";
 
 export interface IMerchantConnector {
   resolveChallenge(paymentId: string): Promise<IResolutionResult>;
@@ -33,6 +33,9 @@ export interface IMerchantConnector {
   onPullPaymentSent(payment: PullPayment): void;
   onPullPaymentUpdated(payment: PullPayment): void;
   onPullPaymentReceived(payment: PullPayment): void;
+
+  onPublicIdentifierReceived(public_identifier: PublicIdentifier): void;
+  onBalancesReceived(balances: Balances): void;
 }
 
 export interface ISendFundsRequest {

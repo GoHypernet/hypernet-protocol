@@ -9,6 +9,7 @@ import {
   commonPaymentId,
   mediatorSignature,
   merchantUrl2,
+  publicIdentifier,
 } from "@mock/mocks";
 import { BlockchainProviderMock, ConfigProviderMock, ContextProviderMock } from "@mock/utils";
 import { IVectorUtils, IMerchantConnectorProxy, IBlockchainUtils } from "@interfaces/utilities";
@@ -17,6 +18,7 @@ import {
   MerchantValidationError,
   TransferResolutionError,
   Signature,
+  Balances,
 } from "@hypernetlabs/objects";
 import { IMerchantConnectorRepository } from "@interfaces/data/IMerchantConnectorRepository";
 import { okAsync, errAsync } from "neverthrow";
@@ -27,11 +29,13 @@ import { IResolutionResult } from "@hypernetlabs/merchant-connector";
 import { BigNumber } from "ethers";
 import { IBasicTransferResponse } from "@hypernetlabs/objects";
 
-const validatedSignature = "0xValidatedSignature";
-const newAuthorizationSignature = "0xNewAuthorizationSignature";
-const authorizationSignature =
-  "0x1e866e66e7f3a68658bd186bafbdc534d4a5022e14022fddfe8865e2236dc67d64eee05b4d8f340dffa1928efa517784b63cad6a3fb35d999cb9d722b34075071b";
+const validatedSignature = Signature("0xValidatedSignature");
+const newAuthorizationSignature = Signature("0xNewAuthorizationSignature");
+const authorizationSignature = Signature(
+  "0x1e866e66e7f3a68658bd186bafbdc534d4a5022e14022fddfe8865e2236dc67d64eee05b4d8f340dffa1928efa517784b63cad6a3fb35d999cb9d722b34075071b",
+);
 const resolutionAmount = "1";
+const balances = new Balances([]);
 
 class MerchantConnectorRepositoryMocks {
   public blockchainProvider = new BlockchainProviderMock();
@@ -81,7 +85,7 @@ class MerchantConnectorRepositoryMocks {
     );
 
     td.when(this.merchantConnectorProxy.getValidatedSignature()).thenReturn(okAsync(Signature(validatedSignature)));
-    td.when(this.merchantConnectorProxy.activateConnector()).thenReturn(okAsync(undefined));
+    td.when(this.merchantConnectorProxy.activateConnector(publicIdentifier, balances)).thenReturn(okAsync(undefined));
     td.when(this.merchantConnectorProxy.resolveChallenge(commonPaymentId)).thenReturn(
       okAsync({ mediatorSignature, amount: resolutionAmount } as IResolutionResult),
     );
@@ -160,7 +164,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.activateAuthorizedMerchants();
+    const result = await repo.activateAuthorizedMerchants(balances);
 
     // Assert
     expect(result).toBeDefined();
@@ -188,7 +192,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.activateAuthorizedMerchants();
+    const result = await repo.activateAuthorizedMerchants(balances);
 
     // Assert
     expect(result).toBeDefined();
@@ -218,7 +222,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.activateAuthorizedMerchants();
+    const result = await repo.activateAuthorizedMerchants(balances);
 
     // Assert
     expect(result).toBeDefined();
@@ -243,7 +247,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.activateAuthorizedMerchants();
+    const result = await repo.activateAuthorizedMerchants(balances);
 
     // Assert
     expect(result).toBeDefined();
@@ -259,7 +263,7 @@ describe("MerchantConnectorRepository tests", () => {
     const mocks = new MerchantConnectorRepositoryMocks();
 
     const error = new MerchantConnectorError();
-    td.when(mocks.merchantConnectorProxy.activateConnector()).thenReturn(errAsync(error));
+    td.when(mocks.merchantConnectorProxy.activateConnector(publicIdentifier, balances)).thenReturn(errAsync(error));
 
     let onAuthorizedMerchantActivationFailedVal: string | null = null;
     mocks.contextProvider.onAuthorizedMerchantActivationFailed.subscribe((val) => {
@@ -269,7 +273,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.activateAuthorizedMerchants();
+    const result = await repo.activateAuthorizedMerchants(balances);
 
     // Assert
     expect(result).toBeDefined();
@@ -286,7 +290,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.activateAuthorizedMerchants().andThen(() => {
+    const result = await repo.activateAuthorizedMerchants(balances).andThen(() => {
       return repo.resolveChallenge(merchantUrl, commonPaymentId, insuranceTransferId);
     });
 
@@ -319,7 +323,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.activateAuthorizedMerchants().andThen(() => {
+    const result = await repo.activateAuthorizedMerchants(balances).andThen(() => {
       return repo.resolveChallenge(merchantUrl, commonPaymentId, insuranceTransferId);
     });
 
@@ -345,7 +349,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.activateAuthorizedMerchants().andThen(() => {
+    const result = await repo.activateAuthorizedMerchants(balances).andThen(() => {
       return repo.resolveChallenge(merchantUrl, commonPaymentId, insuranceTransferId);
     });
 
@@ -364,7 +368,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.addAuthorizedMerchant(merchantUrl);
+    const result = await repo.addAuthorizedMerchant(merchantUrl, balances);
 
     // Assert
     expect(result).toBeDefined();
@@ -393,7 +397,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.addAuthorizedMerchant(merchantUrl);
+    const result = await repo.addAuthorizedMerchant(merchantUrl, balances);
 
     // Assert
     expect(result).toBeDefined();
@@ -421,7 +425,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.addAuthorizedMerchant(merchantUrl);
+    const result = await repo.addAuthorizedMerchant(merchantUrl, balances);
 
     // Assert
     expect(result).toBeDefined();
@@ -455,7 +459,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.addAuthorizedMerchant(merchantUrl);
+    const result = await repo.addAuthorizedMerchant(merchantUrl, balances);
 
     // Assert
     expect(result).toBeDefined();
@@ -473,7 +477,7 @@ describe("MerchantConnectorRepository tests", () => {
     td.when(mocks.localStorageUtils.getItem("AuthorizedMerchants")).thenReturn(null);
 
     const error = new MerchantConnectorError();
-    td.when(mocks.merchantConnectorProxy.activateConnector()).thenReturn(errAsync(error));
+    td.when(mocks.merchantConnectorProxy.activateConnector(publicIdentifier, balances)).thenReturn(errAsync(error));
 
     let onAuthorizedMerchantActivationFailedVal: string | null = null;
     mocks.contextProvider.onAuthorizedMerchantActivationFailed.subscribe((val) => {
@@ -483,7 +487,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.addAuthorizedMerchant(merchantUrl);
+    const result = await repo.addAuthorizedMerchant(merchantUrl, balances);
 
     // Assert
     expect(result).toBeDefined();
@@ -500,7 +504,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.activateAuthorizedMerchants().andThen(() => {
+    const result = await repo.activateAuthorizedMerchants(balances).andThen(() => {
       return repo.getMerchantAddresses([merchantUrl]);
     });
 
@@ -552,7 +556,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.activateAuthorizedMerchants().andThen(() => {
+    const result = await repo.activateAuthorizedMerchants(balances).andThen(() => {
       return repo.getMerchantAddresses([merchantUrl, merchantUrl2]);
     });
 
@@ -581,7 +585,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.activateAuthorizedMerchants().andThen(() => {
+    const result = await repo.activateAuthorizedMerchants(balances).andThen(() => {
       return repo.getMerchantAddresses([merchantUrl, merchantUrl2]);
     });
 

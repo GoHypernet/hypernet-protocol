@@ -113,7 +113,7 @@ export function useFund(): IReducerStateReducer {
 
   const prepareTokenSelector = (balance: Balances) => {
     return balance.assets.reduce((acc: PaymentTokenOptionViewModel[], assetBalance) => {
-      acc.push(new PaymentTokenOptionViewModel(assetBalance.assetAddresss, assetBalance.assetAddresss));
+      acc.push(new PaymentTokenOptionViewModel(assetBalance.assetAddress, assetBalance.assetAddress));
       return acc;
     }, new Array<PaymentTokenOptionViewModel>());
   };
