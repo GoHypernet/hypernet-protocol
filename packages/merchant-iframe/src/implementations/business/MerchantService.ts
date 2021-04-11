@@ -5,9 +5,9 @@ import { IMerchantConnectorRepository, IPersistenceRepository } from "@merchant-
 import { MerchantConnectorError, MerchantValidationError } from "@merchant-iframe/interfaces/objects/errors";
 import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
-import { IMerchantConnector, IRedirectInfo } from "@hypernetlabs/merchant-connector";
+import { IMerchantConnector, IRedirectInfo, IResolutionResult } from "@hypernetlabs/merchant-connector";
 import { ExpectedRedirect } from "@merchant-iframe/interfaces/objects";
-import { LogicalError, PublicIdentifier, Balances, EthereumAddress, Signature } from "@hypernetlabs/objects";
+import { LogicalError, PublicIdentifier, Balances, EthereumAddress, Signature, PaymentId } from "@hypernetlabs/objects";
 
 declare global {
   interface Window {
@@ -51,9 +51,11 @@ export class MerchantService implements IMerchantService {
     }
 
     console.log(`CHARLIE, publicIdentifier=${publicIdentifier}, balances=${balances}`);
+    console.log(balances)
 
     // Send some initial information to the merchant connector
     merchantConnector.onPublicIdentifierReceived(publicIdentifier);
+
     merchantConnector.onBalancesReceived(balances);
 
     // Store the merchant connector object and notify the world
@@ -127,10 +129,7 @@ export class MerchantService implements IMerchantService {
       }
 
       // Merchant's code passes muster. Store the merchant code in the context as validated.
-      const context = this.contextProvider.getMerchantContext();
-      context.validatedMerchantCode = merchantCode;
-      context.validatedMerchantSignature = signature;
-      this.contextProvider.setMerchantContext(context);
+      this.contextProvider.setValidatedMerchantConnector(merchantCode, signature);
 
       // Return the valid signature
       return okAsync(signature);
@@ -206,5 +205,44 @@ export class MerchantService implements IMerchantService {
     this.contextProvider.setMerchantContext(context);
     context.merchantConnector?.onPublicIdentifierReceived(publicIdentifier); 
     return okAsync(undefined);
+  }
+
+  public getValidatedSignature(): ResultAsync<Signature, MerchantValidationError> {
+    let context = this.contextProvider.getMerchantContext();
+    return context.merchantValidated.map(() => {
+      context = this.contextProvider.getMerchantContext();
+      
+      if (context.validatedMerchantSignature == null) {
+        throw new Error("validatedMerchantSignature is null but merchantValidated is OK");
+      }
+
+      return context.validatedMerchantSignature;
+    });
+  }
+  getAddress(): ResultAsync<EthereumAddress, MerchantValidationError> {
+    let context = this.contextProvider.getMerchantContext();
+    return context.merchantValidated
+    .andThen(() => {
+      if (context.merchantConnector == null) {
+        throw new Error("merchantConnector is null but merchantValidated is OK");
+      }
+
+      return ResultAsync.fromPromise(context.merchantConnector.getAddress(), 
+      (e) => e as MerchantConnectorError);
+    });
+  }
+  
+  
+  public resolveChallenge(paymentId: PaymentId): ResultAsync<IResolutionResult, MerchantConnectorError | MerchantValidationError> {
+    let context = this.contextProvider.getMerchantContext();
+    return context.merchantValidated
+    .andThen(() => {
+      if (context.merchantConnector == null) {
+        throw new Error("merchantConnector is null but merchantValidated is OK");
+      }
+
+      return ResultAsync.fromPromise(context.merchantConnector.resolveChallenge(paymentId), 
+      (e) => e as MerchantConnectorError);
+    });
   }
 }

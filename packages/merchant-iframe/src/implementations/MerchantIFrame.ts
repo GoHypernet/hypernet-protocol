@@ -39,7 +39,6 @@ export class MerchantIframe {
     this.merchantIframeApi = new PostmateApi(this.merchantService, this.contextProvider);
     this.merchantConnectorListener = new MerchantConnectorListener(this.contextProvider, this.merchantService);
 
-    const context = this.contextProvider.getMerchantContext();
     this.merchantConnectorListener
       .initialize()
       .andThen(() => {
@@ -51,6 +50,12 @@ export class MerchantIframe {
         context.merchantUrl = merchantUrl;
         this.contextProvider.setMerchantContext(context);
 
+        // We're ready to answer questions about the connector, we can activate the API
+        // Note, it would be better to have a waitForValidated() function down lower so that the API
+        // can be activated immediately.
+        return this.merchantIframeApi.activateModel();
+      })
+      .andThen(() => {
         // Now that we have a merchant URL, let's validate the merchant's connector
         return this.merchantService.validateMerchantConnector();
       })
@@ -59,14 +64,8 @@ export class MerchantIframe {
         // the connector if it's eligible.
         return this.merchantService.autoActivateMerchantConnector();
       })
-      .andThen(() => {
-        // We're ready to answer questions about the connector, we can activate the API
-        // Note, it would be better to have a waitForValidated() function down lower so that the API
-        // can be activated immediately.
-        return this.merchantIframeApi.activateModel();
-      })
       .mapErr((e) => {
-        console.error(e);
+        console.log(e);
       });
   }
 }

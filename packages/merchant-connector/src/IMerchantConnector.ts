@@ -1,10 +1,10 @@
 import { Subject } from "rxjs";
 import { IResolutionResult } from "./IResolutionResult";
-import { PushPayment, PullPayment, Balances, PublicIdentifier } from "@hypernetlabs/objects";
+import { PushPayment, PullPayment, Balances, PublicIdentifier, EthereumAddress, PaymentId } from "@hypernetlabs/objects";
 
 export interface IMerchantConnector {
-  resolveChallenge(paymentId: string): Promise<IResolutionResult>;
-  getAddress(): Promise<string>;
+  resolveChallenge(paymentId: PaymentId): Promise<IResolutionResult>;
+  getAddress(): Promise<EthereumAddress>;
 
   onSendFundsRequested: Subject<ISendFundsRequest>;
   onAuthorizeFundsRequested: Subject<IAuthorizeFundsRequest>;

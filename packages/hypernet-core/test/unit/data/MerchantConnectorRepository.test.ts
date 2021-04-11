@@ -91,7 +91,7 @@ class MerchantConnectorRepositoryMocks {
         td.matchers.contains(this.expectedSignerValue),
         authorizationSignature,
       ),
-    ).thenReturn(account);
+    ).thenReturn(account as never);
 
     td.when(
       this.blockchainProvider.signer._signTypedData(
@@ -175,7 +175,7 @@ describe("MerchantConnectorRepository tests", () => {
         td.matchers.contains(mocks.expectedSignerValue),
         authorizationSignature,
       ),
-    ).thenReturn(account2);
+    ).thenReturn(account2 as never);
 
     let onAuthorizedMerchantUpdatedVal: string | null = null;
     mocks.contextProvider.onAuthorizedMerchantUpdated.subscribe((val) => {
