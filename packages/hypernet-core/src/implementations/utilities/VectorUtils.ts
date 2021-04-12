@@ -5,13 +5,14 @@ import {
   IHypernetOfferDetails,
   InitializedHypernetContext,
   PublicIdentifier,
-  PublicKey,
   IHypernetPullPaymentDetails,
   IBasicTransferResponse,
   IFullChannelState,
   IFullTransferState,
   EthereumAddress,
   PaymentId,
+  TransferId,
+  Signature,
 } from "@hypernetlabs/objects";
 import {
   IBrowserNodeProvider,
@@ -75,7 +76,7 @@ export class VectorUtils implements IVectorUtils {
    * Resolves a message/offer/null transfer with Vector.
    * @param transferId the ID of the transfer to resolve
    */
-  public resolveMessageTransfer(transferId: string): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
+  public resolveMessageTransfer(transferId: TransferId): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
     let channelAddress: EthereumAddress;
     let browserNode: IBrowserNode;
 
@@ -91,8 +92,8 @@ export class VectorUtils implements IVectorUtils {
    * @param transferId the ID of the transfer to resolve
    */
   public resolvePaymentTransfer(
-    transferId: string,
-    paymentId: string,
+    transferId: TransferId,
+    paymentId: PaymentId,
     amount: string,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
     const resolverData: ParameterizedResolverData = {
@@ -137,9 +138,9 @@ export class VectorUtils implements IVectorUtils {
    * @param transferId the ID of the tarnsfer to resolve
    */
   public resolveInsuranceTransfer(
-    transferId: string,
-    paymentId: string,
-    mediatorSignature?: string,
+    transferId: TransferId,
+    paymentId: PaymentId,
+    mediatorSignature?: Signature,
     amount?: BigNumber,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
     // If you do not provide an actual amount, then it resolves for nothing
@@ -401,7 +402,7 @@ export class VectorUtils implements IVectorUtils {
    */
   public createInsuranceTransfer(
     toAddress: PublicIdentifier,
-    mediatorPublicKey: PublicKey,
+    mediatorAddress: EthereumAddress,
     amount: BigNumber,
     expiration: number,
     paymentId: PaymentId,
@@ -428,7 +429,7 @@ export class VectorUtils implements IVectorUtils {
 
         const initialState: InsuranceState = {
           receiver: toEthAddress,
-          mediator: mediatorPublicKey,
+          mediator: mediatorAddress,
           collateral: amount.toString(),
           expiration: expiration.toString(),
           UUID: paymentId,

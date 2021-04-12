@@ -4,6 +4,7 @@ import { PaymentId } from "@objects/PaymentId";
 import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { BigNumber } from "ethers";
+import { MerchantUrl } from "@objects/MerchantUrl";
 
 export abstract class Payment {
   constructor(
@@ -18,7 +19,7 @@ export abstract class Payment {
     public createdTimestamp: number,
     public updatedTimestamp: number,
     public collateralRecovered: BigNumber,
-    public merchantUrl: string,
+    public merchantUrl: MerchantUrl,
     public details: PaymentInternalDetails,
   ) {}
 }

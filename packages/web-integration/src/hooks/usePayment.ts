@@ -2,7 +2,7 @@ import { useEffect, useReducer, useContext } from "react";
 import { StoreContext } from "@web-integration-contexts";
 import { ITokenSelectorOption } from "@hypernetlabs/web-ui/src/interfaces";
 import { Balances, PublicIdentifier } from "@hypernetlabs/objects";
-import { EPaymentType } from "@hypernetlabs/objects";
+import { EPaymentType, MerchantUrl } from "@hypernetlabs/objects";
 import { PaymentTokenOptionViewModel, EResultStatus, ResultMessage } from "@web-integration-interfaces/objects";
 import { utils } from "ethers";
 
@@ -40,7 +40,7 @@ interface IReducerStateReducer {
   setRequiredStake: (param?: string) => void;
   paymentType: EPaymentType;
   setPaymentType: (param?: EPaymentType) => void;
-  merchantUrl: string;
+  merchantUrl: MerchantUrl;
   sendFunds: () => void;
   paymentTypeOptions: PaymentTypeOption[];
 }
@@ -55,7 +55,7 @@ interface IReducerState {
   amount: string;
   expirationDate: string;
   requiredStake: string;
-  merchantUrl: string;
+  merchantUrl: MerchantUrl;
   paymentType: EPaymentType;
   paymentTypeOptions: PaymentTypeOption[];
 }

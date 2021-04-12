@@ -1,12 +1,13 @@
 import {
   IHypernetOfferDetails,
-  PublicKey,
   IHypernetPullPaymentDetails,
   IBasicTransferResponse,
   IFullTransferState,
   EthereumAddress,
   PublicIdentifier,
   PaymentId,
+  TransferId,
+  Signature,
 } from "@hypernetlabs/objects";
 import {
   InvalidParametersError,
@@ -32,10 +33,10 @@ export interface IVectorUtils {
    *
    * @param transferId
    */
-  resolveMessageTransfer(transferId: string): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
+  resolveMessageTransfer(transferId: TransferId): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
   resolvePaymentTransfer(
-    transferId: string,
+    transferId: TransferId,
     paymentId: PaymentId,
     amount: string,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
@@ -48,9 +49,9 @@ export interface IVectorUtils {
    * @param amount
    */
   resolveInsuranceTransfer(
-    transferId: string,
+    transferId: TransferId,
     paymentId: PaymentId,
-    mediatorSignature?: string,
+    mediatorSignature?: Signature,
     amount?: BigNumber,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
@@ -91,7 +92,7 @@ export interface IVectorUtils {
    */
   createInsuranceTransfer(
     toAddress: PublicIdentifier,
-    mediatorPublicKey: PublicKey,
+    mediatorAddress: EthereumAddress,
     amount: BigNumber,
     expiration: number,
     UUID: string,

@@ -7,6 +7,8 @@ import {
   Balances,
   EthereumAddress,
   PublicIdentifier,
+  MerchantUrl,
+  Signature,
 } from "@hypernetlabs/objects";
 import { IContextProvider } from "@interfaces/utilities";
 import { Subject } from "rxjs";
@@ -28,11 +30,11 @@ export class ContextProvider implements IContextProvider {
     onPushPaymentUpdated: Subject<PushPayment>,
     onPullPaymentUpdated: Subject<PullPayment>,
     onBalancesChanged: Subject<Balances>,
-    onMerchantAuthorized: Subject<string>,
-    onAuthorizedMerchantUpdated: Subject<string>,
-    onAuthorizedMerchantActivationFailed: Subject<string>,
-    onMerchantIFrameDisplayRequested: Subject<string>,
-    onMerchantIFrameCloseRequested: Subject<string>,
+    onMerchantAuthorized: Subject<MerchantUrl>,
+    onAuthorizedMerchantUpdated: Subject<MerchantUrl>,
+    onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>,
+    onMerchantIFrameDisplayRequested: Subject<MerchantUrl>,
+    onMerchantIFrameCloseRequested: Subject<MerchantUrl>,
     onInitializationRequired: Subject<void>,
     onPrivateCredentialsRequested: Subject<void>,
   ) {
@@ -103,7 +105,7 @@ export class ContextProvider implements IContextProvider {
           this.context.onMerchantIFrameCloseRequested,
           this.context.onInitializationRequired,
           this.context.onPrivateCredentialsRequested,
-          new Map<string, string>(),
+          new Map<MerchantUrl, Signature>(),
         ),
       );
     }

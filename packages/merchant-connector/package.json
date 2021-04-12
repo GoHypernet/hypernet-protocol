@@ -45,5 +45,7 @@
     "webpack": "webpack"
   },
   "types": "dist/index.d.ts",
-  "dependencies": {}
+  "dependencies": {
+    "@hypernetlabs/objects": "^0.0.1"
+  }
 }

@@ -8,6 +8,7 @@ import {
   ProxyError,
 } from "@hypernetlabs/objects";
 import { IAccountsRepository, IMerchantConnectorRepository } from "@interfaces/data";
+import { MerchantUrl, Signature } from "@hypernetlabs/objects";
 import { IContextProvider, ILogUtils } from "@interfaces/utilities";
 import { ResultUtils } from "@hypernetlabs/utils";
 
@@ -17,7 +18,7 @@ export class MerchantService implements IMerchantService {
     protected accountsRepository: IAccountsRepository,
     protected contextProvider: IContextProvider,
     protected logUtils: ILogUtils,
-  ) { }
+  ) {}
 
   public initialize(): ResultAsync<void, LogicalError | MerchantConnectorError> {
     return this.contextProvider.getContext().map((context) => {
@@ -66,10 +67,12 @@ export class MerchantService implements IMerchantService {
     });
   }
 
-  public authorizeMerchant(merchantUrl: string): ResultAsync<void, MerchantValidationError> {
-    return ResultUtils.combine([this.contextProvider.getContext(),
-    this.getAuthorizedMerchants(),
-    this.accountsRepository.getBalances()]).map(async (vals) => {
+  public authorizeMerchant(merchantUrl: MerchantUrl): ResultAsync<void, MerchantValidationError> {
+    return ResultUtils.combine([
+      this.contextProvider.getContext(),
+      this.getAuthorizedMerchants(),
+      this.accountsRepository.getBalances(),
+    ]).map(async (vals) => {
       const [context, authorizedMerchantsMap, balances] = vals;
 
       // Remove the merchant iframe proxy related to that merchantUrl if there is any activated ones.
@@ -83,29 +86,24 @@ export class MerchantService implements IMerchantService {
     });
   }
 
-  public getAuthorizedMerchants(): ResultAsync<Map<string, string>, never> {
+  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, never> {
     return this.merchantConnectorRepository.getAuthorizedMerchants();
   }
 
   public activateAuthorizedMerchants(): ResultAsync<
     void,
-    | MerchantConnectorError
-    | MerchantValidationError
-    | BlockchainUnavailableError
-    | LogicalError
-    | ProxyError
+    MerchantConnectorError | MerchantValidationError | BlockchainUnavailableError | LogicalError | ProxyError
   > {
-    return this.accountsRepository.getBalances()
-      .andThen((balances) => {
-        return this.merchantConnectorRepository.activateAuthorizedMerchants(balances);
-      });
+    return this.accountsRepository.getBalances().andThen((balances) => {
+      return this.merchantConnectorRepository.activateAuthorizedMerchants(balances);
+    });
   }
 
-  public closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+  public closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError> {
     return this.merchantConnectorRepository.closeMerchantIFrame(merchantUrl);
   }
 
-  public displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+  public displayMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError> {
     return this.merchantConnectorRepository.displayMerchantIFrame(merchantUrl);
   }
 }

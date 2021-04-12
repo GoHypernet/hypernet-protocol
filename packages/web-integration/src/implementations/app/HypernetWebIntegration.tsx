@@ -24,6 +24,7 @@ import {
 import IHypernetIFrameProxy from "@web-integration-interfaces/proxy/IHypernetIFrameProxy";
 import HypernetIFrameProxy from "@web-integration-implementations/proxy/HypernetIFrameProxy";
 import ConnectorAuthorizationFlow from "@web-integration-flows/ConnectorAuthorizationFlow";
+import { MerchantUrl } from "@hypernetlabs/objects";
 import PrivateKeysFlow from "@web-integration-flows/PrivateKeysFlow";
 import { ThemeProvider } from "theming";
 
@@ -31,7 +32,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
 
   protected iframeURL: string = "http://localhost:8090";
-  protected currentMerchantUrl: string | undefined | null;
+  protected currentMerchantUrl: MerchantUrl | undefined | null;
 
   public core: IHypernetIFrameProxy;
 
@@ -237,11 +238,11 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     );
   }
 
-  public displayMerchantIFrame(merchantUrl: string): void {
+  public displayMerchantIFrame(merchantUrl: MerchantUrl): void {
     this.core.displayMerchantIFrame(merchantUrl);
   }
 
-  public closeMerchantIFrame(merchantUrl: string): void {
+  public closeMerchantIFrame(merchantUrl: MerchantUrl): void {
     this.core.closeMerchantIFrame(merchantUrl);
   }
 }

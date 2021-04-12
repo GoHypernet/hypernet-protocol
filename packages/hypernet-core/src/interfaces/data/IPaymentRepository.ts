@@ -4,6 +4,13 @@ import {
   PublicIdentifier,
   PullPayment,
   PushPayment,
+  PaymentId,
+  MerchantUrl,
+} from "@hypernetlabs/objects";
+import {
+  PaymentFinalizeError,
+  RouterChannelUnknownError,
+  VectorError,
   PaymentCreationError,
   BlockchainUnavailableError,
   LogicalError,
@@ -12,9 +19,7 @@ import {
   InvalidParametersError,
   PaymentStakeError,
   TransferCreationError,
-  PaymentId,
 } from "@hypernetlabs/objects";
-import { PaymentFinalizeError, RouterChannelUnknownError, VectorError } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IPaymentRepository {
@@ -45,7 +50,7 @@ export interface IPaymentRepository {
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<PushPayment, PaymentCreationError>;
 
   createPullPayment(
@@ -56,7 +61,7 @@ export interface IPaymentRepository {
     expirationDate: number,
     requiredStake: string, // TODO: amounts should be consistently use BigNumber
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<PullPayment, PaymentCreationError>;
 
   createPullRecord(paymentId: PaymentId, amount: string): ResultAsync<Payment, PaymentCreationError>;
@@ -88,7 +93,7 @@ export interface IPaymentRepository {
    */
   provideStake(
     paymentId: PaymentId,
-    merchantAddress: string,
+    merchantAddress: EthereumAddress,
   ): ResultAsync<
     Payment,
     | BlockchainUnavailableError

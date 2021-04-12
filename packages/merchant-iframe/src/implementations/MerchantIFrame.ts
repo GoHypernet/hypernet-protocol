@@ -7,7 +7,7 @@ import { MerchantService } from "@merchant-iframe/implementations/business";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { IMerchantConnectorListener, IMerchantIFrameApi } from "@merchant-iframe/interfaces/api";
 import { IAjaxUtils, AxiosAjaxUtils, LocalStorageUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
-
+import { MerchantUrl } from "@hypernetlabs/objects";
 export class MerchantIframe {
   protected contextProvider: IContextProvider;
   protected ajaxUtils: IAjaxUtils;
@@ -23,7 +23,7 @@ export class MerchantIframe {
 
   constructor() {
     // Instantiate all the pieces
-    this.contextProvider = new ContextProvider("");
+    this.contextProvider = new ContextProvider(MerchantUrl(""));
     this.ajaxUtils = new AxiosAjaxUtils();
     this.localStorageUtils = new LocalStorageUtils();
 

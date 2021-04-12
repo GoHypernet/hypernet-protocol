@@ -1,7 +1,8 @@
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { PaymentId } from "@objects/PaymentId";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
-import { PublicKey } from "@objects/PublicKey";
+import { MerchantUrl } from "@objects/MerchantUrl";
+import { TransferId } from "@objects/TransferId";
 import { BigNumber, constants } from "ethers";
 
 export const account = EthereumAddress("0xDEADBEEF");
@@ -18,15 +19,15 @@ export const commonAmount = BigNumber.from("1");
 export const destinationAddress = EthereumAddress("0x0afd1c03a0373b4c99233cbb0719ab0cbe6374gt");
 export const erc20AssetAddress = EthereumAddress("0x9FBDa871d559710256a2502A2517b794B482Db40");
 export const commonPaymentId = PaymentId("See, this doesn't have to be legit data if it's never checked!");
-export const offerTransferId = "OfferTransferId";
-export const insuranceTransferId = "InsuranceTransferId";
-export const parameterizedTransferId = "ParameterizedTransferId";
+export const offerTransferId = TransferId("OfferTransferId");
+export const insuranceTransferId = TransferId("InsuranceTransferId");
+export const parameterizedTransferId = TransferId("ParameterizedTransferId");
 export const unixPast = 1318870398; // Less that defaultExpirationlength before now
 export const unixNow = 1318874398;
 export const nowFormatted = "2021-02-03T04:28:09+03:00";
 export const defaultExpirationLength = 5000;
-export const merchantUrl = "https://example.merchant.com/";
-export const merchantUrl2 = "https://example2.merchant.com/";
-export const merchantPublicKey = PublicKey("0xMediatorPublicKey");
-export const merchantPublicKey2 = PublicKey("0xMediatorPublicKey2");
+export const merchantUrl = MerchantUrl("https://example.merchant.com/");
+export const merchantUrl2 = MerchantUrl("https://example2.merchant.com/");
+export const merchantAddress = EthereumAddress("0xMediatorEthereumAddress");
+export const merchantAddress2 = EthereumAddress("0xMediatorEthereumAddress2");
 export const mediatorSignature = "0xMediatorSignature";

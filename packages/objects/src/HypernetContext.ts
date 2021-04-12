@@ -5,6 +5,8 @@ import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
 import { Balances } from "@objects/Balances";
 import { EthereumAddress } from "@objects/EthereumAddress";
+import { MerchantUrl } from "@objects/MerchantUrl";
+import { Signature } from "@objects/Signature";
 
 export class HypernetContext {
   constructor(
@@ -20,11 +22,11 @@ export class HypernetContext {
     public onPushPaymentUpdated: Subject<PushPayment>,
     public onPullPaymentUpdated: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
-    public onMerchantAuthorized: Subject<string>,
-    public onAuthorizedMerchantUpdated: Subject<string>,
-    public onAuthorizedMerchantActivationFailed: Subject<string>,
-    public onMerchantIFrameDisplayRequested: Subject<string>,
-    public onMerchantIFrameCloseRequested: Subject<string>,
+    public onMerchantAuthorized: Subject<MerchantUrl>,
+    public onAuthorizedMerchantUpdated: Subject<MerchantUrl>,
+    public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>,
+    public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>,
+    public onMerchantIFrameCloseRequested: Subject<MerchantUrl>,
     public onInitializationRequired: Subject<void>,
     public onPrivateCredentialsRequested: Subject<void>,
   ) {}
@@ -45,13 +47,13 @@ export class InitializedHypernetContext {
     public onPushPaymentUpdated: Subject<PushPayment>,
     public onPullPaymentUpdated: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
-    public onMerchantAuthorized: Subject<string>,
-    public onAuthorizedMerchantUpdated: Subject<string>,
-    public onAuthorizedMerchantActivationFailed: Subject<string>,
-    public onMerchantIFrameDisplayRequested: Subject<string>,
-    public onMerchantIFrameCloseRequested: Subject<string>,
+    public onMerchantAuthorized: Subject<MerchantUrl>,
+    public onAuthorizedMerchantUpdated: Subject<MerchantUrl>,
+    public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>,
+    public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>,
+    public onMerchantIFrameCloseRequested: Subject<MerchantUrl>,
     public onInitializationRequired: Subject<void>,
     public onPrivateCredentialsRequested: Subject<void>,
-    public authorizedMediators: Map<string, string>,
+    public authorizedMediators: Map<MerchantUrl, Signature>,
   ) {}
 }

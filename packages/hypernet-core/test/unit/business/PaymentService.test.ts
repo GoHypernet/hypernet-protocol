@@ -9,11 +9,11 @@ import {
   PaymentInternalDetails,
   PaymentId,
   EthereumAddress,
+  MerchantUrl,
 } from "@hypernetlabs/objects";
 import { EPaymentState } from "@hypernetlabs/objects";
 import {
   defaultExpirationLength,
-  merchantPublicKey,
   merchantUrl,
   hyperTokenAddress,
   insuranceTransferId,
@@ -67,7 +67,7 @@ class PaymentServiceMocks {
   public finalizedPushPayment: PushPayment;
 
   public assetBalance: AssetBalance;
-  public merchantAddresses: Map<string, EthereumAddress>;
+  public merchantAddresses: Map<MerchantUrl, EthereumAddress>;
 
   constructor(hypertokenBalance: string = amount) {
     this.pushPayment = this.factoryPushPayment();
@@ -116,9 +116,7 @@ class PaymentServiceMocks {
       okAsync(new Map<PaymentId, Payment>()),
     );
     td.when(this.accountRepository.getBalanceByAsset(hyperTokenAddress)).thenReturn(okAsync(this.assetBalance));
-    td.when(this.paymentRepository.provideStake(paymentId, account)).thenReturn(
-      okAsync(this.stakedPushPayment),
-    );
+    td.when(this.paymentRepository.provideStake(paymentId, account)).thenReturn(okAsync(this.stakedPushPayment));
     td.when(this.paymentRepository.provideAsset(paymentId)).thenReturn(okAsync(this.paidPushPayment));
     td.when(this.paymentRepository.finalizePayment(paymentId, amount)).thenReturn(okAsync(this.finalizedPushPayment));
 

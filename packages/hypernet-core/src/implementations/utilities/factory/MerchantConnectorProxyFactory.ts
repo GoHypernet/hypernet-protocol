@@ -2,15 +2,16 @@ import { IConfigProvider, IMerchantConnectorProxy, IContextProvider } from "@int
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 import { MerchantConnectorProxy } from "@implementations/utilities/MerchantConnectorProxy";
 import { ok, Result, ResultAsync } from "neverthrow";
-import { LogicalError, MerchantConnectorError, MerchantValidationError, ProxyError } from "@hypernetlabs/objects";
+import { MerchantUrl } from "@hypernetlabs/objects";
+import { LogicalError, MerchantValidationError, ProxyError } from "@hypernetlabs/objects";
 
 export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFactory {
-  protected static proxyMap: Map<string, IMerchantConnectorProxy> = new Map();
+  protected static proxyMap: Map<MerchantUrl, IMerchantConnectorProxy> = new Map();
 
   constructor(protected configProvider: IConfigProvider, protected contextProvider: IContextProvider) {}
 
   factoryProxy(
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<IMerchantConnectorProxy, MerchantValidationError | LogicalError | ProxyError> {
     let proxy: IMerchantConnectorProxy;
     return this.configProvider
@@ -41,7 +42,7 @@ export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFac
       });
   }
 
-  destroyMerchantConnectorProxy(merchantUrl: string): Result<void, never> {
+  destroyMerchantConnectorProxy(merchantUrl: MerchantUrl): Result<void, never> {
     const proxy = MerchantConnectorProxyFactory.proxyMap.get(merchantUrl);
     proxy?.destroy();
     MerchantConnectorProxyFactory.proxyMap.delete(merchantUrl);

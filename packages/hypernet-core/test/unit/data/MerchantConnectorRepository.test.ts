@@ -16,9 +16,9 @@ import { IVectorUtils, IMerchantConnectorProxy, IBlockchainUtils } from "@interf
 import {
   MerchantConnectorError,
   MerchantValidationError,
-  TransferResolutionError,
   Signature,
   Balances,
+  TransferResolutionError,
 } from "@hypernetlabs/objects";
 import { IMerchantConnectorRepository } from "@interfaces/data/IMerchantConnectorRepository";
 import { okAsync, errAsync } from "neverthrow";
@@ -71,7 +71,7 @@ class MerchantConnectorRepositoryMocks {
       this.vectorUtils.resolveInsuranceTransfer(
         insuranceTransferId,
         commonPaymentId,
-        mediatorSignature,
+        Signature(mediatorSignature),
         BigNumber.from(resolutionAmount),
       ),
     ).thenReturn(okAsync({} as IBasicTransferResponse));
@@ -341,7 +341,7 @@ describe("MerchantConnectorRepository tests", () => {
       mocks.vectorUtils.resolveInsuranceTransfer(
         insuranceTransferId,
         commonPaymentId,
-        mediatorSignature,
+        Signature(mediatorSignature),
         BigNumber.from(resolutionAmount),
       ),
     ).thenReturn(errAsync(new TransferResolutionError()));

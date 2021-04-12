@@ -14,8 +14,8 @@ import {
   PushPayment,
   HypernetConfig,
   HypernetContext,
-  HexString,
   PaymentId,
+  MerchantUrl,
 } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
@@ -94,7 +94,7 @@ export class PaymentService implements IPaymentService {
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<PullPayment, PaymentCreationError | LogicalError> {
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
     // totalAuthorized / (deltaAmount/deltaTime) > ((expiration date - now) + someMinimumNumDays)
@@ -174,7 +174,7 @@ export class PaymentService implements IPaymentService {
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<PushPayment, PaymentCreationError | LogicalError> {
     // TODO: Sanity checking on the values
     return ResultUtils.combine([
@@ -257,7 +257,7 @@ export class PaymentService implements IPaymentService {
   > {
     let config: HypernetConfig;
     let payments: Map<PaymentId, Payment>;
-    const merchantUrls = new Set<string>();
+    const merchantUrls = new Set<MerchantUrl>();
 
     return ResultUtils.combine([this.configProvider.getConfig(), this.paymentRepository.getPaymentsByIds(paymentIds)])
       .andThen((vals) => {

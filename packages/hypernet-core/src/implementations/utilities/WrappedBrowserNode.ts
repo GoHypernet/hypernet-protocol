@@ -12,6 +12,7 @@ import {
   IRegisteredTransfer,
   IWithdrawQuote,
   IWithdrawResponse,
+  TransferId,
 } from "@hypernetlabs/objects";
 import { VectorError } from "@hypernetlabs/objects";
 import { InsuranceResolver, MessageResolver, ParameterizedResolver } from "@hypernetlabs/objects/types/typechain";
@@ -35,7 +36,10 @@ export class WrappedBrowserNode implements IBrowserNode {
     );
   }
 
-  public reconcileDeposit(assetId: EthereumAddress, channelAddress: EthereumAddress): ResultAsync<EthereumAddress, VectorError> {
+  public reconcileDeposit(
+    assetId: EthereumAddress,
+    channelAddress: EthereumAddress,
+  ): ResultAsync<EthereumAddress, VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.reconcileDeposit({ assetId, channelAddress }),
       this.toVectorError,
@@ -79,7 +83,7 @@ export class WrappedBrowserNode implements IBrowserNode {
     });
   }
 
-  public getTransfer(transferId: string): ResultAsync<IFullTransferState, VectorError> {
+  public getTransfer(transferId: TransferId): ResultAsync<IFullTransferState, VectorError> {
     return ResultAsync.fromPromise(this.browserNode.getTransfer({ transferId }), this.toVectorError).andThen(
       (result) => {
         if (result.isError) {
@@ -144,7 +148,7 @@ export class WrappedBrowserNode implements IBrowserNode {
 
   public resolveTransfer(
     channelAddress: EthereumAddress,
-    transferId: string,
+    transferId: TransferId,
     transferResolver: MessageResolver | ParameterizedResolver | InsuranceResolver,
   ): ResultAsync<IBasicTransferResponse, VectorError> {
     return ResultAsync.fromPromise(
@@ -203,7 +207,11 @@ export class WrappedBrowserNode implements IBrowserNode {
       if (result.isError) {
         return errAsync(new VectorError(result.getError() as VectorError));
       } else {
-        return okAsync(result.getValue().map((val) => {return EthereumAddress(val);}));
+        return okAsync(
+          result.getValue().map((val) => {
+            return EthereumAddress(val);
+          }),
+        );
       }
     });
   }

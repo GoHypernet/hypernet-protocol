@@ -8,13 +8,14 @@ import {
   InitializedHypernetContext,
   Payment,
   PublicIdentifier,
-  PublicKey,
   PullPayment,
   PushPayment,
   IHypernetPullPaymentDetails,
   IFullTransferState,
   IBasicTransferResponse,
   PaymentId,
+  MerchantUrl,
+  TransferId,
 } from "@hypernetlabs/objects";
 import {
   LogicalError,
@@ -84,7 +85,7 @@ export class PaymentRepository implements IPaymentRepository {
       })
       .andThen((transferResponse) => {
         // Get the newly minted transfer
-        return browserNode.getTransfer(transferResponse.transferId);
+        return browserNode.getTransfer(TransferId(transferResponse.transferId));
       })
       .andThen((newTransfer) => {
         // Add the new transfer to the list
@@ -104,7 +105,7 @@ export class PaymentRepository implements IPaymentRepository {
     expirationDate: number,
     requiredStake: string, // TODO: amounts should be consistently use BigNumber
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<PullPayment, PaymentCreationError> {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
@@ -141,7 +142,7 @@ export class PaymentRepository implements IPaymentRepository {
         return this.vectorUtils.createOfferTransfer(counterPartyAccount, message);
       })
       .andThen((transferInfo) => {
-        return browserNode.getTransfer(transferInfo.transferId);
+        return browserNode.getTransfer(TransferId(transferInfo.transferId));
       })
       .andThen((transfer) => {
         // Return the payment
@@ -170,7 +171,7 @@ export class PaymentRepository implements IPaymentRepository {
     expirationDate: number,
     requiredStake: string,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
   ): ResultAsync<PushPayment, PaymentCreationError> {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
@@ -203,7 +204,7 @@ export class PaymentRepository implements IPaymentRepository {
         return this.vectorUtils.createOfferTransfer(counterPartyAccount, message);
       })
       .andThen((transferInfo) => {
-        return browserNode.getTransfer(transferInfo.transferId);
+        return browserNode.getTransfer(TransferId(transferInfo.transferId));
       })
       .andThen((transfer) => {
         // Return the payment
@@ -391,7 +392,7 @@ export class PaymentRepository implements IPaymentRepository {
   > {
     let browserNode: IBrowserNode;
     let existingTransfers: IFullTransferState[];
-    let parameterizedTransferId: string;
+    let parameterizedTransferId: TransferId;
 
     return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this._getTransfersByPaymentId(paymentId)])
       .andThen((vals) => {
@@ -412,7 +413,7 @@ export class PaymentRepository implements IPaymentRepository {
           );
         }
 
-        parameterizedTransferId = sortedTransfers.parameterizedTransfer.transferId;
+        parameterizedTransferId = TransferId(sortedTransfers.parameterizedTransfer.transferId);
 
         return this.vectorUtils.resolvePaymentTransfer(parameterizedTransferId, paymentId, amount);
       })
@@ -439,7 +440,7 @@ export class PaymentRepository implements IPaymentRepository {
    */
   public provideStake(
     paymentId: PaymentId,
-    merchantPublicKey: PublicKey,
+    merchantAddress: EthereumAddress,
   ): ResultAsync<
     Payment,
     | BlockchainUnavailableError
@@ -482,7 +483,7 @@ export class PaymentRepository implements IPaymentRepository {
         this.logUtils.log(`PaymentRepository:provideStake: Creating insurance transfer for paymentId: ${paymentId}`);
         return this.vectorUtils.createInsuranceTransfer(
           paymentSender,
-          merchantPublicKey,
+          merchantAddress,
           payment.requiredStake,
           paymentExpiration,
           paymentID,
@@ -490,7 +491,7 @@ export class PaymentRepository implements IPaymentRepository {
       })
       .andThen((transferInfoUnk) => {
         const transferInfo = transferInfoUnk as IBasicTransferResponse;
-        return browserNode.getTransfer(transferInfo.transferId);
+        return browserNode.getTransfer(TransferId(transferInfo.transferId));
       })
       .andThen((transfer) => {
         const allTransfers = [transfer, ...existingTransfers];
@@ -577,7 +578,7 @@ export class PaymentRepository implements IPaymentRepository {
       })
       .andThen((transferInfoUnk) => {
         const transferInfo = transferInfoUnk as NodeResponses.ConditionalTransfer;
-        return browserNode.getTransfer(transferInfo.transferId);
+        return browserNode.getTransfer(TransferId(transferInfo.transferId));
       })
       .andThen((transfer) => {
         const allTransfers = [transfer, ...existingTransfers];

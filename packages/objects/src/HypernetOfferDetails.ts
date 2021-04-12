@@ -3,6 +3,7 @@ import { IMessageTransferData } from "@objects/MessageTransferData";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { IRate } from "@objects/Rate";
 import { PaymentId } from "@objects/PaymentId";
+import { MerchantUrl } from "@objects/MerchantUrl";
 
 export interface IHypernetOfferDetails extends IMessageTransferData {
   paymentId: PaymentId;
@@ -11,7 +12,7 @@ export interface IHypernetOfferDetails extends IMessageTransferData {
   from: PublicIdentifier;
   requiredStake: string;
   paymentAmount: string;
-  merchantUrl: string;
+  merchantUrl: MerchantUrl;
   paymentToken: EthereumAddress;
   expirationDate: number;
   rate?: IRate;
