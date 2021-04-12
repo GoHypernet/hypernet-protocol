@@ -5,6 +5,8 @@ import {
   EthereumAddress,
   HypernetContext,
   InitializedHypernetContext,
+  InvalidParametersError,
+  PrivateCredentials,
   PublicIdentifier,
 } from "@hypernetlabs/objects";
 import {
@@ -14,8 +16,8 @@ import {
   VectorError,
   RouterChannelUnknownError,
 } from "@hypernetlabs/objects";
-import { IContextProvider, ILogUtils } from "@interfaces/utilities";
-import { okAsync, ResultAsync } from "neverthrow";
+import { IContextProvider, IBlockchainProvider, ILogUtils } from "@interfaces/utilities";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { BigNumber } from "ethers";
 
 /**
@@ -25,6 +27,7 @@ export class AccountService implements IAccountService {
   constructor(
     protected accountRepository: IAccountsRepository,
     protected contextProvider: IContextProvider,
+    protected blockchainProvider: IBlockchainProvider,
     protected logUtils: ILogUtils,
   ) {}
 
@@ -92,5 +95,15 @@ export class AccountService implements IAccountService {
 
         return okAsync(balances);
       });
+  }
+
+  public providePrivateCredentials(privateCredentials: PrivateCredentials): ResultAsync<void, InvalidParametersError> {
+    if (!privateCredentials.mnemonic && !privateCredentials.privateKey) {
+      return errAsync(new InvalidParametersError("You must provide a mnemonic or private key"));
+    }
+
+    return this.contextProvider.getContext().map((context) => {
+      this.blockchainProvider.supplyPrivateCredentials(privateCredentials);
+    });
   }
 }

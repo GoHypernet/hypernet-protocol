@@ -141,6 +141,16 @@ export default class CoreWrapper extends ChildProxy {
           return this.core.getAuthorizedMerchants();
         }, data.callId);
       },
+      providePrivateCredentials: (
+        data: IIFrameCallData<{
+          privateKey: string | null;
+          mnemonic: string | null;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.providePrivateCredentials(data.data.privateKey, data.data.mnemonic);
+        }, data.callId);
+      },
     });
   }
 
@@ -208,8 +218,12 @@ export default class CoreWrapper extends ChildProxy {
       parent.emit("onMerchantIFrameCloseRequested", merchantUrl);
     });
 
-    this.core.onInitializationRequired.subscribe((merchantUrl) => {
-      parent.emit("onInitializationRequired", merchantUrl);
+    this.core.onInitializationRequired.subscribe(() => {
+      parent.emit("onInitializationRequired");
+    });
+
+    this.core.onPrivateCredentialsRequested.subscribe(() => {
+      parent.emit("onPrivateCredentialsRequested");
     });
   }
 }

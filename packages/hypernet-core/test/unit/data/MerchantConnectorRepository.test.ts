@@ -13,7 +13,13 @@ import {
 } from "@mock/mocks";
 import { BlockchainProviderMock, ConfigProviderMock, ContextProviderMock } from "@mock/utils";
 import { IVectorUtils, IMerchantConnectorProxy, IBlockchainUtils } from "@interfaces/utilities";
-import { Balances, MerchantConnectorError, MerchantValidationError, Signature, TransferResolutionError } from "@hypernetlabs/objects";
+import {
+  MerchantConnectorError,
+  MerchantValidationError,
+  TransferResolutionError,
+  Signature,
+  Balances,
+} from "@hypernetlabs/objects";
 import { IMerchantConnectorRepository } from "@interfaces/data/IMerchantConnectorRepository";
 import { okAsync, errAsync } from "neverthrow";
 import { MerchantConnectorRepository } from "@implementations/data/MerchantConnectorRepository";
@@ -25,8 +31,9 @@ import { IBasicTransferResponse } from "@hypernetlabs/objects";
 
 const validatedSignature = Signature("0xValidatedSignature");
 const newAuthorizationSignature = Signature("0xNewAuthorizationSignature");
-const authorizationSignature =
-Signature("0x1e866e66e7f3a68658bd186bafbdc534d4a5022e14022fddfe8865e2236dc67d64eee05b4d8f340dffa1928efa517784b63cad6a3fb35d999cb9d722b34075071b");
+const authorizationSignature = Signature(
+  "0x1e866e66e7f3a68658bd186bafbdc534d4a5022e14022fddfe8865e2236dc67d64eee05b4d8f340dffa1928efa517784b63cad6a3fb35d999cb9d722b34075071b",
+);
 const resolutionAmount = "1";
 const balances = new Balances([]);
 
@@ -77,7 +84,7 @@ class MerchantConnectorRepositoryMocks {
       okAsync(this.merchantConnectorProxy),
     );
 
-    td.when(this.merchantConnectorProxy.getValidatedSignature()).thenReturn(okAsync(validatedSignature));
+    td.when(this.merchantConnectorProxy.getValidatedSignature()).thenReturn(okAsync(Signature(validatedSignature)));
     td.when(this.merchantConnectorProxy.activateConnector(publicIdentifier, balances)).thenReturn(okAsync(undefined));
     td.when(this.merchantConnectorProxy.resolveChallenge(commonPaymentId)).thenReturn(
       okAsync({ mediatorSignature, amount: resolutionAmount } as IResolutionResult),
@@ -89,9 +96,9 @@ class MerchantConnectorRepositoryMocks {
         td.matchers.contains(this.expectedSignerDomain),
         td.matchers.contains(this.expectedSignerTypes),
         td.matchers.contains(this.expectedSignerValue),
-        authorizationSignature,
+        Signature(authorizationSignature),
       ),
-    ).thenReturn(account);
+    ).thenReturn(account as never);
 
     td.when(
       this.blockchainProvider.signer._signTypedData(
@@ -173,9 +180,9 @@ describe("MerchantConnectorRepository tests", () => {
         td.matchers.contains(mocks.expectedSignerDomain),
         td.matchers.contains(mocks.expectedSignerTypes),
         td.matchers.contains(mocks.expectedSignerValue),
-        authorizationSignature,
+        Signature(authorizationSignature),
       ),
-    ).thenReturn(account2);
+    ).thenReturn(account2 as never);
 
     let onAuthorizedMerchantUpdatedVal: string | null = null;
     mocks.contextProvider.onAuthorizedMerchantUpdated.subscribe((val) => {

@@ -1,5 +1,5 @@
 import { ResultAsync } from "neverthrow";
-import { BlockchainUnavailableError } from "@hypernetlabs/objects";
+import { PrivateCredentials, BlockchainUnavailableError, InvalidParametersError } from "@hypernetlabs/objects";
 import { TransactionResponse, TransactionReceipt } from "@ethersproject/abstract-provider";
 import { IBlockchainProvider } from "@interfaces/utilities";
 import { ethers } from "ethers";
@@ -31,5 +31,9 @@ export class BlockchainProviderMock implements IBlockchainProvider {
 
   public getLatestBlock(): ResultAsync<ethers.providers.Block, BlockchainUnavailableError> {
     return okAsync({} as ethers.providers.Block);
+  }
+
+  public supplyPrivateCredentials(privateCredentials: PrivateCredentials): ResultAsync<void, InvalidParametersError> {
+    return okAsync(undefined);
   }
 }

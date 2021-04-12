@@ -7,7 +7,7 @@ import {
   PullPayment,
   PushPayment,
 } from "@hypernetlabs/objects";
-import { IContextProvider } from "@interfaces/utilities/IContextProvider";
+import { IContextProvider } from "@interfaces/utilities";
 import { okAsync, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 import { account, publicIdentifier } from "@mock/mocks";
@@ -31,6 +31,7 @@ export class ContextProviderMock implements IContextProvider {
   public onMerchantIFrameDisplayRequested: Subject<string>;
   public onMerchantIFrameCloseRequested: Subject<string>;
   public onInitializationRequired: Subject<void>;
+  public onPrivateCredentialsRequested: Subject<void>;
 
   public authorizedMerchants: Map<string, string>;
 
@@ -54,6 +55,7 @@ export class ContextProviderMock implements IContextProvider {
     this.onMerchantIFrameDisplayRequested = new Subject<string>();
     this.onMerchantIFrameCloseRequested = new Subject<string>();
     this.onInitializationRequired = new Subject<void>();
+    this.onPrivateCredentialsRequested = new Subject<void>();
 
     this.authorizedMerchants = new Map<string, string>();
 
@@ -79,6 +81,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onMerchantIFrameDisplayRequested,
         this.onMerchantIFrameCloseRequested,
         this.onInitializationRequired,
+        this.onPrivateCredentialsRequested,
       );
     }
 
@@ -104,6 +107,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onMerchantIFrameDisplayRequested,
         this.onMerchantIFrameCloseRequested,
         this.onInitializationRequired,
+        this.onPrivateCredentialsRequested,
         this.authorizedMerchants,
       );
     }
