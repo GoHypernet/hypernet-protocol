@@ -212,6 +212,11 @@ export interface IHypernetCore {
   closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError>;
   displayMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError>;
 
+  providePrivateCredentials(
+    privateKey: string | null,
+    mnemonic: string | null,
+  ): ResultAsync<void, InvalidParametersError>;
+
   /**
    * Observables for seeing what's going on
    */
@@ -230,4 +235,5 @@ export interface IHypernetCore {
   onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
   onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
   onInitializationRequired: Subject<void>;
+  onPrivateCredentialsRequested: Subject<void>;
 }

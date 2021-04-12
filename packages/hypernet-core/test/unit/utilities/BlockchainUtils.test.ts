@@ -4,8 +4,8 @@ import { ethers } from "ethers";
 import { EthersBlockchainUtils } from "@implementations/utilities";
 import { merchantUrl } from "@mock/mocks";
 import { IBlockchainUtils } from "@interfaces/utilities";
-import { BlockchainProviderMock } from "@tests/mock/utils";
 import { Signature } from "@hypernetlabs/objects";
+import { BlockchainProviderMock } from "@tests/mock/utils";
 
 const validatedSignature = "0xValidatedSignature";
 const validatedSignature2 = "0xInvalidatedSignature";

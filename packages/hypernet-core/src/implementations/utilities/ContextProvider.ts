@@ -36,6 +36,7 @@ export class ContextProvider implements IContextProvider {
     onMerchantIFrameDisplayRequested: Subject<MerchantUrl>,
     onMerchantIFrameCloseRequested: Subject<MerchantUrl>,
     onInitializationRequired: Subject<void>,
+    onPrivateCredentialsRequested: Subject<void>,
   ) {
     this.context = new HypernetContext(
       null,
@@ -56,6 +57,7 @@ export class ContextProvider implements IContextProvider {
       onMerchantIFrameDisplayRequested,
       onMerchantIFrameCloseRequested,
       onInitializationRequired,
+      onPrivateCredentialsRequested,
     );
     this._initializePromiseResolve = () => null;
     this._initializePromise = new Promise((resolve) => {
@@ -102,6 +104,7 @@ export class ContextProvider implements IContextProvider {
           this.context.onMerchantIFrameDisplayRequested,
           this.context.onMerchantIFrameCloseRequested,
           this.context.onInitializationRequired,
+          this.context.onPrivateCredentialsRequested,
           new Map<MerchantUrl, Signature>(),
         ),
       );

@@ -59,6 +59,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     this.onMerchantIFrameDisplayRequested = new Subject<MerchantUrl>();
     this.onMerchantIFrameCloseRequested = new Subject<MerchantUrl>();
     this.onInitializationRequired = new Subject<void>();
+    this.onPrivateCredentialsRequested = new Subject<void>();
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -144,6 +145,10 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
 
         child.on("onInitializationRequired", () => {
           this.onInitializationRequired.next();
+        });
+
+        child.on("onPrivateCredentialsRequested", () => {
+          this.onPrivateCredentialsRequested.next();
         });
       });
     });
@@ -329,6 +334,16 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return this._createCall("displayMerchantIFrame", merchantUrl);
   }
 
+  public providePrivateCredentials(
+    privateKey: string | null,
+    mnemonic: string | null,
+  ): ResultAsync<void, InvalidParametersError> {
+    return this._createCall("providePrivateCredentials", {
+      privateKey,
+      mnemonic,
+    });
+  }
+
   /**
    * Observables for seeing what's going on
    */
@@ -347,4 +362,5 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
   public onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
   public onInitializationRequired: Subject<void>;
+  public onPrivateCredentialsRequested: Subject<void>;
 }

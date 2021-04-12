@@ -84,7 +84,7 @@ class MerchantConnectorRepositoryMocks {
       okAsync(this.merchantConnectorProxy),
     );
 
-    td.when(this.merchantConnectorProxy.getValidatedSignature()).thenReturn(okAsync(validatedSignature));
+    td.when(this.merchantConnectorProxy.getValidatedSignature()).thenReturn(okAsync(Signature(validatedSignature)));
     td.when(this.merchantConnectorProxy.activateConnector(publicIdentifier, balances)).thenReturn(okAsync(undefined));
     td.when(this.merchantConnectorProxy.resolveChallenge(commonPaymentId)).thenReturn(
       okAsync({ mediatorSignature, amount: resolutionAmount } as IResolutionResult),
@@ -96,7 +96,7 @@ class MerchantConnectorRepositoryMocks {
         td.matchers.contains(this.expectedSignerDomain),
         td.matchers.contains(this.expectedSignerTypes),
         td.matchers.contains(this.expectedSignerValue),
-        authorizationSignature,
+        Signature(authorizationSignature),
       ),
     ).thenReturn(account as never);
 
@@ -180,7 +180,7 @@ describe("MerchantConnectorRepository tests", () => {
         td.matchers.contains(mocks.expectedSignerDomain),
         td.matchers.contains(mocks.expectedSignerTypes),
         td.matchers.contains(mocks.expectedSignerValue),
-        authorizationSignature,
+        Signature(authorizationSignature),
       ),
     ).thenReturn(account2 as never);
 

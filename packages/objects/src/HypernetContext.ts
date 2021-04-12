@@ -28,6 +28,7 @@ export class HypernetContext {
     public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>,
     public onMerchantIFrameCloseRequested: Subject<MerchantUrl>,
     public onInitializationRequired: Subject<void>,
+    public onPrivateCredentialsRequested: Subject<void>,
   ) {}
 }
 
@@ -52,6 +53,7 @@ export class InitializedHypernetContext {
     public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>,
     public onMerchantIFrameCloseRequested: Subject<MerchantUrl>,
     public onInitializationRequired: Subject<void>,
+    public onPrivateCredentialsRequested: Subject<void>,
     public authorizedMediators: Map<MerchantUrl, Signature>,
   ) {}
 }

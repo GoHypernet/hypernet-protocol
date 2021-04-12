@@ -465,7 +465,7 @@ export class VectorUtils implements IVectorUtils {
     let context: InitializedHypernetContext;
     let browserNode: IBrowserNode;
 
-    return ResultUtils.combine([
+    this.getRouterChannelAddressSetup = ResultUtils.combine([
       this.configProvider.getConfig(),
       this.contextProvider.getInitializedContext(),
       this.browserNodeProvider.getBrowserNode(),
@@ -496,6 +496,8 @@ export class VectorUtils implements IVectorUtils {
         // If a channel does not exist with the router, we need to create it.
         return this._createRouterStateChannel(browserNode, config);
       });
+
+    return this.getRouterChannelAddressSetup;
   }
 
   public getTimestampFromTransfer(transfer: IFullTransferState): number {

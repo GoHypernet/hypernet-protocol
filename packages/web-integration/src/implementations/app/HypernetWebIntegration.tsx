@@ -19,11 +19,14 @@ import {
   FUND_WIDGET_ID_SELECTOR,
   LINKS_WIDGET_ID_SELECTOR,
   PAYMENT_WIDGET_ID_SELECTOR,
+  PRIVATE_KEYS_FLOW_ID_SELECTOR,
 } from "@web-integration-constants";
 import IHypernetIFrameProxy from "@web-integration-interfaces/proxy/IHypernetIFrameProxy";
 import HypernetIFrameProxy from "@web-integration-implementations/proxy/HypernetIFrameProxy";
 import ConnectorAuthorizationFlow from "@web-integration-flows/ConnectorAuthorizationFlow";
 import { MerchantUrl } from "@hypernetlabs/objects";
+import PrivateKeysFlow from "@web-integration-flows/PrivateKeysFlow";
+import { ThemeProvider } from "theming";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
@@ -42,6 +45,10 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     this.core.onMerchantIFrameDisplayRequested.subscribe((merchantUrl) => {
       this.currentMerchantUrl = merchantUrl;
     });
+
+    this.core.onPrivateCredentialsRequested.subscribe(() => {
+      this._renderPrivateKeysModal();
+    });
   }
 
   // wait for the core to be intialized
@@ -52,9 +59,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     }
     this.getReadyResult = this.core
       .activate()
-      .andThen(() => {
-        return this.core.activate();
-      })
       .andThen(() => {
         return this.core.getEthereumAccounts();
       })
@@ -224,6 +228,13 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
         config.showInModal,
       ),
       this._generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
+    );
+  }
+
+  private _renderPrivateKeysModal() {
+    ReactDOM.render(
+      this._bootstrapComponent(<PrivateKeysFlow />, true),
+      this._generateDomElement(PRIVATE_KEYS_FLOW_ID_SELECTOR),
     );
   }
 

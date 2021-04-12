@@ -11,3 +11,4 @@ export * from "./PaymentUtils";
 export * from "./TimeUtils";
 export * from "./VectorUtils";
 export * from "./WrappedBrowserNode";
+export * from "./InternalProvider";
