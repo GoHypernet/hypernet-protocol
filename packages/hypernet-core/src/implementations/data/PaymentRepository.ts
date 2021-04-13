@@ -62,7 +62,14 @@ export class PaymentRepository implements IPaymentRepository {
     protected timeUtils: ITimeUtils,
   ) {}
 
-  public createPullRecord(paymentId: PaymentId, amount: string): ResultAsync<Payment, PaymentCreationError> {
+  public createPullRecord(
+    paymentId: PaymentId,
+    amount: string,
+  ): ResultAsync<Payment, PaymentCreationError | InvalidParametersError> {
+    if (!paymentId || !amount) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     let transfers: IFullTransferState[];
     let browserNode: IBrowserNode;
 
@@ -106,7 +113,20 @@ export class PaymentRepository implements IPaymentRepository {
     requiredStake: string, // TODO: amounts should be consistently use BigNumber
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
-  ): ResultAsync<PullPayment, PaymentCreationError> {
+  ): ResultAsync<PullPayment, PaymentCreationError | InvalidParametersError> {
+    if (
+      !counterPartyAccount ||
+      !maximumAmount ||
+      !deltaTime ||
+      !deltaAmount ||
+      !expirationDate ||
+      !requiredStake ||
+      !paymentToken ||
+      !merchantUrl
+    ) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
     let paymentId: PaymentId;
@@ -172,7 +192,11 @@ export class PaymentRepository implements IPaymentRepository {
     requiredStake: string,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
-  ): ResultAsync<PushPayment, PaymentCreationError> {
+  ): ResultAsync<PushPayment, PaymentCreationError | InvalidParametersError> {
+    if (!counterPartyAccount || !amount || !expirationDate || !requiredStake || !paymentToken || !merchantUrl) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
     let paymentId: PaymentId;
@@ -224,8 +248,12 @@ export class PaymentRepository implements IPaymentRepository {
     paymentId: PaymentId,
   ): ResultAsync<
     IFullTransferState[],
-    RouterChannelUnknownError | VectorError | BlockchainUnavailableError | LogicalError
+    RouterChannelUnknownError | VectorError | BlockchainUnavailableError | LogicalError | InvalidParametersError
   > {
+    if (!paymentId) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     let browserNode: IBrowserNode;
     let channelAddress: EthereumAddress;
 
@@ -302,6 +330,10 @@ export class PaymentRepository implements IPaymentRepository {
     | InvalidPaymentError
     | InvalidParametersError
   > {
+    if (!paymentIds) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     let browserNode: IBrowserNode;
     let channelAddress: EthereumAddress;
 
@@ -390,6 +422,10 @@ export class PaymentRepository implements IPaymentRepository {
     | InvalidPaymentError
     | InvalidParametersError
   > {
+    if (!paymentId || !amount) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     let browserNode: IBrowserNode;
     let existingTransfers: IFullTransferState[];
     let parameterizedTransferId: TransferId;
@@ -453,6 +489,10 @@ export class PaymentRepository implements IPaymentRepository {
     | InvalidParametersError
     | TransferCreationError
   > {
+    if (!paymentId || !merchantAddress) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
     let existingTransfers: IFullTransferState[];
@@ -521,6 +561,10 @@ export class PaymentRepository implements IPaymentRepository {
     | InvalidParametersError
     | TransferCreationError
   > {
+    if (!paymentId) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
     let existingTransfers: IFullTransferState[];

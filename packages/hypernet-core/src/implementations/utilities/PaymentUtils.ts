@@ -69,7 +69,11 @@ export class PaymentUtils implements IPaymentUtils {
    * Verifies that the paymentId provided has domain matching Hypernet's domain name.
    * @param paymentId the payment ID to check
    */
-  public isHypernetDomain(paymentId: PaymentId): ResultAsync<boolean, InvalidPaymentIdError> {
+  public isHypernetDomain(paymentId: PaymentId): ResultAsync<boolean, InvalidPaymentIdError | InvalidParametersError> {
+    if (!paymentId) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this.configProvider.getConfig().andThen((config) => {
       const domainRes = this.paymentIdUtils.getDomain(paymentId);
 
@@ -86,6 +90,10 @@ export class PaymentUtils implements IPaymentUtils {
    * @param paymentType the payment type for the id - PUSH or PULL
    */
   public createPaymentId(paymentType: EPaymentType): ResultAsync<PaymentId, InvalidParametersError> {
+    if (!paymentType) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this.configProvider.getConfig().andThen((config) => {
       return this.paymentIdUtils.makePaymentId(config.hypernetProtocolDomain, paymentType, UUID(uuidv4()));
     });
@@ -106,7 +114,11 @@ export class PaymentUtils implements IPaymentUtils {
     from: PublicIdentifier,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<PushPayment, LogicalError> {
+  ): ResultAsync<PushPayment, LogicalError | InvalidParametersError> {
+    if (!paymentId || !to || !from || !state || !(sortedTransfers instanceof SortedTransfers)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     /**
      * Push payments consist of 3 transfers:
      * MessageTransfer - 0 value, represents an offer
@@ -180,7 +192,11 @@ export class PaymentUtils implements IPaymentUtils {
     from: PublicIdentifier,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<PullPayment, LogicalError> {
+  ): ResultAsync<PullPayment, LogicalError | InvalidParametersError> {
+    if (!paymentId || !to || !from || !state || !(sortedTransfers instanceof SortedTransfers)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     /**
      * Pull payments consist of 3+ transfers, a null transfer for 0 value that represents the
      * offer, an insurance payment, and a parameterized payment.
@@ -272,6 +288,10 @@ export class PaymentUtils implements IPaymentUtils {
     paymentId: PaymentId,
     transfers: IFullTransferState[],
   ): ResultAsync<Payment, InvalidPaymentError | InvalidParametersError> {
+    if (!paymentId || !transfers) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     let paymentType: EPaymentType;
     return this.configProvider
       .getConfig()
@@ -331,6 +351,10 @@ export class PaymentUtils implements IPaymentUtils {
   }
 
   public getPaymentState(sortedTransfers: SortedTransfers): EPaymentState {
+    if (!(sortedTransfers instanceof SortedTransfers)) {
+      throw new InvalidParametersError("Incorrectly provided arguments");
+    }
+
     // Determine the state of the payment. There is really a flowchart for doing this,
     // payments move through a set of states.
     // The main considerations here are the presence of each kind of transfer,
@@ -447,6 +471,10 @@ export class PaymentUtils implements IPaymentUtils {
     transfer: IFullTransferState<InsuranceState>,
     offerDetails: IHypernetOfferDetails,
   ): boolean {
+    if (!transfer || !offerDetails) {
+      throw new InvalidParametersError("Incorrectly provided arguments");
+    }
+
     return BigNumber.from(transfer.transferState.collateral).eq(BigNumber.from(offerDetails.requiredStake));
   }
 
@@ -454,6 +482,10 @@ export class PaymentUtils implements IPaymentUtils {
     transfer: IFullTransferState<ParameterizedState>,
     offerDetails: IHypernetOfferDetails,
   ): boolean {
+    if (!transfer || !offerDetails) {
+      throw new InvalidParametersError("Incorrectly provided arguments");
+    }
+
     let total = BigNumber.from(0);
     for (const amount of transfer.balance.amount) {
       total = total.add(amount);
@@ -475,6 +507,10 @@ export class PaymentUtils implements IPaymentUtils {
   public transfersToPayments(
     transfers: IFullTransferState[],
   ): ResultAsync<Payment[], VectorError | LogicalError | InvalidPaymentError | InvalidParametersError> {
+    if (!transfers) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     // First step, get the transfer types for all the transfers
     const transferTypeResults = new Array<
       ResultAsync<{ transferType: ETransferType; transfer: IFullTransferState }, VectorError | Error>
@@ -530,7 +566,11 @@ export class PaymentUtils implements IPaymentUtils {
    */
   public getTransferType(
     transfer: IFullTransferState,
-  ): ResultAsync<ETransferType, VectorError | BlockchainUnavailableError | LogicalError> {
+  ): ResultAsync<ETransferType, VectorError | BlockchainUnavailableError | LogicalError | InvalidParametersError> {
+    if (!transfer) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     // TransferDefinition here is the ETH address of the transfer
     // We need to get the registered transfer definitions as canonical by the browser node
     return this.browserNodeProvider
@@ -592,7 +632,14 @@ export class PaymentUtils implements IPaymentUtils {
    */
   public getTransferTypeWithTransfer(
     transfer: IFullTransferState,
-  ): ResultAsync<{ transferType: ETransferType; transfer: IFullTransferState }, VectorError | LogicalError> {
+  ): ResultAsync<
+    { transferType: ETransferType; transfer: IFullTransferState },
+    VectorError | LogicalError | InvalidParametersError
+  > {
+    if (!transfer) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this.getTransferType(transfer).map((transferType) => {
       return { transferType, transfer };
     });
@@ -609,7 +656,11 @@ export class PaymentUtils implements IPaymentUtils {
   public sortTransfers(
     _paymentId: string,
     transfers: IFullTransferState[],
-  ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError | LogicalError> {
+  ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError | LogicalError | InvalidParametersError> {
+    if (!_paymentId || !transfers) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const offerTransfers: IFullTransferState[] = [];
     const insuranceTransfers: IFullTransferState[] = [];
     const parameterizedTransfers: IFullTransferState[] = [];
@@ -687,6 +738,10 @@ export class PaymentUtils implements IPaymentUtils {
   }
 
   public getEarliestDateFromTransfers(transfers: IFullTransferState[]): number {
+    if (!transfers) {
+      throw new InvalidParametersError("Incorrectly provided arguments");
+    }
+
     // If there are no transfers, the earliest transfer would be now
     if (transfers.length == 0) {
       return this.timeUtils.getUnixNow();

@@ -1,11 +1,12 @@
 import { IMerchantService } from "@interfaces/business";
-import { ResultAsync } from "neverthrow";
+import { ResultAsync, errAsync } from "neverthrow";
 import {
   LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
   BlockchainUnavailableError,
   ProxyError,
+  InvalidParametersError,
 } from "@hypernetlabs/objects";
 import { IAccountsRepository, IMerchantConnectorRepository } from "@interfaces/data";
 import { MerchantUrl, Signature } from "@hypernetlabs/objects";
@@ -68,6 +69,9 @@ export class MerchantService implements IMerchantService {
   }
 
   public authorizeMerchant(merchantUrl: MerchantUrl): ResultAsync<void, MerchantValidationError> {
+    if (!merchantUrl) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
     return ResultUtils.combine([
       this.contextProvider.getContext(),
       this.getAuthorizedMerchants(),
@@ -99,11 +103,21 @@ export class MerchantService implements IMerchantService {
     });
   }
 
-  public closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError> {
+  public closeMerchantIFrame(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError> {
+    if (!merchantUrl) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
     return this.merchantConnectorRepository.closeMerchantIFrame(merchantUrl);
   }
 
-  public displayMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError> {
+  public displayMerchantIFrame(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError> {
+    if (!merchantUrl) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
     return this.merchantConnectorRepository.displayMerchantIFrame(merchantUrl);
   }
 }

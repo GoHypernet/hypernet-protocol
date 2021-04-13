@@ -20,7 +20,11 @@ export class PaymentIdUtils implements IPaymentIdUtils {
    * (characters 0-19 of the paymentIdString)
    * @param paymentIdString
    */
-  public getDomain(paymentIdString: PaymentId): Result<string, InvalidPaymentIdError> {
+  public getDomain(paymentIdString: PaymentId): Result<string, InvalidPaymentIdError | InvalidParametersError> {
+    if (!paymentIdString) {
+      return err(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const paymentIdValidRes = this.isValidPaymentId(paymentIdString);
     if (paymentIdValidRes.isErr() || !paymentIdValidRes.value) {
       return err(new InvalidPaymentIdError(`Not a valid paymentId: '${paymentIdString}'`));
@@ -36,7 +40,11 @@ export class PaymentIdUtils implements IPaymentIdUtils {
    * (characters 20-31 of the paymentIdString)
    * @param paymentIdString
    */
-  public getType(paymentIdString: PaymentId): Result<EPaymentType, InvalidPaymentIdError> {
+  public getType(paymentIdString: PaymentId): Result<EPaymentType, InvalidPaymentIdError | InvalidParametersError> {
+    if (!paymentIdString) {
+      return err(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const paymentIdValidRes = this.isValidPaymentId(paymentIdString);
     if (paymentIdValidRes.isErr() || !paymentIdValidRes.value) {
       return err(new InvalidPaymentIdError(`Not a valid paymentId: '${paymentIdString}'`));
@@ -60,7 +68,11 @@ export class PaymentIdUtils implements IPaymentIdUtils {
    * (characters 32-63 of the paymentIdString)
    * @param paymentIdString
    */
-  public getUUID(paymentIdString: PaymentId): Result<UUID, InvalidPaymentIdError> {
+  public getUUID(paymentIdString: PaymentId): Result<UUID, InvalidPaymentIdError | InvalidParametersError> {
+    if (!paymentIdString) {
+      return err(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const paymentIdValidRes = this.isValidPaymentId(paymentIdString);
     if (paymentIdValidRes.isErr() || !paymentIdValidRes.value) {
       return err(new InvalidPaymentIdError(`Not a valid paymentId: '${paymentIdString}'`));
@@ -74,6 +86,10 @@ export class PaymentIdUtils implements IPaymentIdUtils {
    * @param paymentIdString
    */
   public isValidPaymentId(paymentIdString: PaymentId): Result<boolean, InvalidParametersError> {
+    if (!paymentIdString) {
+      return err(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const overallRegex = /^0x[0-9A-Fa-f]{64}$/;
     return ok(overallRegex.test(paymentIdString));
 
@@ -88,6 +104,10 @@ export class PaymentIdUtils implements IPaymentIdUtils {
    * @param uuid Hex string of 32 characterx exactly
    */
   public makePaymentId(domain: string, type: EPaymentType, uuid: string): Result<PaymentId, InvalidParametersError> {
+    if (!domain || !type || !uuid) {
+      return err(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const domainRegex = /^[0-9A-Za-z]{1,10}$/;
     const typeRegex = /^[0-9A-Za-z]{1,6}$/;
     const uuidRegex = /^[0-9A-Fa-f]{32}$/;

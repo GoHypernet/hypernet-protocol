@@ -1,4 +1,4 @@
-import { HexString, PaymentId, EPaymentType, UUID, InvalidParametersError, InvalidPaymentIdError} from "@hypernetlabs/objects";
+import { PaymentId, EPaymentType, UUID, InvalidParametersError, InvalidPaymentIdError } from "@hypernetlabs/objects";
 import { Result } from "neverthrow";
 
 /**
@@ -16,21 +16,21 @@ export interface IPaymentIdUtils {
    * (characters 0-19 of the paymentIdString)
    * @param paymentIdString
    */
-  getDomain(paymentIdString: PaymentId): Result<string, InvalidPaymentIdError>;
+  getDomain(paymentIdString: PaymentId): Result<string, InvalidPaymentIdError | InvalidParametersError>;
 
   /**
    * Returns an ascii representation of the type portion of the paymentID string.
    * (characters 20-31 of the paymentIdString)
    * @param paymentIdString
    */
-  getType(paymentIdString: PaymentId): Result<EPaymentType, InvalidPaymentIdError>;
+  getType(paymentIdString: PaymentId): Result<EPaymentType, InvalidPaymentIdError | InvalidParametersError>;
 
   /**
    * Returns the UUID portion of the paymentID string.
    * (characters 32-63 of the paymentIdString)
    * @param paymentIdString
    */
-  getUUID(paymentIdString: PaymentId): Result<UUID, InvalidPaymentIdError>;
+  getUUID(paymentIdString: PaymentId): Result<UUID, InvalidPaymentIdError | InvalidParametersError>;
 
   /**
    * A valid payment ID is exactly 64 characters, hexadecimal, prefixed with 0x.

@@ -1,9 +1,9 @@
 import { IConfigProvider, IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 import { MerchantConnectorProxy } from "@implementations/utilities/MerchantConnectorProxy";
-import { ok, Result, ResultAsync } from "neverthrow";
+import { ok, Result, ResultAsync, errAsync, err } from "neverthrow";
 import { MerchantUrl } from "@hypernetlabs/objects";
-import { LogicalError, MerchantValidationError, ProxyError } from "@hypernetlabs/objects";
+import { LogicalError, MerchantValidationError, ProxyError, InvalidParametersError } from "@hypernetlabs/objects";
 
 export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFactory {
   protected static proxyMap: Map<MerchantUrl, IMerchantConnectorProxy> = new Map();
@@ -12,7 +12,14 @@ export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFac
 
   factoryProxy(
     merchantUrl: MerchantUrl,
-  ): ResultAsync<IMerchantConnectorProxy, MerchantValidationError | LogicalError | ProxyError> {
+  ): ResultAsync<
+    IMerchantConnectorProxy,
+    MerchantValidationError | LogicalError | ProxyError | InvalidParametersError
+  > {
+    if (!merchantUrl) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     let proxy: IMerchantConnectorProxy;
     return this.configProvider
       .getConfig()
@@ -42,7 +49,11 @@ export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFac
       });
   }
 
-  destroyMerchantConnectorProxy(merchantUrl: MerchantUrl): Result<void, never> {
+  destroyMerchantConnectorProxy(merchantUrl: MerchantUrl): Result<void, InvalidParametersError> {
+    if (!merchantUrl) {
+      return err(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const proxy = MerchantConnectorProxyFactory.proxyMap.get(merchantUrl);
     proxy?.destroy();
     MerchantConnectorProxyFactory.proxyMap.delete(merchantUrl);

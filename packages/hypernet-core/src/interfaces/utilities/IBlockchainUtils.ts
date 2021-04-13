@@ -1,7 +1,7 @@
 import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import { EthereumAddress, Signature } from "@hypernetlabs/objects";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
-import { BlockchainUnavailableError } from "@hypernetlabs/objects";
+import { BlockchainUnavailableError, InvalidParametersError } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
@@ -17,7 +17,10 @@ export interface IBlockchainUtils {
     assetAddress: EthereumAddress,
     channelAddress: string,
     amount: BigNumber,
-  ): ResultAsync<TransactionResponse, BlockchainUnavailableError>;
+  ): ResultAsync<TransactionResponse, BlockchainUnavailableError | InvalidParametersError>;
 
-  mintToken(amount: BigNumber, to: EthereumAddress): ResultAsync<TransactionResponse, BlockchainUnavailableError>;
+  mintToken(
+    amount: BigNumber,
+    to: EthereumAddress,
+  ): ResultAsync<TransactionResponse, BlockchainUnavailableError | InvalidParametersError>;
 }

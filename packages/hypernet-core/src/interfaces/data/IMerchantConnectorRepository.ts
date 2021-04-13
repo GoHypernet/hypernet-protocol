@@ -8,6 +8,7 @@ import {
   ProxyError,
   BlockchainUnavailableError,
   TransferResolutionError,
+  InvalidParametersError,
   EthereumAddress,
   PaymentId,
   TransferId,
@@ -38,13 +39,14 @@ export interface IMerchantConnectorRepository {
     | ProxyError
     | BlockchainUnavailableError
     | MerchantConnectorError
+    | InvalidParametersError
   >;
 
   /**
    * Destroy merchant connector proxy
    * @param merchantUrl
    */
-  removeAuthorizedMerchant(merchantUrl: MerchantUrl): Result<void, never>;
+  removeAuthorizedMerchant(merchantUrl: MerchantUrl): Result<void, InvalidParametersError>;
 
   getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, never>;
 
@@ -52,23 +54,49 @@ export interface IMerchantConnectorRepository {
     balances: Balances,
   ): ResultAsync<
     void,
-    MerchantConnectorError | MerchantValidationError | BlockchainUnavailableError | LogicalError | ProxyError
+    | MerchantConnectorError
+    | MerchantValidationError
+    | BlockchainUnavailableError
+    | LogicalError
+    | ProxyError
+    | InvalidParametersError
   >;
 
   resolveChallenge(
     merchantUrl: MerchantUrl,
     paymentId: PaymentId,
     transferId: TransferId,
-  ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | TransferResolutionError>;
+  ): ResultAsync<
+    void,
+    MerchantConnectorError | MerchantValidationError | TransferResolutionError | InvalidParametersError
+  >;
 
-  closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError>;
-  displayMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError>;
+  closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError | InvalidParametersError>;
+  displayMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError | InvalidParametersError>;
 
-  notifyPushPaymentSent(merchantUrl: MerchantUrl, payment: PushPayment): ResultAsync<void, MerchantConnectorError>;
-  notifyPushPaymentUpdated(merchantUrl: MerchantUrl, payment: PushPayment): ResultAsync<void, MerchantConnectorError>;
-  notifyPushPaymentReceived(merchantUrl: MerchantUrl, payment: PushPayment): ResultAsync<void, MerchantConnectorError>;
-  notifyPullPaymentSent(merchantUrl: MerchantUrl, payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
-  notifyPullPaymentUpdated(merchantUrl: MerchantUrl, payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
-  notifyPullPaymentReceived(merchantUrl: MerchantUrl, payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
+  notifyPushPaymentSent(
+    merchantUrl: MerchantUrl,
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError>;
+  notifyPushPaymentUpdated(
+    merchantUrl: MerchantUrl,
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError>;
+  notifyPushPaymentReceived(
+    merchantUrl: MerchantUrl,
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError>;
+  notifyPullPaymentSent(
+    merchantUrl: MerchantUrl,
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError>;
+  notifyPullPaymentUpdated(
+    merchantUrl: MerchantUrl,
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError>;
+  notifyPullPaymentReceived(
+    merchantUrl: MerchantUrl,
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError>;
   notifyBalancesReceived(balances: Balances): ResultAsync<void, MerchantConnectorError>;
 }

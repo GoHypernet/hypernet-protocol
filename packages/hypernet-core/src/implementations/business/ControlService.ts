@@ -1,9 +1,9 @@
 import { IContextProvider } from "@interfaces/utilities";
 import { ControlClaim, InitializedHypernetContext } from "@hypernetlabs/objects";
 import { IControlService } from "@interfaces/business";
-import { BlockchainUnavailableError, LogicalError, ThreeBoxError } from "@hypernetlabs/objects";
+import { BlockchainUnavailableError, LogicalError, ThreeBoxError, InvalidParametersError } from "@hypernetlabs/objects";
 import { IMessagingRepository } from "@interfaces/data";
-import { ResultAsync } from "neverthrow";
+import { ResultAsync, errAsync } from "neverthrow";
 
 export class ControlService implements IControlService {
   protected claimPeriod = 1000 * 60 * 5; // 5 minutes
@@ -53,6 +53,9 @@ export class ControlService implements IControlService {
    * @param controlClaim
    */
   public processControlClaim(controlClaim: ControlClaim): ResultAsync<void, LogicalError> {
+    if (!controlClaim) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
     let context: InitializedHypernetContext;
 
     return this.contextProvider

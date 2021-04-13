@@ -16,6 +16,10 @@ export class LinkUtils implements ILinkUtils {
    * @param context instance of HypernetContext
    */
   public paymentsToHypernetLinks(payments: Payment[]): ResultAsync<HypernetLink[], InvalidParametersError> {
+    if (!payments) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this.contextProvider.getInitializedContext().andThen((context) => {
       const linksByCounterpartyId = new Map<string, HypernetLink>();
 

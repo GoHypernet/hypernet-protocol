@@ -27,6 +27,7 @@ import {
   InvalidParametersError,
   TransferResolutionError,
   ProxyError,
+  PaymentCreationError,
 } from "@hypernetlabs/objects";
 import { ResultAsync, Result } from "neverthrow";
 import { BigNumber } from "ethers";
@@ -36,7 +37,7 @@ import { BigNumber } from "ethers";
  * user account. The user can be /both/ a consumer and a provider.
  */
 export interface IHypernetCore {
-  initialized(): Result<boolean, LogicalError>;
+  initialized(): Result<boolean, LogicalError | InvalidParametersError>;
 
   waitInitialized(): ResultAsync<void, LogicalError>;
 
@@ -75,7 +76,10 @@ export interface IHypernetCore {
   depositFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
-  ): ResultAsync<Balances, BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error>;
+  ): ResultAsync<
+    Balances,
+    BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error | InvalidParametersError
+  >;
 
   /**
    * This function will withdraw funds from Hypernet core into a specified Ethereum address.
@@ -87,7 +91,10 @@ export interface IHypernetCore {
     assetAddress: EthereumAddress,
     amount: BigNumber,
     destinationAddress: EthereumAddress,
-  ): ResultAsync<Balances, BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error>;
+  ): ResultAsync<
+    Balances,
+    BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error | InvalidParametersError
+  >;
 
   /**
    * Returns the balance account, including funds within
@@ -131,7 +138,7 @@ export interface IHypernetCore {
     requiredStake: string,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
+  ): ResultAsync<Payment, PaymentCreationError | LogicalError | InvalidParametersError>;
 
   /**
    * Authorizes funds to a specified counterparty, with an amount, rate, & expiration date.
@@ -153,7 +160,7 @@ export interface IHypernetCore {
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
+  ): ResultAsync<Payment, PaymentCreationError | LogicalError | InvalidParametersError>;
 
   /**
    * For a specified payment, puts up stake to accept the payment
@@ -161,7 +168,19 @@ export interface IHypernetCore {
    */
   acceptOffers(
     paymentIds: PaymentId[],
-  ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError>;
+  ): ResultAsync<
+    Result<Payment, AcceptPaymentError>[],
+    | InsufficientBalanceError
+    | AcceptPaymentError
+    | BalancesUnavailableError
+    | MerchantValidationError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+  >;
 
   /**
    * Pulls an incremental amount from an authorized payment
@@ -171,7 +190,16 @@ export interface IHypernetCore {
   pullFunds(
     paymentId: PaymentId,
     amount: BigNumber,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
+  ): ResultAsync<
+    Payment,
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | PaymentCreationError
+  >;
 
   /**
    * Finalized an authorized payment with the final payment amount.
@@ -203,19 +231,19 @@ export interface IHypernetCore {
    * Only used for development purposes!
    * @param amount
    */
-  mintTestToken(amount: BigNumber): ResultAsync<void, BlockchainUnavailableError>;
+  mintTestToken(amount: BigNumber): ResultAsync<void, BlockchainUnavailableError | InvalidParametersError>;
 
-  authorizeMerchant(merchantUrl: MerchantUrl): ResultAsync<void, MerchantValidationError>;
+  authorizeMerchant(merchantUrl: MerchantUrl): ResultAsync<void, MerchantValidationError | InvalidParametersError>;
 
   getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, PersistenceError>;
 
-  closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError>;
-  displayMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError>;
+  closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError | InvalidParametersError>;
+  displayMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError | InvalidParametersError>;
 
   providePrivateCredentials(
     privateKey: string | null,
     mnemonic: string | null,
-  ): ResultAsync<void, InvalidParametersError>;
+  ): ResultAsync<void, InvalidParametersError | InvalidParametersError>;
 
   /**
    * Observables for seeing what's going on

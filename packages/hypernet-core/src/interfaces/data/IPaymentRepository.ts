@@ -51,7 +51,7 @@ export interface IPaymentRepository {
     requiredStake: string,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
-  ): ResultAsync<PushPayment, PaymentCreationError>;
+  ): ResultAsync<PushPayment, PaymentCreationError | InvalidParametersError>;
 
   createPullPayment(
     counterPartyAccount: PublicIdentifier,
@@ -62,7 +62,7 @@ export interface IPaymentRepository {
     requiredStake: string, // TODO: amounts should be consistently use BigNumber
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
-  ): ResultAsync<PullPayment, PaymentCreationError>;
+  ): ResultAsync<PullPayment, PaymentCreationError | InvalidParametersError>;
 
   createPullRecord(paymentId: PaymentId, amount: string): ResultAsync<Payment, PaymentCreationError>;
 

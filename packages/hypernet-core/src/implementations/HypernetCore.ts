@@ -69,6 +69,7 @@ import {
   InvalidPaymentError,
   InvalidParametersError,
   TransferResolutionError,
+  PaymentCreationError,
 } from "@hypernetlabs/objects";
 import { EBlockchainNetwork } from "@hypernetlabs/objects";
 import {
@@ -319,10 +320,12 @@ export class HypernetCore implements IHypernetCore {
     //this.controlService = new ControlService(this.contextProvider, this.threeboxMessagingRepository);
     this.linkService = new LinkService(this.linkRepository);
     this.developmentService = new DevelopmentService(this.accountRepository);
-    this.merchantService = new MerchantService(this.merchantConnectorRepository, 
-      this.accountRepository, 
-      this.contextProvider, 
-      this.logUtils);
+    this.merchantService = new MerchantService(
+      this.merchantConnectorRepository,
+      this.accountRepository,
+      this.contextProvider,
+      this.logUtils,
+    );
 
     this.vectorAPIListener = new VectorAPIListener(
       this.browserNodeProvider,
@@ -387,7 +390,10 @@ export class HypernetCore implements IHypernetCore {
   public depositFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
-  ): ResultAsync<Balances, BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error> {
+  ): ResultAsync<
+    Balances,
+    BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error | InvalidParametersError
+  > {
     // console.log(`HypernetCore:depositFunds:assetAddress:${assetAddress}`)
     return this.accountService.depositFunds(assetAddress, amount);
   }
@@ -402,7 +408,10 @@ export class HypernetCore implements IHypernetCore {
     assetAddress: EthereumAddress,
     amount: BigNumber,
     destinationAddress: EthereumAddress,
-  ): ResultAsync<Balances, BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error> {
+  ): ResultAsync<
+    Balances,
+    BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error | InvalidParametersError
+  > {
     return this.accountService.withdrawFunds(assetAddress, amount, destinationAddress);
   }
 
@@ -455,7 +464,7 @@ export class HypernetCore implements IHypernetCore {
     requiredStake: string,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
+  ): ResultAsync<Payment, PaymentCreationError | LogicalError | InvalidParametersError> {
     // Send payment terms to provider & request provider make insurance payment
     return this.paymentService.sendFunds(
       counterPartyAccount,
@@ -473,7 +482,19 @@ export class HypernetCore implements IHypernetCore {
    */
   public acceptOffers(
     paymentIds: PaymentId[],
-  ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
+  ): ResultAsync<
+    Result<Payment, AcceptPaymentError>[],
+    | InsufficientBalanceError
+    | AcceptPaymentError
+    | BalancesUnavailableError
+    | MerchantValidationError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+  > {
     return this.paymentService.acceptOffers(paymentIds);
   }
 
@@ -495,7 +516,7 @@ export class HypernetCore implements IHypernetCore {
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
+  ): ResultAsync<Payment, PaymentCreationError | LogicalError | InvalidParametersError> {
     return this.paymentService.authorizeFunds(
       counterPartyAccount,
       totalAuthorized,
@@ -516,7 +537,16 @@ export class HypernetCore implements IHypernetCore {
   public pullFunds(
     paymentId: PaymentId,
     amount: BigNumber,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
+  ): ResultAsync<
+    Payment,
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | PaymentCreationError
+  > {
     return this.paymentService.pullFunds(paymentId, amount);
   }
 
@@ -553,7 +583,7 @@ export class HypernetCore implements IHypernetCore {
    * Initialize this instance of Hypernet Core
    * @param account: the ethereum account to initialize with
    */
-  public initialize(account: EthereumAddress): ResultAsync<void, LogicalError> {
+  public initialize(account: EthereumAddress): ResultAsync<void, LogicalError | InvalidParametersError> {
     if (this._initializeResult != null) {
       return this._initializeResult;
     }
@@ -612,13 +642,15 @@ export class HypernetCore implements IHypernetCore {
    * Mints the test token to the Ethereum address associated with the Core account.
    * @param amount the amount of test token to mint
    */
-  public mintTestToken(amount: BigNumber): ResultAsync<void, BlockchainUnavailableError> {
+  public mintTestToken(amount: BigNumber): ResultAsync<void, BlockchainUnavailableError | InvalidParametersError> {
     return this.contextProvider.getInitializedContext().andThen((context) => {
       return this.developmentService.mintTestToken(amount, context.account);
     });
   }
 
-  public authorizeMerchant(merchantUrl: MerchantUrl): ResultAsync<void, MerchantValidationError> {
+  public authorizeMerchant(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, MerchantValidationError | InvalidParametersError> {
     return this.merchantService.authorizeMerchant(merchantUrl);
   }
 
@@ -626,11 +658,15 @@ export class HypernetCore implements IHypernetCore {
     return this.merchantService.getAuthorizedMerchants();
   }
 
-  public closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError> {
+  public closeMerchantIFrame(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError> {
     return this.merchantService.closeMerchantIFrame(merchantUrl);
   }
 
-  public displayMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError> {
+  public displayMerchantIFrame(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError> {
     return this.merchantService.displayMerchantIFrame(merchantUrl);
   }
 

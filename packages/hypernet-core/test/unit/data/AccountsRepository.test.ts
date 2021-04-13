@@ -240,6 +240,7 @@ describe("AccountsRepository tests", () => {
 
     // Act
     const result = await repo.getBalances();
+    console.log('result: ', result);
 
     // Assert
     expect(result).toBeDefined();

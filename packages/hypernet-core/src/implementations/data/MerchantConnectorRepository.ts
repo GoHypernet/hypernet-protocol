@@ -14,8 +14,14 @@ import {
   Balances,
   InitializedHypernetContext,
 } from "@hypernetlabs/objects";
-import { LogicalError, MerchantConnectorError, MerchantValidationError, PersistenceError } from "@hypernetlabs/objects";
-import { errAsync, okAsync, ResultAsync, Result } from "neverthrow";
+import {
+  LogicalError,
+  MerchantConnectorError,
+  MerchantValidationError,
+  PersistenceError,
+  InvalidParametersError,
+} from "@hypernetlabs/objects";
+import { errAsync, okAsync, ResultAsync, Result, err } from "neverthrow";
 import { ResultUtils, IAjaxUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
 import {
   IBlockchainProvider,
@@ -64,7 +70,11 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
   public getMerchantAddresses(
     merchantUrls: MerchantUrl[],
-  ): ResultAsync<Map<MerchantUrl, EthereumAddress>, LogicalError> {
+  ): ResultAsync<Map<MerchantUrl, EthereumAddress>, LogicalError | InvalidParametersError> {
+    if (!merchantUrls) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     // TODO: right now, the merchant will publish a URL with their address; eventually, they should be held in a smart contract
 
     // For merchants that are already authorized, we can just go to their connector for the
@@ -114,7 +124,12 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     | ProxyError
     | BlockchainUnavailableError
     | MerchantConnectorError
+    | InvalidParametersError
   > {
+    if (!merchantUrl || !initialBalances) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     let proxy: IMerchantConnectorProxy;
     let context: InitializedHypernetContext;
 
@@ -173,7 +188,11 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       });
   }
 
-  public removeAuthorizedMerchant(merchantUrl: MerchantUrl): Result<void, never> {
+  public removeAuthorizedMerchant(merchantUrl: MerchantUrl): Result<void, InvalidParametersError> {
+    if (!merchantUrl) {
+      return err(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this.merchantConnectorProxyFactory.destroyMerchantConnectorProxy(merchantUrl);
   }
 
@@ -190,7 +209,14 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     merchantUrl: MerchantUrl,
     paymentId: PaymentId,
     transferId: TransferId,
-  ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | TransferResolutionError> {
+  ): ResultAsync<
+    void,
+    MerchantConnectorError | MerchantValidationError | TransferResolutionError | InvalidParametersError
+  > {
+    if (!merchantUrl || !paymentId || !transferId) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const proxy = this.activatedMerchants.get(merchantUrl);
 
     if (proxy == null) {
@@ -212,7 +238,13 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       .map(() => {});
   }
 
-  public closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError> {
+  public closeMerchantIFrame(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError> {
+    if (!merchantUrl) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const proxy = this.activatedMerchants.get(merchantUrl);
 
     if (proxy == null) {
@@ -222,7 +254,13 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     return proxy.closeMerchantIFrame();
   }
 
-  public displayMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError> {
+  public displayMerchantIFrame(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError> {
+    if (!merchantUrl) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const proxy = this.activatedMerchants.get(merchantUrl);
 
     if (proxy == null) {
@@ -236,8 +274,17 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     balances: Balances,
   ): ResultAsync<
     void,
-    MerchantConnectorError | MerchantValidationError | BlockchainUnavailableError | LogicalError | ProxyError
+    | MerchantConnectorError
+    | MerchantValidationError
+    | BlockchainUnavailableError
+    | LogicalError
+    | ProxyError
+    | InvalidParametersError
   > {
+    if (!balances) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return ResultUtils.combine([
       this.contextProvider.getInitializedContext(),
       this.getAuthorizedMerchants(),
@@ -268,7 +315,11 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   public notifyPushPaymentSent(
     merchantUrl: MerchantUrl,
     payment: PushPayment,
-  ): ResultAsync<void, MerchantConnectorError> {
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError> {
+    if (!merchantUrl || !(payment instanceof PushPayment)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPushPaymentSent(payment);
     });
@@ -277,7 +328,11 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   public notifyPushPaymentUpdated(
     merchantUrl: MerchantUrl,
     payment: PushPayment,
-  ): ResultAsync<void, MerchantConnectorError> {
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError> {
+    if (!merchantUrl || !(payment instanceof PushPayment)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPushPaymentUpdated(payment);
     });
@@ -286,7 +341,11 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   public notifyPushPaymentReceived(
     merchantUrl: MerchantUrl,
     payment: PushPayment,
-  ): ResultAsync<void, MerchantConnectorError> {
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError> {
+    if (!merchantUrl || !(payment instanceof PushPayment)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPushPaymentReceived(payment);
     });
@@ -295,7 +354,11 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   public notifyPullPaymentSent(
     merchantUrl: MerchantUrl,
     payment: PullPayment,
-  ): ResultAsync<void, MerchantConnectorError> {
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError> {
+    if (!merchantUrl || !(payment instanceof PullPayment)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPullPaymentSent(payment);
     });
@@ -304,7 +367,11 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   public notifyPullPaymentUpdated(
     merchantUrl: MerchantUrl,
     payment: PullPayment,
-  ): ResultAsync<void, MerchantConnectorError> {
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError> {
+    if (!merchantUrl || !(payment instanceof PullPayment)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPullPaymentUpdated(payment);
     });
@@ -313,13 +380,23 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   public notifyPullPaymentReceived(
     merchantUrl: MerchantUrl,
     payment: PullPayment,
-  ): ResultAsync<void, MerchantConnectorError> {
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError> {
+    if (!merchantUrl || !(payment instanceof PullPayment)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPullPaymentReceived(payment);
     });
   }
 
-  public notifyBalancesReceived(balances: Balances): ResultAsync<void, MerchantConnectorError> {
+  public notifyBalancesReceived(
+    balances: Balances,
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError> {
+    if (!balances) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const results = new Array<ResultAsync<void, MerchantConnectorError>>();
 
     for (const [, merchantConnector] of this.activatedMerchants) {
@@ -331,7 +408,11 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
   protected getMerchantConnector(
     merchantUrl: MerchantUrl,
-  ): ResultAsync<IMerchantConnectorProxy, MerchantConnectorError> {
+  ): ResultAsync<IMerchantConnectorProxy, MerchantConnectorError | InvalidParametersError> {
+    if (!merchantUrl) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const proxy = this.activatedMerchants.get(merchantUrl);
 
     if (proxy == null) {
@@ -350,6 +431,17 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     signer: ethers.providers.JsonRpcSigner,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | LogicalError | ProxyError> {
     let proxy: IMerchantConnectorProxy;
+    if (
+      !accountAddress ||
+      !balances ||
+      !merchantUrl ||
+      !authorizationSignature ||
+      !(context instanceof InitializedHypernetContext) ||
+      !signer
+    ) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this.merchantConnectorProxyFactory
       .factoryProxy(merchantUrl)
       .andThen((myProxy) => {

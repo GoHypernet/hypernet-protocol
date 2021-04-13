@@ -2,10 +2,10 @@ import { IBlockchainProvider, IBlockchainUtils } from "@interfaces/utilities";
 import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import { Contract, ethers, BigNumber } from "ethers";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
-import { BlockchainUnavailableError, Signature } from "@hypernetlabs/objects";
-import { ResultAsync } from "neverthrow";
+import { BlockchainUnavailableError, InvalidParametersError } from "@hypernetlabs/objects";
+import { ResultAsync, errAsync } from "neverthrow";
 import { ERC20Abi } from "@connext/vector-types";
-import { EthereumAddress } from "@hypernetlabs/objects";
+import { Signature, EthereumAddress } from "@hypernetlabs/objects";
 import { artifacts } from "@connext/vector-contracts";
 
 export class EthersBlockchainUtils implements IBlockchainUtils {
@@ -30,6 +30,10 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
     channelAddress: string,
     amount: BigNumber,
   ): ResultAsync<TransactionResponse, BlockchainUnavailableError> {
+    if (!assetAddress || !channelAddress || !amount) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this.blockchainProvider.getSigner().andThen((signer) => {
       const tokenContract = new Contract(assetAddress, this.erc20Abi, signer);
       return ResultAsync.fromPromise(tokenContract.transfer(channelAddress, amount), (err) => {
@@ -41,7 +45,11 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
   public mintToken(
     amount: BigNumber,
     to: EthereumAddress,
-  ): ResultAsync<TransactionResponse, BlockchainUnavailableError> {
+  ): ResultAsync<TransactionResponse, BlockchainUnavailableError | InvalidParametersError> {
+    if (!amount || !to) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this.blockchainProvider.getSigner().andThen((signer) => {
       const testTokenContract = new Contract(
         "0x9FBDa871d559710256a2502A2517b794B482Db40",

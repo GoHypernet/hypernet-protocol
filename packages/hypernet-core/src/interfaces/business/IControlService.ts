@@ -1,5 +1,5 @@
 import { ControlClaim } from "@hypernetlabs/objects";
-import { BlockchainUnavailableError, LogicalError, ThreeBoxError } from "@hypernetlabs/objects";
+import { BlockchainUnavailableError, LogicalError, ThreeBoxError, InvalidParametersError } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 /**
@@ -16,5 +16,5 @@ export interface IControlService {
   /**
    * Processes an incoming control claim. Basically just yields control.
    */
-  processControlClaim(controlClaim: ControlClaim): ResultAsync<void, LogicalError>;
+  processControlClaim(controlClaim: ControlClaim): ResultAsync<void, LogicalError | InvalidParametersError>;
 }

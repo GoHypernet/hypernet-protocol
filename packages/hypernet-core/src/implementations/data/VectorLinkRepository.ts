@@ -1,6 +1,12 @@
 import { ResultUtils } from "@hypernetlabs/utils";
 import { ILinkRepository } from "@interfaces/data";
-import { BlockchainUnavailableError, EthereumAddress, HypernetLink, Payment, PublicIdentifier } from "@hypernetlabs/objects";
+import {
+  BlockchainUnavailableError,
+  EthereumAddress,
+  HypernetLink,
+  Payment,
+  PublicIdentifier,
+} from "@hypernetlabs/objects";
 import {
   InvalidParametersError,
   RouterChannelUnknownError,
@@ -18,7 +24,7 @@ import {
   IVectorUtils,
   ILinkUtils,
 } from "@interfaces/utilities";
-import { okAsync, ResultAsync } from "neverthrow";
+import { okAsync, ResultAsync, errAsync } from "neverthrow";
 
 /**
  * Provides methods for retrieving Hypernet Links.
@@ -90,6 +96,10 @@ export class VectorLinkRepository implements ILinkRepository {
     | InvalidPaymentError
     | LogicalError
   > {
+    if (!counterpartyId) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     let browserNode: IBrowserNode;
     return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.vectorUtils.getRouterChannelAddress()])
       .andThen((vals) => {

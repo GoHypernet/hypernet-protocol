@@ -1,4 +1,5 @@
 import { HypernetContext, InitializedHypernetContext } from "@hypernetlabs/objects";
+import { InvalidParametersError } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 /**
@@ -18,7 +19,7 @@ export interface IContextProvider {
   /**
    *
    */
-  setContext(context: HypernetContext): ResultAsync<void, never>;
+  setContext(context: HypernetContext): ResultAsync<void, InvalidParametersError>;
 
   /**
    * Will return the account once it is populated. This may be before the whole context is initialized.

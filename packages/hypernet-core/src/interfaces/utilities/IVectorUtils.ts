@@ -33,13 +33,15 @@ export interface IVectorUtils {
    *
    * @param transferId
    */
-  resolveMessageTransfer(transferId: TransferId): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
+  resolveMessageTransfer(
+    transferId: TransferId,
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError | InvalidParametersError>;
 
   resolvePaymentTransfer(
     transferId: TransferId,
     paymentId: PaymentId,
     amount: string,
-  ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError | InvalidParametersError>;
 
   /**
    *
@@ -53,7 +55,7 @@ export interface IVectorUtils {
     paymentId: PaymentId,
     mediatorSignature?: Signature,
     amount?: BigNumber,
-  ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError | InvalidParametersError>;
 
   /**
    *
@@ -61,7 +63,7 @@ export interface IVectorUtils {
   createOfferTransfer(
     toAddress: PublicIdentifier,
     message: IHypernetOfferDetails,
-  ): ResultAsync<IBasicTransferResponse, TransferCreationError>;
+  ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
 
   createPullNotificationTransfer(
     toAddress: PublicIdentifier,

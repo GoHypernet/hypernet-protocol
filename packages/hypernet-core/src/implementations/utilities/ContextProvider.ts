@@ -10,9 +10,10 @@ import {
   MerchantUrl,
   Signature,
 } from "@hypernetlabs/objects";
+import { InvalidParametersError } from "@hypernetlabs/objects";
 import { IContextProvider } from "@interfaces/utilities";
 import { Subject } from "rxjs";
-import { okAsync, ResultAsync } from "neverthrow";
+import { okAsync, ResultAsync, errAsync } from "neverthrow";
 
 export class ContextProvider implements IContextProvider {
   protected context: HypernetContext;
@@ -80,7 +81,11 @@ export class ContextProvider implements IContextProvider {
     return ResultAsync.fromSafePromise(this._initializePromise);
   }
 
-  public setContext(context: HypernetContext): ResultAsync<void, never> {
+  public setContext(context: HypernetContext): ResultAsync<void, InvalidParametersError> {
+    if (!(context instanceof HypernetContext)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     this.context = context;
 
     if (this.contextInitialized()) {

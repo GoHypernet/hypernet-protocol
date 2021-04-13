@@ -41,7 +41,7 @@ export interface IPaymentService {
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
-  ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
+  ): ResultAsync<Payment, PaymentCreationError | LogicalError | InvalidParametersError>;
 
   /**
    * Record a pull against a Pull Payment's authorized funds. Doesn't actually
@@ -77,7 +77,7 @@ export interface IPaymentService {
     requiredStake: string,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
-  ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
+  ): ResultAsync<Payment, PaymentCreationError | LogicalError | InvalidParametersError>;
 
   /**
    * Called by the person on the receiving end of a push payment,

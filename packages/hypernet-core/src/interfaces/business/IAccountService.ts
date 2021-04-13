@@ -21,7 +21,12 @@ export interface IAccountService {
     amount: BigNumber,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | RouterChannelUnknownError | BlockchainUnavailableError | VectorError | LogicalError
+    | BalancesUnavailableError
+    | RouterChannelUnknownError
+    | BlockchainUnavailableError
+    | VectorError
+    | LogicalError
+    | InvalidParametersError
   >;
   withdrawFunds(
     assetAddress: EthereumAddress,
@@ -29,7 +34,11 @@ export interface IAccountService {
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | RouterChannelUnknownError | BlockchainUnavailableError | VectorError
+    | BalancesUnavailableError
+    | RouterChannelUnknownError
+    | BlockchainUnavailableError
+    | VectorError
+    | InvalidParametersError
   >;
   getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError | RouterChannelUnknownError>;
   providePrivateCredentials(privateCredentials: PrivateCredentials): ResultAsync<void, InvalidParametersError>;

@@ -48,8 +48,16 @@ export class AccountService implements IAccountService {
     amount: BigNumber,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | RouterChannelUnknownError | BlockchainUnavailableError | VectorError | LogicalError
+    | BalancesUnavailableError
+    | RouterChannelUnknownError
+    | BlockchainUnavailableError
+    | VectorError
+    | LogicalError
+    | InvalidParametersError
   > {
+    if (!assetAddress || !amount) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
     this.logUtils.log(`HypernetCore:depositFunds: assetAddress: ${assetAddress}`);
 
     let context: HypernetContext;
@@ -77,8 +85,15 @@ export class AccountService implements IAccountService {
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | RouterChannelUnknownError | BlockchainUnavailableError | VectorError
+    | BalancesUnavailableError
+    | RouterChannelUnknownError
+    | BlockchainUnavailableError
+    | VectorError
+    | InvalidParametersError
   > {
+    if (!assetAddress || !amount || !destinationAddress) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
     let context: InitializedHypernetContext;
 
     return this.contextProvider

@@ -1,5 +1,5 @@
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
-import { ResultAsync } from "neverthrow";
+import { ResultAsync, errAsync } from "neverthrow";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
 import {
   EthereumAddress,
@@ -8,6 +8,7 @@ import {
   MerchantValidationError,
   PaymentId,
   ProxyError,
+  InvalidParametersError,
   Signature,
   MerchantUrl,
   Balances,
@@ -33,7 +34,11 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
   public activateConnector(
     publicIdentifier: PublicIdentifier,
     balances: Balances,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  ): ResultAsync<void, MerchantConnectorError | ProxyError | InvalidParametersError> {
+    if (!publicIdentifier || !balances) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const assets = balances.assets.map((val) => {
       return {
         assetAddress: val.assetAddress,
@@ -52,7 +57,13 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     return this._createCall("activateConnector", activateData);
   }
 
-  public resolveChallenge(paymentId: PaymentId): ResultAsync<IResolutionResult, MerchantConnectorError | ProxyError> {
+  public resolveChallenge(
+    paymentId: PaymentId,
+  ): ResultAsync<IResolutionResult, MerchantConnectorError | ProxyError | InvalidParametersError> {
+    if (!paymentId) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this._createCall("resolveChallenge", paymentId);
   }
 
@@ -122,35 +133,83 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     });
   }
 
-  public notifyPushPaymentSent(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  public notifyPushPaymentSent(
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError | InvalidParametersError> {
+    if (!(payment instanceof PushPayment)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this._createCall("notifyPushPaymentSent", payment);
   }
 
-  public notifyPushPaymentUpdated(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  public notifyPushPaymentUpdated(
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError | InvalidParametersError> {
+    if (!(payment instanceof PushPayment)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this._createCall("notifyPushPaymentUpdated", payment);
   }
 
-  public notifyPushPaymentReceived(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  public notifyPushPaymentReceived(
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError | InvalidParametersError> {
+    if (!(payment instanceof PushPayment)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this._createCall("notifyPushPaymentReceived", payment);
   }
 
-  public notifyPullPaymentSent(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  public notifyPullPaymentSent(
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError | InvalidParametersError> {
+    if (!(payment instanceof PullPayment)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this._createCall("notifyPullPaymentSent", payment);
   }
 
-  public notifyPullPaymentUpdated(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  public notifyPullPaymentUpdated(
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError | InvalidParametersError> {
+    if (!(payment instanceof PullPayment)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this._createCall("notifyPullPaymentUpdated", payment);
   }
 
-  public notifyPullPaymentReceived(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  public notifyPullPaymentReceived(
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError | InvalidParametersError> {
+    if (!(payment instanceof PullPayment)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this._createCall("notifyPullPaymentReceived", payment);
   }
 
-  public notifyPublicIdentifier(public_identifier: PublicIdentifier): ResultAsync<void, MerchantConnectorError> {
-    return this._createCall("notifyPublicIdentifier", public_identifier);
+  public notifyPublicIdentifier(
+    publicIdentifier: PublicIdentifier,
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError> {
+    if (!publicIdentifier) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
+    return this._createCall("notifyPublicIdentifier", publicIdentifier);
   }
 
-  public notifyBalancesReceived(balances: Balances): ResultAsync<void, MerchantConnectorError> {
+  public notifyBalancesReceived(
+    balances: Balances,
+  ): ResultAsync<void, MerchantConnectorError | InvalidParametersError> {
+    if (!(balances instanceof PushPayment)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this._createCall("notifyBalancesReceived", balances);
   }
 

@@ -13,6 +13,7 @@ import {
   PullPayment,
   PushPayment,
   HypernetConfig,
+  InitializedHypernetContext,
   HypernetContext,
   PaymentId,
   MerchantUrl,
@@ -39,14 +40,6 @@ import { EPaymentState } from "@hypernetlabs/objects";
 import { IConfigProvider, IContextProvider, ILogUtils } from "@interfaces/utilities";
 import { err, errAsync, ok, okAsync, ResultAsync, Result } from "neverthrow";
 import { BigNumber } from "ethers";
-
-type PaymentsByIdsErrors =
-  | RouterChannelUnknownError
-  | VectorError
-  | BlockchainUnavailableError
-  | LogicalError
-  | InvalidPaymentError
-  | InvalidParametersError;
 
 /**
  * PaymentService uses Vector internally to send payments on the requested channel.
@@ -95,7 +88,20 @@ export class PaymentService implements IPaymentService {
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
-  ): ResultAsync<PullPayment, PaymentCreationError | LogicalError> {
+  ): ResultAsync<PullPayment, PaymentCreationError | LogicalError | InvalidParametersError> {
+    if (
+      !counterPartyAccount ||
+      !totalAuthorized ||
+      !expirationDate ||
+      !deltaAmount ||
+      !deltaTime ||
+      !requiredStake ||
+      !paymentToken ||
+      !merchantUrl
+    ) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
     // totalAuthorized / (deltaAmount/deltaTime) > ((expiration date - now) + someMinimumNumDays)
 
@@ -124,7 +130,20 @@ export class PaymentService implements IPaymentService {
   public pullFunds(
     paymentId: PaymentId,
     amount: BigNumber,
-  ): ResultAsync<Payment, PaymentsByIdsErrors | PaymentCreationError> {
+  ): ResultAsync<
+    Payment,
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | PaymentCreationError
+    | InvalidParametersError
+  > {
+    if (!paymentId || !amount) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
     // Pull the up the payment
     return this.paymentRepository.getPaymentsByIds([paymentId]).andThen((payments) => {
       const payment = payments.get(paymentId);
@@ -175,8 +194,11 @@ export class PaymentService implements IPaymentService {
     requiredStake: string,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
-  ): ResultAsync<PushPayment, PaymentCreationError | LogicalError> {
-    // TODO: Sanity checking on the values
+  ): ResultAsync<PushPayment, PaymentCreationError | LogicalError | InvalidParametersError> {
+    if (!counterPartyAccount || !amount || !expirationDate || !requiredStake || !paymentToken || !merchantUrl) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return ResultUtils.combine([
       this.paymentRepository.createPushPayment(
         counterPartyAccount,
@@ -203,7 +225,21 @@ export class PaymentService implements IPaymentService {
    * Then, publish an RXJS event to the user.
    * @param paymentId the paymentId for the offer
    */
-  public offerReceived(paymentId: PaymentId): ResultAsync<void, PaymentsByIdsErrors> {
+  public offerReceived(
+    paymentId: PaymentId,
+  ): ResultAsync<
+    void,
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+  > {
+    if (!paymentId) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const prerequisites = ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -253,8 +289,17 @@ export class PaymentService implements IPaymentService {
     | AcceptPaymentError
     | BalancesUnavailableError
     | MerchantValidationError
-    | PaymentsByIdsErrors
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
   > {
+    if (!paymentIds) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     let config: HypernetConfig;
     let payments: Map<PaymentId, Payment>;
     const merchantUrls = new Set<MerchantUrl>();
@@ -334,8 +379,21 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
   > {
+    if (!paymentId) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -371,8 +429,21 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
   > {
+    if (!paymentId) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -407,8 +478,21 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
   > {
+    if (!paymentId) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -443,8 +527,21 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
   > {
+    if (!paymentId) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -474,7 +571,21 @@ export class PaymentService implements IPaymentService {
    * Notifies the service that a pull-payment has been recorded.
    * @param paymentId the paymentId for the pull-payment
    */
-  public pullRecorded(paymentId: PaymentId): ResultAsync<void, PaymentsByIdsErrors> {
+  public pullRecorded(
+    paymentId: PaymentId,
+  ): ResultAsync<
+    void,
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+  > {
+    if (!paymentId) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getContext(),
@@ -499,8 +610,20 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    MerchantConnectorError | MerchantValidationError | PaymentsByIdsErrors | TransferResolutionError
+    | MerchantConnectorError
+    | MerchantValidationError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
   > {
+    if (!paymentId) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     // Get the payment
     return this.paymentRepository
       .getPaymentsByIds([paymentId])
@@ -543,8 +666,21 @@ export class PaymentService implements IPaymentService {
     paymentIds: PaymentId[],
   ): ResultAsync<
     Payment[],
-    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
   > {
+    if (!paymentIds || !(paymentIds instanceof Array)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds(paymentIds),
       this.contextProvider.getContext(),
@@ -557,7 +693,12 @@ export class PaymentService implements IPaymentService {
           | PaymentFinalizeError
           | PaymentStakeError
           | TransferResolutionError
-          | PaymentsByIdsErrors
+          | RouterChannelUnknownError
+          | VectorError
+          | BlockchainUnavailableError
+          | LogicalError
+          | InvalidPaymentError
+          | InvalidParametersError
           | TransferCreationError
         >
       >();
@@ -571,11 +712,27 @@ export class PaymentService implements IPaymentService {
 
   protected _advancePayment(
     payment: Payment,
-    context: HypernetContext,
+    context: InitializedHypernetContext | HypernetContext,
   ): ResultAsync<
     Payment,
-    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
   > {
+    if (
+      !(payment instanceof Payment) ||
+      (!(context instanceof InitializedHypernetContext) && !(context instanceof HypernetContext))
+    ) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     // Notified the UI, move on to advancing the state of the payment.
     // Payment state must be in "staked" in order to progress
     const paymentId = payment.id;

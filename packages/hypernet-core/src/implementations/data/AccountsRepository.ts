@@ -5,7 +5,7 @@ import {
   EthereumAddress,
   PublicIdentifier,
   IFullChannelState,
-  LogicalError
+  LogicalError,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import {
@@ -22,10 +22,11 @@ import {
   BlockchainUnavailableError,
   RouterChannelUnknownError,
   VectorError,
+  InvalidParametersError,
 } from "@hypernetlabs/objects";
 import { combine, errAsync, okAsync, ResultAsync } from "neverthrow";
 import { ResultUtils } from "@hypernetlabs/utils";
-import {make} from "ts-brand";
+import { make } from "ts-brand";
 
 class AssetInfo {
   constructor(public assetId: EthereumAddress, public name: string, public symbol: string, public decimals: number) {}
@@ -52,7 +53,10 @@ export class AccountsRepository implements IAccountsRepository {
     this.assetInfo = new Map();
 
     // Add a default entry for Ethereum, it's not an ERC20, it's special and it's also universal.
-    this.assetInfo.set(EthereumAddress(constants.AddressZero), new AssetInfo(EthereumAddress(constants.AddressZero), "Ethereum", "ETH", 18));
+    this.assetInfo.set(
+      EthereumAddress(constants.AddressZero),
+      new AssetInfo(EthereumAddress(constants.AddressZero), "Ethereum", "ETH", 18),
+    );
   }
 
   /**
@@ -71,8 +75,7 @@ export class AccountsRepository implements IAccountsRepository {
     return this.blockchainProvider.getProvider().andThen((provider) => {
       return ResultAsync.fromPromise(provider.listAccounts(), (e) => {
         return e as BlockchainUnavailableError;
-      })
-      .map((addresses) => {
+      }).map((addresses) => {
         return addresses.map((val) => EthereumAddress(val));
       });
     });
@@ -81,10 +84,7 @@ export class AccountsRepository implements IAccountsRepository {
   /**
    * Get all balances associated with this instance.
    */
-  public getBalances(): ResultAsync<
-    Balances,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
-  > {
+  public getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError | RouterChannelUnknownError> {
     return this.vectorUtils.getRouterChannelAddress().andThen((channelAddress) => {
       return this.browserNodeProvider
         .getBrowserNode()
@@ -119,8 +119,12 @@ export class AccountsRepository implements IAccountsRepository {
     assetAddress: EthereumAddress,
   ): ResultAsync<
     AssetBalance,
-    BalancesUnavailableError | VectorError  | RouterChannelUnknownError
+    BalancesUnavailableError | VectorError | RouterChannelUnknownError | InvalidParametersError
   > {
+    if (!assetAddress) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return this.getBalances().andThen((balances) => {
       for (const assetBalance of balances.assets) {
         if (assetBalance.assetAddress === assetAddress) {
@@ -156,8 +160,12 @@ export class AccountsRepository implements IAccountsRepository {
     amount: BigNumber,
   ): ResultAsync<
     null,
-    RouterChannelUnknownError | VectorError | LogicalError | BlockchainUnavailableError
+    RouterChannelUnknownError | VectorError | LogicalError | BlockchainUnavailableError | InvalidParametersError
   > {
+    if (!assetAddress || !amount) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     let signer: ethers.providers.JsonRpcSigner;
     let channelAddress: EthereumAddress;
     let browserNode: IBrowserNode;
@@ -216,7 +224,11 @@ export class AccountsRepository implements IAccountsRepository {
     assetAddress: EthereumAddress,
     amount: BigNumber,
     destinationAddress: EthereumAddress,
-  ): ResultAsync<void, RouterChannelUnknownError | VectorError | BlockchainUnavailableError> {
+  ): ResultAsync<void, RouterChannelUnknownError | VectorError | BlockchainUnavailableError | InvalidParametersError> {
+    if (!assetAddress || !amount || !destinationAddress) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const prerequisites = ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.vectorUtils.getRouterChannelAddress(),
@@ -237,7 +249,14 @@ export class AccountsRepository implements IAccountsRepository {
    * @param amount the amount of the test token to mint
    * @param to the (Ethereum) address to mint the test token to
    */
-  public mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<void, BlockchainUnavailableError> {
+  public mintTestToken(
+    amount: BigNumber,
+    to: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | InvalidParametersError> {
+    if (!amount || !to) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const resp = this.blockchainUtils.mintToken(amount, to);
 
     return resp
@@ -254,7 +273,11 @@ export class AccountsRepository implements IAccountsRepository {
   protected _getAssetBalance(
     i: number,
     channelState: IFullChannelState,
-  ): ResultAsync<AssetBalance, BlockchainUnavailableError> {
+  ): ResultAsync<AssetBalance, BlockchainUnavailableError | InvalidParametersError> {
+    if (i == undefined || !channelState) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const assetAddress = EthereumAddress(channelState.assetIds[i]);
 
     return this._getAssetInfo(assetAddress).map((assetInfo) => {

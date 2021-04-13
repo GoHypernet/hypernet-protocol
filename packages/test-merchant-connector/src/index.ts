@@ -9,7 +9,7 @@ import { Subject } from "rxjs";
 import { Bytes32 } from "@connext/vector-types";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { ChannelSigner } from "@connext/vector-utils";
-import { PushPayment, PullPayment, PublicIdentifier, Balances } from "@hypernetlabs/objects";
+import { PushPayment, PullPayment, PublicIdentifier, Balances, EthereumAddress } from "@hypernetlabs/objects";
 
 declare global {
   interface Window {
@@ -56,8 +56,8 @@ class TestMerchantConnector implements IMerchantConnector {
     });
   }
 
-  public async getAddress(): Promise<string> {
-    return Promise.resolve("0x14791697260E4c9A71f18484C9f997B308e59325");
+  public async getAddress(): Promise<EthereumAddress> {
+    return Promise.resolve(EthereumAddress("0x14791697260E4c9A71f18484C9f997B308e59325"));
   }
 
   public onIFrameClosed() {

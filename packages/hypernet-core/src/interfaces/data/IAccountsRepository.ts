@@ -5,6 +5,7 @@ import {
   LogicalError,
   RouterChannelUnknownError,
   VectorError,
+  InvalidParametersError,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
@@ -18,16 +19,25 @@ export interface IAccountsRepository {
   getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError | RouterChannelUnknownError>;
   getBalanceByAsset(
     assetAddress: EthereumAddress,
-  ): ResultAsync<AssetBalance, BalancesUnavailableError | VectorError | RouterChannelUnknownError>;
+  ): ResultAsync<
+    AssetBalance,
+    BalancesUnavailableError | VectorError | RouterChannelUnknownError | InvalidParametersError
+  >;
   depositFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
-  ): ResultAsync<null, RouterChannelUnknownError | VectorError | LogicalError | BlockchainUnavailableError>;
+  ): ResultAsync<
+    null,
+    RouterChannelUnknownError | VectorError | LogicalError | BlockchainUnavailableError | InvalidParametersError
+  >;
   withdrawFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
     destinationAddress: EthereumAddress,
-  ): ResultAsync<void, RouterChannelUnknownError | VectorError | BlockchainUnavailableError>;
+  ): ResultAsync<void, RouterChannelUnknownError | VectorError | BlockchainUnavailableError | InvalidParametersError>;
 
-  mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<void, BlockchainUnavailableError>;
+  mintTestToken(
+    amount: BigNumber,
+    to: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | InvalidParametersError>;
 }

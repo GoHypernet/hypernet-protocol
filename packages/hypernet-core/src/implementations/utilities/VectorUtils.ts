@@ -76,7 +76,13 @@ export class VectorUtils implements IVectorUtils {
    * Resolves a message/offer/null transfer with Vector.
    * @param transferId the ID of the transfer to resolve
    */
-  public resolveMessageTransfer(transferId: TransferId): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
+  public resolveMessageTransfer(
+    transferId: TransferId,
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError | InvalidParametersError> {
+    if (!transferId) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     let channelAddress: EthereumAddress;
     let browserNode: IBrowserNode;
 
@@ -95,7 +101,11 @@ export class VectorUtils implements IVectorUtils {
     transferId: TransferId,
     paymentId: PaymentId,
     amount: string,
-  ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError | InvalidParametersError> {
+    if (!transferId || !paymentId || !amount) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const resolverData: ParameterizedResolverData = {
       UUID: paymentId,
       paymentAmountTaken: amount,
@@ -142,7 +152,11 @@ export class VectorUtils implements IVectorUtils {
     paymentId: PaymentId,
     mediatorSignature?: Signature,
     amount?: BigNumber,
-  ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError | InvalidParametersError> {
+    if (!transferId || !paymentId) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     // If you do not provide an actual amount, then it resolves for nothing
     if (amount == null) {
       amount = BigNumber.from(0);
@@ -191,6 +205,10 @@ export class VectorUtils implements IVectorUtils {
     toAddress: PublicIdentifier,
     message: IHypernetPullPaymentDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
+    if (!toAddress || !message) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     // The message type has to be PULLPAYMENT
     message.messageType = EMessageTransferType.PULLPAYMENT;
 
@@ -243,6 +261,10 @@ export class VectorUtils implements IVectorUtils {
     toAddress: PublicIdentifier,
     message: IHypernetOfferDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
+    if (!toAddress || !message) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     // The message type has to be OFFER
     message.messageType = EMessageTransferType.OFFER;
 
@@ -302,6 +324,10 @@ export class VectorUtils implements IVectorUtils {
     deltaTime?: number,
     deltaAmount?: string,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
+    if (!type || !toAddress || !amount || !assetAddress || !paymentId || !start || !expiration) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     // Sanity check
     if (type === EPaymentType.Pull && deltaTime === undefined) {
       this.logUtils.error("Must provide deltaTime for Pull payments");
@@ -407,7 +433,10 @@ export class VectorUtils implements IVectorUtils {
     expiration: number,
     paymentId: PaymentId,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError> {
-    // Sanity check - make sure the paymentId is valid:
+    if (!toAddress || !mediatorAddress || !amount || !expiration || !paymentId) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     const validPayment = this.paymentIdUtils.isValidPaymentId(paymentId);
     if (validPayment.isErr()) {
       return errAsync(validPayment.error);
@@ -501,6 +530,10 @@ export class VectorUtils implements IVectorUtils {
   }
 
   public getTimestampFromTransfer(transfer: IFullTransferState): number {
+    if (!transfer) {
+      throw new InvalidParametersError("Incorrectly provided arguments");
+    }
+
     if (transfer.meta == null) {
       // We need to figure out the transfer type, I think; but for now we'll just say
       // that the transfer is right now
@@ -511,6 +544,10 @@ export class VectorUtils implements IVectorUtils {
   }
 
   public getTransferStateFromTransfer(transfer: IFullTransferState): ETransferState {
+    if (!transfer) {
+      throw new InvalidParametersError("Incorrectly provided arguments");
+    }
+
     // if (transfer.inDispute) {
     //   return ETransferState.Challenged;
     // }
@@ -529,7 +566,11 @@ export class VectorUtils implements IVectorUtils {
   protected _createRouterStateChannel(
     browserNode: IBrowserNode,
     config: HypernetConfig,
-  ): ResultAsync<EthereumAddress, VectorError> {
+  ): ResultAsync<EthereumAddress, VectorError | InvalidParametersError> {
+    if (!browserNode || !(config instanceof HypernetConfig)) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return browserNode
       .setup(config.routerPublicIdentifier, config.chainId, DEFAULT_CHANNEL_TIMEOUT.toString())
       .map((response) => {
@@ -555,7 +596,11 @@ export class VectorUtils implements IVectorUtils {
   protected _getStateChannel(
     channelAddress: EthereumAddress,
     browserNode: IBrowserNode,
-  ): ResultAsync<IFullChannelState, RouterChannelUnknownError | VectorError> {
+  ): ResultAsync<IFullChannelState, RouterChannelUnknownError | VectorError | InvalidParametersError> {
+    if (!channelAddress || !browserNode) {
+      return errAsync(new InvalidParametersError("Incorrectly provided arguments"));
+    }
+
     return browserNode.getStateChannel(channelAddress).andThen((channel) => {
       if (channel == null) {
         return errAsync(new RouterChannelUnknownError());
