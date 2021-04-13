@@ -1,11 +1,11 @@
-import { EthereumAddress, HypernetConfig, PublicIdentifier } from "@hypernetlabs/objects";
+import { EthereumAddress, HypernetConfig, PublicIdentifier, EBlockchainNetwork } from "@hypernetlabs/objects";
 import { getPublicIdentifierFromPublicKey } from "@connext/vector-utils/dist/identifiers";
 import { getPublicKeyFromPrivateKey } from "@connext/vector-utils/dist/crypto";
 import { Wallet, constants } from "ethers";
-import { EBlockchainNetwork } from "@hypernetlabs/objects";
 import { ResultAsync, okAsync } from "neverthrow";
-import { ILogUtils, IConfigProvider } from "@interfaces/utilities";
+import { IConfigProvider } from "@interfaces/utilities";
 import { ChainAddresses, ChainProviders, ContractAddresses } from "@connext/vector-types";
+import { ILogUtils } from "@hypernetlabs/utils";
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
@@ -48,9 +48,9 @@ export class ConfigProvider implements IConfigProvider {
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
-      this.config.routerPublicIdentifier = PublicIdentifier(getPublicIdentifierFromPublicKey(
-        getPublicKeyFromPrivateKey(wallet.privateKey),
-      ));
+      this.config.routerPublicIdentifier = PublicIdentifier(
+        getPublicIdentifierFromPublicKey(getPublicKeyFromPrivateKey(wallet.privateKey)),
+      );
 
       this.logUtils.log("Wallet private key", wallet.privateKey);
       this.logUtils.log("Router publicIdentifier", this.config.routerPublicIdentifier);
@@ -88,9 +88,9 @@ export class ConfigProvider implements IConfigProvider {
       );
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
-      this.config.routerPublicIdentifier = PublicIdentifier(getPublicIdentifierFromPublicKey(
-        getPublicKeyFromPrivateKey(wallet.privateKey),
-      ));
+      this.config.routerPublicIdentifier = PublicIdentifier(
+        getPublicIdentifierFromPublicKey(getPublicKeyFromPrivateKey(wallet.privateKey)),
+      );
     }
   }
 

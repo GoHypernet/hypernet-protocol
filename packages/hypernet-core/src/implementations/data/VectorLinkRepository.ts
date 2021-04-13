@@ -1,6 +1,12 @@
 import { ResultUtils } from "@hypernetlabs/utils";
 import { ILinkRepository } from "@interfaces/data";
-import { BlockchainUnavailableError, EthereumAddress, HypernetLink, Payment, PublicIdentifier } from "@hypernetlabs/objects";
+import {
+  BlockchainUnavailableError,
+  EthereumAddress,
+  HypernetLink,
+  Payment,
+  PublicIdentifier,
+} from "@hypernetlabs/objects";
 import {
   InvalidParametersError,
   RouterChannelUnknownError,

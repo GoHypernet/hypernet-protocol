@@ -4,7 +4,6 @@ export * from "./ControlClaim";
 export * from "./EthereumAddress";
 export * from "./HexString";
 export * from "./HypernetConfig";
-export * from "./HypernetContext";
 export * from "./HypernetLink";
 export * from "./HypernetOfferDetails";
 export * from "./HypernetPullPaymentDetails";

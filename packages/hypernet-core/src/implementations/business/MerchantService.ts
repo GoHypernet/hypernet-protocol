@@ -9,8 +9,8 @@ import {
 } from "@hypernetlabs/objects";
 import { IAccountsRepository, IMerchantConnectorRepository } from "@interfaces/data";
 import { MerchantUrl, Signature } from "@hypernetlabs/objects";
-import { IContextProvider, ILogUtils } from "@interfaces/utilities";
-import { ResultUtils } from "@hypernetlabs/utils";
+import { IContextProvider } from "@interfaces/utilities";
+import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 
 export class MerchantService implements IMerchantService {
   constructor(

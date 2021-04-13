@@ -10,6 +10,7 @@ import {
   IWithdrawQuote,
   IWithdrawResponse,
   PublicIdentifier,
+  Signature,
   TransferId,
 } from "@hypernetlabs/objects";
 import { VectorError } from "@hypernetlabs/objects";
@@ -57,11 +58,11 @@ export interface IBrowserNode {
 
   getTransfers(startDate: number, endDate: number): ResultAsync<IFullTransferState[], VectorError>;
 
-  init(signature: string, account: EthereumAddress): ResultAsync<void, VectorError>;
+  init(signature: Signature, account: EthereumAddress): ResultAsync<void, VectorError>;
 
   getRegisteredTransfers(chainId: number): ResultAsync<IRegisteredTransfer[], VectorError>;
 
-  signUtilityMessage(message: string): ResultAsync<string, VectorError>;
+  signUtilityMessage(message: string): ResultAsync<Signature, VectorError>;
 
   resolveTransfer(
     channelAddress: EthereumAddress,

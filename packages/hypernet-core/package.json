@@ -62,7 +62,6 @@
     "moment": "^2.27.0",
     "neverthrow": "^4.1.0",
     "path-browserify": "^1.0.1",
-    "pino": "^6.7.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.6.2",
     "sjcl": "^1.0.8",

@@ -3,7 +3,6 @@ import { BigNumber } from "ethers";
 import {
   HypernetConfig,
   IHypernetOfferDetails,
-  InitializedHypernetContext,
   PublicIdentifier,
   IHypernetPullPaymentDetails,
   IBasicTransferResponse,
@@ -13,19 +12,6 @@ import {
   PaymentId,
   TransferId,
   Signature,
-} from "@hypernetlabs/objects";
-import {
-  IBrowserNodeProvider,
-  IContextProvider,
-  IVectorUtils,
-  IConfigProvider,
-  IBlockchainProvider,
-  ILogUtils,
-  IPaymentIdUtils,
-  IBrowserNode,
-  ITimeUtils,
-} from "@interfaces/utilities";
-import {
   EPaymentType,
   ETransferState,
   InsuranceResolver,
@@ -35,13 +21,6 @@ import {
   MessageState,
   ParameterizedState,
   EMessageTransferType,
-} from "@hypernetlabs/objects";
-import "reflect-metadata";
-import { serialize } from "class-transformer";
-import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@hypernetlabs/objects/types/typechain";
-import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils";
-import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
-import {
   InvalidParametersError,
   RouterChannelUnknownError,
   RouterUnavailableError,
@@ -49,8 +28,24 @@ import {
   TransferResolutionError,
   VectorError,
 } from "@hypernetlabs/objects";
+import {
+  IBrowserNodeProvider,
+  IContextProvider,
+  IVectorUtils,
+  IConfigProvider,
+  IBlockchainProvider,
+  IPaymentIdUtils,
+  IBrowserNode,
+  ITimeUtils,
+} from "@interfaces/utilities";
+import "reflect-metadata";
+import { serialize } from "class-transformer";
+import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@hypernetlabs/objects/types/typechain";
+import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils";
+import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
+import { InitializedHypernetContext } from "@interfaces/objects";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
-import { ResultUtils } from "@hypernetlabs/utils";
+import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 
 /**
  * VectorUtils contains methods for interacting directly with the core Vector stuff -

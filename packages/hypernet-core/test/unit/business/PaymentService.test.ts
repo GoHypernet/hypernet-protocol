@@ -39,7 +39,7 @@ import {
   IPaymentRepository,
 } from "@interfaces/data";
 import { ConfigProviderMock, ContextProviderMock } from "@tests/mock/utils";
-import { ILogUtils } from "@interfaces/utilities";
+import { ILogUtils } from "@hypernetlabs/utils";
 import { IPaymentService } from "@interfaces/business/IPaymentService";
 import { PaymentService } from "@implementations/business/PaymentService";
 import { BigNumber } from "ethers";

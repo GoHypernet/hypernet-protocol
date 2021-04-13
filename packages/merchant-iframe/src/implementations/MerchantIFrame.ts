@@ -6,12 +6,20 @@ import { ContextProvider } from "@merchant-iframe/implementations/utils";
 import { MerchantService } from "@merchant-iframe/implementations/business";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { IMerchantConnectorListener, IMerchantIFrameApi } from "@merchant-iframe/interfaces/api";
-import { IAjaxUtils, AxiosAjaxUtils, LocalStorageUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
+import {
+  IAjaxUtils,
+  AxiosAjaxUtils,
+  LocalStorageUtils,
+  ILocalStorageUtils,
+  ILogUtils,
+  LogUtils,
+} from "@hypernetlabs/utils";
 import { MerchantUrl } from "@hypernetlabs/objects";
 export class MerchantIframe {
   protected contextProvider: IContextProvider;
   protected ajaxUtils: IAjaxUtils;
   protected localStorageUtils: ILocalStorageUtils;
+  protected logUtils: ILogUtils;
 
   protected merchantConnectorRepository: IMerchantConnectorRepository;
   protected persistenceRepository: IPersistenceRepository;
@@ -26,6 +34,7 @@ export class MerchantIframe {
     this.contextProvider = new ContextProvider(MerchantUrl(""));
     this.ajaxUtils = new AxiosAjaxUtils();
     this.localStorageUtils = new LocalStorageUtils();
+    this.logUtils = new LogUtils();
 
     this.merchantConnectorRepository = new MerchantConnectorRepository(this.ajaxUtils);
     this.persistenceRepository = new PersistenceRepository(this.localStorageUtils);
@@ -37,7 +46,11 @@ export class MerchantIframe {
     );
 
     this.merchantIframeApi = new PostmateApi(this.merchantService, this.contextProvider);
-    this.merchantConnectorListener = new MerchantConnectorListener(this.contextProvider, this.merchantService);
+    this.merchantConnectorListener = new MerchantConnectorListener(
+      this.contextProvider,
+      this.merchantService,
+      this.logUtils,
+    );
 
     this.merchantConnectorListener
       .initialize()

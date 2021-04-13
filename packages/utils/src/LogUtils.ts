@@ -1,4 +1,4 @@
-import { ILogUtils } from "@interfaces/utilities";
+import { ILogUtils } from "@utils/ILogUtils";
 import pino from "pino";
 
 export class LogUtils implements ILogUtils {

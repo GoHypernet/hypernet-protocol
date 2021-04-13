@@ -2,12 +2,12 @@ import { NonEIP712Message } from "@connext/vector-browser-node";
 import {
   IBrowserNode,
   IContextProvider,
-  ILogUtils,
   IBrowserNodeProvider,
   IConfigProvider,
   IBlockchainProvider,
 } from "@interfaces/utilities";
-import { BlockchainUnavailableError, EthereumAddress, VectorError } from "@hypernetlabs/objects";
+import { ILogUtils } from "@hypernetlabs/utils";
+import { BlockchainUnavailableError, EthereumAddress, Signature, VectorError } from "@hypernetlabs/objects";
 import { HypernetConfig } from "@hypernetlabs/objects";
 import { ResultUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
 import { ethers } from "ethers";
@@ -64,7 +64,7 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
           // Store the signature so you don't have to sign again
           this.storageUtils.setSessionItem(`account-${address}-signature`, signature);
 
-          return this.browserNode.init(signature, EthereumAddress(account));
+          return this.browserNode.init(Signature(signature), EthereumAddress(account));
         })
         .orElse((e) => {
           const shouldAttemptRestore = ((e as any).context?.validationError ?? "").includes("Channel is already setup");

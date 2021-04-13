@@ -5,7 +5,7 @@ export * from "./ConfigProvider";
 export * from "./ContextProvider";
 export * from "./EthersBlockchainUtils";
 export * from "./LinkUtils";
-export * from "./LogUtils";
+export * from "@hypernetlabs/utils/src/LogUtils";
 export * from "./PaymentIdUtils";
 export * from "./PaymentUtils";
 export * from "./TimeUtils";

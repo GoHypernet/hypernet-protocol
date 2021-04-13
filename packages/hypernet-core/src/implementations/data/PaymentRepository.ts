@@ -1,11 +1,11 @@
 import { NodeResponses } from "@connext/vector-types";
-import { ResultUtils } from "@hypernetlabs/utils";
+import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { IPaymentRepository } from "@interfaces/data";
+import { InitializedHypernetContext } from "@interfaces/objects";
 import {
   EthereumAddress,
   HypernetConfig,
   IHypernetOfferDetails,
-  InitializedHypernetContext,
   Payment,
   PublicIdentifier,
   PullPayment,
@@ -36,7 +36,6 @@ import {
   IBrowserNodeProvider,
   IConfigProvider,
   IContextProvider,
-  ILogUtils,
   IPaymentUtils,
   ITimeUtils,
   IVectorUtils,

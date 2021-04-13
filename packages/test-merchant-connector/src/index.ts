@@ -9,7 +9,7 @@ import { Subject } from "rxjs";
 import { Bytes32 } from "@connext/vector-types";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { ChannelSigner } from "@connext/vector-utils";
-import { PushPayment, PullPayment, PublicIdentifier, Balances } from "@hypernetlabs/objects";
+import { PushPayment, PullPayment, PublicIdentifier, Balances, EthereumAddress } from "@hypernetlabs/objects";
 
 declare global {
   interface Window {
@@ -56,8 +56,8 @@ class TestMerchantConnector implements IMerchantConnector {
     });
   }
 
-  public async getAddress(): Promise<string> {
-    return Promise.resolve("0x14791697260E4c9A71f18484C9f997B308e59325");
+  public async getAddress(): Promise<EthereumAddress> {
+    return Promise.resolve(EthereumAddress("0x14791697260E4c9A71f18484C9f997B308e59325"));
   }
 
   public onIFrameClosed() {
@@ -81,12 +81,12 @@ class TestMerchantConnector implements IMerchantConnector {
     // connector did all the rendering stuff, now he is asking merchant-iframe to show his stuff
     // Merchant iframe Postmate model is running after the connector code get compiled in MerchantService.activateMerchantConnector so we need a small delay to wait for the Postmate model to get initialized.
     setTimeout(() => {
-      //this.onDisplayRequested.next();
+      //this.displayRequested.next();
     }, 100);
 
     // connector done with the UI he rendered previously, now he want to ask the merchant-iframe to close everything.
     setTimeout(() => {
-      //this.onCloseRequested.next();
+      //this.closeRequested.next();
     }, 10000);
   }
 
@@ -94,18 +94,18 @@ class TestMerchantConnector implements IMerchantConnector {
   //       // Send the payment details to galileo
   //   }
 
-  onSendFundsRequested: Subject<ISendFundsRequest>;
-  onAuthorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
-  onDisplayRequested: Subject<void>;
-  onCloseRequested: Subject<void>;
+  sendFundsRequested: Subject<ISendFundsRequest>;
+  authorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
+  displayRequested: Subject<void>;
+  closeRequested: Subject<void>;
   onPreRedirect: Subject<IRedirectInfo>;
 
   constructor() {
     console.log("Instantiating TestMerchantConnector");
-    this.onSendFundsRequested = new Subject<ISendFundsRequest>();
-    this.onAuthorizeFundsRequested = new Subject<IAuthorizeFundsRequest>();
-    this.onDisplayRequested = new Subject<void>();
-    this.onCloseRequested = new Subject<void>();
+    this.sendFundsRequested = new Subject<ISendFundsRequest>();
+    this.authorizeFundsRequested = new Subject<IAuthorizeFundsRequest>();
+    this.displayRequested = new Subject<void>();
+    this.closeRequested = new Subject<void>();
     this.onPreRedirect = new Subject<IRedirectInfo>();
 
     this._renderContent();

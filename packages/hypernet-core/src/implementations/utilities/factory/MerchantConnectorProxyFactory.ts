@@ -37,7 +37,11 @@ export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFac
         return proxy.activate();
       })
       .map(() => {
+        // Store the proxy in the proxyMap so that it can be destroyed if
+        // the merchant is deauthorized.
         MerchantConnectorProxyFactory.proxyMap.set(merchantUrl, proxy);
+
+        // We need to notify the world that
         return proxy;
       });
   }

@@ -1,15 +1,28 @@
 import { ParentProxy } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
-import { Balances, EthereumAddress, MerchantConnectorError, MerchantValidationError, PaymentId, ProxyError, PublicIdentifier, Signature } from "@hypernetlabs/objects";
+import {
+  Balances,
+  EthereumAddress,
+  MerchantConnectorError,
+  MerchantValidationError,
+  PaymentId,
+  ProxyError,
+  PublicIdentifier,
+  Signature,
+} from "@hypernetlabs/objects";
 import { PullPayment, PushPayment } from "@hypernetlabs/objects";
+import { Observable } from "rxjs";
 
 export interface IMerchantConnectorProxy extends ParentProxy {
   /**
    * activateConnector() will actual cause the connector code to execute. This should only
    * be done if the user has authorized the connector.
    */
-  activateConnector(publicIdentifier: PublicIdentifier, balances: Balances): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  activateConnector(
+    publicIdentifier: PublicIdentifier,
+    balances: Balances,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError>;
 
   resolveChallenge(paymentId: PaymentId): ResultAsync<IResolutionResult, MerchantConnectorError | ProxyError>;
 
@@ -28,4 +41,7 @@ export interface IMerchantConnectorProxy extends ParentProxy {
   notifyPullPaymentUpdated(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError>;
   notifyPullPaymentReceived(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError>;
   notifyBalancesReceived(balances: Balances): ResultAsync<void, MerchantConnectorError | ProxyError>;
+
+  signMessageRequested: Observable<string>;
+  messageSigned(message: string, signature: Signature): ResultAsync<void, ProxyError>;
 }
