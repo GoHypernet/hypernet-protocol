@@ -2,14 +2,14 @@ import {
   Balances,
   ControlClaim,
   EthereumAddress,
-  HypernetContext,
-  InitializedHypernetContext,
   MerchantUrl,
   PullPayment,
   PushPayment,
   Signature,
 } from "@hypernetlabs/objects";
-import { IContextProvider } from "@interfaces/utilities";
+import { HypernetContext,
+  InitializedHypernetContext } from "@interfaces/objects";
+import { IContextProvider, IMerchantConnectorProxy } from "@interfaces/utilities";
 import { okAsync, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 import { account, publicIdentifier } from "@mock/mocks";
@@ -34,6 +34,7 @@ export class ContextProviderMock implements IContextProvider {
   public onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
+  public onMerchantConnectorActivated: Subject<IMerchantConnectorProxy>;
 
   public authorizedMerchants: Map<MerchantUrl, Signature>;
 
@@ -58,6 +59,7 @@ export class ContextProviderMock implements IContextProvider {
     this.onMerchantIFrameCloseRequested = new Subject<MerchantUrl>();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
+    this.onMerchantConnectorActivated = new Subject();
 
     this.authorizedMerchants = new Map<MerchantUrl, Signature>();
 
@@ -84,6 +86,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onMerchantIFrameCloseRequested,
         this.onInitializationRequired,
         this.onPrivateCredentialsRequested,
+        this.onMerchantConnectorActivated,
       );
     }
 
@@ -110,6 +113,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onMerchantIFrameCloseRequested,
         this.onInitializationRequired,
         this.onPrivateCredentialsRequested,
+        this.onMerchantConnectorActivated,
         this.authorizedMerchants,
       );
     }

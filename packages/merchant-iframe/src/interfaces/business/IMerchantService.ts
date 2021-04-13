@@ -29,4 +29,6 @@ export interface IMerchantService {
   resolveChallenge(
     paymentId: PaymentId,
   ): ResultAsync<IResolutionResult, MerchantConnectorError | MerchantValidationError>;
+  signMessage(message: string, callback: (message: string, signature: Signature) => void): ResultAsync<void, never>;
+  messageSigned(message: string, signature: Signature): ResultAsync<void, never>;
 }

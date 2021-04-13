@@ -13,6 +13,7 @@ import {
   IWithdrawQuote,
   IWithdrawResponse,
   TransferId,
+  Signature,
 } from "@hypernetlabs/objects";
 import { VectorError } from "@hypernetlabs/objects";
 import { InsuranceResolver, MessageResolver, ParameterizedResolver } from "@hypernetlabs/objects/types/typechain";
@@ -26,7 +27,7 @@ export class WrappedBrowserNode implements IBrowserNode {
 
   constructor(protected browserNode: BrowserNode) {}
 
-  public init(signature: string, account: EthereumAddress): ResultAsync<void, VectorError> {
+  public init(signature: Signature, account: EthereumAddress): ResultAsync<void, VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.init({
         signature,
@@ -134,13 +135,13 @@ export class WrappedBrowserNode implements IBrowserNode {
     });
   }
 
-  public signUtilityMessage(message: string): ResultAsync<string, VectorError> {
+  public signUtilityMessage(message: string): ResultAsync<Signature, VectorError> {
     return ResultAsync.fromPromise(this.browserNode.signUtilityMessage({ message }), this.toVectorError).andThen(
       (result) => {
         if (result.isError) {
           return errAsync(new VectorError(result.getError() as VectorError));
         } else {
-          return okAsync(result.getValue().signedMessage);
+          return okAsync(Signature(result.getValue().signedMessage));
         }
       },
     );

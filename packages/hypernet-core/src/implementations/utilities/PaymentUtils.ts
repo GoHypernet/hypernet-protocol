@@ -17,15 +17,11 @@ import {
   PaymentId,
   UUID,
   TransferId,
-} from "@hypernetlabs/objects";
-import {
   InvalidParametersError,
   InvalidPaymentError,
   InvalidPaymentIdError,
   LogicalError,
   VectorError,
-} from "@hypernetlabs/objects";
-import {
   EPaymentState,
   EPaymentType,
   ETransferState,
@@ -38,14 +34,13 @@ import {
 import {
   IBrowserNodeProvider,
   IConfigProvider,
-  ILogUtils,
   IPaymentIdUtils,
   IPaymentUtils,
   ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
-import { ResultUtils } from "@hypernetlabs/utils";
+import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { v4 as uuidv4 } from "uuid";
 
 /**

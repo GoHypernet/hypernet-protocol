@@ -1,12 +1,15 @@
 import { Subject } from "rxjs";
-import { ControlClaim } from "@objects/ControlClaim";
-import { PublicIdentifier } from "@objects/PublicIdentifier";
-import { PullPayment } from "@objects/PullPayment";
-import { PushPayment } from "@objects/PushPayment";
-import { Balances } from "@objects/Balances";
-import { EthereumAddress } from "@objects/EthereumAddress";
-import { MerchantUrl } from "@objects/MerchantUrl";
-import { Signature } from "@objects/Signature";
+import {
+  ControlClaim,
+  PublicIdentifier,
+  PullPayment,
+  PushPayment,
+  Balances,
+  EthereumAddress,
+  MerchantUrl,
+  Signature,
+} from "@hypernetlabs/objects";
+import { IMerchantConnectorProxy } from "@interfaces/utilities";
 
 export class HypernetContext {
   constructor(
@@ -29,6 +32,7 @@ export class HypernetContext {
     public onMerchantIFrameCloseRequested: Subject<MerchantUrl>,
     public onInitializationRequired: Subject<void>,
     public onPrivateCredentialsRequested: Subject<void>,
+    public onMerchantConnectorProxyActivated: Subject<IMerchantConnectorProxy>,
   ) {}
 }
 
@@ -54,6 +58,7 @@ export class InitializedHypernetContext {
     public onMerchantIFrameCloseRequested: Subject<MerchantUrl>,
     public onInitializationRequired: Subject<void>,
     public onPrivateCredentialsRequested: Subject<void>,
+    public onMerchantConnectorProxyActivated: Subject<IMerchantConnectorProxy>,
     public authorizedMediators: Map<MerchantUrl, Signature>,
   ) {}
 }

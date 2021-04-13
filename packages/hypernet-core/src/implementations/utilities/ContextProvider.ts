@@ -1,7 +1,5 @@
 import {
-  HypernetContext,
   ControlClaim,
-  InitializedHypernetContext,
   PushPayment,
   PullPayment,
   Balances,
@@ -10,7 +8,8 @@ import {
   MerchantUrl,
   Signature,
 } from "@hypernetlabs/objects";
-import { IContextProvider } from "@interfaces/utilities";
+import { HypernetContext, InitializedHypernetContext } from "@interfaces/objects";
+import { IContextProvider, IMerchantConnectorProxy } from "@interfaces/utilities";
 import { Subject } from "rxjs";
 import { okAsync, ResultAsync } from "neverthrow";
 
@@ -58,6 +57,7 @@ export class ContextProvider implements IContextProvider {
       onMerchantIFrameCloseRequested,
       onInitializationRequired,
       onPrivateCredentialsRequested,
+      new Subject<IMerchantConnectorProxy>(),
     );
     this._initializePromiseResolve = () => null;
     this._initializePromise = new Promise((resolve) => {
@@ -105,6 +105,7 @@ export class ContextProvider implements IContextProvider {
           this.context.onMerchantIFrameCloseRequested,
           this.context.onInitializationRequired,
           this.context.onPrivateCredentialsRequested,
+          this.context.onMerchantConnectorProxyActivated,
           new Map<MerchantUrl, Signature>(),
         ),
       );

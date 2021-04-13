@@ -2,20 +2,37 @@ import { IMerchantConnectorListener } from "@merchant-iframe/interfaces/api";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 import { okAsync, ResultAsync } from "neverthrow";
+import { ILogUtils } from "@hypernetlabs/utils";
 
 export class MerchantConnectorListener implements IMerchantConnectorListener {
-  constructor(protected contextProvider: IContextProvider, protected merchantService: IMerchantService) {}
+  constructor(
+    protected contextProvider: IContextProvider,
+    protected merchantService: IMerchantService,
+    protected logUtils: ILogUtils,
+  ) {}
 
   public initialize(): ResultAsync<void, Error> {
     const context = this.contextProvider.getMerchantContext();
 
-    // Once the connecto is activated, we need to listen to events
+    // Once the connector is activated, we need to listen to events
     // from the connector.
     context.onMerchantConnectorActivated.subscribe((connector) => {
       // Register event listeners
-      connector.onPreRedirect.subscribe((redirectInfo) => {
-        this.merchantService.prepareForRedirect(redirectInfo);
-      });
+      if (connector.preRedirect != null) {
+        connector.preRedirect.subscribe((redirectInfo) => {
+          this.merchantService.prepareForRedirect(redirectInfo).mapErr((e) => {
+            this.logUtils.error(e);
+          });
+        });
+      }
+
+      if (connector.signMessageRequested != null) {
+        connector.signMessageRequested.subscribe((request) => {
+          this.merchantService.signMessage(request.message, request.callback).mapErr((e) => {
+            this.logUtils.error(e);
+          });
+        });
+      }
     });
 
     return okAsync(undefined);

@@ -1,6 +1,5 @@
 import { IMerchantConnectorRepository } from "@interfaces/data";
 import {
-  HypernetContext,
   PullPayment,
   PushPayment,
   ProxyError,
@@ -12,8 +11,8 @@ import {
   Signature,
   MerchantUrl,
   Balances,
-  InitializedHypernetContext,
 } from "@hypernetlabs/objects";
+import { InitializedHypernetContext } from "@interfaces/objects";
 import { LogicalError, MerchantConnectorError, MerchantValidationError, PersistenceError } from "@hypernetlabs/objects";
 import { errAsync, okAsync, ResultAsync, Result } from "neverthrow";
 import { ResultUtils, IAjaxUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
@@ -145,11 +144,18 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         return ResultAsync.fromPromise(signerPromise, (e) => e as MerchantValidationError);
       })
       .andThen((authorizationSignature) => {
+        // The connector has been authorized, store it as an authorized connector
         const authorizedMerchants = this._getAuthorizedMerchants();
 
         authorizedMerchants.set(merchantUrl, Signature(authorizationSignature));
 
         this._setAuthorizedMerchants(authorizedMerchants);
+
+        // Notify the world that the merchant connector exists
+        // Notably, API listeners could start
+        if (context != null) {
+          context.onMerchantConnectorProxyActivated.next(proxy);
+        }
 
         // Activate the merchant connector
         return proxy.activateConnector(context.publicIdentifier, initialBalances);
@@ -160,9 +166,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       })
       .mapErr((e) => {
         // If we encounter a problem, destroy the proxy so we can start afresh.
-        if (proxy != null) {
-          proxy.destroy();
-        }
+        this.merchantConnectorProxyFactory.destroyMerchantConnectorProxy(merchantUrl);
 
         // Notify the world
         if (context != null) {

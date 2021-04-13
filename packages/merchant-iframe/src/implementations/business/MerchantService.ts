@@ -24,11 +24,15 @@ declare global {
 }
 
 export class MerchantService implements IMerchantService {
+  protected signMessageCallbacks: Map<string, (message: string, signature: Signature) => void>;
+
   constructor(
     protected merchantConnectorRepository: IMerchantConnectorRepository,
     protected persistenceRepository: IPersistenceRepository,
     protected contextProvider: IContextProvider,
-  ) {}
+  ) {
+    this.signMessageCallbacks = new Map();
+  }
   private static merchantUrlCacheBusterUsed: boolean = false;
 
   public activateMerchantConnector(
@@ -233,7 +237,7 @@ export class MerchantService implements IMerchantService {
       return context.validatedMerchantSignature;
     });
   }
-  getAddress(): ResultAsync<EthereumAddress, MerchantValidationError> {
+  public getAddress(): ResultAsync<EthereumAddress, MerchantValidationError> {
     let context = this.contextProvider.getMerchantContext();
     return context.merchantValidated.andThen(() => {
       if (context.merchantConnector == null) {
@@ -258,5 +262,27 @@ export class MerchantService implements IMerchantService {
         (e) => e as MerchantConnectorError,
       );
     });
+  }
+
+  public signMessage(
+    message: string,
+    callback: (message: string, signature: Signature) => void,
+  ): ResultAsync<void, never> {
+    // Need to stash the callback so that when the answer is
+    // transmitted back, we can call it.
+    this.signMessageCallbacks.set(message, callback);
+
+    return okAsync(undefined);
+  }
+
+  public messageSigned(message: string, signature: Signature): ResultAsync<void, never> {
+    // We have a signature for a message, find the callback
+    const callback = this.signMessageCallbacks.get(message);
+
+    if (callback != null) {
+      callback(message, signature);
+    }
+
+    return okAsync(undefined);
   }
 }

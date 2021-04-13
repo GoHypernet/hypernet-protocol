@@ -1,4 +1,4 @@
-import { HypernetContext, InitializedHypernetContext } from "@hypernetlabs/objects";
+import { HypernetContext, InitializedHypernetContext } from "@interfaces/objects";
 import { ResultAsync } from "neverthrow";
 
 /**

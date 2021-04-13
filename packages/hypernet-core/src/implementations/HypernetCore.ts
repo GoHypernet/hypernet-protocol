@@ -17,14 +17,13 @@ import {
   ContextProvider,
   EthersBlockchainProvider,
   LinkUtils,
-  LogUtils,
   PaymentUtils,
   PaymentIdUtils,
   TimeUtils,
   VectorUtils,
   EthersBlockchainUtils,
 } from "@implementations/utilities";
-import { VectorAPIListener } from "@implementations/api";
+import { MerchantConnectorListener, VectorAPIListener } from "@implementations/api";
 import {
   IAccountService,
   IDevelopmentService,
@@ -42,9 +41,7 @@ import {
   Balances,
   ControlClaim,
   EthereumAddress,
-  HexString,
   HypernetConfig,
-  HypernetContext,
   HypernetLink,
   Payment,
   PublicIdentifier,
@@ -53,9 +50,9 @@ import {
   PaymentId,
   MerchantUrl,
   Signature,
-} from "@hypernetlabs/objects";
-import { IHypernetCore, PrivateCredentials } from "@hypernetlabs/objects";
-import {
+  IHypernetCore,
+  PrivateCredentials,
+  EBlockchainNetwork,
   AcceptPaymentError,
   BalancesUnavailableError,
   BlockchainUnavailableError,
@@ -70,7 +67,7 @@ import {
   InvalidParametersError,
   TransferResolutionError,
 } from "@hypernetlabs/objects";
-import { EBlockchainNetwork } from "@hypernetlabs/objects";
+import { HypernetContext } from "@interfaces/objects";
 import {
   IBlockchainProvider,
   IBlockchainUtils,
@@ -78,13 +75,12 @@ import {
   IConfigProvider,
   IContextProvider,
   ILinkUtils,
-  ILogUtils,
   IPaymentIdUtils,
   IPaymentUtils,
   ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
-import { IVectorListener } from "@interfaces/api";
+import { IMerchantConnectorListener, IVectorListener } from "@interfaces/api";
 import { Subject } from "rxjs";
 import { ok, Result, ResultAsync } from "neverthrow";
 import { AxiosAjaxUtils, IAjaxUtils, ResultUtils, ILocalStorageUtils, LocalStorageUtils } from "@hypernetlabs/utils";
@@ -99,6 +95,7 @@ import {
   InternalProviderFactory,
 } from "@implementations/utilities/factory";
 import { BigNumber } from "ethers";
+import { ILogUtils, LogUtils } from "@hypernetlabs/utils";
 
 /**
  * The top-level class-definition for Hypernet Core.
@@ -158,6 +155,7 @@ export class HypernetCore implements IHypernetCore {
 
   // API
   protected vectorAPIListener: IVectorListener;
+  protected merchantConnectorListener: IMerchantConnectorListener;
 
   protected _initializeResult: ResultAsync<void, LogicalError> | null;
   protected _initialized: boolean;
@@ -319,10 +317,12 @@ export class HypernetCore implements IHypernetCore {
     //this.controlService = new ControlService(this.contextProvider, this.threeboxMessagingRepository);
     this.linkService = new LinkService(this.linkRepository);
     this.developmentService = new DevelopmentService(this.accountRepository);
-    this.merchantService = new MerchantService(this.merchantConnectorRepository, 
-      this.accountRepository, 
-      this.contextProvider, 
-      this.logUtils);
+    this.merchantService = new MerchantService(
+      this.merchantConnectorRepository,
+      this.accountRepository,
+      this.contextProvider,
+      this.logUtils,
+    );
 
     this.vectorAPIListener = new VectorAPIListener(
       this.browserNodeProvider,
@@ -330,6 +330,12 @@ export class HypernetCore implements IHypernetCore {
       this.vectorUtils,
       this.contextProvider,
       this.paymentUtils,
+      this.logUtils,
+    );
+
+    this.merchantConnectorListener = new MerchantConnectorListener(
+      this.accountService,
+      this.contextProvider,
       this.logUtils,
     );
 

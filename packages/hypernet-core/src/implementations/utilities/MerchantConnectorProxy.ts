@@ -12,9 +12,12 @@ import {
   MerchantUrl,
   Balances,
   PublicIdentifier,
+  PullPayment,
+  PushPayment,
 } from "@hypernetlabs/objects";
-import { HypernetContext, PullPayment, PushPayment } from "@hypernetlabs/objects";
 import { IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
+import { Subject } from "rxjs";
+import { HypernetContext } from "@interfaces/objects";
 
 export class MerchantConnectorProxy extends ParentProxy implements IMerchantConnectorProxy {
   protected static openedIFramesQueue: string[] = [];
@@ -28,7 +31,11 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     protected debug: boolean = false,
   ) {
     super(element, iframeUrl, iframeName, debug);
+
+    this.signMessageRequested = new Subject();
   }
+
+  public signMessageRequested: Subject<string>;
 
   public activateConnector(
     publicIdentifier: PublicIdentifier,
@@ -69,12 +76,12 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
       const [context] = vals;
 
       // Events coming from merchant connector iframe
-      this.child?.on("onDisplayRequested", () => {
+      this.child?.on("displayRequested", () => {
         this._pushOpenedMerchantIFrame(this.merchantUrl);
         this._showMerchantIFrame(context);
       });
 
-      this.child?.on("onCloseRequested", () => {
+      this.child?.on("closeRequested", () => {
         // Only hide the merchant iframe if it's really displayed in the screen
         if (MerchantConnectorProxy.openedIFramesQueue[0] === this.merchantUrl) {
           this._hideMerchantIFrame();
@@ -88,13 +95,17 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
         }
       });
 
-      // this.child?.on("onSendFundsRequested", (request: ISendFundsRequest) => {
-      //   context.onSendFundsRequested.next(request);
+      // this.child?.on("sendFundsRequested", (request: ISendFundsRequest) => {
+      //   context.sendFundsRequested.next(request);
       // });
 
-      // this.child?.on("onAuthorizeFundsRequested", (request: IAuthorizeFundsRequest) => {
-      //   context.onAuthorizeFundsRequested.next(request);
+      // this.child?.on("authorizeFundsRequested", (request: IAuthorizeFundsRequest) => {
+      //   context.authorizeFundsRequested.next(request);
       // });
+
+      this.child?.on("signMessageRequested", (message: string) => {
+        this.signMessageRequested.next(message);
+      });
     });
   }
 
@@ -152,6 +163,10 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
 
   public notifyBalancesReceived(balances: Balances): ResultAsync<void, MerchantConnectorError> {
     return this._createCall("notifyBalancesReceived", balances);
+  }
+
+  public messageSigned(message: string, signature: Signature): ResultAsync<void, ProxyError> {
+    return this._createCall("messageSigned", { message, signature });
   }
 
   private _pushOpenedMerchantIFrame(merchantUrl: MerchantUrl) {

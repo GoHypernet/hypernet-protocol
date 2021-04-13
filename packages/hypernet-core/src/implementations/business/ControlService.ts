@@ -1,5 +1,6 @@
 import { IContextProvider } from "@interfaces/utilities";
-import { ControlClaim, InitializedHypernetContext } from "@hypernetlabs/objects";
+import { InitializedHypernetContext } from "@interfaces/objects";
+import { ControlClaim } from "@hypernetlabs/objects";
 import { IControlService } from "@interfaces/business";
 import { BlockchainUnavailableError, LogicalError, ThreeBoxError } from "@hypernetlabs/objects";
 import { IMessagingRepository } from "@interfaces/data";

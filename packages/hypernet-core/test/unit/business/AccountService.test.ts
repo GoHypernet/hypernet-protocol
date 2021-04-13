@@ -4,10 +4,11 @@ import { okAsync } from "neverthrow";
 import { IAccountsRepository } from "@interfaces/data";
 import td from "testdouble";
 import { ContextProviderMock } from "@mock/utils";
-import { ILogUtils, IBlockchainProvider } from "@interfaces/utilities";
+import { IBlockchainProvider } from "@interfaces/utilities";
 import { AccountService } from "@implementations/business/AccountService";
 import { IAccountService } from "@interfaces/business";
 import { BigNumber } from "ethers";
+import { ILogUtils } from "@hypernetlabs/utils";
 
 const assetAddress = mockUtils.generateRandomEtherAdress();
 const destinationAddress = mockUtils.generateRandomEtherAdress();

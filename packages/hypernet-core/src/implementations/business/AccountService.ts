@@ -3,22 +3,21 @@ import { IAccountsRepository } from "@interfaces/data";
 import {
   Balances,
   EthereumAddress,
-  HypernetContext,
-  InitializedHypernetContext,
   InvalidParametersError,
   PrivateCredentials,
   PublicIdentifier,
-} from "@hypernetlabs/objects";
-import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
   LogicalError,
   VectorError,
   RouterChannelUnknownError,
+  Signature,
 } from "@hypernetlabs/objects";
-import { IContextProvider, IBlockchainProvider, ILogUtils } from "@interfaces/utilities";
+import { HypernetContext, InitializedHypernetContext } from "@interfaces/objects";
+import { IContextProvider, IBlockchainProvider } from "@interfaces/utilities";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { BigNumber } from "ethers";
+import { ILogUtils } from "@hypernetlabs/utils";
 
 /**
  *
@@ -105,5 +104,9 @@ export class AccountService implements IAccountService {
     return this.contextProvider.getContext().map((context) => {
       this.blockchainProvider.supplyPrivateCredentials(privateCredentials);
     });
+  }
+
+  public signMessage(message: string): ResultAsync<Signature, BlockchainUnavailableError | VectorError> {
+    return this.accountRepository.signMessage(message);
   }
 }

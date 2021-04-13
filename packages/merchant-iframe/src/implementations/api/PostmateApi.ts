@@ -5,34 +5,60 @@ import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 import { IMerchantConnector } from "@hypernetlabs/merchant-connector";
 import { IMerchantIFrameApi } from "@merchant-iframe/interfaces/api";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
-import { PushPayment, PullPayment, PublicIdentifier, Balances, AssetBalance, PaymentId } from "@hypernetlabs/objects";
-import { BigNumber} from "ethers";
+import {
+  PushPayment,
+  PullPayment,
+  PublicIdentifier,
+  Balances,
+  AssetBalance,
+  PaymentId,
+  Signature,
+} from "@hypernetlabs/objects";
+import { BigNumber } from "ethers";
 
 export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
   protected merchantConnector: IMerchantConnector | undefined;
+
   constructor(protected merchantService: IMerchantService, protected contextProvider: IContextProvider) {
     super();
-
     const context = contextProvider.getMerchantContext();
 
     context.onMerchantConnectorActivated.subscribe({
       next: (merchantConnector) => {
         // We are going to relay the RXJS events
-        merchantConnector.onSendFundsRequested.subscribe(() => {
-          this.parent?.emit("onSendFundsRequested");
-        });
+        if (merchantConnector.sendFundsRequested != null) {
+          merchantConnector.sendFundsRequested.subscribe(() => {
+            this.parent?.emit("sendFundsRequested");
+          });
+        }
 
-        merchantConnector.onAuthorizeFundsRequested.subscribe(() => {
-          this.parent?.emit("onAuthorizeFundsRequested");
-        });
+        if (merchantConnector.authorizeFundsRequested != null) {
+          merchantConnector.authorizeFundsRequested.subscribe(() => {
+            this.parent?.emit("authorizeFundsRequested");
+          });
+        }
 
-        merchantConnector.onDisplayRequested.subscribe(() => {
-          this.parent?.emit("onDisplayRequested", context.merchantUrl);
-        });
+        if (merchantConnector.displayRequested != null) {
+          merchantConnector.displayRequested.subscribe(() => {
+            this.parent?.emit("displayRequested", context.merchantUrl);
+          });
+        }
 
-        merchantConnector.onCloseRequested.subscribe(() => {
-          this.parent?.emit("onCloseRequested", context.merchantUrl);
-        });
+        if (merchantConnector.closeRequested != null) {
+          merchantConnector.closeRequested.subscribe(() => {
+            this.parent?.emit("closeRequested", context.merchantUrl);
+          });
+        }
+
+        if (merchantConnector.signMessageRequested != null) {
+          merchantConnector.signMessageRequested.subscribe((request) => {
+            this.merchantService.signMessage(request.message, request.callback);
+
+            // Emit the request to the parent. Technically, I should have
+            // this as a response to an observable in the context...
+            this.parent?.emit("signMessageRequested", request.message);
+          });
+        }
       },
     });
   }
@@ -49,21 +75,25 @@ export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
           // Convert the balances to an actual balances object
           console.log(data.data);
           const assets = data.data.balances.assets.map((val) => {
-            return new AssetBalance(val.assetAddress,
+            return new AssetBalance(
+              val.assetAddress,
               val.name,
               val.symbol,
               val.decimals,
               BigNumber.from(val.totalAmount),
               BigNumber.from(val.lockedAmount),
-              BigNumber.from(val.freeAmount));
-          })
+              BigNumber.from(val.freeAmount),
+            );
+          });
           const balances = new Balances(assets);
 
           console.log(balances);
 
-          return this.merchantService.activateMerchantConnector(data.data.publicIdentifier, balances).map((merchantConnector) => {
-            this.merchantConnector = merchantConnector;
-          });
+          return this.merchantService
+            .activateMerchantConnector(data.data.publicIdentifier, balances)
+            .map((merchantConnector) => {
+              this.merchantConnector = merchantConnector;
+            });
         }, data.callId);
       },
       resolveChallenge: (data: IIFrameCallData<PaymentId>) => {
@@ -91,43 +121,50 @@ export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
       merchantIFrameDisplayed: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getMerchantContext();
-          context.merchantConnector?.onIFrameClosed(); return okAsync(undefined);
+          context.merchantConnector?.onIFrameClosed();
+          return okAsync(undefined);
         }, data.callId);
       },
       notifyPushPaymentSent: (data: IIFrameCallData<PushPayment>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getMerchantContext();
-          context.merchantConnector?.onPushPaymentSent(data.data); return okAsync(undefined);
+          context.merchantConnector?.onPushPaymentSent(data.data);
+          return okAsync(undefined);
         }, data.callId);
       },
       notifyPushPaymentUpdated: (data: IIFrameCallData<PushPayment>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getMerchantContext();
-          context.merchantConnector?.onPushPaymentUpdated(data.data); return okAsync(undefined);
+          context.merchantConnector?.onPushPaymentUpdated(data.data);
+          return okAsync(undefined);
         }, data.callId);
       },
       notifyPushPaymentReceived: (data: IIFrameCallData<PushPayment>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getMerchantContext();
-          context.merchantConnector?.onPushPaymentReceived(data.data); return okAsync(undefined);
+          context.merchantConnector?.onPushPaymentReceived(data.data);
+          return okAsync(undefined);
         }, data.callId);
       },
       notifyPullPaymentSent: (data: IIFrameCallData<PullPayment>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getMerchantContext();
-          context.merchantConnector?.onPullPaymentSent(data.data); return okAsync(undefined);
+          context.merchantConnector?.onPullPaymentSent(data.data);
+          return okAsync(undefined);
         }, data.callId);
       },
       notifyPullPaymentUpdated: (data: IIFrameCallData<PullPayment>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getMerchantContext();
-          context.merchantConnector?.onPullPaymentUpdated(data.data); return okAsync(undefined);
+          context.merchantConnector?.onPullPaymentUpdated(data.data);
+          return okAsync(undefined);
         }, data.callId);
       },
       notifyPullPaymentReceived: (data: IIFrameCallData<PullPayment>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getMerchantContext();
-          context.merchantConnector?.onPullPaymentReceived(data.data); return okAsync(undefined);
+          context.merchantConnector?.onPullPaymentReceived(data.data);
+          return okAsync(undefined);
         }, data.callId);
       },
       notifyPublicIdentifier: (data: IIFrameCallData<PublicIdentifier>) => {
@@ -138,16 +175,28 @@ export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
       notifyBalancesReceived: (data: IIFrameCallData<Balances>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getMerchantContext();
-          context.merchantConnector?.onBalancesReceived(data.data); return okAsync(undefined);
+          context.merchantConnector?.onBalancesReceived(data.data);
+          return okAsync(undefined);
         }, data.callId);
-      }
+      },
+
+      messageSigned: (data: IIFrameCallData<ISignatureResponseData>) => {
+        this.returnForModel(() => {
+          return this.merchantService.messageSigned(data.data.message, data.data.signature);
+        }, data.callId);
+      },
     });
   }
 
-  protected onModelActivated(parent: Postmate.ChildAPI): void { }
+  protected onModelActivated(parent: Postmate.ChildAPI): void {}
 }
 
 interface IActivateConnectorData {
   publicIdentifier: PublicIdentifier;
   balances: any;
+}
+
+interface ISignatureResponseData {
+  message: string;
+  signature: Signature;
 }

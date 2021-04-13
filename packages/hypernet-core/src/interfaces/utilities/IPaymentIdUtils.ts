@@ -1,4 +1,11 @@
-import { HexString, PaymentId, EPaymentType, UUID, InvalidParametersError, InvalidPaymentIdError} from "@hypernetlabs/objects";
+import {
+  HexString,
+  PaymentId,
+  EPaymentType,
+  UUID,
+  InvalidParametersError,
+  InvalidPaymentIdError,
+} from "@hypernetlabs/objects";
 import { Result } from "neverthrow";
 
 /**

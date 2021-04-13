@@ -5,7 +5,6 @@ export * from "./IBrowserNodeProvider";
 export * from "./IConfigProvider";
 export * from "./IContextProvider";
 export * from "./ILinkUtils";
-export * from "./ILogUtils";
 export * from "./IMerchantConnectorProxy";
 export * from "./IPaymentIdUtils";
 export * from "./IPaymentUtils";

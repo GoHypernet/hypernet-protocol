@@ -6,8 +6,6 @@ import {
   IConditionalTransferCreatedPayload,
   IConditionalTransferResolvedPayload,
   PaymentId,
-} from "@hypernetlabs/objects";
-import {
   LogicalError,
   VectorError,
   BlockchainUnavailableError,
@@ -21,7 +19,8 @@ import {
   TransferCreationError,
 } from "@hypernetlabs/objects";
 import { ETransferType, MessageState } from "@hypernetlabs/objects";
-import { IBrowserNodeProvider, IContextProvider, ILogUtils, IPaymentUtils, IVectorUtils } from "@interfaces/utilities";
+import { IBrowserNodeProvider, IContextProvider, IPaymentUtils, IVectorUtils } from "@interfaces/utilities";
+import { ILogUtils } from "@hypernetlabs/utils";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
 /**

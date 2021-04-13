@@ -13,19 +13,24 @@ import {
 } from "@mock/mocks";
 import { BlockchainProviderMock, BrowserNodeProviderMock } from "@mock/utils";
 import {
-  ILogUtils,
   IVectorUtils,
   IBrowserNodeProvider,
   IBlockchainProvider,
   IBlockchainUtils,
 } from "@interfaces/utilities";
-import { VectorError, RouterChannelUnknownError, BlockchainUnavailableError, EthereumAddress } from "@hypernetlabs/objects";
-import { IAccountsRepository } from "@interfaces/data/IAccountsRepository";
+import {
+  VectorError,
+  RouterChannelUnknownError,
+  BlockchainUnavailableError,
+  EthereumAddress,
+  AssetBalance, Balances,
+} from "@hypernetlabs/objects";
+import { IAccountsRepository } from "@interfaces/data/";
 import { okAsync, errAsync } from "neverthrow";
 import { Log, TransactionReceipt, TransactionResponse } from "@ethersproject/abstract-provider";
 import { AccountsRepository } from "@implementations/data/AccountsRepository";
 import { BigNumber } from "ethers";
-import { AssetBalance, Balances } from "@hypernetlabs/objects";
+import { ILogUtils } from "@hypernetlabs/utils";
 
 class TransacationReceiptMock implements TransactionReceipt {
   public to: string;

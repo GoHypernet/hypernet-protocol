@@ -2,17 +2,18 @@ import td from "testdouble";
 require("testdouble-jest")(td, jest);
 import { merchantUrl, account } from "@mock/mocks";
 import { BlockchainProviderMock, ConfigProviderMock, ContextProviderMock } from "@mock/utils";
-import { ILogUtils, IBrowserNode } from "@interfaces/utilities";
+import { IBrowserNode } from "@interfaces/utilities";
 import { IBrowserNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider";
 import { okAsync } from "neverthrow";
 import { BrowserNodeProvider } from "@implementations/utilities/BrowserNodeProvider";
-import { ILocalStorageUtils } from "@hypernetlabs/utils";
+import { ILocalStorageUtils, ILogUtils } from "@hypernetlabs/utils";
 import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
 import { NonEIP712Message } from "@connext/vector-browser-node";
+import { Signature } from "@hypernetlabs/objects";
 
-const validatedSignature = "0xValidatedSignature";
+const validatedSignature = Signature("0xValidatedSignature");
 const authorizationSignature =
-  "0x1e866e66e7f3a68658bd186bafbdc534d4a5022e14022fddfe8865e2236dc67d64eee05b4d8f340dffa1928efa517784b63cad6a3fb35d999cb9d722b34075071b";
+  Signature("0x1e866e66e7f3a68658bd186bafbdc534d4a5022e14022fddfe8865e2236dc67d64eee05b4d8f340dffa1928efa517784b63cad6a3fb35d999cb9d722b34075071b");
 
 class BrowserNodeProviderMocks {
   public blockchainProvider = new BlockchainProviderMock();

@@ -2,7 +2,8 @@ import { VectorUtils } from "@implementations/utilities/VectorUtils";
 import { ConfigProviderMock, ContextProviderMock, BlockchainProviderMock, createBrowserNodeMock } from "@mock/utils";
 import { routerChannelAddress, unixNow } from "@mock/mocks";
 import td from "testdouble";
-import { IBrowserNode, IBrowserNodeProvider, ILogUtils, IPaymentIdUtils, ITimeUtils } from "@interfaces/utilities";
+import { IBrowserNode, IBrowserNodeProvider, IPaymentIdUtils, ITimeUtils } from "@interfaces/utilities";
+import { ILogUtils } from "@hypernetlabs/utils";
 import { okAsync } from "neverthrow";
 
 class VectorUtilsMocks {

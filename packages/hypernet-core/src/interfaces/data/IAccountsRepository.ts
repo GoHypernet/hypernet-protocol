@@ -1,4 +1,4 @@
-import { EthereumAddress, Balances, AssetBalance, PublicIdentifier } from "@hypernetlabs/objects";
+import { EthereumAddress, Balances, AssetBalance, PublicIdentifier, Signature } from "@hypernetlabs/objects";
 import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
@@ -28,6 +28,7 @@ export interface IAccountsRepository {
     amount: BigNumber,
     destinationAddress: EthereumAddress,
   ): ResultAsync<void, RouterChannelUnknownError | VectorError | BlockchainUnavailableError>;
+  signMessage(message: string): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;
 
   mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<void, BlockchainUnavailableError>;
 }
