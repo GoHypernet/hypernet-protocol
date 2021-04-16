@@ -30,6 +30,7 @@ export class ConfigProviderMock implements IConfigProvider {
           },
         },
         "merchantIframeUrl",
+        "https://ceramic-clay.3boxlabs.com",
         false, // debug is off for testing
       );
   }

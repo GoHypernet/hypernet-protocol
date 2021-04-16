@@ -17,6 +17,7 @@ export class HypernetConfig {
     public openThreadKey: string,
     public chainAddresses: ChainAddresses,
     public merchantIframeUrl: string,
+    public ceramicNodeUrl: string,
     public debug: boolean,
   ) {}
 }

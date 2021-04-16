@@ -11,6 +11,7 @@ import {
   Signature,
   MerchantUrl,
   Balances,
+  Document,
 } from "@hypernetlabs/objects";
 import { InitializedHypernetContext } from "@interfaces/objects";
 import { LogicalError, MerchantConnectorError, MerchantValidationError, PersistenceError } from "@hypernetlabs/objects";
@@ -19,6 +20,7 @@ import { ResultUtils, IAjaxUtils, ILocalStorageUtils } from "@hypernetlabs/utils
 import {
   IBlockchainProvider,
   IBlockchainUtils,
+  ICeramicUtils,
   IConfigProvider,
   IContextProvider,
   IMerchantConnectorProxy,
@@ -47,6 +49,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     protected localStorageUtils: ILocalStorageUtils,
     protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory,
     protected blockchainUtils: IBlockchainUtils,
+    protected ceramicUtils: ICeramicUtils,
   ) {
     this.activatedMerchants = new Map();
     this.domain = {
@@ -423,10 +426,15 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         authorizationSignature: Signature(keyval[1]),
       });
     }
+    // TODO: replace local storage with Ceramic utils once it's ready
+    //const document = new Document("AuthorizedMerchants", authorizedMerchantEntries);
+    //this.ceramicUtils.writeDocument(document);
     this.localStorageUtils.setItem("AuthorizedMerchants", JSON.stringify(authorizedMerchantEntries));
   }
 
   protected _getAuthorizedMerchants(): Map<MerchantUrl, Signature> {
+    // TODO: replace local storage with Ceramic utils once it's ready
+    //let authorizedMerchantStr =this.ceramicUtils.readDocument("AuthorizedMerchants");
     let authorizedMerchantStr = this.localStorageUtils.getItem("AuthorizedMerchants");
 
     if (authorizedMerchantStr == null) {

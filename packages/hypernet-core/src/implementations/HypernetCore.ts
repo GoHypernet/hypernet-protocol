@@ -22,8 +22,9 @@ import {
   TimeUtils,
   VectorUtils,
   EthersBlockchainUtils,
+  CeramicUtils,
 } from "@implementations/utilities";
-import { MerchantConnectorListener, VectorAPIListener } from "@implementations/api";
+import { MerchantConnectorListener, VectorAPIListener, CeramicListener } from "@implementations/api";
 import {
   IAccountService,
   IDevelopmentService,
@@ -79,8 +80,9 @@ import {
   IPaymentUtils,
   ITimeUtils,
   IVectorUtils,
+  ICeramicUtils,
 } from "@interfaces/utilities";
-import { IMerchantConnectorListener, IVectorListener } from "@interfaces/api";
+import { IMerchantConnectorListener, IVectorListener, ICeramicListener } from "@interfaces/api";
 import { Subject } from "rxjs";
 import { ok, Result, ResultAsync } from "neverthrow";
 import { AxiosAjaxUtils, IAjaxUtils, ResultUtils, ILocalStorageUtils, LocalStorageUtils } from "@hypernetlabs/utils";
@@ -133,6 +135,7 @@ export class HypernetCore implements IHypernetCore {
   protected ajaxUtils: IAjaxUtils;
   protected blockchainUtils: IBlockchainUtils;
   protected localStorageUtils: ILocalStorageUtils;
+  protected ceramicUtils: ICeramicUtils;
 
   // Factories
   protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory;
@@ -156,6 +159,7 @@ export class HypernetCore implements IHypernetCore {
   // API
   protected vectorAPIListener: IVectorListener;
   protected merchantConnectorListener: IMerchantConnectorListener;
+  protected ceramicListener: ICeramicListener;
 
   protected _initializeResult: ResultAsync<void, LogicalError> | null;
   protected _initialized: boolean;
@@ -258,6 +262,7 @@ export class HypernetCore implements IHypernetCore {
     );
     this.ajaxUtils = new AxiosAjaxUtils();
     this.blockchainUtils = new EthersBlockchainUtils(this.blockchainProvider);
+    this.ceramicUtils = new CeramicUtils(this.blockchainProvider, this.configProvider, this.logUtils);
 
     this.accountRepository = new AccountsRepository(
       this.blockchainProvider,
@@ -296,6 +301,7 @@ export class HypernetCore implements IHypernetCore {
       this.localStorageUtils,
       this.merchantConnectorProxyFactory,
       this.blockchainUtils,
+      this.ceramicUtils,
     );
 
     this.paymentService = new PaymentService(
@@ -338,6 +344,8 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.logUtils,
     );
+
+    this.ceramicListener = new CeramicListener(this.ceramicUtils, this.logUtils);
 
     // This whole rigamarole is to make sure it can only be initialized a single time, and that you can call waitInitialized()
     // before the call to initialize() is made
@@ -579,12 +587,15 @@ export class HypernetCore implements IHypernetCore {
         context.publicIdentifier = publicIdentifier;
         return this.contextProvider.setContext(context);
       })
+      /* .andThen(() => {
+        return this.ceramicListener.initialize();
+      }) */
       .andThen(() => {
         // Initialize anything that wants an initialized context
         return ResultUtils.combine([
           this.vectorAPIListener.setup(),
           this.merchantService.activateAuthorizedMerchants(),
-        ]); // , this.threeboxMessagingListener.initialize()]);
+        ]);
       })
       // .andThen(() => {
       //   // Claim control

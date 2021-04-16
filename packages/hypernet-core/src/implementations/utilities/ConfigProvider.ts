@@ -44,6 +44,7 @@ export class ConfigProvider implements IConfigProvider {
         "openThreadKey",
         chainAddresses,
         "http://localhost:5005", // merchantIframeUrl
+        "https://ceramic-clay.3boxlabs.com", // ceramicNodeUrl
         true, // debug
       );
 
@@ -84,6 +85,7 @@ export class ConfigProvider implements IConfigProvider {
         "openThreadKey",
         chainAddresses,
         "http://localhost:5005", // merchantIframeUrl
+        "https://ceramic-clay.3boxlabs.com", // ceramicNodeUrl
         true, // debug
       );
 

@@ -21,3 +21,4 @@ export * from "./TransferCreationError";
 export * from "./TransferResolutionError";
 export * from "./VectorError";
 export * from "./PaymentCreationError";
+export * from "./CeramicError";

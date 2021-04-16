@@ -12,7 +12,7 @@ import {
   publicIdentifier,
 } from "@mock/mocks";
 import { BlockchainProviderMock, ConfigProviderMock, ContextProviderMock } from "@mock/utils";
-import { IVectorUtils, IMerchantConnectorProxy, IBlockchainUtils } from "@interfaces/utilities";
+import { IVectorUtils, IMerchantConnectorProxy, IBlockchainUtils, ICeramicUtils } from "@interfaces/utilities";
 import {
   MerchantConnectorError,
   MerchantValidationError,
@@ -47,6 +47,7 @@ class MerchantConnectorRepositoryMocks {
   public merchantConnectorProxyFactory = td.object<IMerchantConnectorProxyFactory>();
   public merchantConnectorProxy = td.object<IMerchantConnectorProxy>();
   public blockchainUtils = td.object<IBlockchainUtils>();
+  public ceramicUtils = td.object<ICeramicUtils>();
 
   public expectedSignerDomain = {
     name: "Hypernet Protocol",
@@ -119,6 +120,7 @@ class MerchantConnectorRepositoryMocks {
       this.localStorageUtils,
       this.merchantConnectorProxyFactory,
       this.blockchainUtils,
+      this.ceramicUtils,
     );
   }
 }
