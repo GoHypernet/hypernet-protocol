@@ -11,6 +11,7 @@ import {
   Signature,
   MerchantUrl,
   Balances,
+  AuthorizedMerchantSignature,
 } from "@hypernetlabs/objects";
 import { InitializedHypernetContext } from "@interfaces/objects";
 import { LogicalError, MerchantConnectorError, MerchantValidationError, PersistenceError } from "@hypernetlabs/objects";
@@ -31,6 +32,7 @@ import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 interface IAuthorizedMerchantEntry {
   merchantUrl: MerchantUrl;
   authorizationSignature: string;
+  activationStatus: boolean;
 }
 
 export class MerchantConnectorRepository implements IMerchantConnectorRepository {
@@ -141,13 +143,16 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         } as Record<string, any>;
         const signerPromise = signer._signTypedData(this.domain, this.types, value);
 
-        return ResultAsync.fromPromise(signerPromise, (e) => e as MerchantValidationError);
+        return ResultAsync.fromPromise<string, MerchantValidationError>(
+          signerPromise,
+          (e) => e as MerchantValidationError,
+        );
       })
       .andThen((authorizationSignature) => {
         // The connector has been authorized, store it as an authorized connector
         const authorizedMerchants = this._getAuthorizedMerchants();
 
-        authorizedMerchants.set(merchantUrl, Signature(authorizationSignature));
+        authorizedMerchants.set(merchantUrl, new AuthorizedMerchantSignature(Signature(authorizationSignature), true));
 
         this._setAuthorizedMerchants(authorizedMerchants);
 
@@ -184,7 +189,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   /**
    * Returns a map of merchant URLs with their authorization signatures.
    */
-  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, never> {
+  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, AuthorizedMerchantSignature>, never> {
     const authorizedMerchants = this._getAuthorizedMerchants();
 
     return okAsync(authorizedMerchants);
@@ -236,12 +241,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     return proxy.displayMerchantIFrame();
   }
 
-  public activateAuthorizedMerchants(
-    balances: Balances,
-  ): ResultAsync<
-    void,
-    MerchantConnectorError | MerchantValidationError | BlockchainUnavailableError | LogicalError | ProxyError
-  > {
+  public activateAuthorizedMerchants(balances: Balances): ResultAsync<void, BlockchainUnavailableError> {
     return ResultUtils.combine([
       this.contextProvider.getInitializedContext(),
       this.getAuthorizedMerchants(),
@@ -258,14 +258,18 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
             context.account,
             balances,
             keyval[0], // URL
-            keyval[1],
+            keyval[1], // Signature
             context,
             signer,
           );
         });
       }
 
-      return ResultUtils.executeSerially(activationResults).map(() => {});
+      return ResultUtils.executeSerially(activationResults)
+        .map(() => {})
+        .orElse((e) => {
+          return okAsync(undefined);
+        });
     });
   }
 
@@ -349,7 +353,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     accountAddress: EthereumAddress,
     balances: Balances,
     merchantUrl: MerchantUrl,
-    authorizationSignature: Signature,
+    authorizationSignature: AuthorizedMerchantSignature,
     context: InitializedHypernetContext,
     signer: ethers.providers.JsonRpcSigner,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | LogicalError | ProxyError> {
@@ -367,34 +371,47 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
           authorizedMerchantUrl: merchantUrl,
           merchantValidatedSignature: validatedSignature,
         } as Record<string, any>;
-        const validationAddress = this.blockchainUtils.verifyTypedData(
+
+        const throwableVerifyTypedData = Result.fromThrowable<(...arg) => EthereumAddress, MerchantConnectorError>(
+          this.blockchainUtils.verifyTypedData,
+          (e) => {
+            return e as MerchantConnectorError;
+          },
+        );
+
+        const validationAddressResult = throwableVerifyTypedData(
           this.domain,
           this.types,
           value,
-          authorizationSignature,
+          authorizationSignature.signature,
         );
 
-        if (validationAddress !== accountAddress) {
-          // Notify the user that one of their authorized merchants has changed their code
-          context.onAuthorizedMerchantUpdated.next(merchantUrl);
+        return validationAddressResult.map((validationAddress) => {
+          if (validationAddress !== accountAddress) {
+            // Notify the user that one of their authorized merchants has changed their code
+            context.onAuthorizedMerchantUpdated.next(merchantUrl);
 
-          // Get a new signature
-          // validatedSignature means the code is signed by the provider, so we just need
-          // to sign this new version.
-          const signerPromise = signer._signTypedData(this.domain, this.types, value);
+            // Get a new signature
+            // validatedSignature means the code is signed by the provider, so we just need
+            // to sign this new version.
+            const signerPromise = signer._signTypedData(this.domain, this.types, value);
 
-          return ResultAsync.fromPromise(signerPromise, (e) => e as MerchantConnectorError).map(
-            (newAuthorizationSignature) => {
-              const authorizedMerchants = this._getAuthorizedMerchants();
+            return ResultAsync.fromPromise(signerPromise, (e) => e as MerchantConnectorError).map(
+              (newAuthorizationSignature) => {
+                const authorizedMerchants = this._getAuthorizedMerchants();
 
-              authorizedMerchants.set(MerchantUrl(merchantUrl.toString()), Signature(newAuthorizationSignature));
+                authorizedMerchants.set(
+                  MerchantUrl(merchantUrl.toString()),
+                  new AuthorizedMerchantSignature(Signature(newAuthorizationSignature), true),
+                );
 
-              this._setAuthorizedMerchants(authorizedMerchants);
-            },
-          );
-        }
+                this._setAuthorizedMerchants(authorizedMerchants);
+              },
+            );
+          }
 
-        return okAsync<void, MerchantValidationError>(undefined);
+          return okAsync<void, MerchantValidationError>(undefined);
+        });
       })
       .andThen(() => {
         return proxy.activateConnector(context.publicIdentifier, balances);
@@ -408,6 +425,16 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
           proxy.destroy();
         }
 
+        const authorizedMerchants = this._getAuthorizedMerchants();
+        authorizedMerchants.get(merchantUrl)?.signature;
+
+        authorizedMerchants.set(
+          MerchantUrl(merchantUrl.toString()),
+          new AuthorizedMerchantSignature(Signature(authorizedMerchants.get(merchantUrl)?.signature || ""), false),
+        );
+
+        this._setAuthorizedMerchants(authorizedMerchants);
+
         // Notify the world
         context.onAuthorizedMerchantActivationFailed.next(merchantUrl);
 
@@ -415,18 +442,19 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       });
   }
 
-  protected _setAuthorizedMerchants(authorizedMerchantMap: Map<MerchantUrl, Signature>) {
+  protected _setAuthorizedMerchants(authorizedMerchantMap: Map<MerchantUrl, AuthorizedMerchantSignature>) {
     const authorizedMerchantEntries = new Array<IAuthorizedMerchantEntry>();
     for (const keyval of authorizedMerchantMap) {
       authorizedMerchantEntries.push({
         merchantUrl: MerchantUrl(keyval[0]),
-        authorizationSignature: Signature(keyval[1]),
+        authorizationSignature: Signature(keyval[1].signature),
+        activationStatus: keyval[1].activationStatus,
       });
     }
     this.localStorageUtils.setItem("AuthorizedMerchants", JSON.stringify(authorizedMerchantEntries));
   }
 
-  protected _getAuthorizedMerchants(): Map<MerchantUrl, Signature> {
+  protected _getAuthorizedMerchants(): Map<MerchantUrl, AuthorizedMerchantSignature> {
     let authorizedMerchantStr = this.localStorageUtils.getItem("AuthorizedMerchants");
 
     if (authorizedMerchantStr == null) {
@@ -434,11 +462,14 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     }
     const authorizedMerchantEntries = JSON.parse(authorizedMerchantStr) as IAuthorizedMerchantEntry[];
 
-    const authorizedMerchants = new Map<MerchantUrl, Signature>();
+    const authorizedMerchants = new Map<MerchantUrl, AuthorizedMerchantSignature>();
     for (const authorizedMerchantEntry of authorizedMerchantEntries) {
       authorizedMerchants.set(
         MerchantUrl(authorizedMerchantEntry.merchantUrl),
-        Signature(authorizedMerchantEntry.authorizationSignature),
+        new AuthorizedMerchantSignature(
+          Signature(authorizedMerchantEntry.authorizationSignature),
+          authorizedMerchantEntry.activationStatus,
+        ),
       );
     }
     return authorizedMerchants;

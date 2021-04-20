@@ -137,7 +137,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(result.isErr()).toBeFalsy();
     const authorizedMerchants = result._unsafeUnwrap();
     expect(authorizedMerchants.size).toBe(1);
-    expect(authorizedMerchants.get(merchantUrl)).toBe(authorizationSignature);
+    expect(authorizedMerchants.get(merchantUrl)?.signature).toBe(authorizationSignature);
   });
 
   test("getAuthorizedMerchants returns an empty map", async () => {
@@ -200,14 +200,14 @@ describe("MerchantConnectorRepository tests", () => {
     verify(
       mocks.localStorageUtils.setItem(
         "AuthorizedMerchants",
-        `[{"merchantUrl":"${merchantUrl}","authorizationSignature":"${newAuthorizationSignature}"}]`,
+        `[{"merchantUrl":"${merchantUrl}","authorizationSignature":"${newAuthorizationSignature}","activationStatus":${true}}]`,
       ),
     );
     expect(onAuthorizedMerchantUpdatedVal).toBeDefined();
     expect(onAuthorizedMerchantUpdatedVal).toBe(merchantUrl);
   });
 
-  test("activateAuthorizedMerchants returns an error if proxy can not be factoried", async () => {
+  test("activateAuthorizedMerchants passes if proxy can not be factoried", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
@@ -226,13 +226,17 @@ describe("MerchantConnectorRepository tests", () => {
 
     // Assert
     expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    const resultVal = result._unsafeUnwrapErr();
-    expect(resultVal).toBe(error);
+    expect(result.isErr()).toBeFalsy();
+    verify(
+      mocks.localStorageUtils.setItem(
+        "AuthorizedMerchants",
+        `[{"merchantUrl":"${merchantUrl}","authorizationSignature":"${authorizationSignature}","activationStatus":${false}}]`,
+      ),
+    );
     expect(onAuthorizedMerchantActivationFailedVal).toBe(merchantUrl);
   });
 
-  test("activateAuthorizedMerchants returns an error if one of the merchant connector's signatures can't be verified by the iFrame.", async () => {
+  test("activateAuthorizedMerchants passes if one of the merchant connector's signatures can't be verified by the iFrame.", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
@@ -251,14 +255,18 @@ describe("MerchantConnectorRepository tests", () => {
 
     // Assert
     expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    const resultVal = result._unsafeUnwrapErr();
-    expect(resultVal).toBe(error);
+    expect(result.isErr()).toBeFalsy();
+    verify(
+      mocks.localStorageUtils.setItem(
+        "AuthorizedMerchants",
+        `[{"merchantUrl":"${merchantUrl}","authorizationSignature":"${authorizationSignature}","activationStatus":${false}}]`,
+      ),
+    );
     verify(mocks.merchantConnectorProxy.destroy());
     expect(onAuthorizedMerchantActivationFailedVal).toBe(merchantUrl);
   });
 
-  test("activateAuthorizedMerchants returns an error if the connector can not be activated", async () => {
+  test("activateAuthorizedMerchants passes if the connector can not be activated", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
@@ -277,10 +285,14 @@ describe("MerchantConnectorRepository tests", () => {
 
     // Assert
     expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    const resultVal = result._unsafeUnwrapErr();
-    expect(resultVal).toBe(error);
+    expect(result.isErr()).toBeFalsy();
     verify(mocks.merchantConnectorProxy.destroy());
+    verify(
+      mocks.localStorageUtils.setItem(
+        "AuthorizedMerchants",
+        `[{"merchantUrl":"${merchantUrl}","authorizationSignature":"${authorizationSignature}","activationStatus":${false}}]`,
+      ),
+    );
     expect(onAuthorizedMerchantActivationFailedVal).toBe(merchantUrl);
   });
 
@@ -376,7 +388,7 @@ describe("MerchantConnectorRepository tests", () => {
     verify(
       mocks.localStorageUtils.setItem(
         "AuthorizedMerchants",
-        `[{"merchantUrl":"${merchantUrl}","authorizationSignature":"${newAuthorizationSignature}"}]`,
+        `[{"merchantUrl":"${merchantUrl}","authorizationSignature":"${newAuthorizationSignature}","activationStatus":${true}}]`,
       ),
     );
   });

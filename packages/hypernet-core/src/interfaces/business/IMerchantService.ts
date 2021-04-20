@@ -6,12 +6,12 @@ import {
   BlockchainUnavailableError,
   ProxyError,
 } from "@hypernetlabs/objects";
-import { MerchantUrl, Signature } from "@hypernetlabs/objects";
+import { MerchantUrl, AuthorizedMerchantSignature } from "@hypernetlabs/objects";
 
 export interface IMerchantService {
   initialize(): ResultAsync<void, LogicalError | MerchantConnectorError>;
   authorizeMerchant(merchantUrl: MerchantUrl): ResultAsync<void, MerchantValidationError>;
-  getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, never>;
+  getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, AuthorizedMerchantSignature>, never>;
   activateAuthorizedMerchants(): ResultAsync<
     void,
     MerchantConnectorError | MerchantValidationError | BlockchainUnavailableError | LogicalError | ProxyError

@@ -49,7 +49,7 @@ import {
   PushPayment,
   PaymentId,
   MerchantUrl,
-  Signature,
+  AuthorizedMerchantSignature,
   IHypernetCore,
   PrivateCredentials,
   EBlockchainNetwork,
@@ -628,7 +628,7 @@ export class HypernetCore implements IHypernetCore {
     return this.merchantService.authorizeMerchant(merchantUrl);
   }
 
-  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, PersistenceError> {
+  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, AuthorizedMerchantSignature>, PersistenceError> {
     return this.merchantService.getAuthorizedMerchants();
   }
 

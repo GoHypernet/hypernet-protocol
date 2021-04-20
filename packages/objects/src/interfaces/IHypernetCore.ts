@@ -9,7 +9,7 @@ import {
   PullPayment,
   PaymentId,
   MerchantUrl,
-  Signature,
+  AuthorizedMerchantSignature,
 } from "@hypernetlabs/objects";
 import { Subject } from "rxjs";
 import {
@@ -207,7 +207,7 @@ export interface IHypernetCore {
 
   authorizeMerchant(merchantUrl: MerchantUrl): ResultAsync<void, MerchantValidationError>;
 
-  getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, PersistenceError>;
+  getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, AuthorizedMerchantSignature>, PersistenceError>;
 
   closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError>;
   displayMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError>;

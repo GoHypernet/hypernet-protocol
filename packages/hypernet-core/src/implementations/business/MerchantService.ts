@@ -8,7 +8,7 @@ import {
   ProxyError,
 } from "@hypernetlabs/objects";
 import { IAccountsRepository, IMerchantConnectorRepository } from "@interfaces/data";
-import { MerchantUrl, Signature } from "@hypernetlabs/objects";
+import { MerchantUrl, AuthorizedMerchantSignature } from "@hypernetlabs/objects";
 import { IContextProvider } from "@interfaces/utilities";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 
@@ -86,7 +86,7 @@ export class MerchantService implements IMerchantService {
     });
   }
 
-  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, never> {
+  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, AuthorizedMerchantSignature>, never> {
     return this.merchantConnectorRepository.getAuthorizedMerchants();
   }
 

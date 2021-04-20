@@ -11,8 +11,8 @@ import {
   EthereumAddress,
   PaymentId,
   TransferId,
-  Signature,
   MerchantUrl,
+  AuthorizedMerchantSignature,
 } from "@hypernetlabs/objects";
 import { PullPayment, PushPayment } from "@hypernetlabs/objects";
 
@@ -46,7 +46,7 @@ export interface IMerchantConnectorRepository {
    */
   removeAuthorizedMerchant(merchantUrl: MerchantUrl): Result<void, never>;
 
-  getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, never>;
+  getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, AuthorizedMerchantSignature>, never>;
 
   activateAuthorizedMerchants(
     balances: Balances,
