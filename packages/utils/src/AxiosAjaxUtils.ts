@@ -1,4 +1,4 @@
-import { IAjaxUtils, IRequestConfig } from "./IAjaxUtils";
+import { IAjaxUtils, IRequestConfig } from "@utils/IAjaxUtils";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import { ResultAsync } from "neverthrow";
