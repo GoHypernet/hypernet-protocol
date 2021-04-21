@@ -1,5 +1,4 @@
 import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
-import { BigNumber } from "ethers";
 import {
   HypernetConfig,
   IHypernetOfferDetails,
@@ -28,6 +27,14 @@ import {
   TransferResolutionError,
   VectorError,
 } from "@hypernetlabs/objects";
+import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@hypernetlabs/objects/types/typechain";
+import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { serialize } from "class-transformer";
+import { BigNumber } from "ethers";
+import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
+import { ResultAsync, errAsync, okAsync } from "neverthrow";
+
+import { InitializedHypernetContext } from "@interfaces/objects";
 import {
   IBrowserNodeProvider,
   IContextProvider,
@@ -38,14 +45,9 @@ import {
   IBrowserNode,
   ITimeUtils,
 } from "@interfaces/utilities";
+
 import "reflect-metadata";
-import { serialize } from "class-transformer";
-import { ParameterizedResolver, ParameterizedResolverData, Rate } from "@hypernetlabs/objects/types/typechain";
 import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils";
-import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
-import { InitializedHypernetContext } from "@interfaces/objects";
-import { ResultAsync, errAsync, okAsync } from "neverthrow";
-import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 
 /**
  * VectorUtils contains methods for interacting directly with the core Vector stuff -

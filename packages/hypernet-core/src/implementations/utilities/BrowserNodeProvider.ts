@@ -1,4 +1,11 @@
 import { NonEIP712Message } from "@connext/vector-browser-node";
+import { BlockchainUnavailableError, EthereumAddress, Signature, VectorError } from "@hypernetlabs/objects";
+import { HypernetConfig } from "@hypernetlabs/objects";
+import { ILogUtils } from "@hypernetlabs/utils";
+import { ResultUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
+import { ethers } from "ethers";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
+
 import {
   IBrowserNode,
   IContextProvider,
@@ -6,13 +13,7 @@ import {
   IConfigProvider,
   IBlockchainProvider,
 } from "@interfaces/utilities";
-import { ILogUtils } from "@hypernetlabs/utils";
-import { BlockchainUnavailableError, EthereumAddress, Signature, VectorError } from "@hypernetlabs/objects";
-import { HypernetConfig } from "@hypernetlabs/objects";
-import { ResultUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
-import { ethers } from "ethers";
 import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 export class BrowserNodeProvider implements IBrowserNodeProvider {
   protected browserNodeResult: ResultAsync<IBrowserNode, VectorError | BlockchainUnavailableError> | null = null;

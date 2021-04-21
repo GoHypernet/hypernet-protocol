@@ -1,4 +1,5 @@
 import React from "react";
+
 import IHypernetIFrameProxy from "@web-integration-interfaces/proxy/IHypernetIFrameProxy";
 
 interface IStore {

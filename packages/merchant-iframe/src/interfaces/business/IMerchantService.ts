@@ -1,5 +1,3 @@
-import { ResultAsync } from "neverthrow";
-import { MerchantConnectorError, MerchantValidationError } from "@merchant-iframe/interfaces/objects/errors";
 import { IMerchantConnector, IRedirectInfo, IResolutionResult } from "@hypernetlabs/merchant-connector";
 import {
   Balances,
@@ -10,6 +8,9 @@ import {
   Signature,
   MerchantUrl,
 } from "@hypernetlabs/objects";
+import { ResultAsync } from "neverthrow";
+
+import { MerchantConnectorError, MerchantValidationError } from "@merchant-iframe/interfaces/objects/errors";
 
 export interface IMerchantService {
   validateMerchantConnector(): ResultAsync<string, MerchantValidationError>;

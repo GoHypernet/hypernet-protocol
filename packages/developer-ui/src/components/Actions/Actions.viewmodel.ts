@@ -1,9 +1,11 @@
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import ko from "knockout";
-import { ButtonParams } from "../Button/Button.viewmodel";
-import html from "./Actions.template.html";
 import { ethers } from "ethers";
+import ko from "knockout";
+
+import { ButtonParams } from "../Button/Button.viewmodel";
 import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
+
+import html from "./Actions.template.html";
 
 export class ActionsParams {
   constructor(public integration: IHypernetWebIntegration) {}

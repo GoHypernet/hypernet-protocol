@@ -1,10 +1,11 @@
 import { BlockchainUnavailableError, InvalidParametersError } from "@hypernetlabs/objects";
 import { PrivateCredentials, EthereumAddress } from "@hypernetlabs/objects";
+import { ethers } from "ethers";
+import { okAsync, ResultAsync, errAsync } from "neverthrow";
+
 import { IContextProvider, IInternalProvider } from "@interfaces/utilities";
 import { IInternalProviderFactory } from "@interfaces/utilities/factory";
 import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
-import { ethers } from "ethers";
-import { okAsync, ResultAsync, errAsync } from "neverthrow";
 declare global {
   interface Window {
     ethereum: any;

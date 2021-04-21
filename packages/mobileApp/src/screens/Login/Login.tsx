@@ -1,9 +1,10 @@
 import React from "react";
 import { Text, View } from "react-native";
-import { useStateContext } from "@mobileApp/state/store";
+import { TouchableOpacity } from "react-native-gesture-handler";
+
 import { SomeActionType } from "@mobileApp/interfaces/state/IsomeReducer";
 import { UserActionType } from "@mobileApp/interfaces/state/IuserReducer";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { useStateContext } from "@mobileApp/state/store";
 
 interface LoginProps {}
 

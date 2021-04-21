@@ -1,6 +1,6 @@
 import { EthereumAddress, PublicIdentifier, IHypernetCore, PaymentId, MerchantUrl } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
+import { BigNumber } from "ethers";
 import Postmate from "postmate";
 
 export default class CoreWrapper extends ChildProxy {

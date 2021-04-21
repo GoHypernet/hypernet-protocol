@@ -1,12 +1,4 @@
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
-import { ResultUtils } from "@hypernetlabs/utils";
-import { ethers } from "ethers";
-import { IMerchantConnectorRepository, IPersistenceRepository } from "@merchant-iframe/interfaces/data";
-import { MerchantConnectorError, MerchantValidationError } from "@merchant-iframe/interfaces/objects/errors";
-import { IContextProvider } from "@merchant-iframe/interfaces/utils";
-import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { IMerchantConnector, IRedirectInfo, IResolutionResult } from "@hypernetlabs/merchant-connector";
-import { ExpectedRedirect } from "@merchant-iframe/interfaces/objects";
 import {
   LogicalError,
   PublicIdentifier,
@@ -16,6 +8,15 @@ import {
   MerchantUrl,
   PaymentId,
 } from "@hypernetlabs/objects";
+import { ResultUtils } from "@hypernetlabs/utils";
+import { ethers } from "ethers";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
+
+import { IMerchantService } from "@merchant-iframe/interfaces/business";
+import { IMerchantConnectorRepository, IPersistenceRepository } from "@merchant-iframe/interfaces/data";
+import { ExpectedRedirect } from "@merchant-iframe/interfaces/objects";
+import { MerchantConnectorError, MerchantValidationError } from "@merchant-iframe/interfaces/objects/errors";
+import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 
 declare global {
   interface Window {
@@ -33,7 +34,7 @@ export class MerchantService implements IMerchantService {
   ) {
     this.signMessageCallbacks = new Map();
   }
-  private static merchantUrlCacheBusterUsed: boolean = false;
+  private static merchantUrlCacheBusterUsed = false;
 
   public activateMerchantConnector(
     publicIdentifier: PublicIdentifier,
@@ -51,8 +52,8 @@ export class MerchantService implements IMerchantService {
     }
 
     // We will now run the connector code. It needs to put an IMerchantConnector object in the window.connector
-    var newScript = document.createElement("script");
-    var inlineScript = document.createTextNode(context.validatedMerchantCode);
+    const newScript = document.createElement("script");
+    const inlineScript = document.createTextNode(context.validatedMerchantCode);
     newScript.appendChild(inlineScript);
     document.head.appendChild(newScript);
 
@@ -126,7 +127,7 @@ export class MerchantService implements IMerchantService {
       return okAsync(Signature(""));
     }
 
-    let cacheBuster: string = "";
+    let cacheBuster = "";
     if (useCacheBuster) {
       cacheBuster = `?v=${Date.now()}`;
     }
@@ -190,7 +191,7 @@ export class MerchantService implements IMerchantService {
     // First, see if this is going to be easy. Normally a merchantUrl
     // is provided as a param.
     const urlParams = new URLSearchParams(window.location.search);
-    let merchantUrl = urlParams.get("merchantUrl");
+    const merchantUrl = urlParams.get("merchantUrl");
 
     if (merchantUrl != null) {
       return okAsync(MerchantUrl(merchantUrl));
@@ -207,7 +208,7 @@ export class MerchantService implements IMerchantService {
       if (expectedRedirect != null) {
         // Check the redirect params
         const urlParams = new URLSearchParams(window.location.search);
-        let paramValue = urlParams.get(expectedRedirect.redirectParam);
+        const paramValue = urlParams.get(expectedRedirect.redirectParam);
 
         if (paramValue == expectedRedirect.paramValue) {
           return okAsync(expectedRedirect.merchantUrl);
@@ -238,7 +239,7 @@ export class MerchantService implements IMerchantService {
     });
   }
   public getAddress(): ResultAsync<EthereumAddress, MerchantValidationError> {
-    let context = this.contextProvider.getMerchantContext();
+    const context = this.contextProvider.getMerchantContext();
     return context.merchantValidated.andThen(() => {
       if (context.merchantConnector == null) {
         throw new Error("merchantConnector is null but merchantValidated is OK");
@@ -251,7 +252,7 @@ export class MerchantService implements IMerchantService {
   public resolveChallenge(
     paymentId: PaymentId,
   ): ResultAsync<IResolutionResult, MerchantConnectorError | MerchantValidationError> {
-    let context = this.contextProvider.getMerchantContext();
+    const context = this.contextProvider.getMerchantContext();
     return context.merchantValidated.andThen(() => {
       if (context.merchantConnector == null) {
         throw new Error("merchantConnector is null but merchantValidated is OK");

@@ -1,5 +1,3 @@
-import { ResultUtils } from "@hypernetlabs/utils";
-import { ILinkRepository } from "@interfaces/data";
 import {
   BlockchainUnavailableError,
   EthereumAddress,
@@ -14,6 +12,10 @@ import {
   InvalidPaymentError,
   LogicalError,
 } from "@hypernetlabs/objects";
+import { ResultUtils } from "@hypernetlabs/utils";
+import { okAsync, ResultAsync } from "neverthrow";
+
+import { ILinkRepository } from "@interfaces/data";
 import {
   IBrowserNode,
   IBrowserNodeProvider,
@@ -24,7 +26,6 @@ import {
   IVectorUtils,
   ILinkUtils,
 } from "@interfaces/utilities";
-import { okAsync, ResultAsync } from "neverthrow";
 
 /**
  * Provides methods for retrieving Hypernet Links.

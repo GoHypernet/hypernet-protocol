@@ -1,5 +1,7 @@
 import React, { useContext, useReducer } from "react";
 import combineReducers from "react-combine-reducers";
+
+import { RootReducer, IStore, IStoreProvider } from "@mobileApp/interfaces/state/IdataStore";
 import {
   userReducer,
   initialUserReducer,
@@ -8,7 +10,6 @@ import {
   coreReducer,
   initialCoreReducer,
 } from "@mobileApp/state/reducers";
-import { RootReducer, IStore, IStoreProvider } from "@mobileApp/interfaces/state/IdataStore";
 
 const [rootReducer, initialState] = combineReducers<RootReducer>({
   userReducer: [userReducer, initialUserReducer],

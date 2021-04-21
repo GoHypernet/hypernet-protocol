@@ -1,7 +1,8 @@
-import { okAsync, ResultAsync } from "neverthrow";
 import { BlockchainUnavailableError } from "@hypernetlabs/objects";
-import { IBlockchainProvider, ITimeUtils } from "@interfaces/utilities";
 import moment from "moment";
+import { okAsync, ResultAsync } from "neverthrow";
+
+import { IBlockchainProvider, ITimeUtils } from "@interfaces/utilities";
 
 export class TimeUtils implements ITimeUtils {
   protected lastBlockchainCheck: number | undefined;

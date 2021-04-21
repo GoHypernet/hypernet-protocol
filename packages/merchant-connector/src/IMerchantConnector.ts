@@ -1,5 +1,3 @@
-import { Observable } from "rxjs";
-import { IResolutionResult } from "./IResolutionResult";
 import {
   PushPayment,
   PullPayment,
@@ -9,6 +7,9 @@ import {
   PaymentId,
   Signature,
 } from "@hypernetlabs/objects";
+import { Observable } from "rxjs";
+
+import { IResolutionResult } from "./IResolutionResult";
 
 export interface IMerchantConnector {
   resolveChallenge(paymentId: PaymentId): Promise<IResolutionResult>;

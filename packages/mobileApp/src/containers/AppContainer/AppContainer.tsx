@@ -1,9 +1,11 @@
 import React from "react";
-import Router from "../Router";
 import LinearGradient from "react-native-linear-gradient";
-import { StoreProvider } from "@mobileApp/state/store";
-import { appBackgroundGradientColors } from "@mobileApp/constants/theme";
+
+import Router from "../Router";
+
 import WebViewBridge from "@mobileApp/components/WebViewBridge";
+import { appBackgroundGradientColors } from "@mobileApp/constants/theme";
+import { StoreProvider } from "@mobileApp/state/store";
 
 interface AppContainerProps {}
 

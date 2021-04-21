@@ -1,7 +1,4 @@
 import { NodeResponses } from "@connext/vector-types";
-import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
-import { IPaymentRepository } from "@interfaces/data";
-import { InitializedHypernetContext } from "@interfaces/objects";
 import {
   EthereumAddress,
   HypernetConfig,
@@ -31,6 +28,12 @@ import {
   BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
 import { EPaymentType, ETransferType, MessageState, EMessageTransferType } from "@hypernetlabs/objects";
+import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { BigNumber } from "ethers";
+import { ResultAsync, errAsync, okAsync } from "neverthrow";
+
+import { IPaymentRepository } from "@interfaces/data";
+import { InitializedHypernetContext } from "@interfaces/objects";
 import {
   IBrowserNode,
   IBrowserNodeProvider,
@@ -40,8 +43,6 @@ import {
   ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
-import { ResultAsync, errAsync, okAsync } from "neverthrow";
-import { BigNumber } from "ethers";
 
 /**
  * Contains methods for creating push, pull, etc payments,

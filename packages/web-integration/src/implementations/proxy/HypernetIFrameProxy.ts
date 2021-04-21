@@ -27,15 +27,16 @@ import {
   InvalidParametersError,
   TransferResolutionError,
 } from "@hypernetlabs/objects";
+import { ParentProxy } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
 import { Result, ResultAsync, ok } from "neverthrow";
 import { Subject } from "rxjs";
+
 import IHypernetIFrameProxy from "@web-integration-interfaces/proxy/IHypernetIFrameProxy";
-import { ParentProxy } from "@hypernetlabs/utils";
 
 export default class HypernetIFrameProxy extends ParentProxy implements IHypernetIFrameProxy {
-  protected coreInitialized: boolean = false;
-  protected isInControl: boolean = false;
+  protected coreInitialized = false;
+  protected isInControl = false;
   protected waitInitializedPromise: Promise<void>;
   protected _handshakePromise: Promise<void> | null;
 

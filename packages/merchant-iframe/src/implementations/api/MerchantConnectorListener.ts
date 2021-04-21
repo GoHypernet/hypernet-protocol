@@ -1,8 +1,9 @@
+import { ILogUtils } from "@hypernetlabs/utils";
+import { okAsync, ResultAsync } from "neverthrow";
+
 import { IMerchantConnectorListener } from "@merchant-iframe/interfaces/api";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import { IContextProvider } from "@merchant-iframe/interfaces/utils";
-import { okAsync, ResultAsync } from "neverthrow";
-import { ILogUtils } from "@hypernetlabs/utils";
 
 export class MerchantConnectorListener implements IMerchantConnectorListener {
   constructor(

@@ -1,6 +1,6 @@
-import Postmate from "postmate";
-import { errAsync, ResultAsync } from "neverthrow";
 import { ProxyError } from "@hypernetlabs/objects";
+import { errAsync, ResultAsync } from "neverthrow";
+import Postmate from "postmate";
 
 interface IIFrameCallData<T> {
   callId: number;
@@ -48,7 +48,7 @@ class IFrameCall<T, E> {
 export abstract class ParentProxy {
   protected handshake: Postmate;
   protected child: Postmate.ParentAPI | null;
-  protected callId: number = 0;
+  protected callId = 0;
   protected calls: IFrameCall<any, any>[] = [];
   protected active: boolean;
 

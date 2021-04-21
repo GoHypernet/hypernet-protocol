@@ -3,6 +3,7 @@ import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { Button, Text } from "react-native-elements";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import Icon from "react-native-vector-icons/FontAwesome";
+
 import { colors } from "@mobileApp/constants";
 
 interface IScreenHeaderProps {

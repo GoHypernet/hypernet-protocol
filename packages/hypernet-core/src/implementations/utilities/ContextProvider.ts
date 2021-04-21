@@ -8,10 +8,11 @@ import {
   MerchantUrl,
   Signature,
 } from "@hypernetlabs/objects";
+import { okAsync, ResultAsync } from "neverthrow";
+import { Subject } from "rxjs";
+
 import { HypernetContext, InitializedHypernetContext } from "@interfaces/objects";
 import { IContextProvider, IMerchantConnectorProxy } from "@interfaces/utilities";
-import { Subject } from "rxjs";
-import { okAsync, ResultAsync } from "neverthrow";
 
 export class ContextProvider implements IContextProvider {
   protected context: HypernetContext;

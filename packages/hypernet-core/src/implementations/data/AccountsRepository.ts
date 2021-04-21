@@ -1,4 +1,3 @@
-import { IAccountsRepository } from "@interfaces/data";
 import {
   AssetBalance,
   Balances,
@@ -8,7 +7,18 @@ import {
   LogicalError,
   Signature,
 } from "@hypernetlabs/objects";
+import {
+  BalancesUnavailableError,
+  BlockchainUnavailableError,
+  RouterChannelUnknownError,
+  VectorError,
+} from "@hypernetlabs/objects";
+import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { ethers, constants } from "ethers";
 import { BigNumber } from "ethers";
+import { combine, errAsync, okAsync, ResultAsync } from "neverthrow";
+
+import { IAccountsRepository } from "@interfaces/data";
 import {
   IVectorUtils,
   IBlockchainProvider,
@@ -16,15 +26,6 @@ import {
   IBrowserNode,
   IBlockchainUtils,
 } from "@interfaces/utilities";
-import { ethers, constants } from "ethers";
-import {
-  BalancesUnavailableError,
-  BlockchainUnavailableError,
-  RouterChannelUnknownError,
-  VectorError,
-} from "@hypernetlabs/objects";
-import { combine, errAsync, okAsync, ResultAsync } from "neverthrow";
-import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 
 class AssetInfo {
   constructor(public assetId: EthereumAddress, public name: string, public symbol: string, public decimals: number) {}

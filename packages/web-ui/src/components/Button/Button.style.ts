@@ -1,5 +1,6 @@
-import { colors, getColorFromStatus, EStatusColor } from "../../theme";
 import { createUseStyles } from "react-jss";
+
+import { colors, getColorFromStatus, EStatusColor } from "../../theme";
 
 const useStyles = createUseStyles({
   button: {

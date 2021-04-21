@@ -1,4 +1,3 @@
-import { BigNumber } from "ethers";
 import {
   EthereumAddress,
   IHypernetOfferDetails,
@@ -31,6 +30,11 @@ import {
   ParameterizedState,
   EMessageTransferType,
 } from "@hypernetlabs/objects";
+import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { BigNumber } from "ethers";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
+import { v4 as uuidv4 } from "uuid";
+
 import {
   IBrowserNodeProvider,
   IConfigProvider,
@@ -39,9 +43,6 @@ import {
   ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
-import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
-import { v4 as uuidv4 } from "uuid";
 
 /**
  * A class for creating Hypernet-Payment objects from Vector transfers, verifying information
@@ -207,7 +208,7 @@ export class PaymentUtils implements IPaymentUtils {
     const pullAmounts = new Array<PullAmount>();
 
     for (const pullRecord of sortedTransfers.pullRecordTransfers) {
-      let message = JSON.parse(pullRecord.transferState.message) as IHypernetPullPaymentDetails;
+      const message = JSON.parse(pullRecord.transferState.message) as IHypernetPullPaymentDetails;
       pullAmounts.push(
         new PullAmount(
           BigNumber.from(message.pullPaymentAmount),

@@ -1,6 +1,6 @@
+import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import { EthereumAddress, Signature } from "@hypernetlabs/objects";
-import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { BlockchainUnavailableError } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";

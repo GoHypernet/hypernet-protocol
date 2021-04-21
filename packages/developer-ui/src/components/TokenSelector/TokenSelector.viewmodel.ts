@@ -1,6 +1,7 @@
-import ko from "knockout";
-import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { Balances, EthereumAddress } from "@hypernetlabs/objects";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import ko from "knockout";
+
 import html from "./TokenSelector.template.html";
 
 export class TokenSelectorParams {

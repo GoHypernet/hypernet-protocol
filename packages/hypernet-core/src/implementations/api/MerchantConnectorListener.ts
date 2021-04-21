@@ -1,8 +1,9 @@
+import { ILogUtils } from "@hypernetlabs/utils";
+import { ResultAsync } from "neverthrow";
+
 import { IMerchantConnectorListener } from "@interfaces/api";
 import { IAccountService } from "@interfaces/business";
 import { IContextProvider } from "@interfaces/utilities";
-import { ILogUtils } from "@hypernetlabs/utils";
-import { ResultAsync } from "neverthrow";
 
 export class MerchantConnectorListener implements IMerchantConnectorListener {
   constructor(

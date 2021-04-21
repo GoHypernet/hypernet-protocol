@@ -1,4 +1,3 @@
-import { ResultAsync, Result } from "neverthrow";
 import {
   Balances,
   LogicalError,
@@ -15,6 +14,7 @@ import {
   MerchantUrl,
 } from "@hypernetlabs/objects";
 import { PullPayment, PushPayment } from "@hypernetlabs/objects";
+import { ResultAsync, Result } from "neverthrow";
 
 export interface IMerchantConnectorRepository {
   /**

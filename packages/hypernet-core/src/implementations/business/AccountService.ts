@@ -1,5 +1,3 @@
-import { IAccountService } from "@interfaces/business";
-import { IAccountsRepository } from "@interfaces/data";
 import {
   Balances,
   EthereumAddress,
@@ -13,11 +11,14 @@ import {
   RouterChannelUnknownError,
   Signature,
 } from "@hypernetlabs/objects";
+import { ILogUtils } from "@hypernetlabs/utils";
+import { BigNumber } from "ethers";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
+
+import { IAccountService } from "@interfaces/business";
+import { IAccountsRepository } from "@interfaces/data";
 import { HypernetContext, InitializedHypernetContext } from "@interfaces/objects";
 import { IContextProvider, IBlockchainProvider } from "@interfaces/utilities";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
-import { BigNumber } from "ethers";
-import { ILogUtils } from "@hypernetlabs/utils";
 
 /**
  *

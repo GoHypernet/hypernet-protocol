@@ -1,10 +1,10 @@
-import { EPaymentState } from "@objects/types";
 import { EthereumAddress } from "@objects/EthereumAddress";
+import { MerchantUrl } from "@objects/MerchantUrl";
 import { PaymentId } from "@objects/PaymentId";
 import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
+import { EPaymentState } from "@objects/types";
 import { BigNumber } from "ethers";
-import { MerchantUrl } from "@objects/MerchantUrl";
 
 export abstract class Payment {
   constructor(

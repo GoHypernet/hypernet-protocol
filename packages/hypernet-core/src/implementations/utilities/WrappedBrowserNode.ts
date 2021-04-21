@@ -17,8 +17,9 @@ import {
 } from "@hypernetlabs/objects";
 import { VectorError } from "@hypernetlabs/objects";
 import { InsuranceResolver, MessageResolver, ParameterizedResolver } from "@hypernetlabs/objects/types/typechain";
-import { IBrowserNode } from "@interfaces/utilities";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
+
+import { IBrowserNode } from "@interfaces/utilities";
 
 export class WrappedBrowserNode implements IBrowserNode {
   protected toVectorError: (e: unknown) => VectorError = (e) => {

@@ -4,7 +4,7 @@
 "use strict";
 function Spinner() {
   Spinner.element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  let c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
   Spinner.element.setAttribute("width", "100");
   Spinner.element.setAttribute("height", "100");
   c.setAttribute("viewBox", "0 0 100 100");

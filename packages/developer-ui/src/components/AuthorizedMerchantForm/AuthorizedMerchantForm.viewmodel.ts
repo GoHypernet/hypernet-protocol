@@ -1,8 +1,10 @@
-import ko from "knockout";
-import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import html from "./AuthorizedMerchantForm.template.html";
-import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
 import { MerchantUrl } from "@hypernetlabs/objects";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import ko from "knockout";
+
+import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
+
+import html from "./AuthorizedMerchantForm.template.html";
 
 export class AuthorizedMerchantFormParams {
   constructor(public integration: IHypernetWebIntegration) {}

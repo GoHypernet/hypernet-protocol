@@ -1,11 +1,12 @@
-import { EthereumAddress, HypernetConfig, PublicIdentifier, EBlockchainNetwork } from "@hypernetlabs/objects";
-import { getPublicIdentifierFromPublicKey } from "@connext/vector-utils/dist/identifiers";
+import { ChainAddresses, ChainProviders, ContractAddresses } from "@connext/vector-types";
 import { getPublicKeyFromPrivateKey } from "@connext/vector-utils/dist/crypto";
+import { getPublicIdentifierFromPublicKey } from "@connext/vector-utils/dist/identifiers";
+import { EthereumAddress, HypernetConfig, PublicIdentifier, EBlockchainNetwork } from "@hypernetlabs/objects";
+import { ILogUtils } from "@hypernetlabs/utils";
 import { Wallet, constants } from "ethers";
 import { ResultAsync, okAsync } from "neverthrow";
+
 import { IConfigProvider } from "@interfaces/utilities";
-import { ChainAddresses, ChainProviders, ContractAddresses } from "@connext/vector-types";
-import { ILogUtils } from "@hypernetlabs/utils";
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;

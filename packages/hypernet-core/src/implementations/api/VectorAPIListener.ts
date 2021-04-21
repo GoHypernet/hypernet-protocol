@@ -1,5 +1,3 @@
-import { IVectorListener } from "@interfaces/api";
-import { IPaymentService } from "@interfaces/business";
 import {
   IHypernetOfferDetails,
   IHypernetPullPaymentDetails,
@@ -19,9 +17,12 @@ import {
   TransferCreationError,
 } from "@hypernetlabs/objects";
 import { ETransferType, MessageState } from "@hypernetlabs/objects";
-import { IBrowserNodeProvider, IContextProvider, IPaymentUtils, IVectorUtils } from "@interfaces/utilities";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
+
+import { IVectorListener } from "@interfaces/api";
+import { IPaymentService } from "@interfaces/business";
+import { IBrowserNodeProvider, IContextProvider, IPaymentUtils, IVectorUtils } from "@interfaces/utilities";
 
 /**
  *

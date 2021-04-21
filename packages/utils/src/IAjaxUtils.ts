@@ -13,4 +13,4 @@ export interface IAjaxUtils {
   ): ResultAsync<T, E>;
 }
 
-export interface IRequestConfig extends AxiosRequestConfig {}
+export type IRequestConfig = AxiosRequestConfig;

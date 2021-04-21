@@ -1,5 +1,6 @@
-import React, { useContext, useEffect, useState } from "react";
 import { SelectInput, TextareaInput, Button } from "@hypernetlabs/web-ui";
+import React, { useContext, useEffect, useState } from "react";
+
 import { LayoutContext, StoreContext } from "@web-integration-contexts";
 
 const PrivateKeysFlow: React.FC = () => {

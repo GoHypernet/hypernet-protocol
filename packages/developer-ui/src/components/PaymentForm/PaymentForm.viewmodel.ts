@@ -1,9 +1,11 @@
-import ko from "knockout";
-import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { EPaymentType, PublicIdentifier } from "@hypernetlabs/objects";
-import html from "./PaymentForm.template.html";
-import { PushPaymentFormParams } from "../PushPaymentForm/PushPaymentForm.viewmodel";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import ko from "knockout";
+
 import { PullPaymentFormParams } from "../PullPaymentForm/PullPaymentForm.viewmodel";
+import { PushPaymentFormParams } from "../PushPaymentForm/PushPaymentForm.viewmodel";
+
+import html from "./PaymentForm.template.html";
 
 export class PaymentFormParams {
   constructor(public integration: IHypernetWebIntegration) {}

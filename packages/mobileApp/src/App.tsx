@@ -1,6 +1,7 @@
 import React from "react";
+import Icon from "react-native-vector-icons/FontAwesome";
+
 import AppContainer from "./containers/AppContainer/AppContainer";
-import Icon from 'react-native-vector-icons/FontAwesome'
 
 declare const global: { HermesInternal: null | {} };
 

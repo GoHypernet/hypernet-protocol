@@ -1,5 +1,3 @@
-import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
-import { ResultAsync } from "neverthrow";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
 import {
   EthereumAddress,
@@ -15,9 +13,12 @@ import {
   PullPayment,
   PushPayment,
 } from "@hypernetlabs/objects";
-import { IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
+import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
+import { ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
+
 import { HypernetContext } from "@interfaces/objects";
+import { IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
 
 export class MerchantConnectorProxy extends ParentProxy implements IMerchantConnectorProxy {
   protected static openedIFramesQueue: string[] = [];

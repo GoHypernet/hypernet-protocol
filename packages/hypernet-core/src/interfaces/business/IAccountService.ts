@@ -1,4 +1,3 @@
-import { BigNumber } from "ethers";
 import { Balances, EthereumAddress, PrivateCredentials, PublicIdentifier, Signature } from "@hypernetlabs/objects";
 import {
   BalancesUnavailableError,
@@ -8,6 +7,7 @@ import {
   RouterChannelUnknownError,
   InvalidParametersError,
 } from "@hypernetlabs/objects";
+import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 /**

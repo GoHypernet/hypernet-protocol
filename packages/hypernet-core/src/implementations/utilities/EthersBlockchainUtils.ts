@@ -1,12 +1,13 @@
-import { IBlockchainProvider, IBlockchainUtils } from "@interfaces/utilities";
-import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
-import { Contract, ethers, BigNumber } from "ethers";
-import { TransactionResponse } from "@ethersproject/abstract-provider";
-import { BlockchainUnavailableError, Signature } from "@hypernetlabs/objects";
-import { ResultAsync } from "neverthrow";
-import { ERC20Abi } from "@connext/vector-types";
-import { EthereumAddress } from "@hypernetlabs/objects";
 import { artifacts } from "@connext/vector-contracts";
+import { ERC20Abi } from "@connext/vector-types";
+import { TransactionResponse } from "@ethersproject/abstract-provider";
+import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
+import { BlockchainUnavailableError, Signature } from "@hypernetlabs/objects";
+import { EthereumAddress } from "@hypernetlabs/objects";
+import { Contract, ethers, BigNumber } from "ethers";
+import { ResultAsync } from "neverthrow";
+
+import { IBlockchainProvider, IBlockchainUtils } from "@interfaces/utilities";
 
 export class EthersBlockchainUtils implements IBlockchainUtils {
   protected erc20Abi: string[];

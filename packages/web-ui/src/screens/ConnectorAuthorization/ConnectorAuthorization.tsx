@@ -1,7 +1,9 @@
-import React, { useEffect } from "react";
-import Button from "../../components/Button";
 import { AssetBalance } from "@hypernetlabs/objects";
+import React, { useEffect } from "react";
+
 import BalanceList from "../../components/BalanceList";
+import Button from "../../components/Button";
+
 import useStyles from "./ConnectorAuthorization.style";
 
 interface IConnectorAuthorization {

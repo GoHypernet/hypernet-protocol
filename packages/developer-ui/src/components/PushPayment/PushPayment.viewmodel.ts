@@ -1,12 +1,14 @@
-import ko from "knockout";
-import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { PaymentId, PublicIdentifier, PushPayment, MerchantUrl } from "@hypernetlabs/objects";
 import { EPaymentState } from "@hypernetlabs/objects";
-import html from "./PushPayment.template.html";
-import moment from "moment";
-import { PaymentStatusParams } from "../PaymentStatus/PaymentStatus.viewmodel";
-import { ButtonParams } from "../Button/Button.viewmodel";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { utils } from "ethers";
+import ko from "knockout";
+import moment from "moment";
+
+import { ButtonParams } from "../Button/Button.viewmodel";
+import { PaymentStatusParams } from "../PaymentStatus/PaymentStatus.viewmodel";
+
+import html from "./PushPayment.template.html";
 
 export class PushPaymentParams {
   constructor(public integration: IHypernetWebIntegration, public payment: PushPayment) {}

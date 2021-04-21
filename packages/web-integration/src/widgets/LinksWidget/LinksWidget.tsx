@@ -1,5 +1,6 @@
-import React from "react";
 import { LinkList } from "@hypernetlabs/web-ui";
+import React from "react";
+
 import { useLinks } from "@web-integration-hooks";
 
 const LinksWidget: React.FC = () => {

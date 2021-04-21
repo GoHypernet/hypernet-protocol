@@ -1,5 +1,6 @@
-import { ExpectedRedirect } from "@merchant-iframe/interfaces/objects";
 import { Signature } from "@hypernetlabs/objects";
+
+import { ExpectedRedirect } from "@merchant-iframe/interfaces/objects";
 
 export interface IPersistenceRepository {
   getActivatedMerchantSignatures(): string[];

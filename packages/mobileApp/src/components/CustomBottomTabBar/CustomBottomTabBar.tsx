@@ -1,7 +1,8 @@
+import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import React from "react";
 import { View, TouchableOpacity, StyleSheet } from "react-native";
-import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
+
 import { colors } from "@mobileApp/constants";
 
 const CustomBottomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {

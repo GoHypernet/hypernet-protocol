@@ -1,9 +1,10 @@
+import { Signature, MerchantUrl } from "@hypernetlabs/objects";
+import { ResultAsync } from "neverthrow";
+import { Subject } from "rxjs";
+
 import { MerchantContext } from "@merchant-iframe/interfaces/objects";
 import { IContextProvider } from "@merchant-iframe/interfaces/utils";
-import { ResultAsync } from "neverthrow";
 import { IMerchantConnector } from "packages/merchant-connector/dist";
-import { Signature, MerchantUrl } from "@hypernetlabs/objects";
-import { Subject } from "rxjs";
 
 export class ContextProvider implements IContextProvider {
   protected context: MerchantContext;

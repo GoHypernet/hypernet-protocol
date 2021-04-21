@@ -1,7 +1,9 @@
-import { LayoutContext } from "@web-integration-contexts";
 import React, { useEffect, useContext } from "react";
 import { createPortal } from "react-dom";
+
 import useStyles from "./Modal.style";
+
+import { LayoutContext } from "@web-integration-contexts";
 
 interface IModal {
   isOpen: boolean;

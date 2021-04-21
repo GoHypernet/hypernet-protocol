@@ -1,5 +1,6 @@
 import { InsuranceState, MessageState, ParameterizedState } from "@objects/types";
 import { IFullTransferState } from "@objects/vector";
+
 import { IHypernetOfferDetails } from "./HypernetOfferDetails";
 
 export class SortedTransfers {

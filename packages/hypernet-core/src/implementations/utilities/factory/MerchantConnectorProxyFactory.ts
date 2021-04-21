@@ -1,9 +1,10 @@
-import { IConfigProvider, IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
-import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
-import { MerchantConnectorProxy } from "@implementations/utilities/MerchantConnectorProxy";
-import { ok, Result, ResultAsync } from "neverthrow";
 import { MerchantUrl } from "@hypernetlabs/objects";
 import { LogicalError, MerchantValidationError, ProxyError } from "@hypernetlabs/objects";
+import { ok, Result, ResultAsync } from "neverthrow";
+
+import { MerchantConnectorProxy } from "@implementations/utilities/MerchantConnectorProxy";
+import { IConfigProvider, IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
+import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 
 export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFactory {
   protected static proxyMap: Map<MerchantUrl, IMerchantConnectorProxy> = new Map();

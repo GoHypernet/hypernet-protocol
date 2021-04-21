@@ -1,9 +1,11 @@
-import ko from "knockout";
-import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { HypernetLink } from "@hypernetlabs/objects";
-import html from "./Link.template.html";
-import { PushPaymentParams } from "../PushPayment/PushPayment.viewmodel";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import ko from "knockout";
+
 import { PullPaymentParams } from "../PullPayment/PullPayment.viewmodel";
+import { PushPaymentParams } from "../PushPayment/PushPayment.viewmodel";
+
+import html from "./Link.template.html";
 
 export class LinkParams {
   constructor(public integration: IHypernetWebIntegration, public link: HypernetLink) {}

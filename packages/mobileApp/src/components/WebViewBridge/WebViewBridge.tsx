@@ -1,8 +1,9 @@
 import React, { useRef, useEffect } from "react";
-import { WebView } from "react-native-webview";
 import { View } from "react-native";
-import { useStateContext } from "@mobileApp/state/store";
+import { WebView } from "react-native-webview";
+
 import { CoreActionType, ECoreViewDataKeys, TCoreViewData } from "@mobileApp/interfaces/state/IcoreReducer";
+import { useStateContext } from "@mobileApp/state/store";
 
 interface WebViewBridgeProps {
   sourceUrl?: string;

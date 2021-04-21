@@ -1,5 +1,5 @@
-import { ResultAsync } from "neverthrow";
 import { Signature, EthereumAddress, MerchantUrl } from "@hypernetlabs/objects";
+import { ResultAsync } from "neverthrow";
 
 export interface IMerchantConnectorRepository {
   getMerchantCode(merchantUrl: MerchantUrl): ResultAsync<string, Error>;

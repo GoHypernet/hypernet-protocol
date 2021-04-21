@@ -1,13 +1,13 @@
-import React from "react";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-
-import { ENavigatorType, RouterProps } from "@mobileApp/interfaces/containers/IRouter";
+import React from "react";
 
 import { cardStyleInterpolator } from "./Router.utils";
-import { getNavigationTheme, NAVIGATION_SCREENS } from "@mobileApp/constants";
+
 import CustomBottomTabBar from "@mobileApp/components/CustomBottomTabBar";
+import { getNavigationTheme, NAVIGATION_SCREENS } from "@mobileApp/constants";
+import { ENavigatorType, RouterProps } from "@mobileApp/interfaces/containers/IRouter";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();

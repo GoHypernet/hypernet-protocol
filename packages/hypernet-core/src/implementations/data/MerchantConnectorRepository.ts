@@ -1,4 +1,4 @@
-import { IMerchantConnectorRepository } from "@interfaces/data";
+import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import {
   PullPayment,
   PushPayment,
@@ -12,10 +12,13 @@ import {
   MerchantUrl,
   Balances,
 } from "@hypernetlabs/objects";
-import { InitializedHypernetContext } from "@interfaces/objects";
 import { LogicalError, MerchantConnectorError, MerchantValidationError, PersistenceError } from "@hypernetlabs/objects";
-import { errAsync, okAsync, ResultAsync, Result } from "neverthrow";
 import { ResultUtils, IAjaxUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
+import { BigNumber, ethers } from "ethers";
+import { errAsync, okAsync, ResultAsync, Result } from "neverthrow";
+
+import { IMerchantConnectorRepository } from "@interfaces/data";
+import { InitializedHypernetContext } from "@interfaces/objects";
 import {
   IBlockchainProvider,
   IBlockchainUtils,
@@ -24,8 +27,6 @@ import {
   IMerchantConnectorProxy,
   IVectorUtils,
 } from "@interfaces/utilities";
-import { BigNumber, ethers } from "ethers";
-import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 
 interface IAuthorizedMerchantEntry {

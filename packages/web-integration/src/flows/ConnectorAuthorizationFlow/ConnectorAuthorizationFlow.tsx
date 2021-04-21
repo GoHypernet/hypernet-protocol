@@ -1,8 +1,9 @@
-import React, { useContext, useEffect } from "react";
 import { ConnectorAuthorization, SucessContent } from "@hypernetlabs/web-ui";
 import { EStatusColor } from "@hypernetlabs/web-ui/src/theme";
-import { useBalances } from "@web-integration-hooks";
+import React, { useContext, useEffect } from "react";
+
 import { LayoutContext, StoreContext } from "@web-integration-contexts";
+import { useBalances } from "@web-integration-hooks";
 import { IConnectorAuthorizationFlowParams } from "@web-integration-interfaces/app/IHypernetWebIntegration";
 
 const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> = (

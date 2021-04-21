@@ -1,9 +1,10 @@
 import { PaymentId, UUID } from "@hypernetlabs/objects";
 import { InvalidParametersError, InvalidPaymentIdError } from "@hypernetlabs/objects";
 import { EPaymentType } from "@hypernetlabs/objects";
-import { IPaymentIdUtils } from "@interfaces/utilities";
 import { ethers } from "ethers";
 import { err, ok, Result } from "neverthrow";
+
+import { IPaymentIdUtils } from "@interfaces/utilities";
 
 /**
  * An abstract class for creating & converting payment IDs, as well as verifying

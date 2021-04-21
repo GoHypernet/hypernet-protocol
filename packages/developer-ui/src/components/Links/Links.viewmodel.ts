@@ -1,8 +1,10 @@
-import ko from "knockout";
-import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { HypernetLink, PublicIdentifier } from "@hypernetlabs/objects";
-import html from "./Links.template.html";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import ko from "knockout";
+
 import { LinkParams } from "../Link/Link.viewmodel";
+
+import html from "./Links.template.html";
 
 export class LinksParams {
   constructor(public integration: IHypernetWebIntegration) {}

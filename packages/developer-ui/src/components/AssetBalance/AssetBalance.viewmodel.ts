@@ -1,7 +1,8 @@
-import ko from "knockout";
 import { AssetBalance } from "@hypernetlabs/objects";
-import html from "./AssetBalance.template.html";
 import { utils } from "ethers";
+import ko from "knockout";
+
+import html from "./AssetBalance.template.html";
 
 export class AssetBalanceParams {
   constructor(public assetBalance: AssetBalance) {}

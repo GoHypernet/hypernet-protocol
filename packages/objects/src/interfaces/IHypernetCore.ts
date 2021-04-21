@@ -1,5 +1,6 @@
-import { HypernetLink } from "@objects/HypernetLink";
-import { Subject } from "rxjs";
+import { Balances } from "@objects/Balances";
+import { Signature } from "@objects/Signature";
+import { ControlClaim } from "@objects/ControlClaim";
 import {
   AcceptPaymentError,
   BalancesUnavailableError,
@@ -16,18 +17,17 @@ import {
   TransferResolutionError,
   ProxyError,
 } from "@objects/errors";
-import { ResultAsync, Result } from "neverthrow";
-import { BigNumber } from "ethers";
 import { EthereumAddress } from "@objects/EthereumAddress";
-import { PublicIdentifier } from "@objects/PublicIdentifier";
-import { Balances } from "@objects/Balances";
+import { HypernetLink } from "@objects/HypernetLink";
 import { MerchantUrl } from "@objects/MerchantUrl";
 import { Payment } from "@objects/Payment";
 import { PaymentId } from "@objects/PaymentId";
-import { Signature } from "@objects/Signature";
-import { ControlClaim } from "@objects/ControlClaim";
-import { PushPayment } from "@objects/PushPayment";
+import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullPayment } from "@objects/PullPayment";
+import { PushPayment } from "@objects/PushPayment";
+import { BigNumber } from "ethers";
+import { ResultAsync, Result } from "neverthrow";
+import { Subject } from "rxjs";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single

@@ -1,6 +1,7 @@
-import { useEffect, useReducer, useContext } from "react";
-import { StoreContext } from "@web-integration-contexts";
 import { AssetBalance, Balances } from "@hypernetlabs/objects";
+import { useEffect, useReducer, useContext } from "react";
+
+import { StoreContext } from "@web-integration-contexts";
 import { AssetBalanceParams, AssetBalanceViewModel } from "@web-integration-interfaces/objects";
 
 enum EActionTypes {

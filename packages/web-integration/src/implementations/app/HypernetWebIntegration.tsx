@@ -1,19 +1,9 @@
+import { MerchantUrl } from "@hypernetlabs/objects";
+import { ResultAsync } from "neverthrow";
 import React from "react";
 import ReactDOM from "react-dom";
-import { ResultAsync } from "neverthrow";
+import { ThemeProvider } from "theming";
 
-import MainContainer from "@web-integration-containers/MainContainer";
-import BalancesWidget from "@web-integration-widgets/BalancesWidget";
-import LinksWidget from "@web-integration-widgets/LinksWidget";
-import PaymentWidget from "@web-integration-widgets/PaymentWidget";
-import FundWidget from "@web-integration-widgets/FundWidget";
-import {
-  IConnectorAuthorizationFlowParams,
-  IHypernetWebIntegration,
-  IRenderParams,
-  IRenderPaymentWidgetParams,
-} from "@web-integration-interfaces/app/IHypernetWebIntegration";
-import { LayoutProvider, StoreProvider } from "@web-integration-contexts";
 import {
   BALANCES_WIDGET_ID_SELECTOR,
   FUND_WIDGET_ID_SELECTOR,
@@ -21,17 +11,27 @@ import {
   PAYMENT_WIDGET_ID_SELECTOR,
   PRIVATE_KEYS_FLOW_ID_SELECTOR,
 } from "@web-integration-constants";
-import IHypernetIFrameProxy from "@web-integration-interfaces/proxy/IHypernetIFrameProxy";
-import HypernetIFrameProxy from "@web-integration-implementations/proxy/HypernetIFrameProxy";
+import MainContainer from "@web-integration-containers/MainContainer";
+import { LayoutProvider, StoreProvider } from "@web-integration-contexts";
 import ConnectorAuthorizationFlow from "@web-integration-flows/ConnectorAuthorizationFlow";
-import { MerchantUrl } from "@hypernetlabs/objects";
 import PrivateKeysFlow from "@web-integration-flows/PrivateKeysFlow";
-import { ThemeProvider } from "theming";
+import HypernetIFrameProxy from "@web-integration-implementations/proxy/HypernetIFrameProxy";
+import {
+  IConnectorAuthorizationFlowParams,
+  IHypernetWebIntegration,
+  IRenderParams,
+  IRenderPaymentWidgetParams,
+} from "@web-integration-interfaces/app/IHypernetWebIntegration";
+import IHypernetIFrameProxy from "@web-integration-interfaces/proxy/IHypernetIFrameProxy";
+import BalancesWidget from "@web-integration-widgets/BalancesWidget";
+import FundWidget from "@web-integration-widgets/FundWidget";
+import LinksWidget from "@web-integration-widgets/LinksWidget";
+import PaymentWidget from "@web-integration-widgets/PaymentWidget";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
 
-  protected iframeURL: string = "http://localhost:8090";
+  protected iframeURL = "http://localhost:8090";
   protected currentMerchantUrl: MerchantUrl | undefined | null;
 
   public core: IHypernetIFrameProxy;
@@ -95,7 +95,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     }
   }
 
-  private _bootstrapComponent(component: React.ReactNode, withModal: boolean = false) {
+  private _bootstrapComponent(component: React.ReactNode, withModal = false) {
     return (
       <StoreProvider proxy={this.core}>
         <LayoutProvider>

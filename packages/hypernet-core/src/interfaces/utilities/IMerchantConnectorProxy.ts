@@ -1,5 +1,3 @@
-import { ParentProxy } from "@hypernetlabs/utils";
-import { ResultAsync } from "neverthrow";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
 import {
   Balances,
@@ -12,6 +10,8 @@ import {
   Signature,
 } from "@hypernetlabs/objects";
 import { PullPayment, PushPayment } from "@hypernetlabs/objects";
+import { ParentProxy } from "@hypernetlabs/utils";
+import { ResultAsync } from "neverthrow";
 import { Observable } from "rxjs";
 
 export interface IMerchantConnectorProxy extends ParentProxy {

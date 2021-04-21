@@ -1,4 +1,3 @@
-import { Subject } from "rxjs";
 import {
   ControlClaim,
   PublicIdentifier,
@@ -9,6 +8,8 @@ import {
   MerchantUrl,
   Signature,
 } from "@hypernetlabs/objects";
+import { Subject } from "rxjs";
+
 import { IMerchantConnectorProxy } from "@interfaces/utilities";
 
 export class HypernetContext {

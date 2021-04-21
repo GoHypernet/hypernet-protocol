@@ -1,11 +1,4 @@
-import { PostmateApi, MerchantConnectorListener } from "@merchant-iframe/implementations/api";
-import { IMerchantConnectorRepository, IPersistenceRepository } from "@merchant-iframe/interfaces/data";
-import { IContextProvider } from "@merchant-iframe/interfaces/utils";
-import { MerchantConnectorRepository, PersistenceRepository } from "@merchant-iframe/implementations/data";
-import { ContextProvider } from "@merchant-iframe/implementations/utils";
-import { MerchantService } from "@merchant-iframe/implementations/business";
-import { IMerchantService } from "@merchant-iframe/interfaces/business";
-import { IMerchantConnectorListener, IMerchantIFrameApi } from "@merchant-iframe/interfaces/api";
+import { MerchantUrl } from "@hypernetlabs/objects";
 import {
   IAjaxUtils,
   AxiosAjaxUtils,
@@ -14,7 +7,15 @@ import {
   ILogUtils,
   LogUtils,
 } from "@hypernetlabs/utils";
-import { MerchantUrl } from "@hypernetlabs/objects";
+
+import { PostmateApi, MerchantConnectorListener } from "@merchant-iframe/implementations/api";
+import { MerchantService } from "@merchant-iframe/implementations/business";
+import { MerchantConnectorRepository, PersistenceRepository } from "@merchant-iframe/implementations/data";
+import { ContextProvider } from "@merchant-iframe/implementations/utils";
+import { IMerchantConnectorListener, IMerchantIFrameApi } from "@merchant-iframe/interfaces/api";
+import { IMerchantService } from "@merchant-iframe/interfaces/business";
+import { IMerchantConnectorRepository, IPersistenceRepository } from "@merchant-iframe/interfaces/data";
+import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 export class MerchantIframe {
   protected contextProvider: IContextProvider;
   protected ajaxUtils: IAjaxUtils;

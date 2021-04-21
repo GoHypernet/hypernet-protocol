@@ -1,4 +1,5 @@
 import React from "react";
+
 import { ITokenSelectorOption } from "../../interfaces";
 import SelectInput from "../SelectInput";
 

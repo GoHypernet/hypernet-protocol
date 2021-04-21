@@ -1,6 +1,7 @@
+import { EthereumAddress, PrivateCredentials } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { ResultAsync, okAsync } from "neverthrow";
-import { EthereumAddress, PrivateCredentials } from "@hypernetlabs/objects";
+
 import { IInternalProvider, IConfigProvider } from "@interfaces/utilities";
 
 export class InternalProvider implements IInternalProvider {

@@ -1,4 +1,3 @@
-import { ResultAsync } from "neverthrow";
 import {
   LogicalError,
   MerchantConnectorError,
@@ -7,6 +6,7 @@ import {
   ProxyError,
 } from "@hypernetlabs/objects";
 import { MerchantUrl, Signature } from "@hypernetlabs/objects";
+import { ResultAsync } from "neverthrow";
 
 export interface IMerchantService {
   initialize(): ResultAsync<void, LogicalError | MerchantConnectorError>;

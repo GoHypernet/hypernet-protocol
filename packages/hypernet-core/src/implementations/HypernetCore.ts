@@ -1,43 +1,4 @@
 import {
-  AccountService,
-  DevelopmentService,
-  LinkService,
-  MerchantService,
-  PaymentService,
-} from "@implementations/business";
-import {
-  AccountsRepository,
-  MerchantConnectorRepository,
-  PaymentRepository,
-  VectorLinkRepository,
-} from "@implementations/data";
-import {
-  BrowserNodeProvider,
-  ConfigProvider,
-  ContextProvider,
-  EthersBlockchainProvider,
-  LinkUtils,
-  PaymentUtils,
-  PaymentIdUtils,
-  TimeUtils,
-  VectorUtils,
-  EthersBlockchainUtils,
-} from "@implementations/utilities";
-import { MerchantConnectorListener, VectorAPIListener } from "@implementations/api";
-import {
-  IAccountService,
-  IDevelopmentService,
-  ILinkService,
-  IMerchantService,
-  IPaymentService,
-} from "@interfaces/business";
-import {
-  IAccountsRepository,
-  ILinkRepository,
-  IMerchantConnectorRepository,
-  IPaymentRepository,
-} from "@interfaces/data";
-import {
   Balances,
   ControlClaim,
   EthereumAddress,
@@ -67,6 +28,57 @@ import {
   InvalidParametersError,
   TransferResolutionError,
 } from "@hypernetlabs/objects";
+import { AxiosAjaxUtils, IAjaxUtils, ResultUtils, ILocalStorageUtils, LocalStorageUtils } from "@hypernetlabs/utils";
+import { ILogUtils, LogUtils } from "@hypernetlabs/utils";
+import { BigNumber } from "ethers";
+import { ok, Result, ResultAsync } from "neverthrow";
+import { Subject } from "rxjs";
+
+import { MerchantConnectorListener, VectorAPIListener } from "@implementations/api";
+import {
+  AccountService,
+  DevelopmentService,
+  LinkService,
+  MerchantService,
+  PaymentService,
+} from "@implementations/business";
+import {
+  AccountsRepository,
+  MerchantConnectorRepository,
+  PaymentRepository,
+  VectorLinkRepository,
+} from "@implementations/data";
+import {
+  BrowserNodeProvider,
+  ConfigProvider,
+  ContextProvider,
+  EthersBlockchainProvider,
+  LinkUtils,
+  PaymentUtils,
+  PaymentIdUtils,
+  TimeUtils,
+  VectorUtils,
+  EthersBlockchainUtils,
+} from "@implementations/utilities";
+import {
+  MerchantConnectorProxyFactory,
+  BrowserNodeFactory,
+  InternalProviderFactory,
+} from "@implementations/utilities/factory";
+import { IMerchantConnectorListener, IVectorListener } from "@interfaces/api";
+import {
+  IAccountService,
+  IDevelopmentService,
+  ILinkService,
+  IMerchantService,
+  IPaymentService,
+} from "@interfaces/business";
+import {
+  IAccountsRepository,
+  ILinkRepository,
+  IMerchantConnectorRepository,
+  IPaymentRepository,
+} from "@interfaces/data";
 import { HypernetContext } from "@interfaces/objects";
 import {
   IBlockchainProvider,
@@ -80,22 +92,11 @@ import {
   ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
-import { IMerchantConnectorListener, IVectorListener } from "@interfaces/api";
-import { Subject } from "rxjs";
-import { ok, Result, ResultAsync } from "neverthrow";
-import { AxiosAjaxUtils, IAjaxUtils, ResultUtils, ILocalStorageUtils, LocalStorageUtils } from "@hypernetlabs/utils";
 import {
   IBrowserNodeFactory,
   IInternalProviderFactory,
   IMerchantConnectorProxyFactory,
 } from "@interfaces/utilities/factory";
-import {
-  MerchantConnectorProxyFactory,
-  BrowserNodeFactory,
-  InternalProviderFactory,
-} from "@implementations/utilities/factory";
-import { BigNumber } from "ethers";
-import { ILogUtils, LogUtils } from "@hypernetlabs/utils";
 
 /**
  * The top-level class-definition for Hypernet Core.

@@ -1,5 +1,6 @@
-import React from "react";
 import { AssetBalance } from "@hypernetlabs/objects";
+import React from "react";
+
 import useStyles from "./BalanceList.style";
 
 interface BalanceListProps {

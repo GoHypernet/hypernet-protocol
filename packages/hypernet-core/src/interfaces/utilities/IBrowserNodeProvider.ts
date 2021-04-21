@@ -1,5 +1,6 @@
-import { ResultAsync } from "neverthrow";
 import { BlockchainUnavailableError, VectorError } from "@hypernetlabs/objects";
+import { ResultAsync } from "neverthrow";
+
 import { IBrowserNode } from "./IBrowserNode";
 
 /**

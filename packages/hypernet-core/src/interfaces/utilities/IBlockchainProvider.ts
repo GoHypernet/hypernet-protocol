@@ -1,7 +1,7 @@
-import { ResultAsync } from "neverthrow";
 import { BlockchainUnavailableError, InvalidParametersError } from "@hypernetlabs/objects";
 import { PrivateCredentials } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
+import { ResultAsync } from "neverthrow";
 
 /**
  * @todo What is the main role/purpose of this class? Description here.

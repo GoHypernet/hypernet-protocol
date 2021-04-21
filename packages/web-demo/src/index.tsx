@@ -1,11 +1,12 @@
-import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { MerchantUrl } from "@hypernetlabs/objects";
+import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+
 import Spinner from "./assets/loading-spinner";
 
 const client: IHypernetWebIntegration = new HypernetWebIntegration();
 
 // set image background styles
-var style = document.createElement("style");
+const style = document.createElement("style");
 style.innerHTML = `body {
   background-image: url(https://res.cloudinary.com/dqueufbs7/image/upload/v1614731973/images/image.png);
   height: 100%;
@@ -15,7 +16,7 @@ style.innerHTML = `body {
 }`;
 
 // Get the first script tag
-var ref = document.querySelector("script");
+const ref = document.querySelector("script");
 ref?.parentNode?.insertBefore(style, ref);
 
 Spinner();

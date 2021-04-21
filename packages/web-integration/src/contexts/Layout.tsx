@@ -1,5 +1,5 @@
-import React, { useState } from "react";
 import { EStatusColor } from "@hypernetlabs/web-ui/src/theme";
+import React, { useState } from "react";
 
 interface ILayout {
   setModalWidth: (width: number) => void;

@@ -1,5 +1,3 @@
-import { IMerchantService } from "@interfaces/business";
-import { ResultAsync } from "neverthrow";
 import {
   LogicalError,
   MerchantConnectorError,
@@ -7,10 +5,13 @@ import {
   BlockchainUnavailableError,
   ProxyError,
 } from "@hypernetlabs/objects";
-import { IAccountsRepository, IMerchantConnectorRepository } from "@interfaces/data";
 import { MerchantUrl, Signature } from "@hypernetlabs/objects";
-import { IContextProvider } from "@interfaces/utilities";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { ResultAsync } from "neverthrow";
+
+import { IMerchantService } from "@interfaces/business";
+import { IAccountsRepository, IMerchantConnectorRepository } from "@interfaces/data";
+import { IContextProvider } from "@interfaces/utilities";
 
 export class MerchantService implements IMerchantService {
   constructor(

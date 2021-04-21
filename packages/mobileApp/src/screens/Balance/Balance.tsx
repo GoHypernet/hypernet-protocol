@@ -1,10 +1,11 @@
 import React from "react";
 import { View, StyleSheet, Image } from "react-native";
-import { useStateContext } from "@mobileApp/state/store";
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
 
 import BalanceCard from "./components/BalanceCard";
+
 import ScreenHeader from "@mobileApp/components/ScreenHeader";
+import { useStateContext } from "@mobileApp/state/store";
 
 interface BalanceProps {}
 

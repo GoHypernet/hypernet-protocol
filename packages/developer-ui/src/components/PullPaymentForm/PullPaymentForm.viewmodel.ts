@@ -1,12 +1,14 @@
-import ko from "knockout";
-import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { EthereumAddress, PublicIdentifier } from "@hypernetlabs/objects";
-import html from "./PullPaymentForm.template.html";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import { utils } from "ethers";
+import ko from "knockout";
 import moment from "moment";
+
+import { AuthorizedMerchantSelectorParams } from "../AuthorizedMerchantSelector/AuthorizedMerchantSelector.viewmodel";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
 import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
-import { utils } from "ethers";
-import { AuthorizedMerchantSelectorParams } from "../AuthorizedMerchantSelector/AuthorizedMerchantSelector.viewmodel";
+
+import html from "./PullPaymentForm.template.html";
 
 export class PullPaymentFormParams {
   constructor(
