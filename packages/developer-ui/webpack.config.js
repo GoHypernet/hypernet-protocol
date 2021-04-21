@@ -1,5 +1,5 @@
 const path = require("path");
-const rootWebpackConfig = require('../../webpack.config');
+const rootWebpackConfig = require("../../webpack.config");
 
 module.exports = {
   ...rootWebpackConfig,
@@ -7,12 +7,12 @@ module.exports = {
   output: {
     filename: "index.js",
     path: path.join(__dirname, "/dist/bundle"),
-  },  
+  },
   devServer: {
     contentBase: path.join(__dirname, "src"),
     liveReload: true,
     compress: true,
     publicPath: "/",
     port: 5015,
-  }
+  },
 };

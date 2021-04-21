@@ -12,18 +12,14 @@ import {
   routerChannelAddress,
 } from "@mock/mocks";
 import { BlockchainProviderMock, BrowserNodeProviderMock } from "@mock/utils";
-import {
-  IVectorUtils,
-  IBrowserNodeProvider,
-  IBlockchainProvider,
-  IBlockchainUtils,
-} from "@interfaces/utilities";
+import { IVectorUtils, IBrowserNodeProvider, IBlockchainProvider, IBlockchainUtils } from "@interfaces/utilities";
 import {
   VectorError,
   RouterChannelUnknownError,
   BlockchainUnavailableError,
   EthereumAddress,
-  AssetBalance, Balances,
+  AssetBalance,
+  Balances,
 } from "@hypernetlabs/objects";
 import { IAccountsRepository } from "@interfaces/data/";
 import { okAsync, errAsync } from "neverthrow";

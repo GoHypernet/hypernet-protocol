@@ -1,5 +1,5 @@
 const path = require("path");
-const rootWebpackConfig = require('../../webpack.config');
+const rootWebpackConfig = require("../../webpack.config");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
@@ -8,7 +8,7 @@ module.exports = {
   output: {
     filename: "index.js",
     path: path.join(__dirname, "/dist/bundle"),
-  },  
+  },
   devServer: {
     contentBase: path.join(__dirname, "src"),
     liveReload: true,
@@ -16,7 +16,5 @@ module.exports = {
     publicPath: "/",
     port: 5005,
   },
-  plugins: [
-    new HtmlWebpackPlugin({})
-  ]
+  plugins: [new HtmlWebpackPlugin({})],
 };

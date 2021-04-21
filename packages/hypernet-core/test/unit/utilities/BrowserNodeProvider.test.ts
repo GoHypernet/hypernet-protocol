@@ -12,8 +12,9 @@ import { NonEIP712Message } from "@connext/vector-browser-node";
 import { Signature } from "@hypernetlabs/objects";
 
 const validatedSignature = Signature("0xValidatedSignature");
-const authorizationSignature =
-  Signature("0x1e866e66e7f3a68658bd186bafbdc534d4a5022e14022fddfe8865e2236dc67d64eee05b4d8f340dffa1928efa517784b63cad6a3fb35d999cb9d722b34075071b");
+const authorizationSignature = Signature(
+  "0x1e866e66e7f3a68658bd186bafbdc534d4a5022e14022fddfe8865e2236dc67d64eee05b4d8f340dffa1928efa517784b63cad6a3fb35d999cb9d722b34075071b",
+);
 
 class BrowserNodeProviderMocks {
   public blockchainProvider = new BlockchainProviderMock();

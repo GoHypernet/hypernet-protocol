@@ -80,7 +80,10 @@ export abstract class ParentProxy {
     if (this.activateResult != null) {
       return this.activateResult;
     }
-    this.activateResult = ResultAsync.fromPromise(this.handshake, (e) => e as ProxyError).map((child) => {
+    this.activateResult = ResultAsync.fromPromise(
+      this.handshake,
+      (e) => e as ProxyError,
+    ).map((child) => {
       // Stash the API for future calls
       this.child = child;
 
@@ -129,10 +132,15 @@ export abstract class ParentProxy {
     this.active = false;
   }
 
-  protected _createCall<T, E>(callName: string, data: any): ResultAsync<T, E | ProxyError> {
+  protected _createCall<T, E>(
+    callName: string,
+    data: any,
+  ): ResultAsync<T, E | ProxyError> {
     if (!this.active) {
       return errAsync(
-        new ProxyError("Proxy is not activated or has been destroyed, cannot make a call to the iframe!"),
+        new ProxyError(
+          "Proxy is not activated or has been destroyed, cannot make a call to the iframe!",
+        ),
       );
     }
     const callId = this.callId++;

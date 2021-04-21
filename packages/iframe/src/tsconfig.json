@@ -1,14 +1,14 @@
 {
-    "extends": "../../../tsconfig.build.json",
-    "compilerOptions": {
-        "outDir": "../dist",
+  "extends": "../../../tsconfig.build.json",
+  "compilerOptions": {
+    "outDir": "../dist"
+  },
+  "references": [
+    {
+      "path": "../../hypernet-core/src"
     },
-    "references": [
-        {
-            "path": "../../hypernet-core/src"
-        },
-        {
-            "path": "../../web-ui/src"
-        }
-    ]
+    {
+      "path": "../../web-ui/src"
+    }
+  ]
 }

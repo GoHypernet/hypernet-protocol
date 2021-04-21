@@ -31,7 +31,10 @@ export abstract class ChildProxy {
     );
   }
 
-  protected returnForModel<T, E>(func: () => ResultAsync<T, E>, callId: number) {
+  protected returnForModel<T, E>(
+    func: () => ResultAsync<T, E>,
+    callId: number,
+  ) {
     func().match(
       (result) => {
         if (this.parent != null) {

@@ -22,13 +22,20 @@ import {
   ContextProviderMock,
   PaymentUtilsMockFactory,
 } from "@mock/utils";
-import { PaymentInternalDetails, PushPayment, EPaymentState, EPaymentType, VectorError, PaymentCreationError } from "@hypernetlabs/objects";
+import {
+  PaymentInternalDetails,
+  PushPayment,
+  EPaymentState,
+  EPaymentType,
+  VectorError,
+  PaymentCreationError,
+} from "@hypernetlabs/objects";
 import { IVectorUtils, IBrowserNodeProvider, IPaymentUtils, ITimeUtils } from "@interfaces/utilities";
 import { IPaymentRepository } from "@interfaces/data";
 import { okAsync, errAsync } from "neverthrow";
 import { PaymentRepository } from "@implementations/data/PaymentRepository";
 import { BigNumber } from "ethers";
-import {ILogUtils} from "@hypernetlabs/utils";
+import { ILogUtils } from "@hypernetlabs/utils";
 
 const expirationDate = unixNow + defaultExpirationLength;
 const counterPartyAccount = publicIdentifier2;

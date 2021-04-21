@@ -3,7 +3,7 @@ version: 2.1
 defaults: &defaults
   working_directory: ~/repo
   docker:
-    - image: 'cimg/node:12.14.1'
+    - image: "cimg/node:12.14.1"
       auth:
         username: mydockerhub-user
         password: $DOCKERHUB_PASSWORD

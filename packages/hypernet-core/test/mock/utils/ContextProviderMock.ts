@@ -7,8 +7,7 @@ import {
   PushPayment,
   Signature,
 } from "@hypernetlabs/objects";
-import { HypernetContext,
-  InitializedHypernetContext } from "@interfaces/objects";
+import { HypernetContext, InitializedHypernetContext } from "@interfaces/objects";
 import { IContextProvider, IMerchantConnectorProxy } from "@interfaces/utilities";
 import { okAsync, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";

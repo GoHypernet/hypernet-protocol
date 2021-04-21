@@ -10,7 +10,11 @@ describe("ResultUtils tests", () => {
     };
 
     // Act
-    const result = await ResultUtils.executeSerially([asyncMethod, asyncMethod, asyncMethod]);
+    const result = await ResultUtils.executeSerially([
+      asyncMethod,
+      asyncMethod,
+      asyncMethod,
+    ]);
 
     // Assert
     expect(result.isErr()).toBeFalsy();
@@ -32,7 +36,11 @@ describe("ResultUtils tests", () => {
     };
 
     // Act
-    const result = await ResultUtils.executeSerially([asyncMethod, asyncFailed, asyncMethod]);
+    const result = await ResultUtils.executeSerially([
+      asyncMethod,
+      asyncFailed,
+      asyncMethod,
+    ]);
 
     // Assert
     expect(result.isErr()).toBeTruthy();
