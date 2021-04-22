@@ -1,4 +1,5 @@
 import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
+import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils";
 import {
   HypernetConfig,
   IHypernetOfferDetails,
@@ -26,8 +27,6 @@ import {
   TransferCreationError,
   TransferResolutionError,
   VectorError,
-} from "@hypernetlabs/objects";
-import {
   ParameterizedResolver,
   ParameterizedResolverData,
   Rate,
@@ -51,7 +50,6 @@ import {
 } from "@interfaces/utilities";
 
 import "reflect-metadata";
-import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils";
 
 /**
  * VectorUtils contains methods for interacting directly with the core Vector stuff -

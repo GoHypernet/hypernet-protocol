@@ -1,6 +1,17 @@
+import { IResolutionResult } from "@hypernetlabs/merchant-connector";
+import {
+  MerchantConnectorError,
+  MerchantValidationError,
+  Signature,
+  Balances,
+  TransferResolutionError,
+  IBasicTransferResponse,
+} from "@hypernetlabs/objects";
+import { IAjaxUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
+import { BigNumber } from "ethers";
+import { okAsync, errAsync } from "neverthrow";
 import td, { verify } from "testdouble";
 
-require("testdouble-jest")(td, jest);
 import { MerchantConnectorRepository } from "@implementations/data/MerchantConnectorRepository";
 import { IMerchantConnectorRepository } from "@interfaces/data/IMerchantConnectorRepository";
 import {
@@ -26,18 +37,8 @@ import {
   ContextProviderMock,
 } from "@mock/utils";
 
-import {
-  MerchantConnectorError,
-  MerchantValidationError,
-  Signature,
-  Balances,
-  TransferResolutionError,
-} from "@hypernetlabs/objects";
-import { okAsync, errAsync } from "neverthrow";
-import { IAjaxUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
-import { IResolutionResult } from "@hypernetlabs/merchant-connector";
-import { BigNumber } from "ethers";
-import { IBasicTransferResponse } from "@hypernetlabs/objects";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("testdouble-jest")(td, jest);
 
 const validatedSignature = Signature("0xValidatedSignature");
 const newAuthorizationSignature = Signature("0xNewAuthorizationSignature");

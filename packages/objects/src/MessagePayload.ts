@@ -1,7 +1,8 @@
+import { Transform, Type } from "class-transformer";
+
 import { EMessageType } from "@objects/types";
 
 import "reflect-metadata";
-import { Transform, Type } from "class-transformer";
 
 export class MessagePayload {
   @Transform((input) => EMessageType[input.value])

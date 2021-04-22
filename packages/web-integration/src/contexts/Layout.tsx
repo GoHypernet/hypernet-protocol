@@ -1,5 +1,5 @@
 import { EStatusColor } from "@hypernetlabs/web-ui/src/theme";
-import React, { useState } from "react";
+import React, { ReactNode, useState } from "react";
 
 interface ILayout {
   setModalWidth: (width: number) => void;
@@ -10,12 +10,12 @@ interface ILayout {
 }
 
 interface ILayoutProps {
-  children: any;
+  children: ReactNode;
 }
 
-const LayoutContext = React.createContext<ILayout>(undefined!);
+const LayoutContext = React.createContext<ILayout>({} as ILayout);
 
-function LayoutProvider({ children }: ILayoutProps) {
+function LayoutProvider({ children }: ILayoutProps): unknown {
   const [modalWidth, setModalWidth] = useState<number>(373);
   const [modalStatus, setModalStatus] = useState<EStatusColor>(
     EStatusColor.IDLE,
@@ -25,11 +25,12 @@ function LayoutProvider({ children }: ILayoutProps) {
     const modalRoot = document.getElementById(
       "__hypernet-protocol-modal-root__",
     );
-    //@ts-ignore
-    modalRoot.innerHTML = "";
+    if (modalRoot != null) {
+      modalRoot.innerHTML = "";
+    }
   };
 
-  const initialState: any = {
+  const initialState: unknown = {
     setModalWidth,
     modalWidth,
     setModalStatus,

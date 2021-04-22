@@ -1,6 +1,16 @@
+import {
+  PaymentInternalDetails,
+  PushPayment,
+  EPaymentState,
+  EPaymentType,
+  VectorError,
+  PaymentCreationError,
+} from "@hypernetlabs/objects";
+import { ILogUtils } from "@hypernetlabs/utils";
+import { BigNumber } from "ethers";
+import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
-require("testdouble-jest")(td, jest);
 import { PaymentRepository } from "@implementations/data/PaymentRepository";
 import { IPaymentRepository } from "@interfaces/data";
 import {
@@ -32,17 +42,8 @@ import {
   PaymentUtilsMockFactory,
 } from "@mock/utils";
 
-import {
-  PaymentInternalDetails,
-  PushPayment,
-  EPaymentState,
-  EPaymentType,
-  VectorError,
-  PaymentCreationError,
-} from "@hypernetlabs/objects";
-import { okAsync, errAsync } from "neverthrow";
-import { BigNumber } from "ethers";
-import { ILogUtils } from "@hypernetlabs/utils";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("testdouble-jest")(td, jest);
 
 const expirationDate = unixNow + defaultExpirationLength;
 const counterPartyAccount = publicIdentifier2;

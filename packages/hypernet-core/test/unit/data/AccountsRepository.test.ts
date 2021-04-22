@@ -1,6 +1,21 @@
+import {
+  Log,
+  TransactionReceipt,
+  TransactionResponse,
+} from "@ethersproject/abstract-provider";
+import {
+  VectorError,
+  RouterChannelUnknownError,
+  BlockchainUnavailableError,
+  EthereumAddress,
+  AssetBalance,
+  Balances,
+} from "@hypernetlabs/objects";
+import { ILogUtils } from "@hypernetlabs/utils";
+import { BigNumber } from "ethers";
+import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
-require("testdouble-jest")(td, jest);
 import { AccountsRepository } from "@implementations/data/AccountsRepository";
 import { IAccountsRepository } from "@interfaces/data/";
 import {
@@ -22,22 +37,8 @@ import {
 } from "@mock/mocks";
 import { BlockchainProviderMock, BrowserNodeProviderMock } from "@mock/utils";
 
-import {
-  VectorError,
-  RouterChannelUnknownError,
-  BlockchainUnavailableError,
-  EthereumAddress,
-  AssetBalance,
-  Balances,
-} from "@hypernetlabs/objects";
-import { okAsync, errAsync } from "neverthrow";
-import {
-  Log,
-  TransactionReceipt,
-  TransactionResponse,
-} from "@ethersproject/abstract-provider";
-import { BigNumber } from "ethers";
-import { ILogUtils } from "@hypernetlabs/utils";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("testdouble-jest")(td, jest);
 
 class TransacationReceiptMock implements TransactionReceipt {
   public to: string;

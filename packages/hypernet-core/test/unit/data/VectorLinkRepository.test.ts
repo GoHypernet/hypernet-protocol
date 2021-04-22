@@ -1,16 +1,14 @@
-import td from "testdouble";
-
-require("testdouble-jest")(td, jest);
 import {
   PushPayment,
   HypernetLink,
   Payment,
   PaymentInternalDetails,
+  VectorError,
+  EPaymentState,
 } from "@hypernetlabs/objects";
-import { VectorError } from "@hypernetlabs/objects";
-import { EPaymentState } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { okAsync, errAsync } from "neverthrow";
+import td from "testdouble";
 
 import { VectorLinkRepository } from "@implementations/data/VectorLinkRepository";
 import { ILinkRepository } from "@interfaces/data";
@@ -43,6 +41,9 @@ import {
   ContextProviderMock,
   PaymentUtilsMockFactory,
 } from "@mock/utils";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("testdouble-jest")(td, jest);
 
 const expirationDate = unixNow + defaultExpirationLength;
 const counterPartyAccount = publicIdentifier2;

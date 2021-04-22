@@ -1,13 +1,12 @@
-import td, { verify } from "testdouble";
-require("testdouble-jest")(td, jest);
+import { Signature } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
+import td from "testdouble";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("testdouble-jest")(td, jest);
 
 import { EthersBlockchainUtils } from "@implementations/utilities";
 import { IBlockchainUtils } from "@interfaces/utilities";
 import { merchantUrl } from "@mock/mocks";
-
-import { Signature } from "@hypernetlabs/objects";
-
 import { BlockchainProviderMock } from "@tests/mock/utils";
 
 const validatedSignature = "0xValidatedSignature";

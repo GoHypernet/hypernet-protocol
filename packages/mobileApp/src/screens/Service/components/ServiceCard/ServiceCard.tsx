@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Image, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Button } from "react-native-elements";
 import {
   widthPercentageToDP as wp,
@@ -8,7 +8,7 @@ import {
 import Icon from "react-native-vector-icons/FontAwesome";
 
 interface ServiceCardProps {
-  renderIcon: () => {};
+  renderIcon: () => void;
 }
 
 const ServiceCard: React.FC<ServiceCardProps> = (props: ServiceCardProps) => {

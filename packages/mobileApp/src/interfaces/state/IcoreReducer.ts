@@ -1,4 +1,4 @@
-import { Balances, HypernetLink } from "@objects";
+import { Balances, HypernetLink } from "@hypernetlabs/objects";
 
 import { ResultMessage } from "@mobileApp/interfaces/objects";
 

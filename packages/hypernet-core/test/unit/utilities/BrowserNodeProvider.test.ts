@@ -1,6 +1,9 @@
+import { NonEIP712Message } from "@connext/vector-browser-node";
+import { Signature } from "@hypernetlabs/objects";
+import { ILocalStorageUtils, ILogUtils } from "@hypernetlabs/utils";
+import { okAsync } from "neverthrow";
 import td from "testdouble";
 
-require("testdouble-jest")(td, jest);
 import { BrowserNodeProvider } from "@implementations/utilities/BrowserNodeProvider";
 import { IBrowserNode } from "@interfaces/utilities";
 import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
@@ -12,10 +15,8 @@ import {
   ContextProviderMock,
 } from "@mock/utils";
 
-import { okAsync } from "neverthrow";
-import { ILocalStorageUtils, ILogUtils } from "@hypernetlabs/utils";
-import { NonEIP712Message } from "@connext/vector-browser-node";
-import { Signature } from "@hypernetlabs/objects";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("testdouble-jest")(td, jest);
 
 const validatedSignature = Signature("0xValidatedSignature");
 const authorizationSignature = Signature(

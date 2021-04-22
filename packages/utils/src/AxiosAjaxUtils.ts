@@ -1,5 +1,4 @@
-import axios from "axios";
-import { AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 import { ResultAsync } from "neverthrow";
 
 import { IAjaxUtils, IRequestConfig } from "@utils/IAjaxUtils";
@@ -15,7 +14,12 @@ export class AxiosAjaxUtils implements IAjaxUtils {
   }
   post<T, E>(
     url: URL,
-    data: string | object | ArrayBuffer | ArrayBufferView | URLSearchParams,
+    data:
+      | string
+      | Record<string, unknown>
+      | ArrayBuffer
+      | ArrayBufferView
+      | URLSearchParams,
     config?: IRequestConfig,
   ): ResultAsync<T, E> {
     return ResultAsync.fromPromise(
