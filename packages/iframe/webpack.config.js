@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
-const webpack = require("webpack");
-const rootWebpackConfig = require("../../webpack.config");
+
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const webpack = require("webpack");
+
+const rootWebpackConfig = require("../../webpack.config");
 
 module.exports = {
   ...rootWebpackConfig,

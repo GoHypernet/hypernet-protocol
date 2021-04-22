@@ -39,7 +39,7 @@
     "build": "lerna run build",
     "clean": "rimraf ./packages/*/dist ./packages/*/tsconfig.tsbuildinfo",
     "clean-docker": "cd packages/developer-ui && yarn clean-docker",
-    "compile": "tsc --build",
+    "compile": "tsc --build ",
     "compile-necessary": "cd packages/objects && yarn build && cd ../merchant-connector && yarn build && cd ../utils && yarn compile && cd ../test-merchant-connector && yarn build && cd ../iframe && yarn build && cd ../merchant-iframe && yarn build && cd ../",
     "format": "prettier . --write && yarn format:pkg",
     "format:pkg": "format-package -w",

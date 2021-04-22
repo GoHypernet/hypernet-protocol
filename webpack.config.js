@@ -1,7 +1,9 @@
-const webpack = require("webpack");
+/* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
+
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
+const webpack = require("webpack");
 
 const configFilePath = require.resolve("./tsconfig.json");
 

@@ -7,11 +7,10 @@
   "keywords": [],
   "main": "dist/index.js",
   "scripts": {
-    "build": "yarn clean && yarn compile",
+    "build": "yarn clean && yarn compile && webpack",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
-    "compile": "webpack",
-    "format": "prettier --write \"src/**/*.ts\"",
-    "lint": "tslint -p src/tsconfig.json",
+    "compile": "tsc --build && tsc-alias",
+    "webpack": "webpack",
     "prepare": "yarn build",
     "start": "webpack serve --config webpack.config.js --mode development --open",
     "test": "echo \"Error: no test specified\" && exit 0"

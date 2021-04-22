@@ -3,14 +3,19 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": "./src/",
-    "jsx": "react"
+    "baseUrl": "./src/"
   },
   "references": [
     {
       "path": "../objects"
+    },
+    {
+      "path": "../utils"
+    },
+    {
+      "path": "../merchant-connector"
     }
   ],
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*.ts"],
   "exclude": ["node_modules"]
 }

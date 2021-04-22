@@ -13,10 +13,9 @@
       "path": "../utils"
     },
     {
-      "path": "../web-ui/src"
+      "path": "../web-ui"
     }
   ],
-  "include": ["./src/**/*.ts","./src/**/*.tsx"],
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
   "exclude": ["node_modules"]
 }
-

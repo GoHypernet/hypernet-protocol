@@ -3,14 +3,22 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": "./src/",
-    "jsx": "react"
+    "baseUrl": "./src/"
   },
   "references": [
     {
       "path": "../objects"
+    },
+    {
+      "path": "../utils"
+    },
+    {
+      "path": "../../hypernet-core"
+    },
+    {
+      "path": "../../web-ui"
     }
   ],
-  "include": ["./src/**/*"],
+  "include": ["./src/**/*.ts"],
   "exclude": ["node_modules"]
 }

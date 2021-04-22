@@ -2,7 +2,6 @@ import { MerchantUrl } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 import React from "react";
 import ReactDOM from "react-dom";
-import { ThemeProvider } from "theming";
 
 import { MainContainer } from "@web-integration-containers/MainContainer";
 import { LayoutProvider, StoreProvider } from "@web-integration-contexts";
@@ -119,7 +118,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     // Add close modal icon to iframe container
     const closeButton = document.createElement("div");
     closeButton.id = "__hypernet-protocol-iframe-close-icon__";
-    //@ts-ignore
     closeButton.innerHTML = `
       <img src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png" width="20" />
     `;
@@ -191,7 +189,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     );
   }
 
-  public async renderFundWidget(config?: IRenderParams) {
+  public async renderFundWidget(config?: IRenderParams): Promise<void> {
     ReactDOM.render(
       await this._bootstrapComponent(<FundWidget />),
       this._generateDomElement(config?.selector || FUND_WIDGET_ID_SELECTOR),

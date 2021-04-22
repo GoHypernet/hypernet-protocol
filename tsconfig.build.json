@@ -33,30 +33,22 @@
       "@mock/*": ["./packages/hypernet-core/test/mock/*"],
       "@integration-tests/*": ["./packages/developer-ui/test/integration/*"],
       "@web-integration/*": ["./*"],
-      "@web-integration-containers/*": [
-        "./containers/*"
-      ],
+      "@web-integration-containers/*": ["./containers/*"],
       "@web-integration-contexts": ["./contexts"],
       "@web-integration-flows/*": ["./flows/*"],
       "@web-integration-hooks": ["./hooks"],
-      "@web-integration-implementations/*": [
-        "./implementations/*"
-      ],
-      "@web-integration-interfaces/*": [
-        "./interfaces/*"
-      ],
-      "@web-integration-widgets/*": [
-        "./widgets/*"
-      ],
+      "@web-integration-implementations/*": ["./implementations/*"],
+      "@web-integration-interfaces/*": ["./interfaces/*"],
+      "@web-integration-widgets/*": ["./widgets/*"],
       "@mobile-integration/*": ["./packages/mobile-integration/src/*"],
       "@mobileApp/*": ["./packages/mobileApp/src/*"],
       "@merchant-connector/*": ["./*"],
-      "@merchant-iframe/*": ["./packages/merchant-iframe/src/*"],
+      "@merchant-iframe/*": ["./*"],
       "@test-merchant-connector/*": [
         "./packages/test-merchant-connector/src/*"
       ],
       "@utils/*": ["./*"],
-      "@developer-ui/*": ["./packages/developer-ui/src/*"],
+      "@developer-ui/*": ["./*"],
       "@objects/*": ["./*"]
     }
   }

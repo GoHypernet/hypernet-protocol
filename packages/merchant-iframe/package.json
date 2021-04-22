@@ -28,9 +28,10 @@
     "!dist/tsconfig.tsbuildinfo"
   ],
   "scripts": {
-    "build": "yarn clean && yarn compile",
+    "build": "yarn clean && yarn compile && yarn webpack",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
-    "compile": "webpack",
+    "compile": "tsc --build && tsc-alias",
+    "webpack": "webpack",
     "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",

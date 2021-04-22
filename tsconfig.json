@@ -12,19 +12,19 @@
       "path": "packages/web-integration"
     },
     {
-      "path": "packages/web-ui/src"
+      "path": "packages/web-ui"
     },
     {
-      "path": "packages/iframe/src"
+      "path": "packages/iframe"
     },
     {
-      "path": "packages/merchant-iframe/src"
+      "path": "packages/merchant-iframe"
     },
     {
       "path": "packages/merchant-iframe/test"
     },
     {
-      "path": "packages/developer-ui/src"
+      "path": "packages/developer-ui"
     },
     {
       "path": "packages/merchant-connector"
