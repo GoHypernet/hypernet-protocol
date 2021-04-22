@@ -1,4 +1,10 @@
-import { HypernetLink, Payment, PublicIdentifier, PullPayment, PushPayment } from "@hypernetlabs/objects";
+import {
+  HypernetLink,
+  Payment,
+  PublicIdentifier,
+  PullPayment,
+  PushPayment,
+} from "@hypernetlabs/objects";
 import { InvalidParametersError } from "@hypernetlabs/objects";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
@@ -16,13 +22,16 @@ export class LinkUtils implements ILinkUtils {
    * @param payments the payments to get the associated Links for
    * @param context instance of HypernetContext
    */
-  public paymentsToHypernetLinks(payments: Payment[]): ResultAsync<HypernetLink[], InvalidParametersError> {
+  public paymentsToHypernetLinks(
+    payments: Payment[],
+  ): ResultAsync<HypernetLink[], InvalidParametersError> {
     return this.contextProvider.getInitializedContext().andThen((context) => {
       const linksByCounterpartyId = new Map<string, HypernetLink>();
 
       for (const payment of payments) {
         // Now that it's converted, we can stick it in the hypernet link
-        const counterpartyId: PublicIdentifier = payment.to === context.publicIdentifier ? payment.from : payment.to;
+        const counterpartyId: PublicIdentifier =
+          payment.to === context.publicIdentifier ? payment.from : payment.to;
         let link = linksByCounterpartyId.get(counterpartyId);
         if (link == null) {
           link = new HypernetLink(counterpartyId, [], [], [], [], []);

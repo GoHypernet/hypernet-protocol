@@ -1,5 +1,7 @@
 import { MerchantUrl } from "@hypernetlabs/objects";
-import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import HypernetWebIntegration, {
+  IHypernetWebIntegration,
+} from "@hypernetlabs/web-integration";
 
 import Spinner from "./assets/loading-spinner";
 

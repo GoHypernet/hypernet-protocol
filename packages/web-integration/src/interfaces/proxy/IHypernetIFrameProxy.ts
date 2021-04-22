@@ -1,5 +1,6 @@
 import { IHypernetCore } from "@hypernetlabs/objects";
+import { ParentProxy } from "@hypernetlabs/utils";
 
-import { ParentProxy } from "packages/utils";
-
-export default interface IHypernetIFrameProxy extends IHypernetCore, ParentProxy {}
+export default interface IHypernetIFrameProxy
+  extends IHypernetCore,
+    ParentProxy {}

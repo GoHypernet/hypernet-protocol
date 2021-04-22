@@ -5,5 +5,8 @@ import { MerchantContext } from "@merchant-iframe/interfaces/objects";
 export interface IContextProvider {
   getMerchantContext(): MerchantContext;
   setMerchantContext(context: MerchantContext): void;
-  setValidatedMerchantConnector(validatedMerchantCode: string, validatedMerchantSignature: Signature): void;
+  setValidatedMerchantConnector(
+    validatedMerchantCode: string,
+    validatedMerchantSignature: Signature,
+  ): void;
 }

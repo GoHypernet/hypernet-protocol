@@ -1,7 +1,11 @@
 import React from "react";
 import Icon from "react-native-vector-icons/FontAwesome";
 
-import { ENavigationScreenName, ENavigatorType, INavigationScreens } from "@mobileApp/interfaces/containers/IRouter";
+import {
+  ENavigationScreenName,
+  ENavigatorType,
+  INavigationScreens,
+} from "@mobileApp/interfaces/containers/IRouter";
 import Balance from "@mobileApp/screens/Balance";
 import Service from "@mobileApp/screens/Service";
 import Splash from "@mobileApp/screens/Splash";

@@ -1,6 +1,9 @@
 import { ResultAsync } from "neverthrow";
 
-import { HypernetContext, InitializedHypernetContext } from "@interfaces/objects";
+import {
+  HypernetContext,
+  InitializedHypernetContext,
+} from "@interfaces/objects";
 
 /**
  * @todo What is the main role/purpose of this class? Description here.

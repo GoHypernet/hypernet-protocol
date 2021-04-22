@@ -84,7 +84,12 @@ export class TokenSelectorViewModel {
           const paymentTokens = new Array<PaymentTokenOption>();
           for (const assetBalance of balances.assets) {
             // TODO: Convert the asset address to a readable name!
-            paymentTokens.push(new PaymentTokenOption(assetBalance.assetAddress, assetBalance.assetAddress));
+            paymentTokens.push(
+              new PaymentTokenOption(
+                assetBalance.assetAddress,
+                assetBalance.assetAddress,
+              ),
+            );
           }
 
           this.paymentTokens(paymentTokens);
@@ -94,8 +99,14 @@ export class TokenSelectorViewModel {
           console.log("No balances.");
         });
     } else {
-      const eth = new PaymentTokenOption("ETH", EthereumAddress("0x0000000000000000000000000000000000000000"));
-      const test = new PaymentTokenOption("HyperToken", EthereumAddress("0x9FBDa871d559710256a2502A2517b794B482Db40"));
+      const eth = new PaymentTokenOption(
+        "ETH",
+        EthereumAddress("0x0000000000000000000000000000000000000000"),
+      );
+      const test = new PaymentTokenOption(
+        "HyperToken",
+        EthereumAddress("0x9FBDa871d559710256a2502A2517b794B482Db40"),
+      );
       this.paymentTokens([eth, test]);
     }
   }

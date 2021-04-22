@@ -19,12 +19,16 @@ export class AuthorizedMerchantFormViewModel {
 
   constructor(params: AuthorizedMerchantFormParams) {
     this.integration = params.integration;
-    this.merchantUrl = ko.observable(MerchantUrl("http://localhost:8080/hypernet_protocol/v0"));
+    this.merchantUrl = ko.observable(
+      MerchantUrl("http://localhost:8080/hypernet_protocol/v0"),
+    );
 
     this.submitButton = new ButtonParams(
       "Authorize Merchant",
       async () => {
-        return await this.integration.core.authorizeMerchant(this.merchantUrl());
+        return await this.integration.core.authorizeMerchant(
+          this.merchantUrl(),
+        );
       },
       EButtonType.Normal,
       ko.pureComputed(() => {

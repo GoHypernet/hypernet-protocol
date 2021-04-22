@@ -1,3 +1,5 @@
+import { BigNumber } from "ethers";
+
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { MerchantUrl } from "@objects/MerchantUrl";
 import { Payment } from "@objects/Payment";
@@ -6,7 +8,6 @@ import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullAmount } from "@objects/PullAmount";
 import { EPaymentState } from "@objects/types";
-import { BigNumber } from "ethers";
 
 export class PullPayment extends Payment {
   constructor(

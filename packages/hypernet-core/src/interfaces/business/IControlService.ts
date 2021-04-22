@@ -1,5 +1,9 @@
 import { ControlClaim } from "@hypernetlabs/objects";
-import { BlockchainUnavailableError, LogicalError, ThreeBoxError } from "@hypernetlabs/objects";
+import {
+  BlockchainUnavailableError,
+  LogicalError,
+  ThreeBoxError,
+} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 /**
@@ -11,10 +15,15 @@ export interface IControlService {
    * of an account.
    * @todo Describe the purpose of this function - what does it do?
    */
-  claimControl(): ResultAsync<void, BlockchainUnavailableError | ThreeBoxError | LogicalError>;
+  claimControl(): ResultAsync<
+    void,
+    BlockchainUnavailableError | ThreeBoxError | LogicalError
+  >;
 
   /**
    * Processes an incoming control claim. Basically just yields control.
    */
-  processControlClaim(controlClaim: ControlClaim): ResultAsync<void, LogicalError>;
+  processControlClaim(
+    controlClaim: ControlClaim,
+  ): ResultAsync<void, LogicalError>;
 }

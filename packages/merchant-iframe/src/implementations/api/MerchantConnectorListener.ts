@@ -29,9 +29,11 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
 
       if (connector.signMessageRequested != null) {
         connector.signMessageRequested.subscribe((request) => {
-          this.merchantService.signMessage(request.message, request.callback).mapErr((e) => {
-            this.logUtils.error(e);
-          });
+          this.merchantService
+            .signMessage(request.message, request.callback)
+            .mapErr((e) => {
+              this.logUtils.error(e);
+            });
         });
       }
     });

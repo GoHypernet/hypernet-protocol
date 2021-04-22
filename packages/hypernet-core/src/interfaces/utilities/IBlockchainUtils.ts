@@ -1,5 +1,8 @@
 import { TransactionResponse } from "@ethersproject/abstract-provider";
-import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
+import {
+  TypedDataDomain,
+  TypedDataField,
+} from "@ethersproject/abstract-signer";
 import { EthereumAddress, Signature } from "@hypernetlabs/objects";
 import { BlockchainUnavailableError } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
@@ -19,5 +22,8 @@ export interface IBlockchainUtils {
     amount: BigNumber,
   ): ResultAsync<TransactionResponse, BlockchainUnavailableError>;
 
-  mintToken(amount: BigNumber, to: EthereumAddress): ResultAsync<TransactionResponse, BlockchainUnavailableError>;
+  mintToken(
+    amount: BigNumber,
+    to: EthereumAddress,
+  ): ResultAsync<TransactionResponse, BlockchainUnavailableError>;
 }

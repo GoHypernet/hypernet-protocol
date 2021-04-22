@@ -1,4 +1,10 @@
-import { Payment, EthereumAddress, PublicIdentifier, MerchantUrl, PaymentId } from "@hypernetlabs/objects";
+import {
+  Payment,
+  EthereumAddress,
+  PublicIdentifier,
+  MerchantUrl,
+  PaymentId,
+} from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
   InsufficientBalanceError,

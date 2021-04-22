@@ -1,7 +1,11 @@
-import { InsuranceState, MessageState, ParameterizedState } from "@objects/types";
-import { IFullTransferState } from "@objects/vector";
-
 import { IHypernetOfferDetails } from "./HypernetOfferDetails";
+
+import {
+  InsuranceState,
+  MessageState,
+  ParameterizedState,
+} from "@objects/types";
+import { IFullTransferState } from "@objects/vector";
 
 export class SortedTransfers {
   constructor(

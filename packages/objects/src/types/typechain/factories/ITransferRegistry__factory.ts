@@ -8,8 +8,15 @@ import { Provider } from "@ethersproject/providers";
 import type { ITransferRegistry } from "../ITransferRegistry";
 
 export class ITransferRegistry__factory {
-  static connect(address: string, signerOrProvider: Signer | Provider): ITransferRegistry {
-    return (new Contract(address, _abi, signerOrProvider) as unknown) as ITransferRegistry;
+  static connect(
+    address: string,
+    signerOrProvider: Signer | Provider,
+  ): ITransferRegistry {
+    return (new Contract(
+      address,
+      _abi,
+      signerOrProvider,
+    ) as unknown) as ITransferRegistry;
   }
 }
 

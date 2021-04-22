@@ -50,7 +50,10 @@ const Modal: React.FC<IModal> = (props: IModal) => {
         createPortal(
           <div className={classes.container}>
             <div className={classes.wrapper}>
-              <div className={classes.closeIcon} onClick={() => modalRoot.removeChild(el)}>
+              <div
+                className={classes.closeIcon}
+                onClick={() => modalRoot.removeChild(el)}
+              >
                 <img
                   src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png"
                   width="20"

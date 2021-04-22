@@ -12,7 +12,9 @@ interface IScreenHeaderProps {
   screenLabel: string;
 }
 
-const ScreenHeader: React.FC<IScreenHeaderProps> = (props: IScreenHeaderProps) => {
+const ScreenHeader: React.FC<IScreenHeaderProps> = (
+  props: IScreenHeaderProps,
+) => {
   const { onActionClick, onFilterClick, screenLabel } = props;
   return (
     <View style={styles.container}>

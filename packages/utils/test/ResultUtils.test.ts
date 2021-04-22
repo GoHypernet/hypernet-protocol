@@ -1,4 +1,5 @@
 import { errAsync, okAsync } from "neverthrow";
+
 import { ResultUtils } from "../src/ResultUtils";
 
 describe("ResultUtils tests", () => {

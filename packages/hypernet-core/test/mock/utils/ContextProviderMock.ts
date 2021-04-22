@@ -7,10 +7,17 @@ import {
   PushPayment,
   Signature,
 } from "@hypernetlabs/objects";
-import { HypernetContext, InitializedHypernetContext } from "@interfaces/objects";
-import { IContextProvider, IMerchantConnectorProxy } from "@interfaces/utilities";
 import { okAsync, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
+
+import {
+  HypernetContext,
+  InitializedHypernetContext,
+} from "@interfaces/objects";
+import {
+  IContextProvider,
+  IMerchantConnectorProxy,
+} from "@interfaces/utilities";
 import { account, publicIdentifier } from "@mock/mocks";
 
 export class ContextProviderMock implements IContextProvider {
@@ -126,7 +133,10 @@ export class ContextProviderMock implements IContextProvider {
     return okAsync(this.context.account || "");
   }
 
-  public getInitializedContext(): ResultAsync<InitializedHypernetContext, never> {
+  public getInitializedContext(): ResultAsync<
+    InitializedHypernetContext,
+    never
+  > {
     return okAsync(this.initializedContext);
   }
 

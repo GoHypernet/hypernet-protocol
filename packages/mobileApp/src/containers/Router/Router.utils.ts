@@ -1,6 +1,10 @@
 import { StackCardInterpolationProps } from "@react-navigation/stack";
 
-export const cardStyleInterpolator = ({ current: { progress }, next, layouts }: StackCardInterpolationProps) => ({
+export const cardStyleInterpolator = ({
+  current: { progress },
+  next,
+  layouts,
+}: StackCardInterpolationProps) => ({
   cardStyle: {
     transform: [
       {

@@ -1,5 +1,10 @@
 import { IMerchantConnector } from "@hypernetlabs/merchant-connector";
-import { MerchantValidationError, PublicIdentifier, Signature, MerchantUrl } from "@hypernetlabs/objects";
+import {
+  MerchantValidationError,
+  PublicIdentifier,
+  Signature,
+  MerchantUrl,
+} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 

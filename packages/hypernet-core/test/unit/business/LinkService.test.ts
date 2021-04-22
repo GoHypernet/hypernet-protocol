@@ -1,16 +1,19 @@
-import { LinkService } from "@implementations/business/LinkService";
-import { ILinkService } from "@interfaces/business/ILinkService";
-import { ILinkRepository } from "@interfaces/data";
 import { HypernetLink } from "@hypernetlabs/objects";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
+
+import { LinkService } from "@implementations/business/LinkService";
+import { ILinkService } from "@interfaces/business/ILinkService";
+import { ILinkRepository } from "@interfaces/data";
 
 class LinkServiceMocks {
   public linkRepository = td.object<ILinkRepository>();
   public hypernetLinks = new Array<HypernetLink>();
 
   constructor() {
-    td.when(this.linkRepository.getHypernetLinks()).thenReturn(okAsync(this.hypernetLinks));
+    td.when(this.linkRepository.getHypernetLinks()).thenReturn(
+      okAsync(this.hypernetLinks),
+    );
   }
 
   public factoryLinkService(): ILinkService {

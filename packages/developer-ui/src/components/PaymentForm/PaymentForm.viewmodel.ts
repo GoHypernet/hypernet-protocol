@@ -31,7 +31,9 @@ export class PaymentFormViewModel {
   constructor(params: PaymentFormParams) {
     this.integration = params.integration;
 
-    this.remoteAccount = ko.observable(PublicIdentifier("Enter public identifier"));
+    this.remoteAccount = ko.observable(
+      PublicIdentifier("Enter public identifier"),
+    );
 
     this.paymentTypes = [
       new PaymentTypeOption("Push", EPaymentType.Push),
@@ -48,8 +50,14 @@ export class PaymentFormViewModel {
       return this.selectedPaymentType()?.type === EPaymentType.Pull;
     });
 
-    this.pushPayment = new PushPaymentFormParams(this.integration, this.remoteAccount);
-    this.pullPayment = new PullPaymentFormParams(this.integration, this.remoteAccount);
+    this.pushPayment = new PushPaymentFormParams(
+      this.integration,
+      this.remoteAccount,
+    );
+    this.pullPayment = new PullPaymentFormParams(
+      this.integration,
+      this.remoteAccount,
+    );
   }
 }
 

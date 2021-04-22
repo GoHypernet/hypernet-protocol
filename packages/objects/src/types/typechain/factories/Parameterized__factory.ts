@@ -25,7 +25,10 @@ export class Parameterized__factory extends ContractFactory {
   connect(signer: Signer): Parameterized__factory {
     return super.connect(signer) as Parameterized__factory;
   }
-  static connect(address: string, signerOrProvider: Signer | Provider): Parameterized {
+  static connect(
+    address: string,
+    signerOrProvider: Signer | Provider,
+  ): Parameterized {
     return new Contract(address, _abi, signerOrProvider) as Parameterized;
   }
 }

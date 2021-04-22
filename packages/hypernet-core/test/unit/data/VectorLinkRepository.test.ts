@@ -1,5 +1,26 @@
 import td from "testdouble";
+
 require("testdouble-jest")(td, jest);
+import {
+  PushPayment,
+  HypernetLink,
+  Payment,
+  PaymentInternalDetails,
+} from "@hypernetlabs/objects";
+import { VectorError } from "@hypernetlabs/objects";
+import { EPaymentState } from "@hypernetlabs/objects";
+import { BigNumber } from "ethers";
+import { okAsync, errAsync } from "neverthrow";
+
+import { VectorLinkRepository } from "@implementations/data/VectorLinkRepository";
+import { ILinkRepository } from "@interfaces/data";
+import {
+  IVectorUtils,
+  IBrowserNodeProvider,
+  IPaymentUtils,
+  ILinkUtils,
+  ITimeUtils,
+} from "@interfaces/utilities";
 import {
   commonAmount,
   routerChannelAddress,
@@ -22,19 +43,16 @@ import {
   ContextProviderMock,
   PaymentUtilsMockFactory,
 } from "@mock/utils";
-import { PushPayment, HypernetLink, Payment, PaymentInternalDetails } from "@hypernetlabs/objects";
-import { IVectorUtils, IBrowserNodeProvider, IPaymentUtils, ILinkUtils, ITimeUtils } from "@interfaces/utilities";
-import { VectorError } from "@hypernetlabs/objects";
-import { ILinkRepository } from "@interfaces/data";
-import { okAsync, errAsync } from "neverthrow";
-import { VectorLinkRepository } from "@implementations/data/VectorLinkRepository";
-import { EPaymentState } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
 
 const expirationDate = unixNow + defaultExpirationLength;
 const counterPartyAccount = publicIdentifier2;
 const fromAccount = publicIdentifier;
-const paymentDetails = new PaymentInternalDetails(offerTransferId, insuranceTransferId, parameterizedTransferId, []);
+const paymentDetails = new PaymentInternalDetails(
+  offerTransferId,
+  insuranceTransferId,
+  parameterizedTransferId,
+  [],
+);
 
 class VectorLinkRepositoryMocks {
   public blockchainProvider = new BlockchainProviderMock();
@@ -71,7 +89,9 @@ class VectorLinkRepositoryMocks {
       [],
     );
 
-    td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
+    td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(
+      okAsync(routerChannelAddress),
+    );
 
     td.when(
       this.linkUtils.paymentsToHypernetLinks(
@@ -89,7 +109,9 @@ class VectorLinkRepositoryMocks {
     ).thenReturn(okAsync([]));
 
     td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow);
-    td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(okAsync(unixNow));
+    td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(
+      okAsync(unixNow),
+    );
   }
 
   public factoryVectorLinkRepository(): ILinkRepository {
@@ -133,7 +155,9 @@ class VectorLinkRepositoryErrorMocks {
   private vectorLinkRepositoryMocks = new VectorLinkRepositoryMocks();
 
   constructor() {
-    td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(errAsync(new VectorError()));
+    td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(
+      errAsync(new VectorError()),
+    );
   }
 
   public factoryVectorLinkRepository(): ILinkRepository {
@@ -205,7 +229,9 @@ describe("VectorLinkRepository tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toStrictEqual(new HypernetLink(publicIdentifier3, [], [], [], [], []));
+    expect(result._unsafeUnwrap()).toStrictEqual(
+      new HypernetLink(publicIdentifier3, [], [], [], [], []),
+    );
   });
 
   test("Should getHypernetLink return error if getBrowserNode failed", async () => {

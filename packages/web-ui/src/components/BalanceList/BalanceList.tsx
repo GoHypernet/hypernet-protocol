@@ -23,8 +23,12 @@ const BalanceList: React.FC<BalanceListProps> = (props: BalanceListProps) => {
                 : "https://res.cloudinary.com/dqueufbs7/image/upload/v1614373316/images/Screen_Shot_2021-02-27_at_00.01.31.png"
             }
           />
-          <div className={classes.tokenAmount}>{Number(balance.freeAmount) / 1000000000000000000}</div>
-          <div className={classes.tokenName}>{balance.symbol || index === 0 ? "HPT" : "MINT"}</div>
+          <div className={classes.tokenAmount}>
+            {Number(balance.freeAmount) / 1000000000000000000}
+          </div>
+          <div className={classes.tokenName}>
+            {balance.symbol || index === 0 ? "HPT" : "MINT"}
+          </div>
         </div>
       ))}
     </div>

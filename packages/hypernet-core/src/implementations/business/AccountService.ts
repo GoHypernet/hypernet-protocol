@@ -17,7 +17,10 @@ import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import { IAccountService } from "@interfaces/business";
 import { IAccountsRepository } from "@interfaces/data";
-import { HypernetContext, InitializedHypernetContext } from "@interfaces/objects";
+import {
+  HypernetContext,
+  InitializedHypernetContext,
+} from "@interfaces/objects";
 import { IContextProvider, IBlockchainProvider } from "@interfaces/utilities";
 
 /**
@@ -31,15 +34,24 @@ export class AccountService implements IAccountService {
     protected logUtils: ILogUtils,
   ) {}
 
-  public getPublicIdentifier(): ResultAsync<PublicIdentifier, BlockchainUnavailableError | VectorError> {
+  public getPublicIdentifier(): ResultAsync<
+    PublicIdentifier,
+    BlockchainUnavailableError | VectorError
+  > {
     return this.accountRepository.getPublicIdentifier();
   }
 
-  public getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError> {
+  public getAccounts(): ResultAsync<
+    EthereumAddress[],
+    BlockchainUnavailableError
+  > {
     return this.accountRepository.getAccounts();
   }
 
-  public getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError | RouterChannelUnknownError> {
+  public getBalances(): ResultAsync<
+    Balances,
+    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+  > {
     return this.accountRepository.getBalances();
   }
 
@@ -48,9 +60,15 @@ export class AccountService implements IAccountService {
     amount: BigNumber,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | RouterChannelUnknownError | BlockchainUnavailableError | VectorError | LogicalError
+    | BalancesUnavailableError
+    | RouterChannelUnknownError
+    | BlockchainUnavailableError
+    | VectorError
+    | LogicalError
   > {
-    this.logUtils.log(`HypernetCore:depositFunds: assetAddress: ${assetAddress}`);
+    this.logUtils.log(
+      `HypernetCore:depositFunds: assetAddress: ${assetAddress}`,
+    );
 
     let context: HypernetContext;
 
@@ -77,7 +95,10 @@ export class AccountService implements IAccountService {
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | RouterChannelUnknownError | BlockchainUnavailableError | VectorError
+    | BalancesUnavailableError
+    | RouterChannelUnknownError
+    | BlockchainUnavailableError
+    | VectorError
   > {
     let context: InitializedHypernetContext;
 
@@ -85,7 +106,11 @@ export class AccountService implements IAccountService {
       .getInitializedContext()
       .andThen((contextVal) => {
         context = contextVal;
-        return this.accountRepository.withdrawFunds(assetAddress, amount, destinationAddress);
+        return this.accountRepository.withdrawFunds(
+          assetAddress,
+          amount,
+          destinationAddress,
+        );
       })
       .andThen(() => {
         return this.accountRepository.getBalances();
@@ -97,9 +122,15 @@ export class AccountService implements IAccountService {
       });
   }
 
-  public providePrivateCredentials(privateCredentials: PrivateCredentials): ResultAsync<void, InvalidParametersError> {
+  public providePrivateCredentials(
+    privateCredentials: PrivateCredentials,
+  ): ResultAsync<void, InvalidParametersError> {
     if (!privateCredentials.mnemonic && !privateCredentials.privateKey) {
-      return errAsync(new InvalidParametersError("You must provide a mnemonic or private key"));
+      return errAsync(
+        new InvalidParametersError(
+          "You must provide a mnemonic or private key",
+        ),
+      );
     }
 
     return this.contextProvider.getContext().map((context) => {
@@ -107,7 +138,9 @@ export class AccountService implements IAccountService {
     });
   }
 
-  public signMessage(message: string): ResultAsync<Signature, BlockchainUnavailableError | VectorError> {
+  public signMessage(
+    message: string,
+  ): ResultAsync<Signature, BlockchainUnavailableError | VectorError> {
     return this.accountRepository.signMessage(message);
   }
 }

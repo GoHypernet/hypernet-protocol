@@ -25,7 +25,10 @@ export class Insurance__factory extends ContractFactory {
   connect(signer: Signer): Insurance__factory {
     return super.connect(signer) as Insurance__factory;
   }
-  static connect(address: string, signerOrProvider: Signer | Provider): Insurance {
+  static connect(
+    address: string,
+    signerOrProvider: Signer | Provider,
+  ): Insurance {
     return new Contract(address, _abi, signerOrProvider) as Insurance;
   }
 }

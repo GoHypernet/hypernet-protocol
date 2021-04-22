@@ -1,19 +1,37 @@
 import { MerchantUrl } from "@hypernetlabs/objects";
-import { LogicalError, MerchantValidationError, ProxyError } from "@hypernetlabs/objects";
+import {
+  LogicalError,
+  MerchantValidationError,
+  ProxyError,
+} from "@hypernetlabs/objects";
 import { ok, Result, ResultAsync } from "neverthrow";
 
 import { MerchantConnectorProxy } from "@implementations/utilities/MerchantConnectorProxy";
-import { IConfigProvider, IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
+import {
+  IConfigProvider,
+  IMerchantConnectorProxy,
+  IContextProvider,
+} from "@interfaces/utilities";
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 
-export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFactory {
-  protected static proxyMap: Map<MerchantUrl, IMerchantConnectorProxy> = new Map();
+export class MerchantConnectorProxyFactory
+  implements IMerchantConnectorProxyFactory {
+  protected static proxyMap: Map<
+    MerchantUrl,
+    IMerchantConnectorProxy
+  > = new Map();
 
-  constructor(protected configProvider: IConfigProvider, protected contextProvider: IContextProvider) {}
+  constructor(
+    protected configProvider: IConfigProvider,
+    protected contextProvider: IContextProvider,
+  ) {}
 
   factoryProxy(
     merchantUrl: MerchantUrl,
-  ): ResultAsync<IMerchantConnectorProxy, MerchantValidationError | LogicalError | ProxyError> {
+  ): ResultAsync<
+    IMerchantConnectorProxy,
+    MerchantValidationError | LogicalError | ProxyError
+  > {
     let proxy: IMerchantConnectorProxy;
     return this.configProvider
       .getConfig()

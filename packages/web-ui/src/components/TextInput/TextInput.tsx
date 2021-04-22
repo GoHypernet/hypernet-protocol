@@ -18,7 +18,9 @@ const TextInput: React.FC<TextInputProps> = (props: TextInputProps) => {
       <input
         type="text"
         value={value}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) => onChange && onChange(event.target.value)}
+        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+          onChange && onChange(event.target.value)
+        }
         disabled={disabled}
         placeholder={placeholder}
       />

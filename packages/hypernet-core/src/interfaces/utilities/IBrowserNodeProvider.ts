@@ -9,5 +9,8 @@ import { IBrowserNode } from "./IBrowserNode";
  * testing of it.
  */
 export interface IBrowserNodeProvider {
-  getBrowserNode(): ResultAsync<IBrowserNode, VectorError | BlockchainUnavailableError>;
+  getBrowserNode(): ResultAsync<
+    IBrowserNode,
+    VectorError | BlockchainUnavailableError
+  >;
 }

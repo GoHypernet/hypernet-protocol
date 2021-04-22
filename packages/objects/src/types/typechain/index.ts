@@ -13,8 +13,17 @@ export type { Parameterized } from "./Parameterized";
 export type { TransferDefinition } from "./TransferDefinition";
 export type { Withdraw } from "./Withdraw";
 
-export type { InsuranceState, InsuranceResolver, InsuranceResolverData } from "./InsuranceTypes";
-export type { ParameterizedState, ParameterizedResolver, ParameterizedResolverData, Rate } from "./ParameterizedTypes";
+export type {
+  InsuranceState,
+  InsuranceResolver,
+  InsuranceResolverData,
+} from "./InsuranceTypes";
+export type {
+  ParameterizedState,
+  ParameterizedResolver,
+  ParameterizedResolverData,
+  Rate,
+} from "./ParameterizedTypes";
 export type { MessageState, MessageResolver } from "./MessageTypes";
 
 export { HashlockTransfer__factory } from "./factories/HashlockTransfer__factory";

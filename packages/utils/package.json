@@ -27,8 +27,8 @@
   ],
   "scripts": {
     "build": "yarn clean && yarn compile",
-    "clean": "rimraf dist",
-    "compile": "tsc && tsc-alias",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "compile": "tsc --build && tsc-alias",
     "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",
@@ -41,7 +41,7 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/objects": "^0.0.1",
+    "@hypernetlabs/objects": ">=0.0.1",
     "axios": "^0.21.1",
     "neverthrow": "^4.1.0",
     "pino": "^6.7.0",

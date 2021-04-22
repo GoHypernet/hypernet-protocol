@@ -1,6 +1,9 @@
 import React from "react";
 import { View, StyleSheet, Image } from "react-native";
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from "react-native-responsive-screen";
 
 import BalanceCard from "./components/BalanceCard";
 
@@ -31,7 +34,9 @@ const Balance: React.FC<BalanceProps> = (props: BalanceProps) => {
           primaryValue="1.00043"
           secondaryTitle="WBTC"
           secondaryValue="5750,70"
-          renderIcon={() => <Image source={require("@mobileApp/assets/images/wbtc.png")} />}
+          renderIcon={() => (
+            <Image source={require("@mobileApp/assets/images/wbtc.png")} />
+          )}
         />
 
         <BalanceCard
@@ -39,14 +44,18 @@ const Balance: React.FC<BalanceProps> = (props: BalanceProps) => {
           primaryValue="831,54"
           secondaryTitle="HC"
           secondaryValue="831,54"
-          renderIcon={() => <Image source={require("@mobileApp/assets/images/hc.png")} />}
+          renderIcon={() => (
+            <Image source={require("@mobileApp/assets/images/hc.png")} />
+          )}
         />
         <BalanceCard
           primaryTitle="United States Dist."
           primaryValue="24.923"
           secondaryTitle="USDC"
           secondaryValue="1390,10"
-          renderIcon={() => <Image source={require("@mobileApp/assets/images/usdc.png")} />}
+          renderIcon={() => (
+            <Image source={require("@mobileApp/assets/images/usdc.png")} />
+          )}
         />
       </View>
     </View>

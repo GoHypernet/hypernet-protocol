@@ -2,8 +2,19 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { ethers, EventFilter, Signer, BigNumber, BigNumberish, PopulatedTransaction } from "ethers";
-import { Contract, ContractTransaction, CallOverrides } from "@ethersproject/contracts";
+import {
+  ethers,
+  EventFilter,
+  Signer,
+  BigNumber,
+  BigNumberish,
+  PopulatedTransaction,
+} from "ethers";
+import {
+  Contract,
+  ContractTransaction,
+  CallOverrides,
+} from "@ethersproject/contracts";
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
@@ -19,20 +30,50 @@ interface WithdrawInterface extends ethers.utils.Interface {
     "resolve(bytes,bytes,bytes)": FunctionFragment;
   };
 
-  encodeFunctionData(functionFragment: "EncodedCancel", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "EncodedCancel",
+    values?: undefined,
+  ): string;
   encodeFunctionData(functionFragment: "Name", values?: undefined): string;
-  encodeFunctionData(functionFragment: "ResolverEncoding", values?: undefined): string;
-  encodeFunctionData(functionFragment: "StateEncoding", values?: undefined): string;
-  encodeFunctionData(functionFragment: "create", values: [BytesLike, BytesLike]): string;
-  encodeFunctionData(functionFragment: "getRegistryInformation", values?: undefined): string;
-  encodeFunctionData(functionFragment: "resolve", values: [BytesLike, BytesLike, BytesLike]): string;
+  encodeFunctionData(
+    functionFragment: "ResolverEncoding",
+    values?: undefined,
+  ): string;
+  encodeFunctionData(
+    functionFragment: "StateEncoding",
+    values?: undefined,
+  ): string;
+  encodeFunctionData(
+    functionFragment: "create",
+    values: [BytesLike, BytesLike],
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getRegistryInformation",
+    values?: undefined,
+  ): string;
+  encodeFunctionData(
+    functionFragment: "resolve",
+    values: [BytesLike, BytesLike, BytesLike],
+  ): string;
 
-  decodeFunctionResult(functionFragment: "EncodedCancel", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "EncodedCancel",
+    data: BytesLike,
+  ): Result;
   decodeFunctionResult(functionFragment: "Name", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "ResolverEncoding", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "StateEncoding", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "ResolverEncoding",
+    data: BytesLike,
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "StateEncoding",
+    data: BytesLike,
+  ): Result;
   decodeFunctionResult(functionFragment: "create", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "getRegistryInformation", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getRegistryInformation",
+    data: BytesLike,
+  ): Result;
   decodeFunctionResult(functionFragment: "resolve", data: BytesLike): Result;
 
   events: {};
@@ -195,7 +236,11 @@ export class Withdraw extends Contract {
 
   "StateEncoding()"(overrides?: CallOverrides): Promise<string>;
 
-  create(encodedBalance: BytesLike, encodedState: BytesLike, overrides?: CallOverrides): Promise<boolean>;
+  create(
+    encodedBalance: BytesLike,
+    encodedState: BytesLike,
+    overrides?: CallOverrides,
+  ): Promise<boolean>;
 
   "create(bytes,bytes)"(
     encodedBalance: BytesLike,
@@ -274,7 +319,11 @@ export class Withdraw extends Contract {
 
     "StateEncoding()"(overrides?: CallOverrides): Promise<string>;
 
-    create(encodedBalance: BytesLike, encodedState: BytesLike, overrides?: CallOverrides): Promise<boolean>;
+    create(
+      encodedBalance: BytesLike,
+      encodedState: BytesLike,
+      overrides?: CallOverrides,
+    ): Promise<boolean>;
 
     "create(bytes,bytes)"(
       encodedBalance: BytesLike,
@@ -356,7 +405,11 @@ export class Withdraw extends Contract {
 
     "StateEncoding()"(overrides?: CallOverrides): Promise<BigNumber>;
 
-    create(encodedBalance: BytesLike, encodedState: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+    create(
+      encodedBalance: BytesLike,
+      encodedState: BytesLike,
+      overrides?: CallOverrides,
+    ): Promise<BigNumber>;
 
     "create(bytes,bytes)"(
       encodedBalance: BytesLike,
@@ -394,7 +447,9 @@ export class Withdraw extends Contract {
 
     ResolverEncoding(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    "ResolverEncoding()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    "ResolverEncoding()"(
+      overrides?: CallOverrides,
+    ): Promise<PopulatedTransaction>;
 
     StateEncoding(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -412,9 +467,13 @@ export class Withdraw extends Contract {
       overrides?: CallOverrides,
     ): Promise<PopulatedTransaction>;
 
-    getRegistryInformation(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    getRegistryInformation(
+      overrides?: CallOverrides,
+    ): Promise<PopulatedTransaction>;
 
-    "getRegistryInformation()"(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    "getRegistryInformation()"(
+      overrides?: CallOverrides,
+    ): Promise<PopulatedTransaction>;
 
     resolve(
       encodedBalance: BytesLike,

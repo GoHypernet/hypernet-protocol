@@ -1,7 +1,10 @@
 import React from "react";
 import { View, Image, StyleSheet } from "react-native";
 import { Button } from "react-native-elements";
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from "react-native-responsive-screen";
 import Icon from "react-native-vector-icons/FontAwesome";
 
 interface ServiceCardProps {

@@ -1,4 +1,6 @@
-import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import HypernetWebIntegration, {
+  IHypernetWebIntegration,
+} from "@hypernetlabs/web-integration";
 import ko from "knockout";
 
 import { AccountParams } from "../Account/Account.viewmodel";

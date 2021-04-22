@@ -13,8 +13,14 @@ export class InternalProviderFactory implements IInternalProviderFactory {
     privateCredentials: PrivateCredentials,
   ): ResultAsync<IInternalProvider, InvalidParametersError> {
     if (!privateCredentials.privateKey && !privateCredentials.mnemonic) {
-      return errAsync(new InvalidParametersError("You must provide a mnemonic or private key"));
+      return errAsync(
+        new InvalidParametersError(
+          "You must provide a mnemonic or private key",
+        ),
+      );
     }
-    return okAsync(new InternalProvider(this.configProvider, privateCredentials));
+    return okAsync(
+      new InternalProvider(this.configProvider, privateCredentials),
+    );
   }
 }

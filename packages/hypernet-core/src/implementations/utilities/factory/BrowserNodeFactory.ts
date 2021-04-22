@@ -7,7 +7,10 @@ import { IBrowserNode, IConfigProvider } from "@interfaces/utilities";
 import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
 
 export class BrowserNodeFactory implements IBrowserNodeFactory {
-  constructor(protected configProvider: IConfigProvider, protected logUtils: ILogUtils) {}
+  constructor(
+    protected configProvider: IConfigProvider,
+    protected logUtils: ILogUtils,
+  ) {}
 
   public factoryBrowserNode(): ResultAsync<IBrowserNode, never> {
     return this.configProvider.getConfig().map((config) => {

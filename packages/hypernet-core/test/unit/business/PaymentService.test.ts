@@ -1,5 +1,3 @@
-import td from "testdouble";
-
 import {
   PushPayment,
   Payment,
@@ -13,6 +11,25 @@ import {
 } from "@hypernetlabs/objects";
 import { EPaymentState } from "@hypernetlabs/objects";
 import {
+  AcceptPaymentError,
+  InsufficientBalanceError,
+  InvalidParametersError,
+  LogicalError,
+} from "@hypernetlabs/objects";
+import { ILogUtils } from "@hypernetlabs/utils";
+import { BigNumber } from "ethers";
+import { okAsync, errAsync } from "neverthrow";
+import td from "testdouble";
+
+import { PaymentService } from "@implementations/business/PaymentService";
+import { IPaymentService } from "@interfaces/business/IPaymentService";
+import {
+  IAccountsRepository,
+  ILinkRepository,
+  IMerchantConnectorRepository,
+  IPaymentRepository,
+} from "@interfaces/data";
+import {
   defaultExpirationLength,
   merchantUrl,
   hyperTokenAddress,
@@ -25,32 +42,22 @@ import {
   unixNow,
   account,
 } from "@mock/mocks";
-import { okAsync, errAsync } from "neverthrow";
-import {
-  AcceptPaymentError,
-  InsufficientBalanceError,
-  InvalidParametersError,
-  LogicalError,
-} from "@hypernetlabs/objects";
-import {
-  IAccountsRepository,
-  ILinkRepository,
-  IMerchantConnectorRepository,
-  IPaymentRepository,
-} from "@interfaces/data";
 import { ConfigProviderMock, ContextProviderMock } from "@tests/mock/utils";
-import { ILogUtils } from "@hypernetlabs/utils";
-import { IPaymentService } from "@interfaces/business/IPaymentService";
-import { PaymentService } from "@implementations/business/PaymentService";
-import { BigNumber } from "ethers";
 
 const requiredStake = "42";
 const paymentToken = mockUtils.generateRandomPaymentToken();
 const amount = "42";
 const expirationDate = unixNow + defaultExpirationLength;
-const paymentId = PaymentId("See, this doesn't have to be legit data if it's never checked!");
+const paymentId = PaymentId(
+  "See, this doesn't have to be legit data if it's never checked!",
+);
 const nonExistentPaymentId = PaymentId("This payment is not mocked");
-const paymentDetails = new PaymentInternalDetails(offerTransferId, insuranceTransferId, parameterizedTransferId, []);
+const paymentDetails = new PaymentInternalDetails(
+  offerTransferId,
+  insuranceTransferId,
+  parameterizedTransferId,
+  [],
+);
 
 class PaymentServiceMocks {
   public vectorLinkRepository = td.object<ILinkRepository>();
@@ -112,19 +119,31 @@ class PaymentServiceMocks {
     ).thenReturn(okAsync(this.pushPayment));
 
     this.setExistingPayments([this.pushPayment]);
-    td.when(this.paymentRepository.getPaymentsByIds(td.matchers.contains(nonExistentPaymentId))).thenReturn(
-      okAsync(new Map<PaymentId, Payment>()),
+    td.when(
+      this.paymentRepository.getPaymentsByIds(
+        td.matchers.contains(nonExistentPaymentId),
+      ),
+    ).thenReturn(okAsync(new Map<PaymentId, Payment>()));
+    td.when(
+      this.accountRepository.getBalanceByAsset(hyperTokenAddress),
+    ).thenReturn(okAsync(this.assetBalance));
+    td.when(this.paymentRepository.provideStake(paymentId, account)).thenReturn(
+      okAsync(this.stakedPushPayment),
     );
-    td.when(this.accountRepository.getBalanceByAsset(hyperTokenAddress)).thenReturn(okAsync(this.assetBalance));
-    td.when(this.paymentRepository.provideStake(paymentId, account)).thenReturn(okAsync(this.stakedPushPayment));
-    td.when(this.paymentRepository.provideAsset(paymentId)).thenReturn(okAsync(this.paidPushPayment));
-    td.when(this.paymentRepository.finalizePayment(paymentId, amount)).thenReturn(okAsync(this.finalizedPushPayment));
+    td.when(this.paymentRepository.provideAsset(paymentId)).thenReturn(
+      okAsync(this.paidPushPayment),
+    );
+    td.when(
+      this.paymentRepository.finalizePayment(paymentId, amount),
+    ).thenReturn(okAsync(this.finalizedPushPayment));
 
     this.merchantAddresses = new Map();
     this.merchantAddresses.set(merchantUrl, account);
-    td.when(this.merchantConnectorRepository.getMerchantAddresses(td.matchers.contains(merchantUrl))).thenReturn(
-      okAsync(this.merchantAddresses),
-    );
+    td.when(
+      this.merchantConnectorRepository.getMerchantAddresses(
+        td.matchers.contains(merchantUrl),
+      ),
+    ).thenReturn(okAsync(this.merchantAddresses));
   }
 
   public factoryPaymentService(): IPaymentService {
@@ -148,16 +167,16 @@ class PaymentServiceMocks {
       paymentIds.push(payment.id);
     }
 
-    td.when(this.paymentRepository.getPaymentsByIds(td.matchers.contains(paymentIds))).thenReturn(
-      okAsync(returnedPaymentsMap),
-    );
+    td.when(
+      this.paymentRepository.getPaymentsByIds(td.matchers.contains(paymentIds)),
+    ).thenReturn(okAsync(returnedPaymentsMap));
   }
 
   public factoryPushPayment(
     to: PublicIdentifier = publicIdentifier2,
     from: PublicIdentifier = publicIdentifier,
     state: EPaymentState = EPaymentState.Proposed,
-    amountStaked: string = "0",
+    amountStaked = "0",
   ): PushPayment {
     return new PushPayment(
       paymentId,
@@ -249,14 +268,20 @@ describe("PaymentService tests", () => {
     const payments = result._unsafeUnwrap();
     expect(payments.length).toBe(1);
     expect(payments[0].isErr()).toBeFalsy();
-    expect(payments[0]._unsafeUnwrap()).toBe(paymentServiceMock.stakedPushPayment);
+    expect(payments[0]._unsafeUnwrap()).toBe(
+      paymentServiceMock.stakedPushPayment,
+    );
   });
 
   test("Should acceptOffers return error if payment state is not Proposed", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
-    const payment = paymentServiceMock.factoryPushPayment(publicIdentifier2, publicIdentifier2, EPaymentState.Staked);
+    const payment = paymentServiceMock.factoryPushPayment(
+      publicIdentifier2,
+      publicIdentifier2,
+      EPaymentState.Staked,
+    );
     paymentServiceMock.setExistingPayments([payment]);
 
     const paymentService = paymentServiceMock.factoryPaymentService();
@@ -288,9 +313,9 @@ describe("PaymentService tests", () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
-    td.when(paymentServiceMock.paymentRepository.provideStake(paymentId, account)).thenReturn(
-      errAsync(new Error("test error")),
-    );
+    td.when(
+      paymentServiceMock.paymentRepository.provideStake(paymentId, account),
+    ).thenReturn(errAsync(new Error("test error")));
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 
@@ -303,7 +328,9 @@ describe("PaymentService tests", () => {
     const paymentResults = result._unsafeUnwrap();
     expect(paymentResults.length).toBe(1);
     expect(paymentResults[0].isErr()).toBeTruthy();
-    expect(paymentResults[0]._unsafeUnwrapErr()).toBeInstanceOf(AcceptPaymentError);
+    expect(paymentResults[0]._unsafeUnwrapErr()).toBeInstanceOf(
+      AcceptPaymentError,
+    );
   });
 
   test("Should stakePosted run without errors", async () => {
@@ -318,10 +345,12 @@ describe("PaymentService tests", () => {
     );
     paymentServiceMock.setExistingPayments([payment]);
 
-    let updatedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val: PushPayment) => {
-      updatedPushPayments.push(val);
-    });
+    const updatedPushPayments = new Array<PushPayment>();
+    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe(
+      (val: PushPayment) => {
+        updatedPushPayments.push(val);
+      },
+    );
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 
@@ -362,10 +391,12 @@ describe("PaymentService tests", () => {
     );
     paymentServiceMock.setExistingPayments([payment]);
 
-    let updatedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val: PushPayment) => {
-      updatedPushPayments.push(val);
-    });
+    const updatedPushPayments = new Array<PushPayment>();
+    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe(
+      (val: PushPayment) => {
+        updatedPushPayments.push(val);
+      },
+    );
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 
@@ -383,13 +414,19 @@ describe("PaymentService tests", () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
-    const payment = paymentServiceMock.factoryPushPayment(publicIdentifier, publicIdentifier2, EPaymentState.Approved);
+    const payment = paymentServiceMock.factoryPushPayment(
+      publicIdentifier,
+      publicIdentifier2,
+      EPaymentState.Approved,
+    );
     paymentServiceMock.setExistingPayments([payment]);
 
-    let updatedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val: PushPayment) => {
-      updatedPushPayments.push(val);
-    });
+    const updatedPushPayments = new Array<PushPayment>();
+    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe(
+      (val: PushPayment) => {
+        updatedPushPayments.push(val);
+      },
+    );
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 
@@ -401,20 +438,28 @@ describe("PaymentService tests", () => {
     expect(result.isErr()).toBeFalsy();
     expect(result._unsafeUnwrap()).toBeDefined();
     expect(updatedPushPayments.length).toBe(2);
-    expect(updatedPushPayments[1]).toBe(paymentServiceMock.finalizedPushPayment);
+    expect(updatedPushPayments[1]).toBe(
+      paymentServiceMock.finalizedPushPayment,
+    );
   });
 
   test("Should paymentPosted run without errors when payment from is not equal to publicIdentifier and payment is PushPayment", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
-    const payment = paymentServiceMock.factoryPushPayment(publicIdentifier2, publicIdentifier, EPaymentState.Approved);
+    const payment = paymentServiceMock.factoryPushPayment(
+      publicIdentifier2,
+      publicIdentifier,
+      EPaymentState.Approved,
+    );
     paymentServiceMock.setExistingPayments([payment]);
 
-    let updatedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val: PushPayment) => {
-      updatedPushPayments.push(val);
-    });
+    const updatedPushPayments = new Array<PushPayment>();
+    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe(
+      (val: PushPayment) => {
+        updatedPushPayments.push(val);
+      },
+    );
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 
@@ -454,10 +499,12 @@ describe("PaymentService tests", () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
-    let updatedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val: PushPayment) => {
-      updatedPushPayments.push(val);
-    });
+    const updatedPushPayments = new Array<PushPayment>();
+    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe(
+      (val: PushPayment) => {
+        updatedPushPayments.push(val);
+      },
+    );
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 
@@ -475,10 +522,12 @@ describe("PaymentService tests", () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
-    let receivedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val: PushPayment) => {
-      receivedPushPayments.push(val);
-    });
+    const receivedPushPayments = new Array<PushPayment>();
+    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe(
+      (val: PushPayment) => {
+        receivedPushPayments.push(val);
+      },
+    );
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 
@@ -497,10 +546,12 @@ describe("PaymentService tests", () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
-    let receivedPushPayments = new Array<PushPayment>();
-    paymentServiceMock.contextProvider.onPushPaymentReceived.subscribe((val: PushPayment) => {
-      receivedPushPayments.push(val);
-    });
+    const receivedPushPayments = new Array<PushPayment>();
+    paymentServiceMock.contextProvider.onPushPaymentReceived.subscribe(
+      (val: PushPayment) => {
+        receivedPushPayments.push(val);
+      },
+    );
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 

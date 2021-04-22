@@ -6,7 +6,9 @@ const { compilerOptions } = require("../../tsconfig.build");
 
 console.log(compilerOptions);
 
-const moduleNames = pathsToModuleNameMapper(compilerOptions.paths, { prefix: "<rootDir>/../../" });
+const moduleNames = pathsToModuleNameMapper(compilerOptions.paths, {
+  prefix: "<rootDir>/../../",
+});
 
 console.log(moduleNames);
 

@@ -9,12 +9,20 @@ interface TokenSelectorProps {
   setSelectedPaymentToken: (selectedOption?: ITokenSelectorOption) => void;
 }
 
-const TokenSelector: React.FC<TokenSelectorProps> = (props: TokenSelectorProps) => {
-  const { tokenSelectorOptions, selectedPaymentToken, setSelectedPaymentToken } = props;
+const TokenSelector: React.FC<TokenSelectorProps> = (
+  props: TokenSelectorProps,
+) => {
+  const {
+    tokenSelectorOptions,
+    selectedPaymentToken,
+    setSelectedPaymentToken,
+  } = props;
   console.log("tokenSelectorOptions: ", tokenSelectorOptions);
 
   const handleChange = (event: any) => {
-    const selectedOption = tokenSelectorOptions?.find((option) => option?.address === event.target.value);
+    const selectedOption = tokenSelectorOptions?.find(
+      (option) => option?.address === event.target.value,
+    );
     setSelectedPaymentToken(selectedOption);
   };
 

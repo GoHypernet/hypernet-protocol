@@ -8,13 +8,25 @@ import {
   LogUtils,
 } from "@hypernetlabs/utils";
 
-import { PostmateApi, MerchantConnectorListener } from "@merchant-iframe/implementations/api";
+import {
+  PostmateApi,
+  MerchantConnectorListener,
+} from "@merchant-iframe/implementations/api";
 import { MerchantService } from "@merchant-iframe/implementations/business";
-import { MerchantConnectorRepository, PersistenceRepository } from "@merchant-iframe/implementations/data";
+import {
+  MerchantConnectorRepository,
+  PersistenceRepository,
+} from "@merchant-iframe/implementations/data";
 import { ContextProvider } from "@merchant-iframe/implementations/utils";
-import { IMerchantConnectorListener, IMerchantIFrameApi } from "@merchant-iframe/interfaces/api";
+import {
+  IMerchantConnectorListener,
+  IMerchantIFrameApi,
+} from "@merchant-iframe/interfaces/api";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
-import { IMerchantConnectorRepository, IPersistenceRepository } from "@merchant-iframe/interfaces/data";
+import {
+  IMerchantConnectorRepository,
+  IPersistenceRepository,
+} from "@merchant-iframe/interfaces/data";
 import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 export class MerchantIframe {
   protected contextProvider: IContextProvider;
@@ -37,8 +49,12 @@ export class MerchantIframe {
     this.localStorageUtils = new LocalStorageUtils();
     this.logUtils = new LogUtils();
 
-    this.merchantConnectorRepository = new MerchantConnectorRepository(this.ajaxUtils);
-    this.persistenceRepository = new PersistenceRepository(this.localStorageUtils);
+    this.merchantConnectorRepository = new MerchantConnectorRepository(
+      this.ajaxUtils,
+    );
+    this.persistenceRepository = new PersistenceRepository(
+      this.localStorageUtils,
+    );
 
     this.merchantService = new MerchantService(
       this.merchantConnectorRepository,
@@ -46,7 +62,10 @@ export class MerchantIframe {
       this.contextProvider,
     );
 
-    this.merchantIframeApi = new PostmateApi(this.merchantService, this.contextProvider);
+    this.merchantIframeApi = new PostmateApi(
+      this.merchantService,
+      this.contextProvider,
+    );
     this.merchantConnectorListener = new MerchantConnectorListener(
       this.contextProvider,
       this.merchantService,

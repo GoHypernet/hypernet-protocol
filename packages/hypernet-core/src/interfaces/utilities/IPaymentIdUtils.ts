@@ -30,7 +30,9 @@ export interface IPaymentIdUtils {
    * (characters 20-31 of the paymentIdString)
    * @param paymentIdString
    */
-  getType(paymentIdString: PaymentId): Result<EPaymentType, InvalidPaymentIdError>;
+  getType(
+    paymentIdString: PaymentId,
+  ): Result<EPaymentType, InvalidPaymentIdError>;
 
   /**
    * Returns the UUID portion of the paymentID string.
@@ -43,7 +45,9 @@ export interface IPaymentIdUtils {
    * A valid payment ID is exactly 64 characters, hexadecimal, prefixed with 0x.
    * @param paymentIdString
    */
-  isValidPaymentId(paymentIdString: PaymentId): Result<boolean, InvalidParametersError>;
+  isValidPaymentId(
+    paymentIdString: PaymentId,
+  ): Result<boolean, InvalidParametersError>;
 
   /**
    * Given domain, type, and uuid, returns the computed paymentId
@@ -51,5 +55,9 @@ export interface IPaymentIdUtils {
    * @param type Alphanumeric string of 6 characters or less
    * @param uuid Hex string of 32 characterx exactly
    */
-  makePaymentId(domain: string, type: EPaymentType, uuid: UUID): Result<PaymentId, InvalidParametersError>;
+  makePaymentId(
+    domain: string,
+    type: EPaymentType,
+    uuid: UUID,
+  ): Result<PaymentId, InvalidParametersError>;
 }

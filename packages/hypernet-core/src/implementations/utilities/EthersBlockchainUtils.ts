@@ -1,7 +1,10 @@
 import { artifacts } from "@connext/vector-contracts";
 import { ERC20Abi } from "@connext/vector-types";
 import { TransactionResponse } from "@ethersproject/abstract-provider";
-import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
+import {
+  TypedDataDomain,
+  TypedDataField,
+} from "@ethersproject/abstract-signer";
 import { BlockchainUnavailableError, Signature } from "@hypernetlabs/objects";
 import { EthereumAddress } from "@hypernetlabs/objects";
 import { Contract, ethers, BigNumber } from "ethers";
@@ -23,7 +26,9 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
     value: Record<string, any>,
     signature: Signature,
   ): EthereumAddress {
-    return EthereumAddress(ethers.utils.verifyTypedData(domain, types, value, signature));
+    return EthereumAddress(
+      ethers.utils.verifyTypedData(domain, types, value, signature),
+    );
   }
 
   public erc20Transfer(
@@ -33,9 +38,12 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
   ): ResultAsync<TransactionResponse, BlockchainUnavailableError> {
     return this.blockchainProvider.getSigner().andThen((signer) => {
       const tokenContract = new Contract(assetAddress, this.erc20Abi, signer);
-      return ResultAsync.fromPromise(tokenContract.transfer(channelAddress, amount), (err) => {
-        return err as BlockchainUnavailableError;
-      });
+      return ResultAsync.fromPromise(
+        tokenContract.transfer(channelAddress, amount),
+        (err) => {
+          return err as BlockchainUnavailableError;
+        },
+      );
     });
   }
 
@@ -50,9 +58,12 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
         signer,
       );
 
-      return ResultAsync.fromPromise(testTokenContract.mint(to, amount) as Promise<TransactionResponse>, (e) => {
-        return e as BlockchainUnavailableError;
-      });
+      return ResultAsync.fromPromise(
+        testTokenContract.mint(to, amount) as Promise<TransactionResponse>,
+        (e) => {
+          return e as BlockchainUnavailableError;
+        },
+      );
     });
   }
 }

@@ -1,6 +1,15 @@
-import { PublicIdentifier, EthereumAddress, MerchantUrl } from "@hypernetlabs/objects";
+import {
+  PublicIdentifier,
+  EthereumAddress,
+  MerchantUrl,
+} from "@hypernetlabs/objects";
 import { EPaymentType } from "@hypernetlabs/objects";
-import { TokenSelector, Button, TextInput, SelectInput } from "@hypernetlabs/web-ui";
+import {
+  TokenSelector,
+  Button,
+  TextInput,
+  SelectInput,
+} from "@hypernetlabs/web-ui";
 import React from "react";
 
 import { usePayment } from "@web-integration-hooks";
@@ -16,7 +25,9 @@ interface PaymentWidgetProps {
   paymentType?: EPaymentType;
 }
 
-const PaymentWidget: React.FC<PaymentWidgetProps> = (props: PaymentWidgetProps) => {
+export const PaymentWidget: React.FC<PaymentWidgetProps> = (
+  props: PaymentWidgetProps,
+) => {
   const {
     tokenSelectorOptions,
     selectedPaymentToken,
@@ -83,7 +94,12 @@ const PaymentWidget: React.FC<PaymentWidgetProps> = (props: PaymentWidgetProps) 
             setSelectedPaymentToken={setSelectedPaymentToken}
           />
           <br />
-          <TextInput value={amount} onChange={setAmount} label="Amount:" placeholder="Enter Amount" />
+          <TextInput
+            value={amount}
+            onChange={setAmount}
+            label="Amount:"
+            placeholder="Enter Amount"
+          />
           <br />
           <TextInput
             value={expirationDate}
@@ -95,12 +111,14 @@ const PaymentWidget: React.FC<PaymentWidgetProps> = (props: PaymentWidgetProps) 
         </div>
       )}
       {paymentType && (
-        <Button onClick={submitPaymentClick} disabled={!selectedPaymentToken?.address} label="Submit Payment" />
+        <Button
+          onClick={submitPaymentClick}
+          disabled={!selectedPaymentToken?.address}
+          label="Submit Payment"
+        />
       )}
       <br />
       <h3>{resultMessage?.message}</h3>
     </div>
   );
 };
-
-export default PaymentWidget;

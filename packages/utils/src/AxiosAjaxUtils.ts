@@ -1,7 +1,8 @@
-import { IAjaxUtils, IRequestConfig } from "@utils/IAjaxUtils";
 import axios from "axios";
 import { AxiosResponse } from "axios";
 import { ResultAsync } from "neverthrow";
+
+import { IAjaxUtils, IRequestConfig } from "@utils/IAjaxUtils";
 
 export class AxiosAjaxUtils implements IAjaxUtils {
   get<T, E>(url: URL, config?: IRequestConfig): ResultAsync<T, E> {

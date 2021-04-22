@@ -27,7 +27,12 @@ import {
   PaymentCreationError,
   BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
-import { EPaymentType, ETransferType, MessageState, EMessageTransferType } from "@hypernetlabs/objects";
+import {
+  EPaymentType,
+  ETransferType,
+  MessageState,
+  EMessageTransferType,
+} from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
@@ -62,11 +67,17 @@ export class PaymentRepository implements IPaymentRepository {
     protected timeUtils: ITimeUtils,
   ) {}
 
-  public createPullRecord(paymentId: PaymentId, amount: string): ResultAsync<Payment, PaymentCreationError> {
+  public createPullRecord(
+    paymentId: PaymentId,
+    amount: string,
+  ): ResultAsync<Payment, PaymentCreationError> {
     let transfers: IFullTransferState[];
     let browserNode: IBrowserNode;
 
-    return ResultUtils.combine([this._getTransfersByPaymentId(paymentId), this.browserNodeProvider.getBrowserNode()])
+    return ResultUtils.combine([
+      this._getTransfersByPaymentId(paymentId),
+      this.browserNodeProvider.getBrowserNode(),
+    ])
       .andThen((vals) => {
         [transfers, browserNode] = vals;
         return this.paymentUtils.transfersToPayment(paymentId, transfers);
@@ -81,7 +92,10 @@ export class PaymentRepository implements IPaymentRepository {
           pullPaymentAmount: amount,
         };
 
-        return this.vectorUtils.createPullNotificationTransfer(payment.to, message);
+        return this.vectorUtils.createPullNotificationTransfer(
+          payment.to,
+          message,
+        );
       })
       .andThen((transferResponse) => {
         // Get the newly minted transfer
@@ -139,7 +153,10 @@ export class PaymentRepository implements IPaymentRepository {
         };
 
         // Create a message transfer, with the terms of the payment in the metadata.
-        return this.vectorUtils.createOfferTransfer(counterPartyAccount, message);
+        return this.vectorUtils.createOfferTransfer(
+          counterPartyAccount,
+          message,
+        );
       })
       .andThen((transferInfo) => {
         return browserNode.getTransfer(TransferId(transferInfo.transferId));
@@ -201,7 +218,10 @@ export class PaymentRepository implements IPaymentRepository {
         };
 
         // Create a message transfer, with the terms of the payment in the metadata.
-        return this.vectorUtils.createOfferTransfer(counterPartyAccount, message);
+        return this.vectorUtils.createOfferTransfer(
+          counterPartyAccount,
+          message,
+        );
       })
       .andThen((transferInfo) => {
         return browserNode.getTransfer(TransferId(transferInfo.transferId));
@@ -224,21 +244,32 @@ export class PaymentRepository implements IPaymentRepository {
     paymentId: PaymentId,
   ): ResultAsync<
     IFullTransferState[],
-    RouterChannelUnknownError | VectorError | BlockchainUnavailableError | LogicalError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
   > {
     let browserNode: IBrowserNode;
     let channelAddress: EthereumAddress;
 
-    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.vectorUtils.getRouterChannelAddress()])
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.vectorUtils.getRouterChannelAddress(),
+    ])
       .andThen((vals) => {
         [browserNode, channelAddress] = vals;
         return browserNode.getActiveTransfers(channelAddress);
       })
       .andThen((activeTransfers) => {
         // We also need to look for potentially resolved transfers
-        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
+        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(
+          activeTransfers,
+        );
 
-        return browserNode.getTransfers(earliestDate, this.timeUtils.getUnixNow());
+        return browserNode.getTransfers(
+          earliestDate,
+          this.timeUtils.getUnixNow(),
+        );
       })
       .andThen((transfers) => {
         // This new list is complete- it should include active and inactive transfers
@@ -253,7 +284,9 @@ export class PaymentRepository implements IPaymentRepository {
           >
         >();
         for (const transfer of transfers) {
-          transferTypeResults.push(this.paymentUtils.getTransferTypeWithTransfer(transfer));
+          transferTypeResults.push(
+            this.paymentUtils.getTransferTypeWithTransfer(transfer),
+          );
         }
 
         return ResultUtils.combine(transferTypeResults);
@@ -267,19 +300,28 @@ export class PaymentRepository implements IPaymentRepository {
           const { transferType, transfer } = transferTypeWithTransfer;
 
           if (transferType === ETransferType.Offer) {
-            const offerDetails: IHypernetOfferDetails = JSON.parse((transfer.transferState as MessageState).message);
+            const offerDetails: IHypernetOfferDetails = JSON.parse(
+              (transfer.transferState as MessageState).message,
+            );
 
             if (offerDetails.paymentId === paymentId) {
               relevantTransfers.push(transfer);
             }
-          } else if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
+          } else if (
+            transferType === ETransferType.Insurance ||
+            transferType === ETransferType.Parameterized
+          ) {
             if (paymentId === transfer.transferState.UUID) {
               relevantTransfers.push(transfer);
             } else {
-              this.logUtils.debug(`Transfer not relevant to payment ${paymentId}, transferId: ${transfer.transferId}`);
+              this.logUtils.debug(
+                `Transfer not relevant to payment ${paymentId}, transferId: ${transfer.transferId}`,
+              );
             }
           } else {
-            this.logUtils.debug(`Unrecognized transfer in PaymentRepository, transferId: ${transfer.transferId}`);
+            this.logUtils.debug(
+              `Unrecognized transfer in PaymentRepository, transferId: ${transfer.transferId}`,
+            );
           }
         }
 
@@ -305,7 +347,10 @@ export class PaymentRepository implements IPaymentRepository {
     let browserNode: IBrowserNode;
     let channelAddress: EthereumAddress;
 
-    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.vectorUtils.getRouterChannelAddress()])
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.vectorUtils.getRouterChannelAddress(),
+    ])
       .andThen((vals) => {
         [browserNode, channelAddress] = vals;
 
@@ -313,9 +358,14 @@ export class PaymentRepository implements IPaymentRepository {
       })
       .andThen((activeTransfers) => {
         // We also need to look for potentially resolved transfers
-        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
+        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(
+          activeTransfers,
+        );
 
-        return browserNode.getTransfers(earliestDate, this.timeUtils.getUnixNow());
+        return browserNode.getTransfers(
+          earliestDate,
+          this.timeUtils.getUnixNow(),
+        );
       })
       .andThen((transfers) => {
         const transferTypeResults = new Array<
@@ -328,7 +378,9 @@ export class PaymentRepository implements IPaymentRepository {
           >
         >();
         for (const transfer of transfers) {
-          transferTypeResults.push(this.paymentUtils.getTransferTypeWithTransfer(transfer));
+          transferTypeResults.push(
+            this.paymentUtils.getTransferTypeWithTransfer(transfer),
+          );
         }
 
         return ResultUtils.combine(transferTypeResults);
@@ -342,19 +394,28 @@ export class PaymentRepository implements IPaymentRepository {
           const { transferType, transfer } = transferTypeWithTransfer;
 
           if (transferType === ETransferType.Offer) {
-            const offerDetails: IHypernetOfferDetails = JSON.parse((transfer.transferState as MessageState).message);
+            const offerDetails: IHypernetOfferDetails = JSON.parse(
+              (transfer.transferState as MessageState).message,
+            );
             if (paymentIds.includes(offerDetails.paymentId)) {
               relevantTransfers.push(transfer);
             }
           } else {
-            if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
+            if (
+              transferType === ETransferType.Insurance ||
+              transferType === ETransferType.Parameterized
+            ) {
               if (paymentIds.includes(transfer.transferState.UUID)) {
                 relevantTransfers.push(transfer);
               } else {
-                this.logUtils.log(`Transfer not relevant in PaymentRepository, transferId: ${transfer.transferId}`);
+                this.logUtils.log(
+                  `Transfer not relevant in PaymentRepository, transferId: ${transfer.transferId}`,
+                );
               }
             } else {
-              this.logUtils.log(`Unrecognized transfer in PaymentRepository, transferId: ${transfer.transferId}`);
+              this.logUtils.log(
+                `Unrecognized transfer in PaymentRepository, transferId: ${transfer.transferId}`,
+              );
             }
           }
         }
@@ -394,7 +455,10 @@ export class PaymentRepository implements IPaymentRepository {
     let existingTransfers: IFullTransferState[];
     let parameterizedTransferId: TransferId;
 
-    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this._getTransfersByPaymentId(paymentId)])
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this._getTransfersByPaymentId(paymentId),
+    ])
       .andThen((vals) => {
         [browserNode, existingTransfers] = vals;
 
@@ -413,9 +477,15 @@ export class PaymentRepository implements IPaymentRepository {
           );
         }
 
-        parameterizedTransferId = TransferId(sortedTransfers.parameterizedTransfer.transferId);
+        parameterizedTransferId = TransferId(
+          sortedTransfers.parameterizedTransfer.transferId,
+        );
 
-        return this.vectorUtils.resolvePaymentTransfer(parameterizedTransferId, paymentId, amount);
+        return this.vectorUtils.resolvePaymentTransfer(
+          parameterizedTransferId,
+          paymentId,
+          amount,
+        );
       })
       .andThen(() => {
         return browserNode.getTransfer(parameterizedTransferId);
@@ -423,11 +493,16 @@ export class PaymentRepository implements IPaymentRepository {
       .andThen((transfer) => {
         // Remove the parameterized transfer, and replace it
         // with this latest transfer
-        existingTransfers = existingTransfers.filter((obj) => obj.transferId !== parameterizedTransferId);
+        existingTransfers = existingTransfers.filter(
+          (obj) => obj.transferId !== parameterizedTransferId,
+        );
         existingTransfers.push(transfer);
 
         // Transfer has been resolved successfully; return the updated payment.
-        const updatedPayment = this.paymentUtils.transfersToPayment(paymentId, existingTransfers);
+        const updatedPayment = this.paymentUtils.transfersToPayment(
+          paymentId,
+          existingTransfers,
+        );
 
         return updatedPayment;
       });
@@ -467,20 +542,26 @@ export class PaymentRepository implements IPaymentRepository {
       .andThen((vals) => {
         [browserNode, config, existingTransfers, timestamp] = vals;
 
-        return this.paymentUtils.transfersToPayment(paymentId, existingTransfers);
+        return this.paymentUtils.transfersToPayment(
+          paymentId,
+          existingTransfers,
+        );
       })
       .andThen((payment) => {
         const paymentSender = payment.from;
         const paymentID = payment.id;
         const paymentStart = timestamp;
-        const paymentExpiration = paymentStart + config.defaultPaymentExpiryLength;
+        const paymentExpiration =
+          paymentStart + config.defaultPaymentExpiryLength;
 
         // TODO: There are probably some logical times when you should not provide a stake
         if (false) {
           return errAsync(new PaymentStakeError());
         }
 
-        this.logUtils.log(`PaymentRepository:provideStake: Creating insurance transfer for paymentId: ${paymentId}`);
+        this.logUtils.log(
+          `PaymentRepository:provideStake: Creating insurance transfer for paymentId: ${paymentId}`,
+        );
         return this.vectorUtils.createInsuranceTransfer(
           paymentSender,
           merchantAddress,
@@ -535,7 +616,10 @@ export class PaymentRepository implements IPaymentRepository {
       .andThen((vals) => {
         [browserNode, config, existingTransfers, timestamp] = vals;
 
-        return this.paymentUtils.transfersToPayment(paymentId, existingTransfers);
+        return this.paymentUtils.transfersToPayment(
+          paymentId,
+          existingTransfers,
+        );
       })
       .andThen((payment) => {
         const paymentTokenAddress = payment.paymentToken;
@@ -545,8 +629,14 @@ export class PaymentRepository implements IPaymentRepository {
         } else if (payment instanceof PullPayment) {
           paymentTokenAmount = payment.authorizedAmount;
         } else {
-          this.logUtils.error(`Payment was not instance of push or pull payment!`);
-          return errAsync(new LogicalError("Payment was not instance of push or pull payment!"));
+          this.logUtils.error(
+            `Payment was not instance of push or pull payment!`,
+          );
+          return errAsync(
+            new LogicalError(
+              "Payment was not instance of push or pull payment!",
+            ),
+          );
         }
 
         const paymentRecipient = payment.to;
@@ -561,11 +651,15 @@ export class PaymentRepository implements IPaymentRepository {
         const paymentStart = timestamp - 1;
         const paymentExpiration = timestamp + config.defaultPaymentExpiryLength;
 
-        this.logUtils.log(`Providing a payment amount of ${paymentTokenAmount}`);
+        this.logUtils.log(
+          `Providing a payment amount of ${paymentTokenAmount}`,
+        );
 
         // Use vectorUtils to create the parameterizedPayment
         return this.vectorUtils.createPaymentTransfer(
-          payment instanceof PushPayment ? EPaymentType.Push : EPaymentType.Pull,
+          payment instanceof PushPayment
+            ? EPaymentType.Push
+            : EPaymentType.Pull,
           paymentRecipient,
           paymentTokenAmount,
           paymentTokenAddress,
@@ -573,7 +667,9 @@ export class PaymentRepository implements IPaymentRepository {
           paymentStart,
           paymentExpiration,
           payment instanceof PullPayment ? payment.deltaTime : undefined,
-          payment instanceof PullPayment ? payment.deltaAmount.toString() : undefined,
+          payment instanceof PullPayment
+            ? payment.deltaAmount.toString()
+            : undefined,
         );
       })
       .andThen((transferInfoUnk) => {

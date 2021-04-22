@@ -1,1 +1,1 @@
-export { default } from "./FundWidget";
+export { default } from "@web-integration/widgets/FundWidget/FundWidget";

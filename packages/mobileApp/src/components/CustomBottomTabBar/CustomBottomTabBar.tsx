@@ -5,7 +5,11 @@ import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 
 import { colors } from "@mobileApp/constants";
 
-const CustomBottomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
+const CustomBottomTabBar: React.FC<BottomTabBarProps> = ({
+  state,
+  descriptors,
+  navigation,
+}) => {
   const focusedOptions = descriptors[state.routes[state.index].key].options;
 
   if (focusedOptions.tabBarVisible === false) {
@@ -55,7 +59,9 @@ const CustomBottomTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, n
             onLongPress={onLongPress}
             style={{
               ...styles.touchableOpacityStyle,
-              borderTopColor: isFocused ? colors.borderBlue : colors.transparent,
+              borderTopColor: isFocused
+                ? colors.borderBlue
+                : colors.transparent,
             }}
           >
             {options?.tabBarIcon &&

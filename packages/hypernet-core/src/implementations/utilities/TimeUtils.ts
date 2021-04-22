@@ -13,11 +13,18 @@ export class TimeUtils implements ITimeUtils {
     return moment().unix();
   }
 
-  public getBlockchainTimestamp(): ResultAsync<number, BlockchainUnavailableError> {
+  public getBlockchainTimestamp(): ResultAsync<
+    number,
+    BlockchainUnavailableError
+  > {
     const now = this.getUnixNow();
 
     // We can return a cached value if the last time we checked was this second
-    if (this.lastBlockchainCheck != null && this.lastBlockchainTimestamp != null && this.lastBlockchainCheck >= now) {
+    if (
+      this.lastBlockchainCheck != null &&
+      this.lastBlockchainTimestamp != null &&
+      this.lastBlockchainCheck >= now
+    ) {
       return okAsync(this.lastBlockchainTimestamp);
     }
 

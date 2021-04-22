@@ -1,5 +1,6 @@
-import { ILogUtils } from "@utils/ILogUtils";
 import pino from "pino";
+
+import { ILogUtils } from "@utils/ILogUtils";
 
 export class LogUtils implements ILogUtils {
   protected logger: pino.Logger;

@@ -1,1 +1,1 @@
-export { default } from "./PaymentWidget";
+export * from "@web-integration/widgets/PaymentWidget/PaymentWidget";

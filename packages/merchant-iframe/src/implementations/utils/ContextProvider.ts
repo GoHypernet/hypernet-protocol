@@ -33,12 +33,17 @@ export class ContextProvider implements IContextProvider {
     this.context = context;
   }
 
-  setValidatedMerchantConnector(validatedMerchantCode: string, validatedMerchantSignature: Signature): void {
+  setValidatedMerchantConnector(
+    validatedMerchantCode: string,
+    validatedMerchantSignature: Signature,
+  ): void {
     this.context.validatedMerchantCode = validatedMerchantCode;
     this.context.validatedMerchantSignature = validatedMerchantSignature;
 
     if (this.connectorValidatedResolve == null) {
-      throw new Error("Connector validated promise is null, this should never happen!");
+      throw new Error(
+        "Connector validated promise is null, this should never happen!",
+      );
     }
     this.connectorValidatedResolve();
   }

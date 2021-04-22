@@ -1,11 +1,15 @@
+import { MerchantUrl, Signature, EthereumAddress } from "@hypernetlabs/objects";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
+
 import { MerchantService } from "@merchant-iframe/implementations/business";
 import { ContextProvider } from "@merchant-iframe/implementations/utils";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
+import {
+  IMerchantConnectorRepository,
+  IPersistenceRepository,
+} from "@merchant-iframe/interfaces/data";
 import { MerchantValidationError } from "@merchant-iframe/interfaces/objects/errors";
-import { MerchantUrl, Signature, EthereumAddress } from "@hypernetlabs/objects";
-import { IMerchantConnectorRepository, IPersistenceRepository } from "@merchant-iframe/interfaces/data";
 
 jest.mock("ethers", () => {
   return {
@@ -36,31 +40,43 @@ class MerchantServiceMocks {
   }
 
   public runSuccessScenarios() {
-    td.when(this.merchantConnectorRepository.getMerchantSignature(this.merchantUrl)).thenReturn(
-      okAsync(Signature(this.signature)),
-    );
-    td.when(this.merchantConnectorRepository.getMerchantAddress(this.merchantUrl)).thenReturn(
-      okAsync(EthereumAddress(this.address)),
-    );
-    td.when(this.merchantConnectorRepository.getMerchantCode(this.merchantUrl)).thenReturn(okAsync(this.merchantCode));
-    td.when(this.persistenceRepository.addActivatedMerchantSignature(this.signature)).thenReturn(undefined);
+    td.when(
+      this.merchantConnectorRepository.getMerchantSignature(this.merchantUrl),
+    ).thenReturn(okAsync(Signature(this.signature)));
+    td.when(
+      this.merchantConnectorRepository.getMerchantAddress(this.merchantUrl),
+    ).thenReturn(okAsync(EthereumAddress(this.address)));
+    td.when(
+      this.merchantConnectorRepository.getMerchantCode(this.merchantUrl),
+    ).thenReturn(okAsync(this.merchantCode));
+    td.when(
+      this.persistenceRepository.addActivatedMerchantSignature(this.signature),
+    ).thenReturn(undefined);
   }
 
   public runFailureScenarios() {
-    td.when(this.merchantConnectorRepository.getMerchantSignature(this.merchantUrl)).thenReturn(
-      okAsync(Signature(this.signature)),
-    );
-    td.when(this.merchantConnectorRepository.getMerchantAddress(this.merchantUrl)).thenReturn(
-      okAsync(EthereumAddress(this.address + "1")),
-    );
-    td.when(this.merchantConnectorRepository.getMerchantCode(this.merchantUrl)).thenReturn(okAsync(this.merchantCode));
     td.when(
-      this.merchantConnectorRepository.getMerchantCode(MerchantUrl(this.merchantUrl + `?v=${this.nowTime}`)),
+      this.merchantConnectorRepository.getMerchantSignature(this.merchantUrl),
+    ).thenReturn(okAsync(Signature(this.signature)));
+    td.when(
+      this.merchantConnectorRepository.getMerchantAddress(this.merchantUrl),
+    ).thenReturn(okAsync(EthereumAddress(this.address + "1")));
+    td.when(
+      this.merchantConnectorRepository.getMerchantCode(this.merchantUrl),
+    ).thenReturn(okAsync(this.merchantCode));
+    td.when(
+      this.merchantConnectorRepository.getMerchantCode(
+        MerchantUrl(this.merchantUrl + `?v=${this.nowTime}`),
+      ),
     ).thenReturn(okAsync(this.merchantCode));
   }
 
   public factoryMerchantService(): IMerchantService {
-    return new MerchantService(this.merchantConnectorRepository, this.persistenceRepository, this.contextProvider);
+    return new MerchantService(
+      this.merchantConnectorRepository,
+      this.persistenceRepository,
+      this.contextProvider,
+    );
   }
 }
 
@@ -74,8 +90,9 @@ describe("MerchantService tests", () => {
 
     // Act
     const response = await merchantService.validateMerchantConnector();
-    const getMerchantCodeCallingcount = td.explain(merchantServiceMock.merchantConnectorRepository.getMerchantCode)
-      .callCount;
+    const getMerchantCodeCallingcount = td.explain(
+      merchantServiceMock.merchantConnectorRepository.getMerchantCode,
+    ).callCount;
 
     // Assert
     expect(response).toBeDefined();
@@ -93,8 +110,9 @@ describe("MerchantService tests", () => {
 
     // Act
     const response = await merchantService.validateMerchantConnector();
-    const getMerchantCodeCallingcount = td.explain(merchantServiceMock.merchantConnectorRepository.getMerchantCode)
-      .callCount;
+    const getMerchantCodeCallingcount = td.explain(
+      merchantServiceMock.merchantConnectorRepository.getMerchantCode,
+    ).callCount;
 
     // Assert
     expect(response).toBeDefined();

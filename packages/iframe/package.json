@@ -8,7 +8,7 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "yarn clean && yarn compile",
-    "clean": "rimraf dist",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
     "compile": "webpack",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p src/tsconfig.json",

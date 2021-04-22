@@ -9,7 +9,9 @@ import { StoreProvider } from "@mobileApp/state/store";
 
 interface AppContainerProps {}
 
-const AppContainer: React.FC<AppContainerProps> = (props: AppContainerProps) => {
+const AppContainer: React.FC<AppContainerProps> = (
+  props: AppContainerProps,
+) => {
   return (
     <StoreProvider>
       <WebViewBridge />

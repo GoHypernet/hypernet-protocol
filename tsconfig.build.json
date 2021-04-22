@@ -15,44 +15,42 @@
     "experimentalDecorators": true,
     "declarationMap": true,
     "forceConsistentCasingInFileNames": true,
-    "composite": true,
     "allowSyntheticDefaultImports": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "noImplicitAny": false,
     "resolveJsonModule": true,
     "jsx": "react",
+    "composite": true,
     "typeRoots": [
       "./packages/hypernet-core/src/typings",
       "./node_modules/@types"
     ],
     "paths": {
-      "@interfaces/*": ["./packages/hypernet-core/src/interfaces/*"],
-      "@implementations/*": ["./packages/hypernet-core/src/implementations/*"],
+      "@interfaces/*": ["./interfaces/*"],
+      "@implementations/*": ["./implementations/*"],
       "@tests/*": ["./packages/hypernet-core/test/*"],
       "@mock/*": ["./packages/hypernet-core/test/mock/*"],
       "@integration-tests/*": ["./packages/developer-ui/test/integration/*"],
-      "@web-integration-constants": [
-        "./packages/web-integration/src/constants"
-      ],
+      "@web-integration/*": ["./*"],
       "@web-integration-containers/*": [
-        "./packages/web-integration/src/containers/*"
+        "./containers/*"
       ],
-      "@web-integration-contexts": ["./packages/web-integration/src/contexts"],
-      "@web-integration-flows/*": ["./packages/web-integration/src/flows/*"],
-      "@web-integration-hooks": ["./packages/web-integration/src/hooks"],
+      "@web-integration-contexts": ["./contexts"],
+      "@web-integration-flows/*": ["./flows/*"],
+      "@web-integration-hooks": ["./hooks"],
       "@web-integration-implementations/*": [
-        "./packages/web-integration/src/implementations/*"
+        "./implementations/*"
       ],
       "@web-integration-interfaces/*": [
-        "./packages/web-integration/src/interfaces/*"
+        "./interfaces/*"
       ],
       "@web-integration-widgets/*": [
-        "./packages/web-integration/src/widgets/*"
+        "./widgets/*"
       ],
       "@mobile-integration/*": ["./packages/mobile-integration/src/*"],
       "@mobileApp/*": ["./packages/mobileApp/src/*"],
-      "@merchant-connector/*": ["./packages/merchant-connector/src/*"],
+      "@merchant-connector/*": ["./*"],
       "@merchant-iframe/*": ["./packages/merchant-iframe/src/*"],
       "@test-merchant-connector/*": [
         "./packages/test-merchant-connector/src/*"

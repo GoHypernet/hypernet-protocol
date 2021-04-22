@@ -39,7 +39,10 @@ const MainHome: React.FC<MainHomeProps> = (props: MainHomeProps) => {
       </Text>
       <TouchableOpacity
         onPress={() => {
-          dispatch({ type: SomeActionType.ADD_CONTACT, payload: "ffff MainHome" });
+          dispatch({
+            type: SomeActionType.ADD_CONTACT,
+            payload: "ffff MainHome",
+          });
         }}
       >
         <Text>change store state</Text>

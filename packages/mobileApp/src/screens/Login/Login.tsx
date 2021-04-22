@@ -33,7 +33,10 @@ const Login: React.FC<LoginProps> = (props: LoginProps) => {
 
       <TouchableOpacity
         onPress={() => {
-          dispatch({ type: UserActionType.SET_USER_NAME, payload: "muhammed altinci" });
+          dispatch({
+            type: UserActionType.SET_USER_NAME,
+            payload: "muhammed altinci",
+          });
         }}
       >
         <Text>change user state</Text>
@@ -41,7 +44,10 @@ const Login: React.FC<LoginProps> = (props: LoginProps) => {
 
       <TouchableOpacity
         onPress={() => {
-          dispatch({ type: UserActionType.SET_USER_ID, payload: id ? id + 1 : 1 });
+          dispatch({
+            type: UserActionType.SET_USER_ID,
+            payload: id ? id + 1 : 1,
+          });
         }}
       >
         <Text>increase id</Text>

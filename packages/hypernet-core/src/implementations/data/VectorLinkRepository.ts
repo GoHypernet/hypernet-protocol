@@ -58,7 +58,10 @@ export class VectorLinkRepository implements ILinkRepository {
   > {
     let browserNode: IBrowserNode;
 
-    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.vectorUtils.getRouterChannelAddress()])
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.vectorUtils.getRouterChannelAddress(),
+    ])
       .andThen((vals) => {
         let channelAddress: EthereumAddress;
         [browserNode, channelAddress] = vals;
@@ -66,9 +69,14 @@ export class VectorLinkRepository implements ILinkRepository {
       })
       .andThen((activeTransfers) => {
         // We also need to look for potentially resolved transfers
-        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
+        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(
+          activeTransfers,
+        );
 
-        return browserNode.getTransfers(earliestDate, this.timeUtils.getUnixNow());
+        return browserNode.getTransfers(
+          earliestDate,
+          this.timeUtils.getUnixNow(),
+        );
       })
       .andThen((transfers) => {
         if (transfers.length === 0) {
@@ -98,7 +106,10 @@ export class VectorLinkRepository implements ILinkRepository {
     | LogicalError
   > {
     let browserNode: IBrowserNode;
-    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.vectorUtils.getRouterChannelAddress()])
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.vectorUtils.getRouterChannelAddress(),
+    ])
       .andThen((vals) => {
         let channelAddress: EthereumAddress;
         [browserNode, channelAddress] = vals;
@@ -106,13 +117,20 @@ export class VectorLinkRepository implements ILinkRepository {
       })
       .andThen((activeTransfers) => {
         // We also need to look for potentially resolved transfers
-        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
+        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(
+          activeTransfers,
+        );
 
-        return browserNode.getTransfers(earliestDate, this.timeUtils.getUnixNow());
+        return browserNode.getTransfers(
+          earliestDate,
+          this.timeUtils.getUnixNow(),
+        );
       })
       .andThen((transfers) => {
         const filteredActiveTransfers = transfers.filter((val) => {
-          return val.responder === counterpartyId || val.initiator === counterpartyId;
+          return (
+            val.responder === counterpartyId || val.initiator === counterpartyId
+          );
         });
 
         // Because of the filter above, this should only produce a single link

@@ -1,6 +1,9 @@
 import React from "react";
 import { View, Image, StyleSheet } from "react-native";
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from "react-native-responsive-screen";
 
 import ScreenHeader from "@mobileApp/components/ScreenHeader";
 
@@ -19,7 +22,10 @@ const Summary: React.FC<SummaryProps> = (props: SummaryProps) => {
         }}
       />
       <View style={styles.cardListContainer}>
-        <Image style={styles.img} source={require("@mobileApp/assets/images/summary.png")} />
+        <Image
+          style={styles.img}
+          source={require("@mobileApp/assets/images/summary.png")}
+        />
       </View>
     </View>
   );

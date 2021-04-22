@@ -8,14 +8,13 @@
   "main": "dist/index.js",
   "files": [
     "dist",
-    "src",
     "!dist/test",
     "!dist/tsconfig.tsbuildinfo"
   ],
   "scripts": {
     "build": "yarn clean && yarn compile",
-    "clean": "rimraf dist",
-    "compile": "tsc --build src/tsconfig.json && npx tsc-alias -p src/tsconfig.json",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "compile": "tsc && tsc-alias",
     "format": "prettier --write \"src/**/*.{js,ts,tsx,json,md}\"",
     "lint": "tslint -p src/tsconfig.json",
     "prepublish": "yarn build",

@@ -25,7 +25,10 @@ export class MessageTransfer__factory extends ContractFactory {
   connect(signer: Signer): MessageTransfer__factory {
     return super.connect(signer) as MessageTransfer__factory;
   }
-  static connect(address: string, signerOrProvider: Signer | Provider): MessageTransfer {
+  static connect(
+    address: string,
+    signerOrProvider: Signer | Provider,
+  ): MessageTransfer {
     return new Contract(address, _abi, signerOrProvider) as MessageTransfer;
   }
 }

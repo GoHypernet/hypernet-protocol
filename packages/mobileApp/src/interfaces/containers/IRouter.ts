@@ -13,7 +13,11 @@ export enum ENavigationScreenName {
   SUMMARY = "Summary",
 }
 
-type TabBarIcon = (props: { focused: boolean; color: string; size: number }) => React.ReactNode | undefined;
+type TabBarIcon = (props: {
+  focused: boolean;
+  color: string;
+  size: number;
+}) => React.ReactNode | undefined;
 export interface INavigationScreens {
   name: ENavigationScreenName;
   component: React.FC<any>;

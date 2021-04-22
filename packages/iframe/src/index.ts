@@ -5,7 +5,10 @@ import { EBlockchainNetwork } from "@hypernetlabs/objects";
 import CoreWrapper from "./CoreWrapper";
 
 // Instantiate the hypernet core.
-const core: IHypernetCore = new HypernetCore(EBlockchainNetwork.Localhost, undefined);
+const core: IHypernetCore = new HypernetCore(
+  EBlockchainNetwork.Localhost,
+  undefined,
+);
 
 const coreWrapper = new CoreWrapper(core);
 coreWrapper.activateModel();

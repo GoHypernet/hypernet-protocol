@@ -1,4 +1,7 @@
-import { BlockchainUnavailableError, InvalidParametersError } from "@hypernetlabs/objects";
+import {
+  BlockchainUnavailableError,
+  InvalidParametersError,
+} from "@hypernetlabs/objects";
 import { PrivateCredentials, EthereumAddress } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { okAsync, ResultAsync, errAsync } from "neverthrow";
@@ -14,11 +17,19 @@ declare global {
 // This is just a code of avoiding errors in mobile app.
 // An actuall non metamask provider set up should be implemented in this class.
 export class EthersBlockchainProvider implements IBlockchainProvider {
-  protected provider: ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider | null;
+  protected provider:
+    | ethers.providers.Web3Provider
+    | ethers.providers.JsonRpcProvider
+    | null;
   protected signer: ethers.providers.JsonRpcSigner | null;
-  protected initializationPromise: ResultAsync<void, BlockchainUnavailableError> | null;
+  protected initializationPromise: ResultAsync<
+    void,
+    BlockchainUnavailableError
+  > | null;
   protected address: EthereumAddress | undefined;
-  protected privateCredentialsPromiseResolve: (privateCredentials: PrivateCredentials) => void;
+  protected privateCredentialsPromiseResolve: (
+    privateCredentials: PrivateCredentials,
+  ) => void;
   protected providerResult: ResultAsync<
     ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
     BlockchainUnavailableError
@@ -64,7 +75,10 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
       return this.provider;
     });
   }
-  public getSigner(): ResultAsync<ethers.providers.JsonRpcSigner, BlockchainUnavailableError> {
+  public getSigner(): ResultAsync<
+    ethers.providers.JsonRpcSigner,
+    BlockchainUnavailableError
+  > {
     return this.initialize().map(() => {
       if (this.signer == null) {
         throw new BlockchainUnavailableError("No signer available!");
@@ -72,15 +86,24 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
       return this.signer;
     });
   }
-  public getLatestBlock(): ResultAsync<ethers.providers.Block, BlockchainUnavailableError> {
+  public getLatestBlock(): ResultAsync<
+    ethers.providers.Block,
+    BlockchainUnavailableError
+  > {
     return this.getProvider().map(async (provider) => {
       return await provider.getBlock("latest");
     });
   }
 
-  public supplyPrivateCredentials(privateCredentials: PrivateCredentials): ResultAsync<void, InvalidParametersError> {
+  public supplyPrivateCredentials(
+    privateCredentials: PrivateCredentials,
+  ): ResultAsync<void, InvalidParametersError> {
     if (!privateCredentials.privateKey && !privateCredentials.mnemonic) {
-      return errAsync(new InvalidParametersError("You must provide a mnemonic or private key"));
+      return errAsync(
+        new InvalidParametersError(
+          "You must provide a mnemonic or private key",
+        ),
+      );
     }
     // Once we have keys info, we can resolve the promise
     this.privateCredentialsPromiseResolve(privateCredentials);
@@ -95,9 +118,14 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
 
     if (window.ethereum != null) {
       window.ethereum.autoRefreshOnNetworkChange = false;
-      this.providerResult = ResultAsync.fromPromise(window.ethereum.enable(), (e: any) => {
-        return new BlockchainUnavailableError("Unable to initialize ethereum provider from the window");
-      }).map(() => {
+      this.providerResult = ResultAsync.fromPromise(
+        window.ethereum.enable(),
+        (e: any) => {
+          return new BlockchainUnavailableError(
+            "Unable to initialize ethereum provider from the window",
+          );
+        },
+      ).map(() => {
         // A Web3Provider wraps a standard Web3 provider, which is
         // what Metamask injects as window.ethereum into each page
         return new ethers.providers.Web3Provider(window.ethereum);
@@ -108,9 +136,11 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
         .getContext()
         .andThen((context) => {
           // Fire an onPrivateCredentialsRequested
-          const privateKeyPromise: Promise<PrivateCredentials> = new Promise((resolve) => {
-            this.privateCredentialsPromiseResolve = resolve;
-          });
+          const privateKeyPromise: Promise<PrivateCredentials> = new Promise(
+            (resolve) => {
+              this.privateCredentialsPromiseResolve = resolve;
+            },
+          );
 
           // Emit an event that sends a callback to the user. The user can execute the callback to provide their private key or mnemonic._getAccountPromise
           context.onPrivateCredentialsRequested.next();
@@ -118,7 +148,9 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
         })
         .andThen((privateCredentials) => {
           // Inject a InternalProviderFactory to do this
-          return this.internalProviderFactory.factoryInternalProvider(privateCredentials);
+          return this.internalProviderFactory.factoryInternalProvider(
+            privateCredentials,
+          );
         })
         .andThen((_internalProvider) => {
           internalProvider = _internalProvider;

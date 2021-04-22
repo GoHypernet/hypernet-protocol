@@ -2,7 +2,10 @@ import { AssetBalance, Balances } from "@hypernetlabs/objects";
 import { useEffect, useReducer, useContext } from "react";
 
 import { StoreContext } from "@web-integration-contexts";
-import { AssetBalanceParams, AssetBalanceViewModel } from "@web-integration-interfaces/objects";
+import {
+  AssetBalanceParams,
+  AssetBalanceViewModel,
+} from "@web-integration-interfaces/objects";
 
 enum EActionTypes {
   FETCHING = "FETCHING",
@@ -48,7 +51,10 @@ export function useBalances() {
         // get data from proxy
         proxy?.getBalances().map((balance: Balances) => {
           // prepare balances
-          dispatch({ type: EActionTypes.FETCHED, payload: prepareBalances(balance) });
+          dispatch({
+            type: EActionTypes.FETCHED,
+            payload: prepareBalances(balance),
+          });
         });
       } catch (error) {
         if (cancelRequest) return;
@@ -61,7 +67,10 @@ export function useBalances() {
     proxy?.onBalancesChanged.subscribe({
       next: (balance) => {
         if (cancelRequest) return;
-        dispatch({ type: EActionTypes.FETCHED, payload: prepareBalances(balance) });
+        dispatch({
+          type: EActionTypes.FETCHED,
+          payload: prepareBalances(balance),
+        });
       },
     });
 
@@ -71,10 +80,15 @@ export function useBalances() {
   }, []);
 
   const prepareBalances = (balance: Balances) => {
-    return balance.assets.reduce((acc: AssetBalanceViewModel[], assetBalance) => {
-      acc.push(new AssetBalanceViewModel(new AssetBalanceParams(assetBalance)));
-      return acc;
-    }, []);
+    return balance.assets.reduce(
+      (acc: AssetBalanceViewModel[], assetBalance) => {
+        acc.push(
+          new AssetBalanceViewModel(new AssetBalanceParams(assetBalance)),
+        );
+        return acc;
+      },
+      [],
+    );
   };
 
   return state;

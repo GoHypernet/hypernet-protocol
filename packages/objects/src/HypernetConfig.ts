@@ -1,4 +1,5 @@
 import { ChainAddresses, ChainProviders } from "@connext/vector-types";
+
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
 

@@ -10,7 +10,11 @@ export enum ECoreViewDataKeys {
   authorizedMerchants = "authorizedMerchants",
 }
 
-export type TCoreViewData = string[] | Balances | HypernetLink[] | Map<URL, string>;
+export type TCoreViewData =
+  | string[]
+  | Balances
+  | HypernetLink[]
+  | Map<URL, string>;
 
 export interface ICoreViewData {
   [ECoreViewDataKeys.accounts]?: string[];

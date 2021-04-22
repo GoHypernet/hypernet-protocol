@@ -13,7 +13,9 @@ import html from "./PushPaymentForm.template.html";
 export class PushPaymentFormParams {
   constructor(
     public integration: IHypernetWebIntegration,
-    public counterparty: ko.Observable<PublicIdentifier> | ko.Computed<PublicIdentifier>,
+    public counterparty:
+      | ko.Observable<PublicIdentifier>
+      | ko.Computed<PublicIdentifier>,
   ) {}
 }
 
@@ -33,7 +35,9 @@ export class PushPaymentFormViewModel {
   public submitButton: ButtonParams;
 
   protected integration: IHypernetWebIntegration;
-  protected counterparty: ko.Observable<PublicIdentifier> | ko.Computed<PublicIdentifier>;
+  protected counterparty:
+    | ko.Observable<PublicIdentifier>
+    | ko.Computed<PublicIdentifier>;
 
   constructor(params: PushPaymentFormParams) {
     this.integration = params.integration;
@@ -43,9 +47,16 @@ export class PushPaymentFormViewModel {
     this.expirationDate = ko.observable(moment().format());
     this.amount = ko.observable("0");
 
-    this.tokenSelector = new TokenSelectorParams(this.integration, ko.observable(null), true);
+    this.tokenSelector = new TokenSelectorParams(
+      this.integration,
+      ko.observable(null),
+      true,
+    );
 
-    this.merchantSelector = new AuthorizedMerchantSelectorParams(this.integration, ko.observable(null));
+    this.merchantSelector = new AuthorizedMerchantSelectorParams(
+      this.integration,
+      ko.observable(null),
+    );
 
     this.submitButton = new ButtonParams(
       "Submit Payment",

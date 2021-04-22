@@ -18,7 +18,11 @@ function StoreProvider({ proxy, children }: IStoreProps) {
     proxy,
   };
 
-  return <StoreContext.Provider value={initialState as IStore}>{children}</StoreContext.Provider>;
+  return (
+    <StoreContext.Provider value={initialState as IStore}>
+      {children}
+    </StoreContext.Provider>
+  );
 }
 
 export { StoreContext, StoreProvider };

@@ -8,7 +8,10 @@ import { PushPaymentParams } from "../PushPayment/PushPayment.viewmodel";
 import html from "./Link.template.html";
 
 export class LinkParams {
-  constructor(public integration: IHypernetWebIntegration, public link: HypernetLink) {}
+  constructor(
+    public integration: IHypernetWebIntegration,
+    public link: HypernetLink,
+  ) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -46,14 +49,18 @@ export class LinkViewModel {
     this.integration.core.onPullPaymentReceived.subscribe({
       next: (payment) => {
         // It's for us, we'll need to add it to the payments for the link
-        this.pullPayments.push(new PullPaymentParams(this.integration, payment));
+        this.pullPayments.push(
+          new PullPaymentParams(this.integration, payment),
+        );
       },
     });
 
     this.integration.core.onPushPaymentReceived.subscribe({
       next: (payment) => {
         // It's for us, we'll need to add it to the payments for the link
-        this.pushPayments.push(new PushPaymentParams(this.integration, payment));
+        this.pushPayments.push(
+          new PushPaymentParams(this.integration, payment),
+        );
       },
     });
   }
