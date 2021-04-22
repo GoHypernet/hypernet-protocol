@@ -6,30 +6,30 @@ import { Signer } from "ethers";
 import { Provider, TransactionRequest } from "@ethersproject/providers";
 import { Contract, ContractFactory, Overrides } from "@ethersproject/contracts";
 
-import type { Insurance } from "../Insurance";
+import { Insurance } from "../Insurance";
 
 export class Insurance__factory extends ContractFactory {
   constructor(signer?: Signer) {
     super(_abi, _bytecode, signer);
   }
 
-  deploy(overrides?: Overrides): Promise<Insurance> {
-    return super.deploy(overrides || {}) as Promise<Insurance>;
-  }
-  getDeployTransaction(overrides?: Overrides): TransactionRequest {
-    return super.getDeployTransaction(overrides || {});
-  }
-  attach(address: string): Insurance {
-    return super.attach(address) as Insurance;
-  }
-  connect(signer: Signer): Insurance__factory {
-    return super.connect(signer) as Insurance__factory;
-  }
+  // deploy(overrides?: Overrides): Promise<Insurance> {
+  //   return super.deploy(overrides || {}) as Promise<Insurance>;
+  // }
+  // getDeployTransaction(overrides?: Overrides): TransactionRequest {
+  //   return super.getDeployTransaction(overrides || {});
+  // }
+  // attach(address: string): Insurance {
+  //   return super.attach(address) as Insurance;
+  // }
+  // connect(signer: Signer): Insurance__factory {
+  //   return super.connect(signer) as Insurance__factory;
+  // }
   static connect(
     address: string,
     signerOrProvider: Signer | Provider,
   ): Insurance {
-    return new Contract(address, _abi, signerOrProvider) as Insurance;
+    return new Insurance(address, _abi, signerOrProvider);
   }
 }
 

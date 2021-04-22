@@ -3,7 +3,8 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": "./src/"
+    "baseUrl": "./src/",
+    "strictFunctionTypes": false
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["node_modules"],

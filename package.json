@@ -39,6 +39,7 @@
     "build": "yarn clean && yarn compile",
     "clean": "rimraf ./packages/*/dist ./packages/*/tsconfig.tsbuildinfo",
     "clean-docker": "cd packages/developer-ui && yarn clean-docker",
+    "clean-node": "rimraf node_modules packages/*/node_modules yarn.lock",
     "compile": "tsc --build && yarn alias",
     "alias": "lerna run alias",
     "format": "prettier . --write && yarn format:pkg",

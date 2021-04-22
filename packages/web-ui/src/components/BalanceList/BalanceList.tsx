@@ -9,7 +9,7 @@ interface BalanceListProps {
 
 const BalanceList: React.FC<BalanceListProps> = (props: BalanceListProps) => {
   const { balances } = props;
-  const classes = useStyles(props);
+  const classes = useStyles((props as unknown) as Jss.Theme);
 
   return (
     <div className={classes.container}>

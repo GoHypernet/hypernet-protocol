@@ -6,30 +6,30 @@ import { Signer } from "ethers";
 import { Provider, TransactionRequest } from "@ethersproject/providers";
 import { Contract, ContractFactory, Overrides } from "@ethersproject/contracts";
 
-import type { HashlockTransfer } from "../HashlockTransfer";
+import { HashlockTransfer } from "../HashlockTransfer";
 
 export class HashlockTransfer__factory extends ContractFactory {
   constructor(signer?: Signer) {
     super(_abi, _bytecode, signer);
   }
 
-  deploy(overrides?: Overrides): Promise<HashlockTransfer> {
-    return super.deploy(overrides || {}) as Promise<HashlockTransfer>;
-  }
-  getDeployTransaction(overrides?: Overrides): TransactionRequest {
-    return super.getDeployTransaction(overrides || {});
-  }
-  attach(address: string): HashlockTransfer {
-    return super.attach(address) as HashlockTransfer;
-  }
-  connect(signer: Signer): HashlockTransfer__factory {
-    return super.connect(signer) as HashlockTransfer__factory;
-  }
+  // deploy(overrides?: Overrides): Promise<HashlockTransfer> {
+  //   return super.deploy(overrides || {}) as Promise<HashlockTransfer>;
+  // }
+  // getDeployTransaction(overrides?: Overrides): TransactionRequest {
+  //   return super.getDeployTransaction(overrides || {});
+  // }
+  // attach(address: string): HashlockTransfer {
+  //   return super.attach(address) as HashlockTransfer;
+  // }
+  // connect(signer: Signer): HashlockTransfer__factory {
+  //   return super.connect(signer) as HashlockTransfer__factory;
+  // }
   static connect(
     address: string,
     signerOrProvider: Signer | Provider,
   ): HashlockTransfer {
-    return new Contract(address, _abi, signerOrProvider) as HashlockTransfer;
+    return new HashlockTransfer(address, _abi, signerOrProvider);
   }
 }
 

@@ -6,30 +6,30 @@ import { Signer } from "ethers";
 import { Provider, TransactionRequest } from "@ethersproject/providers";
 import { Contract, ContractFactory, Overrides } from "@ethersproject/contracts";
 
-import type { Parameterized } from "../Parameterized";
+import { Parameterized } from "../Parameterized";
 
 export class Parameterized__factory extends ContractFactory {
   constructor(signer?: Signer) {
     super(_abi, _bytecode, signer);
   }
 
-  deploy(overrides?: Overrides): Promise<Parameterized> {
-    return super.deploy(overrides || {}) as Promise<Parameterized>;
-  }
-  getDeployTransaction(overrides?: Overrides): TransactionRequest {
-    return super.getDeployTransaction(overrides || {});
-  }
-  attach(address: string): Parameterized {
-    return super.attach(address) as Parameterized;
-  }
-  connect(signer: Signer): Parameterized__factory {
-    return super.connect(signer) as Parameterized__factory;
-  }
+  // deploy(overrides?: Overrides): Promise<Parameterized> {
+  //   return super.deploy(overrides || {}) as Promise<Parameterized>;
+  // }
+  // getDeployTransaction(overrides?: Overrides): TransactionRequest {
+  //   return super.getDeployTransaction(overrides || {});
+  // }
+  // attach(address: string): Parameterized {
+  //   return super.attach(address) as Parameterized;
+  // }
+  // connect(signer: Signer): Parameterized__factory {
+  //   return super.connect(signer) as Parameterized__factory;
+  // }
   static connect(
     address: string,
     signerOrProvider: Signer | Provider,
   ): Parameterized {
-    return new Contract(address, _abi, signerOrProvider) as Parameterized;
+    return new Parameterized(address, _abi, signerOrProvider);
   }
 }
 

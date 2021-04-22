@@ -6,30 +6,30 @@ import { Signer } from "ethers";
 import { Provider, TransactionRequest } from "@ethersproject/providers";
 import { Contract, ContractFactory, Overrides } from "@ethersproject/contracts";
 
-import type { Withdraw } from "../Withdraw";
+import { Withdraw } from "../Withdraw";
 
 export class Withdraw__factory extends ContractFactory {
   constructor(signer?: Signer) {
     super(_abi, _bytecode, signer);
   }
 
-  deploy(overrides?: Overrides): Promise<Withdraw> {
-    return super.deploy(overrides || {}) as Promise<Withdraw>;
-  }
-  getDeployTransaction(overrides?: Overrides): TransactionRequest {
-    return super.getDeployTransaction(overrides || {});
-  }
-  attach(address: string): Withdraw {
-    return super.attach(address) as Withdraw;
-  }
-  connect(signer: Signer): Withdraw__factory {
-    return super.connect(signer) as Withdraw__factory;
-  }
+  // deploy(overrides?: Overrides): Promise<Withdraw> {
+  //   return super.deploy(overrides || {}) as Promise<Withdraw>;
+  // }
+  // getDeployTransaction(overrides?: Overrides): TransactionRequest {
+  //   return super.getDeployTransaction(overrides || {});
+  // }
+  // attach(address: string): Withdraw {
+  //   return super.attach(address) as Withdraw;
+  // }
+  // connect(signer: Signer): Withdraw__factory {
+  //   return super.connect(signer) as Withdraw__factory;
+  // }
   static connect(
     address: string,
     signerOrProvider: Signer | Provider,
   ): Withdraw {
-    return new Contract(address, _abi, signerOrProvider) as Withdraw;
+    return new Withdraw(address, _abi, signerOrProvider);
   }
 }
 
