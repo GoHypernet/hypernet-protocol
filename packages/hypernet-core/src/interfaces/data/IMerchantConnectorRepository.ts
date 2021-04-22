@@ -55,10 +55,16 @@ export interface IMerchantConnectorRepository {
     MerchantConnectorError | MerchantValidationError | BlockchainUnavailableError | LogicalError | ProxyError
   >;
 
+  retryAuthorizedMerchantActivation(
+    merchantUrl: MerchantUrl,
+    balances: Balances,
+  ): ResultAsync<void, MerchantConnectorError | BlockchainUnavailableError>;
+
   resolveChallenge(
     merchantUrl: MerchantUrl,
     paymentId: PaymentId,
     transferId: TransferId,
+    balances: Balances,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | TransferResolutionError>;
 
   closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError>;

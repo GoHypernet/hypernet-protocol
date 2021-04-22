@@ -71,6 +71,10 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     return this._createCall("getValidatedSignature", null);
   }
 
+  public getMerchantUrl(): ResultAsync<MerchantUrl, MerchantValidationError | ProxyError> {
+    return this._createCall("getMerchantUrl", null);
+  }
+
   public activate(): ResultAsync<void, MerchantValidationError | LogicalError | ProxyError> {
     return ResultUtils.combine([this.contextProvider.getContext(), super.activate()]).map((vals) => {
       const [context] = vals;

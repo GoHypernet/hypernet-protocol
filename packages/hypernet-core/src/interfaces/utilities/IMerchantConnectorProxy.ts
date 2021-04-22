@@ -5,6 +5,7 @@ import {
   Balances,
   EthereumAddress,
   MerchantConnectorError,
+  MerchantUrl,
   MerchantValidationError,
   PaymentId,
   ProxyError,
@@ -29,6 +30,8 @@ export interface IMerchantConnectorProxy extends ParentProxy {
   getAddress(): ResultAsync<EthereumAddress, MerchantConnectorError | ProxyError>;
 
   getValidatedSignature(): ResultAsync<Signature, MerchantValidationError | ProxyError>;
+
+  getMerchantUrl(): ResultAsync<MerchantUrl, MerchantValidationError | ProxyError>;
 
   closeMerchantIFrame(): ResultAsync<void, MerchantConnectorError | ProxyError>;
 

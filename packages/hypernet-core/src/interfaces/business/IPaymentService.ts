@@ -117,6 +117,7 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | BalancesUnavailableError
   >;
 
   /** Notify the service that an insurance payment has resolved
@@ -136,6 +137,7 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | BalancesUnavailableError
   >;
 
   /**
@@ -156,6 +158,7 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | BalancesUnavailableError
   >;
 
   /**
@@ -192,6 +195,7 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | BalancesUnavailableError
   >;
 
   /**
@@ -233,6 +237,7 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferResolutionError
+    | BalancesUnavailableError
   >;
 
   /**
@@ -257,5 +262,8 @@ export interface IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | BalancesUnavailableError
   >;
+
+  advanceMerchantUnresolvedPayments(merchantUrl: MerchantUrl): ResultAsync<void, never>;
 }

@@ -199,11 +199,12 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     merchantUrl: MerchantUrl,
     paymentId: PaymentId,
     transferId: TransferId,
+    balances: Balances,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | TransferResolutionError> {
     const proxy = this.activatedMerchants.get(merchantUrl);
 
     if (proxy == null) {
-      return errAsync(new MerchantValidationError(`No existing merchant connector for ${merchantUrl}`));
+      return this.retryAuthorizedMerchantActivation(merchantUrl, balances);
     }
 
     return proxy
@@ -267,9 +268,37 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
       return ResultUtils.executeSerially(activationResults)
         .map(() => {})
-        .orElse((e) => {
+        .orElse(() => {
           return okAsync(undefined);
         });
+    });
+  }
+
+  public retryAuthorizedMerchantActivation(
+    merchantUrl,
+    balances,
+  ): ResultAsync<void, MerchantConnectorError | BlockchainUnavailableError> {
+    return ResultUtils.combine([
+      this.contextProvider.getInitializedContext(),
+      this.getAuthorizedMerchants(),
+      this.blockchainProvider.getSigner(),
+    ]).andThen((vals) => {
+      const [context, authorizedMerchants, signer] = vals;
+
+      const authorizedMerchantSignature = authorizedMerchants.get(merchantUrl);
+
+      if (!authorizedMerchantSignature) {
+        return errAsync(new MerchantConnectorError("merchant is not authorized"));
+      }
+
+      return this._activateAuthorizedMerchant(
+        context.account,
+        balances,
+        merchantUrl, // URL
+        authorizedMerchantSignature, // Signature
+        context,
+        signer,
+      );
     });
   }
 
@@ -358,6 +387,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     signer: ethers.providers.JsonRpcSigner,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | LogicalError | ProxyError> {
     let proxy: IMerchantConnectorProxy;
+    let authorizedMerchants = this._getAuthorizedMerchants();
     return this.merchantConnectorProxyFactory
       .factoryProxy(merchantUrl)
       .andThen((myProxy) => {
@@ -398,8 +428,6 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
             return ResultAsync.fromPromise(signerPromise, (e) => e as MerchantConnectorError).map(
               (newAuthorizationSignature) => {
-                const authorizedMerchants = this._getAuthorizedMerchants();
-
                 authorizedMerchants.set(
                   MerchantUrl(merchantUrl.toString()),
                   new AuthorizedMerchantSignature(Signature(newAuthorizationSignature), true),
@@ -424,9 +452,6 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         if (proxy != null) {
           proxy.destroy();
         }
-
-        const authorizedMerchants = this._getAuthorizedMerchants();
-        authorizedMerchants.get(merchantUrl)?.signature;
 
         authorizedMerchants.set(
           MerchantUrl(merchantUrl.toString()),

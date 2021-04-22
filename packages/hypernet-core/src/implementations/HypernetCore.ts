@@ -335,6 +335,7 @@ export class HypernetCore implements IHypernetCore {
 
     this.merchantConnectorListener = new MerchantConnectorListener(
       this.accountService,
+      this.paymentService,
       this.contextProvider,
       this.logUtils,
     );
