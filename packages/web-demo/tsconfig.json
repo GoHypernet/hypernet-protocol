@@ -3,19 +3,14 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": "./src/"
+    "baseUrl": "./src/",
+    "lib": ["es5", "es6", "dom"]
   },
   "references": [
     {
-      "path": "../objects"
-    },
-    {
-      "path": "../utils"
-    },
-    {
-      "path": "../merchant-connector"
+      "path": "../web-integration"
     }
   ],
-  "include": ["./src/**/*.ts"],
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
   "exclude": ["node_modules"]
 }

@@ -13,10 +13,10 @@
       "path": "../utils"
     },
     {
-      "path": "../../hypernet-core"
+      "path": "../hypernet-core"
     },
     {
-      "path": "../../web-ui"
+      "path": "../web-ui"
     }
   ],
   "include": ["./src/**/*.ts"],

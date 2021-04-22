@@ -7,15 +7,9 @@
   },
   "references": [
     {
-      "path": "../objects"
-    },
-    {
-      "path": "../utils"
-    },
-    {
-      "path": "../merchant-connector"
+      "path": "../web-integration"
     }
   ],
-  "include": ["./src/**/*.ts"],
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
   "exclude": ["node_modules"]
 }

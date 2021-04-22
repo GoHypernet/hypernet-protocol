@@ -1,12 +1,12 @@
+import {
+  PublicIdentifier,
+  PaymentId,
+  EthereumAddress,
+} from "@hypernetlabs/objects";
 import { MockProvider } from "ethereum-waffle";
 import { providers, ethers } from "ethers";
 import Ganache from "ganache-core";
-
-import { EthereumAddress } from "@objects/EthereumAddress";
-import { PaymentId } from "@objects/PaymentId";
-import { PublicIdentifier } from "@objects/PublicIdentifier";
-
-const randomstring = require("randomstring");
+import randomstring from "randomstring";
 
 class MockUtils {
   public generateRandomAccounts(
@@ -15,8 +15,8 @@ class MockUtils {
       total_accounts: 1,
       default_balance_ether: 100,
     },
-  ): any {
-    return [...new Array(options.total_accounts)].map((el, idx) => ({
+  ): { balance: string; secretKey: string }[] {
+    return [...new Array(options.total_accounts)].map((_el, idx) => ({
       balance: `${options.default_balance_ether}000000000000000000`,
       secretKey: ethers.Wallet.fromMnemonic(
         options.mnemonic,

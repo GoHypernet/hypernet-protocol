@@ -8,8 +8,7 @@ import {
   InvalidParametersError,
 } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
-import { ResultAsync } from "neverthrow";
-import { okAsync } from "neverthrow";
+import { ResultAsync, okAsync } from "neverthrow";
 import td from "testdouble";
 
 import { IBlockchainProvider } from "@interfaces/utilities";
@@ -21,7 +20,7 @@ export class BlockchainProviderMock implements IBlockchainProvider {
 
   constructor() {
     td.when(this.provider.listAccounts()).thenResolve(
-      mockUtils.generateRandomAccounts(),
+      mockUtils.generateRandomAccounts().map((val) => val.secretKey),
     );
 
     td.when(

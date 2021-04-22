@@ -1,10 +1,11 @@
+import {
+  EthereumAddress,
+  MerchantUrl,
+  PaymentId,
+  PublicIdentifier,
+  TransferId,
+} from "@hypernetlabs/objects";
 import { BigNumber, constants } from "ethers";
-
-import { EthereumAddress } from "@objects/EthereumAddress";
-import { MerchantUrl } from "@objects/MerchantUrl";
-import { PaymentId } from "@objects/PaymentId";
-import { PublicIdentifier } from "@objects/PublicIdentifier";
-import { TransferId } from "@objects/TransferId";
 
 export const account = EthereumAddress("0xDEADBEEF");
 export const account2 = EthereumAddress("0xBEEFDEAD");

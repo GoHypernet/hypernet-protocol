@@ -42,13 +42,13 @@
       "path": "packages/test-merchant-connector/test"
     },
     {
-      "path": "packages/web-demo/src"
+      "path": "packages/web-demo"
     },
     {
       "path": "packages/utils"
     },
     {
-      "path": "packages/mobile-integration/src"
+      "path": "packages/mobile-integration"
     },
     {
       "path": "packages/objects"

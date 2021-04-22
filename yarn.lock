@@ -1748,6 +1748,16 @@
   dependencies:
     "@hapi/hoek" "^9.0.0"
 
+"@hypernetlabs/objects@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@hypernetlabs/objects/-/objects-0.1.1.tgz#aafa213cad39ab869c858272a585eff3af3a7cd9"
+  integrity sha512-8a9sw6yFVkp1eEZytPLeo/8LN+pi67khCzGRw7D91Q3ewZmWtjODGO0sTJF2+a380btlN3uDUP2BtcFOZkkBiQ==
+  dependencies:
+    class-transformer "^0.3.2"
+    ethers "5.0.31"
+    reflect-metadata "^0.1.13"
+    ts-brand "^0.0.2"
+
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@istanbuljs/load-nyc-config/-/load-nyc-config-1.1.0.tgz#fd3db1d59ecf7cf121e80650bb86712f9b55eced"

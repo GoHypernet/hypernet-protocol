@@ -13,8 +13,9 @@
   ],
   "scripts": {
     "build": "yarn clean && yarn compile",
+    "alias": "tsc-alias",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
-    "compile": "tsc --build && npx tsc-alias",
+    "compile": "tsc --build && cd ../.. && yarn alias",
     "generate-docs": "npx typedoc --options typedoc.json",
     "test": "echo \"Error: no test specified\" && exit 0"
   },

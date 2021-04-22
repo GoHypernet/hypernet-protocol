@@ -1,5 +1,6 @@
+import { EthereumAddress } from "@hypernetlabs/objects";
+
 import { ChannelUtils } from "@implementations/utilities/ChannelUtils";
-import { EthereumAddress } from "@objects/EthereumAddress";
 
 test("ChannelUtils.getChannelAddress", () => {
   const address = ChannelUtils.getChannelId(

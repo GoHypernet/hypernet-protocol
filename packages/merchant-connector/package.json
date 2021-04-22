@@ -29,7 +29,8 @@
   "scripts": {
     "build": "yarn clean && yarn compile",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
-    "compile": "tsc --build && npx tsc-alias",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "alias": "tsc-alias",
     "generate-docs": "npx typedoc --options typedoc.json",
     "prepare": "yarn build",
     "test": "yarn test:ci",

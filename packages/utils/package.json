@@ -28,7 +28,8 @@
   "scripts": {
     "build": "yarn clean && yarn compile",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
-    "compile": "tsc --build && tsc-alias",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "alias": "tsc-alias",
     "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",

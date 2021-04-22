@@ -29,8 +29,8 @@
   "scripts": {
     "build": "yarn clean && yarn compile",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
-    "compile": "tsc --build && npx tsc-alias",
-    "compile-necessary": "cd ../merchant-connector && yarn compile && cd ../utils && yarn compile",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "alias": "tsc-alias",
     "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",
     "generate-docs": "npx typedoc --options typedoc.json",
     "prepare": "yarn build",

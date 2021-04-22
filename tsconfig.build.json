@@ -29,8 +29,8 @@
     "paths": {
       "@interfaces/*": ["./interfaces/*"],
       "@implementations/*": ["./implementations/*"],
-      "@tests/*": ["./packages/hypernet-core/test/*"],
-      "@mock/*": ["./packages/hypernet-core/test/mock/*"],
+      "@tests/*": ["../test/*"],
+      "@mock/*": ["../test/mock/*"],
       "@integration-tests/*": ["./packages/developer-ui/test/integration/*"],
       "@web-integration/*": ["./*"],
       "@web-integration-containers/*": ["./containers/*"],
