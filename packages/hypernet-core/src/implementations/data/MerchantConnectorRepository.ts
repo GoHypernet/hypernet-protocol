@@ -203,23 +203,14 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | TransferResolutionError> {
     const proxy = this.activatedMerchants.get(merchantUrl);
 
-    if (proxy == null) {
-      return this.retryAuthorizedMerchantActivation(merchantUrl, balances);
+    // if merchant is activated, start resolving the transfer
+    if (proxy) {
+      return this._resolveTransfer(merchantUrl, paymentId, transferId, balances);
     }
-
-    return proxy
-      .resolveChallenge(paymentId)
-      .andThen((result) => {
-        const { mediatorSignature, amount } = result;
-
-        return this.vectorUtils.resolveInsuranceTransfer(
-          transferId,
-          paymentId,
-          Signature(mediatorSignature),
-          BigNumber.from(amount),
-        );
-      })
-      .map(() => {});
+    // If merchant is not activated, try to activate it again and after that start resolving.
+    return this.retryAuthorizedMerchantActivation(merchantUrl, balances).andThen(() => {
+      return this._resolveTransfer(merchantUrl, paymentId, transferId, balances);
+    });
   }
 
   public closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError> {
@@ -306,7 +297,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     merchantUrl: MerchantUrl,
     payment: PushPayment,
   ): ResultAsync<void, MerchantConnectorError> {
-    return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
+    return this._getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPushPaymentSent(payment);
     });
   }
@@ -315,7 +306,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     merchantUrl: MerchantUrl,
     payment: PushPayment,
   ): ResultAsync<void, MerchantConnectorError> {
-    return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
+    return this._getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPushPaymentUpdated(payment);
     });
   }
@@ -324,7 +315,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     merchantUrl: MerchantUrl,
     payment: PushPayment,
   ): ResultAsync<void, MerchantConnectorError> {
-    return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
+    return this._getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPushPaymentReceived(payment);
     });
   }
@@ -333,7 +324,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     merchantUrl: MerchantUrl,
     payment: PullPayment,
   ): ResultAsync<void, MerchantConnectorError> {
-    return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
+    return this._getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPullPaymentSent(payment);
     });
   }
@@ -342,7 +333,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     merchantUrl: MerchantUrl,
     payment: PullPayment,
   ): ResultAsync<void, MerchantConnectorError> {
-    return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
+    return this._getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPullPaymentUpdated(payment);
     });
   }
@@ -351,7 +342,7 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     merchantUrl: MerchantUrl,
     payment: PullPayment,
   ): ResultAsync<void, MerchantConnectorError> {
-    return this.getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
+    return this._getMerchantConnector(merchantUrl).andThen((merchantConnector) => {
       return merchantConnector.notifyPullPaymentReceived(payment);
     });
   }
@@ -366,7 +357,33 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     return ResultUtils.combine(results).map(() => {});
   }
 
-  protected getMerchantConnector(
+  protected _resolveTransfer(
+    merchantUrl: MerchantUrl,
+    paymentId: PaymentId,
+    transferId: TransferId,
+    balances: Balances,
+  ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | TransferResolutionError> {
+    const proxy = this.activatedMerchants.get(merchantUrl);
+
+    if (proxy == null) {
+      return errAsync(new MerchantValidationError(`No existing merchant connector for ${merchantUrl}`));
+    }
+    return proxy
+      .resolveChallenge(paymentId)
+      .andThen((result) => {
+        const { mediatorSignature, amount } = result;
+
+        return this.vectorUtils.resolveInsuranceTransfer(
+          transferId,
+          paymentId,
+          Signature(mediatorSignature),
+          BigNumber.from(amount),
+        );
+      })
+      .map(() => {});
+  }
+
+  protected _getMerchantConnector(
     merchantUrl: MerchantUrl,
   ): ResultAsync<IMerchantConnectorProxy, MerchantConnectorError> {
     const proxy = this.activatedMerchants.get(merchantUrl);

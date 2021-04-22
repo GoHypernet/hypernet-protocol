@@ -77,7 +77,7 @@ class MerchantConnectorRepositoryMocks {
     ).thenReturn(okAsync({} as IBasicTransferResponse));
 
     td.when(this.localStorageUtils.getItem("AuthorizedMerchants")).thenReturn(
-      `[{"merchantUrl":"${merchantUrl}","authorizationSignature":"${authorizationSignature}"}]`,
+      `[{"merchantUrl":"${merchantUrl}","authorizationSignature":"${authorizationSignature}","activationStatus": ${true}}]`,
     );
 
     td.when(this.merchantConnectorProxyFactory.factoryProxy(merchantUrl)).thenReturn(
@@ -119,6 +119,12 @@ class MerchantConnectorRepositoryMocks {
       this.localStorageUtils,
       this.merchantConnectorProxyFactory,
       this.blockchainUtils,
+    );
+  }
+
+  public setAuthorizedMerchant(_merchantUrl, status) {
+    td.when(this.localStorageUtils.getItem("AuthorizedMerchants")).thenReturn(
+      `[{"merchantUrl":"${_merchantUrl}","authorizationSignature":"${authorizationSignature}","activationStatus": ${status}}]`,
     );
   }
 }
@@ -311,19 +317,18 @@ describe("MerchantConnectorRepository tests", () => {
     expect(result.isErr()).toBeFalsy();
   });
 
-  test("resolveChallenge returns an error if merchant is not activated", async () => {
+  test("resolveChallenge run successfully if merchant gets activated after running merchant activation retry", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
+    mocks.setAuthorizedMerchant(merchantUrl, false);
     const repo = mocks.factoryRepository();
 
     // Act
     const result = await repo.resolveChallenge(merchantUrl, commonPaymentId, insuranceTransferId, balances);
-    console.log("result: ", result);
 
     // Assert
     expect(result).toBeDefined();
-    //expect(result.isErr()).toBeTruthy();
-    //expect(result._unsafeUnwrapErr()).toBeInstanceOf(MerchantValidationError);
+    expect(result.isErr()).toBeFalsy();
   });
 
   test("resolveChallenge returns an error if the merchant connector resolveChallenge fails", async () => {
