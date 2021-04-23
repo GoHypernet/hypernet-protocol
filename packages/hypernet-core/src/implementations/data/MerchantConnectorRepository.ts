@@ -203,7 +203,8 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     transferId: TransferId,
     balances: Balances,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | TransferResolutionError> {
-    const proxy = this.activatedMerchants.get(merchantUrl);
+    // const proxy = this.activatedMerchants.get(merchantUrl);
+    const proxy = this._getActivatedMerchantProxy(merchantUrl);
 
     // if merchant is activated, start resolving the transfer
     if (proxy) {
@@ -404,7 +405,8 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     });
   }
 
-  protected _getActivatedMerchantProxy(merchantUrl: MerchantUrl): ResultAsync<IMerchantConnectorProxy, MerchantAuthorizationDeniedError> {
+  protected _getActivatedMerchantProxy(merchantUrl: MerchantUrl): 
+  ResultAsync<IMerchantConnectorProxy, MerchantAuthorizationDeniedError> {
     // The goal of this method is to return an activated merchant proxy,
     // and not resolve unless all hope is lost.
 
@@ -475,8 +477,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
                   merchantUrl, cachedAuthorizationSignature,
                   context, 
                   signer)
-              });      
-          })
+              }));      
+          }, 
+          [ProxyError, MerchantValidationError, MerchantActivationError],
+          );
         }
 
         // Backoff
