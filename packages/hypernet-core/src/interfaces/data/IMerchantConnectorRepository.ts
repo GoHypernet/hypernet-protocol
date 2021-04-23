@@ -12,7 +12,8 @@ import {
   PaymentId,
   TransferId,
   MerchantUrl,
-  AuthorizedMerchantSignature,
+  Signature,
+  MerchantAuthorizationDeniedError,
 } from "@hypernetlabs/objects";
 import { PullPayment, PushPayment } from "@hypernetlabs/objects";
 
@@ -33,27 +34,34 @@ export interface IMerchantConnectorRepository {
   ): ResultAsync<
     void,
     | PersistenceError
-    | LogicalError
     | MerchantValidationError
     | ProxyError
     | BlockchainUnavailableError
     | MerchantConnectorError
+    | MerchantAuthorizationDeniedError
   >;
 
   /**
-   * Destroy merchant connector proxy
+   * Deauthorizes a merchant, which will also destroy their proxy.
    * @param merchantUrl
    */
-  removeAuthorizedMerchant(merchantUrl: MerchantUrl): Result<void, never>;
+   deauthorizeMerchant(merchantUrl: MerchantUrl): ResultAsync<void, never>
 
-  getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, AuthorizedMerchantSignature>, never>;
+  /**
+   * Returns the status of all the authorized merchant's connectors.
+   * @returns A map of merchant URL and a boolean indicating whether or not the connector is active.
+   */
+  getAuthorizedMerchantConnectorStatus(): ResultAsync<Map<MerchantUrl, boolean>, never>
+
+  /**
+   * Returns a list of authorized merchants and the user's authorization signature for that
+   * merchant.
+   */
+  getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, never>;
 
   activateAuthorizedMerchants(
     balances: Balances,
-  ): ResultAsync<
-    void,
-    MerchantConnectorError | MerchantValidationError | BlockchainUnavailableError | LogicalError | ProxyError
-  >;
+  ): ResultAsync<void, never>;
 
   retryAuthorizedMerchantActivation(
     merchantUrl: MerchantUrl,

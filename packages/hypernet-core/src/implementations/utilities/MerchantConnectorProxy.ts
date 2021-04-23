@@ -14,10 +14,13 @@ import {
   PublicIdentifier,
   PullPayment,
   PushPayment,
+  MerchantActivationError,
+  FatalMerchantConnectorError,
 } from "@hypernetlabs/objects";
 import { IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
 import { Subject } from "rxjs";
 import { HypernetContext } from "@interfaces/objects";
+import e from "cors";
 
 export class MerchantConnectorProxy extends ParentProxy implements IMerchantConnectorProxy {
   protected static openedIFramesQueue: string[] = [];
@@ -25,7 +28,7 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
   constructor(
     protected element: HTMLElement | null,
     protected iframeUrl: string,
-    protected merchantUrl: MerchantUrl,
+    public merchantUrl: MerchantUrl,
     protected iframeName: string,
     protected contextProvider: IContextProvider,
     protected debug: boolean = false,
@@ -40,7 +43,7 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
   public activateConnector(
     publicIdentifier: PublicIdentifier,
     balances: Balances,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  ): ResultAsync<void, MerchantActivationError | FatalMerchantConnectorError | ProxyError> {
     const assets = balances.assets.map((val) => {
       return {
         assetAddress: val.assetAddress,
@@ -56,7 +59,13 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
       publicIdentifier,
       balances: { assets: assets },
     };
-    return this._createCall("activateConnector", activateData);
+    return this._createCall<void, MerchantActivationError | FatalMerchantConnectorError | ProxyError>("activateConnector", activateData)
+    .mapErr((e) => {
+      // TODO
+      // _createCall's return type should be adjusted; it's not actually
+      // the type is says
+      return e;
+    });
   }
 
   public resolveChallenge(paymentId: PaymentId): ResultAsync<IResolutionResult, MerchantConnectorError | ProxyError> {
@@ -71,12 +80,10 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     return this._createCall("getValidatedSignature", null);
   }
 
-  public getMerchantUrl(): ResultAsync<MerchantUrl, MerchantValidationError | ProxyError> {
-    return this._createCall("getMerchantUrl", null);
-  }
-
-  public activate(): ResultAsync<void, MerchantValidationError | LogicalError | ProxyError> {
-    return ResultUtils.combine([this.contextProvider.getContext(), super.activate()]).map((vals) => {
+  public activateProxy(): ResultAsync<void, ProxyError> {
+    return ResultUtils.combine([this.contextProvider.getContext(), 
+      this.activate()])
+      .map((vals) => {
       const [context] = vals;
 
       // Events coming from merchant connector iframe

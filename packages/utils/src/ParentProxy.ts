@@ -76,7 +76,7 @@ export abstract class ParentProxy {
 
   protected activateResult: ResultAsync<void, ProxyError> | undefined;
 
-  public activate(): ResultAsync<void, Error> {
+  public activate(): ResultAsync<void, ProxyError> {
     if (this.activateResult != null) {
       return this.activateResult;
     }
