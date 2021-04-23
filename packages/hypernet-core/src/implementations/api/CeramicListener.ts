@@ -8,6 +8,7 @@ export class CeramicListener implements ICeramicListener {
   constructor(protected ceramicUtils: ICeramicUtils, protected logUtils: ILogUtils) {}
   public initialize(): ResultAsync<void, CeramicError | BlockchainUnavailableError> {
     return this.ceramicUtils.AuthenticateUser().andThen(() => {
+      console.log("doneee");
       return okAsync(undefined);
     });
   }

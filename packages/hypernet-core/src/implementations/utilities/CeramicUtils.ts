@@ -3,7 +3,7 @@ import { EthereumAddress, Document } from "@hypernetlabs/objects";
 import { okAsync, ResultAsync, errAsync } from "neverthrow";
 import { ICeramicUtils, IBlockchainProvider, IConfigProvider } from "@interfaces/utilities";
 import { ILogUtils } from "@hypernetlabs/utils";
-import { ThreeIdConnect, EthereumAuthProvider } from "3id-connect";
+import { ThreeIdConnect, EthereumAuthProvider } from "@3id/connect";
 import CeramicClient from "@ceramicnetwork/http-client";
 import { Doctype } from "@ceramicnetwork/common/lib/doctype";
 import ThreeIdResolver from "@ceramicnetwork/3id-did-resolver";
@@ -37,6 +37,8 @@ export class CeramicUtils implements ICeramicUtils {
               return errAsync(this.toCeramicError(new Error("Something went wrong with ceramic!")));
             } else {
               // TODO: setDIDProvider is not getting resolved because of Ceramic version incompatibility
+              //const mockPromise = new Promise(() => {});
+              //@ts-ignore
               return ResultAsync.fromPromise(this.ceramic.setDIDProvider(didProvider), this.toCeramicError).andThen(
                 () => {
                   return okAsync(undefined);

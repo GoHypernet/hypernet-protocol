@@ -587,9 +587,9 @@ export class HypernetCore implements IHypernetCore {
         context.publicIdentifier = publicIdentifier;
         return this.contextProvider.setContext(context);
       })
-      /* .andThen(() => {
+      .andThen(() => {
         return this.ceramicListener.initialize();
-      }) */
+      })
       .andThen(() => {
         // Initialize anything that wants an initialized context
         return ResultUtils.combine([
