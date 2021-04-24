@@ -9,7 +9,7 @@ import {
   Payment,
   PaymentId,
   MerchantUrl,
-  AuthorizedMerchantSignature,
+  Signature,
 } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
@@ -309,7 +309,7 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return this._createCall("authorizeMerchant", merchantUrl);
   }
 
-  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, AuthorizedMerchantSignature>, PersistenceError> {
+  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, PersistenceError> {
     return this._createCall("getAuthorizedMerchants", null);
   }
 

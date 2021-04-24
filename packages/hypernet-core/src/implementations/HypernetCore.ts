@@ -49,8 +49,8 @@ import {
   PushPayment,
   PaymentId,
   MerchantUrl,
-  AuthorizedMerchantSignature,
   IHypernetCore,
+  Signature,
   PrivateCredentials,
   EBlockchainNetwork,
   AcceptPaymentError,
@@ -296,6 +296,7 @@ export class HypernetCore implements IHypernetCore {
       this.localStorageUtils,
       this.merchantConnectorProxyFactory,
       this.blockchainUtils,
+      this.logUtils,
     );
 
     this.paymentService = new PaymentService(
@@ -335,7 +336,6 @@ export class HypernetCore implements IHypernetCore {
 
     this.merchantConnectorListener = new MerchantConnectorListener(
       this.accountService,
-      this.paymentService,
       this.contextProvider,
       this.logUtils,
     );
@@ -629,7 +629,7 @@ export class HypernetCore implements IHypernetCore {
     return this.merchantService.authorizeMerchant(merchantUrl);
   }
 
-  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, AuthorizedMerchantSignature>, PersistenceError> {
+  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, PersistenceError> {
     return this.merchantService.getAuthorizedMerchants();
   }
 

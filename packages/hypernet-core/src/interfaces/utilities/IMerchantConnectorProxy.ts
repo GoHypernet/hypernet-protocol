@@ -4,7 +4,6 @@ import { IResolutionResult } from "@hypernetlabs/merchant-connector";
 import {
   Balances,
   EthereumAddress,
-  FatalMerchantConnectorError,
   MerchantActivationError,
   MerchantConnectorError,
   MerchantUrl,
@@ -33,7 +32,7 @@ export interface IMerchantConnectorProxy extends ParentProxy {
   activateConnector(
     publicIdentifier: PublicIdentifier,
     balances: Balances,
-  ): ResultAsync<void, MerchantActivationError | FatalMerchantConnectorError | ProxyError>;
+  ): ResultAsync<void, MerchantActivationError | ProxyError>;
 
   resolveChallenge(paymentId: PaymentId): ResultAsync<IResolutionResult, MerchantConnectorError | ProxyError>;
 
@@ -41,8 +40,8 @@ export interface IMerchantConnectorProxy extends ParentProxy {
 
   /**
    * getValidatedSignature() requests the merchant iframe to return the
-   * signature of the connector code, AFTER validating that the connector 
-   * code matches the signature. 
+   * signature of the connector code, AFTER validating that the connector
+   * code matches the signature.
    */
   getValidatedSignature(): ResultAsync<Signature, MerchantValidationError | ProxyError>;
 

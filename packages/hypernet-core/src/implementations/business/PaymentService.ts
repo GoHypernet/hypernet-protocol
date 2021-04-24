@@ -63,9 +63,6 @@ export class PaymentService implements IPaymentService {
   /**
    * Creates an instanceo of the paymentService.
    */
-  protected unresolvedPaymentsResolve: Map<Payment, ((value: Payment) => void) | undefined>;
-  protected unresolvedPaymentsPromise: Map<Payment, Promise<Payment> | undefined>;
-
   constructor(
     protected linkRepository: ILinkRepository,
     protected accountRepository: IAccountsRepository,
@@ -74,10 +71,7 @@ export class PaymentService implements IPaymentService {
     protected paymentRepository: IPaymentRepository,
     protected merchantConnectorRepository: IMerchantConnectorRepository,
     protected logUtils: ILogUtils,
-  ) {
-    this.unresolvedPaymentsResolve = new Map();
-    this.unresolvedPaymentsPromise = new Map();
-  }
+  ) {}
 
   /**
    * Authorizes funds to a specified counterparty, with an amount, rate, & expiration date.
@@ -338,12 +332,7 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    | PaymentFinalizeError
-    | PaymentStakeError
-    | TransferResolutionError
-    | PaymentsByIdsErrors
-    | TransferCreationError
-    | BalancesUnavailableError
+    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
@@ -380,12 +369,7 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    | PaymentFinalizeError
-    | PaymentStakeError
-    | TransferResolutionError
-    | PaymentsByIdsErrors
-    | TransferCreationError
-    | BalancesUnavailableError
+    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
@@ -421,12 +405,7 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    | PaymentFinalizeError
-    | PaymentStakeError
-    | TransferResolutionError
-    | PaymentsByIdsErrors
-    | TransferCreationError
-    | BalancesUnavailableError
+    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
@@ -462,12 +441,7 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    | PaymentFinalizeError
-    | PaymentStakeError
-    | TransferResolutionError
-    | PaymentsByIdsErrors
-    | TransferCreationError
-    | BalancesUnavailableError
+    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
@@ -523,19 +497,12 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    | MerchantConnectorError
-    | MerchantValidationError
-    | PaymentsByIdsErrors
-    | TransferResolutionError
-    | BalancesUnavailableError
+    MerchantConnectorError | MerchantValidationError | PaymentsByIdsErrors | TransferResolutionError
   > {
     // Get the payment
-    return ResultUtils.combine([
-      this.paymentRepository.getPaymentsByIds([paymentId]),
-      this.accountRepository.getBalances(),
-    ])
-      .andThen((vals) => {
-        const [payments, balances] = vals;
+    return this.paymentRepository
+      .getPaymentsByIds([paymentId])
+      .andThen((payments) => {
         const payment = payments.get(paymentId);
 
         if (payment == null) {
@@ -556,7 +523,6 @@ export class PaymentService implements IPaymentService {
           payment.merchantUrl,
           paymentId,
           payment.details.insuranceTransferId,
-          balances,
         );
       })
       .andThen(() => {
@@ -575,12 +541,7 @@ export class PaymentService implements IPaymentService {
     paymentIds: PaymentId[],
   ): ResultAsync<
     Payment[],
-    | PaymentFinalizeError
-    | PaymentStakeError
-    | TransferResolutionError
-    | PaymentsByIdsErrors
-    | TransferCreationError
-    | BalancesUnavailableError
+    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds(paymentIds),
@@ -606,58 +567,7 @@ export class PaymentService implements IPaymentService {
     });
   }
 
-  public advanceMerchantUnresolvedPayments(merchantUrl: MerchantUrl): ResultAsync<void, never> {
-    return this.contextProvider.getInitializedContext().andThen((context) => {
-      for (const [payment] of this.unresolvedPaymentsPromise.entries()) {
-        if (payment.merchantUrl === merchantUrl) {
-          this._advancePayment(payment, context).map((payment) => {
-            const paymentResolver = this.unresolvedPaymentsResolve.get(payment);
-            paymentResolver && paymentResolver(payment);
-          });
-        }
-      }
-      return okAsync(undefined);
-    });
-  }
-
   protected _advancePayment(
-    payment: Payment,
-    context: HypernetContext,
-  ): ResultAsync<
-    Payment,
-    | PaymentFinalizeError
-    | PaymentStakeError
-    | TransferResolutionError
-    | PaymentsByIdsErrors
-    | TransferCreationError
-    | BalancesUnavailableError
-  > {
-    return ResultUtils.combine([
-      this.merchantConnectorRepository.getAuthorizedMerchants(),
-      this.accountRepository.getBalances(),
-    ]).andThen((vals) => {
-      const [authorizedMerchant, balances] = vals;
-      if (!authorizedMerchant.get(payment.merchantUrl)?.activationStatus) {
-        return this.merchantConnectorRepository
-          .retryAuthorizedMerchantActivation(payment.merchantUrl, balances)
-          .andThen(() => {
-            return this._advancePaymentForAcitvatedMerchant(payment, context);
-          })
-          .orElse(() => {
-            const paymentPromise = new Promise<Payment>((resolve) => {
-              this.unresolvedPaymentsResolve.set(payment, resolve);
-            });
-            this.unresolvedPaymentsPromise.set(payment, paymentPromise);
-            return ResultAsync.fromPromise(paymentPromise, (err) => {
-              return err as Error;
-            });
-          });
-      }
-      return this._advancePaymentForAcitvatedMerchant(payment, context);
-    });
-  }
-
-  protected _advancePaymentForAcitvatedMerchant(
     payment: Payment,
     context: HypernetContext,
   ): ResultAsync<

@@ -8,7 +8,7 @@ import {
   ProxyError,
 } from "@hypernetlabs/objects";
 import { IAccountsRepository, IMerchantConnectorRepository } from "@interfaces/data";
-import { MerchantUrl, AuthorizedMerchantSignature } from "@hypernetlabs/objects";
+import { MerchantUrl, Signature } from "@hypernetlabs/objects";
 import { IContextProvider } from "@interfaces/utilities";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 
@@ -77,7 +77,7 @@ export class MerchantService implements IMerchantService {
 
       // Remove the merchant iframe proxy related to that merchantUrl if there is any activated ones.
       if (authorizedMerchantsMap.get(merchantUrl)) {
-        this.merchantConnectorRepository.removeAuthorizedMerchant(merchantUrl);
+        this.merchantConnectorRepository.deauthorizeMerchant(merchantUrl);
       }
 
       this.merchantConnectorRepository.addAuthorizedMerchant(merchantUrl, balances).map(() => {
@@ -86,7 +86,7 @@ export class MerchantService implements IMerchantService {
     });
   }
 
-  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, AuthorizedMerchantSignature>, never> {
+  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, never> {
     return this.merchantConnectorRepository.getAuthorizedMerchants();
   }
 

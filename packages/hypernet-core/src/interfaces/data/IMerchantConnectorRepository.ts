@@ -45,13 +45,13 @@ export interface IMerchantConnectorRepository {
    * Deauthorizes a merchant, which will also destroy their proxy.
    * @param merchantUrl
    */
-   deauthorizeMerchant(merchantUrl: MerchantUrl): ResultAsync<void, never>
+  deauthorizeMerchant(merchantUrl: MerchantUrl): ResultAsync<void, never>;
 
   /**
    * Returns the status of all the authorized merchant's connectors.
    * @returns A map of merchant URL and a boolean indicating whether or not the connector is active.
    */
-  getAuthorizedMerchantConnectorStatus(): ResultAsync<Map<MerchantUrl, boolean>, never>
+  getAuthorizedMerchantConnectorStatus(): ResultAsync<Map<MerchantUrl, boolean>, never>;
 
   /**
    * Returns a list of authorized merchants and the user's authorization signature for that
@@ -59,20 +59,12 @@ export interface IMerchantConnectorRepository {
    */
   getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, never>;
 
-  activateAuthorizedMerchants(
-    balances: Balances,
-  ): ResultAsync<void, never>;
-
-  retryAuthorizedMerchantActivation(
-    merchantUrl: MerchantUrl,
-    balances: Balances,
-  ): ResultAsync<void, MerchantConnectorError | BlockchainUnavailableError>;
+  activateAuthorizedMerchants(balances: Balances): ResultAsync<void, never>;
 
   resolveChallenge(
     merchantUrl: MerchantUrl,
     paymentId: PaymentId,
     transferId: TransferId,
-    balances: Balances,
   ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | TransferResolutionError>;
 
   closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError>;

@@ -22,9 +22,9 @@ export class ResultUtils {
         ? result.isErr()
           ? err(result.error)
           : acc.map((values) => {
-            values.push(result.value);
-            return values;
-          })
+              values.push(result.value);
+              return values;
+            })
         : acc;
     }, ok([]));
   }
@@ -73,11 +73,12 @@ export class ResultUtils {
     });
   }
 
-  static backoffAndRetry<T, E extends Error>(func: () => ResultAsync<T, E>,
+  static backoffAndRetry<T, E extends Error>(
+    func: () => ResultAsync<T, E>,
     acceptableErrors: Function[],
     maxAttempts?: number,
-    baseSeconds: number = 5): ResultAsync<T, E> {
-
+    baseSeconds: number = 5,
+  ): ResultAsync<T, E> {
     if (maxAttempts != null && maxAttempts < 1) {
       throw new Error("maxAttempts must be 1 or more!");
     }
@@ -86,11 +87,7 @@ export class ResultUtils {
       throw new Error("baseSeconds must be 1 or more!");
     }
 
-    const runAndCheck = (
-      currentAttempt: number,
-      nextAttemptSecs: number,
-      lastError: E | null): ResultAsync<T, E> => {
-
+    const runAndCheck = (currentAttempt: number, nextAttemptSecs: number, lastError: E | null): ResultAsync<T, E> => {
       if (maxAttempts != null && currentAttempt > maxAttempts) {
         if (lastError == null) {
           throw new Error("Error before first function run; logical error! maxAttempts must be 1 or more!");
@@ -102,24 +99,22 @@ export class ResultUtils {
       // If it's an error, check the error type against acceptableErrors. If it's in the list,
       // wait some amount of time and try again.
       // If it is not in the list, return the error and stop.
-      return func()
-        .orElse((e) => {
-          let retry = false;
-          for (const acceptableError of acceptableErrors) {
-            if (e instanceof acceptableError) {
-              retry = true;
-              break;
-            }
+      return func().orElse((e) => {
+        let retry = false;
+        for (const acceptableError of acceptableErrors) {
+          if (e instanceof acceptableError) {
+            retry = true;
+            break;
           }
-          if (retry) {
-            return ResultAsync.fromSafePromise<void, never>(delay(nextAttemptSecs))
-            .andThen(() => {
-              return runAndCheck(++currentAttempt, nextAttemptSecs * 2, e);
-            });
-          }
-          return errAsync(e);
-        });
-    }
+        }
+        if (retry) {
+          return ResultAsync.fromSafePromise<void, never>(delay(nextAttemptSecs)).andThen(() => {
+            return runAndCheck(++currentAttempt, nextAttemptSecs * 2, e);
+          });
+        }
+        return errAsync(e);
+      });
+    };
 
     return runAndCheck(1, baseSeconds, null);
   }

@@ -1,7 +1,6 @@
 export * from "./AcceptPaymentError";
 export * from "./BalancesUnavailableError";
 export * from "./BlockchainUnavailableError";
-export * from "./FatalMerchantConnectorError";
 export * from "./InsufficientBalanceError";
 export * from "./InvalidParametersError";
 export * from "./InvalidPaymentError";

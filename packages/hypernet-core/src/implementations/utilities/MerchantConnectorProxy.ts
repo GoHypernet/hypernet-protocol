@@ -3,7 +3,6 @@ import { ResultAsync } from "neverthrow";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
 import {
   EthereumAddress,
-  LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
   PaymentId,
@@ -15,7 +14,6 @@ import {
   PullPayment,
   PushPayment,
   MerchantActivationError,
-  FatalMerchantConnectorError,
 } from "@hypernetlabs/objects";
 import { IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
 import { Subject } from "rxjs";
@@ -43,7 +41,7 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
   public activateConnector(
     publicIdentifier: PublicIdentifier,
     balances: Balances,
-  ): ResultAsync<void, MerchantActivationError | FatalMerchantConnectorError | ProxyError> {
+  ): ResultAsync<void, MerchantActivationError | ProxyError> {
     const assets = balances.assets.map((val) => {
       return {
         assetAddress: val.assetAddress,
@@ -59,13 +57,14 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
       publicIdentifier,
       balances: { assets: assets },
     };
-    return this._createCall<void, MerchantActivationError | FatalMerchantConnectorError | ProxyError>("activateConnector", activateData)
-    .mapErr((e) => {
-      // TODO
-      // _createCall's return type should be adjusted; it's not actually
-      // the type is says
-      return e;
-    });
+    return this._createCall<void, MerchantActivationError | ProxyError>("activateConnector", activateData).mapErr(
+      (e) => {
+        // TODO
+        // _createCall's return type should be adjusted; it's not actually
+        // the type is says
+        return e;
+      },
+    );
   }
 
   public resolveChallenge(paymentId: PaymentId): ResultAsync<IResolutionResult, MerchantConnectorError | ProxyError> {
@@ -81,9 +80,7 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
   }
 
   public activateProxy(): ResultAsync<void, ProxyError> {
-    return ResultUtils.combine([this.contextProvider.getContext(), 
-      this.activate()])
-      .map((vals) => {
+    return ResultUtils.combine([this.contextProvider.getContext(), this.activate()]).map((vals) => {
       const [context] = vals;
 
       // Events coming from merchant connector iframe
