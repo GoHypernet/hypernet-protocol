@@ -10,6 +10,8 @@ import {
   PaymentId,
   EthereumAddress,
   MerchantUrl,
+  Signature,
+  Balances,
 } from "@hypernetlabs/objects";
 import { EPaymentState } from "@hypernetlabs/objects";
 import {
@@ -50,6 +52,7 @@ const amount = "42";
 const expirationDate = unixNow + defaultExpirationLength;
 const paymentId = PaymentId("See, this doesn't have to be legit data if it's never checked!");
 const nonExistentPaymentId = PaymentId("This payment is not mocked");
+const validatedSignature = Signature("0xValidatedSignature");
 const paymentDetails = new PaymentInternalDetails(offerTransferId, insuranceTransferId, parameterizedTransferId, []);
 
 class PaymentServiceMocks {
@@ -116,6 +119,7 @@ class PaymentServiceMocks {
       okAsync(new Map<PaymentId, Payment>()),
     );
     td.when(this.accountRepository.getBalanceByAsset(hyperTokenAddress)).thenReturn(okAsync(this.assetBalance));
+    td.when(this.accountRepository.getBalances()).thenReturn(okAsync(new Balances([this.assetBalance])));
     td.when(this.paymentRepository.provideStake(paymentId, account)).thenReturn(okAsync(this.stakedPushPayment));
     td.when(this.paymentRepository.provideAsset(paymentId)).thenReturn(okAsync(this.paidPushPayment));
     td.when(this.paymentRepository.finalizePayment(paymentId, amount)).thenReturn(okAsync(this.finalizedPushPayment));
@@ -124,6 +128,15 @@ class PaymentServiceMocks {
     this.merchantAddresses.set(merchantUrl, account);
     td.when(this.merchantConnectorRepository.getMerchantAddresses(td.matchers.contains(merchantUrl))).thenReturn(
       okAsync(this.merchantAddresses),
+    );
+    td.when(this.merchantConnectorRepository.getAuthorizedMerchants()).thenReturn(
+      okAsync(new Map([[this.pushPayment.merchantUrl, Signature(validatedSignature)]])),
+    );
+    td.when(
+      this.merchantConnectorRepository.addAuthorizedMerchant(merchantUrl, new Balances([this.assetBalance])),
+    ).thenReturn(okAsync(undefined));
+    td.when(this.merchantConnectorRepository.getAuthorizedMerchantConnectorStatus()).thenReturn(
+      okAsync(new Map([[merchantUrl, true]])),
     );
   }
 
@@ -150,6 +163,12 @@ class PaymentServiceMocks {
 
     td.when(this.paymentRepository.getPaymentsByIds(td.matchers.contains(paymentIds))).thenReturn(
       okAsync(returnedPaymentsMap),
+    );
+  }
+
+  public setPaymentMerchantActivationStatus(payment: Payment, status: boolean) {
+    td.when(this.merchantConnectorRepository.getAuthorizedMerchants()).thenReturn(
+      okAsync(new Map([[payment.merchantUrl, Signature(validatedSignature)]])),
     );
   }
 
@@ -428,28 +447,6 @@ describe("PaymentService tests", () => {
     expect(updatedPushPayments.length).toBe(1);
   });
 
-  // test("Should paymentPosted run without errors when payment from is not equal to publicIdentifier and payment is PullPayment", async () => {
-  //   // Arrange
-  //   const paymentServiceMock = new PaymentServiceMocks();
-  //   const payment = paymentServiceMock.factoryPullPayment({
-  //     state: EPaymentState.Approved,
-  //   });
-  //   const paymentId = mockUtils.generateRandomPaymentId();
-  //   const returnedPaymentsMap = new Map<string, Payment>([[paymentId, payment]]);
-
-  //   const hypernetContext = paymentServiceMock.getHypernetContextFactory();
-  //   hypernetContext.publicIdentifier = mockUtils.generateRandomEtherAdress();
-  //   hypernetContext.onPullPaymentReceived = new Subject<PullPayment>();
-
-  //   jestWhen(paymentServiceMock.paymentRepository.prototype.getPaymentsByIds)
-  //     .calledWith([paymentId])
-  //     .mockReturnValue(okAsync(returnedPaymentsMap));
-  //   when(paymentServiceMock.contextProvider.getContext()).thenReturn(okAsync(hypernetContext));
-
-  //   // Assert
-  //   expect((await paymentServiceMock.factoryPaymentService().paymentPosted(paymentId))._unsafeUnwrap()).toEqual(undefined);
-  // });
-
   test("Should paymentPosted return error if payment is null", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
@@ -514,26 +511,57 @@ describe("PaymentService tests", () => {
     expect(receivedPushPayments.length).toBe(0);
   });
 
-  // test("Should pullRecorded return error if payment is null", async () => {
-  //   // Arrange
-  //   const paymentServiceMock = new PaymentServiceMocks();
-  //   const payment = null;
-  //   const paymentId = mockUtils.generateRandomPaymentId();
-  //   const returnedPaymentsMap = new Map<string, Payment | null>([[paymentId, payment]]);
-  //   const publicIdentifier = mkPublicIdentifier();
-  //   const hypernetContext = paymentServiceMock.getHypernetContextFactory();
-  //   hypernetContext.publicIdentifier = publicIdentifier;
+  test("Should advancePayments provide asset if payment is staked", async () => {
+    // Arrange
+    const paymentServiceMock = new PaymentServiceMocks();
 
-  //   const throwenError = new InvalidParametersError(`Invalid payment ID!`);
+    const payment = paymentServiceMock.factoryPushPayment(publicIdentifier2, publicIdentifier, EPaymentState.Staked);
+    paymentServiceMock.setExistingPayments([payment]);
+    paymentServiceMock.contextProvider.context.publicIdentifier = publicIdentifier;
 
-  //   jestWhen(paymentServiceMock.paymentRepository.prototype.getPaymentsByIds)
-  //     .calledWith([paymentId])
-  //     .mockReturnValue(okAsync(returnedPaymentsMap));
-  //   when(paymentServiceMock.contextProvider.getContext()).thenReturn(okAsync(hypernetContext));
+    let receivedPushPayments = new Array<PushPayment>();
+    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val: PushPayment) => {
+      receivedPushPayments.push(val);
+    });
 
-  //   // Assert
-  //   expect((await paymentServiceMock.factoryPaymentService().pullRecorded(paymentId))._unsafeUnwrapErr()).toEqual(
-  //     throwenError,
-  //   );
-  // });
+    const paymentService = paymentServiceMock.factoryPaymentService();
+
+    // Act
+    const result = await paymentService.advancePayments([paymentId]);
+    const provideAssetCallingcount = td.explain(paymentServiceMock.paymentRepository.provideAsset).callCount;
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toBeDefined();
+    expect(receivedPushPayments.length).toBe(1);
+    expect(provideAssetCallingcount).toBe(1);
+    expect(receivedPushPayments[0]).toBe(paymentServiceMock.paidPushPayment);
+  });
+
+  test("Should advancePayments finalize payments if payment is approved", async () => {
+    // Arrange
+    const paymentServiceMock = new PaymentServiceMocks();
+
+    const payment = paymentServiceMock.factoryPushPayment(publicIdentifier, publicIdentifier2, EPaymentState.Approved);
+    paymentServiceMock.setExistingPayments([payment]);
+    paymentServiceMock.contextProvider.context.publicIdentifier = publicIdentifier;
+
+    let receivedPushPayments = new Array<PushPayment>();
+    paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe((val: PushPayment) => {
+      receivedPushPayments.push(val);
+    });
+
+    const paymentService = paymentServiceMock.factoryPaymentService();
+
+    // Act
+    const result = await paymentService.advancePayments([paymentId]);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toBeDefined();
+    expect(receivedPushPayments.length).toBe(1);
+    expect(receivedPushPayments[0]).toBe(paymentServiceMock.finalizedPushPayment);
+  });
 });

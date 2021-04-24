@@ -258,4 +258,6 @@ export interface IPaymentService {
     | InvalidParametersError
     | TransferCreationError
   >;
+
+  advanceMerchantUnresolvedPayments(merchantUrl: MerchantUrl): ResultAsync<void, never>;
 }

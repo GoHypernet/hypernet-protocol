@@ -559,6 +559,12 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
       .andThen(() => {
         return this._activateConnector(context, proxy, balances);
       })
+      .map(() => {
+        // TODO: make sure of the implementation here, this will trigger an event and a subscribe event in MerchantConnectorListener
+        // will call advanceMerchantUnresolvedPayments.
+        context.onMerchantConnectorProxyActivated.next(proxy);
+        return proxy;
+      })
       .mapErr((e) => {
         // Notify the world
         context.onAuthorizedMerchantActivationFailed.next(merchantUrl);

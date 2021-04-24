@@ -336,6 +336,7 @@ export class HypernetCore implements IHypernetCore {
 
     this.merchantConnectorListener = new MerchantConnectorListener(
       this.accountService,
+      this.paymentService,
       this.contextProvider,
       this.logUtils,
     );
@@ -581,11 +582,11 @@ export class HypernetCore implements IHypernetCore {
         return this.contextProvider.setContext(context);
       })
       .andThen(() => {
+        return this.merchantService.activateAuthorizedMerchants();
+      })
+      .andThen(() => {
         // Initialize anything that wants an initialized context
-        return ResultUtils.combine([
-          this.vectorAPIListener.setup(),
-          this.merchantService.activateAuthorizedMerchants(),
-        ]); // , this.threeboxMessagingListener.initialize()]);
+        return ResultUtils.combine([this.vectorAPIListener.setup(), this.merchantConnectorListener.setup()]); // , this.threeboxMessagingListener.initialize()]);
       })
       // .andThen(() => {
       //   // Claim control
