@@ -1,3 +1,4 @@
+export * from "@objects/errors/AjaxError";
 export * from "@objects/errors/AcceptPaymentError";
 export * from "@objects/errors/BalancesUnavailableError";
 export * from "@objects/errors/BlockchainUnavailableError";

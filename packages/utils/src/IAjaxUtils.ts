@@ -1,12 +1,13 @@
 import { AxiosRequestConfig } from "axios";
 import { ResultAsync } from "neverthrow";
+import { AjaxError } from "@hypernetlabs/objects";
 
 /**
  * AjaxUtils are just a wrapper around Axios for purposes of testing.
  */
 export interface IAjaxUtils {
-  get<T, E>(url: URL, config?: IRequestConfig): ResultAsync<T, E>;
-  post<T, E>(
+  get<T>(url: URL, config?: IRequestConfig): ResultAsync<T, AjaxError>;
+  post<T>(
     url: URL,
     data:
       | string
@@ -15,7 +16,11 @@ export interface IAjaxUtils {
       | ArrayBufferView
       | URLSearchParams,
     config?: IRequestConfig,
-  ): ResultAsync<T, E>;
+  ): ResultAsync<T, AjaxError>;
 }
 
-export type IRequestConfig = AxiosRequestConfig;
+export interface IRequestConfig extends AxiosRequestConfig {}
+
+export const IAjaxUtilsType = Symbol.for(
+  "IAjaxUtils"
+);

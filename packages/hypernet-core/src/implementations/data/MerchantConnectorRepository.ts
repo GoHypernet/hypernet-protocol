@@ -8,6 +8,7 @@ import {
   ProxyError,
   BlockchainUnavailableError,
   TransferResolutionError,
+  AjaxError,
   PaymentId,
   TransferId,
   EthereumAddress,
@@ -77,7 +78,7 @@ export class MerchantConnectorRepository
 
   public getMerchantAddresses(
     merchantUrls: MerchantUrl[],
-  ): ResultAsync<Map<MerchantUrl, EthereumAddress>, LogicalError> {
+  ): ResultAsync<Map<MerchantUrl, EthereumAddress>, AjaxError> {
     // TODO: right now, the merchant will publish a URL with their address; eventually, they should be held in a smart contract
 
     // For merchants that are already authorized, we can just go to their connector for the
@@ -102,11 +103,9 @@ export class MerchantConnectorRepository
         const url = new URL(merchantUrl.toString());
         url.pathname = "address";
         addressRequests.push(
-          this.ajaxUtils
-            .get<EthereumAddress, LogicalError>(url)
-            .map((address) => {
-              return { merchantUrl, address };
-            }),
+          this.ajaxUtils.get<EthereumAddress>(url).map((address) => {
+            return { merchantUrl, address };
+          }),
         );
       }
     }
