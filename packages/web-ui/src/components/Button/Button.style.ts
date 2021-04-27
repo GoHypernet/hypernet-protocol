@@ -11,7 +11,7 @@ const useStyles = createUseStyles({
     border: "none",
     height: 52,
     cursor: "pointer",
-    background: (props) =>
+    background: (props: any) =>
       props.bgColor ||
       `${getColorFromStatus(
         props.status || EStatusColor.PRIMARY,

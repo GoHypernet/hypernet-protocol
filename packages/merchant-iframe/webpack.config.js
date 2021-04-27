@@ -24,7 +24,6 @@ module.exports = {
     publicPath: "/",
     port: 5005,
   },
-  plugins: [new HtmlWebpackPlugin({})],
   module: {
     rules: [
       {
@@ -109,6 +108,7 @@ module.exports = {
   },
   devtool: "inline-source-map",
   plugins: [
+    new HtmlWebpackPlugin({}),
     //new CleanWebpackPlugin({ dangerouslyAllowCleanPatternsOutsideProject: false }),
     new webpack.ProvidePlugin({
       Buffer: ["buffer", "Buffer"],

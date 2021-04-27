@@ -15,7 +15,7 @@ interface ILayoutProps {
 
 const LayoutContext = React.createContext<ILayout>({} as ILayout);
 
-function LayoutProvider({ children }: ILayoutProps): unknown {
+function LayoutProvider({ children }: ILayoutProps) {
   const [modalWidth, setModalWidth] = useState<number>(373);
   const [modalStatus, setModalStatus] = useState<EStatusColor>(
     EStatusColor.IDLE,

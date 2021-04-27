@@ -35,15 +35,13 @@
     "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",
-    "prepare": "yarn build",
-    "prepublishOnly": "npm test && npm run lint",
+    "compile": "tsc -p src/tsconfig.json && tsc -p server/tsconfig.json && cd ../.. && yarn alias",
+    "alias": "tsc-alias -p src/tsconfig.json && tsc-alias -p server/tsconfig.json",
+    "postcompile": "yarn build-connector && yarn build-server",
     "start": "yarn build-connector && ts-node server/index.ts",
     "test": "yarn test:ci",
     "test:ci": "jest --runInBand --coverage --passWithNoTests",
-    "test:watch": "jest --watch --color --detectOpenHandles",
-    "preversion": "npm run lint",
-    "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags"
+    "test:watch": "jest --watch --color --detectOpenHandles"
   },
   "types": "dist/index.d.ts",
   "dependencies": {

@@ -11,7 +11,6 @@ interface ButtonProps {
   status?: EStatusColor;
   fullWidth?: boolean;
   bgColor?: string;
-  theme: Jss.Theme;
 }
 
 const Button: React.FC<ButtonProps> = (props: ButtonProps) => {

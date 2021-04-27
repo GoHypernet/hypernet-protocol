@@ -25,7 +25,7 @@ import {
   LINKS_WIDGET_ID_SELECTOR,
   PAYMENT_WIDGET_ID_SELECTOR,
   PRIVATE_KEYS_FLOW_ID_SELECTOR,
-} from "@web-integration/constants";
+} from "@web-integration-constants";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;

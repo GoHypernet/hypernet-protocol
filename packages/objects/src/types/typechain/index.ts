@@ -3,7 +3,6 @@
 
 import { Parameterized } from "..";
 
-/* eslint-disable */
 export type { HashlockTransfer } from "./HashlockTransfer";
 export type { Insurance } from "./Insurance";
 export type { ITransferDefinition } from "./ITransferDefinition";

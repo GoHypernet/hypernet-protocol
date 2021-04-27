@@ -26,10 +26,10 @@
     "!dist/tsconfig.tsbuildinfo"
   ],
   "scripts": {
-    "build": "yarn clean && yarn compile && yarn copy-files",
+    "build": "yarn clean && yarn compile",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "compile": "tsc --build && cd ../.. && yarn alias",
-    "alias": "tsc-alias",
+    "alias": "yarn copy-files && tsc-alias",
     "copy-files": "copyfiles -u 1 src/**/*.d.ts dist/",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",

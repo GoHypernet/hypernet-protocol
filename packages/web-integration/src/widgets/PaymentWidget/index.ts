@@ -1,1 +1,1 @@
-export * from "@web-integration/widgets/PaymentWidget/PaymentWidget";
+export * from "@web-integration-widgets/PaymentWidget/PaymentWidget";
