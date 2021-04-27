@@ -166,9 +166,9 @@ class PaymentServiceMocks {
     );
   }
 
-  public setPaymentMerchantActivationStatus(payment: Payment, status: boolean) {
-    td.when(this.merchantConnectorRepository.getAuthorizedMerchants()).thenReturn(
-      okAsync(new Map([[payment.merchantUrl, Signature(validatedSignature)]])),
+  public setMerchantStatus(merchantUrl: MerchantUrl, status: boolean) {
+    td.when(this.merchantConnectorRepository.getAuthorizedMerchantConnectorStatus()).thenReturn(
+      okAsync(new Map([[merchantUrl, false]])),
     );
   }
 
@@ -350,7 +350,7 @@ describe("PaymentService tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toBeDefined();
+    expect(result._unsafeUnwrap()).toBeUndefined();
     expect(updatedPushPayments.length).toBe(2);
   });
 
@@ -394,7 +394,7 @@ describe("PaymentService tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toBeDefined();
+    expect(result._unsafeUnwrap()).toBeUndefined();
     expect(updatedPushPayments.length).toBe(1);
   });
 
@@ -418,7 +418,7 @@ describe("PaymentService tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toBeDefined();
+    expect(result._unsafeUnwrap()).toBeUndefined();
     expect(updatedPushPayments.length).toBe(2);
     expect(updatedPushPayments[1]).toBe(paymentServiceMock.finalizedPushPayment);
   });
@@ -443,7 +443,7 @@ describe("PaymentService tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toBeDefined();
+    expect(result._unsafeUnwrap()).toBeUndefined();
     expect(updatedPushPayments.length).toBe(1);
   });
 
@@ -485,7 +485,7 @@ describe("PaymentService tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toBeDefined();
+    expect(result._unsafeUnwrap()).toBeUndefined();
     expect(receivedPushPayments.length).toBe(1);
     expect(receivedPushPayments[0]).toBe(paymentServiceMock.pushPayment);
   });
@@ -533,7 +533,7 @@ describe("PaymentService tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toBeDefined();
+    expect(result._unsafeUnwrap()).toBeUndefined();
     expect(receivedPushPayments.length).toBe(1);
     expect(provideAssetCallingcount).toBe(1);
     expect(receivedPushPayments[0]).toBe(paymentServiceMock.paidPushPayment);
@@ -560,8 +560,35 @@ describe("PaymentService tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toBeDefined();
+    expect(result._unsafeUnwrap()).toBeUndefined();
     expect(receivedPushPayments.length).toBe(1);
     expect(receivedPushPayments[0]).toBe(paymentServiceMock.finalizedPushPayment);
+  });
+
+  test("Should advancePayments pass and trigger onPushPaymentDelayed if payment merchant is inactive", async () => {
+    // Arrange
+    const paymentServiceMock = new PaymentServiceMocks();
+
+    const payment = paymentServiceMock.factoryPushPayment(publicIdentifier2, publicIdentifier);
+    paymentServiceMock.setExistingPayments([payment]);
+    paymentServiceMock.setMerchantStatus(merchantUrl, false);
+    paymentServiceMock.contextProvider.context.publicIdentifier = publicIdentifier;
+
+    let delayedPushPayments = new Array<PushPayment>();
+    paymentServiceMock.contextProvider.onPushPaymentDelayed.subscribe((val: PushPayment) => {
+      delayedPushPayments.push(val);
+    });
+
+    const paymentService = paymentServiceMock.factoryPaymentService();
+
+    // Act
+    const result = await paymentService.advancePayments([paymentId]);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toBeUndefined();
+    expect(delayedPushPayments.length).toBe(1);
+    expect(delayedPushPayments[0]).toStrictEqual(paymentServiceMock.pushPayment);
   });
 });

@@ -63,8 +63,6 @@ export class PaymentService implements IPaymentService {
   /**
    * Creates an instanceo of the paymentService.
    */
-  protected unresolvedPaymentsResolve: Map<Payment, ((value: Payment) => void) | undefined>;
-  protected unresolvedPaymentsPromise: Map<Payment, Promise<Payment> | undefined>;
 
   constructor(
     protected linkRepository: ILinkRepository,
@@ -74,10 +72,7 @@ export class PaymentService implements IPaymentService {
     protected paymentRepository: IPaymentRepository,
     protected merchantConnectorRepository: IMerchantConnectorRepository,
     protected logUtils: ILogUtils,
-  ) {
-    this.unresolvedPaymentsResolve = new Map();
-    this.unresolvedPaymentsPromise = new Map();
-  }
+  ) {}
 
   /**
    * Authorizes funds to a specified counterparty, with an amount, rate, & expiration date.
@@ -337,7 +332,7 @@ export class PaymentService implements IPaymentService {
   public stakePosted(
     paymentId: PaymentId,
   ): ResultAsync<
-    Payment,
+    void,
     PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
     return ResultUtils.combine([
@@ -374,7 +369,7 @@ export class PaymentService implements IPaymentService {
   public paymentPosted(
     paymentId: PaymentId,
   ): ResultAsync<
-    Payment,
+    void,
     PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
     return ResultUtils.combine([
@@ -410,7 +405,7 @@ export class PaymentService implements IPaymentService {
   public paymentCompleted(
     paymentId: PaymentId,
   ): ResultAsync<
-    Payment,
+    void,
     PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
     return ResultUtils.combine([
@@ -446,7 +441,7 @@ export class PaymentService implements IPaymentService {
   public insuranceResolved(
     paymentId: PaymentId,
   ): ResultAsync<
-    Payment,
+    void,
     PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
     return ResultUtils.combine([
@@ -543,55 +538,40 @@ export class PaymentService implements IPaymentService {
       });
   }
 
-  public advanceMerchantUnresolvedPayments(merchantUrl: MerchantUrl): ResultAsync<void, never> {
-    return this.contextProvider.getInitializedContext().andThen((context) => {
-      for (const [payment] of this.unresolvedPaymentsPromise.entries()) {
-        if (payment.merchantUrl === merchantUrl) {
-          this._advancePayment(payment, context).map((payment) => {
-            const paymentResolver = this.unresolvedPaymentsResolve.get(payment);
-            paymentResolver && paymentResolver(payment);
-          });
-        }
-      }
-      return okAsync(undefined);
-    });
-  }
-
   public advancePayments(
     paymentIds: PaymentId[],
   ): ResultAsync<
-    Payment[],
+    void,
     PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
-    return ResultUtils.combine([
-      this.paymentRepository.getPaymentsByIds(paymentIds),
-      this.contextProvider.getContext(),
-    ]).andThen((vals) => {
-      const [payments, context] = vals;
+    return ResultUtils.combine([this.paymentRepository.getPaymentsByIds(paymentIds), this.contextProvider.getContext()])
+      .map((vals) => {
+        const [payments, context] = vals;
 
-      const paymentAdvancements = new Array<
-        ResultAsync<
-          Payment,
-          | PaymentFinalizeError
-          | PaymentStakeError
-          | TransferResolutionError
-          | PaymentsByIdsErrors
-          | TransferCreationError
-        >
-      >();
-      for (const keyval of payments) {
-        const [paymentId, payment] = keyval;
-        paymentAdvancements.push(this._advancePayment(payment, context));
-      }
-      return ResultUtils.combine(paymentAdvancements);
-    });
+        const paymentAdvancements = new Array<
+          ResultAsync<
+            void,
+            | PaymentFinalizeError
+            | PaymentStakeError
+            | TransferResolutionError
+            | PaymentsByIdsErrors
+            | TransferCreationError
+          >
+        >();
+        for (const keyval of payments) {
+          const [paymentId, payment] = keyval;
+          paymentAdvancements.push(this._advancePayment(payment, context));
+        }
+        return ResultUtils.combine(paymentAdvancements);
+      })
+      .map(() => {});
   }
 
   protected _advancePayment(
     payment: Payment,
     context: HypernetContext,
   ): ResultAsync<
-    Payment,
+    void,
     PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
     return this.merchantConnectorRepository
@@ -599,19 +579,16 @@ export class PaymentService implements IPaymentService {
       .andThen((merchantConnectorStatusMap) => {
         const merchantConnectorStatus = merchantConnectorStatusMap.get(payment.merchantUrl);
         if (merchantConnectorStatus) {
-          return this._advancePaymentForAcitvatedMerchant(payment, context);
+          return this._advancePaymentForAcitvatedMerchant(payment, context).map(() => {});
         } else {
-          const paymentPromise = new Promise<Payment>((resolve) => {
-            this.unresolvedPaymentsResolve.set(payment, resolve);
-          });
-          this.unresolvedPaymentsPromise.set(payment, paymentPromise);
-
-          // TODO: make sure of the implementation here, in this case, _advancePayment will hang until the payment promise is resolved
-          // an alternative solution would be returning the payment itself or void so that _advancePayments and methods on
-          // vectorUtilsListener would resolve immediately without waiting for the merchant to get activated.
-          return ResultAsync.fromPromise(paymentPromise, (err) => {
-            return err as Error;
-          });
+          // fire an event for payment advancement error / onPaymentDelay
+          if (payment instanceof PushPayment) {
+            context.onPushPaymentDelayed.next(payment);
+          }
+          if (payment instanceof PullPayment) {
+            context.onPullPaymentDelayed.next(payment);
+          }
+          return okAsync(undefined);
         }
       });
   }

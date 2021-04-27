@@ -61,51 +61,56 @@ export class VectorAPIListener implements IVectorListener {
         // Filter out any transfer not containing a transfer with a UUID in the transferState (insurance & parameterized transfer types)
         // or a UUID as part of transferState.message (message transfer type)
 
-        this.paymentUtils.getTransferType(payload.transfer).andThen((transferType) => {
-          let paymentId: PaymentId;
-          const transfer = payload.transfer;
+        this.paymentUtils
+          .getTransferType(payload.transfer)
+          .andThen((transferType) => {
+            let paymentId: PaymentId;
+            const transfer = payload.transfer;
 
-          if (transferType === ETransferType.Offer) {
-            // @todo also add in PullRecord type)
-            const offerDetails: IHypernetOfferDetails = JSON.parse((transfer.transferState as MessageState).message);
-            paymentId = offerDetails.paymentId;
-          } else if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
-            paymentId = transfer.transferState.UUID;
-          } else {
-            this.logUtils.log(`Transfer type was not recognized, doing nothing. TransferType: '${transferType}'`);
-            return okAsync(null);
-          }
-
-          return this.paymentUtils.isHypernetDomain(paymentId).andThen((isHypernetDomain) => {
-            if (!isHypernetDomain) {
-              this.logUtils.log(
-                `Ignoring transfer that is not in the Hypernet Domain: transferID of ${transfer.transferId}, initiator: ${transfer.initiator}`,
-              );
+            if (transferType === ETransferType.Offer) {
+              // @todo also add in PullRecord type)
+              const offerDetails: IHypernetOfferDetails = JSON.parse((transfer.transferState as MessageState).message);
+              paymentId = offerDetails.paymentId;
+            } else if (transferType === ETransferType.Insurance || transferType === ETransferType.Parameterized) {
+              paymentId = transfer.transferState.UUID;
+            } else {
+              this.logUtils.log(`Transfer type was not recognized, doing nothing. TransferType: '${transferType}'`);
               return okAsync(null);
             }
 
-            if (transferType === ETransferType.Offer) {
-              // if the transfer is an offer transfer, we need to notify the payment service
-              // than an offer has been resolved.
-              // @todo create methods in payment service
-              return errAsync(new LogicalError("Method not yet implemented!"));
-            } else if (transferType === ETransferType.Insurance) {
-              // if the transfer is an insurance transfer, we need to notify the payment service
-              // that stake has been resolved.
-              // @todo create methods in payment service
-              return this.paymentService.insuranceResolved(paymentId);
-            } else if (transferType === ETransferType.Parameterized) {
-              // if the transfer is the parameterized transfer, we need to notify the payment service
-              // that the parameterized payment has been resolved.
-              return this.paymentService.paymentCompleted(paymentId);
-            } else if (transferType === ETransferType.PullRecord) {
-              // @todo create methods in payment service
-              return errAsync(new LogicalError("Method not yet implemented!"));
-            } else {
-              return errAsync(new LogicalError("Unrecognized transfer type!"));
-            }
+            return this.paymentUtils.isHypernetDomain(paymentId).andThen((isHypernetDomain) => {
+              if (!isHypernetDomain) {
+                this.logUtils.log(
+                  `Ignoring transfer that is not in the Hypernet Domain: transferID of ${transfer.transferId}, initiator: ${transfer.initiator}`,
+                );
+                return okAsync(null);
+              }
+
+              if (transferType === ETransferType.Offer) {
+                // if the transfer is an offer transfer, we need to notify the payment service
+                // than an offer has been resolved.
+                // @todo create methods in payment service
+                return errAsync(new LogicalError("Method not yet implemented!"));
+              } else if (transferType === ETransferType.Insurance) {
+                // if the transfer is an insurance transfer, we need to notify the payment service
+                // that stake has been resolved.
+                // @todo create methods in payment service
+                return this.paymentService.insuranceResolved(paymentId);
+              } else if (transferType === ETransferType.Parameterized) {
+                // if the transfer is the parameterized transfer, we need to notify the payment service
+                // that the parameterized payment has been resolved.
+                return this.paymentService.paymentCompleted(paymentId);
+              } else if (transferType === ETransferType.PullRecord) {
+                // @todo create methods in payment service
+                return errAsync(new LogicalError("Method not yet implemented!"));
+              } else {
+                return errAsync(new LogicalError("Unrecognized transfer type!"));
+              }
+            });
+          })
+          .mapErr((e) => {
+            this.logUtils.error(e);
           });
-        });
       });
 
       // When the browser node notifies us that a conditional transfer has been created
