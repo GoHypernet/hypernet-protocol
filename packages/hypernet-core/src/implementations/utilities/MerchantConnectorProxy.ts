@@ -18,7 +18,6 @@ import {
 import { IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
 import { Subject } from "rxjs";
 import { HypernetContext } from "@interfaces/objects";
-import e from "cors";
 
 export class MerchantConnectorProxy extends ParentProxy implements IMerchantConnectorProxy {
   protected static openedIFramesQueue: string[] = [];
