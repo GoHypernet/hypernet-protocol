@@ -194,6 +194,14 @@ export default class CoreWrapper extends ChildProxy {
       parent.emit("onPullPaymentReceived", val);
     });
 
+    this.core.onPushPaymentDelayed.subscribe((val) => {
+      parent.emit("onPushPaymentDelayed", val);
+    });
+
+    this.core.onPullPaymentDelayed.subscribe((val) => {
+      parent.emit("onPullPaymentDelayed", val);
+    });
+
     this.core.onBalancesChanged.subscribe((val) => {
       parent.emit("onBalancesChanged", val);
     });

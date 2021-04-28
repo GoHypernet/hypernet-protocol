@@ -6,6 +6,8 @@ export * from "./InvalidParametersError";
 export * from "./InvalidPaymentError";
 export * from "./InvalidPaymentIdError";
 export * from "./LogicalError";
+export * from "./MerchantActivationError";
+export * from "./MerchantAuthorizationDeniedError";
 export * from "./MerchantConnectorError";
 export * from "./MerchantValidationError";
 export * from "./OfferMismatchError";

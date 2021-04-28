@@ -77,7 +77,7 @@ export class MerchantService implements IMerchantService {
 
       // Remove the merchant iframe proxy related to that merchantUrl if there is any activated ones.
       if (authorizedMerchantsMap.get(merchantUrl)) {
-        this.merchantConnectorRepository.removeAuthorizedMerchant(merchantUrl);
+        this.merchantConnectorRepository.deauthorizeMerchant(merchantUrl);
       }
 
       this.merchantConnectorRepository.addAuthorizedMerchant(merchantUrl, balances).map(() => {

@@ -228,6 +228,8 @@ export interface IHypernetCore {
   onPullPaymentUpdated: Subject<PullPayment>;
   onPushPaymentReceived: Subject<PushPayment>;
   onPullPaymentReceived: Subject<PullPayment>;
+  onPushPaymentDelayed: Subject<PushPayment>;
+  onPullPaymentDelayed: Subject<PullPayment>;
   onBalancesChanged: Subject<Balances>;
   onMerchantAuthorized: Subject<MerchantUrl>;
   onAuthorizedMerchantUpdated: Subject<MerchantUrl>;

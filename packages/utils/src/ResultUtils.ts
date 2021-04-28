@@ -1,4 +1,5 @@
 import { err, ok, ResultAsync, Result, okAsync, errAsync } from "neverthrow";
+import delay from "delay";
 
 export class ResultUtils {
   static combine<T, T2, T3, T4, E, E2, E3, E4>(
@@ -70,5 +71,51 @@ export class ResultUtils {
     return ResultAsync.fromPromise(func(), (e) => {
       return e as E;
     });
+  }
+
+  static backoffAndRetry<T, E extends Error>(
+    func: () => ResultAsync<T, E>,
+    acceptableErrors: Function[],
+    maxAttempts?: number,
+    baseSeconds: number = 5,
+  ): ResultAsync<T, E> {
+    if (maxAttempts != null && maxAttempts < 1) {
+      throw new Error("maxAttempts must be 1 or more!");
+    }
+
+    if (baseSeconds < 1) {
+      throw new Error("baseSeconds must be 1 or more!");
+    }
+
+    const runAndCheck = (currentAttempt: number, nextAttemptSecs: number, lastError: E | null): ResultAsync<T, E> => {
+      if (maxAttempts != null && currentAttempt > maxAttempts) {
+        if (lastError == null) {
+          throw new Error("Error before first function run; logical error! maxAttempts must be 1 or more!");
+        }
+        return errAsync(lastError);
+      }
+
+      // Check the result. If it's not an error, we're done!
+      // If it's an error, check the error type against acceptableErrors. If it's in the list,
+      // wait some amount of time and try again.
+      // If it is not in the list, return the error and stop.
+      return func().orElse((e) => {
+        let retry = false;
+        for (const acceptableError of acceptableErrors) {
+          if (e instanceof acceptableError) {
+            retry = true;
+            break;
+          }
+        }
+        if (retry) {
+          return ResultAsync.fromSafePromise<void, never>(delay(nextAttemptSecs)).andThen(() => {
+            return runAndCheck(++currentAttempt, nextAttemptSecs * 2, e);
+          });
+        }
+        return errAsync(e);
+      });
+    };
+
+    return runAndCheck(1, baseSeconds, null);
   }
 }

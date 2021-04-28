@@ -49,8 +49,8 @@ import {
   PushPayment,
   PaymentId,
   MerchantUrl,
-  Signature,
   IHypernetCore,
+  Signature,
   PrivateCredentials,
   EBlockchainNetwork,
   AcceptPaymentError,
@@ -110,6 +110,8 @@ export class HypernetCore implements IHypernetCore {
   public onPushPaymentReceived: Subject<PushPayment>;
   public onPullPaymentUpdated: Subject<PullPayment>;
   public onPullPaymentReceived: Subject<PullPayment>;
+  public onPushPaymentDelayed: Subject<PushPayment>;
+  public onPullPaymentDelayed: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
   public onMerchantAuthorized: Subject<MerchantUrl>;
   public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
@@ -179,6 +181,8 @@ export class HypernetCore implements IHypernetCore {
     this.onPullPaymentSent = new Subject<PullPayment>();
     this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onPullPaymentReceived = new Subject<PullPayment>();
+    this.onPushPaymentDelayed = new Subject<PushPayment>();
+    this.onPullPaymentDelayed = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
     this.onMerchantAuthorized = new Subject<MerchantUrl>();
     this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
@@ -209,6 +213,8 @@ export class HypernetCore implements IHypernetCore {
       this.onPullPaymentSent,
       this.onPushPaymentReceived,
       this.onPullPaymentReceived,
+      this.onPushPaymentDelayed,
+      this.onPullPaymentDelayed,
       this.onPushPaymentUpdated,
       this.onPullPaymentUpdated,
       this.onBalancesChanged,
@@ -296,6 +302,7 @@ export class HypernetCore implements IHypernetCore {
       this.localStorageUtils,
       this.merchantConnectorProxyFactory,
       this.blockchainUtils,
+      this.logUtils,
     );
 
     this.paymentService = new PaymentService(
@@ -335,6 +342,8 @@ export class HypernetCore implements IHypernetCore {
 
     this.merchantConnectorListener = new MerchantConnectorListener(
       this.accountService,
+      this.paymentService,
+      this.linkService,
       this.contextProvider,
       this.logUtils,
     );
@@ -581,28 +590,15 @@ export class HypernetCore implements IHypernetCore {
       })
       .andThen(() => {
         // Initialize anything that wants an initialized context
-        return ResultUtils.combine([
-          this.vectorAPIListener.setup(),
-          this.merchantService.activateAuthorizedMerchants(),
-        ]); // , this.threeboxMessagingListener.initialize()]);
+        return ResultUtils.combine([this.vectorAPIListener.setup(), this.merchantConnectorListener.setup()]); // , this.threeboxMessagingListener.initialize()]);
+      })
+      .andThen(() => {
+        return this.merchantService.activateAuthorizedMerchants();
       })
       // .andThen(() => {
       //   // Claim control
       //   return this.controlService.claimControl();
       // })
-      .andThen(() => {
-        // Get all the existing payments and try to catch them up
-        return this.linkService.getLinks();
-      })
-      .andThen((links) => {
-        const paymentIds = new Array<PaymentId>();
-        for (const link of links) {
-          for (const payment of link.payments) {
-            paymentIds.push(payment.id);
-          }
-        }
-        return this.paymentService.advancePayments(paymentIds);
-      })
       .map(() => {
         if (this._initializePromiseResolve != null) {
           this._initializePromiseResolve();

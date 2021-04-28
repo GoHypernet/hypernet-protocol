@@ -58,6 +58,14 @@ export default class HypernetMobileIntegration {
         this.postLinks();
         this.postActiveLinks();
       });
+      coreProxy.onPushPaymentDelayed.subscribe(() => {
+        this.postLinks();
+        this.postActiveLinks();
+      });
+      coreProxy.onPullPaymentDelayed.subscribe(() => {
+        this.postLinks();
+        this.postActiveLinks();
+      });
       coreProxy.onMerchantAuthorized.subscribe(() => {
         this.postAuthorizedMerchants();
       });

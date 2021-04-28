@@ -63,6 +63,7 @@ export class PaymentService implements IPaymentService {
   /**
    * Creates an instanceo of the paymentService.
    */
+
   constructor(
     protected linkRepository: ILinkRepository,
     protected accountRepository: IAccountsRepository,
@@ -331,7 +332,7 @@ export class PaymentService implements IPaymentService {
   public stakePosted(
     paymentId: PaymentId,
   ): ResultAsync<
-    Payment,
+    void,
     PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
     return ResultUtils.combine([
@@ -368,7 +369,7 @@ export class PaymentService implements IPaymentService {
   public paymentPosted(
     paymentId: PaymentId,
   ): ResultAsync<
-    Payment,
+    void,
     PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
     return ResultUtils.combine([
@@ -404,7 +405,7 @@ export class PaymentService implements IPaymentService {
   public paymentCompleted(
     paymentId: PaymentId,
   ): ResultAsync<
-    Payment,
+    void,
     PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
     return ResultUtils.combine([
@@ -440,7 +441,7 @@ export class PaymentService implements IPaymentService {
   public insuranceResolved(
     paymentId: PaymentId,
   ): ResultAsync<
-    Payment,
+    void,
     PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
     return ResultUtils.combine([
@@ -540,34 +541,59 @@ export class PaymentService implements IPaymentService {
   public advancePayments(
     paymentIds: PaymentId[],
   ): ResultAsync<
-    Payment[],
+    void,
     PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
   > {
-    return ResultUtils.combine([
-      this.paymentRepository.getPaymentsByIds(paymentIds),
-      this.contextProvider.getContext(),
-    ]).andThen((vals) => {
-      const [payments, context] = vals;
+    return ResultUtils.combine([this.paymentRepository.getPaymentsByIds(paymentIds), this.contextProvider.getContext()])
+      .map((vals) => {
+        const [payments, context] = vals;
 
-      const paymentAdvancements = new Array<
-        ResultAsync<
-          Payment,
-          | PaymentFinalizeError
-          | PaymentStakeError
-          | TransferResolutionError
-          | PaymentsByIdsErrors
-          | TransferCreationError
-        >
-      >();
-      for (const keyval of payments) {
-        const [paymentId, payment] = keyval;
-        paymentAdvancements.push(this._advancePayment(payment, context));
-      }
-      return ResultUtils.combine(paymentAdvancements);
-    });
+        const paymentAdvancements = new Array<
+          ResultAsync<
+            void,
+            | PaymentFinalizeError
+            | PaymentStakeError
+            | TransferResolutionError
+            | PaymentsByIdsErrors
+            | TransferCreationError
+          >
+        >();
+        for (const keyval of payments) {
+          const [paymentId, payment] = keyval;
+          paymentAdvancements.push(this._advancePayment(payment, context));
+        }
+        return ResultUtils.combine(paymentAdvancements);
+      })
+      .map(() => {});
   }
 
   protected _advancePayment(
+    payment: Payment,
+    context: HypernetContext,
+  ): ResultAsync<
+    void,
+    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+  > {
+    return this.merchantConnectorRepository
+      .getAuthorizedMerchantConnectorStatus()
+      .andThen((merchantConnectorStatusMap) => {
+        const merchantConnectorStatus = merchantConnectorStatusMap.get(payment.merchantUrl);
+        if (merchantConnectorStatus) {
+          return this._advancePaymentForAcitvatedMerchant(payment, context).map(() => {});
+        } else {
+          // fire an event for payment advancement error / onPaymentDelay
+          if (payment instanceof PushPayment) {
+            context.onPushPaymentDelayed.next(payment);
+          }
+          if (payment instanceof PullPayment) {
+            context.onPullPaymentDelayed.next(payment);
+          }
+          return okAsync(undefined);
+        }
+      });
+  }
+
+  protected _advancePaymentForAcitvatedMerchant(
     payment: Payment,
     context: HypernetContext,
   ): ResultAsync<
