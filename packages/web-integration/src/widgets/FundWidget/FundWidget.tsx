@@ -1,7 +1,7 @@
 import { TokenSelector, Button, TextInput } from "@hypernetlabs/web-ui";
 import React from "react";
 
-import { useFund } from "@web-integration-hooks";
+import { useFund } from "@web-integration/hooks";
 
 const FundWidget: React.FC = () => {
   const {

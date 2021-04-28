@@ -4,12 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "baseUrl": "./src/",
-    "strictFunctionTypes": false,
-    "typeRoots": [
-      "./node_modules/@types",
-      "../../node_modules/@types",
-      "./src/types",
-    ],
+    "strictFunctionTypes": false
   },
   "include": ["./src/**/*.ts"],
   "exclude": ["node_modules"],

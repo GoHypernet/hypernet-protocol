@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 
 import useStyles from "./Modal.style";
 
-import { LayoutContext } from "@web-integration-contexts";
+import { LayoutContext } from "@web-integration/contexts";
 
 interface IModal {
   isOpen: boolean;

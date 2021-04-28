@@ -1,1 +1,1 @@
-export { default } from "@web-integration-widgets/LinksWidget/LinksWidget";
+export { default } from "@web-integration/widgets/LinksWidget/LinksWidget";

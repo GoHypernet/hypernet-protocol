@@ -7,7 +7,7 @@ import { PaymentId } from "@objects/PaymentId";
 import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullAmount } from "@objects/PullAmount";
-import { EPaymentState } from "@objects/types";
+import { EPaymentState } from "@objects/typing";
 
 export class PullPayment extends Payment {
   constructor(

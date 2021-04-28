@@ -1,1 +1,1 @@
-export * from "@web-integration-containers/MainContainer/MainContainer";
+export * from "@web-integration/containers/MainContainer/MainContainer";

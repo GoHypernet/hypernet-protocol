@@ -1,7 +1,7 @@
 import { SelectInput, TextareaInput, Button } from "@hypernetlabs/web-ui";
 import React, { useContext, useState } from "react";
 
-import { LayoutContext, StoreContext } from "@web-integration-contexts";
+import { LayoutContext, StoreContext } from "@web-integration/contexts";
 
 const PrivateKeysFlow: React.FC = () => {
   const { proxy } = useContext(StoreContext);

@@ -1,6 +1,6 @@
 import React from "react";
 
-import Modal from "@web-integration-containers/Modal";
+import Modal from "@web-integration/containers/Modal";
 
 interface IMainContainer {
   children: React.ReactNode;

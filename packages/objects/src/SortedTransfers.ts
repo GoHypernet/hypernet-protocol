@@ -4,7 +4,7 @@ import {
   InsuranceState,
   MessageState,
   ParameterizedState,
-} from "@objects/types";
+} from "@objects/typing";
 import { IFullTransferState } from "@objects/vector";
 
 export class SortedTransfers {

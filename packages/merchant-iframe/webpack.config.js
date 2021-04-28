@@ -106,7 +106,8 @@ module.exports = {
       fs: false,
     },
   },
-  devtool: "inline-source-map",
+  // TODO: eval devtool is only for development it makes wepback a bit faster, this should be different for production setup
+  devtool: "eval-source-map",
   plugins: [
     new HtmlWebpackPlugin({}),
     //new CleanWebpackPlugin({ dangerouslyAllowCleanPatternsOutsideProject: false }),

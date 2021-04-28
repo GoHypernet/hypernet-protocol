@@ -2,7 +2,7 @@ import { PublicIdentifier, EthereumAddress } from "@hypernetlabs/objects";
 import { EPaymentType, MerchantUrl } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
-import IHypernetIFrameProxy from "@web-integration-interfaces/proxy/IHypernetIFrameProxy";
+import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 
 export interface IRenderParams {
   selector?: string;

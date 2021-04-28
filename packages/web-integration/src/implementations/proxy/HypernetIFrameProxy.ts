@@ -32,7 +32,7 @@ import { BigNumber } from "ethers";
 import { Result, ResultAsync, ok } from "neverthrow";
 import { Subject } from "rxjs";
 
-import IHypernetIFrameProxy from "@web-integration-interfaces/proxy/IHypernetIFrameProxy";
+import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 
 export default class HypernetIFrameProxy
   extends ParentProxy

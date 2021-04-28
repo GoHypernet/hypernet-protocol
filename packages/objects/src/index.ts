@@ -30,4 +30,4 @@ export * from "@objects/vector";
 export * from "@objects/MerchantUrl";
 export * from "@objects/errors";
 export * from "@objects/interfaces";
-export * from "@objects/types";
+export * from "@objects/typing";

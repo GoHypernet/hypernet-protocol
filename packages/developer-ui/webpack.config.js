@@ -104,6 +104,11 @@ module.exports = {
       tls: false,
       fs: false,
     },
+    alias: {
+      "@web-integration": path.resolve(__dirname, "../web-integration/src"),
+      "@objects": path.resolve(__dirname, "../objects/src"),
+      "@utils": path.resolve(__dirname, "../utils/src"),
+    },
   },
   devtool: "inline-source-map",
   plugins: [

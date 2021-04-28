@@ -41,9 +41,10 @@
     "clean-docker": "docker-compose down",
     "deploy-custom-transfers": "yarn ts-node scripts/deploy.ts",
     "start": "yarn start-backend && yarn start-web",
+    "start-docker-sync": "docker-sync stop && docker volume create --name=hypernet-docker-sync",
     "start-backend": "docker-compose up -d && yarn verify-backend",
     "start-vector": "docker run -d -p 3001:80 vector-unit:latest",
-    "start-web": "webpack serve --config webpack.config.js --mode development --open",
+    "start-web": "webpack serve --mode development",
     "test": "echo \"Error: run tests from root\" && exit 0",
     "test-integration": "cucumber-js --require-module ts-node/register --require-module tsconfig-paths/register --require 'test/integration/**/*.ts' test/integration/features/**/*.feature",
     "verify-backend": "docker ps -f status=running -f name=developer-ui | grep connextproject | if [ `wc -l` -ne 9 ]; then echo 'Error: did not detect 9 running docker containers!' && `exit 1`; fi"

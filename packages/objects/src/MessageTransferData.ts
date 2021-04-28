@@ -1,4 +1,4 @@
-import { EMessageTransferType } from "@objects/types/EMessageTransferType";
+import { EMessageTransferType } from "@objects/typing/EMessageTransferType";
 
 export interface IMessageTransferData {
   messageType: EMessageTransferType;

@@ -5,7 +5,7 @@ import { MerchantUrl } from "@objects/MerchantUrl";
 import { PaymentId } from "@objects/PaymentId";
 import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
-import { EPaymentState } from "@objects/types";
+import { EPaymentState } from "@objects/typing";
 
 export abstract class Payment {
   constructor(
