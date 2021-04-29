@@ -1,7 +1,9 @@
+import { injectable } from "inversify";
 import pino from "pino";
 
 import { ILogUtils } from "@utils/ILogUtils";
 
+@injectable()
 export class LogUtils implements ILogUtils {
   protected logger: pino.Logger;
 

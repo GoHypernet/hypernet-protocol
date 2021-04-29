@@ -4,3 +4,5 @@ export interface ILocalStorageUtils {
   getSessionItem(key: string): string | null;
   setSessionItem(key: string, value: string): void;
 }
+
+export const ILocalStorageUtilsType = Symbol.for("ILocalStorageUtils");

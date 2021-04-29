@@ -7,6 +7,7 @@ export * from "@objects/HypernetConfig";
 export * from "@objects/HypernetLink";
 export * from "@objects/HypernetOfferDetails";
 export * from "@objects/HypernetPullPaymentDetails";
+export * from "@objects/JsonWebToken";
 export * from "@objects/Message";
 export * from "@objects/MessagePayload";
 export * from "@objects/MessageThread";

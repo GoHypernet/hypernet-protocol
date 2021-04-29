@@ -1,9 +1,11 @@
 import { AjaxError } from "@hypernetlabs/objects";
 import axios, { AxiosResponse } from "axios";
+import { injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
 
 import { IAjaxUtils, IRequestConfig } from "@utils/IAjaxUtils";
 
+@injectable()
 export class AxiosAjaxUtils implements IAjaxUtils {
   get<T>(url: URL, config?: IRequestConfig): ResultAsync<T, AjaxError> {
     return ResultAsync.fromPromise(

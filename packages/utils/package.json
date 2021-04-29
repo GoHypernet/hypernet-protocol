@@ -44,6 +44,7 @@
   "dependencies": {
     "@hypernetlabs/objects": ">=0.0.1",
     "axios": "^0.21.1",
+    "inversify": "^5.1.1",
     "delay": "^5.0.0",
     "neverthrow": "^4.1.0",
     "pino": "^6.7.0",
