@@ -305,7 +305,7 @@ export class MerchantService implements IMerchantService {
       context = this.contextProvider.getMerchantContext();
 
       if (context.validatedMerchantSignature == null) {
-        throw new Error(
+        throw new MerchantValidationError(
           "validatedMerchantSignature is null but merchantValidated is OK",
         );
       }

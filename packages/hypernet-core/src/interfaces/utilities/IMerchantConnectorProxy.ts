@@ -2,7 +2,9 @@ import { IResolutionResult } from "@hypernetlabs/merchant-connector";
 import {
   Balances,
   EthereumAddress,
+  MerchantActivationError,
   MerchantConnectorError,
+  MerchantUrl,
   MerchantValidationError,
   PaymentId,
   ProxyError,
@@ -15,6 +17,14 @@ import { ResultAsync } from "neverthrow";
 import { Observable } from "rxjs";
 
 export interface IMerchantConnectorProxy extends ParentProxy {
+  merchantUrl: MerchantUrl;
+
+  /**
+   * activateProxy() sets up the merchant iframe and the communication
+   * channel to the iframe. Not.hing else is done
+   */
+  activateProxy(): ResultAsync<void, ProxyError>;
+
   /**
    * activateConnector() will actual cause the connector code to execute. This should only
    * be done if the user has authorized the connector.
@@ -22,7 +32,7 @@ export interface IMerchantConnectorProxy extends ParentProxy {
   activateConnector(
     publicIdentifier: PublicIdentifier,
     balances: Balances,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  ): ResultAsync<void, MerchantActivationError | ProxyError>;
 
   resolveChallenge(
     paymentId: PaymentId,
@@ -33,6 +43,11 @@ export interface IMerchantConnectorProxy extends ParentProxy {
     MerchantConnectorError | ProxyError
   >;
 
+  /**
+   * getValidatedSignature() requests the merchant iframe to return the
+   * signature of the connector code, AFTER validating that the connector
+   * code matches the signature.
+   */
   getValidatedSignature(): ResultAsync<
     Signature,
     MerchantValidationError | ProxyError

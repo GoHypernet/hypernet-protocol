@@ -1,7 +1,6 @@
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
 import {
   EthereumAddress,
-  LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
   PaymentId,
@@ -12,6 +11,7 @@ import {
   PublicIdentifier,
   PullPayment,
   PushPayment,
+  MerchantActivationError,
 } from "@hypernetlabs/objects";
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
@@ -31,7 +31,7 @@ export class MerchantConnectorProxy
   constructor(
     protected element: HTMLElement | null,
     protected iframeUrl: string,
-    protected merchantUrl: MerchantUrl,
+    public merchantUrl: MerchantUrl,
     protected iframeName: string,
     protected contextProvider: IContextProvider,
     protected debug: boolean = false,
@@ -46,7 +46,7 @@ export class MerchantConnectorProxy
   public activateConnector(
     publicIdentifier: PublicIdentifier,
     balances: Balances,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  ): ResultAsync<void, MerchantActivationError | ProxyError> {
     const assets = balances.assets.map((val) => {
       return {
         assetAddress: val.assetAddress,
@@ -62,7 +62,15 @@ export class MerchantConnectorProxy
       publicIdentifier,
       balances: { assets: assets },
     };
-    return this._createCall("activateConnector", activateData);
+    return this._createCall<void, MerchantActivationError | ProxyError>(
+      "activateConnector",
+      activateData,
+    ).mapErr((e) => {
+      // TODO
+      // _createCall's return type should be adjusted; it's not actually
+      // the type is says
+      return e;
+    });
   }
 
   public resolveChallenge(
@@ -85,13 +93,10 @@ export class MerchantConnectorProxy
     return this._createCall("getValidatedSignature", null);
   }
 
-  public activate(): ResultAsync<
-    void,
-    MerchantValidationError | LogicalError | ProxyError
-  > {
+  public activateProxy(): ResultAsync<void, ProxyError> {
     return ResultUtils.combine([
       this.contextProvider.getContext(),
-      super.activate(),
+      this.activate(),
     ]).map((vals) => {
       const [context] = vals;
 
