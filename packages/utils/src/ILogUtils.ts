@@ -8,3 +8,5 @@ export interface ILogUtils {
   error(message?: any, ...optionalParams: any[]): void;
   getPino(): pino.Logger;
 }
+
+export const ILogUtilsType = Symbol.for("ILogUtils");

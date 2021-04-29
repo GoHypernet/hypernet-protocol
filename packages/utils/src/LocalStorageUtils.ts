@@ -1,5 +1,8 @@
+import { injectable } from "inversify";
+
 import { ILocalStorageUtils } from "@utils/ILocalStorageUtils";
 
+@injectable()
 export class LocalStorageUtils implements ILocalStorageUtils {
   public getItem(key: string): string | null {
     return window.localStorage.getItem(key);
