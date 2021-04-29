@@ -7,10 +7,19 @@
   },
   "references": [
     {
+      "path": "../web-integration"
+    },
+    {
       "path": "../objects"
     },
     {
-      "path": "../web-integration"
+      "path": "../utils"
+    },
+    {
+      "path": "../hypernet-core"
+    },
+    {
+      "path": "../web-ui"
     }
   ],
   "include": ["./src/**/*.ts"],

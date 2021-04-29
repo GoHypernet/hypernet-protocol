@@ -22,6 +22,7 @@ module.exports = {
     compress: true,
     publicPath: "/",
     port: 5015,
+    writeToDisk: true,
   },
   module: {
     rules: [
@@ -108,9 +109,15 @@ module.exports = {
       "@web-integration": path.resolve(__dirname, "../web-integration/src"),
       "@objects": path.resolve(__dirname, "../objects/src"),
       "@utils": path.resolve(__dirname, "../utils/src"),
+      "@interfaces": path.resolve(__dirname, "../hypernet-core/src/interfaces"),
+      "@implementations": path.resolve(
+        __dirname,
+        "../hypernet-core/src/implementations",
+      ),
     },
   },
-  devtool: "inline-source-map",
+  // TODO: this devtool setup is for development it makes wepback a bit faster, this setup should be different for production
+  devtool: "eval-source-map",
   plugins: [
     //new CleanWebpackPlugin({ dangerouslyAllowCleanPatternsOutsideProject: false }),
     new webpack.ProvidePlugin({

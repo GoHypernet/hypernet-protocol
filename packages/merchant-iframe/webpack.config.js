@@ -23,6 +23,7 @@ module.exports = {
     compress: true,
     publicPath: "/",
     port: 5005,
+    writeToDisk: true,
   },
   module: {
     rules: [
@@ -105,8 +106,18 @@ module.exports = {
       tls: false,
       fs: false,
     },
+    alias: {
+      "@web-integration": path.resolve(__dirname, "../web-integration/src"),
+      "@objects": path.resolve(__dirname, "../objects/src"),
+      "@utils": path.resolve(__dirname, "../utils/src"),
+      "@interfaces": path.resolve(__dirname, "../hypernet-core/src/interfaces"),
+      "@implementations": path.resolve(
+        __dirname,
+        "../hypernet-core/src/implementations",
+      ),
+    },
   },
-  // TODO: eval devtool is only for development it makes wepback a bit faster, this should be different for production setup
+  // TODO: this devtool setup is for development it makes wepback a bit faster, this setup should be different for production
   devtool: "eval-source-map",
   plugins: [
     new HtmlWebpackPlugin({}),

@@ -1,8 +1,0 @@
-version: "2"
-
-options:
-  verbose: true
-syncs:
-  hypernet-docker-sync:
-    src: "../../packages"
-    sync_excludes: ["node_modules", "test"]

@@ -269,7 +269,3 @@ services:
       - ../test-merchant-connector/dist/connector-bundle:/app/connector
     command:
       node /app/index.js
-
-volumes:
-  hypernet-docker-sync:
-    external: true
