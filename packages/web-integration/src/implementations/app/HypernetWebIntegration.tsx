@@ -3,6 +3,13 @@ import { ResultAsync } from "neverthrow";
 import React from "react";
 import ReactDOM from "react-dom";
 
+import {
+  BALANCES_WIDGET_ID_SELECTOR,
+  FUND_WIDGET_ID_SELECTOR,
+  LINKS_WIDGET_ID_SELECTOR,
+  PAYMENT_WIDGET_ID_SELECTOR,
+  PRIVATE_KEYS_FLOW_ID_SELECTOR,
+} from "@web-integration/constants";
 import { MainContainer } from "@web-integration/containers/MainContainer";
 import { LayoutProvider, StoreProvider } from "@web-integration/contexts";
 import ConnectorAuthorizationFlow from "@web-integration/flows/ConnectorAuthorizationFlow";
@@ -19,13 +26,6 @@ import BalancesWidget from "@web-integration/widgets/BalancesWidget";
 import FundWidget from "@web-integration/widgets/FundWidget";
 import LinksWidget from "@web-integration/widgets/LinksWidget";
 import { PaymentWidget } from "@web-integration/widgets/PaymentWidget";
-import {
-  BALANCES_WIDGET_ID_SELECTOR,
-  FUND_WIDGET_ID_SELECTOR,
-  LINKS_WIDGET_ID_SELECTOR,
-  PAYMENT_WIDGET_ID_SELECTOR,
-  PRIVATE_KEYS_FLOW_ID_SELECTOR,
-} from "@web-integration/constants";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;

@@ -591,7 +591,7 @@ describe("PaymentService tests", () => {
     paymentServiceMock.setExistingPayments([payment]);
     paymentServiceMock.contextProvider.context.publicIdentifier = publicIdentifier;
 
-    let receivedPushPayments = new Array<PushPayment>();
+    const receivedPushPayments = new Array<PushPayment>();
     paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe(
       (val: PushPayment) => {
         receivedPushPayments.push(val);
@@ -627,7 +627,7 @@ describe("PaymentService tests", () => {
     paymentServiceMock.setExistingPayments([payment]);
     paymentServiceMock.contextProvider.context.publicIdentifier = publicIdentifier;
 
-    let receivedPushPayments = new Array<PushPayment>();
+    const receivedPushPayments = new Array<PushPayment>();
     paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe(
       (val: PushPayment) => {
         receivedPushPayments.push(val);
@@ -661,7 +661,7 @@ describe("PaymentService tests", () => {
     paymentServiceMock.setMerchantStatus(merchantUrl, false);
     paymentServiceMock.contextProvider.context.publicIdentifier = publicIdentifier;
 
-    let delayedPushPayments = new Array<PushPayment>();
+    const delayedPushPayments = new Array<PushPayment>();
     paymentServiceMock.contextProvider.onPushPaymentDelayed.subscribe(
       (val: PushPayment) => {
         delayedPushPayments.push(val);

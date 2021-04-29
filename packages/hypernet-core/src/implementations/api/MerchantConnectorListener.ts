@@ -1,3 +1,4 @@
+import { MerchantUrl, PaymentId } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
 
@@ -8,7 +9,6 @@ import {
   ILinkService,
 } from "@interfaces/business";
 import { IContextProvider } from "@interfaces/utilities";
-import { MerchantUrl, PaymentId } from "@hypernetlabs/objects";
 
 export class MerchantConnectorListener implements IMerchantConnectorListener {
   constructor(

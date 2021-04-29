@@ -1,5 +1,5 @@
-import { err, ok, ResultAsync, Result, okAsync, errAsync } from "neverthrow";
 import delay from "delay";
+import { err, ok, ResultAsync, Result, okAsync, errAsync } from "neverthrow";
 
 export class ResultUtils {
   static combine<T, T2, T3, T4, E, E2, E3, E4>(
@@ -94,7 +94,7 @@ export class ResultUtils {
     func: () => ResultAsync<T, E>,
     acceptableErrors: Function[],
     maxAttempts?: number,
-    baseSeconds: number = 5,
+    baseSeconds = 5,
   ): ResultAsync<T, E> {
     if (maxAttempts != null && maxAttempts < 1) {
       throw new Error("maxAttempts must be 1 or more!");

@@ -1,6 +1,6 @@
+import { AjaxError } from "@hypernetlabs/objects";
 import { AxiosRequestConfig } from "axios";
 import { ResultAsync } from "neverthrow";
-import { AjaxError } from "@hypernetlabs/objects";
 
 /**
  * AjaxUtils are just a wrapper around Axios for purposes of testing.
@@ -21,6 +21,4 @@ export interface IAjaxUtils {
 
 export interface IRequestConfig extends AxiosRequestConfig {}
 
-export const IAjaxUtilsType = Symbol.for(
-  "IAjaxUtils"
-);
+export const IAjaxUtilsType = Symbol.for("IAjaxUtils");

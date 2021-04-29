@@ -1,10 +1,27 @@
+import { IResolutionResult } from "@hypernetlabs/merchant-connector";
+import {
+  MerchantConnectorError,
+  MerchantValidationError,
+  Signature,
+  Balances,
+  TransferResolutionError,
+  MerchantActivationError,
+  ProxyError,
+} from "@hypernetlabs/objects";
+import { IBasicTransferResponse } from "@hypernetlabs/objects";
+import { IAjaxUtils, ILocalStorageUtils, ILogUtils } from "@hypernetlabs/utils";
+import { BigNumber } from "ethers";
+import { okAsync, errAsync } from "neverthrow";
 import td, { verify } from "testdouble";
 
+import { MerchantConnectorRepository } from "@implementations/data/MerchantConnectorRepository";
+import { IMerchantConnectorRepository } from "@interfaces/data/IMerchantConnectorRepository";
 import {
   IVectorUtils,
   IMerchantConnectorProxy,
   IBlockchainUtils,
 } from "@interfaces/utilities";
+import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 import {
   merchantUrl,
   account,
@@ -16,23 +33,6 @@ import {
   merchantUrl2,
   publicIdentifier,
 } from "@mock/mocks";
-import {
-  MerchantConnectorError,
-  MerchantValidationError,
-  Signature,
-  Balances,
-  TransferResolutionError,
-  MerchantActivationError,
-  ProxyError,
-} from "@hypernetlabs/objects";
-import { IMerchantConnectorRepository } from "@interfaces/data/IMerchantConnectorRepository";
-import { okAsync, errAsync } from "neverthrow";
-import { MerchantConnectorRepository } from "@implementations/data/MerchantConnectorRepository";
-import { IAjaxUtils, ILocalStorageUtils, ILogUtils } from "@hypernetlabs/utils";
-import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
-import { IResolutionResult } from "@hypernetlabs/merchant-connector";
-import { BigNumber } from "ethers";
-import { IBasicTransferResponse } from "@hypernetlabs/objects";
 import {
   BlockchainProviderMock,
   ConfigProviderMock,

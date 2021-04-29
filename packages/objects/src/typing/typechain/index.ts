@@ -35,8 +35,8 @@ export { TransferDefinition__factory } from "./factories/TransferDefinition__fac
 export { Withdraw__factory } from "./factories/Withdraw__factory";
 
 import InsuranceAbi from "./artifacts/Insurance";
-import ParameterizedAbi from "./artifacts/Parameterized";
 import MessageTransferAbi from "./artifacts/MessageTransfer";
+import ParameterizedAbi from "./artifacts/Parameterized";
 
 const TransferAbis = {
   Insurance: InsuranceAbi,

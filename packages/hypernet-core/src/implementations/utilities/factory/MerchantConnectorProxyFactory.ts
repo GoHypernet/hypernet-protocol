@@ -1,13 +1,14 @@
+import { MerchantUrl } from "@hypernetlabs/objects";
+import { ProxyError } from "@hypernetlabs/objects";
+import { ResultAsync } from "neverthrow";
+
+import { MerchantConnectorProxy } from "@implementations/utilities/MerchantConnectorProxy";
 import {
   IConfigProvider,
   IMerchantConnectorProxy,
   IContextProvider,
 } from "@interfaces/utilities";
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
-import { MerchantConnectorProxy } from "@implementations/utilities/MerchantConnectorProxy";
-import { ResultAsync } from "neverthrow";
-import { MerchantUrl } from "@hypernetlabs/objects";
-import { ProxyError } from "@hypernetlabs/objects";
 
 export class MerchantConnectorProxyFactory
   implements IMerchantConnectorProxyFactory {

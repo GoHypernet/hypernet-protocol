@@ -1,6 +1,7 @@
 import { ProxyError, MerchantUrl } from "@hypernetlabs/objects";
-import { IMerchantConnectorProxy } from "@interfaces/utilities";
 import { ResultAsync } from "neverthrow";
+
+import { IMerchantConnectorProxy } from "@interfaces/utilities";
 
 export interface IMerchantConnectorProxyFactory {
   factoryProxy(

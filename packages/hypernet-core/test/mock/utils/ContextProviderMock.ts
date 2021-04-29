@@ -9,15 +9,16 @@ import {
 } from "@hypernetlabs/objects";
 import { okAsync, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
+
+import {
+  HypernetContext,
+  InitializedHypernetContext,
+} from "@interfaces/objects";
 import {
   IContextProvider,
   IMerchantConnectorProxy,
 } from "@interfaces/utilities";
 import { account, publicIdentifier } from "@mock/mocks";
-import {
-  HypernetContext,
-  InitializedHypernetContext,
-} from "@interfaces/objects";
 
 export class ContextProviderMock implements IContextProvider {
   public context: HypernetContext;
