@@ -1,1 +1,1 @@
-export { default } from "./BalancesWidget";
+export { default } from "@web-integration/widgets/BalancesWidget/BalancesWidget";

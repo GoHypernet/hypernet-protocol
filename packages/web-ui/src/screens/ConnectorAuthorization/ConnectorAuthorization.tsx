@@ -1,7 +1,9 @@
-import React, { useEffect } from "react";
-import Button from "../../components/Button";
 import { AssetBalance } from "@hypernetlabs/objects";
+import React from "react";
+
 import BalanceList from "../../components/BalanceList";
+import Button from "../../components/Button";
+
 import useStyles from "./ConnectorAuthorization.style";
 
 interface IConnectorAuthorization {
@@ -11,7 +13,9 @@ interface IConnectorAuthorization {
   connectorLogoUrl?: string;
 }
 
-const ConnectorAuthorization: React.FC<IConnectorAuthorization> = (props: IConnectorAuthorization) => {
+const ConnectorAuthorization: React.FC<IConnectorAuthorization> = (
+  props: IConnectorAuthorization,
+) => {
   const { balances, onAuthorizeClick, connectorName, connectorLogoUrl } = props;
   const classes = useStyles();
   return (
@@ -33,7 +37,11 @@ const ConnectorAuthorization: React.FC<IConnectorAuthorization> = (props: IConne
         bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
       />
       <div className={classes.account}>
-        <a className={classes.accountLink} href="https://hypernetlabs.io/" target="_blank">
+        <a
+          className={classes.accountLink}
+          href="https://hypernetlabs.io/"
+          target="_blank"
+        >
           View your Hypernet account.
         </a>
       </div>

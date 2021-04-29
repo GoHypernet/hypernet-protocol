@@ -9,10 +9,15 @@
     "isolatedModules": true,
     "typeRoots": ["../hypernet-core/src/typings", "../../node_modules/@types"]
   },
-  "exclude": ["node_modules", "babel.config.js", "metro.config.js", "jest.config.js"],
+  "exclude": [
+    "node_modules",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js"
+  ],
   "references": [
     {
-      "path": "../hypernet-core/src"
+      "path": "../hypernet-core"
     }
   ]
 }

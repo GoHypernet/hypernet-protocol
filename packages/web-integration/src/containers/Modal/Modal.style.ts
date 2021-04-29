@@ -1,6 +1,10 @@
 import { createUseStyles } from "react-jss";
 
-const useStyles = createUseStyles({
+interface IStyleProps {
+  modalWidth: number;
+}
+
+const useStyles = createUseStyles<any, IStyleProps>({
   container: {
     position: "absolute",
     top: 0,
@@ -23,7 +27,7 @@ const useStyles = createUseStyles({
     borderRadius: 4,
     transform: "translate(-50%, -50%)",
     boxShadow: "0px 4px 20px #000000",
-    width: (props) => props.modalWidth,
+    width: (props: IStyleProps) => props.modalWidth,
   },
   closeIcon: {
     position: "absolute",

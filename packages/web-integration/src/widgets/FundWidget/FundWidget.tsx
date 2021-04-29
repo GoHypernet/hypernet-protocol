@@ -1,6 +1,7 @@
-import React from "react";
 import { TokenSelector, Button, TextInput } from "@hypernetlabs/web-ui";
-import { useFund } from "@web-integration-hooks";
+import React from "react";
+
+import { useFund } from "@web-integration/hooks";
 
 const FundWidget: React.FC = () => {
   const {
@@ -24,7 +25,11 @@ const FundWidget: React.FC = () => {
       <br />
       <TextInput label="Amount" value={amount} onChange={setAmount} />
       <br />
-      <Button onClick={depositFunds} disabled={!selectedPaymentToken?.address} label="Fund" />
+      <Button
+        onClick={depositFunds}
+        disabled={!selectedPaymentToken?.address}
+        label="Fund"
+      />
       <br />
       <br />
       <Button onClick={mintTokens} label="Mint HyperToken" />

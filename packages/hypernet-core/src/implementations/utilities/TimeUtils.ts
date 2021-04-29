@@ -1,7 +1,8 @@
-import { okAsync, ResultAsync } from "neverthrow";
 import { BlockchainUnavailableError } from "@hypernetlabs/objects";
-import { IBlockchainProvider, ITimeUtils } from "@interfaces/utilities";
 import moment from "moment";
+import { okAsync, ResultAsync } from "neverthrow";
+
+import { IBlockchainProvider, ITimeUtils } from "@interfaces/utilities";
 
 export class TimeUtils implements ITimeUtils {
   protected lastBlockchainCheck: number | undefined;
@@ -12,11 +13,18 @@ export class TimeUtils implements ITimeUtils {
     return moment().unix();
   }
 
-  public getBlockchainTimestamp(): ResultAsync<number, BlockchainUnavailableError> {
+  public getBlockchainTimestamp(): ResultAsync<
+    number,
+    BlockchainUnavailableError
+  > {
     const now = this.getUnixNow();
 
     // We can return a cached value if the last time we checked was this second
-    if (this.lastBlockchainCheck != null && this.lastBlockchainTimestamp != null && this.lastBlockchainCheck >= now) {
+    if (
+      this.lastBlockchainCheck != null &&
+      this.lastBlockchainTimestamp != null &&
+      this.lastBlockchainCheck >= now
+    ) {
       return okAsync(this.lastBlockchainTimestamp);
     }
 

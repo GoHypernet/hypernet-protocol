@@ -1,4 +1,3 @@
-import { ResultAsync, Result } from "neverthrow";
 import {
   Balances,
   LogicalError,
@@ -16,12 +15,15 @@ import {
   MerchantAuthorizationDeniedError,
 } from "@hypernetlabs/objects";
 import { PullPayment, PushPayment } from "@hypernetlabs/objects";
+import { ResultAsync, Result } from "neverthrow";
 
 export interface IMerchantConnectorRepository {
   /**
    * Returns a map of merchant URLs to their address
    */
-  getMerchantAddresses(merchantUrl: MerchantUrl[]): ResultAsync<Map<MerchantUrl, EthereumAddress>, LogicalError>;
+  getMerchantAddresses(
+    merchantUrl: MerchantUrl[],
+  ): ResultAsync<Map<MerchantUrl, EthereumAddress>, LogicalError>;
 
   /**
    * Adds the merchant url as authorized with a particular signature
@@ -51,7 +53,10 @@ export interface IMerchantConnectorRepository {
    * Returns the status of all the authorized merchant's connectors.
    * @returns A map of merchant URL and a boolean indicating whether or not the connector is active.
    */
-  getAuthorizedMerchantConnectorStatus(): ResultAsync<Map<MerchantUrl, boolean>, never>;
+  getAuthorizedMerchantConnectorStatus(): ResultAsync<
+    Map<MerchantUrl, boolean>,
+    never
+  >;
 
   /**
    * Returns a list of authorized merchants and the user's authorization signature for that
@@ -65,16 +70,43 @@ export interface IMerchantConnectorRepository {
     merchantUrl: MerchantUrl,
     paymentId: PaymentId,
     transferId: TransferId,
-  ): ResultAsync<void, MerchantConnectorError | MerchantValidationError | TransferResolutionError>;
+  ): ResultAsync<
+    void,
+    MerchantConnectorError | MerchantValidationError | TransferResolutionError
+  >;
 
-  closeMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError>;
-  displayMerchantIFrame(merchantUrl: MerchantUrl): ResultAsync<void, MerchantConnectorError>;
+  closeMerchantIFrame(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, MerchantConnectorError>;
+  displayMerchantIFrame(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, MerchantConnectorError>;
 
-  notifyPushPaymentSent(merchantUrl: MerchantUrl, payment: PushPayment): ResultAsync<void, MerchantConnectorError>;
-  notifyPushPaymentUpdated(merchantUrl: MerchantUrl, payment: PushPayment): ResultAsync<void, MerchantConnectorError>;
-  notifyPushPaymentReceived(merchantUrl: MerchantUrl, payment: PushPayment): ResultAsync<void, MerchantConnectorError>;
-  notifyPullPaymentSent(merchantUrl: MerchantUrl, payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
-  notifyPullPaymentUpdated(merchantUrl: MerchantUrl, payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
-  notifyPullPaymentReceived(merchantUrl: MerchantUrl, payment: PullPayment): ResultAsync<void, MerchantConnectorError>;
-  notifyBalancesReceived(balances: Balances): ResultAsync<void, MerchantConnectorError>;
+  notifyPushPaymentSent(
+    merchantUrl: MerchantUrl,
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError>;
+  notifyPushPaymentUpdated(
+    merchantUrl: MerchantUrl,
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError>;
+  notifyPushPaymentReceived(
+    merchantUrl: MerchantUrl,
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError>;
+  notifyPullPaymentSent(
+    merchantUrl: MerchantUrl,
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError>;
+  notifyPullPaymentUpdated(
+    merchantUrl: MerchantUrl,
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError>;
+  notifyPullPaymentReceived(
+    merchantUrl: MerchantUrl,
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError>;
+  notifyBalancesReceived(
+    balances: Balances,
+  ): ResultAsync<void, MerchantConnectorError>;
 }

@@ -1,11 +1,12 @@
-import { Payment } from "@objects/Payment";
-import { PublicIdentifier } from "@objects/PublicIdentifier";
-import { EPaymentState } from "@objects/types";
-import { EthereumAddress } from "@objects/EthereumAddress";
 import { BigNumber } from "ethers";
-import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
-import { PaymentId } from "@objects/PaymentId";
+
+import { EthereumAddress } from "@objects/EthereumAddress";
 import { MerchantUrl } from "@objects/MerchantUrl";
+import { Payment } from "@objects/Payment";
+import { PaymentId } from "@objects/PaymentId";
+import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
+import { PublicIdentifier } from "@objects/PublicIdentifier";
+import { EPaymentState } from "@objects/typing";
 
 export class PushPayment extends Payment {
   constructor(

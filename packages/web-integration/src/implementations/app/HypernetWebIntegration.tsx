@@ -1,37 +1,36 @@
+import { MerchantUrl } from "@hypernetlabs/objects";
+import { ResultAsync } from "neverthrow";
 import React from "react";
 import ReactDOM from "react-dom";
-import { ResultAsync } from "neverthrow";
 
-import MainContainer from "@web-integration-containers/MainContainer";
-import BalancesWidget from "@web-integration-widgets/BalancesWidget";
-import LinksWidget from "@web-integration-widgets/LinksWidget";
-import PaymentWidget from "@web-integration-widgets/PaymentWidget";
-import FundWidget from "@web-integration-widgets/FundWidget";
-import {
-  IConnectorAuthorizationFlowParams,
-  IHypernetWebIntegration,
-  IRenderParams,
-  IRenderPaymentWidgetParams,
-} from "@web-integration-interfaces/app/IHypernetWebIntegration";
-import { LayoutProvider, StoreProvider } from "@web-integration-contexts";
 import {
   BALANCES_WIDGET_ID_SELECTOR,
   FUND_WIDGET_ID_SELECTOR,
   LINKS_WIDGET_ID_SELECTOR,
   PAYMENT_WIDGET_ID_SELECTOR,
   PRIVATE_KEYS_FLOW_ID_SELECTOR,
-} from "@web-integration-constants";
-import IHypernetIFrameProxy from "@web-integration-interfaces/proxy/IHypernetIFrameProxy";
-import HypernetIFrameProxy from "@web-integration-implementations/proxy/HypernetIFrameProxy";
-import ConnectorAuthorizationFlow from "@web-integration-flows/ConnectorAuthorizationFlow";
-import { MerchantUrl } from "@hypernetlabs/objects";
-import PrivateKeysFlow from "@web-integration-flows/PrivateKeysFlow";
-import { ThemeProvider } from "theming";
+} from "@web-integration/constants";
+import { MainContainer } from "@web-integration/containers/MainContainer";
+import { LayoutProvider, StoreProvider } from "@web-integration/contexts";
+import ConnectorAuthorizationFlow from "@web-integration/flows/ConnectorAuthorizationFlow";
+import PrivateKeysFlow from "@web-integration/flows/PrivateKeysFlow";
+import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
+import {
+  IConnectorAuthorizationFlowParams,
+  IHypernetWebIntegration,
+  IRenderParams,
+  IRenderPaymentWidgetParams,
+} from "@web-integration/interfaces/app/IHypernetWebIntegration";
+import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
+import BalancesWidget from "@web-integration/widgets/BalancesWidget";
+import FundWidget from "@web-integration/widgets/FundWidget";
+import LinksWidget from "@web-integration/widgets/LinksWidget";
+import { PaymentWidget } from "@web-integration/widgets/PaymentWidget";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
 
-  protected iframeURL: string = "http://localhost:8090";
+  protected iframeURL = "http://localhost:8090";
   protected currentMerchantUrl: MerchantUrl | undefined | null;
 
   public core: IHypernetIFrameProxy;
@@ -40,7 +39,11 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     this.iframeURL = iframeURL || this.iframeURL;
 
     // Create a proxy connection to the iframe
-    this.core = new HypernetIFrameProxy(this._prepareIFrameContainer(), this.iframeURL, "hypernet-core-iframe");
+    this.core = new HypernetIFrameProxy(
+      this._prepareIFrameContainer(),
+      this.iframeURL,
+      "hypernet-core-iframe",
+    );
 
     this.core.onMerchantIFrameDisplayRequested.subscribe((merchantUrl) => {
       this.currentMerchantUrl = merchantUrl;
@@ -52,7 +55,9 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   // wait for the core to be intialized
-  protected getReadyResult: ResultAsync<IHypernetIFrameProxy, Error> | undefined;
+  protected getReadyResult:
+    | ResultAsync<IHypernetIFrameProxy, Error>
+    | undefined;
   public getReady(): ResultAsync<IHypernetIFrameProxy, Error> {
     if (this.getReadyResult != null) {
       return this.getReadyResult;
@@ -95,7 +100,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     }
   }
 
-  private _bootstrapComponent(component: React.ReactNode, withModal: boolean = false) {
+  private _bootstrapComponent(component: React.ReactNode, withModal = false) {
     return (
       <StoreProvider proxy={this.core}>
         <LayoutProvider>
@@ -113,7 +118,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     // Add close modal icon to iframe container
     const closeButton = document.createElement("div");
     closeButton.id = "__hypernet-protocol-iframe-close-icon__";
-    //@ts-ignore
     closeButton.innerHTML = `
       <img src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png" width="20" />
     `;
@@ -185,7 +189,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     );
   }
 
-  public async renderFundWidget(config?: IRenderParams) {
+  public async renderFundWidget(config?: IRenderParams): Promise<void> {
     ReactDOM.render(
       await this._bootstrapComponent(<FundWidget />),
       this._generateDomElement(config?.selector || FUND_WIDGET_ID_SELECTOR),
@@ -217,7 +221,9 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     );
   }
 
-  public async renderConnectorAuthorizationFlow(config: IConnectorAuthorizationFlowParams) {
+  public async renderConnectorAuthorizationFlow(
+    config: IConnectorAuthorizationFlowParams,
+  ) {
     ReactDOM.render(
       await this._bootstrapComponent(
         <ConnectorAuthorizationFlow

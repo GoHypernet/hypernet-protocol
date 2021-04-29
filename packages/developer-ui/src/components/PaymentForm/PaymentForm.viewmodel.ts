@@ -1,9 +1,11 @@
-import ko from "knockout";
-import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { EPaymentType, PublicIdentifier } from "@hypernetlabs/objects";
-import html from "./PaymentForm.template.html";
-import { PushPaymentFormParams } from "../PushPaymentForm/PushPaymentForm.viewmodel";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import ko from "knockout";
+
 import { PullPaymentFormParams } from "../PullPaymentForm/PullPaymentForm.viewmodel";
+import { PushPaymentFormParams } from "../PushPaymentForm/PushPaymentForm.viewmodel";
+
+import html from "./PaymentForm.template.html";
 
 export class PaymentFormParams {
   constructor(public integration: IHypernetWebIntegration) {}
@@ -29,7 +31,9 @@ export class PaymentFormViewModel {
   constructor(params: PaymentFormParams) {
     this.integration = params.integration;
 
-    this.remoteAccount = ko.observable(PublicIdentifier("Enter public identifier"));
+    this.remoteAccount = ko.observable(
+      PublicIdentifier("Enter public identifier"),
+    );
 
     this.paymentTypes = [
       new PaymentTypeOption("Push", EPaymentType.Push),
@@ -46,8 +50,14 @@ export class PaymentFormViewModel {
       return this.selectedPaymentType()?.type === EPaymentType.Pull;
     });
 
-    this.pushPayment = new PushPaymentFormParams(this.integration, this.remoteAccount);
-    this.pullPayment = new PullPaymentFormParams(this.integration, this.remoteAccount);
+    this.pushPayment = new PushPaymentFormParams(
+      this.integration,
+      this.remoteAccount,
+    );
+    this.pullPayment = new PullPaymentFormParams(
+      this.integration,
+      this.remoteAccount,
+    );
   }
 }
 

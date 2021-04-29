@@ -1,5 +1,6 @@
 import React from "react";
-import IHypernetIFrameProxy from "@web-integration-interfaces/proxy/IHypernetIFrameProxy";
+
+import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 
 interface IStore {
   proxy: IHypernetIFrameProxy;
@@ -17,7 +18,11 @@ function StoreProvider({ proxy, children }: IStoreProps) {
     proxy,
   };
 
-  return <StoreContext.Provider value={initialState as IStore}>{children}</StoreContext.Provider>;
+  return (
+    <StoreContext.Provider value={initialState as IStore}>
+      {children}
+    </StoreContext.Provider>
+  );
 }
 
 export { StoreContext, StoreProvider };

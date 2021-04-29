@@ -1,4 +1,5 @@
 import { binding, before, after } from "cucumber-tsflow";
+
 import PageUtils from "@integration-tests/utils/PageUtils";
 
 @binding([PageUtils])

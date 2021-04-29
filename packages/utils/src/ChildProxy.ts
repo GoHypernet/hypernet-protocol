@@ -1,6 +1,6 @@
+import { PostmateError } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 import Postmate from "postmate";
-import { PostmateError } from "@hypernetlabs/objects";
 
 export interface IIFrameCallData<T> {
   callId: number;
@@ -31,7 +31,10 @@ export abstract class ChildProxy {
     );
   }
 
-  protected returnForModel<T, E>(func: () => ResultAsync<T, E>, callId: number) {
+  protected returnForModel<T, E>(
+    func: () => ResultAsync<T, E>,
+    callId: number,
+  ) {
     func().match(
       (result) => {
         if (this.parent != null) {

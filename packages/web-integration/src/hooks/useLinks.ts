@@ -1,7 +1,8 @@
-import { useEffect, useReducer, useContext } from "react";
-import { StoreContext } from "@web-integration-contexts";
-import { ILinkList } from "@hypernetlabs/web-ui/src/interfaces";
 import { HypernetLink } from "@hypernetlabs/objects";
+import { ILinkList } from "@hypernetlabs/web-ui/src/interfaces";
+import { useEffect, useReducer, useContext } from "react";
+
+import { StoreContext } from "@web-integration/contexts";
 
 enum EActionTypes {
   FETCHING = "FETCHING",
@@ -71,13 +72,26 @@ export function useLinks(): IState {
         // Check if there is a link for this counterparty already
         const paymentLinkIndex = linksArr.findIndex((val) => {
           const counterPartyAccount = val.counterPartyAccount;
-          return counterPartyAccount === payment.to || counterPartyAccount === payment.from;
+          return (
+            counterPartyAccount === payment.to ||
+            counterPartyAccount === payment.from
+          );
         });
 
         if (paymentLinkIndex === -1) {
           // We need to create a new link for the counterparty
-          const counterPartyAccount = payment.to === publicIdentifier ? payment.from : payment.to;
-          linksArr.push(new HypernetLink(counterPartyAccount, [payment], [], [payment], [], [payment]));
+          const counterPartyAccount =
+            payment.to === publicIdentifier ? payment.from : payment.to;
+          linksArr.push(
+            new HypernetLink(
+              counterPartyAccount,
+              [payment],
+              [],
+              [payment],
+              [],
+              [payment],
+            ),
+          );
         } else {
           // It's for us, we'll need to add it to the payments for the link
           linksArr[paymentLinkIndex].pullPayments.push(payment);
@@ -94,13 +108,26 @@ export function useLinks(): IState {
         // Check if there is a link for this counterparty already
         const paymentLinkIndex = linksArr.findIndex((val) => {
           const counterPartyAccount = val.counterPartyAccount;
-          return counterPartyAccount === payment.to || counterPartyAccount === payment.from;
+          return (
+            counterPartyAccount === payment.to ||
+            counterPartyAccount === payment.from
+          );
         });
 
         if (paymentLinkIndex === -1) {
           // We need to create a new link for the counterparty
-          const counterPartyAccount = payment.to === publicIdentifier ? payment.from : payment.to;
-          linksArr.push(new HypernetLink(counterPartyAccount, [payment], [payment], [], [payment], []));
+          const counterPartyAccount =
+            payment.to === publicIdentifier ? payment.from : payment.to;
+          linksArr.push(
+            new HypernetLink(
+              counterPartyAccount,
+              [payment],
+              [payment],
+              [],
+              [payment],
+              [],
+            ),
+          );
         } else {
           // It's for us, we'll need to add it to the payments for the link
           linksArr[paymentLinkIndex].pushPayments.push(payment);

@@ -22,38 +22,37 @@ let connector: string = "";
 let signature: string = "unknown";
 let address: string = wallet.address;
 
-// Read the webpacked connector file. 
+// Read the webpacked connector file.
 const filename = __dirname + "/connector/index.js";
 
-fs.readFile(filename, 'utf8', (err, data) => {
-   connector = data;
+fs.readFile(filename, "utf8", (err, data) => {
+  connector = data;
 
-   // Sign the connector
-   wallet.signMessage(connector).then((sig) => {
-      console.log(`Signature: ${sig}`);
-      signature = sig;
-   });
+  // Sign the connector
+  wallet.signMessage(connector).then((sig) => {
+    console.log(`Signature: ${sig}`);
+    signature = sig;
+  });
 });
 
-
-app.get('/connector', (req, res) => {
-   res.end(connector);
+app.get("/connector", (req, res) => {
+  res.end(connector);
 });
 
-app.get('/signature', (req, res) => {
-   res.end(signature);
+app.get("/signature", (req, res) => {
+  res.end(signature);
 });
 
-app.get('/address', (req, res) => {
-   res.end(address);
-})
+app.get("/address", (req, res) => {
+  res.end(address);
+});
 
 const server = app.listen(5010, () => {
-   const addressInfo = server.address() as net.AddressInfo;
-   if (addressInfo != null) {
-      var host = addressInfo.address;
-      var port = addressInfo.port;
-      console.log("Example Merchant listening at http://%s:%s", host, port);
-      console.log(`filename: ${filename}`);
-   }
+  const addressInfo = server.address() as net.AddressInfo;
+  if (addressInfo != null) {
+    var host = addressInfo.address;
+    var port = addressInfo.port;
+    console.log("Example Merchant listening at http://%s:%s", host, port);
+    console.log(`filename: ${filename}`);
+  }
 });

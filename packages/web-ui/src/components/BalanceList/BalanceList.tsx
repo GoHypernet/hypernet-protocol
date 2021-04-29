@@ -1,5 +1,6 @@
-import React from "react";
 import { AssetBalance } from "@hypernetlabs/objects";
+import React from "react";
+
 import useStyles from "./BalanceList.style";
 
 interface BalanceListProps {
@@ -8,7 +9,7 @@ interface BalanceListProps {
 
 const BalanceList: React.FC<BalanceListProps> = (props: BalanceListProps) => {
   const { balances } = props;
-  const classes = useStyles(props);
+  const classes = useStyles((props as unknown) as Jss.Theme);
 
   return (
     <div className={classes.container}>
@@ -22,8 +23,12 @@ const BalanceList: React.FC<BalanceListProps> = (props: BalanceListProps) => {
                 : "https://res.cloudinary.com/dqueufbs7/image/upload/v1614373316/images/Screen_Shot_2021-02-27_at_00.01.31.png"
             }
           />
-          <div className={classes.tokenAmount}>{Number(balance.freeAmount) / 1000000000000000000}</div>
-          <div className={classes.tokenName}>{balance.symbol || index === 0 ? "HPT" : "MINT"}</div>
+          <div className={classes.tokenAmount}>
+            {Number(balance.freeAmount) / 1000000000000000000}
+          </div>
+          <div className={classes.tokenName}>
+            {balance.symbol || index === 0 ? "HPT" : "MINT"}
+          </div>
         </div>
       ))}
     </div>

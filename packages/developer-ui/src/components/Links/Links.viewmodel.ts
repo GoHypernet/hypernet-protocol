@@ -1,8 +1,10 @@
-import ko from "knockout";
-import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { HypernetLink, PublicIdentifier } from "@hypernetlabs/objects";
-import html from "./Links.template.html";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import ko from "knockout";
+
 import { LinkParams } from "../Link/Link.viewmodel";
+
+import html from "./Links.template.html";
 
 export class LinksParams {
   constructor(public integration: IHypernetWebIntegration) {}
@@ -25,13 +27,24 @@ export class LinksViewModel {
         // Check if there is a link for this counterparty already
         const links = this.links().filter((val) => {
           const counterPartyAccount = val.link.counterPartyAccount;
-          return counterPartyAccount === payment.to || counterPartyAccount === payment.from;
+          return (
+            counterPartyAccount === payment.to ||
+            counterPartyAccount === payment.from
+          );
         });
 
         if (links.length === 0) {
           // We need to create a new link for the counterparty
-          const counterPartyAccount = payment.to === this.publicIdentifier() ? payment.from : payment.to;
-          const link = new HypernetLink(counterPartyAccount, [payment], [], [payment], [], [payment]);
+          const counterPartyAccount =
+            payment.to === this.publicIdentifier() ? payment.from : payment.to;
+          const link = new HypernetLink(
+            counterPartyAccount,
+            [payment],
+            [],
+            [payment],
+            [],
+            [payment],
+          );
           this.links.push(new LinkParams(this.integration, link));
         }
 
@@ -44,13 +57,24 @@ export class LinksViewModel {
         // Check if there is a link for this counterparty already
         const links = this.links().filter((val) => {
           const counterPartyAccount = val.link.counterPartyAccount;
-          return counterPartyAccount === payment.to || counterPartyAccount === payment.from;
+          return (
+            counterPartyAccount === payment.to ||
+            counterPartyAccount === payment.from
+          );
         });
 
         if (links.length === 0) {
           // We need to create a new link for the counterparty
-          const counterPartyAccount = payment.to === this.publicIdentifier() ? payment.from : payment.to;
-          const link = new HypernetLink(counterPartyAccount, [payment], [payment], [], [payment], []);
+          const counterPartyAccount =
+            payment.to === this.publicIdentifier() ? payment.from : payment.to;
+          const link = new HypernetLink(
+            counterPartyAccount,
+            [payment],
+            [payment],
+            [],
+            [payment],
+            [],
+          );
           this.links.push(new LinkParams(this.integration, link));
         }
 
@@ -73,7 +97,9 @@ export class LinksViewModel {
         return this.integration.core.getActiveLinks();
       })
       .map((links) => {
-        const linkParams = links.map((link: HypernetLink) => new LinkParams(this.integration, link));
+        const linkParams = links.map(
+          (link: HypernetLink) => new LinkParams(this.integration, link),
+        );
         this.links.push(...linkParams);
       });
   }

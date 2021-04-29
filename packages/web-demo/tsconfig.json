@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.build.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": "./src/",
+    "lib": ["es5", "es6", "dom"]
+  },
+  "references": [
+    {
+      "path": "../web-integration"
+    }
+  ],
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+  "exclude": ["node_modules"]
+}

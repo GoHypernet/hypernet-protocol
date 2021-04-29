@@ -8,21 +8,20 @@
   "main": "dist/index.js",
   "files": [
     "dist",
-    "src",
     "!dist/test",
     "!dist/tsconfig.tsbuildinfo"
   ],
   "scripts": {
     "build": "yarn clean && yarn compile",
-    "clean": "rimraf dist",
-    "compile": "tsc --build src/tsconfig.json && npx tsc-alias -p src/tsconfig.json",
-    "format": "prettier --write \"src/**/*.ts\"",
+    "alias": "tsc-alias",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "compile": "tsc --build && cd ../.. && yarn alias",
     "generate-docs": "npx typedoc --options typedoc.json",
-    "lint": "tslint -p src/tsconfig.json",
     "test": "echo \"Error: no test specified\" && exit 0"
   },
   "types": "dist/index.d.ts",
   "dependencies": {
+    "@hypernetlabs/objects": "^0.0.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-jss": "^10.5.1"

@@ -1,1 +1,1 @@
-export * from "./IHypernetCore";
+export * from "@objects/interfaces/IHypernetCore";

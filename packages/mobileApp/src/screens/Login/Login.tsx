@@ -1,9 +1,10 @@
 import React from "react";
 import { Text, View } from "react-native";
-import { useStateContext } from "@mobileApp/state/store";
+import { TouchableOpacity } from "react-native-gesture-handler";
+
 import { SomeActionType } from "@mobileApp/interfaces/state/IsomeReducer";
 import { UserActionType } from "@mobileApp/interfaces/state/IuserReducer";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import { useStateContext } from "@mobileApp/state/store";
 
 interface LoginProps {}
 
@@ -32,7 +33,10 @@ const Login: React.FC<LoginProps> = (props: LoginProps) => {
 
       <TouchableOpacity
         onPress={() => {
-          dispatch({ type: UserActionType.SET_USER_NAME, payload: "muhammed altinci" });
+          dispatch({
+            type: UserActionType.SET_USER_NAME,
+            payload: "muhammed altinci",
+          });
         }}
       >
         <Text>change user state</Text>
@@ -40,7 +44,10 @@ const Login: React.FC<LoginProps> = (props: LoginProps) => {
 
       <TouchableOpacity
         onPress={() => {
-          dispatch({ type: UserActionType.SET_USER_ID, payload: id ? id + 1 : 1 });
+          dispatch({
+            type: UserActionType.SET_USER_ID,
+            payload: id ? id + 1 : 1,
+          });
         }}
       >
         <Text>increase id</Text>

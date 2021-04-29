@@ -3,6 +3,7 @@ import { View, TouchableOpacity, StyleSheet } from "react-native";
 import { Button, Text } from "react-native-elements";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import Icon from "react-native-vector-icons/FontAwesome";
+
 import { colors } from "@mobileApp/constants";
 
 interface IScreenHeaderProps {
@@ -11,7 +12,9 @@ interface IScreenHeaderProps {
   screenLabel: string;
 }
 
-const ScreenHeader: React.FC<IScreenHeaderProps> = (props: IScreenHeaderProps) => {
+const ScreenHeader: React.FC<IScreenHeaderProps> = (
+  props: IScreenHeaderProps,
+) => {
   const { onActionClick, onFilterClick, screenLabel } = props;
   return (
     <View style={styles.container}>

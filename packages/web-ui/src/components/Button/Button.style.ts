@@ -1,5 +1,6 @@
-import { colors, getColorFromStatus, EStatusColor } from "../../theme";
 import { createUseStyles } from "react-jss";
+
+import { colors, getColorFromStatus, EStatusColor } from "../../theme";
 
 const useStyles = createUseStyles({
   button: {
@@ -10,8 +11,11 @@ const useStyles = createUseStyles({
     border: "none",
     height: 52,
     cursor: "pointer",
-    background: (props) =>
-      props.bgColor || `${getColorFromStatus(props.status || EStatusColor.PRIMARY)} 0% 0% no-repeat padding-box`,
+    background: (props: any) =>
+      props.bgColor ||
+      `${getColorFromStatus(
+        props.status || EStatusColor.PRIMARY,
+      )} 0% 0% no-repeat padding-box`,
     width: (props) => (props.fullWidth ? "100%" : "auto"),
   },
 });

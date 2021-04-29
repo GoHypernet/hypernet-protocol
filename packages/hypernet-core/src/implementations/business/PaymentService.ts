@@ -1,11 +1,3 @@
-import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
-import { IPaymentService } from "@interfaces/business";
-import {
-  IAccountsRepository,
-  ILinkRepository,
-  IMerchantConnectorRepository,
-  IPaymentRepository,
-} from "@interfaces/data";
 import {
   EthereumAddress,
   Payment,
@@ -33,10 +25,19 @@ import {
   BlockchainUnavailableError,
   EPaymentState,
 } from "@hypernetlabs/objects";
+import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { BigNumber } from "ethers";
+import { err, errAsync, ok, okAsync, ResultAsync, Result } from "neverthrow";
+
+import { IPaymentService } from "@interfaces/business";
+import {
+  IAccountsRepository,
+  ILinkRepository,
+  IMerchantConnectorRepository,
+  IPaymentRepository,
+} from "@interfaces/data";
 import { HypernetContext } from "@interfaces/objects";
 import { IConfigProvider, IContextProvider } from "@interfaces/utilities";
-import { err, errAsync, ok, okAsync, ResultAsync, Result } from "neverthrow";
-import { BigNumber } from "ethers";
 
 type PaymentsByIdsErrors =
   | RouterChannelUnknownError
@@ -125,35 +126,46 @@ export class PaymentService implements IPaymentService {
     amount: BigNumber,
   ): ResultAsync<Payment, PaymentsByIdsErrors | PaymentCreationError> {
     // Pull the up the payment
-    return this.paymentRepository.getPaymentsByIds([paymentId]).andThen((payments) => {
-      const payment = payments.get(paymentId);
+    return this.paymentRepository
+      .getPaymentsByIds([paymentId])
+      .andThen((payments) => {
+        const payment = payments.get(paymentId);
 
-      // Verify that it is indeed a pull payment
-      if (payment instanceof PullPayment) {
-        // Verify that we're not pulling too quickly (greater than the average rate)
-        if (payment.amountTransferred.add(amount).gt(payment.vestedAmount)) {
+        // Verify that it is indeed a pull payment
+        if (payment instanceof PullPayment) {
+          // Verify that we're not pulling too quickly (greater than the average rate)
+          if (payment.amountTransferred.add(amount).gt(payment.vestedAmount)) {
+            return errAsync(
+              new InvalidParametersError(
+                `Amount of ${amount} exceeds the vested payment amount of ${payment.vestedAmount}`,
+              ),
+            );
+          }
+
+          // Verify that the amount we're trying to pull does not exceed the total authorized amount
+          if (
+            payment.amountTransferred.add(amount).gt(payment.authorizedAmount)
+          ) {
+            return errAsync(
+              new InvalidParametersError(
+                `Amount of ${amount} exceeds the total authorized amount of ${payment.authorizedAmount}`,
+              ),
+            );
+          }
+
+          // Create the PullRecord
+          return this.paymentRepository.createPullRecord(
+            paymentId,
+            amount.toString(),
+          );
+        } else {
           return errAsync(
             new InvalidParametersError(
-              `Amount of ${amount} exceeds the vested payment amount of ${payment.vestedAmount}`,
+              "Can not pull funds from a non pull payment",
             ),
           );
         }
-
-        // Verify that the amount we're trying to pull does not exceed the total authorized amount
-        if (payment.amountTransferred.add(amount).gt(payment.authorizedAmount)) {
-          return errAsync(
-            new InvalidParametersError(
-              `Amount of ${amount} exceeds the total authorized amount of ${payment.authorizedAmount}`,
-            ),
-          );
-        }
-
-        // Create the PullRecord
-        return this.paymentRepository.createPullRecord(paymentId, amount.toString());
-      } else {
-        return errAsync(new InvalidParametersError("Can not pull funds from a non pull payment"));
-      }
-    });
+      });
   }
 
   /**
@@ -202,7 +214,9 @@ export class PaymentService implements IPaymentService {
    * Then, publish an RXJS event to the user.
    * @param paymentId the paymentId for the offer
    */
-  public offerReceived(paymentId: PaymentId): ResultAsync<void, PaymentsByIdsErrors> {
+  public offerReceived(
+    paymentId: PaymentId,
+  ): ResultAsync<void, PaymentsByIdsErrors> {
     const prerequisites = ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -214,7 +228,11 @@ export class PaymentService implements IPaymentService {
       const payment = payments.get(paymentId);
 
       if (payment == null) {
-        return errAsync(new LogicalError(`PaymentService:offerReceived():Could not get payment!`));
+        return errAsync(
+          new LogicalError(
+            `PaymentService:offerReceived():Could not get payment!`,
+          ),
+        );
       }
 
       if (payment.state !== EPaymentState.Proposed) {
@@ -258,7 +276,10 @@ export class PaymentService implements IPaymentService {
     let payments: Map<PaymentId, Payment>;
     const merchantUrls = new Set<MerchantUrl>();
 
-    return ResultUtils.combine([this.configProvider.getConfig(), this.paymentRepository.getPaymentsByIds(paymentIds)])
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.paymentRepository.getPaymentsByIds(paymentIds),
+    ])
       .andThen((vals) => {
         [config, payments] = vals;
 
@@ -270,7 +291,9 @@ export class PaymentService implements IPaymentService {
 
         return ResultUtils.combine([
           this.accountRepository.getBalanceByAsset(config.hypertokenAddress),
-          this.merchantConnectorRepository.getMerchantAddresses(Array.from(merchantUrls)),
+          this.merchantConnectorRepository.getMerchantAddresses(
+            Array.from(merchantUrls),
+          ),
         ]);
       })
       .andThen((vals) => {
@@ -278,7 +301,9 @@ export class PaymentService implements IPaymentService {
 
         // If we don't have a public key for each merchant, then we should not proceed.
         if (merchantUrls.size != addresses.size) {
-          return errAsync(new MerchantValidationError("Not all merchants are authorized!"));
+          return errAsync(
+            new MerchantValidationError("Not all merchants are authorized!"),
+          );
         }
 
         // For each payment ID, call the singular version of acceptOffers
@@ -288,39 +313,63 @@ export class PaymentService implements IPaymentService {
         for (const [key, payment] of payments) {
           if (payment.state !== EPaymentState.Proposed) {
             return errAsync(
-              new AcceptPaymentError(`Cannot accept payment ${payment.id}, it is not in the Proposed state`),
+              new AcceptPaymentError(
+                `Cannot accept payment ${payment.id}, it is not in the Proposed state`,
+              ),
             );
           }
 
-          totalStakeRequired = totalStakeRequired.add(BigNumber.from(payment.requiredStake));
+          totalStakeRequired = totalStakeRequired.add(
+            BigNumber.from(payment.requiredStake),
+          );
         }
 
         // Check the balance and make sure you have enough HyperToken to cover it
         if (hypertokenBalance.freeAmount.lt(totalStakeRequired)) {
-          return errAsync(new InsufficientBalanceError("Not enough Hypertoken to cover provided payments."));
+          return errAsync(
+            new InsufficientBalanceError(
+              "Not enough Hypertoken to cover provided payments.",
+            ),
+          );
         }
 
         // Now that we know we can (probably) make the payments, let's try
-        const stakeAttempts = new Array<Promise<Result<Payment, AcceptPaymentError>>>();
+        const stakeAttempts = new Array<
+          Promise<Result<Payment, AcceptPaymentError>>
+        >();
         for (const keyval of payments) {
           const [paymentId, payment] = keyval;
-          this.logUtils.log(`PaymentService:acceptOffers: attempting to provide stake for payment ${paymentId}`);
+          this.logUtils.log(
+            `PaymentService:acceptOffers: attempting to provide stake for payment ${paymentId}`,
+          );
 
           // We need to get the public key of the merchant for the payment
           const merchantAddress = addresses.get(payment.merchantUrl);
 
           if (merchantAddress != null) {
-            const stakeAttempt = this.paymentRepository.provideStake(paymentId, merchantAddress).match(
-              (payment) => ok(payment) as Result<Payment, AcceptPaymentError>,
-              (e) => err(new AcceptPaymentError(`Payment ${paymentId} could not be staked! Source exception: ${e}`)),
-            );
+            const stakeAttempt = this.paymentRepository
+              .provideStake(paymentId, merchantAddress)
+              .match(
+                (payment) => ok(payment) as Result<Payment, AcceptPaymentError>,
+                (e) =>
+                  err(
+                    new AcceptPaymentError(
+                      `Payment ${paymentId} could not be staked! Source exception: ${e}`,
+                    ),
+                  ),
+              );
 
             stakeAttempts.push(stakeAttempt);
           } else {
-            throw new LogicalError("Merchant does not have a public key; are they ");
+            throw new LogicalError(
+              "Merchant does not have a public key; are they ",
+            );
           }
         }
-        return ResultAsync.fromPromise(Promise.all(stakeAttempts), (e) => e as AcceptPaymentError);
+        return ResultAsync.fromPromise(
+          Promise.all(stakeAttempts),
+          (e) => e as AcceptPaymentError,
+        );
       });
   }
 
@@ -333,7 +382,11 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     void,
-    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | PaymentsByIdsErrors
+    | TransferCreationError
   > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
@@ -370,7 +423,11 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     void,
-    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | PaymentsByIdsErrors
+    | TransferCreationError
   > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
@@ -406,7 +463,11 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     void,
-    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | PaymentsByIdsErrors
+    | TransferCreationError
   > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
@@ -442,7 +503,11 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     void,
-    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | PaymentsByIdsErrors
+    | TransferCreationError
   > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
@@ -473,7 +538,9 @@ export class PaymentService implements IPaymentService {
    * Notifies the service that a pull-payment has been recorded.
    * @param paymentId the paymentId for the pull-payment
    */
-  public pullRecorded(paymentId: PaymentId): ResultAsync<void, PaymentsByIdsErrors> {
+  public pullRecorded(
+    paymentId: PaymentId,
+  ): ResultAsync<void, PaymentsByIdsErrors> {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getContext(),
@@ -498,7 +565,10 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    MerchantConnectorError | MerchantValidationError | PaymentsByIdsErrors | TransferResolutionError
+    | MerchantConnectorError
+    | MerchantValidationError
+    | PaymentsByIdsErrors
+    | TransferResolutionError
   > {
     // Get the payment
     return this.paymentRepository
@@ -507,15 +577,22 @@ export class PaymentService implements IPaymentService {
         const payment = payments.get(paymentId);
 
         if (payment == null) {
-          return errAsync<void, InvalidParametersError>(new InvalidParametersError("Invalid payment ID"));
+          return errAsync<void, InvalidParametersError>(
+            new InvalidParametersError("Invalid payment ID"),
+          );
         }
 
         // You can only dispute payments that are in the accepted state- the reciever has taken their money.
         // The second condition can't happen if it's in Accepted unless something is very, very badly wrong,
         // but it keeps typescript happy
-        if (payment.state != EPaymentState.Accepted || payment.details.insuranceTransferId == null) {
+        if (
+          payment.state != EPaymentState.Accepted ||
+          payment.details.insuranceTransferId == null
+        ) {
           return errAsync<void, InvalidParametersError>(
-            new InvalidParametersError("Can not dispute a payment that is not in the Accepted state"),
+            new InvalidParametersError(
+              "Can not dispute a payment that is not in the Accepted state",
+            ),
           );
         }
 
@@ -542,9 +619,16 @@ export class PaymentService implements IPaymentService {
     paymentIds: PaymentId[],
   ): ResultAsync<
     void,
-    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | PaymentsByIdsErrors
+    | TransferCreationError
   > {
-    return ResultUtils.combine([this.paymentRepository.getPaymentsByIds(paymentIds), this.contextProvider.getContext()])
+    return ResultUtils.combine([
+      this.paymentRepository.getPaymentsByIds(paymentIds),
+      this.contextProvider.getContext(),
+    ])
       .map((vals) => {
         const [payments, context] = vals;
 
@@ -572,14 +656,23 @@ export class PaymentService implements IPaymentService {
     context: HypernetContext,
   ): ResultAsync<
     void,
-    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | PaymentsByIdsErrors
+    | TransferCreationError
   > {
     return this.merchantConnectorRepository
       .getAuthorizedMerchantConnectorStatus()
       .andThen((merchantConnectorStatusMap) => {
-        const merchantConnectorStatus = merchantConnectorStatusMap.get(payment.merchantUrl);
+        const merchantConnectorStatus = merchantConnectorStatusMap.get(
+          payment.merchantUrl,
+        );
         if (merchantConnectorStatus) {
-          return this._advancePaymentForAcitvatedMerchant(payment, context).map(() => {});
+          return this._advancePaymentForAcitvatedMerchant(
+            payment,
+            context,
+          ).map(() => {});
         } else {
           // fire an event for payment advancement error / onPaymentDelay
           if (payment instanceof PushPayment) {
@@ -598,28 +691,40 @@ export class PaymentService implements IPaymentService {
     context: HypernetContext,
   ): ResultAsync<
     Payment,
-    PaymentFinalizeError | PaymentStakeError | TransferResolutionError | PaymentsByIdsErrors | TransferCreationError
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | PaymentsByIdsErrors
+    | TransferCreationError
   > {
     // Notified the UI, move on to advancing the state of the payment.
     // Payment state must be in "staked" in order to progress
     const paymentId = payment.id;
-    if (payment.state == EPaymentState.Staked && payment.from === context.publicIdentifier) {
+    if (
+      payment.state == EPaymentState.Staked &&
+      payment.from === context.publicIdentifier
+    ) {
       // If the payment state is staked, we know that the proper
       // insurance has been posted.
       this.logUtils.log(`Providing asset for paymentId ${paymentId}`);
-      return this.paymentRepository.provideAsset(paymentId).andThen((updatedPayment) => {
-        if (updatedPayment instanceof PushPayment) {
-          context.onPushPaymentUpdated.next(updatedPayment);
-        }
-        if (updatedPayment instanceof PullPayment) {
-          context.onPullPaymentUpdated.next(updatedPayment);
-        }
-        return okAsync(updatedPayment);
-      });
+      return this.paymentRepository
+        .provideAsset(paymentId)
+        .andThen((updatedPayment) => {
+          if (updatedPayment instanceof PushPayment) {
+            context.onPushPaymentUpdated.next(updatedPayment);
+          }
+          if (updatedPayment instanceof PullPayment) {
+            context.onPullPaymentUpdated.next(updatedPayment);
+          }
+          return okAsync(updatedPayment);
+        });
     }
 
     // Payment state must be in "approved" to finalize
-    if (payment.state == EPaymentState.Approved && payment.to === context.publicIdentifier) {
+    if (
+      payment.state == EPaymentState.Approved &&
+      payment.to === context.publicIdentifier
+    ) {
       // If the payment state is approved, we know that it matches our insurance payment
       if (payment instanceof PushPayment) {
         // Resolve the parameterized payment immediately for the full balance

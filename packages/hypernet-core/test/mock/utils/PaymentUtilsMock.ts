@@ -1,10 +1,22 @@
-import td from "testdouble";
-import { IPaymentUtils } from "@interfaces/utilities";
 import { EPaymentType, ETransferType } from "@hypernetlabs/objects";
+import {
+  PushPayment,
+  SortedTransfers,
+  IFullTransferState,
+} from "@hypernetlabs/objects";
 import { okAsync } from "neverthrow";
-import { commonPaymentId, insuranceTransferId, offerTransferId, parameterizedTransferId, unixPast } from "@mock/mocks";
-import { PushPayment, SortedTransfers, IFullTransferState } from "@hypernetlabs/objects";
+import td from "testdouble";
+
 import { BrowserNodeProviderMock } from "./BrowserNodeProviderMock";
+
+import { IPaymentUtils } from "@interfaces/utilities";
+import {
+  commonPaymentId,
+  insuranceTransferId,
+  offerTransferId,
+  parameterizedTransferId,
+  unixPast,
+} from "@mock/mocks";
 
 export class PaymentUtilsMockFactory {
   static factoryPaymentUtils(
@@ -15,7 +27,9 @@ export class PaymentUtilsMockFactory {
   ): IPaymentUtils {
     const paymentUtils = td.object<IPaymentUtils>();
 
-    td.when(paymentUtils.createPaymentId(EPaymentType.Push)).thenReturn(okAsync(commonPaymentId));
+    td.when(paymentUtils.createPaymentId(EPaymentType.Push)).thenReturn(
+      okAsync(commonPaymentId),
+    );
 
     td.when(
       paymentUtils.transfersToPayment(
@@ -44,16 +58,35 @@ export class PaymentUtilsMockFactory {
       ),
     ).thenReturn(okAsync(approvedPayment));
 
-    td.when(paymentUtils.getTransferTypeWithTransfer(td.matchers.contains({ transferId: offerTransferId }))).thenReturn(
-      okAsync({ transferType: ETransferType.Offer, transfer: browserNodeProvider.offerTransfer }),
+    td.when(
+      paymentUtils.getTransferTypeWithTransfer(
+        td.matchers.contains({ transferId: offerTransferId }),
+      ),
+    ).thenReturn(
+      okAsync({
+        transferType: ETransferType.Offer,
+        transfer: browserNodeProvider.offerTransfer,
+      }),
     );
     td.when(
-      paymentUtils.getTransferTypeWithTransfer(td.matchers.contains({ transferId: insuranceTransferId })),
-    ).thenReturn(okAsync({ transferType: ETransferType.Insurance, transfer: browserNodeProvider.insuranceTransfer }));
-    td.when(
-      paymentUtils.getTransferTypeWithTransfer(td.matchers.contains({ transferId: parameterizedTransferId })),
+      paymentUtils.getTransferTypeWithTransfer(
+        td.matchers.contains({ transferId: insuranceTransferId }),
+      ),
     ).thenReturn(
-      okAsync({ transferType: ETransferType.Parameterized, transfer: browserNodeProvider.parameterizedTransfer }),
+      okAsync({
+        transferType: ETransferType.Insurance,
+        transfer: browserNodeProvider.insuranceTransfer,
+      }),
+    );
+    td.when(
+      paymentUtils.getTransferTypeWithTransfer(
+        td.matchers.contains({ transferId: parameterizedTransferId }),
+      ),
+    ).thenReturn(
+      okAsync({
+        transferType: ETransferType.Parameterized,
+        transfer: browserNodeProvider.parameterizedTransfer,
+      }),
     );
 
     td.when(
@@ -88,7 +121,15 @@ export class PaymentUtilsMockFactory {
         }),
       ),
     ).thenReturn(
-      okAsync(new SortedTransfers(browserNodeProvider.offerTransfer, null, null, [], browserNodeProvider.offerDetails)),
+      okAsync(
+        new SortedTransfers(
+          browserNodeProvider.offerTransfer,
+          null,
+          null,
+          [],
+          browserNodeProvider.offerDetails,
+        ),
+      ),
     );
 
     td.when(

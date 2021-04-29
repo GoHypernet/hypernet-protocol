@@ -8,15 +8,24 @@ import {
   MerchantUrl,
   Signature,
 } from "@hypernetlabs/objects";
-import { HypernetContext, InitializedHypernetContext } from "@interfaces/objects";
-import { IContextProvider, IMerchantConnectorProxy } from "@interfaces/utilities";
-import { Subject } from "rxjs";
 import { okAsync, ResultAsync } from "neverthrow";
+import { Subject } from "rxjs";
+
+import {
+  HypernetContext,
+  InitializedHypernetContext,
+} from "@interfaces/objects";
+import {
+  IContextProvider,
+  IMerchantConnectorProxy,
+} from "@interfaces/utilities";
 
 export class ContextProvider implements IContextProvider {
   protected context: HypernetContext;
   protected _initializePromise: Promise<InitializedHypernetContext>;
-  protected _initializePromiseResolve: (value: InitializedHypernetContext) => void;
+  protected _initializePromiseResolve: (
+    value: InitializedHypernetContext,
+  ) => void;
   protected _getAccountPromise: Promise<string>;
   protected _getAccountPromiseResolve: (value: string) => void;
   constructor(
@@ -77,7 +86,10 @@ export class ContextProvider implements IContextProvider {
     return okAsync(this.context);
   }
 
-  public getInitializedContext(): ResultAsync<InitializedHypernetContext, never> {
+  public getInitializedContext(): ResultAsync<
+    InitializedHypernetContext,
+    never
+  > {
     if (!this.contextInitialized()) {
       this.context.onInitializationRequired.next();
     }
@@ -129,6 +141,8 @@ export class ContextProvider implements IContextProvider {
   }
 
   protected contextInitialized(): boolean {
-    return this.context.account != null && this.context.publicIdentifier != null;
+    return (
+      this.context.account != null && this.context.publicIdentifier != null
+    );
   }
 }

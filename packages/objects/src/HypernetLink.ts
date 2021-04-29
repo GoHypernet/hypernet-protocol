@@ -1,5 +1,5 @@
-import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { Payment } from "@objects/Payment";
+import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
 

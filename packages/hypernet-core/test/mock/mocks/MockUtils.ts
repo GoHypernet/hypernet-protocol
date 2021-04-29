@@ -1,10 +1,12 @@
-import { providers, ethers } from "ethers";
+import {
+  PublicIdentifier,
+  PaymentId,
+  EthereumAddress,
+} from "@hypernetlabs/objects";
 import { MockProvider } from "ethereum-waffle";
+import { providers, ethers } from "ethers";
 import Ganache from "ganache-core";
-import { EthereumAddress } from "@objects/EthereumAddress";
-import { PublicIdentifier } from "@objects/PublicIdentifier";
-import { PaymentId } from "@objects/PaymentId";
-var randomstring = require("randomstring");
+import randomstring from "randomstring";
 
 class MockUtils {
   public generateRandomAccounts(
@@ -13,32 +15,46 @@ class MockUtils {
       total_accounts: 1,
       default_balance_ether: 100,
     },
-  ): any {
-    return [...new Array(options.total_accounts)].map((el, idx) => ({
+  ): { balance: string; secretKey: string }[] {
+    return [...new Array(options.total_accounts)].map((_el, idx) => ({
       balance: `${options.default_balance_ether}000000000000000000`,
-      secretKey: ethers.Wallet.fromMnemonic(options.mnemonic, `m/44'/60'/0'/0/${idx}`).privateKey,
+      secretKey: ethers.Wallet.fromMnemonic(
+        options.mnemonic,
+        `m/44'/60'/0'/0/${idx}`,
+      ).privateKey,
     }));
   }
 
-  public defaultMnemonic: string = "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
+  public defaultMnemonic =
+    "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
 
   public generateRandomEtherAdress(): EthereumAddress {
-    return EthereumAddress("0x" + randomstring.generate({ length: 40, charset: "hex" }));
+    return EthereumAddress(
+      "0x" + randomstring.generate({ length: 40, charset: "hex" }),
+    );
   }
 
   public generateRandomPublicIdentifier(): PublicIdentifier {
-    return PublicIdentifier("vector" + randomstring.generate({ length: 50, charset: "hex" }));
+    return PublicIdentifier(
+      "vector" + randomstring.generate({ length: 50, charset: "hex" }),
+    );
   }
 
   public generateRandomPaymentId(): PaymentId {
-    return PaymentId("0x" + randomstring.generate({ length: 64, charset: "hex" }));
+    return PaymentId(
+      "0x" + randomstring.generate({ length: 64, charset: "hex" }),
+    );
   }
 
   public generateRandomPaymentToken(): EthereumAddress {
-    return EthereumAddress("0x" + randomstring.generate({ length: 40, charset: "hex" }));
+    return EthereumAddress(
+      "0x" + randomstring.generate({ length: 40, charset: "hex" }),
+    );
   }
 
-  public generateMockProvider(options?: Ganache.IProviderOptions): providers.Web3Provider {
+  public generateMockProvider(
+    options?: Ganache.IProviderOptions,
+  ): providers.Web3Provider {
     return new MockProvider(
       options
         ? {

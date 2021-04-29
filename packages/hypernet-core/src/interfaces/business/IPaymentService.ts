@@ -1,4 +1,10 @@
-import { Payment, EthereumAddress, PublicIdentifier, MerchantUrl, PaymentId } from "@hypernetlabs/objects";
+import {
+  Payment,
+  EthereumAddress,
+  PublicIdentifier,
+  MerchantUrl,
+  PaymentId,
+} from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
   InsufficientBalanceError,
@@ -17,8 +23,8 @@ import {
   TransferCreationError,
   TransferResolutionError,
 } from "@hypernetlabs/objects";
-import { ResultAsync, Result } from "neverthrow";
 import { BigNumber } from "ethers";
+import { ResultAsync, Result } from "neverthrow";
 
 export interface IPaymentService {
   /**

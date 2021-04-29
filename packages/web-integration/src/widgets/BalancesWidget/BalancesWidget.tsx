@@ -1,6 +1,7 @@
-import React from "react";
 import { BalanceList } from "@hypernetlabs/web-ui";
-import { useBalances } from "@web-integration-hooks";
+import React from "react";
+
+import { useBalances } from "@web-integration/hooks";
 
 const BalancesWidget: React.FC = () => {
   const { balances } = useBalances();

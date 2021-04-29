@@ -1,6 +1,3 @@
-import { EthereumAddress } from "@objects/EthereumAddress";
-import { PublicIdentifier } from "@objects/PublicIdentifier";
-
 export interface IConditionalTransferResolvedPayload {
   aliceIdentifier: string;
   bobIdentifier: string;

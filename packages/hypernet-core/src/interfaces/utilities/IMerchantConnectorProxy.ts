@@ -1,5 +1,3 @@
-import { ParentProxy } from "@hypernetlabs/utils";
-import { ResultAsync } from "neverthrow";
 import { IResolutionResult } from "@hypernetlabs/merchant-connector";
 import {
   Balances,
@@ -14,6 +12,8 @@ import {
   Signature,
 } from "@hypernetlabs/objects";
 import { PullPayment, PushPayment } from "@hypernetlabs/objects";
+import { ParentProxy } from "@hypernetlabs/utils";
+import { ResultAsync } from "neverthrow";
 import { Observable } from "rxjs";
 
 export interface IMerchantConnectorProxy extends ParentProxy {
@@ -34,29 +34,57 @@ export interface IMerchantConnectorProxy extends ParentProxy {
     balances: Balances,
   ): ResultAsync<void, MerchantActivationError | ProxyError>;
 
-  resolveChallenge(paymentId: PaymentId): ResultAsync<IResolutionResult, MerchantConnectorError | ProxyError>;
+  resolveChallenge(
+    paymentId: PaymentId,
+  ): ResultAsync<IResolutionResult, MerchantConnectorError | ProxyError>;
 
-  getAddress(): ResultAsync<EthereumAddress, MerchantConnectorError | ProxyError>;
+  getAddress(): ResultAsync<
+    EthereumAddress,
+    MerchantConnectorError | ProxyError
+  >;
 
   /**
    * getValidatedSignature() requests the merchant iframe to return the
    * signature of the connector code, AFTER validating that the connector
    * code matches the signature.
    */
-  getValidatedSignature(): ResultAsync<Signature, MerchantValidationError | ProxyError>;
+  getValidatedSignature(): ResultAsync<
+    Signature,
+    MerchantValidationError | ProxyError
+  >;
 
   closeMerchantIFrame(): ResultAsync<void, MerchantConnectorError | ProxyError>;
 
-  displayMerchantIFrame(): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  displayMerchantIFrame(): ResultAsync<
+    void,
+    MerchantConnectorError | ProxyError
+  >;
 
-  notifyPushPaymentSent(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError>;
-  notifyPushPaymentUpdated(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError>;
-  notifyPushPaymentReceived(payment: PushPayment): ResultAsync<void, MerchantConnectorError | ProxyError>;
-  notifyPullPaymentSent(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError>;
-  notifyPullPaymentUpdated(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError>;
-  notifyPullPaymentReceived(payment: PullPayment): ResultAsync<void, MerchantConnectorError | ProxyError>;
-  notifyBalancesReceived(balances: Balances): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  notifyPushPaymentSent(
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  notifyPushPaymentUpdated(
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  notifyPushPaymentReceived(
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  notifyPullPaymentSent(
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  notifyPullPaymentUpdated(
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  notifyPullPaymentReceived(
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  notifyBalancesReceived(
+    balances: Balances,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError>;
 
   signMessageRequested: Observable<string>;
-  messageSigned(message: string, signature: Signature): ResultAsync<void, ProxyError>;
+  messageSigned(
+    message: string,
+    signature: Signature,
+  ): ResultAsync<void, ProxyError>;
 }

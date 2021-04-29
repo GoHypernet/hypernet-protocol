@@ -1,5 +1,10 @@
-import { BigNumber } from "ethers";
-import { Balances, EthereumAddress, PrivateCredentials, PublicIdentifier, Signature } from "@hypernetlabs/objects";
+import {
+  Balances,
+  EthereumAddress,
+  PrivateCredentials,
+  PublicIdentifier,
+  Signature,
+} from "@hypernetlabs/objects";
 import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
@@ -8,20 +13,28 @@ import {
   RouterChannelUnknownError,
   InvalidParametersError,
 } from "@hypernetlabs/objects";
+import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 /**
  * @todo What is the main role/purpose of this class? Description here.
  */
 export interface IAccountService {
-  getPublicIdentifier(): ResultAsync<PublicIdentifier, BlockchainUnavailableError | VectorError>;
+  getPublicIdentifier(): ResultAsync<
+    PublicIdentifier,
+    BlockchainUnavailableError | VectorError
+  >;
   getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
   depositFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | RouterChannelUnknownError | BlockchainUnavailableError | VectorError | LogicalError
+    | BalancesUnavailableError
+    | RouterChannelUnknownError
+    | BlockchainUnavailableError
+    | VectorError
+    | LogicalError
   >;
   withdrawFunds(
     assetAddress: EthereumAddress,
@@ -29,9 +42,19 @@ export interface IAccountService {
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | RouterChannelUnknownError | BlockchainUnavailableError | VectorError
+    | BalancesUnavailableError
+    | RouterChannelUnknownError
+    | BlockchainUnavailableError
+    | VectorError
   >;
-  getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError | RouterChannelUnknownError>;
-  providePrivateCredentials(privateCredentials: PrivateCredentials): ResultAsync<void, InvalidParametersError>;
-  signMessage(message: string): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;
+  getBalances(): ResultAsync<
+    Balances,
+    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+  >;
+  providePrivateCredentials(
+    privateCredentials: PrivateCredentials,
+  ): ResultAsync<void, InvalidParametersError>;
+  signMessage(
+    message: string,
+  ): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;
 }

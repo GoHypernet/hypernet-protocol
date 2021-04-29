@@ -1,6 +1,7 @@
-import ko from "knockout";
-import html from "./PaymentStatus.template.html";
 import { EPaymentState } from "@hypernetlabs/objects";
+import ko from "knockout";
+
+import html from "./PaymentStatus.template.html";
 
 export class PaymentStatusParams {
   constructor(public state: EPaymentState) {}

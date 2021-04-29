@@ -1,4 +1,5 @@
 import ko from "knockout";
+
 import html from "./Button.template.html";
 
 export enum EButtonType {
@@ -23,7 +24,10 @@ export class ButtonViewModel {
   public enabled: ko.PureComputed<boolean>;
 
   protected action: () => Promise<any> | null;
-  protected externalEnabled: ko.Observable<boolean> | ko.Computed<boolean> | null;
+  protected externalEnabled:
+    | ko.Observable<boolean>
+    | ko.Computed<boolean>
+    | null;
 
   constructor(params: ButtonParams) {
     this.action = params.action;

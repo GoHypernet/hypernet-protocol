@@ -1,10 +1,15 @@
-import { useEffect, useReducer, useContext } from "react";
-import { StoreContext } from "@web-integration-contexts";
-import { ITokenSelectorOption } from "@hypernetlabs/web-ui/src/interfaces";
 import { Balances, PublicIdentifier } from "@hypernetlabs/objects";
 import { EPaymentType, MerchantUrl } from "@hypernetlabs/objects";
-import { PaymentTokenOptionViewModel, EResultStatus, ResultMessage } from "@web-integration-interfaces/objects";
+import { ITokenSelectorOption } from "@hypernetlabs/web-ui/src/interfaces";
 import { utils } from "ethers";
+import { useEffect, useReducer, useContext } from "react";
+
+import { StoreContext } from "@web-integration/contexts";
+import {
+  PaymentTokenOptionViewModel,
+  EResultStatus,
+  ResultMessage,
+} from "@web-integration/interfaces/objects";
 
 class PaymentTypeOption {
   constructor(public typeName: string, public type: EPaymentType) {}
@@ -70,8 +75,9 @@ export function usePayment(initialParams: any): IReducerStateReducer {
     resultMessage: new ResultMessage(EResultStatus.IDLE, ""),
     tokenSelectorOptions: initialParams?.tokenSelectorOptions || [],
     selectedPaymentToken:
-      initialParams?.tokenSelectorOptions?.find((option: any) => option?.address === initialParams?.paymentTokenAddress)
-        ?.address || undefined,
+      initialParams?.tokenSelectorOptions?.find(
+        (option: any) => option?.address === initialParams?.paymentTokenAddress,
+      )?.address || undefined,
     counterPartyAccount: initialParams?.counterPartyAccount || "",
     amount: initialParams?.amount || "0",
     expirationDate: initialParams?.expirationDate || "",
@@ -89,25 +95,43 @@ export function usePayment(initialParams: any): IReducerStateReducer {
       case EActionTypes.FETCHING:
         return { ...state, loading: true };
       case EActionTypes.FETCHED:
-        return { ...state, loading: false, tokenSelectorOptions: action.payload };
+        return {
+          ...state,
+          loading: false,
+          tokenSelectorOptions: action.payload,
+        };
       case EActionTypes.ERROR:
         return {
           ...state,
           loading: false,
           error: true,
-          resultMessage: new ResultMessage(EResultStatus.FAILURE, action.payload),
+          resultMessage: new ResultMessage(
+            EResultStatus.FAILURE,
+            action.payload,
+          ),
         };
       case EActionTypes.SUCCESS:
         return {
           ...state,
           loading: false,
           error: false,
-          resultMessage: new ResultMessage(EResultStatus.SUCCESS, action.payload),
+          resultMessage: new ResultMessage(
+            EResultStatus.SUCCESS,
+            action.payload,
+          ),
         };
       case EActionTypes.TOKEN_SELECTED:
-        return { ...state, loading: false, selectedPaymentToken: action.payload };
+        return {
+          ...state,
+          loading: false,
+          selectedPaymentToken: action.payload,
+        };
       case EActionTypes.COUNTER_PARTY_CHANGED:
-        return { ...state, loading: false, counterPartyAccount: action.payload };
+        return {
+          ...state,
+          loading: false,
+          counterPartyAccount: action.payload,
+        };
       case EActionTypes.AMOUNT_CHANGED:
         return { ...state, loading: false, amount: action.payload };
       case EActionTypes.EXPIRATION_DATE_CHANGED:
@@ -131,7 +155,10 @@ export function usePayment(initialParams: any): IReducerStateReducer {
         // get data from proxy
         proxy?.getBalances().map((balance: Balances) => {
           // prepare balances
-          dispatch({ type: EActionTypes.FETCHED, payload: prepareTokenSelector(balance) });
+          dispatch({
+            type: EActionTypes.FETCHED,
+            payload: prepareTokenSelector(balance),
+          });
         });
       } catch (error) {
         if (cancelRequest) return;
@@ -144,7 +171,10 @@ export function usePayment(initialParams: any): IReducerStateReducer {
     proxy?.onBalancesChanged.subscribe({
       next: (balance) => {
         if (cancelRequest) return;
-        dispatch({ type: EActionTypes.FETCHED, payload: prepareTokenSelector(balance) });
+        dispatch({
+          type: EActionTypes.FETCHED,
+          payload: prepareTokenSelector(balance),
+        });
       },
     });
 
@@ -154,10 +184,18 @@ export function usePayment(initialParams: any): IReducerStateReducer {
   }, []);
 
   const prepareTokenSelector = (balance: Balances) => {
-    return balance.assets.reduce((acc: PaymentTokenOptionViewModel[], assetBalance) => {
-      acc.push(new PaymentTokenOptionViewModel(assetBalance.assetAddress, assetBalance.assetAddress));
-      return acc;
-    }, new Array<PaymentTokenOptionViewModel>());
+    return balance.assets.reduce(
+      (acc: PaymentTokenOptionViewModel[], assetBalance) => {
+        acc.push(
+          new PaymentTokenOptionViewModel(
+            assetBalance.assetAddress,
+            assetBalance.assetAddress,
+          ),
+        );
+        return acc;
+      },
+      new Array<PaymentTokenOptionViewModel>(),
+    );
   };
 
   const setSelectedPaymentToken = (param?: ITokenSelectorOption) => {

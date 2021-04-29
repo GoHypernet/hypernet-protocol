@@ -10,7 +10,9 @@ interface TextareaInputProps {
   rows?: number;
 }
 
-const TextareaInput: React.FC<TextareaInputProps> = (props: TextareaInputProps) => {
+const TextareaInput: React.FC<TextareaInputProps> = (
+  props: TextareaInputProps,
+) => {
   const { onChange, label, disabled, value, placeholder, rows } = props;
 
   return (
@@ -19,7 +21,9 @@ const TextareaInput: React.FC<TextareaInputProps> = (props: TextareaInputProps) 
       <textarea
         rows={rows || 3}
         value={value}
-        onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => onChange && onChange(event.target.value)}
+        onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
+          onChange && onChange(event.target.value)
+        }
         disabled={disabled}
         placeholder={placeholder}
       />

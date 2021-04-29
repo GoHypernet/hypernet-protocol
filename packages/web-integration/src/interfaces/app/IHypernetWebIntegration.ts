@@ -1,7 +1,8 @@
 import { PublicIdentifier, EthereumAddress } from "@hypernetlabs/objects";
 import { EPaymentType, MerchantUrl } from "@hypernetlabs/objects";
-import IHypernetIFrameProxy from "@web-integration-interfaces/proxy/IHypernetIFrameProxy";
 import { ResultAsync } from "neverthrow";
+
+import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 
 export interface IRenderParams {
   selector?: string;
@@ -32,7 +33,9 @@ export interface IHypernetWebIntegration {
   renderFundWidget(params?: IRenderParams): void;
   renderLinksWidget(params?: IRenderParams): void;
   renderPaymentWidget(params?: IRenderPaymentWidgetParams): void;
-  renderConnectorAuthorizationFlow(params: IConnectorAuthorizationFlowParams): void;
+  renderConnectorAuthorizationFlow(
+    params: IConnectorAuthorizationFlowParams,
+  ): void;
   displayMerchantIFrame(merchantUrl: MerchantUrl): void;
   closeMerchantIFrame(merchantUrl: MerchantUrl): void;
 }

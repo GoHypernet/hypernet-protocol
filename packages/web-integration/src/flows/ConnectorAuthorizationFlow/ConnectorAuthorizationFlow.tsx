@@ -1,9 +1,10 @@
-import React, { useContext, useEffect } from "react";
 import { ConnectorAuthorization, SucessContent } from "@hypernetlabs/web-ui";
 import { EStatusColor } from "@hypernetlabs/web-ui/src/theme";
-import { useBalances } from "@web-integration-hooks";
-import { LayoutContext, StoreContext } from "@web-integration-contexts";
-import { IConnectorAuthorizationFlowParams } from "@web-integration-interfaces/app/IHypernetWebIntegration";
+import React, { useContext, useEffect } from "react";
+
+import { LayoutContext, StoreContext } from "@web-integration/contexts";
+import { useBalances } from "@web-integration/hooks";
+import { IConnectorAuthorizationFlowParams } from "@web-integration/interfaces/app/IHypernetWebIntegration";
 
 const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> = (
   props: IConnectorAuthorizationFlowParams,
@@ -15,7 +16,9 @@ const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> = 
   } = props;
   const { balances } = useBalances();
   const { proxy } = useContext(StoreContext);
-  const { setModalWidth, setModalStatus, modalStatus, closeModal } = useContext(LayoutContext);
+  const { setModalWidth, setModalStatus, modalStatus, closeModal } = useContext(
+    LayoutContext,
+  );
 
   useEffect(() => {
     proxy.onMerchantAuthorized.subscribe(() => {
@@ -23,7 +26,9 @@ const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> = 
     });
 
     // Destroy self modal if merchant modal is visible.
-    const iframeElements = document.getElementsByName("hypernet-core-merchant-connector-iframe");
+    const iframeElements = document.getElementsByName(
+      "hypernet-core-merchant-connector-iframe",
+    );
     if (iframeElements.length && iframeElements[0].style.display === "block") {
       closeModal();
     }

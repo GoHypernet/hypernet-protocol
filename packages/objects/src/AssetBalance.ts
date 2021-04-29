@@ -1,5 +1,6 @@
-import { EthereumAddress } from "@objects/EthereumAddress";
 import { BigNumber } from "ethers";
+
+import { EthereumAddress } from "@objects/EthereumAddress";
 
 /**
  * Represents the current balance of a specific asset in the channel.

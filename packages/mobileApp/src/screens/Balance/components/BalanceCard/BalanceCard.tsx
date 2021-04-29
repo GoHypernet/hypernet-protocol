@@ -1,7 +1,10 @@
 import React from "react";
 import { View, Image, StyleSheet } from "react-native";
 import { Button, Text } from "react-native-elements";
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from "react-native-responsive-screen";
 
 interface BalanceCardProps {
   renderIcon?: () => any;
@@ -12,7 +15,13 @@ interface BalanceCardProps {
 }
 
 const BalanceCard: React.FC<BalanceCardProps> = (props: BalanceCardProps) => {
-  const { primaryTitle, primaryValue, secondaryTitle, secondaryValue, renderIcon = () => {} } = props;
+  const {
+    primaryTitle,
+    primaryValue,
+    secondaryTitle,
+    secondaryValue,
+    renderIcon = () => {},
+  } = props;
   return (
     <View style={styles.container}>
       <Text style={styles.icon}>{renderIcon()}</Text>

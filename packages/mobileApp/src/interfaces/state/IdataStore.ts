@@ -1,6 +1,6 @@
+import { ICoreData } from "./IcoreReducer";
 import { ISomeReducerState } from "./IsomeReducer";
 import { IUserData } from "./IuserReducer";
-import { ICoreData } from "./IcoreReducer";
 
 export interface IStore {
   state: RootState;

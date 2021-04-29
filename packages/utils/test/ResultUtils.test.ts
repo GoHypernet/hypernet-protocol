@@ -1,4 +1,5 @@
 import { errAsync, okAsync } from "neverthrow";
+
 import { ResultUtils } from "../src/ResultUtils";
 
 describe("ResultUtils tests", () => {
@@ -10,7 +11,11 @@ describe("ResultUtils tests", () => {
     };
 
     // Act
-    const result = await ResultUtils.executeSerially([asyncMethod, asyncMethod, asyncMethod]);
+    const result = await ResultUtils.executeSerially([
+      asyncMethod,
+      asyncMethod,
+      asyncMethod,
+    ]);
 
     // Assert
     expect(result.isErr()).toBeFalsy();
@@ -32,7 +37,11 @@ describe("ResultUtils tests", () => {
     };
 
     // Act
-    const result = await ResultUtils.executeSerially([asyncMethod, asyncFailed, asyncMethod]);
+    const result = await ResultUtils.executeSerially([
+      asyncMethod,
+      asyncFailed,
+      asyncMethod,
+    ]);
 
     // Assert
     expect(result.isErr()).toBeTruthy();
@@ -69,7 +78,12 @@ describe("ResultUtils tests", () => {
     };
 
     // Act
-    const result = await ResultUtils.backoffAndRetry(asyncMethod, [Error], 10, 1);
+    const result = await ResultUtils.backoffAndRetry(
+      asyncMethod,
+      [Error],
+      10,
+      1,
+    );
 
     // Assert
     expect(result.isErr()).toBeFalsy();
@@ -80,7 +94,7 @@ describe("ResultUtils tests", () => {
 
   test("backoffAndRetry max retries exceeded", async () => {
     // Arrange
-    let value = 0
+    let value = 0;
     const err = new Error();
     const asyncMethod = () => {
       value++;
@@ -88,7 +102,12 @@ describe("ResultUtils tests", () => {
     };
 
     // Act
-    const result = await ResultUtils.backoffAndRetry(asyncMethod, [Error], 3, 1);
+    const result = await ResultUtils.backoffAndRetry(
+      asyncMethod,
+      [Error],
+      3,
+      1,
+    );
 
     // Assert
     expect(result.isErr()).toBeTruthy();
@@ -99,7 +118,7 @@ describe("ResultUtils tests", () => {
 
   test("backoffAndRetry unnaceptable error returned", async () => {
     // Arrange
-    let value = 0
+    let value = 0;
     const err = new Error();
     const asyncMethod = () => {
       value++;
@@ -116,5 +135,3 @@ describe("ResultUtils tests", () => {
     expect(value).toBe(1);
   });
 });
-
-

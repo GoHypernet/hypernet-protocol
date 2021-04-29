@@ -1,10 +1,11 @@
-import React, { useContext, useEffect, useState } from "react";
 import { SelectInput, TextareaInput, Button } from "@hypernetlabs/web-ui";
-import { LayoutContext, StoreContext } from "@web-integration-contexts";
+import React, { useContext, useState } from "react";
+
+import { LayoutContext, StoreContext } from "@web-integration/contexts";
 
 const PrivateKeysFlow: React.FC = () => {
   const { proxy } = useContext(StoreContext);
-  const { setModalWidth, setModalStatus, modalStatus, closeModal } = useContext(LayoutContext);
+  const { closeModal } = useContext(LayoutContext);
   const [inputValue, setInputValue] = useState<string>("");
   const [privateKeyType, setPrivateKeyType] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -37,7 +38,11 @@ const PrivateKeysFlow: React.FC = () => {
         onChange={(event) => setPrivateKeyType(event.target.value)}
       />
       <br />
-      <TextareaInput label="Amount" value={inputValue} onChange={(value) => setInputValue(value)} />
+      <TextareaInput
+        label="Amount"
+        value={inputValue}
+        onChange={(value) => setInputValue(value)}
+      />
       <br />
       <br />
       <Button onClick={handleSubmit} label="Provide your Key" />

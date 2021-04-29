@@ -7,7 +7,11 @@ import {
   IFullTransferState,
   PaymentId,
 } from "@hypernetlabs/objects";
-import { EPaymentState, EPaymentType, ETransferType } from "@hypernetlabs/objects";
+import {
+  EPaymentState,
+  EPaymentType,
+  ETransferType,
+} from "@hypernetlabs/objects";
 import {
   InvalidParametersError,
   InvalidPaymentError,
@@ -22,18 +26,25 @@ export interface IPaymentUtils {
    *
    * @param paymentId
    */
-  isHypernetDomain(paymentId: PaymentId): ResultAsync<boolean, InvalidPaymentIdError>;
+  isHypernetDomain(
+    paymentId: PaymentId,
+  ): ResultAsync<boolean, InvalidPaymentIdError>;
 
   /**
    * Creates a PaymentId by combining
    * @param paymentType
    */
-  createPaymentId(paymentType: EPaymentType): ResultAsync<PaymentId, InvalidParametersError>;
+  createPaymentId(
+    paymentType: EPaymentType,
+  ): ResultAsync<PaymentId, InvalidParametersError>;
 
   sortTransfers(
     _paymentId: PaymentId,
     transfers: IFullTransferState[],
-  ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError | LogicalError>;
+  ): ResultAsync<
+    SortedTransfers,
+    InvalidPaymentError | VectorError | LogicalError
+  >;
 
   /**
    *
@@ -44,7 +55,10 @@ export interface IPaymentUtils {
    */
   transfersToPayments(
     transfers: IFullTransferState[],
-  ): ResultAsync<Payment[], VectorError | LogicalError | InvalidPaymentError | InvalidParametersError>;
+  ): ResultAsync<
+    Payment[],
+    VectorError | LogicalError | InvalidPaymentError | InvalidParametersError
+  >;
 
   /**
    *
@@ -62,11 +76,16 @@ export interface IPaymentUtils {
    *
    * @param transfer
    */
-  getTransferType(transfer: IFullTransferState): ResultAsync<ETransferType, LogicalError | VectorError>;
+  getTransferType(
+    transfer: IFullTransferState,
+  ): ResultAsync<ETransferType, LogicalError | VectorError>;
 
   getTransferTypeWithTransfer(
     transfer: IFullTransferState,
-  ): ResultAsync<{ transferType: ETransferType; transfer: IFullTransferState }, VectorError | LogicalError>;
+  ): ResultAsync<
+    { transferType: ETransferType; transfer: IFullTransferState },
+    VectorError | LogicalError
+  >;
 
   /**
    *

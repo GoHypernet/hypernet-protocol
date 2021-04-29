@@ -1,9 +1,11 @@
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import ko from "knockout";
-import { ButtonParams } from "../Button/Button.viewmodel";
-import html from "./Actions.template.html";
 import { ethers } from "ethers";
+import ko from "knockout";
+
+import { ButtonParams } from "../Button/Button.viewmodel";
 import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
+
+import html from "./Actions.template.html";
 
 export class ActionsParams {
   constructor(public integration: IHypernetWebIntegration) {}
@@ -24,7 +26,11 @@ export class ActionsViewModel {
 
     this.startupComplete = ko.observable(false);
 
-    this.tokenSelector = new TokenSelectorParams(this.integration, ko.observable(null), false);
+    this.tokenSelector = new TokenSelectorParams(
+      this.integration,
+      ko.observable(null),
+      false,
+    );
 
     this.tokenSelected = ko.pureComputed(() => {
       return this.tokenSelector.selectedToken() != null;
@@ -39,7 +45,10 @@ export class ActionsViewModel {
 
       // tslint:disable-next-line: no-console
       console.log(`Selected token for deposit: ${selectedToken}`);
-      await this.integration.core.depositFunds(selectedToken, ethers.utils.parseEther("1"));
+      await this.integration.core.depositFunds(
+        selectedToken,
+        ethers.utils.parseEther("1"),
+      );
     });
 
     this.mintTestTokenButton = new ButtonParams("Mint HyperToken", async () => {

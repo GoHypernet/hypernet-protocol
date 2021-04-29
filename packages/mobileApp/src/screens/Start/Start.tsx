@@ -3,7 +3,10 @@ import { StyleSheet, View, Animated, Easing, Dimensions } from "react-native";
 import { Button, CheckBox, Text } from "react-native-elements";
 
 import HypernetLogo from "@mobileApp/components/HypernetLogo";
-import { ENavigationScreenName, NavigationProps } from "@mobileApp/interfaces/containers/IRouter";
+import {
+  ENavigationScreenName,
+  NavigationProps,
+} from "@mobileApp/interfaces/containers/IRouter";
 
 const moveTop = (value: Animated.Value) => {
   Animated.timing(value, {
@@ -78,7 +81,11 @@ const Start: React.FC<StartProps> = (props: StartProps) => {
           }
           checked={false}
           uncheckedColor="#6D778B"
-          containerStyle={{ backgroundColor: "transparent", borderColor: "transparent", marginTop: 24 }}
+          containerStyle={{
+            backgroundColor: "transparent",
+            borderColor: "transparent",
+            marginTop: 24,
+          }}
         />
       </Animated.View>
     </View>

@@ -1,4 +1,3 @@
-import { ResultAsync } from "neverthrow";
 import { HypernetLink } from "@hypernetlabs/objects";
 import {
   RouterChannelUnknownError,
@@ -8,6 +7,7 @@ import {
   InvalidPaymentError,
   LogicalError,
 } from "@hypernetlabs/objects";
+import { ResultAsync } from "neverthrow";
 
 export interface ILinkService {
   /**

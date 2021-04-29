@@ -1,5 +1,6 @@
-import { ResultAsync } from "neverthrow";
 import { BlockchainUnavailableError, VectorError } from "@hypernetlabs/objects";
+import { ResultAsync } from "neverthrow";
+
 import { IBrowserNode } from "./IBrowserNode";
 
 /**
@@ -8,5 +9,8 @@ import { IBrowserNode } from "./IBrowserNode";
  * testing of it.
  */
 export interface IBrowserNodeProvider {
-  getBrowserNode(): ResultAsync<IBrowserNode, VectorError | BlockchainUnavailableError>;
+  getBrowserNode(): ResultAsync<
+    IBrowserNode,
+    VectorError | BlockchainUnavailableError
+  >;
 }

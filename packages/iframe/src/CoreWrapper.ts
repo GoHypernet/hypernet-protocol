@@ -1,6 +1,12 @@
-import { EthereumAddress, PublicIdentifier, IHypernetCore, PaymentId, MerchantUrl } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
+import {
+  EthereumAddress,
+  PublicIdentifier,
+  IHypernetCore,
+  PaymentId,
+  MerchantUrl,
+} from "@hypernetlabs/objects";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
+import { BigNumber } from "ethers";
 import Postmate from "postmate";
 
 export default class CoreWrapper extends ChildProxy {
@@ -31,14 +37,26 @@ export default class CoreWrapper extends ChildProxy {
           return this.core.getPublicIdentifier();
         }, data.callId);
       },
-      depositFunds: (data: IIFrameCallData<{ assetAddress: EthereumAddress; amount: string }>) => {
+      depositFunds: (
+        data: IIFrameCallData<{
+          assetAddress: EthereumAddress;
+          amount: string;
+        }>,
+      ) => {
         this.returnForModel(() => {
-          return this.core.depositFunds(data.data.assetAddress, BigNumber.from(data.data.amount));
+          return this.core.depositFunds(
+            data.data.assetAddress,
+            BigNumber.from(data.data.amount),
+          );
         }, data.callId);
       },
 
       withdrawFunds: (
-        data: IIFrameCallData<{ assetAddress: EthereumAddress; amount: string; destinationAddress: EthereumAddress }>,
+        data: IIFrameCallData<{
+          assetAddress: EthereumAddress;
+          amount: string;
+          destinationAddress: EthereumAddress;
+        }>,
       ) => {
         this.returnForModel(() => {
           return this.core.withdrawFunds(
@@ -148,7 +166,10 @@ export default class CoreWrapper extends ChildProxy {
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.providePrivateCredentials(data.data.privateKey, data.data.mnemonic);
+          return this.core.providePrivateCredentials(
+            data.data.privateKey,
+            data.data.mnemonic,
+          );
         }, data.callId);
       },
     });

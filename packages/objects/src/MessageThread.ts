@@ -1,5 +1,5 @@
-import { Message } from "@objects/Message";
 import { EthereumAddress } from "@objects/EthereumAddress";
+import { Message } from "@objects/Message";
 
 export class MessageThread {
   constructor(

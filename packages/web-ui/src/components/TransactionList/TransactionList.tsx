@@ -4,13 +4,16 @@ interface TransactionListProps {
   transactionDataList?: any[];
 }
 
-const TransactionList: React.FC<TransactionListProps> = (props: TransactionListProps) => {
+const TransactionList: React.FC<TransactionListProps> = (
+  props: TransactionListProps,
+) => {
   const { transactionDataList } = props;
   console.log("transactionDataList: ", transactionDataList);
 
   return (
     <h2>
-      TransactionList from web ui package loaded with data from HypernetWebIntegration
+      TransactionList from web ui package loaded with data from
+      HypernetWebIntegration
       <br />
       {transactionDataList?.length &&
         transactionDataList.map((trs) => (

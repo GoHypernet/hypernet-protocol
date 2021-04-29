@@ -30,8 +30,9 @@
   },
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "clean": "rimraf dist",
-    "compile": "tsc -b src/tsconfig.json",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "alias": "tsc-alias",
     "deploy-custom-transfers": "yarn ts-node scripts/deploy.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p src/tsconfig.json",

@@ -1,4 +1,5 @@
 import React from "react";
+
 import useStyles from "./SucessContent.style";
 
 interface ISucessContentProps {
@@ -7,7 +8,9 @@ interface ISucessContentProps {
   onOkay?: () => void;
 }
 
-const SucessContent: React.FC<ISucessContentProps> = (props: ISucessContentProps) => {
+const SucessContent: React.FC<ISucessContentProps> = (
+  props: ISucessContentProps,
+) => {
   const { label = "SUCCESS!", info, onOkay } = props;
   const classes = useStyles();
   return (

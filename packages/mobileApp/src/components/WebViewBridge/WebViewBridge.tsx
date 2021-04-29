@@ -1,8 +1,13 @@
 import React, { useRef, useEffect } from "react";
-import { WebView } from "react-native-webview";
 import { View } from "react-native";
+import { WebView } from "react-native-webview";
+
+import {
+  CoreActionType,
+  ECoreViewDataKeys,
+  TCoreViewData,
+} from "@mobileApp/interfaces/state/IcoreReducer";
 import { useStateContext } from "@mobileApp/state/store";
-import { CoreActionType, ECoreViewDataKeys, TCoreViewData } from "@mobileApp/interfaces/state/IcoreReducer";
 
 interface WebViewBridgeProps {
   sourceUrl?: string;
@@ -13,7 +18,9 @@ interface IParsedData {
   keyValue: TCoreViewData;
 }
 
-const WebViewBridge: React.FC<WebViewBridgeProps> = (props: WebViewBridgeProps) => {
+const WebViewBridge: React.FC<WebViewBridgeProps> = (
+  props: WebViewBridgeProps,
+) => {
   // NOTE: if we dont want to host a the mobile-integration (http://localhost:8091) we can embed the js bundle of the package in a script tag in an html string and give it as source prop to the webView
   const { sourceUrl = "http://localhost:8091" } = props;
   const { dispatch } = useStateContext();
@@ -44,22 +51,40 @@ const WebViewBridge: React.FC<WebViewBridgeProps> = (props: WebViewBridgeProps) 
           const parsedData = JSON.parse(event.nativeEvent.data) as IParsedData;
           switch (parsedData.keyName) {
             case ECoreViewDataKeys.accounts:
-              dispatch({ type: CoreActionType.SET_ACCOUNTS, payload: parsedData.keyValue });
+              dispatch({
+                type: CoreActionType.SET_ACCOUNTS,
+                payload: parsedData.keyValue,
+              });
               break;
             case ECoreViewDataKeys.balances:
-              dispatch({ type: CoreActionType.SET_BALANCES, payload: parsedData.keyValue });
+              dispatch({
+                type: CoreActionType.SET_BALANCES,
+                payload: parsedData.keyValue,
+              });
               break;
             case ECoreViewDataKeys.links:
-              dispatch({ type: CoreActionType.SET_LINKS, payload: parsedData.keyValue });
+              dispatch({
+                type: CoreActionType.SET_LINKS,
+                payload: parsedData.keyValue,
+              });
               break;
             case ECoreViewDataKeys.activeLinks:
-              dispatch({ type: CoreActionType.SET_ACTIVE_LINKS, payload: parsedData.keyValue });
+              dispatch({
+                type: CoreActionType.SET_ACTIVE_LINKS,
+                payload: parsedData.keyValue,
+              });
               break;
             case ECoreViewDataKeys.authorizedMerchants:
-              dispatch({ type: CoreActionType.SET_AUTHERIZED_MERCHANTS, payload: parsedData.keyValue });
+              dispatch({
+                type: CoreActionType.SET_AUTHERIZED_MERCHANTS,
+                payload: parsedData.keyValue,
+              });
               break;
             default:
-              dispatch({ type: CoreActionType.ERROR_OCCURRED, payload: "Method not implemented" });
+              dispatch({
+                type: CoreActionType.ERROR_OCCURRED,
+                payload: "Method not implemented",
+              });
           }
           dispatch({ type: CoreActionType.LOADING, payload: false });
         }}

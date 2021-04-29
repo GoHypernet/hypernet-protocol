@@ -1,4 +1,7 @@
-import { IMerchantConnectorRepository } from "@interfaces/data";
+import {
+  TypedDataDomain,
+  TypedDataField,
+} from "@ethersproject/abstract-signer";
 import {
   PullPayment,
   PushPayment,
@@ -14,10 +17,24 @@ import {
   MerchantActivationError,
   MerchantAuthorizationDeniedError,
 } from "@hypernetlabs/objects";
+import {
+  LogicalError,
+  MerchantConnectorError,
+  MerchantValidationError,
+  PersistenceError,
+  AjaxError,
+} from "@hypernetlabs/objects";
+import {
+  ResultUtils,
+  IAjaxUtils,
+  ILocalStorageUtils,
+  ILogUtils,
+} from "@hypernetlabs/utils";
+import { BigNumber, ethers } from "ethers";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
+
+import { IMerchantConnectorRepository } from "@interfaces/data";
 import { InitializedHypernetContext } from "@interfaces/objects";
-import { LogicalError, MerchantConnectorError, MerchantValidationError, PersistenceError } from "@hypernetlabs/objects";
-import { errAsync, okAsync, ResultAsync, Result, ok, err } from "neverthrow";
-import { ResultUtils, IAjaxUtils, ILocalStorageUtils, ILogUtils } from "@hypernetlabs/utils";
 import {
   IBlockchainProvider,
   IBlockchainUtils,
@@ -26,8 +43,6 @@ import {
   IMerchantConnectorProxy,
   IVectorUtils,
 } from "@interfaces/utilities";
-import { BigNumber, ethers } from "ethers";
-import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 
 interface IAuthorizedMerchantEntry {
@@ -35,18 +50,24 @@ interface IAuthorizedMerchantEntry {
   authorizationSignature: string;
 }
 
-export class MerchantConnectorRepository implements IMerchantConnectorRepository {
+export class MerchantConnectorRepository
+  implements IMerchantConnectorRepository {
   protected authorizedMerchantProxies: Map<
     MerchantUrl,
     ResultAsync<
       IMerchantConnectorProxy,
-      MerchantActivationError | MerchantValidationError | MerchantAuthorizationDeniedError | ProxyError
+      | MerchantActivationError
+      | MerchantValidationError
+      | MerchantAuthorizationDeniedError
+      | ProxyError
     >
   >;
   protected existingProxies: Map<MerchantUrl, IMerchantConnectorProxy>;
   protected domain: TypedDataDomain;
   protected types: Record<string, TypedDataField[]>;
-  protected activateAuthorizedMerchantsResult: ResultAsync<void, never> | undefined;
+  protected activateAuthorizedMerchantsResult:
+    | ResultAsync<void, never>
+    | undefined;
   protected balances: Balances | undefined;
 
   constructor(
@@ -76,7 +97,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
   public getMerchantAddresses(
     merchantUrls: MerchantUrl[],
-  ): ResultAsync<Map<MerchantUrl, EthereumAddress>, LogicalError | ProxyError | MerchantAuthorizationDeniedError> {
+  ): ResultAsync<
+    Map<MerchantUrl, EthereumAddress>,
+    AjaxError | ProxyError | MerchantAuthorizationDeniedError
+  > {
     // TODO: right now, the merchant will publish a URL with their address; eventually, they should be held in a smart contract
 
     // For merchants that are already authorized, we can just go to their connector for the
@@ -84,13 +108,18 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     const addressRequests = new Array<
       ResultAsync<
         { merchantUrl: MerchantUrl; address: EthereumAddress },
-        MerchantConnectorError | LogicalError | ProxyError | MerchantAuthorizationDeniedError
+        | MerchantConnectorError
+        | LogicalError
+        | ProxyError
+        | MerchantAuthorizationDeniedError
       >
     >();
     for (const merchantUrl of merchantUrls) {
       // We can't use _getActivatedMerchantProxy because it may fire an error when activateAuthorizedMerchantsResult is null
       // and in our case here we might need to pull the address from the source using ajax request not from the proxy.
-      const authorizedMerchantProxyResult = this.authorizedMerchantProxies.get(merchantUrl);
+      const authorizedMerchantProxyResult = this.authorizedMerchantProxies.get(
+        merchantUrl,
+      );
 
       if (authorizedMerchantProxyResult == null) {
         addressRequests.push(this._getMerchantAddress(merchantUrl));
@@ -113,7 +142,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     return ResultUtils.combine(addressRequests).map((vals) => {
       const returnMap = new Map<MerchantUrl, EthereumAddress>();
       for (const val of vals) {
-        returnMap.set(MerchantUrl(val.merchantUrl.toString()), EthereumAddress(val.address));
+        returnMap.set(
+          MerchantUrl(val.merchantUrl.toString()),
+          EthereumAddress(val.address),
+        );
       }
 
       return returnMap;
@@ -147,7 +179,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         this.existingProxies.set(merchantUrl, proxy);
 
         // With the proxy activated, we can get the validated merchant signature
-        return ResultUtils.combine([proxy.getValidatedSignature(), this.blockchainProvider.getSigner()]);
+        return ResultUtils.combine([
+          proxy.getValidatedSignature(),
+          this.blockchainProvider.getSigner(),
+        ]);
       })
       .andThen((vals) => {
         const [merchantSignature, signer] = vals;
@@ -158,10 +193,17 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
           authorizedMerchantUrl: merchantUrl,
           merchantValidatedSignature: merchantSignature,
         } as Record<string, any>;
-        const signerPromise = signer._signTypedData(this.domain, this.types, value);
+        const signerPromise = signer._signTypedData(
+          this.domain,
+          this.types,
+          value,
+        );
 
         return ResultUtils.combine([
-          ResultAsync.fromPromise<string, MerchantValidationError>(signerPromise, (e) => e as MerchantValidationError),
+          ResultAsync.fromPromise<string, MerchantValidationError>(
+            signerPromise,
+            (e) => e as MerchantValidationError,
+          ),
           this._getAuthorizedMerchants(),
         ]);
       })
@@ -180,7 +222,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         }
 
         // Activate the merchant connector
-        return proxy.activateConnector(context.publicIdentifier, initialBalances);
+        return proxy.activateConnector(
+          context.publicIdentifier,
+          initialBalances,
+        );
       })
       .map(() => {
         // Only if the merchant is successfully activated do we stick it in the list.
@@ -202,7 +247,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   /**
    * Returns a map of merchant URLs with their authorization signatures.
    */
-  public getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, never> {
+  public getAuthorizedMerchants(): ResultAsync<
+    Map<MerchantUrl, Signature>,
+    never
+  > {
     return this._getAuthorizedMerchants();
   }
 
@@ -238,7 +286,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
   public closeMerchantIFrame(
     merchantUrl: MerchantUrl,
-  ): ResultAsync<void, MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError> {
+  ): ResultAsync<
+    void,
+    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+  > {
     return this._getActivatedMerchantProxy(merchantUrl).andThen((proxy) => {
       return proxy.closeMerchantIFrame();
     });
@@ -246,7 +297,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
   public displayMerchantIFrame(
     merchantUrl: MerchantUrl,
-  ): ResultAsync<void, MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError> {
+  ): ResultAsync<
+    void,
+    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+  > {
     return this._getActivatedMerchantProxy(merchantUrl).andThen((proxy) => {
       return proxy.displayMerchantIFrame();
     });
@@ -259,7 +313,9 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
    * not stop it; the net effect is that you have no activated merchants. Authorized, yes, activated no.
    * There are lots of things you can do with an inactive merchant connector.
    */
-  public activateAuthorizedMerchants(balances: Balances): ResultAsync<void, never> {
+  public activateAuthorizedMerchants(
+    balances: Balances,
+  ): ResultAsync<void, never> {
     this.balances = balances;
 
     if (this.activateAuthorizedMerchantsResult == null) {
@@ -274,14 +330,22 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
           for (const [merchantUrl, signature] of authorizedMerchants) {
             activationResults.push(() => {
-              return this._activateAuthorizedMerchant(balances, merchantUrl, signature, context, signer)
+              return this._activateAuthorizedMerchant(
+                balances,
+                merchantUrl,
+                signature,
+                context,
+                signer,
+              )
                 .map((_proxy) => {
                   return;
                 })
                 .orElse((e) => {
                   // This function will eat all errors, so that startup
                   // will not be denied.
-                  this.logUtils.error(`Could not activate authorized merchant ${merchantUrl}`);
+                  this.logUtils.error(
+                    `Could not activate authorized merchant ${merchantUrl}`,
+                  );
                   this.logUtils.error(e);
                   return okAsync(undefined);
                 });
@@ -296,7 +360,9 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         })
         .map(() => {})
         .orElse((e) => {
-          this.logUtils.error("Could not get prerequisites for activateAuthorizedMerchants");
+          this.logUtils.error(
+            "Could not get prerequisites for activateAuthorizedMerchants",
+          );
           this.logUtils.error(e);
           return okAsync(undefined);
         });
@@ -307,7 +373,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   public notifyPushPaymentSent(
     merchantUrl: MerchantUrl,
     payment: PushPayment,
-  ): ResultAsync<void, MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError> {
+  ): ResultAsync<
+    void,
+    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+  > {
     return this._getActivatedMerchantProxy(merchantUrl).andThen((proxy) => {
       return proxy.notifyPushPaymentSent(payment);
     });
@@ -316,7 +385,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   public notifyPushPaymentUpdated(
     merchantUrl: MerchantUrl,
     payment: PushPayment,
-  ): ResultAsync<void, MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError> {
+  ): ResultAsync<
+    void,
+    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+  > {
     return this._getActivatedMerchantProxy(merchantUrl).andThen((proxy) => {
       return proxy.notifyPushPaymentUpdated(payment);
     });
@@ -325,7 +397,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   public notifyPushPaymentReceived(
     merchantUrl: MerchantUrl,
     payment: PushPayment,
-  ): ResultAsync<void, MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError> {
+  ): ResultAsync<
+    void,
+    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+  > {
     return this._getActivatedMerchantProxy(merchantUrl).andThen((proxy) => {
       return proxy.notifyPushPaymentReceived(payment);
     });
@@ -334,7 +409,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   public notifyPullPaymentSent(
     merchantUrl: MerchantUrl,
     payment: PullPayment,
-  ): ResultAsync<void, MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError> {
+  ): ResultAsync<
+    void,
+    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+  > {
     return this._getActivatedMerchantProxy(merchantUrl).andThen((proxy) => {
       return proxy.notifyPullPaymentSent(payment);
     });
@@ -343,7 +421,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   public notifyPullPaymentUpdated(
     merchantUrl: MerchantUrl,
     payment: PullPayment,
-  ): ResultAsync<void, MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError> {
+  ): ResultAsync<
+    void,
+    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+  > {
     return this._getActivatedMerchantProxy(merchantUrl).andThen((proxy) => {
       return proxy.notifyPullPaymentUpdated(payment);
     });
@@ -352,7 +433,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   public notifyPullPaymentReceived(
     merchantUrl: MerchantUrl,
     payment: PullPayment,
-  ): ResultAsync<void, MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError> {
+  ): ResultAsync<
+    void,
+    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+  > {
     return this._getActivatedMerchantProxy(merchantUrl).andThen((proxy) => {
       return proxy.notifyPullPaymentReceived(payment);
     });
@@ -360,7 +444,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
 
   public notifyBalancesReceived(
     balances: Balances,
-  ): ResultAsync<void, MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError> {
+  ): ResultAsync<
+    void,
+    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+  > {
     const results = new Array<ResultAsync<void, MerchantConnectorError>>();
     return this._getAuthorizedMerchants().andThen((authorizedMerchants) => {
       for (const [merchantUrl] of authorizedMerchants) {
@@ -374,7 +461,9 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     });
   }
 
-  public deauthorizeMerchant(merchantUrl: MerchantUrl): ResultAsync<void, never> {
+  public deauthorizeMerchant(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, never> {
     return this._getAuthorizedMerchants().map((authorizedMerchants) => {
       authorizedMerchants.delete(merchantUrl);
       this._setAuthorizedMerchants(authorizedMerchants);
@@ -384,13 +473,19 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     });
   }
 
-  public getAuthorizedMerchantConnectorStatus(): ResultAsync<Map<MerchantUrl, boolean>, never> {
+  public getAuthorizedMerchantConnectorStatus(): ResultAsync<
+    Map<MerchantUrl, boolean>,
+    never
+  > {
     const retMap = new Map<MerchantUrl, boolean>();
     if (this.activateAuthorizedMerchantsResult == null) {
       throw new Error("You must call activateAuthorizedMerchants first!");
     }
 
-    return ResultUtils.combine([this._getAuthorizedMerchants(), this.activateAuthorizedMerchantsResult])
+    return ResultUtils.combine([
+      this._getAuthorizedMerchants(),
+      this.activateAuthorizedMerchantsResult,
+    ])
       .andThen((vals) => {
         const [authorizedMerchants] = vals;
         // Go through the results for the merchant
@@ -425,18 +520,24 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     merchantUrl: MerchantUrl,
   ): ResultAsync<
     { merchantUrl: MerchantUrl; address: EthereumAddress },
-    MerchantConnectorError | LogicalError | ProxyError | MerchantAuthorizationDeniedError
+    | MerchantConnectorError
+    | LogicalError
+    | ProxyError
+    | MerchantAuthorizationDeniedError
   > {
     const url = new URL(merchantUrl.toString());
     url.pathname = "address";
-    return this.ajaxUtils.get<EthereumAddress, LogicalError>(url).map((address) => {
+    return this.ajaxUtils.get<EthereumAddress>(url).map((address) => {
       return { merchantUrl, address };
     });
   }
 
   protected _getActivatedMerchantProxy(
     merchantUrl: MerchantUrl,
-  ): ResultAsync<IMerchantConnectorProxy, ProxyError | MerchantAuthorizationDeniedError> {
+  ): ResultAsync<
+    IMerchantConnectorProxy,
+    ProxyError | MerchantAuthorizationDeniedError
+  > {
     // The goal of this method is to return an activated merchant proxy,
     // and not resolve unless all hope is lost.
 
@@ -448,7 +549,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     let cachedAuthorizationSignature: Signature | undefined;
 
     // Check that the merchantUrl is authorized
-    return ResultUtils.combine([this._getAuthorizedMerchants(), this.activateAuthorizedMerchantsResult])
+    return ResultUtils.combine([
+      this._getAuthorizedMerchants(),
+      this.activateAuthorizedMerchantsResult,
+    ])
       .andThen((vals) => {
         const [authorizedMerchants] = vals;
         // If the merchant is not authorized, that's a fatal error.
@@ -497,7 +601,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
             ]).andThen((vals) => {
               const [context, signer] = vals;
 
-              if (this.balances == null || cachedAuthorizationSignature == null) {
+              if (
+                this.balances == null ||
+                cachedAuthorizationSignature == null
+              ) {
                 throw new Error("No cached balances");
               }
               return this._activateAuthorizedMerchant(
@@ -536,7 +643,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     signer: ethers.providers.JsonRpcSigner,
   ): ResultAsync<
     IMerchantConnectorProxy,
-    MerchantActivationError | MerchantValidationError | MerchantAuthorizationDeniedError | ProxyError
+    | MerchantActivationError
+    | MerchantValidationError
+    | MerchantAuthorizationDeniedError
+    | ProxyError
   > {
     // Do some initial cleanup, so that this can be called repeatedly.
     const existingProxyResult = this.authorizedMerchantProxies.get(merchantUrl);
@@ -554,7 +664,13 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         this.existingProxies.set(merchantUrl, proxy);
 
         // We need to get the validated signature, so we can see if it was authorized
-        return this._validateConnector(merchantUrl, proxy, authorizationSignature, context, signer);
+        return this._validateConnector(
+          merchantUrl,
+          proxy,
+          authorizationSignature,
+          context,
+          signer,
+        );
       })
       .andThen(() => {
         return this._activateConnector(context, proxy, balances);
@@ -588,7 +704,10 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     authorizationSignature: Signature,
     context: InitializedHypernetContext,
     signer: ethers.providers.JsonRpcSigner,
-  ): ResultAsync<void, MerchantAuthorizationDeniedError | MerchantValidationError | ProxyError> {
+  ): ResultAsync<
+    void,
+    MerchantAuthorizationDeniedError | MerchantValidationError | ProxyError
+  > {
     return proxy.getValidatedSignature().andThen((validatedSignature) => {
       const value = {
         authorizedMerchantUrl: merchantUrl,
@@ -609,10 +728,17 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         // Get a new signature
         // validatedSignature means the code is signed by the provider, so we just need
         // to sign this new version.
-        const signerPromise = signer._signTypedData(this.domain, this.types, value);
+        const signerPromise = signer._signTypedData(
+          this.domain,
+          this.types,
+          value,
+        );
 
         // Get a new signature from the user
-        const signerResult = ResultAsync.fromPromise(signerPromise, (e) => e as Error).orElse((e) => {
+        const signerResult = ResultAsync.fromPromise(
+          signerPromise,
+          (e) => e as Error,
+        ).orElse((e) => {
           // We only end up here if the user has denied signing
           // to authorize the new connector.
           // We need to de-authorize this merchant
@@ -623,10 +749,16 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
           });
         });
 
-        return ResultUtils.combine([signerResult, this._getAuthorizedMerchants()]).map((vals) => {
+        return ResultUtils.combine([
+          signerResult,
+          this._getAuthorizedMerchants(),
+        ]).map((vals) => {
           const [newAuthorizationSignature, authorizedMerchants] = vals;
 
-          authorizedMerchants.set(merchantUrl, Signature(newAuthorizationSignature));
+          authorizedMerchants.set(
+            merchantUrl,
+            Signature(newAuthorizationSignature),
+          );
 
           this._setAuthorizedMerchants(authorizedMerchants);
         });
@@ -640,10 +772,15 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     context: InitializedHypernetContext,
     proxy: IMerchantConnectorProxy,
     balances: Balances,
-  ): ResultAsync<IMerchantConnectorProxy, MerchantActivationError | ProxyError> {
-    return proxy.activateConnector(context.publicIdentifier, balances).map(() => {
-      return proxy;
-    });
+  ): ResultAsync<
+    IMerchantConnectorProxy,
+    MerchantActivationError | ProxyError
+  > {
+    return proxy
+      .activateConnector(context.publicIdentifier, balances)
+      .map(() => {
+        return proxy;
+      });
   }
 
   protected _destroyProxy(merchantUrl: MerchantUrl): void {
@@ -654,7 +791,9 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
     }
   }
 
-  protected _setAuthorizedMerchants(authorizedMerchantMap: Map<MerchantUrl, Signature>) {
+  protected _setAuthorizedMerchants(
+    authorizedMerchantMap: Map<MerchantUrl, Signature>,
+  ) {
     const authorizedMerchantEntries = new Array<IAuthorizedMerchantEntry>();
     for (const keyval of authorizedMerchantMap) {
       authorizedMerchantEntries.push({
@@ -662,16 +801,26 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
         authorizationSignature: Signature(keyval[1]),
       });
     }
-    this.localStorageUtils.setItem("AuthorizedMerchants", JSON.stringify(authorizedMerchantEntries));
+    this.localStorageUtils.setItem(
+      "AuthorizedMerchants",
+      JSON.stringify(authorizedMerchantEntries),
+    );
   }
 
-  protected _getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, never> {
-    let authorizedMerchantStr = this.localStorageUtils.getItem("AuthorizedMerchants");
+  protected _getAuthorizedMerchants(): ResultAsync<
+    Map<MerchantUrl, Signature>,
+    never
+  > {
+    let authorizedMerchantStr = this.localStorageUtils.getItem(
+      "AuthorizedMerchants",
+    );
 
     if (authorizedMerchantStr == null) {
       authorizedMerchantStr = "[]";
     }
-    const authorizedMerchantEntries = JSON.parse(authorizedMerchantStr) as IAuthorizedMerchantEntry[];
+    const authorizedMerchantEntries = JSON.parse(
+      authorizedMerchantStr,
+    ) as IAuthorizedMerchantEntry[];
 
     const authorizedMerchants = new Map<MerchantUrl, Signature>();
     for (const authorizedMerchantEntry of authorizedMerchantEntries) {

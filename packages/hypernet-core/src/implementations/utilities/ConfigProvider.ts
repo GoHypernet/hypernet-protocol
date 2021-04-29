@@ -1,16 +1,30 @@
-import { EthereumAddress, HypernetConfig, PublicIdentifier, EBlockchainNetwork } from "@hypernetlabs/objects";
-import { getPublicIdentifierFromPublicKey } from "@connext/vector-utils/dist/identifiers";
+import {
+  ChainAddresses,
+  ChainProviders,
+  ContractAddresses,
+} from "@connext/vector-types";
 import { getPublicKeyFromPrivateKey } from "@connext/vector-utils/dist/crypto";
+import { getPublicIdentifierFromPublicKey } from "@connext/vector-utils/dist/identifiers";
+import {
+  EthereumAddress,
+  HypernetConfig,
+  PublicIdentifier,
+  EBlockchainNetwork,
+} from "@hypernetlabs/objects";
+import { ILogUtils } from "@hypernetlabs/utils";
 import { Wallet, constants } from "ethers";
 import { ResultAsync, okAsync } from "neverthrow";
+
 import { IConfigProvider } from "@interfaces/utilities";
-import { ChainAddresses, ChainProviders, ContractAddresses } from "@connext/vector-types";
-import { ILogUtils } from "@hypernetlabs/utils";
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
 
-  constructor(network: EBlockchainNetwork, protected logUtils: ILogUtils, config?: HypernetConfig) {
+  constructor(
+    network: EBlockchainNetwork,
+    protected logUtils: ILogUtils,
+    config?: HypernetConfig,
+  ) {
     if (config != null) {
       this.config = config;
       return;
@@ -49,11 +63,16 @@ export class ConfigProvider implements IConfigProvider {
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
       this.config.routerPublicIdentifier = PublicIdentifier(
-        getPublicIdentifierFromPublicKey(getPublicKeyFromPrivateKey(wallet.privateKey)),
+        getPublicIdentifierFromPublicKey(
+          getPublicKeyFromPrivateKey(wallet.privateKey),
+        ),
       );
 
       this.logUtils.log("Wallet private key", wallet.privateKey);
-      this.logUtils.log("Router publicIdentifier", this.config.routerPublicIdentifier);
+      this.logUtils.log(
+        "Router publicIdentifier",
+        this.config.routerPublicIdentifier,
+      );
     } else {
       // Should be MainNet config here
       const chainProvider: ChainProviders = {
@@ -89,7 +108,9 @@ export class ConfigProvider implements IConfigProvider {
 
       const wallet = Wallet.fromMnemonic(this.config.routerMnemonic);
       this.config.routerPublicIdentifier = PublicIdentifier(
-        getPublicIdentifierFromPublicKey(getPublicKeyFromPrivateKey(wallet.privateKey)),
+        getPublicIdentifierFromPublicKey(
+          getPublicKeyFromPrivateKey(wallet.privateKey),
+        ),
       );
     }
   }

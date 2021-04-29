@@ -1,16 +1,31 @@
-import { err, ok, ResultAsync, Result, okAsync, errAsync } from "neverthrow";
 import delay from "delay";
+import { err, ok, ResultAsync, Result, okAsync, errAsync } from "neverthrow";
 
 export class ResultUtils {
   static combine<T, T2, T3, T4, E, E2, E3, E4>(
-    asyncResultList: [ResultAsync<T, E>, ResultAsync<T2, E2>, ResultAsync<T3, E3>, ResultAsync<T4, E4>],
+    asyncResultList: [
+      ResultAsync<T, E>,
+      ResultAsync<T2, E2>,
+      ResultAsync<T3, E3>,
+      ResultAsync<T4, E4>,
+    ],
   ): ResultAsync<[T, T2, T3, T4], E | E2 | E3 | E4>;
   static combine<T, T2, T3, E, E2, E3>(
-    asyncResultList: [ResultAsync<T, E>, ResultAsync<T2, E2>, ResultAsync<T3, E3>],
+    asyncResultList: [
+      ResultAsync<T, E>,
+      ResultAsync<T2, E2>,
+      ResultAsync<T3, E3>,
+    ],
   ): ResultAsync<[T, T2, T3], E | E2 | E3>;
-  static combine<T, T2, E, E2>(asyncResultList: [ResultAsync<T, E>, ResultAsync<T2, E2>]): ResultAsync<[T, T2], E | E2>;
-  static combine<T, E>(asyncResultList: ResultAsync<T, E>[]): ResultAsync<T[], E>;
-  static combine<T, E>(asyncResultList: ResultAsync<T, E>[]): ResultAsync<T[], E> {
+  static combine<T, T2, E, E2>(
+    asyncResultList: [ResultAsync<T, E>, ResultAsync<T2, E2>],
+  ): ResultAsync<[T, T2], E | E2>;
+  static combine<T, E>(
+    asyncResultList: ResultAsync<T, E>[],
+  ): ResultAsync<T[], E>;
+  static combine<T, E>(
+    asyncResultList: ResultAsync<T, E>[],
+  ): ResultAsync<T[], E> {
     return ResultAsync.fromPromise(Promise.all(asyncResultList), (e) => {
       return e as E;
     }).andThen(ResultUtils.combineResultList);
@@ -29,7 +44,9 @@ export class ResultUtils {
     }, ok([]));
   }
 
-  static executeSerially<T, E>(funcList: (() => ResultAsync<T, E>)[]): ResultAsync<T[], E> {
+  static executeSerially<T, E>(
+    funcList: (() => ResultAsync<T, E>)[],
+  ): ResultAsync<T[], E> {
     // const results = new Array<T>();
 
     // // for (const func of funcList) {
@@ -77,7 +94,7 @@ export class ResultUtils {
     func: () => ResultAsync<T, E>,
     acceptableErrors: Function[],
     maxAttempts?: number,
-    baseSeconds: number = 5,
+    baseSeconds = 5,
   ): ResultAsync<T, E> {
     if (maxAttempts != null && maxAttempts < 1) {
       throw new Error("maxAttempts must be 1 or more!");
@@ -87,10 +104,16 @@ export class ResultUtils {
       throw new Error("baseSeconds must be 1 or more!");
     }
 
-    const runAndCheck = (currentAttempt: number, nextAttemptSecs: number, lastError: E | null): ResultAsync<T, E> => {
+    const runAndCheck = (
+      currentAttempt: number,
+      nextAttemptSecs: number,
+      lastError: E | null,
+    ): ResultAsync<T, E> => {
       if (maxAttempts != null && currentAttempt > maxAttempts) {
         if (lastError == null) {
-          throw new Error("Error before first function run; logical error! maxAttempts must be 1 or more!");
+          throw new Error(
+            "Error before first function run; logical error! maxAttempts must be 1 or more!",
+          );
         }
         return errAsync(lastError);
       }
@@ -108,7 +131,9 @@ export class ResultUtils {
           }
         }
         if (retry) {
-          return ResultAsync.fromSafePromise<void, never>(delay(nextAttemptSecs)).andThen(() => {
+          return ResultAsync.fromSafePromise<void, never>(
+            delay(nextAttemptSecs),
+          ).andThen(() => {
             return runAndCheck(++currentAttempt, nextAttemptSecs * 2, e);
           });
         }

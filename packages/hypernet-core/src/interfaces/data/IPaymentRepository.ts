@@ -64,7 +64,10 @@ export interface IPaymentRepository {
     merchantUrl: MerchantUrl,
   ): ResultAsync<PullPayment, PaymentCreationError>;
 
-  createPullRecord(paymentId: PaymentId, amount: string): ResultAsync<Payment, PaymentCreationError>;
+  createPullRecord(
+    paymentId: PaymentId,
+    amount: string,
+  ): ResultAsync<Payment, PaymentCreationError>;
 
   /**
    * Provides assets for a given list of payment ids.

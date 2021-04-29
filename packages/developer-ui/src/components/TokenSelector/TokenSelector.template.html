@@ -1,9 +1,12 @@
 <div class="form-group">
-        <label for="paymentToken">Token Selector</label>
-        <select id="paymentToken" class="form-control" data-bind="options: paymentTokens,
+  <label for="paymentToken">Token Selector</label>
+  <select
+    id="paymentToken"
+    class="form-control"
+    data-bind="options: paymentTokens,
         optionsText: 'tokenName',
         value: selectedPaymentTokenOption,
         optionsAfterRender: setPaymentTokenOptionValue, 
-        optionsCaption: 'Choose...'">
-        </select>
+        optionsCaption: 'Choose...'"
+  ></select>
 </div>

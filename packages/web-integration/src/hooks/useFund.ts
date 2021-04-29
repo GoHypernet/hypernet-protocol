@@ -1,9 +1,14 @@
-import { useEffect, useReducer, useContext } from "react";
-import { StoreContext } from "@web-integration-contexts";
-import { ITokenSelectorOption } from "@hypernetlabs/web-ui/src/interfaces";
 import { Balances } from "@hypernetlabs/objects";
+import { ITokenSelectorOption } from "@hypernetlabs/web-ui/src/interfaces";
 import { ethers } from "ethers";
-import { PaymentTokenOptionViewModel, EResultStatus, ResultMessage } from "@web-integration-interfaces/objects";
+import { useEffect, useReducer, useContext } from "react";
+
+import { StoreContext } from "@web-integration/contexts";
+import {
+  PaymentTokenOptionViewModel,
+  EResultStatus,
+  ResultMessage,
+} from "@web-integration/interfaces/objects";
 
 enum EActionTypes {
   FETCHING = "FETCHING",
@@ -53,11 +58,19 @@ export function useFund(): IReducerStateReducer {
       case EActionTypes.FETCHING:
         return { ...state, loading: true };
       case EActionTypes.FETCHED:
-        return { ...state, loading: false, tokenSelectorOptions: action.payload };
+        return {
+          ...state,
+          loading: false,
+          tokenSelectorOptions: action.payload,
+        };
       case EActionTypes.ERROR:
         return { ...state, loading: false, error: action.payload };
       case EActionTypes.TOKEN_SELECTED:
-        return { ...state, loading: false, selectedPaymentToken: action.payload };
+        return {
+          ...state,
+          loading: false,
+          selectedPaymentToken: action.payload,
+        };
       case EActionTypes.AMOUNT_CHANGED:
         return { ...state, loading: false, amount: action.payload };
       case EActionTypes.ERROR:
@@ -65,14 +78,20 @@ export function useFund(): IReducerStateReducer {
           ...state,
           loading: false,
           error: true,
-          resultMessage: new ResultMessage(EResultStatus.FAILURE, action.payload),
+          resultMessage: new ResultMessage(
+            EResultStatus.FAILURE,
+            action.payload,
+          ),
         };
       case EActionTypes.SUCCESS:
         return {
           ...state,
           loading: false,
           error: false,
-          resultMessage: new ResultMessage(EResultStatus.SUCCESS, action.payload),
+          resultMessage: new ResultMessage(
+            EResultStatus.SUCCESS,
+            action.payload,
+          ),
         };
       default:
         return { ...state };
@@ -89,7 +108,10 @@ export function useFund(): IReducerStateReducer {
         // get data from proxy
         proxy?.getBalances().map((balance: Balances) => {
           // prepare balances
-          dispatch({ type: EActionTypes.FETCHED, payload: prepareTokenSelector(balance) });
+          dispatch({
+            type: EActionTypes.FETCHED,
+            payload: prepareTokenSelector(balance),
+          });
         });
       } catch (error) {
         if (cancelRequest) return;
@@ -102,7 +124,10 @@ export function useFund(): IReducerStateReducer {
     proxy?.onBalancesChanged.subscribe({
       next: (balance) => {
         if (cancelRequest) return;
-        dispatch({ type: EActionTypes.FETCHED, payload: prepareTokenSelector(balance) });
+        dispatch({
+          type: EActionTypes.FETCHED,
+          payload: prepareTokenSelector(balance),
+        });
       },
     });
 
@@ -112,10 +137,18 @@ export function useFund(): IReducerStateReducer {
   }, []);
 
   const prepareTokenSelector = (balance: Balances) => {
-    return balance.assets.reduce((acc: PaymentTokenOptionViewModel[], assetBalance) => {
-      acc.push(new PaymentTokenOptionViewModel(assetBalance.assetAddress, assetBalance.assetAddress));
-      return acc;
-    }, new Array<PaymentTokenOptionViewModel>());
+    return balance.assets.reduce(
+      (acc: PaymentTokenOptionViewModel[], assetBalance) => {
+        acc.push(
+          new PaymentTokenOptionViewModel(
+            assetBalance.assetAddress,
+            assetBalance.assetAddress,
+          ),
+        );
+        return acc;
+      },
+      new Array<PaymentTokenOptionViewModel>(),
+    );
   };
 
   const setSelectedPaymentToken = (selectedOption?: ITokenSelectorOption) => {
@@ -139,20 +172,25 @@ export function useFund(): IReducerStateReducer {
         payload: "Token address not selected",
       });
     }
-    proxy.depositFunds(state.selectedPaymentToken?.address, ethers.utils.parseEther("1")).match(
-      (balances) => {
-        dispatch({
-          type: EActionTypes.SUCCESS,
-          payload: "your deposit has succeeded",
-        });
-      },
-      (err) => {
-        dispatch({
-          type: EActionTypes.ERROR,
-          payload: err.message || "your deposit has failed",
-        });
-      },
-    );
+    proxy
+      .depositFunds(
+        state.selectedPaymentToken?.address,
+        ethers.utils.parseEther("1"),
+      )
+      .match(
+        (balances) => {
+          dispatch({
+            type: EActionTypes.SUCCESS,
+            payload: "your deposit has succeeded",
+          });
+        },
+        (err) => {
+          dispatch({
+            type: EActionTypes.ERROR,
+            payload: err.message || "your deposit has failed",
+          });
+        },
+      );
   };
 
   const mintTokens = () => {
@@ -172,5 +210,11 @@ export function useFund(): IReducerStateReducer {
     );
   };
 
-  return { ...state, setSelectedPaymentToken, depositFunds, mintTokens, setAmount };
+  return {
+    ...state,
+    setSelectedPaymentToken,
+    depositFunds,
+    mintTokens,
+    setAmount,
+  };
 }
