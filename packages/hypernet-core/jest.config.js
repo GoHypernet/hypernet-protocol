@@ -4,13 +4,11 @@ const { pathsToModuleNameMapper } = require("ts-jest/utils");
 // which contains the path mapping (ie the `compilerOptions.paths` option):
 const { compilerOptions } = require("../../tsconfig.build");
 
-console.log(compilerOptions);
+//Users/muhammedaltinci/Desktop/workspace/hypernet-protocol/packages/implementations/$1"
 
 const moduleNames = pathsToModuleNameMapper(compilerOptions.paths, {
-  prefix: "<rootDir>/../../",
+  prefix: "<rootDir>/src",
 });
-
-console.log(moduleNames);
 
 module.exports = {
   preset: "ts-jest",
@@ -34,7 +32,7 @@ module.exports = {
   moduleNameMapper: moduleNames,
   globals: {
     "ts-jest": {
-      tsconfig: "test/tsconfig.json",
+      tsconfig: "tsconfig.json",
     },
   },
 };
