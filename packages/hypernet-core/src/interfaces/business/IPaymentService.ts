@@ -112,7 +112,7 @@ export interface IPaymentService {
   paymentPosted(
     paymentId: PaymentId,
   ): ResultAsync<
-    Payment,
+    void,
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
@@ -131,7 +131,7 @@ export interface IPaymentService {
   insuranceResolved(
     paymentId: PaymentId,
   ): ResultAsync<
-    Payment,
+    void,
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
@@ -151,7 +151,7 @@ export interface IPaymentService {
   paymentCompleted(
     paymentId: PaymentId,
   ): ResultAsync<
-    Payment,
+    void,
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
@@ -187,7 +187,7 @@ export interface IPaymentService {
   stakePosted(
     paymentId: PaymentId,
   ): ResultAsync<
-    Payment,
+    void,
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
@@ -252,7 +252,7 @@ export interface IPaymentService {
   advancePayments(
     paymentIds: PaymentId[],
   ): ResultAsync<
-    Payment[],
+    void,
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError

@@ -35,7 +35,7 @@
     ]
   },
   "scripts": {
-    "bootstrap": "yarn install && lerna init",
+    "bootstrap": "yarn install && lerna init && cd packages/developer-ui && yarn bootstrap",
     "build": "yarn clean && yarn compile && yarn postcompile",
     "clean": "rimraf ./packages/*/dist ./packages/*/tsconfig.tsbuildinfo",
     "clean-docker": "cd packages/developer-ui && yarn clean-docker",

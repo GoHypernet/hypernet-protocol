@@ -129,6 +129,9 @@ export class VectorAPIListener implements IVectorListener {
                     );
                   }
                 });
+            })
+            .mapErr((e) => {
+              this.logUtils.error(e);
             });
         },
       );

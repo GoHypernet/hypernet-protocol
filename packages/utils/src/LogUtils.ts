@@ -9,7 +9,6 @@ export class LogUtils implements ILogUtils {
 
   constructor() {
     this.logger = pino();
-    console.log("this.logger123455666777888999000: ", this.logger);
   }
 
   public debug(message?: any, ...optionalParams: any[]): void {

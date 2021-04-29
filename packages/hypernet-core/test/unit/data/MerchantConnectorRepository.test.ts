@@ -5,9 +5,11 @@ import {
   Signature,
   Balances,
   TransferResolutionError,
-  IBasicTransferResponse,
+  MerchantActivationError,
+  ProxyError,
 } from "@hypernetlabs/objects";
-import { IAjaxUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
+import { IBasicTransferResponse } from "@hypernetlabs/objects";
+import { IAjaxUtils, ILocalStorageUtils, ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
 import { okAsync, errAsync } from "neverthrow";
 import td, { verify } from "testdouble";
@@ -35,10 +37,7 @@ import {
   BlockchainProviderMock,
   ConfigProviderMock,
   ContextProviderMock,
-} from "@mock/utils";
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-require("testdouble-jest")(td, jest);
+} from "@tests/mock/utils";
 
 const validatedSignature = Signature("0xValidatedSignature");
 const newAuthorizationSignature = Signature("0xNewAuthorizationSignature");
@@ -58,6 +57,7 @@ class MerchantConnectorRepositoryMocks {
   public merchantConnectorProxyFactory = td.object<IMerchantConnectorProxyFactory>();
   public merchantConnectorProxy = td.object<IMerchantConnectorProxy>();
   public blockchainUtils = td.object<IBlockchainUtils>();
+  public logUtils = td.object<ILogUtils>();
 
   public expectedSignerDomain = {
     name: "Hypernet Protocol",
@@ -143,6 +143,7 @@ class MerchantConnectorRepositoryMocks {
       this.localStorageUtils,
       this.merchantConnectorProxyFactory,
       this.blockchainUtils,
+      this.logUtils,
     );
   }
 }
@@ -233,11 +234,11 @@ describe("MerchantConnectorRepository tests", () => {
     expect(onAuthorizedMerchantUpdatedVal).toBe(merchantUrl);
   });
 
-  test("activateAuthorizedMerchants returns an error if proxy can not be factoried", async () => {
+  test("activateAuthorizedMerchants passes if proxy can not be factoried", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
-    const error = new MerchantConnectorError();
+    const error = new ProxyError();
     td.when(
       mocks.merchantConnectorProxyFactory.factoryProxy(merchantUrl),
     ).thenReturn(errAsync(error));
@@ -256,13 +257,11 @@ describe("MerchantConnectorRepository tests", () => {
 
     // Assert
     expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    const resultVal = result._unsafeUnwrapErr();
-    expect(resultVal).toBe(error);
+    expect(result.isErr()).toBeFalsy();
     expect(onAuthorizedMerchantActivationFailedVal).toBe(merchantUrl);
   });
 
-  test("activateAuthorizedMerchants returns an error if one of the merchant connector's signatures can't be verified by the iFrame.", async () => {
+  test("activateAuthorizedMerchants passes if one of the merchant connector's signatures can't be verified by the iFrame.", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
@@ -285,18 +284,15 @@ describe("MerchantConnectorRepository tests", () => {
 
     // Assert
     expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    const resultVal = result._unsafeUnwrapErr();
-    expect(resultVal).toBe(error);
-    verify(mocks.merchantConnectorProxy.destroy());
+    expect(result.isErr()).toBeFalsy();
     expect(onAuthorizedMerchantActivationFailedVal).toBe(merchantUrl);
   });
 
-  test("activateAuthorizedMerchants returns an error if the connector can not be activated", async () => {
+  test("activateAuthorizedMerchants passes if the connector can not be activated and make sure proxy is destroyed", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
-    const error = new MerchantConnectorError();
+    const error = new MerchantActivationError();
     td.when(
       mocks.merchantConnectorProxy.activateConnector(
         publicIdentifier,
@@ -318,9 +314,7 @@ describe("MerchantConnectorRepository tests", () => {
 
     // Assert
     expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    const resultVal = result._unsafeUnwrapErr();
-    expect(resultVal).toBe(error);
+    expect(result.isErr()).toBeFalsy();
     verify(mocks.merchantConnectorProxy.destroy());
     expect(onAuthorizedMerchantActivationFailedVal).toBe(merchantUrl);
   });
@@ -346,22 +340,25 @@ describe("MerchantConnectorRepository tests", () => {
     expect(result.isErr()).toBeFalsy();
   });
 
-  test("resolveChallenge returns an error if merchant is not activated", async () => {
+  test("resolveChallenge fire an error if activateAuthorizedMerchants is not called", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.resolveChallenge(
-      merchantUrl,
-      commonPaymentId,
-      insuranceTransferId,
-    );
+    let error = undefined;
+    try {
+      await repo.resolveChallenge(
+        merchantUrl,
+        commonPaymentId,
+        insuranceTransferId,
+      );
+    } catch (err) {
+      error = err;
+    }
 
     // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    expect(result._unsafeUnwrapErr()).toBeInstanceOf(MerchantValidationError);
+    expect(error).toBeDefined();
   });
 
   test("resolveChallenge returns an error if the merchant connector resolveChallenge fails", async () => {
@@ -690,5 +687,25 @@ describe("MerchantConnectorRepository tests", () => {
     expect(result.isErr()).toBeTruthy();
     const value = result._unsafeUnwrapErr();
     expect(value).toBe(error);
+  });
+
+  test("getAuthorizedMerchantConnectorStatus returns map of merchant urls and status", async () => {
+    // Arrange
+    const mocks = new MerchantConnectorRepositoryMocks();
+    const repo = mocks.factoryRepository();
+    const resultMap = new Map([[merchantUrl, true]]);
+
+    // Act
+    const result = await repo
+      .activateAuthorizedMerchants(balances)
+      .andThen(() => {
+        return repo.getAuthorizedMerchantConnectorStatus();
+      });
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    const value = result._unsafeUnwrap();
+    expect(value).toStrictEqual(resultMap);
   });
 });

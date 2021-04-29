@@ -32,6 +32,8 @@ export class ContextProviderMock implements IContextProvider {
   public onPullPaymentReceived: Subject<PullPayment>;
   public onPushPaymentUpdated: Subject<PushPayment>;
   public onPullPaymentUpdated: Subject<PullPayment>;
+  public onPushPaymentDelayed: Subject<PushPayment>;
+  public onPullPaymentDelayed: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
   public onMerchantAuthorized: Subject<MerchantUrl>;
   public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
@@ -57,6 +59,8 @@ export class ContextProviderMock implements IContextProvider {
     this.onPullPaymentReceived = new Subject<PullPayment>();
     this.onPushPaymentUpdated = new Subject<PushPayment>();
     this.onPullPaymentUpdated = new Subject<PullPayment>();
+    this.onPushPaymentDelayed = new Subject<PushPayment>();
+    this.onPullPaymentDelayed = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
     this.onMerchantAuthorized = new Subject<MerchantUrl>();
     this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
@@ -84,6 +88,8 @@ export class ContextProviderMock implements IContextProvider {
         this.onPullPaymentReceived,
         this.onPushPaymentUpdated,
         this.onPullPaymentUpdated,
+        this.onPushPaymentDelayed,
+        this.onPullPaymentDelayed,
         this.onBalancesChanged,
         this.onMerchantAuthorized,
         this.onAuthorizedMerchantUpdated,
@@ -111,6 +117,8 @@ export class ContextProviderMock implements IContextProvider {
         this.onPullPaymentReceived,
         this.onPushPaymentUpdated,
         this.onPullPaymentUpdated,
+        this.onPushPaymentDelayed,
+        this.onPullPaymentDelayed,
         this.onBalancesChanged,
         this.onMerchantAuthorized,
         this.onAuthorizedMerchantUpdated,

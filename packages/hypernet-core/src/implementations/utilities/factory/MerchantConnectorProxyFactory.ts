@@ -1,10 +1,6 @@
 import { MerchantUrl } from "@hypernetlabs/objects";
-import {
-  LogicalError,
-  MerchantValidationError,
-  ProxyError,
-} from "@hypernetlabs/objects";
-import { ok, Result, ResultAsync } from "neverthrow";
+import { ProxyError } from "@hypernetlabs/objects";
+import { ResultAsync } from "neverthrow";
 
 import { MerchantConnectorProxy } from "@implementations/utilities/MerchantConnectorProxy";
 import {
@@ -16,11 +12,6 @@ import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 
 export class MerchantConnectorProxyFactory
   implements IMerchantConnectorProxyFactory {
-  protected static proxyMap: Map<
-    MerchantUrl,
-    IMerchantConnectorProxy
-  > = new Map();
-
   constructor(
     protected configProvider: IConfigProvider,
     protected contextProvider: IContextProvider,
@@ -28,10 +19,7 @@ export class MerchantConnectorProxyFactory
 
   factoryProxy(
     merchantUrl: MerchantUrl,
-  ): ResultAsync<
-    IMerchantConnectorProxy,
-    MerchantValidationError | LogicalError | ProxyError
-  > {
+  ): ResultAsync<IMerchantConnectorProxy, ProxyError> {
     let proxy: IMerchantConnectorProxy;
     return this.configProvider
       .getConfig()
@@ -56,23 +44,16 @@ export class MerchantConnectorProxyFactory
         return proxy.activate();
       })
       .map(() => {
-        // Store the proxy in the proxyMap so that it can be destroyed if
-        // the merchant is deauthorized.
-        MerchantConnectorProxyFactory.proxyMap.set(merchantUrl, proxy);
-
-        // We need to notify the world that
+        // Return the activated proxy
         return proxy;
+      })
+      .mapErr((e) => {
+        //
+        return e;
       });
   }
 
-  destroyMerchantConnectorProxy(merchantUrl: MerchantUrl): Result<void, never> {
-    const proxy = MerchantConnectorProxyFactory.proxyMap.get(merchantUrl);
-    proxy?.destroy();
-    MerchantConnectorProxyFactory.proxyMap.delete(merchantUrl);
-    return ok(undefined);
-  }
-
-  private _prepareIFrameContainer(): HTMLElement {
+  protected _prepareIFrameContainer(): HTMLElement {
     // We want the body to be the container here.
     const element = document.body;
     const style = document.createElement("style");
