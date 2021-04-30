@@ -1,10 +1,24 @@
 {
   "name": "@hypernetlabs/web-ui",
   "version": "0.0.1",
-  "description": "",
+  "description": "Web ui react components for hypernet protocol",
   "license": "ISC",
-  "author": "",
-  "keywords": [],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/web-ui#readme",
+  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
+  "keywords": [
+    "Blockchain",
+    "Hypernet",
+    "SDK",
+    "Ethereum",
+    "Vector"
+  ],
   "main": "dist/index.js",
   "files": [
     "dist",

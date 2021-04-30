@@ -1,5 +1,5 @@
 import { ConnectorAuthorization, SucessContent } from "@hypernetlabs/web-ui";
-import { EStatusColor } from "@hypernetlabs/web-ui/src/theme";
+import { EStatusColor } from "@hypernetlabs/web-ui";
 import React, { useContext, useEffect } from "react";
 
 import { LayoutContext, StoreContext } from "@web-integration/contexts";
