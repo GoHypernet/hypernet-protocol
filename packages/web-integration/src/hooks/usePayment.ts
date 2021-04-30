@@ -1,6 +1,6 @@
 import { Balances, PublicIdentifier } from "@hypernetlabs/objects";
 import { EPaymentType, MerchantUrl } from "@hypernetlabs/objects";
-import { ITokenSelectorOption } from "@hypernetlabs/web-ui/src/interfaces";
+import { ITokenSelectorOption } from "@hypernetlabs/web-ui";
 import { utils } from "ethers";
 import { useEffect, useReducer, useContext } from "react";
 

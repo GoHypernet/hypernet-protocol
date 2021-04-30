@@ -1,4 +1,4 @@
-import { EStatusColor } from "@hypernetlabs/web-ui/src/theme";
+import { EStatusColor } from "@hypernetlabs/web-ui";
 import React, { ReactNode, useState } from "react";
 
 interface ILayout {

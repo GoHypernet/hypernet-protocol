@@ -1,5 +1,5 @@
 import { Balances } from "@hypernetlabs/objects";
-import { ITokenSelectorOption } from "@hypernetlabs/web-ui/src/interfaces";
+import { ITokenSelectorOption } from "@hypernetlabs/web-ui";
 import { ethers } from "ethers";
 import { useEffect, useReducer, useContext } from "react";
 
