@@ -116,6 +116,7 @@ module.exports = {
     },
     alias: {
       "@web-integration": path.resolve(__dirname, "../web-integration/src"),
+      "@web-ui": path.resolve(__dirname, "../web-ui/src"),
       "@objects": path.resolve(__dirname, "../objects/src"),
       "@utils": path.resolve(__dirname, "../utils/src"),
       "@interfaces": path.resolve(__dirname, "../hypernet-core/src/interfaces"),

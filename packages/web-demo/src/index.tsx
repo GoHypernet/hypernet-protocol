@@ -2,8 +2,8 @@ import { MerchantUrl } from "@hypernetlabs/objects";
 import HypernetWebIntegration, {
   IHypernetWebIntegration,
 } from "@hypernetlabs/web-integration";
-
 import Spinner from "./assets/loading-spinner";
+import { IHypernetWebUI } from "@hypernetlabs/web-ui";
 
 const client: IHypernetWebIntegration = new HypernetWebIntegration();
 
@@ -26,8 +26,8 @@ Spinner.show();
 
 const merchantUrl = MerchantUrl("http://localhost:5010");
 
-const renderConnectorAuthorizationFlow = () => {
-  client
+const renderConnectorAuthorizationFlow = (webUIClient: IHypernetWebUI) => {
+  webUIClient
     .renderConnectorAuthorizationFlow({
       connectorUrl: merchantUrl,
       showInModal: true,
@@ -37,8 +37,8 @@ const renderConnectorAuthorizationFlow = () => {
     });
 };
 
-const renderFundWidget = () => {
-  client
+const renderFundWidget = (webUIClient: IHypernetWebUI) => {
+  webUIClient
     .renderFundWidget({
       showInModal: true,
     })
@@ -50,9 +50,9 @@ const renderFundWidget = () => {
 client.getReady().map((coreProxy) => {
   coreProxy.getAuthorizedMerchants().map((merchantsMap) => {
     if (merchantsMap.get(merchantUrl)) {
-      renderFundWidget();
+      renderFundWidget(client.webUIClient);
     } else {
-      renderConnectorAuthorizationFlow();
+      renderConnectorAuthorizationFlow(client.webUIClient);
     }
   });
 
@@ -61,7 +61,7 @@ client.getReady().map((coreProxy) => {
     console.log("merchantUrl", merchantUrl);
     if (merchantUrl === _merchantUrl) {
       console.log("starttttt");
-      renderFundWidget();
+      renderFundWidget(client.webUIClient);
     }
   });
 });

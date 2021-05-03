@@ -10,7 +10,7 @@ interface TextareaInputProps {
   rows?: number;
 }
 
-const TextareaInput: React.FC<TextareaInputProps> = (
+export const TextareaInput: React.FC<TextareaInputProps> = (
   props: TextareaInputProps,
 ) => {
   const { onChange, label, disabled, value, placeholder, rows } = props;
@@ -30,5 +30,3 @@ const TextareaInput: React.FC<TextareaInputProps> = (
     </label>
   );
 };
-
-export default TextareaInput;

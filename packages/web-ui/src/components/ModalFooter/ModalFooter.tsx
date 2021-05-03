@@ -2,7 +2,7 @@ import React from "react";
 
 import useStyles from "./ModalFooter.style";
 
-const ModalFooter: React.FC = () => {
+export const ModalFooter: React.FC = () => {
   const classes = useStyles();
 
   return (
@@ -19,5 +19,3 @@ const ModalFooter: React.FC = () => {
     </div>
   );
 };
-
-export default ModalFooter;

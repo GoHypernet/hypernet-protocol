@@ -2,7 +2,7 @@ import React from "react";
 
 import useStyles from "./ModalHeader.style";
 
-const ModalHeader: React.FC = () => {
+export const ModalHeader: React.FC = () => {
   const classes = useStyles();
   const connectorLogoUrl =
     "https://res.cloudinary.com/dqueufbs7/image/upload/v1614369421/images/Screen_Shot_2021-02-26_at_22.56.34.png";
@@ -18,5 +18,3 @@ const ModalHeader: React.FC = () => {
     </div>
   );
 };
-
-export default ModalHeader;

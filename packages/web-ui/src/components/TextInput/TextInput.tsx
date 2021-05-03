@@ -9,7 +9,7 @@ interface TextInputProps {
   placeholder?: string;
 }
 
-const TextInput: React.FC<TextInputProps> = (props: TextInputProps) => {
+export const TextInput: React.FC<TextInputProps> = (props: TextInputProps) => {
   const { onChange, label, disabled, value, placeholder, fullWidth } = props;
 
   return (
@@ -27,5 +27,3 @@ const TextInput: React.FC<TextInputProps> = (props: TextInputProps) => {
     </label>
   );
 };
-
-export default TextInput;

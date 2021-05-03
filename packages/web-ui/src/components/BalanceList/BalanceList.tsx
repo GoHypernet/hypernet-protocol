@@ -7,7 +7,9 @@ interface BalanceListProps {
   balances?: AssetBalance[];
 }
 
-const BalanceList: React.FC<BalanceListProps> = (props: BalanceListProps) => {
+export const BalanceList: React.FC<BalanceListProps> = (
+  props: BalanceListProps,
+) => {
   const { balances } = props;
   const classes = useStyles((props as unknown) as Jss.Theme);
 
@@ -34,5 +36,3 @@ const BalanceList: React.FC<BalanceListProps> = (props: BalanceListProps) => {
     </div>
   );
 };
-
-export default BalanceList;

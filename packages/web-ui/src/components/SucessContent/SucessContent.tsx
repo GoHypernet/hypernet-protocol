@@ -8,7 +8,7 @@ interface ISucessContentProps {
   onOkay?: () => void;
 }
 
-const SucessContent: React.FC<ISucessContentProps> = (
+export const SucessContent: React.FC<ISucessContentProps> = (
   props: ISucessContentProps,
 ) => {
   const { label = "SUCCESS!", info, onOkay } = props;
@@ -35,5 +35,3 @@ const SucessContent: React.FC<ISucessContentProps> = (
     </div>
   );
 };
-
-export default SucessContent;

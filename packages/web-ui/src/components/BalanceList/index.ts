@@ -1,1 +1,1 @@
-export { default } from "./BalanceList";
+export * from "./BalanceList";
