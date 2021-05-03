@@ -5,3 +5,5 @@ export const LINKS_WIDGET_ID_SELECTOR = "hypernet-protocol-links-widget";
 export const PAYMENT_WIDGET_ID_SELECTOR = "hypernet-protocol-payment-widget";
 export const PRIVATE_KEYS_FLOW_ID_SELECTOR =
   "hypernet-protocol-private-key-flow";
+export const CONNECTOR_AUTHORIZATION_FLOW =
+  "hypernet-protocol-connector-authorization-flow";

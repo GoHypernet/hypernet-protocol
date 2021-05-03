@@ -42,7 +42,7 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/objects": ">=0.0.1",
+    "@hypernetlabs/objects": "^0.0.1",
     "axios": "^0.21.1",
     "inversify": "^5.1.1",
     "delay": "^5.0.0",

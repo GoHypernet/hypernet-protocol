@@ -17,28 +17,6 @@ const useStyles = createUseStyles({
     fontSize: 24,
     paddingLeft: 5,
   },
-  closeWrapper: {
-    position: "absolute",
-    right: 0,
-    marginRight: 10,
-    cursor: "pointer",
-    top: 10,
-  },
-  balancesWrapper: {
-    margin: "24px 0",
-  },
-  balancesLabel: {
-    fontSize: 20,
-    marginBottom: 24,
-    textAlign: "center",
-  },
-  account: {
-    marginTop: 24,
-    fontSize: 15,
-  },
-  accountLink: {
-    color: "#2539DE",
-  },
 });
 
 export default useStyles;

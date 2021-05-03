@@ -1,6 +1,11 @@
-import { PublicIdentifier, EthereumAddress } from "@hypernetlabs/objects";
-import { EPaymentType, MerchantUrl } from "@hypernetlabs/objects";
-import { ResultAsync } from "neverthrow";
+import {
+  EPaymentType,
+  MerchantUrl,
+  PublicIdentifier,
+  EthereumAddress,
+} from "@hypernetlabs/objects";
+import { RenderError } from "@hypernetlabs/objects";
+import { ResultAsync, Result } from "neverthrow";
 
 import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 
@@ -15,7 +20,7 @@ export interface IConnectorAuthorizationFlowParams extends IRenderParams {
   connectorLogoUrl?: string;
 }
 
-export interface IRenderPaymentWidgetParams {
+export interface IRenderPaymentWidgetParams extends IRenderParams {
   selector: string;
   counterPartyAccount: PublicIdentifier;
   amount: string;
@@ -29,13 +34,15 @@ export interface IRenderPaymentWidgetParams {
 export interface IHypernetWebIntegration {
   getReady: () => ResultAsync<IHypernetIFrameProxy, Error>;
   core: IHypernetIFrameProxy;
-  renderBalancesWidget(params?: IRenderParams): void;
-  renderFundWidget(params?: IRenderParams): void;
-  renderLinksWidget(params?: IRenderParams): void;
-  renderPaymentWidget(params?: IRenderPaymentWidgetParams): void;
+  renderBalancesWidget(params?: IRenderParams): Result<void, RenderError>;
+  renderFundWidget(params?: IRenderParams): Result<void, RenderError>;
+  renderLinksWidget(params?: IRenderParams): Result<void, RenderError>;
+  renderPaymentWidget(
+    params?: IRenderPaymentWidgetParams,
+  ): Result<void, RenderError>;
   renderConnectorAuthorizationFlow(
     params: IConnectorAuthorizationFlowParams,
-  ): void;
+  ): Result<void, RenderError>;
   displayMerchantIFrame(merchantUrl: MerchantUrl): void;
   closeMerchantIFrame(merchantUrl: MerchantUrl): void;
 }

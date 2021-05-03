@@ -23,10 +23,45 @@ ref?.parentNode?.insertBefore(style, ref);
 
 Spinner();
 Spinner.show();
-client.getReady().map(() => {
-  Spinner.hide();
-  client.renderConnectorAuthorizationFlow({
-    connectorUrl: MerchantUrl("http://localhost:8080/hypernet_protocol/v0"),
-    showInModal: true,
+
+const merchantUrl = MerchantUrl("http://localhost:5010");
+
+const renderConnectorAuthorizationFlow = () => {
+  client
+    .renderConnectorAuthorizationFlow({
+      connectorUrl: merchantUrl,
+      showInModal: true,
+    })
+    .map(() => {
+      Spinner.hide();
+    });
+};
+
+const renderFundWidget = () => {
+  client
+    .renderFundWidget({
+      showInModal: true,
+    })
+    .map(() => {
+      Spinner.hide();
+    });
+};
+
+client.getReady().map((coreProxy) => {
+  coreProxy.getAuthorizedMerchants().map((merchantsMap) => {
+    if (merchantsMap.get(merchantUrl)) {
+      renderFundWidget();
+    } else {
+      renderConnectorAuthorizationFlow();
+    }
+  });
+
+  coreProxy.onMerchantAuthorized.subscribe((_merchantUrl) => {
+    console.log("_merchantUrl: ", _merchantUrl);
+    console.log("merchantUrl", merchantUrl);
+    if (merchantUrl === _merchantUrl) {
+      console.log("starttttt");
+      renderFundWidget();
+    }
   });
 });

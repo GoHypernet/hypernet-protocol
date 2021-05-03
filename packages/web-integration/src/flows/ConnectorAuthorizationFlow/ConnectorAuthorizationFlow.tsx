@@ -1,10 +1,17 @@
-import { ConnectorAuthorization, SucessContent } from "@hypernetlabs/web-ui";
+import {
+  ModalHeader,
+  ModalFooter,
+  SucessContent,
+  BalanceList,
+  Button,
+} from "@hypernetlabs/web-ui";
 import { EStatusColor } from "@hypernetlabs/web-ui";
 import React, { useContext, useEffect } from "react";
 
 import { LayoutContext, StoreContext } from "@web-integration/contexts";
 import { useBalances } from "@web-integration/hooks";
 import { IConnectorAuthorizationFlowParams } from "@web-integration/interfaces/app/IHypernetWebIntegration";
+import useStyles from "./ConnectorAuthorizationFlow.style";
 
 const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> = (
   props: IConnectorAuthorizationFlowParams,
@@ -19,6 +26,7 @@ const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> = 
   const { setModalWidth, setModalStatus, modalStatus, closeModal } = useContext(
     LayoutContext,
   );
+  const classes = useStyles();
 
   useEffect(() => {
     proxy.onMerchantAuthorized.subscribe(() => {
@@ -60,12 +68,20 @@ const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> = 
       onOkay={() => closeModal()}
     />
   ) : (
-    <ConnectorAuthorization
-      balances={balances}
-      connectorName={connectorName}
-      connectorLogoUrl={connectorLogoUrl}
-      onAuthorizeClick={handleMerchantAuthorization}
-    />
+    <div className={classes.container}>
+      <ModalHeader />
+      <div className={classes.balancesWrapper}>
+        <div className={classes.balancesLabel}>Your Balances</div>
+        <BalanceList balances={balances} />
+      </div>
+      <Button
+        label="Authorize"
+        onClick={handleMerchantAuthorization}
+        fullWidth={true}
+        bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
+      />
+      <ModalFooter />
+    </div>
   );
 };
 

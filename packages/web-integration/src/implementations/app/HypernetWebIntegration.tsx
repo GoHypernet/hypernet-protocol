@@ -1,5 +1,5 @@
-import { MerchantUrl } from "@hypernetlabs/objects";
-import { ResultAsync } from "neverthrow";
+import { MerchantUrl, RenderError } from "@hypernetlabs/objects";
+import { ResultAsync, Result } from "neverthrow";
 import React from "react";
 import ReactDOM from "react-dom";
 
@@ -9,6 +9,7 @@ import {
   LINKS_WIDGET_ID_SELECTOR,
   PAYMENT_WIDGET_ID_SELECTOR,
   PRIVATE_KEYS_FLOW_ID_SELECTOR,
+  CONNECTOR_AUTHORIZATION_FLOW,
 } from "@web-integration/constants";
 import { MainContainer } from "@web-integration/containers/MainContainer";
 import { LayoutProvider, StoreProvider } from "@web-integration/contexts";
@@ -182,66 +183,98 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     return iframeContainer;
   }
 
-  public async renderBalancesWidget(config?: IRenderParams) {
-    ReactDOM.render(
-      await this._bootstrapComponent(<BalancesWidget />),
-      this._generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
-    );
-  }
-
-  public async renderFundWidget(config?: IRenderParams): Promise<void> {
-    ReactDOM.render(
-      await this._bootstrapComponent(<FundWidget />),
-      this._generateDomElement(config?.selector || FUND_WIDGET_ID_SELECTOR),
-    );
-  }
-
-  public async renderLinksWidget(config?: IRenderParams) {
-    ReactDOM.render(
-      await this._bootstrapComponent(<LinksWidget />),
-      this._generateDomElement(config?.selector || LINKS_WIDGET_ID_SELECTOR),
-    );
-  }
-
-  public async renderPaymentWidget(config?: IRenderPaymentWidgetParams) {
-    ReactDOM.render(
-      await this._bootstrapComponent(
-        <PaymentWidget
-          counterPartyAccount={config?.counterPartyAccount}
-          amount={config?.amount}
-          expirationDate={config?.expirationDate}
-          requiredStake={config?.requiredStake}
-          paymentTokenAddress={config?.paymentTokenAddress}
-          merchantUrl={config?.merchantUrl}
-          paymentType={config?.paymentType}
-        />,
-        true,
-      ),
-      this._generateDomElement(config?.selector || PAYMENT_WIDGET_ID_SELECTOR),
-    );
-  }
-
-  public async renderConnectorAuthorizationFlow(
-    config: IConnectorAuthorizationFlowParams,
-  ) {
-    ReactDOM.render(
-      await this._bootstrapComponent(
-        <ConnectorAuthorizationFlow
-          connectorUrl={config.connectorUrl}
-          connectorName={config.connectorName}
-          connectorLogoUrl={config.connectorLogoUrl}
-        />,
-        config.showInModal,
-      ),
-      this._generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
-    );
-  }
-
   private _renderPrivateKeysModal() {
     ReactDOM.render(
       this._bootstrapComponent(<PrivateKeysFlow />, true),
       this._generateDomElement(PRIVATE_KEYS_FLOW_ID_SELECTOR),
     );
+  }
+
+  private _getThrowableRender(renderReact: () => void): Result<void, any> {
+    const throwable = Result.fromThrowable(renderReact, (err) => {
+      return err as RenderError;
+    });
+    return throwable();
+  }
+
+  public renderBalancesWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(<BalancesWidget />, config?.showInModal),
+        this._generateDomElement(
+          config?.selector || BALANCES_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderFundWidget(config?: IRenderParams): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(<FundWidget />, config?.showInModal),
+        this._generateDomElement(config?.selector || FUND_WIDGET_ID_SELECTOR),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderLinksWidget(config?: IRenderParams): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(<LinksWidget />, config?.showInModal),
+        this._generateDomElement(config?.selector || LINKS_WIDGET_ID_SELECTOR),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderPaymentWidget(
+    config?: IRenderPaymentWidgetParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <PaymentWidget
+            counterPartyAccount={config?.counterPartyAccount}
+            amount={config?.amount}
+            expirationDate={config?.expirationDate}
+            requiredStake={config?.requiredStake}
+            paymentTokenAddress={config?.paymentTokenAddress}
+            merchantUrl={config?.merchantUrl}
+            paymentType={config?.paymentType}
+          />,
+          config?.showInModal,
+        ),
+        this._generateDomElement(
+          config?.selector || PAYMENT_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderConnectorAuthorizationFlow(
+    config: IConnectorAuthorizationFlowParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <ConnectorAuthorizationFlow
+            connectorUrl={config.connectorUrl}
+            connectorName={config.connectorName}
+            connectorLogoUrl={config.connectorLogoUrl}
+          />,
+          config.showInModal,
+        ),
+        this._generateDomElement(
+          config?.selector || CONNECTOR_AUTHORIZATION_FLOW,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
   }
 
   public displayMerchantIFrame(merchantUrl: MerchantUrl): void {
