@@ -2,8 +2,9 @@ import { MerchantUrl } from "@hypernetlabs/objects";
 import HypernetWebIntegration, {
   IHypernetWebIntegration,
 } from "@hypernetlabs/web-integration";
-import Spinner from "./assets/loading-spinner";
 import { IHypernetWebUI } from "@hypernetlabs/web-ui";
+
+import Spinner from "./assets/loading-spinner";
 
 const client: IHypernetWebIntegration = new HypernetWebIntegration();
 

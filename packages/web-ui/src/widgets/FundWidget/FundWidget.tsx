@@ -1,6 +1,6 @@
-import { TokenSelector, Button, TextInput } from "@web-ui/components";
 import React from "react";
 
+import { TokenSelector, Button, TextInput } from "@web-ui/components";
 import { useFund } from "@web-ui/hooks";
 
 const FundWidget: React.FC = () => {

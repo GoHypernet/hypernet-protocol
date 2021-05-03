@@ -1,6 +1,6 @@
-import { SelectInput, TextareaInput, Button } from "@web-ui/components";
 import React, { useContext, useState } from "react";
 
+import { SelectInput, TextareaInput, Button } from "@web-ui/components";
 import { LayoutContext, StoreContext } from "@web-ui/contexts";
 
 const PrivateKeysFlow: React.FC = () => {

@@ -1,6 +1,6 @@
-import { LinkList } from "@web-ui/components";
 import React from "react";
 
+import { LinkList } from "@web-ui/components";
 import { useLinks } from "@web-ui/hooks";
 
 const LinksWidget: React.FC = () => {

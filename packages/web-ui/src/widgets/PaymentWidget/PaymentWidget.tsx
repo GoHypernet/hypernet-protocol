@@ -4,14 +4,14 @@ import {
   MerchantUrl,
 } from "@hypernetlabs/objects";
 import { EPaymentType } from "@hypernetlabs/objects";
+import React from "react";
+
 import {
   TokenSelector,
   Button,
   TextInput,
   SelectInput,
 } from "@web-ui/components";
-import React from "react";
-
 import { usePayment } from "@web-ui/hooks";
 import { EResultStatus } from "@web-ui/interfaces/objects";
 

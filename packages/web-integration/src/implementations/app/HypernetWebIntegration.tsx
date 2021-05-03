@@ -1,9 +1,10 @@
 import { MerchantUrl } from "@hypernetlabs/objects";
+import HypernetWebUI, { IHypernetWebUI } from "@hypernetlabs/web-ui";
 import { ResultAsync } from "neverthrow";
+
 import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
 import { IHypernetWebIntegration } from "@web-integration/interfaces/app/IHypernetWebIntegration";
 import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
-import HypernetWebUI, { IHypernetWebUI } from "@hypernetlabs/web-ui";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;

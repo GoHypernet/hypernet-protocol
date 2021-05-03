@@ -1,3 +1,7 @@
+import React, { useContext, useEffect } from "react";
+
+import useStyles from "./ConnectorAuthorizationFlow.style";
+
 import {
   ModalHeader,
   ModalFooter,
@@ -5,13 +9,10 @@ import {
   BalanceList,
   Button,
 } from "@web-ui/components";
-import { EStatusColor } from "@web-ui/theme";
-import React, { useContext, useEffect } from "react";
-
 import { LayoutContext, StoreContext } from "@web-ui/contexts";
 import { useBalances } from "@web-ui/hooks";
 import { IConnectorAuthorizationFlowParams } from "@web-ui/interfaces";
-import useStyles from "./ConnectorAuthorizationFlow.style";
+import { EStatusColor } from "@web-ui/theme";
 
 const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> = (
   props: IConnectorAuthorizationFlowParams,

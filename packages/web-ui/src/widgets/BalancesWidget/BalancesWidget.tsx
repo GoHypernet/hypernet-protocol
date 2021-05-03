@@ -1,6 +1,6 @@
-import { BalanceList } from "@web-ui/components";
 import React from "react";
 
+import { BalanceList } from "@web-ui/components";
 import { useBalances } from "@web-ui/hooks";
 
 const BalancesWidget: React.FC = () => {

@@ -1,5 +1,5 @@
-import React from "react";
 import { IHypernetCore } from "@hypernetlabs/objects";
+import React from "react";
 
 interface IStore {
   proxy: IHypernetCore;

@@ -1,5 +1,6 @@
-import { EStatusColor } from "@web-ui/theme";
 import React, { ReactNode, useState } from "react";
+
+import { EStatusColor } from "@web-ui/theme";
 
 interface ILayout {
   setModalWidth: (width: number) => void;
