@@ -4,7 +4,7 @@ interface TransactionListProps {
   transactionDataList?: any[];
 }
 
-const TransactionList: React.FC<TransactionListProps> = (
+export const TransactionList: React.FC<TransactionListProps> = (
   props: TransactionListProps,
 ) => {
   const { transactionDataList } = props;
@@ -25,5 +25,3 @@ const TransactionList: React.FC<TransactionListProps> = (
     </h2>
   );
 };
-
-export default TransactionList;

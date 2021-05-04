@@ -13,7 +13,7 @@ class PaymentStatusParams {
   constructor(public state: EPaymentState) {}
 }
 
-const LinkList: React.FC<LinkListProps> = (props: LinkListProps) => {
+export const LinkList: React.FC<LinkListProps> = (props: LinkListProps) => {
   const { links } = props;
 
   return (
@@ -78,5 +78,3 @@ const LinkList: React.FC<LinkListProps> = (props: LinkListProps) => {
     </div>
   );
 };
-
-export default LinkList;

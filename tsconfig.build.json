@@ -35,6 +35,7 @@
       "@mobile-integration": ["./packages/mobile-integration/src/*"],
       "@mobileApp/*": ["./packages/mobileApp/src/*"],
       "@web-integration/*": ["./*"],
+      "@web-ui/*": ["./*"],
       "@merchant-connector/*": ["./*"],
       "@merchant-iframe/*": ["./*"],
       "@test-merchant-connector/*": [

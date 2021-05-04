@@ -24,3 +24,4 @@ export * from "@objects/errors/TransferResolutionError";
 export * from "@objects/errors/VectorError";
 export * from "@objects/errors/PaymentCreationError";
 export * from "@objects/errors/MerchantAuthorizationDeniedError";
+export * from "@objects/errors/RenderError";
