@@ -6,19 +6,19 @@ interface IStore {
 }
 
 interface IStoreProps {
-  children: any;
+  children: React.ReactNode;
   proxy: IHypernetCore;
 }
 
 const StoreContext = React.createContext<IStore>(undefined!);
 
 function StoreProvider({ proxy, children }: IStoreProps) {
-  const initialState: any = {
+  const initialState: IStore = {
     proxy,
   };
 
   return (
-    <StoreContext.Provider value={initialState as IStore}>
+    <StoreContext.Provider value={initialState}>
       {children}
     </StoreContext.Provider>
   );

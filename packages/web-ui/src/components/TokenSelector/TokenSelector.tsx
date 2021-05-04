@@ -1,7 +1,7 @@
 import React from "react";
 
-import { ITokenSelectorOption } from "../../interfaces";
-import { SelectInput } from "../SelectInput";
+import { ITokenSelectorOption } from "@web-ui/interfaces";
+import { SelectInput } from "@web-ui/components";
 
 interface TokenSelectorProps {
   tokenSelectorOptions: ITokenSelectorOption[];

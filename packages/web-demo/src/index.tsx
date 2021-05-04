@@ -58,10 +58,7 @@ client.getReady().map((coreProxy) => {
   });
 
   coreProxy.onMerchantAuthorized.subscribe((_merchantUrl) => {
-    console.log("_merchantUrl: ", _merchantUrl);
-    console.log("merchantUrl", merchantUrl);
     if (merchantUrl === _merchantUrl) {
-      console.log("starttttt");
       renderFundWidget(client.webUIClient);
     }
   });

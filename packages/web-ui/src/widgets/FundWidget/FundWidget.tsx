@@ -1,9 +1,17 @@
 import React from "react";
 
-import { TokenSelector, Button, TextInput } from "@web-ui/components";
+import {
+  TokenSelector,
+  Button,
+  TextInput,
+  ModalHeader,
+  ModalFooter,
+} from "@web-ui/components";
 import { useFund } from "@web-ui/hooks";
+import useStyles from "@web-ui/widgets/FundWidget/FundWidget.style";
 
 const FundWidget: React.FC = () => {
+  const classes = useStyles();
   const {
     tokenSelectorOptions,
     selectedPaymentToken,
@@ -16,25 +24,25 @@ const FundWidget: React.FC = () => {
   } = useFund();
 
   return (
-    <div>
+    <div className={classes.wrapper}>
+      <ModalHeader />
       <TokenSelector
         tokenSelectorOptions={tokenSelectorOptions}
         selectedPaymentToken={selectedPaymentToken}
         setSelectedPaymentToken={setSelectedPaymentToken}
       />
-      <br />
       <TextInput label="Amount" value={amount} onChange={setAmount} />
-      <br />
       <Button
         onClick={depositFunds}
         disabled={!selectedPaymentToken?.address}
-        label="Fund"
+        fullWidth
+        hasMaterialUIStyle
+        label="Fund your Wallet"
       />
-      <br />
-      <br />
-      <Button onClick={mintTokens} label="Mint HyperToken" />
-      <br />
+      {/* <Button onClick={mintTokens} label="Mint HyperToken" />
+      <br /> */}
       <h3>{resultMessage?.message}</h3>
+      <ModalFooter />
     </div>
   );
 };

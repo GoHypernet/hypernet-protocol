@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from "react";
 
-import useStyles from "./ConnectorAuthorizationFlow.style";
+import useStyles from "@web-ui/flows/ConnectorAuthorizationFlow/ConnectorAuthorizationFlow.style";
 
 import {
   ModalHeader,
