@@ -10,6 +10,7 @@ import {
   PaymentId,
   MerchantUrl,
   Signature,
+  AssetInfo,
 } from "@hypernetlabs/objects";
 import {
   AcceptPaymentError,
@@ -26,6 +27,7 @@ import {
   InvalidPaymentError,
   InvalidParametersError,
   TransferResolutionError,
+  PreferredPaymentTokenError,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -403,6 +405,19 @@ export default class HypernetIFrameProxy
       privateKey,
       mnemonic,
     });
+  }
+
+  public setPreferredPaymentToken(
+    tokenAddress: EthereumAddress,
+  ): ResultAsync<void, PreferredPaymentTokenError> {
+    return this._createCall("setPreferredPaymentToken", tokenAddress);
+  }
+
+  public getPreferredPaymentToken(): ResultAsync<
+    AssetInfo,
+    BlockchainUnavailableError | PreferredPaymentTokenError
+  > {
+    return this._createCall("getPreferredPaymentToken", null);
   }
 
   /**

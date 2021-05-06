@@ -14,6 +14,7 @@ import {
   Signature,
   PrivateCredentials,
   EBlockchainNetwork,
+  AssetInfo,
   AcceptPaymentError,
   BalancesUnavailableError,
   BlockchainUnavailableError,
@@ -27,6 +28,7 @@ import {
   InvalidPaymentError,
   InvalidParametersError,
   TransferResolutionError,
+  PreferredPaymentTokenError,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -293,8 +295,9 @@ export class HypernetCore implements IHypernetCore {
       this.blockchainProvider,
       this.vectorUtils,
       this.browserNodeProvider,
-      this.logUtils,
       this.blockchainUtils,
+      this.localStorageUtils,
+      this.logUtils,
     );
 
     this.paymentRepository = new PaymentRepository(
@@ -708,5 +711,18 @@ export class HypernetCore implements IHypernetCore {
     return this.accountService.providePrivateCredentials(
       new PrivateCredentials(privateKey, mnemonic),
     );
+  }
+
+  public setPreferredPaymentToken(
+    tokenAddress: EthereumAddress,
+  ): ResultAsync<void, PreferredPaymentTokenError> {
+    return this.accountService.setPreferredPaymentToken(tokenAddress);
+  }
+
+  public getPreferredPaymentToken(): ResultAsync<
+    AssetInfo,
+    BlockchainUnavailableError | PreferredPaymentTokenError
+  > {
+    return this.accountService.getPreferredPaymentToken();
   }
 }

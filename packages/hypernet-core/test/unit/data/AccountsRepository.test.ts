@@ -24,6 +24,7 @@ import {
   IBlockchainProvider,
   IBlockchainUtils,
 } from "@interfaces/utilities";
+import { ILocalStorageUtils } from "@hypernetlabs/utils";
 import {
   account,
   account2,
@@ -116,6 +117,7 @@ class AccountsRepositoryMocks {
   public browserNodeProvider = new BrowserNodeProviderMock();
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
+  public localStorageUtils = td.object<ILocalStorageUtils>();
 
   constructor() {
     td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(
@@ -146,8 +148,9 @@ class AccountsRepositoryMocks {
       this.blockchainProvider,
       this.vectorUtils,
       this.browserNodeProvider,
-      this.logUtils,
       this.blockchainUtils,
+      this.localStorageUtils,
+      this.logUtils,
     );
   }
 }
@@ -158,6 +161,7 @@ class AccountsRepositoryErrorMocks {
   public browserNodeProvider = td.object<IBrowserNodeProvider>();
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
+  public localStorageUtils = td.object<ILocalStorageUtils>();
 
   constructor() {
     td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(
@@ -184,8 +188,9 @@ class AccountsRepositoryErrorMocks {
       this.blockchainProvider,
       this.vectorUtils,
       this.browserNodeProvider,
-      this.logUtils,
       this.blockchainUtils,
+      this.localStorageUtils,
+      this.logUtils,
     );
   }
 }

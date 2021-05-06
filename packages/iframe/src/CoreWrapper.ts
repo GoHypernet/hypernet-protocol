@@ -172,6 +172,16 @@ export default class CoreWrapper extends ChildProxy {
           );
         }, data.callId);
       },
+      setPreferredPaymentToken: (data: IIFrameCallData<EthereumAddress>) => {
+        this.returnForModel(() => {
+          return this.core.setPreferredPaymentToken(data.data);
+        }, data.callId);
+      },
+      getPreferredPaymentToken: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getPreferredPaymentToken();
+        }, data.callId);
+      },
     });
   }
 

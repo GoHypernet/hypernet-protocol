@@ -1,4 +1,5 @@
 import { AssetBalance } from "@hypernetlabs/objects";
+import { useStoreContext } from "@web-ui/contexts";
 import React from "react";
 
 import useStyles from "./BalanceList.style";
@@ -12,6 +13,7 @@ export const BalanceList: React.FC<BalanceListProps> = (
 ) => {
   const { balances } = props;
   const classes = useStyles((props as unknown) as Jss.Theme);
+  const { viewUtils } = useStoreContext();
 
   return (
     <div className={classes.container}>
@@ -26,7 +28,7 @@ export const BalanceList: React.FC<BalanceListProps> = (
             }
           />
           <div className={classes.tokenAmount}>
-            {Number(balance.freeAmount) / 1000000000000000000}
+            {viewUtils.fromBigNumber(balance.freeAmount)}
           </div>
           <div className={classes.tokenName}>
             {balance.symbol || index === 0 ? "HPT" : "MINT"}

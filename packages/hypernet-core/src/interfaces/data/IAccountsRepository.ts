@@ -4,6 +4,7 @@ import {
   AssetBalance,
   PublicIdentifier,
   Signature,
+  AssetInfo,
 } from "@hypernetlabs/objects";
 import {
   BalancesUnavailableError,
@@ -11,6 +12,7 @@ import {
   LogicalError,
   RouterChannelUnknownError,
   VectorError,
+  PreferredPaymentTokenError,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
@@ -60,4 +62,13 @@ export interface IAccountsRepository {
     amount: BigNumber,
     to: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError>;
+
+  setPreferredPaymentToken(
+    tokenAddress: EthereumAddress,
+  ): ResultAsync<void, PreferredPaymentTokenError>;
+
+  getPreferredPaymentToken(): ResultAsync<
+    AssetInfo,
+    BlockchainUnavailableError | PreferredPaymentTokenError
+  >;
 }
