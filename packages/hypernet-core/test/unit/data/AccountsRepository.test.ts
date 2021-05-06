@@ -12,6 +12,7 @@ import {
   Balances,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
+import { ILocalStorageUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
@@ -24,7 +25,6 @@ import {
   IBlockchainProvider,
   IBlockchainUtils,
 } from "@interfaces/utilities";
-import { ILocalStorageUtils } from "@hypernetlabs/utils";
 import {
   account,
   account2,

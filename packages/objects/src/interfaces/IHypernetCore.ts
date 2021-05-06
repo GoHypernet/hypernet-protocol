@@ -2,6 +2,7 @@ import { BigNumber } from "ethers";
 import { ResultAsync, Result } from "neverthrow";
 import { Subject } from "rxjs";
 
+import { AssetInfo } from "@objects/AssetInfo";
 import { Balances } from "@objects/Balances";
 import { ControlClaim } from "@objects/ControlClaim";
 import {
@@ -30,7 +31,6 @@ import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
 import { Signature } from "@objects/Signature";
-import { AssetInfo } from "@objects/AssetInfo";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single

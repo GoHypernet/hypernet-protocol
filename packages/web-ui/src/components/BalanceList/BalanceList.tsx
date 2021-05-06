@@ -1,8 +1,9 @@
 import { AssetBalance } from "@hypernetlabs/objects";
-import { useStoreContext } from "@web-ui/contexts";
 import React from "react";
 
 import useStyles from "./BalanceList.style";
+
+import { useStoreContext } from "@web-ui/contexts";
 
 interface BalanceListProps {
   balances?: AssetBalance[];

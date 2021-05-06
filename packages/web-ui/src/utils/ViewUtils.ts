@@ -1,4 +1,5 @@
 import { BigNumber } from "ethers";
+
 import { IViewUtils } from "@web-ui/interfaces";
 
 export class ViewUtils implements IViewUtils {
