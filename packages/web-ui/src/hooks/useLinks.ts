@@ -1,7 +1,7 @@
 import { HypernetLink } from "@hypernetlabs/objects";
-import { useEffect, useReducer, useContext } from "react";
+import { useEffect, useReducer } from "react";
 
-import { StoreContext } from "@web-ui/contexts";
+import { useStoreContext } from "@web-ui/contexts";
 import { ILinkList } from "@web-ui/interfaces";
 
 enum EActionTypes {
@@ -17,7 +17,7 @@ interface IState {
 }
 
 export function useLinks(): IState {
-  const { proxy } = useContext(StoreContext);
+  const { proxy } = useStoreContext();
 
   const initialState: IState = {
     loading: true,

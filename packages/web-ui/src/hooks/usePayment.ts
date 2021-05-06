@@ -1,9 +1,9 @@
 import { Balances, PublicIdentifier } from "@hypernetlabs/objects";
 import { EPaymentType, MerchantUrl } from "@hypernetlabs/objects";
 import { utils } from "ethers";
-import { useEffect, useReducer, useContext } from "react";
+import { useEffect, useReducer } from "react";
 
-import { StoreContext } from "@web-ui/contexts";
+import { useStoreContext } from "@web-ui/contexts";
 import { ITokenSelectorOption } from "@web-ui/interfaces";
 import {
   PaymentTokenOptionViewModel,
@@ -67,7 +67,7 @@ interface IReducerState {
 
 // export function usePayment(): IReducerStateReducer {
 export function usePayment(initialParams: any): IReducerStateReducer {
-  const { proxy } = useContext(StoreContext);
+  const { proxy } = useStoreContext();
 
   const initialState: IReducerState = {
     loading: true,

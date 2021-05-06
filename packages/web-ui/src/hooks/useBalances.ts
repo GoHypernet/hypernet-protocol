@@ -1,65 +1,63 @@
 import { AssetBalance, Balances } from "@hypernetlabs/objects";
-import { useEffect, useReducer, useContext } from "react";
+import { useEffect, useReducer } from "react";
+import { useAlert } from "react-alert";
 
-import { StoreContext } from "@web-ui/contexts";
-import {
-  AssetBalanceParams,
-  AssetBalanceViewModel,
-} from "@web-ui/interfaces/objects";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
+import { ITokenSelectorOption } from "@web-ui/interfaces";
+import { PaymentTokenOptionViewModel } from "@web-ui/interfaces/objects";
 
 enum EActionTypes {
   FETCHING = "FETCHING",
   FETCHED = "FETCHED",
   ERROR = "ERROR",
+  TOKEN_SELECTED = "TOKEN_SELECTED",
 }
 
 interface IState {
-  loading: boolean;
-  error: any;
+  error: boolean;
   balances: AssetBalance[];
+  channelTokenSelectorOptions: ITokenSelectorOption[];
+  preferredPaymentToken?: ITokenSelectorOption;
+  setPreferredPaymentToken?: (selectedOption?: ITokenSelectorOption) => void;
 }
 
+type Action =
+  | { type: EActionTypes.FETCHING }
+  | { type: EActionTypes.FETCHED; payload: Balances }
+  | { type: EActionTypes.ERROR; payload: string }
+  | {
+      type: EActionTypes.TOKEN_SELECTED;
+      payload: ITokenSelectorOption | undefined;
+    };
+
 export function useBalances() {
-  const { proxy } = useContext(StoreContext);
-
-  const initialState: IState = {
-    loading: true,
-    error: null,
-    balances: [],
-  };
-
-  const [state, dispatch] = useReducer((state: IState, action: any) => {
-    switch (action.type) {
-      case EActionTypes.FETCHING:
-        return { ...state, loading: true };
-      case EActionTypes.FETCHED:
-        return { ...state, loading: false, balances: action.payload };
-      case EActionTypes.ERROR:
-        return { ...state, loading: false, error: action.payload };
-      default:
-        return state;
-    }
-  }, initialState);
+  const { proxy } = useStoreContext();
+  const { setLoading } = useLayoutContext();
+  const alert = useAlert();
 
   useEffect(() => {
     let cancelRequest = false;
 
     const fetchData = async () => {
+      if (cancelRequest) return;
       dispatch({ type: EActionTypes.FETCHING });
-      try {
-        if (cancelRequest) return;
-        // get data from proxy
-        proxy?.getBalances().map((balance: Balances) => {
-          // prepare balances
+      setLoading(true);
+      proxy
+        ?.getBalances()
+        .map((balance: Balances) => {
+          setLoading(false);
           dispatch({
             type: EActionTypes.FETCHED,
-            payload: prepareBalances(balance),
+            payload: balance,
           });
+        })
+        .mapErr((error) => {
+          setLoading(false);
+          alert.error(
+            error.message || "An error has happened while pulling balances",
+          );
+          dispatch({ type: EActionTypes.ERROR, payload: error.message });
         });
-      } catch (error) {
-        if (cancelRequest) return;
-        dispatch({ type: EActionTypes.ERROR, payload: error.message });
-      }
     };
 
     fetchData();
@@ -69,7 +67,7 @@ export function useBalances() {
         if (cancelRequest) return;
         dispatch({
           type: EActionTypes.FETCHED,
-          payload: prepareBalances(balance),
+          payload: balance,
         });
       },
     });
@@ -79,11 +77,39 @@ export function useBalances() {
     };
   }, []);
 
-  const prepareBalances = (balance: Balances) => {
+  const initialState: IState = {
+    error: false,
+    balances: [],
+    channelTokenSelectorOptions: [],
+    preferredPaymentToken: undefined,
+  };
+
+  const setPreferredPaymentToken = (selectedOption?: ITokenSelectorOption) => {
+    // save preferred payment token in
+    alert.success("Your default payment token has changed!");
+    dispatch({
+      type: EActionTypes.TOKEN_SELECTED,
+      payload: selectedOption,
+    });
+  };
+
+  const prepareBalances = (balance: Balances): AssetBalance[] => {
+    return balance.assets.reduce((acc: AssetBalance[], assetBalance) => {
+      acc.push(assetBalance);
+      return acc;
+    }, []);
+  };
+
+  const prepareChannelTokenSelectorOptions = (
+    balance: Balances,
+  ): ITokenSelectorOption[] => {
     return balance.assets.reduce(
-      (acc: AssetBalanceViewModel[], assetBalance) => {
+      (acc: ITokenSelectorOption[], assetBalance) => {
         acc.push(
-          new AssetBalanceViewModel(new AssetBalanceParams(assetBalance)),
+          new PaymentTokenOptionViewModel(
+            assetBalance.name,
+            assetBalance.assetAddress,
+          ),
         );
         return acc;
       },
@@ -91,5 +117,37 @@ export function useBalances() {
     );
   };
 
-  return state;
+  const [state, dispatch] = useReducer((state: IState, action: Action) => {
+    switch (action.type) {
+      case EActionTypes.FETCHING:
+        return {
+          ...state,
+          error: false,
+        };
+      case EActionTypes.FETCHED:
+        return {
+          ...state,
+          error: false,
+          balances: prepareBalances(action.payload),
+          channelTokenSelectorOptions: prepareChannelTokenSelectorOptions(
+            action.payload,
+          ),
+        };
+      case EActionTypes.TOKEN_SELECTED:
+        return {
+          ...state,
+          error: false,
+          preferredPaymentToken: action.payload,
+        };
+      case EActionTypes.ERROR:
+        return {
+          ...state,
+          error: true,
+        };
+      default:
+        return state;
+    }
+  }, initialState);
+
+  return { ...state, setPreferredPaymentToken };
 }

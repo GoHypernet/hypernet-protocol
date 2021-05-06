@@ -34,6 +34,14 @@ const useStyles = createUseStyles({
     fontSize: 18,
     width: (props) => (props.fullWidth ? "100%" : "auto"),
   },
+  linkWrapper: {
+    marginTop: 24,
+    fontSize: 15,
+  },
+  link: {
+    color: "#2539DE",
+    cursor: "pointer",
+  },
 });
 
 export default useStyles;

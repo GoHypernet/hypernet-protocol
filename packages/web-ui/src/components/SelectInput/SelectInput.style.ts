@@ -9,7 +9,7 @@ const useStyles = createUseStyles({
   select: {
     fontFamily: "'Roboto','Helvetica','Arial',sans-serif",
     position: "relative",
-    width: "350px",
+    width: "100%",
     "&:after": {
       position: "absolute",
       top: "18px",

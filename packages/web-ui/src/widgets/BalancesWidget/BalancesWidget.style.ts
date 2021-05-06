@@ -1,12 +1,12 @@
 import { createUseStyles } from "react-jss";
 
 const useStyles = createUseStyles({
-  container: {
-    width: "100%",
+  balancesWrapper: {
+    margin: "25px 0",
   },
-  balancesEmptyLabel: {
+  balancesLabel: {
     fontSize: 20,
-    margin: 25,
+    marginBottom: 24,
     textAlign: "center",
   },
 });

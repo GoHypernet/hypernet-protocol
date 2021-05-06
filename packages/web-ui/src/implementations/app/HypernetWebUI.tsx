@@ -9,17 +9,20 @@ import {
   LINKS_WIDGET_ID_SELECTOR,
   PAYMENT_WIDGET_ID_SELECTOR,
   PRIVATE_KEYS_FLOW_ID_SELECTOR,
-  CONNECTOR_AUTHORIZATION_FLOW,
+  CONNECTOR_AUTHORIZATION_FLOW_ID_SELECTOR,
+  ONBOARDING_FLOW_ID_SELECTOR,
 } from "@web-ui/constants";
 import { MainContainer } from "@web-ui/containers/MainContainer";
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import PrivateKeysFlow from "@web-ui/flows/PrivateKeysFlow";
+import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
 import {
   IConnectorAuthorizationFlowParams,
   IHypernetWebUI,
   IRenderParams,
   IRenderPaymentWidgetParams,
+  IOnboardingFlowParams,
 } from "@web-ui/interfaces/app/IHypernetWebUI";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget";
 import FundWidget from "@web-ui/widgets/FundWidget";
@@ -163,7 +166,28 @@ export default class HypernetWebUI implements IHypernetWebUI {
           config.showInModal,
         ),
         this._generateDomElement(
-          config?.selector || CONNECTOR_AUTHORIZATION_FLOW,
+          config?.selector || CONNECTOR_AUTHORIZATION_FLOW_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public startOnboardingFlow(
+    config: IOnboardingFlowParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <OnboardingFlow
+            merchantUrl={config.merchantUrl}
+            merchantName={config.merchantName}
+            merchantLogoUrl={config.merchantLogoUrl}
+          />,
+          config.showInModal,
+        ),
+        this._generateDomElement(
+          config?.selector || ONBOARDING_FLOW_ID_SELECTOR,
         ),
       );
     };
