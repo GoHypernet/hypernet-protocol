@@ -15,8 +15,8 @@ import {
 import { MainContainer } from "@web-ui/containers/MainContainer";
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
-import PrivateKeysFlow from "@web-ui/flows/PrivateKeysFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
+import PrivateKeysFlow from "@web-ui/flows/PrivateKeysFlow";
 import {
   IConnectorAuthorizationFlowParams,
   IHypernetWebUI,

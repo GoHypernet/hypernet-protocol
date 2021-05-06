@@ -1,9 +1,5 @@
 import React, { useEffect } from "react";
 
-import useStyles from "@web-ui/flows/ConnectorAuthorizationFlow/ConnectorAuthorizationFlow.style";
-
-import BalancesWidget from "@web-ui/widgets/BalancesWidget/BalancesWidget";
-
 import {
   ModalHeader,
   ModalFooter,
@@ -12,9 +8,11 @@ import {
   Button,
 } from "@web-ui/components";
 import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
+import useStyles from "@web-ui/flows/ConnectorAuthorizationFlow/ConnectorAuthorizationFlow.style";
 import { useBalances } from "@web-ui/hooks";
 import { IConnectorAuthorizationFlowParams } from "@web-ui/interfaces";
 import { EStatusColor } from "@web-ui/theme";
+import BalancesWidget from "@web-ui/widgets/BalancesWidget/BalancesWidget";
 
 const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> = (
   props: IConnectorAuthorizationFlowParams,

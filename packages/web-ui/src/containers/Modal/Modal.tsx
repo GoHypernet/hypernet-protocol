@@ -3,8 +3,8 @@ import { createPortal } from "react-dom";
 
 import useStyles from "./Modal.style";
 
-import { useLayoutContext } from "@web-ui/contexts";
 import { WEB_UI_MODAL_ID_SELECTOR } from "@web-ui/constants";
+import { useLayoutContext } from "@web-ui/contexts";
 
 interface IModal {
   children: React.ReactNode;

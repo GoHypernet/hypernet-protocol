@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from "react";
 
-import useStyles from "@web-ui/flows/OnboardingFlow/OnboardingFlow.style";
-
-import BalancesWidget from "@web-ui/widgets/BalancesWidget/BalancesWidget";
-
 import {
   ModalHeader,
   ModalFooter,
@@ -12,9 +8,11 @@ import {
   Button,
 } from "@web-ui/components";
 import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
+import useStyles from "@web-ui/flows/OnboardingFlow/OnboardingFlow.style";
 import { useBalances } from "@web-ui/hooks";
 import { IOnboardingFlowParams } from "@web-ui/interfaces";
 import { EStatusColor } from "@web-ui/theme";
+import BalancesWidget from "@web-ui/widgets/BalancesWidget/BalancesWidget";
 
 enum EOnboardingScreens {
   MERCHANT_AUTHORIZATION = 0,

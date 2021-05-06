@@ -3,9 +3,9 @@ import { ethers } from "ethers";
 import { useEffect, useReducer } from "react";
 import { useAlert } from "react-alert";
 
+import { ETHER_HEX_ADDRESS } from "@web-ui/constants";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { ITokenSelectorOption } from "@web-ui/interfaces";
-import { ETHER_HEX_ADDRESS } from "@web-ui/constants";
 import { PaymentTokenOptionViewModel } from "@web-ui/interfaces/objects";
 
 enum EActionTypes {
@@ -129,7 +129,7 @@ export function useFund(): IReducerStateReducer {
     if (false) {
       return balance.assets.reduce(
         (acc: PaymentTokenOptionViewModel[], assetBalance) => {
-          let tokenName =
+          const tokenName =
             assetBalance.assetAddress === ETHER_HEX_ADDRESS
               ? "ETH"
               : "HypernetToken";
