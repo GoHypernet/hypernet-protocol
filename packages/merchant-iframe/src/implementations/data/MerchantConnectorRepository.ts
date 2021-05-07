@@ -1,28 +1,41 @@
-import { IMerchantConnectorRepository } from "@merchant-iframe/interfaces/data";
+import {
+  EthereumAddress,
+  Signature,
+  MerchantUrl,
+  AjaxError,
+} from "@hypernetlabs/objects";
 import { IAjaxUtils } from "@hypernetlabs/utils";
 import { okAsync, ResultAsync } from "neverthrow";
 import { urlJoinP } from "url-join-ts";
-import { EthereumAddress, Signature, MerchantUrl } from "@hypernetlabs/objects";
 
-export class MerchantConnectorRepository implements IMerchantConnectorRepository {
+import { IMerchantConnectorRepository } from "@merchant-iframe/interfaces/data";
+
+export class MerchantConnectorRepository
+  implements IMerchantConnectorRepository {
   constructor(protected ajaxUtils: IAjaxUtils) {}
 
-  public getMerchantSignature(merchantUrl: MerchantUrl): ResultAsync<Signature, Error> {
+  public getMerchantSignature(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<Signature, AjaxError> {
     const url = this._prepareMerchantUrl(merchantUrl, "signature");
-    return this.ajaxUtils.get<Signature, Error>(url).andThen((response) => {
+    return this.ajaxUtils.get<Signature>(url).andThen((response) => {
       return okAsync(response);
     });
   }
-  public getMerchantAddress(merchantUrl: MerchantUrl): ResultAsync<EthereumAddress, Error> {
+  public getMerchantAddress(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<EthereumAddress, AjaxError> {
     const url = this._prepareMerchantUrl(merchantUrl, "address");
-    return this.ajaxUtils.get<EthereumAddress, Error>(url).andThen((response) => {
+    return this.ajaxUtils.get<EthereumAddress>(url).andThen((response) => {
       return okAsync(response);
     });
   }
 
-  public getMerchantCode(merchantUrl: MerchantUrl): ResultAsync<string, Error> {
+  public getMerchantCode(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<string, AjaxError> {
     const url = this._prepareMerchantUrl(merchantUrl, "connector");
-    return this.ajaxUtils.get<string, Error>(url).andThen((response) => {
+    return this.ajaxUtils.get<string>(url).andThen((response) => {
       return okAsync(response);
     });
   }
@@ -30,10 +43,14 @@ export class MerchantConnectorRepository implements IMerchantConnectorRepository
   private _prepareMerchantUrl(merchantUrl: MerchantUrl, path: string): URL {
     const merchantUrlObject = new URL(merchantUrl);
     const searchParams = {};
-    for (const [key, value] of new URLSearchParams(merchantUrlObject.search).entries()) {
+    for (const [key, value] of new URLSearchParams(
+      merchantUrlObject.search,
+    ).entries()) {
       searchParams[key] = value;
     }
     merchantUrlObject.search = "";
-    return new URL(urlJoinP(merchantUrlObject.toString(), [path], searchParams));
+    return new URL(
+      urlJoinP(merchantUrlObject.toString(), [path], searchParams),
+    );
   }
 }

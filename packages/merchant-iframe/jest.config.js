@@ -4,7 +4,9 @@ const { pathsToModuleNameMapper } = require("ts-jest/utils");
 // which contains the path mapping (ie the `compilerOptions.paths` option):
 const { compilerOptions } = require("../../tsconfig.build");
 
-const moduleNames = pathsToModuleNameMapper(compilerOptions.paths, { prefix: "<rootDir>/../../" });
+const moduleNames = pathsToModuleNameMapper(compilerOptions.paths, {
+  prefix: "<rootDir>/src",
+});
 
 module.exports = {
   preset: "ts-jest",

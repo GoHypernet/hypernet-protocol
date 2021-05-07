@@ -1,4 +1,3 @@
-import { ResultAsync } from "neverthrow";
 import {
   VectorError,
   BlockchainUnavailableError,
@@ -12,6 +11,7 @@ import {
   InvalidParametersError,
   TransferCreationError,
 } from "@hypernetlabs/objects";
+import { ResultAsync } from "neverthrow";
 
 export interface IVectorListener {
   setup(): ResultAsync<

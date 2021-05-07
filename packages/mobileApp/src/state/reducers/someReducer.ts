@@ -1,4 +1,8 @@
-import { SomeActionType, ISomeReducerState, SomeAction } from "@mobileApp/interfaces/state/IsomeReducer";
+import {
+  SomeActionType,
+  ISomeReducerState,
+  SomeAction,
+} from "@mobileApp/interfaces/state/IsomeReducer";
 
 export const someReducer = (state: ISomeReducerState, action: SomeAction) => {
   switch (action.type) {
@@ -13,4 +17,7 @@ export const someReducer = (state: ISomeReducerState, action: SomeAction) => {
   }
 };
 
-export const initialSomeReducer: ISomeReducerState = { isAuthenticated: false, contacts: "fgfgg" };
+export const initialSomeReducer: ISomeReducerState = {
+  isAuthenticated: false,
+  contacts: "fgfgg",
+};

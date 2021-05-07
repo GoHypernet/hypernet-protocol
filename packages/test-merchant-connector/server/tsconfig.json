@@ -1,8 +1,7 @@
 {
-    "extends": "../../../tsconfig.build.json",
-    "compilerOptions": {
-      "outDir": "../dist/server"
-    },
-    "references": []
-  }
-  
+  "extends": "../../../tsconfig.build.json",
+  "compilerOptions": {
+    "outDir": "../dist/server"
+  },
+  "references": []
+}

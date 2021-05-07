@@ -1,5 +1,29 @@
+import {
+  Log,
+  TransactionReceipt,
+  TransactionResponse,
+} from "@ethersproject/abstract-provider";
+import {
+  VectorError,
+  RouterChannelUnknownError,
+  BlockchainUnavailableError,
+  EthereumAddress,
+  AssetBalance,
+  Balances,
+} from "@hypernetlabs/objects";
+import { ILogUtils } from "@hypernetlabs/utils";
+import { BigNumber } from "ethers";
+import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
-require("testdouble-jest")(td, jest);
+
+import { AccountsRepository } from "@implementations/data/AccountsRepository";
+import { IAccountsRepository } from "@interfaces/data/";
+import {
+  IVectorUtils,
+  IBrowserNodeProvider,
+  IBlockchainProvider,
+  IBlockchainUtils,
+} from "@interfaces/utilities";
 import {
   account,
   account2,
@@ -12,25 +36,9 @@ import {
   routerChannelAddress,
 } from "@mock/mocks";
 import { BlockchainProviderMock, BrowserNodeProviderMock } from "@mock/utils";
-import {
-  IVectorUtils,
-  IBrowserNodeProvider,
-  IBlockchainProvider,
-  IBlockchainUtils,
-} from "@interfaces/utilities";
-import {
-  VectorError,
-  RouterChannelUnknownError,
-  BlockchainUnavailableError,
-  EthereumAddress,
-  AssetBalance, Balances,
-} from "@hypernetlabs/objects";
-import { IAccountsRepository } from "@interfaces/data/";
-import { okAsync, errAsync } from "neverthrow";
-import { Log, TransactionReceipt, TransactionResponse } from "@ethersproject/abstract-provider";
-import { AccountsRepository } from "@implementations/data/AccountsRepository";
-import { BigNumber } from "ethers";
-import { ILogUtils } from "@hypernetlabs/utils";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("testdouble-jest")(td, jest);
 
 class TransacationReceiptMock implements TransactionReceipt {
   public to: string;
@@ -110,7 +118,9 @@ class AccountsRepositoryMocks {
   public blockchainUtils = td.object<IBlockchainUtils>();
 
   constructor() {
-    td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
+    td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(
+      okAsync(routerChannelAddress),
+    );
 
     td.when(
       this.blockchainUtils.erc20Transfer(
@@ -150,9 +160,15 @@ class AccountsRepositoryErrorMocks {
   public blockchainUtils = td.object<IBlockchainUtils>();
 
   constructor() {
-    td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(errAsync(new VectorError()));
-    td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(errAsync(new RouterChannelUnknownError()));
-    td.when(this.blockchainProvider.getSigner()).thenReturn(errAsync(new BlockchainUnavailableError()));
+    td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(
+      errAsync(new VectorError()),
+    );
+    td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(
+      errAsync(new RouterChannelUnknownError()),
+    );
+    td.when(this.blockchainProvider.getSigner()).thenReturn(
+      errAsync(new BlockchainUnavailableError()),
+    );
     td.when(
       this.blockchainUtils.mintToken(
         td.matchers.argThat((arg: BigNumber) => {
@@ -224,7 +240,9 @@ describe("AccountsRepository tests", () => {
     const accountsRepositoryMocks = new AccountsRepositoryMocks();
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-    const stateChannel = accountsRepositoryMocks.browserNodeProvider.stateChannels.get(routerChannelAddress);
+    const stateChannel = accountsRepositoryMocks.browserNodeProvider.stateChannels.get(
+      routerChannelAddress,
+    );
     if (stateChannel == null) {
       throw new Error();
     }
@@ -271,7 +289,9 @@ describe("AccountsRepository tests", () => {
     const accountsRepositoryMocks = new AccountsRepositoryMocks();
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-    const stateChannel = accountsRepositoryMocks.browserNodeProvider.stateChannels.get(routerChannelAddress);
+    const stateChannel = accountsRepositoryMocks.browserNodeProvider.stateChannels.get(
+      routerChannelAddress,
+    );
     if (stateChannel == null) {
       throw new Error();
     }
@@ -329,7 +349,11 @@ describe("AccountsRepository tests", () => {
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
     // Act
-    const result = await repo.withdrawFunds(ethereumAddress, commonAmount, destinationAddress);
+    const result = await repo.withdrawFunds(
+      ethereumAddress,
+      commonAmount,
+      destinationAddress,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -343,7 +367,11 @@ describe("AccountsRepository tests", () => {
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
     // Act
-    const result = await repo.withdrawFunds(erc20AssetAddress, commonAmount, destinationAddress);
+    const result = await repo.withdrawFunds(
+      erc20AssetAddress,
+      commonAmount,
+      destinationAddress,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -357,7 +385,11 @@ describe("AccountsRepository tests", () => {
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
     // Act
-    const result = await repo.withdrawFunds(erc20AssetAddress, commonAmount, destinationAddress);
+    const result = await repo.withdrawFunds(
+      erc20AssetAddress,
+      commonAmount,
+      destinationAddress,
+    );
     const error = result._unsafeUnwrapErr();
 
     // Assert

@@ -1,11 +1,18 @@
-import { IBrowserNode } from "@interfaces/utilities";
-import { chainId, routerChannelAddress, routerPublicIdentifier } from "@mock/mocks";
-import { okAsync } from "neverthrow";
-import td from "testdouble";
 import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
 import { EthereumAddress, IFullChannelState } from "@hypernetlabs/objects";
+import { okAsync } from "neverthrow";
+import td from "testdouble";
 
-export function createBrowserNodeMock(stateChannels: IFullChannelState[] | null = null): IBrowserNode {
+import { IBrowserNode } from "@interfaces/utilities";
+import {
+  chainId,
+  routerChannelAddress,
+  routerPublicIdentifier,
+} from "@mock/mocks";
+
+export function createBrowserNodeMock(
+  stateChannels: IFullChannelState[] | null = null,
+): IBrowserNode {
   const stateChannelsMap = new Map<EthereumAddress, IFullChannelState>();
 
   if (stateChannels == null) {
@@ -42,20 +49,33 @@ export function createBrowserNodeMock(stateChannels: IFullChannelState[] | null 
     });
   } else {
     for (const channelState of stateChannels) {
-      stateChannelsMap.set(EthereumAddress(channelState.channelAddress), channelState);
+      stateChannelsMap.set(
+        EthereumAddress(channelState.channelAddress),
+        channelState,
+      );
     }
   }
 
   const browserNode = td.object<IBrowserNode>();
 
-  td.when(browserNode.setup(routerPublicIdentifier, chainId, DEFAULT_CHANNEL_TIMEOUT.toString())).thenReturn(
-    okAsync({ channelAddress: routerChannelAddress }),
+  td.when(
+    browserNode.setup(
+      routerPublicIdentifier,
+      chainId,
+      DEFAULT_CHANNEL_TIMEOUT.toString(),
+    ),
+  ).thenReturn(okAsync({ channelAddress: routerChannelAddress }));
+  td.when(browserNode.getStateChannels()).thenReturn(
+    okAsync(Array.from(stateChannelsMap.keys())),
   );
-  td.when(browserNode.getStateChannels()).thenReturn(okAsync(Array.from(stateChannelsMap.keys())));
 
   for (const stateChannel of stateChannelsMap.values()) {
-    td.when(browserNode.getStateChannel(EthereumAddress(stateChannel.channelAddress))).thenReturn(
-      okAsync(stateChannelsMap.get(EthereumAddress(stateChannel.channelAddress))),
+    td.when(
+      browserNode.getStateChannel(EthereumAddress(stateChannel.channelAddress)),
+    ).thenReturn(
+      okAsync(
+        stateChannelsMap.get(EthereumAddress(stateChannel.channelAddress)),
+      ),
     );
   }
 

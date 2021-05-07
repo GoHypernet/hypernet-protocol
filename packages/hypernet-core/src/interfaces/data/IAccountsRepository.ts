@@ -1,4 +1,10 @@
-import { EthereumAddress, Balances, AssetBalance, PublicIdentifier, Signature } from "@hypernetlabs/objects";
+import {
+  EthereumAddress,
+  Balances,
+  AssetBalance,
+  PublicIdentifier,
+  Signature,
+} from "@hypernetlabs/objects";
 import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
@@ -13,22 +19,45 @@ import { ResultAsync } from "neverthrow";
  * @todo What is the main role/purpose of this class? Description here.
  */
 export interface IAccountsRepository {
-  getPublicIdentifier(): ResultAsync<PublicIdentifier, BlockchainUnavailableError | VectorError>;
+  getPublicIdentifier(): ResultAsync<
+    PublicIdentifier,
+    BlockchainUnavailableError | VectorError
+  >;
   getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
-  getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError | RouterChannelUnknownError>;
+  getBalances(): ResultAsync<
+    Balances,
+    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+  >;
   getBalanceByAsset(
     assetAddress: EthereumAddress,
-  ): ResultAsync<AssetBalance, BalancesUnavailableError | VectorError | RouterChannelUnknownError>;
+  ): ResultAsync<
+    AssetBalance,
+    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+  >;
   depositFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
-  ): ResultAsync<null, RouterChannelUnknownError | VectorError | LogicalError | BlockchainUnavailableError>;
+  ): ResultAsync<
+    null,
+    | RouterChannelUnknownError
+    | VectorError
+    | LogicalError
+    | BlockchainUnavailableError
+  >;
   withdrawFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
     destinationAddress: EthereumAddress,
-  ): ResultAsync<void, RouterChannelUnknownError | VectorError | BlockchainUnavailableError>;
-  signMessage(message: string): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;
+  ): ResultAsync<
+    void,
+    RouterChannelUnknownError | VectorError | BlockchainUnavailableError
+  >;
+  signMessage(
+    message: string,
+  ): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;
 
-  mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<void, BlockchainUnavailableError>;
+  mintTestToken(
+    amount: BigNumber,
+    to: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError>;
 }

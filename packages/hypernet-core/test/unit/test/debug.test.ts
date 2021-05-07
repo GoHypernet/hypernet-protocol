@@ -1,6 +1,6 @@
-import td from "testdouble";
-import { okAsync, ResultAsync, combine, ok, err, Result } from "neverthrow";
 import { ResultUtils } from "@hypernetlabs/utils";
+import { okAsync, ResultAsync, combine, ok, err, Result } from "neverthrow";
+import td from "testdouble";
 
 interface ITestInterface {
   getName(): string;
@@ -38,7 +38,9 @@ describe("Debugging and basic info tests", () => {
     const mock = td.object<ITestInterface>();
     const mock2 = td.object<ITestInterface>();
 
-    td.when(mock.getAsyncResult()).thenReturn(okAsync<ITestInterface, Error>(mock2));
+    td.when(mock.getAsyncResult()).thenReturn(
+      okAsync<ITestInterface, Error>(mock2),
+    );
 
     // Act
     const result = await mock.getAsyncResult().map((val) => {
@@ -59,7 +61,10 @@ describe("Debugging and basic info tests", () => {
     const tc2 = new TestClass();
 
     // Act
-    const result = await combine([tc1.getAsyncResult(), tc2.getAsyncResult()]).map((vals) => {
+    const result = await combine([
+      tc1.getAsyncResult(),
+      tc2.getAsyncResult(),
+    ]).map((vals) => {
       const [tc1Res, tc2Res] = vals;
 
       expect(tc1Res).toBe(tc1);
@@ -127,7 +132,10 @@ describe("Debugging and basic info tests", () => {
     const tc = new TestClass();
 
     // Act
-    const result = await combine([okAsync(mock), okAsync(tc) as ResultAsync<any, any>]).map((vals) => {
+    const result = await combine([
+      okAsync(mock),
+      okAsync(tc) as ResultAsync<any, any>,
+    ]).map((vals) => {
       const [tcVal, mockVal] = vals;
 
       expect(tcVal).toBe(tc);
@@ -147,7 +155,10 @@ describe("Debugging and basic info tests", () => {
     td.when(mock.getAsyncResult()).thenReturn(okAsync(mock2));
 
     // Act
-    const result = await ResultUtils.combine([okAsync(mock), okAsync(tc) as ResultAsync<any, any>])
+    const result = await ResultUtils.combine([
+      okAsync(mock),
+      okAsync(tc) as ResultAsync<any, any>,
+    ])
       .andThen((vals) => {
         const [mockVal, tcVal] = vals;
 
@@ -179,7 +190,10 @@ describe("Debugging and basic info tests", () => {
     td.when(mock2.getAsyncResult()).thenReturn(okAsync(mock5));
 
     // Act
-    const result = await combine([mock.getAsyncResult(), mock3.getAsyncResult()]).map((vals) => {
+    const result = await combine([
+      mock.getAsyncResult(),
+      mock3.getAsyncResult(),
+    ]).map((vals) => {
       const [mock2Val, mock4Val] = vals;
 
       expect(mock2Val).toBeUndefined();
@@ -203,7 +217,10 @@ describe("Debugging and basic info tests", () => {
     td.when(mock2.getAsyncResult()).thenReturn(okAsync(mock5));
 
     // Act
-    const result = await ResultUtils.combine([mock.getAsyncResult(), mock3.getAsyncResult()])
+    const result = await ResultUtils.combine([
+      mock.getAsyncResult(),
+      mock3.getAsyncResult(),
+    ])
       .andThen((vals) => {
         const [mock2Val, mock4Val] = vals;
 

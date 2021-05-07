@@ -1,12 +1,11 @@
 {
-    "extends": "../../../tsconfig.build.json",
-    "compilerOptions": {
-      "outDir": "../dist/test"
-    },
-    "references": [
-      {
-        "path": "../src"
-      }
-    ]
-  }
-  
+  "extends": "../../../tsconfig.build.json",
+  "compilerOptions": {
+    "outDir": "../dist/test"
+  },
+  "references": [
+    {
+      "path": "../"
+    }
+  ]
+}

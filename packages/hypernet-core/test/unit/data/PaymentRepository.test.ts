@@ -1,5 +1,24 @@
+import {
+  PaymentInternalDetails,
+  PushPayment,
+  EPaymentState,
+  EPaymentType,
+  VectorError,
+  PaymentCreationError,
+} from "@hypernetlabs/objects";
+import { ILogUtils } from "@hypernetlabs/utils";
+import { BigNumber } from "ethers";
+import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
-require("testdouble-jest")(td, jest);
+
+import { PaymentRepository } from "@implementations/data/PaymentRepository";
+import { IPaymentRepository } from "@interfaces/data";
+import {
+  IVectorUtils,
+  IBrowserNodeProvider,
+  IPaymentUtils,
+  ITimeUtils,
+} from "@interfaces/utilities";
 import {
   commonAmount,
   routerChannelAddress,
@@ -22,18 +41,19 @@ import {
   ContextProviderMock,
   PaymentUtilsMockFactory,
 } from "@mock/utils";
-import { PaymentInternalDetails, PushPayment, EPaymentState, EPaymentType, VectorError, PaymentCreationError } from "@hypernetlabs/objects";
-import { IVectorUtils, IBrowserNodeProvider, IPaymentUtils, ITimeUtils } from "@interfaces/utilities";
-import { IPaymentRepository } from "@interfaces/data";
-import { okAsync, errAsync } from "neverthrow";
-import { PaymentRepository } from "@implementations/data/PaymentRepository";
-import { BigNumber } from "ethers";
-import {ILogUtils} from "@hypernetlabs/utils";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("testdouble-jest")(td, jest);
 
 const expirationDate = unixNow + defaultExpirationLength;
 const counterPartyAccount = publicIdentifier2;
 const fromAccount = publicIdentifier;
-const paymentDetails = new PaymentInternalDetails(offerTransferId, insuranceTransferId, parameterizedTransferId, []);
+const paymentDetails = new PaymentInternalDetails(
+  offerTransferId,
+  insuranceTransferId,
+  parameterizedTransferId,
+  [],
+);
 
 class PaymentRepositoryMocks {
   public timeUtils = td.object<ITimeUtils>();
@@ -49,12 +69,14 @@ class PaymentRepositoryMocks {
   public approvedPayment: PushPayment;
 
   constructor(
-    includeOfferTransfer: boolean = true,
-    includeInsuranceTransfer: boolean = true,
-    includeParameterizedTransfer: boolean = true,
+    includeOfferTransfer = true,
+    includeInsuranceTransfer = true,
+    includeParameterizedTransfer = true,
   ) {
     td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow);
-    td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(okAsync(unixNow));
+    td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(
+      okAsync(unixNow),
+    );
 
     this.browserNodeProvider = new BrowserNodeProviderMock(
       includeOfferTransfer,
@@ -73,7 +95,9 @@ class PaymentRepositoryMocks {
       this.approvedPayment,
     );
 
-    td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(okAsync(routerChannelAddress));
+    td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(
+      okAsync(routerChannelAddress),
+    );
 
     td.when(
       this.vectorUtils.createOfferTransfer(
@@ -90,10 +114,19 @@ class PaymentRepositoryMocks {
           merchantUrl: merchantUrl,
         }),
       ),
-    ).thenReturn(okAsync({ channelAddress: routerChannelAddress, transferId: offerTransferId }));
+    ).thenReturn(
+      okAsync({
+        channelAddress: routerChannelAddress,
+        transferId: offerTransferId,
+      }),
+    );
 
     td.when(
-      this.vectorUtils.resolvePaymentTransfer(parameterizedTransferId, commonPaymentId, commonAmount.toString()),
+      this.vectorUtils.resolvePaymentTransfer(
+        parameterizedTransferId,
+        commonPaymentId,
+        commonAmount.toString(),
+      ),
     ).thenReturn(
       okAsync({
         channelAddress: routerChannelAddress,
@@ -181,7 +214,9 @@ class PaymentRepositoryErrorMocks {
   private paymentRepositoryMocks = new PaymentRepositoryMocks();
 
   constructor() {
-    td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(errAsync(new VectorError()));
+    td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(
+      errAsync(new VectorError()),
+    );
   }
 
   public factoryPaymentRepository(): IPaymentRepository {
@@ -255,7 +290,9 @@ describe("PaymentRepository tests", () => {
     expect(result.isErr()).toBeFalsy();
     const resultMap = result._unsafeUnwrap();
     expect(resultMap).toBeInstanceOf(Map);
-    expect(resultMap.get(commonPaymentId)).toBe(paymentRepositoryMocks.approvedPayment);
+    expect(resultMap.get(commonPaymentId)).toBe(
+      paymentRepositoryMocks.approvedPayment,
+    );
   });
 
   test("Should getPaymentsByIds return error if getBrowserNode failed", async () => {
@@ -278,7 +315,10 @@ describe("PaymentRepository tests", () => {
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    const result = await repo.finalizePayment(commonPaymentId, commonAmount.toString());
+    const result = await repo.finalizePayment(
+      commonPaymentId,
+      commonAmount.toString(),
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -292,7 +332,10 @@ describe("PaymentRepository tests", () => {
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    const result = await repo.finalizePayment(commonPaymentId, commonAmount.toString());
+    const result = await repo.finalizePayment(
+      commonPaymentId,
+      commonAmount.toString(),
+    );
     const error = result._unsafeUnwrapErr();
 
     // Assert
@@ -302,7 +345,11 @@ describe("PaymentRepository tests", () => {
 
   test("Should provideStake work and return Payment without any errors", async () => {
     // Arrange
-    const paymentRepositoryMocks = new PaymentRepositoryMocks(true, false, false);
+    const paymentRepositoryMocks = new PaymentRepositoryMocks(
+      true,
+      false,
+      false,
+    );
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
@@ -331,7 +378,11 @@ describe("PaymentRepository tests", () => {
 
   test("Should provideAsset work and return Payment without any errors", async () => {
     // Arrange
-    const paymentRepositoryMocks = new PaymentRepositoryMocks(true, true, false);
+    const paymentRepositoryMocks = new PaymentRepositoryMocks(
+      true,
+      true,
+      false,
+    );
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act

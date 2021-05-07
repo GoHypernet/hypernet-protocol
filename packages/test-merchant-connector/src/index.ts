@@ -1,3 +1,5 @@
+import { Bytes32 } from "@connext/vector-types";
+import { ChannelSigner } from "@connext/vector-utils";
 import {
   IAuthorizeFundsRequest,
   IMerchantConnector,
@@ -5,11 +7,9 @@ import {
   IResolutionResult,
   IRedirectInfo,
 } from "@hypernetlabs/merchant-connector";
-import { Subject } from "rxjs";
-import { Bytes32 } from "@connext/vector-types";
-import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
-import { ChannelSigner } from "@connext/vector-utils";
 import { PushPayment, PullPayment, PublicIdentifier, Balances, EthereumAddress } from "@hypernetlabs/objects";
+import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
+import { Subject } from "rxjs";
 
 declare global {
   interface Window {
@@ -45,7 +45,7 @@ class TestMerchantConnector implements IMerchantConnector {
     // 5) Sign the hash of the data so that people know we sent it
     // Note, it is assumed this is being done on the Merchant's server, and this private key is protected.
     const privateKey = "0x0123456789012345678901234567890123456789012345678901234567890123";
-    let mediator = new ChannelSigner(privateKey);
+    const mediator = new ChannelSigner(privateKey);
     const mediatorSignature = await mediator.signUtilityMessage(hashedData);
 
     // 6) Return both the signature of the hash of the data & the data itself

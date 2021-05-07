@@ -1,7 +1,11 @@
-import expect from "expect";
-import { AVERAGE_TIMEOUT, PUBLIC_IDENTIFIER_DATA_BIND } from "@integration-tests/constants";
-import PageUtils from "@integration-tests/utils/PageUtils";
 import { binding, given, then, when } from "cucumber-tsflow";
+import expect from "expect";
+
+import {
+  AVERAGE_TIMEOUT,
+  PUBLIC_IDENTIFIER_DATA_BIND,
+} from "@integration-tests/constants";
+import PageUtils from "@integration-tests/utils/PageUtils";
 
 @binding([PageUtils])
 class CoreInitialization {
@@ -23,7 +27,9 @@ class CoreInitialization {
   )
   public async thenUserAAccountIsAssociated() {
     await this.pageUtils.page.waitForSelector(PUBLIC_IDENTIFIER_DATA_BIND);
-    const publicIdentifier = await this.pageUtils.getElementInnerText(PUBLIC_IDENTIFIER_DATA_BIND);
+    const publicIdentifier = await this.pageUtils.getElementInnerText(
+      PUBLIC_IDENTIFIER_DATA_BIND,
+    );
 
     expect(!!publicIdentifier).toBeTruthy();
   }

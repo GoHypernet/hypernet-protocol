@@ -1,7 +1,8 @@
-import ko from "knockout";
-import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import html from "./AuthorizedMerchants.template.html";
 import { MerchantUrl } from "@hypernetlabs/objects";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import ko from "knockout";
+
+import html from "./AuthorizedMerchants.template.html";
 
 export class AuthorizedMerchantsParams {
   constructor(public integration: IHypernetWebIntegration) {}

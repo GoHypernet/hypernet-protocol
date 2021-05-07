@@ -1,5 +1,7 @@
 import React from "react";
+
 import { EStatusColor } from "../../theme";
+
 import useStyles from "./Button.style";
 
 interface ButtonProps {
@@ -11,7 +13,7 @@ interface ButtonProps {
   bgColor?: string;
 }
 
-const Button: React.FC<ButtonProps> = (props: ButtonProps) => {
+export const Button: React.FC<ButtonProps> = (props: ButtonProps) => {
   const { onClick, label, disabled } = props;
   const classes = useStyles(props);
   return (
@@ -20,5 +22,3 @@ const Button: React.FC<ButtonProps> = (props: ButtonProps) => {
     </button>
   );
 };
-
-export default Button;

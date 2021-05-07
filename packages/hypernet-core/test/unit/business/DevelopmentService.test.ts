@@ -1,10 +1,11 @@
+import { BigNumber } from "ethers";
+import { okAsync } from "neverthrow";
+import td from "testdouble";
+
 import { DevelopmentService } from "@implementations/business/DevelopmentService";
 import { IDevelopmentService } from "@interfaces/business/IDevelopmentService";
 import { IAccountsRepository } from "@interfaces/data";
-import { BigNumber } from "ethers";
 import { mockUtils } from "@mock/mocks";
-import { okAsync } from "neverthrow";
-import td from "testdouble";
 
 const amount = BigNumber.from("42");
 const to = mockUtils.generateRandomEtherAdress();
@@ -13,7 +14,9 @@ class DevelopmentServiceMocks {
   public accountRepository = td.object<IAccountsRepository>();
 
   constructor() {
-    td.when(this.accountRepository.mintTestToken(amount, to)).thenReturn(okAsync(undefined));
+    td.when(this.accountRepository.mintTestToken(amount, to)).thenReturn(
+      okAsync(undefined),
+    );
   }
 
   public factoryDevelopmentService(): IDevelopmentService {

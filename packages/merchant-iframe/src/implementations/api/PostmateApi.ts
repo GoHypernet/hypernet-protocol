@@ -1,10 +1,4 @@
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
-import Postmate from "postmate";
-import { ChildProxy, IIFrameCallData } from "@hypernetlabs/utils";
-import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 import { IMerchantConnector } from "@hypernetlabs/merchant-connector";
-import { IMerchantIFrameApi } from "@merchant-iframe/interfaces/api";
-import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import {
   PushPayment,
   PullPayment,
@@ -14,12 +8,22 @@ import {
   PaymentId,
   Signature,
 } from "@hypernetlabs/objects";
+import { ChildProxy, IIFrameCallData } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
+import Postmate from "postmate";
+
+import { IMerchantIFrameApi } from "@merchant-iframe/interfaces/api";
+import { IMerchantService } from "@merchant-iframe/interfaces/business";
+import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 
 export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
   protected merchantConnector: IMerchantConnector | undefined;
 
-  constructor(protected merchantService: IMerchantService, protected contextProvider: IContextProvider) {
+  constructor(
+    protected merchantService: IMerchantService,
+    protected contextProvider: IContextProvider,
+  ) {
     super();
     const context = contextProvider.getMerchantContext();
 
@@ -111,6 +115,11 @@ export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
           return this.merchantService.getValidatedSignature();
         }, data.callId);
       },
+      getMerchantUrl: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.merchantService.getMerchantUrl();
+        }, data.callId);
+      },
       merchantIFrameClosed: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getMerchantContext();
@@ -182,7 +191,10 @@ export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
 
       messageSigned: (data: IIFrameCallData<ISignatureResponseData>) => {
         this.returnForModel(() => {
-          return this.merchantService.messageSigned(data.data.message, data.data.signature);
+          return this.merchantService.messageSigned(
+            data.data.message,
+            data.data.signature,
+          );
         }, data.callId);
       },
     });

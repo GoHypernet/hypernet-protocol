@@ -1,1 +1,1 @@
-export { default } from "./SucessContent";
+export * from "./SucessContent";

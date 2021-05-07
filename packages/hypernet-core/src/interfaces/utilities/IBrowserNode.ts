@@ -14,17 +14,25 @@ import {
   TransferId,
 } from "@hypernetlabs/objects";
 import { VectorError } from "@hypernetlabs/objects";
-import { MessageResolver, InsuranceResolver, ParameterizedResolver } from "@hypernetlabs/objects/types/typechain";
+import {
+  MessageResolver,
+  InsuranceResolver,
+  ParameterizedResolver,
+} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IBrowserNode {
   onConditionalTransferResolved(
-    callback: (payload: IConditionalTransferResolvedPayload) => void | Promise<void>,
+    callback: (
+      payload: IConditionalTransferResolvedPayload,
+    ) => void | Promise<void>,
     filter?: (payload: IConditionalTransferResolvedPayload) => boolean,
   ): Promise<void>;
 
   onConditionalTransferCreated(
-    callback: (payload: IConditionalTransferCreatedPayload) => void | Promise<void>,
+    callback: (
+      payload: IConditionalTransferCreatedPayload,
+    ) => void | Promise<void>,
     filter?: (payload: IConditionalTransferCreatedPayload) => boolean,
   ): Promise<void>;
 
@@ -52,22 +60,37 @@ export interface IBrowserNode {
     meta?: any,
   ): ResultAsync<IWithdrawResponse, VectorError>;
 
-  getTransfer(transferId: TransferId): ResultAsync<IFullTransferState, VectorError>;
+  getTransfer(
+    transferId: TransferId,
+  ): ResultAsync<IFullTransferState, VectorError>;
 
-  getActiveTransfers(channelAddress: EthereumAddress): ResultAsync<IFullTransferState[], VectorError>;
+  getActiveTransfers(
+    channelAddress: EthereumAddress,
+  ): ResultAsync<IFullTransferState[], VectorError>;
 
-  getTransfers(startDate: number, endDate: number): ResultAsync<IFullTransferState[], VectorError>;
+  getTransfers(
+    startDate: number,
+    endDate: number,
+  ): ResultAsync<IFullTransferState[], VectorError>;
 
-  init(signature: Signature, account: EthereumAddress): ResultAsync<void, VectorError>;
+  init(
+    signature: Signature,
+    account: EthereumAddress,
+  ): ResultAsync<void, VectorError>;
 
-  getRegisteredTransfers(chainId: number): ResultAsync<IRegisteredTransfer[], VectorError>;
+  getRegisteredTransfers(
+    chainId: number,
+  ): ResultAsync<IRegisteredTransfer[], VectorError>;
 
   signUtilityMessage(message: string): ResultAsync<Signature, VectorError>;
 
   resolveTransfer(
     channelAddress: EthereumAddress,
     transferId: TransferId,
-    transferResolver: MessageResolver | ParameterizedResolver | InsuranceResolver,
+    transferResolver:
+      | MessageResolver
+      | ParameterizedResolver
+      | InsuranceResolver,
   ): ResultAsync<IBasicTransferResponse, VectorError>;
 
   conditionalTransfer(
@@ -85,7 +108,9 @@ export interface IBrowserNode {
 
   getStateChannels(): ResultAsync<EthereumAddress[], VectorError>;
 
-  getStateChannel(channelAddress: EthereumAddress): ResultAsync<IFullChannelState | undefined, VectorError>;
+  getStateChannel(
+    channelAddress: EthereumAddress,
+  ): ResultAsync<IFullChannelState | undefined, VectorError>;
 
   getStateChannelByParticipants(
     counterparty: PublicIdentifier,
@@ -99,5 +124,8 @@ export interface IBrowserNode {
     meta?: any,
   ): ResultAsync<IBasicChannelResponse, VectorError>;
 
-  restoreState(counterpartyIdentifier: PublicIdentifier, chainId: number): ResultAsync<void, VectorError>;
+  restoreState(
+    counterpartyIdentifier: PublicIdentifier,
+    chainId: number,
+  ): ResultAsync<void, VectorError>;
 }

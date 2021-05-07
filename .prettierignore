@@ -1,0 +1,9 @@
+# Ignore artifacts:
+dist
+coverage
+packages/server/public/api-explorer
+
+# Ignore all HTML files:
+# *.html
+
+packages/server/src/implementations/business/services/connector.js

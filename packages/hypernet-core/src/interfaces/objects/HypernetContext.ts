@@ -1,4 +1,3 @@
-import { Subject } from "rxjs";
 import {
   ControlClaim,
   PublicIdentifier,
@@ -9,6 +8,8 @@ import {
   MerchantUrl,
   Signature,
 } from "@hypernetlabs/objects";
+import { Subject } from "rxjs";
+
 import { IMerchantConnectorProxy } from "@interfaces/utilities";
 
 export class HypernetContext {
@@ -24,6 +25,8 @@ export class HypernetContext {
     public onPullPaymentReceived: Subject<PullPayment>,
     public onPushPaymentUpdated: Subject<PushPayment>,
     public onPullPaymentUpdated: Subject<PullPayment>,
+    public onPushPaymentDelayed: Subject<PushPayment>,
+    public onPullPaymentDelayed: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
     public onMerchantAuthorized: Subject<MerchantUrl>,
     public onAuthorizedMerchantUpdated: Subject<MerchantUrl>,
@@ -50,6 +53,8 @@ export class InitializedHypernetContext {
     public onPullPaymentReceived: Subject<PullPayment>,
     public onPushPaymentUpdated: Subject<PushPayment>,
     public onPullPaymentUpdated: Subject<PullPayment>,
+    public onPushPaymentDelayed: Subject<PushPayment>,
+    public onPullPaymentDelayed: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
     public onMerchantAuthorized: Subject<MerchantUrl>,
     public onAuthorizedMerchantUpdated: Subject<MerchantUrl>,

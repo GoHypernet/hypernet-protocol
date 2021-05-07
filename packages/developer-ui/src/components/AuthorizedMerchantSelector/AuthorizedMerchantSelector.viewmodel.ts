@@ -1,6 +1,7 @@
-import ko from "knockout";
-import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { MerchantUrl } from "@hypernetlabs/objects";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import ko from "knockout";
+
 import html from "./AuthorizedMerchantSelector.template.html";
 
 export class AuthorizedMerchantSelectorParams {
@@ -33,7 +34,9 @@ export class AuthorizedMerchantSelectorViewModel {
 
     this.integration.core.onMerchantAuthorized.subscribe((merchant) => {
       const url = merchant.toString();
-      this.authorizedMerchantOptions.push(new AuthorizedMerchantOption(url, url));
+      this.authorizedMerchantOptions.push(
+        new AuthorizedMerchantOption(url, url),
+      );
     });
 
     this.selectedAuthorizedMerchantOption = ko.pureComputed({
@@ -81,7 +84,9 @@ export class AuthorizedMerchantSelectorViewModel {
         for (const keyVal of authorizedMerchants) {
           // TODO: Convert the URL to a comercial name
           const url = keyVal[0].toString();
-          authorizedMerchantOptions.push(new AuthorizedMerchantOption(url, url));
+          authorizedMerchantOptions.push(
+            new AuthorizedMerchantOption(url, url),
+          );
         }
 
         this.authorizedMerchantOptions(authorizedMerchantOptions);

@@ -1,10 +1,12 @@
-import td, { verify } from "testdouble";
-require("testdouble-jest")(td, jest);
-import { ethers } from "ethers";
-import { EthersBlockchainUtils } from "@implementations/utilities";
-import { merchantUrl } from "@mock/mocks";
-import { IBlockchainUtils } from "@interfaces/utilities";
 import { Signature } from "@hypernetlabs/objects";
+import { ethers } from "ethers";
+import td from "testdouble";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("testdouble-jest")(td, jest);
+
+import { EthersBlockchainUtils } from "@implementations/utilities";
+import { IBlockchainUtils } from "@interfaces/utilities";
+import { merchantUrl } from "@mock/mocks";
 import { BlockchainProviderMock } from "@tests/mock/utils";
 
 const validatedSignature = "0xValidatedSignature";
@@ -45,14 +47,22 @@ describe("EthersBlockchainUtils tests", () => {
     const utils = mocks.factoryUtils();
 
     // This private key is from the ethers documentation, don't use it except for testing.
-    const privateKey = "0x0123456789012345678901234567890123456789012345678901234567890123";
+    const privateKey =
+      "0x0123456789012345678901234567890123456789012345678901234567890123";
 
     const wallet = new ethers.Wallet(privateKey);
 
-    let signature = Signature(await wallet._signTypedData(domain, types, value));
+    const signature = Signature(
+      await wallet._signTypedData(domain, types, value),
+    );
 
     // Act
-    const result = utils.verifyTypedData(domain, types, value, Signature(signature));
+    const result = utils.verifyTypedData(
+      domain,
+      types,
+      value,
+      Signature(signature),
+    );
 
     // Assert
     expect(result).toBe(wallet.address);
@@ -64,18 +74,26 @@ describe("EthersBlockchainUtils tests", () => {
     const utils = mocks.factoryUtils();
 
     // This private key is from the ethers documentation, don't use it except for testing.
-    const privateKey = "0x0123456789012345678901234567890123456789012345678901234567890123";
+    const privateKey =
+      "0x0123456789012345678901234567890123456789012345678901234567890123";
 
     const wallet = new ethers.Wallet(privateKey);
 
-    let signature = Signature(await wallet._signTypedData(domain, types, value));
+    const signature = Signature(
+      await wallet._signTypedData(domain, types, value),
+    );
 
     // Act
     const value2 = {
       authorizedMerchantUrl: merchantUrl,
       merchantValidatedSignature: validatedSignature2,
     };
-    const result = utils.verifyTypedData(domain, types, value2, Signature(signature));
+    const result = utils.verifyTypedData(
+      domain,
+      types,
+      value2,
+      Signature(signature),
+    );
 
     // Assert
     expect(result).not.toBe(wallet.address);

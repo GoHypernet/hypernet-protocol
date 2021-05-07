@@ -1,7 +1,7 @@
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { IMessageTransferData } from "@objects/MessageTransferData";
-import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PaymentId } from "@objects/PaymentId";
+import { PublicIdentifier } from "@objects/PublicIdentifier";
 
 export interface IHypernetPullPaymentDetails extends IMessageTransferData {
   paymentId: PaymentId;

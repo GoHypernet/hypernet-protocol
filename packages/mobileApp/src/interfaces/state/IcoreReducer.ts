@@ -1,4 +1,5 @@
-import { Balances, HypernetLink } from "@objects";
+import { Balances, HypernetLink } from "@hypernetlabs/objects";
+
 import { ResultMessage } from "@mobileApp/interfaces/objects";
 
 export enum ECoreViewDataKeys {
@@ -9,7 +10,11 @@ export enum ECoreViewDataKeys {
   authorizedMerchants = "authorizedMerchants",
 }
 
-export type TCoreViewData = string[] | Balances | HypernetLink[] | Map<URL, string>;
+export type TCoreViewData =
+  | string[]
+  | Balances
+  | HypernetLink[]
+  | Map<URL, string>;
 
 export interface ICoreViewData {
   [ECoreViewDataKeys.accounts]?: string[];

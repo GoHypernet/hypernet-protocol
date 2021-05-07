@@ -11,8 +11,19 @@ interface SelectInputProps {
   optionValueKey: string;
 }
 
-const SelectInput: React.FC<SelectInputProps> = (props: SelectInputProps) => {
-  const { onChange, label, disabled, value, fullWidth, options, optionValueKey, optionLabelKey } = props;
+export const SelectInput: React.FC<SelectInputProps> = (
+  props: SelectInputProps,
+) => {
+  const {
+    onChange,
+    label,
+    disabled,
+    value,
+    fullWidth,
+    options,
+    optionValueKey,
+    optionLabelKey,
+  } = props;
 
   return (
     <label>
@@ -28,5 +39,3 @@ const SelectInput: React.FC<SelectInputProps> = (props: SelectInputProps) => {
     </label>
   );
 };
-
-export default SelectInput;

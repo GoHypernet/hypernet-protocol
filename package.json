@@ -35,18 +35,21 @@
     ]
   },
   "scripts": {
-    "bootstrap": "yarn install && lerna init",
-    "build": "lerna run build",
-    "clean": "rimraf ./packages/*/dist",
+    "bootstrap": "yarn install && lerna init && cd packages/developer-ui && yarn bootstrap",
+    "build": "yarn clean && yarn compile && yarn postcompile",
+    "clean": "rimraf ./packages/*/dist ./packages/*/tsconfig.tsbuildinfo",
     "clean-docker": "cd packages/developer-ui && yarn clean-docker",
-    "compile": "tsc --build",
-    "compile-necessary": "cd packages/objects && yarn build && cd ../merchant-connector && yarn build && cd ../utils && yarn compile && cd ../test-merchant-connector && yarn build && cd ../iframe && yarn build && cd ../merchant-iframe && yarn build && cd ../",
-    "format": "lerna run format && yarn format:pkg",
+    "clean-node": "rimraf node_modules packages/*/node_modules yarn.lock",
+    "compile": "tsc --build && yarn alias",
+    "postcompile": "lerna run postcompile",
+    "alias": "lerna run alias",
+    "format": "prettier . --write && yarn format:pkg",
     "format:pkg": "format-package -w",
     "generate-docs": "lerna run generate-docs",
-    "lint": "lerna run lint",
+    "lint": "eslint \"packages/*/{src,test}/**/*.{ts,tsx}\" --quiet",
+    "lint:fix": "eslint \"packages/*/{src,test}/**/*.{ts,tsx}\" --quiet --fix",
     "prepare-for-publish": "cd packages/objects && yarn build && cd ../merchant-connector && yarn build && cd ../utils && yarn build && cd ../hypernet-core && yarn build && cd ../web-ui && yarn build && cd ../web-integration && yarn build && cd ../",
-    "start": "yarn clean && yarn compile-necessary && cd packages/developer-ui && yarn start",
+    "start": "yarn build && cd packages/developer-ui && yarn start",
     "start-developer-ui": "yarn start",
     "start-web-demo": "cd packages/web-demo && yarn start",
     "test": "cd packages/hypernet-core && yarn test"
@@ -58,9 +61,6 @@
   },
   "lint-staged": {
     "*.format:pkg": "prettier --write"
-  },
-  "dependencies": {
-    "browserify-zlib": "^0.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.8.4",
@@ -85,11 +85,14 @@
     "@types/reflect-metadata": "^0.1.0",
     "@types/sjcl": "^1.0.29",
     "@types/uuid": "^8.3.0",
+    "@typescript-eslint/eslint-plugin": "^4.14.0",
+    "@typescript-eslint/parser": "^4.22.0",
     "@webpack-cli/serve": "^1.2.2",
     "babel-jest": "^25.1.0",
     "babel-plugin-module-resolver": "^4.1.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-decorators-legacy": "^1.3.5",
+    "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
     "case-sensitive-paths-webpack-plugin": "^2.3.0",
     "clean-webpack-plugin": "^3.0.0",
@@ -98,7 +101,11 @@
     "css-loader": "^5.0.1",
     "cucumber-tsflow": "^4.0.0-rc.1",
     "env-cmd": "^10.1.0",
-    "eslint": "^6.5.1",
+    "eslint": "^7.18.0",
+    "eslint-config-prettier": "^7.2.0",
+    "eslint-import-resolver-typescript": "^2.4.0",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-prettier": "^3.4.0",
     "ethereum-waffle": "^3.2.1",
     "file-loader": "^6.2.0",
     "format-package": "^6.1.0",
@@ -133,18 +140,22 @@
     "testdouble-jest": "^2.0.0",
     "ts-jest": "^26.3.0",
     "ts-loader": "^8.0.14",
-    "ts-node": "^9.0.0",
+    "ts-node": "^9.1.1",
     "tsc-alias": "^1.2.6",
     "tsconfig-paths": "^3.9.0",
     "tsconfig-paths-webpack-plugin": "^3.3.0",
-    "tslint": "^6.1.3",
-    "tslint-config-prettier": "^1.18.0",
     "typedoc": "^0.20.16",
-    "typescript": "^4.1.3",
+    "typescript": "^4.2.4",
     "url-loader": "3.0.0",
     "wait-on": "^5.2.0",
     "webpack": "^5.19.0",
     "webpack-cli": "^4.4.0",
-    "webpack-dev-server": "^3.11.2"
+    "webpack-dev-server": "^3.11.2",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
+  },
+  "resolutions": {
+    "**/@typescript-eslint/eslint-plugin": "^4.14.0",
+    "**/@typescript-eslint/parser": "^4.22.0"
   }
 }

@@ -62,8 +62,14 @@ declare module "3box" {
   export class BoxSpace {
     public: BoxKeyValueStore;
     private: BoxKeyValueStore;
-    joinThread(name: string, opts?: BoxSpaceOpts_joinThread): Promise<BoxThread>;
-    joinThreadByAddress(threadAddress: string, opts?: BoxSpaceOpts_joinThreadByAddress): Promise<BoxThread>;
+    joinThread(
+      name: string,
+      opts?: BoxSpaceOpts_joinThread,
+    ): Promise<BoxThread>;
+    joinThreadByAddress(
+      threadAddress: string,
+      opts?: BoxSpaceOpts_joinThreadByAddress,
+    ): Promise<BoxThread>;
     subscribeThread(address: string): Promise<void>;
     unsubscribeThread(address: string): Promise<void>;
     subscribedThreads(): Promise<string[]>;
@@ -154,19 +160,46 @@ declare module "3box" {
   }
 
   export const idUtils: BoxStaticIdUtils;
-  export function getProfile(address: any, opts?: BoxObjectOpts_GetProfile): Promise<any>;
-  export function getProfiles(address: any[], opts?: BoxObjectOpts_GetProfiles): undefined;
-  export function getSpace(address: any, name: any, opts?: BoxObjectOpts_GetSpace): undefined;
-  export function getThread(space: any, name: any, opts?: BoxObjectOpts_GetThread): string[];
-  export function listSpaces(address: any, opts?: BoxObjectOpts_ListSpaces): undefined;
-  export function profileGraphQL(query: any, opts?: BoxObjectOpts_profileGraphQL): undefined;
+  export function getProfile(
+    address: any,
+    opts?: BoxObjectOpts_GetProfile,
+  ): Promise<any>;
+  export function getProfiles(
+    address: any[],
+    opts?: BoxObjectOpts_GetProfiles,
+  ): undefined;
+  export function getSpace(
+    address: any,
+    name: any,
+    opts?: BoxObjectOpts_GetSpace,
+  ): undefined;
+  export function getThread(
+    space: any,
+    name: any,
+    opts?: BoxObjectOpts_GetThread,
+  ): string[];
+  export function listSpaces(
+    address: any,
+    opts?: BoxObjectOpts_ListSpaces,
+  ): undefined;
+  export function profileGraphQL(
+    query: any,
+    opts?: BoxObjectOpts_profileGraphQL,
+  ): undefined;
   export function getVerifiedAccounts(profile: any): undefined;
   export function openBox(
     address: string,
-    ethereumProvider: ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
+    ethereumProvider:
+      | ethers.providers.Web3Provider
+      | ethers.providers.JsonRpcProvider,
     opts?: BoxObjectOpts_openBox,
   ): Promise<BoxInstance>;
   export function isLoggedIn(address: any): boolean;
-  export function openSpace(spaceName: string, opts?: BoxObjectOpts_OpenSpace): Promise<BoxSpace>;
-  export function create(ethereumProvider: ethers.providers.Web3Provider): Promise<BoxInstance>;
+  export function openSpace(
+    spaceName: string,
+    opts?: BoxObjectOpts_OpenSpace,
+  ): Promise<BoxSpace>;
+  export function create(
+    ethereumProvider: ethers.providers.Web3Provider,
+  ): Promise<BoxInstance>;
 }

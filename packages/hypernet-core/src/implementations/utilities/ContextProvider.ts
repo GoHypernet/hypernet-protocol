@@ -8,15 +8,24 @@ import {
   MerchantUrl,
   Signature,
 } from "@hypernetlabs/objects";
-import { HypernetContext, InitializedHypernetContext } from "@interfaces/objects";
-import { IContextProvider, IMerchantConnectorProxy } from "@interfaces/utilities";
-import { Subject } from "rxjs";
 import { okAsync, ResultAsync } from "neverthrow";
+import { Subject } from "rxjs";
+
+import {
+  HypernetContext,
+  InitializedHypernetContext,
+} from "@interfaces/objects";
+import {
+  IContextProvider,
+  IMerchantConnectorProxy,
+} from "@interfaces/utilities";
 
 export class ContextProvider implements IContextProvider {
   protected context: HypernetContext;
   protected _initializePromise: Promise<InitializedHypernetContext>;
-  protected _initializePromiseResolve: (value: InitializedHypernetContext) => void;
+  protected _initializePromiseResolve: (
+    value: InitializedHypernetContext,
+  ) => void;
   protected _getAccountPromise: Promise<string>;
   protected _getAccountPromiseResolve: (value: string) => void;
   constructor(
@@ -28,6 +37,8 @@ export class ContextProvider implements IContextProvider {
     onPullPaymentReceived: Subject<PullPayment>,
     onPushPaymentUpdated: Subject<PushPayment>,
     onPullPaymentUpdated: Subject<PullPayment>,
+    onPushPaymentDelayed: Subject<PushPayment>,
+    onPullPaymentDelayed: Subject<PullPayment>,
     onBalancesChanged: Subject<Balances>,
     onMerchantAuthorized: Subject<MerchantUrl>,
     onAuthorizedMerchantUpdated: Subject<MerchantUrl>,
@@ -49,6 +60,8 @@ export class ContextProvider implements IContextProvider {
       onPullPaymentReceived,
       onPushPaymentUpdated,
       onPullPaymentUpdated,
+      onPushPaymentDelayed,
+      onPullPaymentDelayed,
       onBalancesChanged,
       onMerchantAuthorized,
       onAuthorizedMerchantUpdated,
@@ -73,7 +86,10 @@ export class ContextProvider implements IContextProvider {
     return okAsync(this.context);
   }
 
-  public getInitializedContext(): ResultAsync<InitializedHypernetContext, never> {
+  public getInitializedContext(): ResultAsync<
+    InitializedHypernetContext,
+    never
+  > {
     if (!this.contextInitialized()) {
       this.context.onInitializationRequired.next();
     }
@@ -97,6 +113,8 @@ export class ContextProvider implements IContextProvider {
           this.context.onPullPaymentReceived,
           this.context.onPushPaymentUpdated,
           this.context.onPullPaymentUpdated,
+          this.context.onPushPaymentDelayed,
+          this.context.onPullPaymentDelayed,
           this.context.onBalancesChanged,
           this.context.onMerchantAuthorized,
           this.context.onAuthorizedMerchantUpdated,
@@ -123,6 +141,8 @@ export class ContextProvider implements IContextProvider {
   }
 
   protected contextInitialized(): boolean {
-    return this.context.account != null && this.context.publicIdentifier != null;
+    return (
+      this.context.account != null && this.context.publicIdentifier != null
+    );
   }
 }

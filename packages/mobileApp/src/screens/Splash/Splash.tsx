@@ -1,10 +1,11 @@
+import LottieView from "lottie-react-native";
 import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
-import LottieView from "lottie-react-native";
-import { useStateContext } from "@mobileApp/state/store";
-import { NavigationProps } from "@mobileApp/interfaces/containers/IRouter";
 
 import { splashAnimation } from "./animation";
+
+import { NavigationProps } from "@mobileApp/interfaces/containers/IRouter";
+import { useStateContext } from "@mobileApp/state/store";
 
 interface MainHomeProps {
   navigation: NavigationProps;

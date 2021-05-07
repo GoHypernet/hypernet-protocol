@@ -27,13 +27,18 @@ export interface IVectorUtils {
   /**
    *
    */
-  getRouterChannelAddress(): ResultAsync<EthereumAddress, RouterChannelUnknownError | VectorError>;
+  getRouterChannelAddress(): ResultAsync<
+    EthereumAddress,
+    RouterChannelUnknownError | VectorError
+  >;
 
   /**
    *
    * @param transferId
    */
-  resolveMessageTransfer(transferId: TransferId): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
+  resolveMessageTransfer(
+    transferId: TransferId,
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
   resolvePaymentTransfer(
     transferId: TransferId,
@@ -66,7 +71,10 @@ export interface IVectorUtils {
   createPullNotificationTransfer(
     toAddress: PublicIdentifier,
     message: IHypernetPullPaymentDetails,
-  ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
+  ): ResultAsync<
+    IBasicTransferResponse,
+    TransferCreationError | InvalidParametersError
+  >;
 
   /**
    *
@@ -83,7 +91,10 @@ export interface IVectorUtils {
     expiration: number,
     deltaTime?: number,
     deltaAmount?: string,
-  ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
+  ): ResultAsync<
+    IBasicTransferResponse,
+    TransferCreationError | InvalidParametersError
+  >;
 
   /**
    *
@@ -96,7 +107,10 @@ export interface IVectorUtils {
     amount: BigNumber,
     expiration: number,
     UUID: string,
-  ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
+  ): ResultAsync<
+    IBasicTransferResponse,
+    TransferCreationError | InvalidParametersError
+  >;
 
   getTimestampFromTransfer(transfer: IFullTransferState): number;
   getTransferStateFromTransfer(transfer: IFullTransferState): ETransferState;

@@ -1,7 +1,9 @@
-const webpack = require('webpack');
+/* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
+
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
+const webpack = require("webpack");
 
 const configFilePath = require.resolve("./tsconfig.json");
 
@@ -13,7 +15,7 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        loader: 'ts-loader',
+        loader: "ts-loader",
         exclude: /node_modules/,
         options: {
           projectReferences: true,
@@ -52,9 +54,9 @@ module.exports = {
       },
       {
         test: /\.(png|jpe?g|gif)$/i,
-        loader: 'file-loader',
+        loader: "file-loader",
         options: {
-          name: '[path][name].[ext]',
+          name: "[path][name].[ext]",
         },
       },
       {
@@ -77,28 +79,26 @@ module.exports = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js", ".html"],
-    plugins: [
-      new TsconfigPathsPlugin({ configFile: configFilePath })
-    ],
+    plugins: [new TsconfigPathsPlugin({ configFile: configFilePath })],
     fallback: {
-      "crypto": require.resolve("crypto-browserify"),
-      "path": require.resolve("path-browserify"),
-      "stream": require.resolve("stream-browserify"),
-      "http": require.resolve("stream-http"),
-      "https": require.resolve("https-browserify"),
-      "os": require.resolve("os-browserify/browser"),
-      "zlib": require.resolve("browserify-zlib"),
-      "net": false,
-      "tls": false,
-      "fs": false
-    }
+      crypto: require.resolve("crypto-browserify"),
+      path: require.resolve("path-browserify"),
+      stream: require.resolve("stream-browserify"),
+      http: require.resolve("stream-http"),
+      https: require.resolve("https-browserify"),
+      os: require.resolve("os-browserify/browser"),
+      zlib: require.resolve("browserify-zlib"),
+      net: false,
+      tls: false,
+      fs: false,
+    },
   },
   devtool: "inline-source-map",
   plugins: [
     //new CleanWebpackPlugin({ dangerouslyAllowCleanPatternsOutsideProject: false }),
     new webpack.ProvidePlugin({
-      Buffer: ['buffer', 'Buffer'],
-      process: 'process/browser',
-    })
-  ]
+      Buffer: ["buffer", "Buffer"],
+      process: "process/browser",
+    }),
+  ],
 };
