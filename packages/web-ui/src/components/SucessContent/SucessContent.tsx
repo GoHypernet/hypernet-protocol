@@ -1,7 +1,7 @@
 import React from "react";
 
-import useStyles from "@web-ui/components/SucessContent/SucessContent.style";
 import { Button } from "@web-ui/components";
+import useStyles from "@web-ui/components/SucessContent/SucessContent.style";
 
 interface ISucessContentProps {
   label?: string;
