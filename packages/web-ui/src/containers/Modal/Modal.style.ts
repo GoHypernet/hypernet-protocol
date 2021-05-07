@@ -31,10 +31,10 @@ const useStyles = createUseStyles<any, IStyleProps>({
   },
   closeIcon: {
     position: "absolute",
-    right: 5,
+    right: "85%",
     marginRight: 10,
     cursor: "pointer",
-    top: 37,
+    top: 38,
   },
 });
 

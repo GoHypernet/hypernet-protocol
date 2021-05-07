@@ -2,7 +2,7 @@ import { createUseStyles } from "react-jss";
 
 const useStyles = createUseStyles({
   wrapper: {
-    padding: 5,
+    padding: "5px 0",
     width: "100%",
   },
   balancesWrapper: {

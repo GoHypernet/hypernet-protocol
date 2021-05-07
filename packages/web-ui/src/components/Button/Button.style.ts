@@ -21,7 +21,7 @@ const useStyles = createUseStyles({
   materialUIButtonWrapper: {
     display: "flex",
     justifyContent: "center",
-    padding: "35px 25px 20px 25px",
+    padding: "35px 0 20px 0",
   },
   materialUIButton: {
     borderRadius: 2,

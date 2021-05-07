@@ -188,6 +188,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
             merchantUrl={config.merchantUrl}
             merchantName={config.merchantName}
             merchantLogoUrl={config.merchantLogoUrl}
+            finalSuccessContent={config.finalSuccessContent}
           />,
           config.showInModal,
         ),

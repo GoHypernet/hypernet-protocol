@@ -26,13 +26,23 @@ Spinner.show();
 
 const merchantUrl = MerchantUrl("http://localhost:5010");
 
-client.getReady().map((coreProxy) => {
-  client.webUIClient
-    .startOnboardingFlow({
-      merchantUrl: merchantUrl,
-      showInModal: true,
-    })
-    .map(() => {
-      Spinner.hide();
-    });
-});
+client
+  .getReady()
+  .map((coreProxy) => {
+    client.webUIClient
+      .startOnboardingFlow({
+        merchantUrl: merchantUrl,
+        finalSuccessContent:
+          'You are good to go now and purchase credits from <a href="http://localhost:9000/settings/credits">here</a>',
+        showInModal: true,
+      })
+      .map(() => {
+        Spinner.hide();
+      })
+      .mapErr((err) => {
+        console.log("startOnboardingFlow errerrerr", err);
+      });
+  })
+  .mapErr((err) => {
+    console.log("getReady errerrerr", err);
+  });

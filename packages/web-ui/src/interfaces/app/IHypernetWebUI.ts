@@ -22,6 +22,7 @@ export interface IOnboardingFlowParams extends IRenderParams {
   merchantUrl: MerchantUrl;
   merchantName?: string;
   merchantLogoUrl?: string;
+  finalSuccessContent?: string;
 }
 
 export interface IRenderPaymentWidgetParams extends IRenderParams {

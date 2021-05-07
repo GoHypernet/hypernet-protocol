@@ -4,7 +4,7 @@ const useStyles = createUseStyles({
   wrapper: {
     display: "flex",
     flexDirection: "column",
-    padding: "20px 25px",
+    padding: "20px 0",
   },
   textInput: {
     position: "relative",

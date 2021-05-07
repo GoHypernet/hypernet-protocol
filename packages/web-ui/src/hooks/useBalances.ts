@@ -1,10 +1,16 @@
-import { AssetBalance, Balances } from "@hypernetlabs/objects";
+import {
+  AssetBalance,
+  Balances,
+  EthereumAddress,
+  AssetInfo,
+} from "@hypernetlabs/objects";
 import { useEffect, useReducer } from "react";
 import { useAlert } from "react-alert";
 
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { ITokenSelectorOption } from "@web-ui/interfaces";
 import { PaymentTokenOptionViewModel } from "@web-ui/interfaces/objects";
+import { ETHER_HEX_ADDRESS } from "@web-ui/constants";
 
 enum EActionTypes {
   FETCHING = "FETCHING",
@@ -19,6 +25,7 @@ interface IState {
   channelTokenSelectorOptions: ITokenSelectorOption[];
   preferredPaymentToken?: ITokenSelectorOption;
   setPreferredPaymentToken?: (selectedOption?: ITokenSelectorOption) => void;
+  //setPreferredPaymentTokenByAssetInfo?: (assetInfo?: AssetInfo) => void;
 }
 
 type Action =
@@ -49,6 +56,19 @@ export function useBalances() {
           dispatch({
             type: EActionTypes.FETCHED,
             payload: balance,
+          });
+
+          proxy.getPreferredPaymentToken().map((assetInfo) => {
+            console.log("AssetInfo token: ", assetInfo);
+            const tokenName =
+              assetInfo.assetId === ETHER_HEX_ADDRESS ? "ETH" : "HyperToken";
+            dispatch({
+              type: EActionTypes.TOKEN_SELECTED,
+              payload: new PaymentTokenOptionViewModel(
+                tokenName,
+                assetInfo.assetId,
+              ),
+            });
           });
         })
         .mapErr((error) => {
@@ -84,39 +104,6 @@ export function useBalances() {
     preferredPaymentToken: undefined,
   };
 
-  const setPreferredPaymentToken = (selectedOption?: ITokenSelectorOption) => {
-    // save preferred payment token in
-    alert.success("Your default payment token has changed!");
-    dispatch({
-      type: EActionTypes.TOKEN_SELECTED,
-      payload: selectedOption,
-    });
-  };
-
-  const prepareBalances = (balance: Balances): AssetBalance[] => {
-    return balance.assets.reduce((acc: AssetBalance[], assetBalance) => {
-      acc.push(assetBalance);
-      return acc;
-    }, []);
-  };
-
-  const prepareChannelTokenSelectorOptions = (
-    balance: Balances,
-  ): ITokenSelectorOption[] => {
-    return balance.assets.reduce(
-      (acc: ITokenSelectorOption[], assetBalance) => {
-        acc.push(
-          new PaymentTokenOptionViewModel(
-            assetBalance.name,
-            assetBalance.assetAddress,
-          ),
-        );
-        return acc;
-      },
-      [],
-    );
-  };
-
   const [state, dispatch] = useReducer((state: IState, action: Action) => {
     switch (action.type) {
       case EActionTypes.FETCHING:
@@ -149,5 +136,74 @@ export function useBalances() {
     }
   }, initialState);
 
-  return { ...state, setPreferredPaymentToken };
+  /* const setPreferredPaymentTokenByAssetInfo = (assetInfo: AssetInfo) => {
+    if (!assetInfo) {
+      alert.error("Token address most be provided!");
+      return;
+    }
+    const tokenName =
+      assetInfo.assetId === ETHER_HEX_ADDRESS ? "ETH" : "HyperToken";
+    dispatch({
+      type: EActionTypes.TOKEN_SELECTED,
+      payload: new PaymentTokenOptionViewModel(tokenName, assetInfo.assetId),
+    });
+  }; */
+
+  const setPreferredPaymentToken = (selectedOption?: ITokenSelectorOption) => {
+    if (!selectedOption?.address) {
+      alert.error("Token address most be provided!");
+      return;
+    }
+    setLoading(true);
+    proxy
+      .setPreferredPaymentToken(EthereumAddress(selectedOption.address))
+      .match(
+        () => {
+          setLoading(false);
+          alert.success("Your default payment token has changed!");
+          dispatch({
+            type: EActionTypes.TOKEN_SELECTED,
+            payload: selectedOption,
+          });
+        },
+        (err) => {
+          setLoading(false);
+          alert.error(
+            err.message || "An error occurred while saveing payment token",
+          );
+          dispatch({ type: EActionTypes.ERROR, payload: err.message });
+        },
+      );
+  };
+
+  function prepareBalances(balance: Balances): AssetBalance[] {
+    return balance.assets.reduce((acc: AssetBalance[], assetBalance) => {
+      acc.push(assetBalance);
+      return acc;
+    }, []);
+  }
+
+  function prepareChannelTokenSelectorOptions(
+    balance: Balances,
+  ): ITokenSelectorOption[] {
+    return balance.assets.reduce(
+      (acc: ITokenSelectorOption[], assetBalance) => {
+        const tokenName =
+          assetBalance.assetAddress === ETHER_HEX_ADDRESS
+            ? "ETH"
+            : "HyperToken";
+        acc.push(
+          new PaymentTokenOptionViewModel(tokenName, assetBalance.assetAddress),
+        );
+        return acc;
+      },
+      [],
+    );
+  }
+
+  return {
+    ...state,
+    setPreferredPaymentToken,
+    //setPreferredPaymentTokenByAssetInfo,
+  };
 }
