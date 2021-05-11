@@ -227,6 +227,18 @@ export default class CoreWrapper extends ChildProxy {
       parent.emit("onBalancesChanged", val);
     });
 
+    this.core.onDeStorageAuthenticationStarted.subscribe(() => {
+      parent.emit("onDeStorageAuthenticationStarted");
+    });
+
+    this.core.onDeStorageAuthenticationSucceeded.subscribe(() => {
+      parent.emit("onDeStorageAuthenticationSucceeded");
+    });
+
+    this.core.onDeStorageAuthenticationFailed.subscribe(() => {
+      parent.emit("onDeStorageAuthenticationFailed");
+    });
+
     this.core.onMerchantAuthorized.subscribe((val) => {
       parent.emit("onMerchantAuthorized", val.toString());
     });

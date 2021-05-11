@@ -130,6 +130,9 @@ export class HypernetCore implements IHypernetCore {
   public onPushPaymentDelayed: Subject<PushPayment>;
   public onPullPaymentDelayed: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
+  public onDeStorageAuthenticationStarted: Subject<void>;
+  public onDeStorageAuthenticationSucceeded: Subject<void>;
+  public onDeStorageAuthenticationFailed: Subject<void>;
   public onMerchantAuthorized: Subject<MerchantUrl>;
   public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
   public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
@@ -206,6 +209,9 @@ export class HypernetCore implements IHypernetCore {
     this.onPushPaymentDelayed = new Subject<PushPayment>();
     this.onPullPaymentDelayed = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
+    this.onDeStorageAuthenticationStarted = new Subject<void>();
+    this.onDeStorageAuthenticationSucceeded = new Subject<void>();
+    this.onDeStorageAuthenticationFailed = new Subject<void>();
     this.onMerchantAuthorized = new Subject<MerchantUrl>();
     this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
     this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
@@ -240,6 +246,9 @@ export class HypernetCore implements IHypernetCore {
       this.onPushPaymentUpdated,
       this.onPullPaymentUpdated,
       this.onBalancesChanged,
+      this.onDeStorageAuthenticationStarted,
+      this.onDeStorageAuthenticationSucceeded,
+      this.onDeStorageAuthenticationFailed,
       this.onMerchantAuthorized,
       this.onAuthorizedMerchantUpdated,
       this.onAuthorizedMerchantActivationFailed,
@@ -298,8 +307,9 @@ export class HypernetCore implements IHypernetCore {
     this.ajaxUtils = new AxiosAjaxUtils();
     this.blockchainUtils = new EthersBlockchainUtils(this.blockchainProvider);
     this.ceramicUtils = new CeramicUtils(
-      this.blockchainProvider,
       this.configProvider,
+      this.contextProvider,
+      this.blockchainProvider,
       this.logUtils,
     );
 

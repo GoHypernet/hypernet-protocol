@@ -71,7 +71,7 @@ class TestMerchantConnector implements IMerchantConnector {
   private _renderContent() {
     const element = window.document.createElement("div");
     element.innerHTML = `
-      <div style="text-align: center; display: flex; justify-content: center; flex-direction: column;">
+      <div style="text-align: center; display: flex; justify-content: center; flex-direction: column; background-color: #ffffff;">
         <img src="https://res.cloudinary.com/dqueufbs7/image/upload/v1614648372/images/Screen_Shot_2021-03-02_at_04.14.05.png" width="100%" />
         <h2>Galileo merchant connector</h2>
       </div>
