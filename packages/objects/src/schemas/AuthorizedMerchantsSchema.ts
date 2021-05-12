@@ -3,9 +3,9 @@ export const AuthorizedMerchantsSchema = {
   title: "AuthorizedMerchants",
   type: "object",
   properties: {
-    authorizedMerchants: {
+    data: {
       type: "array",
-      title: "AuthorizedMerchants",
+      title: "data",
       items: {
         type: "object",
         title: "AuthorizedMerchantItem",
@@ -24,5 +24,5 @@ export const AuthorizedMerchantsSchema = {
       },
     },
   },
-  required: ["authorizedMerchants"],
+  required: ["data"],
 };

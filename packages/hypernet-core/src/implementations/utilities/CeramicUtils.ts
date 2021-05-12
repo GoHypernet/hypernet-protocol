@@ -11,7 +11,6 @@ import ThreeIdResolver from "@ceramicnetwork/3id-did-resolver";
 import { Resolver, ResolverRegistry } from "did-resolver";
 import { IDX } from "@ceramicstudio/idx";
 import { createDefinition, publishSchema } from "@ceramicstudio/idx-tools";
-import type StreamID from "@ceramicnetwork/streamid";
 
 import {
   CeramicError,
@@ -27,13 +26,10 @@ import {
   IBlockchainProvider,
   IConfigProvider,
   IContextProvider,
+  ISchemaWithName,
+  IRecordWithDataKey,
 } from "@interfaces/utilities";
 import { ILogUtils } from "@hypernetlabs/utils";
-
-interface ISchemaWithName {
-  name: string;
-  schema: TileDocument;
-}
 
 export class CeramicUtils implements ICeramicUtils {
   protected toCeramicError: (e: unknown) => CeramicError = (e) => {
@@ -46,7 +42,10 @@ export class CeramicUtils implements ICeramicUtils {
   protected threeIdResolver: ResolverRegistry | null = null;
   protected didResolver: Resolver | null = null;
   protected idx: IDX | null = null;
-  protected schemas = [AuthorizedMerchantsSchema];
+  protected aliases = {
+    [AuthorizedMerchantsSchema.title]:
+      "kjzl6cwe1jw148ngghzoumihdtadlx9rzodfjlq5tv01jzr7cin7jx3g3gtfxf3",
+  };
 
   constructor(
     protected configProvider: IConfigProvider,
@@ -88,13 +87,7 @@ export class CeramicUtils implements ICeramicUtils {
 
               this.idx = new IDX({
                 ceramic: this.ceramic as CeramicClient,
-                aliases: this.schemas.reduce(
-                  (acc, schema) => ({
-                    [schema.properties.authorizedMerchants.title]:
-                      "kjzl6cwe1jw14au7u7ab9y0ynvk2t9uge8iu1hcb46ucproqr7tgn7h7tl5nmlz",
-                  }),
-                  {},
-                ),
+                aliases: this.aliases,
               });
 
               return okAsync(undefined);
@@ -126,17 +119,18 @@ export class CeramicUtils implements ICeramicUtils {
       CeramicError
     >[] = [];
 
-    for (const schema of this.schemas) {
+    const schemas = [AuthorizedMerchantsSchema];
+    for (const schema of schemas) {
       promisesOfPublishSchema.push(
         ResultAsync.fromPromise(
           publishSchema(this.ceramic, {
             content: schema,
-            name: schema.properties.authorizedMerchants.title,
+            name: schema.title,
           }),
           this.toCeramicError,
         ).map((res) => {
           return {
-            name: schema.properties.authorizedMerchants.title,
+            name: schema.title,
             schema: res,
           };
         }),
@@ -168,15 +162,17 @@ export class CeramicUtils implements ICeramicUtils {
   public writeRecord<T>(
     aliasName: string,
     content: T,
-  ): ResultAsync<StreamID, CeramicError> {
+  ): ResultAsync<void, CeramicError> {
     if (!this.idx) {
       throw new Error("Something went wrong while initializing Ceramic!");
     }
 
     return ResultAsync.fromPromise(
-      this.idx.set(aliasName, content),
+      this.idx.set(aliasName, { data: content }),
       this.toCeramicError,
-    );
+    ).andThen(() => {
+      return okAsync(undefined);
+    });
   }
 
   public readRecord<T>(aliasName: string): ResultAsync<T | null, CeramicError> {
@@ -185,9 +181,11 @@ export class CeramicUtils implements ICeramicUtils {
     }
 
     return ResultAsync.fromPromise(
-      this.idx.get<T>(aliasName),
+      this.idx.get<IRecordWithDataKey<T>>(aliasName),
       this.toCeramicError,
-    );
+    ).andThen((record) => {
+      return okAsync(record?.data || null);
+    });
   }
 
   public removeRecord(aliasName: string): ResultAsync<void, CeramicError> {

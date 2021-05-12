@@ -279,6 +279,13 @@ export class HypernetCore implements IHypernetCore {
     );
     this.timeUtils = new TimeUtils(this.blockchainProvider);
 
+    this.ceramicUtils = new CeramicUtils(
+      this.configProvider,
+      this.contextProvider,
+      this.blockchainProvider,
+      this.logUtils,
+    );
+
     this.browserNodeProvider = new BrowserNodeProvider(
       this.configProvider,
       this.contextProvider,
@@ -306,12 +313,6 @@ export class HypernetCore implements IHypernetCore {
     );
     this.ajaxUtils = new AxiosAjaxUtils();
     this.blockchainUtils = new EthersBlockchainUtils(this.blockchainProvider);
-    this.ceramicUtils = new CeramicUtils(
-      this.configProvider,
-      this.contextProvider,
-      this.blockchainProvider,
-      this.logUtils,
-    );
 
     this.accountRepository = new AccountsRepository(
       this.blockchainProvider,
@@ -347,7 +348,6 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
       this.contextProvider,
       this.vectorUtils,
-      this.localStorageUtils,
       this.merchantConnectorProxyFactory,
       this.blockchainUtils,
       this.ceramicUtils,

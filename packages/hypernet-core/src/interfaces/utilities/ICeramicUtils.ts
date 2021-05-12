@@ -1,5 +1,4 @@
 import { ResultAsync } from "neverthrow";
-import type StreamID from "@ceramicnetwork/streamid";
 import { TileDocument } from "@ceramicnetwork/stream-tile";
 
 import {
@@ -19,7 +18,16 @@ export interface ICeramicUtils {
   writeRecord<T>(
     aliasName: string,
     content: T,
-  ): ResultAsync<StreamID, CeramicError>;
+  ): ResultAsync<void, CeramicError>;
   readRecord<T>(aliasName: string): ResultAsync<T | null, CeramicError>;
   removeRecord(aliasName: string): ResultAsync<void, CeramicError>;
+}
+
+export interface ISchemaWithName {
+  name: string;
+  schema: TileDocument;
+}
+
+export interface IRecordWithDataKey<T> {
+  data: T;
 }

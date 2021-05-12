@@ -142,7 +142,6 @@ class MerchantConnectorRepositoryMocks {
       this.configProvider,
       this.contextProvider,
       this.vectorUtils,
-      this.localStorageUtils,
       this.merchantConnectorProxyFactory,
       this.blockchainUtils,
       this.ceramicUtils,
