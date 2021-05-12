@@ -10,9 +10,7 @@ import {
   MerchantUrl,
   Signature,
   Balances,
-} from "@hypernetlabs/objects";
-import { EPaymentState } from "@hypernetlabs/objects";
-import {
+  EPaymentState,
   AcceptPaymentError,
   InsufficientBalanceError,
   InvalidParametersError,
@@ -46,7 +44,7 @@ import {
 } from "@mock/mocks";
 import { ConfigProviderMock, ContextProviderMock } from "@tests/mock/utils";
 
-const requiredStake = BigNumber.from("43");
+const requiredStake = BigNumber.from("42");
 const paymentToken = mockUtils.generateRandomPaymentToken();
 const amount = BigNumber.from("42");
 const expirationDate = unixNow + defaultExpirationLength;
