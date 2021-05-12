@@ -62,5 +62,5 @@ export class HypernetCoreRepository implements IHypernetCoreRepository {
     this.childApi?.emit("signMessageRequested", message);
 
     return okAsync(undefined);
-}
+  }
 }
