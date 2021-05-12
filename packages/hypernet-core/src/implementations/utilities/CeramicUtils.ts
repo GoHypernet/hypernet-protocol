@@ -1,16 +1,4 @@
-import {
-  CeramicError,
-  BlockchainUnavailableError,
-} from "@hypernetlabs/objects";
-import { EthereumAddress, Document } from "@hypernetlabs/objects";
-import { okAsync, ResultAsync, errAsync, err } from "neverthrow";
-import {
-  ICeramicUtils,
-  IBlockchainProvider,
-  IConfigProvider,
-  IContextProvider,
-} from "@interfaces/utilities";
-import { ILogUtils } from "@hypernetlabs/utils";
+import { okAsync, ResultAsync, errAsync } from "neverthrow";
 import {
   ThreeIdConnect,
   EthereumAuthProvider,
@@ -18,20 +6,47 @@ import {
 } from "@3id/connect";
 import CeramicClient from "@ceramicnetwork/http-client";
 import { DID } from "dids";
-//import { Doctype } from "@ceramicnetwork/common/lib/doctype";
+import { TileDocument } from "@ceramicnetwork/stream-tile";
 import ThreeIdResolver from "@ceramicnetwork/3id-did-resolver";
-import { Resolver, DIDResolutionResult, ResolverRegistry } from "did-resolver";
+import { Resolver, ResolverRegistry } from "did-resolver";
+import { IDX } from "@ceramicstudio/idx";
+import { createDefinition, publishSchema } from "@ceramicstudio/idx-tools";
+import type StreamID from "@ceramicnetwork/streamid";
+
+import {
+  CeramicError,
+  BlockchainUnavailableError,
+} from "@hypernetlabs/objects";
+import {
+  EthereumAddress,
+  AuthorizedMerchantsSchema,
+} from "@hypernetlabs/objects";
+import { ResultUtils } from "@hypernetlabs/utils";
+import {
+  ICeramicUtils,
+  IBlockchainProvider,
+  IConfigProvider,
+  IContextProvider,
+} from "@interfaces/utilities";
+import { ILogUtils } from "@hypernetlabs/utils";
+
+interface ISchemaWithName {
+  name: string;
+  schema: TileDocument;
+}
 
 export class CeramicUtils implements ICeramicUtils {
   protected toCeramicError: (e: unknown) => CeramicError = (e) => {
     console.log("toCeramicError e: ", e);
     return new CeramicError(e as Error);
   };
-  protected ceramic: CeramicClient = {} as CeramicClient;
-  protected threeIdConnect: ThreeIdConnect = {} as ThreeIdConnect;
-  protected authProvider: EthereumAuthProvider = {} as EthereumAuthProvider;
-  protected threeIdResolver: ResolverRegistry = {} as ResolverRegistry;
-  protected didResolver: Resolver = {} as Resolver;
+  protected ceramic: CeramicClient | null = null;
+  protected threeIdConnect: ThreeIdConnect | null = null;
+  protected authProvider: EthereumAuthProvider | null = null;
+  protected threeIdResolver: ResolverRegistry | null = null;
+  protected didResolver: Resolver | null = null;
+  protected idx: IDX | null = null;
+  protected schemas = [AuthorizedMerchantsSchema];
 
   constructor(
     protected configProvider: IConfigProvider,
@@ -40,86 +55,151 @@ export class CeramicUtils implements ICeramicUtils {
     protected logUtils: ILogUtils,
   ) {}
 
-  public AuthenticateUser(): ResultAsync<
+  public authenticateUser(): ResultAsync<
     void,
     CeramicError | BlockchainUnavailableError
   > {
-    return this._setup().andThen(() => {
-      return this._checkInitialization().andThen(() => {
-        return this.contextProvider
-          .getInitializedContext()
-          .andThen((context) => {
-            return this._getDidProvider().andThen((didProvider) => {
-              this.ceramic.setDID(
-                new DID({
-                  provider: didProvider,
-                  resolver: ThreeIdResolver.getResolver(this.ceramic),
-                }),
-              );
+    return this.contextProvider.getInitializedContext().andThen((context) => {
+      return this._setup().andThen(() => {
+        return this._getDidProvider().andThen((didProvider) => {
+          if (!this.ceramic || !this.threeIdResolver) {
+            throw new Error("Something went wrong while initializing Ceramic!");
+          }
 
-              if (!this.ceramic.did) {
-                return errAsync(
-                  this.toCeramicError(new Error("did is undefined")),
-                );
-              }
+          this.ceramic.setDID(
+            new DID({
+              provider: didProvider,
+              resolver: this.threeIdResolver,
+            }),
+          );
 
-              context.onDeStorageAuthenticationStarted.next();
+          if (!this.ceramic.did) {
+            return errAsync(this.toCeramicError(new Error("did is undefined")));
+          }
 
-              return ResultAsync.fromPromise(
-                this.ceramic.did?.authenticate(),
-                this.toCeramicError,
-              )
-                .andThen(() => {
-                  context.onDeStorageAuthenticationSucceeded.next();
+          context.onDeStorageAuthenticationStarted.next();
 
-                  return okAsync(undefined);
-                })
-                .mapErr((e) => {
-                  context.onDeStorageAuthenticationFailed.next();
+          return ResultAsync.fromPromise(
+            this.ceramic.did?.authenticate(),
+            this.toCeramicError,
+          )
+            .andThen(() => {
+              context.onDeStorageAuthenticationSucceeded.next();
 
-                  return e as CeramicError;
-                });
+              this.idx = new IDX({
+                ceramic: this.ceramic as CeramicClient,
+                aliases: this.schemas.reduce(
+                  (acc, schema) => ({
+                    [schema.properties.authorizedMerchants.title]:
+                      "kjzl6cwe1jw14au7u7ab9y0ynvk2t9uge8iu1hcb46ucproqr7tgn7h7tl5nmlz",
+                  }),
+                  {},
+                ),
+              });
+
+              return okAsync(undefined);
+            })
+            .mapErr((e) => {
+              context.onDeStorageAuthenticationFailed.next();
+              return e as CeramicError;
             });
-          });
+        });
       });
     });
   }
 
-  /* public writeDocument(document: Document): ResultAsync<Doctype, CeramicError> {
-    return this._checkInitialization().andThen(() => {
-      return ResultAsync.fromPromise(
-        this.ceramic.createDocument(document.type, {
-          content: { data: document.content },
-          metadata: {
-            controllers: document.controllers || [
-              this.ceramic?.did?.id as string,
-            ],
-            family: document.family,
-          },
+  public initiateDefinitions(): ResultAsync<
+    TileDocument[],
+    CeramicError | BlockchainUnavailableError
+  > {
+    if (!this.ceramic || !this.idx) {
+      throw new Error("Something went wrong while initializing Ceramic!");
+    }
+
+    const promisesOfPublishSchema: ResultAsync<
+      ISchemaWithName,
+      CeramicError
+    >[] = [];
+
+    const promisesOfCreateDifnition: ResultAsync<
+      TileDocument,
+      CeramicError
+    >[] = [];
+
+    for (const schema of this.schemas) {
+      promisesOfPublishSchema.push(
+        ResultAsync.fromPromise(
+          publishSchema(this.ceramic, {
+            content: schema,
+            name: schema.properties.authorizedMerchants.title,
+          }),
+          this.toCeramicError,
+        ).map((res) => {
+          return {
+            name: schema.properties.authorizedMerchants.title,
+            schema: res,
+          };
         }),
-        this.toCeramicError,
       );
-    });
-  } */
+    }
 
-  /* public readDocument(
-    documentFamilyName: string,
-  ): ResultAsync<Doctype, CeramicError> {
-    return this._getDocumentsByDID().andThen(
-      (didResolutionResult: DIDResolutionResult) => {
-        console.log("didResolutionResult: ", didResolutionResult);
-        // TODO: Ceramic repo is still in maintenance, complete the implementation here once Ceramic version becomes stable
-        return okAsync({} as Doctype);
-      },
-    );
-  } */
+    return ResultUtils.combine(promisesOfPublishSchema)
+      .andThen((publishedSchemas) => {
+        for (const publishedSchema of publishedSchemas) {
+          promisesOfCreateDifnition.push(
+            ResultAsync.fromPromise(
+              createDefinition(this.ceramic as CeramicClient, {
+                name: publishedSchema.name,
+                description: publishedSchema.name,
+                schema: publishedSchema.schema.commitId.toUrl(),
+              }),
+              this.toCeramicError,
+            ),
+          );
+        }
 
-  /* private _getDocumentsByDID(): ResultAsync<DIDResolutionResult, CeramicError> {
+        return ResultUtils.combine(promisesOfCreateDifnition);
+      })
+      .mapErr((e) => {
+        return e as CeramicError;
+      });
+  }
+
+  public writeRecord<T>(
+    aliasName: string,
+    content: T,
+  ): ResultAsync<StreamID, CeramicError> {
+    if (!this.idx) {
+      throw new Error("Something went wrong while initializing Ceramic!");
+    }
+
     return ResultAsync.fromPromise(
-      this.didResolver.resolve(this.ceramic?.did?.id as string),
+      this.idx.set(aliasName, content),
       this.toCeramicError,
     );
-  } */
+  }
+
+  public readRecord<T>(aliasName: string): ResultAsync<T | null, CeramicError> {
+    if (!this.idx) {
+      throw new Error("Something went wrong while initializing Ceramic!");
+    }
+
+    return ResultAsync.fromPromise(
+      this.idx.get<T>(aliasName),
+      this.toCeramicError,
+    );
+  }
+
+  public removeRecord(aliasName: string): ResultAsync<void, CeramicError> {
+    if (!this.idx) {
+      throw new Error("Something went wrong while initializing Ceramic!");
+    }
+
+    return ResultAsync.fromPromise(
+      this.idx.remove(aliasName),
+      this.toCeramicError,
+    );
+  }
 
   private _setup(): ResultAsync<void, CeramicError> {
     return this.configProvider.getConfig().andThen((config) => {
@@ -130,8 +210,8 @@ export class CeramicUtils implements ICeramicUtils {
           addresses[0],
         );
         this.threeIdConnect = new ThreeIdConnect();
-        //this.threeIdResolver = ThreeIdResolver.getResolver(this.ceramic);
-        //this.didResolver = new Resolver(this.threeIdResolver);
+        this.threeIdResolver = ThreeIdResolver.getResolver(this.ceramic);
+        this.didResolver = new Resolver(this.threeIdResolver);
         return okAsync(undefined);
       });
     });
@@ -151,12 +231,15 @@ export class CeramicUtils implements ICeramicUtils {
   }
 
   private _getDidProvider(): ResultAsync<DidProviderProxy, CeramicError> {
+    if (!this.authProvider || !this.threeIdConnect) {
+      throw new Error("Something went wrong while initializing Ceramic!");
+    }
+
     return ResultAsync.fromPromise(
       this.threeIdConnect.connect(this.authProvider),
       this.toCeramicError,
     ).andThen(() => {
       const didProvider = this.threeIdConnect?.getDidProvider();
-      console.log("didProvider: ", didProvider);
 
       if (!didProvider) {
         return errAsync(
@@ -165,23 +248,5 @@ export class CeramicUtils implements ICeramicUtils {
       }
       return okAsync(didProvider);
     });
-  }
-
-  private _checkInitialization(): ResultAsync<void, CeramicError> {
-    if (
-      !Object.keys(this.ceramic).length ||
-      !Object.keys(this.authProvider).length ||
-      !Object.keys(this.threeIdConnect).length
-      //!Object.keys(this.threeIdResolver).length ||
-      //!Object.keys(this.didResolver).length
-    ) {
-      return errAsync(
-        this.toCeramicError(
-          new Error("Something went wrong while initializing Ceramic!"),
-        ),
-      );
-    } else {
-      return okAsync(undefined);
-    }
   }
 }

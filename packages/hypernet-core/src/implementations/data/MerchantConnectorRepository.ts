@@ -14,7 +14,6 @@ import {
   Signature,
   MerchantUrl,
   Balances,
-  Document,
 } from "@hypernetlabs/objects";
 import {
   LogicalError,

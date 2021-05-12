@@ -29,7 +29,7 @@ export * from "@objects/UUID";
 export * from "@objects/PrivateCredentials";
 export * from "@objects/vector";
 export * from "@objects/MerchantUrl";
-export * from "@objects/Document";
 export * from "@objects/errors";
 export * from "@objects/interfaces";
 export * from "@objects/typing";
+export * from "@objects/schemas";

@@ -1,16 +1,25 @@
 import { ResultAsync } from "neverthrow";
+import type StreamID from "@ceramicnetwork/streamid";
+import { TileDocument } from "@ceramicnetwork/stream-tile";
+
 import {
   CeramicError,
   BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
-import { Document } from "@hypernetlabs/objects";
-//import { Doctype } from "@ceramicnetwork/http-client/lib/document";
 
 export interface ICeramicUtils {
-  AuthenticateUser(): ResultAsync<
+  authenticateUser(): ResultAsync<
     void,
     CeramicError | BlockchainUnavailableError
   >;
-  /* writeDocument(document: Document): ResultAsync<Doctype, CeramicError>;
-  readDocument(documentFamilyName: string): ResultAsync<Doctype, CeramicError>; */
+  initiateDefinitions(): ResultAsync<
+    TileDocument[],
+    CeramicError | BlockchainUnavailableError
+  >;
+  writeRecord<T>(
+    aliasName: string,
+    content: T,
+  ): ResultAsync<StreamID, CeramicError>;
+  readRecord<T>(aliasName: string): ResultAsync<T | null, CeramicError>;
+  removeRecord(aliasName: string): ResultAsync<void, CeramicError>;
 }
