@@ -7,27 +7,39 @@ import {
   ILogUtils,
   LogUtils,
 } from "@hypernetlabs/utils";
+import { okAsync } from "neverthrow";
 
 import {
-  PostmateApi,
+  HypernetCoreListener,
   MerchantConnectorListener,
 } from "@merchant-iframe/implementations/api";
-import { MerchantService } from "@merchant-iframe/implementations/business";
 import {
+  DisplayService,
+  MerchantService,
+  PaymentService,
+} from "@merchant-iframe/implementations/business";
+import {
+  HypernetCoreRepository,
   MerchantConnectorRepository,
   PersistenceRepository,
 } from "@merchant-iframe/implementations/data";
 import { ContextProvider } from "@merchant-iframe/implementations/utils";
 import {
   IMerchantConnectorListener,
-  IMerchantIFrameApi,
+  IHypernetCoreListener,
 } from "@merchant-iframe/interfaces/api";
-import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import {
+  IDisplayService,
+  IMerchantService,
+  IPaymentService,
+} from "@merchant-iframe/interfaces/business";
+import {
+  IHypernetCoreRepository,
   IMerchantConnectorRepository,
   IPersistenceRepository,
 } from "@merchant-iframe/interfaces/data";
 import { IContextProvider } from "@merchant-iframe/interfaces/utils";
+
 export class MerchantIframe {
   protected contextProvider: IContextProvider;
   protected ajaxUtils: IAjaxUtils;
@@ -36,10 +48,13 @@ export class MerchantIframe {
 
   protected merchantConnectorRepository: IMerchantConnectorRepository;
   protected persistenceRepository: IPersistenceRepository;
+  protected hypernetCoreRepository: IHypernetCoreRepository;
 
+  protected displayService: IDisplayService;
   protected merchantService: IMerchantService;
+  protected paymentService: IPaymentService;
 
-  protected merchantIframeApi: IMerchantIFrameApi;
+  protected hypernetCoreListener: IHypernetCoreListener;
   protected merchantConnectorListener: IMerchantConnectorListener;
 
   constructor() {
@@ -55,20 +70,28 @@ export class MerchantIframe {
     this.persistenceRepository = new PersistenceRepository(
       this.localStorageUtils,
     );
+    this.hypernetCoreRepository = new HypernetCoreRepository(
+      this.contextProvider,
+    );
 
     this.merchantService = new MerchantService(
       this.merchantConnectorRepository,
       this.persistenceRepository,
+      this.hypernetCoreRepository,
       this.contextProvider,
     );
+    this.paymentService = new PaymentService(this.hypernetCoreRepository);
+    this.displayService = new DisplayService(this.hypernetCoreRepository);
 
-    this.merchantIframeApi = new PostmateApi(
+    this.hypernetCoreListener = new HypernetCoreListener(
       this.merchantService,
       this.contextProvider,
     );
     this.merchantConnectorListener = new MerchantConnectorListener(
       this.contextProvider,
       this.merchantService,
+      this.paymentService,
+      this.displayService,
       this.logUtils,
     );
 
@@ -83,10 +106,8 @@ export class MerchantIframe {
         context.merchantUrl = merchantUrl;
         this.contextProvider.setMerchantContext(context);
 
-        // We're ready to answer questions about the connector, we can activate the API
-        // Note, it would be better to have a waitForValidated() function down lower so that the API
-        // can be activated immediately.
-        return this.merchantIframeApi.activateModel();
+        // Start the Hypernet Core listener API up
+        return this.hypernetCoreListener.activateModel();
       })
       .andThen(() => {
         // Now that we have a merchant URL, let's validate the merchant's connector
@@ -97,8 +118,10 @@ export class MerchantIframe {
         // the connector if it's eligible.
         return this.merchantService.autoActivateMerchantConnector();
       })
-      .mapErr((e) => {
-        console.log(e);
+      .orElse((e) => {
+        this.logUtils.error("Failure during merchant iframe initialization");
+        this.logUtils.error(e);
+        return okAsync(null);
       });
   }
 }

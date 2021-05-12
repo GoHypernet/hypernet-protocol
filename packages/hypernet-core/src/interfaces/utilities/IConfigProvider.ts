@@ -1,5 +1,4 @@
-import { LogicalError } from "@hypernetlabs/objects";
-import { HypernetConfig } from "@hypernetlabs/objects";
+import { LogicalError, HypernetConfig } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 /**
@@ -8,3 +7,5 @@ import { ResultAsync } from "neverthrow";
 export interface IConfigProvider {
   getConfig(): ResultAsync<HypernetConfig, never>;
 }
+
+export const IConfigProviderType = Symbol.for("IConfigProvider");

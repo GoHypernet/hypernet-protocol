@@ -25,19 +25,29 @@ import {
   BlockchainUnavailableError,
   EPaymentState,
 } from "@hypernetlabs/objects";
-import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
+import { injectable, inject } from "inversify";
 import { err, errAsync, ok, okAsync, ResultAsync, Result } from "neverthrow";
 
 import { IPaymentService } from "@interfaces/business";
 import {
   IAccountsRepository,
+  IAccountsRepositoryType,
   ILinkRepository,
+  ILinkRepositoryType,
   IMerchantConnectorRepository,
+  IMerchantConnectorRepositoryType,
   IPaymentRepository,
+  IPaymentRepositoryType,
 } from "@interfaces/data";
 import { HypernetContext } from "@interfaces/objects";
-import { IConfigProvider, IContextProvider } from "@interfaces/utilities";
+import {
+  IConfigProvider,
+  IConfigProviderType,
+  IContextProvider,
+  IContextProviderType,
+} from "@interfaces/utilities";
 
 type PaymentsByIdsErrors =
   | RouterChannelUnknownError
@@ -60,19 +70,23 @@ type PaymentsByIdsErrors =
  *
  * @todo we should also finalize the insurance transfer, and maybe finalize the offer transfer
  */
+@injectable()
 export class PaymentService implements IPaymentService {
   /**
    * Creates an instanceo of the paymentService.
    */
 
   constructor(
-    protected linkRepository: ILinkRepository,
+    @inject(ILinkRepositoryType) protected linkRepository: ILinkRepository,
+    @inject(IAccountsRepositoryType)
     protected accountRepository: IAccountsRepository,
-    protected contextProvider: IContextProvider,
-    protected configProvider: IConfigProvider,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
+    @inject(IConfigProviderType) protected configProvider: IConfigProvider,
+    @inject(IPaymentRepositoryType)
     protected paymentRepository: IPaymentRepository,
+    @inject(IMerchantConnectorRepositoryType)
     protected merchantConnectorRepository: IMerchantConnectorRepository,
-    protected logUtils: ILogUtils,
+    @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
   /**
@@ -90,7 +104,7 @@ export class PaymentService implements IPaymentService {
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumber,
     expirationDate: number,
-    deltaAmount: string,
+    deltaAmount: BigNumber,
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
@@ -104,7 +118,7 @@ export class PaymentService implements IPaymentService {
         counterPartyAccount,
         totalAuthorized.toString(),
         deltaTime,
-        deltaAmount,
+        deltaAmount.toString(),
         expirationDate,
         requiredStake.toString(),
         paymentToken,
@@ -181,9 +195,9 @@ export class PaymentService implements IPaymentService {
    */
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: string,
+    amount: BigNumber,
     expirationDate: number,
-    requiredStake: string,
+    requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
   ): ResultAsync<PushPayment, PaymentCreationError | LogicalError> {
@@ -191,9 +205,9 @@ export class PaymentService implements IPaymentService {
     return ResultUtils.combine([
       this.paymentRepository.createPushPayment(
         counterPartyAccount,
-        amount,
+        amount.toString(),
         expirationDate,
-        requiredStake,
+        requiredStake.toString(),
         paymentToken,
         merchantUrl,
       ),

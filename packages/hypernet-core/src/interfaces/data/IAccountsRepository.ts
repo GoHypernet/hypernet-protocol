@@ -4,8 +4,6 @@ import {
   AssetBalance,
   PublicIdentifier,
   Signature,
-} from "@hypernetlabs/objects";
-import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
   LogicalError,
@@ -61,3 +59,5 @@ export interface IAccountsRepository {
     to: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError>;
 }
+
+export const IAccountsRepositoryType = Symbol.for("IAccountsRepository");

@@ -1,2 +1,2 @@
-export * from "./MerchantConnectorListener";
-export * from "./PostmateApi";
+export * from "@merchant-iframe/implementations/api/MerchantConnectorListener";
+export * from "@merchant-iframe/implementations/api/HypernetCoreListener";

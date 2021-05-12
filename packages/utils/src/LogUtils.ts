@@ -8,7 +8,7 @@ export class LogUtils implements ILogUtils {
   protected logger: pino.Logger;
 
   constructor() {
-    this.logger = pino();
+    this.logger = pino({ level: "debug" });
   }
 
   public debug(message?: any, ...optionalParams: any[]): void {

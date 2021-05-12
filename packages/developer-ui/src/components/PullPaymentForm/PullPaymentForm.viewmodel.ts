@@ -87,7 +87,7 @@ export class PullPaymentFormViewModel {
             this.counterparty(),
             amount,
             expirationDate,
-            deltaAmount.toString(),
+            deltaAmount,
             deltaTime,
             requiredStake,
             selectedPaymentTokenAddress,

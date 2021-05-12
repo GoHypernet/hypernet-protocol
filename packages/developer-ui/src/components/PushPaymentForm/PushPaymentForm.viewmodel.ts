@@ -80,9 +80,9 @@ export class PushPaymentFormViewModel {
 
           return await this.integration.core.sendFunds(
             this.counterparty(),
-            amount.toString(),
+            amount,
             expirationDate.unix(),
-            requiredStake.toString(),
+            requiredStake,
             selectedPaymentTokenAddress,
             selectedMerchantUrl,
           );

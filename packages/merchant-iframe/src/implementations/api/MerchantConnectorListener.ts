@@ -1,15 +1,29 @@
-import { ILogUtils } from "@hypernetlabs/utils";
+import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
+import { injectable, inject } from "inversify";
 import { okAsync, ResultAsync } from "neverthrow";
 
 import { IMerchantConnectorListener } from "@merchant-iframe/interfaces/api";
-import { IMerchantService } from "@merchant-iframe/interfaces/business";
-import { IContextProvider } from "@merchant-iframe/interfaces/utils";
+import {
+  IMerchantService,
+  IMerchantServiceType,
+  IDisplayService,
+  IDisplayServiceType,
+  IPaymentService,
+  IPaymentServiceType,
+} from "@merchant-iframe/interfaces/business";
+import {
+  IContextProvider,
+  IContextProviderType,
+} from "@merchant-iframe/interfaces/utils";
 
+@injectable()
 export class MerchantConnectorListener implements IMerchantConnectorListener {
   constructor(
-    protected contextProvider: IContextProvider,
-    protected merchantService: IMerchantService,
-    protected logUtils: ILogUtils,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
+    @inject(IMerchantServiceType) protected merchantService: IMerchantService,
+    @inject(IPaymentServiceType) protected paymentService: IPaymentService,
+    @inject(IDisplayServiceType) protected displayService: IDisplayService,
+    @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
   public initialize(): ResultAsync<void, Error> {
@@ -34,6 +48,34 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
             .mapErr((e) => {
               this.logUtils.error(e);
             });
+        });
+      }
+
+      if (connector.sendFundsRequested != null) {
+        connector.sendFundsRequested.subscribe((request) => {
+          this.paymentService.sendFunds(request).mapErr((e) => {
+            this.logUtils.error(e);
+          });
+        });
+      }
+
+      if (connector.authorizeFundsRequested != null) {
+        connector.authorizeFundsRequested.subscribe((request) => {
+          this.paymentService.authorizeFunds(request).mapErr((e) => {
+            this.logUtils.error(e);
+          });
+        });
+      }
+
+      if (connector.displayRequested != null) {
+        connector.displayRequested.subscribe(() => {
+          this.displayService.displayRequested();
+        });
+      }
+
+      if (connector.closeRequested != null) {
+        connector.closeRequested.subscribe(() => {
+          this.displayService.closeRequested();
         });
       }
     });

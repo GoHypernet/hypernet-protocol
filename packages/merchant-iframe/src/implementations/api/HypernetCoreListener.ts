@@ -10,61 +10,31 @@ import {
 } from "@hypernetlabs/objects";
 import { ChildProxy, IIFrameCallData } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
+import { injectable, inject } from "inversify";
+import { okAsync } from "neverthrow";
 import Postmate from "postmate";
 
-import { IMerchantIFrameApi } from "@merchant-iframe/interfaces/api";
-import { IMerchantService } from "@merchant-iframe/interfaces/business";
-import { IContextProvider } from "@merchant-iframe/interfaces/utils";
+import { IHypernetCoreListener } from "@merchant-iframe/interfaces/api";
+import {
+  IMerchantService,
+  IMerchantServiceType,
+} from "@merchant-iframe/interfaces/business";
+import {
+  IContextProvider,
+  IContextProviderType,
+} from "@merchant-iframe/interfaces/utils";
 
-export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
+@injectable()
+export class HypernetCoreListener
+  extends ChildProxy
+  implements IHypernetCoreListener {
   protected merchantConnector: IMerchantConnector | undefined;
 
   constructor(
-    protected merchantService: IMerchantService,
-    protected contextProvider: IContextProvider,
+    @inject(IMerchantServiceType) protected merchantService: IMerchantService,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
   ) {
     super();
-    const context = contextProvider.getMerchantContext();
-
-    context.onMerchantConnectorActivated.subscribe({
-      next: (merchantConnector) => {
-        // We are going to relay the RXJS events
-        if (merchantConnector.sendFundsRequested != null) {
-          merchantConnector.sendFundsRequested.subscribe(() => {
-            this.parent?.emit("sendFundsRequested");
-          });
-        }
-
-        if (merchantConnector.authorizeFundsRequested != null) {
-          merchantConnector.authorizeFundsRequested.subscribe(() => {
-            this.parent?.emit("authorizeFundsRequested");
-          });
-        }
-
-        if (merchantConnector.displayRequested != null) {
-          merchantConnector.displayRequested.subscribe(() => {
-            this.parent?.emit("displayRequested", context.merchantUrl);
-          });
-        }
-
-        if (merchantConnector.closeRequested != null) {
-          merchantConnector.closeRequested.subscribe(() => {
-            this.parent?.emit("closeRequested", context.merchantUrl);
-          });
-        }
-
-        if (merchantConnector.signMessageRequested != null) {
-          merchantConnector.signMessageRequested.subscribe((request) => {
-            this.merchantService.signMessage(request.message, request.callback);
-
-            // Emit the request to the parent. Technically, I should have
-            // this as a response to an observable in the context...
-            this.parent?.emit("signMessageRequested", request.message);
-          });
-        }
-      },
-    });
   }
 
   protected getModel(): Postmate.Model {
@@ -74,10 +44,7 @@ export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
     return new Postmate.Model({
       activateConnector: (data: IIFrameCallData<IActivateConnectorData>) => {
         this.returnForModel(() => {
-          console.log("activateConnector!");
-
           // Convert the balances to an actual balances object
-          console.log(data.data);
           const assets = data.data.balances.assets.map((val) => {
             return new AssetBalance(
               val.assetAddress,
@@ -90,8 +57,6 @@ export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
             );
           });
           const balances = new Balances(assets);
-
-          console.log(balances);
 
           return this.merchantService
             .activateMerchantConnector(data.data.publicIdentifier, balances)
@@ -200,12 +165,17 @@ export class PostmateApi extends ChildProxy implements IMerchantIFrameApi {
     });
   }
 
-  protected onModelActivated(parent: Postmate.ChildAPI): void {}
+  protected onModelActivated(parent: Postmate.ChildAPI): void {
+    // Send an event out to anybody that may be interested
+    this.contextProvider
+      .getMerchantContext()
+      .onHypernetCoreProxyActivated.next(parent);
+  }
 }
 
 interface IActivateConnectorData {
   publicIdentifier: PublicIdentifier;
-  balances: any;
+  balances: Balances;
 }
 
 interface ISignatureResponseData {
