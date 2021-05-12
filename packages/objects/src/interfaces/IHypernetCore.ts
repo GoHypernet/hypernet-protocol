@@ -142,9 +142,9 @@ export interface IHypernetCore {
    */
   sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: string,
+    amount: BigNumber,
     expirationDate: number,
-    requiredStake: string,
+    requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
@@ -164,7 +164,7 @@ export interface IHypernetCore {
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumber,
     expirationDate: number,
-    deltaAmount: string,
+    deltaAmount: BigNumber,
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,

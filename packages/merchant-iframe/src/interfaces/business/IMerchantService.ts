@@ -54,3 +54,5 @@ export interface IMerchantService {
     signature: Signature,
   ): ResultAsync<void, never>;
 }
+
+export const IMerchantServiceType = Symbol.for("IMerchantService");

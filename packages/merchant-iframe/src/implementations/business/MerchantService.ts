@@ -14,19 +14,27 @@ import {
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
 import { ethers } from "ethers";
+import { injectable, inject } from "inversify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import {
+  IHypernetCoreRepository,
+  IHypernetCoreRepositoryType,
   IMerchantConnectorRepository,
+  IMerchantConnectorRepositoryType,
   IPersistenceRepository,
+  IPersistenceRepositoryType,
 } from "@merchant-iframe/interfaces/data";
 import { ExpectedRedirect } from "@merchant-iframe/interfaces/objects";
 import {
   MerchantConnectorError,
   MerchantValidationError,
 } from "@merchant-iframe/interfaces/objects/errors";
-import { IContextProvider } from "@merchant-iframe/interfaces/utils";
+import {
+  IContextProvider,
+  IContextProviderType,
+} from "@merchant-iframe/interfaces/utils";
 
 declare global {
   interface Window {
@@ -34,6 +42,7 @@ declare global {
   }
 }
 
+@injectable()
 export class MerchantService implements IMerchantService {
   protected signMessageCallbacks: Map<
     string,
@@ -41,9 +50,13 @@ export class MerchantService implements IMerchantService {
   >;
 
   constructor(
+    @inject(IMerchantConnectorRepositoryType)
     protected merchantConnectorRepository: IMerchantConnectorRepository,
+    @inject(IPersistenceRepositoryType)
     protected persistenceRepository: IPersistenceRepository,
-    protected contextProvider: IContextProvider,
+    @inject(IHypernetCoreRepositoryType)
+    protected hypernetCoreRepository: IHypernetCoreRepository,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
   ) {
     this.signMessageCallbacks = new Map();
   }
@@ -93,11 +106,6 @@ export class MerchantService implements IMerchantService {
         ),
       );
     }
-
-    console.log(
-      `CHARLIE, publicIdentifier=${publicIdentifier}, balances=${balances}`,
-    );
-    console.log(balances);
 
     // Send some initial information to the merchant connector
     merchantConnector.onPublicIdentifierReceived(publicIdentifier);
@@ -358,7 +366,7 @@ export class MerchantService implements IMerchantService {
     // transmitted back, we can call it.
     this.signMessageCallbacks.set(message, callback);
 
-    return okAsync(undefined);
+    return this.hypernetCoreRepository.emitSignMessageRequested(message);
   }
 
   public messageSigned(

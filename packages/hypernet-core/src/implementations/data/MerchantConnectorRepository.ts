@@ -16,8 +16,6 @@ import {
   Balances,
   MerchantActivationError,
   MerchantAuthorizationDeniedError,
-} from "@hypernetlabs/objects";
-import {
   LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
@@ -192,7 +190,7 @@ export class MerchantConnectorRepository
         const value = {
           authorizedMerchantUrl: merchantUrl,
           merchantValidatedSignature: merchantSignature,
-        } as Record<string, any>;
+        } as Record<string, unknown>;
         const signerPromise = signer._signTypedData(
           this.domain,
           this.types,
@@ -657,9 +655,11 @@ export class MerchantConnectorRepository
 
     let proxy: IMerchantConnectorProxy;
 
+    this.logUtils.debug(`Activating merchant connector ${merchantUrl}`);
     const proxyResult = this.merchantConnectorProxyFactory
       .factoryProxy(merchantUrl)
       .andThen((myProxy) => {
+        this.logUtils.debug(`Proxy created for ${merchantUrl}`);
         proxy = myProxy;
         this.existingProxies.set(merchantUrl, proxy);
 
@@ -685,6 +685,10 @@ export class MerchantConnectorRepository
         // Notify the world
         context.onAuthorizedMerchantActivationFailed.next(merchantUrl);
 
+        this.logUtils.error(
+          `Merchant connector ${merchantUrl} failed to activate`,
+        );
+
         // TODO: make sure of error cases where we want to destroy the proxy or not
         if (e instanceof ProxyError || e instanceof MerchantActivationError) {
           this._destroyProxy(merchantUrl);
@@ -708,11 +712,12 @@ export class MerchantConnectorRepository
     void,
     MerchantAuthorizationDeniedError | MerchantValidationError | ProxyError
   > {
+    this.logUtils.debug(`Validating code signature for ${merchantUrl}`);
     return proxy.getValidatedSignature().andThen((validatedSignature) => {
       const value = {
         authorizedMerchantUrl: merchantUrl,
         merchantValidatedSignature: validatedSignature,
-      } as Record<string, any>;
+      } as Record<string, unknown>;
 
       const validationAddress = this.blockchainUtils.verifyTypedData(
         this.domain,
@@ -761,9 +766,13 @@ export class MerchantConnectorRepository
           );
 
           this._setAuthorizedMerchants(authorizedMerchants);
+          this.logUtils.debug(
+            `Updated connector approved and validated for ${merchantUrl}`,
+          );
         });
       }
 
+      this.logUtils.debug(`Code signature validated for ${merchantUrl}`);
       return okAsync<void, MerchantAuthorizationDeniedError>(undefined);
     });
   }
@@ -776,9 +785,11 @@ export class MerchantConnectorRepository
     IMerchantConnectorProxy,
     MerchantActivationError | ProxyError
   > {
+    this.logUtils.debug(`Activating connector for ${proxy.merchantUrl}`);
     return proxy
       .activateConnector(context.publicIdentifier, balances)
       .map(() => {
+        this.logUtils.debug(`Connector activated for ${proxy.merchantUrl}`);
         return proxy;
       });
   }
@@ -793,7 +804,7 @@ export class MerchantConnectorRepository
 
   protected _setAuthorizedMerchants(
     authorizedMerchantMap: Map<MerchantUrl, Signature>,
-  ) {
+  ): void {
     const authorizedMerchantEntries = new Array<IAuthorizedMerchantEntry>();
     for (const keyval of authorizedMerchantMap) {
       authorizedMerchantEntries.push({

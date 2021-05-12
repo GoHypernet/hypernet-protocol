@@ -6,8 +6,6 @@ import {
   PushPayment,
   PaymentId,
   MerchantUrl,
-} from "@hypernetlabs/objects";
-import {
   PaymentFinalizeError,
   RouterChannelUnknownError,
   VectorError,
@@ -131,3 +129,5 @@ export interface IPaymentRepository {
     | InvalidParametersError
   >;
 }
+
+export const IPaymentRepositoryType = Symbol.for("IPaymentRepository");

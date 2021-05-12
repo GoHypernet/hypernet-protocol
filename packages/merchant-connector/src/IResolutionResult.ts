@@ -1,5 +1,7 @@
+import { PaymentId, Signature } from "@hypernetlabs/objects";
+
 export interface IResolutionResult {
-  paymentId: string;
-  mediatorSignature: string;
+  paymentId: PaymentId;
+  mediatorSignature: Signature;
   amount: string;
 }

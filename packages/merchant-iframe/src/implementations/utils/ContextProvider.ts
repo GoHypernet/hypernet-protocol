@@ -1,11 +1,12 @@
-import { IMerchantConnector } from "@hypernetlabs/merchant-connector";
 import { Signature, MerchantUrl } from "@hypernetlabs/objects";
+import { injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
 import { MerchantContext } from "@merchant-iframe/interfaces/objects";
 import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 
+@injectable()
 export class ContextProvider implements IContextProvider {
   protected context: MerchantContext;
   protected connectorValidatedResolve: (() => void) | undefined;
@@ -16,7 +17,8 @@ export class ContextProvider implements IContextProvider {
     });
     this.context = new MerchantContext(
       merchantUrl,
-      new Subject<IMerchantConnector>(),
+      new Subject(),
+      new Subject(),
       null,
       null,
       null,

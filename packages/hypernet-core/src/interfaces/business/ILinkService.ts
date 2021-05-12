@@ -1,5 +1,5 @@
-import { HypernetLink } from "@hypernetlabs/objects";
 import {
+  HypernetLink,
   RouterChannelUnknownError,
   VectorError,
   InvalidParametersError,
@@ -23,3 +23,5 @@ export interface ILinkService {
     | LogicalError
   >;
 }
+
+export const ILinkServiceType = Symbol.for("ILinkService");

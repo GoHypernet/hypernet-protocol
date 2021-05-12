@@ -46,9 +46,9 @@ import {
 } from "@mock/mocks";
 import { ConfigProviderMock, ContextProviderMock } from "@tests/mock/utils";
 
-const requiredStake = "42";
+const requiredStake = BigNumber.from("43");
 const paymentToken = mockUtils.generateRandomPaymentToken();
-const amount = "42";
+const amount = BigNumber.from("42");
 const expirationDate = unixNow + defaultExpirationLength;
 const paymentId = PaymentId(
   "See, this doesn't have to be legit data if it's never checked!",
@@ -79,7 +79,7 @@ class PaymentServiceMocks {
   public assetBalance: AssetBalance;
   public merchantAddresses: Map<MerchantUrl, EthereumAddress>;
 
-  constructor(hypertokenBalance: string = amount) {
+  constructor(hypertokenBalance: BigNumber = amount) {
     this.pushPayment = this.factoryPushPayment();
     this.stakedPushPayment = this.factoryPushPayment(
       publicIdentifier2,
@@ -105,17 +105,17 @@ class PaymentServiceMocks {
       "PhoebeCoin",
       "BEEP",
       4,
-      BigNumber.from(hypertokenBalance),
+      hypertokenBalance,
       BigNumber.from(0),
-      BigNumber.from(hypertokenBalance),
+      hypertokenBalance,
     );
 
     td.when(
       this.paymentRepository.createPushPayment(
         publicIdentifier,
-        amount,
+        amount.toString(),
         expirationDate,
-        requiredStake,
+        requiredStake.toString(),
         paymentToken,
         merchantUrl,
       ),
@@ -146,7 +146,7 @@ class PaymentServiceMocks {
       okAsync(this.paidPushPayment),
     );
     td.when(
-      this.paymentRepository.finalizePayment(paymentId, amount),
+      this.paymentRepository.finalizePayment(paymentId, amount.toString()),
     ).thenReturn(okAsync(this.finalizedPushPayment));
 
     this.merchantAddresses = new Map();
@@ -212,7 +212,7 @@ class PaymentServiceMocks {
     to: PublicIdentifier = publicIdentifier2,
     from: PublicIdentifier = publicIdentifier,
     state: EPaymentState = EPaymentState.Proposed,
-    amountStaked = "0",
+    amountStaked: BigNumber = BigNumber.from("0"),
   ): PushPayment {
     return new PushPayment(
       paymentId,
@@ -220,15 +220,15 @@ class PaymentServiceMocks {
       from,
       state,
       paymentToken,
-      BigNumber.from(requiredStake),
-      BigNumber.from(amountStaked),
+      requiredStake,
+      amountStaked,
       expirationDate,
       unixNow,
       unixNow,
       BigNumber.from(0),
       merchantUrl,
       paymentDetails,
-      BigNumber.from(amount),
+      amount,
       BigNumber.from(0),
     );
   }
@@ -333,7 +333,7 @@ describe("PaymentService tests", () => {
 
   test("Should acceptOffers return error if freeAmount is less than totalStakeRequired", async () => {
     // Arrange
-    const paymentServiceMock = new PaymentServiceMocks("13");
+    const paymentServiceMock = new PaymentServiceMocks(BigNumber.from("13"));
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act

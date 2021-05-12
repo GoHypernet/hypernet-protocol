@@ -6,6 +6,7 @@ import { MerchantService } from "@merchant-iframe/implementations/business";
 import { ContextProvider } from "@merchant-iframe/implementations/utils";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import {
+  IHypernetCoreRepository,
   IMerchantConnectorRepository,
   IPersistenceRepository,
 } from "@merchant-iframe/interfaces/data";
@@ -26,6 +27,7 @@ jest.mock("ethers", () => {
 class MerchantServiceMocks {
   public merchantConnectorRepository = td.object<IMerchantConnectorRepository>();
   public persistenceRepository = td.object<IPersistenceRepository>();
+  public hypernetCoreRepository = td.object<IHypernetCoreRepository>();
   public merchantUrl = MerchantUrl("http://localhost:5010");
   public nowTime = 1487076708000;
   public signature = Signature(
@@ -75,6 +77,7 @@ class MerchantServiceMocks {
     return new MerchantService(
       this.merchantConnectorRepository,
       this.persistenceRepository,
+      this.hypernetCoreRepository,
       this.contextProvider,
     );
   }

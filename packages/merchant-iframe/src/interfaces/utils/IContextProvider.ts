@@ -10,3 +10,5 @@ export interface IContextProvider {
     validatedMerchantSignature: Signature,
   ): void;
 }
+
+export const IContextProviderType = Symbol.for("IContextProvider");
