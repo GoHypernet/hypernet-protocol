@@ -7,6 +7,7 @@ import {
   ILogUtils,
   LogUtils,
 } from "@hypernetlabs/utils";
+import { okAsync } from "neverthrow";
 
 import {
   HypernetCoreListener,
@@ -117,8 +118,10 @@ export class MerchantIframe {
         // the connector if it's eligible.
         return this.merchantService.autoActivateMerchantConnector();
       })
-      .mapErr((e) => {
-        console.log(e);
+      .orElse((e) => {
+        this.logUtils.error("Failure during merchant iframe initialization");
+        this.logUtils.error(e);
+        return okAsync(null);
       });
   }
 }

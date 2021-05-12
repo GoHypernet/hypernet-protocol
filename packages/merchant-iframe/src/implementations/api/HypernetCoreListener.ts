@@ -44,10 +44,7 @@ export class HypernetCoreListener
     return new Postmate.Model({
       activateConnector: (data: IIFrameCallData<IActivateConnectorData>) => {
         this.returnForModel(() => {
-          console.log("activateConnector!");
-
           // Convert the balances to an actual balances object
-          console.log(data.data);
           const assets = data.data.balances.assets.map((val) => {
             return new AssetBalance(
               val.assetAddress,
@@ -60,8 +57,6 @@ export class HypernetCoreListener
             );
           });
           const balances = new Balances(assets);
-
-          console.log(balances);
 
           return this.merchantService
             .activateMerchantConnector(data.data.publicIdentifier, balances)

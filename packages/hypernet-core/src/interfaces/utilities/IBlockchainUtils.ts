@@ -3,8 +3,11 @@ import {
   TypedDataDomain,
   TypedDataField,
 } from "@ethersproject/abstract-signer";
-import { EthereumAddress, Signature } from "@hypernetlabs/objects";
-import { BlockchainUnavailableError } from "@hypernetlabs/objects";
+import {
+  EthereumAddress,
+  Signature,
+  BlockchainUnavailableError,
+} from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
@@ -12,7 +15,7 @@ export interface IBlockchainUtils {
   verifyTypedData(
     domain: TypedDataDomain,
     types: Record<string, Array<TypedDataField>>,
-    value: Record<string, any>,
+    value: Record<string, unknown>,
     signature: Signature,
   ): EthereumAddress;
 
@@ -27,3 +30,5 @@ export interface IBlockchainUtils {
     to: EthereumAddress,
   ): ResultAsync<TransactionResponse, BlockchainUnavailableError>;
 }
+
+export const IBlockchainUtilsType = Symbol.for("IBlockchainUtils");

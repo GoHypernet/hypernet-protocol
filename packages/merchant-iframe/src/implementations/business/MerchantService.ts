@@ -11,6 +11,7 @@ import {
   Signature,
   MerchantUrl,
   PaymentId,
+  AjaxError,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
 import { ethers } from "ethers";
@@ -158,7 +159,6 @@ export class MerchantService implements IMerchantService {
         );
       })
       .orElse((e) => {
-        const err = e as MerchantValidationError;
         if (!MerchantService.merchantUrlCacheBusterUsed) {
           MerchantService.merchantUrlCacheBusterUsed = true;
           return this._validateMerchantConnectorCode(
@@ -168,8 +168,15 @@ export class MerchantService implements IMerchantService {
             true,
           );
         } else {
-          return errAsync(err);
+          return errAsync(e);
         }
+      })
+      .mapErr((e) => {
+        // Error occured; we tried recovery above, so now we need to mark
+        // the validation process as failed.
+        this.contextProvider.setValidatedMerchantConnectorFailed(e);
+
+        return e;
       });
   }
 
@@ -178,7 +185,7 @@ export class MerchantService implements IMerchantService {
     signature: Signature,
     address: EthereumAddress,
     useCacheBuster?: boolean,
-  ): ResultAsync<Signature, MerchantValidationError> {
+  ): ResultAsync<Signature, MerchantValidationError | AjaxError> {
     // If there is no merchant URL set, it's not an error
     if (merchantUrl == "") {
       return okAsync(Signature(""));
@@ -212,7 +219,7 @@ export class MerchantService implements IMerchantService {
         );
 
         // Return the valid signature
-        return okAsync(signature);
+        return okAsync<Signature, MerchantValidationError>(signature);
       });
   }
 
@@ -321,6 +328,7 @@ export class MerchantService implements IMerchantService {
       return context.validatedMerchantSignature;
     });
   }
+
   public getAddress(): ResultAsync<EthereumAddress, MerchantValidationError> {
     const context = this.contextProvider.getMerchantContext();
     return context.merchantValidated.andThen(() => {

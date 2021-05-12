@@ -9,6 +9,7 @@ export interface IContextProvider {
     validatedMerchantCode: string,
     validatedMerchantSignature: Signature,
   ): void;
+  setValidatedMerchantConnectorFailed(e: Error): void;
 }
 
 export const IContextProviderType = Symbol.for("IContextProvider");

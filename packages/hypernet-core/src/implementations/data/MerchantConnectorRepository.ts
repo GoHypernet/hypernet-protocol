@@ -27,27 +27,40 @@ import {
   IAjaxUtils,
   ILocalStorageUtils,
   ILogUtils,
+  IAjaxUtilsType,
+  ILocalStorageUtilsType,
+  ILogUtilsType,
 } from "@hypernetlabs/utils";
 import { BigNumber, ethers } from "ethers";
+import { injectable, inject } from "inversify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import { IMerchantConnectorRepository } from "@interfaces/data";
 import { InitializedHypernetContext } from "@interfaces/objects";
 import {
   IBlockchainProvider,
+  IBlockchainProviderType,
   IBlockchainUtils,
+  IBlockchainUtilsType,
   IConfigProvider,
+  IConfigProviderType,
   IContextProvider,
+  IContextProviderType,
   IMerchantConnectorProxy,
   IVectorUtils,
+  IVectorUtilsType,
 } from "@interfaces/utilities";
-import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
+import {
+  IMerchantConnectorProxyFactory,
+  IMerchantConnectorProxyFactoryType,
+} from "@interfaces/utilities/factory";
 
 interface IAuthorizedMerchantEntry {
   merchantUrl: MerchantUrl;
   authorizationSignature: string;
 }
 
+@injectable()
 export class MerchantConnectorRepository
   implements IMerchantConnectorRepository {
   protected authorizedMerchantProxies: Map<
@@ -69,15 +82,18 @@ export class MerchantConnectorRepository
   protected balances: Balances | undefined;
 
   constructor(
+    @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
-    protected ajaxUtils: IAjaxUtils,
-    protected configProvider: IConfigProvider,
-    protected contextProvider: IContextProvider,
-    protected vectorUtils: IVectorUtils,
+    @inject(IAjaxUtilsType) protected ajaxUtils: IAjaxUtils,
+    @inject(IConfigProviderType) protected configProvider: IConfigProvider,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
+    @inject(IVectorUtilsType) protected vectorUtils: IVectorUtils,
+    @inject(ILocalStorageUtilsType)
     protected localStorageUtils: ILocalStorageUtils,
+    @inject(IMerchantConnectorProxyFactoryType)
     protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory,
-    protected blockchainUtils: IBlockchainUtils,
-    protected logUtils: ILogUtils,
+    @inject(IBlockchainUtilsType) protected blockchainUtils: IBlockchainUtils,
+    @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {
     this.authorizedMerchantProxies = new Map();
     this.existingProxies = new Map();
