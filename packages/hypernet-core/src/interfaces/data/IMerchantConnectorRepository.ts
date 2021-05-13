@@ -13,9 +13,10 @@ import {
   MerchantUrl,
   Signature,
   MerchantAuthorizationDeniedError,
+  PullPayment,
+  PushPayment,
   CeramicError,
 } from "@hypernetlabs/objects";
-import { PullPayment, PushPayment } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IMerchantConnectorRepository {
@@ -123,3 +124,7 @@ export interface IAuthorizedMerchantEntry {
   merchantUrl: MerchantUrl;
   authorizationSignature: string;
 }
+
+export const IMerchantConnectorRepositoryType = Symbol.for(
+  "IMerchantConnectorRepository",
+);

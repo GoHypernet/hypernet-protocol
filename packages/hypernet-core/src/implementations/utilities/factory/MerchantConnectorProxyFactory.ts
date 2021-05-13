@@ -1,5 +1,5 @@
-import { MerchantUrl } from "@hypernetlabs/objects";
-import { ProxyError } from "@hypernetlabs/objects";
+import { MerchantUrl, ProxyError } from "@hypernetlabs/objects";
+import { injectable, inject } from "inversify";
 import { ResultAsync } from "neverthrow";
 
 import { MerchantConnectorProxy } from "@implementations/utilities/MerchantConnectorProxy";
@@ -7,14 +7,17 @@ import {
   IConfigProvider,
   IMerchantConnectorProxy,
   IContextProvider,
+  IConfigProviderType,
+  IContextProviderType,
 } from "@interfaces/utilities";
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 
+@injectable()
 export class MerchantConnectorProxyFactory
   implements IMerchantConnectorProxyFactory {
   constructor(
-    protected configProvider: IConfigProvider,
-    protected contextProvider: IContextProvider,
+    @inject(IConfigProviderType) protected configProvider: IConfigProvider,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
   ) {}
 
   factoryProxy(
@@ -41,7 +44,7 @@ export class MerchantConnectorProxyFactory
         // for communication. In the case of the merchant connector, it will grab
         // the necessary data from the merchant URL in order to validate that the
         // connector code is properly signed and valid.
-        return proxy.activate();
+        return proxy.activateProxy();
       })
       .map(() => {
         // Return the activated proxy

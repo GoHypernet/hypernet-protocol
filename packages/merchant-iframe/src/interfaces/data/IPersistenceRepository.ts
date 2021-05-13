@@ -8,3 +8,5 @@ export interface IPersistenceRepository {
   setExpectedRedirect(redirect: ExpectedRedirect): void;
   getExpectedRedirect(): ExpectedRedirect | null;
 }
+
+export const IPersistenceRepositoryType = Symbol.for("IPersistenceRepository");

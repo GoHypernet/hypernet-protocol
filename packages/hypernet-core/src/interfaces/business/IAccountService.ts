@@ -4,8 +4,6 @@ import {
   PrivateCredentials,
   PublicIdentifier,
   Signature,
-} from "@hypernetlabs/objects";
-import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
   LogicalError,
@@ -58,3 +56,5 @@ export interface IAccountService {
     message: string,
   ): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;
 }
+
+export const IAccountServiceType = Symbol.for("IAccountService");

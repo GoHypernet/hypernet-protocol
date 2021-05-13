@@ -95,31 +95,40 @@ export default class CoreWrapper extends ChildProxy {
         this.returnForModel(() => {
           return this.core.sendFunds(
             data.data.counterPartyAccount,
-            data.data.amount,
+            BigNumber.from(data.data.amount),
             data.data.expirationDate,
-            data.data.requiredStake,
+            BigNumber.from(data.data.requiredStake),
             data.data.paymentToken,
             data.data.merchantUrl,
           );
         }, data.callId);
       },
-      //   authorizeFunds: (data: IIFrameCallData<{
-      //     counterPartyAccount: PublicIdentifier,
-      //     totalAuthorized: string,
-      //     expirationDate: string,
-      //     requiredStake: string,
-      //     paymentToken: EthereumAddress,
-      //     merchantUrl: string,
-      //   }>) => {
-      //     this.returnForModel(() => {
-      //       return core.authorizeFunds(data.data.counterPartyAccount,
-      //         BigNumber.from(data.data.totalAuthorized),
-      //         moment(data.data.expirationDate),
-      //         BigNumber.from(data.data.requiredStake),
-      //         data.data.paymentToken,
-      //         data.data.merchantUrl);
-      //     }, data.callId);
-      //   },
+
+      authorizeFunds: (
+        data: IIFrameCallData<{
+          counterPartyAccount: PublicIdentifier;
+          totalAuthorized: string;
+          expirationDate: number;
+          deltaAmount: string;
+          deltaTime: number;
+          requiredStake: string;
+          paymentToken: EthereumAddress;
+          merchantUrl: MerchantUrl;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.authorizeFunds(
+            data.data.counterPartyAccount,
+            BigNumber.from(data.data.totalAuthorized),
+            data.data.expirationDate,
+            BigNumber.from(data.data.deltaAmount),
+            data.data.deltaTime,
+            BigNumber.from(data.data.requiredStake),
+            data.data.paymentToken,
+            data.data.merchantUrl,
+          );
+        }, data.callId);
+      },
 
       acceptFunds: (data: IIFrameCallData<PaymentId[]>) => {
         this.returnForModel(() => {

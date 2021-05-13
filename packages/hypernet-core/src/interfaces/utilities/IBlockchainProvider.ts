@@ -1,8 +1,8 @@
 import {
   BlockchainUnavailableError,
   InvalidParametersError,
+  PrivateCredentials,
 } from "@hypernetlabs/objects";
-import { PrivateCredentials } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
 
@@ -26,3 +26,5 @@ export interface IBlockchainProvider {
     privateCredentials: PrivateCredentials,
   ): ResultAsync<void, InvalidParametersError>;
 }
+
+export const IBlockchainProviderType = Symbol.for("IBlockchainProvider");

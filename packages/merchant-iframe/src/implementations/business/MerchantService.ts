@@ -11,22 +11,31 @@ import {
   Signature,
   MerchantUrl,
   PaymentId,
+  AjaxError,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
 import { ethers } from "ethers";
+import { injectable, inject } from "inversify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import {
+  IHypernetCoreRepository,
+  IHypernetCoreRepositoryType,
   IMerchantConnectorRepository,
+  IMerchantConnectorRepositoryType,
   IPersistenceRepository,
+  IPersistenceRepositoryType,
 } from "@merchant-iframe/interfaces/data";
 import { ExpectedRedirect } from "@merchant-iframe/interfaces/objects";
 import {
   MerchantConnectorError,
   MerchantValidationError,
 } from "@merchant-iframe/interfaces/objects/errors";
-import { IContextProvider } from "@merchant-iframe/interfaces/utils";
+import {
+  IContextProvider,
+  IContextProviderType,
+} from "@merchant-iframe/interfaces/utils";
 
 declare global {
   interface Window {
@@ -34,6 +43,7 @@ declare global {
   }
 }
 
+@injectable()
 export class MerchantService implements IMerchantService {
   protected signMessageCallbacks: Map<
     string,
@@ -41,9 +51,13 @@ export class MerchantService implements IMerchantService {
   >;
 
   constructor(
+    @inject(IMerchantConnectorRepositoryType)
     protected merchantConnectorRepository: IMerchantConnectorRepository,
+    @inject(IPersistenceRepositoryType)
     protected persistenceRepository: IPersistenceRepository,
-    protected contextProvider: IContextProvider,
+    @inject(IHypernetCoreRepositoryType)
+    protected hypernetCoreRepository: IHypernetCoreRepository,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
   ) {
     this.signMessageCallbacks = new Map();
   }
@@ -93,11 +107,6 @@ export class MerchantService implements IMerchantService {
         ),
       );
     }
-
-    console.log(
-      `CHARLIE, publicIdentifier=${publicIdentifier}, balances=${balances}`,
-    );
-    console.log(balances);
 
     // Send some initial information to the merchant connector
     merchantConnector.onPublicIdentifierReceived(publicIdentifier);
@@ -150,7 +159,6 @@ export class MerchantService implements IMerchantService {
         );
       })
       .orElse((e) => {
-        const err = e as MerchantValidationError;
         if (!MerchantService.merchantUrlCacheBusterUsed) {
           MerchantService.merchantUrlCacheBusterUsed = true;
           return this._validateMerchantConnectorCode(
@@ -160,8 +168,15 @@ export class MerchantService implements IMerchantService {
             true,
           );
         } else {
-          return errAsync(err);
+          return errAsync(e);
         }
+      })
+      .mapErr((e) => {
+        // Error occured; we tried recovery above, so now we need to mark
+        // the validation process as failed.
+        this.contextProvider.setValidatedMerchantConnectorFailed(e);
+
+        return e;
       });
   }
 
@@ -170,7 +185,7 @@ export class MerchantService implements IMerchantService {
     signature: Signature,
     address: EthereumAddress,
     useCacheBuster?: boolean,
-  ): ResultAsync<Signature, MerchantValidationError> {
+  ): ResultAsync<Signature, MerchantValidationError | AjaxError> {
     // If there is no merchant URL set, it's not an error
     if (merchantUrl == "") {
       return okAsync(Signature(""));
@@ -204,7 +219,7 @@ export class MerchantService implements IMerchantService {
         );
 
         // Return the valid signature
-        return okAsync(signature);
+        return okAsync<Signature, MerchantValidationError>(signature);
       });
   }
 
@@ -313,6 +328,7 @@ export class MerchantService implements IMerchantService {
       return context.validatedMerchantSignature;
     });
   }
+
   public getAddress(): ResultAsync<EthereumAddress, MerchantValidationError> {
     const context = this.contextProvider.getMerchantContext();
     return context.merchantValidated.andThen(() => {
@@ -358,7 +374,7 @@ export class MerchantService implements IMerchantService {
     // transmitted back, we can call it.
     this.signMessageCallbacks.set(message, callback);
 
-    return okAsync(undefined);
+    return this.hypernetCoreRepository.emitSignMessageRequested(message);
   }
 
   public messageSigned(

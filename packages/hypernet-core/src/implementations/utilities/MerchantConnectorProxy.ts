@@ -1,4 +1,8 @@
-import { IResolutionResult } from "@hypernetlabs/merchant-connector";
+import {
+  IAuthorizeFundsRequest,
+  IResolutionResult,
+  ISendFundsRequest,
+} from "@hypernetlabs/merchant-connector";
 import {
   EthereumAddress,
   MerchantConnectorError,
@@ -39,9 +43,13 @@ export class MerchantConnectorProxy
     super(element, iframeUrl, iframeName, debug);
 
     this.signMessageRequested = new Subject();
+    this.sendFundsRequested = new Subject();
+    this.authorizeFundsRequested = new Subject();
   }
 
   public signMessageRequested: Subject<string>;
+  public sendFundsRequested: Subject<ISendFundsRequest>;
+  public authorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
 
   public activateConnector(
     publicIdentifier: PublicIdentifier,
@@ -120,13 +128,16 @@ export class MerchantConnectorProxy
         }
       });
 
-      // this.child?.on("sendFundsRequested", (request: ISendFundsRequest) => {
-      //   context.sendFundsRequested.next(request);
-      // });
+      this.child?.on("sendFundsRequested", (request: ISendFundsRequest) => {
+        this.sendFundsRequested.next(request);
+      });
 
-      // this.child?.on("authorizeFundsRequested", (request: IAuthorizeFundsRequest) => {
-      //   context.authorizeFundsRequested.next(request);
-      // });
+      this.child?.on(
+        "authorizeFundsRequested",
+        (request: IAuthorizeFundsRequest) => {
+          this.authorizeFundsRequested.next(request);
+        },
+      );
 
       this.child?.on("signMessageRequested", (message: string) => {
         this.signMessageRequested.next(message);

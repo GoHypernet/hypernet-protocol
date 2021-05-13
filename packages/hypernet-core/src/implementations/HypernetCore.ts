@@ -34,8 +34,11 @@ import {
   ResultUtils,
   ILocalStorageUtils,
   LocalStorageUtils,
+  ILogUtils,
+  LogUtils,
+  IValidationUtils,
+  ValidationUtils,
 } from "@hypernetlabs/utils";
-import { ILogUtils, LogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
 import { ok, Result, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
@@ -156,6 +159,7 @@ export class HypernetCore implements IHypernetCore {
   protected blockchainUtils: IBlockchainUtils;
   protected localStorageUtils: ILocalStorageUtils;
   protected ceramicUtils: ICeramicUtils;
+  protected validationUtils: IValidationUtils;
 
   // Factories
   protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory;
@@ -313,6 +317,7 @@ export class HypernetCore implements IHypernetCore {
     );
     this.ajaxUtils = new AxiosAjaxUtils();
     this.blockchainUtils = new EthersBlockchainUtils(this.blockchainProvider);
+    this.validationUtils = new ValidationUtils();
 
     this.accountRepository = new AccountsRepository(
       this.blockchainProvider,
@@ -348,9 +353,9 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
       this.contextProvider,
       this.vectorUtils,
+      this.ceramicUtils,
       this.merchantConnectorProxyFactory,
       this.blockchainUtils,
-      this.ceramicUtils,
       this.logUtils,
     );
 
@@ -395,6 +400,7 @@ export class HypernetCore implements IHypernetCore {
       this.linkService,
       this.contextProvider,
       this.logUtils,
+      this.validationUtils,
     );
 
     this.ceramicListener = new CeramicListener(
@@ -540,9 +546,9 @@ export class HypernetCore implements IHypernetCore {
    */
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: string,
+    amount: BigNumber,
     expirationDate: number,
-    requiredStake: string,
+    requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
@@ -583,7 +589,7 @@ export class HypernetCore implements IHypernetCore {
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumber,
     expirationDate: number,
-    deltaAmount: string,
+    deltaAmount: BigNumber,
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,

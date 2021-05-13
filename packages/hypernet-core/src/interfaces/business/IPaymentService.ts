@@ -4,8 +4,6 @@ import {
   PublicIdentifier,
   MerchantUrl,
   PaymentId,
-} from "@hypernetlabs/objects";
-import {
   AcceptPaymentError,
   InsufficientBalanceError,
   InvalidParametersError,
@@ -42,7 +40,7 @@ export interface IPaymentService {
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumber,
     expirationDate: number,
-    deltaAmount: string,
+    deltaAmount: BigNumber,
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
@@ -78,9 +76,9 @@ export interface IPaymentService {
    */
   sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: string,
+    amount: BigNumber,
     expirationDate: number,
-    requiredStake: string,
+    requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
   ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
@@ -265,3 +263,5 @@ export interface IPaymentService {
     | TransferCreationError
   >;
 }
+
+export const IPaymentServiceType = Symbol.for("IPaymentService");

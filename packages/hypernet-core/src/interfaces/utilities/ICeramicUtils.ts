@@ -30,3 +30,5 @@ export interface ISchemaWithName {
 export interface IRecordWithDataKey<T> {
   data: T;
 }
+
+export const ICeramicUtilsType = Symbol.for("ICeramicUtils");

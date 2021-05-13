@@ -15,3 +15,7 @@ export interface IMerchantConnectorRepository {
     merchantUrl: MerchantUrl,
   ): ResultAsync<EthereumAddress, AjaxError>;
 }
+
+export const IMerchantConnectorRepositoryType = Symbol.for(
+  "IMerchantConnectorRepository"
+);

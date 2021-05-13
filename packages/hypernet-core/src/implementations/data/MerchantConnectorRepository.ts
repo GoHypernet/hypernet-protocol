@@ -15,8 +15,6 @@ import {
   MerchantUrl,
   Balances,
   AuthorizedMerchantsSchema,
-} from "@hypernetlabs/objects";
-import {
   LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
@@ -26,8 +24,17 @@ import {
   MerchantAuthorizationDeniedError,
   CeramicError,
 } from "@hypernetlabs/objects";
-import { ResultUtils, IAjaxUtils, ILogUtils } from "@hypernetlabs/utils";
+import {
+  ResultUtils,
+  IAjaxUtils,
+  ILocalStorageUtils,
+  ILogUtils,
+  IAjaxUtilsType,
+  ILocalStorageUtilsType,
+  ILogUtilsType,
+} from "@hypernetlabs/utils";
 import { BigNumber, ethers } from "ethers";
+import { injectable, inject } from "inversify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import {
@@ -37,15 +44,25 @@ import {
 import { InitializedHypernetContext } from "@interfaces/objects";
 import {
   IBlockchainProvider,
+  IBlockchainProviderType,
   IBlockchainUtils,
-  ICeramicUtils,
+  IBlockchainUtilsType,
   IConfigProvider,
+  IConfigProviderType,
   IContextProvider,
+  IContextProviderType,
   IMerchantConnectorProxy,
   IVectorUtils,
+  IVectorUtilsType,
+  ICeramicUtils,
+  ICeramicUtilsType,
 } from "@interfaces/utilities";
-import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
+import {
+  IMerchantConnectorProxyFactory,
+  IMerchantConnectorProxyFactoryType,
+} from "@interfaces/utilities/factory";
 
+@injectable()
 export class MerchantConnectorRepository
   implements IMerchantConnectorRepository {
   protected authorizedMerchantProxies: Map<
@@ -67,15 +84,17 @@ export class MerchantConnectorRepository
   protected balances: Balances | undefined;
 
   constructor(
+    @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
-    protected ajaxUtils: IAjaxUtils,
-    protected configProvider: IConfigProvider,
-    protected contextProvider: IContextProvider,
-    protected vectorUtils: IVectorUtils,
+    @inject(IAjaxUtilsType) protected ajaxUtils: IAjaxUtils,
+    @inject(IConfigProviderType) protected configProvider: IConfigProvider,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
+    @inject(IVectorUtilsType) protected vectorUtils: IVectorUtils,
+    @inject(ICeramicUtilsType) protected ceramicUtils: ICeramicUtils,
+    @inject(IMerchantConnectorProxyFactoryType)
     protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory,
-    protected blockchainUtils: IBlockchainUtils,
-    protected ceramicUtils: ICeramicUtils,
-    protected logUtils: ILogUtils,
+    @inject(IBlockchainUtilsType) protected blockchainUtils: IBlockchainUtils,
+    @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {
     this.authorizedMerchantProxies = new Map();
     this.existingProxies = new Map();
@@ -189,7 +208,7 @@ export class MerchantConnectorRepository
         const value = {
           authorizedMerchantUrl: merchantUrl,
           merchantValidatedSignature: merchantSignature,
-        } as Record<string, any>;
+        } as Record<string, unknown>;
         const signerPromise = signer._signTypedData(
           this.domain,
           this.types,
@@ -676,9 +695,11 @@ export class MerchantConnectorRepository
 
     let proxy: IMerchantConnectorProxy;
 
+    this.logUtils.debug(`Activating merchant connector ${merchantUrl}`);
     const proxyResult = this.merchantConnectorProxyFactory
       .factoryProxy(merchantUrl)
       .andThen((myProxy) => {
+        this.logUtils.debug(`Proxy created for ${merchantUrl}`);
         proxy = myProxy;
         this.existingProxies.set(merchantUrl, proxy);
 
@@ -703,6 +724,10 @@ export class MerchantConnectorRepository
       .mapErr((e) => {
         // Notify the world
         context.onAuthorizedMerchantActivationFailed.next(merchantUrl);
+
+        this.logUtils.error(
+          `Merchant connector ${merchantUrl} failed to activate`,
+        );
 
         // TODO: make sure of error cases where we want to destroy the proxy or not
         if (e instanceof ProxyError || e instanceof MerchantActivationError) {
@@ -730,11 +755,12 @@ export class MerchantConnectorRepository
     | ProxyError
     | CeramicError
   > {
+    this.logUtils.debug(`Validating code signature for ${merchantUrl}`);
     return proxy.getValidatedSignature().andThen((validatedSignature) => {
       const value = {
         authorizedMerchantUrl: merchantUrl,
         merchantValidatedSignature: validatedSignature,
-      } as Record<string, any>;
+      } as Record<string, unknown>;
 
       const validationAddress = this.blockchainUtils.verifyTypedData(
         this.domain,
@@ -788,6 +814,7 @@ export class MerchantConnectorRepository
           .map(() => {});
       }
 
+      this.logUtils.debug(`Code signature validated for ${merchantUrl}`);
       return okAsync<void, MerchantAuthorizationDeniedError>(undefined);
     });
   }
@@ -800,9 +827,11 @@ export class MerchantConnectorRepository
     IMerchantConnectorProxy,
     MerchantActivationError | ProxyError
   > {
+    this.logUtils.debug(`Activating connector for ${proxy.merchantUrl}`);
     return proxy
       .activateConnector(context.publicIdentifier, balances)
       .map(() => {
+        this.logUtils.debug(`Connector activated for ${proxy.merchantUrl}`);
         return proxy;
       });
   }
