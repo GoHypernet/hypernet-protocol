@@ -3,10 +3,11 @@ import {
   BlockchainUnavailableError,
   AuthorizedMerchantsSchema,
 } from "@hypernetlabs/objects";
+import { ILogUtils } from "@hypernetlabs/utils";
 import { okAsync, ResultAsync } from "neverthrow";
+
 import { ICeramicListener } from "@interfaces/api";
 import { ICeramicUtils } from "@interfaces/utilities";
-import { ILogUtils } from "@hypernetlabs/utils";
 
 export class CeramicListener implements ICeramicListener {
   constructor(

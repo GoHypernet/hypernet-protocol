@@ -1,17 +1,13 @@
-import { okAsync, ResultAsync, errAsync } from "neverthrow";
 import {
   ThreeIdConnect,
   EthereumAuthProvider,
   DidProviderProxy,
 } from "@3id/connect";
-import CeramicClient from "@ceramicnetwork/http-client";
-import { DID } from "dids";
-import { TileDocument } from "@ceramicnetwork/stream-tile";
 import ThreeIdResolver from "@ceramicnetwork/3id-did-resolver";
-import { Resolver, ResolverRegistry } from "did-resolver";
+import CeramicClient from "@ceramicnetwork/http-client";
+import { TileDocument } from "@ceramicnetwork/stream-tile";
 import { IDX } from "@ceramicstudio/idx";
 import { createDefinition, publishSchema } from "@ceramicstudio/idx-tools";
-
 import {
   CeramicError,
   BlockchainUnavailableError,
@@ -21,6 +17,11 @@ import {
   AuthorizedMerchantsSchema,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
+import { ILogUtils } from "@hypernetlabs/utils";
+import { Resolver, ResolverRegistry } from "did-resolver";
+import { DID } from "dids";
+import { okAsync, ResultAsync, errAsync } from "neverthrow";
+
 import {
   ICeramicUtils,
   IBlockchainProvider,
@@ -29,7 +30,6 @@ import {
   ISchemaWithName,
   IRecordWithDataKey,
 } from "@interfaces/utilities";
-import { ILogUtils } from "@hypernetlabs/utils";
 
 export class CeramicUtils implements ICeramicUtils {
   protected toCeramicError: (e: unknown) => CeramicError = (e) => {

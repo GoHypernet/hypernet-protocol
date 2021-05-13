@@ -77,6 +77,11 @@ import {
   InternalProviderFactory,
 } from "@implementations/utilities/factory";
 import {
+  IMerchantConnectorListener,
+  IVectorListener,
+  ICeramicListener,
+} from "@interfaces/api";
+import {
   IAccountService,
   IDevelopmentService,
   ILinkService,
@@ -103,11 +108,6 @@ import {
   IVectorUtils,
   ICeramicUtils,
 } from "@interfaces/utilities";
-import {
-  IMerchantConnectorListener,
-  IVectorListener,
-  ICeramicListener,
-} from "@interfaces/api";
 import {
   IBrowserNodeFactory,
   IInternalProviderFactory,

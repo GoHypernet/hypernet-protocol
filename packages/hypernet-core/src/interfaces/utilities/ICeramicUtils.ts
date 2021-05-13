@@ -1,10 +1,9 @@
-import { ResultAsync } from "neverthrow";
 import { TileDocument } from "@ceramicnetwork/stream-tile";
-
 import {
   CeramicError,
   BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
+import { ResultAsync } from "neverthrow";
 
 export interface ICeramicUtils {
   authenticateUser(): ResultAsync<
