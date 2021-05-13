@@ -30,7 +30,10 @@ import { ResultUtils, IAjaxUtils, ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber, ethers } from "ethers";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
-import { IMerchantConnectorRepository } from "@interfaces/data";
+import {
+  IMerchantConnectorRepository,
+  IAuthorizedMerchantEntry,
+} from "@interfaces/data";
 import { InitializedHypernetContext } from "@interfaces/objects";
 import {
   IBlockchainProvider,
@@ -42,11 +45,6 @@ import {
   IVectorUtils,
 } from "@interfaces/utilities";
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
-
-interface IAuthorizedMerchantEntry {
-  merchantUrl: MerchantUrl;
-  authorizationSignature: string;
-}
 
 export class MerchantConnectorRepository
   implements IMerchantConnectorRepository {

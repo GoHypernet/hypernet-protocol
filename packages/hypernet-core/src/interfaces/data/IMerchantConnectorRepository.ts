@@ -118,3 +118,8 @@ export interface IMerchantConnectorRepository {
     balances: Balances,
   ): ResultAsync<void, MerchantConnectorError>;
 }
+
+export interface IAuthorizedMerchantEntry {
+  merchantUrl: MerchantUrl;
+  authorizationSignature: string;
+}

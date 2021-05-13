@@ -7,15 +7,19 @@ import {
   TransferResolutionError,
   MerchantActivationError,
   ProxyError,
+  AuthorizedMerchantsSchema,
 } from "@hypernetlabs/objects";
 import { IBasicTransferResponse } from "@hypernetlabs/objects";
-import { IAjaxUtils, ILocalStorageUtils, ILogUtils } from "@hypernetlabs/utils";
+import { IAjaxUtils, ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
 import { okAsync, errAsync } from "neverthrow";
 import td, { verify } from "testdouble";
 
 import { MerchantConnectorRepository } from "@implementations/data/MerchantConnectorRepository";
-import { IMerchantConnectorRepository } from "@interfaces/data/IMerchantConnectorRepository";
+import {
+  IMerchantConnectorRepository,
+  IAuthorizedMerchantEntry,
+} from "@interfaces/data/IMerchantConnectorRepository";
 import {
   IVectorUtils,
   IMerchantConnectorProxy,
@@ -54,7 +58,6 @@ class MerchantConnectorRepositoryMocks {
   public vectorUtils = td.object<IVectorUtils>();
   public configProvider = new ConfigProviderMock();
   public contextProvider = new ContextProviderMock();
-  public localStorageUtils = td.object<ILocalStorageUtils>();
   public merchantConnectorProxyFactory = td.object<IMerchantConnectorProxyFactory>();
   public merchantConnectorProxy = td.object<IMerchantConnectorProxy>();
   public blockchainUtils = td.object<IBlockchainUtils>();
@@ -91,8 +94,17 @@ class MerchantConnectorRepositoryMocks {
       ),
     ).thenReturn(okAsync({} as IBasicTransferResponse));
 
-    td.when(this.localStorageUtils.getItem("AuthorizedMerchants")).thenReturn(
-      `[{"merchantUrl":"${merchantUrl}","authorizationSignature":"${authorizationSignature}"}]`,
+    td.when(
+      this.ceramicUtils.readRecord<IAuthorizedMerchantEntry[]>(
+        AuthorizedMerchantsSchema.title,
+      ),
+    ).thenReturn(
+      okAsync([
+        {
+          merchantUrl,
+          authorizationSignature,
+        },
+      ]),
     );
 
     td.when(
@@ -171,9 +183,9 @@ describe("MerchantConnectorRepository tests", () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
-    td.when(mocks.localStorageUtils.getItem("AuthorizedMerchants")).thenReturn(
-      null,
-    );
+    td.when(
+      mocks.ceramicUtils.readRecord(AuthorizedMerchantsSchema.title),
+    ).thenReturn(okAsync(null));
 
     const repo = mocks.factoryRepository();
 
@@ -213,6 +225,20 @@ describe("MerchantConnectorRepository tests", () => {
       ),
     ).thenReturn(account2 as never);
 
+    const authorizedMerchantEntry = [
+      {
+        merchantUrl: merchantUrl,
+        authorizationSignature: newAuthorizationSignature,
+      },
+    ];
+
+    td.when(
+      mocks.ceramicUtils.writeRecord<IAuthorizedMerchantEntry[]>(
+        AuthorizedMerchantsSchema.title,
+        authorizedMerchantEntry,
+      ),
+    ).thenReturn(okAsync(undefined));
+
     let onAuthorizedMerchantUpdatedVal: string | null = null;
     mocks.contextProvider.onAuthorizedMerchantUpdated.subscribe((val) => {
       onAuthorizedMerchantUpdatedVal = val.toString();
@@ -226,12 +252,6 @@ describe("MerchantConnectorRepository tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    verify(
-      mocks.localStorageUtils.setItem(
-        "AuthorizedMerchants",
-        `[{"merchantUrl":"${merchantUrl}","authorizationSignature":"${newAuthorizationSignature}"}]`,
-      ),
-    );
     expect(onAuthorizedMerchantUpdatedVal).toBeDefined();
     expect(onAuthorizedMerchantUpdatedVal).toBe(merchantUrl);
   });
@@ -425,9 +445,23 @@ describe("MerchantConnectorRepository tests", () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
-    td.when(mocks.localStorageUtils.getItem("AuthorizedMerchants")).thenReturn(
-      null,
-    );
+    td.when(
+      mocks.ceramicUtils.readRecord(AuthorizedMerchantsSchema.title),
+    ).thenReturn(okAsync(null));
+
+    const authorizedMerchantEntry = [
+      {
+        merchantUrl: merchantUrl,
+        authorizationSignature: newAuthorizationSignature,
+      },
+    ];
+
+    td.when(
+      mocks.ceramicUtils.writeRecord<IAuthorizedMerchantEntry[]>(
+        AuthorizedMerchantsSchema.title,
+        authorizedMerchantEntry,
+      ),
+    ).thenReturn(okAsync(undefined));
 
     const repo = mocks.factoryRepository();
 
@@ -437,21 +471,16 @@ describe("MerchantConnectorRepository tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    verify(
-      mocks.localStorageUtils.setItem(
-        "AuthorizedMerchants",
-        `[{"merchantUrl":"${merchantUrl}","authorizationSignature":"${newAuthorizationSignature}"}]`,
-      ),
-    );
   });
 
   test("addAuthorizedMerchant returns an error if proxy can not be factoried", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
-    td.when(mocks.localStorageUtils.getItem("AuthorizedMerchants")).thenReturn(
-      null,
-    );
+    td.when(
+      mocks.ceramicUtils.readRecord(AuthorizedMerchantsSchema.title),
+    ).thenReturn(okAsync(null));
+
     const error = new MerchantConnectorError();
     td.when(
       mocks.merchantConnectorProxyFactory.factoryProxy(merchantUrl),
@@ -482,9 +511,9 @@ describe("MerchantConnectorRepository tests", () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
-    td.when(mocks.localStorageUtils.getItem("AuthorizedMerchants")).thenReturn(
-      null,
-    );
+    td.when(
+      mocks.ceramicUtils.readRecord(AuthorizedMerchantsSchema.title),
+    ).thenReturn(okAsync(null));
 
     const error = new MerchantValidationError();
     td.when(mocks.merchantConnectorProxy.getValidatedSignature()).thenReturn(
@@ -516,9 +545,9 @@ describe("MerchantConnectorRepository tests", () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
-    td.when(mocks.localStorageUtils.getItem("AuthorizedMerchants")).thenReturn(
-      null,
-    );
+    td.when(
+      mocks.ceramicUtils.readRecord(AuthorizedMerchantsSchema.title),
+    ).thenReturn(okAsync(null));
 
     const error = new MerchantValidationError();
     td.when(
@@ -554,9 +583,23 @@ describe("MerchantConnectorRepository tests", () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
-    td.when(mocks.localStorageUtils.getItem("AuthorizedMerchants")).thenReturn(
-      null,
-    );
+    td.when(
+      mocks.ceramicUtils.readRecord(AuthorizedMerchantsSchema.title),
+    ).thenReturn(okAsync(null));
+
+    const authorizedMerchantEntry = [
+      {
+        merchantUrl: merchantUrl,
+        authorizationSignature: newAuthorizationSignature,
+      },
+    ];
+
+    td.when(
+      mocks.ceramicUtils.writeRecord<IAuthorizedMerchantEntry[]>(
+        AuthorizedMerchantsSchema.title,
+        authorizedMerchantEntry,
+      ),
+    ).thenReturn(okAsync(undefined));
 
     const error = new MerchantConnectorError();
     td.when(
