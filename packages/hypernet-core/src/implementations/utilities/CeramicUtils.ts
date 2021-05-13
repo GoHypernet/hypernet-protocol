@@ -101,6 +101,7 @@ export class CeramicUtils implements ICeramicUtils {
     });
   }
 
+  // This is used to create a difinition derived from a schema, and it shouldn't be called in run time
   public initiateDefinitions(): ResultAsync<
     TileDocument[],
     CeramicError | BlockchainUnavailableError
