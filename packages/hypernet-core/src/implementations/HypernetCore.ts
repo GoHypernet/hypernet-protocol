@@ -676,9 +676,6 @@ export class HypernetCore implements IHypernetCore {
         return this.contextProvider.setContext(context);
       })
       .andThen(() => {
-        return this.ceramicListener.initialize();
-      })
-      .andThen(() => {
         // Initialize anything that wants an initialized context
         return ResultUtils.combine([
           this.vectorAPIListener.setup(),

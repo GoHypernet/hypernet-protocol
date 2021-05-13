@@ -9,12 +9,13 @@ import { TileDocument } from "@ceramicnetwork/stream-tile";
 import { IDX } from "@ceramicstudio/idx";
 import { createDefinition, publishSchema } from "@ceramicstudio/idx-tools";
 import {
-  CeramicError,
+  PersistenceError,
   BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
 import {
   EthereumAddress,
   AuthorizedMerchantsSchema,
+  HypernetConfig,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
 import { ILogUtils } from "@hypernetlabs/utils";
@@ -32,20 +33,13 @@ import {
 } from "@interfaces/utilities";
 
 export class CeramicUtils implements ICeramicUtils {
-  protected toCeramicError: (e: unknown) => CeramicError = (e) => {
-    console.log("toCeramicError e: ", e);
-    return new CeramicError(e as Error);
-  };
   protected ceramic: CeramicClient | null = null;
   protected threeIdConnect: ThreeIdConnect | null = null;
   protected authProvider: EthereumAuthProvider | null = null;
   protected threeIdResolver: ResolverRegistry | null = null;
   protected didResolver: Resolver | null = null;
   protected idx: IDX | null = null;
-  protected aliases = {
-    [AuthorizedMerchantsSchema.title]:
-      "kjzl6cwe1jw148ngghzoumihdtadlx9rzodfjlq5tv01jzr7cin7jx3g3gtfxf3",
-  };
+  protected isAuthenticated: boolean = false;
 
   constructor(
     protected configProvider: IConfigProvider,
@@ -54,12 +48,22 @@ export class CeramicUtils implements ICeramicUtils {
     protected logUtils: ILogUtils,
   ) {}
 
+  public initialize(): ResultAsync<
+    void,
+    PersistenceError | BlockchainUnavailableError
+  > {
+    if (this.isAuthenticated === true) {
+      return okAsync(undefined);
+    }
+    return this.authenticateUser();
+  }
+
   public authenticateUser(): ResultAsync<
     void,
-    CeramicError | BlockchainUnavailableError
+    PersistenceError | BlockchainUnavailableError
   > {
     return this.contextProvider.getInitializedContext().andThen((context) => {
-      return this._setup().andThen(() => {
+      return this._setup().andThen((config) => {
         return this._getDidProvider().andThen((didProvider) => {
           if (!this.ceramic || !this.threeIdResolver) {
             throw new Error("Something went wrong while initializing Ceramic!");
@@ -73,28 +77,32 @@ export class CeramicUtils implements ICeramicUtils {
           );
 
           if (!this.ceramic.did) {
-            return errAsync(this.toCeramicError(new Error("did is undefined")));
+            return errAsync(new PersistenceError("did is undefined"));
           }
 
           context.onDeStorageAuthenticationStarted.next();
 
           return ResultAsync.fromPromise(
             this.ceramic.did?.authenticate(),
-            this.toCeramicError,
+            (e) => e as PersistenceError,
           )
             .andThen(() => {
               context.onDeStorageAuthenticationSucceeded.next();
 
+              const aliases: Record<string, string> = {};
+              for (const [key, value] of config.storageAliases) {
+                aliases[key] = value;
+              }
               this.idx = new IDX({
                 ceramic: this.ceramic as CeramicClient,
-                aliases: this.aliases,
+                aliases: aliases,
               });
-
+              this.isAuthenticated = true;
               return okAsync(undefined);
             })
             .mapErr((e) => {
               context.onDeStorageAuthenticationFailed.next();
-              return e as CeramicError;
+              return e as PersistenceError;
             });
         });
       });
@@ -104,103 +112,111 @@ export class CeramicUtils implements ICeramicUtils {
   // This is used to create a difinition derived from a schema, and it shouldn't be called in run time
   public initiateDefinitions(): ResultAsync<
     TileDocument[],
-    CeramicError | BlockchainUnavailableError
+    PersistenceError | BlockchainUnavailableError
   > {
-    if (!this.ceramic || !this.idx) {
-      throw new Error("Something went wrong while initializing Ceramic!");
-    }
+    return this.initialize().andThen(() => {
+      if (!this.ceramic || !this.idx) {
+        throw new Error("Something went wrong while initializing Ceramic!");
+      }
 
-    const promisesOfPublishSchema: ResultAsync<
-      ISchemaWithName,
-      CeramicError
-    >[] = [];
+      const promisesOfPublishSchema: ResultAsync<
+        ISchemaWithName,
+        PersistenceError
+      >[] = [];
 
-    const promisesOfCreateDifnition: ResultAsync<
-      TileDocument,
-      CeramicError
-    >[] = [];
+      const promisesOfCreateDifnition: ResultAsync<
+        TileDocument,
+        PersistenceError
+      >[] = [];
 
-    const schemas = [AuthorizedMerchantsSchema];
-    for (const schema of schemas) {
-      promisesOfPublishSchema.push(
-        ResultAsync.fromPromise(
-          publishSchema(this.ceramic, {
-            content: schema,
-            name: schema.title,
+      const schemas = [AuthorizedMerchantsSchema];
+      for (const schema of schemas) {
+        promisesOfPublishSchema.push(
+          ResultAsync.fromPromise(
+            publishSchema(this.ceramic, {
+              content: schema,
+              name: schema.title,
+            }),
+            (e) => e as PersistenceError,
+          ).map((res) => {
+            return {
+              name: schema.title,
+              schema: res,
+            };
           }),
-          this.toCeramicError,
-        ).map((res) => {
-          return {
-            name: schema.title,
-            schema: res,
-          };
-        }),
-      );
-    }
+        );
+      }
 
-    return ResultUtils.combine(promisesOfPublishSchema)
-      .andThen((publishedSchemas) => {
-        for (const publishedSchema of publishedSchemas) {
-          promisesOfCreateDifnition.push(
-            ResultAsync.fromPromise(
-              createDefinition(this.ceramic as CeramicClient, {
-                name: publishedSchema.name,
-                description: publishedSchema.name,
-                schema: publishedSchema.schema.commitId.toUrl(),
-              }),
-              this.toCeramicError,
-            ),
-          );
-        }
+      return ResultUtils.combine(promisesOfPublishSchema)
+        .andThen((publishedSchemas) => {
+          for (const publishedSchema of publishedSchemas) {
+            promisesOfCreateDifnition.push(
+              ResultAsync.fromPromise(
+                createDefinition(this.ceramic as CeramicClient, {
+                  name: publishedSchema.name,
+                  description: publishedSchema.name,
+                  schema: publishedSchema.schema.commitId.toUrl(),
+                }),
+                (e) => e as PersistenceError,
+              ),
+            );
+          }
 
-        return ResultUtils.combine(promisesOfCreateDifnition);
-      })
-      .mapErr((e) => {
-        return e as CeramicError;
-      });
+          return ResultUtils.combine(promisesOfCreateDifnition);
+        })
+        .mapErr((e) => {
+          return e as PersistenceError;
+        });
+    });
   }
 
   public writeRecord<T>(
     aliasName: string,
     content: T,
-  ): ResultAsync<void, CeramicError> {
-    if (!this.idx) {
-      throw new Error("Something went wrong while initializing Ceramic!");
-    }
+  ): ResultAsync<void, PersistenceError> {
+    return this.initialize().andThen(() => {
+      if (!this.idx) {
+        throw new Error("Something went wrong while initializing Ceramic!");
+      }
 
-    return ResultAsync.fromPromise(
-      this.idx.set(aliasName, { data: content }),
-      this.toCeramicError,
-    ).andThen(() => {
-      return okAsync(undefined);
+      return ResultAsync.fromPromise(
+        this.idx.set(aliasName, { data: content }),
+        (e) => e as PersistenceError,
+      ).map(() => {});
     });
   }
 
-  public readRecord<T>(aliasName: string): ResultAsync<T | null, CeramicError> {
-    if (!this.idx) {
-      throw new Error("Something went wrong while initializing Ceramic!");
-    }
+  public readRecord<T>(
+    aliasName: string,
+  ): ResultAsync<T | null, PersistenceError> {
+    return this.initialize().andThen(() => {
+      if (!this.idx) {
+        throw new Error("Something went wrong while initializing Ceramic!");
+      }
 
-    return ResultAsync.fromPromise(
-      this.idx.get<IRecordWithDataKey<T>>(aliasName),
-      this.toCeramicError,
-    ).andThen((record) => {
-      return okAsync(record?.data || null);
+      return ResultAsync.fromPromise(
+        this.idx.get<IRecordWithDataKey<T>>(aliasName),
+        (e) => e as PersistenceError,
+      ).map((record) => {
+        return record?.data || null;
+      });
     });
   }
 
-  public removeRecord(aliasName: string): ResultAsync<void, CeramicError> {
-    if (!this.idx) {
-      throw new Error("Something went wrong while initializing Ceramic!");
-    }
+  public removeRecord(aliasName: string): ResultAsync<void, PersistenceError> {
+    return this.initialize().andThen(() => {
+      if (!this.idx) {
+        throw new Error("Something went wrong while initializing Ceramic!");
+      }
 
-    return ResultAsync.fromPromise(
-      this.idx.remove(aliasName),
-      this.toCeramicError,
-    );
+      return ResultAsync.fromPromise(
+        this.idx.remove(aliasName),
+        (e) => e as PersistenceError,
+      );
+    });
   }
 
-  private _setup(): ResultAsync<void, CeramicError> {
+  private _setup(): ResultAsync<HypernetConfig, PersistenceError> {
     return this.configProvider.getConfig().andThen((config) => {
       return this._getAdresses().andThen((addresses) => {
         this.ceramic = new CeramicClient(config.ceramicNodeUrl);
@@ -211,7 +227,7 @@ export class CeramicUtils implements ICeramicUtils {
         this.threeIdConnect = new ThreeIdConnect();
         this.threeIdResolver = ThreeIdResolver.getResolver(this.ceramic);
         this.didResolver = new Resolver(this.threeIdResolver);
-        return okAsync(undefined);
+        return okAsync(config);
       });
     });
   }
@@ -229,20 +245,20 @@ export class CeramicUtils implements ICeramicUtils {
     });
   }
 
-  private _getDidProvider(): ResultAsync<DidProviderProxy, CeramicError> {
+  private _getDidProvider(): ResultAsync<DidProviderProxy, PersistenceError> {
     if (!this.authProvider || !this.threeIdConnect) {
       throw new Error("Something went wrong while initializing Ceramic!");
     }
 
     return ResultAsync.fromPromise(
       this.threeIdConnect.connect(this.authProvider),
-      this.toCeramicError,
+      (e) => e as PersistenceError,
     ).andThen(() => {
       const didProvider = this.threeIdConnect?.getDidProvider();
 
       if (!didProvider) {
         return errAsync(
-          this.toCeramicError(new Error("Something went wrong with ceramic!")),
+          new PersistenceError("Something went wrong with ceramic!"),
         );
       }
       return okAsync(didProvider);

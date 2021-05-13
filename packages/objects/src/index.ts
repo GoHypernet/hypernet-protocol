@@ -33,3 +33,5 @@ export * from "@objects/errors";
 export * from "@objects/interfaces";
 export * from "@objects/typing";
 export * from "@objects/schemas";
+export * from "@web-integration/DefinitionName";
+export * from "@web-integration/SchemaUrl";
