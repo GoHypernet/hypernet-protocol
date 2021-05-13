@@ -1,5 +1,5 @@
 import {
-  CeramicError,
+  PersistenceError,
   BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
@@ -15,7 +15,7 @@ export class CeramicListener implements ICeramicListener {
   ) {}
   public initialize(): ResultAsync<
     void,
-    CeramicError | BlockchainUnavailableError
+    PersistenceError | BlockchainUnavailableError
   > {
     return this.ceramicUtils.authenticateUser();
   }

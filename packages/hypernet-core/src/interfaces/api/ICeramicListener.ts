@@ -1,9 +1,9 @@
 import {
-  CeramicError,
+  PersistenceError,
   BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface ICeramicListener {
-  initialize(): ResultAsync<void, CeramicError | BlockchainUnavailableError>;
+  initialize(): ResultAsync<void, PersistenceError | BlockchainUnavailableError>;
 }

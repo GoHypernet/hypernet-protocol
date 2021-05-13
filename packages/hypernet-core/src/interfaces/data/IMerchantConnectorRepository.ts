@@ -15,7 +15,6 @@ import {
   MerchantAuthorizationDeniedError,
   PullPayment,
   PushPayment,
-  CeramicError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -51,7 +50,7 @@ export interface IMerchantConnectorRepository {
    */
   deauthorizeMerchant(
     merchantUrl: MerchantUrl,
-  ): ResultAsync<void, CeramicError>;
+  ): ResultAsync<void, PersistenceError>;
 
   /**
    * Returns the status of all the authorized merchant's connectors.
@@ -59,7 +58,7 @@ export interface IMerchantConnectorRepository {
    */
   getAuthorizedMerchantConnectorStatus(): ResultAsync<
     Map<MerchantUrl, boolean>,
-    CeramicError
+    PersistenceError
   >;
 
   /**
@@ -68,12 +67,12 @@ export interface IMerchantConnectorRepository {
    */
   getAuthorizedMerchants(): ResultAsync<
     Map<MerchantUrl, Signature>,
-    CeramicError
+    PersistenceError
   >;
 
   activateAuthorizedMerchants(
     balances: Balances,
-  ): ResultAsync<void, CeramicError>;
+  ): ResultAsync<void, PersistenceError>;
 
   resolveChallenge(
     merchantUrl: MerchantUrl,

@@ -4,7 +4,7 @@ import {
   MerchantValidationError,
   BlockchainUnavailableError,
   ProxyError,
-  CeramicError,
+  PersistenceError,
 } from "@hypernetlabs/objects";
 import { MerchantUrl, Signature } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
@@ -114,7 +114,7 @@ export class MerchantService implements IMerchantService {
 
   public getAuthorizedMerchants(): ResultAsync<
     Map<MerchantUrl, Signature>,
-    CeramicError
+    PersistenceError
   > {
     return this.merchantConnectorRepository.getAuthorizedMerchants();
   }

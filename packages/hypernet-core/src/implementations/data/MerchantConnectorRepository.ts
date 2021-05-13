@@ -18,11 +18,10 @@ import {
   LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
-  PersistenceError,
   AjaxError,
   MerchantActivationError,
   MerchantAuthorizationDeniedError,
-  CeramicError,
+  PersistenceError,
 } from "@hypernetlabs/objects";
 import {
   ResultUtils,
@@ -178,7 +177,7 @@ export class MerchantConnectorRepository
     | ProxyError
     | BlockchainUnavailableError
     | MerchantConnectorError
-    | CeramicError
+    | PersistenceError
   > {
     let proxy: IMerchantConnectorProxy;
     let context: InitializedHypernetContext;
@@ -266,7 +265,7 @@ export class MerchantConnectorRepository
    */
   public getAuthorizedMerchants(): ResultAsync<
     Map<MerchantUrl, Signature>,
-    CeramicError
+    PersistenceError
   > {
     return this.ceramicUtils
       .readRecord<IAuthorizedMerchantEntry[]>(AuthorizedMerchantsSchema.title)
@@ -347,7 +346,7 @@ export class MerchantConnectorRepository
    */
   public activateAuthorizedMerchants(
     balances: Balances,
-  ): ResultAsync<void, CeramicError> {
+  ): ResultAsync<void, PersistenceError> {
     this.balances = balances;
 
     if (this.activateAuthorizedMerchantsResult == null) {
@@ -481,7 +480,7 @@ export class MerchantConnectorRepository
     | MerchantAuthorizationDeniedError
     | ProxyError
     | MerchantConnectorError
-    | CeramicError
+    | PersistenceError
   > {
     const results = new Array<ResultAsync<void, MerchantConnectorError>>();
     return this.getAuthorizedMerchants().andThen((authorizedMerchants) => {
@@ -498,7 +497,7 @@ export class MerchantConnectorRepository
 
   public deauthorizeMerchant(
     merchantUrl: MerchantUrl,
-  ): ResultAsync<void, CeramicError> {
+  ): ResultAsync<void, PersistenceError> {
     return this.getAuthorizedMerchants()
       .map((authorizedMerchants) => {
         authorizedMerchants.delete(merchantUrl);
@@ -513,7 +512,7 @@ export class MerchantConnectorRepository
 
   public getAuthorizedMerchantConnectorStatus(): ResultAsync<
     Map<MerchantUrl, boolean>,
-    CeramicError
+    PersistenceError
   > {
     const retMap = new Map<MerchantUrl, boolean>();
     if (this.activateAuthorizedMerchantsResult == null) {
@@ -574,7 +573,7 @@ export class MerchantConnectorRepository
     merchantUrl: MerchantUrl,
   ): ResultAsync<
     IMerchantConnectorProxy,
-    ProxyError | MerchantAuthorizationDeniedError | CeramicError
+    ProxyError | MerchantAuthorizationDeniedError | PersistenceError
   > {
     // The goal of this method is to return an activated merchant proxy,
     // and not resolve unless all hope is lost.
@@ -753,7 +752,7 @@ export class MerchantConnectorRepository
     | MerchantAuthorizationDeniedError
     | MerchantValidationError
     | ProxyError
-    | CeramicError
+    | PersistenceError
   > {
     this.logUtils.debug(`Validating code signature for ${merchantUrl}`);
     return proxy.getValidatedSignature().andThen((validatedSignature) => {
@@ -846,7 +845,7 @@ export class MerchantConnectorRepository
 
   protected _setAuthorizedMerchants(
     authorizedMerchantMap: Map<MerchantUrl, Signature>,
-  ): ResultAsync<void, CeramicError> {
+  ): ResultAsync<void, PersistenceError> {
     return this.getAuthorizedMerchants().andThen(
       (storedAuthorizedMerchantsMap) => {
         const allAuthorizedMerchantMap: Map<MerchantUrl, Signature> = new Map([
