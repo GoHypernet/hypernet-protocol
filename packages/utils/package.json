@@ -42,6 +42,7 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
+    "@connext/vector-utils": "^0.2.0-beta.8",
     "@hypernetlabs/objects": "^0.0.1",
     "axios": "^0.21.1",
     "inversify": "^5.1.1",
