@@ -17,5 +17,5 @@ export interface IMerchantConnectorRepository {
 }
 
 export const IMerchantConnectorRepositoryType = Symbol.for(
-  "IMerchantConnectorRepository"
+  "IMerchantConnectorRepository",
 );
