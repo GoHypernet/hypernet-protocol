@@ -48,17 +48,17 @@ export class CeramicUtils implements ICeramicUtils {
     protected logUtils: ILogUtils,
   ) {}
 
-  public initialize(): ResultAsync<
+  private _initialize(): ResultAsync<
     void,
     PersistenceError | BlockchainUnavailableError
   > {
     if (this.isAuthenticated === true) {
       return okAsync(undefined);
     }
-    return this.authenticateUser();
+    return this._authenticateUser();
   }
 
-  public authenticateUser(): ResultAsync<
+  private _authenticateUser(): ResultAsync<
     void,
     PersistenceError | BlockchainUnavailableError
   > {
@@ -114,7 +114,7 @@ export class CeramicUtils implements ICeramicUtils {
     TileDocument[],
     PersistenceError | BlockchainUnavailableError
   > {
-    return this.initialize().andThen(() => {
+    return this._initialize().andThen(() => {
       if (!this.ceramic || !this.idx) {
         throw new Error("Something went wrong while initializing Ceramic!");
       }
@@ -174,7 +174,7 @@ export class CeramicUtils implements ICeramicUtils {
     aliasName: string,
     content: T,
   ): ResultAsync<void, PersistenceError> {
-    return this.initialize().andThen(() => {
+    return this._initialize().andThen(() => {
       if (!this.idx) {
         throw new Error("Something went wrong while initializing Ceramic!");
       }
@@ -189,7 +189,7 @@ export class CeramicUtils implements ICeramicUtils {
   public readRecord<T>(
     aliasName: string,
   ): ResultAsync<T | null, PersistenceError> {
-    return this.initialize().andThen(() => {
+    return this._initialize().andThen(() => {
       if (!this.idx) {
         throw new Error("Something went wrong while initializing Ceramic!");
       }
@@ -204,7 +204,7 @@ export class CeramicUtils implements ICeramicUtils {
   }
 
   public removeRecord(aliasName: string): ResultAsync<void, PersistenceError> {
-    return this.initialize().andThen(() => {
+    return this._initialize().andThen(() => {
       if (!this.idx) {
         throw new Error("Something went wrong while initializing Ceramic!");
       }

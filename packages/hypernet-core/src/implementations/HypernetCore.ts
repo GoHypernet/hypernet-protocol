@@ -46,7 +46,6 @@ import { Subject } from "rxjs";
 import {
   MerchantConnectorListener,
   VectorAPIListener,
-  CeramicListener,
 } from "@implementations/api";
 import {
   AccountService,
@@ -82,7 +81,6 @@ import {
 import {
   IMerchantConnectorListener,
   IVectorListener,
-  ICeramicListener,
 } from "@interfaces/api";
 import {
   IAccountService,
@@ -183,7 +181,6 @@ export class HypernetCore implements IHypernetCore {
   // API
   protected vectorAPIListener: IVectorListener;
   protected merchantConnectorListener: IMerchantConnectorListener;
-  protected ceramicListener: ICeramicListener;
 
   protected _initializeResult: ResultAsync<void, LogicalError> | null;
   protected _initialized: boolean;
@@ -401,11 +398,6 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.logUtils,
       this.validationUtils,
-    );
-
-    this.ceramicListener = new CeramicListener(
-      this.ceramicUtils,
-      this.logUtils,
     );
 
     // This whole rigamarole is to make sure it can only be initialized a single time, and that you can call waitInitialized()

@@ -6,10 +6,6 @@ import {
 import { ResultAsync } from "neverthrow";
 
 export interface ICeramicUtils {
-  authenticateUser(): ResultAsync<
-    void,
-    PersistenceError | BlockchainUnavailableError
-  >;
   initiateDefinitions(): ResultAsync<
     TileDocument[],
     PersistenceError | BlockchainUnavailableError
