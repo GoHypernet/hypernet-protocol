@@ -8,3 +8,7 @@ export interface IMerchantConnectorProxyFactory {
     merchantUrl: MerchantUrl,
   ): ResultAsync<IMerchantConnectorProxy, ProxyError>;
 }
+
+export const IMerchantConnectorProxyFactoryType = Symbol.for(
+  "IMerchantConnectorProxyFactory",
+);

@@ -8,15 +8,14 @@ import {
   PaymentId,
   TransferId,
   Signature,
-} from "@hypernetlabs/objects";
-import {
   InvalidParametersError,
   RouterChannelUnknownError,
   TransferCreationError,
   TransferResolutionError,
   VectorError,
+  EPaymentType,
+  ETransferState,
 } from "@hypernetlabs/objects";
-import { EPaymentType, ETransferState } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
@@ -115,3 +114,5 @@ export interface IVectorUtils {
   getTimestampFromTransfer(transfer: IFullTransferState): number;
   getTransferStateFromTransfer(transfer: IFullTransferState): ETransferState;
 }
+
+export const IVectorUtilsType = Symbol.for("IVectorUtils");

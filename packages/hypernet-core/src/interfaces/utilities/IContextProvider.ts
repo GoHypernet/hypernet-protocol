@@ -29,3 +29,5 @@ export interface IContextProvider {
    */
   getAccount(): ResultAsync<string, never>;
 }
+
+export const IContextProviderType = Symbol.for("IContextProvider");

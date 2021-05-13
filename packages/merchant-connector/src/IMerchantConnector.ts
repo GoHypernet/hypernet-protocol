@@ -5,11 +5,14 @@ import {
   PublicIdentifier,
   EthereumAddress,
   PaymentId,
-  Signature,
 } from "@hypernetlabs/objects";
 import { Observable } from "rxjs";
 
+import { IAuthorizeFundsRequest } from "./IAuthorizeFundsRequest";
+import { IRedirectInfo } from "./IRedirectInfo";
 import { IResolutionResult } from "./IResolutionResult";
+import { ISendFundsRequest } from "./ISendFundsRequest";
+import { ISignMessageRequest } from "./ISignMessageRequest";
 
 export interface IMerchantConnector {
   resolveChallenge(paymentId: PaymentId): Promise<IResolutionResult>;
@@ -81,31 +84,4 @@ export interface IMerchantConnector {
    * @param balances
    */
   onBalancesReceived(balances: Balances): void;
-}
-
-export interface ISendFundsRequest {
-  recipientPublicIdentifier: string;
-  amount: string;
-}
-
-export interface IAuthorizeFundsRequest {
-  recipientPublicIdentifier: string;
-  total: string;
-  expirationDate: number;
-}
-
-export interface IRedirectInfo {
-  // This is a query string parameter that the iframe will look for
-  redirectParam: string;
-
-  // This is the value to expect
-  redirectValue: string;
-
-  // This callback will be called by the frame when it is ready for the redirect.
-  readyFunction: () => void;
-}
-
-export interface ISignMessageRequest {
-  message: string;
-  callback: (message: string, signature: Signature) => void;
 }

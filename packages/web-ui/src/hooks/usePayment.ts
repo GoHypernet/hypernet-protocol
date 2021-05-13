@@ -1,5 +1,9 @@
-import { Balances, PublicIdentifier } from "@hypernetlabs/objects";
-import { EPaymentType, MerchantUrl } from "@hypernetlabs/objects";
+import {
+  Balances,
+  PublicIdentifier,
+  EPaymentType,
+  MerchantUrl,
+} from "@hypernetlabs/objects";
 import { utils } from "ethers";
 import { useEffect, useReducer } from "react";
 
@@ -244,9 +248,9 @@ export function usePayment(initialParams: any): IReducerStateReducer {
     proxy
       .sendFunds(
         state.counterPartyAccount,
-        utils.parseUnits(state.amount, "wei").toString(),
+        utils.parseUnits(state.amount, "wei"),
         state.expirationDate,
-        utils.parseUnits(state.requiredStake, "wei").toString(),
+        utils.parseUnits(state.requiredStake, "wei"),
         state.selectedPaymentToken?.address,
         state.merchantUrl,
       )

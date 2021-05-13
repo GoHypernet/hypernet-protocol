@@ -7,7 +7,15 @@ import {
   IResolutionResult,
   IRedirectInfo,
 } from "@hypernetlabs/merchant-connector";
-import { PushPayment, PullPayment, PublicIdentifier, Balances, EthereumAddress } from "@hypernetlabs/objects";
+import {
+  PushPayment,
+  PullPayment,
+  PublicIdentifier,
+  Balances,
+  EthereumAddress,
+  PaymentId,
+  Signature,
+} from "@hypernetlabs/objects";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { Subject } from "rxjs";
 
@@ -18,7 +26,7 @@ declare global {
 }
 
 class TestMerchantConnector implements IMerchantConnector {
-  async resolveChallenge(paymentId: string): Promise<IResolutionResult> {
+  async resolveChallenge(paymentId: PaymentId): Promise<IResolutionResult> {
     // What the mediator needs to sign:
     // https://github.com/connext/transfers/blob/20f44307164cb245c075cf3723b09d8ff75901d4/tests/insurance/insurance.spec.ts#L399
 
@@ -51,7 +59,7 @@ class TestMerchantConnector implements IMerchantConnector {
     // 6) Return both the signature of the hash of the data & the data itself
     return Promise.resolve({
       paymentId,
-      mediatorSignature,
+      mediatorSignature: Signature(mediatorSignature),
       amount: resolutionAmount,
     });
   }

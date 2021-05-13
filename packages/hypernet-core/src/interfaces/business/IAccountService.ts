@@ -4,9 +4,6 @@ import {
   PrivateCredentials,
   PublicIdentifier,
   Signature,
-  AssetInfo,
-} from "@hypernetlabs/objects";
-import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
   LogicalError,
@@ -14,6 +11,7 @@ import {
   RouterChannelUnknownError,
   InvalidParametersError,
   PreferredPaymentTokenError,
+  AssetInfo,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
@@ -67,3 +65,5 @@ export interface IAccountService {
     BlockchainUnavailableError | PreferredPaymentTokenError
   >;
 }
+
+export const IAccountServiceType = Symbol.for("IAccountService");

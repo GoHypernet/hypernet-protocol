@@ -7,3 +7,5 @@ export * from "@utils/LocalStorageUtils";
 export * from "@utils/ParentProxy";
 export * from "@utils/ILogUtils";
 export * from "@utils/LogUtils";
+export * from "@utils/IValidationUtils";
+export * from "@utils/ValidationUtils";

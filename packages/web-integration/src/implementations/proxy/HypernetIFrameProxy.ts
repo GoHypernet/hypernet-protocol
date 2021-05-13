@@ -11,8 +11,6 @@ import {
   MerchantUrl,
   Signature,
   AssetInfo,
-} from "@hypernetlabs/objects";
-import {
   AcceptPaymentError,
   RouterChannelUnknownError,
   BlockchainUnavailableError,
@@ -279,17 +277,17 @@ export default class HypernetIFrameProxy
 
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: string,
+    amount: BigNumber,
     expirationDate: number,
-    requiredStake: string,
+    requiredStake: BigNumber,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this._createCall("sendFunds", {
       counterPartyAccount,
-      amount,
+      amount: amount.toString(),
       expirationDate,
-      requiredStake,
+      requiredStake: requiredStake.toString(),
       paymentToken,
       merchantUrl,
     });
@@ -299,7 +297,7 @@ export default class HypernetIFrameProxy
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumber,
     expirationDate: number,
-    deltaAmount: string,
+    deltaAmount: BigNumber,
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
@@ -307,11 +305,11 @@ export default class HypernetIFrameProxy
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this._createCall("authorizeFunds", {
       counterPartyAccount,
-      totalAuthorized,
+      totalAuthorized: totalAuthorized.toString(),
       expirationDate,
-      deltaAmount,
+      deltaAmount: deltaAmount.toString(),
       deltaTime,
-      requiredStake,
+      requiredStake: requiredStake.toString(),
       paymentToken,
       merchantUrl,
     });

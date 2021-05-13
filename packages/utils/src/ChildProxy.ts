@@ -34,7 +34,7 @@ export abstract class ChildProxy {
   protected returnForModel<T, E>(
     func: () => ResultAsync<T, E>,
     callId: number,
-  ) {
+  ): void {
     func().match(
       (result) => {
         if (this.parent != null) {
@@ -43,7 +43,6 @@ export abstract class ChildProxy {
       },
       (e) => {
         if (this.parent != null) {
-          console.error(e);
           this.parent.emit("callError", new IFrameCallData(callId, e));
         }
       },

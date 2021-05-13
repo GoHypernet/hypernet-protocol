@@ -5,8 +5,6 @@ import {
   PublicIdentifier,
   Signature,
   AssetInfo,
-} from "@hypernetlabs/objects";
-import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
   LogicalError,
@@ -72,3 +70,5 @@ export interface IAccountsRepository {
     BlockchainUnavailableError | PreferredPaymentTokenError
   >;
 }
+
+export const IAccountsRepositoryType = Symbol.for("IAccountsRepository");

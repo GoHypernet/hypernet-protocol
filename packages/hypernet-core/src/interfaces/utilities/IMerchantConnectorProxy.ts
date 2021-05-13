@@ -1,4 +1,8 @@
-import { IResolutionResult } from "@hypernetlabs/merchant-connector";
+import {
+  IAuthorizeFundsRequest,
+  IResolutionResult,
+  ISendFundsRequest,
+} from "@hypernetlabs/merchant-connector";
 import {
   Balances,
   EthereumAddress,
@@ -10,8 +14,9 @@ import {
   ProxyError,
   PublicIdentifier,
   Signature,
+  PullPayment,
+  PushPayment,
 } from "@hypernetlabs/objects";
-import { PullPayment, PushPayment } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
 import { Observable } from "rxjs";
@@ -82,9 +87,13 @@ export interface IMerchantConnectorProxy extends ParentProxy {
     balances: Balances,
   ): ResultAsync<void, MerchantConnectorError | ProxyError>;
 
-  signMessageRequested: Observable<string>;
   messageSigned(
     message: string,
     signature: Signature,
   ): ResultAsync<void, ProxyError>;
+
+  // Signals to the outside world
+  signMessageRequested: Observable<string>;
+  sendFundsRequested: Observable<ISendFundsRequest>;
+  authorizeFundsRequested: Observable<IAuthorizeFundsRequest>;
 }
