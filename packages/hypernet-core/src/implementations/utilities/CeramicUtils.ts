@@ -257,7 +257,9 @@ export class CeramicUtils implements ICeramicUtils {
       const result = ResultUtils.fromThrowableResult<
         DidProviderProxy,
         PersistenceError
-      >(this.threeIdConnect?.getDidProvider as () => DidProviderProxy);
+      >(() => {
+        return this.threeIdConnect?.getDidProvider() as DidProviderProxy;
+      });
 
       if (result.isErr()) {
         return errAsync(result.error);
