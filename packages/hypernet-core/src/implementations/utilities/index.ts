@@ -11,3 +11,4 @@ export * from "./TimeUtils";
 export * from "./VectorUtils";
 export * from "./WrappedBrowserNode";
 export * from "./InternalProvider";
+export * from "./CeramicUtils";

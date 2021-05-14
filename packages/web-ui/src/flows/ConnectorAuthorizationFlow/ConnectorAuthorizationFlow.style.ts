@@ -4,12 +4,9 @@ const useStyles = createUseStyles({
   container: {
     width: "100%",
   },
-  balancesWrapper: {
-    margin: "24px 0",
-  },
-  balancesLabel: {
+  balancesEmptyLabel: {
     fontSize: 20,
-    marginBottom: 24,
+    margin: 25,
     textAlign: "center",
   },
 });

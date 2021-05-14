@@ -181,6 +181,16 @@ export default class CoreWrapper extends ChildProxy {
           );
         }, data.callId);
       },
+      setPreferredPaymentToken: (data: IIFrameCallData<EthereumAddress>) => {
+        this.returnForModel(() => {
+          return this.core.setPreferredPaymentToken(data.data);
+        }, data.callId);
+      },
+      getPreferredPaymentToken: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getPreferredPaymentToken();
+        }, data.callId);
+      },
     });
   }
 
@@ -234,6 +244,18 @@ export default class CoreWrapper extends ChildProxy {
 
     this.core.onBalancesChanged.subscribe((val) => {
       parent.emit("onBalancesChanged", val);
+    });
+
+    this.core.onDeStorageAuthenticationStarted.subscribe(() => {
+      parent.emit("onDeStorageAuthenticationStarted");
+    });
+
+    this.core.onDeStorageAuthenticationSucceeded.subscribe(() => {
+      parent.emit("onDeStorageAuthenticationSucceeded");
+    });
+
+    this.core.onDeStorageAuthenticationFailed.subscribe(() => {
+      parent.emit("onDeStorageAuthenticationFailed");
     });
 
     this.core.onMerchantAuthorized.subscribe((val) => {

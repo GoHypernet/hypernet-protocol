@@ -10,6 +10,9 @@ import {
   HypernetConfig,
   PublicIdentifier,
   EBlockchainNetwork,
+  AuthorizedMerchantsSchema,
+  DefinitionName,
+  SchemaUrl,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { Wallet, constants } from "ethers";
@@ -58,6 +61,15 @@ export class ConfigProvider implements IConfigProvider {
         "openThreadKey",
         chainAddresses,
         "http://localhost:5005", // merchantIframeUrl
+        "https://ceramic-clay.3boxlabs.com", // ceramicNodeUrl,
+        new Map([
+          [
+            DefinitionName(AuthorizedMerchantsSchema.title),
+            SchemaUrl(
+              "kjzl6cwe1jw148ngghzoumihdtadlx9rzodfjlq5tv01jzr7cin7jx3g3gtfxf3",
+            ),
+          ],
+        ]),
         true, // debug
       );
 
@@ -103,6 +115,15 @@ export class ConfigProvider implements IConfigProvider {
         "openThreadKey",
         chainAddresses,
         "http://localhost:5005", // merchantIframeUrl
+        "https://ceramic-clay.3boxlabs.com", // ceramicNodeUrl
+        new Map([
+          [
+            DefinitionName(AuthorizedMerchantsSchema.title),
+            SchemaUrl(
+              "kjzl6cwe1jw148ngghzoumihdtadlx9rzodfjlq5tv01jzr7cin7jx3g3gtfxf3",
+            ),
+          ],
+        ]),
         true, // debug
       );
 

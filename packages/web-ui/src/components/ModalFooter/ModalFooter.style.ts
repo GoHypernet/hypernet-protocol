@@ -9,7 +9,8 @@ const useStyles = createUseStyles({
     fontSize: 15,
   },
   accountLink: {
-    color: "#2539DE",
+    color: "#7d7d7d",
+    fontSize: 12,
   },
 });
 

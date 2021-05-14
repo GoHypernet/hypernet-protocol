@@ -1,4 +1,9 @@
-import { HypernetConfig } from "@hypernetlabs/objects";
+import {
+  AuthorizedMerchantsSchema,
+  DefinitionName,
+  HypernetConfig,
+  SchemaUrl,
+} from "@hypernetlabs/objects";
 import { okAsync, ResultAsync } from "neverthrow";
 
 import { IConfigProvider } from "@interfaces/utilities";
@@ -37,6 +42,15 @@ export class ConfigProviderMock implements IConfigProvider {
           },
         },
         "merchantIframeUrl",
+        "https://ceramic-clay.3boxlabs.com",
+        new Map([
+          [
+            DefinitionName(AuthorizedMerchantsSchema.title),
+            SchemaUrl(
+              "kjzl6cwe1jw148ngghzoumihdtadlx9rzodfjlq5tv01jzr7cin7jx3g3gtfxf3",
+            ),
+          ],
+        ]),
         false, // debug is off for testing
       );
   }

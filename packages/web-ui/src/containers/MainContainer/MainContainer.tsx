@@ -1,5 +1,6 @@
 import React from "react";
 
+import LoadingSpinner from "@web-ui/components/LoadingSpinner";
 import Modal from "@web-ui/containers/Modal";
 
 interface IMainContainer {
@@ -8,9 +9,10 @@ interface IMainContainer {
 }
 
 export function MainContainer({ children, withModal }: IMainContainer) {
-  if (withModal) {
-    return <Modal isOpen={true}>{children}</Modal>;
-  }
-
-  return <>{children}</>;
+  return (
+    <>
+      <LoadingSpinner />
+      {withModal ? <Modal>{children}</Modal> : children}
+    </>
+  );
 }

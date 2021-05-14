@@ -44,6 +44,13 @@ export class ResultUtils {
     }, ok([]));
   }
 
+  static fromThrowableResult<T, E>(throwableCallback: () => T): Result<T, E> {
+    const throwable = Result.fromThrowable(throwableCallback, (err) => {
+      return err as E;
+    });
+    return throwable();
+  }
+
   static executeSerially<T, E>(
     funcList: (() => ResultAsync<T, E>)[],
   ): ResultAsync<T[], E> {

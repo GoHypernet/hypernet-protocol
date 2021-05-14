@@ -18,6 +18,13 @@ export interface IConnectorAuthorizationFlowParams extends IRenderParams {
   connectorLogoUrl?: string;
 }
 
+export interface IOnboardingFlowParams extends IRenderParams {
+  merchantUrl: MerchantUrl;
+  merchantName?: string;
+  merchantLogoUrl?: string;
+  finalSuccessContent?: string;
+}
+
 export interface IRenderPaymentWidgetParams extends IRenderParams {
   selector: string;
   counterPartyAccount: PublicIdentifier;
@@ -39,6 +46,7 @@ export interface IHypernetWebUI {
   renderConnectorAuthorizationFlow(
     params: IConnectorAuthorizationFlowParams,
   ): Result<void, RenderError>;
+  startOnboardingFlow(params: IOnboardingFlowParams): Result<void, RenderError>;
   renderPrivateKeysModal(): Result<void, RenderError>;
   displayMerchantIFrame(merchantUrl: MerchantUrl): void;
   closeMerchantIFrame(merchantUrl: MerchantUrl): void;

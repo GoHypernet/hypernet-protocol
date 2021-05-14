@@ -4,16 +4,22 @@ import {
   EthereumAddress,
   PublicIdentifier,
   IFullChannelState,
-  LogicalError,
   Signature,
+  AssetInfo,
 } from "@hypernetlabs/objects";
 import {
-  BalancesUnavailableError,
+  PreferredPaymentTokenError,
   BlockchainUnavailableError,
   RouterChannelUnknownError,
+  BalancesUnavailableError,
+  LogicalError,
   VectorError,
 } from "@hypernetlabs/objects";
-import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import {
+  ResultUtils,
+  ILogUtils,
+  ILocalStorageUtils,
+} from "@hypernetlabs/utils";
 import { ethers, constants } from "ethers";
 import { BigNumber } from "ethers";
 import { combine, errAsync, okAsync, ResultAsync } from "neverthrow";
@@ -26,15 +32,6 @@ import {
   IBrowserNode,
   IBlockchainUtils,
 } from "@interfaces/utilities";
-
-class AssetInfo {
-  constructor(
-    public assetId: EthereumAddress,
-    public name: string,
-    public symbol: string,
-    public decimals: number,
-  ) {}
-}
 
 /**
  * Contains methods for getting Ethereum accounts, public identifiers,
@@ -50,8 +47,9 @@ export class AccountsRepository implements IAccountsRepository {
     protected blockchainProvider: IBlockchainProvider,
     protected vectorUtils: IVectorUtils,
     protected browserNodeProvider: IBrowserNodeProvider,
-    protected logUtils: ILogUtils,
     protected blockchainUtils: IBlockchainUtils,
+    protected localStorageUtils: ILocalStorageUtils,
+    protected logUtils: ILogUtils,
   ) {
     // We will cache the info about each asset type, so we only have to look it up once.
     this.assetInfo = new Map();
@@ -307,6 +305,28 @@ export class AccountsRepository implements IAccountsRepository {
       });
   }
 
+  public setPreferredPaymentToken(
+    tokenAddress: EthereumAddress,
+  ): ResultAsync<void, PreferredPaymentTokenError> {
+    this.localStorageUtils.setItem(
+      "PreferredPaymentTokenAddress",
+      tokenAddress,
+    );
+    return okAsync(undefined);
+  }
+
+  public getPreferredPaymentToken(): ResultAsync<
+    AssetInfo,
+    BlockchainUnavailableError | PreferredPaymentTokenError
+  > {
+    const tokenAddress = this.localStorageUtils.getItem(
+      "PreferredPaymentTokenAddress",
+    );
+    if (!tokenAddress) {
+      return errAsync(new PreferredPaymentTokenError(""));
+    }
+    return this._getAssetInfo(EthereumAddress(tokenAddress));
+  }
   protected _getAssetBalance(
     i: number,
     channelState: IFullChannelState,

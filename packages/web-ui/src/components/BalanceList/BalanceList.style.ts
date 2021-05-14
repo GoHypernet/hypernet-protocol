@@ -7,10 +7,11 @@ const useStyles = createUseStyles({
     borderRadius: 4,
   },
   itemWrapper: {
-    margin: 24,
+    padding: 24,
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+    border: "1px solid #F2F2F2",
   },
   tokenLogo: {
     width: 30,

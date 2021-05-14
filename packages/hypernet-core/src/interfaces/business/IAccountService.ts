@@ -10,6 +10,8 @@ import {
   VectorError,
   RouterChannelUnknownError,
   InvalidParametersError,
+  PreferredPaymentTokenError,
+  AssetInfo,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
@@ -55,6 +57,13 @@ export interface IAccountService {
   signMessage(
     message: string,
   ): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;
+  setPreferredPaymentToken(
+    tokenAddress: EthereumAddress,
+  ): ResultAsync<void, PreferredPaymentTokenError>;
+  getPreferredPaymentToken(): ResultAsync<
+    AssetInfo,
+    BlockchainUnavailableError | PreferredPaymentTokenError
+  >;
 }
 
 export const IAccountServiceType = Symbol.for("IAccountService");

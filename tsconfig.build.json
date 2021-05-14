@@ -43,7 +43,8 @@
       ],
       "@utils/*": ["./*"],
       "@developer-ui/*": ["./*"],
-      "@objects/*": ["./*"]
+      "@objects/*": ["./*"],
+      "@user-dashboard/*": ["./*"]
     }
   }
 }
