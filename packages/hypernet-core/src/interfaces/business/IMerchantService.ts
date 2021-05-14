@@ -4,6 +4,7 @@ import {
   MerchantValidationError,
   BlockchainUnavailableError,
   ProxyError,
+  PersistenceError,
 } from "@hypernetlabs/objects";
 import { MerchantUrl, Signature } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
@@ -13,7 +14,10 @@ export interface IMerchantService {
   authorizeMerchant(
     merchantUrl: MerchantUrl,
   ): ResultAsync<void, MerchantValidationError>;
-  getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, never>;
+  getAuthorizedMerchants(): ResultAsync<
+    Map<MerchantUrl, Signature>,
+    PersistenceError
+  >;
   activateAuthorizedMerchants(): ResultAsync<
     void,
     | MerchantConnectorError
