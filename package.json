@@ -52,6 +52,7 @@
     "start": "yarn build && cd packages/developer-ui && yarn start",
     "start-developer-ui": "yarn start",
     "start-web-demo": "cd packages/web-demo && yarn start",
+    "start-user-dashboard": "cd packages/user-dashboard && yarn start",
     "test": "cd packages/hypernet-core && yarn test"
   },
   "husky": {
