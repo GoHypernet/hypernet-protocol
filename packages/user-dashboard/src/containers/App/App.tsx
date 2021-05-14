@@ -1,30 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import HypernetWebIntegration, {
   IHypernetWebIntegration,
 } from "@hypernetlabs/web-integration";
 import { ResultMessage, EResultStatus } from "@hypernetlabs/web-ui";
 
-import { LayoutProvider, StoreProvider } from "@user-dashboard/contexts";
+import { useLayoutContext, useStoreContext } from "@user-dashboard/contexts";
+import Router from "@user-dashboard/containers/Router";
 
 const App: React.FC = () => {
-  const [initializing, setInitializing] = useState<boolean>(true);
-  const [resultMessage, setResultMessage] = useState<ResultMessage>(
-    new ResultMessage(EResultStatus.IDLE, ""),
-  );
-  const [
-    HNPIntegration,
-    setHNPIntegration,
-  ] = useState<IHypernetWebIntegration>();
+  const { setLoading, setResultMessage } = useLayoutContext();
+  const { setCoreProxy } = useStoreContext();
 
   useEffect(() => {
     const integration: IHypernetWebIntegration = new HypernetWebIntegration();
-    setHNPIntegration(integration);
 
-    setInitializing(true);
+    setLoading(true);
+
     integration
       .getReady()
-      .map(() => {
-        setInitializing(false);
+      .map((coreProxy) => {
+        setCoreProxy(coreProxy);
+        setLoading(false);
       })
       .mapErr((e) => {
         setResultMessage(
@@ -36,13 +32,7 @@ const App: React.FC = () => {
       });
   }, []);
 
-  return (
-    <StoreProvider proxy={HNPIntegration?.core}>
-      <LayoutProvider loading={initializing} resultMessage={resultMessage}>
-        App
-      </LayoutProvider>
-    </StoreProvider>
-  );
+  return <Router />;
 };
 
 export default App;

@@ -1,27 +1,31 @@
+import React, { useState, useContext } from "react";
+
 import { IHypernetCore } from "@hypernetlabs/objects";
-import React from "react";
 
 interface IStore {
-  proxy: IHypernetCore;
+  coreProxy?: IHypernetCore;
+  setCoreProxy: (value: IHypernetCore) => void;
 }
 
 interface IStoreProps {
   children: any;
-  proxy?: IHypernetCore;
 }
 
 const StoreContext = React.createContext<IStore>(undefined!);
 
-function StoreProvider({ proxy, children }: IStoreProps) {
-  const initialState: any = {
-    proxy,
+export function StoreProvider({ children }: IStoreProps) {
+  const [coreProxy, setCoreProxy] = useState<IHypernetCore>();
+
+  const initialState: IStore = {
+    coreProxy,
+    setCoreProxy,
   };
 
   return (
-    <StoreContext.Provider value={initialState as IStore}>
+    <StoreContext.Provider value={initialState}>
       {children}
     </StoreContext.Provider>
   );
 }
 
-export { StoreContext, StoreProvider };
+export const useStoreContext = () => useContext(StoreContext);

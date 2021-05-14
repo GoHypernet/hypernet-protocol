@@ -14,21 +14,15 @@ interface ILayout {
 }
 
 interface ILayoutProps {
-  loading: boolean;
-  resultMessage: ResultMessage;
   children: ReactNode;
 }
 
 const LayoutContext = React.createContext<ILayout>({} as ILayout);
 
-export function LayoutProvider({
-  children,
-  loading: loadingProp,
-  resultMessage: resultMessageProp,
-}: ILayoutProps) {
-  const [loading, setLoading] = useState<boolean>(loadingProp);
+export function LayoutProvider({ children }: ILayoutProps) {
+  const [loading, setLoading] = useState<boolean>(false);
   const [resultMessage, setResultMessage] = useState<ResultMessage>(
-    resultMessageProp,
+    new ResultMessage(EResultStatus.IDLE, ""),
   );
 
   useEffect(() => {
@@ -49,7 +43,7 @@ export function LayoutProvider({
     }
   };
 
-  const initialState: unknown = {
+  const initialState: ILayout = {
     closeModal,
     loading,
     setLoading,
@@ -63,7 +57,7 @@ export function LayoutProvider({
   };
 
   return (
-    <LayoutContext.Provider value={initialState as ILayout}>
+    <LayoutContext.Provider value={initialState}>
       <LoadingSpinner />
       <Provider template={AlertTemplate} {...alertOptions}>
         {children}
