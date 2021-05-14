@@ -254,14 +254,15 @@ export class CeramicUtils implements ICeramicUtils {
       this.threeIdConnect.connect(this.authProvider),
       (e) => e as PersistenceError,
     ).andThen(() => {
-      const didProvider = this.threeIdConnect?.getDidProvider();
+      const result = ResultUtils.fromThrowableResult<
+        DidProviderProxy,
+        PersistenceError
+      >(this.threeIdConnect?.getDidProvider as () => DidProviderProxy);
 
-      if (!didProvider) {
-        return errAsync(
-          new PersistenceError("Something went wrong with ceramic!"),
-        );
+      if (result.isErr()) {
+        return errAsync(result.error);
       }
-      return okAsync(didProvider);
+      return okAsync(result.value);
     });
   }
 }

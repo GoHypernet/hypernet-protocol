@@ -120,18 +120,53 @@ describe("ResultUtils tests", () => {
     // Arrange
     let value = 0;
     const err = new Error();
-    const asyncMethod = () => {
+    const syncMethod = () => {
       value++;
       return errAsync(err);
     };
 
     // Act
-    const result = await ResultUtils.backoffAndRetry(asyncMethod, [], 10, 1);
+    const result = await ResultUtils.backoffAndRetry(syncMethod, [], 10, 1);
 
     // Assert
     expect(result.isErr()).toBeTruthy();
     const results = result._unsafeUnwrapErr();
     expect(results).toBe(err);
     expect(value).toBe(1);
+  });
+
+  test("fromThrowableResult return result in ideal case", async () => {
+    // Arrange
+    const syncMethod = (): number => {
+      return 1;
+    };
+
+    // Act
+    const result = await ResultUtils.fromThrowableResult<number, Error>(
+      syncMethod,
+    );
+
+    // Assert
+    expect(result.isErr()).toBeFalsy();
+    const resultValue = result._unsafeUnwrap();
+    expect(resultValue).toBe(1);
+  });
+
+  test("fromThrowableResult return error result if funtion throw an error", async () => {
+    // Arrange
+    const err = new Error();
+    const syncMethod = (): number => {
+      throw err;
+    };
+
+    // Act
+    const result = await ResultUtils.fromThrowableResult<number, Error>(
+      syncMethod,
+    );
+
+    // Assert
+    expect(result.isErr()).toBeTruthy();
+    const results = result._unsafeUnwrapErr();
+    expect(results).toBe(err);
   });
 });
