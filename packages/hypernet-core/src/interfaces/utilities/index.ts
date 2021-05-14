@@ -11,3 +11,5 @@ export * from "./IPaymentUtils";
 export * from "./ITimeUtils";
 export * from "./IVectorUtils";
 export * from "./IInternalProvider";
+export * from "./ICeramicUtils";
+export * from "./IAccountAddressSignature";

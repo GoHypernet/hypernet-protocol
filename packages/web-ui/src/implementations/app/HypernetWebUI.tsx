@@ -9,18 +9,23 @@ import {
   LINKS_WIDGET_ID_SELECTOR,
   PAYMENT_WIDGET_ID_SELECTOR,
   PRIVATE_KEYS_FLOW_ID_SELECTOR,
-  CONNECTOR_AUTHORIZATION_FLOW,
+  CONNECTOR_AUTHORIZATION_FLOW_ID_SELECTOR,
+  ONBOARDING_FLOW_ID_SELECTOR,
 } from "@web-ui/constants";
 import { MainContainer } from "@web-ui/containers/MainContainer";
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
+import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
 import PrivateKeysFlow from "@web-ui/flows/PrivateKeysFlow";
 import {
   IConnectorAuthorizationFlowParams,
   IHypernetWebUI,
   IRenderParams,
   IRenderPaymentWidgetParams,
-} from "@web-ui/interfaces/app/IHypernetWebUI";
+  IOnboardingFlowParams,
+  IViewUtils,
+} from "@web-ui/interfaces";
+import { ViewUtils } from "@web-ui/utils";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget";
 import FundWidget from "@web-ui/widgets/FundWidget";
 import LinksWidget from "@web-ui/widgets/LinksWidget";
@@ -29,6 +34,7 @@ import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
   protected coreInstance: IHypernetCore;
+  protected viewUtils: IViewUtils;
   constructor(_coreInstance?: IHypernetCore) {
     if (_coreInstance) {
       this.coreInstance = _coreInstance;
@@ -40,6 +46,8 @@ export default class HypernetWebUI implements IHypernetWebUI {
 
     // This is to cache web ui instance in window so it may prevent from having multiple web ui instances
     window.hypernetWebUIInstance = HypernetWebUI.instance;
+
+    this.viewUtils = new ViewUtils();
   }
 
   private _generateDomElement(selector: string) {
@@ -65,7 +73,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
       throw new Error("core instance is required");
     }
     return (
-      <StoreProvider proxy={this.coreInstance}>
+      <StoreProvider proxy={this.coreInstance} viewUtils={this.viewUtils}>
         <LayoutProvider>
           <MainContainer withModal={withModal}>{component}</MainContainer>
         </LayoutProvider>
@@ -163,7 +171,29 @@ export default class HypernetWebUI implements IHypernetWebUI {
           config.showInModal,
         ),
         this._generateDomElement(
-          config?.selector || CONNECTOR_AUTHORIZATION_FLOW,
+          config?.selector || CONNECTOR_AUTHORIZATION_FLOW_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public startOnboardingFlow(
+    config: IOnboardingFlowParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <OnboardingFlow
+            merchantUrl={config.merchantUrl}
+            merchantName={config.merchantName}
+            merchantLogoUrl={config.merchantLogoUrl}
+            finalSuccessContent={config.finalSuccessContent}
+          />,
+          config.showInModal,
+        ),
+        this._generateDomElement(
+          config?.selector || ONBOARDING_FLOW_ID_SELECTOR,
         ),
       );
     };

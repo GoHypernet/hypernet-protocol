@@ -2,14 +2,21 @@ import React from "react";
 
 import { BalanceList } from "@web-ui/components";
 import { useBalances } from "@web-ui/hooks";
+import useStyles from "@web-ui/widgets/BalancesWidget/BalancesWidget.style";
 
 const BalancesWidget: React.FC = () => {
   const { balances } = useBalances();
-  console.log("balances: ", balances);
 
-  // put some logic if needed
+  const classes = useStyles();
 
-  return <BalanceList balances={balances} />;
+  return (
+    <div className={classes.balancesWrapper}>
+      {balances?.length && (
+        <div className={classes.balancesLabel}>Your Balances</div>
+      )}
+      <BalanceList balances={balances} />
+    </div>
+  );
 };
 
 export default BalancesWidget;

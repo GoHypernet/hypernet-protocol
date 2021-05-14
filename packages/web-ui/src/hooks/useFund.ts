@@ -1,17 +1,14 @@
-import { Balances } from "@hypernetlabs/objects";
+import { Balances, EthereumAddress } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
-import { useEffect, useReducer, useContext } from "react";
+import { useEffect, useReducer } from "react";
+import { useAlert } from "react-alert";
 
-import { StoreContext } from "@web-ui/contexts";
+import { ETHER_HEX_ADDRESS } from "@web-ui/constants";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { ITokenSelectorOption } from "@web-ui/interfaces";
-import {
-  PaymentTokenOptionViewModel,
-  EResultStatus,
-  ResultMessage,
-} from "@web-ui/interfaces/objects";
+import { PaymentTokenOptionViewModel } from "@web-ui/interfaces/objects";
 
 enum EActionTypes {
-  FETCHING = "FETCHING",
   FETCHED = "FETCHED",
   TOKEN_SELECTED = "TOKEN_SELECTED",
   SUCCESS = "SUCCESS",
@@ -20,9 +17,7 @@ enum EActionTypes {
 }
 
 interface IReducerStateReducer {
-  loading: boolean;
   error: any;
-  resultMessage: ResultMessage;
   tokenSelectorOptions: ITokenSelectorOption[];
   selectedPaymentToken?: ITokenSelectorOption;
   setSelectedPaymentToken: (selectedOption?: ITokenSelectorOption) => void;
@@ -33,65 +28,53 @@ interface IReducerStateReducer {
 }
 
 interface IReducerState {
-  loading: boolean;
   error: any;
   tokenSelectorOptions: ITokenSelectorOption[];
   amount: string;
   selectedPaymentToken?: ITokenSelectorOption;
-  resultMessage: ResultMessage;
 }
 
 export function useFund(): IReducerStateReducer {
-  const { proxy } = useContext(StoreContext);
+  const { proxy } = useStoreContext();
+  const { setLoading } = useLayoutContext();
+  const alert = useAlert();
 
   const initialState: IReducerState = {
-    loading: true,
     error: null,
     tokenSelectorOptions: [],
     selectedPaymentToken: undefined,
-    resultMessage: new ResultMessage(EResultStatus.IDLE, ""),
     amount: "1",
   };
 
   const [state, dispatch] = useReducer((state: IReducerState, action: any) => {
     switch (action.type) {
-      case EActionTypes.FETCHING:
-        return { ...state, loading: true };
       case EActionTypes.FETCHED:
         return {
           ...state,
-          loading: false,
+          error: false,
           tokenSelectorOptions: action.payload,
         };
-      case EActionTypes.ERROR:
-        return { ...state, loading: false, error: action.payload };
       case EActionTypes.TOKEN_SELECTED:
         return {
           ...state,
-          loading: false,
+          error: false,
           selectedPaymentToken: action.payload,
         };
       case EActionTypes.AMOUNT_CHANGED:
-        return { ...state, loading: false, amount: action.payload };
+        return {
+          ...state,
+          error: false,
+          amount: action.payload,
+        };
       case EActionTypes.ERROR:
         return {
           ...state,
-          loading: false,
           error: true,
-          resultMessage: new ResultMessage(
-            EResultStatus.FAILURE,
-            action.payload,
-          ),
         };
       case EActionTypes.SUCCESS:
         return {
           ...state,
-          loading: false,
           error: false,
-          resultMessage: new ResultMessage(
-            EResultStatus.SUCCESS,
-            action.payload,
-          ),
         };
       default:
         return { ...state };
@@ -102,20 +85,22 @@ export function useFund(): IReducerStateReducer {
     let cancelRequest = false;
 
     const fetchData = async () => {
-      dispatch({ type: EActionTypes.FETCHING });
+      setLoading(true);
       try {
         if (cancelRequest) return;
         // get data from proxy
         proxy?.getBalances().map((balance: Balances) => {
           // prepare balances
+          setLoading(false);
           dispatch({
             type: EActionTypes.FETCHED,
             payload: prepareTokenSelector(balance),
           });
         });
       } catch (error) {
+        setLoading(false);
         if (cancelRequest) return;
-        dispatch({ type: EActionTypes.ERROR, payload: error.message });
+        dispatch({ type: EActionTypes.ERROR });
       }
     };
 
@@ -136,19 +121,40 @@ export function useFund(): IReducerStateReducer {
     };
   }, []);
 
-  const prepareTokenSelector = (balance: Balances) => {
-    return balance.assets.reduce(
-      (acc: PaymentTokenOptionViewModel[], assetBalance) => {
-        acc.push(
-          new PaymentTokenOptionViewModel(
-            assetBalance.assetAddress,
-            assetBalance.assetAddress,
-          ),
-        );
-        return acc;
-      },
-      new Array<PaymentTokenOptionViewModel>(),
-    );
+  const prepareTokenSelector = (
+    balance: Balances,
+  ): PaymentTokenOptionViewModel[] => {
+    // TODO: this should be pulled from metamask available balances not the channel balances
+    //if (balance.assets.length) {
+    if (false) {
+      return balance.assets.reduce(
+        (acc: PaymentTokenOptionViewModel[], assetBalance) => {
+          const tokenName =
+            assetBalance.assetAddress === ETHER_HEX_ADDRESS
+              ? "ETH"
+              : "HypernetToken";
+          acc.push(
+            new PaymentTokenOptionViewModel(
+              tokenName,
+              assetBalance.assetAddress,
+            ),
+          );
+          return acc;
+        },
+        new Array<PaymentTokenOptionViewModel>(),
+      );
+    } else {
+      return [
+        new PaymentTokenOptionViewModel(
+          "ETH",
+          EthereumAddress("0x0000000000000000000000000000000000000000"),
+        ),
+        new PaymentTokenOptionViewModel(
+          "HyperToken",
+          EthereumAddress("0x9FBDa871d559710256a2502A2517b794B482Db40"),
+        ),
+      ];
+    }
   };
 
   const setSelectedPaymentToken = (selectedOption?: ITokenSelectorOption) => {
@@ -169,9 +175,9 @@ export function useFund(): IReducerStateReducer {
     if (!state.selectedPaymentToken?.address) {
       dispatch({
         type: EActionTypes.ERROR,
-        payload: "Token address not selected",
       });
     }
+    setLoading(true);
     proxy
       .depositFunds(
         state.selectedPaymentToken?.address,
@@ -179,29 +185,36 @@ export function useFund(): IReducerStateReducer {
       )
       .match(
         (balances) => {
+          alert.success("Your fund deposit has succeeded!");
+          setLoading(false);
           dispatch({
             type: EActionTypes.SUCCESS,
-            payload: "your deposit has succeeded",
           });
         },
         (err) => {
+          alert.error(err.message || "Your fund deposit has failed");
+          setLoading(false);
           dispatch({
             type: EActionTypes.ERROR,
-            payload: err.message || "your deposit has failed",
           });
         },
       );
   };
 
   const mintTokens = () => {
+    setLoading(true);
     proxy.mintTestToken(ethers.utils.parseEther(state.amount || "1")).match(
       () => {
+        alert.success("mint tokens has succeeded");
+        setLoading(false);
         dispatch({
           type: EActionTypes.SUCCESS,
           payload: "mint tokens has succeeded",
         });
       },
       (err) => {
+        alert.error(err.message || "mint tokens has failed");
+        setLoading(false);
         dispatch({
           type: EActionTypes.ERROR,
           payload: err.message || "mint tokens has failed",

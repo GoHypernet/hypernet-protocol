@@ -131,6 +131,8 @@
     "process": "^0.11.10",
     "puppeteer": "^7.1.0",
     "randomstring": "^1.1.5",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
     "react-test-renderer": "16.13.1",
     "rimraf": "^3.0.2",
     "sass-loader": "8.0.0",
@@ -151,9 +153,7 @@
     "wait-on": "^5.2.0",
     "webpack": "^5.19.0",
     "webpack-cli": "^4.4.0",
-    "webpack-dev-server": "^3.11.2",
-    "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "webpack-dev-server": "^3.11.2"
   },
   "resolutions": {
     "**/@typescript-eslint/eslint-plugin": "^4.14.0",
