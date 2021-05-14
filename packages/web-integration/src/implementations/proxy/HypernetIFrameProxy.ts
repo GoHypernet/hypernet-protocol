@@ -41,9 +41,9 @@ export default class HypernetIFrameProxy
   protected _handshakePromise: Promise<void> | null;
 
   constructor(
-    element: HTMLElement | null,
-    iframeUrl: string,
-    iframeName: string,
+    protected element: HTMLElement | null,
+    protected iframeUrl: string,
+    protected iframeName: string,
   ) {
     super(element, iframeUrl, iframeName);
 
@@ -60,6 +60,9 @@ export default class HypernetIFrameProxy
     this.onPushPaymentDelayed = new Subject<PushPayment>();
     this.onPullPaymentDelayed = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
+    this.onDeStorageAuthenticationStarted = new Subject<void>();
+    this.onDeStorageAuthenticationSucceeded = new Subject<void>();
+    this.onDeStorageAuthenticationFailed = new Subject<void>();
     this.onMerchantAuthorized = new Subject<MerchantUrl>();
     this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
     this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
@@ -121,6 +124,22 @@ export default class HypernetIFrameProxy
           this.onBalancesChanged.next(data);
         });
 
+        child.on("onDeStorageAuthenticationStarted", () => {
+          this._displayCoreIFrame();
+
+          this.onDeStorageAuthenticationStarted.next();
+        });
+
+        child.on("onDeStorageAuthenticationSucceeded", () => {
+          this._closeCoreIFrame();
+
+          this.onDeStorageAuthenticationSucceeded.next();
+        });
+
+        child.on("onDeStorageAuthenticationFailed", () => {
+          this.onDeStorageAuthenticationFailed.next();
+        });
+
         child.on("onMerchantAuthorized", (data: MerchantUrl) => {
           this.onMerchantAuthorized.next(data);
         });
@@ -146,18 +165,14 @@ export default class HypernetIFrameProxy
         });
 
         child.on("onMerchantIFrameDisplayRequested", (data: MerchantUrl) => {
-          child.frame.style.display = "block";
-          if (element) {
-            element.style.display = "block";
-          }
+          this._displayCoreIFrame();
+
           this.onMerchantIFrameDisplayRequested.next(data);
         });
 
         child.on("onMerchantIFrameCloseRequested", (data: MerchantUrl) => {
-          child.frame.style.display = "none";
-          if (element) {
-            element.style.display = "none";
-          }
+          this._closeCoreIFrame();
+
           this.onMerchantIFrameCloseRequested.next(data);
         });
 
@@ -368,29 +383,20 @@ export default class HypernetIFrameProxy
     return this._createCall("getAuthorizedMerchants", null);
   }
 
-  public closeMerchantIFrame(
-    merchantUrl: MerchantUrl,
-  ): ResultAsync<void, MerchantConnectorError> {
-    if (this.child != null) {
-      this.child.frame.style.display = "none";
-    }
-    if (this.element != null) {
-      this.element.style.display = "none";
-    }
-    return this._createCall("closeMerchantIFrame", merchantUrl);
-  }
-
   public displayMerchantIFrame(
     merchantUrl: MerchantUrl,
   ): ResultAsync<void, MerchantConnectorError> {
-    if (this.child != null) {
-      this.child.frame.style.display = "block";
-    }
-    if (this.element != null) {
-      this.element.style.display = "block";
-    }
+    this._displayCoreIFrame();
 
     return this._createCall("displayMerchantIFrame", merchantUrl);
+  }
+
+  public closeMerchantIFrame(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, MerchantConnectorError> {
+    this._closeCoreIFrame();
+
+    return this._createCall("closeMerchantIFrame", merchantUrl);
   }
 
   public providePrivateCredentials(
@@ -401,6 +407,30 @@ export default class HypernetIFrameProxy
       privateKey,
       mnemonic,
     });
+  }
+
+  private _displayCoreIFrame(): void {
+    // Show core iframe
+    if (this.child != null) {
+      this.child.frame.style.display = "block";
+    }
+
+    // Show core iframe container
+    if (this.element != null) {
+      this.element.style.display = "block";
+    }
+  }
+
+  private _closeCoreIFrame(): void {
+    // Hide core iframe
+    if (this.child != null) {
+      this.child.frame.style.display = "none";
+    }
+
+    // Hide core iframe container
+    if (this.element != null) {
+      this.element.style.display = "none";
+    }
   }
 
   /**
@@ -417,6 +447,9 @@ export default class HypernetIFrameProxy
   public onPushPaymentDelayed: Subject<PushPayment>;
   public onPullPaymentDelayed: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
+  public onDeStorageAuthenticationStarted: Subject<void>;
+  public onDeStorageAuthenticationSucceeded: Subject<void>;
+  public onDeStorageAuthenticationFailed: Subject<void>;
   public onMerchantAuthorized: Subject<MerchantUrl>;
   public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
   public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;

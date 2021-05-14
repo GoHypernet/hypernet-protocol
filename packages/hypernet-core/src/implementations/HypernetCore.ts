@@ -71,13 +71,17 @@ import {
   TimeUtils,
   VectorUtils,
   EthersBlockchainUtils,
+  CeramicUtils,
 } from "@implementations/utilities";
 import {
   MerchantConnectorProxyFactory,
   BrowserNodeFactory,
   InternalProviderFactory,
 } from "@implementations/utilities/factory";
-import { IMerchantConnectorListener, IVectorListener } from "@interfaces/api";
+import {
+  IMerchantConnectorListener,
+  IVectorListener,
+} from "@interfaces/api";
 import {
   IAccountService,
   IDevelopmentService,
@@ -103,6 +107,7 @@ import {
   IPaymentUtils,
   ITimeUtils,
   IVectorUtils,
+  ICeramicUtils,
 } from "@interfaces/utilities";
 import {
   IBrowserNodeFactory,
@@ -126,6 +131,9 @@ export class HypernetCore implements IHypernetCore {
   public onPushPaymentDelayed: Subject<PushPayment>;
   public onPullPaymentDelayed: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
+  public onDeStorageAuthenticationStarted: Subject<void>;
+  public onDeStorageAuthenticationSucceeded: Subject<void>;
+  public onDeStorageAuthenticationFailed: Subject<void>;
   public onMerchantAuthorized: Subject<MerchantUrl>;
   public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
   public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
@@ -148,6 +156,7 @@ export class HypernetCore implements IHypernetCore {
   protected ajaxUtils: IAjaxUtils;
   protected blockchainUtils: IBlockchainUtils;
   protected localStorageUtils: ILocalStorageUtils;
+  protected ceramicUtils: ICeramicUtils;
   protected validationUtils: IValidationUtils;
 
   // Factories
@@ -201,6 +210,9 @@ export class HypernetCore implements IHypernetCore {
     this.onPushPaymentDelayed = new Subject<PushPayment>();
     this.onPullPaymentDelayed = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
+    this.onDeStorageAuthenticationStarted = new Subject<void>();
+    this.onDeStorageAuthenticationSucceeded = new Subject<void>();
+    this.onDeStorageAuthenticationFailed = new Subject<void>();
     this.onMerchantAuthorized = new Subject<MerchantUrl>();
     this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
     this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
@@ -235,6 +247,9 @@ export class HypernetCore implements IHypernetCore {
       this.onPushPaymentUpdated,
       this.onPullPaymentUpdated,
       this.onBalancesChanged,
+      this.onDeStorageAuthenticationStarted,
+      this.onDeStorageAuthenticationSucceeded,
+      this.onDeStorageAuthenticationFailed,
       this.onMerchantAuthorized,
       this.onAuthorizedMerchantUpdated,
       this.onAuthorizedMerchantActivationFailed,
@@ -264,6 +279,13 @@ export class HypernetCore implements IHypernetCore {
       this.internalProviderFactory,
     );
     this.timeUtils = new TimeUtils(this.blockchainProvider);
+
+    this.ceramicUtils = new CeramicUtils(
+      this.configProvider,
+      this.contextProvider,
+      this.blockchainProvider,
+      this.logUtils,
+    );
 
     this.browserNodeProvider = new BrowserNodeProvider(
       this.configProvider,
@@ -328,7 +350,7 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
       this.contextProvider,
       this.vectorUtils,
-      this.localStorageUtils,
+      this.ceramicUtils,
       this.merchantConnectorProxyFactory,
       this.blockchainUtils,
       this.logUtils,

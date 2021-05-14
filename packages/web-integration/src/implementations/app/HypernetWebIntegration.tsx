@@ -98,17 +98,16 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     closeButton.addEventListener(
       "click",
       (e) => {
-        // TODO: Figure out how to track which merchant we are showing
         if (this.currentMerchantUrl != null) {
           this.core.closeMerchantIFrame(this.currentMerchantUrl);
           this.currentMerchantUrl = null;
         }
+        iframeContainer.style.display = "none";
       },
       false,
     );
 
     // Add iframe modal style
-    // TODO: Close button style is not responsive with the content height, need to be fixed.
     const style = document.createElement("style");
     style.appendChild(
       document.createTextNode(`

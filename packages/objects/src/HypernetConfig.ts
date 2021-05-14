@@ -2,6 +2,8 @@ import { ChainAddresses, ChainProviders } from "@connext/vector-types";
 
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
+import { SchemaUrl } from "@objects/SchemaUrl";
+import { DefinitionName } from "@objects/DefinitionName";
 
 export class HypernetConfig {
   constructor(
@@ -18,6 +20,8 @@ export class HypernetConfig {
     public openThreadKey: string,
     public chainAddresses: ChainAddresses,
     public merchantIframeUrl: string,
+    public ceramicNodeUrl: string,
+    public storageAliases: Map<DefinitionName, SchemaUrl>,
     public debug: boolean,
   ) {}
 }

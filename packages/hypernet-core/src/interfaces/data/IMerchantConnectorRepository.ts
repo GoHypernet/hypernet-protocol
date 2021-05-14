@@ -16,7 +16,7 @@ import {
   PullPayment,
   PushPayment,
 } from "@hypernetlabs/objects";
-import { ResultAsync, Result } from "neverthrow";
+import { ResultAsync } from "neverthrow";
 
 export interface IMerchantConnectorRepository {
   /**
@@ -48,7 +48,9 @@ export interface IMerchantConnectorRepository {
    * Deauthorizes a merchant, which will also destroy their proxy.
    * @param merchantUrl
    */
-  deauthorizeMerchant(merchantUrl: MerchantUrl): ResultAsync<void, never>;
+  deauthorizeMerchant(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, PersistenceError>;
 
   /**
    * Returns the status of all the authorized merchant's connectors.
@@ -56,16 +58,21 @@ export interface IMerchantConnectorRepository {
    */
   getAuthorizedMerchantConnectorStatus(): ResultAsync<
     Map<MerchantUrl, boolean>,
-    never
+    PersistenceError
   >;
 
   /**
    * Returns a list of authorized merchants and the user's authorization signature for that
    * merchant.
    */
-  getAuthorizedMerchants(): ResultAsync<Map<MerchantUrl, Signature>, never>;
+  getAuthorizedMerchants(): ResultAsync<
+    Map<MerchantUrl, Signature>,
+    PersistenceError
+  >;
 
-  activateAuthorizedMerchants(balances: Balances): ResultAsync<void, never>;
+  activateAuthorizedMerchants(
+    balances: Balances,
+  ): ResultAsync<void, PersistenceError>;
 
   resolveChallenge(
     merchantUrl: MerchantUrl,
@@ -110,6 +117,11 @@ export interface IMerchantConnectorRepository {
   notifyBalancesReceived(
     balances: Balances,
   ): ResultAsync<void, MerchantConnectorError>;
+}
+
+export interface IAuthorizedMerchantEntry {
+  merchantUrl: MerchantUrl;
+  authorizationSignature: string;
 }
 
 export const IMerchantConnectorRepositoryType = Symbol.for(
