@@ -66,21 +66,10 @@ module.exports = {
         ],
       },
       {
-        test: /\.(png|jpe?g|gif)$/i,
-        loader: "file-loader",
-        options: {
-          name: "[path][name].[ext]",
-        },
-      },
-      {
-        test: /\.(gif|png|jpe?g|svg)/,
+        test: /\.(png|jpe?g|gif|svg)$/i,
         use: [
-          "url-loader",
           {
-            loader: "image-webpack-loader",
-            options: {
-              disable: false,
-            },
+            loader: "file-loader",
           },
         ],
       },
