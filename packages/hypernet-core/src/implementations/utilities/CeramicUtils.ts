@@ -39,7 +39,7 @@ export class CeramicUtils implements ICeramicUtils {
   protected threeIdResolver: ResolverRegistry | null = null;
   protected didResolver: Resolver | null = null;
   protected idx: IDX | null = null;
-  protected isAuthenticated: boolean = false;
+  protected isAuthenticated = false;
 
   constructor(
     protected configProvider: IConfigProvider,
@@ -87,6 +87,7 @@ export class CeramicUtils implements ICeramicUtils {
             (e) => e as PersistenceError,
           )
             .andThen(() => {
+              console.log("his.ceramic", this.ceramic?.did?.id.toString());
               context.onDeStorageAuthenticationSucceeded.next();
 
               const aliases: Record<string, string> = {};
@@ -257,7 +258,9 @@ export class CeramicUtils implements ICeramicUtils {
       const result = ResultUtils.fromThrowableResult<
         DidProviderProxy,
         PersistenceError
-      >(this.threeIdConnect?.getDidProvider as () => DidProviderProxy);
+      >(() => {
+        return this.threeIdConnect?.getDidProvider() as DidProviderProxy;
+      });
 
       if (result.isErr()) {
         return errAsync(result.error);
