@@ -3,43 +3,28 @@ import { createUseStyles } from "react-jss";
 const useStyles = createUseStyles({
   container: {
     display: "flex",
-  },
-  rightWrapper: {
-    display: "flex",
     flexDirection: "column",
-    justifyContent: "space-between",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  successImage: {
+    width: 120,
+    margin: 25,
   },
   textWrapper: {
     display: "flex",
     flexDirection: "column",
-    textAlign: "left",
-    marginLeft: 25,
-    marginTop: 17,
-    alignItems: "flex-start",
+    marginTop: 15,
   },
   label: {
     color: "#6D6D6D",
-    fontSize: 16,
+    fontSize: 20,
     marginBottom: 10,
     fontWeight: "bold",
   },
   info: {
-    color: "#BABABA",
-    fontSize: 14,
-  },
-  buttonWrapper: {
-    display: "flex",
-    justifyContent: "flex-end",
-  },
-  button: {
-    borderRadius: 2,
-    backgroundColor: "#00C3A9",
-    color: "#ffffff",
-    border: "none",
-    padding: "10px 28px",
-    float: "right",
-    cursor: "pointer",
-    width: 100,
+    color: "#8a8a8a",
+    fontSize: 18,
   },
 });
 
