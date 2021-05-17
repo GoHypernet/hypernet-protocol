@@ -1,9 +1,9 @@
 import { ChainAddresses, ChainProviders } from "@connext/vector-types";
 
+import { DefinitionName } from "@objects/DefinitionName";
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { SchemaUrl } from "@objects/SchemaUrl";
-import { DefinitionName } from "@objects/DefinitionName";
 
 export class HypernetConfig {
   constructor(
