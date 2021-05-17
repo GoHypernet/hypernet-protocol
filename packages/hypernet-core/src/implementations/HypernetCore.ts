@@ -78,10 +78,7 @@ import {
   BrowserNodeFactory,
   InternalProviderFactory,
 } from "@implementations/utilities/factory";
-import {
-  IMerchantConnectorListener,
-  IVectorListener,
-} from "@interfaces/api";
+import { IMerchantConnectorListener, IVectorListener } from "@interfaces/api";
 import {
   IAccountService,
   IDevelopmentService,
