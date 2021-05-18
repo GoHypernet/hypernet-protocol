@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { Box } from "@material-ui/core";
 import HypernetWebIntegration, {
   IHypernetWebIntegration,
 } from "@hypernetlabs/web-integration";
@@ -7,7 +8,7 @@ import { ResultMessage, EResultStatus } from "@hypernetlabs/web-ui";
 
 import { useLayoutContext } from "@user-dashboard/contexts";
 import Router from "@user-dashboard/containers/Router";
-import useStyles from "./App.style";
+import { useStyles } from "./App.style";
 import Header from "@user-dashboard/components/Header";
 import { StoreProvider } from "@user-dashboard/contexts";
 
@@ -37,12 +38,12 @@ const App: React.FC = () => {
 
   return (
     <StoreProvider hypernetCore={integration.core}>
-      <div className={classes.appWrapper}>
+      <Box className={classes.appWrapper}>
         <BrowserRouter>
           <Header />
           <Router />
         </BrowserRouter>
-      </div>
+      </Box>
     </StoreProvider>
   );
 };

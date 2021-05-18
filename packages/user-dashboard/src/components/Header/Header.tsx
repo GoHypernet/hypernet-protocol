@@ -2,8 +2,9 @@ import { routes } from "@user-dashboard/containers/Router/Router.routes";
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { pathToRegexp } from "path-to-regexp";
+import { Box } from "@material-ui/core";
 
-import useStyles from "./Header.style";
+import { useStyles } from "@user-dashboard/components/Header/Header.style";
 
 const Header: React.FC = () => {
   const classes = useStyles();
@@ -13,34 +14,33 @@ const Header: React.FC = () => {
     !!pathToRegexp(path).exec(pathname);
 
   return (
-    <div className={classes.headerWrapper}>
-      <div className={classes.logoWrapper}>
+    <Box className={classes.headerWrapper}>
+      <Box className={classes.logoWrapper}>
         <img
           className={classes.logo}
           src={require("@user-dashboard/assets/images/HNPLogo.png").default}
           alt=""
         />
-      </div>
-      <div className={classes.menuWrapper}>
+      </Box>
+      <Box className={classes.menuWrapper}>
         {routes.map((route, index) => (
-          <div
-            className={`${classes.menuItem} ${
-              isPathMatchRequestedUrl(route.path)
-                ? classes.activeMenuItem
-                : classes.inactiveMenuItem
-            }`}
+          <Box
+            className={`${classes.menuItem} ${isPathMatchRequestedUrl(route.path)
+              ? classes.activeMenuItem
+              : classes.inactiveMenuItem
+              }`}
             key={index}
           >
             <Link to={route.path}>{route.name}</Link>
-          </div>
+          </Box>
         ))}
-        <div className={`${classes.menuItem} ${classes.inactiveMenuItem}`}>
+        <Box className={`${classes.menuItem} ${classes.inactiveMenuItem}`}>
           <a href="https://galileo-forum.hypernetlabs.io/" target="_blank">
             COMMUNITY
           </a>
-        </div>
-      </div>
-    </div>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

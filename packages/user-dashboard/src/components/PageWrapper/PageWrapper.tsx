@@ -1,6 +1,6 @@
 import React from "react";
-
-import useStyles from "./PageWrapper.style";
+import { Box } from "@material-ui/core";
+import { useStyles } from "@user-dashboard/components/PageWrapper/PageWrapper.style";
 
 interface IPageWrapper {
   children: React.ReactNode;
@@ -14,10 +14,10 @@ const PageWrapper: React.FC<IPageWrapper> = ({
   const classes = useStyles();
 
   return (
-    <div className={classes.wrapper}>
-      <div className={classes.label}>{label}</div>
+    <Box className={classes.wrapper}>
+      <Box className={classes.label}>{label}</Box>
       {children}
-    </div>
+    </Box>
   );
 };
 

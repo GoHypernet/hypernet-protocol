@@ -1,8 +1,8 @@
-import { createUseStyles } from "react-jss";
-
 import { colors } from "@user-dashboard/theme";
 
-const useStyles = createUseStyles({
+import { makeStyles } from '@material-ui/core';
+
+export const useStyles = makeStyles({
   wrapper: {
     backgroundColor: colors.WHITE,
     border: `1px solid ${colors.BOX_BORDER_COLOR}`,
@@ -18,4 +18,3 @@ const useStyles = createUseStyles({
   },
 });
 
-export default useStyles;

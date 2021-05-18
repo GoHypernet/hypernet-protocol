@@ -1,6 +1,7 @@
 import React from "react";
+import { Box } from "@material-ui/core";
 
-import useStyles from "./BoxWrapper.style";
+import { useStyles } from "@user-dashboard/components/BoxWrapper/BoxWrapper.style";
 
 interface IBoxWrapper {
   children: React.ReactNode;
@@ -14,10 +15,10 @@ const BoxWrapper: React.FC<IBoxWrapper> = ({
   const classes = useStyles();
 
   return (
-    <div className={classes.wrapper}>
-      {label && <div className={classes.label}>{label}</div>}
+    <Box className={classes.wrapper}>
+      {label && <Box className={classes.label}>{label}</Box>}
       {children}
-    </div>
+    </Box>
   );
 };
 

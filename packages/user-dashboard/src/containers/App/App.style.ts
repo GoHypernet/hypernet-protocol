@@ -1,8 +1,8 @@
-import { createUseStyles } from "react-jss";
+import { makeStyles } from '@material-ui/core';
 
 import { colors } from "@user-dashboard/theme";
 
-const useStyles = createUseStyles({
+export const useStyles = makeStyles({
   "@global": {
     body: {
       margin: 0,
@@ -16,5 +16,3 @@ const useStyles = createUseStyles({
     margin: 0,
   },
 });
-
-export default useStyles;

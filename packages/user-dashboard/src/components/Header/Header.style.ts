@@ -1,8 +1,8 @@
-import { createUseStyles } from "react-jss";
-
 import { colors } from "@user-dashboard/theme";
 
-const useStyles = createUseStyles({
+import { makeStyles } from '@material-ui/core';
+
+export const useStyles = makeStyles({
   headerWrapper: {
     background: colors.BLACK,
     padding: "8px 25px",
@@ -37,4 +37,3 @@ const useStyles = createUseStyles({
   headerWrapper5: {},
 });
 
-export default useStyles;

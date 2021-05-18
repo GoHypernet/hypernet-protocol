@@ -1,8 +1,6 @@
-import { createUseStyles } from "react-jss";
+import { makeStyles } from '@material-ui/core';
 
-import { colors } from "@user-dashboard/theme";
-
-const useStyles = createUseStyles({
+export const useStyles = makeStyles({
   wrapper: {
     padding: "40px 24px",
   },
@@ -12,4 +10,5 @@ const useStyles = createUseStyles({
   },
 });
 
-export default useStyles;
+
+
