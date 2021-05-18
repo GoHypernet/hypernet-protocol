@@ -12,6 +12,7 @@ interface BalanceListProps {
 export const BalanceList: React.FC<BalanceListProps> = (
   props: BalanceListProps,
 ) => {
+  console.log("propspropsprops", props);
   const { balances } = props;
   const classes = useStyles((props as unknown) as Jss.Theme);
   const { viewUtils } = useStoreContext();

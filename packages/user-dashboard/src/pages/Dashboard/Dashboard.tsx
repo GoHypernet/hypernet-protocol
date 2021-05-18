@@ -3,7 +3,6 @@ import { useLayoutContext, useStoreContext } from "@user-dashboard/contexts";
 
 const Dasboard: React.FC = () => {
   const { setLoading, setResultMessage } = useLayoutContext();
-  const { setCoreProxy } = useStoreContext();
 
   useEffect(() => {}, []);
 
