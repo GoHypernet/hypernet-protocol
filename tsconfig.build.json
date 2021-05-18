@@ -38,6 +38,7 @@
       "@web-ui/*": ["./*"],
       "@merchant-connector/*": ["./*"],
       "@merchant-iframe/*": ["./*"],
+      "@core-iframe/*": ["./*"],
       "@test-merchant-connector/*": [
         "./packages/test-merchant-connector/src/*"
       ],

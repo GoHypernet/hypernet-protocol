@@ -2,7 +2,8 @@ import { HypernetCore } from "@hypernetlabs/hypernet-core";
 import { IHypernetCore } from "@hypernetlabs/objects";
 import { EBlockchainNetwork } from "@hypernetlabs/objects";
 
-import CoreWrapper from "./CoreWrapper";
+import { CoreListener } from "@core-iframe/implementations/api";
+import { CoreUIService } from "@core-iframe/implementations/business";
 
 // Instantiate the hypernet core.
 const core: IHypernetCore = new HypernetCore(
@@ -10,37 +11,7 @@ const core: IHypernetCore = new HypernetCore(
   undefined,
 );
 
-const coreWrapper = new CoreWrapper(core);
-coreWrapper.activateModel();
+const coreUIService = new CoreUIService();
 
-// Here is only where can access and manipulate core iframe dom and style
-core.onDeStorageAuthenticationStarted.subscribe(() => {
-  const content = document.createElement("div");
-  content.id = "__hypernet-protocol-iframe-authentication-content__";
-  content.innerHTML = `<h3>3ID Connect wants to authenticate: </h3>`;
-
-  document.body.appendChild(content);
-});
-
-core.onDeStorageAuthenticationFailed.subscribe(() => {
-  const content = document.createElement("div");
-  content.id = "__hypernet-protocol-iframe-authentication-failuer-content__";
-  content.innerHTML = `<h4>Something went wrong during authentication</h4>`;
-
-  document.body.appendChild(content);
-});
-
-core.onDeStorageAuthenticationSucceeded.subscribe(() => {
-  const content = document.createElement("div");
-  content.innerHTML = `<h3>3ID Connect wants to authenticate: </h3>`;
-
-  document
-    .getElementById("__hypernet-protocol-iframe-authentication-content__")
-    ?.remove();
-
-  document
-    .getElementById(
-      "__hypernet-protocol-iframe-authentication-failuer-content__",
-    )
-    ?.remove();
-});
+const coreListener = new CoreListener(core, coreUIService);
+coreListener.activateModel();

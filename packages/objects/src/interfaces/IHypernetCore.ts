@@ -286,3 +286,5 @@ export interface IHypernetCore {
   onInitializationRequired: Subject<void>;
   onPrivateCredentialsRequested: Subject<void>;
 }
+
+export const IHypernetCoreType = Symbol.for("IHypernetCore");
