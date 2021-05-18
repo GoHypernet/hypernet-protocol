@@ -7,7 +7,7 @@ import useStyles from "./Balances.style";
 
 const Balances: React.FC = () => {
   const { handleError } = useLayoutContext();
-  const { coreProxy } = useStoreContext();
+  const { coreProxy, viewUtils } = useStoreContext();
   const [balanceList, setBalanceList] = useState<AssetBalance[]>();
   const classes = useStyles();
 
@@ -22,7 +22,7 @@ const Balances: React.FC = () => {
   return (
     <BoxWrapper label="YOUR BALANCES">
       <div className={classes.wrapper}>
-        <BalanceListUI balances={balanceList} />
+        <BalanceListUI balances={balanceList} viewUtils={viewUtils} />
       </div>
     </BoxWrapper>
   );

@@ -2,20 +2,19 @@ import { AssetBalance } from "@hypernetlabs/objects";
 import React from "react";
 
 import useStyles from "./BalanceList.style";
-
-import { useStoreContext } from "@web-ui/contexts";
+import { IViewUtils } from "@web-ui/interfaces";
+import { ETHER_HEX_ADDRESS } from "@web-ui/constants";
 
 interface BalanceListProps {
   balances?: AssetBalance[];
+  viewUtils: IViewUtils;
 }
 
 export const BalanceList: React.FC<BalanceListProps> = (
   props: BalanceListProps,
 ) => {
-  console.log("propspropsprops", props);
-  const { balances } = props;
+  const { balances, viewUtils } = props;
   const classes = useStyles((props as unknown) as Jss.Theme);
-  const { viewUtils } = useStoreContext();
 
   return (
     <div className={classes.container}>
@@ -33,7 +32,7 @@ export const BalanceList: React.FC<BalanceListProps> = (
             {viewUtils.fromBigNumber(balance.freeAmount)}
           </div>
           <div className={classes.tokenName}>
-            {balance.symbol || index === 0 ? "HPT" : "MINT"}
+            {balance.assetAddress === ETHER_HEX_ADDRESS ? "ETH" : "MINT"}
           </div>
         </div>
       ))}
