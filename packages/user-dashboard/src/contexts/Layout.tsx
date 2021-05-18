@@ -11,6 +11,7 @@ interface ILayout {
   setLoading: (loading: boolean) => void;
   resultMessage: ResultMessage;
   setResultMessage: (resultMessage: ResultMessage) => void;
+  handleError: (err: Error | undefined) => void;
 }
 
 interface ILayoutProps {
@@ -43,12 +44,22 @@ export function LayoutProvider({ children }: ILayoutProps) {
     }
   };
 
+  const handleError = (err: Error | undefined) => {
+    setResultMessage(
+      new ResultMessage(
+        EResultStatus.FAILURE,
+        err?.message || "Something went wrong!",
+      ),
+    );
+  };
+
   const initialState: ILayout = {
     closeModal,
     loading,
     setLoading,
     resultMessage,
     setResultMessage,
+    handleError,
   };
 
   const alertOptions = {

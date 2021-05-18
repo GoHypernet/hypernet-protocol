@@ -4,6 +4,9 @@ export const colors = {
   STATUS_GREEN: "#00C3A9",
   STATUS_RED: "#D32F2F",
   STATUS_BLUE: "#0078FF",
+  BACKGROUND_GREY: "#F9F9F9",
+  MAIN_TEXT_BLACK: "#1D1D1D",
+  BOX_BORDER_COLOR: "#F6F6F6",
 };
 
 export enum EStatusColor {

@@ -6,9 +6,7 @@ import App from "@user-dashboard/containers/App";
 const MainContainer: React.FC = () => {
   return (
     <LayoutProvider>
-      <StoreProvider>
-        <App />
-      </StoreProvider>
+      <App />
     </LayoutProvider>
   );
 };
