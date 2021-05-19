@@ -1,8 +1,9 @@
 import React from "react";
+import { Box } from "@material-ui/core";
 
 import { BalanceList } from "@web-ui/components";
 import { useBalances } from "@web-ui/hooks";
-import useStyles from "@web-ui/widgets/BalancesWidget/BalancesWidget.style";
+import { useStyles } from "@web-ui/widgets/BalancesWidget/BalancesWidget.style";
 import { useStoreContext } from "@web-ui/contexts";
 
 interface IBalancesWidget {
@@ -20,12 +21,12 @@ const BalancesWidget: React.FC<IBalancesWidget> = ({
   return noLabel ? (
     <BalanceList balances={balances} viewUtils={viewUtils} />
   ) : (
-    <div className={classes.balancesWrapper}>
+    <Box className={classes.balancesWrapper}>
       {balances?.length && (
-        <div className={classes.balancesLabel}>Your Balances</div>
+        <Box className={classes.balancesLabel}>Your Balances</Box>
       )}
       <BalanceList balances={balances} viewUtils={viewUtils} />
-    </div>
+    </Box>
   );
 };
 

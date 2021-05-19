@@ -1,7 +1,8 @@
 import React from "react";
+import { Box } from "@material-ui/core";
 
 import { Button } from "@web-ui/components";
-import useStyles from "@web-ui/components/SucessContent/SucessContent.style";
+import { useStyles } from "@web-ui/components/SucessContent/SucessContent.style";
 
 interface ISucessContentProps {
   label?: string;
@@ -15,23 +16,23 @@ export const SucessContent: React.FC<ISucessContentProps> = (
   const { label = "SUCCESS!", info, onOkay } = props;
   const classes = useStyles();
   return (
-    <div className={classes.container}>
+    <Box className={classes.container}>
       <img
         className={classes.successImage}
         src="https://res.cloudinary.com/dqueufbs7/image/upload/v1620338380/images/success-icon-23194.png"
       />
-      <div className={classes.textWrapper}>
-        <div className={classes.label}>{label}</div>
+      <Box className={classes.textWrapper}>
+        <Box className={classes.label}>{label}</Box>
         {info && (
-          <div
+          <Box
             className={classes.info}
             dangerouslySetInnerHTML={{ __html: info }}
-          ></div>
+          ></Box>
         )}
-      </div>
+      </Box>
       {onOkay && (
         <Button onClick={onOkay} fullWidth hasMaterialUIStyle label="OKAY" />
       )}
-    </div>
+    </Box>
   );
 };

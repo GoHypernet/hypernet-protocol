@@ -12,7 +12,7 @@ import {
   CONNECTOR_AUTHORIZATION_FLOW_ID_SELECTOR,
   ONBOARDING_FLOW_ID_SELECTOR,
 } from "@web-ui/constants";
-import MainContainer from "@web-integration/containers/MainContainer";
+import MainContainer from "@web-ui/containers/MainContainer";
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";

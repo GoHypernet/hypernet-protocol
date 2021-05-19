@@ -1,7 +1,8 @@
 import React from "react";
+import { Box } from "@material-ui/core";
 import PuffLoader from "react-spinners/PuffLoader";
 
-import useStyles from "@web-ui/components/LoadingSpinner/LoadingSpinner.style";
+import { useStyles } from "@web-ui/components/LoadingSpinner/LoadingSpinner.style";
 import { useLayoutContext } from "@web-ui/contexts";
 
 const LoadingSpinner: React.FC = () => {
@@ -11,9 +12,9 @@ const LoadingSpinner: React.FC = () => {
   return (
     <>
       {loading && (
-        <div className={classes.loadingWrapper}>
+        <Box className={classes.loadingWrapper}>
           <PuffLoader color={"#4dc1ab"} loading={loading} size={70} />
-        </div>
+        </Box>
       )}
     </>
   );

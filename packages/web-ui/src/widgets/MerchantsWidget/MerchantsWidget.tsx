@@ -1,6 +1,7 @@
 import React from "react";
+import { Box } from "@material-ui/core";
 
-import useStyles from "@web-ui/widgets/MerchantsWidget/MerchantsWidget.style";
+import { useStyles } from "@web-ui/widgets/MerchantsWidget/MerchantsWidget.style";
 
 interface IMerchantsWidget {
   noLabel?: boolean;
@@ -11,7 +12,7 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
 }: IMerchantsWidget) => {
   const classes = useStyles();
 
-  return <div>MerchantsWidget</div>;
+  return <Box>MerchantsWidget</Box>;
 };
 
 export default MerchantsWidget;

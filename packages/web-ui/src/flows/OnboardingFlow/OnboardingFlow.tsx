@@ -1,5 +1,6 @@
 import React, { useEffect, useState, ReactNode } from "react";
 import { useAlert } from "react-alert";
+import { Box } from "@material-ui/core";
 
 import {
   ModalHeader,
@@ -9,7 +10,7 @@ import {
   TokenSelector,
 } from "@web-ui/components";
 import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
-import useStyles from "@web-ui/flows/OnboardingFlow/OnboardingFlow.style";
+import { useStyles } from "@web-ui/flows/OnboardingFlow/OnboardingFlow.style";
 import { useBalances } from "@web-ui/hooks";
 import { IOnboardingFlowParams } from "@web-ui/interfaces";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget/BalancesWidget";
@@ -39,7 +40,6 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     setPreferredPaymentToken,
     //setPreferredPaymentTokenByAssetInfo,
   } = useBalances();
-  console.log("preferredPaymentTokennnn", preferredPaymentToken);
 
   const { proxy } = useStoreContext();
   const { setLoading, closeModal } = useLayoutContext();
@@ -140,9 +140,9 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
             {balances?.length ? (
               <BalancesWidget />
             ) : (
-              <div className={classes.balancesEmptyLabel}>
+              <Box className={classes.balancesEmptyLabel}>
                 You are one step away!
-              </div>
+              </Box>
             )}
             <Button
               label="Authorize Merchant"
@@ -155,9 +155,9 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
       case EOnboardingScreens.EMPTY_BALANCE:
         return (
           <>
-            <div className={classes.balancesEmptyLabel}>
+            <Box className={classes.balancesEmptyLabel}>
               You don't have any balances in your channel wallet
-            </div>
+            </Box>
             {renderFundWalletButton()}
           </>
         );
@@ -168,18 +168,18 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
           <>
             {balances?.length && <BalancesWidget />}
             {!preferredPaymentToken && (
-              <div className={classes.paymentTokenLabel}>
+              <Box className={classes.paymentTokenLabel}>
                 You need to set a default payment token to purchase with!
-              </div>
+              </Box>
             )}
-            <div className={classes.preferredTokenWrapper}>
+            <Box className={classes.preferredTokenWrapper}>
               <TokenSelector
                 tokenSelectorOptions={channelTokenSelectorOptions}
                 selectedPaymentToken={preferredPaymentToken}
                 setSelectedPaymentToken={setPreferredPaymentToken}
                 label="Select your preferred token:"
               />
-            </div>
+            </Box>
             {renderFundWalletButton()}
             {preferredPaymentToken && (
               <Button
@@ -202,16 +202,16 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
           </>
         );
       default:
-        return <div>Something went wrong!</div>;
+        return <Box>Something went wrong!</Box>;
     }
   };
 
   return (
-    <div className={classes.container}>
+    <Box className={classes.container}>
       <ModalHeader />
       {renderScreen()}
       <ModalFooter />
-    </div>
+    </Box>
   );
 };
 

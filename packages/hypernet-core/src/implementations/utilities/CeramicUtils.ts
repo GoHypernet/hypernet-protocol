@@ -192,7 +192,6 @@ export class CeramicUtils implements ICeramicUtils {
   public readRecord<T>(
     aliasName: string,
   ): ResultAsync<T | null, PersistenceError> {
-    return okAsync(null);
     return this._initialize().andThen(() => {
       if (!this.idx) {
         throw new Error("Something went wrong while initializing Ceramic!");

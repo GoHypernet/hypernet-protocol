@@ -1,8 +1,9 @@
 import React from "react";
+import { Box } from "@material-ui/core";
 
 import { TokenSelector, Button, TextInput } from "@web-ui/components";
 import { useFund } from "@web-ui/hooks";
-import useStyles from "@web-ui/widgets/FundWidget/FundWidget.style";
+import { useStyles } from "@web-ui/widgets/FundWidget/FundWidget.style";
 
 const FundWidget: React.FC = () => {
   const {
@@ -18,7 +19,7 @@ const FundWidget: React.FC = () => {
   const classes = useStyles({ error });
 
   return (
-    <div className={classes.wrapper}>
+    <Box className={classes.wrapper}>
       <TokenSelector
         tokenSelectorOptions={tokenSelectorOptions}
         selectedPaymentToken={selectedPaymentToken}
@@ -34,7 +35,7 @@ const FundWidget: React.FC = () => {
       />
       {/* <Button onClick={mintTokens} label="Mint HyperToken" />
       <br /> */}
-    </div>
+    </Box>
   );
 };
 

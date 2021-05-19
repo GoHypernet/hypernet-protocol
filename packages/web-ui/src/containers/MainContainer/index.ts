@@ -1,1 +1,1 @@
-export { default } from "@web-integration/containers/MainContainer/MainContainer";
+export { default } from "@web-ui/containers/MainContainer/MainContainer";

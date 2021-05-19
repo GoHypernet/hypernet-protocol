@@ -1,6 +1,6 @@
-import { createUseStyles } from "react-jss";
+import { makeStyles } from "@material-ui/core";
 
-const useStyles = createUseStyles({
+export const useStyles = makeStyles({
   container: {
     width: "100%",
     padding: "0 10px",
@@ -19,5 +19,3 @@ const useStyles = createUseStyles({
     marginBottom: 25,
   },
 });
-
-export default useStyles;

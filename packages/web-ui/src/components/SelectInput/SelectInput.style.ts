@@ -1,6 +1,6 @@
-import { createUseStyles } from "react-jss";
+import { makeStyles } from "@material-ui/core";
 
-const useStyles = createUseStyles({
+export const useStyles = makeStyles({
   wrapper: {
     display: "flex",
     flexDirection: "column",
@@ -47,5 +47,3 @@ const useStyles = createUseStyles({
     paddingBottom: 10,
   },
 });
-
-export default useStyles;

@@ -1,8 +1,8 @@
-import { createUseStyles } from "react-jss";
-
 import { colors, getColorFromStatus, EStatusColor } from "../../theme";
 
-const useStyles = createUseStyles({
+import { makeStyles } from "@material-ui/core";
+
+export const useStyles = makeStyles({
   button: {
     color: colors.WHITE,
     textAlign: "center",
@@ -43,5 +43,3 @@ const useStyles = createUseStyles({
     cursor: "pointer",
   },
 });
-
-export default useStyles;
