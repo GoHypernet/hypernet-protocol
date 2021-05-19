@@ -41,7 +41,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     //setPreferredPaymentTokenByAssetInfo,
   } = useBalances();
 
-  const { proxy } = useStoreContext();
+  const { coreProxy } = useStoreContext();
   const { setLoading, closeModal } = useLayoutContext();
   const classes = useStyles();
 
@@ -52,10 +52,10 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
   useEffect(() => {
     setLoading(true);
     // First initialze the merchant
-    proxy.getAuthorizedMerchants().match((merchantsMap) => {
+    coreProxy.getAuthorizedMerchants().match((merchantsMap) => {
       if (merchantsMap.get(merchantUrl)) {
         //check for balances
-        proxy.getBalances().match((_balances) => {
+        coreProxy.getBalances().match((_balances) => {
           decideScreenWhenMerchantIsAlreadyAuthorized(
             !!_balances.assets?.length,
           );
@@ -66,16 +66,16 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
 
       setLoading(false);
       // Then get the preferred payment token if there is any
-      /* proxy.getPreferredPaymentToken().map((token) => {
+      /* coreProxy.getPreferredPaymentToken().map((token) => {
         setPreferredPaymentTokenByAssetInfo(token);
       }); */
     }, handleError);
 
-    proxy.onMerchantAuthorized.subscribe((_merchantUrl) => {
+    coreProxy.onMerchantAuthorized.subscribe((_merchantUrl) => {
       if (merchantUrl === _merchantUrl) {
         alert.success(`Merchant ${merchantUrl} authorization succeeded!`);
         setLoading(false);
-        proxy.getBalances().match((_balances) => {
+        coreProxy.getBalances().match((_balances) => {
           decideScreenWhenMerchantIsAlreadyAuthorized(
             !!_balances.assets?.length,
           );
@@ -103,7 +103,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
 
   const handleMerchantAuthorization = () => {
     setLoading(true);
-    proxy.authorizeMerchant(merchantUrl).mapErr(handleError);
+    coreProxy.authorizeMerchant(merchantUrl).mapErr(handleError);
   };
 
   const goToFundWalletScreen = () => {

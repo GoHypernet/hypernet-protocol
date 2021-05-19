@@ -16,7 +16,7 @@ interface IState {
   links: ILinkList[];
 }
 
-export function useLinks(): IState {
+export function useMerchants(): IState {
   const { coreProxy } = useStoreContext();
 
   const initialState: IState = {

@@ -77,7 +77,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
       throw new Error("core instance is required");
     }
     return (
-      <StoreProvider proxy={this.coreInstance} viewUtils={this.viewUtils}>
+      <StoreProvider coreProxy={this.coreInstance} viewUtils={this.viewUtils}>
         <LayoutProvider>
           <MainContainer withModal={withModal}>{component}</MainContainer>
         </LayoutProvider>
