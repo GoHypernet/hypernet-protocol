@@ -240,6 +240,11 @@ export interface IHypernetCore {
     PersistenceError
   >;
 
+  getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
+    Map<MerchantUrl, boolean>,
+    PersistenceError
+  >;
+
   closeMerchantIFrame(
     merchantUrl: MerchantUrl,
   ): ResultAsync<void, MerchantConnectorError>;

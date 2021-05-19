@@ -13,7 +13,7 @@
     "alias": "tsc-alias",
     "postcompile": "webpack",
     "prepare": "yarn build",
-    "start": "webpack watch --config webpack.config.js --mode development",
+    "start": "webpack serve --config webpack.config.js --mode development",
     "test": "echo \"Error: no test specified\" && exit 0"
   },
   "types": "dist/index.d.ts",

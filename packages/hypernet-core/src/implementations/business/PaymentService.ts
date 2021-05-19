@@ -677,7 +677,7 @@ export class PaymentService implements IPaymentService {
     | TransferCreationError
   > {
     return this.merchantConnectorRepository
-      .getAuthorizedMerchantConnectorStatus()
+      .getAuthorizedMerchantsConnectorsStatus()
       .andThen((merchantConnectorStatusMap) => {
         const merchantConnectorStatus = merchantConnectorStatusMap.get(
           payment.merchantUrl,

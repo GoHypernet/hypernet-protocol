@@ -5,13 +5,21 @@ import { useBalances } from "@web-ui/hooks";
 import useStyles from "@web-ui/widgets/BalancesWidget/BalancesWidget.style";
 import { useStoreContext } from "@web-ui/contexts";
 
-const BalancesWidget: React.FC = () => {
+interface IBalancesWidget {
+  noLabel?: boolean;
+}
+
+const BalancesWidget: React.FC<IBalancesWidget> = ({
+  noLabel,
+}: IBalancesWidget) => {
   const { balances } = useBalances();
   const { viewUtils } = useStoreContext();
 
   const classes = useStyles();
 
-  return (
+  return noLabel ? (
+    <BalanceList balances={balances} viewUtils={viewUtils} />
+  ) : (
     <div className={classes.balancesWrapper}>
       {balances?.length && (
         <div className={classes.balancesLabel}>Your Balances</div>

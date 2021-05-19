@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Box } from "@material-ui/core";
 import HypernetWebIntegration, {
   IHypernetWebIntegration,
@@ -17,6 +17,7 @@ const integration: IHypernetWebIntegration = new HypernetWebIntegration();
 const App: React.FC = () => {
   const { setLoading, setResultMessage } = useLayoutContext();
   const classes = useStyles();
+  const [coreReady, setCoreReady] = useState<boolean>(false);
 
   useEffect(() => {
     setLoading(true);
@@ -25,6 +26,7 @@ const App: React.FC = () => {
       .getReady()
       .map((coreProxy) => {
         setLoading(false);
+        setCoreReady(true);
       })
       .mapErr((e) => {
         setResultMessage(
@@ -37,11 +39,14 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <StoreProvider hypernetCore={integration.core}>
+    <StoreProvider
+      hypernetCore={integration.core}
+      hypernetWebIntegration={integration}
+    >
       <Box className={classes.appWrapper}>
         <BrowserRouter>
           <Header />
-          <Router />
+          {coreReady ? <Router /> : <Box>App is loading...</Box>}
         </BrowserRouter>
       </Box>
     </StoreProvider>

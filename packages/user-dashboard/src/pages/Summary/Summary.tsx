@@ -1,29 +1,45 @@
 import React, { useEffect } from "react";
-import { useLayoutContext } from "@user-dashboard/contexts";
 import PageWrapper from "@user-dashboard/components/PageWrapper";
 import BoxWrapper from "@user-dashboard/components/BoxWrapper";
 import { useStyles } from "@user-dashboard/pages/Summary/Summary.style";
-import Balances from "@user-dashboard/pages/Summary/components/Balances";
+import { useLayoutContext, useStoreContext } from "@user-dashboard/contexts";
 import { Box } from "@material-ui/core";
 
 const Summary: React.FC = () => {
-  const { setLoading, setResultMessage } = useLayoutContext();
+  const { handleError } = useLayoutContext();
+  const { hypernetWebIntegration } = useStoreContext();
 
-  useEffect(() => { }, []);
+  useEffect(() => {
+    hypernetWebIntegration.webUIClient
+      .renderBalancesWidget({
+        selector: "balances-wrapper",
+        noLabel: true,
+      })
+      .mapErr(handleError);
+
+    hypernetWebIntegration.webUIClient
+      .renderMerchantsWidget({
+        selector: "merchant-list-wrapper",
+        noLabel: true,
+      })
+      .mapErr(handleError);
+  }, []);
   const classes = useStyles();
 
   return (
     <PageWrapper label="SUMMARY">
       <Box className={classes.wrapper}>
-        <Box className={classes.leftContent}>
-          <BoxWrapper label="TRANSACTION HISTORY">
-            <Box> BoxWrapper TRANSACTION HISTORY</Box>
+        <Box className={classes.upporContent}>
+          <BoxWrapper label="YOUR BALANCES" flex={1}>
+            <Box id="balances-wrapper"></Box>
+          </BoxWrapper>
+          <BoxWrapper label="YOUR SERVICES" flex={1}>
+            <Box id="merchant-list-wrapper"></Box>
           </BoxWrapper>
         </Box>
-        <Box className={classes.rightContent}>
-          <Balances />
-          <BoxWrapper label="YOUR SERVICES">
-            <Box> BoxWrapper YOUR SERVICES</Box>
+        <Box className={classes.bottomContent}>
+          <BoxWrapper label="TRANSACTION HISTORY">
+            <Box> BoxWrapper TRANSACTION HISTORY</Box>
           </BoxWrapper>
         </Box>
       </Box>

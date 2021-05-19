@@ -359,6 +359,7 @@ export class AccountsRepository implements IAccountsRepository {
   protected _getAssetInfo(
     assetAddress: EthereumAddress,
   ): ResultAsync<AssetInfo, BlockchainUnavailableError> {
+    console.log("assetAddress", assetAddress);
     let name: string;
     let symbol: string;
     let tokenContract: Contract;
@@ -369,9 +370,9 @@ export class AccountsRepository implements IAccountsRepository {
     if (cachedAssetInfo == null) {
       // No cached info, we'll have to get it
       return this.blockchainProvider
-        .getSigner()
-        .andThen((signer) => {
-          tokenContract = new Contract(assetAddress, this.erc20Abi, signer);
+        .getProvider()
+        .andThen((provider) => {
+          tokenContract = new Contract(assetAddress, this.erc20Abi, provider);
 
           return ResultAsync.fromPromise<
             string | null,
@@ -381,6 +382,7 @@ export class AccountsRepository implements IAccountsRepository {
           });
         })
         .orElse((err) => {
+          console.log("err name: ", err);
           this.logUtils.error(`tokenContract.name() failed: ${err.message}`);
           return okAsync<string, BlockchainUnavailableError>("");
         })
@@ -403,6 +405,7 @@ export class AccountsRepository implements IAccountsRepository {
           return okAsync<string, BlockchainUnavailableError>("");
         })
         .andThen((mySymbol) => {
+          console.log("myName", name);
           if (mySymbol == null || mySymbol == "") {
             symbol = "Unk";
           } else {

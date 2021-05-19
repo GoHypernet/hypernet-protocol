@@ -170,7 +170,7 @@ class PaymentServiceMocks {
       ),
     ).thenReturn(okAsync(undefined));
     td.when(
-      this.merchantConnectorRepository.getAuthorizedMerchantConnectorStatus(),
+      this.merchantConnectorRepository.getAuthorizedMerchantsConnectorsStatus(),
     ).thenReturn(okAsync(new Map([[merchantUrl, true]])));
   }
 
@@ -202,7 +202,7 @@ class PaymentServiceMocks {
 
   public setMerchantStatus(merchantUrl: MerchantUrl, status: boolean) {
     td.when(
-      this.merchantConnectorRepository.getAuthorizedMerchantConnectorStatus(),
+      this.merchantConnectorRepository.getAuthorizedMerchantsConnectorsStatus(),
     ).thenReturn(okAsync(new Map([[merchantUrl, false]])));
   }
 

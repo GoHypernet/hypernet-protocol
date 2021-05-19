@@ -734,7 +734,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(value).toBe(error);
   });
 
-  test("getAuthorizedMerchantConnectorStatus returns map of merchant urls and status", async () => {
+  test("getAuthorizedMerchantsConnectorsStatus returns map of merchant urls and status", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
     const repo = mocks.factoryRepository();
@@ -744,7 +744,7 @@ describe("MerchantConnectorRepository tests", () => {
     const result = await repo
       .activateAuthorizedMerchants(balances)
       .andThen(() => {
-        return repo.getAuthorizedMerchantConnectorStatus();
+        return repo.getAuthorizedMerchantsConnectorsStatus();
       });
 
     // Assert

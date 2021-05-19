@@ -710,6 +710,13 @@ export class HypernetCore implements IHypernetCore {
     return this.merchantService.authorizeMerchant(merchantUrl);
   }
 
+  public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
+    Map<MerchantUrl, boolean>,
+    PersistenceError
+  > {
+    return this.merchantService.getAuthorizedMerchantsConnectorsStatus();
+  }
+
   public getAuthorizedMerchants(): ResultAsync<
     Map<MerchantUrl, Signature>,
     PersistenceError

@@ -18,6 +18,10 @@ export interface IMerchantService {
     Map<MerchantUrl, Signature>,
     PersistenceError
   >;
+  getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
+    Map<MerchantUrl, boolean>,
+    PersistenceError
+  >;
   activateAuthorizedMerchants(): ResultAsync<
     void,
     | MerchantConnectorError

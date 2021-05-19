@@ -510,7 +510,7 @@ export class MerchantConnectorRepository
       });
   }
 
-  public getAuthorizedMerchantConnectorStatus(): ResultAsync<
+  public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
     Map<MerchantUrl, boolean>,
     PersistenceError
   > {

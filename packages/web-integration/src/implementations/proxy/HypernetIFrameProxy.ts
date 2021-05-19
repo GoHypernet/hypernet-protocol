@@ -385,6 +385,13 @@ export default class HypernetIFrameProxy
     return this._createCall("getAuthorizedMerchants", null);
   }
 
+  public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
+    Map<MerchantUrl, boolean>,
+    PersistenceError
+  > {
+    return this._createCall("getAuthorizedMerchantsConnectorsStatus", null);
+  }
+
   public displayMerchantIFrame(
     merchantUrl: MerchantUrl,
   ): ResultAsync<void, MerchantConnectorError> {

@@ -8,11 +8,16 @@ interface IMainContainer {
   withModal?: boolean;
 }
 
-export function MainContainer({ children, withModal }: IMainContainer) {
+const MainContainer: React.FC<IMainContainer> = ({
+  children,
+  withModal,
+}: IMainContainer) => {
   return (
     <>
       <LoadingSpinner />
-      {withModal ? <Modal>{children}</Modal> : children}
+      {withModal ? <Modal>{children}</Modal> : <>{children}</>}
     </>
   );
-}
+};
+
+export default MainContainer;

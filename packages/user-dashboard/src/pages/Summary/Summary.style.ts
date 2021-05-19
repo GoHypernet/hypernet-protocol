@@ -1,17 +1,19 @@
-import { makeStyles } from '@material-ui/core';
+import { makeStyles } from "@material-ui/core";
 
 export const useStyles = makeStyles({
   wrapper: {
     display: "flex",
+    flexDirection: "column",
   },
-  leftContent: {
-    flex: 2,
-    marginRight: 24,
-  },
-  rightContent: {
-    flex: 1,
+  upporContent: {
+    display: "flex",
+    width: "100%",
+    marginBottom: 24,
     "& > div:first-child": {
-      marginBottom: 24,
+      marginRight: 24,
     },
+  },
+  bottomContent: {
+    marginBottom: 24,
   },
 });

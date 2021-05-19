@@ -12,7 +12,7 @@ import {
   CONNECTOR_AUTHORIZATION_FLOW_ID_SELECTOR,
   ONBOARDING_FLOW_ID_SELECTOR,
 } from "@web-ui/constants";
-import { MainContainer } from "@web-ui/containers/MainContainer";
+import MainContainer from "@web-integration/containers/MainContainer";
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
@@ -27,6 +27,7 @@ import {
 } from "@web-ui/interfaces";
 import { ViewUtils } from "@web-ui/utils";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget";
+import MerchantsWidget from "@web-ui/widgets/MerchantsWidget";
 import FundWidget from "@web-ui/widgets/FundWidget";
 import LinksWidget from "@web-ui/widgets/LinksWidget";
 import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
@@ -50,15 +51,18 @@ export default class HypernetWebUI implements IHypernetWebUI {
     this.viewUtils = new ViewUtils();
   }
 
-  private _generateDomElement(selector: string) {
-    this._removeExistedElement(selector);
+  private _generateDomElement(selector: string): HTMLElement | null {
+    if (document.getElementById(selector) == null) {
+      this._removeExistedElement(selector);
 
-    const element = document.createElement("div");
-    element.setAttribute("id", selector);
-    document.body.appendChild(element);
-    document.getElementById(selector);
+      const element = document.createElement("div");
+      element.setAttribute("id", selector);
+      document.body.appendChild(element);
+      document.getElementById(selector);
 
-    return element;
+      return element;
+    }
+    return document.getElementById(selector);
   }
 
   private _removeExistedElement(selector: string) {
@@ -103,7 +107,27 @@ export default class HypernetWebUI implements IHypernetWebUI {
   ): Result<void, RenderError> {
     const renderReact = () => {
       return ReactDOM.render(
-        this._bootstrapComponent(<BalancesWidget />, config?.showInModal),
+        this._bootstrapComponent(
+          <BalancesWidget noLabel={config?.noLabel} />,
+          config?.showInModal,
+        ),
+        this._generateDomElement(
+          config?.selector || BALANCES_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderMerchantsWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <MerchantsWidget noLabel={config?.noLabel} />,
+          config?.showInModal,
+        ),
         this._generateDomElement(
           config?.selector || BALANCES_WIDGET_ID_SELECTOR,
         ),

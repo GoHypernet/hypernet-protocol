@@ -10,6 +10,7 @@ import { Result } from "neverthrow";
 export interface IRenderParams {
   selector?: string;
   showInModal?: boolean;
+  noLabel?: boolean;
 }
 
 export interface IConnectorAuthorizationFlowParams extends IRenderParams {
@@ -38,6 +39,7 @@ export interface IRenderPaymentWidgetParams extends IRenderParams {
 
 export interface IHypernetWebUI {
   renderBalancesWidget(params?: IRenderParams): Result<void, RenderError>;
+  renderMerchantsWidget(params?: IRenderParams): Result<void, RenderError>;
   renderFundWidget(params?: IRenderParams): Result<void, RenderError>;
   renderLinksWidget(params?: IRenderParams): Result<void, RenderError>;
   renderPaymentWidget(

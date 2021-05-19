@@ -46,7 +46,7 @@ export class CeramicUtils implements ICeramicUtils {
     protected contextProvider: IContextProvider,
     protected blockchainProvider: IBlockchainProvider,
     protected logUtils: ILogUtils,
-  ) { }
+  ) {}
 
   private _initialize(): ResultAsync<
     void,
@@ -87,7 +87,9 @@ export class CeramicUtils implements ICeramicUtils {
             (e) => e as PersistenceError,
           )
             .andThen(() => {
-              this.logUtils.info(`ceramic logged in, ceramic did id: ${this.ceramic?.did?.id.toString()}`)
+              this.logUtils.info(
+                `ceramic logged in, ceramic did id: ${this.ceramic?.did?.id.toString()}`,
+              );
               context.onDeStorageAuthenticationSucceeded.next();
 
               const aliases: Record<string, string> = {};
@@ -183,13 +185,14 @@ export class CeramicUtils implements ICeramicUtils {
       return ResultAsync.fromPromise(
         this.idx.set(aliasName, { data: content }),
         (e) => e as PersistenceError,
-      ).map(() => { });
+      ).map(() => {});
     });
   }
 
   public readRecord<T>(
     aliasName: string,
   ): ResultAsync<T | null, PersistenceError> {
+    return okAsync(null);
     return this._initialize().andThen(() => {
       if (!this.idx) {
         throw new Error("Something went wrong while initializing Ceramic!");
