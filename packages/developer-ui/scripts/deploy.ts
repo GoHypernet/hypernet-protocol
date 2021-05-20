@@ -1,17 +1,16 @@
+import { artifacts } from "@connext/vector-contracts";
 import { stringify } from "@connext/vector-utils";
 import { Contract } from "@ethersproject/contracts";
 import { keccak256 } from "@ethersproject/keccak256";
-import { Wallet, providers, ContractFactory, BigNumber, utils } from "ethers";
 import { TransferAbis } from "@hypernetlabs/objects";
-import { artifacts } from "@connext/vector-contracts";
+import { Wallet, providers, ContractFactory, BigNumber, utils } from "ethers";
 
 const provider = new providers.JsonRpcProvider("http://localhost:8545");
 const owner = Wallet.fromMnemonic(
   "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat",
 ).connect(provider);
-const transfers = ["Insurance", "Parameterized", "Message"];
 
-const MIN_GAS_LIMIT = BigNumber.from(500_000);
+const MIN_GAS_LIMIT = BigNumber.from(1000000);
 
 const localRegistryAddress = "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F";
 
@@ -28,105 +27,104 @@ async function main() {
   );
 
   // Deploy all transfers
-  const entries1: { [key: string]: any } = {};
-  for (const transfer of transfers) {
-    const insuranceFactory = ContractFactory.fromSolidity(
-      TransferAbis["Insurance"],
-    );
-    const parameterizedFactory = ContractFactory.fromSolidity(
-      TransferAbis["Parameterized"],
-    );
-    const messageFactory = ContractFactory.fromSolidity(
-      TransferAbis["MessageTransfer"],
-    );
+  const entries1: { [key: string]: Record<string, string> } = {};
+  const insuranceFactory = ContractFactory.fromSolidity(
+    TransferAbis["Insurance"],
+  );
+  const parameterizedFactory = ContractFactory.fromSolidity(
+    TransferAbis["Parameterized"],
+  );
+  const messageFactory = ContractFactory.fromSolidity(
+    TransferAbis["MessageTransfer"],
+  );
 
-    const insuranceDeployTx = insuranceFactory.getDeployTransaction();
-    const parameterizedDeployTx = parameterizedFactory.getDeployTransaction();
-    const messageDeployTx = messageFactory.getDeployTransaction();
+  const insuranceDeployTx = insuranceFactory.getDeployTransaction();
+  const parameterizedDeployTx = parameterizedFactory.getDeployTransaction();
+  const messageDeployTx = messageFactory.getDeployTransaction();
 
-    const insuranceTx = await accounts[0].sendTransaction({
-      ...insuranceDeployTx,
-      gasLimit:
-        insuranceDeployTx.gasLimit &&
-        BigNumber.from(insuranceDeployTx.gasLimit).lt(MIN_GAS_LIMIT)
-          ? MIN_GAS_LIMIT
-          : undefined,
-    });
+  const insuranceTx = await accounts[0].sendTransaction({
+    ...insuranceDeployTx,
+    gasLimit:
+      insuranceDeployTx.gasLimit &&
+      BigNumber.from(insuranceDeployTx.gasLimit).lt(MIN_GAS_LIMIT)
+        ? MIN_GAS_LIMIT
+        : undefined,
+  });
 
-    const parameterizedTx = await accounts[0].sendTransaction({
-      ...parameterizedDeployTx,
-      gasLimit:
-        parameterizedDeployTx.gasLimit &&
-        BigNumber.from(parameterizedDeployTx.gasLimit).lt(MIN_GAS_LIMIT)
-          ? MIN_GAS_LIMIT
-          : undefined,
-    });
+  const parameterizedTx = await accounts[0].sendTransaction({
+    ...parameterizedDeployTx,
+    gasLimit:
+      parameterizedDeployTx.gasLimit &&
+      BigNumber.from(parameterizedDeployTx.gasLimit).lt(MIN_GAS_LIMIT)
+        ? MIN_GAS_LIMIT
+        : undefined,
+  });
 
-    const messageTx = await accounts[0].sendTransaction({
-      ...messageDeployTx,
-      gasLimit:
-        messageDeployTx.gasLimit &&
-        BigNumber.from(messageDeployTx.gasLimit).lt(MIN_GAS_LIMIT)
-          ? MIN_GAS_LIMIT
-          : undefined,
-    });
+  const messageTx = await accounts[0].sendTransaction({
+    ...messageDeployTx,
+    gasLimit:
+      messageDeployTx.gasLimit &&
+      BigNumber.from(messageDeployTx.gasLimit).lt(MIN_GAS_LIMIT)
+        ? MIN_GAS_LIMIT
+        : undefined,
+  });
 
-    console.log(
-      `Sent transaction to deploy Insurance, txHash: ${insuranceTx.hash}`,
-    );
-    console.log(
-      `Sent transaction to deploy Parameterized, txHash: ${parameterizedTx.hash}`,
-    );
-    console.log(
-      `Sent transaction to deploy MessageTransfer, txHash: ${messageTx.hash}`,
-    );
+  console.log(
+    `Sent transaction to deploy Insurance, txHash: ${insuranceTx.hash}`,
+  );
+  console.log(
+    `Sent transaction to deploy Parameterized, txHash: ${parameterizedTx.hash}`,
+  );
+  console.log(
+    `Sent transaction to deploy MessageTransfer, txHash: ${messageTx.hash}`,
+  );
 
-    const insuranceReceipt = await insuranceTx.wait();
-    const parameterizedReceipt = await parameterizedTx.wait();
-    const messageReceipt = await messageTx.wait();
+  const insuranceReceipt = await insuranceTx.wait();
+  const parameterizedReceipt = await parameterizedTx.wait();
+  const messageReceipt = await messageTx.wait();
 
-    const insuranceAddress = Contract.getContractAddress(insuranceTx);
-    const parameterizedAddress = Contract.getContractAddress(parameterizedTx);
-    const messageAddress = Contract.getContractAddress(messageTx);
+  const insuranceAddress = Contract.getContractAddress(insuranceTx);
+  const parameterizedAddress = Contract.getContractAddress(parameterizedTx);
+  const messageAddress = Contract.getContractAddress(messageTx);
 
-    const insuranceRuntimeCodeHash = hash(
-      await accounts[0].provider!.getCode(insuranceAddress),
-    );
-    const parameterizedRuntimeCodeHash = hash(
-      await accounts[0].provider!.getCode(parameterizedAddress),
-    );
-    const messageRuntimeCodeHash = hash(
-      await accounts[0].provider!.getCode(messageAddress),
-    );
+  const insuranceRuntimeCodeHash = hash(
+    await accounts[0].provider!.getCode(insuranceAddress),
+  );
+  const parameterizedRuntimeCodeHash = hash(
+    await accounts[0].provider!.getCode(parameterizedAddress),
+  );
+  const messageRuntimeCodeHash = hash(
+    await accounts[0].provider!.getCode(messageAddress),
+  );
 
-    const insuranceCreationCodeHash = hash(insuranceFactory.bytecode);
-    const parameterizedCreationCodeHash = hash(parameterizedFactory.bytecode);
-    const messageCreationCodeHash = hash(messageFactory.bytecode);
+  const insuranceCreationCodeHash = hash(insuranceFactory.bytecode);
+  const parameterizedCreationCodeHash = hash(parameterizedFactory.bytecode);
+  const messageCreationCodeHash = hash(messageFactory.bytecode);
 
-    console.log(`Successfully deployed Insurance`);
-    entries1["Insurance"] = {
-      insuranceAddress,
-      insuranceRuntimeCodeHash,
-      insuranceCreationCodeHash,
-      txHash: insuranceTx.hash,
-    };
+  console.log(`Successfully deployed Insurance`);
+  entries1["Insurance"] = {
+    insuranceAddress,
+    insuranceRuntimeCodeHash,
+    insuranceCreationCodeHash,
+    txHash: insuranceTx.hash,
+  };
 
-    console.log(`Successfully deployed Parameterized`);
-    entries1["Parameterized"] = {
-      parameterizedAddress,
-      parameterizedRuntimeCodeHash,
-      parameterizedCreationCodeHash,
-      txHash: parameterizedTx.hash,
-    };
+  console.log(`Successfully deployed Parameterized`);
+  entries1["Parameterized"] = {
+    parameterizedAddress,
+    parameterizedRuntimeCodeHash,
+    parameterizedCreationCodeHash,
+    txHash: parameterizedTx.hash,
+  };
 
-    console.log(`Successfully deployed MessageTransfer`);
-    entries1["MessageTransfer"] = {
-      messageAddress,
-      messageRuntimeCodeHash,
-      messageCreationCodeHash,
-      txHash: messageTx.hash,
-    };
-  }
+  console.log(`Successfully deployed MessageTransfer`);
+  entries1["MessageTransfer"] = {
+    messageAddress,
+    messageRuntimeCodeHash,
+    messageCreationCodeHash,
+    txHash: messageTx.hash,
+  };
+
   console.log("Successfully deployed all transfers:");
   console.log(stringify(entries1));
 
@@ -166,17 +164,24 @@ async function main() {
   console.log(`Parameterized Registry Info: ${parameterizedRegistryInfo}`);
   console.log(`MessageTransfer Registry Info: ${messageRegistryInfo}`);
 
-  const insuranceTx = await registry.addTransferDefinition(
+  const insuranceTransferDef = await registry.addTransferDefinition(
     insuranceRegistryInfo,
   );
-  const parameterizedTx = await registry.addTransferDefinition(
+  console.log("Added insurance transfer definition");
+
+  const parameterizedTransferDef = await registry.addTransferDefinition(
     parameterizedRegistryInfo,
   );
-  const messageTx = await registry.addTransferDefinition(messageRegistryInfo);
+  console.log("Added parameterized transfer definition");
 
-  const insuranceReceipt = await insuranceTx.wait();
-  const parameterizedReceipt = await parameterizedTx.wait();
-  const messageReceipt = await messageTx.wait();
+  const messageTransferDef = await registry.addTransferDefinition(
+    messageRegistryInfo,
+  );
+  console.log("Added message transfer definition");
+
+  const insuranceDefReceipt = await insuranceTransferDef.wait();
+  const parameterizedDefReceipt = await parameterizedTransferDef.wait();
+  const messageDefReceipt = await messageTransferDef.wait();
 
   console.log("Transfer registration complete.");
 }

@@ -2,6 +2,7 @@ import {
   TransactionResponse,
   TransactionReceipt,
 } from "@ethersproject/abstract-provider";
+import { Eip1193Bridge } from "@ethersproject/experimental";
 import {
   PrivateCredentials,
   BlockchainUnavailableError,
@@ -44,6 +45,13 @@ export class BlockchainProviderMock implements IBlockchainProvider {
     BlockchainUnavailableError
   > {
     return okAsync(this.provider);
+  }
+
+  public getEIP1193Provider(): ResultAsync<
+    Eip1193Bridge,
+    BlockchainUnavailableError
+  > {
+    throw new Error("Method not implemented.");
   }
 
   public getLatestBlock(): ResultAsync<
