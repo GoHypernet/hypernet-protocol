@@ -13,8 +13,6 @@ import {
   PaymentId,
   MerchantUrl,
   TransferId,
-} from "@hypernetlabs/objects";
-import {
   LogicalError,
   PaymentFinalizeError,
   PaymentStakeError,
@@ -26,8 +24,6 @@ import {
   InvalidPaymentError,
   PaymentCreationError,
   BlockchainUnavailableError,
-} from "@hypernetlabs/objects";
-import {
   EPaymentType,
   ETransferType,
   MessageState,
@@ -71,43 +67,45 @@ export class PaymentRepository implements IPaymentRepository {
     paymentId: PaymentId,
     amount: string,
   ): ResultAsync<Payment, PaymentCreationError> {
-    let transfers: IFullTransferState[];
-    let browserNode: IBrowserNode;
-
     return ResultUtils.combine([
       this._getTransfersByPaymentId(paymentId),
       this.browserNodeProvider.getBrowserNode(),
     ])
       .andThen((vals) => {
-        [transfers, browserNode] = vals;
-        return this.paymentUtils.transfersToPayment(paymentId, transfers);
-      })
-      .andThen((payment) => {
-        const message: IHypernetPullPaymentDetails = {
-          messageType: EMessageTransferType.PULLPAYMENT,
-          paymentId: paymentId,
-          to: payment.to,
-          from: payment.from,
-          paymentToken: payment.paymentToken,
-          pullPaymentAmount: amount,
-        };
+        const [transfers, browserNode] = vals;
+        return this.paymentUtils
+          .transfersToPayment(paymentId, transfers)
+          .andThen((payment) => {
+            const message: IHypernetPullPaymentDetails = {
+              messageType: EMessageTransferType.PULLPAYMENT,
+              requireOnline: false,
+              paymentId: paymentId,
+              to: payment.to,
+              from: payment.from,
+              paymentToken: payment.paymentToken,
+              pullPaymentAmount: amount,
+            };
 
-        return this.vectorUtils.createPullNotificationTransfer(
-          payment.to,
-          message,
-        );
-      })
-      .andThen((transferResponse) => {
-        // Get the newly minted transfer
-        return browserNode.getTransfer(TransferId(transferResponse.transferId));
-      })
-      .andThen((newTransfer) => {
-        // Add the new transfer to the list
-        transfers.push(newTransfer);
+            return this.vectorUtils.createPullNotificationTransfer(
+              payment.to,
+              message,
+            );
+          })
+          .andThen((transferResponse) => {
+            // Get the newly minted transfer
+            return browserNode.getTransfer(
+              TransferId(transferResponse.transferId),
+            );
+          })
+          .andThen((newTransfer) => {
+            // Add the new transfer to the list
+            transfers.push(newTransfer);
 
-        // Convert the list of transfers to a payment (again)
-        return this.paymentUtils.transfersToPayment(paymentId, transfers);
+            // Convert the list of transfers to a payment (again)
+            return this.paymentUtils.transfersToPayment(paymentId, transfers);
+          });
       })
+
       .mapErr((err) => new PaymentCreationError(err, err?.message));
   }
 
@@ -121,11 +119,6 @@ export class PaymentRepository implements IPaymentRepository {
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
   ): ResultAsync<PullPayment, PaymentCreationError> {
-    let browserNode: IBrowserNode;
-    let context: InitializedHypernetContext;
-    let paymentId: PaymentId;
-    let timestamp: number;
-
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
@@ -133,10 +126,11 @@ export class PaymentRepository implements IPaymentRepository {
       this.timeUtils.getBlockchainTimestamp(),
     ])
       .andThen((vals) => {
-        [browserNode, context, paymentId, timestamp] = vals;
+        const [browserNode, context, paymentId, timestamp] = vals;
 
         const message: IHypernetOfferDetails = {
           messageType: EMessageTransferType.OFFER,
+          requireOnline: false,
           paymentId,
           creationDate: timestamp,
           to: counterPartyAccount,
@@ -153,20 +147,18 @@ export class PaymentRepository implements IPaymentRepository {
         };
 
         // Create a message transfer, with the terms of the payment in the metadata.
-        return this.vectorUtils.createOfferTransfer(
-          counterPartyAccount,
-          message,
-        );
-      })
-      .andThen((transferInfo) => {
-        return browserNode.getTransfer(TransferId(transferInfo.transferId));
-      })
-      .andThen((transfer) => {
-        // Return the payment
-        return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
-      })
-      .map((payment) => {
-        return payment as PullPayment;
+        return this.vectorUtils
+          .createOfferTransfer(counterPartyAccount, message)
+          .andThen((transferInfo) => {
+            return browserNode.getTransfer(TransferId(transferInfo.transferId));
+          })
+          .andThen((transfer) => {
+            // Return the payment
+            return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
+          })
+          .map((payment) => {
+            return payment as PullPayment;
+          });
       })
       .mapErr((err) => new PaymentCreationError(err, err?.message));
   }
@@ -215,6 +207,7 @@ export class PaymentRepository implements IPaymentRepository {
           expirationDate: expirationDate,
           paymentToken,
           merchantUrl,
+          requireOnline: false,
         };
 
         // Create a message transfer, with the terms of the payment in the metadata.

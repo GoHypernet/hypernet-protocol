@@ -1,14 +1,17 @@
+import { Eip1193Bridge } from "@ethersproject/experimental";
 import {
   BlockchainUnavailableError,
   InvalidParametersError,
+  PrivateCredentials,
+  EthereumAddress,
 } from "@hypernetlabs/objects";
-import { PrivateCredentials, EthereumAddress } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { okAsync, ResultAsync, errAsync } from "neverthrow";
 
 import { IContextProvider, IInternalProvider } from "@interfaces/utilities";
 import { IInternalProviderFactory } from "@interfaces/utilities/factory";
 import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
+import { ResultUtils } from "@web-integration/../../utils/src/ResultUtils";
 declare global {
   interface Window {
     ethereum: any;
@@ -45,6 +48,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
     this.address = undefined;
     this.providerResult = null;
   }
+
   protected initialize(): ResultAsync<void, BlockchainUnavailableError> {
     this.initializationPromise = this._initializeProviderResult()
       .map((provider) => {
@@ -86,6 +90,20 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
       return this.signer;
     });
   }
+
+  public getEIP1193Provider(): ResultAsync<
+    Eip1193Bridge,
+    BlockchainUnavailableError
+  > {
+    return ResultUtils.combine([this.getProvider(), this.getSigner()]).map(
+      (vals) => {
+        const [provider, signer] = vals;
+
+        return new Eip1193Bridge(signer, provider);
+      },
+    );
+  }
+
   public getLatestBlock(): ResultAsync<
     ethers.providers.Block,
     BlockchainUnavailableError
@@ -120,7 +138,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
       window.ethereum.autoRefreshOnNetworkChange = false;
       this.providerResult = ResultAsync.fromPromise(
         window.ethereum.enable(),
-        (e: any) => {
+        (e: unknown) => {
           return new BlockchainUnavailableError(
             "Unable to initialize ethereum provider from the window",
           );

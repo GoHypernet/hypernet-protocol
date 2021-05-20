@@ -15,8 +15,9 @@ import {
   InvalidPaymentError,
   InvalidParametersError,
   TransferCreationError,
+  ETransferType,
+  MessageState,
 } from "@hypernetlabs/objects";
-import { ETransferType, MessageState } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
@@ -106,9 +107,11 @@ export class VectorAPIListener implements IVectorListener {
                     // if the transfer is an offer transfer, we need to notify the payment service
                     // than an offer has been resolved.
                     // @todo create methods in payment service
-                    return errAsync(
-                      new LogicalError("Method not yet implemented!"),
+                    this.logUtils.error(
+                      "Resolved offer transfer is unimplemented!",
                     );
+                    this.logUtils.debug(payload);
+                    return okAsync(undefined);
                   } else if (transferType === ETransferType.Insurance) {
                     // if the transfer is an insurance transfer, we need to notify the payment service
                     // that stake has been resolved.
@@ -120,9 +123,11 @@ export class VectorAPIListener implements IVectorListener {
                     return this.paymentService.paymentCompleted(paymentId);
                   } else if (transferType === ETransferType.PullRecord) {
                     // @todo create methods in payment service
-                    return errAsync(
-                      new LogicalError("Method not yet implemented!"),
+                    this.logUtils.error(
+                      "Resolved pull record transfer is unimplemented!",
                     );
+                    this.logUtils.debug(payload);
+                    return okAsync(undefined);
                   } else {
                     return errAsync(
                       new LogicalError("Unrecognized transfer type!"),

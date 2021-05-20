@@ -70,9 +70,7 @@ export interface IMerchantConnectorRepository {
     PersistenceError
   >;
 
-  activateAuthorizedMerchants(
-    balances: Balances,
-  ): ResultAsync<void, PersistenceError>;
+  activateAuthorizedMerchants(balances: Balances): ResultAsync<void, never>;
 
   resolveChallenge(
     merchantUrl: MerchantUrl,

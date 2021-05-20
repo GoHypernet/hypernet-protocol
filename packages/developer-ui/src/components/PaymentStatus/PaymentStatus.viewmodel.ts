@@ -14,6 +14,8 @@ export class PaymentStatusViewModel {
   constructor(params: PaymentStatusParams) {
     if (params.state === EPaymentState.Proposed) {
       this.state = "Proposed";
+    } else if (params.state === EPaymentState.Rejected) {
+      this.state = "Rejected";
     } else if (params.state === EPaymentState.InvalidProposal) {
       this.state = "Invalid Proposal";
     } else if (params.state === EPaymentState.Staked) {
@@ -35,6 +37,7 @@ export class PaymentStatusViewModel {
     } else if (params.state === EPaymentState.Borked) {
       this.state = "Borked";
     } else {
+      console.error(params.state);
       this.state = "Unknown - update PaymentStatus.viewmodel";
     }
   }
