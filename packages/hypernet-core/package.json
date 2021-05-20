@@ -54,6 +54,7 @@
     "@connext/vector-contracts": "^0.2.5-beta.6",
     "@connext/vector-types": "^0.2.5-beta.6",
     "@connext/vector-utils": "^0.2.5-beta.6",
+    "@ethersproject/experimental": "^5.1.2",
     "@hypernetlabs/merchant-connector": "^0.0.1",
     "@hypernetlabs/objects": "^0.0.1",
     "@hypernetlabs/utils": "^0.0.1",
