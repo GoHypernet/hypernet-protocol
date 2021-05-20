@@ -1,8 +1,8 @@
-import { HypernetLink } from "@hypernetlabs/objects";
+import { MerchantUrl } from "@hypernetlabs/objects";
 import { useEffect, useReducer } from "react";
 
 import { useStoreContext } from "@web-ui/contexts";
-import { ILinkList } from "@web-ui/interfaces";
+import { useAlert } from "react-alert";
 
 enum EActionTypes {
   FETCHING = "FETCHING",
@@ -13,24 +13,34 @@ enum EActionTypes {
 interface IState {
   loading: boolean;
   error: any;
-  links: ILinkList[];
+  merchantsMap: Map<MerchantUrl, boolean>;
+  openMerchantIFrame: (merchantUrl: MerchantUrl) => void;
+  deauthorizeMerchant: (merchantUrl: MerchantUrl) => void;
 }
+
+type Action =
+  | { type: EActionTypes.FETCHING }
+  | { type: EActionTypes.FETCHED; payload: Map<MerchantUrl, boolean> }
+  | { type: EActionTypes.ERROR; payload: string };
 
 export function useMerchants(): IState {
   const { coreProxy } = useStoreContext();
+  const alert = useAlert();
 
   const initialState: IState = {
     loading: true,
     error: null,
-    links: [],
+    merchantsMap: new Map(),
+    openMerchantIFrame,
+    deauthorizeMerchant,
   };
 
-  const [state, dispatch] = useReducer((state: IState, action: any) => {
+  const [state, dispatch] = useReducer((state: IState, action: Action) => {
     switch (action.type) {
       case EActionTypes.FETCHING:
         return { ...state, loading: true };
       case EActionTypes.FETCHED:
-        return { ...state, loading: false, links: action.payload };
+        return { ...state, loading: false, merchantsMap: action.payload };
       case EActionTypes.ERROR:
         return { ...state, loading: false, error: action.payload };
       default:
@@ -39,108 +49,75 @@ export function useMerchants(): IState {
   }, initialState);
 
   useEffect(() => {
-    let cancelRequest = false;
-    let publicIdentifier = "";
-
-    const fetchData = async () => {
-      dispatch({ type: EActionTypes.FETCHING });
-      try {
-        if (cancelRequest) return;
-        // get data from coreProxy
-        coreProxy
-          .getPublicIdentifier()
-          .andThen((publicIdentifierRes) => {
-            publicIdentifier = publicIdentifierRes;
-            return coreProxy.getLinks();
-          })
-          .map((links) => {
-            console.log("links123: ", links);
-            dispatch({ type: EActionTypes.FETCHED, payload: [...links] });
-          });
-      } catch (error) {
-        if (cancelRequest) return;
-        dispatch({ type: EActionTypes.ERROR, payload: error.message });
-      }
-    };
-
     fetchData();
 
-    coreProxy.onPullPaymentSent.subscribe({
-      next: (payment) => {
-        const linksArr = [...state.links];
-
-        // Check if there is a link for this counterparty already
-        const paymentLinkIndex = linksArr.findIndex((val) => {
-          const counterPartyAccount = val.counterPartyAccount;
-          return (
-            counterPartyAccount === payment.to ||
-            counterPartyAccount === payment.from
-          );
+    coreProxy.onMerchantAuthorized.subscribe({
+      next: (merchantUrl) => {
+        const merchantsMap = state.merchantsMap;
+        merchantsMap.set(merchantUrl, true);
+        dispatch({
+          type: EActionTypes.FETCHED,
+          payload: merchantsMap,
         });
-
-        if (paymentLinkIndex === -1) {
-          // We need to create a new link for the counterparty
-          const counterPartyAccount =
-            payment.to === publicIdentifier ? payment.from : payment.to;
-          linksArr.push(
-            new HypernetLink(
-              counterPartyAccount,
-              [payment],
-              [],
-              [payment],
-              [],
-              [payment],
-            ),
-          );
-        } else {
-          // It's for us, we'll need to add it to the payments for the link
-          linksArr[paymentLinkIndex].pullPayments.push(payment);
-        }
-
-        dispatch({ type: EActionTypes.FETCHED, payload: [...linksArr] });
       },
     });
 
-    coreProxy.onPushPaymentSent.subscribe({
-      next: (payment) => {
-        const linksArr = [...state.links];
-
-        // Check if there is a link for this counterparty already
-        const paymentLinkIndex = linksArr.findIndex((val) => {
-          const counterPartyAccount = val.counterPartyAccount;
-          return (
-            counterPartyAccount === payment.to ||
-            counterPartyAccount === payment.from
-          );
+    coreProxy.onAuthorizedMerchantActivationFailed.subscribe({
+      next: (merchantUrl) => {
+        const merchantsMap = state.merchantsMap;
+        merchantsMap.set(merchantUrl, false);
+        dispatch({
+          type: EActionTypes.FETCHED,
+          payload: merchantsMap,
         });
-
-        if (paymentLinkIndex === -1) {
-          // We need to create a new link for the counterparty
-          const counterPartyAccount =
-            payment.to === publicIdentifier ? payment.from : payment.to;
-          linksArr.push(
-            new HypernetLink(
-              counterPartyAccount,
-              [payment],
-              [payment],
-              [],
-              [payment],
-              [],
-            ),
-          );
-        } else {
-          // It's for us, we'll need to add it to the payments for the link
-          linksArr[paymentLinkIndex].pushPayments.push(payment);
-        }
-
-        dispatch({ type: EActionTypes.FETCHED, payload: [...linksArr] });
       },
     });
-
-    return function cleanup() {
-      cancelRequest = true;
-    };
   }, []);
 
-  return state;
+  async function fetchData() {
+    dispatch({ type: EActionTypes.FETCHING });
+    coreProxy
+      .getAuthorizedMerchantsConnectorsStatus()
+      .map((merchantsStatusMap) => {
+        dispatch({
+          type: EActionTypes.FETCHED,
+          payload: merchantsStatusMap,
+        });
+      })
+      .mapErr((error) => {
+        alert.error(
+          error.message || "An error has happened while pulling merchant list",
+        );
+        dispatch({ type: EActionTypes.ERROR, payload: error.message });
+      });
+  }
+
+  function openMerchantIFrame(merchantUrl: MerchantUrl) {
+    coreProxy.displayMerchantIFrame(merchantUrl).mapErr((error) => {
+      alert.error(
+        error.message || "An error has happened while pulling merchant list",
+      );
+      dispatch({ type: EActionTypes.ERROR, payload: error.message });
+    });
+  }
+
+  function deauthorizeMerchant(merchantUrl: MerchantUrl) {
+    dispatch({ type: EActionTypes.FETCHING });
+    coreProxy
+      .deauthorizeMerchant(merchantUrl)
+      .map(() => {
+        alert.success(`Merchant ${merchantUrl} deauthorized successfully`);
+        fetchData();
+      })
+      .mapErr((error) => {
+        alert.error(
+          error.message || "An error has happened while deauthorizing merchant",
+        );
+        dispatch({ type: EActionTypes.ERROR, payload: error.message });
+      });
+  }
+
+  return {
+    ...state,
+  };
 }

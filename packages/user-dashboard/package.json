@@ -34,6 +34,8 @@
     "postcompile": "webpack",
     "prepare": "yarn build",
     "start": "webpack serve --config webpack.config.js --mode development",
+    "start-iframe-watch": "cd ../iframe && yarn start",
+    "start-merchant-iframe-watch": "cd ../merchant-iframe && yarn start",
     "test": "echo \"Error: no test specified\" && exit 0"
   },
   "types": "dist/index.d.ts",

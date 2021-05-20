@@ -152,6 +152,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.authorizeMerchant(data.data);
         }, data.callId);
       },
+      deauthorizeMerchant: (data: IIFrameCallData<MerchantUrl>) => {
+        this.returnForModel(() => {
+          return this.core.deauthorizeMerchant(data.data);
+        }, data.callId);
+      },
       initiateDispute: (data: IIFrameCallData<PaymentId>) => {
         this.returnForModel(() => {
           return this.core.initiateDispute(data.data);

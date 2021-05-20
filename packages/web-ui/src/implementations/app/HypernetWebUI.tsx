@@ -223,14 +223,6 @@ export default class HypernetWebUI implements IHypernetWebUI {
     };
     return this._getThrowableRender(renderReact);
   }
-
-  public displayMerchantIFrame(merchantUrl: MerchantUrl): void {
-    this.coreInstance?.displayMerchantIFrame(merchantUrl);
-  }
-
-  public closeMerchantIFrame(merchantUrl: MerchantUrl): void {
-    this.coreInstance?.closeMerchantIFrame(merchantUrl);
-  }
 }
 
 declare let window: any;
