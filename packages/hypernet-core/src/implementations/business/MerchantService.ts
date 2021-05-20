@@ -23,7 +23,7 @@ export class MerchantService implements IMerchantService {
     protected accountsRepository: IAccountsRepository,
     protected contextProvider: IContextProvider,
     protected logUtils: ILogUtils,
-  ) { }
+  ) {}
 
   public initialize(): ResultAsync<
     void,
@@ -110,6 +110,12 @@ export class MerchantService implements IMerchantService {
           context.onMerchantAuthorized.next(merchantUrl);
         });
     });
+  }
+
+  public deauthorizeMerchant(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, PersistenceError> {
+    return this.merchantConnectorRepository.deauthorizeMerchant(merchantUrl);
   }
 
   public getAuthorizedMerchants(): ResultAsync<

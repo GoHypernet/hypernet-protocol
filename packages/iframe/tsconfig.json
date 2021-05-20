@@ -14,9 +14,6 @@
     },
     {
       "path": "../hypernet-core"
-    },
-    {
-      "path": "../web-ui"
     }
   ],
   "include": ["./src/**/*.ts"],

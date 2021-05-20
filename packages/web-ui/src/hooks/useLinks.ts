@@ -17,7 +17,7 @@ interface IState {
 }
 
 export function useLinks(): IState {
-  const { proxy } = useStoreContext();
+  const { coreProxy } = useStoreContext();
 
   const initialState: IState = {
     loading: true,
@@ -46,12 +46,12 @@ export function useLinks(): IState {
       dispatch({ type: EActionTypes.FETCHING });
       try {
         if (cancelRequest) return;
-        // get data from proxy
-        proxy
+        // get data from coreProxy
+        coreProxy
           .getPublicIdentifier()
           .andThen((publicIdentifierRes) => {
             publicIdentifier = publicIdentifierRes;
-            return proxy.getLinks();
+            return coreProxy.getLinks();
           })
           .map((links) => {
             console.log("links123: ", links);
@@ -65,7 +65,7 @@ export function useLinks(): IState {
 
     fetchData();
 
-    proxy.onPullPaymentSent.subscribe({
+    coreProxy.onPullPaymentSent.subscribe({
       next: (payment) => {
         const linksArr = [...state.links];
 
@@ -101,7 +101,7 @@ export function useLinks(): IState {
       },
     });
 
-    proxy.onPushPaymentSent.subscribe({
+    coreProxy.onPushPaymentSent.subscribe({
       next: (payment) => {
         const linksArr = [...state.links];
 

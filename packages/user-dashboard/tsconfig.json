@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": "./src",
+    "baseUrl": "./src"
   },
   "references": [
     {
@@ -11,6 +11,9 @@
     },
     {
       "path": "../web-integration"
+    },
+    {
+      "path": "../web-ui"
     }
   ],
   "include": ["./src/**/*.ts", "./src/**/*.tsx"],

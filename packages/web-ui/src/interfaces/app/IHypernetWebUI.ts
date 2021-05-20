@@ -50,6 +50,4 @@ export interface IHypernetWebUI {
   ): Result<void, RenderError>;
   startOnboardingFlow(params: IOnboardingFlowParams): Result<void, RenderError>;
   renderPrivateKeysModal(): Result<void, RenderError>;
-  displayMerchantIFrame(merchantUrl: MerchantUrl): void;
-  closeMerchantIFrame(merchantUrl: MerchantUrl): void;
 }

@@ -14,12 +14,12 @@ const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> = 
 ) => {
   const { connectorUrl } = props;
   const { balances } = useBalances();
-  const { proxy } = useStoreContext();
+  const { coreProxy } = useStoreContext();
   const { setModalWidth, setModalStatus, closeModal } = useLayoutContext();
   const classes = useStyles();
 
   useEffect(() => {
-    proxy.onMerchantAuthorized.subscribe(() => {
+    coreProxy.onMerchantAuthorized.subscribe(() => {
       closeModal();
     });
 
@@ -31,14 +31,14 @@ const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> = 
       closeModal();
     }
 
-    proxy.onAuthorizedMerchantActivationFailed.subscribe(() => {
+    coreProxy.onAuthorizedMerchantActivationFailed.subscribe(() => {
       // show some error
       console.log("onAuthorizedMerchantActivationFailed");
     });
   }, []);
 
   const handleMerchantAuthorization = () => {
-    proxy.authorizeMerchant(connectorUrl).match(
+    coreProxy.authorizeMerchant(connectorUrl).match(
       () => {
         setModalWidth(565);
         setModalStatus(EStatusColor.SUCCESS);

@@ -4,7 +4,7 @@ import { SelectInput, TextareaInput, Button } from "@web-ui/components";
 import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 
 const PrivateKeysFlow: React.FC = () => {
-  const { proxy } = useStoreContext();
+  const { coreProxy } = useStoreContext();
   const { closeModal } = useLayoutContext();
   const [inputValue, setInputValue] = useState<string>("");
   const [privateKeyType, setPrivateKeyType] = useState<string>("");
@@ -13,7 +13,7 @@ const PrivateKeysFlow: React.FC = () => {
   const handleSubmit = () => {
     const privateKey = privateKeyType === "privateKey" ? inputValue : null;
     const mnemonic = privateKeyType === "mnemonic" ? inputValue : null;
-    proxy.providePrivateCredentials(privateKey, mnemonic).match(
+    coreProxy.providePrivateCredentials(privateKey, mnemonic).match(
       () => {
         closeModal();
       },

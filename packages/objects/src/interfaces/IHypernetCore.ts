@@ -235,6 +235,10 @@ export interface IHypernetCore {
     merchantUrl: MerchantUrl,
   ): ResultAsync<void, MerchantValidationError>;
 
+  deauthorizeMerchant(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, PersistenceError>;
+
   getAuthorizedMerchants(): ResultAsync<
     Map<MerchantUrl, Signature>,
     PersistenceError

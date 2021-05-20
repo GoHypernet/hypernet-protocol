@@ -38,7 +38,7 @@ type Action =
     };
 
 export function useBalances() {
-  const { proxy } = useStoreContext();
+  const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const alert = useAlert();
 
@@ -49,7 +49,7 @@ export function useBalances() {
       if (cancelRequest) return;
       dispatch({ type: EActionTypes.FETCHING });
       setLoading(true);
-      proxy
+      coreProxy
         ?.getBalances()
         .map((balance: Balances) => {
           setLoading(false);
@@ -58,7 +58,7 @@ export function useBalances() {
             payload: balance,
           });
 
-          proxy.getPreferredPaymentToken().map((assetInfo) => {
+          coreProxy.getPreferredPaymentToken().map((assetInfo) => {
             console.log("AssetInfo token: ", assetInfo);
             const tokenName =
               assetInfo.assetId === ETHER_HEX_ADDRESS ? "ETH" : "HyperToken";
@@ -82,7 +82,7 @@ export function useBalances() {
 
     fetchData();
 
-    proxy?.onBalancesChanged.subscribe({
+    coreProxy?.onBalancesChanged.subscribe({
       next: (balance) => {
         if (cancelRequest) return;
         dispatch({
@@ -155,7 +155,7 @@ export function useBalances() {
       return;
     }
     setLoading(true);
-    proxy
+    coreProxy
       .setPreferredPaymentToken(EthereumAddress(selectedOption.address))
       .match(
         () => {
