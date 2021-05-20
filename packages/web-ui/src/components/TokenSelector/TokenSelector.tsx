@@ -1,12 +1,13 @@
 import React from "react";
 
-import { ITokenSelectorOption } from "../../interfaces";
-import { SelectInput } from "../SelectInput";
+import { SelectInput } from "@web-ui/components";
+import { ITokenSelectorOption } from "@web-ui/interfaces";
 
 interface TokenSelectorProps {
   tokenSelectorOptions: ITokenSelectorOption[];
   selectedPaymentToken?: ITokenSelectorOption;
   setSelectedPaymentToken: (selectedOption?: ITokenSelectorOption) => void;
+  label?: string;
 }
 
 export const TokenSelector: React.FC<TokenSelectorProps> = (
@@ -16,8 +17,8 @@ export const TokenSelector: React.FC<TokenSelectorProps> = (
     tokenSelectorOptions,
     selectedPaymentToken,
     setSelectedPaymentToken,
+    label = "Token Selector:",
   } = props;
-  console.log("tokenSelectorOptions: ", tokenSelectorOptions);
 
   const handleChange = (event: any) => {
     const selectedOption = tokenSelectorOptions?.find(
@@ -30,7 +31,8 @@ export const TokenSelector: React.FC<TokenSelectorProps> = (
     <div>
       <SelectInput
         options={tokenSelectorOptions}
-        label="Token Selector:"
+        label={label}
+        value={selectedPaymentToken?.address}
         onChange={handleChange}
         optionLabelKey="tokenName"
         optionValueKey="address"

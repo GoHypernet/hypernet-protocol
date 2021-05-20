@@ -9,7 +9,9 @@ import {
   LogicalError,
   VectorError,
   RouterChannelUnknownError,
+  PreferredPaymentTokenError,
   Signature,
+  AssetInfo,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -142,5 +144,18 @@ export class AccountService implements IAccountService {
     message: string,
   ): ResultAsync<Signature, BlockchainUnavailableError | VectorError> {
     return this.accountRepository.signMessage(message);
+  }
+
+  public setPreferredPaymentToken(
+    tokenAddress: EthereumAddress,
+  ): ResultAsync<void, PreferredPaymentTokenError> {
+    return this.accountRepository.setPreferredPaymentToken(tokenAddress);
+  }
+
+  public getPreferredPaymentToken(): ResultAsync<
+    AssetInfo,
+    BlockchainUnavailableError | PreferredPaymentTokenError
+  > {
+    return this.accountRepository.getPreferredPaymentToken();
   }
 }

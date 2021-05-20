@@ -2,6 +2,7 @@ import { BigNumber } from "ethers";
 import { ResultAsync, Result } from "neverthrow";
 import { Subject } from "rxjs";
 
+import { AssetInfo } from "@objects/AssetInfo";
 import { Balances } from "@objects/Balances";
 import { ControlClaim } from "@objects/ControlClaim";
 import {
@@ -18,6 +19,7 @@ import {
   InvalidPaymentError,
   InvalidParametersError,
   TransferResolutionError,
+  PreferredPaymentTokenError,
   ProxyError,
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
@@ -250,6 +252,15 @@ export interface IHypernetCore {
     mnemonic: string | null,
   ): ResultAsync<void, InvalidParametersError>;
 
+  setPreferredPaymentToken(
+    tokenAddress: EthereumAddress,
+  ): ResultAsync<void, PreferredPaymentTokenError>;
+
+  getPreferredPaymentToken(): ResultAsync<
+    AssetInfo,
+    BlockchainUnavailableError | PreferredPaymentTokenError
+  >;
+
   /**
    * Observables for seeing what's going on
    */
@@ -275,3 +286,5 @@ export interface IHypernetCore {
   onInitializationRequired: Subject<void>;
   onPrivateCredentialsRequested: Subject<void>;
 }
+
+export const IHypernetCoreType = Symbol.for("IHypernetCore");

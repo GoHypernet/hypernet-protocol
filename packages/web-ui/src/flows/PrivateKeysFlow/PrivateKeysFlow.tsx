@@ -1,11 +1,11 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 
 import { SelectInput, TextareaInput, Button } from "@web-ui/components";
-import { LayoutContext, StoreContext } from "@web-ui/contexts";
+import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 
 const PrivateKeysFlow: React.FC = () => {
-  const { proxy } = useContext(StoreContext);
-  const { closeModal } = useContext(LayoutContext);
+  const { proxy } = useStoreContext();
+  const { closeModal } = useLayoutContext();
   const [inputValue, setInputValue] = useState<string>("");
   const [privateKeyType, setPrivateKeyType] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string>("");

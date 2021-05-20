@@ -1,5 +1,7 @@
 import React from "react";
 
+import useStyles from "@web-ui/components/SelectInput/SelectInput.style";
+
 interface SelectInputProps {
   onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   label?: string;
@@ -25,17 +27,27 @@ export const SelectInput: React.FC<SelectInputProps> = (
     optionLabelKey,
   } = props;
 
+  const classes = useStyles();
+
   return (
-    <label>
-      {label}
-      <select value={value} onChange={onChange} disabled={disabled}>
-        <option value="">Choose...</option>
-        {options?.map((option: any, index: number) => (
-          <option key={index} value={option[optionValueKey]}>
-            {option[optionLabelKey]}
-          </option>
-        ))}
-      </select>
-    </label>
+    <div className={classes.wrapper}>
+      <label className={classes.selectLabel}>{label}</label>
+      <div className={classes.select}>
+        <select
+          className={classes.selectText}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          required
+        >
+          <option value="">Choose...</option>
+          {options?.map((option: any, index: number) => (
+            <option key={index} value={option[optionValueKey]}>
+              {option[optionLabelKey]}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
   );
 };

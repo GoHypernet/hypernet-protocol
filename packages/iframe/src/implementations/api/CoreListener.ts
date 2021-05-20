@@ -2,15 +2,27 @@ import {
   EthereumAddress,
   PublicIdentifier,
   IHypernetCore,
+  IHypernetCoreType,
   PaymentId,
   MerchantUrl,
 } from "@hypernetlabs/objects";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
+import { injectable, inject } from "inversify";
 import Postmate from "postmate";
 
-export default class CoreWrapper extends ChildProxy {
-  constructor(protected core: IHypernetCore) {
+import { ICoreListener } from "@core-iframe/interfaces/api";
+import {
+  ICoreUIService,
+  ICoreUIServiceType,
+} from "@core-iframe/interfaces/business";
+
+@injectable()
+export class CoreListener extends ChildProxy implements ICoreListener {
+  constructor(
+    @inject(IHypernetCoreType) protected core: IHypernetCore,
+    @inject(ICoreUIServiceType) protected coreUIService: ICoreUIService,
+  ) {
     super();
   }
 
@@ -181,6 +193,16 @@ export default class CoreWrapper extends ChildProxy {
           );
         }, data.callId);
       },
+      setPreferredPaymentToken: (data: IIFrameCallData<EthereumAddress>) => {
+        this.returnForModel(() => {
+          return this.core.setPreferredPaymentToken(data.data);
+        }, data.callId);
+      },
+      getPreferredPaymentToken: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getPreferredPaymentToken();
+        }, data.callId);
+      },
     });
   }
 
@@ -274,6 +296,18 @@ export default class CoreWrapper extends ChildProxy {
 
     this.core.onPrivateCredentialsRequested.subscribe(() => {
       parent.emit("onPrivateCredentialsRequested");
+    });
+
+    this.core.onDeStorageAuthenticationStarted.subscribe(() => {
+      this.coreUIService.renderDeStorageAuthenticationUI();
+    });
+
+    this.core.onDeStorageAuthenticationFailed.subscribe(() => {
+      this.coreUIService.renderDeStorageAuthenticationFailedUI();
+    });
+
+    this.core.onDeStorageAuthenticationSucceeded.subscribe(() => {
+      this.coreUIService.renderDeStorageAuthenticationSucceededUI();
     });
   }
 }

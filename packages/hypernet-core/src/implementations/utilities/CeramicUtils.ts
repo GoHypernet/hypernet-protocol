@@ -84,6 +84,7 @@ export class CeramicUtils implements ICeramicUtils {
             (e) => e as PersistenceError,
           )
             .andThen(() => {
+              console.log("his.ceramic", this.ceramic?.did?.id.toString());
               context.onDeStorageAuthenticationSucceeded.next();
 
               const aliases: Record<string, string> = {};
