@@ -149,7 +149,10 @@ export default class HypernetWebUI implements IHypernetWebUI {
   public renderLinksWidget(config?: IRenderParams): Result<void, RenderError> {
     const renderReact = () => {
       return ReactDOM.render(
-        this._bootstrapComponent(<LinksWidget />, config?.showInModal),
+        this._bootstrapComponent(
+          <LinksWidget noLabel={config?.noLabel} />,
+          config?.showInModal,
+        ),
         this._generateDomElement(config?.selector || LINKS_WIDGET_ID_SELECTOR),
       );
     };

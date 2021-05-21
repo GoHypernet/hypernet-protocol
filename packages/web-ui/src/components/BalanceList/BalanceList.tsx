@@ -30,7 +30,7 @@ export const BalanceList: React.FC<BalanceListProps> = (
             }
           />
           <Box className={classes.tokenAmount}>
-            {viewUtils.fromBigNumber(balance.freeAmount)}
+            {viewUtils.fromBigNumberEther(balance.freeAmount)}
           </Box>
           <Box className={classes.tokenName}>
             {balance.assetAddress === ETHER_HEX_ADDRESS ? "ETH" : "MINT"}

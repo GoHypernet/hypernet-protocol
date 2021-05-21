@@ -3,6 +3,7 @@ import {
   PublicIdentifier,
   PushPayment,
   MerchantUrl,
+  PaymentStatusParams,
 } from "@hypernetlabs/objects";
 import { EPaymentState } from "@hypernetlabs/objects";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
@@ -11,7 +12,6 @@ import ko from "knockout";
 import moment from "moment";
 
 import { ButtonParams } from "../Button/Button.viewmodel";
-import { PaymentStatusParams } from "../PaymentStatus/PaymentStatus.viewmodel";
 
 import html from "./PushPayment.template.html";
 

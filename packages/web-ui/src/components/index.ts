@@ -1,6 +1,6 @@
 export * from "./BalanceList";
 export * from "./Button";
-export * from "./LinkList";
+export * from "./PushPaymentList";
 export * from "./ModalFooter";
 export * from "./ModalHeader";
 export * from "./SelectInput";
@@ -9,3 +9,4 @@ export * from "./TextInput";
 export * from "./TextareaInput";
 export * from "./TokenSelector";
 export * from "./TransactionList";
+export * from "./Tabs";
