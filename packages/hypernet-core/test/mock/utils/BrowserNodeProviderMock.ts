@@ -91,6 +91,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
 
     this.offerDetails = {
       messageType: EMessageTransferType.OFFER,
+      requireOnline: false,
       paymentId: commonPaymentId,
       creationDate: unixPast,
       to: publicIdentifier2,

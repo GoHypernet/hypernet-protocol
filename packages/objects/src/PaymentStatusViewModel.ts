@@ -1,7 +1,4 @@
-import { EPaymentState } from "@hypernetlabs/objects";
-import ko from "knockout";
-
-import html from "./PaymentStatus.template.html";
+import { EPaymentState } from "@objects/typing";
 
 export class PaymentStatusParams {
   constructor(public state: EPaymentState) {}
@@ -42,8 +39,3 @@ export class PaymentStatusViewModel {
     }
   }
 }
-
-ko.components.register("payment-status", {
-  viewModel: PaymentStatusViewModel,
-  template: html,
-});

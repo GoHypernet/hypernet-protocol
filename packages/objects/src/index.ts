@@ -38,3 +38,4 @@ export * from "@objects/DefinitionName";
 export * from "@objects/SchemaUrl";
 export * from "@objects/BigNumberString";
 export * from "@objects/UnixTimestamp";
+export * from "@objects/PaymentStatusViewModel";

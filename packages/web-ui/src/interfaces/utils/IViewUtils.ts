@@ -1,5 +1,9 @@
+import { EPaymentState } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 
 export interface IViewUtils {
-  fromBigNumber(value: BigNumber): number;
+  fromBigNumberWei(value: any): string;
+  fromBigNumberEther(value: any): string;
+  fromPaymentState(state: EPaymentState): string;
+  fromPaymentStateColor(state: EPaymentState): string;
 }

@@ -1,3 +1,4 @@
+import { Eip1193Bridge } from "@ethersproject/experimental";
 import {
   BlockchainUnavailableError,
   InvalidParametersError,
@@ -18,6 +19,7 @@ export interface IBlockchainProvider {
     ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
     BlockchainUnavailableError
   >;
+  getEIP1193Provider(): ResultAsync<Eip1193Bridge, BlockchainUnavailableError>;
   getLatestBlock(): ResultAsync<
     ethers.providers.Block,
     BlockchainUnavailableError

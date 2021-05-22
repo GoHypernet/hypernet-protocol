@@ -86,7 +86,7 @@ export function useMerchants(): IState {
       })
       .mapErr((error) => {
         alert.error(
-          error.message || "An error has happened while pulling merchant list",
+          error.message || "An error had happened while pulling merchant list",
         );
         dispatch({ type: EActionTypes.ERROR, payload: error.message });
       });
@@ -95,7 +95,7 @@ export function useMerchants(): IState {
   function openMerchantIFrame(merchantUrl: MerchantUrl) {
     coreProxy.displayMerchantIFrame(merchantUrl).mapErr((error) => {
       alert.error(
-        error.message || "An error has happened while pulling merchant list",
+        error.message || "An error had happened while pulling merchant list",
       );
       dispatch({ type: EActionTypes.ERROR, payload: error.message });
     });
@@ -111,7 +111,7 @@ export function useMerchants(): IState {
       })
       .mapErr((error) => {
         alert.error(
-          error.message || "An error has happened while deauthorizing merchant",
+          error.message || "An error had happened while deauthorizing merchant",
         );
         dispatch({ type: EActionTypes.ERROR, payload: error.message });
       });

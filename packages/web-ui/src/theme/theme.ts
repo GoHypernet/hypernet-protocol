@@ -3,6 +3,7 @@ export const colors = {
   STATUS_GREEN: "#00C3A9",
   STATUS_RED: "#D32F2F",
   STATUS_BLUE: "#0078FF",
+  STATUS_GREY: "#676767",
 };
 
 export enum EStatusColor {
@@ -22,6 +23,9 @@ export const getColorFromStatus = (status: EStatusColor) => {
 
     case EStatusColor.SUCCESS:
       return colors.STATUS_GREEN;
+
+    case EStatusColor.IDLE:
+      return colors.STATUS_GREY;
 
     default:
       return colors.WHITE;

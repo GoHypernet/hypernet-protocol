@@ -26,10 +26,8 @@ import {
 import {
   ResultUtils,
   IAjaxUtils,
-  ILocalStorageUtils,
   ILogUtils,
   IAjaxUtilsType,
-  ILocalStorageUtilsType,
   ILogUtilsType,
 } from "@hypernetlabs/utils";
 import { BigNumber, ethers } from "ethers";
@@ -346,13 +344,15 @@ export class MerchantConnectorRepository
    */
   public activateAuthorizedMerchants(
     balances: Balances,
-  ): ResultAsync<void, PersistenceError> {
+  ): ResultAsync<void, never> {
     this.balances = balances;
 
     if (this.activateAuthorizedMerchantsResult == null) {
       this.activateAuthorizedMerchantsResult = ResultUtils.combine([
         this.contextProvider.getInitializedContext(),
-        this.getAuthorizedMerchants(),
+        this.getAuthorizedMerchants().orElse((e) => {
+          return okAsync(new Map());
+        }),
         this.blockchainProvider.getSigner(),
       ])
         .andThen((vals) => {

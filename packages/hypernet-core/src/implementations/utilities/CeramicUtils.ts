@@ -11,14 +11,11 @@ import { createDefinition, publishSchema } from "@ceramicstudio/idx-tools";
 import {
   PersistenceError,
   BlockchainUnavailableError,
-} from "@hypernetlabs/objects";
-import {
   EthereumAddress,
   AuthorizedMerchantsSchema,
   HypernetConfig,
 } from "@hypernetlabs/objects";
-import { ResultUtils } from "@hypernetlabs/utils";
-import { ILogUtils } from "@hypernetlabs/utils";
+import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { Resolver, ResolverRegistry } from "did-resolver";
 import { DID } from "dids";
 import { okAsync, ResultAsync, errAsync } from "neverthrow";
@@ -65,7 +62,7 @@ export class CeramicUtils implements ICeramicUtils {
     return this.contextProvider.getInitializedContext().andThen((context) => {
       return this._setup().andThen((config) => {
         return this._getDidProvider().andThen((didProvider) => {
-          if (!this.ceramic || !this.threeIdResolver) {
+          if (this.ceramic == null || this.threeIdResolver == null) {
             throw new Error("Something went wrong while initializing Ceramic!");
           }
 
@@ -118,7 +115,7 @@ export class CeramicUtils implements ICeramicUtils {
     PersistenceError | BlockchainUnavailableError
   > {
     return this._initialize().andThen(() => {
-      if (!this.ceramic || !this.idx) {
+      if (this.ceramic == null || this.idx == null) {
         throw new Error("Something went wrong while initializing Ceramic!");
       }
 
@@ -177,8 +174,9 @@ export class CeramicUtils implements ICeramicUtils {
     aliasName: string,
     content: T,
   ): ResultAsync<void, PersistenceError> {
+    //return okAsync(undefined);
     return this._initialize().andThen(() => {
-      if (!this.idx) {
+      if (this.idx == null) {
         throw new Error("Something went wrong while initializing Ceramic!");
       }
 
@@ -192,8 +190,15 @@ export class CeramicUtils implements ICeramicUtils {
   public readRecord<T>(
     aliasName: string,
   ): ResultAsync<T | null, PersistenceError> {
+    /* return okAsync(([
+      {
+        merchantUrl: "http://localhost:5010",
+        authorizationSignature:
+          "0xe7f734f06f49a3de497509089144c6a10227433cdfbd13cc6e482d2d33acb484759492fbc625824f2db3dc9ed531a13e4181d5a8dc9ca6fcae0ee797a658f2181b",
+      },
+    ] as unknown) as T); */
     return this._initialize().andThen(() => {
-      if (!this.idx) {
+      if (this.idx == null) {
         throw new Error("Something went wrong while initializing Ceramic!");
       }
 
@@ -208,7 +213,7 @@ export class CeramicUtils implements ICeramicUtils {
 
   public removeRecord(aliasName: string): ResultAsync<void, PersistenceError> {
     return this._initialize().andThen(() => {
-      if (!this.idx) {
+      if (this.idx == null) {
         throw new Error("Something went wrong while initializing Ceramic!");
       }
 
@@ -220,18 +225,23 @@ export class CeramicUtils implements ICeramicUtils {
   }
 
   private _setup(): ResultAsync<HypernetConfig, PersistenceError> {
-    return this.configProvider.getConfig().andThen((config) => {
-      return this._getAdresses().andThen((addresses) => {
-        this.ceramic = new CeramicClient(config.ceramicNodeUrl);
-        this.authProvider = new EthereumAuthProvider(
-          window.ethereum,
-          addresses[0],
-        );
-        this.threeIdConnect = new ThreeIdConnect();
-        this.threeIdResolver = ThreeIdResolver.getResolver(this.ceramic);
-        this.didResolver = new Resolver(this.threeIdResolver);
-        return okAsync(config);
-      });
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.blockchainProvider.getEIP1193Provider(),
+      this._getAdresses(),
+    ]).andThen((vals) => {
+      const [config, provider, addresses] = vals;
+
+      this.ceramic = new CeramicClient(config.ceramicNodeUrl);
+      // this.authProvider = new EthereumAuthProvider(provider, addresses[0]);
+      this.authProvider = new EthereumAuthProvider(
+        window.ethereum,
+        addresses[0],
+      );
+      this.threeIdConnect = new ThreeIdConnect();
+      this.threeIdResolver = ThreeIdResolver.getResolver(this.ceramic);
+      this.didResolver = new Resolver(this.threeIdResolver);
+      return okAsync(config);
     });
   }
 
@@ -249,19 +259,21 @@ export class CeramicUtils implements ICeramicUtils {
   }
 
   private _getDidProvider(): ResultAsync<DidProviderProxy, PersistenceError> {
-    if (!this.authProvider || !this.threeIdConnect) {
+    if (this.authProvider == null || this.threeIdConnect == null) {
       throw new Error("Something went wrong while initializing Ceramic!");
     }
+    const authProvider = this.authProvider;
+    const threeIdConnect = this.threeIdConnect;
 
     return ResultAsync.fromPromise(
-      this.threeIdConnect.connect(this.authProvider),
+      threeIdConnect.connect(authProvider),
       (e) => e as PersistenceError,
     ).andThen(() => {
       const result = ResultUtils.fromThrowableResult<
         DidProviderProxy,
         PersistenceError
       >(() => {
-        return this.threeIdConnect?.getDidProvider() as DidProviderProxy;
+        return threeIdConnect.getDidProvider();
       });
 
       if (result.isErr()) {

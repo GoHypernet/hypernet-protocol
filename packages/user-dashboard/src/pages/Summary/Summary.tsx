@@ -22,6 +22,13 @@ const Summary: React.FC = () => {
         noLabel: true,
       })
       .mapErr(handleError);
+
+    hypernetWebIntegration.webUIClient
+      .renderLinksWidget({
+        selector: "payments-wrapper",
+        noLabel: true,
+      })
+      .mapErr(handleError);
   }, []);
 
   return (
@@ -29,7 +36,7 @@ const Summary: React.FC = () => {
       <Grid container spacing={3}>
         <Grid item xs={8}>
           <BoxWrapper label="TRANSACTION HISTORY">
-            <Box> BoxWrapper TRANSACTION HISTORY</Box>
+            <Box id="payments-wrapper"></Box>
           </BoxWrapper>
         </Grid>
         <Grid item container xs={4} spacing={3}>

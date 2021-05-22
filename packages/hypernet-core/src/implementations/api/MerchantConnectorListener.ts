@@ -159,7 +159,7 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
 
     // Verify that the expiration date is sometime in the future
     const now = Math.floor(new Date().getTime() / 1000);
-    if (now < request.expirationDate) {
+    if (now >= request.expirationDate) {
       return false;
     }
 
