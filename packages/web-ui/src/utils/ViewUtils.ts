@@ -9,11 +9,11 @@ import {
 import { getColorFromStatus, EStatusColor } from "@web-ui/theme";
 
 export class ViewUtils implements IViewUtils {
-  public fromBigNumberWei(value: any): string {
+  public fromBigNumberWei(value: BigNumber): string {
     return utils.formatUnits(value, "wei");
   }
 
-  public fromBigNumberEther(value: any): string {
+  public fromBigNumberEther(value: BigNumber): string {
     return utils.formatUnits(value, "ether");
   }
 
@@ -23,12 +23,12 @@ export class ViewUtils implements IViewUtils {
 
   public fromPaymentStateColor(state: EPaymentState): string {
     switch (state) {
-      case EPaymentState.Finalized:
+      case EPaymentState.Finalized ||
+        EPaymentState.Accepted ||
+        EPaymentState.Approved:
         return getColorFromStatus(EStatusColor.SUCCESS);
 
-      case EPaymentState.Accepted ||
-        EPaymentState.Approved ||
-        EPaymentState.Staked:
+      case EPaymentState.Proposed || EPaymentState.Staked:
         return getColorFromStatus(EStatusColor.PRIMARY);
 
       case EPaymentState.InvalidFunds ||

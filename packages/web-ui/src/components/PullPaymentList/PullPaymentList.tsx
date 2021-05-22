@@ -1,8 +1,8 @@
 import {
-  PushPayment,
+  PullPayment,
   PublicIdentifier,
-  PaymentId,
   EPaymentState,
+  PaymentId,
 } from "@hypernetlabs/objects";
 import React from "react";
 import {
@@ -25,28 +25,33 @@ import { withStyles } from "@material-ui/core/styles";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
 import { useStoreContext } from "@web-ui/contexts";
 
-interface IPushPaymentList {
-  pushPayments: PushPayment[];
+interface IPullPaymentList {
+  pullPayments: PullPayment[];
   publicIdentifier: PublicIdentifier;
-  onAcceptPushPaymentClick: (paymentId: PaymentId) => void;
-  onDisputePushPaymentClick: (paymentId: PaymentId) => void;
+  onAcceptPullPaymentClick: (paymentId: PaymentId) => void;
+  onDisputePullPaymentClick: (paymentId: PaymentId) => void;
+  onPullFundClick: (paymentId: PaymentId) => void;
 }
 
-interface IPushPaymentRow {
-  pushPayment: PushPayment;
+interface IPullPaymentRow {
+  pullPayment: PullPayment;
   acceptPaymentButtonVisible: boolean;
+  pullFundsButtonVisible: boolean;
   disputeButtonVisible: boolean;
-  onAcceptPushPaymentClick: (paymentId: PaymentId) => void;
-  onDisputePushPaymentClick: (paymentId: PaymentId) => void;
+  onAcceptPullPaymentClick: (paymentId: PaymentId) => void;
+  onDisputePullPaymentClick: (paymentId: PaymentId) => void;
+  onPullFundClick: (paymentId: PaymentId) => void;
 }
 
-const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
+const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
   const {
-    pushPayment,
+    pullPayment,
     acceptPaymentButtonVisible,
+    pullFundsButtonVisible,
     disputeButtonVisible,
-    onAcceptPushPaymentClick,
-    onDisputePushPaymentClick,
+    onAcceptPullPaymentClick,
+    onDisputePullPaymentClick,
+    onPullFundClick,
   } = props;
   const [open, setOpen] = React.useState(false);
   const { viewUtils } = useStoreContext();
@@ -95,25 +100,25 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
           </IconButton>
         </TableCell>
         <TableCell component="th" scope="row">
-          {pushPayment.merchantUrl}
+          {pullPayment.merchantUrl}
         </TableCell>
         <TableCell align="right">
-          {viewUtils.fromBigNumberWei(pushPayment.paymentAmount)}
+          {viewUtils.fromBigNumberWei(pullPayment.authorizedAmount)}
         </TableCell>
         <TableCell align="right">
-          {viewUtils.fromBigNumberWei(pushPayment.requiredStake)}
+          {viewUtils.fromBigNumberWei(pullPayment.requiredStake)}
         </TableCell>
         <TableCell align="right">
-          {viewUtils.fromBigNumberWei(pushPayment.amountStaked)}
+          {viewUtils.fromBigNumberWei(pullPayment.amountTransferred)}
         </TableCell>
-        <TableCell align="right">{pushPayment.expirationDate}</TableCell>
+        <TableCell align="right">{pullPayment.expirationDate}</TableCell>
         <TableCell
           align="right"
           style={{
-            color: viewUtils.fromPaymentStateColor(pushPayment.state),
+            color: viewUtils.fromPaymentStateColor(pullPayment.state),
           }}
         >
-          {viewUtils.fromPaymentState(pushPayment.state)}
+          {viewUtils.fromPaymentState(pullPayment.state)}
         </TableCell>
         <TableCell align="right">
           {acceptPaymentButtonVisible && (
@@ -121,7 +126,7 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
               size="small"
               variant="outlined"
               color="primary"
-              onClick={() => onAcceptPushPaymentClick(pushPayment.id)}
+              onClick={() => onAcceptPullPaymentClick(pullPayment.id)}
             >
               Accept
             </Button>
@@ -131,9 +136,19 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
               size="small"
               variant="outlined"
               color="secondary"
-              onClick={() => onDisputePushPaymentClick(pushPayment.id)}
+              onClick={() => onDisputePullPaymentClick(pullPayment.id)}
             >
               Dispute
+            </Button>
+          )}
+          {pullFundsButtonVisible && (
+            <Button
+              size="small"
+              variant="outlined"
+              color="secondary"
+              onClick={() => onPullFundClick(pullPayment.id)}
+            >
+              Pull Funds
             </Button>
           )}
         </TableCell>
@@ -145,29 +160,29 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
         <Collapse in={open} timeout="auto" unmountOnExit>
           <Box marginBottom={1}>
             <List dense={true}>
-              {renderListItem("Payment ID", pushPayment.id)}
-              {renderListItem("From", pushPayment.from)}
-              {renderListItem("To", pushPayment.to)}
+              {renderListItem("Payment ID", pullPayment.id)}
+              {renderListItem("From", pullPayment.from)}
+              {renderListItem("To", pullPayment.to)}
               {renderListItem(
                 "State",
-                viewUtils.fromPaymentState(pushPayment.state),
+                viewUtils.fromPaymentState(pullPayment.state),
               )}
-              {renderListItem("Payment Token", pushPayment.paymentToken)}
+              {renderListItem("Payment Token", pullPayment.paymentToken)}
               {renderListItem(
                 "Required Stake",
-                viewUtils.fromBigNumberWei(pushPayment.requiredStake),
+                viewUtils.fromBigNumberWei(pullPayment.requiredStake),
               )}
               {renderListItem(
                 "Amount Staked	",
-                viewUtils.fromBigNumberWei(pushPayment.amountStaked),
+                viewUtils.fromBigNumberWei(pullPayment.amountStaked),
               )}
-              {renderListItem("Expiration Date", pushPayment.expirationDate)}
-              {renderListItem("Created", pushPayment.createdTimestamp)}
-              {renderListItem("Updated", pushPayment.updatedTimestamp)}
-              {renderListItem("Merchant URL", pushPayment.merchantUrl)}
+              {renderListItem("Expiration Date", pullPayment.expirationDate)}
+              {renderListItem("Created", pullPayment.createdTimestamp)}
+              {renderListItem("Updated", pullPayment.updatedTimestamp)}
+              {renderListItem("Merchant URL", pullPayment.merchantUrl)}
               {renderListItem(
-                "Payment Amount",
-                viewUtils.fromBigNumberWei(pushPayment.paymentAmount),
+                "Authorized Amount",
+                viewUtils.fromBigNumberWei(pullPayment.authorizedAmount),
                 true,
               )}
             </List>
@@ -178,14 +193,15 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
   );
 };
 
-export const PushPaymentList: React.FC<IPushPaymentList> = (
-  props: IPushPaymentList,
+export const PullPaymentList: React.FC<IPullPaymentList> = (
+  props: IPullPaymentList,
 ) => {
   const {
-    pushPayments,
+    pullPayments,
     publicIdentifier,
-    onAcceptPushPaymentClick,
-    onDisputePushPaymentClick,
+    onAcceptPullPaymentClick,
+    onDisputePullPaymentClick,
+    onPullFundClick,
   } = props;
 
   return (
@@ -195,7 +211,7 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
           <TableRow>
             <TableCell />
             <TableCell>Validator</TableCell>
-            <TableCell align="right">Amount</TableCell>
+            <TableCell align="right">Authorized Amount</TableCell>
             <TableCell align="right">Required Stake</TableCell>
             <TableCell align="right">Amount Staked</TableCell>
             <TableCell align="right">Expiration Date</TableCell>
@@ -204,17 +220,24 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
           </TableRow>
         </TableHead>
         <TableBody>
-          {pushPayments.map((pushPayment) => (
-            <PushPaymentRow
-              key={pushPayment.id}
-              pushPayment={pushPayment}
-              acceptPaymentButtonVisible={publicIdentifier === pushPayment.to}
-              disputeButtonVisible={
-                publicIdentifier === pushPayment.from &&
-                pushPayment.state === EPaymentState.Accepted
+          {pullPayments.map((pullPayment) => (
+            <PullPaymentRow
+              key={pullPayment.id}
+              pullPayment={pullPayment}
+              acceptPaymentButtonVisible={
+                pullPayment.state === EPaymentState.Proposed
               }
-              onAcceptPushPaymentClick={onAcceptPushPaymentClick}
-              onDisputePushPaymentClick={onDisputePushPaymentClick}
+              pullFundsButtonVisible={
+                publicIdentifier === pullPayment.to &&
+                pullPayment.state === EPaymentState.Approved
+              }
+              disputeButtonVisible={
+                publicIdentifier === pullPayment.from &&
+                pullPayment.state === EPaymentState.Accepted
+              }
+              onAcceptPullPaymentClick={onAcceptPullPaymentClick}
+              onDisputePullPaymentClick={onDisputePullPaymentClick}
+              onPullFundClick={onPullFundClick}
             />
           ))}
         </TableBody>

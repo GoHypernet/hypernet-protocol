@@ -174,7 +174,7 @@ export class CeramicUtils implements ICeramicUtils {
     aliasName: string,
     content: T,
   ): ResultAsync<void, PersistenceError> {
-    return okAsync(undefined);
+    //return okAsync(undefined);
     return this._initialize().andThen(() => {
       if (this.idx == null) {
         throw new Error("Something went wrong while initializing Ceramic!");
@@ -190,13 +190,13 @@ export class CeramicUtils implements ICeramicUtils {
   public readRecord<T>(
     aliasName: string,
   ): ResultAsync<T | null, PersistenceError> {
-    return okAsync(([
+    /* return okAsync(([
       {
         merchantUrl: "http://localhost:5010",
         authorizationSignature:
           "0xe7f734f06f49a3de497509089144c6a10227433cdfbd13cc6e482d2d33acb484759492fbc625824f2db3dc9ed531a13e4181d5a8dc9ca6fcae0ee797a658f2181b",
       },
-    ] as unknown) as T);
+    ] as unknown) as T); */
     return this._initialize().andThen(() => {
       if (this.idx == null) {
         throw new Error("Something went wrong while initializing Ceramic!");
