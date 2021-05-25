@@ -23,19 +23,19 @@ contract Voting is IForwarder, IACLOracle, TokenManagerHook, AragonApp {
     uint64 public constant PCT_BASE = 10 ** 18; // 0% = 0; 1% = 10^16; 100% = 10^18
     uint8 private constant EXECUTION_PERIOD_FALLBACK_DIVISOR = 2;
 
-    string private constant ERROR_VOTE_ID_ZERO = "OTING_VOTE_ID_ZERO";
-    string private constant ERROR_NO_VOTE = "OTING_NO_VOTE";
-    string private constant ERROR_INIT_PCTS = "OTING_INIT_PCTS";
-    string private constant ERROR_CHANGE_SUPPORT_PCTS = "OTING_CHANGE_SUPPORT_PCTS";
-    string private constant ERROR_CHANGE_QUORUM_PCTS = "OTING_CHANGE_QUORUM_PCTS";
-    string private constant ERROR_INIT_SUPPORT_TOO_BIG = "OTING_INIT_SUPPORT_TOO_BIG";
-    string private constant ERROR_CHANGE_SUPPORT_TOO_BIG = "OTING_CHANGE_SUPP_TOO_BIG";
-    string private constant ERROR_CAN_NOT_VOTE = "OTING_CAN_NOT_VOTE";
-    string private constant ERROR_CAN_NOT_EXECUTE = "OTING_CAN_NOT_EXECUTE";
-    string private constant ERROR_CAN_NOT_FORWARD = "OTING_CAN_NOT_FORWARD";
-    string private constant ERROR_ORACLE_SENDER_MISSING = "OTING_ORACLE_SENDER_MISSING";
-    string private constant ERROR_ORACLE_SENDER_TOO_BIG = "OTING_ORACLE_SENDER_TOO_BIG";
-    string private constant ERROR_ORACLE_SENDER_ZERO = "OTING_ORACLE_SENDER_ZERO";
+    string private constant ERROR_VOTE_ID_ZERO = "VOTING_VOTE_ID_ZERO";
+    string private constant ERROR_NO_VOTE = "VOTING_NO_VOTE";
+    string private constant ERROR_INIT_PCTS = "VOTING_INIT_PCTS";
+    string private constant ERROR_CHANGE_SUPPORT_PCTS = "VOTING_CHANGE_SUPPORT_PCTS";
+    string private constant ERROR_CHANGE_QUORUM_PCTS = "VOTING_CHANGE_QUORUM_PCTS";
+    string private constant ERROR_INIT_SUPPORT_TOO_BIG = "VOTING_INIT_SUPPORT_TOO_BIG";
+    string private constant ERROR_CHANGE_SUPPORT_TOO_BIG = "VOTING_CHANGE_SUPP_TOO_BIG";
+    string private constant ERROR_CAN_NOT_VOTE = "VOTING_CAN_NOT_VOTE";
+    string private constant ERROR_CAN_NOT_EXECUTE = "VOTING_CAN_NOT_EXECUTE";
+    string private constant ERROR_CAN_NOT_FORWARD = "VOTING_CAN_NOT_FORWARD";
+    string private constant ERROR_ORACLE_SENDER_MISSING = "VOTING_ORACLE_SENDER_MISSING";
+    string private constant ERROR_ORACLE_SENDER_TOO_BIG = "VOTING_ORACLE_SENDER_TOO_BIG";
+    string private constant ERROR_ORACLE_SENDER_ZERO = "VOTING_ORACLE_SENDER_ZERO";
 
     enum VoterState { Absent, Yea, Nay }
 
