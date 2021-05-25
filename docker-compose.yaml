@@ -248,7 +248,7 @@ services:
   core-iframe:
     image: hypernetlabs/hypernet-protocol-core-iframe
     ports:
-      - 8090:80
+      - 5020:80
 
   merchant-iframe:
     image: hypernetlabs/hypernet-protocol-merchant-iframe

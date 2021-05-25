@@ -9,7 +9,7 @@ import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFr
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
 
-  protected iframeURL = "http://localhost:8090";
+  protected iframeURL = "http://localhost:5020";
   protected currentMerchantUrl: MerchantUrl | undefined | null;
 
   public webUIClient: IHypernetWebUI;
