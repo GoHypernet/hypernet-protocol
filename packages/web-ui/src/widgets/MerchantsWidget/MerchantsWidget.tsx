@@ -14,13 +14,16 @@ import {
 import { Folder, Block } from "@material-ui/icons";
 import PulseLoader from "react-spinners/PulseLoader";
 
+import { IRenderParams } from "@web-ui/interfaces";
 import { useMerchants } from "@web-ui/hooks";
+import { BoxWrapper } from "@web-ui/components";
 
-interface IMerchantsWidget {
-  noLabel?: boolean;
-}
+interface IMerchantsWidget extends IRenderParams {}
 
-const MerchantsWidget: React.FC<IMerchantsWidget> = ({}: IMerchantsWidget) => {
+const MerchantsWidget: React.FC<IMerchantsWidget> = ({
+  includeBoxWrapper,
+  noLabel,
+}: IMerchantsWidget) => {
   const {
     merchantsMap,
     openMerchantIFrame,
@@ -28,21 +31,23 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({}: IMerchantsWidget) => {
     loading,
   } = useMerchants();
 
+  const CustomBox = includeBoxWrapper ? BoxWrapper : Box;
+
   if (loading) {
     return (
-      <Box
+      <CustomBox
         display="flex"
         justifyContent="center"
         alignItems="center"
         height={150}
       >
         <PulseLoader color={"#b9b9b9"} loading={true} size={25} />
-      </Box>
+      </CustomBox>
     );
   }
 
   return (
-    <Box>
+    <CustomBox label={!noLabel ? "YOUR SERVICES" : undefined}>
       <List>
         {[...merchantsMap.keys()].map((merchantUrl, index) => (
           <Box key={index}>
@@ -109,7 +114,7 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({}: IMerchantsWidget) => {
           </Box>
         ))}
       </List>
-    </Box>
+    </CustomBox>
   );
 };
 

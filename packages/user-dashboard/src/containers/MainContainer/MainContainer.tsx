@@ -1,5 +1,5 @@
 import React from "react";
-import { LayoutProvider, StoreProvider } from "@user-dashboard/contexts";
+import { LayoutProvider } from "@user-dashboard/contexts";
 
 import App from "@user-dashboard/containers/App";
 

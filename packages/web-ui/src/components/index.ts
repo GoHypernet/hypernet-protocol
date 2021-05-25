@@ -11,3 +11,6 @@ export * from "./TextareaInput";
 export * from "./TokenSelector";
 export * from "./TransactionList";
 export * from "./Tabs";
+export * from "./SideFilter";
+export * from "./SliderRange";
+export * from "./BoxWrapper";

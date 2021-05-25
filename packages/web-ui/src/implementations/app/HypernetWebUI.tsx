@@ -108,7 +108,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     const renderReact = () => {
       return ReactDOM.render(
         this._bootstrapComponent(
-          <BalancesWidget noLabel={config?.noLabel} />,
+          <BalancesWidget {...config} />,
           config?.showInModal,
         ),
         this._generateDomElement(
@@ -125,7 +125,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     const renderReact = () => {
       return ReactDOM.render(
         this._bootstrapComponent(
-          <MerchantsWidget noLabel={config?.noLabel} />,
+          <MerchantsWidget {...config} />,
           config?.showInModal,
         ),
         this._generateDomElement(
@@ -150,7 +150,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     const renderReact = () => {
       return ReactDOM.render(
         this._bootstrapComponent(
-          <LinksWidget noLabel={config?.noLabel} />,
+          <LinksWidget {...config} />,
           config?.showInModal,
         ),
         this._generateDomElement(config?.selector || LINKS_WIDGET_ID_SELECTOR),

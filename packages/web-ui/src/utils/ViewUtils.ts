@@ -1,6 +1,6 @@
 import { utils, BigNumber } from "ethers";
 
-import { IViewUtils } from "@web-ui/interfaces";
+import { IViewUtils, PaymentStateOption } from "@web-ui/interfaces";
 import {
   EPaymentState,
   PaymentStatusViewModel,
@@ -40,6 +40,63 @@ export class ViewUtils implements IViewUtils {
       default:
         return getColorFromStatus(EStatusColor.IDLE);
     }
+  }
+
+  public getPaymentStateOptions(): PaymentStateOption[] {
+    return [
+      new PaymentStateOption(
+        this._factoryPaymentStatusViewModel(EPaymentState.Accepted).state,
+        EPaymentState.Accepted,
+      ),
+      new PaymentStateOption(
+        this._factoryPaymentStatusViewModel(EPaymentState.Approved).state,
+        EPaymentState.Approved,
+      ),
+      new PaymentStateOption(
+        this._factoryPaymentStatusViewModel(EPaymentState.Borked).state,
+        EPaymentState.Borked,
+      ),
+      new PaymentStateOption(
+        this._factoryPaymentStatusViewModel(EPaymentState.Challenged).state,
+        EPaymentState.Challenged,
+      ),
+      new PaymentStateOption(
+        this._factoryPaymentStatusViewModel(EPaymentState.Finalized).state,
+        EPaymentState.Finalized,
+      ),
+      new PaymentStateOption(
+        this._factoryPaymentStatusViewModel(
+          EPaymentState.InsuranceReleased,
+        ).state,
+        EPaymentState.InsuranceReleased,
+      ),
+      new PaymentStateOption(
+        this._factoryPaymentStatusViewModel(EPaymentState.InvalidFunds).state,
+        EPaymentState.InvalidFunds,
+      ),
+      new PaymentStateOption(
+        this._factoryPaymentStatusViewModel(
+          EPaymentState.InvalidProposal,
+        ).state,
+        EPaymentState.InvalidProposal,
+      ),
+      new PaymentStateOption(
+        this._factoryPaymentStatusViewModel(EPaymentState.InvalidStake).state,
+        EPaymentState.InvalidStake,
+      ),
+      new PaymentStateOption(
+        this._factoryPaymentStatusViewModel(EPaymentState.Proposed).state,
+        EPaymentState.Proposed,
+      ),
+      new PaymentStateOption(
+        this._factoryPaymentStatusViewModel(EPaymentState.Rejected).state,
+        EPaymentState.Rejected,
+      ),
+      new PaymentStateOption(
+        this._factoryPaymentStatusViewModel(EPaymentState.Staked).state,
+        EPaymentState.Staked,
+      ),
+    ];
   }
 
   private _factoryPaymentStatusViewModel(

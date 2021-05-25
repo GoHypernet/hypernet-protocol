@@ -6,21 +6,28 @@ import { useStyles } from "@user-dashboard/components/BoxWrapper/BoxWrapper.styl
 interface IBoxWrapper extends BoxProps {
   children?: React.ReactNode;
   label?: string;
+  rightComponent?: React.ReactNode;
 }
 
-const BoxWrapper: React.FC<IBoxWrapper> = ({
+export const BoxWrapper: React.FC<IBoxWrapper> = ({
   children,
   label,
   flex,
+  rightComponent,
 }: IBoxWrapper) => {
   const classes = useStyles();
 
   return (
     <Box className={classes.wrapper} flex={flex}>
-      {label && <Box className={classes.label}>{label}</Box>}
+      {label && (
+        <Box className={classes.headerWrapper}>
+          <Box className={classes.label}>{label}</Box>
+          <Box display="flex" alignItems="center">
+            {rightComponent}
+          </Box>
+        </Box>
+      )}
       {children}
     </Box>
   );
 };
-
-export default BoxWrapper;

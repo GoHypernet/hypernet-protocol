@@ -2,9 +2,7 @@ import React, { useState, useContext } from "react";
 
 import { IHypernetCore } from "@hypernetlabs/objects";
 import { ViewUtils, IViewUtils } from "@hypernetlabs/web-ui";
-import HypernetWebIntegration, {
-  IHypernetWebIntegration,
-} from "@hypernetlabs/web-integration";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 
 interface IStore {
   coreProxy: IHypernetCore;
