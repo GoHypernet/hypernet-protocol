@@ -29,10 +29,12 @@
     "test": "__tests__"
   },
   "scripts": {
-    "build": "webpack --config webpack.config.js",
+    "build": "yarn clean && yarn compile && yarn webpack",
+    "dockerize": "docker build -t hypernetlabs/hypernet-protocol-web-demo -f Dockerfile ../..",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "compile": "tsc --build && cd ../.. && yarn alias",
     "alias": "tsc-alias",
+    "webpack": "webpack --config webpack.config.js",
     "deploy-custom-transfers": "yarn ts-node scripts/deploy.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p src/tsconfig.json",
