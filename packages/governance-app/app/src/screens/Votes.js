@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import {
   Bar,
   DropDown,
@@ -8,26 +8,26 @@ import {
   useLayout,
   useTheme,
   DateRangePicker,
-} from '@aragon/ui'
-import EmptyFilteredVotes from '../components/EmptyFilteredVotes'
-import VoteCard from '../components/VoteCard/VoteCard'
-import VoteCardGroup from '../components/VoteCard/VoteCardGroup'
+} from "@aragon/ui";
+import EmptyFilteredVotes from "../components/EmptyFilteredVotes";
+import VoteCard from "../components/VoteCard/VoteCard";
+import VoteCardGroup from "../components/VoteCard/VoteCardGroup";
 
 const sortVotes = (a, b) => {
-  const dateDiff = b.data.endBlock - a.data.endBlock
+  const dateDiff = b.data.endBlock - a.data.endBlock;
   // Order by descending voteId if there's no end block difference
-  return dateDiff !== 0 ? dateDiff : b.voteId - a.voteId
-}
+  return dateDiff !== 0 ? dateDiff : b.voteId - a.voteId;
+};
 
-const useVotes = votes => {
-  const sortedVotes = votes.sort(sortVotes)
-  const openVotes = sortedVotes.filter(vote => vote.data.open)
-  const upcomingVotes = sortedVotes.filter(vote => vote.data.upcoming)
+const useVotes = (votes) => {
+  const sortedVotes = votes.sort(sortVotes);
+  const openVotes = sortedVotes.filter((vote) => vote.data.open);
+  const upcomingVotes = sortedVotes.filter((vote) => vote.data.upcoming);
   const closedVotes = sortedVotes.filter(
-    vote => !upcomingVotes.includes(vote) && !openVotes.includes(vote)
-  )
-  return { openVotes, upcomingVotes, closedVotes }
-}
+    (vote) => !upcomingVotes.includes(vote) && !openVotes.includes(vote),
+  );
+  return { openVotes, upcomingVotes, closedVotes };
+};
 
 const Votes = React.memo(function Votes({
   votes,
@@ -46,18 +46,18 @@ const Votes = React.memo(function Votes({
   handleVoteDateRangeFilterChange,
   handleClearFilters,
 }) {
-  const theme = useTheme()
-  const { layoutName } = useLayout()
-  const { openVotes, upcomingVotes, closedVotes } = useVotes(filteredVotes)
+  const theme = useTheme();
+  const { layoutName } = useLayout();
+  const { openVotes, upcomingVotes, closedVotes } = useVotes(filteredVotes);
 
   const multipleOfTarget = executionTargets.reduce((map, { name }) => {
-    map.set(name, map.has(name))
-    return map
-  }, new Map())
+    map.set(name, map.has(name));
+    return map;
+  }, new Map());
 
   return (
     <React.Fragment>
-      {layoutName !== 'small' && (
+      {layoutName !== "small" && (
         <Bar>
           <div
             css={`
@@ -84,15 +84,15 @@ const Votes = React.memo(function Votes({
                       align-items: center;
                       justify-content: center;
                       color: ${theme.info};
-                      ${textStyle('label3')};
+                      ${textStyle("label3")};
                     `}
                   >
                     <Tag limitDigits={4} label={votes.length} size="small" />
                   </span>
                 </div>,
-                'Open',
-                'Upcoming',
-                'Closed',
+                "Open",
+                "Upcoming",
+                "Closed",
               ]}
               width="128px"
             />
@@ -102,7 +102,7 @@ const Votes = React.memo(function Votes({
                 placeholder="Trend"
                 selected={voteTrendFilter}
                 onChange={handleVoteTrendFilterChange}
-                items={['All', 'Will pass', 'Won’t pass']}
+                items={["All", "Will pass", "Won’t pass"]}
                 width="128px"
               />
             )}
@@ -112,7 +112,7 @@ const Votes = React.memo(function Votes({
                 placeholder="Outcome"
                 selected={voteOutcomeFilter}
                 onChange={handleVoteOutcomeFilterChange}
-                items={['All', 'Passed', 'Rejected', 'Enacted', 'Pending']}
+                items={["All", "Passed", "Rejected", "Enacted", "Pending"]}
                 width="128px"
               />
             )}
@@ -122,17 +122,17 @@ const Votes = React.memo(function Votes({
               selected={voteAppFilter}
               onChange={handleVoteAppFilterChange}
               items={[
-                'All',
-                <ThisVoting showTag={multipleOfTarget.get('Voting')} />,
+                "All",
+                <ThisVoting showTag={multipleOfTarget.get("Voting")} />,
                 ...executionTargets.map(
                   ({ name, identifier }) =>
                     `${name}${
                       multipleOfTarget.get(name) && identifier
                         ? ` (${identifier})`
-                        : ''
-                    }`
+                        : ""
+                    }`,
                 ),
-                'External',
+                "External",
               ]}
               width="128px"
             />
@@ -158,8 +158,8 @@ const Votes = React.memo(function Votes({
         )}
       </React.Fragment>
     </React.Fragment>
-  )
-})
+  );
+});
 
 const ThisVoting = ({ showTag }) => (
   <div
@@ -180,15 +180,15 @@ const ThisVoting = ({ showTag }) => (
       </Tag>
     )}
   </div>
-)
+);
 
 const VoteGroups = React.memo(
   ({ openVotes, upcomingVotes, closedVotes, onSelectVote }) => {
     const voteGroups = [
-      ['Open votes', openVotes],
-      ['Upcoming votes', upcomingVotes],
-      ['Closed votes', closedVotes],
-    ]
+      ["Open votes", openVotes],
+      ["Upcoming votes", upcomingVotes],
+      ["Closed votes", closedVotes],
+    ];
 
     return (
       <React.Fragment>
@@ -199,15 +199,15 @@ const VoteGroups = React.memo(
               count={votes.length}
               key={groupName}
             >
-              {votes.map(vote => (
+              {votes.map((vote) => (
                 <VoteCard key={vote.voteId} vote={vote} onOpen={onSelectVote} />
               ))}
             </VoteCardGroup>
-          ) : null
+          ) : null,
         )}
       </React.Fragment>
-    )
-  }
-)
+    );
+  },
+);
 
-export default Votes
+export default Votes;

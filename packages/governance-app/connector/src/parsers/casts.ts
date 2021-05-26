@@ -1,14 +1,11 @@
-import { QueryResult } from '@aragon/connect-thegraph'
-import Cast, { CastData } from '../entities/Cast'
+import { QueryResult } from "@aragon/connect-thegraph";
+import Cast, { CastData } from "../entities/Cast";
 
-export function parseCasts(
-  result: QueryResult,
-  connector: any
-): Cast[] {
-  const casts = result.data.casts
+export function parseCasts(result: QueryResult, connector: any): Cast[] {
+  const casts = result.data.casts;
 
   if (!casts) {
-    throw new Error('Unable to parse casts.')
+    throw new Error("Unable to parse casts.");
   }
 
   const datas = casts.map(
@@ -19,12 +16,12 @@ export function parseCasts(
         voteNum: cast.voteNum,
         voter: cast.voter,
         supports: cast.supports,
-        voterStake: cast.voterStake
-      }
-    }
-  )
+        voterStake: cast.voterStake,
+      };
+    },
+  );
 
   return datas.map((data: CastData) => {
-    return new Cast(data, connector)
-  })
+    return new Cast(data, connector);
+  });
 }

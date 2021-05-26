@@ -1,5 +1,5 @@
-import React from 'react'
-import { GU, Tag } from '@aragon/ui'
+import React from "react";
+import { GU, Tag } from "@aragon/ui";
 
 const You = () => (
   <Tag
@@ -10,6 +10,6 @@ const You = () => (
   >
     you
   </Tag>
-)
+);
 
-export default You
+export default You;

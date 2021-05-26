@@ -16,14 +16,15 @@ To verify underlying attribute and endorsement data, corresponding hashes must b
 
 Attributes and endorsements are formed of field sets, merkle-root hashes are used to allow sharing and verification of partial data (such as date of birth within a driving license).
 
-Smart Account and Voting is a platform that uses Ethereum and solidity smart contracts as a framework for its core protocol. 
+Smart Account and Voting is a platform that uses Ethereum and solidity smart contracts as a framework for its core protocol.
 
 ## Prerequisites
-  * min [Node.js 6.9](https://nodejs.org)
-  * min [Python 2.7](https://www.python.org/download/releases/2.7/)
-  * Command Line Tools
-   * **Mac OS X**: [Xcode](https://itunes.apple.com/us/app/xcode/id497799835?mt=12) (or **OS X 10.9+**: `xcode-select --install`) and `brew install libgcrypt`
-   * **Ubuntu / Linux**: `sudo apt-get install build-essential python-software-properties libssl-dev`
+
+- min [Node.js 6.9](https://nodejs.org)
+- min [Python 2.7](https://www.python.org/download/releases/2.7/)
+- Command Line Tools
+- **Mac OS X**: [Xcode](https://itunes.apple.com/us/app/xcode/id497799835?mt=12) (or **OS X 10.9+**: `xcode-select --install`) and `brew install libgcrypt`
+- **Ubuntu / Linux**: `sudo apt-get install build-essential python-software-properties libssl-dev`
 
 ## Overview
 
@@ -35,21 +36,21 @@ The Smart Account construct uses an attribute-endorsement model enabled by the u
 
 ##### SmartAccount.sol
 
-This is the Smart Account contract as used by the Smart Account instance.  It describes the core functionality required as part of a Smart Account contracts with encryption keys, attributes & endorsements. 
+This is the Smart Account contract as used by the Smart Account instance. It describes the core functionality required as part of a Smart Account contracts with encryption keys, attributes & endorsements.
 
 A Smart Account is an [Ethereum](https://www.ethereum.org/) Smart Contract address. The smart contract must be constructed using valid Smart Account bytecode. It provides access to account management commands and stores hash representations of account data.
 
 The Smart Contract has a constructor that defines the owner and core elements of the account:
 
-* Contract address - a 32byte hash of the address at which the contract is deployed.
-* Encryption key - a changeable encryption (public) key that allows other actors to send data for encrypted receipt and decryption by this account. This can be changed at any point.
-* Signing key - a changeable encryption (public) key that allows other actors to verify Endorsements signed by this account.
-* Attribute mapping - A mapping that stores the Attributes (and associated Endorsements) related to the contract/account.
-* It also implements a kill function so that an account can be retired (though the record of it's 'active' period is of course retained in the blockchain).
+- Contract address - a 32byte hash of the address at which the contract is deployed.
+- Encryption key - a changeable encryption (public) key that allows other actors to send data for encrypted receipt and decryption by this account. This can be changed at any point.
+- Signing key - a changeable encryption (public) key that allows other actors to verify Endorsements signed by this account.
+- Attribute mapping - A mapping that stores the Attributes (and associated Endorsements) related to the contract/account.
+- It also implements a kill function so that an account can be retired (though the record of it's 'active' period is of course retained in the blockchain).
 
 #### SmartAccountRegistry.sol
 
-This contract holds a curated list of valid contracts have approved as valid implementations of Smart Account. These are curated by hashing the bytecode of a known good contract.  This should be maintained as a list on the Blockchain so that other contracts can perform (optional) real-time verification that a contract is present on this list, and therefore a valid smart account.  There may be multiple statuses on this registry (initially Pending / Accepted / Rejected) so that the contracts can be better maintained.
+This contract holds a curated list of valid contracts have approved as valid implementations of Smart Account. These are curated by hashing the bytecode of a known good contract. This should be maintained as a list on the Blockchain so that other contracts can perform (optional) real-time verification that a contract is present on this list, and therefore a valid smart account. There may be multiple statuses on this registry (initially Pending / Accepted / Rejected) so that the contracts can be better maintained.
 
 ### Attributes
 
@@ -59,9 +60,9 @@ If verification of attribute field subsets is required, for instance to use a di
 
 **The attribute hash corresponds to an attribute record stored off-chain, which consists of at least:**
 
-* AttributeHash
-* AttributeId (attribute template accounting)
-* Attribute field set
+- AttributeHash
+- AttributeId (attribute template accounting)
+- Attribute field set
 
 Attribute creation/update/removal transactions can only be submitted by the account owner.
 
@@ -69,16 +70,16 @@ Attribute creation/update/removal transactions can only be submitted by the acco
 
 An endorsement is a notarised record of attestation by a third party in relation to a specified attribute, stored with the attribute within the account contract. Our initial implementation uses a single endorsement template. The definition of what 'endorsement' means for a given attribute can also be varied within the underlying attribute definition to provide some flexibility.
 
-Receivers/consumers of account data may (should) privately manage the Endorser identities they are prepared to trust. 
+Receivers/consumers of account data may (should) privately manage the Endorser identities they are prepared to trust.
 
 **The endorsement hash corresponds to an endorsement record stored off-chain, which consists of at least:**
 
-  * Endorsement Hash
-  * Endorsee Address (Smart Account)
-  * Endorsed Attribute Hash
-  * Endorsement Expiry Date
-  * Endorser Address (Smart Account or Voting ID)
-  * Endorser signature of endorsement
+- Endorsement Hash
+- Endorsee Address (Smart Account)
+- Endorsed Attribute Hash
+- Endorsement Expiry Date
+- Endorser Address (Smart Account or Voting ID)
+- Endorser signature of endorsement
 
 Whilst attributes can only be added by an account owner, endorsements must be added anonymously from previously unused ethereum public keys. This is to preserve privacy and prevent unwanted account identification of an endorsing party. This will also allow endorsements to be created 'off chain', and added in by the owner themselves, providing the signature of the endorsement can be verified against an on-chain Account. The unrestricted ability to add endorsements presents a risk of spam or unwanted endorsements, for which there are a number of potential solutions, and for which future protocol updates may be introduced.
 
@@ -98,13 +99,13 @@ The model for templates should follow that of jsonschemaform - whereby the defin
 
 Whilst bespoke attribute templates can be configured for any purpose (consider an attribute template as a data collection form which facilitates personal data notarisation), it is expected that common attributes (e.g. driving license) will be standardised and endorsable, and in time repositories of common templates will be curated and shared for common reference.
 
---------
+---
 
-##  Voting App
+## Voting App
 
 #### 🐲 Project stage: Rinkeby
 
-Deployed audited version on APM: v1.1.0  
+Deployed audited version on APM: v1.1.0
 
 Beware some changes have been made to the contract since this audit. Specifically the contract now implements the TokenManagerHook to enable the use of transferable tokens.
 
@@ -122,7 +123,6 @@ The main changes that have been implemented which differ from the original Votin
 - Changed the vote duration to blocks. The main reason for this is that since proposals are queued we do not necessarily know which block number to use for the vote snapshot (since we are not necessarily processing the transaction right when the vote starts).
 - Keep track of the latest vote ids users have voted yes on.
 - Make the app an [ACL Oracle](https://hack.aragon.org/docs/acl_IACLOracle).
-
 
 ## How does it work?
 
@@ -210,7 +210,7 @@ yarn test
 
 ## Wider architecture
 
-The distributed ledger and account smart contract form just one layer in the Smart Account ecosystem, outside of this layer, numerous applications support the various off-chain storage and processing tasks needed during interaction with the blockchain. 
+The distributed ledger and account smart contract form just one layer in the Smart Account ecosystem, outside of this layer, numerous applications support the various off-chain storage and processing tasks needed during interaction with the blockchain.
 
 ## Licensing
 

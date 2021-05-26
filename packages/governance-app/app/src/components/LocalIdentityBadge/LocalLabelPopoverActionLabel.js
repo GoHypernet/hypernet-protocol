@@ -1,6 +1,6 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import { IconLabel, GU } from '@aragon/ui'
+import React from "react";
+import PropTypes from "prop-types";
+import { IconLabel, GU } from "@aragon/ui";
 
 function LocalLabelPopoverActionLabel({ hasLabel }) {
   return (
@@ -15,12 +15,12 @@ function LocalLabelPopoverActionLabel({ hasLabel }) {
           margin-right: ${1 * GU}px;
         `}
       />
-      {hasLabel ? 'Edit' : 'Add'} custom label
+      {hasLabel ? "Edit" : "Add"} custom label
     </div>
-  )
+  );
 }
 LocalLabelPopoverActionLabel.propTypes = {
   hasLabel: PropTypes.bool,
-}
+};
 
-export default LocalLabelPopoverActionLabel
+export default LocalLabelPopoverActionLabel;

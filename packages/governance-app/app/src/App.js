@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback } from "react";
 import {
   Button,
   Header,
@@ -7,16 +7,16 @@ import {
   SyncIndicator,
   GU,
   useLayout,
-} from '@aragon/ui'
-import NewVotePanel from './components/NewVotePanel'
-import useFilterVotes from './hooks/useFilterVotes'
-import useScrollTop from './hooks/useScrollTop'
-import NoVotes from './screens/NoVotes'
-import VoteDetail from './screens/VoteDetail'
-import Votes from './screens/Votes'
-import { AppLogicProvider, useAppLogic, useGuiStyle } from './app-logic'
-import { IdentityProvider } from './identity-manager'
-import { SettingsProvider } from './vote-settings-manager'
+} from "@aragon/ui";
+import NewVotePanel from "./components/NewVotePanel";
+import useFilterVotes from "./hooks/useFilterVotes";
+import useScrollTop from "./hooks/useScrollTop";
+import NoVotes from "./screens/NoVotes";
+import VoteDetail from "./screens/VoteDetail";
+import Votes from "./screens/Votes";
+import { AppLogicProvider, useAppLogic, useGuiStyle } from "./app-logic";
+import { IdentityProvider } from "./identity-manager";
+import { SettingsProvider } from "./vote-settings-manager";
 
 const App = React.memo(function App() {
   const {
@@ -27,11 +27,11 @@ const App = React.memo(function App() {
     selectedVote,
     selectVote,
     votes,
-  } = useAppLogic()
-  const { layoutName } = useLayout()
-  const { appearance } = useGuiStyle()
-  const compactMode = layoutName === 'small'
-  const handleBack = useCallback(() => selectVote(-1), [selectVote])
+  } = useAppLogic();
+  const { layoutName } = useLayout();
+  const { appearance } = useGuiStyle();
+  const compactMode = layoutName === "small";
+  const handleBack = useCallback(() => selectVote(-1), [selectVote]);
   const {
     filteredVotes,
     voteStatusFilter,
@@ -45,9 +45,9 @@ const App = React.memo(function App() {
     voteDateRangeFilter,
     handleVoteDateRangeFilterChange,
     handleClearFilters,
-  } = useFilterVotes(votes, executionTargets)
+  } = useFilterVotes(votes, executionTargets);
 
-  useScrollTop(selectedVote)
+  useScrollTop(selectedVote);
 
   return (
     <Main theme={appearance} assetsUrl="./aragon-ui">
@@ -75,7 +75,7 @@ const App = React.memo(function App() {
                   onClick={newVotePanel.requestOpen}
                   label="New vote"
                   icon={<IconPlus />}
-                  display={compactMode ? 'icon' : 'label'}
+                  display={compactMode ? "icon" : "label"}
                 />
               )
             }
@@ -113,8 +113,8 @@ const App = React.memo(function App() {
         panelState={newVotePanel}
       />
     </Main>
-  )
-})
+  );
+});
 
 export default function Voting() {
   return (
@@ -125,5 +125,5 @@ export default function Voting() {
         </SettingsProvider>
       </IdentityProvider>
     </AppLogicProvider>
-  )
+  );
 }

@@ -1,16 +1,16 @@
-import React from 'react'
-import styled from 'styled-components'
-import { GU, textStyle, useTheme } from '@aragon/ui'
-import You from './You'
-import { formatNumber } from '../math-utils'
-import { VOTE_NAY, VOTE_YEA } from '../vote-types'
+import React from "react";
+import styled from "styled-components";
+import { GU, textStyle, useTheme } from "@aragon/ui";
+import You from "./You";
+import { formatNumber } from "../math-utils";
+import { VOTE_NAY, VOTE_YEA } from "../vote-types";
 
 function SummaryRows({ yea, nay, symbol, connectedAccountVote }) {
-  const theme = useTheme()
+  const theme = useTheme();
   return (
     <div
       css={`
-        ${textStyle('body2')};
+        ${textStyle("body2")};
         display: inline-block;
       `}
     >
@@ -29,11 +29,11 @@ function SummaryRows({ yea, nay, symbol, connectedAccountVote }) {
         youVoted={connectedAccountVote === VOTE_NAY}
       />
     </div>
-  )
+  );
 }
 
 function SummaryRow({ color, label, pct, token, youVoted }) {
-  const theme = useTheme()
+  const theme = useTheme();
   return (
     <div
       css={`
@@ -72,7 +72,7 @@ function SummaryRow({ color, label, pct, token, youVoted }) {
         {formatNumber(token.amount, 5)} {token.symbol}
       </div>
     </div>
-  )
+  );
 }
 
 const Bullet = styled.div`
@@ -83,6 +83,6 @@ const Bullet = styled.div`
   margin-right: ${2 * GU}px;
   border-radius: 50%;
   background: ${({ color }) => color};
-`
+`;
 
-export default React.memo(SummaryRows)
+export default React.memo(SummaryRows);

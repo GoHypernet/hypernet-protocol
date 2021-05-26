@@ -2,11 +2,11 @@ import {
   IAuthorizeFundsRequest,
   ISendFundsRequest,
 } from "@hypernetlabs/merchant-connector";
+import { IHypernetCoreRepository } from "@merchant-iframe/interfaces/data";
 import { injectable, inject } from "inversify";
 import { okAsync, ResultAsync } from "neverthrow";
 import Postmate from "postmate";
 
-import { IHypernetCoreRepository } from "@merchant-iframe/interfaces/data";
 import {
   IContextProvider,
   IContextProviderType,

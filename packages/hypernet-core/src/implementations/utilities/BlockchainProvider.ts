@@ -5,13 +5,13 @@ import {
   PrivateCredentials,
   EthereumAddress,
 } from "@hypernetlabs/objects";
+import { ResultUtils } from "@web-integration/../../utils/src/ResultUtils";
 import { ethers } from "ethers";
 import { okAsync, ResultAsync, errAsync } from "neverthrow";
 
 import { IContextProvider, IInternalProvider } from "@interfaces/utilities";
 import { IInternalProviderFactory } from "@interfaces/utilities/factory";
 import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
-import { ResultUtils } from "@web-integration/../../utils/src/ResultUtils";
 declare global {
   interface Window {
     ethereum: any;

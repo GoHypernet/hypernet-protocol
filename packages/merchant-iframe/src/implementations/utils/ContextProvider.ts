@@ -3,11 +3,11 @@ import {
   MerchantUrl,
   MerchantValidationError,
 } from "@hypernetlabs/objects";
+import { MerchantContext } from "@merchant-iframe/interfaces/objects";
 import { injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
-import { MerchantContext } from "@merchant-iframe/interfaces/objects";
 import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 
 @injectable()

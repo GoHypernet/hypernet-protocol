@@ -1,6 +1,6 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import { Tag, GU } from '@aragon/ui'
+import React from "react";
+import PropTypes from "prop-types";
+import { Tag, GU } from "@aragon/ui";
 
 function LocalLabelPopoverTitle({ label }) {
   return (
@@ -30,10 +30,10 @@ function LocalLabelPopoverTitle({ label }) {
         Custom label
       </Tag>
     </div>
-  )
+  );
 }
 LocalLabelPopoverTitle.propTypes = {
   label: PropTypes.string.isRequired,
-}
+};
 
-export default LocalLabelPopoverTitle
+export default LocalLabelPopoverTitle;

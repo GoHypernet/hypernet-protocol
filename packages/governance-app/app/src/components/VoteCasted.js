@@ -1,14 +1,14 @@
-import React from 'react'
-import { GU, IconCheck, RADIUS, textStyle, useTheme } from '@aragon/ui'
-import { useAppState } from '@aragon/api-react'
-import useExtendedVoteData from '../hooks/useExtendedVoteData'
-import { VOTE_YEA } from '../vote-types'
+import React from "react";
+import { GU, IconCheck, RADIUS, textStyle, useTheme } from "@aragon/ui";
+import { useAppState } from "@aragon/api-react";
+import useExtendedVoteData from "../hooks/useExtendedVoteData";
+import { VOTE_YEA } from "../vote-types";
 
 function VoteCasted({ vote }) {
-  const { connectedAccountVote } = vote
-  const { userBalance } = useExtendedVoteData(vote)
-  const { tokenSymbol } = useAppState()
-  const theme = useTheme()
+  const { connectedAccountVote } = vote;
+  const { userBalance } = useExtendedVoteData(vote);
+  const { tokenSymbol } = useAppState();
+  const theme = useTheme();
 
   return (
     <div
@@ -47,19 +47,19 @@ function VoteCasted({ vote }) {
         <div>
           <div
             css={`
-            ${textStyle('body1')}
-            margin-bottom: ${0.5 * GU}px;
-          `}
+              ${textStyle("body1")}
+              margin-bottom: ${0.5 * GU}px;
+            `}
           >
             Your vote was cast successfully
           </div>
           <div
             css={`
-            ${textStyle('body2')}
-            color: ${theme.surfaceContentSecondary};
-          `}
+              ${textStyle("body2")}
+              color: ${theme.surfaceContentSecondary};
+            `}
           >
-            You voted{' '}
+            You voted{" "}
             <span
               css={`
                 color: ${theme.surfaceContent};
@@ -67,23 +67,23 @@ function VoteCasted({ vote }) {
                 text-transform: uppercase;
               `}
             >
-              {connectedAccountVote === VOTE_YEA ? 'yes' : 'no'}
-            </span>{' '}
-            with{' '}
+              {connectedAccountVote === VOTE_YEA ? "yes" : "no"}
+            </span>{" "}
+            with{" "}
             <span
               css={`
                 color: ${theme.surfaceContent};
                 font-weight: 600;
               `}
             >
-              {userBalance === -1 ? '…' : userBalance} {tokenSymbol}
+              {userBalance === -1 ? "…" : userBalance} {tokenSymbol}
             </span>
             .
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default VoteCasted
+export default VoteCasted;

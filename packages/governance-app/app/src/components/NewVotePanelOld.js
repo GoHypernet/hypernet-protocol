@@ -1,9 +1,9 @@
-import React from 'react'
-import { Button, GU, Info, Field, SidePanel, TextInput } from '@aragon/ui'
+import React from "react";
+import { Button, GU, Info, Field, SidePanel, TextInput } from "@aragon/ui";
 
 const initialState = {
-  question: '',
-}
+  question: "",
+};
 
 const NewVotePanel = React.memo(({ panelState, onCreateVote }) => {
   return (
@@ -18,35 +18,35 @@ const NewVotePanel = React.memo(({ panelState, onCreateVote }) => {
         panelOpened={panelState.didOpen}
       />
     </SidePanel>
-  )
-})
+  );
+});
 
 class NewVotePanelContent extends React.PureComponent {
   static defaultProps = {
     onCreateVote: () => {},
-  }
+  };
   state = {
     ...initialState,
-  }
+  };
   componentWillReceiveProps({ panelOpened }) {
     if (panelOpened && !this.props.panelOpened) {
       // setTimeout is needed as a small hack to wait until the input's on
       // screen until we call focus
-      this.questionInput && setTimeout(() => this.questionInput.focus(), 0)
+      this.questionInput && setTimeout(() => this.questionInput.focus(), 0);
     } else if (!panelOpened && this.props.panelOpened) {
       // Finished closing the panel, so reset its state
-      this.setState({ ...initialState })
+      this.setState({ ...initialState });
     }
   }
-  handleQuestionChange = event => {
-    this.setState({ question: event.target.value })
-  }
-  handleSubmit = event => {
-    event.preventDefault()
-    this.props.onCreateVote(this.state.question.trim())
-  }
+  handleQuestionChange = (event) => {
+    this.setState({ question: event.target.value });
+  };
+  handleSubmit = (event) => {
+    event.preventDefault();
+    this.props.onCreateVote(this.state.question.trim());
+  };
   render() {
-    const { question } = this.state
+    const { question } = this.state;
     return (
       <div>
         <form
@@ -57,7 +57,7 @@ class NewVotePanelContent extends React.PureComponent {
         >
           <Field label="Question">
             <TextInput
-              ref={question => (this.questionInput = question)}
+              ref={(question) => (this.questionInput = question)}
               value={question}
               onChange={this.handleQuestionChange}
               required
@@ -79,8 +79,8 @@ class NewVotePanelContent extends React.PureComponent {
           </Button>
         </form>
       </div>
-    )
+    );
   }
 }
 
-export default NewVotePanel
+export default NewVotePanel;

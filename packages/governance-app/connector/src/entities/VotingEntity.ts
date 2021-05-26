@@ -1,9 +1,9 @@
 import VotingConnectorTheGraph from "../connector";
 
 export default class VotingEntity {
-  protected _connector: VotingConnectorTheGraph
+  protected _connector: VotingConnectorTheGraph;
 
   constructor(connector: VotingConnectorTheGraph) {
-    this._connector = connector
+    this._connector = connector;
   }
 }

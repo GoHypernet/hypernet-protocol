@@ -1,6 +1,6 @@
-import React from 'react'
-import { Button, EmptyStateCard, GU, LoadingRing } from '@aragon/ui'
-import noVotesPng from '../assets/no-votes.png'
+import React from "react";
+import { Button, EmptyStateCard, GU, LoadingRing } from "@aragon/ui";
+import noVotesPng from "../assets/no-votes.png";
 
 const NoVotes = React.memo(function NoVotes({ onNewVote, isSyncing }) {
   return (
@@ -20,7 +20,7 @@ const NoVotes = React.memo(function NoVotes({ onNewVote, isSyncing }) {
             <span>Syncing…</span>
           </div>
         ) : (
-          'No votes here!'
+          "No votes here!"
         )
       }
       action={
@@ -39,7 +39,7 @@ const NoVotes = React.memo(function NoVotes({ onNewVote, isSyncing }) {
         />
       }
     />
-  )
-})
+  );
+});
 
-export default NoVotes
+export default NoVotes;

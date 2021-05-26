@@ -1,15 +1,15 @@
 import { MerchantUrl, Signature, EthereumAddress } from "@hypernetlabs/objects";
-import { okAsync } from "neverthrow";
-import td from "testdouble";
-
 import { MerchantService } from "@merchant-iframe/implementations/business";
-import { ContextProvider } from "@merchant-iframe/implementations/utils";
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import {
   IHypernetCoreRepository,
   IMerchantConnectorRepository,
   IPersistenceRepository,
 } from "@merchant-iframe/interfaces/data";
+import { okAsync } from "neverthrow";
+import td from "testdouble";
+
+import { ContextProvider } from "@merchant-iframe/implementations/utils";
 import { MerchantValidationError } from "@merchant-iframe/interfaces/objects/errors";
 
 jest.mock("ethers", () => {
