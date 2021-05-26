@@ -1,7 +1,13 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import { EtherSymbol, Zero } from "@ethersproject/constants";
 import { formatEther, parseEther } from "@ethersproject/units";
-import { deployments, ethers, getNamedAccounts, getChainId, network } from "hardhat";
+import {
+  deployments,
+  ethers,
+  getNamedAccounts,
+  getChainId,
+  network,
+} from "hardhat";
 import { DeployFunction } from "hardhat-deploy/types";
 
 import { registerTransfer } from "../src.ts/utils";
@@ -19,10 +25,16 @@ const func: DeployFunction = async () => {
   const balance = await provider.getBalance(deployer);
   const nonce = await provider.getTransactionCount(deployer);
   log.info(`Preparing to migrate contracts to chain ${chainId}`);
-  log.info(`Deployer address=${deployer} nonce=${nonce} balance=${formatEther(balance)}`);
+  log.info(
+    `Deployer address=${deployer} nonce=${nonce} balance=${formatEther(
+      balance,
+    )}`,
+  );
 
   if (balance.eq(0)) {
-    throw new Error(`Account ${deployer} has zero balance on chain ${chainId}, aborting migration`);
+    throw new Error(
+      `Account ${deployer} has zero balance on chain ${chainId}, aborting migration`,
+    );
   }
 
   ////////////////////////////////////////
@@ -55,11 +67,19 @@ const func: DeployFunction = async () => {
     if (!deployment.transactionHash) {
       throw new Error(`Failed to deploy ${name}`);
     }
-    const tx = await ethers.provider.getTransaction(deployment.transactionHash!);
-    const receipt = await ethers.provider.getTransactionReceipt(deployment.transactionHash!);
-    log.info(`Sent transaction to deploy ${name}, txHash: ${deployment.transactionHash}`);
+    const tx = await ethers.provider.getTransaction(
+      deployment.transactionHash!,
+    );
+    const receipt = await ethers.provider.getTransactionReceipt(
+      deployment.transactionHash!,
+    );
     log.info(
-      `Success! Consumed ${receipt?.gasUsed ?? "unknown"} gas worth ${EtherSymbol} ${formatEther(
+      `Sent transaction to deploy ${name}, txHash: ${deployment.transactionHash}`,
+    );
+    log.info(
+      `Success! Consumed ${
+        receipt?.gasUsed ?? "unknown"
+      } gas worth ${EtherSymbol} ${formatEther(
         (receipt?.gasUsed || Zero).mul(tx.gasPrice),
       )} deploying ${name} to address: ${deployment.address}`,
     );
@@ -121,7 +141,10 @@ const func: DeployFunction = async () => {
       from: deployer,
       args: [parseEther("2500")],
     });
-    log.info({ address: res.address, txHash: res.transactionHash }, `Deployed AMM ${network.config.chainId}`);
+    log.info(
+      { address: res.address, txHash: res.transactionHash },
+      `Deployed AMM ${network.config.chainId}`,
+    );
   }
 
   ////////////////////////////////////////
@@ -129,6 +152,10 @@ const func: DeployFunction = async () => {
   log.info("All done!");
   const spent = formatEther(balance.sub(await provider.getBalance(deployer)));
   const nTx = (await provider.getTransactionCount(deployer)) - nonce;
-  log.info(`Sent ${nTx} transaction${nTx === 1 ? "" : "s"} & spent ${EtherSymbol} ${spent}`);
+  log.info(
+    `Sent ${nTx} transaction${
+      nTx === 1 ? "" : "s"
+    } & spent ${EtherSymbol} ${spent}`,
+  );
 };
 export default func;

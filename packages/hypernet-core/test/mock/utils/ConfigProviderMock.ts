@@ -50,6 +50,7 @@ export class ConfigProviderMock implements IConfigProvider {
           ],
         ]),
         5 * 1000,
+        "HypernetProtocolControlClaims", // controlClaimSubject
         false, // debug is off for testing
       );
   }

@@ -11,3 +11,5 @@ export interface ITimeUtils {
     BlockchainUnavailableError
   >;
 }
+
+export const ITimeUtilsType = Symbol.for("ITimeUtils");

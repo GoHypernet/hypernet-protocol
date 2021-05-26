@@ -17,6 +17,8 @@ import {
   IWithdrawResponse,
   TransferId,
   Signature,
+  BigNumberString,
+  UnixTimestamp,
   VectorError,
   InsuranceResolver,
   MessageResolver,
@@ -64,7 +66,7 @@ export class WrappedBrowserNode implements IBrowserNode {
 
   public withdraw(
     channelAddress: EthereumAddress,
-    amount: string,
+    amount: BigNumberString,
     assetId: EthereumAddress,
     recipient: EthereumAddress,
     quote?: IWithdrawQuote,
@@ -138,8 +140,8 @@ export class WrappedBrowserNode implements IBrowserNode {
   }
 
   public getTransfers(
-    startDate: number,
-    endDate: number,
+    startDate: UnixTimestamp,
+    endDate: UnixTimestamp,
   ): ResultAsync<IFullTransferState[], VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.getTransfers({
@@ -197,7 +199,7 @@ export class WrappedBrowserNode implements IBrowserNode {
 
   public conditionalTransfer(
     channelAddress: EthereumAddress,
-    amount: string,
+    amount: BigNumberString,
     assetId: EthereumAddress,
     type: string,
     details: any,

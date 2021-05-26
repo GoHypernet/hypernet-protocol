@@ -28,7 +28,7 @@ export class TimeUtils implements ITimeUtils {
       this.lastBlockchainTimestamp != null &&
       this.lastBlockchainCheck >= now
     ) {
-      return okAsync(this.lastBlockchainTimestamp);
+      return okAsync(UnixTimestamp(this.lastBlockchainTimestamp));
     }
 
     this.lastBlockchainCheck = now;

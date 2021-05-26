@@ -1,8 +1,7 @@
-import { ControlClaim } from "@hypernetlabs/objects";
+import { ControlClaim, MessagingError } from "@hypernetlabs/objects";
 import {
   BlockchainUnavailableError,
   LogicalError,
-  ThreeBoxError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -17,7 +16,7 @@ export interface IControlService {
    */
   claimControl(): ResultAsync<
     void,
-    BlockchainUnavailableError | ThreeBoxError | LogicalError
+    MessagingError
   >;
 
   /**
@@ -25,5 +24,7 @@ export interface IControlService {
    */
   processControlClaim(
     controlClaim: ControlClaim,
-  ): ResultAsync<void, LogicalError>;
+  ): ResultAsync<void, never>;
 }
+
+export const IControlServiceType = Symbol.for("IControlService");
