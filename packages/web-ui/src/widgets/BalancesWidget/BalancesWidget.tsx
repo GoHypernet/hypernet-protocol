@@ -13,6 +13,7 @@ interface IBalancesWidget extends IRenderParams {}
 const BalancesWidget: React.FC<IBalancesWidget> = ({
   noLabel,
   includeBoxWrapper,
+  bodyStyle,
 }: IBalancesWidget) => {
   const { balances } = useBalances();
   const { viewUtils } = useStoreContext();
@@ -25,8 +26,13 @@ const BalancesWidget: React.FC<IBalancesWidget> = ({
     <CustomBox
       className={!includeBoxWrapper ? classes.balancesWrapper : ""}
       label={!noLabel ? "YOUR BALANCES" : undefined}
+      bodyStyle={bodyStyle}
     >
-      <BalanceList balances={balances} viewUtils={viewUtils} />
+      <BalanceList
+        balances={balances}
+        viewUtils={viewUtils}
+        noBorder={includeBoxWrapper}
+      />
     </CustomBox>
   );
 };

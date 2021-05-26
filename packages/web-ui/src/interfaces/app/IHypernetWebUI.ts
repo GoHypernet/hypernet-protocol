@@ -1,3 +1,4 @@
+import React from "react";
 import {
   EPaymentType,
   MerchantUrl,
@@ -12,6 +13,7 @@ export interface IRenderParams {
   showInModal?: boolean;
   noLabel?: boolean;
   includeBoxWrapper?: boolean;
+  bodyStyle?: React.CSSProperties;
 }
 
 export interface IConnectorAuthorizationFlowParams extends IRenderParams {

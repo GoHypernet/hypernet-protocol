@@ -23,6 +23,7 @@ interface IMerchantsWidget extends IRenderParams {}
 const MerchantsWidget: React.FC<IMerchantsWidget> = ({
   includeBoxWrapper,
   noLabel,
+  bodyStyle,
 }: IMerchantsWidget) => {
   const {
     merchantsMap,
@@ -47,7 +48,10 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
   }
 
   return (
-    <CustomBox label={!noLabel ? "YOUR SERVICES" : undefined}>
+    <CustomBox
+      label={!noLabel ? "YOUR SERVICES" : undefined}
+      bodyStyle={bodyStyle}
+    >
       <List>
         {[...merchantsMap.keys()].map((merchantUrl, index) => (
           <Box key={index}>

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { Box, AppBar, IconButton } from "@material-ui/core";
 import FilterListIcon from "@material-ui/icons/FilterList";
-import { PushPayment, PullPayment, EPaymentState } from "@hypernetlabs/objects";
+import { PushPayment, PullPayment } from "@hypernetlabs/objects";
 import {
   PullPaymentList,
   PushPaymentList,
@@ -32,12 +32,12 @@ interface ISideFilter {
 const LinksWidget: React.FC<ILinksWidget> = ({
   noLabel,
   includeBoxWrapper,
+  bodyStyle,
 }: ILinksWidget) => {
   const { viewUtils, dateUtils } = useStoreContext();
   const [tabValue, setTabValue] = useState<number>(0);
   const [isSideFilterOpen, setIsSideFilterOpen] = useState(false);
   const [filter, setFilter] = useState<ISideFilter>();
-  console.log("filter", filter);
   const {
     links,
     publicIdentifier,
@@ -45,7 +45,6 @@ const LinksWidget: React.FC<ILinksWidget> = ({
     disputePayment,
     pullFunds,
   } = useLinks();
-  console.log("link list: ", links);
 
   const handleChange = (event, newValue) => {
     setTabValue(newValue);
@@ -86,13 +85,11 @@ const LinksWidget: React.FC<ILinksWidget> = ({
         label: "Search By created date",
         widgetType: EItemType.dateTimeDifference,
         stateKey: "createdTimestamp",
-        defaultValue: "2021-01-01T00:00",
       },
       {
         label: "Search By expiration date",
         widgetType: EItemType.dateTimeDifference,
         stateKey: "expirationDate",
-        defaultValue: "2021-01-01T00:00",
       },
     ],
     [],
@@ -181,6 +178,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           <FilterListIcon />
         </IconButton>
       }
+      bodyStyle={bodyStyle}
     >
       <SideFilter
         visible={isSideFilterOpen}

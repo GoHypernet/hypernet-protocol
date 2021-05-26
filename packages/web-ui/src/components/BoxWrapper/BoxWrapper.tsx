@@ -7,6 +7,7 @@ interface IBoxWrapper extends BoxProps {
   children?: React.ReactNode;
   label?: string;
   rightComponent?: React.ReactNode;
+  bodyStyle?: React.CSSProperties;
 }
 
 export const BoxWrapper: React.FC<IBoxWrapper> = ({
@@ -14,6 +15,7 @@ export const BoxWrapper: React.FC<IBoxWrapper> = ({
   label,
   flex,
   rightComponent,
+  bodyStyle,
 }: IBoxWrapper) => {
   const classes = useStyles();
 
@@ -27,7 +29,7 @@ export const BoxWrapper: React.FC<IBoxWrapper> = ({
           </Box>
         </Box>
       )}
-      {children}
+      <Box style={bodyStyle}>{children}</Box>
     </Box>
   );
 };

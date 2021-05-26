@@ -38,6 +38,7 @@ interface IPushPaymentRow {
   disputeButtonVisible: boolean;
   onAcceptPushPaymentClick: (paymentId: PaymentId) => void;
   onDisputePushPaymentClick: (paymentId: PaymentId) => void;
+  publicIdentifier: PublicIdentifier;
 }
 
 const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
@@ -47,6 +48,7 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
     disputeButtonVisible,
     onAcceptPushPaymentClick,
     onDisputePushPaymentClick,
+    publicIdentifier,
   } = props;
   const [open, setOpen] = React.useState(false);
   const { viewUtils, dateUtils } = useStoreContext();
@@ -148,8 +150,18 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
           <Box marginBottom={1}>
             <List dense={true}>
               {renderListItem("Payment ID", pushPayment.id)}
-              {renderListItem("From", pushPayment.from)}
-              {renderListItem("To", pushPayment.to)}
+              {renderListItem(
+                "From",
+                `${pushPayment.from} ${
+                  pushPayment.from === publicIdentifier ? "(You)" : ""
+                }`,
+              )}
+              {renderListItem(
+                "To",
+                `${pushPayment.to} ${
+                  pushPayment.to === publicIdentifier ? "(You)" : ""
+                }`,
+              )}
               {renderListItem(
                 "State",
                 viewUtils.fromPaymentState(pushPayment.state),
@@ -219,6 +231,7 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
             <PushPaymentRow
               key={pushPayment.id}
               pushPayment={pushPayment}
+              publicIdentifier={publicIdentifier}
               acceptPaymentButtonVisible={publicIdentifier === pushPayment.to}
               disputeButtonVisible={
                 publicIdentifier === pushPayment.from &&

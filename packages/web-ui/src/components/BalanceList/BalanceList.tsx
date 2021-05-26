@@ -9,18 +9,30 @@ import { ETHER_HEX_ADDRESS } from "@web-ui/constants";
 interface BalanceListProps {
   balances?: AssetBalance[];
   viewUtils: IViewUtils;
+  noBorder?: boolean;
 }
 
 export const BalanceList: React.FC<BalanceListProps> = (
   props: BalanceListProps,
 ) => {
-  const { balances, viewUtils } = props;
+  const { balances, viewUtils, noBorder } = props;
   const classes = useStyles();
 
   return (
-    <Box className={classes.container}>
+    <Box
+      className={`${classes.container} ${noBorder ? "" : classes.itemBorder}`}
+    >
       {balances?.map((balance, index) => (
-        <Box key={index} className={classes.itemWrapper}>
+        <Box
+          key={index}
+          className={`${classes.itemWrapper} ${
+            noBorder
+              ? index === balances.length - 1
+                ? ""
+                : classes.itemBorderBottom
+              : classes.itemBorder
+          }`}
+        >
           <img
             className={classes.tokenLogo}
             src={

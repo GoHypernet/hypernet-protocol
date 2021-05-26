@@ -146,7 +146,10 @@ export default class HypernetWebUI implements IHypernetWebUI {
   public renderFundWidget(config?: IRenderParams): Result<void, RenderError> {
     const renderReact = () => {
       return ReactDOM.render(
-        this._bootstrapComponent(<FundWidget />, config?.showInModal),
+        this._bootstrapComponent(
+          <FundWidget {...config} />,
+          config?.showInModal,
+        ),
         this._generateDomElement(config?.selector || FUND_WIDGET_ID_SELECTOR),
       );
     };

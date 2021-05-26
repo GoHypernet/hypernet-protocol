@@ -46,7 +46,7 @@ const App: React.FC = () => {
       <Box className={classes.appWrapper}>
         <BrowserRouter>
           <Header />
-          {coreReady ? <Router /> : <Box>App is loading...</Box>}
+          {coreReady && <Router />}
         </BrowserRouter>
       </Box>
     </StoreProvider>
