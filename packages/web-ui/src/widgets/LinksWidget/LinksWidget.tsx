@@ -33,7 +33,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
   noLabel,
   includeBoxWrapper,
 }: ILinksWidget) => {
-  const { viewUtils } = useStoreContext();
+  const { viewUtils, dateUtils } = useStoreContext();
   const [tabValue, setTabValue] = useState<number>(0);
   const [isSideFilterOpen, setIsSideFilterOpen] = useState(false);
   const [filter, setFilter] = useState<ISideFilter>();
@@ -114,7 +114,19 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           pushPayment.merchantUrl.includes(filter?.merchantUrl || "") &&
           (filter?.state == null ||
             filter?.state === "all" ||
-            pushPayment.state.toString() == filter?.state)
+            pushPayment.state.toString() == filter?.state) &&
+          dateUtils.checkTimestampInRang(
+            pushPayment.createdTimestamp,
+            dateUtils.fromDatetimeStringToTimestamp(
+              filter?.createdTimestampFrom,
+            ),
+            dateUtils.fromDatetimeStringToTimestamp(filter?.createdTimestampTo),
+          ) &&
+          dateUtils.checkTimestampInRang(
+            pushPayment.expirationDate,
+            dateUtils.fromDatetimeStringToTimestamp(filter?.expirationDateFrom),
+            dateUtils.fromDatetimeStringToTimestamp(filter?.expirationDateTo),
+          )
         );
       });
 
@@ -133,7 +145,19 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           pullPayment.merchantUrl.includes(filter?.merchantUrl || "") &&
           (filter?.state == null ||
             filter?.state === "all" ||
-            pullPayment.state.toString() == filter?.state)
+            pullPayment.state.toString() == filter?.state) &&
+          dateUtils.checkTimestampInRang(
+            pullPayment.createdTimestamp,
+            dateUtils.fromDatetimeStringToTimestamp(
+              filter?.createdTimestampFrom,
+            ),
+            dateUtils.fromDatetimeStringToTimestamp(filter?.createdTimestampTo),
+          ) &&
+          dateUtils.checkTimestampInRang(
+            pullPayment.expirationDate,
+            dateUtils.fromDatetimeStringToTimestamp(filter?.expirationDateFrom),
+            dateUtils.fromDatetimeStringToTimestamp(filter?.expirationDateTo),
+          )
         );
       });
 

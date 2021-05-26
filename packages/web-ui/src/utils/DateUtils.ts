@@ -5,9 +5,7 @@ export class DateUtils implements IDateUtils {
   public fromTimestampToUI(dateTimestamp: number): string {
     if (dateTimestamp == null) return "";
 
-    const date = new Date(
-      dateTimestamp * (`${dateTimestamp}`.length > 10 ? 1 : 1000),
-    );
+    const date = new Date(this._getTimestamp(dateTimestamp));
     return `${
       date.getMonth() + 1
     }/${date.getDate()}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`;
@@ -18,5 +16,33 @@ export class DateUtils implements IDateUtils {
     return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
       .toISOString()
       .substring(0, 16);
+  }
+
+  public fromDatetimeStringToTimestamp(datetimeString?: string): number | null {
+    if (datetimeString == null) {
+      return null;
+    }
+    return Date.parse(datetimeString);
+  }
+
+  public checkTimestampInRang(
+    timestamp: number,
+    timestampFrom?: number | null,
+    timestampTo?: number | null,
+  ): boolean {
+    if (timestampFrom == null || timestampTo == null) {
+      return true;
+    }
+    return (
+      this._getTimestamp(timestamp) >= this._getTimestamp(timestampFrom) &&
+      this._getTimestamp(timestamp) <= this._getTimestamp(timestampTo)
+    );
+  }
+
+  private _getTimestamp(timestamp: number) {
+    if (`${timestamp}`.length < 11) {
+      return timestamp * 1000;
+    }
+    return timestamp;
   }
 }
