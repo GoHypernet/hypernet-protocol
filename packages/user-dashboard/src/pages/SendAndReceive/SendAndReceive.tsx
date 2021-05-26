@@ -13,7 +13,7 @@ const SendAndReceive: React.FC = () => {
       .renderFundWidget({
         selector: "fund-wrapper",
         includeBoxWrapper: true,
-        bodyStyle: { padding: "0 20% 15px 20%" },
+        bodyStyle: { padding: "0 25% 15px 25%" },
       })
       .mapErr(handleError);
 
@@ -21,6 +21,7 @@ const SendAndReceive: React.FC = () => {
       .renderBalancesWidget({
         selector: "balances-wrapper",
         includeBoxWrapper: true,
+        bodyStyle: { padding: "0 25% 15px 25%" },
       })
       .mapErr(handleError);
   }, []);

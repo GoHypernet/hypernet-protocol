@@ -20,7 +20,6 @@ import CloseIcon from "@material-ui/icons/Close";
 import { theme, useStyles } from "./SideFilter.style";
 import { ISideFilterProps, EItemType } from "@web-ui/interfaces";
 import { SliderRange } from "@web-ui/components";
-import { useStoreContext } from "@web-ui/contexts";
 
 export const SideFilter: React.FC<ISideFilterProps> = (
   props: ISideFilterProps,
@@ -34,13 +33,12 @@ export const SideFilter: React.FC<ISideFilterProps> = (
     onFilterSubmit,
   } = props;
   const [filterValues, setFilterValues] = useState({});
-  const { dateUtils } = useStoreContext();
 
   const setDefaultFilterValues = () => {
     const defaultFilterValues = filterItems.reduce((acc, item) => {
       if (item.widgetType === EItemType.dateTimeDifference) {
         acc[`${item.stateKey}From`] = item.defaultValue;
-        acc[`${item.stateKey}To`] = dateUtils.getCurrentIISODateTime();
+        acc[`${item.stateKey}To`] = null;
       } else {
         acc[item.stateKey] = item.defaultValue;
       }

@@ -28,7 +28,11 @@ const BalancesWidget: React.FC<IBalancesWidget> = ({
       label={!noLabel ? "YOUR BALANCES" : undefined}
       bodyStyle={bodyStyle}
     >
-      <BalanceList balances={balances} viewUtils={viewUtils} />
+      <BalanceList
+        balances={balances}
+        viewUtils={viewUtils}
+        noBorder={includeBoxWrapper}
+      />
     </CustomBox>
   );
 };

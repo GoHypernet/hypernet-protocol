@@ -41,6 +41,7 @@ interface IPullPaymentRow {
   onAcceptPullPaymentClick: (paymentId: PaymentId) => void;
   onDisputePullPaymentClick: (paymentId: PaymentId) => void;
   onPullFundClick: (paymentId: PaymentId) => void;
+  publicIdentifier: PublicIdentifier;
 }
 
 const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
@@ -52,6 +53,7 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
     onAcceptPullPaymentClick,
     onDisputePullPaymentClick,
     onPullFundClick,
+    publicIdentifier,
   } = props;
   const [open, setOpen] = React.useState(false);
   const { viewUtils, dateUtils } = useStoreContext();
@@ -163,8 +165,18 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
           <Box marginBottom={1}>
             <List dense={true}>
               {renderListItem("Payment ID", pullPayment.id)}
-              {renderListItem("From", pullPayment.from)}
-              {renderListItem("To", pullPayment.to)}
+              {renderListItem(
+                "From",
+                `${pullPayment.from} ${
+                  pullPayment.from === publicIdentifier ? "(You)" : ""
+                }`,
+              )}
+              {renderListItem(
+                "To",
+                `${pullPayment.to} ${
+                  pullPayment.to === publicIdentifier ? "(You)" : ""
+                }`,
+              )}
               {renderListItem(
                 "State",
                 viewUtils.fromPaymentState(pullPayment.state),
@@ -235,6 +247,7 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
             <PullPaymentRow
               key={pullPayment.id}
               pullPayment={pullPayment}
+              publicIdentifier={publicIdentifier}
               acceptPaymentButtonVisible={
                 pullPayment.state === EPaymentState.Proposed
               }
