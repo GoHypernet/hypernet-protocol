@@ -1,11 +1,19 @@
 import { ControlClaim, MessagingError } from "@hypernetlabs/objects";
+import { inject, injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
 
 import { IControlService } from "@interfaces/business";
-import { IMessagingRepository, IMessagingRepositoryType } from "@interfaces/data";
+import {
+  IMessagingRepository,
+  IMessagingRepositoryType,
+} from "@interfaces/data";
 import { InitializedHypernetContext } from "@interfaces/objects";
-import { IContextProvider, IContextProviderType, ITimeUtils, ITimeUtilsType } from "@interfaces/utilities";
-import { inject, injectable } from "inversify";
+import {
+  IContextProvider,
+  IContextProviderType,
+  ITimeUtils,
+  ITimeUtilsType,
+} from "@interfaces/utilities";
 
 @injectable()
 export class ControlService implements IControlService {
@@ -15,7 +23,8 @@ export class ControlService implements IControlService {
   protected checkControlInterval: NodeJS.Timeout | null;
 
   constructor(
-    @inject(IMessagingRepositoryType) protected messagingRepo: IMessagingRepository,
+    @inject(IMessagingRepositoryType)
+    protected messagingRepo: IMessagingRepository,
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
     @inject(ITimeUtilsType) protected timeUtils: ITimeUtils,
   ) {
@@ -24,10 +33,7 @@ export class ControlService implements IControlService {
     this.checkControlInterval = null;
   }
 
-  public claimControl(): ResultAsync<
-    void,
-    MessagingError
-  > {
+  public claimControl(): ResultAsync<void, MessagingError> {
     let context: InitializedHypernetContext;
     let controlClaim: ControlClaim;
 
@@ -36,7 +42,10 @@ export class ControlService implements IControlService {
       .andThen((myContext) => {
         context = myContext;
         // Create a new claim
-        controlClaim = new ControlClaim(context.publicIdentifier, this.timeUtils.getUnixNow());
+        controlClaim = new ControlClaim(
+          context.publicIdentifier,
+          this.timeUtils.getUnixNow(),
+        );
 
         // Send the claim out to the other cores
         return this.messagingRepo.sendControlClaim(controlClaim);
