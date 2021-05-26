@@ -8,5 +8,4 @@ export interface IViewUtils {
   fromPaymentState(state: EPaymentState): string;
   fromPaymentStateColor(state: EPaymentState): string;
   getPaymentStateOptions(): PaymentStateOption[];
-  fromTimestampToUI(dateTimestamp: number): string;
 }

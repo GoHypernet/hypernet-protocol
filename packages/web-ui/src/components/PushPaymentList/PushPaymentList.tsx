@@ -49,7 +49,7 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
     onDisputePushPaymentClick,
   } = props;
   const [open, setOpen] = React.useState(false);
-  const { viewUtils } = useStoreContext();
+  const { viewUtils, dateUtils } = useStoreContext();
 
   const StyledTableRow = withStyles((theme) => ({
     root: {
@@ -107,7 +107,7 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
           {viewUtils.fromBigNumberWei(pushPayment.amountStaked)}
         </TableCell>
         <TableCell align="right">
-          {viewUtils.fromTimestampToUI(pushPayment.expirationDate)}
+          {dateUtils.fromTimestampToUI(pushPayment.expirationDate)}
         </TableCell>
         <TableCell
           align="right"
@@ -165,15 +165,15 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
               )}
               {renderListItem(
                 "Expiration Date",
-                viewUtils.fromTimestampToUI(pushPayment.expirationDate),
+                dateUtils.fromTimestampToUI(pushPayment.expirationDate),
               )}
               {renderListItem(
                 "Created",
-                viewUtils.fromTimestampToUI(pushPayment.createdTimestamp),
+                dateUtils.fromTimestampToUI(pushPayment.createdTimestamp),
               )}
               {renderListItem(
                 "Updated",
-                viewUtils.fromTimestampToUI(pushPayment.updatedTimestamp),
+                dateUtils.fromTimestampToUI(pushPayment.updatedTimestamp),
               )}
               {renderListItem("Merchant URL", pushPayment.merchantUrl)}
               {renderListItem(
