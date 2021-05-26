@@ -72,9 +72,9 @@ const func: DeployFunction = async () => {
     ["Withdraw", []],
     ["TransferRegistry", []],
     ["TestToken", []],
-    // ["ParameterizedTransfer", []],
-    // ["InsuranceTransfer", []],
-    // ["MessageTransfer", []],
+    ["Parameterized", []],
+    ["Insurance", []],
+    ["Message", []],
   ];
 
   // Only deploy test fixtures during hardhat tests
@@ -95,9 +95,9 @@ const func: DeployFunction = async () => {
     }
     await registerTransfer("Withdraw", deployer);
     await registerTransfer("HashlockTransfer", deployer);
-    await registerTransfer("ParameterizedTransfer", deployer);
-    await registerTransfer("InsuranceTransfer", deployer);
-    await registerTransfer("MessageTransfer", deployer);
+    await registerTransfer("Parameterized", deployer);
+    await registerTransfer("Insurance", deployer);
+    await registerTransfer("Message", deployer);
 
     // Default: run standard migration
   } else {
@@ -109,9 +109,9 @@ const func: DeployFunction = async () => {
     }
     await registerTransfer("Withdraw", deployer);
     await registerTransfer("HashlockTransfer", deployer);
-    // await registerTransfer("ParameterizedTransfer", deployer);
-    // await registerTransfer("InsuranceTransfer", deployer);
-    // await registerTransfer("MessageTransfer", deployer);
+    await registerTransfer("Parameterized", deployer);
+    await registerTransfer("Insurance", deployer);
+    await registerTransfer("Message", deployer);
   }
 
   if ([1337, 5].includes(network.config.chainId ?? 0)) {
