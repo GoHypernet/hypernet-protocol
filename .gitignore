@@ -3,6 +3,8 @@ lerna-debug.log
 npm-debug.log
 packages/*/lib
 packages/*/dist
+packages/*/artifacts
+packages/*/cache
 .idea
 *.tsbuildinfo
 package-lock.json
