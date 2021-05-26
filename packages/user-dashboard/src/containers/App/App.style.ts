@@ -1,6 +1,6 @@
-import { makeStyles } from '@material-ui/core';
+import { makeStyles } from "@material-ui/core";
 
-import { colors } from "@user-dashboard/theme";
+import { colors } from "@hypernetlabs/web-ui";
 
 export const useStyles = makeStyles({
   "@global": {

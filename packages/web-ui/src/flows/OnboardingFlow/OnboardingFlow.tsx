@@ -138,7 +138,10 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
         return (
           <>
             {balances?.length ? (
-              <BalancesWidget />
+              <Box>
+                <Box className={classes.balancesLabel}>Your Balances</Box>
+                <BalancesWidget />
+              </Box>
             ) : (
               <Box className={classes.balancesEmptyLabel}>
                 You are one step away!

@@ -11,6 +11,7 @@ export interface IRenderParams {
   selector?: string;
   showInModal?: boolean;
   noLabel?: boolean;
+  includeBoxWrapper?: boolean;
 }
 
 export interface IConnectorAuthorizationFlowParams extends IRenderParams {

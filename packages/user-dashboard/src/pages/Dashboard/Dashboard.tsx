@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useLayoutContext, useStoreContext } from "@user-dashboard/contexts";
+import { useLayoutContext } from "@user-dashboard/contexts";
 
 const Dasboard: React.FC = () => {
   const { setLoading, setResultMessage } = useLayoutContext();

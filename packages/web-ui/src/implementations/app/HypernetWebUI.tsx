@@ -24,8 +24,9 @@ import {
   IRenderPaymentWidgetParams,
   IOnboardingFlowParams,
   IViewUtils,
+  IDateUtils,
 } from "@web-ui/interfaces";
-import { ViewUtils } from "@web-ui/utils";
+import { ViewUtils, DateUtils } from "@web-ui/utils";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget";
 import MerchantsWidget from "@web-ui/widgets/MerchantsWidget";
 import FundWidget from "@web-ui/widgets/FundWidget";
@@ -36,6 +37,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
   protected coreInstance: IHypernetCore;
   protected viewUtils: IViewUtils;
+  protected dateUtils: IDateUtils;
   constructor(_coreInstance?: IHypernetCore) {
     if (_coreInstance) {
       this.coreInstance = _coreInstance;
@@ -49,6 +51,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     window.hypernetWebUIInstance = HypernetWebUI.instance;
 
     this.viewUtils = new ViewUtils();
+    this.dateUtils = new DateUtils();
   }
 
   private _generateDomElement(selector: string): HTMLElement | null {
@@ -77,7 +80,11 @@ export default class HypernetWebUI implements IHypernetWebUI {
       throw new Error("core instance is required");
     }
     return (
-      <StoreProvider coreProxy={this.coreInstance} viewUtils={this.viewUtils}>
+      <StoreProvider
+        coreProxy={this.coreInstance}
+        viewUtils={this.viewUtils}
+        dateUtils={this.dateUtils}
+      >
         <LayoutProvider>
           <MainContainer withModal={withModal}>{component}</MainContainer>
         </LayoutProvider>
@@ -108,7 +115,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     const renderReact = () => {
       return ReactDOM.render(
         this._bootstrapComponent(
-          <BalancesWidget noLabel={config?.noLabel} />,
+          <BalancesWidget {...config} />,
           config?.showInModal,
         ),
         this._generateDomElement(
@@ -125,7 +132,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     const renderReact = () => {
       return ReactDOM.render(
         this._bootstrapComponent(
-          <MerchantsWidget noLabel={config?.noLabel} />,
+          <MerchantsWidget {...config} />,
           config?.showInModal,
         ),
         this._generateDomElement(
@@ -150,7 +157,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     const renderReact = () => {
       return ReactDOM.render(
         this._bootstrapComponent(
-          <LinksWidget noLabel={config?.noLabel} />,
+          <LinksWidget {...config} />,
           config?.showInModal,
         ),
         this._generateDomElement(config?.selector || LINKS_WIDGET_ID_SELECTOR),

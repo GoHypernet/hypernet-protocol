@@ -1,6 +1,6 @@
-import { colors } from "@user-dashboard/theme";
+import { colors } from "@hypernetlabs/web-ui";
 
-import { makeStyles } from '@material-ui/core';
+import { makeStyles } from "@material-ui/core";
 
 export const useStyles = makeStyles({
   headerWrapper: {
@@ -36,4 +36,3 @@ export const useStyles = makeStyles({
   headerWrapper4: {},
   headerWrapper5: {},
 });
-

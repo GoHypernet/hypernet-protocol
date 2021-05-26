@@ -18,4 +18,9 @@ export const useStyles = makeStyles({
   preferredTokenWrapper: {
     marginBottom: 25,
   },
+  balancesLabel: {
+    fontSize: 20,
+    marginTop: 24,
+    textAlign: "center",
+  },
 });

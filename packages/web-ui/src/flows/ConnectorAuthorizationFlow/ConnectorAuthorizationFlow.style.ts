@@ -9,4 +9,9 @@ export const useStyles = makeStyles({
     margin: 25,
     textAlign: "center",
   },
+  balancesLabel: {
+    fontSize: 20,
+    marginTop: 24,
+    textAlign: "center",
+  },
 });

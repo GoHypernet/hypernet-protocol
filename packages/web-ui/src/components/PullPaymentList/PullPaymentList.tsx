@@ -54,7 +54,7 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
     onPullFundClick,
   } = props;
   const [open, setOpen] = React.useState(false);
-  const { viewUtils } = useStoreContext();
+  const { viewUtils, dateUtils } = useStoreContext();
 
   const StyledTableRow = withStyles((theme) => ({
     root: {
@@ -111,7 +111,9 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
         <TableCell align="right">
           {viewUtils.fromBigNumberWei(pullPayment.amountTransferred)}
         </TableCell>
-        <TableCell align="right">{pullPayment.expirationDate}</TableCell>
+        <TableCell align="right">
+          {dateUtils.fromTimestampToUI(pullPayment.expirationDate)}
+        </TableCell>
         <TableCell
           align="right"
           style={{
@@ -176,9 +178,18 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
                 "Amount Staked	",
                 viewUtils.fromBigNumberWei(pullPayment.amountStaked),
               )}
-              {renderListItem("Expiration Date", pullPayment.expirationDate)}
-              {renderListItem("Created", pullPayment.createdTimestamp)}
-              {renderListItem("Updated", pullPayment.updatedTimestamp)}
+              {renderListItem(
+                "Expiration Date",
+                dateUtils.fromTimestampToUI(pullPayment.expirationDate),
+              )}
+              {renderListItem(
+                "Created",
+                dateUtils.fromTimestampToUI(pullPayment.createdTimestamp),
+              )}
+              {renderListItem(
+                "Updated",
+                dateUtils.fromTimestampToUI(pullPayment.updatedTimestamp),
+              )}
               {renderListItem("Merchant URL", pullPayment.merchantUrl)}
               {renderListItem(
                 "Authorized Amount",

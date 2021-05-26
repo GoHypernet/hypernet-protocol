@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import PageWrapper from "@user-dashboard/components/PageWrapper";
-import BoxWrapper from "@user-dashboard/components/BoxWrapper";
 import { useLayoutContext, useStoreContext } from "@user-dashboard/contexts";
 import { Box, Grid } from "@material-ui/core";
 
@@ -12,21 +11,21 @@ const Summary: React.FC = () => {
     hypernetWebIntegration.webUIClient
       .renderBalancesWidget({
         selector: "balances-wrapper",
-        noLabel: true,
+        includeBoxWrapper: true,
       })
       .mapErr(handleError);
 
     hypernetWebIntegration.webUIClient
       .renderMerchantsWidget({
         selector: "merchant-list-wrapper",
-        noLabel: true,
+        includeBoxWrapper: true,
       })
       .mapErr(handleError);
 
     hypernetWebIntegration.webUIClient
       .renderLinksWidget({
         selector: "payments-wrapper",
-        noLabel: true,
+        includeBoxWrapper: true,
       })
       .mapErr(handleError);
   }, []);
@@ -35,20 +34,14 @@ const Summary: React.FC = () => {
     <PageWrapper label="SUMMARY">
       <Grid container spacing={3}>
         <Grid item xs={8}>
-          <BoxWrapper label="TRANSACTION HISTORY">
-            <Box id="payments-wrapper"></Box>
-          </BoxWrapper>
+          <Box id="payments-wrapper"></Box>
         </Grid>
         <Grid item container xs={4} spacing={3}>
           <Grid item xs={12}>
-            <BoxWrapper label="YOUR BALANCES">
-              <Box id="balances-wrapper"></Box>
-            </BoxWrapper>
+            <Box id="balances-wrapper"></Box>
           </Grid>
           <Grid item xs={12}>
-            <BoxWrapper label="YOUR SERVICES">
-              <Box id="merchant-list-wrapper"></Box>
-            </BoxWrapper>
+            <Box id="merchant-list-wrapper"></Box>
           </Grid>
         </Grid>
       </Grid>
