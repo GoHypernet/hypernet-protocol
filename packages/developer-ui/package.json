@@ -32,13 +32,12 @@
     "test": "test"
   },
   "scripts": {
-    "bootstrap": "yarn clean-docker && docker-compose pull && docker-compose up -d && wait-on -l -d 15000 package.json && docker-compose up -d && yarn verify-backend && yarn deploy-custom-transfers",
     "build": "yarn clean && yarn compile && yarn webpack",
+    "dockerize": "docker build -t hypernetlabs/hypernet-protocol-developer-ui -f Dockerfile ../..",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "compile": "tsc --build && cd ../.. && yarn alias",
     "alias": "tsc-alias",
     "webpack": "webpack",
-    "clean-docker": "docker-compose down",
     "deploy-custom-transfers": "yarn ts-node scripts/deploy.ts",
     "dev": "yarn start-backend && yarn dev-web",
     "start": "yarn start-backend && yarn start-web",

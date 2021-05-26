@@ -246,18 +246,19 @@ services:
       }' 
   
   core-iframe:
-    image: nginx:latest
+    image: hypernetlabs/hypernet-protocol-core-iframe
     ports:
-      - 8090:80
-    volumes:
-      - ../iframe/dist/bundle:/usr/share/nginx/html
+      - 5020:80
 
   merchant-iframe:
-    image: nginx:latest
+    image: hypernetlabs/hypernet-protocol-merchant-iframe
     ports:
       - 5005:80
-    volumes:
-      - ../merchant-iframe/dist/bundle:/usr/share/nginx/html
+
+  developer-ui:
+    image: hypernetlabs/hypernet-protocol-developer-ui
+    ports: 
+      - 5015:80
 
   test-merchant:
     image: node:14
