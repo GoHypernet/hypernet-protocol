@@ -106,7 +106,9 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
         <TableCell align="right">
           {viewUtils.fromBigNumberWei(pushPayment.amountStaked)}
         </TableCell>
-        <TableCell align="right">{pushPayment.expirationDate}</TableCell>
+        <TableCell align="right">
+          {viewUtils.fromTimestampToUI(pushPayment.expirationDate)}
+        </TableCell>
         <TableCell
           align="right"
           style={{
@@ -161,9 +163,18 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
                 "Amount Staked	",
                 viewUtils.fromBigNumberWei(pushPayment.amountStaked),
               )}
-              {renderListItem("Expiration Date", pushPayment.expirationDate)}
-              {renderListItem("Created", pushPayment.createdTimestamp)}
-              {renderListItem("Updated", pushPayment.updatedTimestamp)}
+              {renderListItem(
+                "Expiration Date",
+                viewUtils.fromTimestampToUI(pushPayment.expirationDate),
+              )}
+              {renderListItem(
+                "Created",
+                viewUtils.fromTimestampToUI(pushPayment.createdTimestamp),
+              )}
+              {renderListItem(
+                "Updated",
+                viewUtils.fromTimestampToUI(pushPayment.updatedTimestamp),
+              )}
               {renderListItem("Merchant URL", pushPayment.merchantUrl)}
               {renderListItem(
                 "Payment Amount",

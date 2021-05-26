@@ -21,6 +21,17 @@ export class ViewUtils implements IViewUtils {
     return this._factoryPaymentStatusViewModel(state).state;
   }
 
+  public fromTimestampToUI(dateTimestamp: number): string {
+    if (dateTimestamp == null) return "";
+
+    const date = new Date(
+      dateTimestamp * (`${dateTimestamp}`.length > 10 ? 1 : 1000),
+    );
+    return `${
+      date.getMonth() + 1
+    }/${date.getDate()}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`;
+  }
+
   public fromPaymentStateColor(state: EPaymentState): string {
     switch (state) {
       case EPaymentState.Finalized ||
@@ -44,6 +55,7 @@ export class ViewUtils implements IViewUtils {
 
   public getPaymentStateOptions(): PaymentStateOption[] {
     return [
+      new PaymentStateOption("All", "all"),
       new PaymentStateOption(
         this._factoryPaymentStatusViewModel(EPaymentState.Accepted).state,
         EPaymentState.Accepted,

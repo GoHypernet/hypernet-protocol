@@ -36,7 +36,13 @@ export const SideFilter: React.FC<ISideFilterProps> = (
 
   const setDefaultFilterValues = () => {
     const defaultFilterValues = filterItems.reduce((acc, item) => {
-      acc[item.stateKey] = item.defaultValue;
+      if (item.widgetType === EItemType.dateTimeDifference) {
+        const currentDate = new Date().toISOString().substring(0, 16);
+        acc[`${item.stateKey}From`] = item.defaultValue;
+        acc[`${item.stateKey}To`] = currentDate;
+      } else {
+        acc[item.stateKey] = item.defaultValue;
+      }
       return acc;
     }, {});
     setFilterValues(defaultFilterValues);
@@ -82,7 +88,11 @@ export const SideFilter: React.FC<ISideFilterProps> = (
           </Typography>
         )}
       </Box>
-      <IconButton aria-label="close" onClick={handleClickCancel}>
+      <IconButton
+        aria-label="close"
+        onClick={handleClickCancel}
+        className={classes.headerIconWrapper}
+      >
         <CloseIcon className={classes.headerIcon} />
       </IconButton>
     </Box>
@@ -186,6 +196,48 @@ export const SideFilter: React.FC<ISideFilterProps> = (
                 </Box>
               );
 
+            case EItemType.dateTimeDifference:
+              return (
+                <Box key={index}>
+                  <Typography className={classes.widgetLabel}>
+                    {label}
+                  </Typography>
+                  <Box marginBottom={1}>
+                    <TextField
+                      id="datetime-local-from"
+                      type="datetime-local"
+                      value={filterValues[`${stateKey}From`]}
+                      label="from"
+                      onChange={(
+                        event: React.ChangeEvent<HTMLInputElement>,
+                      ) => {
+                        event.persist();
+                        changeFilterValues(
+                          `${stateKey}From`,
+                          event?.target?.value,
+                        );
+                      }}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+                  </Box>
+                  <TextField
+                    id="datetime-local-to"
+                    type="datetime-local"
+                    value={filterValues[`${stateKey}To`]}
+                    label="to"
+                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                      event.persist();
+                      changeFilterValues(`${stateKey}To`, event?.target?.value);
+                    }}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                </Box>
+              );
+
             case EItemType.select:
               return (
                 <Box key={index}>
@@ -280,8 +332,10 @@ export const SideFilter: React.FC<ISideFilterProps> = (
         disableBackdropClick
       >
         <Box className={classes.drawerContainer}>
-          {Header}
-          {Body}
+          <Box display="flex" flexDirection="column">
+            {Header}
+            {Body}
+          </Box>
           {Footer}
         </Box>
       </SwipeableDrawer>

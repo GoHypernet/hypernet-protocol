@@ -5,6 +5,7 @@ export enum EItemType {
   check = "check",
   select = "select",
   dateTime = "dateTime",
+  dateTimeDifference = "dateTimeDifference",
 }
 export interface IChipsFilterWidgetItem {
   label: string;

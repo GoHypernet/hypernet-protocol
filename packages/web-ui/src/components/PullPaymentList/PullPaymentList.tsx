@@ -111,7 +111,9 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
         <TableCell align="right">
           {viewUtils.fromBigNumberWei(pullPayment.amountTransferred)}
         </TableCell>
-        <TableCell align="right">{pullPayment.expirationDate}</TableCell>
+        <TableCell align="right">
+          {viewUtils.fromTimestampToUI(pullPayment.expirationDate)}
+        </TableCell>
         <TableCell
           align="right"
           style={{
@@ -176,9 +178,18 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
                 "Amount Staked	",
                 viewUtils.fromBigNumberWei(pullPayment.amountStaked),
               )}
-              {renderListItem("Expiration Date", pullPayment.expirationDate)}
-              {renderListItem("Created", pullPayment.createdTimestamp)}
-              {renderListItem("Updated", pullPayment.updatedTimestamp)}
+              {renderListItem(
+                "Expiration Date",
+                viewUtils.fromTimestampToUI(pullPayment.expirationDate),
+              )}
+              {renderListItem(
+                "Created",
+                viewUtils.fromTimestampToUI(pullPayment.createdTimestamp),
+              )}
+              {renderListItem(
+                "Updated",
+                viewUtils.fromTimestampToUI(pullPayment.updatedTimestamp),
+              )}
               {renderListItem("Merchant URL", pullPayment.merchantUrl)}
               {renderListItem(
                 "Authorized Amount",

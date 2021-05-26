@@ -51,6 +51,11 @@ export const useStyles = makeStyles({
   drawerContainer: {
     cursor: "pointer",
     width: 400,
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "space-between",
+    height: "100%",
+    overflowX: "hidden",
   },
   header: {
     padding: "15px 20px",
@@ -62,9 +67,8 @@ export const useStyles = makeStyles({
     cursor: "auto",
   },
   footer: {
-    position: "sticky",
-    bottom: 0,
     marginBottom: 30,
+    marginTop: 40,
     width: "100%",
     backgroundColor: "#ffffff",
   },
@@ -76,6 +80,9 @@ export const useStyles = makeStyles({
     fontSize: 14,
     color: "#9A9A9A",
     marginLeft: 10,
+  },
+  headerIconWrapper: {
+    paddingRight: 0,
   },
   headerIcon: {
     fontSize: 24,

@@ -23,8 +23,10 @@ interface ISideFilter {
   to: string;
   merchantUrl: string;
   state: string;
-  createdTimestamp: string;
-  expirationDate: string;
+  createdTimestampFrom: string;
+  createdTimestampTo: string;
+  expirationDateFrom: string;
+  expirationDateTo: string;
 }
 
 const LinksWidget: React.FC<ILinksWidget> = ({
@@ -34,15 +36,8 @@ const LinksWidget: React.FC<ILinksWidget> = ({
   const { viewUtils } = useStoreContext();
   const [tabValue, setTabValue] = useState<number>(0);
   const [isSideFilterOpen, setIsSideFilterOpen] = useState(false);
-  /* const [filter, setFilter] = useState<ISideFilter>({
-    id: "",
-    from: "",
-    to: "",
-    merchantUrl: "",
-    state: "",
-    createdTimestamp: "",
-    expirationDate: "",
-  }); */
+  const [filter, setFilter] = useState<ISideFilter>();
+  console.log("filter", filter);
   const {
     links,
     publicIdentifier,
@@ -82,22 +77,22 @@ const LinksWidget: React.FC<ILinksWidget> = ({
         label: "Search By Payment State",
         widgetType: EItemType.select,
         stateKey: "state",
-        defaultValue: EPaymentState.Approved.toString(),
+        defaultValue: "all",
         widgetProps: {
           options: viewUtils.getPaymentStateOptions(),
         },
       },
       {
         label: "Search By created date",
-        widgetType: EItemType.dateTime,
+        widgetType: EItemType.dateTimeDifference,
         stateKey: "createdTimestamp",
-        defaultValue: "2021-01-24T10:30",
+        defaultValue: "2021-01-01T00:00",
       },
       {
         label: "Search By expiration date",
-        widgetType: EItemType.dateTime,
+        widgetType: EItemType.dateTimeDifference,
         stateKey: "expirationDate",
-        defaultValue: "2021-02-24T10:30",
+        defaultValue: "2021-01-01T00:00",
       },
     ],
     [],
@@ -105,19 +100,46 @@ const LinksWidget: React.FC<ILinksWidget> = ({
 
   const handleFilterSubmit = (filter?: ISideFilter) => {
     console.log("handleFilterSubmit filter: ", filter);
-    /* if (!filter) return;
-    setFilter((prevState) => {
-      return {
-        ...prevState,
-        id: filter.id,
-        from: filter.from,
-        to: filter.to,
-        merchantUrl: filter.merchantUrl,
-        state: filter.state,
-        createdTimestamp: filter.createdTimestamp,
-        expirationDate: filter.expirationDate,
-      };
-    }); */
+    if (!filter) return;
+    setFilter(filter);
+  };
+
+  const getPushPayments = (): PushPayment[] => {
+    return links.reduce((acc, link) => {
+      const pushPayments = link.pushPayments.filter((pushPayment) => {
+        return (
+          pushPayment.id.includes(filter?.id || "") &&
+          pushPayment.from.includes(filter?.from || "") &&
+          pushPayment.to.includes(filter?.to || "") &&
+          pushPayment.merchantUrl.includes(filter?.merchantUrl || "") &&
+          (filter?.state == null ||
+            filter?.state === "all" ||
+            pushPayment.state.toString() == filter?.state)
+        );
+      });
+
+      acc.push(...pushPayments);
+      return acc;
+    }, new Array<PushPayment>());
+  };
+
+  const getPullPayments = (): PullPayment[] => {
+    return links.reduce((acc, link) => {
+      const pullPayments = link.pullPayments.filter((pullPayment) => {
+        return (
+          pullPayment.id.includes(filter?.id || "") &&
+          pullPayment.from.includes(filter?.from || "") &&
+          pullPayment.to.includes(filter?.to || "") &&
+          pullPayment.merchantUrl.includes(filter?.merchantUrl || "") &&
+          (filter?.state == null ||
+            filter?.state === "all" ||
+            pullPayment.state.toString() == filter?.state)
+        );
+      });
+
+      acc.push(...pullPayments);
+      return acc;
+    }, new Array<PullPayment>());
   };
 
   const CustomBox = includeBoxWrapper ? BoxWrapper : Box;
@@ -156,10 +178,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
       <TabPanel value={tabValue} index={0}>
         <PushPaymentList
           publicIdentifier={publicIdentifier}
-          pushPayments={links.reduce((acc, link) => {
-            acc.push(...link.pushPayments);
-            return acc;
-          }, new Array<PushPayment>())}
+          pushPayments={getPushPayments()}
           onAcceptPushPaymentClick={acceptPayment}
           onDisputePushPaymentClick={disputePayment}
         />
@@ -167,10 +186,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
       <TabPanel value={tabValue} index={1}>
         <PullPaymentList
           publicIdentifier={publicIdentifier}
-          pullPayments={links.reduce((acc, link) => {
-            acc.push(...link.pullPayments);
-            return acc;
-          }, new Array<PullPayment>())}
+          pullPayments={getPullPayments()}
           onAcceptPullPaymentClick={acceptPayment}
           onDisputePullPaymentClick={disputePayment}
           onPullFundClick={pullFunds}

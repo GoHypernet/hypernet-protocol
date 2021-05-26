@@ -8,12 +8,6 @@
   "references": [
     {
       "path": "../objects"
-    },
-    {
-      "path": "../web-integration"
-    },
-    {
-      "path": "../web-ui"
     }
   ],
   "include": ["./src/**/*.ts", "./src/**/*.tsx"],

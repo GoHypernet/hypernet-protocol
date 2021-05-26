@@ -1,4 +1,4 @@
-import { colors } from "@user-dashboard/theme";
+import { colors } from "@web-ui/theme";
 
 import { makeStyles } from "@material-ui/core";
 
