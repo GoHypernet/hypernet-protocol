@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback } from "react";
 import {
   BackButton,
   Bar,
@@ -13,34 +13,38 @@ import {
   textStyle,
   useLayout,
   useTheme,
-} from '@aragon/ui'
-import { useAppState, useConnectedAccount, useNetwork } from '@aragon/api-react'
-import { format } from 'date-fns'
-import LocalIdentityBadge from '../components/LocalIdentityBadge/LocalIdentityBadge'
-import LocalLabelAppBadge from '../components/LocalIdentityBadge/LocalLabelAppBadge'
-import SummaryBar from '../components/SummaryBar'
-import SummaryRows from '../components/SummaryRows'
-import VoteActions from '../components/VoteActions'
-import VoteStatus from '../components/VoteStatus'
-import VoteText from '../components/VoteText'
-import VoteCasted from '../components/VoteCasted'
-import { percentageList, round, safeDiv } from '../math-utils'
-import { getQuorumProgress, getVoteSuccess } from '../vote-utils'
-import { VOTE_NAY, VOTE_YEA } from '../vote-types'
-import { addressesEqual } from '../web3-utils'
-import { useBlockTimeStamp } from '../hooks/useBlock'
-import { useSettings } from '../vote-settings-manager'
+} from "@aragon/ui";
+import {
+  useAppState,
+  useConnectedAccount,
+  useNetwork,
+} from "@aragon/api-react";
+import { format } from "date-fns";
+import LocalIdentityBadge from "../components/LocalIdentityBadge/LocalIdentityBadge";
+import LocalLabelAppBadge from "../components/LocalIdentityBadge/LocalLabelAppBadge";
+import SummaryBar from "../components/SummaryBar";
+import SummaryRows from "../components/SummaryRows";
+import VoteActions from "../components/VoteActions";
+import VoteStatus from "../components/VoteStatus";
+import VoteText from "../components/VoteText";
+import VoteCasted from "../components/VoteCasted";
+import { percentageList, round, safeDiv } from "../math-utils";
+import { getQuorumProgress, getVoteSuccess } from "../vote-utils";
+import { VOTE_NAY, VOTE_YEA } from "../vote-types";
+import { addressesEqual } from "../web3-utils";
+import { useBlockTimeStamp } from "../hooks/useBlock";
+import { useSettings } from "../vote-settings-manager";
 
-const formatDate = date => `${format(date, 'do MMM yy, HH:mm')} UTC`
+const formatDate = (date) => `${format(date, "do MMM yy, HH:mm")} UTC`;
 
 const DEFAULT_DESCRIPTION =
-  'No additional description has been provided for this proposal.'
+  "No additional description has been provided for this proposal.";
 
 function VoteDetail({ vote, onBack, onVote, onExecute }) {
-  const theme = useTheme()
-  const { layoutName } = useLayout()
-  const { tokenSymbol } = useAppState()
-  const connectedAccount = useConnectedAccount()
+  const theme = useTheme();
+  const { layoutName } = useLayout();
+  const { tokenSymbol } = useAppState();
+  const connectedAccount = useConnectedAccount();
 
   const {
     connectedAccountVote,
@@ -48,30 +52,30 @@ function VoteDetail({ vote, onBack, onVote, onExecute }) {
     executionTargetData,
     numData,
     voteId,
-  } = vote
-  const { minAcceptQuorum, supportRequired, yea, nay } = numData
-  const { creator, description, metadata, open } = data
-  const quorumProgress = getQuorumProgress(vote)
-  const totalVotes = yea + nay
-  const votesYeaVotersSize = safeDiv(yea, totalVotes)
-  const votesNayVotersSize = safeDiv(nay, totalVotes)
+  } = vote;
+  const { minAcceptQuorum, supportRequired, yea, nay } = numData;
+  const { creator, description, metadata, open } = data;
+  const quorumProgress = getQuorumProgress(vote);
+  const totalVotes = yea + nay;
+  const votesYeaVotersSize = safeDiv(yea, totalVotes);
+  const votesNayVotersSize = safeDiv(nay, totalVotes);
   const [yeaPct, nayPct] = percentageList(
     [votesYeaVotersSize, votesNayVotersSize],
-    2
-  )
+    2,
+  );
   const youVoted =
-    connectedAccountVote === VOTE_YEA || connectedAccountVote === VOTE_NAY
+    connectedAccountVote === VOTE_YEA || connectedAccountVote === VOTE_NAY;
 
   const handleVoteNo = useCallback(() => {
-    onVote(voteId, VOTE_NAY)
-  }, [onVote, voteId])
+    onVote(voteId, VOTE_NAY);
+  }, [onVote, voteId]);
   const handleVoteYes = useCallback(() => {
-    onVote(voteId, VOTE_YEA)
-  }, [onVote, voteId])
+    onVote(voteId, VOTE_YEA);
+  }, [onVote, voteId]);
 
   const handleExecute = useCallback(() => {
-    onExecute(voteId)
-  }, [onExecute, voteId])
+    onExecute(voteId);
+  }, [onExecute, voteId]);
 
   return (
     <React.Fragment>
@@ -107,7 +111,7 @@ function VoteDetail({ vote, onBack, onVote, onExecute }) {
             >
               <h1
                 css={`
-                  ${textStyle('title2')};
+                  ${textStyle("title2")};
                 `}
               >
                 <span css="font-weight: bold;">Vote #{voteId}</span>
@@ -115,16 +119,16 @@ function VoteDetail({ vote, onBack, onVote, onExecute }) {
               <div
                 css={`
                   display: grid;
-                  grid-template-columns: ${layoutName === 'large'
-                    ? '1fr minmax(300px, auto)'
-                    : 'auto'};
-                  grid-gap: ${layoutName === 'large' ? 5 * GU : 2.5 * GU}px;
+                  grid-template-columns: ${layoutName === "large"
+                    ? "1fr minmax(300px, auto)"
+                    : "auto"};
+                  grid-gap: ${layoutName === "large" ? 5 * GU : 2.5 * GU}px;
                 `}
               >
                 <div>
                   <h2
                     css={`
-                      ${textStyle('label2')};
+                      ${textStyle("label2")};
                       color: ${theme.surfaceContentSecondary};
                       margin-bottom: ${2 * GU}px;
                     `}
@@ -133,7 +137,7 @@ function VoteDetail({ vote, onBack, onVote, onExecute }) {
                   </h2>
                   <div
                     css={`
-                      ${textStyle('body2')};
+                      ${textStyle("body2")};
                     `}
                   >
                     <VoteText
@@ -144,7 +148,7 @@ function VoteDetail({ vote, onBack, onVote, onExecute }) {
                 <div>
                   <h2
                     css={`
-                      ${textStyle('label2')};
+                      ${textStyle("label2")};
                       color: ${theme.surfaceContentSecondary};
                       margin-bottom: ${2 * GU}px;
                     `}
@@ -160,7 +164,7 @@ function VoteDetail({ vote, onBack, onVote, onExecute }) {
                     <LocalIdentityBadge
                       connectedAccount={addressesEqual(
                         creator,
-                        connectedAccount
+                        connectedAccount,
                       )}
                       entity={creator}
                     />
@@ -170,12 +174,12 @@ function VoteDetail({ vote, onBack, onVote, onExecute }) {
               <div>
                 <h2
                   css={`
-                    ${textStyle('label2')};
+                    ${textStyle("label2")};
                     color: ${theme.surfaceContentSecondary};
                     margin-bottom: ${2 * GU}px;
                   `}
                 >
-                  {open ? 'Current votes' : 'Votes'}
+                  {open ? "Current votes" : "Votes"}
                 </h2>
                 <SummaryBar
                   positiveSize={votesYeaVotersSize}
@@ -210,10 +214,10 @@ function VoteDetail({ vote, onBack, onVote, onExecute }) {
             <Box heading="Relative support %">
               <div
                 css={`
-                  ${textStyle('body2')};
+                  ${textStyle("body2")};
                 `}
               >
-                {round(votesYeaVotersSize * 100, 2)}%{' '}
+                {round(votesYeaVotersSize * 100, 2)}%{" "}
                 <span
                   css={`
                     color: ${theme.surfaceContentSecondary};
@@ -233,10 +237,10 @@ function VoteDetail({ vote, onBack, onVote, onExecute }) {
             <Box heading="Minimum approval %">
               <div
                 css={`
-                  ${textStyle('body2')};
+                  ${textStyle("body2")};
                 `}
               >
-                {round(quorumProgress * 100, 2)}%{' '}
+                {round(quorumProgress * 100, 2)}%{" "}
                 <span
                   css={`
                     color: ${theme.surfaceContentSecondary};
@@ -257,13 +261,13 @@ function VoteDetail({ vote, onBack, onVote, onExecute }) {
         }
       />
     </React.Fragment>
-  )
+  );
 }
 
 function Status({ vote }) {
-  const theme = useTheme()
-  const network = useNetwork()
-  const { pctBase } = useSettings()
+  const theme = useTheme();
+  const network = useNetwork();
+  const { pctBase } = useSettings();
   const {
     executionDate,
     executionTransaction,
@@ -273,16 +277,16 @@ function Status({ vote }) {
     closed,
     transitionAt,
     endBlock,
-  } = vote.data
+  } = vote.data;
 
-  const endBlockTimeStamp = useBlockTimeStamp(endBlock, closed)
+  const endBlockTimeStamp = useBlockTimeStamp(endBlock, closed);
 
   if (!closed || (delayed && getVoteSuccess(vote, pctBase))) {
     return (
       <React.Fragment>
         <div
           css={`
-            ${textStyle('body2')};
+            ${textStyle("body2")};
             color: ${theme.surfaceContentSecondary};
             margin-bottom: ${1 * GU}px;
           `}
@@ -295,10 +299,10 @@ function Status({ vote }) {
         </div>
         {<Timer end={transitionAt} maxUnits={4} />}
       </React.Fragment>
-    )
+    );
   }
 
-  const dateHasLoaded = executionDate || endBlockTimeStamp
+  const dateHasLoaded = executionDate || endBlockTimeStamp;
   return (
     <React.Fragment>
       <VoteStatus vote={vote} />
@@ -310,10 +314,10 @@ function Status({ vote }) {
           grid-gap: ${1 * GU}px;
           align-items: center;
           color: ${theme.surfaceContentSecondary};
-          ${textStyle('body2')};
+          ${textStyle("body2")};
         `}
       >
-        <IconTime size="small" />{' '}
+        <IconTime size="small" />{" "}
         {dateHasLoaded ? (
           formatDate(executionDate || new Date(endBlockTimeStamp))
         ) : (
@@ -339,7 +343,7 @@ function Status({ vote }) {
         </div>
       )}
     </React.Fragment>
-  )
+  );
 }
 
-export default VoteDetail
+export default VoteDetail;

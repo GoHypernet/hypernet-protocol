@@ -1,12 +1,20 @@
-import React from 'react'
-import { Button, GU, Info, Field, SidePanel, TextInput, useSidePanelFocusOnReady } from '@aragon/ui'
+import React from "react";
+import {
+  Button,
+  GU,
+  Info,
+  Field,
+  SidePanel,
+  TextInput,
+  useSidePanelFocusOnReady,
+} from "@aragon/ui";
 
 const initialState = {
-  question: '',
-  url: '',
-  wallet: '',
-  signature: '',
-}
+  question: "",
+  url: "",
+  wallet: "",
+  signature: "",
+};
 
 const NewVotePanel = React.memo(({ panelState, onCreateVote }) => {
   return (
@@ -21,16 +29,16 @@ const NewVotePanel = React.memo(({ panelState, onCreateVote }) => {
         panelOpened={panelState.didOpen}
       />
     </SidePanel>
-  )
-})
+  );
+});
 
 class NewVotePanelContent extends React.PureComponent {
   static defaultProps = {
     onCreateVote: () => {},
-  }
+  };
   state = {
     ...initialState,
-  }
+  };
   componentWillReceiveProps({ panelOpened }) {
     if (panelOpened && !this.props.panelOpened) {
       // setTimeout is needed as a small hack to wait until the input's on
@@ -39,30 +47,37 @@ class NewVotePanelContent extends React.PureComponent {
       // const inputRef = useSidePanelFocusOnReady()
     } else if (!panelOpened && this.props.panelOpened) {
       // Finished closing the panel, so reset its state
-      this.setState({ ...initialState })
+      this.setState({ ...initialState });
     }
   }
-  handleQuestionChange = event => {
-    this.setState({ question: event.target.value })
-  }
-  
-  handleUrlChange = event => {
-    this.setState({ url: event.target.value })
-  }
-  handleWalletChange = event => {
-    this.setState({ wallet: event.target.value })
-  }
-  handleSignatureChange = event => {
-    this.setState({ signature: event.target.value })
-  }
+  handleQuestionChange = (event) => {
+    this.setState({ question: event.target.value });
+  };
 
-  handleSubmit = event => {
-    event.preventDefault()
-    const metadata = this.state.question.trim().replaceAll("\n", "") + "\n" + this.state.url.trim().replaceAll("\n", "") + "\n" + this.state.wallet.trim().replaceAll("\n", "") + "\n" + this.state.signature.trim().replaceAll("\n", "");
-    this.props.onCreateVote(metadata)
-  }
+  handleUrlChange = (event) => {
+    this.setState({ url: event.target.value });
+  };
+  handleWalletChange = (event) => {
+    this.setState({ wallet: event.target.value });
+  };
+  handleSignatureChange = (event) => {
+    this.setState({ signature: event.target.value });
+  };
+
+  handleSubmit = (event) => {
+    event.preventDefault();
+    const metadata =
+      this.state.question.trim().replaceAll("\n", "") +
+      "\n" +
+      this.state.url.trim().replaceAll("\n", "") +
+      "\n" +
+      this.state.wallet.trim().replaceAll("\n", "") +
+      "\n" +
+      this.state.signature.trim().replaceAll("\n", "");
+    this.props.onCreateVote(metadata);
+  };
   render() {
-    const { question, url, wallet, signature } = this.state
+    const { question, url, wallet, signature } = this.state;
     return (
       <div>
         <form
@@ -114,13 +129,18 @@ class NewVotePanelContent extends React.PureComponent {
               have any direct repercussions on the organization.
             </Info>
           </div>
-          <Button disabled={!question && !url && !wallet && !signature} mode="strong" type="submit" wide>
+          <Button
+            disabled={!question && !url && !wallet && !signature}
+            mode="strong"
+            type="submit"
+            wide
+          >
             Create new vote
           </Button>
         </form>
       </div>
-    )
+    );
   }
 }
 
-export default NewVotePanel
+export default NewVotePanel;

@@ -1,11 +1,11 @@
-import BN from 'bn.js'
-import { hasLoadedVoteSettings } from './vote-settings'
+import BN from "bn.js";
+import { hasLoadedVoteSettings } from "./vote-settings";
 
 function appStateReducer(state) {
-  const ready = hasLoadedVoteSettings(state)
+  const ready = hasLoadedVoteSettings(state);
 
   if (!ready) {
-    return { ...state, ready }
+    return { ...state, ready };
   }
 
   const {
@@ -14,11 +14,11 @@ function appStateReducer(state) {
     durationBlocks,
     votes,
     connectedAccountVotes,
-  } = state
+  } = state;
 
-  const pctBaseNum = parseInt(pctBase, 10)
-  const tokenDecimalsNum = parseInt(tokenDecimals, 10)
-  const tokenDecimalsBaseNum = Math.pow(10, tokenDecimalsNum)
+  const pctBaseNum = parseInt(pctBase, 10);
+  const tokenDecimalsNum = parseInt(tokenDecimals, 10);
+  const tokenDecimalsBaseNum = Math.pow(10, tokenDecimalsNum);
 
   return {
     ...state,
@@ -36,8 +36,8 @@ function appStateReducer(state) {
 
     // Transform the vote data for the frontend
     votes: votes
-      ? votes.map(vote => {
-          const { data } = vote
+      ? votes.map((vote) => {
+          const { data } = vote;
           return {
             ...vote,
             data: {
@@ -59,10 +59,10 @@ function appStateReducer(state) {
                 parseInt(data.votingPower, 10) / tokenDecimalsBaseNum,
               yea: parseInt(data.yea, 10) / tokenDecimalsBaseNum,
             },
-          }
+          };
         })
       : [],
-  }
+  };
 }
 
-export default appStateReducer
+export default appStateReducer;

@@ -1,1 +1,1 @@
-export const EMPTY_CALLSCRIPT = '0x00000001'
+export const EMPTY_CALLSCRIPT = "0x00000001";

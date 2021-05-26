@@ -1,4 +1,4 @@
-import gql from 'graphql-tag'
+import gql from "graphql-tag";
 
 export const ALL_VOTES = (type: string) => gql`
   ${type} Votes($appAddress: String!, $first: Int!, $skip: Int!) {
@@ -22,7 +22,7 @@ export const ALL_VOTES = (type: string) => gql`
       script
     }
   }
-`
+`;
 
 export const CASTS_FOR_VOTE = (type: string) => gql`
   ${type} Casts($voteId: ID!, $first: Int!, $skip: Int!) {
@@ -37,4 +37,4 @@ export const CASTS_FOR_VOTE = (type: string) => gql`
       voterStake
     }
   }
-`
+`;

@@ -1,17 +1,17 @@
-import React from 'react'
-import { useNetwork } from '@aragon/api-react'
-import { IdentityBadge } from '@aragon/ui'
-import { useIdentity } from '../../identity-manager'
-import LocalLabelPopoverTitle from './LocalLabelPopoverTitle'
-import LocalLabelPopoverActionLabel from './LocalLabelPopoverActionLabel'
+import React from "react";
+import { useNetwork } from "@aragon/api-react";
+import { IdentityBadge } from "@aragon/ui";
+import { useIdentity } from "../../identity-manager";
+import LocalLabelPopoverTitle from "./LocalLabelPopoverTitle";
+import LocalLabelPopoverActionLabel from "./LocalLabelPopoverActionLabel";
 
 const LocalIdentityBadge = ({ entity, ...props }) => {
-  const network = useNetwork()
-  const [label, showLocalIdentityModal] = useIdentity(entity)
-  const handleClick = () => showLocalIdentityModal(entity)
+  const network = useNetwork();
+  const [label, showLocalIdentityModal] = useIdentity(entity);
+  const handleClick = () => showLocalIdentityModal(entity);
   return (
     <IdentityBadge
-      label={label || ''}
+      label={label || ""}
       entity={entity}
       networkType={network && network.type}
       popoverAction={{
@@ -23,11 +23,11 @@ const LocalIdentityBadge = ({ entity, ...props }) => {
       }
       {...props}
     />
-  )
-}
+  );
+};
 
 LocalIdentityBadge.propTypes = {
   ...IdentityBadge.propTypes,
-}
+};
 
-export default LocalIdentityBadge
+export default LocalIdentityBadge;

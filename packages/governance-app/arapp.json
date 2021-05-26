@@ -33,7 +33,7 @@
       "appName": "governance.aragonpm.eth",
       "wsRPC": "wss://xdai.poanetwork.dev/wss",
       "network": "xdai"
-    }	    
+    }
   },
   "roles": [
     {

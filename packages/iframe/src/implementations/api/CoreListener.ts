@@ -1,3 +1,8 @@
+import { ICoreListener } from "@core-iframe/interfaces/api";
+import {
+  ICoreUIService,
+  ICoreUIServiceType,
+} from "@core-iframe/interfaces/business";
 import {
   EthereumAddress,
   PublicIdentifier,
@@ -10,12 +15,6 @@ import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
 import { injectable, inject } from "inversify";
 import Postmate from "postmate";
-
-import { ICoreListener } from "@core-iframe/interfaces/api";
-import {
-  ICoreUIService,
-  ICoreUIServiceType,
-} from "@core-iframe/interfaces/business";
 
 @injectable()
 export class CoreListener extends ChildProxy implements ICoreListener {

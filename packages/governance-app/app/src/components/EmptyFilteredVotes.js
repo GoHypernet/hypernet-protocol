@@ -1,10 +1,10 @@
-import React from 'react'
-import PropTypes from 'prop-types'
-import { Box, Link, GU, unselectable, useTheme } from '@aragon/ui'
-import noResultsPng from '../assets/no-results.png'
+import React from "react";
+import PropTypes from "prop-types";
+import { Box, Link, GU, unselectable, useTheme } from "@aragon/ui";
+import noResultsPng from "../assets/no-results.png";
 
 function EmptyFilteredVotes({ onClear }) {
-  const theme = useTheme()
+  const theme = useTheme();
 
   return (
     <Box>
@@ -43,16 +43,16 @@ function EmptyFilteredVotes({ onClear }) {
             font-size: 16px;
           `}
         >
-          We can’t find any item matching your filter selection.{' '}
+          We can’t find any item matching your filter selection.{" "}
           <Link onClick={onClear}>Clear filters</Link>
         </div>
       </div>
     </Box>
-  )
+  );
 }
 
 EmptyFilteredVotes.propTypes = {
   onClear: PropTypes.func.isRequired,
-}
+};
 
-export default React.memo(EmptyFilteredVotes)
+export default React.memo(EmptyFilteredVotes);

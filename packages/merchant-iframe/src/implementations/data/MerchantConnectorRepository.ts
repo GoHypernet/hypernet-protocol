@@ -5,10 +5,9 @@ import {
   AjaxError,
 } from "@hypernetlabs/objects";
 import { IAjaxUtils } from "@hypernetlabs/utils";
+import { IMerchantConnectorRepository } from "@merchant-iframe/interfaces/data";
 import { okAsync, ResultAsync } from "neverthrow";
 import { urlJoinP } from "url-join-ts";
-
-import { IMerchantConnectorRepository } from "@merchant-iframe/interfaces/data";
 
 export class MerchantConnectorRepository
   implements IMerchantConnectorRepository {

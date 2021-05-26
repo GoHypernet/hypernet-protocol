@@ -7,8 +7,6 @@ import {
   ILogUtils,
   LogUtils,
 } from "@hypernetlabs/utils";
-import { okAsync } from "neverthrow";
-
 import {
   HypernetCoreListener,
   MerchantConnectorListener,
@@ -23,7 +21,6 @@ import {
   MerchantConnectorRepository,
   PersistenceRepository,
 } from "@merchant-iframe/implementations/data";
-import { ContextProvider } from "@merchant-iframe/implementations/utils";
 import {
   IMerchantConnectorListener,
   IHypernetCoreListener,
@@ -38,6 +35,9 @@ import {
   IMerchantConnectorRepository,
   IPersistenceRepository,
 } from "@merchant-iframe/interfaces/data";
+import { okAsync } from "neverthrow";
+
+import { ContextProvider } from "@merchant-iframe/implementations/utils";
 import { IContextProvider } from "@merchant-iframe/interfaces/utils";
 
 export class MerchantIframe {

@@ -4,6 +4,7 @@ import {
   MerchantUrl,
 } from "@hypernetlabs/objects";
 import { EPaymentType } from "@hypernetlabs/objects";
+import { EResultStatus } from "@web-ui/interfaces/objects";
 import React from "react";
 
 import {
@@ -13,7 +14,6 @@ import {
   SelectInput,
 } from "@web-ui/components";
 import { usePayment } from "@web-ui/hooks";
-import { EResultStatus } from "@web-ui/interfaces/objects";
 
 interface PaymentWidgetProps {
   counterPartyAccount?: PublicIdentifier;

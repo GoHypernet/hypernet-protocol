@@ -1,2 +1,2 @@
-export { parseVotes } from './votes'
-export { parseCasts } from './casts'
+export { parseVotes } from "./votes";
+export { parseCasts } from "./casts";

@@ -1,6 +1,5 @@
-import { BigNumber } from "ethers";
-
 import { IViewUtils } from "@web-ui/interfaces";
+import { BigNumber } from "ethers";
 
 export class ViewUtils implements IViewUtils {
   public fromBigNumber(value: BigNumber): number {

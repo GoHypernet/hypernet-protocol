@@ -1,10 +1,10 @@
-import { useMemo } from 'react'
-import { useAragonApi } from '@aragon/api-react'
-import { getUserBalanceAt, getUserBalanceNow } from '../token-utils'
-import { getCanExecute, getCanVote } from '../vote-utils'
-import useTokenContract from './useTokenContract'
-import usePromise from './usePromise'
-import { useBlockTimeStamp } from './useBlock'
+import { useMemo } from "react";
+import { useAragonApi } from "@aragon/api-react";
+import { getUserBalanceAt, getUserBalanceNow } from "../token-utils";
+import { getCanExecute, getCanVote } from "../vote-utils";
+import useTokenContract from "./useTokenContract";
+import usePromise from "./usePromise";
+import { useBlockTimeStamp } from "./useBlock";
 
 // Get the extended data related to a vote
 export default function useExtendedVoteData(vote) {
@@ -12,39 +12,45 @@ export default function useExtendedVoteData(vote) {
     api,
     connectedAccount,
     appState: { tokenDecimals },
-  } = useAragonApi()
+  } = useAragonApi();
 
-  const tokenContract = useTokenContract()
+  const tokenContract = useTokenContract();
 
-  const canExecutePromise = useMemo(() => getCanExecute(vote, api), [api, vote])
-  const canExecute = usePromise(canExecutePromise, [], false)
+  const canExecutePromise = useMemo(() => getCanExecute(vote, api), [
+    api,
+    vote,
+  ]);
+  const canExecute = usePromise(canExecutePromise, [], false);
 
   const canUserVotePromise = useMemo(
     () => getCanVote(vote, connectedAccount, api),
-    [vote, connectedAccount, api]
-  )
-  const canUserVote = usePromise(canUserVotePromise, [], false)
+    [vote, connectedAccount, api],
+  );
+  const canUserVote = usePromise(canUserVotePromise, [], false);
 
   const userBalancePromise = useMemo(() => {
     if (!vote) {
-      return -1
+      return -1;
     }
     return getUserBalanceAt(
       connectedAccount,
       vote.data.snapshotBlock,
       tokenContract,
-      tokenDecimals
-    )
-  }, [connectedAccount, tokenContract, tokenDecimals, vote])
-  const userBalance = usePromise(userBalancePromise, [], -1)
+      tokenDecimals,
+    );
+  }, [connectedAccount, tokenContract, tokenDecimals, vote]);
+  const userBalance = usePromise(userBalancePromise, [], -1);
 
   const userBalanceNowPromise = useMemo(
     () => getUserBalanceNow(connectedAccount, tokenContract, tokenDecimals),
-    [connectedAccount, tokenContract, tokenDecimals]
-  )
-  const userBalanceNow = usePromise(userBalanceNowPromise, [], -1)
+    [connectedAccount, tokenContract, tokenDecimals],
+  );
+  const userBalanceNow = usePromise(userBalanceNowPromise, [], -1);
 
-  const startTimestamp = useBlockTimeStamp(vote.data.startBlock, vote.data.open)
+  const startTimestamp = useBlockTimeStamp(
+    vote.data.startBlock,
+    vote.data.open,
+  );
 
   return {
     canExecute,
@@ -56,5 +62,5 @@ export default function useExtendedVoteData(vote) {
     canUserVotePromise,
     canExecutePromise,
     startTimestamp,
-  }
+  };
 }

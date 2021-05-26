@@ -1,6 +1,5 @@
-import { okAsync, ResultAsync } from "neverthrow";
-
 import { ICoreUIService } from "@core-iframe/interfaces/business";
+import { okAsync, ResultAsync } from "neverthrow";
 
 export class CoreUIService implements ICoreUIService {
   protected authenticationContentId =

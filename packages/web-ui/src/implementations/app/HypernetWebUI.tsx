@@ -1,4 +1,12 @@
 import { IHypernetCore, MerchantUrl, RenderError } from "@hypernetlabs/objects";
+import {
+  IConnectorAuthorizationFlowParams,
+  IHypernetWebUI,
+  IRenderParams,
+  IRenderPaymentWidgetParams,
+  IOnboardingFlowParams,
+  IViewUtils,
+} from "@web-ui/interfaces";
 import { Result } from "neverthrow";
 import React from "react";
 import ReactDOM from "react-dom";
@@ -17,14 +25,6 @@ import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
 import PrivateKeysFlow from "@web-ui/flows/PrivateKeysFlow";
-import {
-  IConnectorAuthorizationFlowParams,
-  IHypernetWebUI,
-  IRenderParams,
-  IRenderPaymentWidgetParams,
-  IOnboardingFlowParams,
-  IViewUtils,
-} from "@web-ui/interfaces";
 import { ViewUtils } from "@web-ui/utils";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget";
 import FundWidget from "@web-ui/widgets/FundWidget";
