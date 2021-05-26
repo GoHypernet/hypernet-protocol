@@ -13,9 +13,9 @@ export const useStyles = makeStyles({
   headerWrapper: {
     display: "flex",
     justifyContent: "space-between",
+    borderBottom: `1px solid ${colors.BOX_BORDER_COLOR}`,
   },
   label: {
-    borderBottom: `1px solid ${colors.BOX_BORDER_COLOR}`,
     fontSize: 20,
     padding: 24,
   },

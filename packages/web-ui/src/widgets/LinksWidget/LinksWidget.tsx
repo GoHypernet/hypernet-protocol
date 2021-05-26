@@ -32,6 +32,7 @@ interface ISideFilter {
 const LinksWidget: React.FC<ILinksWidget> = ({
   noLabel,
   includeBoxWrapper,
+  bodyStyle,
 }: ILinksWidget) => {
   const { viewUtils, dateUtils } = useStoreContext();
   const [tabValue, setTabValue] = useState<number>(0);
@@ -181,6 +182,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           <FilterListIcon />
         </IconButton>
       }
+      bodyStyle={bodyStyle}
     >
       <SideFilter
         visible={isSideFilterOpen}
