@@ -676,4 +676,23 @@ export class PaymentRepository implements IPaymentRepository {
         return this.paymentUtils.transfersToPayment(paymentId, allTransfers);
       });
   }
+
+  /**
+   * Release transfer insurance with 0 value
+   * @param paymentId the payment for which to resolve insurance for
+   * @param transferId the transferId for which to resolve insurance for
+   */
+  public resolveInsurance(
+    paymentId: PaymentId,
+    transferId: TransferId,
+  ): ResultAsync<void, TransferResolutionError> {
+    return this.vectorUtils
+      .resolveInsuranceTransfer(
+        transferId,
+        paymentId,
+        undefined,
+        BigNumber.from("0"),
+      )
+      .map(() => {});
+  }
 }
