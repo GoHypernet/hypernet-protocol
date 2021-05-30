@@ -10,6 +10,7 @@ import {
   EthereumAddress,
   AssetBalance,
   Balances,
+  IFullChannelState,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { ILocalStorageUtils } from "@hypernetlabs/utils";
@@ -36,7 +37,11 @@ import {
   publicIdentifier,
   routerChannelAddress,
 } from "@mock/mocks";
-import { BlockchainProviderMock, BrowserNodeProviderMock } from "@mock/utils";
+import {
+  BlockchainProviderMock,
+  BrowserNodeProviderMock,
+  ContextProviderMock,
+} from "@mock/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
@@ -118,6 +123,9 @@ class AccountsRepositoryMocks {
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
   public localStorageUtils = td.object<ILocalStorageUtils>();
+  public contextProvider = new ContextProviderMock();
+  public balances: Balances;
+  public stateChannel: IFullChannelState | undefined;
 
   constructor() {
     td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(
@@ -141,6 +149,27 @@ class AccountsRepositoryMocks {
         account,
       ),
     ).thenReturn(okAsync(new TransactionResponseMock()));
+
+    this.stateChannel = this.browserNodeProvider.stateChannels.get(
+      routerChannelAddress,
+    );
+    if (this.stateChannel == null) {
+      throw new Error();
+    }
+
+    this.balances = {
+      assets: [
+        new AssetBalance(
+          EthereumAddress(this.stateChannel?.assetIds[0]),
+          "",
+          "",
+          0,
+          BigNumber.from(this.stateChannel?.balances[0].amount[1]),
+          BigNumber.from(0),
+          BigNumber.from(this.stateChannel?.balances[0].amount[1]),
+        ),
+      ],
+    };
   }
 
   public factoryAccountsRepository(): IAccountsRepository {
@@ -148,6 +177,7 @@ class AccountsRepositoryMocks {
       this.blockchainProvider,
       this.vectorUtils,
       this.browserNodeProvider,
+      this.contextProvider,
       this.blockchainUtils,
       this.localStorageUtils,
       this.logUtils,
@@ -162,6 +192,7 @@ class AccountsRepositoryErrorMocks {
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
   public localStorageUtils = td.object<ILocalStorageUtils>();
+  public contextProvider = new ContextProviderMock();
 
   constructor() {
     td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(
@@ -188,6 +219,7 @@ class AccountsRepositoryErrorMocks {
       this.blockchainProvider,
       this.vectorUtils,
       this.browserNodeProvider,
+      this.contextProvider,
       this.blockchainUtils,
       this.localStorageUtils,
       this.logUtils,
@@ -239,32 +271,10 @@ describe("AccountsRepository tests", () => {
     expect(result._unsafeUnwrap()).toStrictEqual(accounts);
   });
 
-  // TODO: there is a bug in getBalances related to contract token names, refactor this test when it fixed
   test("Should getBalances return balances", async () => {
     // Arrange
     const accountsRepositoryMocks = new AccountsRepositoryMocks();
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
-
-    const stateChannel = accountsRepositoryMocks.browserNodeProvider.stateChannels.get(
-      routerChannelAddress,
-    );
-    if (stateChannel == null) {
-      throw new Error();
-    }
-
-    const balances: Balances = {
-      assets: [
-        new AssetBalance(
-          EthereumAddress(stateChannel?.assetIds[0]),
-          "",
-          "",
-          0,
-          BigNumber.from(stateChannel?.balances[0].amount[1]),
-          BigNumber.from(0),
-          BigNumber.from(stateChannel?.balances[0].amount[1]),
-        ),
-      ],
-    };
 
     // Act
     const result = await repo.getBalances();
@@ -272,7 +282,7 @@ describe("AccountsRepository tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toEqual(balances);
+    expect(result._unsafeUnwrap()).toEqual(accountsRepositoryMocks.balances);
   });
 
   test("Should getBalances throw error when getRouterChannelAddress fails", async () => {
@@ -428,5 +438,27 @@ describe("AccountsRepository tests", () => {
     // Assert
     expect(result.isErr()).toBeTruthy();
     expect(error).toBeInstanceOf(BlockchainUnavailableError);
+  });
+
+  test("Should refreshBlances return balances and update the context", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
+
+    let updatedBalances: Balances | null = null;
+    accountsRepositoryMocks.contextProvider.onBalancesChanged.subscribe(
+      (val) => {
+        updatedBalances = val;
+      },
+    );
+
+    // Act
+    const result = await repo.refreshBalances();
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toEqual(accountsRepositoryMocks.balances);
+    expect(updatedBalances).toEqual(accountsRepositoryMocks.balances);
   });
 });

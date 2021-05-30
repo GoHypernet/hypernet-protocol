@@ -168,10 +168,13 @@ export class PaymentService implements IPaymentService {
           }
 
           // Create the PullRecord
-          return this.paymentRepository.createPullRecord(
-            paymentId,
-            amount.toString(),
-          );
+          return this.paymentRepository
+            .createPullRecord(paymentId, amount.toString())
+            .andThen((payment) => {
+              return this.accountRepository.refreshBalances().map(() => {
+                return payment;
+              });
+            });
         } else {
           return errAsync(
             new InvalidParametersError(
@@ -268,7 +271,9 @@ export class PaymentService implements IPaymentService {
         throw new LogicalError("Unknown payment type!");
       }
 
-      return okAsync(undefined);
+      return this.accountRepository
+        .refreshBalances()
+        .andThen(() => okAsync(undefined));
     });
   }
 
@@ -383,7 +388,11 @@ export class PaymentService implements IPaymentService {
         return ResultAsync.fromPromise(
           Promise.all(stakeAttempts),
           (e) => e as AcceptPaymentError,
-        );
+        ).andThen((paymentsResult) => {
+          return this.accountRepository
+            .refreshBalances()
+            .andThen(() => okAsync(paymentsResult));
+        });
       });
   }
 
@@ -571,7 +580,9 @@ export class PaymentService implements IPaymentService {
         context.onPullPaymentUpdated.next(payment);
       }
 
-      return okAsync(undefined);
+      return this.accountRepository
+        .refreshBalances()
+        .andThen(() => okAsync(undefined));
     });
   }
 
@@ -625,7 +636,9 @@ export class PaymentService implements IPaymentService {
         if (payment == null) {
           return errAsync(new InvalidParametersError("Invalid payment ID"));
         }
-        return okAsync(payment);
+        return this.accountRepository
+          .refreshBalances()
+          .andThen(() => okAsync(payment));
       });
   }
 
@@ -695,7 +708,9 @@ export class PaymentService implements IPaymentService {
           if (payment instanceof PullPayment) {
             context.onPullPaymentDelayed.next(payment);
           }
-          return okAsync(undefined);
+          return this.accountRepository
+            .refreshBalances()
+            .andThen(() => okAsync(undefined));
         }
       });
   }

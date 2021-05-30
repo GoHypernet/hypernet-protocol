@@ -319,6 +319,7 @@ export class HypernetCore implements IHypernetCore {
       this.blockchainProvider,
       this.vectorUtils,
       this.browserNodeProvider,
+      this.contextProvider,
       this.blockchainUtils,
       this.localStorageUtils,
       this.logUtils,
@@ -368,7 +369,6 @@ export class HypernetCore implements IHypernetCore {
 
     this.accountService = new AccountService(
       this.accountRepository,
-      this.contextProvider,
       this.blockchainProvider,
       this.logUtils,
     );
