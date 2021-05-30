@@ -64,9 +64,6 @@ class AccountServiceMocks {
   }
 }
 
-const assetName = "PhoebeCoin";
-const assetSymbol = ":P";
-
 describe("AccountService tests", () => {
   test("Should getPublicIdentifier return publicIdentifier", async () => {
     // Arrange

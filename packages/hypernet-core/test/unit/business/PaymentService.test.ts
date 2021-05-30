@@ -172,6 +172,10 @@ class PaymentServiceMocks {
     td.when(
       this.merchantConnectorRepository.getAuthorizedMerchantConnectorStatus(),
     ).thenReturn(okAsync(new Map([[merchantUrl, true]])));
+
+    td.when(this.accountRepository.refreshBalances()).thenReturn(
+      okAsync(new Balances([this.assetBalance])),
+    );
   }
 
   public factoryPaymentService(): IPaymentService {
@@ -231,9 +235,6 @@ class PaymentServiceMocks {
     );
   }
 }
-
-const assetName = "PhoebeCoin";
-const assetSymbol = ":P";
 
 describe("PaymentService tests", () => {
   test("sendFunds returns payment", async () => {

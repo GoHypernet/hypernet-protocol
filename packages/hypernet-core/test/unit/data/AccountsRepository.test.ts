@@ -161,8 +161,8 @@ class AccountsRepositoryMocks {
       assets: [
         new AssetBalance(
           EthereumAddress(this.stateChannel?.assetIds[0]),
-          "",
-          "",
+          `Unknown Token (${EthereumAddress(this.stateChannel?.assetIds[0])})`,
+          "Unk",
           0,
           BigNumber.from(this.stateChannel?.balances[0].amount[1]),
           BigNumber.from(0),
@@ -304,21 +304,8 @@ describe("AccountsRepository tests", () => {
     const accountsRepositoryMocks = new AccountsRepositoryMocks();
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-    const stateChannel = accountsRepositoryMocks.browserNodeProvider.stateChannels.get(
-      routerChannelAddress,
-    );
-    if (stateChannel == null) {
-      throw new Error();
-    }
-    const assetId = EthereumAddress(stateChannel?.assetIds[0]);
-    const assetBalance = new AssetBalance(
-      assetId,
-      "",
-      "",
-      0,
-      BigNumber.from(stateChannel?.balances[0].amount[1]),
-      BigNumber.from(0),
-      BigNumber.from(stateChannel?.balances[0].amount[1]),
+    const assetId = EthereumAddress(
+      accountsRepositoryMocks.stateChannel?.assetIds[0] as string,
     );
 
     // Act
@@ -327,7 +314,9 @@ describe("AccountsRepository tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toStrictEqual(assetBalance);
+    expect(result._unsafeUnwrap()).toStrictEqual(
+      accountsRepositoryMocks.balances.assets[0],
+    );
   });
 
   test("Should depositFunds with ether address without errors", async () => {
