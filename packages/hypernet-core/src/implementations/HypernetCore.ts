@@ -643,6 +643,21 @@ export class HypernetCore implements IHypernetCore {
     return this.paymentService.initiateDispute(paymentId);
   }
 
+  public resolveInsurance(
+    paymentId: PaymentId,
+  ): ResultAsync<
+    Payment,
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
+  > {
+    return this.paymentService.resolveInsurance(paymentId);
+  }
+
   /**
    * Initialize this instance of Hypernet Core
    * @param account: the ethereum account to initialize with

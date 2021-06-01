@@ -43,6 +43,8 @@ export class PullPaymentViewModel {
   public showPullButton: ko.PureComputed<boolean>;
   public disputeButton: ButtonParams;
   public showDisputeButton: ko.PureComputed<boolean>;
+  public resolveInsuranceButton: ButtonParams;
+  public showResolveInsuranceButton: ko.PureComputed<boolean>;
 
   protected integration: IHypernetWebIntegration;
   protected paymentId: PaymentId;
@@ -147,6 +149,25 @@ export class PullPaymentViewModel {
     });
 
     this.showDisputeButton = ko.pureComputed(() => {
+      return (
+        this.state().state === EPaymentState.Accepted &&
+        this.publicIdentifier() === this.from()
+      );
+    });
+
+    this.resolveInsuranceButton = new ButtonParams(
+      "Resolve Insurace",
+      async () => {
+        return await this.integration.core
+          .resolveInsurance(this.paymentId)
+          .mapErr((e) => {
+            alert("Error during resolveInsurance!");
+            console.error(e);
+          });
+      },
+    );
+
+    this.showResolveInsuranceButton = ko.pureComputed(() => {
       return (
         this.state().state === EPaymentState.Accepted &&
         this.publicIdentifier() === this.from()

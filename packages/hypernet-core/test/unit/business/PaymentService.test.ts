@@ -176,6 +176,9 @@ class PaymentServiceMocks {
     td.when(this.accountRepository.refreshBalances()).thenReturn(
       okAsync(new Balances([this.assetBalance])),
     );
+    td.when(
+      this.paymentRepository.resolveInsurance(paymentId, insuranceTransferId),
+    ).thenReturn(okAsync(undefined));
   }
 
   public factoryPaymentService(): IPaymentService {
@@ -680,5 +683,62 @@ describe("PaymentService tests", () => {
     expect(delayedPushPayments[0]).toStrictEqual(
       paymentServiceMock.pushPayment,
     );
+  });
+
+  test("Should resolveInsurance works without any errors if payment is accepted and has amount staked", async () => {
+    // Arrange
+    const paymentServiceMock = new PaymentServiceMocks();
+    const paymentService = paymentServiceMock.factoryPaymentService();
+    const acceptedPayment = paymentServiceMock.factoryPushPayment(
+      publicIdentifier2,
+      publicIdentifier,
+      EPaymentState.Accepted,
+      requiredStake,
+    );
+    paymentServiceMock.setExistingPayments([acceptedPayment]);
+
+    // Act
+    const result = await paymentService.resolveInsurance(acceptedPayment.id);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toBe(acceptedPayment);
+  });
+
+  test("Should resolveInsurance fails if payment is not accepted", async () => {
+    // Arrange
+    const paymentServiceMock = new PaymentServiceMocks();
+    const paymentService = paymentServiceMock.factoryPaymentService();
+
+    // Act
+    const result = await paymentService.resolveInsurance(paymentId);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeTruthy();
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(InvalidParametersError);
+  });
+
+  test("Should resolveInsurance fails if payment requiered stake is not equal to amount staked", async () => {
+    // Arrange
+    const paymentServiceMock = new PaymentServiceMocks();
+    const paymentService = paymentServiceMock.factoryPaymentService();
+    const acceptedPayment = paymentServiceMock.factoryPushPayment(
+      publicIdentifier2,
+      publicIdentifier,
+      EPaymentState.Accepted,
+      requiredStake,
+    );
+    acceptedPayment.amountStaked = BigNumber.from("10");
+    paymentServiceMock.setExistingPayments([acceptedPayment]);
+
+    // Act
+    const result = await paymentService.resolveInsurance(acceptedPayment.id);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeTruthy();
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(InvalidParametersError);
   });
 });

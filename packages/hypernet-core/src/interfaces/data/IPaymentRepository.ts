@@ -5,6 +5,7 @@ import {
   PullPayment,
   PushPayment,
   PaymentId,
+  TransferId,
   MerchantUrl,
   PaymentFinalizeError,
   RouterChannelUnknownError,
@@ -128,6 +129,11 @@ export interface IPaymentRepository {
     | InvalidPaymentError
     | InvalidParametersError
   >;
+
+  resolveInsurance(
+    paymentId: PaymentId,
+    transferId: TransferId,
+  ): ResultAsync<void, TransferResolutionError>;
 }
 
 export const IPaymentRepositoryType = Symbol.for("IPaymentRepository");

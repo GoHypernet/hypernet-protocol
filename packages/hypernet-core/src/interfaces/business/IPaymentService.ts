@@ -239,6 +239,19 @@ export interface IPaymentService {
     | TransferResolutionError
   >;
 
+  resolveInsurance(
+    paymentId: PaymentId,
+  ): ResultAsync<
+    Payment,
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
+  >;
+
   /**
    * This function will advance the state of the payments if they can or should be.
    * It will provide funds for a staked payment, accept the funds for a paid push payment,
