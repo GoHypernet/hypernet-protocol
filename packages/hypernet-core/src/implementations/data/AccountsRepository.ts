@@ -30,7 +30,6 @@ import {
   IVectorUtils,
   IBlockchainProvider,
   IBrowserNodeProvider,
-  IContextProvider,
   IBrowserNode,
   IBlockchainUtils,
 } from "@interfaces/utilities";
@@ -50,7 +49,6 @@ export class AccountsRepository implements IAccountsRepository {
     protected blockchainProvider: IBlockchainProvider,
     protected vectorUtils: IVectorUtils,
     protected browserNodeProvider: IBrowserNodeProvider,
-    protected contextProvider: IContextProvider,
     protected blockchainUtils: IBlockchainUtils,
     protected localStorageUtils: ILocalStorageUtils,
     protected logUtils: ILogUtils,
@@ -437,18 +435,5 @@ export class AccountsRepository implements IAccountsRepository {
 
     // We have cached info
     return okAsync(cachedAssetInfo);
-  }
-
-  // Caculates balances and update the context after that
-  public refreshBalances(): ResultAsync<
-    Balances,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
-  > {
-    return this.contextProvider.getContext().andThen((context) => {
-      return this.getBalances().andThen((balances) => {
-        context.onBalancesChanged.next(balances);
-        return okAsync(balances);
-      });
-    });
   }
 }

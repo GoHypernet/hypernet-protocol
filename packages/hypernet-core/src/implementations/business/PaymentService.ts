@@ -171,7 +171,7 @@ export class PaymentService implements IPaymentService {
           return this.paymentRepository
             .createPullRecord(paymentId, amount.toString())
             .andThen((payment) => {
-              return this.accountRepository.refreshBalances().map(() => {
+              return this._refreshBalances().map(() => {
                 return payment;
               });
             });
@@ -271,9 +271,7 @@ export class PaymentService implements IPaymentService {
         throw new LogicalError("Unknown payment type!");
       }
 
-      return this.accountRepository
-        .refreshBalances()
-        .andThen(() => okAsync(undefined));
+      return this._refreshBalances();
     });
   }
 
@@ -389,9 +387,7 @@ export class PaymentService implements IPaymentService {
           Promise.all(stakeAttempts),
           (e) => e as AcceptPaymentError,
         ).andThen((paymentsResult) => {
-          return this.accountRepository
-            .refreshBalances()
-            .andThen(() => okAsync(paymentsResult));
+          return this._refreshBalances().andThen(() => okAsync(paymentsResult));
         });
       });
   }
@@ -580,9 +576,7 @@ export class PaymentService implements IPaymentService {
         context.onPullPaymentUpdated.next(payment);
       }
 
-      return this.accountRepository
-        .refreshBalances()
-        .andThen(() => okAsync(undefined));
+      return this._refreshBalances();
     });
   }
 
@@ -636,9 +630,7 @@ export class PaymentService implements IPaymentService {
         if (payment == null) {
           return errAsync(new InvalidParametersError("Invalid payment ID"));
         }
-        return this.accountRepository
-          .refreshBalances()
-          .andThen(() => okAsync(payment));
+        return this._refreshBalances().andThen(() => okAsync(payment));
       });
   }
 
@@ -773,9 +765,7 @@ export class PaymentService implements IPaymentService {
           if (payment instanceof PullPayment) {
             context.onPullPaymentDelayed.next(payment);
           }
-          return this.accountRepository
-            .refreshBalances()
-            .andThen(() => okAsync(undefined));
+          return this._refreshBalances();
         }
       });
   }
@@ -832,5 +822,17 @@ export class PaymentService implements IPaymentService {
     }
 
     return okAsync(payment);
+  }
+
+  // Caculates balances and update the context after that
+  private _refreshBalances(): ResultAsync<
+    void,
+    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+  > {
+    return this.contextProvider.getContext().andThen((context) => {
+      return this.accountRepository.getBalances().map((balances) => {
+        context.onBalancesChanged.next(balances);
+      });
+    });
   }
 }

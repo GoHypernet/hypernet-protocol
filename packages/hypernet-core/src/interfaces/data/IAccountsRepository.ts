@@ -69,11 +69,6 @@ export interface IAccountsRepository {
     AssetInfo,
     BlockchainUnavailableError | PreferredPaymentTokenError
   >;
-
-  refreshBalances(): ResultAsync<
-    Balances,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
-  >;
 }
 
 export const IAccountsRepositoryType = Symbol.for("IAccountsRepository");

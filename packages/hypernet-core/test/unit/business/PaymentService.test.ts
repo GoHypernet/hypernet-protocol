@@ -173,9 +173,6 @@ class PaymentServiceMocks {
       this.merchantConnectorRepository.getAuthorizedMerchantConnectorStatus(),
     ).thenReturn(okAsync(new Map([[merchantUrl, true]])));
 
-    td.when(this.accountRepository.refreshBalances()).thenReturn(
-      okAsync(new Balances([this.assetBalance])),
-    );
     td.when(
       this.paymentRepository.resolveInsurance(paymentId, insuranceTransferId),
     ).thenReturn(okAsync(undefined));

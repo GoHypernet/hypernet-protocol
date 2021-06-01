@@ -37,11 +37,7 @@ import {
   publicIdentifier,
   routerChannelAddress,
 } from "@mock/mocks";
-import {
-  BlockchainProviderMock,
-  BrowserNodeProviderMock,
-  ContextProviderMock,
-} from "@mock/utils";
+import { BlockchainProviderMock, BrowserNodeProviderMock } from "@mock/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
@@ -123,7 +119,6 @@ class AccountsRepositoryMocks {
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
   public localStorageUtils = td.object<ILocalStorageUtils>();
-  public contextProvider = new ContextProviderMock();
   public balances: Balances;
   public stateChannel: IFullChannelState | undefined;
 
@@ -177,7 +172,6 @@ class AccountsRepositoryMocks {
       this.blockchainProvider,
       this.vectorUtils,
       this.browserNodeProvider,
-      this.contextProvider,
       this.blockchainUtils,
       this.localStorageUtils,
       this.logUtils,
@@ -192,7 +186,6 @@ class AccountsRepositoryErrorMocks {
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
   public localStorageUtils = td.object<ILocalStorageUtils>();
-  public contextProvider = new ContextProviderMock();
 
   constructor() {
     td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(
@@ -219,7 +212,6 @@ class AccountsRepositoryErrorMocks {
       this.blockchainProvider,
       this.vectorUtils,
       this.browserNodeProvider,
-      this.contextProvider,
       this.blockchainUtils,
       this.localStorageUtils,
       this.logUtils,
@@ -427,27 +419,5 @@ describe("AccountsRepository tests", () => {
     // Assert
     expect(result.isErr()).toBeTruthy();
     expect(error).toBeInstanceOf(BlockchainUnavailableError);
-  });
-
-  test("Should refreshBlances return balances and update the context", async () => {
-    // Arrange
-    const accountsRepositoryMocks = new AccountsRepositoryMocks();
-    const repo = accountsRepositoryMocks.factoryAccountsRepository();
-
-    let updatedBalances: Balances | null = null;
-    accountsRepositoryMocks.contextProvider.onBalancesChanged.subscribe(
-      (val) => {
-        updatedBalances = val;
-      },
-    );
-
-    // Act
-    const result = await repo.refreshBalances();
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toEqual(accountsRepositoryMocks.balances);
-    expect(updatedBalances).toEqual(accountsRepositoryMocks.balances);
   });
 });

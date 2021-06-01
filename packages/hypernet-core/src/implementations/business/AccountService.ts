@@ -15,11 +15,15 @@ import {
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
-import { errAsync, ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import { IAccountService } from "@interfaces/business";
 import { IAccountsRepository } from "@interfaces/data";
-import { IBlockchainProvider } from "@interfaces/utilities";
+import {
+  HypernetContext,
+  InitializedHypernetContext,
+} from "@interfaces/objects";
+import { IContextProvider, IBlockchainProvider } from "@interfaces/utilities";
 
 /**
  *
@@ -27,6 +31,7 @@ import { IBlockchainProvider } from "@interfaces/utilities";
 export class AccountService implements IAccountService {
   constructor(
     protected accountRepository: IAccountsRepository,
+    protected contextProvider: IContextProvider,
     protected blockchainProvider: IBlockchainProvider,
     protected logUtils: ILogUtils,
   ) {}
@@ -67,10 +72,22 @@ export class AccountService implements IAccountService {
       `HypernetCore:depositFunds: assetAddress: ${assetAddress}`,
     );
 
-    return this.accountRepository
-      .depositFunds(assetAddress, amount)
+    let context: HypernetContext;
+
+    return this.contextProvider
+      .getContext()
+      .andThen((contextVal) => {
+        context = contextVal;
+
+        return this.accountRepository.depositFunds(assetAddress, amount);
+      })
       .andThen(() => {
-        return this.accountRepository.refreshBalances();
+        return this.accountRepository.getBalances();
+      })
+      .andThen((balances) => {
+        context.onBalancesChanged.next(balances);
+
+        return okAsync(balances);
       });
   }
 
@@ -85,10 +102,25 @@ export class AccountService implements IAccountService {
     | BlockchainUnavailableError
     | VectorError
   > {
-    return this.accountRepository
-      .withdrawFunds(assetAddress, amount, destinationAddress)
+    let context: InitializedHypernetContext;
+
+    return this.contextProvider
+      .getInitializedContext()
+      .andThen((contextVal) => {
+        context = contextVal;
+        return this.accountRepository.withdrawFunds(
+          assetAddress,
+          amount,
+          destinationAddress,
+        );
+      })
       .andThen(() => {
-        return this.accountRepository.refreshBalances();
+        return this.accountRepository.getBalances();
+      })
+      .andThen((balances) => {
+        context.onBalancesChanged.next(balances);
+
+        return okAsync(balances);
       });
   }
 
