@@ -14,6 +14,10 @@ import {
   AjaxError,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
+import { ethers } from "ethers";
+import { injectable, inject } from "inversify";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
+
 import { IMerchantService } from "@merchant-iframe/interfaces/business";
 import {
   IHypernetCoreRepository,
@@ -24,10 +28,6 @@ import {
   IPersistenceRepositoryType,
 } from "@merchant-iframe/interfaces/data";
 import { ExpectedRedirect } from "@merchant-iframe/interfaces/objects";
-import { ethers } from "ethers";
-import { injectable, inject } from "inversify";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
-
 import {
   MerchantConnectorError,
   MerchantValidationError,
@@ -320,7 +320,7 @@ export class MerchantService implements IMerchantService {
       context = this.contextProvider.getMerchantContext();
 
       if (context.validatedMerchantSignature == null) {
-        throw new MerchantValidationError(
+        throw new Error(
           "validatedMerchantSignature is null but merchantValidated is OK",
         );
       }

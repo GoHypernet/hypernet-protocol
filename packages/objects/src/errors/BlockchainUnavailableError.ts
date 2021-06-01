@@ -1,1 +1,5 @@
-export class BlockchainUnavailableError extends Error {}
+export class BlockchainUnavailableError extends Error {
+  constructor(message?: string, public src?: unknown) {
+    super(message);
+  }
+}

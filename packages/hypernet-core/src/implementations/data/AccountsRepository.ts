@@ -6,8 +6,6 @@ import {
   IFullChannelState,
   Signature,
   AssetInfo,
-} from "@hypernetlabs/objects";
-import {
   PreferredPaymentTokenError,
   BlockchainUnavailableError,
   RouterChannelUnknownError,
@@ -20,8 +18,7 @@ import {
   ILogUtils,
   ILocalStorageUtils,
 } from "@hypernetlabs/utils";
-import { ethers, constants } from "ethers";
-import { BigNumber } from "ethers";
+import { ethers, constants, BigNumber } from "ethers";
 import { combine, errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import { IAccountsRepository } from "@interfaces/data";
@@ -87,7 +84,10 @@ export class AccountsRepository implements IAccountsRepository {
   > {
     return this.blockchainProvider.getProvider().andThen((provider) => {
       return ResultAsync.fromPromise(provider.listAccounts(), (e) => {
-        return e as BlockchainUnavailableError;
+        return new BlockchainUnavailableError(
+          "Unable to get accounts from blockchain provider",
+          e,
+        );
       }).map((addresses) => {
         return addresses.map((val) => EthereumAddress(val));
       });
@@ -199,7 +199,10 @@ export class AccountsRepository implements IAccountsRepository {
           return ResultAsync.fromPromise(
             signer.sendTransaction({ to: channelAddress, value: amount }),
             (err) => {
-              return err as BlockchainUnavailableError;
+              return new BlockchainUnavailableError(
+                "Unable to send transaction",
+                err,
+              );
             },
           );
         } else {

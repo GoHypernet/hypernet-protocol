@@ -1,9 +1,10 @@
-import { PaymentId, UUID } from "@hypernetlabs/objects";
 import {
+  PaymentId,
+  UUID,
   InvalidParametersError,
   InvalidPaymentIdError,
+  EPaymentType,
 } from "@hypernetlabs/objects";
-import { EPaymentType } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { err, ok, Result } from "neverthrow";
 
@@ -28,10 +29,11 @@ export class PaymentIdUtils implements IPaymentIdUtils {
     paymentIdString: PaymentId,
   ): Result<string, InvalidPaymentIdError> {
     const paymentIdValidRes = this.isValidPaymentId(paymentIdString);
-    if (paymentIdValidRes.isErr() || !paymentIdValidRes.value) {
+    if (paymentIdValidRes.isErr()) {
       return err(
         new InvalidPaymentIdError(
           `Not a valid paymentId: '${paymentIdString}'`,
+          paymentIdValidRes.error,
         ),
       );
     }
@@ -50,10 +52,11 @@ export class PaymentIdUtils implements IPaymentIdUtils {
     paymentIdString: PaymentId,
   ): Result<EPaymentType, InvalidPaymentIdError> {
     const paymentIdValidRes = this.isValidPaymentId(paymentIdString);
-    if (paymentIdValidRes.isErr() || !paymentIdValidRes.value) {
+    if (paymentIdValidRes.isErr()) {
       return err(
         new InvalidPaymentIdError(
           `Not a valid paymentId: '${paymentIdString}'`,
+          paymentIdValidRes.error,
         ),
       );
     }
@@ -84,10 +87,11 @@ export class PaymentIdUtils implements IPaymentIdUtils {
     paymentIdString: PaymentId,
   ): Result<UUID, InvalidPaymentIdError> {
     const paymentIdValidRes = this.isValidPaymentId(paymentIdString);
-    if (paymentIdValidRes.isErr() || !paymentIdValidRes.value) {
+    if (paymentIdValidRes.isErr()) {
       return err(
         new InvalidPaymentIdError(
           `Not a valid paymentId: '${paymentIdString}'`,
+          paymentIdValidRes.error,
         ),
       );
     }

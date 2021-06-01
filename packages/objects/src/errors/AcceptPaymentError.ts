@@ -1,1 +1,5 @@
-export class AcceptPaymentError extends Error {}
+export class AcceptPaymentError extends Error {
+  constructor(message?: string, public src?: unknown) {
+    super(message);
+  }
+}
