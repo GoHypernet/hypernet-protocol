@@ -27,7 +27,7 @@ export abstract class ChildProxy {
         this.onModelActivated(initializedParent);
         return initializedParent;
       }),
-      (e) => e as PostmateError,
+      (e) => new PostmateError("Postmate handshake failed", e),
     );
   }
 

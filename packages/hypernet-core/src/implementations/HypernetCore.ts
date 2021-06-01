@@ -413,20 +413,18 @@ export class HypernetCore implements IHypernetCore {
   /**
    * Returns the initialized status of this instance of Hypernet Core.
    */
-  public initialized(): Result<boolean, LogicalError> {
+  public initialized(): Result<boolean, never> {
     return ok(this._initialized);
   }
 
-  public waitInitialized(): ResultAsync<void, LogicalError> {
-    return ResultAsync.fromPromise(this._initializePromise, (e) => {
-      return e as LogicalError;
-    });
+  public waitInitialized(): ResultAsync<void, never> {
+    return ResultAsync.fromSafePromise(this._initializePromise);
   }
 
   /**
    * Whether or not this instance of Hypernet Core is currently the one in control.
    */
-  public inControl(): Result<boolean, LogicalError> {
+  public inControl(): Result<boolean, never> {
     return ok(this._inControl);
   }
 

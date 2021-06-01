@@ -1,9 +1,10 @@
-import { PaymentId, UUID } from "@hypernetlabs/objects";
 import {
+  PaymentId,
+  UUID,
   InvalidParametersError,
   InvalidPaymentIdError,
+  EPaymentType,
 } from "@hypernetlabs/objects";
-import { EPaymentType } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { err, ok, Result } from "neverthrow";
 
@@ -28,17 +29,14 @@ export class PaymentIdUtils implements IPaymentIdUtils {
     paymentIdString: PaymentId,
   ): Result<string, InvalidPaymentIdError> {
     const paymentIdValidRes = this.isValidPaymentId(paymentIdString);
-    if (paymentIdValidRes.isErr() || !paymentIdValidRes.value) {
-      return err(
-        new InvalidPaymentIdError(
-          `Not a valid paymentId: '${paymentIdString}'`,
-        ),
-      );
+    if (paymentIdValidRes.isOk() && paymentIdValidRes.value) {
+      const domainHex = paymentIdString.substr(2, 20);
+      const domain = Buffer.from(domainHex, "hex").toString("ascii");
+      return ok(domain.trim());
     }
-
-    const domainHex = paymentIdString.substr(2, 20);
-    const domain = Buffer.from(domainHex, "hex").toString("ascii");
-    return ok(domain.trim());
+    return err(
+      new InvalidPaymentIdError(`Not a valid paymentId: '${paymentIdString}'`),
+    );
   }
 
   /**
@@ -50,28 +48,25 @@ export class PaymentIdUtils implements IPaymentIdUtils {
     paymentIdString: PaymentId,
   ): Result<EPaymentType, InvalidPaymentIdError> {
     const paymentIdValidRes = this.isValidPaymentId(paymentIdString);
-    if (paymentIdValidRes.isErr() || !paymentIdValidRes.value) {
+    if (paymentIdValidRes.isOk() && paymentIdValidRes.value) {
+      const typeHex = paymentIdString.substr(22, 12);
+      const type = Buffer.from(typeHex, "hex").toString("ascii");
+      const trimmedType = type.trim();
+
+      if (trimmedType === EPaymentType.Pull) {
+        return ok(EPaymentType.Pull);
+      }
+      if (trimmedType === EPaymentType.Push) {
+        return ok(EPaymentType.Push);
+      }
       return err(
         new InvalidPaymentIdError(
-          `Not a valid paymentId: '${paymentIdString}'`,
+          `Type did not correspond to a known EPaymentType, got '${type}'`,
         ),
       );
     }
-    const typeHex = paymentIdString.substr(22, 12);
-    const type = Buffer.from(typeHex, "hex").toString("ascii");
-    const trimmedType = type.trim();
-
-    if (trimmedType === EPaymentType.Pull) {
-      return ok(EPaymentType.Pull);
-    }
-    if (trimmedType === EPaymentType.Push) {
-      return ok(EPaymentType.Push);
-    }
-
     return err(
-      new InvalidPaymentIdError(
-        `Type did not correspond to a known EPaymentType, got '${type}'`,
-      ),
+      new InvalidPaymentIdError(`Not a valid paymentId: '${paymentIdString}'`),
     );
   }
 
@@ -84,24 +79,20 @@ export class PaymentIdUtils implements IPaymentIdUtils {
     paymentIdString: PaymentId,
   ): Result<UUID, InvalidPaymentIdError> {
     const paymentIdValidRes = this.isValidPaymentId(paymentIdString);
-    if (paymentIdValidRes.isErr() || !paymentIdValidRes.value) {
-      return err(
-        new InvalidPaymentIdError(
-          `Not a valid paymentId: '${paymentIdString}'`,
-        ),
-      );
+    if (paymentIdValidRes.isOk() && paymentIdValidRes.value) {
+      const uuid = UUID(paymentIdString.substr(34, 32));
+      return ok(uuid);
     }
-    const uuid = UUID(paymentIdString.substr(34, 32));
-    return ok(uuid);
+    return err(
+      new InvalidPaymentIdError(`Not a valid paymentId: '${paymentIdString}'`),
+    );
   }
 
   /**
    * A valid payment ID is exactly 64 characters, hexadecimal, refixed with 0x.
    * @param paymentIdString
    */
-  public isValidPaymentId(
-    paymentIdString: PaymentId,
-  ): Result<boolean, InvalidParametersError> {
+  public isValidPaymentId(paymentIdString: PaymentId): Result<boolean, never> {
     const overallRegex = /^0x[0-9A-Fa-f]{64}$/;
     return ok(overallRegex.test(paymentIdString));
 

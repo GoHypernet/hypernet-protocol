@@ -1,5 +1,5 @@
 export class PaymentCreationError extends Error {
-  constructor(public sourceError?: Error, message?: string) {
+  constructor(message?: string, public src?: unknown) {
     super(message);
   }
 }

@@ -78,7 +78,8 @@ export class CeramicUtils implements ICeramicUtils {
 
           return ResultAsync.fromPromise(
             ceramic.did?.authenticate(),
-            (e) => e as PersistenceError,
+            (e) =>
+              new PersistenceError("Could not authenticate with Ceramic", e),
           )
             .andThen(() => {
               console.log("his.ceramic", this.ceramic?.did?.id.toString());
@@ -98,7 +99,7 @@ export class CeramicUtils implements ICeramicUtils {
             })
             .mapErr((e) => {
               context.onDeStorageAuthenticationFailed.next();
-              return e as PersistenceError;
+              return new PersistenceError("Storage authentication failed", e);
             });
         });
       });
@@ -133,7 +134,7 @@ export class CeramicUtils implements ICeramicUtils {
               content: schema,
               name: schema.title,
             }),
-            (e) => e as PersistenceError,
+            (e) => new PersistenceError("publishSchema failed", e),
           ).map((res) => {
             return {
               name: schema.title,
@@ -143,8 +144,8 @@ export class CeramicUtils implements ICeramicUtils {
         );
       }
 
-      return ResultUtils.combine(promisesOfPublishSchema)
-        .andThen((publishedSchemas) => {
+      return ResultUtils.combine(promisesOfPublishSchema).andThen(
+        (publishedSchemas) => {
           for (const publishedSchema of publishedSchemas) {
             promisesOfCreateDifnition.push(
               ResultAsync.fromPromise(
@@ -153,16 +154,14 @@ export class CeramicUtils implements ICeramicUtils {
                   description: publishedSchema.name,
                   schema: publishedSchema.schema.commitId.toUrl(),
                 }),
-                (e) => e as PersistenceError,
+                (e) => new PersistenceError("createDefinition failed", e),
               ),
             );
           }
 
           return ResultUtils.combine(promisesOfCreateDifnition);
-        })
-        .mapErr((e) => {
-          return e as PersistenceError;
-        });
+        },
+      );
     });
   }
 
@@ -177,7 +176,7 @@ export class CeramicUtils implements ICeramicUtils {
 
       return ResultAsync.fromPromise(
         this.idx.set(aliasName, { data: content }),
-        (e) => e as PersistenceError,
+        (e) => new PersistenceError("idx.set failed", e),
       ).map(() => {});
     });
   }
@@ -192,7 +191,7 @@ export class CeramicUtils implements ICeramicUtils {
 
       return ResultAsync.fromPromise(
         this.idx.get<IRecordWithDataKey<T>>(aliasName),
-        (e) => e as PersistenceError,
+        (e) => new PersistenceError("idx.get failed", e),
       ).map((record) => {
         return record?.data || null;
       });
@@ -207,7 +206,7 @@ export class CeramicUtils implements ICeramicUtils {
 
       return ResultAsync.fromPromise(
         this.idx.remove(aliasName),
-        (e) => e as PersistenceError,
+        (e) => new PersistenceError("idx.remove failed", e),
       );
     });
   }
@@ -266,7 +265,7 @@ export class CeramicUtils implements ICeramicUtils {
 
     return ResultAsync.fromPromise(
       threeIdConnect.connect(authProvider),
-      (e) => e as PersistenceError,
+      (e) => new PersistenceError("threeIdConnect.connect failed", e),
     ).andThen(() => {
       const result = ResultUtils.fromThrowableResult<
         DidProviderProxy,

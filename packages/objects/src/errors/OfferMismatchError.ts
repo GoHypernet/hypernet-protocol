@@ -1,1 +1,5 @@
-export class OfferMismatchError extends Error {}
+export class OfferMismatchError extends Error {
+  constructor(message?: string, public src?: unknown) {
+    super(message);
+  }
+}

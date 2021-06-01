@@ -1,10 +1,9 @@
-import { MerchantUrl } from "@hypernetlabs/objects";
+import { IHypernetCore, MerchantUrl } from "@hypernetlabs/objects";
 import HypernetWebUI, { IHypernetWebUI } from "@hypernetlabs/web-ui";
 import { ResultAsync } from "neverthrow";
 
 import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
 import { IHypernetWebIntegration } from "@web-integration/interfaces/app/IHypernetWebIntegration";
-import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
@@ -14,7 +13,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
   public webUIClient: IHypernetWebUI;
 
-  public core: IHypernetIFrameProxy;
+  public core: HypernetIFrameProxy;
 
   constructor(iframeURL?: string) {
     this.iframeURL = iframeURL || this.iframeURL;
@@ -43,10 +42,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   // wait for the core to be intialized
-  protected getReadyResult:
-    | ResultAsync<IHypernetIFrameProxy, Error>
-    | undefined;
-  public getReady(): ResultAsync<IHypernetIFrameProxy, Error> {
+  protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
+  public getReady(): ResultAsync<IHypernetCore, Error> {
     if (this.getReadyResult != null) {
       return this.getReadyResult;
     }
@@ -55,7 +52,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       .andThen(() => {
         return this.core.getEthereumAccounts();
       })
-      .andThen((accounts: any) => this.core.initialize(accounts[0]))
+      .andThen((accounts) => this.core.initialize(accounts[0]))
       .map(() => {
         // This is for web ui to use if there is no core instance passed in web ui constructor
         window.hypernetCoreInstance = this.core;

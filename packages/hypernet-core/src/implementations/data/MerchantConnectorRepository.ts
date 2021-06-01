@@ -175,7 +175,7 @@ export class MerchantConnectorRepository
     | ProxyError
     | BlockchainUnavailableError
     | MerchantConnectorError
-    | PersistenceError
+    | MerchantActivationError
   > {
     let proxy: IMerchantConnectorProxy;
     let context: InitializedHypernetContext;
@@ -254,7 +254,10 @@ export class MerchantConnectorRepository
           context.onAuthorizedMerchantActivationFailed.next(merchantUrl);
         }
 
-        return e as PersistenceError;
+        return new MerchantActivationError(
+          `Unable to activate merchant ${merchantUrl}`,
+          e,
+        );
       });
   }
 
@@ -792,7 +795,12 @@ export class MerchantConnectorRepository
           return this.deauthorizeMerchant(merchantUrl).andThen(() => {
             // And then propagate the error
             this.logUtils.error(e);
-            return errAsync(new MerchantAuthorizationDeniedError(e.message));
+            return errAsync(
+              new MerchantAuthorizationDeniedError(
+                `User declined authorization of the validator`,
+                e,
+              ),
+            );
           });
         });
 

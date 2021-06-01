@@ -106,7 +106,7 @@ export class PaymentRepository implements IPaymentRepository {
           });
       })
 
-      .mapErr((err) => new PaymentCreationError(err, err?.message));
+      .mapErr((err) => new PaymentCreationError(err?.message, err));
   }
 
   public createPullPayment(
@@ -160,7 +160,7 @@ export class PaymentRepository implements IPaymentRepository {
             return payment as PullPayment;
           });
       })
-      .mapErr((err) => new PaymentCreationError(err, err?.message));
+      .mapErr((err) => new PaymentCreationError(err?.message, err));
   }
 
   /**
@@ -226,7 +226,7 @@ export class PaymentRepository implements IPaymentRepository {
       .map((payment) => {
         return payment as PushPayment;
       })
-      .mapErr((err) => new PaymentCreationError(err, err?.message));
+      .mapErr((err) => new PaymentCreationError(err?.message, err));
   }
 
   /**
