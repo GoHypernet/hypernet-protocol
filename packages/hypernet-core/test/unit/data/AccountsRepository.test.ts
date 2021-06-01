@@ -270,6 +270,7 @@ describe("AccountsRepository tests", () => {
 
     // Act
     const result = await repo.getBalances();
+    console.log("result._unsafeUnwrap(): ", result._unsafeUnwrap());
 
     // Assert
     expect(result).toBeDefined();

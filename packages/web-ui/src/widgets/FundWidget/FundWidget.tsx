@@ -1,10 +1,23 @@
 import React from "react";
+import { Box } from "@material-ui/core";
 
-import { TokenSelector, Button, TextInput } from "@web-ui/components";
+import {
+  TokenSelector,
+  Button,
+  TextInput,
+  BoxWrapper,
+} from "@web-ui/components";
 import { useFund } from "@web-ui/hooks";
-import useStyles from "@web-ui/widgets/FundWidget/FundWidget.style";
+import { IRenderParams } from "@web-ui/interfaces";
+import { useStyles } from "@web-ui/widgets/FundWidget/FundWidget.style";
 
-const FundWidget: React.FC = () => {
+interface IFundWidget extends IRenderParams {}
+
+const FundWidget: React.FC<IFundWidget> = ({
+  includeBoxWrapper,
+  noLabel,
+  bodyStyle,
+}: IFundWidget) => {
   const {
     tokenSelectorOptions,
     selectedPaymentToken,
@@ -17,8 +30,14 @@ const FundWidget: React.FC = () => {
   } = useFund();
   const classes = useStyles({ error });
 
+  const CustomBox = includeBoxWrapper ? BoxWrapper : Box;
+
   return (
-    <div className={classes.wrapper}>
+    <CustomBox
+      className={classes.wrapper}
+      label={!noLabel ? "FUND YOUR CHANNEL" : undefined}
+      bodyStyle={bodyStyle}
+    >
       <TokenSelector
         tokenSelectorOptions={tokenSelectorOptions}
         selectedPaymentToken={selectedPaymentToken}
@@ -34,7 +53,7 @@ const FundWidget: React.FC = () => {
       />
       {/* <Button onClick={mintTokens} label="Mint HyperToken" />
       <br /> */}
-    </div>
+    </CustomBox>
   );
 };
 

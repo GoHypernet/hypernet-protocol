@@ -35,7 +35,7 @@ interface IReducerState {
 }
 
 export function useFund(): IReducerStateReducer {
-  const { proxy } = useStoreContext();
+  const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const alert = useAlert();
 
@@ -88,8 +88,8 @@ export function useFund(): IReducerStateReducer {
       setLoading(true);
       try {
         if (cancelRequest) return;
-        // get data from proxy
-        proxy?.getBalances().map((balance: Balances) => {
+        // get data from coreProxy
+        coreProxy?.getBalances().map((balance: Balances) => {
           // prepare balances
           setLoading(false);
           dispatch({
@@ -106,7 +106,7 @@ export function useFund(): IReducerStateReducer {
 
     fetchData();
 
-    proxy?.onBalancesChanged.subscribe({
+    coreProxy?.onBalancesChanged.subscribe({
       next: (balance) => {
         if (cancelRequest) return;
         dispatch({
@@ -178,7 +178,7 @@ export function useFund(): IReducerStateReducer {
       });
     }
     setLoading(true);
-    proxy
+    coreProxy
       .depositFunds(
         state.selectedPaymentToken?.address,
         ethers.utils.parseEther("1"),
@@ -203,7 +203,7 @@ export function useFund(): IReducerStateReducer {
 
   const mintTokens = () => {
     setLoading(true);
-    proxy.mintTestToken(ethers.utils.parseEther(state.amount || "1")).match(
+    coreProxy.mintTestToken(ethers.utils.parseEther(state.amount || "1")).match(
       () => {
         alert.success("mint tokens has succeeded");
         setLoading(false);

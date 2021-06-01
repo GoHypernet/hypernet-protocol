@@ -513,7 +513,7 @@ export class MerchantConnectorRepository
       });
   }
 
-  public getAuthorizedMerchantConnectorStatus(): ResultAsync<
+  public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
     Map<MerchantUrl, boolean>,
     PersistenceError
   > {
@@ -854,26 +854,18 @@ export class MerchantConnectorRepository
   protected _setAuthorizedMerchants(
     authorizedMerchantMap: Map<MerchantUrl, Signature>,
   ): ResultAsync<void, PersistenceError> {
-    return this.getAuthorizedMerchants().andThen(
-      (storedAuthorizedMerchantsMap) => {
-        const allAuthorizedMerchantMap: Map<MerchantUrl, Signature> = new Map([
-          ...storedAuthorizedMerchantsMap,
-          ...authorizedMerchantMap,
-        ]);
-        const authorizedMerchantEntries = new Array<IAuthorizedMerchantEntry>();
+    const authorizedMerchantEntries = new Array<IAuthorizedMerchantEntry>();
 
-        for (const keyval of allAuthorizedMerchantMap) {
-          authorizedMerchantEntries.push({
-            merchantUrl: MerchantUrl(keyval[0]),
-            authorizationSignature: Signature(keyval[1]),
-          });
-        }
+    for (const keyval of authorizedMerchantMap) {
+      authorizedMerchantEntries.push({
+        merchantUrl: MerchantUrl(keyval[0]),
+        authorizationSignature: Signature(keyval[1]),
+      });
+    }
 
-        return this.ceramicUtils.writeRecord<IAuthorizedMerchantEntry[]>(
-          AuthorizedMerchantsSchema.title,
-          authorizedMerchantEntries,
-        );
-      },
+    return this.ceramicUtils.writeRecord<IAuthorizedMerchantEntry[]>(
+      AuthorizedMerchantsSchema.title,
+      authorizedMerchantEntries,
     );
   }
 }

@@ -21,6 +21,7 @@ enum EActionTypes {
 
 interface IState {
   error: boolean;
+  loading: boolean;
   balances: AssetBalance[];
   channelTokenSelectorOptions: ITokenSelectorOption[];
   preferredPaymentToken?: ITokenSelectorOption;
@@ -38,7 +39,7 @@ type Action =
     };
 
 export function useBalances() {
-  const { proxy } = useStoreContext();
+  const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const alert = useAlert();
 
@@ -49,7 +50,7 @@ export function useBalances() {
       if (cancelRequest) return;
       dispatch({ type: EActionTypes.FETCHING });
       setLoading(true);
-      proxy
+      coreProxy
         ?.getBalances()
         .map((balance: Balances) => {
           setLoading(false);
@@ -58,7 +59,7 @@ export function useBalances() {
             payload: balance,
           });
 
-          proxy.getPreferredPaymentToken().map((assetInfo) => {
+          coreProxy.getPreferredPaymentToken().map((assetInfo) => {
             console.log("AssetInfo token: ", assetInfo);
             const tokenName =
               assetInfo.assetId === ETHER_HEX_ADDRESS ? "ETH" : "HyperToken";
@@ -82,7 +83,7 @@ export function useBalances() {
 
     fetchData();
 
-    proxy?.onBalancesChanged.subscribe({
+    coreProxy?.onBalancesChanged.subscribe({
       next: (balance) => {
         if (cancelRequest) return;
         dispatch({
@@ -99,6 +100,7 @@ export function useBalances() {
 
   const initialState: IState = {
     error: false,
+    loading: true,
     balances: [],
     channelTokenSelectorOptions: [],
     preferredPaymentToken: undefined,
@@ -110,11 +112,13 @@ export function useBalances() {
         return {
           ...state,
           error: false,
+          loading: true,
         };
       case EActionTypes.FETCHED:
         return {
           ...state,
           error: false,
+          loading: false,
           balances: prepareBalances(action.payload),
           channelTokenSelectorOptions: prepareChannelTokenSelectorOptions(
             action.payload,
@@ -124,12 +128,14 @@ export function useBalances() {
         return {
           ...state,
           error: false,
+          loading: false,
           preferredPaymentToken: action.payload,
         };
       case EActionTypes.ERROR:
         return {
           ...state,
           error: true,
+          loading: false,
         };
       default:
         return state;
@@ -155,7 +161,7 @@ export function useBalances() {
       return;
     }
     setLoading(true);
-    proxy
+    coreProxy
       .setPreferredPaymentToken(EthereumAddress(selectedOption.address))
       .match(
         () => {

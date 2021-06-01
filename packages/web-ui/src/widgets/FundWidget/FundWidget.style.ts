@@ -1,6 +1,6 @@
-import { createUseStyles } from "react-jss";
+import { makeStyles } from "@material-ui/core";
 
-const useStyles = createUseStyles({
+export const useStyles = makeStyles({
   wrapper: {
     padding: "5px 0",
     width: "100%",
@@ -17,5 +17,3 @@ const useStyles = createUseStyles({
     color: (props: any) => (props.error ? "red" : "black"),
   },
 });
-
-export default useStyles;

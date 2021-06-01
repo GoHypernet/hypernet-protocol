@@ -56,7 +56,7 @@ export interface IMerchantConnectorRepository {
    * Returns the status of all the authorized merchant's connectors.
    * @returns A map of merchant URL and a boolean indicating whether or not the connector is active.
    */
-  getAuthorizedMerchantConnectorStatus(): ResultAsync<
+  getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
     Map<MerchantUrl, boolean>,
     PersistenceError
   >;

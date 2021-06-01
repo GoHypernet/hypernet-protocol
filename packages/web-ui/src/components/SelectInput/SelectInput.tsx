@@ -1,6 +1,7 @@
 import React from "react";
+import { Box } from "@material-ui/core";
 
-import useStyles from "@web-ui/components/SelectInput/SelectInput.style";
+import { useStyles } from "@web-ui/components/SelectInput/SelectInput.style";
 
 interface SelectInputProps {
   onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
@@ -30,9 +31,9 @@ export const SelectInput: React.FC<SelectInputProps> = (
   const classes = useStyles();
 
   return (
-    <div className={classes.wrapper}>
+    <Box className={classes.wrapper}>
       <label className={classes.selectLabel}>{label}</label>
-      <div className={classes.select}>
+      <Box className={classes.select}>
         <select
           className={classes.selectText}
           value={value}
@@ -47,7 +48,7 @@ export const SelectInput: React.FC<SelectInputProps> = (
             </option>
           ))}
         </select>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };

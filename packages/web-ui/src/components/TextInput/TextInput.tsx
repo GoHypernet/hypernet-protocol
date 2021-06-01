@@ -1,6 +1,7 @@
 import React from "react";
+import { Box } from "@material-ui/core";
 
-import useStyles from "@web-ui/components/TextInput/TextInput.style";
+import { useStyles } from "@web-ui/components/TextInput/TextInput.style";
 
 interface TextInputProps {
   onChange?: (value: string) => void;
@@ -17,7 +18,7 @@ export const TextInput: React.FC<TextInputProps> = (props: TextInputProps) => {
   const classes = useStyles();
 
   return (
-    <div className={classes.wrapper}>
+    <Box className={classes.wrapper}>
       <label className={classes.label}>{label}</label>
       <input
         type="text"
@@ -29,6 +30,6 @@ export const TextInput: React.FC<TextInputProps> = (props: TextInputProps) => {
         placeholder={placeholder}
         className={classes.textInput}
       />
-    </div>
+    </Box>
   );
 };

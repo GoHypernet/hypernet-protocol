@@ -1,8 +1,8 @@
 import React from "react";
+import { Box } from "@material-ui/core";
 
-import { EStatusColor } from "../../theme";
-
-import useStyles from "@web-ui/components/Button/Button.style";
+import { EStatusColor } from "@web-ui/theme";
+import { useStyles } from "@web-ui/components/Button/Button.style";
 
 interface ButtonProps {
   onClick?: () => void;
@@ -29,17 +29,17 @@ export const Button: React.FC<ButtonProps> = (props: ButtonProps) => {
 
   if (linkStyle) {
     return (
-      <div className={classes.linkWrapper}>
+      <Box className={classes.linkWrapper}>
         <a className={classes.link} onClick={onClick}>
           {hasBackIcon && "←  "}
           {label}
         </a>
-      </div>
+      </Box>
     );
   }
   if (hasMaterialUIStyle) {
     return (
-      <div className={classes.materialUIButtonWrapper}>
+      <Box className={classes.materialUIButtonWrapper}>
         <button
           className={classes.materialUIButton}
           onClick={onClick}
@@ -47,7 +47,7 @@ export const Button: React.FC<ButtonProps> = (props: ButtonProps) => {
         >
           {label}
         </button>
-      </div>
+      </Box>
     );
   }
   return (

@@ -1,10 +1,10 @@
-import { createUseStyles } from "react-jss";
-
 interface IStyleProps {
   modalWidth: number;
 }
 
-const useStyles = createUseStyles<any, IStyleProps>({
+import { makeStyles } from "@material-ui/core";
+
+export const useStyles = makeStyles({
   container: {
     position: "absolute",
     top: 0,
@@ -37,5 +37,3 @@ const useStyles = createUseStyles<any, IStyleProps>({
     top: 38,
   },
 });
-
-export default useStyles;

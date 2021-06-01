@@ -151,6 +151,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.authorizeMerchant(data.data);
         }, data.callId);
       },
+      deauthorizeMerchant: (data: IIFrameCallData<MerchantUrl>) => {
+        this.returnForModel(() => {
+          return this.core.deauthorizeMerchant(data.data);
+        }, data.callId);
+      },
       initiateDispute: (data: IIFrameCallData<PaymentId>) => {
         this.returnForModel(() => {
           return this.core.initiateDispute(data.data);
@@ -179,9 +184,14 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.mintTestToken(BigNumber.from(data.data));
         }, data.callId);
       },
-      getAuthorizedMerchants: (data: IIFrameCallData<string>) => {
+      getAuthorizedMerchants: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           return this.core.getAuthorizedMerchants();
+        }, data.callId);
+      },
+      getAuthorizedMerchantsConnectorsStatus: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getAuthorizedMerchantsConnectorsStatus();
         }, data.callId);
       },
       providePrivateCredentials: (

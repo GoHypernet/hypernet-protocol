@@ -71,7 +71,7 @@ interface IReducerState {
 
 // export function usePayment(): IReducerStateReducer {
 export function usePayment(initialParams: any): IReducerStateReducer {
-  const { proxy } = useStoreContext();
+  const { coreProxy } = useStoreContext();
 
   const initialState: IReducerState = {
     loading: true,
@@ -156,8 +156,8 @@ export function usePayment(initialParams: any): IReducerStateReducer {
       dispatch({ type: EActionTypes.FETCHING });
       try {
         if (cancelRequest) return;
-        // get data from proxy
-        proxy?.getBalances().map((balance: Balances) => {
+        // get data from coreProxy
+        coreProxy?.getBalances().map((balance: Balances) => {
           // prepare balances
           dispatch({
             type: EActionTypes.FETCHED,
@@ -172,7 +172,7 @@ export function usePayment(initialParams: any): IReducerStateReducer {
 
     fetchData();
 
-    proxy?.onBalancesChanged.subscribe({
+    coreProxy?.onBalancesChanged.subscribe({
       next: (balance) => {
         if (cancelRequest) return;
         dispatch({
@@ -245,7 +245,7 @@ export function usePayment(initialParams: any): IReducerStateReducer {
   };
 
   const sendFunds = () => {
-    proxy
+    coreProxy
       .sendFunds(
         state.counterPartyAccount,
         utils.parseUnits(state.amount, "wei"),

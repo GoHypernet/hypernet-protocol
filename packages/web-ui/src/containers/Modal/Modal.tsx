@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
+import { Box } from "@material-ui/core";
 
-import useStyles from "./Modal.style";
+import { useStyles } from "@web-ui/containers/Modal/Modal.style";
 
 import { WEB_UI_MODAL_ID_SELECTOR } from "@web-ui/constants";
 import { useLayoutContext } from "@web-ui/contexts";
@@ -41,9 +42,9 @@ const Modal: React.FC<IModal> = (props: IModal) => {
   }, [modalWidth, modalStatus]);
 
   return createPortal(
-    <div className={classes.container}>
-      <div className={classes.wrapper}>
-        <div
+    <Box className={classes.container}>
+      <Box className={classes.wrapper}>
+        <Box
           className={classes.closeIcon}
           onClick={() => modalRootRef.current.removeChild(elementRef.current)}
         >
@@ -51,10 +52,10 @@ const Modal: React.FC<IModal> = (props: IModal) => {
             src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png"
             width="20"
           />
-        </div>
+        </Box>
         {children}
-      </div>
-    </div>,
+      </Box>
+    </Box>,
     elementRef.current,
   );
 };

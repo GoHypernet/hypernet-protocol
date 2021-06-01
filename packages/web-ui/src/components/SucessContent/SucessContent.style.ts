@@ -1,6 +1,6 @@
-import { createUseStyles } from "react-jss";
+import { makeStyles } from "@material-ui/core";
 
-const useStyles = createUseStyles({
+export const useStyles = makeStyles({
   container: {
     display: "flex",
     flexDirection: "column",
@@ -27,5 +27,3 @@ const useStyles = createUseStyles({
     fontSize: 18,
   },
 });
-
-export default useStyles;

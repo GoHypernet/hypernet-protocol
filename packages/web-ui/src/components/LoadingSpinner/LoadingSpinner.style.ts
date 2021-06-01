@@ -1,6 +1,6 @@
-import { createUseStyles } from "react-jss";
+import { makeStyles } from "@material-ui/core";
 
-const useStyles = createUseStyles({
+export const useStyles = makeStyles({
   loadingWrapper: {
     width: "100%",
     height: "100%",
@@ -12,5 +12,3 @@ const useStyles = createUseStyles({
     alignItems: "center",
   },
 });
-
-export default useStyles;

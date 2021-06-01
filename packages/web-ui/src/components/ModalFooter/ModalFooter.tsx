@@ -1,21 +1,22 @@
+import { Box } from "@material-ui/core";
 import React from "react";
 
-import useStyles from "./ModalFooter.style";
+import { useStyles } from "./ModalFooter.style";
 
 export const ModalFooter: React.FC = () => {
   const classes = useStyles();
 
   return (
-    <div className={classes.container}>
-      <div className={classes.account}>
+    <Box className={classes.container}>
+      <Box className={classes.account}>
         <a
           className={classes.accountLink}
-          href="https://hypernetlabs.io/"
+          href="http://localhost:9002/"
           target="_blank"
         >
           View your Hypernet account.
         </a>
-      </div>
-    </div>
+      </Box>
+    </Box>
   );
 };

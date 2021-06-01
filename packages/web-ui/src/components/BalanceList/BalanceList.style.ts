@@ -1,9 +1,8 @@
-import { createUseStyles } from "react-jss";
+import { makeStyles } from "@material-ui/core";
 
-const useStyles = createUseStyles({
+export const useStyles = makeStyles({
   container: {
     width: "100%",
-    border: "1px solid #F2F2F2",
     borderRadius: 4,
   },
   itemWrapper: {
@@ -11,6 +10,11 @@ const useStyles = createUseStyles({
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  itemBorderBottom: {
+    borderBottom: "1px solid #F2F2F2",
+  },
+  itemBorder: {
     border: "1px solid #F2F2F2",
   },
   tokenLogo: {
@@ -24,5 +28,3 @@ const useStyles = createUseStyles({
     opacity: 0.3,
   },
 });
-
-export default useStyles;

@@ -112,11 +112,24 @@ export class MerchantService implements IMerchantService {
     });
   }
 
+  public deauthorizeMerchant(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, PersistenceError> {
+    return this.merchantConnectorRepository.deauthorizeMerchant(merchantUrl);
+  }
+
   public getAuthorizedMerchants(): ResultAsync<
     Map<MerchantUrl, Signature>,
     PersistenceError
   > {
     return this.merchantConnectorRepository.getAuthorizedMerchants();
+  }
+
+  public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
+    Map<MerchantUrl, boolean>,
+    PersistenceError
+  > {
+    return this.merchantConnectorRepository.getAuthorizedMerchantsConnectorsStatus();
   }
 
   public activateAuthorizedMerchants(): ResultAsync<

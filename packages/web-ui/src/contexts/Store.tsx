@@ -1,24 +1,33 @@
 import { IHypernetCore } from "@hypernetlabs/objects";
-import { IViewUtils } from "@web-ui/interfaces";
 import React, { createContext, useContext } from "react";
 
+import { IViewUtils, IDateUtils } from "@web-ui/interfaces";
+
 interface IStore {
-  proxy: IHypernetCore;
+  coreProxy: IHypernetCore;
   viewUtils: IViewUtils;
+  dateUtils: IDateUtils;
 }
 
 interface IStoreProps {
   children: React.ReactNode;
-  proxy: IHypernetCore;
+  coreProxy: IHypernetCore;
   viewUtils: IViewUtils;
+  dateUtils: IDateUtils;
 }
 
 const StoreContext = createContext<IStore>(undefined!);
 
-export function StoreProvider({ proxy, viewUtils, children }: IStoreProps) {
+export function StoreProvider({
+  coreProxy,
+  viewUtils,
+  dateUtils,
+  children,
+}: IStoreProps) {
   const initialState: IStore = {
-    proxy,
+    coreProxy,
     viewUtils,
+    dateUtils,
   };
 
   return (

@@ -1,3 +1,4 @@
+import React from "react";
 import {
   EPaymentType,
   MerchantUrl,
@@ -10,6 +11,9 @@ import { Result } from "neverthrow";
 export interface IRenderParams {
   selector?: string;
   showInModal?: boolean;
+  noLabel?: boolean;
+  includeBoxWrapper?: boolean;
+  bodyStyle?: React.CSSProperties;
 }
 
 export interface IConnectorAuthorizationFlowParams extends IRenderParams {
@@ -38,6 +42,7 @@ export interface IRenderPaymentWidgetParams extends IRenderParams {
 
 export interface IHypernetWebUI {
   renderBalancesWidget(params?: IRenderParams): Result<void, RenderError>;
+  renderMerchantsWidget(params?: IRenderParams): Result<void, RenderError>;
   renderFundWidget(params?: IRenderParams): Result<void, RenderError>;
   renderLinksWidget(params?: IRenderParams): Result<void, RenderError>;
   renderPaymentWidget(
@@ -48,6 +53,4 @@ export interface IHypernetWebUI {
   ): Result<void, RenderError>;
   startOnboardingFlow(params: IOnboardingFlowParams): Result<void, RenderError>;
   renderPrivateKeysModal(): Result<void, RenderError>;
-  displayMerchantIFrame(merchantUrl: MerchantUrl): void;
-  closeMerchantIFrame(merchantUrl: MerchantUrl): void;
 }

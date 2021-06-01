@@ -52,6 +52,9 @@
     },
     {
       "path": "packages/objects"
+    },
+    {
+      "path": "packages/user-dashboard"
     }
   ]
 }

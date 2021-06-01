@@ -12,7 +12,7 @@ import {
   CONNECTOR_AUTHORIZATION_FLOW_ID_SELECTOR,
   ONBOARDING_FLOW_ID_SELECTOR,
 } from "@web-ui/constants";
-import { MainContainer } from "@web-ui/containers/MainContainer";
+import MainContainer from "@web-ui/containers/MainContainer";
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
@@ -24,9 +24,11 @@ import {
   IRenderPaymentWidgetParams,
   IOnboardingFlowParams,
   IViewUtils,
+  IDateUtils,
 } from "@web-ui/interfaces";
-import { ViewUtils } from "@web-ui/utils";
+import { ViewUtils, DateUtils } from "@web-ui/utils";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget";
+import MerchantsWidget from "@web-ui/widgets/MerchantsWidget";
 import FundWidget from "@web-ui/widgets/FundWidget";
 import LinksWidget from "@web-ui/widgets/LinksWidget";
 import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
@@ -35,6 +37,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
   protected coreInstance: IHypernetCore;
   protected viewUtils: IViewUtils;
+  protected dateUtils: IDateUtils;
   constructor(_coreInstance?: IHypernetCore) {
     if (_coreInstance) {
       this.coreInstance = _coreInstance;
@@ -48,17 +51,21 @@ export default class HypernetWebUI implements IHypernetWebUI {
     window.hypernetWebUIInstance = HypernetWebUI.instance;
 
     this.viewUtils = new ViewUtils();
+    this.dateUtils = new DateUtils();
   }
 
-  private _generateDomElement(selector: string) {
-    this._removeExistedElement(selector);
+  private _generateDomElement(selector: string): HTMLElement | null {
+    if (document.getElementById(selector) == null) {
+      this._removeExistedElement(selector);
 
-    const element = document.createElement("div");
-    element.setAttribute("id", selector);
-    document.body.appendChild(element);
-    document.getElementById(selector);
+      const element = document.createElement("div");
+      element.setAttribute("id", selector);
+      document.body.appendChild(element);
+      document.getElementById(selector);
 
-    return element;
+      return element;
+    }
+    return document.getElementById(selector);
   }
 
   private _removeExistedElement(selector: string) {
@@ -73,7 +80,11 @@ export default class HypernetWebUI implements IHypernetWebUI {
       throw new Error("core instance is required");
     }
     return (
-      <StoreProvider proxy={this.coreInstance} viewUtils={this.viewUtils}>
+      <StoreProvider
+        coreProxy={this.coreInstance}
+        viewUtils={this.viewUtils}
+        dateUtils={this.dateUtils}
+      >
         <LayoutProvider>
           <MainContainer withModal={withModal}>{component}</MainContainer>
         </LayoutProvider>
@@ -105,7 +116,27 @@ export default class HypernetWebUI implements IHypernetWebUI {
   ): Result<void, RenderError> {
     const renderReact = () => {
       return ReactDOM.render(
-        this._bootstrapComponent(<BalancesWidget />, config?.showInModal),
+        this._bootstrapComponent(
+          <BalancesWidget {...config} />,
+          config?.showInModal,
+        ),
+        this._generateDomElement(
+          config?.selector || BALANCES_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderMerchantsWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <MerchantsWidget {...config} />,
+          config?.showInModal,
+        ),
         this._generateDomElement(
           config?.selector || BALANCES_WIDGET_ID_SELECTOR,
         ),
@@ -117,7 +148,10 @@ export default class HypernetWebUI implements IHypernetWebUI {
   public renderFundWidget(config?: IRenderParams): Result<void, RenderError> {
     const renderReact = () => {
       return ReactDOM.render(
-        this._bootstrapComponent(<FundWidget />, config?.showInModal),
+        this._bootstrapComponent(
+          <FundWidget {...config} />,
+          config?.showInModal,
+        ),
         this._generateDomElement(config?.selector || FUND_WIDGET_ID_SELECTOR),
       );
     };
@@ -127,7 +161,10 @@ export default class HypernetWebUI implements IHypernetWebUI {
   public renderLinksWidget(config?: IRenderParams): Result<void, RenderError> {
     const renderReact = () => {
       return ReactDOM.render(
-        this._bootstrapComponent(<LinksWidget />, config?.showInModal),
+        this._bootstrapComponent(
+          <LinksWidget {...config} />,
+          config?.showInModal,
+        ),
         this._generateDomElement(config?.selector || LINKS_WIDGET_ID_SELECTOR),
       );
     };
@@ -200,14 +237,6 @@ export default class HypernetWebUI implements IHypernetWebUI {
       );
     };
     return this._getThrowableRender(renderReact);
-  }
-
-  public displayMerchantIFrame(merchantUrl: MerchantUrl): void {
-    this.coreInstance?.displayMerchantIFrame(merchantUrl);
-  }
-
-  public closeMerchantIFrame(merchantUrl: MerchantUrl): void {
-    this.coreInstance?.closeMerchantIFrame(merchantUrl);
   }
 }
 

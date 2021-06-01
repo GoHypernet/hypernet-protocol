@@ -1,6 +1,6 @@
-import { createUseStyles } from "react-jss";
+import { makeStyles } from "@material-ui/core";
 
-const useStyles = createUseStyles({
+export const useStyles = makeStyles({
   container: {
     width: "100%",
     padding: "0 10px",
@@ -18,6 +18,9 @@ const useStyles = createUseStyles({
   preferredTokenWrapper: {
     marginBottom: 25,
   },
+  balancesLabel: {
+    fontSize: 20,
+    marginTop: 24,
+    textAlign: "center",
+  },
 });
-
-export default useStyles;
