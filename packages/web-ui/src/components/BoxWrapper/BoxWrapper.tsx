@@ -8,6 +8,8 @@ interface IBoxWrapper extends BoxProps {
   label?: string;
   rightComponent?: React.ReactNode;
   bodyStyle?: React.CSSProperties;
+  hasEmptyState?: boolean;
+  emptyState?: React.ReactNode;
 }
 
 export const BoxWrapper: React.FC<IBoxWrapper> = ({
@@ -16,6 +18,8 @@ export const BoxWrapper: React.FC<IBoxWrapper> = ({
   flex,
   rightComponent,
   bodyStyle,
+  hasEmptyState,
+  emptyState,
 }: IBoxWrapper) => {
   const classes = useStyles();
 
@@ -29,7 +33,14 @@ export const BoxWrapper: React.FC<IBoxWrapper> = ({
           </Box>
         </Box>
       )}
-      <Box style={bodyStyle}>{children}</Box>
+      <Box
+        style={{
+          ...bodyStyle,
+          ...(hasEmptyState && { display: "flex", justifyContent: "center" }),
+        }}
+      >
+        {hasEmptyState ? emptyState : children}
+      </Box>
     </Box>
   );
 };

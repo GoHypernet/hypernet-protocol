@@ -16,7 +16,7 @@ import PulseLoader from "react-spinners/PulseLoader";
 
 import { IRenderParams } from "@web-ui/interfaces";
 import { useMerchants } from "@web-ui/hooks";
-import { BoxWrapper } from "@web-ui/components";
+import { BoxWrapper, EmptyState } from "@web-ui/components";
 
 interface IMerchantsWidget extends IRenderParams {}
 
@@ -51,6 +51,10 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
     <CustomBox
       label={!noLabel ? "YOUR SERVICES" : undefined}
       bodyStyle={bodyStyle}
+      hasEmptyState={[...merchantsMap.keys()].length === 0 && !loading}
+      emptyState={
+        <EmptyState info={<>You don't have any authorized validators yet</>} />
+      }
     >
       <List>
         {[...merchantsMap.keys()].map((merchantUrl, index) => (

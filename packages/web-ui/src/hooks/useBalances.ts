@@ -21,6 +21,7 @@ enum EActionTypes {
 
 interface IState {
   error: boolean;
+  loading: boolean;
   balances: AssetBalance[];
   channelTokenSelectorOptions: ITokenSelectorOption[];
   preferredPaymentToken?: ITokenSelectorOption;
@@ -99,6 +100,7 @@ export function useBalances() {
 
   const initialState: IState = {
     error: false,
+    loading: true,
     balances: [],
     channelTokenSelectorOptions: [],
     preferredPaymentToken: undefined,
@@ -110,11 +112,13 @@ export function useBalances() {
         return {
           ...state,
           error: false,
+          loading: true,
         };
       case EActionTypes.FETCHED:
         return {
           ...state,
           error: false,
+          loading: false,
           balances: prepareBalances(action.payload),
           channelTokenSelectorOptions: prepareChannelTokenSelectorOptions(
             action.payload,
@@ -124,12 +128,14 @@ export function useBalances() {
         return {
           ...state,
           error: false,
+          loading: false,
           preferredPaymentToken: action.payload,
         };
       case EActionTypes.ERROR:
         return {
           ...state,
           error: true,
+          loading: false,
         };
       default:
         return state;

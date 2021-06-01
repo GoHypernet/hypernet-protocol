@@ -6,6 +6,7 @@ export * from "./ModalFooter";
 export * from "./ModalHeader";
 export * from "./SelectInput";
 export * from "./SucessContent";
+export * from "./EmptyState";
 export * from "./TextInput";
 export * from "./TextareaInput";
 export * from "./TokenSelector";

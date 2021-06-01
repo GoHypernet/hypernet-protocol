@@ -10,6 +10,7 @@ import {
   TabPanel,
   SideFilter,
   BoxWrapper,
+  EmptyState,
 } from "@web-ui/components";
 import { IFilterItem, EItemType, IRenderParams } from "@web-ui/interfaces";
 import { useLinks } from "@web-ui/hooks";
@@ -44,6 +45,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
     acceptPayment,
     disputePayment,
     pullFunds,
+    loading,
   } = useLinks();
 
   const handleChange = (event, newValue) => {
@@ -179,6 +181,8 @@ const LinksWidget: React.FC<ILinksWidget> = ({
         </IconButton>
       }
       bodyStyle={bodyStyle}
+      hasEmptyState={links.length === 0 && !loading}
+      emptyState={<EmptyState info={<>You don't have any payments yet.</>} />}
     >
       <SideFilter
         visible={isSideFilterOpen}
