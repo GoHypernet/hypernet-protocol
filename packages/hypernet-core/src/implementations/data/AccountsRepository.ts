@@ -1,3 +1,4 @@
+import { ERC20Abi } from "@connext/vector-types";
 import {
   AssetBalance,
   Balances,
@@ -18,7 +19,7 @@ import {
   ILogUtils,
   ILocalStorageUtils,
 } from "@hypernetlabs/utils";
-import { ethers, constants, BigNumber } from "ethers";
+import { ethers, constants, BigNumber, Contract } from "ethers";
 import { combine, errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import { IAccountsRepository } from "@interfaces/data";
@@ -39,6 +40,7 @@ export class AccountsRepository implements IAccountsRepository {
    * Retrieves an instances of the AccountsRepository.
    */
   protected assetInfo: Map<EthereumAddress, AssetInfo>;
+  protected erc20Abi: string[];
 
   constructor(
     protected blockchainProvider: IBlockchainProvider,
@@ -61,6 +63,9 @@ export class AccountsRepository implements IAccountsRepository {
         18,
       ),
     );
+
+    this.erc20Abi = Object.assign([], ERC20Abi);
+    this.erc20Abi.push("function name() view returns (string)");
   }
 
   /**
@@ -354,11 +359,10 @@ export class AccountsRepository implements IAccountsRepository {
     });
   }
 
-  // TODO: fix it, tokenContract.name() not working
   protected _getAssetInfo(
     assetAddress: EthereumAddress,
   ): ResultAsync<AssetInfo, BlockchainUnavailableError> {
-    /* let name: string;
+    let name: string;
     let symbol: string;
     let tokenContract: Contract;
 
@@ -368,13 +372,20 @@ export class AccountsRepository implements IAccountsRepository {
     if (cachedAssetInfo == null) {
       // No cached info, we'll have to get it
       return this.blockchainProvider
-        .getSigner()
-        .andThen((signer) => {
-          tokenContract = new Contract(assetAddress, this.erc20Abi, signer);
+        .getProvider()
+        .andThen((provider) => {
+          tokenContract = new Contract(assetAddress, this.erc20Abi, provider);
 
-          return ResultAsync.fromPromise<string | null, BlockchainUnavailableError>(tokenContract.name(), (err) => {
+          return ResultAsync.fromPromise<
+            string | null,
+            BlockchainUnavailableError
+          >(tokenContract.name(), (err) => {
             return err as BlockchainUnavailableError;
           });
+        })
+        .orElse((err) => {
+          this.logUtils.error(`tokenContract.name() failed: ${err.message}`);
+          return okAsync<string, BlockchainUnavailableError>("");
         })
         .andThen((myName) => {
           if (myName == null || myName == "") {
@@ -383,9 +394,16 @@ export class AccountsRepository implements IAccountsRepository {
             name = myName;
           }
 
-          return ResultAsync.fromPromise<string | null, BlockchainUnavailableError>(tokenContract.symbol(), (err) => {
+          return ResultAsync.fromPromise<
+            string | null,
+            BlockchainUnavailableError
+          >(tokenContract.symbol(), (err) => {
             return err as BlockchainUnavailableError;
           });
+        })
+        .orElse((err) => {
+          this.logUtils.error(`tokenContract.symbol() failed: ${err.message}`);
+          return okAsync<string, BlockchainUnavailableError>("");
         })
         .andThen((mySymbol) => {
           if (mySymbol == null || mySymbol == "") {
@@ -394,9 +412,18 @@ export class AccountsRepository implements IAccountsRepository {
             symbol = mySymbol;
           }
 
-          return ResultAsync.fromPromise<number | null, BlockchainUnavailableError>(tokenContract.decimals(), (err) => {
+          return ResultAsync.fromPromise<
+            number | null,
+            BlockchainUnavailableError
+          >(tokenContract.decimals(), (err) => {
             return err as BlockchainUnavailableError;
           });
+        })
+        .orElse((err) => {
+          this.logUtils.error(
+            `tokenContract.decimals() failed: ${err.message}`,
+          );
+          return okAsync<number, BlockchainUnavailableError>(0);
         })
         .map((myDecimals) => {
           const decimals = myDecimals ?? 0;
@@ -407,11 +434,9 @@ export class AccountsRepository implements IAccountsRepository {
 
           return assetInfo;
         });
-    } 
+    }
 
     // We have cached info
-    return okAsync(cachedAssetInfo); */
-
-    return okAsync(new AssetInfo(assetAddress, "", "", 0));
+    return okAsync(cachedAssetInfo);
   }
 }

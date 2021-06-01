@@ -135,9 +135,7 @@ export class AccountService implements IAccountService {
       );
     }
 
-    return this.contextProvider.getContext().map((context) => {
-      this.blockchainProvider.supplyPrivateCredentials(privateCredentials);
-    });
+    return this.blockchainProvider.supplyPrivateCredentials(privateCredentials);
   }
 
   public signMessage(

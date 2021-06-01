@@ -236,9 +236,6 @@ class PaymentServiceMocks {
   }
 }
 
-const assetName = "PhoebeCoin";
-const assetSymbol = ":P";
-
 describe("PaymentService tests", () => {
   test("sendFunds returns payment", async () => {
     // Arrange
