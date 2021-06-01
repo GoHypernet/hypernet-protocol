@@ -1,13 +1,11 @@
-import { MerchantUrl } from "@hypernetlabs/objects";
+import { IHypernetCore, MerchantUrl } from "@hypernetlabs/objects";
 import { IHypernetWebUI } from "@hypernetlabs/web-ui";
 import { ResultAsync } from "neverthrow";
 
-import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
-
 export interface IHypernetWebIntegration {
-  core: IHypernetIFrameProxy;
+  core: IHypernetCore;
   webUIClient: IHypernetWebUI;
-  getReady: () => ResultAsync<IHypernetIFrameProxy, Error>;
+  getReady: () => ResultAsync<IHypernetCore, Error>;
   displayMerchantIFrame(merchantUrl: MerchantUrl): void;
   closeMerchantIFrame(merchantUrl: MerchantUrl): void;
 }

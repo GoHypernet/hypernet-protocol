@@ -4,7 +4,7 @@
  * We got a response, which will be recorded in the error.
  */
 export class MerchantConnectorError extends Error {
-  constructor(message?: string, public sourceErr?: Error) {
+  constructor(message?: string, public src?: unknown) {
     super(message);
   }
 }

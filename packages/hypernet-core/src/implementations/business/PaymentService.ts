@@ -368,7 +368,8 @@ export class PaymentService implements IPaymentService {
                 (e) =>
                   err(
                     new AcceptPaymentError(
-                      `Payment ${paymentId} could not be staked! Source exception: ${e}`,
+                      `Payment ${paymentId} could not be staked!`,
+                      e,
                     ),
                   ),
               );
@@ -382,7 +383,7 @@ export class PaymentService implements IPaymentService {
         }
         return ResultAsync.fromPromise(
           Promise.all(stakeAttempts),
-          (e) => e as AcceptPaymentError,
+          (e) => new AcceptPaymentError("Error while staking payment", e),
         );
       });
   }

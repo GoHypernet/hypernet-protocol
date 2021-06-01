@@ -82,7 +82,7 @@ export abstract class ParentProxy {
     }
     this.activateResult = ResultAsync.fromPromise(
       this.handshake,
-      (e) => e as ProxyError,
+      (e) => new ProxyError("Proxy handshake failed in parent", e),
     ).map((child) => {
       // Stash the API for future calls
       this.child = child;
