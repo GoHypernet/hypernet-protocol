@@ -4,6 +4,7 @@ import {
   DidProviderProxy,
 } from "@3id/connect";
 import ThreeIdResolver from "@ceramicnetwork/3id-did-resolver";
+import { CeramicApi } from "@ceramicnetwork/common";
 import CeramicClient from "@ceramicnetwork/http-client";
 import { TileDocument } from "@ceramicnetwork/stream-tile";
 import { IDX } from "@ceramicstudio/idx";
@@ -30,7 +31,7 @@ import {
 } from "@interfaces/utilities";
 
 export class CeramicUtils implements ICeramicUtils {
-  protected ceramic: CeramicClient | null = null;
+  protected ceramic: CeramicApi | null = null;
   protected threeIdConnect: ThreeIdConnect | null = null;
   protected authProvider: EthereumAuthProvider | null = null;
   protected threeIdResolver: ResolverRegistry | null = null;
@@ -60,27 +61,23 @@ export class CeramicUtils implements ICeramicUtils {
     PersistenceError | BlockchainUnavailableError
   > {
     return this.contextProvider.getInitializedContext().andThen((context) => {
-      return this._setup().andThen((config) => {
+      return this._setup().andThen(({ config, ceramic, threeIdResolver }) => {
         return this._getDidProvider().andThen((didProvider) => {
-          if (this.ceramic == null || this.threeIdResolver == null) {
-            throw new Error("Something went wrong while initializing Ceramic!");
-          }
-
-          this.ceramic.setDID(
+          ceramic.setDID(
             new DID({
               provider: didProvider,
-              resolver: this.threeIdResolver,
+              resolver: threeIdResolver,
             }),
           );
 
-          if (!this.ceramic.did) {
+          if (!ceramic.did) {
             return errAsync(new PersistenceError("did is undefined"));
           }
 
           context.onDeStorageAuthenticationStarted.next();
 
           return ResultAsync.fromPromise(
-            this.ceramic.did?.authenticate(),
+            ceramic.did?.authenticate(),
             (e) => e as PersistenceError,
           )
             .andThen(() => {
@@ -91,8 +88,9 @@ export class CeramicUtils implements ICeramicUtils {
               for (const [key, value] of config.storageAliases) {
                 aliases[key] = value;
               }
+
               this.idx = new IDX({
-                ceramic: this.ceramic as CeramicClient,
+                ceramic: ceramic,
                 aliases: aliases,
               });
               this.isAuthenticated = true;
@@ -150,7 +148,7 @@ export class CeramicUtils implements ICeramicUtils {
           for (const publishedSchema of publishedSchemas) {
             promisesOfCreateDifnition.push(
               ResultAsync.fromPromise(
-                createDefinition(this.ceramic as CeramicClient, {
+                createDefinition(this.ceramic as CeramicApi, {
                   name: publishedSchema.name,
                   description: publishedSchema.name,
                   schema: publishedSchema.schema.commitId.toUrl(),
@@ -214,7 +212,14 @@ export class CeramicUtils implements ICeramicUtils {
     });
   }
 
-  private _setup(): ResultAsync<HypernetConfig, PersistenceError> {
+  private _setup(): ResultAsync<
+    {
+      config: HypernetConfig;
+      ceramic: CeramicApi;
+      threeIdResolver: ResolverRegistry;
+    },
+    PersistenceError
+  > {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.blockchainProvider.getEIP1193Provider(),
@@ -231,7 +236,11 @@ export class CeramicUtils implements ICeramicUtils {
       this.threeIdConnect = new ThreeIdConnect();
       this.threeIdResolver = ThreeIdResolver.getResolver(this.ceramic);
       this.didResolver = new Resolver(this.threeIdResolver);
-      return okAsync(config);
+      return okAsync({
+        config,
+        ceramic: this.ceramic,
+        threeIdResolver: this.threeIdResolver,
+      });
     });
   }
 
