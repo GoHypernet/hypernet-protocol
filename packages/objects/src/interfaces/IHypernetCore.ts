@@ -21,8 +21,6 @@ import {
   TransferResolutionError,
   PreferredPaymentTokenError,
   ProxyError,
-  PaymentStakeError,
-  TransferCreationError,
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { HypernetLink } from "@objects/HypernetLink";
