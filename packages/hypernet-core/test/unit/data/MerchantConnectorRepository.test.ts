@@ -502,8 +502,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeTruthy();
     const resultVal = result._unsafeUnwrapErr();
-    expect(resultVal).toBeInstanceOf(MerchantConnectorError);
-    expect(resultVal).toBe(error);
+    expect(resultVal).toBeInstanceOf(MerchantActivationError);
     expect(onAuthorizedMerchantActivationFailedVal).toBe(merchantUrl);
   });
 
@@ -536,8 +535,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeTruthy();
     const resultVal = result._unsafeUnwrapErr();
-    expect(resultVal).toBeInstanceOf(MerchantValidationError);
-    expect(resultVal).toBe(error);
+    expect(resultVal).toBeInstanceOf(MerchantActivationError);
     expect(onAuthorizedMerchantActivationFailedVal).toBe(merchantUrl);
   });
 
@@ -574,8 +572,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeTruthy();
     const resultVal = result._unsafeUnwrapErr();
-    expect(resultVal).toBeInstanceOf(MerchantValidationError);
-    expect(resultVal).toBe(error);
+    expect(resultVal).toBeInstanceOf(MerchantActivationError);
     expect(onAuthorizedMerchantActivationFailedVal).toBe(merchantUrl);
   });
 
@@ -625,8 +622,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeTruthy();
     const resultVal = result._unsafeUnwrapErr();
-    expect(resultVal).toBeInstanceOf(MerchantConnectorError);
-    expect(resultVal).toBe(error);
+    expect(resultVal).toBeInstanceOf(MerchantActivationError);
     expect(onAuthorizedMerchantActivationFailedVal).toBe(merchantUrl);
   });
 

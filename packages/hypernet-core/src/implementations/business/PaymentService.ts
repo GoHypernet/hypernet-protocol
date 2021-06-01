@@ -168,10 +168,13 @@ export class PaymentService implements IPaymentService {
           }
 
           // Create the PullRecord
-          return this.paymentRepository.createPullRecord(
-            paymentId,
-            amount.toString(),
-          );
+          return this.paymentRepository
+            .createPullRecord(paymentId, amount.toString())
+            .andThen((payment) => {
+              return this._refreshBalances().map(() => {
+                return payment;
+              });
+            });
         } else {
           return errAsync(
             new InvalidParametersError(
@@ -268,7 +271,7 @@ export class PaymentService implements IPaymentService {
         throw new LogicalError("Unknown payment type!");
       }
 
-      return okAsync(undefined);
+      return this._refreshBalances();
     });
   }
 
@@ -368,7 +371,8 @@ export class PaymentService implements IPaymentService {
                 (e) =>
                   err(
                     new AcceptPaymentError(
-                      `Payment ${paymentId} could not be staked! Source exception: ${e}`,
+                      `Payment ${paymentId} could not be staked!`,
+                      e,
                     ),
                   ),
               );
@@ -382,8 +386,10 @@ export class PaymentService implements IPaymentService {
         }
         return ResultAsync.fromPromise(
           Promise.all(stakeAttempts),
-          (e) => e as AcceptPaymentError,
-        );
+          (e) => new AcceptPaymentError("Error while staking payment", e),
+        ).andThen((paymentsResult) => {
+          return this._refreshBalances().map(() => paymentsResult);
+        });
       });
   }
 
@@ -571,7 +577,7 @@ export class PaymentService implements IPaymentService {
         context.onPullPaymentUpdated.next(payment);
       }
 
-      return okAsync(undefined);
+      return this._refreshBalances();
     });
   }
 
@@ -613,6 +619,71 @@ export class PaymentService implements IPaymentService {
         // Resolve the dispute
         return this.merchantConnectorRepository.resolveChallenge(
           payment.merchantUrl,
+          paymentId,
+          payment.details.insuranceTransferId,
+        );
+      })
+      .andThen(() => {
+        return this.paymentRepository.getPaymentsByIds([paymentId]);
+      })
+      .andThen((payments) => {
+        const payment = payments.get(paymentId);
+        if (payment == null) {
+          return errAsync(new InvalidParametersError("Invalid payment ID"));
+        }
+        return this._refreshBalances().andThen(() => okAsync(payment));
+      });
+  }
+
+  public resolveInsurance(
+    paymentId: PaymentId,
+  ): ResultAsync<
+    Payment,
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
+  > {
+    // Get the payment
+    return this.paymentRepository
+      .getPaymentsByIds([paymentId])
+      .andThen((payments) => {
+        const payment = payments.get(paymentId);
+
+        if (payment == null) {
+          return errAsync(new InvalidParametersError("Invalid payment ID"));
+        }
+
+        // You can only resolve payments insurance that are in the accepted state- the reciever has taken their money but you they still
+        // have payment amount staked as an insurace amount.
+        // The second condition can't happen if it's in Accepted unless something is very, very badly wrong,
+        // but it keeps typescript happy
+        if (
+          payment.state != EPaymentState.Accepted ||
+          payment.details.insuranceTransferId == null
+        ) {
+          return errAsync(
+            new InvalidParametersError(
+              "Can not resolve payment that is not in the Accepted state",
+            ),
+          );
+        }
+        // Making sure the payment staked amount(the insurance amount) is equal to the payment required staked amount
+        if (
+          payment.amountStaked.toString() != payment.requiredStake.toString()
+        ) {
+          return errAsync(
+            new InvalidParametersError(
+              "Payment insurance amount should be equal to payment required staked amount",
+            ),
+          );
+        }
+
+        // Resolve the insurance
+        return this.paymentRepository.resolveInsurance(
           paymentId,
           payment.details.insuranceTransferId,
         );
@@ -695,7 +766,7 @@ export class PaymentService implements IPaymentService {
           if (payment instanceof PullPayment) {
             context.onPullPaymentDelayed.next(payment);
           }
-          return okAsync(undefined);
+          return this._refreshBalances();
         }
       });
   }
@@ -752,5 +823,19 @@ export class PaymentService implements IPaymentService {
     }
 
     return okAsync(payment);
+  }
+
+  // Caculates balances and update the context after that
+  private _refreshBalances(): ResultAsync<
+    void,
+    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+  > {
+    return ResultUtils.combine([
+      this.contextProvider.getContext(),
+      this.accountRepository.getBalances(),
+    ]).map((vals) => {
+      const [context, balances] = vals;
+      context.onBalancesChanged.next(balances);
+    });
   }
 }

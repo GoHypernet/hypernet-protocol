@@ -37,15 +37,15 @@ import { Signature } from "@objects/Signature";
  * user account. The user can be /both/ a consumer and a provider.
  */
 export interface IHypernetCore {
-  initialized(): Result<boolean, LogicalError>;
+  initialized(): Result<boolean, never>;
 
-  waitInitialized(): ResultAsync<void, LogicalError>;
+  waitInitialized(): ResultAsync<void, never>;
 
   /**
    * Probably can be removed, but leaving as a reminder in case we need to solve
    * the multiple-instance-of-Hypernet-core issue
    */
-  inControl(): Result<boolean, LogicalError>;
+  inControl(): Result<boolean, never>;
 
   /**
    * This returns the linked Ethereum accounts via your installed wallet (ie: Metamask)
@@ -214,6 +214,19 @@ export interface IHypernetCore {
     Payment,
     | MerchantConnectorError
     | MerchantValidationError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
+  >;
+
+  resolveInsurance(
+    paymentId: PaymentId,
+  ): ResultAsync<
+    Payment,
     | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError

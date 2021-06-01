@@ -1,3 +1,8 @@
+import { ICoreListener } from "@core-iframe/interfaces/api";
+import {
+  ICoreUIService,
+  ICoreUIServiceType,
+} from "@core-iframe/interfaces/business";
 import {
   EthereumAddress,
   PublicIdentifier,
@@ -10,12 +15,6 @@ import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
 import { injectable, inject } from "inversify";
 import Postmate from "postmate";
-
-import { ICoreListener } from "@core-iframe/interfaces/api";
-import {
-  ICoreUIService,
-  ICoreUIServiceType,
-} from "@core-iframe/interfaces/business";
 
 @injectable()
 export class CoreListener extends ChildProxy implements ICoreListener {
@@ -160,6 +159,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       initiateDispute: (data: IIFrameCallData<PaymentId>) => {
         this.returnForModel(() => {
           return this.core.initiateDispute(data.data);
+        }, data.callId);
+      },
+      resolveInsurance: (data: IIFrameCallData<PaymentId>) => {
+        this.returnForModel(() => {
+          return this.core.resolveInsurance(data.data);
         }, data.callId);
       },
       closeMerchantIFrame: (data: IIFrameCallData<MerchantUrl>) => {

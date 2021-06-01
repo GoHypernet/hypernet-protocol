@@ -92,9 +92,11 @@ export default class HypernetWebUI implements IHypernetWebUI {
     );
   }
 
-  private _getThrowableRender(renderReact: () => void): Result<void, any> {
+  private _getThrowableRender(
+    renderReact: () => void,
+  ): Result<void, RenderError> {
     const throwable = Result.fromThrowable(renderReact, (err) => {
-      return err as RenderError;
+      return new RenderError("Error in fromThrowable", err);
     });
     return throwable();
   }

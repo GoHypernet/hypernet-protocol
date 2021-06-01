@@ -106,7 +106,7 @@ export class PaymentRepository implements IPaymentRepository {
           });
       })
 
-      .mapErr((err) => new PaymentCreationError(err, err?.message));
+      .mapErr((err) => new PaymentCreationError(err?.message, err));
   }
 
   public createPullPayment(
@@ -160,7 +160,7 @@ export class PaymentRepository implements IPaymentRepository {
             return payment as PullPayment;
           });
       })
-      .mapErr((err) => new PaymentCreationError(err, err?.message));
+      .mapErr((err) => new PaymentCreationError(err?.message, err));
   }
 
   /**
@@ -226,7 +226,7 @@ export class PaymentRepository implements IPaymentRepository {
       .map((payment) => {
         return payment as PushPayment;
       })
-      .mapErr((err) => new PaymentCreationError(err, err?.message));
+      .mapErr((err) => new PaymentCreationError(err?.message, err));
   }
 
   /**
@@ -675,5 +675,24 @@ export class PaymentRepository implements IPaymentRepository {
         // Transfer has been created successfully; return the updated payment.
         return this.paymentUtils.transfersToPayment(paymentId, allTransfers);
       });
+  }
+
+  /**
+   * Release transfer insurance with 0 value
+   * @param paymentId the payment for which to resolve insurance for
+   * @param transferId the transferId for which to resolve insurance for
+   */
+  public resolveInsurance(
+    paymentId: PaymentId,
+    transferId: TransferId,
+  ): ResultAsync<void, TransferResolutionError> {
+    return this.vectorUtils
+      .resolveInsuranceTransfer(
+        transferId,
+        paymentId,
+        undefined,
+        BigNumber.from("0"),
+      )
+      .map(() => {});
   }
 }

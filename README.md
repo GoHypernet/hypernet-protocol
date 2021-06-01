@@ -69,4 +69,5 @@ Dev dependencies should be added to the root of the repository, via
 Normal dependencies and peer dependencies should be added via yarn to the actual pacakge. Refer to the example monorepo above for more examples.
 
 ## Development
+
 Using VSCode is recommended. You should install and use the ESLint extention, details on that are [here](https://code.visualstudio.com/api/advanced-topics/tslint-eslint-migration)

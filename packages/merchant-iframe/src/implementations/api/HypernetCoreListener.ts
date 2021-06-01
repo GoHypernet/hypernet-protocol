@@ -9,16 +9,16 @@ import {
   Signature,
 } from "@hypernetlabs/objects";
 import { ChildProxy, IIFrameCallData } from "@hypernetlabs/utils";
-import { BigNumber } from "ethers";
-import { injectable, inject } from "inversify";
-import { okAsync } from "neverthrow";
-import Postmate from "postmate";
-
 import { IHypernetCoreListener } from "@merchant-iframe/interfaces/api";
 import {
   IMerchantService,
   IMerchantServiceType,
 } from "@merchant-iframe/interfaces/business";
+import { BigNumber } from "ethers";
+import { injectable, inject } from "inversify";
+import { okAsync } from "neverthrow";
+import Postmate from "postmate";
+
 import {
   IContextProvider,
   IContextProviderType,

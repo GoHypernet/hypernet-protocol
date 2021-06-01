@@ -1,6 +1,5 @@
 import { MerchantUrl } from "@hypernetlabs/objects";
 import { ILocalStorageUtils } from "@hypernetlabs/utils";
-
 import { IPersistenceRepository } from "@merchant-iframe/interfaces/data";
 import { ExpectedRedirect } from "@merchant-iframe/interfaces/objects";
 export class PersistenceRepository implements IPersistenceRepository {

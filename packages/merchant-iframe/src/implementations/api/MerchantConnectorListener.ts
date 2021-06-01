@@ -1,7 +1,4 @@
 import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
-import { injectable, inject } from "inversify";
-import { okAsync, ResultAsync } from "neverthrow";
-
 import { IMerchantConnectorListener } from "@merchant-iframe/interfaces/api";
 import {
   IMerchantService,
@@ -11,6 +8,9 @@ import {
   IPaymentService,
   IPaymentServiceType,
 } from "@merchant-iframe/interfaces/business";
+import { injectable, inject } from "inversify";
+import { okAsync, ResultAsync } from "neverthrow";
+
 import {
   IContextProvider,
   IContextProviderType,

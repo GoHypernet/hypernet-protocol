@@ -45,9 +45,7 @@ export interface IPaymentIdUtils {
    * A valid payment ID is exactly 64 characters, hexadecimal, prefixed with 0x.
    * @param paymentIdString
    */
-  isValidPaymentId(
-    paymentIdString: PaymentId,
-  ): Result<boolean, InvalidParametersError>;
+  isValidPaymentId(paymentIdString: PaymentId): Result<boolean, never>;
 
   /**
    * Given domain, type, and uuid, returns the computed paymentId

@@ -1,3 +1,4 @@
+import { IConnectorAuthorizationFlowParams } from "@web-ui/interfaces";
 import React, { useEffect } from "react";
 import { Box } from "@material-ui/core";
 
@@ -5,7 +6,6 @@ import { ModalHeader, ModalFooter, Button } from "@web-ui/components";
 import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 import { useStyles } from "@web-ui/flows/ConnectorAuthorizationFlow/ConnectorAuthorizationFlow.style";
 import { useBalances } from "@web-ui/hooks";
-import { IConnectorAuthorizationFlowParams } from "@web-ui/interfaces";
 import { EStatusColor } from "@web-ui/theme";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget/BalancesWidget";
 

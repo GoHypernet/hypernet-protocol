@@ -1,11 +1,10 @@
-import { injectable, inject } from "inversify";
-import { ResultAsync } from "neverthrow";
-
 import { IDisplayService } from "@merchant-iframe/interfaces/business";
 import {
   IHypernetCoreRepository,
   IHypernetCoreRepositoryType,
 } from "@merchant-iframe/interfaces/data";
+import { injectable, inject } from "inversify";
+import { ResultAsync } from "neverthrow";
 
 @injectable()
 export class DisplayService implements IDisplayService {

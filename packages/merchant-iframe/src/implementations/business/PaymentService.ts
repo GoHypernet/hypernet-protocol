@@ -2,14 +2,13 @@ import {
   ISendFundsRequest,
   IAuthorizeFundsRequest,
 } from "@hypernetlabs/merchant-connector";
-import { injectable, inject } from "inversify";
-import { ResultAsync } from "neverthrow";
-
 import { IPaymentService } from "@merchant-iframe/interfaces/business";
 import {
   IHypernetCoreRepository,
   IHypernetCoreRepositoryType,
 } from "@merchant-iframe/interfaces/data";
+import { injectable, inject } from "inversify";
+import { ResultAsync } from "neverthrow";
 
 @injectable()
 export class PaymentService implements IPaymentService {

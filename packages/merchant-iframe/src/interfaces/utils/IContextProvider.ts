@@ -1,5 +1,4 @@
 import { Signature } from "@hypernetlabs/objects";
-
 import { MerchantContext } from "@merchant-iframe/interfaces/objects";
 
 export interface IContextProvider {

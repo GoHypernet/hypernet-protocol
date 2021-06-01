@@ -26,17 +26,16 @@ import {
   InvalidParametersError,
   TransferResolutionError,
   PreferredPaymentTokenError,
+  IHypernetCore,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
 import { Result, ResultAsync, ok } from "neverthrow";
 import { Subject } from "rxjs";
 
-import IHypernetIFrameProxy from "@web-integration/interfaces/proxy/IHypernetIFrameProxy";
-
 export default class HypernetIFrameProxy
   extends ParentProxy
-  implements IHypernetIFrameProxy {
+  implements IHypernetCore {
   protected coreInitialized = false;
   protected isInControl = false;
   protected waitInitializedPromise: Promise<void>;
@@ -196,7 +195,7 @@ export default class HypernetIFrameProxy
     throw new Error("Method not implemented.");
   }
 
-  public initialized(): Result<boolean, LogicalError> {
+  public initialized(): Result<boolean, never> {
     // If the child is not initialized, there is no way the core can be.
     if (this.child == null) {
       return ok(false);
@@ -207,13 +206,11 @@ export default class HypernetIFrameProxy
     return ok(this.coreInitialized);
   }
 
-  public waitInitialized(): ResultAsync<void, LogicalError> {
-    return this.activate().andThen(() => {
-      return this._createCall("waitInitialized", null);
-    });
+  public waitInitialized(): ResultAsync<void, never> {
+    return ResultAsync.fromSafePromise(this.waitInitializedPromise);
   }
 
-  public inControl(): Result<boolean, LogicalError> {
+  public inControl(): Result<boolean, never> {
     // If the child is not initialized, there is no way the core can be.
     if (this.child == null) {
       return ok(false);
@@ -364,6 +361,21 @@ export default class HypernetIFrameProxy
     | TransferResolutionError
   > {
     return this._createCall("initiateDispute", paymentId);
+  }
+
+  public resolveInsurance(
+    paymentId: PaymentId,
+  ): ResultAsync<
+    Payment,
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
+  > {
+    return this._createCall("resolveInsurance", paymentId);
   }
 
   public mintTestToken(

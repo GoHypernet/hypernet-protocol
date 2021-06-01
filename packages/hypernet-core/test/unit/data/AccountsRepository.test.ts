@@ -10,6 +10,7 @@ import {
   EthereumAddress,
   AssetBalance,
   Balances,
+  IFullChannelState,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { ILocalStorageUtils } from "@hypernetlabs/utils";
@@ -118,6 +119,8 @@ class AccountsRepositoryMocks {
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
   public localStorageUtils = td.object<ILocalStorageUtils>();
+  public balances: Balances;
+  public stateChannel: IFullChannelState | undefined;
 
   constructor() {
     td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(
@@ -141,6 +144,27 @@ class AccountsRepositoryMocks {
         account,
       ),
     ).thenReturn(okAsync(new TransactionResponseMock()));
+
+    this.stateChannel = this.browserNodeProvider.stateChannels.get(
+      routerChannelAddress,
+    );
+    if (this.stateChannel == null) {
+      throw new Error();
+    }
+
+    this.balances = {
+      assets: [
+        new AssetBalance(
+          EthereumAddress(this.stateChannel?.assetIds[0]),
+          `Unknown Token (${EthereumAddress(this.stateChannel?.assetIds[0])})`,
+          "Unk",
+          0,
+          BigNumber.from(this.stateChannel?.balances[0].amount[1]),
+          BigNumber.from(0),
+          BigNumber.from(this.stateChannel?.balances[0].amount[1]),
+        ),
+      ],
+    };
   }
 
   public factoryAccountsRepository(): IAccountsRepository {
@@ -196,7 +220,7 @@ class AccountsRepositoryErrorMocks {
 }
 
 describe("AccountsRepository tests", () => {
-  /* test("Should getPublicIdentifier return publicIdentifier", async () => {
+  test("Should getPublicIdentifier return publicIdentifier", async () => {
     // Arrange
     const accountsRepositoryMocks = new AccountsRepositoryMocks();
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
@@ -237,34 +261,12 @@ describe("AccountsRepository tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
     expect(result._unsafeUnwrap()).toStrictEqual(accounts);
-  }); */
+  });
 
-  // TODO: there is a bug in getBalances related to contract token names, refactor this test when it fixed
   test("Should getBalances return balances", async () => {
     // Arrange
     const accountsRepositoryMocks = new AccountsRepositoryMocks();
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
-
-    const stateChannel = accountsRepositoryMocks.browserNodeProvider.stateChannels.get(
-      routerChannelAddress,
-    );
-    if (stateChannel == null) {
-      throw new Error();
-    }
-
-    const balances: Balances = {
-      assets: [
-        new AssetBalance(
-          EthereumAddress(stateChannel?.assetIds[0]),
-          "Unknown Token (0x9FBDa871d559710256a2502A2517b794B482Db40)",
-          "Unk",
-          0,
-          BigNumber.from(stateChannel?.balances[0].amount[1]),
-          BigNumber.from(0),
-          BigNumber.from(stateChannel?.balances[0].amount[1]),
-        ),
-      ],
-    };
 
     // Act
     const result = await repo.getBalances();
@@ -273,10 +275,10 @@ describe("AccountsRepository tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toEqual(balances);
+    expect(result._unsafeUnwrap()).toEqual(accountsRepositoryMocks.balances);
   });
 
-  /* test("Should getBalances throw error when getRouterChannelAddress fails", async () => {
+  test("Should getBalances throw error when getRouterChannelAddress fails", async () => {
     // Arrange
     const accountsRepositoryMocks = new AccountsRepositoryErrorMocks();
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
@@ -295,21 +297,8 @@ describe("AccountsRepository tests", () => {
     const accountsRepositoryMocks = new AccountsRepositoryMocks();
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
-    const stateChannel = accountsRepositoryMocks.browserNodeProvider.stateChannels.get(
-      routerChannelAddress,
-    );
-    if (stateChannel == null) {
-      throw new Error();
-    }
-    const assetId = EthereumAddress(stateChannel?.assetIds[0]);
-    const assetBalance = new AssetBalance(
-      assetId,
-      "",
-      "",
-      0,
-      BigNumber.from(stateChannel?.balances[0].amount[1]),
-      BigNumber.from(0),
-      BigNumber.from(stateChannel?.balances[0].amount[1]),
+    const assetId = EthereumAddress(
+      accountsRepositoryMocks.stateChannel?.assetIds[0] as string,
     );
 
     // Act
@@ -318,7 +307,9 @@ describe("AccountsRepository tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toStrictEqual(assetBalance);
+    expect(result._unsafeUnwrap()).toStrictEqual(
+      accountsRepositoryMocks.balances.assets[0],
+    );
   });
 
   test("Should depositFunds with ether address without errors", async () => {
@@ -429,5 +420,5 @@ describe("AccountsRepository tests", () => {
     // Assert
     expect(result.isErr()).toBeTruthy();
     expect(error).toBeInstanceOf(BlockchainUnavailableError);
-  }); */
+  });
 });
