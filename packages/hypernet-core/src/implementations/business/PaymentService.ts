@@ -388,7 +388,7 @@ export class PaymentService implements IPaymentService {
           Promise.all(stakeAttempts),
           (e) => new AcceptPaymentError("Error while staking payment", e),
         ).andThen((paymentsResult) => {
-          return this._refreshBalances().andThen(() => okAsync(paymentsResult));
+          return this._refreshBalances().map(() => paymentsResult);
         });
       });
   }
@@ -830,10 +830,12 @@ export class PaymentService implements IPaymentService {
     void,
     BalancesUnavailableError | VectorError | RouterChannelUnknownError
   > {
-    return this.contextProvider.getContext().andThen((context) => {
-      return this.accountRepository.getBalances().map((balances) => {
-        context.onBalancesChanged.next(balances);
-      });
+    return ResultUtils.combine([
+      this.contextProvider.getContext(),
+      this.accountRepository.getBalances(),
+    ]).map((vals) => {
+      const [context, balances] = vals;
+      context.onBalancesChanged.next(balances);
     });
   }
 }
