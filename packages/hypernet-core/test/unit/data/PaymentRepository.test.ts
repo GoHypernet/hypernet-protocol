@@ -3,8 +3,10 @@ import {
   PushPayment,
   EPaymentState,
   EPaymentType,
+  IBasicTransferResponse,
   VectorError,
   PaymentCreationError,
+  TransferResolutionError,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -171,6 +173,15 @@ class PaymentRepositoryMocks {
         transferId: parameterizedTransferId,
       }),
     );
+
+    td.when(
+      this.vectorUtils.resolveInsuranceTransfer(
+        insuranceTransferId,
+        commonPaymentId,
+        undefined,
+        BigNumber.from("0"),
+      ),
+    ).thenReturn(okAsync({} as IBasicTransferResponse));
   }
 
   public factoryPaymentRepository(): IPaymentRepository {
@@ -407,5 +418,53 @@ describe("PaymentRepository tests", () => {
     // Assert
     expect(result.isErr()).toBeTruthy();
     expect(error).toBeInstanceOf(VectorError);
+  });
+
+  test("resolveInsurance runs without errors", async () => {
+    // Arrange
+    const paymentRepositoryMocks = new PaymentRepositoryMocks();
+    const repo = paymentRepositoryMocks.factoryPaymentRepository();
+
+    // Act
+    const result = await repo.resolveInsurance(
+      commonPaymentId,
+      insuranceTransferId,
+    );
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toBeUndefined();
+  });
+
+  test("resolveInsurance fails if resolveInsuranceTransfer failed", async () => {
+    // Arrange
+    const paymentRepositoryMocks = new PaymentRepositoryMocks();
+    const repo = paymentRepositoryMocks.factoryPaymentRepository();
+    td.when(
+      paymentRepositoryMocks.vectorUtils.resolveInsuranceTransfer(
+        insuranceTransferId,
+        commonPaymentId,
+        undefined,
+        BigNumber.from("0"),
+      ),
+    ).thenReturn(
+      errAsync(
+        new TransferResolutionError(
+          new Error("resolveInsuranceTransfer failed"),
+        ),
+      ),
+    );
+
+    // Act
+    const result = await repo.resolveInsurance(
+      commonPaymentId,
+      insuranceTransferId,
+    );
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeTruthy();
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(TransferResolutionError);
   });
 });

@@ -21,6 +21,8 @@ import {
   TransferResolutionError,
   PreferredPaymentTokenError,
   ProxyError,
+  PaymentStakeError,
+  TransferCreationError,
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { HypernetLink } from "@objects/HypernetLink";
@@ -214,6 +216,19 @@ export interface IHypernetCore {
     Payment,
     | MerchantConnectorError
     | MerchantValidationError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
+  >;
+
+  resolveInsurance(
+    paymentId: PaymentId,
+  ): ResultAsync<
+    Payment,
     | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
