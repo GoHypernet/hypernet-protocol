@@ -1,18 +1,27 @@
-import td from "testdouble";
-require("testdouble-jest")(td, jest);
-import { merchantUrl, account } from "@mock/mocks";
-import { BlockchainProviderMock, ConfigProviderMock, ContextProviderMock } from "@mock/utils";
-import { ILogUtils, IBrowserNode } from "@interfaces/utilities";
-import { IBrowserNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider";
-import { okAsync } from "neverthrow";
-import { BrowserNodeProvider } from "@implementations/utilities/BrowserNodeProvider";
-import { ILocalStorageUtils } from "@hypernetlabs/utils";
-import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
 import { NonEIP712Message } from "@connext/vector-browser-node";
+import { Signature } from "@hypernetlabs/objects";
+import { ILocalStorageUtils, ILogUtils } from "@hypernetlabs/utils";
+import { okAsync } from "neverthrow";
+import td from "testdouble";
 
-const validatedSignature = "0xValidatedSignature";
-const authorizationSignature =
-  "0x1e866e66e7f3a68658bd186bafbdc534d4a5022e14022fddfe8865e2236dc67d64eee05b4d8f340dffa1928efa517784b63cad6a3fb35d999cb9d722b34075071b";
+import { BrowserNodeProvider } from "@implementations/utilities/BrowserNodeProvider";
+import { IBrowserNode } from "@interfaces/utilities";
+import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
+import { IBrowserNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider";
+import { merchantUrl, account } from "@mock/mocks";
+import {
+  BlockchainProviderMock,
+  ConfigProviderMock,
+  ContextProviderMock,
+} from "@mock/utils";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+require("testdouble-jest")(td, jest);
+
+const validatedSignature = Signature("0xValidatedSignature");
+const authorizationSignature = Signature(
+  "0x1e866e66e7f3a68658bd186bafbdc534d4a5022e14022fddfe8865e2236dc67d64eee05b4d8f340dffa1928efa517784b63cad6a3fb35d999cb9d722b34075071b",
+);
 
 class BrowserNodeProviderMocks {
   public blockchainProvider = new BlockchainProviderMock();
@@ -41,17 +50,25 @@ class BrowserNodeProviderMocks {
     merchantValidatedSignature: validatedSignature,
   };
 
-  constructor(stubSigner: boolean = true) {
-    td.when(this.localStorageUtils.getSessionItem(`account-${account}-signature`)).thenReturn(null);
+  constructor(stubSigner = true) {
+    td.when(
+      this.localStorageUtils.getSessionItem(`account-${account}-signature`),
+    ).thenReturn(null);
 
-    td.when(this.browserNodeFactory.factoryBrowserNode()).thenReturn(okAsync(this.browserNode));
+    td.when(this.browserNodeFactory.factoryBrowserNode()).thenReturn(
+      okAsync(this.browserNode),
+    );
 
     if (stubSigner) {
       td.when(this.blockchainProvider.signer.getAddress()).thenResolve(account);
-      td.when(this.blockchainProvider.signer.signMessage(NonEIP712Message)).thenResolve(authorizationSignature);
+      td.when(
+        this.blockchainProvider.signer.signMessage(NonEIP712Message),
+      ).thenResolve(authorizationSignature);
     }
 
-    td.when(this.browserNode.init(authorizationSignature, account)).thenReturn(okAsync(undefined));
+    td.when(this.browserNode.init(authorizationSignature, account)).thenReturn(
+      okAsync(undefined),
+    );
   }
 
   public factoryProvider(): IBrowserNodeProvider {
@@ -80,14 +97,21 @@ describe("BrowserNodeProvider tests", () => {
     expect(result.isErr()).toBeFalsy();
     const node = result._unsafeUnwrap();
     expect(node).toBe(mocks.browserNode);
-    td.verify(mocks.localStorageUtils.setSessionItem(`account-${account}-signature`, authorizationSignature));
+    td.verify(
+      mocks.localStorageUtils.setSessionItem(
+        `account-${account}-signature`,
+        authorizationSignature,
+      ),
+    );
   });
 
   test("getBrowserNode returns a returns a browser node without signing message with existing signature", async () => {
     // Arrange
     const mocks = new BrowserNodeProviderMocks(false);
 
-    td.when(mocks.localStorageUtils.getSessionItem(`account-${account}-signature`)).thenReturn(authorizationSignature);
+    td.when(
+      mocks.localStorageUtils.getSessionItem(`account-${account}-signature`),
+    ).thenReturn(authorizationSignature);
 
     const provider = mocks.factoryProvider();
 
@@ -99,8 +123,15 @@ describe("BrowserNodeProvider tests", () => {
     expect(result.isErr()).toBeFalsy();
     const node = result._unsafeUnwrap();
     expect(node).toBe(mocks.browserNode);
-    td.verify(mocks.localStorageUtils.setSessionItem(`account-${account}-signature`, authorizationSignature));
-    td.verify(mocks.blockchainProvider.signer.signMessage(NonEIP712Message), { times: 0 });
+    td.verify(
+      mocks.localStorageUtils.setSessionItem(
+        `account-${account}-signature`,
+        authorizationSignature,
+      ),
+    );
+    td.verify(mocks.blockchainProvider.signer.signMessage(NonEIP712Message), {
+      times: 0,
+    });
   });
 
   test("getBrowserNode returns the same browser node and only initializes once if called twice", async () => {
@@ -117,7 +148,12 @@ describe("BrowserNodeProvider tests", () => {
     expect(result.isErr()).toBeFalsy();
     const node1 = result._unsafeUnwrap();
     expect(node1).toBe(mocks.browserNode);
-    td.verify(mocks.localStorageUtils.setSessionItem(`account-${account}-signature`, authorizationSignature));
+    td.verify(
+      mocks.localStorageUtils.setSessionItem(
+        `account-${account}-signature`,
+        authorizationSignature,
+      ),
+    );
 
     expect(result2).toBeDefined();
     expect(result2.isErr()).toBeFalsy();

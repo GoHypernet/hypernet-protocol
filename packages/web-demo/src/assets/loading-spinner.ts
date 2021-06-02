@@ -2,9 +2,12 @@
 
 */
 "use strict";
-function Spinner() {
-  Spinner.element = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  let c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+function Spinner(): void {
+  Spinner.element = document.createElementNS(
+    "http://www.w3.org/2000/svg",
+    "svg",
+  );
+  const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
   Spinner.element.setAttribute("width", "100");
   Spinner.element.setAttribute("height", "100");
   c.setAttribute("viewBox", "0 0 100 100");
@@ -15,12 +18,11 @@ function Spinner() {
   c.setAttribute("stroke", "#354962");
   c.setAttribute("fill", "transparent");
   Spinner.element.appendChild(c);
-  Spinner.element.style.cssText = "position:absolute;left:calc(50% - 50px);top:calc(50% - 50px)";
+  Spinner.element.style.cssText =
+    "position:absolute;left:calc(50% - 50px);top:calc(50% - 50px)";
   document.body.appendChild(Spinner.element);
 }
-//@ts-ignore
 Spinner.id = null;
-//@ts-ignore
 Spinner.element = null;
 Spinner.show = function () {
   const c = 264,

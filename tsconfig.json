@@ -3,31 +3,31 @@
   "files": [],
   "references": [
     {
-      "path": "packages/hypernet-core/src"
+      "path": "packages/hypernet-core"
     },
     {
       "path": "packages/hypernet-core/test"
     },
     {
-      "path": "packages/web-integration/src"
+      "path": "packages/web-integration"
     },
     {
-      "path": "packages/web-ui/src"
+      "path": "packages/web-ui"
     },
     {
-      "path": "packages/iframe/src"
+      "path": "packages/iframe"
     },
     {
-      "path": "packages/merchant-iframe/src"
+      "path": "packages/merchant-iframe"
     },
     {
       "path": "packages/merchant-iframe/test"
     },
     {
-      "path": "packages/developer-ui/src"
+      "path": "packages/developer-ui"
     },
     {
-      "path": "packages/merchant-connector/src"
+      "path": "packages/merchant-connector"
     },
     {
       "path": "packages/merchant-connector/test"
@@ -42,16 +42,19 @@
       "path": "packages/test-merchant-connector/test"
     },
     {
-      "path": "packages/web-demo/src"
+      "path": "packages/web-demo"
     },
     {
-      "path": "packages/utils/src"
+      "path": "packages/utils"
     },
     {
-      "path": "packages/mobile-integration/src"
+      "path": "packages/mobile-integration"
     },
     {
       "path": "packages/objects"
+    },
+    {
+      "path": "packages/user-dashboard"
     }
   ]
 }

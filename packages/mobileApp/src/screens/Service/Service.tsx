@@ -1,8 +1,13 @@
-import ScreenHeader from "@mobileApp/components/ScreenHeader";
 import React from "react";
 import { View, Image, StyleSheet } from "react-native";
-import { widthPercentageToDP as wp, heightPercentageToDP as hp } from "react-native-responsive-screen";
+import {
+  widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from "react-native-responsive-screen";
+
 import ServiceCard from "./components/ServiceCard";
+
+import ScreenHeader from "@mobileApp/components/ScreenHeader";
 
 interface ServiceProps {}
 
@@ -19,8 +24,18 @@ const Service: React.FC<ServiceProps> = (props: ServiceProps) => {
         }}
       />
       <View style={styles.cardListContainer}>
-        <ServiceCard renderIcon={() => <Image source={require("@mobileApp/assets/images/copernicus.png")} />} />
-        <ServiceCard renderIcon={() => <Image source={require("@mobileApp/assets/images/galileo.png")} />} />
+        <ServiceCard
+          renderIcon={() => (
+            <Image
+              source={require("@mobileApp/assets/images/copernicus.png")}
+            />
+          )}
+        />
+        <ServiceCard
+          renderIcon={() => (
+            <Image source={require("@mobileApp/assets/images/galileo.png")} />
+          )}
+        />
       </View>
     </View>
   );

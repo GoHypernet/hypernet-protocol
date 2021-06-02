@@ -1,8 +1,14 @@
-import { MerchantConnectorError } from "@hypernetlabs/objects";
-import { IMerchantConnectorProxy } from "@interfaces/utilities";
+import { ProxyError, MerchantUrl } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
+import { IMerchantConnectorProxy } from "@interfaces/utilities";
+
 export interface IMerchantConnectorProxyFactory {
-  factoryProxy(merchantUrl: string): ResultAsync<IMerchantConnectorProxy, MerchantConnectorError>;
-  destroyMerchantConnectorProxy(merchantUrl: string): void;
+  factoryProxy(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<IMerchantConnectorProxy, ProxyError>;
 }
+
+export const IMerchantConnectorProxyFactoryType = Symbol.for(
+  "IMerchantConnectorProxyFactory",
+);

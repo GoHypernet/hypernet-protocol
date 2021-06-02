@@ -1,5 +1,6 @@
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import ko from "knockout";
+
 import html from "./Account.template.html";
 
 export class AccountParams {

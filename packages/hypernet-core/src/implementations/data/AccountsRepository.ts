@@ -1,28 +1,35 @@
+import { ERC20Abi } from "@connext/vector-types";
+import {
+  AssetBalance,
+  Balances,
+  EthereumAddress,
+  PublicIdentifier,
+  IFullChannelState,
+  Signature,
+  AssetInfo,
+  PreferredPaymentTokenError,
+  BlockchainUnavailableError,
+  RouterChannelUnknownError,
+  BalancesUnavailableError,
+  LogicalError,
+  VectorError,
+} from "@hypernetlabs/objects";
+import {
+  ResultUtils,
+  ILogUtils,
+  ILocalStorageUtils,
+} from "@hypernetlabs/utils";
+import { ethers, constants, BigNumber, Contract } from "ethers";
+import { combine, errAsync, okAsync, ResultAsync } from "neverthrow";
+
 import { IAccountsRepository } from "@interfaces/data";
-import { AssetBalance, Balances, EthereumAddress, PublicIdentifier, IFullChannelState } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
 import {
   IVectorUtils,
   IBlockchainProvider,
   IBrowserNodeProvider,
-  ILogUtils,
   IBrowserNode,
   IBlockchainUtils,
 } from "@interfaces/utilities";
-import { ethers, constants } from "ethers";
-import {
-  BalancesUnavailableError,
-  BlockchainUnavailableError,
-  CoreUninitializedError,
-  RouterChannelUnknownError,
-  VectorError,
-} from "@hypernetlabs/objects";
-import { combine, errAsync, okAsync, ResultAsync } from "neverthrow";
-import { ResultUtils } from "@hypernetlabs/utils";
-
-class AssetInfo {
-  constructor(public assetId: EthereumAddress, public name: string, public symbol: string, public decimals: number) {}
-}
 
 /**
  * Contains methods for getting Ethereum accounts, public identifiers,
@@ -33,25 +40,41 @@ export class AccountsRepository implements IAccountsRepository {
    * Retrieves an instances of the AccountsRepository.
    */
   protected assetInfo: Map<EthereumAddress, AssetInfo>;
+  protected erc20Abi: string[];
 
   constructor(
     protected blockchainProvider: IBlockchainProvider,
     protected vectorUtils: IVectorUtils,
     protected browserNodeProvider: IBrowserNodeProvider,
-    protected logUtils: ILogUtils,
     protected blockchainUtils: IBlockchainUtils,
+    protected localStorageUtils: ILocalStorageUtils,
+    protected logUtils: ILogUtils,
   ) {
     // We will cache the info about each asset type, so we only have to look it up once.
     this.assetInfo = new Map();
 
     // Add a default entry for Ethereum, it's not an ERC20, it's special and it's also universal.
-    this.assetInfo.set(constants.AddressZero, new AssetInfo(constants.AddressZero, "Ethereum", "ETH", 18));
+    this.assetInfo.set(
+      EthereumAddress(constants.AddressZero),
+      new AssetInfo(
+        EthereumAddress(constants.AddressZero),
+        "Ethereum",
+        "ETH",
+        18,
+      ),
+    );
+
+    this.erc20Abi = Object.assign([], ERC20Abi);
+    this.erc20Abi.push("function name() view returns (string)");
   }
 
   /**
    * Get the current public identifier for this instance.
    */
-  public getPublicIdentifier(): ResultAsync<PublicIdentifier, VectorError | Error> {
+  public getPublicIdentifier(): ResultAsync<
+    PublicIdentifier,
+    BlockchainUnavailableError | VectorError
+  > {
     return this.browserNodeProvider.getBrowserNode().map((browserNode) => {
       return browserNode.publicIdentifier;
     });
@@ -60,10 +83,18 @@ export class AccountsRepository implements IAccountsRepository {
   /**
    * Get the Ethereum accounts associated with this instance.
    */
-  public getAccounts(): ResultAsync<string[], BlockchainUnavailableError> {
+  public getAccounts(): ResultAsync<
+    EthereumAddress[],
+    BlockchainUnavailableError
+  > {
     return this.blockchainProvider.getProvider().andThen((provider) => {
       return ResultAsync.fromPromise(provider.listAccounts(), (e) => {
-        return e as BlockchainUnavailableError;
+        return new BlockchainUnavailableError(
+          "Unable to get accounts from blockchain provider",
+          e,
+        );
+      }).map((addresses) => {
+        return addresses.map((val) => EthereumAddress(val));
       });
     });
   }
@@ -71,41 +102,53 @@ export class AccountsRepository implements IAccountsRepository {
   /**
    * Get all balances associated with this instance.
    */
-  public getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError> {
-    return this.vectorUtils.getRouterChannelAddress().andThen((channelAddress: string) => {
-      return this.browserNodeProvider
-        .getBrowserNode()
-        .andThen((browserNode) => {
-          return browserNode.getStateChannel(channelAddress);
-        })
-        .andThen((channelState) => {
-          const assetBalanceResults = new Array<ResultAsync<AssetBalance, VectorError>>();
+  public getBalances(): ResultAsync<
+    Balances,
+    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+  > {
+    return this.vectorUtils
+      .getRouterChannelAddress()
+      .andThen((channelAddress) => {
+        return this.browserNodeProvider
+          .getBrowserNode()
+          .andThen((browserNode) => {
+            return browserNode.getStateChannel(channelAddress);
+          })
+          .andThen((channelState) => {
+            const assetBalanceResults = new Array<
+              ResultAsync<AssetBalance, VectorError>
+            >();
 
-          if (channelState == null) {
+            if (channelState == null) {
+              return combine(assetBalanceResults);
+            }
+
+            for (let i = 0; i < channelState.assetIds.length; i++) {
+              const assetBalanceResult = this._getAssetBalance(i, channelState);
+              assetBalanceResults.push(assetBalanceResult);
+            }
+
             return combine(assetBalanceResults);
-          }
-
-          for (let i = 0; i < channelState.assetIds.length; i++) {
-            const assetBalanceResult = this._getAssetBalance(i, channelState);
-            assetBalanceResults.push(assetBalanceResult);
-          }
-
-          return combine(assetBalanceResults);
-        })
-        .map((assetBalances) => {
-          return new Balances(assetBalances);
-        });
-    });
+          })
+          .map((assetBalances) => {
+            return new Balances(assetBalances);
+          });
+      });
   }
 
   /**
    * Get balance for a particular asset for this instance
    * @param assetAddress the (Ethereum) address of the token to get the balance of
    */
-  public getBalanceByAsset(assetAddress: EthereumAddress): ResultAsync<AssetBalance, BalancesUnavailableError> {
+  public getBalanceByAsset(
+    assetAddress: EthereumAddress,
+  ): ResultAsync<
+    AssetBalance,
+    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+  > {
     return this.getBalances().andThen((balances) => {
       for (const assetBalance of balances.assets) {
-        if (assetBalance.assetAddresss === assetAddress) {
+        if (assetBalance.assetAddress === assetAddress) {
           // The user has a balance of the selected asset type, so we have an asset balance
           // to give back.
           return okAsync(assetBalance);
@@ -138,10 +181,13 @@ export class AccountsRepository implements IAccountsRepository {
     amount: BigNumber,
   ): ResultAsync<
     null,
-    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error | BlockchainUnavailableError
+    | RouterChannelUnknownError
+    | VectorError
+    | LogicalError
+    | BlockchainUnavailableError
   > {
     let signer: ethers.providers.JsonRpcSigner;
-    let channelAddress: string;
+    let channelAddress: EthereumAddress;
     let browserNode: IBrowserNode;
 
     return ResultUtils.combine([
@@ -155,22 +201,35 @@ export class AccountsRepository implements IAccountsRepository {
         if (assetAddress === "0x0000000000000000000000000000000000000000") {
           this.logUtils.log("Transferring ETH.");
           // send eth
-          return ResultAsync.fromPromise(signer.sendTransaction({ to: channelAddress, value: amount }), (err) => {
-            return err as BlockchainUnavailableError;
-          });
+          return ResultAsync.fromPromise(
+            signer.sendTransaction({ to: channelAddress, value: amount }),
+            (err) => {
+              return new BlockchainUnavailableError(
+                "Unable to send transaction",
+                err,
+              );
+            },
+          );
         } else {
           this.logUtils.log("Transferring an ERC20 asset.");
           // send an actual erc20 token
-          return this.blockchainUtils.erc20Transfer(assetAddress, channelAddress, amount);
+          return this.blockchainUtils.erc20Transfer(
+            assetAddress,
+            channelAddress,
+            amount,
+          );
         }
       })
       .andThen((tx) => {
         // TODO: Wait on this, break it up, this could take a while
-        return ResultAsync.fromPromise(tx.wait(), (e) => e as BlockchainUnavailableError);
+        return ResultAsync.fromPromise(
+          tx.wait(),
+          (e) => e as BlockchainUnavailableError,
+        );
       })
       .andThen(() => {
         if (browserNode == null || channelAddress == null) {
-          return errAsync(new Error("Really screwed up!"));
+          return errAsync(new LogicalError("Really screwed up!"));
         }
         return browserNode.reconcileDeposit(assetAddress, channelAddress);
       })
@@ -181,7 +240,9 @@ export class AccountsRepository implements IAccountsRepository {
 
         // Sanity check, the deposit was for the channel we tried to deposit into.
         if (depositChannelAddress !== channelAddress) {
-          return errAsync(new Error("Something has gone horribly wrong!"));
+          return errAsync(
+            new LogicalError("Something has gone horribly wrong!"),
+          );
         }
 
         return okAsync(null);
@@ -195,10 +256,13 @@ export class AccountsRepository implements IAccountsRepository {
    * @param destinationAddress the destination (Ethereum) address to withdraw to
    */
   public withdrawFunds(
-    assetAddress: string,
+    assetAddress: EthereumAddress,
     amount: BigNumber,
-    destinationAddress: string,
-  ): ResultAsync<void, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+    destinationAddress: EthereumAddress,
+  ): ResultAsync<
+    void,
+    RouterChannelUnknownError | VectorError | BlockchainUnavailableError
+  > {
     const prerequisites = ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.vectorUtils.getRouterChannelAddress(),
@@ -207,11 +271,24 @@ export class AccountsRepository implements IAccountsRepository {
     return prerequisites
       .andThen((vals) => {
         const [browserNode, channelAddress] = vals;
-        return browserNode.withdraw(channelAddress, amount.toString(), assetAddress, destinationAddress);
+        return browserNode.withdraw(
+          channelAddress,
+          amount.toString(),
+          assetAddress,
+          destinationAddress,
+        );
       })
       .map(() => {
         return;
       });
+  }
+
+  public signMessage(
+    message: string,
+  ): ResultAsync<Signature, BlockchainUnavailableError | VectorError> {
+    return this.browserNodeProvider.getBrowserNode().andThen((browserNode) => {
+      return browserNode.signUtilityMessage(message);
+    });
   }
 
   /**
@@ -219,7 +296,10 @@ export class AccountsRepository implements IAccountsRepository {
    * @param amount the amount of the test token to mint
    * @param to the (Ethereum) address to mint the test token to
    */
-  public mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<void, BlockchainUnavailableError> {
+  public mintTestToken(
+    amount: BigNumber,
+    to: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError> {
     const resp = this.blockchainUtils.mintToken(amount, to);
 
     return resp
@@ -233,8 +313,33 @@ export class AccountsRepository implements IAccountsRepository {
       });
   }
 
-  protected _getAssetBalance(i: number, channelState: IFullChannelState): ResultAsync<AssetBalance, VectorError> {
-    const assetAddress = channelState.assetIds[i];
+  public setPreferredPaymentToken(
+    tokenAddress: EthereumAddress,
+  ): ResultAsync<void, PreferredPaymentTokenError> {
+    this.localStorageUtils.setItem(
+      "PreferredPaymentTokenAddress",
+      tokenAddress,
+    );
+    return okAsync(undefined);
+  }
+
+  public getPreferredPaymentToken(): ResultAsync<
+    AssetInfo,
+    BlockchainUnavailableError | PreferredPaymentTokenError
+  > {
+    const tokenAddress = this.localStorageUtils.getItem(
+      "PreferredPaymentTokenAddress",
+    );
+    if (!tokenAddress) {
+      return errAsync(new PreferredPaymentTokenError(""));
+    }
+    return this._getAssetInfo(EthereumAddress(tokenAddress));
+  }
+  protected _getAssetBalance(
+    i: number,
+    channelState: IFullChannelState,
+  ): ResultAsync<AssetBalance, BlockchainUnavailableError> {
+    const assetAddress = EthereumAddress(channelState.assetIds[i]);
 
     return this._getAssetInfo(assetAddress).map((assetInfo) => {
       const amount = BigNumber.from(channelState.balances[i].amount[1]);
@@ -254,9 +359,10 @@ export class AccountsRepository implements IAccountsRepository {
     });
   }
 
-  // TODO: fix it, tokenContract.name() not working
-  protected _getAssetInfo(assetAddress: EthereumAddress): ResultAsync<AssetInfo, BlockchainUnavailableError> {
-    /* let name: string;
+  protected _getAssetInfo(
+    assetAddress: EthereumAddress,
+  ): ResultAsync<AssetInfo, BlockchainUnavailableError> {
+    let name: string;
     let symbol: string;
     let tokenContract: Contract;
 
@@ -266,13 +372,20 @@ export class AccountsRepository implements IAccountsRepository {
     if (cachedAssetInfo == null) {
       // No cached info, we'll have to get it
       return this.blockchainProvider
-        .getSigner()
-        .andThen((signer) => {
-          tokenContract = new Contract(assetAddress, this.erc20Abi, signer);
+        .getProvider()
+        .andThen((provider) => {
+          tokenContract = new Contract(assetAddress, this.erc20Abi, provider);
 
-          return ResultAsync.fromPromise<string | null, BlockchainUnavailableError>(tokenContract.name(), (err) => {
+          return ResultAsync.fromPromise<
+            string | null,
+            BlockchainUnavailableError
+          >(tokenContract.name(), (err) => {
             return err as BlockchainUnavailableError;
           });
+        })
+        .orElse((err) => {
+          this.logUtils.error(`tokenContract.name() failed: ${err.message}`);
+          return okAsync<string, BlockchainUnavailableError>("");
         })
         .andThen((myName) => {
           if (myName == null || myName == "") {
@@ -281,20 +394,37 @@ export class AccountsRepository implements IAccountsRepository {
             name = myName;
           }
 
-          return ResultAsync.fromPromise<string | null, BlockchainUnavailableError>(tokenContract.symbol(), (err) => {
+          return ResultAsync.fromPromise<
+            string | null,
+            BlockchainUnavailableError
+          >(tokenContract.symbol(), (err) => {
             return err as BlockchainUnavailableError;
           });
         })
+        .orElse((err) => {
+          this.logUtils.error(`tokenContract.symbol() failed: ${err.message}`);
+          return okAsync<string, BlockchainUnavailableError>("");
+        })
         .andThen((mySymbol) => {
+          console.log("myName", name);
           if (mySymbol == null || mySymbol == "") {
             symbol = "Unk";
           } else {
             symbol = mySymbol;
           }
 
-          return ResultAsync.fromPromise<number | null, BlockchainUnavailableError>(tokenContract.decimals(), (err) => {
+          return ResultAsync.fromPromise<
+            number | null,
+            BlockchainUnavailableError
+          >(tokenContract.decimals(), (err) => {
             return err as BlockchainUnavailableError;
           });
+        })
+        .orElse((err) => {
+          this.logUtils.error(
+            `tokenContract.decimals() failed: ${err.message}`,
+          );
+          return okAsync<number, BlockchainUnavailableError>(0);
         })
         .map((myDecimals) => {
           const decimals = myDecimals ?? 0;
@@ -305,11 +435,9 @@ export class AccountsRepository implements IAccountsRepository {
 
           return assetInfo;
         });
-    } 
+    }
 
     // We have cached info
-    return okAsync(cachedAssetInfo);*/
-
-    return okAsync(new AssetInfo(assetAddress, "", "", 0));
+    return okAsync(cachedAssetInfo);
   }
 }

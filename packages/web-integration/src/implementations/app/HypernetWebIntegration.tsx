@@ -1,65 +1,63 @@
-import React from "react";
-import ReactDOM from "react-dom";
+import { IHypernetCore, MerchantUrl } from "@hypernetlabs/objects";
+import HypernetWebUI, { IHypernetWebUI } from "@hypernetlabs/web-ui";
 import { ResultAsync } from "neverthrow";
 
-import MainContainer from "@web-integration-containers/MainContainer";
-import BalancesWidget from "@web-integration-widgets/BalancesWidget";
-import LinksWidget from "@web-integration-widgets/LinksWidget";
-import PaymentWidget from "@web-integration-widgets/PaymentWidget";
-import FundWidget from "@web-integration-widgets/FundWidget";
-import {
-  IConnectorAuthorizationFlowParams,
-  IHypernetWebIntegration,
-  IRenderParams,
-  IRenderPaymentWidgetParams,
-} from "@web-integration-interfaces/app/IHypernetWebIntegration";
-import { LayoutProvider, StoreProvider } from "@web-integration-contexts";
-import {
-  BALANCES_WIDGET_ID_SELECTOR,
-  FUND_WIDGET_ID_SELECTOR,
-  LINKS_WIDGET_ID_SELECTOR,
-  PAYMENT_WIDGET_ID_SELECTOR,
-} from "@web-integration-constants";
-import IHypernetIFrameProxy from "@web-integration-interfaces/proxy/IHypernetIFrameProxy";
-import HypernetIFrameProxy from "@web-integration-implementations/proxy/HypernetIFrameProxy";
-import ConnectorAuthorizationFlow from "@web-integration-flows/ConnectorAuthorizationFlow";
-import { ThemeProvider } from "theming";
+import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
+import { IHypernetWebIntegration } from "@web-integration/interfaces/app/IHypernetWebIntegration";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
 
-  protected iframeURL: string = "http://localhost:8090";
-  protected currentMerchantUrl: string | undefined | null;
+  protected iframeURL = "http://localhost:8090";
+  protected currentMerchantUrl: MerchantUrl | undefined | null;
 
-  public core: IHypernetIFrameProxy;
+  public webUIClient: IHypernetWebUI;
+
+  public core: HypernetIFrameProxy;
 
   constructor(iframeURL?: string) {
     this.iframeURL = iframeURL || this.iframeURL;
 
     // Create a proxy connection to the iframe
-    this.core = new HypernetIFrameProxy(this._prepareIFrameContainer(), this.iframeURL, "hypernet-core-iframe");
+    this.core = new HypernetIFrameProxy(
+      this._prepareIFrameContainer(),
+      this.iframeURL,
+      "hypernet-core-iframe",
+    );
 
     this.core.onMerchantIFrameDisplayRequested.subscribe((merchantUrl) => {
       this.currentMerchantUrl = merchantUrl;
     });
+
+    // TODO: check this when dealing with core multiple instances issue
+    if (window.hypernetWebUIInstance) {
+      this.webUIClient = window.hypernetWebUIInstance as IHypernetWebUI;
+    } else {
+      this.webUIClient = new HypernetWebUI(this.core);
+    }
+
+    this.core.onPrivateCredentialsRequested.subscribe(() => {
+      this.webUIClient.renderPrivateKeysModal();
+    });
   }
 
   // wait for the core to be intialized
-  protected getReadyResult: ResultAsync<IHypernetIFrameProxy, Error> | undefined;
-  public getReady(): ResultAsync<IHypernetIFrameProxy, Error> {
+  protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
+  public getReady(): ResultAsync<IHypernetCore, Error> {
     if (this.getReadyResult != null) {
       return this.getReadyResult;
     }
     this.getReadyResult = this.core
       .activate()
       .andThen(() => {
-        return this.core.activate();
-      })
-      .andThen(() => {
         return this.core.getEthereumAccounts();
       })
-      .andThen((accounts: any) => this.core.initialize(accounts[0]))
-      .map(() => this.core);
+      .andThen((accounts) => this.core.initialize(accounts[0]))
+      .map(() => {
+        // This is for web ui to use if there is no core instance passed in web ui constructor
+        window.hypernetCoreInstance = this.core;
+        return this.core;
+      });
 
     return this.getReadyResult;
   }
@@ -73,32 +71,12 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     return HypernetWebIntegration.instance;
   }
 
-  private _generateDomElement(selector: string) {
-    this._removeExistedElement(selector);
-
-    const element = document.createElement("div");
-    element.setAttribute("id", selector);
-    document.body.appendChild(element);
-    document.getElementById(selector);
-
-    return element;
+  public displayMerchantIFrame(merchantUrl: MerchantUrl): void {
+    this.core.displayMerchantIFrame(merchantUrl);
   }
 
-  private _removeExistedElement(selector: string) {
-    const element = document.getElementById(selector);
-    if (element) {
-      element.remove();
-    }
-  }
-
-  private _bootstrapComponent(component: React.ReactNode, withModal: boolean = false) {
-    return (
-      <StoreProvider proxy={this.core}>
-        <LayoutProvider>
-          <MainContainer withModal={withModal}>{component}</MainContainer>
-        </LayoutProvider>
-      </StoreProvider>
-    );
+  public closeMerchantIFrame(merchantUrl: MerchantUrl): void {
+    this.core.closeMerchantIFrame(merchantUrl);
   }
 
   private _prepareIFrameContainer(): HTMLElement {
@@ -109,7 +87,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     // Add close modal icon to iframe container
     const closeButton = document.createElement("div");
     closeButton.id = "__hypernet-protocol-iframe-close-icon__";
-    //@ts-ignore
     closeButton.innerHTML = `
       <img src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png" width="20" />
     `;
@@ -118,17 +95,16 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     closeButton.addEventListener(
       "click",
       (e) => {
-        // TODO: Figure out how to track which merchant we are showing
         if (this.currentMerchantUrl != null) {
           this.core.closeMerchantIFrame(this.currentMerchantUrl);
           this.currentMerchantUrl = null;
         }
+        iframeContainer.style.display = "none";
       },
       false,
     );
 
     // Add iframe modal style
-    // TODO: Close button style is not responsive with the content height, need to be fixed.
     const style = document.createElement("style");
     style.appendChild(
       document.createTextNode(`
@@ -172,67 +148,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     document.body.appendChild(iframeContainer);
 
     return iframeContainer;
-  }
-
-  public async renderBalancesWidget(config?: IRenderParams) {
-    ReactDOM.render(
-      await this._bootstrapComponent(<BalancesWidget />),
-      this._generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
-    );
-  }
-
-  public async renderFundWidget(config?: IRenderParams) {
-    ReactDOM.render(
-      await this._bootstrapComponent(<FundWidget />),
-      this._generateDomElement(config?.selector || FUND_WIDGET_ID_SELECTOR),
-    );
-  }
-
-  public async renderLinksWidget(config?: IRenderParams) {
-    ReactDOM.render(
-      await this._bootstrapComponent(<LinksWidget />),
-      this._generateDomElement(config?.selector || LINKS_WIDGET_ID_SELECTOR),
-    );
-  }
-
-  public async renderPaymentWidget(config?: IRenderPaymentWidgetParams) {
-    ReactDOM.render(
-      await this._bootstrapComponent(
-        <PaymentWidget
-          counterPartyAccount={config?.counterPartyAccount}
-          amount={config?.amount}
-          expirationDate={config?.expirationDate}
-          requiredStake={config?.requiredStake}
-          paymentTokenAddress={config?.paymentTokenAddress}
-          merchantUrl={config?.merchantUrl}
-          paymentType={config?.paymentType}
-        />,
-        true,
-      ),
-      this._generateDomElement(config?.selector || PAYMENT_WIDGET_ID_SELECTOR),
-    );
-  }
-
-  public async renderConnectorAuthorizationFlow(config: IConnectorAuthorizationFlowParams) {
-    ReactDOM.render(
-      await this._bootstrapComponent(
-        <ConnectorAuthorizationFlow
-          connectorUrl={config.connectorUrl}
-          connectorName={config.connectorName}
-          connectorLogoUrl={config.connectorLogoUrl}
-        />,
-        config.showInModal,
-      ),
-      this._generateDomElement(config?.selector || BALANCES_WIDGET_ID_SELECTOR),
-    );
-  }
-
-  public displayMerchantIFrame(merchantUrl: string): void {
-    this.core.displayMerchantIFrame(merchantUrl);
-  }
-
-  public closeMerchantIFrame(merchantUrl: string): void {
-    this.core.closeMerchantIFrame(merchantUrl);
   }
 }
 

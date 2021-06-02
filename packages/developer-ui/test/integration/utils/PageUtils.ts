@@ -1,10 +1,14 @@
-import { CORE_INITIALIZATION_TIMEOUT, PUBLIC_IDENTIFIER_DATA_BIND } from "@integration-tests/constants";
 import puppeteer, { Page, Browser } from "puppeteer";
+
+import {
+  CORE_INITIALIZATION_TIMEOUT,
+  PUBLIC_IDENTIFIER_DATA_BIND,
+} from "@integration-tests/constants";
 
 class PageUtils {
   public page: Page = {} as Page;
   public browser: Browser = {} as Browser;
-  public isReady: boolean = false;
+  public isReady = false;
 
   public async getPageUtilsReady(): Promise<void> {
     this.browser = await puppeteer.launch({ headless: false });
@@ -20,9 +24,13 @@ class PageUtils {
     await this.page.waitForSelector(PUBLIC_IDENTIFIER_DATA_BIND);
     await this.page.waitForTimeout(CORE_INITIALIZATION_TIMEOUT);
 
-    const publicIdentifier = await this.getElementInnerText(PUBLIC_IDENTIFIER_DATA_BIND);
+    const publicIdentifier = await this.getElementInnerText(
+      PUBLIC_IDENTIFIER_DATA_BIND,
+    );
     return new Promise((resolve, reject) =>
-      publicIdentifier ? resolve(null) : reject("failed to initialize the core"),
+      publicIdentifier
+        ? resolve(null)
+        : reject("failed to initialize the core"),
     );
   }
 
@@ -53,7 +61,10 @@ class PageUtils {
 
   public async getElementInnerText(selector: string) {
     const element = await this.getElement(selector);
-    const elementInnerText = await this.page.evaluate((el) => el.textContent, element);
+    const elementInnerText = await this.page.evaluate(
+      (el) => el.textContent,
+      element,
+    );
 
     return elementInnerText;
   }
@@ -79,7 +90,9 @@ class PageUtils {
 
   public async getElement(selector: string) {
     const isXPath = selector[1] === "/";
-    const element = isXPath ? (await this.page.$x(selector))[0] : await this.page.$(selector);
+    const element = isXPath
+      ? (await this.page.$x(selector))[0]
+      : await this.page.$(selector);
     return element;
   }
 

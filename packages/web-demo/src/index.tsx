@@ -1,10 +1,14 @@
-import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import { MerchantUrl } from "@hypernetlabs/objects";
+import HypernetWebIntegration, {
+  IHypernetWebIntegration,
+} from "@hypernetlabs/web-integration";
+
 import Spinner from "./assets/loading-spinner";
 
 const client: IHypernetWebIntegration = new HypernetWebIntegration();
 
 // set image background styles
-var style = document.createElement("style");
+const style = document.createElement("style");
 style.innerHTML = `body {
   background-image: url(https://res.cloudinary.com/dqueufbs7/image/upload/v1614731973/images/image.png);
   height: 100%;
@@ -14,12 +18,31 @@ style.innerHTML = `body {
 }`;
 
 // Get the first script tag
-var ref = document.querySelector("script");
+const ref = document.querySelector("script");
 ref?.parentNode?.insertBefore(style, ref);
 
 Spinner();
 Spinner.show();
-client.getReady().map(() => {
-  Spinner.hide();
-  client.renderConnectorAuthorizationFlow({ connectorUrl: "http://localhost:8080/hypernet_protocol/v0", showInModal: true });
-});
+
+const merchantUrl = MerchantUrl("http://localhost:5010");
+
+client
+  .getReady()
+  .map((coreProxy) => {
+    client.webUIClient
+      .startOnboardingFlow({
+        merchantUrl: merchantUrl,
+        finalSuccessContent:
+          'You are good to go now and purchase credits from <a href="http://localhost:9000/settings/credits">here</a>',
+        showInModal: true,
+      })
+      .map(() => {
+        Spinner.hide();
+      })
+      .mapErr((err) => {
+        console.log("startOnboardingFlow errerrerr", err);
+      });
+  })
+  .mapErr((err) => {
+    console.log("getReady errerrerr", err);
+  });

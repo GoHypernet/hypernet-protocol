@@ -1,14 +1,30 @@
 <form>
-    <div>Required Stake: <input class="form-control" data-bind="textInput: requiredStake"></div>
-    <div id="paymentTokenSelector" data-bind='component: {
+  <div>
+    Required Stake:
+    <input class="form-control" data-bind="textInput: requiredStake" />
+  </div>
+  <div
+    id="paymentTokenSelector"
+    data-bind='component: {
         name: "token-selector",
-        params: tokenSelector}'></div>
-    <div>Amount: <input class="form-control" data-bind="textInput: amount"></div>
-    <div>Expiration Date: <input class="form-control" data-bind="textInput: expirationDate"></div>
-    <div data-bind='component: {
+        params: tokenSelector}'
+  ></div>
+  <div>
+    Amount: <input class="form-control" data-bind="textInput: amount" />
+  </div>
+  <div>
+    Expiration Date:
+    <input class="form-control" data-bind="textInput: expirationDate" />
+  </div>
+  <div
+    data-bind='component: {
         name: "authorized-merchant-selector",
-        params: merchantSelector}'></div>
-    <span id="submitPaymentButton" data-bind='component: {
+        params: merchantSelector}'
+  ></div>
+  <span
+    id="submitPaymentButton"
+    data-bind='component: {
         name: "button",
-        params: submitButton}'></span>
-    </form>
+        params: submitButton}'
+  ></span>
+</form>

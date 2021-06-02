@@ -1,5 +1,7 @@
-import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import IHypernetIFrameProxy from "@web-integration-interfaces/proxy/IHypernetIFrameProxy";
+import { IHypernetCore } from "@hypernetlabs/objects";
+import HypernetWebIntegration, {
+  IHypernetWebIntegration,
+} from "@hypernetlabs/web-integration";
 
 declare global {
   interface Window {
@@ -17,7 +19,7 @@ export enum ECoreViewDataKeys {
 
 export default class HypernetMobileIntegration {
   private webIntegrationInstance: IHypernetWebIntegration;
-  public coreProxy: IHypernetIFrameProxy = {} as IHypernetIFrameProxy;
+  public coreProxy: IHypernetCore = {} as IHypernetCore;
 
   constructor() {
     this.webIntegrationInstance = new HypernetWebIntegration();
@@ -55,6 +57,14 @@ export default class HypernetMobileIntegration {
         this.postActiveLinks();
       });
       coreProxy.onPushPaymentUpdated.subscribe(() => {
+        this.postLinks();
+        this.postActiveLinks();
+      });
+      coreProxy.onPushPaymentDelayed.subscribe(() => {
+        this.postLinks();
+        this.postActiveLinks();
+      });
+      coreProxy.onPullPaymentDelayed.subscribe(() => {
         this.postLinks();
         this.postActiveLinks();
       });

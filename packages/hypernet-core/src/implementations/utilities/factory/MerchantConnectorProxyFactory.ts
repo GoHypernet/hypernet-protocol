@@ -1,21 +1,35 @@
-import { IConfigProvider, IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
-import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
+import { MerchantUrl, ProxyError } from "@hypernetlabs/objects";
+import { injectable, inject } from "inversify";
+import { ResultAsync } from "neverthrow";
+
 import { MerchantConnectorProxy } from "@implementations/utilities/MerchantConnectorProxy";
-import { ok, okAsync, ResultAsync } from "neverthrow";
-import { MerchantConnectorError } from "@hypernetlabs/objects";
+import {
+  IConfigProvider,
+  IMerchantConnectorProxy,
+  IContextProvider,
+  IConfigProviderType,
+  IContextProviderType,
+} from "@interfaces/utilities";
+import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 
-export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFactory {
-  protected static proxyMap: Map<string, IMerchantConnectorProxy> = new Map();
+@injectable()
+export class MerchantConnectorProxyFactory
+  implements IMerchantConnectorProxyFactory {
+  constructor(
+    @inject(IConfigProviderType) protected configProvider: IConfigProvider,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
+  ) {}
 
-  constructor(protected configProvider: IConfigProvider, protected contextProvider: IContextProvider) {}
-
-  factoryProxy(merchantUrl: string): ResultAsync<IMerchantConnectorProxy, MerchantConnectorError> {
+  factoryProxy(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<IMerchantConnectorProxy, ProxyError> {
     let proxy: IMerchantConnectorProxy;
     return this.configProvider
       .getConfig()
       .andThen((config) => {
         const iframeUrl = new URL(config.merchantIframeUrl);
         iframeUrl.searchParams.set("merchantUrl", merchantUrl);
+
         proxy = new MerchantConnectorProxy(
           this._prepareIFrameContainer(),
           iframeUrl.toString(),
@@ -30,21 +44,19 @@ export class MerchantConnectorProxyFactory implements IMerchantConnectorProxyFac
         // for communication. In the case of the merchant connector, it will grab
         // the necessary data from the merchant URL in order to validate that the
         // connector code is properly signed and valid.
-        return proxy.activate();
+        return proxy.activateProxy();
       })
       .map(() => {
-        MerchantConnectorProxyFactory.proxyMap.set(merchantUrl, proxy);
+        // Return the activated proxy
         return proxy;
+      })
+      .mapErr((e) => {
+        //
+        return e;
       });
   }
 
-  destroyMerchantConnectorProxy(merchantUrl: string) {
-    const proxy = MerchantConnectorProxyFactory.proxyMap.get(merchantUrl);
-    proxy?.destroy();
-    MerchantConnectorProxyFactory.proxyMap.delete(merchantUrl);
-  }
-
-  private _prepareIFrameContainer(): HTMLElement {
+  protected _prepareIFrameContainer(): HTMLElement {
     // We want the body to be the container here.
     const element = document.body;
     const style = document.createElement("style");

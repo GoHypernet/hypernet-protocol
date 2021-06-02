@@ -1,12 +1,21 @@
-import { ResultUtils } from "@hypernetlabs/utils";
-import { ILinkRepository } from "@interfaces/data";
-import { HypernetLink, Payment, PublicIdentifier } from "@hypernetlabs/objects";
 import {
-  CoreUninitializedError,
+  BlockchainUnavailableError,
+  EthereumAddress,
+  HypernetLink,
+  Payment,
+  PublicIdentifier,
+} from "@hypernetlabs/objects";
+import {
   InvalidParametersError,
   RouterChannelUnknownError,
   VectorError,
+  InvalidPaymentError,
+  LogicalError,
 } from "@hypernetlabs/objects";
+import { ResultUtils } from "@hypernetlabs/utils";
+import { okAsync, ResultAsync } from "neverthrow";
+
+import { ILinkRepository } from "@interfaces/data";
 import {
   IBrowserNode,
   IBrowserNodeProvider,
@@ -17,7 +26,6 @@ import {
   IVectorUtils,
   ILinkUtils,
 } from "@interfaces/utilities";
-import { okAsync, ResultAsync } from "neverthrow";
 
 /**
  * Provides methods for retrieving Hypernet Links.
@@ -41,21 +49,34 @@ export class VectorLinkRepository implements ILinkRepository {
    */
   public getHypernetLinks(): ResultAsync<
     HypernetLink[],
-    RouterChannelUnknownError | CoreUninitializedError | VectorError | InvalidParametersError
+    | RouterChannelUnknownError
+    | VectorError
+    | InvalidParametersError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | LogicalError
   > {
     let browserNode: IBrowserNode;
 
-    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.vectorUtils.getRouterChannelAddress()])
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.vectorUtils.getRouterChannelAddress(),
+    ])
       .andThen((vals) => {
-        let channelAddress: string;
+        let channelAddress: EthereumAddress;
         [browserNode, channelAddress] = vals;
         return browserNode.getActiveTransfers(channelAddress);
       })
       .andThen((activeTransfers) => {
         // We also need to look for potentially resolved transfers
-        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
+        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(
+          activeTransfers,
+        );
 
-        return browserNode.getTransfers(earliestDate, this.timeUtils.getUnixNow());
+        return browserNode.getTransfers(
+          earliestDate,
+          this.timeUtils.getUnixNow(),
+        );
       })
       .andThen((transfers) => {
         if (transfers.length === 0) {
@@ -75,23 +96,41 @@ export class VectorLinkRepository implements ILinkRepository {
    */
   public getHypernetLink(
     counterpartyId: PublicIdentifier,
-  ): ResultAsync<HypernetLink, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  ): ResultAsync<
+    HypernetLink,
+    | RouterChannelUnknownError
+    | VectorError
+    | InvalidParametersError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | LogicalError
+  > {
     let browserNode: IBrowserNode;
-    return ResultUtils.combine([this.browserNodeProvider.getBrowserNode(), this.vectorUtils.getRouterChannelAddress()])
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.vectorUtils.getRouterChannelAddress(),
+    ])
       .andThen((vals) => {
-        let channelAddress: string;
+        let channelAddress: EthereumAddress;
         [browserNode, channelAddress] = vals;
         return browserNode.getActiveTransfers(channelAddress);
       })
       .andThen((activeTransfers) => {
         // We also need to look for potentially resolved transfers
-        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
+        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(
+          activeTransfers,
+        );
 
-        return browserNode.getTransfers(earliestDate, this.timeUtils.getUnixNow());
+        return browserNode.getTransfers(
+          earliestDate,
+          this.timeUtils.getUnixNow(),
+        );
       })
       .andThen((transfers) => {
         const filteredActiveTransfers = transfers.filter((val) => {
-          return val.responder === counterpartyId || val.initiator === counterpartyId;
+          return (
+            val.responder === counterpartyId || val.initiator === counterpartyId
+          );
         });
 
         // Because of the filter above, this should only produce a single link

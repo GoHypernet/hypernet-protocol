@@ -2,6 +2,26 @@
   "extends": "../../tsconfig.build.json",
   "compilerOptions": {
     "outDir": "./dist",
-    "noImplicitAny": false
-  }
+    "rootDir": "./src",
+    "baseUrl": "./src/"
+  },
+  "references": [
+    {
+      "path": "../web-integration"
+    },
+    {
+      "path": "../objects"
+    },
+    {
+      "path": "../utils"
+    },
+    {
+      "path": "../hypernet-core"
+    },
+    {
+      "path": "../web-ui"
+    }
+  ],
+  "include": ["./src/**/*.ts"],
+  "exclude": ["node_modules"]
 }

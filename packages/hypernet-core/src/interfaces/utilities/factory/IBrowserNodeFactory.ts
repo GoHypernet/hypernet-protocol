@@ -1,7 +1,7 @@
-import { VectorError } from "@hypernetlabs/objects";
-import { IBrowserNode } from "@interfaces/utilities";
 import { ResultAsync } from "neverthrow";
 
+import { IBrowserNode } from "@interfaces/utilities";
+
 export interface IBrowserNodeFactory {
-  factoryBrowserNode(): ResultAsync<IBrowserNode, VectorError>;
+  factoryBrowserNode(): ResultAsync<IBrowserNode, never>;
 }

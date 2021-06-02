@@ -1,15 +1,20 @@
-import ko from "knockout";
-import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import { PullPayment } from "@hypernetlabs/objects";
+import { MerchantUrl, PaymentId, PullPayment } from "@hypernetlabs/objects";
 import { EPaymentState } from "@hypernetlabs/objects";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { BigNumber } from "ethers";
-import html from "./PullPayment.template.html";
+import ko from "knockout";
 import moment from "moment";
-import { PaymentStatusParams } from "../PaymentStatus/PaymentStatus.viewmodel";
+
 import { ButtonParams } from "../Button/Button.viewmodel";
+import { PaymentStatusParams } from "../PaymentStatus/PaymentStatus.viewmodel";
+
+import html from "./PullPayment.template.html";
 
 export class PullPaymentParams {
-  constructor(public integration: IHypernetWebIntegration, public payment: PullPayment) {}
+  constructor(
+    public integration: IHypernetWebIntegration,
+    public payment: PullPayment,
+  ) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -25,7 +30,7 @@ export class PullPaymentViewModel {
   public createdTimestamp: ko.Observable<string>;
   public updatedTimestamp: ko.Observable<string>;
   public collateralRecovered: ko.Observable<string>;
-  public merchantUrl: ko.Observable<string>;
+  public merchantUrl: ko.Observable<MerchantUrl>;
   public authorizedAmount: ko.Observable<string>;
   public transferedAmount: ko.Observable<string>;
   public deltaAmount: ko.Observable<string>;
@@ -38,9 +43,11 @@ export class PullPaymentViewModel {
   public showPullButton: ko.PureComputed<boolean>;
   public disputeButton: ButtonParams;
   public showDisputeButton: ko.PureComputed<boolean>;
+  public resolveInsuranceButton: ButtonParams;
+  public showResolveInsuranceButton: ko.PureComputed<boolean>;
 
   protected integration: IHypernetWebIntegration;
-  protected paymentId: string;
+  protected paymentId: PaymentId;
   protected publicIdentifier: ko.Observable<string | null>;
 
   constructor(params: PullPaymentParams) {
@@ -50,18 +57,30 @@ export class PullPaymentViewModel {
     this.paymentId = params.payment.id;
     this.to = ko.observable(params.payment.to);
     this.from = ko.observable(params.payment.from);
-    this.state = ko.observable(new PaymentStatusParams(params.payment.id,  params.payment.state));
+    this.state = ko.observable(
+      new PaymentStatusParams(params.payment.id, params.payment.state),
+    );
     this.paymentToken = ko.observable(params.payment.paymentToken);
     this.requiredStake = ko.observable(params.payment.requiredStake.toString());
     this.amountStaked = ko.observable(params.payment.amountStaked.toString());
     const mdate = moment.unix(params.payment.expirationDate);
     this.expirationDate = ko.observable(mdate.format());
-    this.createdTimestamp = ko.observable(params.payment.createdTimestamp.toString());
-    this.updatedTimestamp = ko.observable(params.payment.updatedTimestamp.toString());
-    this.collateralRecovered = ko.observable(params.payment.collateralRecovered.toString());
+    this.createdTimestamp = ko.observable(
+      params.payment.createdTimestamp.toString(),
+    );
+    this.updatedTimestamp = ko.observable(
+      params.payment.updatedTimestamp.toString(),
+    );
+    this.collateralRecovered = ko.observable(
+      params.payment.collateralRecovered.toString(),
+    );
     this.merchantUrl = ko.observable(params.payment.merchantUrl);
-    this.authorizedAmount = ko.observable(params.payment.authorizedAmount.toString());
-    this.transferedAmount = ko.observable(params.payment.amountTransferred.toString());
+    this.authorizedAmount = ko.observable(
+      params.payment.authorizedAmount.toString(),
+    );
+    this.transferedAmount = ko.observable(
+      params.payment.amountTransferred.toString(),
+    );
     this.deltaAmount = ko.observable(params.payment.deltaAmount.toString());
     this.deltaTime = ko.observable(params.payment.deltaTime);
 
@@ -82,19 +101,23 @@ export class PullPaymentViewModel {
     });
 
     this.acceptButton = new ButtonParams("Accept", async () => {
-      return await this.integration.core.acceptOffers([this.paymentId]).map((results) => {
-        const result = results[0];
+      return await this.integration.core
+        .acceptOffers([this.paymentId])
+        .map((results) => {
+          const result = results[0];
 
-        return result.match(
-          (payment) => {
-            this.state(new PaymentStatusParams(payment.id, payment.state));
-          },
-          (e) => {
-            // tslint:disable-next-line: no-console
-            console.error(`Error getting payment with ID ${this.paymentId}: ${e}`);
-          },
-        );
-      });
+          return result.match(
+            (payment) => {
+              this.state(new PaymentStatusParams(payment.state));
+            },
+            (e) => {
+              // tslint:disable-next-line: no-console
+              console.error(
+                `Error getting payment with ID ${this.paymentId}: ${e}`,
+              );
+            },
+          );
+        });
     });
 
     this.showAcceptButton = ko.pureComputed(() => {
@@ -102,26 +125,55 @@ export class PullPaymentViewModel {
     });
 
     this.pullButton = new ButtonParams("Pull", async () => {
-      return await this.integration.core.pullFunds(this.paymentId, BigNumber.from(1)).mapErr((e) => {
-        alert("Unable to pull funds!");
-        console.error(e);
-      });
+      return await this.integration.core
+        .pullFunds(this.paymentId, BigNumber.from(1))
+        .mapErr((e) => {
+          alert("Unable to pull funds!");
+          console.error(e);
+        });
     });
 
     this.showPullButton = ko.pureComputed(() => {
       const state = this.state();
-      return state.state === EPaymentState.Approved && this.publicIdentifier() == this.to();
+      return (
+        state.state === EPaymentState.Approved &&
+        this.publicIdentifier() == this.to()
+      );
     });
 
     this.disputeButton = new ButtonParams("Dispute", async () => {
-      return await this.integration.core.initiateDispute(this.paymentId).mapErr((e) => {
-        alert("Error during dispute!");
-        console.error(e);
-      });
+      return await this.integration.core
+        .initiateDispute(this.paymentId)
+        .mapErr((e) => {
+          alert("Error during dispute!");
+          console.error(e);
+        });
     });
 
     this.showDisputeButton = ko.pureComputed(() => {
-      return this.state().state === EPaymentState.Accepted && this.publicIdentifier() === this.from();
+      return (
+        this.state().state === EPaymentState.Accepted &&
+        this.publicIdentifier() === this.from()
+      );
+    });
+
+    this.resolveInsuranceButton = new ButtonParams(
+      "Resolve Insurace",
+      async () => {
+        return await this.integration.core
+          .resolveInsurance(this.paymentId)
+          .mapErr((e) => {
+            alert("Error during resolveInsurance!");
+            console.error(e);
+          });
+      },
+    );
+
+    this.showResolveInsuranceButton = ko.pureComputed(() => {
+      return (
+        this.state().state === EPaymentState.Accepted &&
+        this.publicIdentifier() === this.from()
+      );
     });
 
     this.publicIdentifier = ko.observable(null);

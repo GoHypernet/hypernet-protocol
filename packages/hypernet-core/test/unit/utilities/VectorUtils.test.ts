@@ -1,9 +1,21 @@
-import { VectorUtils } from "@implementations/utilities/VectorUtils";
-import { ConfigProviderMock, ContextProviderMock, BlockchainProviderMock, createBrowserNodeMock } from "@mock/utils";
-import { routerChannelAddress, unixNow } from "@mock/mocks";
-import td from "testdouble";
-import { IBrowserNode, IBrowserNodeProvider, ILogUtils, IPaymentIdUtils, ITimeUtils } from "@interfaces/utilities";
+import { ILogUtils } from "@hypernetlabs/utils";
 import { okAsync } from "neverthrow";
+import td from "testdouble";
+
+import { VectorUtils } from "@implementations/utilities/VectorUtils";
+import {
+  IBrowserNode,
+  IBrowserNodeProvider,
+  IPaymentIdUtils,
+  ITimeUtils,
+} from "@interfaces/utilities";
+import { routerChannelAddress, unixNow } from "@mock/mocks";
+import {
+  ConfigProviderMock,
+  ContextProviderMock,
+  BlockchainProviderMock,
+  createBrowserNodeMock,
+} from "@mock/utils";
 
 class VectorUtilsMocks {
   public configProvider = new ConfigProviderMock();
@@ -15,12 +27,18 @@ class VectorUtilsMocks {
   public browserNodeMock: IBrowserNode;
   public timeUtils = td.object<ITimeUtils>();
 
-  constructor(includeExistingStateChannels: boolean = true) {
-    this.browserNodeMock = createBrowserNodeMock(includeExistingStateChannels ? null : []);
-    td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(okAsync(this.browserNodeMock));
+  constructor(includeExistingStateChannels = true) {
+    this.browserNodeMock = createBrowserNodeMock(
+      includeExistingStateChannels ? null : [],
+    );
+    td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(
+      okAsync(this.browserNodeMock),
+    );
 
     td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow);
-    td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(okAsync(unixNow));
+    td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(
+      okAsync(unixNow),
+    );
   }
 
   public factoryVectorUtils(): VectorUtils {

@@ -19,32 +19,31 @@
     "Ethereum",
     "Vector"
   ],
-  "main": "dist/src/index.js",
+  "main": "dist/index.js",
   "files": [
     "dist",
-    "src",
-    "errors",
-    "types",
     "!dist/test",
     "!dist/tsconfig.tsbuildinfo"
   ],
   "scripts": {
     "build": "yarn clean && yarn compile",
-    "clean": "rimraf dist",
-    "compile": "tsc --build tsconfig.json && npx tsc-alias -p tsconfig.json",
-    "format": "prettier --write \"src/**/*.ts\"",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "alias": "yarn copy-files && tsc-alias",
+    "copy-files": "copyfiles -u 1 src/**/*.d.ts dist/",
     "generate-docs": "npx typedoc --options typedoc.json",
-    "lint": "tslint -p src/tsconfig.json",
     "prepare": "yarn build",
     "test": "yarn compile && jest --runInBand --coverage --passWithNoTests",
+    "update-package-json": "ts-node ../../scripts/importDevDependencies.ts",
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",
     "postversion": "git push && git push --tags"
   },
-  "types": "dist/src/index.d.ts",
+  "types": "dist/index.d.ts",
   "dependencies": {
-    "ethers": "5.0.31",
     "class-transformer": "^0.3.2",
-    "reflect-metadata": "^0.1.13"
+    "ethers": "^5.1.0",
+    "reflect-metadata": "^0.1.13",
+    "ts-brand": "^0.0.2"
   }
 }

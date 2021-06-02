@@ -7,10 +7,11 @@ import {
   PullPayment,
   PushPayment,
   Payment,
-} from "@hypernetlabs/objects";
-import {
+  PaymentId,
+  MerchantUrl,
+  Signature,
+  AssetInfo,
   AcceptPaymentError,
-  CoreUninitializedError,
   RouterChannelUnknownError,
   BlockchainUnavailableError,
   VectorError,
@@ -20,20 +21,31 @@ import {
   MerchantValidationError,
   PersistenceError,
   MerchantConnectorError,
+  ProxyError,
+  InvalidPaymentError,
+  InvalidParametersError,
+  TransferResolutionError,
+  PreferredPaymentTokenError,
+  IHypernetCore,
 } from "@hypernetlabs/objects";
+import { ParentProxy } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
 import { Result, ResultAsync, ok } from "neverthrow";
 import { Subject } from "rxjs";
-import IHypernetIFrameProxy from "@web-integration-interfaces/proxy/IHypernetIFrameProxy";
-import { ParentProxy } from "@hypernetlabs/utils";
 
-export default class HypernetIFrameProxy extends ParentProxy implements IHypernetIFrameProxy {
-  protected coreInitialized: boolean = false;
-  protected isInControl: boolean = false;
+export default class HypernetIFrameProxy
+  extends ParentProxy
+  implements IHypernetCore {
+  protected coreInitialized = false;
+  protected isInControl = false;
   protected waitInitializedPromise: Promise<void>;
   protected _handshakePromise: Promise<void> | null;
 
-  constructor(element: HTMLElement | null, iframeUrl: string, iframeName: string) {
+  constructor(
+    protected element: HTMLElement | null,
+    protected iframeUrl: string,
+    protected iframeName: string,
+  ) {
     super(element, iframeUrl, iframeName);
 
     this._handshakePromise = null;
@@ -46,12 +58,19 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     this.onPullPaymentReceived = new Subject<PullPayment>();
     this.onPushPaymentUpdated = new Subject<PushPayment>();
     this.onPullPaymentUpdated = new Subject<PullPayment>();
+    this.onPushPaymentDelayed = new Subject<PushPayment>();
+    this.onPullPaymentDelayed = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
-    this.onMerchantAuthorized = new Subject<string>();
-    this.onAuthorizedMerchantUpdated = new Subject<string>();
-    this.onAuthorizedMerchantActivationFailed = new Subject<string>();
-    this.onMerchantIFrameDisplayRequested = new Subject<string>();
-    this.onMerchantIFrameCloseRequested = new Subject<string>();
+    this.onDeStorageAuthenticationStarted = new Subject<void>();
+    this.onDeStorageAuthenticationSucceeded = new Subject<void>();
+    this.onDeStorageAuthenticationFailed = new Subject<void>();
+    this.onMerchantAuthorized = new Subject<MerchantUrl>();
+    this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
+    this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
+    this.onMerchantIFrameDisplayRequested = new Subject<MerchantUrl>();
+    this.onMerchantIFrameCloseRequested = new Subject<MerchantUrl>();
+    this.onInitializationRequired = new Subject<void>();
+    this.onPrivateCredentialsRequested = new Subject<void>();
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -94,21 +113,48 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
           this.onPullPaymentUpdated.next(data);
         });
 
+        child.on("onPushPaymentDelayed", (data: PushPayment) => {
+          this.onPushPaymentDelayed.next(data);
+        });
+
+        child.on("onPullPaymentDelayed", (data: PullPayment) => {
+          this.onPullPaymentDelayed.next(data);
+        });
+
         child.on("onBalancesChanged", (data: Balances) => {
           this.onBalancesChanged.next(data);
         });
 
-        child.on("onMerchantAuthorized", (data: string) => {
+        child.on("onDeStorageAuthenticationStarted", () => {
+          this._displayCoreIFrame();
+
+          this.onDeStorageAuthenticationStarted.next();
+        });
+
+        child.on("onDeStorageAuthenticationSucceeded", () => {
+          this._closeCoreIFrame();
+
+          this.onDeStorageAuthenticationSucceeded.next();
+        });
+
+        child.on("onDeStorageAuthenticationFailed", () => {
+          this.onDeStorageAuthenticationFailed.next();
+        });
+
+        child.on("onMerchantAuthorized", (data: MerchantUrl) => {
           this.onMerchantAuthorized.next(data);
         });
 
-        child.on("onAuthorizedMerchantUpdated", (data: string) => {
+        child.on("onAuthorizedMerchantUpdated", (data: MerchantUrl) => {
           this.onAuthorizedMerchantUpdated.next(data);
         });
 
-        child.on("onAuthorizedMerchantActivationFailed", (data: string) => {
-          this.onAuthorizedMerchantActivationFailed.next(data);
-        });
+        child.on(
+          "onAuthorizedMerchantActivationFailed",
+          (data: MerchantUrl) => {
+            this.onAuthorizedMerchantActivationFailed.next(data);
+          },
+        );
 
         // Setup a listener for the "initialized" event.
         child.on("initialized", () => {
@@ -119,26 +165,37 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
           this.coreInitialized = true;
         });
 
-        child.on("onMerchantIFrameDisplayRequested", (data: string) => {
-          child.frame.style.display = "block";
-          if (element) {
-            element.style.display = "block";
-          }
+        child.on("onMerchantIFrameDisplayRequested", (data: MerchantUrl) => {
+          this._displayCoreIFrame();
+
           this.onMerchantIFrameDisplayRequested.next(data);
         });
 
-        child.on("onMerchantIFrameCloseRequested", (data: string) => {
-          child.frame.style.display = "none";
-          if (element) {
-            element.style.display = "none";
-          }
+        child.on("onMerchantIFrameCloseRequested", (data: MerchantUrl) => {
+          this._closeCoreIFrame();
+
           this.onMerchantIFrameCloseRequested.next(data);
+        });
+
+        child.on("onInitializationRequired", () => {
+          this.onInitializationRequired.next();
+        });
+
+        child.on("onPrivateCredentialsRequested", () => {
+          this.onPrivateCredentialsRequested.next();
         });
       });
     });
   }
 
-  public initialized(): Result<boolean, LogicalError> {
+  public finalizePullPayment(
+    _paymentId: PaymentId,
+    _finalAmount: BigNumber,
+  ): Promise<HypernetLink> {
+    throw new Error("Method not implemented.");
+  }
+
+  public initialized(): Result<boolean, never> {
     // If the child is not initialized, there is no way the core can be.
     if (this.child == null) {
       return ok(false);
@@ -149,13 +206,11 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return ok(this.coreInitialized);
   }
 
-  public waitInitialized(): ResultAsync<void, LogicalError> {
-    return this.activate().andThen(() => {
-      return this._createCall("waitInitialized", null);
-    });
+  public waitInitialized(): ResultAsync<void, never> {
+    return ResultAsync.fromSafePromise(this.waitInitializedPromise);
   }
 
-  public inControl(): Result<boolean, LogicalError> {
+  public inControl(): Result<boolean, never> {
     // If the child is not initialized, there is no way the core can be.
     if (this.child == null) {
       return ok(false);
@@ -165,15 +220,18 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     return ok(this.isInControl);
   }
 
-  public getEthereumAccounts(): ResultAsync<string[], BlockchainUnavailableError> {
+  public getEthereumAccounts(): ResultAsync<
+    EthereumAddress[],
+    BlockchainUnavailableError
+  > {
     return this._createCall("getEthereumAccounts", null);
   }
 
-  public initialize(account: PublicIdentifier): ResultAsync<void, LogicalError> {
+  public initialize(account: EthereumAddress): ResultAsync<void, LogicalError> {
     return this._createCall("initialize", account);
   }
 
-  public getPublicIdentifier(): ResultAsync<PublicIdentifier, CoreUninitializedError> {
+  public getPublicIdentifier(): ResultAsync<PublicIdentifier, ProxyError> {
     return this._createCall("getPublicIdentifier", null);
   }
 
@@ -182,9 +240,12 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     amount: BigNumber,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
+    BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
-    return this._createCall("depositFunds", { assetAddress, amount: amount.toString() });
+    return this._createCall("depositFunds", {
+      assetAddress,
+      amount: amount.toString(),
+    });
   }
 
   public withdrawFunds(
@@ -193,46 +254,52 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
+    BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
-    return this._createCall("withdrawFunds", { assetAddress, amount: amount.toString(), destinationAddress });
+    return this._createCall("withdrawFunds", {
+      assetAddress,
+      amount: amount.toString(),
+      destinationAddress,
+    });
   }
 
-  public getBalances(): ResultAsync<Balances, BalancesUnavailableError | CoreUninitializedError> {
+  public getBalances(): ResultAsync<Balances, BalancesUnavailableError> {
     return this._createCall("getBalances", null);
   }
 
   public getLinks(): ResultAsync<
     HypernetLink[],
-    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
+    RouterChannelUnknownError | VectorError | Error
   > {
     return this._createCall("getLinks", null);
   }
 
   public getActiveLinks(): ResultAsync<
     HypernetLink[],
-    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
+    RouterChannelUnknownError | VectorError | Error
   > {
     return this._createCall("getActiveLinks", null);
   }
 
-  public getLinkByCounterparty(counterPartyAccount: PublicIdentifier): Promise<HypernetLink> {
+  public getLinkByCounterparty(
+    _counterPartyAccount: PublicIdentifier,
+  ): Promise<HypernetLink> {
     throw new Error("Unimplemented");
   }
 
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: string,
+    amount: BigNumber,
     expirationDate: number,
-    requiredStake: string,
+    requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this._createCall("sendFunds", {
       counterPartyAccount,
-      amount,
+      amount: amount.toString(),
       expirationDate,
-      requiredStake,
+      requiredStake: requiredStake.toString(),
       paymentToken,
       merchantUrl,
     });
@@ -242,83 +309,168 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumber,
     expirationDate: number,
-    deltaAmount: string,
+    deltaAmount: BigNumber,
     deltaTime: number,
     requiredStake: BigNumber,
     paymentToken: EthereumAddress,
-    merchantUrl: string,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this._createCall("authorizeFunds", {
       counterPartyAccount,
-      totalAuthorized,
+      totalAuthorized: totalAuthorized.toString(),
       expirationDate,
-      deltaAmount,
+      deltaAmount: deltaAmount.toString(),
       deltaTime,
-      requiredStake,
+      requiredStake: requiredStake.toString(),
       paymentToken,
       merchantUrl,
     });
   }
 
   public acceptOffers(
-    paymentIds: string[],
-  ): ResultAsync<Result<Payment, AcceptPaymentError>[], InsufficientBalanceError | AcceptPaymentError> {
+    paymentIds: PaymentId[],
+  ): ResultAsync<
+    Result<Payment, AcceptPaymentError>[],
+    InsufficientBalanceError | AcceptPaymentError
+  > {
     return this._createCall("acceptFunds", paymentIds);
   }
 
   public pullFunds(
-    paymentId: string,
+    paymentId: PaymentId,
     amount: BigNumber,
-  ): ResultAsync<Payment, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error> {
+  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this._createCall("pullFunds", {
       paymentId,
       amount: amount.toString(),
     });
   }
 
-  public finalizePullPayment(paymentId: string, finalAmount: BigNumber): Promise<HypernetLink> {
-    throw new Error("Unimplemented");
-  }
-
-  public finalizePushPayment(paymentId: string): Promise<void> {
-    throw new Error("Unimplemented");
-  }
-
-  public initiateDispute(paymentId: string): ResultAsync<Payment, CoreUninitializedError> {
+  public initiateDispute(
+    paymentId: PaymentId,
+  ): ResultAsync<
+    Payment,
+    | MerchantConnectorError
+    | MerchantValidationError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
+  > {
     return this._createCall("initiateDispute", paymentId);
   }
 
-  public mintTestToken(amount: BigNumber): ResultAsync<void, CoreUninitializedError> {
+  public resolveInsurance(
+    paymentId: PaymentId,
+  ): ResultAsync<
+    Payment,
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
+  > {
+    return this._createCall("resolveInsurance", paymentId);
+  }
+
+  public mintTestToken(
+    amount: BigNumber,
+  ): ResultAsync<void, BlockchainUnavailableError> {
     return this._createCall("mintTestToken", amount.toString());
   }
 
-  public authorizeMerchant(merchantUrl: string): ResultAsync<void, CoreUninitializedError | MerchantValidationError> {
+  public authorizeMerchant(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, MerchantValidationError> {
     return this._createCall("authorizeMerchant", merchantUrl);
   }
 
-  public getAuthorizedMerchants(): ResultAsync<Map<string, string>, PersistenceError> {
+  public deauthorizeMerchant(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, PersistenceError> {
+    return this._createCall("deauthorizeMerchant", merchantUrl);
+  }
+
+  public getAuthorizedMerchants(): ResultAsync<
+    Map<MerchantUrl, Signature>,
+    PersistenceError
+  > {
     return this._createCall("getAuthorizedMerchants", null);
   }
 
-  public closeMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
-    if (this.child != null) {
-      this.child.frame.style.display = "none";
-    }
-    if (this.element != null) {
-      this.element.style.display = "none";
-    }
+  public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
+    Map<MerchantUrl, boolean>,
+    PersistenceError
+  > {
+    return this._createCall("getAuthorizedMerchantsConnectorsStatus", null);
+  }
+
+  public displayMerchantIFrame(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, MerchantConnectorError> {
+    this._displayCoreIFrame();
+
+    return this._createCall("displayMerchantIFrame", merchantUrl);
+  }
+
+  public closeMerchantIFrame(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, MerchantConnectorError> {
+    this._closeCoreIFrame();
+
     return this._createCall("closeMerchantIFrame", merchantUrl);
   }
 
-  public displayMerchantIFrame(merchantUrl: string): ResultAsync<void, MerchantConnectorError> {
+  public providePrivateCredentials(
+    privateKey: string | null,
+    mnemonic: string | null,
+  ): ResultAsync<void, InvalidParametersError> {
+    return this._createCall("providePrivateCredentials", {
+      privateKey,
+      mnemonic,
+    });
+  }
+
+  public setPreferredPaymentToken(
+    tokenAddress: EthereumAddress,
+  ): ResultAsync<void, PreferredPaymentTokenError> {
+    return this._createCall("setPreferredPaymentToken", tokenAddress);
+  }
+
+  public getPreferredPaymentToken(): ResultAsync<
+    AssetInfo,
+    BlockchainUnavailableError | PreferredPaymentTokenError
+  > {
+    return this._createCall("getPreferredPaymentToken", null);
+  }
+
+  private _displayCoreIFrame(): void {
+    // Show core iframe
     if (this.child != null) {
       this.child.frame.style.display = "block";
     }
+
+    // Show core iframe container
     if (this.element != null) {
       this.element.style.display = "block";
     }
+  }
 
-    return this._createCall("displayMerchantIFrame", merchantUrl);
+  private _closeCoreIFrame(): void {
+    // Hide core iframe
+    if (this.child != null) {
+      this.child.frame.style.display = "none";
+    }
+
+    // Hide core iframe container
+    if (this.element != null) {
+      this.element.style.display = "none";
+    }
   }
 
   /**
@@ -332,10 +484,17 @@ export default class HypernetIFrameProxy extends ParentProxy implements IHyperne
   public onPullPaymentUpdated: Subject<PullPayment>;
   public onPushPaymentReceived: Subject<PushPayment>;
   public onPullPaymentReceived: Subject<PullPayment>;
+  public onPushPaymentDelayed: Subject<PushPayment>;
+  public onPullPaymentDelayed: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
-  public onMerchantAuthorized: Subject<string>;
-  public onAuthorizedMerchantUpdated: Subject<string>;
-  public onAuthorizedMerchantActivationFailed: Subject<string>;
-  public onMerchantIFrameDisplayRequested: Subject<string>;
-  public onMerchantIFrameCloseRequested: Subject<string>;
+  public onDeStorageAuthenticationStarted: Subject<void>;
+  public onDeStorageAuthenticationSucceeded: Subject<void>;
+  public onDeStorageAuthenticationFailed: Subject<void>;
+  public onMerchantAuthorized: Subject<MerchantUrl>;
+  public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
+  public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
+  public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
+  public onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
+  public onInitializationRequired: Subject<void>;
+  public onPrivateCredentialsRequested: Subject<void>;
 }

@@ -1,7 +1,18 @@
-import { HypernetConfig } from "@hypernetlabs/objects";
-import { IConfigProvider } from "@interfaces/utilities";
-import { chainId, defaultExpirationLength, hyperTokenAddress, routerPublicIdentifier } from "@mock/mocks";
+import {
+  AuthorizedMerchantsSchema,
+  DefinitionName,
+  HypernetConfig,
+  SchemaUrl,
+} from "@hypernetlabs/objects";
 import { okAsync, ResultAsync } from "neverthrow";
+
+import { IConfigProvider } from "@interfaces/utilities";
+import {
+  chainId,
+  defaultExpirationLength,
+  hyperTokenAddress,
+  routerPublicIdentifier,
+} from "@mock/mocks";
 
 export class ConfigProviderMock implements IConfigProvider {
   public config: HypernetConfig;
@@ -26,10 +37,20 @@ export class ConfigProviderMock implements IConfigProvider {
         {
           [1337]: {
             channelFactoryAddress: "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
-            transferRegistryAddress: "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F",
+            transferRegistryAddress:
+              "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F",
           },
         },
         "merchantIframeUrl",
+        "https://ceramic-clay.3boxlabs.com",
+        new Map([
+          [
+            DefinitionName(AuthorizedMerchantsSchema.title),
+            SchemaUrl(
+              "kjzl6cwe1jw148ngghzoumihdtadlx9rzodfjlq5tv01jzr7cin7jx3g3gtfxf3",
+            ),
+          ],
+        ]),
         false, // debug is off for testing
       );
   }

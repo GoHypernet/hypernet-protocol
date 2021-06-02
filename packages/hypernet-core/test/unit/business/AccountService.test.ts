@@ -1,13 +1,15 @@
 import { Balances, AssetBalance } from "@hypernetlabs/objects";
-import { account, mockUtils, publicIdentifier } from "@mock/mocks";
+import { ILogUtils } from "@hypernetlabs/utils";
+import { BigNumber } from "ethers";
 import { okAsync } from "neverthrow";
-import { IAccountsRepository } from "@interfaces/data";
 import td from "testdouble";
-import { ContextProviderMock } from "@mock/utils";
-import { ILogUtils } from "@interfaces/utilities";
+
 import { AccountService } from "@implementations/business/AccountService";
 import { IAccountService } from "@interfaces/business";
-import { BigNumber } from "ethers";
+import { IAccountsRepository } from "@interfaces/data";
+import { IBlockchainProvider } from "@interfaces/utilities";
+import { account, mockUtils, publicIdentifier } from "@mock/mocks";
+import { ContextProviderMock } from "@mock/utils";
 
 const assetAddress = mockUtils.generateRandomEtherAdress();
 const destinationAddress = mockUtils.generateRandomEtherAdress();
@@ -15,23 +17,49 @@ const amount = BigNumber.from("42");
 
 class AccountServiceMocks {
   public accountRepository = td.object<IAccountsRepository>();
+  public blockchainProvider = td.object<IBlockchainProvider>();
   public contextProvider = new ContextProviderMock();
   public logUtils = td.object<ILogUtils>();
   public balances: Balances;
 
   constructor() {
-    this.balances = new Balances([new AssetBalance(assetAddress, "PhoebeCoin", "BEEP", 4, amount, amount, amount)]);
+    this.balances = new Balances([
+      new AssetBalance(
+        assetAddress,
+        "PhoebeCoin",
+        "BEEP",
+        4,
+        amount,
+        amount,
+        amount,
+      ),
+    ]);
 
-    td.when(this.accountRepository.getPublicIdentifier()).thenReturn(okAsync(publicIdentifier));
-    td.when(this.accountRepository.depositFunds(assetAddress, amount)).thenReturn(okAsync(null));
-    td.when(this.accountRepository.withdrawFunds(assetAddress, amount, destinationAddress)).thenReturn(
-      okAsync(undefined),
+    td.when(this.accountRepository.getPublicIdentifier()).thenReturn(
+      okAsync(publicIdentifier),
     );
-    td.when(this.accountRepository.getBalances()).thenReturn(okAsync(this.balances));
+    td.when(
+      this.accountRepository.depositFunds(assetAddress, amount),
+    ).thenReturn(okAsync(null));
+    td.when(
+      this.accountRepository.withdrawFunds(
+        assetAddress,
+        amount,
+        destinationAddress,
+      ),
+    ).thenReturn(okAsync(undefined));
+    td.when(this.accountRepository.getBalances()).thenReturn(
+      okAsync(this.balances),
+    );
   }
 
   public factoryAccountService(): IAccountService {
-    return new AccountService(this.accountRepository, this.contextProvider, this.logUtils);
+    return new AccountService(
+      this.accountRepository,
+      this.contextProvider,
+      this.blockchainProvider,
+      this.logUtils,
+    );
   }
 }
 
@@ -49,7 +77,9 @@ describe("AccountService tests", () => {
 
     // Assert
     expect(getPublicIdentifierResponse.isErr()).toStrictEqual(false);
-    expect(getPublicIdentifierResponse._unsafeUnwrap()).toStrictEqual(publicIdentifier);
+    expect(getPublicIdentifierResponse._unsafeUnwrap()).toStrictEqual(
+      publicIdentifier,
+    );
   });
 
   test("Should getAccounts return accounts", async () => {
@@ -58,7 +88,9 @@ describe("AccountService tests", () => {
     const accountService = accountServiceMock.factoryAccountService();
     const accounts = [account];
 
-    td.when(accountServiceMock.accountRepository.getAccounts()).thenReturn(okAsync(accounts));
+    td.when(accountServiceMock.accountRepository.getAccounts()).thenReturn(
+      okAsync(accounts),
+    );
 
     // Act
     const getAccountsResponse = await accountService.getAccounts();
@@ -78,7 +110,9 @@ describe("AccountService tests", () => {
 
     // Assert
     expect(getBalancesResponse.isErr()).toStrictEqual(false);
-    expect(getBalancesResponse._unsafeUnwrap()).toStrictEqual(accountServiceMock.balances); // There's no logic between what the repo returns and what the service returns, so we only need to verify that we get the object we made the repo return. It's strucutre is unimportant.
+    expect(getBalancesResponse._unsafeUnwrap()).toStrictEqual(
+      accountServiceMock.balances,
+    ); // There's no logic between what the repo returns and what the service returns, so we only need to verify that we get the object we made the repo return. It's strucutre is unimportant.
   });
 
   test("Should depositFunds call accountRepository.depositFunds ones and return balances", async () => {
@@ -86,7 +120,7 @@ describe("AccountService tests", () => {
     const accountServiceMock = new AccountServiceMocks();
     const accountService = accountServiceMock.factoryAccountService();
 
-    let publishedBalances = new Array<Balances>();
+    const publishedBalances = new Array<Balances>();
     accountServiceMock.contextProvider.onBalancesChanged.subscribe((val) => {
       publishedBalances.push(val);
     });
@@ -106,13 +140,17 @@ describe("AccountService tests", () => {
     const accountServiceMock = new AccountServiceMocks();
     const accountService = accountServiceMock.factoryAccountService();
 
-    let publishedBalances = new Array<Balances>();
+    const publishedBalances = new Array<Balances>();
     accountServiceMock.contextProvider.onBalancesChanged.subscribe((val) => {
       publishedBalances.push(val);
     });
 
     // Act
-    const response = await accountService.withdrawFunds(assetAddress, amount, destinationAddress);
+    const response = await accountService.withdrawFunds(
+      assetAddress,
+      amount,
+      destinationAddress,
+    );
 
     // Assert
     expect(response.isErr()).toBeFalsy();

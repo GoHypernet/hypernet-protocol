@@ -1,18 +1,21 @@
 import {
   IHypernetOfferDetails,
-  PublicKey,
   IHypernetPullPaymentDetails,
   IBasicTransferResponse,
   IFullTransferState,
-} from "@hypernetlabs/objects";
-import {
-  CoreUninitializedError,
+  EthereumAddress,
+  PublicIdentifier,
+  PaymentId,
+  TransferId,
+  Signature,
   InvalidParametersError,
   RouterChannelUnknownError,
   TransferCreationError,
   TransferResolutionError,
+  VectorError,
+  EPaymentType,
+  ETransferState,
 } from "@hypernetlabs/objects";
-import { EPaymentType, ETransferState } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
@@ -23,17 +26,22 @@ export interface IVectorUtils {
   /**
    *
    */
-  getRouterChannelAddress(): ResultAsync<string, RouterChannelUnknownError | CoreUninitializedError>;
+  getRouterChannelAddress(): ResultAsync<
+    EthereumAddress,
+    RouterChannelUnknownError | VectorError
+  >;
 
   /**
    *
    * @param transferId
    */
-  resolveMessageTransfer(transferId: string): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
+  resolveMessageTransfer(
+    transferId: TransferId,
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
   resolvePaymentTransfer(
-    transferId: string,
-    paymentId: string,
+    transferId: TransferId,
+    paymentId: PaymentId,
     amount: string,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
@@ -45,9 +53,9 @@ export interface IVectorUtils {
    * @param amount
    */
   resolveInsuranceTransfer(
-    transferId: string,
-    paymentId: string,
-    mediatorSignature?: string,
+    transferId: TransferId,
+    paymentId: PaymentId,
+    mediatorSignature?: Signature,
     amount?: BigNumber,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
@@ -55,14 +63,17 @@ export interface IVectorUtils {
    *
    */
   createOfferTransfer(
-    toAddress: string,
+    toAddress: PublicIdentifier,
     message: IHypernetOfferDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError>;
 
   createPullNotificationTransfer(
-    toAddress: string,
+    toAddress: PublicIdentifier,
     message: IHypernetPullPaymentDetails,
-  ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
+  ): ResultAsync<
+    IBasicTransferResponse,
+    TransferCreationError | InvalidParametersError
+  >;
 
   /**
    *
@@ -71,15 +82,18 @@ export interface IVectorUtils {
    */
   createPaymentTransfer(
     type: EPaymentType,
-    toAddress: string,
+    toAddress: PublicIdentifier,
     amount: BigNumber,
-    assetAddress: string,
+    assetAddress: EthereumAddress,
     UUID: string,
     start: number,
     expiration: number,
     deltaTime?: number,
     deltaAmount?: string,
-  ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
+  ): ResultAsync<
+    IBasicTransferResponse,
+    TransferCreationError | InvalidParametersError
+  >;
 
   /**
    *
@@ -87,13 +101,18 @@ export interface IVectorUtils {
    * @param amount
    */
   createInsuranceTransfer(
-    toAddress: string,
-    mediatorPublicKey: PublicKey,
+    toAddress: PublicIdentifier,
+    mediatorAddress: EthereumAddress,
     amount: BigNumber,
     expiration: number,
     UUID: string,
-  ): ResultAsync<IBasicTransferResponse, TransferCreationError | InvalidParametersError>;
+  ): ResultAsync<
+    IBasicTransferResponse,
+    TransferCreationError | InvalidParametersError
+  >;
 
   getTimestampFromTransfer(transfer: IFullTransferState): number;
   getTransferStateFromTransfer(transfer: IFullTransferState): ETransferState;
 }
+
+export const IVectorUtilsType = Symbol.for("IVectorUtils");

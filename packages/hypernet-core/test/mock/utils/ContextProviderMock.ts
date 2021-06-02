@@ -1,15 +1,23 @@
 import {
   Balances,
   ControlClaim,
-  HypernetContext,
-  InitializedHypernetContext,
+  EthereumAddress,
+  MerchantUrl,
   PullPayment,
   PushPayment,
+  Signature,
 } from "@hypernetlabs/objects";
-import { CoreUninitializedError } from "@hypernetlabs/objects";
-import { IContextProvider } from "@interfaces/utilities/IContextProvider";
 import { okAsync, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
+
+import {
+  HypernetContext,
+  InitializedHypernetContext,
+} from "@interfaces/objects";
+import {
+  IContextProvider,
+  IMerchantConnectorProxy,
+} from "@interfaces/utilities";
 import { account, publicIdentifier } from "@mock/mocks";
 
 export class ContextProviderMock implements IContextProvider {
@@ -24,19 +32,27 @@ export class ContextProviderMock implements IContextProvider {
   public onPullPaymentReceived: Subject<PullPayment>;
   public onPushPaymentUpdated: Subject<PushPayment>;
   public onPullPaymentUpdated: Subject<PullPayment>;
+  public onPushPaymentDelayed: Subject<PushPayment>;
+  public onPullPaymentDelayed: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
-  public onMerchantAuthorized: Subject<string>;
-  public onAuthorizedMerchantUpdated: Subject<string>;
-  public onAuthorizedMerchantActivationFailed: Subject<string>;
-  public onMerchantIFrameDisplayRequested: Subject<string>;
-  public onMerchantIFrameCloseRequested: Subject<string>;
+  public onDeStorageAuthenticationStarted: Subject<void>;
+  public onDeStorageAuthenticationSucceeded: Subject<void>;
+  public onDeStorageAuthenticationFailed: Subject<void>;
+  public onMerchantAuthorized: Subject<MerchantUrl>;
+  public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
+  public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
+  public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
+  public onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
+  public onInitializationRequired: Subject<void>;
+  public onPrivateCredentialsRequested: Subject<void>;
+  public onMerchantConnectorActivated: Subject<IMerchantConnectorProxy>;
 
-  public authorizedMerchants: Map<string, string>;
+  public authorizedMerchants: Map<MerchantUrl, Signature>;
 
   constructor(
     context: HypernetContext | null = null,
     initializedContext: InitializedHypernetContext | null = null,
-    uninitializedAccount: string | null = null,
+    uninitializedAccount: EthereumAddress | null = null,
   ) {
     this.onControlClaimed = new Subject<ControlClaim>();
     this.onControlYielded = new Subject<ControlClaim>();
@@ -46,14 +62,22 @@ export class ContextProviderMock implements IContextProvider {
     this.onPullPaymentReceived = new Subject<PullPayment>();
     this.onPushPaymentUpdated = new Subject<PushPayment>();
     this.onPullPaymentUpdated = new Subject<PullPayment>();
+    this.onPushPaymentDelayed = new Subject<PushPayment>();
+    this.onPullPaymentDelayed = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
-    this.onMerchantAuthorized = new Subject<string>();
-    this.onAuthorizedMerchantUpdated = new Subject<string>();
-    this.onAuthorizedMerchantActivationFailed = new Subject<string>();
-    this.onMerchantIFrameDisplayRequested = new Subject<string>();
-    this.onMerchantIFrameCloseRequested = new Subject<string>();
+    this.onDeStorageAuthenticationStarted = new Subject<void>();
+    this.onDeStorageAuthenticationSucceeded = new Subject<void>();
+    this.onDeStorageAuthenticationFailed = new Subject<void>();
+    this.onMerchantAuthorized = new Subject<MerchantUrl>();
+    this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
+    this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
+    this.onMerchantIFrameDisplayRequested = new Subject<MerchantUrl>();
+    this.onMerchantIFrameCloseRequested = new Subject<MerchantUrl>();
+    this.onInitializationRequired = new Subject<void>();
+    this.onPrivateCredentialsRequested = new Subject<void>();
+    this.onMerchantConnectorActivated = new Subject();
 
-    this.authorizedMerchants = new Map<string, string>();
+    this.authorizedMerchants = new Map<MerchantUrl, Signature>();
 
     if (context != null) {
       this.context = context;
@@ -70,12 +94,20 @@ export class ContextProviderMock implements IContextProvider {
         this.onPullPaymentReceived,
         this.onPushPaymentUpdated,
         this.onPullPaymentUpdated,
+        this.onPushPaymentDelayed,
+        this.onPullPaymentDelayed,
         this.onBalancesChanged,
+        this.onDeStorageAuthenticationStarted,
+        this.onDeStorageAuthenticationSucceeded,
+        this.onDeStorageAuthenticationFailed,
         this.onMerchantAuthorized,
         this.onAuthorizedMerchantUpdated,
         this.onAuthorizedMerchantActivationFailed,
         this.onMerchantIFrameDisplayRequested,
         this.onMerchantIFrameCloseRequested,
+        this.onInitializationRequired,
+        this.onPrivateCredentialsRequested,
+        this.onMerchantConnectorActivated,
       );
     }
 
@@ -94,12 +126,20 @@ export class ContextProviderMock implements IContextProvider {
         this.onPullPaymentReceived,
         this.onPushPaymentUpdated,
         this.onPullPaymentUpdated,
+        this.onPushPaymentDelayed,
+        this.onPullPaymentDelayed,
         this.onBalancesChanged,
+        this.onDeStorageAuthenticationStarted,
+        this.onDeStorageAuthenticationSucceeded,
+        this.onDeStorageAuthenticationFailed,
         this.onMerchantAuthorized,
         this.onAuthorizedMerchantUpdated,
         this.onAuthorizedMerchantActivationFailed,
         this.onMerchantIFrameDisplayRequested,
         this.onMerchantIFrameCloseRequested,
+        this.onInitializationRequired,
+        this.onPrivateCredentialsRequested,
+        this.onMerchantConnectorActivated,
         this.authorizedMerchants,
       );
     }
@@ -109,7 +149,14 @@ export class ContextProviderMock implements IContextProvider {
     return okAsync(this.context);
   }
 
-  public getInitializedContext(): ResultAsync<InitializedHypernetContext, CoreUninitializedError> {
+  public getAccount(): ResultAsync<string, never> {
+    return okAsync(this.context.account || "");
+  }
+
+  public getInitializedContext(): ResultAsync<
+    InitializedHypernetContext,
+    never
+  > {
     return okAsync(this.initializedContext);
   }
 

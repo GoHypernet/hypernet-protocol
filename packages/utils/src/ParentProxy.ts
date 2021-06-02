@@ -1,6 +1,6 @@
-import Postmate from "postmate";
-import { errAsync, ResultAsync } from "neverthrow";
 import { ProxyError } from "@hypernetlabs/objects";
+import { errAsync, ResultAsync } from "neverthrow";
+import Postmate from "postmate";
 
 interface IIFrameCallData<T> {
   callId: number;
@@ -48,7 +48,7 @@ class IFrameCall<T, E> {
 export abstract class ParentProxy {
   protected handshake: Postmate;
   protected child: Postmate.ParentAPI | null;
-  protected callId: number = 0;
+  protected callId = 0;
   protected calls: IFrameCall<any, any>[] = [];
   protected active: boolean;
 
@@ -74,13 +74,16 @@ export abstract class ParentProxy {
     });
   }
 
-  protected activateResult: ResultAsync<void, Error> | undefined;
+  protected activateResult: ResultAsync<void, ProxyError> | undefined;
 
-  public activate(): ResultAsync<void, Error> {
+  public activate(): ResultAsync<void, ProxyError> {
     if (this.activateResult != null) {
       return this.activateResult;
     }
-    this.activateResult = ResultAsync.fromPromise(this.handshake, (e) => e as Error).map((child) => {
+    this.activateResult = ResultAsync.fromPromise(
+      this.handshake,
+      (e) => new ProxyError("Proxy handshake failed in parent", e),
+    ).map((child) => {
       // Stash the API for future calls
       this.child = child;
 
@@ -129,10 +132,15 @@ export abstract class ParentProxy {
     this.active = false;
   }
 
-  protected _createCall<T, E>(callName: string, data: any): ResultAsync<T, E | ProxyError> {
+  protected _createCall<T, E>(
+    callName: string,
+    data: any,
+  ): ResultAsync<T, E | ProxyError> {
     if (!this.active) {
       return errAsync(
-        new ProxyError("Proxy is not activated or has been destroyed, cannot make a call to the iframe!"),
+        new ProxyError(
+          "Proxy is not activated or has been destroyed, cannot make a call to the iframe!",
+        ),
       );
     }
     const callId = this.callId++;

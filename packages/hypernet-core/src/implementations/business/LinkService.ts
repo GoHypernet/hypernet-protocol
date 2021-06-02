@@ -1,8 +1,16 @@
+import { HypernetLink } from "@hypernetlabs/objects";
+import {
+  RouterChannelUnknownError,
+  VectorError,
+  InvalidParametersError,
+  BlockchainUnavailableError,
+  InvalidPaymentError,
+  LogicalError,
+} from "@hypernetlabs/objects";
+import { ResultAsync } from "neverthrow";
+
 import { ILinkService } from "@interfaces/business";
 import { ILinkRepository } from "@interfaces/data";
-import { HypernetLink } from "@hypernetlabs/objects";
-import { CoreUninitializedError, RouterChannelUnknownError, VectorError } from "@hypernetlabs/objects";
-import { ResultAsync } from "neverthrow";
 
 export class LinkService implements ILinkService {
   constructor(protected linkRepository: ILinkRepository) {}
@@ -12,7 +20,12 @@ export class LinkService implements ILinkService {
    */
   public getLinks(): ResultAsync<
     HypernetLink[],
-    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error
+    | InvalidPaymentError
+    | InvalidParametersError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
   > {
     return this.linkRepository.getHypernetLinks();
   }

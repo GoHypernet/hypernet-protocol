@@ -1,6 +1,7 @@
-import ko from "knockout";
-import html from "./PaymentStatus.template.html";
 import { EPaymentState } from "@hypernetlabs/objects";
+import ko from "knockout";
+
+import html from "./PaymentStatus.template.html";
 
 export class PaymentStatusParams {
   constructor(public id: string, public state: EPaymentState) {}
@@ -16,6 +17,8 @@ export class PaymentStatusViewModel {
 
     if (params.state === EPaymentState.Proposed) {
       this.state = "Proposed";
+    } else if (params.state === EPaymentState.Rejected) {
+      this.state = "Rejected";
     } else if (params.state === EPaymentState.InvalidProposal) {
       this.state = "Invalid Proposal";
     } else if (params.state === EPaymentState.Staked) {
@@ -37,6 +40,7 @@ export class PaymentStatusViewModel {
     } else if (params.state === EPaymentState.Borked) {
       this.state = "Borked";
     } else {
+      console.error(params.state);
       this.state = "Unknown - update PaymentStatus.viewmodel";
     }
   }

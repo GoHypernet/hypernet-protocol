@@ -1,12 +1,13 @@
-import React from "react";
-import AppContainer from "./containers/AppContainer/AppContainer";
-import Icon from 'react-native-vector-icons/FontAwesome'
+import React, { ReactNode } from "react";
+import Icon from "react-native-vector-icons/FontAwesome";
 
-declare const global: { HermesInternal: null | {} };
+import AppContainer from "./containers/AppContainer/AppContainer";
+
+// declare const global: { HermesInternal: null | {} };
 
 Icon.loadFont();
 
-const App = () => {
+const App = (): ReactNode => {
   return <AppContainer />;
 };
 

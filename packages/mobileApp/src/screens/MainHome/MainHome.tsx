@@ -1,9 +1,10 @@
 import React from "react";
 import { Text, View } from "react-native";
-import { useStateContext } from "@mobileApp/state/store";
-import { SomeActionType } from "@mobileApp/interfaces/state/IsomeReducer";
 import { TouchableOpacity } from "react-native-gesture-handler";
+
 import { NavigationProps } from "@mobileApp/interfaces/containers/IRouter";
+import { SomeActionType } from "@mobileApp/interfaces/state/IsomeReducer";
+import { useStateContext } from "@mobileApp/state/store";
 
 interface MainHomeProps {
   navigation: NavigationProps;
@@ -38,7 +39,10 @@ const MainHome: React.FC<MainHomeProps> = (props: MainHomeProps) => {
       </Text>
       <TouchableOpacity
         onPress={() => {
-          dispatch({ type: SomeActionType.ADD_CONTACT, payload: "ffff MainHome" });
+          dispatch({
+            type: SomeActionType.ADD_CONTACT,
+            payload: "ffff MainHome",
+          });
         }}
       >
         <Text>change store state</Text>

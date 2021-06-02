@@ -1,15 +1,18 @@
+import HypernetWebIntegration, {
+  IHypernetWebIntegration,
+} from "@hypernetlabs/web-integration";
 import ko from "knockout";
-import html from "./Agent.template.html";
-import { BalancesParams } from "../Balances/Balances.viewmodel";
-import { PaymentFormParams } from "../PaymentForm/PaymentForm.viewmodel";
-import { LinksParams } from "../Links/Links.viewmodel";
+
 import { AccountParams } from "../Account/Account.viewmodel";
 import { ActionsParams } from "../Actions/Actions.viewmodel";
-import { StatusParams } from "../Status/Status.viewmodel";
-import HypernetWebIntegration, { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { AuthorizedMerchantFormParams } from "../AuthorizedMerchantForm/AuthorizedMerchantForm.viewmodel";
 import { AuthorizedMerchantsParams } from "../AuthorizedMerchants/AuthorizedMerchants.viewmodel";
-import { ExternalProviderUtils } from "packages/utils";
+import { BalancesParams } from "../Balances/Balances.viewmodel";
+import { LinksParams } from "../Links/Links.viewmodel";
+import { PaymentFormParams } from "../PaymentForm/PaymentForm.viewmodel";
+import { StatusParams } from "../Status/Status.viewmodel";
+
+import html from "./Agent.template.html";
 
 declare global {
   interface Window {

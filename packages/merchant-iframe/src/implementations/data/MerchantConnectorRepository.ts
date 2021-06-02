@@ -1,28 +1,55 @@
-import { IMerchantConnectorRepository } from "@merchant-iframe/interfaces/data";
+import {
+  EthereumAddress,
+  Signature,
+  MerchantUrl,
+  AjaxError,
+} from "@hypernetlabs/objects";
 import { IAjaxUtils } from "@hypernetlabs/utils";
+import { IMerchantConnectorRepository } from "@merchant-iframe/interfaces/data";
 import { okAsync, ResultAsync } from "neverthrow";
-import { urlJoin } from "url-join-ts";
+import { urlJoinP } from "url-join-ts";
 
-export class MerchantConnectorRepository implements IMerchantConnectorRepository {
+export class MerchantConnectorRepository
+  implements IMerchantConnectorRepository {
   constructor(protected ajaxUtils: IAjaxUtils) {}
 
-  public getMerchantSignature(merchantUrl: string): ResultAsync<string, Error> {
-    const url = new URL(urlJoin(merchantUrl, "signature"));
-    return this.ajaxUtils.get<string, Error>(url).andThen((response) => {
+  public getMerchantSignature(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<Signature, AjaxError> {
+    const url = this._prepareMerchantUrl(merchantUrl, "signature");
+    return this.ajaxUtils.get<Signature>(url).andThen((response) => {
       return okAsync(response);
     });
   }
-  public getMerchantAddress(merchantUrl: string): ResultAsync<string, Error> {
-    const url = new URL(urlJoin(merchantUrl, "address"));
-    return this.ajaxUtils.get<string, Error>(url).andThen((response) => {
+  public getMerchantAddress(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<EthereumAddress, AjaxError> {
+    const url = this._prepareMerchantUrl(merchantUrl, "address");
+    return this.ajaxUtils.get<EthereumAddress>(url).andThen((response) => {
       return okAsync(response);
     });
   }
 
-  public getMerchantCode(merchantUrl: string): ResultAsync<string, Error> {
-    const url = new URL(urlJoin(merchantUrl, "connector"));
-    return this.ajaxUtils.get<string, Error>(url).andThen((response) => {
+  public getMerchantCode(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<string, AjaxError> {
+    const url = this._prepareMerchantUrl(merchantUrl, "connector");
+    return this.ajaxUtils.get<string>(url).andThen((response) => {
       return okAsync(response);
     });
+  }
+
+  private _prepareMerchantUrl(merchantUrl: MerchantUrl, path: string): URL {
+    const merchantUrlObject = new URL(merchantUrl);
+    const searchParams = {};
+    for (const [key, value] of new URLSearchParams(
+      merchantUrlObject.search,
+    ).entries()) {
+      searchParams[key] = value;
+    }
+    merchantUrlObject.search = "";
+    return new URL(
+      urlJoinP(merchantUrlObject.toString(), [path], searchParams),
+    );
   }
 }

@@ -1,22 +1,32 @@
 import { NonEIP712Message } from "@connext/vector-browser-node";
 import {
+  BlockchainUnavailableError,
+  EthereumAddress,
+  Signature,
+  VectorError,
+} from "@hypernetlabs/objects";
+import { HypernetConfig } from "@hypernetlabs/objects";
+import { ILogUtils } from "@hypernetlabs/utils";
+import { ResultUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
+import { ethers } from "ethers";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
+
+import {
   IBrowserNode,
   IContextProvider,
-  ILogUtils,
   IBrowserNodeProvider,
   IConfigProvider,
   IBlockchainProvider,
 } from "@interfaces/utilities";
-import { BlockchainUnavailableError, CoreUninitializedError, VectorError } from "@hypernetlabs/objects";
-import { HypernetConfig, HypernetContext } from "@hypernetlabs/objects";
-import { ResultUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
-import { ethers } from "ethers";
 import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 export class BrowserNodeProvider implements IBrowserNodeProvider {
-  protected browserNodeResult: ResultAsync<IBrowserNode, VectorError | Error> | null;
-  protected browserNode: IBrowserNode | null;
+  protected browserNodeResult: ResultAsync<
+    IBrowserNode,
+    VectorError | BlockchainUnavailableError
+  > | null = null;
+  protected browserNode: IBrowserNode = {} as IBrowserNode;
+
   constructor(
     protected configProvider: IConfigProvider,
     protected contextProvider: IContextProvider,
@@ -24,74 +34,81 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
     protected logUtils: ILogUtils,
     protected storageUtils: ILocalStorageUtils,
     protected browserNodeFactory: IBrowserNodeFactory,
-  ) {
-    this.browserNodeResult = null;
-    this.browserNode = null;
-  }
-  protected initialize(): ResultAsync<IBrowserNode, VectorError | CoreUninitializedError> {
+  ) {}
+
+  protected initialize(): ResultAsync<
+    IBrowserNode,
+    VectorError | BlockchainUnavailableError
+  > {
     if (this.browserNodeResult == null) {
       let config: HypernetConfig;
       let signer: ethers.providers.JsonRpcSigner;
-      let context: HypernetContext;
+      let account: string;
 
       this.browserNodeResult = ResultUtils.combine([
         this.configProvider.getConfig(),
         this.blockchainProvider.getSigner(),
-        this.contextProvider.getContext(),
+        this.contextProvider.getAccount(),
         this.browserNodeFactory.factoryBrowserNode(),
       ])
         .andThen((vals) => {
-          [config, signer, context, this.browserNode] = vals;
-
-          // If no account is set in the context, then we have to error out.
-          // Normally we would use getInitializedContext, but in this case, you need
-          // the browser node up and running to get the publicIdentifier, which
-          // is part of what qualifies for getInitializedContext. I do not see
-          // a better way that doesn't involve a huge refactor.
-          if (context.account == null) {
-            return errAsync<string[], CoreUninitializedError>(
-              new CoreUninitializedError("Account is not set in BrowserNodeProvider.initialize"),
-            );
-          }
+          [config, signer, account, this.browserNode] = vals;
 
           // Check if the user has a signature in local storage for this account
-          const storedSignature = this.storageUtils.getSessionItem(`account-${context.account}-signature`);
+          const storedSignature = this.storageUtils.getSessionItem(
+            `account-${account}-signature`,
+          );
 
           if (storedSignature != null) {
-            return okAsync<string[], BlockchainUnavailableError>([context.account, storedSignature]);
+            return okAsync<string[], BlockchainUnavailableError>([
+              account,
+              storedSignature,
+            ]);
           }
 
           return ResultUtils.combine([
             ResultAsync.fromPromise(signer.getAddress(), (e) => {
               return e as BlockchainUnavailableError;
             }),
-            ResultAsync.fromPromise(signer.signMessage(NonEIP712Message), (e) => {
-              return e as BlockchainUnavailableError;
-            }),
+            ResultAsync.fromPromise(
+              signer.signMessage(NonEIP712Message),
+              (e) => {
+                return e as BlockchainUnavailableError;
+              },
+            ),
           ]);
         })
         .andThen((vals) => {
-          const [account, signature] = vals;
+          const [address, signature] = vals;
 
           // Store the signature so you don't have to sign again
-          this.storageUtils.setSessionItem(`account-${account}-signature`, signature);
+          this.storageUtils.setSessionItem(
+            `account-${address}-signature`,
+            signature,
+          );
 
-          // Initialize the browser node
-          if (this.browserNode == null) {
-            throw new Error("Something is badly broken");
-          }
-          return this.browserNode.init(signature, account);
+          return this.browserNode.init(
+            Signature(signature),
+            EthereumAddress(account),
+          );
         })
         .orElse((e) => {
-          console.log(e);
-          const shouldAttemptRestore = ((e as any).context?.validationError ?? "").includes("Channel is already setup");
+          const shouldAttemptRestore = (
+            (e as any).context?.validationError ?? ""
+          ).includes("Channel is already setup");
 
           if (shouldAttemptRestore && this.browserNode != null) {
             return this.browserNode
-              .getStateChannelByParticipants(config.routerPublicIdentifier, config.chainId)
+              .getStateChannelByParticipants(
+                config.routerPublicIdentifier,
+                config.chainId,
+              )
               .andThen((channelState) => {
                 if (channelState == null && this.browserNode != null) {
-                  return this.browserNode.restoreState(config.routerPublicIdentifier, config.chainId);
+                  return this.browserNode.restoreState(
+                    config.routerPublicIdentifier,
+                    config.chainId,
+                  );
                 }
                 return okAsync<void, VectorError>(undefined);
               });
@@ -99,13 +116,17 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
             return errAsync(e);
           }
         })
-        .map(() => {
-          return this.browserNode as IBrowserNode;
-        });
+        .map(() => this.browserNode);
     }
-    return this.browserNodeResult as ResultAsync<IBrowserNode, VectorError>;
+    return this.browserNodeResult as ResultAsync<
+      IBrowserNode,
+      VectorError | BlockchainUnavailableError
+    >;
   }
-  public getBrowserNode(): ResultAsync<IBrowserNode, VectorError | Error> {
+  public getBrowserNode(): ResultAsync<
+    IBrowserNode,
+    VectorError | BlockchainUnavailableError
+  > {
     return this.initialize();
   }
 }

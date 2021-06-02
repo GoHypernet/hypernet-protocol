@@ -1,18 +1,33 @@
 import {
-  HypernetContext,
   ControlClaim,
-  InitializedHypernetContext,
   PushPayment,
   PullPayment,
   Balances,
+  EthereumAddress,
+  PublicIdentifier,
+  MerchantUrl,
+  Signature,
 } from "@hypernetlabs/objects";
-import { CoreUninitializedError } from "@hypernetlabs/objects";
-import { IContextProvider } from "@interfaces/utilities/IContextProvider";
+import { okAsync, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
-import { okAsync, errAsync, ResultAsync } from "neverthrow";
+
+import {
+  HypernetContext,
+  InitializedHypernetContext,
+} from "@interfaces/objects";
+import {
+  IContextProvider,
+  IMerchantConnectorProxy,
+} from "@interfaces/utilities";
 
 export class ContextProvider implements IContextProvider {
   protected context: HypernetContext;
+  protected _initializePromise: Promise<InitializedHypernetContext>;
+  protected _initializePromiseResolve: (
+    value: InitializedHypernetContext,
+  ) => void;
+  protected _getAccountPromise: Promise<string>;
+  protected _getAccountPromiseResolve: (value: string) => void;
   constructor(
     onControlClaimed: Subject<ControlClaim>,
     onControlYielded: Subject<ControlClaim>,
@@ -22,12 +37,19 @@ export class ContextProvider implements IContextProvider {
     onPullPaymentReceived: Subject<PullPayment>,
     onPushPaymentUpdated: Subject<PushPayment>,
     onPullPaymentUpdated: Subject<PullPayment>,
+    onPushPaymentDelayed: Subject<PushPayment>,
+    onPullPaymentDelayed: Subject<PullPayment>,
     onBalancesChanged: Subject<Balances>,
-    onMerchantAuthorized: Subject<string>,
-    onAuthorizedMerchantUpdated: Subject<string>,
-    onAuthorizedMerchantActivationFailed: Subject<string>,
-    onMerchantIFrameDisplayRequested: Subject<string>,
-    onMerchantIFrameCloseRequested: Subject<string>,
+    onDeStorageAuthenticationStarted: Subject<void>,
+    onDeStorageAuthenticationSucceeded: Subject<void>,
+    onDeStorageAuthenticationFailed: Subject<void>,
+    onMerchantAuthorized: Subject<MerchantUrl>,
+    onAuthorizedMerchantUpdated: Subject<MerchantUrl>,
+    onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>,
+    onMerchantIFrameDisplayRequested: Subject<MerchantUrl>,
+    onMerchantIFrameCloseRequested: Subject<MerchantUrl>,
+    onInitializationRequired: Subject<void>,
+    onPrivateCredentialsRequested: Subject<void>,
   ) {
     this.context = new HypernetContext(
       null,
@@ -41,51 +63,95 @@ export class ContextProvider implements IContextProvider {
       onPullPaymentReceived,
       onPushPaymentUpdated,
       onPullPaymentUpdated,
+      onPushPaymentDelayed,
+      onPullPaymentDelayed,
       onBalancesChanged,
+      onDeStorageAuthenticationStarted,
+      onDeStorageAuthenticationSucceeded,
+      onDeStorageAuthenticationFailed,
       onMerchantAuthorized,
       onAuthorizedMerchantUpdated,
       onAuthorizedMerchantActivationFailed,
       onMerchantIFrameDisplayRequested,
       onMerchantIFrameCloseRequested,
+      onInitializationRequired,
+      onPrivateCredentialsRequested,
+      new Subject<IMerchantConnectorProxy>(),
     );
+    this._initializePromiseResolve = () => null;
+    this._initializePromise = new Promise((resolve) => {
+      this._initializePromiseResolve = resolve;
+    });
+
+    this._getAccountPromiseResolve = () => null;
+    this._getAccountPromise = new Promise((resolve) => {
+      this._getAccountPromiseResolve = resolve;
+    });
   }
   public getContext(): ResultAsync<HypernetContext, never> {
     return okAsync(this.context);
   }
 
-  public getInitializedContext(): ResultAsync<InitializedHypernetContext, CoreUninitializedError> {
-    if (this.context.account == null || this.context.publicIdentifier == null) {
-      return errAsync(new CoreUninitializedError());
+  public getInitializedContext(): ResultAsync<
+    InitializedHypernetContext,
+    never
+  > {
+    if (!this.contextInitialized()) {
+      this.context.onInitializationRequired.next();
     }
-
-    return okAsync(
-      new InitializedHypernetContext(
-        this.context.account,
-        this.context.publicIdentifier,
-        this.context.inControl,
-        this.context.onControlClaimed,
-        this.context.onControlYielded,
-        this.context.onPushPaymentSent,
-        this.context.onPullPaymentSent,
-        this.context.onPushPaymentReceived,
-        this.context.onPullPaymentReceived,
-        this.context.onPushPaymentUpdated,
-        this.context.onPullPaymentUpdated,
-        this.context.onBalancesChanged,
-        this.context.onMerchantAuthorized,
-        this.context.onAuthorizedMerchantUpdated,
-        this.context.onAuthorizedMerchantActivationFailed,
-        this.context.onMerchantIFrameDisplayRequested,
-        this.context.onMerchantIFrameCloseRequested,
-        new Map<string, string>(),
-      ),
-    );
+    return ResultAsync.fromSafePromise(this._initializePromise);
   }
 
   public setContext(context: HypernetContext): ResultAsync<void, never> {
     this.context = context;
-    return okAsync<null, never>(null).map(() => {
-      return;
-    });
+
+    if (this.contextInitialized()) {
+      this._initializePromiseResolve(
+        new InitializedHypernetContext(
+          EthereumAddress(this.context.account || ""),
+          PublicIdentifier(this.context.publicIdentifier || ""),
+          this.context.inControl,
+          this.context.onControlClaimed,
+          this.context.onControlYielded,
+          this.context.onPushPaymentSent,
+          this.context.onPullPaymentSent,
+          this.context.onPushPaymentReceived,
+          this.context.onPullPaymentReceived,
+          this.context.onPushPaymentUpdated,
+          this.context.onPullPaymentUpdated,
+          this.context.onPushPaymentDelayed,
+          this.context.onPullPaymentDelayed,
+          this.context.onBalancesChanged,
+          this.context.onDeStorageAuthenticationStarted,
+          this.context.onDeStorageAuthenticationSucceeded,
+          this.context.onDeStorageAuthenticationFailed,
+          this.context.onMerchantAuthorized,
+          this.context.onAuthorizedMerchantUpdated,
+          this.context.onAuthorizedMerchantActivationFailed,
+          this.context.onMerchantIFrameDisplayRequested,
+          this.context.onMerchantIFrameCloseRequested,
+          this.context.onInitializationRequired,
+          this.context.onPrivateCredentialsRequested,
+          this.context.onMerchantConnectorProxyActivated,
+          new Map<MerchantUrl, Signature>(),
+        ),
+      );
+    }
+
+    if (this.context.account != null) {
+      this._getAccountPromiseResolve(this.context.account);
+    }
+
+    return okAsync(undefined);
+  }
+
+  public getAccount(): ResultAsync<string, never> {
+    return ResultAsync.fromSafePromise(this._getAccountPromise);
+  }
+
+  protected contextInitialized(): boolean {
+    return (
+      this.context.account != null && this.context.publicIdentifier != null
+    );
   }
 }

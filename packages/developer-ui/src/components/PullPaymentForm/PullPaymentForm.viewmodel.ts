@@ -1,17 +1,21 @@
-import ko from "knockout";
-import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { EthereumAddress, PublicIdentifier } from "@hypernetlabs/objects";
-import html from "./PullPaymentForm.template.html";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import { utils } from "ethers";
+import ko from "knockout";
 import moment from "moment";
+
+import { AuthorizedMerchantSelectorParams } from "../AuthorizedMerchantSelector/AuthorizedMerchantSelector.viewmodel";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
 import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
-import { utils } from "ethers";
-import { AuthorizedMerchantSelectorParams } from "../AuthorizedMerchantSelector/AuthorizedMerchantSelector.viewmodel";
+
+import html from "./PullPaymentForm.template.html";
 
 export class PullPaymentFormParams {
   constructor(
     public integration: IHypernetWebIntegration,
-    public counterparty: ko.Observable<PublicIdentifier> | ko.Computed<PublicIdentifier>,
+    public counterparty:
+      | ko.Observable<PublicIdentifier>
+      | ko.Computed<PublicIdentifier>,
   ) {}
 }
 
@@ -33,7 +37,9 @@ export class PullPaymentFormViewModel {
   public submitButton: ButtonParams;
 
   protected integration: IHypernetWebIntegration;
-  protected counterparty: ko.Observable<PublicIdentifier> | ko.Computed<PublicIdentifier>;
+  protected counterparty:
+    | ko.Observable<PublicIdentifier>
+    | ko.Computed<PublicIdentifier>;
 
   constructor(params: PullPaymentFormParams) {
     this.integration = params.integration;
@@ -45,8 +51,15 @@ export class PullPaymentFormViewModel {
     this.deltaAmount = ko.observable("0");
     this.deltaTime = ko.observable("0");
 
-    this.tokenSelector = new TokenSelectorParams(this.integration, ko.observable(null), true);
-    this.merchantSelector = new AuthorizedMerchantSelectorParams(this.integration, ko.observable(null));
+    this.tokenSelector = new TokenSelectorParams(
+      this.integration,
+      ko.observable(null),
+      true,
+    );
+    this.merchantSelector = new AuthorizedMerchantSelectorParams(
+      this.integration,
+      ko.observable(null),
+    );
 
     this.submitButton = new ButtonParams(
       "Submit Payment",
@@ -74,7 +87,7 @@ export class PullPaymentFormViewModel {
             this.counterparty(),
             amount,
             expirationDate,
-            deltaAmount.toString(),
+            deltaAmount,
             deltaTime,
             requiredStake,
             selectedPaymentTokenAddress,

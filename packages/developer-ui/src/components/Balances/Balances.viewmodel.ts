@@ -1,8 +1,10 @@
-import ko from "knockout";
-import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { AssetBalance, Balances } from "@hypernetlabs/objects";
-import html from "./Balances.template.html";
+import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import ko from "knockout";
+
 import { AssetBalanceParams } from "../AssetBalance/AssetBalance.viewmodel";
+
+import html from "./Balances.template.html";
 
 export class BalancesParams {
   constructor(public integration: IHypernetWebIntegration) {}

@@ -1,14 +1,17 @@
-import { Payment } from "@objects/Payment";
-import { PublicIdentifier } from "@objects/PublicIdentifier";
-import { EPaymentState } from "@objects/types";
-import { EthereumAddress } from "@objects/EthereumAddress";
 import { BigNumber } from "ethers";
+
+import { EthereumAddress } from "@objects/EthereumAddress";
+import { MerchantUrl } from "@objects/MerchantUrl";
+import { Payment } from "@objects/Payment";
+import { PaymentId } from "@objects/PaymentId";
 import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
+import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullAmount } from "@objects/PullAmount";
+import { EPaymentState } from "@objects/typing";
 
 export class PullPayment extends Payment {
   constructor(
-    id: string,
+    id: PaymentId,
     to: PublicIdentifier,
     from: PublicIdentifier,
     state: EPaymentState,
@@ -19,7 +22,7 @@ export class PullPayment extends Payment {
     createdTimestamp: number,
     updatedTimestamp: number,
     collateralRecovered: BigNumber,
-    merchantUrl: string,
+    merchantUrl: MerchantUrl,
     details: PaymentInternalDetails,
     public authorizedAmount: BigNumber,
     public amountTransferred: BigNumber,

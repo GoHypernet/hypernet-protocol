@@ -17,9 +17,11 @@
       </tr>
       <tr class="custom-border-bottom">
         <th>State</th>
-        <td data-bind='component: {
+        <td
+          data-bind='component: {
           name: "payment-status",
-          params: state}'></td>
+          params: state}'
+        ></td>
       </tr>
       <tr class="custom-border-bottom">
         <th>Payment Token</th>
@@ -58,18 +60,32 @@
         <td data-bind="text: paymentAmount, attr: { 'data-payment-amount': id }"></td>
       </tr>
       <tr>
-        <td colspan="2" data-bind='component: {
+        <td
+          colspan="2"
+          data-bind='component: {
           name: "button",
-          params: acceptButton}, visible: showAcceptButton'>
-        </td>
-        <td colspan="2" data-bind='component: {
+          params: acceptButton}, visible: showAcceptButton'
+        ></td>
+        <td
+          colspan="2"
+          data-bind='component: {
           name: "button",
-          params: sendButton}, visible: showSendButton'>
-        </td>
-        <td colspan="2" data-bind='component: {
+          params: sendButton}, visible: showSendButton'
+        ></td>
+        <td
+          colspan="2"
+          data-bind='component: {
           name: "button",
-          params: disputeButton}, visible: showDisputeButton'>
-        </td>
+          params: disputeButton}, visible: showDisputeButton'
+        ></td>
+      </tr>
+      <tr>
+        <td
+          colspan="2"
+          data-bind='component: {
+          name: "button",
+          params: resolveInsuranceButton}, visible: showResolveInsuranceButton'
+        ></td>
       </tr>
     </tbody>
   </table>

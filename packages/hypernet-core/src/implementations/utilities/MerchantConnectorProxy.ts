@@ -1,51 +1,120 @@
+import {
+  IAuthorizeFundsRequest,
+  IResolutionResult,
+  ISendFundsRequest,
+} from "@hypernetlabs/merchant-connector";
+import {
+  EthereumAddress,
+  MerchantConnectorError,
+  MerchantValidationError,
+  PaymentId,
+  ProxyError,
+  Signature,
+  MerchantUrl,
+  Balances,
+  PublicIdentifier,
+  PullPayment,
+  PushPayment,
+  MerchantActivationError,
+} from "@hypernetlabs/objects";
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
-import { IAuthorizeFundsRequest, IResolutionResult, ISendFundsRequest } from "@hypernetlabs/merchant-connector";
-import { MerchantConnectorError, MerchantValidationError } from "@hypernetlabs/objects";
-import { HexString, HypernetContext, PullPayment, PushPayment } from "@hypernetlabs/objects";
-import { IMerchantConnectorProxy, IContextProvider } from "@interfaces/utilities";
+import { Subject } from "rxjs";
 
-export class MerchantConnectorProxy extends ParentProxy implements IMerchantConnectorProxy {
+import { HypernetContext } from "@interfaces/objects";
+import {
+  IMerchantConnectorProxy,
+  IContextProvider,
+} from "@interfaces/utilities";
+
+export class MerchantConnectorProxy
+  extends ParentProxy
+  implements IMerchantConnectorProxy {
   protected static openedIFramesQueue: string[] = [];
 
   constructor(
     protected element: HTMLElement | null,
     protected iframeUrl: string,
-    protected merchantUrl: string,
+    public merchantUrl: MerchantUrl,
     protected iframeName: string,
     protected contextProvider: IContextProvider,
     protected debug: boolean = false,
   ) {
     super(element, iframeUrl, iframeName, debug);
+
+    this.signMessageRequested = new Subject();
+    this.sendFundsRequested = new Subject();
+    this.authorizeFundsRequested = new Subject();
   }
 
-  public activateConnector(): ResultAsync<void, MerchantConnectorError> {
-    return this._createCall("activateConnector", null);
+  public signMessageRequested: Subject<string>;
+  public sendFundsRequested: Subject<ISendFundsRequest>;
+  public authorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
+
+  public activateConnector(
+    publicIdentifier: PublicIdentifier,
+    balances: Balances,
+  ): ResultAsync<void, MerchantActivationError | ProxyError> {
+    const assets = balances.assets.map((val) => {
+      return {
+        assetAddress: val.assetAddress,
+        name: val.name,
+        symbol: val.symbol,
+        decimals: val.decimals,
+        totalAmount: val.totalAmount.toString(),
+        lockedAmount: val.lockedAmount.toString(),
+        freeAmount: val.freeAmount.toString(),
+      };
+    });
+    const activateData = {
+      publicIdentifier,
+      balances: { assets: assets },
+    };
+    return this._createCall<void, MerchantActivationError | ProxyError>(
+      "activateConnector",
+      activateData,
+    ).mapErr((e) => {
+      // TODO
+      // _createCall's return type should be adjusted; it's not actually
+      // the type is says
+      return e;
+    });
   }
 
-  public resolveChallenge(paymentId: HexString): ResultAsync<IResolutionResult, MerchantConnectorError> {
+  public resolveChallenge(
+    paymentId: PaymentId,
+  ): ResultAsync<IResolutionResult, MerchantConnectorError | ProxyError> {
     return this._createCall("resolveChallenge", paymentId);
   }
 
-  public getAddress(): ResultAsync<HexString, MerchantConnectorError> {
+  public getAddress(): ResultAsync<
+    EthereumAddress,
+    MerchantConnectorError | ProxyError
+  > {
     return this._createCall("getAddress", null);
   }
 
-  public getValidatedSignature(): ResultAsync<string, MerchantValidationError> {
+  public getValidatedSignature(): ResultAsync<
+    Signature,
+    MerchantValidationError | ProxyError
+  > {
     return this._createCall("getValidatedSignature", null);
   }
 
-  public activate(): ResultAsync<void, MerchantValidationError> {
-    return ResultUtils.combine([this.contextProvider.getContext(), super.activate()]).map((vals) => {
+  public activateProxy(): ResultAsync<void, ProxyError> {
+    return ResultUtils.combine([
+      this.contextProvider.getContext(),
+      this.activate(),
+    ]).map((vals) => {
       const [context] = vals;
 
       // Events coming from merchant connector iframe
-      this.child?.on("onDisplayRequested", () => {
+      this.child?.on("displayRequested", () => {
         this._pushOpenedMerchantIFrame(this.merchantUrl);
         this._showMerchantIFrame(context);
       });
 
-      this.child?.on("onCloseRequested", () => {
+      this.child?.on("closeRequested", () => {
         // Only hide the merchant iframe if it's really displayed in the screen
         if (MerchantConnectorProxy.openedIFramesQueue[0] === this.merchantUrl) {
           this._hideMerchantIFrame();
@@ -59,18 +128,28 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
         }
       });
 
-      // this.child?.on("onSendFundsRequested", (request: ISendFundsRequest) => {
-      //   context.onSendFundsRequested.next(request);
-      // });
+      this.child?.on("sendFundsRequested", (request: ISendFundsRequest) => {
+        this.sendFundsRequested.next(request);
+      });
 
-      // this.child?.on("onAuthorizeFundsRequested", (request: IAuthorizeFundsRequest) => {
-      //   context.onAuthorizeFundsRequested.next(request);
-      // });
+      this.child?.on(
+        "authorizeFundsRequested",
+        (request: IAuthorizeFundsRequest) => {
+          this.authorizeFundsRequested.next(request);
+        },
+      );
+
+      this.child?.on("signMessageRequested", (message: string) => {
+        this.signMessageRequested.next(message);
+      });
     });
   }
 
   // Events coming from web integration and user interactions
-  public displayMerchantIFrame(): ResultAsync<void, MerchantConnectorError> {
+  public displayMerchantIFrame(): ResultAsync<
+    void,
+    MerchantConnectorError | ProxyError
+  > {
     return this.contextProvider.getContext().andThen((context) => {
       this._pushOpenedMerchantIFrame(this.merchantUrl);
       this._showMerchantIFrame(context);
@@ -79,7 +158,10 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     });
   }
 
-  public closeMerchantIFrame(): ResultAsync<void, MerchantConnectorError> {
+  public closeMerchantIFrame(): ResultAsync<
+    void,
+    MerchantConnectorError | ProxyError
+  > {
     return this.contextProvider.getContext().andThen((context) => {
       this._hideMerchantIFrame();
 
@@ -93,34 +175,67 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     });
   }
 
-  notifyPushPaymentSent(payment: PushPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPushPaymentSent(
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPushPaymentSent", payment);
   }
 
-  notifyPushPaymentUpdated(payment: PushPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPushPaymentUpdated(
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPushPaymentUpdated", payment);
   }
 
-  notifyPushPaymentReceived(payment: PushPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPushPaymentReceived(
+    payment: PushPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPushPaymentReceived", payment);
   }
 
-  notifyPullPaymentSent(payment: PullPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPullPaymentSent(
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPullPaymentSent", payment);
   }
 
-  notifyPullPaymentUpdated(payment: PullPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPullPaymentUpdated(
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPullPaymentUpdated", payment);
   }
 
-  notifyPullPaymentReceived(payment: PullPayment): ResultAsync<void, MerchantConnectorError> {
+  public notifyPullPaymentReceived(
+    payment: PullPayment,
+  ): ResultAsync<void, MerchantConnectorError | ProxyError> {
     return this._createCall("notifyPullPaymentReceived", payment);
   }
 
-  private _pushOpenedMerchantIFrame(merchantUrl: string) {
+  public notifyPublicIdentifier(
+    public_identifier: PublicIdentifier,
+  ): ResultAsync<void, MerchantConnectorError> {
+    return this._createCall("notifyPublicIdentifier", public_identifier);
+  }
+
+  public notifyBalancesReceived(
+    balances: Balances,
+  ): ResultAsync<void, MerchantConnectorError> {
+    return this._createCall("notifyBalancesReceived", balances);
+  }
+
+  public messageSigned(
+    message: string,
+    signature: Signature,
+  ): ResultAsync<void, ProxyError> {
+    return this._createCall("messageSigned", { message, signature });
+  }
+
+  private _pushOpenedMerchantIFrame(merchantUrl: MerchantUrl) {
     // Check if there is merchantUrl in the queue
     // If there is, don't re-add it.
-    const index = MerchantConnectorProxy.openedIFramesQueue.indexOf(merchantUrl);
+    const index = MerchantConnectorProxy.openedIFramesQueue.indexOf(
+      merchantUrl,
+    );
     if (index > -1) {
       return;
     }
@@ -132,7 +247,9 @@ export class MerchantConnectorProxy extends ParentProxy implements IMerchantConn
     document.getElementsByName(
       `hypernet-core-merchant-connector-iframe-${MerchantConnectorProxy.openedIFramesQueue[0]}`,
     )[0].style.display = "block";
-    context.onMerchantIFrameDisplayRequested.next(MerchantConnectorProxy.openedIFramesQueue[0]);
+    context.onMerchantIFrameDisplayRequested.next(
+      MerchantUrl(MerchantConnectorProxy.openedIFramesQueue[0]),
+    );
   }
 
   private _hideMerchantIFrame() {

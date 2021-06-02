@@ -1,19 +1,29 @@
+import { ITokenSelectorOption } from "@web-ui/interfaces";
 import React from "react";
-import { ITokenSelectorOption } from "../../interfaces";
-import SelectInput from "../SelectInput";
+
+import { SelectInput } from "@web-ui/components";
 
 interface TokenSelectorProps {
   tokenSelectorOptions: ITokenSelectorOption[];
   selectedPaymentToken?: ITokenSelectorOption;
   setSelectedPaymentToken: (selectedOption?: ITokenSelectorOption) => void;
+  label?: string;
 }
 
-const TokenSelector: React.FC<TokenSelectorProps> = (props: TokenSelectorProps) => {
-  const { tokenSelectorOptions, selectedPaymentToken, setSelectedPaymentToken } = props;
-  console.log("tokenSelectorOptions: ", tokenSelectorOptions);
+export const TokenSelector: React.FC<TokenSelectorProps> = (
+  props: TokenSelectorProps,
+) => {
+  const {
+    tokenSelectorOptions,
+    selectedPaymentToken,
+    setSelectedPaymentToken,
+    label = "Token Selector:",
+  } = props;
 
   const handleChange = (event: any) => {
-    const selectedOption = tokenSelectorOptions?.find((option) => option?.address === event.target.value);
+    const selectedOption = tokenSelectorOptions?.find(
+      (option) => option?.address === event.target.value,
+    );
     setSelectedPaymentToken(selectedOption);
   };
 
@@ -21,7 +31,8 @@ const TokenSelector: React.FC<TokenSelectorProps> = (props: TokenSelectorProps) 
     <div>
       <SelectInput
         options={tokenSelectorOptions}
-        label="Token Selector:"
+        label={label}
+        value={selectedPaymentToken?.address}
         onChange={handleChange}
         optionLabelKey="tokenName"
         optionValueKey="address"
@@ -29,5 +40,3 @@ const TokenSelector: React.FC<TokenSelectorProps> = (props: TokenSelectorProps) 
     </div>
   );
 };
-
-export default TokenSelector;

@@ -1,7 +1,25 @@
-import { VectorError } from "@hypernetlabs/objects";
-import { IBrowserNode, IBrowserNodeProvider } from "@interfaces/utilities";
+import {
+  BlockchainUnavailableError,
+  EthereumAddress,
+  VectorError,
+} from "@hypernetlabs/objects";
+import {
+  InsuranceState,
+  ParameterizedState,
+  MessageState,
+} from "@hypernetlabs/objects";
+import {
+  IHypernetOfferDetails,
+  IFullChannelState,
+  IFullTransferState,
+  IRegisteredTransfer,
+  IWithdrawResponse,
+} from "@hypernetlabs/objects";
+import { EMessageTransferType } from "@hypernetlabs/objects";
 import { okAsync, ResultAsync } from "neverthrow";
 import td from "testdouble";
+
+import { IBrowserNode, IBrowserNodeProvider } from "@interfaces/utilities";
 import {
   publicIdentifier,
   routerChannelAddress,
@@ -18,28 +36,19 @@ import {
   merchantUrl,
   unixPast,
 } from "@mock/mocks";
-import { InsuranceState, ParameterizedState, MessageState } from "@hypernetlabs/objects";
-import {
-  IHypernetOfferDetails,
-  IFullChannelState,
-  IFullTransferState,
-  IRegisteredTransfer,
-  IWithdrawResponse,
-} from "@hypernetlabs/objects";
-import { EMessageTransferType } from "@hypernetlabs/objects";
 
 export class BrowserNodeProviderMock implements IBrowserNodeProvider {
   public browserNode: IBrowserNode;
-  public stateChannels = new Map<string, IFullChannelState>();
+  public stateChannels = new Map<EthereumAddress, IFullChannelState>();
   public offerTransfer: IFullTransferState<MessageState>;
   public insuranceTransfer: IFullTransferState<InsuranceState>;
   public parameterizedTransfer: IFullTransferState<ParameterizedState>;
   public offerDetails: IHypernetOfferDetails;
 
   constructor(
-    includeOfferTransfer: boolean = true,
-    includeInsuranceTransfer: boolean = true,
-    includeParameterizedTransfer: boolean = true,
+    includeOfferTransfer = true,
+    includeInsuranceTransfer = true,
+    includeParameterizedTransfer = true,
     browserNode: IBrowserNode | null = null,
   ) {
     // Create the default set of state channels
@@ -82,6 +91,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
 
     this.offerDetails = {
       messageType: EMessageTransferType.OFFER,
+      requireOnline: false,
       paymentId: commonPaymentId,
       creationDate: unixPast,
       to: publicIdentifier2,
@@ -182,32 +192,56 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
     // If we were not provided with a specific browser node, set up a mock one.
     if (browserNode == null) {
       this.browserNode = td.object<IBrowserNode>();
-      td.when(this.browserNode.getStateChannels()).thenReturn(okAsync(Array.from(this.stateChannels.keys())));
-      td.when(this.browserNode.getStateChannel(routerChannelAddress)).thenReturn(
-        okAsync(this.stateChannels.get(routerChannelAddress)),
+      td.when(this.browserNode.getStateChannels()).thenReturn(
+        okAsync(Array.from(this.stateChannels.keys())),
       );
+      td.when(
+        this.browserNode.getStateChannel(routerChannelAddress),
+      ).thenReturn(okAsync(this.stateChannels.get(routerChannelAddress)));
 
       // @todo: Figure out if there is a better way to stub get properties
       (this.browserNode as any).publicIdentifier = publicIdentifier;
 
-      td.when(this.browserNode.reconcileDeposit(ethereumAddress, routerChannelAddress)).thenReturn(
-        okAsync(routerChannelAddress),
-      );
-      td.when(this.browserNode.reconcileDeposit(erc20AssetAddress, routerChannelAddress)).thenReturn(
-        okAsync(routerChannelAddress),
-      );
+      td.when(
+        this.browserNode.reconcileDeposit(
+          ethereumAddress,
+          routerChannelAddress,
+        ),
+      ).thenReturn(okAsync(routerChannelAddress));
+      td.when(
+        this.browserNode.reconcileDeposit(
+          erc20AssetAddress,
+          routerChannelAddress,
+        ),
+      ).thenReturn(okAsync(routerChannelAddress));
 
       td.when(
-        this.browserNode.withdraw(routerChannelAddress, commonAmount.toString(), ethereumAddress, destinationAddress),
+        this.browserNode.withdraw(
+          routerChannelAddress,
+          commonAmount.toString(),
+          ethereumAddress,
+          destinationAddress,
+        ),
       ).thenReturn(okAsync({} as IWithdrawResponse));
 
       td.when(
-        this.browserNode.withdraw(routerChannelAddress, commonAmount.toString(), erc20AssetAddress, destinationAddress),
+        this.browserNode.withdraw(
+          routerChannelAddress,
+          commonAmount.toString(),
+          erc20AssetAddress,
+          destinationAddress,
+        ),
       ).thenReturn(okAsync({} as IWithdrawResponse));
 
-      td.when(this.browserNode.getTransfer(offerTransferId)).thenReturn(okAsync(this.offerTransfer));
-      td.when(this.browserNode.getTransfer(insuranceTransferId)).thenReturn(okAsync(this.insuranceTransfer));
-      td.when(this.browserNode.getTransfer(parameterizedTransferId)).thenReturn(okAsync(this.parameterizedTransfer));
+      td.when(this.browserNode.getTransfer(offerTransferId)).thenReturn(
+        okAsync(this.offerTransfer),
+      );
+      td.when(this.browserNode.getTransfer(insuranceTransferId)).thenReturn(
+        okAsync(this.insuranceTransfer),
+      );
+      td.when(this.browserNode.getTransfer(parameterizedTransferId)).thenReturn(
+        okAsync(this.parameterizedTransfer),
+      );
 
       const transfers = new Array<IFullTransferState>();
       if (includeOfferTransfer) {
@@ -219,12 +253,19 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       if (includeParameterizedTransfer) {
         transfers.push(this.parameterizedTransfer);
       }
-      td.when(this.browserNode.getActiveTransfers(routerChannelAddress)).thenReturn(okAsync(transfers));
-      td.when(this.browserNode.getTransfers(td.matchers.isA(Number), td.matchers.isA(Number))).thenReturn(
-        okAsync(transfers),
-      );
+      td.when(
+        this.browserNode.getActiveTransfers(routerChannelAddress),
+      ).thenReturn(okAsync(transfers));
+      td.when(
+        this.browserNode.getTransfers(
+          td.matchers.isA(Number),
+          td.matchers.isA(Number),
+        ),
+      ).thenReturn(okAsync(transfers));
 
-      td.when(this.browserNode.getRegisteredTransfers(this.offerTransfer.chainId)).thenReturn(
+      td.when(
+        this.browserNode.getRegisteredTransfers(this.offerTransfer.chainId),
+      ).thenReturn(
         okAsync([
           {
             name: "Insurance",
@@ -240,8 +281,14 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
     }
   }
 
-  getBrowserNode(): ResultAsync<IBrowserNode, VectorError | Error> {
-    const result = okAsync<IBrowserNode, VectorError | Error>(this.browserNode);
+  getBrowserNode(): ResultAsync<
+    IBrowserNode,
+    VectorError | BlockchainUnavailableError
+  > {
+    const result = okAsync<
+      IBrowserNode,
+      VectorError | BlockchainUnavailableError
+    >(this.browserNode);
     return result;
   }
 }

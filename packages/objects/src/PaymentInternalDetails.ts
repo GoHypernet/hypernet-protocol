@@ -1,8 +1,9 @@
+import { TransferId } from "@objects/TransferId";
 export class PaymentInternalDetails {
   constructor(
-    public offerTransferId: string,
-    public insuranceTransferId: string | null | undefined,
-    public parameterizedTransferId: string | null | undefined,
-    public pullTransferIds: string[],
+    public offerTransferId: TransferId,
+    public insuranceTransferId: TransferId | null | undefined,
+    public parameterizedTransferId: TransferId | null | undefined,
+    public pullTransferIds: TransferId[],
   ) {}
 }

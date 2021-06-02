@@ -21,30 +21,34 @@
   ],
   "main": "dist/index.js",
   "files": [
-    "dist",
-    "src",
+    "dist/**/*",
     "!dist/test",
     "!dist/tsconfig.tsbuildinfo"
   ],
   "scripts": {
     "build": "yarn clean && yarn compile",
-    "clean": "rimraf dist",
-    "compile": "tsc --build src/tsconfig.json && npx tsc-alias -p src/tsconfig.json",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "alias": "tsc-alias",
     "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",
-    "prepare": "yarn build",
     "test": "jest --runInBand --coverage",
     "test:watch": "jest --watch --color --detectOpenHandles",
+    "prepare": "yarn build",
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",
     "postversion": "git push && git push --tags"
   },
   "types": "dist/index.d.ts",
   "dependencies": {
+    "@connext/vector-utils": "^0.2.5-beta.6",
     "@hypernetlabs/objects": "^0.0.1",
     "axios": "^0.21.1",
+    "inversify": "^5.1.1",
+    "delay": "^5.0.0",
     "neverthrow": "^4.1.0",
+    "pino": "^6.7.0",
     "postmate": "^1.5.2"
   }
 }

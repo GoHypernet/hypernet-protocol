@@ -1,11 +1,16 @@
-import { EthereumAddress, Balances, AssetBalance, PublicIdentifier } from "@hypernetlabs/objects";
 import {
+  EthereumAddress,
+  Balances,
+  AssetBalance,
+  PublicIdentifier,
+  Signature,
+  AssetInfo,
   BalancesUnavailableError,
   BlockchainUnavailableError,
-  CoreUninitializedError,
   LogicalError,
   RouterChannelUnknownError,
   VectorError,
+  PreferredPaymentTokenError,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
@@ -14,22 +19,56 @@ import { ResultAsync } from "neverthrow";
  * @todo What is the main role/purpose of this class? Description here.
  */
 export interface IAccountsRepository {
-  getPublicIdentifier(): ResultAsync<PublicIdentifier, VectorError | LogicalError>;
-  getAccounts(): ResultAsync<string[], BlockchainUnavailableError>;
-  getBalances(): ResultAsync<Balances, BalancesUnavailableError | CoreUninitializedError>;
-  getBalanceByAsset(assetAddress: EthereumAddress): ResultAsync<AssetBalance, BalancesUnavailableError>;
+  getPublicIdentifier(): ResultAsync<
+    PublicIdentifier,
+    BlockchainUnavailableError | VectorError
+  >;
+  getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
+  getBalances(): ResultAsync<
+    Balances,
+    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+  >;
+  getBalanceByAsset(
+    assetAddress: EthereumAddress,
+  ): ResultAsync<
+    AssetBalance,
+    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+  >;
   depositFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
   ): ResultAsync<
     null,
-    RouterChannelUnknownError | CoreUninitializedError | VectorError | Error | BlockchainUnavailableError
+    | RouterChannelUnknownError
+    | VectorError
+    | LogicalError
+    | BlockchainUnavailableError
   >;
   withdrawFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
     destinationAddress: EthereumAddress,
-  ): ResultAsync<void, RouterChannelUnknownError | CoreUninitializedError | VectorError | Error>;
+  ): ResultAsync<
+    void,
+    RouterChannelUnknownError | VectorError | BlockchainUnavailableError
+  >;
+  signMessage(
+    message: string,
+  ): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;
 
-  mintTestToken(amount: BigNumber, to: EthereumAddress): ResultAsync<void, BlockchainUnavailableError>;
+  mintTestToken(
+    amount: BigNumber,
+    to: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError>;
+
+  setPreferredPaymentToken(
+    tokenAddress: EthereumAddress,
+  ): ResultAsync<void, PreferredPaymentTokenError>;
+
+  getPreferredPaymentToken(): ResultAsync<
+    AssetInfo,
+    BlockchainUnavailableError | PreferredPaymentTokenError
+  >;
 }
+
+export const IAccountsRepositoryType = Symbol.for("IAccountsRepository");

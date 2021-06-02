@@ -1,14 +1,15 @@
-import { IContextProvider } from "@interfaces/utilities";
-import { ControlClaim, InitializedHypernetContext } from "@hypernetlabs/objects";
-import { IControlService } from "@interfaces/business";
+import { ControlClaim } from "@hypernetlabs/objects";
 import {
   BlockchainUnavailableError,
-  CoreUninitializedError,
   LogicalError,
   ThreeBoxError,
 } from "@hypernetlabs/objects";
-import { IMessagingRepository } from "@interfaces/data";
 import { ResultAsync } from "neverthrow";
+
+import { IControlService } from "@interfaces/business";
+import { IMessagingRepository } from "@interfaces/data";
+import { InitializedHypernetContext } from "@interfaces/objects";
+import { IContextProvider } from "@interfaces/utilities";
 
 export class ControlService implements IControlService {
   protected claimPeriod = 1000 * 60 * 5; // 5 minutes
@@ -16,7 +17,10 @@ export class ControlService implements IControlService {
   protected lastControlClaim: ControlClaim | null;
   protected checkControlInterval: NodeJS.Timeout | null;
 
-  constructor(protected contextProvider: IContextProvider, protected messagingRepo: IMessagingRepository) {
+  constructor(
+    protected contextProvider: IContextProvider,
+    protected messagingRepo: IMessagingRepository,
+  ) {
     this.timeout = null;
     this.lastControlClaim = null;
     this.checkControlInterval = null;
@@ -24,7 +28,7 @@ export class ControlService implements IControlService {
 
   public claimControl(): ResultAsync<
     void,
-    CoreUninitializedError | BlockchainUnavailableError | ThreeBoxError | LogicalError
+    BlockchainUnavailableError | ThreeBoxError | LogicalError
   > {
     let context: InitializedHypernetContext;
     let controlClaim: ControlClaim;
@@ -60,7 +64,9 @@ export class ControlService implements IControlService {
    * SHUT DOWN EVERYTHING
    * @param controlClaim
    */
-  public processControlClaim(controlClaim: ControlClaim): ResultAsync<void, CoreUninitializedError> {
+  public processControlClaim(
+    controlClaim: ControlClaim,
+  ): ResultAsync<void, LogicalError> {
     let context: InitializedHypernetContext;
 
     return this.contextProvider
@@ -87,7 +93,10 @@ export class ControlService implements IControlService {
         const now = new Date().getTime();
 
         this.checkControlInterval = (setInterval(() => {
-          if (this.lastControlClaim != null && now - (this.lastControlClaim.timestamp + this.claimPeriod) > 5000) {
+          if (
+            this.lastControlClaim != null &&
+            now - (this.lastControlClaim.timestamp + this.claimPeriod) > 5000
+          ) {
             // TODO: take control of our lives
           }
         }, this.claimPeriod) as unknown) as NodeJS.Timeout;

@@ -1,26 +1,40 @@
-import { BigNumber } from "ethers";
-import { Balances, EthereumAddress, PublicIdentifier } from "@hypernetlabs/objects";
 import {
+  Balances,
+  EthereumAddress,
+  PrivateCredentials,
+  PublicIdentifier,
+  Signature,
   BalancesUnavailableError,
   BlockchainUnavailableError,
-  CoreUninitializedError,
   LogicalError,
   VectorError,
+  RouterChannelUnknownError,
+  InvalidParametersError,
+  PreferredPaymentTokenError,
+  AssetInfo,
 } from "@hypernetlabs/objects";
+import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 /**
  * @todo What is the main role/purpose of this class? Description here.
  */
 export interface IAccountService {
-  getPublicIdentifier(): ResultAsync<PublicIdentifier, VectorError | LogicalError>;
-  getAccounts(): ResultAsync<string[], BlockchainUnavailableError>;
+  getPublicIdentifier(): ResultAsync<
+    PublicIdentifier,
+    BlockchainUnavailableError | VectorError
+  >;
+  getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
   depositFunds(
     assetAddress: EthereumAddress,
     amount: BigNumber,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
+    | BalancesUnavailableError
+    | RouterChannelUnknownError
+    | BlockchainUnavailableError
+    | VectorError
+    | LogicalError
   >;
   withdrawFunds(
     assetAddress: EthereumAddress,
@@ -28,7 +42,28 @@ export interface IAccountService {
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    BalancesUnavailableError | CoreUninitializedError | BlockchainUnavailableError | VectorError | Error
+    | BalancesUnavailableError
+    | RouterChannelUnknownError
+    | BlockchainUnavailableError
+    | VectorError
   >;
-  getBalances(): ResultAsync<Balances, BalancesUnavailableError | CoreUninitializedError>;
+  getBalances(): ResultAsync<
+    Balances,
+    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+  >;
+  providePrivateCredentials(
+    privateCredentials: PrivateCredentials,
+  ): ResultAsync<void, InvalidParametersError>;
+  signMessage(
+    message: string,
+  ): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;
+  setPreferredPaymentToken(
+    tokenAddress: EthereumAddress,
+  ): ResultAsync<void, PreferredPaymentTokenError>;
+  getPreferredPaymentToken(): ResultAsync<
+    AssetInfo,
+    BlockchainUnavailableError | PreferredPaymentTokenError
+  >;
 }
+
+export const IAccountServiceType = Symbol.for("IAccountService");

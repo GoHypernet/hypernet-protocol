@@ -1,4 +1,7 @@
 import React from "react";
+import { Box } from "@material-ui/core";
+
+import { useStyles } from "@web-ui/components/SelectInput/SelectInput.style";
 
 interface SelectInputProps {
   onChange?: (event: React.ChangeEvent<HTMLSelectElement>) => void;
@@ -11,22 +14,41 @@ interface SelectInputProps {
   optionValueKey: string;
 }
 
-const SelectInput: React.FC<SelectInputProps> = (props: SelectInputProps) => {
-  const { onChange, label, disabled, value, fullWidth, options, optionValueKey, optionLabelKey } = props;
+export const SelectInput: React.FC<SelectInputProps> = (
+  props: SelectInputProps,
+) => {
+  const {
+    onChange,
+    label,
+    disabled,
+    value,
+    fullWidth,
+    options,
+    optionValueKey,
+    optionLabelKey,
+  } = props;
+
+  const classes = useStyles();
 
   return (
-    <label>
-      {label}
-      <select value={value} onChange={onChange} disabled={disabled}>
-        <option value="">Choose...</option>
-        {options?.map((option: any, index: number) => (
-          <option key={index} value={option[optionValueKey]}>
-            {option[optionLabelKey]}
-          </option>
-        ))}
-      </select>
-    </label>
+    <Box className={classes.wrapper}>
+      <label className={classes.selectLabel}>{label}</label>
+      <Box className={classes.select}>
+        <select
+          className={classes.selectText}
+          value={value}
+          onChange={onChange}
+          disabled={disabled}
+          required
+        >
+          <option value="">Choose...</option>
+          {options?.map((option: any, index: number) => (
+            <option key={index} value={option[optionValueKey]}>
+              {option[optionLabelKey]}
+            </option>
+          ))}
+        </select>
+      </Box>
+    </Box>
   );
 };
-
-export default SelectInput;

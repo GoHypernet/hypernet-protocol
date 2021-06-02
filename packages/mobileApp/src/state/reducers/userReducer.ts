@@ -1,4 +1,8 @@
-import { IUserData, UserActionType, UserAction } from "@mobileApp/interfaces/state/IuserReducer";
+import {
+  IUserData,
+  UserActionType,
+  UserAction,
+} from "@mobileApp/interfaces/state/IuserReducer";
 
 export const userReducer = (state: IUserData, action: UserAction) => {
   switch (action.type) {
