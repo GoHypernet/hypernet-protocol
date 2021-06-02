@@ -59,9 +59,7 @@ export class PushPaymentViewModel {
     this.paymentId = params.payment.id;
     this.to = ko.observable(params.payment.to);
     this.from = ko.observable(params.payment.from);
-    this.state = ko.observable(
-      new PaymentStatusParams(params.payment.id, params.payment.state),
-    );
+    this.state = ko.observable(new PaymentStatusParams(params.payment.state));
     this.paymentToken = ko.observable(params.payment.paymentToken);
     this.requiredStake = ko.observable(
       utils.formatUnits(params.payment.requiredStake, "wei"),
@@ -106,7 +104,7 @@ export class PushPaymentViewModel {
           `In PushPayment, this.paymentId = ${this.paymentId}, updated payment = ${payment}`,
         );
         if (payment.id === this.paymentId) {
-          this.state(new PaymentStatusParams(payment.id, payment.state));
+          this.state(new PaymentStatusParams(payment.state));
         }
       },
     });

@@ -4,17 +4,14 @@ import ko from "knockout";
 import html from "./PaymentStatus.template.html";
 
 export class PaymentStatusParams {
-  constructor(public id: string, public state: EPaymentState) {}
+  constructor(public state: EPaymentState) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
 export class PaymentStatusViewModel {
   public state: string;
-  public paymentId: string;
 
   constructor(params: PaymentStatusParams) {
-    this.paymentId = params.id;
-
     if (params.state === EPaymentState.Proposed) {
       this.state = "Proposed";
     } else if (params.state === EPaymentState.Rejected) {
