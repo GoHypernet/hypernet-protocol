@@ -51,6 +51,8 @@
     "lint:fix": "eslint \"packages/*/{src,test}/**/*.{ts,tsx}\" --quiet --fix",
     "prepare-for-publish": "cd packages/objects && yarn build && cd ../merchant-connector && yarn build && cd ../utils && yarn build && cd ../hypernet-core && yarn build && cd ../web-ui && yarn build && cd ../web-integration && yarn build && cd ../",
     "start": "docker-compose up",
+    "dev": "docker-compose --file docker-compose.dev.yaml up --detach && lerna run dev",
+    "dev2": "lerna run dev",
     "test": "cd packages/hypernet-core && yarn test"
   },
   "husky": {

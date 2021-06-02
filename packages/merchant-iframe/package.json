@@ -30,6 +30,7 @@
   "scripts": {
     "build": "yarn clean && yarn compile && yarn postcompile",
     "dockerize": "docker build -t hypernetlabs/hypernet-protocol-merchant-iframe -f Dockerfile ../..",
+    "dev": "webpack watch --config webpack.config.js --mode development",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "compile": "tsc --build && cd ../.. && yarn alias",
     "alias": "tsc-alias",
@@ -38,7 +39,6 @@
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",
     "prepare": "yarn build",
-    "start": "webpack watch --config webpack.config.js --mode development",
     "test": "yarn build && yarn test:ci",
     "test:ci": "jest --runInBand --coverage --passWithNoTests",
     "test:watch": "jest --watch --color --detectOpenHandles",
