@@ -22,6 +22,7 @@ export class HypernetConfig {
     public merchantIframeUrl: string,
     public ceramicNodeUrl: string,
     public storageAliases: Map<DefinitionName, SchemaUrl>,
+    public metamaskEnabled: boolean,
     public debug: boolean,
   ) {}
 }

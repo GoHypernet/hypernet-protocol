@@ -47,6 +47,8 @@ export class ConfigProvider implements IConfigProvider {
         [1337]: contractAddresses,
       };
 
+      const metamaskEnabled = window.ethereum != null;
+
       this.config = new HypernetConfig(
         "http://localhost:5000", // iframeSource
         "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat", // Router mnemonic
@@ -70,6 +72,7 @@ export class ConfigProvider implements IConfigProvider {
             ),
           ],
         ]),
+        metamaskEnabled,
         true, // debug
       );
 
@@ -101,6 +104,8 @@ export class ConfigProvider implements IConfigProvider {
         [1]: contractAddresses,
       };
 
+      const metamaskEnabled = window.ethereum != null;
+
       this.config = new HypernetConfig(
         "http://localhost:5000", // iframeSource
         "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat", // Router mnemonic
@@ -124,6 +129,7 @@ export class ConfigProvider implements IConfigProvider {
             ),
           ],
         ]),
+        metamaskEnabled,
         true, // debug
       );
 

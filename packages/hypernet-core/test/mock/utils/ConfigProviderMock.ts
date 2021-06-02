@@ -51,6 +51,7 @@ export class ConfigProviderMock implements IConfigProvider {
             ),
           ],
         ]),
+        window.ethereum != null,
         false, // debug is off for testing
       );
   }

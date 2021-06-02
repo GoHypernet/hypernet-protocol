@@ -16,7 +16,11 @@ import {
   AuthorizedMerchantsSchema,
   HypernetConfig,
 } from "@hypernetlabs/objects";
-import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import {
+  ResultUtils,
+  ILogUtils,
+  ILocalStorageUtils,
+} from "@hypernetlabs/utils";
 import { Resolver, ResolverRegistry } from "did-resolver";
 import { DID } from "dids";
 import { okAsync, ResultAsync, errAsync } from "neverthrow";
@@ -43,6 +47,7 @@ export class CeramicUtils implements ICeramicUtils {
     protected configProvider: IConfigProvider,
     protected contextProvider: IContextProvider,
     protected blockchainProvider: IBlockchainProvider,
+    protected localStorageUtils: ILocalStorageUtils,
     protected logUtils: ILogUtils,
   ) {}
 
@@ -108,7 +113,7 @@ export class CeramicUtils implements ICeramicUtils {
     });
   }
 
-  // This is used to create a difinition derived from a schema, and it shouldn't be called in run time
+  // This is for development used to create a difinition derived from a schema, and it shouldn't be called in run time
   public initiateDefinitions(): ResultAsync<
     TileDocument[],
     PersistenceError | BlockchainUnavailableError
@@ -171,53 +176,69 @@ export class CeramicUtils implements ICeramicUtils {
     aliasName: string,
     content: T,
   ): ResultAsync<void, PersistenceError> {
-    //return okAsync(undefined);
-    return this._initialize().andThen(() => {
-      if (this.idx == null) {
-        throw new Error("Something went wrong while initializing Ceramic!");
-      }
+    return this.configProvider.getConfig().andThen((config) => {
+      if (config.metamaskEnabled) {
+        return this._initialize().andThen(() => {
+          if (this.idx == null) {
+            throw new Error("Something went wrong while initializing Ceramic!");
+          }
 
-      return ResultAsync.fromPromise(
-        this.idx.set(aliasName, { data: content }),
-        (e) => new PersistenceError("idx.set failed", e),
-      ).map(() => {});
+          return ResultAsync.fromPromise(
+            this.idx.set(aliasName, { data: content }),
+            (e) => new PersistenceError("idx.set failed", e),
+          ).map(() => {});
+        });
+      } else {
+        this.localStorageUtils.setItem(aliasName, JSON.stringify(content));
+        return okAsync(undefined);
+      }
     });
   }
 
   public readRecord<T>(
     aliasName: string,
   ): ResultAsync<T | null, PersistenceError> {
-    /* return okAsync(([
-      {
-        merchantUrl: "http://localhost:5010",
-        authorizationSignature:
-          "0xe7f734f06f49a3de497509089144c6a10227433cdfbd13cc6e482d2d33acb484759492fbc625824f2db3dc9ed531a13e4181d5a8dc9ca6fcae0ee797a658f2181b",
-      },
-    ] as unknown) as T); */
-    return this._initialize().andThen(() => {
-      if (this.idx == null) {
-        throw new Error("Something went wrong while initializing Ceramic!");
-      }
+    return this.configProvider.getConfig().andThen((config) => {
+      if (config.metamaskEnabled) {
+        return this._initialize().andThen(() => {
+          if (this.idx == null) {
+            throw new Error("Something went wrong while initializing Ceramic!");
+          }
 
-      return ResultAsync.fromPromise(
-        this.idx.get<IRecordWithDataKey<T>>(aliasName),
-        (e) => new PersistenceError("idx.get failed", e),
-      ).map((record) => {
-        return record?.data || null;
-      });
+          return ResultAsync.fromPromise(
+            this.idx.get<IRecordWithDataKey<T>>(aliasName),
+            (e) => new PersistenceError("idx.get failed", e),
+          ).map((record) => {
+            return record?.data || null;
+          });
+        });
+      } else {
+        const data = this.localStorageUtils.getItem(aliasName);
+        if (data == null) {
+          return okAsync(null);
+        }
+        return okAsync(JSON.parse(data));
+      }
     });
   }
 
   public removeRecord(aliasName: string): ResultAsync<void, PersistenceError> {
-    return this._initialize().andThen(() => {
-      if (this.idx == null) {
-        throw new Error("Something went wrong while initializing Ceramic!");
-      }
+    return this.configProvider.getConfig().andThen((config) => {
+      if (config.metamaskEnabled) {
+        return this._initialize().andThen(() => {
+          if (this.idx == null) {
+            throw new Error("Something went wrong while initializing Ceramic!");
+          }
 
-      return ResultAsync.fromPromise(
-        this.idx.remove(aliasName),
-        (e) => new PersistenceError("idx.remove failed", e),
-      );
+          return ResultAsync.fromPromise(
+            this.idx.remove(aliasName),
+            (e) => new PersistenceError("idx.remove failed", e),
+          );
+        });
+      } else {
+        this.localStorageUtils.removeItem(aliasName);
+        return okAsync(undefined);
+      }
     });
   }
 

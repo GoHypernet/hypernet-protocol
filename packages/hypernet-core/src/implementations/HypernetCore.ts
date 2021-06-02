@@ -274,6 +274,7 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.blockchainProvider = new EthersBlockchainProvider(
+      this.configProvider,
       this.contextProvider,
       this.internalProviderFactory,
     );
@@ -283,6 +284,7 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
       this.contextProvider,
       this.blockchainProvider,
+      this.localStorageUtils,
       this.logUtils,
     );
 
