@@ -32,5 +32,6 @@ module.exports = {
     "ts-jest": {
       tsconfig: "test/tsconfig.json",
     },
+    window: {},
   },
 };
