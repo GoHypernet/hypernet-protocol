@@ -24,8 +24,8 @@ import {
   IVectorUtils,
   IMerchantConnectorProxy,
   IBlockchainUtils,
-  ICeramicUtils,
 } from "@interfaces/utilities";
+import { IStorageUtils } from "@interfaces/data/utilities";
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 import {
   merchantUrl,
@@ -61,7 +61,7 @@ class MerchantConnectorRepositoryMocks {
   public merchantConnectorProxyFactory = td.object<IMerchantConnectorProxyFactory>();
   public merchantConnectorProxy = td.object<IMerchantConnectorProxy>();
   public blockchainUtils = td.object<IBlockchainUtils>();
-  public ceramicUtils = td.object<ICeramicUtils>();
+  public storageUtils = td.object<IStorageUtils>();
   public logUtils = td.object<ILogUtils>();
 
   public expectedSignerDomain = {
@@ -95,7 +95,7 @@ class MerchantConnectorRepositoryMocks {
     ).thenReturn(okAsync({} as IBasicTransferResponse));
 
     td.when(
-      this.ceramicUtils.readRecord<IAuthorizedMerchantEntry[]>(
+      this.storageUtils.read<IAuthorizedMerchantEntry[]>(
         AuthorizedMerchantsSchema.title,
       ),
     ).thenReturn(
@@ -154,7 +154,7 @@ class MerchantConnectorRepositoryMocks {
       this.configProvider,
       this.contextProvider,
       this.vectorUtils,
-      this.ceramicUtils,
+      this.storageUtils,
       this.merchantConnectorProxyFactory,
       this.blockchainUtils,
       this.logUtils,
@@ -184,7 +184,7 @@ describe("MerchantConnectorRepository tests", () => {
     const mocks = new MerchantConnectorRepositoryMocks();
 
     td.when(
-      mocks.ceramicUtils.readRecord(AuthorizedMerchantsSchema.title),
+      mocks.storageUtils.read(AuthorizedMerchantsSchema.title),
     ).thenReturn(okAsync(null));
 
     const repo = mocks.factoryRepository();
@@ -233,7 +233,7 @@ describe("MerchantConnectorRepository tests", () => {
     ];
 
     td.when(
-      mocks.ceramicUtils.writeRecord<IAuthorizedMerchantEntry[]>(
+      mocks.storageUtils.write<IAuthorizedMerchantEntry[]>(
         AuthorizedMerchantsSchema.title,
         authorizedMerchantEntry,
       ),
@@ -446,7 +446,7 @@ describe("MerchantConnectorRepository tests", () => {
     const mocks = new MerchantConnectorRepositoryMocks();
 
     td.when(
-      mocks.ceramicUtils.readRecord(AuthorizedMerchantsSchema.title),
+      mocks.storageUtils.read(AuthorizedMerchantsSchema.title),
     ).thenReturn(okAsync(null));
 
     const authorizedMerchantEntry = [
@@ -457,7 +457,7 @@ describe("MerchantConnectorRepository tests", () => {
     ];
 
     td.when(
-      mocks.ceramicUtils.writeRecord<IAuthorizedMerchantEntry[]>(
+      mocks.storageUtils.write<IAuthorizedMerchantEntry[]>(
         AuthorizedMerchantsSchema.title,
         authorizedMerchantEntry,
       ),
@@ -478,7 +478,7 @@ describe("MerchantConnectorRepository tests", () => {
     const mocks = new MerchantConnectorRepositoryMocks();
 
     td.when(
-      mocks.ceramicUtils.readRecord(AuthorizedMerchantsSchema.title),
+      mocks.storageUtils.read(AuthorizedMerchantsSchema.title),
     ).thenReturn(okAsync(null));
 
     const error = new MerchantConnectorError();
@@ -511,7 +511,7 @@ describe("MerchantConnectorRepository tests", () => {
     const mocks = new MerchantConnectorRepositoryMocks();
 
     td.when(
-      mocks.ceramicUtils.readRecord(AuthorizedMerchantsSchema.title),
+      mocks.storageUtils.read(AuthorizedMerchantsSchema.title),
     ).thenReturn(okAsync(null));
 
     const error = new MerchantValidationError();
@@ -544,7 +544,7 @@ describe("MerchantConnectorRepository tests", () => {
     const mocks = new MerchantConnectorRepositoryMocks();
 
     td.when(
-      mocks.ceramicUtils.readRecord(AuthorizedMerchantsSchema.title),
+      mocks.storageUtils.read(AuthorizedMerchantsSchema.title),
     ).thenReturn(okAsync(null));
 
     const error = new MerchantValidationError();
@@ -581,7 +581,7 @@ describe("MerchantConnectorRepository tests", () => {
     const mocks = new MerchantConnectorRepositoryMocks();
 
     td.when(
-      mocks.ceramicUtils.readRecord(AuthorizedMerchantsSchema.title),
+      mocks.storageUtils.read(AuthorizedMerchantsSchema.title),
     ).thenReturn(okAsync(null));
 
     const authorizedMerchantEntry = [
@@ -592,7 +592,7 @@ describe("MerchantConnectorRepository tests", () => {
     ];
 
     td.when(
-      mocks.ceramicUtils.writeRecord<IAuthorizedMerchantEntry[]>(
+      mocks.storageUtils.write<IAuthorizedMerchantEntry[]>(
         AuthorizedMerchantsSchema.title,
         authorizedMerchantEntry,
       ),
