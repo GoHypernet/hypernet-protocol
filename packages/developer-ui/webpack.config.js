@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
 
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const webpack = require("webpack");
 
 const configFilePath = require.resolve("./tsconfig.json");
@@ -120,7 +120,9 @@ module.exports = {
   // TODO: this devtool setup is for development it makes wepback a bit faster, this setup should be different for production
   devtool: "eval-source-map",
   plugins: [
-    //new CleanWebpackPlugin({ dangerouslyAllowCleanPatternsOutsideProject: false }),
+    new HtmlWebpackPlugin({
+      template: path.join(__dirname, "src/index.html"),
+    }),
     new webpack.ProvidePlugin({
       Buffer: ["buffer", "Buffer"],
       process: "process/browser",
