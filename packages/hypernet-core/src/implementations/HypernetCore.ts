@@ -62,6 +62,7 @@ import {
   PaymentRepository,
   VectorLinkRepository,
 } from "@implementations/data";
+import { StorageUtils } from "@implementations/data/utilities";
 import {
   BrowserNodeProvider,
   ConfigProvider,
@@ -94,6 +95,7 @@ import {
   IMerchantConnectorRepository,
   IPaymentRepository,
 } from "@interfaces/data";
+import { IStorageUtils } from "@interfaces/data/utilities";
 import { HypernetContext } from "@interfaces/objects";
 import {
   IBlockchainProvider,
@@ -157,6 +159,7 @@ export class HypernetCore implements IHypernetCore {
   protected localStorageUtils: ILocalStorageUtils;
   protected ceramicUtils: ICeramicUtils;
   protected validationUtils: IValidationUtils;
+  protected storageUtils: IStorageUtils;
 
   // Factories
   protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory;
@@ -286,6 +289,13 @@ export class HypernetCore implements IHypernetCore {
       this.logUtils,
     );
 
+    this.storageUtils = new StorageUtils(
+      this.contextProvider,
+      this.ceramicUtils,
+      this.localStorageUtils,
+      this.logUtils,
+    );
+
     this.browserNodeProvider = new BrowserNodeProvider(
       this.configProvider,
       this.contextProvider,
@@ -350,7 +360,7 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
       this.contextProvider,
       this.vectorUtils,
-      this.ceramicUtils,
+      this.storageUtils,
       this.merchantConnectorProxyFactory,
       this.blockchainUtils,
       this.logUtils,
