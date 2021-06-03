@@ -32,7 +32,7 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
     protected contextProvider: IContextProvider,
     protected blockchainProvider: IBlockchainProvider,
     protected logUtils: ILogUtils,
-    protected storageUtils: ILocalStorageUtils,
+    protected localStorageUtils: ILocalStorageUtils,
     protected browserNodeFactory: IBrowserNodeFactory,
   ) {}
 
@@ -55,7 +55,7 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
           [config, signer, account, this.browserNode] = vals;
 
           // Check if the user has a signature in local storage for this account
-          const storedSignature = this.storageUtils.getSessionItem(
+          const storedSignature = this.localStorageUtils.getSessionItem(
             `account-${account}-signature`,
           );
 
@@ -82,7 +82,7 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
           const [address, signature] = vals;
 
           // Store the signature so you don't have to sign again
-          this.storageUtils.setSessionItem(
+          this.localStorageUtils.setSessionItem(
             `account-${address}-signature`,
             signature,
           );

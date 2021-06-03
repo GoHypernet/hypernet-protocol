@@ -51,9 +51,8 @@ import {
   IMerchantConnectorProxy,
   IVectorUtils,
   IVectorUtilsType,
-  ICeramicUtils,
-  ICeramicUtilsType,
 } from "@interfaces/utilities";
+import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import {
   IMerchantConnectorProxyFactory,
   IMerchantConnectorProxyFactoryType,
@@ -87,7 +86,7 @@ export class MerchantConnectorRepository
     @inject(IConfigProviderType) protected configProvider: IConfigProvider,
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
     @inject(IVectorUtilsType) protected vectorUtils: IVectorUtils,
-    @inject(ICeramicUtilsType) protected ceramicUtils: ICeramicUtils,
+    @inject(IStorageUtilsType) protected storageUtils: IStorageUtils,
     @inject(IMerchantConnectorProxyFactoryType)
     protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory,
     @inject(IBlockchainUtilsType) protected blockchainUtils: IBlockchainUtils,
@@ -268,8 +267,8 @@ export class MerchantConnectorRepository
     Map<MerchantUrl, Signature>,
     PersistenceError
   > {
-    return this.ceramicUtils
-      .readRecord<IAuthorizedMerchantEntry[]>(AuthorizedMerchantsSchema.title)
+    return this.storageUtils
+      .read<IAuthorizedMerchantEntry[]>(AuthorizedMerchantsSchema.title)
       .andThen((storedAuthorizedMerchants) => {
         const authorizedMerchants = new Map<MerchantUrl, Signature>();
 
@@ -863,7 +862,7 @@ export class MerchantConnectorRepository
       });
     }
 
-    return this.ceramicUtils.writeRecord<IAuthorizedMerchantEntry[]>(
+    return this.storageUtils.write<IAuthorizedMerchantEntry[]>(
       AuthorizedMerchantsSchema.title,
       authorizedMerchantEntries,
     );
