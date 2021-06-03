@@ -251,6 +251,9 @@ services:
       - 5020:80
     volumes:
       - ./packages/iframe/dist/bundle:/usr/share/nginx/html
+    depends_on:
+      - router
+      - iframe
 
   merchant-iframe:
     image: hypernetlabs/hypernet-protocol-merchant-iframe
@@ -258,6 +261,9 @@ services:
       - 5005:80
     volumes:
     - ./packages/merchant-iframe/dist/bundle:/usr/share/nginx/html
+    depends_on:
+      - router
+      - iframe
 
   developer-ui:
     image: hypernetlabs/hypernet-protocol-developer-ui
@@ -265,6 +271,9 @@ services:
       - 5015:80
     volumes:
       - ./packages/developer-ui/dist/bundle:/usr/share/nginx/html
+    depends_on:
+      - core-iframe
+      - merchant-iframe
 
   test-merchant:
     image: node:14

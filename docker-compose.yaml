@@ -249,16 +249,25 @@ services:
     image: hypernetlabs/hypernet-protocol-core-iframe
     ports:
       - 5020:80
+    depends_on:
+      - router
+      - iframe
 
   merchant-iframe:
     image: hypernetlabs/hypernet-protocol-merchant-iframe
     ports:
       - 5005:80
+    depends_on:
+      - router
+      - iframe
 
   developer-ui:
     image: hypernetlabs/hypernet-protocol-developer-ui
     ports: 
       - 5015:80
+    depends_on:
+      - core-iframe
+      - merchant-iframe
 
   test-merchant:
     image: node:14
