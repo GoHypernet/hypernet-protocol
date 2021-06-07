@@ -6,6 +6,7 @@ export const useStyles = makeStyles({
   },
   header: {
     borderBottom: "2px solid #F2F2F2",
+    width: "100%",
   },
   imageContainer: {
     display: "flex",

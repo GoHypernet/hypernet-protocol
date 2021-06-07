@@ -9,10 +9,12 @@ import { useLayoutContext } from "@web-ui/contexts";
 
 interface IModal {
   children: React.ReactNode;
+  closeCallback?: () => void;
+  modalStyle?: React.CSSProperties;
 }
 
 const Modal: React.FC<IModal> = (props: IModal) => {
-  const { children } = props;
+  const { children, closeCallback = () => {}, modalStyle = {} } = props;
   const { modalWidth, modalStatus } = useLayoutContext();
   const classes = useStyles({
     modalWidth,
@@ -41,13 +43,15 @@ const Modal: React.FC<IModal> = (props: IModal) => {
     };
   }, [modalWidth, modalStatus]);
 
+  const closeModal = () => {
+    closeCallback();
+    modalRootRef.current.removeChild(elementRef.current);
+  };
+
   return createPortal(
     <Box className={classes.container}>
-      <Box className={classes.wrapper}>
-        <Box
-          className={classes.closeIcon}
-          onClick={() => modalRootRef.current.removeChild(elementRef.current)}
-        >
+      <Box className={classes.wrapper} style={modalStyle}>
+        <Box className={classes.closeIcon} onClick={closeModal}>
           <img
             src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png"
             width="20"
