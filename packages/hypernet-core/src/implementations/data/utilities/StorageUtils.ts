@@ -42,7 +42,7 @@ export class StorageUtils implements IStorageUtils {
 
   public read<T>(keyName: string): ResultAsync<T | null, PersistenceError> {
     return this.contextProvider.getContext().andThen((context) => {
-      if (context.metamaskEnabled) {
+      if (false) {
         return this.ceramicUtils.readRecord(keyName);
       } else {
         const data = this.localStorageUtils.getItem(keyName);
@@ -56,7 +56,7 @@ export class StorageUtils implements IStorageUtils {
 
   public remove(keyName: string): ResultAsync<void, PersistenceError> {
     return this.contextProvider.getContext().andThen((context) => {
-      if (context.metamaskEnabled) {
+      if (false) {
         return this.ceramicUtils.removeRecord(keyName);
       } else {
         this.localStorageUtils.removeItem(keyName);
