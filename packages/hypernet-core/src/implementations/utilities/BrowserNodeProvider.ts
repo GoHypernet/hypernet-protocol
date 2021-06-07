@@ -4,10 +4,13 @@ import {
   EthereumAddress,
   Signature,
   VectorError,
+  HypernetConfig,
 } from "@hypernetlabs/objects";
-import { HypernetConfig } from "@hypernetlabs/objects";
-import { ILogUtils } from "@hypernetlabs/utils";
-import { ResultUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
+import {
+  ILogUtils,
+  ResultUtils,
+  ILocalStorageUtils,
+} from "@hypernetlabs/utils";
 import { ethers } from "ethers";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
@@ -40,89 +43,86 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
     IBrowserNode,
     VectorError | BlockchainUnavailableError
   > {
-    if (this.browserNodeResult == null) {
-      let config: HypernetConfig;
-      let signer: ethers.providers.JsonRpcSigner;
-      let account: string;
-
-      this.browserNodeResult = ResultUtils.combine([
-        this.configProvider.getConfig(),
-        this.blockchainProvider.getSigner(),
-        this.contextProvider.getAccount(),
-        this.browserNodeFactory.factoryBrowserNode(),
-      ])
-        .andThen((vals) => {
-          [config, signer, account, this.browserNode] = vals;
-
-          // Check if the user has a signature in local storage for this account
-          const storedSignature = this.localStorageUtils.getSessionItem(
-            `account-${account}-signature`,
-          );
-
-          if (storedSignature != null) {
-            return okAsync<string[], BlockchainUnavailableError>([
-              account,
-              storedSignature,
-            ]);
-          }
-
-          return ResultUtils.combine([
-            ResultAsync.fromPromise(signer.getAddress(), (e) => {
-              return e as BlockchainUnavailableError;
-            }),
-            ResultAsync.fromPromise(
-              signer.signMessage(NonEIP712Message),
-              (e) => {
-                return e as BlockchainUnavailableError;
-              },
-            ),
-          ]);
-        })
-        .andThen((vals) => {
-          const [address, signature] = vals;
-
-          // Store the signature so you don't have to sign again
-          this.localStorageUtils.setSessionItem(
-            `account-${address}-signature`,
-            signature,
-          );
-
-          return this.browserNode.init(
-            Signature(signature),
-            EthereumAddress(account),
-          );
-        })
-        .orElse((e) => {
-          const shouldAttemptRestore = (
-            (e as any).context?.validationError ?? ""
-          ).includes("Channel is already setup");
-
-          if (shouldAttemptRestore && this.browserNode != null) {
-            return this.browserNode
-              .getStateChannelByParticipants(
-                config.routerPublicIdentifier,
-                config.chainId,
-              )
-              .andThen((channelState) => {
-                if (channelState == null && this.browserNode != null) {
-                  return this.browserNode.restoreState(
-                    config.routerPublicIdentifier,
-                    config.chainId,
-                  );
-                }
-                return okAsync<void, VectorError>(undefined);
-              });
-          } else {
-            return errAsync(e);
-          }
-        })
-        .map(() => this.browserNode);
+    if (this.browserNodeResult != null) {
+      return this.browserNodeResult;
     }
-    return this.browserNodeResult as ResultAsync<
-      IBrowserNode,
-      VectorError | BlockchainUnavailableError
-    >;
+    let config: HypernetConfig;
+    let signer: ethers.providers.JsonRpcSigner;
+    let account: string;
+
+    this.browserNodeResult = ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.blockchainProvider.getSigner(),
+      this.contextProvider.getAccount(),
+      this.browserNodeFactory.factoryBrowserNode(),
+    ])
+      .andThen((vals) => {
+        [config, signer, account, this.browserNode] = vals;
+
+        // Check if the user has a signature in local storage for this account
+        const storedSignature = this.localStorageUtils.getSessionItem(
+          `account-${account}-signature`,
+        );
+
+        if (storedSignature != null) {
+          return okAsync<string[], BlockchainUnavailableError>([
+            account,
+            storedSignature,
+          ]);
+        }
+
+        return ResultUtils.combine([
+          ResultAsync.fromPromise(signer.getAddress(), (e) => {
+            return e as BlockchainUnavailableError;
+          }),
+          ResultAsync.fromPromise(signer.signMessage(NonEIP712Message), (e) => {
+            return e as BlockchainUnavailableError;
+          }),
+        ]);
+      })
+      .andThen((vals) => {
+        const [address, signature] = vals;
+
+        // Store the signature so you don't have to sign again
+        this.localStorageUtils.setSessionItem(
+          `account-${address}-signature`,
+          signature,
+        );
+
+        return this.browserNode.init(
+          Signature(signature),
+          EthereumAddress(account),
+        );
+      })
+      .orElse((e) => {
+        const shouldAttemptRestore = (
+          (e as any).context?.validationError ?? ""
+        ).includes("Channel is already setup");
+
+        if (shouldAttemptRestore && this.browserNode != null) {
+          return this.browserNode
+            .getStateChannelByParticipants(
+              config.routerPublicIdentifier,
+              config.chainId,
+            )
+            .andThen((channelState) => {
+              if (channelState == null && this.browserNode != null) {
+                return this.browserNode.restoreState(
+                  config.routerPublicIdentifier,
+                  config.chainId,
+                );
+              }
+              return okAsync<void, VectorError>(undefined);
+            });
+        } else {
+          return errAsync(e);
+        }
+      })
+      .map(() => this.browserNode);
+
+    return this.browserNodeResult;
   }
+
   public getBrowserNode(): ResultAsync<
     IBrowserNode,
     VectorError | BlockchainUnavailableError
