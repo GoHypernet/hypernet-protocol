@@ -31,6 +31,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
   const {
     merchantUrl,
     finalSuccessContent = "You are good to go and purchase using your payment token",
+    closeCallback = () => {},
   } = props;
   const alert = useAlert();
   const {
@@ -130,6 +131,11 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     );
   };
 
+  const onOkClick = () => {
+    closeCallback();
+    closeModal();
+  };
+
   const renderScreen = (): ReactNode => {
     switch (currentSreen) {
       case EOnboardingScreens.IDLE:
@@ -199,7 +205,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
             <SucessContent
               label="All good!"
               info={finalSuccessContent}
-              onOkay={closeModal}
+              onOkay={onOkClick}
             />
             {renderFundWalletButton()}
           </>
