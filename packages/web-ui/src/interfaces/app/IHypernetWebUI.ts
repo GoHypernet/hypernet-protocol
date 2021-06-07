@@ -14,6 +14,7 @@ export interface IRenderParams {
   noLabel?: boolean;
   includeBoxWrapper?: boolean;
   bodyStyle?: React.CSSProperties;
+  closeCallback?: () => void;
 }
 
 export interface IConnectorAuthorizationFlowParams extends IRenderParams {

@@ -75,7 +75,12 @@ export default class HypernetWebUI implements IHypernetWebUI {
     }
   }
 
-  private _bootstrapComponent(component: React.ReactNode, withModal = false) {
+  private _bootstrapComponent(
+    component: React.ReactNode,
+    withModal: boolean = false,
+    closeCallback?: () => void,
+    modalStyle?: React.CSSProperties,
+  ) {
     if (this.coreInstance == null) {
       throw new Error("core instance is required");
     }
@@ -86,7 +91,13 @@ export default class HypernetWebUI implements IHypernetWebUI {
         dateUtils={this.dateUtils}
       >
         <LayoutProvider>
-          <MainContainer withModal={withModal}>{component}</MainContainer>
+          <MainContainer
+            withModal={withModal}
+            closeCallback={closeCallback}
+            modalStyle={modalStyle}
+          >
+            {component}
+          </MainContainer>
         </LayoutProvider>
       </StoreProvider>
     );
@@ -104,7 +115,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
   public renderPrivateKeysModal(): Result<void, RenderError> {
     const renderReact = () => {
       return ReactDOM.render(
-        this._bootstrapComponent(<PrivateKeysFlow />, true),
+        this._bootstrapComponent(<PrivateKeysFlow />, true, undefined, {
+          zIndex: 99999,
+        }),
         this._generateDomElement(PRIVATE_KEYS_FLOW_ID_SELECTOR),
       );
     };
@@ -228,8 +241,10 @@ export default class HypernetWebUI implements IHypernetWebUI {
             merchantName={config.merchantName}
             merchantLogoUrl={config.merchantLogoUrl}
             finalSuccessContent={config.finalSuccessContent}
+            closeCallback={config.closeCallback}
           />,
           config.showInModal,
+          config.closeCallback,
         ),
         this._generateDomElement(
           config?.selector || ONBOARDING_FLOW_ID_SELECTOR,
