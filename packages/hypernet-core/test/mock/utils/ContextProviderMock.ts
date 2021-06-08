@@ -8,6 +8,7 @@ import {
   PullPayment,
   PushPayment,
   Signature,
+  PersistenceError,
 } from "@hypernetlabs/objects";
 import {
   HypernetContext,
@@ -52,12 +53,12 @@ export class ContextProviderMock implements IContextProvider {
   public onPullPaymentCanceledActivations: PullPayment[] = [];
   public onBalancesChanged: Subject<Balances>;
   public onBalancesChangedActivations: Balances[] = [];
-  public onDeStorageAuthenticationStarted: Subject<void>;
-  public onDeStorageAuthenticationStartedActivationCount = 0;
-  public onDeStorageAuthenticationSucceeded: Subject<void>;
-  public onDeStorageAuthenticationSucceededActivationCount = 0;
-  public onDeStorageAuthenticationFailed: Subject<void>;
-  public onDeStorageAuthenticationFailedActivationCount = 0;
+  public onCeramicAuthenticationStarted: Subject<void>;
+  public onCeramicAuthenticationStartedActivationCount = 0;
+  public onCeramicAuthenticationSucceeded: Subject<void>;
+  public onCeramicAuthenticationSucceededActivationCount = 0;
+  public onCeramicFailed: Subject<void>;
+  public onCeramicFailedActivationCount = 0;
   public onGatewayAuthorized: Subject<GatewayUrl>;
   public onGatewayAuthorizedActivations: GatewayUrl[] = [];
   public onGatewayDeauthorizationStarted: Subject<GatewayUrl>;
@@ -167,19 +168,19 @@ export class ContextProviderMock implements IContextProvider {
       this.onBalancesChangedActivations.push(val);
     });
 
-    this.onDeStorageAuthenticationStarted = new Subject<void>();
-    this.onDeStorageAuthenticationStarted.subscribe(() => {
-      this.onDeStorageAuthenticationStartedActivationCount++;
+    this.onCeramicAuthenticationStarted = new Subject<void>();
+    this.onCeramicAuthenticationStarted.subscribe(() => {
+      this.onCeramicAuthenticationStartedActivationCount++;
     });
 
-    this.onDeStorageAuthenticationSucceeded = new Subject<void>();
-    this.onDeStorageAuthenticationSucceeded.subscribe(() => {
-      this.onDeStorageAuthenticationSucceededActivationCount++;
+    this.onCeramicAuthenticationSucceeded = new Subject<void>();
+    this.onCeramicAuthenticationSucceeded.subscribe(() => {
+      this.onCeramicAuthenticationSucceededActivationCount++;
     });
 
-    this.onDeStorageAuthenticationFailed = new Subject<void>();
-    this.onDeStorageAuthenticationFailed.subscribe(() => {
-      this.onDeStorageAuthenticationFailedActivationCount++;
+    this.onCeramicFailed = new Subject<void>();
+    this.onCeramicFailed.subscribe(() => {
+      this.onCeramicFailedActivationCount++;
     });
 
     this.onGatewayAuthorized = new Subject<GatewayUrl>();
@@ -295,9 +296,9 @@ export class ContextProviderMock implements IContextProvider {
         this.onPushPaymentCanceled,
         this.onPullPaymentCanceled,
         this.onBalancesChanged,
-        this.onDeStorageAuthenticationStarted,
-        this.onDeStorageAuthenticationSucceeded,
-        this.onDeStorageAuthenticationFailed,
+        this.onCeramicAuthenticationStarted,
+        this.onCeramicAuthenticationSucceeded,
+        this.onCeramicFailed,
         this.onGatewayAuthorized,
         this.onGatewayDeauthorizationStarted,
         this.onAuthorizedGatewayUpdated,
@@ -340,9 +341,9 @@ export class ContextProviderMock implements IContextProvider {
         this.onPushPaymentCanceled,
         this.onPullPaymentCanceled,
         this.onBalancesChanged,
-        this.onDeStorageAuthenticationStarted,
-        this.onDeStorageAuthenticationSucceeded,
-        this.onDeStorageAuthenticationFailed,
+        this.onCeramicAuthenticationStarted,
+        this.onCeramicAuthenticationSucceeded,
+        this.onCeramicFailed,
         this.onGatewayAuthorized,
         this.onGatewayDeauthorizationStarted,
         this.onAuthorizedGatewayUpdated,
@@ -402,9 +403,9 @@ export class ContextProviderMock implements IContextProvider {
       onPushPaymentCanceled: 0,
       onPullPaymentCanceled: 0,
       onBalancesChanged: 0,
-      onDeStorageAuthenticationStarted: 0,
-      onDeStorageAuthenticationSucceeded: 0,
-      onDeStorageAuthenticationFailed: 0,
+      onCeramicAuthenticationStarted: 0,
+      onCeramicAuthenticationSucceeded: 0,
+      onCeramicFailed: 0,
       onGatewayAuthorized: 0,
       onGatewayDeauthorizationStarted: 0,
       onAuthorizedGatewayUpdated: 0,
@@ -465,14 +466,14 @@ export class ContextProviderMock implements IContextProvider {
     expect(this.onBalancesChangedActivations.length).toBe(
       counts.onBalancesChanged,
     );
-    expect(this.onDeStorageAuthenticationStartedActivationCount).toBe(
-      counts.onDeStorageAuthenticationStarted,
+    expect(this.onCeramicAuthenticationStartedActivationCount).toBe(
+      counts.onCeramicAuthenticationStarted,
     );
-    expect(this.onDeStorageAuthenticationSucceededActivationCount).toBe(
-      counts.onDeStorageAuthenticationSucceeded,
+    expect(this.onCeramicAuthenticationSucceededActivationCount).toBe(
+      counts.onCeramicAuthenticationSucceeded,
     );
-    expect(this.onDeStorageAuthenticationFailedActivationCount).toBe(
-      counts.onDeStorageAuthenticationFailed,
+    expect(this.onCeramicFailedActivationCount).toBe(
+      counts.onCeramicFailed,
     );
     expect(this.onGatewayAuthorizedActivations.length).toBe(
       counts.onGatewayAuthorized,
@@ -544,9 +545,9 @@ export interface IExpectedEventCounts {
   onPushPaymentCanceled?: number;
   onPullPaymentCanceled?: number;
   onBalancesChanged?: number;
-  onDeStorageAuthenticationStarted?: number;
-  onDeStorageAuthenticationSucceeded?: number;
-  onDeStorageAuthenticationFailed?: number;
+  onCeramicAuthenticationStarted?: number;
+  onCeramicAuthenticationSucceeded?: number;
+  onCeramicFailed?: number;
   onGatewayAuthorized?: number;
   onGatewayDeauthorizationStarted?: number;
   onAuthorizedGatewayUpdated?: number;

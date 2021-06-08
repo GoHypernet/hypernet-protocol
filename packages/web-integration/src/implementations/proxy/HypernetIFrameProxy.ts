@@ -66,9 +66,9 @@ export default class HypernetIFrameProxy
     this.onPushPaymentCanceled = new Subject<PushPayment>();
     this.onPullPaymentCanceled = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
-    this.onDeStorageAuthenticationStarted = new Subject<void>();
-    this.onDeStorageAuthenticationSucceeded = new Subject<void>();
-    this.onDeStorageAuthenticationFailed = new Subject<void>();
+    this.onCeramicAuthenticationStarted = new Subject<void>();
+    this.onCeramicAuthenticationSucceeded = new Subject<void>();
+    this.onCeramicFailed = new Subject<void>();
     this.onGatewayAuthorized = new Subject<GatewayUrl>();
     this.onGatewayDeauthorizationStarted = new Subject<GatewayUrl>();
     this.onAuthorizedGatewayUpdated = new Subject<GatewayUrl>();
@@ -148,20 +148,20 @@ export default class HypernetIFrameProxy
           this.onBalancesChanged.next(data);
         });
 
-        child.on("onDeStorageAuthenticationStarted", () => {
+        child.on("onCeramicAuthenticationStarted", () => {
           this._displayCoreIFrame();
 
-          this.onDeStorageAuthenticationStarted.next();
+          this.onCeramicAuthenticationStarted.next();
         });
 
-        child.on("onDeStorageAuthenticationSucceeded", () => {
+        child.on("onCeramicAuthenticationSucceeded", () => {
           this._closeCoreIFrame();
 
-          this.onDeStorageAuthenticationSucceeded.next();
+          this.onCeramicAuthenticationSucceeded.next();
         });
 
-        child.on("onDeStorageAuthenticationFailed", () => {
-          this.onDeStorageAuthenticationFailed.next();
+        child.on("onCeramicFailed", () => {
+          this.onCeramicFailed.next();
         });
 
         child.on("onGatewayAuthorized", (data: GatewayUrl) => {
@@ -524,9 +524,9 @@ export default class HypernetIFrameProxy
   public onPushPaymentCanceled: Subject<PushPayment>;
   public onPullPaymentCanceled: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
-  public onDeStorageAuthenticationStarted: Subject<void>;
-  public onDeStorageAuthenticationSucceeded: Subject<void>;
-  public onDeStorageAuthenticationFailed: Subject<void>;
+  public onCeramicAuthenticationStarted: Subject<void>;
+  public onCeramicAuthenticationSucceeded: Subject<void>;
+  public onCeramicFailed: Subject<void>;
   public onGatewayAuthorized: Subject<GatewayUrl>;
   public onGatewayDeauthorizationStarted: Subject<GatewayUrl>;
   public onAuthorizedGatewayUpdated: Subject<GatewayUrl>;

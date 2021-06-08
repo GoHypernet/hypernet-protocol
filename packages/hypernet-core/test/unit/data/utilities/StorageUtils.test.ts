@@ -1,10 +1,10 @@
+import { ILocalStorageUtils, ILogUtils } from "@hypernetlabs/utils";
 import td from "testdouble";
 
-import { ConfigProviderMock, ContextProviderMock } from "@mock/utils";
-import { IStorageUtils } from "@interfaces/data/utilities";
 import { StorageUtils } from "@implementations/data/utilities";
-import { ILocalStorageUtils, ILogUtils } from "@hypernetlabs/utils";
+import { IStorageUtils } from "@interfaces/data/utilities";
 import { ICeramicUtils } from "@interfaces/utilities";
+import { ConfigProviderMock, ContextProviderMock } from "@mock/utils";
 
 class StorageUtilsMocks {
   public contextProvider = new ContextProviderMock();
@@ -36,65 +36,173 @@ class StorageUtilsMocks {
 }
 
 describe("StorageUtils tests", () => {
-  test("write should okAsync", async () => {
+  test("StorageUtils writes data using only localstorage when metamask is not installed", async () => {
     // Arrange
-    const storageUtilsMocks = new StorageUtilsMocks();
-    const storageUtils = storageUtilsMocks.factoryStorageUtils();
+    const mocks = new StorageUtilsMocks();
+    const utils = mocks.factoryStorageUtils();
+    mocks.contextProvider.context.metamaskEnabled = false;
 
     // Act
-    const result = await storageUtils.write(
-      storageUtilsMocks.exampleKey,
-      storageUtilsMocks.exampleData,
+    const writeResult = await utils.write<IAuthorizedMerchantEntry[]>(
+      authorizaedMerchantsKey,
+      authorizaedMerchantsData,
     );
 
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toStrictEqual(undefined);
-    td.verify(
-      storageUtilsMocks.localStorageUtils.setItem(
-        storageUtilsMocks.exampleKey,
-        JSON.stringify(storageUtilsMocks.exampleData),
-      ),
-      {
-        times: 1,
-      },
+    const readResult = await utils.read<IAuthorizedMerchantEntry[]>(
+      authorizaedMerchantsKey,
     );
+
+    const ceramicWriteRecordCallingcount = td.explain(
+      mocks.ceramicUtils.writeRecord,
+    ).callCount;
+
+    // Assert
+    expect(writeResult).toBeDefined();
+    expect(writeResult.isErr()).toBeFalsy();
+    expect(readResult).toBeDefined();
+    expect(readResult.isErr()).toBeFalsy();
+    const authorizedMerchants = readResult._unsafeUnwrap();
+    if (authorizedMerchants == null) {
+      throw new Error("couldn't retrieve authorizedMerchants");
+    }
+    expect(authorizedMerchants?.length).toBe(1);
+    expect(authorizedMerchants[0].authorizationSignature).toBe(
+      authorizationSignature,
+    );
+    expect(ceramicWriteRecordCallingcount).toBe(0);
   });
 
-  test("read should okAsync(data)", async () => {
+  test("StorageUtils writes data using ceramic and localstorage when metamask is installed", async () => {
     // Arrange
-    const storageUtilsMocks = new StorageUtilsMocks();
-    const storageUtils = storageUtilsMocks.factoryStorageUtils();
+    const mocks = new StorageUtilsMocks();
+    const utils = mocks.factoryStorageUtils();
+    mocks.contextProvider.context.metamaskEnabled = true;
 
     // Act
-    const result = await storageUtils.read(storageUtilsMocks.exampleKey);
+    const writeResult = await utils.write<IAuthorizedMerchantEntry[]>(
+      authorizaedMerchantsKey,
+      authorizaedMerchantsData,
+    );
+
+    const readResult = await utils.read<IAuthorizedMerchantEntry[]>(
+      authorizaedMerchantsKey,
+    );
+
+    const ceramicWriteRecordCallingcount = td.explain(
+      mocks.ceramicUtils.writeRecord,
+    ).callCount;
 
     // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toStrictEqual(storageUtilsMocks.exampleData);
+    expect(writeResult).toBeDefined();
+    expect(writeResult.isErr()).toBeFalsy();
+    expect(readResult).toBeDefined();
+    expect(readResult.isErr()).toBeFalsy();
+    const authorizedMerchants = readResult._unsafeUnwrap();
+    if (authorizedMerchants == null) {
+      throw new Error("couldn't retrieve authorizedMerchants");
+    }
+    expect(authorizedMerchants?.length).toBe(1);
+    expect(authorizedMerchants[0].authorizationSignature).toBe(
+      authorizationSignature,
+    );
+    expect(ceramicWriteRecordCallingcount).toBe(1);
   });
 
-  test("remove should okAsync(data)", async () => {
+  test("StorageUtils reads data using only localstorage when metamask is not installed", async () => {
     // Arrange
-    const storageUtilsMocks = new StorageUtilsMocks();
-    const storageUtils = storageUtilsMocks.factoryStorageUtils();
+    const mocks = new StorageUtilsMocks();
+    const utils = mocks.factoryStorageUtils();
+    mocks.contextProvider.context.metamaskEnabled = false;
 
     // Act
-    const result = await storageUtils.remove(storageUtilsMocks.exampleKey);
+    const readResult = await utils.read<IAuthorizedMerchantEntry[]>(
+      authorizaedMerchantsKey,
+    );
+
+    const ceramicReadRecordCallingcount = td.explain(
+      mocks.ceramicUtils.readRecord,
+    ).callCount;
 
     // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toStrictEqual(undefined);
-    td.verify(
-      storageUtilsMocks.localStorageUtils.removeItem(
-        storageUtilsMocks.exampleKey,
-      ),
-      {
-        times: 1,
-      },
+    expect(readResult).toBeDefined();
+    expect(readResult.isErr()).toBeFalsy();
+    const authorizedMerchants = readResult._unsafeUnwrap();
+    if (authorizedMerchants == null) {
+      throw new Error("couldn't retrieve authorizedMerchants");
+    }
+    expect(authorizedMerchants?.length).toBe(1);
+    expect(authorizedMerchants[0].authorizationSignature).toBe(
+      authorizationSignature,
     );
+    expect(ceramicReadRecordCallingcount).toBe(0);
+  });
+
+  test("StorageUtils reads data using ceramic and localstorage when metamask is installed", async () => {
+    // Arrange
+    const mocks = new StorageUtilsMocks();
+    const utils = mocks.factoryStorageUtils();
+    mocks.contextProvider.context.metamaskEnabled = true;
+
+    // Act
+    const readResult = await utils.read<IAuthorizedMerchantEntry[]>(
+      authorizaedMerchantsKey,
+    );
+
+    const ceramicReadRecordCallingcount = td.explain(
+      mocks.ceramicUtils.readRecord,
+    ).callCount;
+
+    // Assert
+    expect(readResult).toBeDefined();
+    expect(readResult.isErr()).toBeFalsy();
+    const authorizedMerchants = readResult._unsafeUnwrap();
+    if (authorizedMerchants == null) {
+      throw new Error("couldn't retrieve authorizedMerchants");
+    }
+    expect(authorizedMerchants?.length).toBe(1);
+    expect(authorizedMerchants[0].authorizationSignature).toBe(
+      authorizationSignature,
+    );
+    expect(ceramicReadRecordCallingcount).toBe(1);
+  });
+
+  test("StorageUtils removes data using only localstorage when metamask is not installed", async () => {
+    // Arrange
+    const mocks = new StorageUtilsMocks();
+    const utils = mocks.factoryStorageUtils();
+    mocks.contextProvider.context.metamaskEnabled = false;
+
+    // Act
+    const removeResult = await utils.remove(authorizaedMerchantsKey);
+
+    const ceramicReadRecordCallingcount = td.explain(
+      mocks.ceramicUtils.removeRecord,
+    ).callCount;
+
+    // Assert
+    expect(removeResult).toBeDefined();
+    expect(removeResult.isErr()).toBeFalsy();
+    expect(removeResult._unsafeUnwrap()).toBeUndefined();
+    expect(ceramicReadRecordCallingcount).toBe(0);
+  });
+
+  test("StorageUtils removes data using only localstorage when metamask is not installed", async () => {
+    // Arrange
+    const mocks = new StorageUtilsMocks();
+    const utils = mocks.factoryStorageUtils();
+    mocks.contextProvider.context.metamaskEnabled = true;
+
+    // Act
+    const removeResult = await utils.remove(authorizaedMerchantsKey);
+
+    const ceramicReadRecordCallingcount = td.explain(
+      mocks.ceramicUtils.removeRecord,
+    ).callCount;
+
+    // Assert
+    expect(removeResult).toBeDefined();
+    expect(removeResult.isErr()).toBeFalsy();
+    expect(removeResult._unsafeUnwrap()).toBeUndefined();
+    expect(ceramicReadRecordCallingcount).toBe(1);
   });
 });

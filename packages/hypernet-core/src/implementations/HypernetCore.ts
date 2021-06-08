@@ -155,9 +155,9 @@ export class HypernetCore implements IHypernetCore {
   public onPushPaymentCanceled = new Subject<PushPayment>();
   public onPullPaymentCanceled = new Subject<PullPayment>();
   public onBalancesChanged: Subject<Balances>;
-  public onDeStorageAuthenticationStarted: Subject<void>;
-  public onDeStorageAuthenticationSucceeded: Subject<void>;
-  public onDeStorageAuthenticationFailed: Subject<void>;
+  public onCeramicAuthenticationStarted: Subject<void>;
+  public onCeramicAuthenticationSucceeded: Subject<void>;
+  public onCeramicFailed: Subject<Error>;
   public onGatewayAuthorized: Subject<GatewayUrl>;
   public onGatewayDeauthorizationStarted: Subject<GatewayUrl>;
   public onAuthorizedGatewayUpdated: Subject<GatewayUrl>;
@@ -260,9 +260,9 @@ export class HypernetCore implements IHypernetCore {
     this.onPushPaymentCanceled = new Subject();
     this.onPullPaymentCanceled = new Subject();
     this.onBalancesChanged = new Subject();
-    this.onDeStorageAuthenticationStarted = new Subject();
-    this.onDeStorageAuthenticationSucceeded = new Subject();
-    this.onDeStorageAuthenticationFailed = new Subject();
+    this.onCeramicAuthenticationStarted = new Subject();
+    this.onCeramicAuthenticationSucceeded = new Subject();
+    this.onCeramicFailed = new Subject();
     this.onGatewayAuthorized = new Subject();
     this.onGatewayDeauthorizationStarted = new Subject();
     this.onAuthorizedGatewayUpdated = new Subject();
@@ -309,9 +309,9 @@ export class HypernetCore implements IHypernetCore {
       this.onPushPaymentCanceled,
       this.onPullPaymentCanceled,
       this.onBalancesChanged,
-      this.onDeStorageAuthenticationStarted,
-      this.onDeStorageAuthenticationSucceeded,
-      this.onDeStorageAuthenticationFailed,
+      this.onCeramicAuthenticationStarted,
+      this.onCeramicAuthenticationSucceeded,
+      this.onCeramicFailed,
       this.onGatewayAuthorized,
       this.onGatewayDeauthorizationStarted,
       this.onAuthorizedGatewayUpdated,
