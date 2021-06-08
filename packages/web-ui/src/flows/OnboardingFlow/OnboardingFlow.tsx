@@ -83,6 +83,13 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
         }, handleError);
       }
     });
+
+    coreProxy.onAuthorizedMerchantActivationFailed.subscribe((_merchantUrl) => {
+      if (merchantUrl === _merchantUrl) {
+        alert.error(`Merchant ${merchantUrl} authorization failed!`);
+        setLoading(false);
+      }
+    });
   }, []);
 
   // Watch funding success
