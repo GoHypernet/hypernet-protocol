@@ -105,7 +105,8 @@ describe("StorageUtils tests", () => {
     expect(authorizedMerchants[0].authorizationSignature).toBe(
       authorizationSignature,
     );
-    expect(ceramicWriteRecordCallingcount).toBe(1);
+    // Ceramic now is disabled, Remove this comment when we have it enabled again
+    // expect(ceramicWriteRecordCallingcount).toBe(1);
   });
 
   test("StorageUtils reads data using only localstorage when metamask is not installed", async () => {
@@ -163,7 +164,8 @@ describe("StorageUtils tests", () => {
     expect(authorizedMerchants[0].authorizationSignature).toBe(
       authorizationSignature,
     );
-    expect(ceramicReadRecordCallingcount).toBe(1);
+    // Ceramic now is disabled, Remove this comment when we have it enabled again
+    // expect(ceramicReadRecordCallingcount).toBe(1);
   });
 
   test("StorageUtils removes data using only localstorage when metamask is not installed", async () => {
@@ -203,6 +205,7 @@ describe("StorageUtils tests", () => {
     expect(removeResult).toBeDefined();
     expect(removeResult.isErr()).toBeFalsy();
     expect(removeResult._unsafeUnwrap()).toBeUndefined();
-    expect(ceramicReadRecordCallingcount).toBe(1);
+    // Ceramic now is disabled, Remove this comment when we have it enabled again
+    // expect(ceramicReadRecordCallingcount).toBe(1);
   });
 });
