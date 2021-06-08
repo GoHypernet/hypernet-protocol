@@ -862,7 +862,7 @@ export class MerchantConnectorRepository
       });
     }
 
-    return this.storageUtils.write<IAuthorizedMerchantEntry[]>(
+    return this.storageUtils.write(
       AuthorizedMerchantsSchema.title,
       authorizedMerchantEntries,
     );

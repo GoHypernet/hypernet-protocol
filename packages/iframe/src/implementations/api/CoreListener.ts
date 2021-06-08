@@ -272,16 +272,16 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       parent.emit("onBalancesChanged", val);
     });
 
-    this.core.onDeStorageAuthenticationStarted.subscribe(() => {
-      parent.emit("onDeStorageAuthenticationStarted");
+    this.core.onCeramicAuthenticationStarted.subscribe(() => {
+      parent.emit("onCeramicAuthenticationStarted");
     });
 
-    this.core.onDeStorageAuthenticationSucceeded.subscribe(() => {
-      parent.emit("onDeStorageAuthenticationSucceeded");
+    this.core.onCeramicAuthenticationSucceeded.subscribe(() => {
+      parent.emit("onCeramicAuthenticationSucceeded");
     });
 
-    this.core.onDeStorageAuthenticationFailed.subscribe(() => {
-      parent.emit("onDeStorageAuthenticationFailed");
+    this.core.onCeramicFailed.subscribe((val) => {
+      parent.emit("onCeramicFailed", val);
     });
 
     this.core.onMerchantAuthorized.subscribe((val) => {
@@ -312,16 +312,16 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       parent.emit("onPrivateCredentialsRequested");
     });
 
-    this.core.onDeStorageAuthenticationStarted.subscribe(() => {
-      this.coreUIService.renderDeStorageAuthenticationUI();
+    this.core.onCeramicAuthenticationStarted.subscribe(() => {
+      this.coreUIService.renderCeramicAuthenticationUI();
     });
 
-    this.core.onDeStorageAuthenticationFailed.subscribe(() => {
-      this.coreUIService.renderDeStorageAuthenticationFailedUI();
+    this.core.onCeramicFailed.subscribe(() => {
+      this.coreUIService.renderCeramicFailureUI();
     });
 
-    this.core.onDeStorageAuthenticationSucceeded.subscribe(() => {
-      this.coreUIService.renderDeStorageAuthenticationSucceededUI();
+    this.core.onCeramicAuthenticationSucceeded.subscribe(() => {
+      this.coreUIService.renderCeramicAuthenticationSucceededUI();
     });
   }
 }

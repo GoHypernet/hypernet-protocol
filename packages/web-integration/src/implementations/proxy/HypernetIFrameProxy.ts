@@ -61,9 +61,9 @@ export default class HypernetIFrameProxy
     this.onPushPaymentDelayed = new Subject<PushPayment>();
     this.onPullPaymentDelayed = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
-    this.onDeStorageAuthenticationStarted = new Subject<void>();
-    this.onDeStorageAuthenticationSucceeded = new Subject<void>();
-    this.onDeStorageAuthenticationFailed = new Subject<void>();
+    this.onCeramicAuthenticationStarted = new Subject<void>();
+    this.onCeramicAuthenticationSucceeded = new Subject<void>();
+    this.onCeramicFailed = new Subject<PersistenceError>();
     this.onMerchantAuthorized = new Subject<MerchantUrl>();
     this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
     this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
@@ -125,20 +125,20 @@ export default class HypernetIFrameProxy
           this.onBalancesChanged.next(data);
         });
 
-        child.on("onDeStorageAuthenticationStarted", () => {
+        child.on("onCeramicAuthenticationStarted", () => {
           this._displayCoreIFrame();
 
-          this.onDeStorageAuthenticationStarted.next();
+          this.onCeramicAuthenticationStarted.next();
         });
 
-        child.on("onDeStorageAuthenticationSucceeded", () => {
+        child.on("onCeramicAuthenticationSucceeded", () => {
           this._closeCoreIFrame();
 
-          this.onDeStorageAuthenticationSucceeded.next();
+          this.onCeramicAuthenticationSucceeded.next();
         });
 
-        child.on("onDeStorageAuthenticationFailed", () => {
-          this.onDeStorageAuthenticationFailed.next();
+        child.on("onCeramicFailed", (data: PersistenceError) => {
+          this.onCeramicFailed.next(data);
         });
 
         child.on("onMerchantAuthorized", (data: MerchantUrl) => {
@@ -487,9 +487,9 @@ export default class HypernetIFrameProxy
   public onPushPaymentDelayed: Subject<PushPayment>;
   public onPullPaymentDelayed: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
-  public onDeStorageAuthenticationStarted: Subject<void>;
-  public onDeStorageAuthenticationSucceeded: Subject<void>;
-  public onDeStorageAuthenticationFailed: Subject<void>;
+  public onCeramicAuthenticationStarted: Subject<void>;
+  public onCeramicAuthenticationSucceeded: Subject<void>;
+  public onCeramicFailed: Subject<PersistenceError>;
   public onMerchantAuthorized: Subject<MerchantUrl>;
   public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
   public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;

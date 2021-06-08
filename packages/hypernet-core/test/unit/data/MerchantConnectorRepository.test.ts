@@ -233,7 +233,7 @@ describe("MerchantConnectorRepository tests", () => {
     ];
 
     td.when(
-      mocks.storageUtils.write<IAuthorizedMerchantEntry[]>(
+      mocks.storageUtils.write(
         AuthorizedMerchantsSchema.title,
         authorizedMerchantEntry,
       ),
@@ -457,7 +457,7 @@ describe("MerchantConnectorRepository tests", () => {
     ];
 
     td.when(
-      mocks.storageUtils.write<IAuthorizedMerchantEntry[]>(
+      mocks.storageUtils.write(
         AuthorizedMerchantsSchema.title,
         authorizedMerchantEntry,
       ),
@@ -592,7 +592,7 @@ describe("MerchantConnectorRepository tests", () => {
     ];
 
     td.when(
-      mocks.storageUtils.write<IAuthorizedMerchantEntry[]>(
+      mocks.storageUtils.write(
         AuthorizedMerchantsSchema.title,
         authorizedMerchantEntry,
       ),

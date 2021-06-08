@@ -7,6 +7,7 @@ import {
   EthereumAddress,
   MerchantUrl,
   Signature,
+  PersistenceError,
 } from "@hypernetlabs/objects";
 import { Subject } from "rxjs";
 
@@ -29,9 +30,9 @@ export class HypernetContext {
     public onPushPaymentDelayed: Subject<PushPayment>,
     public onPullPaymentDelayed: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
-    public onDeStorageAuthenticationStarted: Subject<void>,
-    public onDeStorageAuthenticationSucceeded: Subject<void>,
-    public onDeStorageAuthenticationFailed: Subject<void>,
+    public onCeramicAuthenticationStarted: Subject<void>,
+    public onCeramicAuthenticationSucceeded: Subject<void>,
+    public onCeramicFailed: Subject<PersistenceError>,
     public onMerchantAuthorized: Subject<MerchantUrl>,
     public onAuthorizedMerchantUpdated: Subject<MerchantUrl>,
     public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>,
@@ -61,9 +62,9 @@ export class InitializedHypernetContext {
     public onPushPaymentDelayed: Subject<PushPayment>,
     public onPullPaymentDelayed: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
-    public onDeStorageAuthenticationStarted: Subject<void>,
-    public onDeStorageAuthenticationSucceeded: Subject<void>,
-    public onDeStorageAuthenticationFailed: Subject<void>,
+    public onCeramicAuthenticationStarted: Subject<void>,
+    public onCeramicAuthenticationSucceeded: Subject<void>,
+    public onCeramicFailed: Subject<PersistenceError>,
     public onMerchantAuthorized: Subject<MerchantUrl>,
     public onAuthorizedMerchantUpdated: Subject<MerchantUrl>,
     public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>,

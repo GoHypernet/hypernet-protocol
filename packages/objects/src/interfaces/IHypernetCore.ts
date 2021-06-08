@@ -297,9 +297,9 @@ export interface IHypernetCore {
   onPushPaymentDelayed: Subject<PushPayment>;
   onPullPaymentDelayed: Subject<PullPayment>;
   onBalancesChanged: Subject<Balances>;
-  onDeStorageAuthenticationStarted: Subject<void>;
-  onDeStorageAuthenticationSucceeded: Subject<void>;
-  onDeStorageAuthenticationFailed: Subject<void>;
+  onCeramicAuthenticationStarted: Subject<void>;
+  onCeramicAuthenticationSucceeded: Subject<void>;
+  onCeramicFailed: Subject<PersistenceError>;
   onMerchantAuthorized: Subject<MerchantUrl>;
   onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
   onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;

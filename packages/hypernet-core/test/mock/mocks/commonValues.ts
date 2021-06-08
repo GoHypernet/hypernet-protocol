@@ -4,6 +4,7 @@ import {
   PaymentId,
   PublicIdentifier,
   TransferId,
+  Signature,
 } from "@hypernetlabs/objects";
 import { BigNumber, constants } from "ethers";
 
@@ -43,3 +44,6 @@ export const merchantUrl2 = MerchantUrl("https://example2.merchant.com/");
 export const merchantAddress = EthereumAddress("0xMediatorEthereumAddress");
 export const merchantAddress2 = EthereumAddress("0xMediatorEthereumAddress2");
 export const mediatorSignature = "0xMediatorSignature";
+export const authorizationSignature = Signature(
+  "0x1e866e66e7f3a68658bd186bafbdc534d4a5022e14022fddfe8865e2236dc67d64eee05b4d8f340dffa1928efa517784b63cad6a3fb35d999cb9d722b34075071b",
+);

@@ -1,4 +1,3 @@
-import { PersistenceError } from "@hypernetlabs/objects";
 import {
   ILogUtils,
   ILogUtilsType,
@@ -29,39 +28,64 @@ export class StorageUtils implements IStorageUtils {
 
   public write<T>(keyName: string, data: T): ResultAsync<void, never> {
     return this.contextProvider.getContext().andThen((context) => {
-      this.localStorageUtils.setItem(keyName, JSON.stringify(data));
-      if (false) { // context.metamaskEnabled) {
+      //if (context.metamaskEnabled) {
+      if (false) {
         this.ceramicUtils.writeRecord(keyName, data).mapErr((err) => {
           this.logUtils.error(err);
+          context.onCeramicFailed.next(err);
         });
-        // TODO: More advanced ceramic error handling
       }
-      return okAsync(undefined);
+
+      return this._writeLocalStorage(keyName, data);
     });
   }
 
-  public read<T>(keyName: string): ResultAsync<T | null, PersistenceError> {
+  public read<T>(keyName: string): ResultAsync<T | null, never> {
     return this.contextProvider.getContext().andThen((context) => {
+      //if (context.metamaskEnabled) {
       if (false) {
-        return this.ceramicUtils.readRecord(keyName);
+        return this.ceramicUtils.readRecord<T>(keyName).orElse((err) => {
+          this.logUtils.error(err);
+          context.onCeramicFailed.next(err);
+          return this._readLocalStorage<T>(keyName);
+        });
       } else {
-        const data = this.localStorageUtils.getItem(keyName);
-        if (data == null) {
-          return okAsync(null);
-        }
-        return okAsync(JSON.parse(data));
+        return this._readLocalStorage<T>(keyName);
       }
     });
   }
 
-  public remove(keyName: string): ResultAsync<void, PersistenceError> {
+  public remove(keyName: string): ResultAsync<void, never> {
     return this.contextProvider.getContext().andThen((context) => {
+      //if (context.metamaskEnabled) {
       if (false) {
-        return this.ceramicUtils.removeRecord(keyName);
-      } else {
-        this.localStorageUtils.removeItem(keyName);
-        return okAsync(undefined);
+        this.ceramicUtils.removeRecord(keyName).mapErr((err) => {
+          this.logUtils.error(err);
+          context.onCeramicFailed.next(err);
+        });
       }
+      return this._removeLocalStorage(keyName);
     });
+  }
+
+  private _writeLocalStorage(
+    keyName: string,
+    data: any,
+  ): ResultAsync<void, never> {
+    this.localStorageUtils.setItem(keyName, JSON.stringify(data));
+    return okAsync(undefined);
+  }
+
+  private _readLocalStorage<T>(keyName: string): ResultAsync<T | null, never> {
+    const data = this.localStorageUtils.getItem(keyName);
+    if (data == null) {
+      return okAsync(null);
+    }
+    return okAsync(JSON.parse(data) as T);
+  }
+
+  private _removeLocalStorage(keyName: string): ResultAsync<void, never> {
+    this.localStorageUtils.removeItem(keyName);
+    return okAsync(undefined);
   }
 }

@@ -4,11 +4,11 @@ import { okAsync, ResultAsync } from "neverthrow";
 export class CoreUIService implements ICoreUIService {
   protected authenticationContentId =
     "__hypernet-protocol-iframe-authentication-content__";
-  protected authenticationFailureContentId =
+  protected failureContentId =
     "__hypernet-protocol-iframe-authentication-failuer-content__";
   constructor() {}
 
-  public renderDeStorageAuthenticationUI(): ResultAsync<void, never> {
+  public renderCeramicAuthenticationUI(): ResultAsync<void, never> {
     this._cleanUpAuthenticationContent();
 
     const content = document.createElement("div");
@@ -19,18 +19,18 @@ export class CoreUIService implements ICoreUIService {
     return okAsync(undefined);
   }
 
-  public renderDeStorageAuthenticationFailedUI(): ResultAsync<void, never> {
+  public renderCeramicFailureUI(): ResultAsync<void, never> {
     this._cleanUpAuthenticationContent();
 
     const content = document.createElement("div");
-    content.id = this.authenticationFailureContentId;
-    content.innerHTML = `<h4>Something went wrong during authentication</h4>`;
+    content.id = this.failureContentId;
+    content.innerHTML = `<h4>Something went wrong during with ceramic</h4>`;
 
     document.body.appendChild(content);
     return okAsync(undefined);
   }
 
-  public renderDeStorageAuthenticationSucceededUI(): ResultAsync<void, never> {
+  public renderCeramicAuthenticationSucceededUI(): ResultAsync<void, never> {
     this._cleanUpAuthenticationContent();
     return okAsync(undefined);
   }
@@ -42,9 +42,7 @@ export class CoreUIService implements ICoreUIService {
       prevElm.remove();
     }
 
-    const prevFailureElm = document.getElementById(
-      this.authenticationFailureContentId,
-    );
+    const prevFailureElm = document.getElementById(this.failureContentId);
     //remove if there is already a previous 3id connect related failure content
     if (prevFailureElm) {
       prevFailureElm.remove();
