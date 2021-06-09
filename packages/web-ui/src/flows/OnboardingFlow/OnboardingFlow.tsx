@@ -31,6 +31,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
   const {
     merchantUrl,
     finalSuccessContent = "You are good to go and purchase using your payment token",
+    closeCallback = () => {},
   } = props;
   const alert = useAlert();
   const {
@@ -82,6 +83,13 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
         }, handleError);
       }
     });
+
+    coreProxy.onAuthorizedMerchantActivationFailed.subscribe((_merchantUrl) => {
+      if (merchantUrl === _merchantUrl) {
+        alert.error(`Merchant ${merchantUrl} authorization failed!`);
+        setLoading(false);
+      }
+    });
   }, []);
 
   // Watch funding success
@@ -128,6 +136,11 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
         linkStyle
       />
     );
+  };
+
+  const onOkClick = () => {
+    closeCallback();
+    closeModal();
   };
 
   const renderScreen = (): ReactNode => {
@@ -199,7 +212,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
             <SucessContent
               label="All good!"
               info={finalSuccessContent}
-              onOkay={closeModal}
+              onOkay={onOkClick}
             />
             {renderFundWalletButton()}
           </>

@@ -5,6 +5,7 @@ import {
   PrivateCredentials,
   EthereumAddress,
 } from "@hypernetlabs/objects";
+import { ILogUtils } from "@hypernetlabs/utils";
 import { ethers } from "ethers";
 import { okAsync, ResultAsync, errAsync } from "neverthrow";
 
@@ -36,6 +37,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
   constructor(
     protected contextProvider: IContextProvider,
     protected internalProviderFactory: IInternalProviderFactory,
+    protected logUtils: ILogUtils,
   ) {
     this.privateCredentialsPromiseResolve = () => null;
     this.address = undefined;
@@ -100,10 +102,14 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
     IProviderSigner,
     BlockchainUnavailableError
   > {
-    if (this.initializeResult) return this.initializeResult;
+    if (this.initializeResult != null) {
+      return this.initializeResult;
+    }
 
     return this.contextProvider.getContext().andThen((context) => {
       if (context.metamaskEnabled) {
+        this.logUtils.info("Using metamask as the blockchain provider");
+
         window.ethereum.autoRefreshOnNetworkChange = false;
         this.initializeResult = ResultAsync.fromPromise(
           window.ethereum.enable(),
@@ -126,6 +132,10 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
         return this.initializeResult;
       }
 
+      this.logUtils.info(
+        "Reverting to using JsonRPCProvider as the blockchain provider, waiting for a key or mnemonic to be provided.",
+      );
+
       let internalProvider: IInternalProvider = {} as IInternalProvider;
       // Fire an onPrivateCredentialsRequested
       const privateKeyPromise: Promise<PrivateCredentials> = new Promise(
@@ -138,6 +148,20 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
       context.onPrivateCredentialsRequested.next();
       this.initializeResult = ResultAsync.fromSafePromise(privateKeyPromise)
         .andThen((privateCredentials) => {
+          if (privateCredentials.mnemonic != null) {
+            this.logUtils.info(
+              "Mnemonic provided, initializing JsonRPCprovider",
+            );
+          } else if (privateCredentials.privateKey != null) {
+            this.logUtils.info(
+              "Private key provided, initializing JsonRPCprovider",
+            );
+          } else {
+            this.logUtils.info(
+              "Neither a mnemonic nor a private key was provided, error iminent!",
+            );
+          }
+
           // Inject a InternalProviderFactory to do this
           return this.internalProviderFactory.factoryInternalProvider(
             privateCredentials,

@@ -5,6 +5,7 @@ export const useStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     padding: "20px 0",
+    height: "auto",
   },
   select: {
     fontFamily: "'Roboto','Helvetica','Arial',sans-serif",

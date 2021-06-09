@@ -35,10 +35,11 @@
     ]
   },
   "scripts": {
-    "bootstrap": "yarn install && lerna init && cd packages/developer-ui && yarn bootstrap",
+    "bootstrap": "yarn install && lerna init && yarn clean-docker && docker-compose pull && docker-compose up -d && wait-on -l -d 15000 package.json && docker-compose up -d && yarn verify-backend",
     "build": "yarn clean && yarn compile && yarn postcompile",
+    "dockerize": "lerna run dockerize",
     "clean": "rimraf ./packages/*/dist ./packages/*/tsconfig.tsbuildinfo",
-    "clean-docker": "cd packages/developer-ui && yarn clean-docker",
+    "clean-docker": "docker-compose down",
     "clean-node": "rimraf node_modules packages/*/node_modules yarn.lock",
     "compile": "tsc --build && yarn alias",
     "postcompile": "lerna run postcompile",
@@ -49,10 +50,9 @@
     "lint": "eslint \"packages/*/{src,test}/**/*.{ts,tsx}\" --quiet",
     "lint:fix": "eslint \"packages/*/{src,test}/**/*.{ts,tsx}\" --quiet --fix",
     "prepare-for-publish": "cd packages/objects && yarn build && cd ../merchant-connector && yarn build && cd ../utils && yarn build && cd ../hypernet-core && yarn build && cd ../web-ui && yarn build && cd ../web-integration && yarn build && cd ../",
-    "start": "yarn build && cd packages/developer-ui && yarn start",
-    "start-developer-ui": "yarn start",
-    "start-web-demo": "cd packages/web-demo && yarn start",
-    "start-user-dashboard": "cd packages/user-dashboard && yarn start",
+    "start": "docker-compose up",
+    "dev": "docker-compose --file docker-compose.dev.yaml up --detach && lerna run dev",
+    "dev2": "lerna run dev",
     "test": "cd packages/hypernet-core && yarn test"
   },
   "husky": {

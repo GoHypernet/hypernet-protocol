@@ -8,12 +8,13 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "yarn clean && yarn compile && yarn postcompile",
+    "dockerize": "docker build -t hypernetlabs/hypernet-protocol-core-iframe -f Dockerfile ../..",
+    "dev": "webpack watch --config webpack.config.js --mode development",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "compile": "tsc --build && cd ../.. && yarn alias",
     "alias": "tsc-alias",
     "postcompile": "webpack",
     "prepare": "yarn build",
-    "start": "webpack serve --config webpack.config.js --mode development",
     "test": "echo \"Error: no test specified\" && exit 0"
   },
   "types": "dist/index.d.ts",

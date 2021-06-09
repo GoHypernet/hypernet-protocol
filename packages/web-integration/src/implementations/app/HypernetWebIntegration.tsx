@@ -8,7 +8,7 @@ import { IHypernetWebIntegration } from "@web-integration/interfaces/app/IHypern
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
 
-  protected iframeURL = "http://localhost:8090";
+  protected iframeURL = "http://localhost:5020";
   protected currentMerchantUrl: MerchantUrl | undefined | null;
 
   public webUIClient: IHypernetWebUI;
@@ -131,6 +131,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
           height: 100%;
           width: 100%;
           background-color: rgba(0,0,0,0.6);
+          z-index: 999999 !important;
         }
         #__hypernet-protocol-iframe-close-icon__ {
           position: absolute;
