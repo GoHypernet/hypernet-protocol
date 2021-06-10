@@ -20,12 +20,12 @@ import {
   IMerchantConnectorRepository,
   IAuthorizedMerchantEntry,
 } from "@interfaces/data/IMerchantConnectorRepository";
+import { IStorageUtils } from "@interfaces/data/utilities";
 import {
   IVectorUtils,
   IMerchantConnectorProxy,
   IBlockchainUtils,
 } from "@interfaces/utilities";
-import { IStorageUtils } from "@interfaces/data/utilities";
 import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
 import {
   merchantUrl,

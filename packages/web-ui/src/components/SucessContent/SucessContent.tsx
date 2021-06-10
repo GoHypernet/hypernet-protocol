@@ -1,5 +1,5 @@
-import React from "react";
 import { Box } from "@material-ui/core";
+import React from "react";
 
 import { Button } from "@web-ui/components";
 import { useStyles } from "@web-ui/components/SucessContent/SucessContent.style";

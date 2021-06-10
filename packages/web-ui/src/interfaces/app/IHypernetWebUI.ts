@@ -1,4 +1,3 @@
-import React from "react";
 import {
   EPaymentType,
   MerchantUrl,
@@ -7,6 +6,7 @@ import {
 } from "@hypernetlabs/objects";
 import { RenderError } from "@hypernetlabs/objects";
 import { Result } from "neverthrow";
+import React from "react";
 
 export interface IRenderParams {
   selector?: string;

@@ -1,6 +1,6 @@
-import { colors, getColorFromStatus, EStatusColor } from "../../theme";
-
 import { makeStyles } from "@material-ui/core";
+
+import { colors, getColorFromStatus, EStatusColor } from "../../theme";
 
 export const useStyles = makeStyles({
   button: {

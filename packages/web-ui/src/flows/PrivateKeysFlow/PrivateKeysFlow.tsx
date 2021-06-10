@@ -1,7 +1,7 @@
+import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 import React, { useState } from "react";
 
 import { SelectInput, TextareaInput, Button } from "@web-ui/components";
-import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 
 const PrivateKeysFlow: React.FC = () => {
   const { coreProxy } = useStoreContext();

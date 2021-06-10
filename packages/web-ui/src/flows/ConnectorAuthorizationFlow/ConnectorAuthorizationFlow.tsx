@@ -1,9 +1,9 @@
+import { Box } from "@material-ui/core";
+import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 import { IConnectorAuthorizationFlowParams } from "@web-ui/interfaces";
 import React, { useEffect } from "react";
-import { Box } from "@material-ui/core";
 
 import { ModalHeader, ModalFooter, Button } from "@web-ui/components";
-import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 import { useStyles } from "@web-ui/flows/ConnectorAuthorizationFlow/ConnectorAuthorizationFlow.style";
 import { useBalances } from "@web-ui/hooks";
 import { EStatusColor } from "@web-ui/theme";

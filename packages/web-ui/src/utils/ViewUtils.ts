@@ -1,11 +1,11 @@
-import { utils, BigNumber } from "ethers";
-
-import { IViewUtils, PaymentStateOption } from "@web-ui/interfaces";
 import {
   EPaymentState,
   PaymentStatusViewModel,
   PaymentStatusParams,
 } from "@hypernetlabs/objects";
+import { IViewUtils, PaymentStateOption } from "@web-ui/interfaces";
+import { utils, BigNumber } from "ethers";
+
 import { getColorFromStatus, EStatusColor } from "@web-ui/theme";
 
 export class ViewUtils implements IViewUtils {

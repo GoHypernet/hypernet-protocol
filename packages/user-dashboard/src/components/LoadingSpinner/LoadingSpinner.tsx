@@ -1,10 +1,9 @@
+import { Box } from "@material-ui/core";
 import React from "react";
 import PuffLoader from "react-spinners/PuffLoader";
-import { Box } from "@material-ui/core";
 
 import { useStyles } from "@user-dashboard/components/LoadingSpinner/LoadingSpinner.style";
 import { useLayoutContext } from "@user-dashboard/contexts";
-
 
 const LoadingSpinner: React.FC = () => {
   const { loading } = useLayoutContext();

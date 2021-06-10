@@ -1,5 +1,5 @@
-import React from "react";
 import { Box, BoxProps } from "@material-ui/core";
+import React from "react";
 
 import { useStyles } from "@web-ui/components/BoxWrapper/BoxWrapper.style";
 

@@ -1,7 +1,7 @@
 import { FC } from "react";
 
-import Summary from "@user-dashboard/pages/Summary";
 import SendAndReceive from "@user-dashboard/pages/SendAndReceive";
+import Summary from "@user-dashboard/pages/Summary";
 
 interface IRoute {
   path: string;

@@ -1,7 +1,6 @@
 import { MerchantUrl } from "@hypernetlabs/objects";
-import { useEffect, useReducer } from "react";
-
 import { useStoreContext } from "@web-ui/contexts";
+import { useEffect, useReducer } from "react";
 import { useAlert } from "react-alert";
 
 enum EActionTypes {

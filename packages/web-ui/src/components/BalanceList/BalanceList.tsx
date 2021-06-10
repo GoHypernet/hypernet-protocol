@@ -1,9 +1,9 @@
-import React, { useRef } from "react";
-import { Box, Tooltip } from "@material-ui/core";
-
 import { AssetBalance } from "@hypernetlabs/objects";
-import { useStyles } from "@web-ui/components/BalanceList/BalanceList.style";
+import { Box, Tooltip } from "@material-ui/core";
 import { IViewUtils } from "@web-ui/interfaces";
+import React, { useRef } from "react";
+
+import { useStyles } from "@web-ui/components/BalanceList/BalanceList.style";
 import { HYPER_TOKEN_LOGO_URL } from "@web-ui/constants";
 
 interface BalanceListProps {

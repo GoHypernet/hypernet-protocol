@@ -1,8 +1,8 @@
-import React from "react";
 import { Box } from "@material-ui/core";
+import React from "react";
 
-import { EStatusColor } from "@web-ui/theme";
 import { useStyles } from "@web-ui/components/Button/Button.style";
+import { EStatusColor } from "@web-ui/theme";
 
 interface ButtonProps {
   onClick?: () => void;

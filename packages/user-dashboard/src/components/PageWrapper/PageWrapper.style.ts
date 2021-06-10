@@ -1,4 +1,4 @@
-import { makeStyles } from '@material-ui/core';
+import { makeStyles } from "@material-ui/core";
 
 export const useStyles = makeStyles({
   wrapper: {
@@ -9,6 +9,3 @@ export const useStyles = makeStyles({
     marginBottom: 30,
   },
 });
-
-
-
