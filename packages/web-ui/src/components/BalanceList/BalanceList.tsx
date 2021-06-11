@@ -1,10 +1,10 @@
-import React from "react";
-import { Box } from "@material-ui/core";
-
 import { AssetBalance } from "@hypernetlabs/objects";
-import { useStyles } from "@web-ui/components/BalanceList/BalanceList.style";
+import { Box, Tooltip } from "@material-ui/core";
 import { IViewUtils } from "@web-ui/interfaces";
-import { ETHER_HEX_ADDRESS } from "@web-ui/constants";
+import React, { useRef } from "react";
+
+import { useStyles } from "@web-ui/components/BalanceList/BalanceList.style";
+import { HYPER_TOKEN_LOGO_URL } from "@web-ui/constants";
 
 interface BalanceListProps {
   balances?: AssetBalance[];
@@ -16,6 +16,7 @@ export const BalanceList: React.FC<BalanceListProps> = (
   props: BalanceListProps,
 ) => {
   const { balances, viewUtils, noBorder } = props;
+  const tokenLogoRef = useRef<HTMLImageElement>(null);
   const classes = useStyles();
 
   return (
@@ -35,17 +36,19 @@ export const BalanceList: React.FC<BalanceListProps> = (
         >
           <img
             className={classes.tokenLogo}
-            src={
-              index === 0
-                ? "https://res.cloudinary.com/dqueufbs7/image/upload/v1614369421/images/Screen_Shot_2021-02-26_at_22.56.34.png"
-                : "https://res.cloudinary.com/dqueufbs7/image/upload/v1614373316/images/Screen_Shot_2021-02-27_at_00.01.31.png"
-            }
+            src={`https://icons.bitbot.tools/api/${balance.symbol}/64x64`}
+            ref={tokenLogoRef}
+            onError={() => {
+              tokenLogoRef.current?.setAttribute("src", HYPER_TOKEN_LOGO_URL);
+            }}
           />
           <Box className={classes.tokenAmount}>
             {viewUtils.fromBigNumberEther(balance.freeAmount)}
           </Box>
           <Box className={classes.tokenName}>
-            {balance.assetAddress === ETHER_HEX_ADDRESS ? "ETH" : "MINT"}
+            <Tooltip title={balance.name} placement="top">
+              <Box>{balance.symbol}</Box>
+            </Tooltip>
           </Box>
         </Box>
       ))}

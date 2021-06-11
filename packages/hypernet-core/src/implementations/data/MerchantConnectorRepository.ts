@@ -38,6 +38,7 @@ import {
   IMerchantConnectorRepository,
   IAuthorizedMerchantEntry,
 } from "@interfaces/data";
+import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import { InitializedHypernetContext } from "@interfaces/objects";
 import {
   IBlockchainProvider,
@@ -52,7 +53,6 @@ import {
   IVectorUtils,
   IVectorUtilsType,
 } from "@interfaces/utilities";
-import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import {
   IMerchantConnectorProxyFactory,
   IMerchantConnectorProxyFactoryType,

@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Button,
@@ -12,11 +11,12 @@ import {
   Tooltip,
 } from "@material-ui/core";
 import { Folder, Block } from "@material-ui/icons";
+import { IRenderParams } from "@web-ui/interfaces";
+import React from "react";
 import PulseLoader from "react-spinners/PulseLoader";
 
-import { IRenderParams } from "@web-ui/interfaces";
-import { useMerchants } from "@web-ui/hooks";
 import { BoxWrapper, EmptyState } from "@web-ui/components";
+import { useMerchants } from "@web-ui/hooks";
 
 interface IMerchantsWidget extends IRenderParams {}
 

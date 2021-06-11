@@ -10,3 +10,5 @@ export const CONNECTOR_AUTHORIZATION_FLOW_ID_SELECTOR =
 export const ONBOARDING_FLOW_ID_SELECTOR = "hypernet-protocol-onboarding-flow";
 export const ETHER_HEX_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const WEB_UI_MODAL_ID_SELECTOR = "__hypernet-protocol-modal-root__";
+export const HYPER_TOKEN_LOGO_URL =
+  "https://res.cloudinary.com/dqueufbs7/image/upload/v1614369421/images/Screen_Shot_2021-02-26_at_22.56.34.png";

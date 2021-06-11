@@ -1,8 +1,8 @@
+import * as H from "history";
 import React from "react";
 import { Route, Switch } from "react-router-dom";
-import { routes } from "@user-dashboard/containers/Router/Router.routes";
 
-import * as H from "history";
+import { routes } from "@user-dashboard/containers/Router/Router.routes";
 
 interface IRouter {
   history?: H.History;

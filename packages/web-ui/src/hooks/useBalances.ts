@@ -4,13 +4,13 @@ import {
   EthereumAddress,
   AssetInfo,
 } from "@hypernetlabs/objects";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { ITokenSelectorOption } from "@web-ui/interfaces";
 import { PaymentTokenOptionViewModel } from "@web-ui/interfaces/objects";
 import { useEffect, useReducer } from "react";
 import { useAlert } from "react-alert";
 
 import { ETHER_HEX_ADDRESS } from "@web-ui/constants";
-import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 
 enum EActionTypes {
   FETCHING = "FETCHING",

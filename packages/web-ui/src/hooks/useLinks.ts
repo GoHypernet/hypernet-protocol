@@ -5,10 +5,9 @@ import {
   PullPayment,
   PushPayment,
 } from "@hypernetlabs/objects";
-import { useEffect, useReducer } from "react";
-import { BigNumber } from "ethers";
-
 import { useStoreContext } from "@web-ui/contexts";
+import { BigNumber } from "ethers";
+import { useEffect, useReducer } from "react";
 import { useAlert } from "react-alert";
 
 enum EActionTypes {

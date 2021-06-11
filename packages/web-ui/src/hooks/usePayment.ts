@@ -4,6 +4,7 @@ import {
   EPaymentType,
   MerchantUrl,
 } from "@hypernetlabs/objects";
+import { useStoreContext } from "@web-ui/contexts";
 import { ITokenSelectorOption } from "@web-ui/interfaces";
 import {
   PaymentTokenOptionViewModel,
@@ -12,8 +13,6 @@ import {
 } from "@web-ui/interfaces/objects";
 import { utils } from "ethers";
 import { useEffect, useReducer } from "react";
-
-import { useStoreContext } from "@web-ui/contexts";
 
 class PaymentTypeOption {
   constructor(public typeName: string, public type: EPaymentType) {}

@@ -1,7 +1,8 @@
+import { Box } from "@material-ui/core";
+import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 import { IOnboardingFlowParams } from "@web-ui/interfaces";
 import React, { useEffect, useState, ReactNode } from "react";
 import { useAlert } from "react-alert";
-import { Box } from "@material-ui/core";
 
 import {
   ModalHeader,
@@ -10,7 +11,6 @@ import {
   Button,
   TokenSelector,
 } from "@web-ui/components";
-import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 import { useStyles } from "@web-ui/flows/OnboardingFlow/OnboardingFlow.style";
 import { useBalances } from "@web-ui/hooks";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget/BalancesWidget";

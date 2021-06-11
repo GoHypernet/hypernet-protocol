@@ -1,4 +1,15 @@
 import { IHypernetCore, MerchantUrl, RenderError } from "@hypernetlabs/objects";
+import MainContainer from "@web-ui/containers/MainContainer";
+import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
+import {
+  IConnectorAuthorizationFlowParams,
+  IHypernetWebUI,
+  IRenderParams,
+  IRenderPaymentWidgetParams,
+  IOnboardingFlowParams,
+  IViewUtils,
+  IDateUtils,
+} from "@web-ui/interfaces";
 import { Result } from "neverthrow";
 import React from "react";
 import ReactDOM from "react-dom";
@@ -12,25 +23,14 @@ import {
   CONNECTOR_AUTHORIZATION_FLOW_ID_SELECTOR,
   ONBOARDING_FLOW_ID_SELECTOR,
 } from "@web-ui/constants";
-import MainContainer from "@web-ui/containers/MainContainer";
-import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
 import PrivateKeysFlow from "@web-ui/flows/PrivateKeysFlow";
-import {
-  IConnectorAuthorizationFlowParams,
-  IHypernetWebUI,
-  IRenderParams,
-  IRenderPaymentWidgetParams,
-  IOnboardingFlowParams,
-  IViewUtils,
-  IDateUtils,
-} from "@web-ui/interfaces";
 import { ViewUtils, DateUtils } from "@web-ui/utils";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget";
-import MerchantsWidget from "@web-ui/widgets/MerchantsWidget";
 import FundWidget from "@web-ui/widgets/FundWidget";
 import LinksWidget from "@web-ui/widgets/LinksWidget";
+import MerchantsWidget from "@web-ui/widgets/MerchantsWidget";
 import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
 
 export default class HypernetWebUI implements IHypernetWebUI {
@@ -77,7 +77,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
 
   private _bootstrapComponent(
     component: React.ReactNode,
-    withModal: boolean = false,
+    withModal = false,
     closeCallback?: () => void,
     modalStyle?: React.CSSProperties,
   ) {

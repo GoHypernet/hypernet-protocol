@@ -406,7 +406,6 @@ export class AccountsRepository implements IAccountsRepository {
           return okAsync<string, BlockchainUnavailableError>("");
         })
         .andThen((mySymbol) => {
-          console.log("myName", name);
           if (mySymbol == null || mySymbol == "") {
             symbol = "Unk";
           } else {

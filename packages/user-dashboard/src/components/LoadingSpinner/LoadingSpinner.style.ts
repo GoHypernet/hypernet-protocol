@@ -1,4 +1,4 @@
-import { makeStyles } from '@material-ui/core';
+import { makeStyles } from "@material-ui/core";
 
 export const useStyles = makeStyles({
   loadingWrapper: {
@@ -11,5 +11,3 @@ export const useStyles = makeStyles({
     alignItems: "center",
   },
 });
-
-

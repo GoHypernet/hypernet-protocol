@@ -1,5 +1,6 @@
-import React from "react";
 import { Box } from "@material-ui/core";
+import { IRenderParams } from "@web-ui/interfaces";
+import React from "react";
 
 import {
   TokenSelector,
@@ -8,7 +9,6 @@ import {
   BoxWrapper,
 } from "@web-ui/components";
 import { useFund } from "@web-ui/hooks";
-import { IRenderParams } from "@web-ui/interfaces";
 import { useStyles } from "@web-ui/widgets/FundWidget/FundWidget.style";
 
 interface IFundWidget extends IRenderParams {}

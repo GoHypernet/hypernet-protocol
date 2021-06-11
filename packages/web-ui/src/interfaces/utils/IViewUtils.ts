@@ -1,6 +1,6 @@
-import { BigNumber } from "ethers";
 import { EPaymentState } from "@hypernetlabs/objects";
 import { PaymentStateOption } from "@web-ui/interfaces";
+import { BigNumber } from "ethers";
 
 export interface IViewUtils {
   fromBigNumberWei(value: BigNumber): string;

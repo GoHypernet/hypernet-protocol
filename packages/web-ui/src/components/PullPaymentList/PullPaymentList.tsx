@@ -4,7 +4,6 @@ import {
   EPaymentState,
   PaymentId,
 } from "@hypernetlabs/objects";
-import React from "react";
 import {
   Box,
   TableContainer,
@@ -24,6 +23,7 @@ import {
 import { withStyles } from "@material-ui/core/styles";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
 import { useStoreContext } from "@web-ui/contexts";
+import React from "react";
 
 interface IPullPaymentList {
   pullPayments: PullPayment[];
