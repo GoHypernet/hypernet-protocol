@@ -3,6 +3,7 @@ import {
   IHypernetCoreRepository,
   IHypernetCoreRepositoryType,
 } from "@merchant-iframe/interfaces/data";
+import { IFrameHeight } from "@hypernetlabs/objects";
 import { injectable, inject } from "inversify";
 import { ResultAsync } from "neverthrow";
 
@@ -18,5 +19,9 @@ export class DisplayService implements IDisplayService {
 
   public closeRequested(): ResultAsync<void, never> {
     return this.hypernetCoreRepository.emitCloseRequested();
+  }
+
+  public heightUpdated(height: IFrameHeight): ResultAsync<void, never> {
+    return this.hypernetCoreRepository.emitHeightUpdated(height);
   }
 }

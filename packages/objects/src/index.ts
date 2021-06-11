@@ -39,3 +39,4 @@ export * from "@objects/SchemaUrl";
 export * from "@objects/BigNumberString";
 export * from "@objects/UnixTimestamp";
 export * from "@objects/PaymentStatusViewModel";
+export * from "@objects/IFrameHeight";

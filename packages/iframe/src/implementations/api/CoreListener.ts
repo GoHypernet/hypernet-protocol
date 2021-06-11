@@ -312,6 +312,10 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       parent.emit("onPrivateCredentialsRequested");
     });
 
+    this.core.onCoreIFrameheightUpdated.subscribe((iframeHeight) => {
+      parent.emit("onCoreIFrameheightUpdated", iframeHeight);
+    });
+
     this.core.onDeStorageAuthenticationStarted.subscribe(() => {
       this.coreUIService.renderDeStorageAuthenticationUI();
     });

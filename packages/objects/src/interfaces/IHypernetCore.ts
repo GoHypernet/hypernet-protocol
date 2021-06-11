@@ -31,6 +31,7 @@ import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
 import { Signature } from "@objects/Signature";
+import { IFrameHeight } from "@objects/IFrameHeight";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -307,6 +308,7 @@ export interface IHypernetCore {
   onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
   onInitializationRequired: Subject<void>;
   onPrivateCredentialsRequested: Subject<void>;
+  onCoreIFrameheightUpdated: Subject<IFrameHeight>;
 }
 
 export const IHypernetCoreType = Symbol.for("IHypernetCore");

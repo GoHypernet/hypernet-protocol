@@ -2,6 +2,7 @@ import {
   Balances,
   ControlClaim,
   EthereumAddress,
+  IFrameHeight,
   MerchantUrl,
   PullPayment,
   PushPayment,
@@ -45,6 +46,7 @@ export class ContextProviderMock implements IContextProvider {
   public onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
+  public onCoreIFrameheightUpdated: Subject<IFrameHeight>;
   public onMerchantConnectorActivated: Subject<IMerchantConnectorProxy>;
 
   public authorizedMerchants: Map<MerchantUrl, Signature>;
@@ -75,6 +77,7 @@ export class ContextProviderMock implements IContextProvider {
     this.onMerchantIFrameCloseRequested = new Subject<MerchantUrl>();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
+    this.onCoreIFrameheightUpdated = new Subject<IFrameHeight>();
     this.onMerchantConnectorActivated = new Subject();
 
     this.authorizedMerchants = new Map<MerchantUrl, Signature>();
@@ -108,6 +111,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onMerchantIFrameCloseRequested,
         this.onInitializationRequired,
         this.onPrivateCredentialsRequested,
+        this.onCoreIFrameheightUpdated,
         this.onMerchantConnectorActivated,
       );
     }
@@ -141,6 +145,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onMerchantIFrameCloseRequested,
         this.onInitializationRequired,
         this.onPrivateCredentialsRequested,
+        this.onCoreIFrameheightUpdated,
         this.onMerchantConnectorActivated,
         this.authorizedMerchants,
       );

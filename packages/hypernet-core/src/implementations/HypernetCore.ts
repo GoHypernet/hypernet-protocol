@@ -10,6 +10,7 @@ import {
   PushPayment,
   PaymentId,
   MerchantUrl,
+  IFrameHeight,
   IHypernetCore,
   Signature,
   PrivateCredentials,
@@ -142,6 +143,7 @@ export class HypernetCore implements IHypernetCore {
   public onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
+  public onCoreIFrameheightUpdated: Subject<IFrameHeight>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -222,6 +224,7 @@ export class HypernetCore implements IHypernetCore {
     this.onMerchantIFrameCloseRequested = new Subject<MerchantUrl>();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
+    this.onCoreIFrameheightUpdated = new Subject<IFrameHeight>();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -259,6 +262,7 @@ export class HypernetCore implements IHypernetCore {
       this.onMerchantIFrameCloseRequested,
       this.onInitializationRequired,
       this.onPrivateCredentialsRequested,
+      this.onCoreIFrameheightUpdated,
     );
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(network, this.logUtils, config);

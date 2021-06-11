@@ -11,6 +11,7 @@ import {
   IContextProvider,
   IContextProviderType,
 } from "@merchant-iframe/interfaces/utils";
+import { IFrameHeight } from "@hypernetlabs/objects";
 
 @injectable()
 export class HypernetCoreRepository implements IHypernetCoreRepository {
@@ -60,6 +61,12 @@ export class HypernetCoreRepository implements IHypernetCoreRepository {
 
   public emitSignMessageRequested(message: string): ResultAsync<void, never> {
     this.childApi?.emit("signMessageRequested", message);
+
+    return okAsync(undefined);
+  }
+
+  public emitHeightUpdated(height: IFrameHeight): ResultAsync<void, never> {
+    this.childApi?.emit("heightUpdated", height);
 
     return okAsync(undefined);
   }

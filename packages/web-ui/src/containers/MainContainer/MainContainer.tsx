@@ -1,7 +1,9 @@
 import LoadingSpinner from "@web-ui/components/LoadingSpinner";
 import React from "react";
+import { Box } from "@material-ui/core";
 
 import Modal from "@web-ui/containers/Modal";
+import { useStyles } from "@web-ui/containers/MainContainer/MainContainer.style";
 
 interface IMainContainer {
   children: React.ReactNode;
@@ -16,6 +18,8 @@ const MainContainer: React.FC<IMainContainer> = ({
   closeCallback,
   modalStyle,
 }: IMainContainer) => {
+  const classes = useStyles();
+
   return (
     <>
       <LoadingSpinner />
@@ -24,7 +28,7 @@ const MainContainer: React.FC<IMainContainer> = ({
           {children}
         </Modal>
       ) : (
-        <>{children}</>
+        <Box className={classes.wrapper}>{children}</Box>
       )}
     </>
   );

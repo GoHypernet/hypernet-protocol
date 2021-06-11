@@ -15,6 +15,7 @@ import {
   IContextProvider,
   IContextProviderType,
 } from "@merchant-iframe/interfaces/utils";
+import { IFrameHeight } from "@web-integration/../../objects/src/IFrameHeight";
 
 @injectable()
 export class MerchantConnectorListener implements IMerchantConnectorListener {
@@ -70,6 +71,13 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
       if (connector.displayRequested != null) {
         connector.displayRequested.subscribe(() => {
           this.displayService.displayRequested();
+          // We need setTimeout here because if the merchant is using some frontend library like react,
+          // we might need to wait for the react application to get renederd and after that update the height
+          setTimeout(() => {
+            this.displayService.heightUpdated(
+              IFrameHeight(document.body.offsetHeight),
+            );
+          }, 100);
         });
       }
 

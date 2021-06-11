@@ -7,6 +7,7 @@ import {
   PublicIdentifier,
   MerchantUrl,
   Signature,
+  IFrameHeight,
 } from "@hypernetlabs/objects";
 import { okAsync, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
@@ -50,6 +51,7 @@ export class ContextProvider implements IContextProvider {
     onMerchantIFrameCloseRequested: Subject<MerchantUrl>,
     onInitializationRequired: Subject<void>,
     onPrivateCredentialsRequested: Subject<void>,
+    onCoreIFrameheightUpdated: Subject<IFrameHeight>,
   ) {
     this.context = new HypernetContext(
       null,
@@ -77,6 +79,7 @@ export class ContextProvider implements IContextProvider {
       onMerchantIFrameCloseRequested,
       onInitializationRequired,
       onPrivateCredentialsRequested,
+      onCoreIFrameheightUpdated,
       new Subject<IMerchantConnectorProxy>(),
     );
     this._initializePromiseResolve = () => null;
@@ -134,6 +137,7 @@ export class ContextProvider implements IContextProvider {
           this.context.onMerchantIFrameCloseRequested,
           this.context.onInitializationRequired,
           this.context.onPrivateCredentialsRequested,
+          this.context.onCoreIFrameheightUpdated,
           this.context.onMerchantConnectorProxyActivated,
           new Map<MerchantUrl, Signature>(),
         ),

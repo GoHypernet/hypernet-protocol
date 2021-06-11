@@ -27,6 +27,7 @@ import {
   TransferResolutionError,
   PreferredPaymentTokenError,
   IHypernetCore,
+  IFrameHeight,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -71,6 +72,7 @@ export default class HypernetIFrameProxy
     this.onMerchantIFrameCloseRequested = new Subject<MerchantUrl>();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
+    this.onCoreIFrameheightUpdated = new Subject<IFrameHeight>();
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -183,6 +185,10 @@ export default class HypernetIFrameProxy
 
         child.on("onPrivateCredentialsRequested", () => {
           this.onPrivateCredentialsRequested.next();
+        });
+
+        child.on("onCoreIFrameheightUpdated", (hightData) => {
+          this.onCoreIFrameheightUpdated.next(hightData);
         });
       });
     });
@@ -497,4 +503,5 @@ export default class HypernetIFrameProxy
   public onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
+  public onCoreIFrameheightUpdated: Subject<IFrameHeight>;
 }

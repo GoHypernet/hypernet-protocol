@@ -16,6 +16,7 @@ import {
   PullPayment,
   PushPayment,
   MerchantActivationError,
+  IFrameHeight,
 } from "@hypernetlabs/objects";
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
@@ -126,6 +127,10 @@ export class MerchantConnectorProxy
         } else {
           this._showMerchantIFrame(context);
         }
+      });
+
+      this.child?.on("heightUpdated", (iframeHeight: IFrameHeight) => {
+        context.onCoreIFrameheightUpdated.next(iframeHeight);
       });
 
       this.child?.on("sendFundsRequested", (request: ISendFundsRequest) => {

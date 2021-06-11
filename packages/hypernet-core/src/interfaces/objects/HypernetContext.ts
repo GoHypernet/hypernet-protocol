@@ -7,6 +7,7 @@ import {
   EthereumAddress,
   MerchantUrl,
   Signature,
+  IFrameHeight,
 } from "@hypernetlabs/objects";
 import { Subject } from "rxjs";
 
@@ -39,6 +40,7 @@ export class HypernetContext {
     public onMerchantIFrameCloseRequested: Subject<MerchantUrl>,
     public onInitializationRequired: Subject<void>,
     public onPrivateCredentialsRequested: Subject<void>,
+    public onCoreIFrameheightUpdated: Subject<IFrameHeight>,
     public onMerchantConnectorProxyActivated: Subject<IMerchantConnectorProxy>,
   ) {}
 }
@@ -71,6 +73,7 @@ export class InitializedHypernetContext {
     public onMerchantIFrameCloseRequested: Subject<MerchantUrl>,
     public onInitializationRequired: Subject<void>,
     public onPrivateCredentialsRequested: Subject<void>,
+    public onCoreIFrameheightUpdated: Subject<IFrameHeight>,
     public onMerchantConnectorProxyActivated: Subject<IMerchantConnectorProxy>,
     public authorizedMediators: Map<MerchantUrl, Signature>,
   ) {}
