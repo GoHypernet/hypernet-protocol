@@ -5,7 +5,14 @@
     data-bind="foreach: authorizedMerchants"
   >
     <li class="list-group-item remove-padding flex flex-row space-between">
-      <p class="m-0" data-bind="text: $data"></p>
+      <p class="m-0" style="width: 80%" data-bind="text: $data"></p>
+      <img
+        data-bind="click: $parent.deauthorizeMerchantClick"
+        class="pointer"
+        height="20"
+        src="https://res.cloudinary.com/dqueufbs7/image/upload/v1623441879/images/130877.png"
+      />
+
       <img
         data-bind="click: $parent.openMerchantIFrameClick"
         class="pointer"

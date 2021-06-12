@@ -29,7 +29,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       this.currentMerchantUrl = merchantUrl;
     });
 
-    // TODO: check this when dealing with core multiple instances issue
     if (window.hypernetWebUIInstance) {
       this.webUIClient = window.hypernetWebUIInstance as IHypernetWebUI;
     } else {
@@ -88,21 +87,9 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     const closeButton = document.createElement("div");
     closeButton.id = "__hypernet-protocol-iframe-close-icon__";
     closeButton.innerHTML = `
-      <img src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png" width="20" />
+      <img id="__hypernet-protocol-iframe-close-img__" src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png" width="20" />
     `;
     iframeContainer.appendChild(closeButton);
-
-    closeButton.addEventListener(
-      "click",
-      (e) => {
-        if (this.currentMerchantUrl != null) {
-          this.core.closeMerchantIFrame(this.currentMerchantUrl);
-          this.currentMerchantUrl = null;
-        }
-        iframeContainer.style.display = "none";
-      },
-      false,
-    );
 
     // Add iframe modal style
     const style = document.createElement("style");
@@ -112,8 +99,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
           position: absolute;
           display: none;
           border: none;
-          width: 700px;
-          height: 800px;
+          width: 550px;
+          height: 60%;
           min-height: 200px;
           background-color: white;
           top: 50%;
@@ -121,7 +108,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
           box-shadow: 0px 4px 20px #000000;
           border-radius: 4px;
           transform: translate(-50%, -50%);
-          padding: 15px;
         }
         #__hypernet-protocol-iframe-container__ {
           position: absolute;
@@ -134,11 +120,14 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
           z-index: 999999 !important;
         }
         #__hypernet-protocol-iframe-close-icon__ {
+          z-index: 2;
           position: absolute;
+          height: 60%;
           top: 50%;
           left: 50%;
-          transform: translate(calc(-50% + 335px), calc(-50% - 385px));
-          z-index: 2;
+          transform: translate(calc(-50% + 263px), -50%);
+        }
+        #__hypernet-protocol-iframe-close-img__{
           cursor: pointer;
         }
     `),
@@ -147,6 +136,22 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
     // Attach everything to the body
     document.body.appendChild(iframeContainer);
+
+    const closeImg = document.getElementById(
+      "__hypernet-protocol-iframe-close-img__",
+    );
+
+    closeImg?.addEventListener(
+      "click",
+      (e) => {
+        if (this.currentMerchantUrl != null) {
+          this.core.closeMerchantIFrame(this.currentMerchantUrl);
+          this.currentMerchantUrl = null;
+        }
+        iframeContainer.style.display = "none";
+      },
+      false,
+    );
 
     return iframeContainer;
   }

@@ -121,7 +121,9 @@ module.exports = {
   // TODO: this devtool setup is for development it makes wepback a bit faster, this setup should be different for production
   devtool: "eval-source-map",
   plugins: [
-    new HtmlWebpackPlugin({}),
+    new HtmlWebpackPlugin({
+      template: path.join(__dirname, "src/index.html"),
+    }),
     //new CleanWebpackPlugin({ dangerouslyAllowCleanPatternsOutsideProject: false }),
     new webpack.ProvidePlugin({
       Buffer: ["buffer", "Buffer"],

@@ -3,7 +3,6 @@ import { pathToRegexp } from "path-to-regexp";
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
-import HNPLogo from "@user-dashboard/assets/images/HNPLogo.png";
 import { useStyles } from "@user-dashboard/components/Header/Header.style";
 import { routes } from "@user-dashboard/containers/Router/Router.routes";
 
@@ -17,7 +16,11 @@ const Header: React.FC = () => {
   return (
     <Box className={classes.headerWrapper}>
       <Box className={classes.logoWrapper}>
-        <img className={classes.logo} src={HNPLogo} alt="" />
+        <img
+          className={classes.logo}
+          src="https://res.cloudinary.com/dqueufbs7/image/upload/v1623464753/images/HNPLogo.png"
+          alt=""
+        />
       </Box>
       <Box className={classes.menuWrapper}>
         {routes.map((route, index) => (
