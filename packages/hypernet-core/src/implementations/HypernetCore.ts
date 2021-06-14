@@ -261,7 +261,7 @@ export class HypernetCore implements IHypernetCore {
       this.onPrivateCredentialsRequested,
     );
     this.paymentIdUtils = new PaymentIdUtils();
-    this.configProvider = new ConfigProvider(network, this.logUtils, config);
+    this.configProvider = new ConfigProvider(this.logUtils, config);
     this.linkUtils = new LinkUtils(this.contextProvider);
 
     this.merchantConnectorProxyFactory = new MerchantConnectorProxyFactory(

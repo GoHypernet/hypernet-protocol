@@ -1,4 +1,11 @@
 version: 2.1
+orbs:
+  gke: circleci/gcp-gke@1.2.0
+
+executors:
+  ubuntu:
+    machine:
+      image: ubuntu-2004:202104-01
 
 defaults: &defaults
   working_directory: ~/repo
@@ -59,3 +66,34 @@ workflows:
               only: master
           requires:
             - test
+      - gke/publish-and-rollout-image:
+          cluster: galileo
+          container: hypernet-protocol-core-iframe
+          deployment: hypernet-protocol-core-iframe
+          image: hypernetlabs/hypernet-protocol-core-iframe
+          google-compute-zone: GOOGLE_KUBERNETES_ZONE
+          tag: $CIRCLE_SHA1
+          dockerfile-dir: packages/iframe
+          docker-context: .
+          filters:
+            branches:
+              only: dev
+          context: Development
+          executor: ubuntu
+          use-remote-docker: false
+          extra-build-args: '--build-arg IFRAME_SOURCE=http://vector-iframe-dev.hypernetlabs.io --build-arg CHAIN_PROVIDERS={"1337": "eth-provider-dev.hypernetlabs.io:8545"} --build-arg VALIDATOR_IFRAME_URL=https://validator-iframe-dev.hypernetlabs.io'
+      - gke/publish-and-rollout-image:
+          cluster: galileo
+          container: hypernet-protocol-validator-iframe
+          deployment: hypernet-protocol-validator-iframe
+          image: hypernetlabs/hypernet-protocol-validator-iframe
+          google-compute-zone: GOOGLE_KUBERNETES_ZONE
+          tag: $CIRCLE_SHA1
+          dockerfile-dir: packages/merchant-iframe
+          docker-context: .
+          filters:
+            branches:
+              only: dev
+          context: Development
+          executor: ubuntu
+          use-remote-docker: false

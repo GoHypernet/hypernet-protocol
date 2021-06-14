@@ -27,11 +27,11 @@
     "!dist/tsconfig.tsbuildinfo"
   ],
   "scripts": {
-    "build": "yarn clean && yarn compile && yarn postcompile",
+    "build": "yarn clean && yarn compile && yarn postCompile",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "compile": "tsc --build && cd ../.. && yarn alias",
     "alias": "tsc-alias",
-    "postcompile": "webpack",
+    "postCompile": "webpack",
     "prepare": "yarn build",
     "start": "webpack serve --config webpack.config.js --mode development",
     "start-iframe-watch": "cd ../iframe && yarn start",
