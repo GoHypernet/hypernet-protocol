@@ -25,6 +25,24 @@ export class AuthorizedMerchantsViewModel {
       },
     });
 
+    this.getAuthorizedMerchants();
+  }
+
+  openMerchantIFrameClick = (merchantUrl: MerchantUrl) => {
+    this.integration.core.waitInitialized().map(() => {
+      this.integration.displayMerchantIFrame(merchantUrl);
+    });
+  };
+
+  deauthorizeMerchantClick = (merchantUrl: MerchantUrl) => {
+    this.integration.core.waitInitialized().map(() => {
+      this.integration.core.deauthorizeMerchant(merchantUrl).map(() => {
+        this.getAuthorizedMerchants();
+      });
+    });
+  };
+
+  getAuthorizedMerchants() {
     this.integration.core
       .waitInitialized()
       .andThen(() => {
@@ -38,12 +56,6 @@ export class AuthorizedMerchantsViewModel {
         this.authorizedMerchants(merchantStrings);
       });
   }
-
-  openMerchantIFrameClick = (merchantUrl: MerchantUrl) => {
-    this.integration.core.waitInitialized().map(() => {
-      this.integration.displayMerchantIFrame(merchantUrl);
-    });
-  };
 }
 
 ko.components.register("authorized-merchants", {
