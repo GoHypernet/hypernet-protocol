@@ -22,6 +22,38 @@ COPY ./packages/web-integration/package.json /build/packages/web-integration/pac
 COPY ./packages/web-ui/package.json /build/packages/web-ui/package.json
 RUN yarn install
 
+# Configuration for the protocol is baked in at build time
+# We create a bunch of ARGs so that we can configure it properly
+# for the environment.
+ARG IFRAME_SOURCE=http://localhost:5000
+ENV __IFRAME_SOURCE__ $IFRAME_SOURCE
+
+ARG ROUTER_PUBLIC_IDENTIFIER=vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR
+ENV __ROUTER_PUBLIC_IDENTIFIER__ $ROUTER_PUBLIC_IDENTIFIER
+
+ARG CHAIN_ID=1337
+ENV __CHAIN_ID__ $CHAIN_ID
+
+ARG CHAIN_PROVIDERS='{"1337": "http://localhost:8545"}'
+ENV __CHAIN_PROVIDERS__ $CHAIN_PROVIDERS
+
+ARG CHAIN_ADDRESSES='{ \
+      "1337": { \
+        "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
+        "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F" \
+      } \
+    }'
+ENV __CHAIN_ADDRESSES__ $CHAIN_ADDRESSES
+
+ARG VALIDATOR_IFRAME_URL=http://localhost:5005
+ENV __VALIDATOR_IFRAME_URL__ $VALIDATOR_IFRAME_URL
+
+ARG CERAMIC_NODE_URL=https://ceramic-clay.3boxlabs.com
+ENV __CERAMIC_NODE_URL__ $CERAMIC_NODE_URL
+
+ARG DEBUG=true
+ENV __DEBUG__ $DEBUG
+
 # Copy the rest of the stuff and build
 COPY . /build
 RUN cd packages/iframe && yarn build

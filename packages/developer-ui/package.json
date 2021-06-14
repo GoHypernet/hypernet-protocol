@@ -32,12 +32,12 @@
     "test": "test"
   },
   "scripts": {
-    "build": "yarn clean && yarn compile && yarn postcompile",
-    "dockerize": "docker build -t hypernetlabs/hypernet-protocol-developer-ui -f Dockerfile ../..",
+    "build": "yarn clean && yarn compile && yarn postCompile",
+    "dockerize": "docker build -t hypernetlabs/hypernet-protocol-developer-ui -f Dockerfile --progress=plain ../..",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "compile": "tsc --build && cd ../.. && yarn alias",
     "alias": "tsc-alias",
-    "postcompile": "webpack",
+    "postCompile": "webpack",
     "test": "echo \"Error: run tests from root\" && exit 0",
     "test-integration": "cucumber-js --require-module ts-node/register --require-module tsconfig-paths/register --require 'test/integration/**/*.ts' test/integration/features/**/*.feature"
   },

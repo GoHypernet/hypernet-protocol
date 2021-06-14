@@ -1,11 +1,14 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
 
-const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const webpack = require("webpack");
 
 const configFilePath = require.resolve("./tsconfig.json");
+
+console.log("CHARLIE!");
+console.log(process.env.__IFRAME_SOURCE__);
 
 /** @type import('webpack').Configuration */
 module.exports = {
@@ -127,6 +130,20 @@ module.exports = {
     new webpack.ProvidePlugin({
       Buffer: ["buffer", "Buffer"],
       process: "process/browser",
+    }),
+    new webpack.DefinePlugin({
+      __IFRAME_SOURCE__: JSON.stringify(process.env.__IFRAME_SOURCE__),
+      __ROUTER_PUBLIC_IDENTIFIER__: JSON.stringify(
+        process.env.__ROUTER_PUBLIC_IDENTIFIER__,
+      ),
+      __CHAIN_ID__: JSON.stringify(process.env.__CHAIN_ID__),
+      __CHAIN_PROVIDERS__: JSON.stringify(process.env.__CHAIN_PROVIDERS__),
+      __CHAIN_ADDRESSES__: JSON.stringify(process.env.__CHAIN_ADDRESSES__),
+      __VALIDATOR_IFRAME_URL__: JSON.stringify(
+        process.env.__VALIDATOR_IFRAME_URL__,
+      ),
+      __CERAMIC_NODE_URL__: JSON.stringify(process.env.__CERAMIC_NODE_URL__),
+      __DEBUG__: JSON.stringify(process.env.__DEBUG__),
     }),
   ],
 };
