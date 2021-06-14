@@ -77,7 +77,7 @@ workflows:
           docker-context: .
           filters:
             branches:
-              only: feature/GalileoDemo
+              only: dev
           context: Development
           executor: ubuntu
           use-remote-docker: false
@@ -93,7 +93,7 @@ workflows:
           docker-context: .
           filters:
             branches:
-              only: feature/GalileoDemo
+              only: dev
           context: Development
           executor: ubuntu
           use-remote-docker: false
