@@ -15,6 +15,8 @@ export class HypernetConfig {
     public defaultPaymentExpiryLength: number,
     public chainProviders: ChainProviders,
     public chainAddresses: ChainAddresses,
+    public natsUrl: string,
+    public authUrl: string,
     public merchantIframeUrl: string,
     public ceramicNodeUrl: string,
     public storageAliases: Map<DefinitionName, SchemaUrl>,

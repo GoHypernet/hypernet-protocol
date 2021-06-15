@@ -21,6 +21,8 @@ export class BrowserNodeFactory implements IBrowserNodeFactory {
         iframeSrc: config.iframeSource,
         chainProviders: config.chainProviders,
         chainAddresses: config.chainAddresses,
+        natsUrl: config.natsUrl,
+        authUrl: config.authUrl,
         //messagingUrl: 'localhost:80'
       });
 

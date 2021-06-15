@@ -136,6 +136,8 @@ module.exports = {
       __CHAIN_ID__: JSON.stringify(process.env.__CHAIN_ID__),
       __CHAIN_PROVIDERS__: JSON.stringify(process.env.__CHAIN_PROVIDERS__),
       __CHAIN_ADDRESSES__: JSON.stringify(process.env.__CHAIN_ADDRESSES__),
+      __NATS_URL__: JSON.stringify(process.env.__NATS_URL__),
+      __AUTH_URL__: JSON.stringify(process.env.__AUTH_URL__),
       __VALIDATOR_IFRAME_URL__: JSON.stringify(
         process.env.__VALIDATOR_IFRAME_URL__,
       ),
