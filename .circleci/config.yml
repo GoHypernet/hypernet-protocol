@@ -81,7 +81,7 @@ workflows:
           context: Development
           executor: ubuntu
           use-remote-docker: false
-          extra-build-args: '--build-arg IFRAME_SOURCE=http://vector-iframe-dev.hypernetlabs.io --build-arg CHAIN_PROVIDERS={"1337": "eth-provider-dev.hypernetlabs.io:8545"} --build-arg VALIDATOR_IFRAME_URL=https://validator-iframe-dev.hypernetlabs.io'
+          extra-build-args: "--build-arg IFRAME_SOURCE=http://vector-iframe-dev.hypernetlabs.io --build-arg 'CHAIN_PROVIDERS={\"1337\": \"eth-provider-dev.hypernetlabs.io\"}' --build-arg VALIDATOR_IFRAME_URL=https://validator-iframe-dev.hypernetlabs.io"
       - gke/publish-and-rollout-image:
           cluster: galileo
           container: hypernet-protocol-validator-iframe
