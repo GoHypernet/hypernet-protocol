@@ -77,7 +77,7 @@ workflows:
           docker-context: .
           filters:
             branches:
-              only: feature/FixCircleCIBuild
+              only: dev
           context: Development
           executor: ubuntu
           use-remote-docker: false
