@@ -42,8 +42,8 @@ export class ConfigProvider implements IConfigProvider {
       5 * 24 * 60 * 60, // 5 days as the default payment expiration time
       JSON.parse(__CHAIN_PROVIDERS__) as ChainProviders, // chainProviders
       JSON.parse(__CHAIN_ADDRESSES__) as ChainAddresses, // chainAddresses
-      JSON.parse(__NATS_URL__), // natsUrl
-      JSON.parse(__AUTH_URL__), // authUrl
+      __NATS_URL__, // natsUrl
+      __AUTH_URL__, // authUrl
       __VALIDATOR_IFRAME_URL__, // merchantIframeUrl
       __CERAMIC_NODE_URL__, // ceramicNodeUrl,
       new Map([
