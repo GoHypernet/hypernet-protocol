@@ -1,9 +1,9 @@
+import { Box } from "@material-ui/core";
 import LoadingSpinner from "@web-ui/components/LoadingSpinner";
 import React from "react";
-import { Box } from "@material-ui/core";
 
-import Modal from "@web-ui/containers/Modal";
 import { useStyles } from "@web-ui/containers/MainContainer/MainContainer.style";
+import Modal from "@web-ui/containers/Modal";
 
 interface IMainContainer {
   children: React.ReactNode;

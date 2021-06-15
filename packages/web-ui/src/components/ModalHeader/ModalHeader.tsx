@@ -1,8 +1,9 @@
 import { Box } from "@material-ui/core";
-import { HYPER_TOKEN_LOGO_URL } from "@web-ui/constants";
 import React from "react";
 
 import { useStyles } from "./ModalHeader.style";
+
+import { HYPER_TOKEN_LOGO_URL } from "@web-ui/constants";
 
 export const ModalHeader: React.FC = () => {
   const classes = useStyles();
