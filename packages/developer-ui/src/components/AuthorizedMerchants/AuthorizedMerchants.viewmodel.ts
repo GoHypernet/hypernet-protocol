@@ -8,9 +8,13 @@ export class AuthorizedMerchantsParams {
   constructor(public integration: IHypernetWebIntegration) {}
 }
 
+export class MerchantStatus {
+  constructor(public merchantUrl: MerchantUrl, public status: boolean) {}
+}
+
 // tslint:disable-next-line: max-classes-per-file
 export class AuthorizedMerchantsViewModel {
-  public authorizedMerchants: ko.ObservableArray<MerchantUrl>;
+  public authorizedMerchants: ko.ObservableArray<MerchantStatus>;
 
   protected integration: IHypernetWebIntegration;
 
@@ -21,24 +25,28 @@ export class AuthorizedMerchantsViewModel {
 
     this.integration.core.onMerchantAuthorized.subscribe({
       next: (val) => {
-        this.authorizedMerchants.push(MerchantUrl(val.toString()));
+        this.authorizedMerchants.push(
+          new MerchantStatus(MerchantUrl(val.toString()), true),
+        );
       },
     });
 
     this.getAuthorizedMerchants();
   }
 
-  openMerchantIFrameClick = (merchantUrl: MerchantUrl) => {
+  openMerchantIFrameClick = (merchantStatus: MerchantStatus) => {
     this.integration.core.waitInitialized().map(() => {
-      this.integration.displayMerchantIFrame(merchantUrl);
+      this.integration.displayMerchantIFrame(merchantStatus.merchantUrl);
     });
   };
 
-  deauthorizeMerchantClick = (merchantUrl: MerchantUrl) => {
+  deauthorizeMerchantClick = (merchantStatus: MerchantStatus) => {
     this.integration.core.waitInitialized().map(() => {
-      this.integration.core.deauthorizeMerchant(merchantUrl).map(() => {
-        this.getAuthorizedMerchants();
-      });
+      this.integration.core
+        .deauthorizeMerchant(merchantStatus.merchantUrl)
+        .map(() => {
+          this.getAuthorizedMerchants();
+        });
     });
   };
 
@@ -46,12 +54,12 @@ export class AuthorizedMerchantsViewModel {
     this.integration.core
       .waitInitialized()
       .andThen(() => {
-        return this.integration.core.getAuthorizedMerchants();
+        return this.integration.core.getAuthorizedMerchantsConnectorsStatus();
       })
-      .map((merchants) => {
-        const merchantStrings = new Array<MerchantUrl>();
-        for (const keyval of merchants) {
-          merchantStrings.push(MerchantUrl(keyval[0].toString()));
+      .map((merchantsMap) => {
+        const merchantStrings = new Array<MerchantStatus>();
+        for (const [merchantUrl, status] of merchantsMap.entries()) {
+          merchantStrings.push(new MerchantStatus(merchantUrl, status));
         }
         this.authorizedMerchants(merchantStrings);
       });
