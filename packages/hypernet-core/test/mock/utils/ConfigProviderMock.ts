@@ -37,6 +37,8 @@ export class ConfigProviderMock implements IConfigProvider {
               "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F",
           },
         },
+        "natsUrl",
+        "authUrl",
         "merchantIframeUrl",
         "https://ceramic-clay.3boxlabs.com",
         new Map([
