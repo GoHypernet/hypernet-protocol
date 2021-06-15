@@ -7,9 +7,6 @@ const webpack = require("webpack");
 
 const configFilePath = require.resolve("./tsconfig.json");
 
-console.log("CHARLIE!");
-console.log(process.env.__IFRAME_SOURCE__);
-
 /** @type import('webpack').Configuration */
 module.exports = {
   context: __dirname,

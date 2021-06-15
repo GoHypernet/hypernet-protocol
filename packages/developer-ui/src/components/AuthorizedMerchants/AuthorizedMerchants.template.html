@@ -4,8 +4,12 @@
     class="list-group list-group-flush"
     data-bind="foreach: authorizedMerchants"
   >
-    <li class="list-group-item remove-padding flex flex-row space-between">
-      <p class="m-0" style="width: 80%" data-bind="text: $data"></p>
+    <li
+      class="list-group-item remove-padding flex flex-row space-between"
+      data-bind="style: { color: status ? 'black' : 'grey' }"
+    >
+      <p class="m-0" style="width: 80%" data-bind="text: merchantUrl"></p>
+
       <img
         data-bind="click: $parent.deauthorizeMerchantClick"
         class="pointer"

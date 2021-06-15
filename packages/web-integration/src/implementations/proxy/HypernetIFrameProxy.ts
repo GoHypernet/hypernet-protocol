@@ -30,7 +30,7 @@ import {
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
-import { Result, ResultAsync, ok } from "neverthrow";
+import { Result, ResultAsync, ok, okAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
 export default class HypernetIFrameProxy
@@ -413,9 +413,20 @@ export default class HypernetIFrameProxy
   public displayMerchantIFrame(
     merchantUrl: MerchantUrl,
   ): ResultAsync<void, MerchantConnectorError> {
-    this._displayCoreIFrame();
+    return this.getAuthorizedMerchantsConnectorsStatus().andThen(
+      (merchantsMap) => {
+        if (merchantsMap.get(merchantUrl) == true) {
+          this._displayCoreIFrame();
 
-    return this._createCall("displayMerchantIFrame", merchantUrl);
+          return this._createCall("displayMerchantIFrame", merchantUrl);
+        } else {
+          alert(
+            `Merchant ${merchantUrl} is not activated at the moment, try again later`,
+          );
+          return okAsync(undefined);
+        }
+      },
+    );
   }
 
   public closeMerchantIFrame(
