@@ -15,7 +15,7 @@ import { IConfigProvider } from "@interfaces/utilities";
 
 declare const __IFRAME_SOURCE__: string;
 declare const __ROUTER_PUBLIC_IDENTIFIER__: PublicIdentifier;
-declare const __CHAIN_ID__: number;
+declare const __CHAIN_ID__: string;
 declare const __CHAIN_PROVIDERS__: string;
 declare const __CHAIN_ADDRESSES__: string;
 declare const __NATS_URL__: string;
@@ -33,15 +33,29 @@ export class ConfigProvider implements IConfigProvider {
       return;
     }
 
+    // Convert the __CHAIN_PROVIDERS__ and __CHAIN_ADDRESSES__ json to
+    // proper objects
+    const chainProvidersObj = JSON.parse(__CHAIN_PROVIDERS__);
+    const chainProviders: ChainProviders = {};
+    for (const chainIdStr in chainProvidersObj) {
+      chainProviders[parseInt(chainIdStr)] = chainProvidersObj[chainIdStr];
+    }
+
+    const chainAddressesObj = JSON.parse(__CHAIN_ADDRESSES__);
+    const chainAddresses: ChainAddresses = {};
+    for (const chainIdStr in chainAddressesObj) {
+      chainAddresses[parseInt(chainIdStr)] = chainAddressesObj[chainIdStr];
+    }
+
     this.config = new HypernetConfig(
       __IFRAME_SOURCE__, // iframeSource
       __ROUTER_PUBLIC_IDENTIFIER__, // routerPublicIdentifier
-      __CHAIN_ID__, // Chain ID
+      parseInt(__CHAIN_ID__, 10), // Chain ID
       EthereumAddress(constants.AddressZero), // Hypertoken address,
       "Hypernet", // Hypernet Protocol Domain for Transfers
       5 * 24 * 60 * 60, // 5 days as the default payment expiration time
-      JSON.parse(__CHAIN_PROVIDERS__) as ChainProviders, // chainProviders
-      JSON.parse(__CHAIN_ADDRESSES__) as ChainAddresses, // chainAddresses
+      chainProviders, // chainProviders
+      chainAddresses, // chainAddresses
       __NATS_URL__, // natsUrl
       __AUTH_URL__, // authUrl
       __VALIDATOR_IFRAME_URL__, // merchantIframeUrl
