@@ -96,7 +96,7 @@ class TestMerchantConnector implements IMerchantConnector {
     window.document.body.appendChild(element);
 
     // connector did all the rendering stuff, now he is asking merchant-iframe to show his stuff
-    // Merchant iframe Postmate model is running after the connector code get compiled in MerchantService.activateMerchantConnector so we need a small delay to wait for the Postmate model to get initialized.
+    // Merchant iframe Postmate model is running after the connector code get compiled in MerchantConnectorService.activateMerchantConnector so we need a small delay to wait for the Postmate model to get initialized.
     setTimeout(() => {
       //this.displayRequested.next();
     }, 100);

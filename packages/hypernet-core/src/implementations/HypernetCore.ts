@@ -55,7 +55,7 @@ import {
   AccountService,
   DevelopmentService,
   LinkService,
-  MerchantService,
+  MerchantConnectorService,
   PaymentService,
 } from "@implementations/business";
 import {
@@ -88,7 +88,7 @@ import {
   IAccountService,
   IDevelopmentService,
   ILinkService,
-  IMerchantService,
+  IMerchantConnectorService,
   IPaymentService,
 } from "@interfaces/business";
 import {
@@ -181,7 +181,7 @@ export class HypernetCore implements IHypernetCore {
   protected paymentService: IPaymentService;
   protected linkService: ILinkService;
   protected developmentService: IDevelopmentService;
-  protected merchantService: IMerchantService;
+  protected merchantConnectorService: IMerchantConnectorService;
 
   // API
   protected vectorAPIListener: IVectorListener;
@@ -391,7 +391,7 @@ export class HypernetCore implements IHypernetCore {
     //this.controlService = new ControlService(this.contextProvider, this.threeboxMessagingRepository);
     this.linkService = new LinkService(this.linkRepository);
     this.developmentService = new DevelopmentService(this.accountRepository);
-    this.merchantService = new MerchantService(
+    this.merchantConnectorService = new MerchantConnectorService(
       this.merchantConnectorRepository,
       this.accountRepository,
       this.contextProvider,
@@ -704,7 +704,7 @@ export class HypernetCore implements IHypernetCore {
         ]); // , this.threeboxMessagingListener.initialize()]);
       })
       .andThen(() => {
-        return this.merchantService.activateAuthorizedMerchants();
+        return this.merchantConnectorService.activateAuthorizedMerchants();
       })
       // .andThen(() => {
       //   // Claim control
@@ -736,7 +736,7 @@ export class HypernetCore implements IHypernetCore {
   public authorizeMerchant(
     merchantUrl: MerchantUrl,
   ): ResultAsync<void, MerchantValidationError> {
-    return this.merchantService.authorizeMerchant(merchantUrl);
+    return this.merchantConnectorService.authorizeMerchant(merchantUrl);
   }
 
   public deauthorizeMerchant(
@@ -745,33 +745,33 @@ export class HypernetCore implements IHypernetCore {
     void,
     PersistenceError | ProxyError | MerchantAuthorizationDeniedError
   > {
-    return this.merchantService.deauthorizeMerchant(merchantUrl);
+    return this.merchantConnectorService.deauthorizeMerchant(merchantUrl);
   }
 
   public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
     Map<MerchantUrl, boolean>,
     PersistenceError
   > {
-    return this.merchantService.getAuthorizedMerchantsConnectorsStatus();
+    return this.merchantConnectorService.getAuthorizedMerchantsConnectorsStatus();
   }
 
   public getAuthorizedMerchants(): ResultAsync<
     Map<MerchantUrl, Signature>,
     PersistenceError
   > {
-    return this.merchantService.getAuthorizedMerchants();
+    return this.merchantConnectorService.getAuthorizedMerchants();
   }
 
   public closeMerchantIFrame(
     merchantUrl: MerchantUrl,
   ): ResultAsync<void, MerchantConnectorError> {
-    return this.merchantService.closeMerchantIFrame(merchantUrl);
+    return this.merchantConnectorService.closeMerchantIFrame(merchantUrl);
   }
 
   public displayMerchantIFrame(
     merchantUrl: MerchantUrl,
   ): ResultAsync<void, MerchantConnectorError> {
-    return this.merchantService.displayMerchantIFrame(merchantUrl);
+    return this.merchantConnectorService.displayMerchantIFrame(merchantUrl);
   }
 
   public providePrivateCredentials(

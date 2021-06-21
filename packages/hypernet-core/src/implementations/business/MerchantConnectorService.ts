@@ -11,14 +11,14 @@ import { MerchantUrl, Signature } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
 
-import { IMerchantService } from "@interfaces/business";
+import { IMerchantConnectorService } from "@interfaces/business";
 import {
   IAccountsRepository,
   IMerchantConnectorRepository,
 } from "@interfaces/data";
 import { IContextProvider } from "@interfaces/utilities";
 
-export class MerchantService implements IMerchantService {
+export class MerchantConnectorService implements IMerchantConnectorService {
   protected deauthorizationTimeout: number = 5000;
   constructor(
     protected merchantConnectorRepository: IMerchantConnectorRepository,
@@ -118,27 +118,13 @@ export class MerchantService implements IMerchantService {
     merchantUrl: MerchantUrl,
   ): ResultAsync<
     void,
-    | PersistenceError
-    | ProxyError
-    | MerchantAuthorizationDeniedError
+    PersistenceError | ProxyError | MerchantAuthorizationDeniedError
   > {
     return this.contextProvider.getContext().andThen((context) => {
       context.onMerchantDeauthorizationStarted.next(merchantUrl);
 
-      // Destroy the merchant connector if deauthorizeMerchant lasted more than deauthorizationTimeout
-      const deauthorizationTimeoutPromise = new Promise<void>((resolve) => {
-        setTimeout(() => {
-          this.merchantConnectorRepository.destroyProxy(merchantUrl);
-          resolve(undefined);
-        }, this.deauthorizationTimeout);
-      });
-      const deauthorizationTimeoutResult = ResultAsync.fromPromise(
-        deauthorizationTimeoutPromise,
-        (e) => e as Error,
-      );
-
       return ResultUtils.race([
-        deauthorizationTimeoutResult,
+        this._getDeauthorizationTimeoutResult(merchantUrl),
         this.merchantConnectorRepository.deauthorizeMerchant(merchantUrl),
       ]);
     });
@@ -183,5 +169,21 @@ export class MerchantService implements IMerchantService {
     merchantUrl: MerchantUrl,
   ): ResultAsync<void, MerchantConnectorError> {
     return this.merchantConnectorRepository.displayMerchantIFrame(merchantUrl);
+  }
+
+  /* Destroy merchant connector if deauthorizeMerchant lasted more than deauthorizationTimeout */
+  private _getDeauthorizationTimeoutResult(
+    merchantUrl: MerchantUrl,
+  ): ResultAsync<void, Error> {
+    const deauthorizationTimeoutPromise = new Promise<void>((resolve) => {
+      setTimeout(() => {
+        this.merchantConnectorRepository.destroyProxy(merchantUrl);
+        resolve(undefined);
+      }, this.deauthorizationTimeout);
+    });
+    return ResultAsync.fromPromise(
+      deauthorizationTimeoutPromise,
+      (e) => e as Error,
+    );
   }
 }

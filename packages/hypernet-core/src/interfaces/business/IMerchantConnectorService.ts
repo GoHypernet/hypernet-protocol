@@ -10,7 +10,7 @@ import {
 import { MerchantUrl, Signature } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
-export interface IMerchantService {
+export interface IMerchantConnectorService {
   initialize(): ResultAsync<void, LogicalError | MerchantConnectorError>;
   authorizeMerchant(
     merchantUrl: MerchantUrl,
