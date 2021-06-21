@@ -5,6 +5,7 @@ import {
   BlockchainUnavailableError,
   ProxyError,
   PersistenceError,
+  MerchantAuthorizationDeniedError,
 } from "@hypernetlabs/objects";
 import { MerchantUrl, Signature } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
@@ -18,6 +19,7 @@ import {
 import { IContextProvider } from "@interfaces/utilities";
 
 export class MerchantService implements IMerchantService {
+  protected deauthorizationTimeout: number = 5000;
   constructor(
     protected merchantConnectorRepository: IMerchantConnectorRepository,
     protected accountsRepository: IAccountsRepository,
@@ -114,8 +116,32 @@ export class MerchantService implements IMerchantService {
 
   public deauthorizeMerchant(
     merchantUrl: MerchantUrl,
-  ): ResultAsync<void, PersistenceError> {
-    return this.merchantConnectorRepository.deauthorizeMerchant(merchantUrl);
+  ): ResultAsync<
+    void,
+    | PersistenceError
+    | ProxyError
+    | MerchantAuthorizationDeniedError
+  > {
+    return this.contextProvider.getContext().andThen((context) => {
+      context.onMerchantDeauthorizationStarted.next(merchantUrl);
+
+      // Destroy the merchant connector if deauthorizeMerchant lasted more than deauthorizationTimeout
+      const deauthorizationTimeoutPromise = new Promise<void>((resolve) => {
+        setTimeout(() => {
+          this.merchantConnectorRepository.destroyProxy(merchantUrl);
+          resolve(undefined);
+        }, this.deauthorizationTimeout);
+      });
+      const deauthorizationTimeoutResult = ResultAsync.fromPromise(
+        deauthorizationTimeoutPromise,
+        (e) => e as Error,
+      );
+
+      return ResultUtils.race([
+        deauthorizationTimeoutResult,
+        this.merchantConnectorRepository.deauthorizeMerchant(merchantUrl),
+      ]);
+    });
   }
 
   public getAuthorizedMerchants(): ResultAsync<

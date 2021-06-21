@@ -29,6 +29,8 @@ import {
   InvalidParametersError,
   TransferResolutionError,
   PreferredPaymentTokenError,
+  ProxyError,
+  MerchantAuthorizationDeniedError,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -136,6 +138,7 @@ export class HypernetCore implements IHypernetCore {
   public onDeStorageAuthenticationSucceeded: Subject<void>;
   public onDeStorageAuthenticationFailed: Subject<void>;
   public onMerchantAuthorized: Subject<MerchantUrl>;
+  public onMerchantDeauthorizationStarted: Subject<MerchantUrl>;
   public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
   public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
   public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
@@ -216,6 +219,7 @@ export class HypernetCore implements IHypernetCore {
     this.onDeStorageAuthenticationSucceeded = new Subject<void>();
     this.onDeStorageAuthenticationFailed = new Subject<void>();
     this.onMerchantAuthorized = new Subject<MerchantUrl>();
+    this.onMerchantDeauthorizationStarted = new Subject<MerchantUrl>();
     this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
     this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
     this.onMerchantIFrameDisplayRequested = new Subject<MerchantUrl>();
@@ -253,6 +257,7 @@ export class HypernetCore implements IHypernetCore {
       this.onDeStorageAuthenticationSucceeded,
       this.onDeStorageAuthenticationFailed,
       this.onMerchantAuthorized,
+      this.onMerchantDeauthorizationStarted,
       this.onAuthorizedMerchantUpdated,
       this.onAuthorizedMerchantActivationFailed,
       this.onMerchantIFrameDisplayRequested,
@@ -736,7 +741,10 @@ export class HypernetCore implements IHypernetCore {
 
   public deauthorizeMerchant(
     merchantUrl: MerchantUrl,
-  ): ResultAsync<void, PersistenceError> {
+  ): ResultAsync<
+    void,
+    PersistenceError | ProxyError | MerchantAuthorizationDeniedError
+  > {
     return this.merchantService.deauthorizeMerchant(merchantUrl);
   }
 

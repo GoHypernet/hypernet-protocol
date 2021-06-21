@@ -21,6 +21,7 @@ import {
   TransferResolutionError,
   PreferredPaymentTokenError,
   ProxyError,
+  MerchantAuthorizationDeniedError,
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { HypernetLink } from "@objects/HypernetLink";
@@ -250,7 +251,10 @@ export interface IHypernetCore {
 
   deauthorizeMerchant(
     merchantUrl: MerchantUrl,
-  ): ResultAsync<void, PersistenceError>;
+  ): ResultAsync<
+    void,
+    PersistenceError | ProxyError | MerchantAuthorizationDeniedError
+  >;
 
   getAuthorizedMerchants(): ResultAsync<
     Map<MerchantUrl, Signature>,
@@ -301,6 +305,7 @@ export interface IHypernetCore {
   onDeStorageAuthenticationSucceeded: Subject<void>;
   onDeStorageAuthenticationFailed: Subject<void>;
   onMerchantAuthorized: Subject<MerchantUrl>;
+  onMerchantDeauthorizationStarted: Subject<MerchantUrl>;
   onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
   onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
   onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;

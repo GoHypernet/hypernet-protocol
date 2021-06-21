@@ -330,19 +330,14 @@ export class MerchantService implements IMerchantService {
   }
 
   public getAddress(): ResultAsync<EthereumAddress, MerchantValidationError> {
-    const context = this.contextProvider.getMerchantContext();
-    return context.merchantValidated.andThen(() => {
-      if (context.merchantConnector == null) {
-        throw new Error(
-          "merchantConnector is null but merchantValidated is OK",
+    return this._getValidatedMerchantConnector().andThen(
+      (merchantConnector) => {
+        return ResultAsync.fromPromise(
+          merchantConnector.getAddress(),
+          (e) => e as MerchantConnectorError,
         );
-      }
-
-      return ResultAsync.fromPromise(
-        context.merchantConnector.getAddress(),
-        (e) => e as MerchantConnectorError,
-      );
-    });
+      },
+    );
   }
 
   public resolveChallenge(
@@ -351,19 +346,28 @@ export class MerchantService implements IMerchantService {
     IResolutionResult,
     MerchantConnectorError | MerchantValidationError
   > {
-    const context = this.contextProvider.getMerchantContext();
-    return context.merchantValidated.andThen(() => {
-      if (context.merchantConnector == null) {
-        throw new Error(
-          "merchantConnector is null but merchantValidated is OK",
+    return this._getValidatedMerchantConnector().andThen(
+      (merchantConnector) => {
+        return ResultAsync.fromPromise(
+          merchantConnector.resolveChallenge(paymentId),
+          (e) => e as MerchantConnectorError,
         );
-      }
+      },
+    );
+  }
 
-      return ResultAsync.fromPromise(
-        context.merchantConnector.resolveChallenge(paymentId),
-        (e) => e as MerchantConnectorError,
-      );
-    });
+  public deauthorize(): ResultAsync<
+    void,
+    MerchantConnectorError | MerchantValidationError
+  > {
+    return this._getValidatedMerchantConnector().andThen(
+      (merchantConnector) => {
+        return ResultAsync.fromPromise(
+          merchantConnector.deauthorize(),
+          (e) => e as MerchantConnectorError,
+        );
+      },
+    );
   }
 
   public signMessage(
@@ -389,5 +393,21 @@ export class MerchantService implements IMerchantService {
     }
 
     return okAsync(undefined);
+  }
+
+  private _getValidatedMerchantConnector(): ResultAsync<
+    IMerchantConnector,
+    MerchantValidationError
+  > {
+    const context = this.contextProvider.getMerchantContext();
+    return context.merchantValidated.map(() => {
+      if (context.merchantConnector == null) {
+        throw new Error(
+          "merchantConnector is null but merchantValidated is OK",
+        );
+      }
+
+      return context.merchantConnector;
+    });
   }
 }

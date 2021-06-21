@@ -76,6 +76,15 @@ class TestMerchantConnector implements IMerchantConnector {
     console.log("Hey, user just opened merchant iframe");
   }
 
+  public deauthorize() {
+    return new Promise<void>((resolve, reject) => {
+      // async operations, remove stuff from db and other services
+      setTimeout(() => {
+        return resolve(undefined);
+      }, 6000);
+    });
+  }
+
   private _renderContent() {
     const element = window.document.createElement("div");
     element.innerHTML = `

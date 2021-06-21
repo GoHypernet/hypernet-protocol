@@ -1,4 +1,4 @@
-import { errAsync, okAsync } from "neverthrow";
+import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
 import { ResultUtils } from "../src/ResultUtils";
 
@@ -168,5 +168,66 @@ describe("ResultUtils tests", () => {
     expect(result.isErr()).toBeTruthy();
     const results = result._unsafeUnwrapErr();
     expect(results).toBe(err);
+  });
+
+  test("race returns the first resolved Promise value", async () => {
+    // Arrange
+    let value = 0;
+    const timedPromise = new Promise<number>((resolve, reject) => {
+      setTimeout(() => {
+        value = 2;
+        resolve(2);
+      }, 500);
+    });
+    const timedResult = ResultAsync.fromPromise(
+      timedPromise,
+      (e) => e as Error,
+    );
+    const asyncMethod = () => {
+      return okAsync<number, Error>(value++);
+    };
+
+    // Act
+    const result = await ResultUtils.race([timedResult, asyncMethod()]);
+
+    // Assert
+    expect(result.isErr()).toBeFalsy();
+    const resultWrap = result._unsafeUnwrap();
+    expect(resultWrap).toStrictEqual(0);
+    expect(value).toBe(1);
+  });
+
+  test("race stops at the first resolved promise", async () => {
+    // Arrange
+    let value = 0;
+    const timedPromise = new Promise<number>((resolve, reject) => {
+      setTimeout(() => {
+        value = 1;
+        resolve(1);
+      }, 500);
+    });
+    const timedResult = ResultAsync.fromPromise(
+      timedPromise,
+      (e) => e as Error,
+    );
+
+    const timedPromise2 = new Promise<number>((resolve, reject) => {
+      setTimeout(() => {
+        resolve(2);
+      }, 100);
+    });
+    const timedResult2 = ResultAsync.fromPromise(
+      timedPromise2,
+      (e) => e as Error,
+    );
+
+    // Act
+    const result = await ResultUtils.race([timedResult, timedResult2]);
+
+    // Assert
+    expect(result.isErr()).toBeFalsy();
+    const resultWrap = result._unsafeUnwrap();
+    expect(resultWrap).toStrictEqual(2);
+    expect(value).toBe(0);
   });
 });

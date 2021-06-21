@@ -27,6 +27,7 @@ import {
   TransferResolutionError,
   PreferredPaymentTokenError,
   IHypernetCore,
+  MerchantAuthorizationDeniedError,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -65,6 +66,7 @@ export default class HypernetIFrameProxy
     this.onDeStorageAuthenticationSucceeded = new Subject<void>();
     this.onDeStorageAuthenticationFailed = new Subject<void>();
     this.onMerchantAuthorized = new Subject<MerchantUrl>();
+    this.onMerchantDeauthorizationStarted = new Subject<MerchantUrl>();
     this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
     this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
     this.onMerchantIFrameDisplayRequested = new Subject<MerchantUrl>();
@@ -143,6 +145,10 @@ export default class HypernetIFrameProxy
 
         child.on("onMerchantAuthorized", (data: MerchantUrl) => {
           this.onMerchantAuthorized.next(data);
+        });
+
+        child.on("onMerchantDeauthorizationStarted", (data: MerchantUrl) => {
+          this.onMerchantDeauthorizationStarted.next(data);
         });
 
         child.on("onAuthorizedMerchantUpdated", (data: MerchantUrl) => {
@@ -392,7 +398,10 @@ export default class HypernetIFrameProxy
 
   public deauthorizeMerchant(
     merchantUrl: MerchantUrl,
-  ): ResultAsync<void, PersistenceError> {
+  ): ResultAsync<
+    void,
+    PersistenceError | ProxyError | MerchantAuthorizationDeniedError
+  > {
     return this._createCall("deauthorizeMerchant", merchantUrl);
   }
 
@@ -502,6 +511,7 @@ export default class HypernetIFrameProxy
   public onDeStorageAuthenticationSucceeded: Subject<void>;
   public onDeStorageAuthenticationFailed: Subject<void>;
   public onMerchantAuthorized: Subject<MerchantUrl>;
+  public onMerchantDeauthorizationStarted: Subject<MerchantUrl>;
   public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
   public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
   public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;

@@ -19,6 +19,11 @@ export interface IMerchantConnector {
   getAddress(): Promise<EthereumAddress>;
 
   /**
+   * Deauthorize the merchant
+   */
+  deauthorize(): Promise<void>;
+
+  /**
    * This observable should emit when the connector wants to create a
    * push payment. The callback will be called after the push payment
    * is initiated.

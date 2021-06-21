@@ -48,6 +48,8 @@ export interface IMerchantConnectorProxy extends ParentProxy {
     MerchantConnectorError | ProxyError
   >;
 
+  deauthorize(): ResultAsync<void, MerchantConnectorError | ProxyError>;
+
   /**
    * getValidatedSignature() requests the merchant iframe to return the
    * signature of the connector code, AFTER validating that the connector
