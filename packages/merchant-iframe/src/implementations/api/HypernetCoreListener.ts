@@ -75,6 +75,11 @@ export class HypernetCoreListener
           return this.merchantService.getAddress();
         }, data.callId);
       },
+      deauthorize: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.merchantService.deauthorize();
+        }, data.callId);
+      },
       getValidatedSignature: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           return this.merchantService.getValidatedSignature();

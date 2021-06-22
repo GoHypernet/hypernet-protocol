@@ -45,6 +45,10 @@ export interface IMerchantService {
     IResolutionResult,
     MerchantConnectorError | MerchantValidationError
   >;
+  deauthorize(): ResultAsync<
+    void,
+    MerchantConnectorError | MerchantValidationError
+  >;
   signMessage(
     message: string,
     callback: (message: string, signature: Signature) => void,

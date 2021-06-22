@@ -50,7 +50,10 @@ export interface IMerchantConnectorRepository {
    */
   deauthorizeMerchant(
     merchantUrl: MerchantUrl,
-  ): ResultAsync<void, PersistenceError>;
+  ): ResultAsync<
+    void,
+    PersistenceError | ProxyError | MerchantAuthorizationDeniedError
+  >;
 
   /**
    * Returns the status of all the authorized merchant's connectors.
@@ -87,6 +90,8 @@ export interface IMerchantConnectorRepository {
   displayMerchantIFrame(
     merchantUrl: MerchantUrl,
   ): ResultAsync<void, MerchantConnectorError>;
+
+  destroyProxy(merchantUrl: MerchantUrl): void;
 
   notifyPushPaymentSent(
     merchantUrl: MerchantUrl,

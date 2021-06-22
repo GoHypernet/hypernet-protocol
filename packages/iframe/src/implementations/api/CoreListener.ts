@@ -288,6 +288,10 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       parent.emit("onMerchantAuthorized", val.toString());
     });
 
+    this.core.onMerchantDeauthorizationStarted.subscribe((val) => {
+      parent.emit("onMerchantDeauthorizationStarted", val.toString());
+    });
+
     this.core.onAuthorizedMerchantUpdated.subscribe((val) => {
       parent.emit("onAuthorizedMerchantUpdated", val.toString());
     });

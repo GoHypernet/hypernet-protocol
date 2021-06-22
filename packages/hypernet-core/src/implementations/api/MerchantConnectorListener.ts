@@ -23,9 +23,23 @@ import {
   ILinkServiceType,
 } from "@interfaces/business";
 import { IContextProvider, IContextProviderType } from "@interfaces/utilities";
+import { Subscription } from "rxjs";
 
 @injectable()
 export class MerchantConnectorListener implements IMerchantConnectorListener {
+  protected signMessageRequestedSubscriptionMap: Map<
+    MerchantUrl,
+    Subscription
+  > = new Map<MerchantUrl, Subscription>();
+  protected sendFundsRequestedSubscriptionMap: Map<
+    MerchantUrl,
+    Subscription
+  > = new Map<MerchantUrl, Subscription>();
+  protected authorizeFundsRequestedSubscriptionMap: Map<
+    MerchantUrl,
+    Subscription
+  > = new Map<MerchantUrl, Subscription>();
+
   constructor(
     @inject(IAccountServiceType) protected accountService: IAccountService,
     @inject(IPaymentServiceType) protected paymentService: IPaymentService,
@@ -45,73 +59,105 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
         this._advanceMerchantRelatedPayments(proxy.merchantUrl);
 
         // When the merchant iframe wants a message signed, we can do it.
-        proxy.signMessageRequested.subscribe((message) => {
-          this.logUtils.debug(
-            `Merchant Connector ${proxy.merchantUrl} requested to sign message ${message}`,
-          );
+        const signMessageRequestedSubscription = proxy.signMessageRequested.subscribe(
+          (message) => {
+            this.logUtils.debug(
+              `Merchant Connector ${proxy.merchantUrl} requested to sign message ${message}`,
+            );
 
-          this.accountService
-            .signMessage(message)
-            .andThen((signature) => {
-              return proxy.messageSigned(message, signature);
-            })
-            .mapErr((e) => {
-              this.logUtils.error(e);
-            });
-        });
-
-        proxy.sendFundsRequested.subscribe((request) => {
-          this.logUtils.debug(
-            `Merchant Connector ${proxy.merchantUrl} requested to send funds to ${request.recipientPublicIdentifier}`,
-          );
-
-          // Validate some things
-          if (this.validateSendFundsRequest(request)) {
-            this.paymentService
-              .sendFunds(
-                request.recipientPublicIdentifier,
-                BigNumber.from(request.amount),
-                request.expirationDate,
-                BigNumber.from(request.requiredStake),
-                request.paymentToken,
-                proxy.merchantUrl,
-              )
+            this.accountService
+              .signMessage(message)
+              .andThen((signature) => {
+                return proxy.messageSigned(message, signature);
+              })
               .mapErr((e) => {
                 this.logUtils.error(e);
               });
-          } else {
-            this.logUtils.error(
-              `Invalid ISendFundsRequest from merchant connector ${proxy.merchantUrl}`,
-            );
-          }
-        });
+          },
+        );
 
-        proxy.authorizeFundsRequested.subscribe((request) => {
-          this.logUtils.debug(
-            `Merchant Connector ${proxy.merchantUrl} requested to authorize funds for ${request.recipientPublicIdentifier}`,
-          );
+        this.signMessageRequestedSubscriptionMap.set(
+          proxy.merchantUrl,
+          signMessageRequestedSubscription,
+        );
 
-          if (this.validateAuthorizeFundsRequest(request)) {
-            this.paymentService
-              .authorizeFunds(
-                request.recipientPublicIdentifier,
-                BigNumber.from(request.totalAuthorized),
-                request.expirationDate,
-                BigNumber.from(request.deltaAmount),
-                request.deltaTime,
-                BigNumber.from(request.requiredStake),
-                request.paymentToken,
-                proxy.merchantUrl,
-              )
-              .mapErr((e) => {
-                this.logUtils.error(e);
-              });
-          } else {
-            this.logUtils.error(
-              `Invalid IAuthorizeFundsRequest from merchant connector ${proxy.merchantUrl}`,
+        const sendFundsRequestedSubscription = proxy.sendFundsRequested.subscribe(
+          (request) => {
+            this.logUtils.debug(
+              `Merchant Connector ${proxy.merchantUrl} requested to send funds to ${request.recipientPublicIdentifier}`,
             );
-          }
-        });
+
+            // Validate some things
+            if (this.validateSendFundsRequest(request)) {
+              this.paymentService
+                .sendFunds(
+                  request.recipientPublicIdentifier,
+                  BigNumber.from(request.amount),
+                  request.expirationDate,
+                  BigNumber.from(request.requiredStake),
+                  request.paymentToken,
+                  proxy.merchantUrl,
+                )
+                .mapErr((e) => {
+                  this.logUtils.error(e);
+                });
+            } else {
+              this.logUtils.error(
+                `Invalid ISendFundsRequest from merchant connector ${proxy.merchantUrl}`,
+              );
+            }
+          },
+        );
+
+        this.sendFundsRequestedSubscriptionMap.set(
+          proxy.merchantUrl,
+          sendFundsRequestedSubscription,
+        );
+
+        const authorizeFundsRequestedSubscription = proxy.authorizeFundsRequested.subscribe(
+          (request) => {
+            this.logUtils.debug(
+              `Merchant Connector ${proxy.merchantUrl} requested to authorize funds for ${request.recipientPublicIdentifier}`,
+            );
+
+            if (this.validateAuthorizeFundsRequest(request)) {
+              this.paymentService
+                .authorizeFunds(
+                  request.recipientPublicIdentifier,
+                  BigNumber.from(request.totalAuthorized),
+                  request.expirationDate,
+                  BigNumber.from(request.deltaAmount),
+                  request.deltaTime,
+                  BigNumber.from(request.requiredStake),
+                  request.paymentToken,
+                  proxy.merchantUrl,
+                )
+                .mapErr((e) => {
+                  this.logUtils.error(e);
+                });
+            } else {
+              this.logUtils.error(
+                `Invalid IAuthorizeFundsRequest from merchant connector ${proxy.merchantUrl}`,
+              );
+            }
+          },
+        );
+
+        this.authorizeFundsRequestedSubscriptionMap.set(
+          proxy.merchantUrl,
+          authorizeFundsRequestedSubscription,
+        );
+      });
+
+      // Stop listening for merchant connector events when merchant deauthorization starts
+      context.onMerchantDeauthorizationStarted.subscribe((merchantUrl) => {
+        this.signMessageRequestedSubscriptionMap
+          .get(merchantUrl)
+          ?.unsubscribe();
+        this.sendFundsRequestedSubscriptionMap.get(merchantUrl)?.unsubscribe();
+        this.authorizeFundsRequestedSubscriptionMap
+          .get(merchantUrl)
+          ?.unsubscribe();
       });
     });
   }

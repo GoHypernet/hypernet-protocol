@@ -246,7 +246,7 @@ export class MerchantConnectorRepository
       })
       .mapErr((e) => {
         // If we encounter a problem, destroy the proxy so we can start afresh.
-        this._destroyProxy(merchantUrl);
+        this.destroyProxy(merchantUrl);
 
         // Notify the world
         if (context != null) {
@@ -499,16 +499,24 @@ export class MerchantConnectorRepository
 
   public deauthorizeMerchant(
     merchantUrl: MerchantUrl,
-  ): ResultAsync<void, PersistenceError> {
+  ): ResultAsync<
+    void,
+    PersistenceError | ProxyError | MerchantAuthorizationDeniedError
+  > {
     return this.getAuthorizedMerchants()
       .map((authorizedMerchants) => {
         authorizedMerchants.delete(merchantUrl);
 
         return this._setAuthorizedMerchants(authorizedMerchants);
       })
+      .andThen(() => {
+        return this._getActivatedMerchantProxy(merchantUrl).andThen((proxy) => {
+          return proxy.deauthorize();
+        });
+      })
       .map(() => {
         // Remove the proxy
-        this._destroyProxy(merchantUrl);
+        return this.destroyProxy(merchantUrl);
       });
   }
 
@@ -553,6 +561,14 @@ export class MerchantConnectorRepository
       .map(() => {
         return retMap;
       });
+  }
+
+  public destroyProxy(merchantUrl: MerchantUrl): void {
+    const proxy = this.existingProxies.get(merchantUrl);
+    if (proxy != null) {
+      proxy.destroy();
+      this.existingProxies.delete(merchantUrl);
+    }
   }
 
   protected _getMerchantAddress(
@@ -633,7 +649,7 @@ export class MerchantConnectorRepository
           return ResultUtils.backoffAndRetry(() => {
             // Clean out
             this.authorizedMerchantProxies.delete(merchantUrl);
-            this._destroyProxy(merchantUrl);
+            this.destroyProxy(merchantUrl);
             const activationResult = ResultUtils.combine([
               this.contextProvider.getInitializedContext(),
               this.blockchainProvider.getSigner(),
@@ -732,7 +748,7 @@ export class MerchantConnectorRepository
 
         // TODO: make sure of error cases where we want to destroy the proxy or not
         if (e instanceof ProxyError || e instanceof MerchantActivationError) {
-          this._destroyProxy(merchantUrl);
+          this.destroyProxy(merchantUrl);
         }
 
         return e;
@@ -840,14 +856,6 @@ export class MerchantConnectorRepository
         this.logUtils.debug(`Connector activated for ${proxy.merchantUrl}`);
         return proxy;
       });
-  }
-
-  protected _destroyProxy(merchantUrl: MerchantUrl): void {
-    const proxy = this.existingProxies.get(merchantUrl);
-    if (proxy != null) {
-      proxy.destroy();
-      this.existingProxies.delete(merchantUrl);
-    }
   }
 
   protected _setAuthorizedMerchants(

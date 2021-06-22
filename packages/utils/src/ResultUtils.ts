@@ -23,6 +23,7 @@ export class ResultUtils {
   static combine<T, E>(
     asyncResultList: ResultAsync<T, E>[],
   ): ResultAsync<T[], E>;
+
   static combine<T, E>(
     asyncResultList: ResultAsync<T, E>[],
   ): ResultAsync<T[], E> {
@@ -42,6 +43,16 @@ export class ResultUtils {
             })
         : acc;
     }, ok([]));
+  }
+
+  static race<T, E>(asyncResultList: ResultAsync<T, E>[]): ResultAsync<T, E> {
+    return ResultAsync.fromPromise(Promise.race(asyncResultList), (e) => {
+      return e as E;
+    }).andThen(ResultUtils.resultRace);
+  }
+
+  static resultRace<T, E>(result: Result<T, E>): Result<T, E> {
+    return result.isErr() ? err(result.error) : ok(result.value);
   }
 
   static fromThrowableResult<T, E>(throwableCallback: () => T): Result<T, E> {
