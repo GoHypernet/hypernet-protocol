@@ -7,7 +7,7 @@ import { IHypernetWebIntegration } from "@web-integration/interfaces/app/IHypern
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
-  protected iframeURL: string = "https://core-iframe-dev.hypernetlabs.io/";
+  protected iframeURL = "http://localhost:5020";
   protected currentMerchantUrl: MerchantUrl | undefined | null;
   protected getReadyTimeout: number = 20 * 1000;
   protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
