@@ -334,7 +334,10 @@ export class MerchantService implements IMerchantService {
       (merchantConnector) => {
         return ResultAsync.fromPromise(
           merchantConnector.getAddress(),
-          (e) => e as MerchantConnectorError,
+          (e) => new MerchantConnectorError(
+            "Error happened while getting merchant connector addresses",
+            e
+          ),
         );
       },
     );
@@ -350,7 +353,10 @@ export class MerchantService implements IMerchantService {
       (merchantConnector) => {
         return ResultAsync.fromPromise(
           merchantConnector.resolveChallenge(paymentId),
-          (e) => e as MerchantConnectorError,
+          (e) => new MerchantConnectorError(
+            "Error happened while resolving challenge in merchant connector code",
+            e
+          ),
         );
       },
     );
@@ -364,7 +370,10 @@ export class MerchantService implements IMerchantService {
       (merchantConnector) => {
         return ResultAsync.fromPromise(
           merchantConnector.deauthorize(),
-          (e) => e as MerchantConnectorError,
+          (e) => new MerchantConnectorError(
+            "Error happened while deauthorizing merchant in merchant connector code",
+            e
+          ),
         );
       },
     );
