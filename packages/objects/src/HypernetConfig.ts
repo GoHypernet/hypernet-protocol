@@ -20,6 +20,7 @@ export class HypernetConfig {
     public merchantIframeUrl: string,
     public ceramicNodeUrl: string,
     public storageAliases: Map<DefinitionName, SchemaUrl>,
+    public merchantDeauthorizationTimeout: number,
     public debug: boolean,
   ) {}
 }

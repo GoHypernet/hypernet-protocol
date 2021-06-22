@@ -94,6 +94,10 @@ export class MerchantConnectorProxy
     return this._createCall("getAddress", null);
   }
 
+  public deauthorize(): ResultAsync<void, MerchantConnectorError | ProxyError> {
+    return this._createCall("deauthorize", null);
+  }
+
   public getValidatedSignature(): ResultAsync<
     Signature,
     MerchantValidationError | ProxyError

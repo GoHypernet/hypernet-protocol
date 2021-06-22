@@ -39,6 +39,7 @@ export class ContextProviderMock implements IContextProvider {
   public onDeStorageAuthenticationSucceeded: Subject<void>;
   public onDeStorageAuthenticationFailed: Subject<void>;
   public onMerchantAuthorized: Subject<MerchantUrl>;
+  public onMerchantDeauthorizationStarted: Subject<MerchantUrl>;
   public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
   public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
   public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
@@ -69,6 +70,7 @@ export class ContextProviderMock implements IContextProvider {
     this.onDeStorageAuthenticationSucceeded = new Subject<void>();
     this.onDeStorageAuthenticationFailed = new Subject<void>();
     this.onMerchantAuthorized = new Subject<MerchantUrl>();
+    this.onMerchantDeauthorizationStarted = new Subject<MerchantUrl>();
     this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
     this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
     this.onMerchantIFrameDisplayRequested = new Subject<MerchantUrl>();
@@ -102,6 +104,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onDeStorageAuthenticationSucceeded,
         this.onDeStorageAuthenticationFailed,
         this.onMerchantAuthorized,
+        this.onMerchantDeauthorizationStarted,
         this.onAuthorizedMerchantUpdated,
         this.onAuthorizedMerchantActivationFailed,
         this.onMerchantIFrameDisplayRequested,
@@ -135,6 +138,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onDeStorageAuthenticationSucceeded,
         this.onDeStorageAuthenticationFailed,
         this.onMerchantAuthorized,
+        this.onMerchantDeauthorizationStarted,
         this.onAuthorizedMerchantUpdated,
         this.onAuthorizedMerchantActivationFailed,
         this.onMerchantIFrameDisplayRequested,

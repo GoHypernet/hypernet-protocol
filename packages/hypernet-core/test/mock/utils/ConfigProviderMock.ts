@@ -49,6 +49,7 @@ export class ConfigProviderMock implements IConfigProvider {
             ),
           ],
         ]),
+        5 * 1000,
         false, // debug is off for testing
       );
   }

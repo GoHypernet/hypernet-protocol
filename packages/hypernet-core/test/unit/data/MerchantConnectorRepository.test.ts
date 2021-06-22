@@ -749,4 +749,42 @@ describe("MerchantConnectorRepository tests", () => {
     const value = result._unsafeUnwrap();
     expect(value).toStrictEqual(resultMap);
   });
+
+  test("deauthorizeMerchant without erros", async () => {
+    // Arrange
+    const mocks = new MerchantConnectorRepositoryMocks();
+    const repo = mocks.factoryRepository();
+
+    td.when(mocks.merchantConnectorProxy.deauthorize()).thenReturn(
+      okAsync(undefined),
+    );
+
+    // Act
+    await repo.activateAuthorizedMerchants(balances);
+    const result = await repo.deauthorizeMerchant(merchantUrl);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toBe(undefined);
+  });
+
+  test("deauthorizeMerchant returns ProxyError of proxy.deauthorize failes", async () => {
+    // Arrange
+    const mocks = new MerchantConnectorRepositoryMocks();
+    const repo = mocks.factoryRepository();
+
+    td.when(mocks.merchantConnectorProxy.deauthorize()).thenReturn(
+      errAsync(new ProxyError()),
+    );
+
+    // Act
+    await repo.activateAuthorizedMerchants(balances);
+    const result = await repo.deauthorizeMerchant(merchantUrl);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeTruthy();
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(ProxyError);
+  });
 });
