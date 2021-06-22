@@ -15,6 +15,7 @@ class MerchantConnectorServiceMocks {
   public merchantConnectorRepository = td.object<IMerchantConnectorRepository>();
   public accountRepository = td.object<IAccountsRepository>();
   public contextProvider = new ContextProviderMock();
+  public configProvider = new ConfigProviderMock();
   public logUtils = td.object<ILogUtils>();
   public merchantUrl = MerchantUrl("http://localhost:5010");
 
@@ -33,6 +34,7 @@ class MerchantConnectorServiceMocks {
       this.merchantConnectorRepository,
       this.accountRepository,
       this.contextProvider,
+      this.configProvider,
       this.logUtils,
     );
   }

@@ -395,6 +395,7 @@ export class HypernetCore implements IHypernetCore {
       this.merchantConnectorRepository,
       this.accountRepository,
       this.contextProvider,
+      this.configProvider,
       this.logUtils,
     );
 

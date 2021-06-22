@@ -68,6 +68,7 @@ export class ConfigProvider implements IConfigProvider {
           ),
         ],
       ]),
+      5 * 1000,
       __DEBUG__, // debug
     );
   }

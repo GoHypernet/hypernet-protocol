@@ -16,14 +16,14 @@ import {
   IAccountsRepository,
   IMerchantConnectorRepository,
 } from "@interfaces/data";
-import { IContextProvider } from "@interfaces/utilities";
+import { IContextProvider, IConfigProvider } from "@interfaces/utilities";
 
 export class MerchantConnectorService implements IMerchantConnectorService {
-  protected deauthorizationTimeout: number = 5000;
   constructor(
     protected merchantConnectorRepository: IMerchantConnectorRepository,
     protected accountsRepository: IAccountsRepository,
     protected contextProvider: IContextProvider,
+    protected configProvider: IConfigProvider,
     protected logUtils: ILogUtils,
   ) {}
 
@@ -171,19 +171,21 @@ export class MerchantConnectorService implements IMerchantConnectorService {
     return this.merchantConnectorRepository.displayMerchantIFrame(merchantUrl);
   }
 
-  /* Destroy merchant connector if deauthorizeMerchant lasted more than deauthorizationTimeout */
+  /* Destroy merchant connector if deauthorizeMerchant lasted more than merchantDeauthorizationTimeout */
   private _getDeauthorizationTimeoutResult(
     merchantUrl: MerchantUrl,
   ): ResultAsync<void, Error> {
-    const deauthorizationTimeoutPromise = new Promise<void>((resolve) => {
-      setTimeout(() => {
-        this.merchantConnectorRepository.destroyProxy(merchantUrl);
-        resolve(undefined);
-      }, this.deauthorizationTimeout);
+    return this.configProvider.getConfig().andThen((config) => {
+      const deauthorizationTimeoutPromise = new Promise<void>((resolve) => {
+        setTimeout(() => {
+          this.merchantConnectorRepository.destroyProxy(merchantUrl);
+          resolve(undefined);
+        }, config.merchantDeauthorizationTimeout);
+      });
+      return ResultAsync.fromPromise(
+        deauthorizationTimeoutPromise,
+        (e) => e as Error,
+      );
     });
-    return ResultAsync.fromPromise(
-      deauthorizationTimeoutPromise,
-      (e) => e as Error,
-    );
   }
 }
