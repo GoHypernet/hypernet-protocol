@@ -22,6 +22,8 @@ import {
   PRIVATE_KEYS_FLOW_ID_SELECTOR,
   CONNECTOR_AUTHORIZATION_FLOW_ID_SELECTOR,
   ONBOARDING_FLOW_ID_SELECTOR,
+  TIMEOUT_GUID_SELECTOR,
+  WARNING_ALERT_SELECTOR,
 } from "@web-ui/constants";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
@@ -31,6 +33,7 @@ import BalancesWidget from "@web-ui/widgets/BalancesWidget";
 import FundWidget from "@web-ui/widgets/FundWidget";
 import LinksWidget from "@web-ui/widgets/LinksWidget";
 import MerchantsWidget from "@web-ui/widgets/MerchantsWidget";
+import { TimeoutGuide, WarningAlert } from "@web-ui/components";
 import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
 
 export default class HypernetWebUI implements IHypernetWebUI {
@@ -119,6 +122,37 @@ export default class HypernetWebUI implements IHypernetWebUI {
           zIndex: 99999,
         }),
         this._generateDomElement(PRIVATE_KEYS_FLOW_ID_SELECTOR),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderTimeoutGuideModal(): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(<TimeoutGuide />, true, undefined, {
+          zIndex: 99999,
+        }),
+        this._generateDomElement(TIMEOUT_GUID_SELECTOR),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderWarningAlertModal(
+    errorMessage?: string,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <WarningAlert errorMessage={errorMessage} />,
+          true,
+          undefined,
+          {
+            zIndex: 99999,
+          },
+        ),
+        this._generateDomElement(WARNING_ALERT_SELECTOR),
       );
     };
     return this._getThrowableRender(renderReact);

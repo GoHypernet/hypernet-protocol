@@ -7,12 +7,13 @@ import { IHypernetWebIntegration } from "@web-integration/interfaces/app/IHypern
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
-
-  protected iframeURL = "http://localhost:5020";
+  protected iframeURL: string = "https://core-iframe-dev.hypernetlabs.io/";
   protected currentMerchantUrl: MerchantUrl | undefined | null;
+  protected getReadyTimeout: number = 15 * 1000;
+  protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
+  protected getReadyResolved: boolean = false;
 
   public webUIClient: IHypernetWebUI;
-
   public core: HypernetIFrameProxy;
 
   constructor(iframeURL?: string) {
@@ -38,10 +39,16 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     this.core.onPrivateCredentialsRequested.subscribe(() => {
       this.webUIClient.renderPrivateKeysModal();
     });
+
+    // Wait getReadyTimeout and show timeout guid if getReady hasn't resolved yet
+    setTimeout(() => {
+      if (this.getReadyResolved === false) {
+        this.webUIClient.renderTimeoutGuideModal();
+      }
+    }, this.getReadyTimeout);
   }
 
   // wait for the core to be intialized
-  protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
   public getReady(): ResultAsync<IHypernetCore, Error> {
     if (this.getReadyResult != null) {
       return this.getReadyResult;
@@ -55,7 +62,13 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       .map(() => {
         // This is for web ui to use if there is no core instance passed in web ui constructor
         window.hypernetCoreInstance = this.core;
+        this.getReadyResolved = true;
         return this.core;
+      })
+      .mapErr((err) => {
+        this.getReadyResolved = true;
+        this.webUIClient.renderWarningAlertModal(err?.message);
+        return new Error("Something went wrong!");
       });
 
     return this.getReadyResult;

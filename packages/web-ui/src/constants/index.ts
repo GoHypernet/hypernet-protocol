@@ -12,3 +12,5 @@ export const ETHER_HEX_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const WEB_UI_MODAL_ID_SELECTOR = "__hypernet-protocol-modal-root__";
 export const HYPER_TOKEN_LOGO_URL =
   "https://res.cloudinary.com/dqueufbs7/image/upload/v1614369421/images/Screen_Shot_2021-02-26_at_22.56.34.png";
+export const TIMEOUT_GUID_SELECTOR = "hypernet-protocol-timout-guid";
+export const WARNING_ALERT_SELECTOR = "hypernet-protocol-warning-alert";
