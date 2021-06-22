@@ -9,7 +9,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
   protected iframeURL: string = "https://core-iframe-dev.hypernetlabs.io/";
   protected currentMerchantUrl: MerchantUrl | undefined | null;
-  protected getReadyTimeout: number = 15 * 1000;
+  protected getReadyTimeout: number = 20 * 1000;
   protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
   protected getReadyResolved: boolean = false;
 
