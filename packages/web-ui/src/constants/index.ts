@@ -11,6 +11,10 @@ export const ONBOARDING_FLOW_ID_SELECTOR = "hypernet-protocol-onboarding-flow";
 export const ETHER_HEX_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const WEB_UI_MODAL_ID_SELECTOR = "__hypernet-protocol-modal-root__";
 export const HYPER_TOKEN_LOGO_URL =
-  "https://res.cloudinary.com/dqueufbs7/image/upload/v1614369421/images/Screen_Shot_2021-02-26_at_22.56.34.png";
+  "https://res.cloudinary.com/dqueufbs7/image/upload/v1624402355/images/Screen_Shot_2021-06-23_at_01.52.28.png";
+export const AUTHENTICATION_IMAGE_URL =
+  "https://res.cloudinary.com/dqueufbs7/image/upload/v1624393360/images/authentication.svg";
+export const AUTHENTICATION_SUCCESS_IMAGE_URL =
+  "https://res.cloudinary.com/dqueufbs7/image/upload/v1624402693/images/success.svg";
 export const TIMEOUT_GUID_SELECTOR = "hypernet-protocol-timout-guid";
 export const WARNING_ALERT_SELECTOR = "hypernet-protocol-warning-alert";

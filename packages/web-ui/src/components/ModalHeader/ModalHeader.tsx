@@ -12,8 +12,7 @@ export const ModalHeader: React.FC = () => {
     <Box className={classes.container}>
       <Box className={classes.header}>
         <Box className={classes.imageContainer}>
-          <img width="40" src={HYPER_TOKEN_LOGO_URL} />
-          <Box className={classes.connectorName}>Hypernet</Box>
+          <img width="225" src={HYPER_TOKEN_LOGO_URL} />
         </Box>
       </Box>
     </Box>

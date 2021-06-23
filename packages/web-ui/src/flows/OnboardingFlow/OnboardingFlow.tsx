@@ -13,8 +13,13 @@ import {
 } from "@web-ui/components";
 import { useStyles } from "@web-ui/flows/OnboardingFlow/OnboardingFlow.style";
 import { useBalances } from "@web-ui/hooks";
+import { EButtonStatus } from "@web-ui/theme";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget/BalancesWidget";
 import FundWidget from "@web-ui/widgets/FundWidget/FundWidget";
+import {
+  AUTHENTICATION_IMAGE_URL,
+  AUTHENTICATION_SUCCESS_IMAGE_URL,
+} from "@web-ui/constants";
 
 enum EOnboardingScreens {
   IDLE = 0,
@@ -127,13 +132,23 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     alert.error(err?.message || "Something went wrong!");
   };
 
-  const renderFundWalletButton = () => {
+  const renderFundWalletButton = (status?: EButtonStatus) => {
+    if (status === EButtonStatus.primary) {
+      return (
+        <Button
+          label="Fund my wallet"
+          onClick={goToFundWalletScreen}
+          fullWidth={true}
+          status={EButtonStatus.secondary}
+        />
+      );
+    }
     return (
       <Button
-        label="Fund your wallet"
+        label="Fund my wallet"
         onClick={goToFundWalletScreen}
         fullWidth={true}
-        linkStyle
+        bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
       />
     );
   };
@@ -156,9 +171,15 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
                 <BalancesWidget />
               </Box>
             ) : (
-              <Box className={classes.balancesEmptyLabel}>
-                You are one step away!
-              </Box>
+              <>
+                <Box className={classes.balancesEmptyLabel}>
+                  You are getting closer!
+                </Box>
+                <img
+                  className={classes.authenticationImg}
+                  src={AUTHENTICATION_IMAGE_URL}
+                />
+              </>
             )}
             <Button
               label="Authorize Merchant"
@@ -172,8 +193,12 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
         return (
           <>
             <Box className={classes.balancesEmptyLabel}>
-              You don't have any balances in your channel wallet
+              You have successfully connected your wallet!
             </Box>
+            <img
+              className={classes.authenticationSuccessImg}
+              src={AUTHENTICATION_SUCCESS_IMAGE_URL}
+            />
             {renderFundWalletButton()}
           </>
         );
@@ -193,17 +218,20 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
                 tokenSelectorOptions={channelTokenSelectorOptions}
                 selectedPaymentToken={preferredPaymentToken}
                 setSelectedPaymentToken={setPreferredPaymentToken}
-                label="Select your preferred token:"
+                label="Default Payment Token:"
               />
             </Box>
-            {renderFundWalletButton()}
             {preferredPaymentToken && (
-              <Button
-                label="Done"
-                onClick={goToSuccessScreen}
-                hasMaterialUIStyle
-              />
+              <Box className={classes.doneButtonWrapper}>
+                <Button
+                  label="Done"
+                  onClick={goToSuccessScreen}
+                  fullWidth={true}
+                  bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
+                />
+              </Box>
             )}
+            {renderFundWalletButton(EButtonStatus.secondary)}
           </>
         );
       case EOnboardingScreens.ONBOARDING_SUCCESS:
@@ -214,7 +242,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
               info={finalSuccessContent}
               onOkay={onOkClick}
             />
-            {renderFundWalletButton()}
+            {renderFundWalletButton(EButtonStatus.secondary)}
           </>
         );
       default:

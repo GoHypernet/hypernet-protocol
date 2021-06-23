@@ -9,7 +9,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
   protected iframeURL = "http://localhost:5020";
   protected currentMerchantUrl: MerchantUrl | undefined | null;
-  protected getReadyTimeout: number = 20 * 1000;
+  protected getReadyTimeout: number = 60 * 1000;
   protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
   protected getReadyResolved: boolean = false;
 
@@ -42,7 +42,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
     // Wait getReadyTimeout and show timeout guid if getReady hasn't resolved yet
     setTimeout(() => {
-      if (this.getReadyResolved === false) {
+      if (false /* this.getReadyResolved === false */) {
         this.webUIClient.renderTimeoutGuideModal();
       }
     }, this.getReadyTimeout);
