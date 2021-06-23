@@ -15,6 +15,7 @@ export class AxiosAjaxUtils implements IAjaxUtils {
       return response.data;
     });
   }
+
   post<T>(
     url: URL,
     data:
@@ -27,6 +28,24 @@ export class AxiosAjaxUtils implements IAjaxUtils {
   ): ResultAsync<T, AjaxError> {
     return ResultAsync.fromPromise(
       axios.post(url.toString(), data, config),
+      (e) => new AjaxError(`Unable to get ${url}`, e),
+    ).map((response: AxiosResponse<T>) => {
+      return response.data;
+    });
+  }
+
+  put<T>(
+    url: URL,
+    data:
+      | string
+      | Record<string, unknown>
+      | ArrayBuffer
+      | ArrayBufferView
+      | URLSearchParams,
+    config?: IRequestConfig,
+  ): ResultAsync<T, AjaxError> {
+    return ResultAsync.fromPromise(
+      axios.put(url.toString(), data, config),
       (e) => new AjaxError(`Unable to get ${url}`, e),
     ).map((response: AxiosResponse<T>) => {
       return response.data;

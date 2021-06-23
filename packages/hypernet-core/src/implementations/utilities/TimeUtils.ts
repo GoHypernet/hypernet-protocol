@@ -1,20 +1,23 @@
-import { BlockchainUnavailableError } from "@hypernetlabs/objects";
+import {
+  BlockchainUnavailableError,
+  UnixTimestamp,
+} from "@hypernetlabs/objects";
 import moment from "moment";
 import { okAsync, ResultAsync } from "neverthrow";
 
 import { IBlockchainProvider, ITimeUtils } from "@interfaces/utilities";
 
 export class TimeUtils implements ITimeUtils {
-  protected lastBlockchainCheck: number | undefined;
-  protected lastBlockchainTimestamp: number | undefined;
+  protected lastBlockchainCheck: UnixTimestamp | undefined;
+  protected lastBlockchainTimestamp: UnixTimestamp | undefined;
   constructor(protected blockchainProvider: IBlockchainProvider) {}
 
-  public getUnixNow(): number {
-    return moment().unix();
+  public getUnixNow(): UnixTimestamp {
+    return UnixTimestamp(moment().unix());
   }
 
   public getBlockchainTimestamp(): ResultAsync<
-    number,
+    UnixTimestamp,
     BlockchainUnavailableError
   > {
     const now = this.getUnixNow();
@@ -30,8 +33,8 @@ export class TimeUtils implements ITimeUtils {
 
     this.lastBlockchainCheck = now;
     return this.blockchainProvider.getLatestBlock().map((block) => {
-      this.lastBlockchainTimestamp = block.timestamp;
-      return block.timestamp;
+      this.lastBlockchainTimestamp = UnixTimestamp(block.timestamp);
+      return this.lastBlockchainTimestamp;
     });
   }
 }

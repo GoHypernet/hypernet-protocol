@@ -29,8 +29,6 @@ export class PaymentStatusViewModel {
       this.state = "Insurance Released";
     } else if (params.state === EPaymentState.Finalized) {
       this.state = "Finalized";
-    } else if (params.state === EPaymentState.Challenged) {
-      this.state = "Challenged";
     } else if (params.state === EPaymentState.Borked) {
       this.state = "Borked";
     } else {
