@@ -8,6 +8,7 @@ import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullAmount } from "@objects/PullAmount";
 import { EPaymentState } from "@objects/typing";
+import { UnixTimestamp } from "@objects/UnixTimestamp";
 
 export class PullPayment extends Payment {
   constructor(
@@ -18,9 +19,7 @@ export class PullPayment extends Payment {
     paymentToken: EthereumAddress,
     requiredStake: BigNumber,
     amountStaked: BigNumber,
-    expirationDate: number,
-    createdTimestamp: number,
-    updatedTimestamp: number,
+    expirationDate: UnixTimestamp,
     collateralRecovered: BigNumber,
     merchantUrl: MerchantUrl,
     details: PaymentInternalDetails,
@@ -40,8 +39,6 @@ export class PullPayment extends Payment {
       requiredStake,
       amountStaked,
       expirationDate,
-      createdTimestamp,
-      updatedTimestamp,
       collateralRecovered,
       merchantUrl,
       details,
