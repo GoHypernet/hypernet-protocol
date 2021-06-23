@@ -194,14 +194,6 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
                 "Expiration Date",
                 dateUtils.fromTimestampToUI(pullPayment.expirationDate),
               )}
-              {renderListItem(
-                "Created",
-                dateUtils.fromTimestampToUI(pullPayment.createdTimestamp),
-              )}
-              {renderListItem(
-                "Updated",
-                dateUtils.fromTimestampToUI(pullPayment.updatedTimestamp),
-              )}
               {renderListItem("Merchant URL", pullPayment.merchantUrl)}
               {renderListItem(
                 "Authorized Amount",

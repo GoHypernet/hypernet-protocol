@@ -7,6 +7,7 @@ import {
   VectorError,
   PaymentCreationError,
   TransferResolutionError,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -47,7 +48,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
 
-const expirationDate = unixNow + defaultExpirationLength;
+const expirationDate = UnixTimestamp(unixNow + defaultExpirationLength);
 const counterPartyAccount = publicIdentifier2;
 const fromAccount = publicIdentifier;
 const paymentDetails = new PaymentInternalDetails(
@@ -75,7 +76,7 @@ class PaymentRepositoryMocks {
     includeInsuranceTransfer = true,
     includeParameterizedTransfer = true,
   ) {
-    td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow);
+    td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow as never);
     td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(
       okAsync(unixNow),
     );
@@ -209,8 +210,6 @@ class PaymentRepositoryMocks {
       BigNumber.from(commonAmount.toString()),
       BigNumber.from(amountStaked),
       expirationDate,
-      unixNow,
-      unixNow,
       BigNumber.from(0),
       merchantUrl,
       paymentDetails,

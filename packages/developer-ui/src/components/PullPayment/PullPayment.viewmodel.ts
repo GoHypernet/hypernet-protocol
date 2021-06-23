@@ -27,8 +27,6 @@ export class PullPaymentViewModel {
   public requiredStake: ko.Observable<string>;
   public amountStaked: ko.Observable<string>;
   public expirationDate: ko.Observable<string>;
-  public createdTimestamp: ko.Observable<string>;
-  public updatedTimestamp: ko.Observable<string>;
   public collateralRecovered: ko.Observable<string>;
   public merchantUrl: ko.Observable<MerchantUrl>;
   public authorizedAmount: ko.Observable<string>;
@@ -63,12 +61,6 @@ export class PullPaymentViewModel {
     this.amountStaked = ko.observable(params.payment.amountStaked.toString());
     const mdate = moment.unix(params.payment.expirationDate);
     this.expirationDate = ko.observable(mdate.format());
-    this.createdTimestamp = ko.observable(
-      params.payment.createdTimestamp.toString(),
-    );
-    this.updatedTimestamp = ko.observable(
-      params.payment.updatedTimestamp.toString(),
-    );
     this.collateralRecovered = ko.observable(
       params.payment.collateralRecovered.toString(),
     );

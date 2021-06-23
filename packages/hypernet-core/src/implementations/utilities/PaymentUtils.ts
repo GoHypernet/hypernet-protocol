@@ -29,6 +29,7 @@ import {
   MessageState,
   ParameterizedState,
   EMessageTransferType,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -164,8 +165,6 @@ export class PaymentUtils implements IPaymentUtils {
         paymentToken,
         BigNumber.from(sortedTransfers.offerDetails.requiredStake),
         BigNumber.from(amountStaked),
-        sortedTransfers.offerDetails.expirationDate,
-        sortedTransfers.offerDetails.creationDate,
         this.timeUtils.getUnixNow(),
         BigNumber.from(0),
         sortedTransfers.offerDetails.merchantUrl,
@@ -264,9 +263,7 @@ export class PaymentUtils implements IPaymentUtils {
         paymentToken,
         BigNumber.from(sortedTransfers.offerDetails.requiredStake),
         BigNumber.from(amountStaked),
-        this.timeUtils.getUnixNow() + 60 * 60, // 1 hour
-        sortedTransfers.offerDetails.creationDate,
-        this.timeUtils.getUnixNow(),
+        UnixTimestamp(this.timeUtils.getUnixNow() + 60 * 60), // 1 hour
         BigNumber.from(0),
         sortedTransfers.offerDetails.merchantUrl,
         details,

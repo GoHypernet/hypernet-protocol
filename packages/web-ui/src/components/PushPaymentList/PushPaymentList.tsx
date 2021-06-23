@@ -179,14 +179,6 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
                 "Expiration Date",
                 dateUtils.fromTimestampToUI(pushPayment.expirationDate),
               )}
-              {renderListItem(
-                "Created",
-                dateUtils.fromTimestampToUI(pushPayment.createdTimestamp),
-              )}
-              {renderListItem(
-                "Updated",
-                dateUtils.fromTimestampToUI(pushPayment.updatedTimestamp),
-              )}
               {renderListItem("Merchant URL", pushPayment.merchantUrl)}
               {renderListItem(
                 "Payment Amount",

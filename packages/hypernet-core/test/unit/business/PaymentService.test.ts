@@ -15,6 +15,7 @@ import {
   InsufficientBalanceError,
   InvalidParametersError,
   LogicalError,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -47,7 +48,7 @@ import { ConfigProviderMock, ContextProviderMock } from "@tests/mock/utils";
 const requiredStake = BigNumber.from("42");
 const paymentToken = mockUtils.generateRandomPaymentToken();
 const amount = BigNumber.from("42");
-const expirationDate = unixNow + defaultExpirationLength;
+const expirationDate = UnixTimestamp(unixNow + defaultExpirationLength);
 const paymentId = PaymentId(
   "See, this doesn't have to be legit data if it's never checked!",
 );
@@ -225,8 +226,6 @@ class PaymentServiceMocks {
       requiredStake,
       amountStaked,
       expirationDate,
-      unixNow,
-      unixNow,
       BigNumber.from(0),
       merchantUrl,
       paymentDetails,

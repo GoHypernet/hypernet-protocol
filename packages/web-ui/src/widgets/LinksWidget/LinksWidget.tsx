@@ -25,8 +25,6 @@ interface ISideFilter {
   to: string;
   merchantUrl: string;
   state: string;
-  createdTimestampFrom: string;
-  createdTimestampTo: string;
   expirationDateFrom: string;
   expirationDateTo: string;
 }
@@ -85,11 +83,6 @@ const LinksWidget: React.FC<ILinksWidget> = ({
         },
       },
       {
-        label: "Search By created date",
-        widgetType: EItemType.dateTimeDifference,
-        stateKey: "createdTimestamp",
-      },
-      {
         label: "Search By expiration date",
         widgetType: EItemType.dateTimeDifference,
         stateKey: "expirationDate",
@@ -116,13 +109,6 @@ const LinksWidget: React.FC<ILinksWidget> = ({
             filter?.state === "all" ||
             pushPayment.state.toString() == filter?.state) &&
           dateUtils.checkTimestampInRang(
-            pushPayment.createdTimestamp,
-            dateUtils.fromDatetimeStringToTimestamp(
-              filter?.createdTimestampFrom,
-            ),
-            dateUtils.fromDatetimeStringToTimestamp(filter?.createdTimestampTo),
-          ) &&
-          dateUtils.checkTimestampInRang(
             pushPayment.expirationDate,
             dateUtils.fromDatetimeStringToTimestamp(filter?.expirationDateFrom),
             dateUtils.fromDatetimeStringToTimestamp(filter?.expirationDateTo),
@@ -146,13 +132,6 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           (filter?.state == null ||
             filter?.state === "all" ||
             pullPayment.state.toString() == filter?.state) &&
-          dateUtils.checkTimestampInRang(
-            pullPayment.createdTimestamp,
-            dateUtils.fromDatetimeStringToTimestamp(
-              filter?.createdTimestampFrom,
-            ),
-            dateUtils.fromDatetimeStringToTimestamp(filter?.createdTimestampTo),
-          ) &&
           dateUtils.checkTimestampInRang(
             pullPayment.expirationDate,
             dateUtils.fromDatetimeStringToTimestamp(filter?.expirationDateFrom),

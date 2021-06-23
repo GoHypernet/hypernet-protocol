@@ -5,6 +5,7 @@ import {
   PaymentInternalDetails,
   VectorError,
   EPaymentState,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { okAsync, errAsync } from "neverthrow";
@@ -45,7 +46,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
 
-const expirationDate = unixNow + defaultExpirationLength;
+const expirationDate = UnixTimestamp(unixNow + defaultExpirationLength);
 const counterPartyAccount = publicIdentifier2;
 const fromAccount = publicIdentifier;
 const paymentDetails = new PaymentInternalDetails(
@@ -109,7 +110,7 @@ class VectorLinkRepositoryMocks {
       ),
     ).thenReturn(okAsync([]));
 
-    td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow);
+    td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow as never);
     td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(
       okAsync(unixNow),
     );
@@ -140,8 +141,6 @@ class VectorLinkRepositoryMocks {
       BigNumber.from(commonAmount.toString()),
       BigNumber.from(amountStaked),
       expirationDate,
-      unixNow,
-      unixNow,
       BigNumber.from(0),
       merchantUrl,
       paymentDetails,
