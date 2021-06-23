@@ -17,6 +17,16 @@ export interface IAjaxUtils {
       | URLSearchParams,
     config?: IRequestConfig,
   ): ResultAsync<T, AjaxError>;
+  put<T>(
+    url: URL,
+    data:
+      | string
+      | Record<string, unknown>
+      | ArrayBuffer
+      | ArrayBufferView
+      | URLSearchParams,
+    config?: IRequestConfig,
+  ): ResultAsync<T, AjaxError>;
 }
 
 export interface IRequestConfig extends AxiosRequestConfig {}

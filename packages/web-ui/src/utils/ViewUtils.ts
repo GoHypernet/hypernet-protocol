@@ -58,10 +58,6 @@ export class ViewUtils implements IViewUtils {
         EPaymentState.Borked,
       ),
       new PaymentStateOption(
-        this._factoryPaymentStatusViewModel(EPaymentState.Challenged).state,
-        EPaymentState.Challenged,
-      ),
-      new PaymentStateOption(
         this._factoryPaymentStatusViewModel(EPaymentState.Finalized).state,
         EPaymentState.Finalized,
       ),

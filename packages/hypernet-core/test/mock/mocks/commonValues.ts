@@ -4,6 +4,7 @@ import {
   PaymentId,
   PublicIdentifier,
   TransferId,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { BigNumber, constants } from "ethers";
 
@@ -34,8 +35,8 @@ export const commonPaymentId = PaymentId(
 export const offerTransferId = TransferId("OfferTransferId");
 export const insuranceTransferId = TransferId("InsuranceTransferId");
 export const parameterizedTransferId = TransferId("ParameterizedTransferId");
-export const unixPast = 1318870398; // Less that defaultExpirationlength before now
-export const unixNow = 1318874398;
+export const unixPast = UnixTimestamp(1318870398); // Less that defaultExpirationlength before now
+export const unixNow = UnixTimestamp(1318874398);
 export const nowFormatted = "2021-02-03T04:28:09+03:00";
 export const defaultExpirationLength = 5000;
 export const merchantUrl = MerchantUrl("https://example.merchant.com/");
