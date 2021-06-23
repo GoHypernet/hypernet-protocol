@@ -14,8 +14,14 @@ export const useStyles = makeStyles({
     alignItems: "center",
     marginBottom: 24,
   },
-  connectorName: {
+  hypernet: {
     fontSize: 24,
     paddingLeft: 5,
+  },
+  protocol: {
+    fontSize: 23,
+    paddingLeft: 5,
+    fontWeight: 300,
+    paddingTop: 3,
   },
 });

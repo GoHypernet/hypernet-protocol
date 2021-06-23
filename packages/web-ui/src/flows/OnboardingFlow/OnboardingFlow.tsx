@@ -37,6 +37,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     merchantUrl,
     finalSuccessContent = "You are good to go and purchase using your payment token",
     closeCallback = () => {},
+    merchantName,
   } = props;
   const alert = useAlert();
   const {
@@ -182,7 +183,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
               </>
             )}
             <Button
-              label="Authorize Merchant"
+              label={`Approve ${merchantName || "Hyperpay"}`}
               onClick={handleMerchantAuthorization}
               fullWidth={true}
               bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"

@@ -22,8 +22,8 @@ import {
   PRIVATE_KEYS_FLOW_ID_SELECTOR,
   CONNECTOR_AUTHORIZATION_FLOW_ID_SELECTOR,
   ONBOARDING_FLOW_ID_SELECTOR,
-  TIMEOUT_GUID_SELECTOR,
   WARNING_ALERT_SELECTOR,
+  METAMASK_WARNING_ID_SELECTOR,
 } from "@web-ui/constants";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
@@ -33,7 +33,7 @@ import BalancesWidget from "@web-ui/widgets/BalancesWidget";
 import FundWidget from "@web-ui/widgets/FundWidget";
 import LinksWidget from "@web-ui/widgets/LinksWidget";
 import MerchantsWidget from "@web-ui/widgets/MerchantsWidget";
-import { TimeoutGuide, WarningAlert } from "@web-ui/components";
+import { MetamaskWarning, WarningAlert } from "@web-ui/components";
 import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
 
 export default class HypernetWebUI implements IHypernetWebUI {
@@ -127,13 +127,13 @@ export default class HypernetWebUI implements IHypernetWebUI {
     return this._getThrowableRender(renderReact);
   }
 
-  public renderTimeoutGuideModal(): Result<void, RenderError> {
+  public renderMetamaskWarningModal(): Result<void, RenderError> {
     const renderReact = () => {
       return ReactDOM.render(
-        this._bootstrapComponent(<TimeoutGuide />, true, undefined, {
+        this._bootstrapComponent(<MetamaskWarning />, true, undefined, {
           zIndex: 99999,
         }),
-        this._generateDomElement(TIMEOUT_GUID_SELECTOR),
+        this._generateDomElement(METAMASK_WARNING_ID_SELECTOR),
       );
     };
     return this._getThrowableRender(renderReact);
