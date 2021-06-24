@@ -603,10 +603,13 @@ export class PaymentUtils implements IPaymentUtils {
   > {
     // TransferDefinition here is the ETH address of the transfer
     // We need to get the registered transfer definitions as canonical by the browser node
-    return this.browserNodeProvider
-      .getBrowserNode()
-      .andThen((browserNode) => {
-        return browserNode.getRegisteredTransfers(1337);
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.configProvider.getConfig(),
+    ])
+      .andThen((vals) => {
+        const [browserNode, config] = vals;
+        return browserNode.getRegisteredTransfers(config.chainId);
       })
       .andThen((registeredTransfers) => {
         // registeredTransfers.name = 'Insurance', registeredTransfers.definition = <address>, transfer.transferDefinition = <address>

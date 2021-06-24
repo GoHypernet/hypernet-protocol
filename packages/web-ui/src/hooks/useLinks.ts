@@ -7,6 +7,7 @@ import {
   PushPayment,
 } from "@hypernetlabs/objects";
 import { useStoreContext } from "@web-ui/contexts";
+import { BigNumber } from "ethers";
 import { useEffect, useReducer } from "react";
 import { useAlert } from "react-alert";
 

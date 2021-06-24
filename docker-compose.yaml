@@ -154,7 +154,7 @@ services:
       VECTOR_ENV: "dev"
 
   blockchain:
-    image: hypernetlabs/eth-provider
+    image: hypernetlabs/eth-provider:local
     ports:
       - 8545:8545
     environment:

@@ -203,7 +203,10 @@ export class AccountsRepository implements IAccountsRepository {
           this.logUtils.log("Transferring ETH.");
           // send eth
           return ResultAsync.fromPromise(
-            signer.sendTransaction({ to: channelAddress, value: amount }),
+            signer.sendTransaction({
+              to: channelAddress,
+              value: BigNumber.from(amount),
+            }),
             (err) => {
               return new BlockchainUnavailableError(
                 "Unable to send transaction",
