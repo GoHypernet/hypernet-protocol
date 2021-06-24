@@ -11,5 +11,5 @@ export interface ISendFundsRequest {
   expirationDate: UnixTimestamp;
   requiredStake: BigNumberString;
   paymentToken: EthereumAddress;
-  metadata: string;
+  metadata: string | null;
 }
