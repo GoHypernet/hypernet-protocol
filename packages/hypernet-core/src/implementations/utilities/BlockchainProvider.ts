@@ -4,6 +4,7 @@ import {
   InvalidParametersError,
   PrivateCredentials,
   EthereumAddress,
+  IProviderSigner,
 } from "@hypernetlabs/objects";
 import { ILogUtils, ResultUtils } from "@hypernetlabs/utils";
 import { ethers } from "ethers";
@@ -21,11 +22,6 @@ declare global {
   interface Window {
     ethereum: any;
   }
-}
-
-interface IProviderSigner {
-  provider: ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider;
-  signer: ethers.providers.JsonRpcSigner;
 }
 
 // This is just a code of avoiding errors in mobile app.
