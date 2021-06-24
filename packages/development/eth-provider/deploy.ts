@@ -75,6 +75,7 @@ const func: DeployFunction = async () => {
     ["Parameterized", []],
     ["Insurance", []],
     ["Message", []],
+    ["Hypertoken", []],
   ];
 
   // Only deploy test fixtures during hardhat tests
