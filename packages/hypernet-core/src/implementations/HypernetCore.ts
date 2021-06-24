@@ -286,6 +286,7 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
     );
 
+    // TODO: This could work on Ethers provider and BlockchainUtils might be a good place for it
     this.metamaskUtils = new MetamaskUtils(this.configProvider, this.logUtils);
 
     this.blockchainProvider = new EthersBlockchainProvider(
