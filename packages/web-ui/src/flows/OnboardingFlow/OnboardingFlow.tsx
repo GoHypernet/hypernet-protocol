@@ -4,13 +4,7 @@ import { IOnboardingFlowParams } from "@web-ui/interfaces";
 import React, { useEffect, useState, ReactNode } from "react";
 import { useAlert } from "react-alert";
 
-import {
-  ModalHeader,
-  ModalFooter,
-  SucessContent,
-  Button,
-  TokenSelector,
-} from "@web-ui/components";
+import { ModalHeader, SucessContent, Button } from "@web-ui/components";
 import { useStyles } from "@web-ui/flows/OnboardingFlow/OnboardingFlow.style";
 import { useBalances } from "@web-ui/hooks";
 import { EButtonStatus } from "@web-ui/theme";
@@ -26,7 +20,7 @@ enum EOnboardingScreens {
   MERCHANT_AUTHORIZATION = 1,
   EMPTY_BALANCE = 2,
   FUND_WIDGET = 3,
-  BALANCES_AND_PREFERRED_TOKEN = 4,
+  BALANCES = 4,
   ONBOARDING_SUCCESS = 5,
 }
 
@@ -40,13 +34,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     merchantName,
   } = props;
   const alert = useAlert();
-  const {
-    balances,
-    channelTokenSelectorOptions,
-    preferredPaymentToken,
-    setPreferredPaymentToken,
-    //setPreferredPaymentTokenByAssetInfo,
-  } = useBalances();
+  const { balances } = useBalances();
 
   const { coreProxy } = useStoreContext();
   const { setLoading, closeModal } = useLayoutContext();
@@ -101,7 +89,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
   // Watch funding success
   useEffect(() => {
     if (balances?.length && currentSreen === EOnboardingScreens.FUND_WIDGET) {
-      setCurrentSreen(EOnboardingScreens.BALANCES_AND_PREFERRED_TOKEN);
+      setCurrentSreen(EOnboardingScreens.BALANCES);
     }
   }, [balances]);
 
@@ -109,7 +97,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     hasBalances?: boolean,
   ) => {
     if (hasBalances || balances?.length) {
-      setCurrentSreen(EOnboardingScreens.BALANCES_AND_PREFERRED_TOKEN);
+      setCurrentSreen(EOnboardingScreens.BALANCES);
     } else {
       setCurrentSreen(EOnboardingScreens.EMPTY_BALANCE);
     }
@@ -124,17 +112,17 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     setCurrentSreen(EOnboardingScreens.FUND_WIDGET);
   };
 
-  const goToSuccessScreen = () => {
-    setCurrentSreen(EOnboardingScreens.ONBOARDING_SUCCESS);
-  };
-
   const handleError = (err?: Error) => {
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };
 
+  const goToSuccessScreen = () => {
+    setCurrentSreen(EOnboardingScreens.ONBOARDING_SUCCESS);
+  };
+
   const renderFundWalletButton = (status?: EButtonStatus) => {
-    if (status === EButtonStatus.primary) {
+    if (status === EButtonStatus.secondary) {
       return (
         <Button
           label="Fund my wallet"
@@ -205,33 +193,20 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
         );
       case EOnboardingScreens.FUND_WIDGET:
         return <FundWidget />;
-      case EOnboardingScreens.BALANCES_AND_PREFERRED_TOKEN:
+      case EOnboardingScreens.BALANCES:
         return (
           <>
             {balances?.length && <BalancesWidget />}
-            {!preferredPaymentToken && (
-              <Box className={classes.paymentTokenLabel}>
-                You need to set a default payment token to purchase with!
-              </Box>
-            )}
-            <Box className={classes.preferredTokenWrapper}>
-              <TokenSelector
-                tokenSelectorOptions={channelTokenSelectorOptions}
-                selectedPaymentToken={preferredPaymentToken}
-                setSelectedPaymentToken={setPreferredPaymentToken}
-                label="Default Payment Token:"
+
+            <Box className={classes.doneButtonWrapper}>
+              <Button
+                label="Done"
+                onClick={goToSuccessScreen}
+                fullWidth={true}
+                bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
               />
             </Box>
-            {preferredPaymentToken && (
-              <Box className={classes.doneButtonWrapper}>
-                <Button
-                  label="Done"
-                  onClick={goToSuccessScreen}
-                  fullWidth={true}
-                  bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
-                />
-              </Box>
-            )}
+
             {renderFundWalletButton(EButtonStatus.secondary)}
           </>
         );
@@ -255,7 +230,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     <Box className={classes.container}>
       <ModalHeader />
       {renderScreen()}
-      <ModalFooter />
+      {/* <ModalFooter /> */}
     </Box>
   );
 };
