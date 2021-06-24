@@ -4,23 +4,24 @@ import {
   InvalidParametersError,
   PrivateCredentials,
   EthereumAddress,
+  IProviderSigner,
 } from "@hypernetlabs/objects";
-import { ILogUtils } from "@hypernetlabs/utils";
+import { ILogUtils, ResultUtils } from "@hypernetlabs/utils";
 import { ethers } from "ethers";
 import { okAsync, ResultAsync, errAsync } from "neverthrow";
 
-import { IContextProvider, IInternalProvider } from "@interfaces/utilities";
+import {
+  IContextProvider,
+  IConfigProvider,
+  IInternalProvider,
+  IMetamaskUtils,
+} from "@interfaces/utilities";
 import { IInternalProviderFactory } from "@interfaces/utilities/factory";
 import { IBlockchainProvider } from "@interfaces/utilities/IBlockchainProvider";
 declare global {
   interface Window {
     ethereum: any;
   }
-}
-
-interface IProviderSigner {
-  provider: ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider;
-  signer: ethers.providers.JsonRpcSigner;
 }
 
 // This is just a code of avoiding errors in mobile app.
@@ -36,6 +37,8 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
   > | null;
   constructor(
     protected contextProvider: IContextProvider,
+    protected configProvider: IConfigProvider,
+    protected metamaskUtils: IMetamaskUtils,
     protected internalProviderFactory: IInternalProviderFactory,
     protected logUtils: ILogUtils,
   ) {
@@ -110,16 +113,14 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
       if (context.metamaskEnabled) {
         this.logUtils.info("Using metamask as the blockchain provider");
 
-        window.ethereum.autoRefreshOnNetworkChange = false;
-        this.initializeResult = ResultAsync.fromPromise(
-          window.ethereum.enable(),
-          (e: unknown) => {
-            return new BlockchainUnavailableError(
-              "Unable to initialize ethereum provider from the window",
-              e,
-            );
-          },
-        )
+        this.initializeResult = this.metamaskUtils
+          .enable()
+          .map(() => {
+            return this.metamaskUtils.addNetwork();
+          })
+          .map(() => {
+            return this.metamaskUtils.addTokenAddress();
+          })
           .map(() => {
             // A Web3Provider wraps a standard Web3 provider, which is
             // what Metamask injects as window.ethereum into each page

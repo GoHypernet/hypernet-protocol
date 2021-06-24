@@ -22,6 +22,6 @@
   ],
   "scripts": {
     "deploy-custom-transfers": "yarn ts-node blockchain/deploy.ts",
-    "dockerize": "docker build -t hypernetlabs/eth-provider eth-provider"
+    "dockerize": "docker build -t hypernetlabs/eth-provider:local eth-provider && docker build --build-arg CHAIN_ID_ARG=1369 -t hypernetlabs/eth-provider:development eth-provider"
   }
 }

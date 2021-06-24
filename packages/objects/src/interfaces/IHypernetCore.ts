@@ -1,9 +1,9 @@
-import { BigNumber } from "ethers";
 import { ResultAsync, Result } from "neverthrow";
 import { Subject } from "rxjs";
 
 import { AssetInfo } from "@objects/AssetInfo";
 import { Balances } from "@objects/Balances";
+import { BigNumberString } from "@objects/BigNumberString";
 import { ControlClaim } from "@objects/ControlClaim";
 import {
   AcceptPaymentError,
@@ -32,6 +32,7 @@ import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
 import { Signature } from "@objects/Signature";
+import { UnixTimestamp } from "@objects/UnixTimestamp";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -79,7 +80,7 @@ export interface IHypernetCore {
    */
   depositFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<
     Balances,
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
@@ -93,7 +94,7 @@ export interface IHypernetCore {
    */
   withdrawFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
@@ -145,11 +146,12 @@ export interface IHypernetCore {
    */
   sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: BigNumber,
-    expirationDate: number,
-    requiredStake: BigNumber,
+    amount: BigNumberString,
+    expirationDate: UnixTimestamp,
+    requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
+    metadata: string | null,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
 
   /**
@@ -165,13 +167,14 @@ export interface IHypernetCore {
    */
   authorizeFunds(
     counterPartyAccount: PublicIdentifier,
-    totalAuthorized: BigNumber,
-    expirationDate: number,
-    deltaAmount: BigNumber,
+    totalAuthorized: BigNumberString,
+    expirationDate: UnixTimestamp,
+    deltaAmount: BigNumberString,
     deltaTime: number,
-    requiredStake: BigNumber,
+    requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
+    metadata: string | null,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
 
   /**
@@ -192,7 +195,7 @@ export interface IHypernetCore {
    */
   pullFunds(
     paymentId: PaymentId,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
 
   /**
@@ -202,7 +205,7 @@ export interface IHypernetCore {
    */
   finalizePullPayment(
     paymentId: PaymentId,
-    finalAmount: BigNumber,
+    finalAmount: BigNumberString,
   ): Promise<HypernetLink>;
 
   /**
@@ -242,7 +245,7 @@ export interface IHypernetCore {
    * @param amount
    */
   mintTestToken(
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<void, BlockchainUnavailableError>;
 
   authorizeMerchant(

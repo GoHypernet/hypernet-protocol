@@ -11,6 +11,7 @@ import {
   RouterChannelUnknownError,
   VectorError,
   PreferredPaymentTokenError,
+  BigNumberString,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
@@ -36,7 +37,7 @@ export interface IAccountsRepository {
   >;
   depositFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<
     null,
     | RouterChannelUnknownError
@@ -46,7 +47,7 @@ export interface IAccountsRepository {
   >;
   withdrawFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     void,
@@ -57,7 +58,7 @@ export interface IAccountsRepository {
   ): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;
 
   mintTestToken(
-    amount: BigNumber,
+    amount: BigNumberString,
     to: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError>;
 

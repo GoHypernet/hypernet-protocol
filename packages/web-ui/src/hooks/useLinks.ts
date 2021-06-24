@@ -1,4 +1,5 @@
 import {
+  BigNumberString,
   HypernetLink,
   PaymentId,
   PublicIdentifier,
@@ -179,7 +180,7 @@ export function useLinks(): IState {
   }
 
   function pullFunds(paymentId: PaymentId) {
-    coreProxy.pullFunds(paymentId, BigNumber.from(1)).match(() => {
+    coreProxy.pullFunds(paymentId, BigNumberString("1")).match(() => {
       fetchData();
       alert.success("Payment disputed successfully!");
     }, handleError);

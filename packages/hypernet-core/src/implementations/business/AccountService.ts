@@ -12,6 +12,7 @@ import {
   PreferredPaymentTokenError,
   Signature,
   AssetInfo,
+  BigNumberString,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -59,7 +60,7 @@ export class AccountService implements IAccountService {
 
   public depositFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<
     Balances,
     | BalancesUnavailableError
@@ -93,7 +94,7 @@ export class AccountService implements IAccountService {
 
   public withdrawFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,

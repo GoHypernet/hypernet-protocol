@@ -133,6 +133,9 @@ module.exports = {
       __ROUTER_PUBLIC_IDENTIFIER__: JSON.stringify(
         process.env.__ROUTER_PUBLIC_IDENTIFIER__,
       ),
+      __HYPERTOKEN_ADDRESS__: JSON.stringify(
+        process.env.__HYPERTOKEN_ADDRESS__,
+      ),
       __CHAIN_ID__: JSON.stringify(process.env.__CHAIN_ID__),
       __CHAIN_PROVIDERS__: JSON.stringify(process.env.__CHAIN_PROVIDERS__),
       __CHAIN_ADDRESSES__: JSON.stringify(process.env.__CHAIN_ADDRESSES__),

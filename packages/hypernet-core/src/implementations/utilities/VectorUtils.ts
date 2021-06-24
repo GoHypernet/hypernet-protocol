@@ -30,6 +30,8 @@ import {
   ParameterizedResolver,
   ParameterizedResolverData,
   Rate,
+  BigNumberString,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { serialize } from "class-transformer";
@@ -255,7 +257,7 @@ export class VectorUtils implements IVectorUtils {
 
         return browserNode.conditionalTransfer(
           channelAddress,
-          "0",
+          BigNumberString("0"),
           config.hypertokenAddress,
           "MessageTransfer",
           initialState,
@@ -313,7 +315,7 @@ export class VectorUtils implements IVectorUtils {
 
         return browserNode.conditionalTransfer(
           channelAddress,
-          "0",
+          BigNumberString("0"),
           message.paymentToken, // The offer is always for 0, so we will make the asset ID in the payment token type, because why not?
           "MessageTransfer",
           initialState,
@@ -341,11 +343,11 @@ export class VectorUtils implements IVectorUtils {
   public createPaymentTransfer(
     type: EPaymentType,
     toAddress: PublicIdentifier,
-    amount: BigNumber,
+    amount: BigNumberString,
     assetAddress: EthereumAddress,
     paymentId: PaymentId,
-    start: number,
-    expiration: number,
+    start: UnixTimestamp,
+    expiration: UnixTimestamp,
     deltaTime?: number,
     deltaAmount?: string,
   ): ResultAsync<
@@ -369,7 +371,7 @@ export class VectorUtils implements IVectorUtils {
       );
     }
 
-    if (amount.isZero()) {
+    if (BigNumber.from(amount).isZero()) {
       this.logUtils.error("Amount cannot be zero.");
       return errAsync(new InvalidParametersError("Amount cannot be zero."));
     }
@@ -452,7 +454,7 @@ export class VectorUtils implements IVectorUtils {
 
         return browserNode.conditionalTransfer(
           channelAddress,
-          amount.toString(),
+          amount,
           assetAddress,
           "Parameterized",
           initialState,
@@ -478,8 +480,8 @@ export class VectorUtils implements IVectorUtils {
   public createInsuranceTransfer(
     toAddress: PublicIdentifier,
     mediatorAddress: EthereumAddress,
-    amount: BigNumber,
-    expiration: number,
+    amount: BigNumberString,
+    expiration: UnixTimestamp,
     paymentId: PaymentId,
   ): ResultAsync<
     IBasicTransferResponse,
@@ -500,7 +502,7 @@ export class VectorUtils implements IVectorUtils {
     }
 
     return ResultUtils.combine([
-      this.configProvider.getConfig() as ResultAsync<any, any>,
+      this.configProvider.getConfig(),
       this.getRouterChannelAddress(),
       this.browserNodeProvider.getBrowserNode(),
     ])
@@ -519,7 +521,7 @@ export class VectorUtils implements IVectorUtils {
 
         return browserNode.conditionalTransfer(
           channelAddress,
-          amount.toString(),
+          amount,
           config.hypertokenAddress,
           "Insurance",
           initialState,
@@ -596,7 +598,7 @@ export class VectorUtils implements IVectorUtils {
     return this.getRouterChannelAddressSetup;
   }
 
-  public getTimestampFromTransfer(transfer: IFullTransferState): number {
+  public getTimestampFromTransfer(transfer: IFullTransferState): UnixTimestamp {
     if (transfer.meta == null) {
       // We need to figure out the transfer type, I think; but for now we'll just say
       // that the transfer is right now

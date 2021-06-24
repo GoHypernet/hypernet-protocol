@@ -1,4 +1,9 @@
-import { EthereumAddress, PublicIdentifier } from "@hypernetlabs/objects";
+import {
+  BigNumberString,
+  EthereumAddress,
+  PublicIdentifier,
+  UnixTimestamp,
+} from "@hypernetlabs/objects";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { utils } from "ethers";
 import ko from "knockout";
@@ -77,10 +82,18 @@ export class PullPaymentFormViewModel {
         }
 
         try {
-          const expirationDate = moment(this.expirationDate()).unix();
-          const amount = utils.parseUnits(this.amount(), "wei");
-          const requiredStake = utils.parseUnits(this.requiredStake(), "wei");
-          const deltaAmount = utils.parseUnits(this.deltaAmount(), "wei");
+          const expirationDate = UnixTimestamp(
+            moment(this.expirationDate()).unix(),
+          );
+          const amount = BigNumberString(
+            utils.parseUnits(this.amount(), "wei").toString(),
+          );
+          const requiredStake = BigNumberString(
+            utils.parseUnits(this.requiredStake(), "wei").toString(),
+          );
+          const deltaAmount = BigNumberString(
+            utils.parseUnits(this.deltaAmount(), "wei").toString(),
+          );
           const deltaTime = Number(this.deltaTime());
 
           return await this.integration.core.authorizeFunds(
@@ -92,6 +105,7 @@ export class PullPaymentFormViewModel {
             requiredStake,
             selectedPaymentTokenAddress,
             selectedMerchantUrl,
+            null,
           );
         } catch {
           return null;

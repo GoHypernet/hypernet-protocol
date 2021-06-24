@@ -7,8 +7,8 @@ import {
   EthereumAddress,
   Signature,
   BlockchainUnavailableError,
+  BigNumberString,
 } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 export interface IBlockchainUtils {
@@ -22,11 +22,11 @@ export interface IBlockchainUtils {
   erc20Transfer(
     assetAddress: EthereumAddress,
     channelAddress: string,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<TransactionResponse, BlockchainUnavailableError>;
 
   mintToken(
-    amount: BigNumber,
+    amount: BigNumberString,
     to: EthereumAddress,
   ): ResultAsync<TransactionResponse, BlockchainUnavailableError>;
 }

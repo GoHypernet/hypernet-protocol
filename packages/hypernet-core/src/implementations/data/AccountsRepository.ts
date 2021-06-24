@@ -13,6 +13,7 @@ import {
   BalancesUnavailableError,
   LogicalError,
   VectorError,
+  BigNumberString,
 } from "@hypernetlabs/objects";
 import {
   ResultUtils,
@@ -163,9 +164,9 @@ export class AccountsRepository implements IAccountsRepository {
           assetInfo.name,
           assetInfo.symbol,
           assetInfo.decimals,
-          BigNumber.from(0),
-          BigNumber.from(0),
-          BigNumber.from(0),
+          BigNumberString("0"),
+          BigNumberString("0"),
+          BigNumberString("0"),
         );
       });
     });
@@ -178,7 +179,7 @@ export class AccountsRepository implements IAccountsRepository {
    */
   public depositFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<
     null,
     | RouterChannelUnknownError
@@ -202,7 +203,10 @@ export class AccountsRepository implements IAccountsRepository {
           this.logUtils.log("Transferring ETH.");
           // send eth
           return ResultAsync.fromPromise(
-            signer.sendTransaction({ to: channelAddress, value: amount }),
+            signer.sendTransaction({
+              to: channelAddress,
+              value: BigNumber.from(amount),
+            }),
             (err) => {
               return new BlockchainUnavailableError(
                 "Unable to send transaction",
@@ -257,7 +261,7 @@ export class AccountsRepository implements IAccountsRepository {
    */
   public withdrawFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     void,
@@ -273,7 +277,7 @@ export class AccountsRepository implements IAccountsRepository {
         const [browserNode, channelAddress] = vals;
         return browserNode.withdraw(
           channelAddress,
-          amount.toString(),
+          amount,
           assetAddress,
           destinationAddress,
         );
@@ -297,7 +301,7 @@ export class AccountsRepository implements IAccountsRepository {
    * @param to the (Ethereum) address to mint the test token to
    */
   public mintTestToken(
-    amount: BigNumber,
+    amount: BigNumberString,
     to: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError> {
     const resp = this.blockchainUtils.mintToken(amount, to);
@@ -342,7 +346,7 @@ export class AccountsRepository implements IAccountsRepository {
     const assetAddress = EthereumAddress(channelState.assetIds[i]);
 
     return this._getAssetInfo(assetAddress).map((assetInfo) => {
-      const amount = BigNumber.from(channelState.balances[i].amount[1]);
+      const amount = BigNumberString(channelState.balances[i].amount[1]);
 
       // Return the asset balance
       const assetBalance = new AssetBalance(
@@ -351,7 +355,7 @@ export class AccountsRepository implements IAccountsRepository {
         assetInfo.symbol,
         assetInfo.decimals,
         amount,
-        BigNumber.from(0), // @todo figure out how to grab the locked amount
+        BigNumberString("0"), // @todo figure out how to grab the locked amount
         amount,
       );
 

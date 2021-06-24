@@ -31,6 +31,8 @@ import {
   PreferredPaymentTokenError,
   ProxyError,
   MerchantAuthorizationDeniedError,
+  BigNumberString,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -77,6 +79,7 @@ import {
   VectorUtils,
   EthersBlockchainUtils,
   CeramicUtils,
+  MetamaskUtils,
 } from "@implementations/utilities";
 import {
   MerchantConnectorProxyFactory,
@@ -111,6 +114,7 @@ import {
   ITimeUtils,
   IVectorUtils,
   ICeramicUtils,
+  IMetamaskUtils,
 } from "@interfaces/utilities";
 import {
   IBrowserNodeFactory,
@@ -163,6 +167,7 @@ export class HypernetCore implements IHypernetCore {
   protected ceramicUtils: ICeramicUtils;
   protected validationUtils: IValidationUtils;
   protected storageUtils: IStorageUtils;
+  protected metamaskUtils: IMetamaskUtils;
 
   // Factories
   protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory;
@@ -281,8 +286,13 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
     );
 
+    // TODO: This could work on Ethers provider and BlockchainUtils might be a good place for it
+    this.metamaskUtils = new MetamaskUtils(this.configProvider, this.logUtils);
+
     this.blockchainProvider = new EthersBlockchainProvider(
       this.contextProvider,
+      this.configProvider,
+      this.metamaskUtils,
       this.internalProviderFactory,
       this.logUtils,
     );
@@ -471,7 +481,7 @@ export class HypernetCore implements IHypernetCore {
    */
   public depositFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<
     Balances,
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
@@ -488,7 +498,7 @@ export class HypernetCore implements IHypernetCore {
    */
   public withdrawFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
@@ -553,11 +563,12 @@ export class HypernetCore implements IHypernetCore {
    */
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: BigNumber,
-    expirationDate: number,
-    requiredStake: BigNumber,
+    amount: BigNumberString,
+    expirationDate: UnixTimestamp,
+    requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
+    metadata: string | null,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     // Send payment terms to provider & request provider make insurance payment
     return this.paymentService.sendFunds(
@@ -567,6 +578,7 @@ export class HypernetCore implements IHypernetCore {
       requiredStake,
       paymentToken,
       merchantUrl,
+      metadata,
     );
   }
 
@@ -594,13 +606,14 @@ export class HypernetCore implements IHypernetCore {
    */
   public authorizeFunds(
     counterPartyAccount: PublicIdentifier,
-    totalAuthorized: BigNumber,
-    expirationDate: number,
-    deltaAmount: BigNumber,
+    totalAuthorized: BigNumberString,
+    expirationDate: UnixTimestamp,
+    deltaAmount: BigNumberString,
     deltaTime: number,
-    requiredStake: BigNumber,
+    requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
+    metadata: string | null,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this.paymentService.authorizeFunds(
       counterPartyAccount,
@@ -611,6 +624,7 @@ export class HypernetCore implements IHypernetCore {
       requiredStake,
       paymentToken,
       merchantUrl,
+      metadata,
     );
   }
 
@@ -621,7 +635,7 @@ export class HypernetCore implements IHypernetCore {
    */
   public pullFunds(
     paymentId: PaymentId,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this.paymentService.pullFunds(paymentId, amount);
   }
@@ -630,8 +644,8 @@ export class HypernetCore implements IHypernetCore {
    * Finalize a pull-payment.
    */
   public async finalizePullPayment(
-    paymentId: string,
-    finalAmount: BigNumber,
+    paymentId: PaymentId,
+    finalAmount: BigNumberString,
   ): Promise<HypernetLink> {
     throw new Error("Method not yet implemented.");
   }
@@ -727,7 +741,7 @@ export class HypernetCore implements IHypernetCore {
    * @param amount the amount of test token to mint
    */
   public mintTestToken(
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<void, BlockchainUnavailableError> {
     return this.contextProvider.getInitializedContext().andThen((context) => {
       return this.developmentService.mintTestToken(amount, context.account);

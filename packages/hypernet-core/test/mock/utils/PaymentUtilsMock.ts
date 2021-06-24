@@ -1,5 +1,6 @@
-import { EPaymentType, ETransferType } from "@hypernetlabs/objects";
 import {
+  EPaymentType,
+  ETransferType,
   PushPayment,
   SortedTransfers,
   IFullTransferState,
@@ -157,7 +158,7 @@ export class PaymentUtilsMockFactory {
           return arr[0].transferId === offerTransferId;
         }),
       ),
-    ).thenReturn(unixPast);
+    ).thenReturn(unixPast as never);
 
     return paymentUtils;
   }

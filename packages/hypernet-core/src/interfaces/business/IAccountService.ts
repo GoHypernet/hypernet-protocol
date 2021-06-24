@@ -12,6 +12,7 @@ import {
   InvalidParametersError,
   PreferredPaymentTokenError,
   AssetInfo,
+  BigNumberString,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
@@ -27,7 +28,7 @@ export interface IAccountService {
   getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
   depositFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<
     Balances,
     | BalancesUnavailableError
@@ -38,7 +39,7 @@ export interface IAccountService {
   >;
   withdrawFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,

@@ -1,21 +1,18 @@
 import {
   BlockchainUnavailableError,
   EthereumAddress,
+  UnixTimestamp,
   VectorError,
-} from "@hypernetlabs/objects";
-import {
   InsuranceState,
   ParameterizedState,
   MessageState,
-} from "@hypernetlabs/objects";
-import {
   IHypernetOfferDetails,
   IFullChannelState,
   IFullTransferState,
   IRegisteredTransfer,
   IWithdrawResponse,
+  EMessageTransferType,
 } from "@hypernetlabs/objects";
-import { EMessageTransferType } from "@hypernetlabs/objects";
 import { okAsync, ResultAsync } from "neverthrow";
 import td from "testdouble";
 
@@ -96,11 +93,12 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       creationDate: unixPast,
       to: publicIdentifier2,
       from: publicIdentifier,
-      requiredStake: commonAmount.toString(),
-      paymentAmount: commonAmount.toString(),
+      requiredStake: commonAmount,
+      paymentAmount: commonAmount,
       merchantUrl: merchantUrl,
       paymentToken: erc20AssetAddress,
-      expirationDate: unixPast + defaultExpirationLength,
+      expirationDate: UnixTimestamp(unixPast + defaultExpirationLength),
+      metadata: null,
     };
 
     this.offerTransfer = {
@@ -218,7 +216,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       td.when(
         this.browserNode.withdraw(
           routerChannelAddress,
-          commonAmount.toString(),
+          commonAmount,
           ethereumAddress,
           destinationAddress,
         ),
@@ -227,7 +225,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       td.when(
         this.browserNode.withdraw(
           routerChannelAddress,
-          commonAmount.toString(),
+          commonAmount,
           erc20AssetAddress,
           destinationAddress,
         ),

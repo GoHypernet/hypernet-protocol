@@ -5,8 +5,12 @@ import {
   TypedDataDomain,
   TypedDataField,
 } from "@ethersproject/abstract-signer";
-import { BlockchainUnavailableError, Signature } from "@hypernetlabs/objects";
-import { EthereumAddress } from "@hypernetlabs/objects";
+import {
+  BigNumberString,
+  BlockchainUnavailableError,
+  Signature,
+  EthereumAddress,
+} from "@hypernetlabs/objects";
 import { Contract, ethers, BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
@@ -34,7 +38,7 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
   public erc20Transfer(
     assetAddress: EthereumAddress,
     channelAddress: string,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<TransactionResponse, BlockchainUnavailableError> {
     return this.blockchainProvider.getSigner().andThen((signer) => {
       const tokenContract = new Contract(assetAddress, this.erc20Abi, signer);
@@ -48,7 +52,7 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
   }
 
   public mintToken(
-    amount: BigNumber,
+    amount: BigNumberString,
     to: EthereumAddress,
   ): ResultAsync<TransactionResponse, BlockchainUnavailableError> {
     return this.blockchainProvider.getSigner().andThen((signer) => {

@@ -11,9 +11,9 @@ import {
   AssetBalance,
   Balances,
   IFullChannelState,
+  BigNumberString,
 } from "@hypernetlabs/objects";
-import { ILogUtils } from "@hypernetlabs/utils";
-import { ILocalStorageUtils } from "@hypernetlabs/utils";
+import { ILogUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
@@ -131,15 +131,13 @@ class AccountsRepositoryMocks {
       this.blockchainUtils.erc20Transfer(
         erc20AssetAddress,
         routerChannelAddress,
-        td.matchers.argThat((arg: BigNumber) => {
-          return commonAmount.eq(arg);
-        }),
+        commonAmount,
       ),
     ).thenReturn(okAsync(new TransactionResponseMock()));
     td.when(
       this.blockchainUtils.mintToken(
-        td.matchers.argThat((arg: BigNumber) => {
-          return commonAmount.eq(arg);
+        td.matchers.argThat((arg: BigNumberString) => {
+          return commonAmount == arg;
         }),
         account,
       ),
@@ -159,9 +157,9 @@ class AccountsRepositoryMocks {
           `Unknown Token (${EthereumAddress(this.stateChannel?.assetIds[0])})`,
           "Unk",
           0,
-          BigNumber.from(this.stateChannel?.balances[0].amount[1]),
-          BigNumber.from(0),
-          BigNumber.from(this.stateChannel?.balances[0].amount[1]),
+          BigNumberString(this.stateChannel?.balances[0].amount[1]),
+          BigNumberString("0"),
+          BigNumberString(this.stateChannel?.balances[0].amount[1]),
         ),
       ],
     };
@@ -199,8 +197,8 @@ class AccountsRepositoryErrorMocks {
     );
     td.when(
       this.blockchainUtils.mintToken(
-        td.matchers.argThat((arg: BigNumber) => {
-          return commonAmount.eq(arg);
+        td.matchers.argThat((arg: BigNumberString) => {
+          return commonAmount == arg;
         }),
         account,
       ),
