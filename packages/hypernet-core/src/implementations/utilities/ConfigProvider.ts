@@ -23,6 +23,7 @@ declare const __AUTH_URL__: string;
 declare const __VALIDATOR_IFRAME_URL__: string;
 declare const __CERAMIC_NODE_URL__: string;
 declare const __DEBUG__: boolean;
+declare const __HYPERTOKEN_ADDRESS__: EthereumAddress;
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
@@ -51,7 +52,7 @@ export class ConfigProvider implements IConfigProvider {
       __IFRAME_SOURCE__, // iframeSource
       __ROUTER_PUBLIC_IDENTIFIER__, // routerPublicIdentifier
       parseInt(__CHAIN_ID__, 10), // Chain ID
-      EthereumAddress(constants.AddressZero), // Hypertoken address,
+      __HYPERTOKEN_ADDRESS__, // Hypertoken address,
       "Hypernet", // Hypernet Protocol Domain for Transfers
       5 * 24 * 60 * 60, // 5 days as the default payment expiration time
       chainProviders, // chainProviders
