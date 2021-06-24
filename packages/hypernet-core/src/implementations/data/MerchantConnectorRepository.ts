@@ -529,12 +529,8 @@ export class MerchantConnectorRepository
       throw new Error("You must call activateAuthorizedMerchants first!");
     }
 
-    return ResultUtils.combine([
-      this.getAuthorizedMerchants(),
-      this.activateAuthorizedMerchantsResult,
-    ])
-      .andThen((vals) => {
-        const [authorizedMerchants] = vals;
+    return this.getAuthorizedMerchants()
+      .andThen((authorizedMerchants) => {
         // Go through the results for the merchant
         const proxyResults = new Array<ResultAsync<void, never>>();
         for (const [merchantUrl, _signature] of authorizedMerchants) {
