@@ -21,10 +21,6 @@ export class MetamaskUtils implements IMetamaskUtils {
     protected logUtils: ILogUtils,
   ) {}
 
-  /**
-   * getProvider
-   * @return ethers.providers.Web3Provider
-   */
   public enable(): ResultAsync<IProviderSigner, BlockchainUnavailableError> {
     window.ethereum.autoRefreshOnNetworkChange = false;
     return ResultAsync.fromPromise(
