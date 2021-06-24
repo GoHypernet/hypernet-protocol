@@ -50,7 +50,7 @@ export class ActionsViewModel {
       console.log(`Selected token for deposit: ${selectedToken}`);
       await this.integration.core.depositFunds(
         selectedToken,
-        BigNumberString("1"),
+        BigNumberString(ethers.utils.parseEther("1").toString()),
       );
     });
 
@@ -61,7 +61,9 @@ export class ActionsViewModel {
         return;
       }
 
-      await this.integration.core.mintTestToken(BigNumberString("1"));
+      await this.integration.core.mintTestToken(
+        BigNumberString(ethers.utils.parseEther("1").toString()),
+      );
     });
 
     this.integration.core.waitInitialized().map(() => {

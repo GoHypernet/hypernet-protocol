@@ -6,7 +6,7 @@ import {
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { ITokenSelectorOption } from "@web-ui/interfaces";
 import { PaymentTokenOptionViewModel } from "@web-ui/interfaces/objects";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { useEffect, useReducer } from "react";
 import { useAlert } from "react-alert";
 
@@ -183,7 +183,10 @@ export function useFund(): IReducerStateReducer {
     }
     setLoading(true);
     coreProxy
-      .depositFunds(state.selectedPaymentToken?.address, BigNumberString("1"))
+      .depositFunds(
+        state.selectedPaymentToken?.address,
+        BigNumberString(ethers.utils.parseEther("1").toString()),
+      )
       .match(
         (balances) => {
           alert.success("Your fund deposit has succeeded!");
