@@ -1,6 +1,5 @@
-import { Balances, AssetBalance } from "@hypernetlabs/objects";
+import { Balances, AssetBalance, BigNumberString } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
-import { BigNumber } from "ethers";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
 
@@ -13,7 +12,7 @@ import { ContextProviderMock } from "@mock/utils";
 
 const assetAddress = mockUtils.generateRandomEtherAdress();
 const destinationAddress = mockUtils.generateRandomEtherAdress();
-const amount = BigNumber.from("42");
+const amount = BigNumberString("42");
 
 class AccountServiceMocks {
   public accountRepository = td.object<IAccountsRepository>();

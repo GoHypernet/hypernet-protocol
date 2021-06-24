@@ -20,6 +20,8 @@ import {
   PaymentStakeError,
   TransferCreationError,
   TransferResolutionError,
+  UnixTimestamp,
+  BigNumberString,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync, Result } from "neverthrow";
@@ -38,13 +40,14 @@ export interface IPaymentService {
    */
   authorizeFunds(
     counterPartyAccount: PublicIdentifier,
-    totalAuthorized: BigNumber,
-    expirationDate: number,
-    deltaAmount: BigNumber,
+    totalAuthorized: BigNumberString,
+    expirationDate: UnixTimestamp,
+    deltaAmount: BigNumberString,
     deltaTime: number,
-    requiredStake: BigNumber,
+    requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
+    metadata: string | null,
   ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
 
   /**
@@ -53,7 +56,7 @@ export interface IPaymentService {
    */
   pullFunds(
     paymentId: PaymentId,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<
     Payment,
     | RouterChannelUnknownError
@@ -76,11 +79,12 @@ export interface IPaymentService {
    */
   sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: BigNumber,
-    expirationDate: number,
-    requiredStake: BigNumber,
+    amount: BigNumberString,
+    expirationDate: UnixTimestamp,
+    requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
+    metadata: string | null,
   ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
 
   /**

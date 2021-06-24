@@ -7,6 +7,8 @@ import {
   VectorError,
   PaymentCreationError,
   TransferResolutionError,
+  UnixTimestamp,
+  BigNumberString,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -47,7 +49,7 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
 
-const expirationDate = unixNow + defaultExpirationLength;
+const expirationDate = UnixTimestamp(unixNow + defaultExpirationLength);
 const counterPartyAccount = publicIdentifier2;
 const fromAccount = publicIdentifier;
 const paymentDetails = new PaymentInternalDetails(
@@ -140,9 +142,7 @@ class PaymentRepositoryMocks {
       this.vectorUtils.createInsuranceTransfer(
         publicIdentifier,
         merchantAddress,
-        td.matchers.argThat((val: BigNumber) => {
-          return val.eq(commonAmount);
-        }),
+        commonAmount,
         expirationDate,
         commonPaymentId,
       ),
@@ -157,12 +157,10 @@ class PaymentRepositoryMocks {
       this.vectorUtils.createPaymentTransfer(
         EPaymentType.Push,
         publicIdentifier2,
-        td.matchers.argThat((val: BigNumber) => {
-          return val.eq(commonAmount);
-        }),
+        commonAmount,
         erc20AssetAddress,
         commonPaymentId,
-        unixNow - 1,
+        UnixTimestamp(unixNow - 1),
         expirationDate,
         undefined,
         undefined,
@@ -198,7 +196,7 @@ class PaymentRepositoryMocks {
 
   public factoryPushPayment(
     state: EPaymentState = EPaymentState.Proposed,
-    amountStaked: string = commonAmount.toString(),
+    amountStaked: BigNumberString = commonAmount,
   ): PushPayment {
     return new PushPayment(
       commonPaymentId,
@@ -206,16 +204,17 @@ class PaymentRepositoryMocks {
       fromAccount,
       state,
       erc20AssetAddress,
-      BigNumber.from(commonAmount.toString()),
-      BigNumber.from(amountStaked),
+      commonAmount,
+      amountStaked,
       expirationDate,
       unixNow,
       unixNow,
-      BigNumber.from(0),
+      BigNumberString("0"),
       merchantUrl,
       paymentDetails,
-      BigNumber.from(commonAmount.toString()),
-      BigNumber.from(0),
+      null,
+      commonAmount,
+      BigNumberString("0"),
     );
   }
 }
@@ -252,11 +251,12 @@ describe("PaymentRepository tests", () => {
     // Act
     const result = await repo.createPushPayment(
       counterPartyAccount,
-      commonAmount.toString(),
+      commonAmount,
       expirationDate,
-      commonAmount.toString(),
+      commonAmount,
       erc20AssetAddress,
       merchantUrl,
+      null,
     );
 
     // Assert
@@ -274,11 +274,12 @@ describe("PaymentRepository tests", () => {
     // Act
     const result = await repo.createPushPayment(
       counterPartyAccount,
-      commonAmount.toString(),
+      commonAmount,
       expirationDate,
-      commonAmount.toString(),
+      commonAmount,
       erc20AssetAddress,
       merchantUrl,
+      null,
     );
     const error = result._unsafeUnwrapErr();
 
@@ -326,10 +327,7 @@ describe("PaymentRepository tests", () => {
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    const result = await repo.finalizePayment(
-      commonPaymentId,
-      commonAmount.toString(),
-    );
+    const result = await repo.finalizePayment(commonPaymentId, commonAmount);
 
     // Assert
     expect(result).toBeDefined();
@@ -343,10 +341,7 @@ describe("PaymentRepository tests", () => {
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    const result = await repo.finalizePayment(
-      commonPaymentId,
-      commonAmount.toString(),
-    );
+    const result = await repo.finalizePayment(commonPaymentId, commonAmount);
     const error = result._unsafeUnwrapErr();
 
     // Assert

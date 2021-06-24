@@ -18,6 +18,8 @@ import {
   InvalidParametersError,
   PaymentStakeError,
   TransferCreationError,
+  BigNumberString,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -45,27 +47,29 @@ export interface IPaymentRepository {
    */
   createPushPayment(
     counterPartyAccount: PublicIdentifier,
-    amount: string,
-    expirationDate: number,
-    requiredStake: string,
+    amount: BigNumberString,
+    expirationDate: UnixTimestamp,
+    requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
+    metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError>;
 
   createPullPayment(
     counterPartyAccount: PublicIdentifier,
-    maximumAmount: string, // TODO: amounts should be consistently use BigNumber
+    maximumAmount: BigNumberString, // TODO: amounts should be consistently use BigNumber
     deltaTime: number,
-    deltaAmount: string, // TODO: amounts should be consistently use BigNumber
-    expirationDate: number,
-    requiredStake: string, // TODO: amounts should be consistently use BigNumber
+    deltaAmount: BigNumberString, // TODO: amounts should be consistently use BigNumber
+    expirationDate: UnixTimestamp,
+    requiredStake: BigNumberString, // TODO: amounts should be consistently use BigNumber
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
+    metadata: string | null,
   ): ResultAsync<PullPayment, PaymentCreationError>;
 
   createPullRecord(
     paymentId: PaymentId,
-    amount: string,
+    amount: BigNumberString,
   ): ResultAsync<Payment, PaymentCreationError>;
 
   /**
@@ -117,7 +121,7 @@ export interface IPaymentRepository {
    */
   finalizePayment(
     paymentId: PaymentId,
-    amount: string,
+    amount: BigNumberString,
   ): ResultAsync<
     Payment,
     | RouterChannelUnknownError

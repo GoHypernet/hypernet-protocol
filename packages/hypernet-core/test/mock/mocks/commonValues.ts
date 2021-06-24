@@ -1,4 +1,5 @@
 import {
+  BigNumberString,
   EthereumAddress,
   MerchantUrl,
   PaymentId,
@@ -22,7 +23,7 @@ export const ethereumAddress = EthereumAddress(
 );
 export const chainId = 1337;
 export const hyperTokenAddress = EthereumAddress(constants.AddressZero);
-export const commonAmount = BigNumber.from("1");
+export const commonAmount = BigNumberString("1");
 export const destinationAddress = EthereumAddress(
   "0x0afd1c03a0373b4c99233cbb0719ab0cbe6374gt",
 );

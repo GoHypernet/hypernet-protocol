@@ -1,7 +1,11 @@
-import { MerchantUrl, PaymentId, PullPayment } from "@hypernetlabs/objects";
-import { EPaymentState } from "@hypernetlabs/objects";
+import {
+  BigNumberString,
+  MerchantUrl,
+  PaymentId,
+  PullPayment,
+  EPaymentState,
+} from "@hypernetlabs/objects";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import { BigNumber } from "ethers";
 import ko from "knockout";
 import moment from "moment";
 
@@ -124,7 +128,7 @@ export class PullPaymentViewModel {
 
     this.pullButton = new ButtonParams("Pull", async () => {
       return await this.integration.core
-        .pullFunds(this.paymentId, BigNumber.from(1))
+        .pullFunds(this.paymentId, BigNumberString("1"))
         .mapErr((e) => {
           alert("Unable to pull funds!");
           console.error(e);

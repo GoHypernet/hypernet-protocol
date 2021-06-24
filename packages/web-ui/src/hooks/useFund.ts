@@ -1,4 +1,8 @@
-import { Balances, EthereumAddress } from "@hypernetlabs/objects";
+import {
+  Balances,
+  BigNumberString,
+  EthereumAddress,
+} from "@hypernetlabs/objects";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { ITokenSelectorOption } from "@web-ui/interfaces";
 import { PaymentTokenOptionViewModel } from "@web-ui/interfaces/objects";
@@ -179,10 +183,7 @@ export function useFund(): IReducerStateReducer {
     }
     setLoading(true);
     coreProxy
-      .depositFunds(
-        state.selectedPaymentToken?.address,
-        ethers.utils.parseEther("1"),
-      )
+      .depositFunds(state.selectedPaymentToken?.address, BigNumberString("1"))
       .match(
         (balances) => {
           alert.success("Your fund deposit has succeeded!");
@@ -203,24 +204,30 @@ export function useFund(): IReducerStateReducer {
 
   const mintTokens = () => {
     setLoading(true);
-    coreProxy.mintTestToken(ethers.utils.parseEther(state.amount || "1")).match(
-      () => {
-        alert.success("mint tokens has succeeded");
-        setLoading(false);
-        dispatch({
-          type: EActionTypes.SUCCESS,
-          payload: "mint tokens has succeeded",
-        });
-      },
-      (err) => {
-        alert.error(err.message || "mint tokens has failed");
-        setLoading(false);
-        dispatch({
-          type: EActionTypes.ERROR,
-          payload: err.message || "mint tokens has failed",
-        });
-      },
-    );
+    coreProxy
+      .mintTestToken(
+        BigNumberString(
+          ethers.utils.parseEther(state.amount || "1").toString(),
+        ),
+      )
+      .match(
+        () => {
+          alert.success("mint tokens has succeeded");
+          setLoading(false);
+          dispatch({
+            type: EActionTypes.SUCCESS,
+            payload: "mint tokens has succeeded",
+          });
+        },
+        (err) => {
+          alert.error(err.message || "mint tokens has failed");
+          setLoading(false);
+          dispatch({
+            type: EActionTypes.ERROR,
+            payload: err.message || "mint tokens has failed",
+          });
+        },
+      );
   };
 
   return {

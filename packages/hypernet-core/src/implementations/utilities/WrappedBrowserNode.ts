@@ -17,9 +17,7 @@ import {
   IWithdrawResponse,
   TransferId,
   Signature,
-} from "@hypernetlabs/objects";
-import { VectorError } from "@hypernetlabs/objects";
-import {
+  VectorError,
   InsuranceResolver,
   MessageResolver,
   ParameterizedResolver,

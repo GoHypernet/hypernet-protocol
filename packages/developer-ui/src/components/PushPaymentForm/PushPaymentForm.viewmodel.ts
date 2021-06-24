@@ -1,4 +1,9 @@
-import { EthereumAddress, PublicIdentifier } from "@hypernetlabs/objects";
+import {
+  BigNumberString,
+  EthereumAddress,
+  PublicIdentifier,
+  UnixTimestamp,
+} from "@hypernetlabs/objects";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { utils, BigNumber } from "ethers";
 import ko from "knockout";
@@ -75,16 +80,21 @@ export class PushPaymentFormViewModel {
 
         try {
           const expirationDate = moment(this.expirationDate());
-          const amount = utils.parseUnits(this.amount(), "wei");
-          const requiredStake = utils.parseUnits(this.requiredStake(), "wei");
+          const amount = BigNumberString(
+            utils.parseUnits(this.amount(), "wei").toString(),
+          );
+          const requiredStake = BigNumberString(
+            utils.parseUnits(this.requiredStake(), "wei").toString(),
+          );
 
           return await this.integration.core.sendFunds(
             this.counterparty(),
             amount,
-            expirationDate.unix(),
+            UnixTimestamp(expirationDate.unix()),
             requiredStake,
             selectedPaymentTokenAddress,
             selectedMerchantUrl,
+            null,
           );
         } catch {
           return null;

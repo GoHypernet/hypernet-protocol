@@ -1,11 +1,17 @@
-import { EthereumAddress, PublicIdentifier } from "@hypernetlabs/objects";
+import {
+  BigNumberString,
+  EthereumAddress,
+  PublicIdentifier,
+  UnixTimestamp,
+} from "@hypernetlabs/objects";
 
 export interface IAuthorizeFundsRequest {
   recipientPublicIdentifier: PublicIdentifier;
-  totalAuthorized: string;
-  expirationDate: number;
-  deltaAmount: string;
+  totalAuthorized: BigNumberString;
+  expirationDate: UnixTimestamp;
+  deltaAmount: BigNumberString;
   deltaTime: number;
-  requiredStake: string;
+  requiredStake: BigNumberString;
   paymentToken: EthereumAddress;
+  metadata: string;
 }

@@ -1,6 +1,8 @@
-import { EthereumAddress } from "@hypernetlabs/objects";
-import { BlockchainUnavailableError } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
+import {
+  BigNumberString,
+  EthereumAddress,
+  BlockchainUnavailableError,
+} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 import { IDevelopmentService } from "@interfaces/business";
@@ -10,7 +12,7 @@ export class DevelopmentService implements IDevelopmentService {
   constructor(protected accountRepo: IAccountsRepository) {}
 
   public mintTestToken(
-    amount: BigNumber,
+    amount: BigNumberString,
     to: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError> {
     return this.accountRepo.mintTestToken(amount, to);

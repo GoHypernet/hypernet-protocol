@@ -28,9 +28,10 @@ import {
   PreferredPaymentTokenError,
   IHypernetCore,
   MerchantAuthorizationDeniedError,
+  BigNumberString,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
-import { BigNumber } from "ethers";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
@@ -196,7 +197,7 @@ export default class HypernetIFrameProxy
 
   public finalizePullPayment(
     _paymentId: PaymentId,
-    _finalAmount: BigNumber,
+    _finalAmount: BigNumberString,
   ): Promise<HypernetLink> {
     throw new Error("Method not implemented.");
   }
@@ -243,20 +244,20 @@ export default class HypernetIFrameProxy
 
   public depositFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<
     Balances,
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
     return this._createCall("depositFunds", {
       assetAddress,
-      amount: amount.toString(),
+      amount: amount,
     });
   }
 
   public withdrawFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
@@ -264,7 +265,7 @@ export default class HypernetIFrameProxy
   > {
     return this._createCall("withdrawFunds", {
       assetAddress,
-      amount: amount.toString(),
+      amount: amount,
       destinationAddress,
     });
   }
@@ -295,17 +296,17 @@ export default class HypernetIFrameProxy
 
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: BigNumber,
-    expirationDate: number,
-    requiredStake: BigNumber,
+    amount: BigNumberString,
+    expirationDate: UnixTimestamp,
+    requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this._createCall("sendFunds", {
       counterPartyAccount,
-      amount: amount.toString(),
+      amount: amount,
       expirationDate,
-      requiredStake: requiredStake.toString(),
+      requiredStake: requiredStake,
       paymentToken,
       merchantUrl,
     });
@@ -313,21 +314,21 @@ export default class HypernetIFrameProxy
 
   public authorizeFunds(
     counterPartyAccount: PublicIdentifier,
-    totalAuthorized: BigNumber,
-    expirationDate: number,
-    deltaAmount: BigNumber,
+    totalAuthorized: BigNumberString,
+    expirationDate: UnixTimestamp,
+    deltaAmount: BigNumberString,
     deltaTime: number,
-    requiredStake: BigNumber,
+    requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this._createCall("authorizeFunds", {
       counterPartyAccount,
-      totalAuthorized: totalAuthorized.toString(),
+      totalAuthorized: totalAuthorized,
       expirationDate,
-      deltaAmount: deltaAmount.toString(),
+      deltaAmount: deltaAmount,
       deltaTime,
-      requiredStake: requiredStake.toString(),
+      requiredStake: requiredStake,
       paymentToken,
       merchantUrl,
     });
@@ -344,11 +345,11 @@ export default class HypernetIFrameProxy
 
   public pullFunds(
     paymentId: PaymentId,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this._createCall("pullFunds", {
       paymentId,
-      amount: amount.toString(),
+      amount: amount,
     });
   }
 
@@ -385,9 +386,9 @@ export default class HypernetIFrameProxy
   }
 
   public mintTestToken(
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<void, BlockchainUnavailableError> {
-    return this._createCall("mintTestToken", amount.toString());
+    return this._createCall("mintTestToken", amount);
   }
 
   public authorizeMerchant(

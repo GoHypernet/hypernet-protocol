@@ -12,6 +12,7 @@ import {
 import { BigNumber } from "ethers";
 import { injectable, inject } from "inversify";
 import { ResultAsync } from "neverthrow";
+import { Subscription } from "rxjs";
 
 import { IMerchantConnectorListener } from "@interfaces/api";
 import {
@@ -23,7 +24,6 @@ import {
   ILinkServiceType,
 } from "@interfaces/business";
 import { IContextProvider, IContextProviderType } from "@interfaces/utilities";
-import { Subscription } from "rxjs";
 
 @injectable()
 export class MerchantConnectorListener implements IMerchantConnectorListener {
@@ -92,11 +92,12 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
               this.paymentService
                 .sendFunds(
                   request.recipientPublicIdentifier,
-                  BigNumber.from(request.amount),
+                  request.amount,
                   request.expirationDate,
-                  BigNumber.from(request.requiredStake),
+                  request.requiredStake,
                   request.paymentToken,
                   proxy.merchantUrl,
+                  request.metadata,
                 )
                 .mapErr((e) => {
                   this.logUtils.error(e);
@@ -124,13 +125,14 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
               this.paymentService
                 .authorizeFunds(
                   request.recipientPublicIdentifier,
-                  BigNumber.from(request.totalAuthorized),
+                  request.totalAuthorized,
                   request.expirationDate,
-                  BigNumber.from(request.deltaAmount),
+                  request.deltaAmount,
                   request.deltaTime,
-                  BigNumber.from(request.requiredStake),
+                  request.requiredStake,
                   request.paymentToken,
                   proxy.merchantUrl,
+                  request.metadata,
                 )
                 .mapErr((e) => {
                   this.logUtils.error(e);
