@@ -6,8 +6,9 @@ import {
   ProxyError,
   PersistenceError,
   MerchantAuthorizationDeniedError,
+  MerchantUrl,
+  Signature,
 } from "@hypernetlabs/objects";
-import { MerchantUrl, Signature } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
 

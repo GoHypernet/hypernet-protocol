@@ -415,6 +415,8 @@ export class PaymentService implements IPaymentService {
     | PaymentsByIdsErrors
     | TransferCreationError
   > {
+    this.logUtils.debug(`Insurance transfer created for payment ${paymentId}`);
+
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -456,6 +458,8 @@ export class PaymentService implements IPaymentService {
     | PaymentsByIdsErrors
     | TransferCreationError
   > {
+    this.logUtils.debug(`Payment transfer created for payment ${paymentId}`);
+
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -536,6 +540,8 @@ export class PaymentService implements IPaymentService {
     | PaymentsByIdsErrors
     | TransferCreationError
   > {
+    this.logUtils.debug(`Insurance transfer resolved for payment ${paymentId}`);
+
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -754,21 +760,30 @@ export class PaymentService implements IPaymentService {
     | PaymentsByIdsErrors
     | TransferCreationError
   > {
+    this.logUtils.debug(`Advancing payment ${payment.id}`);
+
     return this.merchantConnectorRepository
       .getAuthorizedMerchantsConnectorsStatus()
       .andThen((merchantConnectorStatusMap) => {
         const merchantConnectorStatus = merchantConnectorStatusMap.get(
           payment.merchantUrl,
         );
-        console.log(
-          `in _advancePayment, merchantConnectorStatus = ${merchantConnectorStatus}`,
+        this.logUtils.debug(
+          `In _advancePayment, merchantConnectorStatus = ${
+            merchantConnectorStatus == true
+          }`,
         );
-        if (merchantConnectorStatus) {
+        if (merchantConnectorStatus == true) {
           return this._advancePaymentForActivatedMerchant(
             payment,
             context,
           ).map(() => {});
         } else {
+          // Validator is not active, so we will not advance the payment
+          this.logUtils.debug(
+            `Validator inactive, payment ${payment.id} will be delayed`,
+          );
+
           // fire an event for payment advancement error / onPaymentDelay
           if (payment instanceof PushPayment) {
             context.onPushPaymentDelayed.next(payment);
