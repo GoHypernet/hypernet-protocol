@@ -79,6 +79,7 @@ import {
   VectorUtils,
   EthersBlockchainUtils,
   CeramicUtils,
+  MetamaskUtils,
 } from "@implementations/utilities";
 import {
   MerchantConnectorProxyFactory,
@@ -113,6 +114,7 @@ import {
   ITimeUtils,
   IVectorUtils,
   ICeramicUtils,
+  IMetamaskUtils,
 } from "@interfaces/utilities";
 import {
   IBrowserNodeFactory,
@@ -165,6 +167,7 @@ export class HypernetCore implements IHypernetCore {
   protected ceramicUtils: ICeramicUtils;
   protected validationUtils: IValidationUtils;
   protected storageUtils: IStorageUtils;
+  protected metamaskUtils: IMetamaskUtils;
 
   // Factories
   protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory;
@@ -283,8 +286,13 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
     );
 
+    // TODO: This could work on Ethers provider and BlockchainUtils might be a good place for it
+    this.metamaskUtils = new MetamaskUtils(this.configProvider, this.logUtils);
+
     this.blockchainProvider = new EthersBlockchainProvider(
       this.contextProvider,
+      this.configProvider,
+      this.metamaskUtils,
       this.internalProviderFactory,
       this.logUtils,
     );

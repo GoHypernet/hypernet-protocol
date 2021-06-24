@@ -12,3 +12,4 @@ export * from "./VectorUtils";
 export * from "./WrappedBrowserNode";
 export * from "./InternalProvider";
 export * from "./CeramicUtils";
+export * from "./MetamaskUtils";
