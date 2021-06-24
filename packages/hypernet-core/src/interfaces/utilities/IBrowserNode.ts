@@ -1,4 +1,5 @@
 import {
+  BigNumberString,
   EthereumAddress,
   IBasicChannelResponse,
   IBasicTransferResponse,
@@ -12,12 +13,11 @@ import {
   PublicIdentifier,
   Signature,
   TransferId,
-} from "@hypernetlabs/objects";
-import { VectorError } from "@hypernetlabs/objects";
-import {
+  VectorError,
   MessageResolver,
   InsuranceResolver,
   ParameterizedResolver,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -51,7 +51,7 @@ export interface IBrowserNode {
 
   withdraw(
     channelAddress: EthereumAddress,
-    amount: string,
+    amount: BigNumberString,
     assetId: EthereumAddress,
     recipient: EthereumAddress,
     quote?: IWithdrawQuote,
@@ -69,8 +69,8 @@ export interface IBrowserNode {
   ): ResultAsync<IFullTransferState[], VectorError>;
 
   getTransfers(
-    startDate: number,
-    endDate: number,
+    startDate: UnixTimestamp,
+    endDate: UnixTimestamp,
   ): ResultAsync<IFullTransferState[], VectorError>;
 
   init(
@@ -95,7 +95,7 @@ export interface IBrowserNode {
 
   conditionalTransfer(
     channelAddress: EthereumAddress,
-    amount: string,
+    amount: BigNumberString,
     assetId: EthereumAddress,
     type: string,
     details: any,

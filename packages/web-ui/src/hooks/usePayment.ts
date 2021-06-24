@@ -3,6 +3,8 @@ import {
   PublicIdentifier,
   EPaymentType,
   MerchantUrl,
+  UnixTimestamp,
+  BigNumberString,
 } from "@hypernetlabs/objects";
 import { useStoreContext } from "@web-ui/contexts";
 import { ITokenSelectorOption } from "@web-ui/interfaces";
@@ -247,11 +249,14 @@ export function usePayment(initialParams: any): IReducerStateReducer {
     coreProxy
       .sendFunds(
         state.counterPartyAccount,
-        utils.parseUnits(state.amount, "wei"),
+        BigNumberString(utils.parseUnits(state.amount, "wei").toString()),
         state.expirationDate,
-        utils.parseUnits(state.requiredStake, "wei"),
+        BigNumberString(
+          utils.parseUnits(state.requiredStake, "wei").toString(),
+        ),
         state.selectedPaymentToken?.address,
         state.merchantUrl,
+        null,
       )
       .match(
         (balances) => {

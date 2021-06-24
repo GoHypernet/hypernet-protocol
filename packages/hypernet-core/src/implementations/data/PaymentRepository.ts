@@ -28,6 +28,8 @@ import {
   ETransferType,
   MessageState,
   EMessageTransferType,
+  BigNumberString,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -111,13 +113,14 @@ export class PaymentRepository implements IPaymentRepository {
 
   public createPullPayment(
     counterPartyAccount: PublicIdentifier,
-    maximumAmount: string, // TODO: amounts should be consistently use BigNumber
+    maximumAmount: BigNumberString,
     deltaTime: number,
-    deltaAmount: string, // TODO: amounts should be consistently use BigNumber
-    expirationDate: number,
-    requiredStake: string, // TODO: amounts should be consistently use BigNumber
+    deltaAmount: BigNumberString,
+    expirationDate: UnixTimestamp,
+    requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
+    metadata: string | null,
   ): ResultAsync<PullPayment, PaymentCreationError> {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
@@ -140,6 +143,7 @@ export class PaymentRepository implements IPaymentRepository {
           expirationDate,
           paymentToken,
           merchantUrl,
+          metadata,
           rate: {
             deltaAmount,
             deltaTime,
@@ -176,16 +180,17 @@ export class PaymentRepository implements IPaymentRepository {
    */
   public createPushPayment(
     counterPartyAccount: PublicIdentifier,
-    amount: string,
-    expirationDate: number,
-    requiredStake: string,
+    amount: BigNumberString,
+    expirationDate: UnixTimestamp,
+    requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
+    metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError> {
     let browserNode: IBrowserNode;
     let context: InitializedHypernetContext;
     let paymentId: PaymentId;
-    let timestamp: number;
+    let timestamp: UnixTimestamp;
 
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
@@ -202,11 +207,12 @@ export class PaymentRepository implements IPaymentRepository {
           creationDate: timestamp,
           to: counterPartyAccount,
           from: context.publicIdentifier,
-          requiredStake: requiredStake.toString(),
-          paymentAmount: amount.toString(),
+          requiredStake: requiredStake,
+          paymentAmount: amount,
           expirationDate: expirationDate,
           paymentToken,
           merchantUrl,
+          metadata,
           requireOnline: false,
         };
 
@@ -544,8 +550,9 @@ export class PaymentRepository implements IPaymentRepository {
         const paymentSender = payment.from;
         const paymentID = payment.id;
         const paymentStart = timestamp;
-        const paymentExpiration =
-          paymentStart + config.defaultPaymentExpiryLength;
+        const paymentExpiration = UnixTimestamp(
+          paymentStart + config.defaultPaymentExpiryLength,
+        );
 
         // TODO: There are probably some logical times when you should not provide a stake
         if (false) {
@@ -616,7 +623,7 @@ export class PaymentRepository implements IPaymentRepository {
       })
       .andThen((payment) => {
         const paymentTokenAddress = payment.paymentToken;
-        let paymentTokenAmount: BigNumber;
+        let paymentTokenAmount: BigNumberString;
         if (payment instanceof PushPayment) {
           paymentTokenAmount = payment.paymentAmount;
         } else if (payment instanceof PullPayment) {
@@ -641,8 +648,10 @@ export class PaymentRepository implements IPaymentRepository {
         // "mathematicians", you can't divide by 0. What do they know?).
         // Since we don't have any assurance that a block has passed between creating the
         // transfer and resolving it, this offset assures this will never happen.
-        const paymentStart = timestamp - 1;
-        const paymentExpiration = timestamp + config.defaultPaymentExpiryLength;
+        const paymentStart = UnixTimestamp(timestamp - 1);
+        const paymentExpiration = UnixTimestamp(
+          timestamp + config.defaultPaymentExpiryLength,
+        );
 
         this.logUtils.log(
           `Providing a payment amount of ${paymentTokenAmount}`,

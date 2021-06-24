@@ -11,7 +11,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   protected currentMerchantUrl: MerchantUrl | undefined | null;
   protected getReadyTimeout: number = 20 * 1000;
   protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
-  protected getReadyResolved: boolean = false;
+  protected getReadyResolved = false;
 
   public webUIClient: IHypernetWebUI;
   public core: HypernetIFrameProxy;

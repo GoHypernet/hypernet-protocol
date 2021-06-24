@@ -6,13 +6,10 @@ import {
   SortedTransfers,
   IFullTransferState,
   PaymentId,
-} from "@hypernetlabs/objects";
-import {
+  UnixTimestamp,
   EPaymentState,
   EPaymentType,
   ETransferType,
-} from "@hypernetlabs/objects";
-import {
   InvalidParametersError,
   InvalidPaymentError,
   LogicalError,
@@ -127,6 +124,6 @@ export interface IPaymentUtils {
    * @param transfers an unsorted list of transfers
    * @returns the unix timestamp of the earliest transfer
    */
-  getEarliestDateFromTransfers(transfers: IFullTransferState[]): number;
+  getEarliestDateFromTransfers(transfers: IFullTransferState[]): UnixTimestamp;
   getPaymentState(sortedTransfers: SortedTransfers): EPaymentState;
 }

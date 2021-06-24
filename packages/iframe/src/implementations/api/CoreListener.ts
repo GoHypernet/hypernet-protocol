@@ -10,9 +10,10 @@ import {
   IHypernetCoreType,
   PaymentId,
   MerchantUrl,
+  BigNumberString,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
-import { BigNumber } from "ethers";
 import { injectable, inject } from "inversify";
 import Postmate from "postmate";
 
@@ -51,13 +52,13 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       depositFunds: (
         data: IIFrameCallData<{
           assetAddress: EthereumAddress;
-          amount: string;
+          amount: BigNumberString;
         }>,
       ) => {
         this.returnForModel(() => {
           return this.core.depositFunds(
             data.data.assetAddress,
-            BigNumber.from(data.data.amount),
+            data.data.amount,
           );
         }, data.callId);
       },
@@ -65,14 +66,14 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       withdrawFunds: (
         data: IIFrameCallData<{
           assetAddress: EthereumAddress;
-          amount: string;
+          amount: BigNumberString;
           destinationAddress: EthereumAddress;
         }>,
       ) => {
         this.returnForModel(() => {
           return this.core.withdrawFunds(
             data.data.assetAddress,
-            BigNumber.from(data.data.amount),
+            data.data.amount,
             data.data.destinationAddress,
           );
         }, data.callId);
@@ -96,21 +97,23 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       sendFunds: (
         data: IIFrameCallData<{
           counterPartyAccount: PublicIdentifier;
-          amount: string;
-          expirationDate: number;
-          requiredStake: string;
+          amount: BigNumberString;
+          expirationDate: UnixTimestamp;
+          requiredStake: BigNumberString;
           paymentToken: EthereumAddress;
           merchantUrl: MerchantUrl;
+          metadata: string | null;
         }>,
       ) => {
         this.returnForModel(() => {
           return this.core.sendFunds(
             data.data.counterPartyAccount,
-            BigNumber.from(data.data.amount),
+            data.data.amount,
             data.data.expirationDate,
-            BigNumber.from(data.data.requiredStake),
+            data.data.requiredStake,
             data.data.paymentToken,
             data.data.merchantUrl,
+            data.data.metadata,
           );
         }, data.callId);
       },
@@ -118,25 +121,27 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       authorizeFunds: (
         data: IIFrameCallData<{
           counterPartyAccount: PublicIdentifier;
-          totalAuthorized: string;
-          expirationDate: number;
-          deltaAmount: string;
+          totalAuthorized: BigNumberString;
+          expirationDate: UnixTimestamp;
+          deltaAmount: BigNumberString;
           deltaTime: number;
-          requiredStake: string;
+          requiredStake: BigNumberString;
           paymentToken: EthereumAddress;
           merchantUrl: MerchantUrl;
+          metadata: string | null;
         }>,
       ) => {
         this.returnForModel(() => {
           return this.core.authorizeFunds(
             data.data.counterPartyAccount,
-            BigNumber.from(data.data.totalAuthorized),
+            data.data.totalAuthorized,
             data.data.expirationDate,
-            BigNumber.from(data.data.deltaAmount),
+            data.data.deltaAmount,
             data.data.deltaTime,
-            BigNumber.from(data.data.requiredStake),
+            data.data.requiredStake,
             data.data.paymentToken,
             data.data.merchantUrl,
+            data.data.metadata,
           );
         }, data.callId);
       },
@@ -179,9 +184,9 @@ export class CoreListener extends ChildProxy implements ICoreListener {
 
       // finalizePushPayment(paymentId: string): Promise<void>;
 
-      mintTestToken: (data: IIFrameCallData<string>) => {
+      mintTestToken: (data: IIFrameCallData<BigNumberString>) => {
         this.returnForModel(() => {
-          return this.core.mintTestToken(BigNumber.from(data.data));
+          return this.core.mintTestToken(data.data);
         }, data.callId);
       },
       getAuthorizedMerchants: (data: IIFrameCallData<void>) => {

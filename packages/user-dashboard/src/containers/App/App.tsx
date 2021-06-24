@@ -10,8 +10,7 @@ import { useStyles } from "./App.style";
 
 import Header from "@user-dashboard/components/Header";
 import Router from "@user-dashboard/containers/Router";
-import { useLayoutContext } from "@user-dashboard/contexts";
-import { StoreProvider } from "@user-dashboard/contexts";
+import { useLayoutContext, StoreProvider } from "@user-dashboard/contexts";
 
 const integration: IHypernetWebIntegration = new HypernetWebIntegration();
 

@@ -29,6 +29,8 @@ import {
   MessageState,
   ParameterizedState,
   EMessageTransferType,
+  BigNumberString,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -127,8 +129,10 @@ export class PaymentUtils implements IPaymentUtils {
 
     const amountStaked =
       sortedTransfers.insuranceTransfer != null
-        ? sortedTransfers.insuranceTransfer.transferState.collateral
-        : 0;
+        ? BigNumberString(
+            sortedTransfers.insuranceTransfer.transferState.collateral,
+          )
+        : BigNumberString("0");
 
     const paymentAmount = sortedTransfers.offerDetails.paymentAmount;
 
@@ -162,16 +166,17 @@ export class PaymentUtils implements IPaymentUtils {
         from,
         state,
         paymentToken,
-        BigNumber.from(sortedTransfers.offerDetails.requiredStake),
-        BigNumber.from(amountStaked),
+        sortedTransfers.offerDetails.requiredStake,
+        amountStaked,
         sortedTransfers.offerDetails.expirationDate,
         sortedTransfers.offerDetails.creationDate,
         this.timeUtils.getUnixNow(),
-        BigNumber.from(0),
+        BigNumberString("0"),
         sortedTransfers.offerDetails.merchantUrl,
         details,
-        BigNumber.from(paymentAmount),
-        BigNumber.from(amountTransferred),
+        sortedTransfers.offerDetails.metadata,
+        paymentAmount,
+        amountTransferred,
       ),
     );
   }
@@ -196,11 +201,10 @@ export class PaymentUtils implements IPaymentUtils {
      * Pull payments consist of 3+ transfers, a null transfer for 0 value that represents the
      * offer, an insurance payment, and a parameterized payment.
      */
-
     const amountStaked =
       sortedTransfers.insuranceTransfer != null
-        ? sortedTransfers.insuranceTransfer.balance.amount[0]
-        : 0;
+        ? BigNumberString(sortedTransfers.insuranceTransfer.balance.amount[0])
+        : BigNumberString("0");
 
     // Get deltaAmount & deltaTime from the parameterized payment
     if (sortedTransfers.offerDetails.rate == null) {
@@ -262,19 +266,20 @@ export class PaymentUtils implements IPaymentUtils {
         from,
         state,
         paymentToken,
-        BigNumber.from(sortedTransfers.offerDetails.requiredStake),
-        BigNumber.from(amountStaked),
-        this.timeUtils.getUnixNow() + 60 * 60, // 1 hour
+        sortedTransfers.offerDetails.requiredStake,
+        amountStaked,
+        UnixTimestamp(this.timeUtils.getUnixNow() + 60 * 60), // 1 hour
         sortedTransfers.offerDetails.creationDate,
         this.timeUtils.getUnixNow(),
-        BigNumber.from(0),
+        BigNumberString("0"),
         sortedTransfers.offerDetails.merchantUrl,
         details,
-        BigNumber.from(sortedTransfers.offerDetails.paymentAmount),
-        BigNumber.from(0),
-        vestedAmount,
+        sortedTransfers.offerDetails.metadata,
+        sortedTransfers.offerDetails.paymentAmount,
+        BigNumberString("0"),
+        BigNumberString(vestedAmount.toString()),
         deltaTime,
-        deltaAmount,
+        BigNumberString(deltaAmount.toString()),
         pullAmounts,
       ),
     );
@@ -799,7 +804,9 @@ export class PaymentUtils implements IPaymentUtils {
     );
   }
 
-  public getEarliestDateFromTransfers(transfers: IFullTransferState[]): number {
+  public getEarliestDateFromTransfers(
+    transfers: IFullTransferState[],
+  ): UnixTimestamp {
     // If there are no transfers, the earliest transfer would be now
     if (transfers.length == 0) {
       return this.timeUtils.getUnixNow();

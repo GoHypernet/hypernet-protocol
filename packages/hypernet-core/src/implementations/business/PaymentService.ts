@@ -24,6 +24,8 @@ import {
   VectorError,
   BlockchainUnavailableError,
   EPaymentState,
+  UnixTimestamp,
+  BigNumberString,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -102,13 +104,14 @@ export class PaymentService implements IPaymentService {
    */
   public authorizeFunds(
     counterPartyAccount: PublicIdentifier,
-    totalAuthorized: BigNumber,
-    expirationDate: number,
-    deltaAmount: BigNumber,
+    totalAuthorized: BigNumberString,
+    expirationDate: UnixTimestamp,
+    deltaAmount: BigNumberString,
     deltaTime: number,
-    requiredStake: BigNumber,
+    requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
+    metadata: string | null,
   ): ResultAsync<PullPayment, PaymentCreationError | LogicalError> {
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
     // totalAuthorized / (deltaAmount/deltaTime) > ((expiration date - now) + someMinimumNumDays)
@@ -116,13 +119,14 @@ export class PaymentService implements IPaymentService {
     return ResultUtils.combine([
       this.paymentRepository.createPullPayment(
         counterPartyAccount,
-        totalAuthorized.toString(),
+        totalAuthorized,
         deltaTime,
-        deltaAmount.toString(),
+        deltaAmount,
         expirationDate,
-        requiredStake.toString(),
+        requiredStake,
         paymentToken,
         merchantUrl,
+        metadata,
       ),
       this.contextProvider.getContext(),
     ]).map((vals) => {
@@ -137,7 +141,7 @@ export class PaymentService implements IPaymentService {
 
   public pullFunds(
     paymentId: PaymentId,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<Payment, PaymentsByIdsErrors | PaymentCreationError> {
     // Pull the up the payment
     return this.paymentRepository
@@ -147,8 +151,9 @@ export class PaymentService implements IPaymentService {
 
         // Verify that it is indeed a pull payment
         if (payment instanceof PullPayment) {
+          const amountTransferred = BigNumber.from(payment.amountTransferred);
           // Verify that we're not pulling too quickly (greater than the average rate)
-          if (payment.amountTransferred.add(amount).gt(payment.vestedAmount)) {
+          if (amountTransferred.add(amount).gt(payment.vestedAmount)) {
             return errAsync(
               new InvalidParametersError(
                 `Amount of ${amount} exceeds the vested payment amount of ${payment.vestedAmount}`,
@@ -157,9 +162,7 @@ export class PaymentService implements IPaymentService {
           }
 
           // Verify that the amount we're trying to pull does not exceed the total authorized amount
-          if (
-            payment.amountTransferred.add(amount).gt(payment.authorizedAmount)
-          ) {
+          if (amountTransferred.add(amount).gt(payment.authorizedAmount)) {
             return errAsync(
               new InvalidParametersError(
                 `Amount of ${amount} exceeds the total authorized amount of ${payment.authorizedAmount}`,
@@ -169,7 +172,7 @@ export class PaymentService implements IPaymentService {
 
           // Create the PullRecord
           return this.paymentRepository
-            .createPullRecord(paymentId, amount.toString())
+            .createPullRecord(paymentId, amount)
             .andThen((payment) => {
               return this._refreshBalances().map(() => {
                 return payment;
@@ -198,21 +201,23 @@ export class PaymentService implements IPaymentService {
    */
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: BigNumber,
-    expirationDate: number,
-    requiredStake: BigNumber,
+    amount: BigNumberString,
+    expirationDate: UnixTimestamp,
+    requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
     merchantUrl: MerchantUrl,
+    metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError | LogicalError> {
     // TODO: Sanity checking on the values
     return ResultUtils.combine([
       this.paymentRepository.createPushPayment(
         counterPartyAccount,
-        amount.toString(),
+        amount,
         expirationDate,
-        requiredStake.toString(),
+        requiredStake,
         paymentToken,
         merchantUrl,
+        metadata,
       ),
       this.contextProvider.getContext(),
     ]).map((vals) => {
@@ -342,7 +347,9 @@ export class PaymentService implements IPaymentService {
         }
 
         // Check the balance and make sure you have enough HyperToken to cover it
-        if (hypertokenBalance.freeAmount.lt(totalStakeRequired)) {
+        if (
+          BigNumber.from(hypertokenBalance.freeAmount).lt(totalStakeRequired)
+        ) {
           return errAsync(
             new InsufficientBalanceError(
               "Not enough Hypertoken to cover provided payments.",
@@ -753,8 +760,11 @@ export class PaymentService implements IPaymentService {
         const merchantConnectorStatus = merchantConnectorStatusMap.get(
           payment.merchantUrl,
         );
+        console.log(
+          `in _advancePayment, merchantConnectorStatus = ${merchantConnectorStatus}`,
+        );
         if (merchantConnectorStatus) {
-          return this._advancePaymentForAcitvatedMerchant(
+          return this._advancePaymentForActivatedMerchant(
             payment,
             context,
           ).map(() => {});
@@ -771,7 +781,7 @@ export class PaymentService implements IPaymentService {
       });
   }
 
-  protected _advancePaymentForAcitvatedMerchant(
+  protected _advancePaymentForActivatedMerchant(
     payment: Payment,
     context: HypernetContext,
   ): ResultAsync<
@@ -814,7 +824,7 @@ export class PaymentService implements IPaymentService {
       if (payment instanceof PushPayment) {
         // Resolve the parameterized payment immediately for the full balance
         return this.paymentRepository
-          .finalizePayment(paymentId, payment.paymentAmount.toString())
+          .finalizePayment(paymentId, payment.paymentAmount)
           .map((finalizedPayment) => {
             context.onPushPaymentUpdated.next(finalizedPayment as PushPayment);
             return payment;

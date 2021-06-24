@@ -15,6 +15,8 @@ import {
   InsufficientBalanceError,
   InvalidParametersError,
   LogicalError,
+  BigNumberString,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -44,10 +46,10 @@ import {
 } from "@mock/mocks";
 import { ConfigProviderMock, ContextProviderMock } from "@tests/mock/utils";
 
-const requiredStake = BigNumber.from("42");
+const requiredStake = BigNumberString("42");
 const paymentToken = mockUtils.generateRandomPaymentToken();
-const amount = BigNumber.from("42");
-const expirationDate = unixNow + defaultExpirationLength;
+const amount = BigNumberString("42");
+const expirationDate = UnixTimestamp(unixNow + defaultExpirationLength);
 const paymentId = PaymentId(
   "See, this doesn't have to be legit data if it's never checked!",
 );
@@ -77,7 +79,7 @@ class PaymentServiceMocks {
   public assetBalance: AssetBalance;
   public merchantAddresses: Map<MerchantUrl, EthereumAddress>;
 
-  constructor(hypertokenBalance: BigNumber = amount) {
+  constructor(hypertokenBalance: BigNumberString = amount) {
     this.pushPayment = this.factoryPushPayment();
     this.stakedPushPayment = this.factoryPushPayment(
       publicIdentifier2,
@@ -104,18 +106,19 @@ class PaymentServiceMocks {
       "BEEP",
       4,
       hypertokenBalance,
-      BigNumber.from(0),
+      BigNumberString("0"),
       hypertokenBalance,
     );
 
     td.when(
       this.paymentRepository.createPushPayment(
         publicIdentifier,
-        amount.toString(),
+        amount,
         expirationDate,
-        requiredStake.toString(),
+        requiredStake,
         paymentToken,
         merchantUrl,
+        null,
       ),
     ).thenReturn(okAsync(this.pushPayment));
 
@@ -144,7 +147,7 @@ class PaymentServiceMocks {
       okAsync(this.paidPushPayment),
     );
     td.when(
-      this.paymentRepository.finalizePayment(paymentId, amount.toString()),
+      this.paymentRepository.finalizePayment(paymentId, amount),
     ).thenReturn(okAsync(this.finalizedPushPayment));
 
     this.merchantAddresses = new Map();
@@ -214,7 +217,7 @@ class PaymentServiceMocks {
     to: PublicIdentifier = publicIdentifier2,
     from: PublicIdentifier = publicIdentifier,
     state: EPaymentState = EPaymentState.Proposed,
-    amountStaked: BigNumber = BigNumber.from("0"),
+    amountStaked: BigNumberString = BigNumberString("0"),
   ): PushPayment {
     return new PushPayment(
       paymentId,
@@ -227,11 +230,12 @@ class PaymentServiceMocks {
       expirationDate,
       unixNow,
       unixNow,
-      BigNumber.from(0),
+      BigNumberString("0"),
       merchantUrl,
       paymentDetails,
+      null,
       amount,
-      BigNumber.from(0),
+      BigNumberString("0"),
     );
   }
 }
@@ -251,6 +255,7 @@ describe("PaymentService tests", () => {
       requiredStake,
       paymentToken,
       merchantUrl,
+      null,
     );
 
     // Assert
@@ -332,7 +337,7 @@ describe("PaymentService tests", () => {
 
   test("Should acceptOffers return error if freeAmount is less than totalStakeRequired", async () => {
     // Arrange
-    const paymentServiceMock = new PaymentServiceMocks(BigNumber.from("13"));
+    const paymentServiceMock = new PaymentServiceMocks(BigNumberString("13"));
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
@@ -727,7 +732,7 @@ describe("PaymentService tests", () => {
       EPaymentState.Accepted,
       requiredStake,
     );
-    acceptedPayment.amountStaked = BigNumber.from("10");
+    acceptedPayment.amountStaked = BigNumberString("10");
     paymentServiceMock.setExistingPayments([acceptedPayment]);
 
     // Act

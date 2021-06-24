@@ -2,6 +2,7 @@ import {
   EPaymentState,
   PaymentStatusViewModel,
   PaymentStatusParams,
+  BigNumberString,
 } from "@hypernetlabs/objects";
 import { IViewUtils, PaymentStateOption } from "@web-ui/interfaces";
 import { utils, BigNumber } from "ethers";
@@ -9,11 +10,11 @@ import { utils, BigNumber } from "ethers";
 import { getColorFromStatus, EStatusColor } from "@web-ui/theme";
 
 export class ViewUtils implements IViewUtils {
-  public fromBigNumberWei(value: BigNumber): string {
+  public fromBigNumberWei(value: BigNumber | BigNumberString): string {
     return utils.formatUnits(value, "wei");
   }
 
-  public fromBigNumberEther(value: BigNumber): string {
+  public fromBigNumberEther(value: BigNumber | BigNumberString): string {
     return utils.formatUnits(value, "ether");
   }
 

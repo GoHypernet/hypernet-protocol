@@ -1,5 +1,4 @@
-import { BigNumber } from "ethers";
-
+import { BigNumberString } from "@objects/BigNumberString";
 import { EthereumAddress } from "@objects/EthereumAddress";
 
 /**
@@ -16,8 +15,8 @@ export class AssetBalance {
     public name: string,
     public symbol: string,
     public decimals: number,
-    public totalAmount: BigNumber,
-    public lockedAmount: BigNumber,
-    public freeAmount: BigNumber,
+    public totalAmount: BigNumberString,
+    public lockedAmount: BigNumberString,
+    public freeAmount: BigNumberString,
   ) {}
 }

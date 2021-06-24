@@ -14,7 +14,6 @@ import {
   IMerchantService,
   IMerchantServiceType,
 } from "@merchant-iframe/interfaces/business";
-import { BigNumber } from "ethers";
 import { injectable, inject } from "inversify";
 import { okAsync } from "neverthrow";
 import Postmate from "postmate";
@@ -51,9 +50,9 @@ export class HypernetCoreListener
               val.name,
               val.symbol,
               val.decimals,
-              BigNumber.from(val.totalAmount),
-              BigNumber.from(val.lockedAmount),
-              BigNumber.from(val.freeAmount),
+              val.totalAmount,
+              val.lockedAmount,
+              val.freeAmount,
             );
           });
           const balances = new Balances(assets);

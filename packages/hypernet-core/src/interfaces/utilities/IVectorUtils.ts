@@ -15,6 +15,8 @@ import {
   VectorError,
   EPaymentType,
   ETransferState,
+  BigNumberString,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
@@ -83,11 +85,11 @@ export interface IVectorUtils {
   createPaymentTransfer(
     type: EPaymentType,
     toAddress: PublicIdentifier,
-    amount: BigNumber,
+    amount: BigNumberString,
     assetAddress: EthereumAddress,
     UUID: string,
-    start: number,
-    expiration: number,
+    start: UnixTimestamp,
+    expiration: UnixTimestamp,
     deltaTime?: number,
     deltaAmount?: string,
   ): ResultAsync<
@@ -103,15 +105,15 @@ export interface IVectorUtils {
   createInsuranceTransfer(
     toAddress: PublicIdentifier,
     mediatorAddress: EthereumAddress,
-    amount: BigNumber,
-    expiration: number,
+    amount: BigNumberString,
+    expiration: UnixTimestamp,
     UUID: string,
   ): ResultAsync<
     IBasicTransferResponse,
     TransferCreationError | InvalidParametersError
   >;
 
-  getTimestampFromTransfer(transfer: IFullTransferState): number;
+  getTimestampFromTransfer(transfer: IFullTransferState): UnixTimestamp;
   getTransferStateFromTransfer(transfer: IFullTransferState): ETransferState;
 }
 
