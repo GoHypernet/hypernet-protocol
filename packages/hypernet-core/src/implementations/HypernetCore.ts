@@ -28,7 +28,6 @@ import {
   InvalidPaymentError,
   InvalidParametersError,
   TransferResolutionError,
-  PreferredPaymentTokenError,
   ProxyError,
   MerchantAuthorizationDeniedError,
   BigNumberString,
@@ -346,7 +345,7 @@ export class HypernetCore implements IHypernetCore {
       this.vectorUtils,
       this.browserNodeProvider,
       this.blockchainUtils,
-      this.localStorageUtils,
+      this.storageUtils,
       this.logUtils,
     );
 
@@ -805,14 +804,27 @@ export class HypernetCore implements IHypernetCore {
 
   public setPreferredPaymentToken(
     tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PreferredPaymentTokenError> {
+  ): ResultAsync<void, PersistenceError> {
     return this.accountService.setPreferredPaymentToken(tokenAddress);
   }
 
   public getPreferredPaymentToken(): ResultAsync<
     AssetInfo,
-    BlockchainUnavailableError | PreferredPaymentTokenError
+    BlockchainUnavailableError | PersistenceError
   > {
     return this.accountService.getPreferredPaymentToken();
+  }
+
+  public setPaymentsAutoAccept(
+    autoAccept: boolean,
+  ): ResultAsync<void, PersistenceError> {
+    return this.accountService.setPaymentsAutoAccept(autoAccept);
+  }
+
+  public getPaymentsAutoAccept(): ResultAsync<
+    boolean,
+    BlockchainUnavailableError | PersistenceError
+  > {
+    return this.accountService.getPaymentsAutoAccept();
   }
 }

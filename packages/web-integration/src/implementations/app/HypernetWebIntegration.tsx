@@ -1,9 +1,10 @@
 import { IHypernetCore, MerchantUrl } from "@hypernetlabs/objects";
 import HypernetWebUI, { IHypernetWebUI } from "@hypernetlabs/web-ui";
-import { ResultAsync } from "neverthrow";
+import { okAsync, ResultAsync } from "neverthrow";
 
 import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
 import { IHypernetWebIntegration } from "@web-integration/interfaces/app/IHypernetWebIntegration";
+import { ILocalStorageUtils, LocalStorageUtils } from "@hypernetlabs/utils";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
@@ -12,6 +13,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   protected getReadyTimeout: number = 15 * 1000;
   protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
   protected getReadyResolved = false;
+  protected localStorageUtils: ILocalStorageUtils = new LocalStorageUtils();
 
   public webUIClient: IHypernetWebUI;
   public core: HypernetIFrameProxy;
@@ -39,6 +41,23 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     this.core.onPrivateCredentialsRequested.subscribe(() => {
       //this.webUIClient.renderPrivateKeysModal();
       this.webUIClient.renderMetamaskWarningModal();
+    });
+
+    // Watch payments receive events and run accept automatically if autoAccept key is true
+    this.core.onPushPaymentReceived.subscribe((payment) => {
+      this.core.getPaymentsAutoAccept().map((autoAccept) => {
+        if (autoAccept == true) {
+          this.core.acceptOffers([payment.id]);
+        }
+      });
+    });
+
+    this.core.onPullPaymentReceived.subscribe((payment) => {
+      this.core.getPaymentsAutoAccept().map((autoAccept) => {
+        if (autoAccept == true) {
+          this.core.acceptOffers([payment.id]);
+        }
+      });
     });
   }
 

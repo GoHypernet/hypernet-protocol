@@ -1,5 +1,5 @@
 import { PushPayment, PullPayment } from "@hypernetlabs/objects";
-import { Box, AppBar, IconButton } from "@material-ui/core";
+import { Box, AppBar, IconButton, Switch, Typography } from "@material-ui/core";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import { useStoreContext } from "@web-ui/contexts";
 import { IFilterItem, EItemType, IRenderParams } from "@web-ui/interfaces";
@@ -47,6 +47,8 @@ const LinksWidget: React.FC<ILinksWidget> = ({
     disputePayment,
     pullFunds,
     loading,
+    paymentsAutoAccept,
+    setPaymentsAutoAccept,
   } = useLinks();
 
   const handleChange = (event, newValue) => {
@@ -166,20 +168,38 @@ const LinksWidget: React.FC<ILinksWidget> = ({
     }, new Array<PullPayment>());
   };
 
+  const onPaymentsAutoAcceptChange = (event) => {
+    setPaymentsAutoAccept(event.target.checked);
+  };
+
   const CustomBox = includeBoxWrapper ? BoxWrapper : Box;
 
   return (
     <CustomBox
       label={!noLabel ? "TRANSACTION HISTORY" : undefined}
       rightComponent={
-        <IconButton
-          aria-label="list"
-          onClick={() => setIsSideFilterOpen(true)}
-          style={{ height: 30, display: "flex", fontSize: 18 }}
-        >
-          <Box marginRight={1}>Filter</Box>
-          <FilterListIcon />
-        </IconButton>
+        <Box display="flex" alignItems="center">
+          <Box display="flex" alignItems="center" marginRight={1}>
+            <Box marginRight={1} color="#0000008a">
+              Payments auto accept
+            </Box>
+            <Switch
+              checked={paymentsAutoAccept}
+              onChange={onPaymentsAutoAcceptChange}
+              name="paymentsAutoAccept"
+              color="primary"
+              inputProps={{ "aria-label": "primary checkbox" }}
+            />
+          </Box>
+          <IconButton
+            aria-label="list"
+            onClick={() => setIsSideFilterOpen(true)}
+            style={{ height: 30, display: "flex", fontSize: 18 }}
+          >
+            <Box marginRight={1}>Filter</Box>
+            <FilterListIcon />
+          </IconButton>
+        </Box>
       }
       bodyStyle={bodyStyle}
       hasEmptyState={links.length === 0 && !loading}

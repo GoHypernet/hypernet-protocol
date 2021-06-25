@@ -19,7 +19,6 @@ import {
   InvalidPaymentError,
   InvalidParametersError,
   TransferResolutionError,
-  PreferredPaymentTokenError,
   ProxyError,
   MerchantAuthorizationDeniedError,
 } from "@objects/errors";
@@ -283,12 +282,18 @@ export interface IHypernetCore {
 
   setPreferredPaymentToken(
     tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PreferredPaymentTokenError>;
+  ): ResultAsync<void, PersistenceError>;
 
   getPreferredPaymentToken(): ResultAsync<
     AssetInfo,
-    BlockchainUnavailableError | PreferredPaymentTokenError
+    BlockchainUnavailableError | PersistenceError
   >;
+
+  setPaymentsAutoAccept(
+    autoAccept: boolean,
+  ): ResultAsync<void, PersistenceError>;
+
+  getPaymentsAutoAccept(): ResultAsync<boolean, PersistenceError>;
 
   /**
    * Observables for seeing what's going on

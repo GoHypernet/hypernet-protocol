@@ -9,13 +9,12 @@ import {
   LogicalError,
   VectorError,
   RouterChannelUnknownError,
-  PreferredPaymentTokenError,
   Signature,
   AssetInfo,
   BigNumberString,
+  PersistenceError,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
-import { BigNumber } from "ethers";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import { IAccountService } from "@interfaces/business";
@@ -147,14 +146,24 @@ export class AccountService implements IAccountService {
 
   public setPreferredPaymentToken(
     tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PreferredPaymentTokenError> {
+  ): ResultAsync<void, PersistenceError> {
     return this.accountRepository.setPreferredPaymentToken(tokenAddress);
   }
 
   public getPreferredPaymentToken(): ResultAsync<
     AssetInfo,
-    BlockchainUnavailableError | PreferredPaymentTokenError
+    BlockchainUnavailableError | PersistenceError
   > {
     return this.accountRepository.getPreferredPaymentToken();
+  }
+
+  public setPaymentsAutoAccept(
+    autoAccept: boolean,
+  ): ResultAsync<void, PersistenceError> {
+    return this.accountRepository.setPaymentsAutoAccept(autoAccept);
+  }
+
+  public getPaymentsAutoAccept(): ResultAsync<boolean, PersistenceError> {
+    return this.accountRepository.getPaymentsAutoAccept();
   }
 }

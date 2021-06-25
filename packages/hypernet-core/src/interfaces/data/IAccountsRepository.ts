@@ -10,10 +10,9 @@ import {
   LogicalError,
   RouterChannelUnknownError,
   VectorError,
-  PreferredPaymentTokenError,
   BigNumberString,
+  PersistenceError,
 } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 /**
@@ -64,12 +63,18 @@ export interface IAccountsRepository {
 
   setPreferredPaymentToken(
     tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PreferredPaymentTokenError>;
+  ): ResultAsync<void, PersistenceError>;
 
   getPreferredPaymentToken(): ResultAsync<
     AssetInfo,
-    BlockchainUnavailableError | PreferredPaymentTokenError
+    BlockchainUnavailableError | PersistenceError
   >;
+
+  setPaymentsAutoAccept(
+    autoAccept: boolean,
+  ): ResultAsync<void, PersistenceError>;
+
+  getPaymentsAutoAccept(): ResultAsync<boolean, PersistenceError>;
 }
 
 export const IAccountsRepositoryType = Symbol.for("IAccountsRepository");
