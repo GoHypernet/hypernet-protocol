@@ -104,7 +104,7 @@ workflows:
           cluster: galileo
           container: hypernet-protocol-user-dashboard
           deployment: hypernet-protocol-user-dashboard
-          image: hypernetlabs/hypernet-protocol-user-dashboard:latest
+          image: hypernetlabs/hypernet-protocol-user-dashboard
           google-compute-zone: GOOGLE_KUBERNETES_ZONE
           tag: $CIRCLE_SHA1
           dockerfile-dir: packages/user-dashboard

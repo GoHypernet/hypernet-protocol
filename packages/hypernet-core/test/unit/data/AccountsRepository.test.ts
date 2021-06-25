@@ -13,13 +13,14 @@ import {
   IFullChannelState,
   BigNumberString,
 } from "@hypernetlabs/objects";
-import { ILogUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
+import { ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
 import { AccountsRepository } from "@implementations/data/AccountsRepository";
 import { IAccountsRepository } from "@interfaces/data/";
+import { IStorageUtils } from "@interfaces/data/utilities";
 import {
   IVectorUtils,
   IBrowserNodeProvider,
@@ -118,7 +119,7 @@ class AccountsRepositoryMocks {
   public browserNodeProvider = new BrowserNodeProviderMock();
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
-  public localStorageUtils = td.object<ILocalStorageUtils>();
+  public storageUtils = td.object<IStorageUtils>();
   public balances: Balances;
   public stateChannel: IFullChannelState | undefined;
 
@@ -134,6 +135,7 @@ class AccountsRepositoryMocks {
         commonAmount,
       ),
     ).thenReturn(okAsync(new TransactionResponseMock()));
+
     td.when(
       this.blockchainUtils.mintToken(
         td.matchers.argThat((arg: BigNumberString) => {
@@ -171,7 +173,7 @@ class AccountsRepositoryMocks {
       this.vectorUtils,
       this.browserNodeProvider,
       this.blockchainUtils,
-      this.localStorageUtils,
+      this.storageUtils,
       this.logUtils,
     );
   }
@@ -183,7 +185,7 @@ class AccountsRepositoryErrorMocks {
   public browserNodeProvider = td.object<IBrowserNodeProvider>();
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
-  public localStorageUtils = td.object<ILocalStorageUtils>();
+  public storageUtils = td.object<IStorageUtils>();
 
   constructor() {
     td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(
@@ -211,7 +213,7 @@ class AccountsRepositoryErrorMocks {
       this.vectorUtils,
       this.browserNodeProvider,
       this.blockchainUtils,
-      this.localStorageUtils,
+      this.storageUtils,
       this.logUtils,
     );
   }
