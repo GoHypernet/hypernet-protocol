@@ -54,6 +54,6 @@ export interface IHypernetWebUI {
   ): Result<void, RenderError>;
   startOnboardingFlow(params: IOnboardingFlowParams): Result<void, RenderError>;
   renderPrivateKeysModal(): Result<void, RenderError>;
-  renderTimeoutGuideModal(): Result<void, RenderError>;
   renderWarningAlertModal(errorMessage?: string): Result<void, RenderError>;
+  renderMetamaskWarningModal(): Result<void, RenderError>;
 }

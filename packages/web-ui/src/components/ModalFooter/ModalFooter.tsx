@@ -14,7 +14,7 @@ export const ModalFooter: React.FC = () => {
           href="http://localhost:9002/"
           target="_blank"
         >
-          View your Hypernet account.
+          View your Hypernet Protocol account.
         </a>
       </Box>
     </Box>

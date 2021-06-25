@@ -45,11 +45,11 @@ const FundWidget: React.FC<IFundWidget> = ({
       />
       <TextInput label="Amount" value={amount} onChange={setAmount} />
       <Button
-        onClick={depositFunds}
+        label="Fund my wallet"
         disabled={!selectedPaymentToken?.address}
-        fullWidth
-        hasMaterialUIStyle
-        label="Fund your Wallet"
+        onClick={depositFunds}
+        fullWidth={true}
+        bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
       />
       {/* <Button onClick={mintTokens} label="Mint HyperToken" />
       <br /> */}

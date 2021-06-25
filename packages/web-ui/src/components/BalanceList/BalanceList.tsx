@@ -46,8 +46,13 @@ export const BalanceList: React.FC<BalanceListProps> = (
             {viewUtils.fromBigNumberEther(balance.freeAmount)}
           </Box>
           <Box className={classes.tokenName}>
-            <Tooltip title={balance.name} placement="top">
-              <Box>{balance.symbol}</Box>
+            <Tooltip
+              title={
+                balance.name === "Test Token" ? "HyperToken" : balance.name
+              }
+              placement="top"
+            >
+              <Box>{balance.symbol === "TEST" ? "HYPR" : balance.symbol}</Box>
             </Tooltip>
           </Box>
         </Box>

@@ -31,7 +31,7 @@ export const useStyles = makeStyles({
   },
   closeIcon: {
     position: "absolute",
-    right: "85%",
+    right: "89%",
     marginRight: 10,
     cursor: "pointer",
     top: 38,

@@ -12,5 +12,16 @@ export const ETHER_HEX_ADDRESS = "0x0000000000000000000000000000000000000000";
 export const WEB_UI_MODAL_ID_SELECTOR = "__hypernet-protocol-modal-root__";
 export const HYPER_TOKEN_LOGO_URL =
   "https://res.cloudinary.com/dqueufbs7/image/upload/v1614369421/images/Screen_Shot_2021-02-26_at_22.56.34.png";
-export const TIMEOUT_GUID_SELECTOR = "hypernet-protocol-timout-guid";
+export const AUTHENTICATION_IMAGE_URL =
+  "https://res.cloudinary.com/dqueufbs7/image/upload/v1624393360/images/authentication.svg";
+export const AUTHENTICATION_SUCCESS_IMAGE_URL =
+  "https://res.cloudinary.com/dqueufbs7/image/upload/v1624402693/images/success.svg";
 export const WARNING_ALERT_SELECTOR = "hypernet-protocol-warning-alert";
+export const METAMASK_IMAGE_URL =
+  "https://res.cloudinary.com/dqueufbs7/image/upload/v1624475379/images/Screen_Shot_2021-06-23_at_22.09.16.png";
+export const INSECURE_CONTENT_IMAGE_URL =
+  "https://res.cloudinary.com/dqueufbs7/image/upload/v1624476851/images/Screen_Shot_2021-06-23_at_22.32.55.png";
+export const METAMASK_WARNING_ID_SELECTOR =
+  "hypernet-protocol-metamask-warning";
+export const METAMASK_URL =
+  "https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn";

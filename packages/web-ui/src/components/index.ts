@@ -15,5 +15,5 @@ export * from "./Tabs";
 export * from "./SideFilter";
 export * from "./SliderRange";
 export * from "./BoxWrapper";
-export * from "./TimeoutGuide";
 export * from "./WarningAlert";
+export * from "./MetamaskWarning";
