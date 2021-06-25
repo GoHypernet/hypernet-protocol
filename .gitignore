@@ -22,3 +22,5 @@ packages/*/yarn-error.log
 yarn-error.log
 .DS_Store
 build/
+out/linecounter.json
+out/linecounter.txt

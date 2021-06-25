@@ -696,6 +696,10 @@ export class HypernetCore implements IHypernetCore {
       return this._initializeResult;
     }
 
+    this.logUtils.debug(
+      `Initializing Hypernet Protocol Core with account ${account}`,
+    );
+
     let context: HypernetContext;
     this._initializeResult = this.contextProvider
       .getContext()
@@ -716,6 +720,7 @@ export class HypernetCore implements IHypernetCore {
         return ResultUtils.combine([
           this.vectorAPIListener.setup(),
           this.merchantConnectorListener.setup(),
+          this.merchantConnectorService.initialize(),
         ]); // , this.threeboxMessagingListener.initialize()]);
       })
       .andThen(() => {
@@ -729,7 +734,7 @@ export class HypernetCore implements IHypernetCore {
         if (this._initializePromiseResolve != null) {
           this._initializePromiseResolve();
         }
-
+        this.logUtils.debug(`Hypernet Protocol core initialized successfully`);
         this._initialized = true;
       });
 
