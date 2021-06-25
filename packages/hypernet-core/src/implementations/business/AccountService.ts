@@ -156,14 +156,4 @@ export class AccountService implements IAccountService {
   > {
     return this.accountRepository.getPreferredPaymentToken();
   }
-
-  public setPaymentsAutoAccept(
-    autoAccept: boolean,
-  ): ResultAsync<void, PersistenceError> {
-    return this.accountRepository.setPaymentsAutoAccept(autoAccept);
-  }
-
-  public getPaymentsAutoAccept(): ResultAsync<boolean, PersistenceError> {
-    return this.accountRepository.getPaymentsAutoAccept();
-  }
 }

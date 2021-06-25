@@ -64,10 +64,6 @@ export interface IAccountService {
     AssetInfo,
     BlockchainUnavailableError | PersistenceError
   >;
-  setPaymentsAutoAccept(
-    autoAccept: boolean,
-  ): ResultAsync<void, PersistenceError>;
-  getPaymentsAutoAccept(): ResultAsync<boolean, PersistenceError>;
 }
 
 export const IAccountServiceType = Symbol.for("IAccountService");

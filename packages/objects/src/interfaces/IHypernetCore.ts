@@ -289,12 +289,6 @@ export interface IHypernetCore {
     BlockchainUnavailableError | PersistenceError
   >;
 
-  setPaymentsAutoAccept(
-    autoAccept: boolean,
-  ): ResultAsync<void, PersistenceError>;
-
-  getPaymentsAutoAccept(): ResultAsync<boolean, PersistenceError>;
-
   /**
    * Observables for seeing what's going on
    */

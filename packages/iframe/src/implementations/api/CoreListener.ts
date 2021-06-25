@@ -222,16 +222,6 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getPreferredPaymentToken();
         }, data.callId);
       },
-      setPaymentsAutoAccept: (data: IIFrameCallData<boolean>) => {
-        this.returnForModel(() => {
-          return this.core.setPaymentsAutoAccept(data.data);
-        }, data.callId);
-      },
-      getPaymentsAutoAccept: (data: IIFrameCallData<void>) => {
-        this.returnForModel(() => {
-          return this.core.getPaymentsAutoAccept();
-        }, data.callId);
-      },
     });
   }
 

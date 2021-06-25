@@ -814,17 +814,4 @@ export class HypernetCore implements IHypernetCore {
   > {
     return this.accountService.getPreferredPaymentToken();
   }
-
-  public setPaymentsAutoAccept(
-    autoAccept: boolean,
-  ): ResultAsync<void, PersistenceError> {
-    return this.accountService.setPaymentsAutoAccept(autoAccept);
-  }
-
-  public getPaymentsAutoAccept(): ResultAsync<
-    boolean,
-    BlockchainUnavailableError | PersistenceError
-  > {
-    return this.accountService.getPaymentsAutoAccept();
-  }
 }

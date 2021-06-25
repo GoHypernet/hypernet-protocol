@@ -341,27 +341,6 @@ export class AccountsRepository implements IAccountsRepository {
       });
   }
 
-  public setPaymentsAutoAccept(
-    autoAccept: boolean,
-  ): ResultAsync<void, PersistenceError> {
-    return this.storageUtils.write("PaymentsAutoAccept", autoAccept);
-  }
-
-  public getPaymentsAutoAccept(): ResultAsync<boolean, PersistenceError> {
-    return this.storageUtils
-      .read<boolean>("PaymentsAutoAccept")
-      .andThen((autoAccept) => {
-        if (autoAccept == null) {
-          return errAsync(
-            new PersistenceError(
-              "Couldn't get PaymentsAutoAccept from storageUtils.read",
-            ),
-          );
-        }
-        return okAsync(autoAccept);
-      });
-  }
-
   protected _getAssetBalance(
     i: number,
     channelState: IFullChannelState,

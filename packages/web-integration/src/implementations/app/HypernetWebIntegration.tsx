@@ -45,19 +45,15 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
     // Watch payments receive events and run accept automatically if autoAccept key is true
     this.core.onPushPaymentReceived.subscribe((payment) => {
-      this.core.getPaymentsAutoAccept().map((autoAccept) => {
-        if (autoAccept == true) {
-          this.core.acceptOffers([payment.id]);
-        }
-      });
+      if (this._getPaymentsAutoAccept()) {
+        this.core.acceptOffers([payment.id]);
+      }
     });
 
     this.core.onPullPaymentReceived.subscribe((payment) => {
-      this.core.getPaymentsAutoAccept().map((autoAccept) => {
-        if (autoAccept == true) {
-          this.core.acceptOffers([payment.id]);
-        }
-      });
+      if (this._getPaymentsAutoAccept()) {
+        this.core.acceptOffers([payment.id]);
+      }
     });
   }
 
@@ -111,6 +107,18 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
   public closeMerchantIFrame(merchantUrl: MerchantUrl): void {
     this.core.closeMerchantIFrame(merchantUrl);
+  }
+
+  private _getPaymentsAutoAccept(): boolean {
+    const autoAccept = this.localStorageUtils.getItem(
+      "PreferredPaymentTokenAddress",
+    );
+
+    if (autoAccept == null) {
+      return false;
+    }
+
+    return JSON.parse(autoAccept);
   }
 
   private _prepareIFrameContainer(): HTMLElement {

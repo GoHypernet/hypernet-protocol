@@ -69,12 +69,6 @@ export interface IAccountsRepository {
     AssetInfo,
     BlockchainUnavailableError | PersistenceError
   >;
-
-  setPaymentsAutoAccept(
-    autoAccept: boolean,
-  ): ResultAsync<void, PersistenceError>;
-
-  getPaymentsAutoAccept(): ResultAsync<boolean, PersistenceError>;
 }
 
 export const IAccountsRepositoryType = Symbol.for("IAccountsRepository");

@@ -469,16 +469,6 @@ export default class HypernetIFrameProxy
     return this._createCall("getPreferredPaymentToken", null);
   }
 
-  public setPaymentsAutoAccept(
-    autoAccept: boolean,
-  ): ResultAsync<void, PersistenceError> {
-    return this._createCall("setPaymentsAutoAccept", autoAccept);
-  }
-
-  public getPaymentsAutoAccept(): ResultAsync<boolean, PersistenceError> {
-    return this._createCall("getPaymentsAutoAccept", null);
-  }
-
   private _displayCoreIFrame(): void {
     // Show core iframe
     if (this.child != null) {

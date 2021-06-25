@@ -43,13 +43,15 @@ export function useLinks(): IState {
   const alert = useAlert();
 
   const setPaymentsAutoAccept = (val: boolean) => {
-    coreProxy.setPaymentsAutoAccept(val).match(() => {
-      dispatch({
-        type: EActionTypes.PAYMENT_AUTO_ACCEPT_CHANGED,
-        payload: val,
-      });
-      alert.success("Payments auto accept changed successfully.");
-    }, handleError);
+    dispatch({
+      type: EActionTypes.PAYMENT_AUTO_ACCEPT_CHANGED,
+      payload: val,
+    });
+    window.localStorage.setItem(
+      "PreferredPaymentTokenAddress",
+      JSON.stringify(val),
+    );
+    alert.success("Payments auto accept changed successfully.");
   };
 
   const initialState: IState = {
@@ -106,12 +108,15 @@ export function useLinks(): IState {
       });
     }, handleError);
 
-    coreProxy.getPaymentsAutoAccept().match((autoAccept) => {
+    const paymentsAutoAccept = window.localStorage.getItem(
+      "PreferredPaymentTokenAddress",
+    );
+    if (paymentsAutoAccept != null) {
       dispatch({
         type: EActionTypes.PAYMENT_AUTO_ACCEPT_CHANGED,
-        payload: autoAccept,
+        payload: JSON.parse(paymentsAutoAccept),
       });
-    }, handleError);
+    }
   }
 
   function onPullPaymentSent(payment: PullPayment) {
