@@ -7,7 +7,7 @@ import {
   IFullChannelState,
   Signature,
   AssetInfo,
-  PreferredPaymentTokenError,
+  PersistenceError,
   BlockchainUnavailableError,
   RouterChannelUnknownError,
   BalancesUnavailableError,
@@ -15,11 +15,7 @@ import {
   VectorError,
   BigNumberString,
 } from "@hypernetlabs/objects";
-import {
-  ResultUtils,
-  ILogUtils,
-  ILocalStorageUtils,
-} from "@hypernetlabs/utils";
+import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { ethers, constants, BigNumber, Contract } from "ethers";
 import { combine, errAsync, okAsync, ResultAsync } from "neverthrow";
 
@@ -31,6 +27,7 @@ import {
   IBrowserNode,
   IBlockchainUtils,
 } from "@interfaces/utilities";
+import { IStorageUtils } from "@interfaces/data/utilities";
 
 /**
  * Contains methods for getting Ethereum accounts, public identifiers,
@@ -48,7 +45,7 @@ export class AccountsRepository implements IAccountsRepository {
     protected vectorUtils: IVectorUtils,
     protected browserNodeProvider: IBrowserNodeProvider,
     protected blockchainUtils: IBlockchainUtils,
-    protected localStorageUtils: ILocalStorageUtils,
+    protected storageUtils: IStorageUtils,
     protected logUtils: ILogUtils,
   ) {
     // We will cache the info about each asset type, so we only have to look it up once.
@@ -319,26 +316,31 @@ export class AccountsRepository implements IAccountsRepository {
 
   public setPreferredPaymentToken(
     tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PreferredPaymentTokenError> {
-    this.localStorageUtils.setItem(
+  ): ResultAsync<void, PersistenceError> {
+    return this.storageUtils.write(
       "PreferredPaymentTokenAddress",
       tokenAddress,
     );
-    return okAsync(undefined);
   }
 
   public getPreferredPaymentToken(): ResultAsync<
     AssetInfo,
-    BlockchainUnavailableError | PreferredPaymentTokenError
+    BlockchainUnavailableError | PersistenceError
   > {
-    const tokenAddress = this.localStorageUtils.getItem(
-      "PreferredPaymentTokenAddress",
-    );
-    if (!tokenAddress) {
-      return errAsync(new PreferredPaymentTokenError(""));
-    }
-    return this._getAssetInfo(EthereumAddress(tokenAddress));
+    return this.storageUtils
+      .read<string>("PreferredPaymentTokenAddress")
+      .andThen((tokenAddress) => {
+        if (tokenAddress == null) {
+          return errAsync(
+            new PersistenceError(
+              "Couldn't get PreferredPaymentTokenAddress from storageUtils.read",
+            ),
+          );
+        }
+        return this._getAssetInfo(EthereumAddress(tokenAddress));
+      });
   }
+
   protected _getAssetBalance(
     i: number,
     channelState: IFullChannelState,

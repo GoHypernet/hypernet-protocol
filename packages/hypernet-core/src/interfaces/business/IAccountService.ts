@@ -10,11 +10,10 @@ import {
   VectorError,
   RouterChannelUnknownError,
   InvalidParametersError,
-  PreferredPaymentTokenError,
   AssetInfo,
   BigNumberString,
+  PersistenceError,
 } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 /**
@@ -60,10 +59,10 @@ export interface IAccountService {
   ): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;
   setPreferredPaymentToken(
     tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PreferredPaymentTokenError>;
+  ): ResultAsync<void, PersistenceError>;
   getPreferredPaymentToken(): ResultAsync<
     AssetInfo,
-    BlockchainUnavailableError | PreferredPaymentTokenError
+    BlockchainUnavailableError | PersistenceError
   >;
 }
 

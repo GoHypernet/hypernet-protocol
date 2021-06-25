@@ -25,7 +25,6 @@ import {
   InvalidPaymentError,
   InvalidParametersError,
   TransferResolutionError,
-  PreferredPaymentTokenError,
   IHypernetCore,
   MerchantAuthorizationDeniedError,
   BigNumberString,
@@ -459,13 +458,13 @@ export default class HypernetIFrameProxy
 
   public setPreferredPaymentToken(
     tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PreferredPaymentTokenError> {
+  ): ResultAsync<void, PersistenceError> {
     return this._createCall("setPreferredPaymentToken", tokenAddress);
   }
 
   public getPreferredPaymentToken(): ResultAsync<
     AssetInfo,
-    BlockchainUnavailableError | PreferredPaymentTokenError
+    BlockchainUnavailableError | PersistenceError
   > {
     return this._createCall("getPreferredPaymentToken", null);
   }

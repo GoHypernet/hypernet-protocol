@@ -15,6 +15,7 @@ enum EActionTypes {
   FETCHING = "FETCHING",
   FETCHED = "FETCHED",
   PUBLIC_IDENTIFIER_FETCHED = "PUBLIC_IDENTIFIER_FETCHED",
+  PAYMENT_AUTO_ACCEPT_CHANGED = "PAYMENT_AUTO_ACCEPT_CHANGED",
   ERROR = "ERROR",
 }
 
@@ -23,6 +24,8 @@ interface IState {
   error: any;
   links: HypernetLink[];
   publicIdentifier: PublicIdentifier;
+  paymentsAutoAccept: boolean;
+  setPaymentsAutoAccept: (val: boolean) => void;
   acceptPayment: (paymentId: PaymentId) => void;
   disputePayment: (paymentId: PaymentId) => void;
   pullFunds: (paymentId: PaymentId) => void;
@@ -32,17 +35,32 @@ type Action =
   | { type: EActionTypes.FETCHING }
   | { type: EActionTypes.FETCHED; payload: HypernetLink[] }
   | { type: EActionTypes.PUBLIC_IDENTIFIER_FETCHED; payload: PublicIdentifier }
+  | { type: EActionTypes.PAYMENT_AUTO_ACCEPT_CHANGED; payload: boolean }
   | { type: EActionTypes.ERROR; payload: string };
 
 export function useLinks(): IState {
   const { coreProxy } = useStoreContext();
   const alert = useAlert();
 
+  const setPaymentsAutoAccept = (val: boolean) => {
+    dispatch({
+      type: EActionTypes.PAYMENT_AUTO_ACCEPT_CHANGED,
+      payload: val,
+    });
+    window.localStorage.setItem(
+      "PreferredPaymentTokenAddress",
+      JSON.stringify(val),
+    );
+    alert.success("Payments auto accept changed successfully.");
+  };
+
   const initialState: IState = {
     loading: true,
     error: null,
     links: [],
     publicIdentifier: PublicIdentifier(""),
+    paymentsAutoAccept: false,
+    setPaymentsAutoAccept,
     acceptPayment,
     disputePayment,
     pullFunds,
@@ -56,6 +74,8 @@ export function useLinks(): IState {
         return { ...state, loading: false, links: action.payload };
       case EActionTypes.PUBLIC_IDENTIFIER_FETCHED:
         return { ...state, loading: false, publicIdentifier: action.payload };
+      case EActionTypes.PAYMENT_AUTO_ACCEPT_CHANGED:
+        return { ...state, loading: false, paymentsAutoAccept: action.payload };
       case EActionTypes.ERROR:
         return { ...state, loading: false, error: action.payload };
       default:
@@ -87,6 +107,16 @@ export function useLinks(): IState {
         payload: publicIdentifier,
       });
     }, handleError);
+
+    const paymentsAutoAccept = window.localStorage.getItem(
+      "PreferredPaymentTokenAddress",
+    );
+    if (paymentsAutoAccept != null) {
+      dispatch({
+        type: EActionTypes.PAYMENT_AUTO_ACCEPT_CHANGED,
+        payload: JSON.parse(paymentsAutoAccept),
+      });
+    }
   }
 
   function onPullPaymentSent(payment: PullPayment) {
@@ -164,7 +194,7 @@ export function useLinks(): IState {
       try {
         results[0].match(() => {
           fetchData();
-          alert.success("Payment accepted successfully!");
+          alert.success("Payment accepted successfully.");
         }, handleError);
       } catch (err) {
         handleError();
@@ -175,14 +205,14 @@ export function useLinks(): IState {
   function disputePayment(paymentId: PaymentId) {
     coreProxy.initiateDispute(paymentId).match(() => {
       fetchData();
-      alert.success("Payment disputed successfully!");
+      alert.success("Payment disputed successfully.");
     }, handleError);
   }
 
   function pullFunds(paymentId: PaymentId) {
     coreProxy.pullFunds(paymentId, BigNumberString("1")).match(() => {
       fetchData();
-      alert.success("Payment disputed successfully!");
+      alert.success("Payment disputed successfully.");
     }, handleError);
   }
 
