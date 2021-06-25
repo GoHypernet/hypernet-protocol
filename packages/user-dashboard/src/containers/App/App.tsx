@@ -12,7 +12,11 @@ import Header from "@user-dashboard/components/Header";
 import Router from "@user-dashboard/containers/Router";
 import { useLayoutContext, StoreProvider } from "@user-dashboard/contexts";
 
-const integration: IHypernetWebIntegration = new HypernetWebIntegration();
+declare const __CORE_IFRAME_SOURCE__: string;
+
+const integration: IHypernetWebIntegration = new HypernetWebIntegration(
+  __CORE_IFRAME_SOURCE__,
+);
 
 const App: React.FC = () => {
   const { setLoading, setResultMessage } = useLayoutContext();
