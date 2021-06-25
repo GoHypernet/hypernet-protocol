@@ -20,6 +20,8 @@ declare global {
   }
 }
 
+declare const __CORE_IFRAME_SOURCE__: string;
+
 export class AgentViewModel {
   public account: AccountParams;
   public links: LinksParams;
@@ -35,7 +37,7 @@ export class AgentViewModel {
   protected integration: IHypernetWebIntegration;
 
   constructor() {
-    this.integration = new HypernetWebIntegration();
+    this.integration = new HypernetWebIntegration(__CORE_IFRAME_SOURCE__);
     this.status = new StatusParams(this.integration);
 
     this.account = new AccountParams(this.integration);

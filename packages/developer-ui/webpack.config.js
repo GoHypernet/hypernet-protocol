@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
 
-const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const webpack = require("webpack");
 
 const configFilePath = require.resolve("./tsconfig.json");
@@ -126,6 +126,11 @@ module.exports = {
     new webpack.ProvidePlugin({
       Buffer: ["buffer", "Buffer"],
       process: "process/browser",
+    }),
+    new webpack.DefinePlugin({
+      __CORE_IFRAME_SOURCE__: JSON.stringify(
+        process.env.__CORE_IFRAME_SOURCE__,
+      ),
     }),
   ],
 };

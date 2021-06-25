@@ -28,6 +28,7 @@
   ],
   "scripts": {
     "build": "yarn clean && yarn compile && yarn postCompile",
+    "dockerize": "docker build -t hypernetlabs/hypernet-protocol-user-dashboard:local -f Dockerfile --progress=plain ../..",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "compile": "tsc --build && cd ../.. && yarn alias",
     "alias": "tsc-alias",

@@ -8,7 +8,7 @@ import { ILocalStorageUtils, LocalStorageUtils } from "@hypernetlabs/utils";
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
-  protected iframeURL = "http://localhost:5020";
+  protected iframeURL = "http://localhost:5020"; // TODO: This should eventually be mainnet release
   protected currentMerchantUrl: MerchantUrl | undefined | null;
   protected getReadyTimeout: number = 15 * 1000;
   protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
