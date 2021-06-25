@@ -52,7 +52,7 @@ export const BalanceList: React.FC<BalanceListProps> = (
               }
               placement="top"
             >
-              <Box>{balance.symbol === "TEST" ? "HPT" : balance.symbol}</Box>
+              <Box>{balance.symbol === "TEST" ? "HYPR" : balance.symbol}</Box>
             </Tooltip>
           </Box>
         </Box>
