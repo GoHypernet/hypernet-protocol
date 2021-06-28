@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
   gke: circleci/gcp-gke@1.2.0
-
+  gcr: circleci/gcp-gcr@0.13.0
 executors:
   ubuntu:
     machine:
