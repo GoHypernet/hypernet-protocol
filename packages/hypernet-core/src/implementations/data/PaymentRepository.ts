@@ -80,7 +80,7 @@ export class PaymentRepository implements IPaymentRepository {
           .andThen((payment) => {
             const message: IHypernetPullPaymentDetails = {
               messageType: EMessageTransferType.PULLPAYMENT,
-              requireOnline: false,
+              requireOnline: true,
               paymentId: paymentId,
               to: payment.to,
               from: payment.from,
@@ -133,7 +133,7 @@ export class PaymentRepository implements IPaymentRepository {
 
         const message: IHypernetOfferDetails = {
           messageType: EMessageTransferType.OFFER,
-          requireOnline: false,
+          requireOnline: true,
           paymentId,
           creationDate: timestamp,
           to: counterPartyAccount,
@@ -213,7 +213,7 @@ export class PaymentRepository implements IPaymentRepository {
           paymentToken,
           merchantUrl,
           metadata,
-          requireOnline: false,
+          requireOnline: true,
         };
 
         // Create a message transfer, with the terms of the payment in the metadata.
