@@ -46,6 +46,9 @@ export interface IHypernetWebUI {
   renderMerchantsWidget(params?: IRenderParams): Result<void, RenderError>;
   renderFundWidget(params?: IRenderParams): Result<void, RenderError>;
   renderLinksWidget(params?: IRenderParams): Result<void, RenderError>;
+  renderPublicIdentifierWidget(
+    params?: IRenderParams,
+  ): Result<void, RenderError>;
   renderPaymentWidget(
     params?: IRenderPaymentWidgetParams,
   ): Result<void, RenderError>;

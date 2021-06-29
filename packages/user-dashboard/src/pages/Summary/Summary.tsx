@@ -29,20 +29,34 @@ const Summary: React.FC = () => {
         includeBoxWrapper: true,
       })
       .mapErr(handleError);
+
+    hypernetWebIntegration.webUIClient
+      .renderPublicIdentifierWidget({
+        selector: "public-identifier",
+        includeBoxWrapper: true,
+      })
+      .mapErr(handleError);
   }, []);
 
   return (
     <PageWrapper label="SUMMARY">
       <Grid container spacing={3}>
+        <Grid item xs={12} spacing={3}>
+          <Box id="public-identifier"></Box>
+        </Grid>
+      </Grid>
+      <Grid container spacing={3}>
         <Grid item xs={8}>
           <Box id="payments-wrapper"></Box>
         </Grid>
-        <Grid item container xs={4} spacing={3}>
-          <Grid item xs={12}>
-            <Box id="balances-wrapper"></Box>
-          </Grid>
-          <Grid item xs={12}>
-            <Box id="merchant-list-wrapper"></Box>
+        <Grid item xs={4}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} spacing={3}>
+              <Box id="balances-wrapper"></Box>
+            </Grid>
+            <Grid item xs={12} spacing={3}>
+              <Box id="merchant-list-wrapper"></Box>
+            </Grid>
           </Grid>
         </Grid>
       </Grid>

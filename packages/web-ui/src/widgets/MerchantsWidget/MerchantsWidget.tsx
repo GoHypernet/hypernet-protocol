@@ -9,14 +9,16 @@ import {
   ListItemSecondaryAction,
   Divider,
   Tooltip,
+  TextField,
 } from "@material-ui/core";
 import { Folder, Block } from "@material-ui/icons";
 import { IRenderParams } from "@web-ui/interfaces";
-import React from "react";
+import React, { useState, ReactNode } from "react";
 import PulseLoader from "react-spinners/PulseLoader";
 
 import { BoxWrapper, EmptyState } from "@web-ui/components";
 import { useMerchants } from "@web-ui/hooks";
+import { MerchantUrl } from "@hypernetlabs/objects";
 
 interface IMerchantsWidget extends IRenderParams {}
 
@@ -29,8 +31,46 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
     merchantsMap,
     openMerchantIFrame,
     deauthorizeMerchant,
+    authorizeMerchant,
     loading,
   } = useMerchants();
+  const [inputMerchantUrl, setInputMerchantUrl] = useState<MerchantUrl>(
+    MerchantUrl(""),
+  );
+
+  const renderMerchantAuthorization = (): ReactNode => {
+    return (
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="flex-end"
+        padding="0px 17px 40px 70px"
+      >
+        <Box flex={1} paddingRight="50px">
+          <TextField
+            label="Validator Url"
+            value={inputMerchantUrl}
+            fullWidth
+            onChange={(event) => {
+              setInputMerchantUrl(MerchantUrl(event.target.value));
+            }}
+          />
+        </Box>
+        <Button
+          size="small"
+          variant="outlined"
+          color="primary"
+          disabled={inputMerchantUrl == null || inputMerchantUrl == ""}
+          onClick={() => {
+            authorizeMerchant(inputMerchantUrl);
+            setInputMerchantUrl(MerchantUrl(""));
+          }}
+        >
+          Authorize
+        </Button>
+      </Box>
+    );
+  };
 
   const CustomBox = includeBoxWrapper ? BoxWrapper : Box;
 
@@ -47,13 +87,20 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
     );
   }
 
+  const hasEmptyState = [...merchantsMap.keys()].length === 0 && !loading;
+
   return (
     <CustomBox
       label={!noLabel ? "YOUR SERVICES" : undefined}
       bodyStyle={bodyStyle}
-      hasEmptyState={[...merchantsMap.keys()].length === 0 && !loading}
+      hasEmptyState={hasEmptyState}
       emptyState={
-        <EmptyState info={<>You don't have any authorized validators yet</>} />
+        <Box>
+          <EmptyState
+            info={<>You don't have any authorized validators yet</>}
+          />
+          {renderMerchantAuthorization()}
+        </Box>
       }
     >
       <List>
@@ -116,12 +163,11 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
                 </Button>
               </ListItemSecondaryAction>
             </ListItem>
-            {index !== [...merchantsMap.keys()].length - 1 && (
-              <Divider variant="inset" />
-            )}
+            <Divider variant="inset" />
           </Box>
         ))}
       </List>
+      {renderMerchantAuthorization()}
     </CustomBox>
   );
 };

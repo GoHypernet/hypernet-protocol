@@ -36,7 +36,11 @@ export const BalanceList: React.FC<BalanceListProps> = (
         >
           <img
             className={classes.tokenLogo}
-            src={`https://icons.bitbot.tools/api/${balance.symbol}/64x64`}
+            src={
+              balance.symbol === "TEST" || balance.symbol === "TEST"
+                ? HYPER_TOKEN_LOGO_URL
+                : `https://icons.bitbot.tools/api/${balance.symbol}/64x64`
+            }
             ref={tokenLogoRef}
             onError={() => {
               tokenLogoRef.current?.setAttribute("src", HYPER_TOKEN_LOGO_URL);

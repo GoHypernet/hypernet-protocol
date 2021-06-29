@@ -110,9 +110,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   }
 
   private _getPaymentsAutoAccept(): boolean {
-    const autoAccept = this.localStorageUtils.getItem(
-      "PreferredPaymentTokenAddress",
-    );
+    const autoAccept = this.localStorageUtils.getItem("PaymentsAutoAccept");
 
     if (autoAccept == null) {
       return false;

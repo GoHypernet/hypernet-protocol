@@ -3,11 +3,8 @@ import {
   HypernetLink,
   PaymentId,
   PublicIdentifier,
-  PullPayment,
-  PushPayment,
 } from "@hypernetlabs/objects";
-import { useStoreContext } from "@web-ui/contexts";
-import { BigNumber } from "ethers";
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { useEffect, useReducer } from "react";
 import { useAlert } from "react-alert";
 
@@ -40,6 +37,7 @@ type Action =
 
 export function useLinks(): IState {
   const { coreProxy } = useStoreContext();
+  const { setLoading } = useLayoutContext();
   const alert = useAlert();
 
   const setPaymentsAutoAccept = (val: boolean) => {
@@ -47,10 +45,7 @@ export function useLinks(): IState {
       type: EActionTypes.PAYMENT_AUTO_ACCEPT_CHANGED,
       payload: val,
     });
-    window.localStorage.setItem(
-      "PreferredPaymentTokenAddress",
-      JSON.stringify(val),
-    );
+    window.localStorage.setItem("PaymentsAutoAccept", JSON.stringify(val));
     alert.success("Payments auto accept changed successfully.");
   };
 
@@ -86,20 +81,29 @@ export function useLinks(): IState {
   useEffect(() => {
     fetchData();
 
-    coreProxy.onPullPaymentSent.subscribe({
-      next: onPullPaymentSent,
+    coreProxy.onPullPaymentSent.subscribe(() => {
+      alert.show("New pull payment sent.");
+      fetchPayments();
     });
 
-    coreProxy.onPushPaymentSent.subscribe({
-      next: onPushPaymentSent,
+    coreProxy.onPushPaymentSent.subscribe(() => {
+      alert.show("New push payment sent.");
+      fetchPayments();
+    });
+
+    coreProxy.onPullPaymentReceived.subscribe((payment) => {
+      alert.show("New pull payment received.");
+      fetchPayments();
+    });
+
+    coreProxy.onPushPaymentReceived.subscribe((payment) => {
+      alert.show("New push payment received.");
+      fetchPayments();
     });
   }, []);
 
   function fetchData() {
-    dispatch({ type: EActionTypes.FETCHING });
-    coreProxy.getLinks().match((links) => {
-      dispatch({ type: EActionTypes.FETCHED, payload: [...links] });
-    }, handleError);
+    fetchPayments();
 
     coreProxy.getPublicIdentifier().match((publicIdentifier) => {
       dispatch({
@@ -109,7 +113,7 @@ export function useLinks(): IState {
     }, handleError);
 
     const paymentsAutoAccept = window.localStorage.getItem(
-      "PreferredPaymentTokenAddress",
+      "PaymentsAutoAccept",
     );
     if (paymentsAutoAccept != null) {
       dispatch({
@@ -119,99 +123,35 @@ export function useLinks(): IState {
     }
   }
 
-  function onPullPaymentSent(payment: PullPayment) {
-    const linksArr = [...state.links];
-
-    // Check if there is already a link for the payment counterparty
-    const paymentLinkIndex = linksArr.findIndex((val) => {
-      const counterPartyAccount = val.counterPartyAccount;
-      return (
-        counterPartyAccount === payment.to ||
-        counterPartyAccount === payment.from
-      );
-    });
-
-    if (paymentLinkIndex === -1) {
-      // We need to create a new link for the counterparty
-      const counterPartyAccount =
-        payment.to === state.publicIdentifier ? payment.from : payment.to;
-      linksArr.push(
-        new HypernetLink(
-          counterPartyAccount,
-          [payment],
-          [],
-          [payment],
-          [],
-          [payment],
-        ),
-      );
-    } else {
-      // It's for us, we'll need to add it to the payments for the link
-      linksArr[paymentLinkIndex].pullPayments.push(payment);
-      linksArr[paymentLinkIndex].payments.push(payment);
-    }
-
-    dispatch({ type: EActionTypes.FETCHED, payload: [...linksArr] });
-  }
-
-  function onPushPaymentSent(payment: PushPayment) {
-    const linksArr = [...state.links];
-
-    // Check if there is already a link for the payment counterparty
-    const paymentLinkIndex = linksArr.findIndex((val) => {
-      const counterPartyAccount = val.counterPartyAccount;
-      return (
-        counterPartyAccount === payment.to ||
-        counterPartyAccount === payment.from
-      );
-    });
-
-    if (paymentLinkIndex === -1) {
-      // We need to create a new link for the counterparty
-      const counterPartyAccount =
-        payment.to === state.publicIdentifier ? payment.from : payment.to;
-      linksArr.push(
-        new HypernetLink(
-          counterPartyAccount,
-          [payment],
-          [payment],
-          [],
-          [payment],
-          [],
-        ),
-      );
-    } else {
-      // It's for us, we'll need to add it to the payments for the link
-      linksArr[paymentLinkIndex].pushPayments.push(payment);
-      linksArr[paymentLinkIndex].payments.push(payment);
-    }
-
-    dispatch({ type: EActionTypes.FETCHED, payload: [...linksArr] });
+  function fetchPayments() {
+    setLoading(true);
+    dispatch({ type: EActionTypes.FETCHING });
+    coreProxy.getLinks().match((links) => {
+      dispatch({ type: EActionTypes.FETCHED, payload: [...links] });
+      setLoading(false);
+    }, handleError);
   }
 
   function acceptPayment(paymentId: PaymentId) {
+    setLoading(true);
     coreProxy.acceptOffers([paymentId]).match((results) => {
-      try {
-        results[0].match(() => {
-          fetchData();
-          alert.success("Payment accepted successfully.");
-        }, handleError);
-      } catch (err) {
-        handleError();
-      }
+      fetchPayments();
+      alert.success("Payment accepted successfully.");
     }, handleError);
   }
 
   function disputePayment(paymentId: PaymentId) {
+    setLoading(true);
     coreProxy.initiateDispute(paymentId).match(() => {
-      fetchData();
+      fetchPayments();
       alert.success("Payment disputed successfully.");
     }, handleError);
   }
 
   function pullFunds(paymentId: PaymentId) {
+    setLoading(true);
     coreProxy.pullFunds(paymentId, BigNumberString("1")).match(() => {
-      fetchData();
+      fetchPayments();
       alert.success("Payment disputed successfully.");
     }, handleError);
   }
@@ -220,6 +160,7 @@ export function useLinks(): IState {
     const err = error?.message || "Something went wrong in payments!";
     alert.error(err);
     dispatch({ type: EActionTypes.ERROR, payload: err });
+    setLoading(false);
   }
 
   return state;

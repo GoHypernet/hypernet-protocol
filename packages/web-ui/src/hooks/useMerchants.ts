@@ -15,6 +15,7 @@ interface IState {
   merchantsMap: Map<MerchantUrl, boolean>;
   openMerchantIFrame: (merchantUrl: MerchantUrl) => void;
   deauthorizeMerchant: (merchantUrl: MerchantUrl) => void;
+  authorizeMerchant: (merchantUrl: MerchantUrl) => void;
 }
 
 type Action =
@@ -32,6 +33,7 @@ export function useMerchants(): IState {
     merchantsMap: new Map(),
     openMerchantIFrame,
     deauthorizeMerchant,
+    authorizeMerchant,
   };
 
   const [state, dispatch] = useReducer((state: IState, action: Action) => {
@@ -111,6 +113,22 @@ export function useMerchants(): IState {
       .mapErr((error) => {
         alert.error(
           error.message || "An error had happened while deauthorizing merchant",
+        );
+        dispatch({ type: EActionTypes.ERROR, payload: error.message });
+      });
+  }
+
+  function authorizeMerchant(merchantUrl: MerchantUrl) {
+    dispatch({ type: EActionTypes.FETCHING });
+    coreProxy
+      .authorizeMerchant(merchantUrl)
+      .map(() => {
+        alert.success(`Merchant ${merchantUrl} authorized successfully`);
+        fetchData();
+      })
+      .mapErr((error) => {
+        alert.error(
+          error.message || "An error had happened while authorizing merchant",
         );
         dispatch({ type: EActionTypes.ERROR, payload: error.message });
       });

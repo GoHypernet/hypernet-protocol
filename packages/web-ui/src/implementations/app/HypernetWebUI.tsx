@@ -24,6 +24,7 @@ import {
   ONBOARDING_FLOW_ID_SELECTOR,
   WARNING_ALERT_SELECTOR,
   METAMASK_WARNING_ID_SELECTOR,
+  PUBLIC_IDENTIFIER_WIDGET_ID_SELECTOR,
 } from "@web-ui/constants";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
@@ -32,6 +33,7 @@ import { ViewUtils, DateUtils } from "@web-ui/utils";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget";
 import FundWidget from "@web-ui/widgets/FundWidget";
 import LinksWidget from "@web-ui/widgets/LinksWidget";
+import PublicIdentifierWidget from "@web-ui/widgets/PublicIdentifierWidget";
 import MerchantsWidget from "@web-ui/widgets/MerchantsWidget";
 import { MetamaskWarning, WarningAlert } from "@web-ui/components";
 import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
@@ -237,6 +239,23 @@ export default class HypernetWebUI implements IHypernetWebUI {
         ),
         this._generateDomElement(
           config?.selector || PAYMENT_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderPublicIdentifierWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <PublicIdentifierWidget {...config} />,
+          config?.showInModal,
+        ),
+        this._generateDomElement(
+          config?.selector || PUBLIC_IDENTIFIER_WIDGET_ID_SELECTOR,
         ),
       );
     };
