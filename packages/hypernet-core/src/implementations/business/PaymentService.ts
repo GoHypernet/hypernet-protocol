@@ -257,15 +257,20 @@ export class PaymentService implements IPaymentService {
         );
       }
 
-      if (payment.state !== EPaymentState.Proposed) {
+      // offerReceived will be called even if we are the ones that created
+      // the transfer. Because of that, we only want to generate an event
+      // if the payment is TO us.
+      if (
+        payment.state !== EPaymentState.Proposed ||
+        payment.to !== context.publicIdentifier
+      ) {
         // The payment has already moved forward, somehow.
         // We don't need to do anything, we probably got called
         // by another instance of the core.
         return okAsync(undefined);
       }
 
-      // Payment state is 'Proposed', continue to handle
-
+      // Payment state is 'Proposed' and to us, continue to handle
       if (payment instanceof PushPayment) {
         // Someone wants to send us a pushPayment, emit up to the api
         context.onPushPaymentReceived.next(payment);
