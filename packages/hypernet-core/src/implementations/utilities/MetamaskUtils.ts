@@ -3,8 +3,8 @@ import {
   IProviderSigner,
   EthereumAddress,
 } from "@hypernetlabs/objects";
-import { ILogUtils } from "@hypernetlabs/utils";
-import { ResultAsync } from "neverthrow";
+import { ILogUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
+import { okAsync, ResultAsync } from "neverthrow";
 
 import { IConfigProvider } from "@interfaces/utilities";
 import { IMetamaskUtils } from "@interfaces/utilities/IMetamaskUtils";
@@ -18,6 +18,7 @@ declare global {
 export class MetamaskUtils implements IMetamaskUtils {
   constructor(
     protected configProvider: IConfigProvider,
+    protected localStorageUtils: ILocalStorageUtils,
     protected logUtils: ILogUtils,
   ) {}
 
@@ -36,6 +37,12 @@ export class MetamaskUtils implements IMetamaskUtils {
 
   public addNetwork(): ResultAsync<unknown, BlockchainUnavailableError> {
     return this.configProvider.getConfig().andThen((config) => {
+      const network = config.chainProviders[config.chainId];
+      const storedNetworkes = this._getStoredNetworks();
+      if (storedNetworkes.includes(network)) {
+        return okAsync(undefined);
+      }
+
       return ResultAsync.fromPromise(
         window.ethereum.request({
           method: "wallet_addEthereumChain",
@@ -43,7 +50,7 @@ export class MetamaskUtils implements IMetamaskUtils {
             {
               chainId: `0x${config.chainId.toString(16)}`,
               chainName: "Hypernet protocol dev network",
-              rpcUrls: [config.chainProviders[config.chainId]],
+              rpcUrls: [network],
             },
           ],
         }),
@@ -52,7 +59,9 @@ export class MetamaskUtils implements IMetamaskUtils {
           this.logUtils.error(errorMessage);
           return new BlockchainUnavailableError(errorMessage, e);
         },
-      );
+      ).map(() => {
+        return this._storeNetwork(network);
+      });
     });
   }
 
@@ -61,13 +70,19 @@ export class MetamaskUtils implements IMetamaskUtils {
     tokenAddress?: EthereumAddress,
   ): ResultAsync<unknown, BlockchainUnavailableError> {
     return this.configProvider.getConfig().andThen((config) => {
+      const token = tokenAddress || config.hypertokenAddress;
+      const storedTokens = this._getStoredTokenAddresses();
+      if (storedTokens.includes(token)) {
+        return okAsync(undefined);
+      }
+
       return ResultAsync.fromPromise(
         window.ethereum.request({
           method: "wallet_watchAsset",
           params: {
             type: "ERC20",
             options: {
-              address: tokenAddress || config.hypertokenAddress,
+              address: token,
               symbol: tokenName || "HyperToken",
               decimals: 18,
             },
@@ -78,7 +93,37 @@ export class MetamaskUtils implements IMetamaskUtils {
           this.logUtils.error(errorMessage);
           return new BlockchainUnavailableError(errorMessage, e);
         },
-      );
+      ).map(() => {
+        return this._storeTokenAddress(token);
+      });
     });
+  }
+
+  private _getStoredNetworks(): string[] {
+    const networksStr = this.localStorageUtils.getItem("AddedNetworks");
+    return networksStr == null ? [] : (JSON.parse(networksStr) as string[]);
+  }
+
+  private _storeNetwork(network: string): void {
+    const addedNetworks = this._getStoredNetworks();
+    this.localStorageUtils.setItem(
+      "AddedNetworks",
+      JSON.stringify([...addedNetworks, network]),
+    );
+  }
+
+  private _getStoredTokenAddresses(): string[] {
+    const tokenAddressesStr = this.localStorageUtils.getItem("TokenAddresses");
+    return tokenAddressesStr == null
+      ? []
+      : (JSON.parse(tokenAddressesStr) as string[]);
+  }
+
+  private _storeTokenAddress(token: string): void {
+    const addedTokenAdresses = this._getStoredTokenAddresses();
+    this.localStorageUtils.setItem(
+      "TokenAddresses",
+      JSON.stringify([...addedTokenAdresses, token]),
+    );
   }
 }
