@@ -4,7 +4,12 @@ import { IOnboardingFlowParams } from "@web-ui/interfaces";
 import React, { useEffect, useState, ReactNode } from "react";
 import { useAlert } from "react-alert";
 
-import { ModalHeader, SucessContent, Button } from "@web-ui/components";
+import {
+  ModalHeader,
+  SucessContent,
+  Button,
+  ModalFooter,
+} from "@web-ui/components";
 import { useStyles } from "@web-ui/flows/OnboardingFlow/OnboardingFlow.style";
 import { useBalances } from "@web-ui/hooks";
 import { EButtonStatus } from "@web-ui/theme";
@@ -230,7 +235,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     <Box className={classes.container}>
       <ModalHeader />
       {renderScreen()}
-      {/* <ModalFooter /> */}
+      <ModalFooter />
     </Box>
   );
 };
