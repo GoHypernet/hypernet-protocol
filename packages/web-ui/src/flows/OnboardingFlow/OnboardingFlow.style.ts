@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core";
 export const useStyles = makeStyles({
   container: {
     width: "100%",
-    padding: "0px 20px 20px 20px",
+    padding: "0 10px",
   },
   emptyBalanceScreenWrapper: {},
   paymentTokenLabel: {

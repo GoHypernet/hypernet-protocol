@@ -7,6 +7,8 @@ const webpack = require("webpack");
 
 const configFilePath = require.resolve("./tsconfig.json");
 
+//process.env.__CORE_IFRAME_SOURCE__ = "https://core-iframe-dev.hypernetlabs.io";
+
 /** @type import('webpack').Configuration */
 module.exports = {
   context: __dirname,
