@@ -3,6 +3,7 @@ import {
   HypernetLink,
   PaymentId,
   PublicIdentifier,
+  EPaymentState,
 } from "@hypernetlabs/objects";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { useEffect, useReducer } from "react";
@@ -93,12 +94,30 @@ export function useLinks(): IState {
 
     coreProxy.onPullPaymentReceived.subscribe((payment) => {
       alert.show("New pull payment received.");
-      fetchPayments();
+
+      const paymentsAutoAccept = getPaymentAutoAccept();
+      if (
+        paymentsAutoAccept == true &&
+        payment.state == EPaymentState.Proposed
+      ) {
+        acceptPayment(payment.id);
+      } else {
+        fetchPayments();
+      }
     });
 
     coreProxy.onPushPaymentReceived.subscribe((payment) => {
       alert.show("New push payment received.");
-      fetchPayments();
+
+      const paymentsAutoAccept = getPaymentAutoAccept();
+      if (
+        paymentsAutoAccept == true &&
+        payment.state == EPaymentState.Proposed
+      ) {
+        acceptPayment(payment.id);
+      } else {
+        fetchPayments();
+      }
     });
   }, []);
 
@@ -112,15 +131,12 @@ export function useLinks(): IState {
       });
     }, handleError);
 
-    const paymentsAutoAccept = window.localStorage.getItem(
-      "PaymentsAutoAccept",
-    );
-    if (paymentsAutoAccept != null) {
-      dispatch({
-        type: EActionTypes.PAYMENT_AUTO_ACCEPT_CHANGED,
-        payload: JSON.parse(paymentsAutoAccept),
-      });
-    }
+    const paymentsAutoAccept = getPaymentAutoAccept();
+
+    dispatch({
+      type: EActionTypes.PAYMENT_AUTO_ACCEPT_CHANGED,
+      payload: paymentsAutoAccept,
+    });
   }
 
   function fetchPayments() {
@@ -134,10 +150,16 @@ export function useLinks(): IState {
 
   function acceptPayment(paymentId: PaymentId) {
     setLoading(true);
-    coreProxy.acceptOffers([paymentId]).match((results) => {
-      fetchPayments();
-      alert.success("Payment accepted successfully.");
-    }, handleError);
+    coreProxy.acceptOffers([paymentId]).match(
+      () => {
+        fetchPayments();
+        alert.success("Payment accepted successfully.");
+      },
+      (err) => {
+        fetchPayments();
+        handleError(err);
+      },
+    );
   }
 
   function disputePayment(paymentId: PaymentId) {
@@ -154,6 +176,16 @@ export function useLinks(): IState {
       fetchPayments();
       alert.success("Payment disputed successfully.");
     }, handleError);
+  }
+
+  function getPaymentAutoAccept(): boolean {
+    const paymentsAutoAcceptStr = window.localStorage.getItem(
+      "PaymentsAutoAccept",
+    );
+
+    return paymentsAutoAcceptStr == null
+      ? false
+      : (JSON.parse(paymentsAutoAcceptStr) as boolean);
   }
 
   function handleError(error?: Error) {
