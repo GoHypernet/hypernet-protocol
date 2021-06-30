@@ -45,7 +45,7 @@ export class HypernetCoreRepository implements IHypernetCoreRepository {
   public emitDisplayRequested(): ResultAsync<void, never> {
     const context = this.contextProvider.getMerchantContext();
 
-    this.childApi?.emit("displayRequested", context.merchantUrl);
+    this.childApi?.emit("displayRequested", context.gatewayUrl);
 
     return okAsync(undefined);
   }
@@ -53,7 +53,7 @@ export class HypernetCoreRepository implements IHypernetCoreRepository {
   public emitCloseRequested(): ResultAsync<void, never> {
     const context = this.contextProvider.getMerchantContext();
 
-    this.childApi?.emit("closeRequested", context.merchantUrl);
+    this.childApi?.emit("closeRequested", context.gatewayUrl);
 
     return okAsync(undefined);
   }

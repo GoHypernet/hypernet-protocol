@@ -101,7 +101,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           expirationDate: UnixTimestamp;
           requiredStake: BigNumberString;
           paymentToken: EthereumAddress;
-          merchantUrl: GatewayUrl;
+          gatewayUrl: GatewayUrl;
           metadata: string | null;
         }>,
       ) => {
@@ -112,7 +112,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.expirationDate,
             data.data.requiredStake,
             data.data.paymentToken,
-            data.data.merchantUrl,
+            data.data.gatewayUrl,
             data.data.metadata,
           );
         }, data.callId);
@@ -127,7 +127,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           deltaTime: number;
           requiredStake: BigNumberString;
           paymentToken: EthereumAddress;
-          merchantUrl: GatewayUrl;
+          gatewayUrl: GatewayUrl;
           metadata: string | null;
         }>,
       ) => {
@@ -140,7 +140,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.deltaTime,
             data.data.requiredStake,
             data.data.paymentToken,
-            data.data.merchantUrl,
+            data.data.gatewayUrl,
             data.data.metadata,
           );
         }, data.callId);
@@ -305,12 +305,12 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       parent.emit("onAuthorizedMerchantActivationFailed", val.toString());
     });
 
-    this.core.onMerchantIFrameDisplayRequested.subscribe((merchantUrl) => {
-      parent.emit("onMerchantIFrameDisplayRequested", merchantUrl);
+    this.core.onMerchantIFrameDisplayRequested.subscribe((gatewayUrl) => {
+      parent.emit("onMerchantIFrameDisplayRequested", gatewayUrl);
     });
 
-    this.core.onMerchantIFrameCloseRequested.subscribe((merchantUrl) => {
-      parent.emit("onMerchantIFrameCloseRequested", merchantUrl);
+    this.core.onMerchantIFrameCloseRequested.subscribe((gatewayUrl) => {
+      parent.emit("onMerchantIFrameCloseRequested", gatewayUrl);
     });
 
     this.core.onInitializationRequired.subscribe(() => {

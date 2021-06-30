@@ -13,9 +13,9 @@ interface IState {
   loading: boolean;
   error: any;
   merchantsMap: Map<GatewayUrl, boolean>;
-  openMerchantIFrame: (merchantUrl: GatewayUrl) => void;
-  deauthorizeMerchant: (merchantUrl: GatewayUrl) => void;
-  authorizeMerchant: (merchantUrl: GatewayUrl) => void;
+  openMerchantIFrame: (gatewayUrl: GatewayUrl) => void;
+  deauthorizeMerchant: (gatewayUrl: GatewayUrl) => void;
+  authorizeMerchant: (gatewayUrl: GatewayUrl) => void;
 }
 
 type Action =
@@ -53,9 +53,9 @@ export function useMerchants(): IState {
     fetchData();
 
     coreProxy.onMerchantAuthorized.subscribe({
-      next: (merchantUrl) => {
+      next: (gatewayUrl) => {
         const merchantsMap = state.merchantsMap;
-        merchantsMap.set(merchantUrl, true);
+        merchantsMap.set(gatewayUrl, true);
         dispatch({
           type: EActionTypes.FETCHED,
           payload: merchantsMap,
@@ -64,9 +64,9 @@ export function useMerchants(): IState {
     });
 
     coreProxy.onAuthorizedMerchantActivationFailed.subscribe({
-      next: (merchantUrl) => {
+      next: (gatewayUrl) => {
         const merchantsMap = state.merchantsMap;
-        merchantsMap.set(merchantUrl, false);
+        merchantsMap.set(gatewayUrl, false);
         dispatch({
           type: EActionTypes.FETCHED,
           payload: merchantsMap,
@@ -93,8 +93,8 @@ export function useMerchants(): IState {
       });
   }
 
-  function openMerchantIFrame(merchantUrl: GatewayUrl) {
-    coreProxy.displayMerchantIFrame(merchantUrl).mapErr((error) => {
+  function openMerchantIFrame(gatewayUrl: GatewayUrl) {
+    coreProxy.displayMerchantIFrame(gatewayUrl).mapErr((error) => {
       alert.error(
         error.message || "An error had happened while pulling merchant list",
       );
@@ -102,12 +102,12 @@ export function useMerchants(): IState {
     });
   }
 
-  function deauthorizeMerchant(merchantUrl: GatewayUrl) {
+  function deauthorizeMerchant(gatewayUrl: GatewayUrl) {
     dispatch({ type: EActionTypes.FETCHING });
     coreProxy
-      .deauthorizeMerchant(merchantUrl)
+      .deauthorizeMerchant(gatewayUrl)
       .map(() => {
-        alert.success(`Gateway ${merchantUrl} deauthorized successfully`);
+        alert.success(`Gateway ${gatewayUrl} deauthorized successfully`);
         fetchData();
       })
       .mapErr((error) => {
@@ -118,12 +118,12 @@ export function useMerchants(): IState {
       });
   }
 
-  function authorizeMerchant(merchantUrl: GatewayUrl) {
+  function authorizeMerchant(gatewayUrl: GatewayUrl) {
     dispatch({ type: EActionTypes.FETCHING });
     coreProxy
-      .authorizeMerchant(merchantUrl)
+      .authorizeMerchant(gatewayUrl)
       .map(() => {
-        alert.success(`Gateway ${merchantUrl} authorized successfully`);
+        alert.success(`Gateway ${gatewayUrl} authorized successfully`);
         fetchData();
       })
       .mapErr((error) => {

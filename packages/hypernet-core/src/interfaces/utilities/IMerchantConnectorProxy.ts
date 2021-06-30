@@ -22,7 +22,7 @@ import { ResultAsync } from "neverthrow";
 import { Observable } from "rxjs";
 
 export interface IMerchantConnectorProxy extends ParentProxy {
-  merchantUrl: GatewayUrl;
+  gatewayUrl: GatewayUrl;
 
   /**
    * activateProxy() sets up the merchant iframe and the communication

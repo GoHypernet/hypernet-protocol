@@ -10,9 +10,9 @@ export const AuthorizedGatewaysSchema = {
         type: "object",
         title: "AuthorizedMerchantItem",
         properties: {
-          merchantUrl: {
+          gatewayUrl: {
             type: "string",
-            title: "merchantUrl",
+            title: "gatewayUrl",
             maxLength: 500,
           },
           authorizationSignature: {

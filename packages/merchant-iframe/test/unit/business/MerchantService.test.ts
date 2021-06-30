@@ -28,14 +28,14 @@ class MerchantServiceMocks {
   public merchantConnectorRepository = td.object<IMerchantConnectorRepository>();
   public persistenceRepository = td.object<IPersistenceRepository>();
   public hypernetCoreRepository = td.object<IHypernetCoreRepository>();
-  public merchantUrl = GatewayUrl("http://localhost:5010");
+  public gatewayUrl = GatewayUrl("http://localhost:5010");
   public nowTime = 1487076708000;
   public signature = Signature(
     "0x236d12b38357dc30944bfe99ba9088f75b20caacb1f9166b680238f41968c02d44de2896897f116708a1317cec186a259166bf675a1fae85c85fcb5ec646ba5f1c",
   );
   public address = "0x14791697260E4c9A71f18484C9f997B308e59325";
   public merchantCode = "some code";
-  public contextProvider = new ContextProvider(this.merchantUrl);
+  public contextProvider = new ContextProvider(this.gatewayUrl);
 
   constructor() {
     Date.now = jest.fn(() => this.nowTime);
@@ -43,13 +43,13 @@ class MerchantServiceMocks {
 
   public runSuccessScenarios() {
     td.when(
-      this.merchantConnectorRepository.getMerchantSignature(this.merchantUrl),
+      this.merchantConnectorRepository.getMerchantSignature(this.gatewayUrl),
     ).thenReturn(okAsync(Signature(this.signature)));
     td.when(
-      this.merchantConnectorRepository.getMerchantAddress(this.merchantUrl),
+      this.merchantConnectorRepository.getMerchantAddress(this.gatewayUrl),
     ).thenReturn(okAsync(EthereumAddress(this.address)));
     td.when(
-      this.merchantConnectorRepository.getMerchantCode(this.merchantUrl),
+      this.merchantConnectorRepository.getMerchantCode(this.gatewayUrl),
     ).thenReturn(okAsync(this.merchantCode));
     td.when(
       this.persistenceRepository.addActivatedMerchantSignature(this.signature),
@@ -58,17 +58,17 @@ class MerchantServiceMocks {
 
   public runFailureScenarios() {
     td.when(
-      this.merchantConnectorRepository.getMerchantSignature(this.merchantUrl),
+      this.merchantConnectorRepository.getMerchantSignature(this.gatewayUrl),
     ).thenReturn(okAsync(Signature(this.signature)));
     td.when(
-      this.merchantConnectorRepository.getMerchantAddress(this.merchantUrl),
+      this.merchantConnectorRepository.getMerchantAddress(this.gatewayUrl),
     ).thenReturn(okAsync(EthereumAddress(this.address + "1")));
     td.when(
-      this.merchantConnectorRepository.getMerchantCode(this.merchantUrl),
+      this.merchantConnectorRepository.getMerchantCode(this.gatewayUrl),
     ).thenReturn(okAsync(this.merchantCode));
     td.when(
       this.merchantConnectorRepository.getMerchantCode(
-        GatewayUrl(this.merchantUrl + `?v=${this.nowTime}`),
+        GatewayUrl(this.gatewayUrl + `?v=${this.nowTime}`),
       ),
     ).thenReturn(okAsync(this.merchantCode));
   }

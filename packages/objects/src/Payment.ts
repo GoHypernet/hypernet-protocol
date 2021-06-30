@@ -20,7 +20,7 @@ export abstract class Payment {
     public createdTimestamp: UnixTimestamp,
     public updatedTimestamp: UnixTimestamp,
     public collateralRecovered: BigNumberString,
-    public merchantUrl: GatewayUrl,
+    public gatewayUrl: GatewayUrl,
     public details: PaymentInternalDetails,
     public metadata: string | null,
   ) {}

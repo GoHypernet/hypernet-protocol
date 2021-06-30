@@ -14,33 +14,33 @@ export class MerchantConnectorRepository
   constructor(protected ajaxUtils: IAjaxUtils) {}
 
   public getMerchantSignature(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<Signature, AjaxError> {
-    const url = this._prepareMerchantUrl(merchantUrl, "signature");
+    const url = this._prepareMerchantUrl(gatewayUrl, "signature");
     return this.ajaxUtils.get<Signature>(url).andThen((response) => {
       return okAsync(response);
     });
   }
   public getMerchantAddress(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<EthereumAddress, AjaxError> {
-    const url = this._prepareMerchantUrl(merchantUrl, "address");
+    const url = this._prepareMerchantUrl(gatewayUrl, "address");
     return this.ajaxUtils.get<EthereumAddress>(url).andThen((response) => {
       return okAsync(response);
     });
   }
 
   public getMerchantCode(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<string, AjaxError> {
-    const url = this._prepareMerchantUrl(merchantUrl, "connector");
+    const url = this._prepareMerchantUrl(gatewayUrl, "connector");
     return this.ajaxUtils.get<string>(url).andThen((response) => {
       return okAsync(response);
     });
   }
 
-  private _prepareMerchantUrl(merchantUrl: GatewayUrl, path: string): URL {
-    const merchantUrlObject = new URL(merchantUrl);
+  private _prepareMerchantUrl(gatewayUrl: GatewayUrl, path: string): URL {
+    const merchantUrlObject = new URL(gatewayUrl);
     const searchParams = {};
     for (const [key, value] of new URLSearchParams(
       merchantUrlObject.search,

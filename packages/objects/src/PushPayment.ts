@@ -21,7 +21,7 @@ export class PushPayment extends Payment {
     createdTimestamp: UnixTimestamp,
     updatedTimestamp: UnixTimestamp,
     collateralRecovered: BigNumberString,
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
     details: PaymentInternalDetails,
     metadata: string | null,
     public paymentAmount: BigNumberString,
@@ -39,7 +39,7 @@ export class PushPayment extends Payment {
       createdTimestamp,
       updatedTimestamp,
       collateralRecovered,
-      merchantUrl,
+      gatewayUrl,
       details,
       metadata,
     );

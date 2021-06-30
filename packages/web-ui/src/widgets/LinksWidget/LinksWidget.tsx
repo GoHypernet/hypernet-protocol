@@ -23,7 +23,7 @@ interface ISideFilter {
   id: string;
   from: string;
   to: string;
-  merchantUrl: string;
+  gatewayUrl: string;
   state: string;
   createdTimestampFrom: string;
   createdTimestampTo: string;
@@ -75,7 +75,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
       {
         label: "Search By Gateway URL",
         widgetType: EItemType.stringInput,
-        stateKey: "merchantUrl",
+        stateKey: "gatewayUrl",
       },
       {
         label: "Search By Payment State",
@@ -113,7 +113,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           pushPayment.id.includes(filter?.id || "") &&
           pushPayment.from.includes(filter?.from || "") &&
           pushPayment.to.includes(filter?.to || "") &&
-          pushPayment.merchantUrl.includes(filter?.merchantUrl || "") &&
+          pushPayment.gatewayUrl.includes(filter?.gatewayUrl || "") &&
           (filter?.state == null ||
             filter?.state === "all" ||
             pushPayment.state.toString() == filter?.state) &&
@@ -144,7 +144,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           pullPayment.id.includes(filter?.id || "") &&
           pullPayment.from.includes(filter?.from || "") &&
           pullPayment.to.includes(filter?.to || "") &&
-          pullPayment.merchantUrl.includes(filter?.merchantUrl || "") &&
+          pullPayment.gatewayUrl.includes(filter?.gatewayUrl || "") &&
           (filter?.state == null ||
             filter?.state === "all" ||
             pullPayment.state.toString() == filter?.state) &&

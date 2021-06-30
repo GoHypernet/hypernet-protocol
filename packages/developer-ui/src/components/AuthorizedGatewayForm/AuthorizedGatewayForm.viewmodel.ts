@@ -12,14 +12,14 @@ export class AuthorizedGatewayFormParams {
 
 // tslint:disable-next-line: max-classes-per-file
 export class AuthorizedGatewayFormViewModel {
-  public merchantUrl: ko.Observable<GatewayUrl>;
+  public gatewayUrl: ko.Observable<GatewayUrl>;
   public submitButton: ButtonParams;
 
   protected integration: IHypernetWebIntegration;
 
   constructor(params: AuthorizedGatewayFormParams) {
     this.integration = params.integration;
-    this.merchantUrl = ko.observable(
+    this.gatewayUrl = ko.observable(
       GatewayUrl("http://localhost:8080/hypernet_protocol/v0"),
     );
 
@@ -27,12 +27,12 @@ export class AuthorizedGatewayFormViewModel {
       "Authorize Gateway",
       async () => {
         return await this.integration.core.authorizeMerchant(
-          this.merchantUrl(),
+          this.gatewayUrl(),
         );
       },
       EButtonType.Normal,
       ko.pureComputed(() => {
-        return this.merchantUrl() !== "";
+        return this.gatewayUrl() !== "";
       }),
     );
   }

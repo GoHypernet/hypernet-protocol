@@ -8,7 +8,7 @@ import { BrowserNodeProvider } from "@implementations/utilities/BrowserNodeProvi
 import { IBrowserNode } from "@interfaces/utilities";
 import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
 import { IBrowserNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider";
-import { merchantUrl, account } from "@mock/mocks";
+import { gatewayUrl, account } from "@mock/mocks";
 import {
   BlockchainProviderMock,
   ConfigProviderMock,
@@ -46,7 +46,7 @@ class BrowserNodeProviderMocks {
   };
 
   public expectedSignerValue = {
-    authorizedGatewayUrl: merchantUrl,
+    authorizedGatewayUrl: gatewayUrl,
     merchantValidatedSignature: validatedSignature,
   };
 

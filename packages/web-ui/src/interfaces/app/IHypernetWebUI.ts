@@ -24,7 +24,7 @@ export interface IConnectorAuthorizationFlowParams extends IRenderParams {
 }
 
 export interface IOnboardingFlowParams extends IRenderParams {
-  merchantUrl: GatewayUrl;
+  gatewayUrl: GatewayUrl;
   merchantName?: string;
   merchantLogoUrl?: string;
   finalSuccessContent?: string;
@@ -37,7 +37,7 @@ export interface IRenderPaymentWidgetParams extends IRenderParams {
   expirationDate: number;
   requiredStake: string;
   paymentTokenAddress: EthereumAddress;
-  merchantUrl: GatewayUrl;
+  gatewayUrl: GatewayUrl;
   paymentType: EPaymentType;
 }
 

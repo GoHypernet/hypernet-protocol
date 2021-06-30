@@ -33,7 +33,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
   props: IOnboardingFlowParams,
 ) => {
   const {
-    merchantUrl,
+    gatewayUrl,
     finalSuccessContent = "You are good to go and purchase using your payment token",
     closeCallback = () => {},
     merchantName,
@@ -53,7 +53,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     setLoading(true);
     // First initialze the merchant
     coreProxy.getAuthorizedGateways().match((merchantsMap) => {
-      if (merchantsMap.get(merchantUrl)) {
+      if (merchantsMap.get(gatewayUrl)) {
         //check for balances
         coreProxy.getBalances().match((_balances) => {
           decideScreenWhenMerchantIsAlreadyAuthorized(
@@ -72,8 +72,8 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     }, handleError);
 
     coreProxy.onMerchantAuthorized.subscribe((_merchantUrl) => {
-      if (merchantUrl === _merchantUrl) {
-        alert.success(`Gateway ${merchantUrl} authorization succeeded!`);
+      if (gatewayUrl === _merchantUrl) {
+        alert.success(`Gateway ${gatewayUrl} authorization succeeded!`);
         setLoading(false);
         coreProxy.getBalances().match((_balances) => {
           decideScreenWhenMerchantIsAlreadyAuthorized(
@@ -84,8 +84,8 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     });
 
     coreProxy.onAuthorizedMerchantActivationFailed.subscribe((_merchantUrl) => {
-      if (merchantUrl === _merchantUrl) {
-        alert.error(`Gateway ${merchantUrl} authorization failed!`);
+      if (gatewayUrl === _merchantUrl) {
+        alert.error(`Gateway ${gatewayUrl} authorization failed!`);
         setLoading(false);
       }
     });
@@ -110,7 +110,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
 
   const handleMerchantAuthorization = () => {
     setLoading(true);
-    coreProxy.authorizeMerchant(merchantUrl).mapErr(handleError);
+    coreProxy.authorizeMerchant(gatewayUrl).mapErr(handleError);
   };
 
   const goToFundWalletScreen = () => {

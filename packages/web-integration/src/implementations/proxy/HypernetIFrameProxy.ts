@@ -299,7 +299,7 @@ export default class HypernetIFrameProxy
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this._createCall("sendFunds", {
       counterPartyAccount,
@@ -307,7 +307,7 @@ export default class HypernetIFrameProxy
       expirationDate,
       requiredStake: requiredStake,
       paymentToken,
-      merchantUrl,
+      gatewayUrl,
     });
   }
 
@@ -319,7 +319,7 @@ export default class HypernetIFrameProxy
     deltaTime: number,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this._createCall("authorizeFunds", {
       counterPartyAccount,
@@ -329,7 +329,7 @@ export default class HypernetIFrameProxy
       deltaTime,
       requiredStake: requiredStake,
       paymentToken,
-      merchantUrl,
+      gatewayUrl,
     });
   }
 
@@ -391,18 +391,18 @@ export default class HypernetIFrameProxy
   }
 
   public authorizeMerchant(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<void, MerchantValidationError> {
-    return this._createCall("authorizeMerchant", merchantUrl);
+    return this._createCall("authorizeMerchant", gatewayUrl);
   }
 
   public deauthorizeMerchant(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
     PersistenceError | ProxyError | MerchantAuthorizationDeniedError
   > {
-    return this._createCall("deauthorizeMerchant", merchantUrl);
+    return this._createCall("deauthorizeMerchant", gatewayUrl);
   }
 
   public getAuthorizedGateways(): ResultAsync<
@@ -420,17 +420,17 @@ export default class HypernetIFrameProxy
   }
 
   public displayMerchantIFrame(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError> {
     return this.getAuthorizedGatewaysConnectorsStatus().andThen(
       (merchantsMap) => {
-        if (merchantsMap.get(merchantUrl) == true) {
+        if (merchantsMap.get(gatewayUrl) == true) {
           this._displayCoreIFrame();
 
-          return this._createCall("displayMerchantIFrame", merchantUrl);
+          return this._createCall("displayMerchantIFrame", gatewayUrl);
         } else {
           alert(
-            `Gateway ${merchantUrl} is not activated at the moment, try again later`,
+            `Gateway ${gatewayUrl} is not activated at the moment, try again later`,
           );
           return okAsync(undefined);
         }
@@ -439,11 +439,11 @@ export default class HypernetIFrameProxy
   }
 
   public closeMerchantIFrame(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError> {
     this._closeCoreIFrame();
 
-    return this._createCall("closeMerchantIFrame", merchantUrl);
+    return this._createCall("closeMerchantIFrame", gatewayUrl);
   }
 
   public providePrivateCredentials(

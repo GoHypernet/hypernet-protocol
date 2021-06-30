@@ -28,7 +28,7 @@ const integration = new HypernetWebIntegration();
 
 integration.getReady().map((coreProxy) => {
     integration.webUIClient.startOnboardingFlow({
-        merchantUrl: merchantUrl,
+        gatewayUrl: gatewayUrl,
         finalSuccessContent: 'Awesome, you can buy credits with your crypto now!',
         showInModal: true,
     }).mapErr((err) => {

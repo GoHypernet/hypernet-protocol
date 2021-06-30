@@ -2,7 +2,7 @@ import { GatewayUrl } from "@hypernetlabs/objects";
 
 export class ExpectedRedirect {
   constructor(
-    public merchantUrl: GatewayUrl,
+    public gatewayUrl: GatewayUrl,
     public redirectParam: string,
     public paramValue: string,
   ) {}

@@ -7,12 +7,12 @@ import {
 import { ResultAsync } from "neverthrow";
 
 export interface IMerchantConnectorRepository {
-  getMerchantCode(merchantUrl: GatewayUrl): ResultAsync<string, AjaxError>;
+  getMerchantCode(gatewayUrl: GatewayUrl): ResultAsync<string, AjaxError>;
   getMerchantSignature(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<Signature, AjaxError>;
   getMerchantAddress(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<EthereumAddress, AjaxError>;
 }
 

@@ -36,7 +36,7 @@ export class MerchantConnectorService implements IMerchantConnectorService {
       // Subscribe to the various events, and sort them out for the merchant connector
       context.onPushPaymentSent.subscribe((payment) => {
         this.merchantConnectorRepository
-          .notifyPushPaymentSent(payment.merchantUrl, payment)
+          .notifyPushPaymentSent(payment.gatewayUrl, payment)
           .mapErr((e) => {
             this.logUtils.debug(e);
           });
@@ -44,7 +44,7 @@ export class MerchantConnectorService implements IMerchantConnectorService {
 
       context.onPushPaymentUpdated.subscribe((payment) => {
         this.merchantConnectorRepository
-          .notifyPushPaymentUpdated(payment.merchantUrl, payment)
+          .notifyPushPaymentUpdated(payment.gatewayUrl, payment)
           .mapErr((e) => {
             this.logUtils.debug(e);
           });
@@ -52,7 +52,7 @@ export class MerchantConnectorService implements IMerchantConnectorService {
 
       context.onPushPaymentReceived.subscribe((payment) => {
         this.merchantConnectorRepository
-          .notifyPushPaymentReceived(payment.merchantUrl, payment)
+          .notifyPushPaymentReceived(payment.gatewayUrl, payment)
           .mapErr((e) => {
             this.logUtils.debug(e);
           });
@@ -60,7 +60,7 @@ export class MerchantConnectorService implements IMerchantConnectorService {
 
       context.onPullPaymentSent.subscribe((payment) => {
         this.merchantConnectorRepository
-          .notifyPullPaymentSent(payment.merchantUrl, payment)
+          .notifyPullPaymentSent(payment.gatewayUrl, payment)
           .mapErr((e) => {
             this.logUtils.debug(e);
           });
@@ -68,7 +68,7 @@ export class MerchantConnectorService implements IMerchantConnectorService {
 
       context.onPullPaymentUpdated.subscribe((payment) => {
         this.merchantConnectorRepository
-          .notifyPullPaymentUpdated(payment.merchantUrl, payment)
+          .notifyPullPaymentUpdated(payment.gatewayUrl, payment)
           .mapErr((e) => {
             this.logUtils.debug(e);
           });
@@ -76,7 +76,7 @@ export class MerchantConnectorService implements IMerchantConnectorService {
 
       context.onPullPaymentReceived.subscribe((payment) => {
         this.merchantConnectorRepository
-          .notifyPullPaymentReceived(payment.merchantUrl, payment)
+          .notifyPullPaymentReceived(payment.gatewayUrl, payment)
           .mapErr((e) => {
             this.logUtils.debug(e);
           });
@@ -93,7 +93,7 @@ export class MerchantConnectorService implements IMerchantConnectorService {
   }
 
   public authorizeMerchant(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<void, MerchantValidationError> {
     return ResultUtils.combine([
       this.contextProvider.getContext(),
@@ -102,31 +102,31 @@ export class MerchantConnectorService implements IMerchantConnectorService {
     ]).map(async (vals) => {
       const [context, authorizedGatewaysMap, balances] = vals;
 
-      // Remove the merchant iframe proxy related to that merchantUrl if there is any activated ones.
-      if (authorizedGatewaysMap.get(merchantUrl)) {
-        this.merchantConnectorRepository.deauthorizeMerchant(merchantUrl);
+      // Remove the merchant iframe proxy related to that gatewayUrl if there is any activated ones.
+      if (authorizedGatewaysMap.get(gatewayUrl)) {
+        this.merchantConnectorRepository.deauthorizeMerchant(gatewayUrl);
       }
 
       this.merchantConnectorRepository
-        .addAuthorizedMerchant(merchantUrl, balances)
+        .addAuthorizedMerchant(gatewayUrl, balances)
         .map(() => {
-          context.onMerchantAuthorized.next(merchantUrl);
+          context.onMerchantAuthorized.next(gatewayUrl);
         });
     });
   }
 
   public deauthorizeMerchant(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
     PersistenceError | ProxyError | MerchantAuthorizationDeniedError
   > {
     return this.contextProvider.getContext().andThen((context) => {
-      context.onMerchantDeauthorizationStarted.next(merchantUrl);
+      context.onMerchantDeauthorizationStarted.next(gatewayUrl);
 
       return ResultUtils.race([
-        this._getDeauthorizationTimeoutResult(merchantUrl),
-        this.merchantConnectorRepository.deauthorizeMerchant(merchantUrl),
+        this._getDeauthorizationTimeoutResult(gatewayUrl),
+        this.merchantConnectorRepository.deauthorizeMerchant(gatewayUrl),
       ]);
     });
   }
@@ -161,25 +161,25 @@ export class MerchantConnectorService implements IMerchantConnectorService {
   }
 
   public closeMerchantIFrame(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError> {
-    return this.merchantConnectorRepository.closeMerchantIFrame(merchantUrl);
+    return this.merchantConnectorRepository.closeMerchantIFrame(gatewayUrl);
   }
 
   public displayMerchantIFrame(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError> {
-    return this.merchantConnectorRepository.displayMerchantIFrame(merchantUrl);
+    return this.merchantConnectorRepository.displayMerchantIFrame(gatewayUrl);
   }
 
   /* Destroy merchant connector if deauthorizeMerchant lasted more than merchantDeauthorizationTimeout */
   private _getDeauthorizationTimeoutResult(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<void, Error> {
     return this.configProvider.getConfig().andThen((config) => {
       const deauthorizationTimeoutPromise = new Promise<void>((resolve) => {
         setTimeout(() => {
-          this.merchantConnectorRepository.destroyProxy(merchantUrl);
+          this.merchantConnectorRepository.destroyProxy(gatewayUrl);
           resolve(undefined);
         }, config.merchantDeauthorizationTimeout);
       });

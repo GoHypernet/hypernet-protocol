@@ -8,13 +8,13 @@ export class AuthorizedGatewaysParams {
   constructor(public integration: IHypernetWebIntegration) {}
 }
 
-export class MerchantStatus {
-  constructor(public merchantUrl: GatewayUrl, public status: boolean) {}
+export class GatewayStatus {
+  constructor(public gatewayUrl: GatewayUrl, public status: boolean) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
 export class AuthorizedGatewaysViewModel {
-  public authorizedGateways: ko.ObservableArray<MerchantStatus>;
+  public authorizedGateways: ko.ObservableArray<GatewayStatus>;
 
   protected integration: IHypernetWebIntegration;
 
@@ -26,7 +26,7 @@ export class AuthorizedGatewaysViewModel {
     this.integration.core.onMerchantAuthorized.subscribe({
       next: (val) => {
         this.authorizedGateways.push(
-          new MerchantStatus(GatewayUrl(val.toString()), true),
+          new GatewayStatus(GatewayUrl(val.toString()), true),
         );
       },
     });
@@ -34,16 +34,16 @@ export class AuthorizedGatewaysViewModel {
     this.getAuthorizedGateways();
   }
 
-  openMerchantIFrameClick = (merchantStatus: MerchantStatus) => {
+  openMerchantIFrameClick = (merchantStatus: GatewayStatus) => {
     this.integration.core.waitInitialized().map(() => {
-      this.integration.displayMerchantIFrame(merchantStatus.merchantUrl);
+      this.integration.displayMerchantIFrame(merchantStatus.gatewayUrl);
     });
   };
 
-  deauthorizeMerchantClick = (merchantStatus: MerchantStatus) => {
+  deauthorizeMerchantClick = (merchantStatus: GatewayStatus) => {
     this.integration.core.waitInitialized().map(() => {
       this.integration.core
-        .deauthorizeMerchant(merchantStatus.merchantUrl)
+        .deauthorizeMerchant(merchantStatus.gatewayUrl)
         .map(() => {
           this.getAuthorizedGateways();
         });
@@ -57,9 +57,9 @@ export class AuthorizedGatewaysViewModel {
         return this.integration.core.getAuthorizedGatewaysConnectorsStatus();
       })
       .map((merchantsMap) => {
-        const merchantStrings = new Array<MerchantStatus>();
-        for (const [merchantUrl, status] of merchantsMap.entries()) {
-          merchantStrings.push(new MerchantStatus(merchantUrl, status));
+        const merchantStrings = new Array<GatewayStatus>();
+        for (const [gatewayUrl, status] of merchantsMap.entries()) {
+          merchantStrings.push(new GatewayStatus(gatewayUrl, status));
         }
         this.authorizedGateways(merchantStrings);
       });

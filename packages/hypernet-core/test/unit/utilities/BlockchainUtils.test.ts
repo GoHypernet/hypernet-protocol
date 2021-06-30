@@ -6,7 +6,7 @@ require("testdouble-jest")(td, jest);
 
 import { EthersBlockchainUtils } from "@implementations/utilities";
 import { IBlockchainUtils } from "@interfaces/utilities";
-import { merchantUrl } from "@mock/mocks";
+import { gatewayUrl } from "@mock/mocks";
 import { BlockchainProviderMock } from "@tests/mock/utils";
 
 const validatedSignature = "0xValidatedSignature";
@@ -24,7 +24,7 @@ const types = {
 };
 
 const value = {
-  authorizedGatewayUrl: merchantUrl,
+  authorizedGatewayUrl: gatewayUrl,
   merchantValidatedSignature: validatedSignature,
 };
 
@@ -85,7 +85,7 @@ describe("EthersBlockchainUtils tests", () => {
 
     // Act
     const value2 = {
-      authorizedGatewayUrl: merchantUrl,
+      authorizedGatewayUrl: gatewayUrl,
       merchantValidatedSignature: validatedSignature2,
     };
     const result = utils.verifyTypedData(

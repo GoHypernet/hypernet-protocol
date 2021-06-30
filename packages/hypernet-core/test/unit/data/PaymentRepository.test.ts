@@ -34,7 +34,7 @@ import {
   parameterizedTransferId,
   offerTransferId,
   insuranceTransferId,
-  merchantUrl,
+  gatewayUrl,
   erc20AssetAddress,
   merchantAddress,
 } from "@mock/mocks";
@@ -115,7 +115,7 @@ class PaymentRepositoryMocks {
           paymentAmount: commonAmount.toString(),
           expirationDate,
           paymentToken: erc20AssetAddress,
-          merchantUrl: merchantUrl,
+          gatewayUrl: gatewayUrl,
         }),
       ),
     ).thenReturn(
@@ -210,7 +210,7 @@ class PaymentRepositoryMocks {
       unixNow,
       unixNow,
       BigNumberString("0"),
-      merchantUrl,
+      gatewayUrl,
       paymentDetails,
       null,
       commonAmount,
@@ -255,7 +255,7 @@ describe("PaymentRepository tests", () => {
       expirationDate,
       commonAmount,
       erc20AssetAddress,
-      merchantUrl,
+      gatewayUrl,
       null,
     );
 
@@ -278,7 +278,7 @@ describe("PaymentRepository tests", () => {
       expirationDate,
       commonAmount,
       erc20AssetAddress,
-      merchantUrl,
+      gatewayUrl,
       null,
     );
     const error = result._unsafeUnwrapErr();

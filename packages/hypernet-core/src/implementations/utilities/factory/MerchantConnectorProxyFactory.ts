@@ -21,20 +21,20 @@ export class MerchantConnectorProxyFactory
   ) {}
 
   factoryProxy(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<IMerchantConnectorProxy, ProxyError> {
     let proxy: IMerchantConnectorProxy;
     return this.configProvider
       .getConfig()
       .andThen((config) => {
         const iframeUrl = new URL(config.merchantIframeUrl);
-        iframeUrl.searchParams.set("merchantUrl", merchantUrl);
+        iframeUrl.searchParams.set("gatewayUrl", gatewayUrl);
 
         proxy = new MerchantConnectorProxy(
           this._prepareIFrameContainer(),
           iframeUrl.toString(),
-          merchantUrl,
-          `hypernet-core-merchant-connector-iframe-${merchantUrl}`,
+          gatewayUrl,
+          `hypernet-core-merchant-connector-iframe-${gatewayUrl}`,
           this.contextProvider,
           config.debug,
         );

@@ -71,7 +71,7 @@ export class MerchantService implements IMerchantService {
     MerchantConnectorError | MerchantValidationError
   > {
     const context = this.contextProvider.getMerchantContext();
-    console.log(`Activating merchant connector for ${context.merchantUrl}`);
+    console.log(`Activating merchant connector for ${context.gatewayUrl}`);
     // If we don't have validated code, that's a problem.
     if (
       context.validatedMerchantCode == null ||
@@ -131,29 +131,29 @@ export class MerchantService implements IMerchantService {
     Signature,
     MerchantValidationError
   > {
-    // This is going to connect to the merchantUrl/connector and pull down the connector code.
-    // That code is expected to be signed, with the public key available at merchantUrl/address
+    // This is going to connect to the gatewayUrl/connector and pull down the connector code.
+    // That code is expected to be signed, with the public key available at gatewayUrl/address
     // The code will be cached in local storage but the signing key will be
     const context = this.contextProvider.getMerchantContext();
     let signature = Signature("");
     let address = EthereumAddress("");
 
     // If there is no merchant URL set, it's not an error
-    if (context.merchantUrl == "") {
+    if (context.gatewayUrl == "") {
       return okAsync(Signature(""));
     }
 
     return ResultUtils.combine([
       this.merchantConnectorRepository.getMerchantSignature(
-        context.merchantUrl,
+        context.gatewayUrl,
       ),
-      this.merchantConnectorRepository.getMerchantAddress(context.merchantUrl),
+      this.merchantConnectorRepository.getMerchantAddress(context.gatewayUrl),
     ])
       .andThen((vals) => {
         [signature, address] = vals;
 
         return this._validateMerchantConnectorCode(
-          context.merchantUrl,
+          context.gatewayUrl,
           signature,
           address,
         );
@@ -162,7 +162,7 @@ export class MerchantService implements IMerchantService {
         if (!MerchantService.merchantUrlCacheBusterUsed) {
           MerchantService.merchantUrlCacheBusterUsed = true;
           return this._validateMerchantConnectorCode(
-            context.merchantUrl,
+            context.gatewayUrl,
             signature,
             address,
             true,
@@ -181,13 +181,13 @@ export class MerchantService implements IMerchantService {
   }
 
   private _validateMerchantConnectorCode(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
     signature: Signature,
     address: EthereumAddress,
     useCacheBuster?: boolean,
   ): ResultAsync<Signature, MerchantValidationError | AjaxError> {
     // If there is no merchant URL set, it's not an error
-    if (merchantUrl == "") {
+    if (gatewayUrl == "") {
       return okAsync(Signature(""));
     }
 
@@ -197,7 +197,7 @@ export class MerchantService implements IMerchantService {
     }
 
     return this.merchantConnectorRepository
-      .getMerchantCode(GatewayUrl(merchantUrl + cacheBuster))
+      .getMerchantCode(GatewayUrl(gatewayUrl + cacheBuster))
       .andThen((merchantCode) => {
         const calculatedAddress = ethers.utils.verifyMessage(
           merchantCode,
@@ -231,7 +231,7 @@ export class MerchantService implements IMerchantService {
     // Register the redirect
     this.persistenceRepository.setExpectedRedirect(
       new ExpectedRedirect(
-        context.merchantUrl,
+        context.gatewayUrl,
         redirectInfo.redirectParam,
         redirectInfo.redirectValue,
       ),
@@ -269,13 +269,13 @@ export class MerchantService implements IMerchantService {
   }
 
   public getMerchantUrl(): ResultAsync<GatewayUrl, MerchantValidationError> {
-    // First, see if this is going to be easy. Normally a merchantUrl
+    // First, see if this is going to be easy. Normally a gatewayUrl
     // is provided as a param.
     const urlParams = new URLSearchParams(window.location.search);
-    const merchantUrl = urlParams.get("merchantUrl");
+    const gatewayUrl = urlParams.get("gatewayUrl");
 
-    if (merchantUrl != null) {
-      return okAsync(GatewayUrl(merchantUrl));
+    if (gatewayUrl != null) {
+      return okAsync(GatewayUrl(gatewayUrl));
     }
 
     // Can't do it the easy way; there is an alternative. If this is
@@ -292,12 +292,12 @@ export class MerchantService implements IMerchantService {
         const paramValue = urlParams.get(expectedRedirect.redirectParam);
 
         if (paramValue == expectedRedirect.paramValue) {
-          return okAsync(expectedRedirect.merchantUrl);
+          return okAsync(expectedRedirect.gatewayUrl);
         }
       }
     }
     return errAsync(
-      new MerchantValidationError("merchantUrl can not be determined!"),
+      new MerchantValidationError("gatewayUrl can not be determined!"),
     );
   }
 

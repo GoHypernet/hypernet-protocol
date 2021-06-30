@@ -13,10 +13,10 @@ import { ResultAsync } from "neverthrow";
 export interface IMerchantConnectorService {
   initialize(): ResultAsync<void, LogicalError | MerchantConnectorError>;
   authorizeMerchant(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<void, MerchantValidationError>;
   deauthorizeMerchant(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
     PersistenceError | ProxyError | MerchantAuthorizationDeniedError
@@ -38,9 +38,9 @@ export interface IMerchantConnectorService {
     | ProxyError
   >;
   closeMerchantIFrame(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError>;
   displayMerchantIFrame(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError>;
 }

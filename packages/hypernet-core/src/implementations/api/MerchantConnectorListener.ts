@@ -53,16 +53,16 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
     return this.contextProvider.getContext().map((context) => {
       context.onMerchantConnectorProxyActivated.subscribe((proxy) => {
         this.logUtils.debug(
-          `Gateway connector proxy activated ${proxy.merchantUrl}`,
+          `Gateway connector proxy activated ${proxy.gatewayUrl}`,
         );
 
-        this._advanceMerchantRelatedPayments(proxy.merchantUrl);
+        this._advanceMerchantRelatedPayments(proxy.gatewayUrl);
 
         // When the merchant iframe wants a message signed, we can do it.
         const signMessageRequestedSubscription = proxy.signMessageRequested.subscribe(
           (message) => {
             this.logUtils.debug(
-              `Gateway Connector ${proxy.merchantUrl} requested to sign message ${message}`,
+              `Gateway Connector ${proxy.gatewayUrl} requested to sign message ${message}`,
             );
 
             this.accountService
@@ -77,14 +77,14 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
         );
 
         this.signMessageRequestedSubscriptionMap.set(
-          proxy.merchantUrl,
+          proxy.gatewayUrl,
           signMessageRequestedSubscription,
         );
 
         const sendFundsRequestedSubscription = proxy.sendFundsRequested.subscribe(
           (request) => {
             this.logUtils.debug(
-              `Gateway Connector ${proxy.merchantUrl} requested to send funds to ${request.recipientPublicIdentifier}`,
+              `Gateway Connector ${proxy.gatewayUrl} requested to send funds to ${request.recipientPublicIdentifier}`,
             );
 
             // Validate some things
@@ -96,7 +96,7 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
                   request.expirationDate,
                   request.requiredStake,
                   request.paymentToken,
-                  proxy.merchantUrl,
+                  proxy.gatewayUrl,
                   request.metadata,
                 )
                 .mapErr((e) => {
@@ -104,21 +104,21 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
                 });
             } else {
               this.logUtils.error(
-                `Invalid ISendFundsRequest from merchant connector ${proxy.merchantUrl}`,
+                `Invalid ISendFundsRequest from merchant connector ${proxy.gatewayUrl}`,
               );
             }
           },
         );
 
         this.sendFundsRequestedSubscriptionMap.set(
-          proxy.merchantUrl,
+          proxy.gatewayUrl,
           sendFundsRequestedSubscription,
         );
 
         const authorizeFundsRequestedSubscription = proxy.authorizeFundsRequested.subscribe(
           (request) => {
             this.logUtils.debug(
-              `Gateway Connector ${proxy.merchantUrl} requested to authorize funds for ${request.recipientPublicIdentifier}`,
+              `Gateway Connector ${proxy.gatewayUrl} requested to authorize funds for ${request.recipientPublicIdentifier}`,
             );
 
             if (this.validateAuthorizeFundsRequest(request)) {
@@ -131,7 +131,7 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
                   request.deltaTime,
                   request.requiredStake,
                   request.paymentToken,
-                  proxy.merchantUrl,
+                  proxy.gatewayUrl,
                   request.metadata,
                 )
                 .mapErr((e) => {
@@ -139,40 +139,40 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
                 });
             } else {
               this.logUtils.error(
-                `Invalid IAuthorizeFundsRequest from merchant connector ${proxy.merchantUrl}`,
+                `Invalid IAuthorizeFundsRequest from merchant connector ${proxy.gatewayUrl}`,
               );
             }
           },
         );
 
         this.authorizeFundsRequestedSubscriptionMap.set(
-          proxy.merchantUrl,
+          proxy.gatewayUrl,
           authorizeFundsRequestedSubscription,
         );
       });
 
       // Stop listening for merchant connector events when merchant deauthorization starts
-      context.onMerchantDeauthorizationStarted.subscribe((merchantUrl) => {
+      context.onMerchantDeauthorizationStarted.subscribe((gatewayUrl) => {
         this.signMessageRequestedSubscriptionMap
-          .get(merchantUrl)
+          .get(gatewayUrl)
           ?.unsubscribe();
-        this.sendFundsRequestedSubscriptionMap.get(merchantUrl)?.unsubscribe();
+        this.sendFundsRequestedSubscriptionMap.get(gatewayUrl)?.unsubscribe();
         this.authorizeFundsRequestedSubscriptionMap
-          .get(merchantUrl)
+          .get(gatewayUrl)
           ?.unsubscribe();
       });
     });
   }
 
-  protected _advanceMerchantRelatedPayments(merchantUrl: GatewayUrl): void {
-    this.logUtils.debug(`Advancing payments for ${merchantUrl}`);
+  protected _advanceMerchantRelatedPayments(gatewayUrl: GatewayUrl): void {
+    this.logUtils.debug(`Advancing payments for ${gatewayUrl}`);
     this.linkService
       .getLinks()
       .map((links) => {
         const paymentIds = new Array<PaymentId>();
         for (const link of links) {
           for (const payment of link.payments) {
-            if (payment.merchantUrl === merchantUrl) {
+            if (payment.gatewayUrl === gatewayUrl) {
               paymentIds.push(payment.id);
             }
           }

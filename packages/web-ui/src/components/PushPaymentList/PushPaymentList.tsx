@@ -97,7 +97,7 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
           </IconButton>
         </TableCell>
         <TableCell component="th" scope="row">
-          {pushPayment.merchantUrl}
+          {pushPayment.gatewayUrl}
         </TableCell>
         <TableCell align="right">
           {viewUtils.fromBigNumberWei(pushPayment.paymentAmount)}
@@ -190,7 +190,7 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
                 "Updated",
                 dateUtils.fromTimestampToUI(pushPayment.updatedTimestamp),
               )}
-              {renderListItem("Gateway URL", pushPayment.merchantUrl)}
+              {renderListItem("Gateway URL", pushPayment.gatewayUrl)}
               {renderListItem(
                 "Payment Amount",
                 viewUtils.fromBigNumberWei(pushPayment.paymentAmount),

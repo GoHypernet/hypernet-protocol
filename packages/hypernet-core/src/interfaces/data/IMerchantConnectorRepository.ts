@@ -23,16 +23,16 @@ export interface IMerchantConnectorRepository {
    * Returns a map of merchant URLs to their address
    */
   getMerchantAddresses(
-    merchantUrl: GatewayUrl[],
+    gatewayUrl: GatewayUrl[],
   ): ResultAsync<Map<GatewayUrl, EthereumAddress>, LogicalError>;
 
   /**
    * Adds the merchant url as authorized with a particular signature
-   * @param merchantUrl
+   * @param gatewayUrl
    * @param signature
    */
   addAuthorizedMerchant(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
     initialBalances: Balances,
   ): ResultAsync<
     void,
@@ -46,10 +46,10 @@ export interface IMerchantConnectorRepository {
 
   /**
    * Deauthorizes a merchant, which will also destroy their proxy.
-   * @param merchantUrl
+   * @param gatewayUrl
    */
   deauthorizeMerchant(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
     PersistenceError | ProxyError | MerchantAuthorizationDeniedError
@@ -76,7 +76,7 @@ export interface IMerchantConnectorRepository {
   activateAuthorizedGateways(balances: Balances): ResultAsync<void, never>;
 
   resolveChallenge(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
     paymentId: PaymentId,
     transferId: TransferId,
   ): ResultAsync<
@@ -85,36 +85,36 @@ export interface IMerchantConnectorRepository {
   >;
 
   closeMerchantIFrame(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError>;
   displayMerchantIFrame(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError>;
 
-  destroyProxy(merchantUrl: GatewayUrl): void;
+  destroyProxy(gatewayUrl: GatewayUrl): void;
 
   notifyPushPaymentSent(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
     payment: PushPayment,
   ): ResultAsync<void, MerchantConnectorError>;
   notifyPushPaymentUpdated(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
     payment: PushPayment,
   ): ResultAsync<void, MerchantConnectorError>;
   notifyPushPaymentReceived(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
     payment: PushPayment,
   ): ResultAsync<void, MerchantConnectorError>;
   notifyPullPaymentSent(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
     payment: PullPayment,
   ): ResultAsync<void, MerchantConnectorError>;
   notifyPullPaymentUpdated(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
     payment: PullPayment,
   ): ResultAsync<void, MerchantConnectorError>;
   notifyPullPaymentReceived(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
     payment: PullPayment,
   ): ResultAsync<void, MerchantConnectorError>;
   notifyBalancesReceived(
@@ -123,7 +123,7 @@ export interface IMerchantConnectorRepository {
 }
 
 export interface IAuthorizedMerchantEntry {
-  merchantUrl: GatewayUrl;
+  gatewayUrl: GatewayUrl;
   authorizationSignature: string;
 }
 

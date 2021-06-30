@@ -14,7 +14,7 @@ export interface IHypernetOfferDetails extends IMessageTransferData {
   from: PublicIdentifier;
   requiredStake: BigNumberString;
   paymentAmount: BigNumberString;
-  merchantUrl: GatewayUrl;
+  gatewayUrl: GatewayUrl;
   paymentToken: EthereumAddress;
   expirationDate: UnixTimestamp;
   metadata: string | null;

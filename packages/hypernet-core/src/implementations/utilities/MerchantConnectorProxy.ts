@@ -35,7 +35,7 @@ export class MerchantConnectorProxy
   constructor(
     protected element: HTMLElement | null,
     protected iframeUrl: string,
-    public merchantUrl: GatewayUrl,
+    public gatewayUrl: GatewayUrl,
     protected iframeName: string,
     protected contextProvider: IContextProvider,
     protected debug: boolean = false,
@@ -114,19 +114,19 @@ export class MerchantConnectorProxy
 
       // Events coming from merchant connector iframe
       this.child?.on("displayRequested", () => {
-        this._pushOpenedMerchantIFrame(this.merchantUrl);
+        this._pushOpenedMerchantIFrame(this.gatewayUrl);
         this._showMerchantIFrame(context);
       });
 
       this.child?.on("closeRequested", () => {
         // Only hide the merchant iframe if it's really displayed in the screen
-        if (MerchantConnectorProxy.openedIFramesQueue[0] === this.merchantUrl) {
+        if (MerchantConnectorProxy.openedIFramesQueue[0] === this.gatewayUrl) {
           this._hideMerchantIFrame();
         }
 
         // Only close the core iframe if there isn't any merchant iframe left in the queue, otherwise show the next one in the line
         if (MerchantConnectorProxy.openedIFramesQueue.length === 0) {
-          context.onMerchantIFrameCloseRequested.next(this.merchantUrl);
+          context.onMerchantIFrameCloseRequested.next(this.gatewayUrl);
         } else {
           this._showMerchantIFrame(context);
         }
@@ -155,10 +155,10 @@ export class MerchantConnectorProxy
     MerchantConnectorError | ProxyError
   > {
     return this.contextProvider.getContext().andThen((context) => {
-      this._pushOpenedMerchantIFrame(this.merchantUrl);
+      this._pushOpenedMerchantIFrame(this.gatewayUrl);
       this._showMerchantIFrame(context);
 
-      return this._createCall("merchantIFrameDisplayed", this.merchantUrl);
+      return this._createCall("merchantIFrameDisplayed", this.gatewayUrl);
     });
   }
 
@@ -175,7 +175,7 @@ export class MerchantConnectorProxy
       }
 
       // notify the child in merchant connector to tell him that the merchant iframe is going to close up.
-      return this._createCall("merchantIFrameClosed", this.merchantUrl);
+      return this._createCall("merchantIFrameClosed", this.gatewayUrl);
     });
   }
 
@@ -234,16 +234,16 @@ export class MerchantConnectorProxy
     return this._createCall("messageSigned", { message, signature });
   }
 
-  private _pushOpenedMerchantIFrame(merchantUrl: GatewayUrl) {
-    // Check if there is merchantUrl in the queue
+  private _pushOpenedMerchantIFrame(gatewayUrl: GatewayUrl) {
+    // Check if there is gatewayUrl in the queue
     // If there is, don't re-add it.
     const index = MerchantConnectorProxy.openedIFramesQueue.indexOf(
-      merchantUrl,
+      gatewayUrl,
     );
     if (index > -1) {
       return;
     }
-    MerchantConnectorProxy.openedIFramesQueue.push(merchantUrl);
+    MerchantConnectorProxy.openedIFramesQueue.push(gatewayUrl);
   }
 
   private _showMerchantIFrame(context: HypernetContext) {

@@ -24,14 +24,14 @@ ref?.parentNode?.insertBefore(style, ref);
 Spinner();
 Spinner.show();
 
-const merchantUrl = GatewayUrl("http://localhost:5010");
+const gatewayUrl = GatewayUrl("http://localhost:5010");
 
 client
   .getReady()
   .map((coreProxy) => {
     client.webUIClient
       .startOnboardingFlow({
-        merchantUrl: merchantUrl,
+        gatewayUrl: gatewayUrl,
         finalSuccessContent:
           'You are good to go now and purchase credits from <a href="http://localhost:9000/settings/credits">here</a>',
         showInModal: true,

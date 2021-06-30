@@ -232,7 +232,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
             expirationDate={config?.expirationDate}
             requiredStake={config?.requiredStake}
             paymentTokenAddress={config?.paymentTokenAddress}
-            merchantUrl={config?.merchantUrl}
+            gatewayUrl={config?.gatewayUrl}
             paymentType={config?.paymentType}
           />,
           config?.showInModal,
@@ -290,7 +290,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
       return ReactDOM.render(
         this._bootstrapComponent(
           <OnboardingFlow
-            merchantUrl={config.merchantUrl}
+            gatewayUrl={config.gatewayUrl}
             merchantName={config.merchantName}
             merchantLogoUrl={config.merchantLogoUrl}
             finalSuccessContent={config.finalSuccessContent}

@@ -21,7 +21,7 @@ interface PaymentWidgetProps {
   expirationDate?: number;
   requiredStake?: string;
   paymentTokenAddress?: EthereumAddress;
-  merchantUrl?: GatewayUrl;
+  gatewayUrl?: GatewayUrl;
   paymentType?: EPaymentType;
 }
 

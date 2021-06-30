@@ -100,10 +100,10 @@ export class MerchantIframe {
       .andThen(() => {
         return this.merchantService.getMerchantUrl();
       })
-      .andThen((merchantUrl) => {
+      .andThen((gatewayUrl) => {
         // Set the merchant url
         const context = this.contextProvider.getMerchantContext();
-        context.merchantUrl = merchantUrl;
+        context.gatewayUrl = gatewayUrl;
         this.contextProvider.setMerchantContext(context);
 
         // Start the Hypernet Core listener API up

@@ -5,7 +5,7 @@ import { IMerchantConnectorProxy } from "@interfaces/utilities";
 
 export interface IMerchantConnectorProxyFactory {
   factoryProxy(
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<IMerchantConnectorProxy, ProxyError>;
 }
 

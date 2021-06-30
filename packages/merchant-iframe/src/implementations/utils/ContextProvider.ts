@@ -16,13 +16,13 @@ export class ContextProvider implements IContextProvider {
   protected connectorValidatedResolve: (() => void) | undefined;
   protected connectorValidatedReject: ((e: unknown) => void) | undefined;
 
-  constructor(merchantUrl: GatewayUrl) {
+  constructor(gatewayUrl: GatewayUrl) {
     const connectorValidatedPromise = new Promise<void>((resolve, reject) => {
       this.connectorValidatedResolve = resolve;
       this.connectorValidatedReject = reject;
     });
     this.context = new MerchantContext(
-      merchantUrl,
+      gatewayUrl,
       new Subject(),
       new Subject(),
       null,

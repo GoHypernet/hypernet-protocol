@@ -32,7 +32,7 @@ import {
 } from "@interfaces/data";
 import {
   defaultExpirationLength,
-  merchantUrl,
+  gatewayUrl,
   hyperTokenAddress,
   insuranceTransferId,
   mockUtils,
@@ -116,7 +116,7 @@ class PaymentServiceMocks {
         expirationDate,
         requiredStake,
         paymentToken,
-        merchantUrl,
+        gatewayUrl,
         null,
       ),
     ).thenReturn(okAsync(this.proposedPushPayment));
@@ -158,27 +158,27 @@ class PaymentServiceMocks {
     );
 
     this.merchantAddresses = new Map();
-    this.merchantAddresses.set(merchantUrl, account);
+    this.merchantAddresses.set(gatewayUrl, account);
     td.when(
       this.merchantConnectorRepository.getMerchantAddresses(
-        td.matchers.contains(merchantUrl),
+        td.matchers.contains(gatewayUrl),
       ),
     ).thenReturn(okAsync(this.merchantAddresses));
 
     td.when(
       this.merchantConnectorRepository.getAuthorizedGateways(),
-    ).thenReturn(okAsync(new Map([[merchantUrl, validatedSignature]])));
+    ).thenReturn(okAsync(new Map([[gatewayUrl, validatedSignature]])));
 
     td.when(
       this.merchantConnectorRepository.addAuthorizedMerchant(
-        merchantUrl,
+        gatewayUrl,
         new Balances([this.assetBalance]),
       ),
     ).thenReturn(okAsync(undefined));
 
     td.when(
       this.merchantConnectorRepository.getAuthorizedGatewaysConnectorsStatus(),
-    ).thenReturn(okAsync(new Map([[merchantUrl, true]])));
+    ).thenReturn(okAsync(new Map([[gatewayUrl, true]])));
 
     td.when(
       this.paymentRepository.resolveInsurance(paymentId, insuranceTransferId),
@@ -211,10 +211,10 @@ class PaymentServiceMocks {
     ).thenReturn(okAsync(returnedPaymentsMap));
   }
 
-  public setMerchantStatus(merchantUrl: GatewayUrl, status: boolean) {
+  public setGatewayStatus(gatewayUrl: GatewayUrl, status: boolean) {
     td.when(
       this.merchantConnectorRepository.getAuthorizedGatewaysConnectorsStatus(),
-    ).thenReturn(okAsync(new Map([[merchantUrl, false]])));
+    ).thenReturn(okAsync(new Map([[gatewayUrl, false]])));
   }
 
   public factoryPushPayment(
@@ -235,7 +235,7 @@ class PaymentServiceMocks {
       unixNow,
       unixNow,
       BigNumberString("0"),
-      merchantUrl,
+      gatewayUrl,
       paymentDetails,
       null,
       amount,
@@ -261,7 +261,7 @@ class PaymentServiceMocks {
       unixNow,
       unixNow,
       BigNumberString("0"),
-      merchantUrl,
+      gatewayUrl,
       paymentDetails,
       null,
       amount,
@@ -288,7 +288,7 @@ describe("PaymentService tests", () => {
       expirationDate,
       requiredStake,
       paymentToken,
-      merchantUrl,
+      gatewayUrl,
       null,
     );
 
@@ -717,7 +717,7 @@ describe("PaymentService tests", () => {
       publicIdentifier,
     );
     paymentServiceMock.setExistingPayments([payment]);
-    paymentServiceMock.setMerchantStatus(merchantUrl, false);
+    paymentServiceMock.setGatewayStatus(gatewayUrl, false);
     paymentServiceMock.contextProvider.context.publicIdentifier = publicIdentifier;
 
     const delayedPushPayments = new Array<PushPayment>();

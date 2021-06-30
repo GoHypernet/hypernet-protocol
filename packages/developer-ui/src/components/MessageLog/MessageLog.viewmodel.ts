@@ -17,7 +17,7 @@
 //     this.consumer = this.link().consumer;
 //     this.provider = this.link().provider;
 //     this.paymentToken = this.link().paymentToken;
-//     this.merchantUrl = this.link().merchantUrl;
+//     this.gatewayUrl = this.link().gatewayUrl;
 
 //     this.consumerTotalDeposit = ko.pureComputed(() => {
 //       return this.link().consumerTotalDeposit;

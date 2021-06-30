@@ -120,7 +120,7 @@ export class PaymentRepository implements IPaymentRepository {
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PullPayment, PaymentCreationError> {
     return ResultUtils.combine([
@@ -143,7 +143,7 @@ export class PaymentRepository implements IPaymentRepository {
           paymentAmount: maximumAmount,
           expirationDate,
           paymentToken,
-          merchantUrl,
+          gatewayUrl,
           metadata,
           rate: {
             deltaAmount,
@@ -177,7 +177,7 @@ export class PaymentRepository implements IPaymentRepository {
    * @param expirationDate the date (in unix time) at which point the payment will expire & revert
    * @param requiredStake the amount of insurance the counterparty must put up for this payment
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayUrl the registered URL for the merchant that will resolve any disputes.
    */
   public createPushPayment(
     counterPartyAccount: PublicIdentifier,
@@ -185,7 +185,7 @@ export class PaymentRepository implements IPaymentRepository {
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError> {
     let browserNode: IBrowserNode;
@@ -212,7 +212,7 @@ export class PaymentRepository implements IPaymentRepository {
           paymentAmount: amount,
           expirationDate: expirationDate,
           paymentToken,
-          merchantUrl,
+          gatewayUrl,
           metadata,
           requireOnline: true,
         };

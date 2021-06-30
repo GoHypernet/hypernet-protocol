@@ -104,13 +104,13 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
       }
     >
       <List>
-        {[...merchantsMap.keys()].map((merchantUrl, index) => (
+        {[...merchantsMap.keys()].map((gatewayUrl, index) => (
           <Box key={index}>
             <ListItem>
               <ListItemAvatar>
                 <Tooltip
                   title={
-                    merchantsMap.get(merchantUrl)
+                    merchantsMap.get(gatewayUrl)
                       ? "View merchant application"
                       : "Gateway is inactive"
                   }
@@ -118,35 +118,35 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
                 >
                   <Avatar
                     style={{
-                      cursor: merchantsMap.get(merchantUrl)
+                      cursor: merchantsMap.get(gatewayUrl)
                         ? "pointer"
                         : "auto",
                     }}
                     onClick={() => {
-                      merchantsMap.get(merchantUrl) &&
-                        openMerchantIFrame(merchantUrl);
+                      merchantsMap.get(gatewayUrl) &&
+                        openMerchantIFrame(gatewayUrl);
                     }}
                   >
-                    {merchantsMap.get(merchantUrl) ? <Folder /> : <Block />}
+                    {merchantsMap.get(gatewayUrl) ? <Folder /> : <Block />}
                   </Avatar>
                 </Tooltip>
               </ListItemAvatar>
               <ListItemText
                 primaryTypographyProps={{
-                  color: merchantsMap.get(merchantUrl)
+                  color: merchantsMap.get(gatewayUrl)
                     ? "textPrimary"
                     : "textSecondary",
                 }}
                 primary={
                   <Tooltip
-                    title={merchantUrl}
-                    disableHoverListener={merchantUrl.length <= 36}
+                    title={gatewayUrl}
+                    disableHoverListener={gatewayUrl.length <= 36}
                     placement="top"
                   >
                     <Box>
-                      {merchantUrl.length > 36
-                        ? `${merchantUrl.substr(0, 36)}...`
-                        : merchantUrl}
+                      {gatewayUrl.length > 36
+                        ? `${gatewayUrl.substr(0, 36)}...`
+                        : gatewayUrl}
                     </Box>
                   </Tooltip>
                 }
@@ -156,7 +156,7 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
                   size="small"
                   color="secondary"
                   onClick={() => {
-                    deauthorizeMerchant(merchantUrl);
+                    deauthorizeMerchant(gatewayUrl);
                   }}
                 >
                   Deauthorize

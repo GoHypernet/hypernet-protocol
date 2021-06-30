@@ -17,15 +17,15 @@ class MerchantConnectorServiceMocks {
   public contextProvider = new ContextProviderMock();
   public configProvider = new ConfigProviderMock();
   public logUtils = td.object<ILogUtils>();
-  public merchantUrl = GatewayUrl("http://localhost:5010");
+  public gatewayUrl = GatewayUrl("http://localhost:5010");
 
   constructor() {
     td.when(
-      this.merchantConnectorRepository.deauthorizeMerchant(this.merchantUrl),
+      this.merchantConnectorRepository.deauthorizeMerchant(this.gatewayUrl),
     ).thenReturn(okAsync(undefined));
 
     td.when(
-      this.merchantConnectorRepository.destroyProxy(this.merchantUrl),
+      this.merchantConnectorRepository.destroyProxy(this.gatewayUrl),
     ).thenReturn(undefined);
   }
 
@@ -49,7 +49,7 @@ describe("MerchantConnectorService tests", () => {
 
     // Act
     const response = await merchantConnectorService.deauthorizeMerchant(
-      merchantConnectorServiceMock.merchantUrl,
+      merchantConnectorServiceMock.gatewayUrl,
     );
 
     // Indicator for the deauthorization timeout method
@@ -72,7 +72,7 @@ describe("MerchantConnectorService tests", () => {
 
     td.when(
       merchantConnectorServiceMock.merchantConnectorRepository.deauthorizeMerchant(
-        merchantConnectorServiceMock.merchantUrl,
+        merchantConnectorServiceMock.gatewayUrl,
       ),
     ).thenReturn(
       new Promise((resolve, reject) =>
@@ -82,7 +82,7 @@ describe("MerchantConnectorService tests", () => {
 
     // Act
     const response = await merchantConnectorService.deauthorizeMerchant(
-      merchantConnectorServiceMock.merchantUrl,
+      merchantConnectorServiceMock.gatewayUrl,
     );
 
     // Indicator for the deauthorization timeout method

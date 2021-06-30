@@ -24,7 +24,7 @@ export class PullPayment extends Payment {
     createdTimestamp: UnixTimestamp,
     updatedTimestamp: UnixTimestamp,
     collateralRecovered: BigNumberString,
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
     details: PaymentInternalDetails,
     metadata: string | null,
     public authorizedAmount: BigNumberString,
@@ -46,7 +46,7 @@ export class PullPayment extends Payment {
       createdTimestamp,
       updatedTimestamp,
       collateralRecovered,
-      merchantUrl,
+      gatewayUrl,
       details,
       metadata,
     );

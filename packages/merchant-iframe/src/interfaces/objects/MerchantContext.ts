@@ -11,7 +11,7 @@ import { Subject } from "rxjs";
 
 export class MerchantContext {
   constructor(
-    public merchantUrl: GatewayUrl,
+    public gatewayUrl: GatewayUrl,
     public onMerchantConnectorActivated: Subject<IMerchantConnector>,
     public onHypernetCoreProxyActivated: Subject<Postmate.ChildAPI>,
     public validatedMerchantCode: string | null,

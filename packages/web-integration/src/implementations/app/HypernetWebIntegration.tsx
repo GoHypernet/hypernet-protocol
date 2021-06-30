@@ -26,8 +26,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       "hypernet-core-iframe",
     );
 
-    this.core.onMerchantIFrameDisplayRequested.subscribe((merchantUrl) => {
-      this.currentMerchantUrl = merchantUrl;
+    this.core.onMerchantIFrameDisplayRequested.subscribe((gatewayUrl) => {
+      this.currentMerchantUrl = gatewayUrl;
     });
 
     if (window.hypernetWebUIInstance) {
@@ -86,12 +86,12 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     return HypernetWebIntegration.instance;
   }
 
-  public displayMerchantIFrame(merchantUrl: GatewayUrl): void {
-    this.core.displayMerchantIFrame(merchantUrl);
+  public displayMerchantIFrame(gatewayUrl: GatewayUrl): void {
+    this.core.displayMerchantIFrame(gatewayUrl);
   }
 
-  public closeMerchantIFrame(merchantUrl: GatewayUrl): void {
-    this.core.closeMerchantIFrame(merchantUrl);
+  public closeMerchantIFrame(gatewayUrl: GatewayUrl): void {
+    this.core.closeMerchantIFrame(gatewayUrl);
   }
 
   private _prepareIFrameContainer(): HTMLElement {

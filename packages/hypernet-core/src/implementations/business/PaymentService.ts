@@ -100,7 +100,7 @@ export class PaymentService implements IPaymentService {
    * @param deltaTime the number of seconds after which deltaAmount will be authorized, up to the limit of totalAuthorized.
    * @param requiredStake the amount of stake the counterparyt must put up as insurance
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayUrl the registered URL for the merchant that will resolve any disputes.
    */
   public authorizeFunds(
     counterPartyAccount: PublicIdentifier,
@@ -110,7 +110,7 @@ export class PaymentService implements IPaymentService {
     deltaTime: number,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PullPayment, PaymentCreationError | LogicalError> {
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
@@ -125,7 +125,7 @@ export class PaymentService implements IPaymentService {
         expirationDate,
         requiredStake,
         paymentToken,
-        merchantUrl,
+        gatewayUrl,
         metadata,
       ),
       this.contextProvider.getContext(),
@@ -197,7 +197,7 @@ export class PaymentService implements IPaymentService {
    * @param expirationDate the expiration date at which point this payment will revert
    * @param requiredStake the amount of insurance the counterparty should put up
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayUrl the registered URL for the merchant that will resolve any disputes.
    */
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
@@ -205,7 +205,7 @@ export class PaymentService implements IPaymentService {
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: GatewayUrl,
+    gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError | LogicalError> {
     // TODO: Sanity checking on the values
@@ -216,7 +216,7 @@ export class PaymentService implements IPaymentService {
         expirationDate,
         requiredStake,
         paymentToken,
-        merchantUrl,
+        gatewayUrl,
         metadata,
       ),
       this.contextProvider.getContext(),
@@ -313,7 +313,7 @@ export class PaymentService implements IPaymentService {
         // Iterate over the payments, and find all the merchant URLs.
 
         for (const keyval of payments) {
-          merchantUrls.add(keyval[1].merchantUrl);
+          merchantUrls.add(keyval[1].gatewayUrl);
         }
 
         return ResultUtils.combine([
@@ -373,7 +373,7 @@ export class PaymentService implements IPaymentService {
           );
 
           // We need to get the public key of the merchant for the payment
-          const merchantAddress = addresses.get(payment.merchantUrl);
+          const merchantAddress = addresses.get(payment.gatewayUrl);
 
           if (merchantAddress != null) {
             const stakeAttempt = this.paymentRepository
@@ -637,7 +637,7 @@ export class PaymentService implements IPaymentService {
 
         // Resolve the dispute
         return this.merchantConnectorRepository.resolveChallenge(
-          payment.merchantUrl,
+          payment.gatewayUrl,
           paymentId,
           payment.details.insuranceTransferId,
         );
@@ -772,7 +772,7 @@ export class PaymentService implements IPaymentService {
       .getAuthorizedGatewaysConnectorsStatus()
       .andThen((merchantConnectorStatusMap) => {
         const merchantConnectorStatus = merchantConnectorStatusMap.get(
-          payment.merchantUrl,
+          payment.gatewayUrl,
         );
         this.logUtils.debug(
           `In _advancePayment, merchantConnectorStatus = ${

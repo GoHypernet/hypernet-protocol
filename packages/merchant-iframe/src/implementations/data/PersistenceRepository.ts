@@ -59,7 +59,7 @@ export class PersistenceRepository implements IPersistenceRepository {
     const redirect = JSON.parse(redirectStr);
 
     return new ExpectedRedirect(
-      redirect.merchantUrl as GatewayUrl,
+      redirect.gatewayUrl as GatewayUrl,
       redirect.redirectParam,
       redirect.paramValue,
     );
