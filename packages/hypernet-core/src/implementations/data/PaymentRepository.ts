@@ -11,7 +11,7 @@ import {
   IFullTransferState,
   IBasicTransferResponse,
   PaymentId,
-  MerchantUrl,
+  GatewayUrl,
   TransferId,
   LogicalError,
   PaymentFinalizeError,
@@ -120,7 +120,7 @@ export class PaymentRepository implements IPaymentRepository {
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PullPayment, PaymentCreationError> {
     return ResultUtils.combine([
@@ -185,7 +185,7 @@ export class PaymentRepository implements IPaymentRepository {
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError> {
     let browserNode: IBrowserNode;

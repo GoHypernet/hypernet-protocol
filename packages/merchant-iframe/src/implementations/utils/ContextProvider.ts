@@ -1,6 +1,6 @@
 import {
   Signature,
-  MerchantUrl,
+  GatewayUrl,
   MerchantValidationError,
 } from "@hypernetlabs/objects";
 import { MerchantContext } from "@merchant-iframe/interfaces/objects";
@@ -16,7 +16,7 @@ export class ContextProvider implements IContextProvider {
   protected connectorValidatedResolve: (() => void) | undefined;
   protected connectorValidatedReject: ((e: unknown) => void) | undefined;
 
-  constructor(merchantUrl: MerchantUrl) {
+  constructor(merchantUrl: GatewayUrl) {
     const connectorValidatedPromise = new Promise<void>((resolve, reject) => {
       this.connectorValidatedResolve = resolve;
       this.connectorValidatedReject = reject;

@@ -6,7 +6,7 @@ import {
   ProxyError,
   PersistenceError,
   MerchantAuthorizationDeniedError,
-  MerchantUrl,
+  GatewayUrl,
   Signature,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
@@ -93,7 +93,7 @@ export class MerchantConnectorService implements IMerchantConnectorService {
   }
 
   public authorizeMerchant(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<void, MerchantValidationError> {
     return ResultUtils.combine([
       this.contextProvider.getContext(),
@@ -116,7 +116,7 @@ export class MerchantConnectorService implements IMerchantConnectorService {
   }
 
   public deauthorizeMerchant(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<
     void,
     PersistenceError | ProxyError | MerchantAuthorizationDeniedError
@@ -132,14 +132,14 @@ export class MerchantConnectorService implements IMerchantConnectorService {
   }
 
   public getAuthorizedMerchants(): ResultAsync<
-    Map<MerchantUrl, Signature>,
+    Map<GatewayUrl, Signature>,
     PersistenceError
   > {
     return this.merchantConnectorRepository.getAuthorizedMerchants();
   }
 
   public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
-    Map<MerchantUrl, boolean>,
+    Map<GatewayUrl, boolean>,
     PersistenceError
   > {
     return this.merchantConnectorRepository.getAuthorizedMerchantsConnectorsStatus();
@@ -161,20 +161,20 @@ export class MerchantConnectorService implements IMerchantConnectorService {
   }
 
   public closeMerchantIFrame(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError> {
     return this.merchantConnectorRepository.closeMerchantIFrame(merchantUrl);
   }
 
   public displayMerchantIFrame(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError> {
     return this.merchantConnectorRepository.displayMerchantIFrame(merchantUrl);
   }
 
   /* Destroy merchant connector if deauthorizeMerchant lasted more than merchantDeauthorizationTimeout */
   private _getDeauthorizationTimeoutResult(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<void, Error> {
     return this.configProvider.getConfig().andThen((config) => {
       const deauthorizationTimeoutPromise = new Promise<void>((resolve) => {

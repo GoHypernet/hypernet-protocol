@@ -2,7 +2,7 @@ import {
   Balances,
   PublicIdentifier,
   EPaymentType,
-  MerchantUrl,
+  GatewayUrl,
   UnixTimestamp,
   BigNumberString,
 } from "@hypernetlabs/objects";
@@ -50,7 +50,7 @@ interface IReducerStateReducer {
   setRequiredStake: (param?: string) => void;
   paymentType: EPaymentType;
   setPaymentType: (param?: EPaymentType) => void;
-  merchantUrl: MerchantUrl;
+  merchantUrl: GatewayUrl;
   sendFunds: () => void;
   paymentTypeOptions: PaymentTypeOption[];
 }
@@ -65,7 +65,7 @@ interface IReducerState {
   amount: string;
   expirationDate: string;
   requiredStake: string;
-  merchantUrl: MerchantUrl;
+  merchantUrl: GatewayUrl;
   paymentType: EPaymentType;
   paymentTypeOptions: PaymentTypeOption[];
 }

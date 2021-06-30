@@ -2,7 +2,7 @@ import {
   Balances,
   ControlClaim,
   EthereumAddress,
-  MerchantUrl,
+  GatewayUrl,
   PullPayment,
   PushPayment,
   Signature,
@@ -52,18 +52,18 @@ export class ContextProviderMock implements IContextProvider {
   public onDeStorageAuthenticationSucceededActivationCount = 0;
   public onDeStorageAuthenticationFailed: Subject<void>;
   public onDeStorageAuthenticationFailedActivationCount = 0;
-  public onMerchantAuthorized: Subject<MerchantUrl>;
-  public onMerchantAuthorizedActivations: MerchantUrl[] = [];
-  public onMerchantDeauthorizationStarted: Subject<MerchantUrl>;
-  public onMerchantDeauthorizationStartedActivations: MerchantUrl[] = [];
-  public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
-  public onAuthorizedMerchantUpdatedActivations: MerchantUrl[] = [];
-  public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
-  public onAuthorizedMerchantActivationFailedActivations: MerchantUrl[] = [];
-  public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
-  public onMerchantIFrameDisplayRequestedActivations: MerchantUrl[] = [];
-  public onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
-  public onMerchantIFrameCloseRequestedActivations: MerchantUrl[] = [];
+  public onMerchantAuthorized: Subject<GatewayUrl>;
+  public onMerchantAuthorizedActivations: GatewayUrl[] = [];
+  public onMerchantDeauthorizationStarted: Subject<GatewayUrl>;
+  public onMerchantDeauthorizationStartedActivations: GatewayUrl[] = [];
+  public onAuthorizedMerchantUpdated: Subject<GatewayUrl>;
+  public onAuthorizedMerchantUpdatedActivations: GatewayUrl[] = [];
+  public onAuthorizedMerchantActivationFailed: Subject<GatewayUrl>;
+  public onAuthorizedMerchantActivationFailedActivations: GatewayUrl[] = [];
+  public onMerchantIFrameDisplayRequested: Subject<GatewayUrl>;
+  public onMerchantIFrameDisplayRequestedActivations: GatewayUrl[] = [];
+  public onMerchantIFrameCloseRequested: Subject<GatewayUrl>;
+  public onMerchantIFrameCloseRequestedActivations: GatewayUrl[] = [];
   public onInitializationRequired: Subject<void>;
   public onInitializationRequiredActivationCount = 0;
   public onPrivateCredentialsRequested: Subject<void>;
@@ -71,7 +71,7 @@ export class ContextProviderMock implements IContextProvider {
   public onMerchantConnectorActivated: Subject<IMerchantConnectorProxy>;
   public onMerchantConnectorActivatedActivations: IMerchantConnectorProxy[] = [];
 
-  public authorizedMerchants: Map<MerchantUrl, Signature>;
+  public authorizedMerchants: Map<GatewayUrl, Signature>;
 
   constructor(
     context: HypernetContext | null = null,
@@ -148,32 +148,32 @@ export class ContextProviderMock implements IContextProvider {
       this.onDeStorageAuthenticationFailedActivationCount++;
     });
 
-    this.onMerchantAuthorized = new Subject<MerchantUrl>();
+    this.onMerchantAuthorized = new Subject<GatewayUrl>();
     this.onMerchantAuthorized.subscribe((val) => {
       this.onMerchantAuthorizedActivations.push(val);
     });
 
-    this.onMerchantDeauthorizationStarted = new Subject<MerchantUrl>();
+    this.onMerchantDeauthorizationStarted = new Subject<GatewayUrl>();
     this.onMerchantDeauthorizationStarted.subscribe((val) => {
       this.onMerchantDeauthorizationStartedActivations.push(val);
     });
 
-    this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
+    this.onAuthorizedMerchantUpdated = new Subject<GatewayUrl>();
     this.onAuthorizedMerchantUpdated.subscribe((val) => {
       this.onAuthorizedMerchantUpdatedActivations.push(val);
     });
 
-    this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
+    this.onAuthorizedMerchantActivationFailed = new Subject<GatewayUrl>();
     this.onAuthorizedMerchantActivationFailed.subscribe((val) => {
       this.onAuthorizedMerchantActivationFailedActivations.push(val);
     });
 
-    this.onMerchantIFrameDisplayRequested = new Subject<MerchantUrl>();
+    this.onMerchantIFrameDisplayRequested = new Subject<GatewayUrl>();
     this.onMerchantIFrameDisplayRequested.subscribe((val) => {
       this.onMerchantIFrameDisplayRequestedActivations.push(val);
     });
 
-    this.onMerchantIFrameCloseRequested = new Subject<MerchantUrl>();
+    this.onMerchantIFrameCloseRequested = new Subject<GatewayUrl>();
     this.onMerchantIFrameCloseRequested.subscribe((val) => {
       this.onMerchantIFrameCloseRequestedActivations.push(val);
     });
@@ -193,7 +193,7 @@ export class ContextProviderMock implements IContextProvider {
       this.onMerchantConnectorActivatedActivations.push(val);
     });
 
-    this.authorizedMerchants = new Map<MerchantUrl, Signature>();
+    this.authorizedMerchants = new Map<GatewayUrl, Signature>();
 
     if (context != null) {
       this.context = context;

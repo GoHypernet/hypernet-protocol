@@ -8,7 +8,7 @@ import {
   PushPayment,
   Payment,
   PaymentId,
-  MerchantUrl,
+  GatewayUrl,
   Signature,
   AssetInfo,
   AcceptPaymentError,
@@ -65,12 +65,12 @@ export default class HypernetIFrameProxy
     this.onDeStorageAuthenticationStarted = new Subject<void>();
     this.onDeStorageAuthenticationSucceeded = new Subject<void>();
     this.onDeStorageAuthenticationFailed = new Subject<void>();
-    this.onMerchantAuthorized = new Subject<MerchantUrl>();
-    this.onMerchantDeauthorizationStarted = new Subject<MerchantUrl>();
-    this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
-    this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
-    this.onMerchantIFrameDisplayRequested = new Subject<MerchantUrl>();
-    this.onMerchantIFrameCloseRequested = new Subject<MerchantUrl>();
+    this.onMerchantAuthorized = new Subject<GatewayUrl>();
+    this.onMerchantDeauthorizationStarted = new Subject<GatewayUrl>();
+    this.onAuthorizedMerchantUpdated = new Subject<GatewayUrl>();
+    this.onAuthorizedMerchantActivationFailed = new Subject<GatewayUrl>();
+    this.onMerchantIFrameDisplayRequested = new Subject<GatewayUrl>();
+    this.onMerchantIFrameCloseRequested = new Subject<GatewayUrl>();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
 
@@ -143,21 +143,21 @@ export default class HypernetIFrameProxy
           this.onDeStorageAuthenticationFailed.next();
         });
 
-        child.on("onMerchantAuthorized", (data: MerchantUrl) => {
+        child.on("onMerchantAuthorized", (data: GatewayUrl) => {
           this.onMerchantAuthorized.next(data);
         });
 
-        child.on("onMerchantDeauthorizationStarted", (data: MerchantUrl) => {
+        child.on("onMerchantDeauthorizationStarted", (data: GatewayUrl) => {
           this.onMerchantDeauthorizationStarted.next(data);
         });
 
-        child.on("onAuthorizedMerchantUpdated", (data: MerchantUrl) => {
+        child.on("onAuthorizedMerchantUpdated", (data: GatewayUrl) => {
           this.onAuthorizedMerchantUpdated.next(data);
         });
 
         child.on(
           "onAuthorizedMerchantActivationFailed",
-          (data: MerchantUrl) => {
+          (data: GatewayUrl) => {
             this.onAuthorizedMerchantActivationFailed.next(data);
           },
         );
@@ -171,13 +171,13 @@ export default class HypernetIFrameProxy
           this.coreInitialized = true;
         });
 
-        child.on("onMerchantIFrameDisplayRequested", (data: MerchantUrl) => {
+        child.on("onMerchantIFrameDisplayRequested", (data: GatewayUrl) => {
           this._displayCoreIFrame();
 
           this.onMerchantIFrameDisplayRequested.next(data);
         });
 
-        child.on("onMerchantIFrameCloseRequested", (data: MerchantUrl) => {
+        child.on("onMerchantIFrameCloseRequested", (data: GatewayUrl) => {
           this._closeCoreIFrame();
 
           this.onMerchantIFrameCloseRequested.next(data);
@@ -299,7 +299,7 @@ export default class HypernetIFrameProxy
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this._createCall("sendFunds", {
       counterPartyAccount,
@@ -319,7 +319,7 @@ export default class HypernetIFrameProxy
     deltaTime: number,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this._createCall("authorizeFunds", {
       counterPartyAccount,
@@ -391,13 +391,13 @@ export default class HypernetIFrameProxy
   }
 
   public authorizeMerchant(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<void, MerchantValidationError> {
     return this._createCall("authorizeMerchant", merchantUrl);
   }
 
   public deauthorizeMerchant(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<
     void,
     PersistenceError | ProxyError | MerchantAuthorizationDeniedError
@@ -406,21 +406,21 @@ export default class HypernetIFrameProxy
   }
 
   public getAuthorizedMerchants(): ResultAsync<
-    Map<MerchantUrl, Signature>,
+    Map<GatewayUrl, Signature>,
     PersistenceError
   > {
     return this._createCall("getAuthorizedMerchants", null);
   }
 
   public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
-    Map<MerchantUrl, boolean>,
+    Map<GatewayUrl, boolean>,
     PersistenceError
   > {
     return this._createCall("getAuthorizedMerchantsConnectorsStatus", null);
   }
 
   public displayMerchantIFrame(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError> {
     return this.getAuthorizedMerchantsConnectorsStatus().andThen(
       (merchantsMap) => {
@@ -439,7 +439,7 @@ export default class HypernetIFrameProxy
   }
 
   public closeMerchantIFrame(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError> {
     this._closeCoreIFrame();
 
@@ -510,12 +510,12 @@ export default class HypernetIFrameProxy
   public onDeStorageAuthenticationStarted: Subject<void>;
   public onDeStorageAuthenticationSucceeded: Subject<void>;
   public onDeStorageAuthenticationFailed: Subject<void>;
-  public onMerchantAuthorized: Subject<MerchantUrl>;
-  public onMerchantDeauthorizationStarted: Subject<MerchantUrl>;
-  public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
-  public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
-  public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
-  public onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
+  public onMerchantAuthorized: Subject<GatewayUrl>;
+  public onMerchantDeauthorizationStarted: Subject<GatewayUrl>;
+  public onAuthorizedMerchantUpdated: Subject<GatewayUrl>;
+  public onAuthorizedMerchantActivationFailed: Subject<GatewayUrl>;
+  public onMerchantIFrameDisplayRequested: Subject<GatewayUrl>;
+  public onMerchantIFrameCloseRequested: Subject<GatewayUrl>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
 }

@@ -1,6 +1,6 @@
 import { BigNumberString } from "@objects/BigNumberString";
 import { EthereumAddress } from "@objects/EthereumAddress";
-import { MerchantUrl } from "@objects/MerchantUrl";
+import { GatewayUrl } from "@objects/GatewayUrl";
 import { Payment } from "@objects/Payment";
 import { PaymentId } from "@objects/PaymentId";
 import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
@@ -21,7 +21,7 @@ export class PushPayment extends Payment {
     createdTimestamp: UnixTimestamp,
     updatedTimestamp: UnixTimestamp,
     collateralRecovered: BigNumberString,
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     details: PaymentInternalDetails,
     metadata: string | null,
     public paymentAmount: BigNumberString,

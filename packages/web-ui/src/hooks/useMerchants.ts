@@ -1,4 +1,4 @@
-import { MerchantUrl } from "@hypernetlabs/objects";
+import { GatewayUrl } from "@hypernetlabs/objects";
 import { useStoreContext } from "@web-ui/contexts";
 import { useEffect, useReducer } from "react";
 import { useAlert } from "react-alert";
@@ -12,15 +12,15 @@ enum EActionTypes {
 interface IState {
   loading: boolean;
   error: any;
-  merchantsMap: Map<MerchantUrl, boolean>;
-  openMerchantIFrame: (merchantUrl: MerchantUrl) => void;
-  deauthorizeMerchant: (merchantUrl: MerchantUrl) => void;
-  authorizeMerchant: (merchantUrl: MerchantUrl) => void;
+  merchantsMap: Map<GatewayUrl, boolean>;
+  openMerchantIFrame: (merchantUrl: GatewayUrl) => void;
+  deauthorizeMerchant: (merchantUrl: GatewayUrl) => void;
+  authorizeMerchant: (merchantUrl: GatewayUrl) => void;
 }
 
 type Action =
   | { type: EActionTypes.FETCHING }
-  | { type: EActionTypes.FETCHED; payload: Map<MerchantUrl, boolean> }
+  | { type: EActionTypes.FETCHED; payload: Map<GatewayUrl, boolean> }
   | { type: EActionTypes.ERROR; payload: string };
 
 export function useMerchants(): IState {
@@ -93,7 +93,7 @@ export function useMerchants(): IState {
       });
   }
 
-  function openMerchantIFrame(merchantUrl: MerchantUrl) {
+  function openMerchantIFrame(merchantUrl: GatewayUrl) {
     coreProxy.displayMerchantIFrame(merchantUrl).mapErr((error) => {
       alert.error(
         error.message || "An error had happened while pulling merchant list",
@@ -102,7 +102,7 @@ export function useMerchants(): IState {
     });
   }
 
-  function deauthorizeMerchant(merchantUrl: MerchantUrl) {
+  function deauthorizeMerchant(merchantUrl: GatewayUrl) {
     dispatch({ type: EActionTypes.FETCHING });
     coreProxy
       .deauthorizeMerchant(merchantUrl)
@@ -118,7 +118,7 @@ export function useMerchants(): IState {
       });
   }
 
-  function authorizeMerchant(merchantUrl: MerchantUrl) {
+  function authorizeMerchant(merchantUrl: GatewayUrl) {
     dispatch({ type: EActionTypes.FETCHING });
     coreProxy
       .authorizeMerchant(merchantUrl)

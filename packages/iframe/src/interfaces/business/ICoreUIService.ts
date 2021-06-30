@@ -10,7 +10,7 @@ import {
   PaymentId,
   PublicIdentifier,
   Signature,
-  MerchantUrl,
+  GatewayUrl,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 

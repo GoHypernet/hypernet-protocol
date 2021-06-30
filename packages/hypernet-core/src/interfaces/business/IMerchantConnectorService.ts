@@ -7,26 +7,26 @@ import {
   PersistenceError,
   MerchantAuthorizationDeniedError,
 } from "@hypernetlabs/objects";
-import { MerchantUrl, Signature } from "@hypernetlabs/objects";
+import { GatewayUrl, Signature } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IMerchantConnectorService {
   initialize(): ResultAsync<void, LogicalError | MerchantConnectorError>;
   authorizeMerchant(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<void, MerchantValidationError>;
   deauthorizeMerchant(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<
     void,
     PersistenceError | ProxyError | MerchantAuthorizationDeniedError
   >;
   getAuthorizedMerchants(): ResultAsync<
-    Map<MerchantUrl, Signature>,
+    Map<GatewayUrl, Signature>,
     PersistenceError
   >;
   getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
-    Map<MerchantUrl, boolean>,
+    Map<GatewayUrl, boolean>,
     PersistenceError
   >;
   activateAuthorizedMerchants(): ResultAsync<
@@ -38,9 +38,9 @@ export interface IMerchantConnectorService {
     | ProxyError
   >;
   closeMerchantIFrame(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError>;
   displayMerchantIFrame(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError>;
 }

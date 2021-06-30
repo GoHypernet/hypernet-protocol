@@ -9,7 +9,7 @@ import {
   IHypernetCore,
   IHypernetCoreType,
   PaymentId,
-  MerchantUrl,
+  GatewayUrl,
   BigNumberString,
   UnixTimestamp,
 } from "@hypernetlabs/objects";
@@ -101,7 +101,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           expirationDate: UnixTimestamp;
           requiredStake: BigNumberString;
           paymentToken: EthereumAddress;
-          merchantUrl: MerchantUrl;
+          merchantUrl: GatewayUrl;
           metadata: string | null;
         }>,
       ) => {
@@ -127,7 +127,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           deltaTime: number;
           requiredStake: BigNumberString;
           paymentToken: EthereumAddress;
-          merchantUrl: MerchantUrl;
+          merchantUrl: GatewayUrl;
           metadata: string | null;
         }>,
       ) => {
@@ -151,12 +151,12 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.acceptOffers(data.data);
         }, data.callId);
       },
-      authorizeMerchant: (data: IIFrameCallData<MerchantUrl>) => {
+      authorizeMerchant: (data: IIFrameCallData<GatewayUrl>) => {
         this.returnForModel(() => {
           return this.core.authorizeMerchant(data.data);
         }, data.callId);
       },
-      deauthorizeMerchant: (data: IIFrameCallData<MerchantUrl>) => {
+      deauthorizeMerchant: (data: IIFrameCallData<GatewayUrl>) => {
         this.returnForModel(() => {
           return this.core.deauthorizeMerchant(data.data);
         }, data.callId);
@@ -171,10 +171,10 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.resolveInsurance(data.data);
         }, data.callId);
       },
-      closeMerchantIFrame: (data: IIFrameCallData<MerchantUrl>) => {
+      closeMerchantIFrame: (data: IIFrameCallData<GatewayUrl>) => {
         this.core.closeMerchantIFrame(data.data);
       },
-      displayMerchantIFrame: (data: IIFrameCallData<MerchantUrl>) => {
+      displayMerchantIFrame: (data: IIFrameCallData<GatewayUrl>) => {
         this.core.displayMerchantIFrame(data.data);
       },
 

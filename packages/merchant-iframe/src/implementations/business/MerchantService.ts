@@ -9,7 +9,7 @@ import {
   Balances,
   EthereumAddress,
   Signature,
-  MerchantUrl,
+  GatewayUrl,
   PaymentId,
   AjaxError,
 } from "@hypernetlabs/objects";
@@ -181,7 +181,7 @@ export class MerchantService implements IMerchantService {
   }
 
   private _validateMerchantConnectorCode(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     signature: Signature,
     address: EthereumAddress,
     useCacheBuster?: boolean,
@@ -197,7 +197,7 @@ export class MerchantService implements IMerchantService {
     }
 
     return this.merchantConnectorRepository
-      .getMerchantCode(MerchantUrl(merchantUrl + cacheBuster))
+      .getMerchantCode(GatewayUrl(merchantUrl + cacheBuster))
       .andThen((merchantCode) => {
         const calculatedAddress = ethers.utils.verifyMessage(
           merchantCode,
@@ -268,14 +268,14 @@ export class MerchantService implements IMerchantService {
     return okAsync(null);
   }
 
-  public getMerchantUrl(): ResultAsync<MerchantUrl, MerchantValidationError> {
+  public getMerchantUrl(): ResultAsync<GatewayUrl, MerchantValidationError> {
     // First, see if this is going to be easy. Normally a merchantUrl
     // is provided as a param.
     const urlParams = new URLSearchParams(window.location.search);
     const merchantUrl = urlParams.get("merchantUrl");
 
     if (merchantUrl != null) {
-      return okAsync(MerchantUrl(merchantUrl));
+      return okAsync(GatewayUrl(merchantUrl));
     }
 
     // Can't do it the easy way; there is an alternative. If this is

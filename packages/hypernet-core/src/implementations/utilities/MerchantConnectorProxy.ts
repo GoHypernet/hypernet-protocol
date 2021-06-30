@@ -10,7 +10,7 @@ import {
   PaymentId,
   ProxyError,
   Signature,
-  MerchantUrl,
+  GatewayUrl,
   Balances,
   PublicIdentifier,
   PullPayment,
@@ -35,7 +35,7 @@ export class MerchantConnectorProxy
   constructor(
     protected element: HTMLElement | null,
     protected iframeUrl: string,
-    public merchantUrl: MerchantUrl,
+    public merchantUrl: GatewayUrl,
     protected iframeName: string,
     protected contextProvider: IContextProvider,
     protected debug: boolean = false,
@@ -234,7 +234,7 @@ export class MerchantConnectorProxy
     return this._createCall("messageSigned", { message, signature });
   }
 
-  private _pushOpenedMerchantIFrame(merchantUrl: MerchantUrl) {
+  private _pushOpenedMerchantIFrame(merchantUrl: GatewayUrl) {
     // Check if there is merchantUrl in the queue
     // If there is, don't re-add it.
     const index = MerchantConnectorProxy.openedIFramesQueue.indexOf(
@@ -252,7 +252,7 @@ export class MerchantConnectorProxy
       `hypernet-core-merchant-connector-iframe-${MerchantConnectorProxy.openedIFramesQueue[0]}`,
     )[0].style.display = "block";
     context.onMerchantIFrameDisplayRequested.next(
-      MerchantUrl(MerchantConnectorProxy.openedIFramesQueue[0]),
+      GatewayUrl(MerchantConnectorProxy.openedIFramesQueue[0]),
     );
   }
 

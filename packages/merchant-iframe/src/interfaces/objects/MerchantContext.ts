@@ -3,7 +3,7 @@ import {
   MerchantValidationError,
   PublicIdentifier,
   Signature,
-  MerchantUrl,
+  GatewayUrl,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 import Postmate from "postmate";
@@ -11,7 +11,7 @@ import { Subject } from "rxjs";
 
 export class MerchantContext {
   constructor(
-    public merchantUrl: MerchantUrl,
+    public merchantUrl: GatewayUrl,
     public onMerchantConnectorActivated: Subject<IMerchantConnector>,
     public onHypernetCoreProxyActivated: Subject<Postmate.ChildAPI>,
     public validatedMerchantCode: string | null,

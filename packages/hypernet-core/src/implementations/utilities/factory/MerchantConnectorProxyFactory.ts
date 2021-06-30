@@ -1,4 +1,4 @@
-import { MerchantUrl, ProxyError } from "@hypernetlabs/objects";
+import { GatewayUrl, ProxyError } from "@hypernetlabs/objects";
 import { injectable, inject } from "inversify";
 import { ResultAsync } from "neverthrow";
 
@@ -21,7 +21,7 @@ export class MerchantConnectorProxyFactory
   ) {}
 
   factoryProxy(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<IMerchantConnectorProxy, ProxyError> {
     let proxy: IMerchantConnectorProxy;
     return this.configProvider

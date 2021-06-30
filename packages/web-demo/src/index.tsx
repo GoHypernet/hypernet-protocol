@@ -1,4 +1,4 @@
-import { MerchantUrl } from "@hypernetlabs/objects";
+import { GatewayUrl } from "@hypernetlabs/objects";
 import HypernetWebIntegration, {
   IHypernetWebIntegration,
 } from "@hypernetlabs/web-integration";
@@ -24,7 +24,7 @@ ref?.parentNode?.insertBefore(style, ref);
 Spinner();
 Spinner.show();
 
-const merchantUrl = MerchantUrl("http://localhost:5010");
+const merchantUrl = GatewayUrl("http://localhost:5010");
 
 client
   .getReady()

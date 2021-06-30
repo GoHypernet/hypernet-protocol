@@ -10,7 +10,7 @@ import {
   PaymentId,
   PublicIdentifier,
   Signature,
-  MerchantUrl,
+  GatewayUrl,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -29,7 +29,7 @@ export interface IMerchantService {
     MerchantConnectorError | MerchantValidationError
   >;
   prepareForRedirect(redirectInfo: IRedirectInfo): ResultAsync<void, Error>;
-  getMerchantUrl(): ResultAsync<MerchantUrl, MerchantValidationError>;
+  getMerchantUrl(): ResultAsync<GatewayUrl, MerchantValidationError>;
   autoActivateMerchantConnector(): ResultAsync<
     IMerchantConnector | null,
     MerchantConnectorError | MerchantValidationError

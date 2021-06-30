@@ -6,7 +6,7 @@ import {
   PushPayment,
   PaymentId,
   TransferId,
-  MerchantUrl,
+  GatewayUrl,
   PaymentFinalizeError,
   RouterChannelUnknownError,
   VectorError,
@@ -51,7 +51,7 @@ export interface IPaymentRepository {
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError>;
 
@@ -63,7 +63,7 @@ export interface IPaymentRepository {
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString, // TODO: amounts should be consistently use BigNumber
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PullPayment, PaymentCreationError>;
 

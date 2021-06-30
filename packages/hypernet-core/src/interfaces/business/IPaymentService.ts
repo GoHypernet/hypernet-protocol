@@ -2,7 +2,7 @@ import {
   Payment,
   EthereumAddress,
   PublicIdentifier,
-  MerchantUrl,
+  GatewayUrl,
   PaymentId,
   AcceptPaymentError,
   InsufficientBalanceError,
@@ -46,7 +46,7 @@ export interface IPaymentService {
     deltaTime: number,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
 
@@ -83,7 +83,7 @@ export interface IPaymentService {
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
 

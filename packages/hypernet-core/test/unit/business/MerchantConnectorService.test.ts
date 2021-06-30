@@ -1,4 +1,4 @@
-import { MerchantUrl } from "@hypernetlabs/objects";
+import { GatewayUrl } from "@hypernetlabs/objects";
 import { MerchantConnectorService } from "@implementations/business/MerchantConnectorService";
 import { IMerchantConnectorService } from "@interfaces/business/IMerchantConnectorService";
 import {
@@ -17,7 +17,7 @@ class MerchantConnectorServiceMocks {
   public contextProvider = new ContextProviderMock();
   public configProvider = new ConfigProviderMock();
   public logUtils = td.object<ILogUtils>();
-  public merchantUrl = MerchantUrl("http://localhost:5010");
+  public merchantUrl = GatewayUrl("http://localhost:5010");
 
   constructor() {
     td.when(

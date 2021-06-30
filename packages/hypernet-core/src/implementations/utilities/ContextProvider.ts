@@ -5,7 +5,7 @@ import {
   Balances,
   EthereumAddress,
   PublicIdentifier,
-  MerchantUrl,
+  GatewayUrl,
   Signature,
 } from "@hypernetlabs/objects";
 import { okAsync, ResultAsync } from "neverthrow";
@@ -43,12 +43,12 @@ export class ContextProvider implements IContextProvider {
     onDeStorageAuthenticationStarted: Subject<void>,
     onDeStorageAuthenticationSucceeded: Subject<void>,
     onDeStorageAuthenticationFailed: Subject<void>,
-    onMerchantAuthorized: Subject<MerchantUrl>,
-    onMerchantDeauthorizationStarted: Subject<MerchantUrl>,
-    onAuthorizedMerchantUpdated: Subject<MerchantUrl>,
-    onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>,
-    onMerchantIFrameDisplayRequested: Subject<MerchantUrl>,
-    onMerchantIFrameCloseRequested: Subject<MerchantUrl>,
+    onMerchantAuthorized: Subject<GatewayUrl>,
+    onMerchantDeauthorizationStarted: Subject<GatewayUrl>,
+    onAuthorizedMerchantUpdated: Subject<GatewayUrl>,
+    onAuthorizedMerchantActivationFailed: Subject<GatewayUrl>,
+    onMerchantIFrameDisplayRequested: Subject<GatewayUrl>,
+    onMerchantIFrameCloseRequested: Subject<GatewayUrl>,
     onInitializationRequired: Subject<void>,
     onPrivateCredentialsRequested: Subject<void>,
   ) {
@@ -138,7 +138,7 @@ export class ContextProvider implements IContextProvider {
           this.context.onInitializationRequired,
           this.context.onPrivateCredentialsRequested,
           this.context.onMerchantConnectorProxyActivated,
-          new Map<MerchantUrl, Signature>(),
+          new Map<GatewayUrl, Signature>(),
         ),
       );
     }

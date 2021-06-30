@@ -1,8 +1,8 @@
-import { MerchantUrl } from "@hypernetlabs/objects";
+import { GatewayUrl } from "@hypernetlabs/objects";
 
 export class ExpectedRedirect {
   constructor(
-    public merchantUrl: MerchantUrl,
+    public merchantUrl: GatewayUrl,
     public redirectParam: string,
     public paramValue: string,
   ) {}

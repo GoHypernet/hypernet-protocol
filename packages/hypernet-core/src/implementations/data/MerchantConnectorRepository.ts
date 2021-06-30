@@ -12,7 +12,7 @@ import {
   TransferId,
   EthereumAddress,
   Signature,
-  MerchantUrl,
+  GatewayUrl,
   Balances,
   AuthorizedMerchantsSchema,
   LogicalError,
@@ -62,7 +62,7 @@ import {
 export class MerchantConnectorRepository
   implements IMerchantConnectorRepository {
   protected authorizedMerchantProxies: Map<
-    MerchantUrl,
+    GatewayUrl,
     ResultAsync<
       IMerchantConnectorProxy,
       | MerchantActivationError
@@ -71,7 +71,7 @@ export class MerchantConnectorRepository
       | ProxyError
     >
   >;
-  protected existingProxies: Map<MerchantUrl, IMerchantConnectorProxy>;
+  protected existingProxies: Map<GatewayUrl, IMerchantConnectorProxy>;
   protected domain: TypedDataDomain;
   protected types: Record<string, TypedDataField[]>;
   protected activateAuthorizedMerchantsResult:
@@ -107,9 +107,9 @@ export class MerchantConnectorRepository
   }
 
   public getMerchantAddresses(
-    merchantUrls: MerchantUrl[],
+    merchantUrls: GatewayUrl[],
   ): ResultAsync<
-    Map<MerchantUrl, EthereumAddress>,
+    Map<GatewayUrl, EthereumAddress>,
     AjaxError | ProxyError | MerchantAuthorizationDeniedError
   > {
     // TODO: right now, the merchant will publish a URL with their address; eventually, they should be held in a smart contract
@@ -118,7 +118,7 @@ export class MerchantConnectorRepository
     // public key.
     const addressRequests = new Array<
       ResultAsync<
-        { merchantUrl: MerchantUrl; address: EthereumAddress },
+        { merchantUrl: GatewayUrl; address: EthereumAddress },
         | MerchantConnectorError
         | LogicalError
         | ProxyError
@@ -151,10 +151,10 @@ export class MerchantConnectorRepository
     }
 
     return ResultUtils.combine(addressRequests).map((vals) => {
-      const returnMap = new Map<MerchantUrl, EthereumAddress>();
+      const returnMap = new Map<GatewayUrl, EthereumAddress>();
       for (const val of vals) {
         returnMap.set(
-          MerchantUrl(val.merchantUrl.toString()),
+          GatewayUrl(val.merchantUrl.toString()),
           EthereumAddress(val.address),
         );
       }
@@ -164,7 +164,7 @@ export class MerchantConnectorRepository
   }
 
   public addAuthorizedMerchant(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     initialBalances: Balances,
   ): ResultAsync<
     void,
@@ -264,18 +264,18 @@ export class MerchantConnectorRepository
    * Returns a map of merchant URLs with their authorization signatures.
    */
   public getAuthorizedMerchants(): ResultAsync<
-    Map<MerchantUrl, Signature>,
+    Map<GatewayUrl, Signature>,
     PersistenceError
   > {
     return this.storageUtils
       .read<IAuthorizedMerchantEntry[]>(AuthorizedMerchantsSchema.title)
       .andThen((storedAuthorizedMerchants) => {
-        const authorizedMerchants = new Map<MerchantUrl, Signature>();
+        const authorizedMerchants = new Map<GatewayUrl, Signature>();
 
         if (storedAuthorizedMerchants != null) {
           for (const authorizedMerchantEntry of storedAuthorizedMerchants) {
             authorizedMerchants.set(
-              MerchantUrl(authorizedMerchantEntry.merchantUrl),
+              GatewayUrl(authorizedMerchantEntry.merchantUrl),
               Signature(authorizedMerchantEntry.authorizationSignature),
             );
           }
@@ -286,7 +286,7 @@ export class MerchantConnectorRepository
   }
 
   public resolveChallenge(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     paymentId: PaymentId,
     transferId: TransferId,
   ): ResultAsync<
@@ -316,7 +316,7 @@ export class MerchantConnectorRepository
   }
 
   public closeMerchantIFrame(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<
     void,
     MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
@@ -327,7 +327,7 @@ export class MerchantConnectorRepository
   }
 
   public displayMerchantIFrame(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<
     void,
     MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
@@ -404,7 +404,7 @@ export class MerchantConnectorRepository
   }
 
   public notifyPushPaymentSent(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     payment: PushPayment,
   ): ResultAsync<
     void,
@@ -416,7 +416,7 @@ export class MerchantConnectorRepository
   }
 
   public notifyPushPaymentUpdated(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     payment: PushPayment,
   ): ResultAsync<
     void,
@@ -428,7 +428,7 @@ export class MerchantConnectorRepository
   }
 
   public notifyPushPaymentReceived(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     payment: PushPayment,
   ): ResultAsync<
     void,
@@ -440,7 +440,7 @@ export class MerchantConnectorRepository
   }
 
   public notifyPullPaymentSent(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     payment: PullPayment,
   ): ResultAsync<
     void,
@@ -452,7 +452,7 @@ export class MerchantConnectorRepository
   }
 
   public notifyPullPaymentUpdated(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     payment: PullPayment,
   ): ResultAsync<
     void,
@@ -464,7 +464,7 @@ export class MerchantConnectorRepository
   }
 
   public notifyPullPaymentReceived(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     payment: PullPayment,
   ): ResultAsync<
     void,
@@ -498,7 +498,7 @@ export class MerchantConnectorRepository
   }
 
   public deauthorizeMerchant(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<
     void,
     PersistenceError | ProxyError | MerchantAuthorizationDeniedError
@@ -521,10 +521,10 @@ export class MerchantConnectorRepository
   }
 
   public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
-    Map<MerchantUrl, boolean>,
+    Map<GatewayUrl, boolean>,
     PersistenceError
   > {
-    const retMap = new Map<MerchantUrl, boolean>();
+    const retMap = new Map<GatewayUrl, boolean>();
     if (this.activateAuthorizedMerchantsResult == null) {
       throw new Error("You must call activateAuthorizedMerchants first!");
     }
@@ -559,7 +559,7 @@ export class MerchantConnectorRepository
       });
   }
 
-  public destroyProxy(merchantUrl: MerchantUrl): void {
+  public destroyProxy(merchantUrl: GatewayUrl): void {
     const proxy = this.existingProxies.get(merchantUrl);
     if (proxy != null) {
       proxy.destroy();
@@ -568,9 +568,9 @@ export class MerchantConnectorRepository
   }
 
   protected _getMerchantAddress(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<
-    { merchantUrl: MerchantUrl; address: EthereumAddress },
+    { merchantUrl: GatewayUrl; address: EthereumAddress },
     | MerchantConnectorError
     | LogicalError
     | ProxyError
@@ -584,7 +584,7 @@ export class MerchantConnectorRepository
   }
 
   protected _getActivatedMerchantProxy(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<
     IMerchantConnectorProxy,
     ProxyError | MerchantAuthorizationDeniedError | PersistenceError
@@ -688,7 +688,7 @@ export class MerchantConnectorRepository
    */
   protected _activateAuthorizedMerchant(
     balances: Balances,
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     authorizationSignature: Signature,
     context: InitializedHypernetContext,
     signer: ethers.providers.JsonRpcSigner,
@@ -756,7 +756,7 @@ export class MerchantConnectorRepository
   }
 
   protected _validateConnector(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     proxy: IMerchantConnectorProxy,
     authorizationSignature: Signature,
     context: InitializedHypernetContext,
@@ -855,13 +855,13 @@ export class MerchantConnectorRepository
   }
 
   protected _setAuthorizedMerchants(
-    authorizedMerchantMap: Map<MerchantUrl, Signature>,
+    authorizedMerchantMap: Map<GatewayUrl, Signature>,
   ): ResultAsync<void, PersistenceError> {
     const authorizedMerchantEntries = new Array<IAuthorizedMerchantEntry>();
 
     for (const keyval of authorizedMerchantMap) {
       authorizedMerchantEntries.push({
-        merchantUrl: MerchantUrl(keyval[0]),
+        merchantUrl: GatewayUrl(keyval[0]),
         authorizationSignature: Signature(keyval[1]),
       });
     }

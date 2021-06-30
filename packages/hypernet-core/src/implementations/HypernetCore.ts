@@ -9,7 +9,7 @@ import {
   PullPayment,
   PushPayment,
   PaymentId,
-  MerchantUrl,
+  GatewayUrl,
   IHypernetCore,
   Signature,
   PrivateCredentials,
@@ -152,12 +152,12 @@ export class HypernetCore implements IHypernetCore {
   public onDeStorageAuthenticationStarted: Subject<void>;
   public onDeStorageAuthenticationSucceeded: Subject<void>;
   public onDeStorageAuthenticationFailed: Subject<void>;
-  public onMerchantAuthorized: Subject<MerchantUrl>;
-  public onMerchantDeauthorizationStarted: Subject<MerchantUrl>;
-  public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
-  public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
-  public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
-  public onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
+  public onMerchantAuthorized: Subject<GatewayUrl>;
+  public onMerchantDeauthorizationStarted: Subject<GatewayUrl>;
+  public onAuthorizedMerchantUpdated: Subject<GatewayUrl>;
+  public onAuthorizedMerchantActivationFailed: Subject<GatewayUrl>;
+  public onMerchantIFrameDisplayRequested: Subject<GatewayUrl>;
+  public onMerchantIFrameCloseRequested: Subject<GatewayUrl>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
 
@@ -240,12 +240,12 @@ export class HypernetCore implements IHypernetCore {
     this.onDeStorageAuthenticationStarted = new Subject<void>();
     this.onDeStorageAuthenticationSucceeded = new Subject<void>();
     this.onDeStorageAuthenticationFailed = new Subject<void>();
-    this.onMerchantAuthorized = new Subject<MerchantUrl>();
-    this.onMerchantDeauthorizationStarted = new Subject<MerchantUrl>();
-    this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
-    this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
-    this.onMerchantIFrameDisplayRequested = new Subject<MerchantUrl>();
-    this.onMerchantIFrameCloseRequested = new Subject<MerchantUrl>();
+    this.onMerchantAuthorized = new Subject<GatewayUrl>();
+    this.onMerchantDeauthorizationStarted = new Subject<GatewayUrl>();
+    this.onAuthorizedMerchantUpdated = new Subject<GatewayUrl>();
+    this.onAuthorizedMerchantActivationFailed = new Subject<GatewayUrl>();
+    this.onMerchantIFrameDisplayRequested = new Subject<GatewayUrl>();
+    this.onMerchantIFrameCloseRequested = new Subject<GatewayUrl>();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
 
@@ -608,7 +608,7 @@ export class HypernetCore implements IHypernetCore {
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     // Send payment terms to provider & request provider make insurance payment
@@ -653,7 +653,7 @@ export class HypernetCore implements IHypernetCore {
     deltaTime: number,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this.paymentService.authorizeFunds(
@@ -798,13 +798,13 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public authorizeMerchant(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<void, MerchantValidationError> {
     return this.merchantConnectorService.authorizeMerchant(merchantUrl);
   }
 
   public deauthorizeMerchant(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<
     void,
     PersistenceError | ProxyError | MerchantAuthorizationDeniedError
@@ -813,27 +813,27 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
-    Map<MerchantUrl, boolean>,
+    Map<GatewayUrl, boolean>,
     PersistenceError
   > {
     return this.merchantConnectorService.getAuthorizedMerchantsConnectorsStatus();
   }
 
   public getAuthorizedMerchants(): ResultAsync<
-    Map<MerchantUrl, Signature>,
+    Map<GatewayUrl, Signature>,
     PersistenceError
   > {
     return this.merchantConnectorService.getAuthorizedMerchants();
   }
 
   public closeMerchantIFrame(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError> {
     return this.merchantConnectorService.closeMerchantIFrame(merchantUrl);
   }
 
   public displayMerchantIFrame(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError> {
     return this.merchantConnectorService.displayMerchantIFrame(merchantUrl);
   }

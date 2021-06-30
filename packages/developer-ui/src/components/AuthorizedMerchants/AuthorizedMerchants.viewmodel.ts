@@ -1,4 +1,4 @@
-import { MerchantUrl } from "@hypernetlabs/objects";
+import { GatewayUrl } from "@hypernetlabs/objects";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import ko from "knockout";
 
@@ -9,7 +9,7 @@ export class AuthorizedMerchantsParams {
 }
 
 export class MerchantStatus {
-  constructor(public merchantUrl: MerchantUrl, public status: boolean) {}
+  constructor(public merchantUrl: GatewayUrl, public status: boolean) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -26,7 +26,7 @@ export class AuthorizedMerchantsViewModel {
     this.integration.core.onMerchantAuthorized.subscribe({
       next: (val) => {
         this.authorizedMerchants.push(
-          new MerchantStatus(MerchantUrl(val.toString()), true),
+          new MerchantStatus(GatewayUrl(val.toString()), true),
         );
       },
     });

@@ -25,7 +25,7 @@ import {
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { HypernetLink } from "@objects/HypernetLink";
-import { MerchantUrl } from "@objects/MerchantUrl";
+import { GatewayUrl } from "@objects/GatewayUrl";
 import { Payment } from "@objects/Payment";
 import { PaymentId } from "@objects/PaymentId";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
@@ -152,7 +152,7 @@ export interface IHypernetCore {
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
 
@@ -175,7 +175,7 @@ export interface IHypernetCore {
     deltaTime: number,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
 
@@ -251,31 +251,31 @@ export interface IHypernetCore {
   ): ResultAsync<void, BlockchainUnavailableError>;
 
   authorizeMerchant(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<void, MerchantValidationError>;
 
   deauthorizeMerchant(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<
     void,
     PersistenceError | ProxyError | MerchantAuthorizationDeniedError
   >;
 
   getAuthorizedMerchants(): ResultAsync<
-    Map<MerchantUrl, Signature>,
+    Map<GatewayUrl, Signature>,
     PersistenceError
   >;
 
   getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
-    Map<MerchantUrl, boolean>,
+    Map<GatewayUrl, boolean>,
     PersistenceError
   >;
 
   closeMerchantIFrame(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError>;
   displayMerchantIFrame(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError>;
 
   providePrivateCredentials(
@@ -309,12 +309,12 @@ export interface IHypernetCore {
   onDeStorageAuthenticationStarted: Subject<void>;
   onDeStorageAuthenticationSucceeded: Subject<void>;
   onDeStorageAuthenticationFailed: Subject<void>;
-  onMerchantAuthorized: Subject<MerchantUrl>;
-  onMerchantDeauthorizationStarted: Subject<MerchantUrl>;
-  onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
-  onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
-  onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
-  onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
+  onMerchantAuthorized: Subject<GatewayUrl>;
+  onMerchantDeauthorizationStarted: Subject<GatewayUrl>;
+  onAuthorizedMerchantUpdated: Subject<GatewayUrl>;
+  onAuthorizedMerchantActivationFailed: Subject<GatewayUrl>;
+  onMerchantIFrameDisplayRequested: Subject<GatewayUrl>;
+  onMerchantIFrameCloseRequested: Subject<GatewayUrl>;
   onInitializationRequired: Subject<void>;
   onPrivateCredentialsRequested: Subject<void>;
 }

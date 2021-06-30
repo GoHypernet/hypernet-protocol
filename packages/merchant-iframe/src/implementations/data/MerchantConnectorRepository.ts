@@ -1,7 +1,7 @@
 import {
   EthereumAddress,
   Signature,
-  MerchantUrl,
+  GatewayUrl,
   AjaxError,
 } from "@hypernetlabs/objects";
 import { IAjaxUtils } from "@hypernetlabs/utils";
@@ -14,7 +14,7 @@ export class MerchantConnectorRepository
   constructor(protected ajaxUtils: IAjaxUtils) {}
 
   public getMerchantSignature(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<Signature, AjaxError> {
     const url = this._prepareMerchantUrl(merchantUrl, "signature");
     return this.ajaxUtils.get<Signature>(url).andThen((response) => {
@@ -22,7 +22,7 @@ export class MerchantConnectorRepository
     });
   }
   public getMerchantAddress(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<EthereumAddress, AjaxError> {
     const url = this._prepareMerchantUrl(merchantUrl, "address");
     return this.ajaxUtils.get<EthereumAddress>(url).andThen((response) => {
@@ -31,7 +31,7 @@ export class MerchantConnectorRepository
   }
 
   public getMerchantCode(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<string, AjaxError> {
     const url = this._prepareMerchantUrl(merchantUrl, "connector");
     return this.ajaxUtils.get<string>(url).andThen((response) => {
@@ -39,7 +39,7 @@ export class MerchantConnectorRepository
     });
   }
 
-  private _prepareMerchantUrl(merchantUrl: MerchantUrl, path: string): URL {
+  private _prepareMerchantUrl(merchantUrl: GatewayUrl, path: string): URL {
     const merchantUrlObject = new URL(merchantUrl);
     const searchParams = {};
     for (const [key, value] of new URLSearchParams(

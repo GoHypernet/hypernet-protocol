@@ -6,7 +6,7 @@ import {
   PushPayment,
   HypernetConfig,
   PaymentId,
-  MerchantUrl,
+  GatewayUrl,
   AcceptPaymentError,
   InsufficientBalanceError,
   InvalidParametersError,
@@ -110,7 +110,7 @@ export class PaymentService implements IPaymentService {
     deltaTime: number,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PullPayment, PaymentCreationError | LogicalError> {
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
@@ -205,7 +205,7 @@ export class PaymentService implements IPaymentService {
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError | LogicalError> {
     // TODO: Sanity checking on the values
@@ -301,7 +301,7 @@ export class PaymentService implements IPaymentService {
   > {
     let config: HypernetConfig;
     let payments: Map<PaymentId, Payment>;
-    const merchantUrls = new Set<MerchantUrl>();
+    const merchantUrls = new Set<GatewayUrl>();
 
     return ResultUtils.combine([
       this.configProvider.getConfig(),

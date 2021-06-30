@@ -1,7 +1,7 @@
 import {
   PublicIdentifier,
   EthereumAddress,
-  MerchantUrl,
+  GatewayUrl,
 } from "@hypernetlabs/objects";
 import { EPaymentType } from "@hypernetlabs/objects";
 import { EResultStatus } from "@web-ui/interfaces/objects";
@@ -21,7 +21,7 @@ interface PaymentWidgetProps {
   expirationDate?: number;
   requiredStake?: string;
   paymentTokenAddress?: EthereumAddress;
-  merchantUrl?: MerchantUrl;
+  merchantUrl?: GatewayUrl;
   paymentType?: EPaymentType;
 }
 

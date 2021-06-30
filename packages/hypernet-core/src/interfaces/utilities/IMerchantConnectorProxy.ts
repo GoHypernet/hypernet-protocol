@@ -8,7 +8,7 @@ import {
   EthereumAddress,
   MerchantActivationError,
   MerchantConnectorError,
-  MerchantUrl,
+  GatewayUrl,
   MerchantValidationError,
   PaymentId,
   ProxyError,
@@ -22,7 +22,7 @@ import { ResultAsync } from "neverthrow";
 import { Observable } from "rxjs";
 
 export interface IMerchantConnectorProxy extends ParentProxy {
-  merchantUrl: MerchantUrl;
+  merchantUrl: GatewayUrl;
 
   /**
    * activateProxy() sets up the merchant iframe and the communication

@@ -2,7 +2,7 @@ import {
   IAuthorizeFundsRequest,
   ISendFundsRequest,
 } from "@hypernetlabs/merchant-connector";
-import { MerchantUrl, PaymentId } from "@hypernetlabs/objects";
+import { GatewayUrl, PaymentId } from "@hypernetlabs/objects";
 import {
   ILogUtils,
   ILogUtilsType,
@@ -28,17 +28,17 @@ import { IContextProvider, IContextProviderType } from "@interfaces/utilities";
 @injectable()
 export class MerchantConnectorListener implements IMerchantConnectorListener {
   protected signMessageRequestedSubscriptionMap: Map<
-    MerchantUrl,
+    GatewayUrl,
     Subscription
-  > = new Map<MerchantUrl, Subscription>();
+  > = new Map<GatewayUrl, Subscription>();
   protected sendFundsRequestedSubscriptionMap: Map<
-    MerchantUrl,
+    GatewayUrl,
     Subscription
-  > = new Map<MerchantUrl, Subscription>();
+  > = new Map<GatewayUrl, Subscription>();
   protected authorizeFundsRequestedSubscriptionMap: Map<
-    MerchantUrl,
+    GatewayUrl,
     Subscription
-  > = new Map<MerchantUrl, Subscription>();
+  > = new Map<GatewayUrl, Subscription>();
 
   constructor(
     @inject(IAccountServiceType) protected accountService: IAccountService,
@@ -164,7 +164,7 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
     });
   }
 
-  protected _advanceMerchantRelatedPayments(merchantUrl: MerchantUrl): void {
+  protected _advanceMerchantRelatedPayments(merchantUrl: GatewayUrl): void {
     this.logUtils.debug(`Advancing payments for ${merchantUrl}`);
     this.linkService
       .getLinks()

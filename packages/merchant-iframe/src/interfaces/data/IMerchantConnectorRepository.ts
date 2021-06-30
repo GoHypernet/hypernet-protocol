@@ -1,18 +1,18 @@
 import {
   Signature,
   EthereumAddress,
-  MerchantUrl,
+  GatewayUrl,
   AjaxError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IMerchantConnectorRepository {
-  getMerchantCode(merchantUrl: MerchantUrl): ResultAsync<string, AjaxError>;
+  getMerchantCode(merchantUrl: GatewayUrl): ResultAsync<string, AjaxError>;
   getMerchantSignature(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<Signature, AjaxError>;
   getMerchantAddress(
-    merchantUrl: MerchantUrl,
+    merchantUrl: GatewayUrl,
   ): ResultAsync<EthereumAddress, AjaxError>;
 }
 

@@ -18,7 +18,7 @@ import PulseLoader from "react-spinners/PulseLoader";
 
 import { BoxWrapper, EmptyState } from "@web-ui/components";
 import { useMerchants } from "@web-ui/hooks";
-import { MerchantUrl } from "@hypernetlabs/objects";
+import { GatewayUrl } from "@hypernetlabs/objects";
 
 interface IMerchantsWidget extends IRenderParams {}
 
@@ -34,8 +34,8 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
     authorizeMerchant,
     loading,
   } = useMerchants();
-  const [inputMerchantUrl, setInputMerchantUrl] = useState<MerchantUrl>(
-    MerchantUrl(""),
+  const [inputMerchantUrl, setInputMerchantUrl] = useState<GatewayUrl>(
+    GatewayUrl(""),
   );
 
   const renderMerchantAuthorization = (): ReactNode => {
@@ -52,7 +52,7 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
             value={inputMerchantUrl}
             fullWidth
             onChange={(event) => {
-              setInputMerchantUrl(MerchantUrl(event.target.value));
+              setInputMerchantUrl(GatewayUrl(event.target.value));
             }}
           />
         </Box>
@@ -63,7 +63,7 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
           disabled={inputMerchantUrl == null || inputMerchantUrl == ""}
           onClick={() => {
             authorizeMerchant(inputMerchantUrl);
-            setInputMerchantUrl(MerchantUrl(""));
+            setInputMerchantUrl(GatewayUrl(""));
           }}
         >
           Authorize

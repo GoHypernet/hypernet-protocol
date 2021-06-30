@@ -1,4 +1,4 @@
-import { MerchantUrl } from "@hypernetlabs/objects";
+import { GatewayUrl } from "@hypernetlabs/objects";
 import {
   IAjaxUtils,
   AxiosAjaxUtils,
@@ -59,7 +59,7 @@ export class MerchantIframe {
 
   constructor() {
     // Instantiate all the pieces
-    this.contextProvider = new ContextProvider(MerchantUrl(""));
+    this.contextProvider = new ContextProvider(GatewayUrl(""));
     this.ajaxUtils = new AxiosAjaxUtils();
     this.localStorageUtils = new LocalStorageUtils();
     this.logUtils = new LogUtils();

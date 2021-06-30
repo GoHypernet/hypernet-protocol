@@ -1,6 +1,6 @@
 import {
   BigNumberString,
-  MerchantUrl,
+  GatewayUrl,
   PaymentId,
   PullPayment,
   EPaymentState,
@@ -34,7 +34,7 @@ export class PullPaymentViewModel {
   public createdTimestamp: ko.Observable<string>;
   public updatedTimestamp: ko.Observable<string>;
   public collateralRecovered: ko.Observable<string>;
-  public merchantUrl: ko.Observable<MerchantUrl>;
+  public merchantUrl: ko.Observable<GatewayUrl>;
   public authorizedAmount: ko.Observable<string>;
   public transferedAmount: ko.Observable<string>;
   public deltaAmount: ko.Observable<string>;

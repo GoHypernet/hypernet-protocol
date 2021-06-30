@@ -7,7 +7,7 @@ import {
   PaymentInternalDetails,
   PaymentId,
   EthereumAddress,
-  MerchantUrl,
+  GatewayUrl,
   Signature,
   Balances,
   EPaymentState,
@@ -76,7 +76,7 @@ class PaymentServiceMocks {
   public finalizedPushPayment: PushPayment;
 
   public assetBalance: AssetBalance;
-  public merchantAddresses: Map<MerchantUrl, EthereumAddress>;
+  public merchantAddresses: Map<GatewayUrl, EthereumAddress>;
 
   constructor(hypertokenBalance: BigNumberString = amount) {
     this.proposedPushPayment = this.factoryPushPayment();
@@ -211,7 +211,7 @@ class PaymentServiceMocks {
     ).thenReturn(okAsync(returnedPaymentsMap));
   }
 
-  public setMerchantStatus(merchantUrl: MerchantUrl, status: boolean) {
+  public setMerchantStatus(merchantUrl: GatewayUrl, status: boolean) {
     td.when(
       this.merchantConnectorRepository.getAuthorizedMerchantsConnectorsStatus(),
     ).thenReturn(okAsync(new Map([[merchantUrl, false]])));

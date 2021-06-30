@@ -1,6 +1,6 @@
 import { BigNumberString } from "@objects/BigNumberString";
 import { EthereumAddress } from "@objects/EthereumAddress";
-import { MerchantUrl } from "@objects/MerchantUrl";
+import { GatewayUrl } from "@objects/GatewayUrl";
 import { PaymentId } from "@objects/PaymentId";
 import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
@@ -20,7 +20,7 @@ export abstract class Payment {
     public createdTimestamp: UnixTimestamp,
     public updatedTimestamp: UnixTimestamp,
     public collateralRecovered: BigNumberString,
-    public merchantUrl: MerchantUrl,
+    public merchantUrl: GatewayUrl,
     public details: PaymentInternalDetails,
     public metadata: string | null,
   ) {}

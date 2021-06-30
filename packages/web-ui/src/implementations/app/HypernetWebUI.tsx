@@ -1,4 +1,4 @@
-import { IHypernetCore, MerchantUrl, RenderError } from "@hypernetlabs/objects";
+import { IHypernetCore, GatewayUrl, RenderError } from "@hypernetlabs/objects";
 import MainContainer from "@web-ui/containers/MainContainer";
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import {
