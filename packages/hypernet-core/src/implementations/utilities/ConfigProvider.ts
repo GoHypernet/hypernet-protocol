@@ -70,6 +70,7 @@ export class ConfigProvider implements IConfigProvider {
         ],
       ]),
       5 * 1000,
+      "HypernetProtocolControl",
       __DEBUG__, // debug
     );
   }

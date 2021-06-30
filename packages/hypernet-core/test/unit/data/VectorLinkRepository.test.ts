@@ -8,7 +8,6 @@ import {
   BigNumberString,
   UnixTimestamp,
 } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
