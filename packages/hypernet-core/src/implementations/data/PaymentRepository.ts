@@ -30,6 +30,7 @@ import {
   EMessageTransferType,
   BigNumberString,
   UnixTimestamp,
+  EPaymentState,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -436,7 +437,7 @@ export class PaymentRepository implements IPaymentRepository {
    * @param paymentId the payment to finalize
    * @param amount the amount of the payment to finalize for
    */
-  public finalizePayment(
+  public acceptPayment(
     paymentId: PaymentId,
     amount: string,
   ): ResultAsync<
@@ -461,14 +462,15 @@ export class PaymentRepository implements IPaymentRepository {
       .andThen((vals) => {
         [browserNode, existingTransfers] = vals;
 
-        this.logUtils.log(`Finalizing payment ${paymentId}`);
+        this.logUtils.debug(`Accepting payment ${paymentId}`);
 
         // get the transfer id from the paymentId
         // use payment utils for this
         return this.paymentUtils.sortTransfers(paymentId, existingTransfers);
       })
       .andThen((sortedTransfers) => {
-        if (sortedTransfers.parameterizedTransfer == null) {
+        const paymentState = this.paymentUtils.getPaymentState(sortedTransfers);
+        if (paymentState != EPaymentState.Approved) {
           return errAsync(
             new PaymentFinalizeError(
               `Cannot finalize payment ${paymentId}, no parameterized transfer exists for this!`,
@@ -477,7 +479,7 @@ export class PaymentRepository implements IPaymentRepository {
         }
 
         parameterizedTransferId = TransferId(
-          sortedTransfers.parameterizedTransfer.transferId,
+          sortedTransfers.parameterizedTransfers[0].transferId,
         );
 
         return this.vectorUtils.resolvePaymentTransfer(

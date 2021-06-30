@@ -251,7 +251,7 @@ export class PaymentService implements IPaymentService {
 
       if (payment == null) {
         return errAsync(
-          new LogicalError(
+          new InvalidPaymentError(
             `PaymentService:offerReceived():Could not get payment!`,
           ),
         );
@@ -414,6 +414,7 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     void,
+    | InvalidPaymentError
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
@@ -432,7 +433,7 @@ export class PaymentService implements IPaymentService {
 
       if (payment == null) {
         this.logUtils.error(`Invalid payment ID: ${paymentId}`);
-        return errAsync(new InvalidParametersError("Invalid payment ID!"));
+        return errAsync(new InvalidPaymentError("Invalid payment ID!"));
       }
 
       // Let the UI know we got an insurance transfer
@@ -844,7 +845,7 @@ export class PaymentService implements IPaymentService {
       if (payment instanceof PushPayment) {
         // Resolve the parameterized payment immediately for the full balance
         return this.paymentRepository
-          .finalizePayment(paymentId, payment.paymentAmount)
+          .acceptPayment(paymentId, payment.paymentAmount)
           .map((finalizedPayment) => {
             context.onPushPaymentUpdated.next(finalizedPayment as PushPayment);
             return payment;

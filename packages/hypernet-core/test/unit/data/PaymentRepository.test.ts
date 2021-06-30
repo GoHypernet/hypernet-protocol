@@ -321,13 +321,13 @@ describe("PaymentRepository tests", () => {
     expect(error).toBeInstanceOf(VectorError);
   });
 
-  test("Should finalizePayment work and return Payment without any errors", async () => {
+  test("Should acceptPayment work and return Payment without any errors", async () => {
     // Arrange
     const paymentRepositoryMocks = new PaymentRepositoryMocks();
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    const result = await repo.finalizePayment(commonPaymentId, commonAmount);
+    const result = await repo.acceptPayment(commonPaymentId, commonAmount);
 
     // Assert
     expect(result).toBeDefined();
@@ -335,13 +335,13 @@ describe("PaymentRepository tests", () => {
     expect(result._unsafeUnwrap()).toBe(paymentRepositoryMocks.approvedPayment);
   });
 
-  test("Should finalizePayment return error if getBrowserNode failed", async () => {
+  test("Should acceptPayment return error if getBrowserNode failed", async () => {
     // Arrange
     const paymentRepositoryMocks = new PaymentRepositoryErrorMocks();
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    const result = await repo.finalizePayment(commonPaymentId, commonAmount);
+    const result = await repo.acceptPayment(commonPaymentId, commonAmount);
     const error = result._unsafeUnwrapErr();
 
     // Assert

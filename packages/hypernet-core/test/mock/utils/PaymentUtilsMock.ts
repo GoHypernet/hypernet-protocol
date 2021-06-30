@@ -4,6 +4,7 @@ import {
   PushPayment,
   SortedTransfers,
   IFullTransferState,
+  EPaymentState,
 } from "@hypernetlabs/objects";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
@@ -124,9 +125,9 @@ export class PaymentUtilsMockFactory {
     ).thenReturn(
       okAsync(
         new SortedTransfers(
-          browserNodeProvider.offerTransfer,
-          null,
-          null,
+          [browserNodeProvider.offerTransfer],
+          [],
+          [],
           [],
           browserNodeProvider.offerDetails,
         ),
@@ -143,9 +144,9 @@ export class PaymentUtilsMockFactory {
     ).thenReturn(
       okAsync(
         new SortedTransfers(
-          browserNodeProvider.offerTransfer,
-          browserNodeProvider.insuranceTransfer,
-          browserNodeProvider.parameterizedTransfer,
+          [browserNodeProvider.offerTransfer],
+          [browserNodeProvider.insuranceTransfer],
+          [browserNodeProvider.parameterizedTransfer],
           [],
           browserNodeProvider.offerDetails,
         ),
@@ -159,6 +160,52 @@ export class PaymentUtilsMockFactory {
         }),
       ),
     ).thenReturn(unixPast as never);
+
+    // getPaymentState is just a simple state machine
+    td.when(
+      paymentUtils.getPaymentState(
+        td.matchers.argThat((arg: SortedTransfers) => {
+          return (
+            arg.parameterizedTransfers != null &&
+            arg.parameterizedTransfers.length > 0 &&
+            arg.insuranceTransfers != null &&
+            arg.insuranceTransfers.length > 0 &&
+            arg.offerTransfers != null &&
+            arg.offerTransfers.length > 0
+          );
+        }),
+      ),
+    ).thenReturn(EPaymentState.Approved);
+
+    td.when(
+      paymentUtils.getPaymentState(
+        td.matchers.argThat((arg: SortedTransfers) => {
+          return (
+            arg.parameterizedTransfers != null &&
+            arg.parameterizedTransfers.length == 0 &&
+            arg.insuranceTransfers != null &&
+            arg.insuranceTransfers.length > 0 &&
+            arg.offerTransfers != null &&
+            arg.offerTransfers.length > 0
+          );
+        }),
+      ),
+    ).thenReturn(EPaymentState.Staked);
+
+    td.when(
+      paymentUtils.getPaymentState(
+        td.matchers.argThat((arg: SortedTransfers) => {
+          return (
+            arg.parameterizedTransfers != null &&
+            arg.parameterizedTransfers.length == 0 &&
+            arg.insuranceTransfers != null &&
+            arg.insuranceTransfers.length == 0 &&
+            arg.offerTransfers != null &&
+            arg.offerTransfers.length > 0
+          );
+        }),
+      ),
+    ).thenReturn(EPaymentState.Proposed);
 
     return paymentUtils;
   }
