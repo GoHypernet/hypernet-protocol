@@ -768,7 +768,7 @@ export class HypernetCore implements IHypernetCore {
         ]); // , this.threeboxMessagingListener.initialize()]);
       })
       .andThen(() => {
-        return this.merchantConnectorService.activateAuthorizedMerchants();
+        return this.merchantConnectorService.activateAuthorizedGateways();
       })
       // .andThen(() => {
       //   // Claim control
@@ -812,18 +812,18 @@ export class HypernetCore implements IHypernetCore {
     return this.merchantConnectorService.deauthorizeMerchant(merchantUrl);
   }
 
-  public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
+  public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
     PersistenceError
   > {
-    return this.merchantConnectorService.getAuthorizedMerchantsConnectorsStatus();
+    return this.merchantConnectorService.getAuthorizedGatewaysConnectorsStatus();
   }
 
-  public getAuthorizedMerchants(): ResultAsync<
+  public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
     PersistenceError
   > {
-    return this.merchantConnectorService.getAuthorizedMerchants();
+    return this.merchantConnectorService.getAuthorizedGateways();
   }
 
   public closeMerchantIFrame(

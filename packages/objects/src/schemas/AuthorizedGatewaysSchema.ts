@@ -1,6 +1,6 @@
-export const AuthorizedMerchantsSchema = {
+export const AuthorizedGatewaysSchema = {
   $schema: "http://json-schema.org/draft-07/schema",
-  title: "AuthorizedMerchants",
+  title: "AuthorizedGateways",
   type: "object",
   properties: {
     data: {

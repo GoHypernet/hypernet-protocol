@@ -112,7 +112,7 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
                   title={
                     merchantsMap.get(merchantUrl)
                       ? "View merchant application"
-                      : "Merchant is inactive"
+                      : "Gateway is inactive"
                   }
                   placement="top"
                 >

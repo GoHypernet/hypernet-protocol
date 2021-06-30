@@ -1,5 +1,5 @@
 import {
-  AuthorizedMerchantsSchema,
+  AuthorizedGatewaysSchema,
   DefinitionName,
   HypernetConfig,
   SchemaUrl,
@@ -43,7 +43,7 @@ export class ConfigProviderMock implements IConfigProvider {
         "https://ceramic-clay.3boxlabs.com",
         new Map([
           [
-            DefinitionName(AuthorizedMerchantsSchema.title),
+            DefinitionName(AuthorizedGatewaysSchema.title),
             SchemaUrl(
               "kjzl6cwe1jw148ngghzoumihdtadlx9rzodfjlq5tv01jzr7cin7jx3g3gtfxf3",
             ),

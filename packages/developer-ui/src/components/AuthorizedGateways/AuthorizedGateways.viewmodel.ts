@@ -2,9 +2,9 @@ import { GatewayUrl } from "@hypernetlabs/objects";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import ko from "knockout";
 
-import html from "./AuthorizedMerchants.template.html";
+import html from "./AuthorizedGateways.template.html";
 
-export class AuthorizedMerchantsParams {
+export class AuthorizedGatewaysParams {
   constructor(public integration: IHypernetWebIntegration) {}
 }
 
@@ -13,25 +13,25 @@ export class MerchantStatus {
 }
 
 // tslint:disable-next-line: max-classes-per-file
-export class AuthorizedMerchantsViewModel {
-  public authorizedMerchants: ko.ObservableArray<MerchantStatus>;
+export class AuthorizedGatewaysViewModel {
+  public authorizedGateways: ko.ObservableArray<MerchantStatus>;
 
   protected integration: IHypernetWebIntegration;
 
-  constructor(params: AuthorizedMerchantsParams) {
+  constructor(params: AuthorizedGatewaysParams) {
     this.integration = params.integration;
 
-    this.authorizedMerchants = ko.observableArray();
+    this.authorizedGateways = ko.observableArray();
 
     this.integration.core.onMerchantAuthorized.subscribe({
       next: (val) => {
-        this.authorizedMerchants.push(
+        this.authorizedGateways.push(
           new MerchantStatus(GatewayUrl(val.toString()), true),
         );
       },
     });
 
-    this.getAuthorizedMerchants();
+    this.getAuthorizedGateways();
   }
 
   openMerchantIFrameClick = (merchantStatus: MerchantStatus) => {
@@ -45,28 +45,28 @@ export class AuthorizedMerchantsViewModel {
       this.integration.core
         .deauthorizeMerchant(merchantStatus.merchantUrl)
         .map(() => {
-          this.getAuthorizedMerchants();
+          this.getAuthorizedGateways();
         });
     });
   };
 
-  getAuthorizedMerchants() {
+  getAuthorizedGateways() {
     this.integration.core
       .waitInitialized()
       .andThen(() => {
-        return this.integration.core.getAuthorizedMerchantsConnectorsStatus();
+        return this.integration.core.getAuthorizedGatewaysConnectorsStatus();
       })
       .map((merchantsMap) => {
         const merchantStrings = new Array<MerchantStatus>();
         for (const [merchantUrl, status] of merchantsMap.entries()) {
           merchantStrings.push(new MerchantStatus(merchantUrl, status));
         }
-        this.authorizedMerchants(merchantStrings);
+        this.authorizedGateways(merchantStrings);
       });
   }
 }
 
 ko.components.register("authorized-merchants", {
-  viewModel: AuthorizedMerchantsViewModel,
+  viewModel: AuthorizedGatewaysViewModel,
   template: html,
 });

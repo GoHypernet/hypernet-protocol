@@ -53,7 +53,7 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
     return this.contextProvider.getContext().map((context) => {
       context.onMerchantConnectorProxyActivated.subscribe((proxy) => {
         this.logUtils.debug(
-          `Merchant connector proxy activated ${proxy.merchantUrl}`,
+          `Gateway connector proxy activated ${proxy.merchantUrl}`,
         );
 
         this._advanceMerchantRelatedPayments(proxy.merchantUrl);
@@ -62,7 +62,7 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
         const signMessageRequestedSubscription = proxy.signMessageRequested.subscribe(
           (message) => {
             this.logUtils.debug(
-              `Merchant Connector ${proxy.merchantUrl} requested to sign message ${message}`,
+              `Gateway Connector ${proxy.merchantUrl} requested to sign message ${message}`,
             );
 
             this.accountService
@@ -84,7 +84,7 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
         const sendFundsRequestedSubscription = proxy.sendFundsRequested.subscribe(
           (request) => {
             this.logUtils.debug(
-              `Merchant Connector ${proxy.merchantUrl} requested to send funds to ${request.recipientPublicIdentifier}`,
+              `Gateway Connector ${proxy.merchantUrl} requested to send funds to ${request.recipientPublicIdentifier}`,
             );
 
             // Validate some things
@@ -118,7 +118,7 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
         const authorizeFundsRequestedSubscription = proxy.authorizeFundsRequested.subscribe(
           (request) => {
             this.logUtils.debug(
-              `Merchant Connector ${proxy.merchantUrl} requested to authorize funds for ${request.recipientPublicIdentifier}`,
+              `Gateway Connector ${proxy.merchantUrl} requested to authorize funds for ${request.recipientPublicIdentifier}`,
             );
 
             if (this.validateAuthorizeFundsRequest(request)) {

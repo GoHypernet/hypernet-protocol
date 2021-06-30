@@ -61,7 +61,7 @@ const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> = 
         <Box className={classes.balancesEmptyLabel}>You are one step away!</Box>
       )}
       <Button
-        label="Authorize Merchant"
+        label="Authorize Gateway"
         onClick={handleMerchantAuthorization}
         fullWidth={true}
         bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"

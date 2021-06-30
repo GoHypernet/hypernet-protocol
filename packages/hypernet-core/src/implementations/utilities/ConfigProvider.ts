@@ -3,7 +3,7 @@ import {
   EthereumAddress,
   HypernetConfig,
   PublicIdentifier,
-  AuthorizedMerchantsSchema,
+  AuthorizedGatewaysSchema,
   DefinitionName,
   SchemaUrl,
 } from "@hypernetlabs/objects";
@@ -63,7 +63,7 @@ export class ConfigProvider implements IConfigProvider {
       __CERAMIC_NODE_URL__, // ceramicNodeUrl,
       new Map([
         [
-          DefinitionName(AuthorizedMerchantsSchema.title),
+          DefinitionName(AuthorizedGatewaysSchema.title),
           SchemaUrl(
             "kjzl6cwe1jw148ngghzoumihdtadlx9rzodfjlq5tv01jzr7cin7jx3g3gtfxf3",
           ),

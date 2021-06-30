@@ -97,13 +97,13 @@ export class MerchantConnectorService implements IMerchantConnectorService {
   ): ResultAsync<void, MerchantValidationError> {
     return ResultUtils.combine([
       this.contextProvider.getContext(),
-      this.getAuthorizedMerchants(),
+      this.getAuthorizedGateways(),
       this.accountsRepository.getBalances(),
     ]).map(async (vals) => {
-      const [context, authorizedMerchantsMap, balances] = vals;
+      const [context, authorizedGatewaysMap, balances] = vals;
 
       // Remove the merchant iframe proxy related to that merchantUrl if there is any activated ones.
-      if (authorizedMerchantsMap.get(merchantUrl)) {
+      if (authorizedGatewaysMap.get(merchantUrl)) {
         this.merchantConnectorRepository.deauthorizeMerchant(merchantUrl);
       }
 
@@ -131,21 +131,21 @@ export class MerchantConnectorService implements IMerchantConnectorService {
     });
   }
 
-  public getAuthorizedMerchants(): ResultAsync<
+  public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
     PersistenceError
   > {
-    return this.merchantConnectorRepository.getAuthorizedMerchants();
+    return this.merchantConnectorRepository.getAuthorizedGateways();
   }
 
-  public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
+  public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
     PersistenceError
   > {
-    return this.merchantConnectorRepository.getAuthorizedMerchantsConnectorsStatus();
+    return this.merchantConnectorRepository.getAuthorizedGatewaysConnectorsStatus();
   }
 
-  public activateAuthorizedMerchants(): ResultAsync<
+  public activateAuthorizedGateways(): ResultAsync<
     void,
     | MerchantConnectorError
     | MerchantValidationError
@@ -154,7 +154,7 @@ export class MerchantConnectorService implements IMerchantConnectorService {
     | ProxyError
   > {
     return this.accountsRepository.getBalances().andThen((balances) => {
-      return this.merchantConnectorRepository.activateAuthorizedMerchants(
+      return this.merchantConnectorRepository.activateAuthorizedGateways(
         balances,
       );
     });

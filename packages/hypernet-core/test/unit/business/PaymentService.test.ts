@@ -166,7 +166,7 @@ class PaymentServiceMocks {
     ).thenReturn(okAsync(this.merchantAddresses));
 
     td.when(
-      this.merchantConnectorRepository.getAuthorizedMerchants(),
+      this.merchantConnectorRepository.getAuthorizedGateways(),
     ).thenReturn(okAsync(new Map([[merchantUrl, validatedSignature]])));
 
     td.when(
@@ -177,7 +177,7 @@ class PaymentServiceMocks {
     ).thenReturn(okAsync(undefined));
 
     td.when(
-      this.merchantConnectorRepository.getAuthorizedMerchantsConnectorsStatus(),
+      this.merchantConnectorRepository.getAuthorizedGatewaysConnectorsStatus(),
     ).thenReturn(okAsync(new Map([[merchantUrl, true]])));
 
     td.when(
@@ -213,7 +213,7 @@ class PaymentServiceMocks {
 
   public setMerchantStatus(merchantUrl: GatewayUrl, status: boolean) {
     td.when(
-      this.merchantConnectorRepository.getAuthorizedMerchantsConnectorsStatus(),
+      this.merchantConnectorRepository.getAuthorizedGatewaysConnectorsStatus(),
     ).thenReturn(okAsync(new Map([[merchantUrl, false]])));
   }
 

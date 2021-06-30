@@ -207,12 +207,12 @@ export class MerchantService implements IMerchantService {
         if (calculatedAddress !== address) {
           return errAsync<Signature, MerchantValidationError>(
             new MerchantValidationError(
-              "Merchant code does not match signature!",
+              "Gateway code does not match signature!",
             ),
           );
         }
 
-        // Merchant's code passes muster. Store the merchant code in the context as validated.
+        // Gateway's code passes muster. Store the merchant code in the context as validated.
         this.contextProvider.setValidatedMerchantConnector(
           merchantCode,
           signature,

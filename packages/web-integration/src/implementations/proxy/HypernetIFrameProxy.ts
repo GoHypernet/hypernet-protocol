@@ -405,24 +405,24 @@ export default class HypernetIFrameProxy
     return this._createCall("deauthorizeMerchant", merchantUrl);
   }
 
-  public getAuthorizedMerchants(): ResultAsync<
+  public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
     PersistenceError
   > {
-    return this._createCall("getAuthorizedMerchants", null);
+    return this._createCall("getAuthorizedGateways", null);
   }
 
-  public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
+  public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
     PersistenceError
   > {
-    return this._createCall("getAuthorizedMerchantsConnectorsStatus", null);
+    return this._createCall("getAuthorizedGatewaysConnectorsStatus", null);
   }
 
   public displayMerchantIFrame(
     merchantUrl: GatewayUrl,
   ): ResultAsync<void, MerchantConnectorError> {
-    return this.getAuthorizedMerchantsConnectorsStatus().andThen(
+    return this.getAuthorizedGatewaysConnectorsStatus().andThen(
       (merchantsMap) => {
         if (merchantsMap.get(merchantUrl) == true) {
           this._displayCoreIFrame();
@@ -430,7 +430,7 @@ export default class HypernetIFrameProxy
           return this._createCall("displayMerchantIFrame", merchantUrl);
         } else {
           alert(
-            `Merchant ${merchantUrl} is not activated at the moment, try again later`,
+            `Gateway ${merchantUrl} is not activated at the moment, try again later`,
           );
           return okAsync(undefined);
         }

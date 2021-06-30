@@ -7,7 +7,7 @@ import {
   TransferResolutionError,
   MerchantActivationError,
   ProxyError,
-  AuthorizedMerchantsSchema,
+  AuthorizedGatewaysSchema,
 } from "@hypernetlabs/objects";
 import { IBasicTransferResponse } from "@hypernetlabs/objects";
 import { IAjaxUtils, ILogUtils } from "@hypernetlabs/utils";
@@ -71,13 +71,13 @@ class MerchantConnectorRepositoryMocks {
 
   public expectedSignerTypes = {
     AuthorizedMerchant: [
-      { name: "authorizedMerchantUrl", type: "string" },
+      { name: "authorizedGatewayUrl", type: "string" },
       { name: "merchantValidatedSignature", type: "string" },
     ],
   };
 
   public expectedSignerValue = {
-    authorizedMerchantUrl: merchantUrl,
+    authorizedGatewayUrl: merchantUrl,
     merchantValidatedSignature: validatedSignature,
   };
 
@@ -96,7 +96,7 @@ class MerchantConnectorRepositoryMocks {
 
     td.when(
       this.storageUtils.read<IAuthorizedMerchantEntry[]>(
-        AuthorizedMerchantsSchema.title,
+        AuthorizedGatewaysSchema.title,
       ),
     ).thenReturn(
       okAsync([
@@ -163,56 +163,56 @@ class MerchantConnectorRepositoryMocks {
 }
 
 describe("MerchantConnectorRepository tests", () => {
-  test("getAuthorizedMerchants returns a map", async () => {
+  test("getAuthorizedGateways returns a map", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.getAuthorizedMerchants();
+    const result = await repo.getAuthorizedGateways();
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    const authorizedMerchants = result._unsafeUnwrap();
-    expect(authorizedMerchants.size).toBe(1);
-    expect(authorizedMerchants.get(merchantUrl)).toBe(authorizationSignature);
+    const authorizedGateways = result._unsafeUnwrap();
+    expect(authorizedGateways.size).toBe(1);
+    expect(authorizedGateways.get(merchantUrl)).toBe(authorizationSignature);
   });
 
-  test("getAuthorizedMerchants returns an empty map", async () => {
+  test("getAuthorizedGateways returns an empty map", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
     td.when(
-      mocks.storageUtils.read(AuthorizedMerchantsSchema.title),
+      mocks.storageUtils.read(AuthorizedGatewaysSchema.title),
     ).thenReturn(okAsync(null));
 
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.getAuthorizedMerchants();
+    const result = await repo.getAuthorizedGateways();
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    const authorizedMerchants = result._unsafeUnwrap();
-    expect(authorizedMerchants.size).toBe(0);
+    const authorizedGateways = result._unsafeUnwrap();
+    expect(authorizedGateways.size).toBe(0);
   });
 
-  test("activateAuthorizedMerchants returns successfully", async () => {
+  test("activateAuthorizedGateways returns successfully", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.activateAuthorizedMerchants(balances);
+    const result = await repo.activateAuthorizedGateways(balances);
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
   });
 
-  test("activateAuthorizedMerchants re-authenticates if the signature has changed", async () => {
+  test("activateAuthorizedGateways re-authenticates if the signature has changed", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
@@ -225,7 +225,7 @@ describe("MerchantConnectorRepository tests", () => {
       ),
     ).thenReturn(account2 as never);
 
-    const authorizedMerchantEntry = [
+    const authorizedGatewayEntry = [
       {
         merchantUrl: merchantUrl,
         authorizationSignature: newAuthorizationSignature,
@@ -234,8 +234,8 @@ describe("MerchantConnectorRepository tests", () => {
 
     td.when(
       mocks.storageUtils.write<IAuthorizedMerchantEntry[]>(
-        AuthorizedMerchantsSchema.title,
-        authorizedMerchantEntry,
+        AuthorizedGatewaysSchema.title,
+        authorizedGatewayEntry,
       ),
     ).thenReturn(okAsync(undefined));
 
@@ -247,7 +247,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.activateAuthorizedMerchants(balances);
+    const result = await repo.activateAuthorizedGateways(balances);
 
     // Assert
     expect(result).toBeDefined();
@@ -256,7 +256,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(onAuthorizedMerchantUpdatedVal).toBe(merchantUrl);
   });
 
-  test("activateAuthorizedMerchants passes if proxy can not be factoried", async () => {
+  test("activateAuthorizedGateways passes if proxy can not be factoried", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
@@ -275,7 +275,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.activateAuthorizedMerchants(balances);
+    const result = await repo.activateAuthorizedGateways(balances);
 
     // Assert
     expect(result).toBeDefined();
@@ -283,7 +283,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(onAuthorizedMerchantActivationFailedVal).toBe(merchantUrl);
   });
 
-  test("activateAuthorizedMerchants passes if one of the merchant connector's signatures can't be verified by the iFrame.", async () => {
+  test("activateAuthorizedGateways passes if one of the merchant connector's signatures can't be verified by the iFrame.", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
@@ -302,7 +302,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.activateAuthorizedMerchants(balances);
+    const result = await repo.activateAuthorizedGateways(balances);
 
     // Assert
     expect(result).toBeDefined();
@@ -310,7 +310,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(onAuthorizedMerchantActivationFailedVal).toBe(merchantUrl);
   });
 
-  test("activateAuthorizedMerchants passes if the connector can not be activated and make sure proxy is destroyed", async () => {
+  test("activateAuthorizedGateways passes if the connector can not be activated and make sure proxy is destroyed", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
@@ -332,7 +332,7 @@ describe("MerchantConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.activateAuthorizedMerchants(balances);
+    const result = await repo.activateAuthorizedGateways(balances);
 
     // Assert
     expect(result).toBeDefined();
@@ -348,7 +348,7 @@ describe("MerchantConnectorRepository tests", () => {
 
     // Act
     const result = await repo
-      .activateAuthorizedMerchants(balances)
+      .activateAuthorizedGateways(balances)
       .andThen(() => {
         return repo.resolveChallenge(
           merchantUrl,
@@ -362,7 +362,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(result.isErr()).toBeFalsy();
   });
 
-  test("resolveChallenge fire an error if activateAuthorizedMerchants is not called", async () => {
+  test("resolveChallenge fire an error if activateAuthorizedGateways is not called", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
     const repo = mocks.factoryRepository();
@@ -394,7 +394,7 @@ describe("MerchantConnectorRepository tests", () => {
 
     // Act
     const result = await repo
-      .activateAuthorizedMerchants(balances)
+      .activateAuthorizedGateways(balances)
       .andThen(() => {
         return repo.resolveChallenge(
           merchantUrl,
@@ -426,7 +426,7 @@ describe("MerchantConnectorRepository tests", () => {
 
     // Act
     const result = await repo
-      .activateAuthorizedMerchants(balances)
+      .activateAuthorizedGateways(balances)
       .andThen(() => {
         return repo.resolveChallenge(
           merchantUrl,
@@ -446,10 +446,10 @@ describe("MerchantConnectorRepository tests", () => {
     const mocks = new MerchantConnectorRepositoryMocks();
 
     td.when(
-      mocks.storageUtils.read(AuthorizedMerchantsSchema.title),
+      mocks.storageUtils.read(AuthorizedGatewaysSchema.title),
     ).thenReturn(okAsync(null));
 
-    const authorizedMerchantEntry = [
+    const authorizedGatewayEntry = [
       {
         merchantUrl: merchantUrl,
         authorizationSignature: newAuthorizationSignature,
@@ -458,8 +458,8 @@ describe("MerchantConnectorRepository tests", () => {
 
     td.when(
       mocks.storageUtils.write<IAuthorizedMerchantEntry[]>(
-        AuthorizedMerchantsSchema.title,
-        authorizedMerchantEntry,
+        AuthorizedGatewaysSchema.title,
+        authorizedGatewayEntry,
       ),
     ).thenReturn(okAsync(undefined));
 
@@ -478,7 +478,7 @@ describe("MerchantConnectorRepository tests", () => {
     const mocks = new MerchantConnectorRepositoryMocks();
 
     td.when(
-      mocks.storageUtils.read(AuthorizedMerchantsSchema.title),
+      mocks.storageUtils.read(AuthorizedGatewaysSchema.title),
     ).thenReturn(okAsync(null));
 
     const error = new MerchantConnectorError();
@@ -511,7 +511,7 @@ describe("MerchantConnectorRepository tests", () => {
     const mocks = new MerchantConnectorRepositoryMocks();
 
     td.when(
-      mocks.storageUtils.read(AuthorizedMerchantsSchema.title),
+      mocks.storageUtils.read(AuthorizedGatewaysSchema.title),
     ).thenReturn(okAsync(null));
 
     const error = new MerchantValidationError();
@@ -544,7 +544,7 @@ describe("MerchantConnectorRepository tests", () => {
     const mocks = new MerchantConnectorRepositoryMocks();
 
     td.when(
-      mocks.storageUtils.read(AuthorizedMerchantsSchema.title),
+      mocks.storageUtils.read(AuthorizedGatewaysSchema.title),
     ).thenReturn(okAsync(null));
 
     const error = new MerchantValidationError();
@@ -581,10 +581,10 @@ describe("MerchantConnectorRepository tests", () => {
     const mocks = new MerchantConnectorRepositoryMocks();
 
     td.when(
-      mocks.storageUtils.read(AuthorizedMerchantsSchema.title),
+      mocks.storageUtils.read(AuthorizedGatewaysSchema.title),
     ).thenReturn(okAsync(null));
 
-    const authorizedMerchantEntry = [
+    const authorizedGatewayEntry = [
       {
         merchantUrl: merchantUrl,
         authorizationSignature: newAuthorizationSignature,
@@ -593,8 +593,8 @@ describe("MerchantConnectorRepository tests", () => {
 
     td.when(
       mocks.storageUtils.write<IAuthorizedMerchantEntry[]>(
-        AuthorizedMerchantsSchema.title,
-        authorizedMerchantEntry,
+        AuthorizedGatewaysSchema.title,
+        authorizedGatewayEntry,
       ),
     ).thenReturn(okAsync(undefined));
 
@@ -633,7 +633,7 @@ describe("MerchantConnectorRepository tests", () => {
 
     // Act
     const result = await repo
-      .activateAuthorizedMerchants(balances)
+      .activateAuthorizedGateways(balances)
       .andThen(() => {
         return repo.getMerchantAddresses([merchantUrl]);
       });
@@ -687,7 +687,7 @@ describe("MerchantConnectorRepository tests", () => {
 
     // Act
     const result = await repo
-      .activateAuthorizedMerchants(balances)
+      .activateAuthorizedGateways(balances)
       .andThen(() => {
         return repo.getMerchantAddresses([merchantUrl, merchantUrl2]);
       });
@@ -718,7 +718,7 @@ describe("MerchantConnectorRepository tests", () => {
 
     // Act
     const result = await repo
-      .activateAuthorizedMerchants(balances)
+      .activateAuthorizedGateways(balances)
       .andThen(() => {
         return repo.getMerchantAddresses([merchantUrl, merchantUrl2]);
       });
@@ -730,7 +730,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(value).toBe(error);
   });
 
-  test("getAuthorizedMerchantsConnectorsStatus returns map of merchant urls and status", async () => {
+  test("getAuthorizedGatewaysConnectorsStatus returns map of merchant urls and status", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
     const repo = mocks.factoryRepository();
@@ -738,9 +738,9 @@ describe("MerchantConnectorRepository tests", () => {
 
     // Act
     const result = await repo
-      .activateAuthorizedMerchants(balances)
+      .activateAuthorizedGateways(balances)
       .andThen(() => {
-        return repo.getAuthorizedMerchantsConnectorsStatus();
+        return repo.getAuthorizedGatewaysConnectorsStatus();
       });
 
     // Assert
@@ -760,7 +760,7 @@ describe("MerchantConnectorRepository tests", () => {
     );
 
     // Act
-    await repo.activateAuthorizedMerchants(balances);
+    await repo.activateAuthorizedGateways(balances);
     const result = await repo.deauthorizeMerchant(merchantUrl);
 
     // Assert
@@ -779,7 +779,7 @@ describe("MerchantConnectorRepository tests", () => {
     );
 
     // Act
-    await repo.activateAuthorizedMerchants(balances);
+    await repo.activateAuthorizedGateways(balances);
     const result = await repo.deauthorizeMerchant(merchantUrl);
 
     // Assert

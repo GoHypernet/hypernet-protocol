@@ -392,7 +392,7 @@ export class PaymentService implements IPaymentService {
             stakeAttempts.push(stakeAttempt);
           } else {
             throw new LogicalError(
-              "Merchant does not have a public key; are they ",
+              "Gateway does not have a public key; are they ",
             );
           }
         }
@@ -769,7 +769,7 @@ export class PaymentService implements IPaymentService {
     this.logUtils.debug(`Advancing payment ${payment.id}`);
 
     return this.merchantConnectorRepository
-      .getAuthorizedMerchantsConnectorsStatus()
+      .getAuthorizedGatewaysConnectorsStatus()
       .andThen((merchantConnectorStatusMap) => {
         const merchantConnectorStatus = merchantConnectorStatusMap.get(
           payment.merchantUrl,

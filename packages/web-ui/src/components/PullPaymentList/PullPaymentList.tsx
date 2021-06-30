@@ -202,7 +202,7 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
                 "Updated",
                 dateUtils.fromTimestampToUI(pullPayment.updatedTimestamp),
               )}
-              {renderListItem("Merchant URL", pullPayment.merchantUrl)}
+              {renderListItem("Gateway URL", pullPayment.merchantUrl)}
               {renderListItem(
                 "Authorized Amount",
                 viewUtils.fromBigNumberWei(pullPayment.authorizedAmount),

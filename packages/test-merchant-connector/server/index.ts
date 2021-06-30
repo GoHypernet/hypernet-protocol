@@ -52,7 +52,7 @@ const server = app.listen(5010, () => {
   if (addressInfo != null) {
     var host = addressInfo.address;
     var port = addressInfo.port;
-    console.log("Example Merchant listening at http://%s:%s", host, port);
+    console.log("Example Gateway listening at http://%s:%s", host, port);
     console.log(`filename: ${filename}`);
   }
 });

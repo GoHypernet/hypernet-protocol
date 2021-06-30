@@ -73,7 +73,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
         stateKey: "to",
       },
       {
-        label: "Search By Merchant URL",
+        label: "Search By Gateway URL",
         widgetType: EItemType.stringInput,
         stateKey: "merchantUrl",
       },

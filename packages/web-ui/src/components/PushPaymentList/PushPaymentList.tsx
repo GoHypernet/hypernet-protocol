@@ -190,7 +190,7 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
                 "Updated",
                 dateUtils.fromTimestampToUI(pushPayment.updatedTimestamp),
               )}
-              {renderListItem("Merchant URL", pushPayment.merchantUrl)}
+              {renderListItem("Gateway URL", pushPayment.merchantUrl)}
               {renderListItem(
                 "Payment Amount",
                 viewUtils.fromBigNumberWei(pushPayment.paymentAmount),

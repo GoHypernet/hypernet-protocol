@@ -71,7 +71,7 @@ export class ContextProviderMock implements IContextProvider {
   public onMerchantConnectorActivated: Subject<IMerchantConnectorProxy>;
   public onMerchantConnectorActivatedActivations: IMerchantConnectorProxy[] = [];
 
-  public authorizedMerchants: Map<GatewayUrl, Signature>;
+  public authorizedGateways: Map<GatewayUrl, Signature>;
 
   constructor(
     context: HypernetContext | null = null,
@@ -193,7 +193,7 @@ export class ContextProviderMock implements IContextProvider {
       this.onMerchantConnectorActivatedActivations.push(val);
     });
 
-    this.authorizedMerchants = new Map<GatewayUrl, Signature>();
+    this.authorizedGateways = new Map<GatewayUrl, Signature>();
 
     if (context != null) {
       this.context = context;
@@ -260,7 +260,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onInitializationRequired,
         this.onPrivateCredentialsRequested,
         this.onMerchantConnectorActivated,
-        this.authorizedMerchants,
+        this.authorizedGateways,
       );
     }
   }
@@ -309,7 +309,7 @@ export class ContextProviderMock implements IContextProvider {
       onInitializationRequired: 0,
       onPrivateCredentialsRequested: 0,
       onMerchantConnectorActivated: 0,
-      authorizedMerchants: 0,
+      authorizedGateways: 0,
     };
 
     // Merge the passed in counts with the basic counts
@@ -411,5 +411,5 @@ export interface IExpectedEventCounts {
   onInitializationRequired?: number;
   onPrivateCredentialsRequested?: number;
   onMerchantConnectorActivated?: number;
-  authorizedMerchants?: number;
+  authorizedGateways?: number;
 }

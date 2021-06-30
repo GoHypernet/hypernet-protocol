@@ -18,13 +18,13 @@ const domain = {
 
 const types = {
   AuthorizedMerchant: [
-    { name: "authorizedMerchantUrl", type: "string" },
+    { name: "authorizedGatewayUrl", type: "string" },
     { name: "merchantValidatedSignature", type: "string" },
   ],
 };
 
 const value = {
-  authorizedMerchantUrl: merchantUrl,
+  authorizedGatewayUrl: merchantUrl,
   merchantValidatedSignature: validatedSignature,
 };
 
@@ -85,7 +85,7 @@ describe("EthersBlockchainUtils tests", () => {
 
     // Act
     const value2 = {
-      authorizedMerchantUrl: merchantUrl,
+      authorizedGatewayUrl: merchantUrl,
       merchantValidatedSignature: validatedSignature2,
     };
     const result = utils.verifyTypedData(

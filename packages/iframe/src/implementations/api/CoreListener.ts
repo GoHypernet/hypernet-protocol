@@ -189,14 +189,14 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.mintTestToken(data.data);
         }, data.callId);
       },
-      getAuthorizedMerchants: (data: IIFrameCallData<void>) => {
+      getAuthorizedGateways: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getAuthorizedMerchants();
+          return this.core.getAuthorizedGateways();
         }, data.callId);
       },
-      getAuthorizedMerchantsConnectorsStatus: (data: IIFrameCallData<void>) => {
+      getAuthorizedGatewaysConnectorsStatus: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getAuthorizedMerchantsConnectorsStatus();
+          return this.core.getAuthorizedGatewaysConnectorsStatus();
         }, data.callId);
       },
       providePrivateCredentials: (

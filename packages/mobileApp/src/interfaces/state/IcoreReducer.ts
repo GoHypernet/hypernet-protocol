@@ -7,7 +7,7 @@ export enum ECoreViewDataKeys {
   balances = "balances",
   links = "links",
   activeLinks = "activeLinks",
-  authorizedMerchants = "authorizedMerchants",
+  authorizedGateways = "authorizedGateways",
 }
 
 export type TCoreViewData =
@@ -21,7 +21,7 @@ export interface ICoreViewData {
   [ECoreViewDataKeys.balances]?: Balances;
   [ECoreViewDataKeys.links]?: HypernetLink[];
   [ECoreViewDataKeys.activeLinks]?: HypernetLink[];
-  [ECoreViewDataKeys.authorizedMerchants]?: Map<URL, string>;
+  [ECoreViewDataKeys.authorizedGateways]?: Map<URL, string>;
 }
 
 export interface ICoreData {

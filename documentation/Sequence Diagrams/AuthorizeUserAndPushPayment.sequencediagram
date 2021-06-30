@@ -1,6 +1,6 @@
 title Make a Payment Flow
 
-participant Merchant (Galileo)
+participant Gateway (Galileo)
 participant Validator (HyperPay)
 participant Validator Connector
 participant Hypernet Core
@@ -8,9 +8,9 @@ participant Consumer
 participant Governance Wallet
 
 activate Hypernet Core
-Merchant (Galileo)->Validator (HyperPay):RequestUserAuth\nGalileo requests the User to authorize Galileo via HyperPay\n
+Gateway (Galileo)->Validator (HyperPay):RequestUserAuth\nGalileo requests the User to authorize Galileo via HyperPay\n
 activate Validator (HyperPay)
-Validator (HyperPay)->Validator Connector:RequestAuth for Merchant
+Validator (HyperPay)->Validator Connector:RequestAuth for Gateway
 deactivate Validator (HyperPay)
 activate Validator Connector
 Validator Connector->Hypernet Core:Show Me!
@@ -22,14 +22,14 @@ Validator Connector->Hypernet Core:Hide Me!
 Validator (HyperPay)<-Validator Connector:UserProduct Auth Signature
 deactivate Validator Connector
 activate Validator (HyperPay)
-Merchant (Galileo)<-Validator (HyperPay):Callback to Merchant\nUser XXX has authorized you
+Gateway (Galileo)<-Validator (HyperPay):Callback to Gateway\nUser XXX has authorized you
 deactivate Validator (HyperPay)
-Merchant (Galileo)->Validator (HyperPay):PushPayment\nXXXX to send $3 token to vector5VM
+Gateway (Galileo)->Validator (HyperPay):PushPayment\nXXXX to send $3 token to vector5VM
 activate Validator (HyperPay)
 Validator (HyperPay)->Validator Connector:PushPayment
 activate Validator Connector
 Validator Connector->Hypernet Core:PushPayment
-Hypernet Core->Hypernet Core:Send money to remote via Router\nRemote is presumably Merchant's Core
+Hypernet Core->Hypernet Core:Send money to remote via Router\nRemote is presumably Gateway's Core
 Validator Connector<-Hypernet Core:Status Report
 Validator (HyperPay)<-Validator Connector:Status Report
 Validator Connector<-Hypernet Core:Status Report
@@ -37,5 +37,5 @@ Validator (HyperPay)<-Validator Connector:Status Report
 Validator Connector<-Hypernet Core:Payment Accepted\nRemote has received money, but insurance is still held
 Validator (HyperPay)<-Validator Connector:Status Report
 deactivate Validator Connector
-Merchant (Galileo)<-Validator (HyperPay):Callback to Merchant\nPayment Accepted
+Gateway (Galileo)<-Validator (HyperPay):Callback to Gateway\nPayment Accepted
 deactivate Validator (HyperPay)

@@ -59,7 +59,7 @@ export interface IMerchantConnectorRepository {
    * Returns the status of all the authorized merchant's connectors.
    * @returns A map of merchant URL and a boolean indicating whether or not the connector is active.
    */
-  getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
+  getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
     PersistenceError
   >;
@@ -68,12 +68,12 @@ export interface IMerchantConnectorRepository {
    * Returns a list of authorized merchants and the user's authorization signature for that
    * merchant.
    */
-  getAuthorizedMerchants(): ResultAsync<
+  getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
     PersistenceError
   >;
 
-  activateAuthorizedMerchants(balances: Balances): ResultAsync<void, never>;
+  activateAuthorizedGateways(balances: Balances): ResultAsync<void, never>;
 
   resolveChallenge(
     merchantUrl: GatewayUrl,

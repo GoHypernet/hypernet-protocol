@@ -2,9 +2,9 @@ import { GatewayUrl } from "@hypernetlabs/objects";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import ko from "knockout";
 
-import html from "./AuthorizedMerchantSelector.template.html";
+import html from "./AuthorizedGatewaySelector.template.html";
 
-export class AuthorizedMerchantSelectorParams {
+export class AuthorizedGatewaySelectorParams {
   constructor(
     public integration: IHypernetWebIntegration,
     public selectedAuthorizedMerchant: ko.Observable<GatewayUrl | null>,
@@ -17,24 +17,24 @@ export class AuthorizedMerchantOption {
 }
 
 // tslint:disable-next-line: max-classes-per-file
-export class AuthorizedMerchantSelectorViewModel {
-  public authorizedMerchantOptions: ko.ObservableArray<AuthorizedMerchantOption>;
+export class AuthorizedGatewaySelectorViewModel {
+  public authorizedGatewayOptions: ko.ObservableArray<AuthorizedMerchantOption>;
   public selectedAuthorizedMerchantOption: ko.Computed<AuthorizedMerchantOption | null>;
 
   protected integration: IHypernetWebIntegration;
   protected selectedAuthorizedMerchant: ko.Observable<string | null>;
   protected merchants: ko.Observable<string[] | null>;
 
-  constructor(params: AuthorizedMerchantSelectorParams) {
+  constructor(params: AuthorizedGatewaySelectorParams) {
     this.integration = params.integration;
     this.selectedAuthorizedMerchant = params.selectedAuthorizedMerchant;
 
     this.merchants = ko.observable(null);
-    this.authorizedMerchantOptions = ko.observableArray<AuthorizedMerchantOption>();
+    this.authorizedGatewayOptions = ko.observableArray<AuthorizedMerchantOption>();
 
     this.integration.core.onMerchantAuthorized.subscribe((merchant) => {
       const url = merchant.toString();
-      this.authorizedMerchantOptions.push(
+      this.authorizedGatewayOptions.push(
         new AuthorizedMerchantOption(url, url),
       );
     });
@@ -48,7 +48,7 @@ export class AuthorizedMerchantSelectorViewModel {
           return null;
         }
 
-        const options = this.authorizedMerchantOptions();
+        const options = this.authorizedGatewayOptions();
 
         for (const option of options) {
           if (option.url === selectedAuthorizedMerchant) {
@@ -70,26 +70,26 @@ export class AuthorizedMerchantSelectorViewModel {
       },
     });
 
-    this.getAuthorizedMerchants();
+    this.getAuthorizedGateways();
   }
 
-  protected getAuthorizedMerchants() {
+  protected getAuthorizedGateways() {
     this.integration.core
       .waitInitialized()
       .andThen(() => {
-        return this.integration.core.getAuthorizedMerchants();
+        return this.integration.core.getAuthorizedGateways();
       })
-      .map((authorizedMerchants) => {
-        const authorizedMerchantOptions = new Array<AuthorizedMerchantOption>();
-        for (const keyVal of authorizedMerchants) {
+      .map((authorizedGateways) => {
+        const authorizedGatewayOptions = new Array<AuthorizedMerchantOption>();
+        for (const keyVal of authorizedGateways) {
           // TODO: Convert the URL to a comercial name
           const url = keyVal[0].toString();
-          authorizedMerchantOptions.push(
+          authorizedGatewayOptions.push(
             new AuthorizedMerchantOption(url, url),
           );
         }
 
-        this.authorizedMerchantOptions(authorizedMerchantOptions);
+        this.authorizedGatewayOptions(authorizedGatewayOptions);
       })
       .mapErr(() => {
         // tslint:disable-next-line: no-console
@@ -99,6 +99,6 @@ export class AuthorizedMerchantSelectorViewModel {
 }
 
 ko.components.register("authorized-merchant-selector", {
-  viewModel: AuthorizedMerchantSelectorViewModel,
+  viewModel: AuthorizedGatewaySelectorViewModel,
   template: html,
 });

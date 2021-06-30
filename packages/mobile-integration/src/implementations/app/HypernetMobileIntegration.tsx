@@ -14,7 +14,7 @@ export enum ECoreViewDataKeys {
   balances = "balances",
   links = "links",
   activeLinks = "activeLinks",
-  authorizedMerchants = "authorizedMerchants",
+  authorizedGateways = "authorizedGateways",
 }
 
 export default class HypernetMobileIntegration {
@@ -30,7 +30,7 @@ export default class HypernetMobileIntegration {
         this.postBalances();
         this.postLinks();
         this.postActiveLinks();
-        this.postAuthorizedMerchants();
+        this.postAuthorizedGateways();
       }
 
       coreProxy.onBalancesChanged.subscribe(() => {
@@ -69,7 +69,7 @@ export default class HypernetMobileIntegration {
         this.postActiveLinks();
       });
       coreProxy.onMerchantAuthorized.subscribe(() => {
-        this.postAuthorizedMerchants();
+        this.postAuthorizedGateways();
       });
     });
   }
@@ -98,10 +98,10 @@ export default class HypernetMobileIntegration {
     });
   }
 
-  private postAuthorizedMerchants() {
-    this.coreProxy.getAuthorizedMerchants().map((merchants) => {
+  private postAuthorizedGateways() {
+    this.coreProxy.getAuthorizedGateways().map((merchants) => {
       //const merchantList = [...merchants].map(([name, value]) => ({ name, value }));
-      this.postDataToRN(ECoreViewDataKeys.authorizedMerchants, merchants);
+      this.postDataToRN(ECoreViewDataKeys.authorizedGateways, merchants);
     });
   }
 

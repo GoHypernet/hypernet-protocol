@@ -14,7 +14,7 @@ import {
   Signature,
   GatewayUrl,
   Balances,
-  AuthorizedMerchantsSchema,
+  AuthorizedGatewaysSchema,
   LogicalError,
   MerchantConnectorError,
   MerchantValidationError,
@@ -61,7 +61,7 @@ import {
 @injectable()
 export class MerchantConnectorRepository
   implements IMerchantConnectorRepository {
-  protected authorizedMerchantProxies: Map<
+  protected authorizedGatewayProxies: Map<
     GatewayUrl,
     ResultAsync<
       IMerchantConnectorProxy,
@@ -74,7 +74,7 @@ export class MerchantConnectorRepository
   protected existingProxies: Map<GatewayUrl, IMerchantConnectorProxy>;
   protected domain: TypedDataDomain;
   protected types: Record<string, TypedDataField[]>;
-  protected activateAuthorizedMerchantsResult:
+  protected activateAuthorizedGatewaysResult:
     | ResultAsync<void, never>
     | undefined;
   protected balances: Balances | undefined;
@@ -92,7 +92,7 @@ export class MerchantConnectorRepository
     @inject(IBlockchainUtilsType) protected blockchainUtils: IBlockchainUtils,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {
-    this.authorizedMerchantProxies = new Map();
+    this.authorizedGatewayProxies = new Map();
     this.existingProxies = new Map();
     this.domain = {
       name: "Hypernet Protocol",
@@ -100,7 +100,7 @@ export class MerchantConnectorRepository
     };
     this.types = {
       AuthorizedMerchant: [
-        { name: "authorizedMerchantUrl", type: "string" },
+        { name: "authorizedGatewayUrl", type: "string" },
         { name: "merchantValidatedSignature", type: "string" },
       ],
     };
@@ -126,17 +126,17 @@ export class MerchantConnectorRepository
       >
     >();
     for (const merchantUrl of merchantUrls) {
-      // We can't use _getActivatedMerchantProxy because it may fire an error when activateAuthorizedMerchantsResult is null
+      // We can't use _getActivatedMerchantProxy because it may fire an error when activateAuthorizedGatewaysResult is null
       // and in our case here we might need to pull the address from the source using ajax request not from the proxy.
-      const authorizedMerchantProxyResult = this.authorizedMerchantProxies.get(
+      const authorizedGatewayProxyResult = this.authorizedGatewayProxies.get(
         merchantUrl,
       );
 
-      if (authorizedMerchantProxyResult == null) {
+      if (authorizedGatewayProxyResult == null) {
         addressRequests.push(this._getMerchantAddress(merchantUrl));
       } else {
         addressRequests.push(
-          authorizedMerchantProxyResult
+          authorizedGatewayProxyResult
             .andThen((merchantProxy) => {
               return merchantProxy.getAddress().map((address) => {
                 return { merchantUrl, address };
@@ -202,7 +202,7 @@ export class MerchantConnectorRepository
         // merchantSignature has been validated by the iframe, so this is already confirmed.
         // Now we need to get an authorization signature
         const value = {
-          authorizedMerchantUrl: merchantUrl,
+          authorizedGatewayUrl: merchantUrl,
           merchantValidatedSignature: merchantSignature,
         } as Record<string, unknown>;
         const signerPromise = signer._signTypedData(
@@ -216,16 +216,16 @@ export class MerchantConnectorRepository
             signerPromise,
             (e) => e as MerchantValidationError,
           ),
-          this.getAuthorizedMerchants(),
+          this.getAuthorizedGateways(),
         ]);
       })
       .andThen((vals) => {
         // The connector has been authorized, store it as an authorized connector
-        const [authorizationSignature, authorizedMerchants] = vals;
+        const [authorizationSignature, authorizedGateways] = vals;
 
-        authorizedMerchants.set(merchantUrl, Signature(authorizationSignature));
+        authorizedGateways.set(merchantUrl, Signature(authorizationSignature));
 
-        return this._setAuthorizedMerchants(authorizedMerchants);
+        return this._setAuthorizedGateways(authorizedGateways);
       })
       .andThen(() => {
         // Notify the world that the merchant connector exists
@@ -242,7 +242,7 @@ export class MerchantConnectorRepository
       })
       .map(() => {
         // Only if the merchant is successfully activated do we stick it in the list.
-        this.authorizedMerchantProxies.set(merchantUrl, okAsync(proxy));
+        this.authorizedGatewayProxies.set(merchantUrl, okAsync(proxy));
       })
       .mapErr((e) => {
         // If we encounter a problem, destroy the proxy so we can start afresh.
@@ -263,25 +263,25 @@ export class MerchantConnectorRepository
   /**
    * Returns a map of merchant URLs with their authorization signatures.
    */
-  public getAuthorizedMerchants(): ResultAsync<
+  public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
     PersistenceError
   > {
     return this.storageUtils
-      .read<IAuthorizedMerchantEntry[]>(AuthorizedMerchantsSchema.title)
-      .andThen((storedAuthorizedMerchants) => {
-        const authorizedMerchants = new Map<GatewayUrl, Signature>();
+      .read<IAuthorizedMerchantEntry[]>(AuthorizedGatewaysSchema.title)
+      .andThen((storedAuthorizedGateways) => {
+        const authorizedGateways = new Map<GatewayUrl, Signature>();
 
-        if (storedAuthorizedMerchants != null) {
-          for (const authorizedMerchantEntry of storedAuthorizedMerchants) {
-            authorizedMerchants.set(
-              GatewayUrl(authorizedMerchantEntry.merchantUrl),
-              Signature(authorizedMerchantEntry.authorizationSignature),
+        if (storedAuthorizedGateways != null) {
+          for (const authorizedGatewayEntry of storedAuthorizedGateways) {
+            authorizedGateways.set(
+              GatewayUrl(authorizedGatewayEntry.merchantUrl),
+              Signature(authorizedGatewayEntry.authorizationSignature),
             );
           }
         }
 
-        return okAsync(authorizedMerchants);
+        return okAsync(authorizedGateways);
       });
   }
 
@@ -344,24 +344,24 @@ export class MerchantConnectorRepository
    * not stop it; the net effect is that you have no activated merchants. Authorized, yes, activated no.
    * There are lots of things you can do with an inactive merchant connector.
    */
-  public activateAuthorizedMerchants(
+  public activateAuthorizedGateways(
     balances: Balances,
   ): ResultAsync<void, never> {
     this.balances = balances;
 
-    if (this.activateAuthorizedMerchantsResult == null) {
-      this.activateAuthorizedMerchantsResult = ResultUtils.combine([
+    if (this.activateAuthorizedGatewaysResult == null) {
+      this.activateAuthorizedGatewaysResult = ResultUtils.combine([
         this.contextProvider.getInitializedContext(),
-        this.getAuthorizedMerchants().orElse((e) => {
+        this.getAuthorizedGateways().orElse((e) => {
           return okAsync(new Map());
         }),
         this.blockchainProvider.getSigner(),
       ])
         .andThen((vals) => {
-          const [context, authorizedMerchants, signer] = vals;
+          const [context, authorizedGateways, signer] = vals;
           const activationResults = new Array<() => ResultAsync<void, never>>();
 
-          for (const [merchantUrl, signature] of authorizedMerchants) {
+          for (const [merchantUrl, signature] of authorizedGateways) {
             activationResults.push(() => {
               return this._activateAuthorizedMerchant(
                 balances,
@@ -394,13 +394,13 @@ export class MerchantConnectorRepository
         .map(() => {})
         .orElse((e) => {
           this.logUtils.error(
-            "Could not get prerequisites for activateAuthorizedMerchants",
+            "Could not get prerequisites for activateAuthorizedGateways",
           );
           this.logUtils.error(e);
           return okAsync(undefined);
         });
     }
-    return this.activateAuthorizedMerchantsResult;
+    return this.activateAuthorizedGatewaysResult;
   }
 
   public notifyPushPaymentSent(
@@ -485,8 +485,8 @@ export class MerchantConnectorRepository
     | PersistenceError
   > {
     const results = new Array<ResultAsync<void, MerchantConnectorError>>();
-    return this.getAuthorizedMerchants().andThen((authorizedMerchants) => {
-      for (const [merchantUrl] of authorizedMerchants) {
+    return this.getAuthorizedGateways().andThen((authorizedGateways) => {
+      for (const [merchantUrl] of authorizedGateways) {
         results.push(
           this._getActivatedMerchantProxy(merchantUrl).map((proxy) => {
             proxy.notifyBalancesReceived(balances);
@@ -503,11 +503,11 @@ export class MerchantConnectorRepository
     void,
     PersistenceError | ProxyError | MerchantAuthorizationDeniedError
   > {
-    return this.getAuthorizedMerchants()
-      .map((authorizedMerchants) => {
-        authorizedMerchants.delete(merchantUrl);
+    return this.getAuthorizedGateways()
+      .map((authorizedGateways) => {
+        authorizedGateways.delete(merchantUrl);
 
-        return this._setAuthorizedMerchants(authorizedMerchants);
+        return this._setAuthorizedGateways(authorizedGateways);
       })
       .andThen(() => {
         return this._getActivatedMerchantProxy(merchantUrl).andThen((proxy) => {
@@ -520,21 +520,21 @@ export class MerchantConnectorRepository
       });
   }
 
-  public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
+  public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
     PersistenceError
   > {
     const retMap = new Map<GatewayUrl, boolean>();
-    if (this.activateAuthorizedMerchantsResult == null) {
-      throw new Error("You must call activateAuthorizedMerchants first!");
+    if (this.activateAuthorizedGatewaysResult == null) {
+      throw new Error("You must call activateAuthorizedGateways first!");
     }
 
-    return this.getAuthorizedMerchants()
-      .andThen((authorizedMerchants) => {
+    return this.getAuthorizedGateways()
+      .andThen((authorizedGateways) => {
         // Go through the results for the merchant
         const proxyResults = new Array<ResultAsync<void, never>>();
-        for (const [merchantUrl, _signature] of authorizedMerchants) {
-          const proxyResult = this.authorizedMerchantProxies.get(merchantUrl);
+        for (const [merchantUrl, _signature] of authorizedGateways) {
+          const proxyResult = this.authorizedGatewayProxies.get(merchantUrl);
 
           if (proxyResult == null) {
             throw new Error("Something deeply screwed up!");
@@ -592,34 +592,34 @@ export class MerchantConnectorRepository
     // The goal of this method is to return an activated merchant proxy,
     // and not resolve unless all hope is lost.
 
-    // Wait until activateAuthorizedMerchants is done doing its thing
-    if (this.activateAuthorizedMerchantsResult == null) {
-      throw new Error("You need to call activateAuthorizedMerchants first!");
+    // Wait until activateAuthorizedGateways is done doing its thing
+    if (this.activateAuthorizedGatewaysResult == null) {
+      throw new Error("You need to call activateAuthorizedGateways first!");
     }
 
     let cachedAuthorizationSignature: Signature | undefined;
 
     // Check that the merchantUrl is authorized
     return ResultUtils.combine([
-      this.getAuthorizedMerchants(),
-      this.activateAuthorizedMerchantsResult,
+      this.getAuthorizedGateways(),
+      this.activateAuthorizedGatewaysResult,
     ])
       .andThen((vals) => {
-        const [authorizedMerchants] = vals;
+        const [authorizedGateways] = vals;
         // If the merchant is not authorized, that's a fatal error.
         // Now, you may ask yourself, what about addAuthorizedMerchant?
         // Well, you can't call this method until that one is complete.
         // If the merchant was already authorized, you can call this
         // method and get the in-progress activation.
-        const authorizationSignature = authorizedMerchants.get(merchantUrl);
+        const authorizationSignature = authorizedGateways.get(merchantUrl);
         if (authorizationSignature == null) {
-          throw new Error(`Merchant ${merchantUrl} is unauthorized!`);
+          throw new Error(`Gateway ${merchantUrl} is unauthorized!`);
         }
 
         // Store the signature in case we need to retry anything.
         cachedAuthorizationSignature = authorizationSignature;
 
-        const proxyResult = this.authorizedMerchantProxies.get(merchantUrl);
+        const proxyResult = this.authorizedGatewayProxies.get(merchantUrl);
         if (proxyResult == null) {
           throw new Error(
             `There is not result for merchant ${merchantUrl}, even though it is authorized. Something strange going on.`,
@@ -644,7 +644,7 @@ export class MerchantConnectorRepository
           // This is retryable
           return ResultUtils.backoffAndRetry(() => {
             // Clean out
-            this.authorizedMerchantProxies.delete(merchantUrl);
+            this.authorizedGatewayProxies.delete(merchantUrl);
             this.destroyProxy(merchantUrl);
             const activationResult = ResultUtils.combine([
               this.contextProvider.getInitializedContext(),
@@ -666,7 +666,7 @@ export class MerchantConnectorRepository
                 signer,
               );
             });
-            this.authorizedMerchantProxies.set(merchantUrl, activationResult);
+            this.authorizedGatewayProxies.set(merchantUrl, activationResult);
             return activationResult;
           }, [ProxyError, MerchantValidationError, MerchantActivationError]);
         }
@@ -700,7 +700,7 @@ export class MerchantConnectorRepository
     | ProxyError
   > {
     // Do some initial cleanup, so that this can be called repeatedly.
-    const existingProxyResult = this.authorizedMerchantProxies.get(merchantUrl);
+    const existingProxyResult = this.authorizedGatewayProxies.get(merchantUrl);
 
     if (existingProxyResult != null) {
       return existingProxyResult;
@@ -739,7 +739,7 @@ export class MerchantConnectorRepository
         context.onAuthorizedMerchantActivationFailed.next(merchantUrl);
 
         this.logUtils.error(
-          `Merchant connector ${merchantUrl} failed to activate`,
+          `Gateway connector ${merchantUrl} failed to activate`,
         );
 
         // TODO: make sure of error cases where we want to destroy the proxy or not
@@ -750,7 +750,7 @@ export class MerchantConnectorRepository
         return e;
       });
 
-    this.authorizedMerchantProxies.set(merchantUrl, proxyResult);
+    this.authorizedGatewayProxies.set(merchantUrl, proxyResult);
 
     return proxyResult;
   }
@@ -771,7 +771,7 @@ export class MerchantConnectorRepository
     this.logUtils.debug(`Validating code signature for ${merchantUrl}`);
     return proxy.getValidatedSignature().andThen((validatedSignature) => {
       const value = {
-        authorizedMerchantUrl: merchantUrl,
+        authorizedGatewayUrl: merchantUrl,
         merchantValidatedSignature: validatedSignature,
       } as Record<string, unknown>;
 
@@ -817,17 +817,17 @@ export class MerchantConnectorRepository
 
         return ResultUtils.combine([
           signerResult,
-          this.getAuthorizedMerchants(),
+          this.getAuthorizedGateways(),
         ])
           .map((vals) => {
-            const [newAuthorizationSignature, authorizedMerchants] = vals;
+            const [newAuthorizationSignature, authorizedGateways] = vals;
 
-            authorizedMerchants.set(
+            authorizedGateways.set(
               merchantUrl,
               Signature(newAuthorizationSignature),
             );
 
-            return this._setAuthorizedMerchants(authorizedMerchants);
+            return this._setAuthorizedGateways(authorizedGateways);
           })
           .map(() => {});
       }
@@ -854,21 +854,21 @@ export class MerchantConnectorRepository
       });
   }
 
-  protected _setAuthorizedMerchants(
-    authorizedMerchantMap: Map<GatewayUrl, Signature>,
+  protected _setAuthorizedGateways(
+    authorizedGatewayMap: Map<GatewayUrl, Signature>,
   ): ResultAsync<void, PersistenceError> {
-    const authorizedMerchantEntries = new Array<IAuthorizedMerchantEntry>();
+    const authorizedGatewayEntries = new Array<IAuthorizedMerchantEntry>();
 
-    for (const keyval of authorizedMerchantMap) {
-      authorizedMerchantEntries.push({
+    for (const keyval of authorizedGatewayMap) {
+      authorizedGatewayEntries.push({
         merchantUrl: GatewayUrl(keyval[0]),
         authorizationSignature: Signature(keyval[1]),
       });
     }
 
     return this.storageUtils.write<IAuthorizedMerchantEntry[]>(
-      AuthorizedMerchantsSchema.title,
-      authorizedMerchantEntries,
+      AuthorizedGatewaysSchema.title,
+      authorizedGatewayEntries,
     );
   }
 }

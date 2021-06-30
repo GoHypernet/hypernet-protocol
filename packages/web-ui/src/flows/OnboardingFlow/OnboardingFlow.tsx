@@ -52,7 +52,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
   useEffect(() => {
     setLoading(true);
     // First initialze the merchant
-    coreProxy.getAuthorizedMerchants().match((merchantsMap) => {
+    coreProxy.getAuthorizedGateways().match((merchantsMap) => {
       if (merchantsMap.get(merchantUrl)) {
         //check for balances
         coreProxy.getBalances().match((_balances) => {
@@ -73,7 +73,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
 
     coreProxy.onMerchantAuthorized.subscribe((_merchantUrl) => {
       if (merchantUrl === _merchantUrl) {
-        alert.success(`Merchant ${merchantUrl} authorization succeeded!`);
+        alert.success(`Gateway ${merchantUrl} authorization succeeded!`);
         setLoading(false);
         coreProxy.getBalances().match((_balances) => {
           decideScreenWhenMerchantIsAlreadyAuthorized(
@@ -85,7 +85,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
 
     coreProxy.onAuthorizedMerchantActivationFailed.subscribe((_merchantUrl) => {
       if (merchantUrl === _merchantUrl) {
-        alert.error(`Merchant ${merchantUrl} authorization failed!`);
+        alert.error(`Gateway ${merchantUrl} authorization failed!`);
         setLoading(false);
       }
     });

@@ -51,7 +51,7 @@ class TestMerchantConnector implements IMerchantConnector {
     const hashedData = keccak256(encodedData);
 
     // 5) Sign the hash of the data so that people know we sent it
-    // Note, it is assumed this is being done on the Merchant's server, and this private key is protected.
+    // Note, it is assumed this is being done on the Gateway's server, and this private key is protected.
     const privateKey = "0x0123456789012345678901234567890123456789012345678901234567890123";
     const mediator = new ChannelSigner(privateKey);
     const mediatorSignature = await mediator.signUtilityMessage(hashedData);
@@ -96,7 +96,7 @@ class TestMerchantConnector implements IMerchantConnector {
     window.document.body.appendChild(element);
 
     // connector did all the rendering stuff, now he is asking merchant-iframe to show his stuff
-    // Merchant iframe Postmate model is running after the connector code get compiled in MerchantConnectorService.activateMerchantConnector so we need a small delay to wait for the Postmate model to get initialized.
+    // Gateway iframe Postmate model is running after the connector code get compiled in MerchantConnectorService.activateMerchantConnector so we need a small delay to wait for the Postmate model to get initialized.
     setTimeout(() => {
       //this.displayRequested.next();
     }, 100);

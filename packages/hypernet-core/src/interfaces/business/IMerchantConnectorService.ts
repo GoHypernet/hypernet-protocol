@@ -21,15 +21,15 @@ export interface IMerchantConnectorService {
     void,
     PersistenceError | ProxyError | MerchantAuthorizationDeniedError
   >;
-  getAuthorizedMerchants(): ResultAsync<
+  getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
     PersistenceError
   >;
-  getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
+  getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
     PersistenceError
   >;
-  activateAuthorizedMerchants(): ResultAsync<
+  activateAuthorizedGateways(): ResultAsync<
     void,
     | MerchantConnectorError
     | MerchantValidationError

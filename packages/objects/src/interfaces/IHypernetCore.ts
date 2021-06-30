@@ -261,12 +261,12 @@ export interface IHypernetCore {
     PersistenceError | ProxyError | MerchantAuthorizationDeniedError
   >;
 
-  getAuthorizedMerchants(): ResultAsync<
+  getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
     PersistenceError
   >;
 
-  getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
+  getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
     PersistenceError
   >;

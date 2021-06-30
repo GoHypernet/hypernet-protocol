@@ -78,7 +78,7 @@ export function useMerchants(): IState {
   async function fetchData() {
     dispatch({ type: EActionTypes.FETCHING });
     coreProxy
-      .getAuthorizedMerchantsConnectorsStatus()
+      .getAuthorizedGatewaysConnectorsStatus()
       .map((merchantsStatusMap) => {
         dispatch({
           type: EActionTypes.FETCHED,
@@ -107,7 +107,7 @@ export function useMerchants(): IState {
     coreProxy
       .deauthorizeMerchant(merchantUrl)
       .map(() => {
-        alert.success(`Merchant ${merchantUrl} deauthorized successfully`);
+        alert.success(`Gateway ${merchantUrl} deauthorized successfully`);
         fetchData();
       })
       .mapErr((error) => {
@@ -123,7 +123,7 @@ export function useMerchants(): IState {
     coreProxy
       .authorizeMerchant(merchantUrl)
       .map(() => {
-        alert.success(`Merchant ${merchantUrl} authorized successfully`);
+        alert.success(`Gateway ${merchantUrl} authorized successfully`);
         fetchData();
       })
       .mapErr((error) => {
