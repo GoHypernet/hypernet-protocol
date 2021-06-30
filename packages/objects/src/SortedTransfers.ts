@@ -9,9 +9,9 @@ import { IFullTransferState } from "@objects/vector";
 
 export class SortedTransfers {
   constructor(
-    public offerTransfer: IFullTransferState<MessageState>,
-    public insuranceTransfer: IFullTransferState<InsuranceState> | null,
-    public parameterizedTransfer: IFullTransferState<ParameterizedState> | null,
+    public offerTransfers: IFullTransferState<MessageState>[],
+    public insuranceTransfers: IFullTransferState<InsuranceState>[],
+    public parameterizedTransfers: IFullTransferState<ParameterizedState>[],
     public pullRecordTransfers: IFullTransferState<MessageState>[],
     public offerDetails: IHypernetOfferDetails,
   ) {}

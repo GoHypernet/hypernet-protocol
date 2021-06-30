@@ -251,21 +251,26 @@ export class PaymentService implements IPaymentService {
 
       if (payment == null) {
         return errAsync(
-          new LogicalError(
+          new InvalidPaymentError(
             `PaymentService:offerReceived():Could not get payment!`,
           ),
         );
       }
 
-      if (payment.state !== EPaymentState.Proposed) {
+      // offerReceived will be called even if we are the ones that created
+      // the transfer. Because of that, we only want to generate an event
+      // if the payment is TO us.
+      if (
+        payment.state !== EPaymentState.Proposed ||
+        payment.to !== context.publicIdentifier
+      ) {
         // The payment has already moved forward, somehow.
         // We don't need to do anything, we probably got called
         // by another instance of the core.
         return okAsync(undefined);
       }
 
-      // Payment state is 'Proposed', continue to handle
-
+      // Payment state is 'Proposed' and to us, continue to handle
       if (payment instanceof PushPayment) {
         // Someone wants to send us a pushPayment, emit up to the api
         context.onPushPaymentReceived.next(payment);
@@ -409,6 +414,7 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     void,
+    | InvalidPaymentError
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
@@ -427,7 +433,7 @@ export class PaymentService implements IPaymentService {
 
       if (payment == null) {
         this.logUtils.error(`Invalid payment ID: ${paymentId}`);
-        return errAsync(new InvalidParametersError("Invalid payment ID!"));
+        return errAsync(new InvalidPaymentError("Invalid payment ID!"));
       }
 
       // Let the UI know we got an insurance transfer
@@ -839,7 +845,7 @@ export class PaymentService implements IPaymentService {
       if (payment instanceof PushPayment) {
         // Resolve the parameterized payment immediately for the full balance
         return this.paymentRepository
-          .finalizePayment(paymentId, payment.paymentAmount)
+          .acceptPayment(paymentId, payment.paymentAmount)
           .map((finalizedPayment) => {
             context.onPushPaymentUpdated.next(finalizedPayment as PushPayment);
             return payment;

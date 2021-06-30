@@ -119,7 +119,7 @@ export interface IPaymentRepository {
    * be it a insurancePayments or parameterizedPayments.
    * @param paymentId
    */
-  finalizePayment(
+  acceptPayment(
     paymentId: PaymentId,
     amount: BigNumberString,
   ): ResultAsync<

@@ -127,33 +127,37 @@ export class PaymentUtils implements IPaymentUtils {
       throw new LogicalError("Push payment has pull transfers!");
     }
 
-    const amountStaked =
-      sortedTransfers.insuranceTransfer != null
-        ? BigNumberString(
-            sortedTransfers.insuranceTransfer.transferState.collateral,
-          )
-        : BigNumberString("0");
-
+    let amountStaked = BigNumberString("0");
+    let insuranceTransferId: TransferId | null = null;
+    if (sortedTransfers.insuranceTransfers.length > 0) {
+      amountStaked = BigNumberString(
+        sortedTransfers.insuranceTransfers[0].balance.amount[0],
+      );
+      insuranceTransferId = TransferId(
+        sortedTransfers.insuranceTransfers[0].transferId,
+      );
+    }
     const paymentAmount = sortedTransfers.offerDetails.paymentAmount;
 
-    const amountTransferred =
-      sortedTransfers.parameterizedTransfer != null
-        ? sortedTransfers.offerDetails.paymentAmount // @todo fix later? sortedTransfers.parameterizedTransfer.transferState.rate.deltaAmount
-        : sortedTransfers.offerDetails.paymentAmount;
-
-    const paymentToken =
-      sortedTransfers.parameterizedTransfer != null
-        ? EthereumAddress(sortedTransfers.parameterizedTransfer.assetId)
-        : sortedTransfers.offerDetails.paymentToken;
+    let amountTransfered = BigNumberString("0");
+    let parameterizedTransferId: TransferId | null = null;
+    let paymentToken = sortedTransfers.offerDetails.paymentToken;
+    if (sortedTransfers.parameterizedTransfers.length > 0) {
+      amountTransfered = BigNumberString(
+        sortedTransfers.parameterizedTransfers[0].balance.amount[0],
+      );
+      parameterizedTransferId = TransferId(
+        sortedTransfers.parameterizedTransfers[0].transferId,
+      );
+      paymentToken = EthereumAddress(
+        sortedTransfers.parameterizedTransfers[0].assetId,
+      );
+    }
 
     const details = new PaymentInternalDetails(
-      TransferId(sortedTransfers.offerTransfer.transferId),
-      sortedTransfers.insuranceTransfer?.transferId
-        ? TransferId(sortedTransfers.insuranceTransfer?.transferId)
-        : null,
-      sortedTransfers.parameterizedTransfer?.transferId
-        ? TransferId(sortedTransfers.parameterizedTransfer?.transferId)
-        : null,
+      TransferId(sortedTransfers.offerTransfers[0].transferId),
+      insuranceTransferId,
+      parameterizedTransferId,
       sortedTransfers.pullRecordTransfers.map((val) => {
         return TransferId(val.transferId);
       }),
@@ -176,7 +180,7 @@ export class PaymentUtils implements IPaymentUtils {
         details,
         sortedTransfers.offerDetails.metadata,
         paymentAmount,
-        amountTransferred,
+        amountTransfered,
       ),
     );
   }
@@ -201,10 +205,16 @@ export class PaymentUtils implements IPaymentUtils {
      * Pull payments consist of 3+ transfers, a null transfer for 0 value that represents the
      * offer, an insurance payment, and a parameterized payment.
      */
-    const amountStaked =
-      sortedTransfers.insuranceTransfer != null
-        ? BigNumberString(sortedTransfers.insuranceTransfer.balance.amount[0])
-        : BigNumberString("0");
+    let amountStaked = BigNumberString("0");
+    let insuranceTransferId: TransferId | null = null;
+    if (sortedTransfers.insuranceTransfers.length > 0) {
+      amountStaked = BigNumberString(
+        sortedTransfers.insuranceTransfers[0].balance.amount[0],
+      );
+      insuranceTransferId = TransferId(
+        sortedTransfers.insuranceTransfers[0].transferId,
+      );
+    }
 
     // Get deltaAmount & deltaTime from the parameterized payment
     if (sortedTransfers.offerDetails.rate == null) {
@@ -218,16 +228,21 @@ export class PaymentUtils implements IPaymentUtils {
     );
     const deltaTime = sortedTransfers.offerDetails.rate.deltaTime;
     let vestedAmount: BigNumber;
+    let parameterizedTransferId: TransferId | null = null;
 
-    if (sortedTransfers.parameterizedTransfer == null) {
+    if (sortedTransfers.parameterizedTransfers.length == 0) {
       // No paramterized transfer, no vested amount!
       vestedAmount = BigNumber.from(0);
     } else {
       // Calculate vestedAmount
       const now = this.timeUtils.getUnixNow();
       const timePassed =
-        now - Number(sortedTransfers.parameterizedTransfer.transferState.start);
+        now -
+        Number(sortedTransfers.parameterizedTransfers[0].transferState.start);
       vestedAmount = deltaAmount.div(deltaTime).mul(timePassed);
+      parameterizedTransferId = TransferId(
+        sortedTransfers.parameterizedTransfers[0].transferId,
+      );
     }
 
     // Convert the PullRecords to PullAmounts
@@ -246,14 +261,14 @@ export class PaymentUtils implements IPaymentUtils {
     }
 
     const paymentToken =
-      sortedTransfers.parameterizedTransfer != null
-        ? EthereumAddress(sortedTransfers.parameterizedTransfer.assetId)
+      sortedTransfers.parameterizedTransfers.length > 0
+        ? EthereumAddress(sortedTransfers.parameterizedTransfers[0].assetId)
         : sortedTransfers.offerDetails.paymentToken;
 
     const details = new PaymentInternalDetails(
-      TransferId(sortedTransfers.offerTransfer.transferId),
-      TransferId(sortedTransfers.insuranceTransfer?.transferId || ""),
-      TransferId(sortedTransfers.parameterizedTransfer?.transferId || ""),
+      TransferId(sortedTransfers.offerTransfers[0].transferId),
+      insuranceTransferId,
+      parameterizedTransferId,
       sortedTransfers.pullRecordTransfers.map((val) => {
         return TransferId(val.transferId);
       }),
@@ -307,12 +322,14 @@ export class PaymentUtils implements IPaymentUtils {
         const idRes = this.paymentIdUtils.getUUID(paymentId);
 
         if (domainRes.isErr()) {
-          return errAsync(domainRes.error);
+          return errAsync<SortedTransfers, InvalidPaymentIdError>(
+            domainRes.error,
+          );
         }
 
         // TODO: This should probably be encapsulated down lower; getDomain() is probably unnecessary and and invalid domain should just result in an InvalidPaymentIdError from getType and getUUID.
         if (domainRes.value !== config.hypernetProtocolDomain) {
-          return errAsync(
+          return errAsync<SortedTransfers, InvalidParametersError>(
             new InvalidParametersError(
               `Invalid payment domain: '${domainRes.value}'`,
             ),
@@ -320,19 +337,20 @@ export class PaymentUtils implements IPaymentUtils {
         }
 
         if (paymentTypeRes.isErr()) {
-          return errAsync(paymentTypeRes.error);
+          return errAsync<SortedTransfers, InvalidPaymentIdError>(
+            paymentTypeRes.error,
+          );
         } else {
           paymentType = paymentTypeRes.value;
         }
 
         if (idRes.isErr()) {
-          return errAsync(idRes.error);
+          return errAsync<SortedTransfers, InvalidPaymentIdError>(idRes.error);
         }
 
         return this.sortTransfers(paymentId, transfers);
       })
-      .andThen((sortedTransfersUnk) => {
-        const sortedTransfers = sortedTransfersUnk as SortedTransfers;
+      .andThen((sortedTransfers) => {
         const paymentState = this.getPaymentState(sortedTransfers);
 
         // TODO: Figure out how to determine if the payment is Challenged
@@ -373,15 +391,28 @@ export class PaymentUtils implements IPaymentUtils {
     // First thing that can disqualify everything else is if there is no offer transfer
     // at all. This will probably error at higher levels but we should check it here just
     // in case
-    if (sortedTransfers.offerTransfer == null) {
+    if (sortedTransfers.offerTransfers.length == 0) {
       return EPaymentState.InvalidProposal;
     }
 
+    if (sortedTransfers.offerTransfers.length > 1) {
+      return EPaymentState.Borked;
+    }
+
     const offerState = this.vectorUtils.getTransferStateFromTransfer(
-      sortedTransfers.offerTransfer,
+      sortedTransfers.offerTransfers[0],
     );
-    const hasInsurance = sortedTransfers.insuranceTransfer != null;
-    const hasParameterized = sortedTransfers.parameterizedTransfer != null;
+
+    if (sortedTransfers.insuranceTransfers.length > 1) {
+      return EPaymentState.Borked;
+    }
+
+    if (sortedTransfers.parameterizedTransfers.length > 1) {
+      return EPaymentState.Borked;
+    }
+
+    const hasInsurance = sortedTransfers.insuranceTransfers.length == 1;
+    const hasParameterized = sortedTransfers.parameterizedTransfers.length == 1;
 
     // Payments that only have an offer
     if (!hasInsurance && !hasParameterized) {
@@ -397,12 +428,12 @@ export class PaymentUtils implements IPaymentUtils {
     }
 
     // States with insurance
-    if (sortedTransfers.insuranceTransfer != null) {
+    if (hasInsurance) {
       const insuranceState = this.vectorUtils.getTransferStateFromTransfer(
-        sortedTransfers.insuranceTransfer,
+        sortedTransfers.insuranceTransfers[0],
       );
       const insuranceValid = this.validateInsuranceTransfer(
-        sortedTransfers.insuranceTransfer,
+        sortedTransfers.insuranceTransfers[0],
         sortedTransfers.offerDetails,
       );
 
@@ -429,12 +460,12 @@ export class PaymentUtils implements IPaymentUtils {
       }
 
       // Now we can do states with all 3 payments
-      if (sortedTransfers.parameterizedTransfer != null && insuranceValid) {
+      if (sortedTransfers.parameterizedTransfers[0] != null && insuranceValid) {
         const paymentState = this.vectorUtils.getTransferStateFromTransfer(
-          sortedTransfers.parameterizedTransfer,
+          sortedTransfers.parameterizedTransfers[0],
         );
         const paymentValid = this.validatePaymentTransfer(
-          sortedTransfers.parameterizedTransfer,
+          sortedTransfers.parameterizedTransfers[0],
           sortedTransfers.offerDetails,
         );
 
@@ -772,33 +803,11 @@ export class PaymentUtils implements IPaymentUtils {
           (offerTransfer.transferState as MessageState).message,
         );
 
-        let insuranceTransfer: IFullTransferState | null = null;
-        if (insuranceTransfers.length === 1) {
-          insuranceTransfer = insuranceTransfers[0];
-        } else if (insuranceTransfers.length > 1) {
-          return errAsync(
-            new InvalidPaymentError(
-              "Invalid payment, too many insurance transfers!",
-            ),
-          );
-        }
-
-        let parameterizedTransfer: IFullTransferState | null = null;
-        if (parameterizedTransfers.length === 1) {
-          parameterizedTransfer = parameterizedTransfers[0];
-        } else if (parameterizedTransfers.length > 1) {
-          return errAsync(
-            new InvalidPaymentError(
-              "Invalid payment, too many parameterized transfers!",
-            ),
-          );
-        }
-
         return okAsync(
           new SortedTransfers(
-            offerTransfer,
-            insuranceTransfer,
-            parameterizedTransfer,
+            offerTransfers,
+            insuranceTransfers,
+            parameterizedTransfers,
             pullTransfers,
             offerDetails,
           ),
