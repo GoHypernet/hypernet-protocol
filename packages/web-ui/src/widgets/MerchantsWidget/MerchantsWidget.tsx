@@ -140,12 +140,12 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
                 primary={
                   <Tooltip
                     title={merchantUrl}
-                    disableHoverListener={merchantUrl.length <= 40}
+                    disableHoverListener={merchantUrl.length <= 36}
                     placement="top"
                   >
                     <Box>
-                      {merchantUrl.length > 40
-                        ? `${merchantUrl.substr(0, 40)}...`
+                      {merchantUrl.length > 36
+                        ? `${merchantUrl.substr(0, 36)}...`
                         : merchantUrl}
                     </Box>
                   </Tooltip>
