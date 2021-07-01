@@ -1,7 +1,7 @@
 import {
   IAuthorizeFundsRequest,
   ISendFundsRequest,
-} from "@hypernetlabs/merchant-connector";
+} from "@hypernetlabs/gateway-connector";
 import { GatewayUrl, PaymentId } from "@hypernetlabs/objects";
 import {
   ILogUtils,
@@ -27,14 +27,10 @@ import { IContextProvider, IContextProviderType } from "@interfaces/utilities";
 
 @injectable()
 export class MerchantConnectorListener implements IMerchantConnectorListener {
-  protected signMessageRequestedSubscriptionMap: Map<
-    GatewayUrl,
-    Subscription
-  > = new Map<GatewayUrl, Subscription>();
-  protected sendFundsRequestedSubscriptionMap: Map<
-    GatewayUrl,
-    Subscription
-  > = new Map<GatewayUrl, Subscription>();
+  protected signMessageRequestedSubscriptionMap: Map<GatewayUrl, Subscription> =
+    new Map<GatewayUrl, Subscription>();
+  protected sendFundsRequestedSubscriptionMap: Map<GatewayUrl, Subscription> =
+    new Map<GatewayUrl, Subscription>();
   protected authorizeFundsRequestedSubscriptionMap: Map<
     GatewayUrl,
     Subscription
@@ -59,8 +55,8 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
         this._advanceMerchantRelatedPayments(proxy.gatewayUrl);
 
         // When the merchant iframe wants a message signed, we can do it.
-        const signMessageRequestedSubscription = proxy.signMessageRequested.subscribe(
-          (message) => {
+        const signMessageRequestedSubscription =
+          proxy.signMessageRequested.subscribe((message) => {
             this.logUtils.debug(
               `Gateway Connector ${proxy.gatewayUrl} requested to sign message ${message}`,
             );
@@ -73,16 +69,15 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
               .mapErr((e) => {
                 this.logUtils.error(e);
               });
-          },
-        );
+          });
 
         this.signMessageRequestedSubscriptionMap.set(
           proxy.gatewayUrl,
           signMessageRequestedSubscription,
         );
 
-        const sendFundsRequestedSubscription = proxy.sendFundsRequested.subscribe(
-          (request) => {
+        const sendFundsRequestedSubscription =
+          proxy.sendFundsRequested.subscribe((request) => {
             this.logUtils.debug(
               `Gateway Connector ${proxy.gatewayUrl} requested to send funds to ${request.recipientPublicIdentifier}`,
             );
@@ -107,16 +102,15 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
                 `Invalid ISendFundsRequest from merchant connector ${proxy.gatewayUrl}`,
               );
             }
-          },
-        );
+          });
 
         this.sendFundsRequestedSubscriptionMap.set(
           proxy.gatewayUrl,
           sendFundsRequestedSubscription,
         );
 
-        const authorizeFundsRequestedSubscription = proxy.authorizeFundsRequested.subscribe(
-          (request) => {
+        const authorizeFundsRequestedSubscription =
+          proxy.authorizeFundsRequested.subscribe((request) => {
             this.logUtils.debug(
               `Gateway Connector ${proxy.gatewayUrl} requested to authorize funds for ${request.recipientPublicIdentifier}`,
             );
@@ -142,8 +136,7 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
                 `Invalid IAuthorizeFundsRequest from merchant connector ${proxy.gatewayUrl}`,
               );
             }
-          },
-        );
+          });
 
         this.authorizeFundsRequestedSubscriptionMap.set(
           proxy.gatewayUrl,
@@ -153,9 +146,7 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
 
       // Stop listening for merchant connector events when merchant deauthorization starts
       context.onMerchantDeauthorizationStarted.subscribe((gatewayUrl) => {
-        this.signMessageRequestedSubscriptionMap
-          .get(gatewayUrl)
-          ?.unsubscribe();
+        this.signMessageRequestedSubscriptionMap.get(gatewayUrl)?.unsubscribe();
         this.sendFundsRequestedSubscriptionMap.get(gatewayUrl)?.unsubscribe();
         this.authorizeFundsRequestedSubscriptionMap
           .get(gatewayUrl)

@@ -1,10 +1,11 @@
-import express from "express";
 import fs from "fs";
 import net from "net";
-import { ethers } from "ethers";
-import cors from "cors";
 
-var app = express();
+import cors from "cors";
+import { ethers } from "ethers";
+import express from "express";
+
+const app = express();
 
 app.use(cors());
 //app.options('*', cors());
@@ -18,9 +19,9 @@ const provider = new ethers.providers.JsonRpcProvider("http://localhost:8545");
 // Create a wallet using that provider. Wallet combines a provider and a signer.
 const wallet = new ethers.Wallet(privateKey, provider);
 
-let connector: string = "";
-let signature: string = "unknown";
-let address: string = wallet.address;
+let connector = "";
+let signature = "unknown";
+const address: string = wallet.address;
 
 // Read the webpacked connector file.
 const filename = __dirname + "/connector/index.js";
@@ -50,8 +51,8 @@ app.get("/address", (req, res) => {
 const server = app.listen(5010, () => {
   const addressInfo = server.address() as net.AddressInfo;
   if (addressInfo != null) {
-    var host = addressInfo.address;
-    var port = addressInfo.port;
+    const host = addressInfo.address;
+    const port = addressInfo.port;
     console.log("Example Gateway listening at http://%s:%s", host, port);
     console.log(`filename: ${filename}`);
   }

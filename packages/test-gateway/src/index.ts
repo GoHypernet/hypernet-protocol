@@ -2,11 +2,11 @@ import { Bytes32 } from "@connext/vector-types";
 import { ChannelSigner } from "@connext/vector-utils";
 import {
   IAuthorizeFundsRequest,
-  IMerchantConnector,
+  IGatewayConnector,
   ISendFundsRequest,
   IResolutionResult,
   IRedirectInfo,
-} from "@hypernetlabs/merchant-connector";
+} from "@hypernetlabs/gateway-connector";
 import {
   PushPayment,
   PullPayment,
@@ -21,11 +21,11 @@ import { Subject } from "rxjs";
 
 declare global {
   interface Window {
-    connector: IMerchantConnector;
+    connector: IGatewayConnector;
   }
 }
 
-class TestMerchantConnector implements IMerchantConnector {
+class TestGatewayConnector implements IGatewayConnector {
   async resolveChallenge(paymentId: PaymentId): Promise<IResolutionResult> {
     // What the mediator needs to sign:
     // https://github.com/connext/transfers/blob/20f44307164cb245c075cf3723b09d8ff75901d4/tests/insurance/insurance.spec.ts#L399
@@ -118,7 +118,7 @@ class TestMerchantConnector implements IMerchantConnector {
   onPreRedirect: Subject<IRedirectInfo>;
 
   constructor() {
-    console.log("Instantiating TestMerchantConnector");
+    console.log("Instantiating TestGatewayConnector");
     this.sendFundsRequested = new Subject<ISendFundsRequest>();
     this.authorizeFundsRequested = new Subject<IAuthorizeFundsRequest>();
     this.displayRequested = new Subject<void>();
@@ -164,4 +164,4 @@ class TestMerchantConnector implements IMerchantConnector {
   }
 }
 
-window.connector = new TestMerchantConnector();
+window.connector = new TestGatewayConnector();

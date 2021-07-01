@@ -14,7 +14,7 @@ import { IResolutionResult } from "./IResolutionResult";
 import { ISendFundsRequest } from "./ISendFundsRequest";
 import { ISignMessageRequest } from "./ISignMessageRequest";
 
-export interface IMerchantConnector {
+export interface IGatewayConnector {
   resolveChallenge(paymentId: PaymentId): Promise<IResolutionResult>;
   getAddress(): Promise<EthereumAddress>;
 

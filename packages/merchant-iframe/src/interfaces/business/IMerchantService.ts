@@ -1,8 +1,8 @@
 import {
-  IMerchantConnector,
+  IGatewayConnector,
   IRedirectInfo,
   IResolutionResult,
-} from "@hypernetlabs/merchant-connector";
+} from "@hypernetlabs/gateway-connector";
 import {
   Balances,
   EthereumAddress,
@@ -25,13 +25,13 @@ export interface IMerchantService {
     publicIdentifier: PublicIdentifier,
     balances: Balances,
   ): ResultAsync<
-    IMerchantConnector,
+    IGatewayConnector,
     MerchantConnectorError | MerchantValidationError
   >;
   prepareForRedirect(redirectInfo: IRedirectInfo): ResultAsync<void, Error>;
   getMerchantUrl(): ResultAsync<GatewayUrl, MerchantValidationError>;
   autoActivateMerchantConnector(): ResultAsync<
-    IMerchantConnector | null,
+    IGatewayConnector | null,
     MerchantConnectorError | MerchantValidationError
   >;
   publicIdentifierReceived(

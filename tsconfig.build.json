@@ -36,11 +36,11 @@
       "@mobileApp/*": ["./packages/mobileApp/src/*"],
       "@web-integration/*": ["./*"],
       "@web-ui/*": ["./*"],
-      "@merchant-connector/*": ["./*"],
+      "@gateway-connector/*": ["./*"],
       "@merchant-iframe/*": ["./*"],
       "@core-iframe/*": ["./*"],
-      "@test-merchant-connector/*": [
-        "./packages/test-merchant-connector/src/*"
+      "@test-gateway/*": [
+        "./packages/test-gateway/src/*"
       ],
       "@utils/*": ["./*"],
       "@developer-ui/*": ["./*"],

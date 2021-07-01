@@ -1,7 +1,7 @@
 import {
   IAuthorizeFundsRequest,
   ISendFundsRequest,
-} from "@hypernetlabs/merchant-connector";
+} from "@hypernetlabs/gateway-connector";
 import { IHypernetCoreRepository } from "@merchant-iframe/interfaces/data";
 import { injectable, inject } from "inversify";
 import { okAsync, ResultAsync } from "neverthrow";

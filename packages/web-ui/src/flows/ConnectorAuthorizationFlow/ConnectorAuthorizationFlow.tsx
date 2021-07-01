@@ -25,7 +25,7 @@ const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> = 
 
     // Destroy self modal if merchant modal is visible.
     const iframeElements = document.getElementsByName(
-      "hypernet-core-merchant-connector-iframe",
+      "hypernet-core-gateway-connector-iframe",
     );
     if (iframeElements.length && iframeElements[0].style.display === "block") {
       closeModal();

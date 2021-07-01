@@ -2,7 +2,7 @@ import {
   IAuthorizeFundsRequest,
   IResolutionResult,
   ISendFundsRequest,
-} from "@hypernetlabs/merchant-connector";
+} from "@hypernetlabs/gateway-connector";
 import {
   Balances,
   EthereumAddress,

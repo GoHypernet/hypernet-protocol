@@ -1,5 +1,5 @@
 {
-  "name": "@hypernetlabs/test-merchant-connector",
+  "name": "@hypernetlabs/test-gateway",
   "version": "0.0.1",
   "description": "An example dispute mediator for testing, which always resolve's in the sender's favor.",
   "license": "ISC",
@@ -45,7 +45,7 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/merchant-connector": "^0.0.1",
+    "@hypernetlabs/gateway-connector": "^0.0.1",
     "@hypernetlabs/objects": "^0.1.1",
     "cors": "^2.8.5",
     "ethers": "^5.0.31",

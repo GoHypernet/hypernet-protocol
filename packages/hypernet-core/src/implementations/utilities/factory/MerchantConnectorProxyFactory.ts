@@ -34,7 +34,7 @@ export class MerchantConnectorProxyFactory
           this._prepareIFrameContainer(),
           iframeUrl.toString(),
           gatewayUrl,
-          `hypernet-core-merchant-connector-iframe-${gatewayUrl}`,
+          `hypernet-core-gateway-connector-iframe-${gatewayUrl}`,
           this.contextProvider,
           config.debug,
         );

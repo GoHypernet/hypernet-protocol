@@ -1,4 +1,4 @@
-import { IMerchantConnector } from "@hypernetlabs/merchant-connector";
+import { IGatewayConnector } from "@hypernetlabs/gateway-connector";
 import {
   PushPayment,
   PullPayment,
@@ -26,8 +26,9 @@ import {
 @injectable()
 export class HypernetCoreListener
   extends ChildProxy
-  implements IHypernetCoreListener {
-  protected merchantConnector: IMerchantConnector | undefined;
+  implements IHypernetCoreListener
+{
+  protected merchantConnector: IGatewayConnector | undefined;
 
   constructor(
     @inject(IMerchantServiceType) protected merchantService: IMerchantService,

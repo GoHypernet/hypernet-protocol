@@ -1,4 +1,4 @@
-import { IMerchantConnector } from "@hypernetlabs/merchant-connector";
+import { IGatewayConnector } from "@hypernetlabs/gateway-connector";
 import {
   MerchantValidationError,
   PublicIdentifier,
@@ -12,11 +12,11 @@ import { Subject } from "rxjs";
 export class MerchantContext {
   constructor(
     public gatewayUrl: GatewayUrl,
-    public onMerchantConnectorActivated: Subject<IMerchantConnector>,
+    public onMerchantConnectorActivated: Subject<IGatewayConnector>,
     public onHypernetCoreProxyActivated: Subject<Postmate.ChildAPI>,
     public validatedMerchantCode: string | null,
     public validatedMerchantSignature: Signature | null,
-    public merchantConnector: IMerchantConnector | null,
+    public merchantConnector: IGatewayConnector | null,
     public publicIdentifier: PublicIdentifier | null,
     public merchantValidated: ResultAsync<void, MerchantValidationError>,
   ) {}

@@ -48,7 +48,7 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/merchant-connector": "^0.0.1",
+    "@hypernetlabs/gateway-connector": "^0.0.1",
     "@hypernetlabs/objects": "^0.0.1",
     "@hypernetlabs/utils": "^0.0.1",
     "ethers": "^5.0.31",

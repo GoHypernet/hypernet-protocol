@@ -2,7 +2,7 @@ import {
   IAuthorizeFundsRequest,
   IResolutionResult,
   ISendFundsRequest,
-} from "@hypernetlabs/merchant-connector";
+} from "@hypernetlabs/gateway-connector";
 import {
   EthereumAddress,
   MerchantConnectorError,
@@ -249,7 +249,7 @@ export class MerchantConnectorProxy
   private _showMerchantIFrame(context: HypernetContext) {
     // Show the first merchant iframe in the queue
     document.getElementsByName(
-      `hypernet-core-merchant-connector-iframe-${MerchantConnectorProxy.openedIFramesQueue[0]}`,
+      `hypernet-core-gateway-connector-iframe-${MerchantConnectorProxy.openedIFramesQueue[0]}`,
     )[0].style.display = "block";
     context.onMerchantIFrameDisplayRequested.next(
       GatewayUrl(MerchantConnectorProxy.openedIFramesQueue[0]),
@@ -261,7 +261,7 @@ export class MerchantConnectorProxy
 
     // Hide the first merchant iframe in the queue which is the current one that is displayed in the screen.
     document.getElementsByName(
-      `hypernet-core-merchant-connector-iframe-${MerchantConnectorProxy.openedIFramesQueue[0]}`,
+      `hypernet-core-gateway-connector-iframe-${MerchantConnectorProxy.openedIFramesQueue[0]}`,
     )[0].style.display = "none";
     // We're done with it, remove it from the queue
     MerchantConnectorProxy.openedIFramesQueue.shift();

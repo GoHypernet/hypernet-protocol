@@ -1,8 +1,8 @@
 import {
-  IMerchantConnector,
+  IGatewayConnector,
   IRedirectInfo,
   IResolutionResult,
-} from "@hypernetlabs/merchant-connector";
+} from "@hypernetlabs/gateway-connector";
 import {
   LogicalError,
   PublicIdentifier,
@@ -39,7 +39,7 @@ import {
 
 declare global {
   interface Window {
-    connector: IMerchantConnector;
+    connector: IGatewayConnector;
   }
 }
 
@@ -67,7 +67,7 @@ export class MerchantService implements IMerchantService {
     publicIdentifier: PublicIdentifier,
     balances: Balances,
   ): ResultAsync<
-    IMerchantConnector,
+    IGatewayConnector,
     MerchantConnectorError | MerchantValidationError
   > {
     const context = this.contextProvider.getMerchantContext();
@@ -92,7 +92,7 @@ export class MerchantService implements IMerchantService {
       );
     }
 
-    // We will now run the connector code. It needs to put an IMerchantConnector object in the window.connector
+    // We will now run the connector code. It needs to put an IGatewayConnector object in the window.connector
     const newScript = document.createElement("script");
     const inlineScript = document.createTextNode(context.validatedMerchantCode);
     newScript.appendChild(inlineScript);
@@ -245,7 +245,7 @@ export class MerchantService implements IMerchantService {
   }
 
   public autoActivateMerchantConnector(): ResultAsync<
-    IMerchantConnector | null,
+    IGatewayConnector | null,
     MerchantConnectorError | MerchantValidationError
   > {
     const context = this.contextProvider.getMerchantContext();
@@ -405,7 +405,7 @@ export class MerchantService implements IMerchantService {
   }
 
   private _getValidatedMerchantConnector(): ResultAsync<
-    IMerchantConnector,
+    IGatewayConnector,
     MerchantValidationError
   > {
     const context = this.contextProvider.getMerchantContext();

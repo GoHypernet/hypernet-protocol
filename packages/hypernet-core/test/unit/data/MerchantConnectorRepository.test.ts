@@ -1,4 +1,4 @@
-import { IResolutionResult } from "@hypernetlabs/merchant-connector";
+import { IResolutionResult } from "@hypernetlabs/gateway-connector";
 import {
   MerchantConnectorError,
   MerchantValidationError,

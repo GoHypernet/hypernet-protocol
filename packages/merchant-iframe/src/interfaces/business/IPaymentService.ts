@@ -1,7 +1,7 @@
 import {
   ISendFundsRequest,
   IAuthorizeFundsRequest,
-} from "@hypernetlabs/merchant-connector";
+} from "@hypernetlabs/gateway-connector";
 import { ResultAsync } from "neverthrow";
 
 export interface IPaymentService {

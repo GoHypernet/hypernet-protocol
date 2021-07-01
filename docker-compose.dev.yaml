@@ -275,12 +275,12 @@ services:
       - core-iframe
       - merchant-iframe
 
-  test-merchant:
+  test-gateway:
     image: node:14
     ports:
       - 5010:5010
     volumes:
-      - ./packages/test-merchant-connector/dist/server-bundle:/app
-      - ./packages/test-merchant-connector/dist/connector-bundle:/app/connector
+      - ./packages/test-gateway/dist/server-bundle:/app
+      - ./packages/test-gateway/dist/connector-bundle:/app/connector
     command:
       node /app/index.js
