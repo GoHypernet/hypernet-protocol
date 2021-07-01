@@ -220,7 +220,7 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
         <TableHead>
           <TableRow>
             <TableCell />
-            <TableCell>Validator</TableCell>
+            <TableCell>Gateway</TableCell>
             <TableCell align="right">Amount</TableCell>
             <TableCell align="right">Required Stake</TableCell>
             <TableCell align="right">Amount Staked</TableCell>

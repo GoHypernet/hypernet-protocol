@@ -48,7 +48,7 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
       >
         <Box flex={1} paddingRight="50px">
           <TextField
-            label="Validator Url"
+            label="Gateway Url"
             value={inputGatewayUrl}
             fullWidth
             onChange={(event) => {
@@ -97,7 +97,7 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
       emptyState={
         <Box>
           <EmptyState
-            info={<>You don't have any authorized validators yet</>}
+            info={<>You don't have any authorized gateways yet</>}
           />
           {renderGatewayAuthorization()}
         </Box>

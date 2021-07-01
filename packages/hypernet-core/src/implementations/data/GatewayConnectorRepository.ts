@@ -808,7 +808,7 @@ export class GatewayConnectorRepository
             this.logUtils.error(e);
             return errAsync(
               new GatewayAuthorizationDeniedError(
-                `User declined authorization of the validator`,
+                `User declined authorization of the gateway`,
                 e,
               ),
             );

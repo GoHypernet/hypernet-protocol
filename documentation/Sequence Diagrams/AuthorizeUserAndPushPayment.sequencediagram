@@ -1,41 +1,41 @@
 title Make a Payment Flow
 
 participant Gateway (Galileo)
-participant Validator (HyperPay)
-participant Validator Connector
+participant Gateway (HyperPay)
+participant Gateway Connector
 participant Hypernet Core
 participant Consumer
 participant Governance Wallet
 
 activate Hypernet Core
-Gateway (Galileo)->Validator (HyperPay):RequestUserAuth\nGalileo requests the User to authorize Galileo via HyperPay\n
-activate Validator (HyperPay)
-Validator (HyperPay)->Validator Connector:RequestAuth for Gateway
-deactivate Validator (HyperPay)
-activate Validator Connector
-Validator Connector->Hypernet Core:Show Me!
-Validator Connector->Consumer:Request to Auth Galileo
+Gateway (Galileo)->Gateway (HyperPay):RequestUserAuth\nGalileo requests the User to authorize Galileo via HyperPay\n
+activate Gateway (HyperPay)
+Gateway (HyperPay)->Gateway Connector:RequestAuth for Gateway
+deactivate Gateway (HyperPay)
+activate Gateway Connector
+Gateway Connector->Hypernet Core:Show Me!
+Gateway Connector->Consumer:Request to Auth Galileo
 activate Consumer
-Validator Connector<-Consumer:Click Auth Button\nGenerate a Signature
+Gateway Connector<-Consumer:Click Auth Button\nGenerate a Signature
 deactivate Consumer
-Validator Connector->Hypernet Core:Hide Me!
-Validator (HyperPay)<-Validator Connector:UserProduct Auth Signature
-deactivate Validator Connector
-activate Validator (HyperPay)
-Gateway (Galileo)<-Validator (HyperPay):Callback to Gateway\nUser XXX has authorized you
-deactivate Validator (HyperPay)
-Gateway (Galileo)->Validator (HyperPay):PushPayment\nXXXX to send $3 token to vector5VM
-activate Validator (HyperPay)
-Validator (HyperPay)->Validator Connector:PushPayment
-activate Validator Connector
-Validator Connector->Hypernet Core:PushPayment
+Gateway Connector->Hypernet Core:Hide Me!
+Gateway (HyperPay)<-Gateway Connector:UserProduct Auth Signature
+deactivate Gateway Connector
+activate Gateway (HyperPay)
+Gateway (Galileo)<-Gateway (HyperPay):Callback to Gateway\nUser XXX has authorized you
+deactivate Gateway (HyperPay)
+Gateway (Galileo)->Gateway (HyperPay):PushPayment\nXXXX to send $3 token to vector5VM
+activate Gateway (HyperPay)
+Gateway (HyperPay)->Gateway Connector:PushPayment
+activate Gateway Connector
+Gateway Connector->Hypernet Core:PushPayment
 Hypernet Core->Hypernet Core:Send money to remote via Router\nRemote is presumably Gateway's Core
-Validator Connector<-Hypernet Core:Status Report
-Validator (HyperPay)<-Validator Connector:Status Report
-Validator Connector<-Hypernet Core:Status Report
-Validator (HyperPay)<-Validator Connector:Status Report
-Validator Connector<-Hypernet Core:Payment Accepted\nRemote has received money, but insurance is still held
-Validator (HyperPay)<-Validator Connector:Status Report
-deactivate Validator Connector
-Gateway (Galileo)<-Validator (HyperPay):Callback to Gateway\nPayment Accepted
-deactivate Validator (HyperPay)
+Gateway Connector<-Hypernet Core:Status Report
+Gateway (HyperPay)<-Gateway Connector:Status Report
+Gateway Connector<-Hypernet Core:Status Report
+Gateway (HyperPay)<-Gateway Connector:Status Report
+Gateway Connector<-Hypernet Core:Payment Accepted\nRemote has received money, but insurance is still held
+Gateway (HyperPay)<-Gateway Connector:Status Report
+deactivate Gateway Connector
+Gateway (Galileo)<-Gateway (HyperPay):Callback to Gateway\nPayment Accepted
+deactivate Gateway (HyperPay)

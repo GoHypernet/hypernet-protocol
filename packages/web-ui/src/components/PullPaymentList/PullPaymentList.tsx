@@ -233,7 +233,7 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
         <TableHead>
           <TableRow>
             <TableCell />
-            <TableCell>Validator</TableCell>
+            <TableCell>Gateway</TableCell>
             <TableCell align="right">Authorized Amount</TableCell>
             <TableCell align="right">Required Stake</TableCell>
             <TableCell align="right">Amount Staked</TableCell>

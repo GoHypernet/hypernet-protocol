@@ -785,9 +785,9 @@ export class PaymentService implements IPaymentService {
             context,
           ).map(() => {});
         } else {
-          // Validator is not active, so we will not advance the payment
+          // Gateway is not active, so we will not advance the payment
           this.logUtils.debug(
-            `Validator inactive, payment ${payment.id} will be delayed`,
+            `Gateway inactive, payment ${payment.id} will be delayed`,
           );
 
           // fire an event for payment advancement error / onPaymentDelay

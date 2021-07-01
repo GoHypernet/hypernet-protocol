@@ -92,7 +92,7 @@ workflows:
             - Deploy Core Iframe
           context: Development
       - gke/publish-and-rollout-image:
-          name: Deploy Validator Iframe
+          name: Deploy Gateway Iframe
           cluster: galileo
           container: hypernet-protocol-gateway-iframe
           deployment: hypernet-protocol-gateway-iframe
@@ -108,12 +108,12 @@ workflows:
           executor: ubuntu
           use-remote-docker: false
       - gcr/add-image-tag:
-          name: Tag Latest Validator Iframe
+          name: Tag Latest Gateway Iframe
           image: hypernetlabs/hypernet-protocol-gateway-iframe
           source-tag: $CIRCLE_SHA1
           target-tag: latest
           requires:
-            - Deploy Validator Iframe
+            - Deploy Gateway Iframe
           context: Development
       - gke/publish-and-rollout-image:
           name: Deploy User Dashboard

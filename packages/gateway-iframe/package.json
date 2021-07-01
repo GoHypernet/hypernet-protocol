@@ -1,7 +1,7 @@
 {
   "name": "@hypernetlabs/gateway-iframe",
   "version": "0.0.1",
-  "description": "Validator iFrame package. This is used to sandbox the connector code away from the running hypernet core.",
+  "description": "Gateway iFrame package. This is used to sandbox the connector code away from the running hypernet core.",
   "license": "ISC",
   "repository": {
     "type": "git",
