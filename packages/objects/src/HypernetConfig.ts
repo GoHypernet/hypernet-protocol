@@ -21,6 +21,7 @@ export class HypernetConfig {
     public ceramicNodeUrl: string,
     public storageAliases: Map<DefinitionName, SchemaUrl>,
     public merchantDeauthorizationTimeout: number,
+    public controlClaimSubject: string,
     public debug: boolean,
   ) {}
 }

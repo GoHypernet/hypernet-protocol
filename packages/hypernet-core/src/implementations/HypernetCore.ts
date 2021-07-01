@@ -32,6 +32,7 @@ import {
   MerchantAuthorizationDeniedError,
   BigNumberString,
   UnixTimestamp,
+  MessagingError,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -50,10 +51,12 @@ import { Subject } from "rxjs";
 
 import {
   MerchantConnectorListener,
+  NatsMessagingListener,
   VectorAPIListener,
 } from "@implementations/api";
 import {
   AccountService,
+  ControlService,
   DevelopmentService,
   LinkService,
   MerchantConnectorService,
@@ -62,6 +65,7 @@ import {
 import {
   AccountsRepository,
   MerchantConnectorRepository,
+  NatsMessagingRepository,
   PaymentRepository,
   VectorLinkRepository,
 } from "@implementations/data";
@@ -79,15 +83,21 @@ import {
   EthersBlockchainUtils,
   CeramicUtils,
   MetamaskUtils,
+  MessagingProvider,
 } from "@implementations/utilities";
 import {
   MerchantConnectorProxyFactory,
   BrowserNodeFactory,
   InternalProviderFactory,
 } from "@implementations/utilities/factory";
-import { IMerchantConnectorListener, IVectorListener } from "@interfaces/api";
+import {
+  IMerchantConnectorListener,
+  IMessagingListener,
+  IVectorListener,
+} from "@interfaces/api";
 import {
   IAccountService,
+  IControlService,
   IDevelopmentService,
   ILinkService,
   IMerchantConnectorService,
@@ -97,6 +107,7 @@ import {
   IAccountsRepository,
   ILinkRepository,
   IMerchantConnectorRepository,
+  IMessagingRepository,
   IPaymentRepository,
 } from "@interfaces/data";
 import { IStorageUtils } from "@interfaces/data/utilities";
@@ -114,6 +125,7 @@ import {
   IVectorUtils,
   ICeramicUtils,
   IMetamaskUtils,
+  IMessagingProvider,
 } from "@interfaces/utilities";
 import {
   IBrowserNodeFactory,
@@ -167,6 +179,7 @@ export class HypernetCore implements IHypernetCore {
   protected validationUtils: IValidationUtils;
   protected storageUtils: IStorageUtils;
   protected metamaskUtils: IMetamaskUtils;
+  protected messagingProvider: IMessagingProvider;
 
   // Factories
   protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory;
@@ -178,10 +191,11 @@ export class HypernetCore implements IHypernetCore {
   protected linkRepository: ILinkRepository;
   protected paymentRepository: IPaymentRepository;
   protected merchantConnectorRepository: IMerchantConnectorRepository;
+  protected messagingRepository: IMessagingRepository;
 
   // Business Layer Stuff
   protected accountService: IAccountService;
-  //protected controlService: IControlService;
+  protected controlService: IControlService;
   protected paymentService: IPaymentService;
   protected linkService: ILinkService;
   protected developmentService: IDevelopmentService;
@@ -190,8 +204,12 @@ export class HypernetCore implements IHypernetCore {
   // API
   protected vectorAPIListener: IVectorListener;
   protected merchantConnectorListener: IMerchantConnectorListener;
+  protected messagingListener: IMessagingListener;
 
-  protected _initializeResult: ResultAsync<void, LogicalError> | null;
+  protected _initializeResult: ResultAsync<
+    void,
+    LogicalError | MessagingError
+  > | null;
   protected _initialized: boolean;
   protected _initializePromise: Promise<void>;
   protected _initializePromiseResolve: (() => void) | null;
@@ -343,6 +361,12 @@ export class HypernetCore implements IHypernetCore {
     this.ajaxUtils = new AxiosAjaxUtils();
     this.blockchainUtils = new EthersBlockchainUtils(this.blockchainProvider);
     this.validationUtils = new ValidationUtils();
+    this.messagingProvider = new MessagingProvider(
+      this.configProvider,
+      this.contextProvider,
+      this.browserNodeProvider,
+      this.ajaxUtils,
+    );
 
     this.accountRepository = new AccountsRepository(
       this.blockchainProvider,
@@ -384,6 +408,10 @@ export class HypernetCore implements IHypernetCore {
       this.blockchainUtils,
       this.logUtils,
     );
+    this.messagingRepository = new NatsMessagingRepository(
+      this.messagingProvider,
+      this.configProvider,
+    );
 
     this.paymentService = new PaymentService(
       this.linkRepository,
@@ -401,7 +429,11 @@ export class HypernetCore implements IHypernetCore {
       this.blockchainProvider,
       this.logUtils,
     );
-    //this.controlService = new ControlService(this.contextProvider, this.threeboxMessagingRepository);
+    this.controlService = new ControlService(
+      this.messagingRepository,
+      this.contextProvider,
+      this.timeUtils,
+    );
     this.linkService = new LinkService(this.linkRepository);
     this.developmentService = new DevelopmentService(this.accountRepository);
     this.merchantConnectorService = new MerchantConnectorService(
@@ -428,6 +460,12 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.logUtils,
       this.validationUtils,
+    );
+    this.messagingListener = new NatsMessagingListener(
+      this.controlService,
+      this.messagingProvider,
+      this.configProvider,
+      this.logUtils,
     );
 
     // This whole rigamarole is to make sure it can only be initialized a single time, and that you can call waitInitialized()
@@ -694,7 +732,9 @@ export class HypernetCore implements IHypernetCore {
    * Initialize this instance of Hypernet Core
    * @param account: the ethereum account to initialize with
    */
-  public initialize(account: EthereumAddress): ResultAsync<void, LogicalError> {
+  public initialize(
+    account: EthereumAddress,
+  ): ResultAsync<void, LogicalError | MessagingError> {
     if (this._initializeResult != null) {
       return this._initializeResult;
     }
@@ -724,6 +764,7 @@ export class HypernetCore implements IHypernetCore {
           this.vectorAPIListener.setup(),
           this.merchantConnectorListener.setup(),
           this.merchantConnectorService.initialize(),
+          this.messagingListener.setup(),
         ]); // , this.threeboxMessagingListener.initialize()]);
       })
       .andThen(() => {

@@ -1,3 +1,9 @@
+import { PublicIdentifier } from "@objects/PublicIdentifier";
+import { UnixTimestamp } from "@objects/UnixTimestamp";
+
 export class ControlClaim {
-  constructor(public account: string, public timestamp: number) {}
+  constructor(
+    public publicIdentifier: PublicIdentifier,
+    public timestamp: UnixTimestamp,
+  ) {}
 }

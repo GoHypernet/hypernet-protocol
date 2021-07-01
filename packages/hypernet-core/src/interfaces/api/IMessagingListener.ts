@@ -1,9 +1,6 @@
-import {
-  BlockchainUnavailableError,
-  ThreeBoxError,
-} from "@hypernetlabs/objects";
+import { MessagingError } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IMessagingListener {
-  initialize(): ResultAsync<void, ThreeBoxError | BlockchainUnavailableError>;
+  setup(): ResultAsync<void, MessagingError>;
 }

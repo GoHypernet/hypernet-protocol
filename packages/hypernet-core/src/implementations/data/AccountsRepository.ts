@@ -20,6 +20,7 @@ import { ethers, constants, BigNumber, Contract } from "ethers";
 import { combine, errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import { IAccountsRepository } from "@interfaces/data";
+import { IStorageUtils } from "@interfaces/data/utilities";
 import {
   IVectorUtils,
   IBlockchainProvider,
@@ -27,7 +28,6 @@ import {
   IBrowserNode,
   IBlockchainUtils,
 } from "@interfaces/utilities";
-import { IStorageUtils } from "@interfaces/data/utilities";
 
 /**
  * Contains methods for getting Ethereum accounts, public identifiers,

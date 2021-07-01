@@ -94,7 +94,7 @@ export interface IPaymentUtils {
    * @param metadata
    */
   transfersToPullPayment(
-    id: string,
+    id: PaymentId,
     to: PublicIdentifier,
     from: PublicIdentifier,
     state: EPaymentState,
@@ -111,7 +111,7 @@ export interface IPaymentUtils {
    * @param metadata
    */
   transfersToPushPayment(
-    id: string,
+    id: PaymentId,
     to: PublicIdentifier,
     from: PublicIdentifier,
     state: EPaymentState,

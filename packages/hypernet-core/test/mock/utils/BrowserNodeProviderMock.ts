@@ -1,4 +1,5 @@
 import {
+  BigNumberString,
   BlockchainUnavailableError,
   EthereumAddress,
   UnixTimestamp,

@@ -21,6 +21,7 @@ import {
   TransferResolutionError,
   ProxyError,
   MerchantAuthorizationDeniedError,
+  MessagingError,
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { HypernetLink } from "@objects/HypernetLink";
@@ -61,7 +62,9 @@ export interface IHypernetCore {
    * hypernet core will be representing.
    * @param account The address that says who this instance of HypernetCore is representing.
    */
-  initialize(account: EthereumAddress): ResultAsync<void, LogicalError>;
+  initialize(
+    account: EthereumAddress,
+  ): ResultAsync<void, LogicalError | MessagingError>;
 
   /**
    * Gets the public id of the Hypernet Core user account. If the core is not initialized,

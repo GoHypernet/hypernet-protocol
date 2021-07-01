@@ -532,7 +532,7 @@ export class PaymentRepository implements IPaymentRepository {
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
     let existingTransfers: IFullTransferState[];
-    let timestamp: number;
+    let timestamp: UnixTimestamp;
 
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
@@ -607,7 +607,7 @@ export class PaymentRepository implements IPaymentRepository {
     let browserNode: IBrowserNode;
     let config: HypernetConfig;
     let existingTransfers: IFullTransferState[];
-    let timestamp: number;
+    let timestamp: UnixTimestamp;
 
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
