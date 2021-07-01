@@ -253,8 +253,8 @@ services:
       - router
       - iframe
 
-  merchant-iframe:
-    image: hypernetlabs/hypernet-protocol-merchant-iframe:local
+  gateway-iframe:
+    image: hypernetlabs/hypernet-protocol-gateway-iframe:local
     ports:
       - 5005:80
     depends_on:
@@ -267,7 +267,7 @@ services:
       - 5015:80
     depends_on:
       - core-iframe
-      - merchant-iframe
+      - gateway-iframe
 
   user-dashboard:
     image: hypernetlabs/hypernet-protocol-user-dashboard:local
@@ -275,7 +275,7 @@ services:
       - 5016:80
     depends_on:
       - core-iframe
-      - merchant-iframe
+      - gateway-iframe
 
   test-gateway:
     image: node:14

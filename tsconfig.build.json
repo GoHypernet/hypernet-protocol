@@ -37,7 +37,7 @@
       "@web-integration/*": ["./*"],
       "@web-ui/*": ["./*"],
       "@gateway-connector/*": ["./*"],
-      "@merchant-iframe/*": ["./*"],
+      "@gateway-iframe/*": ["./*"],
       "@core-iframe/*": ["./*"],
       "@test-gateway/*": [
         "./packages/test-gateway/src/*"

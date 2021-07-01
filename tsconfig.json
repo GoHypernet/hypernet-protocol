@@ -18,10 +18,10 @@
       "path": "packages/iframe"
     },
     {
-      "path": "packages/merchant-iframe"
+      "path": "packages/gateway-iframe"
     },
     {
-      "path": "packages/merchant-iframe/test"
+      "path": "packages/gateway-iframe/test"
     },
     {
       "path": "packages/developer-ui"

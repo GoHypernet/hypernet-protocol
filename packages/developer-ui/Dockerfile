@@ -12,7 +12,7 @@ COPY ./packages/governance-app/package.json /build/packages/governance-app/packa
 COPY ./packages/hypernet-core/package.json /build/packages/hypernet-core/package.json
 COPY ./packages/iframe/package.json /build/packages/iframe/package.json
 COPY ./packages/gateway-connector/package.json /build/packages/gateway-connector/package.json
-COPY ./packages/merchant-iframe/package.json /build/packages/merchant-iframe/package.json
+COPY ./packages/gateway-iframe/package.json /build/packages/gateway-iframe/package.json
 COPY ./packages/mobile-integration/package.json /build/packages/mobile-integration/package.json
 COPY ./packages/objects/package.json /build/packages/objects/package.json
 COPY ./packages/test-gateway/package.json /build/packages/test-gateway/package.json

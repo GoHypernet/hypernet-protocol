@@ -1,7 +1,7 @@
 {
-  "name": "@hypernetlabs/gateway-connector",
+  "name": "@hypernetlabs/gateway-iframe",
   "version": "0.0.1",
-  "description": "Package that defines how to write a dispute mediator. Includes an example mediator for testing, which always resolve's in the sender's favor.",
+  "description": "Validator iFrame package. This is used to sandbox the connector code away from the running hypernet core.",
   "license": "ISC",
   "repository": {
     "type": "git",
@@ -23,17 +23,23 @@
   "main": "dist/index.js",
   "files": [
     "dist",
+    "src",
     "!dist/test",
     "!dist/tsconfig.tsbuildinfo"
   ],
   "scripts": {
-    "build": "yarn clean && yarn compile",
+    "build": "yarn clean && yarn compile && yarn postCompile",
+    "dockerize": "docker build -t hypernetlabs/hypernet-protocol-gateway-iframe:local -f Dockerfile --progress=plain ../..",
+    "dev": "webpack watch --config webpack.config.js --mode development",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "compile": "tsc --build && cd ../.. && yarn alias",
     "alias": "tsc-alias",
+    "postCompile": "webpack",
+    "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
+    "lint": "tslint -p src/tsconfig.json",
     "prepare": "yarn build",
-    "test": "yarn test:ci",
+    "test": "yarn build && yarn test:ci",
     "test:ci": "jest --runInBand --coverage --passWithNoTests",
     "test:watch": "jest --watch --color --detectOpenHandles",
     "preversion": "npm run lint",
@@ -42,6 +48,14 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/objects": "^0.0.1"
+    "@hypernetlabs/gateway-connector": "^0.0.1",
+    "@hypernetlabs/objects": "^0.0.1",
+    "@hypernetlabs/utils": "^0.0.1",
+    "ethers": "^5.0.31",
+    "inversify": "^5.1.1",
+    "neverthrow": "^4.1.0",
+    "postmate": "^1.5.2",
+    "rxjs": "^6.6.2",
+    "url-join-ts": "^1.0.5"
   }
 }

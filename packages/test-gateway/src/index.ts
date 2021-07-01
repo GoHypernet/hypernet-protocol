@@ -95,13 +95,13 @@ class TestGatewayConnector implements IGatewayConnector {
     `;
     window.document.body.appendChild(element);
 
-    // connector did all the rendering stuff, now he is asking merchant-iframe to show his stuff
+    // connector did all the rendering stuff, now he is asking gateway-iframe to show his stuff
     // Gateway iframe Postmate model is running after the connector code get compiled in MerchantConnectorService.activateMerchantConnector so we need a small delay to wait for the Postmate model to get initialized.
     setTimeout(() => {
       //this.displayRequested.next();
     }, 100);
 
-    // connector done with the UI he rendered previously, now he want to ask the merchant-iframe to close everything.
+    // connector done with the UI he rendered previously, now he want to ask the gateway-iframe to close everything.
     setTimeout(() => {
       //this.closeRequested.next();
     }, 10000);
