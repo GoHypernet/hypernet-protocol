@@ -46,12 +46,12 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
 
   public setup(): ResultAsync<void, never> {
     return this.contextProvider.getContext().map((context) => {
-      context.onMerchantConnectorProxyActivated.subscribe((proxy) => {
+      context.onGatewayConnectorProxyActivated.subscribe((proxy) => {
         this.logUtils.debug(
           `Gateway connector proxy activated ${proxy.gatewayUrl}`,
         );
 
-        this._advanceMerchantRelatedPayments(proxy.gatewayUrl);
+        this._advanceGatewayRelatedPayments(proxy.gatewayUrl);
 
         // When the gateway iframe wants a message signed, we can do it.
         const signMessageRequestedSubscription =
@@ -144,7 +144,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
       });
 
       // Stop listening for gateway connector events when gateway deauthorization starts
-      context.onMerchantDeauthorizationStarted.subscribe((gatewayUrl) => {
+      context.onGatewayDeauthorizationStarted.subscribe((gatewayUrl) => {
         this.signMessageRequestedSubscriptionMap.get(gatewayUrl)?.unsubscribe();
         this.sendFundsRequestedSubscriptionMap.get(gatewayUrl)?.unsubscribe();
         this.authorizeFundsRequestedSubscriptionMap
@@ -154,7 +154,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
     });
   }
 
-  protected _advanceMerchantRelatedPayments(gatewayUrl: GatewayUrl): void {
+  protected _advanceGatewayRelatedPayments(gatewayUrl: GatewayUrl): void {
     this.logUtils.debug(`Advancing payments for ${gatewayUrl}`);
     this.linkService
       .getLinks()

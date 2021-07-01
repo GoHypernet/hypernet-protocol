@@ -5,41 +5,41 @@ import {
   AjaxError,
 } from "@hypernetlabs/objects";
 import { IAjaxUtils } from "@hypernetlabs/utils";
-import { IMerchantConnectorRepository } from "@gateway-iframe/interfaces/data";
+import { IGatewayConnectorRepository } from "@gateway-iframe/interfaces/data";
 import { okAsync, ResultAsync } from "neverthrow";
 import { urlJoinP } from "url-join-ts";
 
-export class MerchantConnectorRepository
-  implements IMerchantConnectorRepository {
+export class GatewayConnectorRepository
+  implements IGatewayConnectorRepository {
   constructor(protected ajaxUtils: IAjaxUtils) {}
 
-  public getMerchantSignature(
+  public getGatewaySignature(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<Signature, AjaxError> {
-    const url = this._prepareMerchantUrl(gatewayUrl, "signature");
+    const url = this._prepareGatewayUrl(gatewayUrl, "signature");
     return this.ajaxUtils.get<Signature>(url).andThen((response) => {
       return okAsync(response);
     });
   }
-  public getMerchantAddress(
+  public getGatewayAddress(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<EthereumAddress, AjaxError> {
-    const url = this._prepareMerchantUrl(gatewayUrl, "address");
+    const url = this._prepareGatewayUrl(gatewayUrl, "address");
     return this.ajaxUtils.get<EthereumAddress>(url).andThen((response) => {
       return okAsync(response);
     });
   }
 
-  public getMerchantCode(
+  public getGatewayCode(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<string, AjaxError> {
-    const url = this._prepareMerchantUrl(gatewayUrl, "connector");
+    const url = this._prepareGatewayUrl(gatewayUrl, "connector");
     return this.ajaxUtils.get<string>(url).andThen((response) => {
       return okAsync(response);
     });
   }
 
-  private _prepareMerchantUrl(gatewayUrl: GatewayUrl, path: string): URL {
+  private _prepareGatewayUrl(gatewayUrl: GatewayUrl, path: string): URL {
     const merchantUrlObject = new URL(gatewayUrl);
     const searchParams = {};
     for (const [key, value] of new URLSearchParams(

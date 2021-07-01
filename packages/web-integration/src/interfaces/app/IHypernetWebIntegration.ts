@@ -6,6 +6,6 @@ export interface IHypernetWebIntegration {
   core: IHypernetCore;
   webUIClient: IHypernetWebUI;
   getReady: () => ResultAsync<IHypernetCore, Error>;
-  displayMerchantIFrame(gatewayUrl: GatewayUrl): void;
-  closeMerchantIFrame(gatewayUrl: GatewayUrl): void;
+  displayGatewayIFrame(gatewayUrl: GatewayUrl): void;
+  closeGatewayIFrame(gatewayUrl: GatewayUrl): void;
 }

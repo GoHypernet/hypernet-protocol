@@ -1,9 +1,9 @@
 import {
   Signature,
   GatewayUrl,
-  MerchantValidationError,
+  GatewayValidationError,
 } from "@hypernetlabs/objects";
-import { MerchantContext } from "@gateway-iframe/interfaces/objects";
+import { GatewayContext } from "@gateway-iframe/interfaces/objects";
 import { injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
@@ -12,7 +12,7 @@ import { IContextProvider } from "@gateway-iframe/interfaces/utils";
 
 @injectable()
 export class ContextProvider implements IContextProvider {
-  protected context: MerchantContext;
+  protected context: GatewayContext;
   protected connectorValidatedResolve: (() => void) | undefined;
   protected connectorValidatedReject: ((e: unknown) => void) | undefined;
 
@@ -21,7 +21,7 @@ export class ContextProvider implements IContextProvider {
       this.connectorValidatedResolve = resolve;
       this.connectorValidatedReject = reject;
     });
-    this.context = new MerchantContext(
+    this.context = new GatewayContext(
       gatewayUrl,
       new Subject(),
       new Subject(),
@@ -31,25 +31,25 @@ export class ContextProvider implements IContextProvider {
       null, // Public Identifier
       ResultAsync.fromPromise(
         connectorValidatedPromise,
-        (e) => e as MerchantValidationError,
+        (e) => e as GatewayValidationError,
       ),
     );
   }
 
-  public getMerchantContext(): MerchantContext {
+  public getGatewayContext(): GatewayContext {
     return this.context;
   }
 
-  public setMerchantContext(context: MerchantContext): void {
+  public setGatewayContext(context: GatewayContext): void {
     this.context = context;
   }
 
-  public setValidatedMerchantConnector(
-    validatedMerchantCode: string,
-    validatedMerchantSignature: Signature,
+  public setValidatedGatewayConnector(
+    validatedGatewayCode: string,
+    validatedGatewaySignature: Signature,
   ): void {
-    this.context.validatedMerchantCode = validatedMerchantCode;
-    this.context.validatedMerchantSignature = validatedMerchantSignature;
+    this.context.validatedGatewayCode = validatedGatewayCode;
+    this.context.validatedGatewaySignature = validatedGatewaySignature;
 
     if (this.connectorValidatedResolve == null) {
       throw new Error(
@@ -59,7 +59,7 @@ export class ContextProvider implements IContextProvider {
     this.connectorValidatedResolve();
   }
 
-  public setValidatedMerchantConnectorFailed(e: Error): void {
+  public setValidatedGatewayConnectorFailed(e: Error): void {
     if (this.connectorValidatedReject == null) {
       throw new Error(
         "Connector validated promise is null, this should never happen!",

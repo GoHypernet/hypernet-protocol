@@ -1,8 +1,8 @@
 import {
   Balances,
   LogicalError,
-  MerchantConnectorError,
-  MerchantValidationError,
+  GatewayConnectorError,
+  GatewayValidationError,
   PersistenceError,
   ProxyError,
   BlockchainUnavailableError,
@@ -12,17 +12,17 @@ import {
   TransferId,
   GatewayUrl,
   Signature,
-  MerchantAuthorizationDeniedError,
+  GatewayAuthorizationDeniedError,
   PullPayment,
   PushPayment,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
-export interface IMerchantConnectorRepository {
+export interface IGatewayConnectorRepository {
   /**
    * Returns a map of gateway URLs to their address
    */
-  getMerchantAddresses(
+  getGatewayAddresses(
     gatewayUrl: GatewayUrl[],
   ): ResultAsync<Map<GatewayUrl, EthereumAddress>, LogicalError>;
 
@@ -31,28 +31,28 @@ export interface IMerchantConnectorRepository {
    * @param gatewayUrl
    * @param signature
    */
-  addAuthorizedMerchant(
+  addAuthorizedGateway(
     gatewayUrl: GatewayUrl,
     initialBalances: Balances,
   ): ResultAsync<
     void,
     | PersistenceError
-    | MerchantValidationError
+    | GatewayValidationError
     | ProxyError
     | BlockchainUnavailableError
-    | MerchantConnectorError
-    | MerchantAuthorizationDeniedError
+    | GatewayConnectorError
+    | GatewayAuthorizationDeniedError
   >;
 
   /**
    * Deauthorizes a gateway, which will also destroy their proxy.
    * @param gatewayUrl
    */
-  deauthorizeMerchant(
+  deauthorizeGateway(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    PersistenceError | ProxyError | MerchantAuthorizationDeniedError
+    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
   >;
 
   /**
@@ -81,52 +81,52 @@ export interface IMerchantConnectorRepository {
     transferId: TransferId,
   ): ResultAsync<
     void,
-    MerchantConnectorError | MerchantValidationError | TransferResolutionError
+    GatewayConnectorError | GatewayValidationError | TransferResolutionError
   >;
 
-  closeMerchantIFrame(
+  closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, MerchantConnectorError>;
-  displayMerchantIFrame(
+  ): ResultAsync<void, GatewayConnectorError>;
+  displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, MerchantConnectorError>;
+  ): ResultAsync<void, GatewayConnectorError>;
 
   destroyProxy(gatewayUrl: GatewayUrl): void;
 
   notifyPushPaymentSent(
     gatewayUrl: GatewayUrl,
     payment: PushPayment,
-  ): ResultAsync<void, MerchantConnectorError>;
+  ): ResultAsync<void, GatewayConnectorError>;
   notifyPushPaymentUpdated(
     gatewayUrl: GatewayUrl,
     payment: PushPayment,
-  ): ResultAsync<void, MerchantConnectorError>;
+  ): ResultAsync<void, GatewayConnectorError>;
   notifyPushPaymentReceived(
     gatewayUrl: GatewayUrl,
     payment: PushPayment,
-  ): ResultAsync<void, MerchantConnectorError>;
+  ): ResultAsync<void, GatewayConnectorError>;
   notifyPullPaymentSent(
     gatewayUrl: GatewayUrl,
     payment: PullPayment,
-  ): ResultAsync<void, MerchantConnectorError>;
+  ): ResultAsync<void, GatewayConnectorError>;
   notifyPullPaymentUpdated(
     gatewayUrl: GatewayUrl,
     payment: PullPayment,
-  ): ResultAsync<void, MerchantConnectorError>;
+  ): ResultAsync<void, GatewayConnectorError>;
   notifyPullPaymentReceived(
     gatewayUrl: GatewayUrl,
     payment: PullPayment,
-  ): ResultAsync<void, MerchantConnectorError>;
+  ): ResultAsync<void, GatewayConnectorError>;
   notifyBalancesReceived(
     balances: Balances,
-  ): ResultAsync<void, MerchantConnectorError>;
+  ): ResultAsync<void, GatewayConnectorError>;
 }
 
-export interface IAuthorizedMerchantEntry {
+export interface IAuthorizedGatewayEntry {
   gatewayUrl: GatewayUrl;
   authorizationSignature: string;
 }
 
-export const IMerchantConnectorRepositoryType = Symbol.for(
-  "IMerchantConnectorRepository",
+export const IGatewayConnectorRepositoryType = Symbol.for(
+  "IGatewayConnectorRepository",
 );

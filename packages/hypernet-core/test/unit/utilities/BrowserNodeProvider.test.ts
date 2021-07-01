@@ -39,7 +39,7 @@ class BrowserNodeProviderMocks {
   };
 
   public expectedSignerTypes = {
-    AuthorizedMerchant: [
+    AuthorizedGateway: [
       { name: "authorizedGatewayUrl", type: "string" },
       { name: "merchantValidatedSignature", type: "string" },
     ],

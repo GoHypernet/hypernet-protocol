@@ -1,7 +1,7 @@
 title Authorize Gateway Connector Flow
 
 participant Hypernet Core
-participant MerchantConnectorRepository
+participant GatewayConnectorRepository
 participant Gateway Iframe
 participant Gateway API
 participant Blockchain Wallet
@@ -25,7 +25,7 @@ deactivate Hypernet Core
 Hypernet Core<-Blockchain Wallet:Signature Signature
 activate Hypernet Core
 deactivate Blockchain Wallet
-Hypernet Core->MerchantConnectorRepository:merchantURL:SignatureSignature
-Hypernet Core->Gateway Iframe:startMerchantConnector()
+Hypernet Core->GatewayConnectorRepository:merchantURL:SignatureSignature
+Hypernet Core->Gateway Iframe:startGatewayConnector()
 deactivate Hypernet Core
 activate Gateway Iframe

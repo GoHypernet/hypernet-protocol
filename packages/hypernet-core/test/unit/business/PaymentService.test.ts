@@ -27,7 +27,7 @@ import { IPaymentService } from "@interfaces/business/IPaymentService";
 import {
   IAccountsRepository,
   ILinkRepository,
-  IMerchantConnectorRepository,
+  IGatewayConnectorRepository,
   IPaymentRepository,
 } from "@interfaces/data";
 import {
@@ -68,7 +68,7 @@ class PaymentServiceMocks {
   public configProvider = new ConfigProviderMock();
   public logUtils = td.object<ILogUtils>();
   public paymentRepository = td.object<IPaymentRepository>();
-  public merchantConnectorRepository = td.object<IMerchantConnectorRepository>();
+  public merchantConnectorRepository = td.object<IGatewayConnectorRepository>();
 
   public proposedPushPayment: PushPayment;
   public stakedPushPayment: PushPayment;
@@ -160,7 +160,7 @@ class PaymentServiceMocks {
     this.merchantAddresses = new Map();
     this.merchantAddresses.set(gatewayUrl, account);
     td.when(
-      this.merchantConnectorRepository.getMerchantAddresses(
+      this.merchantConnectorRepository.getGatewayAddresses(
         td.matchers.contains(gatewayUrl),
       ),
     ).thenReturn(okAsync(this.merchantAddresses));
@@ -170,7 +170,7 @@ class PaymentServiceMocks {
     ).thenReturn(okAsync(new Map([[gatewayUrl, validatedSignature]])));
 
     td.when(
-      this.merchantConnectorRepository.addAuthorizedMerchant(
+      this.merchantConnectorRepository.addAuthorizedGateway(
         gatewayUrl,
         new Balances([this.assetBalance]),
       ),

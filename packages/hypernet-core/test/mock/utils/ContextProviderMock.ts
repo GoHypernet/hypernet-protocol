@@ -52,24 +52,24 @@ export class ContextProviderMock implements IContextProvider {
   public onDeStorageAuthenticationSucceededActivationCount = 0;
   public onDeStorageAuthenticationFailed: Subject<void>;
   public onDeStorageAuthenticationFailedActivationCount = 0;
-  public onMerchantAuthorized: Subject<GatewayUrl>;
-  public onMerchantAuthorizedActivations: GatewayUrl[] = [];
-  public onMerchantDeauthorizationStarted: Subject<GatewayUrl>;
-  public onMerchantDeauthorizationStartedActivations: GatewayUrl[] = [];
-  public onAuthorizedMerchantUpdated: Subject<GatewayUrl>;
-  public onAuthorizedMerchantUpdatedActivations: GatewayUrl[] = [];
-  public onAuthorizedMerchantActivationFailed: Subject<GatewayUrl>;
-  public onAuthorizedMerchantActivationFailedActivations: GatewayUrl[] = [];
-  public onMerchantIFrameDisplayRequested: Subject<GatewayUrl>;
-  public onMerchantIFrameDisplayRequestedActivations: GatewayUrl[] = [];
-  public onMerchantIFrameCloseRequested: Subject<GatewayUrl>;
-  public onMerchantIFrameCloseRequestedActivations: GatewayUrl[] = [];
+  public onGatewayAuthorized: Subject<GatewayUrl>;
+  public onGatewayAuthorizedActivations: GatewayUrl[] = [];
+  public onGatewayDeauthorizationStarted: Subject<GatewayUrl>;
+  public onGatewayDeauthorizationStartedActivations: GatewayUrl[] = [];
+  public onAuthorizedGatewayUpdated: Subject<GatewayUrl>;
+  public onAuthorizedGatewayUpdatedActivations: GatewayUrl[] = [];
+  public onAuthorizedGatewayActivationFailed: Subject<GatewayUrl>;
+  public onAuthorizedGatewayActivationFailedActivations: GatewayUrl[] = [];
+  public onGatewayIFrameDisplayRequested: Subject<GatewayUrl>;
+  public onGatewayIFrameDisplayRequestedActivations: GatewayUrl[] = [];
+  public onGatewayIFrameCloseRequested: Subject<GatewayUrl>;
+  public onGatewayIFrameCloseRequestedActivations: GatewayUrl[] = [];
   public onInitializationRequired: Subject<void>;
   public onInitializationRequiredActivationCount = 0;
   public onPrivateCredentialsRequested: Subject<void>;
   public onPrivateCredentialsRequestedActivationCount = 0;
-  public onMerchantConnectorActivated: Subject<IGatewayConnectorProxy>;
-  public onMerchantConnectorActivatedActivations: IGatewayConnectorProxy[] = [];
+  public onGatewayConnectorActivated: Subject<IGatewayConnectorProxy>;
+  public onGatewayConnectorActivatedActivations: IGatewayConnectorProxy[] = [];
 
   public authorizedGateways: Map<GatewayUrl, Signature>;
 
@@ -148,34 +148,34 @@ export class ContextProviderMock implements IContextProvider {
       this.onDeStorageAuthenticationFailedActivationCount++;
     });
 
-    this.onMerchantAuthorized = new Subject<GatewayUrl>();
-    this.onMerchantAuthorized.subscribe((val) => {
-      this.onMerchantAuthorizedActivations.push(val);
+    this.onGatewayAuthorized = new Subject<GatewayUrl>();
+    this.onGatewayAuthorized.subscribe((val) => {
+      this.onGatewayAuthorizedActivations.push(val);
     });
 
-    this.onMerchantDeauthorizationStarted = new Subject<GatewayUrl>();
-    this.onMerchantDeauthorizationStarted.subscribe((val) => {
-      this.onMerchantDeauthorizationStartedActivations.push(val);
+    this.onGatewayDeauthorizationStarted = new Subject<GatewayUrl>();
+    this.onGatewayDeauthorizationStarted.subscribe((val) => {
+      this.onGatewayDeauthorizationStartedActivations.push(val);
     });
 
-    this.onAuthorizedMerchantUpdated = new Subject<GatewayUrl>();
-    this.onAuthorizedMerchantUpdated.subscribe((val) => {
-      this.onAuthorizedMerchantUpdatedActivations.push(val);
+    this.onAuthorizedGatewayUpdated = new Subject<GatewayUrl>();
+    this.onAuthorizedGatewayUpdated.subscribe((val) => {
+      this.onAuthorizedGatewayUpdatedActivations.push(val);
     });
 
-    this.onAuthorizedMerchantActivationFailed = new Subject<GatewayUrl>();
-    this.onAuthorizedMerchantActivationFailed.subscribe((val) => {
-      this.onAuthorizedMerchantActivationFailedActivations.push(val);
+    this.onAuthorizedGatewayActivationFailed = new Subject<GatewayUrl>();
+    this.onAuthorizedGatewayActivationFailed.subscribe((val) => {
+      this.onAuthorizedGatewayActivationFailedActivations.push(val);
     });
 
-    this.onMerchantIFrameDisplayRequested = new Subject<GatewayUrl>();
-    this.onMerchantIFrameDisplayRequested.subscribe((val) => {
-      this.onMerchantIFrameDisplayRequestedActivations.push(val);
+    this.onGatewayIFrameDisplayRequested = new Subject<GatewayUrl>();
+    this.onGatewayIFrameDisplayRequested.subscribe((val) => {
+      this.onGatewayIFrameDisplayRequestedActivations.push(val);
     });
 
-    this.onMerchantIFrameCloseRequested = new Subject<GatewayUrl>();
-    this.onMerchantIFrameCloseRequested.subscribe((val) => {
-      this.onMerchantIFrameCloseRequestedActivations.push(val);
+    this.onGatewayIFrameCloseRequested = new Subject<GatewayUrl>();
+    this.onGatewayIFrameCloseRequested.subscribe((val) => {
+      this.onGatewayIFrameCloseRequestedActivations.push(val);
     });
 
     this.onInitializationRequired = new Subject<void>();
@@ -188,9 +188,9 @@ export class ContextProviderMock implements IContextProvider {
       this.onPrivateCredentialsRequestedActivationCount++;
     });
 
-    this.onMerchantConnectorActivated = new Subject<IGatewayConnectorProxy>();
-    this.onMerchantConnectorActivated.subscribe((val) => {
-      this.onMerchantConnectorActivatedActivations.push(val);
+    this.onGatewayConnectorActivated = new Subject<IGatewayConnectorProxy>();
+    this.onGatewayConnectorActivated.subscribe((val) => {
+      this.onGatewayConnectorActivatedActivations.push(val);
     });
 
     this.authorizedGateways = new Map<GatewayUrl, Signature>();
@@ -217,15 +217,15 @@ export class ContextProviderMock implements IContextProvider {
         this.onDeStorageAuthenticationStarted,
         this.onDeStorageAuthenticationSucceeded,
         this.onDeStorageAuthenticationFailed,
-        this.onMerchantAuthorized,
-        this.onMerchantDeauthorizationStarted,
-        this.onAuthorizedMerchantUpdated,
-        this.onAuthorizedMerchantActivationFailed,
-        this.onMerchantIFrameDisplayRequested,
-        this.onMerchantIFrameCloseRequested,
+        this.onGatewayAuthorized,
+        this.onGatewayDeauthorizationStarted,
+        this.onAuthorizedGatewayUpdated,
+        this.onAuthorizedGatewayActivationFailed,
+        this.onGatewayIFrameDisplayRequested,
+        this.onGatewayIFrameCloseRequested,
         this.onInitializationRequired,
         this.onPrivateCredentialsRequested,
-        this.onMerchantConnectorActivated,
+        this.onGatewayConnectorActivated,
       );
     }
 
@@ -251,15 +251,15 @@ export class ContextProviderMock implements IContextProvider {
         this.onDeStorageAuthenticationStarted,
         this.onDeStorageAuthenticationSucceeded,
         this.onDeStorageAuthenticationFailed,
-        this.onMerchantAuthorized,
-        this.onMerchantDeauthorizationStarted,
-        this.onAuthorizedMerchantUpdated,
-        this.onAuthorizedMerchantActivationFailed,
-        this.onMerchantIFrameDisplayRequested,
-        this.onMerchantIFrameCloseRequested,
+        this.onGatewayAuthorized,
+        this.onGatewayDeauthorizationStarted,
+        this.onAuthorizedGatewayUpdated,
+        this.onAuthorizedGatewayActivationFailed,
+        this.onGatewayIFrameDisplayRequested,
+        this.onGatewayIFrameCloseRequested,
         this.onInitializationRequired,
         this.onPrivateCredentialsRequested,
-        this.onMerchantConnectorActivated,
+        this.onGatewayConnectorActivated,
         this.authorizedGateways,
       );
     }
@@ -300,15 +300,15 @@ export class ContextProviderMock implements IContextProvider {
       onDeStorageAuthenticationStarted: 0,
       onDeStorageAuthenticationSucceeded: 0,
       onDeStorageAuthenticationFailed: 0,
-      onMerchantAuthorized: 0,
-      onMerchantDeauthorizationStarted: 0,
-      onAuthorizedMerchantUpdated: 0,
-      onAuthorizedMerchantActivationFailed: 0,
-      onMerchantIFrameDisplayRequested: 0,
-      onMerchantIFrameCloseRequested: 0,
+      onGatewayAuthorized: 0,
+      onGatewayDeauthorizationStarted: 0,
+      onAuthorizedGatewayUpdated: 0,
+      onAuthorizedGatewayActivationFailed: 0,
+      onGatewayIFrameDisplayRequested: 0,
+      onGatewayIFrameCloseRequested: 0,
       onInitializationRequired: 0,
       onPrivateCredentialsRequested: 0,
-      onMerchantConnectorActivated: 0,
+      onGatewayConnectorActivated: 0,
       authorizedGateways: 0,
     };
 
@@ -357,23 +357,23 @@ export class ContextProviderMock implements IContextProvider {
     expect(this.onDeStorageAuthenticationFailedActivationCount).toBe(
       counts.onDeStorageAuthenticationFailed,
     );
-    expect(this.onMerchantAuthorizedActivations.length).toBe(
-      counts.onMerchantAuthorized,
+    expect(this.onGatewayAuthorizedActivations.length).toBe(
+      counts.onGatewayAuthorized,
     );
-    expect(this.onMerchantDeauthorizationStartedActivations.length).toBe(
-      counts.onMerchantDeauthorizationStarted,
+    expect(this.onGatewayDeauthorizationStartedActivations.length).toBe(
+      counts.onGatewayDeauthorizationStarted,
     );
-    expect(this.onAuthorizedMerchantUpdatedActivations.length).toBe(
-      counts.onAuthorizedMerchantUpdated,
+    expect(this.onAuthorizedGatewayUpdatedActivations.length).toBe(
+      counts.onAuthorizedGatewayUpdated,
     );
-    expect(this.onAuthorizedMerchantActivationFailedActivations.length).toBe(
-      counts.onAuthorizedMerchantActivationFailed,
+    expect(this.onAuthorizedGatewayActivationFailedActivations.length).toBe(
+      counts.onAuthorizedGatewayActivationFailed,
     );
-    expect(this.onMerchantIFrameDisplayRequestedActivations.length).toBe(
-      counts.onMerchantIFrameDisplayRequested,
+    expect(this.onGatewayIFrameDisplayRequestedActivations.length).toBe(
+      counts.onGatewayIFrameDisplayRequested,
     );
-    expect(this.onMerchantIFrameCloseRequestedActivations.length).toBe(
-      counts.onMerchantIFrameCloseRequested,
+    expect(this.onGatewayIFrameCloseRequestedActivations.length).toBe(
+      counts.onGatewayIFrameCloseRequested,
     );
     expect(this.onInitializationRequiredActivationCount).toBe(
       counts.onInitializationRequired,
@@ -381,8 +381,8 @@ export class ContextProviderMock implements IContextProvider {
     expect(this.onPrivateCredentialsRequestedActivationCount).toBe(
       counts.onPrivateCredentialsRequested,
     );
-    expect(this.onMerchantConnectorActivatedActivations.length).toBe(
-      counts.onMerchantConnectorActivated,
+    expect(this.onGatewayConnectorActivatedActivations.length).toBe(
+      counts.onGatewayConnectorActivated,
     );
   }
 }
@@ -402,14 +402,14 @@ export interface IExpectedEventCounts {
   onDeStorageAuthenticationStarted?: number;
   onDeStorageAuthenticationSucceeded?: number;
   onDeStorageAuthenticationFailed?: number;
-  onMerchantAuthorized?: number;
-  onMerchantDeauthorizationStarted?: number;
-  onAuthorizedMerchantUpdated?: number;
-  onAuthorizedMerchantActivationFailed?: number;
-  onMerchantIFrameDisplayRequested?: number;
-  onMerchantIFrameCloseRequested?: number;
+  onGatewayAuthorized?: number;
+  onGatewayDeauthorizationStarted?: number;
+  onAuthorizedGatewayUpdated?: number;
+  onAuthorizedGatewayActivationFailed?: number;
+  onGatewayIFrameDisplayRequested?: number;
+  onGatewayIFrameCloseRequested?: number;
   onInitializationRequired?: number;
   onPrivateCredentialsRequested?: number;
-  onMerchantConnectorActivated?: number;
+  onGatewayConnectorActivated?: number;
   authorizedGateways?: number;
 }

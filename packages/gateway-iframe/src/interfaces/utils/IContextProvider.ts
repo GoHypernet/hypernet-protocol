@@ -1,14 +1,14 @@
 import { Signature } from "@hypernetlabs/objects";
-import { MerchantContext } from "@gateway-iframe/interfaces/objects";
+import { GatewayContext } from "@gateway-iframe/interfaces/objects";
 
 export interface IContextProvider {
-  getMerchantContext(): MerchantContext;
-  setMerchantContext(context: MerchantContext): void;
-  setValidatedMerchantConnector(
-    validatedMerchantCode: string,
-    validatedMerchantSignature: Signature,
+  getGatewayContext(): GatewayContext;
+  setGatewayContext(context: GatewayContext): void;
+  setValidatedGatewayConnector(
+    validatedGatewayCode: string,
+    validatedGatewaySignature: Signature,
   ): void;
-  setValidatedMerchantConnectorFailed(e: Error): void;
+  setValidatedGatewayConnectorFailed(e: Error): void;
 }
 
 export const IContextProviderType = Symbol.for("IContextProvider");

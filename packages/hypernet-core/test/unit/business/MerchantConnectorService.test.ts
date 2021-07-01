@@ -3,7 +3,7 @@ import { GatewayConnectorService } from "@implementations/business/GatewayConnec
 import { IGatewayConnectorService } from "@interfaces/business/IGatewayConnectorService";
 import {
   IAccountsRepository,
-  IMerchantConnectorRepository,
+  IGatewayConnectorRepository,
 } from "@interfaces/data";
 import { ok, okAsync } from "neverthrow";
 import { ILogUtils } from "@hypernetlabs/utils";
@@ -12,7 +12,7 @@ import td from "testdouble";
 import { ConfigProviderMock, ContextProviderMock } from "@tests/mock/utils";
 
 class GatewayConnectorServiceMocks {
-  public merchantConnectorRepository = td.object<IMerchantConnectorRepository>();
+  public merchantConnectorRepository = td.object<IGatewayConnectorRepository>();
   public accountRepository = td.object<IAccountsRepository>();
   public contextProvider = new ContextProviderMock();
   public configProvider = new ConfigProviderMock();
@@ -21,7 +21,7 @@ class GatewayConnectorServiceMocks {
 
   constructor() {
     td.when(
-      this.merchantConnectorRepository.deauthorizeMerchant(this.gatewayUrl),
+      this.merchantConnectorRepository.deauthorizeGateway(this.gatewayUrl),
     ).thenReturn(okAsync(undefined));
 
     td.when(
@@ -41,14 +41,14 @@ class GatewayConnectorServiceMocks {
 }
 
 describe("GatewayConnectorService tests", () => {
-  test("Should deauthorizeMerchant works without errors and without having the need to run the timeout method", async () => {
+  test("Should deauthorizeGateway works without errors and without having the need to run the timeout method", async () => {
     // Arrange
     const merchantConnectorServiceMock = new GatewayConnectorServiceMocks();
 
     const merchantConnectorService = merchantConnectorServiceMock.factoryGatewayConnectorService();
 
     // Act
-    const response = await merchantConnectorService.deauthorizeMerchant(
+    const response = await merchantConnectorService.deauthorizeGateway(
       merchantConnectorServiceMock.gatewayUrl,
     );
 
@@ -64,14 +64,14 @@ describe("GatewayConnectorService tests", () => {
     expect(response._unsafeUnwrap()).toBe(undefined);
   });
 
-  test("Should deauthorizeMerchant runs the timeout method if deauthorizeMerchant repository lasted more than deauthorizationTimeout", async () => {
+  test("Should deauthorizeGateway runs the timeout method if deauthorizeGateway repository lasted more than deauthorizationTimeout", async () => {
     // Arrange
     const merchantConnectorServiceMock = new GatewayConnectorServiceMocks();
 
     const merchantConnectorService = merchantConnectorServiceMock.factoryGatewayConnectorService();
 
     td.when(
-      merchantConnectorServiceMock.merchantConnectorRepository.deauthorizeMerchant(
+      merchantConnectorServiceMock.merchantConnectorRepository.deauthorizeGateway(
         merchantConnectorServiceMock.gatewayUrl,
       ),
     ).thenReturn(
@@ -81,7 +81,7 @@ describe("GatewayConnectorService tests", () => {
     );
 
     // Act
-    const response = await merchantConnectorService.deauthorizeMerchant(
+    const response = await merchantConnectorService.deauthorizeGateway(
       merchantConnectorServiceMock.gatewayUrl,
     );
 

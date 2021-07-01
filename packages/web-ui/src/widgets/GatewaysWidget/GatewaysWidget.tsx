@@ -1,3 +1,4 @@
+import { GatewayUrl } from "@hypernetlabs/objects";
 import {
   Box,
   Button,
@@ -17,28 +18,27 @@ import React, { useState, ReactNode } from "react";
 import PulseLoader from "react-spinners/PulseLoader";
 
 import { BoxWrapper, EmptyState } from "@web-ui/components";
-import { useMerchants } from "@web-ui/hooks";
-import { GatewayUrl } from "@hypernetlabs/objects";
+import { useGateways } from "@web-ui/hooks";
 
-interface IMerchantsWidget extends IRenderParams {}
+interface IGatewaysWidget extends IRenderParams {}
 
-const MerchantsWidget: React.FC<IMerchantsWidget> = ({
+const GatewaysWidget: React.FC<IGatewaysWidget> = ({
   includeBoxWrapper,
   noLabel,
   bodyStyle,
-}: IMerchantsWidget) => {
+}: IGatewaysWidget) => {
   const {
     merchantsMap,
-    openMerchantIFrame,
-    deauthorizeMerchant,
-    authorizeMerchant,
+    openGatewayIFrame,
+    deauthorizeGateway,
+    authorizeGateway,
     loading,
-  } = useMerchants();
-  const [inputMerchantUrl, setInputMerchantUrl] = useState<GatewayUrl>(
+  } = useGateways();
+  const [inputGatewayUrl, setInputGatewayUrl] = useState<GatewayUrl>(
     GatewayUrl(""),
   );
 
-  const renderMerchantAuthorization = (): ReactNode => {
+  const renderGatewayAuthorization = (): ReactNode => {
     return (
       <Box
         display="flex"
@@ -49,10 +49,10 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
         <Box flex={1} paddingRight="50px">
           <TextField
             label="Validator Url"
-            value={inputMerchantUrl}
+            value={inputGatewayUrl}
             fullWidth
             onChange={(event) => {
-              setInputMerchantUrl(GatewayUrl(event.target.value));
+              setInputGatewayUrl(GatewayUrl(event.target.value));
             }}
           />
         </Box>
@@ -60,10 +60,10 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
           size="small"
           variant="outlined"
           color="primary"
-          disabled={inputMerchantUrl == null || inputMerchantUrl == ""}
+          disabled={inputGatewayUrl == null || inputGatewayUrl == ""}
           onClick={() => {
-            authorizeMerchant(inputMerchantUrl);
-            setInputMerchantUrl(GatewayUrl(""));
+            authorizeGateway(inputGatewayUrl);
+            setInputGatewayUrl(GatewayUrl(""));
           }}
         >
           Authorize
@@ -99,7 +99,7 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
           <EmptyState
             info={<>You don't have any authorized validators yet</>}
           />
-          {renderMerchantAuthorization()}
+          {renderGatewayAuthorization()}
         </Box>
       }
     >
@@ -118,13 +118,11 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
                 >
                   <Avatar
                     style={{
-                      cursor: merchantsMap.get(gatewayUrl)
-                        ? "pointer"
-                        : "auto",
+                      cursor: merchantsMap.get(gatewayUrl) ? "pointer" : "auto",
                     }}
                     onClick={() => {
                       merchantsMap.get(gatewayUrl) &&
-                        openMerchantIFrame(gatewayUrl);
+                        openGatewayIFrame(gatewayUrl);
                     }}
                   >
                     {merchantsMap.get(gatewayUrl) ? <Folder /> : <Block />}
@@ -156,7 +154,7 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
                   size="small"
                   color="secondary"
                   onClick={() => {
-                    deauthorizeMerchant(gatewayUrl);
+                    deauthorizeGateway(gatewayUrl);
                   }}
                 >
                   Deauthorize
@@ -167,9 +165,9 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
           </Box>
         ))}
       </List>
-      {renderMerchantAuthorization()}
+      {renderGatewayAuthorization()}
     </CustomBox>
   );
 };
 
-export default MerchantsWidget;
+export default GatewaysWidget;

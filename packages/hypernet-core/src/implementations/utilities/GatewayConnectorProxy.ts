@@ -5,8 +5,8 @@ import {
 } from "@hypernetlabs/gateway-connector";
 import {
   EthereumAddress,
-  MerchantConnectorError,
-  MerchantValidationError,
+  GatewayConnectorError,
+  GatewayValidationError,
   PaymentId,
   ProxyError,
   Signature,
@@ -15,7 +15,7 @@ import {
   PublicIdentifier,
   PullPayment,
   PushPayment,
-  MerchantActivationError,
+  GatewayActivationError,
 } from "@hypernetlabs/objects";
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
@@ -54,7 +54,7 @@ export class GatewayConnectorProxy
   public activateConnector(
     publicIdentifier: PublicIdentifier,
     balances: Balances,
-  ): ResultAsync<void, MerchantActivationError | ProxyError> {
+  ): ResultAsync<void, GatewayActivationError | ProxyError> {
     const assets = balances.assets.map((val) => {
       return {
         assetAddress: val.assetAddress,
@@ -70,7 +70,7 @@ export class GatewayConnectorProxy
       publicIdentifier,
       balances: { assets: assets },
     };
-    return this._createCall<void, MerchantActivationError | ProxyError>(
+    return this._createCall<void, GatewayActivationError | ProxyError>(
       "activateConnector",
       activateData,
     ).mapErr((e) => {
@@ -83,24 +83,24 @@ export class GatewayConnectorProxy
 
   public resolveChallenge(
     paymentId: PaymentId,
-  ): ResultAsync<IResolutionResult, MerchantConnectorError | ProxyError> {
+  ): ResultAsync<IResolutionResult, GatewayConnectorError | ProxyError> {
     return this._createCall("resolveChallenge", paymentId);
   }
 
   public getAddress(): ResultAsync<
     EthereumAddress,
-    MerchantConnectorError | ProxyError
+    GatewayConnectorError | ProxyError
   > {
     return this._createCall("getAddress", null);
   }
 
-  public deauthorize(): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  public deauthorize(): ResultAsync<void, GatewayConnectorError | ProxyError> {
     return this._createCall("deauthorize", null);
   }
 
   public getValidatedSignature(): ResultAsync<
     Signature,
-    MerchantValidationError | ProxyError
+    GatewayValidationError | ProxyError
   > {
     return this._createCall("getValidatedSignature", null);
   }
@@ -114,21 +114,21 @@ export class GatewayConnectorProxy
 
       // Events coming from gateway connector iframe
       this.child?.on("displayRequested", () => {
-        this._pushOpenedMerchantIFrame(this.gatewayUrl);
-        this._showMerchantIFrame(context);
+        this._pushOpenedGatewayIFrame(this.gatewayUrl);
+        this._showGatewayIFrame(context);
       });
 
       this.child?.on("closeRequested", () => {
         // Only hide the gateway iframe if it's really displayed in the screen
         if (GatewayConnectorProxy.openedIFramesQueue[0] === this.gatewayUrl) {
-          this._hideMerchantIFrame();
+          this._hideGatewayIFrame();
         }
 
         // Only close the core iframe if there isn't any gateway iframe left in the queue, otherwise show the next one in the line
         if (GatewayConnectorProxy.openedIFramesQueue.length === 0) {
-          context.onMerchantIFrameCloseRequested.next(this.gatewayUrl);
+          context.onGatewayIFrameCloseRequested.next(this.gatewayUrl);
         } else {
-          this._showMerchantIFrame(context);
+          this._showGatewayIFrame(context);
         }
       });
 
@@ -150,28 +150,28 @@ export class GatewayConnectorProxy
   }
 
   // Events coming from web integration and user interactions
-  public displayMerchantIFrame(): ResultAsync<
+  public displayGatewayIFrame(): ResultAsync<
     void,
-    MerchantConnectorError | ProxyError
+    GatewayConnectorError | ProxyError
   > {
     return this.contextProvider.getContext().andThen((context) => {
-      this._pushOpenedMerchantIFrame(this.gatewayUrl);
-      this._showMerchantIFrame(context);
+      this._pushOpenedGatewayIFrame(this.gatewayUrl);
+      this._showGatewayIFrame(context);
 
       return this._createCall("merchantIFrameDisplayed", this.gatewayUrl);
     });
   }
 
-  public closeMerchantIFrame(): ResultAsync<
+  public closeGatewayIFrame(): ResultAsync<
     void,
-    MerchantConnectorError | ProxyError
+    GatewayConnectorError | ProxyError
   > {
     return this.contextProvider.getContext().andThen((context) => {
-      this._hideMerchantIFrame();
+      this._hideGatewayIFrame();
 
       // Show the next gateway iframe (which is always the first gateway iframe in the queue) if there is any in the queue.
       if (GatewayConnectorProxy.openedIFramesQueue.length > 0) {
-        this._showMerchantIFrame(context);
+        this._showGatewayIFrame(context);
       }
 
       // notify the child in gateway connector to tell him that the gateway iframe is going to close up.
@@ -181,49 +181,49 @@ export class GatewayConnectorProxy
 
   public notifyPushPaymentSent(
     payment: PushPayment,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  ): ResultAsync<void, GatewayConnectorError | ProxyError> {
     return this._createCall("notifyPushPaymentSent", payment);
   }
 
   public notifyPushPaymentUpdated(
     payment: PushPayment,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  ): ResultAsync<void, GatewayConnectorError | ProxyError> {
     return this._createCall("notifyPushPaymentUpdated", payment);
   }
 
   public notifyPushPaymentReceived(
     payment: PushPayment,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  ): ResultAsync<void, GatewayConnectorError | ProxyError> {
     return this._createCall("notifyPushPaymentReceived", payment);
   }
 
   public notifyPullPaymentSent(
     payment: PullPayment,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  ): ResultAsync<void, GatewayConnectorError | ProxyError> {
     return this._createCall("notifyPullPaymentSent", payment);
   }
 
   public notifyPullPaymentUpdated(
     payment: PullPayment,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  ): ResultAsync<void, GatewayConnectorError | ProxyError> {
     return this._createCall("notifyPullPaymentUpdated", payment);
   }
 
   public notifyPullPaymentReceived(
     payment: PullPayment,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError> {
+  ): ResultAsync<void, GatewayConnectorError | ProxyError> {
     return this._createCall("notifyPullPaymentReceived", payment);
   }
 
   public notifyPublicIdentifier(
     public_identifier: PublicIdentifier,
-  ): ResultAsync<void, MerchantConnectorError> {
+  ): ResultAsync<void, GatewayConnectorError> {
     return this._createCall("notifyPublicIdentifier", public_identifier);
   }
 
   public notifyBalancesReceived(
     balances: Balances,
-  ): ResultAsync<void, MerchantConnectorError> {
+  ): ResultAsync<void, GatewayConnectorError> {
     return this._createCall("notifyBalancesReceived", balances);
   }
 
@@ -234,7 +234,7 @@ export class GatewayConnectorProxy
     return this._createCall("messageSigned", { message, signature });
   }
 
-  private _pushOpenedMerchantIFrame(gatewayUrl: GatewayUrl) {
+  private _pushOpenedGatewayIFrame(gatewayUrl: GatewayUrl) {
     // Check if there is gatewayUrl in the queue
     // If there is, don't re-add it.
     const index = GatewayConnectorProxy.openedIFramesQueue.indexOf(
@@ -246,17 +246,17 @@ export class GatewayConnectorProxy
     GatewayConnectorProxy.openedIFramesQueue.push(gatewayUrl);
   }
 
-  private _showMerchantIFrame(context: HypernetContext) {
+  private _showGatewayIFrame(context: HypernetContext) {
     // Show the first gateway iframe in the queue
     document.getElementsByName(
       `hypernet-core-gateway-connector-iframe-${GatewayConnectorProxy.openedIFramesQueue[0]}`,
     )[0].style.display = "block";
-    context.onMerchantIFrameDisplayRequested.next(
+    context.onGatewayIFrameDisplayRequested.next(
       GatewayUrl(GatewayConnectorProxy.openedIFramesQueue[0]),
     );
   }
 
-  private _hideMerchantIFrame() {
+  private _hideGatewayIFrame() {
     if (!GatewayConnectorProxy.openedIFramesQueue.length) return;
 
     // Hide the first gateway iframe in the queue which is the current one that is displayed in the screen.

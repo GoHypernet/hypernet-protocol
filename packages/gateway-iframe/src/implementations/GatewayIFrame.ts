@@ -15,12 +15,12 @@ import {
 } from "@gateway-iframe/implementations/api";
 import {
   DisplayService,
-  MerchantService,
+  GatewayService,
   PaymentService,
 } from "@gateway-iframe/implementations/business";
 import {
   HypernetCoreRepository,
-  MerchantConnectorRepository,
+  GatewayConnectorRepository,
   PersistenceRepository,
 } from "@gateway-iframe/implementations/data";
 import { ContextProvider } from "@gateway-iframe/implementations/utils";
@@ -35,7 +35,7 @@ import {
 } from "@gateway-iframe/interfaces/business";
 import {
   IHypernetCoreRepository,
-  IMerchantConnectorRepository,
+  IGatewayConnectorRepository,
   IPersistenceRepository,
 } from "@gateway-iframe/interfaces/data";
 import { IContextProvider } from "@gateway-iframe/interfaces/utils";
@@ -46,7 +46,7 @@ export class GatewayIFrame {
   protected localStorageUtils: ILocalStorageUtils;
   protected logUtils: ILogUtils;
 
-  protected merchantConnectorRepository: IMerchantConnectorRepository;
+  protected merchantConnectorRepository: IGatewayConnectorRepository;
   protected persistenceRepository: IPersistenceRepository;
   protected hypernetCoreRepository: IHypernetCoreRepository;
 
@@ -64,7 +64,7 @@ export class GatewayIFrame {
     this.localStorageUtils = new LocalStorageUtils();
     this.logUtils = new LogUtils();
 
-    this.merchantConnectorRepository = new MerchantConnectorRepository(
+    this.merchantConnectorRepository = new GatewayConnectorRepository(
       this.ajaxUtils,
     );
     this.persistenceRepository = new PersistenceRepository(
@@ -74,7 +74,7 @@ export class GatewayIFrame {
       this.contextProvider,
     );
 
-    this.merchantService = new MerchantService(
+    this.merchantService = new GatewayService(
       this.merchantConnectorRepository,
       this.persistenceRepository,
       this.hypernetCoreRepository,
@@ -98,25 +98,25 @@ export class GatewayIFrame {
     this.merchantConnectorListener
       .initialize()
       .andThen(() => {
-        return this.merchantService.getMerchantUrl();
+        return this.merchantService.getGatewayUrl();
       })
       .andThen((gatewayUrl) => {
         // Set the gateway url
-        const context = this.contextProvider.getMerchantContext();
+        const context = this.contextProvider.getGatewayContext();
         context.gatewayUrl = gatewayUrl;
-        this.contextProvider.setMerchantContext(context);
+        this.contextProvider.setGatewayContext(context);
 
         // Start the Hypernet Core listener API up
         return this.hypernetCoreListener.activateModel();
       })
       .andThen(() => {
         // Now that we have a gateway URL, let's validate the gateway's connector
-        return this.merchantService.validateMerchantConnector();
+        return this.merchantService.validateGatewayConnector();
       })
       .andThen(() => {
         // Regardless of validation, we will try to auto-activate
         // the connector if it's eligible.
-        return this.merchantService.autoActivateMerchantConnector();
+        return this.merchantService.autoActivateGatewayConnector();
       })
       .orElse((e) => {
         this.logUtils.error("Failure during gateway iframe initialization");

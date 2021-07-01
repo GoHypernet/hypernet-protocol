@@ -15,39 +15,39 @@ import {
 import { ResultAsync } from "neverthrow";
 
 import {
-  MerchantConnectorError,
-  MerchantValidationError,
+  GatewayConnectorError,
+  GatewayValidationError,
 } from "@gateway-iframe/interfaces/objects/errors";
 
 export interface IGatewayService {
-  validateMerchantConnector(): ResultAsync<string, MerchantValidationError>;
-  activateMerchantConnector(
+  validateGatewayConnector(): ResultAsync<string, GatewayValidationError>;
+  activateGatewayConnector(
     publicIdentifier: PublicIdentifier,
     balances: Balances,
   ): ResultAsync<
     IGatewayConnector,
-    MerchantConnectorError | MerchantValidationError
+    GatewayConnectorError | GatewayValidationError
   >;
   prepareForRedirect(redirectInfo: IRedirectInfo): ResultAsync<void, Error>;
-  getMerchantUrl(): ResultAsync<GatewayUrl, MerchantValidationError>;
-  autoActivateMerchantConnector(): ResultAsync<
+  getGatewayUrl(): ResultAsync<GatewayUrl, GatewayValidationError>;
+  autoActivateGatewayConnector(): ResultAsync<
     IGatewayConnector | null,
-    MerchantConnectorError | MerchantValidationError
+    GatewayConnectorError | GatewayValidationError
   >;
   publicIdentifierReceived(
     publicIdentifier: PublicIdentifier,
   ): ResultAsync<void, LogicalError>;
-  getValidatedSignature(): ResultAsync<Signature, MerchantValidationError>;
-  getAddress(): ResultAsync<EthereumAddress, MerchantValidationError>;
+  getValidatedSignature(): ResultAsync<Signature, GatewayValidationError>;
+  getAddress(): ResultAsync<EthereumAddress, GatewayValidationError>;
   resolveChallenge(
     paymentId: PaymentId,
   ): ResultAsync<
     IResolutionResult,
-    MerchantConnectorError | MerchantValidationError
+    GatewayConnectorError | GatewayValidationError
   >;
   deauthorize(): ResultAsync<
     void,
-    MerchantConnectorError | MerchantValidationError
+    GatewayConnectorError | GatewayValidationError
   >;
   signMessage(
     message: string,
@@ -59,4 +59,4 @@ export interface IGatewayService {
   ): ResultAsync<void, never>;
 }
 
-export const IMerchantServiceType = Symbol.for("IGatewayService");
+export const IGatewayServiceType = Symbol.for("IGatewayService");

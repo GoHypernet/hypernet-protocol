@@ -10,10 +10,12 @@ import {
   IViewUtils,
   IDateUtils,
 } from "@web-ui/interfaces";
+import GatewaysWidget from "@web-ui/widgets/GatewaysWidget";
 import { Result } from "neverthrow";
 import React from "react";
 import ReactDOM from "react-dom";
 
+import { MetamaskWarning, WarningAlert } from "@web-ui/components";
 import {
   BALANCES_WIDGET_ID_SELECTOR,
   FUND_WIDGET_ID_SELECTOR,
@@ -33,10 +35,8 @@ import { ViewUtils, DateUtils } from "@web-ui/utils";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget";
 import FundWidget from "@web-ui/widgets/FundWidget";
 import LinksWidget from "@web-ui/widgets/LinksWidget";
-import PublicIdentifierWidget from "@web-ui/widgets/PublicIdentifierWidget";
-import MerchantsWidget from "@web-ui/widgets/MerchantsWidget";
-import { MetamaskWarning, WarningAlert } from "@web-ui/components";
 import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
+import PublicIdentifierWidget from "@web-ui/widgets/PublicIdentifierWidget";
 
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
@@ -177,13 +177,13 @@ export default class HypernetWebUI implements IHypernetWebUI {
     return this._getThrowableRender(renderReact);
   }
 
-  public renderMerchantsWidget(
+  public renderGatewaysWidget(
     config?: IRenderParams,
   ): Result<void, RenderError> {
     const renderReact = () => {
       return ReactDOM.render(
         this._bootstrapComponent(
-          <MerchantsWidget {...config} />,
+          <GatewaysWidget {...config} />,
           config?.showInModal,
         ),
         this._generateDomElement(

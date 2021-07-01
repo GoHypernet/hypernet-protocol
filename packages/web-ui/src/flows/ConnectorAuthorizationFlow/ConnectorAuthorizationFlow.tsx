@@ -18,7 +18,7 @@ const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> =
     const classes = useStyles();
 
     useEffect(() => {
-      coreProxy.onMerchantAuthorized.subscribe(() => {
+      coreProxy.onGatewayAuthorized.subscribe(() => {
         closeModal();
       });
 
@@ -33,14 +33,14 @@ const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> =
         closeModal();
       }
 
-      coreProxy.onAuthorizedMerchantActivationFailed.subscribe(() => {
+      coreProxy.onAuthorizedGatewayActivationFailed.subscribe(() => {
         // show some error
-        console.log("onAuthorizedMerchantActivationFailed");
+        console.log("onAuthorizedGatewayActivationFailed");
       });
     }, []);
 
-    const handleMerchantAuthorization = () => {
-      coreProxy.authorizeMerchant(connectorUrl).match(
+    const handleGatewayAuthorization = () => {
+      coreProxy.authorizeGateway(connectorUrl).match(
         () => {
           setModalWidth(565);
           setModalStatus(EStatusColor.SUCCESS);
@@ -66,7 +66,7 @@ const ConnectorAuthorizationFlow: React.FC<IConnectorAuthorizationFlowParams> =
         )}
         <Button
           label="Authorize Gateway"
-          onClick={handleMerchantAuthorization}
+          onClick={handleGatewayAuthorization}
           fullWidth={true}
           bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
         />

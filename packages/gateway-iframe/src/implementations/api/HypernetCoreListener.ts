@@ -16,7 +16,7 @@ import Postmate from "postmate";
 import { IHypernetCoreListener } from "@gateway-iframe/interfaces/api";
 import {
   IGatewayService,
-  IMerchantServiceType,
+  IGatewayServiceType,
 } from "@gateway-iframe/interfaces/business";
 import {
   IContextProvider,
@@ -31,7 +31,7 @@ export class HypernetCoreListener
   protected merchantConnector: IGatewayConnector | undefined;
 
   constructor(
-    @inject(IMerchantServiceType) protected merchantService: IGatewayService,
+    @inject(IGatewayServiceType) protected merchantService: IGatewayService,
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
   ) {
     super();
@@ -59,7 +59,7 @@ export class HypernetCoreListener
           const balances = new Balances(assets);
 
           return this.merchantService
-            .activateMerchantConnector(data.data.publicIdentifier, balances)
+            .activateGatewayConnector(data.data.publicIdentifier, balances)
             .map((merchantConnector) => {
               this.merchantConnector = merchantConnector;
             });
@@ -85,63 +85,63 @@ export class HypernetCoreListener
           return this.merchantService.getValidatedSignature();
         }, data.callId);
       },
-      getMerchantUrl: (data: IIFrameCallData<void>) => {
+      getGatewayUrl: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.merchantService.getMerchantUrl();
+          return this.merchantService.getGatewayUrl();
         }, data.callId);
       },
       merchantIFrameClosed: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getMerchantContext();
+          const context = this.contextProvider.getGatewayContext();
           context.merchantConnector?.onIFrameClosed();
           return okAsync(undefined);
         }, data.callId);
       },
       merchantIFrameDisplayed: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getMerchantContext();
+          const context = this.contextProvider.getGatewayContext();
           context.merchantConnector?.onIFrameClosed();
           return okAsync(undefined);
         }, data.callId);
       },
       notifyPushPaymentSent: (data: IIFrameCallData<PushPayment>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getMerchantContext();
+          const context = this.contextProvider.getGatewayContext();
           context.merchantConnector?.onPushPaymentSent(data.data);
           return okAsync(undefined);
         }, data.callId);
       },
       notifyPushPaymentUpdated: (data: IIFrameCallData<PushPayment>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getMerchantContext();
+          const context = this.contextProvider.getGatewayContext();
           context.merchantConnector?.onPushPaymentUpdated(data.data);
           return okAsync(undefined);
         }, data.callId);
       },
       notifyPushPaymentReceived: (data: IIFrameCallData<PushPayment>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getMerchantContext();
+          const context = this.contextProvider.getGatewayContext();
           context.merchantConnector?.onPushPaymentReceived(data.data);
           return okAsync(undefined);
         }, data.callId);
       },
       notifyPullPaymentSent: (data: IIFrameCallData<PullPayment>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getMerchantContext();
+          const context = this.contextProvider.getGatewayContext();
           context.merchantConnector?.onPullPaymentSent(data.data);
           return okAsync(undefined);
         }, data.callId);
       },
       notifyPullPaymentUpdated: (data: IIFrameCallData<PullPayment>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getMerchantContext();
+          const context = this.contextProvider.getGatewayContext();
           context.merchantConnector?.onPullPaymentUpdated(data.data);
           return okAsync(undefined);
         }, data.callId);
       },
       notifyPullPaymentReceived: (data: IIFrameCallData<PullPayment>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getMerchantContext();
+          const context = this.contextProvider.getGatewayContext();
           context.merchantConnector?.onPullPaymentReceived(data.data);
           return okAsync(undefined);
         }, data.callId);
@@ -153,7 +153,7 @@ export class HypernetCoreListener
       },
       notifyBalancesReceived: (data: IIFrameCallData<Balances>) => {
         this.returnForModel(() => {
-          const context = this.contextProvider.getMerchantContext();
+          const context = this.contextProvider.getGatewayContext();
           context.merchantConnector?.onBalancesReceived(data.data);
           return okAsync(undefined);
         }, data.callId);
@@ -173,7 +173,7 @@ export class HypernetCoreListener
   protected onModelActivated(parent: Postmate.ChildAPI): void {
     // Send an event out to anybody that may be interested
     this.contextProvider
-      .getMerchantContext()
+      .getGatewayContext()
       .onHypernetCoreProxyActivated.next(parent);
   }
 }

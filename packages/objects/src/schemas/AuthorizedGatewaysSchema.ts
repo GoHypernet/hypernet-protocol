@@ -8,7 +8,7 @@ export const AuthorizedGatewaysSchema = {
       title: "data",
       items: {
         type: "object",
-        title: "AuthorizedMerchantItem",
+        title: "AuthorizedGatewayItem",
         properties: {
           gatewayUrl: {
             type: "string",

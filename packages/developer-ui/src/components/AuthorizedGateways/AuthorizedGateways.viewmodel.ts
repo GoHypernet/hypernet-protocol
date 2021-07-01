@@ -23,7 +23,7 @@ export class AuthorizedGatewaysViewModel {
 
     this.authorizedGateways = ko.observableArray();
 
-    this.integration.core.onMerchantAuthorized.subscribe({
+    this.integration.core.onGatewayAuthorized.subscribe({
       next: (val) => {
         this.authorizedGateways.push(
           new GatewayStatus(GatewayUrl(val.toString()), true),
@@ -34,16 +34,16 @@ export class AuthorizedGatewaysViewModel {
     this.getAuthorizedGateways();
   }
 
-  openMerchantIFrameClick = (merchantStatus: GatewayStatus) => {
+  openGatewayIFrameClick = (merchantStatus: GatewayStatus) => {
     this.integration.core.waitInitialized().map(() => {
-      this.integration.displayMerchantIFrame(merchantStatus.gatewayUrl);
+      this.integration.displayGatewayIFrame(merchantStatus.gatewayUrl);
     });
   };
 
-  deauthorizeMerchantClick = (merchantStatus: GatewayStatus) => {
+  deauthorizeGatewayClick = (merchantStatus: GatewayStatus) => {
     this.integration.core.waitInitialized().map(() => {
       this.integration.core
-        .deauthorizeMerchant(merchantStatus.gatewayUrl)
+        .deauthorizeGateway(merchantStatus.gatewayUrl)
         .map(() => {
           this.getAuthorizedGateways();
         });

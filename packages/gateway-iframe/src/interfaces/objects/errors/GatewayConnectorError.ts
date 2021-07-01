@@ -1,4 +1,4 @@
-export class MerchantConnectorError extends Error {
+export class GatewayConnectorError extends Error {
   constructor(message?: string, public src?: unknown) {
     super(message);
   }

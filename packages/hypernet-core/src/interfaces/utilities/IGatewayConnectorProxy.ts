@@ -6,10 +6,10 @@ import {
 import {
   Balances,
   EthereumAddress,
-  MerchantActivationError,
-  MerchantConnectorError,
+  GatewayActivationError,
+  GatewayConnectorError,
   GatewayUrl,
-  MerchantValidationError,
+  GatewayValidationError,
   PaymentId,
   ProxyError,
   PublicIdentifier,
@@ -37,18 +37,18 @@ export interface IGatewayConnectorProxy extends ParentProxy {
   activateConnector(
     publicIdentifier: PublicIdentifier,
     balances: Balances,
-  ): ResultAsync<void, MerchantActivationError | ProxyError>;
+  ): ResultAsync<void, GatewayActivationError | ProxyError>;
 
   resolveChallenge(
     paymentId: PaymentId,
-  ): ResultAsync<IResolutionResult, MerchantConnectorError | ProxyError>;
+  ): ResultAsync<IResolutionResult, GatewayConnectorError | ProxyError>;
 
   getAddress(): ResultAsync<
     EthereumAddress,
-    MerchantConnectorError | ProxyError
+    GatewayConnectorError | ProxyError
   >;
 
-  deauthorize(): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  deauthorize(): ResultAsync<void, GatewayConnectorError | ProxyError>;
 
   /**
    * getValidatedSignature() requests the gateway iframe to return the
@@ -57,37 +57,37 @@ export interface IGatewayConnectorProxy extends ParentProxy {
    */
   getValidatedSignature(): ResultAsync<
     Signature,
-    MerchantValidationError | ProxyError
+    GatewayValidationError | ProxyError
   >;
 
-  closeMerchantIFrame(): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  closeGatewayIFrame(): ResultAsync<void, GatewayConnectorError | ProxyError>;
 
-  displayMerchantIFrame(): ResultAsync<
+  displayGatewayIFrame(): ResultAsync<
     void,
-    MerchantConnectorError | ProxyError
+    GatewayConnectorError | ProxyError
   >;
 
   notifyPushPaymentSent(
     payment: PushPayment,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  ): ResultAsync<void, GatewayConnectorError | ProxyError>;
   notifyPushPaymentUpdated(
     payment: PushPayment,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  ): ResultAsync<void, GatewayConnectorError | ProxyError>;
   notifyPushPaymentReceived(
     payment: PushPayment,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  ): ResultAsync<void, GatewayConnectorError | ProxyError>;
   notifyPullPaymentSent(
     payment: PullPayment,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  ): ResultAsync<void, GatewayConnectorError | ProxyError>;
   notifyPullPaymentUpdated(
     payment: PullPayment,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  ): ResultAsync<void, GatewayConnectorError | ProxyError>;
   notifyPullPaymentReceived(
     payment: PullPayment,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  ): ResultAsync<void, GatewayConnectorError | ProxyError>;
   notifyBalancesReceived(
     balances: Balances,
-  ): ResultAsync<void, MerchantConnectorError | ProxyError>;
+  ): ResultAsync<void, GatewayConnectorError | ProxyError>;
 
   messageSigned(
     message: string,

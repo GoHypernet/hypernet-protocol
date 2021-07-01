@@ -72,9 +72,9 @@ export class PushPaymentFormViewModel {
           return null;
         }
 
-        const selectedMerchantUrl = this.merchantSelector.selectedAuthorizedMerchant();
+        const selectedGatewayUrl = this.merchantSelector.selectedAuthorizedGateway();
 
-        if (selectedMerchantUrl == null) {
+        if (selectedGatewayUrl == null) {
           return null;
         }
 
@@ -93,7 +93,7 @@ export class PushPaymentFormViewModel {
             UnixTimestamp(expirationDate.unix()),
             requiredStake,
             selectedPaymentTokenAddress,
-            selectedMerchantUrl,
+            selectedGatewayUrl,
             null,
           );
         } catch {

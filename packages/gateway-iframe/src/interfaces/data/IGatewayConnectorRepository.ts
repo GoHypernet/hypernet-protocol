@@ -6,16 +6,16 @@ import {
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
-export interface IMerchantConnectorRepository {
-  getMerchantCode(gatewayUrl: GatewayUrl): ResultAsync<string, AjaxError>;
-  getMerchantSignature(
+export interface IGatewayConnectorRepository {
+  getGatewayCode(gatewayUrl: GatewayUrl): ResultAsync<string, AjaxError>;
+  getGatewaySignature(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<Signature, AjaxError>;
-  getMerchantAddress(
+  getGatewayAddress(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<EthereumAddress, AjaxError>;
 }
 
-export const IMerchantConnectorRepositoryType = Symbol.for(
-  "IMerchantConnectorRepository",
+export const IGatewayConnectorRepositoryType = Symbol.for(
+  "IGatewayConnectorRepository",
 );

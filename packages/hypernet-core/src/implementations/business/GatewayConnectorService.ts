@@ -1,37 +1,34 @@
 import {
   LogicalError,
-  MerchantConnectorError,
-  MerchantValidationError,
+  GatewayConnectorError,
+  GatewayValidationError,
   BlockchainUnavailableError,
   ProxyError,
   PersistenceError,
-  MerchantAuthorizationDeniedError,
+  GatewayAuthorizationDeniedError,
   GatewayUrl,
   Signature,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
-import { ResultAsync } from "neverthrow";
-
 import { IGatewayConnectorService } from "@interfaces/business";
 import {
   IAccountsRepository,
-  IMerchantConnectorRepository,
+  IGatewayConnectorRepository,
 } from "@interfaces/data";
+import { ResultAsync } from "neverthrow";
+
 import { IContextProvider, IConfigProvider } from "@interfaces/utilities";
 
 export class GatewayConnectorService implements IGatewayConnectorService {
   constructor(
-    protected merchantConnectorRepository: IMerchantConnectorRepository,
+    protected merchantConnectorRepository: IGatewayConnectorRepository,
     protected accountsRepository: IAccountsRepository,
     protected contextProvider: IContextProvider,
     protected configProvider: IConfigProvider,
     protected logUtils: ILogUtils,
   ) {}
 
-  public initialize(): ResultAsync<
-    void,
-    LogicalError | MerchantConnectorError
-  > {
+  public initialize(): ResultAsync<void, LogicalError | GatewayConnectorError> {
     return this.contextProvider.getContext().map((context) => {
       // Subscribe to the various events, and sort them out for the gateway connector
       context.onPushPaymentSent.subscribe((payment) => {
@@ -92,9 +89,9 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     });
   }
 
-  public authorizeMerchant(
+  public authorizeGateway(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, MerchantValidationError> {
+  ): ResultAsync<void, GatewayValidationError> {
     return ResultUtils.combine([
       this.contextProvider.getContext(),
       this.getAuthorizedGateways(),
@@ -104,29 +101,29 @@ export class GatewayConnectorService implements IGatewayConnectorService {
 
       // Remove the gateway iframe proxy related to that gatewayUrl if there is any activated ones.
       if (authorizedGatewaysMap.get(gatewayUrl)) {
-        this.merchantConnectorRepository.deauthorizeMerchant(gatewayUrl);
+        this.merchantConnectorRepository.deauthorizeGateway(gatewayUrl);
       }
 
       this.merchantConnectorRepository
-        .addAuthorizedMerchant(gatewayUrl, balances)
+        .addAuthorizedGateway(gatewayUrl, balances)
         .map(() => {
-          context.onMerchantAuthorized.next(gatewayUrl);
+          context.onGatewayAuthorized.next(gatewayUrl);
         });
     });
   }
 
-  public deauthorizeMerchant(
+  public deauthorizeGateway(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    PersistenceError | ProxyError | MerchantAuthorizationDeniedError
+    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
   > {
     return this.contextProvider.getContext().andThen((context) => {
-      context.onMerchantDeauthorizationStarted.next(gatewayUrl);
+      context.onGatewayDeauthorizationStarted.next(gatewayUrl);
 
       return ResultUtils.race([
         this._getDeauthorizationTimeoutResult(gatewayUrl),
-        this.merchantConnectorRepository.deauthorizeMerchant(gatewayUrl),
+        this.merchantConnectorRepository.deauthorizeGateway(gatewayUrl),
       ]);
     });
   }
@@ -147,8 +144,8 @@ export class GatewayConnectorService implements IGatewayConnectorService {
 
   public activateAuthorizedGateways(): ResultAsync<
     void,
-    | MerchantConnectorError
-    | MerchantValidationError
+    | GatewayConnectorError
+    | GatewayValidationError
     | BlockchainUnavailableError
     | LogicalError
     | ProxyError
@@ -160,19 +157,19 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     });
   }
 
-  public closeMerchantIFrame(
+  public closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, MerchantConnectorError> {
-    return this.merchantConnectorRepository.closeMerchantIFrame(gatewayUrl);
+  ): ResultAsync<void, GatewayConnectorError> {
+    return this.merchantConnectorRepository.closeGatewayIFrame(gatewayUrl);
   }
 
-  public displayMerchantIFrame(
+  public displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, MerchantConnectorError> {
-    return this.merchantConnectorRepository.displayMerchantIFrame(gatewayUrl);
+  ): ResultAsync<void, GatewayConnectorError> {
+    return this.merchantConnectorRepository.displayGatewayIFrame(gatewayUrl);
   }
 
-  /* Destroy gateway connector if deauthorizeMerchant lasted more than merchantDeauthorizationTimeout */
+  /* Destroy gateway connector if deauthorizeGateway lasted more than merchantDeauthorizationTimeout */
   private _getDeauthorizationTimeoutResult(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, Error> {

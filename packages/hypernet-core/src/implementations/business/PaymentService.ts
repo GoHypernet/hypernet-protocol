@@ -11,8 +11,8 @@ import {
   InsufficientBalanceError,
   InvalidParametersError,
   LogicalError,
-  MerchantConnectorError,
-  MerchantValidationError,
+  GatewayConnectorError,
+  GatewayValidationError,
   PaymentFinalizeError,
   PaymentCreationError,
   InvalidPaymentError,
@@ -38,8 +38,8 @@ import {
   IAccountsRepositoryType,
   ILinkRepository,
   ILinkRepositoryType,
-  IMerchantConnectorRepository,
-  IMerchantConnectorRepositoryType,
+  IGatewayConnectorRepository,
+  IGatewayConnectorRepositoryType,
   IPaymentRepository,
   IPaymentRepositoryType,
 } from "@interfaces/data";
@@ -86,8 +86,8 @@ export class PaymentService implements IPaymentService {
     @inject(IConfigProviderType) protected configProvider: IConfigProvider,
     @inject(IPaymentRepositoryType)
     protected paymentRepository: IPaymentRepository,
-    @inject(IMerchantConnectorRepositoryType)
-    protected merchantConnectorRepository: IMerchantConnectorRepository,
+    @inject(IGatewayConnectorRepositoryType)
+    protected merchantConnectorRepository: IGatewayConnectorRepository,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
@@ -296,7 +296,7 @@ export class PaymentService implements IPaymentService {
     | InsufficientBalanceError
     | AcceptPaymentError
     | BalancesUnavailableError
-    | MerchantValidationError
+    | GatewayValidationError
     | PaymentsByIdsErrors
   > {
     let config: HypernetConfig;
@@ -318,7 +318,7 @@ export class PaymentService implements IPaymentService {
 
         return ResultUtils.combine([
           this.accountRepository.getBalanceByAsset(config.hypertokenAddress),
-          this.merchantConnectorRepository.getMerchantAddresses(
+          this.merchantConnectorRepository.getGatewayAddresses(
             Array.from(merchantUrls),
           ),
         ]);
@@ -329,7 +329,7 @@ export class PaymentService implements IPaymentService {
         // If we don't have a public key for each gateway, then we should not proceed.
         if (merchantUrls.size != addresses.size) {
           return errAsync(
-            new MerchantValidationError("Not all merchants are authorized!"),
+            new GatewayValidationError("Not all merchants are authorized!"),
           );
         }
 
@@ -604,8 +604,8 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    | MerchantConnectorError
-    | MerchantValidationError
+    | GatewayConnectorError
+    | GatewayValidationError
     | PaymentsByIdsErrors
     | TransferResolutionError
   > {
@@ -780,7 +780,7 @@ export class PaymentService implements IPaymentService {
           }`,
         );
         if (merchantConnectorStatus == true) {
-          return this._advancePaymentForActivatedMerchant(
+          return this._advancePaymentForActivatedGateway(
             payment,
             context,
           ).map(() => {});
@@ -802,7 +802,7 @@ export class PaymentService implements IPaymentService {
       });
   }
 
-  protected _advancePaymentForActivatedMerchant(
+  protected _advancePaymentForActivatedGateway(
     payment: Payment,
     context: HypernetContext,
   ): ResultAsync<

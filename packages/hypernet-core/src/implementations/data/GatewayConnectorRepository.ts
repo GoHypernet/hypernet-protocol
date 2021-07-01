@@ -16,11 +16,11 @@ import {
   Balances,
   AuthorizedGatewaysSchema,
   LogicalError,
-  MerchantConnectorError,
-  MerchantValidationError,
+  GatewayConnectorError,
+  GatewayValidationError,
   AjaxError,
-  MerchantActivationError,
-  MerchantAuthorizationDeniedError,
+  GatewayActivationError,
+  GatewayAuthorizationDeniedError,
   PersistenceError,
 } from "@hypernetlabs/objects";
 import {
@@ -35,8 +35,8 @@ import { injectable, inject } from "inversify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import {
-  IMerchantConnectorRepository,
-  IAuthorizedMerchantEntry,
+  IGatewayConnectorRepository,
+  IAuthorizedGatewayEntry,
 } from "@interfaces/data";
 import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import { InitializedHypernetContext } from "@interfaces/objects";
@@ -59,15 +59,15 @@ import {
 } from "@interfaces/utilities/factory";
 
 @injectable()
-export class MerchantConnectorRepository
-  implements IMerchantConnectorRepository {
+export class GatewayConnectorRepository
+  implements IGatewayConnectorRepository {
   protected authorizedGatewayProxies: Map<
     GatewayUrl,
     ResultAsync<
       IGatewayConnectorProxy,
-      | MerchantActivationError
-      | MerchantValidationError
-      | MerchantAuthorizationDeniedError
+      | GatewayActivationError
+      | GatewayValidationError
+      | GatewayAuthorizationDeniedError
       | ProxyError
     >
   >;
@@ -99,18 +99,18 @@ export class MerchantConnectorRepository
       version: "1",
     };
     this.types = {
-      AuthorizedMerchant: [
+      AuthorizedGateway: [
         { name: "authorizedGatewayUrl", type: "string" },
         { name: "merchantValidatedSignature", type: "string" },
       ],
     };
   }
 
-  public getMerchantAddresses(
+  public getGatewayAddresses(
     merchantUrls: GatewayUrl[],
   ): ResultAsync<
     Map<GatewayUrl, EthereumAddress>,
-    AjaxError | ProxyError | MerchantAuthorizationDeniedError
+    AjaxError | ProxyError | GatewayAuthorizationDeniedError
   > {
     // TODO: right now, the gateway will publish a URL with their address; eventually, they should be held in a smart contract
 
@@ -119,21 +119,21 @@ export class MerchantConnectorRepository
     const addressRequests = new Array<
       ResultAsync<
         { gatewayUrl: GatewayUrl; address: EthereumAddress },
-        | MerchantConnectorError
+        | GatewayConnectorError
         | LogicalError
         | ProxyError
-        | MerchantAuthorizationDeniedError
+        | GatewayAuthorizationDeniedError
       >
     >();
     for (const gatewayUrl of merchantUrls) {
-      // We can't use _getActivatedMerchantProxy because it may fire an error when activateAuthorizedGatewaysResult is null
+      // We can't use _getActivatedGatewayProxy because it may fire an error when activateAuthorizedGatewaysResult is null
       // and in our case here we might need to pull the address from the source using ajax request not from the proxy.
       const authorizedGatewayProxyResult = this.authorizedGatewayProxies.get(
         gatewayUrl,
       );
 
       if (authorizedGatewayProxyResult == null) {
-        addressRequests.push(this._getMerchantAddress(gatewayUrl));
+        addressRequests.push(this._getGatewayAddress(gatewayUrl));
       } else {
         addressRequests.push(
           authorizedGatewayProxyResult
@@ -144,7 +144,7 @@ export class MerchantConnectorRepository
             })
             .orElse(() => {
               // Need to get it from the source
-              return this._getMerchantAddress(gatewayUrl);
+              return this._getGatewayAddress(gatewayUrl);
             }),
         );
       }
@@ -163,18 +163,18 @@ export class MerchantConnectorRepository
     });
   }
 
-  public addAuthorizedMerchant(
+  public addAuthorizedGateway(
     gatewayUrl: GatewayUrl,
     initialBalances: Balances,
   ): ResultAsync<
     void,
     | PersistenceError
     | LogicalError
-    | MerchantValidationError
+    | GatewayValidationError
     | ProxyError
     | BlockchainUnavailableError
-    | MerchantConnectorError
-    | MerchantActivationError
+    | GatewayConnectorError
+    | GatewayActivationError
   > {
     let proxy: IGatewayConnectorProxy;
     let context: InitializedHypernetContext;
@@ -212,9 +212,9 @@ export class MerchantConnectorRepository
         );
 
         return ResultUtils.combine([
-          ResultAsync.fromPromise<string, MerchantValidationError>(
+          ResultAsync.fromPromise<string, GatewayValidationError>(
             signerPromise,
-            (e) => e as MerchantValidationError,
+            (e) => e as GatewayValidationError,
           ),
           this.getAuthorizedGateways(),
         ]);
@@ -231,7 +231,7 @@ export class MerchantConnectorRepository
         // Notify the world that the gateway connector exists
         // Notably, API listeners could start
         if (context != null) {
-          context.onMerchantConnectorProxyActivated.next(proxy);
+          context.onGatewayConnectorProxyActivated.next(proxy);
         }
 
         // Activate the gateway connector
@@ -250,10 +250,10 @@ export class MerchantConnectorRepository
 
         // Notify the world
         if (context != null) {
-          context.onAuthorizedMerchantActivationFailed.next(gatewayUrl);
+          context.onAuthorizedGatewayActivationFailed.next(gatewayUrl);
         }
 
-        return new MerchantActivationError(
+        return new GatewayActivationError(
           `Unable to activate gateway ${gatewayUrl}`,
           e,
         );
@@ -268,7 +268,7 @@ export class MerchantConnectorRepository
     PersistenceError
   > {
     return this.storageUtils
-      .read<IAuthorizedMerchantEntry[]>(AuthorizedGatewaysSchema.title)
+      .read<IAuthorizedGatewayEntry[]>(AuthorizedGatewaysSchema.title)
       .andThen((storedAuthorizedGateways) => {
         const authorizedGateways = new Map<GatewayUrl, Signature>();
 
@@ -291,13 +291,13 @@ export class MerchantConnectorRepository
     transferId: TransferId,
   ): ResultAsync<
     void,
-    | MerchantConnectorError
-    | MerchantValidationError
+    | GatewayConnectorError
+    | GatewayValidationError
     | TransferResolutionError
-    | MerchantAuthorizationDeniedError
+    | GatewayAuthorizationDeniedError
     | ProxyError
   > {
-    return this._getActivatedMerchantProxy(gatewayUrl).andThen((proxy) => {
+    return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
       // if gateway is activated, start resolving the transfer
       return proxy
         .resolveChallenge(paymentId)
@@ -315,25 +315,25 @@ export class MerchantConnectorRepository
     });
   }
 
-  public closeMerchantIFrame(
+  public closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+    GatewayAuthorizationDeniedError | ProxyError | GatewayConnectorError
   > {
-    return this._getActivatedMerchantProxy(gatewayUrl).andThen((proxy) => {
-      return proxy.closeMerchantIFrame();
+    return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
+      return proxy.closeGatewayIFrame();
     });
   }
 
-  public displayMerchantIFrame(
+  public displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+    GatewayAuthorizationDeniedError | ProxyError | GatewayConnectorError
   > {
-    return this._getActivatedMerchantProxy(gatewayUrl).andThen((proxy) => {
-      return proxy.displayMerchantIFrame();
+    return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
+      return proxy.displayGatewayIFrame();
     });
   }
 
@@ -363,7 +363,7 @@ export class MerchantConnectorRepository
 
           for (const [gatewayUrl, signature] of authorizedGateways) {
             activationResults.push(() => {
-              return this._activateAuthorizedMerchant(
+              return this._activateAuthorizedGateway(
                 balances,
                 gatewayUrl,
                 signature,
@@ -408,9 +408,9 @@ export class MerchantConnectorRepository
     payment: PushPayment,
   ): ResultAsync<
     void,
-    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+    GatewayAuthorizationDeniedError | ProxyError | GatewayConnectorError
   > {
-    return this._getActivatedMerchantProxy(gatewayUrl).andThen((proxy) => {
+    return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
       return proxy.notifyPushPaymentSent(payment);
     });
   }
@@ -420,9 +420,9 @@ export class MerchantConnectorRepository
     payment: PushPayment,
   ): ResultAsync<
     void,
-    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+    GatewayAuthorizationDeniedError | ProxyError | GatewayConnectorError
   > {
-    return this._getActivatedMerchantProxy(gatewayUrl).andThen((proxy) => {
+    return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
       return proxy.notifyPushPaymentUpdated(payment);
     });
   }
@@ -432,9 +432,9 @@ export class MerchantConnectorRepository
     payment: PushPayment,
   ): ResultAsync<
     void,
-    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+    GatewayAuthorizationDeniedError | ProxyError | GatewayConnectorError
   > {
-    return this._getActivatedMerchantProxy(gatewayUrl).andThen((proxy) => {
+    return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
       return proxy.notifyPushPaymentReceived(payment);
     });
   }
@@ -444,9 +444,9 @@ export class MerchantConnectorRepository
     payment: PullPayment,
   ): ResultAsync<
     void,
-    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+    GatewayAuthorizationDeniedError | ProxyError | GatewayConnectorError
   > {
-    return this._getActivatedMerchantProxy(gatewayUrl).andThen((proxy) => {
+    return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
       return proxy.notifyPullPaymentSent(payment);
     });
   }
@@ -456,9 +456,9 @@ export class MerchantConnectorRepository
     payment: PullPayment,
   ): ResultAsync<
     void,
-    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+    GatewayAuthorizationDeniedError | ProxyError | GatewayConnectorError
   > {
-    return this._getActivatedMerchantProxy(gatewayUrl).andThen((proxy) => {
+    return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
       return proxy.notifyPullPaymentUpdated(payment);
     });
   }
@@ -468,9 +468,9 @@ export class MerchantConnectorRepository
     payment: PullPayment,
   ): ResultAsync<
     void,
-    MerchantAuthorizationDeniedError | ProxyError | MerchantConnectorError
+    GatewayAuthorizationDeniedError | ProxyError | GatewayConnectorError
   > {
-    return this._getActivatedMerchantProxy(gatewayUrl).andThen((proxy) => {
+    return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
       return proxy.notifyPullPaymentReceived(payment);
     });
   }
@@ -479,16 +479,16 @@ export class MerchantConnectorRepository
     balances: Balances,
   ): ResultAsync<
     void,
-    | MerchantAuthorizationDeniedError
+    | GatewayAuthorizationDeniedError
     | ProxyError
-    | MerchantConnectorError
+    | GatewayConnectorError
     | PersistenceError
   > {
-    const results = new Array<ResultAsync<void, MerchantConnectorError>>();
+    const results = new Array<ResultAsync<void, GatewayConnectorError>>();
     return this.getAuthorizedGateways().andThen((authorizedGateways) => {
       for (const [gatewayUrl] of authorizedGateways) {
         results.push(
-          this._getActivatedMerchantProxy(gatewayUrl).map((proxy) => {
+          this._getActivatedGatewayProxy(gatewayUrl).map((proxy) => {
             proxy.notifyBalancesReceived(balances);
           }),
         );
@@ -497,11 +497,11 @@ export class MerchantConnectorRepository
     });
   }
 
-  public deauthorizeMerchant(
+  public deauthorizeGateway(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    PersistenceError | ProxyError | MerchantAuthorizationDeniedError
+    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
   > {
     return this.getAuthorizedGateways()
       .map((authorizedGateways) => {
@@ -510,7 +510,7 @@ export class MerchantConnectorRepository
         return this._setAuthorizedGateways(authorizedGateways);
       })
       .andThen(() => {
-        return this._getActivatedMerchantProxy(gatewayUrl).andThen((proxy) => {
+        return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
           return proxy.deauthorize();
         });
       })
@@ -567,14 +567,14 @@ export class MerchantConnectorRepository
     }
   }
 
-  protected _getMerchantAddress(
+  protected _getGatewayAddress(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     { gatewayUrl: GatewayUrl; address: EthereumAddress },
-    | MerchantConnectorError
+    | GatewayConnectorError
     | LogicalError
     | ProxyError
-    | MerchantAuthorizationDeniedError
+    | GatewayAuthorizationDeniedError
   > {
     const url = new URL(gatewayUrl.toString());
     url.pathname = "address";
@@ -583,11 +583,11 @@ export class MerchantConnectorRepository
     });
   }
 
-  protected _getActivatedMerchantProxy(
+  protected _getActivatedGatewayProxy(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     IGatewayConnectorProxy,
-    ProxyError | MerchantAuthorizationDeniedError | PersistenceError
+    ProxyError | GatewayAuthorizationDeniedError | PersistenceError
   > {
     // The goal of this method is to return an activated gateway proxy,
     // and not resolve unless all hope is lost.
@@ -607,7 +607,7 @@ export class MerchantConnectorRepository
       .andThen((vals) => {
         const [authorizedGateways] = vals;
         // If the gateway is not authorized, that's a fatal error.
-        // Now, you may ask yourself, what about addAuthorizedMerchant?
+        // Now, you may ask yourself, what about addAuthorizedGateway?
         // Well, you can't call this method until that one is complete.
         // If the gateway was already authorized, you can call this
         // method and get the in-progress activation.
@@ -634,7 +634,7 @@ export class MerchantConnectorRepository
       })
       .orElse((e) => {
         // There is something wrong
-        if (e instanceof MerchantAuthorizationDeniedError) {
+        if (e instanceof GatewayAuthorizationDeniedError) {
           // Not a lot we can do about that.
           return errAsync(e);
         }
@@ -658,7 +658,7 @@ export class MerchantConnectorRepository
               ) {
                 throw new Error("No cached balances");
               }
-              return this._activateAuthorizedMerchant(
+              return this._activateAuthorizedGateway(
                 this.balances,
                 gatewayUrl,
                 cachedAuthorizationSignature,
@@ -668,7 +668,7 @@ export class MerchantConnectorRepository
             });
             this.authorizedGatewayProxies.set(gatewayUrl, activationResult);
             return activationResult;
-          }, [ProxyError, MerchantValidationError, MerchantActivationError]);
+          }, [ProxyError, GatewayValidationError, GatewayActivationError]);
         }
 
         // Backoff
@@ -686,7 +686,7 @@ export class MerchantConnectorRepository
    * @param signer
    * @returns
    */
-  protected _activateAuthorizedMerchant(
+  protected _activateAuthorizedGateway(
     balances: Balances,
     gatewayUrl: GatewayUrl,
     authorizationSignature: Signature,
@@ -694,9 +694,9 @@ export class MerchantConnectorRepository
     signer: ethers.providers.JsonRpcSigner,
   ): ResultAsync<
     IGatewayConnectorProxy,
-    | MerchantActivationError
-    | MerchantValidationError
-    | MerchantAuthorizationDeniedError
+    | GatewayActivationError
+    | GatewayValidationError
+    | GatewayAuthorizationDeniedError
     | ProxyError
   > {
     // Do some initial cleanup, so that this can be called repeatedly.
@@ -730,20 +730,20 @@ export class MerchantConnectorRepository
       })
       .map(() => {
         // TODO: make sure of the implementation here, this will trigger an event and a subscribe event in GatewayConnectorListener
-        // will call advanceMerchantUnresolvedPayments.
-        context.onMerchantConnectorProxyActivated.next(proxy);
+        // will call advanceGatewayUnresolvedPayments.
+        context.onGatewayConnectorProxyActivated.next(proxy);
         return proxy;
       })
       .mapErr((e) => {
         // Notify the world
-        context.onAuthorizedMerchantActivationFailed.next(gatewayUrl);
+        context.onAuthorizedGatewayActivationFailed.next(gatewayUrl);
 
         this.logUtils.error(
           `Gateway connector ${gatewayUrl} failed to activate`,
         );
 
         // TODO: make sure of error cases where we want to destroy the proxy or not
-        if (e instanceof ProxyError || e instanceof MerchantActivationError) {
+        if (e instanceof ProxyError || e instanceof GatewayActivationError) {
           this.destroyProxy(gatewayUrl);
         }
 
@@ -763,8 +763,8 @@ export class MerchantConnectorRepository
     signer: ethers.providers.JsonRpcSigner,
   ): ResultAsync<
     void,
-    | MerchantAuthorizationDeniedError
-    | MerchantValidationError
+    | GatewayAuthorizationDeniedError
+    | GatewayValidationError
     | ProxyError
     | PersistenceError
   > {
@@ -784,7 +784,7 @@ export class MerchantConnectorRepository
 
       if (validationAddress !== context.account) {
         // Notify the user that one of their authorized merchants has changed their code
-        context.onAuthorizedMerchantUpdated.next(gatewayUrl);
+        context.onAuthorizedGatewayUpdated.next(gatewayUrl);
 
         // Get a new signature
         // validatedSignature means the code is signed by the provider, so we just need
@@ -803,11 +803,11 @@ export class MerchantConnectorRepository
           // We only end up here if the user has denied signing
           // to authorize the new connector.
           // We need to de-authorize this gateway
-          return this.deauthorizeMerchant(gatewayUrl).andThen(() => {
+          return this.deauthorizeGateway(gatewayUrl).andThen(() => {
             // And then propagate the error
             this.logUtils.error(e);
             return errAsync(
-              new MerchantAuthorizationDeniedError(
+              new GatewayAuthorizationDeniedError(
                 `User declined authorization of the validator`,
                 e,
               ),
@@ -833,7 +833,7 @@ export class MerchantConnectorRepository
       }
 
       this.logUtils.debug(`Code signature validated for ${gatewayUrl}`);
-      return okAsync<void, MerchantAuthorizationDeniedError>(undefined);
+      return okAsync<void, GatewayAuthorizationDeniedError>(undefined);
     });
   }
 
@@ -843,7 +843,7 @@ export class MerchantConnectorRepository
     balances: Balances,
   ): ResultAsync<
     IGatewayConnectorProxy,
-    MerchantActivationError | ProxyError
+    GatewayActivationError | ProxyError
   > {
     this.logUtils.debug(`Activating connector for ${proxy.gatewayUrl}`);
     return proxy
@@ -857,7 +857,7 @@ export class MerchantConnectorRepository
   protected _setAuthorizedGateways(
     authorizedGatewayMap: Map<GatewayUrl, Signature>,
   ): ResultAsync<void, PersistenceError> {
-    const authorizedGatewayEntries = new Array<IAuthorizedMerchantEntry>();
+    const authorizedGatewayEntries = new Array<IAuthorizedGatewayEntry>();
 
     for (const keyval of authorizedGatewayMap) {
       authorizedGatewayEntries.push({
@@ -866,7 +866,7 @@ export class MerchantConnectorRepository
       });
     }
 
-    return this.storageUtils.write<IAuthorizedMerchantEntry[]>(
+    return this.storageUtils.write<IAuthorizedGatewayEntry[]>(
       AuthorizedGatewaysSchema.title,
       authorizedGatewayEntries,
     );

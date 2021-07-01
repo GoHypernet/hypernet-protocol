@@ -3,15 +3,15 @@ import { ILocalStorageUtils } from "@hypernetlabs/utils";
 import { IPersistenceRepository } from "@gateway-iframe/interfaces/data";
 import { ExpectedRedirect } from "@gateway-iframe/interfaces/objects";
 export class PersistenceRepository implements IPersistenceRepository {
-  protected activatedMerchantSignaturesKey = "activatedMerchantSignatures";
+  protected activatedGatewaySignaturesKey = "activatedGatewaySignatures";
   protected expectedRedirectKey = "expectedRedirect";
 
   constructor(protected localStorageUtils: ILocalStorageUtils) {}
 
-  public getActivatedMerchantSignatures(): string[] {
+  public getActivatedGatewaySignatures(): string[] {
     // Grab the list of activated gateway signatures from storage
     const activatedSignatureJson = this.localStorageUtils.getSessionItem(
-      this.activatedMerchantSignaturesKey,
+      this.activatedGatewaySignaturesKey,
     );
 
     if (activatedSignatureJson == null) {
@@ -21,9 +21,9 @@ export class PersistenceRepository implements IPersistenceRepository {
     return JSON.parse(activatedSignatureJson);
   }
 
-  public addActivatedMerchantSignature(signature: string): void {
+  public addActivatedGatewaySignature(signature: string): void {
     const activatedSignatureJson = this.localStorageUtils.getSessionItem(
-      this.activatedMerchantSignaturesKey,
+      this.activatedGatewaySignaturesKey,
     );
 
     let activatedSignatures: string[];
@@ -36,7 +36,7 @@ export class PersistenceRepository implements IPersistenceRepository {
     activatedSignatures.push(signature);
 
     this.localStorageUtils.setSessionItem(
-      this.activatedMerchantSignaturesKey,
+      this.activatedGatewaySignaturesKey,
       JSON.stringify(activatedSignatures),
     );
   }

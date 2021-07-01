@@ -68,7 +68,7 @@ export default class HypernetMobileIntegration {
         this.postLinks();
         this.postActiveLinks();
       });
-      coreProxy.onMerchantAuthorized.subscribe(() => {
+      coreProxy.onGatewayAuthorized.subscribe(() => {
         this.postAuthorizedGateways();
       });
     });

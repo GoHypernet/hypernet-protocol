@@ -1,5 +1,5 @@
 <div class="card-body" style="padding: 0.75rem 0">
-  <h5 class="card-title">Authorized Merchants</h5>
+  <h5 class="card-title">Authorized Gateways</h5>
   <ul
     class="list-group list-group-flush"
     data-bind="foreach: authorizedGateways"
@@ -11,14 +11,14 @@
       <p class="m-0" style="width: 80%" data-bind="text: gatewayUrl"></p>
 
       <img
-        data-bind="click: $parent.deauthorizeMerchantClick"
+        data-bind="click: $parent.deauthorizeGatewayClick"
         class="pointer"
         height="20"
         src="https://res.cloudinary.com/dqueufbs7/image/upload/v1623441879/images/130877.png"
       />
 
       <img
-        data-bind="click: $parent.openMerchantIFrameClick"
+        data-bind="click: $parent.openGatewayIFrameClick"
         class="pointer"
         height="20"
         src="https://res.cloudinary.com/dqueufbs7/image/upload/v1615236105/images/25402.png"

@@ -1,2 +1,2 @@
 export * from "./ExpectedRedirect";
-export * from "./MerchantContext";
+export * from "./GatewayContext";

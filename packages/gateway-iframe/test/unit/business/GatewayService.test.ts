@@ -2,15 +2,15 @@ import { GatewayUrl, Signature, EthereumAddress } from "@hypernetlabs/objects";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
 
-import { MerchantService } from "@gateway-iframe/implementations/business";
+import { GatewayService } from "@gateway-iframe/implementations/business";
 import { ContextProvider } from "@gateway-iframe/implementations/utils";
 import { IGatewayService } from "@gateway-iframe/interfaces/business";
 import {
   IHypernetCoreRepository,
-  IMerchantConnectorRepository,
+  IGatewayConnectorRepository,
   IPersistenceRepository,
 } from "@gateway-iframe/interfaces/data";
-import { MerchantValidationError } from "@gateway-iframe/interfaces/objects/errors";
+import { GatewayValidationError } from "@gateway-iframe/interfaces/objects/errors";
 
 jest.mock("ethers", () => {
   return {
@@ -24,9 +24,9 @@ jest.mock("ethers", () => {
   };
 });
 
-class MerchantServiceMocks {
+class GatewayServiceMocks {
   public merchantConnectorRepository =
-    td.object<IMerchantConnectorRepository>();
+    td.object<IGatewayConnectorRepository>();
   public persistenceRepository = td.object<IPersistenceRepository>();
   public hypernetCoreRepository = td.object<IHypernetCoreRepository>();
   public gatewayUrl = GatewayUrl("http://localhost:5010");
@@ -44,38 +44,38 @@ class MerchantServiceMocks {
 
   public runSuccessScenarios() {
     td.when(
-      this.merchantConnectorRepository.getMerchantSignature(this.gatewayUrl),
+      this.merchantConnectorRepository.getGatewaySignature(this.gatewayUrl),
     ).thenReturn(okAsync(Signature(this.signature)));
     td.when(
-      this.merchantConnectorRepository.getMerchantAddress(this.gatewayUrl),
+      this.merchantConnectorRepository.getGatewayAddress(this.gatewayUrl),
     ).thenReturn(okAsync(EthereumAddress(this.address)));
     td.when(
-      this.merchantConnectorRepository.getMerchantCode(this.gatewayUrl),
+      this.merchantConnectorRepository.getGatewayCode(this.gatewayUrl),
     ).thenReturn(okAsync(this.merchantCode));
     td.when(
-      this.persistenceRepository.addActivatedMerchantSignature(this.signature),
+      this.persistenceRepository.addActivatedGatewaySignature(this.signature),
     ).thenReturn(undefined);
   }
 
   public runFailureScenarios() {
     td.when(
-      this.merchantConnectorRepository.getMerchantSignature(this.gatewayUrl),
+      this.merchantConnectorRepository.getGatewaySignature(this.gatewayUrl),
     ).thenReturn(okAsync(Signature(this.signature)));
     td.when(
-      this.merchantConnectorRepository.getMerchantAddress(this.gatewayUrl),
+      this.merchantConnectorRepository.getGatewayAddress(this.gatewayUrl),
     ).thenReturn(okAsync(EthereumAddress(this.address + "1")));
     td.when(
-      this.merchantConnectorRepository.getMerchantCode(this.gatewayUrl),
+      this.merchantConnectorRepository.getGatewayCode(this.gatewayUrl),
     ).thenReturn(okAsync(this.merchantCode));
     td.when(
-      this.merchantConnectorRepository.getMerchantCode(
+      this.merchantConnectorRepository.getGatewayCode(
         GatewayUrl(this.gatewayUrl + `?v=${this.nowTime}`),
       ),
     ).thenReturn(okAsync(this.merchantCode));
   }
 
-  public factoryMerchantService(): IGatewayService {
-    return new MerchantService(
+  public factoryGatewayService(): IGatewayService {
+    return new GatewayService(
       this.merchantConnectorRepository,
       this.persistenceRepository,
       this.hypernetCoreRepository,
@@ -84,44 +84,44 @@ class MerchantServiceMocks {
   }
 }
 
-describe("MerchantService tests", () => {
-  test("Should validateMerchantConnector works without errors and getMerchantCode should get called once", async () => {
+describe("GatewayService tests", () => {
+  test("Should validateGatewayConnector works without errors and getGatewayCode should get called once", async () => {
     // Arrange
-    const merchantServiceMock = new MerchantServiceMocks();
+    const merchantServiceMock = new GatewayServiceMocks();
     merchantServiceMock.runSuccessScenarios();
 
-    const merchantService = merchantServiceMock.factoryMerchantService();
+    const merchantService = merchantServiceMock.factoryGatewayService();
 
     // Act
-    const response = await merchantService.validateMerchantConnector();
-    const getMerchantCodeCallingcount = td.explain(
-      merchantServiceMock.merchantConnectorRepository.getMerchantCode,
+    const response = await merchantService.validateGatewayConnector();
+    const getGatewayCodeCallingcount = td.explain(
+      merchantServiceMock.merchantConnectorRepository.getGatewayCode,
     ).callCount;
 
     // Assert
     expect(response).toBeDefined();
     expect(response.isErr()).toBeFalsy();
-    expect(getMerchantCodeCallingcount).toBe(1);
+    expect(getGatewayCodeCallingcount).toBe(1);
     expect(response._unsafeUnwrap()).toBe(merchantServiceMock.signature);
   });
 
-  test("Should validateMerchantConnector fails when merchantCode doesn't match with signature and getMerchantCode should get called twice", async () => {
+  test("Should validateGatewayConnector fails when merchantCode doesn't match with signature and getGatewayCode should get called twice", async () => {
     // Arrange
-    const merchantServiceMock = new MerchantServiceMocks();
+    const merchantServiceMock = new GatewayServiceMocks();
     merchantServiceMock.runFailureScenarios();
 
-    const merchantService = merchantServiceMock.factoryMerchantService();
+    const merchantService = merchantServiceMock.factoryGatewayService();
 
     // Act
-    const response = await merchantService.validateMerchantConnector();
-    const getMerchantCodeCallingcount = td.explain(
-      merchantServiceMock.merchantConnectorRepository.getMerchantCode,
+    const response = await merchantService.validateGatewayConnector();
+    const getGatewayCodeCallingcount = td.explain(
+      merchantServiceMock.merchantConnectorRepository.getGatewayCode,
     ).callCount;
 
     // Assert
     expect(response).toBeDefined();
     expect(response.isErr()).toBeTruthy();
-    expect(getMerchantCodeCallingcount).toBe(2);
-    expect(response._unsafeUnwrapErr()).toBeInstanceOf(MerchantValidationError);
+    expect(getGatewayCodeCallingcount).toBe(2);
+    expect(response._unsafeUnwrapErr()).toBeInstanceOf(GatewayValidationError);
   });
 });

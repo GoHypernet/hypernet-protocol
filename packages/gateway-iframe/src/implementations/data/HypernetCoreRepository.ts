@@ -20,7 +20,7 @@ export class HypernetCoreRepository implements IHypernetCoreRepository {
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
   ) {
     this.contextProvider
-      .getMerchantContext()
+      .getGatewayContext()
       .onHypernetCoreProxyActivated.subscribe((childApi) => {
         this.childApi = childApi;
       });
@@ -43,7 +43,7 @@ export class HypernetCoreRepository implements IHypernetCoreRepository {
   }
 
   public emitDisplayRequested(): ResultAsync<void, never> {
-    const context = this.contextProvider.getMerchantContext();
+    const context = this.contextProvider.getGatewayContext();
 
     this.childApi?.emit("displayRequested", context.gatewayUrl);
 
@@ -51,7 +51,7 @@ export class HypernetCoreRepository implements IHypernetCoreRepository {
   }
 
   public emitCloseRequested(): ResultAsync<void, never> {
-    const context = this.contextProvider.getMerchantContext();
+    const context = this.contextProvider.getGatewayContext();
 
     this.childApi?.emit("closeRequested", context.gatewayUrl);
 

@@ -8,8 +8,8 @@ import {
   InsufficientBalanceError,
   InvalidParametersError,
   LogicalError,
-  MerchantConnectorError,
-  MerchantValidationError,
+  GatewayConnectorError,
+  GatewayValidationError,
   PaymentFinalizeError,
   RouterChannelUnknownError,
   VectorError,
@@ -98,7 +98,7 @@ export interface IPaymentService {
     | InsufficientBalanceError
     | AcceptPaymentError
     | BalancesUnavailableError
-    | MerchantValidationError
+    | GatewayValidationError
     | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
@@ -232,8 +232,8 @@ export interface IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    | MerchantConnectorError
-    | MerchantValidationError
+    | GatewayConnectorError
+    | GatewayValidationError
     | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError

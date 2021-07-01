@@ -43,7 +43,7 @@ export interface IRenderPaymentWidgetParams extends IRenderParams {
 
 export interface IHypernetWebUI {
   renderBalancesWidget(params?: IRenderParams): Result<void, RenderError>;
-  renderMerchantsWidget(params?: IRenderParams): Result<void, RenderError>;
+  renderGatewaysWidget(params?: IRenderParams): Result<void, RenderError>;
   renderFundWidget(params?: IRenderParams): Result<void, RenderError>;
   renderLinksWidget(params?: IRenderParams): Result<void, RenderError>;
   renderPublicIdentifierWidget(

@@ -5,7 +5,7 @@ import { okAsync, ResultAsync } from "neverthrow";
 import { IGatewayConnectorListener } from "@gateway-iframe/interfaces/api";
 import {
   IGatewayService,
-  IMerchantServiceType,
+  IGatewayServiceType,
   IDisplayService,
   IDisplayServiceType,
   IPaymentService,
@@ -20,18 +20,18 @@ import {
 export class GatewayConnectorListener implements IGatewayConnectorListener {
   constructor(
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
-    @inject(IMerchantServiceType) protected merchantService: IGatewayService,
+    @inject(IGatewayServiceType) protected merchantService: IGatewayService,
     @inject(IPaymentServiceType) protected paymentService: IPaymentService,
     @inject(IDisplayServiceType) protected displayService: IDisplayService,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
   public initialize(): ResultAsync<void, Error> {
-    const context = this.contextProvider.getMerchantContext();
+    const context = this.contextProvider.getGatewayContext();
 
     // Once the connector is activated, we need to listen to events
     // from the connector.
-    context.onMerchantConnectorActivated.subscribe((connector) => {
+    context.onGatewayConnectorActivated.subscribe((connector) => {
       // Register event listeners
       if (connector.preRedirect != null) {
         connector.preRedirect.subscribe((redirectInfo) => {

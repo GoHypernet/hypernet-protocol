@@ -96,7 +96,7 @@ class TestGatewayConnector implements IGatewayConnector {
     window.document.body.appendChild(element);
 
     // connector did all the rendering stuff, now he is asking gateway-iframe to show his stuff
-    // Gateway iframe Postmate model is running after the connector code get compiled in GatewayConnectorService.activateMerchantConnector so we need a small delay to wait for the Postmate model to get initialized.
+    // Gateway iframe Postmate model is running after the connector code get compiled in GatewayConnectorService.activateGatewayConnector so we need a small delay to wait for the Postmate model to get initialized.
     setTimeout(() => {
       //this.displayRequested.next();
     }, 100);

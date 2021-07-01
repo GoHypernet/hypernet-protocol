@@ -1,26 +1,26 @@
 import {
   LogicalError,
-  MerchantConnectorError,
-  MerchantValidationError,
+  GatewayConnectorError,
+  GatewayValidationError,
   BlockchainUnavailableError,
   ProxyError,
   PersistenceError,
-  MerchantAuthorizationDeniedError,
+  GatewayAuthorizationDeniedError,
   GatewayUrl,
   Signature,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IGatewayConnectorService {
-  initialize(): ResultAsync<void, LogicalError | MerchantConnectorError>;
-  authorizeMerchant(
+  initialize(): ResultAsync<void, LogicalError | GatewayConnectorError>;
+  authorizeGateway(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, MerchantValidationError>;
-  deauthorizeMerchant(
+  ): ResultAsync<void, GatewayValidationError>;
+  deauthorizeGateway(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    PersistenceError | ProxyError | MerchantAuthorizationDeniedError
+    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
   >;
   getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
@@ -32,16 +32,16 @@ export interface IGatewayConnectorService {
   >;
   activateAuthorizedGateways(): ResultAsync<
     void,
-    | MerchantConnectorError
-    | MerchantValidationError
+    | GatewayConnectorError
+    | GatewayValidationError
     | BlockchainUnavailableError
     | LogicalError
     | ProxyError
   >;
-  closeMerchantIFrame(
+  closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, MerchantConnectorError>;
-  displayMerchantIFrame(
+  ): ResultAsync<void, GatewayConnectorError>;
+  displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, MerchantConnectorError>;
+  ): ResultAsync<void, GatewayConnectorError>;
 }

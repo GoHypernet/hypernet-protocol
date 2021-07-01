@@ -7,42 +7,42 @@ import html from "./AuthorizedGatewaySelector.template.html";
 export class AuthorizedGatewaySelectorParams {
   constructor(
     public integration: IHypernetWebIntegration,
-    public selectedAuthorizedMerchant: ko.Observable<GatewayUrl | null>,
+    public selectedAuthorizedGateway: ko.Observable<GatewayUrl | null>,
   ) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
-export class AuthorizedMerchantOption {
+export class AuthorizedGatewayOption {
   constructor(public merchantName: string, public url: string) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
 export class AuthorizedGatewaySelectorViewModel {
-  public authorizedGatewayOptions: ko.ObservableArray<AuthorizedMerchantOption>;
-  public selectedAuthorizedMerchantOption: ko.Computed<AuthorizedMerchantOption | null>;
+  public authorizedGatewayOptions: ko.ObservableArray<AuthorizedGatewayOption>;
+  public selectedAuthorizedGatewayOption: ko.Computed<AuthorizedGatewayOption | null>;
 
   protected integration: IHypernetWebIntegration;
-  protected selectedAuthorizedMerchant: ko.Observable<string | null>;
+  protected selectedAuthorizedGateway: ko.Observable<string | null>;
   protected merchants: ko.Observable<string[] | null>;
 
   constructor(params: AuthorizedGatewaySelectorParams) {
     this.integration = params.integration;
-    this.selectedAuthorizedMerchant = params.selectedAuthorizedMerchant;
+    this.selectedAuthorizedGateway = params.selectedAuthorizedGateway;
 
     this.merchants = ko.observable(null);
-    this.authorizedGatewayOptions = ko.observableArray<AuthorizedMerchantOption>();
+    this.authorizedGatewayOptions = ko.observableArray<AuthorizedGatewayOption>();
 
-    this.integration.core.onMerchantAuthorized.subscribe((gateway) => {
+    this.integration.core.onGatewayAuthorized.subscribe((gateway) => {
       const url = gateway.toString();
       this.authorizedGatewayOptions.push(
-        new AuthorizedMerchantOption(url, url),
+        new AuthorizedGatewayOption(url, url),
       );
     });
 
-    this.selectedAuthorizedMerchantOption = ko.pureComputed({
+    this.selectedAuthorizedGatewayOption = ko.pureComputed({
       read: () => {
-        const selectedAuthorizedMerchant = this.selectedAuthorizedMerchant();
-        if (selectedAuthorizedMerchant == null) {
+        const selectedAuthorizedGateway = this.selectedAuthorizedGateway();
+        if (selectedAuthorizedGateway == null) {
           // tslint:disable-next-line: no-console
           console.log("No selected gateway.");
           return null;
@@ -51,7 +51,7 @@ export class AuthorizedGatewaySelectorViewModel {
         const options = this.authorizedGatewayOptions();
 
         for (const option of options) {
-          if (option.url === selectedAuthorizedMerchant) {
+          if (option.url === selectedAuthorizedGateway) {
             // tslint:disable-next-line: no-console
             console.log(`Selected token: ${option.url}`);
             return option;
@@ -60,13 +60,13 @@ export class AuthorizedGatewaySelectorViewModel {
 
         // The selected token is not actually an option...
         // console.log("No selected token.")
-        this.selectedAuthorizedMerchant(null);
+        this.selectedAuthorizedGateway(null);
         return null;
       },
 
       write: (val) => {
         // console.log(`Selected token (write) ${val}`)
-        this.selectedAuthorizedMerchant(val == null ? null : val.url);
+        this.selectedAuthorizedGateway(val == null ? null : val.url);
       },
     });
 
@@ -80,12 +80,12 @@ export class AuthorizedGatewaySelectorViewModel {
         return this.integration.core.getAuthorizedGateways();
       })
       .map((authorizedGateways) => {
-        const authorizedGatewayOptions = new Array<AuthorizedMerchantOption>();
+        const authorizedGatewayOptions = new Array<AuthorizedGatewayOption>();
         for (const keyVal of authorizedGateways) {
           // TODO: Convert the URL to a comercial name
           const url = keyVal[0].toString();
           authorizedGatewayOptions.push(
-            new AuthorizedMerchantOption(url, url),
+            new AuthorizedGatewayOption(url, url),
           );
         }
 

@@ -17,7 +17,7 @@ const Summary: React.FC = () => {
       .mapErr(handleError);
 
     hypernetWebIntegration.webUIClient
-      .renderMerchantsWidget({
+      .renderGatewaysWidget({
         selector: "gateway-list-wrapper",
         includeBoxWrapper: true,
       })

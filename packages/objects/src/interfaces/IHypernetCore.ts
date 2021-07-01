@@ -14,13 +14,13 @@ import {
   PersistenceError,
   RouterChannelUnknownError,
   VectorError,
-  MerchantValidationError,
-  MerchantConnectorError,
+  GatewayValidationError,
+  GatewayConnectorError,
   InvalidPaymentError,
   InvalidParametersError,
   TransferResolutionError,
   ProxyError,
-  MerchantAuthorizationDeniedError,
+  GatewayAuthorizationDeniedError,
   MessagingError,
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
@@ -218,8 +218,8 @@ export interface IHypernetCore {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    | MerchantConnectorError
-    | MerchantValidationError
+    | GatewayConnectorError
+    | GatewayValidationError
     | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
@@ -250,15 +250,15 @@ export interface IHypernetCore {
     amount: BigNumberString,
   ): ResultAsync<void, BlockchainUnavailableError>;
 
-  authorizeMerchant(
+  authorizeGateway(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, MerchantValidationError>;
+  ): ResultAsync<void, GatewayValidationError>;
 
-  deauthorizeMerchant(
+  deauthorizeGateway(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    PersistenceError | ProxyError | MerchantAuthorizationDeniedError
+    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
   >;
 
   getAuthorizedGateways(): ResultAsync<
@@ -271,12 +271,12 @@ export interface IHypernetCore {
     PersistenceError
   >;
 
-  closeMerchantIFrame(
+  closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, MerchantConnectorError>;
-  displayMerchantIFrame(
+  ): ResultAsync<void, GatewayConnectorError>;
+  displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, MerchantConnectorError>;
+  ): ResultAsync<void, GatewayConnectorError>;
 
   providePrivateCredentials(
     privateKey: string | null,
@@ -309,12 +309,12 @@ export interface IHypernetCore {
   onDeStorageAuthenticationStarted: Subject<void>;
   onDeStorageAuthenticationSucceeded: Subject<void>;
   onDeStorageAuthenticationFailed: Subject<void>;
-  onMerchantAuthorized: Subject<GatewayUrl>;
-  onMerchantDeauthorizationStarted: Subject<GatewayUrl>;
-  onAuthorizedMerchantUpdated: Subject<GatewayUrl>;
-  onAuthorizedMerchantActivationFailed: Subject<GatewayUrl>;
-  onMerchantIFrameDisplayRequested: Subject<GatewayUrl>;
-  onMerchantIFrameCloseRequested: Subject<GatewayUrl>;
+  onGatewayAuthorized: Subject<GatewayUrl>;
+  onGatewayDeauthorizationStarted: Subject<GatewayUrl>;
+  onAuthorizedGatewayUpdated: Subject<GatewayUrl>;
+  onAuthorizedGatewayActivationFailed: Subject<GatewayUrl>;
+  onGatewayIFrameDisplayRequested: Subject<GatewayUrl>;
+  onGatewayIFrameCloseRequested: Subject<GatewayUrl>;
   onInitializationRequired: Subject<void>;
   onPrivateCredentialsRequested: Subject<void>;
 }

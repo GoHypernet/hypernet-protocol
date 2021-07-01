@@ -151,14 +151,14 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.acceptOffers(data.data);
         }, data.callId);
       },
-      authorizeMerchant: (data: IIFrameCallData<GatewayUrl>) => {
+      authorizeGateway: (data: IIFrameCallData<GatewayUrl>) => {
         this.returnForModel(() => {
-          return this.core.authorizeMerchant(data.data);
+          return this.core.authorizeGateway(data.data);
         }, data.callId);
       },
-      deauthorizeMerchant: (data: IIFrameCallData<GatewayUrl>) => {
+      deauthorizeGateway: (data: IIFrameCallData<GatewayUrl>) => {
         this.returnForModel(() => {
-          return this.core.deauthorizeMerchant(data.data);
+          return this.core.deauthorizeGateway(data.data);
         }, data.callId);
       },
       initiateDispute: (data: IIFrameCallData<PaymentId>) => {
@@ -171,11 +171,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.resolveInsurance(data.data);
         }, data.callId);
       },
-      closeMerchantIFrame: (data: IIFrameCallData<GatewayUrl>) => {
-        this.core.closeMerchantIFrame(data.data);
+      closeGatewayIFrame: (data: IIFrameCallData<GatewayUrl>) => {
+        this.core.closeGatewayIFrame(data.data);
       },
-      displayMerchantIFrame: (data: IIFrameCallData<GatewayUrl>) => {
-        this.core.displayMerchantIFrame(data.data);
+      displayGatewayIFrame: (data: IIFrameCallData<GatewayUrl>) => {
+        this.core.displayGatewayIFrame(data.data);
       },
 
       //   pullFunds(paymentId: string, amount: BigNumber): Promise<Payment>;
@@ -289,28 +289,28 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       parent.emit("onDeStorageAuthenticationFailed");
     });
 
-    this.core.onMerchantAuthorized.subscribe((val) => {
-      parent.emit("onMerchantAuthorized", val.toString());
+    this.core.onGatewayAuthorized.subscribe((val) => {
+      parent.emit("onGatewayAuthorized", val.toString());
     });
 
-    this.core.onMerchantDeauthorizationStarted.subscribe((val) => {
-      parent.emit("onMerchantDeauthorizationStarted", val.toString());
+    this.core.onGatewayDeauthorizationStarted.subscribe((val) => {
+      parent.emit("onGatewayDeauthorizationStarted", val.toString());
     });
 
-    this.core.onAuthorizedMerchantUpdated.subscribe((val) => {
-      parent.emit("onAuthorizedMerchantUpdated", val.toString());
+    this.core.onAuthorizedGatewayUpdated.subscribe((val) => {
+      parent.emit("onAuthorizedGatewayUpdated", val.toString());
     });
 
-    this.core.onAuthorizedMerchantActivationFailed.subscribe((val) => {
-      parent.emit("onAuthorizedMerchantActivationFailed", val.toString());
+    this.core.onAuthorizedGatewayActivationFailed.subscribe((val) => {
+      parent.emit("onAuthorizedGatewayActivationFailed", val.toString());
     });
 
-    this.core.onMerchantIFrameDisplayRequested.subscribe((gatewayUrl) => {
-      parent.emit("onMerchantIFrameDisplayRequested", gatewayUrl);
+    this.core.onGatewayIFrameDisplayRequested.subscribe((gatewayUrl) => {
+      parent.emit("onGatewayIFrameDisplayRequested", gatewayUrl);
     });
 
-    this.core.onMerchantIFrameCloseRequested.subscribe((gatewayUrl) => {
-      parent.emit("onMerchantIFrameCloseRequested", gatewayUrl);
+    this.core.onGatewayIFrameCloseRequested.subscribe((gatewayUrl) => {
+      parent.emit("onGatewayIFrameCloseRequested", gatewayUrl);
     });
 
     this.core.onInitializationRequired.subscribe(() => {

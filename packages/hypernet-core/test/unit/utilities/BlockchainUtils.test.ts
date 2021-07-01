@@ -17,7 +17,7 @@ const domain = {
 };
 
 const types = {
-  AuthorizedMerchant: [
+  AuthorizedGateway: [
     { name: "authorizedGatewayUrl", type: "string" },
     { name: "merchantValidatedSignature", type: "string" },
   ],

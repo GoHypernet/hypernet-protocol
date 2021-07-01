@@ -8,7 +8,7 @@ import { IHypernetWebIntegration } from "@web-integration/interfaces/app/IHypern
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
   protected iframeURL = "http://localhost:5020"; // TODO: This should eventually be mainnet release
-  protected currentMerchantUrl: GatewayUrl | undefined | null;
+  protected currentGatewayUrl: GatewayUrl | undefined | null;
   protected getReadyTimeout: number = 15 * 1000;
   protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
   protected getReadyResolved = false;
@@ -26,8 +26,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       "hypernet-core-iframe",
     );
 
-    this.core.onMerchantIFrameDisplayRequested.subscribe((gatewayUrl) => {
-      this.currentMerchantUrl = gatewayUrl;
+    this.core.onGatewayIFrameDisplayRequested.subscribe((gatewayUrl) => {
+      this.currentGatewayUrl = gatewayUrl;
     });
 
     if (window.hypernetWebUIInstance) {
@@ -86,12 +86,12 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     return HypernetWebIntegration.instance;
   }
 
-  public displayMerchantIFrame(gatewayUrl: GatewayUrl): void {
-    this.core.displayMerchantIFrame(gatewayUrl);
+  public displayGatewayIFrame(gatewayUrl: GatewayUrl): void {
+    this.core.displayGatewayIFrame(gatewayUrl);
   }
 
-  public closeMerchantIFrame(gatewayUrl: GatewayUrl): void {
-    this.core.closeMerchantIFrame(gatewayUrl);
+  public closeGatewayIFrame(gatewayUrl: GatewayUrl): void {
+    this.core.closeGatewayIFrame(gatewayUrl);
   }
 
   private _prepareIFrameContainer(): HTMLElement {
@@ -160,9 +160,9 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     closeImg?.addEventListener(
       "click",
       (e) => {
-        if (this.currentMerchantUrl != null) {
-          this.core.closeMerchantIFrame(this.currentMerchantUrl);
-          this.currentMerchantUrl = null;
+        if (this.currentGatewayUrl != null) {
+          this.core.closeGatewayIFrame(this.currentGatewayUrl);
+          this.currentGatewayUrl = null;
         }
         iframeContainer.style.display = "none";
       },

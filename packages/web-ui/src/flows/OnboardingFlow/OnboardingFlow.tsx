@@ -56,7 +56,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
       if (merchantsMap.get(gatewayUrl)) {
         //check for balances
         coreProxy.getBalances().match((_balances) => {
-          decideScreenWhenMerchantIsAlreadyAuthorized(
+          decideScreenWhenGatewayIsAlreadyAuthorized(
             !!_balances.assets?.length,
           );
         }, handleError);
@@ -71,19 +71,19 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
       }); */
     }, handleError);
 
-    coreProxy.onMerchantAuthorized.subscribe((_merchantUrl) => {
+    coreProxy.onGatewayAuthorized.subscribe((_merchantUrl) => {
       if (gatewayUrl === _merchantUrl) {
         alert.success(`Gateway ${gatewayUrl} authorization succeeded!`);
         setLoading(false);
         coreProxy.getBalances().match((_balances) => {
-          decideScreenWhenMerchantIsAlreadyAuthorized(
+          decideScreenWhenGatewayIsAlreadyAuthorized(
             !!_balances.assets?.length,
           );
         }, handleError);
       }
     });
 
-    coreProxy.onAuthorizedMerchantActivationFailed.subscribe((_merchantUrl) => {
+    coreProxy.onAuthorizedGatewayActivationFailed.subscribe((_merchantUrl) => {
       if (gatewayUrl === _merchantUrl) {
         alert.error(`Gateway ${gatewayUrl} authorization failed!`);
         setLoading(false);
@@ -98,7 +98,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     }
   }, [balances]);
 
-  const decideScreenWhenMerchantIsAlreadyAuthorized = (
+  const decideScreenWhenGatewayIsAlreadyAuthorized = (
     hasBalances?: boolean,
   ) => {
     if (hasBalances || balances?.length) {
@@ -108,9 +108,9 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     }
   };
 
-  const handleMerchantAuthorization = () => {
+  const handleGatewayAuthorization = () => {
     setLoading(true);
-    coreProxy.authorizeMerchant(gatewayUrl).mapErr(handleError);
+    coreProxy.authorizeGateway(gatewayUrl).mapErr(handleError);
   };
 
   const goToFundWalletScreen = () => {
@@ -177,7 +177,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
             )}
             <Button
               label={`Approve ${merchantName || "Hyperpay"}`}
-              onClick={handleMerchantAuthorization}
+              onClick={handleGatewayAuthorization}
               fullWidth={true}
               bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
             />
