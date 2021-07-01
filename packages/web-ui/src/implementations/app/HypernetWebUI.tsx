@@ -291,8 +291,8 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <OnboardingFlow
             gatewayUrl={config.gatewayUrl}
-            merchantName={config.merchantName}
-            merchantLogoUrl={config.merchantLogoUrl}
+            gatewayName={config.gatewayName}
+            gatewayLogoUrl={config.gatewayLogoUrl}
             finalSuccessContent={config.finalSuccessContent}
             closeCallback={config.closeCallback}
           />,

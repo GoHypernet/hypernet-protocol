@@ -12,7 +12,7 @@ enum EActionTypes {
 interface IState {
   loading: boolean;
   error: any;
-  merchantsMap: Map<GatewayUrl, boolean>;
+  gatewaysMap: Map<GatewayUrl, boolean>;
   openGatewayIFrame: (gatewayUrl: GatewayUrl) => void;
   deauthorizeGateway: (gatewayUrl: GatewayUrl) => void;
   authorizeGateway: (gatewayUrl: GatewayUrl) => void;
@@ -30,7 +30,7 @@ export function useGateways(): IState {
   const initialState: IState = {
     loading: true,
     error: null,
-    merchantsMap: new Map(),
+    gatewaysMap: new Map(),
     openGatewayIFrame,
     deauthorizeGateway,
     authorizeGateway,
@@ -41,7 +41,7 @@ export function useGateways(): IState {
       case EActionTypes.FETCHING:
         return { ...state, loading: true };
       case EActionTypes.FETCHED:
-        return { ...state, loading: false, merchantsMap: action.payload };
+        return { ...state, loading: false, gatewaysMap: action.payload };
       case EActionTypes.ERROR:
         return { ...state, loading: false, error: action.payload };
       default:
@@ -54,22 +54,22 @@ export function useGateways(): IState {
 
     coreProxy.onGatewayAuthorized.subscribe({
       next: (gatewayUrl) => {
-        const merchantsMap = state.merchantsMap;
-        merchantsMap.set(gatewayUrl, true);
+        const gatewaysMap = state.gatewaysMap;
+        gatewaysMap.set(gatewayUrl, true);
         dispatch({
           type: EActionTypes.FETCHED,
-          payload: merchantsMap,
+          payload: gatewaysMap,
         });
       },
     });
 
     coreProxy.onAuthorizedGatewayActivationFailed.subscribe({
       next: (gatewayUrl) => {
-        const merchantsMap = state.merchantsMap;
-        merchantsMap.set(gatewayUrl, false);
+        const gatewaysMap = state.gatewaysMap;
+        gatewaysMap.set(gatewayUrl, false);
         dispatch({
           type: EActionTypes.FETCHED,
-          payload: merchantsMap,
+          payload: gatewaysMap,
         });
       },
     });
@@ -79,10 +79,10 @@ export function useGateways(): IState {
     dispatch({ type: EActionTypes.FETCHING });
     coreProxy
       .getAuthorizedGatewaysConnectorsStatus()
-      .map((merchantsStatusMap) => {
+      .map((gatewaysStatusMap) => {
         dispatch({
           type: EActionTypes.FETCHED,
-          payload: merchantsStatusMap,
+          payload: gatewaysStatusMap,
         });
       })
       .mapErr((error) => {

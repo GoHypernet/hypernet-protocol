@@ -99,7 +99,7 @@ export interface IPaymentRepository {
    */
   provideStake(
     paymentId: PaymentId,
-    merchantAddress: EthereumAddress,
+    gatewayAddress: EthereumAddress,
   ): ResultAsync<
     Payment,
     | BlockchainUnavailableError

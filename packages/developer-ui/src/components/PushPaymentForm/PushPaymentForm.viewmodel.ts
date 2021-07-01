@@ -35,7 +35,7 @@ export class PushPaymentFormViewModel {
   public expirationDate: ko.Observable<string>;
   public amount: ko.Observable<string>;
   public tokenSelector: TokenSelectorParams;
-  public merchantSelector: AuthorizedGatewaySelectorParams;
+  public gatewaySelector: AuthorizedGatewaySelectorParams;
 
   public submitButton: ButtonParams;
 
@@ -58,7 +58,7 @@ export class PushPaymentFormViewModel {
       true,
     );
 
-    this.merchantSelector = new AuthorizedGatewaySelectorParams(
+    this.gatewaySelector = new AuthorizedGatewaySelectorParams(
       this.integration,
       ko.observable(null),
     );
@@ -72,7 +72,7 @@ export class PushPaymentFormViewModel {
           return null;
         }
 
-        const selectedGatewayUrl = this.merchantSelector.selectedAuthorizedGateway();
+        const selectedGatewayUrl = this.gatewaySelector.selectedAuthorizedGateway();
 
         if (selectedGatewayUrl == null) {
           return null;

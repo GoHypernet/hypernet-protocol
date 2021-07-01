@@ -46,16 +46,16 @@ export class GatewayIFrame {
   protected localStorageUtils: ILocalStorageUtils;
   protected logUtils: ILogUtils;
 
-  protected merchantConnectorRepository: IGatewayConnectorRepository;
+  protected gatewayConnectorRepository: IGatewayConnectorRepository;
   protected persistenceRepository: IPersistenceRepository;
   protected hypernetCoreRepository: IHypernetCoreRepository;
 
   protected displayService: IDisplayService;
-  protected merchantService: IGatewayService;
+  protected gatewayService: IGatewayService;
   protected paymentService: IPaymentService;
 
   protected hypernetCoreListener: IHypernetCoreListener;
-  protected merchantConnectorListener: IGatewayConnectorListener;
+  protected gatewayConnectorListener: IGatewayConnectorListener;
 
   constructor() {
     // Instantiate all the pieces
@@ -64,7 +64,7 @@ export class GatewayIFrame {
     this.localStorageUtils = new LocalStorageUtils();
     this.logUtils = new LogUtils();
 
-    this.merchantConnectorRepository = new GatewayConnectorRepository(
+    this.gatewayConnectorRepository = new GatewayConnectorRepository(
       this.ajaxUtils,
     );
     this.persistenceRepository = new PersistenceRepository(
@@ -74,8 +74,8 @@ export class GatewayIFrame {
       this.contextProvider,
     );
 
-    this.merchantService = new GatewayService(
-      this.merchantConnectorRepository,
+    this.gatewayService = new GatewayService(
+      this.gatewayConnectorRepository,
       this.persistenceRepository,
       this.hypernetCoreRepository,
       this.contextProvider,
@@ -84,21 +84,21 @@ export class GatewayIFrame {
     this.displayService = new DisplayService(this.hypernetCoreRepository);
 
     this.hypernetCoreListener = new HypernetCoreListener(
-      this.merchantService,
+      this.gatewayService,
       this.contextProvider,
     );
-    this.merchantConnectorListener = new GatewayConnectorListener(
+    this.gatewayConnectorListener = new GatewayConnectorListener(
       this.contextProvider,
-      this.merchantService,
+      this.gatewayService,
       this.paymentService,
       this.displayService,
       this.logUtils,
     );
 
-    this.merchantConnectorListener
+    this.gatewayConnectorListener
       .initialize()
       .andThen(() => {
-        return this.merchantService.getGatewayUrl();
+        return this.gatewayService.getGatewayUrl();
       })
       .andThen((gatewayUrl) => {
         // Set the gateway url
@@ -111,12 +111,12 @@ export class GatewayIFrame {
       })
       .andThen(() => {
         // Now that we have a gateway URL, let's validate the gateway's connector
-        return this.merchantService.validateGatewayConnector();
+        return this.gatewayService.validateGatewayConnector();
       })
       .andThen(() => {
         // Regardless of validation, we will try to auto-activate
         // the connector if it's eligible.
-        return this.merchantService.autoActivateGatewayConnector();
+        return this.gatewayService.autoActivateGatewayConnector();
       })
       .orElse((e) => {
         this.logUtils.error("Failure during gateway iframe initialization");

@@ -41,13 +41,13 @@ class BrowserNodeProviderMocks {
   public expectedSignerTypes = {
     AuthorizedGateway: [
       { name: "authorizedGatewayUrl", type: "string" },
-      { name: "merchantValidatedSignature", type: "string" },
+      { name: "gatewayValidatedSignature", type: "string" },
     ],
   };
 
   public expectedSignerValue = {
     authorizedGatewayUrl: gatewayUrl,
-    merchantValidatedSignature: validatedSignature,
+    gatewayValidatedSignature: validatedSignature,
   };
 
   constructor(stubSigner = true) {

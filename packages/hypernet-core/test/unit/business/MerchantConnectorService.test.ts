@@ -12,7 +12,7 @@ import td from "testdouble";
 import { ConfigProviderMock, ContextProviderMock } from "@tests/mock/utils";
 
 class GatewayConnectorServiceMocks {
-  public merchantConnectorRepository = td.object<IGatewayConnectorRepository>();
+  public gatewayConnectorRepository = td.object<IGatewayConnectorRepository>();
   public accountRepository = td.object<IAccountsRepository>();
   public contextProvider = new ContextProviderMock();
   public configProvider = new ConfigProviderMock();
@@ -21,17 +21,17 @@ class GatewayConnectorServiceMocks {
 
   constructor() {
     td.when(
-      this.merchantConnectorRepository.deauthorizeGateway(this.gatewayUrl),
+      this.gatewayConnectorRepository.deauthorizeGateway(this.gatewayUrl),
     ).thenReturn(okAsync(undefined));
 
     td.when(
-      this.merchantConnectorRepository.destroyProxy(this.gatewayUrl),
+      this.gatewayConnectorRepository.destroyProxy(this.gatewayUrl),
     ).thenReturn(undefined);
   }
 
   public factoryGatewayConnectorService(): IGatewayConnectorService {
     return new GatewayConnectorService(
-      this.merchantConnectorRepository,
+      this.gatewayConnectorRepository,
       this.accountRepository,
       this.contextProvider,
       this.configProvider,
@@ -43,18 +43,18 @@ class GatewayConnectorServiceMocks {
 describe("GatewayConnectorService tests", () => {
   test("Should deauthorizeGateway works without errors and without having the need to run the timeout method", async () => {
     // Arrange
-    const merchantConnectorServiceMock = new GatewayConnectorServiceMocks();
+    const gatewayConnectorServiceMock = new GatewayConnectorServiceMocks();
 
-    const merchantConnectorService = merchantConnectorServiceMock.factoryGatewayConnectorService();
+    const gatewayConnectorService = gatewayConnectorServiceMock.factoryGatewayConnectorService();
 
     // Act
-    const response = await merchantConnectorService.deauthorizeGateway(
-      merchantConnectorServiceMock.gatewayUrl,
+    const response = await gatewayConnectorService.deauthorizeGateway(
+      gatewayConnectorServiceMock.gatewayUrl,
     );
 
     // Indicator for the deauthorization timeout method
     const destroyProxyCallingcount = td.explain(
-      merchantConnectorServiceMock.merchantConnectorRepository.destroyProxy,
+      gatewayConnectorServiceMock.gatewayConnectorRepository.destroyProxy,
     ).callCount;
 
     // Assert
@@ -66,13 +66,13 @@ describe("GatewayConnectorService tests", () => {
 
   test("Should deauthorizeGateway runs the timeout method if deauthorizeGateway repository lasted more than deauthorizationTimeout", async () => {
     // Arrange
-    const merchantConnectorServiceMock = new GatewayConnectorServiceMocks();
+    const gatewayConnectorServiceMock = new GatewayConnectorServiceMocks();
 
-    const merchantConnectorService = merchantConnectorServiceMock.factoryGatewayConnectorService();
+    const gatewayConnectorService = gatewayConnectorServiceMock.factoryGatewayConnectorService();
 
     td.when(
-      merchantConnectorServiceMock.merchantConnectorRepository.deauthorizeGateway(
-        merchantConnectorServiceMock.gatewayUrl,
+      gatewayConnectorServiceMock.gatewayConnectorRepository.deauthorizeGateway(
+        gatewayConnectorServiceMock.gatewayUrl,
       ),
     ).thenReturn(
       new Promise((resolve, reject) =>
@@ -81,13 +81,13 @@ describe("GatewayConnectorService tests", () => {
     );
 
     // Act
-    const response = await merchantConnectorService.deauthorizeGateway(
-      merchantConnectorServiceMock.gatewayUrl,
+    const response = await gatewayConnectorService.deauthorizeGateway(
+      gatewayConnectorServiceMock.gatewayUrl,
     );
 
     // Indicator for the deauthorization timeout method
     const destroyProxyCallingcount = td.explain(
-      merchantConnectorServiceMock.merchantConnectorRepository.destroyProxy,
+      gatewayConnectorServiceMock.gatewayConnectorRepository.destroyProxy,
     ).callCount;
 
     // Assert

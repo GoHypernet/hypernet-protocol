@@ -25,8 +25,8 @@ export interface IConnectorAuthorizationFlowParams extends IRenderParams {
 
 export interface IOnboardingFlowParams extends IRenderParams {
   gatewayUrl: GatewayUrl;
-  merchantName?: string;
-  merchantLogoUrl?: string;
+  gatewayName?: string;
+  gatewayLogoUrl?: string;
   finalSuccessContent?: string;
 }
 

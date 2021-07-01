@@ -17,10 +17,10 @@ export class HypernetConfig {
     public chainAddresses: ChainAddresses,
     public natsUrl: string,
     public authUrl: string,
-    public merchantIframeUrl: string,
+    public gatewayIframeUrl: string,
     public ceramicNodeUrl: string,
     public storageAliases: Map<DefinitionName, SchemaUrl>,
-    public merchantDeauthorizationTimeout: number,
+    public gatewayDeauthorizationTimeout: number,
     public controlClaimSubject: string,
     public debug: boolean,
   ) {}

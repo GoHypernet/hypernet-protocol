@@ -34,16 +34,16 @@ export class AuthorizedGatewaysViewModel {
     this.getAuthorizedGateways();
   }
 
-  openGatewayIFrameClick = (merchantStatus: GatewayStatus) => {
+  openGatewayIFrameClick = (gatewayStatus: GatewayStatus) => {
     this.integration.core.waitInitialized().map(() => {
-      this.integration.displayGatewayIFrame(merchantStatus.gatewayUrl);
+      this.integration.displayGatewayIFrame(gatewayStatus.gatewayUrl);
     });
   };
 
-  deauthorizeGatewayClick = (merchantStatus: GatewayStatus) => {
+  deauthorizeGatewayClick = (gatewayStatus: GatewayStatus) => {
     this.integration.core.waitInitialized().map(() => {
       this.integration.core
-        .deauthorizeGateway(merchantStatus.gatewayUrl)
+        .deauthorizeGateway(gatewayStatus.gatewayUrl)
         .map(() => {
           this.getAuthorizedGateways();
         });
@@ -56,17 +56,17 @@ export class AuthorizedGatewaysViewModel {
       .andThen(() => {
         return this.integration.core.getAuthorizedGatewaysConnectorsStatus();
       })
-      .map((merchantsMap) => {
-        const merchantStrings = new Array<GatewayStatus>();
-        for (const [gatewayUrl, status] of merchantsMap.entries()) {
-          merchantStrings.push(new GatewayStatus(gatewayUrl, status));
+      .map((gatewaysMap) => {
+        const gatewayStrings = new Array<GatewayStatus>();
+        for (const [gatewayUrl, status] of gatewaysMap.entries()) {
+          gatewayStrings.push(new GatewayStatus(gatewayUrl, status));
         }
-        this.authorizedGateways(merchantStrings);
+        this.authorizedGateways(gatewayStrings);
       });
   }
 }
 
-ko.components.register("authorized-merchants", {
+ko.components.register("authorized-gateways", {
   viewModel: AuthorizedGatewaysViewModel,
   template: html,
 });

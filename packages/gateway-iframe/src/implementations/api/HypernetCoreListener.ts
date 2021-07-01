@@ -28,10 +28,10 @@ export class HypernetCoreListener
   extends ChildProxy
   implements IHypernetCoreListener
 {
-  protected merchantConnector: IGatewayConnector | undefined;
+  protected gatewayConnector: IGatewayConnector | undefined;
 
   constructor(
-    @inject(IGatewayServiceType) protected merchantService: IGatewayService,
+    @inject(IGatewayServiceType) protected gatewayService: IGatewayService,
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
   ) {
     super();
@@ -58,110 +58,110 @@ export class HypernetCoreListener
           });
           const balances = new Balances(assets);
 
-          return this.merchantService
+          return this.gatewayService
             .activateGatewayConnector(data.data.publicIdentifier, balances)
-            .map((merchantConnector) => {
-              this.merchantConnector = merchantConnector;
+            .map((gatewayConnector) => {
+              this.gatewayConnector = gatewayConnector;
             });
         }, data.callId);
       },
       resolveChallenge: (data: IIFrameCallData<PaymentId>) => {
         this.returnForModel(() => {
-          return this.merchantService.resolveChallenge(data.data);
+          return this.gatewayService.resolveChallenge(data.data);
         }, data.callId);
       },
       getAddress: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.merchantService.getAddress();
+          return this.gatewayService.getAddress();
         }, data.callId);
       },
       deauthorize: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.merchantService.deauthorize();
+          return this.gatewayService.deauthorize();
         }, data.callId);
       },
       getValidatedSignature: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.merchantService.getValidatedSignature();
+          return this.gatewayService.getValidatedSignature();
         }, data.callId);
       },
       getGatewayUrl: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.merchantService.getGatewayUrl();
+          return this.gatewayService.getGatewayUrl();
         }, data.callId);
       },
-      merchantIFrameClosed: (data: IIFrameCallData<void>) => {
+      gatewayIFrameClosed: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getGatewayContext();
-          context.merchantConnector?.onIFrameClosed();
+          context.gatewayConnector?.onIFrameClosed();
           return okAsync(undefined);
         }, data.callId);
       },
-      merchantIFrameDisplayed: (data: IIFrameCallData<void>) => {
+      gatewayIFrameDisplayed: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getGatewayContext();
-          context.merchantConnector?.onIFrameClosed();
+          context.gatewayConnector?.onIFrameClosed();
           return okAsync(undefined);
         }, data.callId);
       },
       notifyPushPaymentSent: (data: IIFrameCallData<PushPayment>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getGatewayContext();
-          context.merchantConnector?.onPushPaymentSent(data.data);
+          context.gatewayConnector?.onPushPaymentSent(data.data);
           return okAsync(undefined);
         }, data.callId);
       },
       notifyPushPaymentUpdated: (data: IIFrameCallData<PushPayment>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getGatewayContext();
-          context.merchantConnector?.onPushPaymentUpdated(data.data);
+          context.gatewayConnector?.onPushPaymentUpdated(data.data);
           return okAsync(undefined);
         }, data.callId);
       },
       notifyPushPaymentReceived: (data: IIFrameCallData<PushPayment>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getGatewayContext();
-          context.merchantConnector?.onPushPaymentReceived(data.data);
+          context.gatewayConnector?.onPushPaymentReceived(data.data);
           return okAsync(undefined);
         }, data.callId);
       },
       notifyPullPaymentSent: (data: IIFrameCallData<PullPayment>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getGatewayContext();
-          context.merchantConnector?.onPullPaymentSent(data.data);
+          context.gatewayConnector?.onPullPaymentSent(data.data);
           return okAsync(undefined);
         }, data.callId);
       },
       notifyPullPaymentUpdated: (data: IIFrameCallData<PullPayment>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getGatewayContext();
-          context.merchantConnector?.onPullPaymentUpdated(data.data);
+          context.gatewayConnector?.onPullPaymentUpdated(data.data);
           return okAsync(undefined);
         }, data.callId);
       },
       notifyPullPaymentReceived: (data: IIFrameCallData<PullPayment>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getGatewayContext();
-          context.merchantConnector?.onPullPaymentReceived(data.data);
+          context.gatewayConnector?.onPullPaymentReceived(data.data);
           return okAsync(undefined);
         }, data.callId);
       },
       notifyPublicIdentifier: (data: IIFrameCallData<PublicIdentifier>) => {
         this.returnForModel(() => {
-          return this.merchantService.publicIdentifierReceived(data.data);
+          return this.gatewayService.publicIdentifierReceived(data.data);
         }, data.callId);
       },
       notifyBalancesReceived: (data: IIFrameCallData<Balances>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getGatewayContext();
-          context.merchantConnector?.onBalancesReceived(data.data);
+          context.gatewayConnector?.onBalancesReceived(data.data);
           return okAsync(undefined);
         }, data.callId);
       },
 
       messageSigned: (data: IIFrameCallData<ISignatureResponseData>) => {
         this.returnForModel(() => {
-          return this.merchantService.messageSigned(
+          return this.gatewayService.messageSigned(
             data.data.message,
             data.data.signature,
           );

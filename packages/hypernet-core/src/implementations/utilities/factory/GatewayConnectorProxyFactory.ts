@@ -28,7 +28,7 @@ export class GatewayConnectorProxyFactory
     return this.configProvider
       .getConfig()
       .andThen((config) => {
-        const iframeUrl = new URL(config.merchantIframeUrl);
+        const iframeUrl = new URL(config.gatewayIframeUrl);
         iframeUrl.searchParams.set("gatewayUrl", gatewayUrl);
 
         proxy = new GatewayConnectorProxy(

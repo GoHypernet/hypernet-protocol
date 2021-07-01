@@ -36,7 +36,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     gatewayUrl,
     finalSuccessContent = "You are good to go and purchase using your payment token",
     closeCallback = () => {},
-    merchantName,
+    gatewayName,
   } = props;
   const alert = useAlert();
   const { balances } = useBalances();
@@ -52,8 +52,8 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
   useEffect(() => {
     setLoading(true);
     // First initialze the gateway
-    coreProxy.getAuthorizedGateways().match((merchantsMap) => {
-      if (merchantsMap.get(gatewayUrl)) {
+    coreProxy.getAuthorizedGateways().match((gatewaysMap) => {
+      if (gatewaysMap.get(gatewayUrl)) {
         //check for balances
         coreProxy.getBalances().match((_balances) => {
           decideScreenWhenGatewayIsAlreadyAuthorized(
@@ -71,8 +71,8 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
       }); */
     }, handleError);
 
-    coreProxy.onGatewayAuthorized.subscribe((_merchantUrl) => {
-      if (gatewayUrl === _merchantUrl) {
+    coreProxy.onGatewayAuthorized.subscribe((_gatewayUrl) => {
+      if (gatewayUrl === _gatewayUrl) {
         alert.success(`Gateway ${gatewayUrl} authorization succeeded!`);
         setLoading(false);
         coreProxy.getBalances().match((_balances) => {
@@ -83,8 +83,8 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
       }
     });
 
-    coreProxy.onAuthorizedGatewayActivationFailed.subscribe((_merchantUrl) => {
-      if (gatewayUrl === _merchantUrl) {
+    coreProxy.onAuthorizedGatewayActivationFailed.subscribe((_gatewayUrl) => {
+      if (gatewayUrl === _gatewayUrl) {
         alert.error(`Gateway ${gatewayUrl} authorization failed!`);
         setLoading(false);
       }
@@ -176,7 +176,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
               </>
             )}
             <Button
-              label={`Approve ${merchantName || "Hyperpay"}`}
+              label={`Approve ${gatewayName || "Hyperpay"}`}
               onClick={handleGatewayAuthorization}
               fullWidth={true}
               bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"

@@ -52,7 +52,7 @@ export class GatewayService implements IGatewayService {
 
   constructor(
     @inject(IGatewayConnectorRepositoryType)
-    protected merchantConnectorRepository: IGatewayConnectorRepository,
+    protected gatewayConnectorRepository: IGatewayConnectorRepository,
     @inject(IPersistenceRepositoryType)
     protected persistenceRepository: IPersistenceRepository,
     @inject(IHypernetCoreRepositoryType)
@@ -61,7 +61,7 @@ export class GatewayService implements IGatewayService {
   ) {
     this.signMessageCallbacks = new Map();
   }
-  private static merchantUrlCacheBusterUsed = false;
+  private static gatewayUrlCacheBusterUsed = false;
 
   public activateGatewayConnector(
     publicIdentifier: PublicIdentifier,
@@ -98,9 +98,9 @@ export class GatewayService implements IGatewayService {
     newScript.appendChild(inlineScript);
     document.head.appendChild(newScript);
 
-    const merchantConnector = window.connector;
+    const gatewayConnector = window.connector;
 
-    if (merchantConnector == null) {
+    if (gatewayConnector == null) {
       return errAsync(
         new GatewayConnectorError(
           "Validated code does not evaluate to an object",
@@ -109,14 +109,14 @@ export class GatewayService implements IGatewayService {
     }
 
     // Send some initial information to the gateway connector
-    merchantConnector.onPublicIdentifierReceived(publicIdentifier);
+    gatewayConnector.onPublicIdentifierReceived(publicIdentifier);
 
-    merchantConnector.onBalancesReceived(balances);
+    gatewayConnector.onBalancesReceived(balances);
 
     // Store the gateway connector object and notify the world
-    context.merchantConnector = merchantConnector;
+    context.gatewayConnector = gatewayConnector;
     this.contextProvider.setGatewayContext(context);
-    context.onGatewayConnectorActivated.next(merchantConnector);
+    context.onGatewayConnectorActivated.next(gatewayConnector);
 
     // Once a connector has been activated once during the session, we can
     // reactivate it automatically on startup.
@@ -124,7 +124,7 @@ export class GatewayService implements IGatewayService {
       context.validatedGatewaySignature,
     );
 
-    return okAsync(merchantConnector);
+    return okAsync(gatewayConnector);
   }
 
   public validateGatewayConnector(): ResultAsync<
@@ -144,8 +144,8 @@ export class GatewayService implements IGatewayService {
     }
 
     return ResultUtils.combine([
-      this.merchantConnectorRepository.getGatewaySignature(context.gatewayUrl),
-      this.merchantConnectorRepository.getGatewayAddress(context.gatewayUrl),
+      this.gatewayConnectorRepository.getGatewaySignature(context.gatewayUrl),
+      this.gatewayConnectorRepository.getGatewayAddress(context.gatewayUrl),
     ])
       .andThen((vals) => {
         [signature, address] = vals;
@@ -157,8 +157,8 @@ export class GatewayService implements IGatewayService {
         );
       })
       .orElse((e) => {
-        if (!GatewayService.merchantUrlCacheBusterUsed) {
-          GatewayService.merchantUrlCacheBusterUsed = true;
+        if (!GatewayService.gatewayUrlCacheBusterUsed) {
+          GatewayService.gatewayUrlCacheBusterUsed = true;
           return this._validateGatewayConnectorCode(
             context.gatewayUrl,
             signature,
@@ -194,11 +194,11 @@ export class GatewayService implements IGatewayService {
       cacheBuster = `?v=${Date.now()}`;
     }
 
-    return this.merchantConnectorRepository
+    return this.gatewayConnectorRepository
       .getGatewayCode(GatewayUrl(gatewayUrl + cacheBuster))
-      .andThen((merchantCode) => {
+      .andThen((gatewayCode) => {
         const calculatedAddress = ethers.utils.verifyMessage(
-          merchantCode,
+          gatewayCode,
           signature,
         );
 
@@ -212,7 +212,7 @@ export class GatewayService implements IGatewayService {
 
         // Gateway's code passes muster. Store the gateway code in the context as validated.
         this.contextProvider.setValidatedGatewayConnector(
-          merchantCode,
+          gatewayCode,
           signature,
         );
 
@@ -306,7 +306,7 @@ export class GatewayService implements IGatewayService {
     const context = this.contextProvider.getGatewayContext();
     context.publicIdentifier = publicIdentifier;
     this.contextProvider.setGatewayContext(context);
-    context.merchantConnector?.onPublicIdentifierReceived(publicIdentifier);
+    context.gatewayConnector?.onPublicIdentifierReceived(publicIdentifier);
     return okAsync(undefined);
   }
 
@@ -315,12 +315,12 @@ export class GatewayService implements IGatewayService {
     GatewayValidationError
   > {
     let context = this.contextProvider.getGatewayContext();
-    return context.merchantValidated.map(() => {
+    return context.gatewayValidated.map(() => {
       context = this.contextProvider.getGatewayContext();
 
       if (context.validatedGatewaySignature == null) {
         throw new Error(
-          "validatedGatewaySignature is null but merchantValidated is OK",
+          "validatedGatewaySignature is null but gatewayValidated is OK",
         );
       }
 
@@ -330,9 +330,9 @@ export class GatewayService implements IGatewayService {
 
   public getAddress(): ResultAsync<EthereumAddress, GatewayValidationError> {
     return this._getValidatedGatewayConnector().andThen(
-      (merchantConnector) => {
+      (gatewayConnector) => {
         return ResultAsync.fromPromise(
-          merchantConnector.getAddress(),
+          gatewayConnector.getAddress(),
           (e) =>
             new GatewayConnectorError(
               "Error happened while getting gateway connector addresses",
@@ -350,9 +350,9 @@ export class GatewayService implements IGatewayService {
     GatewayConnectorError | GatewayValidationError
   > {
     return this._getValidatedGatewayConnector().andThen(
-      (merchantConnector) => {
+      (gatewayConnector) => {
         return ResultAsync.fromPromise(
-          merchantConnector.resolveChallenge(paymentId),
+          gatewayConnector.resolveChallenge(paymentId),
           (e) =>
             new GatewayConnectorError(
               "Error happened while resolving challenge in gateway connector code",
@@ -368,9 +368,9 @@ export class GatewayService implements IGatewayService {
     GatewayConnectorError | GatewayValidationError
   > {
     return this._getValidatedGatewayConnector().andThen(
-      (merchantConnector) => {
+      (gatewayConnector) => {
         return ResultAsync.fromPromise(
-          merchantConnector.deauthorize(),
+          gatewayConnector.deauthorize(),
           (e) =>
             new GatewayConnectorError(
               "Error happened while deauthorizing gateway in gateway connector code",
@@ -411,14 +411,14 @@ export class GatewayService implements IGatewayService {
     GatewayValidationError
   > {
     const context = this.contextProvider.getGatewayContext();
-    return context.merchantValidated.map(() => {
-      if (context.merchantConnector == null) {
+    return context.gatewayValidated.map(() => {
+      if (context.gatewayConnector == null) {
         throw new Error(
-          "merchantConnector is null but merchantValidated is OK",
+          "gatewayConnector is null but gatewayValidated is OK",
         );
       }
 
-      return context.merchantConnector;
+      return context.gatewayConnector;
     });
   }
 }

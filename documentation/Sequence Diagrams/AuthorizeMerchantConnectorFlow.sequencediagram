@@ -7,11 +7,11 @@ participant Gateway API
 participant Blockchain Wallet
 
 
-Hypernet Core->Gateway Iframe:CreateIframeProxy(merchantURL)
+Hypernet Core->Gateway Iframe:CreateIframeProxy(gatewayURL)
 activate Gateway Iframe
-Gateway Iframe->Gateway API:merchantURL/connector
-Gateway Iframe->Gateway API:merchantURL/signature
-Gateway Iframe->Gateway API:merchantURL/publicKey
+Gateway Iframe->Gateway API:gatewayURL/connector
+Gateway Iframe->Gateway API:gatewayURL/signature
+Gateway Iframe->Gateway API:gatewayURL/publicKey
 Gateway Iframe<-Gateway API:Connector
 Gateway Iframe<-Gateway API:Signature
 Gateway Iframe<-Gateway API:Public Key
@@ -25,7 +25,7 @@ deactivate Hypernet Core
 Hypernet Core<-Blockchain Wallet:Signature Signature
 activate Hypernet Core
 deactivate Blockchain Wallet
-Hypernet Core->GatewayConnectorRepository:merchantURL:SignatureSignature
+Hypernet Core->GatewayConnectorRepository:gatewayURL:SignatureSignature
 Hypernet Core->Gateway Iframe:startGatewayConnector()
 deactivate Hypernet Core
 activate Gateway Iframe

@@ -65,7 +65,7 @@ export interface IGatewayConnectorRepository {
   >;
 
   /**
-   * Returns a list of authorized merchants and the user's authorization signature for that
+   * Returns a list of authorized gateways and the user's authorization signature for that
    * gateway.
    */
   getAuthorizedGateways(): ResultAsync<

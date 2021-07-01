@@ -20,7 +20,7 @@ import {
 export class GatewayConnectorListener implements IGatewayConnectorListener {
   constructor(
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
-    @inject(IGatewayServiceType) protected merchantService: IGatewayService,
+    @inject(IGatewayServiceType) protected gatewayService: IGatewayService,
     @inject(IPaymentServiceType) protected paymentService: IPaymentService,
     @inject(IDisplayServiceType) protected displayService: IDisplayService,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
@@ -35,7 +35,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
       // Register event listeners
       if (connector.preRedirect != null) {
         connector.preRedirect.subscribe((redirectInfo) => {
-          this.merchantService.prepareForRedirect(redirectInfo).mapErr((e) => {
+          this.gatewayService.prepareForRedirect(redirectInfo).mapErr((e) => {
             this.logUtils.error(e);
           });
         });
@@ -43,7 +43,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
 
       if (connector.signMessageRequested != null) {
         connector.signMessageRequested.subscribe((request) => {
-          this.merchantService
+          this.gatewayService
             .signMessage(request.message, request.callback)
             .mapErr((e) => {
               this.logUtils.error(e);

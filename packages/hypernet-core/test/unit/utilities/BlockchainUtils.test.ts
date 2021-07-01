@@ -19,13 +19,13 @@ const domain = {
 const types = {
   AuthorizedGateway: [
     { name: "authorizedGatewayUrl", type: "string" },
-    { name: "merchantValidatedSignature", type: "string" },
+    { name: "gatewayValidatedSignature", type: "string" },
   ],
 };
 
 const value = {
   authorizedGatewayUrl: gatewayUrl,
-  merchantValidatedSignature: validatedSignature,
+  gatewayValidatedSignature: validatedSignature,
 };
 
 class EthersBlockchainUtilsMocks {
@@ -86,7 +86,7 @@ describe("EthersBlockchainUtils tests", () => {
     // Act
     const value2 = {
       authorizedGatewayUrl: gatewayUrl,
-      merchantValidatedSignature: validatedSignature2,
+      gatewayValidatedSignature: validatedSignature2,
     };
     const result = utils.verifyTypedData(
       domain,

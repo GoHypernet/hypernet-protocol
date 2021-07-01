@@ -190,7 +190,7 @@ export class HypernetCore implements IHypernetCore {
   protected accountRepository: IAccountsRepository;
   protected linkRepository: ILinkRepository;
   protected paymentRepository: IPaymentRepository;
-  protected merchantConnectorRepository: IGatewayConnectorRepository;
+  protected gatewayConnectorRepository: IGatewayConnectorRepository;
   protected messagingRepository: IMessagingRepository;
 
   // Business Layer Stuff
@@ -199,11 +199,11 @@ export class HypernetCore implements IHypernetCore {
   protected paymentService: IPaymentService;
   protected linkService: ILinkService;
   protected developmentService: IDevelopmentService;
-  protected merchantConnectorService: IGatewayConnectorService;
+  protected gatewayConnectorService: IGatewayConnectorService;
 
   // API
   protected vectorAPIListener: IVectorListener;
-  protected merchantConnectorListener: IGatewayConnectorListener;
+  protected gatewayConnectorListener: IGatewayConnectorListener;
   protected messagingListener: IMessagingListener;
 
   protected _initializeResult: ResultAsync<
@@ -397,7 +397,7 @@ export class HypernetCore implements IHypernetCore {
       this.timeUtils,
     );
 
-    this.merchantConnectorRepository = new GatewayConnectorRepository(
+    this.gatewayConnectorRepository = new GatewayConnectorRepository(
       this.blockchainProvider,
       this.ajaxUtils,
       this.configProvider,
@@ -419,7 +419,7 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.configProvider,
       this.paymentRepository,
-      this.merchantConnectorRepository,
+      this.gatewayConnectorRepository,
       this.logUtils,
     );
 
@@ -436,8 +436,8 @@ export class HypernetCore implements IHypernetCore {
     );
     this.linkService = new LinkService(this.linkRepository);
     this.developmentService = new DevelopmentService(this.accountRepository);
-    this.merchantConnectorService = new GatewayConnectorService(
-      this.merchantConnectorRepository,
+    this.gatewayConnectorService = new GatewayConnectorService(
+      this.gatewayConnectorRepository,
       this.accountRepository,
       this.contextProvider,
       this.configProvider,
@@ -453,7 +453,7 @@ export class HypernetCore implements IHypernetCore {
       this.logUtils,
     );
 
-    this.merchantConnectorListener = new GatewayConnectorListener(
+    this.gatewayConnectorListener = new GatewayConnectorListener(
       this.accountService,
       this.paymentService,
       this.linkService,
@@ -600,7 +600,7 @@ export class HypernetCore implements IHypernetCore {
    * @param amount
    * @param requiredStake the amount of stake that the provider must put up as part of the insurancepayment
    * @param paymentToken
-   * @param merchantURL the registered URL for the gateway that will resolve any disputes.
+   * @param gatewayURL the registered URL for the gateway that will resolve any disputes.
    */
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
@@ -762,13 +762,13 @@ export class HypernetCore implements IHypernetCore {
         // Initialize anything that wants an initialized context
         return ResultUtils.combine([
           this.vectorAPIListener.setup(),
-          this.merchantConnectorListener.setup(),
-          this.merchantConnectorService.initialize(),
+          this.gatewayConnectorListener.setup(),
+          this.gatewayConnectorService.initialize(),
           this.messagingListener.setup(),
         ]); // , this.threeboxMessagingListener.initialize()]);
       })
       .andThen(() => {
-        return this.merchantConnectorService.activateAuthorizedGateways();
+        return this.gatewayConnectorService.activateAuthorizedGateways();
       })
       // .andThen(() => {
       //   // Claim control
@@ -800,7 +800,7 @@ export class HypernetCore implements IHypernetCore {
   public authorizeGateway(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayValidationError> {
-    return this.merchantConnectorService.authorizeGateway(gatewayUrl);
+    return this.gatewayConnectorService.authorizeGateway(gatewayUrl);
   }
 
   public deauthorizeGateway(
@@ -809,33 +809,33 @@ export class HypernetCore implements IHypernetCore {
     void,
     PersistenceError | ProxyError | GatewayAuthorizationDeniedError
   > {
-    return this.merchantConnectorService.deauthorizeGateway(gatewayUrl);
+    return this.gatewayConnectorService.deauthorizeGateway(gatewayUrl);
   }
 
   public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
     PersistenceError
   > {
-    return this.merchantConnectorService.getAuthorizedGatewaysConnectorsStatus();
+    return this.gatewayConnectorService.getAuthorizedGatewaysConnectorsStatus();
   }
 
   public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
     PersistenceError
   > {
-    return this.merchantConnectorService.getAuthorizedGateways();
+    return this.gatewayConnectorService.getAuthorizedGateways();
   }
 
   public closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayConnectorError> {
-    return this.merchantConnectorService.closeGatewayIFrame(gatewayUrl);
+    return this.gatewayConnectorService.closeGatewayIFrame(gatewayUrl);
   }
 
   public displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayConnectorError> {
-    return this.merchantConnectorService.displayGatewayIFrame(gatewayUrl);
+    return this.gatewayConnectorService.displayGatewayIFrame(gatewayUrl);
   }
 
   public providePrivateCredentials(

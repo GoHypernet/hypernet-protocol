@@ -87,7 +87,7 @@ export class PaymentService implements IPaymentService {
     @inject(IPaymentRepositoryType)
     protected paymentRepository: IPaymentRepository,
     @inject(IGatewayConnectorRepositoryType)
-    protected merchantConnectorRepository: IGatewayConnectorRepository,
+    protected gatewayConnectorRepository: IGatewayConnectorRepository,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
@@ -301,7 +301,7 @@ export class PaymentService implements IPaymentService {
   > {
     let config: HypernetConfig;
     let payments: Map<PaymentId, Payment>;
-    const merchantUrls = new Set<GatewayUrl>();
+    const gatewayUrls = new Set<GatewayUrl>();
 
     return ResultUtils.combine([
       this.configProvider.getConfig(),
@@ -313,13 +313,13 @@ export class PaymentService implements IPaymentService {
         // Iterate over the payments, and find all the gateway URLs.
 
         for (const keyval of payments) {
-          merchantUrls.add(keyval[1].gatewayUrl);
+          gatewayUrls.add(keyval[1].gatewayUrl);
         }
 
         return ResultUtils.combine([
           this.accountRepository.getBalanceByAsset(config.hypertokenAddress),
-          this.merchantConnectorRepository.getGatewayAddresses(
-            Array.from(merchantUrls),
+          this.gatewayConnectorRepository.getGatewayAddresses(
+            Array.from(gatewayUrls),
           ),
         ]);
       })
@@ -327,9 +327,9 @@ export class PaymentService implements IPaymentService {
         const [hypertokenBalance, addresses] = vals;
 
         // If we don't have a public key for each gateway, then we should not proceed.
-        if (merchantUrls.size != addresses.size) {
+        if (gatewayUrls.size != addresses.size) {
           return errAsync(
-            new GatewayValidationError("Not all merchants are authorized!"),
+            new GatewayValidationError("Not all gateways are authorized!"),
           );
         }
 
@@ -373,11 +373,11 @@ export class PaymentService implements IPaymentService {
           );
 
           // We need to get the public key of the gateway for the payment
-          const merchantAddress = addresses.get(payment.gatewayUrl);
+          const gatewayAddress = addresses.get(payment.gatewayUrl);
 
-          if (merchantAddress != null) {
+          if (gatewayAddress != null) {
             const stakeAttempt = this.paymentRepository
-              .provideStake(paymentId, merchantAddress)
+              .provideStake(paymentId, gatewayAddress)
               .match(
                 (payment) => ok(payment) as Result<Payment, AcceptPaymentError>,
                 (e) =>
@@ -636,7 +636,7 @@ export class PaymentService implements IPaymentService {
         }
 
         // Resolve the dispute
-        return this.merchantConnectorRepository.resolveChallenge(
+        return this.gatewayConnectorRepository.resolveChallenge(
           payment.gatewayUrl,
           paymentId,
           payment.details.insuranceTransferId,
@@ -768,18 +768,18 @@ export class PaymentService implements IPaymentService {
   > {
     this.logUtils.debug(`Advancing payment ${payment.id}`);
 
-    return this.merchantConnectorRepository
+    return this.gatewayConnectorRepository
       .getAuthorizedGatewaysConnectorsStatus()
-      .andThen((merchantConnectorStatusMap) => {
-        const merchantConnectorStatus = merchantConnectorStatusMap.get(
+      .andThen((gatewayConnectorStatusMap) => {
+        const gatewayConnectorStatus = gatewayConnectorStatusMap.get(
           payment.gatewayUrl,
         );
         this.logUtils.debug(
-          `In _advancePayment, merchantConnectorStatus = ${
-            merchantConnectorStatus == true
+          `In _advancePayment, gatewayConnectorStatus = ${
+            gatewayConnectorStatus == true
           }`,
         );
-        if (merchantConnectorStatus == true) {
+        if (gatewayConnectorStatus == true) {
           return this._advancePaymentForActivatedGateway(
             payment,
             context,

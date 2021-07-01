@@ -21,7 +21,7 @@ import { IContextProvider, IConfigProvider } from "@interfaces/utilities";
 
 export class GatewayConnectorService implements IGatewayConnectorService {
   constructor(
-    protected merchantConnectorRepository: IGatewayConnectorRepository,
+    protected gatewayConnectorRepository: IGatewayConnectorRepository,
     protected accountsRepository: IAccountsRepository,
     protected contextProvider: IContextProvider,
     protected configProvider: IConfigProvider,
@@ -32,7 +32,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     return this.contextProvider.getContext().map((context) => {
       // Subscribe to the various events, and sort them out for the gateway connector
       context.onPushPaymentSent.subscribe((payment) => {
-        this.merchantConnectorRepository
+        this.gatewayConnectorRepository
           .notifyPushPaymentSent(payment.gatewayUrl, payment)
           .mapErr((e) => {
             this.logUtils.debug(e);
@@ -40,7 +40,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       });
 
       context.onPushPaymentUpdated.subscribe((payment) => {
-        this.merchantConnectorRepository
+        this.gatewayConnectorRepository
           .notifyPushPaymentUpdated(payment.gatewayUrl, payment)
           .mapErr((e) => {
             this.logUtils.debug(e);
@@ -48,7 +48,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       });
 
       context.onPushPaymentReceived.subscribe((payment) => {
-        this.merchantConnectorRepository
+        this.gatewayConnectorRepository
           .notifyPushPaymentReceived(payment.gatewayUrl, payment)
           .mapErr((e) => {
             this.logUtils.debug(e);
@@ -56,7 +56,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       });
 
       context.onPullPaymentSent.subscribe((payment) => {
-        this.merchantConnectorRepository
+        this.gatewayConnectorRepository
           .notifyPullPaymentSent(payment.gatewayUrl, payment)
           .mapErr((e) => {
             this.logUtils.debug(e);
@@ -64,7 +64,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       });
 
       context.onPullPaymentUpdated.subscribe((payment) => {
-        this.merchantConnectorRepository
+        this.gatewayConnectorRepository
           .notifyPullPaymentUpdated(payment.gatewayUrl, payment)
           .mapErr((e) => {
             this.logUtils.debug(e);
@@ -72,7 +72,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       });
 
       context.onPullPaymentReceived.subscribe((payment) => {
-        this.merchantConnectorRepository
+        this.gatewayConnectorRepository
           .notifyPullPaymentReceived(payment.gatewayUrl, payment)
           .mapErr((e) => {
             this.logUtils.debug(e);
@@ -80,7 +80,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       });
 
       context.onBalancesChanged.subscribe((balances) => {
-        this.merchantConnectorRepository
+        this.gatewayConnectorRepository
           .notifyBalancesReceived(balances)
           .mapErr((e) => {
             console.log(e);
@@ -101,10 +101,10 @@ export class GatewayConnectorService implements IGatewayConnectorService {
 
       // Remove the gateway iframe proxy related to that gatewayUrl if there is any activated ones.
       if (authorizedGatewaysMap.get(gatewayUrl)) {
-        this.merchantConnectorRepository.deauthorizeGateway(gatewayUrl);
+        this.gatewayConnectorRepository.deauthorizeGateway(gatewayUrl);
       }
 
-      this.merchantConnectorRepository
+      this.gatewayConnectorRepository
         .addAuthorizedGateway(gatewayUrl, balances)
         .map(() => {
           context.onGatewayAuthorized.next(gatewayUrl);
@@ -123,7 +123,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
 
       return ResultUtils.race([
         this._getDeauthorizationTimeoutResult(gatewayUrl),
-        this.merchantConnectorRepository.deauthorizeGateway(gatewayUrl),
+        this.gatewayConnectorRepository.deauthorizeGateway(gatewayUrl),
       ]);
     });
   }
@@ -132,14 +132,14 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     Map<GatewayUrl, Signature>,
     PersistenceError
   > {
-    return this.merchantConnectorRepository.getAuthorizedGateways();
+    return this.gatewayConnectorRepository.getAuthorizedGateways();
   }
 
   public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
     PersistenceError
   > {
-    return this.merchantConnectorRepository.getAuthorizedGatewaysConnectorsStatus();
+    return this.gatewayConnectorRepository.getAuthorizedGatewaysConnectorsStatus();
   }
 
   public activateAuthorizedGateways(): ResultAsync<
@@ -151,7 +151,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | ProxyError
   > {
     return this.accountsRepository.getBalances().andThen((balances) => {
-      return this.merchantConnectorRepository.activateAuthorizedGateways(
+      return this.gatewayConnectorRepository.activateAuthorizedGateways(
         balances,
       );
     });
@@ -160,25 +160,25 @@ export class GatewayConnectorService implements IGatewayConnectorService {
   public closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayConnectorError> {
-    return this.merchantConnectorRepository.closeGatewayIFrame(gatewayUrl);
+    return this.gatewayConnectorRepository.closeGatewayIFrame(gatewayUrl);
   }
 
   public displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayConnectorError> {
-    return this.merchantConnectorRepository.displayGatewayIFrame(gatewayUrl);
+    return this.gatewayConnectorRepository.displayGatewayIFrame(gatewayUrl);
   }
 
-  /* Destroy gateway connector if deauthorizeGateway lasted more than merchantDeauthorizationTimeout */
+  /* Destroy gateway connector if deauthorizeGateway lasted more than gatewayDeauthorizationTimeout */
   private _getDeauthorizationTimeoutResult(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, Error> {
     return this.configProvider.getConfig().andThen((config) => {
       const deauthorizationTimeoutPromise = new Promise<void>((resolve) => {
         setTimeout(() => {
-          this.merchantConnectorRepository.destroyProxy(gatewayUrl);
+          this.gatewayConnectorRepository.destroyProxy(gatewayUrl);
           resolve(undefined);
-        }, config.merchantDeauthorizationTimeout);
+        }, config.gatewayDeauthorizationTimeout);
       });
       return ResultAsync.fromPromise(
         deauthorizationTimeoutPromise,

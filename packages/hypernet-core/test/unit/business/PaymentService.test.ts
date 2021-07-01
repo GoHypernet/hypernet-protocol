@@ -68,7 +68,7 @@ class PaymentServiceMocks {
   public configProvider = new ConfigProviderMock();
   public logUtils = td.object<ILogUtils>();
   public paymentRepository = td.object<IPaymentRepository>();
-  public merchantConnectorRepository = td.object<IGatewayConnectorRepository>();
+  public gatewayConnectorRepository = td.object<IGatewayConnectorRepository>();
 
   public proposedPushPayment: PushPayment;
   public stakedPushPayment: PushPayment;
@@ -76,7 +76,7 @@ class PaymentServiceMocks {
   public finalizedPushPayment: PushPayment;
 
   public assetBalance: AssetBalance;
-  public merchantAddresses: Map<GatewayUrl, EthereumAddress>;
+  public gatewayAddresses: Map<GatewayUrl, EthereumAddress>;
 
   constructor(hypertokenBalance: BigNumberString = amount) {
     this.proposedPushPayment = this.factoryPushPayment();
@@ -157,27 +157,27 @@ class PaymentServiceMocks {
       okAsync(this.finalizedPushPayment),
     );
 
-    this.merchantAddresses = new Map();
-    this.merchantAddresses.set(gatewayUrl, account);
+    this.gatewayAddresses = new Map();
+    this.gatewayAddresses.set(gatewayUrl, account);
     td.when(
-      this.merchantConnectorRepository.getGatewayAddresses(
+      this.gatewayConnectorRepository.getGatewayAddresses(
         td.matchers.contains(gatewayUrl),
       ),
-    ).thenReturn(okAsync(this.merchantAddresses));
+    ).thenReturn(okAsync(this.gatewayAddresses));
 
     td.when(
-      this.merchantConnectorRepository.getAuthorizedGateways(),
+      this.gatewayConnectorRepository.getAuthorizedGateways(),
     ).thenReturn(okAsync(new Map([[gatewayUrl, validatedSignature]])));
 
     td.when(
-      this.merchantConnectorRepository.addAuthorizedGateway(
+      this.gatewayConnectorRepository.addAuthorizedGateway(
         gatewayUrl,
         new Balances([this.assetBalance]),
       ),
     ).thenReturn(okAsync(undefined));
 
     td.when(
-      this.merchantConnectorRepository.getAuthorizedGatewaysConnectorsStatus(),
+      this.gatewayConnectorRepository.getAuthorizedGatewaysConnectorsStatus(),
     ).thenReturn(okAsync(new Map([[gatewayUrl, true]])));
 
     td.when(
@@ -192,7 +192,7 @@ class PaymentServiceMocks {
       this.contextProvider,
       this.configProvider,
       this.paymentRepository,
-      this.merchantConnectorRepository,
+      this.gatewayConnectorRepository,
       this.logUtils,
     );
   }
@@ -213,7 +213,7 @@ class PaymentServiceMocks {
 
   public setGatewayStatus(gatewayUrl: GatewayUrl, status: boolean) {
     td.when(
-      this.merchantConnectorRepository.getAuthorizedGatewaysConnectorsStatus(),
+      this.gatewayConnectorRepository.getAuthorizedGatewaysConnectorsStatus(),
     ).thenReturn(okAsync(new Map([[gatewayUrl, false]])));
   }
 

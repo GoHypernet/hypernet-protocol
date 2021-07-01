@@ -423,8 +423,8 @@ export default class HypernetIFrameProxy
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayConnectorError> {
     return this.getAuthorizedGatewaysConnectorsStatus().andThen(
-      (merchantsMap) => {
-        if (merchantsMap.get(gatewayUrl) == true) {
+      (gatewaysMap) => {
+        if (gatewaysMap.get(gatewayUrl) == true) {
           this._displayCoreIFrame();
 
           return this._createCall("displayGatewayIFrame", gatewayUrl);

@@ -16,8 +16,8 @@ export class GatewayContext {
     public onHypernetCoreProxyActivated: Subject<Postmate.ChildAPI>,
     public validatedGatewayCode: string | null,
     public validatedGatewaySignature: Signature | null,
-    public merchantConnector: IGatewayConnector | null,
+    public gatewayConnector: IGatewayConnector | null,
     public publicIdentifier: PublicIdentifier | null,
-    public merchantValidated: ResultAsync<void, GatewayValidationError>,
+    public gatewayValidated: ResultAsync<void, GatewayValidationError>,
   ) {}
 }

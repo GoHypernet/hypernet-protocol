@@ -13,7 +13,7 @@ export class AuthorizedGatewaySelectorParams {
 
 // tslint:disable-next-line: max-classes-per-file
 export class AuthorizedGatewayOption {
-  constructor(public merchantName: string, public url: string) {}
+  constructor(public gatewayName: string, public url: string) {}
 }
 
 // tslint:disable-next-line: max-classes-per-file
@@ -23,13 +23,13 @@ export class AuthorizedGatewaySelectorViewModel {
 
   protected integration: IHypernetWebIntegration;
   protected selectedAuthorizedGateway: ko.Observable<string | null>;
-  protected merchants: ko.Observable<string[] | null>;
+  protected gateways: ko.Observable<string[] | null>;
 
   constructor(params: AuthorizedGatewaySelectorParams) {
     this.integration = params.integration;
     this.selectedAuthorizedGateway = params.selectedAuthorizedGateway;
 
-    this.merchants = ko.observable(null);
+    this.gateways = ko.observable(null);
     this.authorizedGatewayOptions = ko.observableArray<AuthorizedGatewayOption>();
 
     this.integration.core.onGatewayAuthorized.subscribe((gateway) => {

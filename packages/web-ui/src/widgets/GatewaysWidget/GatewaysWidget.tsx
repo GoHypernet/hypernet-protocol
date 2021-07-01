@@ -28,7 +28,7 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
   bodyStyle,
 }: IGatewaysWidget) => {
   const {
-    merchantsMap,
+    gatewaysMap,
     openGatewayIFrame,
     deauthorizeGateway,
     authorizeGateway,
@@ -87,7 +87,7 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
     );
   }
 
-  const hasEmptyState = [...merchantsMap.keys()].length === 0 && !loading;
+  const hasEmptyState = [...gatewaysMap.keys()].length === 0 && !loading;
 
   return (
     <CustomBox
@@ -104,13 +104,13 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
       }
     >
       <List>
-        {[...merchantsMap.keys()].map((gatewayUrl, index) => (
+        {[...gatewaysMap.keys()].map((gatewayUrl, index) => (
           <Box key={index}>
             <ListItem>
               <ListItemAvatar>
                 <Tooltip
                   title={
-                    merchantsMap.get(gatewayUrl)
+                    gatewaysMap.get(gatewayUrl)
                       ? "View gateway application"
                       : "Gateway is inactive"
                   }
@@ -118,20 +118,20 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
                 >
                   <Avatar
                     style={{
-                      cursor: merchantsMap.get(gatewayUrl) ? "pointer" : "auto",
+                      cursor: gatewaysMap.get(gatewayUrl) ? "pointer" : "auto",
                     }}
                     onClick={() => {
-                      merchantsMap.get(gatewayUrl) &&
+                      gatewaysMap.get(gatewayUrl) &&
                         openGatewayIFrame(gatewayUrl);
                     }}
                   >
-                    {merchantsMap.get(gatewayUrl) ? <Folder /> : <Block />}
+                    {gatewaysMap.get(gatewayUrl) ? <Folder /> : <Block />}
                   </Avatar>
                 </Tooltip>
               </ListItemAvatar>
               <ListItemText
                 primaryTypographyProps={{
-                  color: merchantsMap.get(gatewayUrl)
+                  color: gatewaysMap.get(gatewayUrl)
                     ? "textPrimary"
                     : "textSecondary",
                 }}

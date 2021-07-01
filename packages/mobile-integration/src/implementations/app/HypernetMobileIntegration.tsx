@@ -99,9 +99,9 @@ export default class HypernetMobileIntegration {
   }
 
   private postAuthorizedGateways() {
-    this.coreProxy.getAuthorizedGateways().map((merchants) => {
-      //const merchantList = [...merchants].map(([name, value]) => ({ name, value }));
-      this.postDataToRN(ECoreViewDataKeys.authorizedGateways, merchants);
+    this.coreProxy.getAuthorizedGateways().map((gateways) => {
+      //const gatewayList = [...gateways].map(([name, value]) => ({ name, value }));
+      this.postDataToRN(ECoreViewDataKeys.authorizedGateways, gateways);
     });
   }
 

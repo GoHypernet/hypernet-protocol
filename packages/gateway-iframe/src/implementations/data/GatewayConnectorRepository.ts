@@ -40,16 +40,16 @@ export class GatewayConnectorRepository
   }
 
   private _prepareGatewayUrl(gatewayUrl: GatewayUrl, path: string): URL {
-    const merchantUrlObject = new URL(gatewayUrl);
+    const gatewayUrlObject = new URL(gatewayUrl);
     const searchParams = {};
     for (const [key, value] of new URLSearchParams(
-      merchantUrlObject.search,
+      gatewayUrlObject.search,
     ).entries()) {
       searchParams[key] = value;
     }
-    merchantUrlObject.search = "";
+    gatewayUrlObject.search = "";
     return new URL(
-      urlJoinP(merchantUrlObject.toString(), [path], searchParams),
+      urlJoinP(gatewayUrlObject.toString(), [path], searchParams),
     );
   }
 }

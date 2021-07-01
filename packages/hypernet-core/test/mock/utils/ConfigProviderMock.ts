@@ -39,7 +39,7 @@ export class ConfigProviderMock implements IConfigProvider {
         },
         "natsUrl",
         "authUrl",
-        "merchantIframeUrl",
+        "gatewayIframeUrl",
         "https://ceramic-clay.3boxlabs.com",
         new Map([
           [

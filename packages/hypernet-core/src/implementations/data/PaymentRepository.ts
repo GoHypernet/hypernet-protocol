@@ -516,7 +516,7 @@ export class PaymentRepository implements IPaymentRepository {
    */
   public provideStake(
     paymentId: PaymentId,
-    merchantAddress: EthereumAddress,
+    gatewayAddress: EthereumAddress,
   ): ResultAsync<
     Payment,
     | BlockchainUnavailableError
@@ -566,7 +566,7 @@ export class PaymentRepository implements IPaymentRepository {
         );
         return this.vectorUtils.createInsuranceTransfer(
           paymentSender,
-          merchantAddress,
+          gatewayAddress,
           payment.requiredStake,
           paymentExpiration,
           paymentID,

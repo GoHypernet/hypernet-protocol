@@ -101,20 +101,20 @@ export class GatewayConnectorRepository
     this.types = {
       AuthorizedGateway: [
         { name: "authorizedGatewayUrl", type: "string" },
-        { name: "merchantValidatedSignature", type: "string" },
+        { name: "gatewayValidatedSignature", type: "string" },
       ],
     };
   }
 
   public getGatewayAddresses(
-    merchantUrls: GatewayUrl[],
+    gatewayUrls: GatewayUrl[],
   ): ResultAsync<
     Map<GatewayUrl, EthereumAddress>,
     AjaxError | ProxyError | GatewayAuthorizationDeniedError
   > {
     // TODO: right now, the gateway will publish a URL with their address; eventually, they should be held in a smart contract
 
-    // For merchants that are already authorized, we can just go to their connector for the
+    // For gateways that are already authorized, we can just go to their connector for the
     // public key.
     const addressRequests = new Array<
       ResultAsync<
@@ -125,7 +125,7 @@ export class GatewayConnectorRepository
         | GatewayAuthorizationDeniedError
       >
     >();
-    for (const gatewayUrl of merchantUrls) {
+    for (const gatewayUrl of gatewayUrls) {
       // We can't use _getActivatedGatewayProxy because it may fire an error when activateAuthorizedGatewaysResult is null
       // and in our case here we might need to pull the address from the source using ajax request not from the proxy.
       const authorizedGatewayProxyResult = this.authorizedGatewayProxies.get(
@@ -137,8 +137,8 @@ export class GatewayConnectorRepository
       } else {
         addressRequests.push(
           authorizedGatewayProxyResult
-            .andThen((merchantProxy) => {
-              return merchantProxy.getAddress().map((address) => {
+            .andThen((gatewayProxy) => {
+              return gatewayProxy.getAddress().map((address) => {
                 return { gatewayUrl, address };
               });
             })
@@ -197,13 +197,13 @@ export class GatewayConnectorRepository
         ]);
       })
       .andThen((vals) => {
-        const [merchantSignature, signer] = vals;
+        const [gatewaySignature, signer] = vals;
 
-        // merchantSignature has been validated by the iframe, so this is already confirmed.
+        // gatewaySignature has been validated by the iframe, so this is already confirmed.
         // Now we need to get an authorization signature
         const value = {
           authorizedGatewayUrl: gatewayUrl,
-          merchantValidatedSignature: merchantSignature,
+          gatewayValidatedSignature: gatewaySignature,
         } as Record<string, unknown>;
         const signerPromise = signer._signTypedData(
           this.domain,
@@ -338,10 +338,10 @@ export class GatewayConnectorRepository
   }
 
   /**
-   * This function will attempt to activate all of your authorized merchants. It should only error
+   * This function will attempt to activate all of your authorized gateways. It should only error
    * in the case that the whole startup process should be aborted- something is fatally fucked up.
    * This means that even otherwise fatal errors such as like the blockchain being unavailable will
-   * not stop it; the net effect is that you have no activated merchants. Authorized, yes, activated no.
+   * not stop it; the net effect is that you have no activated gateways. Authorized, yes, activated no.
    * There are lots of things you can do with an inactive gateway connector.
    */
   public activateAuthorizedGateways(
@@ -772,7 +772,7 @@ export class GatewayConnectorRepository
     return proxy.getValidatedSignature().andThen((validatedSignature) => {
       const value = {
         authorizedGatewayUrl: gatewayUrl,
-        merchantValidatedSignature: validatedSignature,
+        gatewayValidatedSignature: validatedSignature,
       } as Record<string, unknown>;
 
       const validationAddress = this.blockchainUtils.verifyTypedData(
@@ -783,7 +783,7 @@ export class GatewayConnectorRepository
       );
 
       if (validationAddress !== context.account) {
-        // Notify the user that one of their authorized merchants has changed their code
+        // Notify the user that one of their authorized gateways has changed their code
         context.onAuthorizedGatewayUpdated.next(gatewayUrl);
 
         // Get a new signature

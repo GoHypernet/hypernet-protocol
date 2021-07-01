@@ -37,7 +37,7 @@ export class PullPaymentFormViewModel {
   public deltaAmount: ko.Observable<string>;
   public deltaTime: ko.Observable<string>;
   public tokenSelector: TokenSelectorParams;
-  public merchantSelector: AuthorizedGatewaySelectorParams;
+  public gatewaySelector: AuthorizedGatewaySelectorParams;
 
   public submitButton: ButtonParams;
 
@@ -61,7 +61,7 @@ export class PullPaymentFormViewModel {
       ko.observable(null),
       true,
     );
-    this.merchantSelector = new AuthorizedGatewaySelectorParams(
+    this.gatewaySelector = new AuthorizedGatewaySelectorParams(
       this.integration,
       ko.observable(null),
     );
@@ -75,7 +75,7 @@ export class PullPaymentFormViewModel {
           return null;
         }
 
-        const selectedGatewayUrl = this.merchantSelector.selectedAuthorizedGateway();
+        const selectedGatewayUrl = this.gatewaySelector.selectedAuthorizedGateway();
 
         if (selectedGatewayUrl == null) {
           return null;

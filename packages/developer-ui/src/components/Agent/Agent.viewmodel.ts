@@ -32,7 +32,7 @@ export class AgentViewModel {
   public message: ko.Observable<string>;
 
   public paymentForm: PaymentFormParams;
-  public merchantForm: AuthorizedGatewayFormParams;
+  public gatewayForm: AuthorizedGatewayFormParams;
 
   protected integration: IHypernetWebIntegration;
 
@@ -50,7 +50,7 @@ export class AgentViewModel {
     this.balances = new BalancesParams(this.integration);
     this.authorizedGateways = new AuthorizedGatewaysParams(this.integration);
     this.paymentForm = new PaymentFormParams(this.integration);
-    this.merchantForm = new AuthorizedGatewayFormParams(this.integration);
+    this.gatewayForm = new AuthorizedGatewayFormParams(this.integration);
   }
 
   protected startup(): Promise<void> {
