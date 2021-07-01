@@ -39,7 +39,7 @@ export class MetamaskUtils implements IMetamaskUtils {
     return this.configProvider.getConfig().andThen((config) => {
       const network = config.chainProviders[config.chainId];
       const storedNetworkes = this._getStoredNetworks();
-      if (storedNetworkes.includes(network)) {
+      if (network.includes("localhost") || storedNetworkes.includes(network)) {
         return okAsync(undefined);
       }
 
