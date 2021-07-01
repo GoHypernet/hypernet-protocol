@@ -1,31 +1,31 @@
-title Authorize Merchant Connector Flow
+title Authorize Gateway Connector Flow
 
 participant Hypernet Core
-participant MerchantConnectorRepository
-participant Merchant Iframe
-participant Merchant API
+participant GatewayConnectorRepository
+participant Gateway Iframe
+participant Gateway API
 participant Blockchain Wallet
 
 
-Hypernet Core->Merchant Iframe:CreateIframeProxy(merchantURL)
-activate Merchant Iframe
-Merchant Iframe->Merchant API:merchantURL/connector
-Merchant Iframe->Merchant API:merchantURL/signature
-Merchant Iframe->Merchant API:merchantURL/publicKey
-Merchant Iframe<-Merchant API:Connector
-Merchant Iframe<-Merchant API:Signature
-Merchant Iframe<-Merchant API:Public Key
-Merchant Iframe->Merchant Iframe:Validate Connector Matches Signature & Public Key
-Hypernet Core<-Merchant Iframe:Signature
+Hypernet Core->Gateway Iframe:CreateIframeProxy(gatewayURL)
+activate Gateway Iframe
+Gateway Iframe->Gateway API:gatewayURL/connector
+Gateway Iframe->Gateway API:gatewayURL/signature
+Gateway Iframe->Gateway API:gatewayURL/publicKey
+Gateway Iframe<-Gateway API:Connector
+Gateway Iframe<-Gateway API:Signature
+Gateway Iframe<-Gateway API:Public Key
+Gateway Iframe->Gateway Iframe:Validate Connector Matches Signature & Public Key
+Hypernet Core<-Gateway Iframe:Signature
 activate Hypernet Core
-deactivate Merchant Iframe
+deactivate Gateway Iframe
 Hypernet Core->Blockchain Wallet:Sign Signature Request
 activate Blockchain Wallet
 deactivate Hypernet Core
 Hypernet Core<-Blockchain Wallet:Signature Signature
 activate Hypernet Core
 deactivate Blockchain Wallet
-Hypernet Core->MerchantConnectorRepository:merchantURL:SignatureSignature
-Hypernet Core->Merchant Iframe:startMerchantConnector()
+Hypernet Core->GatewayConnectorRepository:gatewayURL:SignatureSignature
+Hypernet Core->Gateway Iframe:startGatewayConnector()
 deactivate Hypernet Core
-activate Merchant Iframe
+activate Gateway Iframe

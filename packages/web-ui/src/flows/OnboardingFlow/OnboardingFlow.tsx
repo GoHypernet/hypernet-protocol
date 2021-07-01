@@ -33,10 +33,10 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
   props: IOnboardingFlowParams,
 ) => {
   const {
-    merchantUrl,
+    gatewayUrl,
     finalSuccessContent = "You are good to go and purchase using your payment token",
     closeCallback = () => {},
-    merchantName,
+    gatewayName,
   } = props;
   const alert = useAlert();
   const { balances } = useBalances();
@@ -51,12 +51,12 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
 
   useEffect(() => {
     setLoading(true);
-    // First initialze the merchant
-    coreProxy.getAuthorizedMerchants().match((merchantsMap) => {
-      if (merchantsMap.get(merchantUrl)) {
+    // First initialze the gateway
+    coreProxy.getAuthorizedGateways().match((gatewaysMap) => {
+      if (gatewaysMap.get(gatewayUrl)) {
         //check for balances
         coreProxy.getBalances().match((_balances) => {
-          decideScreenWhenMerchantIsAlreadyAuthorized(
+          decideScreenWhenGatewayIsAlreadyAuthorized(
             !!_balances.assets?.length,
           );
         }, handleError);
@@ -71,21 +71,21 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
       }); */
     }, handleError);
 
-    coreProxy.onMerchantAuthorized.subscribe((_merchantUrl) => {
-      if (merchantUrl === _merchantUrl) {
-        alert.success(`Merchant ${merchantUrl} authorization succeeded!`);
+    coreProxy.onGatewayAuthorized.subscribe((_gatewayUrl) => {
+      if (gatewayUrl === _gatewayUrl) {
+        alert.success(`Gateway ${gatewayUrl} authorization succeeded!`);
         setLoading(false);
         coreProxy.getBalances().match((_balances) => {
-          decideScreenWhenMerchantIsAlreadyAuthorized(
+          decideScreenWhenGatewayIsAlreadyAuthorized(
             !!_balances.assets?.length,
           );
         }, handleError);
       }
     });
 
-    coreProxy.onAuthorizedMerchantActivationFailed.subscribe((_merchantUrl) => {
-      if (merchantUrl === _merchantUrl) {
-        alert.error(`Merchant ${merchantUrl} authorization failed!`);
+    coreProxy.onAuthorizedGatewayActivationFailed.subscribe((_gatewayUrl) => {
+      if (gatewayUrl === _gatewayUrl) {
+        alert.error(`Gateway ${gatewayUrl} authorization failed!`);
         setLoading(false);
       }
     });
@@ -98,7 +98,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     }
   }, [balances]);
 
-  const decideScreenWhenMerchantIsAlreadyAuthorized = (
+  const decideScreenWhenGatewayIsAlreadyAuthorized = (
     hasBalances?: boolean,
   ) => {
     if (hasBalances || balances?.length) {
@@ -108,9 +108,9 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     }
   };
 
-  const handleMerchantAuthorization = () => {
+  const handleGatewayAuthorization = () => {
     setLoading(true);
-    coreProxy.authorizeMerchant(merchantUrl).mapErr(handleError);
+    coreProxy.authorizeGateway(gatewayUrl).mapErr(handleError);
   };
 
   const goToFundWalletScreen = () => {
@@ -176,8 +176,8 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
               </>
             )}
             <Button
-              label={`Approve ${merchantName || "Hyperpay"}`}
-              onClick={handleMerchantAuthorization}
+              label={`Approve ${gatewayName || "Hyperpay"}`}
+              onClick={handleGatewayAuthorization}
               fullWidth={true}
               bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
             />

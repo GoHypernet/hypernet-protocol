@@ -1,8 +1,8 @@
 import {
-  IMerchantConnector,
+  IGatewayConnector,
   IRedirectInfo,
   IResolutionResult,
-} from "@hypernetlabs/merchant-connector";
+} from "@hypernetlabs/gateway-connector";
 import {
   Balances,
   EthereumAddress,
@@ -10,7 +10,7 @@ import {
   PaymentId,
   PublicIdentifier,
   Signature,
-  MerchantUrl,
+  GatewayUrl,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 

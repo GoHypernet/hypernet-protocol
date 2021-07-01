@@ -2,7 +2,7 @@ import {
   Balances,
   PublicIdentifier,
   EPaymentType,
-  MerchantUrl,
+  GatewayUrl,
   UnixTimestamp,
   BigNumberString,
 } from "@hypernetlabs/objects";
@@ -50,7 +50,7 @@ interface IReducerStateReducer {
   setRequiredStake: (param?: string) => void;
   paymentType: EPaymentType;
   setPaymentType: (param?: EPaymentType) => void;
-  merchantUrl: MerchantUrl;
+  gatewayUrl: GatewayUrl;
   sendFunds: () => void;
   paymentTypeOptions: PaymentTypeOption[];
 }
@@ -65,7 +65,7 @@ interface IReducerState {
   amount: string;
   expirationDate: string;
   requiredStake: string;
-  merchantUrl: MerchantUrl;
+  gatewayUrl: GatewayUrl;
   paymentType: EPaymentType;
   paymentTypeOptions: PaymentTypeOption[];
 }
@@ -87,7 +87,7 @@ export function usePayment(initialParams: any): IReducerStateReducer {
     amount: initialParams?.amount || "0",
     expirationDate: initialParams?.expirationDate || "",
     requiredStake: initialParams?.requiredStake || "0",
-    merchantUrl: initialParams?.merchantUrl || "http://localhost:5010/", // @todo replace with an actual mediator address!,
+    gatewayUrl: initialParams?.gatewayUrl || "http://localhost:5010/", // @todo replace with an actual mediator address!,
     paymentType: initialParams?.paymentType || EPaymentType.Push,
     paymentTypeOptions: [
       new PaymentTypeOption("Push", EPaymentType.Push),
@@ -255,7 +255,7 @@ export function usePayment(initialParams: any): IReducerStateReducer {
           utils.parseUnits(state.requiredStake, "wei").toString(),
         ),
         state.selectedPaymentToken?.address,
-        state.merchantUrl,
+        state.gatewayUrl,
         null,
       )
       .match(

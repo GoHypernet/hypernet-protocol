@@ -1,10 +1,10 @@
 import { ControlClaim, MessagingError } from "@hypernetlabs/objects";
 import { ILogUtils, ILogUtilsType, ResultUtils } from "@hypernetlabs/utils";
-import { inject, injectable } from "inversify";
-import { ResultAsync } from "neverthrow";
-
 import { IMessagingListener } from "@interfaces/api";
 import { IControlService, IControlServiceType } from "@interfaces/business";
+import { inject, injectable } from "inversify";
+import { okAsync, ResultAsync } from "neverthrow";
+
 import {
   IConfigProvider,
   IConfigProviderType,
@@ -23,19 +23,21 @@ export class NatsMessagingListener implements IMessagingListener {
   ) {}
 
   public setup(): ResultAsync<void, MessagingError> {
-    return ResultUtils.combine([
-      this.messagingProvider.getBasicMessaging(),
-      this.configProvider.getConfig(),
-    ]).map((vals) => {
-      const [basicMessaging, config] = vals;
-      basicMessaging.subscribe(
-        config.controlClaimSubject,
-        (controlClaim: ControlClaim) => {
-          this.controlService.processControlClaim(controlClaim).mapErr((e) => {
-            this.logUtils.error(e);
-          });
-        },
-      );
-    });
+    this.logUtils.debug("Initializing NATS messaging listener");
+    // return ResultUtils.combine([
+    //   this.messagingProvider.getBasicMessaging(),
+    //   this.configProvider.getConfig(),
+    // ]).map((vals) => {
+    //   const [basicMessaging, config] = vals;
+    //   basicMessaging.subscribe(
+    //     config.controlClaimSubject,
+    //     (controlClaim: ControlClaim) => {
+    //       this.controlService.processControlClaim(controlClaim).mapErr((e) => {
+    //         this.logUtils.error(e);
+    //       });
+    //     },
+    //   );
+    // });
+    return okAsync(undefined);
   }
 }

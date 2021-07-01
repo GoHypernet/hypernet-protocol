@@ -1,7 +1,7 @@
 import {
   BigNumberString,
   EthereumAddress,
-  MerchantUrl,
+  GatewayUrl,
   PaymentId,
   PublicIdentifier,
   TransferId,
@@ -40,8 +40,8 @@ export const unixPast = UnixTimestamp(1318870398); // Less that defaultExpiratio
 export const unixNow = UnixTimestamp(1318874398);
 export const nowFormatted = "2021-02-03T04:28:09+03:00";
 export const defaultExpirationLength = 5000;
-export const merchantUrl = MerchantUrl("https://example.merchant.com/");
-export const merchantUrl2 = MerchantUrl("https://example2.merchant.com/");
-export const merchantAddress = EthereumAddress("0xMediatorEthereumAddress");
-export const merchantAddress2 = EthereumAddress("0xMediatorEthereumAddress2");
+export const gatewayUrl = GatewayUrl("https://example.gateway.com/");
+export const gatewayUrl2 = GatewayUrl("https://example2.gateway.com/");
+export const gatewayAddress = EthereumAddress("0xMediatorEthereumAddress");
+export const gatewayAddress2 = EthereumAddress("0xMediatorEthereumAddress2");
 export const mediatorSignature = "0xMediatorSignature";

@@ -7,7 +7,7 @@ import {
   PaymentInternalDetails,
   PaymentId,
   EthereumAddress,
-  MerchantUrl,
+  GatewayUrl,
   Signature,
   Balances,
   EPaymentState,
@@ -27,12 +27,12 @@ import { IPaymentService } from "@interfaces/business/IPaymentService";
 import {
   IAccountsRepository,
   ILinkRepository,
-  IMerchantConnectorRepository,
+  IGatewayConnectorRepository,
   IPaymentRepository,
 } from "@interfaces/data";
 import {
   defaultExpirationLength,
-  merchantUrl,
+  gatewayUrl,
   hyperTokenAddress,
   insuranceTransferId,
   mockUtils,
@@ -68,7 +68,7 @@ class PaymentServiceMocks {
   public configProvider = new ConfigProviderMock();
   public logUtils = td.object<ILogUtils>();
   public paymentRepository = td.object<IPaymentRepository>();
-  public merchantConnectorRepository = td.object<IMerchantConnectorRepository>();
+  public gatewayConnectorRepository = td.object<IGatewayConnectorRepository>();
 
   public proposedPushPayment: PushPayment;
   public stakedPushPayment: PushPayment;
@@ -76,7 +76,7 @@ class PaymentServiceMocks {
   public finalizedPushPayment: PushPayment;
 
   public assetBalance: AssetBalance;
-  public merchantAddresses: Map<MerchantUrl, EthereumAddress>;
+  public gatewayAddresses: Map<GatewayUrl, EthereumAddress>;
 
   constructor(hypertokenBalance: BigNumberString = amount) {
     this.proposedPushPayment = this.factoryPushPayment();
@@ -116,7 +116,7 @@ class PaymentServiceMocks {
         expirationDate,
         requiredStake,
         paymentToken,
-        merchantUrl,
+        gatewayUrl,
         null,
       ),
     ).thenReturn(okAsync(this.proposedPushPayment));
@@ -157,28 +157,28 @@ class PaymentServiceMocks {
       okAsync(this.finalizedPushPayment),
     );
 
-    this.merchantAddresses = new Map();
-    this.merchantAddresses.set(merchantUrl, account);
+    this.gatewayAddresses = new Map();
+    this.gatewayAddresses.set(gatewayUrl, account);
     td.when(
-      this.merchantConnectorRepository.getMerchantAddresses(
-        td.matchers.contains(merchantUrl),
+      this.gatewayConnectorRepository.getGatewayAddresses(
+        td.matchers.contains(gatewayUrl),
       ),
-    ).thenReturn(okAsync(this.merchantAddresses));
+    ).thenReturn(okAsync(this.gatewayAddresses));
 
     td.when(
-      this.merchantConnectorRepository.getAuthorizedMerchants(),
-    ).thenReturn(okAsync(new Map([[merchantUrl, validatedSignature]])));
+      this.gatewayConnectorRepository.getAuthorizedGateways(),
+    ).thenReturn(okAsync(new Map([[gatewayUrl, validatedSignature]])));
 
     td.when(
-      this.merchantConnectorRepository.addAuthorizedMerchant(
-        merchantUrl,
+      this.gatewayConnectorRepository.addAuthorizedGateway(
+        gatewayUrl,
         new Balances([this.assetBalance]),
       ),
     ).thenReturn(okAsync(undefined));
 
     td.when(
-      this.merchantConnectorRepository.getAuthorizedMerchantsConnectorsStatus(),
-    ).thenReturn(okAsync(new Map([[merchantUrl, true]])));
+      this.gatewayConnectorRepository.getAuthorizedGatewaysConnectorsStatus(),
+    ).thenReturn(okAsync(new Map([[gatewayUrl, true]])));
 
     td.when(
       this.paymentRepository.resolveInsurance(paymentId, insuranceTransferId),
@@ -192,7 +192,7 @@ class PaymentServiceMocks {
       this.contextProvider,
       this.configProvider,
       this.paymentRepository,
-      this.merchantConnectorRepository,
+      this.gatewayConnectorRepository,
       this.logUtils,
     );
   }
@@ -211,10 +211,10 @@ class PaymentServiceMocks {
     ).thenReturn(okAsync(returnedPaymentsMap));
   }
 
-  public setMerchantStatus(merchantUrl: MerchantUrl, status: boolean) {
+  public setGatewayStatus(gatewayUrl: GatewayUrl, status: boolean) {
     td.when(
-      this.merchantConnectorRepository.getAuthorizedMerchantsConnectorsStatus(),
-    ).thenReturn(okAsync(new Map([[merchantUrl, false]])));
+      this.gatewayConnectorRepository.getAuthorizedGatewaysConnectorsStatus(),
+    ).thenReturn(okAsync(new Map([[gatewayUrl, false]])));
   }
 
   public factoryPushPayment(
@@ -235,7 +235,7 @@ class PaymentServiceMocks {
       unixNow,
       unixNow,
       BigNumberString("0"),
-      merchantUrl,
+      gatewayUrl,
       paymentDetails,
       null,
       amount,
@@ -261,7 +261,7 @@ class PaymentServiceMocks {
       unixNow,
       unixNow,
       BigNumberString("0"),
-      merchantUrl,
+      gatewayUrl,
       paymentDetails,
       null,
       amount,
@@ -288,7 +288,7 @@ describe("PaymentService tests", () => {
       expirationDate,
       requiredStake,
       paymentToken,
-      merchantUrl,
+      gatewayUrl,
       null,
     );
 
@@ -708,7 +708,7 @@ describe("PaymentService tests", () => {
     );
   });
 
-  test("Should advancePayments pass and trigger onPushPaymentDelayed if payment merchant is inactive", async () => {
+  test("Should advancePayments pass and trigger onPushPaymentDelayed if payment gateway is inactive", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
@@ -717,7 +717,7 @@ describe("PaymentService tests", () => {
       publicIdentifier,
     );
     paymentServiceMock.setExistingPayments([payment]);
-    paymentServiceMock.setMerchantStatus(merchantUrl, false);
+    paymentServiceMock.setGatewayStatus(gatewayUrl, false);
     paymentServiceMock.contextProvider.context.publicIdentifier = publicIdentifier;
 
     const delayedPushPayments = new Array<PushPayment>();

@@ -9,7 +9,7 @@ import {
   PullPayment,
   PushPayment,
   PaymentId,
-  MerchantUrl,
+  GatewayUrl,
   IHypernetCore,
   Signature,
   PrivateCredentials,
@@ -20,8 +20,8 @@ import {
   BlockchainUnavailableError,
   InsufficientBalanceError,
   LogicalError,
-  MerchantConnectorError,
-  MerchantValidationError,
+  GatewayConnectorError,
+  GatewayValidationError,
   PersistenceError,
   RouterChannelUnknownError,
   VectorError,
@@ -29,7 +29,7 @@ import {
   InvalidParametersError,
   TransferResolutionError,
   ProxyError,
-  MerchantAuthorizationDeniedError,
+  GatewayAuthorizationDeniedError,
   BigNumberString,
   UnixTimestamp,
   MessagingError,
@@ -45,12 +45,8 @@ import {
   IValidationUtils,
   ValidationUtils,
 } from "@hypernetlabs/utils";
-import { BigNumber } from "ethers";
-import { ok, Result, ResultAsync } from "neverthrow";
-import { Subject } from "rxjs";
-
 import {
-  MerchantConnectorListener,
+  GatewayConnectorListener,
   NatsMessagingListener,
   VectorAPIListener,
 } from "@implementations/api";
@@ -59,16 +55,41 @@ import {
   ControlService,
   DevelopmentService,
   LinkService,
-  MerchantConnectorService,
+  GatewayConnectorService,
   PaymentService,
 } from "@implementations/business";
 import {
   AccountsRepository,
-  MerchantConnectorRepository,
+  GatewayConnectorRepository,
   NatsMessagingRepository,
   PaymentRepository,
   VectorLinkRepository,
 } from "@implementations/data";
+import {
+  IGatewayConnectorListener,
+  IMessagingListener,
+  IVectorListener,
+} from "@interfaces/api";
+import {
+  IAccountService,
+  IControlService,
+  IDevelopmentService,
+  ILinkService,
+  IGatewayConnectorService,
+  IPaymentService,
+} from "@interfaces/business";
+import {
+  IAccountsRepository,
+  ILinkRepository,
+  IGatewayConnectorRepository,
+  IMessagingRepository,
+  IPaymentRepository,
+} from "@interfaces/data";
+import { HypernetContext } from "@interfaces/objects";
+import { BigNumber } from "ethers";
+import { ok, Result, ResultAsync } from "neverthrow";
+import { Subject } from "rxjs";
+
 import { StorageUtils } from "@implementations/data/utilities";
 import {
   BrowserNodeProvider,
@@ -86,32 +107,11 @@ import {
   MessagingProvider,
 } from "@implementations/utilities";
 import {
-  MerchantConnectorProxyFactory,
+  GatewayConnectorProxyFactory,
   BrowserNodeFactory,
   InternalProviderFactory,
 } from "@implementations/utilities/factory";
-import {
-  IMerchantConnectorListener,
-  IMessagingListener,
-  IVectorListener,
-} from "@interfaces/api";
-import {
-  IAccountService,
-  IControlService,
-  IDevelopmentService,
-  ILinkService,
-  IMerchantConnectorService,
-  IPaymentService,
-} from "@interfaces/business";
-import {
-  IAccountsRepository,
-  ILinkRepository,
-  IMerchantConnectorRepository,
-  IMessagingRepository,
-  IPaymentRepository,
-} from "@interfaces/data";
 import { IStorageUtils } from "@interfaces/data/utilities";
-import { HypernetContext } from "@interfaces/objects";
 import {
   IBlockchainProvider,
   IBlockchainUtils,
@@ -130,7 +130,7 @@ import {
 import {
   IBrowserNodeFactory,
   IInternalProviderFactory,
-  IMerchantConnectorProxyFactory,
+  IGatewayConnectorProxyFactory,
 } from "@interfaces/utilities/factory";
 
 /**
@@ -152,12 +152,12 @@ export class HypernetCore implements IHypernetCore {
   public onDeStorageAuthenticationStarted: Subject<void>;
   public onDeStorageAuthenticationSucceeded: Subject<void>;
   public onDeStorageAuthenticationFailed: Subject<void>;
-  public onMerchantAuthorized: Subject<MerchantUrl>;
-  public onMerchantDeauthorizationStarted: Subject<MerchantUrl>;
-  public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
-  public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
-  public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
-  public onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
+  public onGatewayAuthorized: Subject<GatewayUrl>;
+  public onGatewayDeauthorizationStarted: Subject<GatewayUrl>;
+  public onAuthorizedGatewayUpdated: Subject<GatewayUrl>;
+  public onAuthorizedGatewayActivationFailed: Subject<GatewayUrl>;
+  public onGatewayIFrameDisplayRequested: Subject<GatewayUrl>;
+  public onGatewayIFrameCloseRequested: Subject<GatewayUrl>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
 
@@ -182,7 +182,7 @@ export class HypernetCore implements IHypernetCore {
   protected messagingProvider: IMessagingProvider;
 
   // Factories
-  protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory;
+  protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory;
   protected browserNodeFactory: IBrowserNodeFactory;
   protected internalProviderFactory: IInternalProviderFactory;
 
@@ -190,7 +190,7 @@ export class HypernetCore implements IHypernetCore {
   protected accountRepository: IAccountsRepository;
   protected linkRepository: ILinkRepository;
   protected paymentRepository: IPaymentRepository;
-  protected merchantConnectorRepository: IMerchantConnectorRepository;
+  protected gatewayConnectorRepository: IGatewayConnectorRepository;
   protected messagingRepository: IMessagingRepository;
 
   // Business Layer Stuff
@@ -199,11 +199,11 @@ export class HypernetCore implements IHypernetCore {
   protected paymentService: IPaymentService;
   protected linkService: ILinkService;
   protected developmentService: IDevelopmentService;
-  protected merchantConnectorService: IMerchantConnectorService;
+  protected gatewayConnectorService: IGatewayConnectorService;
 
   // API
   protected vectorAPIListener: IVectorListener;
-  protected merchantConnectorListener: IMerchantConnectorListener;
+  protected gatewayConnectorListener: IGatewayConnectorListener;
   protected messagingListener: IMessagingListener;
 
   protected _initializeResult: ResultAsync<
@@ -240,12 +240,12 @@ export class HypernetCore implements IHypernetCore {
     this.onDeStorageAuthenticationStarted = new Subject<void>();
     this.onDeStorageAuthenticationSucceeded = new Subject<void>();
     this.onDeStorageAuthenticationFailed = new Subject<void>();
-    this.onMerchantAuthorized = new Subject<MerchantUrl>();
-    this.onMerchantDeauthorizationStarted = new Subject<MerchantUrl>();
-    this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
-    this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
-    this.onMerchantIFrameDisplayRequested = new Subject<MerchantUrl>();
-    this.onMerchantIFrameCloseRequested = new Subject<MerchantUrl>();
+    this.onGatewayAuthorized = new Subject<GatewayUrl>();
+    this.onGatewayDeauthorizationStarted = new Subject<GatewayUrl>();
+    this.onAuthorizedGatewayUpdated = new Subject<GatewayUrl>();
+    this.onAuthorizedGatewayActivationFailed = new Subject<GatewayUrl>();
+    this.onGatewayIFrameDisplayRequested = new Subject<GatewayUrl>();
+    this.onGatewayIFrameCloseRequested = new Subject<GatewayUrl>();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
 
@@ -278,12 +278,12 @@ export class HypernetCore implements IHypernetCore {
       this.onDeStorageAuthenticationStarted,
       this.onDeStorageAuthenticationSucceeded,
       this.onDeStorageAuthenticationFailed,
-      this.onMerchantAuthorized,
-      this.onMerchantDeauthorizationStarted,
-      this.onAuthorizedMerchantUpdated,
-      this.onAuthorizedMerchantActivationFailed,
-      this.onMerchantIFrameDisplayRequested,
-      this.onMerchantIFrameCloseRequested,
+      this.onGatewayAuthorized,
+      this.onGatewayDeauthorizationStarted,
+      this.onAuthorizedGatewayUpdated,
+      this.onAuthorizedGatewayActivationFailed,
+      this.onGatewayIFrameDisplayRequested,
+      this.onGatewayIFrameCloseRequested,
       this.onInitializationRequired,
       this.onPrivateCredentialsRequested,
     );
@@ -291,7 +291,7 @@ export class HypernetCore implements IHypernetCore {
     this.configProvider = new ConfigProvider(this.logUtils, config);
     this.linkUtils = new LinkUtils(this.contextProvider);
 
-    this.merchantConnectorProxyFactory = new MerchantConnectorProxyFactory(
+    this.gatewayConnectorProxyFactory = new GatewayConnectorProxyFactory(
       this.configProvider,
       this.contextProvider,
     );
@@ -397,14 +397,14 @@ export class HypernetCore implements IHypernetCore {
       this.timeUtils,
     );
 
-    this.merchantConnectorRepository = new MerchantConnectorRepository(
+    this.gatewayConnectorRepository = new GatewayConnectorRepository(
       this.blockchainProvider,
       this.ajaxUtils,
       this.configProvider,
       this.contextProvider,
       this.vectorUtils,
       this.storageUtils,
-      this.merchantConnectorProxyFactory,
+      this.gatewayConnectorProxyFactory,
       this.blockchainUtils,
       this.logUtils,
     );
@@ -419,7 +419,7 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.configProvider,
       this.paymentRepository,
-      this.merchantConnectorRepository,
+      this.gatewayConnectorRepository,
       this.logUtils,
     );
 
@@ -436,8 +436,8 @@ export class HypernetCore implements IHypernetCore {
     );
     this.linkService = new LinkService(this.linkRepository);
     this.developmentService = new DevelopmentService(this.accountRepository);
-    this.merchantConnectorService = new MerchantConnectorService(
-      this.merchantConnectorRepository,
+    this.gatewayConnectorService = new GatewayConnectorService(
+      this.gatewayConnectorRepository,
       this.accountRepository,
       this.contextProvider,
       this.configProvider,
@@ -453,7 +453,7 @@ export class HypernetCore implements IHypernetCore {
       this.logUtils,
     );
 
-    this.merchantConnectorListener = new MerchantConnectorListener(
+    this.gatewayConnectorListener = new GatewayConnectorListener(
       this.accountService,
       this.paymentService,
       this.linkService,
@@ -600,7 +600,7 @@ export class HypernetCore implements IHypernetCore {
    * @param amount
    * @param requiredStake the amount of stake that the provider must put up as part of the insurancepayment
    * @param paymentToken
-   * @param merchantURL the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayURL the registered URL for the gateway that will resolve any disputes.
    */
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
@@ -608,7 +608,7 @@ export class HypernetCore implements IHypernetCore {
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     // Send payment terms to provider & request provider make insurance payment
@@ -618,7 +618,7 @@ export class HypernetCore implements IHypernetCore {
       expirationDate,
       requiredStake,
       paymentToken,
-      merchantUrl,
+      gatewayUrl,
       metadata,
     );
   }
@@ -643,7 +643,7 @@ export class HypernetCore implements IHypernetCore {
    * @param expirationDate the latest time in which the counterparty can pull funds
    * @param requiredStake the amount of stake the counterparyt must put up as insurance
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   public authorizeFunds(
     counterPartyAccount: PublicIdentifier,
@@ -653,7 +653,7 @@ export class HypernetCore implements IHypernetCore {
     deltaTime: number,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
     return this.paymentService.authorizeFunds(
@@ -664,7 +664,7 @@ export class HypernetCore implements IHypernetCore {
       deltaTime,
       requiredStake,
       paymentToken,
-      merchantUrl,
+      gatewayUrl,
       metadata,
     );
   }
@@ -700,8 +700,8 @@ export class HypernetCore implements IHypernetCore {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    | MerchantConnectorError
-    | MerchantValidationError
+    | GatewayConnectorError
+    | GatewayValidationError
     | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
@@ -759,16 +759,18 @@ export class HypernetCore implements IHypernetCore {
         return this.contextProvider.setContext(context);
       })
       .andThen(() => {
+        this.logUtils.debug("Initializing internal services");
         // Initialize anything that wants an initialized context
         return ResultUtils.combine([
           this.vectorAPIListener.setup(),
-          this.merchantConnectorListener.setup(),
-          this.merchantConnectorService.initialize(),
+          this.gatewayConnectorListener.setup(),
+          this.gatewayConnectorService.initialize(),
           this.messagingListener.setup(),
         ]); // , this.threeboxMessagingListener.initialize()]);
       })
       .andThen(() => {
-        return this.merchantConnectorService.activateAuthorizedMerchants();
+        this.logUtils.debug("Initialized all internal services");
+        return this.gatewayConnectorService.activateAuthorizedGateways();
       })
       // .andThen(() => {
       //   // Claim control
@@ -797,45 +799,45 @@ export class HypernetCore implements IHypernetCore {
     });
   }
 
-  public authorizeMerchant(
-    merchantUrl: MerchantUrl,
-  ): ResultAsync<void, MerchantValidationError> {
-    return this.merchantConnectorService.authorizeMerchant(merchantUrl);
+  public authorizeGateway(
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<void, GatewayValidationError> {
+    return this.gatewayConnectorService.authorizeGateway(gatewayUrl);
   }
 
-  public deauthorizeMerchant(
-    merchantUrl: MerchantUrl,
+  public deauthorizeGateway(
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    PersistenceError | ProxyError | MerchantAuthorizationDeniedError
+    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
   > {
-    return this.merchantConnectorService.deauthorizeMerchant(merchantUrl);
+    return this.gatewayConnectorService.deauthorizeGateway(gatewayUrl);
   }
 
-  public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
-    Map<MerchantUrl, boolean>,
+  public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
+    Map<GatewayUrl, boolean>,
     PersistenceError
   > {
-    return this.merchantConnectorService.getAuthorizedMerchantsConnectorsStatus();
+    return this.gatewayConnectorService.getAuthorizedGatewaysConnectorsStatus();
   }
 
-  public getAuthorizedMerchants(): ResultAsync<
-    Map<MerchantUrl, Signature>,
+  public getAuthorizedGateways(): ResultAsync<
+    Map<GatewayUrl, Signature>,
     PersistenceError
   > {
-    return this.merchantConnectorService.getAuthorizedMerchants();
+    return this.gatewayConnectorService.getAuthorizedGateways();
   }
 
-  public closeMerchantIFrame(
-    merchantUrl: MerchantUrl,
-  ): ResultAsync<void, MerchantConnectorError> {
-    return this.merchantConnectorService.closeMerchantIFrame(merchantUrl);
+  public closeGatewayIFrame(
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<void, GatewayConnectorError> {
+    return this.gatewayConnectorService.closeGatewayIFrame(gatewayUrl);
   }
 
-  public displayMerchantIFrame(
-    merchantUrl: MerchantUrl,
-  ): ResultAsync<void, MerchantConnectorError> {
-    return this.merchantConnectorService.displayMerchantIFrame(merchantUrl);
+  public displayGatewayIFrame(
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<void, GatewayConnectorError> {
+    return this.gatewayConnectorService.displayGatewayIFrame(gatewayUrl);
   }
 
   public providePrivateCredentials(

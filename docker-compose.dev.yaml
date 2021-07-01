@@ -255,12 +255,12 @@ services:
       - router
       - iframe
 
-  merchant-iframe:
-    image: hypernetlabs/hypernet-protocol-merchant-iframe
+  gateway-iframe:
+    image: hypernetlabs/hypernet-protocol-gateway-iframe
     ports:
       - 5005:80
     volumes:
-    - ./packages/merchant-iframe/dist/bundle:/usr/share/nginx/html
+    - ./packages/gateway-iframe/dist/bundle:/usr/share/nginx/html
     depends_on:
       - router
       - iframe
@@ -273,14 +273,14 @@ services:
       - ./packages/developer-ui/dist/bundle:/usr/share/nginx/html
     depends_on:
       - core-iframe
-      - merchant-iframe
+      - gateway-iframe
 
-  test-merchant:
+  test-gateway:
     image: node:14
     ports:
       - 5010:5010
     volumes:
-      - ./packages/test-merchant-connector/dist/server-bundle:/app
-      - ./packages/test-merchant-connector/dist/connector-bundle:/app/connector
+      - ./packages/test-gateway/dist/server-bundle:/app
+      - ./packages/test-gateway/dist/connector-bundle:/app/connector
     command:
       node /app/index.js

@@ -3,7 +3,7 @@ import {
   EthereumAddress,
   HypernetConfig,
   PublicIdentifier,
-  AuthorizedMerchantsSchema,
+  AuthorizedGatewaysSchema,
   DefinitionName,
   SchemaUrl,
 } from "@hypernetlabs/objects";
@@ -59,11 +59,11 @@ export class ConfigProvider implements IConfigProvider {
       chainAddresses, // chainAddresses
       __NATS_URL__, // natsUrl
       __AUTH_URL__, // authUrl
-      __VALIDATOR_IFRAME_URL__, // merchantIframeUrl
+      __VALIDATOR_IFRAME_URL__, // gatewayIframeUrl
       __CERAMIC_NODE_URL__, // ceramicNodeUrl,
       new Map([
         [
-          DefinitionName(AuthorizedMerchantsSchema.title),
+          DefinitionName(AuthorizedGatewaysSchema.title),
           SchemaUrl(
             "kjzl6cwe1jw148ngghzoumihdtadlx9rzodfjlq5tv01jzr7cin7jx3g3gtfxf3",
           ),

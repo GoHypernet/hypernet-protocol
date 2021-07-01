@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 
 import { BigNumberString } from "@objects/BigNumberString";
 import { EthereumAddress } from "@objects/EthereumAddress";
-import { MerchantUrl } from "@objects/MerchantUrl";
+import { GatewayUrl } from "@objects/GatewayUrl";
 import { Payment } from "@objects/Payment";
 import { PaymentId } from "@objects/PaymentId";
 import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
@@ -24,7 +24,7 @@ export class PullPayment extends Payment {
     createdTimestamp: UnixTimestamp,
     updatedTimestamp: UnixTimestamp,
     collateralRecovered: BigNumberString,
-    merchantUrl: MerchantUrl,
+    gatewayUrl: GatewayUrl,
     details: PaymentInternalDetails,
     metadata: string | null,
     public authorizedAmount: BigNumberString,
@@ -46,7 +46,7 @@ export class PullPayment extends Payment {
       createdTimestamp,
       updatedTimestamp,
       collateralRecovered,
-      merchantUrl,
+      gatewayUrl,
       details,
       metadata,
     );

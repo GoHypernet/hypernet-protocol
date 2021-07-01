@@ -7,7 +7,7 @@ export * from "@implementations/utilities/ContextProvider";
 export * from "@implementations/utilities/EthersBlockchainUtils";
 export * from "@implementations/utilities/InternalProvider";
 export * from "@implementations/utilities/LinkUtils";
-export * from "@implementations/utilities/MerchantConnectorProxy";
+export * from "@implementations/utilities/GatewayConnectorProxy";
 export * from "@implementations/utilities/MessagingProvider";
 export * from "@implementations/utilities/PaymentIdUtils";
 export * from "@implementations/utilities/PaymentUtils";

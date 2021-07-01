@@ -13,7 +13,7 @@ import {
   PersistenceError,
   BlockchainUnavailableError,
   EthereumAddress,
-  AuthorizedMerchantsSchema,
+  AuthorizedGatewaysSchema,
   HypernetConfig,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
@@ -128,7 +128,7 @@ export class CeramicUtils implements ICeramicUtils {
         PersistenceError
       >[] = [];
 
-      const schemas = [AuthorizedMerchantsSchema];
+      const schemas = [AuthorizedGatewaysSchema];
       for (const schema of schemas) {
         promisesOfPublishSchema.push(
           ResultAsync.fromPromise(
@@ -189,7 +189,7 @@ export class CeramicUtils implements ICeramicUtils {
   ): ResultAsync<T | null, PersistenceError> {
     /* return okAsync(([
       {
-        merchantUrl: "http://localhost:5010",
+        gatewayUrl: "http://localhost:5010",
         authorizationSignature:
           "0xe7f734f06f49a3de497509089144c6a10227433cdfbd13cc6e482d2d33acb484759492fbc625824f2db3dc9ed531a13e4181d5a8dc9ca6fcae0ee797a658f2181b",
       },

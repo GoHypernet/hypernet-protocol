@@ -1,6 +1,6 @@
 import {
   EPaymentType,
-  MerchantUrl,
+  GatewayUrl,
   PublicIdentifier,
   EthereumAddress,
 } from "@hypernetlabs/objects";
@@ -18,15 +18,15 @@ export interface IRenderParams {
 }
 
 export interface IConnectorAuthorizationFlowParams extends IRenderParams {
-  connectorUrl: MerchantUrl;
+  connectorUrl: GatewayUrl;
   connectorName?: string;
   connectorLogoUrl?: string;
 }
 
 export interface IOnboardingFlowParams extends IRenderParams {
-  merchantUrl: MerchantUrl;
-  merchantName?: string;
-  merchantLogoUrl?: string;
+  gatewayUrl: GatewayUrl;
+  gatewayName?: string;
+  gatewayLogoUrl?: string;
   finalSuccessContent?: string;
 }
 
@@ -37,13 +37,13 @@ export interface IRenderPaymentWidgetParams extends IRenderParams {
   expirationDate: number;
   requiredStake: string;
   paymentTokenAddress: EthereumAddress;
-  merchantUrl: MerchantUrl;
+  gatewayUrl: GatewayUrl;
   paymentType: EPaymentType;
 }
 
 export interface IHypernetWebUI {
   renderBalancesWidget(params?: IRenderParams): Result<void, RenderError>;
-  renderMerchantsWidget(params?: IRenderParams): Result<void, RenderError>;
+  renderGatewaysWidget(params?: IRenderParams): Result<void, RenderError>;
   renderFundWidget(params?: IRenderParams): Result<void, RenderError>;
   renderLinksWidget(params?: IRenderParams): Result<void, RenderError>;
   renderPublicIdentifierWidget(
