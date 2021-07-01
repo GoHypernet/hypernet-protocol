@@ -74,7 +74,7 @@ const WebViewBridge: React.FC<WebViewBridgeProps> = (
                 payload: parsedData.keyValue,
               });
               break;
-            case ECoreViewDataKeys.authorizedMerchants:
+            case ECoreViewDataKeys.authorizedGateways:
               dispatch({
                 type: CoreActionType.SET_AUTHERIZED_MERCHANTS,
                 payload: parsedData.keyValue,

@@ -59,6 +59,8 @@ class TransacationReceiptMock implements TransactionReceipt {
   public cumulativeGasUsed: BigNumber;
   public byzantium: boolean;
   public status?: number | undefined;
+  public effectiveGasPrice: BigNumber;
+  public type: number;
 
   constructor() {
     this.to = account2;
@@ -74,6 +76,8 @@ class TransacationReceiptMock implements TransactionReceipt {
     this.confirmations = 1;
     this.cumulativeGasUsed = BigNumber.from(1);
     this.byzantium = false;
+    this.effectiveGasPrice = BigNumber.from(1);
+    this.type = 0;
   }
 }
 
@@ -145,9 +149,8 @@ class AccountsRepositoryMocks {
       ),
     ).thenReturn(okAsync(new TransactionResponseMock()));
 
-    this.stateChannel = this.browserNodeProvider.stateChannels.get(
-      routerChannelAddress,
-    );
+    this.stateChannel =
+      this.browserNodeProvider.stateChannels.get(routerChannelAddress);
     if (this.stateChannel == null) {
       throw new Error();
     }
@@ -254,7 +257,8 @@ describe("AccountsRepository tests", () => {
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
     // Act
-    const accounts = await accountsRepositoryMocks.blockchainProvider.provider.listAccounts();
+    const accounts =
+      await accountsRepositoryMocks.blockchainProvider.provider.listAccounts();
     const result = await repo.getAccounts();
 
     // Assert

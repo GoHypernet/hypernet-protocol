@@ -18,28 +18,28 @@
       "path": "packages/iframe"
     },
     {
-      "path": "packages/merchant-iframe"
+      "path": "packages/gateway-iframe"
     },
     {
-      "path": "packages/merchant-iframe/test"
+      "path": "packages/gateway-iframe/test"
     },
     {
       "path": "packages/developer-ui"
     },
     {
-      "path": "packages/merchant-connector"
+      "path": "packages/gateway-connector"
     },
     {
-      "path": "packages/merchant-connector/test"
+      "path": "packages/gateway-connector/test"
     },
     {
-      "path": "packages/test-merchant-connector/src"
+      "path": "packages/test-gateway/src"
     },
     {
-      "path": "packages/test-merchant-connector/server"
+      "path": "packages/test-gateway/server"
     },
     {
-      "path": "packages/test-merchant-connector/test"
+      "path": "packages/test-gateway/test"
     },
     {
       "path": "packages/web-demo"

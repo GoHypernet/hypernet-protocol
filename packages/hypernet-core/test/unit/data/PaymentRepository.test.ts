@@ -34,9 +34,9 @@ import {
   parameterizedTransferId,
   offerTransferId,
   insuranceTransferId,
-  merchantUrl,
+  gatewayUrl,
   erc20AssetAddress,
-  merchantAddress,
+  gatewayAddress,
 } from "@mock/mocks";
 import {
   BlockchainProviderMock,
@@ -115,7 +115,7 @@ class PaymentRepositoryMocks {
           paymentAmount: commonAmount.toString(),
           expirationDate,
           paymentToken: erc20AssetAddress,
-          merchantUrl: merchantUrl,
+          gatewayUrl: gatewayUrl,
         }),
       ),
     ).thenReturn(
@@ -141,7 +141,7 @@ class PaymentRepositoryMocks {
     td.when(
       this.vectorUtils.createInsuranceTransfer(
         publicIdentifier,
-        merchantAddress,
+        gatewayAddress,
         commonAmount,
         expirationDate,
         commonPaymentId,
@@ -210,7 +210,7 @@ class PaymentRepositoryMocks {
       unixNow,
       unixNow,
       BigNumberString("0"),
-      merchantUrl,
+      gatewayUrl,
       paymentDetails,
       null,
       commonAmount,
@@ -255,7 +255,7 @@ describe("PaymentRepository tests", () => {
       expirationDate,
       commonAmount,
       erc20AssetAddress,
-      merchantUrl,
+      gatewayUrl,
       null,
     );
 
@@ -278,7 +278,7 @@ describe("PaymentRepository tests", () => {
       expirationDate,
       commonAmount,
       erc20AssetAddress,
-      merchantUrl,
+      gatewayUrl,
       null,
     );
     const error = result._unsafeUnwrapErr();
@@ -359,7 +359,7 @@ describe("PaymentRepository tests", () => {
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    const result = await repo.provideStake(commonPaymentId, merchantAddress);
+    const result = await repo.provideStake(commonPaymentId, gatewayAddress);
 
     // Assert
     expect(result).toBeDefined();
@@ -374,7 +374,7 @@ describe("PaymentRepository tests", () => {
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    const result = await repo.provideStake(commonPaymentId, merchantAddress);
+    const result = await repo.provideStake(commonPaymentId, gatewayAddress);
     const error = result._unsafeUnwrapErr();
 
     // Assert

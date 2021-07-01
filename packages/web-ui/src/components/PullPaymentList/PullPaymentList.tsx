@@ -102,7 +102,7 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
           </IconButton>
         </TableCell>
         <TableCell component="th" scope="row">
-          {pullPayment.merchantUrl}
+          {pullPayment.gatewayUrl}
         </TableCell>
         <TableCell align="right">
           {viewUtils.fromBigNumberWei(pullPayment.authorizedAmount)}
@@ -202,7 +202,7 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
                 "Updated",
                 dateUtils.fromTimestampToUI(pullPayment.updatedTimestamp),
               )}
-              {renderListItem("Merchant URL", pullPayment.merchantUrl)}
+              {renderListItem("Gateway URL", pullPayment.gatewayUrl)}
               {renderListItem(
                 "Authorized Amount",
                 viewUtils.fromBigNumberWei(pullPayment.authorizedAmount),
@@ -233,7 +233,7 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
         <TableHead>
           <TableRow>
             <TableCell />
-            <TableCell>Validator</TableCell>
+            <TableCell>Gateway</TableCell>
             <TableCell align="right">Authorized Amount</TableCell>
             <TableCell align="right">Required Stake</TableCell>
             <TableCell align="right">Amount Staked</TableCell>

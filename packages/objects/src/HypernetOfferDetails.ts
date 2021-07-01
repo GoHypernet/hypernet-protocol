@@ -1,6 +1,6 @@
 import { BigNumberString } from "@objects/BigNumberString";
 import { EthereumAddress } from "@objects/EthereumAddress";
-import { MerchantUrl } from "@objects/MerchantUrl";
+import { GatewayUrl } from "@objects/GatewayUrl";
 import { IMessageTransferData } from "@objects/MessageTransferData";
 import { PaymentId } from "@objects/PaymentId";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
@@ -14,7 +14,7 @@ export interface IHypernetOfferDetails extends IMessageTransferData {
   from: PublicIdentifier;
   requiredStake: BigNumberString;
   paymentAmount: BigNumberString;
-  merchantUrl: MerchantUrl;
+  gatewayUrl: GatewayUrl;
   paymentToken: EthereumAddress;
   expirationDate: UnixTimestamp;
   metadata: string | null;

@@ -6,13 +6,13 @@ import {
   PushPayment,
   HypernetConfig,
   PaymentId,
-  MerchantUrl,
+  GatewayUrl,
   AcceptPaymentError,
   InsufficientBalanceError,
   InvalidParametersError,
   LogicalError,
-  MerchantConnectorError,
-  MerchantValidationError,
+  GatewayConnectorError,
+  GatewayValidationError,
   PaymentFinalizeError,
   PaymentCreationError,
   InvalidPaymentError,
@@ -38,8 +38,8 @@ import {
   IAccountsRepositoryType,
   ILinkRepository,
   ILinkRepositoryType,
-  IMerchantConnectorRepository,
-  IMerchantConnectorRepositoryType,
+  IGatewayConnectorRepository,
+  IGatewayConnectorRepositoryType,
   IPaymentRepository,
   IPaymentRepositoryType,
 } from "@interfaces/data";
@@ -86,8 +86,8 @@ export class PaymentService implements IPaymentService {
     @inject(IConfigProviderType) protected configProvider: IConfigProvider,
     @inject(IPaymentRepositoryType)
     protected paymentRepository: IPaymentRepository,
-    @inject(IMerchantConnectorRepositoryType)
-    protected merchantConnectorRepository: IMerchantConnectorRepository,
+    @inject(IGatewayConnectorRepositoryType)
+    protected gatewayConnectorRepository: IGatewayConnectorRepository,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
@@ -100,7 +100,7 @@ export class PaymentService implements IPaymentService {
    * @param deltaTime the number of seconds after which deltaAmount will be authorized, up to the limit of totalAuthorized.
    * @param requiredStake the amount of stake the counterparyt must put up as insurance
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   public authorizeFunds(
     counterPartyAccount: PublicIdentifier,
@@ -110,7 +110,7 @@ export class PaymentService implements IPaymentService {
     deltaTime: number,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PullPayment, PaymentCreationError | LogicalError> {
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
@@ -125,7 +125,7 @@ export class PaymentService implements IPaymentService {
         expirationDate,
         requiredStake,
         paymentToken,
-        merchantUrl,
+        gatewayUrl,
         metadata,
       ),
       this.contextProvider.getContext(),
@@ -197,7 +197,7 @@ export class PaymentService implements IPaymentService {
    * @param expirationDate the expiration date at which point this payment will revert
    * @param requiredStake the amount of insurance the counterparty should put up
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
@@ -205,7 +205,7 @@ export class PaymentService implements IPaymentService {
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError | LogicalError> {
     // TODO: Sanity checking on the values
@@ -216,7 +216,7 @@ export class PaymentService implements IPaymentService {
         expirationDate,
         requiredStake,
         paymentToken,
-        merchantUrl,
+        gatewayUrl,
         metadata,
       ),
       this.contextProvider.getContext(),
@@ -296,12 +296,12 @@ export class PaymentService implements IPaymentService {
     | InsufficientBalanceError
     | AcceptPaymentError
     | BalancesUnavailableError
-    | MerchantValidationError
+    | GatewayValidationError
     | PaymentsByIdsErrors
   > {
     let config: HypernetConfig;
     let payments: Map<PaymentId, Payment>;
-    const merchantUrls = new Set<MerchantUrl>();
+    const gatewayUrls = new Set<GatewayUrl>();
 
     return ResultUtils.combine([
       this.configProvider.getConfig(),
@@ -310,26 +310,26 @@ export class PaymentService implements IPaymentService {
       .andThen((vals) => {
         [config, payments] = vals;
 
-        // Iterate over the payments, and find all the merchant URLs.
+        // Iterate over the payments, and find all the gateway URLs.
 
         for (const keyval of payments) {
-          merchantUrls.add(keyval[1].merchantUrl);
+          gatewayUrls.add(keyval[1].gatewayUrl);
         }
 
         return ResultUtils.combine([
           this.accountRepository.getBalanceByAsset(config.hypertokenAddress),
-          this.merchantConnectorRepository.getMerchantAddresses(
-            Array.from(merchantUrls),
+          this.gatewayConnectorRepository.getGatewayAddresses(
+            Array.from(gatewayUrls),
           ),
         ]);
       })
       .andThen((vals) => {
         const [hypertokenBalance, addresses] = vals;
 
-        // If we don't have a public key for each merchant, then we should not proceed.
-        if (merchantUrls.size != addresses.size) {
+        // If we don't have a public key for each gateway, then we should not proceed.
+        if (gatewayUrls.size != addresses.size) {
           return errAsync(
-            new MerchantValidationError("Not all merchants are authorized!"),
+            new GatewayValidationError("Not all gateways are authorized!"),
           );
         }
 
@@ -372,12 +372,12 @@ export class PaymentService implements IPaymentService {
             `PaymentService:acceptOffers: attempting to provide stake for payment ${paymentId}`,
           );
 
-          // We need to get the public key of the merchant for the payment
-          const merchantAddress = addresses.get(payment.merchantUrl);
+          // We need to get the public key of the gateway for the payment
+          const gatewayAddress = addresses.get(payment.gatewayUrl);
 
-          if (merchantAddress != null) {
+          if (gatewayAddress != null) {
             const stakeAttempt = this.paymentRepository
-              .provideStake(paymentId, merchantAddress)
+              .provideStake(paymentId, gatewayAddress)
               .match(
                 (payment) => ok(payment) as Result<Payment, AcceptPaymentError>,
                 (e) =>
@@ -392,7 +392,7 @@ export class PaymentService implements IPaymentService {
             stakeAttempts.push(stakeAttempt);
           } else {
             throw new LogicalError(
-              "Merchant does not have a public key; are they ",
+              "Gateway does not have a public key; are they ",
             );
           }
         }
@@ -604,8 +604,8 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    | MerchantConnectorError
-    | MerchantValidationError
+    | GatewayConnectorError
+    | GatewayValidationError
     | PaymentsByIdsErrors
     | TransferResolutionError
   > {
@@ -636,8 +636,8 @@ export class PaymentService implements IPaymentService {
         }
 
         // Resolve the dispute
-        return this.merchantConnectorRepository.resolveChallenge(
-          payment.merchantUrl,
+        return this.gatewayConnectorRepository.resolveChallenge(
+          payment.gatewayUrl,
           paymentId,
           payment.details.insuranceTransferId,
         );
@@ -768,26 +768,26 @@ export class PaymentService implements IPaymentService {
   > {
     this.logUtils.debug(`Advancing payment ${payment.id}`);
 
-    return this.merchantConnectorRepository
-      .getAuthorizedMerchantsConnectorsStatus()
-      .andThen((merchantConnectorStatusMap) => {
-        const merchantConnectorStatus = merchantConnectorStatusMap.get(
-          payment.merchantUrl,
+    return this.gatewayConnectorRepository
+      .getAuthorizedGatewaysConnectorsStatus()
+      .andThen((gatewayConnectorStatusMap) => {
+        const gatewayConnectorStatus = gatewayConnectorStatusMap.get(
+          payment.gatewayUrl,
         );
         this.logUtils.debug(
-          `In _advancePayment, merchantConnectorStatus = ${
-            merchantConnectorStatus == true
+          `In _advancePayment, gatewayConnectorStatus = ${
+            gatewayConnectorStatus == true
           }`,
         );
-        if (merchantConnectorStatus == true) {
-          return this._advancePaymentForActivatedMerchant(
+        if (gatewayConnectorStatus == true) {
+          return this._advancePaymentForActivatedGateway(
             payment,
             context,
           ).map(() => {});
         } else {
-          // Validator is not active, so we will not advance the payment
+          // Gateway is not active, so we will not advance the payment
           this.logUtils.debug(
-            `Validator inactive, payment ${payment.id} will be delayed`,
+            `Gateway inactive, payment ${payment.id} will be delayed`,
           );
 
           // fire an event for payment advancement error / onPaymentDelay
@@ -802,7 +802,7 @@ export class PaymentService implements IPaymentService {
       });
   }
 
-  protected _advancePaymentForActivatedMerchant(
+  protected _advancePaymentForActivatedGateway(
     payment: Payment,
     context: HypernetContext,
   ): ResultAsync<

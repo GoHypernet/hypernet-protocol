@@ -17,8 +17,8 @@ const Summary: React.FC = () => {
       .mapErr(handleError);
 
     hypernetWebIntegration.webUIClient
-      .renderMerchantsWidget({
-        selector: "merchant-list-wrapper",
+      .renderGatewaysWidget({
+        selector: "gateway-list-wrapper",
         includeBoxWrapper: true,
       })
       .mapErr(handleError);
@@ -55,7 +55,7 @@ const Summary: React.FC = () => {
               <Box id="balances-wrapper"></Box>
             </Grid>
             <Grid item xs={12} spacing={3}>
-              <Box id="merchant-list-wrapper"></Box>
+              <Box id="gateway-list-wrapper"></Box>
             </Grid>
           </Grid>
         </Grid>

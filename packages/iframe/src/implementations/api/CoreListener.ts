@@ -9,7 +9,7 @@ import {
   IHypernetCore,
   IHypernetCoreType,
   PaymentId,
-  MerchantUrl,
+  GatewayUrl,
   BigNumberString,
   UnixTimestamp,
 } from "@hypernetlabs/objects";
@@ -101,7 +101,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           expirationDate: UnixTimestamp;
           requiredStake: BigNumberString;
           paymentToken: EthereumAddress;
-          merchantUrl: MerchantUrl;
+          gatewayUrl: GatewayUrl;
           metadata: string | null;
         }>,
       ) => {
@@ -112,7 +112,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.expirationDate,
             data.data.requiredStake,
             data.data.paymentToken,
-            data.data.merchantUrl,
+            data.data.gatewayUrl,
             data.data.metadata,
           );
         }, data.callId);
@@ -127,7 +127,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           deltaTime: number;
           requiredStake: BigNumberString;
           paymentToken: EthereumAddress;
-          merchantUrl: MerchantUrl;
+          gatewayUrl: GatewayUrl;
           metadata: string | null;
         }>,
       ) => {
@@ -140,7 +140,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.deltaTime,
             data.data.requiredStake,
             data.data.paymentToken,
-            data.data.merchantUrl,
+            data.data.gatewayUrl,
             data.data.metadata,
           );
         }, data.callId);
@@ -151,14 +151,14 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.acceptOffers(data.data);
         }, data.callId);
       },
-      authorizeMerchant: (data: IIFrameCallData<MerchantUrl>) => {
+      authorizeGateway: (data: IIFrameCallData<GatewayUrl>) => {
         this.returnForModel(() => {
-          return this.core.authorizeMerchant(data.data);
+          return this.core.authorizeGateway(data.data);
         }, data.callId);
       },
-      deauthorizeMerchant: (data: IIFrameCallData<MerchantUrl>) => {
+      deauthorizeGateway: (data: IIFrameCallData<GatewayUrl>) => {
         this.returnForModel(() => {
-          return this.core.deauthorizeMerchant(data.data);
+          return this.core.deauthorizeGateway(data.data);
         }, data.callId);
       },
       initiateDispute: (data: IIFrameCallData<PaymentId>) => {
@@ -171,11 +171,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.resolveInsurance(data.data);
         }, data.callId);
       },
-      closeMerchantIFrame: (data: IIFrameCallData<MerchantUrl>) => {
-        this.core.closeMerchantIFrame(data.data);
+      closeGatewayIFrame: (data: IIFrameCallData<GatewayUrl>) => {
+        this.core.closeGatewayIFrame(data.data);
       },
-      displayMerchantIFrame: (data: IIFrameCallData<MerchantUrl>) => {
-        this.core.displayMerchantIFrame(data.data);
+      displayGatewayIFrame: (data: IIFrameCallData<GatewayUrl>) => {
+        this.core.displayGatewayIFrame(data.data);
       },
 
       //   pullFunds(paymentId: string, amount: BigNumber): Promise<Payment>;
@@ -189,14 +189,14 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.mintTestToken(data.data);
         }, data.callId);
       },
-      getAuthorizedMerchants: (data: IIFrameCallData<void>) => {
+      getAuthorizedGateways: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getAuthorizedMerchants();
+          return this.core.getAuthorizedGateways();
         }, data.callId);
       },
-      getAuthorizedMerchantsConnectorsStatus: (data: IIFrameCallData<void>) => {
+      getAuthorizedGatewaysConnectorsStatus: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getAuthorizedMerchantsConnectorsStatus();
+          return this.core.getAuthorizedGatewaysConnectorsStatus();
         }, data.callId);
       },
       providePrivateCredentials: (
@@ -289,28 +289,28 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       parent.emit("onDeStorageAuthenticationFailed");
     });
 
-    this.core.onMerchantAuthorized.subscribe((val) => {
-      parent.emit("onMerchantAuthorized", val.toString());
+    this.core.onGatewayAuthorized.subscribe((val) => {
+      parent.emit("onGatewayAuthorized", val.toString());
     });
 
-    this.core.onMerchantDeauthorizationStarted.subscribe((val) => {
-      parent.emit("onMerchantDeauthorizationStarted", val.toString());
+    this.core.onGatewayDeauthorizationStarted.subscribe((val) => {
+      parent.emit("onGatewayDeauthorizationStarted", val.toString());
     });
 
-    this.core.onAuthorizedMerchantUpdated.subscribe((val) => {
-      parent.emit("onAuthorizedMerchantUpdated", val.toString());
+    this.core.onAuthorizedGatewayUpdated.subscribe((val) => {
+      parent.emit("onAuthorizedGatewayUpdated", val.toString());
     });
 
-    this.core.onAuthorizedMerchantActivationFailed.subscribe((val) => {
-      parent.emit("onAuthorizedMerchantActivationFailed", val.toString());
+    this.core.onAuthorizedGatewayActivationFailed.subscribe((val) => {
+      parent.emit("onAuthorizedGatewayActivationFailed", val.toString());
     });
 
-    this.core.onMerchantIFrameDisplayRequested.subscribe((merchantUrl) => {
-      parent.emit("onMerchantIFrameDisplayRequested", merchantUrl);
+    this.core.onGatewayIFrameDisplayRequested.subscribe((gatewayUrl) => {
+      parent.emit("onGatewayIFrameDisplayRequested", gatewayUrl);
     });
 
-    this.core.onMerchantIFrameCloseRequested.subscribe((merchantUrl) => {
-      parent.emit("onMerchantIFrameCloseRequested", merchantUrl);
+    this.core.onGatewayIFrameCloseRequested.subscribe((gatewayUrl) => {
+      parent.emit("onGatewayIFrameCloseRequested", gatewayUrl);
     });
 
     this.core.onInitializationRequired.subscribe(() => {

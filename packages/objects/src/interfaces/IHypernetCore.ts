@@ -14,18 +14,18 @@ import {
   PersistenceError,
   RouterChannelUnknownError,
   VectorError,
-  MerchantValidationError,
-  MerchantConnectorError,
+  GatewayValidationError,
+  GatewayConnectorError,
   InvalidPaymentError,
   InvalidParametersError,
   TransferResolutionError,
   ProxyError,
-  MerchantAuthorizationDeniedError,
+  GatewayAuthorizationDeniedError,
   MessagingError,
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { HypernetLink } from "@objects/HypernetLink";
-import { MerchantUrl } from "@objects/MerchantUrl";
+import { GatewayUrl } from "@objects/GatewayUrl";
 import { Payment } from "@objects/Payment";
 import { PaymentId } from "@objects/PaymentId";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
@@ -144,7 +144,7 @@ export interface IHypernetCore {
    * @param amount
    * @param requiredStake the amount of stake that the provider must put up as part of the insurancepayment
    * @param paymentToken
-   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   sendFunds(
     counterPartyAccount: PublicIdentifier,
@@ -152,7 +152,7 @@ export interface IHypernetCore {
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
 
@@ -165,7 +165,7 @@ export interface IHypernetCore {
    * @param deltaTime the number of seconds after which deltaAmount will be authorized, up to the limit of totalAuthorized.
    * @param requiredStake the amount of stake the counterparyt must put up as insurance
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   authorizeFunds(
     counterPartyAccount: PublicIdentifier,
@@ -175,7 +175,7 @@ export interface IHypernetCore {
     deltaTime: number,
     requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
 
@@ -218,8 +218,8 @@ export interface IHypernetCore {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    | MerchantConnectorError
-    | MerchantValidationError
+    | GatewayConnectorError
+    | GatewayValidationError
     | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
@@ -250,33 +250,33 @@ export interface IHypernetCore {
     amount: BigNumberString,
   ): ResultAsync<void, BlockchainUnavailableError>;
 
-  authorizeMerchant(
-    merchantUrl: MerchantUrl,
-  ): ResultAsync<void, MerchantValidationError>;
+  authorizeGateway(
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<void, GatewayValidationError>;
 
-  deauthorizeMerchant(
-    merchantUrl: MerchantUrl,
+  deauthorizeGateway(
+    gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    PersistenceError | ProxyError | MerchantAuthorizationDeniedError
+    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
   >;
 
-  getAuthorizedMerchants(): ResultAsync<
-    Map<MerchantUrl, Signature>,
+  getAuthorizedGateways(): ResultAsync<
+    Map<GatewayUrl, Signature>,
     PersistenceError
   >;
 
-  getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
-    Map<MerchantUrl, boolean>,
+  getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
+    Map<GatewayUrl, boolean>,
     PersistenceError
   >;
 
-  closeMerchantIFrame(
-    merchantUrl: MerchantUrl,
-  ): ResultAsync<void, MerchantConnectorError>;
-  displayMerchantIFrame(
-    merchantUrl: MerchantUrl,
-  ): ResultAsync<void, MerchantConnectorError>;
+  closeGatewayIFrame(
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<void, GatewayConnectorError>;
+  displayGatewayIFrame(
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<void, GatewayConnectorError>;
 
   providePrivateCredentials(
     privateKey: string | null,
@@ -309,12 +309,12 @@ export interface IHypernetCore {
   onDeStorageAuthenticationStarted: Subject<void>;
   onDeStorageAuthenticationSucceeded: Subject<void>;
   onDeStorageAuthenticationFailed: Subject<void>;
-  onMerchantAuthorized: Subject<MerchantUrl>;
-  onMerchantDeauthorizationStarted: Subject<MerchantUrl>;
-  onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
-  onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
-  onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
-  onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
+  onGatewayAuthorized: Subject<GatewayUrl>;
+  onGatewayDeauthorizationStarted: Subject<GatewayUrl>;
+  onAuthorizedGatewayUpdated: Subject<GatewayUrl>;
+  onAuthorizedGatewayActivationFailed: Subject<GatewayUrl>;
+  onGatewayIFrameDisplayRequested: Subject<GatewayUrl>;
+  onGatewayIFrameCloseRequested: Subject<GatewayUrl>;
   onInitializationRequired: Subject<void>;
   onPrivateCredentialsRequested: Subject<void>;
 }

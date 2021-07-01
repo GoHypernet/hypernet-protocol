@@ -9,7 +9,7 @@ import { utils, BigNumber } from "ethers";
 import ko from "knockout";
 import moment from "moment";
 
-import { AuthorizedMerchantSelectorParams } from "../AuthorizedMerchantSelector/AuthorizedMerchantSelector.viewmodel";
+import { AuthorizedGatewaySelectorParams } from "../AuthorizedGatewaySelector/AuthorizedGatewaySelector.viewmodel";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
 import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
 
@@ -35,7 +35,7 @@ export class PushPaymentFormViewModel {
   public expirationDate: ko.Observable<string>;
   public amount: ko.Observable<string>;
   public tokenSelector: TokenSelectorParams;
-  public merchantSelector: AuthorizedMerchantSelectorParams;
+  public gatewaySelector: AuthorizedGatewaySelectorParams;
 
   public submitButton: ButtonParams;
 
@@ -58,7 +58,7 @@ export class PushPaymentFormViewModel {
       true,
     );
 
-    this.merchantSelector = new AuthorizedMerchantSelectorParams(
+    this.gatewaySelector = new AuthorizedGatewaySelectorParams(
       this.integration,
       ko.observable(null),
     );
@@ -72,9 +72,9 @@ export class PushPaymentFormViewModel {
           return null;
         }
 
-        const selectedMerchantUrl = this.merchantSelector.selectedAuthorizedMerchant();
+        const selectedGatewayUrl = this.gatewaySelector.selectedAuthorizedGateway();
 
-        if (selectedMerchantUrl == null) {
+        if (selectedGatewayUrl == null) {
           return null;
         }
 
@@ -93,7 +93,7 @@ export class PushPaymentFormViewModel {
             UnixTimestamp(expirationDate.unix()),
             requiredStake,
             selectedPaymentTokenAddress,
-            selectedMerchantUrl,
+            selectedGatewayUrl,
             null,
           );
         } catch {

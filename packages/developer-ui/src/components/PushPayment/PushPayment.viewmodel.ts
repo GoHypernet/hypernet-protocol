@@ -2,7 +2,7 @@ import {
   PaymentId,
   PublicIdentifier,
   PushPayment,
-  MerchantUrl,
+  GatewayUrl,
 } from "@hypernetlabs/objects";
 import { EPaymentState } from "@hypernetlabs/objects";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
@@ -35,7 +35,7 @@ export class PushPaymentViewModel {
   public createdTimestamp: ko.Observable<string>;
   public updatedTimestamp: ko.Observable<string>;
   public collateralRecovered: ko.Observable<string>;
-  public merchantUrl: ko.Observable<MerchantUrl>;
+  public gatewayUrl: ko.Observable<GatewayUrl>;
   public paymentAmount: ko.Observable<string>;
 
   public acceptButton: ButtonParams;
@@ -78,7 +78,7 @@ export class PushPaymentViewModel {
     this.collateralRecovered = ko.observable(
       params.payment.collateralRecovered.toString(),
     );
-    this.merchantUrl = ko.observable(params.payment.merchantUrl);
+    this.gatewayUrl = ko.observable(params.payment.gatewayUrl);
     this.paymentAmount = ko.observable(
       utils.formatUnits(params.payment.paymentAmount, "wei"),
     );

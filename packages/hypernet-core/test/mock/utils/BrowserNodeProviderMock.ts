@@ -31,7 +31,7 @@ import {
   insuranceTransferId,
   parameterizedTransferId,
   defaultExpirationLength,
-  merchantUrl,
+  gatewayUrl,
   unixPast,
 } from "@mock/mocks";
 
@@ -96,7 +96,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       from: publicIdentifier,
       requiredStake: commonAmount,
       paymentAmount: commonAmount,
-      merchantUrl: merchantUrl,
+      gatewayUrl: gatewayUrl,
       paymentToken: erc20AssetAddress,
       expirationDate: UnixTimestamp(unixPast + defaultExpirationLength),
       metadata: null,
@@ -146,7 +146,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       transferEncodings: ["string"],
       transferState: {
         receiver: publicIdentifier,
-        mediator: merchantUrl,
+        mediator: gatewayUrl,
         collateral: "1",
         expiration: (unixPast + defaultExpirationLength).toString(),
         UUID: commonPaymentId,

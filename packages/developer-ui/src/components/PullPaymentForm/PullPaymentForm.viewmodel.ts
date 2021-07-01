@@ -9,7 +9,7 @@ import { utils } from "ethers";
 import ko from "knockout";
 import moment from "moment";
 
-import { AuthorizedMerchantSelectorParams } from "../AuthorizedMerchantSelector/AuthorizedMerchantSelector.viewmodel";
+import { AuthorizedGatewaySelectorParams } from "../AuthorizedGatewaySelector/AuthorizedGatewaySelector.viewmodel";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
 import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
 
@@ -37,7 +37,7 @@ export class PullPaymentFormViewModel {
   public deltaAmount: ko.Observable<string>;
   public deltaTime: ko.Observable<string>;
   public tokenSelector: TokenSelectorParams;
-  public merchantSelector: AuthorizedMerchantSelectorParams;
+  public gatewaySelector: AuthorizedGatewaySelectorParams;
 
   public submitButton: ButtonParams;
 
@@ -61,7 +61,7 @@ export class PullPaymentFormViewModel {
       ko.observable(null),
       true,
     );
-    this.merchantSelector = new AuthorizedMerchantSelectorParams(
+    this.gatewaySelector = new AuthorizedGatewaySelectorParams(
       this.integration,
       ko.observable(null),
     );
@@ -75,9 +75,9 @@ export class PullPaymentFormViewModel {
           return null;
         }
 
-        const selectedMerchantUrl = this.merchantSelector.selectedAuthorizedMerchant();
+        const selectedGatewayUrl = this.gatewaySelector.selectedAuthorizedGateway();
 
-        if (selectedMerchantUrl == null) {
+        if (selectedGatewayUrl == null) {
           return null;
         }
 
@@ -104,7 +104,7 @@ export class PullPaymentFormViewModel {
             deltaTime,
             requiredStake,
             selectedPaymentTokenAddress,
-            selectedMerchantUrl,
+            selectedGatewayUrl,
             null,
           );
         } catch {
