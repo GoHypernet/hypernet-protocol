@@ -11,7 +11,7 @@ const configFilePath = require.resolve("./tsconfig.json");
 /** @type import('webpack').Configuration */
 module.exports = {
   context: __dirname,
-  mode: "development",
+  mode: process.env.__BUILD_ENV__ === "PROD" ? "production" : "development",
   entry: path.join(__dirname, "src/index.ts"),
   output: {
     filename: "index.js",
@@ -118,8 +118,8 @@ module.exports = {
       ),
     },
   },
-  // TODO: this devtool setup is for development it makes wepback a bit faster, this setup should be different for production
-  devtool: "eval-source-map",
+  devtool:
+    process.env.__BUILD_ENV__ === "PROD" ? "source-map" : "eval-source-map",
   plugins: [
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "src/index.html"),
@@ -128,6 +128,9 @@ module.exports = {
     new webpack.ProvidePlugin({
       Buffer: ["buffer", "Buffer"],
       process: "process/browser",
+    }),
+    new webpack.DefinePlugin({
+      __BUILD_ENV__: JSON.stringify(process.env.__BUILD_ENV__),
     }),
   ],
 };
