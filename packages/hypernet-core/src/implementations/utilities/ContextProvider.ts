@@ -17,7 +17,7 @@ import {
 } from "@interfaces/objects";
 import {
   IContextProvider,
-  IMerchantConnectorProxy,
+  IGatewayConnectorProxy,
 } from "@interfaces/utilities";
 
 export class ContextProvider implements IContextProvider {
@@ -79,7 +79,7 @@ export class ContextProvider implements IContextProvider {
       onMerchantIFrameCloseRequested,
       onInitializationRequired,
       onPrivateCredentialsRequested,
-      new Subject<IMerchantConnectorProxy>(),
+      new Subject<IGatewayConnectorProxy>(),
     );
     this._initializePromiseResolve = () => null;
     this._initializePromise = new Promise((resolve) => {

@@ -14,7 +14,11 @@ import {
   AjaxError,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
-import { IMerchantService } from "@gateway-iframe/interfaces/business";
+import { ethers } from "ethers";
+import { injectable, inject } from "inversify";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
+
+import { IGatewayService } from "@gateway-iframe/interfaces/business";
 import {
   IHypernetCoreRepository,
   IHypernetCoreRepositoryType,
@@ -24,10 +28,6 @@ import {
   IPersistenceRepositoryType,
 } from "@gateway-iframe/interfaces/data";
 import { ExpectedRedirect } from "@gateway-iframe/interfaces/objects";
-import { ethers } from "ethers";
-import { injectable, inject } from "inversify";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
-
 import {
   MerchantConnectorError,
   MerchantValidationError,
@@ -44,7 +44,7 @@ declare global {
 }
 
 @injectable()
-export class MerchantService implements IMerchantService {
+export class MerchantService implements IGatewayService {
   protected signMessageCallbacks: Map<
     string,
     (message: string, signature: Signature) => void
@@ -71,7 +71,7 @@ export class MerchantService implements IMerchantService {
     MerchantConnectorError | MerchantValidationError
   > {
     const context = this.contextProvider.getMerchantContext();
-    console.log(`Activating merchant connector for ${context.gatewayUrl}`);
+    console.log(`Activating gateway connector for ${context.gatewayUrl}`);
     // If we don't have validated code, that's a problem.
     if (
       context.validatedMerchantCode == null ||
@@ -79,7 +79,7 @@ export class MerchantService implements IMerchantService {
     ) {
       return errAsync(
         new MerchantValidationError(
-          "Cannot activate merchant connector, no validated code available!",
+          "Cannot activate gateway connector, no validated code available!",
         ),
       );
     }
@@ -87,7 +87,7 @@ export class MerchantService implements IMerchantService {
     if (publicIdentifier == null) {
       return errAsync(
         new LogicalError(
-          "Cannot activate merchant connector, public identifier is unknown!",
+          "Cannot activate gateway connector, public identifier is unknown!",
         ),
       );
     }
@@ -108,12 +108,12 @@ export class MerchantService implements IMerchantService {
       );
     }
 
-    // Send some initial information to the merchant connector
+    // Send some initial information to the gateway connector
     merchantConnector.onPublicIdentifierReceived(publicIdentifier);
 
     merchantConnector.onBalancesReceived(balances);
 
-    // Store the merchant connector object and notify the world
+    // Store the gateway connector object and notify the world
     context.merchantConnector = merchantConnector;
     this.contextProvider.setMerchantContext(context);
     context.onMerchantConnectorActivated.next(merchantConnector);
@@ -138,15 +138,13 @@ export class MerchantService implements IMerchantService {
     let signature = Signature("");
     let address = EthereumAddress("");
 
-    // If there is no merchant URL set, it's not an error
+    // If there is no gateway URL set, it's not an error
     if (context.gatewayUrl == "") {
       return okAsync(Signature(""));
     }
 
     return ResultUtils.combine([
-      this.merchantConnectorRepository.getMerchantSignature(
-        context.gatewayUrl,
-      ),
+      this.merchantConnectorRepository.getMerchantSignature(context.gatewayUrl),
       this.merchantConnectorRepository.getMerchantAddress(context.gatewayUrl),
     ])
       .andThen((vals) => {
@@ -186,7 +184,7 @@ export class MerchantService implements IMerchantService {
     address: EthereumAddress,
     useCacheBuster?: boolean,
   ): ResultAsync<Signature, MerchantValidationError | AjaxError> {
-    // If there is no merchant URL set, it's not an error
+    // If there is no gateway URL set, it's not an error
     if (gatewayUrl == "") {
       return okAsync(Signature(""));
     }
@@ -212,7 +210,7 @@ export class MerchantService implements IMerchantService {
           );
         }
 
-        // Gateway's code passes muster. Store the merchant code in the context as validated.
+        // Gateway's code passes muster. Store the gateway code in the context as validated.
         this.contextProvider.setValidatedMerchantConnector(
           merchantCode,
           signature,
@@ -250,9 +248,10 @@ export class MerchantService implements IMerchantService {
   > {
     const context = this.contextProvider.getMerchantContext();
 
-    // We can auto-activate the merchant connector if the connector
+    // We can auto-activate the gateway connector if the connector
     // had been previously activated in this session.
-    const activatedMerchants = this.persistenceRepository.getActivatedMerchantSignatures();
+    const activatedMerchants =
+      this.persistenceRepository.getActivatedMerchantSignatures();
 
     if (
       context.validatedMerchantSignature != null &&
@@ -334,10 +333,11 @@ export class MerchantService implements IMerchantService {
       (merchantConnector) => {
         return ResultAsync.fromPromise(
           merchantConnector.getAddress(),
-          (e) => new MerchantConnectorError(
-            "Error happened while getting merchant connector addresses",
-            e
-          ),
+          (e) =>
+            new MerchantConnectorError(
+              "Error happened while getting gateway connector addresses",
+              e,
+            ),
         );
       },
     );
@@ -353,10 +353,11 @@ export class MerchantService implements IMerchantService {
       (merchantConnector) => {
         return ResultAsync.fromPromise(
           merchantConnector.resolveChallenge(paymentId),
-          (e) => new MerchantConnectorError(
-            "Error happened while resolving challenge in merchant connector code",
-            e
-          ),
+          (e) =>
+            new MerchantConnectorError(
+              "Error happened while resolving challenge in gateway connector code",
+              e,
+            ),
         );
       },
     );
@@ -370,10 +371,11 @@ export class MerchantService implements IMerchantService {
       (merchantConnector) => {
         return ResultAsync.fromPromise(
           merchantConnector.deauthorize(),
-          (e) => new MerchantConnectorError(
-            "Error happened while deauthorizing merchant in merchant connector code",
-            e
-          ),
+          (e) =>
+            new MerchantConnectorError(
+              "Error happened while deauthorizing gateway in gateway connector code",
+              e,
+            ),
         );
       },
     );

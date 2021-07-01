@@ -1,15 +1,15 @@
 import { GatewayUrl, Signature, EthereumAddress } from "@hypernetlabs/objects";
+import { okAsync } from "neverthrow";
+import td from "testdouble";
+
 import { MerchantService } from "@gateway-iframe/implementations/business";
-import { IMerchantService } from "@gateway-iframe/interfaces/business";
+import { ContextProvider } from "@gateway-iframe/implementations/utils";
+import { IGatewayService } from "@gateway-iframe/interfaces/business";
 import {
   IHypernetCoreRepository,
   IMerchantConnectorRepository,
   IPersistenceRepository,
 } from "@gateway-iframe/interfaces/data";
-import { okAsync } from "neverthrow";
-import td from "testdouble";
-
-import { ContextProvider } from "@gateway-iframe/implementations/utils";
 import { MerchantValidationError } from "@gateway-iframe/interfaces/objects/errors";
 
 jest.mock("ethers", () => {
@@ -25,7 +25,8 @@ jest.mock("ethers", () => {
 });
 
 class MerchantServiceMocks {
-  public merchantConnectorRepository = td.object<IMerchantConnectorRepository>();
+  public merchantConnectorRepository =
+    td.object<IMerchantConnectorRepository>();
   public persistenceRepository = td.object<IPersistenceRepository>();
   public hypernetCoreRepository = td.object<IHypernetCoreRepository>();
   public gatewayUrl = GatewayUrl("http://localhost:5010");
@@ -73,7 +74,7 @@ class MerchantServiceMocks {
     ).thenReturn(okAsync(this.merchantCode));
   }
 
-  public factoryMerchantService(): IMerchantService {
+  public factoryMerchantService(): IGatewayService {
     return new MerchantService(
       this.merchantConnectorRepository,
       this.persistenceRepository,

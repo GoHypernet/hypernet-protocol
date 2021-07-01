@@ -1,8 +1,8 @@
 /**
  * MerchantAuthorizationDeniedError is thrown when the user will
- * not sign the merchant's signature, thereby authorizing the merchant's
+ * not sign the gateway's signature, thereby authorizing the gateway's
  * code.
- * This is a fatal error for the merchant, and no retries should
+ * This is a fatal error for the gateway, and no retries should
  * be attempted.
  */
 export class MerchantAuthorizationDeniedError extends Error {

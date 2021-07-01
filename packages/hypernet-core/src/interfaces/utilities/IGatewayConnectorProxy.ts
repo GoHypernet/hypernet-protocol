@@ -21,11 +21,11 @@ import { ParentProxy } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
 import { Observable } from "rxjs";
 
-export interface IMerchantConnectorProxy extends ParentProxy {
+export interface IGatewayConnectorProxy extends ParentProxy {
   gatewayUrl: GatewayUrl;
 
   /**
-   * activateProxy() sets up the merchant iframe and the communication
+   * activateProxy() sets up the gateway iframe and the communication
    * channel to the iframe. Not.hing else is done
    */
   activateProxy(): ResultAsync<void, ProxyError>;
@@ -51,7 +51,7 @@ export interface IMerchantConnectorProxy extends ParentProxy {
   deauthorize(): ResultAsync<void, MerchantConnectorError | ProxyError>;
 
   /**
-   * getValidatedSignature() requests the merchant iframe to return the
+   * getValidatedSignature() requests the gateway iframe to return the
    * signature of the connector code, AFTER validating that the connector
    * code matches the signature.
    */

@@ -10,7 +10,7 @@ import {
 } from "@hypernetlabs/objects";
 import { Subject } from "rxjs";
 
-import { IMerchantConnectorProxy } from "@interfaces/utilities";
+import { IGatewayConnectorProxy } from "@interfaces/utilities";
 
 export class HypernetContext {
   constructor(
@@ -40,7 +40,7 @@ export class HypernetContext {
     public onMerchantIFrameCloseRequested: Subject<GatewayUrl>,
     public onInitializationRequired: Subject<void>,
     public onPrivateCredentialsRequested: Subject<void>,
-    public onMerchantConnectorProxyActivated: Subject<IMerchantConnectorProxy>,
+    public onMerchantConnectorProxyActivated: Subject<IGatewayConnectorProxy>,
   ) {}
 }
 
@@ -73,7 +73,7 @@ export class InitializedHypernetContext {
     public onMerchantIFrameCloseRequested: Subject<GatewayUrl>,
     public onInitializationRequired: Subject<void>,
     public onPrivateCredentialsRequested: Subject<void>,
-    public onMerchantConnectorProxyActivated: Subject<IMerchantConnectorProxy>,
+    public onMerchantConnectorProxyActivated: Subject<IGatewayConnectorProxy>,
     public authorizedMediators: Map<GatewayUrl, Signature>,
   ) {}
 }

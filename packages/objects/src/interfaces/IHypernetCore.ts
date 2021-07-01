@@ -144,7 +144,7 @@ export interface IHypernetCore {
    * @param amount
    * @param requiredStake the amount of stake that the provider must put up as part of the insurancepayment
    * @param paymentToken
-   * @param gatewayUrl the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   sendFunds(
     counterPartyAccount: PublicIdentifier,
@@ -165,7 +165,7 @@ export interface IHypernetCore {
    * @param deltaTime the number of seconds after which deltaAmount will be authorized, up to the limit of totalAuthorized.
    * @param requiredStake the amount of stake the counterparyt must put up as insurance
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param gatewayUrl the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   authorizeFunds(
     counterPartyAccount: PublicIdentifier,

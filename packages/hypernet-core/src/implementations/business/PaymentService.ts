@@ -100,7 +100,7 @@ export class PaymentService implements IPaymentService {
    * @param deltaTime the number of seconds after which deltaAmount will be authorized, up to the limit of totalAuthorized.
    * @param requiredStake the amount of stake the counterparyt must put up as insurance
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param gatewayUrl the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   public authorizeFunds(
     counterPartyAccount: PublicIdentifier,
@@ -197,7 +197,7 @@ export class PaymentService implements IPaymentService {
    * @param expirationDate the expiration date at which point this payment will revert
    * @param requiredStake the amount of insurance the counterparty should put up
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param gatewayUrl the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
@@ -310,7 +310,7 @@ export class PaymentService implements IPaymentService {
       .andThen((vals) => {
         [config, payments] = vals;
 
-        // Iterate over the payments, and find all the merchant URLs.
+        // Iterate over the payments, and find all the gateway URLs.
 
         for (const keyval of payments) {
           merchantUrls.add(keyval[1].gatewayUrl);
@@ -326,7 +326,7 @@ export class PaymentService implements IPaymentService {
       .andThen((vals) => {
         const [hypertokenBalance, addresses] = vals;
 
-        // If we don't have a public key for each merchant, then we should not proceed.
+        // If we don't have a public key for each gateway, then we should not proceed.
         if (merchantUrls.size != addresses.size) {
           return errAsync(
             new MerchantValidationError("Not all merchants are authorized!"),
@@ -372,7 +372,7 @@ export class PaymentService implements IPaymentService {
             `PaymentService:acceptOffers: attempting to provide stake for payment ${paymentId}`,
           );
 
-          // We need to get the public key of the merchant for the payment
+          // We need to get the public key of the gateway for the payment
           const merchantAddress = addresses.get(payment.gatewayUrl);
 
           if (merchantAddress != null) {

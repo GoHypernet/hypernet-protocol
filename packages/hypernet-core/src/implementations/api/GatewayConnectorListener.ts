@@ -9,12 +9,7 @@ import {
   IValidationUtilsType,
   IValidationUtils,
 } from "@hypernetlabs/utils";
-import { BigNumber } from "ethers";
-import { injectable, inject } from "inversify";
-import { ResultAsync } from "neverthrow";
-import { Subscription } from "rxjs";
-
-import { IMerchantConnectorListener } from "@interfaces/api";
+import { IGatewayConnectorListener } from "@interfaces/api";
 import {
   IAccountService,
   IPaymentService,
@@ -23,10 +18,14 @@ import {
   IPaymentServiceType,
   ILinkServiceType,
 } from "@interfaces/business";
+import { injectable, inject } from "inversify";
+import { ResultAsync } from "neverthrow";
+import { Subscription } from "rxjs";
+
 import { IContextProvider, IContextProviderType } from "@interfaces/utilities";
 
 @injectable()
-export class MerchantConnectorListener implements IMerchantConnectorListener {
+export class GatewayConnectorListener implements IGatewayConnectorListener {
   protected signMessageRequestedSubscriptionMap: Map<GatewayUrl, Subscription> =
     new Map<GatewayUrl, Subscription>();
   protected sendFundsRequestedSubscriptionMap: Map<GatewayUrl, Subscription> =
@@ -54,7 +53,7 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
 
         this._advanceMerchantRelatedPayments(proxy.gatewayUrl);
 
-        // When the merchant iframe wants a message signed, we can do it.
+        // When the gateway iframe wants a message signed, we can do it.
         const signMessageRequestedSubscription =
           proxy.signMessageRequested.subscribe((message) => {
             this.logUtils.debug(
@@ -99,7 +98,7 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
                 });
             } else {
               this.logUtils.error(
-                `Invalid ISendFundsRequest from merchant connector ${proxy.gatewayUrl}`,
+                `Invalid ISendFundsRequest from gateway connector ${proxy.gatewayUrl}`,
               );
             }
           });
@@ -133,7 +132,7 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
                 });
             } else {
               this.logUtils.error(
-                `Invalid IAuthorizeFundsRequest from merchant connector ${proxy.gatewayUrl}`,
+                `Invalid IAuthorizeFundsRequest from gateway connector ${proxy.gatewayUrl}`,
               );
             }
           });
@@ -144,7 +143,7 @@ export class MerchantConnectorListener implements IMerchantConnectorListener {
         );
       });
 
-      // Stop listening for merchant connector events when merchant deauthorization starts
+      // Stop listening for gateway connector events when gateway deauthorization starts
       context.onMerchantDeauthorizationStarted.subscribe((gatewayUrl) => {
         this.signMessageRequestedSubscriptionMap.get(gatewayUrl)?.unsubscribe();
         this.sendFundsRequestedSubscriptionMap.get(gatewayUrl)?.unsubscribe();

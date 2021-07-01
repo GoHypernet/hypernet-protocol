@@ -1,5 +1,5 @@
 import { ResultAsync } from "neverthrow";
 
-export interface IMerchantConnectorListener {
+export interface IGatewayConnectorListener {
   initialize(): ResultAsync<void, Error>;
 }

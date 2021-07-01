@@ -177,7 +177,7 @@ export class PaymentRepository implements IPaymentRepository {
    * @param expirationDate the date (in unix time) at which point the payment will expire & revert
    * @param requiredStake the amount of insurance the counterparty must put up for this payment
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param gatewayUrl the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   public createPushPayment(
     counterPartyAccount: PublicIdentifier,

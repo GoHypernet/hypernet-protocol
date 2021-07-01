@@ -7,9 +7,11 @@ import {
   ILogUtils,
   LogUtils,
 } from "@hypernetlabs/utils";
+import { okAsync } from "neverthrow";
+
 import {
   HypernetCoreListener,
-  MerchantConnectorListener,
+  GatewayConnectorListener,
 } from "@gateway-iframe/implementations/api";
 import {
   DisplayService,
@@ -21,13 +23,14 @@ import {
   MerchantConnectorRepository,
   PersistenceRepository,
 } from "@gateway-iframe/implementations/data";
+import { ContextProvider } from "@gateway-iframe/implementations/utils";
 import {
-  IMerchantConnectorListener,
+  IGatewayConnectorListener,
   IHypernetCoreListener,
 } from "@gateway-iframe/interfaces/api";
 import {
   IDisplayService,
-  IMerchantService,
+  IGatewayService,
   IPaymentService,
 } from "@gateway-iframe/interfaces/business";
 import {
@@ -35,12 +38,9 @@ import {
   IMerchantConnectorRepository,
   IPersistenceRepository,
 } from "@gateway-iframe/interfaces/data";
-import { okAsync } from "neverthrow";
-
-import { ContextProvider } from "@gateway-iframe/implementations/utils";
 import { IContextProvider } from "@gateway-iframe/interfaces/utils";
 
-export class MerchantIframe {
+export class GatewayIFrame {
   protected contextProvider: IContextProvider;
   protected ajaxUtils: IAjaxUtils;
   protected localStorageUtils: ILocalStorageUtils;
@@ -51,11 +51,11 @@ export class MerchantIframe {
   protected hypernetCoreRepository: IHypernetCoreRepository;
 
   protected displayService: IDisplayService;
-  protected merchantService: IMerchantService;
+  protected merchantService: IGatewayService;
   protected paymentService: IPaymentService;
 
   protected hypernetCoreListener: IHypernetCoreListener;
-  protected merchantConnectorListener: IMerchantConnectorListener;
+  protected merchantConnectorListener: IGatewayConnectorListener;
 
   constructor() {
     // Instantiate all the pieces
@@ -87,7 +87,7 @@ export class MerchantIframe {
       this.merchantService,
       this.contextProvider,
     );
-    this.merchantConnectorListener = new MerchantConnectorListener(
+    this.merchantConnectorListener = new GatewayConnectorListener(
       this.contextProvider,
       this.merchantService,
       this.paymentService,
@@ -101,7 +101,7 @@ export class MerchantIframe {
         return this.merchantService.getMerchantUrl();
       })
       .andThen((gatewayUrl) => {
-        // Set the merchant url
+        // Set the gateway url
         const context = this.contextProvider.getMerchantContext();
         context.gatewayUrl = gatewayUrl;
         this.contextProvider.setMerchantContext(context);
@@ -110,7 +110,7 @@ export class MerchantIframe {
         return this.hypernetCoreListener.activateModel();
       })
       .andThen(() => {
-        // Now that we have a merchant URL, let's validate the merchant's connector
+        // Now that we have a gateway URL, let's validate the gateway's connector
         return this.merchantService.validateMerchantConnector();
       })
       .andThen(() => {
@@ -119,7 +119,7 @@ export class MerchantIframe {
         return this.merchantService.autoActivateMerchantConnector();
       })
       .orElse((e) => {
-        this.logUtils.error("Failure during merchant iframe initialization");
+        this.logUtils.error("Failure during gateway iframe initialization");
         this.logUtils.error(e);
         return okAsync(null);
       });

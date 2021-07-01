@@ -1,2 +1,2 @@
-export * from "@gateway-iframe/implementations/api/MerchantConnectorListener";
+export * from "@gateway-iframe/implementations/api/GatewayConnectorListener";
 export * from "@gateway-iframe/implementations/api/HypernetCoreListener";

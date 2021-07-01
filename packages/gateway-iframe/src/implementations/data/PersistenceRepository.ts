@@ -9,7 +9,7 @@ export class PersistenceRepository implements IPersistenceRepository {
   constructor(protected localStorageUtils: ILocalStorageUtils) {}
 
   public getActivatedMerchantSignatures(): string[] {
-    // Grab the list of activated merchant signatures from storage
+    // Grab the list of activated gateway signatures from storage
     const activatedSignatureJson = this.localStorageUtils.getSessionItem(
       this.activatedMerchantSignaturesKey,
     );

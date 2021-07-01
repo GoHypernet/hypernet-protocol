@@ -9,15 +9,15 @@ import {
   Signature,
 } from "@hypernetlabs/objects";
 import { ChildProxy, IIFrameCallData } from "@hypernetlabs/utils";
-import { IHypernetCoreListener } from "@gateway-iframe/interfaces/api";
-import {
-  IMerchantService,
-  IMerchantServiceType,
-} from "@gateway-iframe/interfaces/business";
 import { injectable, inject } from "inversify";
 import { okAsync } from "neverthrow";
 import Postmate from "postmate";
 
+import { IHypernetCoreListener } from "@gateway-iframe/interfaces/api";
+import {
+  IGatewayService,
+  IMerchantServiceType,
+} from "@gateway-iframe/interfaces/business";
 import {
   IContextProvider,
   IContextProviderType,
@@ -31,14 +31,14 @@ export class HypernetCoreListener
   protected merchantConnector: IGatewayConnector | undefined;
 
   constructor(
-    @inject(IMerchantServiceType) protected merchantService: IMerchantService,
+    @inject(IMerchantServiceType) protected merchantService: IGatewayService,
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
   ) {
     super();
   }
 
   protected getModel(): Postmate.Model {
-    // Fire up the Postmate model. The merchant iframe has two halves- the parts that work before the merchant connector has been activated
+    // Fire up the Postmate model. The gateway iframe has two halves- the parts that work before the gateway connector has been activated
     // and the parts that work afterward. Postmate only supports a single model, so you have to have all the functions defined up front.
     Postmate.debug = true;
     return new Postmate.Model({

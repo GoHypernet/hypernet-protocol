@@ -111,7 +111,7 @@ const MerchantsWidget: React.FC<IMerchantsWidget> = ({
                 <Tooltip
                   title={
                     merchantsMap.get(gatewayUrl)
-                      ? "View merchant application"
+                      ? "View gateway application"
                       : "Gateway is inactive"
                   }
                   placement="top"

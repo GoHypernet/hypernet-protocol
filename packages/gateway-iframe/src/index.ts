@@ -1,3 +1,3 @@
-import { MerchantIframe } from "./implementations/MerchantIFrame";
+import { GatewayIFrame } from "./implementations/GatewayIFrame";
 
-const iframe = new MerchantIframe();
+const iframe = new GatewayIFrame();

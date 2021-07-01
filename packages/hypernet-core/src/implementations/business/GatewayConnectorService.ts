@@ -12,14 +12,14 @@ import {
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
 
-import { IMerchantConnectorService } from "@interfaces/business";
+import { IGatewayConnectorService } from "@interfaces/business";
 import {
   IAccountsRepository,
   IMerchantConnectorRepository,
 } from "@interfaces/data";
 import { IContextProvider, IConfigProvider } from "@interfaces/utilities";
 
-export class MerchantConnectorService implements IMerchantConnectorService {
+export class GatewayConnectorService implements IGatewayConnectorService {
   constructor(
     protected merchantConnectorRepository: IMerchantConnectorRepository,
     protected accountsRepository: IAccountsRepository,
@@ -33,7 +33,7 @@ export class MerchantConnectorService implements IMerchantConnectorService {
     LogicalError | MerchantConnectorError
   > {
     return this.contextProvider.getContext().map((context) => {
-      // Subscribe to the various events, and sort them out for the merchant connector
+      // Subscribe to the various events, and sort them out for the gateway connector
       context.onPushPaymentSent.subscribe((payment) => {
         this.merchantConnectorRepository
           .notifyPushPaymentSent(payment.gatewayUrl, payment)
@@ -102,7 +102,7 @@ export class MerchantConnectorService implements IMerchantConnectorService {
     ]).map(async (vals) => {
       const [context, authorizedGatewaysMap, balances] = vals;
 
-      // Remove the merchant iframe proxy related to that gatewayUrl if there is any activated ones.
+      // Remove the gateway iframe proxy related to that gatewayUrl if there is any activated ones.
       if (authorizedGatewaysMap.get(gatewayUrl)) {
         this.merchantConnectorRepository.deauthorizeMerchant(gatewayUrl);
       }
@@ -172,7 +172,7 @@ export class MerchantConnectorService implements IMerchantConnectorService {
     return this.merchantConnectorRepository.displayMerchantIFrame(gatewayUrl);
   }
 
-  /* Destroy merchant connector if deauthorizeMerchant lasted more than merchantDeauthorizationTimeout */
+  /* Destroy gateway connector if deauthorizeMerchant lasted more than merchantDeauthorizationTimeout */
   private _getDeauthorizationTimeoutResult(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, Error> {

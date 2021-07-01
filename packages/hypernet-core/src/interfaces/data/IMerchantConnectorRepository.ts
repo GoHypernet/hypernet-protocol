@@ -20,14 +20,14 @@ import { ResultAsync } from "neverthrow";
 
 export interface IMerchantConnectorRepository {
   /**
-   * Returns a map of merchant URLs to their address
+   * Returns a map of gateway URLs to their address
    */
   getMerchantAddresses(
     gatewayUrl: GatewayUrl[],
   ): ResultAsync<Map<GatewayUrl, EthereumAddress>, LogicalError>;
 
   /**
-   * Adds the merchant url as authorized with a particular signature
+   * Adds the gateway url as authorized with a particular signature
    * @param gatewayUrl
    * @param signature
    */
@@ -45,7 +45,7 @@ export interface IMerchantConnectorRepository {
   >;
 
   /**
-   * Deauthorizes a merchant, which will also destroy their proxy.
+   * Deauthorizes a gateway, which will also destroy their proxy.
    * @param gatewayUrl
    */
   deauthorizeMerchant(
@@ -56,8 +56,8 @@ export interface IMerchantConnectorRepository {
   >;
 
   /**
-   * Returns the status of all the authorized merchant's connectors.
-   * @returns A map of merchant URL and a boolean indicating whether or not the connector is active.
+   * Returns the status of all the authorized gateway's connectors.
+   * @returns A map of gateway URL and a boolean indicating whether or not the connector is active.
    */
   getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
@@ -66,7 +66,7 @@ export interface IMerchantConnectorRepository {
 
   /**
    * Returns a list of authorized merchants and the user's authorization signature for that
-   * merchant.
+   * gateway.
    */
   getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,

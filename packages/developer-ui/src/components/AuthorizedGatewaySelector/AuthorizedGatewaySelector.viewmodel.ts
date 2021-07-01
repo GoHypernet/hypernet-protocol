@@ -32,8 +32,8 @@ export class AuthorizedGatewaySelectorViewModel {
     this.merchants = ko.observable(null);
     this.authorizedGatewayOptions = ko.observableArray<AuthorizedMerchantOption>();
 
-    this.integration.core.onMerchantAuthorized.subscribe((merchant) => {
-      const url = merchant.toString();
+    this.integration.core.onMerchantAuthorized.subscribe((gateway) => {
+      const url = gateway.toString();
       this.authorizedGatewayOptions.push(
         new AuthorizedMerchantOption(url, url),
       );
@@ -44,7 +44,7 @@ export class AuthorizedGatewaySelectorViewModel {
         const selectedAuthorizedMerchant = this.selectedAuthorizedMerchant();
         if (selectedAuthorizedMerchant == null) {
           // tslint:disable-next-line: no-console
-          console.log("No selected merchant.");
+          console.log("No selected gateway.");
           return null;
         }
 
@@ -98,7 +98,7 @@ export class AuthorizedGatewaySelectorViewModel {
   }
 }
 
-ko.components.register("authorized-merchant-selector", {
+ko.components.register("authorized-gateway-selector", {
   viewModel: AuthorizedGatewaySelectorViewModel,
   template: html,
 });

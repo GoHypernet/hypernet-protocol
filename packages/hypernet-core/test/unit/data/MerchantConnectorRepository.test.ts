@@ -23,10 +23,10 @@ import {
 import { IStorageUtils } from "@interfaces/data/utilities";
 import {
   IVectorUtils,
-  IMerchantConnectorProxy,
+  IGatewayConnectorProxy,
   IBlockchainUtils,
 } from "@interfaces/utilities";
-import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
+import { IGatewayConnectorProxyFactory } from "@interfaces/utilities/factory";
 import {
   gatewayUrl,
   account,
@@ -58,8 +58,8 @@ class MerchantConnectorRepositoryMocks {
   public vectorUtils = td.object<IVectorUtils>();
   public configProvider = new ConfigProviderMock();
   public contextProvider = new ContextProviderMock();
-  public merchantConnectorProxyFactory = td.object<IMerchantConnectorProxyFactory>();
-  public merchantConnectorProxy = td.object<IMerchantConnectorProxy>();
+  public gatewayConnectorProxyFactory = td.object<IGatewayConnectorProxyFactory>();
+  public merchantConnectorProxy = td.object<IGatewayConnectorProxy>();
   public blockchainUtils = td.object<IBlockchainUtils>();
   public storageUtils = td.object<IStorageUtils>();
   public logUtils = td.object<ILogUtils>();
@@ -108,7 +108,7 @@ class MerchantConnectorRepositoryMocks {
     );
 
     td.when(
-      this.merchantConnectorProxyFactory.factoryProxy(gatewayUrl),
+      this.gatewayConnectorProxyFactory.factoryProxy(gatewayUrl),
     ).thenReturn(okAsync(this.merchantConnectorProxy));
 
     td.when(this.merchantConnectorProxy.getValidatedSignature()).thenReturn(
@@ -155,7 +155,7 @@ class MerchantConnectorRepositoryMocks {
       this.contextProvider,
       this.vectorUtils,
       this.storageUtils,
-      this.merchantConnectorProxyFactory,
+      this.gatewayConnectorProxyFactory,
       this.blockchainUtils,
       this.logUtils,
     );
@@ -262,7 +262,7 @@ describe("MerchantConnectorRepository tests", () => {
 
     const error = new ProxyError();
     td.when(
-      mocks.merchantConnectorProxyFactory.factoryProxy(gatewayUrl),
+      mocks.gatewayConnectorProxyFactory.factoryProxy(gatewayUrl),
     ).thenReturn(errAsync(error));
 
     let onAuthorizedMerchantActivationFailedVal: string | null = null;
@@ -283,7 +283,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(onAuthorizedMerchantActivationFailedVal).toBe(gatewayUrl);
   });
 
-  test("activateAuthorizedGateways passes if one of the merchant connector's signatures can't be verified by the iFrame.", async () => {
+  test("activateAuthorizedGateways passes if one of the gateway connector's signatures can't be verified by the iFrame.", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
@@ -383,7 +383,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(error).toBeDefined();
   });
 
-  test("resolveChallenge returns an error if the merchant connector resolveChallenge fails", async () => {
+  test("resolveChallenge returns an error if the gateway connector resolveChallenge fails", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
@@ -483,7 +483,7 @@ describe("MerchantConnectorRepository tests", () => {
 
     const error = new MerchantConnectorError();
     td.when(
-      mocks.merchantConnectorProxyFactory.factoryProxy(gatewayUrl),
+      mocks.gatewayConnectorProxyFactory.factoryProxy(gatewayUrl),
     ).thenReturn(errAsync(error));
 
     let onAuthorizedMerchantActivationFailedVal: string | null = null;
@@ -701,7 +701,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(value.get(merchantUrl2)).toBe(account2);
   });
 
-  test("getMerchantAddresses returns an error if a single merchant has an error", async () => {
+  test("getMerchantAddresses returns an error if a single gateway has an error", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
 
@@ -730,7 +730,7 @@ describe("MerchantConnectorRepository tests", () => {
     expect(value).toBe(error);
   });
 
-  test("getAuthorizedGatewaysConnectorsStatus returns map of merchant urls and status", async () => {
+  test("getAuthorizedGatewaysConnectorsStatus returns map of gateway urls and status", async () => {
     // Arrange
     const mocks = new MerchantConnectorRepositoryMocks();
     const repo = mocks.factoryRepository();

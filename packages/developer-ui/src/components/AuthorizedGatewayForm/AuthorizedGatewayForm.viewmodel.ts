@@ -38,7 +38,7 @@ export class AuthorizedGatewayFormViewModel {
   }
 }
 
-ko.components.register("authorized-merchant-form", {
+ko.components.register("authorized-gateway-form", {
   viewModel: AuthorizedGatewayFormViewModel,
   template: html,
 });

@@ -708,7 +708,7 @@ describe("PaymentService tests", () => {
     );
   });
 
-  test("Should advancePayments pass and trigger onPushPaymentDelayed if payment merchant is inactive", async () => {
+  test("Should advancePayments pass and trigger onPushPaymentDelayed if payment gateway is inactive", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 

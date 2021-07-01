@@ -45,12 +45,8 @@ import {
   IValidationUtils,
   ValidationUtils,
 } from "@hypernetlabs/utils";
-import { BigNumber } from "ethers";
-import { ok, Result, ResultAsync } from "neverthrow";
-import { Subject } from "rxjs";
-
 import {
-  MerchantConnectorListener,
+  GatewayConnectorListener,
   NatsMessagingListener,
   VectorAPIListener,
 } from "@implementations/api";
@@ -59,7 +55,7 @@ import {
   ControlService,
   DevelopmentService,
   LinkService,
-  MerchantConnectorService,
+  GatewayConnectorService,
   PaymentService,
 } from "@implementations/business";
 import {
@@ -69,6 +65,31 @@ import {
   PaymentRepository,
   VectorLinkRepository,
 } from "@implementations/data";
+import {
+  IGatewayConnectorListener,
+  IMessagingListener,
+  IVectorListener,
+} from "@interfaces/api";
+import {
+  IAccountService,
+  IControlService,
+  IDevelopmentService,
+  ILinkService,
+  IGatewayConnectorService,
+  IPaymentService,
+} from "@interfaces/business";
+import {
+  IAccountsRepository,
+  ILinkRepository,
+  IMerchantConnectorRepository,
+  IMessagingRepository,
+  IPaymentRepository,
+} from "@interfaces/data";
+import { HypernetContext } from "@interfaces/objects";
+import { BigNumber } from "ethers";
+import { ok, Result, ResultAsync } from "neverthrow";
+import { Subject } from "rxjs";
+
 import { StorageUtils } from "@implementations/data/utilities";
 import {
   BrowserNodeProvider,
@@ -86,32 +107,11 @@ import {
   MessagingProvider,
 } from "@implementations/utilities";
 import {
-  MerchantConnectorProxyFactory,
+  GatewayConnectorProxyFactory,
   BrowserNodeFactory,
   InternalProviderFactory,
 } from "@implementations/utilities/factory";
-import {
-  IMerchantConnectorListener,
-  IMessagingListener,
-  IVectorListener,
-} from "@interfaces/api";
-import {
-  IAccountService,
-  IControlService,
-  IDevelopmentService,
-  ILinkService,
-  IMerchantConnectorService,
-  IPaymentService,
-} from "@interfaces/business";
-import {
-  IAccountsRepository,
-  ILinkRepository,
-  IMerchantConnectorRepository,
-  IMessagingRepository,
-  IPaymentRepository,
-} from "@interfaces/data";
 import { IStorageUtils } from "@interfaces/data/utilities";
-import { HypernetContext } from "@interfaces/objects";
 import {
   IBlockchainProvider,
   IBlockchainUtils,
@@ -130,7 +130,7 @@ import {
 import {
   IBrowserNodeFactory,
   IInternalProviderFactory,
-  IMerchantConnectorProxyFactory,
+  IGatewayConnectorProxyFactory,
 } from "@interfaces/utilities/factory";
 
 /**
@@ -182,7 +182,7 @@ export class HypernetCore implements IHypernetCore {
   protected messagingProvider: IMessagingProvider;
 
   // Factories
-  protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory;
+  protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory;
   protected browserNodeFactory: IBrowserNodeFactory;
   protected internalProviderFactory: IInternalProviderFactory;
 
@@ -199,11 +199,11 @@ export class HypernetCore implements IHypernetCore {
   protected paymentService: IPaymentService;
   protected linkService: ILinkService;
   protected developmentService: IDevelopmentService;
-  protected merchantConnectorService: IMerchantConnectorService;
+  protected merchantConnectorService: IGatewayConnectorService;
 
   // API
   protected vectorAPIListener: IVectorListener;
-  protected merchantConnectorListener: IMerchantConnectorListener;
+  protected merchantConnectorListener: IGatewayConnectorListener;
   protected messagingListener: IMessagingListener;
 
   protected _initializeResult: ResultAsync<
@@ -291,7 +291,7 @@ export class HypernetCore implements IHypernetCore {
     this.configProvider = new ConfigProvider(this.logUtils, config);
     this.linkUtils = new LinkUtils(this.contextProvider);
 
-    this.merchantConnectorProxyFactory = new MerchantConnectorProxyFactory(
+    this.gatewayConnectorProxyFactory = new GatewayConnectorProxyFactory(
       this.configProvider,
       this.contextProvider,
     );
@@ -404,7 +404,7 @@ export class HypernetCore implements IHypernetCore {
       this.contextProvider,
       this.vectorUtils,
       this.storageUtils,
-      this.merchantConnectorProxyFactory,
+      this.gatewayConnectorProxyFactory,
       this.blockchainUtils,
       this.logUtils,
     );
@@ -436,7 +436,7 @@ export class HypernetCore implements IHypernetCore {
     );
     this.linkService = new LinkService(this.linkRepository);
     this.developmentService = new DevelopmentService(this.accountRepository);
-    this.merchantConnectorService = new MerchantConnectorService(
+    this.merchantConnectorService = new GatewayConnectorService(
       this.merchantConnectorRepository,
       this.accountRepository,
       this.contextProvider,
@@ -453,7 +453,7 @@ export class HypernetCore implements IHypernetCore {
       this.logUtils,
     );
 
-    this.merchantConnectorListener = new MerchantConnectorListener(
+    this.merchantConnectorListener = new GatewayConnectorListener(
       this.accountService,
       this.paymentService,
       this.linkService,
@@ -600,7 +600,7 @@ export class HypernetCore implements IHypernetCore {
    * @param amount
    * @param requiredStake the amount of stake that the provider must put up as part of the insurancepayment
    * @param paymentToken
-   * @param merchantURL the registered URL for the merchant that will resolve any disputes.
+   * @param merchantURL the registered URL for the gateway that will resolve any disputes.
    */
   public sendFunds(
     counterPartyAccount: PublicIdentifier,
@@ -643,7 +643,7 @@ export class HypernetCore implements IHypernetCore {
    * @param expirationDate the latest time in which the counterparty can pull funds
    * @param requiredStake the amount of stake the counterparyt must put up as insurance
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param gatewayUrl the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   public authorizeFunds(
     counterPartyAccount: PublicIdentifier,

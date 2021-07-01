@@ -19,7 +19,7 @@ export interface IGatewayConnector {
   getAddress(): Promise<EthereumAddress>;
 
   /**
-   * Deauthorize the merchant
+   * Deauthorize the gateway
    */
   deauthorize(): Promise<void>;
 

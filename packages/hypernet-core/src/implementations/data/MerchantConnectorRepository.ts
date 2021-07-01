@@ -49,13 +49,13 @@ import {
   IConfigProviderType,
   IContextProvider,
   IContextProviderType,
-  IMerchantConnectorProxy,
+  IGatewayConnectorProxy,
   IVectorUtils,
   IVectorUtilsType,
 } from "@interfaces/utilities";
 import {
-  IMerchantConnectorProxyFactory,
-  IMerchantConnectorProxyFactoryType,
+  IGatewayConnectorProxyFactory,
+  IGatewayConnectorProxyFactoryType,
 } from "@interfaces/utilities/factory";
 
 @injectable()
@@ -64,14 +64,14 @@ export class MerchantConnectorRepository
   protected authorizedGatewayProxies: Map<
     GatewayUrl,
     ResultAsync<
-      IMerchantConnectorProxy,
+      IGatewayConnectorProxy,
       | MerchantActivationError
       | MerchantValidationError
       | MerchantAuthorizationDeniedError
       | ProxyError
     >
   >;
-  protected existingProxies: Map<GatewayUrl, IMerchantConnectorProxy>;
+  protected existingProxies: Map<GatewayUrl, IGatewayConnectorProxy>;
   protected domain: TypedDataDomain;
   protected types: Record<string, TypedDataField[]>;
   protected activateAuthorizedGatewaysResult:
@@ -87,8 +87,8 @@ export class MerchantConnectorRepository
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
     @inject(IVectorUtilsType) protected vectorUtils: IVectorUtils,
     @inject(IStorageUtilsType) protected storageUtils: IStorageUtils,
-    @inject(IMerchantConnectorProxyFactoryType)
-    protected merchantConnectorProxyFactory: IMerchantConnectorProxyFactory,
+    @inject(IGatewayConnectorProxyFactoryType)
+    protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory,
     @inject(IBlockchainUtilsType) protected blockchainUtils: IBlockchainUtils,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {
@@ -112,7 +112,7 @@ export class MerchantConnectorRepository
     Map<GatewayUrl, EthereumAddress>,
     AjaxError | ProxyError | MerchantAuthorizationDeniedError
   > {
-    // TODO: right now, the merchant will publish a URL with their address; eventually, they should be held in a smart contract
+    // TODO: right now, the gateway will publish a URL with their address; eventually, they should be held in a smart contract
 
     // For merchants that are already authorized, we can just go to their connector for the
     // public key.
@@ -176,7 +176,7 @@ export class MerchantConnectorRepository
     | MerchantConnectorError
     | MerchantActivationError
   > {
-    let proxy: IMerchantConnectorProxy;
+    let proxy: IGatewayConnectorProxy;
     let context: InitializedHypernetContext;
 
     // First, we will create the proxy
@@ -184,13 +184,13 @@ export class MerchantConnectorRepository
       .getInitializedContext()
       .andThen((myContext) => {
         context = myContext;
-        return this.merchantConnectorProxyFactory.factoryProxy(gatewayUrl);
+        return this.gatewayConnectorProxyFactory.factoryProxy(gatewayUrl);
       })
       .andThen((myProxy) => {
         proxy = myProxy;
         this.existingProxies.set(gatewayUrl, proxy);
 
-        // With the proxy activated, we can get the validated merchant signature
+        // With the proxy activated, we can get the validated gateway signature
         return ResultUtils.combine([
           proxy.getValidatedSignature(),
           this.blockchainProvider.getSigner(),
@@ -228,20 +228,20 @@ export class MerchantConnectorRepository
         return this._setAuthorizedGateways(authorizedGateways);
       })
       .andThen(() => {
-        // Notify the world that the merchant connector exists
+        // Notify the world that the gateway connector exists
         // Notably, API listeners could start
         if (context != null) {
           context.onMerchantConnectorProxyActivated.next(proxy);
         }
 
-        // Activate the merchant connector
+        // Activate the gateway connector
         return proxy.activateConnector(
           context.publicIdentifier,
           initialBalances,
         );
       })
       .map(() => {
-        // Only if the merchant is successfully activated do we stick it in the list.
+        // Only if the gateway is successfully activated do we stick it in the list.
         this.authorizedGatewayProxies.set(gatewayUrl, okAsync(proxy));
       })
       .mapErr((e) => {
@@ -254,14 +254,14 @@ export class MerchantConnectorRepository
         }
 
         return new MerchantActivationError(
-          `Unable to activate merchant ${gatewayUrl}`,
+          `Unable to activate gateway ${gatewayUrl}`,
           e,
         );
       });
   }
 
   /**
-   * Returns a map of merchant URLs with their authorization signatures.
+   * Returns a map of gateway URLs with their authorization signatures.
    */
   public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
@@ -298,7 +298,7 @@ export class MerchantConnectorRepository
     | ProxyError
   > {
     return this._getActivatedMerchantProxy(gatewayUrl).andThen((proxy) => {
-      // if merchant is activated, start resolving the transfer
+      // if gateway is activated, start resolving the transfer
       return proxy
         .resolveChallenge(paymentId)
         .andThen((result) => {
@@ -342,7 +342,7 @@ export class MerchantConnectorRepository
    * in the case that the whole startup process should be aborted- something is fatally fucked up.
    * This means that even otherwise fatal errors such as like the blockchain being unavailable will
    * not stop it; the net effect is that you have no activated merchants. Authorized, yes, activated no.
-   * There are lots of things you can do with an inactive merchant connector.
+   * There are lots of things you can do with an inactive gateway connector.
    */
   public activateAuthorizedGateways(
     balances: Balances,
@@ -377,7 +377,7 @@ export class MerchantConnectorRepository
                   // This function will eat all errors, so that startup
                   // will not be denied.
                   this.logUtils.error(
-                    `Could not activate authorized merchant ${gatewayUrl}`,
+                    `Could not activate authorized gateway ${gatewayUrl}`,
                   );
                   this.logUtils.error(e);
                   return okAsync(undefined);
@@ -531,7 +531,7 @@ export class MerchantConnectorRepository
 
     return this.getAuthorizedGateways()
       .andThen((authorizedGateways) => {
-        // Go through the results for the merchant
+        // Go through the results for the gateway
         const proxyResults = new Array<ResultAsync<void, never>>();
         for (const [gatewayUrl, _signature] of authorizedGateways) {
           const proxyResult = this.authorizedGatewayProxies.get(gatewayUrl);
@@ -586,10 +586,10 @@ export class MerchantConnectorRepository
   protected _getActivatedMerchantProxy(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
-    IMerchantConnectorProxy,
+    IGatewayConnectorProxy,
     ProxyError | MerchantAuthorizationDeniedError | PersistenceError
   > {
-    // The goal of this method is to return an activated merchant proxy,
+    // The goal of this method is to return an activated gateway proxy,
     // and not resolve unless all hope is lost.
 
     // Wait until activateAuthorizedGateways is done doing its thing
@@ -606,10 +606,10 @@ export class MerchantConnectorRepository
     ])
       .andThen((vals) => {
         const [authorizedGateways] = vals;
-        // If the merchant is not authorized, that's a fatal error.
+        // If the gateway is not authorized, that's a fatal error.
         // Now, you may ask yourself, what about addAuthorizedMerchant?
         // Well, you can't call this method until that one is complete.
-        // If the merchant was already authorized, you can call this
+        // If the gateway was already authorized, you can call this
         // method and get the in-progress activation.
         const authorizationSignature = authorizedGateways.get(gatewayUrl);
         if (authorizationSignature == null) {
@@ -622,7 +622,7 @@ export class MerchantConnectorRepository
         const proxyResult = this.authorizedGatewayProxies.get(gatewayUrl);
         if (proxyResult == null) {
           throw new Error(
-            `There is not result for merchant ${gatewayUrl}, even though it is authorized. Something strange going on.`,
+            `There is not result for gateway ${gatewayUrl}, even though it is authorized. Something strange going on.`,
           );
         }
 
@@ -677,7 +677,7 @@ export class MerchantConnectorRepository
   }
 
   /**
-   * This function does all the work of trying to activate a merchant connector. It can be called multiple times.
+   * This function does all the work of trying to activate a gateway connector. It can be called multiple times.
    * @param accountAddress
    * @param balances
    * @param gatewayUrl
@@ -693,7 +693,7 @@ export class MerchantConnectorRepository
     context: InitializedHypernetContext,
     signer: ethers.providers.JsonRpcSigner,
   ): ResultAsync<
-    IMerchantConnectorProxy,
+    IGatewayConnectorProxy,
     | MerchantActivationError
     | MerchantValidationError
     | MerchantAuthorizationDeniedError
@@ -706,10 +706,10 @@ export class MerchantConnectorRepository
       return existingProxyResult;
     }
 
-    let proxy: IMerchantConnectorProxy;
+    let proxy: IGatewayConnectorProxy;
 
-    this.logUtils.debug(`Activating merchant connector ${gatewayUrl}`);
-    const proxyResult = this.merchantConnectorProxyFactory
+    this.logUtils.debug(`Activating gateway connector ${gatewayUrl}`);
+    const proxyResult = this.gatewayConnectorProxyFactory
       .factoryProxy(gatewayUrl)
       .andThen((myProxy) => {
         this.logUtils.debug(`Proxy created for ${gatewayUrl}`);
@@ -729,7 +729,7 @@ export class MerchantConnectorRepository
         return this._activateConnector(context, proxy, balances);
       })
       .map(() => {
-        // TODO: make sure of the implementation here, this will trigger an event and a subscribe event in MerchantConnectorListener
+        // TODO: make sure of the implementation here, this will trigger an event and a subscribe event in GatewayConnectorListener
         // will call advanceMerchantUnresolvedPayments.
         context.onMerchantConnectorProxyActivated.next(proxy);
         return proxy;
@@ -757,7 +757,7 @@ export class MerchantConnectorRepository
 
   protected _validateConnector(
     gatewayUrl: GatewayUrl,
-    proxy: IMerchantConnectorProxy,
+    proxy: IGatewayConnectorProxy,
     authorizationSignature: Signature,
     context: InitializedHypernetContext,
     signer: ethers.providers.JsonRpcSigner,
@@ -802,7 +802,7 @@ export class MerchantConnectorRepository
         ).orElse((e) => {
           // We only end up here if the user has denied signing
           // to authorize the new connector.
-          // We need to de-authorize this merchant
+          // We need to de-authorize this gateway
           return this.deauthorizeMerchant(gatewayUrl).andThen(() => {
             // And then propagate the error
             this.logUtils.error(e);
@@ -839,10 +839,10 @@ export class MerchantConnectorRepository
 
   protected _activateConnector(
     context: InitializedHypernetContext,
-    proxy: IMerchantConnectorProxy,
+    proxy: IGatewayConnectorProxy,
     balances: Balances,
   ): ResultAsync<
-    IMerchantConnectorProxy,
+    IGatewayConnectorProxy,
     MerchantActivationError | ProxyError
   > {
     this.logUtils.debug(`Activating connector for ${proxy.gatewayUrl}`);

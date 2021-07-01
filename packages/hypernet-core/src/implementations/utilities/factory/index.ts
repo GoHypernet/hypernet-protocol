@@ -1,3 +1,3 @@
 export * from "./BrowserNodeFactory";
-export * from "./MerchantConnectorProxyFactory";
+export * from "./GatewayConnectorProxyFactory";
 export * from "./InternalProviderFactory";

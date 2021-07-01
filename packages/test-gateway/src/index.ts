@@ -69,11 +69,11 @@ class TestGatewayConnector implements IGatewayConnector {
   }
 
   public onIFrameClosed() {
-    console.log("Hey, user just closed merchant iframe");
+    console.log("Hey, user just closed gateway iframe");
   }
 
   public onIFrameDisplayed() {
-    console.log("Hey, user just opened merchant iframe");
+    console.log("Hey, user just opened gateway iframe");
   }
 
   public deauthorize() {
@@ -90,13 +90,13 @@ class TestGatewayConnector implements IGatewayConnector {
     element.innerHTML = `
       <div style="text-align: center; display: flex; justify-content: center; flex-direction: column; background-color: #ffffff;">
         <img src="https://res.cloudinary.com/dqueufbs7/image/upload/v1614648372/images/Screen_Shot_2021-03-02_at_04.14.05.png" width="100%" />
-        <h2>Galileo merchant connector</h2>
+        <h2>Galileo gateway connector</h2>
       </div>
     `;
     window.document.body.appendChild(element);
 
     // connector did all the rendering stuff, now he is asking gateway-iframe to show his stuff
-    // Gateway iframe Postmate model is running after the connector code get compiled in MerchantConnectorService.activateMerchantConnector so we need a small delay to wait for the Postmate model to get initialized.
+    // Gateway iframe Postmate model is running after the connector code get compiled in GatewayConnectorService.activateMerchantConnector so we need a small delay to wait for the Postmate model to get initialized.
     setTimeout(() => {
       //this.displayRequested.next();
     }, 100);

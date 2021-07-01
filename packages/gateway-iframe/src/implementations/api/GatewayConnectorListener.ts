@@ -1,26 +1,26 @@
 import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
-import { IMerchantConnectorListener } from "@gateway-iframe/interfaces/api";
+import { injectable, inject } from "inversify";
+import { okAsync, ResultAsync } from "neverthrow";
+
+import { IGatewayConnectorListener } from "@gateway-iframe/interfaces/api";
 import {
-  IMerchantService,
+  IGatewayService,
   IMerchantServiceType,
   IDisplayService,
   IDisplayServiceType,
   IPaymentService,
   IPaymentServiceType,
 } from "@gateway-iframe/interfaces/business";
-import { injectable, inject } from "inversify";
-import { okAsync, ResultAsync } from "neverthrow";
-
 import {
   IContextProvider,
   IContextProviderType,
 } from "@gateway-iframe/interfaces/utils";
 
 @injectable()
-export class MerchantConnectorListener implements IMerchantConnectorListener {
+export class GatewayConnectorListener implements IGatewayConnectorListener {
   constructor(
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
-    @inject(IMerchantServiceType) protected merchantService: IMerchantService,
+    @inject(IMerchantServiceType) protected merchantService: IGatewayService,
     @inject(IPaymentServiceType) protected paymentService: IPaymentService,
     @inject(IDisplayServiceType) protected displayService: IDisplayService,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,

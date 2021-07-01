@@ -16,7 +16,7 @@ import {
 } from "@interfaces/objects";
 import {
   IContextProvider,
-  IMerchantConnectorProxy,
+  IGatewayConnectorProxy,
 } from "@interfaces/utilities";
 import { account, publicIdentifier } from "@mock/mocks";
 
@@ -68,8 +68,8 @@ export class ContextProviderMock implements IContextProvider {
   public onInitializationRequiredActivationCount = 0;
   public onPrivateCredentialsRequested: Subject<void>;
   public onPrivateCredentialsRequestedActivationCount = 0;
-  public onMerchantConnectorActivated: Subject<IMerchantConnectorProxy>;
-  public onMerchantConnectorActivatedActivations: IMerchantConnectorProxy[] = [];
+  public onMerchantConnectorActivated: Subject<IGatewayConnectorProxy>;
+  public onMerchantConnectorActivatedActivations: IGatewayConnectorProxy[] = [];
 
   public authorizedGateways: Map<GatewayUrl, Signature>;
 
@@ -188,7 +188,7 @@ export class ContextProviderMock implements IContextProvider {
       this.onPrivateCredentialsRequestedActivationCount++;
     });
 
-    this.onMerchantConnectorActivated = new Subject<IMerchantConnectorProxy>();
+    this.onMerchantConnectorActivated = new Subject<IGatewayConnectorProxy>();
     this.onMerchantConnectorActivated.subscribe((val) => {
       this.onMerchantConnectorActivatedActivations.push(val);
     });

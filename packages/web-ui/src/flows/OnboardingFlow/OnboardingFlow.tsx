@@ -51,7 +51,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
 
   useEffect(() => {
     setLoading(true);
-    // First initialze the merchant
+    // First initialze the gateway
     coreProxy.getAuthorizedGateways().match((merchantsMap) => {
       if (merchantsMap.get(gatewayUrl)) {
         //check for balances

@@ -19,7 +19,7 @@ import {
   MerchantValidationError,
 } from "@gateway-iframe/interfaces/objects/errors";
 
-export interface IMerchantService {
+export interface IGatewayService {
   validateMerchantConnector(): ResultAsync<string, MerchantValidationError>;
   activateMerchantConnector(
     publicIdentifier: PublicIdentifier,
@@ -59,4 +59,4 @@ export interface IMerchantService {
   ): ResultAsync<void, never>;
 }
 
-export const IMerchantServiceType = Symbol.for("IMerchantService");
+export const IMerchantServiceType = Symbol.for("IGatewayService");

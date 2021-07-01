@@ -23,13 +23,13 @@ import { Subject } from "rxjs";
 
 import { HypernetContext } from "@interfaces/objects";
 import {
-  IMerchantConnectorProxy,
+  IGatewayConnectorProxy,
   IContextProvider,
 } from "@interfaces/utilities";
 
-export class MerchantConnectorProxy
+export class GatewayConnectorProxy
   extends ParentProxy
-  implements IMerchantConnectorProxy {
+  implements IGatewayConnectorProxy {
   protected static openedIFramesQueue: string[] = [];
 
   constructor(
@@ -112,20 +112,20 @@ export class MerchantConnectorProxy
     ]).map((vals) => {
       const [context] = vals;
 
-      // Events coming from merchant connector iframe
+      // Events coming from gateway connector iframe
       this.child?.on("displayRequested", () => {
         this._pushOpenedMerchantIFrame(this.gatewayUrl);
         this._showMerchantIFrame(context);
       });
 
       this.child?.on("closeRequested", () => {
-        // Only hide the merchant iframe if it's really displayed in the screen
-        if (MerchantConnectorProxy.openedIFramesQueue[0] === this.gatewayUrl) {
+        // Only hide the gateway iframe if it's really displayed in the screen
+        if (GatewayConnectorProxy.openedIFramesQueue[0] === this.gatewayUrl) {
           this._hideMerchantIFrame();
         }
 
-        // Only close the core iframe if there isn't any merchant iframe left in the queue, otherwise show the next one in the line
-        if (MerchantConnectorProxy.openedIFramesQueue.length === 0) {
+        // Only close the core iframe if there isn't any gateway iframe left in the queue, otherwise show the next one in the line
+        if (GatewayConnectorProxy.openedIFramesQueue.length === 0) {
           context.onMerchantIFrameCloseRequested.next(this.gatewayUrl);
         } else {
           this._showMerchantIFrame(context);
@@ -169,12 +169,12 @@ export class MerchantConnectorProxy
     return this.contextProvider.getContext().andThen((context) => {
       this._hideMerchantIFrame();
 
-      // Show the next merchant iframe (which is always the first merchant iframe in the queue) if there is any in the queue.
-      if (MerchantConnectorProxy.openedIFramesQueue.length > 0) {
+      // Show the next gateway iframe (which is always the first gateway iframe in the queue) if there is any in the queue.
+      if (GatewayConnectorProxy.openedIFramesQueue.length > 0) {
         this._showMerchantIFrame(context);
       }
 
-      // notify the child in merchant connector to tell him that the merchant iframe is going to close up.
+      // notify the child in gateway connector to tell him that the gateway iframe is going to close up.
       return this._createCall("merchantIFrameClosed", this.gatewayUrl);
     });
   }
@@ -237,33 +237,33 @@ export class MerchantConnectorProxy
   private _pushOpenedMerchantIFrame(gatewayUrl: GatewayUrl) {
     // Check if there is gatewayUrl in the queue
     // If there is, don't re-add it.
-    const index = MerchantConnectorProxy.openedIFramesQueue.indexOf(
+    const index = GatewayConnectorProxy.openedIFramesQueue.indexOf(
       gatewayUrl,
     );
     if (index > -1) {
       return;
     }
-    MerchantConnectorProxy.openedIFramesQueue.push(gatewayUrl);
+    GatewayConnectorProxy.openedIFramesQueue.push(gatewayUrl);
   }
 
   private _showMerchantIFrame(context: HypernetContext) {
-    // Show the first merchant iframe in the queue
+    // Show the first gateway iframe in the queue
     document.getElementsByName(
-      `hypernet-core-gateway-connector-iframe-${MerchantConnectorProxy.openedIFramesQueue[0]}`,
+      `hypernet-core-gateway-connector-iframe-${GatewayConnectorProxy.openedIFramesQueue[0]}`,
     )[0].style.display = "block";
     context.onMerchantIFrameDisplayRequested.next(
-      GatewayUrl(MerchantConnectorProxy.openedIFramesQueue[0]),
+      GatewayUrl(GatewayConnectorProxy.openedIFramesQueue[0]),
     );
   }
 
   private _hideMerchantIFrame() {
-    if (!MerchantConnectorProxy.openedIFramesQueue.length) return;
+    if (!GatewayConnectorProxy.openedIFramesQueue.length) return;
 
-    // Hide the first merchant iframe in the queue which is the current one that is displayed in the screen.
+    // Hide the first gateway iframe in the queue which is the current one that is displayed in the screen.
     document.getElementsByName(
-      `hypernet-core-gateway-connector-iframe-${MerchantConnectorProxy.openedIFramesQueue[0]}`,
+      `hypernet-core-gateway-connector-iframe-${GatewayConnectorProxy.openedIFramesQueue[0]}`,
     )[0].style.display = "none";
     // We're done with it, remove it from the queue
-    MerchantConnectorProxy.openedIFramesQueue.shift();
+    GatewayConnectorProxy.openedIFramesQueue.shift();
   }
 }

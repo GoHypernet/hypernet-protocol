@@ -6,11 +6,12 @@ import {
   ProxyError,
   PersistenceError,
   MerchantAuthorizationDeniedError,
+  GatewayUrl,
+  Signature,
 } from "@hypernetlabs/objects";
-import { GatewayUrl, Signature } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
-export interface IMerchantConnectorService {
+export interface IGatewayConnectorService {
   initialize(): ResultAsync<void, LogicalError | MerchantConnectorError>;
   authorizeMerchant(
     gatewayUrl: GatewayUrl,

@@ -5,7 +5,7 @@ export * from "@interfaces/utilities/IBrowserNodeProvider";
 export * from "@interfaces/utilities/IConfigProvider";
 export * from "@interfaces/utilities/IContextProvider";
 export * from "@interfaces/utilities/ILinkUtils";
-export * from "@interfaces/utilities/IMerchantConnectorProxy";
+export * from "@interfaces/utilities/IGatewayConnectorProxy";
 export * from "@interfaces/utilities/IMessagingProvider";
 export * from "@interfaces/utilities/IPaymentIdUtils";
 export * from "@interfaces/utilities/IPaymentUtils";

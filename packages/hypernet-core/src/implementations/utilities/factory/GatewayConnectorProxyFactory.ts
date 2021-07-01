@@ -2,19 +2,20 @@ import { GatewayUrl, ProxyError } from "@hypernetlabs/objects";
 import { injectable, inject } from "inversify";
 import { ResultAsync } from "neverthrow";
 
-import { MerchantConnectorProxy } from "@implementations/utilities/MerchantConnectorProxy";
+import { GatewayConnectorProxy } from "@implementations/utilities/GatewayConnectorProxy";
 import {
   IConfigProvider,
-  IMerchantConnectorProxy,
+  IGatewayConnectorProxy,
   IContextProvider,
   IConfigProviderType,
   IContextProviderType,
 } from "@interfaces/utilities";
-import { IMerchantConnectorProxyFactory } from "@interfaces/utilities/factory";
+import { IGatewayConnectorProxyFactory } from "@interfaces/utilities/factory";
 
 @injectable()
-export class MerchantConnectorProxyFactory
-  implements IMerchantConnectorProxyFactory {
+export class GatewayConnectorProxyFactory
+  implements IGatewayConnectorProxyFactory
+{
   constructor(
     @inject(IConfigProviderType) protected configProvider: IConfigProvider,
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
@@ -22,15 +23,15 @@ export class MerchantConnectorProxyFactory
 
   factoryProxy(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<IMerchantConnectorProxy, ProxyError> {
-    let proxy: IMerchantConnectorProxy;
+  ): ResultAsync<IGatewayConnectorProxy, ProxyError> {
+    let proxy: IGatewayConnectorProxy;
     return this.configProvider
       .getConfig()
       .andThen((config) => {
         const iframeUrl = new URL(config.merchantIframeUrl);
         iframeUrl.searchParams.set("gatewayUrl", gatewayUrl);
 
-        proxy = new MerchantConnectorProxy(
+        proxy = new GatewayConnectorProxy(
           this._prepareIFrameContainer(),
           iframeUrl.toString(),
           gatewayUrl,
@@ -41,8 +42,8 @@ export class MerchantConnectorProxyFactory
 
         // The proxy needs to be activated to do anything. NOTE: this is different
         // from activating the connector itself; this just activates the proxy
-        // for communication. In the case of the merchant connector, it will grab
-        // the necessary data from the merchant URL in order to validate that the
+        // for communication. In the case of the gateway connector, it will grab
+        // the necessary data from the gateway URL in order to validate that the
         // connector code is properly signed and valid.
         return proxy.activateProxy();
       })

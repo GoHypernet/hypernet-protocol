@@ -1,6 +1,6 @@
 import { GatewayUrl } from "@hypernetlabs/objects";
-import { MerchantConnectorService } from "@implementations/business/MerchantConnectorService";
-import { IMerchantConnectorService } from "@interfaces/business/IMerchantConnectorService";
+import { GatewayConnectorService } from "@implementations/business/GatewayConnectorService";
+import { IGatewayConnectorService } from "@interfaces/business/IGatewayConnectorService";
 import {
   IAccountsRepository,
   IMerchantConnectorRepository,
@@ -11,7 +11,7 @@ import td from "testdouble";
 
 import { ConfigProviderMock, ContextProviderMock } from "@tests/mock/utils";
 
-class MerchantConnectorServiceMocks {
+class GatewayConnectorServiceMocks {
   public merchantConnectorRepository = td.object<IMerchantConnectorRepository>();
   public accountRepository = td.object<IAccountsRepository>();
   public contextProvider = new ContextProviderMock();
@@ -29,8 +29,8 @@ class MerchantConnectorServiceMocks {
     ).thenReturn(undefined);
   }
 
-  public factoryMerchantConnectorService(): IMerchantConnectorService {
-    return new MerchantConnectorService(
+  public factoryGatewayConnectorService(): IGatewayConnectorService {
+    return new GatewayConnectorService(
       this.merchantConnectorRepository,
       this.accountRepository,
       this.contextProvider,
@@ -40,12 +40,12 @@ class MerchantConnectorServiceMocks {
   }
 }
 
-describe("MerchantConnectorService tests", () => {
+describe("GatewayConnectorService tests", () => {
   test("Should deauthorizeMerchant works without errors and without having the need to run the timeout method", async () => {
     // Arrange
-    const merchantConnectorServiceMock = new MerchantConnectorServiceMocks();
+    const merchantConnectorServiceMock = new GatewayConnectorServiceMocks();
 
-    const merchantConnectorService = merchantConnectorServiceMock.factoryMerchantConnectorService();
+    const merchantConnectorService = merchantConnectorServiceMock.factoryGatewayConnectorService();
 
     // Act
     const response = await merchantConnectorService.deauthorizeMerchant(
@@ -66,9 +66,9 @@ describe("MerchantConnectorService tests", () => {
 
   test("Should deauthorizeMerchant runs the timeout method if deauthorizeMerchant repository lasted more than deauthorizationTimeout", async () => {
     // Arrange
-    const merchantConnectorServiceMock = new MerchantConnectorServiceMocks();
+    const merchantConnectorServiceMock = new GatewayConnectorServiceMocks();
 
-    const merchantConnectorService = merchantConnectorServiceMock.factoryMerchantConnectorService();
+    const merchantConnectorService = merchantConnectorServiceMock.factoryGatewayConnectorService();
 
     td.when(
       merchantConnectorServiceMock.merchantConnectorRepository.deauthorizeMerchant(
