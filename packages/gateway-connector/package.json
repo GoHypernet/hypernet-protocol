@@ -1,7 +1,7 @@
 {
   "name": "@hypernetlabs/gateway-connector",
   "version": "0.0.1",
-  "description": "Package that defines how to write a dispute mediator. Includes an example mediator for testing, which always resolve's in the sender's favor.",
+  "description": "Package that defines how to write a Hypernet Gateway.",
   "license": "ISC",
   "repository": {
     "type": "git",
