@@ -118,7 +118,10 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
           return errAsync(e);
         }
       })
-      .map(() => this.browserNode);
+      .map(() => {
+        this.logUtils.debug("Successfully started Vector browser node");
+        return this.browserNode;
+      });
 
     return this.browserNodeResult;
   }

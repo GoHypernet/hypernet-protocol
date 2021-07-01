@@ -759,6 +759,7 @@ export class HypernetCore implements IHypernetCore {
         return this.contextProvider.setContext(context);
       })
       .andThen(() => {
+        this.logUtils.debug("Initializing internal services");
         // Initialize anything that wants an initialized context
         return ResultUtils.combine([
           this.vectorAPIListener.setup(),
@@ -768,6 +769,7 @@ export class HypernetCore implements IHypernetCore {
         ]); // , this.threeboxMessagingListener.initialize()]);
       })
       .andThen(() => {
+        this.logUtils.debug("Initialized all internal services");
         return this.gatewayConnectorService.activateAuthorizedGateways();
       })
       // .andThen(() => {
