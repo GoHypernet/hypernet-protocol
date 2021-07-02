@@ -26,6 +26,9 @@ RUN yarn install
 # Configuration for the protocol is baked in at build time
 # We create a bunch of ARGs so that we can configure it properly
 # for the environment.
+ARG BUILD_ENV=development
+ENV __BUILD_ENV__ $BUILD_ENV
+
 ARG CORE_IFRAME_SOURCE=http://localhost:5020
 ENV __CORE_IFRAME_SOURCE__ $CORE_IFRAME_SOURCE
 
