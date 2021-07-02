@@ -23,6 +23,9 @@ COPY ./packages/web-integration/package.json /build/packages/web-integration/pac
 COPY ./packages/web-ui/package.json /build/packages/web-ui/package.json
 RUN yarn install
 
+ARG BUILD_ENV=development
+ENV __BUILD_ENV__ $BUILD_ENV
+
 # Copy the rest of the stuff and build
 COPY . /build
 RUN cd packages/gateway-iframe && yarn build
