@@ -37,6 +37,7 @@ export class GatewayConnectorProxyFactory
           gatewayUrl,
           `hypernet-core-gateway-connector-iframe-${gatewayUrl}`,
           this.contextProvider,
+          config.gatewayDeauthorizationTimeout,
           config.debug,
         );
 

@@ -30,16 +30,16 @@ import {
   IAjaxUtilsType,
   ILogUtilsType,
 } from "@hypernetlabs/utils";
-import { BigNumber, ethers } from "ethers";
-import { injectable, inject } from "inversify";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
-
 import {
   IGatewayConnectorRepository,
   IAuthorizedGatewayEntry,
 } from "@interfaces/data";
-import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import { InitializedHypernetContext } from "@interfaces/objects";
+import { BigNumber, ethers } from "ethers";
+import { injectable, inject } from "inversify";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
+
+import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
@@ -59,8 +59,7 @@ import {
 } from "@interfaces/utilities/factory";
 
 @injectable()
-export class GatewayConnectorRepository
-  implements IGatewayConnectorRepository {
+export class GatewayConnectorRepository implements IGatewayConnectorRepository {
   protected authorizedGatewayProxies: Map<
     GatewayUrl,
     ResultAsync<
@@ -128,9 +127,8 @@ export class GatewayConnectorRepository
     for (const gatewayUrl of gatewayUrls) {
       // We can't use _getActivatedGatewayProxy because it may fire an error when activateAuthorizedGatewaysResult is null
       // and in our case here we might need to pull the address from the source using ajax request not from the proxy.
-      const authorizedGatewayProxyResult = this.authorizedGatewayProxies.get(
-        gatewayUrl,
-      );
+      const authorizedGatewayProxyResult =
+        this.authorizedGatewayProxies.get(gatewayUrl);
 
       if (authorizedGatewayProxyResult == null) {
         addressRequests.push(this._getGatewayAddress(gatewayUrl));
@@ -503,20 +501,25 @@ export class GatewayConnectorRepository
     void,
     PersistenceError | ProxyError | GatewayAuthorizationDeniedError
   > {
-    return this.getAuthorizedGateways()
-      .map((authorizedGateways) => {
+    return this._getActivatedGatewayProxy(gatewayUrl)
+      .andThen((proxy) => {
+        return proxy.deauthorize();
+      })
+      .andThen(() => {
+        return this.getAuthorizedGateways();
+      })
+      .andThen((authorizedGateways) => {
         authorizedGateways.delete(gatewayUrl);
 
         return this._setAuthorizedGateways(authorizedGateways);
       })
-      .andThen(() => {
-        return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
-          return proxy.deauthorize();
-        });
-      })
       .map(() => {
         // Remove the proxy
         return this.destroyProxy(gatewayUrl);
+      })
+      .orElse(() => {
+        this.destroyProxy(gatewayUrl);
+        return okAsync(undefined);
       });
   }
 
@@ -815,10 +818,7 @@ export class GatewayConnectorRepository
           });
         });
 
-        return ResultUtils.combine([
-          signerResult,
-          this.getAuthorizedGateways(),
-        ])
+        return ResultUtils.combine([signerResult, this.getAuthorizedGateways()])
           .map((vals) => {
             const [newAuthorizationSignature, authorizedGateways] = vals;
 
@@ -841,10 +841,7 @@ export class GatewayConnectorRepository
     context: InitializedHypernetContext,
     proxy: IGatewayConnectorProxy,
     balances: Balances,
-  ): ResultAsync<
-    IGatewayConnectorProxy,
-    GatewayActivationError | ProxyError
-  > {
+  ): ResultAsync<IGatewayConnectorProxy, GatewayActivationError | ProxyError> {
     this.logUtils.debug(`Activating connector for ${proxy.gatewayUrl}`);
     return proxy
       .activateConnector(context.publicIdentifier, balances)

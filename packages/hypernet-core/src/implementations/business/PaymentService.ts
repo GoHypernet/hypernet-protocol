@@ -28,10 +28,6 @@ import {
   BigNumberString,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
-import { BigNumber } from "ethers";
-import { injectable, inject } from "inversify";
-import { err, errAsync, ok, okAsync, ResultAsync, Result } from "neverthrow";
-
 import { IPaymentService } from "@interfaces/business";
 import {
   IAccountsRepository,
@@ -44,6 +40,10 @@ import {
   IPaymentRepositoryType,
 } from "@interfaces/data";
 import { HypernetContext } from "@interfaces/objects";
+import { BigNumber } from "ethers";
+import { injectable, inject } from "inversify";
+import { err, errAsync, ok, okAsync, ResultAsync, Result } from "neverthrow";
+
 import {
   IConfigProvider,
   IConfigProviderType,
@@ -780,10 +780,9 @@ export class PaymentService implements IPaymentService {
           }`,
         );
         if (gatewayConnectorStatus == true) {
-          return this._advancePaymentForActivatedGateway(
-            payment,
-            context,
-          ).map(() => {});
+          return this._advancePaymentForActivatedGateway(payment, context).map(
+            () => {},
+          );
         } else {
           // Gateway is not active, so we will not advance the payment
           this.logUtils.debug(

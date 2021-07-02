@@ -48,7 +48,7 @@ export interface IGatewayConnectorProxy extends ParentProxy {
     GatewayConnectorError | ProxyError
   >;
 
-  deauthorize(): ResultAsync<void, GatewayConnectorError | ProxyError>;
+  deauthorize(): ResultAsync<void, never>;
 
   /**
    * getValidatedSignature() requests the gateway iframe to return the

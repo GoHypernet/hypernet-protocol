@@ -8,18 +8,18 @@ import {
   GatewayActivationError,
   ProxyError,
   AuthorizedGatewaysSchema,
+  IBasicTransferResponse,
 } from "@hypernetlabs/objects";
-import { IBasicTransferResponse } from "@hypernetlabs/objects";
 import { IAjaxUtils, ILogUtils } from "@hypernetlabs/utils";
-import { BigNumber } from "ethers";
-import { okAsync, errAsync } from "neverthrow";
-import td, { verify } from "testdouble";
-
 import { GatewayConnectorRepository } from "@implementations/data/GatewayConnectorRepository";
 import {
   IGatewayConnectorRepository,
   IAuthorizedGatewayEntry,
 } from "@interfaces/data/IGatewayConnectorRepository";
+import { BigNumber } from "ethers";
+import { okAsync, errAsync } from "neverthrow";
+import td, { verify } from "testdouble";
+
 import { IStorageUtils } from "@interfaces/data/utilities";
 import {
   IVectorUtils,
@@ -58,7 +58,8 @@ class GatewayConnectorRepositoryMocks {
   public vectorUtils = td.object<IVectorUtils>();
   public configProvider = new ConfigProviderMock();
   public contextProvider = new ContextProviderMock();
-  public gatewayConnectorProxyFactory = td.object<IGatewayConnectorProxyFactory>();
+  public gatewayConnectorProxyFactory =
+    td.object<IGatewayConnectorProxyFactory>();
   public gatewayConnectorProxy = td.object<IGatewayConnectorProxy>();
   public blockchainUtils = td.object<IBlockchainUtils>();
   public storageUtils = td.object<IStorageUtils>();
@@ -183,9 +184,9 @@ describe("GatewayConnectorRepository tests", () => {
     // Arrange
     const mocks = new GatewayConnectorRepositoryMocks();
 
-    td.when(
-      mocks.storageUtils.read(AuthorizedGatewaysSchema.title),
-    ).thenReturn(okAsync(null));
+    td.when(mocks.storageUtils.read(AuthorizedGatewaysSchema.title)).thenReturn(
+      okAsync(null),
+    );
 
     const repo = mocks.factoryRepository();
 
@@ -316,10 +317,7 @@ describe("GatewayConnectorRepository tests", () => {
 
     const error = new GatewayActivationError();
     td.when(
-      mocks.gatewayConnectorProxy.activateConnector(
-        publicIdentifier,
-        balances,
-      ),
+      mocks.gatewayConnectorProxy.activateConnector(publicIdentifier, balances),
     ).thenReturn(errAsync(error));
 
     let onAuthorizedGatewayActivationFailedVal: string | null = null;
@@ -445,9 +443,9 @@ describe("GatewayConnectorRepository tests", () => {
     // Arrange
     const mocks = new GatewayConnectorRepositoryMocks();
 
-    td.when(
-      mocks.storageUtils.read(AuthorizedGatewaysSchema.title),
-    ).thenReturn(okAsync(null));
+    td.when(mocks.storageUtils.read(AuthorizedGatewaysSchema.title)).thenReturn(
+      okAsync(null),
+    );
 
     const authorizedGatewayEntry = [
       {
@@ -477,9 +475,9 @@ describe("GatewayConnectorRepository tests", () => {
     // Arrange
     const mocks = new GatewayConnectorRepositoryMocks();
 
-    td.when(
-      mocks.storageUtils.read(AuthorizedGatewaysSchema.title),
-    ).thenReturn(okAsync(null));
+    td.when(mocks.storageUtils.read(AuthorizedGatewaysSchema.title)).thenReturn(
+      okAsync(null),
+    );
 
     const error = new GatewayConnectorError();
     td.when(
@@ -510,9 +508,9 @@ describe("GatewayConnectorRepository tests", () => {
     // Arrange
     const mocks = new GatewayConnectorRepositoryMocks();
 
-    td.when(
-      mocks.storageUtils.read(AuthorizedGatewaysSchema.title),
-    ).thenReturn(okAsync(null));
+    td.when(mocks.storageUtils.read(AuthorizedGatewaysSchema.title)).thenReturn(
+      okAsync(null),
+    );
 
     const error = new GatewayValidationError();
     td.when(mocks.gatewayConnectorProxy.getValidatedSignature()).thenReturn(
@@ -543,9 +541,9 @@ describe("GatewayConnectorRepository tests", () => {
     // Arrange
     const mocks = new GatewayConnectorRepositoryMocks();
 
-    td.when(
-      mocks.storageUtils.read(AuthorizedGatewaysSchema.title),
-    ).thenReturn(okAsync(null));
+    td.when(mocks.storageUtils.read(AuthorizedGatewaysSchema.title)).thenReturn(
+      okAsync(null),
+    );
 
     const error = new GatewayValidationError();
     td.when(
@@ -580,9 +578,9 @@ describe("GatewayConnectorRepository tests", () => {
     // Arrange
     const mocks = new GatewayConnectorRepositoryMocks();
 
-    td.when(
-      mocks.storageUtils.read(AuthorizedGatewaysSchema.title),
-    ).thenReturn(okAsync(null));
+    td.when(mocks.storageUtils.read(AuthorizedGatewaysSchema.title)).thenReturn(
+      okAsync(null),
+    );
 
     const authorizedGatewayEntry = [
       {
@@ -600,10 +598,7 @@ describe("GatewayConnectorRepository tests", () => {
 
     const error = new GatewayConnectorError();
     td.when(
-      mocks.gatewayConnectorProxy.activateConnector(
-        publicIdentifier,
-        balances,
-      ),
+      mocks.gatewayConnectorProxy.activateConnector(publicIdentifier, balances),
     ).thenReturn(errAsync(error));
 
     let onAuthorizedGatewayActivationFailedVal: string | null = null;
@@ -767,24 +762,5 @@ describe("GatewayConnectorRepository tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
     expect(result._unsafeUnwrap()).toBe(undefined);
-  });
-
-  test("deauthorizeGateway returns ProxyError of proxy.deauthorize failes", async () => {
-    // Arrange
-    const mocks = new GatewayConnectorRepositoryMocks();
-    const repo = mocks.factoryRepository();
-
-    td.when(mocks.gatewayConnectorProxy.deauthorize()).thenReturn(
-      errAsync(new ProxyError()),
-    );
-
-    // Act
-    await repo.activateAuthorizedGateways(balances);
-    const result = await repo.deauthorizeGateway(gatewayUrl);
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    expect(result._unsafeUnwrapErr()).toBeInstanceOf(ProxyError);
   });
 });
