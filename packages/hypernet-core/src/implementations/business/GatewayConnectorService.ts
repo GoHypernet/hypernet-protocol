@@ -121,10 +121,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     return this.contextProvider.getContext().andThen((context) => {
       context.onGatewayDeauthorizationStarted.next(gatewayUrl);
 
-      return ResultUtils.race([
-        this._getDeauthorizationTimeoutResult(gatewayUrl),
-        this.gatewayConnectorRepository.deauthorizeGateway(gatewayUrl),
-      ]);
+      return this.gatewayConnectorRepository.deauthorizeGateway(gatewayUrl);
     });
   }
 
@@ -167,23 +164,5 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayConnectorError> {
     return this.gatewayConnectorRepository.displayGatewayIFrame(gatewayUrl);
-  }
-
-  /* Destroy gateway connector if deauthorizeGateway lasted more than gatewayDeauthorizationTimeout */
-  private _getDeauthorizationTimeoutResult(
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, Error> {
-    return this.configProvider.getConfig().andThen((config) => {
-      const deauthorizationTimeoutPromise = new Promise<void>((resolve) => {
-        setTimeout(() => {
-          this.gatewayConnectorRepository.destroyProxy(gatewayUrl);
-          resolve(undefined);
-        }, config.gatewayDeauthorizationTimeout);
-      });
-      return ResultAsync.fromPromise(
-        deauthorizationTimeoutPromise,
-        (e) => e as Error,
-      );
-    });
   }
 }

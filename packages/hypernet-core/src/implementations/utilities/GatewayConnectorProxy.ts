@@ -18,10 +18,10 @@ import {
   GatewayActivationError,
 } from "@hypernetlabs/objects";
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
-import { ResultAsync } from "neverthrow";
+import { HypernetContext } from "@interfaces/objects";
+import { okAsync, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
-import { HypernetContext } from "@interfaces/objects";
 import {
   IGatewayConnectorProxy,
   IContextProvider,
@@ -29,7 +29,8 @@ import {
 
 export class GatewayConnectorProxy
   extends ParentProxy
-  implements IGatewayConnectorProxy {
+  implements IGatewayConnectorProxy
+{
   protected static openedIFramesQueue: string[] = [];
 
   constructor(
@@ -38,6 +39,7 @@ export class GatewayConnectorProxy
     public gatewayUrl: GatewayUrl,
     protected iframeName: string,
     protected contextProvider: IContextProvider,
+    protected gatewayDeauthorizationTimeout: number,
     protected debug: boolean = false,
   ) {
     super(element, iframeUrl, iframeName, debug);
@@ -94,8 +96,19 @@ export class GatewayConnectorProxy
     return this._createCall("getAddress", null);
   }
 
-  public deauthorize(): ResultAsync<void, GatewayConnectorError | ProxyError> {
-    return this._createCall("deauthorize", null);
+  public deauthorize(): ResultAsync<void, never> {
+    const deauthTimeout = ResultAsync.fromSafePromise<void, never>(
+      new Promise((resolve) => {
+        setTimeout(() => resolve, this.gatewayDeauthorizationTimeout);
+      }),
+    );
+    return ResultUtils.race<void, ProxyError>([
+      this._createCall("deauthorize", null),
+      deauthTimeout,
+    ]).orElse(() => {
+      // This method will never throw an error
+      return okAsync<void, never>(undefined);
+    });
   }
 
   public getValidatedSignature(): ResultAsync<
@@ -237,9 +250,7 @@ export class GatewayConnectorProxy
   private _pushOpenedGatewayIFrame(gatewayUrl: GatewayUrl) {
     // Check if there is gatewayUrl in the queue
     // If there is, don't re-add it.
-    const index = GatewayConnectorProxy.openedIFramesQueue.indexOf(
-      gatewayUrl,
-    );
+    const index = GatewayConnectorProxy.openedIFramesQueue.indexOf(gatewayUrl);
     if (index > -1) {
       return;
     }
