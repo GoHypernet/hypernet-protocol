@@ -27,6 +27,7 @@ import {
   WARNING_ALERT_SELECTOR,
   METAMASK_WARNING_ID_SELECTOR,
   PUBLIC_IDENTIFIER_WIDGET_ID_SELECTOR,
+  WITHDRAW_WIDGET_ID_SELECTOR,
 } from "@web-ui/constants";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
@@ -34,6 +35,7 @@ import PrivateKeysFlow from "@web-ui/flows/PrivateKeysFlow";
 import { ViewUtils, DateUtils } from "@web-ui/utils";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget";
 import FundWidget from "@web-ui/widgets/FundWidget";
+import WithdrawWidget from "@web-ui/widgets/WithdrawWidget";
 import LinksWidget from "@web-ui/widgets/LinksWidget";
 import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
 import PublicIdentifierWidget from "@web-ui/widgets/PublicIdentifierWidget";
@@ -202,6 +204,23 @@ export default class HypernetWebUI implements IHypernetWebUI {
           config?.showInModal,
         ),
         this._generateDomElement(config?.selector || FUND_WIDGET_ID_SELECTOR),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderWithdrawWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <WithdrawWidget {...config} />,
+          config?.showInModal,
+        ),
+        this._generateDomElement(
+          config?.selector || WITHDRAW_WIDGET_ID_SELECTOR,
+        ),
       );
     };
     return this._getThrowableRender(renderReact);

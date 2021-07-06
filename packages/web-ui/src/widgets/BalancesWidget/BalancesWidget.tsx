@@ -32,7 +32,7 @@ const BalancesWidget: React.FC<IBalancesWidget> = ({
           info={
             <>
               You don't have any balances yet, you can Fund your account from.
-              <a href="/send-and-recieve"> here</a>
+              <a href="/deposit-and-withdraw"> here</a>
             </>
           }
         />
