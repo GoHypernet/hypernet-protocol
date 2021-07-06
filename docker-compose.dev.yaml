@@ -154,7 +154,7 @@ services:
       VECTOR_ENV: "dev"
 
   blockchain:
-    image: hypernetlabs/eth-provider
+    image: hypernetlabs/eth-provider:local
     ports:
       - 8545:8545
     environment:
@@ -246,7 +246,7 @@ services:
       }' 
   
   core-iframe:
-    image: hypernetlabs/hypernet-protocol-core-iframe
+    image: hypernetlabs/hypernet-protocol-core-iframe:local
     ports:
       - 5020:80
     volumes:
@@ -256,7 +256,7 @@ services:
       - iframe
 
   gateway-iframe:
-    image: hypernetlabs/hypernet-protocol-gateway-iframe
+    image: hypernetlabs/hypernet-protocol-gateway-iframe:local
     ports:
       - 5005:80
     volumes:
@@ -265,8 +265,16 @@ services:
       - router
       - iframe
 
+  user-dashboard:
+    image: hypernetlabs/hypernet-protocol-user-dashboard:local
+    ports: 
+      - 5016:80
+    depends_on:
+      - core-iframe
+      - gateway-iframe
+
   developer-ui:
-    image: hypernetlabs/hypernet-protocol-developer-ui
+    image: hypernetlabs/hypernet-protocol-developer-ui:local
     ports: 
       - 5015:80
     volumes:
