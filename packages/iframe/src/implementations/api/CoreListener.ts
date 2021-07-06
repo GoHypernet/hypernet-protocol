@@ -166,11 +166,6 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.initiateDispute(data.data);
         }, data.callId);
       },
-      resolveInsurance: (data: IIFrameCallData<PaymentId>) => {
-        this.returnForModel(() => {
-          return this.core.resolveInsurance(data.data);
-        }, data.callId);
-      },
       closeGatewayIFrame: (data: IIFrameCallData<GatewayUrl>) => {
         this.core.closeGatewayIFrame(data.data);
       },

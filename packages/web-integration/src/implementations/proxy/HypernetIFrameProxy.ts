@@ -369,21 +369,6 @@ export default class HypernetIFrameProxy
     return this._createCall("initiateDispute", paymentId);
   }
 
-  public resolveInsurance(
-    paymentId: PaymentId,
-  ): ResultAsync<
-    Payment,
-    | RouterChannelUnknownError
-    | VectorError
-    | BlockchainUnavailableError
-    | LogicalError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | TransferResolutionError
-  > {
-    return this._createCall("resolveInsurance", paymentId);
-  }
-
   public mintTestToken(
     amount: BigNumberString,
   ): ResultAsync<void, BlockchainUnavailableError> {

@@ -229,19 +229,6 @@ export interface IHypernetCore {
     | TransferResolutionError
   >;
 
-  resolveInsurance(
-    paymentId: PaymentId,
-  ): ResultAsync<
-    Payment,
-    | RouterChannelUnknownError
-    | VectorError
-    | BlockchainUnavailableError
-    | LogicalError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | TransferResolutionError
-  >;
-
   /**
    * Only used for development purposes!
    * @param amount
