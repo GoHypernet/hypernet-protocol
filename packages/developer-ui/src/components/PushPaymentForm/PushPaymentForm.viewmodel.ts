@@ -87,15 +87,16 @@ export class PushPaymentFormViewModel {
             utils.parseUnits(this.requiredStake(), "wei").toString(),
           );
 
-          return await this.integration.core.sendFunds(
-            this.counterparty(),
-            amount,
-            UnixTimestamp(expirationDate.unix()),
-            requiredStake,
-            selectedPaymentTokenAddress,
-            selectedGatewayUrl,
-            null,
-          );
+          return;
+          // return await this.integration.core.sendFunds(
+          //   this.counterparty(),
+          //   amount,
+          //   UnixTimestamp(expirationDate.unix()),
+          //   requiredStake,
+          //   selectedPaymentTokenAddress,
+          //   selectedGatewayUrl,
+          //   null,
+          // );
         } catch {
           return null;
         }

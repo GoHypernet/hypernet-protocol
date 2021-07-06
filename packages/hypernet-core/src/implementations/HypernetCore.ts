@@ -590,40 +590,6 @@ export class HypernetCore implements IHypernetCore {
   }
 
   /**
-   * Sends funds to a counterparty.
-   * Internally, this is a three-step process. First, the consumer will notify the provider of the
-   * proposed terms of the payment (amount, required stake, and payment token). If the provider
-   * accepts these terms, they will create an insurance payment for the stake, and then the consumer
-   * finishes by creating a parameterized payment for the amount. The provider can immediately finalize
-   * the payment.
-   * @param linkId
-   * @param amount
-   * @param requiredStake the amount of stake that the provider must put up as part of the insurancepayment
-   * @param paymentToken
-   * @param gatewayURL the registered URL for the gateway that will resolve any disputes.
-   */
-  public sendFunds(
-    counterPartyAccount: PublicIdentifier,
-    amount: BigNumberString,
-    expirationDate: UnixTimestamp,
-    requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
-    gatewayUrl: GatewayUrl,
-    metadata: string | null,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
-    // Send payment terms to provider & request provider make insurance payment
-    return this.paymentService.sendFunds(
-      counterPartyAccount,
-      amount,
-      expirationDate,
-      requiredStake,
-      paymentToken,
-      gatewayUrl,
-      metadata,
-    );
-  }
-
-  /**
    * Accepts the terms of a push payment, and puts up the stake/insurance transfer.
    * @param paymentId
    */

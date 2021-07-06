@@ -293,24 +293,6 @@ export default class HypernetIFrameProxy
     throw new Error("Unimplemented");
   }
 
-  public sendFunds(
-    counterPartyAccount: PublicIdentifier,
-    amount: BigNumberString,
-    expirationDate: UnixTimestamp,
-    requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
-    return this._createCall("sendFunds", {
-      counterPartyAccount,
-      amount: amount,
-      expirationDate,
-      requiredStake: requiredStake,
-      paymentToken,
-      gatewayUrl,
-    });
-  }
-
   public authorizeFunds(
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumberString,

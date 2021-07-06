@@ -2,11 +2,11 @@ import {
   IAuthorizeFundsRequest,
   ISendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
-import { IHypernetCoreRepository } from "@gateway-iframe/interfaces/data";
 import { injectable, inject } from "inversify";
 import { okAsync, ResultAsync } from "neverthrow";
 import Postmate from "postmate";
 
+import { IHypernetCoreRepository } from "@gateway-iframe/interfaces/data";
 import {
   IContextProvider,
   IContextProviderType,

@@ -51,7 +51,6 @@ interface IReducerStateReducer {
   paymentType: EPaymentType;
   setPaymentType: (param?: EPaymentType) => void;
   gatewayUrl: GatewayUrl;
-  sendFunds: () => void;
   paymentTypeOptions: PaymentTypeOption[];
 }
 
@@ -245,35 +244,36 @@ export function usePayment(initialParams: any): IReducerStateReducer {
     });
   };
 
-  const sendFunds = () => {
-    coreProxy
-      .sendFunds(
-        state.counterPartyAccount,
-        BigNumberString(utils.parseUnits(state.amount, "wei").toString()),
-        state.expirationDate,
-        BigNumberString(
-          utils.parseUnits(state.requiredStake, "wei").toString(),
-        ),
-        state.selectedPaymentToken?.address,
-        state.gatewayUrl,
-        null,
-      )
-      .match(
-        (balances) => {
-          dispatch({
-            type: EActionTypes.SUCCESS,
-            payload: "your fund has succeeded",
-          });
-        },
-        (err) => {
-          console.log("err: ", err);
-          dispatch({
-            type: EActionTypes.ERROR,
-            payload: err.message || "your fund has failed",
-          });
-        },
-      );
-  };
+  // TODO: Determine if we can make this functionality work via the gateway
+  // const sendFunds = () => {
+  //   coreProxy
+  //     .sendFunds(
+  //       state.counterPartyAccount,
+  //       BigNumberString(utils.parseUnits(state.amount, "wei").toString()),
+  //       state.expirationDate,
+  //       BigNumberString(
+  //         utils.parseUnits(state.requiredStake, "wei").toString(),
+  //       ),
+  //       state.selectedPaymentToken?.address,
+  //       state.gatewayUrl,
+  //       null,
+  //     )
+  //     .match(
+  //       (balances) => {
+  //         dispatch({
+  //           type: EActionTypes.SUCCESS,
+  //           payload: "your fund has succeeded",
+  //         });
+  //       },
+  //       (err) => {
+  //         console.log("err: ", err);
+  //         dispatch({
+  //           type: EActionTypes.ERROR,
+  //           payload: err.message || "your fund has failed",
+  //         });
+  //       },
+  //     );
+  // };
 
   return {
     ...state,
@@ -283,6 +283,5 @@ export function usePayment(initialParams: any): IReducerStateReducer {
     setExpirationDate,
     setRequiredStake,
     setPaymentType,
-    sendFunds,
   };
 }

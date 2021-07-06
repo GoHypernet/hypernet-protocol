@@ -134,29 +134,6 @@ export interface IHypernetCore {
   ): Promise<HypernetLink>;
 
   /**
-   * sendFunds can only be called by the Consumer. It sends a one-time payment to the provider.
-   * Internally, this is a three-step process. First, the consumer will notify the provider of the
-   * proposed terms of the payment (amount, required stake, and payment token). If the provider
-   * accepts these terms, they will create an insurance payment for the stake, and then the consumer
-   * finishes by creating a parameterized payment for the amount. The provider can immediately finalize
-   * the payment.
-   * @param linkId
-   * @param amount
-   * @param requiredStake the amount of stake that the provider must put up as part of the insurancepayment
-   * @param paymentToken
-   * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
-   */
-  sendFunds(
-    counterPartyAccount: PublicIdentifier,
-    amount: BigNumberString,
-    expirationDate: UnixTimestamp,
-    requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
-    gatewayUrl: GatewayUrl,
-    metadata: string | null,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
-
-  /**
    * Authorizes funds to a specified counterparty, with an amount, rate, & expiration date.
    * @param counterPartyAccount the public identifier of the counterparty to authorize funds to
    * @param totalAuthorized the total amount the counterparty is allowed to "pull"
