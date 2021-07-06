@@ -10,7 +10,6 @@ import {
   PaymentId,
   GatewayUrl,
   Signature,
-  AssetInfo,
   AcceptPaymentError,
   RouterChannelUnknownError,
   BlockchainUnavailableError,
@@ -36,7 +35,8 @@ import { Subject } from "rxjs";
 
 export default class HypernetIFrameProxy
   extends ParentProxy
-  implements IHypernetCore {
+  implements IHypernetCore
+{
   protected coreInitialized = false;
   protected isInControl = false;
   protected waitInitializedPromise: Promise<void>;
@@ -155,12 +155,9 @@ export default class HypernetIFrameProxy
           this.onAuthorizedGatewayUpdated.next(data);
         });
 
-        child.on(
-          "onAuthorizedGatewayActivationFailed",
-          (data: GatewayUrl) => {
-            this.onAuthorizedGatewayActivationFailed.next(data);
-          },
-        );
+        child.on("onAuthorizedGatewayActivationFailed", (data: GatewayUrl) => {
+          this.onAuthorizedGatewayActivationFailed.next(data);
+        });
 
         // Setup a listener for the "initialized" event.
         child.on("initialized", () => {
@@ -291,28 +288,6 @@ export default class HypernetIFrameProxy
     _counterPartyAccount: PublicIdentifier,
   ): Promise<HypernetLink> {
     throw new Error("Unimplemented");
-  }
-
-  public authorizeFunds(
-    counterPartyAccount: PublicIdentifier,
-    totalAuthorized: BigNumberString,
-    expirationDate: UnixTimestamp,
-    deltaAmount: BigNumberString,
-    deltaTime: number,
-    requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
-    return this._createCall("authorizeFunds", {
-      counterPartyAccount,
-      totalAuthorized: totalAuthorized,
-      expirationDate,
-      deltaAmount: deltaAmount,
-      deltaTime,
-      requiredStake: requiredStake,
-      paymentToken,
-      gatewayUrl,
-    });
   }
 
   public acceptOffers(

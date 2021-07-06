@@ -134,29 +134,6 @@ export interface IHypernetCore {
   ): Promise<HypernetLink>;
 
   /**
-   * Authorizes funds to a specified counterparty, with an amount, rate, & expiration date.
-   * @param counterPartyAccount the public identifier of the counterparty to authorize funds to
-   * @param totalAuthorized the total amount the counterparty is allowed to "pull"
-   * @param expirationDate the latest time in which the counterparty can pull funds. This must be after the full maturation date of totalAuthorized, as calculated via deltaAmount and deltaTime.
-   * @param deltaAmount The amount per deltaTime to authorize
-   * @param deltaTime the number of seconds after which deltaAmount will be authorized, up to the limit of totalAuthorized.
-   * @param requiredStake the amount of stake the counterparyt must put up as insurance
-   * @param paymentToken the (Ethereum) address of the payment token
-   * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
-   */
-  authorizeFunds(
-    counterPartyAccount: PublicIdentifier,
-    totalAuthorized: BigNumberString,
-    expirationDate: UnixTimestamp,
-    deltaAmount: BigNumberString,
-    deltaTime: number,
-    requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
-    gatewayUrl: GatewayUrl,
-    metadata: string | null,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
-
-  /**
    * For a specified payment, puts up stake to accept the payment
    * @param paymentId the payment ID to accept funds
    */

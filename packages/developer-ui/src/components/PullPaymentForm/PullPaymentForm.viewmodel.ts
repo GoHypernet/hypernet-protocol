@@ -39,8 +39,6 @@ export class PullPaymentFormViewModel {
   public tokenSelector: TokenSelectorParams;
   public gatewaySelector: AuthorizedGatewaySelectorParams;
 
-  public submitButton: ButtonParams;
-
   protected integration: IHypernetWebIntegration;
   protected counterparty:
     | ko.Observable<PublicIdentifier>
@@ -66,72 +64,72 @@ export class PullPaymentFormViewModel {
       ko.observable(null),
     );
 
-    this.submitButton = new ButtonParams(
-      "Submit Payment",
-      async () => {
-        const selectedPaymentTokenAddress = this.tokenSelector.selectedToken();
+    //   this.submitButton = new ButtonParams(
+    //     "Submit Payment",
+    //     async () => {
+    //       const selectedPaymentTokenAddress = this.tokenSelector.selectedToken();
 
-        if (selectedPaymentTokenAddress == null) {
-          return null;
-        }
+    //       if (selectedPaymentTokenAddress == null) {
+    //         return null;
+    //       }
 
-        const selectedGatewayUrl = this.gatewaySelector.selectedAuthorizedGateway();
+    //       const selectedGatewayUrl = this.gatewaySelector.selectedAuthorizedGateway();
 
-        if (selectedGatewayUrl == null) {
-          return null;
-        }
+    //       if (selectedGatewayUrl == null) {
+    //         return null;
+    //       }
 
-        try {
-          const expirationDate = UnixTimestamp(
-            moment(this.expirationDate()).unix(),
-          );
-          const amount = BigNumberString(
-            utils.parseUnits(this.amount(), "wei").toString(),
-          );
-          const requiredStake = BigNumberString(
-            utils.parseUnits(this.requiredStake(), "wei").toString(),
-          );
-          const deltaAmount = BigNumberString(
-            utils.parseUnits(this.deltaAmount(), "wei").toString(),
-          );
-          const deltaTime = Number(this.deltaTime());
+    //       try {
+    //         const expirationDate = UnixTimestamp(
+    //           moment(this.expirationDate()).unix(),
+    //         );
+    //         const amount = BigNumberString(
+    //           utils.parseUnits(this.amount(), "wei").toString(),
+    //         );
+    //         const requiredStake = BigNumberString(
+    //           utils.parseUnits(this.requiredStake(), "wei").toString(),
+    //         );
+    //         const deltaAmount = BigNumberString(
+    //           utils.parseUnits(this.deltaAmount(), "wei").toString(),
+    //         );
+    //         const deltaTime = Number(this.deltaTime());
 
-          return await this.integration.core.authorizeFunds(
-            this.counterparty(),
-            amount,
-            expirationDate,
-            deltaAmount,
-            deltaTime,
-            requiredStake,
-            selectedPaymentTokenAddress,
-            selectedGatewayUrl,
-            null,
-          );
-        } catch {
-          return null;
-        }
-      },
-      EButtonType.Normal,
-      ko.pureComputed(() => {
-        const selectedPaymentTokenAddress = this.tokenSelector.selectedToken();
+    //         return await this.integration.core.authorizeFunds(
+    //           this.counterparty(),
+    //           amount,
+    //           expirationDate,
+    //           deltaAmount,
+    //           deltaTime,
+    //           requiredStake,
+    //           selectedPaymentTokenAddress,
+    //           selectedGatewayUrl,
+    //           null,
+    //         );
+    //       } catch {
+    //         return null;
+    //       }
+    //     },
+    //     EButtonType.Normal,
+    //     ko.pureComputed(() => {
+    //       const selectedPaymentTokenAddress = this.tokenSelector.selectedToken();
 
-        if (selectedPaymentTokenAddress == null) {
-          return false;
-        }
+    //       if (selectedPaymentTokenAddress == null) {
+    //         return false;
+    //       }
 
-        try {
-          moment(this.expirationDate());
-          utils.parseUnits(this.amount(), "wei");
-          utils.parseUnits(this.requiredStake(), "wei");
-          utils.parseUnits(this.deltaAmount(), "wei");
-          Number(this.deltaTime());
+    //       try {
+    //         moment(this.expirationDate());
+    //         utils.parseUnits(this.amount(), "wei");
+    //         utils.parseUnits(this.requiredStake(), "wei");
+    //         utils.parseUnits(this.deltaAmount(), "wei");
+    //         Number(this.deltaTime());
 
-          return true;
-        } catch {
-          return false;
-        }
-      }),
-    );
+    //         return true;
+    //       } catch {
+    //         return false;
+    //       }
+    //     }),
+    //   );
   }
 }
 

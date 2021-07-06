@@ -94,34 +94,6 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getActiveLinks();
         }, data.callId);
       },
-      authorizeFunds: (
-        data: IIFrameCallData<{
-          counterPartyAccount: PublicIdentifier;
-          totalAuthorized: BigNumberString;
-          expirationDate: UnixTimestamp;
-          deltaAmount: BigNumberString;
-          deltaTime: number;
-          requiredStake: BigNumberString;
-          paymentToken: EthereumAddress;
-          gatewayUrl: GatewayUrl;
-          metadata: string | null;
-        }>,
-      ) => {
-        this.returnForModel(() => {
-          return this.core.authorizeFunds(
-            data.data.counterPartyAccount,
-            data.data.totalAuthorized,
-            data.data.expirationDate,
-            data.data.deltaAmount,
-            data.data.deltaTime,
-            data.data.requiredStake,
-            data.data.paymentToken,
-            data.data.gatewayUrl,
-            data.data.metadata,
-          );
-        }, data.callId);
-      },
-
       acceptFunds: (data: IIFrameCallData<PaymentId[]>) => {
         this.returnForModel(() => {
           return this.core.acceptOffers(data.data);
