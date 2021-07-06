@@ -283,15 +283,6 @@ export interface IHypernetCore {
     mnemonic: string | null,
   ): ResultAsync<void, InvalidParametersError>;
 
-  setPreferredPaymentToken(
-    tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PersistenceError>;
-
-  getPreferredPaymentToken(): ResultAsync<
-    AssetInfo,
-    BlockchainUnavailableError | PersistenceError
-  >;
-
   /**
    * Observables for seeing what's going on
    */

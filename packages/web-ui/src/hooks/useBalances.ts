@@ -25,8 +25,6 @@ interface IState {
   balances: AssetBalance[];
   channelTokenSelectorOptions: ITokenSelectorOption[];
   preferredPaymentToken?: ITokenSelectorOption;
-  setPreferredPaymentToken?: (selectedOption?: ITokenSelectorOption) => void;
-  //setPreferredPaymentTokenByAssetInfo?: (assetInfo?: AssetInfo) => void;
 }
 
 type Action =
@@ -38,6 +36,7 @@ type Action =
       payload: ITokenSelectorOption | undefined;
     };
 
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function useBalances() {
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
@@ -57,19 +56,6 @@ export function useBalances() {
           dispatch({
             type: EActionTypes.FETCHED,
             payload: balance,
-          });
-
-          coreProxy.getPreferredPaymentToken().map((assetInfo) => {
-            console.log("AssetInfo token: ", assetInfo);
-            const tokenName =
-              assetInfo.assetId === ETHER_HEX_ADDRESS ? "ETH" : "HyperToken";
-            dispatch({
-              type: EActionTypes.TOKEN_SELECTED,
-              payload: new PaymentTokenOptionViewModel(
-                tokenName,
-                assetInfo.assetId,
-              ),
-            });
           });
         })
         .mapErr((error) => {
@@ -142,46 +128,6 @@ export function useBalances() {
     }
   }, initialState);
 
-  /* const setPreferredPaymentTokenByAssetInfo = (assetInfo: AssetInfo) => {
-    if (!assetInfo) {
-      alert.error("Token address most be provided!");
-      return;
-    }
-    const tokenName =
-      assetInfo.assetId === ETHER_HEX_ADDRESS ? "ETH" : "HyperToken";
-    dispatch({
-      type: EActionTypes.TOKEN_SELECTED,
-      payload: new PaymentTokenOptionViewModel(tokenName, assetInfo.assetId),
-    });
-  }; */
-
-  const setPreferredPaymentToken = (selectedOption?: ITokenSelectorOption) => {
-    if (!selectedOption?.address) {
-      alert.error("Token address most be provided!");
-      return;
-    }
-    setLoading(true);
-    coreProxy
-      .setPreferredPaymentToken(EthereumAddress(selectedOption.address))
-      .match(
-        () => {
-          setLoading(false);
-          alert.success("Your default payment token has changed!");
-          dispatch({
-            type: EActionTypes.TOKEN_SELECTED,
-            payload: selectedOption,
-          });
-        },
-        (err) => {
-          setLoading(false);
-          alert.error(
-            err.message || "An error occurred while saveing payment token",
-          );
-          dispatch({ type: EActionTypes.ERROR, payload: err.message });
-        },
-      );
-  };
-
   function prepareBalances(balance: Balances): AssetBalance[] {
     return balance.assets.reduce((acc: AssetBalance[], assetBalance) => {
       acc.push(assetBalance);
@@ -209,7 +155,5 @@ export function useBalances() {
 
   return {
     ...state,
-    setPreferredPaymentToken,
-    //setPreferredPaymentTokenByAssetInfo,
   };
 }

@@ -143,17 +143,4 @@ export class AccountService implements IAccountService {
   ): ResultAsync<Signature, BlockchainUnavailableError | VectorError> {
     return this.accountRepository.signMessage(message);
   }
-
-  public setPreferredPaymentToken(
-    tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PersistenceError> {
-    return this.accountRepository.setPreferredPaymentToken(tokenAddress);
-  }
-
-  public getPreferredPaymentToken(): ResultAsync<
-    AssetInfo,
-    BlockchainUnavailableError | PersistenceError
-  > {
-    return this.accountRepository.getPreferredPaymentToken();
-  }
 }

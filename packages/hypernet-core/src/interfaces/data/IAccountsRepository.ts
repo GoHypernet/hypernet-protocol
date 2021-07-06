@@ -60,15 +60,6 @@ export interface IAccountsRepository {
     amount: BigNumberString,
     to: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError>;
-
-  setPreferredPaymentToken(
-    tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PersistenceError>;
-
-  getPreferredPaymentToken(): ResultAsync<
-    AssetInfo,
-    BlockchainUnavailableError | PersistenceError
-  >;
 }
 
 export const IAccountsRepositoryType = Symbol.for("IAccountsRepository");

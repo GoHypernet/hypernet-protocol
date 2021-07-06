@@ -314,33 +314,6 @@ export class AccountsRepository implements IAccountsRepository {
       });
   }
 
-  public setPreferredPaymentToken(
-    tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PersistenceError> {
-    return this.storageUtils.write(
-      "PreferredPaymentTokenAddress",
-      tokenAddress,
-    );
-  }
-
-  public getPreferredPaymentToken(): ResultAsync<
-    AssetInfo,
-    BlockchainUnavailableError | PersistenceError
-  > {
-    return this.storageUtils
-      .read<string>("PreferredPaymentTokenAddress")
-      .andThen((tokenAddress) => {
-        if (tokenAddress == null) {
-          return errAsync(
-            new PersistenceError(
-              "Couldn't get PreferredPaymentTokenAddress from storageUtils.read",
-            ),
-          );
-        }
-        return this._getAssetInfo(EthereumAddress(tokenAddress));
-      });
-  }
-
   protected _getAssetBalance(
     i: number,
     channelState: IFullChannelState,

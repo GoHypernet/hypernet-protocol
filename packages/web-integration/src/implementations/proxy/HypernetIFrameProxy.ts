@@ -456,19 +456,6 @@ export default class HypernetIFrameProxy
     });
   }
 
-  public setPreferredPaymentToken(
-    tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PersistenceError> {
-    return this._createCall("setPreferredPaymentToken", tokenAddress);
-  }
-
-  public getPreferredPaymentToken(): ResultAsync<
-    AssetInfo,
-    BlockchainUnavailableError | PersistenceError
-  > {
-    return this._createCall("getPreferredPaymentToken", null);
-  }
-
   private _displayCoreIFrame(): void {
     // Show core iframe
     if (this.child != null) {

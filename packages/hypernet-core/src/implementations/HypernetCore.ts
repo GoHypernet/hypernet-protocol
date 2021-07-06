@@ -848,17 +848,4 @@ export class HypernetCore implements IHypernetCore {
       new PrivateCredentials(privateKey, mnemonic),
     );
   }
-
-  public setPreferredPaymentToken(
-    tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PersistenceError> {
-    return this.accountService.setPreferredPaymentToken(tokenAddress);
-  }
-
-  public getPreferredPaymentToken(): ResultAsync<
-    AssetInfo,
-    BlockchainUnavailableError | PersistenceError
-  > {
-    return this.accountService.getPreferredPaymentToken();
-  }
 }
