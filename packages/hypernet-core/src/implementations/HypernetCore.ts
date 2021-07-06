@@ -590,40 +590,6 @@ export class HypernetCore implements IHypernetCore {
   }
 
   /**
-   * Sends funds to a counterparty.
-   * Internally, this is a three-step process. First, the consumer will notify the provider of the
-   * proposed terms of the payment (amount, required stake, and payment token). If the provider
-   * accepts these terms, they will create an insurance payment for the stake, and then the consumer
-   * finishes by creating a parameterized payment for the amount. The provider can immediately finalize
-   * the payment.
-   * @param linkId
-   * @param amount
-   * @param requiredStake the amount of stake that the provider must put up as part of the insurancepayment
-   * @param paymentToken
-   * @param gatewayURL the registered URL for the gateway that will resolve any disputes.
-   */
-  public sendFunds(
-    counterPartyAccount: PublicIdentifier,
-    amount: BigNumberString,
-    expirationDate: UnixTimestamp,
-    requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
-    gatewayUrl: GatewayUrl,
-    metadata: string | null,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
-    // Send payment terms to provider & request provider make insurance payment
-    return this.paymentService.sendFunds(
-      counterPartyAccount,
-      amount,
-      expirationDate,
-      requiredStake,
-      paymentToken,
-      gatewayUrl,
-      metadata,
-    );
-  }
-
-  /**
    * Accepts the terms of a push payment, and puts up the stake/insurance transfer.
    * @param paymentId
    */
@@ -634,39 +600,6 @@ export class HypernetCore implements IHypernetCore {
     InsufficientBalanceError | AcceptPaymentError
   > {
     return this.paymentService.acceptOffers(paymentIds);
-  }
-
-  /**
-   * Authorizes funds to a specified counterparty, with an amount, rate, & expiration date.
-   * @param counterPartyAccount the public identifier of the counterparty to authorize funds to
-   * @param totalAuthorized the total amount the counterparty is allowed to "pull"
-   * @param expirationDate the latest time in which the counterparty can pull funds
-   * @param requiredStake the amount of stake the counterparyt must put up as insurance
-   * @param paymentToken the (Ethereum) address of the payment token
-   * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
-   */
-  public authorizeFunds(
-    counterPartyAccount: PublicIdentifier,
-    totalAuthorized: BigNumberString,
-    expirationDate: UnixTimestamp,
-    deltaAmount: BigNumberString,
-    deltaTime: number,
-    requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
-    gatewayUrl: GatewayUrl,
-    metadata: string | null,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
-    return this.paymentService.authorizeFunds(
-      counterPartyAccount,
-      totalAuthorized,
-      expirationDate,
-      deltaAmount,
-      deltaTime,
-      requiredStake,
-      paymentToken,
-      gatewayUrl,
-      metadata,
-    );
   }
 
   /**
@@ -711,21 +644,6 @@ export class HypernetCore implements IHypernetCore {
     | TransferResolutionError
   > {
     return this.paymentService.initiateDispute(paymentId);
-  }
-
-  public resolveInsurance(
-    paymentId: PaymentId,
-  ): ResultAsync<
-    Payment,
-    | RouterChannelUnknownError
-    | VectorError
-    | BlockchainUnavailableError
-    | LogicalError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | TransferResolutionError
-  > {
-    return this.paymentService.resolveInsurance(paymentId);
   }
 
   /**
@@ -847,18 +765,5 @@ export class HypernetCore implements IHypernetCore {
     return this.accountService.providePrivateCredentials(
       new PrivateCredentials(privateKey, mnemonic),
     );
-  }
-
-  public setPreferredPaymentToken(
-    tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PersistenceError> {
-    return this.accountService.setPreferredPaymentToken(tokenAddress);
-  }
-
-  public getPreferredPaymentToken(): ResultAsync<
-    AssetInfo,
-    BlockchainUnavailableError | PersistenceError
-  > {
-    return this.accountService.getPreferredPaymentToken();
   }
 }

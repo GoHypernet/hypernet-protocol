@@ -10,7 +10,6 @@ import {
   PaymentId,
   GatewayUrl,
   Signature,
-  AssetInfo,
   AcceptPaymentError,
   RouterChannelUnknownError,
   BlockchainUnavailableError,
@@ -36,7 +35,8 @@ import { Subject } from "rxjs";
 
 export default class HypernetIFrameProxy
   extends ParentProxy
-  implements IHypernetCore {
+  implements IHypernetCore
+{
   protected coreInitialized = false;
   protected isInControl = false;
   protected waitInitializedPromise: Promise<void>;
@@ -155,12 +155,9 @@ export default class HypernetIFrameProxy
           this.onAuthorizedGatewayUpdated.next(data);
         });
 
-        child.on(
-          "onAuthorizedGatewayActivationFailed",
-          (data: GatewayUrl) => {
-            this.onAuthorizedGatewayActivationFailed.next(data);
-          },
-        );
+        child.on("onAuthorizedGatewayActivationFailed", (data: GatewayUrl) => {
+          this.onAuthorizedGatewayActivationFailed.next(data);
+        });
 
         // Setup a listener for the "initialized" event.
         child.on("initialized", () => {
@@ -293,46 +290,6 @@ export default class HypernetIFrameProxy
     throw new Error("Unimplemented");
   }
 
-  public sendFunds(
-    counterPartyAccount: PublicIdentifier,
-    amount: BigNumberString,
-    expirationDate: UnixTimestamp,
-    requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
-    return this._createCall("sendFunds", {
-      counterPartyAccount,
-      amount: amount,
-      expirationDate,
-      requiredStake: requiredStake,
-      paymentToken,
-      gatewayUrl,
-    });
-  }
-
-  public authorizeFunds(
-    counterPartyAccount: PublicIdentifier,
-    totalAuthorized: BigNumberString,
-    expirationDate: UnixTimestamp,
-    deltaAmount: BigNumberString,
-    deltaTime: number,
-    requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
-    return this._createCall("authorizeFunds", {
-      counterPartyAccount,
-      totalAuthorized: totalAuthorized,
-      expirationDate,
-      deltaAmount: deltaAmount,
-      deltaTime,
-      requiredStake: requiredStake,
-      paymentToken,
-      gatewayUrl,
-    });
-  }
-
   public acceptOffers(
     paymentIds: PaymentId[],
   ): ResultAsync<
@@ -367,21 +324,6 @@ export default class HypernetIFrameProxy
     | TransferResolutionError
   > {
     return this._createCall("initiateDispute", paymentId);
-  }
-
-  public resolveInsurance(
-    paymentId: PaymentId,
-  ): ResultAsync<
-    Payment,
-    | RouterChannelUnknownError
-    | VectorError
-    | BlockchainUnavailableError
-    | LogicalError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | TransferResolutionError
-  > {
-    return this._createCall("resolveInsurance", paymentId);
   }
 
   public mintTestToken(
@@ -454,19 +396,6 @@ export default class HypernetIFrameProxy
       privateKey,
       mnemonic,
     });
-  }
-
-  public setPreferredPaymentToken(
-    tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PersistenceError> {
-    return this._createCall("setPreferredPaymentToken", tokenAddress);
-  }
-
-  public getPreferredPaymentToken(): ResultAsync<
-    AssetInfo,
-    BlockchainUnavailableError | PersistenceError
-  > {
-    return this._createCall("getPreferredPaymentToken", null);
   }
 
   private _displayCoreIFrame(): void {

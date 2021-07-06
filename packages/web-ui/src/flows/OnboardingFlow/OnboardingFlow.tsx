@@ -65,10 +65,6 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
       }
 
       setLoading(false);
-      // Then get the preferred payment token if there is any
-      /* coreProxy.getPreferredPaymentToken().map((token) => {
-        setPreferredPaymentTokenByAssetInfo(token);
-      }); */
     }, handleError);
 
     coreProxy.onGatewayAuthorized.subscribe((_gatewayUrl) => {

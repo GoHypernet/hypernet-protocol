@@ -94,58 +94,6 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getActiveLinks();
         }, data.callId);
       },
-      sendFunds: (
-        data: IIFrameCallData<{
-          counterPartyAccount: PublicIdentifier;
-          amount: BigNumberString;
-          expirationDate: UnixTimestamp;
-          requiredStake: BigNumberString;
-          paymentToken: EthereumAddress;
-          gatewayUrl: GatewayUrl;
-          metadata: string | null;
-        }>,
-      ) => {
-        this.returnForModel(() => {
-          return this.core.sendFunds(
-            data.data.counterPartyAccount,
-            data.data.amount,
-            data.data.expirationDate,
-            data.data.requiredStake,
-            data.data.paymentToken,
-            data.data.gatewayUrl,
-            data.data.metadata,
-          );
-        }, data.callId);
-      },
-
-      authorizeFunds: (
-        data: IIFrameCallData<{
-          counterPartyAccount: PublicIdentifier;
-          totalAuthorized: BigNumberString;
-          expirationDate: UnixTimestamp;
-          deltaAmount: BigNumberString;
-          deltaTime: number;
-          requiredStake: BigNumberString;
-          paymentToken: EthereumAddress;
-          gatewayUrl: GatewayUrl;
-          metadata: string | null;
-        }>,
-      ) => {
-        this.returnForModel(() => {
-          return this.core.authorizeFunds(
-            data.data.counterPartyAccount,
-            data.data.totalAuthorized,
-            data.data.expirationDate,
-            data.data.deltaAmount,
-            data.data.deltaTime,
-            data.data.requiredStake,
-            data.data.paymentToken,
-            data.data.gatewayUrl,
-            data.data.metadata,
-          );
-        }, data.callId);
-      },
-
       acceptFunds: (data: IIFrameCallData<PaymentId[]>) => {
         this.returnForModel(() => {
           return this.core.acceptOffers(data.data);
@@ -164,11 +112,6 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       initiateDispute: (data: IIFrameCallData<PaymentId>) => {
         this.returnForModel(() => {
           return this.core.initiateDispute(data.data);
-        }, data.callId);
-      },
-      resolveInsurance: (data: IIFrameCallData<PaymentId>) => {
-        this.returnForModel(() => {
-          return this.core.resolveInsurance(data.data);
         }, data.callId);
       },
       closeGatewayIFrame: (data: IIFrameCallData<GatewayUrl>) => {
@@ -210,16 +153,6 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.privateKey,
             data.data.mnemonic,
           );
-        }, data.callId);
-      },
-      setPreferredPaymentToken: (data: IIFrameCallData<EthereumAddress>) => {
-        this.returnForModel(() => {
-          return this.core.setPreferredPaymentToken(data.data);
-        }, data.callId);
-      },
-      getPreferredPaymentToken: (data: IIFrameCallData<void>) => {
-        this.returnForModel(() => {
-          return this.core.getPreferredPaymentToken();
         }, data.callId);
       },
     });

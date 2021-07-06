@@ -10,19 +10,17 @@ import {
   VectorError,
   RouterChannelUnknownError,
   Signature,
-  AssetInfo,
   BigNumberString,
-  PersistenceError,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
-
 import { IAccountService } from "@interfaces/business";
 import { IAccountsRepository } from "@interfaces/data";
 import {
   HypernetContext,
   InitializedHypernetContext,
 } from "@interfaces/objects";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
+
 import { IContextProvider, IBlockchainProvider } from "@interfaces/utilities";
 
 /**
@@ -142,18 +140,5 @@ export class AccountService implements IAccountService {
     message: string,
   ): ResultAsync<Signature, BlockchainUnavailableError | VectorError> {
     return this.accountRepository.signMessage(message);
-  }
-
-  public setPreferredPaymentToken(
-    tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PersistenceError> {
-    return this.accountRepository.setPreferredPaymentToken(tokenAddress);
-  }
-
-  public getPreferredPaymentToken(): ResultAsync<
-    AssetInfo,
-    BlockchainUnavailableError | PersistenceError
-  > {
-    return this.accountRepository.getPreferredPaymentToken();
   }
 }

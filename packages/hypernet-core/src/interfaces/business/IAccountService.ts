@@ -57,13 +57,6 @@ export interface IAccountService {
   signMessage(
     message: string,
   ): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;
-  setPreferredPaymentToken(
-    tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PersistenceError>;
-  getPreferredPaymentToken(): ResultAsync<
-    AssetInfo,
-    BlockchainUnavailableError | PersistenceError
-  >;
 }
 
 export const IAccountServiceType = Symbol.for("IAccountService");
