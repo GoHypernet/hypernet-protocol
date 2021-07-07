@@ -1,6 +1,7 @@
 import {
   ISendFundsRequest,
   IAuthorizeFundsRequest,
+  IResolveInsuranceRequest,
 } from "@hypernetlabs/gateway-connector";
 import { injectable, inject } from "inversify";
 import { ResultAsync } from "neverthrow";
@@ -25,5 +26,11 @@ export class PaymentService implements IPaymentService {
     request: IAuthorizeFundsRequest,
   ): ResultAsync<void, never> {
     return this.hypernetCoreRepository.emitAuthorizeFundsRequest(request);
+  }
+
+  public resolveInsurance(
+    request: IResolveInsuranceRequest,
+  ): ResultAsync<void, Error> {
+    return this.hypernetCoreRepository.emitResolveInsuranceRequest(request);
   }
 }

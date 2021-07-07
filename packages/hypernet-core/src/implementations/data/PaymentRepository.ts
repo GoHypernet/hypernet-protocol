@@ -31,6 +31,7 @@ import {
   BigNumberString,
   UnixTimestamp,
   EPaymentState,
+  Signature,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -692,17 +693,21 @@ export class PaymentRepository implements IPaymentRepository {
    * Release transfer insurance with 0 value
    * @param paymentId the payment for which to resolve insurance for
    * @param transferId the transferId for which to resolve insurance for
+   * @param amount the value of insurance to resolve, usually 0.
+   * @param gatewaySignature if resolving for more than 0, this will be non-null, with a signature provided by the gateway.
    */
   public resolveInsurance(
     paymentId: PaymentId,
     transferId: TransferId,
+    amount: BigNumberString,
+    gatewaySignature: Signature | null,
   ): ResultAsync<void, TransferResolutionError> {
     return this.vectorUtils
       .resolveInsuranceTransfer(
         transferId,
         paymentId,
-        undefined,
-        BigNumber.from("0"),
+        gatewaySignature,
+        BigNumber.from(amount),
       )
       .map(() => {});
   }

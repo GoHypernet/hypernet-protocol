@@ -44,7 +44,6 @@ const LinksWidget: React.FC<ILinksWidget> = ({
     links,
     publicIdentifier,
     acceptPayment,
-    disputePayment,
     pullFunds,
     loading,
     paymentsAutoAccept,
@@ -227,7 +226,6 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           publicIdentifier={publicIdentifier}
           pushPayments={getPushPayments()}
           onAcceptPushPaymentClick={acceptPayment}
-          onDisputePushPaymentClick={disputePayment}
         />
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
@@ -235,7 +233,6 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           publicIdentifier={publicIdentifier}
           pullPayments={getPullPayments()}
           onAcceptPullPaymentClick={acceptPayment}
-          onDisputePullPaymentClick={disputePayment}
           onPullFundClick={pullFunds}
         />
       </TabPanel>

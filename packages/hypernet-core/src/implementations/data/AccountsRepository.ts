@@ -264,12 +264,10 @@ export class AccountsRepository implements IAccountsRepository {
     void,
     RouterChannelUnknownError | VectorError | BlockchainUnavailableError
   > {
-    const prerequisites = ResultUtils.combine([
+    return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.vectorUtils.getRouterChannelAddress(),
-    ]);
-
-    return prerequisites
+    ])
       .andThen((vals) => {
         const [browserNode, channelAddress] = vals;
         return browserNode.withdraw(
@@ -279,7 +277,7 @@ export class AccountsRepository implements IAccountsRepository {
           destinationAddress,
         );
       })
-      .map(() => {
+      .map((response) => {
         return;
       });
   }

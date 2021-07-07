@@ -22,4 +22,9 @@ export class ValidationUtils implements IValidationUtils {
       return false;
     }
   }
+
+  public validatePaymentId(paymentId: string): boolean {
+    const overallRegex = /^0x[0-9A-Fa-f]{64}$/;
+    return overallRegex.test(paymentId);
+  }
 }

@@ -2,6 +2,7 @@ import {
   IGatewayConnector,
   IRedirectInfo,
   IResolutionResult,
+  IResolveInsuranceRequest,
 } from "@hypernetlabs/gateway-connector";
 import {
   Balances,
@@ -28,7 +29,6 @@ export interface IGatewayService {
     IGatewayConnector,
     GatewayConnectorError | GatewayValidationError
   >;
-  prepareForRedirect(redirectInfo: IRedirectInfo): ResultAsync<void, Error>;
   getGatewayUrl(): ResultAsync<GatewayUrl, GatewayValidationError>;
   autoActivateGatewayConnector(): ResultAsync<
     IGatewayConnector | null,
@@ -38,13 +38,6 @@ export interface IGatewayService {
     publicIdentifier: PublicIdentifier,
   ): ResultAsync<void, LogicalError>;
   getValidatedSignature(): ResultAsync<Signature, GatewayValidationError>;
-  getAddress(): ResultAsync<EthereumAddress, GatewayValidationError>;
-  resolveChallenge(
-    paymentId: PaymentId,
-  ): ResultAsync<
-    IResolutionResult,
-    GatewayConnectorError | GatewayValidationError
-  >;
   deauthorize(): ResultAsync<
     void,
     GatewayConnectorError | GatewayValidationError

@@ -625,28 +625,6 @@ export class HypernetCore implements IHypernetCore {
   }
 
   /**
-   * Initiate a dispute for a particular payment.
-   * @param paymentId the payment for which to dispute
-   * @param metadata the data provided to the dispute mediator about this dispute
-   */
-  public initiateDispute(
-    paymentId: PaymentId,
-  ): ResultAsync<
-    Payment,
-    | GatewayConnectorError
-    | GatewayValidationError
-    | RouterChannelUnknownError
-    | VectorError
-    | BlockchainUnavailableError
-    | LogicalError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | TransferResolutionError
-  > {
-    return this.paymentService.initiateDispute(paymentId);
-  }
-
-  /**
    * Initialize this instance of Hypernet Core
    * @param account: the ethereum account to initialize with
    */

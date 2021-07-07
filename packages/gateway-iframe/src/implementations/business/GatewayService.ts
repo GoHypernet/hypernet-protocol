@@ -328,57 +328,20 @@ export class GatewayService implements IGatewayService {
     });
   }
 
-  public getAddress(): ResultAsync<EthereumAddress, GatewayValidationError> {
-    return this._getValidatedGatewayConnector().andThen(
-      (gatewayConnector) => {
-        return ResultAsync.fromPromise(
-          gatewayConnector.getAddress(),
-          (e) =>
-            new GatewayConnectorError(
-              "Error happened while getting gateway connector addresses",
-              e,
-            ),
-        );
-      },
-    );
-  }
-
-  public resolveChallenge(
-    paymentId: PaymentId,
-  ): ResultAsync<
-    IResolutionResult,
-    GatewayConnectorError | GatewayValidationError
-  > {
-    return this._getValidatedGatewayConnector().andThen(
-      (gatewayConnector) => {
-        return ResultAsync.fromPromise(
-          gatewayConnector.resolveChallenge(paymentId),
-          (e) =>
-            new GatewayConnectorError(
-              "Error happened while resolving challenge in gateway connector code",
-              e,
-            ),
-        );
-      },
-    );
-  }
-
   public deauthorize(): ResultAsync<
     void,
     GatewayConnectorError | GatewayValidationError
   > {
-    return this._getValidatedGatewayConnector().andThen(
-      (gatewayConnector) => {
-        return ResultAsync.fromPromise(
-          gatewayConnector.deauthorize(),
-          (e) =>
-            new GatewayConnectorError(
-              "Error happened while deauthorizing gateway in gateway connector code",
-              e,
-            ),
-        );
-      },
-    );
+    return this._getValidatedGatewayConnector().andThen((gatewayConnector) => {
+      return ResultAsync.fromPromise(
+        gatewayConnector.deauthorize(),
+        (e) =>
+          new GatewayConnectorError(
+            "Error happened while deauthorizing gateway in gateway connector code",
+            e,
+          ),
+      );
+    });
   }
 
   public signMessage(
@@ -413,9 +376,7 @@ export class GatewayService implements IGatewayService {
     const context = this.contextProvider.getGatewayContext();
     return context.gatewayValidated.map(() => {
       if (context.gatewayConnector == null) {
-        throw new Error(
-          "gatewayConnector is null but gatewayValidated is OK",
-        );
+        throw new Error("gatewayConnector is null but gatewayValidated is OK");
       }
 
       return context.gatewayConnector;

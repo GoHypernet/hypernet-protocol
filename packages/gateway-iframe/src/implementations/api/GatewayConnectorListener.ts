@@ -33,14 +33,6 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
     // from the connector.
     context.onGatewayConnectorActivated.subscribe((connector) => {
       // Register event listeners
-      if (connector.preRedirect != null) {
-        connector.preRedirect.subscribe((redirectInfo) => {
-          this.gatewayService.prepareForRedirect(redirectInfo).mapErr((e) => {
-            this.logUtils.error(e);
-          });
-        });
-      }
-
       if (connector.signMessageRequested != null) {
         connector.signMessageRequested.subscribe((request) => {
           this.gatewayService
@@ -62,6 +54,14 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
       if (connector.authorizeFundsRequested != null) {
         connector.authorizeFundsRequested.subscribe((request) => {
           this.paymentService.authorizeFunds(request).mapErr((e) => {
+            this.logUtils.error(e);
+          });
+        });
+      }
+
+      if (connector.resolveInsuranceRequested != null) {
+        connector.resolveInsuranceRequested.subscribe((request) => {
+          this.paymentService.resolveInsurance(request).mapErr((e) => {
             this.logUtils.error(e);
           });
         });

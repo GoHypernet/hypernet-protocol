@@ -283,36 +283,6 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
       });
   }
 
-  public resolveChallenge(
-    gatewayUrl: GatewayUrl,
-    paymentId: PaymentId,
-    transferId: TransferId,
-  ): ResultAsync<
-    void,
-    | GatewayConnectorError
-    | GatewayValidationError
-    | TransferResolutionError
-    | GatewayAuthorizationDeniedError
-    | ProxyError
-  > {
-    return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
-      // if gateway is activated, start resolving the transfer
-      return proxy
-        .resolveChallenge(paymentId)
-        .andThen((result) => {
-          const { mediatorSignature, amount } = result;
-
-          return this.vectorUtils.resolveInsuranceTransfer(
-            transferId,
-            paymentId,
-            Signature(mediatorSignature),
-            BigNumber.from(amount),
-          );
-        })
-        .map(() => {});
-    });
-  }
-
   public closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<

@@ -75,15 +75,6 @@ export interface IGatewayConnectorRepository {
 
   activateAuthorizedGateways(balances: Balances): ResultAsync<void, never>;
 
-  resolveChallenge(
-    gatewayUrl: GatewayUrl,
-    paymentId: PaymentId,
-    transferId: TransferId,
-  ): ResultAsync<
-    void,
-    GatewayConnectorError | GatewayValidationError | TransferResolutionError
-  >;
-
   closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayConnectorError>;

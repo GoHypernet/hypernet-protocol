@@ -1,10 +1,8 @@
-import { IResolutionResult } from "@hypernetlabs/gateway-connector";
 import {
   GatewayConnectorError,
   GatewayValidationError,
   Signature,
   Balances,
-  TransferResolutionError,
   GatewayActivationError,
   ProxyError,
   AuthorizedGatewaysSchema,
@@ -34,7 +32,7 @@ import {
   routerChannelAddress,
   insuranceTransferId,
   commonPaymentId,
-  mediatorSignature,
+  gatewaySignature,
   gatewayUrl2,
   publicIdentifier,
 } from "@mock/mocks";
@@ -90,7 +88,7 @@ class GatewayConnectorRepositoryMocks {
       this.vectorUtils.resolveInsuranceTransfer(
         insuranceTransferId,
         commonPaymentId,
-        Signature(mediatorSignature),
+        Signature(gatewaySignature),
         BigNumber.from(resolutionAmount),
       ),
     ).thenReturn(okAsync({} as IBasicTransferResponse));
@@ -118,14 +116,6 @@ class GatewayConnectorRepositoryMocks {
     td.when(
       this.gatewayConnectorProxy.activateConnector(publicIdentifier, balances),
     ).thenReturn(okAsync(undefined));
-    td.when(
-      this.gatewayConnectorProxy.resolveChallenge(commonPaymentId),
-    ).thenReturn(
-      okAsync({
-        mediatorSignature,
-        amount: resolutionAmount,
-      } as IResolutionResult),
-    );
     td.when(this.gatewayConnectorProxy.getAddress()).thenReturn(
       okAsync(account),
     );
@@ -337,106 +327,6 @@ describe("GatewayConnectorRepository tests", () => {
     expect(result.isErr()).toBeFalsy();
     verify(mocks.gatewayConnectorProxy.destroy());
     expect(onAuthorizedGatewayActivationFailedVal).toBe(gatewayUrl);
-  });
-
-  test("resolveChallenge returns successfully", async () => {
-    // Arrange
-    const mocks = new GatewayConnectorRepositoryMocks();
-    const repo = mocks.factoryRepository();
-
-    // Act
-    const result = await repo
-      .activateAuthorizedGateways(balances)
-      .andThen(() => {
-        return repo.resolveChallenge(
-          gatewayUrl,
-          commonPaymentId,
-          insuranceTransferId,
-        );
-      });
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeFalsy();
-  });
-
-  test("resolveChallenge fire an error if activateAuthorizedGateways is not called", async () => {
-    // Arrange
-    const mocks = new GatewayConnectorRepositoryMocks();
-    const repo = mocks.factoryRepository();
-
-    // Act
-    let error = undefined;
-    try {
-      await repo.resolveChallenge(
-        gatewayUrl,
-        commonPaymentId,
-        insuranceTransferId,
-      );
-    } catch (err) {
-      error = err;
-    }
-
-    // Assert
-    expect(error).toBeDefined();
-  });
-
-  test("resolveChallenge returns an error if the gateway connector resolveChallenge fails", async () => {
-    // Arrange
-    const mocks = new GatewayConnectorRepositoryMocks();
-
-    td.when(
-      mocks.gatewayConnectorProxy.resolveChallenge(commonPaymentId),
-    ).thenReturn(errAsync(new GatewayConnectorError()));
-    const repo = mocks.factoryRepository();
-
-    // Act
-    const result = await repo
-      .activateAuthorizedGateways(balances)
-      .andThen(() => {
-        return repo.resolveChallenge(
-          gatewayUrl,
-          commonPaymentId,
-          insuranceTransferId,
-        );
-      });
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    expect(result._unsafeUnwrapErr()).toBeInstanceOf(GatewayConnectorError);
-  });
-
-  test("resolveChallenge returns an error if the insurance transfer can not be resolved", async () => {
-    // Arrange
-    const mocks = new GatewayConnectorRepositoryMocks();
-
-    td.when(
-      mocks.vectorUtils.resolveInsuranceTransfer(
-        insuranceTransferId,
-        commonPaymentId,
-        Signature(mediatorSignature),
-        BigNumber.from(resolutionAmount),
-      ),
-    ).thenReturn(errAsync(new TransferResolutionError()));
-
-    const repo = mocks.factoryRepository();
-
-    // Act
-    const result = await repo
-      .activateAuthorizedGateways(balances)
-      .andThen(() => {
-        return repo.resolveChallenge(
-          gatewayUrl,
-          commonPaymentId,
-          insuranceTransferId,
-        );
-      });
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    expect(result._unsafeUnwrapErr()).toBeInstanceOf(TransferResolutionError);
   });
 
   test("addAuthorizedGateway returns successfully", async () => {

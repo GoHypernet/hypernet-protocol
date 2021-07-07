@@ -6,6 +6,8 @@ import {
   ISendFundsRequest,
   IResolutionResult,
   IRedirectInfo,
+  IResolveInsuranceRequest,
+  ISignMessageRequest,
 } from "@hypernetlabs/gateway-connector";
 import {
   PushPayment,
@@ -54,12 +56,12 @@ class TestGatewayConnector implements IGatewayConnector {
     // Note, it is assumed this is being done on the Gateway's server, and this private key is protected.
     const privateKey = "0x0123456789012345678901234567890123456789012345678901234567890123";
     const mediator = new ChannelSigner(privateKey);
-    const mediatorSignature = await mediator.signUtilityMessage(hashedData);
+    const gatewaySignature = await mediator.signUtilityMessage(hashedData);
 
     // 6) Return both the signature of the hash of the data & the data itself
     return Promise.resolve({
       paymentId,
-      mediatorSignature: Signature(mediatorSignature),
+      gatewaySignature: Signature(gatewaySignature),
       amount: resolutionAmount,
     });
   }
@@ -111,16 +113,20 @@ class TestGatewayConnector implements IGatewayConnector {
   //       // Send the payment details to galileo
   //   }
 
-  sendFundsRequested: Subject<ISendFundsRequest>;
-  authorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
-  displayRequested: Subject<void>;
-  closeRequested: Subject<void>;
-  onPreRedirect: Subject<IRedirectInfo>;
+  public sendFundsRequested: Subject<ISendFundsRequest>;
+  public authorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
+  public resolveInsuranceRequested: Subject<IResolveInsuranceRequest>;
+  public signMessageRequested: Subject<ISignMessageRequest>;
+  public displayRequested: Subject<void>;
+  public closeRequested: Subject<void>;
+  public onPreRedirect: Subject<IRedirectInfo>;
 
   constructor() {
     console.log("Instantiating TestGatewayConnector");
     this.sendFundsRequested = new Subject<ISendFundsRequest>();
     this.authorizeFundsRequested = new Subject<IAuthorizeFundsRequest>();
+    this.resolveInsuranceRequested = new Subject();
+    this.signMessageRequested = new Subject();
     this.displayRequested = new Subject<void>();
     this.closeRequested = new Subject<void>();
     this.onPreRedirect = new Subject<IRedirectInfo>();
@@ -128,23 +134,23 @@ class TestGatewayConnector implements IGatewayConnector {
     this._renderContent();
   }
 
-  onPushPaymentSent(payment: PushPayment): void {
+  public onPushPaymentSent(payment: PushPayment): void {
     console.log("Push Payment Sent");
     console.log(payment);
   }
-  onPushPaymentUpdated(payment: PushPayment): void {
+  public onPushPaymentUpdated(payment: PushPayment): void {
     console.log("Push Payment Updated");
     console.log(payment);
   }
-  onPushPaymentReceived(payment: PushPayment): void {
+  public onPushPaymentReceived(payment: PushPayment): void {
     console.log("Push Payment Received");
     console.log(payment);
   }
-  onPullPaymentSent(payment: PullPayment): void {
+  public onPullPaymentSent(payment: PullPayment): void {
     console.log("Pull Payment Sent");
     console.log(payment);
   }
-  onPullPaymentUpdated(payment: PullPayment): void {
+  public onPullPaymentUpdated(payment: PullPayment): void {
     console.log("Pull Payment Updated");
     console.log(payment);
   }

@@ -44,4 +44,4 @@ export const gatewayUrl = GatewayUrl("https://example.gateway.com/");
 export const gatewayUrl2 = GatewayUrl("https://example2.gateway.com/");
 export const gatewayAddress = EthereumAddress("0xMediatorEthereumAddress");
 export const gatewayAddress2 = EthereumAddress("0xMediatorEthereumAddress2");
-export const mediatorSignature = "0xMediatorSignature";
+export const gatewaySignature = "0xgatewaySignature";
