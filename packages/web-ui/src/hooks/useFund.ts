@@ -18,6 +18,7 @@ enum EActionTypes {
   SUCCESS = "SUCCESS",
   ERROR = "ERROR",
   AMOUNT_CHANGED = "AMOUNT_CHANGED",
+  DESTINATION_ADDRESS_CHANGED = "DESTINATION_ADDRESS_CHANGED",
 }
 
 interface IReducerStateReducer {
@@ -26,8 +27,11 @@ interface IReducerStateReducer {
   selectedPaymentToken?: ITokenSelectorOption;
   setSelectedPaymentToken: (selectedOption?: ITokenSelectorOption) => void;
   amount: string;
+  destinationAddress: EthereumAddress;
   setAmount: (amount: string) => void;
+  setDestinationAddress: (destinationAddress: string) => void;
   depositFunds: () => void;
+  withdrawFunds: () => void;
   mintTokens: () => void;
 }
 
@@ -35,12 +39,14 @@ interface IReducerState {
   error: any;
   tokenSelectorOptions: ITokenSelectorOption[];
   amount: string;
+  destinationAddress: EthereumAddress;
   selectedPaymentToken?: ITokenSelectorOption;
 }
 
 type Action =
   | { type: EActionTypes.FETCHED; payload: PaymentTokenOptionViewModel[] }
   | { type: EActionTypes.AMOUNT_CHANGED; payload: string }
+  | { type: EActionTypes.DESTINATION_ADDRESS_CHANGED; payload: EthereumAddress }
   | { type: EActionTypes.SUCCESS }
   | { type: EActionTypes.ERROR }
   | {
@@ -58,6 +64,7 @@ export function useFund(): IReducerStateReducer {
     tokenSelectorOptions: [],
     selectedPaymentToken: undefined,
     amount: "1",
+    destinationAddress: EthereumAddress(""),
   };
 
   const [state, dispatch] = useReducer(
@@ -80,6 +87,12 @@ export function useFund(): IReducerStateReducer {
             ...state,
             error: false,
             amount: action.payload,
+          };
+        case EActionTypes.DESTINATION_ADDRESS_CHANGED:
+          return {
+            ...state,
+            error: false,
+            destinationAddress: action.payload,
           };
         case EActionTypes.ERROR:
           return {
@@ -114,6 +127,18 @@ export function useFund(): IReducerStateReducer {
             payload: prepareTokenSelector(balance),
           });
         });
+
+        coreProxy.getEthereumAccounts().match(
+          (accounts) => {
+            dispatch({
+              type: EActionTypes.DESTINATION_ADDRESS_CHANGED,
+              payload: accounts[0],
+            });
+          },
+          (err) => {
+            console.log("err: ", err);
+          },
+        );
       } catch (error) {
         setLoading(false);
         if (cancelRequest) return;
@@ -188,6 +213,13 @@ export function useFund(): IReducerStateReducer {
     });
   };
 
+  const setDestinationAddress = (enteredAddress: string) => {
+    dispatch({
+      type: EActionTypes.AMOUNT_CHANGED,
+      payload: EthereumAddress(enteredAddress),
+    });
+  };
+
   const depositFunds = () => {
     if (!state.selectedPaymentToken?.address) {
       dispatch({
@@ -213,6 +245,38 @@ export function useFund(): IReducerStateReducer {
         },
         (err) => {
           alert.error(err.message || "Your fund deposit has failed");
+          setLoading(false);
+          dispatch({
+            type: EActionTypes.ERROR,
+          });
+        },
+      );
+  };
+
+  const withdrawFunds = () => {
+    if (!state.selectedPaymentToken?.address) {
+      dispatch({
+        type: EActionTypes.ERROR,
+      });
+      return;
+    }
+    setLoading(true);
+    coreProxy
+      .withdrawFunds(
+        EthereumAddress(state.selectedPaymentToken?.address),
+        BigNumberString(ethers.utils.parseEther(state.amount).toString()),
+        state.destinationAddress,
+      )
+      .match(
+        () => {
+          alert.success("Your funds withdrawl has succeeded!");
+          setLoading(false);
+          dispatch({
+            type: EActionTypes.SUCCESS,
+          });
+        },
+        (err) => {
+          alert.error(err.message || "Your funds withdrawl has failed");
           setLoading(false);
           dispatch({
             type: EActionTypes.ERROR,
@@ -250,7 +314,9 @@ export function useFund(): IReducerStateReducer {
   return {
     ...state,
     setSelectedPaymentToken,
+    setDestinationAddress,
     depositFunds,
+    withdrawFunds,
     mintTokens,
     setAmount,
   };

@@ -45,6 +45,7 @@ export interface IHypernetWebUI {
   renderBalancesWidget(params?: IRenderParams): Result<void, RenderError>;
   renderGatewaysWidget(params?: IRenderParams): Result<void, RenderError>;
   renderFundWidget(params?: IRenderParams): Result<void, RenderError>;
+  renderWithdrawWidget(params?: IRenderParams): Result<void, RenderError>;
   renderLinksWidget(params?: IRenderParams): Result<void, RenderError>;
   renderPublicIdentifierWidget(
     params?: IRenderParams,

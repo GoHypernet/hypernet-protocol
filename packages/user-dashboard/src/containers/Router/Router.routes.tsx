@@ -1,6 +1,6 @@
 import { FC } from "react";
 
-import SendAndReceive from "@user-dashboard/pages/SendAndReceive";
+import DepositAndWithdraw from "@user-dashboard/pages/DepositAndWithdraw";
 import Summary from "@user-dashboard/pages/Summary";
 
 interface IRoute {
@@ -16,8 +16,8 @@ export const routes: IRoute[] = [
     name: "Summary",
   },
   {
-    path: "/send-and-recieve",
-    component: SendAndReceive,
-    name: "send & receıve",
+    path: "/deposit-and-withdraw",
+    component: DepositAndWithdraw,
+    name: "deposit & withdraw",
   },
 ];

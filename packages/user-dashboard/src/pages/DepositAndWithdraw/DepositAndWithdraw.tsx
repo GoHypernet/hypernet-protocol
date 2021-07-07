@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 import PageWrapper from "@user-dashboard/components/PageWrapper";
 import { useLayoutContext, useStoreContext } from "@user-dashboard/contexts";
 
-const SendAndReceive: React.FC = () => {
+const DepositAndWithdraw: React.FC = () => {
   const { handleError } = useLayoutContext();
   const { hypernetWebIntegration } = useStoreContext();
 
@@ -13,7 +13,15 @@ const SendAndReceive: React.FC = () => {
       .renderFundWidget({
         selector: "fund-wrapper",
         includeBoxWrapper: true,
-        bodyStyle: { padding: "0 25% 15px 25%" },
+        bodyStyle: { padding: "0 25% 30px 25%" },
+      })
+      .mapErr(handleError);
+
+    hypernetWebIntegration.webUIClient
+      .renderWithdrawWidget({
+        selector: "withdraw-wrapper",
+        includeBoxWrapper: true,
+        bodyStyle: { padding: "0 25% 30px 25%" },
       })
       .mapErr(handleError);
 
@@ -21,18 +29,20 @@ const SendAndReceive: React.FC = () => {
       .renderBalancesWidget({
         selector: "balances-wrapper",
         includeBoxWrapper: true,
-        bodyStyle: { padding: "0 25% 15px 25%" },
       })
       .mapErr(handleError);
   }, []);
 
   return (
-    <PageWrapper label="SEND & RECEIVE">
+    <PageWrapper label="DEPOSIT & WITHDRAW">
       <Grid container spacing={3}>
-        <Grid item xs={6}>
+        <Grid item xs={4}>
           <Box id="fund-wrapper"></Box>
         </Grid>
-        <Grid item xs={6}>
+        <Grid item xs={4}>
+          <Box id="withdraw-wrapper"></Box>
+        </Grid>
+        <Grid item xs={4}>
           <Box id="balances-wrapper"></Box>
         </Grid>
       </Grid>
@@ -40,4 +50,4 @@ const SendAndReceive: React.FC = () => {
   );
 };
 
-export default SendAndReceive;
+export default DepositAndWithdraw;
