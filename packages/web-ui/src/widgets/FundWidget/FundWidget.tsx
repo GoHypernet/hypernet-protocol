@@ -35,7 +35,7 @@ const FundWidget: React.FC<IFundWidget> = ({
   return (
     <CustomBox
       className={classes.wrapper}
-      label={!noLabel ? "FUND YOUR CHANNEL" : undefined}
+      label={!noLabel ? "FUND YOUR ACCOUNT" : undefined}
       bodyStyle={bodyStyle}
     >
       <TokenSelector

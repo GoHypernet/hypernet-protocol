@@ -1,6 +1,14 @@
-import { Box } from "@material-ui/core";
+import {
+  Box,
+  Checkbox,
+  FormControl,
+  FormLabel,
+  FormGroup,
+  TextField,
+  FormControlLabel,
+} from "@material-ui/core";
 import { IRenderParams } from "@web-ui/interfaces";
-import React from "react";
+import React, { useState } from "react";
 
 import {
   TokenSelector,
@@ -22,7 +30,7 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
     tokenSelectorOptions,
     selectedPaymentToken,
     setSelectedPaymentToken,
-    depositFunds,
+    setDefaultDestinationAddress,
     withdrawFunds,
     setDestinationAddress,
     amount,
@@ -30,6 +38,17 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
     error,
   } = useFund();
   const classes = useStyles({ error });
+  const [
+    useDifferentDestination,
+    setUseDifferentDestination,
+  ] = useState<boolean>(false);
+
+  const handleCheckboxChange = (event) => {
+    if (event.target.checked === false) {
+      setDefaultDestinationAddress();
+    }
+    setUseDifferentDestination(event.target.checked);
+  };
 
   const CustomBox = includeBoxWrapper ? BoxWrapper : Box;
 
@@ -45,8 +64,39 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
         setSelectedPaymentToken={setSelectedPaymentToken}
       />
       <TextInput label="Amount" value={amount} onChange={setAmount} />
+      <Box display="flex" marginBottom="30px" flexDirection="column">
+        <FormControl component="fieldset">
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  color="primary"
+                  checked={useDifferentDestination}
+                  onChange={handleCheckboxChange}
+                  inputProps={{ "aria-label": "secondary checkbox" }}
+                />
+              }
+              label="Use different destination"
+            />
+          </FormGroup>
+        </FormControl>
+        {useDifferentDestination && (
+          <TextField
+            placeholder="Destination address"
+            onChange={(event) => {
+              setDestinationAddress(event.target.value);
+            }}
+            multiline
+            variant="outlined"
+            rows={2}
+            rowsMax={4}
+          />
+        )}
+      </Box>
       <Button
-        label="Withdraw to your metamask wallet"
+        label={`Withdraw ${
+          useDifferentDestination ? "" : "to Metamask Account"
+        }`}
         disabled={!selectedPaymentToken?.address}
         onClick={withdrawFunds}
         fullWidth={true}

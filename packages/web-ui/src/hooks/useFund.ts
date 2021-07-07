@@ -19,6 +19,7 @@ enum EActionTypes {
   ERROR = "ERROR",
   AMOUNT_CHANGED = "AMOUNT_CHANGED",
   DESTINATION_ADDRESS_CHANGED = "DESTINATION_ADDRESS_CHANGED",
+  SET_DEFAULT_DESTINATION_ADDRESS = "SET_DEFAULT_DESTINATION_ADDRESS",
 }
 
 interface IReducerStateReducer {
@@ -30,6 +31,7 @@ interface IReducerStateReducer {
   destinationAddress: EthereumAddress;
   setAmount: (amount: string) => void;
   setDestinationAddress: (destinationAddress: string) => void;
+  setDefaultDestinationAddress: () => void;
   depositFunds: () => void;
   withdrawFunds: () => void;
   mintTokens: () => void;
@@ -47,6 +49,10 @@ type Action =
   | { type: EActionTypes.FETCHED; payload: PaymentTokenOptionViewModel[] }
   | { type: EActionTypes.AMOUNT_CHANGED; payload: string }
   | { type: EActionTypes.DESTINATION_ADDRESS_CHANGED; payload: EthereumAddress }
+  | {
+      type: EActionTypes.SET_DEFAULT_DESTINATION_ADDRESS;
+      payload: EthereumAddress;
+    }
   | { type: EActionTypes.SUCCESS }
   | { type: EActionTypes.ERROR }
   | {
@@ -94,6 +100,12 @@ export function useFund(): IReducerStateReducer {
             error: false,
             destinationAddress: action.payload,
           };
+        case EActionTypes.SET_DEFAULT_DESTINATION_ADDRESS:
+          return {
+            ...state,
+            error: false,
+            destinationAddress: action.payload,
+          };
         case EActionTypes.ERROR:
           return {
             ...state,
@@ -131,7 +143,7 @@ export function useFund(): IReducerStateReducer {
         coreProxy.getEthereumAccounts().match(
           (accounts) => {
             dispatch({
-              type: EActionTypes.DESTINATION_ADDRESS_CHANGED,
+              type: EActionTypes.SET_DEFAULT_DESTINATION_ADDRESS,
               payload: accounts[0],
             });
           },
@@ -215,9 +227,32 @@ export function useFund(): IReducerStateReducer {
 
   const setDestinationAddress = (enteredAddress: string) => {
     dispatch({
-      type: EActionTypes.AMOUNT_CHANGED,
+      type: EActionTypes.DESTINATION_ADDRESS_CHANGED,
       payload: EthereumAddress(enteredAddress),
     });
+  };
+
+  const setDefaultDestinationAddress = () => {
+    setLoading(true);
+    coreProxy.getEthereumAccounts().match(
+      (accounts) => {
+        setLoading(false);
+        dispatch({
+          type: EActionTypes.SET_DEFAULT_DESTINATION_ADDRESS,
+          payload: accounts[0],
+        });
+      },
+      (err) => {
+        setLoading(false);
+        alert.error(
+          err.message ||
+            "Faild to set default metamask account as a destination address!",
+        );
+        dispatch({
+          type: EActionTypes.ERROR,
+        });
+      },
+    );
   };
 
   const depositFunds = () => {
@@ -254,13 +289,15 @@ export function useFund(): IReducerStateReducer {
   };
 
   const withdrawFunds = () => {
+    console.log("state.destinationAddress", state.destinationAddress);
+    return;
     if (!state.selectedPaymentToken?.address) {
       dispatch({
         type: EActionTypes.ERROR,
       });
       return;
     }
-    setLoading(true);
+    /* setLoading(true);
     coreProxy
       .withdrawFunds(
         EthereumAddress(state.selectedPaymentToken?.address),
@@ -282,7 +319,7 @@ export function useFund(): IReducerStateReducer {
             type: EActionTypes.ERROR,
           });
         },
-      );
+      ); */
   };
 
   const mintTokens = () => {
@@ -315,6 +352,7 @@ export function useFund(): IReducerStateReducer {
     ...state,
     setSelectedPaymentToken,
     setDestinationAddress,
+    setDefaultDestinationAddress,
     depositFunds,
     withdrawFunds,
     mintTokens,
