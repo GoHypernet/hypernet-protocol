@@ -21,6 +21,7 @@ COPY ./packages/utils/package.json /build/packages/utils/package.json
 COPY ./packages/web-demo/package.json /build/packages/web-demo/package.json
 COPY ./packages/web-integration/package.json /build/packages/web-integration/package.json
 COPY ./packages/web-ui/package.json /build/packages/web-ui/package.json
+RUN yarn config set network-timeout 300000
 RUN yarn install
 
 ARG BUILD_ENV=development
