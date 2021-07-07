@@ -65,16 +65,6 @@ export class HypernetCoreListener
             });
         }, data.callId);
       },
-      resolveChallenge: (data: IIFrameCallData<PaymentId>) => {
-        this.returnForModel(() => {
-          return this.gatewayService.resolveChallenge(data.data);
-        }, data.callId);
-      },
-      getAddress: (data: IIFrameCallData<void>) => {
-        this.returnForModel(() => {
-          return this.gatewayService.getAddress();
-        }, data.callId);
-      },
       deauthorize: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           return this.gatewayService.deauthorize();

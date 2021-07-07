@@ -25,7 +25,6 @@ interface IState {
   paymentsAutoAccept: boolean;
   setPaymentsAutoAccept: (val: boolean) => void;
   acceptPayment: (paymentId: PaymentId) => void;
-  disputePayment: (paymentId: PaymentId) => void;
   pullFunds: (paymentId: PaymentId) => void;
 }
 
@@ -58,7 +57,6 @@ export function useLinks(): IState {
     paymentsAutoAccept: false,
     setPaymentsAutoAccept,
     acceptPayment,
-    disputePayment,
     pullFunds,
   };
 
@@ -162,14 +160,6 @@ export function useLinks(): IState {
     );
   }
 
-  function disputePayment(paymentId: PaymentId) {
-    setLoading(true);
-    coreProxy.initiateDispute(paymentId).match(() => {
-      fetchPayments();
-      alert.success("Payment disputed successfully.");
-    }, handleError);
-  }
-
   function pullFunds(paymentId: PaymentId) {
     setLoading(true);
     coreProxy.pullFunds(paymentId, BigNumberString("1")).match(() => {
@@ -179,9 +169,8 @@ export function useLinks(): IState {
   }
 
   function getPaymentAutoAccept(): boolean {
-    const paymentsAutoAcceptStr = window.localStorage.getItem(
-      "PaymentsAutoAccept",
-    );
+    const paymentsAutoAcceptStr =
+      window.localStorage.getItem("PaymentsAutoAccept");
 
     return paymentsAutoAcceptStr == null
       ? false

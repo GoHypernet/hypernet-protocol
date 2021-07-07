@@ -34,12 +34,12 @@ import {
   UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { InitializedHypernetContext } from "@interfaces/objects";
 import { serialize } from "class-transformer";
 import { BigNumber } from "ethers";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
-import { InitializedHypernetContext } from "@interfaces/objects";
 import {
   IBrowserNodeProvider,
   IContextProvider,
@@ -160,14 +160,9 @@ export class VectorUtils implements IVectorUtils {
   public resolveInsuranceTransfer(
     transferId: TransferId,
     paymentId: PaymentId,
-    mediatorSignature?: Signature,
-    amount?: BigNumber,
+    gatewaySignature: Signature | null,
+    amount: BigNumber,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
-    // If you do not provide an actual amount, then it resolves for nothing
-    if (amount == null) {
-      amount = BigNumber.from(0);
-    }
-
     const resolverData: InsuranceResolverData = {
       amount: amount.toString(),
       UUID: paymentId,
@@ -185,7 +180,7 @@ export class VectorUtils implements IVectorUtils {
         browserNode = browserNodeVal;
         channelAddress = channelAddressVal;
 
-        if (mediatorSignature == null) {
+        if (gatewaySignature == null) {
           const resolverDataEncoding = ["tuple(uint256 amount, bytes32 UUID)"];
           const encodedResolverData = defaultAbiCoder.encode(
             resolverDataEncoding,
@@ -195,7 +190,7 @@ export class VectorUtils implements IVectorUtils {
 
           return browserNode.signUtilityMessage(hashedResolverData);
         }
-        return okAsync<string, TransferResolutionError>(mediatorSignature);
+        return okAsync<string, TransferResolutionError>(gatewaySignature);
       })
       .andThen((signature) => {
         const resolver: InsuranceResolver = {

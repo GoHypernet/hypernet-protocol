@@ -309,23 +309,6 @@ export default class HypernetIFrameProxy
     });
   }
 
-  public initiateDispute(
-    paymentId: PaymentId,
-  ): ResultAsync<
-    Payment,
-    | GatewayConnectorError
-    | GatewayValidationError
-    | RouterChannelUnknownError
-    | VectorError
-    | BlockchainUnavailableError
-    | LogicalError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | TransferResolutionError
-  > {
-    return this._createCall("initiateDispute", paymentId);
-  }
-
   public mintTestToken(
     amount: BigNumberString,
   ): ResultAsync<void, BlockchainUnavailableError> {

@@ -26,6 +26,7 @@ import {
   EPaymentState,
   UnixTimestamp,
   BigNumberString,
+  Signature,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IPaymentService } from "@interfaces/business";
@@ -600,62 +601,10 @@ export class PaymentService implements IPaymentService {
     });
   }
 
-  public initiateDispute(
-    paymentId: PaymentId,
-  ): ResultAsync<
-    Payment,
-    | GatewayConnectorError
-    | GatewayValidationError
-    | PaymentsByIdsErrors
-    | TransferResolutionError
-  > {
-    // Get the payment
-    return this.paymentRepository
-      .getPaymentsByIds([paymentId])
-      .andThen((payments) => {
-        const payment = payments.get(paymentId);
-
-        if (payment == null) {
-          return errAsync<void, InvalidParametersError>(
-            new InvalidParametersError("Invalid payment ID"),
-          );
-        }
-
-        // You can only dispute payments that are in the accepted state- the reciever has taken their money.
-        // The second condition can't happen if it's in Accepted unless something is very, very badly wrong,
-        // but it keeps typescript happy
-        if (
-          payment.state != EPaymentState.Accepted ||
-          payment.details.insuranceTransferId == null
-        ) {
-          return errAsync<void, InvalidParametersError>(
-            new InvalidParametersError(
-              "Can not dispute a payment that is not in the Accepted state",
-            ),
-          );
-        }
-
-        // Resolve the dispute
-        return this.gatewayConnectorRepository.resolveChallenge(
-          payment.gatewayUrl,
-          paymentId,
-          payment.details.insuranceTransferId,
-        );
-      })
-      .andThen(() => {
-        return this.paymentRepository.getPaymentsByIds([paymentId]);
-      })
-      .andThen((payments) => {
-        const payment = payments.get(paymentId);
-        if (payment == null) {
-          return errAsync(new InvalidParametersError("Invalid payment ID"));
-        }
-        return this._refreshBalances().andThen(() => okAsync(payment));
-      });
-  }
-
   public resolveInsurance(
     paymentId: PaymentId,
+    amount: BigNumberString,
+    gatewaySignature: Signature | null,
   ): ResultAsync<
     Payment,
     | RouterChannelUnknownError
@@ -705,6 +654,8 @@ export class PaymentService implements IPaymentService {
         return this.paymentRepository.resolveInsurance(
           paymentId,
           payment.details.insuranceTransferId,
+          amount,
+          gatewaySignature,
         );
       })
       .andThen(() => {

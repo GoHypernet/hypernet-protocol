@@ -165,25 +165,6 @@ export interface IHypernetCore {
   ): Promise<HypernetLink>;
 
   /**
-   * Called by the consumer to attempt to claim some or all of the stake within a particular insurance payment.
-   * @param paymentId the payment ID to dispute
-   */
-  initiateDispute(
-    paymentId: PaymentId,
-  ): ResultAsync<
-    Payment,
-    | GatewayConnectorError
-    | GatewayValidationError
-    | RouterChannelUnknownError
-    | VectorError
-    | BlockchainUnavailableError
-    | LogicalError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | TransferResolutionError
-  >;
-
-  /**
    * Only used for development purposes!
    * @param amount
    */

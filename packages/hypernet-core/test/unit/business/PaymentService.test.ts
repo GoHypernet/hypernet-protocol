@@ -19,9 +19,6 @@ import {
   InvalidPaymentError,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
-import { okAsync, errAsync } from "neverthrow";
-import td from "testdouble";
-
 import { PaymentService } from "@implementations/business/PaymentService";
 import { IPaymentService } from "@interfaces/business/IPaymentService";
 import {
@@ -30,6 +27,9 @@ import {
   IGatewayConnectorRepository,
   IPaymentRepository,
 } from "@interfaces/data";
+import { okAsync, errAsync } from "neverthrow";
+import td from "testdouble";
+
 import {
   defaultExpirationLength,
   gatewayUrl,
@@ -165,9 +165,9 @@ class PaymentServiceMocks {
       ),
     ).thenReturn(okAsync(this.gatewayAddresses));
 
-    td.when(
-      this.gatewayConnectorRepository.getAuthorizedGateways(),
-    ).thenReturn(okAsync(new Map([[gatewayUrl, validatedSignature]])));
+    td.when(this.gatewayConnectorRepository.getAuthorizedGateways()).thenReturn(
+      okAsync(new Map([[gatewayUrl, validatedSignature]])),
+    );
 
     td.when(
       this.gatewayConnectorRepository.addAuthorizedGateway(
@@ -181,7 +181,12 @@ class PaymentServiceMocks {
     ).thenReturn(okAsync(new Map([[gatewayUrl, true]])));
 
     td.when(
-      this.paymentRepository.resolveInsurance(paymentId, insuranceTransferId),
+      this.paymentRepository.resolveInsurance(
+        paymentId,
+        insuranceTransferId,
+        BigNumberString("0"),
+        null,
+      ),
     ).thenReturn(okAsync(undefined));
   }
 
@@ -644,7 +649,8 @@ describe("PaymentService tests", () => {
       EPaymentState.Staked,
     );
     paymentServiceMock.setExistingPayments([payment]);
-    paymentServiceMock.contextProvider.context.publicIdentifier = publicIdentifier;
+    paymentServiceMock.contextProvider.context.publicIdentifier =
+      publicIdentifier;
 
     const receivedPushPayments = new Array<PushPayment>();
     paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe(
@@ -682,7 +688,8 @@ describe("PaymentService tests", () => {
       EPaymentState.Approved,
     );
     paymentServiceMock.setExistingPayments([payment]);
-    paymentServiceMock.contextProvider.context.publicIdentifier = publicIdentifier;
+    paymentServiceMock.contextProvider.context.publicIdentifier =
+      publicIdentifier;
 
     const receivedPushPayments = new Array<PushPayment>();
     paymentServiceMock.contextProvider.onPushPaymentUpdated.subscribe(
@@ -718,7 +725,8 @@ describe("PaymentService tests", () => {
     );
     paymentServiceMock.setExistingPayments([payment]);
     paymentServiceMock.setGatewayStatus(gatewayUrl, false);
-    paymentServiceMock.contextProvider.context.publicIdentifier = publicIdentifier;
+    paymentServiceMock.contextProvider.context.publicIdentifier =
+      publicIdentifier;
 
     const delayedPushPayments = new Array<PushPayment>();
     paymentServiceMock.contextProvider.onPushPaymentDelayed.subscribe(
@@ -758,7 +766,11 @@ describe("PaymentService tests", () => {
     paymentServiceMock.setExistingPayments([acceptedPayment]);
 
     // Act
-    const result = await paymentService.resolveInsurance(acceptedPayment.id);
+    const result = await paymentService.resolveInsurance(
+      acceptedPayment.id,
+      BigNumberString("0"),
+      null,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -773,7 +785,11 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.resolveInsurance(paymentId);
+    const result = await paymentService.resolveInsurance(
+      paymentId,
+      BigNumberString("0"),
+      null,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -796,7 +812,11 @@ describe("PaymentService tests", () => {
     paymentServiceMock.setExistingPayments([acceptedPayment]);
 
     // Act
-    const result = await paymentService.resolveInsurance(acceptedPayment.id);
+    const result = await paymentService.resolveInsurance(
+      acceptedPayment.id,
+      BigNumberString("0"),
+      null,
+    );
 
     // Assert
     expect(result).toBeDefined();

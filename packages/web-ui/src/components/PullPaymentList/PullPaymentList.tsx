@@ -29,7 +29,6 @@ interface IPullPaymentList {
   pullPayments: PullPayment[];
   publicIdentifier: PublicIdentifier;
   onAcceptPullPaymentClick: (paymentId: PaymentId) => void;
-  onDisputePullPaymentClick: (paymentId: PaymentId) => void;
   onPullFundClick: (paymentId: PaymentId) => void;
 }
 
@@ -37,9 +36,7 @@ interface IPullPaymentRow {
   pullPayment: PullPayment;
   acceptPaymentButtonVisible: boolean;
   pullFundsButtonVisible: boolean;
-  disputeButtonVisible: boolean;
   onAcceptPullPaymentClick: (paymentId: PaymentId) => void;
-  onDisputePullPaymentClick: (paymentId: PaymentId) => void;
   onPullFundClick: (paymentId: PaymentId) => void;
   publicIdentifier: PublicIdentifier;
 }
@@ -49,9 +46,7 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
     pullPayment,
     acceptPaymentButtonVisible,
     pullFundsButtonVisible,
-    disputeButtonVisible,
     onAcceptPullPaymentClick,
-    onDisputePullPaymentClick,
     onPullFundClick,
     publicIdentifier,
   } = props;
@@ -135,16 +130,6 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
               Accept
             </Button>
           )}
-          {disputeButtonVisible && (
-            <Button
-              size="small"
-              variant="outlined"
-              color="secondary"
-              onClick={() => onDisputePullPaymentClick(pullPayment.id)}
-            >
-              Dispute
-            </Button>
-          )}
           {pullFundsButtonVisible && (
             <Button
               size="small"
@@ -223,7 +208,6 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
     pullPayments,
     publicIdentifier,
     onAcceptPullPaymentClick,
-    onDisputePullPaymentClick,
     onPullFundClick,
   } = props;
 
@@ -255,12 +239,7 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
                 publicIdentifier === pullPayment.to &&
                 pullPayment.state === EPaymentState.Approved
               }
-              disputeButtonVisible={
-                publicIdentifier === pullPayment.from &&
-                pullPayment.state === EPaymentState.Accepted
-              }
               onAcceptPullPaymentClick={onAcceptPullPaymentClick}
-              onDisputePullPaymentClick={onDisputePullPaymentClick}
               onPullFundClick={onPullFundClick}
             />
           ))}

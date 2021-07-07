@@ -20,6 +20,7 @@ import {
   TransferCreationError,
   BigNumberString,
   UnixTimestamp,
+  Signature,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -137,6 +138,8 @@ export interface IPaymentRepository {
   resolveInsurance(
     paymentId: PaymentId,
     transferId: TransferId,
+    amount: BigNumberString,
+    gatewaySignature: Signature | null,
   ): ResultAsync<void, TransferResolutionError>;
 }
 

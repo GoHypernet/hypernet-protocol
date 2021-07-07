@@ -22,6 +22,7 @@ import {
   TransferResolutionError,
   UnixTimestamp,
   BigNumberString,
+  Signature,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync, Result } from "neverthrow";
@@ -220,31 +221,17 @@ export interface IPaymentService {
   >;
 
   /**
-   * A payment that is in the Accepted state may be disputed up to the expiration date.
-   * If the payment is disputed, it is sent to the dispute mediator, who will determine
-   * if the payment was proper. The dispute mediator can provide a signature to resolve
-   * the insurance transfer for an amount from 0 to the full value of Hypertoken.
-   * The method by which the mediator makes this determination is entirely up to the
-   * gateway.
-   * @param paymentId
+   * After a payment is accepted, the next step is to resolve the insurance.
+   * There are two options for that; it can be resolved for 0 by the user's key,
+   * or it can be resolved for more than 0 by the gateway using the gateway's
+   * key. In the current system, insurance is resolved by the Gateway, and
+   * the whole process is controlled and timed by the gateway, without user
+   * input.
    */
-  initiateDispute(
-    paymentId: PaymentId,
-  ): ResultAsync<
-    Payment,
-    | GatewayConnectorError
-    | GatewayValidationError
-    | RouterChannelUnknownError
-    | VectorError
-    | BlockchainUnavailableError
-    | LogicalError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | TransferResolutionError
-  >;
-
   resolveInsurance(
     paymentId: PaymentId,
+    amount: BigNumberString,
+    gatewaySignature: Signature | null,
   ): ResultAsync<
     Payment,
     | RouterChannelUnknownError

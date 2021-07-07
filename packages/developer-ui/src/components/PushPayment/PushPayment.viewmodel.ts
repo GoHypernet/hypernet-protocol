@@ -3,8 +3,8 @@ import {
   PublicIdentifier,
   PushPayment,
   GatewayUrl,
+  EPaymentState,
 } from "@hypernetlabs/objects";
-import { EPaymentState } from "@hypernetlabs/objects";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { utils } from "ethers";
 import ko from "knockout";
@@ -42,8 +42,6 @@ export class PushPaymentViewModel {
   public showAcceptButton: ko.PureComputed<boolean>;
   public sendButton: ButtonParams;
   public showSendButton: ko.PureComputed<boolean>;
-  public disputeButton: ButtonParams;
-  public showDisputeButton: ko.PureComputed<boolean>;
 
   protected integration: IHypernetWebIntegration;
   protected paymentId: PaymentId;
@@ -151,22 +149,6 @@ export class PushPaymentViewModel {
 
     this.showSendButton = ko.pureComputed(() => {
       return this.state().state === EPaymentState.Staked;
-    });
-
-    this.disputeButton = new ButtonParams("Dispute", async () => {
-      return await this.integration.core
-        .initiateDispute(this.paymentId)
-        .mapErr((e) => {
-          alert("Error during dispute!");
-          console.error(e);
-        });
-    });
-
-    this.showDisputeButton = ko.pureComputed(() => {
-      return (
-        this.state().state === EPaymentState.Accepted &&
-        this.publicIdentifier() === this.from()
-      );
     });
 
     this.integration.core.getPublicIdentifier().map((publicIdentifier) => {

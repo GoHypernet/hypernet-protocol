@@ -1,5 +1,6 @@
 import {
   IAuthorizeFundsRequest,
+  IResolveInsuranceRequest,
   ISendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
 import { injectable, inject } from "inversify";
@@ -38,6 +39,14 @@ export class HypernetCoreRepository implements IHypernetCoreRepository {
     request: IAuthorizeFundsRequest,
   ): ResultAsync<void, never> {
     this.childApi?.emit("authorizeFundsRequested", request);
+
+    return okAsync(undefined);
+  }
+
+  public emitResolveInsuranceRequest(
+    request: IResolveInsuranceRequest,
+  ): ResultAsync<void, never> {
+    this.childApi?.emit("resolveInsuranceRequested", request);
 
     return okAsync(undefined);
   }

@@ -11,12 +11,12 @@ import {
   BigNumberString,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
+import { IPaymentRepository } from "@interfaces/data";
 import { BigNumber } from "ethers";
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
 import { PaymentRepository } from "@implementations/data/PaymentRepository";
-import { IPaymentRepository } from "@interfaces/data";
 import {
   IVectorUtils,
   IBrowserNodeProvider,
@@ -176,7 +176,7 @@ class PaymentRepositoryMocks {
       this.vectorUtils.resolveInsuranceTransfer(
         insuranceTransferId,
         commonPaymentId,
-        undefined,
+        null,
         BigNumber.from("0"),
       ),
     ).thenReturn(okAsync({} as IBasicTransferResponse));
@@ -424,6 +424,8 @@ describe("PaymentRepository tests", () => {
     const result = await repo.resolveInsurance(
       commonPaymentId,
       insuranceTransferId,
+      BigNumberString("0"),
+      null,
     );
 
     // Assert
@@ -440,7 +442,7 @@ describe("PaymentRepository tests", () => {
       paymentRepositoryMocks.vectorUtils.resolveInsuranceTransfer(
         insuranceTransferId,
         commonPaymentId,
-        undefined,
+        null,
         BigNumber.from("0"),
       ),
     ).thenReturn(
@@ -455,6 +457,8 @@ describe("PaymentRepository tests", () => {
     const result = await repo.resolveInsurance(
       commonPaymentId,
       insuranceTransferId,
+      BigNumberString("0"),
+      null,
     );
 
     // Assert

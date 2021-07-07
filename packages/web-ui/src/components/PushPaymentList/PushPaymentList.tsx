@@ -29,15 +29,12 @@ interface IPushPaymentList {
   pushPayments: PushPayment[];
   publicIdentifier: PublicIdentifier;
   onAcceptPushPaymentClick: (paymentId: PaymentId) => void;
-  onDisputePushPaymentClick: (paymentId: PaymentId) => void;
 }
 
 interface IPushPaymentRow {
   pushPayment: PushPayment;
   acceptPaymentButtonVisible: boolean;
-  disputeButtonVisible: boolean;
   onAcceptPushPaymentClick: (paymentId: PaymentId) => void;
-  onDisputePushPaymentClick: (paymentId: PaymentId) => void;
   publicIdentifier: PublicIdentifier;
 }
 
@@ -45,9 +42,7 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
   const {
     pushPayment,
     acceptPaymentButtonVisible,
-    disputeButtonVisible,
     onAcceptPushPaymentClick,
-    onDisputePushPaymentClick,
     publicIdentifier,
   } = props;
   const [open, setOpen] = React.useState(false);
@@ -133,16 +128,6 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
               Accept
             </Button>
           )}
-          {disputeButtonVisible && (
-            <Button
-              size="small"
-              variant="outlined"
-              color="secondary"
-              onClick={() => onDisputePushPaymentClick(pushPayment.id)}
-            >
-              Dispute
-            </Button>
-          )}
         </TableCell>
       </StyledTableRow>
       <TableCell
@@ -207,12 +192,7 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
 export const PushPaymentList: React.FC<IPushPaymentList> = (
   props: IPushPaymentList,
 ) => {
-  const {
-    pushPayments,
-    publicIdentifier,
-    onAcceptPushPaymentClick,
-    onDisputePushPaymentClick,
-  } = props;
+  const { pushPayments, publicIdentifier, onAcceptPushPaymentClick } = props;
 
   return (
     <TableContainer>
@@ -240,12 +220,7 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
                 publicIdentifier === pushPayment.to &&
                 pushPayment.state === EPaymentState.Proposed
               }
-              disputeButtonVisible={
-                publicIdentifier === pushPayment.from &&
-                pushPayment.state === EPaymentState.Accepted
-              }
               onAcceptPushPaymentClick={onAcceptPushPaymentClick}
-              onDisputePushPaymentClick={onDisputePushPaymentClick}
             />
           ))}
         </TableBody>

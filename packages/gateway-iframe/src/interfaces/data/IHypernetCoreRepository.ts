@@ -1,5 +1,6 @@
 import {
   IAuthorizeFundsRequest,
+  IResolveInsuranceRequest,
   ISendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
 import { ResultAsync } from "neverthrow";
@@ -9,6 +10,10 @@ export interface IHypernetCoreRepository {
 
   emitAuthorizeFundsRequest(
     request: IAuthorizeFundsRequest,
+  ): ResultAsync<void, never>;
+
+  emitResolveInsuranceRequest(
+    request: IResolveInsuranceRequest,
   ): ResultAsync<void, never>;
 
   emitDisplayRequested(): ResultAsync<void, never>;

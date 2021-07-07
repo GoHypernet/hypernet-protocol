@@ -1,6 +1,7 @@
 import {
   IAuthorizeFundsRequest,
   IResolutionResult,
+  IResolveInsuranceRequest,
   ISendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
 import {
@@ -39,10 +40,6 @@ export interface IGatewayConnectorProxy extends ParentProxy {
     balances: Balances,
   ): ResultAsync<void, GatewayActivationError | ProxyError>;
 
-  resolveChallenge(
-    paymentId: PaymentId,
-  ): ResultAsync<IResolutionResult, GatewayConnectorError | ProxyError>;
-
   getAddress(): ResultAsync<
     EthereumAddress,
     GatewayConnectorError | ProxyError
@@ -62,10 +59,7 @@ export interface IGatewayConnectorProxy extends ParentProxy {
 
   closeGatewayIFrame(): ResultAsync<void, GatewayConnectorError | ProxyError>;
 
-  displayGatewayIFrame(): ResultAsync<
-    void,
-    GatewayConnectorError | ProxyError
-  >;
+  displayGatewayIFrame(): ResultAsync<void, GatewayConnectorError | ProxyError>;
 
   notifyPushPaymentSent(
     payment: PushPayment,
@@ -98,4 +92,5 @@ export interface IGatewayConnectorProxy extends ParentProxy {
   signMessageRequested: Observable<string>;
   sendFundsRequested: Observable<ISendFundsRequest>;
   authorizeFundsRequested: Observable<IAuthorizeFundsRequest>;
+  resolveInsuranceRequested: Observable<IResolveInsuranceRequest>;
 }

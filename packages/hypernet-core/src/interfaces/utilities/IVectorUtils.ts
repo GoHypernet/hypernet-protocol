@@ -51,14 +51,14 @@ export interface IVectorUtils {
    *
    * @param transferId
    * @param paymentId
-   * @param mediatorSignature
+   * @param gatewaySignature
    * @param amount
    */
   resolveInsuranceTransfer(
     transferId: TransferId,
     paymentId: PaymentId,
-    mediatorSignature?: Signature,
-    amount?: BigNumber,
+    gatewaySignature: Signature | null,
+    amount: BigNumber,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
   /**

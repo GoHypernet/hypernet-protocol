@@ -1,5 +1,6 @@
 import {
   IAuthorizeFundsRequest,
+  IResolveInsuranceRequest,
   ISendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
 import { GatewayUrl, PaymentId } from "@hypernetlabs/objects";
@@ -18,6 +19,7 @@ import {
   IPaymentServiceType,
   ILinkServiceType,
 } from "@interfaces/business";
+import { BigNumber } from "ethers";
 import { injectable, inject } from "inversify";
 import { ResultAsync } from "neverthrow";
 import { Subscription } from "rxjs";
@@ -26,14 +28,22 @@ import { IContextProvider, IContextProviderType } from "@interfaces/utilities";
 
 @injectable()
 export class GatewayConnectorListener implements IGatewayConnectorListener {
-  protected signMessageRequestedSubscriptionMap: Map<GatewayUrl, Subscription> =
-    new Map<GatewayUrl, Subscription>();
-  protected sendFundsRequestedSubscriptionMap: Map<GatewayUrl, Subscription> =
-    new Map<GatewayUrl, Subscription>();
-  protected authorizeFundsRequestedSubscriptionMap: Map<
+  protected signMessageRequestedSubscriptionMap = new Map<
     GatewayUrl,
     Subscription
-  > = new Map<GatewayUrl, Subscription>();
+  >();
+  protected sendFundsRequestedSubscriptionMap = new Map<
+    GatewayUrl,
+    Subscription
+  >();
+  protected authorizeFundsRequestedSubscriptionMap = new Map<
+    GatewayUrl,
+    Subscription
+  >();
+  protected resolveInsuranceRequestedSubscriptionMap = new Map<
+    GatewayUrl,
+    Subscription
+  >();
 
   constructor(
     @inject(IAccountServiceType) protected accountService: IAccountService,
@@ -141,6 +151,34 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
           proxy.gatewayUrl,
           authorizeFundsRequestedSubscription,
         );
+
+        const resolveInsuranceRequestedSubscription =
+          proxy.resolveInsuranceRequested.subscribe((request) => {
+            this.logUtils.debug(
+              `Gateway Connector ${proxy.gatewayUrl} requested to resolve insurance for payment ${request.paymentId}`,
+            );
+
+            if (this.validateResolveInsuranceRequest(request)) {
+              this.paymentService
+                .resolveInsurance(
+                  request.paymentId,
+                  request.amount,
+                  request.gatewaySignature,
+                )
+                .mapErr((e) => {
+                  this.logUtils.error(e);
+                });
+            } else {
+              this.logUtils.error(
+                `Invalid IResolveInsuranceRequest from gateway connector ${proxy.gatewayUrl}`,
+              );
+            }
+          });
+
+        this.resolveInsuranceRequestedSubscriptionMap.set(
+          proxy.gatewayUrl,
+          resolveInsuranceRequestedSubscription,
+        );
       });
 
       // Stop listening for gateway connector events when gateway deauthorization starts
@@ -238,6 +276,23 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
     // Verify that the expiration date is sometime in the future
     const now = Math.floor(new Date().getTime() / 1000);
     if (now < request.expirationDate) {
+      return false;
+    }
+
+    return true;
+  }
+
+  protected validateResolveInsuranceRequest(
+    request: IResolveInsuranceRequest,
+  ): boolean {
+    if (!this.validationUtils.validatePaymentId(request.paymentId)) {
+      return false;
+    }
+
+    if (
+      !BigNumber.from(request.amount).isZero() &&
+      request.gatewaySignature == null
+    ) {
       return false;
     }
 

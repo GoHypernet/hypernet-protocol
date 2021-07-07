@@ -1,6 +1,7 @@
 import {
   IAuthorizeFundsRequest,
   IResolutionResult,
+  IResolveInsuranceRequest,
   ISendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
 import {
@@ -47,11 +48,13 @@ export class GatewayConnectorProxy
     this.signMessageRequested = new Subject();
     this.sendFundsRequested = new Subject();
     this.authorizeFundsRequested = new Subject();
+    this.resolveInsuranceRequested = new Subject();
   }
 
   public signMessageRequested: Subject<string>;
   public sendFundsRequested: Subject<ISendFundsRequest>;
   public authorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
+  public resolveInsuranceRequested: Subject<IResolveInsuranceRequest>;
 
   public activateConnector(
     publicIdentifier: PublicIdentifier,
@@ -153,6 +156,13 @@ export class GatewayConnectorProxy
         "authorizeFundsRequested",
         (request: IAuthorizeFundsRequest) => {
           this.authorizeFundsRequested.next(request);
+        },
+      );
+
+      this.child?.on(
+        "resolveInsuranceRequested",
+        (request: IResolveInsuranceRequest) => {
+          this.resolveInsuranceRequested.next(request);
         },
       );
 
