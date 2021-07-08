@@ -38,6 +38,7 @@ import { InitializedHypernetContext } from "@interfaces/objects";
 import { BigNumber, ethers } from "ethers";
 import { injectable, inject } from "inversify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
+import { urlJoinP } from "url-join-ts";
 
 import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import {
@@ -125,27 +126,7 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
       >
     >();
     for (const gatewayUrl of gatewayUrls) {
-      // We can't use _getActivatedGatewayProxy because it may fire an error when activateAuthorizedGatewaysResult is null
-      // and in our case here we might need to pull the address from the source using ajax request not from the proxy.
-      const authorizedGatewayProxyResult =
-        this.authorizedGatewayProxies.get(gatewayUrl);
-
-      if (authorizedGatewayProxyResult == null) {
-        addressRequests.push(this._getGatewayAddress(gatewayUrl));
-      } else {
-        addressRequests.push(
-          authorizedGatewayProxyResult
-            .andThen((gatewayProxy) => {
-              return gatewayProxy.getAddress().map((address) => {
-                return { gatewayUrl, address };
-              });
-            })
-            .orElse(() => {
-              // Need to get it from the source
-              return this._getGatewayAddress(gatewayUrl);
-            }),
-        );
-      }
+      addressRequests.push(this._getGatewayAddress(gatewayUrl));
     }
 
     return ResultUtils.combine(addressRequests).map((vals) => {
@@ -549,8 +530,7 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
     | ProxyError
     | GatewayAuthorizationDeniedError
   > {
-    const url = new URL(gatewayUrl.toString());
-    url.pathname = "address";
+    const url = new URL(urlJoinP(gatewayUrl, ["address"]));
     return this.ajaxUtils.get<EthereumAddress>(url).map((address) => {
       return { gatewayUrl, address };
     });

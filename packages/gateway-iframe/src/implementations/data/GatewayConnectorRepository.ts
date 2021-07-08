@@ -5,12 +5,12 @@ import {
   AjaxError,
 } from "@hypernetlabs/objects";
 import { IAjaxUtils } from "@hypernetlabs/utils";
-import { IGatewayConnectorRepository } from "@gateway-iframe/interfaces/data";
 import { okAsync, ResultAsync } from "neverthrow";
 import { urlJoinP } from "url-join-ts";
 
-export class GatewayConnectorRepository
-  implements IGatewayConnectorRepository {
+import { IGatewayConnectorRepository } from "@gateway-iframe/interfaces/data";
+
+export class GatewayConnectorRepository implements IGatewayConnectorRepository {
   constructor(protected ajaxUtils: IAjaxUtils) {}
 
   public getGatewaySignature(
@@ -48,8 +48,6 @@ export class GatewayConnectorRepository
       searchParams[key] = value;
     }
     gatewayUrlObject.search = "";
-    return new URL(
-      urlJoinP(gatewayUrlObject.toString(), [path], searchParams),
-    );
+    return new URL(urlJoinP(gatewayUrlObject.toString(), [path], searchParams));
   }
 }
