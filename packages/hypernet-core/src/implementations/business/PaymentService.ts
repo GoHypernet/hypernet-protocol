@@ -651,6 +651,7 @@ export class PaymentService implements IPaymentService {
         }
 
         // Resolve the insurance
+        this.logUtils.debug(`Resolving insurance for payment ${paymentId}`);
         return this.paymentRepository.resolveInsurance(
           paymentId,
           payment.details.insuranceTransferId,
@@ -718,6 +719,7 @@ export class PaymentService implements IPaymentService {
     | TransferCreationError
   > {
     this.logUtils.debug(`Advancing payment ${payment.id}`);
+    this.logUtils.debug(`Current payment status is ${payment.state}`);
 
     return this.gatewayConnectorRepository
       .getAuthorizedGatewaysConnectorsStatus()
@@ -793,6 +795,9 @@ export class PaymentService implements IPaymentService {
     ) {
       // If the payment state is approved, we know that it matches our insurance payment
       if (payment instanceof PushPayment) {
+        this.logUtils.debug(
+          `Resolving parameterized transfer to move payment ${payment.id} from Approved to Accepted`,
+        );
         // Resolve the parameterized payment immediately for the full balance
         return this.paymentRepository
           .acceptPayment(paymentId, payment.paymentAmount)
@@ -801,6 +806,27 @@ export class PaymentService implements IPaymentService {
             return payment;
           });
       }
+    }
+
+    // Once the insurance is resolved, there is no need to keep the offer around
+    // Resolve it
+    if (
+      payment.state == EPaymentState.InsuranceReleased &&
+      payment.to === context.publicIdentifier
+    ) {
+      this.logUtils.debug(
+        `Resolving offer transfer to move payment ${payment.id} from Insurance Resolved to Finalize`,
+      );
+      return this.paymentRepository.finalizePayment(payment).map(() => {
+        payment.state = EPaymentState.Finalized;
+        if (payment instanceof PushPayment) {
+          context.onPushPaymentUpdated.next(payment);
+        }
+        if (payment instanceof PullPayment) {
+          context.onPullPaymentUpdated.next(payment);
+        }
+        return payment;
+      });
     }
 
     return okAsync(payment);

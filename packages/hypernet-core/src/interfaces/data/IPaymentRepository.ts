@@ -141,6 +141,12 @@ export interface IPaymentRepository {
     amount: BigNumberString,
     gatewaySignature: Signature | null,
   ): ResultAsync<void, TransferResolutionError>;
+
+  /**
+   * This method will resolve the offer transfer for a payment
+   * @param payment the payment to finalize
+   */
+  finalizePayment(payment: Payment): ResultAsync<void, TransferResolutionError>;
 }
 
 export const IPaymentRepositoryType = Symbol.for("IPaymentRepository");

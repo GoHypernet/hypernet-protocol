@@ -194,6 +194,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
     });
 
     this.core.onPushPaymentDelayed.subscribe((val) => {
+      console.log("Emitting onPushPaymentDelayed");
       parent.emit("onPushPaymentDelayed", val);
     });
 
