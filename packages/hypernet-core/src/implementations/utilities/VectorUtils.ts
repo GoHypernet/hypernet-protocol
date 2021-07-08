@@ -83,14 +83,14 @@ export class VectorUtils implements IVectorUtils {
   public resolveMessageTransfer(
     transferId: TransferId,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
-    let channelAddress: EthereumAddress;
-    let browserNode: IBrowserNode;
-
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.getRouterChannelAddress(),
     ])
-      .andThen(() => {
+      .andThen((vals) => {
+        const [browserNode, channelAddress] = vals;
+
+        this.logUtils.debug(`Resolving offer transfer ${transferId}`);
         return browserNode.resolveTransfer(channelAddress, transferId, {
           message: "",
         } as MessageResolver);

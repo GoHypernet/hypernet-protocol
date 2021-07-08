@@ -116,9 +116,6 @@ class GatewayConnectorRepositoryMocks {
     td.when(
       this.gatewayConnectorProxy.activateConnector(publicIdentifier, balances),
     ).thenReturn(okAsync(undefined));
-    td.when(this.gatewayConnectorProxy.getAddress()).thenReturn(
-      okAsync(account),
-    );
 
     td.when(
       this.blockchainUtils.verifyTypedData(

@@ -40,11 +40,6 @@ export interface IGatewayConnectorProxy extends ParentProxy {
     balances: Balances,
   ): ResultAsync<void, GatewayActivationError | ProxyError>;
 
-  getAddress(): ResultAsync<
-    EthereumAddress,
-    GatewayConnectorError | ProxyError
-  >;
-
   deauthorize(): ResultAsync<void, never>;
 
   /**

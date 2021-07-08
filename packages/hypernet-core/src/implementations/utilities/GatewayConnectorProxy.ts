@@ -92,13 +92,6 @@ export class GatewayConnectorProxy
     return this._createCall("resolveChallenge", paymentId);
   }
 
-  public getAddress(): ResultAsync<
-    EthereumAddress,
-    GatewayConnectorError | ProxyError
-  > {
-    return this._createCall("getAddress", null);
-  }
-
   public deauthorize(): ResultAsync<void, never> {
     const deauthTimeout = ResultAsync.fromSafePromise<void, never>(
       new Promise((resolve) => {

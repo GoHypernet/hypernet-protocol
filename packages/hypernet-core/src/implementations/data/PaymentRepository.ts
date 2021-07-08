@@ -34,11 +34,11 @@ import {
   Signature,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { IPaymentRepository } from "@interfaces/data";
+import { InitializedHypernetContext } from "@interfaces/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
-import { IPaymentRepository } from "@interfaces/data";
-import { InitializedHypernetContext } from "@interfaces/objects";
 import {
   IBrowserNode,
   IBrowserNodeProvider,
@@ -263,9 +263,8 @@ export class PaymentRepository implements IPaymentRepository {
       })
       .andThen((activeTransfers) => {
         // We also need to look for potentially resolved transfers
-        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(
-          activeTransfers,
-        );
+        const earliestDate =
+          this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
 
         return browserNode.getTransfers(
           earliestDate,
@@ -359,9 +358,8 @@ export class PaymentRepository implements IPaymentRepository {
       })
       .andThen((activeTransfers) => {
         // We also need to look for potentially resolved transfers
-        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(
-          activeTransfers,
-        );
+        const earliestDate =
+          this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
 
         return browserNode.getTransfers(
           earliestDate,
@@ -678,7 +676,8 @@ export class PaymentRepository implements IPaymentRepository {
         );
       })
       .andThen((transferInfoUnk) => {
-        const transferInfo = transferInfoUnk as NodeResponses.ConditionalTransfer;
+        const transferInfo =
+          transferInfoUnk as NodeResponses.ConditionalTransfer;
         return browserNode.getTransfer(TransferId(transferInfo.transferId));
       })
       .andThen((transfer) => {
@@ -709,6 +708,14 @@ export class PaymentRepository implements IPaymentRepository {
         gatewaySignature,
         BigNumber.from(amount),
       )
+      .map(() => {});
+  }
+
+  public finalizePayment(
+    payment: Payment,
+  ): ResultAsync<void, TransferResolutionError> {
+    return this.vectorUtils
+      .resolveMessageTransfer(payment.details.offerTransferId)
       .map(() => {});
   }
 }
