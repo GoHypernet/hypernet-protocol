@@ -532,6 +532,48 @@ export class PaymentService implements IPaymentService {
     });
   }
 
+  public offerResolved(
+    paymentId: PaymentId,
+  ): ResultAsync<
+    void,
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
+  > {
+    this.logUtils.debug(`Offer transfer resolved for payment ${paymentId}`);
+
+    return ResultUtils.combine([
+      this.paymentRepository.getPaymentsByIds([paymentId]),
+      this.contextProvider.getInitializedContext(),
+    ]).andThen((vals) => {
+      const [payments, context] = vals;
+
+      const payment = payments.get(paymentId);
+
+      if (payment == null) {
+        this.logUtils.error(`Invalid payment ID: ${paymentId}`);
+        return errAsync(new InvalidParametersError("Invalid payment ID!"));
+      }
+
+      // Let the UI know we got an insurance transfer
+      if (payment instanceof PushPayment) {
+        context.onPushPaymentUpdated.next(payment);
+      }
+      if (payment instanceof PullPayment) {
+        context.onPullPaymentUpdated.next(payment);
+      }
+
+      return this._advancePayment(payment, context);
+    });
+  }
+
   /**
    * Right now, if the insurance is resolved, all we need to do is generate an update event.
    *
