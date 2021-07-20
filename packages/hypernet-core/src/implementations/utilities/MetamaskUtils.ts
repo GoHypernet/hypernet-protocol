@@ -27,7 +27,7 @@ export class MetamaskUtils implements IMetamaskUtils {
     return ResultAsync.fromPromise(
       window.ethereum.request({ method: "eth_requestAccounts" }),
       (e: unknown) => {
-        const errorMessage: string =
+        const errorMessage =
           "Unable to initialize ethereum provider from the window";
         this.logUtils.error(errorMessage);
         return new BlockchainUnavailableError(errorMessage, e);
@@ -55,7 +55,7 @@ export class MetamaskUtils implements IMetamaskUtils {
           ],
         }),
         (e: unknown) => {
-          const errorMessage: string = "Unable to add network in metamask";
+          const errorMessage = "Unable to add network in metamask";
           this.logUtils.error(errorMessage);
           return new BlockchainUnavailableError(errorMessage, e);
         },
@@ -89,7 +89,7 @@ export class MetamaskUtils implements IMetamaskUtils {
           },
         }),
         (e: unknown) => {
-          const errorMessage: string = "Unable to add token in metamask";
+          const errorMessage = "Unable to add token in metamask";
           this.logUtils.error(errorMessage);
           return new BlockchainUnavailableError(errorMessage, e);
         },

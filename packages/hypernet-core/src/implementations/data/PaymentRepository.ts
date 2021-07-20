@@ -407,12 +407,12 @@ export class PaymentRepository implements IPaymentRepository {
               if (paymentIds.includes(transfer.transferState.UUID)) {
                 relevantTransfers.push(transfer);
               } else {
-                this.logUtils.log(
+                this.logUtils.debug(
                   `Transfer not relevant in PaymentRepository, transferId: ${transfer.transferId}`,
                 );
               }
             } else {
-              this.logUtils.log(
+              this.logUtils.warning(
                 `Unrecognized transfer in PaymentRepository, transferId: ${transfer.transferId}`,
               );
             }

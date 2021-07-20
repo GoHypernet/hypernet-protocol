@@ -19,10 +19,10 @@ import {
   MessageState,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
-import { ResultAsync, errAsync, okAsync } from "neverthrow";
-
 import { IVectorListener } from "@interfaces/api";
 import { IPaymentService } from "@interfaces/business";
+import { ResultAsync, errAsync, okAsync } from "neverthrow";
+
 import {
   IBrowserNodeProvider,
   IContextProvider,
@@ -107,11 +107,7 @@ export class VectorAPIListener implements IVectorListener {
                     // if the transfer is an offer transfer, we need to notify the payment service
                     // than an offer has been resolved.
                     // @todo create methods in payment service
-                    this.logUtils.error(
-                      "Resolved offer transfer is unimplemented!",
-                    );
-                    this.logUtils.debug(payload);
-                    return okAsync(undefined);
+                    return this.paymentService.offerResolved(paymentId);
                   } else if (transferType === ETransferType.Insurance) {
                     // if the transfer is an insurance transfer, we need to notify the payment service
                     // that stake has been resolved.

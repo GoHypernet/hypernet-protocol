@@ -128,6 +128,25 @@ export interface IPaymentService {
     | TransferCreationError
   >;
 
+  /**
+   * Notify the service that an offer transfer has resolved.
+   */
+  offerResolved(
+    paymentId: PaymentId,
+  ): ResultAsync<
+    void,
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
+  >;
+
   /** Notify the service that an insurance payment has resolved
    * @param paymentId
    */
