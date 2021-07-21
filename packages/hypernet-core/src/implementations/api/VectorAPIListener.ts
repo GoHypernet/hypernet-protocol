@@ -69,7 +69,7 @@ export class VectorAPIListener implements IVectorListener {
           // Filter out any transfer not containing a transfer with a UUID in the transferState (insurance & parameterized transfer types)
           // or a UUID as part of transferState.message (message transfer type)
 
-          this.paymentUtils
+          this.vectorUtils
             .getTransferType(payload.transfer)
             .andThen((transferType) => {
               let paymentId: PaymentId;
@@ -145,7 +145,7 @@ export class VectorAPIListener implements IVectorListener {
           // Filter out any transfer not containing a transfer with a UUID in the transferState (insurance & parameterized transfer types)
           // or a UUID as part of transferState.message (message transfer type)
 
-          this.paymentUtils
+          this.vectorUtils
             .getTransferType(payload.transfer)
             .andThen((transferType) => {
               let paymentId: PaymentId;

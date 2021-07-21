@@ -35,6 +35,7 @@ import {
   gatewaySignature,
   gatewayUrl2,
   publicIdentifier,
+  gatewayAddress,
 } from "@mock/mocks";
 import {
   BlockchainProviderMock,
@@ -84,6 +85,7 @@ class GatewayConnectorRepositoryMocks {
     td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(
       okAsync(routerChannelAddress),
     );
+
     td.when(
       this.vectorUtils.resolveInsuranceTransfer(
         insuranceTransferId,
@@ -106,6 +108,27 @@ class GatewayConnectorRepositoryMocks {
       ]),
     );
 
+    const authorizedGatewayEntry = [
+      {
+        gatewayUrl: gatewayUrl,
+        authorizationSignature: newAuthorizationSignature,
+      },
+    ];
+
+    td.when(
+      this.storageUtils.write<IAuthorizedGatewayEntry[]>(
+        AuthorizedGatewaysSchema.title,
+        authorizedGatewayEntry,
+      ),
+    ).thenReturn(okAsync(undefined));
+
+    td.when(
+      this.storageUtils.write<IAuthorizedGatewayEntry[]>(
+        AuthorizedGatewaysSchema.title,
+        [],
+      ),
+    ).thenReturn(okAsync(undefined));
+
     td.when(
       this.gatewayConnectorProxyFactory.factoryProxy(gatewayUrl),
     ).thenReturn(okAsync(this.gatewayConnectorProxy));
@@ -113,9 +136,14 @@ class GatewayConnectorRepositoryMocks {
     td.when(this.gatewayConnectorProxy.getValidatedSignature()).thenReturn(
       okAsync(Signature(validatedSignature)),
     );
+
     td.when(
       this.gatewayConnectorProxy.activateConnector(publicIdentifier, balances),
     ).thenReturn(okAsync(undefined));
+
+    td.when(this.gatewayConnectorProxy.deauthorize()).thenReturn(
+      okAsync(undefined),
+    );
 
     td.when(
       this.blockchainUtils.verifyTypedData(
@@ -133,6 +161,22 @@ class GatewayConnectorRepositoryMocks {
         td.matchers.contains(this.expectedSignerValue),
       ),
     ).thenResolve(newAuthorizationSignature);
+
+    td.when(
+      this.ajaxUtils.get(
+        td.matchers.argThat((arg: URL) => {
+          return arg.toString() == `${gatewayUrl}address`;
+        }),
+      ),
+    ).thenReturn(okAsync(account));
+
+    td.when(
+      this.ajaxUtils.get(
+        td.matchers.argThat((arg: URL) => {
+          return arg.toString() == `${gatewayUrl2}address`;
+        }),
+      ),
+    ).thenReturn(okAsync(account2));
   }
 
   public factoryRepository(): IGatewayConnectorRepository {
@@ -212,20 +256,6 @@ describe("GatewayConnectorRepository tests", () => {
         Signature(authorizationSignature),
       ),
     ).thenReturn(account2 as never);
-
-    const authorizedGatewayEntry = [
-      {
-        gatewayUrl: gatewayUrl,
-        authorizationSignature: newAuthorizationSignature,
-      },
-    ];
-
-    td.when(
-      mocks.storageUtils.write<IAuthorizedGatewayEntry[]>(
-        AuthorizedGatewaysSchema.title,
-        authorizedGatewayEntry,
-      ),
-    ).thenReturn(okAsync(undefined));
 
     let onAuthorizedGatewayUpdatedVal: string | null = null;
     mocks.contextProvider.onAuthorizedGatewayUpdated.subscribe((val) => {
@@ -333,20 +363,6 @@ describe("GatewayConnectorRepository tests", () => {
     td.when(mocks.storageUtils.read(AuthorizedGatewaysSchema.title)).thenReturn(
       okAsync(null),
     );
-
-    const authorizedGatewayEntry = [
-      {
-        gatewayUrl: gatewayUrl,
-        authorizationSignature: newAuthorizationSignature,
-      },
-    ];
-
-    td.when(
-      mocks.storageUtils.write<IAuthorizedGatewayEntry[]>(
-        AuthorizedGatewaysSchema.title,
-        authorizedGatewayEntry,
-      ),
-    ).thenReturn(okAsync(undefined));
 
     const repo = mocks.factoryRepository();
 
@@ -469,20 +485,6 @@ describe("GatewayConnectorRepository tests", () => {
       okAsync(null),
     );
 
-    const authorizedGatewayEntry = [
-      {
-        gatewayUrl: gatewayUrl,
-        authorizationSignature: newAuthorizationSignature,
-      },
-    ];
-
-    td.when(
-      mocks.storageUtils.write<IAuthorizedGatewayEntry[]>(
-        AuthorizedGatewaysSchema.title,
-        authorizedGatewayEntry,
-      ),
-    ).thenReturn(okAsync(undefined));
-
     const error = new GatewayConnectorError();
     td.when(
       mocks.gatewayConnectorProxy.activateConnector(publicIdentifier, balances),
@@ -508,38 +510,9 @@ describe("GatewayConnectorRepository tests", () => {
     expect(onAuthorizedGatewayActivationFailedVal).toBe(gatewayUrl);
   });
 
-  test("getGatewayAddresses returns successfully from activated gateways", async () => {
+  test("getGatewayAddresses returns successfully with no cache", async () => {
     // Arrange
     const mocks = new GatewayConnectorRepositoryMocks();
-    const repo = mocks.factoryRepository();
-
-    // Act
-    const result = await repo
-      .activateAuthorizedGateways(balances)
-      .andThen(() => {
-        return repo.getGatewayAddresses([gatewayUrl]);
-      });
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeFalsy();
-    const value = result._unsafeUnwrap();
-    expect(value.size).toBe(1);
-    expect(value.get(gatewayUrl)).toBe(account);
-  });
-
-  test("getGatewayAddresses returns successfully from non-activated gateways", async () => {
-    // Arrange
-    const mocks = new GatewayConnectorRepositoryMocks();
-
-    td.when(
-      mocks.ajaxUtils.get(
-        td.matchers.argThat((arg: URL) => {
-          return arg.toString() == `${gatewayUrl}address`;
-        }),
-      ),
-    ).thenReturn(okAsync(account));
-
     const repo = mocks.factoryRepository();
 
     // Act
@@ -553,26 +526,43 @@ describe("GatewayConnectorRepository tests", () => {
     expect(value.get(gatewayUrl)).toBe(account);
   });
 
-  test("getGatewayAddresses returns successfully from both types of gateways", async () => {
+  test("getGatewayAddresses returns successfully from cache", async () => {
     // Arrange
     const mocks = new GatewayConnectorRepositoryMocks();
-
-    td.when(
-      mocks.ajaxUtils.get(
-        td.matchers.argThat((arg: URL) => {
-          return arg.toString() == `${gatewayUrl2}address`;
-        }),
-      ),
-    ).thenReturn(okAsync(account2));
 
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo
-      .activateAuthorizedGateways(balances)
-      .andThen(() => {
-        return repo.getGatewayAddresses([gatewayUrl, gatewayUrl2]);
-      });
+    const result = await repo.getGatewayAddresses([gatewayUrl]).andThen(() => {
+      return repo.getGatewayAddresses([gatewayUrl]);
+    });
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    const value = result._unsafeUnwrap();
+    expect(value.size).toBe(1);
+    expect(value.get(gatewayUrl)).toBe(account);
+    td.verify(
+      mocks.ajaxUtils.get(
+        td.matchers.argThat((arg: URL) => {
+          return arg.toString() == `${gatewayUrl}address`;
+        }),
+      ),
+      { times: 1 },
+    );
+  });
+
+  test("getGatewayAddresses returns successfully from partial cache", async () => {
+    // Arrange
+    const mocks = new GatewayConnectorRepositoryMocks();
+
+    const repo = mocks.factoryRepository();
+
+    // Act
+    const result = await repo.getGatewayAddresses([gatewayUrl]).andThen(() => {
+      return repo.getGatewayAddresses([gatewayUrl, gatewayUrl2]);
+    });
 
     // Assert
     expect(result).toBeDefined();
@@ -581,6 +571,22 @@ describe("GatewayConnectorRepository tests", () => {
     expect(value.size).toBe(2);
     expect(value.get(gatewayUrl)).toBe(account);
     expect(value.get(gatewayUrl2)).toBe(account2);
+    td.verify(
+      mocks.ajaxUtils.get(
+        td.matchers.argThat((arg: URL) => {
+          return arg.toString() == `${gatewayUrl}address`;
+        }),
+      ),
+      { times: 1 },
+    );
+    td.verify(
+      mocks.ajaxUtils.get(
+        td.matchers.argThat((arg: URL) => {
+          return arg.toString() == `${gatewayUrl2}address`;
+        }),
+      ),
+      { times: 1 },
+    );
   });
 
   test("getGatewayAddresses returns an error if a single gateway has an error", async () => {
@@ -632,14 +638,10 @@ describe("GatewayConnectorRepository tests", () => {
     expect(value).toStrictEqual(resultMap);
   });
 
-  test("deauthorizeGateway without erros", async () => {
+  test("deauthorizeGateway without errors", async () => {
     // Arrange
     const mocks = new GatewayConnectorRepositoryMocks();
     const repo = mocks.factoryRepository();
-
-    td.when(mocks.gatewayConnectorProxy.deauthorize()).thenReturn(
-      okAsync(undefined),
-    );
 
     // Act
     await repo.activateAuthorizedGateways(balances);

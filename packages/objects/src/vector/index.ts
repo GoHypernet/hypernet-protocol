@@ -73,10 +73,16 @@ export interface IFullTransferState<TTransferState = any> {
   transferEncodings: string[]; // Initial state encoding, resolver encoding
   transferState: TTransferState;
   transferResolver?: any; // undefined iff not resolved
-  meta?: any;
+  meta?: IFullTransferStateMetadata;
   channelNonce: number;
   initiatorIdentifier: string; // PublicIdentifier
   responderIdentifier: string; // PublicIdentifier
+}
+
+export interface IFullTransferStateMetadata {
+  cancellationReason?: string;
+  createdAt: number;
+  [key: string]: unknown;
 }
 
 export interface IFullChannelState {

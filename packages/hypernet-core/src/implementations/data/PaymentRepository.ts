@@ -285,7 +285,7 @@ export class PaymentRepository implements IPaymentRepository {
         >();
         for (const transfer of transfers) {
           transferTypeResults.push(
-            this.paymentUtils.getTransferTypeWithTransfer(transfer),
+            this.vectorUtils.getTransferTypeWithTransfer(transfer),
           );
         }
 
@@ -378,7 +378,7 @@ export class PaymentRepository implements IPaymentRepository {
         >();
         for (const transfer of transfers) {
           transferTypeResults.push(
-            this.paymentUtils.getTransferTypeWithTransfer(transfer),
+            this.vectorUtils.getTransferTypeWithTransfer(transfer),
           );
         }
 

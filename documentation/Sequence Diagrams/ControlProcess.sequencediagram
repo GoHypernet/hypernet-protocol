@@ -1,0 +1,61 @@
+title Hypernet Protocol Control Process
+
+participant Core A
+participant Core B
+participant Core C
+participant NATS
+
+
+box over Core A:OFFLINE
+box over Core B:OFFLINE
+box over Core C:OFFLINE
+activate Core A
+box over Core A:ONLINE
+Core A-->NATS:Inquire Control Message
+rbox over Core A:Receive Window
+Core A-->NATS:In Control Message
+box over Core A:IN CONTROL
+
+==B Comes Online==
+activate Core B
+box over Core B:ONLINE
+Core B-->NATS:Inquire Control Message
+Core A<--NATS:
+Core A-->NATS:In Control Message
+Core B<--NATS:
+
+Core B->Core B:Start Ping Window
+==C Comes Online==
+activate Core C
+box over Core C:ONLINE
+Core C-->NATS:Inquire Control Message
+Core A<--NATS:
+Core B<--NATS:
+Core A-->NATS:In Control Message
+Core B<--NATS:
+Core B->Core B:Reset Ping Window
+Core C<--NATS:
+
+Core C->Core C:Start Ping Window
+==Controlling Core Pings==
+loop 
+rbox over Core A,Core C:Ping Window
+Core A-->NATS:In Control Message
+Core B<--NATS:
+Core B->Core B:Reset Ping Window
+Core C<--NATS:
+Core C->Core C:Reset Ping Window
+end
+
+==Controlling Core Goes Offline==
+box over Core A:OFFLINE
+deactivate Core A
+rbox over Core A,Core C:Ping Window
+box over Core B,Core C:Ping Missed
+Core B->Core B:Set Random Timer
+Core C->Core C:Set Random Timer
+Core B-->NATS:In Control Message
+box over Core B:IN CONTROL
+Core C<--NATS:
+Core C->Core C:Abort Timer
+Core C->Core C:Reset Ping Window

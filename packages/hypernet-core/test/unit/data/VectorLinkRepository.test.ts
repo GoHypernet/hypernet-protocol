@@ -8,11 +8,11 @@ import {
   BigNumberString,
   UnixTimestamp,
 } from "@hypernetlabs/objects";
+import { ILinkRepository } from "@interfaces/data";
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
 import { VectorLinkRepository } from "@implementations/data/VectorLinkRepository";
-import { ILinkRepository } from "@interfaces/data";
 import {
   IVectorUtils,
   IBrowserNodeProvider,
@@ -41,6 +41,7 @@ import {
   ConfigProviderMock,
   ContextProviderMock,
   PaymentUtilsMockFactory,
+  VectorUtilsMockFactory,
 } from "@mock/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -82,6 +83,11 @@ class VectorLinkRepositoryMocks {
       this.approvedPayment,
     );
 
+    this.vectorUtils = VectorUtilsMockFactory.factoryVectorUtils(
+      this.browserNodeProvider,
+      expirationDate,
+    );
+
     this.createdLink = new HypernetLink(
       counterPartyAccount,
       [this.proposedPayment],
@@ -89,10 +95,6 @@ class VectorLinkRepositoryMocks {
       [],
       [this.proposedPayment],
       [],
-    );
-
-    td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(
-      okAsync(routerChannelAddress),
     );
 
     td.when(

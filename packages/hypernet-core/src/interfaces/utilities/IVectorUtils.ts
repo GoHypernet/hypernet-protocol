@@ -17,6 +17,7 @@ import {
   ETransferState,
   BigNumberString,
   UnixTimestamp,
+  ETransferType,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
@@ -115,6 +116,21 @@ export interface IVectorUtils {
 
   getTimestampFromTransfer(transfer: IFullTransferState): UnixTimestamp;
   getTransferStateFromTransfer(transfer: IFullTransferState): ETransferState;
+
+  /**
+   *
+   * @param transfer
+   */
+  getTransferType(
+    transfer: IFullTransferState,
+  ): ResultAsync<ETransferType, VectorError>;
+
+  getTransferTypeWithTransfer(
+    transfer: IFullTransferState,
+  ): ResultAsync<
+    { transferType: ETransferType; transfer: IFullTransferState },
+    VectorError
+  >;
 }
 
 export const IVectorUtilsType = Symbol.for("IVectorUtils");
