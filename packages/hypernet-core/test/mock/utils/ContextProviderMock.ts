@@ -7,13 +7,13 @@ import {
   PushPayment,
   Signature,
 } from "@hypernetlabs/objects";
-import { okAsync, ResultAsync } from "neverthrow";
-import { Subject } from "rxjs";
-
 import {
   HypernetContext,
   InitializedHypernetContext,
 } from "@interfaces/objects";
+import { okAsync, ResultAsync } from "neverthrow";
+import { Subject } from "rxjs";
+
 import {
   IContextProvider,
   IGatewayConnectorProxy,

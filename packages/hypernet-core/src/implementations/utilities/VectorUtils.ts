@@ -36,6 +36,7 @@ import {
   ETransferType,
   LogicalError,
   IMessageTransferData,
+  IRegisteredTransfer,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { InitializedHypernetContext } from "@interfaces/objects";
@@ -53,6 +54,7 @@ import {
   IPaymentIdUtils,
   IBrowserNode,
   ITimeUtils,
+  IBlockchainUtils,
 } from "@interfaces/utilities";
 
 import "reflect-metadata";
@@ -75,6 +77,7 @@ export class VectorUtils implements IVectorUtils {
     protected contextProvider: IContextProvider,
     protected browserNodeProvider: IBrowserNodeProvider,
     protected blockchainProvider: IBlockchainProvider,
+    protected blockchainUtils: IBlockchainUtils,
     protected paymentIdUtils: IPaymentIdUtils,
     protected logUtils: ILogUtils,
     protected timeUtils: ITimeUtils,
@@ -619,84 +622,101 @@ export class VectorUtils implements IVectorUtils {
   public getTransferWasCanceled(
     transfer: IFullTransferState,
   ): ResultAsync<boolean, BlockchainUnavailableError> {
-    throw new Error("Unimplemented");
+    // If the transfer isn't resolved, it can't be canceled
+    if (transfer.transferResolver == null) {
+      return okAsync(false);
+    }
+
+    // We need to encode the transferResolver, and to do that, we'll need the ResolverEncoding
+
+    return this._getRegisteredTransfers().map((registeredTransfers) => {
+      const registeredTransfer = registeredTransfers.find(
+        (val) => val.definition == transfer.transferDefinition,
+      );
+
+      if (registeredTransfer == null) {
+        throw new Error(
+          "Transfer is not a registered type. Is the chain deployed correctly?",
+        );
+      }
+
+      const resolverDataEncoding = [registeredTransfer.resolverEncoding];
+      const encodedResolverData = defaultAbiCoder.encode(resolverDataEncoding, [
+        transfer.transferResolver,
+      ]);
+
+      // If the transferResolver is the same as the encodedCancelData, then we can consider the transfer as canceled
+      return encodedResolverData == registeredTransfer.encodedCancel;
+    });
   }
 
   /**
    * Given a (vector) transfer @ IFullTransferState, return the transfer type (as ETransferType)
    * @param transfer the transfer to get the transfer type of
-   * @param browserNode instance of a browserNode so that we can query for registered transfer addresses
    */
+  private registeredTransfersResult: ResultAsync<
+    IRegisteredTransfer[],
+    BlockchainUnavailableError | VectorError
+  > | null = null;
   public getTransferType(
     transfer: IFullTransferState,
   ): ResultAsync<ETransferType, VectorError | BlockchainUnavailableError> {
     // TransferDefinition here is the ETH address of the transfer
     // We need to get the registered transfer definitions as canonical by the browser node
-    return ResultUtils.combine([
-      this.browserNodeProvider.getBrowserNode(),
-      this.configProvider.getConfig(),
-    ])
-      .andThen((vals) => {
-        const [browserNode, config] = vals;
-        return browserNode.getRegisteredTransfers(config.chainId);
-      })
-      .andThen((registeredTransfers) => {
-        // registeredTransfers.name = 'Insurance', registeredTransfers.definition = <address>, transfer.transferDefinition = <address>
-        const transferMap: Map<EthereumAddress, string> = new Map();
-        for (const registeredTransfer of registeredTransfers) {
-          transferMap.set(
-            EthereumAddress(registeredTransfer.definition),
-            registeredTransfer.name,
+    return this._getRegisteredTransfers().map((registeredTransfers) => {
+      const transferMap: Map<EthereumAddress, string> = new Map();
+      for (const registeredTransfer of registeredTransfers) {
+        transferMap.set(
+          EthereumAddress(registeredTransfer.definition),
+          registeredTransfer.name,
+        );
+      }
+
+      // If the transfer address is not one we know, we don't know what this is
+      if (!transferMap.has(EthereumAddress(transfer.transferDefinition))) {
+        this.logUtils.log(
+          `Transfer type not recognized. Transfer definition: ${
+            transfer.transferDefinition
+          }, transferMap: ${JSON.stringify(transferMap)}`,
+        );
+        return ETransferType.Unrecognized;
+      } else {
+        // This is a transfer we know about, but not necessarily one we want.
+        // Narrow down to insurance, parameterized, or  offer/messagetransfer
+        const thisTransfer = transferMap.get(
+          EthereumAddress(transfer.transferDefinition),
+        );
+        if (thisTransfer == null) {
+          throw new LogicalError(
+            "Transfer type not unrecognized, but not in transfer map!",
           );
         }
 
-        // If the transfer address is not one we know, we don't know what this is
-        if (!transferMap.has(EthereumAddress(transfer.transferDefinition))) {
-          this.logUtils.log(
-            `Transfer type not recognized. Transfer definition: ${
-              transfer.transferDefinition
-            }, transferMap: ${JSON.stringify(transferMap)}`,
+        // Now we know it's either insurance, parameterized, or messageTransfer
+        if (thisTransfer === "Insurance") {
+          return ETransferType.Insurance;
+        } else if (thisTransfer === "Parameterized") {
+          return ETransferType.Parameterized;
+        } else if (thisTransfer === "MessageTransfer") {
+          const message: IMessageTransferData = JSON.parse(
+            transfer.transferState.message,
           );
-          return okAsync(ETransferType.Unrecognized);
-        } else {
-          // This is a transfer we know about, but not necessarily one we want.
-          // Narrow down to insurance, parameterized, or  offer/messagetransfer
-          const thisTransfer = transferMap.get(
-            EthereumAddress(transfer.transferDefinition),
-          );
-          if (thisTransfer == null) {
-            throw new LogicalError(
-              "Transfer type not unrecognized, but not in transfer map!",
-            );
-          }
-
-          // Now we know it's either insurance, parameterized, or messageTransfer
-          if (thisTransfer === "Insurance") {
-            return okAsync(ETransferType.Insurance);
-          } else if (thisTransfer === "Parameterized") {
-            return okAsync(ETransferType.Parameterized);
-          } else if (thisTransfer === "MessageTransfer") {
-            const message: IMessageTransferData = JSON.parse(
-              transfer.transferState.message,
-            );
-            if (message.messageType == EMessageTransferType.OFFER) {
-              return okAsync(ETransferType.Offer);
-            } else if (
-              message.messageType == EMessageTransferType.PULLPAYMENT
-            ) {
-              return okAsync(ETransferType.PullRecord);
-            } else {
-              this.logUtils.warning(
-                `Message transfer was not of type OFFER or PULLPAYMENT, got: ${message.messageType}`,
-              );
-              return okAsync(ETransferType.Unrecognized);
-            }
+          if (message.messageType == EMessageTransferType.OFFER) {
+            return ETransferType.Offer;
+          } else if (message.messageType == EMessageTransferType.PULLPAYMENT) {
+            return ETransferType.PullRecord;
           } else {
-            // It's a recognized transfer type- like Withdraw- that we just don't care about
-            return okAsync(ETransferType.Unrecognized);
+            this.logUtils.warning(
+              `Message transfer was not of type OFFER or PULLPAYMENT, got: ${message.messageType}`,
+            );
+            return ETransferType.Unrecognized;
           }
+        } else {
+          // It's a recognized transfer type- like Withdraw- that we just don't care about
+          return ETransferType.Unrecognized;
         }
-      });
+      }
+    });
   }
 
   /**
@@ -712,6 +732,28 @@ export class VectorUtils implements IVectorUtils {
   > {
     return this.getTransferType(transfer).map((transferType) => {
       return { transferType, transfer };
+    });
+  }
+
+  protected _getRegisteredTransfers(): ResultAsync<
+    IRegisteredTransfer[],
+    BlockchainUnavailableError | VectorError
+  > {
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.configProvider.getConfig(),
+    ]).andThen((vals) => {
+      const [browserNode, config] = vals;
+
+      // If the registered transfers already exist, we can just use the cached versions
+      if (this.registeredTransfersResult == null) {
+        // The registered transfers don't exists
+        this.registeredTransfersResult = browserNode.getRegisteredTransfers(
+          config.chainId,
+        );
+      }
+
+      return this.registeredTransfersResult;
     });
   }
 

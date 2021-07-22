@@ -19,7 +19,7 @@ import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
-interface MessageTransferInterface extends ethers.utils.Interface {
+export interface IMessageTransferInterface extends ethers.utils.Interface {
   functions: {
     "EncodedCancel()": FunctionFragment;
     "Name()": FunctionFragment;

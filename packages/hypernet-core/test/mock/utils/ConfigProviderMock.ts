@@ -1,6 +1,7 @@
 import {
   AuthorizedGatewaysSchema,
   DefinitionName,
+  EthereumAddress,
   HypernetConfig,
   SchemaUrl,
 } from "@hypernetlabs/objects";
@@ -25,6 +26,9 @@ export class ConfigProviderMock implements IConfigProvider {
         routerPublicIdentifier,
         chainId,
         hyperTokenAddress,
+        EthereumAddress("messageTransferAddress"),
+        EthereumAddress("insuranceTransferAddress"),
+        EthereumAddress("parameterizedTransferAddress"),
         "hypernetProtocolDomain",
         defaultExpirationLength,
         {

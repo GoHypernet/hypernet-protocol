@@ -6,19 +6,29 @@ import {
   TypedDataField,
 } from "@ethersproject/abstract-signer";
 import {
+  TransferAbis,
   BigNumberString,
   BlockchainUnavailableError,
   Signature,
   EthereumAddress,
+  HexString,
 } from "@hypernetlabs/objects";
-import { Contract, ethers, BigNumber } from "ethers";
+import { ResultUtils } from "@hypernetlabs/utils";
+import { Bytes, Contract, ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
 
-import { IBlockchainProvider, IBlockchainUtils } from "@interfaces/utilities";
+import {
+  IBlockchainProvider,
+  IBlockchainUtils,
+  IConfigProvider,
+} from "@interfaces/utilities";
 
 export class EthersBlockchainUtils implements IBlockchainUtils {
   protected erc20Abi: string[];
-  constructor(protected blockchainProvider: IBlockchainProvider) {
+  constructor(
+    protected blockchainProvider: IBlockchainProvider,
+    protected configProvider: IConfigProvider,
+  ) {
     // The ERC20Abi from Vector does not include the name() function, so we will roll our own
     this.erc20Abi = Object.assign([], ERC20Abi);
     this.erc20Abi.push("function name() view returns (string)");
@@ -68,6 +78,105 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
           return e as BlockchainUnavailableError;
         },
       );
+    });
+  }
+
+  public getMessageTransferEncodedCancelData(): ResultAsync<
+    [string, HexString],
+    BlockchainUnavailableError
+  > {
+    return ResultUtils.combine([
+      this.blockchainProvider.getProvider(),
+      this.configProvider.getConfig(),
+    ]).andThen((vals) => {
+      const [provider, config] = vals;
+      const messageTransferContract = new Contract(
+        config.messageTransferAddress,
+        TransferAbis.MessageTransfer.abi,
+        provider,
+      );
+
+      return ResultUtils.combine([
+        ResultAsync.fromPromise(
+          messageTransferContract.ResolverEncoding() as Promise<HexString>,
+          (e) => {
+            return e as BlockchainUnavailableError;
+          },
+        ),
+
+        ResultAsync.fromPromise(
+          messageTransferContract.EncodedCancel() as Promise<HexString>,
+          (e) => {
+            return e as BlockchainUnavailableError;
+          },
+        ),
+      ]);
+    });
+  }
+
+  public getInsuranceTransferEncodedCancelData(): ResultAsync<
+    [string, HexString],
+    BlockchainUnavailableError
+  > {
+    return ResultUtils.combine([
+      this.blockchainProvider.getProvider(),
+      this.configProvider.getConfig(),
+    ]).andThen((vals) => {
+      const [provider, config] = vals;
+      const insuranceTransferContract = new Contract(
+        config.insuranceTransferAddress,
+        TransferAbis.Insurance.abi,
+        provider,
+      );
+
+      return ResultUtils.combine([
+        ResultAsync.fromPromise(
+          insuranceTransferContract.ResolverEncoding() as Promise<HexString>,
+          (e) => {
+            return e as BlockchainUnavailableError;
+          },
+        ),
+
+        ResultAsync.fromPromise(
+          insuranceTransferContract.EncodedCancel() as Promise<HexString>,
+          (e) => {
+            return e as BlockchainUnavailableError;
+          },
+        ),
+      ]);
+    });
+  }
+
+  public getParameterizedTransferEncodedCancelData(): ResultAsync<
+    [string, HexString],
+    BlockchainUnavailableError
+  > {
+    return ResultUtils.combine([
+      this.blockchainProvider.getProvider(),
+      this.configProvider.getConfig(),
+    ]).andThen((vals) => {
+      const [provider, config] = vals;
+      const parameterizedTransferContract = new Contract(
+        config.parameterizedTransferAddress,
+        TransferAbis.Parameterized.abi,
+        provider,
+      );
+
+      return ResultUtils.combine([
+        ResultAsync.fromPromise(
+          parameterizedTransferContract.ResolverEncoding() as Promise<HexString>,
+          (e) => {
+            return e as BlockchainUnavailableError;
+          },
+        ),
+
+        ResultAsync.fromPromise(
+          parameterizedTransferContract.EncodedCancel() as Promise<HexString>,
+          (e) => {
+            return e as BlockchainUnavailableError;
+          },
+        ),
+      ]);
     });
   }
 }
