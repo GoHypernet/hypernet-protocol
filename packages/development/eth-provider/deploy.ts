@@ -95,7 +95,7 @@ const func: DeployFunction = async () => {
     ["Parameterized", []],
     ["Insurance", []],
     ["Message", []],
-    ["Hypertoken", []],
+    ["Hypertoken", []]
   ];
 
   // Only deploy test fixtures during hardhat tests
@@ -119,6 +119,17 @@ const func: DeployFunction = async () => {
     await registerTransfer("Parameterized", deployer);
     await registerTransfer("Insurance", deployer);
     await registerTransfer("Message", deployer);
+
+    // deploy Mockup Registry if on the hardhat network
+    const MocRegistry = await ethers.getContractFactory("MocRegistry");
+    const mocregistry = await MocRegistry.deploy();
+    await mocregistry.deployed();
+
+    const tx = await mocregistry.setGateway("www.apple.com","{sig, wallet}");
+    const reciept = await tx.wait()
+
+    // print to logs the address of the registry
+    log.info(`Registry Address:`, mocregistry.address)
 
     // Default: run standard migration
   } else {
