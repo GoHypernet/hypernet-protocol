@@ -16,10 +16,10 @@ import {
   BigNumberString,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { IAccountsRepository } from "@interfaces/data";
 import { ethers, constants, BigNumber, Contract } from "ethers";
 import { combine, errAsync, okAsync, ResultAsync } from "neverthrow";
 
-import { IAccountsRepository } from "@interfaces/data";
 import { IStorageUtils } from "@interfaces/data/utilities";
 import {
   IVectorUtils,
@@ -304,7 +304,10 @@ export class AccountsRepository implements IAccountsRepository {
     return resp
       .andThen((mintTx) => {
         return ResultAsync.fromPromise(mintTx.wait(), (e) => {
-          return e as BlockchainUnavailableError;
+          return new BlockchainUnavailableError(
+            "Error while waiting to mint token",
+            e,
+          );
         });
       })
       .map(() => {
