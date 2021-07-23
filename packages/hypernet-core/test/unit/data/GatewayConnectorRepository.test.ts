@@ -64,9 +64,16 @@ class GatewayConnectorRepositoryMocks {
   public blockchainUtils = td.object<IBlockchainUtils>();
   public storageUtils = td.object<IStorageUtils>();
   public logUtils = td.object<ILogUtils>();
-  public gatewayRegistrationInfo = new GatewayRegistrationInfo(
+
+  public gatewayRegistrationInfo1 = new GatewayRegistrationInfo(
     gatewayUrl,
     account,
+    gatewaySignature,
+  );
+
+  public gatewayRegistrationInfo2 = new GatewayRegistrationInfo(
+    gatewayUrl2,
+    account2,
     gatewaySignature,
   );
 
@@ -137,7 +144,7 @@ class GatewayConnectorRepositoryMocks {
 
     td.when(
       this.gatewayConnectorProxyFactory.factoryProxy(
-        this.gatewayRegistrationInfo,
+        this.gatewayRegistrationInfo1,
       ),
     ).thenReturn(okAsync(this.gatewayConnectorProxy));
 
@@ -161,6 +168,20 @@ class GatewayConnectorRepositoryMocks {
         Signature(authorizationSignature),
       ),
     ).thenReturn(account as never);
+
+    td.when(
+      this.blockchainUtils.getGatewayRegistrationInfo(gatewayUrl),
+    ).thenReturn(
+      okAsync(this.gatewayRegistrationInfo1),
+      errAsync(new Error("gatewayUrl called twice")),
+    );
+
+    td.when(
+      this.blockchainUtils.getGatewayRegistrationInfo(gatewayUrl2),
+    ).thenReturn(
+      okAsync(this.gatewayRegistrationInfo2),
+      errAsync(new Error("gatewayUrl2 called twice")),
+    );
 
     td.when(
       this.blockchainProvider.signer._signTypedData(
@@ -289,7 +310,7 @@ describe("GatewayConnectorRepository tests", () => {
     const error = new ProxyError();
     td.when(
       mocks.gatewayConnectorProxyFactory.factoryProxy(
-        mocks.gatewayRegistrationInfo,
+        mocks.gatewayRegistrationInfo1,
       ),
     ).thenReturn(errAsync(error));
 
@@ -378,7 +399,7 @@ describe("GatewayConnectorRepository tests", () => {
 
     // Act
     const result = await repo.addAuthorizedGateway(
-      mocks.gatewayRegistrationInfo,
+      mocks.gatewayRegistrationInfo1,
       balances,
     );
 
@@ -398,7 +419,7 @@ describe("GatewayConnectorRepository tests", () => {
     const error = new GatewayConnectorError();
     td.when(
       mocks.gatewayConnectorProxyFactory.factoryProxy(
-        mocks.gatewayRegistrationInfo,
+        mocks.gatewayRegistrationInfo1,
       ),
     ).thenReturn(errAsync(error));
 
@@ -413,7 +434,7 @@ describe("GatewayConnectorRepository tests", () => {
 
     // Act
     const result = await repo.addAuthorizedGateway(
-      mocks.gatewayRegistrationInfo,
+      mocks.gatewayRegistrationInfo1,
       balances,
     );
 
@@ -449,7 +470,7 @@ describe("GatewayConnectorRepository tests", () => {
 
     // Act
     const result = await repo.addAuthorizedGateway(
-      mocks.gatewayRegistrationInfo,
+      mocks.gatewayRegistrationInfo1,
       balances,
     );
 
@@ -489,7 +510,7 @@ describe("GatewayConnectorRepository tests", () => {
 
     // Act
     const result = await repo.addAuthorizedGateway(
-      mocks.gatewayRegistrationInfo,
+      mocks.gatewayRegistrationInfo1,
       balances,
     );
 
@@ -525,7 +546,7 @@ describe("GatewayConnectorRepository tests", () => {
 
     // Act
     const result = await repo.addAuthorizedGateway(
-      mocks.gatewayRegistrationInfo,
+      mocks.gatewayRegistrationInfo1,
       balances,
     );
 
@@ -537,7 +558,7 @@ describe("GatewayConnectorRepository tests", () => {
     expect(onAuthorizedGatewayActivationFailedVal).toBe(gatewayUrl);
   });
 
-  test("getGatewayRegistrationInfo returns successfully from activated gateways", async () => {
+  test("getGatewayRegistrationInfo returns successfully", async () => {
     // Arrange
     const mocks = new GatewayConnectorRepositoryMocks();
     const repo = mocks.factoryRepository();
@@ -550,7 +571,7 @@ describe("GatewayConnectorRepository tests", () => {
     expect(result.isErr()).toBeFalsy();
     const value = result._unsafeUnwrap();
     expect(value.size).toBe(1);
-    expect(value.get(gatewayUrl)).toBe(account);
+    expect(value.get(gatewayUrl)).toBe(mocks.gatewayRegistrationInfo1);
   });
 
   test("getGatewayRegistrationInfo returns successfully from cache", async () => {
@@ -571,15 +592,7 @@ describe("GatewayConnectorRepository tests", () => {
     expect(result.isErr()).toBeFalsy();
     const value = result._unsafeUnwrap();
     expect(value.size).toBe(1);
-    expect(value.get(gatewayUrl)).toBe(account);
-    td.verify(
-      mocks.ajaxUtils.get(
-        td.matchers.argThat((arg: URL) => {
-          return arg.toString() == `${gatewayUrl}address`;
-        }),
-      ),
-      { times: 1 },
-    );
+    expect(value.get(gatewayUrl)).toBe(mocks.gatewayRegistrationInfo1);
   });
 
   test("getGatewayAddresses returns successfully from partial cache", async () => {
@@ -600,24 +613,8 @@ describe("GatewayConnectorRepository tests", () => {
     expect(result.isErr()).toBeFalsy();
     const value = result._unsafeUnwrap();
     expect(value.size).toBe(2);
-    expect(value.get(gatewayUrl)).toBe(account);
-    expect(value.get(gatewayUrl2)).toBe(account2);
-    td.verify(
-      mocks.ajaxUtils.get(
-        td.matchers.argThat((arg: URL) => {
-          return arg.toString() == `${gatewayUrl}address`;
-        }),
-      ),
-      { times: 1 },
-    );
-    td.verify(
-      mocks.ajaxUtils.get(
-        td.matchers.argThat((arg: URL) => {
-          return arg.toString() == `${gatewayUrl2}address`;
-        }),
-      ),
-      { times: 1 },
-    );
+    expect(value.get(gatewayUrl)).toBe(mocks.gatewayRegistrationInfo1);
+    expect(value.get(gatewayUrl2)).toBe(mocks.gatewayRegistrationInfo2);
   });
 
   test("getGatewayRegistrationInfo returns an error if a single gateway has an error", async () => {
@@ -626,11 +623,7 @@ describe("GatewayConnectorRepository tests", () => {
 
     const error = new Error();
     td.when(
-      mocks.ajaxUtils.get(
-        td.matchers.argThat((arg: URL) => {
-          return arg.toString() == `${gatewayUrl2}address`;
-        }),
-      ),
+      mocks.blockchainUtils.getGatewayRegistrationInfo(gatewayUrl),
     ).thenReturn(errAsync(error));
 
     const repo = mocks.factoryRepository();
