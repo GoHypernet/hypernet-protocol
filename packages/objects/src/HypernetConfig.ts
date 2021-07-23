@@ -14,6 +14,7 @@ export class HypernetConfig {
     public messageTransferAddress: EthereumAddress,
     public insuranceTransferAddress: EthereumAddress,
     public parameterizedTransferAddress: EthereumAddress,
+    public gatewayRegistryAddress: EthereumAddress,
     public hypernetProtocolDomain: string,
     public defaultPaymentExpiryLength: number,
     public chainProviders: ChainProviders,

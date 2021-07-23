@@ -9,6 +9,8 @@ import {
   BlockchainUnavailableError,
   BigNumberString,
   HexString,
+  GatewayUrl,
+  GatewayRegistrationInfo,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -57,6 +59,10 @@ export interface IBlockchainUtils {
     [string, HexString],
     BlockchainUnavailableError
   >;
+
+  getGatewayRegistrationInfo(
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<GatewayRegistrationInfo, BlockchainUnavailableError>;
 }
 
 export const IBlockchainUtilsType = Symbol.for("IBlockchainUtils");

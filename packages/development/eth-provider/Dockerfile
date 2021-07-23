@@ -10,5 +10,6 @@ COPY transferDefinitions/Message.json artifacts/src.sol/transferDefinitions/Mess
 COPY transferDefinitions/Insurance.json artifacts/src.sol/transferDefinitions/Insurance.sol/
 COPY transferDefinitions/Parameterized.json artifacts/src.sol/transferDefinitions/Parameterized.sol/
 COPY Hypertoken/Hypertoken.json artifacts/src.sol/testing/Hypertoken.sol/
+COPY MocRegistry/MocRegistry.json artifacts/src.sol/testing/MocRegistry.sol/
 COPY src.ts/artifacts.ts src.ts/
 EXPOSE 8545

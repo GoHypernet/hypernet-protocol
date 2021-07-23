@@ -12,24 +12,29 @@ import {
   GatewayAuthorizationDeniedError,
   PullPayment,
   PushPayment,
+  GatewayRegistrationInfo,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IGatewayConnectorRepository {
   /**
    * Returns a map of gateway URLs to their address
+   * @param gatewayUrls
    */
-  getGatewayAddresses(
-    gatewayUrl: GatewayUrl[],
-  ): ResultAsync<Map<GatewayUrl, EthereumAddress>, LogicalError>;
+  getGatewayRegistrationInfo(
+    gatewayUrls: GatewayUrl[],
+  ): ResultAsync<
+    Map<GatewayUrl, GatewayRegistrationInfo>,
+    BlockchainUnavailableError
+  >;
 
   /**
    * Adds the gateway url as authorized with a particular signature
-   * @param gatewayUrl
-   * @param signature
+   * @param gatewayRegistrationInfo
+   * @param initialBalances
    */
   addAuthorizedGateway(
-    gatewayUrl: GatewayUrl,
+    gatewayRegistrationInfo: GatewayRegistrationInfo,
     initialBalances: Balances,
   ): ResultAsync<
     void,

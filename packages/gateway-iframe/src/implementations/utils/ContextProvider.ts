@@ -2,12 +2,13 @@ import {
   Signature,
   GatewayUrl,
   GatewayValidationError,
+  EthereumAddress,
 } from "@hypernetlabs/objects";
-import { GatewayContext } from "@gateway-iframe/interfaces/objects";
 import { injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
+import { GatewayContext } from "@gateway-iframe/interfaces/objects";
 import { IContextProvider } from "@gateway-iframe/interfaces/utils";
 
 @injectable()
@@ -16,13 +17,19 @@ export class ContextProvider implements IContextProvider {
   protected connectorValidatedResolve: (() => void) | undefined;
   protected connectorValidatedReject: ((e: unknown) => void) | undefined;
 
-  constructor(gatewayUrl: GatewayUrl) {
+  constructor(
+    gatewayUrl: GatewayUrl,
+    gatewayAddress: EthereumAddress,
+    gatewaySignature: Signature,
+  ) {
     const connectorValidatedPromise = new Promise<void>((resolve, reject) => {
       this.connectorValidatedResolve = resolve;
       this.connectorValidatedReject = reject;
     });
     this.context = new GatewayContext(
       gatewayUrl,
+      gatewayAddress,
+      gatewaySignature,
       new Subject(),
       new Subject(),
       null,

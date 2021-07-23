@@ -15,7 +15,7 @@ import {
   IAccountsRepository,
   IGatewayConnectorRepository,
 } from "@interfaces/data";
-import { ResultAsync } from "neverthrow";
+import { okAsync, ResultAsync } from "neverthrow";
 
 import { IContextProvider, IConfigProvider } from "@interfaces/utilities";
 
@@ -96,18 +96,41 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       this.contextProvider.getContext(),
       this.getAuthorizedGateways(),
       this.accountsRepository.getBalances(),
-    ]).map(async (vals) => {
+    ]).andThen((vals) => {
       const [context, authorizedGatewaysMap, balances] = vals;
 
+      let deauthResult: ResultAsync<
+        void,
+        PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+      >;
       // Remove the gateway iframe proxy related to that gatewayUrl if there is any activated ones.
       if (authorizedGatewaysMap.get(gatewayUrl)) {
-        this.gatewayConnectorRepository.deauthorizeGateway(gatewayUrl);
+        deauthResult =
+          this.gatewayConnectorRepository.deauthorizeGateway(gatewayUrl);
+      } else {
+        deauthResult = okAsync(undefined);
       }
 
-      this.gatewayConnectorRepository
-        .addAuthorizedGateway(gatewayUrl, balances)
-        .map(() => {
-          context.onGatewayAuthorized.next(gatewayUrl);
+      return deauthResult
+        .andThen(() => {
+          return this.gatewayConnectorRepository.getGatewayRegistrationInfo([
+            gatewayUrl,
+          ]);
+        })
+        .andThen((gatewayRegistrationInfoMap) => {
+          const gatewayRegistrationInfo =
+            gatewayRegistrationInfoMap.get(gatewayUrl);
+          if (gatewayRegistrationInfo == null) {
+            throw new Error(
+              "Gateway registration info not available but no error!",
+            );
+          }
+
+          return this.gatewayConnectorRepository
+            .addAuthorizedGateway(gatewayRegistrationInfo, balances)
+            .map(() => {
+              context.onGatewayAuthorized.next(gatewayUrl);
+            });
         });
     });
   }

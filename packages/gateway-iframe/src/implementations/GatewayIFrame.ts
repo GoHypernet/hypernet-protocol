@@ -1,4 +1,4 @@
-import { GatewayUrl } from "@hypernetlabs/objects";
+import { EthereumAddress, GatewayUrl, Signature } from "@hypernetlabs/objects";
 import {
   IAjaxUtils,
   AxiosAjaxUtils,
@@ -7,7 +7,7 @@ import {
   ILogUtils,
   LogUtils,
 } from "@hypernetlabs/utils";
-import { okAsync } from "neverthrow";
+import { errAsync, okAsync } from "neverthrow";
 
 import {
   HypernetCoreListener,
@@ -58,8 +58,22 @@ export class GatewayIFrame {
   protected gatewayConnectorListener: IGatewayConnectorListener;
 
   constructor() {
+    // Address and signature must be provided as params
+    const urlParams = new URLSearchParams(window.location.search);
+    const gatewayAddress = urlParams.get("gatewayAddress");
+    const gatewaySignature = urlParams.get("gatewaySignature");
+
+    if (gatewayAddress == null || gatewaySignature == null) {
+      throw new Error(
+        "gatewayAddress and gatewaySignature are required parameters",
+      );
+    }
     // Instantiate all the pieces
-    this.contextProvider = new ContextProvider(GatewayUrl(""));
+    this.contextProvider = new ContextProvider(
+      GatewayUrl(""),
+      EthereumAddress(gatewayAddress),
+      Signature(gatewaySignature),
+    );
     this.ajaxUtils = new AxiosAjaxUtils();
     this.localStorageUtils = new LocalStorageUtils();
     this.logUtils = new LogUtils();
@@ -103,7 +117,9 @@ export class GatewayIFrame {
       .andThen((gatewayUrl) => {
         // Set the gateway url
         const context = this.contextProvider.getGatewayContext();
+
         context.gatewayUrl = gatewayUrl;
+
         this.contextProvider.setGatewayContext(context);
 
         // Start the Hypernet Core listener API up

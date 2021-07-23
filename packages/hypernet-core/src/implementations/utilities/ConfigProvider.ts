@@ -27,6 +27,7 @@ declare const __HYPERTOKEN_ADDRESS__: EthereumAddress;
 declare const __MESSAGE_TRANSFER_ADDRESS__: EthereumAddress;
 declare const __INSURANCE_TRANSFER_ADDRESS__: EthereumAddress;
 declare const __PARAMETERIZED_TRANSFER_ADDRESS__: EthereumAddress;
+declare const __GATEWAY_REGISTRY_ADDRESS__: EthereumAddress;
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
@@ -59,6 +60,7 @@ export class ConfigProvider implements IConfigProvider {
       __MESSAGE_TRANSFER_ADDRESS__, // messageTransferAddress
       __INSURANCE_TRANSFER_ADDRESS__, // insuranceTransferAddress
       __PARAMETERIZED_TRANSFER_ADDRESS__, // parameterizedTransferAddress
+      __GATEWAY_REGISTRY_ADDRESS__, // gatewayRegistryAddress
       "Hypernet", // Hypernet Protocol Domain for Transfers
       5 * 24 * 60 * 60, // 5 days as the default payment expiration time
       chainProviders, // chainProviders

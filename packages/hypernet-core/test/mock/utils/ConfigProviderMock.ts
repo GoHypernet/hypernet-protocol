@@ -29,6 +29,7 @@ export class ConfigProviderMock implements IConfigProvider {
         EthereumAddress("messageTransferAddress"),
         EthereumAddress("insuranceTransferAddress"),
         EthereumAddress("parameterizedTransferAddress"),
+        EthereumAddress("gatewayRegistryAddress"),
         "hypernetProtocolDomain",
         defaultExpirationLength,
         {

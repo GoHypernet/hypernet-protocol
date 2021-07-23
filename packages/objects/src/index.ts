@@ -2,6 +2,7 @@ export * from "@objects/AssetBalance";
 export * from "@objects/Balances";
 export * from "@objects/ControlClaim";
 export * from "@objects/EthereumAddress";
+export * from "@objects/GatewayRegistrationInfo";
 export * from "@objects/HexString";
 export * from "@objects/HypernetConfig";
 export * from "@objects/HypernetLink";

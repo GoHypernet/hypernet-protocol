@@ -1,2 +1,2 @@
-export * from "./ExpectedRedirect";
-export * from "./GatewayContext";
+export * from "@gateway-iframe/interfaces/objects/ExpectedRedirect";
+export * from "@gateway-iframe/interfaces/objects/GatewayContext";

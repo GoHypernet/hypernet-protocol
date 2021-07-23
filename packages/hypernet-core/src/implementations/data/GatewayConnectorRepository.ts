@@ -7,9 +7,6 @@ import {
   PushPayment,
   ProxyError,
   BlockchainUnavailableError,
-  TransferResolutionError,
-  PaymentId,
-  TransferId,
   EthereumAddress,
   Signature,
   GatewayUrl,
@@ -18,10 +15,10 @@ import {
   LogicalError,
   GatewayConnectorError,
   GatewayValidationError,
-  AjaxError,
   GatewayActivationError,
   GatewayAuthorizationDeniedError,
   PersistenceError,
+  GatewayRegistrationInfo,
 } from "@hypernetlabs/objects";
 import {
   ResultUtils,
@@ -35,7 +32,7 @@ import {
   IAuthorizedGatewayEntry,
 } from "@interfaces/data";
 import { InitializedHypernetContext } from "@interfaces/objects";
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 import { injectable, inject } from "inversify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { urlJoinP } from "url-join-ts";
@@ -78,6 +75,10 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
     | ResultAsync<void, never>
     | undefined;
   protected balances: Balances | undefined;
+  protected gatewayRegistrationInfoMap: Map<
+    GatewayUrl,
+    GatewayRegistrationInfo
+  >;
 
   constructor(
     @inject(IBlockchainProviderType)
@@ -94,6 +95,7 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
   ) {
     this.authorizedGatewayProxies = new Map();
     this.existingProxies = new Map();
+    this.gatewayRegistrationInfoMap = new Map();
     this.domain = {
       name: "Hypernet Protocol",
       version: "1",
@@ -106,58 +108,44 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
     };
   }
 
-  private gatewayAddressesByUrl = new Map<GatewayUrl, EthereumAddress>();
-
-  public getGatewayAddresses(
+  public getGatewayRegistrationInfo(
     gatewayUrls: GatewayUrl[],
   ): ResultAsync<
-    Map<GatewayUrl, EthereumAddress>,
-    AjaxError | ProxyError | GatewayAuthorizationDeniedError
+    Map<GatewayUrl, GatewayRegistrationInfo>,
+    BlockchainUnavailableError
   > {
-    // TODO: right now, the gateway will publish a URL with their address; eventually, they should be held in a smart contract
-
-    // We will cache the gateway's address after we request it; we only need
-    // to look it up the first time.
-    // For gateways that are already authorized, we can just go to their connector for the
-    // public key.
-    const returnMap = new Map<GatewayUrl, EthereumAddress>();
-    const addressRequests = new Array<
-      ResultAsync<
-        { gatewayUrl: GatewayUrl; address: EthereumAddress },
-        | GatewayConnectorError
-        | LogicalError
-        | ProxyError
-        | GatewayAuthorizationDeniedError
-      >
+    const returnInfo = new Map<GatewayUrl, GatewayRegistrationInfo>();
+    const newGatewayResults = new Array<
+      ResultAsync<void, BlockchainUnavailableError>
     >();
 
-    for (const url of gatewayUrls) {
-      // Check if the URL is in the cache. If it is, add it to the return.
-      // If it's not, we'll need to get it from the blockchain
-      const cached = this.gatewayAddressesByUrl.get(url);
-
-      if (cached != null) {
-        returnMap.set(url, cached);
+    // Check for entries that are already cached.
+    for (const gatewayUrl of gatewayUrls) {
+      const cachedRegistration =
+        this.gatewayRegistrationInfoMap.get(gatewayUrl);
+      if (cachedRegistration != null) {
+        returnInfo.set(gatewayUrl, cachedRegistration);
       } else {
-        addressRequests.push(this._getGatewayAddress(url));
+        // We need to get the registration info that's not in the cache
+        newGatewayResults.push(
+          this.blockchainUtils
+            .getGatewayRegistrationInfo(gatewayUrl)
+            .map((registrationInfo) => {
+              returnInfo.set(gatewayUrl, registrationInfo);
+              this.gatewayRegistrationInfoMap.set(gatewayUrl, registrationInfo);
+            }),
+        );
       }
     }
 
-    return ResultUtils.combine(addressRequests).map((vals) => {
-      for (const val of vals) {
-        // Add the value to the return map
-        returnMap.set(val.gatewayUrl, val.address);
-
-        // Also add it to the cache
-        this.gatewayAddressesByUrl.set(val.gatewayUrl, val.address);
-      }
-
-      return returnMap;
+    // Wait for all the new results, and return the final list
+    return ResultUtils.combine(newGatewayResults).map(() => {
+      return returnInfo;
     });
   }
 
   public addAuthorizedGateway(
-    gatewayUrl: GatewayUrl,
+    gatewayRegistrationInfo: GatewayRegistrationInfo,
     initialBalances: Balances,
   ): ResultAsync<
     void,
@@ -177,11 +165,13 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
       .getInitializedContext()
       .andThen((myContext) => {
         context = myContext;
-        return this.gatewayConnectorProxyFactory.factoryProxy(gatewayUrl);
+        return this.gatewayConnectorProxyFactory.factoryProxy(
+          gatewayRegistrationInfo,
+        );
       })
       .andThen((myProxy) => {
         proxy = myProxy;
-        this.existingProxies.set(gatewayUrl, proxy);
+        this.existingProxies.set(gatewayRegistrationInfo.url, proxy);
 
         // With the proxy activated, we can get the validated gateway signature
         return ResultUtils.combine([
@@ -195,7 +185,7 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
         // gatewaySignature has been validated by the iframe, so this is already confirmed.
         // Now we need to get an authorization signature
         const value = {
-          authorizedGatewayUrl: gatewayUrl,
+          authorizedGatewayUrl: gatewayRegistrationInfo.url,
           gatewayValidatedSignature: gatewaySignature,
         } as Record<string, unknown>;
         const signerPromise = signer._signTypedData(
@@ -216,7 +206,10 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
         // The connector has been authorized, store it as an authorized connector
         const [authorizationSignature, authorizedGateways] = vals;
 
-        authorizedGateways.set(gatewayUrl, Signature(authorizationSignature));
+        authorizedGateways.set(
+          gatewayRegistrationInfo.url,
+          Signature(authorizationSignature),
+        );
 
         return this._setAuthorizedGateways(authorizedGateways);
       })
@@ -235,19 +228,24 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
       })
       .map(() => {
         // Only if the gateway is successfully activated do we stick it in the list.
-        this.authorizedGatewayProxies.set(gatewayUrl, okAsync(proxy));
+        this.authorizedGatewayProxies.set(
+          gatewayRegistrationInfo.url,
+          okAsync(proxy),
+        );
       })
       .mapErr((e) => {
         // If we encounter a problem, destroy the proxy so we can start afresh.
-        this.destroyProxy(gatewayUrl);
+        this.destroyProxy(gatewayRegistrationInfo.url);
 
         // Notify the world
         if (context != null) {
-          context.onAuthorizedGatewayActivationFailed.next(gatewayUrl);
+          context.onAuthorizedGatewayActivationFailed.next(
+            gatewayRegistrationInfo.url,
+          );
         }
 
         return new GatewayActivationError(
-          `Unable to activate gateway ${gatewayUrl}`,
+          `Unable to activate gateway ${gatewayRegistrationInfo.url}`,
           e,
         );
       });
@@ -312,57 +310,83 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
   ): ResultAsync<void, never> {
     this.balances = balances;
 
-    if (this.activateAuthorizedGatewaysResult == null) {
-      this.activateAuthorizedGatewaysResult = ResultUtils.combine([
-        this.contextProvider.getInitializedContext(),
-        this.getAuthorizedGateways().orElse((e) => {
-          return okAsync(new Map());
-        }),
-        this.blockchainProvider.getSigner(),
-      ])
-        .andThen((vals) => {
-          const [context, authorizedGateways, signer] = vals;
-          const activationResults = new Array<() => ResultAsync<void, never>>();
-
-          for (const [gatewayUrl, signature] of authorizedGateways) {
-            activationResults.push(() => {
-              return this._activateAuthorizedGateway(
-                balances,
-                gatewayUrl,
-                signature,
-                context,
-                signer,
-              )
-                .map((_proxy) => {
-                  return;
-                })
-                .orElse((e) => {
-                  // This function will eat all errors, so that startup
-                  // will not be denied.
-                  this.logUtils.error(
-                    `Could not activate authorized gateway ${gatewayUrl}`,
-                  );
-                  this.logUtils.error(e);
-                  return okAsync(undefined);
-                });
-            });
-          }
-
-          // There is a reason for this
-          // Postmate has issues creating multiple proxies in parallel- the handshake process will break.
-          // I would like to swap out or fix Postmate- there are some forks that would be good- but the easiest
-          // fix is this.
-          return ResultUtils.executeSerially(activationResults);
-        })
-        .map(() => {})
-        .orElse((e) => {
-          this.logUtils.error(
-            "Could not get prerequisites for activateAuthorizedGateways",
-          );
-          this.logUtils.error(e);
-          return okAsync(undefined);
-        });
+    if (this.activateAuthorizedGatewaysResult != null) {
+      return this.activateAuthorizedGatewaysResult;
     }
+
+    this.activateAuthorizedGatewaysResult = ResultUtils.combine([
+      this.contextProvider.getInitializedContext(),
+      this.getAuthorizedGateways().orElse((e) => {
+        return okAsync(new Map());
+      }),
+      this.blockchainProvider.getSigner(),
+    ])
+      .andThen((vals) => {
+        const [context, authorizedGateways, signer] = vals;
+        const activationResults = new Array<() => ResultAsync<void, never>>();
+
+        const gatewayUrls = new Array<GatewayUrl>();
+        for (const [gatewayUrl] of authorizedGateways) {
+          gatewayUrls.push(gatewayUrl);
+        }
+
+        // Get the registration info
+        return this.getGatewayRegistrationInfo(gatewayUrls)
+          .orElse(() => {
+            return okAsync<Map<GatewayUrl, GatewayRegistrationInfo>, never>(
+              new Map<GatewayUrl, GatewayRegistrationInfo>(),
+            );
+          })
+          .andThen((registrationInfoMap) => {
+            for (const [
+              gatewayUrl,
+              authorizationSignature,
+            ] of authorizedGateways) {
+              const registrationInfo = registrationInfoMap.get(gatewayUrl);
+
+              // If the registration info is not available, skip it
+              if (registrationInfo == null) {
+                continue;
+              }
+
+              activationResults.push(() => {
+                return this._activateAuthorizedGateway(
+                  balances,
+                  registrationInfo,
+                  authorizationSignature,
+                  context,
+                  signer,
+                )
+                  .map((_proxy) => {
+                    return;
+                  })
+                  .orElse((e) => {
+                    // This function will eat all errors, so that startup
+                    // will not be denied.
+                    this.logUtils.error(
+                      `Could not activate authorized gateway ${gatewayUrl}`,
+                    );
+                    this.logUtils.error(e);
+                    return okAsync(undefined);
+                  });
+              });
+            }
+
+            // There is a reason for this
+            // Postmate has issues creating multiple proxies in parallel- the handshake process will break.
+            // I would like to swap out or fix Postmate- there are some forks that would be good- but the easiest
+            // fix is this.
+            return ResultUtils.executeSerially(activationResults);
+          })
+          .map(() => {});
+      })
+      .orElse((e) => {
+        this.logUtils.error(
+          "Could not get prerequisites for activateAuthorizedGateways",
+        );
+        this.logUtils.error(e);
+        return okAsync<void, never>(undefined);
+      });
     return this.activateAuthorizedGatewaysResult;
   }
 
@@ -616,18 +640,23 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
             const activationResult = ResultUtils.combine([
               this.contextProvider.getInitializedContext(),
               this.blockchainProvider.getSigner(),
+              this.getGatewayRegistrationInfo([gatewayUrl]),
             ]).andThen((vals) => {
-              const [context, signer] = vals;
+              const [context, signer, registrationInfoMap] = vals;
+
+              const gatewayRegistrationInfo =
+                registrationInfoMap.get(gatewayUrl);
 
               if (
                 this.balances == null ||
-                cachedAuthorizationSignature == null
+                cachedAuthorizationSignature == null ||
+                gatewayRegistrationInfo == null
               ) {
                 throw new Error("No cached balances");
               }
               return this._activateAuthorizedGateway(
                 this.balances,
-                gatewayUrl,
+                gatewayRegistrationInfo,
                 cachedAuthorizationSignature,
                 context,
                 signer,
@@ -655,7 +684,7 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
    */
   protected _activateAuthorizedGateway(
     balances: Balances,
-    gatewayUrl: GatewayUrl,
+    gatewayRegistrationInfo: GatewayRegistrationInfo,
     authorizationSignature: Signature,
     context: InitializedHypernetContext,
     signer: ethers.providers.JsonRpcSigner,
@@ -667,7 +696,9 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
     | ProxyError
   > {
     // Do some initial cleanup, so that this can be called repeatedly.
-    const existingProxyResult = this.authorizedGatewayProxies.get(gatewayUrl);
+    const existingProxyResult = this.authorizedGatewayProxies.get(
+      gatewayRegistrationInfo.url,
+    );
 
     if (existingProxyResult != null) {
       return existingProxyResult;
@@ -675,17 +706,19 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
 
     let proxy: IGatewayConnectorProxy;
 
-    this.logUtils.debug(`Activating gateway connector ${gatewayUrl}`);
+    this.logUtils.debug(
+      `Activating gateway connector ${gatewayRegistrationInfo.url}`,
+    );
     const proxyResult = this.gatewayConnectorProxyFactory
-      .factoryProxy(gatewayUrl)
+      .factoryProxy(gatewayRegistrationInfo)
       .andThen((myProxy) => {
-        this.logUtils.debug(`Proxy created for ${gatewayUrl}`);
+        this.logUtils.debug(`Proxy created for ${gatewayRegistrationInfo.url}`);
         proxy = myProxy;
-        this.existingProxies.set(gatewayUrl, proxy);
+        this.existingProxies.set(gatewayRegistrationInfo.url, proxy);
 
         // We need to get the validated signature, so we can see if it was authorized
         return this._validateConnector(
-          gatewayUrl,
+          gatewayRegistrationInfo.url,
           proxy,
           authorizationSignature,
           context,
@@ -703,21 +736,23 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
       })
       .mapErr((e) => {
         // Notify the world
-        context.onAuthorizedGatewayActivationFailed.next(gatewayUrl);
+        context.onAuthorizedGatewayActivationFailed.next(
+          gatewayRegistrationInfo.url,
+        );
 
         this.logUtils.error(
-          `Gateway connector ${gatewayUrl} failed to activate`,
+          `Gateway connector ${gatewayRegistrationInfo.url} failed to activate`,
         );
 
         // TODO: make sure of error cases where we want to destroy the proxy or not
         if (e instanceof ProxyError || e instanceof GatewayActivationError) {
-          this.destroyProxy(gatewayUrl);
+          this.destroyProxy(gatewayRegistrationInfo.url);
         }
 
         return e;
       });
 
-    this.authorizedGatewayProxies.set(gatewayUrl, proxyResult);
+    this.authorizedGatewayProxies.set(gatewayRegistrationInfo.url, proxyResult);
 
     return proxyResult;
   }

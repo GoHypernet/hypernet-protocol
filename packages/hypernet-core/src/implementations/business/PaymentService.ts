@@ -319,16 +319,16 @@ export class PaymentService implements IPaymentService {
 
         return ResultUtils.combine([
           this.accountRepository.getBalanceByAsset(config.hypertokenAddress),
-          this.gatewayConnectorRepository.getGatewayAddresses(
+          this.gatewayConnectorRepository.getGatewayRegistrationInfo(
             Array.from(gatewayUrls),
           ),
         ]);
       })
       .andThen((vals) => {
-        const [hypertokenBalance, addresses] = vals;
+        const [hypertokenBalance, registrationInfo] = vals;
 
         // If we don't have a public key for each gateway, then we should not proceed.
-        if (gatewayUrls.size != addresses.size) {
+        if (gatewayUrls.size != registrationInfo.size) {
           return errAsync(
             new GatewayValidationError("Not all gateways are authorized!"),
           );
@@ -374,11 +374,13 @@ export class PaymentService implements IPaymentService {
           );
 
           // We need to get the public key of the gateway for the payment
-          const gatewayAddress = addresses.get(payment.gatewayUrl);
+          const gatewayRegistrationInfo = registrationInfo.get(
+            payment.gatewayUrl,
+          );
 
-          if (gatewayAddress != null) {
+          if (gatewayRegistrationInfo != null) {
             const stakeAttempt = this.paymentRepository
-              .provideStake(paymentId, gatewayAddress)
+              .provideStake(paymentId, gatewayRegistrationInfo.address)
               .match(
                 (payment) => ok(payment) as Result<Payment, AcceptPaymentError>,
                 (e) =>

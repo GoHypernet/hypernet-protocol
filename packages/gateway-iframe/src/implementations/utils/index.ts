@@ -1,1 +1,1 @@
-export * from "./ContextProvider";
+export * from "@gateway-iframe/implementations/utils/ContextProvider";
