@@ -10,4 +10,5 @@ export enum EPaymentState {
   InsuranceReleased = 8, // Insurance resolved
   Finalized = 9, // Offer resolved
   Borked = 10, // Unknown or broken state. Recovery will be attempted.
+  Cancelled = 11, // Payment was cancelled with no value exchanged. This is usually due to an error.
 }

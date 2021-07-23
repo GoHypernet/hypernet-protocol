@@ -136,6 +136,15 @@ module.exports = {
       __HYPERTOKEN_ADDRESS__: JSON.stringify(
         process.env.__HYPERTOKEN_ADDRESS__,
       ),
+      __MESSAGE_TRANSFER_ADDRESS__: JSON.stringify(
+        process.env.__MESSAGE_TRANSFER_ADDRESS__,
+      ),
+      __INSURANCE_TRANSFER_ADDRESS__: JSON.stringify(
+        process.env.__INSURANCE_TRANSFER_ADDRESS__,
+      ),
+      __PARAMETERIZED_TRANSFER_ADDRESS__: JSON.stringify(
+        process.env.__PARAMETERIZED_TRANSFER_ADDRESS__,
+      ),
       __CHAIN_ID__: JSON.stringify(process.env.__CHAIN_ID__),
       __CHAIN_PROVIDERS__: JSON.stringify(process.env.__CHAIN_PROVIDERS__),
       __CHAIN_ADDRESSES__: JSON.stringify(process.env.__CHAIN_ADDRESSES__),

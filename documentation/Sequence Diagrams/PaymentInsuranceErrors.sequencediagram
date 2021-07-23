@@ -1,0 +1,38 @@
+title Payment Insurance Error Flows
+
+participant Gateway
+participant Sender
+participant Receiver
+
+
+Gateway->Sender:Send Payment
+activate Sender
+Sender-->Receiver:Create Offer Transfer
+deactivate Sender
+activate Receiver
+note over Gateway,Receiver:Payment Status: Proposed
+
+alt Insurance Canceled
+Receiver<--Receiver:Create Insurance Transfer
+Receiver<--Receiver:Insurance Transfer Resolved
+note over Gateway,Receiver:Payment Status: Borked
+
+else Invalid Insurance
+Sender<-Receiver:Create Insurance Transfer\nDoes not match Offer Terms
+activate Sender
+note over Receiver,Gateway:Payment Status: InvalidStake
+deactivate Sender
+
+else Multiple Insurance
+Sender<--Receiver:Create Insurance Transfer
+activate Sender
+note over Gateway,Receiver:Payment Status: Staked
+deactivate Receiver
+Sender-->Receiver:Create Parameterized Transfer
+activate Receiver
+deactivate Sender
+note over Gateway,Receiver:Payment Status: Approved
+Sender<--Receiver:Create Insurance Transfer
+note over Gateway,Receiver:Payment Status: Borked\n
+deactivate Receiver
+end

@@ -71,21 +71,6 @@ export interface IPaymentUtils {
 
   /**
    *
-   * @param transfer
-   */
-  getTransferType(
-    transfer: IFullTransferState,
-  ): ResultAsync<ETransferType, LogicalError | VectorError>;
-
-  getTransferTypeWithTransfer(
-    transfer: IFullTransferState,
-  ): ResultAsync<
-    { transferType: ETransferType; transfer: IFullTransferState },
-    VectorError | LogicalError
-  >;
-
-  /**
-   *
    * @param id
    * @param to
    * @param from

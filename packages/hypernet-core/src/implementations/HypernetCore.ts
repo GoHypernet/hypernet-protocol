@@ -341,11 +341,16 @@ export class HypernetCore implements IHypernetCore {
       this.localStorageUtils,
       this.browserNodeFactory,
     );
+    this.blockchainUtils = new EthersBlockchainUtils(
+      this.blockchainProvider,
+      this.configProvider,
+    );
     this.vectorUtils = new VectorUtils(
       this.configProvider,
       this.contextProvider,
       this.browserNodeProvider,
       this.blockchainProvider,
+      this.blockchainUtils,
       this.paymentIdUtils,
       this.logUtils,
       this.timeUtils,
@@ -359,7 +364,6 @@ export class HypernetCore implements IHypernetCore {
       this.timeUtils,
     );
     this.ajaxUtils = new AxiosAjaxUtils();
-    this.blockchainUtils = new EthersBlockchainUtils(this.blockchainProvider);
     this.validationUtils = new ValidationUtils();
     this.messagingProvider = new MessagingProvider(
       this.configProvider,

@@ -61,37 +61,6 @@ export class PaymentUtilsMockFactory {
     ).thenReturn(okAsync(approvedPayment));
 
     td.when(
-      paymentUtils.getTransferTypeWithTransfer(
-        td.matchers.contains({ transferId: offerTransferId }),
-      ),
-    ).thenReturn(
-      okAsync({
-        transferType: ETransferType.Offer,
-        transfer: browserNodeProvider.offerTransfer,
-      }),
-    );
-    td.when(
-      paymentUtils.getTransferTypeWithTransfer(
-        td.matchers.contains({ transferId: insuranceTransferId }),
-      ),
-    ).thenReturn(
-      okAsync({
-        transferType: ETransferType.Insurance,
-        transfer: browserNodeProvider.insuranceTransfer,
-      }),
-    );
-    td.when(
-      paymentUtils.getTransferTypeWithTransfer(
-        td.matchers.contains({ transferId: parameterizedTransferId }),
-      ),
-    ).thenReturn(
-      okAsync({
-        transferType: ETransferType.Parameterized,
-        transfer: browserNodeProvider.parameterizedTransfer,
-      }),
-    );
-
-    td.when(
       paymentUtils.transfersToPayments(
         td.matchers.argThat((arr: IFullTransferState[]) => {
           return arr.length == 0;

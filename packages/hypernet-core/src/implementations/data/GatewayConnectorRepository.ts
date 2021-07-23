@@ -106,6 +106,8 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
     };
   }
 
+  private gatewayAddressesByUrl = new Map<GatewayUrl, EthereumAddress>();
+
   public getGatewayAddresses(
     gatewayUrls: GatewayUrl[],
   ): ResultAsync<
@@ -114,8 +116,11 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
   > {
     // TODO: right now, the gateway will publish a URL with their address; eventually, they should be held in a smart contract
 
+    // We will cache the gateway's address after we request it; we only need
+    // to look it up the first time.
     // For gateways that are already authorized, we can just go to their connector for the
     // public key.
+    const returnMap = new Map<GatewayUrl, EthereumAddress>();
     const addressRequests = new Array<
       ResultAsync<
         { gatewayUrl: GatewayUrl; address: EthereumAddress },
@@ -125,17 +130,26 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
         | GatewayAuthorizationDeniedError
       >
     >();
-    for (const gatewayUrl of gatewayUrls) {
-      addressRequests.push(this._getGatewayAddress(gatewayUrl));
+
+    for (const url of gatewayUrls) {
+      // Check if the URL is in the cache. If it is, add it to the return.
+      // If it's not, we'll need to get it from the blockchain
+      const cached = this.gatewayAddressesByUrl.get(url);
+
+      if (cached != null) {
+        returnMap.set(url, cached);
+      } else {
+        addressRequests.push(this._getGatewayAddress(url));
+      }
     }
 
     return ResultUtils.combine(addressRequests).map((vals) => {
-      const returnMap = new Map<GatewayUrl, EthereumAddress>();
       for (const val of vals) {
-        returnMap.set(
-          GatewayUrl(val.gatewayUrl.toString()),
-          EthereumAddress(val.address),
-        );
+        // Add the value to the return map
+        returnMap.set(val.gatewayUrl, val.address);
+
+        // Also add it to the cache
+        this.gatewayAddressesByUrl.set(val.gatewayUrl, val.address);
       }
 
       return returnMap;
@@ -248,7 +262,7 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
   > {
     return this.storageUtils
       .read<IAuthorizedGatewayEntry[]>(AuthorizedGatewaysSchema.title)
-      .andThen((storedAuthorizedGateways) => {
+      .map((storedAuthorizedGateways) => {
         const authorizedGateways = new Map<GatewayUrl, Signature>();
 
         if (storedAuthorizedGateways != null) {
@@ -260,7 +274,7 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
           }
         }
 
-        return okAsync(authorizedGateways);
+        return authorizedGateways;
       });
   }
 

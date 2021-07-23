@@ -1,14 +1,14 @@
 import { GatewayUrl } from "@hypernetlabs/objects";
-import { GatewayConnectorService } from "@implementations/business/GatewayConnectorService";
-import { IGatewayConnectorService } from "@interfaces/business/IGatewayConnectorService";
+import { ILogUtils } from "@hypernetlabs/utils";
 import {
   IAccountsRepository,
   IGatewayConnectorRepository,
 } from "@interfaces/data";
 import { ok, okAsync } from "neverthrow";
-import { ILogUtils } from "@hypernetlabs/utils";
 import td from "testdouble";
 
+import { GatewayConnectorService } from "@implementations/business/GatewayConnectorService";
+import { IGatewayConnectorService } from "@interfaces/business/IGatewayConnectorService";
 import { ConfigProviderMock, ContextProviderMock } from "@tests/mock/utils";
 
 class GatewayConnectorServiceMocks {
@@ -45,7 +45,8 @@ describe("GatewayConnectorService tests", () => {
     // Arrange
     const gatewayConnectorServiceMock = new GatewayConnectorServiceMocks();
 
-    const gatewayConnectorService = gatewayConnectorServiceMock.factoryGatewayConnectorService();
+    const gatewayConnectorService =
+      gatewayConnectorServiceMock.factoryGatewayConnectorService();
 
     // Act
     const response = await gatewayConnectorService.deauthorizeGateway(
@@ -68,7 +69,8 @@ describe("GatewayConnectorService tests", () => {
     // Arrange
     const gatewayConnectorServiceMock = new GatewayConnectorServiceMocks();
 
-    const gatewayConnectorService = gatewayConnectorServiceMock.factoryGatewayConnectorService();
+    const gatewayConnectorService =
+      gatewayConnectorServiceMock.factoryGatewayConnectorService();
 
     td.when(
       gatewayConnectorServiceMock.gatewayConnectorRepository.deauthorizeGateway(
@@ -93,7 +95,7 @@ describe("GatewayConnectorService tests", () => {
     // Assert
     expect(response).toBeDefined();
     expect(response.isErr()).toBeFalsy();
-    expect(destroyProxyCallingcount).toBe(1);
+    expect(destroyProxyCallingcount).toBe(0);
     expect(response._unsafeUnwrap()).toBe(undefined);
   }, 10000);
 });

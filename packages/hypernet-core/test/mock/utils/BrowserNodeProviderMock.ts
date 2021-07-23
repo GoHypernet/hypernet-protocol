@@ -1,5 +1,5 @@
+import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
 import {
-  BigNumberString,
   BlockchainUnavailableError,
   EthereumAddress,
   UnixTimestamp,
@@ -33,6 +33,17 @@ import {
   defaultExpirationLength,
   gatewayUrl,
   unixPast,
+  routerPublicIdentifier,
+  chainId,
+  messageTransferDefinitionAddress,
+  insuranceTransferDefinitionAddress,
+  parameterizedTransferDefinitionAddress,
+  parameterizedTransferResolverEncoding,
+  parameterizedTransferEncodedCancel,
+  insuranceTransferEncodedCancel,
+  insuranceTransferResolverEncoding,
+  messageTransferEncodedCancel,
+  messageTransferResolverEncoding,
 } from "@mock/mocks";
 
 export class BrowserNodeProviderMock implements IBrowserNodeProvider {
@@ -111,7 +122,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       channelAddress: routerChannelAddress,
       inDispute: false,
       transferId: offerTransferId,
-      transferDefinition: destinationAddress,
+      transferDefinition: messageTransferDefinitionAddress,
       transferTimeout: "string",
       initialStateHash: "string",
       initiator: publicIdentifier,
@@ -136,7 +147,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       channelAddress: routerChannelAddress,
       inDispute: false,
       transferId: insuranceTransferId,
-      transferDefinition: destinationAddress,
+      transferDefinition: insuranceTransferDefinitionAddress,
       transferTimeout: "string",
       initialStateHash: "string",
       initiator: publicIdentifier,
@@ -165,7 +176,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       channelAddress: routerChannelAddress,
       inDispute: false,
       transferId: parameterizedTransferId,
-      transferDefinition: destinationAddress,
+      transferDefinition: parameterizedTransferDefinitionAddress,
       transferTimeout: "string",
       initialStateHash: "string",
       initiator: publicIdentifier,
@@ -191,12 +202,30 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
     // If we were not provided with a specific browser node, set up a mock one.
     if (browserNode == null) {
       this.browserNode = td.object<IBrowserNode>();
+      td.when(
+        this.browserNode.setup(
+          routerPublicIdentifier,
+          chainId,
+          DEFAULT_CHANNEL_TIMEOUT.toString(),
+        ),
+      ).thenReturn(okAsync({ channelAddress: routerChannelAddress }));
       td.when(this.browserNode.getStateChannels()).thenReturn(
         okAsync(Array.from(this.stateChannels.keys())),
       );
-      td.when(
-        this.browserNode.getStateChannel(routerChannelAddress),
-      ).thenReturn(okAsync(this.stateChannels.get(routerChannelAddress)));
+
+      for (const stateChannel of this.stateChannels.values()) {
+        td.when(
+          this.browserNode.getStateChannel(
+            EthereumAddress(stateChannel.channelAddress),
+          ),
+        ).thenReturn(
+          okAsync(
+            this.stateChannels.get(
+              EthereumAddress(stateChannel.channelAddress),
+            ),
+          ),
+        );
+      }
 
       // @todo: Figure out if there is a better way to stub get properties
       (this.browserNode as any).publicIdentifier = publicIdentifier;
@@ -267,11 +296,44 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       ).thenReturn(
         okAsync([
           {
+            definition: "0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF",
+            encodedCancel:
+              "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000041000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            name: "Withdraw",
+            resolverEncoding: "tuple(bytes responderSignature)",
+            stateEncoding:
+              "tuple(bytes initiatorSignature, address initiator, address responder, bytes32 data, uint256 nonce, uint256 fee, address callTo, bytes callData)",
+          } as IRegisteredTransfer,
+          {
+            definition: "0x345cA3e014Aaf5dcA488057592ee47305D9B3e10",
+            encodedCancel:
+              "0x0000000000000000000000000000000000000000000000000000000000000000",
+            name: "HashlockTransfer",
+            resolverEncoding: "tuple(bytes32 preImage)",
+            stateEncoding: "tuple(bytes32 lockHash, uint256 expiry)",
+          } as IRegisteredTransfer,
+          {
+            definition: parameterizedTransferDefinitionAddress,
+            encodedCancel: parameterizedTransferEncodedCancel,
+            name: "Parameterized",
+            resolverEncoding: parameterizedTransferResolverEncoding,
+            stateEncoding:
+              "tuple(address receiver, uint256 start, uint256 expiration, bytes32 UUID, tuple(uint256 deltaAmount, uint256 deltaTime) rate)",
+          } as IRegisteredTransfer,
+          {
+            definition: insuranceTransferDefinitionAddress,
+            encodedCancel: insuranceTransferEncodedCancel,
             name: "Insurance",
-            stateEncoding: "stateEncoding",
-            resolverEncoding: "resolverEncoding",
-            definition: this.offerTransfer.transferDefinition,
-            encodedCancel: "encodedCancel",
+            resolverEncoding: insuranceTransferResolverEncoding,
+            stateEncoding:
+              "tuple(address receiver, address mediator, uint256 collateral, uint256 expiration, bytes32 UUID)",
+          } as IRegisteredTransfer,
+          {
+            definition: messageTransferDefinitionAddress,
+            encodedCancel: messageTransferEncodedCancel,
+            name: "MessageTransfer",
+            resolverEncoding: messageTransferResolverEncoding,
+            stateEncoding: "tuple(string message)",
           } as IRegisteredTransfer,
         ]),
       );

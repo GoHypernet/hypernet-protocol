@@ -25,7 +25,6 @@ import {
 } from "@interfaces/utilities";
 import {
   commonAmount,
-  routerChannelAddress,
   publicIdentifier,
   commonPaymentId,
   publicIdentifier2,
@@ -44,6 +43,7 @@ import {
   ConfigProviderMock,
   ContextProviderMock,
   PaymentUtilsMockFactory,
+  VectorUtilsMockFactory,
 } from "@mock/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -99,87 +99,10 @@ class PaymentRepositoryMocks {
       this.approvedPayment,
     );
 
-    td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(
-      okAsync(routerChannelAddress),
+    this.vectorUtils = VectorUtilsMockFactory.factoryVectorUtils(
+      this.browserNodeProvider,
+      expirationDate,
     );
-
-    td.when(
-      this.vectorUtils.createOfferTransfer(
-        counterPartyAccount,
-        td.matchers.contains({
-          paymentId: commonPaymentId,
-          creationDate: unixNow,
-          to: publicIdentifier2,
-          from: publicIdentifier,
-          requiredStake: commonAmount.toString(),
-          paymentAmount: commonAmount.toString(),
-          expirationDate,
-          paymentToken: erc20AssetAddress,
-          gatewayUrl: gatewayUrl,
-        }),
-      ),
-    ).thenReturn(
-      okAsync({
-        channelAddress: routerChannelAddress,
-        transferId: offerTransferId,
-      }),
-    );
-
-    td.when(
-      this.vectorUtils.resolvePaymentTransfer(
-        parameterizedTransferId,
-        commonPaymentId,
-        commonAmount.toString(),
-      ),
-    ).thenReturn(
-      okAsync({
-        channelAddress: routerChannelAddress,
-        transferId: parameterizedTransferId,
-      }),
-    );
-
-    td.when(
-      this.vectorUtils.createInsuranceTransfer(
-        publicIdentifier,
-        gatewayAddress,
-        commonAmount,
-        expirationDate,
-        commonPaymentId,
-      ),
-    ).thenReturn(
-      okAsync({
-        channelAddress: routerChannelAddress,
-        transferId: insuranceTransferId,
-      }),
-    );
-
-    td.when(
-      this.vectorUtils.createPaymentTransfer(
-        EPaymentType.Push,
-        publicIdentifier2,
-        commonAmount,
-        erc20AssetAddress,
-        commonPaymentId,
-        UnixTimestamp(unixNow - 1),
-        expirationDate,
-        undefined,
-        undefined,
-      ),
-    ).thenReturn(
-      okAsync({
-        channelAddress: routerChannelAddress,
-        transferId: parameterizedTransferId,
-      }),
-    );
-
-    td.when(
-      this.vectorUtils.resolveInsuranceTransfer(
-        insuranceTransferId,
-        commonPaymentId,
-        null,
-        BigNumber.from("0"),
-      ),
-    ).thenReturn(okAsync({} as IBasicTransferResponse));
   }
 
   public factoryPaymentRepository(): IPaymentRepository {
