@@ -135,34 +135,24 @@ export class GatewayService implements IGatewayService {
     // That code is expected to be signed, with the public key available at gatewayUrl/address
     // The code will be cached in local storage but the signing key will be
     const context = this.contextProvider.getGatewayContext();
-    let signature = Signature("");
-    let address = EthereumAddress("");
 
     // If there is no gateway URL set, it's not an error
     if (context.gatewayUrl == "") {
       return okAsync(Signature(""));
     }
 
-    return ResultUtils.combine([
-      this.gatewayConnectorRepository.getGatewaySignature(context.gatewayUrl),
-      this.gatewayConnectorRepository.getGatewayAddress(context.gatewayUrl),
-    ])
-      .andThen((vals) => {
-        [signature, address] = vals;
-
-        return this._validateGatewayConnectorCode(
-          context.gatewayUrl,
-          signature,
-          address,
-        );
-      })
+    return this._validateGatewayConnectorCode(
+      context.gatewayUrl,
+      context.gatewaySignature,
+      context.gatewayAddress,
+    )
       .orElse((e) => {
         if (!GatewayService.gatewayUrlCacheBusterUsed) {
           GatewayService.gatewayUrlCacheBusterUsed = true;
           return this._validateGatewayConnectorCode(
             context.gatewayUrl,
-            signature,
-            address,
+            context.gatewaySignature,
+            context.gatewayAddress,
             true,
           );
         } else {

@@ -10,8 +10,8 @@ import {
 } from "hardhat";
 import { DeployFunction } from "hardhat-deploy/types";
 
-import { registerTransfer } from "../src.ts/utils";
 import { logger } from "../src.ts/constants";
+import { registerTransfer } from "../src.ts/utils";
 
 const func: DeployFunction = async () => {
   const log = logger.child({ module: "Deploy" });
@@ -43,15 +43,13 @@ const func: DeployFunction = async () => {
   type Args = Array<string | BigNumber>;
   const migrate = async (name: string, args: Args): Promise<void> => {
     const processedArgs = await Promise.all(
-      args.map(
-        async (arg: any): Promise<any> => {
-          try {
-            return (await deployments.get(arg)).address;
-          } catch (e) {
-            return arg;
-          }
-        },
-      ),
+      args.map(async (arg: any): Promise<any> => {
+        try {
+          return (await deployments.get(arg)).address;
+        } catch (e) {
+          return arg;
+        }
+      }),
     );
     log.info(`Deploying ${name} with args [${processedArgs.join(", ")}]`);
     await deployments.deploy(name, {
@@ -95,7 +93,8 @@ const func: DeployFunction = async () => {
     ["Parameterized", []],
     ["Insurance", []],
     ["Message", []],
-    ["Hypertoken", []]
+    ["Hypertoken", []],
+    ["MocRegistry", []],
   ];
 
   // Only deploy test fixtures during hardhat tests
@@ -119,17 +118,6 @@ const func: DeployFunction = async () => {
     await registerTransfer("Parameterized", deployer);
     await registerTransfer("Insurance", deployer);
     await registerTransfer("Message", deployer);
-
-    // deploy Mockup Registry if on the hardhat network
-    const MocRegistry = await ethers.getContractFactory("MocRegistry");
-    const mocregistry = await MocRegistry.deploy();
-    await mocregistry.deployed();
-
-    const tx = await mocregistry.setGateway("www.apple.com","{sig, wallet}");
-    const reciept = await tx.wait()
-
-    // print to logs the address of the registry
-    log.info(`Registry Address:`, mocregistry.address)
 
     // Default: run standard migration
   } else {

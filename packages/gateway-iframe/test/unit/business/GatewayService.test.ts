@@ -25,30 +25,29 @@ jest.mock("ethers", () => {
 });
 
 class GatewayServiceMocks {
-  public gatewayConnectorRepository =
-    td.object<IGatewayConnectorRepository>();
+  public gatewayConnectorRepository = td.object<IGatewayConnectorRepository>();
   public persistenceRepository = td.object<IPersistenceRepository>();
   public hypernetCoreRepository = td.object<IHypernetCoreRepository>();
   public gatewayUrl = GatewayUrl("http://localhost:5010");
+  public gatewayAddress = EthereumAddress("gatewayAddress");
+  public gatewaySignature = Signature("gatewaySignature");
   public nowTime = 1487076708000;
   public signature = Signature(
     "0x236d12b38357dc30944bfe99ba9088f75b20caacb1f9166b680238f41968c02d44de2896897f116708a1317cec186a259166bf675a1fae85c85fcb5ec646ba5f1c",
   );
   public address = "0x14791697260E4c9A71f18484C9f997B308e59325";
   public gatewayCode = "some code";
-  public contextProvider = new ContextProvider(this.gatewayUrl);
+  public contextProvider = new ContextProvider(
+    this.gatewayUrl,
+    this.gatewayAddress,
+    this.gatewaySignature,
+  );
 
   constructor() {
     Date.now = jest.fn(() => this.nowTime);
   }
 
   public runSuccessScenarios() {
-    td.when(
-      this.gatewayConnectorRepository.getGatewaySignature(this.gatewayUrl),
-    ).thenReturn(okAsync(Signature(this.signature)));
-    td.when(
-      this.gatewayConnectorRepository.getGatewayAddress(this.gatewayUrl),
-    ).thenReturn(okAsync(EthereumAddress(this.address)));
     td.when(
       this.gatewayConnectorRepository.getGatewayCode(this.gatewayUrl),
     ).thenReturn(okAsync(this.gatewayCode));
@@ -58,12 +57,6 @@ class GatewayServiceMocks {
   }
 
   public runFailureScenarios() {
-    td.when(
-      this.gatewayConnectorRepository.getGatewaySignature(this.gatewayUrl),
-    ).thenReturn(okAsync(Signature(this.signature)));
-    td.when(
-      this.gatewayConnectorRepository.getGatewayAddress(this.gatewayUrl),
-    ).thenReturn(okAsync(EthereumAddress(this.address + "1")));
     td.when(
       this.gatewayConnectorRepository.getGatewayCode(this.gatewayUrl),
     ).thenReturn(okAsync(this.gatewayCode));

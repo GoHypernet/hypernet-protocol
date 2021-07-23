@@ -5,6 +5,7 @@ import {
   AjaxError,
 } from "@hypernetlabs/objects";
 import { IAjaxUtils } from "@hypernetlabs/utils";
+import { Contract } from "ethers";
 import { okAsync, ResultAsync } from "neverthrow";
 import { urlJoinP } from "url-join-ts";
 
@@ -12,23 +13,6 @@ import { IGatewayConnectorRepository } from "@gateway-iframe/interfaces/data";
 
 export class GatewayConnectorRepository implements IGatewayConnectorRepository {
   constructor(protected ajaxUtils: IAjaxUtils) {}
-
-  public getGatewaySignature(
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<Signature, AjaxError> {
-    const url = this._prepareGatewayUrl(gatewayUrl, "signature");
-    return this.ajaxUtils.get<Signature>(url).andThen((response) => {
-      return okAsync(response);
-    });
-  }
-  public getGatewayAddress(
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<EthereumAddress, AjaxError> {
-    const url = this._prepareGatewayUrl(gatewayUrl, "address");
-    return this.ajaxUtils.get<EthereumAddress>(url).andThen((response) => {
-      return okAsync(response);
-    });
-  }
 
   public getGatewayCode(
     gatewayUrl: GatewayUrl,

@@ -145,6 +145,9 @@ module.exports = {
       __PARAMETERIZED_TRANSFER_ADDRESS__: JSON.stringify(
         process.env.__PARAMETERIZED_TRANSFER_ADDRESS__,
       ),
+      __GATEWAY_REGISTRY_ADDRESS__: JSON.stringify(
+        process.env.__GATEWAY_REGISTRY_ADDRESS__,
+      ),
       __CHAIN_ID__: JSON.stringify(process.env.__CHAIN_ID__),
       __CHAIN_PROVIDERS__: JSON.stringify(process.env.__CHAIN_PROVIDERS__),
       __CHAIN_ADDRESSES__: JSON.stringify(process.env.__CHAIN_ADDRESSES__),
