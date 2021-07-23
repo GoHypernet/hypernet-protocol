@@ -1,4 +1,4 @@
-import { GatewayUrl, ProxyError } from "@hypernetlabs/objects";
+import { GatewayRegistrationInfo, ProxyError } from "@hypernetlabs/objects";
 import { injectable, inject } from "inversify";
 import { ResultAsync } from "neverthrow";
 
@@ -22,20 +22,28 @@ export class GatewayConnectorProxyFactory
   ) {}
 
   factoryProxy(
-    gatewayUrl: GatewayUrl,
+    gatewayRegistrationInfo: GatewayRegistrationInfo,
   ): ResultAsync<IGatewayConnectorProxy, ProxyError> {
     let proxy: IGatewayConnectorProxy;
     return this.configProvider
       .getConfig()
       .andThen((config) => {
         const iframeUrl = new URL(config.gatewayIframeUrl);
-        iframeUrl.searchParams.set("gatewayUrl", gatewayUrl);
+        iframeUrl.searchParams.set("gatewayUrl", gatewayRegistrationInfo.url);
+        iframeUrl.searchParams.set(
+          "gatewayAddress",
+          gatewayRegistrationInfo.address,
+        );
+        iframeUrl.searchParams.set(
+          "gatewaySignature",
+          gatewayRegistrationInfo.signature,
+        );
 
         proxy = new GatewayConnectorProxy(
           this._prepareIFrameContainer(),
           iframeUrl.toString(),
-          gatewayUrl,
-          `hypernet-core-gateway-connector-iframe-${gatewayUrl}`,
+          gatewayRegistrationInfo.url,
+          `hypernet-core-gateway-connector-iframe-${gatewayRegistrationInfo.url}`,
           this.contextProvider,
           config.gatewayDeauthorizationTimeout,
           config.debug,

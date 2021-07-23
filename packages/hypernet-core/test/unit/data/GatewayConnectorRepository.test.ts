@@ -7,6 +7,7 @@ import {
   ProxyError,
   AuthorizedGatewaysSchema,
   IBasicTransferResponse,
+  GatewayRegistrationInfo,
 } from "@hypernetlabs/objects";
 import { IAjaxUtils, ILogUtils } from "@hypernetlabs/utils";
 import { GatewayConnectorRepository } from "@implementations/data/GatewayConnectorRepository";
@@ -63,6 +64,11 @@ class GatewayConnectorRepositoryMocks {
   public blockchainUtils = td.object<IBlockchainUtils>();
   public storageUtils = td.object<IStorageUtils>();
   public logUtils = td.object<ILogUtils>();
+  public gatewayRegistrationInfo = new GatewayRegistrationInfo(
+    gatewayUrl,
+    account,
+    gatewaySignature,
+  );
 
   public expectedSignerDomain = {
     name: "Hypernet Protocol",
@@ -130,7 +136,9 @@ class GatewayConnectorRepositoryMocks {
     ).thenReturn(okAsync(undefined));
 
     td.when(
-      this.gatewayConnectorProxyFactory.factoryProxy(gatewayUrl),
+      this.gatewayConnectorProxyFactory.factoryProxy(
+        this.gatewayRegistrationInfo,
+      ),
     ).thenReturn(okAsync(this.gatewayConnectorProxy));
 
     td.when(this.gatewayConnectorProxy.getValidatedSignature()).thenReturn(
@@ -280,7 +288,9 @@ describe("GatewayConnectorRepository tests", () => {
 
     const error = new ProxyError();
     td.when(
-      mocks.gatewayConnectorProxyFactory.factoryProxy(gatewayUrl),
+      mocks.gatewayConnectorProxyFactory.factoryProxy(
+        mocks.gatewayRegistrationInfo,
+      ),
     ).thenReturn(errAsync(error));
 
     let onAuthorizedGatewayActivationFailedVal: string | null = null;
@@ -367,7 +377,10 @@ describe("GatewayConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.addAuthorizedGateway(gatewayUrl, balances);
+    const result = await repo.addAuthorizedGateway(
+      mocks.gatewayRegistrationInfo,
+      balances,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -384,7 +397,9 @@ describe("GatewayConnectorRepository tests", () => {
 
     const error = new GatewayConnectorError();
     td.when(
-      mocks.gatewayConnectorProxyFactory.factoryProxy(gatewayUrl),
+      mocks.gatewayConnectorProxyFactory.factoryProxy(
+        mocks.gatewayRegistrationInfo,
+      ),
     ).thenReturn(errAsync(error));
 
     let onAuthorizedGatewayActivationFailedVal: string | null = null;
@@ -397,7 +412,10 @@ describe("GatewayConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.addAuthorizedGateway(gatewayUrl, balances);
+    const result = await repo.addAuthorizedGateway(
+      mocks.gatewayRegistrationInfo,
+      balances,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -430,7 +448,10 @@ describe("GatewayConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.addAuthorizedGateway(gatewayUrl, balances);
+    const result = await repo.addAuthorizedGateway(
+      mocks.gatewayRegistrationInfo,
+      balances,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -467,7 +488,10 @@ describe("GatewayConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.addAuthorizedGateway(gatewayUrl, balances);
+    const result = await repo.addAuthorizedGateway(
+      mocks.gatewayRegistrationInfo,
+      balances,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -500,7 +524,10 @@ describe("GatewayConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.addAuthorizedGateway(gatewayUrl, balances);
+    const result = await repo.addAuthorizedGateway(
+      mocks.gatewayRegistrationInfo,
+      balances,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -510,13 +537,13 @@ describe("GatewayConnectorRepository tests", () => {
     expect(onAuthorizedGatewayActivationFailedVal).toBe(gatewayUrl);
   });
 
-  test("getGatewayAddresses returns successfully with no cache", async () => {
+  test("getGatewayRegistrationInfo returns successfully from activated gateways", async () => {
     // Arrange
     const mocks = new GatewayConnectorRepositoryMocks();
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.getGatewayAddresses([gatewayUrl]);
+    const result = await repo.getGatewayRegistrationInfo([gatewayUrl]);
 
     // Assert
     expect(result).toBeDefined();
@@ -526,16 +553,18 @@ describe("GatewayConnectorRepository tests", () => {
     expect(value.get(gatewayUrl)).toBe(account);
   });
 
-  test("getGatewayAddresses returns successfully from cache", async () => {
+  test("getGatewayRegistrationInfo returns successfully from cache", async () => {
     // Arrange
     const mocks = new GatewayConnectorRepositoryMocks();
 
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.getGatewayAddresses([gatewayUrl]).andThen(() => {
-      return repo.getGatewayAddresses([gatewayUrl]);
-    });
+    const result = await repo
+      .getGatewayRegistrationInfo([gatewayUrl])
+      .andThen(() => {
+        return repo.getGatewayRegistrationInfo([gatewayUrl]);
+      });
 
     // Assert
     expect(result).toBeDefined();
@@ -560,9 +589,11 @@ describe("GatewayConnectorRepository tests", () => {
     const repo = mocks.factoryRepository();
 
     // Act
-    const result = await repo.getGatewayAddresses([gatewayUrl]).andThen(() => {
-      return repo.getGatewayAddresses([gatewayUrl, gatewayUrl2]);
-    });
+    const result = await repo
+      .getGatewayRegistrationInfo([gatewayUrl])
+      .andThen(() => {
+        return repo.getGatewayRegistrationInfo([gatewayUrl, gatewayUrl2]);
+      });
 
     // Assert
     expect(result).toBeDefined();
@@ -589,7 +620,7 @@ describe("GatewayConnectorRepository tests", () => {
     );
   });
 
-  test("getGatewayAddresses returns an error if a single gateway has an error", async () => {
+  test("getGatewayRegistrationInfo returns an error if a single gateway has an error", async () => {
     // Arrange
     const mocks = new GatewayConnectorRepositoryMocks();
 
@@ -608,7 +639,7 @@ describe("GatewayConnectorRepository tests", () => {
     const result = await repo
       .activateAuthorizedGateways(balances)
       .andThen(() => {
-        return repo.getGatewayAddresses([gatewayUrl, gatewayUrl2]);
+        return repo.getGatewayRegistrationInfo([gatewayUrl, gatewayUrl2]);
       });
 
     // Assert

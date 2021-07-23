@@ -6,7 +6,6 @@ import {
   PublicIdentifier,
   PaymentInternalDetails,
   PaymentId,
-  EthereumAddress,
   GatewayUrl,
   Signature,
   Balances,
@@ -17,6 +16,7 @@ import {
   BigNumberString,
   UnixTimestamp,
   InvalidPaymentError,
+  GatewayRegistrationInfo,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { PaymentService } from "@implementations/business/PaymentService";
@@ -42,6 +42,7 @@ import {
   publicIdentifier2,
   unixNow,
   account,
+  gatewaySignature,
 } from "@mock/mocks";
 import { ConfigProviderMock, ContextProviderMock } from "@tests/mock/utils";
 
@@ -76,7 +77,7 @@ class PaymentServiceMocks {
   public finalizedPushPayment: PushPayment;
 
   public assetBalance: AssetBalance;
-  public gatewayAddresses: Map<GatewayUrl, EthereumAddress>;
+  public gatewayRegistrationInfo: GatewayRegistrationInfo;
 
   constructor(hypertokenBalance: BigNumberString = amount) {
     this.proposedPushPayment = this.factoryPushPayment();
@@ -157,13 +158,21 @@ class PaymentServiceMocks {
       okAsync(this.finalizedPushPayment),
     );
 
-    this.gatewayAddresses = new Map();
-    this.gatewayAddresses.set(gatewayUrl, account);
+    this.gatewayRegistrationInfo = new GatewayRegistrationInfo(
+      gatewayUrl,
+      account,
+      gatewaySignature,
+    );
+    const gatewayRegistrationInfoMap = new Map<
+      GatewayUrl,
+      GatewayRegistrationInfo
+    >();
+    gatewayRegistrationInfoMap.set(gatewayUrl, this.gatewayRegistrationInfo);
     td.when(
-      this.gatewayConnectorRepository.getGatewayAddresses(
+      this.gatewayConnectorRepository.getGatewayRegistrationInfo(
         td.matchers.contains(gatewayUrl),
       ),
-    ).thenReturn(okAsync(this.gatewayAddresses));
+    ).thenReturn(okAsync(gatewayRegistrationInfoMap));
 
     td.when(this.gatewayConnectorRepository.getAuthorizedGateways()).thenReturn(
       okAsync(new Map([[gatewayUrl, validatedSignature]])),
@@ -171,7 +180,7 @@ class PaymentServiceMocks {
 
     td.when(
       this.gatewayConnectorRepository.addAuthorizedGateway(
-        gatewayUrl,
+        this.gatewayRegistrationInfo,
         new Balances([this.assetBalance]),
       ),
     ).thenReturn(okAsync(undefined));

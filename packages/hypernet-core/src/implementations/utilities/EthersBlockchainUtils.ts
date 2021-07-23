@@ -11,10 +11,12 @@ import {
   BlockchainUnavailableError,
   Signature,
   EthereumAddress,
+  GatewayRegistrationInfo,
+  GatewayUrl,
   HexString,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
-import { Bytes, Contract, ethers } from "ethers";
+import { Contract, ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 import {
@@ -179,4 +181,47 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
       ]);
     });
   }
+
+  public getGatewayRegistrationInfo(
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<GatewayRegistrationInfo, BlockchainUnavailableError> {
+    return ResultUtils.combine([
+      this.blockchainProvider.getProvider(),
+      this.configProvider.getConfig(),
+    ])
+      .andThen((vals) => {
+        const [provider, config] = vals;
+        const mocRegistryContract = new Contract(
+          config.gatewayRegistryAddress,
+          TransferAbis.MocRegistry.abi,
+          provider,
+        );
+
+        return ResultAsync.fromPromise(
+          mocRegistryContract.getGateway(gatewayUrl) as Promise<string>,
+          (e) => {
+            return new BlockchainUnavailableError(
+              "Cannot get gateway registry entry",
+              e,
+            );
+          },
+        );
+      })
+      .map((registryString) => {
+        const registryEntry = JSON.parse(
+          registryString,
+        ) as IGatewayRegistryEntry;
+
+        return new GatewayRegistrationInfo(
+          gatewayUrl,
+          registryEntry.address,
+          registryEntry.signature,
+        );
+      });
+  }
+}
+
+interface IGatewayRegistryEntry {
+  address: EthereumAddress;
+  signature: Signature;
 }

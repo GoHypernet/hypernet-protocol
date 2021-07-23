@@ -5,6 +5,7 @@ import {
   HexString,
   PaymentId,
   PublicIdentifier,
+  Signature,
   TransferId,
   UnixTimestamp,
 } from "@hypernetlabs/objects";
