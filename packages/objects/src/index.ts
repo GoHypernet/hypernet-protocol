@@ -16,7 +16,6 @@ export * from "@objects/MessageTransferData";
 export * from "@objects/Payment";
 export * from "@objects/PaymentId";
 export * from "@objects/TransferId";
-export * from "@objects/PaymentInternalDetails";
 export * from "@objects/PublicIdentifier";
 export * from "@objects/PublicKey";
 export * from "@objects/PullAmount";

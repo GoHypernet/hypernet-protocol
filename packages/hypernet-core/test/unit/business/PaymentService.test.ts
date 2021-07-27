@@ -4,7 +4,6 @@ import {
   AssetBalance,
   PullPayment,
   PublicIdentifier,
-  PaymentInternalDetails,
   PaymentId,
   GatewayUrl,
   Signature,
@@ -17,6 +16,8 @@ import {
   UnixTimestamp,
   InvalidPaymentError,
   GatewayRegistrationInfo,
+  SortedTransfers,
+  ETransferState,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { PaymentService } from "@implementations/business/PaymentService";
@@ -36,15 +37,20 @@ import {
   hyperTokenAddress,
   insuranceTransferId,
   mockUtils,
-  offerTransferId,
-  parameterizedTransferId,
   publicIdentifier,
   publicIdentifier2,
   unixNow,
   account,
   gatewaySignature,
+  activeInsuranceTransfer,
+  activeOfferTransfer,
+  activeParameterizedTransfer,
 } from "@mock/mocks";
-import { ConfigProviderMock, ContextProviderMock } from "@tests/mock/utils";
+import {
+  ConfigProviderMock,
+  ContextProviderMock,
+  VectorUtilsMockFactory,
+} from "@tests/mock/utils";
 
 const requiredStake = BigNumberString("42");
 const paymentToken = mockUtils.generateRandomPaymentToken();
@@ -55,12 +61,6 @@ const paymentId = PaymentId(
 );
 const nonExistentPaymentId = PaymentId("This payment is not mocked");
 const validatedSignature = Signature("0xValidatedSignature");
-const paymentDetails = new PaymentInternalDetails(
-  offerTransferId,
-  insuranceTransferId,
-  parameterizedTransferId,
-  [],
-);
 
 class PaymentServiceMocks {
   public vectorLinkRepository = td.object<ILinkRepository>();
@@ -68,6 +68,8 @@ class PaymentServiceMocks {
   public contextProvider = new ContextProviderMock();
   public configProvider = new ConfigProviderMock();
   public logUtils = td.object<ILogUtils>();
+  public vectorUtils =
+    VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
   public paymentRepository = td.object<IPaymentRepository>();
   public gatewayConnectorRepository = td.object<IGatewayConnectorRepository>();
 
@@ -197,6 +199,20 @@ class PaymentServiceMocks {
         null,
       ),
     ).thenReturn(okAsync(undefined));
+
+    td.when(
+      this.vectorUtils.getTransferStateFromTransfer(activeOfferTransfer),
+    ).thenReturn(okAsync(ETransferState.Active));
+
+    td.when(
+      this.vectorUtils.getTransferStateFromTransfer(activeInsuranceTransfer),
+    ).thenReturn(okAsync(ETransferState.Active));
+
+    td.when(
+      this.vectorUtils.getTransferStateFromTransfer(
+        activeParameterizedTransfer,
+      ),
+    ).thenReturn(okAsync(ETransferState.Active));
   }
 
   public factoryPaymentService(): IPaymentService {
@@ -207,6 +223,7 @@ class PaymentServiceMocks {
       this.configProvider,
       this.paymentRepository,
       this.gatewayConnectorRepository,
+      this.vectorUtils,
       this.logUtils,
     );
   }
@@ -250,7 +267,12 @@ class PaymentServiceMocks {
       unixNow,
       BigNumberString("0"),
       gatewayUrl,
-      paymentDetails,
+      new SortedTransfers(
+        [activeOfferTransfer],
+        [activeInsuranceTransfer],
+        [activeParameterizedTransfer],
+        [],
+      ),
       null,
       amount,
       BigNumberString("0"),
@@ -276,7 +298,12 @@ class PaymentServiceMocks {
       unixNow,
       BigNumberString("0"),
       gatewayUrl,
-      paymentDetails,
+      new SortedTransfers(
+        [activeOfferTransfer],
+        [activeInsuranceTransfer],
+        [activeParameterizedTransfer],
+        [],
+      ),
       null,
       amount,
       BigNumberString("0"),

@@ -1,6 +1,5 @@
 import {
   Payment,
-  PublicIdentifier,
   PullPayment,
   PushPayment,
   SortedTransfers,
@@ -9,12 +8,12 @@ import {
   UnixTimestamp,
   EPaymentState,
   EPaymentType,
-  ETransferType,
   InvalidParametersError,
   InvalidPaymentError,
   LogicalError,
   VectorError,
   InvalidPaymentIdError,
+  BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -80,8 +79,6 @@ export interface IPaymentUtils {
    */
   transfersToPullPayment(
     id: PaymentId,
-    to: PublicIdentifier,
-    from: PublicIdentifier,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
   ): ResultAsync<PullPayment, LogicalError>;
@@ -97,8 +94,6 @@ export interface IPaymentUtils {
    */
   transfersToPushPayment(
     id: PaymentId,
-    to: PublicIdentifier,
-    from: PublicIdentifier,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
   ): ResultAsync<PushPayment, LogicalError>;
@@ -110,5 +105,12 @@ export interface IPaymentUtils {
    * @returns the unix timestamp of the earliest transfer
    */
   getEarliestDateFromTransfers(transfers: IFullTransferState[]): UnixTimestamp;
-  getPaymentState(sortedTransfers: SortedTransfers): EPaymentState;
+
+  /**
+   * Returns the calculated payment state, based on all the extant transfers.
+   * @param sortedTransfers
+   */
+  getPaymentState(
+    sortedTransfers: SortedTransfers,
+  ): ResultAsync<EPaymentState, BlockchainUnavailableError>;
 }

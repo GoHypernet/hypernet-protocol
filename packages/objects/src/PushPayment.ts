@@ -3,8 +3,8 @@ import { EthereumAddress } from "@objects/EthereumAddress";
 import { GatewayUrl } from "@objects/GatewayUrl";
 import { Payment } from "@objects/Payment";
 import { PaymentId } from "@objects/PaymentId";
-import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
+import { SortedTransfers } from "@objects/SortedTransfers";
 import { EPaymentState } from "@objects/typing";
 import { UnixTimestamp } from "@objects/UnixTimestamp";
 
@@ -22,7 +22,7 @@ export class PushPayment extends Payment {
     updatedTimestamp: UnixTimestamp,
     collateralRecovered: BigNumberString,
     gatewayUrl: GatewayUrl,
-    details: PaymentInternalDetails,
+    details: SortedTransfers,
     metadata: string | null,
     public paymentAmount: BigNumberString,
     public amountTransferred: BigNumberString,

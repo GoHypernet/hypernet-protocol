@@ -27,6 +27,8 @@ import {
   UnixTimestamp,
   BigNumberString,
   Signature,
+  TransferId,
+  ETransferState,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IPaymentService } from "@interfaces/business";
@@ -50,6 +52,8 @@ import {
   IConfigProviderType,
   IContextProvider,
   IContextProviderType,
+  IVectorUtils,
+  IVectorUtilsType,
 } from "@interfaces/utilities";
 
 type PaymentsByIdsErrors =
@@ -89,6 +93,7 @@ export class PaymentService implements IPaymentService {
     protected paymentRepository: IPaymentRepository,
     @inject(IGatewayConnectorRepositoryType)
     protected gatewayConnectorRepository: IGatewayConnectorRepository,
+    @inject(IVectorUtilsType) protected vectorUtils: IVectorUtils,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
@@ -673,10 +678,7 @@ export class PaymentService implements IPaymentService {
         // have payment amount staked as an insurace amount.
         // The second condition can't happen if it's in Accepted unless something is very, very badly wrong,
         // but it keeps typescript happy
-        if (
-          payment.state != EPaymentState.Accepted ||
-          payment.details.insuranceTransferId == null
-        ) {
+        if (payment.state != EPaymentState.Accepted) {
           return errAsync(
             new InvalidParametersError(
               "Can not resolve payment that is not in the Accepted state",
@@ -694,24 +696,48 @@ export class PaymentService implements IPaymentService {
           );
         }
 
-        // Resolve the insurance
-        this.logUtils.debug(`Resolving insurance for payment ${paymentId}`);
-        return this.paymentRepository.resolveInsurance(
-          paymentId,
-          payment.details.insuranceTransferId,
-          amount,
-          gatewaySignature,
-        );
-      })
-      .andThen(() => {
-        return this.paymentRepository.getPaymentsByIds([paymentId]);
-      })
-      .andThen((payments) => {
-        const payment = payments.get(paymentId);
-        if (payment == null) {
-          return errAsync(new InvalidParametersError("Invalid payment ID"));
-        }
-        return okAsync(payment);
+        // A payment could have multiple insurance transfers and still be accepted if all
+        // but one are canceled.
+        return ResultUtils.filter(
+          payment.details.insuranceTransfers,
+          (transfer) => {
+            return this.vectorUtils
+              .getTransferStateFromTransfer(transfer)
+              .map((transferState) => transferState == ETransferState.Active);
+          },
+        )
+          .andThen((activeInsuranceTransfers) => {
+            if (activeInsuranceTransfers.length > 1) {
+              throw new Error(
+                "Accepted payment has multiple active insurance payments?!",
+              );
+            }
+
+            if (activeInsuranceTransfers.length == 0) {
+              throw new Error(
+                "Accepted payment has no active insurance payments?!",
+              );
+            }
+
+            // Resolve the insurance
+            this.logUtils.debug(`Resolving insurance for payment ${paymentId}`);
+            return this.paymentRepository.resolveInsurance(
+              paymentId,
+              TransferId(activeInsuranceTransfers[0].transferId),
+              amount,
+              gatewaySignature,
+            );
+          })
+          .andThen(() => {
+            return this.paymentRepository.getPaymentsByIds([paymentId]);
+          })
+          .andThen((payments) => {
+            const payment = payments.get(paymentId);
+            if (payment == null) {
+              return errAsync(new InvalidParametersError("Invalid payment ID"));
+            }
+            return okAsync(payment);
+          });
       });
   }
 

@@ -424,6 +424,7 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
       this.paymentRepository,
       this.gatewayConnectorRepository,
+      this.vectorUtils,
       this.logUtils,
     );
 

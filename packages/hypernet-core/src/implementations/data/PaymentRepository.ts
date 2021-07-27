@@ -468,43 +468,46 @@ export class PaymentRepository implements IPaymentRepository {
         return this.paymentUtils.sortTransfers(paymentId, existingTransfers);
       })
       .andThen((sortedTransfers) => {
-        const paymentState = this.paymentUtils.getPaymentState(sortedTransfers);
-        if (paymentState != EPaymentState.Approved) {
-          return errAsync(
-            new PaymentFinalizeError(
-              `Cannot finalize payment ${paymentId}, no parameterized transfer exists for this!`,
-            ),
-          );
-        }
+        return this.paymentUtils
+          .getPaymentState(sortedTransfers)
+          .andThen((paymentState) => {
+            if (paymentState != EPaymentState.Approved) {
+              return errAsync(
+                new PaymentFinalizeError(
+                  `Cannot finalize payment ${paymentId}, no parameterized transfer exists for this!`,
+                ),
+              );
+            }
 
-        parameterizedTransferId = TransferId(
-          sortedTransfers.parameterizedTransfers[0].transferId,
-        );
+            parameterizedTransferId = TransferId(
+              sortedTransfers.parameterizedTransfers[0].transferId,
+            );
 
-        return this.vectorUtils.resolvePaymentTransfer(
-          parameterizedTransferId,
-          paymentId,
-          amount,
-        );
-      })
-      .andThen(() => {
-        return browserNode.getTransfer(parameterizedTransferId);
-      })
-      .andThen((transfer) => {
-        // Remove the parameterized transfer, and replace it
-        // with this latest transfer
-        existingTransfers = existingTransfers.filter(
-          (obj) => obj.transferId !== parameterizedTransferId,
-        );
-        existingTransfers.push(transfer);
+            return this.vectorUtils.resolvePaymentTransfer(
+              parameterizedTransferId,
+              paymentId,
+              amount,
+            );
+          })
+          .andThen(() => {
+            return browserNode.getTransfer(parameterizedTransferId);
+          })
+          .andThen((transfer) => {
+            // Remove the parameterized transfer, and replace it
+            // with this latest transfer
+            existingTransfers = existingTransfers.filter(
+              (obj) => obj.transferId !== parameterizedTransferId,
+            );
+            existingTransfers.push(transfer);
 
-        // Transfer has been resolved successfully; return the updated payment.
-        const updatedPayment = this.paymentUtils.transfersToPayment(
-          paymentId,
-          existingTransfers,
-        );
+            // Transfer has been resolved successfully; return the updated payment.
+            const updatedPayment = this.paymentUtils.transfersToPayment(
+              paymentId,
+              existingTransfers,
+            );
 
-        return updatedPayment;
+            return updatedPayment;
+          });
       });
   }
 
@@ -715,7 +718,9 @@ export class PaymentRepository implements IPaymentRepository {
     payment: Payment,
   ): ResultAsync<void, TransferResolutionError> {
     return this.vectorUtils
-      .resolveMessageTransfer(payment.details.offerTransferId)
+      .resolveMessageTransfer(
+        TransferId(payment.details.offerTransfers[0].transferId),
+      )
       .map(() => {});
   }
 }

@@ -161,4 +161,40 @@ export class ResultUtils {
 
     return runAndCheck(1, baseSeconds, null);
   }
+
+  static filter<T, E extends Error>(
+    arr: T[],
+    callback: (val: T) => ResultAsync<boolean, E>,
+  ): ResultAsync<T[], E> {
+    const filterVals = new Array<T>();
+
+    return ResultUtils.combine(
+      arr.map((val) => {
+        return callback(val).map((result) => {
+          if (result) {
+            filterVals.push(val);
+          }
+        });
+      }),
+    ).map(() => {
+      return filterVals;
+    });
+  }
+
+  static map<T, U, E extends Error>(
+    arr: T[],
+    callback: (val: T) => ResultAsync<U, E>,
+  ): ResultAsync<U[], E> {
+    const mapVals = new Array<U>();
+
+    return ResultUtils.combine(
+      arr.map((val) => {
+        return callback(val).map((result) => {
+          mapVals.push(result);
+        });
+      }),
+    ).map(() => {
+      return mapVals;
+    });
+  }
 }

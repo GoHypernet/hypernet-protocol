@@ -1,14 +1,12 @@
 import {
-  PaymentInternalDetails,
   PushPayment,
   EPaymentState,
-  EPaymentType,
-  IBasicTransferResponse,
   VectorError,
   PaymentCreationError,
   TransferResolutionError,
   UnixTimestamp,
   BigNumberString,
+  SortedTransfers,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { IPaymentRepository } from "@interfaces/data";
@@ -29,13 +27,11 @@ import {
   commonPaymentId,
   publicIdentifier2,
   unixNow,
-  defaultExpirationLength,
-  parameterizedTransferId,
-  offerTransferId,
   insuranceTransferId,
   gatewayUrl,
   erc20AssetAddress,
   gatewayAddress,
+  expirationDate,
 } from "@mock/mocks";
 import {
   BlockchainProviderMock,
@@ -49,20 +45,15 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
 
-const expirationDate = UnixTimestamp(unixNow + defaultExpirationLength);
 const counterPartyAccount = publicIdentifier2;
 const fromAccount = publicIdentifier;
-const paymentDetails = new PaymentInternalDetails(
-  offerTransferId,
-  insuranceTransferId,
-  parameterizedTransferId,
-  [],
-);
+const paymentDetails = new SortedTransfers([], [], [], []);
 
 class PaymentRepositoryMocks {
   public timeUtils = td.object<ITimeUtils>();
   public blockchainProvider = new BlockchainProviderMock();
-  public vectorUtils = td.object<IVectorUtils>();
+  public vectorUtils =
+    VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
   public configProvider = new ConfigProviderMock();
   public contextProvider = new ContextProviderMock();
   public browserNodeProvider: BrowserNodeProviderMock;
@@ -97,11 +88,6 @@ class PaymentRepositoryMocks {
       this.proposedPayment,
       this.stakedPayment,
       this.approvedPayment,
-    );
-
-    this.vectorUtils = VectorUtilsMockFactory.factoryVectorUtils(
-      this.browserNodeProvider,
-      expirationDate,
     );
   }
 
