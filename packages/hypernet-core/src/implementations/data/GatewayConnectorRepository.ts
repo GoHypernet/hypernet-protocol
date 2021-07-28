@@ -426,6 +426,30 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
     });
   }
 
+  public notifyPushPaymentDelayed(
+    gatewayUrl: GatewayUrl,
+    payment: PushPayment,
+  ): ResultAsync<
+    void,
+    GatewayAuthorizationDeniedError | ProxyError | GatewayConnectorError
+  > {
+    return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
+      return proxy.notifyPushPaymentDelayed(payment);
+    });
+  }
+
+  public notifyPushPaymentCanceled(
+    gatewayUrl: GatewayUrl,
+    payment: PushPayment,
+  ): ResultAsync<
+    void,
+    GatewayAuthorizationDeniedError | ProxyError | GatewayConnectorError
+  > {
+    return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
+      return proxy.notifyPushPaymentCanceled(payment);
+    });
+  }
+
   public notifyPullPaymentSent(
     gatewayUrl: GatewayUrl,
     payment: PullPayment,
@@ -459,6 +483,30 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
   > {
     return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
       return proxy.notifyPullPaymentReceived(payment);
+    });
+  }
+
+  public notifyPullPaymentDelayed(
+    gatewayUrl: GatewayUrl,
+    payment: PullPayment,
+  ): ResultAsync<
+    void,
+    GatewayAuthorizationDeniedError | ProxyError | GatewayConnectorError
+  > {
+    return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
+      return proxy.notifyPullPaymentDelayed(payment);
+    });
+  }
+
+  public notifyPullPaymentCanceled(
+    gatewayUrl: GatewayUrl,
+    payment: PullPayment,
+  ): ResultAsync<
+    void,
+    GatewayAuthorizationDeniedError | ProxyError | GatewayConnectorError
+  > {
+    return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
+      return proxy.notifyPullPaymentCanceled(payment);
     });
   }
 

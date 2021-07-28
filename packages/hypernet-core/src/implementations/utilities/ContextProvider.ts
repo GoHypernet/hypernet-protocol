@@ -8,13 +8,13 @@ import {
   GatewayUrl,
   Signature,
 } from "@hypernetlabs/objects";
-import { okAsync, ResultAsync } from "neverthrow";
-import { Subject } from "rxjs";
-
 import {
   HypernetContext,
   InitializedHypernetContext,
 } from "@interfaces/objects";
+import { okAsync, ResultAsync } from "neverthrow";
+import { Subject } from "rxjs";
+
 import {
   IContextProvider,
   IGatewayConnectorProxy,
@@ -39,6 +39,8 @@ export class ContextProvider implements IContextProvider {
     onPullPaymentUpdated: Subject<PullPayment>,
     onPushPaymentDelayed: Subject<PushPayment>,
     onPullPaymentDelayed: Subject<PullPayment>,
+    onPushPaymentCanceled: Subject<PushPayment>,
+    onPullPaymentCanceled: Subject<PullPayment>,
     onBalancesChanged: Subject<Balances>,
     onDeStorageAuthenticationStarted: Subject<void>,
     onDeStorageAuthenticationSucceeded: Subject<void>,
@@ -67,6 +69,8 @@ export class ContextProvider implements IContextProvider {
       onPullPaymentUpdated,
       onPushPaymentDelayed,
       onPullPaymentDelayed,
+      onPushPaymentCanceled,
+      onPullPaymentCanceled,
       onBalancesChanged,
       onDeStorageAuthenticationStarted,
       onDeStorageAuthenticationSucceeded,
@@ -125,6 +129,8 @@ export class ContextProvider implements IContextProvider {
           this.context.onPullPaymentUpdated,
           this.context.onPushPaymentDelayed,
           this.context.onPullPaymentDelayed,
+          this.context.onPushPaymentCanceled,
+          this.context.onPullPaymentCanceled,
           this.context.onBalancesChanged,
           this.context.onDeStorageAuthenticationStarted,
           this.context.onDeStorageAuthenticationSucceeded,

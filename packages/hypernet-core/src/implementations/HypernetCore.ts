@@ -148,6 +148,8 @@ export class HypernetCore implements IHypernetCore {
   public onPullPaymentReceived: Subject<PullPayment>;
   public onPushPaymentDelayed: Subject<PushPayment>;
   public onPullPaymentDelayed: Subject<PullPayment>;
+  public onPushPaymentCanceled = new Subject<PushPayment>();
+  public onPullPaymentCanceled = new Subject<PullPayment>();
   public onBalancesChanged: Subject<Balances>;
   public onDeStorageAuthenticationStarted: Subject<void>;
   public onDeStorageAuthenticationSucceeded: Subject<void>;
@@ -236,6 +238,8 @@ export class HypernetCore implements IHypernetCore {
     this.onPullPaymentReceived = new Subject<PullPayment>();
     this.onPushPaymentDelayed = new Subject<PushPayment>();
     this.onPullPaymentDelayed = new Subject<PullPayment>();
+    this.onPushPaymentCanceled = new Subject<PushPayment>();
+    this.onPullPaymentCanceled = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
     this.onDeStorageAuthenticationStarted = new Subject<void>();
     this.onDeStorageAuthenticationSucceeded = new Subject<void>();
@@ -270,10 +274,12 @@ export class HypernetCore implements IHypernetCore {
       this.onPullPaymentSent,
       this.onPushPaymentReceived,
       this.onPullPaymentReceived,
-      this.onPushPaymentDelayed,
-      this.onPullPaymentDelayed,
       this.onPushPaymentUpdated,
       this.onPullPaymentUpdated,
+      this.onPushPaymentDelayed,
+      this.onPullPaymentDelayed,
+      this.onPushPaymentCanceled,
+      this.onPullPaymentCanceled,
       this.onBalancesChanged,
       this.onDeStorageAuthenticationStarted,
       this.onDeStorageAuthenticationSucceeded,

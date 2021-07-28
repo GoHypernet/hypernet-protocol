@@ -65,6 +65,13 @@ export interface IGatewayConnectorProxy extends ParentProxy {
   notifyPushPaymentReceived(
     payment: PushPayment,
   ): ResultAsync<void, GatewayConnectorError | ProxyError>;
+  notifyPushPaymentDelayed(
+    payment: PushPayment,
+  ): ResultAsync<void, GatewayConnectorError | ProxyError>;
+  notifyPushPaymentCanceled(
+    payment: PushPayment,
+  ): ResultAsync<void, GatewayConnectorError | ProxyError>;
+
   notifyPullPaymentSent(
     payment: PullPayment,
   ): ResultAsync<void, GatewayConnectorError | ProxyError>;
@@ -74,6 +81,13 @@ export interface IGatewayConnectorProxy extends ParentProxy {
   notifyPullPaymentReceived(
     payment: PullPayment,
   ): ResultAsync<void, GatewayConnectorError | ProxyError>;
+  notifyPullPaymentDelayed(
+    payment: PullPayment,
+  ): ResultAsync<void, GatewayConnectorError | ProxyError>;
+  notifyPullPaymentCanceled(
+    payment: PullPayment,
+  ): ResultAsync<void, GatewayConnectorError | ProxyError>;
+
   notifyBalancesReceived(
     balances: Balances,
   ): ResultAsync<void, GatewayConnectorError | ProxyError>;

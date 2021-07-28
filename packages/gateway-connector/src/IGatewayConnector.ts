@@ -76,11 +76,15 @@ export interface IGatewayConnector {
   onPushPaymentSent(payment: PushPayment): void;
   onPushPaymentUpdated(payment: PushPayment): void;
   onPushPaymentReceived(payment: PushPayment): void;
+  onPushPaymentDelayed(payment: PushPayment): void;
+  onPushPaymentCanceled(payment: PushPayment): void;
 
   // Called for when a pull payment is sent, updated or recieved under your perview
   onPullPaymentSent(payment: PullPayment): void;
   onPullPaymentUpdated(payment: PullPayment): void;
   onPullPaymentReceived(payment: PullPayment): void;
+  onPullPaymentDelayed(payment: PullPayment): void;
+  onPullPaymentCanceled(payment: PullPayment): void;
 
   /**
    * This method will be called by the core when the public identifier is sent.

@@ -61,6 +61,8 @@ export default class HypernetIFrameProxy
     this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onPushPaymentDelayed = new Subject<PushPayment>();
     this.onPullPaymentDelayed = new Subject<PullPayment>();
+    this.onPushPaymentCanceled = new Subject<PushPayment>();
+    this.onPullPaymentCanceled = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
     this.onDeStorageAuthenticationStarted = new Subject<void>();
     this.onDeStorageAuthenticationSucceeded = new Subject<void>();
@@ -121,6 +123,14 @@ export default class HypernetIFrameProxy
 
         child.on("onPullPaymentDelayed", (data: PullPayment) => {
           this.onPullPaymentDelayed.next(data);
+        });
+
+        child.on("onPushPaymentCanceled", (data: PushPayment) => {
+          this.onPushPaymentCanceled.next(data);
+        });
+
+        child.on("onPullPaymentCanceled", (data: PullPayment) => {
+          this.onPullPaymentCanceled.next(data);
         });
 
         child.on("onBalancesChanged", (data: Balances) => {
@@ -418,6 +428,8 @@ export default class HypernetIFrameProxy
   public onPullPaymentReceived: Subject<PullPayment>;
   public onPushPaymentDelayed: Subject<PushPayment>;
   public onPullPaymentDelayed: Subject<PullPayment>;
+  public onPushPaymentCanceled: Subject<PushPayment>;
+  public onPullPaymentCanceled: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
   public onDeStorageAuthenticationStarted: Subject<void>;
   public onDeStorageAuthenticationSucceeded: Subject<void>;

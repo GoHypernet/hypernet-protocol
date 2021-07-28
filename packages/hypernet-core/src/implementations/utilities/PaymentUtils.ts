@@ -429,6 +429,11 @@ export class PaymentUtils implements IPaymentUtils {
         return EPaymentState.InvalidProposal;
       }
 
+      // If the only offer transfer was canceled, then the whole payment was canceled.
+      if (nonCanceledOfferTransfers.length == 0) {
+        return EPaymentState.Canceled;
+      }
+
       const offerState = nonCanceledOfferTransfers[0].transferState;
 
       // The details of the offer are encoded in the transfer state, we'll pull it out
@@ -554,6 +559,17 @@ export class PaymentUtils implements IPaymentUtils {
       return EPaymentState.Borked;
     });
   }
+
+  // public getPaymentStateHistory(
+  //   sortedTransfers: SortedTransfers,
+  // ): ResultAsync<EPaymentState[], never> {
+  //   // First step, take all the transfers and unsort them; we need them in a continual list based on their timestamp.
+  //   const allTransfers = new Array<IFullTransferState<any>>()
+  //     .concat(sortedTransfers.offerTransfers)
+  //     .concat(sortedTransfers.insuranceTransfers)
+  //     .concat(sortedTransfers.parameterizedTransfers)
+  //     .concat(sortedTransfers.pullRecordTransfers);
+  // }
 
   // Returns true if the insurance transfer is
   protected validateInsuranceTransfer(

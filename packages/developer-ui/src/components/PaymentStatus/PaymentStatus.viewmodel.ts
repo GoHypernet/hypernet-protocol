@@ -34,6 +34,8 @@ export class PaymentStatusViewModel {
       this.state = "Finalized";
     } else if (params.state === EPaymentState.Borked) {
       this.state = "Borked";
+    } else if (params.state === EPaymentState.Canceled) {
+      this.state = "Canceled";
     } else {
       console.error(params.state);
       this.state = "Unknown - update PaymentStatus.viewmodel";

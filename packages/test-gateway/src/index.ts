@@ -140,6 +140,15 @@ class TestGatewayConnector implements IGatewayConnector {
     console.log("Push Payment Received");
     console.log(payment);
   }
+  public onPushPaymentDelayed(payment: PushPayment): void {
+    console.log("Push Payment Delayed");
+    console.log(payment);
+  }
+  public onPushPaymentCanceled(payment: PushPayment): void {
+    console.log("Push Payment Canceled");
+    console.log(payment);
+  }
+
   public onPullPaymentSent(payment: PullPayment): void {
     console.log("Pull Payment Sent");
     console.log(payment);
@@ -150,6 +159,14 @@ class TestGatewayConnector implements IGatewayConnector {
   }
   public onPullPaymentReceived(payment: PullPayment): void {
     console.log("Pull Payment Received");
+    console.log(payment);
+  }
+  public onPullPaymentDelayed(payment: PullPayment): void {
+    console.log("Pull Payment Delayed");
+    console.log(payment);
+  }
+  public onPullPaymentCanceled(payment: PullPayment): void {
+    console.log("Pull Payment Canceled");
     console.log(payment);
   }
 

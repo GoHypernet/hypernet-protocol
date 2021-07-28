@@ -98,6 +98,15 @@ export interface IGatewayConnectorRepository {
     gatewayUrl: GatewayUrl,
     payment: PushPayment,
   ): ResultAsync<void, GatewayConnectorError>;
+  notifyPushPaymentDelayed(
+    gatewayUrl: GatewayUrl,
+    payment: PushPayment,
+  ): ResultAsync<void, GatewayConnectorError>;
+  notifyPushPaymentCanceled(
+    gatewayUrl: GatewayUrl,
+    payment: PushPayment,
+  ): ResultAsync<void, GatewayConnectorError>;
+
   notifyPullPaymentSent(
     gatewayUrl: GatewayUrl,
     payment: PullPayment,
@@ -110,6 +119,15 @@ export interface IGatewayConnectorRepository {
     gatewayUrl: GatewayUrl,
     payment: PullPayment,
   ): ResultAsync<void, GatewayConnectorError>;
+  notifyPullPaymentDelayed(
+    gatewayUrl: GatewayUrl,
+    payment: PullPayment,
+  ): ResultAsync<void, GatewayConnectorError>;
+  notifyPullPaymentCanceled(
+    gatewayUrl: GatewayUrl,
+    payment: PullPayment,
+  ): ResultAsync<void, GatewayConnectorError>;
+
   notifyBalancesReceived(
     balances: Balances,
   ): ResultAsync<void, GatewayConnectorError>;

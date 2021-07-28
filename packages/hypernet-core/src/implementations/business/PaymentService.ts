@@ -42,7 +42,10 @@ import {
   IPaymentRepository,
   IPaymentRepositoryType,
 } from "@interfaces/data";
-import { HypernetContext } from "@interfaces/objects";
+import {
+  HypernetContext,
+  InitializedHypernetContext,
+} from "@interfaces/objects";
 import { BigNumber } from "ethers";
 import { injectable, inject } from "inversify";
 import { err, errAsync, ok, okAsync, ResultAsync, Result } from "neverthrow";
@@ -768,13 +771,64 @@ export class PaymentService implements IPaymentService {
             | TransferCreationError
           >
         >();
-        for (const keyval of payments) {
-          const [paymentId, payment] = keyval;
+        for (const payment of payments.values()) {
           paymentAdvancements.push(this._advancePayment(payment, context));
         }
         return ResultUtils.combine(paymentAdvancements);
       })
       .map(() => {});
+  }
+
+  public recoverPayments(
+    paymentIds: PaymentId[],
+  ): ResultAsync<
+    Payment[],
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+  > {
+    // Recover payments will work to restore a "borked" payment to a usable status.
+    // First step, get the payments.
+    return ResultUtils.combine([
+      this.paymentRepository.getPaymentsByIds(paymentIds),
+      this.contextProvider.getInitializedContext(),
+    ]).andThen((vals) => {
+      const [paymentsById, context] = vals;
+      const borkedPayments = new Array<Payment>();
+      // Sort out the payments that are borked. We are only worried about those.
+      for (const payment of paymentsById.values()) {
+        if (payment.state === EPaymentState.Borked) {
+          borkedPayments.push(payment);
+        }
+      }
+
+      // Now we have a list of borked payments. Let's try and recover them.
+      return ResultUtils.combine(
+        borkedPayments.map((payment) => {
+          return this._recoverPayment(payment, context);
+        }),
+      );
+    });
+  }
+
+  protected _recoverPayment(
+    payment: Payment,
+    context: InitializedHypernetContext,
+  ): ResultAsync<Payment, never> {
+    // We need to figure out why the payment is borked. We'll start looking at each possible cause
+    // Depending on if the payment is too us or from us, there are different things we can fix.
+    // The main things we can recover from are A. multiple payments/transfers, and B. invalid
+    // payments/transfers. If there are multiples, we will just cancel the extra ones.
+    // If there are invalid transfers, we need to just back out of the whole process.
+    if (context.publicIdentifier == payment.to) {
+      // It's to us, so the offer and payment transfers can be canceled
+    } else if (context.publicIdentifier == payment.from) {
+      // It's from us, so we can only cancel the insurance payments
+    }
+    return okAsync(payment);
   }
 
   protected _advancePayment(
