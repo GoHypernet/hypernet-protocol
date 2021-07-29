@@ -27,6 +27,7 @@ export interface IAjaxUtils {
       | URLSearchParams,
     config?: IRequestConfig,
   ): ResultAsync<T, AjaxError>;
+  delete<T>(url: URL, config?: IRequestConfig): ResultAsync<T, AjaxError>;
 }
 
 export interface IRequestConfig extends AxiosRequestConfig {}
