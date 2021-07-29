@@ -1,4 +1,4 @@
-import { AjaxError } from "@hypernetlabs/objects";
+import { AjaxError, JsonWebToken } from "@hypernetlabs/objects";
 import axios, { AxiosResponse } from "axios";
 import { injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
@@ -7,7 +7,7 @@ import { IAjaxUtils, IRequestConfig } from "@utils/IAjaxUtils";
 
 @injectable()
 export class AxiosAjaxUtils implements IAjaxUtils {
-  get<T>(url: URL, config?: IRequestConfig): ResultAsync<T, AjaxError> {
+  public get<T>(url: URL, config?: IRequestConfig): ResultAsync<T, AjaxError> {
     return ResultAsync.fromPromise(
       axios.get(url.toString(), config),
       (e) => new AjaxError(`Unable to get ${url}`, e),
@@ -16,7 +16,7 @@ export class AxiosAjaxUtils implements IAjaxUtils {
     });
   }
 
-  post<T>(
+  public post<T>(
     url: URL,
     data:
       | string
@@ -28,13 +28,13 @@ export class AxiosAjaxUtils implements IAjaxUtils {
   ): ResultAsync<T, AjaxError> {
     return ResultAsync.fromPromise(
       axios.post(url.toString(), data, config),
-      (e) => new AjaxError(`Unable to get ${url}`, e),
+      (e) => new AjaxError(`Unable to post ${url}`, e),
     ).map((response: AxiosResponse<T>) => {
       return response.data;
     });
   }
 
-  put<T>(
+  public put<T>(
     url: URL,
     data:
       | string
@@ -46,9 +46,25 @@ export class AxiosAjaxUtils implements IAjaxUtils {
   ): ResultAsync<T, AjaxError> {
     return ResultAsync.fromPromise(
       axios.put(url.toString(), data, config),
-      (e) => new AjaxError(`Unable to get ${url}`, e),
+      (e) => new AjaxError(`Unable to put ${url}`, e),
     ).map((response: AxiosResponse<T>) => {
       return response.data;
     });
+  }
+
+  public delete<T>(
+    url: URL,
+    config?: IRequestConfig,
+  ): ResultAsync<T, AjaxError> {
+    return ResultAsync.fromPromise(
+      axios.delete(url.toString(), config),
+      (e) => new AjaxError(`Unable to delete ${url}`, e),
+    ).map((response: AxiosResponse<T>) => {
+      return response.data;
+    });
+  }
+
+  public setDefaultToken(token: JsonWebToken): void {
+    axios.defaults.headers.common = { authorization: `Bearer ${token}` };
   }
 }
