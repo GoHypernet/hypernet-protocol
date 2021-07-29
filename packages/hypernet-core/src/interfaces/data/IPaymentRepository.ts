@@ -8,7 +8,6 @@ import {
   TransferId,
   GatewayUrl,
   PaymentFinalizeError,
-  RouterChannelUnknownError,
   VectorError,
   PaymentCreationError,
   BlockchainUnavailableError,
@@ -33,7 +32,6 @@ export interface IPaymentRepository {
     paymentIds: PaymentId[],
   ): ResultAsync<
     Map<PaymentId, Payment>,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError
@@ -85,7 +83,6 @@ export interface IPaymentRepository {
     | BlockchainUnavailableError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | LogicalError
     | InvalidPaymentError
@@ -106,7 +103,6 @@ export interface IPaymentRepository {
     | BlockchainUnavailableError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | LogicalError
     | InvalidPaymentError
@@ -125,7 +121,6 @@ export interface IPaymentRepository {
     amount: BigNumberString,
   ): ResultAsync<
     Payment,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError

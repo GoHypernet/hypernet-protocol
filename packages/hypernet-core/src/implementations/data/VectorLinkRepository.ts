@@ -5,7 +5,6 @@ import {
   Payment,
   PublicIdentifier,
   InvalidParametersError,
-  RouterChannelUnknownError,
   VectorError,
   InvalidPaymentError,
   LogicalError,
@@ -47,7 +46,6 @@ export class VectorLinkRepository implements ILinkRepository {
    */
   public getHypernetLinks(): ResultAsync<
     HypernetLink[],
-    | RouterChannelUnknownError
     | VectorError
     | InvalidParametersError
     | BlockchainUnavailableError
@@ -95,7 +93,6 @@ export class VectorLinkRepository implements ILinkRepository {
     counterpartyId: PublicIdentifier,
   ): ResultAsync<
     HypernetLink,
-    | RouterChannelUnknownError
     | VectorError
     | InvalidParametersError
     | BlockchainUnavailableError

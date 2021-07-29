@@ -4,6 +4,7 @@ import {
   EthereumAddress,
   GatewayUrl,
   HexString,
+  IFullChannelState,
   IFullTransferState,
   IHypernetOfferDetails,
   InsuranceResolver,
@@ -396,3 +397,40 @@ export const resolvedParameterizedTransfer: IFullTransferState<ParameterizedStat
         "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001",
     } as ParameterizedResolver,
   };
+
+export const channelState = {
+  assetIds: [erc20AssetAddress],
+  balances: [
+    {
+      amount: ["43", "43"],
+      to: [destinationAddress],
+    },
+  ],
+  channelAddress: routerChannelAddress,
+  alice: "aliceAddress",
+  bob: "bobAddress",
+  merkleRoot: "merkleRoot",
+  nonce: 0,
+  processedDepositsA: [],
+  processedDepositsB: [],
+  timeout: "timeout",
+  aliceIdentifier: routerPublicIdentifier,
+  bobIdentifier: "bobIdentifier",
+  latestUpdate: {
+    channelAddress: "channelAddress",
+    fromIdentifier: "",
+    toIdentifier: "",
+    type: "setup",
+    balance: { to: [""], amount: [""] },
+    assetId: "assetId",
+    nonce: 0,
+    details: {},
+  },
+  networkContext: {
+    chainId: 1337,
+    channelFactoryAddress: "channelFactoryAddress",
+    transferRegistryAddress: "transferRegistryAddress",
+  },
+  defundNonces: [],
+  inDispute: false,
+} as IFullChannelState;

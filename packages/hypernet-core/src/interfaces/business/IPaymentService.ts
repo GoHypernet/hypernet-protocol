@@ -8,10 +8,8 @@ import {
   InsufficientBalanceError,
   InvalidParametersError,
   LogicalError,
-  GatewayConnectorError,
   GatewayValidationError,
   PaymentFinalizeError,
-  RouterChannelUnknownError,
   VectorError,
   BlockchainUnavailableError,
   PaymentCreationError,
@@ -24,7 +22,6 @@ import {
   BigNumberString,
   Signature,
 } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
 import { ResultAsync, Result } from "neverthrow";
 
 export interface IPaymentService {
@@ -60,7 +57,6 @@ export interface IPaymentService {
     amount: BigNumberString,
   ): ResultAsync<
     Payment,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError
@@ -100,7 +96,6 @@ export interface IPaymentService {
     | AcceptPaymentError
     | BalancesUnavailableError
     | GatewayValidationError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError
@@ -119,7 +114,6 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError
@@ -138,7 +132,6 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError
@@ -157,7 +150,6 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError
@@ -177,7 +169,6 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError
@@ -194,7 +185,6 @@ export interface IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     void,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError
@@ -213,7 +203,6 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError
@@ -231,7 +220,6 @@ export interface IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     void,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError
@@ -253,7 +241,6 @@ export interface IPaymentService {
     gatewaySignature: Signature | null,
   ): ResultAsync<
     Payment,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError
@@ -277,7 +264,6 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError

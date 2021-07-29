@@ -16,7 +16,6 @@ import {
   LogicalError,
   PaymentFinalizeError,
   PaymentStakeError,
-  RouterChannelUnknownError,
   TransferResolutionError,
   VectorError,
   InvalidParametersError,
@@ -245,10 +244,7 @@ export class PaymentRepository implements IPaymentRepository {
     paymentId: PaymentId,
   ): ResultAsync<
     IFullTransferState[],
-    | RouterChannelUnknownError
-    | VectorError
-    | BlockchainUnavailableError
-    | LogicalError
+    VectorError | BlockchainUnavailableError | LogicalError
   > {
     let browserNode: IBrowserNode;
     let channelAddress: EthereumAddress;
@@ -337,7 +333,6 @@ export class PaymentRepository implements IPaymentRepository {
     paymentIds: PaymentId[],
   ): ResultAsync<
     Map<PaymentId, Payment>,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError
@@ -438,10 +433,9 @@ export class PaymentRepository implements IPaymentRepository {
    */
   public acceptPayment(
     paymentId: PaymentId,
-    amount: string,
+    amount: BigNumberString,
   ): ResultAsync<
     Payment,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError
@@ -524,7 +518,6 @@ export class PaymentRepository implements IPaymentRepository {
     | BlockchainUnavailableError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | LogicalError
     | InvalidPaymentError
@@ -599,7 +592,6 @@ export class PaymentRepository implements IPaymentRepository {
     | BlockchainUnavailableError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | LogicalError
     | InvalidPaymentError
@@ -673,9 +665,7 @@ export class PaymentRepository implements IPaymentRepository {
           paymentStart,
           paymentExpiration,
           payment instanceof PullPayment ? payment.deltaTime : undefined,
-          payment instanceof PullPayment
-            ? payment.deltaAmount.toString()
-            : undefined,
+          payment instanceof PullPayment ? payment.deltaAmount : undefined,
         );
       })
       .andThen((transferInfoUnk) => {

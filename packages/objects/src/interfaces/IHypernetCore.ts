@@ -1,7 +1,6 @@
 import { ResultAsync, Result } from "neverthrow";
 import { Subject } from "rxjs";
 
-import { AssetInfo } from "@objects/AssetInfo";
 import { Balances } from "@objects/Balances";
 import { BigNumberString } from "@objects/BigNumberString";
 import { ControlClaim } from "@objects/ControlClaim";
@@ -12,27 +11,23 @@ import {
   InsufficientBalanceError,
   LogicalError,
   PersistenceError,
-  RouterChannelUnknownError,
   VectorError,
   GatewayValidationError,
   GatewayConnectorError,
-  InvalidPaymentError,
   InvalidParametersError,
-  TransferResolutionError,
   ProxyError,
   GatewayAuthorizationDeniedError,
   MessagingError,
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
-import { HypernetLink } from "@objects/HypernetLink";
 import { GatewayUrl } from "@objects/GatewayUrl";
+import { HypernetLink } from "@objects/HypernetLink";
 import { Payment } from "@objects/Payment";
 import { PaymentId } from "@objects/PaymentId";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
 import { Signature } from "@objects/Signature";
-import { UnixTimestamp } from "@objects/UnixTimestamp";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -112,19 +107,13 @@ export interface IHypernetCore {
   /**
    * Returns all Hypernet Ledger for the user
    */
-  getLinks(): ResultAsync<
-    HypernetLink[],
-    RouterChannelUnknownError | VectorError | Error
-  >;
+  getLinks(): ResultAsync<HypernetLink[], VectorError | Error>;
 
   /**
    * Returns all active Hypernet Ledgers for the user
    * An active link contains an incomplete/non-finalized transfer.
    */
-  getActiveLinks(): ResultAsync<
-    HypernetLink[],
-    RouterChannelUnknownError | VectorError | Error
-  >;
+  getActiveLinks(): ResultAsync<HypernetLink[], VectorError | Error>;
 
   /**
    * Returns the Hypernet Ledger for the user with the specified counterparty
@@ -152,7 +141,7 @@ export interface IHypernetCore {
   pullFunds(
     paymentId: PaymentId,
     amount: BigNumberString,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error>;
+  ): ResultAsync<Payment, VectorError | Error>;
 
   /**
    * Finalized an authorized payment with the final payment amount.

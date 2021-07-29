@@ -5,7 +5,6 @@ import {
 } from "@ethersproject/abstract-provider";
 import {
   VectorError,
-  RouterChannelUnknownError,
   BlockchainUnavailableError,
   EthereumAddress,
   AssetBalance,
@@ -22,7 +21,6 @@ import td from "testdouble";
 import { AccountsRepository } from "@implementations/data/AccountsRepository";
 import { IStorageUtils } from "@interfaces/data/utilities";
 import {
-  IVectorUtils,
   IBrowserNodeProvider,
   IBlockchainProvider,
   IBlockchainUtils,
@@ -197,9 +195,6 @@ class AccountsRepositoryErrorMocks {
     td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(
       errAsync(new VectorError()),
     );
-    td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(
-      errAsync(new RouterChannelUnknownError()),
-    );
     td.when(this.blockchainProvider.getSigner()).thenReturn(
       errAsync(new BlockchainUnavailableError()),
     );
@@ -282,20 +277,6 @@ describe("AccountsRepository tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
     expect(result._unsafeUnwrap()).toEqual(accountsRepositoryMocks.balances);
-  });
-
-  test("Should getBalances throw error when getRouterChannelAddress fails", async () => {
-    // Arrange
-    const accountsRepositoryMocks = new AccountsRepositoryErrorMocks();
-    const repo = accountsRepositoryMocks.factoryAccountsRepository();
-
-    // Act
-    const result = await repo.getBalances();
-    const error = result._unsafeUnwrapErr();
-
-    // Assert
-    expect(result.isErr()).toBeTruthy();
-    expect(error).toBeInstanceOf(RouterChannelUnknownError);
   });
 
   test("Should getBalanceByAsset return balances by asset", async () => {

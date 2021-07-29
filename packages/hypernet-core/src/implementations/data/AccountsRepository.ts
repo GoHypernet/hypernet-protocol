@@ -7,9 +7,7 @@ import {
   IFullChannelState,
   Signature,
   AssetInfo,
-  PersistenceError,
   BlockchainUnavailableError,
-  RouterChannelUnknownError,
   BalancesUnavailableError,
   LogicalError,
   VectorError,
@@ -102,7 +100,7 @@ export class AccountsRepository implements IAccountsRepository {
    */
   public getBalances(): ResultAsync<
     Balances,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+    BalancesUnavailableError | VectorError
   > {
     return this.vectorUtils
       .getRouterChannelAddress()
@@ -140,10 +138,7 @@ export class AccountsRepository implements IAccountsRepository {
    */
   public getBalanceByAsset(
     assetAddress: EthereumAddress,
-  ): ResultAsync<
-    AssetBalance,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
-  > {
+  ): ResultAsync<AssetBalance, BalancesUnavailableError | VectorError> {
     return this.getBalances().andThen((balances) => {
       for (const assetBalance of balances.assets) {
         if (assetBalance.assetAddress === assetAddress) {
@@ -179,10 +174,7 @@ export class AccountsRepository implements IAccountsRepository {
     amount: BigNumberString,
   ): ResultAsync<
     null,
-    | RouterChannelUnknownError
-    | VectorError
-    | LogicalError
-    | BlockchainUnavailableError
+    VectorError | LogicalError | BlockchainUnavailableError
   > {
     let signer: ethers.providers.JsonRpcSigner;
     let channelAddress: EthereumAddress;
@@ -260,10 +252,7 @@ export class AccountsRepository implements IAccountsRepository {
     assetAddress: EthereumAddress,
     amount: BigNumberString,
     destinationAddress: EthereumAddress,
-  ): ResultAsync<
-    void,
-    RouterChannelUnknownError | VectorError | BlockchainUnavailableError
-  > {
+  ): ResultAsync<void, VectorError | BlockchainUnavailableError> {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.vectorUtils.getRouterChannelAddress(),

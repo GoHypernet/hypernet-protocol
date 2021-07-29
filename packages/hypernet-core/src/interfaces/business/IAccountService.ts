@@ -8,11 +8,8 @@ import {
   BlockchainUnavailableError,
   LogicalError,
   VectorError,
-  RouterChannelUnknownError,
   InvalidParametersError,
-  AssetInfo,
   BigNumberString,
-  PersistenceError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -31,7 +28,6 @@ export interface IAccountService {
   ): ResultAsync<
     Balances,
     | BalancesUnavailableError
-    | RouterChannelUnknownError
     | BlockchainUnavailableError
     | VectorError
     | LogicalError
@@ -42,15 +38,9 @@ export interface IAccountService {
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    | BalancesUnavailableError
-    | RouterChannelUnknownError
-    | BlockchainUnavailableError
-    | VectorError
+    BalancesUnavailableError | BlockchainUnavailableError | VectorError
   >;
-  getBalances(): ResultAsync<
-    Balances,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
-  >;
+  getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError>;
   providePrivateCredentials(
     privateCredentials: PrivateCredentials,
   ): ResultAsync<void, InvalidParametersError>;

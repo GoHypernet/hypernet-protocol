@@ -11,7 +11,6 @@ import {
   InsufficientBalanceError,
   InvalidParametersError,
   LogicalError,
-  GatewayConnectorError,
   GatewayValidationError,
   PaymentFinalizeError,
   PaymentCreationError,
@@ -20,7 +19,6 @@ import {
   TransferCreationError,
   TransferResolutionError,
   BalancesUnavailableError,
-  RouterChannelUnknownError,
   VectorError,
   BlockchainUnavailableError,
   EPaymentState,
@@ -60,7 +58,6 @@ import {
 } from "@interfaces/utilities";
 
 type PaymentsByIdsErrors =
-  | RouterChannelUnknownError
   | VectorError
   | BlockchainUnavailableError
   | LogicalError
@@ -549,7 +546,6 @@ export class PaymentService implements IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError
@@ -659,7 +655,6 @@ export class PaymentService implements IPaymentService {
     gatewaySignature: Signature | null,
   ): ResultAsync<
     Payment,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError
@@ -783,7 +778,6 @@ export class PaymentService implements IPaymentService {
     paymentIds: PaymentId[],
   ): ResultAsync<
     Payment[],
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError
@@ -959,7 +953,7 @@ export class PaymentService implements IPaymentService {
   // Caculates balances and update the context after that
   private _refreshBalances(): ResultAsync<
     void,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+    BalancesUnavailableError | VectorError
   > {
     return ResultUtils.combine([
       this.contextProvider.getContext(),

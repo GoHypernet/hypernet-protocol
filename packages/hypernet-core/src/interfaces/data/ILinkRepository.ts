@@ -1,6 +1,5 @@
 import {
   HypernetLink,
-  RouterChannelUnknownError,
   VectorError,
   InvalidParametersError,
   BlockchainUnavailableError,
@@ -18,7 +17,6 @@ export interface ILinkRepository {
    */
   getHypernetLinks(): ResultAsync<
     HypernetLink[],
-    | RouterChannelUnknownError
     | VectorError
     | InvalidParametersError
     | BlockchainUnavailableError
@@ -34,7 +32,6 @@ export interface ILinkRepository {
     linkId: string,
   ): ResultAsync<
     HypernetLink,
-    | RouterChannelUnknownError
     | VectorError
     | InvalidParametersError
     | BlockchainUnavailableError

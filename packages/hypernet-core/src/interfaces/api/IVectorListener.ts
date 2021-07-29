@@ -6,7 +6,6 @@ import {
   PaymentFinalizeError,
   PaymentStakeError,
   TransferResolutionError,
-  RouterChannelUnknownError,
   InvalidPaymentError,
   InvalidParametersError,
   TransferCreationError,
@@ -14,7 +13,7 @@ import {
 import { ResultAsync } from "neverthrow";
 
 export interface IVectorListener {
-  setup(): ResultAsync<
+  initialize(): ResultAsync<
     void,
     | VectorError
     | BlockchainUnavailableError
@@ -23,7 +22,6 @@ export interface IVectorListener {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError

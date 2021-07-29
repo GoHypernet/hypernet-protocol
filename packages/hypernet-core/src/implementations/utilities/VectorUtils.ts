@@ -64,14 +64,7 @@ import "reflect-metadata";
  * creating transfers, resolving them, & dealing the with router channel.
  */
 export class VectorUtils implements IVectorUtils {
-  /**
-   * Creates an instance of VectorUtils
-   */
-  protected getRouterChannelAddressSetup: ResultAsync<
-    EthereumAddress,
-    RouterUnavailableError
-  > | null = null;
-
+  protected routerChannelAddress: EthereumAddress | null = null;
   protected messageTransferTypeName = "MessageTransfer";
   protected insuranceTransferTypeName = "Insurance";
   protected parameterizedTransferTypeName = "Parameterized";
@@ -86,6 +79,58 @@ export class VectorUtils implements IVectorUtils {
     protected logUtils: ILogUtils,
     protected timeUtils: ITimeUtils,
   ) {}
+
+  initialize(): ResultAsync<void, RouterChannelUnknownError | VectorError> {
+    let config: HypernetConfig;
+    let context: InitializedHypernetContext;
+    let browserNode: IBrowserNode;
+
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.contextProvider.getInitializedContext(),
+      this.browserNodeProvider.getBrowserNode(),
+    ])
+      .andThen((vals) => {
+        [config, context, browserNode] = vals;
+        this.logUtils.log(`Core publicIdentifier: ${context.publicIdentifier}`);
+        this.logUtils.log(
+          `Router publicIdentifier: ${config.routerPublicIdentifier}`,
+        );
+        return browserNode.getStateChannels();
+      })
+      .andThen((channelAddresses) => {
+        const channelResults = new Array<
+          ResultAsync<
+            IFullChannelState,
+            RouterChannelUnknownError | VectorError
+          >
+        >();
+        for (const channelAddress of channelAddresses) {
+          channelResults.push(
+            this._getStateChannel(channelAddress, browserNode),
+          );
+        }
+        return ResultUtils.combine(channelResults);
+      })
+      .andThen((channels) => {
+        for (const channel of channels) {
+          if (!channel) {
+            continue;
+          }
+          if (channel.aliceIdentifier !== config.routerPublicIdentifier) {
+            continue;
+          }
+          return okAsync<EthereumAddress, RouterChannelUnknownError>(
+            EthereumAddress(channel.channelAddress),
+          );
+        }
+        // If a channel does not exist with the router, we need to create it.
+        return this._createRouterStateChannel(browserNode, config);
+      })
+      .map((routerChannelAddress) => {
+        this.routerChannelAddress = routerChannelAddress;
+      });
+  }
 
   /**
    * Resolves a message/offer/null transfer with Vector.
@@ -594,63 +639,13 @@ export class VectorUtils implements IVectorUtils {
       .mapErr((err) => new TransferCreationError(err, err?.message));
   }
 
-  public getRouterChannelAddress(): ResultAsync<
-    EthereumAddress,
-    RouterChannelUnknownError | VectorError
-  > {
-    // If we already have the address, no need to do the rest
-    if (this.getRouterChannelAddressSetup != null) {
-      return this.getRouterChannelAddressSetup;
+  public getRouterChannelAddress(): ResultAsync<EthereumAddress, never> {
+    if (this.routerChannelAddress == null) {
+      throw new Error(
+        "Router channel address is not set; you must call initialize() first",
+      );
     }
-
-    let config: HypernetConfig;
-    let context: InitializedHypernetContext;
-    let browserNode: IBrowserNode;
-
-    this.getRouterChannelAddressSetup = ResultUtils.combine([
-      this.configProvider.getConfig(),
-      this.contextProvider.getInitializedContext(),
-      this.browserNodeProvider.getBrowserNode(),
-    ])
-      .andThen((vals) => {
-        [config, context, browserNode] = vals;
-        this.logUtils.log(`Core publicIdentifier: ${context.publicIdentifier}`);
-        this.logUtils.log(
-          `Router publicIdentifier: ${config.routerPublicIdentifier}`,
-        );
-        return browserNode.getStateChannels();
-      })
-      .andThen((channelAddresses) => {
-        const channelResults = new Array<
-          ResultAsync<
-            IFullChannelState,
-            RouterChannelUnknownError | VectorError
-          >
-        >();
-        for (const channelAddress of channelAddresses) {
-          channelResults.push(
-            this._getStateChannel(channelAddress, browserNode),
-          );
-        }
-        return ResultUtils.combine(channelResults);
-      })
-      .andThen((channels) => {
-        for (const channel of channels) {
-          if (!channel) {
-            continue;
-          }
-          if (channel.aliceIdentifier !== config.routerPublicIdentifier) {
-            continue;
-          }
-          return okAsync<EthereumAddress, RouterChannelUnknownError>(
-            EthereumAddress(channel.channelAddress),
-          );
-        }
-        // If a channel does not exist with the router, we need to create it.
-        return this._createRouterStateChannel(browserNode, config);
-      });
-
-    return this.getRouterChannelAddressSetup;
+    return okAsync(this.routerChannelAddress);
   }
 
   public getTimestampFromTransfer(transfer: IFullTransferState): UnixTimestamp {
@@ -825,7 +820,7 @@ export class VectorUtils implements IVectorUtils {
       })
       .orElse((e) => {
         // Channel could be already set up, so we should try restoring the state
-        this.logUtils.log(
+        this.logUtils.warning(
           "Channel setup with router failed, attempting to restore state and retry",
         );
         return browserNode

@@ -96,7 +96,7 @@ export class VectorUtilsMockFactory {
       vectorUtils.resolveParameterizedTransfer(
         parameterizedTransferId,
         commonPaymentId,
-        commonAmount.toString(),
+        commonAmount,
       ),
     ).thenReturn(
       okAsync({

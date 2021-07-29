@@ -1,6 +1,5 @@
 import {
   HypernetLink,
-  RouterChannelUnknownError,
   VectorError,
   InvalidParametersError,
   BlockchainUnavailableError,
@@ -17,7 +16,6 @@ export interface ILinkService {
     HypernetLink[],
     | InvalidPaymentError
     | InvalidParametersError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError

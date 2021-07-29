@@ -11,7 +11,6 @@ import {
   PaymentFinalizeError,
   PaymentStakeError,
   TransferResolutionError,
-  RouterChannelUnknownError,
   InvalidPaymentError,
   InvalidParametersError,
   TransferCreationError,
@@ -46,7 +45,7 @@ export class VectorAPIListener implements IVectorListener {
   /**
    *
    */
-  public setup(): ResultAsync<
+  public initialize(): ResultAsync<
     void,
     | VectorError
     | BlockchainUnavailableError
@@ -55,7 +54,6 @@ export class VectorAPIListener implements IVectorListener {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError

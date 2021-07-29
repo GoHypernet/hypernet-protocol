@@ -14,7 +14,6 @@ import {
   Signature,
   PrivateCredentials,
   EBlockchainNetwork,
-  AssetInfo,
   AcceptPaymentError,
   BalancesUnavailableError,
   BlockchainUnavailableError,
@@ -23,15 +22,11 @@ import {
   GatewayConnectorError,
   GatewayValidationError,
   PersistenceError,
-  RouterChannelUnknownError,
   VectorError,
-  InvalidPaymentError,
   InvalidParametersError,
-  TransferResolutionError,
   ProxyError,
   GatewayAuthorizationDeniedError,
   BigNumberString,
-  UnixTimestamp,
   MessagingError,
 } from "@hypernetlabs/objects";
 import {
@@ -573,20 +568,14 @@ export class HypernetCore implements IHypernetCore {
   /**
    * Return all Hypernet Links.
    */
-  public getLinks(): ResultAsync<
-    HypernetLink[],
-    RouterChannelUnknownError | VectorError | Error
-  > {
+  public getLinks(): ResultAsync<HypernetLink[], VectorError | Error> {
     return this.linkService.getLinks();
   }
 
   /**
    * Return all *active* Hypernet Links.
    */
-  public getActiveLinks(): ResultAsync<
-    HypernetLink[],
-    RouterChannelUnknownError | VectorError | Error
-  > {
+  public getActiveLinks(): ResultAsync<HypernetLink[], VectorError | Error> {
     return this.linkService.getLinks();
   }
 
@@ -621,7 +610,7 @@ export class HypernetCore implements IHypernetCore {
   public pullFunds(
     paymentId: PaymentId,
     amount: BigNumberString,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
+  ): ResultAsync<Payment, VectorError | Error> {
     return this.paymentService.pullFunds(paymentId, amount);
   }
 
@@ -666,14 +655,21 @@ export class HypernetCore implements IHypernetCore {
         return this.contextProvider.setContext(context);
       })
       .andThen(() => {
-        this.logUtils.debug("Initializing internal services");
+        this.logUtils.debug("Initializing utilities");
+        return ResultUtils.combine([this.vectorUtils.initialize()]);
+      })
+      .andThen(() => {
+        this.logUtils.debug("Initializing services");
+        return ResultUtils.combine([this.gatewayConnectorService.initialize()]);
+      })
+      .andThen(() => {
+        this.logUtils.debug("Initializing API listeners");
         // Initialize anything that wants an initialized context
         return ResultUtils.combine([
-          this.vectorAPIListener.setup(),
-          this.gatewayConnectorListener.setup(),
-          this.gatewayConnectorService.initialize(),
-          this.messagingListener.setup(),
-        ]); // , this.threeboxMessagingListener.initialize()]);
+          this.vectorAPIListener.initialize(),
+          this.gatewayConnectorListener.initialize(),
+          this.messagingListener.initialize(),
+        ]);
       })
       .andThen(() => {
         this.logUtils.debug("Initialized all internal services");

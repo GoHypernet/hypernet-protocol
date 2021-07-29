@@ -1,16 +1,14 @@
-import { HypernetLink } from "@hypernetlabs/objects";
 import {
-  RouterChannelUnknownError,
+  HypernetLink,
   VectorError,
   InvalidParametersError,
   BlockchainUnavailableError,
   InvalidPaymentError,
   LogicalError,
 } from "@hypernetlabs/objects";
-import { ResultAsync } from "neverthrow";
-
 import { ILinkService } from "@interfaces/business";
 import { ILinkRepository } from "@interfaces/data";
+import { ResultAsync } from "neverthrow";
 
 export class LinkService implements ILinkService {
   constructor(protected linkRepository: ILinkRepository) {}
@@ -22,7 +20,6 @@ export class LinkService implements ILinkService {
     HypernetLink[],
     | InvalidPaymentError
     | InvalidParametersError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
     | LogicalError

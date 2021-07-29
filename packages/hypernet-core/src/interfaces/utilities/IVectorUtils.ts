@@ -28,13 +28,17 @@ import { ResultAsync } from "neverthrow";
  */
 export interface IVectorUtils {
   /**
+   * initialize the Vector utils. This allows us to avoid lazy loading and removes possible
+   * errors from later calls, like getRouterChannelAddress, which will never error after
+   * a successful initialize().
+   */
+  initialize(): ResultAsync<void, RouterChannelUnknownError | VectorError>;
+
+  /**
    * Returns the address of the channel with the router, if exists.
    * Otherwise, attempts to create a channel with the router & return the address.
    */
-  getRouterChannelAddress(): ResultAsync<
-    EthereumAddress,
-    RouterChannelUnknownError | VectorError
-  >;
+  getRouterChannelAddress(): ResultAsync<EthereumAddress, never>;
 
   /**
    * Resolves a message transfer

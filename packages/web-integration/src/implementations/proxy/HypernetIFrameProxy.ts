@@ -11,7 +11,6 @@ import {
   GatewayUrl,
   Signature,
   AcceptPaymentError,
-  RouterChannelUnknownError,
   BlockchainUnavailableError,
   VectorError,
   LogicalError,
@@ -280,17 +279,11 @@ export default class HypernetIFrameProxy
     return this._createCall("getBalances", null);
   }
 
-  public getLinks(): ResultAsync<
-    HypernetLink[],
-    RouterChannelUnknownError | VectorError | Error
-  > {
+  public getLinks(): ResultAsync<HypernetLink[], VectorError | Error> {
     return this._createCall("getLinks", null);
   }
 
-  public getActiveLinks(): ResultAsync<
-    HypernetLink[],
-    RouterChannelUnknownError | VectorError | Error
-  > {
+  public getActiveLinks(): ResultAsync<HypernetLink[], VectorError | Error> {
     return this._createCall("getActiveLinks", null);
   }
 
@@ -312,7 +305,7 @@ export default class HypernetIFrameProxy
   public pullFunds(
     paymentId: PaymentId,
     amount: BigNumberString,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
+  ): ResultAsync<Payment, VectorError | Error> {
     return this._createCall("pullFunds", {
       paymentId,
       amount: amount,
