@@ -72,6 +72,10 @@ export class VectorUtils implements IVectorUtils {
     RouterUnavailableError
   > | null = null;
 
+  protected messageTransferTypeName = "MessageTransfer";
+  protected insuranceTransferTypeName = "Insurance";
+  protected parameterizedTransferTypeName = "Parameterized";
+
   constructor(
     protected configProvider: IConfigProvider,
     protected contextProvider: IContextProvider,
@@ -89,6 +93,7 @@ export class VectorUtils implements IVectorUtils {
    */
   public resolveMessageTransfer(
     transferId: TransferId,
+    message = "Finalized",
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
@@ -99,63 +104,8 @@ export class VectorUtils implements IVectorUtils {
 
         this.logUtils.debug(`Resolving offer transfer ${transferId}`);
         return browserNode.resolveTransfer(channelAddress, transferId, {
-          message: "",
+          message: message, // This can be literally anything except the blank string; that would be the same as canceling it
         } as MessageResolver);
-      })
-      .mapErr((err) => new TransferResolutionError(err, err?.message));
-  }
-
-  /**
-   * Resolves a parameterized payment transfer with Vector.
-   * @param transferId the ID of the transfer to resolve
-   */
-  public resolvePaymentTransfer(
-    transferId: TransferId,
-    paymentId: PaymentId,
-    amount: string,
-  ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
-    const resolverData: ParameterizedResolverData = {
-      UUID: paymentId,
-      paymentAmountTaken: amount,
-    };
-
-    let channelAddress: EthereumAddress;
-    let browserNode: IBrowserNode;
-
-    return ResultUtils.combine([
-      this.browserNodeProvider.getBrowserNode(),
-      this.getRouterChannelAddress(),
-      this.blockchainProvider.getLatestBlock(),
-    ])
-      .andThen((vals) => {
-        const [browserNodeVal, channelAddressVal, block] = vals;
-        browserNode = browserNodeVal;
-        channelAddress = channelAddressVal;
-
-        this.logUtils.debug(`Current block timestamp: ${block.timestamp}`);
-
-        const resolverDataEncoding = [
-          "tuple(bytes32 UUID, uint256 paymentAmountTaken)",
-        ];
-        const encodedResolverData = defaultAbiCoder.encode(
-          resolverDataEncoding,
-          [resolverData],
-        );
-        const hashedResolverData = keccak256(encodedResolverData);
-
-        return browserNode.signUtilityMessage(hashedResolverData);
-      })
-      .andThen((signature) => {
-        const resolver: ParameterizedResolver = {
-          data: resolverData,
-          payeeSignature: signature,
-        };
-
-        return browserNode.resolveTransfer(
-          channelAddress,
-          transferId,
-          resolver,
-        );
       })
       .mapErr((err) => new TransferResolutionError(err, err?.message));
   }
@@ -215,6 +165,124 @@ export class VectorUtils implements IVectorUtils {
   }
 
   /**
+   * Resolves a parameterized payment transfer with Vector.
+   * @param transferId the ID of the transfer to resolve
+   */
+  public resolveParameterizedTransfer(
+    transferId: TransferId,
+    paymentId: PaymentId,
+    amount: BigNumberString,
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
+    const resolverData: ParameterizedResolverData = {
+      UUID: paymentId,
+      paymentAmountTaken: amount,
+    };
+
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.getRouterChannelAddress(),
+      this.blockchainProvider.getLatestBlock(),
+    ]).andThen((vals) => {
+      const [browserNode, channelAddress, block] = vals;
+
+      this.logUtils.debug(`Current block timestamp: ${block.timestamp}`);
+
+      const resolverDataEncoding = [
+        "tuple(bytes32 UUID, uint256 paymentAmountTaken)",
+      ];
+      const encodedResolverData = defaultAbiCoder.encode(resolverDataEncoding, [
+        resolverData,
+      ]);
+      const hashedResolverData = keccak256(encodedResolverData);
+
+      return browserNode
+        .signUtilityMessage(hashedResolverData)
+        .andThen((signature) => {
+          const resolver: ParameterizedResolver = {
+            data: resolverData,
+            payeeSignature: signature,
+          };
+
+          return browserNode.resolveTransfer(
+            channelAddress,
+            transferId,
+            resolver,
+          );
+        })
+        .mapErr((err) => new TransferResolutionError(err, err?.message));
+    });
+  }
+
+  public cancelMessageTransfer(
+    transferId: TransferId,
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
+    this.logUtils.debug(`Canceling message transfer ${transferId}`);
+
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.getRouterChannelAddress(),
+    ])
+      .andThen((vals) => {
+        const [browserNode, channelAddress] = vals;
+
+        return browserNode.resolveTransfer(channelAddress, transferId, {
+          message: "",
+        } as MessageResolver);
+      })
+      .mapErr((err) => new TransferResolutionError(err, err?.message));
+  }
+
+  public cancelInsuranceTransfer(
+    transferId: TransferId,
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
+    this.logUtils.debug(`Canceling Insurance transfer ${transferId}`);
+
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.getRouterChannelAddress(),
+    ])
+      .andThen((vals) => {
+        const [browserNode, channelAddress] = vals;
+
+        return browserNode.resolveTransfer(channelAddress, transferId, {
+          data: {
+            amount:
+              "0x0000000000000000000000000000000000000000000000000000000000000000",
+            UUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
+          },
+          signature:
+            "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        } as InsuranceResolver);
+      })
+      .mapErr((err) => new TransferResolutionError(err, err?.message));
+  }
+
+  public cancelParameterizedTransfer(
+    transferId: TransferId,
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
+    this.logUtils.debug(`Canceling Parameterized transfer ${transferId}`);
+
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.getRouterChannelAddress(),
+    ])
+      .andThen((vals) => {
+        const [browserNode, channelAddress] = vals;
+
+        return browserNode.resolveTransfer(channelAddress, transferId, {
+          data: {
+            paymentAmountTaken:
+              "0x0000000000000000000000000000000000000000000000000000000000000000",
+            UUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
+          },
+          payeeSignature:
+            "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        } as ParameterizedResolver);
+      })
+      .mapErr((err) => new TransferResolutionError(err, err?.message));
+  }
+
+  /**
    * Creates a "Message" transfer with Vector, to notify the other party of a pull payment
    * @param toAddress the public identifier (not eth address!) of the intended recipient
    * @param message the message to send as IHypernetOfferDetails
@@ -261,7 +329,7 @@ export class VectorUtils implements IVectorUtils {
           channelAddress,
           BigNumberString("0"),
           config.hypertokenAddress,
-          "MessageTransfer",
+          this.messageTransferTypeName,
           initialState,
           toAddress,
           undefined, // CRITICAL- must be undefined
@@ -319,7 +387,7 @@ export class VectorUtils implements IVectorUtils {
           channelAddress,
           BigNumberString("0"),
           message.paymentToken, // The offer is always for 0, so we will make the asset ID in the payment token type, because why not?
-          "MessageTransfer",
+          this.messageTransferTypeName,
           initialState,
           toAddress,
           undefined, // CRITICAL- must be undefined
@@ -332,17 +400,72 @@ export class VectorUtils implements IVectorUtils {
   }
 
   /**
-   * Creates a "Parameterized" transfer with Vector.
-   * @param type "PUSH" or "PULL"
-   * @param toAddress the public identifier of the intended recipient of this transfer
-   * @param amount the amount of tokens to commit to this transfer
-   * @param assetAddress the address of the ERC20-token to transfer; zero-address for ETH
-   * @param paymentId length-64 hexadecimal string; this becomes the UUID component of the InsuranceState
-   * @param start the start time of this transfer (UNIX timestamp)
-   * @param expiration the expiration time of this transfer (UNIX timestamp)
-   * @param rate the maximum allowed rate of this transfer (deltaAmount/deltaTime)
+   * Creates the actual Insurance transfer with Vector
+   * @param toAddress the publicIdentifier of the person to send the transfer to
+   * @param mediatorAddress the Ethereum address of the mediator
+   * @param amount the amount of the token to commit into the InsuranceTransfer
+   * @param expiration the expiration date of this InsuranceTransfer
+   * @param paymentId a length-64 hexadecimal string; this becomes the UUID component of the InsuranceState
    */
-  public createPaymentTransfer(
+  public createInsuranceTransfer(
+    toAddress: PublicIdentifier,
+    mediatorAddress: EthereumAddress,
+    amount: BigNumberString,
+    expiration: UnixTimestamp,
+    paymentId: PaymentId,
+  ): ResultAsync<
+    IBasicTransferResponse,
+    TransferCreationError | InvalidParametersError
+  > {
+    // Sanity check - make sure the paymentId is valid:
+    const validPayment = this.paymentIdUtils.isValidPaymentId(paymentId);
+    if (validPayment.isErr()) {
+      return errAsync(validPayment.error);
+    } else {
+      if (!validPayment.value) {
+        return errAsync(
+          new InvalidParametersError(
+            `CreateInsuranceTransfer: Invalid paymentId: '${paymentId}'`,
+          ),
+        );
+      }
+    }
+
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.getRouterChannelAddress(),
+      this.browserNodeProvider.getBrowserNode(),
+    ])
+      .andThen((vals) => {
+        const [config, channelAddress, browserNode] = vals;
+
+        const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
+
+        const initialState: InsuranceState = {
+          receiver: toEthAddress,
+          mediator: mediatorAddress,
+          collateral: amount.toString(),
+          expiration: expiration.toString(),
+          UUID: paymentId,
+        };
+
+        return browserNode.conditionalTransfer(
+          channelAddress,
+          amount,
+          config.hypertokenAddress,
+          this.insuranceTransferTypeName,
+          initialState,
+          toAddress,
+          undefined,
+          undefined,
+          undefined,
+          {}, // left intentionally blank!
+        );
+      })
+      .mapErr((err) => new TransferCreationError(err, err?.message));
+  }
+
+  public createParameterizedTransfer(
     type: EPaymentType,
     toAddress: PublicIdentifier,
     amount: BigNumberString,
@@ -357,14 +480,14 @@ export class VectorUtils implements IVectorUtils {
     TransferCreationError | InvalidParametersError
   > {
     // Sanity check
-    if (type === EPaymentType.Pull && deltaTime === undefined) {
+    if (type === EPaymentType.Pull && deltaTime == null) {
       this.logUtils.error("Must provide deltaTime for Pull payments");
       return errAsync(
         new InvalidParametersError("Must provide deltaTime for Pull payments"),
       );
     }
 
-    if (type === EPaymentType.Pull && deltaAmount === undefined) {
+    if (type === EPaymentType.Pull && deltaAmount == null) {
       this.logUtils.error("Must provide deltaAmount for Pull payments");
       return errAsync(
         new InvalidParametersError(
@@ -458,7 +581,7 @@ export class VectorUtils implements IVectorUtils {
           channelAddress,
           amount,
           assetAddress,
-          "Parameterized",
+          this.parameterizedTransferTypeName,
           initialState,
           toAddress,
           undefined,
@@ -471,76 +594,6 @@ export class VectorUtils implements IVectorUtils {
       .mapErr((err) => new TransferCreationError(err, err?.message));
   }
 
-  /**
-   * Creates the actual Insurance transfer with Vector
-   * @param toAddress the publicIdentifier of the person to send the transfer to
-   * @param mediatorAddress the Ethereum address of the mediator
-   * @param amount the amount of the token to commit into the InsuranceTransfer
-   * @param expiration the expiration date of this InsuranceTransfer
-   * @param paymentId a length-64 hexadecimal string; this becomes the UUID component of the InsuranceState
-   */
-  public createInsuranceTransfer(
-    toAddress: PublicIdentifier,
-    mediatorAddress: EthereumAddress,
-    amount: BigNumberString,
-    expiration: UnixTimestamp,
-    paymentId: PaymentId,
-  ): ResultAsync<
-    IBasicTransferResponse,
-    TransferCreationError | InvalidParametersError
-  > {
-    // Sanity check - make sure the paymentId is valid:
-    const validPayment = this.paymentIdUtils.isValidPaymentId(paymentId);
-    if (validPayment.isErr()) {
-      return errAsync(validPayment.error);
-    } else {
-      if (!validPayment.value) {
-        return errAsync(
-          new InvalidParametersError(
-            `CreateInsuranceTransfer: Invalid paymentId: '${paymentId}'`,
-          ),
-        );
-      }
-    }
-
-    return ResultUtils.combine([
-      this.configProvider.getConfig(),
-      this.getRouterChannelAddress(),
-      this.browserNodeProvider.getBrowserNode(),
-    ])
-      .andThen((vals) => {
-        const [config, channelAddress, browserNode] = vals;
-
-        const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
-
-        const initialState: InsuranceState = {
-          receiver: toEthAddress,
-          mediator: mediatorAddress,
-          collateral: amount.toString(),
-          expiration: expiration.toString(),
-          UUID: paymentId,
-        };
-
-        return browserNode.conditionalTransfer(
-          channelAddress,
-          amount,
-          config.hypertokenAddress,
-          "Insurance",
-          initialState,
-          toAddress,
-          undefined,
-          undefined,
-          undefined,
-          {}, // left intentionally blank!
-        );
-      })
-      .mapErr((err) => new TransferCreationError(err, err?.message));
-  }
-
-  /**
-   * Returns the address of the channel with the router, if exists.
-   * Otherwise, attempts to create a channel with the router & return the address.
-   */
   public getRouterChannelAddress(): ResultAsync<
     EthereumAddress,
     RouterChannelUnknownError | VectorError
@@ -648,10 +701,6 @@ export class VectorUtils implements IVectorUtils {
    * Given a (vector) transfer @ IFullTransferState, return the transfer type (as ETransferType)
    * @param transfer the transfer to get the transfer type of
    */
-  private registeredTransfersResult: ResultAsync<
-    IRegisteredTransfer[],
-    BlockchainUnavailableError | VectorError
-  > | null = null;
   public getTransferType(
     transfer: IFullTransferState,
   ): ResultAsync<ETransferType, VectorError | BlockchainUnavailableError> {
@@ -687,11 +736,11 @@ export class VectorUtils implements IVectorUtils {
         }
 
         // Now we know it's either insurance, parameterized, or messageTransfer
-        if (thisTransfer === "Insurance") {
+        if (thisTransfer === this.insuranceTransferTypeName) {
           return ETransferType.Insurance;
-        } else if (thisTransfer === "Parameterized") {
+        } else if (thisTransfer === this.parameterizedTransferTypeName) {
           return ETransferType.Parameterized;
-        } else if (thisTransfer === "MessageTransfer") {
+        } else if (thisTransfer === this.messageTransferTypeName) {
           const message: IMessageTransferData = JSON.parse(
             transfer.transferState.message,
           );
@@ -729,6 +778,10 @@ export class VectorUtils implements IVectorUtils {
     });
   }
 
+  private registeredTransfersResult: ResultAsync<
+    IRegisteredTransfer[],
+    BlockchainUnavailableError | VectorError
+  > | null = null;
   protected _getRegisteredTransfers(): ResultAsync<
     IRegisteredTransfer[],
     BlockchainUnavailableError | VectorError

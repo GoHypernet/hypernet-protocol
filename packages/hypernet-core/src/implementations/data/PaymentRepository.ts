@@ -483,7 +483,7 @@ export class PaymentRepository implements IPaymentRepository {
               sortedTransfers.parameterizedTransfers[0].transferId,
             );
 
-            return this.vectorUtils.resolvePaymentTransfer(
+            return this.vectorUtils.resolveParameterizedTransfer(
               parameterizedTransferId,
               paymentId,
               amount,
@@ -662,7 +662,7 @@ export class PaymentRepository implements IPaymentRepository {
         );
 
         // Use vectorUtils to create the parameterizedPayment
-        return this.vectorUtils.createPaymentTransfer(
+        return this.vectorUtils.createParameterizedTransfer(
           payment instanceof PushPayment
             ? EPaymentType.Push
             : EPaymentType.Pull,

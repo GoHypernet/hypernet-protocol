@@ -412,7 +412,7 @@ export class PaymentUtils implements IPaymentUtils {
       // at all. This will probably error at higher levels but we should check it here just
       // in case
       if (sortedTransfers.offerTransfers.length == 0) {
-        return EPaymentState.InvalidProposal;
+        return EPaymentState.Borked;
       }
 
       // If there are more than 1 offer transfer that is not canceled, that's an invalid proposal
@@ -427,7 +427,7 @@ export class PaymentUtils implements IPaymentUtils {
       );
 
       if (nonCanceledOfferTransfers.length > 1) {
-        return EPaymentState.InvalidProposal;
+        return EPaymentState.Borked;
       }
 
       // If the only offer transfer was canceled, then the whole payment was canceled.
@@ -479,6 +479,15 @@ export class PaymentUtils implements IPaymentUtils {
 
         // Insurance but no parameterized payment
         if (!hasParameterized) {
+          // If the insurance is resolved and the offer state is resolved or canceled,
+          // then the payment was canceled.
+          if (
+            offerState == ETransferState.Canceled &&
+            insuranceState == ETransferState.Resolved
+          ) {
+            return EPaymentState.Canceled;
+          }
+
           if (
             offerState == ETransferState.Active &&
             insuranceState == ETransferState.Active &&
@@ -508,6 +517,16 @@ export class PaymentUtils implements IPaymentUtils {
             paymentTransfer,
             offerDetails,
           );
+
+          if (
+            offerState == ETransferState.Canceled &&
+            (insuranceState == ETransferState.Resolved ||
+              insuranceState == ETransferState.Canceled) &&
+            (paymentState == ETransferState.Resolved ||
+              paymentState == ETransferState.Canceled)
+          ) {
+            return EPaymentState.Canceled;
+          }
 
           if (
             offerState == ETransferState.Active &&
@@ -561,6 +580,12 @@ export class PaymentUtils implements IPaymentUtils {
     });
   }
 
+  /**
+   * This method is supposed to return a sorted history of the payment's history, but without
+   * a resolvedAt we can't really do that. So this will just have to sit here for a while.
+   * @param sortedTransfers
+   * @returns
+   */
   public getPaymentStateHistory(
     sortedTransfers: SortedTransfers,
   ): ResultAsync<EPaymentState[], never> {
