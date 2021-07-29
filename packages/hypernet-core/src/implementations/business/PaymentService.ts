@@ -27,6 +27,8 @@ import {
   UnixTimestamp,
   BigNumberString,
   Signature,
+  TransferId,
+  ETransferState,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IPaymentService } from "@interfaces/business";
@@ -40,7 +42,10 @@ import {
   IPaymentRepository,
   IPaymentRepositoryType,
 } from "@interfaces/data";
-import { HypernetContext } from "@interfaces/objects";
+import {
+  HypernetContext,
+  InitializedHypernetContext,
+} from "@interfaces/objects";
 import { BigNumber } from "ethers";
 import { injectable, inject } from "inversify";
 import { err, errAsync, ok, okAsync, ResultAsync, Result } from "neverthrow";
@@ -50,6 +55,8 @@ import {
   IConfigProviderType,
   IContextProvider,
   IContextProviderType,
+  IVectorUtils,
+  IVectorUtilsType,
 } from "@interfaces/utilities";
 
 type PaymentsByIdsErrors =
@@ -89,6 +96,7 @@ export class PaymentService implements IPaymentService {
     protected paymentRepository: IPaymentRepository,
     @inject(IGatewayConnectorRepositoryType)
     protected gatewayConnectorRepository: IGatewayConnectorRepository,
+    @inject(IVectorUtilsType) protected vectorUtils: IVectorUtils,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
@@ -673,10 +681,7 @@ export class PaymentService implements IPaymentService {
         // have payment amount staked as an insurace amount.
         // The second condition can't happen if it's in Accepted unless something is very, very badly wrong,
         // but it keeps typescript happy
-        if (
-          payment.state != EPaymentState.Accepted ||
-          payment.details.insuranceTransferId == null
-        ) {
+        if (payment.state != EPaymentState.Accepted) {
           return errAsync(
             new InvalidParametersError(
               "Can not resolve payment that is not in the Accepted state",
@@ -694,24 +699,48 @@ export class PaymentService implements IPaymentService {
           );
         }
 
-        // Resolve the insurance
-        this.logUtils.debug(`Resolving insurance for payment ${paymentId}`);
-        return this.paymentRepository.resolveInsurance(
-          paymentId,
-          payment.details.insuranceTransferId,
-          amount,
-          gatewaySignature,
-        );
-      })
-      .andThen(() => {
-        return this.paymentRepository.getPaymentsByIds([paymentId]);
-      })
-      .andThen((payments) => {
-        const payment = payments.get(paymentId);
-        if (payment == null) {
-          return errAsync(new InvalidParametersError("Invalid payment ID"));
-        }
-        return okAsync(payment);
+        // A payment could have multiple insurance transfers and still be accepted if all
+        // but one are canceled.
+        return ResultUtils.filter(
+          payment.details.insuranceTransfers,
+          (transfer) => {
+            return this.vectorUtils
+              .getTransferStateFromTransfer(transfer)
+              .map((transferState) => transferState == ETransferState.Active);
+          },
+        )
+          .andThen((activeInsuranceTransfers) => {
+            if (activeInsuranceTransfers.length > 1) {
+              throw new Error(
+                "Accepted payment has multiple active insurance payments?!",
+              );
+            }
+
+            if (activeInsuranceTransfers.length == 0) {
+              throw new Error(
+                "Accepted payment has no active insurance payments?!",
+              );
+            }
+
+            // Resolve the insurance
+            this.logUtils.debug(`Resolving insurance for payment ${paymentId}`);
+            return this.paymentRepository.resolveInsurance(
+              paymentId,
+              TransferId(activeInsuranceTransfers[0].transferId),
+              amount,
+              gatewaySignature,
+            );
+          })
+          .andThen(() => {
+            return this.paymentRepository.getPaymentsByIds([paymentId]);
+          })
+          .andThen((payments) => {
+            const payment = payments.get(paymentId);
+            if (payment == null) {
+              return errAsync(new InvalidParametersError("Invalid payment ID"));
+            }
+            return okAsync(payment);
+          });
       });
   }
 
@@ -742,13 +771,64 @@ export class PaymentService implements IPaymentService {
             | TransferCreationError
           >
         >();
-        for (const keyval of payments) {
-          const [paymentId, payment] = keyval;
+        for (const payment of payments.values()) {
           paymentAdvancements.push(this._advancePayment(payment, context));
         }
         return ResultUtils.combine(paymentAdvancements);
       })
       .map(() => {});
+  }
+
+  public recoverPayments(
+    paymentIds: PaymentId[],
+  ): ResultAsync<
+    Payment[],
+    | RouterChannelUnknownError
+    | VectorError
+    | BlockchainUnavailableError
+    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+  > {
+    // Recover payments will work to restore a "borked" payment to a usable status.
+    // First step, get the payments.
+    return ResultUtils.combine([
+      this.paymentRepository.getPaymentsByIds(paymentIds),
+      this.contextProvider.getInitializedContext(),
+    ]).andThen((vals) => {
+      const [paymentsById, context] = vals;
+      const borkedPayments = new Array<Payment>();
+      // Sort out the payments that are borked. We are only worried about those.
+      for (const payment of paymentsById.values()) {
+        if (payment.state === EPaymentState.Borked) {
+          borkedPayments.push(payment);
+        }
+      }
+
+      // Now we have a list of borked payments. Let's try and recover them.
+      return ResultUtils.combine(
+        borkedPayments.map((payment) => {
+          return this._recoverPayment(payment, context);
+        }),
+      );
+    });
+  }
+
+  protected _recoverPayment(
+    payment: Payment,
+    context: InitializedHypernetContext,
+  ): ResultAsync<Payment, never> {
+    // We need to figure out why the payment is borked. We'll start looking at each possible cause
+    // Depending on if the payment is too us or from us, there are different things we can fix.
+    // The main things we can recover from are A. multiple payments/transfers, and B. invalid
+    // payments/transfers. If there are multiples, we will just cancel the extra ones.
+    // If there are invalid transfers, we need to just back out of the whole process.
+    if (context.publicIdentifier == payment.to) {
+      // It's to us, so the offer and payment transfers can be canceled
+    } else if (context.publicIdentifier == payment.from) {
+      // It's from us, so we can only cancel the insurance payments
+    }
+    return okAsync(payment);
   }
 
   protected _advancePayment(

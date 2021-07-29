@@ -44,6 +44,10 @@ export class ContextProviderMock implements IContextProvider {
   public onPushPaymentDelayedActivations: PushPayment[] = [];
   public onPullPaymentDelayed: Subject<PullPayment>;
   public onPullPaymentDelayedActivations: PullPayment[] = [];
+  public onPushPaymentCanceled: Subject<PushPayment>;
+  public onPushPaymentCanceledActivations: PushPayment[] = [];
+  public onPullPaymentCanceled: Subject<PullPayment>;
+  public onPullPaymentCanceledActivations: PullPayment[] = [];
   public onBalancesChanged: Subject<Balances>;
   public onBalancesChangedActivations: Balances[] = [];
   public onDeStorageAuthenticationStarted: Subject<void>;
@@ -126,6 +130,16 @@ export class ContextProviderMock implements IContextProvider {
     this.onPullPaymentDelayed = new Subject<PullPayment>();
     this.onPullPaymentDelayed.subscribe((val) => {
       this.onPullPaymentDelayedActivations.push(val);
+    });
+
+    this.onPushPaymentCanceled = new Subject<PushPayment>();
+    this.onPushPaymentCanceled.subscribe((val) => {
+      this.onPushPaymentCanceledActivations.push(val);
+    });
+
+    this.onPullPaymentCanceled = new Subject<PullPayment>();
+    this.onPullPaymentCanceled.subscribe((val) => {
+      this.onPullPaymentCanceledActivations.push(val);
     });
 
     this.onBalancesChanged = new Subject<Balances>();
@@ -213,6 +227,8 @@ export class ContextProviderMock implements IContextProvider {
         this.onPullPaymentUpdated,
         this.onPushPaymentDelayed,
         this.onPullPaymentDelayed,
+        this.onPushPaymentCanceled,
+        this.onPullPaymentCanceled,
         this.onBalancesChanged,
         this.onDeStorageAuthenticationStarted,
         this.onDeStorageAuthenticationSucceeded,
@@ -247,6 +263,8 @@ export class ContextProviderMock implements IContextProvider {
         this.onPullPaymentUpdated,
         this.onPushPaymentDelayed,
         this.onPullPaymentDelayed,
+        this.onPushPaymentCanceled,
+        this.onPullPaymentCanceled,
         this.onBalancesChanged,
         this.onDeStorageAuthenticationStarted,
         this.onDeStorageAuthenticationSucceeded,

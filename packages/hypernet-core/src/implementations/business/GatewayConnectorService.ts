@@ -55,6 +55,22 @@ export class GatewayConnectorService implements IGatewayConnectorService {
           });
       });
 
+      context.onPushPaymentDelayed.subscribe((payment) => {
+        this.gatewayConnectorRepository
+          .notifyPushPaymentDelayed(payment.gatewayUrl, payment)
+          .mapErr((e) => {
+            this.logUtils.debug(e);
+          });
+      });
+
+      context.onPushPaymentCanceled.subscribe((payment) => {
+        this.gatewayConnectorRepository
+          .notifyPushPaymentCanceled(payment.gatewayUrl, payment)
+          .mapErr((e) => {
+            this.logUtils.debug(e);
+          });
+      });
+
       context.onPullPaymentSent.subscribe((payment) => {
         this.gatewayConnectorRepository
           .notifyPullPaymentSent(payment.gatewayUrl, payment)
@@ -74,6 +90,22 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       context.onPullPaymentReceived.subscribe((payment) => {
         this.gatewayConnectorRepository
           .notifyPullPaymentReceived(payment.gatewayUrl, payment)
+          .mapErr((e) => {
+            this.logUtils.debug(e);
+          });
+      });
+
+      context.onPullPaymentDelayed.subscribe((payment) => {
+        this.gatewayConnectorRepository
+          .notifyPullPaymentDelayed(payment.gatewayUrl, payment)
+          .mapErr((e) => {
+            this.logUtils.debug(e);
+          });
+      });
+
+      context.onPullPaymentCanceled.subscribe((payment) => {
+        this.gatewayConnectorRepository
+          .notifyPullPaymentCanceled(payment.gatewayUrl, payment)
           .mapErr((e) => {
             this.logUtils.debug(e);
           });

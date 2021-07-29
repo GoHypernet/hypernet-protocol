@@ -14,12 +14,12 @@ import {
   BigNumberString,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
+import { IAccountsRepository } from "@interfaces/data/";
 import { BigNumber } from "ethers";
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
 import { AccountsRepository } from "@implementations/data/AccountsRepository";
-import { IAccountsRepository } from "@interfaces/data/";
 import { IStorageUtils } from "@interfaces/data/utilities";
 import {
   IVectorUtils,
@@ -35,10 +35,15 @@ import {
   destinationAddress,
   erc20AssetAddress,
   ethereumAddress,
+  expirationDate,
   publicIdentifier,
   routerChannelAddress,
 } from "@mock/mocks";
-import { BlockchainProviderMock, BrowserNodeProviderMock } from "@mock/utils";
+import {
+  BlockchainProviderMock,
+  BrowserNodeProviderMock,
+  VectorUtilsMockFactory,
+} from "@mock/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
@@ -119,7 +124,8 @@ class TransactionResponseMock implements TransactionResponse {
 
 class AccountsRepositoryMocks {
   public blockchainProvider = new BlockchainProviderMock();
-  public vectorUtils = td.object<IVectorUtils>();
+  public vectorUtils =
+    VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
   public browserNodeProvider = new BrowserNodeProviderMock();
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
@@ -128,10 +134,6 @@ class AccountsRepositoryMocks {
   public stateChannel: IFullChannelState | undefined;
 
   constructor() {
-    td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(
-      okAsync(routerChannelAddress),
-    );
-
     td.when(
       this.blockchainUtils.erc20Transfer(
         erc20AssetAddress,
@@ -184,7 +186,8 @@ class AccountsRepositoryMocks {
 
 class AccountsRepositoryErrorMocks {
   public blockchainProvider = td.object<IBlockchainProvider>();
-  public vectorUtils = td.object<IVectorUtils>();
+  public vectorUtils =
+    VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
   public browserNodeProvider = td.object<IBrowserNodeProvider>();
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();

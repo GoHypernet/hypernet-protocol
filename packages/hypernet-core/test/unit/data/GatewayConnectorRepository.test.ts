@@ -37,11 +37,13 @@ import {
   gatewayUrl2,
   publicIdentifier,
   gatewayAddress,
+  expirationDate,
 } from "@mock/mocks";
 import {
   BlockchainProviderMock,
   ConfigProviderMock,
   ContextProviderMock,
+  VectorUtilsMockFactory,
 } from "@tests/mock/utils";
 
 const validatedSignature = Signature("0xValidatedSignature");
@@ -49,13 +51,13 @@ const newAuthorizationSignature = Signature("0xNewAuthorizationSignature");
 const authorizationSignature = Signature(
   "0x1e866e66e7f3a68658bd186bafbdc534d4a5022e14022fddfe8865e2236dc67d64eee05b4d8f340dffa1928efa517784b63cad6a3fb35d999cb9d722b34075071b",
 );
-const resolutionAmount = "1";
 const balances = new Balances([]);
 
 class GatewayConnectorRepositoryMocks {
   public blockchainProvider = new BlockchainProviderMock();
   public ajaxUtils = td.object<IAjaxUtils>();
-  public vectorUtils = td.object<IVectorUtils>();
+  public vectorUtils =
+    VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
   public configProvider = new ConfigProviderMock();
   public contextProvider = new ContextProviderMock();
   public gatewayConnectorProxyFactory =
@@ -95,19 +97,6 @@ class GatewayConnectorRepositoryMocks {
   };
 
   constructor() {
-    td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(
-      okAsync(routerChannelAddress),
-    );
-
-    td.when(
-      this.vectorUtils.resolveInsuranceTransfer(
-        insuranceTransferId,
-        commonPaymentId,
-        Signature(gatewaySignature),
-        BigNumber.from(resolutionAmount),
-      ),
-    ).thenReturn(okAsync({} as IBasicTransferResponse));
-
     td.when(
       this.storageUtils.read<IAuthorizedGatewayEntry[]>(
         AuthorizedGatewaysSchema.title,

@@ -71,6 +71,8 @@ services:
     environment:
       VECTOR_CONFIG: '{
         "adminToken": "cxt1234",
+        "authUrl":"http://auth:5040", 
+        "natsUrl": "nats://nats:4222", 
         "messagingUrl": "",
         "logLevel": "debug",
         "chainAddresses": { 

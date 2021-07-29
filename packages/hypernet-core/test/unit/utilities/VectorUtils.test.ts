@@ -1,4 +1,5 @@
 import {
+  ETransferState,
   IFullTransferState,
   InsuranceResolver,
   MessageResolver,
@@ -18,6 +19,10 @@ import {
   ITimeUtils,
 } from "@interfaces/utilities";
 import {
+  activeParameterizedTransfer,
+  canceledInsuranceTransfer,
+  canceledOfferTransfer,
+  canceledParameterizedTransfer,
   destinationAddress,
   erc20AssetAddress,
   insuranceTransferDefinitionAddress,
@@ -32,6 +37,9 @@ import {
   parameterizedTransferResolverEncoding,
   publicIdentifier,
   publicIdentifier2,
+  resolvedInsuranceTransfer,
+  resolvedOfferTransfer,
+  resolvedParameterizedTransfer,
   routerChannelAddress,
   unixNow,
 } from "@mock/mocks";
@@ -128,309 +136,129 @@ describe("VectorUtils tests", () => {
     expect(retRouterChannelAddress).toBe(routerChannelAddress);
   });
 
-  test("getTransferWasCanceled returns false for a non-resolved transfer", async () => {
+  test("getTransferStateFromTransfer returns Active for a non-resolved transfer", async () => {
     // Arrange
     const vectorUtilsMocks = new VectorUtilsMocks();
 
     const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
 
     // Act
-    const result = await vectorUtils.getTransferWasCanceled(
-      vectorUtilsMocks.browserNodeProvider.parameterizedTransfer,
+    const result = await vectorUtils.getTransferStateFromTransfer(
+      activeParameterizedTransfer,
     );
 
     // Assert
     expect(result.isOk).toBeTruthy();
-    const canceled = result._unsafeUnwrap();
+    const transferState = result._unsafeUnwrap();
 
-    expect(canceled).toBe(false);
+    expect(transferState).toBe(ETransferState.Active);
   });
 
-  test("getTransferWasCanceled returns true for a canceled Message Transfer", async () => {
+  test("getTransferStateFromTransfer returns Canceled for a canceled Message Transfer", async () => {
     // Arrange
     const vectorUtilsMocks = new VectorUtilsMocks();
-
-    const messageTransfer: IFullTransferState<MessageState> = {
-      balance: {
-        amount: ["43", "43"],
-        to: [destinationAddress],
-      },
-      assetId: erc20AssetAddress,
-      channelAddress: routerChannelAddress,
-      inDispute: false,
-      transferId: offerTransferId,
-      transferDefinition: messageTransferDefinitionAddress,
-      transferTimeout: "string",
-      initialStateHash: "string",
-      initiator: publicIdentifier,
-      responder: publicIdentifier2,
-      channelFactoryAddress: "channelFactoryAddress",
-      chainId: 1337,
-      transferEncodings: ["string"],
-      transferState: {
-        message: "",
-      },
-      channelNonce: 1,
-      initiatorIdentifier: publicIdentifier,
-      responderIdentifier: publicIdentifier2,
-      transferResolver: { message: "" } as MessageResolver,
-    };
 
     const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
 
     // Act
-    const result = await vectorUtils.getTransferWasCanceled(messageTransfer);
-
-    // Assert
-    expect(result.isOk).toBeTruthy();
-    const canceled = result._unsafeUnwrap();
-
-    expect(canceled).toBe(true);
-  });
-
-  test("getTransferWasCanceled returns false for a Message transfer resolved as anything", async () => {
-    // Arrange
-    const vectorUtilsMocks = new VectorUtilsMocks();
-
-    const messageTransfer: IFullTransferState<MessageState> = {
-      balance: {
-        amount: ["43", "43"],
-        to: [destinationAddress],
-      },
-      assetId: erc20AssetAddress,
-      channelAddress: routerChannelAddress,
-      inDispute: false,
-      transferId: offerTransferId,
-      transferDefinition: messageTransferDefinitionAddress,
-      transferTimeout: "string",
-      initialStateHash: "string",
-      initiator: publicIdentifier,
-      responder: publicIdentifier2,
-      channelFactoryAddress: "channelFactoryAddress",
-      chainId: 1337,
-      transferEncodings: ["string"],
-      transferState: {
-        message: "",
-      },
-      channelNonce: 1,
-      initiatorIdentifier: publicIdentifier,
-      responderIdentifier: publicIdentifier2,
-      transferResolver: { message: "Reply" } as MessageResolver,
-    };
-
-    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
-
-    // Act
-    const result = await vectorUtils.getTransferWasCanceled(messageTransfer);
-
-    // Assert
-    expect(result.isOk).toBeTruthy();
-    const canceled = result._unsafeUnwrap();
-
-    expect(canceled).toBe(false);
-  });
-
-  test("getTransferWasCanceled returns true for a canceled Insurance Transfer", async () => {
-    // Arrange
-    const vectorUtilsMocks = new VectorUtilsMocks();
-
-    const insuranceTransfer: IFullTransferState<MessageState> = {
-      balance: {
-        amount: ["43", "43"],
-        to: [destinationAddress],
-      },
-      assetId: erc20AssetAddress,
-      channelAddress: routerChannelAddress,
-      inDispute: false,
-      transferId: offerTransferId,
-      transferDefinition: insuranceTransferDefinitionAddress,
-      transferTimeout: "string",
-      initialStateHash: "string",
-      initiator: publicIdentifier,
-      responder: publicIdentifier2,
-      channelFactoryAddress: "channelFactoryAddress",
-      chainId: 1337,
-      transferEncodings: ["string"],
-      transferState: {
-        message: "",
-      },
-      channelNonce: 1,
-      initiatorIdentifier: publicIdentifier,
-      responderIdentifier: publicIdentifier2,
-      transferResolver: {
-        data: {
-          amount:
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-          UUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
-        },
-        signature:
-          "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-      } as InsuranceResolver,
-    };
-
-    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
-
-    // Act
-    const result = await vectorUtils.getTransferWasCanceled(insuranceTransfer);
-
-    // Assert
-    expect(result.isOk).toBeTruthy();
-    const canceled = result._unsafeUnwrap();
-
-    expect(canceled).toBe(true);
-  });
-
-  test("getTransferWasCanceled returns false for an Insurance transfer resolved for 0", async () => {
-    // Arrange
-    const vectorUtilsMocks = new VectorUtilsMocks();
-
-    const insuranceTransfer: IFullTransferState<MessageState> = {
-      balance: {
-        amount: ["43", "43"],
-        to: [destinationAddress],
-      },
-      assetId: erc20AssetAddress,
-      channelAddress: routerChannelAddress,
-      inDispute: false,
-      transferId: offerTransferId,
-      transferDefinition: insuranceTransferDefinitionAddress,
-      transferTimeout: "string",
-      initialStateHash: "string",
-      initiator: publicIdentifier,
-      responder: publicIdentifier2,
-      channelFactoryAddress: "channelFactoryAddress",
-      chainId: 1337,
-      transferEncodings: ["string"],
-      transferState: {
-        message: "",
-      },
-      channelNonce: 1,
-      initiatorIdentifier: publicIdentifier,
-      responderIdentifier: publicIdentifier2,
-      transferResolver: {
-        data: {
-          amount:
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-          UUID: "0x0000000000000000000000000000000000000000000000000000000000000001",
-        },
-        signature:
-          "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001",
-      } as InsuranceResolver,
-    };
-
-    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
-
-    // Act
-    const result = await vectorUtils.getTransferWasCanceled(insuranceTransfer);
-
-    // Assert
-    expect(result.isOk).toBeTruthy();
-    const canceled = result._unsafeUnwrap();
-
-    expect(canceled).toBe(false);
-  });
-
-  test("getTransferWasCanceled returns true for a canceled Parameterized Transfer", async () => {
-    // Arrange
-    const vectorUtilsMocks = new VectorUtilsMocks();
-
-    const parameterizedTransfer: IFullTransferState<MessageState> = {
-      balance: {
-        amount: ["43", "43"],
-        to: [destinationAddress],
-      },
-      assetId: erc20AssetAddress,
-      channelAddress: routerChannelAddress,
-      inDispute: false,
-      transferId: offerTransferId,
-      transferDefinition: parameterizedTransferDefinitionAddress,
-      transferTimeout: "string",
-      initialStateHash: "string",
-      initiator: publicIdentifier,
-      responder: publicIdentifier2,
-      channelFactoryAddress: "channelFactoryAddress",
-      chainId: 1337,
-      transferEncodings: ["string"],
-      transferState: {
-        message: "",
-      },
-      channelNonce: 1,
-      initiatorIdentifier: publicIdentifier,
-      responderIdentifier: publicIdentifier2,
-      transferResolver: {
-        data: {
-          paymentAmountTaken:
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-          UUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
-        },
-        payeeSignature:
-          "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-      } as ParameterizedResolver,
-    };
-
-    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
-
-    // Act
-    const result = await vectorUtils.getTransferWasCanceled(
-      parameterizedTransfer,
+    const result = await vectorUtils.getTransferStateFromTransfer(
+      canceledOfferTransfer,
     );
 
     // Assert
     expect(result.isOk).toBeTruthy();
-    const canceled = result._unsafeUnwrap();
+    const transferState = result._unsafeUnwrap();
 
-    expect(canceled).toBe(true);
+    expect(transferState).toBe(ETransferState.Canceled);
   });
 
-  test("getTransferWasCanceled returns false for a Parameterized transfer resolved for 0", async () => {
+  test("getTransferStateFromTransfer returns Resolved for a Message transfer resolved as anything", async () => {
     // Arrange
     const vectorUtilsMocks = new VectorUtilsMocks();
-
-    const parameterizedTransfer: IFullTransferState<MessageState> = {
-      balance: {
-        amount: ["43", "43"],
-        to: [destinationAddress],
-      },
-      assetId: erc20AssetAddress,
-      channelAddress: routerChannelAddress,
-      inDispute: false,
-      transferId: offerTransferId,
-      transferDefinition: parameterizedTransferDefinitionAddress,
-      transferTimeout: "string",
-      initialStateHash: "string",
-      initiator: publicIdentifier,
-      responder: publicIdentifier2,
-      channelFactoryAddress: "channelFactoryAddress",
-      chainId: 1337,
-      transferEncodings: ["string"],
-      transferState: {
-        message: "",
-      },
-      channelNonce: 1,
-      initiatorIdentifier: publicIdentifier,
-      responderIdentifier: publicIdentifier2,
-      transferResolver: {
-        data: {
-          paymentAmountTaken:
-            "0x0000000000000000000000000000000000000000000000000000000000000000",
-          UUID: "0x0000000000000000000000000000000000000000000000000000000000000001",
-        },
-        payeeSignature:
-          "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001",
-      } as ParameterizedResolver,
-    };
 
     const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
 
     // Act
-    const result = await vectorUtils.getTransferWasCanceled(
-      parameterizedTransfer,
+    const result = await vectorUtils.getTransferStateFromTransfer(
+      resolvedOfferTransfer,
     );
 
     // Assert
     expect(result.isOk).toBeTruthy();
-    const canceled = result._unsafeUnwrap();
+    const transferState = result._unsafeUnwrap();
 
-    expect(canceled).toBe(false);
+    expect(transferState).toBe(ETransferState.Resolved);
+  });
+
+  test("getTransferStateFromTransfer returns Canceled for a canceled Insurance Transfer", async () => {
+    // Arrange
+    const vectorUtilsMocks = new VectorUtilsMocks();
+
+    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+    // Act
+    const result = await vectorUtils.getTransferStateFromTransfer(
+      canceledInsuranceTransfer,
+    );
+
+    // Assert
+    expect(result.isOk).toBeTruthy();
+    const transferState = result._unsafeUnwrap();
+
+    expect(transferState).toBe(ETransferState.Canceled);
+  });
+
+  test("getTransferStateFromTransfer returns Resolved for an Insurance transfer resolved for 0", async () => {
+    // Arrange
+    const vectorUtilsMocks = new VectorUtilsMocks();
+
+    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+    // Act
+    const result = await vectorUtils.getTransferStateFromTransfer(
+      resolvedInsuranceTransfer,
+    );
+
+    // Assert
+    expect(result.isOk).toBeTruthy();
+    const transferState = result._unsafeUnwrap();
+
+    expect(transferState).toBe(ETransferState.Resolved);
+  });
+
+  test("getTransferStateFromTransfer returns Canceled for a canceled Parameterized Transfer", async () => {
+    // Arrange
+    const vectorUtilsMocks = new VectorUtilsMocks();
+
+    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+    // Act
+    const result = await vectorUtils.getTransferStateFromTransfer(
+      canceledParameterizedTransfer,
+    );
+
+    // Assert
+    expect(result.isOk).toBeTruthy();
+    const transferState = result._unsafeUnwrap();
+
+    expect(transferState).toBe(ETransferState.Canceled);
+  });
+
+  test("getTransferStateFromTransfer returns false for a Parameterized transfer resolved for 0", async () => {
+    // Arrange
+    const vectorUtilsMocks = new VectorUtilsMocks();
+
+    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+    // Act
+    const result = await vectorUtils.getTransferStateFromTransfer(
+      resolvedParameterizedTransfer,
+    );
+
+    // Assert
+    expect(result.isOk).toBeTruthy();
+    const transferState = result._unsafeUnwrap();
+
+    expect(transferState).toBe(ETransferState.Resolved);
   });
 });

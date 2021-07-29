@@ -1,6 +1,5 @@
 import {
   EPaymentType,
-  ETransferType,
   PushPayment,
   SortedTransfers,
   IFullTransferState,
@@ -13,10 +12,11 @@ import { BrowserNodeProviderMock } from "./BrowserNodeProviderMock";
 
 import { IPaymentUtils } from "@interfaces/utilities";
 import {
+  activeInsuranceTransfer,
+  activeOfferTransfer,
+  activeParameterizedTransfer,
   commonPaymentId,
-  insuranceTransferId,
   offerTransferId,
-  parameterizedTransferId,
   unixPast,
 } from "@mock/mocks";
 
@@ -92,15 +92,7 @@ export class PaymentUtilsMockFactory {
         }),
       ),
     ).thenReturn(
-      okAsync(
-        new SortedTransfers(
-          [browserNodeProvider.offerTransfer],
-          [],
-          [],
-          [],
-          browserNodeProvider.offerDetails,
-        ),
-      ),
+      okAsync(new SortedTransfers([activeOfferTransfer], [], [], [])),
     );
 
     td.when(
@@ -113,11 +105,10 @@ export class PaymentUtilsMockFactory {
     ).thenReturn(
       okAsync(
         new SortedTransfers(
-          [browserNodeProvider.offerTransfer],
-          [browserNodeProvider.insuranceTransfer],
-          [browserNodeProvider.parameterizedTransfer],
+          [activeOfferTransfer],
+          [activeInsuranceTransfer],
+          [activeParameterizedTransfer],
           [],
-          browserNodeProvider.offerDetails,
         ),
       ),
     );
@@ -144,7 +135,7 @@ export class PaymentUtilsMockFactory {
           );
         }),
       ),
-    ).thenReturn(EPaymentState.Approved);
+    ).thenReturn(okAsync(EPaymentState.Approved));
 
     td.when(
       paymentUtils.getPaymentState(
@@ -159,7 +150,7 @@ export class PaymentUtilsMockFactory {
           );
         }),
       ),
-    ).thenReturn(EPaymentState.Staked);
+    ).thenReturn(okAsync(EPaymentState.Staked));
 
     td.when(
       paymentUtils.getPaymentState(
@@ -174,7 +165,7 @@ export class PaymentUtilsMockFactory {
           );
         }),
       ),
-    ).thenReturn(EPaymentState.Proposed);
+    ).thenReturn(okAsync(EPaymentState.Proposed));
 
     return paymentUtils;
   }

@@ -218,6 +218,8 @@ export interface IHypernetCore {
   onPullPaymentReceived: Subject<PullPayment>;
   onPushPaymentDelayed: Subject<PushPayment>;
   onPullPaymentDelayed: Subject<PullPayment>;
+  onPushPaymentCanceled: Subject<PushPayment>;
+  onPullPaymentCanceled: Subject<PullPayment>;
   onBalancesChanged: Subject<Balances>;
   onDeStorageAuthenticationStarted: Subject<void>;
   onDeStorageAuthenticationSucceeded: Subject<void>;

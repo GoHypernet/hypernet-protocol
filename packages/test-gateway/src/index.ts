@@ -17,6 +17,7 @@ import {
   EthereumAddress,
   PaymentId,
   Signature,
+  BigNumberString,
 } from "@hypernetlabs/objects";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { Subject } from "rxjs";
@@ -66,10 +67,6 @@ class TestGatewayConnector implements IGatewayConnector {
     });
   }
 
-  public async getAddress(): Promise<EthereumAddress> {
-    return Promise.resolve(EthereumAddress("0x14791697260E4c9A71f18484C9f997B308e59325"));
-  }
-
   public onIFrameClosed() {
     console.log("Hey, user just closed gateway iframe");
   }
@@ -93,6 +90,7 @@ class TestGatewayConnector implements IGatewayConnector {
       <div style="text-align: center; display: flex; justify-content: center; flex-direction: column; background-color: #ffffff;">
         <img src="https://res.cloudinary.com/dqueufbs7/image/upload/v1614648372/images/Screen_Shot_2021-03-02_at_04.14.05.png" width="100%" />
         <h2>Galileo gateway connector</h2>
+        <a onclick="window.connector.sendPayment()">Send Payment</a>
       </div>
     `;
     window.document.body.appendChild(element);
@@ -108,10 +106,6 @@ class TestGatewayConnector implements IGatewayConnector {
       //this.closeRequested.next();
     }, 10000);
   }
-
-  //   paymentCreated(payment: Payment) {
-  //       // Send the payment details to galileo
-  //   }
 
   public sendFundsRequested: Subject<ISendFundsRequest>;
   public authorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
@@ -146,6 +140,15 @@ class TestGatewayConnector implements IGatewayConnector {
     console.log("Push Payment Received");
     console.log(payment);
   }
+  public onPushPaymentDelayed(payment: PushPayment): void {
+    console.log("Push Payment Delayed");
+    console.log(payment);
+  }
+  public onPushPaymentCanceled(payment: PushPayment): void {
+    console.log("Push Payment Canceled");
+    console.log(payment);
+  }
+
   public onPullPaymentSent(payment: PullPayment): void {
     console.log("Pull Payment Sent");
     console.log(payment);
@@ -158,6 +161,14 @@ class TestGatewayConnector implements IGatewayConnector {
     console.log("Pull Payment Received");
     console.log(payment);
   }
+  public onPullPaymentDelayed(payment: PullPayment): void {
+    console.log("Pull Payment Delayed");
+    console.log(payment);
+  }
+  public onPullPaymentCanceled(payment: PullPayment): void {
+    console.log("Pull Payment Canceled");
+    console.log(payment);
+  }
 
   public onPublicIdentifierReceived(publicIdentifier: PublicIdentifier): void {
     console.log("Public Identifier Received");
@@ -167,6 +178,18 @@ class TestGatewayConnector implements IGatewayConnector {
   public onBalancesReceived(balances: Balances): void {
     console.log("Balances Received");
     console.log(balances);
+  }
+
+  public sendPayment(): void {
+    console.log("Emiting sendFundsRequested");
+    this.sendFundsRequested.next({
+      recipientPublicIdentifier: PublicIdentifier("vector71a1WrjwpGYMHRhvb2HAJKspDonJkMDbghygGnCuiULdxmGuG7"), // Galileo account
+      amount: BigNumberString("1"),
+      expirationDate: new Date().getTime() / 1000 + 1000000,
+      requiredStake: BigNumberString("1"),
+      paymentToken: EthereumAddress("0xAa588d3737B611baFD7bD713445b314BD453a5C8"), // Hypertoken
+      metadata: null,
+    } as ISendFundsRequest);
   }
 }
 

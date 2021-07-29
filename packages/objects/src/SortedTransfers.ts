@@ -13,6 +13,5 @@ export class SortedTransfers {
     public insuranceTransfers: IFullTransferState<InsuranceState>[],
     public parameterizedTransfers: IFullTransferState<ParameterizedState>[],
     public pullRecordTransfers: IFullTransferState<MessageState>[],
-    public offerDetails: IHypernetOfferDetails,
   ) {}
 }

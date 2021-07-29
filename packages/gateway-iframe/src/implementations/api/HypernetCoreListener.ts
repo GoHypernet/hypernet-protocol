@@ -115,6 +115,20 @@ export class HypernetCoreListener
           return okAsync(undefined);
         }, data.callId);
       },
+      notifyPushPaymentDelayed: (data: IIFrameCallData<PushPayment>) => {
+        this.returnForModel(() => {
+          const context = this.contextProvider.getGatewayContext();
+          context.gatewayConnector?.onPushPaymentDelayed(data.data);
+          return okAsync(undefined);
+        }, data.callId);
+      },
+      notifyPushPaymentCanceled: (data: IIFrameCallData<PushPayment>) => {
+        this.returnForModel(() => {
+          const context = this.contextProvider.getGatewayContext();
+          context.gatewayConnector?.onPushPaymentCanceled(data.data);
+          return okAsync(undefined);
+        }, data.callId);
+      },
       notifyPullPaymentSent: (data: IIFrameCallData<PullPayment>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getGatewayContext();
@@ -133,6 +147,20 @@ export class HypernetCoreListener
         this.returnForModel(() => {
           const context = this.contextProvider.getGatewayContext();
           context.gatewayConnector?.onPullPaymentReceived(data.data);
+          return okAsync(undefined);
+        }, data.callId);
+      },
+      notifyPullPaymentDelayed: (data: IIFrameCallData<PullPayment>) => {
+        this.returnForModel(() => {
+          const context = this.contextProvider.getGatewayContext();
+          context.gatewayConnector?.onPullPaymentDelayed(data.data);
+          return okAsync(undefined);
+        }, data.callId);
+      },
+      notifyPullPaymentCanceled: (data: IIFrameCallData<PullPayment>) => {
+        this.returnForModel(() => {
+          const context = this.contextProvider.getGatewayContext();
+          context.gatewayConnector?.onPullPaymentCanceled(data.data);
           return okAsync(undefined);
         }, data.callId);
       },

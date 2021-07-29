@@ -9,6 +9,7 @@
   "scripts": {
     "build": "yarn clean && yarn compile && yarn postCompile",
     "dockerize": "docker build -t hypernetlabs/hypernet-protocol-core-iframe:local -f Dockerfile --progress=plain ../..",
+    "docker-push": "docker push hypernetlabs/hypernet-protocol-core-iframe:local",
     "dev": "webpack watch --config webpack.config.js --mode development",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "compile": "tsc --build && cd ../.. && yarn alias",

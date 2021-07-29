@@ -2,11 +2,11 @@ import {
   PushPayment,
   HypernetLink,
   Payment,
-  PaymentInternalDetails,
   VectorError,
   EPaymentState,
   BigNumberString,
   UnixTimestamp,
+  SortedTransfers,
 } from "@hypernetlabs/objects";
 import { ILinkRepository } from "@interfaces/data";
 import { okAsync, errAsync } from "neverthrow";
@@ -22,7 +22,6 @@ import {
 } from "@interfaces/utilities";
 import {
   commonAmount,
-  routerChannelAddress,
   publicIdentifier,
   commonPaymentId,
   publicIdentifier2,
@@ -50,16 +49,12 @@ require("testdouble-jest")(td, jest);
 const expirationDate = UnixTimestamp(unixNow + defaultExpirationLength);
 const counterPartyAccount = publicIdentifier2;
 const fromAccount = publicIdentifier;
-const paymentDetails = new PaymentInternalDetails(
-  offerTransferId,
-  insuranceTransferId,
-  parameterizedTransferId,
-  [],
-);
+const paymentDetails = new SortedTransfers([], [], [], []);
 
 class VectorLinkRepositoryMocks {
   public blockchainProvider = new BlockchainProviderMock();
-  public vectorUtils = td.object<IVectorUtils>();
+  public vectorUtils =
+    VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
   public configProvider = new ConfigProviderMock();
   public contextProvider = new ContextProviderMock();
   public browserNodeProvider = new BrowserNodeProviderMock();
@@ -81,11 +76,6 @@ class VectorLinkRepositoryMocks {
       this.proposedPayment,
       this.stakedPayment,
       this.approvedPayment,
-    );
-
-    this.vectorUtils = VectorUtilsMockFactory.factoryVectorUtils(
-      this.browserNodeProvider,
-      expirationDate,
     );
 
     this.createdLink = new HypernetLink(

@@ -18,6 +18,7 @@ import {
   BigNumberString,
   UnixTimestamp,
   ETransferType,
+  BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
@@ -115,7 +116,17 @@ export interface IVectorUtils {
   >;
 
   getTimestampFromTransfer(transfer: IFullTransferState): UnixTimestamp;
-  getTransferStateFromTransfer(transfer: IFullTransferState): ETransferState;
+
+  /**
+   * Returns the state of the transfer. Transfers can be active, resolved, or canceled.
+   * A resolved transfer is canceled if it was resolved via the EncodedCancel
+   * transferResolution; if this is not the case the transfer is just resolved.
+   *
+   * @param transfer
+   */
+  getTransferStateFromTransfer(
+    transfer: IFullTransferState,
+  ): ResultAsync<ETransferState, BlockchainUnavailableError>;
 
   /**
    *

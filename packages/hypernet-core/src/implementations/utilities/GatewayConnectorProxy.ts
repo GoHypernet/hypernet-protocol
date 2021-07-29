@@ -5,7 +5,6 @@ import {
   ISendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
 import {
-  EthereumAddress,
   GatewayConnectorError,
   GatewayValidationError,
   PaymentId,
@@ -213,6 +212,18 @@ export class GatewayConnectorProxy
     return this._createCall("notifyPushPaymentReceived", payment);
   }
 
+  public notifyPushPaymentDelayed(
+    payment: PushPayment,
+  ): ResultAsync<void, GatewayConnectorError | ProxyError> {
+    return this._createCall("notifyPushPaymentDelayed", payment);
+  }
+
+  public notifyPushPaymentCanceled(
+    payment: PushPayment,
+  ): ResultAsync<void, GatewayConnectorError | ProxyError> {
+    return this._createCall("notifyPushPaymentCanceled", payment);
+  }
+
   public notifyPullPaymentSent(
     payment: PullPayment,
   ): ResultAsync<void, GatewayConnectorError | ProxyError> {
@@ -229,6 +240,18 @@ export class GatewayConnectorProxy
     payment: PullPayment,
   ): ResultAsync<void, GatewayConnectorError | ProxyError> {
     return this._createCall("notifyPullPaymentReceived", payment);
+  }
+
+  public notifyPullPaymentDelayed(
+    payment: PullPayment,
+  ): ResultAsync<void, GatewayConnectorError | ProxyError> {
+    return this._createCall("notifyPullPaymentDelayed", payment);
+  }
+
+  public notifyPullPaymentCanceled(
+    payment: PullPayment,
+  ): ResultAsync<void, GatewayConnectorError | ProxyError> {
+    return this._createCall("notifyPullPaymentCanceled", payment);
   }
 
   public notifyPublicIdentifier(

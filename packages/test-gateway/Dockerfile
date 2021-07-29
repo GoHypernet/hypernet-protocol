@@ -1,16 +1,22 @@
 FROM node:14
+LABEL Author Charlie Sibbach <charlie@hypernetlabs.io>
 
+RUN mkdir -p /usr/src/app
 WORKDIR /usr/src/app
 
-# Move over the package.json to install dependencies
-COPY ../package.json .
-
+# Install all the yarn stuff
+COPY ./package.json ./package.json
+COPY ./yarn.lock ./yarn.lock
+COPY ./packages/objects/package.json ./packages/objects/package.json
+COPY ./packages/utils/package.json ./packages/utils/package.json
+COPY ./packages/test-gateway/package.json ./packages/test-gateway/package.json
 RUN yarn install
 
-# Bundle app source
-COPY server /usr/src/app
-COPY dist/connector-bundle /usr/src/app/connector
-
-RUN npm run tsc
+# Now build the code
+COPY . .
+WORKDIR /usr/src/app/packages/test-gateway
 
 EXPOSE 5010
+
+# Run it
+CMD [ "yarn", "start" ]

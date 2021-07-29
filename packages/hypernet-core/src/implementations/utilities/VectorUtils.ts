@@ -612,42 +612,36 @@ export class VectorUtils implements IVectorUtils {
 
   public getTransferStateFromTransfer(
     transfer: IFullTransferState,
-  ): ETransferState {
+  ): ResultAsync<ETransferState, BlockchainUnavailableError> {
     if (transfer.transferResolver != null) {
-      return ETransferState.Resolved;
-    }
-    return ETransferState.Active;
-  }
+      // If the transfer isn't resolved, it can't be canceled
 
-  public getTransferWasCanceled(
-    transfer: IFullTransferState,
-  ): ResultAsync<boolean, BlockchainUnavailableError> {
-    // If the transfer isn't resolved, it can't be canceled
-    if (transfer.transferResolver == null) {
-      return okAsync(false);
-    }
-
-    // We need to encode the transferResolver, and to do that, we'll need the ResolverEncoding
-
-    return this._getRegisteredTransfers().map((registeredTransfers) => {
-      const registeredTransfer = registeredTransfers.find(
-        (val) => val.definition == transfer.transferDefinition,
-      );
-
-      if (registeredTransfer == null) {
-        throw new Error(
-          "Transfer is not a registered type. Is the chain deployed correctly?",
+      // We need to encode the transferResolver, and to do that, we'll need the ResolverEncoding
+      return this._getRegisteredTransfers().map((registeredTransfers) => {
+        const registeredTransfer = registeredTransfers.find(
+          (val) => val.definition == transfer.transferDefinition,
         );
-      }
 
-      const resolverDataEncoding = [registeredTransfer.resolverEncoding];
-      const encodedResolverData = defaultAbiCoder.encode(resolverDataEncoding, [
-        transfer.transferResolver,
-      ]);
+        if (registeredTransfer == null) {
+          throw new Error(
+            "Transfer is not a registered type. Is the chain deployed correctly?",
+          );
+        }
 
-      // If the transferResolver is the same as the encodedCancelData, then we can consider the transfer as canceled
-      return encodedResolverData == registeredTransfer.encodedCancel;
-    });
+        const resolverDataEncoding = [registeredTransfer.resolverEncoding];
+        const encodedResolverData = defaultAbiCoder.encode(
+          resolverDataEncoding,
+          [transfer.transferResolver],
+        );
+
+        // If the transferResolver is the same as the encodedCancelData, then we can consider the transfer as canceled
+        if (encodedResolverData == registeredTransfer.encodedCancel) {
+          return ETransferState.Canceled;
+        }
+        return ETransferState.Resolved;
+      });
+    }
+    return okAsync(ETransferState.Active);
   }
 
   /**

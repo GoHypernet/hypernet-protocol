@@ -5,9 +5,9 @@ import { EthereumAddress } from "@objects/EthereumAddress";
 import { GatewayUrl } from "@objects/GatewayUrl";
 import { Payment } from "@objects/Payment";
 import { PaymentId } from "@objects/PaymentId";
-import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullAmount } from "@objects/PullAmount";
+import { SortedTransfers } from "@objects/SortedTransfers";
 import { EPaymentState } from "@objects/typing";
 import { UnixTimestamp } from "@objects/UnixTimestamp";
 
@@ -25,7 +25,7 @@ export class PullPayment extends Payment {
     updatedTimestamp: UnixTimestamp,
     collateralRecovered: BigNumberString,
     gatewayUrl: GatewayUrl,
-    details: PaymentInternalDetails,
+    details: SortedTransfers,
     metadata: string | null,
     public authorizedAmount: BigNumberString,
     public amountTransferred: BigNumberString,

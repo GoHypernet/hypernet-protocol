@@ -3,6 +3,7 @@ import {
   ETransferType,
   UnixTimestamp,
   IBasicTransferResponse,
+  Signature,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { okAsync } from "neverthrow";
@@ -12,10 +13,14 @@ import { BrowserNodeProviderMock } from "./BrowserNodeProviderMock";
 
 import { IVectorUtils } from "@interfaces/utilities";
 import {
+  activeInsuranceTransfer,
+  activeOfferTransfer,
+  activeParameterizedTransfer,
   commonAmount,
   commonPaymentId,
   erc20AssetAddress,
   gatewayAddress,
+  gatewaySignature,
   gatewayUrl,
   insuranceTransferId,
   offerTransferId,
@@ -27,10 +32,7 @@ import {
 } from "@mock/mocks";
 
 export class VectorUtilsMockFactory {
-  static factoryVectorUtils(
-    browserNodeProvider: BrowserNodeProviderMock,
-    expirationDate: UnixTimestamp,
-  ): IVectorUtils {
+  static factoryVectorUtils(expirationDate: UnixTimestamp): IVectorUtils {
     const vectorUtils = td.object<IVectorUtils>();
 
     td.when(
@@ -40,7 +42,7 @@ export class VectorUtilsMockFactory {
     ).thenReturn(
       okAsync({
         transferType: ETransferType.Offer,
-        transfer: browserNodeProvider.offerTransfer,
+        transfer: activeOfferTransfer,
       }),
     );
     td.when(
@@ -50,7 +52,7 @@ export class VectorUtilsMockFactory {
     ).thenReturn(
       okAsync({
         transferType: ETransferType.Insurance,
-        transfer: browserNodeProvider.insuranceTransfer,
+        transfer: activeInsuranceTransfer,
       }),
     );
     td.when(
@@ -60,7 +62,7 @@ export class VectorUtilsMockFactory {
     ).thenReturn(
       okAsync({
         transferType: ETransferType.Parameterized,
-        transfer: browserNodeProvider.parameterizedTransfer,
+        transfer: activeParameterizedTransfer,
       }),
     );
 
@@ -143,6 +145,15 @@ export class VectorUtilsMockFactory {
         commonPaymentId,
         null,
         BigNumber.from("0"),
+      ),
+    ).thenReturn(okAsync({} as IBasicTransferResponse));
+
+    td.when(
+      vectorUtils.resolveInsuranceTransfer(
+        insuranceTransferId,
+        commonPaymentId,
+        Signature(gatewaySignature),
+        BigNumber.from("1"),
       ),
     ).thenReturn(okAsync({} as IBasicTransferResponse));
 
