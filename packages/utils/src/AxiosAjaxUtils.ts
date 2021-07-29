@@ -1,4 +1,4 @@
-import { AjaxError } from "@hypernetlabs/objects";
+import { AjaxError, JsonWebToken } from "@hypernetlabs/objects";
 import axios, { AxiosResponse } from "axios";
 import { injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
@@ -62,5 +62,9 @@ export class AxiosAjaxUtils implements IAjaxUtils {
     ).map((response: AxiosResponse<T>) => {
       return response.data;
     });
+  }
+
+  public setDefaultToken(token: JsonWebToken): void {
+    axios.defaults.headers.common = { authorization: `Bearer ${token}` };
   }
 }
