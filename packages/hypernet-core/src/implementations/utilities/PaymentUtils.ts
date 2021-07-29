@@ -370,6 +370,7 @@ export class PaymentUtils implements IPaymentUtils {
   ): ResultAsync<EPaymentState, BlockchainUnavailableError> {
     // We are going to remove all canceled transfers from consideration.
     // Canceled transfers are irrelevant; artifacts of things gone wonky.
+    console.debug(sortedTransfers);
     return ResultUtils.combine([
       ResultUtils.map(sortedTransfers.offerTransfers, (val) => {
         return this.vectorUtils
@@ -560,16 +561,35 @@ export class PaymentUtils implements IPaymentUtils {
     });
   }
 
-  // public getPaymentStateHistory(
-  //   sortedTransfers: SortedTransfers,
-  // ): ResultAsync<EPaymentState[], never> {
-  //   // First step, take all the transfers and unsort them; we need them in a continual list based on their timestamp.
-  //   const allTransfers = new Array<IFullTransferState<any>>()
-  //     .concat(sortedTransfers.offerTransfers)
-  //     .concat(sortedTransfers.insuranceTransfers)
-  //     .concat(sortedTransfers.parameterizedTransfers)
-  //     .concat(sortedTransfers.pullRecordTransfers);
-  // }
+  public getPaymentStateHistory(
+    sortedTransfers: SortedTransfers,
+  ): ResultAsync<EPaymentState[], never> {
+    // First step, take all the transfers and unsort them; we need them in a continual list based on their timestamp.
+    const allTransfers = new Array<IFullTransferState<any>>()
+      .concat(sortedTransfers.offerTransfers)
+      .concat(sortedTransfers.insuranceTransfers)
+      .concat(sortedTransfers.parameterizedTransfers)
+      .concat(sortedTransfers.pullRecordTransfers);
+
+    // Sort all the transfers by creation date
+    allTransfers.sort((a, b) => {
+      if (a.meta == null || b.meta == null) {
+        return 0;
+      }
+      if (a.meta.createdAt < b.meta.createdAt) {
+        return -1;
+      } else if (a.meta.createdAt > b.meta.createdAt) {
+        return 1;
+      }
+      return 0;
+    });
+
+    this.logUtils.debug(allTransfers);
+
+    const statusHistory = new Array<EPaymentState>();
+
+    return okAsync(statusHistory);
+  }
 
   // Returns true if the insurance transfer is
   protected validateInsuranceTransfer(
@@ -735,22 +755,6 @@ export class PaymentUtils implements IPaymentUtils {
         pullTransfers: ${pullTransfers.length}
         unrecognizedTransfers: ${unrecognizedTransfers.length}
       `);
-
-        if (unrecognizedTransfers.length > 0) {
-          return errAsync(
-            new InvalidPaymentError(
-              "Payment includes unrecognized transfer types!",
-            ),
-          );
-        }
-
-        if (offerTransfers.length !== 1) {
-          // TODO: this could be handled more elegantly; if there's other payments
-          // but no offer, it's still a valid payment
-          return errAsync(
-            new InvalidPaymentError("Invalid payment, no offer transfer!"),
-          );
-        }
 
         return okAsync(
           new SortedTransfers(
