@@ -128,9 +128,10 @@ export class PaymentRepository implements IPaymentRepository {
       this.contextProvider.getInitializedContext(),
       this.paymentUtils.createPaymentId(EPaymentType.Pull),
       this.timeUtils.getBlockchainTimestamp(),
+      this.configProvider.getConfig(),
     ])
       .andThen((vals) => {
-        const [browserNode, context, paymentId, timestamp] = vals;
+        const [browserNode, context, paymentId, timestamp, config] = vals;
 
         const message: IHypernetOfferDetails = {
           messageType: EMessageTransferType.OFFER,
@@ -143,6 +144,7 @@ export class PaymentRepository implements IPaymentRepository {
           paymentAmount: maximumAmount,
           expirationDate,
           paymentToken,
+          insuranceToken: config.hypertokenAddress,
           gatewayUrl,
           metadata,
           rate: {
@@ -188,52 +190,46 @@ export class PaymentRepository implements IPaymentRepository {
     gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError> {
-    let browserNode: IBrowserNode;
-    let context: InitializedHypernetContext;
-    let paymentId: PaymentId;
-    let timestamp: UnixTimestamp;
-
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
       this.paymentUtils.createPaymentId(EPaymentType.Push),
       this.timeUtils.getBlockchainTimestamp(),
-    ])
-      .andThen((vals) => {
-        [browserNode, context, paymentId, timestamp] = vals;
+      this.configProvider.getConfig(),
+    ]).andThen((vals) => {
+      const [browserNode, context, paymentId, timestamp, config] = vals;
 
-        const message: IHypernetOfferDetails = {
-          messageType: EMessageTransferType.OFFER,
-          paymentId,
-          creationDate: timestamp,
-          to: counterPartyAccount,
-          from: context.publicIdentifier,
-          requiredStake: requiredStake,
-          paymentAmount: amount,
-          expirationDate: expirationDate,
-          paymentToken,
-          gatewayUrl,
-          metadata,
-          requireOnline: true,
-        };
+      const message: IHypernetOfferDetails = {
+        messageType: EMessageTransferType.OFFER,
+        paymentId,
+        creationDate: timestamp,
+        to: counterPartyAccount,
+        from: context.publicIdentifier,
+        requiredStake: requiredStake,
+        paymentAmount: amount,
+        expirationDate: expirationDate,
+        paymentToken,
+        insuranceToken: config.hypertokenAddress,
+        gatewayUrl,
+        metadata,
+        requireOnline: true,
+      };
 
-        // Create a message transfer, with the terms of the payment in the metadata.
-        return this.vectorUtils.createOfferTransfer(
-          counterPartyAccount,
-          message,
-        );
-      })
-      .andThen((transferInfo) => {
-        return browserNode.getTransfer(TransferId(transferInfo.transferId));
-      })
-      .andThen((transfer) => {
-        // Return the payment
-        return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
-      })
-      .map((payment) => {
-        return payment as PushPayment;
-      })
-      .mapErr((err) => new PaymentCreationError(err?.message, err));
+      // Create a message transfer, with the terms of the payment in the metadata.
+      return this.vectorUtils
+        .createOfferTransfer(counterPartyAccount, message)
+        .andThen((transferInfo) => {
+          return browserNode.getTransfer(TransferId(transferInfo.transferId));
+        })
+        .andThen((transfer) => {
+          // Return the payment
+          return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
+        })
+        .map((payment) => {
+          return payment as PushPayment;
+        })
+        .mapErr((err) => new PaymentCreationError(err?.message, err));
+    });
   }
 
   /**

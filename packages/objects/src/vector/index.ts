@@ -114,7 +114,7 @@ export interface IRegisteredTransfer {
 
 export interface IBasicTransferResponse {
   channelAddress: string; // EthereumAddress;
-  transferId: string;
+  transferId: string; // TransferId
   routingId?: string;
 }
 

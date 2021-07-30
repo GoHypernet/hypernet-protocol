@@ -96,6 +96,7 @@ export const offerDetails: IHypernetOfferDetails = {
   paymentAmount: commonAmount,
   gatewayUrl: gatewayUrl,
   paymentToken: erc20AssetAddress,
+  insuranceToken: hyperTokenAddress,
   expirationDate: UnixTimestamp(unixPast + defaultExpirationLength),
   metadata: null,
 };

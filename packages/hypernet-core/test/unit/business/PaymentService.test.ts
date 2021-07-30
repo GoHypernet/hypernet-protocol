@@ -31,6 +31,7 @@ import {
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
+import { IPaymentUtils } from "@interfaces/utilities";
 import {
   defaultExpirationLength,
   gatewayUrl,
@@ -70,6 +71,7 @@ class PaymentServiceMocks {
   public logUtils = td.object<ILogUtils>();
   public vectorUtils =
     VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
+  public paymentUtils = td.object<IPaymentUtils>();
   public paymentRepository = td.object<IPaymentRepository>();
   public gatewayConnectorRepository = td.object<IGatewayConnectorRepository>();
 
@@ -224,6 +226,7 @@ class PaymentServiceMocks {
       this.paymentRepository,
       this.gatewayConnectorRepository,
       this.vectorUtils,
+      this.paymentUtils,
       this.logUtils,
     );
   }

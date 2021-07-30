@@ -27,6 +27,9 @@ import {
   Signature,
   TransferId,
   ETransferState,
+  IHypernetOfferDetails,
+  MessageState,
+  IBasicTransferResponse,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IPaymentService } from "@interfaces/business";
@@ -53,6 +56,8 @@ import {
   IConfigProviderType,
   IContextProvider,
   IContextProviderType,
+  IPaymentUtils,
+  IPaymentUtilsType,
   IVectorUtils,
   IVectorUtilsType,
 } from "@interfaces/utilities";
@@ -94,6 +99,7 @@ export class PaymentService implements IPaymentService {
     @inject(IGatewayConnectorRepositoryType)
     protected gatewayConnectorRepository: IGatewayConnectorRepository,
     @inject(IVectorUtilsType) protected vectorUtils: IVectorUtils,
+    @inject(IPaymentUtilsType) protected paymentUtils: IPaymentUtils,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
@@ -789,40 +795,249 @@ export class PaymentService implements IPaymentService {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds(paymentIds),
       this.contextProvider.getInitializedContext(),
-    ]).andThen((vals) => {
-      const [paymentsById, context] = vals;
-      const borkedPayments = new Array<Payment>();
-      // Sort out the payments that are borked. We are only worried about those.
-      for (const payment of paymentsById.values()) {
-        if (payment.state === EPaymentState.Borked) {
-          borkedPayments.push(payment);
+    ])
+      .andThen((vals) => {
+        const [paymentsById, context] = vals;
+        const borkedPayments = new Array<Payment>();
+        // Sort out the payments that are borked. We are only worried about those.
+        for (const payment of paymentsById.values()) {
+          if (payment.state === EPaymentState.Borked) {
+            borkedPayments.push(payment);
+          }
         }
-      }
 
-      // Now we have a list of borked payments. Let's try and recover them.
-      return ResultUtils.combine(
-        borkedPayments.map((payment) => {
-          return this._recoverPayment(payment, context);
-        }),
-      );
-    });
+        // Now we have a list of borked payments. Let's try and recover them.
+        return ResultUtils.combine(
+          borkedPayments.map((payment) => {
+            return this._recoverPayment(payment, context);
+          }),
+        );
+      })
+      .andThen(() => {
+        return this.paymentRepository.getPaymentsByIds(paymentIds);
+      })
+      .map((paymentsById) => {
+        return Array.from(paymentsById.values());
+      });
   }
 
   protected _recoverPayment(
     payment: Payment,
-    context: InitializedHypernetContext,
-  ): ResultAsync<Payment, never> {
+    context: HypernetContext,
+  ): ResultAsync<void, BlockchainUnavailableError> {
     // We need to figure out why the payment is borked. We'll start looking at each possible cause
     // Depending on if the payment is too us or from us, there are different things we can fix.
     // The main things we can recover from are A. multiple payments/transfers, and B. invalid
     // payments/transfers. If there are multiples, we will just cancel the extra ones.
     // If there are invalid transfers, we need to just back out of the whole process.
-    if (context.publicIdentifier == payment.to) {
-      // It's to us, so the offer and payment transfers can be canceled
-    } else if (context.publicIdentifier == payment.from) {
-      // It's from us, so we can only cancel the insurance payments
+
+    // We have the transfers sorted via the payment details
+    // If there are no offer transfers at all, then recovery boils down to canceling everything we can.
+    const hasOfferTransfers = payment.details.offerTransfers.length > 0;
+    if (!hasOfferTransfers) {
+      return this._cancelEverything(context, payment);
     }
-    return okAsync(payment);
+
+    // If we have an offer transfer or two, we need to figure out the offer transfer to use to get the offer details.
+    // The valid offer transfer we will use is the first one, regardless of its state.
+    const offerTransfer = this.paymentUtils.getFirstTransfer(
+      payment.details.offerTransfers,
+    );
+    const offerDetails: IHypernetOfferDetails = JSON.parse(
+      (offerTransfer.transferState as MessageState).message,
+    );
+
+    // Now we have the offer details.  We need to sort the transfers out even further.
+    // For each transfer, we need to know the current state of the transfer and if it
+    // is valid or not (valid = matches the offer)
+
+    return ResultUtils.combine([
+      ResultUtils.map(payment.details.offerTransfers, (val) => {
+        return this.vectorUtils
+          .getTransferStateFromTransfer(val)
+          .map((transferState) => {
+            return { transfer: val, transferState: transferState };
+          });
+      }),
+      ResultUtils.map(payment.details.insuranceTransfers, (val) => {
+        return this.vectorUtils
+          .getTransferStateFromTransfer(val)
+          .map((transferState) => {
+            return {
+              transfer: val,
+              transferState: transferState,
+              valid: this.paymentUtils.validateInsuranceTransfer(
+                val,
+                offerDetails,
+              ),
+            };
+          });
+      }),
+      ResultUtils.map(payment.details.parameterizedTransfers, (val) => {
+        return this.vectorUtils
+          .getTransferStateFromTransfer(val)
+          .map((transferState) => {
+            return {
+              transfer: val,
+              transferState: transferState,
+              valid: this.paymentUtils.validatePaymentTransfer(
+                val,
+                offerDetails,
+              ),
+            };
+          });
+      }),
+      ResultUtils.map(payment.details.pullRecordTransfers, (val) => {
+        return this.vectorUtils
+          .getTransferStateFromTransfer(val)
+          .map((transferState) => {
+            return { transfer: val, transferState: transferState };
+          });
+      }),
+    ])
+      .andThen((vals) => {
+        const [
+          offerTransferStats,
+          insuranceTransferStats,
+          parameterizedTransferStats,
+          pullRecordTransfers,
+        ] = vals;
+
+        // Now we have the transfers, their state, and their validity.
+        // If we found any invalid transfers, that basically means we are not going
+        // to retry the payment (via _advancePayment)
+        if (context.publicIdentifier == payment.to) {
+          // It's to us, so the offer and payment transfers can be canceled
+          // We will cancel all the non-valid offer transfers
+          const offerTransfersToCancel = offerTransferStats.filter((val) => {
+            return (
+              val.transfer.transferId != offerTransfer.transferId &&
+              val.transferState == ETransferState.Active
+            );
+          });
+
+          return ResultUtils.map(offerTransfersToCancel, (transfer) => {
+            return this.vectorUtils.cancelMessageTransfer(
+              TransferId(transfer.transfer.transferId),
+            );
+          }).andThen(() => {
+            // Payment transfers to cancel are any beyond the first
+            if (parameterizedTransferStats.length > 1) {
+              const parameterizedTransfer = this.paymentUtils.getFirstTransfer(
+                payment.details.parameterizedTransfers,
+              );
+              const parameterizedTransfersToCancel =
+                parameterizedTransferStats.filter((val) => {
+                  return (
+                    val.transfer.transferId !=
+                      parameterizedTransfer.transferId &&
+                    val.transferState == ETransferState.Active
+                  );
+                });
+
+              // The only real descision to make as far as recovery, is whether or not to cancel
+              // the first transaction. We will only cancel it if it is invalid.
+              // The state and validity is in parameterizedTransfers
+              const parameterizedTransferStat = parameterizedTransferStats.find(
+                (val) =>
+                  val.transfer.transferId === parameterizedTransfer.transferId,
+              );
+              if (parameterizedTransferStat == null) {
+                throw new Error(
+                  "First parameterized transfer does not exist in parameterizedTransferStats",
+                );
+              }
+              if (!parameterizedTransferStat.valid) {
+                parameterizedTransfersToCancel.push(parameterizedTransferStat);
+              }
+
+              // Now just cancel the transfers
+              return ResultUtils.map(
+                parameterizedTransfersToCancel,
+                (transferStat) => {
+                  return this.vectorUtils.cancelParameterizedTransfer(
+                    TransferId(transferStat.transfer.transferId),
+                  );
+                },
+              );
+            }
+            return okAsync<IBasicTransferResponse[], TransferResolutionError>(
+              [],
+            );
+          });
+        } else if (context.publicIdentifier == payment.from) {
+          // It's from us, so we can only cancel the insurance payments
+          // Payment transfers to cancel are any beyond the first
+          if (insuranceTransferStats.length > 1) {
+            const insuranceTransfer = this.paymentUtils.getFirstTransfer(
+              payment.details.insuranceTransfers,
+            );
+            const insuranceTransfersToCancel = insuranceTransferStats.filter(
+              (val) => {
+                return (
+                  val.transfer.transferId != insuranceTransfer.transferId &&
+                  val.transferState == ETransferState.Active
+                );
+              },
+            );
+
+            // The only real descision to make as far as recovery, is whether or not to cancel
+            // the first transaction. We will only cancel it if it is invalid.
+            // The state and validity is in insuranceTransferStats
+            const insuranceTransferStat = insuranceTransferStats.find(
+              (val) => val.transfer.transferId === insuranceTransfer.transferId,
+            );
+            if (insuranceTransferStat == null) {
+              throw new Error(
+                "First insurance transfer does not exist in insuranceTransferStats",
+              );
+            }
+            if (!insuranceTransferStat.valid) {
+              insuranceTransfersToCancel.push(insuranceTransferStat);
+            }
+
+            // Now just cancel the transfers
+            return ResultUtils.map(
+              insuranceTransfersToCancel,
+              (transferStat) => {
+                return this.vectorUtils.cancelInsuranceTransfer(
+                  TransferId(transferStat.transfer.transferId),
+                );
+              },
+            );
+          }
+          return okAsync<IBasicTransferResponse[], TransferResolutionError>([]);
+        }
+        return okAsync<IBasicTransferResponse[], TransferResolutionError>([]);
+      })
+      .andThen(() => {
+        return okAsync<void, TransferResolutionError>(undefined);
+      })
+      .map(() => {});
+  }
+
+  protected _cancelEverything(
+    context: HypernetContext,
+    payment: Payment,
+  ): ResultAsync<void, TransferResolutionError> {
+    if (context.publicIdentifier == payment.to) {
+      return ResultUtils.combine([
+        ResultUtils.map(payment.details.offerTransfers, (transfer) => {
+          return this.vectorUtils.cancelMessageTransfer(
+            TransferId(transfer.transferId),
+          );
+        }),
+      ]).map(() => {});
+    } else if (context.publicIdentifier == payment.from) {
+      return ResultUtils.combine([
+        ResultUtils.map(payment.details.offerTransfers, (transfer) => {
+          return this.vectorUtils.cancelMessageTransfer(
+            TransferId(transfer.transferId),
+          );
+        }),
+      ]).map(() => {});
+    }
+    return okAsync(undefined);
   }
 
   protected _advancePayment(
@@ -943,6 +1158,13 @@ export class PaymentService implements IPaymentService {
         if (payment instanceof PullPayment) {
           context.onPullPaymentUpdated.next(payment);
         }
+        return payment;
+      });
+    }
+
+    if (payment.state == EPaymentState.Borked) {
+      this.logUtils.debug(`Attempting to recover borked payment ${payment.id}`);
+      return this._recoverPayment(payment, context).map(() => {
         return payment;
       });
     }

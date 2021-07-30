@@ -14,6 +14,9 @@ import {
   VectorError,
   InvalidPaymentIdError,
   BlockchainUnavailableError,
+  InsuranceState,
+  IHypernetOfferDetails,
+  ParameterizedState,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -107,10 +110,39 @@ export interface IPaymentUtils {
   getEarliestDateFromTransfers(transfers: IFullTransferState[]): UnixTimestamp;
 
   /**
+   * Returns the first transfer from a list of transfers, based on the timestamp.
+   * This will throw an error if the transfers list is empty.
+   * @param transfers a list of random transfers
+   */
+  getFirstTransfer(transfers: IFullTransferState[]): IFullTransferState;
+
+  /**
    * Returns the calculated payment state, based on all the extant transfers.
    * @param sortedTransfers
    */
   getPaymentState(
     sortedTransfers: SortedTransfers,
   ): ResultAsync<EPaymentState, BlockchainUnavailableError>;
+
+  /**
+   * This returns true if the provided insurance transfer matches the terms of the offer details
+   * @param transfer an insurance transfer
+   * @param offerDetails the details of the offer you are validating
+   */
+  validateInsuranceTransfer(
+    transfer: IFullTransferState<InsuranceState>,
+    offerDetails: IHypernetOfferDetails,
+  ): boolean;
+
+  /**
+   * This returns true if the provided payment transfer matches the terms of the offer details
+   * @param transfer a parameterized transfer
+   * @param offerDetails the details of the offer you are validating
+   */
+  validatePaymentTransfer(
+    transfer: IFullTransferState<ParameterizedState>,
+    offerDetails: IHypernetOfferDetails,
+  ): boolean;
 }
+
+export const IPaymentUtilsType = Symbol.for("IPaymentUtils");

@@ -332,11 +332,6 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
 
         // Get the registration info
         return this.getGatewayRegistrationInfo(gatewayUrls)
-          .orElse(() => {
-            return okAsync<Map<GatewayUrl, GatewayRegistrationInfo>, never>(
-              new Map<GatewayUrl, GatewayRegistrationInfo>(),
-            );
-          })
           .andThen((registrationInfoMap) => {
             for (const [
               gatewayUrl,
@@ -569,7 +564,10 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
       throw new Error("You must call activateAuthorizedGateways first!");
     }
 
-    return this.getAuthorizedGateways()
+    return this.activateAuthorizedGatewaysResult
+      .andThen(() => {
+        return this.getAuthorizedGateways();
+      })
       .andThen((authorizedGateways) => {
         // Go through the results for the gateway
         const proxyResults = new Array<ResultAsync<void, never>>();
@@ -577,7 +575,9 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
           const proxyResult = this.authorizedGatewayProxies.get(gatewayUrl);
 
           if (proxyResult == null) {
-            throw new Error("Something deeply screwed up!");
+            // Gateway is not currently activated
+            retMap.set(gatewayUrl, false);
+            continue;
           }
 
           proxyResults.push(

@@ -25,7 +25,6 @@ import {
   InsuranceState,
   MessageState,
   ParameterizedState,
-  EMessageTransferType,
   BigNumberString,
   UnixTimestamp,
 } from "@hypernetlabs/objects";
@@ -617,16 +616,18 @@ export class PaymentUtils implements IPaymentUtils {
   }
 
   // Returns true if the insurance transfer is
-  protected validateInsuranceTransfer(
+  public validateInsuranceTransfer(
     transfer: IFullTransferState<InsuranceState>,
     offerDetails: IHypernetOfferDetails,
   ): boolean {
-    return BigNumber.from(transfer.transferState.collateral).eq(
-      BigNumber.from(offerDetails.requiredStake),
+    return (
+      BigNumber.from(transfer.transferState.collateral).eq(
+        BigNumber.from(offerDetails.requiredStake),
+      ) && transfer.assetId == offerDetails.insuranceToken
     );
   }
 
-  protected validatePaymentTransfer(
+  public validatePaymentTransfer(
     transfer: IFullTransferState<ParameterizedState>,
     offerDetails: IHypernetOfferDetails,
   ): boolean {
@@ -635,7 +636,10 @@ export class PaymentUtils implements IPaymentUtils {
       total = total.add(amount);
     }
 
-    return total.eq(BigNumber.from(offerDetails.paymentAmount));
+    return (
+      total.eq(BigNumber.from(offerDetails.paymentAmount)) &&
+      transfer.assetId == offerDetails.paymentToken
+    );
 
     // TODO: Validate the rate is set correctly
     // && transfer.transferState.rate == offerDetails.;
@@ -739,22 +743,11 @@ export class PaymentUtils implements IPaymentUtils {
     const parameterizedTransfers: IFullTransferState[] = [];
     const pullTransfers: IFullTransferState[] = [];
     const unrecognizedTransfers: IFullTransferState[] = [];
-    const transferTypeResults = new Array<
-      ResultAsync<
-        { transferType: ETransferType; transfer: IFullTransferState },
-        VectorError | LogicalError
-      >
-    >();
+    const transferTypeResults = new Array<ResultAsync<void, VectorError>>();
 
     for (const transfer of transfers) {
       transferTypeResults.push(
-        this.vectorUtils.getTransferTypeWithTransfer(transfer),
-      );
-    }
-
-    return ResultUtils.combine(transferTypeResults).andThen(
-      (transferTypesWithTransfers) => {
-        for (const { transferType, transfer } of transferTypesWithTransfers) {
+        this.vectorUtils.getTransferType(transfer).map((transferType) => {
           if (transferType === ETransferType.Offer) {
             offerTransfers.push(transfer);
           } else if (transferType === ETransferType.Insurance) {
@@ -769,9 +762,12 @@ export class PaymentUtils implements IPaymentUtils {
             this.logUtils.log("Unreachable code reached!");
             unrecognizedTransfers.push(transfer);
           }
-        }
+        }),
+      );
+    }
 
-        this.logUtils.debug(`
+    return ResultUtils.combine(transferTypeResults).map(() => {
+      this.logUtils.debug(`
         PaymentUtils:sortTransfers
   
         offerTransfers: ${offerTransfers.length}
@@ -781,16 +777,13 @@ export class PaymentUtils implements IPaymentUtils {
         unrecognizedTransfers: ${unrecognizedTransfers.length}
       `);
 
-        return okAsync(
-          new SortedTransfers(
-            offerTransfers,
-            insuranceTransfers,
-            parameterizedTransfers,
-            pullTransfers,
-          ),
-        );
-      },
-    );
+      return new SortedTransfers(
+        offerTransfers,
+        insuranceTransfers,
+        parameterizedTransfers,
+        pullTransfers,
+      );
+    });
   }
 
   public getEarliestDateFromTransfers(
@@ -811,6 +804,23 @@ export class PaymentUtils implements IPaymentUtils {
     });
 
     return this.vectorUtils.getTimestampFromTransfer(transfers[0]);
+  }
+
+  public getFirstTransfer(transfers: IFullTransferState[]): IFullTransferState {
+    if (transfers.length == 0) {
+      throw new Error("No transfers provided!");
+    }
+
+    const earliestDate = this.getEarliestDateFromTransfers(transfers);
+    const transfer = transfers.find((val) => {
+      return this.vectorUtils.getTimestampFromTransfer(val) == earliestDate;
+    });
+    if (transfer == null) {
+      throw new Error(
+        "Offer with earliest timestamp doesn't actually exist...",
+      );
+    }
+    return transfer;
   }
 
   protected getRegisteredTransfersResponse:
