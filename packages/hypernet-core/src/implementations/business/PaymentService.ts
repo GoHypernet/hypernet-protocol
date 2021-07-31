@@ -10,7 +10,6 @@ import {
   AcceptPaymentError,
   InsufficientBalanceError,
   InvalidParametersError,
-  LogicalError,
   GatewayValidationError,
   PaymentFinalizeError,
   PaymentCreationError,
@@ -30,6 +29,7 @@ import {
   IHypernetOfferDetails,
   MessageState,
   IBasicTransferResponse,
+  LogicalError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IPaymentService } from "@interfaces/business";
@@ -43,10 +43,7 @@ import {
   IPaymentRepository,
   IPaymentRepositoryType,
 } from "@interfaces/data";
-import {
-  HypernetContext,
-  InitializedHypernetContext,
-} from "@interfaces/objects";
+import { HypernetContext } from "@interfaces/objects";
 import { BigNumber } from "ethers";
 import { injectable, inject } from "inversify";
 import { err, errAsync, ok, okAsync, ResultAsync, Result } from "neverthrow";
@@ -65,7 +62,6 @@ import {
 type PaymentsByIdsErrors =
   | VectorError
   | BlockchainUnavailableError
-  | LogicalError
   | InvalidPaymentError
   | InvalidParametersError;
 
@@ -124,7 +120,7 @@ export class PaymentService implements IPaymentService {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PullPayment, PaymentCreationError | LogicalError> {
+  ): ResultAsync<PullPayment, PaymentCreationError> {
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
     // totalAuthorized / (deltaAmount/deltaTime) > ((expiration date - now) + someMinimumNumDays)
 
@@ -219,7 +215,7 @@ export class PaymentService implements IPaymentService {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PushPayment, PaymentCreationError | LogicalError> {
+  ): ResultAsync<PushPayment, PaymentCreationError> {
     // TODO: Sanity checking on the values
     return ResultUtils.combine([
       this.paymentRepository.createPushPayment(
@@ -554,7 +550,6 @@ export class PaymentService implements IPaymentService {
     | TransferResolutionError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -663,7 +658,6 @@ export class PaymentService implements IPaymentService {
     Payment,
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferResolutionError
@@ -786,7 +780,6 @@ export class PaymentService implements IPaymentService {
     Payment[],
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
   > {

@@ -18,7 +18,6 @@ import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
   InsufficientBalanceError,
-  LogicalError,
   GatewayConnectorError,
   GatewayValidationError,
   PersistenceError,
@@ -28,6 +27,7 @@ import {
   GatewayAuthorizationDeniedError,
   BigNumberString,
   MessagingError,
+  RouterChannelUnknownError,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -205,7 +205,13 @@ export class HypernetCore implements IHypernetCore {
 
   protected _initializeResult: ResultAsync<
     void,
-    LogicalError | MessagingError
+    | MessagingError
+    | BlockchainUnavailableError
+    | VectorError
+    | RouterChannelUnknownError
+    | GatewayConnectorError
+    | GatewayValidationError
+    | ProxyError
   > | null;
   protected _initialized: boolean;
   protected _initializePromise: Promise<void>;
@@ -631,7 +637,16 @@ export class HypernetCore implements IHypernetCore {
    */
   public initialize(
     account: EthereumAddress,
-  ): ResultAsync<void, LogicalError | MessagingError> {
+  ): ResultAsync<
+    void,
+    | MessagingError
+    | BlockchainUnavailableError
+    | VectorError
+    | RouterChannelUnknownError
+    | GatewayConnectorError
+    | GatewayValidationError
+    | ProxyError
+  > {
     if (this._initializeResult != null) {
       return this._initializeResult;
     }

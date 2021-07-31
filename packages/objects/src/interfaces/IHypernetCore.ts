@@ -9,7 +9,6 @@ import {
   BalancesUnavailableError,
   BlockchainUnavailableError,
   InsufficientBalanceError,
-  LogicalError,
   PersistenceError,
   VectorError,
   GatewayValidationError,
@@ -18,6 +17,7 @@ import {
   ProxyError,
   GatewayAuthorizationDeniedError,
   MessagingError,
+  RouterChannelUnknownError,
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { GatewayUrl } from "@objects/GatewayUrl";
@@ -59,7 +59,16 @@ export interface IHypernetCore {
    */
   initialize(
     account: EthereumAddress,
-  ): ResultAsync<void, LogicalError | MessagingError>;
+  ): ResultAsync<
+    void,
+    | MessagingError
+    | BlockchainUnavailableError
+    | VectorError
+    | RouterChannelUnknownError
+    | GatewayConnectorError
+    | GatewayValidationError
+    | ProxyError
+  >;
 
   /**
    * Gets the public id of the Hypernet Core user account. If the core is not initialized,

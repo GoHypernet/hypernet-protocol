@@ -13,7 +13,6 @@ import {
   AcceptPaymentError,
   BlockchainUnavailableError,
   VectorError,
-  LogicalError,
   BalancesUnavailableError,
   InsufficientBalanceError,
   GatewayValidationError,
@@ -27,6 +26,8 @@ import {
   GatewayAuthorizationDeniedError,
   BigNumberString,
   UnixTimestamp,
+  MessagingError,
+  RouterChannelUnknownError,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -239,7 +240,18 @@ export default class HypernetIFrameProxy
     return this._createCall("getEthereumAccounts", null);
   }
 
-  public initialize(account: EthereumAddress): ResultAsync<void, LogicalError> {
+  public initialize(
+    account: EthereumAddress,
+  ): ResultAsync<
+    void,
+    | MessagingError
+    | BlockchainUnavailableError
+    | VectorError
+    | RouterChannelUnknownError
+    | GatewayConnectorError
+    | GatewayValidationError
+    | ProxyError
+  > {
     return this._createCall("initialize", account);
   }
 

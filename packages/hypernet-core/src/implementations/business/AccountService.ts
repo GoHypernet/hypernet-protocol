@@ -6,7 +6,6 @@ import {
   PublicIdentifier,
   BalancesUnavailableError,
   BlockchainUnavailableError,
-  LogicalError,
   VectorError,
   Signature,
   BigNumberString,
@@ -59,10 +58,7 @@ export class AccountService implements IAccountService {
     amount: BigNumberString,
   ): ResultAsync<
     Balances,
-    | BalancesUnavailableError
-    | BlockchainUnavailableError
-    | VectorError
-    | LogicalError
+    BalancesUnavailableError | BlockchainUnavailableError | VectorError
   > {
     this.logUtils.log(
       `HypernetCore:depositFunds: assetAddress: ${assetAddress}`,

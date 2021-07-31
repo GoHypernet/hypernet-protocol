@@ -10,7 +10,6 @@ import {
   EPaymentType,
   InvalidParametersError,
   InvalidPaymentError,
-  LogicalError,
   VectorError,
   InvalidPaymentIdError,
   BlockchainUnavailableError,
@@ -40,10 +39,7 @@ export interface IPaymentUtils {
   sortTransfers(
     _paymentId: PaymentId,
     transfers: IFullTransferState[],
-  ): ResultAsync<
-    SortedTransfers,
-    InvalidPaymentError | VectorError | LogicalError
-  >;
+  ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError>;
 
   /**
    *
@@ -56,7 +52,7 @@ export interface IPaymentUtils {
     transfers: IFullTransferState[],
   ): ResultAsync<
     Payment[],
-    VectorError | LogicalError | InvalidPaymentError | InvalidParametersError
+    VectorError | InvalidPaymentError | InvalidParametersError
   >;
 
   /**
@@ -84,7 +80,7 @@ export interface IPaymentUtils {
     id: PaymentId,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<PullPayment, LogicalError>;
+  ): ResultAsync<PullPayment, never>;
 
   /**
    *
@@ -99,7 +95,7 @@ export interface IPaymentUtils {
     id: PaymentId,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<PushPayment, LogicalError>;
+  ): ResultAsync<PushPayment, never>;
 
   /**
    * Given an unsorted list of transfers, it will give you the timestamp of the

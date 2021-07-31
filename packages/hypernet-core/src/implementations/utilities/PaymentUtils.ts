@@ -16,7 +16,6 @@ import {
   InvalidParametersError,
   InvalidPaymentError,
   InvalidPaymentIdError,
-  LogicalError,
   VectorError,
   EPaymentState,
   EPaymentType,
@@ -27,6 +26,7 @@ import {
   ParameterizedState,
   BigNumberString,
   UnixTimestamp,
+  LogicalError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -109,18 +109,13 @@ export class PaymentUtils implements IPaymentUtils {
     paymentId: PaymentId,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<PushPayment, LogicalError> {
+  ): ResultAsync<PushPayment, never> {
     /**
      * Push payments consist of 3 transfers:
      * MessageTransfer - 0 value, represents an offer
      * InsuranceTransfer - service operator puts up to guarantee the sender's funds
      * ParameterizedPayment - the payment to the service operator
      */
-
-    if (sortedTransfers.pullRecordTransfers.length > 0) {
-      throw new LogicalError("Push payment has pull transfers!");
-    }
-
     const offerDetails: IHypernetOfferDetails = JSON.parse(
       (sortedTransfers.offerTransfers[0].transferState as MessageState).message,
     );
@@ -187,7 +182,7 @@ export class PaymentUtils implements IPaymentUtils {
     paymentId: PaymentId,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<PullPayment, LogicalError> {
+  ): ResultAsync<PullPayment, never> {
     /**
      * Pull payments consist of 3+ transfers, a null transfer for 0 value that represents the
      * offer, an insurance payment, and a parameterized payment.
@@ -209,8 +204,8 @@ export class PaymentUtils implements IPaymentUtils {
 
     // Get deltaAmount & deltaTime from the parameterized payment
     if (offerDetails.rate == null) {
-      return errAsync(
-        new LogicalError("These transfers are not for a pull payment."),
+      throw new LogicalError(
+        "Pull payment offer does not include rate information",
       );
     }
 
@@ -656,7 +651,7 @@ export class PaymentUtils implements IPaymentUtils {
     transfers: IFullTransferState[],
   ): ResultAsync<
     Payment[],
-    VectorError | LogicalError | InvalidPaymentError | InvalidParametersError
+    VectorError | InvalidPaymentError | InvalidParametersError
   > {
     // First step, get the transfer types for all the transfers
     const transferTypeResults = new Array<
@@ -734,10 +729,7 @@ export class PaymentUtils implements IPaymentUtils {
   public sortTransfers(
     _paymentId: string,
     transfers: IFullTransferState[],
-  ): ResultAsync<
-    SortedTransfers,
-    InvalidPaymentError | VectorError | LogicalError
-  > {
+  ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError> {
     const offerTransfers: IFullTransferState[] = [];
     const insuranceTransfers: IFullTransferState[] = [];
     const parameterizedTransfers: IFullTransferState[] = [];

@@ -4,7 +4,6 @@ import {
   InvalidParametersError,
   BlockchainUnavailableError,
   InvalidPaymentError,
-  LogicalError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -18,7 +17,6 @@ export interface ILinkService {
     | InvalidParametersError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
   >;
 }
 

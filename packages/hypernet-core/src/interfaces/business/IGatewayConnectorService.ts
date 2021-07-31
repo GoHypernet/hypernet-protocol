@@ -1,5 +1,4 @@
 import {
-  LogicalError,
   GatewayConnectorError,
   GatewayValidationError,
   BlockchainUnavailableError,
@@ -12,7 +11,7 @@ import {
 import { ResultAsync } from "neverthrow";
 
 export interface IGatewayConnectorService {
-  initialize(): ResultAsync<void, LogicalError | GatewayConnectorError>;
+  initialize(): ResultAsync<void, GatewayConnectorError>;
   authorizeGateway(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayValidationError>;
@@ -35,7 +34,6 @@ export interface IGatewayConnectorService {
     | GatewayConnectorError
     | GatewayValidationError
     | BlockchainUnavailableError
-    | LogicalError
     | ProxyError
   >;
   closeGatewayIFrame(

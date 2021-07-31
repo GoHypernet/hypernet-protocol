@@ -11,7 +11,6 @@ import {
   VectorError,
   PaymentCreationError,
   BlockchainUnavailableError,
-  LogicalError,
   TransferResolutionError,
   InvalidPaymentError,
   InvalidParametersError,
@@ -34,7 +33,6 @@ export interface IPaymentRepository {
     Map<PaymentId, Payment>,
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
   >;
@@ -84,7 +82,6 @@ export interface IPaymentRepository {
     | PaymentStakeError
     | TransferResolutionError
     | VectorError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -104,7 +101,6 @@ export interface IPaymentRepository {
     | PaymentStakeError
     | TransferResolutionError
     | VectorError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -123,7 +119,6 @@ export interface IPaymentRepository {
     Payment,
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | PaymentFinalizeError
     | TransferResolutionError
     | InvalidPaymentError

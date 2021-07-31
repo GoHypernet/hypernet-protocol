@@ -1,7 +1,6 @@
 import {
   VectorError,
   BlockchainUnavailableError,
-  LogicalError,
   InvalidPaymentIdError,
   PaymentFinalizeError,
   PaymentStakeError,
@@ -17,7 +16,6 @@ export interface IVectorListener {
     void,
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentIdError
     | PaymentFinalizeError
     | PaymentStakeError

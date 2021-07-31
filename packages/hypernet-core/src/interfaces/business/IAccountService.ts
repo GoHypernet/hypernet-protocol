@@ -6,7 +6,6 @@ import {
   Signature,
   BalancesUnavailableError,
   BlockchainUnavailableError,
-  LogicalError,
   VectorError,
   InvalidParametersError,
   BigNumberString,
@@ -27,10 +26,7 @@ export interface IAccountService {
     amount: BigNumberString,
   ): ResultAsync<
     Balances,
-    | BalancesUnavailableError
-    | BlockchainUnavailableError
-    | VectorError
-    | LogicalError
+    BalancesUnavailableError | BlockchainUnavailableError | VectorError
   >;
   withdrawFunds(
     assetAddress: EthereumAddress,

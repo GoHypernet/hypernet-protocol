@@ -1,17 +1,3 @@
-import {
-  IGatewayConnector,
-  IRedirectInfo,
-  IResolutionResult,
-} from "@hypernetlabs/gateway-connector";
-import {
-  Balances,
-  EthereumAddress,
-  LogicalError,
-  PaymentId,
-  PublicIdentifier,
-  Signature,
-  GatewayUrl,
-} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface ICoreUIService {

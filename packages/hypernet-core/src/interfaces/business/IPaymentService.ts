@@ -7,7 +7,6 @@ import {
   AcceptPaymentError,
   InsufficientBalanceError,
   InvalidParametersError,
-  LogicalError,
   GatewayValidationError,
   PaymentFinalizeError,
   VectorError,
@@ -46,7 +45,7 @@ export interface IPaymentService {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
+  ): ResultAsync<Payment, PaymentCreationError>;
 
   /**
    * Record a pull against a Pull Payment's authorized funds. Doesn't actually
@@ -59,7 +58,6 @@ export interface IPaymentService {
     Payment,
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | PaymentCreationError
@@ -82,7 +80,7 @@ export interface IPaymentService {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
+  ): ResultAsync<Payment, PaymentCreationError>;
 
   /**
    * Called by the person on the receiving end of a push payment,
@@ -98,7 +96,6 @@ export interface IPaymentService {
     | GatewayValidationError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
   >;
@@ -116,7 +113,6 @@ export interface IPaymentService {
     | TransferResolutionError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -134,7 +130,6 @@ export interface IPaymentService {
     | TransferResolutionError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -152,7 +147,6 @@ export interface IPaymentService {
     | TransferResolutionError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -171,7 +165,6 @@ export interface IPaymentService {
     | TransferResolutionError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -187,7 +180,6 @@ export interface IPaymentService {
     void,
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
   >;
@@ -205,7 +197,6 @@ export interface IPaymentService {
     | TransferResolutionError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -222,7 +213,6 @@ export interface IPaymentService {
     void,
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
   >;
@@ -243,7 +233,6 @@ export interface IPaymentService {
     Payment,
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferResolutionError
@@ -266,7 +255,6 @@ export interface IPaymentService {
     | TransferResolutionError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError

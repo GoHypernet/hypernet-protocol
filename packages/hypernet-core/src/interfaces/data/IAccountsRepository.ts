@@ -4,10 +4,8 @@ import {
   AssetBalance,
   PublicIdentifier,
   Signature,
-  AssetInfo,
   BalancesUnavailableError,
   BlockchainUnavailableError,
-  LogicalError,
   VectorError,
   BigNumberString,
 } from "@hypernetlabs/objects";
@@ -29,7 +27,7 @@ export interface IAccountsRepository {
   depositFunds(
     assetAddress: EthereumAddress,
     amount: BigNumberString,
-  ): ResultAsync<null, VectorError | LogicalError | BlockchainUnavailableError>;
+  ): ResultAsync<null, VectorError | BlockchainUnavailableError>;
   withdrawFunds(
     assetAddress: EthereumAddress,
     amount: BigNumberString,

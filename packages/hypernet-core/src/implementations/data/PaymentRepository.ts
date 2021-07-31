@@ -13,7 +13,6 @@ import {
   PaymentId,
   GatewayUrl,
   TransferId,
-  LogicalError,
   PaymentFinalizeError,
   PaymentStakeError,
   TransferResolutionError,
@@ -31,10 +30,10 @@ import {
   UnixTimestamp,
   EPaymentState,
   Signature,
+  LogicalError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { IPaymentRepository } from "@interfaces/data";
-import { InitializedHypernetContext } from "@interfaces/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
@@ -240,7 +239,7 @@ export class PaymentRepository implements IPaymentRepository {
     paymentId: PaymentId,
   ): ResultAsync<
     IFullTransferState[],
-    VectorError | BlockchainUnavailableError | LogicalError
+    VectorError | BlockchainUnavailableError
   > {
     let browserNode: IBrowserNode;
     let channelAddress: EthereumAddress;
@@ -272,7 +271,7 @@ export class PaymentRepository implements IPaymentRepository {
               transferType: ETransferType;
               transfer: IFullTransferState;
             },
-            VectorError | LogicalError
+            VectorError
           >
         >();
         for (const transfer of transfers) {
@@ -331,7 +330,6 @@ export class PaymentRepository implements IPaymentRepository {
     Map<PaymentId, Payment>,
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
   > {
@@ -434,7 +432,6 @@ export class PaymentRepository implements IPaymentRepository {
     Payment,
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | PaymentFinalizeError
     | TransferResolutionError
     | InvalidPaymentError
@@ -515,7 +512,6 @@ export class PaymentRepository implements IPaymentRepository {
     | PaymentStakeError
     | TransferResolutionError
     | VectorError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -589,7 +585,6 @@ export class PaymentRepository implements IPaymentRepository {
     | PaymentStakeError
     | TransferResolutionError
     | VectorError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -624,10 +619,8 @@ export class PaymentRepository implements IPaymentRepository {
           this.logUtils.error(
             `Payment was not instance of push or pull payment!`,
           );
-          return errAsync(
-            new LogicalError(
-              "Payment was not instance of push or pull payment!",
-            ),
+          throw new LogicalError(
+            "Payment was not instance of push or pull payment!",
           );
         }
 

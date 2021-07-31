@@ -4,7 +4,6 @@ import {
   IConditionalTransferCreatedPayload,
   IConditionalTransferResolvedPayload,
   PaymentId,
-  LogicalError,
   VectorError,
   BlockchainUnavailableError,
   InvalidPaymentIdError,
@@ -20,7 +19,7 @@ import {
 import { ILogUtils } from "@hypernetlabs/utils";
 import { IVectorListener } from "@interfaces/api";
 import { IPaymentService } from "@interfaces/business";
-import { ResultAsync, errAsync, okAsync } from "neverthrow";
+import { ResultAsync, okAsync } from "neverthrow";
 
 import {
   IBrowserNodeProvider,
@@ -49,7 +48,6 @@ export class VectorAPIListener implements IVectorListener {
     void,
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentIdError
     | PaymentFinalizeError
     | PaymentStakeError
@@ -122,11 +120,10 @@ export class VectorAPIListener implements IVectorListener {
                     );
                     this.logUtils.debug(payload);
                     return okAsync(undefined);
-                  } else {
-                    return errAsync(
-                      new LogicalError("Unrecognized transfer type!"),
-                    );
                   }
+
+                  this.logUtils.error("Unrecognized transfer type!");
+                  return okAsync(undefined);
                 });
             })
             .mapErr((e) => {

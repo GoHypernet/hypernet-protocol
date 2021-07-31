@@ -1,12 +1,10 @@
 import {
   Balances,
-  LogicalError,
   GatewayConnectorError,
   GatewayValidationError,
   PersistenceError,
   ProxyError,
   BlockchainUnavailableError,
-  EthereumAddress,
   GatewayUrl,
   Signature,
   GatewayAuthorizationDeniedError,

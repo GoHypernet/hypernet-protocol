@@ -12,7 +12,6 @@ import {
   GatewayUrl,
   Balances,
   AuthorizedGatewaysSchema,
-  LogicalError,
   GatewayConnectorError,
   GatewayValidationError,
   GatewayActivationError,
@@ -150,7 +149,6 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
   ): ResultAsync<
     void,
     | PersistenceError
-    | LogicalError
     | GatewayValidationError
     | ProxyError
     | BlockchainUnavailableError
@@ -611,10 +609,7 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     { gatewayUrl: GatewayUrl; address: EthereumAddress },
-    | GatewayConnectorError
-    | LogicalError
-    | ProxyError
-    | GatewayAuthorizationDeniedError
+    GatewayConnectorError | ProxyError | GatewayAuthorizationDeniedError
   > {
     const url = new URL(urlJoinP(gatewayUrl, ["address"]));
     return this.ajaxUtils.get<EthereumAddress>(url).map((address) => {

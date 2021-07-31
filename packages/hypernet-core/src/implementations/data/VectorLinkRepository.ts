@@ -7,7 +7,6 @@ import {
   InvalidParametersError,
   VectorError,
   InvalidPaymentError,
-  LogicalError,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
 import { ILinkRepository } from "@interfaces/data";
@@ -50,7 +49,6 @@ export class VectorLinkRepository implements ILinkRepository {
     | InvalidParametersError
     | BlockchainUnavailableError
     | InvalidPaymentError
-    | LogicalError
   > {
     let browserNode: IBrowserNode;
 
@@ -97,7 +95,6 @@ export class VectorLinkRepository implements ILinkRepository {
     | InvalidParametersError
     | BlockchainUnavailableError
     | InvalidPaymentError
-    | LogicalError
   > {
     let browserNode: IBrowserNode;
     return ResultUtils.combine([
