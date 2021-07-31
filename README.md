@@ -1,4 +1,4 @@
-![alt](documentation/images/Hypernet_Logo.jpg)
+![alt](documentation/images/Hypernet-logo.svg)
 
 # The Hypernet Protocol
 
