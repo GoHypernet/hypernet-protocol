@@ -15,6 +15,9 @@ import {
   TransferCreationError,
   ETransferType,
   MessageState,
+  IFullTransferState,
+  InsuranceState,
+  ParameterizedState,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { IVectorListener } from "@interfaces/api";
@@ -74,14 +77,19 @@ export class VectorAPIListener implements IVectorListener {
               if (transferType === ETransferType.Offer) {
                 // @todo also add in PullRecord type)
                 const offerDetails: IHypernetOfferDetails = JSON.parse(
-                  (transfer.transferState as MessageState).message,
+                  (transfer as IFullTransferState<MessageState>).transferState
+                    .message,
                 );
                 paymentId = offerDetails.paymentId;
               } else if (
                 transferType === ETransferType.Insurance ||
                 transferType === ETransferType.Parameterized
               ) {
-                paymentId = transfer.transferState.UUID;
+                paymentId = (
+                  transfer as IFullTransferState<
+                    InsuranceState | ParameterizedState
+                  >
+                ).transferState.UUID;
               } else {
                 this.logUtils.log(
                   `Transfer type was not recognized, doing nothing. TransferType: '${transferType}'`,
@@ -148,19 +156,25 @@ export class VectorAPIListener implements IVectorListener {
 
               if (transferType === ETransferType.Offer) {
                 const message: IHypernetOfferDetails = JSON.parse(
-                  transfer.transferState.message,
+                  (transfer as IFullTransferState<MessageState>).transferState
+                    .message,
                 );
                 paymentId = message.paymentId;
               } else if (transferType === ETransferType.PullRecord) {
                 const message: IHypernetPullPaymentDetails = JSON.parse(
-                  transfer.transferState.message,
+                  (transfer as IFullTransferState<MessageState>).transferState
+                    .message,
                 );
                 paymentId = message.paymentId;
               } else if (
                 transferType === ETransferType.Insurance ||
                 transferType === ETransferType.Parameterized
               ) {
-                paymentId = transfer.transferState.UUID;
+                paymentId = (
+                  transfer as IFullTransferState<
+                    InsuranceState | ParameterizedState
+                  >
+                ).transferState.UUID;
               } else {
                 this.logUtils.log(
                   `Transfer type was not recognized, doing nothing. TransferType: '${transferType}'`,

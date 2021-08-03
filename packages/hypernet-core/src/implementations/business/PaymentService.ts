@@ -782,6 +782,7 @@ export class PaymentService implements IPaymentService {
     | BlockchainUnavailableError
     | InvalidPaymentError
     | InvalidParametersError
+    | TransferResolutionError
   > {
     // Recover payments will work to restore a "borked" payment to a usable status.
     // First step, get the payments.
@@ -817,7 +818,7 @@ export class PaymentService implements IPaymentService {
   protected _recoverPayment(
     payment: Payment,
     context: HypernetContext,
-  ): ResultAsync<void, BlockchainUnavailableError> {
+  ): ResultAsync<void, BlockchainUnavailableError | TransferResolutionError> {
     // We need to figure out why the payment is borked. We'll start looking at each possible cause
     // Depending on if the payment is too us or from us, there are different things we can fix.
     // The main things we can recover from are A. multiple payments/transfers, and B. invalid
@@ -1004,6 +1005,7 @@ export class PaymentService implements IPaymentService {
         return okAsync<IBasicTransferResponse[], TransferResolutionError>([]);
       })
       .andThen(() => {
+        // TODO: Figure out if there is a better way to update the Payment after the cancels
         return okAsync<void, TransferResolutionError>(undefined);
       })
       .map(() => {});

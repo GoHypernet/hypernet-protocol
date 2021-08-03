@@ -259,6 +259,26 @@ export interface IPaymentService {
     | InvalidParametersError
     | TransferCreationError
   >;
+
+  /**
+   * recoverPayments() will attempt to "recover" any payments that are in the Borked state.
+   * Borked simply means that something has gone wrong in the payment process, such as out
+   * of order resolutions, or most commonly double transfers being created. Recovery is
+   * automatically attempted by advancePayments(), but in the off chance that we want to try
+   * to do it explicitly, this function exists.
+   * Recovery basically amounts to canceling bad or excess transfers.
+   * @param paymentIds Payment IDs to attempt recovery on
+   */
+  recoverPayments(
+    paymentIds: PaymentId[],
+  ): ResultAsync<
+    Payment[],
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
+  >;
 }
 
 export const IPaymentServiceType = Symbol.for("IPaymentService");

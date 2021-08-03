@@ -36,6 +36,7 @@ export const ethereumAddress = EthereumAddress(
 export const chainId = 1337;
 export const hyperTokenAddress = EthereumAddress(constants.AddressZero);
 export const commonAmount = BigNumberString("1");
+export const uncommonAmount = BigNumberString("2");
 export const destinationAddress = EthereumAddress(
   "0x0afd1c03a0373b4c99233cbb0719ab0cbe6374gt",
 );
@@ -46,8 +47,11 @@ export const commonPaymentId = PaymentId(
   "See, this doesn't have to be legit data if it's never checked!",
 );
 export const offerTransferId = TransferId("OfferTransferId");
+export const offerTransferId2 = TransferId("OfferTransferId2");
 export const insuranceTransferId = TransferId("InsuranceTransferId");
+export const insuranceTransferId2 = TransferId("InsuranceTransferId2");
 export const parameterizedTransferId = TransferId("ParameterizedTransferId");
+export const parameterizedTransferId2 = TransferId("ParameterizedTransferId2");
 export const unixPast = UnixTimestamp(1318870398); // Less that defaultExpirationlength before now
 export const unixNow = UnixTimestamp(1318874398);
 export const defaultExpirationLength = 5000;
@@ -101,7 +105,10 @@ export const offerDetails: IHypernetOfferDetails = {
   metadata: null,
 };
 
-export const activeOfferTransfer: IFullTransferState<MessageState> = {
+export const activeOfferTransfer: IFullTransferState<
+  MessageState,
+  MessageResolver
+> = {
   balance: {
     amount: ["43", "43"],
     to: [destinationAddress],
@@ -116,7 +123,7 @@ export const activeOfferTransfer: IFullTransferState<MessageState> = {
   initiator: publicIdentifier,
   responder: publicIdentifier2,
   channelFactoryAddress: "channelFactoryAddress",
-  chainId: 1337,
+  chainId: chainId,
   transferEncodings: ["string"],
   transferState: {
     message: JSON.stringify(offerDetails),
@@ -126,7 +133,10 @@ export const activeOfferTransfer: IFullTransferState<MessageState> = {
   responderIdentifier: publicIdentifier2,
 };
 
-export const canceledOfferTransfer: IFullTransferState<MessageState> = {
+export const canceledOfferTransfer: IFullTransferState<
+  MessageState,
+  MessageResolver
+> = {
   balance: {
     amount: ["43", "43"],
     to: [destinationAddress],
@@ -141,18 +151,21 @@ export const canceledOfferTransfer: IFullTransferState<MessageState> = {
   initiator: publicIdentifier,
   responder: publicIdentifier2,
   channelFactoryAddress: "channelFactoryAddress",
-  chainId: 1337,
+  chainId: chainId,
   transferEncodings: ["string"],
   transferState: {
-    message: "",
+    message: JSON.stringify(offerDetails),
   },
   channelNonce: 1,
   initiatorIdentifier: publicIdentifier,
   responderIdentifier: publicIdentifier2,
-  transferResolver: { message: "" } as MessageResolver,
+  transferResolver: { message: "" },
 };
 
-export const resolvedOfferTransfer: IFullTransferState<MessageState> = {
+export const resolvedOfferTransfer: IFullTransferState<
+  MessageState,
+  MessageResolver
+> = {
   balance: {
     amount: ["43", "43"],
     to: [destinationAddress],
@@ -167,18 +180,21 @@ export const resolvedOfferTransfer: IFullTransferState<MessageState> = {
   initiator: publicIdentifier,
   responder: publicIdentifier2,
   channelFactoryAddress: "channelFactoryAddress",
-  chainId: 1337,
+  chainId: chainId,
   transferEncodings: ["string"],
   transferState: {
-    message: "",
+    message: JSON.stringify(offerDetails),
   },
   channelNonce: 1,
   initiatorIdentifier: publicIdentifier,
   responderIdentifier: publicIdentifier2,
-  transferResolver: { message: "Reply" } as MessageResolver,
+  transferResolver: { message: "Reply" },
 };
 
-export const activeInsuranceTransfer: IFullTransferState<InsuranceState> = {
+export const activeInsuranceTransfer: IFullTransferState<
+  InsuranceState,
+  InsuranceResolver
+> = {
   balance: {
     amount: ["43", "43"],
     to: [destinationAddress],
@@ -193,21 +209,62 @@ export const activeInsuranceTransfer: IFullTransferState<InsuranceState> = {
   initiator: publicIdentifier,
   responder: publicIdentifier2,
   channelFactoryAddress: "channelFactoryAddress",
-  chainId: 1337,
+  chainId: chainId,
   transferEncodings: ["string"],
   transferState: {
     receiver: publicIdentifier,
     mediator: gatewayUrl,
-    collateral: "1",
+    collateral: commonAmount,
     expiration: (unixPast + defaultExpirationLength).toString(),
     UUID: commonPaymentId,
   },
   channelNonce: 1,
-  initiatorIdentifier: publicIdentifier,
-  responderIdentifier: publicIdentifier2,
+  initiatorIdentifier: publicIdentifier2,
+  responderIdentifier: publicIdentifier,
+  meta: {
+    createdAt: unixNow,
+  },
 };
 
-export const canceledInsuranceTransfer: IFullTransferState<InsuranceState> = {
+export const activeInsuranceTransfer2: IFullTransferState<
+  InsuranceState,
+  InsuranceResolver
+> = {
+  balance: {
+    amount: ["43", "43"],
+    to: [destinationAddress],
+  },
+  assetId: erc20AssetAddress,
+  channelAddress: routerChannelAddress,
+  inDispute: false,
+  transferId: insuranceTransferId2,
+  transferDefinition: insuranceTransferDefinitionAddress,
+  transferTimeout: "string",
+  initialStateHash: "string",
+  initiator: publicIdentifier,
+  responder: publicIdentifier2,
+  channelFactoryAddress: "channelFactoryAddress",
+  chainId: chainId,
+  transferEncodings: ["string"],
+  transferState: {
+    receiver: publicIdentifier,
+    mediator: gatewayUrl,
+    collateral: commonAmount,
+    expiration: (unixPast + defaultExpirationLength).toString(),
+    UUID: commonPaymentId,
+  },
+  channelNonce: 1,
+  initiatorIdentifier: publicIdentifier2,
+  responderIdentifier: publicIdentifier,
+  meta: {
+    createdAt: unixNow,
+  },
+};
+
+export const canceledInsuranceTransfer: IFullTransferState<
+  InsuranceState,
+  InsuranceResolver
+> = {
   balance: {
     amount: ["43", "43"],
     to: [destinationAddress],
@@ -222,30 +279,39 @@ export const canceledInsuranceTransfer: IFullTransferState<InsuranceState> = {
   initiator: publicIdentifier,
   responder: publicIdentifier2,
   channelFactoryAddress: "channelFactoryAddress",
-  chainId: 1337,
+  chainId: chainId,
   transferEncodings: ["string"],
   transferState: {
     receiver: publicIdentifier,
     mediator: gatewayUrl,
-    collateral: "1",
+    collateral: commonAmount,
     expiration: (unixPast + defaultExpirationLength).toString(),
     UUID: commonPaymentId,
   },
   channelNonce: 1,
-  initiatorIdentifier: publicIdentifier,
-  responderIdentifier: publicIdentifier2,
+  initiatorIdentifier: publicIdentifier2,
+  responderIdentifier: publicIdentifier,
   transferResolver: {
     data: {
-      amount:
+      amount: BigNumberString(
         "0x0000000000000000000000000000000000000000000000000000000000000000",
-      UUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
+      ),
+      UUID: PaymentId(
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+      ),
     },
     signature:
       "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-  } as InsuranceResolver,
+  },
+  meta: {
+    createdAt: unixNow,
+  },
 };
 
-export const resolvedInsuranceTransfer: IFullTransferState<InsuranceState> = {
+export const resolvedInsuranceTransfer: IFullTransferState<
+  InsuranceState,
+  InsuranceResolver
+> = {
   balance: {
     amount: ["43", "43"],
     to: [destinationAddress],
@@ -260,30 +326,36 @@ export const resolvedInsuranceTransfer: IFullTransferState<InsuranceState> = {
   initiator: publicIdentifier,
   responder: publicIdentifier2,
   channelFactoryAddress: "channelFactoryAddress",
-  chainId: 1337,
+  chainId: chainId,
   transferEncodings: ["string"],
   transferState: {
     receiver: publicIdentifier,
     mediator: gatewayUrl,
-    collateral: "1",
+    collateral: commonAmount,
     expiration: (unixPast + defaultExpirationLength).toString(),
     UUID: commonPaymentId,
   },
   channelNonce: 1,
-  initiatorIdentifier: publicIdentifier,
-  responderIdentifier: publicIdentifier2,
+  initiatorIdentifier: publicIdentifier2,
+  responderIdentifier: publicIdentifier,
   transferResolver: {
     data: {
-      amount:
+      amount: BigNumberString(
         "0x0000000000000000000000000000000000000000000000000000000000000000",
-      UUID: "0x0000000000000000000000000000000000000000000000000000000000000001",
+      ),
+      UUID: PaymentId(
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+      ),
     },
     signature:
       "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001",
-  } as InsuranceResolver,
+  },
 };
 
-export const activeParameterizedTransfer = {
+export const activeParameterizedTransfer: IFullTransferState<
+  ParameterizedState,
+  ParameterizedResolver
+> = {
   balance: {
     amount: ["43", "43"],
     to: [destinationAddress],
@@ -298,7 +370,7 @@ export const activeParameterizedTransfer = {
   initiator: publicIdentifier,
   responder: publicIdentifier2,
   channelFactoryAddress: "channelFactoryAddress",
-  chainId: 1337,
+  chainId: chainId,
   transferEncodings: ["string"],
   transferState: {
     receiver: publicIdentifier2,
@@ -306,7 +378,7 @@ export const activeParameterizedTransfer = {
     expiration: (unixPast + defaultExpirationLength).toString(),
     UUID: commonPaymentId,
     rate: {
-      deltaAmount: "1",
+      deltaAmount: commonAmount,
       deltaTime: "1",
     },
   },
@@ -315,91 +387,136 @@ export const activeParameterizedTransfer = {
   responderIdentifier: publicIdentifier2,
 };
 
-export const canceledParameterizedTransfer: IFullTransferState<ParameterizedState> =
-  {
-    balance: {
-      amount: ["43", "43"],
-      to: [destinationAddress],
+export const activeParameterizedTransfer2: IFullTransferState<
+  ParameterizedState,
+  ParameterizedResolver
+> = {
+  balance: {
+    amount: ["43", "43"],
+    to: [destinationAddress],
+  },
+  assetId: erc20AssetAddress,
+  channelAddress: routerChannelAddress,
+  inDispute: false,
+  transferId: parameterizedTransferId2,
+  transferDefinition: parameterizedTransferDefinitionAddress,
+  transferTimeout: "string",
+  initialStateHash: "string",
+  initiator: publicIdentifier,
+  responder: publicIdentifier2,
+  channelFactoryAddress: "channelFactoryAddress",
+  chainId: chainId,
+  transferEncodings: ["string"],
+  transferState: {
+    receiver: publicIdentifier2,
+    start: unixPast.toString(),
+    expiration: (unixPast + defaultExpirationLength).toString(),
+    UUID: commonPaymentId,
+    rate: {
+      deltaAmount: commonAmount,
+      deltaTime: "1",
     },
-    assetId: erc20AssetAddress,
-    channelAddress: routerChannelAddress,
-    inDispute: false,
-    transferId: offerTransferId,
-    transferDefinition: parameterizedTransferDefinitionAddress,
-    transferTimeout: "string",
-    initialStateHash: "string",
-    initiator: publicIdentifier,
-    responder: publicIdentifier2,
-    channelFactoryAddress: "channelFactoryAddress",
-    chainId: 1337,
-    transferEncodings: ["string"],
-    transferState: {
-      receiver: publicIdentifier2,
-      start: unixPast.toString(),
-      expiration: (unixPast + defaultExpirationLength).toString(),
-      UUID: commonPaymentId,
-      rate: {
-        deltaAmount: "1",
-        deltaTime: "1",
-      },
-    },
-    channelNonce: 1,
-    initiatorIdentifier: publicIdentifier,
-    responderIdentifier: publicIdentifier2,
-    transferResolver: {
-      data: {
-        paymentAmountTaken:
-          "0x0000000000000000000000000000000000000000000000000000000000000000",
-        UUID: "0x0000000000000000000000000000000000000000000000000000000000000000",
-      },
-      payeeSignature:
-        "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-    } as ParameterizedResolver,
-  };
+  },
+  channelNonce: 1,
+  initiatorIdentifier: publicIdentifier,
+  responderIdentifier: publicIdentifier2,
+};
 
-export const resolvedParameterizedTransfer: IFullTransferState<ParameterizedState> =
-  {
-    balance: {
-      amount: ["43", "43"],
-      to: [destinationAddress],
+export const canceledParameterizedTransfer: IFullTransferState<
+  ParameterizedState,
+  ParameterizedResolver
+> = {
+  balance: {
+    amount: ["43", "43"],
+    to: [destinationAddress],
+  },
+  assetId: erc20AssetAddress,
+  channelAddress: routerChannelAddress,
+  inDispute: false,
+  transferId: offerTransferId,
+  transferDefinition: parameterizedTransferDefinitionAddress,
+  transferTimeout: "string",
+  initialStateHash: "string",
+  initiator: publicIdentifier,
+  responder: publicIdentifier2,
+  channelFactoryAddress: "channelFactoryAddress",
+  chainId: chainId,
+  transferEncodings: ["string"],
+  transferState: {
+    receiver: publicIdentifier2,
+    start: unixPast.toString(),
+    expiration: (unixPast + defaultExpirationLength).toString(),
+    UUID: commonPaymentId,
+    rate: {
+      deltaAmount: commonAmount,
+      deltaTime: "1",
     },
-    assetId: erc20AssetAddress,
-    channelAddress: routerChannelAddress,
-    inDispute: false,
-    transferId: offerTransferId,
-    transferDefinition: parameterizedTransferDefinitionAddress,
-    transferTimeout: "string",
-    initialStateHash: "string",
-    initiator: publicIdentifier,
-    responder: publicIdentifier2,
-    channelFactoryAddress: "channelFactoryAddress",
-    chainId: 1337,
-    transferEncodings: ["string"],
-    transferState: {
-      receiver: publicIdentifier2,
-      start: unixPast.toString(),
-      expiration: (unixPast + defaultExpirationLength).toString(),
-      UUID: commonPaymentId,
-      rate: {
-        deltaAmount: "1",
-        deltaTime: "1",
-      },
+  },
+  channelNonce: 1,
+  initiatorIdentifier: publicIdentifier,
+  responderIdentifier: publicIdentifier2,
+  transferResolver: {
+    data: {
+      paymentAmountTaken: BigNumberString(
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+      ),
+      UUID: PaymentId(
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+      ),
     },
-    channelNonce: 1,
-    initiatorIdentifier: publicIdentifier,
-    responderIdentifier: publicIdentifier2,
-    transferResolver: {
-      data: {
-        paymentAmountTaken:
-          "0x0000000000000000000000000000000000000000000000000000000000000000",
-        UUID: "0x0000000000000000000000000000000000000000000000000000000000000001",
-      },
-      payeeSignature:
-        "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001",
-    } as ParameterizedResolver,
-  };
+    payeeSignature:
+      "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+  },
+};
 
-export const channelState = {
+export const resolvedParameterizedTransfer: IFullTransferState<
+  ParameterizedState,
+  ParameterizedResolver
+> = {
+  balance: {
+    amount: ["43", "43"],
+    to: [destinationAddress],
+  },
+  assetId: erc20AssetAddress,
+  channelAddress: routerChannelAddress,
+  inDispute: false,
+  transferId: offerTransferId,
+  transferDefinition: parameterizedTransferDefinitionAddress,
+  transferTimeout: "string",
+  initialStateHash: "string",
+  initiator: publicIdentifier,
+  responder: publicIdentifier2,
+  channelFactoryAddress: "channelFactoryAddress",
+  chainId: chainId,
+  transferEncodings: ["string"],
+  transferState: {
+    receiver: publicIdentifier2,
+    start: unixPast.toString(),
+    expiration: (unixPast + defaultExpirationLength).toString(),
+    UUID: commonPaymentId,
+    rate: {
+      deltaAmount: commonAmount,
+      deltaTime: "1",
+    },
+  },
+  channelNonce: 1,
+  initiatorIdentifier: publicIdentifier,
+  responderIdentifier: publicIdentifier2,
+  transferResolver: {
+    data: {
+      paymentAmountTaken: BigNumberString(
+        "0x0000000000000000000000000000000000000000000000000000000000000000",
+      ),
+      UUID: PaymentId(
+        "0x0000000000000000000000000000000000000000000000000000000000000001",
+      ),
+    },
+    payeeSignature:
+      "0x0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001",
+  },
+};
+
+export const channelState: IFullChannelState = {
   assetIds: [erc20AssetAddress],
   balances: [
     {
@@ -428,10 +545,10 @@ export const channelState = {
     details: {},
   },
   networkContext: {
-    chainId: 1337,
+    chainId: chainId,
     channelFactoryAddress: "channelFactoryAddress",
     transferRegistryAddress: "transferRegistryAddress",
   },
   defundNonces: [],
   inDispute: false,
-} as IFullChannelState;
+};

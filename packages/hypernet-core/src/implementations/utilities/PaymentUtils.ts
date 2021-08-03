@@ -27,6 +27,9 @@ import {
   BigNumberString,
   UnixTimestamp,
   LogicalError,
+  MessageResolver,
+  InsuranceResolver,
+  ParameterizedResolver,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -584,7 +587,7 @@ export class PaymentUtils implements IPaymentUtils {
     sortedTransfers: SortedTransfers,
   ): ResultAsync<EPaymentState[], never> {
     // First step, take all the transfers and unsort them; we need them in a continual list based on their timestamp.
-    const allTransfers = new Array<IFullTransferState<any>>()
+    const allTransfers = new Array<IFullTransferState>()
       .concat(sortedTransfers.offerTransfers)
       .concat(sortedTransfers.insuranceTransfers)
       .concat(sortedTransfers.parameterizedTransfers)
@@ -674,14 +677,20 @@ export class PaymentUtils implements IPaymentUtils {
           if (transferType === ETransferType.Offer) {
             // @todo also add in PullRecord type)
             const offerDetails: IHypernetOfferDetails = JSON.parse(
-              transfer.transferState.message,
+              (transfer as IFullTransferState<MessageState, MessageResolver>)
+                .transferState.message,
             );
             paymentId = offerDetails.paymentId;
           } else if (
             transferType === ETransferType.Insurance ||
             transferType === ETransferType.Parameterized
           ) {
-            paymentId = transfer.transferState.UUID;
+            paymentId = (
+              transfer as IFullTransferState<
+                InsuranceState | ParameterizedState,
+                InsuranceResolver | ParameterizedResolver
+              >
+            ).transferState.UUID;
           } else {
             this.logUtils.log(
               `Transfer type was not recognized, doing nothing. TransferType: '${transfer.transferDefinition}'`,
@@ -730,10 +739,18 @@ export class PaymentUtils implements IPaymentUtils {
     _paymentId: string,
     transfers: IFullTransferState[],
   ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError> {
-    const offerTransfers: IFullTransferState[] = [];
-    const insuranceTransfers: IFullTransferState[] = [];
-    const parameterizedTransfers: IFullTransferState[] = [];
-    const pullTransfers: IFullTransferState[] = [];
+    const offerTransfers: IFullTransferState<MessageState, MessageResolver>[] =
+      [];
+    const insuranceTransfers: IFullTransferState<
+      InsuranceState,
+      InsuranceResolver
+    >[] = [];
+    const parameterizedTransfers: IFullTransferState<
+      ParameterizedState,
+      ParameterizedResolver
+    >[] = [];
+    const pullTransfers: IFullTransferState<MessageState, MessageResolver>[] =
+      [];
     const unrecognizedTransfers: IFullTransferState[] = [];
     const transferTypeResults = new Array<ResultAsync<void, VectorError>>();
 
@@ -741,13 +758,24 @@ export class PaymentUtils implements IPaymentUtils {
       transferTypeResults.push(
         this.vectorUtils.getTransferType(transfer).map((transferType) => {
           if (transferType === ETransferType.Offer) {
-            offerTransfers.push(transfer);
+            offerTransfers.push(
+              transfer as IFullTransferState<MessageState, MessageResolver>,
+            );
           } else if (transferType === ETransferType.Insurance) {
-            insuranceTransfers.push(transfer);
+            insuranceTransfers.push(
+              transfer as IFullTransferState<InsuranceState, InsuranceResolver>,
+            );
           } else if (transferType === ETransferType.Parameterized) {
-            parameterizedTransfers.push(transfer);
+            parameterizedTransfers.push(
+              transfer as IFullTransferState<
+                ParameterizedState,
+                ParameterizedResolver
+              >,
+            );
           } else if (transferType === ETransferType.PullRecord) {
-            pullTransfers.push(transfer);
+            pullTransfers.push(
+              transfer as IFullTransferState<MessageState, MessageResolver>,
+            );
           } else if (transferType === ETransferType.Unrecognized) {
             unrecognizedTransfers.push(transfer);
           } else {

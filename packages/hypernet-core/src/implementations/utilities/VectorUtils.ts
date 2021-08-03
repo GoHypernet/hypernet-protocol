@@ -23,7 +23,6 @@ import {
   EMessageTransferType,
   InvalidParametersError,
   RouterChannelUnknownError,
-  RouterUnavailableError,
   TransferCreationError,
   TransferResolutionError,
   VectorError,
@@ -166,7 +165,7 @@ export class VectorUtils implements IVectorUtils {
     amount: BigNumber,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
     const resolverData: InsuranceResolverData = {
-      amount: amount.toString(),
+      amount: BigNumberString(amount.toString()),
       UUID: paymentId,
     };
 
@@ -489,7 +488,7 @@ export class VectorUtils implements IVectorUtils {
         const initialState: InsuranceState = {
           receiver: toEthAddress,
           mediator: mediatorAddress,
-          collateral: amount.toString(),
+          collateral: amount,
           expiration: expiration.toString(),
           UUID: paymentId,
         };
@@ -519,7 +518,7 @@ export class VectorUtils implements IVectorUtils {
     start: UnixTimestamp,
     expiration: UnixTimestamp,
     deltaTime?: number,
-    deltaAmount?: string,
+    deltaAmount?: BigNumberString,
   ): ResultAsync<
     IBasicTransferResponse,
     TransferCreationError | InvalidParametersError
@@ -578,7 +577,7 @@ export class VectorUtils implements IVectorUtils {
         // with this internal key!
 
         const infiniteRate = {
-          deltaAmount: amount.toString(),
+          deltaAmount: amount,
           deltaTime: "1",
         };
 
@@ -608,7 +607,7 @@ export class VectorUtils implements IVectorUtils {
 
           ourRate = {
             deltaTime: deltaTime?.toString(),
-            deltaAmount: deltaAmount?.toString(),
+            deltaAmount: deltaAmount,
           };
         } else {
           ourRate = infiniteRate;
@@ -737,7 +736,8 @@ export class VectorUtils implements IVectorUtils {
           return ETransferType.Parameterized;
         } else if (thisTransfer === this.messageTransferTypeName) {
           const message: IMessageTransferData = JSON.parse(
-            transfer.transferState.message,
+            (transfer as IFullTransferState<MessageState>).transferState
+              .message,
           );
           if (message.messageType == EMessageTransferType.OFFER) {
             return ETransferType.Offer;

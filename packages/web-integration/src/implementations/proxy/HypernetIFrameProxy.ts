@@ -19,13 +19,10 @@ import {
   PersistenceError,
   GatewayConnectorError,
   ProxyError,
-  InvalidPaymentError,
   InvalidParametersError,
-  TransferResolutionError,
   IHypernetCore,
   GatewayAuthorizationDeniedError,
   BigNumberString,
-  UnixTimestamp,
   MessagingError,
   RouterChannelUnknownError,
 } from "@hypernetlabs/objects";

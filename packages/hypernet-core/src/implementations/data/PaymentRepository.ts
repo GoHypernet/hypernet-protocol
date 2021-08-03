@@ -31,6 +31,8 @@ import {
   EPaymentState,
   Signature,
   LogicalError,
+  InsuranceState,
+  ParameterizedState,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { IPaymentRepository } from "@interfaces/data";
@@ -292,7 +294,8 @@ export class PaymentRepository implements IPaymentRepository {
 
           if (transferType === ETransferType.Offer) {
             const offerDetails: IHypernetOfferDetails = JSON.parse(
-              (transfer.transferState as MessageState).message,
+              (transfer as IFullTransferState<MessageState>).transferState
+                .message,
             );
 
             if (offerDetails.paymentId === paymentId) {
@@ -302,7 +305,14 @@ export class PaymentRepository implements IPaymentRepository {
             transferType === ETransferType.Insurance ||
             transferType === ETransferType.Parameterized
           ) {
-            if (paymentId === transfer.transferState.UUID) {
+            if (
+              paymentId ===
+              (
+                transfer as IFullTransferState<
+                  InsuranceState | ParameterizedState
+                >
+              ).transferState.UUID
+            ) {
               relevantTransfers.push(transfer);
             } else {
               this.logUtils.debug(
@@ -383,7 +393,8 @@ export class PaymentRepository implements IPaymentRepository {
 
           if (transferType === ETransferType.Offer) {
             const offerDetails: IHypernetOfferDetails = JSON.parse(
-              (transfer.transferState as MessageState).message,
+              (transfer as IFullTransferState<MessageState>).transferState
+                .message,
             );
             if (paymentIds.includes(offerDetails.paymentId)) {
               relevantTransfers.push(transfer);
@@ -393,7 +404,15 @@ export class PaymentRepository implements IPaymentRepository {
               transferType === ETransferType.Insurance ||
               transferType === ETransferType.Parameterized
             ) {
-              if (paymentIds.includes(transfer.transferState.UUID)) {
+              if (
+                paymentIds.includes(
+                  (
+                    transfer as IFullTransferState<
+                      InsuranceState | ParameterizedState
+                    >
+                  ).transferState.UUID,
+                )
+              ) {
                 relevantTransfers.push(transfer);
               } else {
                 this.logUtils.debug(
