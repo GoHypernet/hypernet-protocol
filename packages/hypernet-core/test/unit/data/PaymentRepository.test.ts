@@ -195,7 +195,7 @@ describe("PaymentRepository tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeTruthy();
-    expect(error).toBeInstanceOf(PaymentCreationError);
+    expect(error).toBeInstanceOf(VectorError);
   });
 
   test("Should getPaymentsByIds return Payment without any errors", async () => {

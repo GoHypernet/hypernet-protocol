@@ -120,7 +120,7 @@ export const activeOfferTransfer: IFullTransferState<
   MessageResolver
 > = {
   balance: {
-    amount: ["43", "43"],
+    amount: [commonAmount],
     to: [destinationAddress],
   },
   assetId: erc20AssetAddress,
@@ -367,7 +367,7 @@ export const activeParameterizedTransfer: IFullTransferState<
   ParameterizedResolver
 > = {
   balance: {
-    amount: ["43", "43"],
+    amount: [commonAmount],
     to: [destinationAddress],
   },
   assetId: erc20AssetAddress,

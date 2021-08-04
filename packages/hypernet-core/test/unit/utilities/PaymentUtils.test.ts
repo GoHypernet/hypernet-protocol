@@ -9,6 +9,7 @@ import {
   PullPayment,
   UUID,
   ETransferState,
+  EthereumAddress,
 } from "@hypernetlabs/objects";
 import td from "testdouble";
 import { ok, okAsync } from "neverthrow";
@@ -203,7 +204,6 @@ describe("PaymentUtils tests", () => {
     } catch (err) {
       paymentResult = err;
     }
-    console.log("paymentResult: ", paymentResult);
 
     // Assert
     expect(paymentResult).toBeInstanceOf(LogicalError);
@@ -524,6 +524,116 @@ describe("PaymentUtils tests", () => {
     expect(result.isErr()).toBeFalsy();
     expect(paymentResult).toBeInstanceOf(PushPayment);
     expect(paymentResult.state).toStrictEqual(EPaymentState.Canceled);
+    expect(paymentResult.id).toStrictEqual(commonPaymentId);
+  });
+
+  test("transfersToPayment should return Approved payment if it all three transfer types, offerState is Active, insuranceState is Active, parameterizedState is Active and payment is vaild", async () => {
+    // Arrange
+    const mocks = new PaymentUtilsMocks();
+    const utils = mocks.factoryProvider();
+
+    // Act
+    const result = await utils.transfersToPayment(commonPaymentId, transfers);
+    const paymentResult = result._unsafeUnwrap();
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(paymentResult).toBeInstanceOf(PushPayment);
+    expect(paymentResult.state).toStrictEqual(EPaymentState.Approved);
+    expect(paymentResult.id).toStrictEqual(commonPaymentId);
+  });
+
+  test("transfersToPayment should return Accepted payment if it all three transfer types, offerState is Active, insuranceState is Active, parameterizedState is Resolved and payment is vaild", async () => {
+    // Arrange
+    const mocks = new PaymentUtilsMocks();
+    const utils = mocks.factoryProvider();
+    td.when(
+      mocks.vectorUtils.getTransferStateFromTransfer(
+        activeParameterizedTransfer,
+      ),
+    ).thenReturn(okAsync(ETransferState.Resolved));
+
+    // Act
+    const result = await utils.transfersToPayment(commonPaymentId, transfers);
+    const paymentResult = result._unsafeUnwrap();
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(paymentResult).toBeInstanceOf(PushPayment);
+    expect(paymentResult.state).toStrictEqual(EPaymentState.Accepted);
+    expect(paymentResult.id).toStrictEqual(commonPaymentId);
+  });
+
+  test("transfersToPayment should return InsuranceReleased payment if it all three transfer types, offerState is Active, insuranceState is Resolved, parameterizedState is Resolved and payment is vaild", async () => {
+    // Arrange
+    const mocks = new PaymentUtilsMocks();
+    const utils = mocks.factoryProvider();
+    td.when(
+      mocks.vectorUtils.getTransferStateFromTransfer(activeInsuranceTransfer),
+    ).thenReturn(okAsync(ETransferState.Resolved));
+    td.when(
+      mocks.vectorUtils.getTransferStateFromTransfer(
+        activeParameterizedTransfer,
+      ),
+    ).thenReturn(okAsync(ETransferState.Resolved));
+
+    // Act
+    const result = await utils.transfersToPayment(commonPaymentId, transfers);
+    const paymentResult = result._unsafeUnwrap();
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(paymentResult).toBeInstanceOf(PushPayment);
+    expect(paymentResult.state).toStrictEqual(EPaymentState.InsuranceReleased);
+    expect(paymentResult.id).toStrictEqual(commonPaymentId);
+  });
+
+  test("transfersToPayment should return Finalized payment if it all three transfer types, offerState is Resolved, insuranceState is Resolved, parameterizedState is Resolved and payment is vaild", async () => {
+    // Arrange
+    const mocks = new PaymentUtilsMocks();
+    const utils = mocks.factoryProvider();
+    td.when(
+      mocks.vectorUtils.getTransferStateFromTransfer(activeOfferTransfer),
+    ).thenReturn(okAsync(ETransferState.Resolved));
+    td.when(
+      mocks.vectorUtils.getTransferStateFromTransfer(activeInsuranceTransfer),
+    ).thenReturn(okAsync(ETransferState.Resolved));
+    td.when(
+      mocks.vectorUtils.getTransferStateFromTransfer(
+        activeParameterizedTransfer,
+      ),
+    ).thenReturn(okAsync(ETransferState.Resolved));
+
+    // Act
+    const result = await utils.transfersToPayment(commonPaymentId, transfers);
+    const paymentResult = result._unsafeUnwrap();
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(paymentResult).toBeInstanceOf(PushPayment);
+    expect(paymentResult.state).toStrictEqual(EPaymentState.Finalized);
+    expect(paymentResult.id).toStrictEqual(commonPaymentId);
+  });
+
+  test("transfersToPayment should return InvalidFunds payment if it all three transfer types, offerState is Active, insuranceState is Active, parameterizedState is Active and payment is not vaild", async () => {
+    // Arrange
+    const mocks = new PaymentUtilsMocks();
+    const utils = mocks.factoryProvider();
+    // Invalid the payment
+    transfers[2].assetId = EthereumAddress("sss");
+
+    // Act
+    const result = await utils.transfersToPayment(commonPaymentId, transfers);
+    const paymentResult = result._unsafeUnwrap();
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(paymentResult).toBeInstanceOf(PushPayment);
+    expect(paymentResult.state).toStrictEqual(EPaymentState.InvalidFunds);
     expect(paymentResult.id).toStrictEqual(commonPaymentId);
   });
 });
