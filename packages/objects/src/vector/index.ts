@@ -1,3 +1,9 @@
+import {
+  InsuranceState,
+  MessageState,
+  ParameterizedState,
+} from "@objects/typing";
+
 export interface IConditionalTransferResolvedPayload {
   aliceIdentifier: string;
   bobIdentifier: string;
@@ -46,7 +52,7 @@ export interface IChannelUpdate {
   nonce: number;
   balance: IBalance;
   assetId: string; // EthereumAddress
-  details: any;
+  details: unknown;
   aliceSignature?: string | null;
   bobSignature?: string | null;
 }
@@ -57,7 +63,10 @@ export interface INetworkContext {
   chainId: number;
 }
 
-export interface IFullTransferState<TTransferState = any> {
+export interface IFullTransferState<
+  TTransferState = unknown,
+  TTransferResolver = unknown,
+> {
   balance: IBalance;
   assetId: string; // EthereumAddress
   channelAddress: string; // EthereumAddress
@@ -72,7 +81,7 @@ export interface IFullTransferState<TTransferState = any> {
   chainId: number;
   transferEncodings: string[]; // Initial state encoding, resolver encoding
   transferState: TTransferState;
-  transferResolver?: any; // undefined iff not resolved
+  transferResolver?: TTransferResolver; // undefined iff not resolved
   meta?: IFullTransferStateMetadata;
   channelNonce: number;
   initiatorIdentifier: string; // PublicIdentifier
@@ -114,7 +123,7 @@ export interface IRegisteredTransfer {
 
 export interface IBasicTransferResponse {
   channelAddress: string; // EthereumAddress;
-  transferId: string;
+  transferId: string; // TransferId
   routingId?: string;
 }
 

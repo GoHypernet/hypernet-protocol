@@ -1,14 +1,6 @@
-import {
-  IGatewayConnector,
-  IRedirectInfo,
-  IResolutionResult,
-  IResolveInsuranceRequest,
-} from "@hypernetlabs/gateway-connector";
+import { IGatewayConnector } from "@hypernetlabs/gateway-connector";
 import {
   Balances,
-  EthereumAddress,
-  LogicalError,
-  PaymentId,
   PublicIdentifier,
   Signature,
   GatewayUrl,
@@ -36,7 +28,7 @@ export interface IGatewayService {
   >;
   publicIdentifierReceived(
     publicIdentifier: PublicIdentifier,
-  ): ResultAsync<void, LogicalError>;
+  ): ResultAsync<void, never>;
   getValidatedSignature(): ResultAsync<Signature, GatewayValidationError>;
   deauthorize(): ResultAsync<
     void,

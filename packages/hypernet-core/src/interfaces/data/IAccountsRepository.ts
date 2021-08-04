@@ -4,14 +4,10 @@ import {
   AssetBalance,
   PublicIdentifier,
   Signature,
-  AssetInfo,
   BalancesUnavailableError,
   BlockchainUnavailableError,
-  LogicalError,
-  RouterChannelUnknownError,
   VectorError,
   BigNumberString,
-  PersistenceError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -24,34 +20,19 @@ export interface IAccountsRepository {
     BlockchainUnavailableError | VectorError
   >;
   getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
-  getBalances(): ResultAsync<
-    Balances,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
-  >;
+  getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError>;
   getBalanceByAsset(
     assetAddress: EthereumAddress,
-  ): ResultAsync<
-    AssetBalance,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
-  >;
+  ): ResultAsync<AssetBalance, BalancesUnavailableError | VectorError>;
   depositFunds(
     assetAddress: EthereumAddress,
     amount: BigNumberString,
-  ): ResultAsync<
-    null,
-    | RouterChannelUnknownError
-    | VectorError
-    | LogicalError
-    | BlockchainUnavailableError
-  >;
+  ): ResultAsync<null, VectorError | BlockchainUnavailableError>;
   withdrawFunds(
     assetAddress: EthereumAddress,
     amount: BigNumberString,
     destinationAddress: EthereumAddress,
-  ): ResultAsync<
-    void,
-    RouterChannelUnknownError | VectorError | BlockchainUnavailableError
-  >;
+  ): ResultAsync<void, VectorError | BlockchainUnavailableError>;
   signMessage(
     message: string,
   ): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;

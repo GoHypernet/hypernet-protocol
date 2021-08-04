@@ -1,3 +1,4 @@
+import { DEFAULT_CHANNEL_TIMEOUT, VectorError } from "@connext/vector-types";
 import {
   ETransferState,
   IFullTransferState,
@@ -7,7 +8,7 @@ import {
   ParameterizedResolver,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
-import { okAsync } from "neverthrow";
+import { errAsync, okAsync } from "neverthrow";
 import td from "testdouble";
 
 import { VectorUtils } from "@implementations/utilities/VectorUtils";
@@ -23,6 +24,7 @@ import {
   canceledInsuranceTransfer,
   canceledOfferTransfer,
   canceledParameterizedTransfer,
+  chainId,
   destinationAddress,
   erc20AssetAddress,
   insuranceTransferDefinitionAddress,
@@ -41,6 +43,7 @@ import {
   resolvedOfferTransfer,
   resolvedParameterizedTransfer,
   routerChannelAddress,
+  routerPublicIdentifier,
   unixNow,
 } from "@mock/mocks";
 import {
@@ -53,14 +56,21 @@ import {
 class VectorUtilsMocks {
   public configProvider = new ConfigProviderMock();
   public contextProvider = new ContextProviderMock();
-  public browserNodeProvider = new BrowserNodeProviderMock();
+  public browserNodeProvider: BrowserNodeProviderMock;
   public blockchainProvider = new BlockchainProviderMock();
   public blockchainUtils = td.object<IBlockchainUtils>();
   public paymentIdUtils = td.object<IPaymentIdUtils>();
   public logUtils = td.object<ILogUtils>();
   public timeUtils = td.object<ITimeUtils>();
 
-  constructor() {
+  constructor(includeExistingStateChannel = true) {
+    this.browserNodeProvider = new BrowserNodeProviderMock(
+      true,
+      true,
+      true,
+      null,
+      includeExistingStateChannel,
+    );
     td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow as never);
     td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(
       okAsync(unixNow),
@@ -104,33 +114,70 @@ class VectorUtilsMocks {
 }
 
 describe("VectorUtils tests", () => {
-  test("getRouterChannelAddress returns address if channel is already created", async () => {
+  test("initialize completes successfully", async () => {
     // Arrange
     const vectorUtilsMocks = new VectorUtilsMocks();
 
     const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
 
     // Act
-    const result = await vectorUtils.getRouterChannelAddress();
+    const result = await vectorUtils.initialize();
 
     // Assert
-    expect(result.isOk).toBeTruthy();
-    const retRouterChannelAddress = result._unsafeUnwrap();
-
-    expect(retRouterChannelAddress).toBe(routerChannelAddress);
+    expect(result).toBeDefined();
+    expect(result.isOk()).toBeTruthy();
   });
 
-  test("getRouterChannelAddress creates a channel with the router if the channel does not exist", async () => {
+  test("initialize creates a channel with the router if the channel does not exist", async () => {
+    // Arrange
+    const vectorUtilsMocks = new VectorUtilsMocks(false);
+
+    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+    // Act
+    const result = await vectorUtils.initialize();
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isOk()).toBeTruthy();
+  });
+
+  test("initialize restores a channel with the router when setup fails", async () => {
+    // Arrange
+    const vectorUtilsMocks = new VectorUtilsMocks(false);
+
+    td.when(
+      vectorUtilsMocks.browserNodeProvider.browserNode.setup(
+        routerPublicIdentifier,
+        chainId,
+        DEFAULT_CHANNEL_TIMEOUT.toString(),
+      ),
+    ).thenReturn(errAsync(new VectorError("Setup Failed")));
+
+    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+    // Act
+    const result = await vectorUtils.initialize();
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isOk()).toBeTruthy();
+  });
+
+  test("getRouterChannelAddress completes successfully after initialize", async () => {
     // Arrange
     const vectorUtilsMocks = new VectorUtilsMocks();
 
     const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
 
     // Act
-    const result = await vectorUtils.getRouterChannelAddress();
+    const result = await vectorUtils.initialize().andThen(() => {
+      return vectorUtils.getRouterChannelAddress();
+    });
 
     // Assert
-    expect(result.isOk).toBeTruthy();
+    expect(result).toBeDefined();
+    expect(result.isOk()).toBeTruthy();
     const retRouterChannelAddress = result._unsafeUnwrap();
 
     expect(retRouterChannelAddress).toBe(routerChannelAddress);

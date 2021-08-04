@@ -93,10 +93,10 @@ export class VectorUtilsMockFactory {
     );
 
     td.when(
-      vectorUtils.resolvePaymentTransfer(
+      vectorUtils.resolveParameterizedTransfer(
         parameterizedTransferId,
         commonPaymentId,
-        commonAmount.toString(),
+        commonAmount,
       ),
     ).thenReturn(
       okAsync({
@@ -121,7 +121,7 @@ export class VectorUtilsMockFactory {
     );
 
     td.when(
-      vectorUtils.createPaymentTransfer(
+      vectorUtils.createParameterizedTransfer(
         EPaymentType.Push,
         publicIdentifier2,
         commonAmount,

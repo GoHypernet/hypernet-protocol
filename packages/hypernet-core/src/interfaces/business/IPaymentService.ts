@@ -7,11 +7,8 @@ import {
   AcceptPaymentError,
   InsufficientBalanceError,
   InvalidParametersError,
-  LogicalError,
-  GatewayConnectorError,
   GatewayValidationError,
   PaymentFinalizeError,
-  RouterChannelUnknownError,
   VectorError,
   BlockchainUnavailableError,
   PaymentCreationError,
@@ -24,7 +21,6 @@ import {
   BigNumberString,
   Signature,
 } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
 import { ResultAsync, Result } from "neverthrow";
 
 export interface IPaymentService {
@@ -49,7 +45,7 @@ export interface IPaymentService {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
+  ): ResultAsync<Payment, PaymentCreationError>;
 
   /**
    * Record a pull against a Pull Payment's authorized funds. Doesn't actually
@@ -60,10 +56,8 @@ export interface IPaymentService {
     amount: BigNumberString,
   ): ResultAsync<
     Payment,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | PaymentCreationError
@@ -86,7 +80,7 @@ export interface IPaymentService {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
+  ): ResultAsync<Payment, PaymentCreationError>;
 
   /**
    * Called by the person on the receiving end of a push payment,
@@ -100,10 +94,8 @@ export interface IPaymentService {
     | AcceptPaymentError
     | BalancesUnavailableError
     | GatewayValidationError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
   >;
@@ -119,10 +111,8 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -138,10 +128,8 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -157,10 +145,8 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -177,10 +163,8 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -194,10 +178,8 @@ export interface IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     void,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
   >;
@@ -213,10 +195,8 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -231,10 +211,8 @@ export interface IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     void,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
   >;
@@ -253,10 +231,8 @@ export interface IPaymentService {
     gatewaySignature: Signature | null,
   ): ResultAsync<
     Payment,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferResolutionError
@@ -277,13 +253,31 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+  >;
+
+  /**
+   * recoverPayments() will attempt to "recover" any payments that are in the Borked state.
+   * Borked simply means that something has gone wrong in the payment process, such as out
+   * of order resolutions, or most commonly double transfers being created. Recovery is
+   * automatically attempted by advancePayments(), but in the off chance that we want to try
+   * to do it explicitly, this function exists.
+   * Recovery basically amounts to canceling bad or excess transfers.
+   * @param paymentIds Payment IDs to attempt recovery on
+   */
+  recoverPayments(
+    paymentIds: PaymentId[],
+  ): ResultAsync<
+    Payment[],
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
   >;
 }
 

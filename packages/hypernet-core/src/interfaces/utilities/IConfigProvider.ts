@@ -1,4 +1,4 @@
-import { LogicalError, HypernetConfig } from "@hypernetlabs/objects";
+import { HypernetConfig } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 /**

@@ -18,6 +18,11 @@ import {
   GatewayRegistrationInfo,
   SortedTransfers,
   ETransferState,
+  IFullTransferState,
+  TransferId,
+  InsuranceState,
+  ParameterizedState,
+  MessageState,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { PaymentService } from "@implementations/business/PaymentService";
@@ -31,6 +36,7 @@ import {
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
+import { IPaymentUtils } from "@interfaces/utilities";
 import {
   defaultExpirationLength,
   gatewayUrl,
@@ -45,6 +51,22 @@ import {
   activeInsuranceTransfer,
   activeOfferTransfer,
   activeParameterizedTransfer,
+  destinationAddress,
+  erc20AssetAddress,
+  routerChannelAddress,
+  insuranceTransferDefinitionAddress,
+  chainId,
+  commonAmount,
+  unixPast,
+  commonPaymentId,
+  parameterizedTransferDefinitionAddress,
+  messageTransferDefinitionAddress,
+  offerDetails,
+  activeInsuranceTransfer2,
+  insuranceTransferId2,
+  activeParameterizedTransfer2,
+  parameterizedTransferId,
+  parameterizedTransferId2,
 } from "@mock/mocks";
 import {
   ConfigProviderMock,
@@ -70,12 +92,13 @@ class PaymentServiceMocks {
   public logUtils = td.object<ILogUtils>();
   public vectorUtils =
     VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
+  public paymentUtils = td.object<IPaymentUtils>();
   public paymentRepository = td.object<IPaymentRepository>();
   public gatewayConnectorRepository = td.object<IGatewayConnectorRepository>();
 
   public proposedPushPayment: PushPayment;
   public stakedPushPayment: PushPayment;
-  public paidPushPayment: PushPayment;
+  public approvedPushPayment: PushPayment;
   public finalizedPushPayment: PushPayment;
 
   public assetBalance: AssetBalance;
@@ -89,7 +112,7 @@ class PaymentServiceMocks {
       EPaymentState.Staked,
       requiredStake,
     );
-    this.paidPushPayment = this.factoryPushPayment(
+    this.approvedPushPayment = this.factoryPushPayment(
       publicIdentifier2,
       publicIdentifier,
       EPaymentState.Approved,
@@ -153,7 +176,7 @@ class PaymentServiceMocks {
     );
 
     td.when(this.paymentRepository.provideAsset(paymentId)).thenReturn(
-      okAsync(this.paidPushPayment),
+      okAsync(this.approvedPushPayment),
     );
 
     td.when(this.paymentRepository.acceptPayment(paymentId, amount)).thenReturn(
@@ -209,10 +232,117 @@ class PaymentServiceMocks {
     ).thenReturn(okAsync(ETransferState.Active));
 
     td.when(
+      this.vectorUtils.getTransferStateFromTransfer(activeInsuranceTransfer2),
+    ).thenReturn(okAsync(ETransferState.Active));
+
+    td.when(
       this.vectorUtils.getTransferStateFromTransfer(
         activeParameterizedTransfer,
       ),
     ).thenReturn(okAsync(ETransferState.Active));
+
+    td.when(
+      this.vectorUtils.getTransferStateFromTransfer(
+        activeParameterizedTransfer2,
+      ),
+    ).thenReturn(okAsync(ETransferState.Active));
+
+    td.when(
+      this.vectorUtils.cancelInsuranceTransfer(insuranceTransferId),
+    ).thenReturn(
+      okAsync({
+        channelAddress: routerChannelAddress,
+        transferId: insuranceTransferId,
+      }),
+    );
+
+    td.when(
+      this.vectorUtils.cancelInsuranceTransfer(insuranceTransferId2),
+    ).thenReturn(
+      okAsync({
+        channelAddress: routerChannelAddress,
+        transferId: insuranceTransferId2,
+      }),
+    );
+
+    td.when(
+      this.vectorUtils.cancelParameterizedTransfer(parameterizedTransferId),
+    ).thenReturn(
+      okAsync({
+        channelAddress: routerChannelAddress,
+        transferId: parameterizedTransferId,
+      }),
+    );
+
+    td.when(
+      this.vectorUtils.cancelParameterizedTransfer(parameterizedTransferId2),
+    ).thenReturn(
+      okAsync({
+        channelAddress: routerChannelAddress,
+        transferId: parameterizedTransferId2,
+      }),
+    );
+
+    td.when(
+      this.paymentUtils.validateInsuranceTransfer(
+        activeInsuranceTransfer,
+        td.matchers.contains(offerDetails),
+      ),
+    ).thenReturn(true);
+
+    td.when(
+      this.paymentUtils.validateInsuranceTransfer(
+        activeInsuranceTransfer2,
+        td.matchers.contains(offerDetails),
+      ),
+    ).thenReturn(true);
+
+    td.when(
+      this.paymentUtils.validatePaymentTransfer(
+        activeParameterizedTransfer,
+        td.matchers.contains(offerDetails),
+      ),
+    ).thenReturn(true);
+
+    td.when(
+      this.paymentUtils.validatePaymentTransfer(
+        activeParameterizedTransfer2,
+        td.matchers.contains(offerDetails),
+      ),
+    ).thenReturn(true);
+
+    td.when(
+      this.paymentUtils.getFirstTransfer(
+        td.matchers.argThat((arr) => {
+          if (Array.isArray(arr)) {
+            return arr.includes(activeOfferTransfer);
+          }
+          return false;
+        }),
+      ),
+    ).thenReturn(activeOfferTransfer);
+
+    td.when(
+      this.paymentUtils.getFirstTransfer(
+        td.matchers.argThat((arr) => {
+          if (Array.isArray(arr)) {
+            return arr.includes(activeInsuranceTransfer);
+          }
+          return false;
+        }),
+      ),
+    ).thenReturn(activeInsuranceTransfer);
+
+    td.when(
+      this.paymentUtils.getFirstTransfer(
+        td.matchers.argThat((arr) => {
+          if (Array.isArray(arr)) {
+            return arr.includes(activeParameterizedTransfer);
+          }
+          return false;
+        }),
+      ),
+    ).thenReturn(activeParameterizedTransfer);
   }
 
   public factoryPaymentService(): IPaymentService {
@@ -224,6 +354,7 @@ class PaymentServiceMocks {
       this.paymentRepository,
       this.gatewayConnectorRepository,
       this.vectorUtils,
+      this.paymentUtils,
       this.logUtils,
     );
   }
@@ -253,7 +384,17 @@ class PaymentServiceMocks {
     from: PublicIdentifier = publicIdentifier,
     state: EPaymentState = EPaymentState.Proposed,
     amountStaked: BigNumberString = BigNumberString("0"),
+    details: SortedTransfers | null = null,
   ): PushPayment {
+    if (details == null) {
+      details = new SortedTransfers(
+        [activeOfferTransfer],
+        [activeInsuranceTransfer],
+        [activeParameterizedTransfer],
+        [],
+      );
+    }
+
     return new PushPayment(
       paymentId,
       to,
@@ -267,12 +408,7 @@ class PaymentServiceMocks {
       unixNow,
       BigNumberString("0"),
       gatewayUrl,
-      new SortedTransfers(
-        [activeOfferTransfer],
-        [activeInsuranceTransfer],
-        [activeParameterizedTransfer],
-        [],
-      ),
+      details,
       null,
       amount,
       BigNumberString("0"),
@@ -284,7 +420,17 @@ class PaymentServiceMocks {
     from: PublicIdentifier = publicIdentifier,
     state: EPaymentState = EPaymentState.Proposed,
     amountStaked: BigNumberString = BigNumberString("0"),
+    details: SortedTransfers | null = null,
   ): PullPayment {
+    if (details == null) {
+      details = new SortedTransfers(
+        [activeOfferTransfer],
+        [activeInsuranceTransfer],
+        [activeParameterizedTransfer],
+        [],
+      );
+    }
+
     return new PullPayment(
       paymentId,
       to,
@@ -298,12 +444,7 @@ class PaymentServiceMocks {
       unixNow,
       BigNumberString("0"),
       gatewayUrl,
-      new SortedTransfers(
-        [activeOfferTransfer],
-        [activeInsuranceTransfer],
-        [activeParameterizedTransfer],
-        [],
-      ),
+      details,
       null,
       amount,
       BigNumberString("0"),
@@ -312,6 +453,106 @@ class PaymentServiceMocks {
       BigNumberString("1"), // deltaAmount
       [], // ledger
     );
+  }
+
+  public factoryMessageTransfer(
+    transferId: TransferId,
+  ): IFullTransferState<MessageState> {
+    return {
+      balance: {
+        amount: ["43", "43"],
+        to: [destinationAddress],
+      },
+      assetId: erc20AssetAddress,
+      channelAddress: routerChannelAddress,
+      inDispute: false,
+      transferId: transferId,
+      transferDefinition: messageTransferDefinitionAddress,
+      transferTimeout: "string",
+      initialStateHash: "string",
+      initiator: publicIdentifier,
+      responder: publicIdentifier2,
+      channelFactoryAddress: "channelFactoryAddress",
+      chainId: 1337,
+      transferEncodings: ["string"],
+      transferState: {
+        message: JSON.stringify(offerDetails),
+      },
+      channelNonce: 1,
+      initiatorIdentifier: publicIdentifier,
+      responderIdentifier: publicIdentifier2,
+    };
+  }
+
+  public factoryInsuranceTransfer(
+    transferId: TransferId,
+    collateralAmount: BigNumberString = commonAmount,
+  ): IFullTransferState<InsuranceState> {
+    return {
+      balance: {
+        amount: ["43", "43"],
+        to: [destinationAddress],
+      },
+      assetId: erc20AssetAddress,
+      channelAddress: routerChannelAddress,
+      inDispute: false,
+      transferId: transferId,
+      transferDefinition: insuranceTransferDefinitionAddress,
+      transferTimeout: "string",
+      initialStateHash: "string",
+      initiator: publicIdentifier,
+      responder: publicIdentifier2,
+      channelFactoryAddress: "channelFactoryAddress",
+      chainId: chainId,
+      transferEncodings: ["string"],
+      transferState: {
+        receiver: publicIdentifier,
+        mediator: gatewayUrl,
+        collateral: collateralAmount,
+        expiration: (unixPast + defaultExpirationLength).toString(),
+        UUID: commonPaymentId,
+      },
+      channelNonce: 1,
+      initiatorIdentifier: publicIdentifier,
+      responderIdentifier: publicIdentifier2,
+    };
+  }
+
+  public factoryParameterizedTransfer(
+    transferId: TransferId,
+    amount: BigNumberString = commonAmount,
+  ): IFullTransferState<ParameterizedState> {
+    return {
+      balance: {
+        amount: ["43", "43"],
+        to: [destinationAddress],
+      },
+      assetId: erc20AssetAddress,
+      channelAddress: routerChannelAddress,
+      inDispute: false,
+      transferId: transferId,
+      transferDefinition: parameterizedTransferDefinitionAddress,
+      transferTimeout: "string",
+      initialStateHash: "string",
+      initiator: publicIdentifier,
+      responder: publicIdentifier2,
+      channelFactoryAddress: "channelFactoryAddress",
+      chainId: 1337,
+      transferEncodings: ["string"],
+      transferState: {
+        receiver: publicIdentifier2,
+        start: unixPast.toString(),
+        expiration: (unixPast + defaultExpirationLength).toString(),
+        UUID: commonPaymentId,
+        rate: {
+          deltaAmount: amount,
+          deltaTime: "1",
+        },
+      },
+      channelNonce: 1,
+      initiatorIdentifier: publicIdentifier,
+      responderIdentifier: publicIdentifier2,
+    };
   }
 }
 
@@ -711,7 +952,9 @@ describe("PaymentService tests", () => {
       onPushPaymentUpdated: 1,
     });
     expect(provideAssetCallingcount).toBe(1);
-    expect(receivedPushPayments[0]).toBe(paymentServiceMock.paidPushPayment);
+    expect(receivedPushPayments[0]).toBe(
+      paymentServiceMock.approvedPushPayment,
+    );
   });
 
   test("Should advancePayments finalize payments if payment is approved", async () => {
@@ -859,5 +1102,92 @@ describe("PaymentService tests", () => {
     expect(result.isErr()).toBeTruthy();
     expect(result._unsafeUnwrapErr()).toBeInstanceOf(InvalidParametersError);
     paymentServiceMock.contextProvider.assertEventCounts({});
+  });
+
+  test("recoverPayments returns immediately if payment is not actually borked", async () => {
+    // Arrange
+    const paymentServiceMock = new PaymentServiceMocks();
+    const paymentService = paymentServiceMock.factoryPaymentService();
+
+    // Act
+    const result = await paymentService.recoverPayments([paymentId]);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isOk()).toBeTruthy();
+  });
+
+  test("recoverPayments cancels second insurance transfer if duplicates are detected", async () => {
+    // Arrange
+    const paymentServiceMock = new PaymentServiceMocks();
+
+    const borkedPushPayment = paymentServiceMock.factoryPushPayment(
+      publicIdentifier2,
+      publicIdentifier,
+      EPaymentState.Borked,
+      undefined,
+      new SortedTransfers(
+        [activeOfferTransfer],
+        [activeInsuranceTransfer, activeInsuranceTransfer2],
+        [],
+        [],
+      ),
+    );
+
+    td.when(
+      paymentServiceMock.paymentRepository.getPaymentsByIds(
+        td.matchers.contains(paymentId),
+      ),
+    ).thenReturn(
+      okAsync(new Map([[paymentId, borkedPushPayment]])),
+      okAsync(new Map([[paymentId, paymentServiceMock.stakedPushPayment]])),
+    );
+    const paymentService = paymentServiceMock.factoryPaymentService();
+
+    // Act
+    const result = await paymentService.recoverPayments([paymentId]);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isOk()).toBeTruthy();
+    const retPayments = result._unsafeUnwrap();
+    expect(retPayments).toContain(paymentServiceMock.stakedPushPayment);
+  });
+
+  test("recoverPayments cancels second payment transfer if duplicates are detected", async () => {
+    // Arrange
+    const paymentServiceMock = new PaymentServiceMocks();
+
+    const borkedPushPayment = paymentServiceMock.factoryPushPayment(
+      publicIdentifier,
+      publicIdentifier2,
+      EPaymentState.Borked,
+      undefined,
+      new SortedTransfers(
+        [activeOfferTransfer],
+        [activeInsuranceTransfer],
+        [activeParameterizedTransfer, activeParameterizedTransfer2],
+        [],
+      ),
+    );
+
+    td.when(
+      paymentServiceMock.paymentRepository.getPaymentsByIds(
+        td.matchers.contains(paymentId),
+      ),
+    ).thenReturn(
+      okAsync(new Map([[paymentId, borkedPushPayment]])),
+      okAsync(new Map([[paymentId, paymentServiceMock.approvedPushPayment]])),
+    );
+    const paymentService = paymentServiceMock.factoryPaymentService();
+
+    // Act
+    const result = await paymentService.recoverPayments([paymentId]);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isOk()).toBeTruthy();
+    const retPayments = result._unsafeUnwrap();
+    expect(retPayments).toContain(paymentServiceMock.approvedPushPayment);
   });
 });

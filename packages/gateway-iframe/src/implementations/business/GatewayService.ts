@@ -1,19 +1,15 @@
 import {
   IGatewayConnector,
   IRedirectInfo,
-  IResolutionResult,
 } from "@hypernetlabs/gateway-connector";
 import {
-  LogicalError,
   PublicIdentifier,
   Balances,
   EthereumAddress,
   Signature,
   GatewayUrl,
-  PaymentId,
   AjaxError,
 } from "@hypernetlabs/objects";
-import { ResultUtils } from "@hypernetlabs/utils";
 import { ethers } from "ethers";
 import { injectable, inject } from "inversify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
@@ -80,14 +76,6 @@ export class GatewayService implements IGatewayService {
       return errAsync(
         new GatewayValidationError(
           "Cannot activate gateway connector, no validated code available!",
-        ),
-      );
-    }
-
-    if (publicIdentifier == null) {
-      return errAsync(
-        new LogicalError(
-          "Cannot activate gateway connector, public identifier is unknown!",
         ),
       );
     }
@@ -292,7 +280,7 @@ export class GatewayService implements IGatewayService {
 
   public publicIdentifierReceived(
     publicIdentifier: PublicIdentifier,
-  ): ResultAsync<void, LogicalError> {
+  ): ResultAsync<void, never> {
     const context = this.contextProvider.getGatewayContext();
     context.publicIdentifier = publicIdentifier;
     this.contextProvider.setGatewayContext(context);

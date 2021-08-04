@@ -6,9 +6,7 @@ import {
   PublicIdentifier,
   BalancesUnavailableError,
   BlockchainUnavailableError,
-  LogicalError,
   VectorError,
-  RouterChannelUnknownError,
   Signature,
   BigNumberString,
 } from "@hypernetlabs/objects";
@@ -50,7 +48,7 @@ export class AccountService implements IAccountService {
 
   public getBalances(): ResultAsync<
     Balances,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+    BalancesUnavailableError | VectorError
   > {
     return this.accountRepository.getBalances();
   }
@@ -60,11 +58,7 @@ export class AccountService implements IAccountService {
     amount: BigNumberString,
   ): ResultAsync<
     Balances,
-    | BalancesUnavailableError
-    | RouterChannelUnknownError
-    | BlockchainUnavailableError
-    | VectorError
-    | LogicalError
+    BalancesUnavailableError | BlockchainUnavailableError | VectorError
   > {
     this.logUtils.log(
       `HypernetCore:depositFunds: assetAddress: ${assetAddress}`,
@@ -95,10 +89,7 @@ export class AccountService implements IAccountService {
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    | BalancesUnavailableError
-    | RouterChannelUnknownError
-    | BlockchainUnavailableError
-    | VectorError
+    BalancesUnavailableError | BlockchainUnavailableError | VectorError
   > {
     let context: InitializedHypernetContext;
 

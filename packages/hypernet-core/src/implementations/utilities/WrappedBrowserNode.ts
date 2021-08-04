@@ -97,7 +97,7 @@ export class WrappedBrowserNode implements IBrowserNode {
 
   public getTransfer(
     transferId: TransferId,
-  ): ResultAsync<IFullTransferState, VectorError> {
+  ): ResultAsync<IFullTransferState<unknown, unknown>, VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.getTransfer({ transferId }),
       this.toVectorError,
@@ -111,7 +111,7 @@ export class WrappedBrowserNode implements IBrowserNode {
   }
   public getActiveTransfers(
     channelAddress: EthereumAddress,
-  ): ResultAsync<IFullTransferState[], VectorError> {
+  ): ResultAsync<IFullTransferState<unknown, unknown>[], VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.getActiveTransfers({ channelAddress }),
       this.toVectorError,
@@ -142,7 +142,7 @@ export class WrappedBrowserNode implements IBrowserNode {
   public getTransfers(
     startDate: UnixTimestamp,
     endDate: UnixTimestamp,
-  ): ResultAsync<IFullTransferState[], VectorError> {
+  ): ResultAsync<IFullTransferState<unknown, unknown>[], VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.getTransfers({
         startDate: new Date(startDate),
