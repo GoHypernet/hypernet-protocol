@@ -221,7 +221,6 @@ export class PaymentUtils implements IPaymentUtils {
       );
     }
 
-    console.log('offerDetails.rate', offerDetails.rate);
     // Get deltaAmount & deltaTime from the parameterized payment
     if (offerDetails.rate == null) {
       throw new LogicalError(

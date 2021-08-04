@@ -98,6 +98,15 @@ export interface IPaymentUtils {
   ): ResultAsync<PushPayment, never>;
 
   /**
+   * This method is supposed to return a sorted history of the payment's history, but without
+   * a resolvedAt we can't really do that. So this will just have to sit here for a while.
+   * @param sortedTransfers
+   */
+  getPaymentStateHistory(
+    sortedTransfers: SortedTransfers,
+  ): ResultAsync<EPaymentState[], never>;
+
+  /**
    * Given an unsorted list of transfers, it will give you the timestamp of the
    * earliest one.
    * @param transfers an unsorted list of transfers

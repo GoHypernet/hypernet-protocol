@@ -190,6 +190,22 @@ export class VectorUtilsMockFactory {
       ),
     ).thenReturn(okAsync(ETransferType.Parameterized));
 
+    td.when(
+      vectorUtils.getTimestampFromTransfer(
+        td.matchers.contains({ transferId: offerTransferId }),
+      ),
+    ).thenReturn(UnixTimestamp(unixNow - 1) as never);
+    td.when(
+      vectorUtils.getTimestampFromTransfer(
+        td.matchers.contains({ transferId: insuranceTransferId }),
+      ),
+    ).thenReturn(UnixTimestamp(unixNow - 1) as never);
+    td.when(
+      vectorUtils.getTimestampFromTransfer(
+        td.matchers.contains({ transferId: parameterizedTransferId }),
+      ),
+    ).thenReturn(UnixTimestamp(unixNow - 1) as never);
+
     return vectorUtils;
   }
 }
