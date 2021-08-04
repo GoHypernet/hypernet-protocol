@@ -29,6 +29,7 @@
   ],
   "scripts": {
     "build": "yarn clean && yarn build-connector && yarn build-server",
+    "build-server": "webpack --config server/webpack.config.js",
     "build-connector": "webpack --config src/webpack.config.js",
     "dockerize": "docker build -t hypernetlabs/hypernet-protocol-test-gateway:local -f Dockerfile --progress=plain ../..",
     "docker-push": "docker push hypernetlabs/hypernet-protocol-test-gateway:local",

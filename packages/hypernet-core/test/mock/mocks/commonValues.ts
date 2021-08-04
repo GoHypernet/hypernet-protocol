@@ -46,6 +46,15 @@ export const erc20AssetAddress = EthereumAddress(
 export const commonPaymentId = PaymentId(
   "See, this doesn't have to be legit data if it's never checked!",
 );
+export const validPaymentId = PaymentId(
+  "0x48797065726e6574202050555348202037074ce539ff4b81b4cb43dcfe3f4513",
+);
+export const invalidPaymentId = PaymentId(
+  "0x48797065726e6574202050555348202037074ce539ff4b81b4cb43dcfe3f4513Z",
+);
+export const invalidPaymentIdWithBadType = PaymentId(
+  "0x48797065726e6574202051555348202037074ce539ff4b81b4cb43dcfe3f4513",
+);
 export const offerTransferId = TransferId("OfferTransferId");
 export const offerTransferId2 = TransferId("OfferTransferId2");
 export const insuranceTransferId = TransferId("InsuranceTransferId");
@@ -62,6 +71,7 @@ export const gatewayUrl2 = GatewayUrl("https://example2.gateway.com/");
 export const gatewayAddress = EthereumAddress("0xMediatorEthereumAddress");
 export const gatewayAddress2 = EthereumAddress("0xMediatorEthereumAddress2");
 export const gatewaySignature = Signature("0xgatewaySignature");
+export const validDomain = "Hypernet";
 
 export const messageTransferDefinitionAddress = EthereumAddress(
   "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6",
@@ -199,7 +209,7 @@ export const activeInsuranceTransfer: IFullTransferState<
     amount: ["43", "43"],
     to: [destinationAddress],
   },
-  assetId: erc20AssetAddress,
+  assetId: hyperTokenAddress,
   channelAddress: routerChannelAddress,
   inDispute: false,
   transferId: insuranceTransferId,

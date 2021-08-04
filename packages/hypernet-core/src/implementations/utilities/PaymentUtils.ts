@@ -119,9 +119,17 @@ export class PaymentUtils implements IPaymentUtils {
      * InsuranceTransfer - service operator puts up to guarantee the sender's funds
      * ParameterizedPayment - the payment to the service operator
      */
-    const offerDetails: IHypernetOfferDetails = JSON.parse(
-      (sortedTransfers.offerTransfers[0].transferState as MessageState).message,
-    );
+    let offerDetails: IHypernetOfferDetails;
+
+    // If payment is Borked it may have no offerTransfers
+    if (sortedTransfers?.offerTransfers[0] == null) {
+      offerDetails = {} as IHypernetOfferDetails;
+    } else {
+      offerDetails = JSON.parse(
+        (sortedTransfers.offerTransfers[0].transferState as MessageState)
+          .message,
+      );
+    }
 
     let amountStaked = BigNumberString("0");
     let insuranceTransferId: TransferId | null = null;
@@ -201,10 +209,19 @@ export class PaymentUtils implements IPaymentUtils {
       );
     }
 
-    const offerDetails: IHypernetOfferDetails = JSON.parse(
-      (sortedTransfers.offerTransfers[0].transferState as MessageState).message,
-    );
+    let offerDetails: IHypernetOfferDetails;
 
+    // If payment is Borked it may have no offerTransfers
+    if (sortedTransfers?.offerTransfers[0] == null) {
+      offerDetails = {} as IHypernetOfferDetails;
+    } else {
+      offerDetails = JSON.parse(
+        (sortedTransfers.offerTransfers[0].transferState as MessageState)
+          .message,
+      );
+    }
+
+    console.log('offerDetails.rate', offerDetails.rate);
     // Get deltaAmount & deltaTime from the parameterized payment
     if (offerDetails.rate == null) {
       throw new LogicalError(
@@ -236,15 +253,19 @@ export class PaymentUtils implements IPaymentUtils {
     const pullAmounts = new Array<PullAmount>();
 
     for (const pullRecord of sortedTransfers.pullRecordTransfers) {
-      const message = JSON.parse(
-        pullRecord.transferState.message,
-      ) as IHypernetPullPaymentDetails;
-      pullAmounts.push(
-        new PullAmount(
-          BigNumber.from(message.pullPaymentAmount),
-          this.vectorUtils.getTimestampFromTransfer(pullRecord),
-        ),
-      );
+      // Payment might be borked and has no message
+      if (pullRecord.transferState != null) {
+        const message = JSON.parse(
+          pullRecord.transferState.message,
+        ) as IHypernetPullPaymentDetails;
+
+        pullAmounts.push(
+          new PullAmount(
+            BigNumber.from(message.pullPaymentAmount),
+            this.vectorUtils.getTimestampFromTransfer(pullRecord),
+          ),
+        );
+      }
     }
 
     const paymentToken =
@@ -367,7 +388,6 @@ export class PaymentUtils implements IPaymentUtils {
   ): ResultAsync<EPaymentState, BlockchainUnavailableError> {
     // We are going to remove all canceled transfers from consideration.
     // Canceled transfers are irrelevant; artifacts of things gone wonky.
-    console.debug(sortedTransfers);
     return ResultUtils.combine([
       ResultUtils.map(sortedTransfers.offerTransfers, (val) => {
         return this.vectorUtils
@@ -423,7 +443,11 @@ export class PaymentUtils implements IPaymentUtils {
         (val) => val.transferState != ETransferState.Canceled,
       );
 
-      if (nonCanceledOfferTransfers.length > 1) {
+      if (
+        nonCanceledOfferTransfers.length > 1 ||
+        nonCanceledInsuranceTransfers.length > 1 ||
+        nonCanceledParameterizedTransfers.length > 1
+      ) {
         return EPaymentState.Borked;
       }
 
@@ -440,14 +464,6 @@ export class PaymentUtils implements IPaymentUtils {
         (nonCanceledOfferTransfers[0].transfer.transferState as MessageState)
           .message,
       );
-
-      if (nonCanceledInsuranceTransfers.length > 1) {
-        return EPaymentState.Borked;
-      }
-
-      if (nonCanceledParameterizedTransfers.length > 1) {
-        return EPaymentState.Borked;
-      }
 
       const hasInsurance = nonCanceledInsuranceTransfers.length == 1;
       const hasParameterized = nonCanceledParameterizedTransfers.length == 1;

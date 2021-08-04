@@ -4,6 +4,7 @@ import {
   UnixTimestamp,
   IBasicTransferResponse,
   Signature,
+  ETransferState,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { okAsync } from "neverthrow";
@@ -156,6 +157,38 @@ export class VectorUtilsMockFactory {
         BigNumber.from("1"),
       ),
     ).thenReturn(okAsync({} as IBasicTransferResponse));
+
+    td.when(
+      vectorUtils.getTransferStateFromTransfer(
+        td.matchers.contains({ transferId: offerTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferState.Active));
+    td.when(
+      vectorUtils.getTransferStateFromTransfer(
+        td.matchers.contains({ transferId: insuranceTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferState.Active));
+    td.when(
+      vectorUtils.getTransferStateFromTransfer(
+        td.matchers.contains({ transferId: parameterizedTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferState.Active));
+
+    td.when(
+      vectorUtils.getTransferType(
+        td.matchers.contains({ transferId: offerTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferType.Offer));
+    td.when(
+      vectorUtils.getTransferType(
+        td.matchers.contains({ transferId: insuranceTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferType.Insurance));
+    td.when(
+      vectorUtils.getTransferType(
+        td.matchers.contains({ transferId: parameterizedTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferType.Parameterized));
 
     return vectorUtils;
   }
