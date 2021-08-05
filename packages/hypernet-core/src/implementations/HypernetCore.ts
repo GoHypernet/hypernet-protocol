@@ -81,7 +81,6 @@ import {
   IPaymentRepository,
 } from "@interfaces/data";
 import { HypernetContext } from "@interfaces/objects";
-import { BigNumber } from "ethers";
 import { ok, Result, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
@@ -98,7 +97,6 @@ import {
   VectorUtils,
   EthersBlockchainUtils,
   CeramicUtils,
-  MetamaskUtils,
   MessagingProvider,
 } from "@implementations/utilities";
 import {
@@ -119,7 +117,6 @@ import {
   ITimeUtils,
   IVectorUtils,
   ICeramicUtils,
-  IMetamaskUtils,
   IMessagingProvider,
 } from "@interfaces/utilities";
 import {
