@@ -1,27 +1,31 @@
+import { Box } from "@material-ui/core";
+import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 import { IOnboardingFlowParams } from "@web-ui/interfaces";
 import React, { useEffect, useState, ReactNode } from "react";
 import { useAlert } from "react-alert";
-import { Box } from "@material-ui/core";
 
 import {
   ModalHeader,
-  ModalFooter,
   SucessContent,
   Button,
-  TokenSelector,
+  ModalFooter,
 } from "@web-ui/components";
-import { useLayoutContext, useStoreContext } from "@web-ui/contexts";
 import { useStyles } from "@web-ui/flows/OnboardingFlow/OnboardingFlow.style";
 import { useBalances } from "@web-ui/hooks";
+import { EButtonStatus } from "@web-ui/theme";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget/BalancesWidget";
 import FundWidget from "@web-ui/widgets/FundWidget/FundWidget";
+import {
+  AUTHENTICATION_IMAGE_URL,
+  AUTHENTICATION_SUCCESS_IMAGE_URL,
+} from "@web-ui/constants";
 
 enum EOnboardingScreens {
   IDLE = 0,
   MERCHANT_AUTHORIZATION = 1,
   EMPTY_BALANCE = 2,
   FUND_WIDGET = 3,
-  BALANCES_AND_PREFERRED_TOKEN = 4,
+  BALANCES = 4,
   ONBOARDING_SUCCESS = 5,
 }
 
@@ -29,18 +33,13 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
   props: IOnboardingFlowParams,
 ) => {
   const {
-    merchantUrl,
+    gatewayUrl,
     finalSuccessContent = "You are good to go and purchase using your payment token",
     closeCallback = () => {},
+    gatewayName,
   } = props;
   const alert = useAlert();
-  const {
-    balances,
-    channelTokenSelectorOptions,
-    preferredPaymentToken,
-    setPreferredPaymentToken,
-    //setPreferredPaymentTokenByAssetInfo,
-  } = useBalances();
+  const { balances } = useBalances();
 
   const { coreProxy } = useStoreContext();
   const { setLoading, closeModal } = useLayoutContext();
@@ -52,12 +51,12 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
 
   useEffect(() => {
     setLoading(true);
-    // First initialze the merchant
-    coreProxy.getAuthorizedMerchants().match((merchantsMap) => {
-      if (merchantsMap.get(merchantUrl)) {
+    // First initialze the gateway
+    coreProxy.getAuthorizedGateways().match((gatewaysMap) => {
+      if (gatewaysMap.get(gatewayUrl)) {
         //check for balances
         coreProxy.getBalances().match((_balances) => {
-          decideScreenWhenMerchantIsAlreadyAuthorized(
+          decideScreenWhenGatewayIsAlreadyAuthorized(
             !!_balances.assets?.length,
           );
         }, handleError);
@@ -66,27 +65,23 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
       }
 
       setLoading(false);
-      // Then get the preferred payment token if there is any
-      /* coreProxy.getPreferredPaymentToken().map((token) => {
-        setPreferredPaymentTokenByAssetInfo(token);
-      }); */
     }, handleError);
 
-    coreProxy.onMerchantAuthorized.subscribe((_merchantUrl) => {
-      if (merchantUrl === _merchantUrl) {
-        alert.success(`Merchant ${merchantUrl} authorization succeeded!`);
+    coreProxy.onGatewayAuthorized.subscribe((_gatewayUrl) => {
+      if (gatewayUrl === _gatewayUrl) {
+        alert.success(`Gateway ${gatewayUrl} authorization succeeded!`);
         setLoading(false);
         coreProxy.getBalances().match((_balances) => {
-          decideScreenWhenMerchantIsAlreadyAuthorized(
+          decideScreenWhenGatewayIsAlreadyAuthorized(
             !!_balances.assets?.length,
           );
         }, handleError);
       }
     });
 
-    coreProxy.onAuthorizedMerchantActivationFailed.subscribe((_merchantUrl) => {
-      if (merchantUrl === _merchantUrl) {
-        alert.error(`Merchant ${merchantUrl} authorization failed!`);
+    coreProxy.onAuthorizedGatewayActivationFailed.subscribe((_gatewayUrl) => {
+      if (gatewayUrl === _gatewayUrl) {
+        alert.error(`Gateway ${gatewayUrl} authorization failed!`);
         setLoading(false);
       }
     });
@@ -95,31 +90,27 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
   // Watch funding success
   useEffect(() => {
     if (balances?.length && currentSreen === EOnboardingScreens.FUND_WIDGET) {
-      setCurrentSreen(EOnboardingScreens.BALANCES_AND_PREFERRED_TOKEN);
+      setCurrentSreen(EOnboardingScreens.BALANCES);
     }
   }, [balances]);
 
-  const decideScreenWhenMerchantIsAlreadyAuthorized = (
+  const decideScreenWhenGatewayIsAlreadyAuthorized = (
     hasBalances?: boolean,
   ) => {
     if (hasBalances || balances?.length) {
-      setCurrentSreen(EOnboardingScreens.BALANCES_AND_PREFERRED_TOKEN);
+      setCurrentSreen(EOnboardingScreens.BALANCES);
     } else {
       setCurrentSreen(EOnboardingScreens.EMPTY_BALANCE);
     }
   };
 
-  const handleMerchantAuthorization = () => {
+  const handleGatewayAuthorization = () => {
     setLoading(true);
-    coreProxy.authorizeMerchant(merchantUrl).mapErr(handleError);
+    coreProxy.authorizeGateway(gatewayUrl).mapErr(handleError);
   };
 
   const goToFundWalletScreen = () => {
     setCurrentSreen(EOnboardingScreens.FUND_WIDGET);
-  };
-
-  const goToSuccessScreen = () => {
-    setCurrentSreen(EOnboardingScreens.ONBOARDING_SUCCESS);
   };
 
   const handleError = (err?: Error) => {
@@ -127,13 +118,27 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
     alert.error(err?.message || "Something went wrong!");
   };
 
-  const renderFundWalletButton = () => {
+  const goToSuccessScreen = () => {
+    setCurrentSreen(EOnboardingScreens.ONBOARDING_SUCCESS);
+  };
+
+  const renderFundWalletButton = (status?: EButtonStatus) => {
+    if (status === EButtonStatus.secondary) {
+      return (
+        <Button
+          label="Fund my wallet"
+          onClick={goToFundWalletScreen}
+          fullWidth={true}
+          status={EButtonStatus.secondary}
+        />
+      );
+    }
     return (
       <Button
-        label="Fund your wallet"
+        label="Fund my wallet"
         onClick={goToFundWalletScreen}
         fullWidth={true}
-        linkStyle
+        bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
       />
     );
   };
@@ -156,13 +161,19 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
                 <BalancesWidget />
               </Box>
             ) : (
-              <Box className={classes.balancesEmptyLabel}>
-                You are one step away!
-              </Box>
+              <>
+                <Box className={classes.balancesEmptyLabel}>
+                  You are getting closer!
+                </Box>
+                <img
+                  className={classes.authenticationImg}
+                  src={AUTHENTICATION_IMAGE_URL}
+                />
+              </>
             )}
             <Button
-              label="Authorize Merchant"
-              onClick={handleMerchantAuthorization}
+              label={`Approve ${gatewayName || "Hyperpay"}`}
+              onClick={handleGatewayAuthorization}
               fullWidth={true}
               bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
             />
@@ -172,38 +183,32 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
         return (
           <>
             <Box className={classes.balancesEmptyLabel}>
-              You don't have any balances in your channel wallet
+              You have successfully connected your wallet!
             </Box>
+            <img
+              className={classes.authenticationSuccessImg}
+              src={AUTHENTICATION_SUCCESS_IMAGE_URL}
+            />
             {renderFundWalletButton()}
           </>
         );
       case EOnboardingScreens.FUND_WIDGET:
         return <FundWidget />;
-      case EOnboardingScreens.BALANCES_AND_PREFERRED_TOKEN:
+      case EOnboardingScreens.BALANCES:
         return (
           <>
             {balances?.length && <BalancesWidget />}
-            {!preferredPaymentToken && (
-              <Box className={classes.paymentTokenLabel}>
-                You need to set a default payment token to purchase with!
-              </Box>
-            )}
-            <Box className={classes.preferredTokenWrapper}>
-              <TokenSelector
-                tokenSelectorOptions={channelTokenSelectorOptions}
-                selectedPaymentToken={preferredPaymentToken}
-                setSelectedPaymentToken={setPreferredPaymentToken}
-                label="Select your preferred token:"
-              />
-            </Box>
-            {renderFundWalletButton()}
-            {preferredPaymentToken && (
+
+            <Box className={classes.doneButtonWrapper}>
               <Button
                 label="Done"
                 onClick={goToSuccessScreen}
-                hasMaterialUIStyle
+                fullWidth={true}
+                bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
               />
-            )}
+            </Box>
+
+            {renderFundWalletButton(EButtonStatus.secondary)}
           </>
         );
       case EOnboardingScreens.ONBOARDING_SUCCESS:
@@ -214,7 +219,7 @@ const OnboardingFlow: React.FC<IOnboardingFlowParams> = (
               info={finalSuccessContent}
               onOkay={onOkClick}
             />
-            {renderFundWalletButton()}
+            {renderFundWalletButton(EButtonStatus.secondary)}
           </>
         );
       default:

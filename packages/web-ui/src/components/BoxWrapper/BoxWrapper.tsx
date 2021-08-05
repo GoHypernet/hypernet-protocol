@@ -1,11 +1,11 @@
-import React from "react";
 import { Box, BoxProps } from "@material-ui/core";
+import React from "react";
 
 import { useStyles } from "@web-ui/components/BoxWrapper/BoxWrapper.style";
 
 interface IBoxWrapper extends BoxProps {
   children?: React.ReactNode;
-  label?: string;
+  label?: string | React.ReactNode;
   rightComponent?: React.ReactNode;
   bodyStyle?: React.CSSProperties;
   hasEmptyState?: boolean;

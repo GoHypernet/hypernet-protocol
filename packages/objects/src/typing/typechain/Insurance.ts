@@ -19,7 +19,7 @@ import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 
-interface InsuranceInterface extends ethers.utils.Interface {
+export interface IInsuranceInterface extends ethers.utils.Interface {
   functions: {
     "EncodedCancel()": FunctionFragment;
     "Name()": FunctionFragment;

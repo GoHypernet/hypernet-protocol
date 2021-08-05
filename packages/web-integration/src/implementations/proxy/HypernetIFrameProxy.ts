@@ -8,34 +8,32 @@ import {
   PushPayment,
   Payment,
   PaymentId,
-  MerchantUrl,
+  GatewayUrl,
   Signature,
-  AssetInfo,
   AcceptPaymentError,
-  RouterChannelUnknownError,
   BlockchainUnavailableError,
   VectorError,
-  LogicalError,
   BalancesUnavailableError,
   InsufficientBalanceError,
-  MerchantValidationError,
+  GatewayValidationError,
   PersistenceError,
-  MerchantConnectorError,
+  GatewayConnectorError,
   ProxyError,
-  InvalidPaymentError,
   InvalidParametersError,
-  TransferResolutionError,
-  PreferredPaymentTokenError,
   IHypernetCore,
+  GatewayAuthorizationDeniedError,
+  BigNumberString,
+  MessagingError,
+  RouterChannelUnknownError,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
-import { BigNumber } from "ethers";
-import { Result, ResultAsync, ok } from "neverthrow";
+import { Result, ResultAsync, ok, okAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
 export default class HypernetIFrameProxy
   extends ParentProxy
-  implements IHypernetCore {
+  implements IHypernetCore
+{
   protected coreInitialized = false;
   protected isInControl = false;
   protected waitInitializedPromise: Promise<void>;
@@ -60,15 +58,18 @@ export default class HypernetIFrameProxy
     this.onPullPaymentUpdated = new Subject<PullPayment>();
     this.onPushPaymentDelayed = new Subject<PushPayment>();
     this.onPullPaymentDelayed = new Subject<PullPayment>();
+    this.onPushPaymentCanceled = new Subject<PushPayment>();
+    this.onPullPaymentCanceled = new Subject<PullPayment>();
     this.onBalancesChanged = new Subject<Balances>();
     this.onDeStorageAuthenticationStarted = new Subject<void>();
     this.onDeStorageAuthenticationSucceeded = new Subject<void>();
     this.onDeStorageAuthenticationFailed = new Subject<void>();
-    this.onMerchantAuthorized = new Subject<MerchantUrl>();
-    this.onAuthorizedMerchantUpdated = new Subject<MerchantUrl>();
-    this.onAuthorizedMerchantActivationFailed = new Subject<MerchantUrl>();
-    this.onMerchantIFrameDisplayRequested = new Subject<MerchantUrl>();
-    this.onMerchantIFrameCloseRequested = new Subject<MerchantUrl>();
+    this.onGatewayAuthorized = new Subject<GatewayUrl>();
+    this.onGatewayDeauthorizationStarted = new Subject<GatewayUrl>();
+    this.onAuthorizedGatewayUpdated = new Subject<GatewayUrl>();
+    this.onAuthorizedGatewayActivationFailed = new Subject<GatewayUrl>();
+    this.onGatewayIFrameDisplayRequested = new Subject<GatewayUrl>();
+    this.onGatewayIFrameCloseRequested = new Subject<GatewayUrl>();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
 
@@ -121,6 +122,14 @@ export default class HypernetIFrameProxy
           this.onPullPaymentDelayed.next(data);
         });
 
+        child.on("onPushPaymentCanceled", (data: PushPayment) => {
+          this.onPushPaymentCanceled.next(data);
+        });
+
+        child.on("onPullPaymentCanceled", (data: PullPayment) => {
+          this.onPullPaymentCanceled.next(data);
+        });
+
         child.on("onBalancesChanged", (data: Balances) => {
           this.onBalancesChanged.next(data);
         });
@@ -141,20 +150,21 @@ export default class HypernetIFrameProxy
           this.onDeStorageAuthenticationFailed.next();
         });
 
-        child.on("onMerchantAuthorized", (data: MerchantUrl) => {
-          this.onMerchantAuthorized.next(data);
+        child.on("onGatewayAuthorized", (data: GatewayUrl) => {
+          this.onGatewayAuthorized.next(data);
         });
 
-        child.on("onAuthorizedMerchantUpdated", (data: MerchantUrl) => {
-          this.onAuthorizedMerchantUpdated.next(data);
+        child.on("onGatewayDeauthorizationStarted", (data: GatewayUrl) => {
+          this.onGatewayDeauthorizationStarted.next(data);
         });
 
-        child.on(
-          "onAuthorizedMerchantActivationFailed",
-          (data: MerchantUrl) => {
-            this.onAuthorizedMerchantActivationFailed.next(data);
-          },
-        );
+        child.on("onAuthorizedGatewayUpdated", (data: GatewayUrl) => {
+          this.onAuthorizedGatewayUpdated.next(data);
+        });
+
+        child.on("onAuthorizedGatewayActivationFailed", (data: GatewayUrl) => {
+          this.onAuthorizedGatewayActivationFailed.next(data);
+        });
 
         // Setup a listener for the "initialized" event.
         child.on("initialized", () => {
@@ -165,16 +175,16 @@ export default class HypernetIFrameProxy
           this.coreInitialized = true;
         });
 
-        child.on("onMerchantIFrameDisplayRequested", (data: MerchantUrl) => {
+        child.on("onGatewayIFrameDisplayRequested", (data: GatewayUrl) => {
           this._displayCoreIFrame();
 
-          this.onMerchantIFrameDisplayRequested.next(data);
+          this.onGatewayIFrameDisplayRequested.next(data);
         });
 
-        child.on("onMerchantIFrameCloseRequested", (data: MerchantUrl) => {
+        child.on("onGatewayIFrameCloseRequested", (data: GatewayUrl) => {
           this._closeCoreIFrame();
 
-          this.onMerchantIFrameCloseRequested.next(data);
+          this.onGatewayIFrameCloseRequested.next(data);
         });
 
         child.on("onInitializationRequired", () => {
@@ -190,7 +200,7 @@ export default class HypernetIFrameProxy
 
   public finalizePullPayment(
     _paymentId: PaymentId,
-    _finalAmount: BigNumber,
+    _finalAmount: BigNumberString,
   ): Promise<HypernetLink> {
     throw new Error("Method not implemented.");
   }
@@ -227,7 +237,18 @@ export default class HypernetIFrameProxy
     return this._createCall("getEthereumAccounts", null);
   }
 
-  public initialize(account: EthereumAddress): ResultAsync<void, LogicalError> {
+  public initialize(
+    account: EthereumAddress,
+  ): ResultAsync<
+    void,
+    | MessagingError
+    | BlockchainUnavailableError
+    | VectorError
+    | RouterChannelUnknownError
+    | GatewayConnectorError
+    | GatewayValidationError
+    | ProxyError
+  > {
     return this._createCall("initialize", account);
   }
 
@@ -237,20 +258,20 @@ export default class HypernetIFrameProxy
 
   public depositFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<
     Balances,
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
     return this._createCall("depositFunds", {
       assetAddress,
-      amount: amount.toString(),
+      amount: amount,
     });
   }
 
   public withdrawFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
@@ -258,7 +279,7 @@ export default class HypernetIFrameProxy
   > {
     return this._createCall("withdrawFunds", {
       assetAddress,
-      amount: amount.toString(),
+      amount: amount,
       destinationAddress,
     });
   }
@@ -267,17 +288,11 @@ export default class HypernetIFrameProxy
     return this._createCall("getBalances", null);
   }
 
-  public getLinks(): ResultAsync<
-    HypernetLink[],
-    RouterChannelUnknownError | VectorError | Error
-  > {
+  public getLinks(): ResultAsync<HypernetLink[], VectorError | Error> {
     return this._createCall("getLinks", null);
   }
 
-  public getActiveLinks(): ResultAsync<
-    HypernetLink[],
-    RouterChannelUnknownError | VectorError | Error
-  > {
+  public getActiveLinks(): ResultAsync<HypernetLink[], VectorError | Error> {
     return this._createCall("getActiveLinks", null);
   }
 
@@ -285,46 +300,6 @@ export default class HypernetIFrameProxy
     _counterPartyAccount: PublicIdentifier,
   ): Promise<HypernetLink> {
     throw new Error("Unimplemented");
-  }
-
-  public sendFunds(
-    counterPartyAccount: PublicIdentifier,
-    amount: BigNumber,
-    expirationDate: number,
-    requiredStake: BigNumber,
-    paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
-    return this._createCall("sendFunds", {
-      counterPartyAccount,
-      amount: amount.toString(),
-      expirationDate,
-      requiredStake: requiredStake.toString(),
-      paymentToken,
-      merchantUrl,
-    });
-  }
-
-  public authorizeFunds(
-    counterPartyAccount: PublicIdentifier,
-    totalAuthorized: BigNumber,
-    expirationDate: number,
-    deltaAmount: BigNumber,
-    deltaTime: number,
-    requiredStake: BigNumber,
-    paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
-    return this._createCall("authorizeFunds", {
-      counterPartyAccount,
-      totalAuthorized: totalAuthorized.toString(),
-      expirationDate,
-      deltaAmount: deltaAmount.toString(),
-      deltaTime,
-      requiredStake: requiredStake.toString(),
-      paymentToken,
-      merchantUrl,
-    });
   }
 
   public acceptOffers(
@@ -338,92 +313,74 @@ export default class HypernetIFrameProxy
 
   public pullFunds(
     paymentId: PaymentId,
-    amount: BigNumber,
-  ): ResultAsync<Payment, RouterChannelUnknownError | VectorError | Error> {
+    amount: BigNumberString,
+  ): ResultAsync<Payment, VectorError | Error> {
     return this._createCall("pullFunds", {
       paymentId,
-      amount: amount.toString(),
+      amount: amount,
     });
   }
 
-  public initiateDispute(
-    paymentId: PaymentId,
-  ): ResultAsync<
-    Payment,
-    | MerchantConnectorError
-    | MerchantValidationError
-    | RouterChannelUnknownError
-    | VectorError
-    | BlockchainUnavailableError
-    | LogicalError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | TransferResolutionError
-  > {
-    return this._createCall("initiateDispute", paymentId);
-  }
-
-  public resolveInsurance(
-    paymentId: PaymentId,
-  ): ResultAsync<
-    Payment,
-    | RouterChannelUnknownError
-    | VectorError
-    | BlockchainUnavailableError
-    | LogicalError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | TransferResolutionError
-  > {
-    return this._createCall("resolveInsurance", paymentId);
-  }
-
   public mintTestToken(
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<void, BlockchainUnavailableError> {
-    return this._createCall("mintTestToken", amount.toString());
+    return this._createCall("mintTestToken", amount);
   }
 
-  public authorizeMerchant(
-    merchantUrl: MerchantUrl,
-  ): ResultAsync<void, MerchantValidationError> {
-    return this._createCall("authorizeMerchant", merchantUrl);
+  public authorizeGateway(
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<void, GatewayValidationError> {
+    return this._createCall("authorizeGateway", gatewayUrl);
   }
 
-  public deauthorizeMerchant(
-    merchantUrl: MerchantUrl,
-  ): ResultAsync<void, PersistenceError> {
-    return this._createCall("deauthorizeMerchant", merchantUrl);
+  public deauthorizeGateway(
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<
+    void,
+    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+  > {
+    return this._createCall("deauthorizeGateway", gatewayUrl);
   }
 
-  public getAuthorizedMerchants(): ResultAsync<
-    Map<MerchantUrl, Signature>,
+  public getAuthorizedGateways(): ResultAsync<
+    Map<GatewayUrl, Signature>,
     PersistenceError
   > {
-    return this._createCall("getAuthorizedMerchants", null);
+    return this._createCall("getAuthorizedGateways", null);
   }
 
-  public getAuthorizedMerchantsConnectorsStatus(): ResultAsync<
-    Map<MerchantUrl, boolean>,
+  public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
+    Map<GatewayUrl, boolean>,
     PersistenceError
   > {
-    return this._createCall("getAuthorizedMerchantsConnectorsStatus", null);
+    return this._createCall("getAuthorizedGatewaysConnectorsStatus", null);
   }
 
-  public displayMerchantIFrame(
-    merchantUrl: MerchantUrl,
-  ): ResultAsync<void, MerchantConnectorError> {
-    this._displayCoreIFrame();
+  public displayGatewayIFrame(
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<void, GatewayConnectorError> {
+    return this.getAuthorizedGatewaysConnectorsStatus().andThen(
+      (gatewaysMap) => {
+        if (gatewaysMap.get(gatewayUrl) == true) {
+          this._displayCoreIFrame();
 
-    return this._createCall("displayMerchantIFrame", merchantUrl);
+          return this._createCall("displayGatewayIFrame", gatewayUrl);
+        } else {
+          alert(
+            `Gateway ${gatewayUrl} is not activated at the moment, try again later`,
+          );
+          return okAsync(undefined);
+        }
+      },
+    );
   }
 
-  public closeMerchantIFrame(
-    merchantUrl: MerchantUrl,
-  ): ResultAsync<void, MerchantConnectorError> {
+  public closeGatewayIFrame(
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<void, GatewayConnectorError> {
     this._closeCoreIFrame();
 
-    return this._createCall("closeMerchantIFrame", merchantUrl);
+    return this._createCall("closeGatewayIFrame", gatewayUrl);
   }
 
   public providePrivateCredentials(
@@ -434,19 +391,6 @@ export default class HypernetIFrameProxy
       privateKey,
       mnemonic,
     });
-  }
-
-  public setPreferredPaymentToken(
-    tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PreferredPaymentTokenError> {
-    return this._createCall("setPreferredPaymentToken", tokenAddress);
-  }
-
-  public getPreferredPaymentToken(): ResultAsync<
-    AssetInfo,
-    BlockchainUnavailableError | PreferredPaymentTokenError
-  > {
-    return this._createCall("getPreferredPaymentToken", null);
   }
 
   private _displayCoreIFrame(): void {
@@ -486,15 +430,18 @@ export default class HypernetIFrameProxy
   public onPullPaymentReceived: Subject<PullPayment>;
   public onPushPaymentDelayed: Subject<PushPayment>;
   public onPullPaymentDelayed: Subject<PullPayment>;
+  public onPushPaymentCanceled: Subject<PushPayment>;
+  public onPullPaymentCanceled: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
   public onDeStorageAuthenticationStarted: Subject<void>;
   public onDeStorageAuthenticationSucceeded: Subject<void>;
   public onDeStorageAuthenticationFailed: Subject<void>;
-  public onMerchantAuthorized: Subject<MerchantUrl>;
-  public onAuthorizedMerchantUpdated: Subject<MerchantUrl>;
-  public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>;
-  public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>;
-  public onMerchantIFrameCloseRequested: Subject<MerchantUrl>;
+  public onGatewayAuthorized: Subject<GatewayUrl>;
+  public onGatewayDeauthorizationStarted: Subject<GatewayUrl>;
+  public onAuthorizedGatewayUpdated: Subject<GatewayUrl>;
+  public onAuthorizedGatewayActivationFailed: Subject<GatewayUrl>;
+  public onGatewayIFrameDisplayRequested: Subject<GatewayUrl>;
+  public onGatewayIFrameCloseRequested: Subject<GatewayUrl>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
 }

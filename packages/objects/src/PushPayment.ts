@@ -1,12 +1,12 @@
-import { BigNumber } from "ethers";
-
+import { BigNumberString } from "@objects/BigNumberString";
 import { EthereumAddress } from "@objects/EthereumAddress";
-import { MerchantUrl } from "@objects/MerchantUrl";
+import { GatewayUrl } from "@objects/GatewayUrl";
 import { Payment } from "@objects/Payment";
 import { PaymentId } from "@objects/PaymentId";
-import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
+import { SortedTransfers } from "@objects/SortedTransfers";
 import { EPaymentState } from "@objects/typing";
+import { UnixTimestamp } from "@objects/UnixTimestamp";
 
 export class PushPayment extends Payment {
   constructor(
@@ -15,16 +15,17 @@ export class PushPayment extends Payment {
     from: PublicIdentifier,
     state: EPaymentState,
     paymentToken: EthereumAddress,
-    requiredStake: BigNumber,
-    amountStaked: BigNumber,
-    expirationDate: number,
-    createdTimestamp: number,
-    updatedTimestamp: number,
-    collateralRecovered: BigNumber,
-    merchantUrl: MerchantUrl,
-    details: PaymentInternalDetails,
-    public paymentAmount: BigNumber,
-    public amountTransferred: BigNumber,
+    requiredStake: BigNumberString,
+    amountStaked: BigNumberString,
+    expirationDate: UnixTimestamp,
+    createdTimestamp: UnixTimestamp,
+    updatedTimestamp: UnixTimestamp,
+    collateralRecovered: BigNumberString,
+    gatewayUrl: GatewayUrl,
+    details: SortedTransfers,
+    metadata: string | null,
+    public paymentAmount: BigNumberString,
+    public amountTransferred: BigNumberString,
   ) {
     super(
       id,
@@ -38,8 +39,9 @@ export class PushPayment extends Payment {
       createdTimestamp,
       updatedTimestamp,
       collateralRecovered,
-      merchantUrl,
+      gatewayUrl,
       details,
+      metadata,
     );
   }
 }

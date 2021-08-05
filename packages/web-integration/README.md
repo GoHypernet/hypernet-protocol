@@ -2,7 +2,7 @@
 
 # Web integration
 
-This is the package that merchants would include on their actual website if they want to support HNP. This package will instantiate HNC in an iframe and provides a proxy interface to it for the merchant to interface with; from the merchant's POV it should be like working directly with a HypernetCore object. It also provides a number of pre-built UI widgets, along with easy utility functions, that make it trivial to display information from HNC on the merchant's website.
+This is the package that gateways would include on their actual website if they want to support HNP. This package will instantiate HNC in an iframe and provides a proxy interface to it for the gateway to interface with; from the gateway's POV it should be like working directly with a HypernetCore object. It also provides a number of pre-built UI widgets, along with easy utility functions, that make it trivial to display information from HNC on the gateway's website.
 
 ## Get started
 
@@ -28,7 +28,7 @@ const integration = new HypernetWebIntegration();
 
 integration.getReady().map((coreProxy) => {
     integration.webUIClient.startOnboardingFlow({
-        merchantUrl: merchantUrl,
+        gatewayUrl: gatewayUrl,
         finalSuccessContent: 'Awesome, you can buy credits with your crypto now!',
         showInModal: true,
     }).mapErr((err) => {

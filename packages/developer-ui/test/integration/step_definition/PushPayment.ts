@@ -40,16 +40,16 @@ class PushPayment {
     return this.pageUtils.page.waitForTimeout(REQUEST_TIMEOUT);
   }
 
-  @given("PushPaymentUserA authorize merchant url of {string}", undefined, AVERAGE_TIMEOUT)
-  public async givenUserAAuthorizeMerchantUrl(merchantUrl: string) {
+  @given("PushPaymentUserA authorize gateway url of {string}", undefined, AVERAGE_TIMEOUT)
+  public async givenUserAAuthorizeGatewayUrl(gatewayUrl: string) {
     await this.pageUtils.clearInput(MERCHANT_URL_INPUT_DATA_BIND);
-    await this.pageUtils.fillInput(MERCHANT_URL_INPUT_DATA_BIND, merchantUrl);
+    await this.pageUtils.fillInput(MERCHANT_URL_INPUT_DATA_BIND, gatewayUrl);
     await this.pageUtils.buttonClick(AUTHORIZE_MERCHANT_BUTTON_ID);
     return this.pageUtils.page.waitForTimeout(REQUEST_TIMEOUT);
   }
 
   @when(
-    "PushPaymentUserA initiate push payment with public identifier of {string}, Required Stake of {string}, token selector of {string}, amount of {string}, merchant url of {string} and click submit payment",
+    "PushPaymentUserA initiate push payment with public identifier of {string}, Required Stake of {string}, token selector of {string}, amount of {string}, gateway url of {string} and click submit payment",
     undefined,
     AVERAGE_TIMEOUT,
   )
@@ -58,7 +58,7 @@ class PushPayment {
     stakedAmount: string,
     tokenSelector: string,
     amount: string,
-    merchantUrl: string,
+    gatewayUrl: string,
   ) {
     // Enter counter party public identifier
     await this.pageUtils.clearInput(COUNTER_PARTY_ADDRESS_INPUT_DATA_BIND);
@@ -81,8 +81,8 @@ class PushPayment {
     await this.pageUtils.clearInput(PAYMENT_AMOUNT_INPUT_DATA_BIND);
     await this.pageUtils.fillInput(PAYMENT_AMOUNT_INPUT_DATA_BIND, amount);
 
-    // Select merchant
-    await this.pageUtils.page.select(AUTHORIZED_MERCHANT_SELECTOR_ID, merchantUrl);
+    // Select gateway
+    await this.pageUtils.page.select(AUTHORIZED_MERCHANT_SELECTOR_ID, gatewayUrl);
 
     // Get the latest payment id before submitting new payment
     const paymentElements = await this.pageUtils.page.$$(".createdPaymentId");

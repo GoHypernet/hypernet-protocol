@@ -1,16 +1,21 @@
-import { ControlClaim } from "@hypernetlabs/objects";
-import {
-  BlockchainUnavailableError,
-  LogicalError,
-  ThreeBoxError,
-} from "@hypernetlabs/objects";
+import { ControlClaim, MessagingError } from "@hypernetlabs/objects";
+import { inject, injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
 
 import { IControlService } from "@interfaces/business";
-import { IMessagingRepository } from "@interfaces/data";
+import {
+  IMessagingRepository,
+  IMessagingRepositoryType,
+} from "@interfaces/data";
 import { InitializedHypernetContext } from "@interfaces/objects";
-import { IContextProvider } from "@interfaces/utilities";
+import {
+  IContextProvider,
+  IContextProviderType,
+  ITimeUtils,
+  ITimeUtilsType,
+} from "@interfaces/utilities";
 
+@injectable()
 export class ControlService implements IControlService {
   protected claimPeriod = 1000 * 60 * 5; // 5 minutes
   protected timeout: NodeJS.Timeout | null;
@@ -18,18 +23,17 @@ export class ControlService implements IControlService {
   protected checkControlInterval: NodeJS.Timeout | null;
 
   constructor(
-    protected contextProvider: IContextProvider,
+    @inject(IMessagingRepositoryType)
     protected messagingRepo: IMessagingRepository,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
+    @inject(ITimeUtilsType) protected timeUtils: ITimeUtils,
   ) {
     this.timeout = null;
     this.lastControlClaim = null;
     this.checkControlInterval = null;
   }
 
-  public claimControl(): ResultAsync<
-    void,
-    BlockchainUnavailableError | ThreeBoxError | LogicalError
-  > {
+  public claimControl(): ResultAsync<void, MessagingError> {
     let context: InitializedHypernetContext;
     let controlClaim: ControlClaim;
 
@@ -38,7 +42,10 @@ export class ControlService implements IControlService {
       .andThen((myContext) => {
         context = myContext;
         // Create a new claim
-        controlClaim = new ControlClaim(context.account, new Date().getTime());
+        controlClaim = new ControlClaim(
+          context.publicIdentifier,
+          this.timeUtils.getUnixNow(),
+        );
 
         // Send the claim out to the other cores
         return this.messagingRepo.sendControlClaim(controlClaim);
@@ -66,7 +73,7 @@ export class ControlService implements IControlService {
    */
   public processControlClaim(
     controlClaim: ControlClaim,
-  ): ResultAsync<void, LogicalError> {
+  ): ResultAsync<void, never> {
     let context: InitializedHypernetContext;
 
     return this.contextProvider

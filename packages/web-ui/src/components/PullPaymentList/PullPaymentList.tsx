@@ -4,7 +4,6 @@ import {
   EPaymentState,
   PaymentId,
 } from "@hypernetlabs/objects";
-import React from "react";
 import {
   Box,
   TableContainer,
@@ -24,12 +23,12 @@ import {
 import { withStyles } from "@material-ui/core/styles";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
 import { useStoreContext } from "@web-ui/contexts";
+import React from "react";
 
 interface IPullPaymentList {
   pullPayments: PullPayment[];
   publicIdentifier: PublicIdentifier;
   onAcceptPullPaymentClick: (paymentId: PaymentId) => void;
-  onDisputePullPaymentClick: (paymentId: PaymentId) => void;
   onPullFundClick: (paymentId: PaymentId) => void;
 }
 
@@ -37,9 +36,7 @@ interface IPullPaymentRow {
   pullPayment: PullPayment;
   acceptPaymentButtonVisible: boolean;
   pullFundsButtonVisible: boolean;
-  disputeButtonVisible: boolean;
   onAcceptPullPaymentClick: (paymentId: PaymentId) => void;
-  onDisputePullPaymentClick: (paymentId: PaymentId) => void;
   onPullFundClick: (paymentId: PaymentId) => void;
   publicIdentifier: PublicIdentifier;
 }
@@ -49,9 +46,7 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
     pullPayment,
     acceptPaymentButtonVisible,
     pullFundsButtonVisible,
-    disputeButtonVisible,
     onAcceptPullPaymentClick,
-    onDisputePullPaymentClick,
     onPullFundClick,
     publicIdentifier,
   } = props;
@@ -102,7 +97,7 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
           </IconButton>
         </TableCell>
         <TableCell component="th" scope="row">
-          {pullPayment.merchantUrl}
+          {pullPayment.gatewayUrl}
         </TableCell>
         <TableCell align="right">
           {viewUtils.fromBigNumberWei(pullPayment.authorizedAmount)}
@@ -133,16 +128,6 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
               onClick={() => onAcceptPullPaymentClick(pullPayment.id)}
             >
               Accept
-            </Button>
-          )}
-          {disputeButtonVisible && (
-            <Button
-              size="small"
-              variant="outlined"
-              color="secondary"
-              onClick={() => onDisputePullPaymentClick(pullPayment.id)}
-            >
-              Dispute
             </Button>
           )}
           {pullFundsButtonVisible && (
@@ -202,7 +187,7 @@ const PullPaymentRow: React.FC<IPullPaymentRow> = (props: IPullPaymentRow) => {
                 "Updated",
                 dateUtils.fromTimestampToUI(pullPayment.updatedTimestamp),
               )}
-              {renderListItem("Merchant URL", pullPayment.merchantUrl)}
+              {renderListItem("Gateway URL", pullPayment.gatewayUrl)}
               {renderListItem(
                 "Authorized Amount",
                 viewUtils.fromBigNumberWei(pullPayment.authorizedAmount),
@@ -223,7 +208,6 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
     pullPayments,
     publicIdentifier,
     onAcceptPullPaymentClick,
-    onDisputePullPaymentClick,
     onPullFundClick,
   } = props;
 
@@ -233,7 +217,7 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
         <TableHead>
           <TableRow>
             <TableCell />
-            <TableCell>Validator</TableCell>
+            <TableCell>Gateway</TableCell>
             <TableCell align="right">Authorized Amount</TableCell>
             <TableCell align="right">Required Stake</TableCell>
             <TableCell align="right">Amount Staked</TableCell>
@@ -255,12 +239,7 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
                 publicIdentifier === pullPayment.to &&
                 pullPayment.state === EPaymentState.Approved
               }
-              disputeButtonVisible={
-                publicIdentifier === pullPayment.from &&
-                pullPayment.state === EPaymentState.Accepted
-              }
               onAcceptPullPaymentClick={onAcceptPullPaymentClick}
-              onDisputePullPaymentClick={onDisputePullPaymentClick}
               onPullFundClick={onPullFundClick}
             />
           ))}

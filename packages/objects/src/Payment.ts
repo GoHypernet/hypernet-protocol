@@ -1,11 +1,11 @@
-import { BigNumber } from "ethers";
-
+import { BigNumberString } from "@objects/BigNumberString";
 import { EthereumAddress } from "@objects/EthereumAddress";
-import { MerchantUrl } from "@objects/MerchantUrl";
+import { GatewayUrl } from "@objects/GatewayUrl";
 import { PaymentId } from "@objects/PaymentId";
-import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
+import { SortedTransfers } from "@objects/SortedTransfers";
 import { EPaymentState } from "@objects/typing";
+import { UnixTimestamp } from "@objects/UnixTimestamp";
 
 export abstract class Payment {
   constructor(
@@ -14,13 +14,14 @@ export abstract class Payment {
     public from: PublicIdentifier,
     public state: EPaymentState,
     public paymentToken: EthereumAddress,
-    public requiredStake: BigNumber,
-    public amountStaked: BigNumber,
-    public expirationDate: number,
-    public createdTimestamp: number,
-    public updatedTimestamp: number,
-    public collateralRecovered: BigNumber,
-    public merchantUrl: MerchantUrl,
-    public details: PaymentInternalDetails,
+    public requiredStake: BigNumberString,
+    public amountStaked: BigNumberString,
+    public expirationDate: UnixTimestamp,
+    public createdTimestamp: UnixTimestamp,
+    public updatedTimestamp: UnixTimestamp,
+    public collateralRecovered: BigNumberString,
+    public gatewayUrl: GatewayUrl,
+    public details: SortedTransfers,
+    public metadata: string | null,
   ) {}
 }

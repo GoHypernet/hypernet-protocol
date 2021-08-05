@@ -1,5 +1,5 @@
 export * from "./IAccountsRepository";
 export * from "./ILinkRepository";
-export * from "./IMerchantConnectorRepository";
+export * from "./IGatewayConnectorRepository";
 export * from "./IMessagingRepository";
 export * from "./IPaymentRepository";

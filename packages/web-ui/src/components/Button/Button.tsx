@@ -1,18 +1,17 @@
-import React from "react";
 import { Box } from "@material-ui/core";
+import React from "react";
 
-import { EStatusColor } from "@web-ui/theme";
 import { useStyles } from "@web-ui/components/Button/Button.style";
+import { EButtonStatus } from "@web-ui/theme";
 
 interface ButtonProps {
   onClick?: () => void;
   label?: string;
   disabled?: boolean;
-  status?: EStatusColor;
+  status?: EButtonStatus;
   fullWidth?: boolean;
   bgColor?: string;
   hasMaterialUIStyle?: boolean;
-  linkStyle?: boolean;
   hasBackIcon?: boolean;
 }
 
@@ -22,21 +21,11 @@ export const Button: React.FC<ButtonProps> = (props: ButtonProps) => {
     label,
     disabled,
     hasMaterialUIStyle,
-    linkStyle,
     hasBackIcon,
+    status = EButtonStatus.primary,
   } = props;
   const classes = useStyles(props);
 
-  if (linkStyle) {
-    return (
-      <Box className={classes.linkWrapper}>
-        <a className={classes.link} onClick={onClick}>
-          {hasBackIcon && "←  "}
-          {label}
-        </a>
-      </Box>
-    );
-  }
   if (hasMaterialUIStyle) {
     return (
       <Box className={classes.materialUIButtonWrapper}>
@@ -50,6 +39,30 @@ export const Button: React.FC<ButtonProps> = (props: ButtonProps) => {
       </Box>
     );
   }
+
+  if (status === EButtonStatus.link) {
+    return (
+      <Box className={classes.linkWrapper}>
+        <a className={classes.link} onClick={onClick}>
+          {hasBackIcon && "←  "}
+          {label}
+        </a>
+      </Box>
+    );
+  }
+
+  if (status === EButtonStatus.secondary) {
+    return (
+      <button
+        className={`${classes.button} ${classes.secondaryButton}`}
+        onClick={onClick}
+        disabled={disabled}
+      >
+        {label}
+      </button>
+    );
+  }
+
   return (
     <button className={classes.button} onClick={onClick} disabled={disabled}>
       {label}

@@ -6,18 +6,19 @@ import {
   PushPayment,
   PaymentId,
   TransferId,
-  MerchantUrl,
+  GatewayUrl,
   PaymentFinalizeError,
-  RouterChannelUnknownError,
   VectorError,
   PaymentCreationError,
   BlockchainUnavailableError,
-  LogicalError,
   TransferResolutionError,
   InvalidPaymentError,
   InvalidParametersError,
   PaymentStakeError,
   TransferCreationError,
+  BigNumberString,
+  UnixTimestamp,
+  Signature,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -30,10 +31,8 @@ export interface IPaymentRepository {
     paymentIds: PaymentId[],
   ): ResultAsync<
     Map<PaymentId, Payment>,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
   >;
@@ -45,27 +44,29 @@ export interface IPaymentRepository {
    */
   createPushPayment(
     counterPartyAccount: PublicIdentifier,
-    amount: string,
-    expirationDate: number,
-    requiredStake: string,
+    amount: BigNumberString,
+    expirationDate: UnixTimestamp,
+    requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    gatewayUrl: GatewayUrl,
+    metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError>;
 
   createPullPayment(
     counterPartyAccount: PublicIdentifier,
-    maximumAmount: string, // TODO: amounts should be consistently use BigNumber
+    maximumAmount: BigNumberString, // TODO: amounts should be consistently use BigNumber
     deltaTime: number,
-    deltaAmount: string, // TODO: amounts should be consistently use BigNumber
-    expirationDate: number,
-    requiredStake: string, // TODO: amounts should be consistently use BigNumber
+    deltaAmount: BigNumberString, // TODO: amounts should be consistently use BigNumber
+    expirationDate: UnixTimestamp,
+    requiredStake: BigNumberString, // TODO: amounts should be consistently use BigNumber
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
+    gatewayUrl: GatewayUrl,
+    metadata: string | null,
   ): ResultAsync<PullPayment, PaymentCreationError>;
 
   createPullRecord(
     paymentId: PaymentId,
-    amount: string,
+    amount: BigNumberString,
   ): ResultAsync<Payment, PaymentCreationError>;
 
   /**
@@ -80,9 +81,7 @@ export interface IPaymentRepository {
     | BlockchainUnavailableError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -95,15 +94,13 @@ export interface IPaymentRepository {
    */
   provideStake(
     paymentId: PaymentId,
-    merchantAddress: EthereumAddress,
+    gatewayAddress: EthereumAddress,
   ): ResultAsync<
     Payment,
     | BlockchainUnavailableError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -115,15 +112,13 @@ export interface IPaymentRepository {
    * be it a insurancePayments or parameterizedPayments.
    * @param paymentId
    */
-  finalizePayment(
+  acceptPayment(
     paymentId: PaymentId,
-    amount: string,
+    amount: BigNumberString,
   ): ResultAsync<
     Payment,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | PaymentFinalizeError
     | TransferResolutionError
     | InvalidPaymentError
@@ -133,7 +128,15 @@ export interface IPaymentRepository {
   resolveInsurance(
     paymentId: PaymentId,
     transferId: TransferId,
+    amount: BigNumberString,
+    gatewaySignature: Signature | null,
   ): ResultAsync<void, TransferResolutionError>;
+
+  /**
+   * This method will resolve the offer transfer for a payment
+   * @param payment the payment to finalize
+   */
+  finalizePayment(payment: Payment): ResultAsync<void, TransferResolutionError>;
 }
 
 export const IPaymentRepositoryType = Symbol.for("IPaymentRepository");

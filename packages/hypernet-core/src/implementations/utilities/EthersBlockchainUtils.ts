@@ -5,16 +5,32 @@ import {
   TypedDataDomain,
   TypedDataField,
 } from "@ethersproject/abstract-signer";
-import { BlockchainUnavailableError, Signature } from "@hypernetlabs/objects";
-import { EthereumAddress } from "@hypernetlabs/objects";
-import { Contract, ethers, BigNumber } from "ethers";
+import {
+  TransferAbis,
+  BigNumberString,
+  BlockchainUnavailableError,
+  Signature,
+  EthereumAddress,
+  GatewayRegistrationInfo,
+  GatewayUrl,
+  HexString,
+} from "@hypernetlabs/objects";
+import { ResultUtils } from "@hypernetlabs/utils";
+import { Contract, ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
 
-import { IBlockchainProvider, IBlockchainUtils } from "@interfaces/utilities";
+import {
+  IBlockchainProvider,
+  IBlockchainUtils,
+  IConfigProvider,
+} from "@interfaces/utilities";
 
 export class EthersBlockchainUtils implements IBlockchainUtils {
   protected erc20Abi: string[];
-  constructor(protected blockchainProvider: IBlockchainProvider) {
+  constructor(
+    protected blockchainProvider: IBlockchainProvider,
+    protected configProvider: IConfigProvider,
+  ) {
     // The ERC20Abi from Vector does not include the name() function, so we will roll our own
     this.erc20Abi = Object.assign([], ERC20Abi);
     this.erc20Abi.push("function name() view returns (string)");
@@ -34,7 +50,7 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
   public erc20Transfer(
     assetAddress: EthereumAddress,
     channelAddress: string,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<TransactionResponse, BlockchainUnavailableError> {
     return this.blockchainProvider.getSigner().andThen((signer) => {
       const tokenContract = new Contract(assetAddress, this.erc20Abi, signer);
@@ -48,7 +64,7 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
   }
 
   public mintToken(
-    amount: BigNumber,
+    amount: BigNumberString,
     to: EthereumAddress,
   ): ResultAsync<TransactionResponse, BlockchainUnavailableError> {
     return this.blockchainProvider.getSigner().andThen((signer) => {
@@ -66,4 +82,146 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
       );
     });
   }
+
+  public getMessageTransferEncodedCancelData(): ResultAsync<
+    [string, HexString],
+    BlockchainUnavailableError
+  > {
+    return ResultUtils.combine([
+      this.blockchainProvider.getProvider(),
+      this.configProvider.getConfig(),
+    ]).andThen((vals) => {
+      const [provider, config] = vals;
+      const messageTransferContract = new Contract(
+        config.messageTransferAddress,
+        TransferAbis.MessageTransfer.abi,
+        provider,
+      );
+
+      return ResultUtils.combine([
+        ResultAsync.fromPromise(
+          messageTransferContract.ResolverEncoding() as Promise<HexString>,
+          (e) => {
+            return e as BlockchainUnavailableError;
+          },
+        ),
+
+        ResultAsync.fromPromise(
+          messageTransferContract.EncodedCancel() as Promise<HexString>,
+          (e) => {
+            return e as BlockchainUnavailableError;
+          },
+        ),
+      ]);
+    });
+  }
+
+  public getInsuranceTransferEncodedCancelData(): ResultAsync<
+    [string, HexString],
+    BlockchainUnavailableError
+  > {
+    return ResultUtils.combine([
+      this.blockchainProvider.getProvider(),
+      this.configProvider.getConfig(),
+    ]).andThen((vals) => {
+      const [provider, config] = vals;
+      const insuranceTransferContract = new Contract(
+        config.insuranceTransferAddress,
+        TransferAbis.Insurance.abi,
+        provider,
+      );
+
+      return ResultUtils.combine([
+        ResultAsync.fromPromise(
+          insuranceTransferContract.ResolverEncoding() as Promise<HexString>,
+          (e) => {
+            return e as BlockchainUnavailableError;
+          },
+        ),
+
+        ResultAsync.fromPromise(
+          insuranceTransferContract.EncodedCancel() as Promise<HexString>,
+          (e) => {
+            return e as BlockchainUnavailableError;
+          },
+        ),
+      ]);
+    });
+  }
+
+  public getParameterizedTransferEncodedCancelData(): ResultAsync<
+    [string, HexString],
+    BlockchainUnavailableError
+  > {
+    return ResultUtils.combine([
+      this.blockchainProvider.getProvider(),
+      this.configProvider.getConfig(),
+    ]).andThen((vals) => {
+      const [provider, config] = vals;
+      const parameterizedTransferContract = new Contract(
+        config.parameterizedTransferAddress,
+        TransferAbis.Parameterized.abi,
+        provider,
+      );
+
+      return ResultUtils.combine([
+        ResultAsync.fromPromise(
+          parameterizedTransferContract.ResolverEncoding() as Promise<HexString>,
+          (e) => {
+            return e as BlockchainUnavailableError;
+          },
+        ),
+
+        ResultAsync.fromPromise(
+          parameterizedTransferContract.EncodedCancel() as Promise<HexString>,
+          (e) => {
+            return e as BlockchainUnavailableError;
+          },
+        ),
+      ]);
+    });
+  }
+
+  public getGatewayRegistrationInfo(
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<GatewayRegistrationInfo, BlockchainUnavailableError> {
+    return ResultUtils.combine([
+      this.blockchainProvider.getProvider(),
+      this.configProvider.getConfig(),
+    ])
+      .andThen((vals) => {
+        const [provider, config] = vals;
+        const mocRegistryContract = new Contract(
+          config.gatewayRegistryAddress,
+          TransferAbis.MocRegistry.abi,
+          provider,
+        );
+
+        return ResultAsync.fromPromise(
+          mocRegistryContract.getGateway(gatewayUrl) as Promise<string>,
+          (e) => {
+            return new BlockchainUnavailableError(
+              "Cannot get gateway registry entry",
+              e,
+            );
+          },
+        );
+      })
+      .map((registryString) => {
+        const registryEntry = JSON.parse(
+          registryString,
+        ) as IGatewayRegistryEntry;
+
+        return new GatewayRegistrationInfo(
+          gatewayUrl,
+          registryEntry.address,
+          registryEntry.signature,
+        );
+      });
+  }
+}
+
+interface IGatewayRegistryEntry {
+  address: EthereumAddress;
+  signature: Signature;
 }

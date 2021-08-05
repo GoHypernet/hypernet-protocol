@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
 
-const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const webpack = require("webpack");
 
 const configFilePath = require.resolve("./tsconfig.json");
@@ -10,7 +10,7 @@ const configFilePath = require.resolve("./tsconfig.json");
 /** @type import('webpack').Configuration */
 module.exports = {
   context: __dirname,
-  mode: "development",
+  mode: process.env.__BUILD_ENV__ === "PROD" ? "production" : "development",
   entry: path.join(__dirname, "src/index.ts"),
   output: {
     filename: "index.js",
@@ -117,8 +117,8 @@ module.exports = {
       ),
     },
   },
-  // TODO: this devtool setup is for development it makes wepback a bit faster, this setup should be different for production
-  devtool: "eval-source-map",
+  devtool:
+    process.env.__BUILD_ENV__ === "PROD" ? "source-map" : "eval-source-map",
   plugins: [
     new HtmlWebpackPlugin({
       template: path.join(__dirname, "src/index.html"),
@@ -127,6 +127,38 @@ module.exports = {
     new webpack.ProvidePlugin({
       Buffer: ["buffer", "Buffer"],
       process: "process/browser",
+    }),
+    new webpack.DefinePlugin({
+      __IFRAME_SOURCE__: JSON.stringify(process.env.__IFRAME_SOURCE__),
+      __ROUTER_PUBLIC_IDENTIFIER__: JSON.stringify(
+        process.env.__ROUTER_PUBLIC_IDENTIFIER__,
+      ),
+      __HYPERTOKEN_ADDRESS__: JSON.stringify(
+        process.env.__HYPERTOKEN_ADDRESS__,
+      ),
+      __MESSAGE_TRANSFER_ADDRESS__: JSON.stringify(
+        process.env.__MESSAGE_TRANSFER_ADDRESS__,
+      ),
+      __INSURANCE_TRANSFER_ADDRESS__: JSON.stringify(
+        process.env.__INSURANCE_TRANSFER_ADDRESS__,
+      ),
+      __PARAMETERIZED_TRANSFER_ADDRESS__: JSON.stringify(
+        process.env.__PARAMETERIZED_TRANSFER_ADDRESS__,
+      ),
+      __GATEWAY_REGISTRY_ADDRESS__: JSON.stringify(
+        process.env.__GATEWAY_REGISTRY_ADDRESS__,
+      ),
+      __CHAIN_ID__: JSON.stringify(process.env.__CHAIN_ID__),
+      __CHAIN_PROVIDERS__: JSON.stringify(process.env.__CHAIN_PROVIDERS__),
+      __CHAIN_ADDRESSES__: JSON.stringify(process.env.__CHAIN_ADDRESSES__),
+      __NATS_URL__: JSON.stringify(process.env.__NATS_URL__),
+      __AUTH_URL__: JSON.stringify(process.env.__AUTH_URL__),
+      __VALIDATOR_IFRAME_URL__: JSON.stringify(
+        process.env.__VALIDATOR_IFRAME_URL__,
+      ),
+      __CERAMIC_NODE_URL__: JSON.stringify(process.env.__CERAMIC_NODE_URL__),
+      __BUILD_ENV__: JSON.stringify(process.env.__BUILD_ENV__),
+      __DEBUG__: JSON.stringify(process.env.__DEBUG__),
     }),
   ],
 };

@@ -1,11 +1,18 @@
 import { BigNumber } from "@ethersproject/bignumber";
 import { EtherSymbol, Zero } from "@ethersproject/constants";
 import { formatEther, parseEther } from "@ethersproject/units";
-import { deployments, ethers, getNamedAccounts, getChainId, network } from "hardhat";
+import {
+  deployments,
+  ethers,
+  getNamedAccounts,
+  getChainId,
+  network,
+} from "hardhat";
 import { DeployFunction } from "hardhat-deploy/types";
 
-import { registerTransfer } from "../src.ts/utils";
 import { logger } from "../src.ts/constants";
+import { registerTransfer } from "../src.ts/utils";
+import ERC20Abi from "../src.ts/erc20abi";
 
 const func: DeployFunction = async () => {
   const log = logger.child({ module: "Deploy" });
@@ -13,16 +20,24 @@ const func: DeployFunction = async () => {
   const provider = ethers.provider;
   const { deployer } = await getNamedAccounts();
 
+  const signer = await ethers.getSigner(deployer);
+
   log.info(deployments);
 
   // Log initial state
   const balance = await provider.getBalance(deployer);
   const nonce = await provider.getTransactionCount(deployer);
   log.info(`Preparing to migrate contracts to chain ${chainId}`);
-  log.info(`Deployer address=${deployer} nonce=${nonce} balance=${formatEther(balance)}`);
+  log.info(
+    `Deployer address=${deployer} nonce=${nonce} balance=${formatEther(
+      balance,
+    )}`,
+  );
 
   if (balance.eq(0)) {
-    throw new Error(`Account ${deployer} has zero balance on chain ${chainId}, aborting migration`);
+    throw new Error(
+      `Account ${deployer} has zero balance on chain ${chainId}, aborting migration`,
+    );
   }
 
   ////////////////////////////////////////
@@ -31,15 +46,13 @@ const func: DeployFunction = async () => {
   type Args = Array<string | BigNumber>;
   const migrate = async (name: string, args: Args): Promise<void> => {
     const processedArgs = await Promise.all(
-      args.map(
-        async (arg: any): Promise<any> => {
-          try {
-            return (await deployments.get(arg)).address;
-          } catch (e) {
-            return arg;
-          }
-        },
-      ),
+      args.map(async (arg: any): Promise<any> => {
+        try {
+          return (await deployments.get(arg)).address;
+        } catch (e) {
+          return arg;
+        }
+      }),
     );
     log.info(`Deploying ${name} with args [${processedArgs.join(", ")}]`);
     await deployments.deploy(name, {
@@ -55,11 +68,19 @@ const func: DeployFunction = async () => {
     if (!deployment.transactionHash) {
       throw new Error(`Failed to deploy ${name}`);
     }
-    const tx = await ethers.provider.getTransaction(deployment.transactionHash!);
-    const receipt = await ethers.provider.getTransactionReceipt(deployment.transactionHash!);
-    log.info(`Sent transaction to deploy ${name}, txHash: ${deployment.transactionHash}`);
+    const tx = await ethers.provider.getTransaction(
+      deployment.transactionHash!,
+    );
+    const receipt = await ethers.provider.getTransactionReceipt(
+      deployment.transactionHash!,
+    );
     log.info(
-      `Success! Consumed ${receipt?.gasUsed ?? "unknown"} gas worth ${EtherSymbol} ${formatEther(
+      `Sent transaction to deploy ${name}, txHash: ${deployment.transactionHash}`,
+    );
+    log.info(
+      `Success! Consumed ${
+        receipt?.gasUsed ?? "unknown"
+      } gas worth ${EtherSymbol} ${formatEther(
         (receipt?.gasUsed || Zero).mul(tx.gasPrice),
       )} deploying ${name} to address: ${deployment.address}`,
     );
@@ -75,6 +96,8 @@ const func: DeployFunction = async () => {
     ["Parameterized", []],
     ["Insurance", []],
     ["Message", []],
+    ["Hypertoken", []],
+    ["MocRegistry", []],
   ];
 
   // Only deploy test fixtures during hardhat tests
@@ -120,14 +143,67 @@ const func: DeployFunction = async () => {
       from: deployer,
       args: [parseEther("2500")],
     });
-    log.info({ address: res.address, txHash: res.transactionHash }, `Deployed AMM ${network.config.chainId}`);
+    log.info(
+      { address: res.address, txHash: res.transactionHash },
+      `Deployed AMM ${network.config.chainId}`,
+    );
   }
+
+  ////////////////////////////////////////
+  // Disburse funds of different types to a lot of different wallets
+  log.info("Playing rich uncle");
+  const userAddress = "0x243FB44Ea4FDD2651605eC85290f041fF5F876f0";
+  const galileoAddress = "0xDcD7698B42FD7b47bB4889B43338897018f7F47d";
+  const hyperpayAddress = "0x14791697260E4c9A71f18484C9f997B308e59325";
+  const testTokenAddress = "0x9FBDa871d559710256a2502A2517b794B482Db40";
+  const hyperTokenAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
+  const amount = ethers.utils.parseEther("10000.0");
+  const testTokenContract = new ethers.Contract(testTokenAddress, ERC20Abi, signer);
+  const hyperTokenContract = new ethers.Contract(hyperTokenAddress, ERC20Abi, signer);
+
+  const userTestTx = await testTokenContract.transfer(userAddress, amount);
+  const userHyperTx = await hyperTokenContract.transfer(userAddress, amount);
+  const userEthTx = await signer.sendTransaction({
+    to: userAddress,
+    value: amount,
+  });
+
+  await userTestTx.wait();
+  await userHyperTx.wait();
+  await userEthTx.wait();
+
+  const galileoTestTx = await testTokenContract.transfer(galileoAddress, amount);
+  const galileoHyperTx = await hyperTokenContract.transfer(galileoAddress, amount);
+  const galileoEthTx = await signer.sendTransaction({
+    to: galileoAddress,
+    value: amount,
+  });
+
+  await galileoTestTx.wait();
+  await galileoHyperTx.wait();
+  await galileoEthTx.wait();
+
+  const hyperpayTestTx = await testTokenContract.transfer(hyperpayAddress, amount);
+  const hyperpayHyperTx = await hyperTokenContract.transfer(hyperpayAddress, amount);
+  const hyperpayEthTx = await signer.sendTransaction({
+    to: hyperpayAddress,
+    value: amount,
+  });
+
+  await hyperpayTestTx.wait();
+  await hyperpayHyperTx.wait();
+  await hyperpayEthTx.wait();
+  log.info("Rich uncle is now in the poor house");
 
   ////////////////////////////////////////
   // Print summary
   log.info("All done!");
   const spent = formatEther(balance.sub(await provider.getBalance(deployer)));
   const nTx = (await provider.getTransactionCount(deployer)) - nonce;
-  log.info(`Sent ${nTx} transaction${nTx === 1 ? "" : "s"} & spent ${EtherSymbol} ${spent}`);
+  log.info(
+    `Sent ${nTx} transaction${
+      nTx === 1 ? "" : "s"
+    } & spent ${EtherSymbol} ${spent}`,
+  );
 };
 export default func;

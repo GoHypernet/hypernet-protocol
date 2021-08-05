@@ -1,7 +1,10 @@
-import React, { useState, useMemo } from "react";
-import { Box, AppBar, IconButton } from "@material-ui/core";
-import FilterListIcon from "@material-ui/icons/FilterList";
 import { PushPayment, PullPayment } from "@hypernetlabs/objects";
+import { Box, AppBar, IconButton, Switch, Typography } from "@material-ui/core";
+import FilterListIcon from "@material-ui/icons/FilterList";
+import { useStoreContext } from "@web-ui/contexts";
+import { IFilterItem, EItemType, IRenderParams } from "@web-ui/interfaces";
+import React, { useState, useMemo } from "react";
+
 import {
   PullPaymentList,
   PushPaymentList,
@@ -12,9 +15,7 @@ import {
   BoxWrapper,
   EmptyState,
 } from "@web-ui/components";
-import { IFilterItem, EItemType, IRenderParams } from "@web-ui/interfaces";
 import { useLinks } from "@web-ui/hooks";
-import { useStoreContext } from "@web-ui/contexts";
 
 interface ILinksWidget extends IRenderParams {}
 
@@ -22,7 +23,7 @@ interface ISideFilter {
   id: string;
   from: string;
   to: string;
-  merchantUrl: string;
+  gatewayUrl: string;
   state: string;
   createdTimestampFrom: string;
   createdTimestampTo: string;
@@ -43,9 +44,10 @@ const LinksWidget: React.FC<ILinksWidget> = ({
     links,
     publicIdentifier,
     acceptPayment,
-    disputePayment,
     pullFunds,
     loading,
+    paymentsAutoAccept,
+    setPaymentsAutoAccept,
   } = useLinks();
 
   const handleChange = (event, newValue) => {
@@ -70,9 +72,9 @@ const LinksWidget: React.FC<ILinksWidget> = ({
         stateKey: "to",
       },
       {
-        label: "Search By Merchant URL",
+        label: "Search By Gateway URL",
         widgetType: EItemType.stringInput,
-        stateKey: "merchantUrl",
+        stateKey: "gatewayUrl",
       },
       {
         label: "Search By Payment State",
@@ -110,7 +112,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           pushPayment.id.includes(filter?.id || "") &&
           pushPayment.from.includes(filter?.from || "") &&
           pushPayment.to.includes(filter?.to || "") &&
-          pushPayment.merchantUrl.includes(filter?.merchantUrl || "") &&
+          pushPayment.gatewayUrl.includes(filter?.gatewayUrl || "") &&
           (filter?.state == null ||
             filter?.state === "all" ||
             pushPayment.state.toString() == filter?.state) &&
@@ -141,7 +143,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           pullPayment.id.includes(filter?.id || "") &&
           pullPayment.from.includes(filter?.from || "") &&
           pullPayment.to.includes(filter?.to || "") &&
-          pullPayment.merchantUrl.includes(filter?.merchantUrl || "") &&
+          pullPayment.gatewayUrl.includes(filter?.gatewayUrl || "") &&
           (filter?.state == null ||
             filter?.state === "all" ||
             pullPayment.state.toString() == filter?.state) &&
@@ -165,20 +167,38 @@ const LinksWidget: React.FC<ILinksWidget> = ({
     }, new Array<PullPayment>());
   };
 
+  const onPaymentsAutoAcceptChange = (event) => {
+    setPaymentsAutoAccept(event.target.checked);
+  };
+
   const CustomBox = includeBoxWrapper ? BoxWrapper : Box;
 
   return (
     <CustomBox
       label={!noLabel ? "TRANSACTION HISTORY" : undefined}
       rightComponent={
-        <IconButton
-          aria-label="list"
-          onClick={() => setIsSideFilterOpen(true)}
-          style={{ height: 30, display: "flex", fontSize: 18 }}
-        >
-          <Box marginRight={1}>Filter</Box>
-          <FilterListIcon />
-        </IconButton>
+        <Box display="flex" alignItems="center">
+          <Box display="flex" alignItems="center" marginRight={1}>
+            <Box marginRight={1} color="#0000008a">
+              Payments auto accept
+            </Box>
+            <Switch
+              checked={paymentsAutoAccept}
+              onChange={onPaymentsAutoAcceptChange}
+              name="paymentsAutoAccept"
+              color="primary"
+              inputProps={{ "aria-label": "primary checkbox" }}
+            />
+          </Box>
+          <IconButton
+            aria-label="list"
+            onClick={() => setIsSideFilterOpen(true)}
+            style={{ height: 30, display: "flex", fontSize: 18 }}
+          >
+            <Box marginRight={1}>Filter</Box>
+            <FilterListIcon />
+          </IconButton>
+        </Box>
       }
       bodyStyle={bodyStyle}
       hasEmptyState={links.length === 0 && !loading}
@@ -206,7 +226,6 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           publicIdentifier={publicIdentifier}
           pushPayments={getPushPayments()}
           onAcceptPushPaymentClick={acceptPayment}
-          onDisputePushPaymentClick={disputePayment}
         />
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
@@ -214,7 +233,6 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           publicIdentifier={publicIdentifier}
           pullPayments={getPullPayments()}
           onAcceptPullPaymentClick={acceptPayment}
-          onDisputePullPaymentClick={disputePayment}
           onPullFundClick={pullFunds}
         />
       </TabPanel>

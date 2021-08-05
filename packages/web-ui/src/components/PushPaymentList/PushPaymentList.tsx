@@ -4,7 +4,6 @@ import {
   PaymentId,
   EPaymentState,
 } from "@hypernetlabs/objects";
-import React from "react";
 import {
   Box,
   TableContainer,
@@ -24,20 +23,18 @@ import {
 import { withStyles } from "@material-ui/core/styles";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
 import { useStoreContext } from "@web-ui/contexts";
+import React from "react";
 
 interface IPushPaymentList {
   pushPayments: PushPayment[];
   publicIdentifier: PublicIdentifier;
   onAcceptPushPaymentClick: (paymentId: PaymentId) => void;
-  onDisputePushPaymentClick: (paymentId: PaymentId) => void;
 }
 
 interface IPushPaymentRow {
   pushPayment: PushPayment;
   acceptPaymentButtonVisible: boolean;
-  disputeButtonVisible: boolean;
   onAcceptPushPaymentClick: (paymentId: PaymentId) => void;
-  onDisputePushPaymentClick: (paymentId: PaymentId) => void;
   publicIdentifier: PublicIdentifier;
 }
 
@@ -45,9 +42,7 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
   const {
     pushPayment,
     acceptPaymentButtonVisible,
-    disputeButtonVisible,
     onAcceptPushPaymentClick,
-    onDisputePushPaymentClick,
     publicIdentifier,
   } = props;
   const [open, setOpen] = React.useState(false);
@@ -97,7 +92,7 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
           </IconButton>
         </TableCell>
         <TableCell component="th" scope="row">
-          {pushPayment.merchantUrl}
+          {pushPayment.gatewayUrl}
         </TableCell>
         <TableCell align="right">
           {viewUtils.fromBigNumberWei(pushPayment.paymentAmount)}
@@ -107,6 +102,9 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
         </TableCell>
         <TableCell align="right">
           {viewUtils.fromBigNumberWei(pushPayment.amountStaked)}
+        </TableCell>
+        <TableCell align="right">
+          {dateUtils.fromTimestampToUI(pushPayment.createdTimestamp)}
         </TableCell>
         <TableCell align="right">
           {dateUtils.fromTimestampToUI(pushPayment.expirationDate)}
@@ -128,16 +126,6 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
               onClick={() => onAcceptPushPaymentClick(pushPayment.id)}
             >
               Accept
-            </Button>
-          )}
-          {disputeButtonVisible && (
-            <Button
-              size="small"
-              variant="outlined"
-              color="secondary"
-              onClick={() => onDisputePushPaymentClick(pushPayment.id)}
-            >
-              Dispute
             </Button>
           )}
         </TableCell>
@@ -187,7 +175,7 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
                 "Updated",
                 dateUtils.fromTimestampToUI(pushPayment.updatedTimestamp),
               )}
-              {renderListItem("Merchant URL", pushPayment.merchantUrl)}
+              {renderListItem("Gateway URL", pushPayment.gatewayUrl)}
               {renderListItem(
                 "Payment Amount",
                 viewUtils.fromBigNumberWei(pushPayment.paymentAmount),
@@ -204,12 +192,7 @@ const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
 export const PushPaymentList: React.FC<IPushPaymentList> = (
   props: IPushPaymentList,
 ) => {
-  const {
-    pushPayments,
-    publicIdentifier,
-    onAcceptPushPaymentClick,
-    onDisputePushPaymentClick,
-  } = props;
+  const { pushPayments, publicIdentifier, onAcceptPushPaymentClick } = props;
 
   return (
     <TableContainer>
@@ -217,10 +200,11 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
         <TableHead>
           <TableRow>
             <TableCell />
-            <TableCell>Validator</TableCell>
+            <TableCell>Gateway</TableCell>
             <TableCell align="right">Amount</TableCell>
             <TableCell align="right">Required Stake</TableCell>
             <TableCell align="right">Amount Staked</TableCell>
+            <TableCell align="right">Created Date</TableCell>
             <TableCell align="right">Expiration Date</TableCell>
             <TableCell align="right">State</TableCell>
             <TableCell align="right"></TableCell>
@@ -232,13 +216,11 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
               key={pushPayment.id}
               pushPayment={pushPayment}
               publicIdentifier={publicIdentifier}
-              acceptPaymentButtonVisible={publicIdentifier === pushPayment.to}
-              disputeButtonVisible={
-                publicIdentifier === pushPayment.from &&
-                pushPayment.state === EPaymentState.Accepted
+              acceptPaymentButtonVisible={
+                publicIdentifier === pushPayment.to &&
+                pushPayment.state === EPaymentState.Proposed
               }
               onAcceptPushPaymentClick={onAcceptPushPaymentClick}
-              onDisputePushPaymentClick={onDisputePushPaymentClick}
             />
           ))}
         </TableBody>

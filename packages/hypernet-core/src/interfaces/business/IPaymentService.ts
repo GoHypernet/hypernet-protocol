@@ -2,16 +2,13 @@ import {
   Payment,
   EthereumAddress,
   PublicIdentifier,
-  MerchantUrl,
+  GatewayUrl,
   PaymentId,
   AcceptPaymentError,
   InsufficientBalanceError,
   InvalidParametersError,
-  LogicalError,
-  MerchantConnectorError,
-  MerchantValidationError,
+  GatewayValidationError,
   PaymentFinalizeError,
-  RouterChannelUnknownError,
   VectorError,
   BlockchainUnavailableError,
   PaymentCreationError,
@@ -20,8 +17,10 @@ import {
   PaymentStakeError,
   TransferCreationError,
   TransferResolutionError,
+  UnixTimestamp,
+  BigNumberString,
+  Signature,
 } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
 import { ResultAsync, Result } from "neverthrow";
 
 export interface IPaymentService {
@@ -34,18 +33,19 @@ export interface IPaymentService {
    * @param deltaTime the number of seconds after which deltaAmount will be authorized, up to the limit of totalAuthorized.
    * @param requiredStake the amount of stake the counterparyt must put up as insurance
    * @param paymentToken the (Ethereum) address of the payment token
-   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   authorizeFunds(
     counterPartyAccount: PublicIdentifier,
-    totalAuthorized: BigNumber,
-    expirationDate: number,
-    deltaAmount: BigNumber,
+    totalAuthorized: BigNumberString,
+    expirationDate: UnixTimestamp,
+    deltaAmount: BigNumberString,
     deltaTime: number,
-    requiredStake: BigNumber,
+    requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
-  ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
+    gatewayUrl: GatewayUrl,
+    metadata: string | null,
+  ): ResultAsync<Payment, PaymentCreationError>;
 
   /**
    * Record a pull against a Pull Payment's authorized funds. Doesn't actually
@@ -53,13 +53,11 @@ export interface IPaymentService {
    */
   pullFunds(
     paymentId: PaymentId,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<
     Payment,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | PaymentCreationError
@@ -72,16 +70,17 @@ export interface IPaymentService {
    * @param expirationDate the date at which, if not accepted, this payment will expire/cancel
    * @param requiredStake the amount of stake (in Hypertoken) required for the recipient to put up
    * @param paymentToken the address of the payment token we are sending
-   * @param merchantUrl the registered URL for the merchant that will resolve any disputes.
+   * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   sendFunds(
     counterPartyAccount: PublicIdentifier,
-    amount: BigNumber,
-    expirationDate: number,
-    requiredStake: BigNumber,
+    amount: BigNumberString,
+    expirationDate: UnixTimestamp,
+    requiredStake: BigNumberString,
     paymentToken: EthereumAddress,
-    merchantUrl: MerchantUrl,
-  ): ResultAsync<Payment, PaymentCreationError | LogicalError>;
+    gatewayUrl: GatewayUrl,
+    metadata: string | null,
+  ): ResultAsync<Payment, PaymentCreationError>;
 
   /**
    * Called by the person on the receiving end of a push payment,
@@ -94,11 +93,9 @@ export interface IPaymentService {
     | InsufficientBalanceError
     | AcceptPaymentError
     | BalancesUnavailableError
-    | MerchantValidationError
-    | RouterChannelUnknownError
+    | GatewayValidationError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
   >;
@@ -114,10 +111,25 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferCreationError
+  >;
+
+  /**
+   * Notify the service that an offer transfer has resolved.
+   */
+  offerResolved(
+    paymentId: PaymentId,
+  ): ResultAsync<
+    void,
+    | PaymentFinalizeError
+    | PaymentStakeError
+    | TransferResolutionError
+    | VectorError
+    | BlockchainUnavailableError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -133,10 +145,8 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -153,10 +163,8 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -170,10 +178,8 @@ export interface IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     void,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
   >;
@@ -189,10 +195,8 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -207,46 +211,28 @@ export interface IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     void,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
   >;
 
   /**
-   * A payment that is in the Accepted state may be disputed up to the expiration date.
-   * If the payment is disputed, it is sent to the dispute mediator, who will determine
-   * if the payment was proper. The dispute mediator can provide a signature to resolve
-   * the insurance transfer for an amount from 0 to the full value of Hypertoken.
-   * The method by which the mediator makes this determination is entirely up to the
-   * merchant.
-   * @param paymentId
+   * After a payment is accepted, the next step is to resolve the insurance.
+   * There are two options for that; it can be resolved for 0 by the user's key,
+   * or it can be resolved for more than 0 by the gateway using the gateway's
+   * key. In the current system, insurance is resolved by the Gateway, and
+   * the whole process is controlled and timed by the gateway, without user
+   * input.
    */
-  initiateDispute(
-    paymentId: PaymentId,
-  ): ResultAsync<
-    Payment,
-    | MerchantConnectorError
-    | MerchantValidationError
-    | RouterChannelUnknownError
-    | VectorError
-    | BlockchainUnavailableError
-    | LogicalError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | TransferResolutionError
-  >;
-
   resolveInsurance(
     paymentId: PaymentId,
+    amount: BigNumberString,
+    gatewaySignature: Signature | null,
   ): ResultAsync<
     Payment,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferResolutionError
@@ -267,13 +253,31 @@ export interface IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+  >;
+
+  /**
+   * recoverPayments() will attempt to "recover" any payments that are in the Borked state.
+   * Borked simply means that something has gone wrong in the payment process, such as out
+   * of order resolutions, or most commonly double transfers being created. Recovery is
+   * automatically attempted by advancePayments(), but in the off chance that we want to try
+   * to do it explicitly, this function exists.
+   * Recovery basically amounts to canceling bad or excess transfers.
+   * @param paymentIds Payment IDs to attempt recovery on
+   */
+  recoverPayments(
+    paymentIds: PaymentId[],
+  ): ResultAsync<
+    Payment[],
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | TransferResolutionError
   >;
 }
 

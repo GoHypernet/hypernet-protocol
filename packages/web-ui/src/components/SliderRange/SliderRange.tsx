@@ -1,5 +1,6 @@
-import React from "react";
 import { SliderProps, Tooltip } from "@material-ui/core";
+import React from "react";
+
 import { CustomSlider } from "@web-ui/components/SliderRange/SliderRange.style";
 
 export const SliderRange: React.FC<SliderProps> = (props: SliderProps) => {

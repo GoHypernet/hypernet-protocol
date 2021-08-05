@@ -6,14 +6,10 @@ import {
   Signature,
   BalancesUnavailableError,
   BlockchainUnavailableError,
-  LogicalError,
   VectorError,
-  RouterChannelUnknownError,
   InvalidParametersError,
-  PreferredPaymentTokenError,
-  AssetInfo,
+  BigNumberString,
 } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 /**
@@ -27,43 +23,26 @@ export interface IAccountService {
   getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
   depositFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<
     Balances,
-    | BalancesUnavailableError
-    | RouterChannelUnknownError
-    | BlockchainUnavailableError
-    | VectorError
-    | LogicalError
+    BalancesUnavailableError | BlockchainUnavailableError | VectorError
   >;
   withdrawFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    | BalancesUnavailableError
-    | RouterChannelUnknownError
-    | BlockchainUnavailableError
-    | VectorError
+    BalancesUnavailableError | BlockchainUnavailableError | VectorError
   >;
-  getBalances(): ResultAsync<
-    Balances,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
-  >;
+  getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError>;
   providePrivateCredentials(
     privateCredentials: PrivateCredentials,
   ): ResultAsync<void, InvalidParametersError>;
   signMessage(
     message: string,
   ): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;
-  setPreferredPaymentToken(
-    tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PreferredPaymentTokenError>;
-  getPreferredPaymentToken(): ResultAsync<
-    AssetInfo,
-    BlockchainUnavailableError | PreferredPaymentTokenError
-  >;
 }
 
 export const IAccountServiceType = Symbol.for("IAccountService");

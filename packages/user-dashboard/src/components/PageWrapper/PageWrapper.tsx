@@ -1,5 +1,6 @@
-import React from "react";
 import { Box } from "@material-ui/core";
+import React from "react";
+
 import { useStyles } from "@user-dashboard/components/PageWrapper/PageWrapper.style";
 
 interface IPageWrapper {

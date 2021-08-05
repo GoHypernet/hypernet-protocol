@@ -1,12 +1,11 @@
-import React from "react";
 import { Box } from "@material-ui/core";
+import { useStoreContext } from "@web-ui/contexts";
+import { IRenderParams } from "@web-ui/interfaces";
+import React from "react";
 
 import { BalanceList, BoxWrapper, EmptyState } from "@web-ui/components";
 import { useBalances } from "@web-ui/hooks";
-import { IRenderParams } from "@web-ui/interfaces";
-
 import { useStyles } from "@web-ui/widgets/BalancesWidget/BalancesWidget.style";
-import { useStoreContext } from "@web-ui/contexts";
 
 interface IBalancesWidget extends IRenderParams {}
 
@@ -33,7 +32,7 @@ const BalancesWidget: React.FC<IBalancesWidget> = ({
           info={
             <>
               You don't have any balances yet, you can Fund your account from.
-              <a href="/send-and-recieve"> here</a>
+              <a href="/deposit-and-withdraw"> here</a>
             </>
           }
         />

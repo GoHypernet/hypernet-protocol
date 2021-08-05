@@ -1,1 +1,1 @@
-export * from "@objects/schemas/AuthorizedMerchantsSchema";
+export * from "@objects/schemas/AuthorizedGatewaysSchema";

@@ -1,3 +1,3 @@
 export * from "./IBrowserNodeFactory";
-export * from "./IMerchantConnectorProxyFactory";
+export * from "./IGatewayConnectorProxyFactory";
 export * from "./IInternalProviderFactory";

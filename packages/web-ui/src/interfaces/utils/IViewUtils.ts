@@ -1,10 +1,10 @@
-import { BigNumber } from "ethers";
-import { EPaymentState } from "@hypernetlabs/objects";
+import { BigNumberString, EPaymentState } from "@hypernetlabs/objects";
 import { PaymentStateOption } from "@web-ui/interfaces";
+import { BigNumber } from "ethers";
 
 export interface IViewUtils {
-  fromBigNumberWei(value: BigNumber): string;
-  fromBigNumberEther(value: BigNumber): string;
+  fromBigNumberWei(value: BigNumber | BigNumberString): string;
+  fromBigNumberEther(value: BigNumber | BigNumberString): string;
   fromPaymentState(state: EPaymentState): string;
   fromPaymentStateColor(state: EPaymentState): string;
   getPaymentStateOptions(): PaymentStateOption[];

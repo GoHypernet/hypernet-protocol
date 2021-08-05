@@ -21,7 +21,7 @@ export const useStyles = makeStyles({
     width: 30,
   },
   tokenAmount: {
-    fontSize: 34,
+    fontSize: 20,
   },
   tokenName: {
     fontSize: 16,

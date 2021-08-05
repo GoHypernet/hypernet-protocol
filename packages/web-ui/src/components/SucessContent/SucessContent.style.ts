@@ -17,13 +17,21 @@ export const useStyles = makeStyles({
     marginTop: 15,
   },
   label: {
-    color: "#6D6D6D",
+    color: "black",
     fontSize: 20,
     marginBottom: 10,
     fontWeight: "bold",
   },
   info: {
-    color: "#8a8a8a",
-    fontSize: 18,
+    color: "black",
+    fontSize: 20,
+  },
+  authenticationSuccessImg: {
+    maxWidth: 280,
+    padding: "40px 0",
+  },
+  buttonWrapper: {
+    width: "100%",
+    marginBottom: "16px",
   },
 });

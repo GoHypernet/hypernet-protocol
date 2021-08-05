@@ -1,0 +1,14 @@
+{
+  "extends": "../../../tsconfig.build.json",
+  "compilerOptions": {
+    "outDir": "../dist/server"
+  },
+  "references": [
+    {
+      "path": "../../objects"
+    },
+    {
+      "path": "../../gateway-connector"
+    }
+  ],
+}

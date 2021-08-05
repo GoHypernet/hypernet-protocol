@@ -14,3 +14,5 @@ export interface IBrowserNodeProvider {
     VectorError | BlockchainUnavailableError
   >;
 }
+
+export const IBrowserNodeProviderType = Symbol.for("IBrowserNodeProvider");

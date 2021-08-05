@@ -2,6 +2,15 @@ import delay from "delay";
 import { err, ok, ResultAsync, Result, okAsync, errAsync } from "neverthrow";
 
 export class ResultUtils {
+  static combine<T, T2, T3, T4, T5, E, E2, E3, E4, E5>(
+    asyncResultList: [
+      ResultAsync<T, E>,
+      ResultAsync<T2, E2>,
+      ResultAsync<T3, E3>,
+      ResultAsync<T4, E4>,
+      ResultAsync<T5, E5>,
+    ],
+  ): ResultAsync<[T, T2, T3, T4, T5], E | E2 | E3 | E4 | E5>;
   static combine<T, T2, T3, T4, E, E2, E3, E4>(
     asyncResultList: [
       ResultAsync<T, E>,
@@ -23,6 +32,7 @@ export class ResultUtils {
   static combine<T, E>(
     asyncResultList: ResultAsync<T, E>[],
   ): ResultAsync<T[], E>;
+
   static combine<T, E>(
     asyncResultList: ResultAsync<T, E>[],
   ): ResultAsync<T[], E> {
@@ -42,6 +52,16 @@ export class ResultUtils {
             })
         : acc;
     }, ok([]));
+  }
+
+  static race<T, E>(asyncResultList: ResultAsync<T, E>[]): ResultAsync<T, E> {
+    return ResultAsync.fromPromise(Promise.race(asyncResultList), (e) => {
+      return e as E;
+    }).andThen(ResultUtils.resultRace);
+  }
+
+  static resultRace<T, E>(result: Result<T, E>): Result<T, E> {
+    return result.isErr() ? err(result.error) : ok(result.value);
   }
 
   static fromThrowableResult<T, E>(throwableCallback: () => T): Result<T, E> {
@@ -149,5 +169,58 @@ export class ResultUtils {
     };
 
     return runAndCheck(1, baseSeconds, null);
+  }
+
+  /**
+   * filter() is a normal filter method that works with async callbacks.
+   * This works like a nomral array filter() call, except the callback returns
+   * a ResultAsync<boolean> instead of just boolean.
+   * @param arr the source array
+   * @param callback a function that returns a ResultAsync<boolean>; if it returns true then the source value is included in the result.
+   * @returns a ResultAsync containing an array of source values where the callback returns true.
+   */
+  static filter<T, E extends Error>(
+    arr: T[],
+    callback: (val: T) => ResultAsync<boolean, E>,
+  ): ResultAsync<T[], E> {
+    const filterVals = new Array<T>();
+
+    return ResultUtils.combine(
+      arr.map((val) => {
+        return callback(val).map((result) => {
+          if (result) {
+            filterVals.push(val);
+          }
+        });
+      }),
+    ).map(() => {
+      return filterVals;
+    });
+  }
+
+  /**
+   * map() is a way to combine multiple async callbacks.
+   * This works like a normal array map() call, except the callbacks return ResultAsync.
+   * It will combine all the results and return a single ResultAsync with an array of the mapped
+   * values.
+   * @param arr The source array of objects
+   * @param callback A function that returns a ResultAsync and a value
+   * @returns A ResultAsync containing an array of the mapped values or the first error.
+   */
+  static map<T, U, E extends Error>(
+    arr: T[],
+    callback: (val: T) => ResultAsync<U, E>,
+  ): ResultAsync<U[], E> {
+    const mapVals = new Array<U>();
+
+    return ResultUtils.combine(
+      arr.map((val) => {
+        return callback(val).map((result) => {
+          mapVals.push(result);
+        });
+      }),
+    ).map(() => {
+      return mapVals;
+    });
   }
 }

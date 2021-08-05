@@ -1,7 +1,7 @@
-Feature: MerchantAuthorization
-  Tests if user is able to authorize a merchant
+Feature: GatewayAuthorization
+  Tests if user is able to authorize a gateway
 
-  Scenario: MerchantUserA can authorize a merchant
-    Given MerchantUserA has hypernet account and has the developer UI opened
-    When MerchantUserA authorize merchant url of 'http://localhost:5010'
-    Then MerchantUserA has merchant of 'http://localhost:5010' authorized
+  Scenario: GatewayUserA can authorize a gateway
+    Given GatewayUserA has hypernet account and has the developer UI opened
+    When GatewayUserA authorize gateway url of 'http://localhost:5010'
+    Then GatewayUserA has gateway of 'http://localhost:5010' authorized

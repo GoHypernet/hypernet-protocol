@@ -17,9 +17,9 @@ import {
   IWithdrawResponse,
   TransferId,
   Signature,
-} from "@hypernetlabs/objects";
-import { VectorError } from "@hypernetlabs/objects";
-import {
+  BigNumberString,
+  UnixTimestamp,
+  VectorError,
   InsuranceResolver,
   MessageResolver,
   ParameterizedResolver,
@@ -66,7 +66,7 @@ export class WrappedBrowserNode implements IBrowserNode {
 
   public withdraw(
     channelAddress: EthereumAddress,
-    amount: string,
+    amount: BigNumberString,
     assetId: EthereumAddress,
     recipient: EthereumAddress,
     quote?: IWithdrawQuote,
@@ -97,7 +97,7 @@ export class WrappedBrowserNode implements IBrowserNode {
 
   public getTransfer(
     transferId: TransferId,
-  ): ResultAsync<IFullTransferState, VectorError> {
+  ): ResultAsync<IFullTransferState<unknown, unknown>, VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.getTransfer({ transferId }),
       this.toVectorError,
@@ -111,7 +111,7 @@ export class WrappedBrowserNode implements IBrowserNode {
   }
   public getActiveTransfers(
     channelAddress: EthereumAddress,
-  ): ResultAsync<IFullTransferState[], VectorError> {
+  ): ResultAsync<IFullTransferState<unknown, unknown>[], VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.getActiveTransfers({ channelAddress }),
       this.toVectorError,
@@ -140,9 +140,9 @@ export class WrappedBrowserNode implements IBrowserNode {
   }
 
   public getTransfers(
-    startDate: number,
-    endDate: number,
-  ): ResultAsync<IFullTransferState[], VectorError> {
+    startDate: UnixTimestamp,
+    endDate: UnixTimestamp,
+  ): ResultAsync<IFullTransferState<unknown, unknown>[], VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.getTransfers({
         startDate: new Date(startDate),
@@ -199,7 +199,7 @@ export class WrappedBrowserNode implements IBrowserNode {
 
   public conditionalTransfer(
     channelAddress: EthereumAddress,
-    amount: string,
+    amount: BigNumberString,
     assetId: EthereumAddress,
     type: string,
     details: any,

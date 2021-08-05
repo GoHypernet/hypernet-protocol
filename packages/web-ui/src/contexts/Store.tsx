@@ -1,7 +1,6 @@
 import { IHypernetCore } from "@hypernetlabs/objects";
-import React, { createContext, useContext } from "react";
-
 import { IViewUtils, IDateUtils } from "@web-ui/interfaces";
+import React, { createContext, useContext } from "react";
 
 interface IStore {
   coreProxy: IHypernetCore;

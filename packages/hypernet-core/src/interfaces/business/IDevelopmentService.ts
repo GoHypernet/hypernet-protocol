@@ -1,11 +1,13 @@
-import { EthereumAddress } from "@hypernetlabs/objects";
-import { BlockchainUnavailableError } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
+import {
+  EthereumAddress,
+  BlockchainUnavailableError,
+  BigNumberString,
+} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IDevelopmentService {
   mintTestToken(
-    amount: BigNumber,
+    amount: BigNumberString,
     to: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError>;
 }

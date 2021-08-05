@@ -5,19 +5,19 @@ import {
   Balances,
   EthereumAddress,
   PublicIdentifier,
-  MerchantUrl,
+  GatewayUrl,
   Signature,
 } from "@hypernetlabs/objects";
-import { okAsync, ResultAsync } from "neverthrow";
-import { Subject } from "rxjs";
-
 import {
   HypernetContext,
   InitializedHypernetContext,
 } from "@interfaces/objects";
+import { okAsync, ResultAsync } from "neverthrow";
+import { Subject } from "rxjs";
+
 import {
   IContextProvider,
-  IMerchantConnectorProxy,
+  IGatewayConnectorProxy,
 } from "@interfaces/utilities";
 
 export class ContextProvider implements IContextProvider {
@@ -39,15 +39,18 @@ export class ContextProvider implements IContextProvider {
     onPullPaymentUpdated: Subject<PullPayment>,
     onPushPaymentDelayed: Subject<PushPayment>,
     onPullPaymentDelayed: Subject<PullPayment>,
+    onPushPaymentCanceled: Subject<PushPayment>,
+    onPullPaymentCanceled: Subject<PullPayment>,
     onBalancesChanged: Subject<Balances>,
     onDeStorageAuthenticationStarted: Subject<void>,
     onDeStorageAuthenticationSucceeded: Subject<void>,
     onDeStorageAuthenticationFailed: Subject<void>,
-    onMerchantAuthorized: Subject<MerchantUrl>,
-    onAuthorizedMerchantUpdated: Subject<MerchantUrl>,
-    onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>,
-    onMerchantIFrameDisplayRequested: Subject<MerchantUrl>,
-    onMerchantIFrameCloseRequested: Subject<MerchantUrl>,
+    onGatewayAuthorized: Subject<GatewayUrl>,
+    onGatewayDeauthorizationStarted: Subject<GatewayUrl>,
+    onAuthorizedGatewayUpdated: Subject<GatewayUrl>,
+    onAuthorizedGatewayActivationFailed: Subject<GatewayUrl>,
+    onGatewayIFrameDisplayRequested: Subject<GatewayUrl>,
+    onGatewayIFrameCloseRequested: Subject<GatewayUrl>,
     onInitializationRequired: Subject<void>,
     onPrivateCredentialsRequested: Subject<void>,
   ) {
@@ -66,18 +69,21 @@ export class ContextProvider implements IContextProvider {
       onPullPaymentUpdated,
       onPushPaymentDelayed,
       onPullPaymentDelayed,
+      onPushPaymentCanceled,
+      onPullPaymentCanceled,
       onBalancesChanged,
       onDeStorageAuthenticationStarted,
       onDeStorageAuthenticationSucceeded,
       onDeStorageAuthenticationFailed,
-      onMerchantAuthorized,
-      onAuthorizedMerchantUpdated,
-      onAuthorizedMerchantActivationFailed,
-      onMerchantIFrameDisplayRequested,
-      onMerchantIFrameCloseRequested,
+      onGatewayAuthorized,
+      onGatewayDeauthorizationStarted,
+      onAuthorizedGatewayUpdated,
+      onAuthorizedGatewayActivationFailed,
+      onGatewayIFrameDisplayRequested,
+      onGatewayIFrameCloseRequested,
       onInitializationRequired,
       onPrivateCredentialsRequested,
-      new Subject<IMerchantConnectorProxy>(),
+      new Subject<IGatewayConnectorProxy>(),
     );
     this._initializePromiseResolve = () => null;
     this._initializePromise = new Promise((resolve) => {
@@ -123,19 +129,22 @@ export class ContextProvider implements IContextProvider {
           this.context.onPullPaymentUpdated,
           this.context.onPushPaymentDelayed,
           this.context.onPullPaymentDelayed,
+          this.context.onPushPaymentCanceled,
+          this.context.onPullPaymentCanceled,
           this.context.onBalancesChanged,
           this.context.onDeStorageAuthenticationStarted,
           this.context.onDeStorageAuthenticationSucceeded,
           this.context.onDeStorageAuthenticationFailed,
-          this.context.onMerchantAuthorized,
-          this.context.onAuthorizedMerchantUpdated,
-          this.context.onAuthorizedMerchantActivationFailed,
-          this.context.onMerchantIFrameDisplayRequested,
-          this.context.onMerchantIFrameCloseRequested,
+          this.context.onGatewayAuthorized,
+          this.context.onGatewayDeauthorizationStarted,
+          this.context.onAuthorizedGatewayUpdated,
+          this.context.onAuthorizedGatewayActivationFailed,
+          this.context.onGatewayIFrameDisplayRequested,
+          this.context.onGatewayIFrameCloseRequested,
           this.context.onInitializationRequired,
           this.context.onPrivateCredentialsRequested,
-          this.context.onMerchantConnectorProxyActivated,
-          new Map<MerchantUrl, Signature>(),
+          this.context.onGatewayConnectorProxyActivated,
+          new Map<GatewayUrl, Signature>(),
         ),
       );
     }

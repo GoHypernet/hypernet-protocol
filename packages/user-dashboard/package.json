@@ -27,15 +27,17 @@
     "!dist/tsconfig.tsbuildinfo"
   ],
   "scripts": {
-    "build": "yarn clean && yarn compile && yarn postcompile",
+    "build": "yarn clean && yarn compile && yarn postCompile",
+    "dockerize": "docker build -t hypernetlabs/hypernet-protocol-user-dashboard:local -f Dockerfile --progress=plain ../..",
+    "docker-push": "docker push hypernetlabs/hypernet-protocol-user-dashboard:local",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
     "compile": "tsc --build && cd ../.. && yarn alias",
     "alias": "tsc-alias",
-    "postcompile": "webpack",
+    "postCompile": "webpack",
     "prepare": "yarn build",
     "start": "webpack serve --config webpack.config.js --mode development",
     "start-iframe-watch": "cd ../iframe && yarn start",
-    "start-merchant-iframe-watch": "cd ../merchant-iframe && yarn start",
+    "start-gateway-iframe-watch": "cd ../gateway-iframe && yarn start",
     "test": "echo \"Error: no test specified\" && exit 0"
   },
   "types": "dist/index.d.ts",
