@@ -59,11 +59,12 @@
     "@hypernetlabs/gateway-connector": "^0.0.1",
     "@hypernetlabs/objects": "^0.0.1",
     "@hypernetlabs/utils": "^0.0.1",
+    "@walletconnect/web3-provider": "^1.5.2",
     "class-transformer": "^0.3.2",
     "crypto-browserify": "^3.12.0",
     "did-resolver": "^3.1.0",
     "dids": "^2.1.0",
-    "ethers": "^5.1.0",
+    "ethers": "^5.4.3",
     "inversify": "^5.1.1",
     "moment": "^2.27.0",
     "neverthrow": "^4.1.0",
@@ -72,6 +73,7 @@
     "rxjs": "^6.6.2",
     "sjcl": "^1.0.8",
     "stream-browserify": "^3.0.0",
-    "uuid": "^8.3.0"
+    "uuid": "^8.3.0",
+    "web3modal": "^1.9.4"
   }
 }

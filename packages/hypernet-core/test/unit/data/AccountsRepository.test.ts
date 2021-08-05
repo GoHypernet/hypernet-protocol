@@ -183,7 +183,7 @@ class AccountsRepositoryMocks {
 }
 
 class AccountsRepositoryErrorMocks {
-  public blockchainProvider = td.object<IBlockchainProvider>();
+  public blockchainProvider = new BlockchainProviderMock();
   public vectorUtils =
     VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
   public browserNodeProvider = td.object<IBrowserNodeProvider>();
@@ -194,9 +194,6 @@ class AccountsRepositoryErrorMocks {
   constructor() {
     td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(
       errAsync(new VectorError()),
-    );
-    td.when(this.blockchainProvider.getSigner()).thenReturn(
-      errAsync(new BlockchainUnavailableError()),
     );
     td.when(
       this.blockchainUtils.mintToken(
@@ -393,19 +390,5 @@ describe("AccountsRepository tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
     expect(result._unsafeUnwrap()).toBe(undefined);
-  });
-
-  test("Should mintTestToken throw error if getSigner fails", async () => {
-    // Arrange
-    const accountsRepositoryMocks = new AccountsRepositoryErrorMocks();
-    const repo = accountsRepositoryMocks.factoryAccountsRepository();
-
-    // Act
-    const result = await repo.mintTestToken(commonAmount, account);
-    const error = result._unsafeUnwrapErr();
-
-    // Assert
-    expect(result.isErr()).toBeTruthy();
-    expect(error).toBeInstanceOf(BlockchainUnavailableError);
   });
 });

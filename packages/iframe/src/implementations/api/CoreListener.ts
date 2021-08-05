@@ -5,13 +5,11 @@ import {
 } from "@core-iframe/interfaces/business";
 import {
   EthereumAddress,
-  PublicIdentifier,
   IHypernetCore,
   IHypernetCoreType,
   PaymentId,
   GatewayUrl,
   BigNumberString,
-  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import { injectable, inject } from "inversify";
@@ -29,9 +27,9 @@ export class CoreListener extends ChildProxy implements ICoreListener {
   protected getModel(): Postmate.Model {
     // Fire up the Postmate model, and wrap up the core as the model
     return new Postmate.Model({
-      initialize: (data: IIFrameCallData<EthereumAddress>) => {
+      initialize: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.initialize(data.data);
+          return this.core.initialize();
         }, data.callId);
       },
       waitInitialized: (data: IIFrameCallData<void>) => {
@@ -240,6 +238,15 @@ export class CoreListener extends ChildProxy implements ICoreListener {
 
     this.core.onGatewayIFrameCloseRequested.subscribe((gatewayUrl) => {
       parent.emit("onGatewayIFrameCloseRequested", gatewayUrl);
+    });
+
+    this.core.onCoreIFrameDisplayRequested.subscribe(() => {
+      console.log("in CoreListener, emiting onCoreIFrameDisplayRequested");
+      parent.emit("onCoreIFrameDisplayRequested");
+    });
+
+    this.core.onCoreIFrameCloseRequested.subscribe(() => {
+      parent.emit("onCoreIFrameCloseRequested");
     });
 
     this.core.onInitializationRequired.subscribe(() => {

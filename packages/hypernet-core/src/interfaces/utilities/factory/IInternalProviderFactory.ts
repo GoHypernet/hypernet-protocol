@@ -1,5 +1,7 @@
-import { PrivateCredentials } from "@hypernetlabs/objects";
-import { InvalidParametersError } from "@hypernetlabs/objects";
+import {
+  PrivateCredentials,
+  InvalidParametersError,
+} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 import { IInternalProvider } from "@interfaces/utilities";
@@ -9,3 +11,7 @@ export interface IInternalProviderFactory {
     privateCredentials: PrivateCredentials,
   ): ResultAsync<IInternalProvider, InvalidParametersError>;
 }
+
+export const IInternalProviderFactoryType = Symbol.for(
+  "IInternalProviderFactory",
+);

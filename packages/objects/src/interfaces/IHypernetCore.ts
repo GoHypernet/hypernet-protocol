@@ -57,9 +57,7 @@ export interface IHypernetCore {
    * hypernet core will be representing.
    * @param account The address that says who this instance of HypernetCore is representing.
    */
-  initialize(
-    account: EthereumAddress,
-  ): ResultAsync<
+  initialize(): ResultAsync<
     void,
     | MessagingError
     | BlockchainUnavailableError
@@ -228,6 +226,8 @@ export interface IHypernetCore {
   onAuthorizedGatewayActivationFailed: Subject<GatewayUrl>;
   onGatewayIFrameDisplayRequested: Subject<GatewayUrl>;
   onGatewayIFrameCloseRequested: Subject<GatewayUrl>;
+  onCoreIFrameDisplayRequested: Subject<void>;
+  onCoreIFrameCloseRequested: Subject<void>;
   onInitializationRequired: Subject<void>;
   onPrivateCredentialsRequested: Subject<void>;
 }

@@ -14,6 +14,7 @@ export class BrowserNodeFactory implements IBrowserNodeFactory {
 
   public factoryBrowserNode(): ResultAsync<IBrowserNode, never> {
     return this.configProvider.getConfig().map((config) => {
+      this.logUtils.debug("Creating BrowserNode");
       // Create the browser node
       const vectorBrowserNode = new BrowserNode({
         routerPublicIdentifier: config.routerPublicIdentifier,

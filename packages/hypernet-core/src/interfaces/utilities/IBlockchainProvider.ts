@@ -11,15 +11,17 @@ import { ResultAsync } from "neverthrow";
  * @todo What is the main role/purpose of this class? Description here.
  */
 export interface IBlockchainProvider {
-  getSigner(): ResultAsync<
-    ethers.providers.JsonRpcSigner,
-    BlockchainUnavailableError
-  >;
+  /**
+   * This initializes the blockchain provider, and makes sure
+   */
+  initialize(): ResultAsync<void, BlockchainUnavailableError>;
+
+  getSigner(): ResultAsync<ethers.providers.JsonRpcSigner, never>;
   getProvider(): ResultAsync<
     ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
-    BlockchainUnavailableError
+    never
   >;
-  getEIP1193Provider(): ResultAsync<Eip1193Bridge, BlockchainUnavailableError>;
+  getEIP1193Provider(): ResultAsync<Eip1193Bridge, never>;
   getLatestBlock(): ResultAsync<
     ethers.providers.Block,
     BlockchainUnavailableError

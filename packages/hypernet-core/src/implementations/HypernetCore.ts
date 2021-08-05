@@ -155,6 +155,8 @@ export class HypernetCore implements IHypernetCore {
   public onAuthorizedGatewayActivationFailed: Subject<GatewayUrl>;
   public onGatewayIFrameDisplayRequested: Subject<GatewayUrl>;
   public onGatewayIFrameCloseRequested: Subject<GatewayUrl>;
+  public onCoreIFrameDisplayRequested: Subject<void>;
+  public onCoreIFrameCloseRequested: Subject<void>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
 
@@ -175,7 +177,6 @@ export class HypernetCore implements IHypernetCore {
   protected ceramicUtils: ICeramicUtils;
   protected validationUtils: IValidationUtils;
   protected storageUtils: IStorageUtils;
-  protected metamaskUtils: IMetamaskUtils;
   protected messagingProvider: IMessagingProvider;
 
   // Factories
@@ -251,6 +252,8 @@ export class HypernetCore implements IHypernetCore {
     this.onAuthorizedGatewayActivationFailed = new Subject<GatewayUrl>();
     this.onGatewayIFrameDisplayRequested = new Subject<GatewayUrl>();
     this.onGatewayIFrameCloseRequested = new Subject<GatewayUrl>();
+    this.onCoreIFrameDisplayRequested = new Subject();
+    this.onCoreIFrameCloseRequested = new Subject();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
 
@@ -291,6 +294,8 @@ export class HypernetCore implements IHypernetCore {
       this.onAuthorizedGatewayActivationFailed,
       this.onGatewayIFrameDisplayRequested,
       this.onGatewayIFrameCloseRequested,
+      this.onCoreIFrameDisplayRequested,
+      this.onCoreIFrameCloseRequested,
       this.onInitializationRequired,
       this.onPrivateCredentialsRequested,
     );
@@ -310,17 +315,10 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
     );
 
-    // TODO: This could work on Ethers provider and BlockchainUtils might be a good place for it
-    this.metamaskUtils = new MetamaskUtils(
-      this.configProvider,
-      this.localStorageUtils,
-      this.logUtils,
-    );
-
     this.blockchainProvider = new EthersBlockchainProvider(
       this.contextProvider,
       this.configProvider,
-      this.metamaskUtils,
+      this.localStorageUtils,
       this.internalProviderFactory,
       this.logUtils,
     );
@@ -635,9 +633,7 @@ export class HypernetCore implements IHypernetCore {
    * Initialize this instance of Hypernet Core
    * @param account: the ethereum account to initialize with
    */
-  public initialize(
-    account: EthereumAddress,
-  ): ResultAsync<
+  public initialize(): ResultAsync<
     void,
     | MessagingError
     | BlockchainUnavailableError
@@ -651,16 +647,23 @@ export class HypernetCore implements IHypernetCore {
       return this._initializeResult;
     }
 
-    this.logUtils.debug(
-      `Initializing Hypernet Protocol Core with account ${account}`,
-    );
+    this.logUtils.debug(`Initializing Hypernet Protocol Core`);
 
     let context: HypernetContext;
-    this._initializeResult = this.contextProvider
-      .getContext()
-      .andThen((val) => {
-        context = val;
-        context.account = account;
+    this._initializeResult = this.blockchainProvider
+      .initialize()
+      .andThen(() => {
+        this.logUtils.debug("Getting Ethereum accounts");
+        return ResultUtils.combine([
+          this.contextProvider.getContext(),
+          this.accountRepository.getAccounts(),
+        ]);
+      })
+      .andThen((vals) => {
+        context = vals[0];
+        const accounts = vals[1];
+        context.account = accounts[0];
+        this.logUtils.debug(`Obtained accounts: ${accounts}`);
         return this.contextProvider.setContext(context);
       })
       .andThen(() => {
@@ -671,6 +674,9 @@ export class HypernetCore implements IHypernetCore {
         return this.contextProvider.setContext(context);
       })
       .andThen(() => {
+        // By doing some active initialization, we can avoid whole categories
+        // of errors occuring post-initialization (ie, runtime), which makes the
+        // whole thing more reliable in operation.
         this.logUtils.debug("Initializing utilities");
         return ResultUtils.combine([this.vectorUtils.initialize()]);
       })

@@ -70,6 +70,8 @@ export default class HypernetIFrameProxy
     this.onAuthorizedGatewayActivationFailed = new Subject<GatewayUrl>();
     this.onGatewayIFrameDisplayRequested = new Subject<GatewayUrl>();
     this.onGatewayIFrameCloseRequested = new Subject<GatewayUrl>();
+    this.onCoreIFrameDisplayRequested = new Subject();
+    this.onCoreIFrameCloseRequested = new Subject();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
 
@@ -187,6 +189,19 @@ export default class HypernetIFrameProxy
           this.onGatewayIFrameCloseRequested.next(data);
         });
 
+        child.on("onCoreIFrameDisplayRequested", () => {
+          console.log("recieved onCoreIFrameDisplayRequested in HypernetIFrameProxy");
+          this._displayCoreIFrame();
+
+          this.onCoreIFrameDisplayRequested.next();
+        });
+
+        child.on("onCoreIFrameCloseRequested", () => {
+          this._closeCoreIFrame();
+
+          this.onCoreIFrameCloseRequested.next();
+        });
+
         child.on("onInitializationRequired", () => {
           this.onInitializationRequired.next();
         });
@@ -237,9 +252,7 @@ export default class HypernetIFrameProxy
     return this._createCall("getEthereumAccounts", null);
   }
 
-  public initialize(
-    account: EthereumAddress,
-  ): ResultAsync<
+  public initialize(): ResultAsync<
     void,
     | MessagingError
     | BlockchainUnavailableError
@@ -249,7 +262,7 @@ export default class HypernetIFrameProxy
     | GatewayValidationError
     | ProxyError
   > {
-    return this._createCall("initialize", account);
+    return this._createCall("initialize", null);
   }
 
   public getPublicIdentifier(): ResultAsync<PublicIdentifier, ProxyError> {
@@ -442,6 +455,8 @@ export default class HypernetIFrameProxy
   public onAuthorizedGatewayActivationFailed: Subject<GatewayUrl>;
   public onGatewayIFrameDisplayRequested: Subject<GatewayUrl>;
   public onGatewayIFrameCloseRequested: Subject<GatewayUrl>;
+  public onCoreIFrameDisplayRequested: Subject<void>;
+  public onCoreIFrameCloseRequested: Subject<void>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
 }
