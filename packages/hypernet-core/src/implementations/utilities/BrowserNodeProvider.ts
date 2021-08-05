@@ -60,34 +60,23 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
         `account-${account}-signature`,
       );
 
-      let signatureResult: ResultAsync<string[], BlockchainUnavailableError>;
+      let signatureResult: ResultAsync<string, BlockchainUnavailableError>;
 
       if (storedSignature != null) {
-        signatureResult = okAsync<string[], BlockchainUnavailableError>([
-          account,
+        signatureResult = okAsync<string, BlockchainUnavailableError>(
           storedSignature,
-        ]);
+        );
       }
 
-      signatureResult = ResultUtils.combine([
-        ResultAsync.fromPromise(signer.getAddress(), (e) => {
+      signatureResult = ResultAsync.fromPromise(
+        signer.signMessage(NonEIP712Message),
+        (e) => {
           return e as BlockchainUnavailableError;
-        }),
-        ResultAsync.fromPromise(signer.signMessage(NonEIP712Message), (e) => {
-          return e as BlockchainUnavailableError;
-        }),
-      ]);
+        },
+      );
 
       return signatureResult
-        .andThen((vals) => {
-          const [address, signature] = vals;
-
-          this.logUtils.debug(
-            `account = ${account}, address = ${address}, address==account = ${
-              account == address
-            }`,
-          );
-
+        .andThen((signature) => {
           const sigAddress = ethers.utils.verifyMessage(
             NonEIP712Message,
             signature,
@@ -97,7 +86,7 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
 
           // Store the signature so you don't have to sign again
           this.localStorageUtils.setSessionItem(
-            `account-${address}-signature`,
+            `account-${account}-signature`,
             signature,
           );
           this.logUtils.debug(
