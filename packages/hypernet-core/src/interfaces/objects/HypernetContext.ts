@@ -5,13 +5,13 @@ import {
   PushPayment,
   Balances,
   EthereumAddress,
-  MerchantUrl,
+  GatewayUrl,
   Signature,
   PersistenceError,
 } from "@hypernetlabs/objects";
 import { Subject } from "rxjs";
 
-import { IMerchantConnectorProxy } from "@interfaces/utilities";
+import { IGatewayConnectorProxy } from "@interfaces/utilities";
 
 export class HypernetContext {
   constructor(
@@ -29,18 +29,21 @@ export class HypernetContext {
     public onPullPaymentUpdated: Subject<PullPayment>,
     public onPushPaymentDelayed: Subject<PushPayment>,
     public onPullPaymentDelayed: Subject<PullPayment>,
+    public onPushPaymentCanceled: Subject<PushPayment>,
+    public onPullPaymentCanceled: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
     public onCeramicAuthenticationStarted: Subject<void>,
     public onCeramicAuthenticationSucceeded: Subject<void>,
     public onCeramicFailed: Subject<PersistenceError>,
-    public onMerchantAuthorized: Subject<MerchantUrl>,
-    public onAuthorizedMerchantUpdated: Subject<MerchantUrl>,
-    public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>,
-    public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>,
-    public onMerchantIFrameCloseRequested: Subject<MerchantUrl>,
+    public onGatewayAuthorized: Subject<GatewayUrl>,
+    public onGatewayDeauthorizationStarted: Subject<GatewayUrl>,
+    public onAuthorizedGatewayUpdated: Subject<GatewayUrl>,
+    public onAuthorizedGatewayActivationFailed: Subject<GatewayUrl>,
+    public onGatewayIFrameDisplayRequested: Subject<GatewayUrl>,
+    public onGatewayIFrameCloseRequested: Subject<GatewayUrl>,
     public onInitializationRequired: Subject<void>,
     public onPrivateCredentialsRequested: Subject<void>,
-    public onMerchantConnectorProxyActivated: Subject<IMerchantConnectorProxy>,
+    public onGatewayConnectorProxyActivated: Subject<IGatewayConnectorProxy>,
   ) {}
 }
 
@@ -61,18 +64,21 @@ export class InitializedHypernetContext {
     public onPullPaymentUpdated: Subject<PullPayment>,
     public onPushPaymentDelayed: Subject<PushPayment>,
     public onPullPaymentDelayed: Subject<PullPayment>,
+    public onPushPaymentCanceled: Subject<PushPayment>,
+    public onPullPaymentCanceled: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
     public onCeramicAuthenticationStarted: Subject<void>,
     public onCeramicAuthenticationSucceeded: Subject<void>,
     public onCeramicFailed: Subject<PersistenceError>,
-    public onMerchantAuthorized: Subject<MerchantUrl>,
-    public onAuthorizedMerchantUpdated: Subject<MerchantUrl>,
-    public onAuthorizedMerchantActivationFailed: Subject<MerchantUrl>,
-    public onMerchantIFrameDisplayRequested: Subject<MerchantUrl>,
-    public onMerchantIFrameCloseRequested: Subject<MerchantUrl>,
+    public onGatewayAuthorized: Subject<GatewayUrl>,
+    public onGatewayDeauthorizationStarted: Subject<GatewayUrl>,
+    public onAuthorizedGatewayUpdated: Subject<GatewayUrl>,
+    public onAuthorizedGatewayActivationFailed: Subject<GatewayUrl>,
+    public onGatewayIFrameDisplayRequested: Subject<GatewayUrl>,
+    public onGatewayIFrameCloseRequested: Subject<GatewayUrl>,
     public onInitializationRequired: Subject<void>,
     public onPrivateCredentialsRequested: Subject<void>,
-    public onMerchantConnectorProxyActivated: Subject<IMerchantConnectorProxy>,
-    public authorizedMediators: Map<MerchantUrl, Signature>,
+    public onGatewayConnectorProxyActivated: Subject<IGatewayConnectorProxy>,
+    public authorizedMediators: Map<GatewayUrl, Signature>,
   ) {}
 }

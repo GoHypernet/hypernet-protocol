@@ -1,11 +1,10 @@
+import { Box } from "@material-ui/core";
+import { useLayoutContext } from "@web-ui/contexts";
 import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
-import { Box } from "@material-ui/core";
-
-import { useStyles } from "@web-ui/containers/Modal/Modal.style";
 
 import { WEB_UI_MODAL_ID_SELECTOR } from "@web-ui/constants";
-import { useLayoutContext } from "@web-ui/contexts";
+import { useStyles } from "@web-ui/containers/Modal/Modal.style";
 
 interface IModal {
   children: React.ReactNode;

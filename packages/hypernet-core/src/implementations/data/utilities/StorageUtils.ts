@@ -28,8 +28,9 @@ export class StorageUtils implements IStorageUtils {
 
   public write<T>(keyName: string, data: T): ResultAsync<void, never> {
     return this.contextProvider.getContext().andThen((context) => {
-      //if (context.metamaskEnabled) {
+      this.localStorageUtils.setItem(keyName, JSON.stringify(data));
       if (false) {
+        // context.metamaskEnabled) {
         this.ceramicUtils.writeRecord(keyName, data).mapErr((err) => {
           this.logUtils.error(err);
           context.onCeramicFailed.next(err);

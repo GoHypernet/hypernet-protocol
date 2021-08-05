@@ -4,15 +4,11 @@ import {
   AssetBalance,
   PublicIdentifier,
   Signature,
-  AssetInfo,
   BalancesUnavailableError,
   BlockchainUnavailableError,
-  LogicalError,
-  RouterChannelUnknownError,
   VectorError,
-  PreferredPaymentTokenError,
+  BigNumberString,
 } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 /**
@@ -24,51 +20,27 @@ export interface IAccountsRepository {
     BlockchainUnavailableError | VectorError
   >;
   getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
-  getBalances(): ResultAsync<
-    Balances,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
-  >;
+  getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError>;
   getBalanceByAsset(
     assetAddress: EthereumAddress,
-  ): ResultAsync<
-    AssetBalance,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
-  >;
+  ): ResultAsync<AssetBalance, BalancesUnavailableError | VectorError>;
   depositFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
-  ): ResultAsync<
-    null,
-    | RouterChannelUnknownError
-    | VectorError
-    | LogicalError
-    | BlockchainUnavailableError
-  >;
+    amount: BigNumberString,
+  ): ResultAsync<null, VectorError | BlockchainUnavailableError>;
   withdrawFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
     destinationAddress: EthereumAddress,
-  ): ResultAsync<
-    void,
-    RouterChannelUnknownError | VectorError | BlockchainUnavailableError
-  >;
+  ): ResultAsync<void, VectorError | BlockchainUnavailableError>;
   signMessage(
     message: string,
   ): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;
 
   mintTestToken(
-    amount: BigNumber,
+    amount: BigNumberString,
     to: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError>;
-
-  setPreferredPaymentToken(
-    tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PreferredPaymentTokenError>;
-
-  getPreferredPaymentToken(): ResultAsync<
-    AssetInfo,
-    BlockchainUnavailableError | PreferredPaymentTokenError
-  >;
 }
 
 export const IAccountsRepositoryType = Symbol.for("IAccountsRepository");

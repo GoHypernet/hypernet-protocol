@@ -1,43 +1,101 @@
+import { DEFAULT_CHANNEL_TIMEOUT, VectorError } from "@connext/vector-types";
+import {
+  ETransferState,
+  IFullTransferState,
+  InsuranceResolver,
+  MessageResolver,
+  MessageState,
+  ParameterizedResolver,
+} from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
-import { okAsync } from "neverthrow";
+import { errAsync, okAsync } from "neverthrow";
 import td from "testdouble";
 
 import { VectorUtils } from "@implementations/utilities/VectorUtils";
 import {
+  IBlockchainUtils,
   IBrowserNode,
   IBrowserNodeProvider,
   IPaymentIdUtils,
   ITimeUtils,
 } from "@interfaces/utilities";
-import { routerChannelAddress, unixNow } from "@mock/mocks";
+import {
+  activeParameterizedTransfer,
+  canceledInsuranceTransfer,
+  canceledOfferTransfer,
+  canceledParameterizedTransfer,
+  chainId,
+  destinationAddress,
+  erc20AssetAddress,
+  insuranceTransferDefinitionAddress,
+  insuranceTransferEncodedCancel,
+  insuranceTransferResolverEncoding,
+  messageTransferDefinitionAddress,
+  messageTransferEncodedCancel,
+  messageTransferResolverEncoding,
+  offerTransferId,
+  parameterizedTransferDefinitionAddress,
+  parameterizedTransferEncodedCancel,
+  parameterizedTransferResolverEncoding,
+  publicIdentifier,
+  publicIdentifier2,
+  resolvedInsuranceTransfer,
+  resolvedOfferTransfer,
+  resolvedParameterizedTransfer,
+  routerChannelAddress,
+  routerPublicIdentifier,
+  unixNow,
+} from "@mock/mocks";
 import {
   ConfigProviderMock,
   ContextProviderMock,
   BlockchainProviderMock,
-  createBrowserNodeMock,
+  BrowserNodeProviderMock,
 } from "@mock/utils";
 
 class VectorUtilsMocks {
   public configProvider = new ConfigProviderMock();
   public contextProvider = new ContextProviderMock();
-  public browserNodeProvider = td.object<IBrowserNodeProvider>();
+  public browserNodeProvider: BrowserNodeProviderMock;
   public blockchainProvider = new BlockchainProviderMock();
+  public blockchainUtils = td.object<IBlockchainUtils>();
   public paymentIdUtils = td.object<IPaymentIdUtils>();
   public logUtils = td.object<ILogUtils>();
-  public browserNodeMock: IBrowserNode;
   public timeUtils = td.object<ITimeUtils>();
 
-  constructor(includeExistingStateChannels = true) {
-    this.browserNodeMock = createBrowserNodeMock(
-      includeExistingStateChannels ? null : [],
+  constructor(includeExistingStateChannel = true) {
+    this.browserNodeProvider = new BrowserNodeProviderMock(
+      true,
+      true,
+      true,
+      null,
+      includeExistingStateChannel,
     );
-    td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(
-      okAsync(this.browserNodeMock),
-    );
-
-    td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow);
+    td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow as never);
     td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(
       okAsync(unixNow),
+    );
+
+    td.when(
+      this.blockchainUtils.getMessageTransferEncodedCancelData(),
+    ).thenReturn(
+      okAsync([messageTransferResolverEncoding, messageTransferEncodedCancel]),
+    );
+    td.when(
+      this.blockchainUtils.getInsuranceTransferEncodedCancelData(),
+    ).thenReturn(
+      okAsync([
+        insuranceTransferResolverEncoding,
+        insuranceTransferEncodedCancel,
+      ]),
+    );
+    td.when(
+      this.blockchainUtils.getParameterizedTransferEncodedCancelData(),
+    ).thenReturn(
+      okAsync([
+        parameterizedTransferResolverEncoding,
+        parameterizedTransferEncodedCancel,
+      ]),
     );
   }
 
@@ -47,6 +105,7 @@ class VectorUtilsMocks {
       this.contextProvider,
       this.browserNodeProvider,
       this.blockchainProvider,
+      this.blockchainUtils,
       this.paymentIdUtils,
       this.logUtils,
       this.timeUtils,
@@ -55,35 +114,198 @@ class VectorUtilsMocks {
 }
 
 describe("VectorUtils tests", () => {
-  test("getRouterChannelAddress returns address if channel is already created", async () => {
+  test("initialize completes successfully", async () => {
     // Arrange
     const vectorUtilsMocks = new VectorUtilsMocks();
 
     const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
 
     // Act
-    const result = await vectorUtils.getRouterChannelAddress();
+    const result = await vectorUtils.initialize();
 
     // Assert
-    expect(result.isOk).toBeTruthy();
-    const retRouterChannelAddress = result._unsafeUnwrap();
-
-    expect(retRouterChannelAddress).toBe(routerChannelAddress);
+    expect(result).toBeDefined();
+    expect(result.isOk()).toBeTruthy();
   });
 
-  test("getRouterChannelAddress creates a channel with the router if the channel does not exist", async () => {
+  test("initialize creates a channel with the router if the channel does not exist", async () => {
     // Arrange
     const vectorUtilsMocks = new VectorUtilsMocks(false);
 
     const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
 
     // Act
-    const result = await vectorUtils.getRouterChannelAddress();
+    const result = await vectorUtils.initialize();
 
     // Assert
-    expect(result.isOk).toBeTruthy();
+    expect(result).toBeDefined();
+    expect(result.isOk()).toBeTruthy();
+  });
+
+  test("initialize restores a channel with the router when setup fails", async () => {
+    // Arrange
+    const vectorUtilsMocks = new VectorUtilsMocks(false);
+
+    td.when(
+      vectorUtilsMocks.browserNodeProvider.browserNode.setup(
+        routerPublicIdentifier,
+        chainId,
+        DEFAULT_CHANNEL_TIMEOUT.toString(),
+      ),
+    ).thenReturn(errAsync(new VectorError("Setup Failed")));
+
+    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+    // Act
+    const result = await vectorUtils.initialize();
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isOk()).toBeTruthy();
+  });
+
+  test("getRouterChannelAddress completes successfully after initialize", async () => {
+    // Arrange
+    const vectorUtilsMocks = new VectorUtilsMocks();
+
+    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+    // Act
+    const result = await vectorUtils.initialize().andThen(() => {
+      return vectorUtils.getRouterChannelAddress();
+    });
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isOk()).toBeTruthy();
     const retRouterChannelAddress = result._unsafeUnwrap();
 
     expect(retRouterChannelAddress).toBe(routerChannelAddress);
+  });
+
+  test("getTransferStateFromTransfer returns Active for a non-resolved transfer", async () => {
+    // Arrange
+    const vectorUtilsMocks = new VectorUtilsMocks();
+
+    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+    // Act
+    const result = await vectorUtils.getTransferStateFromTransfer(
+      activeParameterizedTransfer,
+    );
+
+    // Assert
+    expect(result.isOk).toBeTruthy();
+    const transferState = result._unsafeUnwrap();
+
+    expect(transferState).toBe(ETransferState.Active);
+  });
+
+  test("getTransferStateFromTransfer returns Canceled for a canceled Message Transfer", async () => {
+    // Arrange
+    const vectorUtilsMocks = new VectorUtilsMocks();
+
+    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+    // Act
+    const result = await vectorUtils.getTransferStateFromTransfer(
+      canceledOfferTransfer,
+    );
+
+    // Assert
+    expect(result.isOk).toBeTruthy();
+    const transferState = result._unsafeUnwrap();
+
+    expect(transferState).toBe(ETransferState.Canceled);
+  });
+
+  test("getTransferStateFromTransfer returns Resolved for a Message transfer resolved as anything", async () => {
+    // Arrange
+    const vectorUtilsMocks = new VectorUtilsMocks();
+
+    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+    // Act
+    const result = await vectorUtils.getTransferStateFromTransfer(
+      resolvedOfferTransfer,
+    );
+
+    // Assert
+    expect(result.isOk).toBeTruthy();
+    const transferState = result._unsafeUnwrap();
+
+    expect(transferState).toBe(ETransferState.Resolved);
+  });
+
+  test("getTransferStateFromTransfer returns Canceled for a canceled Insurance Transfer", async () => {
+    // Arrange
+    const vectorUtilsMocks = new VectorUtilsMocks();
+
+    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+    // Act
+    const result = await vectorUtils.getTransferStateFromTransfer(
+      canceledInsuranceTransfer,
+    );
+
+    // Assert
+    expect(result.isOk).toBeTruthy();
+    const transferState = result._unsafeUnwrap();
+
+    expect(transferState).toBe(ETransferState.Canceled);
+  });
+
+  test("getTransferStateFromTransfer returns Resolved for an Insurance transfer resolved for 0", async () => {
+    // Arrange
+    const vectorUtilsMocks = new VectorUtilsMocks();
+
+    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+    // Act
+    const result = await vectorUtils.getTransferStateFromTransfer(
+      resolvedInsuranceTransfer,
+    );
+
+    // Assert
+    expect(result.isOk).toBeTruthy();
+    const transferState = result._unsafeUnwrap();
+
+    expect(transferState).toBe(ETransferState.Resolved);
+  });
+
+  test("getTransferStateFromTransfer returns Canceled for a canceled Parameterized Transfer", async () => {
+    // Arrange
+    const vectorUtilsMocks = new VectorUtilsMocks();
+
+    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+    // Act
+    const result = await vectorUtils.getTransferStateFromTransfer(
+      canceledParameterizedTransfer,
+    );
+
+    // Assert
+    expect(result.isOk).toBeTruthy();
+    const transferState = result._unsafeUnwrap();
+
+    expect(transferState).toBe(ETransferState.Canceled);
+  });
+
+  test("getTransferStateFromTransfer returns false for a Parameterized transfer resolved for 0", async () => {
+    // Arrange
+    const vectorUtilsMocks = new VectorUtilsMocks();
+
+    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+    // Act
+    const result = await vectorUtils.getTransferStateFromTransfer(
+      resolvedParameterizedTransfer,
+    );
+
+    // Assert
+    expect(result.isOk).toBeTruthy();
+    const transferState = result._unsafeUnwrap();
+
+    expect(transferState).toBe(ETransferState.Resolved);
   });
 });

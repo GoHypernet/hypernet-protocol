@@ -1,3 +1,4 @@
+import { BigNumberString } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
@@ -7,7 +8,7 @@ import { IDevelopmentService } from "@interfaces/business/IDevelopmentService";
 import { IAccountsRepository } from "@interfaces/data";
 import { mockUtils } from "@mock/mocks";
 
-const amount = BigNumber.from("42");
+const amount = BigNumberString("42");
 const to = mockUtils.generateRandomEtherAdress();
 
 class DevelopmentServiceMocks {

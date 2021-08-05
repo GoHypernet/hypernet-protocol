@@ -22,7 +22,7 @@ module.exports = {
     liveReload: true,
     compress: true,
     publicPath: "/",
-    port: 9001,
+    port: 9006,
     writeToDisk: true,
     watchContentBase: true,
     headers: {

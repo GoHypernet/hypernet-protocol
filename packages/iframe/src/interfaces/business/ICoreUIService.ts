@@ -1,17 +1,3 @@
-import {
-  IMerchantConnector,
-  IRedirectInfo,
-  IResolutionResult,
-} from "@hypernetlabs/merchant-connector";
-import {
-  Balances,
-  EthereumAddress,
-  LogicalError,
-  PaymentId,
-  PublicIdentifier,
-  Signature,
-  MerchantUrl,
-} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface ICoreUIService {

@@ -4,18 +4,14 @@ import {
   HypernetLink,
   Payment,
   PublicIdentifier,
-} from "@hypernetlabs/objects";
-import {
   InvalidParametersError,
-  RouterChannelUnknownError,
   VectorError,
   InvalidPaymentError,
-  LogicalError,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
+import { ILinkRepository } from "@interfaces/data";
 import { okAsync, ResultAsync } from "neverthrow";
 
-import { ILinkRepository } from "@interfaces/data";
 import {
   IBrowserNode,
   IBrowserNodeProvider,
@@ -49,12 +45,10 @@ export class VectorLinkRepository implements ILinkRepository {
    */
   public getHypernetLinks(): ResultAsync<
     HypernetLink[],
-    | RouterChannelUnknownError
     | VectorError
     | InvalidParametersError
     | BlockchainUnavailableError
     | InvalidPaymentError
-    | LogicalError
   > {
     let browserNode: IBrowserNode;
 
@@ -69,9 +63,8 @@ export class VectorLinkRepository implements ILinkRepository {
       })
       .andThen((activeTransfers) => {
         // We also need to look for potentially resolved transfers
-        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(
-          activeTransfers,
-        );
+        const earliestDate =
+          this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
 
         return browserNode.getTransfers(
           earliestDate,
@@ -98,12 +91,10 @@ export class VectorLinkRepository implements ILinkRepository {
     counterpartyId: PublicIdentifier,
   ): ResultAsync<
     HypernetLink,
-    | RouterChannelUnknownError
     | VectorError
     | InvalidParametersError
     | BlockchainUnavailableError
     | InvalidPaymentError
-    | LogicalError
   > {
     let browserNode: IBrowserNode;
     return ResultUtils.combine([
@@ -117,9 +108,8 @@ export class VectorLinkRepository implements ILinkRepository {
       })
       .andThen((activeTransfers) => {
         // We also need to look for potentially resolved transfers
-        const earliestDate = this.paymentUtils.getEarliestDateFromTransfers(
-          activeTransfers,
-        );
+        const earliestDate =
+          this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
 
         return browserNode.getTransfers(
           earliestDate,

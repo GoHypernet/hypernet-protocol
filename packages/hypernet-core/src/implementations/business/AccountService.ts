@@ -6,23 +6,19 @@ import {
   PublicIdentifier,
   BalancesUnavailableError,
   BlockchainUnavailableError,
-  LogicalError,
   VectorError,
-  RouterChannelUnknownError,
-  PreferredPaymentTokenError,
   Signature,
-  AssetInfo,
+  BigNumberString,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
-import { BigNumber } from "ethers";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
-
 import { IAccountService } from "@interfaces/business";
 import { IAccountsRepository } from "@interfaces/data";
 import {
   HypernetContext,
   InitializedHypernetContext,
 } from "@interfaces/objects";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
+
 import { IContextProvider, IBlockchainProvider } from "@interfaces/utilities";
 
 /**
@@ -52,21 +48,17 @@ export class AccountService implements IAccountService {
 
   public getBalances(): ResultAsync<
     Balances,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+    BalancesUnavailableError | VectorError
   > {
     return this.accountRepository.getBalances();
   }
 
   public depositFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<
     Balances,
-    | BalancesUnavailableError
-    | RouterChannelUnknownError
-    | BlockchainUnavailableError
-    | VectorError
-    | LogicalError
+    BalancesUnavailableError | BlockchainUnavailableError | VectorError
   > {
     this.logUtils.log(
       `HypernetCore:depositFunds: assetAddress: ${assetAddress}`,
@@ -93,14 +85,11 @@ export class AccountService implements IAccountService {
 
   public withdrawFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
     destinationAddress: EthereumAddress,
   ): ResultAsync<
     Balances,
-    | BalancesUnavailableError
-    | RouterChannelUnknownError
-    | BlockchainUnavailableError
-    | VectorError
+    BalancesUnavailableError | BlockchainUnavailableError | VectorError
   > {
     let context: InitializedHypernetContext;
 
@@ -142,18 +131,5 @@ export class AccountService implements IAccountService {
     message: string,
   ): ResultAsync<Signature, BlockchainUnavailableError | VectorError> {
     return this.accountRepository.signMessage(message);
-  }
-
-  public setPreferredPaymentToken(
-    tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PreferredPaymentTokenError> {
-    return this.accountRepository.setPreferredPaymentToken(tokenAddress);
-  }
-
-  public getPreferredPaymentToken(): ResultAsync<
-    AssetInfo,
-    BlockchainUnavailableError | PreferredPaymentTokenError
-  > {
-    return this.accountRepository.getPreferredPaymentToken();
   }
 }

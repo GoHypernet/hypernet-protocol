@@ -1,4 +1,7 @@
-import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
+import {
+  BigNumberString,
+  IHypernetWebIntegration,
+} from "@hypernetlabs/web-integration";
 import { ethers } from "ethers";
 import ko from "knockout";
 
@@ -47,7 +50,7 @@ export class ActionsViewModel {
       console.log(`Selected token for deposit: ${selectedToken}`);
       await this.integration.core.depositFunds(
         selectedToken,
-        ethers.utils.parseEther("1"),
+        BigNumberString(ethers.utils.parseEther("1").toString()),
       );
     });
 
@@ -58,7 +61,9 @@ export class ActionsViewModel {
         return;
       }
 
-      await this.integration.core.mintTestToken(ethers.utils.parseEther("1"));
+      await this.integration.core.mintTestToken(
+        BigNumberString(ethers.utils.parseEther("1").toString()),
+      );
     });
 
     this.integration.core.waitInitialized().map(() => {

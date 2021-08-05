@@ -3,7 +3,7 @@
     "skipLibCheck": true,
     "declaration": true,
     "downlevelIteration": true,
-    "target": "es6",
+    "target": "ES2019",
     "baseUrl": ".",
     "module": "commonjs",
     "removeComments": false,
@@ -22,10 +22,6 @@
     "resolveJsonModule": true,
     "jsx": "react",
     "composite": true,
-    "typeRoots": [
-      "./packages/hypernet-core/src/typings",
-      "./node_modules/@types"
-    ],
     "paths": {
       "@interfaces/*": ["./interfaces/*"],
       "@implementations/*": ["./implementations/*"],
@@ -36,11 +32,11 @@
       "@mobileApp/*": ["./packages/mobileApp/src/*"],
       "@web-integration/*": ["./*"],
       "@web-ui/*": ["./*"],
-      "@merchant-connector/*": ["./*"],
-      "@merchant-iframe/*": ["./*"],
+      "@gateway-connector/*": ["./*"],
+      "@gateway-iframe/*": ["./*"],
       "@core-iframe/*": ["./*"],
-      "@test-merchant-connector/*": [
-        "./packages/test-merchant-connector/src/*"
+      "@test-gateway/*": [
+        "./packages/test-gateway/src/*"
       ],
       "@utils/*": ["./*"],
       "@developer-ui/*": ["./*"],

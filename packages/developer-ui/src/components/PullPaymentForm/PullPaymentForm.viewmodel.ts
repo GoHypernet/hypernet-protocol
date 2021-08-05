@@ -1,10 +1,15 @@
-import { EthereumAddress, PublicIdentifier } from "@hypernetlabs/objects";
+import {
+  BigNumberString,
+  EthereumAddress,
+  PublicIdentifier,
+  UnixTimestamp,
+} from "@hypernetlabs/objects";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { utils } from "ethers";
 import ko from "knockout";
 import moment from "moment";
 
-import { AuthorizedMerchantSelectorParams } from "../AuthorizedMerchantSelector/AuthorizedMerchantSelector.viewmodel";
+import { AuthorizedGatewaySelectorParams } from "../AuthorizedGatewaySelector/AuthorizedGatewaySelector.viewmodel";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
 import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
 
@@ -32,9 +37,7 @@ export class PullPaymentFormViewModel {
   public deltaAmount: ko.Observable<string>;
   public deltaTime: ko.Observable<string>;
   public tokenSelector: TokenSelectorParams;
-  public merchantSelector: AuthorizedMerchantSelectorParams;
-
-  public submitButton: ButtonParams;
+  public gatewaySelector: AuthorizedGatewaySelectorParams;
 
   protected integration: IHypernetWebIntegration;
   protected counterparty:
@@ -56,68 +59,77 @@ export class PullPaymentFormViewModel {
       ko.observable(null),
       true,
     );
-    this.merchantSelector = new AuthorizedMerchantSelectorParams(
+    this.gatewaySelector = new AuthorizedGatewaySelectorParams(
       this.integration,
       ko.observable(null),
     );
 
-    this.submitButton = new ButtonParams(
-      "Submit Payment",
-      async () => {
-        const selectedPaymentTokenAddress = this.tokenSelector.selectedToken();
+    //   this.submitButton = new ButtonParams(
+    //     "Submit Payment",
+    //     async () => {
+    //       const selectedPaymentTokenAddress = this.tokenSelector.selectedToken();
 
-        if (selectedPaymentTokenAddress == null) {
-          return null;
-        }
+    //       if (selectedPaymentTokenAddress == null) {
+    //         return null;
+    //       }
 
-        const selectedMerchantUrl = this.merchantSelector.selectedAuthorizedMerchant();
+    //       const selectedGatewayUrl = this.gatewaySelector.selectedAuthorizedGateway();
 
-        if (selectedMerchantUrl == null) {
-          return null;
-        }
+    //       if (selectedGatewayUrl == null) {
+    //         return null;
+    //       }
 
-        try {
-          const expirationDate = moment(this.expirationDate()).unix();
-          const amount = utils.parseUnits(this.amount(), "wei");
-          const requiredStake = utils.parseUnits(this.requiredStake(), "wei");
-          const deltaAmount = utils.parseUnits(this.deltaAmount(), "wei");
-          const deltaTime = Number(this.deltaTime());
+    //       try {
+    //         const expirationDate = UnixTimestamp(
+    //           moment(this.expirationDate()).unix(),
+    //         );
+    //         const amount = BigNumberString(
+    //           utils.parseUnits(this.amount(), "wei").toString(),
+    //         );
+    //         const requiredStake = BigNumberString(
+    //           utils.parseUnits(this.requiredStake(), "wei").toString(),
+    //         );
+    //         const deltaAmount = BigNumberString(
+    //           utils.parseUnits(this.deltaAmount(), "wei").toString(),
+    //         );
+    //         const deltaTime = Number(this.deltaTime());
 
-          return await this.integration.core.authorizeFunds(
-            this.counterparty(),
-            amount,
-            expirationDate,
-            deltaAmount,
-            deltaTime,
-            requiredStake,
-            selectedPaymentTokenAddress,
-            selectedMerchantUrl,
-          );
-        } catch {
-          return null;
-        }
-      },
-      EButtonType.Normal,
-      ko.pureComputed(() => {
-        const selectedPaymentTokenAddress = this.tokenSelector.selectedToken();
+    //         return await this.integration.core.authorizeFunds(
+    //           this.counterparty(),
+    //           amount,
+    //           expirationDate,
+    //           deltaAmount,
+    //           deltaTime,
+    //           requiredStake,
+    //           selectedPaymentTokenAddress,
+    //           selectedGatewayUrl,
+    //           null,
+    //         );
+    //       } catch {
+    //         return null;
+    //       }
+    //     },
+    //     EButtonType.Normal,
+    //     ko.pureComputed(() => {
+    //       const selectedPaymentTokenAddress = this.tokenSelector.selectedToken();
 
-        if (selectedPaymentTokenAddress == null) {
-          return false;
-        }
+    //       if (selectedPaymentTokenAddress == null) {
+    //         return false;
+    //       }
 
-        try {
-          moment(this.expirationDate());
-          utils.parseUnits(this.amount(), "wei");
-          utils.parseUnits(this.requiredStake(), "wei");
-          utils.parseUnits(this.deltaAmount(), "wei");
-          Number(this.deltaTime());
+    //       try {
+    //         moment(this.expirationDate());
+    //         utils.parseUnits(this.amount(), "wei");
+    //         utils.parseUnits(this.requiredStake(), "wei");
+    //         utils.parseUnits(this.deltaAmount(), "wei");
+    //         Number(this.deltaTime());
 
-          return true;
-        } catch {
-          return false;
-        }
-      }),
-    );
+    //         return true;
+    //       } catch {
+    //         return false;
+    //       }
+    //     }),
+    //   );
   }
 }
 

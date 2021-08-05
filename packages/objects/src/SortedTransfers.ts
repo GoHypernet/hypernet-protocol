@@ -1,18 +1,27 @@
-import { IHypernetOfferDetails } from "./HypernetOfferDetails";
-
 import {
+  InsuranceResolver,
   InsuranceState,
+  MessageResolver,
   MessageState,
+  ParameterizedResolver,
   ParameterizedState,
 } from "@objects/typing";
 import { IFullTransferState } from "@objects/vector";
 
 export class SortedTransfers {
   constructor(
-    public offerTransfer: IFullTransferState<MessageState>,
-    public insuranceTransfer: IFullTransferState<InsuranceState> | null,
-    public parameterizedTransfer: IFullTransferState<ParameterizedState> | null,
-    public pullRecordTransfers: IFullTransferState<MessageState>[],
-    public offerDetails: IHypernetOfferDetails,
+    public offerTransfers: IFullTransferState<MessageState, MessageResolver>[],
+    public insuranceTransfers: IFullTransferState<
+      InsuranceState,
+      InsuranceResolver
+    >[],
+    public parameterizedTransfers: IFullTransferState<
+      ParameterizedState,
+      ParameterizedResolver
+    >[],
+    public pullRecordTransfers: IFullTransferState<
+      MessageState,
+      MessageResolver
+    >[],
   ) {}
 }

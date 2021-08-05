@@ -52,8 +52,8 @@
         <td data-bind="text: collateralRecovered"></td>
       </tr>
       <tr class="custom-border-bottom">
-        <th>Merchant URL</th>
-        <td data-bind="text: merchantUrl"></td>
+        <th>Gateway URL</th>
+        <td data-bind="text: gatewayUrl"></td>
       </tr>
       <tr class="custom-border-bottom">
         <th>Payment Amount</th>
@@ -71,20 +71,6 @@
           data-bind='component: {
           name: "button",
           params: sendButton}, visible: showSendButton'
-        ></td>
-        <td
-          colspan="2"
-          data-bind='component: {
-          name: "button",
-          params: disputeButton}, visible: showDisputeButton'
-        ></td>
-      </tr>
-      <tr>
-        <td
-          colspan="2"
-          data-bind='component: {
-          name: "button",
-          params: resolveInsuranceButton}, visible: showResolveInsuranceButton'
         ></td>
       </tr>
     </tbody>

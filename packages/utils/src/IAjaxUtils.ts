@@ -1,4 +1,4 @@
-import { AjaxError } from "@hypernetlabs/objects";
+import { AjaxError, JsonWebToken } from "@hypernetlabs/objects";
 import { AxiosRequestConfig } from "axios";
 import { ResultAsync } from "neverthrow";
 
@@ -17,6 +17,18 @@ export interface IAjaxUtils {
       | URLSearchParams,
     config?: IRequestConfig,
   ): ResultAsync<T, AjaxError>;
+  put<T>(
+    url: URL,
+    data:
+      | string
+      | Record<string, unknown>
+      | ArrayBuffer
+      | ArrayBufferView
+      | URLSearchParams,
+    config?: IRequestConfig,
+  ): ResultAsync<T, AjaxError>;
+  delete<T>(url: URL, config?: IRequestConfig): ResultAsync<T, AjaxError>;
+  setDefaultToken(token: JsonWebToken): void;
 }
 
 export interface IRequestConfig extends AxiosRequestConfig {}

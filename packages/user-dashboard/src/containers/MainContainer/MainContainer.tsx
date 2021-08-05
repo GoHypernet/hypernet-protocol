@@ -1,7 +1,7 @@
 import React from "react";
-import { LayoutProvider } from "@user-dashboard/contexts";
 
 import App from "@user-dashboard/containers/App";
+import { LayoutProvider } from "@user-dashboard/contexts";
 
 const MainContainer: React.FC = () => {
   return (

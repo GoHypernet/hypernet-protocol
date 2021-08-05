@@ -1,10 +1,15 @@
-import { EthereumAddress, PublicIdentifier } from "@hypernetlabs/objects";
+import {
+  BigNumberString,
+  EthereumAddress,
+  PublicIdentifier,
+  UnixTimestamp,
+} from "@hypernetlabs/objects";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
 import { utils, BigNumber } from "ethers";
 import ko from "knockout";
 import moment from "moment";
 
-import { AuthorizedMerchantSelectorParams } from "../AuthorizedMerchantSelector/AuthorizedMerchantSelector.viewmodel";
+import { AuthorizedGatewaySelectorParams } from "../AuthorizedGatewaySelector/AuthorizedGatewaySelector.viewmodel";
 import { ButtonParams, EButtonType } from "../Button/Button.viewmodel";
 import { TokenSelectorParams } from "../TokenSelector/TokenSelector.viewmodel";
 
@@ -30,7 +35,7 @@ export class PushPaymentFormViewModel {
   public expirationDate: ko.Observable<string>;
   public amount: ko.Observable<string>;
   public tokenSelector: TokenSelectorParams;
-  public merchantSelector: AuthorizedMerchantSelectorParams;
+  public gatewaySelector: AuthorizedGatewaySelectorParams;
 
   public submitButton: ButtonParams;
 
@@ -53,7 +58,7 @@ export class PushPaymentFormViewModel {
       true,
     );
 
-    this.merchantSelector = new AuthorizedMerchantSelectorParams(
+    this.gatewaySelector = new AuthorizedGatewaySelectorParams(
       this.integration,
       ko.observable(null),
     );
@@ -67,25 +72,31 @@ export class PushPaymentFormViewModel {
           return null;
         }
 
-        const selectedMerchantUrl = this.merchantSelector.selectedAuthorizedMerchant();
+        const selectedGatewayUrl = this.gatewaySelector.selectedAuthorizedGateway();
 
-        if (selectedMerchantUrl == null) {
+        if (selectedGatewayUrl == null) {
           return null;
         }
 
         try {
           const expirationDate = moment(this.expirationDate());
-          const amount = utils.parseUnits(this.amount(), "wei");
-          const requiredStake = utils.parseUnits(this.requiredStake(), "wei");
-
-          return await this.integration.core.sendFunds(
-            this.counterparty(),
-            amount,
-            expirationDate.unix(),
-            requiredStake,
-            selectedPaymentTokenAddress,
-            selectedMerchantUrl,
+          const amount = BigNumberString(
+            utils.parseUnits(this.amount(), "wei").toString(),
           );
+          const requiredStake = BigNumberString(
+            utils.parseUnits(this.requiredStake(), "wei").toString(),
+          );
+
+          return;
+          // return await this.integration.core.sendFunds(
+          //   this.counterparty(),
+          //   amount,
+          //   UnixTimestamp(expirationDate.unix()),
+          //   requiredStake,
+          //   selectedPaymentTokenAddress,
+          //   selectedGatewayUrl,
+          //   null,
+          // );
         } catch {
           return null;
         }

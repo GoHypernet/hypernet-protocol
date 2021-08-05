@@ -1,8 +1,8 @@
+import { ResultMessage, EResultStatus } from "@hypernetlabs/web-ui";
 import React, { useContext, useState, useEffect, ReactNode } from "react";
 import { positions, Provider } from "react-alert";
 import AlertTemplate from "react-alert-template-basic";
 
-import { ResultMessage, EResultStatus } from "@hypernetlabs/web-ui";
 import LoadingSpinner from "@user-dashboard/components/LoadingSpinner";
 
 interface ILayout {

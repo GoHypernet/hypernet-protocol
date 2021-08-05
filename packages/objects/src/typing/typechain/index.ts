@@ -34,14 +34,20 @@ export { Parameterized__factory } from "./factories/Parameterized__factory";
 export { TransferDefinition__factory } from "./factories/TransferDefinition__factory";
 export { Withdraw__factory } from "./factories/Withdraw__factory";
 
+export { IMessageTransferInterface } from "./MessageTransfer";
+export { IInsuranceInterface } from "./Insurance";
+export { IParameterizedInterface } from "./Parameterized";
+
 import InsuranceAbi from "./artifacts/Insurance";
 import MessageTransferAbi from "./artifacts/MessageTransfer";
+import MocRegistryAbi from "./artifacts/MocRegistry";
 import ParameterizedAbi from "./artifacts/Parameterized";
 
 const TransferAbis = {
   Insurance: InsuranceAbi,
   Parameterized: ParameterizedAbi,
   MessageTransfer: MessageTransferAbi,
+  MocRegistry: MocRegistryAbi,
 };
 
 export { TransferAbis };

@@ -7,22 +7,18 @@ import {
   IFullChannelState,
   Signature,
   AssetInfo,
-  PreferredPaymentTokenError,
   BlockchainUnavailableError,
-  RouterChannelUnknownError,
   BalancesUnavailableError,
   LogicalError,
   VectorError,
+  BigNumberString,
 } from "@hypernetlabs/objects";
-import {
-  ResultUtils,
-  ILogUtils,
-  ILocalStorageUtils,
-} from "@hypernetlabs/utils";
+import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { IAccountsRepository } from "@interfaces/data";
 import { ethers, constants, BigNumber, Contract } from "ethers";
 import { combine, errAsync, okAsync, ResultAsync } from "neverthrow";
 
-import { IAccountsRepository } from "@interfaces/data";
+import { IStorageUtils } from "@interfaces/data/utilities";
 import {
   IVectorUtils,
   IBlockchainProvider,
@@ -47,7 +43,7 @@ export class AccountsRepository implements IAccountsRepository {
     protected vectorUtils: IVectorUtils,
     protected browserNodeProvider: IBrowserNodeProvider,
     protected blockchainUtils: IBlockchainUtils,
-    protected localStorageUtils: ILocalStorageUtils,
+    protected storageUtils: IStorageUtils,
     protected logUtils: ILogUtils,
   ) {
     // We will cache the info about each asset type, so we only have to look it up once.
@@ -104,7 +100,7 @@ export class AccountsRepository implements IAccountsRepository {
    */
   public getBalances(): ResultAsync<
     Balances,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+    BalancesUnavailableError | VectorError
   > {
     return this.vectorUtils
       .getRouterChannelAddress()
@@ -142,10 +138,7 @@ export class AccountsRepository implements IAccountsRepository {
    */
   public getBalanceByAsset(
     assetAddress: EthereumAddress,
-  ): ResultAsync<
-    AssetBalance,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
-  > {
+  ): ResultAsync<AssetBalance, BalancesUnavailableError | VectorError> {
     return this.getBalances().andThen((balances) => {
       for (const assetBalance of balances.assets) {
         if (assetBalance.assetAddress === assetAddress) {
@@ -163,9 +156,9 @@ export class AccountsRepository implements IAccountsRepository {
           assetInfo.name,
           assetInfo.symbol,
           assetInfo.decimals,
-          BigNumber.from(0),
-          BigNumber.from(0),
-          BigNumber.from(0),
+          BigNumberString("0"),
+          BigNumberString("0"),
+          BigNumberString("0"),
         );
       });
     });
@@ -178,75 +171,67 @@ export class AccountsRepository implements IAccountsRepository {
    */
   public depositFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
-  ): ResultAsync<
-    null,
-    | RouterChannelUnknownError
-    | VectorError
-    | LogicalError
-    | BlockchainUnavailableError
-  > {
-    let signer: ethers.providers.JsonRpcSigner;
-    let channelAddress: EthereumAddress;
-    let browserNode: IBrowserNode;
-
+    amount: BigNumberString,
+  ): ResultAsync<null, VectorError | BlockchainUnavailableError> {
     return ResultUtils.combine([
       this.blockchainProvider.getSigner(),
       this.vectorUtils.getRouterChannelAddress(),
       this.browserNodeProvider.getBrowserNode(),
-    ])
-      .andThen((vals) => {
-        [signer, channelAddress, browserNode] = vals;
+    ]).andThen((vals) => {
+      const [signer, channelAddress, browserNode] = vals;
+      let transferResult: ResultAsync<
+        ethers.providers.TransactionResponse,
+        BlockchainUnavailableError
+      >;
 
-        if (assetAddress === "0x0000000000000000000000000000000000000000") {
-          this.logUtils.log("Transferring ETH.");
-          // send eth
-          return ResultAsync.fromPromise(
-            signer.sendTransaction({ to: channelAddress, value: amount }),
-            (err) => {
-              return new BlockchainUnavailableError(
-                "Unable to send transaction",
-                err,
-              );
-            },
-          );
-        } else {
-          this.logUtils.log("Transferring an ERC20 asset.");
-          // send an actual erc20 token
-          return this.blockchainUtils.erc20Transfer(
-            assetAddress,
-            channelAddress,
-            amount,
-          );
-        }
-      })
-      .andThen((tx) => {
-        // TODO: Wait on this, break it up, this could take a while
-        return ResultAsync.fromPromise(
-          tx.wait(),
-          (e) => e as BlockchainUnavailableError,
+      if (assetAddress === "0x0000000000000000000000000000000000000000") {
+        this.logUtils.log("Transferring ETH.");
+        // send eth
+        transferResult = ResultAsync.fromPromise(
+          signer.sendTransaction({
+            to: channelAddress,
+            value: BigNumber.from(amount),
+          }),
+          (err) => {
+            return new BlockchainUnavailableError(
+              "Unable to send transaction",
+              err,
+            );
+          },
         );
-      })
-      .andThen(() => {
-        if (browserNode == null || channelAddress == null) {
-          return errAsync(new LogicalError("Really screwed up!"));
-        }
-        return browserNode.reconcileDeposit(assetAddress, channelAddress);
-      })
-      .andThen((depositRes) => {
-        // I can not for the life of me figure out why depositRes is coming back
-        // as "unknown"
-        const depositChannelAddress = depositRes as string;
+      } else {
+        this.logUtils.log("Transferring an ERC20 asset.");
+        // send an actual erc20 token
+        transferResult = this.blockchainUtils.erc20Transfer(
+          assetAddress,
+          channelAddress,
+          amount,
+        );
+      }
 
-        // Sanity check, the deposit was for the channel we tried to deposit into.
-        if (depositChannelAddress !== channelAddress) {
-          return errAsync(
-            new LogicalError("Something has gone horribly wrong!"),
+      return transferResult
+        .andThen((tx) => {
+          // TODO: Wait on this, break it up, this could take a while
+          return ResultAsync.fromPromise(
+            tx.wait(),
+            (e) => e as BlockchainUnavailableError,
           );
-        }
+        })
+        .andThen(() => {
+          if (browserNode == null || channelAddress == null) {
+            throw new LogicalError("Really screwed up!");
+          }
+          return browserNode.reconcileDeposit(assetAddress, channelAddress);
+        })
+        .andThen((depositChannelAddress) => {
+          // Sanity check, the deposit was for the channel we tried to deposit into.
+          if (depositChannelAddress !== channelAddress) {
+            throw new LogicalError("Something has gone horribly wrong!");
+          }
 
-        return okAsync(null);
-      });
+          return okAsync(null);
+        });
+    });
   }
 
   /**
@@ -257,28 +242,23 @@ export class AccountsRepository implements IAccountsRepository {
    */
   public withdrawFunds(
     assetAddress: EthereumAddress,
-    amount: BigNumber,
+    amount: BigNumberString,
     destinationAddress: EthereumAddress,
-  ): ResultAsync<
-    void,
-    RouterChannelUnknownError | VectorError | BlockchainUnavailableError
-  > {
-    const prerequisites = ResultUtils.combine([
+  ): ResultAsync<void, VectorError | BlockchainUnavailableError> {
+    return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.vectorUtils.getRouterChannelAddress(),
-    ]);
-
-    return prerequisites
+    ])
       .andThen((vals) => {
         const [browserNode, channelAddress] = vals;
         return browserNode.withdraw(
           channelAddress,
-          amount.toString(),
+          amount,
           assetAddress,
           destinationAddress,
         );
       })
-      .map(() => {
+      .map((response) => {
         return;
       });
   }
@@ -297,7 +277,7 @@ export class AccountsRepository implements IAccountsRepository {
    * @param to the (Ethereum) address to mint the test token to
    */
   public mintTestToken(
-    amount: BigNumber,
+    amount: BigNumberString,
     to: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError> {
     const resp = this.blockchainUtils.mintToken(amount, to);
@@ -305,7 +285,10 @@ export class AccountsRepository implements IAccountsRepository {
     return resp
       .andThen((mintTx) => {
         return ResultAsync.fromPromise(mintTx.wait(), (e) => {
-          return e as BlockchainUnavailableError;
+          return new BlockchainUnavailableError(
+            "Error while waiting to mint token",
+            e,
+          );
         });
       })
       .map(() => {
@@ -313,28 +296,6 @@ export class AccountsRepository implements IAccountsRepository {
       });
   }
 
-  public setPreferredPaymentToken(
-    tokenAddress: EthereumAddress,
-  ): ResultAsync<void, PreferredPaymentTokenError> {
-    this.localStorageUtils.setItem(
-      "PreferredPaymentTokenAddress",
-      tokenAddress,
-    );
-    return okAsync(undefined);
-  }
-
-  public getPreferredPaymentToken(): ResultAsync<
-    AssetInfo,
-    BlockchainUnavailableError | PreferredPaymentTokenError
-  > {
-    const tokenAddress = this.localStorageUtils.getItem(
-      "PreferredPaymentTokenAddress",
-    );
-    if (!tokenAddress) {
-      return errAsync(new PreferredPaymentTokenError(""));
-    }
-    return this._getAssetInfo(EthereumAddress(tokenAddress));
-  }
   protected _getAssetBalance(
     i: number,
     channelState: IFullChannelState,
@@ -342,7 +303,7 @@ export class AccountsRepository implements IAccountsRepository {
     const assetAddress = EthereumAddress(channelState.assetIds[i]);
 
     return this._getAssetInfo(assetAddress).map((assetInfo) => {
-      const amount = BigNumber.from(channelState.balances[i].amount[1]);
+      const amount = BigNumberString(channelState.balances[i].amount[1]);
 
       // Return the asset balance
       const assetBalance = new AssetBalance(
@@ -351,7 +312,7 @@ export class AccountsRepository implements IAccountsRepository {
         assetInfo.symbol,
         assetInfo.decimals,
         amount,
-        BigNumber.from(0), // @todo figure out how to grab the locked amount
+        BigNumberString("0"), // @todo figure out how to grab the locked amount
         amount,
       );
 
@@ -406,7 +367,6 @@ export class AccountsRepository implements IAccountsRepository {
           return okAsync<string, BlockchainUnavailableError>("");
         })
         .andThen((mySymbol) => {
-          console.log("myName", name);
           if (mySymbol == null || mySymbol == "") {
             symbol = "Unk";
           } else {

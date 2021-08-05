@@ -8,13 +8,13 @@ import { ILogUtils, ILocalStorageUtils } from "@hypernetlabs/utils";
 import { IStorageUtils } from "@interfaces/data/utilities";
 
 import { ContextProviderMock } from "@tests/mock/utils";
-import { IAuthorizedMerchantEntry } from "@interfaces/data";
-import { merchantUrl, authorizationSignature } from "@mock/mocks";
+import { IAuthorizedGatewayEntry } from "@interfaces/data";
+import { gatewayUrl, authorizationSignature } from "@mock/mocks";
 
-const authorizaedMerchantsKey = "AuthorizedMerchants";
-const authorizaedMerchantsData = [
+const authorizaedGatewaysKey = "AuthorizedGateways";
+const authorizaedGatewaysData = [
   {
-    merchantUrl: merchantUrl,
+    gatewayUrl: gatewayUrl,
     authorizationSignature: authorizationSignature,
   },
 ];
@@ -26,18 +26,18 @@ class StorageUtilsMocks {
   public logUtils = td.object<ILogUtils>();
 
   constructor() {
-    td.when(this.localStorageUtils.getItem(authorizaedMerchantsKey)).thenReturn(
-      `[{"merchantUrl":"${merchantUrl}","authorizationSignature":"${authorizationSignature}"}]`,
+    td.when(this.localStorageUtils.getItem(authorizaedGatewaysKey)).thenReturn(
+      `[{"gatewayUrl":"${gatewayUrl}","authorizationSignature":"${authorizationSignature}"}]`,
     );
 
     td.when(
-      this.ceramicUtils.readRecord<IAuthorizedMerchantEntry[]>(
-        authorizaedMerchantsKey,
+      this.ceramicUtils.readRecord<IAuthorizedGatewayEntry[]>(
+        authorizaedGatewaysKey,
       ),
     ).thenReturn(
       okAsync([
         {
-          merchantUrl: merchantUrl,
+          gatewayUrl: gatewayUrl,
           authorizationSignature: authorizationSignature,
         },
       ]),
@@ -45,12 +45,12 @@ class StorageUtilsMocks {
 
     td.when(
       this.ceramicUtils.writeRecord(
-        authorizaedMerchantsKey,
-        authorizaedMerchantsData,
+        authorizaedGatewaysKey,
+        authorizaedGatewaysData,
       ),
     ).thenReturn(okAsync(undefined));
 
-    td.when(this.ceramicUtils.removeRecord(authorizaedMerchantsKey)).thenReturn(
+    td.when(this.ceramicUtils.removeRecord(authorizaedGatewaysKey)).thenReturn(
       okAsync(undefined),
     );
   }
@@ -73,13 +73,13 @@ describe("StorageUtils tests", () => {
     mocks.contextProvider.context.metamaskEnabled = false;
 
     // Act
-    const writeResult = await utils.write<IAuthorizedMerchantEntry[]>(
-      authorizaedMerchantsKey,
-      authorizaedMerchantsData,
+    const writeResult = await utils.write<IAuthorizedGatewayEntry[]>(
+      authorizaedGatewaysKey,
+      authorizaedGatewaysData,
     );
 
-    const readResult = await utils.read<IAuthorizedMerchantEntry[]>(
-      authorizaedMerchantsKey,
+    const readResult = await utils.read<IAuthorizedGatewayEntry[]>(
+      authorizaedGatewaysKey,
     );
 
     const ceramicWriteRecordCallingcount = td.explain(
@@ -91,12 +91,12 @@ describe("StorageUtils tests", () => {
     expect(writeResult.isErr()).toBeFalsy();
     expect(readResult).toBeDefined();
     expect(readResult.isErr()).toBeFalsy();
-    const authorizedMerchants = readResult._unsafeUnwrap();
-    if (authorizedMerchants == null) {
-      throw new Error("couldn't retrieve authorizedMerchants");
+    const authorizedGateways = readResult._unsafeUnwrap();
+    if (authorizedGateways == null) {
+      throw new Error("couldn't retrieve authorizedGateways");
     }
-    expect(authorizedMerchants?.length).toBe(1);
-    expect(authorizedMerchants[0].authorizationSignature).toBe(
+    expect(authorizedGateways?.length).toBe(1);
+    expect(authorizedGateways[0].authorizationSignature).toBe(
       authorizationSignature,
     );
     expect(ceramicWriteRecordCallingcount).toBe(0);
@@ -109,13 +109,13 @@ describe("StorageUtils tests", () => {
     mocks.contextProvider.context.metamaskEnabled = true;
 
     // Act
-    const writeResult = await utils.write<IAuthorizedMerchantEntry[]>(
-      authorizaedMerchantsKey,
-      authorizaedMerchantsData,
+    const writeResult = await utils.write<IAuthorizedGatewayEntry[]>(
+      authorizaedGatewaysKey,
+      authorizaedGatewaysData,
     );
 
-    const readResult = await utils.read<IAuthorizedMerchantEntry[]>(
-      authorizaedMerchantsKey,
+    const readResult = await utils.read<IAuthorizedGatewayEntry[]>(
+      authorizaedGatewaysKey,
     );
 
     const ceramicWriteRecordCallingcount = td.explain(
@@ -127,12 +127,12 @@ describe("StorageUtils tests", () => {
     expect(writeResult.isErr()).toBeFalsy();
     expect(readResult).toBeDefined();
     expect(readResult.isErr()).toBeFalsy();
-    const authorizedMerchants = readResult._unsafeUnwrap();
-    if (authorizedMerchants == null) {
-      throw new Error("couldn't retrieve authorizedMerchants");
+    const authorizedGateways = readResult._unsafeUnwrap();
+    if (authorizedGateways == null) {
+      throw new Error("couldn't retrieve authorizedGateways");
     }
-    expect(authorizedMerchants?.length).toBe(1);
-    expect(authorizedMerchants[0].authorizationSignature).toBe(
+    expect(authorizedGateways?.length).toBe(1);
+    expect(authorizedGateways[0].authorizationSignature).toBe(
       authorizationSignature,
     );
     // Ceramic now is disabled, Remove this comment when we have it enabled again
@@ -146,8 +146,8 @@ describe("StorageUtils tests", () => {
     mocks.contextProvider.context.metamaskEnabled = false;
 
     // Act
-    const readResult = await utils.read<IAuthorizedMerchantEntry[]>(
-      authorizaedMerchantsKey,
+    const readResult = await utils.read<IAuthorizedGatewayEntry[]>(
+      authorizaedGatewaysKey,
     );
 
     const ceramicReadRecordCallingcount = td.explain(
@@ -157,12 +157,12 @@ describe("StorageUtils tests", () => {
     // Assert
     expect(readResult).toBeDefined();
     expect(readResult.isErr()).toBeFalsy();
-    const authorizedMerchants = readResult._unsafeUnwrap();
-    if (authorizedMerchants == null) {
-      throw new Error("couldn't retrieve authorizedMerchants");
+    const authorizedGateways = readResult._unsafeUnwrap();
+    if (authorizedGateways == null) {
+      throw new Error("couldn't retrieve authorizedGateways");
     }
-    expect(authorizedMerchants?.length).toBe(1);
-    expect(authorizedMerchants[0].authorizationSignature).toBe(
+    expect(authorizedGateways?.length).toBe(1);
+    expect(authorizedGateways[0].authorizationSignature).toBe(
       authorizationSignature,
     );
     expect(ceramicReadRecordCallingcount).toBe(0);
@@ -175,8 +175,8 @@ describe("StorageUtils tests", () => {
     mocks.contextProvider.context.metamaskEnabled = true;
 
     // Act
-    const readResult = await utils.read<IAuthorizedMerchantEntry[]>(
-      authorizaedMerchantsKey,
+    const readResult = await utils.read<IAuthorizedGatewayEntry[]>(
+      authorizaedGatewaysKey,
     );
 
     const ceramicReadRecordCallingcount = td.explain(
@@ -186,12 +186,12 @@ describe("StorageUtils tests", () => {
     // Assert
     expect(readResult).toBeDefined();
     expect(readResult.isErr()).toBeFalsy();
-    const authorizedMerchants = readResult._unsafeUnwrap();
-    if (authorizedMerchants == null) {
-      throw new Error("couldn't retrieve authorizedMerchants");
+    const authorizedGateways = readResult._unsafeUnwrap();
+    if (authorizedGateways == null) {
+      throw new Error("couldn't retrieve authorizedGateways");
     }
-    expect(authorizedMerchants?.length).toBe(1);
-    expect(authorizedMerchants[0].authorizationSignature).toBe(
+    expect(authorizedGateways?.length).toBe(1);
+    expect(authorizedGateways[0].authorizationSignature).toBe(
       authorizationSignature,
     );
     // Ceramic now is disabled, Remove this comment when we have it enabled again
@@ -205,7 +205,7 @@ describe("StorageUtils tests", () => {
     mocks.contextProvider.context.metamaskEnabled = false;
 
     // Act
-    const removeResult = await utils.remove(authorizaedMerchantsKey);
+    const removeResult = await utils.remove(authorizaedGatewaysKey);
 
     const ceramicReadRecordCallingcount = td.explain(
       mocks.ceramicUtils.removeRecord,
@@ -225,7 +225,7 @@ describe("StorageUtils tests", () => {
     mocks.contextProvider.context.metamaskEnabled = true;
 
     // Act
-    const removeResult = await utils.remove(authorizaedMerchantsKey);
+    const removeResult = await utils.remove(authorizaedGatewaysKey);
 
     const ceramicReadRecordCallingcount = td.explain(
       mocks.ceramicUtils.removeRecord,

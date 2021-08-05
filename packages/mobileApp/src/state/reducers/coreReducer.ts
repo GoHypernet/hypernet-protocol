@@ -50,7 +50,7 @@ export const coreReducer = (state: ICoreData, action: CoreAction) => {
         ...state,
         core: {
           ...state.core,
-          [ECoreViewDataKeys.authorizedMerchants]: action.payload,
+          [ECoreViewDataKeys.authorizedGateways]: action.payload,
         },
       };
     case CoreActionType.ERROR_OCCURRED:

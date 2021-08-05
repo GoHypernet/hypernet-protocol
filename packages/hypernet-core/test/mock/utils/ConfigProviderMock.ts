@@ -1,6 +1,7 @@
 import {
-  AuthorizedMerchantsSchema,
+  AuthorizedGatewaysSchema,
   DefinitionName,
+  EthereumAddress,
   HypernetConfig,
   SchemaUrl,
 } from "@hypernetlabs/objects";
@@ -22,18 +23,18 @@ export class ConfigProviderMock implements IConfigProvider {
       config ??
       new HypernetConfig(
         "iframeSource",
-        "routerMnemonic",
         routerPublicIdentifier,
         chainId,
-        "routerUrl",
         hyperTokenAddress,
+        EthereumAddress("messageTransferAddress"),
+        EthereumAddress("insuranceTransferAddress"),
+        EthereumAddress("parameterizedTransferAddress"),
+        EthereumAddress("gatewayRegistryAddress"),
         "hypernetProtocolDomain",
         defaultExpirationLength,
         {
           [1337]: "http://localhost:8545",
         },
-        "hypernetProtocolSpace",
-        "openThreadKey",
         {
           [1337]: {
             channelFactoryAddress: "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
@@ -41,16 +42,20 @@ export class ConfigProviderMock implements IConfigProvider {
               "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F",
           },
         },
-        "merchantIframeUrl",
+        "natsUrl",
+        "authUrl",
+        "gatewayIframeUrl",
         "https://ceramic-clay.3boxlabs.com",
         new Map([
           [
-            DefinitionName(AuthorizedMerchantsSchema.title),
+            DefinitionName(AuthorizedGatewaysSchema.title),
             SchemaUrl(
               "kjzl6cwe1jw148ngghzoumihdtadlx9rzodfjlq5tv01jzr7cin7jx3g3gtfxf3",
             ),
           ],
         ]),
+        5 * 1000,
+        "HypernetProtocolControlClaims", // controlClaimSubject
         false, // debug is off for testing
       );
   }

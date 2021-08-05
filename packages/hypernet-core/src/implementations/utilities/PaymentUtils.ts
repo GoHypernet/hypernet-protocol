@@ -1,10 +1,7 @@
 import {
   EthereumAddress,
   IHypernetOfferDetails,
-  IMessageTransferData,
   Payment,
-  PaymentInternalDetails,
-  PublicIdentifier,
   PullAmount,
   PullPayment,
   PushPayment,
@@ -19,7 +16,6 @@ import {
   InvalidParametersError,
   InvalidPaymentError,
   InvalidPaymentIdError,
-  LogicalError,
   VectorError,
   EPaymentState,
   EPaymentType,
@@ -28,7 +24,12 @@ import {
   InsuranceState,
   MessageState,
   ParameterizedState,
-  EMessageTransferType,
+  BigNumberString,
+  UnixTimestamp,
+  LogicalError,
+  MessageResolver,
+  InsuranceResolver,
+  ParameterizedResolver,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -109,69 +110,64 @@ export class PaymentUtils implements IPaymentUtils {
    */
   public transfersToPushPayment(
     paymentId: PaymentId,
-    to: PublicIdentifier,
-    from: PublicIdentifier,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<PushPayment, LogicalError> {
+  ): ResultAsync<PushPayment, never> {
     /**
      * Push payments consist of 3 transfers:
      * MessageTransfer - 0 value, represents an offer
      * InsuranceTransfer - service operator puts up to guarantee the sender's funds
      * ParameterizedPayment - the payment to the service operator
      */
-
-    if (sortedTransfers.pullRecordTransfers.length > 0) {
-      throw new LogicalError("Push payment has pull transfers!");
-    }
-
-    const amountStaked =
-      sortedTransfers.insuranceTransfer != null
-        ? sortedTransfers.insuranceTransfer.transferState.collateral
-        : 0;
-
-    const paymentAmount = sortedTransfers.offerDetails.paymentAmount;
-
-    const amountTransferred =
-      sortedTransfers.parameterizedTransfer != null
-        ? sortedTransfers.offerDetails.paymentAmount // @todo fix later? sortedTransfers.parameterizedTransfer.transferState.rate.deltaAmount
-        : sortedTransfers.offerDetails.paymentAmount;
-
-    const paymentToken =
-      sortedTransfers.parameterizedTransfer != null
-        ? EthereumAddress(sortedTransfers.parameterizedTransfer.assetId)
-        : sortedTransfers.offerDetails.paymentToken;
-
-    const details = new PaymentInternalDetails(
-      TransferId(sortedTransfers.offerTransfer.transferId),
-      sortedTransfers.insuranceTransfer?.transferId
-        ? TransferId(sortedTransfers.insuranceTransfer?.transferId)
-        : null,
-      sortedTransfers.parameterizedTransfer?.transferId
-        ? TransferId(sortedTransfers.parameterizedTransfer?.transferId)
-        : null,
-      sortedTransfers.pullRecordTransfers.map((val) => {
-        return TransferId(val.transferId);
-      }),
+    const offerDetails: IHypernetOfferDetails = JSON.parse(
+      (sortedTransfers.offerTransfers[0].transferState as MessageState).message,
     );
+
+    let amountStaked = BigNumberString("0");
+    let insuranceTransferId: TransferId | null = null;
+    if (sortedTransfers.insuranceTransfers.length > 0) {
+      amountStaked = BigNumberString(
+        sortedTransfers.insuranceTransfers[0].balance.amount[0],
+      );
+      insuranceTransferId = TransferId(
+        sortedTransfers.insuranceTransfers[0].transferId,
+      );
+    }
+    const paymentAmount = offerDetails.paymentAmount;
+
+    let amountTransfered = BigNumberString("0");
+    let parameterizedTransferId: TransferId | null = null;
+    let paymentToken = offerDetails.paymentToken;
+    if (sortedTransfers.parameterizedTransfers.length > 0) {
+      amountTransfered = BigNumberString(
+        sortedTransfers.parameterizedTransfers[0].balance.amount[0],
+      );
+      parameterizedTransferId = TransferId(
+        sortedTransfers.parameterizedTransfers[0].transferId,
+      );
+      paymentToken = EthereumAddress(
+        sortedTransfers.parameterizedTransfers[0].assetId,
+      );
+    }
 
     return okAsync(
       new PushPayment(
         paymentId,
-        to,
-        from,
+        offerDetails.to,
+        offerDetails.from,
         state,
         paymentToken,
-        BigNumber.from(sortedTransfers.offerDetails.requiredStake),
-        BigNumber.from(amountStaked),
-        sortedTransfers.offerDetails.expirationDate,
-        sortedTransfers.offerDetails.creationDate,
+        offerDetails.requiredStake,
+        amountStaked,
+        offerDetails.expirationDate,
+        offerDetails.creationDate,
         this.timeUtils.getUnixNow(),
-        BigNumber.from(0),
-        sortedTransfers.offerDetails.merchantUrl,
-        details,
-        BigNumber.from(paymentAmount),
-        BigNumber.from(amountTransferred),
+        BigNumberString("0"),
+        offerDetails.gatewayUrl,
+        sortedTransfers,
+        offerDetails.metadata,
+        paymentAmount,
+        amountTransfered,
       ),
     );
   }
@@ -187,43 +183,53 @@ export class PaymentUtils implements IPaymentUtils {
    */
   public transfersToPullPayment(
     paymentId: PaymentId,
-    to: PublicIdentifier,
-    from: PublicIdentifier,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<PullPayment, LogicalError> {
+  ): ResultAsync<PullPayment, never> {
     /**
      * Pull payments consist of 3+ transfers, a null transfer for 0 value that represents the
      * offer, an insurance payment, and a parameterized payment.
      */
-
-    const amountStaked =
-      sortedTransfers.insuranceTransfer != null
-        ? sortedTransfers.insuranceTransfer.balance.amount[0]
-        : 0;
-
-    // Get deltaAmount & deltaTime from the parameterized payment
-    if (sortedTransfers.offerDetails.rate == null) {
-      return errAsync(
-        new LogicalError("These transfers are not for a pull payment."),
+    let amountStaked = BigNumberString("0");
+    let insuranceTransferId: TransferId | null = null;
+    if (sortedTransfers.insuranceTransfers.length > 0) {
+      amountStaked = BigNumberString(
+        sortedTransfers.insuranceTransfers[0].balance.amount[0],
+      );
+      insuranceTransferId = TransferId(
+        sortedTransfers.insuranceTransfers[0].transferId,
       );
     }
 
-    const deltaAmount = BigNumber.from(
-      sortedTransfers.offerDetails.rate.deltaAmount,
+    const offerDetails: IHypernetOfferDetails = JSON.parse(
+      (sortedTransfers.offerTransfers[0].transferState as MessageState).message,
     );
-    const deltaTime = sortedTransfers.offerDetails.rate.deltaTime;
-    let vestedAmount: BigNumber;
 
-    if (sortedTransfers.parameterizedTransfer == null) {
+    // Get deltaAmount & deltaTime from the parameterized payment
+    if (offerDetails.rate == null) {
+      throw new LogicalError(
+        "Pull payment offer does not include rate information",
+      );
+    }
+
+    const deltaAmount = BigNumber.from(offerDetails.rate.deltaAmount);
+    const deltaTime = offerDetails.rate.deltaTime;
+    let vestedAmount: BigNumber;
+    let parameterizedTransferId: TransferId | null = null;
+
+    if (sortedTransfers.parameterizedTransfers.length == 0) {
       // No paramterized transfer, no vested amount!
       vestedAmount = BigNumber.from(0);
     } else {
       // Calculate vestedAmount
       const now = this.timeUtils.getUnixNow();
       const timePassed =
-        now - Number(sortedTransfers.parameterizedTransfer.transferState.start);
+        now -
+        Number(sortedTransfers.parameterizedTransfers[0].transferState.start);
       vestedAmount = deltaAmount.div(deltaTime).mul(timePassed);
+      parameterizedTransferId = TransferId(
+        sortedTransfers.parameterizedTransfers[0].transferId,
+      );
     }
 
     // Convert the PullRecords to PullAmounts
@@ -242,39 +248,31 @@ export class PaymentUtils implements IPaymentUtils {
     }
 
     const paymentToken =
-      sortedTransfers.parameterizedTransfer != null
-        ? EthereumAddress(sortedTransfers.parameterizedTransfer.assetId)
-        : sortedTransfers.offerDetails.paymentToken;
-
-    const details = new PaymentInternalDetails(
-      TransferId(sortedTransfers.offerTransfer.transferId),
-      TransferId(sortedTransfers.insuranceTransfer?.transferId || ""),
-      TransferId(sortedTransfers.parameterizedTransfer?.transferId || ""),
-      sortedTransfers.pullRecordTransfers.map((val) => {
-        return TransferId(val.transferId);
-      }),
-    );
+      sortedTransfers.parameterizedTransfers.length > 0
+        ? EthereumAddress(sortedTransfers.parameterizedTransfers[0].assetId)
+        : offerDetails.paymentToken;
 
     return okAsync(
       new PullPayment(
         paymentId,
-        to,
-        from,
+        offerDetails.to,
+        offerDetails.from,
         state,
         paymentToken,
-        BigNumber.from(sortedTransfers.offerDetails.requiredStake),
-        BigNumber.from(amountStaked),
-        this.timeUtils.getUnixNow() + 60 * 60, // 1 hour
-        sortedTransfers.offerDetails.creationDate,
+        offerDetails.requiredStake,
+        amountStaked,
+        UnixTimestamp(this.timeUtils.getUnixNow() + 60 * 60), // 1 hour
+        offerDetails.creationDate,
         this.timeUtils.getUnixNow(),
-        BigNumber.from(0),
-        sortedTransfers.offerDetails.merchantUrl,
-        details,
-        BigNumber.from(sortedTransfers.offerDetails.paymentAmount),
-        BigNumber.from(0),
-        vestedAmount,
+        BigNumberString("0"),
+        offerDetails.gatewayUrl,
+        sortedTransfers,
+        offerDetails.metadata,
+        offerDetails.paymentAmount,
+        BigNumberString("0"),
+        BigNumberString(vestedAmount.toString()),
         deltaTime,
-        deltaAmount,
+        BigNumberString(deltaAmount.toString()),
         pullAmounts,
       ),
     );
@@ -302,12 +300,14 @@ export class PaymentUtils implements IPaymentUtils {
         const idRes = this.paymentIdUtils.getUUID(paymentId);
 
         if (domainRes.isErr()) {
-          return errAsync(domainRes.error);
+          return errAsync<SortedTransfers, InvalidPaymentIdError>(
+            domainRes.error,
+          );
         }
 
         // TODO: This should probably be encapsulated down lower; getDomain() is probably unnecessary and and invalid domain should just result in an InvalidPaymentIdError from getType and getUUID.
         if (domainRes.value !== config.hypernetProtocolDomain) {
-          return errAsync(
+          return errAsync<SortedTransfers, InvalidParametersError>(
             new InvalidParametersError(
               `Invalid payment domain: '${domainRes.value}'`,
             ),
@@ -315,186 +315,317 @@ export class PaymentUtils implements IPaymentUtils {
         }
 
         if (paymentTypeRes.isErr()) {
-          return errAsync(paymentTypeRes.error);
+          return errAsync<SortedTransfers, InvalidPaymentIdError>(
+            paymentTypeRes.error,
+          );
         } else {
           paymentType = paymentTypeRes.value;
         }
 
         if (idRes.isErr()) {
-          return errAsync(idRes.error);
+          return errAsync<SortedTransfers, InvalidPaymentIdError>(idRes.error);
         }
 
         return this.sortTransfers(paymentId, transfers);
       })
-      .andThen((sortedTransfersUnk) => {
-        const sortedTransfers = sortedTransfersUnk as SortedTransfers;
-        const paymentState = this.getPaymentState(sortedTransfers);
+      .andThen((sortedTransfers) => {
+        return this.getPaymentState(sortedTransfers).andThen((paymentState) => {
+          if (paymentType === EPaymentType.Pull) {
+            return this.transfersToPullPayment(
+              paymentId,
+              paymentState,
+              sortedTransfers,
+            );
+          } else if (paymentType === EPaymentType.Push) {
+            return this.transfersToPushPayment(
+              paymentId,
+              paymentState,
+              sortedTransfers,
+            );
+          }
 
-        // TODO: Figure out how to determine if the payment is Challenged
-
-        if (paymentType === EPaymentType.Pull) {
-          return this.transfersToPullPayment(
-            paymentId,
-            sortedTransfers.offerDetails.to,
-            sortedTransfers.offerDetails.from,
-            paymentState,
-            sortedTransfers,
+          return errAsync(
+            new InvalidPaymentError(
+              `Payment type ${paymentType} is unsupported!`,
+            ),
           );
-        } else if (paymentType === EPaymentType.Push) {
-          return this.transfersToPushPayment(
-            paymentId,
-            sortedTransfers.offerDetails.to,
-            sortedTransfers.offerDetails.from,
-            paymentState,
-            sortedTransfers,
-          );
-        }
-
-        return errAsync(
-          new InvalidPaymentError(
-            `Payment type ${paymentType} is unsupported!`,
-          ),
-        );
+        });
       });
   }
 
-  public getPaymentState(sortedTransfers: SortedTransfers): EPaymentState {
-    // Determine the state of the payment. There is really a flowchart for doing this,
-    // payments move through a set of states.
-    // The main considerations here are the presence of each kind of transfer,
-    // whether the transfer is resolved or active, and whether or not the transfer
-    // matches the terms of the offer.
+  /**
+   * Determine the state of the payment. There is really a flowchart for doing this,
+   * payments move through a set of states.
+   * whether the transfer is resolved or active, and whether or not the transfer
+   * matches the terms of the offer.
+   *
+   * @param sortedTransfers
+   * @returns EPaymentState
+   */
+  public getPaymentState(
+    sortedTransfers: SortedTransfers,
+  ): ResultAsync<EPaymentState, BlockchainUnavailableError> {
+    // We are going to remove all canceled transfers from consideration.
+    // Canceled transfers are irrelevant; artifacts of things gone wonky.
+    console.debug(sortedTransfers);
+    return ResultUtils.combine([
+      ResultUtils.map(sortedTransfers.offerTransfers, (val) => {
+        return this.vectorUtils
+          .getTransferStateFromTransfer(val)
+          .map((transferState) => {
+            return { transfer: val, transferState: transferState };
+          });
+      }),
+      ResultUtils.map(sortedTransfers.insuranceTransfers, (val) => {
+        return this.vectorUtils
+          .getTransferStateFromTransfer(val)
+          .map((transferState) => {
+            return { transfer: val, transferState: transferState };
+          });
+      }),
+      ResultUtils.map(sortedTransfers.parameterizedTransfers, (val) => {
+        return this.vectorUtils
+          .getTransferStateFromTransfer(val)
+          .map((transferState) => {
+            return { transfer: val, transferState: transferState };
+          });
+      }),
+      ResultUtils.map(sortedTransfers.pullRecordTransfers, (val) => {
+        return this.vectorUtils
+          .getTransferStateFromTransfer(val)
+          .map((transferState) => {
+            return { transfer: val, transferState: transferState };
+          });
+      }),
+    ]).map((vals) => {
+      const [
+        offerTransfers,
+        insuranceTransfers,
+        parameterizedTransfers,
+        pullRecordTransfers,
+      ] = vals;
 
-    // First thing that can disqualify everything else is if there is no offer transfer
-    // at all. This will probably error at higher levels but we should check it here just
-    // in case
-    if (sortedTransfers.offerTransfer == null) {
-      return EPaymentState.InvalidProposal;
-    }
-
-    const offerState = this.vectorUtils.getTransferStateFromTransfer(
-      sortedTransfers.offerTransfer,
-    );
-    const hasInsurance = sortedTransfers.insuranceTransfer != null;
-    const hasParameterized = sortedTransfers.parameterizedTransfer != null;
-
-    // Payments that only have an offer
-    if (!hasInsurance && !hasParameterized) {
-      // Now we know we have something we can use. The first state it can be in is Proposed
-      if (offerState == ETransferState.Active) {
-        return EPaymentState.Proposed;
+      // First thing that can disqualify everything else is if there is no offer transfer
+      // at all. This will probably error at higher levels but we should check it here just
+      // in case
+      if (sortedTransfers.offerTransfers.length == 0) {
+        return EPaymentState.Borked;
       }
 
-      // It could also be rejected
-      if (offerState == ETransferState.Resolved) {
-        return EPaymentState.Rejected;
-      }
-    }
-
-    // States with insurance
-    if (sortedTransfers.insuranceTransfer != null) {
-      const insuranceState = this.vectorUtils.getTransferStateFromTransfer(
-        sortedTransfers.insuranceTransfer,
+      // If there are more than 1 offer transfer that is not canceled, that's an invalid proposal
+      const nonCanceledOfferTransfers = offerTransfers.filter(
+        (val) => val.transferState != ETransferState.Canceled,
       );
-      const insuranceValid = this.validateInsuranceTransfer(
-        sortedTransfers.insuranceTransfer,
-        sortedTransfers.offerDetails,
+      const nonCanceledInsuranceTransfers = insuranceTransfers.filter(
+        (val) => val.transferState != ETransferState.Canceled,
+      );
+      const nonCanceledParameterizedTransfers = parameterizedTransfers.filter(
+        (val) => val.transferState != ETransferState.Canceled,
       );
 
-      // Insurance but no parameterized payment
-      if (!hasParameterized) {
-        if (
-          offerState == ETransferState.Active &&
-          insuranceState == ETransferState.Active &&
-          insuranceValid
-        ) {
-          return EPaymentState.Staked;
-        }
-
-        if (
-          offerState == ETransferState.Active &&
-          insuranceState == ETransferState.Active &&
-          !insuranceValid
-        ) {
-          return EPaymentState.InvalidStake;
-        }
-
-        // If their is a resolved insurance payment but no parameterized payemnt,
-        // what are we dealing with? TODO
+      if (nonCanceledOfferTransfers.length > 1) {
+        return EPaymentState.Borked;
       }
 
-      // Now we can do states with all 3 payments
-      if (sortedTransfers.parameterizedTransfer != null && insuranceValid) {
-        const paymentState = this.vectorUtils.getTransferStateFromTransfer(
-          sortedTransfers.parameterizedTransfer,
-        );
-        const paymentValid = this.validatePaymentTransfer(
-          sortedTransfers.parameterizedTransfer,
-          sortedTransfers.offerDetails,
-        );
+      // If the only offer transfer was canceled, then the whole payment was canceled.
+      if (nonCanceledOfferTransfers.length == 0) {
+        return EPaymentState.Canceled;
+      }
 
-        if (
-          offerState == ETransferState.Active &&
-          insuranceState == ETransferState.Active &&
-          paymentState == ETransferState.Active &&
-          paymentValid
-        ) {
-          return EPaymentState.Approved;
+      const offerState = nonCanceledOfferTransfers[0].transferState;
+
+      // The details of the offer are encoded in the transfer state, we'll pull it out
+      // and deserialize it to get the hypernet transfer metadata
+      const offerDetails: IHypernetOfferDetails = JSON.parse(
+        (nonCanceledOfferTransfers[0].transfer.transferState as MessageState)
+          .message,
+      );
+
+      if (nonCanceledInsuranceTransfers.length > 1) {
+        return EPaymentState.Borked;
+      }
+
+      if (nonCanceledParameterizedTransfers.length > 1) {
+        return EPaymentState.Borked;
+      }
+
+      const hasInsurance = nonCanceledInsuranceTransfers.length == 1;
+      const hasParameterized = nonCanceledParameterizedTransfers.length == 1;
+
+      // Payments that only have an offer
+      if (!hasInsurance && !hasParameterized) {
+        // Now we know we have something we can use. The first state it can be in is Proposed
+        if (offerState == ETransferState.Active) {
+          return EPaymentState.Proposed;
         }
 
-        if (
-          offerState == ETransferState.Active &&
-          insuranceState == ETransferState.Active &&
-          paymentState == ETransferState.Active &&
-          !paymentValid
-        ) {
-          return EPaymentState.InvalidFunds;
-        }
-
-        if (
-          offerState == ETransferState.Active &&
-          insuranceState == ETransferState.Active &&
-          paymentState == ETransferState.Resolved &&
-          paymentValid
-        ) {
-          return EPaymentState.Accepted;
-        }
-
-        if (
-          offerState == ETransferState.Active &&
-          insuranceState == ETransferState.Resolved &&
-          paymentState == ETransferState.Resolved &&
-          paymentValid
-        ) {
-          return EPaymentState.InsuranceReleased;
-        }
-
-        if (
-          offerState == ETransferState.Resolved &&
-          insuranceState == ETransferState.Resolved &&
-          paymentState == ETransferState.Resolved &&
-          paymentValid
-        ) {
-          return EPaymentState.Finalized;
+        // It could also be rejected
+        if (offerState == ETransferState.Resolved) {
+          return EPaymentState.Rejected;
         }
       }
-    }
 
-    // If none of the above states match, the payment is well and truly EPaymentState.Borked
-    return EPaymentState.Borked;
+      // States with insurance
+      if (hasInsurance) {
+        const insuranceTransfer = nonCanceledInsuranceTransfers[0].transfer;
+        const insuranceState = nonCanceledInsuranceTransfers[0].transferState;
+        const insuranceValid = this.validateInsuranceTransfer(
+          insuranceTransfer,
+          offerDetails,
+        );
+
+        // Insurance but no parameterized payment
+        if (!hasParameterized) {
+          // If the insurance is resolved and the offer state is resolved or canceled,
+          // then the payment was canceled.
+          if (
+            offerState == ETransferState.Canceled &&
+            insuranceState == ETransferState.Resolved
+          ) {
+            return EPaymentState.Canceled;
+          }
+
+          if (
+            offerState == ETransferState.Active &&
+            insuranceState == ETransferState.Active &&
+            insuranceValid
+          ) {
+            return EPaymentState.Staked;
+          }
+
+          if (
+            offerState == ETransferState.Active &&
+            insuranceState == ETransferState.Active &&
+            !insuranceValid
+          ) {
+            return EPaymentState.InvalidStake;
+          }
+
+          // If there is a resolved insurance payment but no parameterized payemnt,
+          // what are we dealing with? TODO
+        }
+
+        // Now we can do states with all 3 payments
+        if (hasParameterized && insuranceValid) {
+          const paymentState =
+            nonCanceledParameterizedTransfers[0].transferState;
+          const paymentTransfer = nonCanceledParameterizedTransfers[0].transfer;
+          const paymentValid = this.validatePaymentTransfer(
+            paymentTransfer,
+            offerDetails,
+          );
+
+          if (
+            offerState == ETransferState.Canceled &&
+            (insuranceState == ETransferState.Resolved ||
+              insuranceState == ETransferState.Canceled) &&
+            (paymentState == ETransferState.Resolved ||
+              paymentState == ETransferState.Canceled)
+          ) {
+            return EPaymentState.Canceled;
+          }
+
+          if (
+            offerState == ETransferState.Active &&
+            insuranceState == ETransferState.Active &&
+            paymentState == ETransferState.Active &&
+            paymentValid
+          ) {
+            return EPaymentState.Approved;
+          }
+
+          if (
+            offerState == ETransferState.Active &&
+            insuranceState == ETransferState.Active &&
+            paymentState == ETransferState.Active &&
+            !paymentValid
+          ) {
+            return EPaymentState.InvalidFunds;
+          }
+
+          if (
+            offerState == ETransferState.Active &&
+            insuranceState == ETransferState.Active &&
+            paymentState == ETransferState.Resolved &&
+            paymentValid
+          ) {
+            return EPaymentState.Accepted;
+          }
+
+          if (
+            offerState == ETransferState.Active &&
+            insuranceState == ETransferState.Resolved &&
+            paymentState == ETransferState.Resolved &&
+            paymentValid
+          ) {
+            return EPaymentState.InsuranceReleased;
+          }
+
+          if (
+            offerState == ETransferState.Resolved &&
+            insuranceState == ETransferState.Resolved &&
+            paymentState == ETransferState.Resolved &&
+            paymentValid
+          ) {
+            return EPaymentState.Finalized;
+          }
+        }
+      }
+
+      // If none of the above states match, the payment is well and truly EPaymentState.Borked
+      return EPaymentState.Borked;
+    });
+  }
+
+  /**
+   * This method is supposed to return a sorted history of the payment's history, but without
+   * a resolvedAt we can't really do that. So this will just have to sit here for a while.
+   * @param sortedTransfers
+   * @returns
+   */
+  public getPaymentStateHistory(
+    sortedTransfers: SortedTransfers,
+  ): ResultAsync<EPaymentState[], never> {
+    // First step, take all the transfers and unsort them; we need them in a continual list based on their timestamp.
+    const allTransfers = new Array<IFullTransferState>()
+      .concat(sortedTransfers.offerTransfers)
+      .concat(sortedTransfers.insuranceTransfers)
+      .concat(sortedTransfers.parameterizedTransfers)
+      .concat(sortedTransfers.pullRecordTransfers);
+
+    // Sort all the transfers by creation date
+    allTransfers.sort((a, b) => {
+      if (a.meta == null || b.meta == null) {
+        return 0;
+      }
+      if (a.meta.createdAt < b.meta.createdAt) {
+        return -1;
+      } else if (a.meta.createdAt > b.meta.createdAt) {
+        return 1;
+      }
+      return 0;
+    });
+
+    this.logUtils.debug(allTransfers);
+
+    const statusHistory = new Array<EPaymentState>();
+
+    return okAsync(statusHistory);
   }
 
   // Returns true if the insurance transfer is
-  protected validateInsuranceTransfer(
+  public validateInsuranceTransfer(
     transfer: IFullTransferState<InsuranceState>,
     offerDetails: IHypernetOfferDetails,
   ): boolean {
-    return BigNumber.from(transfer.transferState.collateral).eq(
-      BigNumber.from(offerDetails.requiredStake),
+    return (
+      BigNumber.from(transfer.transferState.collateral).eq(
+        BigNumber.from(offerDetails.requiredStake),
+      ) && transfer.assetId == offerDetails.insuranceToken
     );
   }
 
-  protected validatePaymentTransfer(
+  public validatePaymentTransfer(
     transfer: IFullTransferState<ParameterizedState>,
     offerDetails: IHypernetOfferDetails,
   ): boolean {
@@ -503,7 +634,10 @@ export class PaymentUtils implements IPaymentUtils {
       total = total.add(amount);
     }
 
-    return total.eq(BigNumber.from(offerDetails.paymentAmount));
+    return (
+      total.eq(BigNumber.from(offerDetails.paymentAmount)) &&
+      transfer.assetId == offerDetails.paymentToken
+    );
 
     // TODO: Validate the rate is set correctly
     // && transfer.transferState.rate == offerDetails.;
@@ -520,7 +654,7 @@ export class PaymentUtils implements IPaymentUtils {
     transfers: IFullTransferState[],
   ): ResultAsync<
     Payment[],
-    VectorError | LogicalError | InvalidPaymentError | InvalidParametersError
+    VectorError | InvalidPaymentError | InvalidParametersError
   > {
     // First step, get the transfer types for all the transfers
     const transferTypeResults = new Array<
@@ -530,7 +664,9 @@ export class PaymentUtils implements IPaymentUtils {
       >
     >();
     for (const transfer of transfers) {
-      transferTypeResults.push(this.getTransferTypeWithTransfer(transfer));
+      transferTypeResults.push(
+        this.vectorUtils.getTransferTypeWithTransfer(transfer),
+      );
     }
 
     return ResultUtils.combine(transferTypeResults).andThen(
@@ -541,14 +677,20 @@ export class PaymentUtils implements IPaymentUtils {
           if (transferType === ETransferType.Offer) {
             // @todo also add in PullRecord type)
             const offerDetails: IHypernetOfferDetails = JSON.parse(
-              transfer.transferState.message,
+              (transfer as IFullTransferState<MessageState, MessageResolver>)
+                .transferState.message,
             );
             paymentId = offerDetails.paymentId;
           } else if (
             transferType === ETransferType.Insurance ||
             transferType === ETransferType.Parameterized
           ) {
-            paymentId = transfer.transferState.UUID;
+            paymentId = (
+              transfer as IFullTransferState<
+                InsuranceState | ParameterizedState,
+                InsuranceResolver | ParameterizedResolver
+              >
+            ).transferState.UUID;
           } else {
             this.logUtils.log(
               `Transfer type was not recognized, doing nothing. TransferType: '${transfer.transferDefinition}'`,
@@ -586,104 +728,8 @@ export class PaymentUtils implements IPaymentUtils {
   }
 
   /**
-   * Given a (vector) transfer @ IFullTransferState, return the transfer type (as ETransferType)
-   * @param transfer the transfer to get the transfer type of
-   * @param browserNode instance of a browserNode so that we can query for registered transfer addresses
-   */
-  public getTransferType(
-    transfer: IFullTransferState,
-  ): ResultAsync<
-    ETransferType,
-    VectorError | BlockchainUnavailableError | LogicalError
-  > {
-    // TransferDefinition here is the ETH address of the transfer
-    // We need to get the registered transfer definitions as canonical by the browser node
-    return this.browserNodeProvider
-      .getBrowserNode()
-      .andThen((browserNode) => {
-        return browserNode.getRegisteredTransfers(1337);
-      })
-      .andThen((registeredTransfers) => {
-        // registeredTransfers.name = 'Insurance', registeredTransfers.definition = <address>, transfer.transferDefinition = <address>
-        const transferMap: Map<EthereumAddress, string> = new Map();
-        for (const registeredTransfer of registeredTransfers) {
-          transferMap.set(
-            EthereumAddress(registeredTransfer.definition),
-            registeredTransfer.name,
-          );
-        }
-
-        // If the transfer address is not one we know, we don't know what this is
-        if (!transferMap.has(EthereumAddress(transfer.transferDefinition))) {
-          this.logUtils.log(
-            `Transfer type not recognized. Transfer definition: ${
-              transfer.transferDefinition
-            }, transferMap: ${JSON.stringify(transferMap)}`,
-          );
-          return okAsync(ETransferType.Unrecognized);
-        } else {
-          // This is a transfer we know about, but not necessarily one we want.
-          // Narrow down to insurance, parameterized, or  offer/messagetransfer
-          const thisTransfer = transferMap.get(
-            EthereumAddress(transfer.transferDefinition),
-          );
-          if (thisTransfer == null) {
-            return errAsync(
-              new LogicalError(
-                "Transfer type not unrecognized, but not in transfer map!",
-              ),
-            );
-          }
-
-          // Now we know it's either insurance, parameterized, or messageTransfer
-          if (thisTransfer === "Insurance") {
-            return okAsync(ETransferType.Insurance);
-          } else if (thisTransfer === "Parameterized") {
-            return okAsync(ETransferType.Parameterized);
-          } else if (thisTransfer === "MessageTransfer") {
-            const message: IMessageTransferData = JSON.parse(
-              transfer.transferState.message,
-            );
-            if (message.messageType == EMessageTransferType.OFFER) {
-              return okAsync(ETransferType.Offer);
-            } else if (
-              message.messageType == EMessageTransferType.PULLPAYMENT
-            ) {
-              return okAsync(ETransferType.PullRecord);
-            } else {
-              return errAsync(
-                new LogicalError(
-                  `Message transfer was not of type OFFER or PULLPAYMENT, got: ${message.messageType}`,
-                ),
-              );
-            }
-          } else {
-            // It's a recognized transfer type- like Withdraw- that we just don't care about
-            return okAsync(ETransferType.Unrecognized);
-          }
-        }
-      });
-  }
-
-  /**
-   * Exactly the same as getTransferType but also returns the source transfer,
-   * useful when dealing with combine() and other contexts where it is easy
-   * to loose track of which transfer you are getting the type for.
-   */
-  public getTransferTypeWithTransfer(
-    transfer: IFullTransferState,
-  ): ResultAsync<
-    { transferType: ETransferType; transfer: IFullTransferState },
-    VectorError | LogicalError
-  > {
-    return this.getTransferType(transfer).map((transferType) => {
-      return { transferType, transfer };
-    });
-  }
-
-  /**
    * Given a paymentID and matching transfers for this paymentId, return the SortedTransfers object associated.
-   * SortedTransfers is an object containing up to 1 of each of Offer, Insurance, Parameterized, PullRecord, and
+   * SortedTransfers is an object containing all Offer, Insurance, Parameterized, PullRecord, and
    * the metadata associated with this payment (as IHypernetOfferDetails).
    * @param _paymentId the paymentId for the provided transfers
    * @param transfers the transfers to sort
@@ -692,46 +738,56 @@ export class PaymentUtils implements IPaymentUtils {
   public sortTransfers(
     _paymentId: string,
     transfers: IFullTransferState[],
-  ): ResultAsync<
-    SortedTransfers,
-    InvalidPaymentError | VectorError | LogicalError
-  > {
-    const offerTransfers: IFullTransferState[] = [];
-    const insuranceTransfers: IFullTransferState[] = [];
-    const parameterizedTransfers: IFullTransferState[] = [];
-    const pullTransfers: IFullTransferState[] = [];
+  ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError> {
+    const offerTransfers: IFullTransferState<MessageState, MessageResolver>[] =
+      [];
+    const insuranceTransfers: IFullTransferState<
+      InsuranceState,
+      InsuranceResolver
+    >[] = [];
+    const parameterizedTransfers: IFullTransferState<
+      ParameterizedState,
+      ParameterizedResolver
+    >[] = [];
+    const pullTransfers: IFullTransferState<MessageState, MessageResolver>[] =
+      [];
     const unrecognizedTransfers: IFullTransferState[] = [];
-    const transferTypeResults = new Array<
-      ResultAsync<
-        { transferType: ETransferType; transfer: IFullTransferState },
-        VectorError | LogicalError
-      >
-    >();
+    const transferTypeResults = new Array<ResultAsync<void, VectorError>>();
 
     for (const transfer of transfers) {
-      transferTypeResults.push(this.getTransferTypeWithTransfer(transfer));
-    }
-
-    return ResultUtils.combine(transferTypeResults).andThen(
-      (transferTypesWithTransfers) => {
-        for (const { transferType, transfer } of transferTypesWithTransfers) {
+      transferTypeResults.push(
+        this.vectorUtils.getTransferType(transfer).map((transferType) => {
           if (transferType === ETransferType.Offer) {
-            offerTransfers.push(transfer);
+            offerTransfers.push(
+              transfer as IFullTransferState<MessageState, MessageResolver>,
+            );
           } else if (transferType === ETransferType.Insurance) {
-            insuranceTransfers.push(transfer);
+            insuranceTransfers.push(
+              transfer as IFullTransferState<InsuranceState, InsuranceResolver>,
+            );
           } else if (transferType === ETransferType.Parameterized) {
-            parameterizedTransfers.push(transfer);
+            parameterizedTransfers.push(
+              transfer as IFullTransferState<
+                ParameterizedState,
+                ParameterizedResolver
+              >,
+            );
           } else if (transferType === ETransferType.PullRecord) {
-            pullTransfers.push(transfer);
+            pullTransfers.push(
+              transfer as IFullTransferState<MessageState, MessageResolver>,
+            );
           } else if (transferType === ETransferType.Unrecognized) {
             unrecognizedTransfers.push(transfer);
           } else {
             this.logUtils.log("Unreachable code reached!");
             unrecognizedTransfers.push(transfer);
           }
-        }
+        }),
+      );
+    }
 
-        this.logUtils.debug(`
+    return ResultUtils.combine(transferTypeResults).map(() => {
+      this.logUtils.debug(`
         PaymentUtils:sortTransfers
   
         offerTransfers: ${offerTransfers.length}
@@ -741,65 +797,18 @@ export class PaymentUtils implements IPaymentUtils {
         unrecognizedTransfers: ${unrecognizedTransfers.length}
       `);
 
-        if (unrecognizedTransfers.length > 0) {
-          return errAsync(
-            new InvalidPaymentError(
-              "Payment includes unrecognized transfer types!",
-            ),
-          );
-        }
-
-        if (offerTransfers.length !== 1) {
-          // TODO: this could be handled more elegantly; if there's other payments
-          // but no offer, it's still a valid payment
-          return errAsync(
-            new InvalidPaymentError("Invalid payment, no offer transfer!"),
-          );
-        }
-        const offerTransfer = offerTransfers[0];
-
-        // The details of the offer are encoded in the transfer state, we'll pull it out
-        // and deserialize it ot get the hypernet transfer metadata
-        const offerDetails: IHypernetOfferDetails = JSON.parse(
-          (offerTransfer.transferState as MessageState).message,
-        );
-
-        let insuranceTransfer: IFullTransferState | null = null;
-        if (insuranceTransfers.length === 1) {
-          insuranceTransfer = insuranceTransfers[0];
-        } else if (insuranceTransfers.length > 1) {
-          return errAsync(
-            new InvalidPaymentError(
-              "Invalid payment, too many insurance transfers!",
-            ),
-          );
-        }
-
-        let parameterizedTransfer: IFullTransferState | null = null;
-        if (parameterizedTransfers.length === 1) {
-          parameterizedTransfer = parameterizedTransfers[0];
-        } else if (parameterizedTransfers.length > 1) {
-          return errAsync(
-            new InvalidPaymentError(
-              "Invalid payment, too many parameterized transfers!",
-            ),
-          );
-        }
-
-        return okAsync(
-          new SortedTransfers(
-            offerTransfer,
-            insuranceTransfer,
-            parameterizedTransfer,
-            pullTransfers,
-            offerDetails,
-          ),
-        );
-      },
-    );
+      return new SortedTransfers(
+        offerTransfers,
+        insuranceTransfers,
+        parameterizedTransfers,
+        pullTransfers,
+      );
+    });
   }
 
-  public getEarliestDateFromTransfers(transfers: IFullTransferState[]): number {
+  public getEarliestDateFromTransfers(
+    transfers: IFullTransferState[],
+  ): UnixTimestamp {
     // If there are no transfers, the earliest transfer would be now
     if (transfers.length == 0) {
       return this.timeUtils.getUnixNow();
@@ -815,6 +824,23 @@ export class PaymentUtils implements IPaymentUtils {
     });
 
     return this.vectorUtils.getTimestampFromTransfer(transfers[0]);
+  }
+
+  public getFirstTransfer(transfers: IFullTransferState[]): IFullTransferState {
+    if (transfers.length == 0) {
+      throw new Error("No transfers provided!");
+    }
+
+    const earliestDate = this.getEarliestDateFromTransfers(transfers);
+    const transfer = transfers.find((val) => {
+      return this.vectorUtils.getTimestampFromTransfer(val) == earliestDate;
+    });
+    if (transfer == null) {
+      throw new Error(
+        "Offer with earliest timestamp doesn't actually exist...",
+      );
+    }
+    return transfer;
   }
 
   protected getRegisteredTransfersResponse:

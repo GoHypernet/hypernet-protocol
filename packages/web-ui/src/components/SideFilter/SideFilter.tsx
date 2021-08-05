@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import {
   Box,
   SwipeableDrawer,
@@ -13,12 +12,14 @@ import {
   InputAdornment,
   MenuItem,
 } from "@material-ui/core";
-import SearchIcon from "@material-ui/icons/Search";
 import { ThemeProvider } from "@material-ui/core/styles";
 import CloseIcon from "@material-ui/icons/Close";
+import SearchIcon from "@material-ui/icons/Search";
+import { ISideFilterProps, EItemType } from "@web-ui/interfaces";
+import React, { useEffect, useState } from "react";
 
 import { theme, useStyles } from "./SideFilter.style";
-import { ISideFilterProps, EItemType } from "@web-ui/interfaces";
+
 import { SliderRange } from "@web-ui/components";
 
 export const SideFilter: React.FC<ISideFilterProps> = (

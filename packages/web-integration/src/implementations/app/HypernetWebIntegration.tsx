@@ -1,4 +1,4 @@
-import { IHypernetCore, MerchantUrl } from "@hypernetlabs/objects";
+import { IHypernetCore, GatewayUrl } from "@hypernetlabs/objects";
 import HypernetWebUI, { IHypernetWebUI } from "@hypernetlabs/web-ui";
 import { ResultAsync } from "neverthrow";
 
@@ -7,12 +7,13 @@ import { IHypernetWebIntegration } from "@web-integration/interfaces/app/IHypern
 
 export default class HypernetWebIntegration implements IHypernetWebIntegration {
   private static instance: IHypernetWebIntegration;
-
-  protected iframeURL = "http://localhost:5020";
-  protected currentMerchantUrl: MerchantUrl | undefined | null;
+  protected iframeURL = "http://localhost:5020"; // TODO: This should eventually be mainnet release
+  protected currentGatewayUrl: GatewayUrl | undefined | null;
+  protected getReadyTimeout: number = 15 * 1000;
+  protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
+  protected getReadyResolved = false;
 
   public webUIClient: IHypernetWebUI;
-
   public core: HypernetIFrameProxy;
 
   constructor(iframeURL?: string) {
@@ -25,11 +26,10 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       "hypernet-core-iframe",
     );
 
-    this.core.onMerchantIFrameDisplayRequested.subscribe((merchantUrl) => {
-      this.currentMerchantUrl = merchantUrl;
+    this.core.onGatewayIFrameDisplayRequested.subscribe((gatewayUrl) => {
+      this.currentGatewayUrl = gatewayUrl;
     });
 
-    // TODO: check this when dealing with core multiple instances issue
     if (window.hypernetWebUIInstance) {
       this.webUIClient = window.hypernetWebUIInstance as IHypernetWebUI;
     } else {
@@ -37,13 +37,22 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     }
 
     this.core.onPrivateCredentialsRequested.subscribe(() => {
-      this.webUIClient.renderPrivateKeysModal();
+      //this.webUIClient.renderPrivateKeysModal();
+      this.webUIClient.renderMetamaskWarningModal();
     });
   }
 
   // wait for the core to be intialized
-  protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
   public getReady(): ResultAsync<IHypernetCore, Error> {
+    // Wait getReadyTimeout and show timeout guid if getReady hasn't resolved yet
+    /* setTimeout(() => {
+      if (this.getReadyResolved === false) {
+        this.webUIClient.renderWarningAlertModal(
+          "Timeout exceeded while initializing Hypernet Protocol!",
+        );
+      }
+    }, this.getReadyTimeout); */
+
     if (this.getReadyResult != null) {
       return this.getReadyResult;
     }
@@ -56,7 +65,13 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       .map(() => {
         // This is for web ui to use if there is no core instance passed in web ui constructor
         window.hypernetCoreInstance = this.core;
+        this.getReadyResolved = true;
         return this.core;
+      })
+      .mapErr((err) => {
+        this.getReadyResolved = true;
+        this.webUIClient.renderWarningAlertModal(err?.message);
+        return new Error("Something went wrong!");
       });
 
     return this.getReadyResult;
@@ -71,12 +86,12 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     return HypernetWebIntegration.instance;
   }
 
-  public displayMerchantIFrame(merchantUrl: MerchantUrl): void {
-    this.core.displayMerchantIFrame(merchantUrl);
+  public displayGatewayIFrame(gatewayUrl: GatewayUrl): void {
+    this.core.displayGatewayIFrame(gatewayUrl);
   }
 
-  public closeMerchantIFrame(merchantUrl: MerchantUrl): void {
-    this.core.closeMerchantIFrame(merchantUrl);
+  public closeGatewayIFrame(gatewayUrl: GatewayUrl): void {
+    this.core.closeGatewayIFrame(gatewayUrl);
   }
 
   private _prepareIFrameContainer(): HTMLElement {
@@ -88,21 +103,9 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     const closeButton = document.createElement("div");
     closeButton.id = "__hypernet-protocol-iframe-close-icon__";
     closeButton.innerHTML = `
-      <img src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png" width="20" />
+      <img id="__hypernet-protocol-iframe-close-img__" src="https://res.cloudinary.com/dqueufbs7/image/upload/v1611371438/images/Close-512.png" width="20" />
     `;
     iframeContainer.appendChild(closeButton);
-
-    closeButton.addEventListener(
-      "click",
-      (e) => {
-        if (this.currentMerchantUrl != null) {
-          this.core.closeMerchantIFrame(this.currentMerchantUrl);
-          this.currentMerchantUrl = null;
-        }
-        iframeContainer.style.display = "none";
-      },
-      false,
-    );
 
     // Add iframe modal style
     const style = document.createElement("style");
@@ -112,8 +115,8 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
           position: absolute;
           display: none;
           border: none;
-          width: 700px;
-          height: 800px;
+          width: 550px;
+          height: 60%;
           min-height: 200px;
           background-color: white;
           top: 50%;
@@ -121,7 +124,6 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
           box-shadow: 0px 4px 20px #000000;
           border-radius: 4px;
           transform: translate(-50%, -50%);
-          padding: 15px;
         }
         #__hypernet-protocol-iframe-container__ {
           position: absolute;
@@ -134,11 +136,14 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
           z-index: 999999 !important;
         }
         #__hypernet-protocol-iframe-close-icon__ {
+          z-index: 2;
           position: absolute;
+          height: 60%;
           top: 50%;
           left: 50%;
-          transform: translate(calc(-50% + 335px), calc(-50% - 385px));
-          z-index: 2;
+          transform: translate(calc(-50% + 263px), -50%);
+        }
+        #__hypernet-protocol-iframe-close-img__{
           cursor: pointer;
         }
     `),
@@ -147,6 +152,22 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
     // Attach everything to the body
     document.body.appendChild(iframeContainer);
+
+    const closeImg = document.getElementById(
+      "__hypernet-protocol-iframe-close-img__",
+    );
+
+    closeImg?.addEventListener(
+      "click",
+      (e) => {
+        if (this.currentGatewayUrl != null) {
+          this.core.closeGatewayIFrame(this.currentGatewayUrl);
+          this.currentGatewayUrl = null;
+        }
+        iframeContainer.style.display = "none";
+      },
+      false,
+    );
 
     return iframeContainer;
   }

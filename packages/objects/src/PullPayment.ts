@@ -1,13 +1,15 @@
 import { BigNumber } from "ethers";
 
+import { BigNumberString } from "@objects/BigNumberString";
 import { EthereumAddress } from "@objects/EthereumAddress";
-import { MerchantUrl } from "@objects/MerchantUrl";
+import { GatewayUrl } from "@objects/GatewayUrl";
 import { Payment } from "@objects/Payment";
 import { PaymentId } from "@objects/PaymentId";
-import { PaymentInternalDetails } from "@objects/PaymentInternalDetails";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullAmount } from "@objects/PullAmount";
+import { SortedTransfers } from "@objects/SortedTransfers";
 import { EPaymentState } from "@objects/typing";
+import { UnixTimestamp } from "@objects/UnixTimestamp";
 
 export class PullPayment extends Payment {
   constructor(
@@ -16,19 +18,20 @@ export class PullPayment extends Payment {
     from: PublicIdentifier,
     state: EPaymentState,
     paymentToken: EthereumAddress,
-    requiredStake: BigNumber,
-    amountStaked: BigNumber,
-    expirationDate: number,
-    createdTimestamp: number,
-    updatedTimestamp: number,
-    collateralRecovered: BigNumber,
-    merchantUrl: MerchantUrl,
-    details: PaymentInternalDetails,
-    public authorizedAmount: BigNumber,
-    public amountTransferred: BigNumber,
-    public vestedAmount: BigNumber,
+    requiredStake: BigNumberString,
+    amountStaked: BigNumberString,
+    expirationDate: UnixTimestamp,
+    createdTimestamp: UnixTimestamp,
+    updatedTimestamp: UnixTimestamp,
+    collateralRecovered: BigNumberString,
+    gatewayUrl: GatewayUrl,
+    details: SortedTransfers,
+    metadata: string | null,
+    public authorizedAmount: BigNumberString,
+    public amountTransferred: BigNumberString,
+    public vestedAmount: BigNumberString,
     public deltaTime: number,
-    public deltaAmount: BigNumber,
+    public deltaAmount: BigNumberString,
     public ledger: PullAmount[],
   ) {
     super(
@@ -43,8 +46,9 @@ export class PullPayment extends Payment {
       createdTimestamp,
       updatedTimestamp,
       collateralRecovered,
-      merchantUrl,
+      gatewayUrl,
       details,
+      metadata,
     );
   }
 }

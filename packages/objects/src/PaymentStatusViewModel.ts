@@ -29,10 +29,10 @@ export class PaymentStatusViewModel {
       this.state = "Insurance Released";
     } else if (params.state === EPaymentState.Finalized) {
       this.state = "Finalized";
-    } else if (params.state === EPaymentState.Challenged) {
-      this.state = "Challenged";
     } else if (params.state === EPaymentState.Borked) {
       this.state = "Borked";
+    } else if (params.state === EPaymentState.Canceled) {
+      this.state = "Canceled";
     } else {
       console.error(params.state);
       this.state = "Unknown - update PaymentStatus.viewmodel";

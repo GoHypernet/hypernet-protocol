@@ -1,22 +1,6 @@
-import { IHypernetCore, MerchantUrl, RenderError } from "@hypernetlabs/objects";
-import { Result } from "neverthrow";
-import React from "react";
-import ReactDOM from "react-dom";
-
-import {
-  BALANCES_WIDGET_ID_SELECTOR,
-  FUND_WIDGET_ID_SELECTOR,
-  LINKS_WIDGET_ID_SELECTOR,
-  PAYMENT_WIDGET_ID_SELECTOR,
-  PRIVATE_KEYS_FLOW_ID_SELECTOR,
-  CONNECTOR_AUTHORIZATION_FLOW_ID_SELECTOR,
-  ONBOARDING_FLOW_ID_SELECTOR,
-} from "@web-ui/constants";
+import { IHypernetCore, GatewayUrl, RenderError } from "@hypernetlabs/objects";
 import MainContainer from "@web-ui/containers/MainContainer";
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
-import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
-import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
-import PrivateKeysFlow from "@web-ui/flows/PrivateKeysFlow";
 import {
   IConnectorAuthorizationFlowParams,
   IHypernetWebUI,
@@ -26,12 +10,35 @@ import {
   IViewUtils,
   IDateUtils,
 } from "@web-ui/interfaces";
+import GatewaysWidget from "@web-ui/widgets/GatewaysWidget";
+import { Result } from "neverthrow";
+import React from "react";
+import ReactDOM from "react-dom";
+
+import { MetamaskWarning, WarningAlert } from "@web-ui/components";
+import {
+  BALANCES_WIDGET_ID_SELECTOR,
+  FUND_WIDGET_ID_SELECTOR,
+  LINKS_WIDGET_ID_SELECTOR,
+  PAYMENT_WIDGET_ID_SELECTOR,
+  PRIVATE_KEYS_FLOW_ID_SELECTOR,
+  CONNECTOR_AUTHORIZATION_FLOW_ID_SELECTOR,
+  ONBOARDING_FLOW_ID_SELECTOR,
+  WARNING_ALERT_SELECTOR,
+  METAMASK_WARNING_ID_SELECTOR,
+  PUBLIC_IDENTIFIER_WIDGET_ID_SELECTOR,
+  WITHDRAW_WIDGET_ID_SELECTOR,
+} from "@web-ui/constants";
+import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
+import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
+import PrivateKeysFlow from "@web-ui/flows/PrivateKeysFlow";
 import { ViewUtils, DateUtils } from "@web-ui/utils";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget";
-import MerchantsWidget from "@web-ui/widgets/MerchantsWidget";
 import FundWidget from "@web-ui/widgets/FundWidget";
+import WithdrawWidget from "@web-ui/widgets/WithdrawWidget";
 import LinksWidget from "@web-ui/widgets/LinksWidget";
 import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
+import PublicIdentifierWidget from "@web-ui/widgets/PublicIdentifierWidget";
 
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
@@ -77,7 +84,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
 
   private _bootstrapComponent(
     component: React.ReactNode,
-    withModal: boolean = false,
+    withModal = false,
     closeCallback?: () => void,
     modalStyle?: React.CSSProperties,
   ) {
@@ -124,6 +131,37 @@ export default class HypernetWebUI implements IHypernetWebUI {
     return this._getThrowableRender(renderReact);
   }
 
+  public renderMetamaskWarningModal(): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(<MetamaskWarning />, true, undefined, {
+          zIndex: 99999,
+        }),
+        this._generateDomElement(METAMASK_WARNING_ID_SELECTOR),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderWarningAlertModal(
+    errorMessage?: string,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <WarningAlert errorMessage={errorMessage} />,
+          true,
+          undefined,
+          {
+            zIndex: 99999,
+          },
+        ),
+        this._generateDomElement(WARNING_ALERT_SELECTOR),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
   public renderBalancesWidget(
     config?: IRenderParams,
   ): Result<void, RenderError> {
@@ -141,13 +179,13 @@ export default class HypernetWebUI implements IHypernetWebUI {
     return this._getThrowableRender(renderReact);
   }
 
-  public renderMerchantsWidget(
+  public renderGatewaysWidget(
     config?: IRenderParams,
   ): Result<void, RenderError> {
     const renderReact = () => {
       return ReactDOM.render(
         this._bootstrapComponent(
-          <MerchantsWidget {...config} />,
+          <GatewaysWidget {...config} />,
           config?.showInModal,
         ),
         this._generateDomElement(
@@ -166,6 +204,23 @@ export default class HypernetWebUI implements IHypernetWebUI {
           config?.showInModal,
         ),
         this._generateDomElement(config?.selector || FUND_WIDGET_ID_SELECTOR),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderWithdrawWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <WithdrawWidget {...config} />,
+          config?.showInModal,
+        ),
+        this._generateDomElement(
+          config?.selector || WITHDRAW_WIDGET_ID_SELECTOR,
+        ),
       );
     };
     return this._getThrowableRender(renderReact);
@@ -196,13 +251,30 @@ export default class HypernetWebUI implements IHypernetWebUI {
             expirationDate={config?.expirationDate}
             requiredStake={config?.requiredStake}
             paymentTokenAddress={config?.paymentTokenAddress}
-            merchantUrl={config?.merchantUrl}
+            gatewayUrl={config?.gatewayUrl}
             paymentType={config?.paymentType}
           />,
           config?.showInModal,
         ),
         this._generateDomElement(
           config?.selector || PAYMENT_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderPublicIdentifierWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <PublicIdentifierWidget {...config} />,
+          config?.showInModal,
+        ),
+        this._generateDomElement(
+          config?.selector || PUBLIC_IDENTIFIER_WIDGET_ID_SELECTOR,
         ),
       );
     };
@@ -237,9 +309,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
       return ReactDOM.render(
         this._bootstrapComponent(
           <OnboardingFlow
-            merchantUrl={config.merchantUrl}
-            merchantName={config.merchantName}
-            merchantLogoUrl={config.merchantLogoUrl}
+            gatewayUrl={config.gatewayUrl}
+            gatewayName={config.gatewayName}
+            gatewayLogoUrl={config.gatewayLogoUrl}
             finalSuccessContent={config.finalSuccessContent}
             closeCallback={config.closeCallback}
           />,

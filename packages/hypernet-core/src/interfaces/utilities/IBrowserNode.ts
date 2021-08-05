@@ -1,4 +1,5 @@
 import {
+  BigNumberString,
   EthereumAddress,
   IBasicChannelResponse,
   IBasicTransferResponse,
@@ -12,12 +13,11 @@ import {
   PublicIdentifier,
   Signature,
   TransferId,
-} from "@hypernetlabs/objects";
-import { VectorError } from "@hypernetlabs/objects";
-import {
+  VectorError,
   MessageResolver,
   InsuranceResolver,
   ParameterizedResolver,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -51,7 +51,7 @@ export interface IBrowserNode {
 
   withdraw(
     channelAddress: EthereumAddress,
-    amount: string,
+    amount: BigNumberString,
     assetId: EthereumAddress,
     recipient: EthereumAddress,
     quote?: IWithdrawQuote,
@@ -62,16 +62,16 @@ export interface IBrowserNode {
 
   getTransfer(
     transferId: TransferId,
-  ): ResultAsync<IFullTransferState, VectorError>;
+  ): ResultAsync<IFullTransferState<unknown, unknown>, VectorError>;
 
   getActiveTransfers(
     channelAddress: EthereumAddress,
-  ): ResultAsync<IFullTransferState[], VectorError>;
+  ): ResultAsync<IFullTransferState<unknown, unknown>[], VectorError>;
 
   getTransfers(
-    startDate: number,
-    endDate: number,
-  ): ResultAsync<IFullTransferState[], VectorError>;
+    startDate: UnixTimestamp,
+    endDate: UnixTimestamp,
+  ): ResultAsync<IFullTransferState<unknown, unknown>[], VectorError>;
 
   init(
     signature: Signature,
@@ -95,15 +95,15 @@ export interface IBrowserNode {
 
   conditionalTransfer(
     channelAddress: EthereumAddress,
-    amount: string,
+    amount: BigNumberString,
     assetId: EthereumAddress,
     type: string,
-    details: any,
+    details: unknown,
     recipient: PublicIdentifier | undefined,
     recipientChainId: number | undefined,
     recipientAssetId: EthereumAddress | undefined,
     timeout: string | undefined,
-    meta: any | null | undefined,
+    meta: unknown | null | undefined,
   ): ResultAsync<IBasicTransferResponse, VectorError>;
 
   getStateChannels(): ResultAsync<EthereumAddress[], VectorError>;
@@ -121,7 +121,7 @@ export interface IBrowserNode {
     counterpartyIdentifier: PublicIdentifier,
     chainId: number,
     timeout: string,
-    meta?: any,
+    meta?: unknown,
   ): ResultAsync<IBasicChannelResponse, VectorError>;
 
   restoreState(

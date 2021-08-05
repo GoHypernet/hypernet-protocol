@@ -71,6 +71,8 @@ services:
     environment:
       VECTOR_CONFIG: '{
         "adminToken": "cxt1234",
+        "authUrl":"http://auth:5040", 
+        "natsUrl": "nats://nats:4222", 
         "messagingUrl": "",
         "logLevel": "debug",
         "chainAddresses": { 
@@ -154,7 +156,7 @@ services:
       VECTOR_ENV: "dev"
 
   blockchain:
-    image: hypernetlabs/eth-provider
+    image: hypernetlabs/eth-provider:local
     ports:
       - 8545:8545
     environment:
@@ -246,15 +248,15 @@ services:
       }' 
   
   core-iframe:
-    image: hypernetlabs/hypernet-protocol-core-iframe
+    image: hypernetlabs/hypernet-protocol-core-iframe:local
     ports:
       - 5020:80
     depends_on:
       - router
       - iframe
 
-  merchant-iframe:
-    image: hypernetlabs/hypernet-protocol-merchant-iframe
+  gateway-iframe:
+    image: hypernetlabs/hypernet-protocol-gateway-iframe:local
     ports:
       - 5005:80
     depends_on:
@@ -262,19 +264,27 @@ services:
       - iframe
 
   developer-ui:
-    image: hypernetlabs/hypernet-protocol-developer-ui
+    image: hypernetlabs/hypernet-protocol-developer-ui:local
     ports: 
       - 5015:80
     depends_on:
       - core-iframe
-      - merchant-iframe
+      - gateway-iframe
 
-  test-merchant:
+  user-dashboard:
+    image: hypernetlabs/hypernet-protocol-user-dashboard:local
+    ports: 
+      - 5016:80
+    depends_on:
+      - core-iframe
+      - gateway-iframe
+
+  test-gateway:
     image: node:14
     ports:
       - 5010:5010
     volumes:
-      - ../test-merchant-connector/dist/server-bundle:/app
-      - ../test-merchant-connector/dist/connector-bundle:/app/connector
+      - ../test-gateway/dist/server-bundle:/app
+      - ../test-gateway/dist/connector-bundle:/app/connector
     command:
       node /app/index.js

@@ -1,20 +1,20 @@
 import {
-  PaymentInternalDetails,
   PushPayment,
   EPaymentState,
-  EPaymentType,
-  IBasicTransferResponse,
   VectorError,
   PaymentCreationError,
   TransferResolutionError,
+  UnixTimestamp,
+  BigNumberString,
+  SortedTransfers,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
+import { IPaymentRepository } from "@interfaces/data";
 import { BigNumber } from "ethers";
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
 import { PaymentRepository } from "@implementations/data/PaymentRepository";
-import { IPaymentRepository } from "@interfaces/data";
 import {
   IVectorUtils,
   IBrowserNodeProvider,
@@ -23,18 +23,15 @@ import {
 } from "@interfaces/utilities";
 import {
   commonAmount,
-  routerChannelAddress,
   publicIdentifier,
   commonPaymentId,
   publicIdentifier2,
   unixNow,
-  defaultExpirationLength,
-  parameterizedTransferId,
-  offerTransferId,
   insuranceTransferId,
-  merchantUrl,
+  gatewayUrl,
   erc20AssetAddress,
-  merchantAddress,
+  gatewayAddress,
+  expirationDate,
 } from "@mock/mocks";
 import {
   BlockchainProviderMock,
@@ -42,25 +39,21 @@ import {
   ConfigProviderMock,
   ContextProviderMock,
   PaymentUtilsMockFactory,
+  VectorUtilsMockFactory,
 } from "@mock/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
 
-const expirationDate = unixNow + defaultExpirationLength;
 const counterPartyAccount = publicIdentifier2;
 const fromAccount = publicIdentifier;
-const paymentDetails = new PaymentInternalDetails(
-  offerTransferId,
-  insuranceTransferId,
-  parameterizedTransferId,
-  [],
-);
+const paymentDetails = new SortedTransfers([], [], [], []);
 
 class PaymentRepositoryMocks {
   public timeUtils = td.object<ITimeUtils>();
   public blockchainProvider = new BlockchainProviderMock();
-  public vectorUtils = td.object<IVectorUtils>();
+  public vectorUtils =
+    VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
   public configProvider = new ConfigProviderMock();
   public contextProvider = new ContextProviderMock();
   public browserNodeProvider: BrowserNodeProviderMock;
@@ -75,7 +68,7 @@ class PaymentRepositoryMocks {
     includeInsuranceTransfer = true,
     includeParameterizedTransfer = true,
   ) {
-    td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow);
+    td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow as never);
     td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(
       okAsync(unixNow),
     );
@@ -96,92 +89,6 @@ class PaymentRepositoryMocks {
       this.stakedPayment,
       this.approvedPayment,
     );
-
-    td.when(this.vectorUtils.getRouterChannelAddress()).thenReturn(
-      okAsync(routerChannelAddress),
-    );
-
-    td.when(
-      this.vectorUtils.createOfferTransfer(
-        counterPartyAccount,
-        td.matchers.contains({
-          paymentId: commonPaymentId,
-          creationDate: unixNow,
-          to: publicIdentifier2,
-          from: publicIdentifier,
-          requiredStake: commonAmount.toString(),
-          paymentAmount: commonAmount.toString(),
-          expirationDate,
-          paymentToken: erc20AssetAddress,
-          merchantUrl: merchantUrl,
-        }),
-      ),
-    ).thenReturn(
-      okAsync({
-        channelAddress: routerChannelAddress,
-        transferId: offerTransferId,
-      }),
-    );
-
-    td.when(
-      this.vectorUtils.resolvePaymentTransfer(
-        parameterizedTransferId,
-        commonPaymentId,
-        commonAmount.toString(),
-      ),
-    ).thenReturn(
-      okAsync({
-        channelAddress: routerChannelAddress,
-        transferId: parameterizedTransferId,
-      }),
-    );
-
-    td.when(
-      this.vectorUtils.createInsuranceTransfer(
-        publicIdentifier,
-        merchantAddress,
-        td.matchers.argThat((val: BigNumber) => {
-          return val.eq(commonAmount);
-        }),
-        expirationDate,
-        commonPaymentId,
-      ),
-    ).thenReturn(
-      okAsync({
-        channelAddress: routerChannelAddress,
-        transferId: insuranceTransferId,
-      }),
-    );
-
-    td.when(
-      this.vectorUtils.createPaymentTransfer(
-        EPaymentType.Push,
-        publicIdentifier2,
-        td.matchers.argThat((val: BigNumber) => {
-          return val.eq(commonAmount);
-        }),
-        erc20AssetAddress,
-        commonPaymentId,
-        unixNow - 1,
-        expirationDate,
-        undefined,
-        undefined,
-      ),
-    ).thenReturn(
-      okAsync({
-        channelAddress: routerChannelAddress,
-        transferId: parameterizedTransferId,
-      }),
-    );
-
-    td.when(
-      this.vectorUtils.resolveInsuranceTransfer(
-        insuranceTransferId,
-        commonPaymentId,
-        undefined,
-        BigNumber.from("0"),
-      ),
-    ).thenReturn(okAsync({} as IBasicTransferResponse));
   }
 
   public factoryPaymentRepository(): IPaymentRepository {
@@ -198,7 +105,7 @@ class PaymentRepositoryMocks {
 
   public factoryPushPayment(
     state: EPaymentState = EPaymentState.Proposed,
-    amountStaked: string = commonAmount.toString(),
+    amountStaked: BigNumberString = commonAmount,
   ): PushPayment {
     return new PushPayment(
       commonPaymentId,
@@ -206,16 +113,17 @@ class PaymentRepositoryMocks {
       fromAccount,
       state,
       erc20AssetAddress,
-      BigNumber.from(commonAmount.toString()),
-      BigNumber.from(amountStaked),
+      commonAmount,
+      amountStaked,
       expirationDate,
       unixNow,
       unixNow,
-      BigNumber.from(0),
-      merchantUrl,
+      BigNumberString("0"),
+      gatewayUrl,
       paymentDetails,
-      BigNumber.from(commonAmount.toString()),
-      BigNumber.from(0),
+      null,
+      commonAmount,
+      BigNumberString("0"),
     );
   }
 }
@@ -252,11 +160,12 @@ describe("PaymentRepository tests", () => {
     // Act
     const result = await repo.createPushPayment(
       counterPartyAccount,
-      commonAmount.toString(),
+      commonAmount,
       expirationDate,
-      commonAmount.toString(),
+      commonAmount,
       erc20AssetAddress,
-      merchantUrl,
+      gatewayUrl,
+      null,
     );
 
     // Assert
@@ -274,11 +183,12 @@ describe("PaymentRepository tests", () => {
     // Act
     const result = await repo.createPushPayment(
       counterPartyAccount,
-      commonAmount.toString(),
+      commonAmount,
       expirationDate,
-      commonAmount.toString(),
+      commonAmount,
       erc20AssetAddress,
-      merchantUrl,
+      gatewayUrl,
+      null,
     );
     const error = result._unsafeUnwrapErr();
 
@@ -320,16 +230,13 @@ describe("PaymentRepository tests", () => {
     expect(error).toBeInstanceOf(VectorError);
   });
 
-  test("Should finalizePayment work and return Payment without any errors", async () => {
+  test("Should acceptPayment work and return Payment without any errors", async () => {
     // Arrange
     const paymentRepositoryMocks = new PaymentRepositoryMocks();
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    const result = await repo.finalizePayment(
-      commonPaymentId,
-      commonAmount.toString(),
-    );
+    const result = await repo.acceptPayment(commonPaymentId, commonAmount);
 
     // Assert
     expect(result).toBeDefined();
@@ -337,16 +244,13 @@ describe("PaymentRepository tests", () => {
     expect(result._unsafeUnwrap()).toBe(paymentRepositoryMocks.approvedPayment);
   });
 
-  test("Should finalizePayment return error if getBrowserNode failed", async () => {
+  test("Should acceptPayment return error if getBrowserNode failed", async () => {
     // Arrange
     const paymentRepositoryMocks = new PaymentRepositoryErrorMocks();
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    const result = await repo.finalizePayment(
-      commonPaymentId,
-      commonAmount.toString(),
-    );
+    const result = await repo.acceptPayment(commonPaymentId, commonAmount);
     const error = result._unsafeUnwrapErr();
 
     // Assert
@@ -364,7 +268,7 @@ describe("PaymentRepository tests", () => {
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    const result = await repo.provideStake(commonPaymentId, merchantAddress);
+    const result = await repo.provideStake(commonPaymentId, gatewayAddress);
 
     // Assert
     expect(result).toBeDefined();
@@ -379,7 +283,7 @@ describe("PaymentRepository tests", () => {
     const repo = paymentRepositoryMocks.factoryPaymentRepository();
 
     // Act
-    const result = await repo.provideStake(commonPaymentId, merchantAddress);
+    const result = await repo.provideStake(commonPaymentId, gatewayAddress);
     const error = result._unsafeUnwrapErr();
 
     // Assert
@@ -429,6 +333,8 @@ describe("PaymentRepository tests", () => {
     const result = await repo.resolveInsurance(
       commonPaymentId,
       insuranceTransferId,
+      BigNumberString("0"),
+      null,
     );
 
     // Assert
@@ -445,7 +351,7 @@ describe("PaymentRepository tests", () => {
       paymentRepositoryMocks.vectorUtils.resolveInsuranceTransfer(
         insuranceTransferId,
         commonPaymentId,
-        undefined,
+        null,
         BigNumber.from("0"),
       ),
     ).thenReturn(
@@ -460,6 +366,8 @@ describe("PaymentRepository tests", () => {
     const result = await repo.resolveInsurance(
       commonPaymentId,
       insuranceTransferId,
+      BigNumberString("0"),
+      null,
     );
 
     // Assert

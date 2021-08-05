@@ -7,13 +7,19 @@ import {
   PrivateCredentials,
   BlockchainUnavailableError,
   InvalidParametersError,
+  EthereumAddress,
 } from "@hypernetlabs/objects";
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 import { ResultAsync, okAsync } from "neverthrow";
 import td from "testdouble";
 
 import { IBlockchainProvider } from "@interfaces/utilities";
 import { routerChannelAddress, commonAmount, mockUtils } from "@mock/mocks";
+
+interface ISendTransactionVals {
+  to: EthereumAddress;
+  value: BigNumber;
+}
 
 export class BlockchainProviderMock implements IBlockchainProvider {
   public signer = td.object<ethers.providers.JsonRpcSigner>();
@@ -25,10 +31,11 @@ export class BlockchainProviderMock implements IBlockchainProvider {
     );
 
     td.when(
-      this.signer.sendTransaction({
-        to: routerChannelAddress,
-        value: commonAmount,
-      }),
+      this.signer.sendTransaction(
+        td.matchers.argThat((arg: ISendTransactionVals) => {
+          return arg.to == routerChannelAddress && arg.value.eq(commonAmount);
+        }),
+      ),
     ).thenResolve({
       wait: () => new Promise((resolve) => resolve({} as TransactionReceipt)),
     } as TransactionResponse);

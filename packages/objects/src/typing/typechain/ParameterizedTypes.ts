@@ -1,7 +1,10 @@
-import { Address, Bytes32, SignatureString } from "@connext/vector-types";
+import { Address, SignatureString } from "@connext/vector-types";
+
+import { BigNumberString } from "@objects/BigNumberString";
+import { PaymentId } from "@objects/PaymentId";
 
 export type Rate = {
-  deltaAmount: string;
+  deltaAmount: BigNumberString;
   deltaTime: string;
 };
 
@@ -9,13 +12,13 @@ export type ParameterizedState = {
   receiver: Address;
   start: string;
   expiration: string;
-  UUID: string;
+  UUID: PaymentId;
   rate: Rate;
 };
 
 export type ParameterizedResolverData = {
-  UUID: string;
-  paymentAmountTaken: string;
+  UUID: PaymentId;
+  paymentAmountTaken: BigNumberString;
 };
 
 export type ParameterizedResolver = {

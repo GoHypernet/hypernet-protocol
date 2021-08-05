@@ -9,10 +9,11 @@ import {
   IHypernetCore,
   IHypernetCoreType,
   PaymentId,
-  MerchantUrl,
+  GatewayUrl,
+  BigNumberString,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
-import { BigNumber } from "ethers";
 import { injectable, inject } from "inversify";
 import Postmate from "postmate";
 
@@ -51,13 +52,13 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       depositFunds: (
         data: IIFrameCallData<{
           assetAddress: EthereumAddress;
-          amount: string;
+          amount: BigNumberString;
         }>,
       ) => {
         this.returnForModel(() => {
           return this.core.depositFunds(
             data.data.assetAddress,
-            BigNumber.from(data.data.amount),
+            data.data.amount,
           );
         }, data.callId);
       },
@@ -65,14 +66,14 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       withdrawFunds: (
         data: IIFrameCallData<{
           assetAddress: EthereumAddress;
-          amount: string;
+          amount: BigNumberString;
           destinationAddress: EthereumAddress;
         }>,
       ) => {
         this.returnForModel(() => {
           return this.core.withdrawFunds(
             data.data.assetAddress,
-            BigNumber.from(data.data.amount),
+            data.data.amount,
             data.data.destinationAddress,
           );
         }, data.callId);
@@ -93,84 +94,26 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getActiveLinks();
         }, data.callId);
       },
-      sendFunds: (
-        data: IIFrameCallData<{
-          counterPartyAccount: PublicIdentifier;
-          amount: string;
-          expirationDate: number;
-          requiredStake: string;
-          paymentToken: EthereumAddress;
-          merchantUrl: MerchantUrl;
-        }>,
-      ) => {
-        this.returnForModel(() => {
-          return this.core.sendFunds(
-            data.data.counterPartyAccount,
-            BigNumber.from(data.data.amount),
-            data.data.expirationDate,
-            BigNumber.from(data.data.requiredStake),
-            data.data.paymentToken,
-            data.data.merchantUrl,
-          );
-        }, data.callId);
-      },
-
-      authorizeFunds: (
-        data: IIFrameCallData<{
-          counterPartyAccount: PublicIdentifier;
-          totalAuthorized: string;
-          expirationDate: number;
-          deltaAmount: string;
-          deltaTime: number;
-          requiredStake: string;
-          paymentToken: EthereumAddress;
-          merchantUrl: MerchantUrl;
-        }>,
-      ) => {
-        this.returnForModel(() => {
-          return this.core.authorizeFunds(
-            data.data.counterPartyAccount,
-            BigNumber.from(data.data.totalAuthorized),
-            data.data.expirationDate,
-            BigNumber.from(data.data.deltaAmount),
-            data.data.deltaTime,
-            BigNumber.from(data.data.requiredStake),
-            data.data.paymentToken,
-            data.data.merchantUrl,
-          );
-        }, data.callId);
-      },
-
       acceptFunds: (data: IIFrameCallData<PaymentId[]>) => {
         this.returnForModel(() => {
           return this.core.acceptOffers(data.data);
         }, data.callId);
       },
-      authorizeMerchant: (data: IIFrameCallData<MerchantUrl>) => {
+      authorizeGateway: (data: IIFrameCallData<GatewayUrl>) => {
         this.returnForModel(() => {
-          return this.core.authorizeMerchant(data.data);
+          return this.core.authorizeGateway(data.data);
         }, data.callId);
       },
-      deauthorizeMerchant: (data: IIFrameCallData<MerchantUrl>) => {
+      deauthorizeGateway: (data: IIFrameCallData<GatewayUrl>) => {
         this.returnForModel(() => {
-          return this.core.deauthorizeMerchant(data.data);
+          return this.core.deauthorizeGateway(data.data);
         }, data.callId);
       },
-      initiateDispute: (data: IIFrameCallData<PaymentId>) => {
-        this.returnForModel(() => {
-          return this.core.initiateDispute(data.data);
-        }, data.callId);
+      closeGatewayIFrame: (data: IIFrameCallData<GatewayUrl>) => {
+        this.core.closeGatewayIFrame(data.data);
       },
-      resolveInsurance: (data: IIFrameCallData<PaymentId>) => {
-        this.returnForModel(() => {
-          return this.core.resolveInsurance(data.data);
-        }, data.callId);
-      },
-      closeMerchantIFrame: (data: IIFrameCallData<MerchantUrl>) => {
-        this.core.closeMerchantIFrame(data.data);
-      },
-      displayMerchantIFrame: (data: IIFrameCallData<MerchantUrl>) => {
-        this.core.displayMerchantIFrame(data.data);
+      displayGatewayIFrame: (data: IIFrameCallData<GatewayUrl>) => {
+        this.core.displayGatewayIFrame(data.data);
       },
 
       //   pullFunds(paymentId: string, amount: BigNumber): Promise<Payment>;
@@ -179,19 +122,19 @@ export class CoreListener extends ChildProxy implements ICoreListener {
 
       // finalizePushPayment(paymentId: string): Promise<void>;
 
-      mintTestToken: (data: IIFrameCallData<string>) => {
+      mintTestToken: (data: IIFrameCallData<BigNumberString>) => {
         this.returnForModel(() => {
-          return this.core.mintTestToken(BigNumber.from(data.data));
+          return this.core.mintTestToken(data.data);
         }, data.callId);
       },
-      getAuthorizedMerchants: (data: IIFrameCallData<void>) => {
+      getAuthorizedGateways: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getAuthorizedMerchants();
+          return this.core.getAuthorizedGateways();
         }, data.callId);
       },
-      getAuthorizedMerchantsConnectorsStatus: (data: IIFrameCallData<void>) => {
+      getAuthorizedGatewaysConnectorsStatus: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
-          return this.core.getAuthorizedMerchantsConnectorsStatus();
+          return this.core.getAuthorizedGatewaysConnectorsStatus();
         }, data.callId);
       },
       providePrivateCredentials: (
@@ -205,16 +148,6 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.privateKey,
             data.data.mnemonic,
           );
-        }, data.callId);
-      },
-      setPreferredPaymentToken: (data: IIFrameCallData<EthereumAddress>) => {
-        this.returnForModel(() => {
-          return this.core.setPreferredPaymentToken(data.data);
-        }, data.callId);
-      },
-      getPreferredPaymentToken: (data: IIFrameCallData<void>) => {
-        this.returnForModel(() => {
-          return this.core.getPreferredPaymentToken();
         }, data.callId);
       },
     });
@@ -261,6 +194,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
     });
 
     this.core.onPushPaymentDelayed.subscribe((val) => {
+      console.log("Emitting onPushPaymentDelayed");
       parent.emit("onPushPaymentDelayed", val);
     });
 
@@ -284,24 +218,28 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       parent.emit("onCeramicFailed", val);
     });
 
-    this.core.onMerchantAuthorized.subscribe((val) => {
-      parent.emit("onMerchantAuthorized", val.toString());
+    this.core.onGatewayAuthorized.subscribe((val) => {
+      parent.emit("onGatewayAuthorized", val.toString());
     });
 
-    this.core.onAuthorizedMerchantUpdated.subscribe((val) => {
-      parent.emit("onAuthorizedMerchantUpdated", val.toString());
+    this.core.onGatewayDeauthorizationStarted.subscribe((val) => {
+      parent.emit("onGatewayDeauthorizationStarted", val.toString());
     });
 
-    this.core.onAuthorizedMerchantActivationFailed.subscribe((val) => {
-      parent.emit("onAuthorizedMerchantActivationFailed", val.toString());
+    this.core.onAuthorizedGatewayUpdated.subscribe((val) => {
+      parent.emit("onAuthorizedGatewayUpdated", val.toString());
     });
 
-    this.core.onMerchantIFrameDisplayRequested.subscribe((merchantUrl) => {
-      parent.emit("onMerchantIFrameDisplayRequested", merchantUrl);
+    this.core.onAuthorizedGatewayActivationFailed.subscribe((val) => {
+      parent.emit("onAuthorizedGatewayActivationFailed", val.toString());
     });
 
-    this.core.onMerchantIFrameCloseRequested.subscribe((merchantUrl) => {
-      parent.emit("onMerchantIFrameCloseRequested", merchantUrl);
+    this.core.onGatewayIFrameDisplayRequested.subscribe((gatewayUrl) => {
+      parent.emit("onGatewayIFrameDisplayRequested", gatewayUrl);
+    });
+
+    this.core.onGatewayIFrameCloseRequested.subscribe((gatewayUrl) => {
+      parent.emit("onGatewayIFrameCloseRequested", gatewayUrl);
     });
 
     this.core.onInitializationRequired.subscribe(() => {

@@ -13,7 +13,7 @@ import {
   PersistenceError,
   BlockchainUnavailableError,
   EthereumAddress,
-  AuthorizedMerchantsSchema,
+  AuthorizedGatewaysSchema,
   HypernetConfig,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
@@ -132,7 +132,7 @@ export class CeramicUtils implements ICeramicUtils {
         PersistenceError
       >[] = [];
 
-      const schemas = [AuthorizedMerchantsSchema];
+      const schemas = [AuthorizedGatewaysSchema];
       for (const schema of schemas) {
         promisesOfPublishSchema.push(
           ResultAsync.fromPromise(

@@ -4,25 +4,26 @@ import {
   IConditionalTransferCreatedPayload,
   IConditionalTransferResolvedPayload,
   PaymentId,
-  LogicalError,
   VectorError,
   BlockchainUnavailableError,
   InvalidPaymentIdError,
   PaymentFinalizeError,
   PaymentStakeError,
   TransferResolutionError,
-  RouterChannelUnknownError,
   InvalidPaymentError,
   InvalidParametersError,
   TransferCreationError,
   ETransferType,
   MessageState,
+  IFullTransferState,
+  InsuranceState,
+  ParameterizedState,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
-import { ResultAsync, errAsync, okAsync } from "neverthrow";
-
 import { IVectorListener } from "@interfaces/api";
 import { IPaymentService } from "@interfaces/business";
+import { ResultAsync, okAsync } from "neverthrow";
+
 import {
   IBrowserNodeProvider,
   IContextProvider,
@@ -46,16 +47,14 @@ export class VectorAPIListener implements IVectorListener {
   /**
    *
    */
-  public setup(): ResultAsync<
+  public initialize(): ResultAsync<
     void,
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentIdError
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -69,7 +68,7 @@ export class VectorAPIListener implements IVectorListener {
           // Filter out any transfer not containing a transfer with a UUID in the transferState (insurance & parameterized transfer types)
           // or a UUID as part of transferState.message (message transfer type)
 
-          this.paymentUtils
+          this.vectorUtils
             .getTransferType(payload.transfer)
             .andThen((transferType) => {
               let paymentId: PaymentId;
@@ -78,14 +77,19 @@ export class VectorAPIListener implements IVectorListener {
               if (transferType === ETransferType.Offer) {
                 // @todo also add in PullRecord type)
                 const offerDetails: IHypernetOfferDetails = JSON.parse(
-                  (transfer.transferState as MessageState).message,
+                  (transfer as IFullTransferState<MessageState>).transferState
+                    .message,
                 );
                 paymentId = offerDetails.paymentId;
               } else if (
                 transferType === ETransferType.Insurance ||
                 transferType === ETransferType.Parameterized
               ) {
-                paymentId = transfer.transferState.UUID;
+                paymentId = (
+                  transfer as IFullTransferState<
+                    InsuranceState | ParameterizedState
+                  >
+                ).transferState.UUID;
               } else {
                 this.logUtils.log(
                   `Transfer type was not recognized, doing nothing. TransferType: '${transferType}'`,
@@ -107,11 +111,7 @@ export class VectorAPIListener implements IVectorListener {
                     // if the transfer is an offer transfer, we need to notify the payment service
                     // than an offer has been resolved.
                     // @todo create methods in payment service
-                    this.logUtils.error(
-                      "Resolved offer transfer is unimplemented!",
-                    );
-                    this.logUtils.debug(payload);
-                    return okAsync(undefined);
+                    return this.paymentService.offerResolved(paymentId);
                   } else if (transferType === ETransferType.Insurance) {
                     // if the transfer is an insurance transfer, we need to notify the payment service
                     // that stake has been resolved.
@@ -128,11 +128,10 @@ export class VectorAPIListener implements IVectorListener {
                     );
                     this.logUtils.debug(payload);
                     return okAsync(undefined);
-                  } else {
-                    return errAsync(
-                      new LogicalError("Unrecognized transfer type!"),
-                    );
                   }
+
+                  this.logUtils.error("Unrecognized transfer type!");
+                  return okAsync(undefined);
                 });
             })
             .mapErr((e) => {
@@ -149,7 +148,7 @@ export class VectorAPIListener implements IVectorListener {
           // Filter out any transfer not containing a transfer with a UUID in the transferState (insurance & parameterized transfer types)
           // or a UUID as part of transferState.message (message transfer type)
 
-          this.paymentUtils
+          this.vectorUtils
             .getTransferType(payload.transfer)
             .andThen((transferType) => {
               let paymentId: PaymentId;
@@ -157,19 +156,25 @@ export class VectorAPIListener implements IVectorListener {
 
               if (transferType === ETransferType.Offer) {
                 const message: IHypernetOfferDetails = JSON.parse(
-                  transfer.transferState.message,
+                  (transfer as IFullTransferState<MessageState>).transferState
+                    .message,
                 );
                 paymentId = message.paymentId;
               } else if (transferType === ETransferType.PullRecord) {
                 const message: IHypernetPullPaymentDetails = JSON.parse(
-                  transfer.transferState.message,
+                  (transfer as IFullTransferState<MessageState>).transferState
+                    .message,
                 );
                 paymentId = message.paymentId;
               } else if (
                 transferType === ETransferType.Insurance ||
                 transferType === ETransferType.Parameterized
               ) {
-                paymentId = transfer.transferState.UUID;
+                paymentId = (
+                  transfer as IFullTransferState<
+                    InsuranceState | ParameterizedState
+                  >
+                ).transferState.UUID;
               } else {
                 this.logUtils.log(
                   `Transfer type was not recognized, doing nothing. TransferType: '${transferType}'`,

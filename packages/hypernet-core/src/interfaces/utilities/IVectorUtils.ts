@@ -15,48 +15,92 @@ import {
   VectorError,
   EPaymentType,
   ETransferState,
+  BigNumberString,
+  UnixTimestamp,
+  ETransferType,
+  BlockchainUnavailableError,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 /**
- *
+ * VectorUtils are for working with low-level transfers and directly with vector concepts.
  */
 export interface IVectorUtils {
   /**
-   *
+   * initialize the Vector utils. This allows us to avoid lazy loading and removes possible
+   * errors from later calls, like getRouterChannelAddress, which will never error after
+   * a successful initialize().
    */
-  getRouterChannelAddress(): ResultAsync<
-    EthereumAddress,
-    RouterChannelUnknownError | VectorError
-  >;
+  initialize(): ResultAsync<void, RouterChannelUnknownError | VectorError>;
 
   /**
-   *
+   * Returns the address of the channel with the router, if exists.
+   * Otherwise, attempts to create a channel with the router & return the address.
+   */
+  getRouterChannelAddress(): ResultAsync<EthereumAddress, never>;
+
+  /**
+   * Resolves a message transfer
    * @param transferId
+   * @param message This can be anything you like, except the blank string "", which is reserved for canceling
    */
   resolveMessageTransfer(
     transferId: TransferId,
-  ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
-
-  resolvePaymentTransfer(
-    transferId: TransferId,
-    paymentId: PaymentId,
-    amount: string,
+    message?: string,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
   /**
    *
    * @param transferId
    * @param paymentId
-   * @param mediatorSignature
+   * @param gatewaySignature
    * @param amount
    */
   resolveInsuranceTransfer(
     transferId: TransferId,
     paymentId: PaymentId,
-    mediatorSignature?: Signature,
-    amount?: BigNumber,
+    gatewaySignature: Signature | null,
+    amount: BigNumber,
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
+
+  /**
+   * Resolves a payment transfer for an amount
+   * @param transferId
+   * @param paymentId
+   * @param amount
+   */
+  resolveParameterizedTransfer(
+    transferId: TransferId,
+    paymentId: PaymentId,
+    amount: BigNumberString,
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
+
+  /**
+   * Cancels a Message transfer.
+   * Canceled transfers are distinct from resolved ones; they always have null values.
+   * @param transferId
+   */
+  cancelMessageTransfer(
+    transferId: TransferId,
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
+
+  /**
+   * Cancels an Insurance transfer.
+   * Canceled transfers are distinct from resolved ones; they always have null values.
+   * @param transferId
+   */
+  cancelInsuranceTransfer(
+    transferId: TransferId,
+  ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
+
+  /**
+   * Cancels a Parameterized transfer.
+   * Canceled transfers are distinct from resolved ones; they always have null values.
+   * @param transferId
+   */
+  cancelParameterizedTransfer(
+    transferId: TransferId,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
   /**
@@ -76,43 +120,81 @@ export interface IVectorUtils {
   >;
 
   /**
-   *
+   * Creates an Insurance transfer. Insurance transfers can be resolved by the reciever for 0,
+   * or resolved for more than 0 by a third party dispute mediator. The mediator will provide a
+   * signature for the non-0 amount.
+   * @param toAddress
+   * @param mediatorAddress
    * @param amount
-   * @param assetAddress
+   * @param expiration
+   * @param UUID
    */
-  createPaymentTransfer(
-    type: EPaymentType,
+  createInsuranceTransfer(
     toAddress: PublicIdentifier,
-    amount: BigNumber,
-    assetAddress: EthereumAddress,
-    UUID: string,
-    start: number,
-    expiration: number,
-    deltaTime?: number,
-    deltaAmount?: string,
+    mediatorAddress: EthereumAddress,
+    amount: BigNumberString,
+    expiration: UnixTimestamp,
+    paymentId: PaymentId,
   ): ResultAsync<
     IBasicTransferResponse,
     TransferCreationError | InvalidParametersError
   >;
 
   /**
-   *
-   * @param toAddress
-   * @param amount
+   * Creates a Parameterized transfer. This is a form of payment transfer that "matures" at a rate
+   * defined by deltaTime and deltaAmount
+   * @param type
+   * @param toAddress the public identifier of the intended recipient of this transfer
+   * @param amount the amount of tokens to commit to this transfer
+   * @param assetAddress the address of the ERC20-token to transfer; zero-address for ETH
+   * @param paymentId length-64 hexadecimal string; this becomes the UUID component of the ParameterizedState
+   * @param start the start time of this transfer (UNIX timestamp)
+   * @param expiration the expiration time of this transfer (UNIX timestamp)
+   * @param deltaTime
+   * @param deltaAmount
    */
-  createInsuranceTransfer(
+  createParameterizedTransfer(
+    type: EPaymentType,
     toAddress: PublicIdentifier,
-    mediatorAddress: EthereumAddress,
-    amount: BigNumber,
-    expiration: number,
-    UUID: string,
+    amount: BigNumberString,
+    assetAddress: EthereumAddress,
+    paymentId: PaymentId,
+    start: UnixTimestamp,
+    expiration: UnixTimestamp,
+    deltaTime?: number,
+    deltaAmount?: BigNumberString,
   ): ResultAsync<
     IBasicTransferResponse,
     TransferCreationError | InvalidParametersError
   >;
 
-  getTimestampFromTransfer(transfer: IFullTransferState): number;
-  getTransferStateFromTransfer(transfer: IFullTransferState): ETransferState;
+  getTimestampFromTransfer(transfer: IFullTransferState): UnixTimestamp;
+
+  /**
+   * Returns the state of the transfer. Transfers can be active, resolved, or canceled.
+   * A resolved transfer is canceled if it was resolved via the EncodedCancel
+   * transferResolution; if this is not the case the transfer is just resolved.
+   *
+   * @param transfer
+   */
+  getTransferStateFromTransfer(
+    transfer: IFullTransferState,
+  ): ResultAsync<ETransferState, BlockchainUnavailableError>;
+
+  /**
+   *
+   * @param transfer
+   */
+  getTransferType(
+    transfer: IFullTransferState,
+  ): ResultAsync<ETransferType, VectorError>;
+
+  getTransferTypeWithTransfer(
+    transfer: IFullTransferState,
+  ): ResultAsync<
+    { transferType: ETransferType; transfer: IFullTransferState },
+    VectorError
+  >;
 }
 
 export const IVectorUtilsType = Symbol.for("IVectorUtils");

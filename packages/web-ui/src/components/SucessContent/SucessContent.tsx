@@ -1,8 +1,9 @@
-import React from "react";
 import { Box } from "@material-ui/core";
+import React from "react";
 
 import { Button } from "@web-ui/components";
 import { useStyles } from "@web-ui/components/SucessContent/SucessContent.style";
+import { AUTHENTICATION_SUCCESS_IMAGE_URL } from "@web-ui/constants";
 
 interface ISucessContentProps {
   label?: string;
@@ -17,10 +18,6 @@ export const SucessContent: React.FC<ISucessContentProps> = (
   const classes = useStyles();
   return (
     <Box className={classes.container}>
-      <img
-        className={classes.successImage}
-        src="https://res.cloudinary.com/dqueufbs7/image/upload/v1620338380/images/success-icon-23194.png"
-      />
       <Box className={classes.textWrapper}>
         <Box className={classes.label}>{label}</Box>
         {info && (
@@ -29,9 +26,22 @@ export const SucessContent: React.FC<ISucessContentProps> = (
             dangerouslySetInnerHTML={{ __html: info }}
           ></Box>
         )}
+        <Box>
+          <img
+            className={classes.authenticationSuccessImg}
+            src={AUTHENTICATION_SUCCESS_IMAGE_URL}
+          />
+        </Box>
       </Box>
       {onOkay && (
-        <Button onClick={onOkay} fullWidth hasMaterialUIStyle label="OKAY" />
+        <Box className={classes.buttonWrapper}>
+          <Button
+            label="Done"
+            onClick={onOkay}
+            fullWidth={true}
+            bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
+          />
+        </Box>
       )}
     </Box>
   );

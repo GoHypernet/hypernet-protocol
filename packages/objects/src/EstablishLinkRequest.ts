@@ -17,7 +17,7 @@
 //   public paymentToken: EthereumAddress;
 
 //   @Type(() => String)
-//   public merchantUrl: string;
+//   public gatewayUrl: string;
 
 //   @Type(() => String)
 //   public threadAddress: string;
@@ -27,14 +27,14 @@
 //     consumer: string,
 //     provider: string,
 //     paymentToken: EthereumAddress,
-//     merchantUrl: string,
+//     gatewayUrl: string,
 //     threadAddress: string,
 //   ) {
 //     this.linkId = linkId;
 //     this.consumer = consumer;
 //     this.provider = provider;
 //     this.paymentToken = paymentToken;
-//     this.merchantUrl = merchantUrl;
+//     this.gatewayUrl = gatewayUrl;
 //     this.threadAddress = threadAddress;
 //   }
 // }
@@ -46,7 +46,7 @@
 //       establishLinkRequest.consumer,
 //       establishLinkRequest.provider,
 //       establishLinkRequest.paymentToken,
-//       establishLinkRequest.merchantUrl,
+//       establishLinkRequest.gatewayUrl,
 //       establishLinkRequest.threadAddress,
 //     );
 //   }

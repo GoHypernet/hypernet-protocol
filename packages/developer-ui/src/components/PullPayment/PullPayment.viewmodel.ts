@@ -1,7 +1,11 @@
-import { MerchantUrl, PaymentId, PullPayment } from "@hypernetlabs/objects";
-import { EPaymentState } from "@hypernetlabs/objects";
+import {
+  BigNumberString,
+  GatewayUrl,
+  PaymentId,
+  PullPayment,
+  EPaymentState,
+} from "@hypernetlabs/objects";
 import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import { BigNumber } from "ethers";
 import ko from "knockout";
 import moment from "moment";
 
@@ -30,7 +34,7 @@ export class PullPaymentViewModel {
   public createdTimestamp: ko.Observable<string>;
   public updatedTimestamp: ko.Observable<string>;
   public collateralRecovered: ko.Observable<string>;
-  public merchantUrl: ko.Observable<MerchantUrl>;
+  public gatewayUrl: ko.Observable<GatewayUrl>;
   public authorizedAmount: ko.Observable<string>;
   public transferedAmount: ko.Observable<string>;
   public deltaAmount: ko.Observable<string>;
@@ -41,10 +45,6 @@ export class PullPaymentViewModel {
   public showAcceptButton: ko.PureComputed<boolean>;
   public pullButton: ButtonParams;
   public showPullButton: ko.PureComputed<boolean>;
-  public disputeButton: ButtonParams;
-  public showDisputeButton: ko.PureComputed<boolean>;
-  public resolveInsuranceButton: ButtonParams;
-  public showResolveInsuranceButton: ko.PureComputed<boolean>;
 
   protected integration: IHypernetWebIntegration;
   protected paymentId: PaymentId;
@@ -72,7 +72,7 @@ export class PullPaymentViewModel {
     this.collateralRecovered = ko.observable(
       params.payment.collateralRecovered.toString(),
     );
-    this.merchantUrl = ko.observable(params.payment.merchantUrl);
+    this.gatewayUrl = ko.observable(params.payment.gatewayUrl);
     this.authorizedAmount = ko.observable(
       params.payment.authorizedAmount.toString(),
     );
@@ -124,7 +124,7 @@ export class PullPaymentViewModel {
 
     this.pullButton = new ButtonParams("Pull", async () => {
       return await this.integration.core
-        .pullFunds(this.paymentId, BigNumber.from(1))
+        .pullFunds(this.paymentId, BigNumberString("1"))
         .mapErr((e) => {
           alert("Unable to pull funds!");
           console.error(e);
@@ -136,41 +136,6 @@ export class PullPaymentViewModel {
       return (
         state.state === EPaymentState.Approved &&
         this.publicIdentifier() == this.to()
-      );
-    });
-
-    this.disputeButton = new ButtonParams("Dispute", async () => {
-      return await this.integration.core
-        .initiateDispute(this.paymentId)
-        .mapErr((e) => {
-          alert("Error during dispute!");
-          console.error(e);
-        });
-    });
-
-    this.showDisputeButton = ko.pureComputed(() => {
-      return (
-        this.state().state === EPaymentState.Accepted &&
-        this.publicIdentifier() === this.from()
-      );
-    });
-
-    this.resolveInsuranceButton = new ButtonParams(
-      "Resolve Insurace",
-      async () => {
-        return await this.integration.core
-          .resolveInsurance(this.paymentId)
-          .mapErr((e) => {
-            alert("Error during resolveInsurance!");
-            console.error(e);
-          });
-      },
-    );
-
-    this.showResolveInsuranceButton = ko.pureComputed(() => {
-      return (
-        this.state().state === EPaymentState.Accepted &&
-        this.publicIdentifier() === this.from()
       );
     });
 

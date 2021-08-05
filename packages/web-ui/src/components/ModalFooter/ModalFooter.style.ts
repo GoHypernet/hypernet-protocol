@@ -9,7 +9,7 @@ export const useStyles = makeStyles({
     fontSize: 15,
   },
   accountLink: {
-    color: "#7d7d7d",
-    fontSize: 12,
+    color: "#2539DEDE",
+    fontSize: 15,
   },
 });

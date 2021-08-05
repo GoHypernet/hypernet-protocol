@@ -2,8 +2,11 @@ import {
   Balances,
   PublicIdentifier,
   EPaymentType,
-  MerchantUrl,
+  GatewayUrl,
+  UnixTimestamp,
+  BigNumberString,
 } from "@hypernetlabs/objects";
+import { useStoreContext } from "@web-ui/contexts";
 import { ITokenSelectorOption } from "@web-ui/interfaces";
 import {
   PaymentTokenOptionViewModel,
@@ -12,8 +15,6 @@ import {
 } from "@web-ui/interfaces/objects";
 import { utils } from "ethers";
 import { useEffect, useReducer } from "react";
-
-import { useStoreContext } from "@web-ui/contexts";
 
 class PaymentTypeOption {
   constructor(public typeName: string, public type: EPaymentType) {}
@@ -49,8 +50,7 @@ interface IReducerStateReducer {
   setRequiredStake: (param?: string) => void;
   paymentType: EPaymentType;
   setPaymentType: (param?: EPaymentType) => void;
-  merchantUrl: MerchantUrl;
-  sendFunds: () => void;
+  gatewayUrl: GatewayUrl;
   paymentTypeOptions: PaymentTypeOption[];
 }
 
@@ -64,7 +64,7 @@ interface IReducerState {
   amount: string;
   expirationDate: string;
   requiredStake: string;
-  merchantUrl: MerchantUrl;
+  gatewayUrl: GatewayUrl;
   paymentType: EPaymentType;
   paymentTypeOptions: PaymentTypeOption[];
 }
@@ -86,7 +86,7 @@ export function usePayment(initialParams: any): IReducerStateReducer {
     amount: initialParams?.amount || "0",
     expirationDate: initialParams?.expirationDate || "",
     requiredStake: initialParams?.requiredStake || "0",
-    merchantUrl: initialParams?.merchantUrl || "http://localhost:5010/", // @todo replace with an actual mediator address!,
+    gatewayUrl: initialParams?.gatewayUrl || "http://localhost:5010/", // @todo replace with an actual mediator address!,
     paymentType: initialParams?.paymentType || EPaymentType.Push,
     paymentTypeOptions: [
       new PaymentTypeOption("Push", EPaymentType.Push),
@@ -244,32 +244,36 @@ export function usePayment(initialParams: any): IReducerStateReducer {
     });
   };
 
-  const sendFunds = () => {
-    coreProxy
-      .sendFunds(
-        state.counterPartyAccount,
-        utils.parseUnits(state.amount, "wei"),
-        state.expirationDate,
-        utils.parseUnits(state.requiredStake, "wei"),
-        state.selectedPaymentToken?.address,
-        state.merchantUrl,
-      )
-      .match(
-        (balances) => {
-          dispatch({
-            type: EActionTypes.SUCCESS,
-            payload: "your fund has succeeded",
-          });
-        },
-        (err) => {
-          console.log("err: ", err);
-          dispatch({
-            type: EActionTypes.ERROR,
-            payload: err.message || "your fund has failed",
-          });
-        },
-      );
-  };
+  // TODO: Determine if we can make this functionality work via the gateway
+  // const sendFunds = () => {
+  //   coreProxy
+  //     .sendFunds(
+  //       state.counterPartyAccount,
+  //       BigNumberString(utils.parseUnits(state.amount, "wei").toString()),
+  //       state.expirationDate,
+  //       BigNumberString(
+  //         utils.parseUnits(state.requiredStake, "wei").toString(),
+  //       ),
+  //       state.selectedPaymentToken?.address,
+  //       state.gatewayUrl,
+  //       null,
+  //     )
+  //     .match(
+  //       (balances) => {
+  //         dispatch({
+  //           type: EActionTypes.SUCCESS,
+  //           payload: "your fund has succeeded",
+  //         });
+  //       },
+  //       (err) => {
+  //         console.log("err: ", err);
+  //         dispatch({
+  //           type: EActionTypes.ERROR,
+  //           payload: err.message || "your fund has failed",
+  //         });
+  //       },
+  //     );
+  // };
 
   return {
     ...state,
@@ -279,6 +283,5 @@ export function usePayment(initialParams: any): IReducerStateReducer {
     setExpirationDate,
     setRequiredStake,
     setPaymentType,
-    sendFunds,
   };
 }

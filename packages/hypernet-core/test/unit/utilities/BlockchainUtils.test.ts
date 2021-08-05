@@ -6,8 +6,8 @@ require("testdouble-jest")(td, jest);
 
 import { EthersBlockchainUtils } from "@implementations/utilities";
 import { IBlockchainUtils } from "@interfaces/utilities";
-import { merchantUrl } from "@mock/mocks";
-import { BlockchainProviderMock } from "@tests/mock/utils";
+import { gatewayUrl } from "@mock/mocks";
+import { BlockchainProviderMock, ConfigProviderMock } from "@tests/mock/utils";
 
 const validatedSignature = "0xValidatedSignature";
 const validatedSignature2 = "0xInvalidatedSignature";
@@ -17,26 +17,31 @@ const domain = {
 };
 
 const types = {
-  AuthorizedMerchant: [
-    { name: "authorizedMerchantUrl", type: "string" },
-    { name: "merchantValidatedSignature", type: "string" },
+  AuthorizedGateway: [
+    { name: "authorizedGatewayUrl", type: "string" },
+    { name: "gatewayValidatedSignature", type: "string" },
   ],
 };
 
 const value = {
-  authorizedMerchantUrl: merchantUrl,
-  merchantValidatedSignature: validatedSignature,
+  authorizedGatewayUrl: gatewayUrl,
+  gatewayValidatedSignature: validatedSignature,
 };
 
 class EthersBlockchainUtilsMocks {
   public blockchainProvider: BlockchainProviderMock;
+  public configProvider: ConfigProviderMock;
 
   constructor() {
     this.blockchainProvider = new BlockchainProviderMock();
+    this.configProvider = new ConfigProviderMock();
   }
 
   public factoryUtils(): IBlockchainUtils {
-    return new EthersBlockchainUtils(this.blockchainProvider);
+    return new EthersBlockchainUtils(
+      this.blockchainProvider,
+      this.configProvider,
+    );
   }
 }
 
@@ -85,8 +90,8 @@ describe("EthersBlockchainUtils tests", () => {
 
     // Act
     const value2 = {
-      authorizedMerchantUrl: merchantUrl,
-      merchantValidatedSignature: validatedSignature2,
+      authorizedGatewayUrl: gatewayUrl,
+      gatewayValidatedSignature: validatedSignature2,
     };
     const result = utils.verifyTypedData(
       domain,
@@ -98,4 +103,36 @@ describe("EthersBlockchainUtils tests", () => {
     // Assert
     expect(result).not.toBe(wallet.address);
   });
+
+  // test("getMessageTransferEncodedCancelData() decode test", async () => {
+  //   // Arrange
+  //   const inter = new ethers.utils.Interface(TransferAbis.MessageTransfer.abi);
+
+  //   // Act
+  //   const decoded = inter.decodeFunctionResult(
+  //     "EncodedCancel",
+  //     messageTransferEncodedCancel,
+  //   );
+
+  //   // Assert
+  //   expect(decoded.length).toBe(1);
+  //   expect(decoded[0]).toBe(
+  //     "0x0000000000000000000000000000000000000000000000000000000000000000",
+  //   );
+  // });
+
+  // test("getInsuranceTransferEncodedCancelData() decode test", async () => {
+  //   // Arrange
+  //   const inter = new ethers.utils.Interface(TransferAbis.Insurance.abi);
+
+  //   // Act
+  //   const decoded = inter.decodeFunctionResult(
+  //     "EncodedCancel",
+  //     insuranceTransferEncodedCancel,
+  //   );
+
+  //   // Assert
+  //   console.log(decoded);
+  //   expect(0).toBe(1);
+  // });
 });

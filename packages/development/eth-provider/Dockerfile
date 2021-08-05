@@ -1,9 +1,15 @@
 FROM connextproject/vector_ethprovider:0.2.5-beta.6
-ENV MNEMONIC="candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"
-ENV CHAIN_ID="1337"
-COPY deploy.ts /app/deploy
+ARG MNEMONIC_ARG="candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"
+ENV MNEMONIC $MNEMONIC_ARG
+
+ARG CHAIN_ID_ARG="1337"
+ENV CHAIN_ID $CHAIN_ID_ARG
+
+COPY deploy.ts /app/deploy/
 COPY transferDefinitions/Message.json artifacts/src.sol/transferDefinitions/Message.sol/
 COPY transferDefinitions/Insurance.json artifacts/src.sol/transferDefinitions/Insurance.sol/
 COPY transferDefinitions/Parameterized.json artifacts/src.sol/transferDefinitions/Parameterized.sol/
-COPY src.ts/artifacts.ts src.ts/
+COPY Hypertoken/Hypertoken.json artifacts/src.sol/testing/Hypertoken.sol/
+COPY MocRegistry/MocRegistry.json artifacts/src.sol/testing/MocRegistry.sol/
+COPY src.ts/ src.ts/
 EXPOSE 8545

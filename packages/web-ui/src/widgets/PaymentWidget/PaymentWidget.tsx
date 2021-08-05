@@ -1,9 +1,9 @@
 import {
   PublicIdentifier,
   EthereumAddress,
-  MerchantUrl,
+  GatewayUrl,
+  EPaymentType,
 } from "@hypernetlabs/objects";
-import { EPaymentType } from "@hypernetlabs/objects";
 import { EResultStatus } from "@web-ui/interfaces/objects";
 import React from "react";
 
@@ -21,7 +21,7 @@ interface PaymentWidgetProps {
   expirationDate?: number;
   requiredStake?: string;
   paymentTokenAddress?: EthereumAddress;
-  merchantUrl?: MerchantUrl;
+  gatewayUrl?: GatewayUrl;
   paymentType?: EPaymentType;
 }
 
@@ -32,7 +32,6 @@ export const PaymentWidget: React.FC<PaymentWidgetProps> = (
     tokenSelectorOptions,
     selectedPaymentToken,
     setSelectedPaymentToken,
-    sendFunds,
     setCounterPartyAccount,
     counterPartyAccount,
     paymentType,
@@ -46,10 +45,6 @@ export const PaymentWidget: React.FC<PaymentWidgetProps> = (
     expirationDate,
     resultMessage,
   } = usePayment({ ...props });
-
-  const submitPaymentClick = () => {
-    sendFunds();
-  };
 
   if (resultMessage?.status === EResultStatus.SUCCESS) {
     return (
@@ -109,13 +104,6 @@ export const PaymentWidget: React.FC<PaymentWidgetProps> = (
           />
           <br />
         </div>
-      )}
-      {paymentType && (
-        <Button
-          onClick={submitPaymentClick}
-          disabled={!selectedPaymentToken?.address}
-          label="Submit Payment"
-        />
       )}
       <br />
       <h3>{resultMessage?.message}</h3>

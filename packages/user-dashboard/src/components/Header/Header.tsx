@@ -1,10 +1,10 @@
-import { routes } from "@user-dashboard/containers/Router/Router.routes";
+import { Box } from "@material-ui/core";
+import { pathToRegexp } from "path-to-regexp";
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { pathToRegexp } from "path-to-regexp";
-import { Box } from "@material-ui/core";
 
 import { useStyles } from "@user-dashboard/components/Header/Header.style";
+import { routes } from "@user-dashboard/containers/Router/Router.routes";
 
 const Header: React.FC = () => {
   const classes = useStyles();
@@ -18,17 +18,18 @@ const Header: React.FC = () => {
       <Box className={classes.logoWrapper}>
         <img
           className={classes.logo}
-          src={require("@user-dashboard/assets/images/HNPLogo.png").default}
+          src="https://res.cloudinary.com/dqueufbs7/image/upload/v1623464753/images/HNPLogo.png"
           alt=""
         />
       </Box>
       <Box className={classes.menuWrapper}>
         {routes.map((route, index) => (
           <Box
-            className={`${classes.menuItem} ${isPathMatchRequestedUrl(route.path)
-              ? classes.activeMenuItem
-              : classes.inactiveMenuItem
-              }`}
+            className={`${classes.menuItem} ${
+              isPathMatchRequestedUrl(route.path)
+                ? classes.activeMenuItem
+                : classes.inactiveMenuItem
+            }`}
             key={index}
           >
             <Link to={route.path}>{route.name}</Link>

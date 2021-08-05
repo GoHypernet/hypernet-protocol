@@ -17,6 +17,12 @@ export enum EStatusColor {
   PRIMARY = "PRIMARY",
 }
 
+export enum EButtonStatus {
+  primary,
+  secondary,
+  link,
+}
+
 export enum EFontWeight {
   LIGHT = 300,
   REGULAR = 400,

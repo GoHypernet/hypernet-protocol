@@ -1,21 +1,13 @@
+import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
 import {
   BlockchainUnavailableError,
   EthereumAddress,
   VectorError,
-} from "@hypernetlabs/objects";
-import {
-  InsuranceState,
-  ParameterizedState,
-  MessageState,
-} from "@hypernetlabs/objects";
-import {
-  IHypernetOfferDetails,
   IFullChannelState,
   IFullTransferState,
   IRegisteredTransfer,
   IWithdrawResponse,
 } from "@hypernetlabs/objects";
-import { EMessageTransferType } from "@hypernetlabs/objects";
 import { okAsync, ResultAsync } from "neverthrow";
 import td from "testdouble";
 
@@ -27,177 +19,82 @@ import {
   erc20AssetAddress,
   commonAmount,
   destinationAddress,
-  commonPaymentId,
-  publicIdentifier2,
   offerTransferId,
   insuranceTransferId,
   parameterizedTransferId,
-  defaultExpirationLength,
-  merchantUrl,
-  unixPast,
+  routerPublicIdentifier,
+  chainId,
+  messageTransferDefinitionAddress,
+  insuranceTransferDefinitionAddress,
+  parameterizedTransferDefinitionAddress,
+  parameterizedTransferResolverEncoding,
+  parameterizedTransferEncodedCancel,
+  insuranceTransferEncodedCancel,
+  insuranceTransferResolverEncoding,
+  messageTransferEncodedCancel,
+  messageTransferResolverEncoding,
+  activeOfferTransfer,
+  activeInsuranceTransfer,
+  activeParameterizedTransfer,
+  channelState,
 } from "@mock/mocks";
 
 export class BrowserNodeProviderMock implements IBrowserNodeProvider {
   public browserNode: IBrowserNode;
   public stateChannels = new Map<EthereumAddress, IFullChannelState>();
-  public offerTransfer: IFullTransferState<MessageState>;
-  public insuranceTransfer: IFullTransferState<InsuranceState>;
-  public parameterizedTransfer: IFullTransferState<ParameterizedState>;
-  public offerDetails: IHypernetOfferDetails;
 
   constructor(
     includeOfferTransfer = true,
     includeInsuranceTransfer = true,
     includeParameterizedTransfer = true,
     browserNode: IBrowserNode | null = null,
+    existingStateChannel = true,
   ) {
-    // Create the default set of state channels
-    this.stateChannels.set(routerChannelAddress, {
-      assetIds: [erc20AssetAddress],
-      balances: [
-        {
-          amount: ["43", "43"],
-          to: [destinationAddress],
-        },
-      ],
-      channelAddress: routerChannelAddress,
-      alice: "aliceAddress",
-      bob: "bobAddress",
-      merkleRoot: "merkleRoot",
-      nonce: 0,
-      processedDepositsA: [],
-      processedDepositsB: [],
-      timeout: "timeout",
-      aliceIdentifier: "routerPublicIdentifier",
-      bobIdentifier: "bobIdentifier",
-      latestUpdate: {
-        channelAddress: "channelAddress",
-        fromIdentifier: "",
-        toIdentifier: "",
-        type: "setup",
-        balance: { to: [""], amount: [""] },
-        assetId: "assetId",
-        nonce: 0,
-        details: {},
-      },
-      networkContext: {
-        chainId: 1337,
-        channelFactoryAddress: "channelFactoryAddress",
-        transferRegistryAddress: "transferRegistryAddress",
-      },
-      defundNonces: [],
-      inDispute: false,
-    });
-
-    this.offerDetails = {
-      messageType: EMessageTransferType.OFFER,
-      requireOnline: false,
-      paymentId: commonPaymentId,
-      creationDate: unixPast,
-      to: publicIdentifier2,
-      from: publicIdentifier,
-      requiredStake: commonAmount.toString(),
-      paymentAmount: commonAmount.toString(),
-      merchantUrl: merchantUrl,
-      paymentToken: erc20AssetAddress,
-      expirationDate: unixPast + defaultExpirationLength,
-    };
-
-    this.offerTransfer = {
-      balance: {
-        amount: ["43", "43"],
-        to: [destinationAddress],
-      },
-      assetId: erc20AssetAddress,
-      channelAddress: routerChannelAddress,
-      inDispute: false,
-      transferId: offerTransferId,
-      transferDefinition: destinationAddress,
-      transferTimeout: "string",
-      initialStateHash: "string",
-      initiator: publicIdentifier,
-      responder: publicIdentifier2,
-      channelFactoryAddress: "channelFactoryAddress",
-      chainId: 1337,
-      transferEncodings: ["string"],
-      transferState: {
-        message: JSON.stringify(this.offerDetails),
-      },
-      channelNonce: 1,
-      initiatorIdentifier: publicIdentifier,
-      responderIdentifier: publicIdentifier2,
-    };
-
-    this.insuranceTransfer = {
-      balance: {
-        amount: ["43", "43"],
-        to: [destinationAddress],
-      },
-      assetId: erc20AssetAddress,
-      channelAddress: routerChannelAddress,
-      inDispute: false,
-      transferId: insuranceTransferId,
-      transferDefinition: destinationAddress,
-      transferTimeout: "string",
-      initialStateHash: "string",
-      initiator: publicIdentifier,
-      responder: publicIdentifier2,
-      channelFactoryAddress: "channelFactoryAddress",
-      chainId: 1337,
-      transferEncodings: ["string"],
-      transferState: {
-        receiver: publicIdentifier,
-        mediator: merchantUrl,
-        collateral: "1",
-        expiration: (unixPast + defaultExpirationLength).toString(),
-        UUID: commonPaymentId,
-      },
-      channelNonce: 1,
-      initiatorIdentifier: publicIdentifier,
-      responderIdentifier: publicIdentifier2,
-    };
-
-    this.parameterizedTransfer = {
-      balance: {
-        amount: ["43", "43"],
-        to: [destinationAddress],
-      },
-      assetId: erc20AssetAddress,
-      channelAddress: routerChannelAddress,
-      inDispute: false,
-      transferId: parameterizedTransferId,
-      transferDefinition: destinationAddress,
-      transferTimeout: "string",
-      initialStateHash: "string",
-      initiator: publicIdentifier,
-      responder: publicIdentifier2,
-      channelFactoryAddress: "channelFactoryAddress",
-      chainId: 1337,
-      transferEncodings: ["string"],
-      transferState: {
-        receiver: publicIdentifier2,
-        start: unixPast.toString(),
-        expiration: (unixPast + defaultExpirationLength).toString(),
-        UUID: commonPaymentId,
-        rate: {
-          deltaAmount: "1",
-          deltaTime: "1",
-        },
-      },
-      channelNonce: 1,
-      initiatorIdentifier: publicIdentifier,
-      responderIdentifier: publicIdentifier2,
-    };
+    if (existingStateChannel) {
+      // Create the default set of state channels
+      this.stateChannels.set(routerChannelAddress, channelState);
+    }
 
     // If we were not provided with a specific browser node, set up a mock one.
     if (browserNode == null) {
       this.browserNode = td.object<IBrowserNode>();
+
+      td.when(
+        this.browserNode.setup(
+          routerPublicIdentifier,
+          chainId,
+          DEFAULT_CHANNEL_TIMEOUT.toString(),
+        ),
+      ).thenReturn(okAsync({ channelAddress: routerChannelAddress }));
+
+      td.when(
+        this.browserNode.restoreState(routerPublicIdentifier, chainId),
+      ).thenReturn(okAsync(undefined));
+
       td.when(this.browserNode.getStateChannels()).thenReturn(
         okAsync(Array.from(this.stateChannels.keys())),
       );
+
+      for (const stateChannel of this.stateChannels.values()) {
+        td.when(
+          this.browserNode.getStateChannel(
+            EthereumAddress(stateChannel.channelAddress),
+          ),
+        ).thenReturn(
+          okAsync(
+            this.stateChannels.get(
+              EthereumAddress(stateChannel.channelAddress),
+            ),
+          ),
+        );
+      }
+
       td.when(
-        this.browserNode.getStateChannel(routerChannelAddress),
-      ).thenReturn(okAsync(this.stateChannels.get(routerChannelAddress)));
+        this.browserNode.getStateChannelByParticipants(
+          routerPublicIdentifier,
+          chainId,
+        ),
+      ).thenReturn(okAsync(channelState));
 
       // @todo: Figure out if there is a better way to stub get properties
       (this.browserNode as any).publicIdentifier = publicIdentifier;
@@ -218,7 +115,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       td.when(
         this.browserNode.withdraw(
           routerChannelAddress,
-          commonAmount.toString(),
+          commonAmount,
           ethereumAddress,
           destinationAddress,
         ),
@@ -227,31 +124,31 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
       td.when(
         this.browserNode.withdraw(
           routerChannelAddress,
-          commonAmount.toString(),
+          commonAmount,
           erc20AssetAddress,
           destinationAddress,
         ),
       ).thenReturn(okAsync({} as IWithdrawResponse));
 
       td.when(this.browserNode.getTransfer(offerTransferId)).thenReturn(
-        okAsync(this.offerTransfer),
+        okAsync(activeOfferTransfer),
       );
       td.when(this.browserNode.getTransfer(insuranceTransferId)).thenReturn(
-        okAsync(this.insuranceTransfer),
+        okAsync(activeInsuranceTransfer),
       );
       td.when(this.browserNode.getTransfer(parameterizedTransferId)).thenReturn(
-        okAsync(this.parameterizedTransfer),
+        okAsync(activeParameterizedTransfer),
       );
 
       const transfers = new Array<IFullTransferState>();
       if (includeOfferTransfer) {
-        transfers.push(this.offerTransfer);
+        transfers.push(activeOfferTransfer);
       }
       if (includeInsuranceTransfer) {
-        transfers.push(this.insuranceTransfer);
+        transfers.push(activeInsuranceTransfer);
       }
       if (includeParameterizedTransfer) {
-        transfers.push(this.parameterizedTransfer);
+        transfers.push(activeParameterizedTransfer);
       }
       td.when(
         this.browserNode.getActiveTransfers(routerChannelAddress),
@@ -263,16 +160,47 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
         ),
       ).thenReturn(okAsync(transfers));
 
-      td.when(
-        this.browserNode.getRegisteredTransfers(this.offerTransfer.chainId),
-      ).thenReturn(
+      td.when(this.browserNode.getRegisteredTransfers(chainId)).thenReturn(
         okAsync([
           {
+            definition: "0xf25186B5081Ff5cE73482AD761DB0eB0d25abfBF",
+            encodedCancel:
+              "0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000041000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            name: "Withdraw",
+            resolverEncoding: "tuple(bytes responderSignature)",
+            stateEncoding:
+              "tuple(bytes initiatorSignature, address initiator, address responder, bytes32 data, uint256 nonce, uint256 fee, address callTo, bytes callData)",
+          } as IRegisteredTransfer,
+          {
+            definition: "0x345cA3e014Aaf5dcA488057592ee47305D9B3e10",
+            encodedCancel:
+              "0x0000000000000000000000000000000000000000000000000000000000000000",
+            name: "HashlockTransfer",
+            resolverEncoding: "tuple(bytes32 preImage)",
+            stateEncoding: "tuple(bytes32 lockHash, uint256 expiry)",
+          } as IRegisteredTransfer,
+          {
+            definition: parameterizedTransferDefinitionAddress,
+            encodedCancel: parameterizedTransferEncodedCancel,
+            name: "Parameterized",
+            resolverEncoding: parameterizedTransferResolverEncoding,
+            stateEncoding:
+              "tuple(address receiver, uint256 start, uint256 expiration, bytes32 UUID, tuple(uint256 deltaAmount, uint256 deltaTime) rate)",
+          } as IRegisteredTransfer,
+          {
+            definition: insuranceTransferDefinitionAddress,
+            encodedCancel: insuranceTransferEncodedCancel,
             name: "Insurance",
-            stateEncoding: "stateEncoding",
-            resolverEncoding: "resolverEncoding",
-            definition: this.offerTransfer.transferDefinition,
-            encodedCancel: "encodedCancel",
+            resolverEncoding: insuranceTransferResolverEncoding,
+            stateEncoding:
+              "tuple(address receiver, address mediator, uint256 collateral, uint256 expiration, bytes32 UUID)",
+          } as IRegisteredTransfer,
+          {
+            definition: messageTransferDefinitionAddress,
+            encodedCancel: messageTransferEncodedCancel,
+            name: "MessageTransfer",
+            resolverEncoding: messageTransferResolverEncoding,
+            stateEncoding: "tuple(string message)",
           } as IRegisteredTransfer,
         ]),
       );
@@ -281,7 +209,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
     }
   }
 
-  getBrowserNode(): ResultAsync<
+  public getBrowserNode(): ResultAsync<
     IBrowserNode,
     VectorError | BlockchainUnavailableError
   > {
