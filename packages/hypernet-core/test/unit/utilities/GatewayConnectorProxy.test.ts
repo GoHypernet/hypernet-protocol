@@ -1,7 +1,6 @@
 // /**
 //  * @jest-environment jsdom
 //  */
-
 // import td from "testdouble";
 // import {
 //   UUID,
@@ -18,7 +17,6 @@
 //   PaymentId,
 // } from "@hypernetlabs/objects";
 // import { errAsync, okAsync, ResultAsync } from "neverthrow";
-
 // import {
 //   BlockchainProviderMock,
 //   BrowserNodeProviderMock,
@@ -27,6 +25,21 @@
 // import { GatewayConnectorProxy } from "@implementations/utilities/GatewayConnectorProxy";
 // import { IGatewayConnectorProxy } from "@interfaces/utilities";
 // import { routerChannelAddress } from "@mock/mocks";
+
+// jest.mock("postmate", () => {
+//   return class Postmate {
+//     constructor() {
+//       return Promise.resolve({
+//         on: function (str, callback) {
+//           if (str === "callSuccess") {
+//             callback();
+//           }
+//         },
+//         call: function () {},
+//       });
+//     }
+//   };
+// });
 
 // class GatewayConnectorProxyMocks {
 //   public blockchainProvider = new BlockchainProviderMock();
@@ -43,15 +56,12 @@
 //   constructor() {
 //     this.stateChannel =
 //       this.browserNodeProvider.stateChannels.get(routerChannelAddress);
-
 //     if (this.stateChannel == null) {
 //       throw new Error();
 //     }
-
 //     // td.when(this.gatewayConnectorProxyObject.activate()).thenReturn(
 //     //   errAsync(new ProxyError("")),
 //     // );
-
 //     this.balances = {
 //       assets: [
 //         new AssetBalance(
@@ -65,7 +75,6 @@
 //         ),
 //       ],
 //     };
-
 //     // public balances = new Balances([
 //     //   new AssetBalance(
 //     //     EthereumAddress(this.stateChannel?.assetIds[0]),
@@ -78,7 +87,6 @@
 //     //   ),
 //     // ],)
 //   }
-
 //   public factoryGatewayConnectorProxy(): IGatewayConnectorProxy {
 //     return new GatewayConnectorProxy(
 //       document.body,
@@ -93,77 +101,44 @@
 // }
 
 // describe("GatewayConnectorProxy tests", () => {
-//   test("activateConnector should activate connector", async () => {
-//     // Arrange
+//   test("activateConnector should return ProxyError if proxy is not activated", async () => {
+//     //Arrange
 //     const gatewayConnectorProxyMocks = new GatewayConnectorProxyMocks();
 //     const gatewayConnectorProxy =
 //       gatewayConnectorProxyMocks.factoryGatewayConnectorProxy();
-//     // Act
-//     // await gatewayConnectorProxy.activateProxy()
-//     await gatewayConnectorProxy.activate();
+
+//     //Act
 //     const result = await gatewayConnectorProxy.activateConnector(
 //       gatewayConnectorProxyMocks.publicIdentifier,
 //       gatewayConnectorProxyMocks.balances,
 //     );
-//     console.log("result", result);
-//     // Assert
+//     const err = result._unsafeUnwrapErr();
+
+//     //Assert
 //     expect(result).toBeDefined();
-//     expect(result.isErr()).toBeFalsy();
-//     expect(result._unsafeUnwrap()).toBe(undefined);
+//     expect(result.isErr()).toBeTruthy();
+//     expect(err).toBeInstanceOf(ProxyError);
 //   });
-//   test("deauthorize should deauthorize", async () => {
-//     // Arrange
+
+//   test("activateConnector should activate connector code and return void", async () => {
+//     //Arrange
 //     const gatewayConnectorProxyMocks = new GatewayConnectorProxyMocks();
 //     const gatewayConnectorProxy =
 //       gatewayConnectorProxyMocks.factoryGatewayConnectorProxy();
-//     // Act
-//     // await gatewayConnectorProxy.activateProxy()
-//     const result = await gatewayConnectorProxy.deauthorize();
-//     console.log("result", result);
-//     // Assert
-//     expect(result).toBeDefined();
-//     expect(result.isErr()).toBeFalsy();
-//     expect(result._unsafeUnwrap()).toBe(undefined);
-//   });
-//   test("getValidatedSignature should createCall with getValidatedSignature", async () => {
-//     // Arrange
-//     const gatewayConnectorProxyMocks = new GatewayConnectorProxyMocks();
-//     const gatewayConnectorProxy =
-//       gatewayConnectorProxyMocks.factoryGatewayConnectorProxy();
-//     // Act
-//     // @ts-ignore
-//     gatewayConnectorProxy.active = true;
-//     const result = await gatewayConnectorProxy.getValidatedSignature();
-//     console.log("result", result);
-//     // Assert
-//     expect(result).toBeDefined();
-//     expect(result.isErr()).toBeFalsy();
-//     expect(result._unsafeUnwrap()).toBe(undefined);
-//   });
-//   test("destroy should destroy connector", async () => {
-//     // Arrange
-//     const gatewayConnectorProxyMocks = new GatewayConnectorProxyMocks();
-//     const gatewayConnectorProxy =
-//       gatewayConnectorProxyMocks.factoryGatewayConnectorProxy();
-//     // Act
-//     const result = await gatewayConnectorProxy.destroy();
-//     console.log("result", result);
-//     // Assert
-//     expect(result).toBe(undefined);
-//   });
-//   test("messageSigned should return void", async () => {
-//     // Arrange
-//     const gatewayConnectorProxyMocks = new GatewayConnectorProxyMocks();
-//     const gatewayConnectorProxy =
-//       gatewayConnectorProxyMocks.factoryGatewayConnectorProxy();
-//     // Act
-//     const result = await gatewayConnectorProxy.messageSigned(
-//       "message",
-//       Signature("signature"),
+//     //Act
+//     const ss = await gatewayConnectorProxy.activateProxy();
+//     console.log("ss: ", ss._unsafeUnwrap());
+//     //await gatewayConnectorProxy.activate();
+//     const result = await gatewayConnectorProxy.activateConnector(
+//       gatewayConnectorProxyMocks.publicIdentifier,
+//       gatewayConnectorProxyMocks.balances,
 //     );
-//     // Assert
+//     const res = result._unsafeUnwrap();
+//     console.log("res", res);
+
+//     //Assert
 //     expect(result).toBeDefined();
-//     expect(result.isErr()).toBeFalsy();
-//     expect(result._unsafeUnwrap()).toBe(undefined);
+//     expect(result.isErr()).toBeTruthy();
+//     expect(res).toBe(undefined);
 //   });
 // });
