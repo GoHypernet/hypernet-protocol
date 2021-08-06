@@ -16,7 +16,6 @@ import {
   InvalidParametersError,
   InvalidPaymentError,
   InvalidPaymentIdError,
-  LogicalError,
   VectorError,
   EPaymentState,
   EPaymentType,
@@ -25,9 +24,12 @@ import {
   InsuranceState,
   MessageState,
   ParameterizedState,
-  EMessageTransferType,
   BigNumberString,
   UnixTimestamp,
+  LogicalError,
+  MessageResolver,
+  InsuranceResolver,
+  ParameterizedResolver,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -110,21 +112,24 @@ export class PaymentUtils implements IPaymentUtils {
     paymentId: PaymentId,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<PushPayment, LogicalError> {
+  ): ResultAsync<PushPayment, never> {
     /**
      * Push payments consist of 3 transfers:
      * MessageTransfer - 0 value, represents an offer
      * InsuranceTransfer - service operator puts up to guarantee the sender's funds
      * ParameterizedPayment - the payment to the service operator
      */
+    let offerDetails: IHypernetOfferDetails;
 
-    if (sortedTransfers.pullRecordTransfers.length > 0) {
-      throw new LogicalError("Push payment has pull transfers!");
+    // If payment is Borked it may have no offerTransfers
+    if (sortedTransfers?.offerTransfers[0] == null) {
+      offerDetails = {} as IHypernetOfferDetails;
+    } else {
+      offerDetails = JSON.parse(
+        (sortedTransfers.offerTransfers[0].transferState as MessageState)
+          .message,
+      );
     }
-
-    const offerDetails: IHypernetOfferDetails = JSON.parse(
-      (sortedTransfers.offerTransfers[0].transferState as MessageState).message,
-    );
 
     let amountStaked = BigNumberString("0");
     let insuranceTransferId: TransferId | null = null;
@@ -188,7 +193,7 @@ export class PaymentUtils implements IPaymentUtils {
     paymentId: PaymentId,
     state: EPaymentState,
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<PullPayment, LogicalError> {
+  ): ResultAsync<PullPayment, never> {
     /**
      * Pull payments consist of 3+ transfers, a null transfer for 0 value that represents the
      * offer, an insurance payment, and a parameterized payment.
@@ -204,14 +209,22 @@ export class PaymentUtils implements IPaymentUtils {
       );
     }
 
-    const offerDetails: IHypernetOfferDetails = JSON.parse(
-      (sortedTransfers.offerTransfers[0].transferState as MessageState).message,
-    );
+    let offerDetails: IHypernetOfferDetails;
+
+    // If payment is Borked it may have no offerTransfers
+    if (sortedTransfers?.offerTransfers[0] == null) {
+      offerDetails = {} as IHypernetOfferDetails;
+    } else {
+      offerDetails = JSON.parse(
+        (sortedTransfers.offerTransfers[0].transferState as MessageState)
+          .message,
+      );
+    }
 
     // Get deltaAmount & deltaTime from the parameterized payment
     if (offerDetails.rate == null) {
-      return errAsync(
-        new LogicalError("These transfers are not for a pull payment."),
+      throw new LogicalError(
+        "Pull payment offer does not include rate information",
       );
     }
 
@@ -239,15 +252,19 @@ export class PaymentUtils implements IPaymentUtils {
     const pullAmounts = new Array<PullAmount>();
 
     for (const pullRecord of sortedTransfers.pullRecordTransfers) {
-      const message = JSON.parse(
-        pullRecord.transferState.message,
-      ) as IHypernetPullPaymentDetails;
-      pullAmounts.push(
-        new PullAmount(
-          BigNumber.from(message.pullPaymentAmount),
-          this.vectorUtils.getTimestampFromTransfer(pullRecord),
-        ),
-      );
+      // Payment might be borked and has no message
+      if (pullRecord.transferState != null) {
+        const message = JSON.parse(
+          pullRecord.transferState.message,
+        ) as IHypernetPullPaymentDetails;
+
+        pullAmounts.push(
+          new PullAmount(
+            BigNumber.from(message.pullPaymentAmount),
+            this.vectorUtils.getTimestampFromTransfer(pullRecord),
+          ),
+        );
+      }
     }
 
     const paymentToken =
@@ -411,7 +428,7 @@ export class PaymentUtils implements IPaymentUtils {
       // at all. This will probably error at higher levels but we should check it here just
       // in case
       if (sortedTransfers.offerTransfers.length == 0) {
-        return EPaymentState.InvalidProposal;
+        return EPaymentState.Borked;
       }
 
       // If there are more than 1 offer transfer that is not canceled, that's an invalid proposal
@@ -425,8 +442,12 @@ export class PaymentUtils implements IPaymentUtils {
         (val) => val.transferState != ETransferState.Canceled,
       );
 
-      if (nonCanceledOfferTransfers.length > 1) {
-        return EPaymentState.InvalidProposal;
+      if (
+        nonCanceledOfferTransfers.length > 1 ||
+        nonCanceledInsuranceTransfers.length > 1 ||
+        nonCanceledParameterizedTransfers.length > 1
+      ) {
+        return EPaymentState.Borked;
       }
 
       // If the only offer transfer was canceled, then the whole payment was canceled.
@@ -442,14 +463,6 @@ export class PaymentUtils implements IPaymentUtils {
         (nonCanceledOfferTransfers[0].transfer.transferState as MessageState)
           .message,
       );
-
-      if (nonCanceledInsuranceTransfers.length > 1) {
-        return EPaymentState.Borked;
-      }
-
-      if (nonCanceledParameterizedTransfers.length > 1) {
-        return EPaymentState.Borked;
-      }
 
       const hasInsurance = nonCanceledInsuranceTransfers.length == 1;
       const hasParameterized = nonCanceledParameterizedTransfers.length == 1;
@@ -478,6 +491,15 @@ export class PaymentUtils implements IPaymentUtils {
 
         // Insurance but no parameterized payment
         if (!hasParameterized) {
+          // If the insurance is resolved and the offer state is resolved or canceled,
+          // then the payment was canceled.
+          if (
+            offerState == ETransferState.Canceled &&
+            insuranceState == ETransferState.Resolved
+          ) {
+            return EPaymentState.Canceled;
+          }
+
           if (
             offerState == ETransferState.Active &&
             insuranceState == ETransferState.Active &&
@@ -507,6 +529,16 @@ export class PaymentUtils implements IPaymentUtils {
             paymentTransfer,
             offerDetails,
           );
+
+          if (
+            offerState == ETransferState.Canceled &&
+            (insuranceState == ETransferState.Resolved ||
+              insuranceState == ETransferState.Canceled) &&
+            (paymentState == ETransferState.Resolved ||
+              paymentState == ETransferState.Canceled)
+          ) {
+            return EPaymentState.Canceled;
+          }
 
           if (
             offerState == ETransferState.Active &&
@@ -560,28 +592,55 @@ export class PaymentUtils implements IPaymentUtils {
     });
   }
 
-  // public getPaymentStateHistory(
-  //   sortedTransfers: SortedTransfers,
-  // ): ResultAsync<EPaymentState[], never> {
-  //   // First step, take all the transfers and unsort them; we need them in a continual list based on their timestamp.
-  //   const allTransfers = new Array<IFullTransferState<any>>()
-  //     .concat(sortedTransfers.offerTransfers)
-  //     .concat(sortedTransfers.insuranceTransfers)
-  //     .concat(sortedTransfers.parameterizedTransfers)
-  //     .concat(sortedTransfers.pullRecordTransfers);
-  // }
+  /**
+   * This method is supposed to return a sorted history of the payment's history, but without
+   * a resolvedAt we can't really do that. So this will just have to sit here for a while.
+   * @param sortedTransfers
+   * @returns
+   */
+  public getPaymentStateHistory(
+    sortedTransfers: SortedTransfers,
+  ): ResultAsync<EPaymentState[], never> {
+    // First step, take all the transfers and unsort them; we need them in a continual list based on their timestamp.
+    const allTransfers = new Array<IFullTransferState>()
+      .concat(sortedTransfers.offerTransfers)
+      .concat(sortedTransfers.insuranceTransfers)
+      .concat(sortedTransfers.parameterizedTransfers)
+      .concat(sortedTransfers.pullRecordTransfers);
+
+    // Sort all the transfers by creation date
+    allTransfers.sort((a, b) => {
+      if (a.meta == null || b.meta == null) {
+        return 0;
+      }
+      if (a.meta.createdAt < b.meta.createdAt) {
+        return -1;
+      } else if (a.meta.createdAt > b.meta.createdAt) {
+        return 1;
+      }
+      return 0;
+    });
+
+    this.logUtils.debug(allTransfers);
+
+    const statusHistory = new Array<EPaymentState>();
+
+    return okAsync(statusHistory);
+  }
 
   // Returns true if the insurance transfer is
-  protected validateInsuranceTransfer(
+  public validateInsuranceTransfer(
     transfer: IFullTransferState<InsuranceState>,
     offerDetails: IHypernetOfferDetails,
   ): boolean {
-    return BigNumber.from(transfer.transferState.collateral).eq(
-      BigNumber.from(offerDetails.requiredStake),
+    return (
+      BigNumber.from(transfer.transferState.collateral).eq(
+        BigNumber.from(offerDetails.requiredStake),
+      ) && transfer.assetId == offerDetails.insuranceToken
     );
   }
 
-  protected validatePaymentTransfer(
+  public validatePaymentTransfer(
     transfer: IFullTransferState<ParameterizedState>,
     offerDetails: IHypernetOfferDetails,
   ): boolean {
@@ -590,7 +649,10 @@ export class PaymentUtils implements IPaymentUtils {
       total = total.add(amount);
     }
 
-    return total.eq(BigNumber.from(offerDetails.paymentAmount));
+    return (
+      total.eq(BigNumber.from(offerDetails.paymentAmount)) &&
+      transfer.assetId == offerDetails.paymentToken
+    );
 
     // TODO: Validate the rate is set correctly
     // && transfer.transferState.rate == offerDetails.;
@@ -607,7 +669,7 @@ export class PaymentUtils implements IPaymentUtils {
     transfers: IFullTransferState[],
   ): ResultAsync<
     Payment[],
-    VectorError | LogicalError | InvalidPaymentError | InvalidParametersError
+    VectorError | InvalidPaymentError | InvalidParametersError
   > {
     // First step, get the transfer types for all the transfers
     const transferTypeResults = new Array<
@@ -630,14 +692,20 @@ export class PaymentUtils implements IPaymentUtils {
           if (transferType === ETransferType.Offer) {
             // @todo also add in PullRecord type)
             const offerDetails: IHypernetOfferDetails = JSON.parse(
-              transfer.transferState.message,
+              (transfer as IFullTransferState<MessageState, MessageResolver>)
+                .transferState.message,
             );
             paymentId = offerDetails.paymentId;
           } else if (
             transferType === ETransferType.Insurance ||
             transferType === ETransferType.Parameterized
           ) {
-            paymentId = transfer.transferState.UUID;
+            paymentId = (
+              transfer as IFullTransferState<
+                InsuranceState | ParameterizedState,
+                InsuranceResolver | ParameterizedResolver
+              >
+            ).transferState.UUID;
           } else {
             this.logUtils.log(
               `Transfer type was not recognized, doing nothing. TransferType: '${transfer.transferDefinition}'`,
@@ -685,48 +753,56 @@ export class PaymentUtils implements IPaymentUtils {
   public sortTransfers(
     _paymentId: string,
     transfers: IFullTransferState[],
-  ): ResultAsync<
-    SortedTransfers,
-    InvalidPaymentError | VectorError | LogicalError
-  > {
-    const offerTransfers: IFullTransferState[] = [];
-    const insuranceTransfers: IFullTransferState[] = [];
-    const parameterizedTransfers: IFullTransferState[] = [];
-    const pullTransfers: IFullTransferState[] = [];
+  ): ResultAsync<SortedTransfers, InvalidPaymentError | VectorError> {
+    const offerTransfers: IFullTransferState<MessageState, MessageResolver>[] =
+      [];
+    const insuranceTransfers: IFullTransferState<
+      InsuranceState,
+      InsuranceResolver
+    >[] = [];
+    const parameterizedTransfers: IFullTransferState<
+      ParameterizedState,
+      ParameterizedResolver
+    >[] = [];
+    const pullTransfers: IFullTransferState<MessageState, MessageResolver>[] =
+      [];
     const unrecognizedTransfers: IFullTransferState[] = [];
-    const transferTypeResults = new Array<
-      ResultAsync<
-        { transferType: ETransferType; transfer: IFullTransferState },
-        VectorError | LogicalError
-      >
-    >();
+    const transferTypeResults = new Array<ResultAsync<void, VectorError>>();
 
     for (const transfer of transfers) {
       transferTypeResults.push(
-        this.vectorUtils.getTransferTypeWithTransfer(transfer),
-      );
-    }
-
-    return ResultUtils.combine(transferTypeResults).andThen(
-      (transferTypesWithTransfers) => {
-        for (const { transferType, transfer } of transferTypesWithTransfers) {
+        this.vectorUtils.getTransferType(transfer).map((transferType) => {
           if (transferType === ETransferType.Offer) {
-            offerTransfers.push(transfer);
+            offerTransfers.push(
+              transfer as IFullTransferState<MessageState, MessageResolver>,
+            );
           } else if (transferType === ETransferType.Insurance) {
-            insuranceTransfers.push(transfer);
+            insuranceTransfers.push(
+              transfer as IFullTransferState<InsuranceState, InsuranceResolver>,
+            );
           } else if (transferType === ETransferType.Parameterized) {
-            parameterizedTransfers.push(transfer);
+            parameterizedTransfers.push(
+              transfer as IFullTransferState<
+                ParameterizedState,
+                ParameterizedResolver
+              >,
+            );
           } else if (transferType === ETransferType.PullRecord) {
-            pullTransfers.push(transfer);
+            pullTransfers.push(
+              transfer as IFullTransferState<MessageState, MessageResolver>,
+            );
           } else if (transferType === ETransferType.Unrecognized) {
             unrecognizedTransfers.push(transfer);
           } else {
             this.logUtils.log("Unreachable code reached!");
             unrecognizedTransfers.push(transfer);
           }
-        }
+        }),
+      );
+    }
 
-        this.logUtils.debug(`
+    return ResultUtils.combine(transferTypeResults).map(() => {
+      this.logUtils.debug(`
         PaymentUtils:sortTransfers
   
         offerTransfers: ${offerTransfers.length}
@@ -736,32 +812,13 @@ export class PaymentUtils implements IPaymentUtils {
         unrecognizedTransfers: ${unrecognizedTransfers.length}
       `);
 
-        if (unrecognizedTransfers.length > 0) {
-          return errAsync(
-            new InvalidPaymentError(
-              "Payment includes unrecognized transfer types!",
-            ),
-          );
-        }
-
-        if (offerTransfers.length !== 1) {
-          // TODO: this could be handled more elegantly; if there's other payments
-          // but no offer, it's still a valid payment
-          return errAsync(
-            new InvalidPaymentError("Invalid payment, no offer transfer!"),
-          );
-        }
-
-        return okAsync(
-          new SortedTransfers(
-            offerTransfers,
-            insuranceTransfers,
-            parameterizedTransfers,
-            pullTransfers,
-          ),
-        );
-      },
-    );
+      return new SortedTransfers(
+        offerTransfers,
+        insuranceTransfers,
+        parameterizedTransfers,
+        pullTransfers,
+      );
+    });
   }
 
   public getEarliestDateFromTransfers(
@@ -782,6 +839,23 @@ export class PaymentUtils implements IPaymentUtils {
     });
 
     return this.vectorUtils.getTimestampFromTransfer(transfers[0]);
+  }
+
+  public getFirstTransfer(transfers: IFullTransferState[]): IFullTransferState {
+    if (transfers.length == 0) {
+      throw new Error("No transfers provided!");
+    }
+
+    const earliestDate = this.getEarliestDateFromTransfers(transfers);
+    const transfer = transfers.find((val) => {
+      return this.vectorUtils.getTimestampFromTransfer(val) == earliestDate;
+    });
+    if (transfer == null) {
+      throw new Error(
+        "Offer with earliest timestamp doesn't actually exist...",
+      );
+    }
+    return transfer;
   }
 
   protected getRegisteredTransfersResponse:

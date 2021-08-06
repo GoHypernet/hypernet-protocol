@@ -22,7 +22,7 @@ export class NatsMessagingListener implements IMessagingListener {
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
-  public setup(): ResultAsync<void, MessagingError> {
+  public initialize(): ResultAsync<void, MessagingError> {
     this.logUtils.debug("Initializing NATS messaging listener");
     // return ResultUtils.combine([
     //   this.messagingProvider.getBasicMessaging(),

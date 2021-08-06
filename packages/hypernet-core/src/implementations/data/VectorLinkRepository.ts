@@ -5,10 +5,8 @@ import {
   Payment,
   PublicIdentifier,
   InvalidParametersError,
-  RouterChannelUnknownError,
   VectorError,
   InvalidPaymentError,
-  LogicalError,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
 import { ILinkRepository } from "@interfaces/data";
@@ -47,12 +45,10 @@ export class VectorLinkRepository implements ILinkRepository {
    */
   public getHypernetLinks(): ResultAsync<
     HypernetLink[],
-    | RouterChannelUnknownError
     | VectorError
     | InvalidParametersError
     | BlockchainUnavailableError
     | InvalidPaymentError
-    | LogicalError
   > {
     let browserNode: IBrowserNode;
 
@@ -95,12 +91,10 @@ export class VectorLinkRepository implements ILinkRepository {
     counterpartyId: PublicIdentifier,
   ): ResultAsync<
     HypernetLink,
-    | RouterChannelUnknownError
     | VectorError
     | InvalidParametersError
     | BlockchainUnavailableError
     | InvalidPaymentError
-    | LogicalError
   > {
     let browserNode: IBrowserNode;
     return ResultUtils.combine([

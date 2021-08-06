@@ -1,8 +1,4 @@
 import { ControlClaim, MessagingError } from "@hypernetlabs/objects";
-import {
-  BlockchainUnavailableError,
-  LogicalError,
-} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 /**

@@ -54,7 +54,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
     @inject(IValidationUtilsType) protected validationUtils: IValidationUtils,
   ) {}
 
-  public setup(): ResultAsync<void, never> {
+  public initialize(): ResultAsync<void, never> {
     return this.contextProvider.getContext().map((context) => {
       context.onGatewayConnectorProxyActivated.subscribe((proxy) => {
         this.logUtils.debug(

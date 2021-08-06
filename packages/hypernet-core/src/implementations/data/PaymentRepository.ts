@@ -13,10 +13,8 @@ import {
   PaymentId,
   GatewayUrl,
   TransferId,
-  LogicalError,
   PaymentFinalizeError,
   PaymentStakeError,
-  RouterChannelUnknownError,
   TransferResolutionError,
   VectorError,
   InvalidParametersError,
@@ -32,10 +30,12 @@ import {
   UnixTimestamp,
   EPaymentState,
   Signature,
+  LogicalError,
+  InsuranceState,
+  ParameterizedState,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { IPaymentRepository } from "@interfaces/data";
-import { InitializedHypernetContext } from "@interfaces/objects";
 import { BigNumber } from "ethers";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
@@ -129,9 +129,10 @@ export class PaymentRepository implements IPaymentRepository {
       this.contextProvider.getInitializedContext(),
       this.paymentUtils.createPaymentId(EPaymentType.Pull),
       this.timeUtils.getBlockchainTimestamp(),
+      this.configProvider.getConfig(),
     ])
       .andThen((vals) => {
-        const [browserNode, context, paymentId, timestamp] = vals;
+        const [browserNode, context, paymentId, timestamp, config] = vals;
 
         const message: IHypernetOfferDetails = {
           messageType: EMessageTransferType.OFFER,
@@ -144,6 +145,7 @@ export class PaymentRepository implements IPaymentRepository {
           paymentAmount: maximumAmount,
           expirationDate,
           paymentToken,
+          insuranceToken: config.hypertokenAddress,
           gatewayUrl,
           metadata,
           rate: {
@@ -189,52 +191,46 @@ export class PaymentRepository implements IPaymentRepository {
     gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError> {
-    let browserNode: IBrowserNode;
-    let context: InitializedHypernetContext;
-    let paymentId: PaymentId;
-    let timestamp: UnixTimestamp;
-
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
       this.paymentUtils.createPaymentId(EPaymentType.Push),
       this.timeUtils.getBlockchainTimestamp(),
-    ])
-      .andThen((vals) => {
-        [browserNode, context, paymentId, timestamp] = vals;
+      this.configProvider.getConfig(),
+    ]).andThen((vals) => {
+      const [browserNode, context, paymentId, timestamp, config] = vals;
 
-        const message: IHypernetOfferDetails = {
-          messageType: EMessageTransferType.OFFER,
-          paymentId,
-          creationDate: timestamp,
-          to: counterPartyAccount,
-          from: context.publicIdentifier,
-          requiredStake: requiredStake,
-          paymentAmount: amount,
-          expirationDate: expirationDate,
-          paymentToken,
-          gatewayUrl,
-          metadata,
-          requireOnline: true,
-        };
+      const message: IHypernetOfferDetails = {
+        messageType: EMessageTransferType.OFFER,
+        paymentId,
+        creationDate: timestamp,
+        to: counterPartyAccount,
+        from: context.publicIdentifier,
+        requiredStake: requiredStake,
+        paymentAmount: amount,
+        expirationDate: expirationDate,
+        paymentToken,
+        insuranceToken: config.hypertokenAddress,
+        gatewayUrl,
+        metadata,
+        requireOnline: true,
+      };
 
-        // Create a message transfer, with the terms of the payment in the metadata.
-        return this.vectorUtils.createOfferTransfer(
-          counterPartyAccount,
-          message,
-        );
-      })
-      .andThen((transferInfo) => {
-        return browserNode.getTransfer(TransferId(transferInfo.transferId));
-      })
-      .andThen((transfer) => {
-        // Return the payment
-        return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
-      })
-      .map((payment) => {
-        return payment as PushPayment;
-      })
-      .mapErr((err) => new PaymentCreationError(err?.message, err));
+      // Create a message transfer, with the terms of the payment in the metadata.
+      return this.vectorUtils
+        .createOfferTransfer(counterPartyAccount, message)
+        .andThen((transferInfo) => {
+          return browserNode.getTransfer(TransferId(transferInfo.transferId));
+        })
+        .andThen((transfer) => {
+          // Return the payment
+          return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
+        })
+        .map((payment) => {
+          return payment as PushPayment;
+        })
+        .mapErr((err) => new PaymentCreationError(err?.message, err));
+    });
   }
 
   /**
@@ -245,10 +241,7 @@ export class PaymentRepository implements IPaymentRepository {
     paymentId: PaymentId,
   ): ResultAsync<
     IFullTransferState[],
-    | RouterChannelUnknownError
-    | VectorError
-    | BlockchainUnavailableError
-    | LogicalError
+    VectorError | BlockchainUnavailableError
   > {
     let browserNode: IBrowserNode;
     let channelAddress: EthereumAddress;
@@ -280,7 +273,7 @@ export class PaymentRepository implements IPaymentRepository {
               transferType: ETransferType;
               transfer: IFullTransferState;
             },
-            VectorError | LogicalError
+            VectorError
           >
         >();
         for (const transfer of transfers) {
@@ -301,7 +294,8 @@ export class PaymentRepository implements IPaymentRepository {
 
           if (transferType === ETransferType.Offer) {
             const offerDetails: IHypernetOfferDetails = JSON.parse(
-              (transfer.transferState as MessageState).message,
+              (transfer as IFullTransferState<MessageState>).transferState
+                .message,
             );
 
             if (offerDetails.paymentId === paymentId) {
@@ -311,7 +305,14 @@ export class PaymentRepository implements IPaymentRepository {
             transferType === ETransferType.Insurance ||
             transferType === ETransferType.Parameterized
           ) {
-            if (paymentId === transfer.transferState.UUID) {
+            if (
+              paymentId ===
+              (
+                transfer as IFullTransferState<
+                  InsuranceState | ParameterizedState
+                >
+              ).transferState.UUID
+            ) {
               relevantTransfers.push(transfer);
             } else {
               this.logUtils.debug(
@@ -337,10 +338,8 @@ export class PaymentRepository implements IPaymentRepository {
     paymentIds: PaymentId[],
   ): ResultAsync<
     Map<PaymentId, Payment>,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
   > {
@@ -394,7 +393,8 @@ export class PaymentRepository implements IPaymentRepository {
 
           if (transferType === ETransferType.Offer) {
             const offerDetails: IHypernetOfferDetails = JSON.parse(
-              (transfer.transferState as MessageState).message,
+              (transfer as IFullTransferState<MessageState>).transferState
+                .message,
             );
             if (paymentIds.includes(offerDetails.paymentId)) {
               relevantTransfers.push(transfer);
@@ -404,7 +404,15 @@ export class PaymentRepository implements IPaymentRepository {
               transferType === ETransferType.Insurance ||
               transferType === ETransferType.Parameterized
             ) {
-              if (paymentIds.includes(transfer.transferState.UUID)) {
+              if (
+                paymentIds.includes(
+                  (
+                    transfer as IFullTransferState<
+                      InsuranceState | ParameterizedState
+                    >
+                  ).transferState.UUID,
+                )
+              ) {
                 relevantTransfers.push(transfer);
               } else {
                 this.logUtils.debug(
@@ -438,13 +446,11 @@ export class PaymentRepository implements IPaymentRepository {
    */
   public acceptPayment(
     paymentId: PaymentId,
-    amount: string,
+    amount: BigNumberString,
   ): ResultAsync<
     Payment,
-    | RouterChannelUnknownError
     | VectorError
     | BlockchainUnavailableError
-    | LogicalError
     | PaymentFinalizeError
     | TransferResolutionError
     | InvalidPaymentError
@@ -483,7 +489,7 @@ export class PaymentRepository implements IPaymentRepository {
               sortedTransfers.parameterizedTransfers[0].transferId,
             );
 
-            return this.vectorUtils.resolvePaymentTransfer(
+            return this.vectorUtils.resolveParameterizedTransfer(
               parameterizedTransferId,
               paymentId,
               amount,
@@ -524,9 +530,7 @@ export class PaymentRepository implements IPaymentRepository {
     | BlockchainUnavailableError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -599,9 +603,7 @@ export class PaymentRepository implements IPaymentRepository {
     | BlockchainUnavailableError
     | PaymentStakeError
     | TransferResolutionError
-    | RouterChannelUnknownError
     | VectorError
-    | LogicalError
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
@@ -636,10 +638,8 @@ export class PaymentRepository implements IPaymentRepository {
           this.logUtils.error(
             `Payment was not instance of push or pull payment!`,
           );
-          return errAsync(
-            new LogicalError(
-              "Payment was not instance of push or pull payment!",
-            ),
+          throw new LogicalError(
+            "Payment was not instance of push or pull payment!",
           );
         }
 
@@ -662,7 +662,7 @@ export class PaymentRepository implements IPaymentRepository {
         );
 
         // Use vectorUtils to create the parameterizedPayment
-        return this.vectorUtils.createPaymentTransfer(
+        return this.vectorUtils.createParameterizedTransfer(
           payment instanceof PushPayment
             ? EPaymentType.Push
             : EPaymentType.Pull,
@@ -673,9 +673,7 @@ export class PaymentRepository implements IPaymentRepository {
           paymentStart,
           paymentExpiration,
           payment instanceof PullPayment ? payment.deltaTime : undefined,
-          payment instanceof PullPayment
-            ? payment.deltaAmount.toString()
-            : undefined,
+          payment instanceof PullPayment ? payment.deltaAmount : undefined,
         );
       })
       .andThen((transferInfoUnk) => {

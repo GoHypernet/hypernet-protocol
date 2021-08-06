@@ -1,5 +1,4 @@
 import {
-  LogicalError,
   GatewayConnectorError,
   GatewayValidationError,
   BlockchainUnavailableError,
@@ -28,7 +27,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     protected logUtils: ILogUtils,
   ) {}
 
-  public initialize(): ResultAsync<void, LogicalError | GatewayConnectorError> {
+  public initialize(): ResultAsync<void, GatewayConnectorError> {
     return this.contextProvider.getContext().map((context) => {
       // Subscribe to the various events, and sort them out for the gateway connector
       context.onPushPaymentSent.subscribe((payment) => {
@@ -199,7 +198,6 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | GatewayConnectorError
     | GatewayValidationError
     | BlockchainUnavailableError
-    | LogicalError
     | ProxyError
   > {
     return this.accountsRepository.getBalances().andThen((balances) => {

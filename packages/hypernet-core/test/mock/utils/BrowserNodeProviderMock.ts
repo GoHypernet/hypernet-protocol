@@ -36,6 +36,7 @@ import {
   activeOfferTransfer,
   activeInsuranceTransfer,
   activeParameterizedTransfer,
+  channelState,
 } from "@mock/mocks";
 
 export class BrowserNodeProviderMock implements IBrowserNodeProvider {
@@ -47,48 +48,17 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
     includeInsuranceTransfer = true,
     includeParameterizedTransfer = true,
     browserNode: IBrowserNode | null = null,
+    existingStateChannel = true,
   ) {
-    // Create the default set of state channels
-    this.stateChannels.set(routerChannelAddress, {
-      assetIds: [erc20AssetAddress],
-      balances: [
-        {
-          amount: ["43", "43"],
-          to: [destinationAddress],
-        },
-      ],
-      channelAddress: routerChannelAddress,
-      alice: "aliceAddress",
-      bob: "bobAddress",
-      merkleRoot: "merkleRoot",
-      nonce: 0,
-      processedDepositsA: [],
-      processedDepositsB: [],
-      timeout: "timeout",
-      aliceIdentifier: "routerPublicIdentifier",
-      bobIdentifier: "bobIdentifier",
-      latestUpdate: {
-        channelAddress: "channelAddress",
-        fromIdentifier: "",
-        toIdentifier: "",
-        type: "setup",
-        balance: { to: [""], amount: [""] },
-        assetId: "assetId",
-        nonce: 0,
-        details: {},
-      },
-      networkContext: {
-        chainId: 1337,
-        channelFactoryAddress: "channelFactoryAddress",
-        transferRegistryAddress: "transferRegistryAddress",
-      },
-      defundNonces: [],
-      inDispute: false,
-    });
+    if (existingStateChannel) {
+      // Create the default set of state channels
+      this.stateChannels.set(routerChannelAddress, channelState);
+    }
 
     // If we were not provided with a specific browser node, set up a mock one.
     if (browserNode == null) {
       this.browserNode = td.object<IBrowserNode>();
+
       td.when(
         this.browserNode.setup(
           routerPublicIdentifier,
@@ -96,6 +66,11 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
           DEFAULT_CHANNEL_TIMEOUT.toString(),
         ),
       ).thenReturn(okAsync({ channelAddress: routerChannelAddress }));
+
+      td.when(
+        this.browserNode.restoreState(routerPublicIdentifier, chainId),
+      ).thenReturn(okAsync(undefined));
+
       td.when(this.browserNode.getStateChannels()).thenReturn(
         okAsync(Array.from(this.stateChannels.keys())),
       );
@@ -113,6 +88,13 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
           ),
         );
       }
+
+      td.when(
+        this.browserNode.getStateChannelByParticipants(
+          routerPublicIdentifier,
+          chainId,
+        ),
+      ).thenReturn(okAsync(channelState));
 
       // @todo: Figure out if there is a better way to stub get properties
       (this.browserNode as any).publicIdentifier = publicIdentifier;
@@ -227,7 +209,7 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
     }
   }
 
-  getBrowserNode(): ResultAsync<
+  public getBrowserNode(): ResultAsync<
     IBrowserNode,
     VectorError | BlockchainUnavailableError
   > {

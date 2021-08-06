@@ -7,9 +7,7 @@ import {
   IFullChannelState,
   Signature,
   AssetInfo,
-  PersistenceError,
   BlockchainUnavailableError,
-  RouterChannelUnknownError,
   BalancesUnavailableError,
   LogicalError,
   VectorError,
@@ -102,7 +100,7 @@ export class AccountsRepository implements IAccountsRepository {
    */
   public getBalances(): ResultAsync<
     Balances,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
+    BalancesUnavailableError | VectorError
   > {
     return this.vectorUtils
       .getRouterChannelAddress()
@@ -140,10 +138,7 @@ export class AccountsRepository implements IAccountsRepository {
    */
   public getBalanceByAsset(
     assetAddress: EthereumAddress,
-  ): ResultAsync<
-    AssetBalance,
-    BalancesUnavailableError | VectorError | RouterChannelUnknownError
-  > {
+  ): ResultAsync<AssetBalance, BalancesUnavailableError | VectorError> {
     return this.getBalances().andThen((balances) => {
       for (const assetBalance of balances.assets) {
         if (assetBalance.assetAddress === assetAddress) {
@@ -177,77 +172,66 @@ export class AccountsRepository implements IAccountsRepository {
   public depositFunds(
     assetAddress: EthereumAddress,
     amount: BigNumberString,
-  ): ResultAsync<
-    null,
-    | RouterChannelUnknownError
-    | VectorError
-    | LogicalError
-    | BlockchainUnavailableError
-  > {
-    let signer: ethers.providers.JsonRpcSigner;
-    let channelAddress: EthereumAddress;
-    let browserNode: IBrowserNode;
-
+  ): ResultAsync<null, VectorError | BlockchainUnavailableError> {
     return ResultUtils.combine([
       this.blockchainProvider.getSigner(),
       this.vectorUtils.getRouterChannelAddress(),
       this.browserNodeProvider.getBrowserNode(),
-    ])
-      .andThen((vals) => {
-        [signer, channelAddress, browserNode] = vals;
+    ]).andThen((vals) => {
+      const [signer, channelAddress, browserNode] = vals;
+      let transferResult: ResultAsync<
+        ethers.providers.TransactionResponse,
+        BlockchainUnavailableError
+      >;
 
-        if (assetAddress === "0x0000000000000000000000000000000000000000") {
-          this.logUtils.log("Transferring ETH.");
-          // send eth
-          return ResultAsync.fromPromise(
-            signer.sendTransaction({
-              to: channelAddress,
-              value: BigNumber.from(amount),
-            }),
-            (err) => {
-              return new BlockchainUnavailableError(
-                "Unable to send transaction",
-                err,
-              );
-            },
-          );
-        } else {
-          this.logUtils.log("Transferring an ERC20 asset.");
-          // send an actual erc20 token
-          return this.blockchainUtils.erc20Transfer(
-            assetAddress,
-            channelAddress,
-            amount,
-          );
-        }
-      })
-      .andThen((tx) => {
-        // TODO: Wait on this, break it up, this could take a while
-        return ResultAsync.fromPromise(
-          tx.wait(),
-          (e) => e as BlockchainUnavailableError,
+      if (assetAddress === "0x0000000000000000000000000000000000000000") {
+        this.logUtils.log("Transferring ETH.");
+        // send eth
+        transferResult = ResultAsync.fromPromise(
+          signer.sendTransaction({
+            to: channelAddress,
+            value: BigNumber.from(amount),
+          }),
+          (err) => {
+            return new BlockchainUnavailableError(
+              "Unable to send transaction",
+              err,
+            );
+          },
         );
-      })
-      .andThen(() => {
-        if (browserNode == null || channelAddress == null) {
-          return errAsync(new LogicalError("Really screwed up!"));
-        }
-        return browserNode.reconcileDeposit(assetAddress, channelAddress);
-      })
-      .andThen((depositRes) => {
-        // I can not for the life of me figure out why depositRes is coming back
-        // as "unknown"
-        const depositChannelAddress = depositRes as string;
+      } else {
+        this.logUtils.log("Transferring an ERC20 asset.");
+        // send an actual erc20 token
+        transferResult = this.blockchainUtils.erc20Transfer(
+          assetAddress,
+          channelAddress,
+          amount,
+        );
+      }
 
-        // Sanity check, the deposit was for the channel we tried to deposit into.
-        if (depositChannelAddress !== channelAddress) {
-          return errAsync(
-            new LogicalError("Something has gone horribly wrong!"),
+      return transferResult
+        .andThen((tx) => {
+          // TODO: Wait on this, break it up, this could take a while
+          return ResultAsync.fromPromise(
+            tx.wait(),
+            (e) => e as BlockchainUnavailableError,
           );
-        }
+        })
+        .andThen(() => {
+          if (browserNode == null || channelAddress == null) {
+            throw new LogicalError("Really screwed up!");
+          }
+          return browserNode.reconcileDeposit(assetAddress, channelAddress);
+        })
+        .andThen((depositChannelAddress) => {
+          // Sanity check, the deposit was for the channel we tried to deposit into.
+          if (depositChannelAddress !== channelAddress) {
+            throw new LogicalError("Something has gone horribly wrong!");
+          }
 
-        return okAsync(null);
-      });
+          return okAsync(null);
+        });
+    });
   }
 
   /**
@@ -260,10 +244,7 @@ export class AccountsRepository implements IAccountsRepository {
     assetAddress: EthereumAddress,
     amount: BigNumberString,
     destinationAddress: EthereumAddress,
-  ): ResultAsync<
-    void,
-    RouterChannelUnknownError | VectorError | BlockchainUnavailableError
-  > {
+  ): ResultAsync<void, VectorError | BlockchainUnavailableError> {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.vectorUtils.getRouterChannelAddress(),

@@ -4,6 +4,7 @@ import {
   UnixTimestamp,
   IBasicTransferResponse,
   Signature,
+  ETransferState,
 } from "@hypernetlabs/objects";
 import { BigNumber } from "ethers";
 import { okAsync } from "neverthrow";
@@ -93,10 +94,10 @@ export class VectorUtilsMockFactory {
     );
 
     td.when(
-      vectorUtils.resolvePaymentTransfer(
+      vectorUtils.resolveParameterizedTransfer(
         parameterizedTransferId,
         commonPaymentId,
-        commonAmount.toString(),
+        commonAmount,
       ),
     ).thenReturn(
       okAsync({
@@ -121,7 +122,7 @@ export class VectorUtilsMockFactory {
     );
 
     td.when(
-      vectorUtils.createPaymentTransfer(
+      vectorUtils.createParameterizedTransfer(
         EPaymentType.Push,
         publicIdentifier2,
         commonAmount,
@@ -156,6 +157,54 @@ export class VectorUtilsMockFactory {
         BigNumber.from("1"),
       ),
     ).thenReturn(okAsync({} as IBasicTransferResponse));
+
+    td.when(
+      vectorUtils.getTransferStateFromTransfer(
+        td.matchers.contains({ transferId: offerTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferState.Active));
+    td.when(
+      vectorUtils.getTransferStateFromTransfer(
+        td.matchers.contains({ transferId: insuranceTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferState.Active));
+    td.when(
+      vectorUtils.getTransferStateFromTransfer(
+        td.matchers.contains({ transferId: parameterizedTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferState.Active));
+
+    td.when(
+      vectorUtils.getTransferType(
+        td.matchers.contains({ transferId: offerTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferType.Offer));
+    td.when(
+      vectorUtils.getTransferType(
+        td.matchers.contains({ transferId: insuranceTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferType.Insurance));
+    td.when(
+      vectorUtils.getTransferType(
+        td.matchers.contains({ transferId: parameterizedTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferType.Parameterized));
+
+    td.when(
+      vectorUtils.getTimestampFromTransfer(
+        td.matchers.contains({ transferId: offerTransferId }),
+      ),
+    ).thenReturn(UnixTimestamp(unixNow - 1) as never);
+    td.when(
+      vectorUtils.getTimestampFromTransfer(
+        td.matchers.contains({ transferId: insuranceTransferId }),
+      ),
+    ).thenReturn(UnixTimestamp(unixNow - 1) as never);
+    td.when(
+      vectorUtils.getTimestampFromTransfer(
+        td.matchers.contains({ transferId: parameterizedTransferId }),
+      ),
+    ).thenReturn(UnixTimestamp(unixNow - 1) as never);
 
     return vectorUtils;
   }

@@ -1,11 +1,9 @@
 import {
   HypernetLink,
-  RouterChannelUnknownError,
   VectorError,
   InvalidParametersError,
   BlockchainUnavailableError,
   InvalidPaymentError,
-  LogicalError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -18,12 +16,10 @@ export interface ILinkRepository {
    */
   getHypernetLinks(): ResultAsync<
     HypernetLink[],
-    | RouterChannelUnknownError
     | VectorError
     | InvalidParametersError
     | BlockchainUnavailableError
     | InvalidPaymentError
-    | LogicalError
   >;
 
   /**
@@ -34,12 +30,10 @@ export interface ILinkRepository {
     linkId: string,
   ): ResultAsync<
     HypernetLink,
-    | RouterChannelUnknownError
     | VectorError
     | InvalidParametersError
     | BlockchainUnavailableError
     | InvalidPaymentError
-    | LogicalError
   >;
 }
 
