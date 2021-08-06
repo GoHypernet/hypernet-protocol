@@ -2,6 +2,7 @@ import {
   BigNumberString,
   EMessageTransferType,
   EthereumAddress,
+  GatewayRegistrationInfo,
   GatewayUrl,
   HexString,
   IFullChannelState,
@@ -23,12 +24,14 @@ import { constants } from "ethers";
 
 export const account = EthereumAddress("0xDEADBEEF");
 export const account2 = EthereumAddress("0xBEEFDEAD");
+export const errorAccount = EthereumAddress("error");
 export const publicIdentifier = PublicIdentifier("vectorDEADBEEF");
 export const publicIdentifier2 = PublicIdentifier("vectorBEEFDEAD");
 export const publicIdentifier3 = PublicIdentifier("vectorDEADPORK");
 export const routerChannelAddress = EthereumAddress(
   "0x0afd1c03a0373b4c99233cbb0719ab0cbe8258eb",
 );
+export const errorRouterChannelAddress = EthereumAddress("error");
 export const routerPublicIdentifier = PublicIdentifier("vectorROUTERPUBLICID");
 export const ethereumAddress = EthereumAddress(
   "0x0000000000000000000000000000000000000000",
@@ -67,10 +70,16 @@ export const defaultExpirationLength = 5000;
 export const expirationDate = UnixTimestamp(unixNow + defaultExpirationLength);
 export const nowFormatted = "2021-02-03T04:28:09+03:00";
 export const gatewayUrl = GatewayUrl("https://example.gateway.com/");
+export const gatewayUrlError = GatewayUrl("gatewayUrlError");
 export const gatewayUrl2 = GatewayUrl("https://example2.gateway.com/");
 export const gatewayAddress = EthereumAddress("0xMediatorEthereumAddress");
 export const gatewayAddress2 = EthereumAddress("0xMediatorEthereumAddress2");
 export const gatewaySignature = Signature("0xgatewaySignature");
+export const gatewayRegistrationInfo = new GatewayRegistrationInfo(
+  gatewayUrl,
+  gatewayAddress,
+  gatewaySignature,
+);
 export const validDomain = "Hypernet";
 
 export const messageTransferDefinitionAddress = EthereumAddress(
