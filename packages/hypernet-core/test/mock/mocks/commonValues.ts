@@ -1,4 +1,5 @@
 import {
+  ActiveRouter,
   ActiveStateChannel,
   BigNumberString,
   ChainId,
@@ -581,3 +582,5 @@ export const activeStateChannel = new ActiveStateChannel(
   routerPublicIdentifier,
   routerChannelAddress,
 );
+
+export const activeRouters = new ActiveRouter(chainId, routerPublicIdentifier);
