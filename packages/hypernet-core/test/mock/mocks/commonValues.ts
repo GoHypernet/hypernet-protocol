@@ -82,7 +82,7 @@ export const gatewayRegistrationInfo = new GatewayRegistrationInfo(
   gatewayAddress,
   gatewaySignature,
 );
-export const validDomain = "Hypernet";
+export const validDomain = "hypernetProtocolDomain";
 
 export const messageTransferDefinitionAddress = EthereumAddress(
   "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6",
