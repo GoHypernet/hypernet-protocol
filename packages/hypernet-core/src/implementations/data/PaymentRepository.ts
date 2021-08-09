@@ -1,7 +1,6 @@
 import { NodeResponses } from "@connext/vector-types";
 import {
   EthereumAddress,
-  HypernetConfig,
   IHypernetOfferDetails,
   Payment,
   PublicIdentifier,
@@ -33,10 +32,11 @@ import {
   LogicalError,
   InsuranceState,
   ParameterizedState,
+  ChainId,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { IPaymentRepository } from "@interfaces/data";
-import { BigNumber } from "ethers";
+import { HypernetConfig } from "@interfaces/objects";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
 import {
@@ -91,6 +91,8 @@ export class PaymentRepository implements IPaymentRepository {
             };
 
             return this.vectorUtils.createPullNotificationTransfer(
+              payment.routerPublicIdentifier,
+              payment.chainId,
               payment.to,
               message,
             );
@@ -114,6 +116,8 @@ export class PaymentRepository implements IPaymentRepository {
   }
 
   public createPullPayment(
+    routerPublicIdentifier: PublicIdentifier,
+    chainId: ChainId,
     counterPartyAccount: PublicIdentifier,
     maximumAmount: BigNumberString,
     deltaTime: number,
@@ -130,45 +134,61 @@ export class PaymentRepository implements IPaymentRepository {
       this.paymentUtils.createPaymentId(EPaymentType.Pull),
       this.timeUtils.getBlockchainTimestamp(),
       this.configProvider.getConfig(),
-    ])
-      .andThen((vals) => {
-        const [browserNode, context, paymentId, timestamp, config] = vals;
+    ]).andThen((vals) => {
+      const [browserNode, context, paymentId, timestamp, config] = vals;
 
-        const message: IHypernetOfferDetails = {
-          messageType: EMessageTransferType.OFFER,
-          requireOnline: true,
-          paymentId,
-          creationDate: timestamp,
-          to: counterPartyAccount,
-          from: context.publicIdentifier,
-          requiredStake,
-          paymentAmount: maximumAmount,
-          expirationDate,
-          paymentToken,
-          insuranceToken: config.hypertokenAddress,
-          gatewayUrl,
-          metadata,
-          rate: {
-            deltaAmount,
-            deltaTime,
-          },
-        };
+      const insuranceToken = config.chainAddresses[chainId]?.hypertokenAddress;
 
-        // Create a message transfer, with the terms of the payment in the metadata.
-        return this.vectorUtils
-          .createOfferTransfer(counterPartyAccount, message)
-          .andThen((transferInfo) => {
-            return browserNode.getTransfer(TransferId(transferInfo.transferId));
-          })
-          .andThen((transfer) => {
-            // Return the payment
-            return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
-          })
-          .map((payment) => {
-            return payment as PullPayment;
-          });
-      })
-      .mapErr((err) => new PaymentCreationError(err?.message, err));
+      if (insuranceToken == null) {
+        return errAsync(
+          new PaymentCreationError(
+            `Cannot create a push payment on chain ${chainId}. No configuration for that chain is available.`,
+          ),
+        );
+      }
+
+      const message: IHypernetOfferDetails = {
+        routerPublicIdentifier,
+        chainId,
+        messageType: EMessageTransferType.OFFER,
+        requireOnline: true,
+        paymentId,
+        creationDate: timestamp,
+        to: counterPartyAccount,
+        from: context.publicIdentifier,
+        requiredStake,
+        paymentAmount: maximumAmount,
+        expirationDate,
+        paymentToken,
+        insuranceToken,
+        gatewayUrl,
+        metadata,
+        rate: {
+          deltaAmount,
+          deltaTime,
+        },
+      };
+
+      // Create a message transfer, with the terms of the payment in the metadata.
+      return this.vectorUtils
+        .createOfferTransfer(
+          routerPublicIdentifier,
+          chainId,
+          counterPartyAccount,
+          message,
+        )
+        .andThen((transferInfo) => {
+          return browserNode.getTransfer(TransferId(transferInfo.transferId));
+        })
+        .andThen((transfer) => {
+          // Return the payment
+          return this.paymentUtils.transfersToPayment(paymentId, [transfer]);
+        })
+        .map((payment) => {
+          return payment as PullPayment;
+        })
+        .mapErr((err) => new PaymentCreationError(err?.message, err));
+    });
   }
 
   /**
@@ -183,6 +203,8 @@ export class PaymentRepository implements IPaymentRepository {
    * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   public createPushPayment(
+    routerPublicIdentifier: PublicIdentifier,
+    chainId: ChainId,
     counterPartyAccount: PublicIdentifier,
     amount: BigNumberString,
     expirationDate: UnixTimestamp,
@@ -200,7 +222,19 @@ export class PaymentRepository implements IPaymentRepository {
     ]).andThen((vals) => {
       const [browserNode, context, paymentId, timestamp, config] = vals;
 
+      const insuranceToken = config.chainAddresses[chainId]?.hypertokenAddress;
+
+      if (insuranceToken == null) {
+        return errAsync(
+          new PaymentCreationError(
+            `Cannot create a push payment on chain ${chainId}. No configuration for that chain is available.`,
+          ),
+        );
+      }
+
       const message: IHypernetOfferDetails = {
+        routerPublicIdentifier,
+        chainId,
         messageType: EMessageTransferType.OFFER,
         paymentId,
         creationDate: timestamp,
@@ -210,7 +244,7 @@ export class PaymentRepository implements IPaymentRepository {
         paymentAmount: amount,
         expirationDate: expirationDate,
         paymentToken,
-        insuranceToken: config.hypertokenAddress,
+        insuranceToken,
         gatewayUrl,
         metadata,
         requireOnline: true,
@@ -218,7 +252,12 @@ export class PaymentRepository implements IPaymentRepository {
 
       // Create a message transfer, with the terms of the payment in the metadata.
       return this.vectorUtils
-        .createOfferTransfer(counterPartyAccount, message)
+        .createOfferTransfer(
+          routerPublicIdentifier,
+          chainId,
+          counterPartyAccount,
+          message,
+        )
         .andThen((transferInfo) => {
           return browserNode.getTransfer(TransferId(transferInfo.transferId));
         })
@@ -243,18 +282,13 @@ export class PaymentRepository implements IPaymentRepository {
     IFullTransferState[],
     VectorError | BlockchainUnavailableError
   > {
-    let browserNode: IBrowserNode;
-    let channelAddress: EthereumAddress;
-
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
-      this.vectorUtils.getRouterChannelAddress(),
+      this.getAllActiveTransfers(),
     ])
       .andThen((vals) => {
-        [browserNode, channelAddress] = vals;
-        return browserNode.getActiveTransfers(channelAddress);
-      })
-      .andThen((activeTransfers) => {
+        const [browserNode, activeTransfers] = vals;
+
         // We also need to look for potentially resolved transfers
         const earliestDate =
           this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
@@ -343,19 +377,12 @@ export class PaymentRepository implements IPaymentRepository {
     | InvalidPaymentError
     | InvalidParametersError
   > {
-    let browserNode: IBrowserNode;
-    let channelAddress: EthereumAddress;
-
     return ResultUtils.combine([
+      this.getAllActiveTransfers(),
       this.browserNodeProvider.getBrowserNode(),
-      this.vectorUtils.getRouterChannelAddress(),
     ])
       .andThen((vals) => {
-        [browserNode, channelAddress] = vals;
-
-        return browserNode.getActiveTransfers(channelAddress);
-      })
-      .andThen((activeTransfers) => {
+        const [activeTransfers, browserNode] = vals;
         // We also need to look for potentially resolved transfers
         const earliestDate =
           this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
@@ -571,6 +598,8 @@ export class PaymentRepository implements IPaymentRepository {
           `PaymentRepository:provideStake: Creating insurance transfer for paymentId: ${paymentId}`,
         );
         return this.vectorUtils.createInsuranceTransfer(
+          payment.routerPublicIdentifier,
+          payment.chainId,
           paymentSender,
           gatewayAddress,
           payment.requiredStake,
@@ -663,6 +692,8 @@ export class PaymentRepository implements IPaymentRepository {
 
         // Use vectorUtils to create the parameterizedPayment
         return this.vectorUtils.createParameterizedTransfer(
+          payment.routerPublicIdentifier,
+          payment.chainId,
           payment instanceof PushPayment
             ? EPaymentType.Push
             : EPaymentType.Pull,
@@ -703,12 +734,7 @@ export class PaymentRepository implements IPaymentRepository {
     gatewaySignature: Signature | null,
   ): ResultAsync<void, TransferResolutionError> {
     return this.vectorUtils
-      .resolveInsuranceTransfer(
-        transferId,
-        paymentId,
-        gatewaySignature,
-        BigNumber.from(amount),
-      )
+      .resolveInsuranceTransfer(transferId, paymentId, gatewaySignature, amount)
       .map(() => {});
   }
 
@@ -720,5 +746,31 @@ export class PaymentRepository implements IPaymentRepository {
         TransferId(payment.details.offerTransfers[0].transferId),
       )
       .map(() => {});
+  }
+
+  protected getAllActiveTransfers(): ResultAsync<
+    IFullTransferState[],
+    VectorError
+  > {
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.contextProvider.getInitializedContext(),
+    ])
+      .andThen((vals) => {
+        const [browserNode, context] = vals;
+
+        const activeTransferResults = context.activeStateChannels.map(
+          (activeStateChannel) => {
+            return browserNode.getActiveTransfers(
+              activeStateChannel.channelAddress,
+            );
+          },
+        );
+
+        return ResultUtils.combine(activeTransferResults);
+      })
+      .map((arrArr) => {
+        return new Array<IFullTransferState>().concat(...arrArr);
+      });
   }
 }

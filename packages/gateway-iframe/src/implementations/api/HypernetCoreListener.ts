@@ -47,6 +47,7 @@ export class HypernetCoreListener
           // Convert the balances to an actual balances object
           const assets = data.data.balances.assets.map((val) => {
             return new AssetBalance(
+              val.channelAddress,
               val.assetAddress,
               val.name,
               val.symbol,

@@ -18,6 +18,7 @@ import {
   InsuranceResolver,
   ParameterizedResolver,
   UnixTimestamp,
+  ChainId,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -79,7 +80,7 @@ export interface IBrowserNode {
   ): ResultAsync<void, VectorError>;
 
   getRegisteredTransfers(
-    chainId: number,
+    chainId: ChainId,
   ): ResultAsync<IRegisteredTransfer[], VectorError>;
 
   signUtilityMessage(message: string): ResultAsync<Signature, VectorError>;
@@ -114,18 +115,18 @@ export interface IBrowserNode {
 
   getStateChannelByParticipants(
     counterparty: PublicIdentifier,
-    chainId: number,
+    chainId: ChainId,
   ): ResultAsync<IFullChannelState | undefined, VectorError>;
 
   setup(
     counterpartyIdentifier: PublicIdentifier,
-    chainId: number,
+    chainId: ChainId,
     timeout: string,
     meta?: unknown,
   ): ResultAsync<IBasicChannelResponse, VectorError>;
 
   restoreState(
     counterpartyIdentifier: PublicIdentifier,
-    chainId: number,
+    chainId: ChainId,
   ): ResultAsync<void, VectorError>;
 }

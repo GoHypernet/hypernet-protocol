@@ -6,6 +6,7 @@ import {
 } from "@hypernetlabs/objects";
 
 export interface ISendFundsRequest {
+  channelAddress: EthereumAddress;
   recipientPublicIdentifier: PublicIdentifier;
   amount: BigNumberString;
   expirationDate: UnixTimestamp;

@@ -29,6 +29,6 @@
     "@1hive/apps-token-manager": "2.1.0",
     "@aragon/minime": "1.0.0",
     "@aragon/os": "4.4.0",
-    "ethers": "^5.0.32"
+    "ethers": "^5.4.3"
   }
 }

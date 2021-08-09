@@ -9,7 +9,6 @@ import {
   TransferId,
   Signature,
   InvalidParametersError,
-  RouterChannelUnknownError,
   TransferCreationError,
   TransferResolutionError,
   VectorError,
@@ -19,8 +18,8 @@ import {
   UnixTimestamp,
   ETransferType,
   BlockchainUnavailableError,
+  ChainId,
 } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 /**
@@ -28,17 +27,13 @@ import { ResultAsync } from "neverthrow";
  */
 export interface IVectorUtils {
   /**
-   * initialize the Vector utils. This allows us to avoid lazy loading and removes possible
-   * errors from later calls, like getRouterChannelAddress, which will never error after
-   * a successful initialize().
-   */
-  initialize(): ResultAsync<void, RouterChannelUnknownError | VectorError>;
-
-  /**
-   * Returns the address of the channel with the router, if exists.
+   * Returns the address of the channel with the router and chain, if it exists.
    * Otherwise, attempts to create a channel with the router & return the address.
    */
-  getRouterChannelAddress(): ResultAsync<EthereumAddress, never>;
+  getRouterChannelAddress(
+    routerPublicIdentifier: PublicIdentifier,
+    chainId: ChainId,
+  ): ResultAsync<EthereumAddress, VectorError>;
 
   /**
    * Resolves a message transfer
@@ -61,7 +56,7 @@ export interface IVectorUtils {
     transferId: TransferId,
     paymentId: PaymentId,
     gatewaySignature: Signature | null,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
   /**
@@ -107,11 +102,15 @@ export interface IVectorUtils {
    *
    */
   createOfferTransfer(
+    routerPublicIdentifier: PublicIdentifier,
+    chainId: ChainId,
     toAddress: PublicIdentifier,
     message: IHypernetOfferDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError>;
 
   createPullNotificationTransfer(
+    routerPublicIdentifier: PublicIdentifier,
+    chainId: ChainId,
     toAddress: PublicIdentifier,
     message: IHypernetPullPaymentDetails,
   ): ResultAsync<
@@ -130,6 +129,8 @@ export interface IVectorUtils {
    * @param UUID
    */
   createInsuranceTransfer(
+    routerPublicIdentifier: PublicIdentifier,
+    chainId: ChainId,
     toAddress: PublicIdentifier,
     mediatorAddress: EthereumAddress,
     amount: BigNumberString,
@@ -154,6 +155,8 @@ export interface IVectorUtils {
    * @param deltaAmount
    */
   createParameterizedTransfer(
+    routerPublicIdentifier: PublicIdentifier,
+    chainId: ChainId,
     type: EPaymentType,
     toAddress: PublicIdentifier,
     amount: BigNumberString,

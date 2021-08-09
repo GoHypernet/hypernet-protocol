@@ -2,9 +2,9 @@ import {
   AuthorizedGatewaysSchema,
   DefinitionName,
   EthereumAddress,
-  HypernetConfig,
   SchemaUrl,
 } from "@hypernetlabs/objects";
+import { HypernetConfig } from "@interfaces/objects";
 import { okAsync, ResultAsync } from "neverthrow";
 
 import { IConfigProvider } from "@interfaces/utilities";
@@ -12,7 +12,6 @@ import {
   chainId,
   defaultExpirationLength,
   hyperTokenAddress,
-  routerPublicIdentifier,
 } from "@mock/mocks";
 
 export class ConfigProviderMock implements IConfigProvider {
@@ -23,23 +22,30 @@ export class ConfigProviderMock implements IConfigProvider {
       config ??
       new HypernetConfig(
         "iframeSource",
-        routerPublicIdentifier,
+        "infuraId",
         chainId,
-        hyperTokenAddress,
-        EthereumAddress("messageTransferAddress"),
-        EthereumAddress("insuranceTransferAddress"),
-        EthereumAddress("parameterizedTransferAddress"),
-        EthereumAddress("gatewayRegistryAddress"),
-        "Hypernet",
+        "hypernetProtocolDomain",
         defaultExpirationLength,
         {
-          [1337]: "http://localhost:8545",
+          [chainId]: "http://localhost:8545",
         },
         {
-          [1337]: {
-            channelFactoryAddress: "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
-            transferRegistryAddress:
+          [chainId]: {
+            channelFactoryAddress: EthereumAddress(
+              "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
+            ),
+            transferRegistryAddress: EthereumAddress(
               "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F",
+            ),
+            hypertokenAddress: hyperTokenAddress,
+            messageTransferAddress: EthereumAddress("messageTransferAddress"),
+            insuranceTransferAddress: EthereumAddress(
+              "insuranceTransferAddress",
+            ),
+            parameterizedTransferAddress: EthereumAddress(
+              "parameterizedTransferAddress",
+            ),
+            gatewayRegistryAddress: EthereumAddress("gatewayRegistryAddress"),
           },
         },
         "natsUrl",

@@ -68,6 +68,10 @@ export class ContextProviderMock implements IContextProvider {
   public onGatewayIFrameDisplayRequestedActivations: GatewayUrl[] = [];
   public onGatewayIFrameCloseRequested: Subject<GatewayUrl>;
   public onGatewayIFrameCloseRequestedActivations: GatewayUrl[] = [];
+  public onCoreIFrameDisplayRequested: Subject<void>;
+  public onCoreIFrameDisplayRequestedActivationCount = 0;
+  public onCoreIFrameCloseRequested: Subject<void>;
+  public onCoreIFrameCloseRequestedActivationCount = 0;
   public onInitializationRequired: Subject<void>;
   public onInitializationRequiredActivationCount = 0;
   public onPrivateCredentialsRequested: Subject<void>;
@@ -192,6 +196,16 @@ export class ContextProviderMock implements IContextProvider {
       this.onGatewayIFrameCloseRequestedActivations.push(val);
     });
 
+    this.onCoreIFrameDisplayRequested = new Subject<void>();
+    this.onCoreIFrameDisplayRequested.subscribe(() => {
+      this.onCoreIFrameDisplayRequestedActivationCount++;
+    });
+
+    this.onCoreIFrameCloseRequested = new Subject<void>();
+    this.onCoreIFrameCloseRequested.subscribe(() => {
+      this.onCoreIFrameCloseRequestedActivationCount++;
+    });
+
     this.onInitializationRequired = new Subject<void>();
     this.onInitializationRequired.subscribe(() => {
       this.onInitializationRequiredActivationCount++;
@@ -215,8 +229,8 @@ export class ContextProviderMock implements IContextProvider {
       this.context = new HypernetContext(
         uninitializedAccount,
         null,
+        null,
         false,
-        window.ethereum != null,
         this.onControlClaimed,
         this.onControlYielded,
         this.onPushPaymentSent,
@@ -239,6 +253,8 @@ export class ContextProviderMock implements IContextProvider {
         this.onAuthorizedGatewayActivationFailed,
         this.onGatewayIFrameDisplayRequested,
         this.onGatewayIFrameCloseRequested,
+        this.onCoreIFrameDisplayRequested,
+        this.onCoreIFrameCloseRequested,
         this.onInitializationRequired,
         this.onPrivateCredentialsRequested,
         this.onGatewayConnectorActivated,
@@ -251,8 +267,8 @@ export class ContextProviderMock implements IContextProvider {
       this.initializedContext = new InitializedHypernetContext(
         account,
         publicIdentifier,
+        [],
         true,
-        window.ethereum != null,
         this.onControlClaimed,
         this.onControlYielded,
         this.onPushPaymentSent,
@@ -275,6 +291,8 @@ export class ContextProviderMock implements IContextProvider {
         this.onAuthorizedGatewayActivationFailed,
         this.onGatewayIFrameDisplayRequested,
         this.onGatewayIFrameCloseRequested,
+        this.onCoreIFrameDisplayRequested,
+        this.onCoreIFrameCloseRequested,
         this.onInitializationRequired,
         this.onPrivateCredentialsRequested,
         this.onGatewayConnectorActivated,

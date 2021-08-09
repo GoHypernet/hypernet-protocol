@@ -5,8 +5,8 @@ import {
   IBasicTransferResponse,
   Signature,
   ETransferState,
+  BigNumberString,
 } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
 
@@ -17,6 +17,7 @@ import {
   activeInsuranceTransfer,
   activeOfferTransfer,
   activeParameterizedTransfer,
+  chainId,
   commonAmount,
   commonPaymentId,
   erc20AssetAddress,
@@ -29,6 +30,7 @@ import {
   publicIdentifier,
   publicIdentifier2,
   routerChannelAddress,
+  routerPublicIdentifier,
   unixNow,
 } from "@mock/mocks";
 
@@ -67,14 +69,18 @@ export class VectorUtilsMockFactory {
       }),
     );
 
-    td.when(vectorUtils.getRouterChannelAddress()).thenReturn(
-      okAsync(routerChannelAddress),
-    );
+    td.when(
+      vectorUtils.getRouterChannelAddress(routerPublicIdentifier, chainId),
+    ).thenReturn(okAsync(routerChannelAddress));
 
     td.when(
       vectorUtils.createOfferTransfer(
+        routerPublicIdentifier,
+        chainId,
         publicIdentifier2,
         td.matchers.contains({
+          routerPublicIdentifier: routerPublicIdentifier,
+          chainId: chainId,
           paymentId: commonPaymentId,
           creationDate: unixNow,
           to: publicIdentifier2,
@@ -108,6 +114,8 @@ export class VectorUtilsMockFactory {
 
     td.when(
       vectorUtils.createInsuranceTransfer(
+        routerPublicIdentifier,
+        chainId,
         publicIdentifier,
         gatewayAddress,
         commonAmount,
@@ -123,6 +131,8 @@ export class VectorUtilsMockFactory {
 
     td.when(
       vectorUtils.createParameterizedTransfer(
+        routerPublicIdentifier,
+        chainId,
         EPaymentType.Push,
         publicIdentifier2,
         commonAmount,
@@ -145,7 +155,7 @@ export class VectorUtilsMockFactory {
         insuranceTransferId,
         commonPaymentId,
         null,
-        BigNumber.from("0"),
+        BigNumberString("0"),
       ),
     ).thenReturn(okAsync({} as IBasicTransferResponse));
 
@@ -154,7 +164,7 @@ export class VectorUtilsMockFactory {
         insuranceTransferId,
         commonPaymentId,
         Signature(gatewaySignature),
-        BigNumber.from("1"),
+        BigNumberString("1"),
       ),
     ).thenReturn(okAsync({} as IBasicTransferResponse));
 

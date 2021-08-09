@@ -23,6 +23,7 @@ import {
   InsuranceResolver,
   MessageResolver,
   ParameterizedResolver,
+  ChainId,
 } from "@hypernetlabs/objects";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
@@ -125,7 +126,7 @@ export class WrappedBrowserNode implements IBrowserNode {
   }
 
   public getRegisteredTransfers(
-    chainId: number,
+    chainId: ChainId,
   ): ResultAsync<IRegisteredTransfer[], VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.getRegisteredTransfers({ chainId }),
@@ -266,7 +267,7 @@ export class WrappedBrowserNode implements IBrowserNode {
 
   public getStateChannelByParticipants(
     counterparty: PublicIdentifier,
-    chainId: number,
+    chainId: ChainId,
   ): ResultAsync<IFullChannelState | undefined, VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.getStateChannelByParticipants({ counterparty, chainId }),
@@ -282,7 +283,7 @@ export class WrappedBrowserNode implements IBrowserNode {
 
   public setup(
     counterpartyIdentifier: PublicIdentifier,
-    chainId: number,
+    chainId: ChainId,
     timeout: string,
     meta?: any,
   ): ResultAsync<IBasicChannelResponse, VectorError> {
@@ -305,7 +306,7 @@ export class WrappedBrowserNode implements IBrowserNode {
 
   public restoreState(
     counterpartyIdentifier: PublicIdentifier,
-    chainId: number,
+    chainId: ChainId,
   ): ResultAsync<void, VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.restoreState({ counterpartyIdentifier, chainId }),

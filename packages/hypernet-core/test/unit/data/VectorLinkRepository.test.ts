@@ -33,6 +33,9 @@ import {
   offerTransferId,
   insuranceTransferId,
   parameterizedTransferId,
+  routerChannelAddress,
+  chainId,
+  routerPublicIdentifier,
 } from "@mock/mocks";
 import {
   BlockchainProviderMock,
@@ -126,6 +129,8 @@ class VectorLinkRepositoryMocks {
   ): PushPayment {
     return new PushPayment(
       commonPaymentId,
+      routerPublicIdentifier,
+      chainId,
       counterPartyAccount,
       fromAccount,
       state,
@@ -175,7 +180,7 @@ describe("VectorLinkRepository tests", () => {
     const repo = vectorLinkRepositoryMocks.factoryVectorLinkRepository();
 
     // Act
-    const result = await repo.getHypernetLinks();
+    const result = await repo.getHypernetLinks(routerChannelAddress);
 
     // Assert
     expect(result).toBeDefined();
@@ -190,7 +195,7 @@ describe("VectorLinkRepository tests", () => {
     const repo = vectorLinkRepositoryMocks.factoryVectorLinkRepository();
 
     // Act
-    const result = await repo.getHypernetLinks();
+    const result = await repo.getHypernetLinks(routerChannelAddress);
     const error = result._unsafeUnwrapErr();
 
     // Assert
@@ -204,7 +209,10 @@ describe("VectorLinkRepository tests", () => {
     const repo = vectorLinkRepositoryMocks.factoryVectorLinkRepository();
 
     // Act
-    const result = await repo.getHypernetLink(counterPartyAccount);
+    const result = await repo.getHypernetLink(
+      routerChannelAddress,
+      counterPartyAccount,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -219,7 +227,10 @@ describe("VectorLinkRepository tests", () => {
     const repo = vectorLinkRepositoryMocks.factoryVectorLinkRepository();
 
     // Act
-    const result = await repo.getHypernetLink(publicIdentifier3);
+    const result = await repo.getHypernetLink(
+      routerChannelAddress,
+      publicIdentifier3,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -235,7 +246,10 @@ describe("VectorLinkRepository tests", () => {
     const repo = vectorLinkRepositoryMocks.factoryVectorLinkRepository();
 
     // Act
-    const result = await repo.getHypernetLink(counterPartyAccount);
+    const result = await repo.getHypernetLink(
+      routerChannelAddress,
+      counterPartyAccount,
+    );
     const error = result._unsafeUnwrapErr();
 
     // Assert

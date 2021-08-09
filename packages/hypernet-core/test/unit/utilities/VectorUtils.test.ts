@@ -77,12 +77,12 @@ class VectorUtilsMocks {
     );
 
     td.when(
-      this.blockchainUtils.getMessageTransferEncodedCancelData(),
+      this.blockchainUtils.getMessageTransferEncodedCancelData(chainId),
     ).thenReturn(
       okAsync([messageTransferResolverEncoding, messageTransferEncodedCancel]),
     );
     td.when(
-      this.blockchainUtils.getInsuranceTransferEncodedCancelData(),
+      this.blockchainUtils.getInsuranceTransferEncodedCancelData(chainId),
     ).thenReturn(
       okAsync([
         insuranceTransferResolverEncoding,
@@ -90,7 +90,7 @@ class VectorUtilsMocks {
       ]),
     );
     td.when(
-      this.blockchainUtils.getParameterizedTransferEncodedCancelData(),
+      this.blockchainUtils.getParameterizedTransferEncodedCancelData(chainId),
     ).thenReturn(
       okAsync([
         parameterizedTransferResolverEncoding,
@@ -114,66 +114,67 @@ class VectorUtilsMocks {
 }
 
 describe("VectorUtils tests", () => {
-  test("initialize completes successfully", async () => {
+  // test("initialize completes successfully", async () => {
+  //   // Arrange
+  //   const vectorUtilsMocks = new VectorUtilsMocks();
+
+  //   const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+  //   // Act
+  //   const result = await vectorUtils.initialize();
+
+  //   // Assert
+  //   expect(result).toBeDefined();
+  //   expect(result.isOk()).toBeTruthy();
+  // });
+
+  // test("initialize creates a channel with the router if the channel does not exist", async () => {
+  //   // Arrange
+  //   const vectorUtilsMocks = new VectorUtilsMocks(false);
+
+  //   const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+  //   // Act
+  //   const result = await vectorUtils.initialize();
+
+  //   // Assert
+  //   expect(result).toBeDefined();
+  //   expect(result.isOk()).toBeTruthy();
+  // });
+
+  // test("initialize restores a channel with the router when setup fails", async () => {
+  //   // Arrange
+  //   const vectorUtilsMocks = new VectorUtilsMocks(false);
+
+  //   td.when(
+  //     vectorUtilsMocks.browserNodeProvider.browserNode.setup(
+  //       routerPublicIdentifier,
+  //       chainId,
+  //       DEFAULT_CHANNEL_TIMEOUT.toString(),
+  //     ),
+  //   ).thenReturn(errAsync(new VectorError("Setup Failed")));
+
+  //   const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
+
+  //   // Act
+  //   const result = await vectorUtils.initialize();
+
+  //   // Assert
+  //   expect(result).toBeDefined();
+  //   expect(result.isOk()).toBeTruthy();
+  // });
+
+  test("getRouterChannelAddress completes successfully", async () => {
     // Arrange
     const vectorUtilsMocks = new VectorUtilsMocks();
 
     const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
 
     // Act
-    const result = await vectorUtils.initialize();
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isOk()).toBeTruthy();
-  });
-
-  test("initialize creates a channel with the router if the channel does not exist", async () => {
-    // Arrange
-    const vectorUtilsMocks = new VectorUtilsMocks(false);
-
-    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
-
-    // Act
-    const result = await vectorUtils.initialize();
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isOk()).toBeTruthy();
-  });
-
-  test("initialize restores a channel with the router when setup fails", async () => {
-    // Arrange
-    const vectorUtilsMocks = new VectorUtilsMocks(false);
-
-    td.when(
-      vectorUtilsMocks.browserNodeProvider.browserNode.setup(
-        routerPublicIdentifier,
-        chainId,
-        DEFAULT_CHANNEL_TIMEOUT.toString(),
-      ),
-    ).thenReturn(errAsync(new VectorError("Setup Failed")));
-
-    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
-
-    // Act
-    const result = await vectorUtils.initialize();
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isOk()).toBeTruthy();
-  });
-
-  test("getRouterChannelAddress completes successfully after initialize", async () => {
-    // Arrange
-    const vectorUtilsMocks = new VectorUtilsMocks();
-
-    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
-
-    // Act
-    const result = await vectorUtils.initialize().andThen(() => {
-      return vectorUtils.getRouterChannelAddress();
-    });
+    const result = await vectorUtils.getRouterChannelAddress(
+      routerPublicIdentifier,
+      chainId,
+    );
 
     // Assert
     expect(result).toBeDefined();

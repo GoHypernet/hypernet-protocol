@@ -14,4 +14,3 @@ export * from "@implementations/utilities/PaymentUtils";
 export * from "@implementations/utilities/TimeUtils";
 export * from "@implementations/utilities/VectorUtils";
 export * from "@implementations/utilities/WrappedBrowserNode";
-export * from "@implementations/utilities/MetamaskUtils";

@@ -2,7 +2,6 @@ import {
   Balances,
   ControlClaim,
   EthereumAddress,
-  HypernetConfig,
   HypernetLink,
   Payment,
   PublicIdentifier,
@@ -28,6 +27,7 @@ import {
   BigNumberString,
   MessagingError,
   RouterChannelUnknownError,
+  ActiveStateChannel,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -80,8 +80,7 @@ import {
   IMessagingRepository,
   IPaymentRepository,
 } from "@interfaces/data";
-import { HypernetContext } from "@interfaces/objects";
-import { BigNumber } from "ethers";
+import { HypernetConfig, HypernetContext } from "@interfaces/objects";
 import { ok, Result, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
@@ -98,7 +97,6 @@ import {
   VectorUtils,
   EthersBlockchainUtils,
   CeramicUtils,
-  MetamaskUtils,
   MessagingProvider,
 } from "@implementations/utilities";
 import {
@@ -119,7 +117,6 @@ import {
   ITimeUtils,
   IVectorUtils,
   ICeramicUtils,
-  IMetamaskUtils,
   IMessagingProvider,
 } from "@interfaces/utilities";
 import {
@@ -155,6 +152,8 @@ export class HypernetCore implements IHypernetCore {
   public onAuthorizedGatewayActivationFailed: Subject<GatewayUrl>;
   public onGatewayIFrameDisplayRequested: Subject<GatewayUrl>;
   public onGatewayIFrameCloseRequested: Subject<GatewayUrl>;
+  public onCoreIFrameDisplayRequested: Subject<void>;
+  public onCoreIFrameCloseRequested: Subject<void>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
 
@@ -175,7 +174,6 @@ export class HypernetCore implements IHypernetCore {
   protected ceramicUtils: ICeramicUtils;
   protected validationUtils: IValidationUtils;
   protected storageUtils: IStorageUtils;
-  protected metamaskUtils: IMetamaskUtils;
   protected messagingProvider: IMessagingProvider;
 
   // Factories
@@ -251,6 +249,8 @@ export class HypernetCore implements IHypernetCore {
     this.onAuthorizedGatewayActivationFailed = new Subject<GatewayUrl>();
     this.onGatewayIFrameDisplayRequested = new Subject<GatewayUrl>();
     this.onGatewayIFrameCloseRequested = new Subject<GatewayUrl>();
+    this.onCoreIFrameDisplayRequested = new Subject();
+    this.onCoreIFrameCloseRequested = new Subject();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
 
@@ -291,6 +291,8 @@ export class HypernetCore implements IHypernetCore {
       this.onAuthorizedGatewayActivationFailed,
       this.onGatewayIFrameDisplayRequested,
       this.onGatewayIFrameCloseRequested,
+      this.onCoreIFrameDisplayRequested,
+      this.onCoreIFrameCloseRequested,
       this.onInitializationRequired,
       this.onPrivateCredentialsRequested,
     );
@@ -310,17 +312,10 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
     );
 
-    // TODO: This could work on Ethers provider and BlockchainUtils might be a good place for it
-    this.metamaskUtils = new MetamaskUtils(
-      this.configProvider,
-      this.localStorageUtils,
-      this.logUtils,
-    );
-
     this.blockchainProvider = new EthersBlockchainProvider(
       this.contextProvider,
       this.configProvider,
-      this.metamaskUtils,
+      this.localStorageUtils,
       this.internalProviderFactory,
       this.logUtils,
     );
@@ -528,12 +523,20 @@ export class HypernetCore implements IHypernetCore {
     });
   }
 
+  public getActiveStateChannels(): ResultAsync<
+    ActiveStateChannel[],
+    VectorError | BlockchainUnavailableError | PersistenceError
+  > {
+    return this.accountService.getActiveStateChannels();
+  }
+
   /**
    * Deposit funds into Hypernet Core.
    * @param assetAddress the Ethereum address of the token to deposit
    * @param amount the amount of the token to deposit
    */
   public depositFunds(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
     amount: BigNumberString,
   ): ResultAsync<
@@ -541,7 +544,11 @@ export class HypernetCore implements IHypernetCore {
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
     // console.log(`HypernetCore:depositFunds:assetAddress:${assetAddress}`)
-    return this.accountService.depositFunds(assetAddress, amount);
+    return this.accountService.depositFunds(
+      channelAddress,
+      assetAddress,
+      amount,
+    );
   }
 
   /**
@@ -551,6 +558,7 @@ export class HypernetCore implements IHypernetCore {
    * @param destinationAddress the (Ethereum) address to withdraw to
    */
   public withdrawFunds(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
     amount: BigNumberString,
     destinationAddress: EthereumAddress,
@@ -559,6 +567,7 @@ export class HypernetCore implements IHypernetCore {
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
     return this.accountService.withdrawFunds(
+      channelAddress,
       assetAddress,
       amount,
       destinationAddress,
@@ -600,13 +609,10 @@ export class HypernetCore implements IHypernetCore {
    * Accepts the terms of a push payment, and puts up the stake/insurance transfer.
    * @param paymentId
    */
-  public acceptOffers(
-    paymentIds: PaymentId[],
-  ): ResultAsync<
-    Result<Payment, AcceptPaymentError>[],
-    InsufficientBalanceError | AcceptPaymentError
-  > {
-    return this.paymentService.acceptOffers(paymentIds);
+  public acceptOffer(
+    paymentId: PaymentId,
+  ): ResultAsync<Payment, InsufficientBalanceError | AcceptPaymentError> {
+    return this.paymentService.acceptOffer(paymentId);
   }
 
   /**
@@ -635,9 +641,7 @@ export class HypernetCore implements IHypernetCore {
    * Initialize this instance of Hypernet Core
    * @param account: the ethereum account to initialize with
    */
-  public initialize(
-    account: EthereumAddress,
-  ): ResultAsync<
+  public initialize(): ResultAsync<
     void,
     | MessagingError
     | BlockchainUnavailableError
@@ -651,16 +655,23 @@ export class HypernetCore implements IHypernetCore {
       return this._initializeResult;
     }
 
-    this.logUtils.debug(
-      `Initializing Hypernet Protocol Core with account ${account}`,
-    );
+    this.logUtils.debug(`Initializing Hypernet Protocol Core`);
 
     let context: HypernetContext;
-    this._initializeResult = this.contextProvider
-      .getContext()
-      .andThen((val) => {
-        context = val;
-        context.account = account;
+    this._initializeResult = this.blockchainProvider
+      .initialize()
+      .andThen(() => {
+        this.logUtils.debug("Getting Ethereum accounts");
+        return ResultUtils.combine([
+          this.contextProvider.getContext(),
+          this.accountRepository.getAccounts(),
+        ]);
+      })
+      .andThen((vals) => {
+        context = vals[0];
+        const accounts = vals[1];
+        context.account = accounts[0];
+        this.logUtils.debug(`Obtained accounts: ${accounts}`);
         return this.contextProvider.setContext(context);
       })
       .andThen(() => {
@@ -671,10 +682,10 @@ export class HypernetCore implements IHypernetCore {
         return this.contextProvider.setContext(context);
       })
       .andThen(() => {
+        // By doing some active initialization, we can avoid whole categories
+        // of errors occuring post-initialization (ie, runtime), which makes the
+        // whole thing more reliable in operation.
         this.logUtils.debug("Initializing utilities");
-        return ResultUtils.combine([this.vectorUtils.initialize()]);
-      })
-      .andThen(() => {
         this.logUtils.debug("Initializing services");
         return ResultUtils.combine([this.gatewayConnectorService.initialize()]);
       })

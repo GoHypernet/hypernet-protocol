@@ -1,4 +1,5 @@
 import { BigNumberString } from "@objects/BigNumberString";
+import { ChainId } from "@objects/ChainId";
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { GatewayUrl } from "@objects/GatewayUrl";
 import { Payment } from "@objects/Payment";
@@ -11,6 +12,8 @@ import { UnixTimestamp } from "@objects/UnixTimestamp";
 export class PushPayment extends Payment {
   constructor(
     id: PaymentId,
+    routerPublicIdentifier: PublicIdentifier,
+    chainId: ChainId,
     to: PublicIdentifier,
     from: PublicIdentifier,
     state: EPaymentState,
@@ -29,6 +32,8 @@ export class PushPayment extends Payment {
   ) {
     super(
       id,
+      routerPublicIdentifier,
+      chainId,
       to,
       from,
       state,

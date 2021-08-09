@@ -51,14 +51,16 @@ export class ContextProvider implements IContextProvider {
     onAuthorizedGatewayActivationFailed: Subject<GatewayUrl>,
     onGatewayIFrameDisplayRequested: Subject<GatewayUrl>,
     onGatewayIFrameCloseRequested: Subject<GatewayUrl>,
+    onCoreIFrameDisplayRequested: Subject<void>,
+    onCoreIFrameCloseRequested: Subject<void>,
     onInitializationRequired: Subject<void>,
     onPrivateCredentialsRequested: Subject<void>,
   ) {
     this.context = new HypernetContext(
       null,
       null,
+      null,
       false,
-      window.ethereum != null,
       onControlClaimed,
       onControlYielded,
       onPushPaymentSent,
@@ -81,6 +83,8 @@ export class ContextProvider implements IContextProvider {
       onAuthorizedGatewayActivationFailed,
       onGatewayIFrameDisplayRequested,
       onGatewayIFrameCloseRequested,
+      onCoreIFrameDisplayRequested,
+      onCoreIFrameCloseRequested,
       onInitializationRequired,
       onPrivateCredentialsRequested,
       new Subject<IGatewayConnectorProxy>(),
@@ -117,8 +121,8 @@ export class ContextProvider implements IContextProvider {
         new InitializedHypernetContext(
           EthereumAddress(this.context.account || ""),
           PublicIdentifier(this.context.publicIdentifier || ""),
+          this.context.activeStateChannels || [],
           this.context.inControl,
-          window.ethereum != null,
           this.context.onControlClaimed,
           this.context.onControlYielded,
           this.context.onPushPaymentSent,
@@ -141,6 +145,8 @@ export class ContextProvider implements IContextProvider {
           this.context.onAuthorizedGatewayActivationFailed,
           this.context.onGatewayIFrameDisplayRequested,
           this.context.onGatewayIFrameCloseRequested,
+          this.context.onCoreIFrameDisplayRequested,
+          this.context.onCoreIFrameCloseRequested,
           this.context.onInitializationRequired,
           this.context.onPrivateCredentialsRequested,
           this.context.onGatewayConnectorProxyActivated,
@@ -162,7 +168,9 @@ export class ContextProvider implements IContextProvider {
 
   protected contextInitialized(): boolean {
     return (
-      this.context.account != null && this.context.publicIdentifier != null
+      this.context.account != null &&
+      this.context.publicIdentifier != null &&
+      this.context.activeStateChannels != null
     );
   }
 }

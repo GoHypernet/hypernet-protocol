@@ -41,23 +41,25 @@ export class BlockchainProviderMock implements IBlockchainProvider {
     } as TransactionResponse);
   }
 
-  public getSigner(): ResultAsync<
-    ethers.providers.JsonRpcSigner,
-    BlockchainUnavailableError
-  > {
+  public initialize(): ResultAsync<void, BlockchainUnavailableError> {
+    return okAsync(undefined);
+  }
+
+  public getSigner(): ResultAsync<ethers.providers.JsonRpcSigner, never> {
     return okAsync(this.signer);
   }
-  public getProvider(): ResultAsync<
-    ethers.providers.Web3Provider,
-    BlockchainUnavailableError
+  public getProvider(): ResultAsync<ethers.providers.Web3Provider, never> {
+    return okAsync(this.provider);
+  }
+
+  public getGovernanceProvider(): ResultAsync<
+    ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
+    never
   > {
     return okAsync(this.provider);
   }
 
-  public getEIP1193Provider(): ResultAsync<
-    Eip1193Bridge,
-    BlockchainUnavailableError
-  > {
+  public getEIP1193Provider(): ResultAsync<Eip1193Bridge, never> {
     throw new Error("Method not implemented.");
   }
 

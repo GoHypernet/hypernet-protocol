@@ -1,4 +1,4 @@
-import { HypernetConfig } from "@hypernetlabs/objects";
+import { HypernetConfig } from "@interfaces/objects";
 import { ResultAsync } from "neverthrow";
 
 /**

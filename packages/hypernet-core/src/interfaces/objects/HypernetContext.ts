@@ -7,6 +7,7 @@ import {
   EthereumAddress,
   GatewayUrl,
   Signature,
+  ActiveStateChannel,
 } from "@hypernetlabs/objects";
 import { Subject } from "rxjs";
 
@@ -16,8 +17,8 @@ export class HypernetContext {
   constructor(
     public account: EthereumAddress | null,
     public publicIdentifier: PublicIdentifier | null,
+    public activeStateChannels: ActiveStateChannel[] | null,
     public inControl: boolean,
-    public metamaskEnabled: boolean,
     public onControlClaimed: Subject<ControlClaim>,
     public onControlYielded: Subject<ControlClaim>,
     public onPushPaymentSent: Subject<PushPayment>,
@@ -40,6 +41,8 @@ export class HypernetContext {
     public onAuthorizedGatewayActivationFailed: Subject<GatewayUrl>,
     public onGatewayIFrameDisplayRequested: Subject<GatewayUrl>,
     public onGatewayIFrameCloseRequested: Subject<GatewayUrl>,
+    public onCoreIFrameDisplayRequested: Subject<void>,
+    public onCoreIFrameCloseRequested: Subject<void>,
     public onInitializationRequired: Subject<void>,
     public onPrivateCredentialsRequested: Subject<void>,
     public onGatewayConnectorProxyActivated: Subject<IGatewayConnectorProxy>,
@@ -51,8 +54,8 @@ export class InitializedHypernetContext {
   constructor(
     public account: EthereumAddress,
     public publicIdentifier: PublicIdentifier,
+    public activeStateChannels: ActiveStateChannel[],
     public inControl: boolean,
-    public metamaskEnabled: boolean,
     public onControlClaimed: Subject<ControlClaim>,
     public onControlYielded: Subject<ControlClaim>,
     public onPushPaymentSent: Subject<PushPayment>,
@@ -75,6 +78,8 @@ export class InitializedHypernetContext {
     public onAuthorizedGatewayActivationFailed: Subject<GatewayUrl>,
     public onGatewayIFrameDisplayRequested: Subject<GatewayUrl>,
     public onGatewayIFrameCloseRequested: Subject<GatewayUrl>,
+    public onCoreIFrameDisplayRequested: Subject<void>,
+    public onCoreIFrameCloseRequested: Subject<void>,
     public onInitializationRequired: Subject<void>,
     public onPrivateCredentialsRequested: Subject<void>,
     public onGatewayConnectorProxyActivated: Subject<IGatewayConnectorProxy>,

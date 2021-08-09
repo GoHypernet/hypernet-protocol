@@ -77,6 +77,7 @@ class AccountsRepositoryMocks {
     this.balances = {
       assets: [
         new AssetBalance(
+          routerChannelAddress,
           EthereumAddress(this.stateChannel?.assetIds[0]),
           `Unknown Token (${EthereumAddress(this.stateChannel?.assetIds[0])})`,
           "Unk",
@@ -102,7 +103,7 @@ class AccountsRepositoryMocks {
 }
 
 class AccountsRepositoryErrorMocks {
-  public blockchainProvider = td.object<IBlockchainProvider>();
+  public blockchainProvider = new BlockchainProviderMock();
   public vectorUtils =
     VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
   public browserNodeProvider = td.object<IBrowserNodeProvider>();
@@ -113,9 +114,6 @@ class AccountsRepositoryErrorMocks {
   constructor() {
     td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(
       errAsync(new VectorError()),
-    );
-    td.when(this.blockchainProvider.getSigner()).thenReturn(
-      errAsync(new BlockchainUnavailableError()),
     );
     td.when(
       this.blockchainUtils.mintToken(
@@ -208,7 +206,7 @@ describe("AccountsRepository tests", () => {
     );
 
     // Act
-    const result = await repo.getBalanceByAsset(assetId);
+    const result = await repo.getBalanceByAsset(routerChannelAddress, assetId);
 
     // Assert
     expect(result).toBeDefined();
@@ -224,7 +222,11 @@ describe("AccountsRepository tests", () => {
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
     // Act
-    const result = await repo.depositFunds(ethereumAddress, commonAmount);
+    const result = await repo.depositFunds(
+      routerChannelAddress,
+      ethereumAddress,
+      commonAmount,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -238,7 +240,11 @@ describe("AccountsRepository tests", () => {
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
     // Act
-    const result = await repo.depositFunds(erc20AssetAddress, commonAmount);
+    const result = await repo.depositFunds(
+      routerChannelAddress,
+      erc20AssetAddress,
+      commonAmount,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -253,6 +259,7 @@ describe("AccountsRepository tests", () => {
 
     // Act
     const result = await repo.withdrawFunds(
+      routerChannelAddress,
       ethereumAddress,
       commonAmount,
       destinationAddress,
@@ -271,6 +278,7 @@ describe("AccountsRepository tests", () => {
 
     // Act
     const result = await repo.withdrawFunds(
+      routerChannelAddress,
       erc20AssetAddress,
       commonAmount,
       destinationAddress,
@@ -289,6 +297,7 @@ describe("AccountsRepository tests", () => {
 
     // Act
     const result = await repo.withdrawFunds(
+      routerChannelAddress,
       erc20AssetAddress,
       commonAmount,
       destinationAddress,
@@ -312,19 +321,5 @@ describe("AccountsRepository tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
     expect(result._unsafeUnwrap()).toBe(undefined);
-  });
-
-  test("Should mintTestToken throw error if getSigner fails", async () => {
-    // Arrange
-    const accountsRepositoryMocks = new AccountsRepositoryErrorMocks();
-    const repo = accountsRepositoryMocks.factoryAccountsRepository();
-
-    // Act
-    const result = await repo.mintTestToken(commonAmount, account);
-    const error = result._unsafeUnwrapErr();
-
-    // Assert
-    expect(result.isErr()).toBeTruthy();
-    expect(error).toBeInstanceOf(BlockchainUnavailableError);
   });
 });

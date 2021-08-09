@@ -11,6 +11,7 @@ import {
   PullPayment,
   PushPayment,
   GatewayRegistrationInfo,
+  ChainId,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 

@@ -1,5 +1,6 @@
 import {
   BigNumberString,
+  EthereumAddress,
   IHypernetWebIntegration,
 } from "@hypernetlabs/web-integration";
 import { ethers } from "ethers";
@@ -49,6 +50,7 @@ export class ActionsViewModel {
       // tslint:disable-next-line: no-console
       console.log(`Selected token for deposit: ${selectedToken}`);
       await this.integration.core.depositFunds(
+        EthereumAddress(""), // TODO: Channel Address Goes Here
         selectedToken,
         BigNumberString(ethers.utils.parseEther("1").toString()),
       );
@@ -76,3 +78,4 @@ ko.components.register("actions", {
   viewModel: ActionsViewModel,
   template: html,
 });
+

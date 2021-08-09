@@ -19,6 +19,7 @@ import {
   BigNumberString,
   UnixTimestamp,
   Signature,
+  ChainId,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -43,6 +44,8 @@ export interface IPaymentRepository {
    * "PROPOSED" status. This function just creates an OfferTransfer.
    */
   createPushPayment(
+    routerPublicIdentifier: PublicIdentifier,
+    chainId: ChainId,
     counterPartyAccount: PublicIdentifier,
     amount: BigNumberString,
     expirationDate: UnixTimestamp,
@@ -53,6 +56,8 @@ export interface IPaymentRepository {
   ): ResultAsync<PushPayment, PaymentCreationError>;
 
   createPullPayment(
+    routerPublicIdentifier: PublicIdentifier,
+    chainId: ChainId,
     counterPartyAccount: PublicIdentifier,
     maximumAmount: BigNumberString, // TODO: amounts should be consistently use BigNumber
     deltaTime: number,

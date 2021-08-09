@@ -1,15 +1,9 @@
 import { TileDocument } from "@ceramicnetwork/stream-tile";
-import {
-  PersistenceError,
-  BlockchainUnavailableError,
-} from "@hypernetlabs/objects";
+import { PersistenceError } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface ICeramicUtils {
-  initiateDefinitions(): ResultAsync<
-    TileDocument[],
-    PersistenceError | BlockchainUnavailableError
-  >;
+  initiateDefinitions(): ResultAsync<TileDocument[], PersistenceError>;
   writeRecord<T>(
     aliasName: string,
     content: T,

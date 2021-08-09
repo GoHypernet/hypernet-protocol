@@ -32,6 +32,8 @@ import {
   erc20AssetAddress,
   gatewayAddress,
   expirationDate,
+  routerPublicIdentifier,
+  chainId,
 } from "@mock/mocks";
 import {
   BlockchainProviderMock,
@@ -109,6 +111,8 @@ class PaymentRepositoryMocks {
   ): PushPayment {
     return new PushPayment(
       commonPaymentId,
+      routerPublicIdentifier,
+      chainId,
       counterPartyAccount,
       fromAccount,
       state,
@@ -159,6 +163,8 @@ describe("PaymentRepository tests", () => {
 
     // Act
     const result = await repo.createPushPayment(
+      routerPublicIdentifier,
+      chainId,
       counterPartyAccount,
       commonAmount,
       expirationDate,
@@ -182,6 +188,8 @@ describe("PaymentRepository tests", () => {
 
     // Act
     const result = await repo.createPushPayment(
+      routerPublicIdentifier,
+      chainId,
       counterPartyAccount,
       commonAmount,
       expirationDate,
@@ -352,7 +360,7 @@ describe("PaymentRepository tests", () => {
         insuranceTransferId,
         commonPaymentId,
         null,
-        BigNumber.from("0"),
+        BigNumberString("0"),
       ),
     ).thenReturn(
       errAsync(

@@ -27,7 +27,7 @@
     "@hypernetlabs/objects": "^0.0.1",
     "@hypernetlabs/utils": "^0.0.1",
     "@hypernetlabs/web-ui": "^0.0.1",
-    "ethers": "^5.1.0",
+    "ethers": "^5.4.3",
     "neverthrow": "^4.1.0",
     "postmate": "^1.5.2",
     "rxjs": "^6.6.3"

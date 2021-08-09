@@ -1,13 +1,18 @@
 import { Balances, AssetBalance, BigNumberString } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
+import { IAccountService } from "@interfaces/business";
+import { IAccountsRepository } from "@interfaces/data";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
 
 import { AccountService } from "@implementations/business/AccountService";
-import { IAccountService } from "@interfaces/business";
-import { IAccountsRepository } from "@interfaces/data";
 import { IBlockchainProvider } from "@interfaces/utilities";
-import { account, mockUtils, publicIdentifier } from "@mock/mocks";
+import {
+  account,
+  mockUtils,
+  publicIdentifier,
+  routerChannelAddress,
+} from "@mock/mocks";
 import { ContextProviderMock } from "@mock/utils";
 
 const assetAddress = mockUtils.generateRandomEtherAdress();
@@ -24,6 +29,7 @@ class AccountServiceMocks {
   constructor() {
     this.balances = new Balances([
       new AssetBalance(
+        routerChannelAddress,
         assetAddress,
         "PhoebeCoin",
         "BEEP",
@@ -38,10 +44,15 @@ class AccountServiceMocks {
       okAsync(publicIdentifier),
     );
     td.when(
-      this.accountRepository.depositFunds(assetAddress, amount),
+      this.accountRepository.depositFunds(
+        routerChannelAddress,
+        assetAddress,
+        amount,
+      ),
     ).thenReturn(okAsync(null));
     td.when(
       this.accountRepository.withdrawFunds(
+        routerChannelAddress,
         assetAddress,
         amount,
         destinationAddress,
@@ -72,7 +83,8 @@ describe("AccountService tests", () => {
     const accountService = accountServiceMock.factoryAccountService();
 
     // Act
-    const getPublicIdentifierResponse = await accountService.getPublicIdentifier();
+    const getPublicIdentifierResponse =
+      await accountService.getPublicIdentifier();
 
     // Assert
     expect(getPublicIdentifierResponse.isErr()).toStrictEqual(false);
@@ -125,7 +137,11 @@ describe("AccountService tests", () => {
     });
 
     // Act
-    const response = await accountService.depositFunds(assetAddress, amount);
+    const response = await accountService.depositFunds(
+      routerChannelAddress,
+      assetAddress,
+      amount,
+    );
 
     // Assert
     expect(response.isErr()).toBeFalsy();
@@ -146,6 +162,7 @@ describe("AccountService tests", () => {
 
     // Act
     const response = await accountService.withdrawFunds(
+      routerChannelAddress,
       assetAddress,
       amount,
       destinationAddress,
