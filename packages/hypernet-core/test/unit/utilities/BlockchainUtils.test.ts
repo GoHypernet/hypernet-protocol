@@ -222,7 +222,11 @@ describe("EthersBlockchainUtils tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeTruthy();
     expect(wrappedResponse).toBeInstanceOf(BlockchainUnavailableError);
-    expect(wrappedResponse).toStrictEqual(new BlockchainUnavailableError());
+    expect(wrappedResponse).toStrictEqual(
+      new BlockchainUnavailableError(
+        "Unable to complete an ERC20 token transfer",
+      ),
+    );
   });
 
   test("mintToken should return TransactionResponse", async () => {
@@ -252,7 +256,9 @@ describe("EthersBlockchainUtils tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeTruthy();
     expect(wrappedResponse).toBeInstanceOf(BlockchainUnavailableError);
-    expect(wrappedResponse).toStrictEqual(new BlockchainUnavailableError());
+    expect(wrappedResponse).toStrictEqual(
+      new BlockchainUnavailableError("Unable to mint test token"),
+    );
   });
 
   test("getMessageTransferEncodedCancelData() decode test", async () => {
