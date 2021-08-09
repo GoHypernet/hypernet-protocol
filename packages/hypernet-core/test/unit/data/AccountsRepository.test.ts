@@ -5,6 +5,7 @@ import {
   AssetBalance,
   Balances,
   IFullChannelState,
+  ActiveRouter,
   BigNumberString,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
@@ -21,6 +22,7 @@ import {
 } from "@interfaces/utilities";
 import {
   account,
+  activeRouters,
   commonAmount,
   destinationAddress,
   erc20AssetAddress,
@@ -123,6 +125,9 @@ class AccountsRepositoryErrorMocks {
         account,
       ),
     ).thenReturn(errAsync(new BlockchainUnavailableError()));
+    td.when(this.storageUtils.read<ActiveRouter[]>("ActiveRouters")).thenReturn(
+      okAsync([activeRouters]),
+    );
   }
 
   public factoryAccountsRepository(): IAccountsRepository {
