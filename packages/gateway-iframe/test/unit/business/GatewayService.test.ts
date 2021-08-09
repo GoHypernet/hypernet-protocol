@@ -24,6 +24,7 @@ import {
   ethereumAddress,
   lockedAmount,
   publicIdentifier,
+  routerChannelAddress,
 } from "@mock/mocks";
 
 jest.mock("ethers", () => {
@@ -64,6 +65,7 @@ class GatewayServiceMocks {
     this.gatewaySignature,
   );
   public assetBalance = new AssetBalance(
+    routerChannelAddress,
     EthereumAddress(ethereumAddress),
     `Unknown Token`,
     "Unk",

@@ -7,6 +7,7 @@ import {
   HexString,
   Signature,
   TransferAbis,
+  ChainId,
 } from "@hypernetlabs/objects";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { ethers } from "ethers";
@@ -32,6 +33,7 @@ import {
   account,
   errorAccount,
   TransactionResponseMock,
+  chainId,
 } from "@mock/mocks";
 import { BlockchainProviderMock, ConfigProviderMock } from "@tests/mock/utils";
 
@@ -264,7 +266,9 @@ describe("EthersBlockchainUtils tests", () => {
       "EncodedCancel",
       messageTransferEncodedCancel,
     );
-    const result = await utils.getMessageTransferEncodedCancelData();
+    const result = await utils.getMessageTransferEncodedCancelData(
+      ChainId(chainId),
+    );
 
     // Assert
     expect(decoded.length).toBe(1);
@@ -283,7 +287,9 @@ describe("EthersBlockchainUtils tests", () => {
     const utils = mocks.factoryUtils();
 
     // Act
-    const result = await utils.getInsuranceTransferEncodedCancelData();
+    const result = await utils.getInsuranceTransferEncodedCancelData(
+      ChainId(chainId),
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -297,7 +303,9 @@ describe("EthersBlockchainUtils tests", () => {
     const utils = mocks.factoryUtils();
 
     // Act
-    const result = await utils.getParameterizedTransferEncodedCancelData();
+    const result = await utils.getParameterizedTransferEncodedCancelData(
+      ChainId(chainId),
+    );
 
     // Assert
     expect(result).toBeDefined();

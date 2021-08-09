@@ -69,6 +69,7 @@ export const gatewaySignature = Signature("0xgatewaySignature");
 export const validDomain = "Hypernet";
 
 export const sendFundsRequest: ISendFundsRequest = {
+  channelAddress: routerChannelAddress,
   recipientPublicIdentifier: publicIdentifier,
   amount: commonAmount,
   expirationDate: expirationDate,
@@ -78,6 +79,7 @@ export const sendFundsRequest: ISendFundsRequest = {
 };
 
 export const authorizeFundsRequest: IAuthorizeFundsRequest = {
+  channelAddress: routerChannelAddress,
   recipientPublicIdentifier: publicIdentifier,
   totalAuthorized: commonAmount,
   expirationDate: expirationDate,
