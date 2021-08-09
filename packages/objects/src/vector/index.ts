@@ -1,9 +1,3 @@
-import {
-  InsuranceState,
-  MessageState,
-  ParameterizedState,
-} from "@objects/typing";
-
 export interface IConditionalTransferResolvedPayload {
   aliceIdentifier: string;
   bobIdentifier: string;

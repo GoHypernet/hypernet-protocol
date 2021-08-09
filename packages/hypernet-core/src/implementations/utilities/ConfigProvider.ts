@@ -1,21 +1,17 @@
-import { ChainAddresses, ChainProviders } from "@connext/vector-types";
+import { ChainProviders } from "@connext/vector-types";
 import {
-  EthereumAddress,
-  HypernetConfig,
-  PublicIdentifier,
   AuthorizedGatewaysSchema,
+  ChainId,
   DefinitionName,
   SchemaUrl,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
-import { constants } from "ethers";
+import { HypernetChainAddresses, HypernetConfig } from "@interfaces/objects";
 import { ResultAsync, okAsync } from "neverthrow";
 
 import { IConfigProvider } from "@interfaces/utilities";
 
 declare const __IFRAME_SOURCE__: string;
-declare const __ROUTER_PUBLIC_IDENTIFIER__: PublicIdentifier;
-declare const __CHAIN_ID__: string;
 declare const __CHAIN_PROVIDERS__: string;
 declare const __CHAIN_ADDRESSES__: string;
 declare const __NATS_URL__: string;
@@ -23,12 +19,8 @@ declare const __AUTH_URL__: string;
 declare const __VALIDATOR_IFRAME_URL__: string;
 declare const __CERAMIC_NODE_URL__: string;
 declare const __DEBUG__: boolean;
-declare const __HYPERTOKEN_ADDRESS__: EthereumAddress;
-declare const __MESSAGE_TRANSFER_ADDRESS__: EthereumAddress;
-declare const __INSURANCE_TRANSFER_ADDRESS__: EthereumAddress;
-declare const __PARAMETERIZED_TRANSFER_ADDRESS__: EthereumAddress;
-declare const __GATEWAY_REGISTRY_ADDRESS__: EthereumAddress;
 declare const __INFURA_ID__: string;
+declare const __DEFAULT_CHAIN_ID__: ChainId;
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
@@ -48,21 +40,15 @@ export class ConfigProvider implements IConfigProvider {
     }
 
     const chainAddressesObj = JSON.parse(__CHAIN_ADDRESSES__);
-    const chainAddresses: ChainAddresses = {};
+    const chainAddresses: HypernetChainAddresses = {};
     for (const chainIdStr in chainAddressesObj) {
       chainAddresses[parseInt(chainIdStr)] = chainAddressesObj[chainIdStr];
     }
 
     this.config = new HypernetConfig(
       __IFRAME_SOURCE__, // iframeSource
-      __ROUTER_PUBLIC_IDENTIFIER__, // routerPublicIdentifier
-      parseInt(__CHAIN_ID__, 10), // Chain ID
-      __HYPERTOKEN_ADDRESS__, // Hypertoken address,
-      __MESSAGE_TRANSFER_ADDRESS__, // messageTransferAddress
-      __INSURANCE_TRANSFER_ADDRESS__, // insuranceTransferAddress
-      __PARAMETERIZED_TRANSFER_ADDRESS__, // parameterizedTransferAddress
-      __GATEWAY_REGISTRY_ADDRESS__, // gatewayRegistryAddress
       __INFURA_ID__, // infuraId
+      __DEFAULT_CHAIN_ID__, // governanceChainId
       "Hypernet", // Hypernet Protocol Domain for Transfers
       5 * 24 * 60 * 60, // 5 days as the default payment expiration time
       chainProviders, // chainProviders

@@ -36,6 +36,7 @@ export interface IPaymentService {
    * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   authorizeFunds(
+    channelAddress: EthereumAddress,
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumberString,
     expirationDate: UnixTimestamp,
@@ -73,6 +74,7 @@ export interface IPaymentService {
    * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   sendFunds(
+    channelAddress: EthereumAddress,
     counterPartyAccount: PublicIdentifier,
     amount: BigNumberString,
     expirationDate: UnixTimestamp,
@@ -86,10 +88,10 @@ export interface IPaymentService {
    * Called by the person on the receiving end of a push payment,
    * to accept the terms of the payment and put up the stake.
    */
-  acceptOffers(
-    paymentIds: PaymentId[],
+  acceptOffer(
+    paymentId: PaymentId,
   ): ResultAsync<
-    Result<Payment, AcceptPaymentError>[],
+    Payment,
     | InsufficientBalanceError
     | AcceptPaymentError
     | BalancesUnavailableError

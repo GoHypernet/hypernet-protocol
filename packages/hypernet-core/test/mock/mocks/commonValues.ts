@@ -1,5 +1,6 @@
 import {
   BigNumberString,
+  ChainId,
   EMessageTransferType,
   EthereumAddress,
   GatewayUrl,
@@ -33,7 +34,7 @@ export const routerPublicIdentifier = PublicIdentifier("vectorROUTERPUBLICID");
 export const ethereumAddress = EthereumAddress(
   "0x0000000000000000000000000000000000000000",
 );
-export const chainId = 1337;
+export const chainId = ChainId(1337);
 export const hyperTokenAddress = EthereumAddress(constants.AddressZero);
 export const commonAmount = BigNumberString("1");
 export const uncommonAmount = BigNumberString("2");
@@ -90,6 +91,8 @@ export const parameterizedTransferResolverEncoding =
   "tuple(tuple(bytes32 UUID, uint256 paymentAmountTaken) data, bytes payeeSignature)";
 
 export const offerDetails: IHypernetOfferDetails = {
+  routerPublicIdentifier: routerPublicIdentifier,
+  chainId: chainId,
   messageType: EMessageTransferType.OFFER,
   requireOnline: false,
   paymentId: commonPaymentId,

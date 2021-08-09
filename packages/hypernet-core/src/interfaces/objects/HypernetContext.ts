@@ -7,6 +7,7 @@ import {
   EthereumAddress,
   GatewayUrl,
   Signature,
+  ActiveStateChannel,
 } from "@hypernetlabs/objects";
 import { Subject } from "rxjs";
 
@@ -16,6 +17,7 @@ export class HypernetContext {
   constructor(
     public account: EthereumAddress | null,
     public publicIdentifier: PublicIdentifier | null,
+    public activeStateChannels: ActiveStateChannel[] | null,
     public inControl: boolean,
     public onControlClaimed: Subject<ControlClaim>,
     public onControlYielded: Subject<ControlClaim>,
@@ -52,6 +54,7 @@ export class InitializedHypernetContext {
   constructor(
     public account: EthereumAddress,
     public publicIdentifier: PublicIdentifier,
+    public activeStateChannels: ActiveStateChannel[],
     public inControl: boolean,
     public onControlClaimed: Subject<ControlClaim>,
     public onControlYielded: Subject<ControlClaim>,

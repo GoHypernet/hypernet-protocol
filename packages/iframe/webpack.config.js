@@ -130,25 +130,6 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       __IFRAME_SOURCE__: JSON.stringify(process.env.__IFRAME_SOURCE__),
-      __ROUTER_PUBLIC_IDENTIFIER__: JSON.stringify(
-        process.env.__ROUTER_PUBLIC_IDENTIFIER__,
-      ),
-      __HYPERTOKEN_ADDRESS__: JSON.stringify(
-        process.env.__HYPERTOKEN_ADDRESS__,
-      ),
-      __MESSAGE_TRANSFER_ADDRESS__: JSON.stringify(
-        process.env.__MESSAGE_TRANSFER_ADDRESS__,
-      ),
-      __INSURANCE_TRANSFER_ADDRESS__: JSON.stringify(
-        process.env.__INSURANCE_TRANSFER_ADDRESS__,
-      ),
-      __PARAMETERIZED_TRANSFER_ADDRESS__: JSON.stringify(
-        process.env.__PARAMETERIZED_TRANSFER_ADDRESS__,
-      ),
-      __GATEWAY_REGISTRY_ADDRESS__: JSON.stringify(
-        process.env.__GATEWAY_REGISTRY_ADDRESS__,
-      ),
-      __CHAIN_ID__: JSON.stringify(process.env.__CHAIN_ID__),
       __CHAIN_PROVIDERS__: JSON.stringify(process.env.__CHAIN_PROVIDERS__),
       __CHAIN_ADDRESSES__: JSON.stringify(process.env.__CHAIN_ADDRESSES__),
       __NATS_URL__: JSON.stringify(process.env.__NATS_URL__),
@@ -158,6 +139,7 @@ module.exports = {
       ),
       __CERAMIC_NODE_URL__: JSON.stringify(process.env.__CERAMIC_NODE_URL__),
       __INFURA_ID__: JSON.stringify(process.env.__INFURA_ID__),
+      __DEFAULT_CHAIN_ID__: JSON.stringify(process.env.__DEFAULT_CHAIN_ID__),
       __BUILD_ENV__: JSON.stringify(process.env.__BUILD_ENV__),
       __DEBUG__: JSON.stringify(process.env.__DEBUG__),
     }),

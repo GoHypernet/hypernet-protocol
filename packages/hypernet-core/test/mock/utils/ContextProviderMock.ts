@@ -229,6 +229,7 @@ export class ContextProviderMock implements IContextProvider {
       this.context = new HypernetContext(
         uninitializedAccount,
         null,
+        null,
         false,
         this.onControlClaimed,
         this.onControlYielded,
@@ -266,6 +267,7 @@ export class ContextProviderMock implements IContextProvider {
       this.initializedContext = new InitializedHypernetContext(
         account,
         publicIdentifier,
+        [],
         true,
         this.onControlClaimed,
         this.onControlYielded,

@@ -95,6 +95,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
             if (this.validateSendFundsRequest(request)) {
               this.paymentService
                 .sendFunds(
+                  request.channelAddress,
                   request.recipientPublicIdentifier,
                   request.amount,
                   request.expirationDate,
@@ -127,6 +128,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
             if (this.validateAuthorizeFundsRequest(request)) {
               this.paymentService
                 .authorizeFunds(
+                  request.channelAddress,
                   request.recipientPublicIdentifier,
                   request.totalAuthorized,
                   request.expirationDate,

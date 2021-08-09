@@ -158,6 +158,7 @@ class AccountsRepositoryMocks {
     this.balances = {
       assets: [
         new AssetBalance(
+          routerChannelAddress,
           EthereumAddress(this.stateChannel?.assetIds[0]),
           `Unknown Token (${EthereumAddress(this.stateChannel?.assetIds[0])})`,
           "Unk",
@@ -286,7 +287,7 @@ describe("AccountsRepository tests", () => {
     );
 
     // Act
-    const result = await repo.getBalanceByAsset(assetId);
+    const result = await repo.getBalanceByAsset(routerChannelAddress, assetId);
 
     // Assert
     expect(result).toBeDefined();
@@ -302,7 +303,11 @@ describe("AccountsRepository tests", () => {
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
     // Act
-    const result = await repo.depositFunds(ethereumAddress, commonAmount);
+    const result = await repo.depositFunds(
+      routerChannelAddress,
+      ethereumAddress,
+      commonAmount,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -316,7 +321,11 @@ describe("AccountsRepository tests", () => {
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
     // Act
-    const result = await repo.depositFunds(erc20AssetAddress, commonAmount);
+    const result = await repo.depositFunds(
+      routerChannelAddress,
+      erc20AssetAddress,
+      commonAmount,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -331,6 +340,7 @@ describe("AccountsRepository tests", () => {
 
     // Act
     const result = await repo.withdrawFunds(
+      routerChannelAddress,
       ethereumAddress,
       commonAmount,
       destinationAddress,
@@ -349,6 +359,7 @@ describe("AccountsRepository tests", () => {
 
     // Act
     const result = await repo.withdrawFunds(
+      routerChannelAddress,
       erc20AssetAddress,
       commonAmount,
       destinationAddress,
@@ -367,6 +378,7 @@ describe("AccountsRepository tests", () => {
 
     // Act
     const result = await repo.withdrawFunds(
+      routerChannelAddress,
       erc20AssetAddress,
       commonAmount,
       destinationAddress,

@@ -97,30 +97,6 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
             EthereumAddress(account),
           );
         })
-        .orElse((e) => {
-          const shouldAttemptRestore = (
-            (e as any).context?.validationError ?? ""
-          ).includes("Channel is already setup");
-
-          if (shouldAttemptRestore && this.browserNode != null) {
-            return this.browserNode
-              .getStateChannelByParticipants(
-                config.routerPublicIdentifier,
-                config.chainId,
-              )
-              .andThen((channelState) => {
-                if (channelState == null && this.browserNode != null) {
-                  return this.browserNode.restoreState(
-                    config.routerPublicIdentifier,
-                    config.chainId,
-                  );
-                }
-                return okAsync<void, VectorError>(undefined);
-              });
-          } else {
-            return errAsync(e);
-          }
-        })
         .map(() => {
           this.logUtils.debug("Successfully started Vector browser node");
           return this.browserNode;

@@ -14,4 +14,3 @@ export * from "@interfaces/utilities/IVectorUtils";
 export * from "@interfaces/utilities/IInternalProvider";
 export * from "@interfaces/utilities/ICeramicUtils";
 export * from "@interfaces/utilities/IAccountAddressSignature";
-export * from "@interfaces/utilities/IMetamaskUtils";

@@ -12,24 +12,27 @@ import {
   LogicalError,
   VectorError,
   BigNumberString,
+  ActiveStateChannel,
+  ChainId,
+  ActiveRouter,
+  PersistenceError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { IAccountsRepository } from "@interfaces/data";
 import { ethers, constants, BigNumber, Contract } from "ethers";
-import { combine, errAsync, okAsync, ResultAsync } from "neverthrow";
+import { combine, okAsync, ResultAsync } from "neverthrow";
 
 import { IStorageUtils } from "@interfaces/data/utilities";
 import {
   IVectorUtils,
   IBlockchainProvider,
   IBrowserNodeProvider,
-  IBrowserNode,
   IBlockchainUtils,
 } from "@interfaces/utilities";
 
 /**
  * Contains methods for getting Ethereum accounts, public identifiers,
- * balances for accounts, and depositing & withdrawing assets.
+ * state channels, balances for accounts, and depositing & withdrawing assets.
  */
 export class AccountsRepository implements IAccountsRepository {
   /**
@@ -62,6 +65,60 @@ export class AccountsRepository implements IAccountsRepository {
 
     this.erc20Abi = Object.assign([], ERC20Abi);
     this.erc20Abi.push("function name() view returns (string)");
+  }
+
+  public getActiveRouters(): ResultAsync<ActiveRouter[], PersistenceError> {
+    return this.storageUtils
+      .read<ActiveRouter[]>("ActiveRouters")
+      .map((activeRouters) => {
+        if (activeRouters == null) {
+          return [];
+        }
+        return activeRouters;
+      });
+  }
+
+  public getActiveStateChannels(): ResultAsync<
+    ActiveStateChannel[],
+    VectorError | BlockchainUnavailableError
+  > {
+    // Need to retrieve the list of active routers from the persistence store
+    return ResultUtils.combine([
+      this.storageUtils.read<ActiveRouter[]>("ActiveRouters"),
+      this.browserNodeProvider.getBrowserNode(),
+    ]).andThen((vals) => {
+      const [activeRouters, browserNode] = vals;
+      if (activeRouters == null) {
+        return okAsync([]);
+      }
+      return browserNode
+        .getStateChannels()
+        .andThen((channelAddresses) => {
+          const channelRequests = channelAddresses.map((channelAddress) => {
+            return browserNode.getStateChannel(channelAddress);
+          });
+
+          return ResultUtils.combine(channelRequests);
+        })
+        .map((fullChannelStates) => {
+          return fullChannelStates
+            .filter((val) => {
+              return val != null;
+            })
+            .map((fullChannelState) => {
+              if (fullChannelState == null) {
+                throw new Error(
+                  "Something deeply screwed up in getActiveStateChannels",
+                );
+              }
+              return new ActiveStateChannel(
+                ChainId(fullChannelState.networkContext.chainId),
+                PublicIdentifier(fullChannelState.aliceIdentifier),
+                EthereumAddress(fullChannelState.channelAddress),
+              );
+            });
+        });
+    });
   }
 
   /**
@@ -102,33 +159,42 @@ export class AccountsRepository implements IAccountsRepository {
     Balances,
     BalancesUnavailableError | VectorError
   > {
-    return this.vectorUtils
-      .getRouterChannelAddress()
-      .andThen((channelAddress) => {
-        return this.browserNodeProvider
-          .getBrowserNode()
-          .andThen((browserNode) => {
-            return browserNode.getStateChannel(channelAddress);
-          })
-          .andThen((channelState) => {
-            const assetBalanceResults = new Array<
-              ResultAsync<AssetBalance, VectorError>
-            >();
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.getActiveStateChannels(),
+    ])
+      .andThen((vals) => {
+        const [browserNode, activeStateChannels] = vals;
 
+        return ResultUtils.combine(
+          activeStateChannels.map((activeStateChannel) => {
+            return browserNode.getStateChannel(
+              activeStateChannel.channelAddress,
+            );
+          }),
+        );
+      })
+      .andThen((channelStates) => {
+        const assetBalanceResults = new Array<
+          ResultAsync<AssetBalance, VectorError>
+        >();
+
+        return ResultUtils.combine(
+          channelStates.map((channelState) => {
             if (channelState == null) {
-              return combine(assetBalanceResults);
+              return okAsync<AssetBalance[], VectorError>([]);
             }
-
             for (let i = 0; i < channelState.assetIds.length; i++) {
               const assetBalanceResult = this._getAssetBalance(i, channelState);
               assetBalanceResults.push(assetBalanceResult);
             }
 
-            return combine(assetBalanceResults);
-          })
-          .map((assetBalances) => {
-            return new Balances(assetBalances);
-          });
+            return ResultUtils.combine(assetBalanceResults);
+          }),
+        );
+      })
+      .map((assetBalances) => {
+        return new Balances(new Array<AssetBalance>().concat(...assetBalances));
       });
   }
 
@@ -137,31 +203,45 @@ export class AccountsRepository implements IAccountsRepository {
    * @param assetAddress the (Ethereum) address of the token to get the balance of
    */
   public getBalanceByAsset(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
   ): ResultAsync<AssetBalance, BalancesUnavailableError | VectorError> {
-    return this.getBalances().andThen((balances) => {
-      for (const assetBalance of balances.assets) {
-        if (assetBalance.assetAddress === assetAddress) {
-          // The user has a balance of the selected asset type, so we have an asset balance
-          // to give back.
+    return this.browserNodeProvider
+      .getBrowserNode()
+      .andThen((browserNode) => {
+        return browserNode.getStateChannel(channelAddress);
+      })
+      .andThen((stateChannel) => {
+        if (stateChannel == null) {
+          return okAsync<AssetBalance | null, VectorError>(null);
+        }
+        for (let i = 0; i < stateChannel.assetIds.length; i++) {
+          if (stateChannel.assetIds[i] == assetAddress) {
+            return this._getAssetBalance(i, stateChannel);
+          }
+        }
+
+        return okAsync<AssetBalance | null, VectorError>(null);
+      })
+      .andThen((assetBalance) => {
+        if (assetBalance != null) {
           return okAsync(assetBalance);
         }
-      }
-
-      // The user does not have a balance in the existing asset. The only problem here
-      // is that we still would like to return a proper name for the asset.
-      return this._getAssetInfo(assetAddress).map((assetInfo) => {
-        return new AssetBalance(
-          assetAddress,
-          assetInfo.name,
-          assetInfo.symbol,
-          assetInfo.decimals,
-          BigNumberString("0"),
-          BigNumberString("0"),
-          BigNumberString("0"),
-        );
+        // The user does not have a balance in the existing asset. The only problem here
+        // is that we still would like to return a proper name for the asset.
+        return this._getAssetInfo(assetAddress).map((assetInfo) => {
+          return new AssetBalance(
+            channelAddress,
+            assetAddress,
+            assetInfo.name,
+            assetInfo.symbol,
+            assetInfo.decimals,
+            BigNumberString("0"),
+            BigNumberString("0"),
+            BigNumberString("0"),
+          );
+        });
       });
-    });
   }
 
   /**
@@ -170,15 +250,15 @@ export class AccountsRepository implements IAccountsRepository {
    * @param amount the amount of the token to deposit
    */
   public depositFunds(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
     amount: BigNumberString,
   ): ResultAsync<null, VectorError | BlockchainUnavailableError> {
     return ResultUtils.combine([
       this.blockchainProvider.getSigner(),
-      this.vectorUtils.getRouterChannelAddress(),
       this.browserNodeProvider.getBrowserNode(),
     ]).andThen((vals) => {
-      const [signer, channelAddress, browserNode] = vals;
+      const [signer, browserNode] = vals;
       let transferResult: ResultAsync<
         ethers.providers.TransactionResponse,
         BlockchainUnavailableError
@@ -241,16 +321,14 @@ export class AccountsRepository implements IAccountsRepository {
    * @param destinationAddress the destination (Ethereum) address to withdraw to
    */
   public withdrawFunds(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
     amount: BigNumberString,
     destinationAddress: EthereumAddress,
   ): ResultAsync<void, VectorError | BlockchainUnavailableError> {
-    return ResultUtils.combine([
-      this.browserNodeProvider.getBrowserNode(),
-      this.vectorUtils.getRouterChannelAddress(),
-    ])
-      .andThen((vals) => {
-        const [browserNode, channelAddress] = vals;
+    return this.browserNodeProvider
+      .getBrowserNode()
+      .andThen((browserNode) => {
         return browserNode.withdraw(
           channelAddress,
           amount,
@@ -258,7 +336,7 @@ export class AccountsRepository implements IAccountsRepository {
           destinationAddress,
         );
       })
-      .map((response) => {
+      .map(() => {
         return;
       });
   }
@@ -307,6 +385,7 @@ export class AccountsRepository implements IAccountsRepository {
 
       // Return the asset balance
       const assetBalance = new AssetBalance(
+        EthereumAddress(channelState.channelAddress),
         assetAddress,
         assetInfo.name,
         assetInfo.symbol,

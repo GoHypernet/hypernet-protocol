@@ -1,8 +1,13 @@
-import { EthereumAddress, PrivateCredentials } from "@hypernetlabs/objects";
+import {
+  ChainId,
+  EthereumAddress,
+  PrivateCredentials,
+} from "@hypernetlabs/objects";
+import { HypernetConfig } from "@interfaces/objects";
 import { ethers } from "ethers";
 import { ResultAsync, okAsync } from "neverthrow";
 
-import { IInternalProvider, IConfigProvider } from "@interfaces/utilities";
+import { IInternalProvider } from "@interfaces/utilities";
 
 export class InternalProvider implements IInternalProvider {
   protected providerInitializedPromiseResolve: () => void;
@@ -11,7 +16,8 @@ export class InternalProvider implements IInternalProvider {
   private _wallet: ethers.Wallet | null = null;
 
   constructor(
-    protected configProvider: IConfigProvider,
+    protected chainId: ChainId,
+    protected config: HypernetConfig,
     protected privateCredentials: PrivateCredentials,
   ) {
     this.providerInitializedPromiseResolve = () => null;
@@ -19,24 +25,22 @@ export class InternalProvider implements IInternalProvider {
       this.providerInitializedPromiseResolve = resolve;
     });
 
-    configProvider.getConfig().map((config) => {
-      this._provider = new ethers.providers.JsonRpcProvider(
-        config.chainProviders[config.chainId],
+    this._provider = new ethers.providers.JsonRpcProvider(
+      config.chainProviders[chainId],
+    );
+    if (this.privateCredentials.mnemonic) {
+      this._wallet = ethers.Wallet.fromMnemonic(
+        this.privateCredentials.mnemonic,
       );
-      if (this.privateCredentials.mnemonic) {
-        this._wallet = ethers.Wallet.fromMnemonic(
-          this.privateCredentials.mnemonic,
-        );
-      } else {
-        this._wallet = new ethers.Wallet(
-          this.privateCredentials.privateKey as string,
-          this._provider,
-        );
-      }
+    } else {
+      this._wallet = new ethers.Wallet(
+        this.privateCredentials.privateKey as string,
+        this._provider,
+      );
+    }
 
-      this._wallet.connect(this._provider);
-      this.providerInitializedPromiseResolve();
-    });
+    this._wallet.connect(this._provider);
+    this.providerInitializedPromiseResolve();
   }
 
   public getProvider(): ResultAsync<ethers.providers.JsonRpcProvider, never> {

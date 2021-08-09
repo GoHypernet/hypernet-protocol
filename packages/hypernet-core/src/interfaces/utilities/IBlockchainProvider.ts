@@ -21,6 +21,15 @@ export interface IBlockchainProvider {
     ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
     never
   >;
+  /**
+   * Returns a provider that is connected to the governance chain, whatever that may be.
+   * If the normal provider is not connected to the governance chain, then a dedicated provider
+   * will be created and returned.
+   */
+  getGovernanceProvider(): ResultAsync<
+    ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
+    never
+  >;
   getEIP1193Provider(): ResultAsync<Eip1193Bridge, never>;
   getLatestBlock(): ResultAsync<
     ethers.providers.Block,

@@ -43,7 +43,9 @@ export class VectorLinkRepository implements ILinkRepository {
   /**
    * Get all Hypernet Links for this client
    */
-  public getHypernetLinks(): ResultAsync<
+  public getHypernetLinks(
+    routerChannelAddress: EthereumAddress,
+  ): ResultAsync<
     HypernetLink[],
     | VectorError
     | InvalidParametersError
@@ -52,14 +54,10 @@ export class VectorLinkRepository implements ILinkRepository {
   > {
     let browserNode: IBrowserNode;
 
-    return ResultUtils.combine([
-      this.browserNodeProvider.getBrowserNode(),
-      this.vectorUtils.getRouterChannelAddress(),
-    ])
-      .andThen((vals) => {
-        let channelAddress: EthereumAddress;
-        [browserNode, channelAddress] = vals;
-        return browserNode.getActiveTransfers(channelAddress);
+    return this.browserNodeProvider
+      .getBrowserNode()
+      .andThen((browserNode) => {
+        return browserNode.getActiveTransfers(routerChannelAddress);
       })
       .andThen((activeTransfers) => {
         // We also need to look for potentially resolved transfers
@@ -88,6 +86,7 @@ export class VectorLinkRepository implements ILinkRepository {
    * @param counterpartyId The ID of the link to retrieve
    */
   public getHypernetLink(
+    routerChannelAddress: EthereumAddress,
     counterpartyId: PublicIdentifier,
   ): ResultAsync<
     HypernetLink,
@@ -96,25 +95,21 @@ export class VectorLinkRepository implements ILinkRepository {
     | BlockchainUnavailableError
     | InvalidPaymentError
   > {
-    let browserNode: IBrowserNode;
-    return ResultUtils.combine([
-      this.browserNodeProvider.getBrowserNode(),
-      this.vectorUtils.getRouterChannelAddress(),
-    ])
-      .andThen((vals) => {
-        let channelAddress: EthereumAddress;
-        [browserNode, channelAddress] = vals;
-        return browserNode.getActiveTransfers(channelAddress);
-      })
-      .andThen((activeTransfers) => {
-        // We also need to look for potentially resolved transfers
-        const earliestDate =
-          this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
+    return this.browserNodeProvider
+      .getBrowserNode()
+      .andThen((browserNode) => {
+        return browserNode
+          .getActiveTransfers(routerChannelAddress)
+          .andThen((activeTransfers) => {
+            // We also need to look for potentially resolved transfers
+            const earliestDate =
+              this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);
 
-        return browserNode.getTransfers(
-          earliestDate,
-          this.timeUtils.getUnixNow(),
-        );
+            return browserNode.getTransfers(
+              earliestDate,
+              this.timeUtils.getUnixNow(),
+            );
+          });
       })
       .andThen((transfers) => {
         const filteredActiveTransfers = transfers.filter((val) => {

@@ -11,6 +11,7 @@ import { EthereumAddress } from "@objects/EthereumAddress";
 
 export class AssetBalance {
   constructor(
+    public channelAddress: EthereumAddress,
     public assetAddress: EthereumAddress,
     public name: string,
     public symbol: string,

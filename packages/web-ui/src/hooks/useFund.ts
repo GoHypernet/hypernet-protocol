@@ -230,6 +230,7 @@ export function useFund(): IReducerStateReducer {
     setLoading(true);
     coreProxy
       .depositFunds(
+        EthereumAddress(""), // TODO: Channel Address Here
         EthereumAddress(state.selectedPaymentToken?.address),
         BigNumberString(
           ethers.utils.parseEther(state.amount || "1").toString(),
@@ -263,6 +264,7 @@ export function useFund(): IReducerStateReducer {
     setLoading(true);
     coreProxy
       .withdrawFunds(
+        EthereumAddress(""), // TODO: Channel Address Here
         EthereumAddress(state.selectedPaymentToken?.address),
         BigNumberString(ethers.utils.parseEther(state.amount).toString()),
         state.destinationAddress,

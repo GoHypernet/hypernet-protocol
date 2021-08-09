@@ -2,7 +2,6 @@ import {
   Balances,
   ControlClaim,
   EthereumAddress,
-  HypernetConfig,
   HypernetLink,
   Payment,
   PublicIdentifier,
@@ -28,6 +27,7 @@ import {
   BigNumberString,
   MessagingError,
   RouterChannelUnknownError,
+  ActiveStateChannel,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -80,7 +80,7 @@ import {
   IMessagingRepository,
   IPaymentRepository,
 } from "@interfaces/data";
-import { HypernetContext } from "@interfaces/objects";
+import { HypernetConfig, HypernetContext } from "@interfaces/objects";
 import { ok, Result, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
@@ -523,12 +523,20 @@ export class HypernetCore implements IHypernetCore {
     });
   }
 
+  public getActiveStateChannels(): ResultAsync<
+    ActiveStateChannel[],
+    VectorError | BlockchainUnavailableError | PersistenceError
+  > {
+    return this.accountService.getActiveStateChannels();
+  }
+
   /**
    * Deposit funds into Hypernet Core.
    * @param assetAddress the Ethereum address of the token to deposit
    * @param amount the amount of the token to deposit
    */
   public depositFunds(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
     amount: BigNumberString,
   ): ResultAsync<
@@ -536,7 +544,11 @@ export class HypernetCore implements IHypernetCore {
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
     // console.log(`HypernetCore:depositFunds:assetAddress:${assetAddress}`)
-    return this.accountService.depositFunds(assetAddress, amount);
+    return this.accountService.depositFunds(
+      channelAddress,
+      assetAddress,
+      amount,
+    );
   }
 
   /**
@@ -546,6 +558,7 @@ export class HypernetCore implements IHypernetCore {
    * @param destinationAddress the (Ethereum) address to withdraw to
    */
   public withdrawFunds(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
     amount: BigNumberString,
     destinationAddress: EthereumAddress,
@@ -554,6 +567,7 @@ export class HypernetCore implements IHypernetCore {
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
     return this.accountService.withdrawFunds(
+      channelAddress,
       assetAddress,
       amount,
       destinationAddress,
@@ -595,13 +609,10 @@ export class HypernetCore implements IHypernetCore {
    * Accepts the terms of a push payment, and puts up the stake/insurance transfer.
    * @param paymentId
    */
-  public acceptOffers(
-    paymentIds: PaymentId[],
-  ): ResultAsync<
-    Result<Payment, AcceptPaymentError>[],
-    InsufficientBalanceError | AcceptPaymentError
-  > {
-    return this.paymentService.acceptOffers(paymentIds);
+  public acceptOffer(
+    paymentId: PaymentId,
+  ): ResultAsync<Payment, InsufficientBalanceError | AcceptPaymentError> {
+    return this.paymentService.acceptOffer(paymentId);
   }
 
   /**
@@ -675,9 +686,6 @@ export class HypernetCore implements IHypernetCore {
         // of errors occuring post-initialization (ie, runtime), which makes the
         // whole thing more reliable in operation.
         this.logUtils.debug("Initializing utilities");
-        return ResultUtils.combine([this.vectorUtils.initialize()]);
-      })
-      .andThen(() => {
         this.logUtils.debug("Initializing services");
         return ResultUtils.combine([this.gatewayConnectorService.initialize()]);
       })

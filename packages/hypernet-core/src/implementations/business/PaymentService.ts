@@ -4,7 +4,6 @@ import {
   PublicIdentifier,
   PullPayment,
   PushPayment,
-  HypernetConfig,
   PaymentId,
   GatewayUrl,
   AcceptPaymentError,
@@ -46,7 +45,7 @@ import {
 import { HypernetContext } from "@interfaces/objects";
 import { BigNumber } from "ethers";
 import { injectable, inject } from "inversify";
-import { err, errAsync, ok, okAsync, ResultAsync, Result } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import {
   IConfigProvider,
@@ -70,7 +69,7 @@ type PaymentsByIdsErrors =
  * The order of operations for sending funds is as follows:
  * sendFunds() is called by sender, which creates a Message transfer with Vector, which triggers
  * offerReceived() on the recipient side, which tosses an event up to the user, who then calls
- * acceptOffers() to accept the sender's funds, which creates an Insurance transfer with Vector, which triggers
+ * acceptOffer() to accept the sender's funds, which creates an Insurance transfer with Vector, which triggers
  * stakePosted() on the sender's side, which finally creates the Parameterized transfer with Vector, which triggers
  * paymentPosted() on the recipient's side, which finalizes/resolves the vector parameterized transfer.
  *
@@ -80,10 +79,6 @@ type PaymentsByIdsErrors =
  */
 @injectable()
 export class PaymentService implements IPaymentService {
-  /**
-   * Creates an instanceo of the paymentService.
-   */
-
   constructor(
     @inject(ILinkRepositoryType) protected linkRepository: ILinkRepository,
     @inject(IAccountsRepositoryType)
@@ -111,6 +106,7 @@ export class PaymentService implements IPaymentService {
    * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   public authorizeFunds(
+    channelAddress: EthereumAddress,
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumberString,
     expirationDate: UnixTimestamp,
@@ -124,26 +120,38 @@ export class PaymentService implements IPaymentService {
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
     // totalAuthorized / (deltaAmount/deltaTime) > ((expiration date - now) + someMinimumNumDays)
 
-    return ResultUtils.combine([
-      this.paymentRepository.createPullPayment(
-        counterPartyAccount,
-        totalAuthorized,
-        deltaTime,
-        deltaAmount,
-        expirationDate,
-        requiredStake,
-        paymentToken,
-        gatewayUrl,
-        metadata,
-      ),
-      this.contextProvider.getContext(),
-    ]).map((vals) => {
-      const [payment, context] = vals;
+    return this.contextProvider.getInitializedContext().andThen((context) => {
+      const activeStateChannel = context.activeStateChannels.find((val) => {
+        return val.channelAddress == channelAddress;
+      });
 
-      // Send an event
-      context.onPullPaymentSent.next(payment);
+      if (activeStateChannel == null) {
+        return errAsync(
+          new PaymentCreationError(
+            `Channel ID ${channelAddress} does not exist`,
+          ),
+        );
+      }
+      return this.paymentRepository
+        .createPullPayment(
+          activeStateChannel.routerPublicIdentifier,
+          activeStateChannel.chainId,
+          counterPartyAccount,
+          totalAuthorized,
+          deltaTime,
+          deltaAmount,
+          expirationDate,
+          requiredStake,
+          paymentToken,
+          gatewayUrl,
+          metadata,
+        )
+        .map((payment) => {
+          // Send an event
+          context.onPullPaymentSent.next(payment);
 
-      return payment;
+          return payment;
+        });
     });
   }
 
@@ -208,6 +216,7 @@ export class PaymentService implements IPaymentService {
    * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   public sendFunds(
+    channelAddress: EthereumAddress,
     counterPartyAccount: PublicIdentifier,
     amount: BigNumberString,
     expirationDate: UnixTimestamp,
@@ -217,24 +226,38 @@ export class PaymentService implements IPaymentService {
     metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError> {
     // TODO: Sanity checking on the values
-    return ResultUtils.combine([
-      this.paymentRepository.createPushPayment(
-        counterPartyAccount,
-        amount,
-        expirationDate,
-        requiredStake,
-        paymentToken,
-        gatewayUrl,
-        metadata,
-      ),
-      this.contextProvider.getContext(),
-    ]).map((vals) => {
-      const [payment, context] = vals;
+    return this.contextProvider.getInitializedContext().andThen((context) => {
+      // Lookup the ActiveStateChannel from the context
+      const activeStateChannel = context.activeStateChannels.find((val) => {
+        return val.channelAddress == channelAddress;
+      });
 
-      // Send an event
-      context.onPushPaymentSent.next(payment);
+      if (activeStateChannel == null) {
+        return errAsync(
+          new PaymentCreationError(
+            `Channel ID ${channelAddress} does not exist`,
+          ),
+        );
+      }
 
-      return payment;
+      return this.paymentRepository
+        .createPushPayment(
+          activeStateChannel.routerPublicIdentifier,
+          activeStateChannel.chainId,
+          counterPartyAccount,
+          amount,
+          expirationDate,
+          requiredStake,
+          paymentToken,
+          gatewayUrl,
+          metadata,
+        )
+        .map((payment) => {
+          // Send an event
+          context.onPushPaymentSent.next(payment);
+
+          return payment;
+        });
     });
   }
 
@@ -294,124 +317,95 @@ export class PaymentService implements IPaymentService {
   }
 
   /**
-   * For each paymentID provided, attempts to accept funds (ie: provide a stake) for that payment.
-   * @param paymentIds a list of paymentIds for which to accept funds for
+   * Attempts to accept funds (ie: provide a stake) for that payment.
+   * @param paymentId a paymentId for which to accept funds for
    */
-  public acceptOffers(
-    paymentIds: PaymentId[],
+  public acceptOffer(
+    paymentId: PaymentId,
   ): ResultAsync<
-    Result<Payment, AcceptPaymentError>[],
+    Payment,
     | InsufficientBalanceError
     | AcceptPaymentError
     | BalancesUnavailableError
     | GatewayValidationError
     | PaymentsByIdsErrors
   > {
-    let config: HypernetConfig;
-    let payments: Map<PaymentId, Payment>;
-    const gatewayUrls = new Set<GatewayUrl>();
-
     return ResultUtils.combine([
       this.configProvider.getConfig(),
-      this.paymentRepository.getPaymentsByIds(paymentIds),
+      this.paymentRepository.getPaymentsByIds([paymentId]),
     ])
       .andThen((vals) => {
-        [config, payments] = vals;
+        const [config, payments] = vals;
+        const payment = payments.get(paymentId);
 
-        // Iterate over the payments, and find all the gateway URLs.
-
-        for (const keyval of payments) {
-          gatewayUrls.add(keyval[1].gatewayUrl);
+        if (payment == null) {
+          return errAsync<Payment, AcceptPaymentError>(
+            new AcceptPaymentError(`Payment ${paymentId} does not exist!`),
+          );
         }
 
+        // We need to make sure that we have a sufficient balance of hypertoken in the channel to accept the payment
         return ResultUtils.combine([
-          this.accountRepository.getBalanceByAsset(config.hypertokenAddress),
-          this.gatewayConnectorRepository.getGatewayRegistrationInfo(
-            Array.from(gatewayUrls),
+          this.vectorUtils.getRouterChannelAddress(
+            payment.routerPublicIdentifier,
+            payment.chainId,
           ),
-        ]);
-      })
-      .andThen((vals) => {
-        const [hypertokenBalance, registrationInfo] = vals;
+          this.gatewayConnectorRepository.getGatewayRegistrationInfo([
+            payment.gatewayUrl,
+          ]),
+        ]).andThen((vals) => {
+          const [routerChannelAddress, registrationInfo] = vals;
 
-        // If we don't have a public key for each gateway, then we should not proceed.
-        if (gatewayUrls.size != registrationInfo.size) {
-          return errAsync(
-            new GatewayValidationError("Not all gateways are authorized!"),
-          );
-        }
-
-        // For each payment ID, call the singular version of acceptOffers
-        // Wrap each one as a Result object, and return an array of Results
-        let totalStakeRequired = BigNumber.from(0);
-        // First, verify to make sure that we have enough hypertoken to cover the insurance collectively
-        for (const [key, payment] of payments) {
-          if (payment.state !== EPaymentState.Proposed) {
-            return errAsync(
-              new AcceptPaymentError(
-                `Cannot accept payment ${payment.id}, it is not in the Proposed state`,
-              ),
-            );
-          }
-
-          totalStakeRequired = totalStakeRequired.add(
-            BigNumber.from(payment.requiredStake),
-          );
-        }
-
-        // Check the balance and make sure you have enough HyperToken to cover it
-        if (
-          BigNumber.from(hypertokenBalance.freeAmount).lt(totalStakeRequired)
-        ) {
-          return errAsync(
-            new InsufficientBalanceError(
-              "Not enough Hypertoken to cover provided payments.",
-            ),
-          );
-        }
-
-        // Now that we know we can (probably) make the payments, let's try
-        const stakeAttempts = new Array<
-          Promise<Result<Payment, AcceptPaymentError>>
-        >();
-        for (const keyval of payments) {
-          const [paymentId, payment] = keyval;
-          this.logUtils.log(
-            `PaymentService:acceptOffers: attempting to provide stake for payment ${paymentId}`,
-          );
-
-          // We need to get the public key of the gateway for the payment
           const gatewayRegistrationInfo = registrationInfo.get(
             payment.gatewayUrl,
           );
 
-          if (gatewayRegistrationInfo != null) {
-            const stakeAttempt = this.paymentRepository
-              .provideStake(paymentId, gatewayRegistrationInfo.address)
-              .match(
-                (payment) => ok(payment) as Result<Payment, AcceptPaymentError>,
-                (e) =>
-                  err(
-                    new AcceptPaymentError(
-                      `Payment ${paymentId} could not be staked!`,
-                      e,
-                    ),
-                  ),
-              );
-
-            stakeAttempts.push(stakeAttempt);
-          } else {
-            throw new LogicalError(
-              "Gateway does not have a public key; are they ",
+          // If we don't have a public key for each gateway, then we should not proceed.
+          if (gatewayRegistrationInfo == null) {
+            return errAsync<Payment, AcceptPaymentError>(
+              new AcceptPaymentError(
+                `Gateway ${payment.gatewayUrl} is not currently active!`,
+              ),
             );
           }
-        }
-        return ResultAsync.fromPromise(
-          Promise.all(stakeAttempts),
-          (e) => new AcceptPaymentError("Error while staking payment", e),
-        ).andThen((paymentsResult) => {
-          return this._refreshBalances().map(() => paymentsResult);
+
+          // Get the address of HyperToken for this particular chain
+          const hypertokenAddress =
+            config.chainAddresses[payment.chainId]?.hypertokenAddress;
+
+          if (hypertokenAddress == null) {
+            return errAsync<Payment, AcceptPaymentError>(
+              new AcceptPaymentError(
+                `Can not accept a payment on chain ${payment.chainId}, no configuration found for HyperToken`,
+              ),
+            );
+          }
+
+          return this.accountRepository
+            .getBalanceByAsset(routerChannelAddress, hypertokenAddress)
+            .andThen((hypertokenBalance) => {
+              // Check the balance and make sure you have enough HyperToken to cover it
+              if (
+                BigNumber.from(hypertokenBalance.freeAmount).lt(
+                  payment.requiredStake,
+                )
+              ) {
+                return errAsync<Payment, InsufficientBalanceError>(
+                  new InsufficientBalanceError(
+                    "Not enough Hypertoken to cover provided payments.",
+                  ),
+                );
+              }
+
+              return this.paymentRepository.provideStake(
+                payment.id,
+                gatewayRegistrationInfo.address,
+              );
+            });
         });
+      })
+      .andThen((paymentsResult) => {
+        return this._refreshBalances().map(() => paymentsResult);
       });
   }
 

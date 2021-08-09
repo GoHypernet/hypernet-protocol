@@ -28,6 +28,7 @@ import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
 import { Signature } from "@objects/Signature";
+import { ActiveStateChannel } from "@web-integration/ActiveStateChannel";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -76,13 +77,24 @@ export interface IHypernetCore {
   getPublicIdentifier(): ResultAsync<PublicIdentifier, never | ProxyError>;
 
   /**
+   * Returns a list of active state channels.
+   * Basically a list of routers with which you are connected.
+   */
+  getActiveStateChannels(): ResultAsync<
+    ActiveStateChannel[],
+    VectorError | BlockchainUnavailableError | PersistenceError
+  >;
+
+  /**
    * This function will load HypernetCore with funds. It should be called for each type of asset you want to use.
    * Can be called by either party (provider or consumer); internally, deposits into the router channel.
+   * @param channelAddress The address of the state channel
    * @param assetAddress The Ethereum address of the token you want to deposit. These can be ETH, HyperToken, Dai, or any othe supported payment token.
    * @param amount The amount of funds (in wei) that you are depositing
    * @dev this creates a transaction on the blockchain!
    */
   depositFunds(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
     amount: BigNumberString,
   ): ResultAsync<
@@ -97,6 +109,7 @@ export interface IHypernetCore {
    * @param destinationAddress
    */
   withdrawFunds(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
     amount: BigNumberString,
     destinationAddress: EthereumAddress,
@@ -133,12 +146,9 @@ export interface IHypernetCore {
    * For a specified payment, puts up stake to accept the payment
    * @param paymentId the payment ID to accept funds
    */
-  acceptOffers(
-    paymentIds: PaymentId[],
-  ): ResultAsync<
-    Result<Payment, AcceptPaymentError>[],
-    InsufficientBalanceError | AcceptPaymentError
-  >;
+  acceptOffer(
+    paymentId: PaymentId,
+  ): ResultAsync<Payment, InsufficientBalanceError | AcceptPaymentError>;
 
   /**
    * Pulls an incremental amount from an authorized payment

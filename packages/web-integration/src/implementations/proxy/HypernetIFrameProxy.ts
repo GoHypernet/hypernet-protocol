@@ -25,6 +25,7 @@ import {
   BigNumberString,
   MessagingError,
   RouterChannelUnknownError,
+  ActiveStateChannel,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -190,7 +191,9 @@ export default class HypernetIFrameProxy
         });
 
         child.on("onCoreIFrameDisplayRequested", () => {
-          console.log("recieved onCoreIFrameDisplayRequested in HypernetIFrameProxy");
+          console.log(
+            "recieved onCoreIFrameDisplayRequested in HypernetIFrameProxy",
+          );
           this._displayCoreIFrame();
 
           this.onCoreIFrameDisplayRequested.next();
@@ -269,7 +272,15 @@ export default class HypernetIFrameProxy
     return this._createCall("getPublicIdentifier", null);
   }
 
+  public getActiveStateChannels(): ResultAsync<
+    ActiveStateChannel[],
+    VectorError | BlockchainUnavailableError | PersistenceError
+  > {
+    return this._createCall("getActiveStateChannels", null);
+  }
+
   public depositFunds(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
     amount: BigNumberString,
   ): ResultAsync<
@@ -277,12 +288,14 @@ export default class HypernetIFrameProxy
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
     return this._createCall("depositFunds", {
+      channelAddress,
       assetAddress,
       amount: amount,
     });
   }
 
   public withdrawFunds(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
     amount: BigNumberString,
     destinationAddress: EthereumAddress,
@@ -291,6 +304,7 @@ export default class HypernetIFrameProxy
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
     return this._createCall("withdrawFunds", {
+      channelAddress,
       assetAddress,
       amount: amount,
       destinationAddress,
@@ -315,13 +329,10 @@ export default class HypernetIFrameProxy
     throw new Error("Unimplemented");
   }
 
-  public acceptOffers(
-    paymentIds: PaymentId[],
-  ): ResultAsync<
-    Result<Payment, AcceptPaymentError>[],
-    InsufficientBalanceError | AcceptPaymentError
-  > {
-    return this._createCall("acceptFunds", paymentIds);
+  public acceptOffer(
+    paymentId: PaymentId,
+  ): ResultAsync<Payment, InsufficientBalanceError | AcceptPaymentError> {
+    return this._createCall("acceptFunds", paymentId);
   }
 
   public pullFunds(

@@ -8,7 +8,6 @@ import {
   SortedTransfers,
   IFullTransferState,
   IHypernetPullPaymentDetails,
-  IRegisteredTransfer,
   BlockchainUnavailableError,
   PaymentId,
   UUID,
@@ -153,6 +152,8 @@ export class PaymentUtils implements IPaymentUtils {
     return okAsync(
       new PushPayment(
         paymentId,
+        offerDetails.routerPublicIdentifier,
+        offerDetails.chainId,
         offerDetails.to,
         offerDetails.from,
         state,
@@ -255,6 +256,8 @@ export class PaymentUtils implements IPaymentUtils {
     return okAsync(
       new PullPayment(
         paymentId,
+        offerDetails.routerPublicIdentifier,
+        offerDetails.chainId,
         offerDetails.to,
         offerDetails.from,
         state,
@@ -841,29 +844,5 @@ export class PaymentUtils implements IPaymentUtils {
       );
     }
     return transfer;
-  }
-
-  protected getRegisteredTransfersResponse:
-    | ResultAsync<
-        IRegisteredTransfer[],
-        VectorError | BlockchainUnavailableError
-      >
-    | undefined;
-  protected getRegisteredTransfers(): ResultAsync<
-    IRegisteredTransfer[],
-    VectorError | BlockchainUnavailableError
-  > {
-    if (this.getRegisteredTransfersResponse == null) {
-      this.getRegisteredTransfersResponse = ResultUtils.combine([
-        this.browserNodeProvider.getBrowserNode(),
-        this.configProvider.getConfig(),
-      ]).andThen((vals) => {
-        const [browserNode, config] = vals;
-
-        return browserNode.getRegisteredTransfers(config.chainId);
-      });
-    }
-
-    return this.getRegisteredTransfersResponse;
   }
 }
