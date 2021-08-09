@@ -228,7 +228,7 @@ export class PaymentService implements IPaymentService {
     // TODO: Sanity checking on the values
     return this.contextProvider.getInitializedContext().andThen((context) => {
       // Lookup the ActiveStateChannel from the context
-      console.log("context", context);
+
       const activeStateChannel = context.activeStateChannels.find((val) => {
         return val.channelAddress == channelAddress;
       });
