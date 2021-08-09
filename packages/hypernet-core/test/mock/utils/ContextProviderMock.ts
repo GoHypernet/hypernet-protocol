@@ -18,7 +18,7 @@ import {
   IContextProvider,
   IGatewayConnectorProxy,
 } from "@interfaces/utilities";
-import { account, publicIdentifier } from "@mock/mocks";
+import { account, activeStateChannel, publicIdentifier } from "@mock/mocks";
 
 export class ContextProviderMock implements IContextProvider {
   public context: HypernetContext;
@@ -229,7 +229,7 @@ export class ContextProviderMock implements IContextProvider {
       this.context = new HypernetContext(
         uninitializedAccount,
         null,
-        null,
+        [activeStateChannel],
         false,
         this.onControlClaimed,
         this.onControlYielded,
@@ -267,7 +267,7 @@ export class ContextProviderMock implements IContextProvider {
       this.initializedContext = new InitializedHypernetContext(
         account,
         publicIdentifier,
-        [],
+        [activeStateChannel],
         true,
         this.onControlClaimed,
         this.onControlYielded,

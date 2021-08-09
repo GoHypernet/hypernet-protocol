@@ -1,4 +1,5 @@
 import {
+  ActiveStateChannel,
   BigNumberString,
   ChainId,
   EMessageTransferType,
@@ -574,3 +575,9 @@ export const channelState: IFullChannelState = {
   defundNonces: [],
   inDispute: false,
 };
+
+export const activeStateChannel = new ActiveStateChannel(
+  ChainId(chainId),
+  routerPublicIdentifier,
+  routerChannelAddress,
+);

@@ -581,6 +581,7 @@ describe("PaymentService tests", () => {
       gatewayUrl,
       null,
     );
+    console.log("response", response);
 
     // Assert
     expect(response).toBeDefined();
