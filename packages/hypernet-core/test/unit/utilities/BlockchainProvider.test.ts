@@ -1,11 +1,9 @@
 import {
-  BlockchainUnavailableError,
   InvalidParametersError,
   PrivateCredentials,
-  Signature,
 } from "@hypernetlabs/objects";
 import { ILocalStorageUtils, ILogUtils } from "@hypernetlabs/utils";
-import { Err, errAsync, Ok, okAsync } from "neverthrow";
+import { Err, Ok, okAsync } from "neverthrow";
 import td from "testdouble";
 import { Eip1193Bridge } from "@ethersproject/experimental";
 import { EthersBlockchainProvider } from "@implementations/utilities";
@@ -16,12 +14,7 @@ import { IInternalProviderFactory } from "@interfaces/utilities/factory";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
 import { ethers } from "ethers";
-import Web3Modal from "web3modal";
 
-const validatedSignature = Signature("0xValidatedSignature");
-const authorizationSignature = Signature(
-  "0x1e866e66e7f3a68658bd186bafbdc534d4a5022e14022fddfe8865e2236dc67d64eee05b4d8f340dffa1928efa517784b63cad6a3fb35d999cb9d722b34075071b",
-);
 
 jest.mock("web3modal", () => {
   return class Web3Modal {
