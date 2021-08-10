@@ -66,14 +66,14 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
         signatureResult = okAsync<string, BlockchainUnavailableError>(
           storedSignature,
         );
+      } else {
+        signatureResult = ResultAsync.fromPromise(
+          signer.signMessage(NonEIP712Message),
+          (e) => {
+            return e as BlockchainUnavailableError;
+          },
+        );
       }
-
-      signatureResult = ResultAsync.fromPromise(
-        signer.signMessage(NonEIP712Message),
-        (e) => {
-          return e as BlockchainUnavailableError;
-        },
-      );
 
       return signatureResult
         .andThen((signature) => {
