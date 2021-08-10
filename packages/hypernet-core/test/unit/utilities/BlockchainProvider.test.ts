@@ -15,7 +15,6 @@ import { IInternalProviderFactory } from "@interfaces/utilities/factory";
 require("testdouble-jest")(td, jest);
 import { ethers } from "ethers";
 
-
 jest.mock("web3modal", () => {
   return class Web3Modal {
     constructor() {}
@@ -246,7 +245,6 @@ describe("BlockchainProvider tests", () => {
     await blockchainProvider.initialize();
     const result = await blockchainProvider.getLatestBlock();
     const wrappedResponse = result._unsafeUnwrap();
-    console.log(result);
 
     // Assert
     expect(result).toBeDefined();
@@ -266,7 +264,6 @@ describe("BlockchainProvider tests", () => {
       privateCredentials,
     );
     const wrappedResponse = result._unsafeUnwrap();
-    console.log(result);
 
     // Assert
     expect(result).toBeDefined();
@@ -284,7 +281,6 @@ describe("BlockchainProvider tests", () => {
     const result = await blockchainProvider.supplyPrivateCredentials(
       privateCredentials,
     );
-    console.log(result);
 
     // Assert
     expect(result).toBeDefined();
