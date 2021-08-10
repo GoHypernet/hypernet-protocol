@@ -675,7 +675,6 @@ describe("PaymentService tests", () => {
 
     // Act
     const result = await paymentService.acceptOffer(paymentId);
-    console.log("result: ", result);
 
     // Assert
     expect(result).toBeDefined();

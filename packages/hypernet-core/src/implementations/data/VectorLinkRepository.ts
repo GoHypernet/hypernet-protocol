@@ -56,7 +56,8 @@ export class VectorLinkRepository implements ILinkRepository {
 
     return this.browserNodeProvider
       .getBrowserNode()
-      .andThen((browserNode) => {
+      .andThen((_browserNode) => {
+        browserNode = _browserNode;
         return browserNode.getActiveTransfers(routerChannelAddress);
       })
       .andThen((activeTransfers) => {
