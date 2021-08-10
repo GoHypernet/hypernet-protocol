@@ -99,7 +99,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
   > {
     if (this.initializeResult == null) {
       throw new Error(
-        "Must call BlockchainProvider.initialize() first before you can call getProvider()",
+        "Must call BlockchainProvider.initialize() first before you can call getGovernanceProvider()",
       );
     }
 
@@ -111,7 +111,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
       })
       .orElse((e) => {
         throw new Error(
-          "Initialization unsuccessful, you should not have called getProvider()",
+          "Initialization unsuccessful, you should not have called getGovernanceProvider()",
         );
       });
   }
