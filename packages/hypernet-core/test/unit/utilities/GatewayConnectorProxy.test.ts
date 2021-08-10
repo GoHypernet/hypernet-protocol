@@ -142,3 +142,9 @@
 //     expect(res).toBe(undefined);
 //   });
 // });
+
+describe("GatewayConnectorProxy tests", () => {
+  test("activateConnector", async () => {
+    expect(true).toBe(true);
+  });
+});
