@@ -33,7 +33,6 @@ export class TimeUtils implements ITimeUtils {
 
     this.lastBlockchainCheck = now;
     return this.blockchainProvider.getLatestBlock().map((block) => {
-      console.log("block", block);
       this.lastBlockchainTimestamp = UnixTimestamp(block.timestamp);
       return this.lastBlockchainTimestamp;
     });
