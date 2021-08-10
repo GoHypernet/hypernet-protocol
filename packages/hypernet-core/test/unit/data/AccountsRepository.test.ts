@@ -7,6 +7,7 @@ import {
   IFullChannelState,
   ActiveRouter,
   BigNumberString,
+  PersistenceError,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { IAccountsRepository } from "@interfaces/data/";
@@ -70,6 +71,10 @@ class AccountsRepositoryMocks {
       ),
     ).thenReturn(okAsync(new TransactionResponseMock()));
 
+    td.when(this.storageUtils.read<ActiveRouter[]>("ActiveRouters")).thenReturn(
+      okAsync([activeRouters]),
+    );
+
     this.stateChannel =
       this.browserNodeProvider.stateChannels.get(routerChannelAddress);
     if (this.stateChannel == null) {
@@ -117,6 +122,9 @@ class AccountsRepositoryErrorMocks {
     td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(
       errAsync(new VectorError()),
     );
+    td.when(this.storageUtils.read<ActiveRouter[]>("ActiveRouters")).thenReturn(
+      errAsync(new PersistenceError()),
+    );
     td.when(
       this.blockchainUtils.mintToken(
         td.matchers.argThat((arg: BigNumberString) => {
@@ -125,9 +133,6 @@ class AccountsRepositoryErrorMocks {
         account,
       ),
     ).thenReturn(errAsync(new BlockchainUnavailableError()));
-    td.when(this.storageUtils.read<ActiveRouter[]>("ActiveRouters")).thenReturn(
-      okAsync([activeRouters]),
-    );
   }
 
   public factoryAccountsRepository(): IAccountsRepository {
@@ -194,6 +199,7 @@ describe("AccountsRepository tests", () => {
 
     // Act
     const result = await repo.getBalances();
+    
 
     // Assert
     expect(result).toBeDefined();
