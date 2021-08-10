@@ -11,5 +11,6 @@ COPY transferDefinitions/Insurance.json artifacts/src.sol/transferDefinitions/In
 COPY transferDefinitions/Parameterized.json artifacts/src.sol/transferDefinitions/Parameterized.sol/
 COPY Hypertoken/Hypertoken.json artifacts/src.sol/testing/Hypertoken.sol/
 COPY MocRegistry/MocRegistry.json artifacts/src.sol/testing/MocRegistry.sol/
+COPY LiquidityRegistry/LiquidityRegistry.json artifacts/src.sol/testing/LiquidityRegistry.sol/
 COPY src.ts/ src.ts/
 EXPOSE 8545
