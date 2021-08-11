@@ -210,6 +210,10 @@ export class VectorUtilsMockFactory {
       ),
     ).thenReturn(UnixTimestamp(unixNow - 1) as never);
 
+    td.when(vectorUtils.getAllActiveTransfers()).thenReturn(
+      okAsync([activeOfferTransfer]),
+    );
+
     return vectorUtils;
   }
 }
