@@ -10,7 +10,7 @@ import {
   BigNumberString,
   ActiveStateChannel,
   PersistenceError,
-  ActiveRouter,
+  ChainId,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -19,10 +19,10 @@ import { ResultAsync } from "neverthrow";
  */
 export interface IAccountsRepository {
   /**
-   * Returns an array of ActiveRouter objects.
+   * Returns an array of public identifiers of routers we have a connection with
    * ActiveRouters are held in HNP persistence, but can be recovered via evaluation of the blockchain and subgraphs.
    */
-  getActiveRouters(): ResultAsync<ActiveRouter[], PersistenceError>;
+  getActiveRouters(): ResultAsync<PublicIdentifier[], PersistenceError>;
 
   /**
    * Returns an array of ActiveStateChannel objects.
@@ -33,6 +33,18 @@ export interface IAccountsRepository {
     ActiveStateChannel[],
     PersistenceError | VectorError | BlockchainUnavailableError
   >;
+
+  /**
+   * Creates a state channel on a particular chain with the requested router.
+   * @param routerPublicIdentifier
+   * @param chainId
+   * @returns the address of the state channel
+   */
+  createStateChannel(
+    routerPublicIdentifier: PublicIdentifier,
+    chainId: ChainId,
+  ): ResultAsync<EthereumAddress, PersistenceError | VectorError>;
+
   getPublicIdentifier(): ResultAsync<
     PublicIdentifier,
     BlockchainUnavailableError | VectorError

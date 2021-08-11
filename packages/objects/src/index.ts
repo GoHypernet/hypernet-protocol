@@ -1,4 +1,3 @@
-export * from "@objects/ActiveRouter";
 export * from "@objects/ActiveStateChannel";
 export * from "@objects/AssetBalance";
 export * from "@objects/AssetInfo";

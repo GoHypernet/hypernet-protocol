@@ -1,17 +1,14 @@
 import {
   IAuthorizeFundsRequest,
-  IResolutionResult,
   IResolveInsuranceRequest,
   ISendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
 import {
   Balances,
-  EthereumAddress,
   GatewayActivationError,
   GatewayConnectorError,
   GatewayUrl,
   GatewayValidationError,
-  PaymentId,
   ProxyError,
   PublicIdentifier,
   Signature,

@@ -795,6 +795,32 @@ export class VectorUtils implements IVectorUtils {
     });
   }
 
+  public getAllActiveTransfers(): ResultAsync<
+    IFullTransferState[],
+    VectorError
+  > {
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.contextProvider.getInitializedContext(),
+    ])
+      .andThen((vals) => {
+        const [browserNode, context] = vals;
+
+        const activeTransferResults = context.activeStateChannels.map(
+          (activeStateChannel) => {
+            return browserNode.getActiveTransfers(
+              activeStateChannel.channelAddress,
+            );
+          },
+        );
+
+        return ResultUtils.combine(activeTransferResults);
+      })
+      .map((arrArr) => {
+        return new Array<IFullTransferState>().concat(...arrArr);
+      });
+  }
+
   private registeredTransfersResult: ResultAsync<
     IRegisteredTransfer[],
     BlockchainUnavailableError | VectorError

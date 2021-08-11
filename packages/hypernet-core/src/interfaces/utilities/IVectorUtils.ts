@@ -198,6 +198,8 @@ export interface IVectorUtils {
     { transferType: ETransferType; transfer: IFullTransferState },
     VectorError
   >;
+
+  getAllActiveTransfers(): ResultAsync<IFullTransferState[], VectorError>;
 }
 
 export const IVectorUtilsType = Symbol.for("IVectorUtils");

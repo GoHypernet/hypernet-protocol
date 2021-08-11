@@ -284,7 +284,7 @@ export class PaymentRepository implements IPaymentRepository {
   > {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
-      this.getAllActiveTransfers(),
+      this.vectorUtils.getAllActiveTransfers(),
     ])
       .andThen((vals) => {
         const [browserNode, activeTransfers] = vals;
@@ -378,7 +378,7 @@ export class PaymentRepository implements IPaymentRepository {
     | InvalidParametersError
   > {
     return ResultUtils.combine([
-      this.getAllActiveTransfers(),
+      this.vectorUtils.getAllActiveTransfers(),
       this.browserNodeProvider.getBrowserNode(),
     ])
       .andThen((vals) => {
@@ -746,31 +746,5 @@ export class PaymentRepository implements IPaymentRepository {
         TransferId(payment.details.offerTransfers[0].transferId),
       )
       .map(() => {});
-  }
-
-  protected getAllActiveTransfers(): ResultAsync<
-    IFullTransferState[],
-    VectorError
-  > {
-    return ResultUtils.combine([
-      this.browserNodeProvider.getBrowserNode(),
-      this.contextProvider.getInitializedContext(),
-    ])
-      .andThen((vals) => {
-        const [browserNode, context] = vals;
-
-        const activeTransferResults = context.activeStateChannels.map(
-          (activeStateChannel) => {
-            return browserNode.getActiveTransfers(
-              activeStateChannel.channelAddress,
-            );
-          },
-        );
-
-        return ResultUtils.combine(activeTransferResults);
-      })
-      .map((arrArr) => {
-        return new Array<IFullTransferState>().concat(...arrArr);
-      });
   }
 }

@@ -40,6 +40,7 @@ import {
 import {
   BlockchainProviderMock,
   BrowserNodeProviderMock,
+  ContextProviderMock,
   VectorUtilsMockFactory,
 } from "@mock/utils";
 
@@ -128,6 +129,7 @@ class AccountsRepositoryMocks {
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
   public storageUtils = td.object<IStorageUtils>();
+  public contextProvider = new ContextProviderMock();
   public balances: Balances;
   public stateChannel: IFullChannelState | undefined;
 
@@ -178,6 +180,7 @@ class AccountsRepositoryMocks {
       this.browserNodeProvider,
       this.blockchainUtils,
       this.storageUtils,
+      this.contextProvider,
       this.logUtils,
     );
   }
@@ -191,6 +194,7 @@ class AccountsRepositoryErrorMocks {
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
   public storageUtils = td.object<IStorageUtils>();
+  public contextProvider = new ContextProviderMock();
 
   constructor() {
     td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(
@@ -213,6 +217,7 @@ class AccountsRepositoryErrorMocks {
       this.browserNodeProvider,
       this.blockchainUtils,
       this.storageUtils,
+      this.contextProvider,
       this.logUtils,
     );
   }

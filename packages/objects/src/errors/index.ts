@@ -18,7 +18,7 @@ export * from "@objects/errors/PersistenceError";
 export * from "@objects/errors/PostmateError";
 export * from "@objects/errors/ProxyError";
 export * from "@objects/errors/RouterChannelUnknownError";
-export * from "@objects/errors/RouterUnavailableError";
+export * from "@objects/errors/RouterUnauthorizedError";
 export * from "@objects/errors/TransferCreationError";
 export * from "@objects/errors/TransferResolutionError";
 export * from "@objects/errors/VectorError";

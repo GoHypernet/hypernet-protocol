@@ -22,7 +22,6 @@ export class LinkService implements ILinkService {
     | VectorError
     | BlockchainUnavailableError
   > {
-    throw new Error();
-    // return this.linkRepository.getHypernetLinks();
+    return this.linkRepository.getHypernetLinks();
   }
 }

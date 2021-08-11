@@ -57,6 +57,7 @@ export class GatewayService implements IGatewayService {
   ) {
     this.signMessageCallbacks = new Map();
   }
+
   private static gatewayUrlCacheBusterUsed = false;
 
   public activateGatewayConnector(

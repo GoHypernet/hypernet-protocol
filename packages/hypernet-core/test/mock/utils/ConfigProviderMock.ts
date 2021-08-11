@@ -46,6 +46,9 @@ export class ConfigProviderMock implements IConfigProvider {
               "parameterizedTransferAddress",
             ),
             gatewayRegistryAddress: EthereumAddress("gatewayRegistryAddress"),
+            liquidityRegistryAddress: EthereumAddress(
+              "liquidityRegistryAddress",
+            ),
           },
         },
         "natsUrl",
