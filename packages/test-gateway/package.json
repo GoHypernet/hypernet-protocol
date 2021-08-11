@@ -28,20 +28,23 @@
     "!dist/tsconfig.tsbuildinfo"
   ],
   "scripts": {
-    "build": "yarn clean && yarn build-connector && yarn build-server",
-    "build-connector": "webpack --config src/webpack.config.js",
+    "build": "yarn clean && cd ../test-gateway-connector && yarn build && cd ../test-gateway && yarn compile ",
     "dockerize": "docker build -t hypernetlabs/hypernet-protocol-test-gateway:local -f Dockerfile --progress=plain ../..",
     "docker-push": "docker push hypernetlabs/hypernet-protocol-test-gateway:local",
+    "start": "node dist/index.js",
     "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "alias": "tsc-alias",
     "format": "prettier --write \"src/**/*.ts\" && prettier --write \"test/**/*.ts\"",
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "tslint -p src/tsconfig.json",
-    "compile": "tsc -p src/tsconfig.json && tsc -p server/tsconfig.json && cd ../.. && yarn alias",
-    "alias": "tsc-alias -p src/tsconfig.json && tsc-alias -p server/tsconfig.json",
-    "start": "yarn build-connector && ts-node server/index.ts",
-    "test": "yarn test:ci",
+    "prepare": "yarn build",
+    "test": "yarn build && yarn test:ci",
     "test:ci": "jest --runInBand --coverage --passWithNoTests",
-    "test:watch": "jest --watch --color --detectOpenHandles"
+    "test:watch": "jest --watch --color --detectOpenHandles",
+    "preversion": "npm run lint",
+    "version": "npm run format && git add -A src",
+    "postversion": "git push && git push --tags"
   },
   "types": "dist/index.d.ts",
   "dependencies": {

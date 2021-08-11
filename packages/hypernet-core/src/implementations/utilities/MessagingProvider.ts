@@ -1,11 +1,7 @@
 import { IBasicMessaging } from "@connext/vector-types";
 import { NatsBasicMessagingService } from "@connext/vector-utils";
 import { JsonWebToken, MessagingError } from "@hypernetlabs/objects";
-import { ResultUtils } from "@hypernetlabs/utils";
-import {
-  IAjaxUtils,
-  IAjaxUtilsType,
-} from "@web-integration/../../utils/src/IAjaxUtils";
+import { ResultUtils, IAjaxUtils, IAjaxUtilsType } from "@hypernetlabs/utils";
 import { inject, injectable } from "inversify";
 import { okAsync, ResultAsync } from "neverthrow";
 

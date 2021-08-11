@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const path = require("path");
 
-const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const TsconfigPathsPlugin = require("tsconfig-paths-webpack-plugin");
 const webpack = require("webpack");
 
@@ -11,6 +10,11 @@ const configFilePath = require.resolve("./tsconfig.json");
 module.exports = {
   context: __dirname,
   mode: "development",
+  entry: path.join(__dirname, "src/index.ts"),
+  output: {
+    filename: "connector.js",
+    path: path.join(__dirname, "../test-gateway/dist"),
+  },
   module: {
     rules: [
       {
@@ -95,7 +99,6 @@ module.exports = {
   },
   devtool: "inline-source-map",
   plugins: [
-    //new CleanWebpackPlugin({ dangerouslyAllowCleanPatternsOutsideProject: false }),
     new webpack.ProvidePlugin({
       Buffer: ["buffer", "Buffer"],
       process: "process/browser",

@@ -10,6 +10,7 @@ COPY ./yarn.lock ./yarn.lock
 COPY ./packages/objects/package.json ./packages/objects/package.json
 COPY ./packages/utils/package.json ./packages/utils/package.json
 COPY ./packages/test-gateway/package.json ./packages/test-gateway/package.json
+COPY ./packages/test-gateway-connector/package.json ./packages/test-gateway-connector/package.json
 RUN yarn install
 
 # Now build the code

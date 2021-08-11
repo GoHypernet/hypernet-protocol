@@ -238,7 +238,8 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
 
             const useMetamask = web3Modal.cachedProvider == "injected";
             const hypertokenAddress =
-              config.chainAddresses[config.governanceChainId]?.hypertokenAddress;
+              config.chainAddresses[config.governanceChainId]
+                ?.hypertokenAddress;
             if (useMetamask && hypertokenAddress != null) {
               return ResultUtils.combine([
                 this.addNetwork(config.governanceChainId, config),

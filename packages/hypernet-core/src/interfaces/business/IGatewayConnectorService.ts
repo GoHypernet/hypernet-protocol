@@ -49,7 +49,7 @@ export interface IGatewayConnectorService {
    * @param routerPublicIdentifiers a list of router public identifiers; if a state channel does not exist already one of these will be chosen randomly.
    * @returns the address of the state channel (newly created or not), or an error.
    */
-   ensureStateChannel(
+  ensureStateChannel(
     gatewayUrl: GatewayUrl,
     chainId: ChainId,
     routerPublicIdentifiers: PublicIdentifier[],
