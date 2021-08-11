@@ -14,6 +14,10 @@ import {
   Signature,
   PullPayment,
   PushPayment,
+  IStateChannelRequest,
+  ChainId,
+  EthereumAddress,
+  UUID,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
@@ -94,9 +98,15 @@ export interface IGatewayConnectorProxy extends ParentProxy {
     signature: Signature,
   ): ResultAsync<void, ProxyError>;
 
+  returnStateChannel(
+    id: UUID,
+    channelAddress: EthereumAddress,
+  ): ResultAsync<void, ProxyError>;
+
   // Signals to the outside world
   signMessageRequested: Observable<string>;
   sendFundsRequested: Observable<ISendFundsRequest>;
   authorizeFundsRequested: Observable<IAuthorizeFundsRequest>;
   resolveInsuranceRequested: Observable<IResolveInsuranceRequest>;
+  stateChannelRequested: Observable<IStateChannelRequest>;
 }

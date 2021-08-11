@@ -164,26 +164,6 @@ describe("VectorUtils tests", () => {
   //   expect(result.isOk()).toBeTruthy();
   // });
 
-  test("getRouterChannelAddress completes successfully", async () => {
-    // Arrange
-    const vectorUtilsMocks = new VectorUtilsMocks();
-
-    const vectorUtils = vectorUtilsMocks.factoryVectorUtils();
-
-    // Act
-    const result = await vectorUtils.getRouterChannelAddress(
-      routerPublicIdentifier,
-      chainId,
-    );
-
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isOk()).toBeTruthy();
-    const retRouterChannelAddress = result._unsafeUnwrap();
-
-    expect(retRouterChannelAddress).toBe(routerChannelAddress);
-  });
-
   test("getTransferStateFromTransfer returns Active for a non-resolved transfer", async () => {
     // Arrange
     const vectorUtilsMocks = new VectorUtilsMocks();

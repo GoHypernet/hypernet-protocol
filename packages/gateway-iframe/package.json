@@ -57,6 +57,7 @@
     "neverthrow": "^4.1.0",
     "postmate": "^1.5.2",
     "rxjs": "^6.6.2",
-    "url-join-ts": "^1.0.5"
+    "url-join-ts": "^1.0.5",
+    "uuid": "^8.3.0"
   }
 }

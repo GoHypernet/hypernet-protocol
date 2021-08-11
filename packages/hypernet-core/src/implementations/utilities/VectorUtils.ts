@@ -288,7 +288,7 @@ export class VectorUtils implements IVectorUtils {
    * @param message the message to send as IHypernetOfferDetails
    */
   public createPullNotificationTransfer(
-    routerPublicIdentifier: PublicIdentifier,
+    channelAddress: EthereumAddress,
     chainId: ChainId,
     toAddress: PublicIdentifier,
     message: IHypernetPullPaymentDetails,
@@ -317,11 +317,10 @@ export class VectorUtils implements IVectorUtils {
 
     return ResultUtils.combine([
       this.configProvider.getConfig(),
-      this.getRouterChannelAddress(routerPublicIdentifier, chainId),
       this.browserNodeProvider.getBrowserNode(),
     ])
       .andThen((vals) => {
-        const [config, channelAddress, browserNode] = vals;
+        const [config, browserNode] = vals;
 
         const hypertokenAddress =
           config.chainAddresses[chainId]?.hypertokenAddress;
@@ -360,8 +359,7 @@ export class VectorUtils implements IVectorUtils {
    * @param message the message to send as IHypernetOfferDetails
    */
   public createOfferTransfer(
-    routerPublicIdentifier: PublicIdentifier,
-    chainId: ChainId,
+    channelAddress: EthereumAddress,
     toAddress: PublicIdentifier,
     message: IHypernetOfferDetails,
   ): ResultAsync<
@@ -387,13 +385,9 @@ export class VectorUtils implements IVectorUtils {
       }
     }
 
-    return ResultUtils.combine([
-      this.getRouterChannelAddress(routerPublicIdentifier, chainId),
-      this.browserNodeProvider.getBrowserNode(),
-    ])
-      .andThen((vals) => {
-        const [channelAddress, browserNode] = vals;
-
+    return this.browserNodeProvider
+      .getBrowserNode()
+      .andThen((browserNode) => {
         const initialState: MessageState = {
           message: JSON.stringify(message),
         };
@@ -423,7 +417,7 @@ export class VectorUtils implements IVectorUtils {
    * @param paymentId a length-64 hexadecimal string; this becomes the UUID component of the InsuranceState
    */
   public createInsuranceTransfer(
-    routerPublicIdentifier: PublicIdentifier,
+    channelAddress: EthereumAddress,
     chainId: ChainId,
     toAddress: PublicIdentifier,
     mediatorAddress: EthereumAddress,
@@ -450,11 +444,10 @@ export class VectorUtils implements IVectorUtils {
 
     return ResultUtils.combine([
       this.configProvider.getConfig(),
-      this.getRouterChannelAddress(routerPublicIdentifier, chainId),
       this.browserNodeProvider.getBrowserNode(),
     ])
       .andThen((vals) => {
-        const [config, channelAddress, browserNode] = vals;
+        const [config, browserNode] = vals;
 
         const hypertokenAddress =
           config.chainAddresses[chainId]?.hypertokenAddress;
@@ -494,8 +487,7 @@ export class VectorUtils implements IVectorUtils {
   }
 
   public createParameterizedTransfer(
-    routerPublicIdentifier: PublicIdentifier,
-    chainId: ChainId,
+    channelAddress: EthereumAddress,
     type: EPaymentType,
     toAddress: PublicIdentifier,
     amount: BigNumberString,
@@ -549,13 +541,9 @@ export class VectorUtils implements IVectorUtils {
       }
     }
 
-    return ResultUtils.combine([
-      this.getRouterChannelAddress(routerPublicIdentifier, chainId),
-      this.browserNodeProvider.getBrowserNode(),
-    ])
-      .andThen((vals) => {
-        const [channelAddress, browserNode] = vals;
-
+    return this.browserNodeProvider
+      .getBrowserNode()
+      .andThen((browserNode) => {
         const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
 
         // @todo toEthAddress isn't really an eth address, it's the internal signing key
@@ -622,45 +610,6 @@ export class VectorUtils implements IVectorUtils {
       })
       .map((val) => val as IBasicTransferResponse)
       .mapErr((err) => new TransferCreationError(err, err?.message));
-  }
-
-  public getRouterChannelAddress(
-    routerPublicIdentifier: PublicIdentifier,
-    chainId: ChainId,
-  ): ResultAsync<EthereumAddress, VectorError> {
-    return this.browserNodeProvider.getBrowserNode().andThen((browserNode) => {
-      return browserNode
-        .getStateChannels()
-        .andThen((channelAddresses) => {
-          return ResultUtils.combine(
-            channelAddresses.map((channelAddress) => {
-              return browserNode.getStateChannel(channelAddress);
-            }),
-          );
-        })
-        .andThen((channels) => {
-          for (const channel of channels) {
-            if (!channel) {
-              continue;
-            }
-            if (
-              channel.aliceIdentifier !== routerPublicIdentifier ||
-              channel.networkContext.chainId !== chainId
-            ) {
-              continue;
-            }
-            return okAsync<EthereumAddress, VectorError>(
-              EthereumAddress(channel.channelAddress),
-            );
-          }
-          // If a channel does not exist with the router, we need to create it.
-          return this.ensureRouterStateChannel(
-            routerPublicIdentifier,
-            chainId,
-            browserNode,
-          );
-        });
-    });
   }
 
   public getTimestampFromTransfer(transfer: IFullTransferState): UnixTimestamp {
@@ -846,48 +795,6 @@ export class VectorUtils implements IVectorUtils {
 
       return this.registeredTransfersResult;
     });
-  }
-
-  /**
-   *
-   * @param browserNode
-   * @param config
-   * @returns
-   */
-  protected ensureRouterStateChannel(
-    routerPublicIdentifier: PublicIdentifier,
-    chainId: ChainId,
-    browserNode: IBrowserNode,
-  ): ResultAsync<EthereumAddress, VectorError> {
-    return browserNode
-      .setup(
-        routerPublicIdentifier,
-        chainId,
-        DEFAULT_CHANNEL_TIMEOUT.toString(),
-      )
-      .map((response) => {
-        return EthereumAddress(response.channelAddress);
-      })
-      .orElse((e) => {
-        // Channel could be already set up, so we should try restoring the state
-        this.logUtils.warning(
-          "Channel setup with router failed, attempting to restore state and retry",
-        );
-        return browserNode
-          .restoreState(routerPublicIdentifier, chainId)
-          .andThen(() => {
-            return browserNode.getStateChannelByParticipants(
-              routerPublicIdentifier,
-              chainId,
-            );
-          })
-          .andThen((channel) => {
-            if (channel == null) {
-              return errAsync(e);
-            }
-            return okAsync(EthereumAddress(channel.channelAddress));
-          });
-      });
   }
 
   protected _getStateChannel(

@@ -33,6 +33,7 @@ import {
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   IBrowserNodeProvider,
@@ -42,10 +43,6 @@ import {
   ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
-
-/* eslint-disable */
-import { v4 as uuidv4 } from "uuid";
-/* eslint-enable */
 
 /**
  * A class for creating Hypernet-Payment objects from Vector transfers, verifying information

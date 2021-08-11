@@ -470,6 +470,7 @@ export class HypernetCore implements IHypernetCore {
 
     this.gatewayConnectorListener = new GatewayConnectorListener(
       this.accountService,
+      this.gatewayConnectorService,
       this.paymentService,
       this.linkService,
       this.contextProvider,

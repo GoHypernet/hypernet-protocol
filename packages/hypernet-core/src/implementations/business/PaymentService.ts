@@ -332,10 +332,11 @@ export class PaymentService implements IPaymentService {
   > {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
+      this.contextProvider.getContext(),
       this.paymentRepository.getPaymentsByIds([paymentId]),
     ])
       .andThen((vals) => {
-        const [config, payments] = vals;
+        const [config, context, payments] = vals;
         const payment = payments.get(paymentId);
 
         if (payment == null) {
@@ -344,65 +345,73 @@ export class PaymentService implements IPaymentService {
           );
         }
 
-        // We need to make sure that we have a sufficient balance of hypertoken in the channel to accept the payment
-        return ResultUtils.combine([
-          this.vectorUtils.getRouterChannelAddress(
-            payment.routerPublicIdentifier,
-            payment.chainId,
-          ),
-          this.gatewayConnectorRepository.getGatewayRegistrationInfo([
-            payment.gatewayUrl,
-          ]),
-        ]).andThen((vals) => {
-          const [routerChannelAddress, registrationInfo] = vals;
-
-          const gatewayRegistrationInfo = registrationInfo.get(
-            payment.gatewayUrl,
+        // Get the state channel for the payment
+        const stateChannel = context.activeStateChannels?.find((asc) => {
+          return (
+            asc.chainId == payment.chainId &&
+            asc.routerPublicIdentifier == payment.routerPublicIdentifier
           );
-
-          // If we don't have a public key for each gateway, then we should not proceed.
-          if (gatewayRegistrationInfo == null) {
-            return errAsync<Payment, AcceptPaymentError>(
-              new AcceptPaymentError(
-                `Gateway ${payment.gatewayUrl} is not currently active!`,
-              ),
-            );
-          }
-
-          // Get the address of HyperToken for this particular chain
-          const hypertokenAddress =
-            config.chainAddresses[payment.chainId]?.hypertokenAddress;
-
-          if (hypertokenAddress == null) {
-            return errAsync<Payment, AcceptPaymentError>(
-              new AcceptPaymentError(
-                `Can not accept a payment on chain ${payment.chainId}, no configuration found for HyperToken`,
-              ),
-            );
-          }
-
-          return this.accountRepository
-            .getBalanceByAsset(routerChannelAddress, hypertokenAddress)
-            .andThen((hypertokenBalance) => {
-              // Check the balance and make sure you have enough HyperToken to cover it
-              if (
-                BigNumber.from(hypertokenBalance.freeAmount).lt(
-                  payment.requiredStake,
-                )
-              ) {
-                return errAsync<Payment, InsufficientBalanceError>(
-                  new InsufficientBalanceError(
-                    "Not enough Hypertoken to cover provided payments.",
-                  ),
-                );
-              }
-
-              return this.paymentRepository.provideStake(
-                payment.id,
-                gatewayRegistrationInfo.address,
-              );
-            });
         });
+
+        if (stateChannel == null) {
+          return errAsync<Payment, AcceptPaymentError>(
+            new AcceptPaymentError(
+              "State channel for payment ${paymentId} does not exist",
+            ),
+          );
+        }
+
+        // We need to make sure that we have a sufficient balance of hypertoken in the channel to accept the payment
+        return this.gatewayConnectorRepository
+          .getGatewayRegistrationInfo([payment.gatewayUrl])
+          .andThen((registrationInfo) => {
+            const gatewayRegistrationInfo = registrationInfo.get(
+              payment.gatewayUrl,
+            );
+
+            // If we don't have a public key for each gateway, then we should not proceed.
+            if (gatewayRegistrationInfo == null) {
+              return errAsync<Payment, AcceptPaymentError>(
+                new AcceptPaymentError(
+                  `Gateway ${payment.gatewayUrl} is not currently active!`,
+                ),
+              );
+            }
+
+            // Get the address of HyperToken for this particular chain
+            const hypertokenAddress =
+              config.chainAddresses[payment.chainId]?.hypertokenAddress;
+
+            if (hypertokenAddress == null) {
+              return errAsync<Payment, AcceptPaymentError>(
+                new AcceptPaymentError(
+                  `Can not accept a payment on chain ${payment.chainId}, no configuration found for HyperToken`,
+                ),
+              );
+            }
+
+            return this.accountRepository
+              .getBalanceByAsset(stateChannel.channelAddress, hypertokenAddress)
+              .andThen((hypertokenBalance) => {
+                // Check the balance and make sure you have enough HyperToken to cover it
+                if (
+                  BigNumber.from(hypertokenBalance.freeAmount).lt(
+                    payment.requiredStake,
+                  )
+                ) {
+                  return errAsync<Payment, InsufficientBalanceError>(
+                    new InsufficientBalanceError(
+                      "Not enough Hypertoken to cover provided payments.",
+                    ),
+                  );
+                }
+
+                return this.paymentRepository.provideStake(
+                  payment.id,
+                  gatewayRegistrationInfo.address,
+                );
+              });
+          });
       })
       .andThen((paymentsResult) => {
         return this._refreshBalances().map(() => paymentsResult);

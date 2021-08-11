@@ -1,4 +1,4 @@
-import { ERC20Abi } from "@connext/vector-types";
+import { DEFAULT_CHANNEL_TIMEOUT, ERC20Abi } from "@connext/vector-types";
 import {
   AssetBalance,
   Balances,
@@ -20,7 +20,7 @@ import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IAccountsRepository } from "@interfaces/data";
 import { ethers, constants, BigNumber, Contract } from "ethers";
 import { inject, injectable } from "inversify";
-import { okAsync, ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import {
@@ -136,31 +136,80 @@ export class AccountsRepository implements IAccountsRepository {
     routerPublicIdentifier: PublicIdentifier,
     chainId: ChainId,
   ): ResultAsync<EthereumAddress, PersistenceError | VectorError> {
-    // getRouterChannelAddress actually ensures that a channel exists
-    return this.vectorUtils
-      .getRouterChannelAddress(routerPublicIdentifier, chainId)
-      .andThen((channelAddress) => {
-        return this.getActiveRouters().andThen((activeRouters) => {
-          if (activeRouters == null) {
-            activeRouters = [];
-          }
-
-          // Check if this router is already in our active list
-          const existingActiveRouter = activeRouters.find((ar) => {
-            return ar == routerPublicIdentifier;
-          });
-
-          if (existingActiveRouter != null) {
-            activeRouters.push(routerPublicIdentifier);
-            return this.storageUtils
-              .write(this.activeRoutersKey, activeRouters)
-              .map(() => {
-                return channelAddress;
-              });
-          }
-          return okAsync(channelAddress);
-        });
+    // Make sure we don't already have a state channel like this setup
+    return ResultUtils.combine([
+      this.contextProvider.getContext(),
+      this.browserNodeProvider.getBrowserNode(),
+    ]).andThen((vals) => {
+      const [context, browserNode] = vals;
+      const existingStateChannel = context.activeStateChannels?.find((asc) => {
+        return (
+          asc.chainId == chainId &&
+          asc.routerPublicIdentifier == routerPublicIdentifier
+        );
       });
+
+      if (existingStateChannel != null) {
+        return okAsync<EthereumAddress, VectorError>(
+          existingStateChannel.channelAddress,
+        );
+      }
+
+      // No existing state channel, we need to create it.
+      return browserNode
+        .setup(
+          routerPublicIdentifier,
+          chainId,
+          DEFAULT_CHANNEL_TIMEOUT.toString(),
+        )
+        .map((response) => {
+          return EthereumAddress(response.channelAddress);
+        })
+        .orElse((e) => {
+          // Channel could be already set up, so we should try restoring the state
+          this.logUtils.warning(
+            "Channel setup with router failed, attempting to restore state and retry",
+          );
+          return browserNode
+            .restoreState(routerPublicIdentifier, chainId)
+            .andThen(() => {
+              return browserNode.getStateChannelByParticipants(
+                routerPublicIdentifier,
+                chainId,
+              );
+            })
+            .andThen((channel) => {
+              if (channel == null) {
+                return errAsync(e);
+              }
+              return okAsync<EthereumAddress, VectorError>(
+                EthereumAddress(channel.channelAddress),
+              );
+            });
+        })
+        .andThen((channelAddress) => {
+          return this.getActiveRouters().andThen((activeRouters) => {
+            if (activeRouters == null) {
+              activeRouters = [];
+            }
+
+            // Check if this router is already in our active list
+            const existingActiveRouter = activeRouters.find((ar) => {
+              return ar == routerPublicIdentifier;
+            });
+
+            if (existingActiveRouter != null) {
+              activeRouters.push(routerPublicIdentifier);
+              return this.storageUtils
+                .write(this.activeRoutersKey, activeRouters)
+                .map(() => {
+                  return channelAddress;
+                });
+            }
+            return okAsync(channelAddress);
+          });
+        });
+    });
   }
 
   /**
