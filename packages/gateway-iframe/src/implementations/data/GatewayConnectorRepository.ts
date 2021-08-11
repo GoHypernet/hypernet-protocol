@@ -1,11 +1,5 @@
-import {
-  EthereumAddress,
-  Signature,
-  GatewayUrl,
-  AjaxError,
-} from "@hypernetlabs/objects";
+import { GatewayUrl, AjaxError } from "@hypernetlabs/objects";
 import { IAjaxUtils } from "@hypernetlabs/utils";
-import { Contract } from "ethers";
 import { okAsync, ResultAsync } from "neverthrow";
 import { urlJoinP } from "url-join-ts";
 

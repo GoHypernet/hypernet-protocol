@@ -13,7 +13,6 @@ import { ILinkRepository } from "@interfaces/data";
 import { okAsync, ResultAsync } from "neverthrow";
 
 import {
-  IBrowserNode,
   IBrowserNodeProvider,
   IConfigProvider,
   IContextProvider,
@@ -26,9 +25,9 @@ import {
 /**
  * Provides methods for retrieving Hypernet Links.
  */
-export class VectorLinkRepository implements ILinkRepository {
+export class LinkRepository implements ILinkRepository {
   /**
-   * Get an instance of the VectorLinkRepository
+   * Get an instance of the LinkRepository
    */
   constructor(
     protected browserNodeProvider: IBrowserNodeProvider,
@@ -43,24 +42,19 @@ export class VectorLinkRepository implements ILinkRepository {
   /**
    * Get all Hypernet Links for this client
    */
-  public getHypernetLinks(
-    routerChannelAddress: EthereumAddress,
-  ): ResultAsync<
+  public getHypernetLinks(): ResultAsync<
     HypernetLink[],
     | VectorError
     | InvalidParametersError
     | BlockchainUnavailableError
     | InvalidPaymentError
   > {
-    let browserNode: IBrowserNode;
-
-    return this.browserNodeProvider
-      .getBrowserNode()
-      .andThen((_browserNode) => {
-        browserNode = _browserNode;
-        return browserNode.getActiveTransfers(routerChannelAddress);
-      })
-      .andThen((activeTransfers) => {
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.vectorUtils.getAllActiveTransfers(),
+    ])
+      .andThen((vals) => {
+        const [browserNode, activeTransfers] = vals;
         // We also need to look for potentially resolved transfers
         const earliestDate =
           this.paymentUtils.getEarliestDateFromTransfers(activeTransfers);

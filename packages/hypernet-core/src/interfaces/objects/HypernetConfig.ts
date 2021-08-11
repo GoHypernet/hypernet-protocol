@@ -39,5 +39,6 @@ export class HypernetContractAddresses {
     public insuranceTransferAddress: EthereumAddress,
     public parameterizedTransferAddress: EthereumAddress,
     public gatewayRegistryAddress: EthereumAddress,
+    public liquidityRegistryAddress: EthereumAddress,
   ) {}
 }

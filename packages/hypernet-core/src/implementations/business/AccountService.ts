@@ -12,7 +12,7 @@ import {
   ActiveStateChannel,
   PersistenceError,
 } from "@hypernetlabs/objects";
-import { ILogUtils, ResultUtils } from "@hypernetlabs/utils";
+import { ILogUtils } from "@hypernetlabs/utils";
 import { IAccountService } from "@interfaces/business";
 import { IAccountsRepository } from "@interfaces/data";
 import {
@@ -52,7 +52,9 @@ export class AccountService implements IAccountService {
     ActiveStateChannel[],
     VectorError | BlockchainUnavailableError | PersistenceError
   > {
-    return this.accountRepository.getActiveStateChannels();
+    return this.contextProvider.getInitializedContext().map((context) => {
+      return context.activeStateChannels;
+    });
   }
 
   public getBalances(): ResultAsync<

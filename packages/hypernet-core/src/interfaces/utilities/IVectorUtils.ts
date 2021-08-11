@@ -27,15 +27,6 @@ import { ResultAsync } from "neverthrow";
  */
 export interface IVectorUtils {
   /**
-   * Returns the address of the channel with the router and chain, if it exists.
-   * Otherwise, attempts to create a channel with the router & return the address.
-   */
-  getRouterChannelAddress(
-    routerPublicIdentifier: PublicIdentifier,
-    chainId: ChainId,
-  ): ResultAsync<EthereumAddress, VectorError>;
-
-  /**
    * Resolves a message transfer
    * @param transferId
    * @param message This can be anything you like, except the blank string "", which is reserved for canceling
@@ -102,14 +93,13 @@ export interface IVectorUtils {
    *
    */
   createOfferTransfer(
-    routerPublicIdentifier: PublicIdentifier,
-    chainId: ChainId,
+    channelAddress: EthereumAddress,
     toAddress: PublicIdentifier,
     message: IHypernetOfferDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError>;
 
   createPullNotificationTransfer(
-    routerPublicIdentifier: PublicIdentifier,
+    channelAddress: EthereumAddress,
     chainId: ChainId,
     toAddress: PublicIdentifier,
     message: IHypernetPullPaymentDetails,
@@ -129,7 +119,7 @@ export interface IVectorUtils {
    * @param UUID
    */
   createInsuranceTransfer(
-    routerPublicIdentifier: PublicIdentifier,
+    channelAddress: EthereumAddress,
     chainId: ChainId,
     toAddress: PublicIdentifier,
     mediatorAddress: EthereumAddress,
@@ -155,8 +145,7 @@ export interface IVectorUtils {
    * @param deltaAmount
    */
   createParameterizedTransfer(
-    routerPublicIdentifier: PublicIdentifier,
-    chainId: ChainId,
+    channelAddress: EthereumAddress,
     type: EPaymentType,
     toAddress: PublicIdentifier,
     amount: BigNumberString,
@@ -198,6 +187,8 @@ export interface IVectorUtils {
     { transferType: ETransferType; transfer: IFullTransferState },
     VectorError
   >;
+
+  getAllActiveTransfers(): ResultAsync<IFullTransferState[], VectorError>;
 }
 
 export const IVectorUtilsType = Symbol.for("IVectorUtils");

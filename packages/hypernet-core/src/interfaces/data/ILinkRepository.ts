@@ -16,9 +16,7 @@ export interface ILinkRepository {
   /**
    * Get all Hypernet Links for this client
    */
-  getHypernetLinks(
-    routerChannelAddress: EthereumAddress,
-  ): ResultAsync<
+  getHypernetLinks(): ResultAsync<
     HypernetLink[],
     | VectorError
     | InvalidParametersError

@@ -12,7 +12,7 @@ import { ILinkRepository } from "@interfaces/data";
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
-import { VectorLinkRepository } from "@implementations/data/VectorLinkRepository";
+import { LinkRepository } from "@implementations/data/LinkRepository";
 import {
   IVectorUtils,
   IBrowserNodeProvider,
@@ -112,7 +112,7 @@ class VectorLinkRepositoryMocks {
   }
 
   public factoryVectorLinkRepository(): ILinkRepository {
-    return new VectorLinkRepository(
+    return new LinkRepository(
       this.browserNodeProvider,
       this.configProvider,
       this.contextProvider,
@@ -161,7 +161,7 @@ class VectorLinkRepositoryErrorMocks {
   }
 
   public factoryVectorLinkRepository(): ILinkRepository {
-    return new VectorLinkRepository(
+    return new LinkRepository(
       this.browserNodeProvider,
       this.vectorLinkRepositoryMocks.configProvider,
       this.vectorLinkRepositoryMocks.contextProvider,
@@ -173,14 +173,14 @@ class VectorLinkRepositoryErrorMocks {
   }
 }
 
-describe("VectorLinkRepository tests", () => {
+describe("LinkRepository tests", () => {
   test("Should getHypernetLinks return HypernetLinks without errors", async () => {
     // Arrange
     const vectorLinkRepositoryMocks = new VectorLinkRepositoryMocks();
     const repo = vectorLinkRepositoryMocks.factoryVectorLinkRepository();
 
     // Act
-    const result = await repo.getHypernetLinks(routerChannelAddress);
+    const result = await repo.getHypernetLinks();
 
     // Assert
     expect(result).toBeDefined();
@@ -195,7 +195,7 @@ describe("VectorLinkRepository tests", () => {
     const repo = vectorLinkRepositoryMocks.factoryVectorLinkRepository();
 
     // Act
-    const result = await repo.getHypernetLinks(routerChannelAddress);
+    const result = await repo.getHypernetLinks();
     const error = result._unsafeUnwrapErr();
 
     // Assert

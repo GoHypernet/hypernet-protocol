@@ -3,6 +3,7 @@ import { ILogUtils } from "@hypernetlabs/utils";
 import {
   IAccountsRepository,
   IGatewayConnectorRepository,
+  IRouterRepository,
 } from "@interfaces/data";
 import { ok, okAsync } from "neverthrow";
 import td from "testdouble";
@@ -14,6 +15,7 @@ import { ConfigProviderMock, ContextProviderMock } from "@tests/mock/utils";
 class GatewayConnectorServiceMocks {
   public gatewayConnectorRepository = td.object<IGatewayConnectorRepository>();
   public accountRepository = td.object<IAccountsRepository>();
+  public routerRespository = td.object<IRouterRepository>();
   public contextProvider = new ContextProviderMock();
   public configProvider = new ConfigProviderMock();
   public logUtils = td.object<ILogUtils>();
@@ -33,6 +35,7 @@ class GatewayConnectorServiceMocks {
     return new GatewayConnectorService(
       this.gatewayConnectorRepository,
       this.accountRepository,
+      this.routerRespository,
       this.contextProvider,
       this.configProvider,
       this.logUtils,

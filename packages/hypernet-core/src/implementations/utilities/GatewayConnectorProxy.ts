@@ -16,6 +16,10 @@ import {
   PullPayment,
   PushPayment,
   GatewayActivationError,
+  IStateChannelRequest,
+  ChainId,
+  EthereumAddress,
+  UUID,
 } from "@hypernetlabs/objects";
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { HypernetContext } from "@interfaces/objects";
@@ -48,12 +52,14 @@ export class GatewayConnectorProxy
     this.sendFundsRequested = new Subject();
     this.authorizeFundsRequested = new Subject();
     this.resolveInsuranceRequested = new Subject();
+    this.stateChannelRequested = new Subject();
   }
 
   public signMessageRequested: Subject<string>;
   public sendFundsRequested: Subject<ISendFundsRequest>;
   public authorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
   public resolveInsuranceRequested: Subject<IResolveInsuranceRequest>;
+  public stateChannelRequested: Subject<IStateChannelRequest>;
 
   public activateConnector(
     publicIdentifier: PublicIdentifier,
@@ -161,6 +167,13 @@ export class GatewayConnectorProxy
       this.child?.on("signMessageRequested", (message: string) => {
         this.signMessageRequested.next(message);
       });
+
+      this.child?.on(
+        "stateChannelRequested",
+        (request: IStateChannelRequest) => {
+          this.stateChannelRequested.next(request);
+        },
+      );
     });
   }
 
@@ -271,6 +284,16 @@ export class GatewayConnectorProxy
     signature: Signature,
   ): ResultAsync<void, ProxyError> {
     return this._createCall("messageSigned", { message, signature });
+  }
+
+  public returnStateChannel(
+    id: UUID,
+    channelAddress: EthereumAddress,
+  ): ResultAsync<void, ProxyError> {
+    return this._createCall("returnStateChannel", {
+      id,
+      channelAddress,
+    });
   }
 
   private _pushOpenedGatewayIFrame(gatewayUrl: GatewayUrl) {

@@ -18,6 +18,7 @@ import {
   IAccountServiceType,
   IPaymentServiceType,
   ILinkServiceType,
+  IGatewayConnectorService,
 } from "@interfaces/business";
 import { BigNumber } from "ethers";
 import { injectable, inject } from "inversify";
@@ -44,9 +45,15 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
     GatewayUrl,
     Subscription
   >();
+  protected stateChannelRequestedSubscriptionMap = new Map<
+    GatewayUrl,
+    Subscription
+  >();
 
   constructor(
     @inject(IAccountServiceType) protected accountService: IAccountService,
+    @inject(IGatewayConnectorServiceType)
+    protected gatewayConnectorService: IGatewayConnectorService,
     @inject(IPaymentServiceType) protected paymentService: IPaymentService,
     @inject(ILinkServiceType) protected linkService: ILinkService,
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
@@ -83,6 +90,31 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
         this.signMessageRequestedSubscriptionMap.set(
           proxy.gatewayUrl,
           signMessageRequestedSubscription,
+        );
+
+        const stateChannelRequestedSubscription =
+          proxy.stateChannelRequested.subscribe((request) => {
+            this.logUtils.debug(
+              `Gateway Connector ${proxy.gatewayUrl} requested a state channel with chain ${request.chainId}`,
+            );
+
+            this.gatewayConnectorService
+              .ensureStateChannel(
+                proxy.gatewayUrl,
+                request.chainId,
+                request.routerPublicIdentifiers,
+              )
+              .andThen((channelAddress) => {
+                return proxy.returnStateChannel(request.id, channelAddress);
+              })
+              .mapErr((e) => {
+                this.logUtils.error(e);
+              });
+          });
+
+        this.stateChannelRequestedSubscriptionMap.set(
+          proxy.gatewayUrl,
+          stateChannelRequestedSubscription,
         );
 
         const sendFundsRequestedSubscription =
@@ -188,6 +220,12 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
         this.signMessageRequestedSubscriptionMap.get(gatewayUrl)?.unsubscribe();
         this.sendFundsRequestedSubscriptionMap.get(gatewayUrl)?.unsubscribe();
         this.authorizeFundsRequestedSubscriptionMap
+          .get(gatewayUrl)
+          ?.unsubscribe();
+        this.resolveInsuranceRequestedSubscriptionMap
+          .get(gatewayUrl)
+          ?.unsubscribe();
+        this.stateChannelRequestedSubscriptionMap
           .get(gatewayUrl)
           ?.unsubscribe();
       });
@@ -300,4 +338,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
 
     return true;
   }
+}
+function IGatewayConnectorServiceType(IGatewayConnectorServiceType: any) {
+  throw new Error("Function not implemented.");
 }

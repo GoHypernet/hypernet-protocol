@@ -58,7 +58,8 @@ import {
   GatewayConnectorRepository,
   NatsMessagingRepository,
   PaymentRepository,
-  VectorLinkRepository,
+  RouterRepository,
+  LinkRepository,
 } from "@implementations/data";
 import {
   IGatewayConnectorListener,
@@ -79,6 +80,7 @@ import {
   IGatewayConnectorRepository,
   IMessagingRepository,
   IPaymentRepository,
+  IRouterRepository,
 } from "@interfaces/data";
 import { HypernetConfig, HypernetContext } from "@interfaces/objects";
 import { ok, Result, ResultAsync } from "neverthrow";
@@ -187,6 +189,7 @@ export class HypernetCore implements IHypernetCore {
   protected paymentRepository: IPaymentRepository;
   protected gatewayConnectorRepository: IGatewayConnectorRepository;
   protected messagingRepository: IMessagingRepository;
+  protected routerRepository: IRouterRepository;
 
   // Business Layer Stuff
   protected accountService: IAccountService;
@@ -221,10 +224,7 @@ export class HypernetCore implements IHypernetCore {
    * @param network the network to attach to
    * @param config optional config, defaults to localhost/dev config
    */
-  constructor(
-    network: EBlockchainNetwork = EBlockchainNetwork.Main,
-    config?: HypernetConfig,
-  ) {
+  constructor(config?: HypernetConfig) {
     this._inControl = false;
 
     this.onControlClaimed = new Subject<ControlClaim>();
@@ -380,6 +380,7 @@ export class HypernetCore implements IHypernetCore {
       this.browserNodeProvider,
       this.blockchainUtils,
       this.storageUtils,
+      this.contextProvider,
       this.logUtils,
     );
 
@@ -393,7 +394,7 @@ export class HypernetCore implements IHypernetCore {
       this.timeUtils,
     );
 
-    this.linkRepository = new VectorLinkRepository(
+    this.linkRepository = new LinkRepository(
       this.browserNodeProvider,
       this.configProvider,
       this.contextProvider,
@@ -416,6 +417,11 @@ export class HypernetCore implements IHypernetCore {
     );
     this.messagingRepository = new NatsMessagingRepository(
       this.messagingProvider,
+      this.configProvider,
+    );
+
+    this.routerRepository = new RouterRepository(
+      this.blockchainProvider,
       this.configProvider,
     );
 
@@ -447,6 +453,7 @@ export class HypernetCore implements IHypernetCore {
     this.gatewayConnectorService = new GatewayConnectorService(
       this.gatewayConnectorRepository,
       this.accountRepository,
+      this.routerRepository,
       this.contextProvider,
       this.configProvider,
       this.logUtils,
@@ -463,6 +470,7 @@ export class HypernetCore implements IHypernetCore {
 
     this.gatewayConnectorListener = new GatewayConnectorListener(
       this.accountService,
+      this.gatewayConnectorService,
       this.paymentService,
       this.linkService,
       this.contextProvider,
@@ -675,10 +683,21 @@ export class HypernetCore implements IHypernetCore {
         return this.contextProvider.setContext(context);
       })
       .andThen(() => {
-        return this.accountService.getPublicIdentifier();
+        return ResultUtils.combine([
+          this.accountRepository.getPublicIdentifier(),
+          this.accountRepository.getActiveStateChannels(),
+        ]);
       })
-      .andThen((publicIdentifier) => {
+      .andThen((vals) => {
+        const [publicIdentifier, activeStateChannels] = vals;
+
+        this.logUtils.debug(
+          `Obtained active state channels: ${activeStateChannels}`,
+        );
+
         context.publicIdentifier = publicIdentifier;
+        context.activeStateChannels = activeStateChannels;
+
         return this.contextProvider.setContext(context);
       })
       .andThen(() => {

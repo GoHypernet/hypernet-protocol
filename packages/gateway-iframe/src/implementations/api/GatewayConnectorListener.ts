@@ -43,6 +43,20 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
         });
       }
 
+      if (connector.stateChannelRequested != null) {
+        connector.stateChannelRequested.subscribe((request) => {
+          this.gatewayService
+            .assureStateChannel(
+              request.chainId,
+              request.routerPublicIdentifiers,
+              request.callback,
+            )
+            .mapErr((e) => {
+              this.logUtils.error(e);
+            });
+        });
+      }
+
       if (connector.sendFundsRequested != null) {
         connector.sendFundsRequested.subscribe((request) => {
           this.paymentService.sendFunds(request).mapErr((e) => {

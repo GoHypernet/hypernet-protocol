@@ -18,7 +18,6 @@ import {
   GatewayAuthorizationDeniedError,
   PersistenceError,
   GatewayRegistrationInfo,
-  ChainId,
 } from "@hypernetlabs/objects";
 import {
   ResultUtils,

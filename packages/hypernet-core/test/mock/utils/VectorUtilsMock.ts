@@ -70,13 +70,8 @@ export class VectorUtilsMockFactory {
     );
 
     td.when(
-      vectorUtils.getRouterChannelAddress(routerPublicIdentifier, chainId),
-    ).thenReturn(okAsync(routerChannelAddress));
-
-    td.when(
       vectorUtils.createOfferTransfer(
-        routerPublicIdentifier,
-        chainId,
+        routerChannelAddress,
         publicIdentifier2,
         td.matchers.contains({
           routerPublicIdentifier: routerPublicIdentifier,
@@ -114,7 +109,7 @@ export class VectorUtilsMockFactory {
 
     td.when(
       vectorUtils.createInsuranceTransfer(
-        routerPublicIdentifier,
+        routerChannelAddress,
         chainId,
         publicIdentifier,
         gatewayAddress,
@@ -131,8 +126,7 @@ export class VectorUtilsMockFactory {
 
     td.when(
       vectorUtils.createParameterizedTransfer(
-        routerPublicIdentifier,
-        chainId,
+        routerChannelAddress,
         EPaymentType.Push,
         publicIdentifier2,
         commonAmount,

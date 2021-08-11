@@ -1,4 +1,4 @@
-import { ERC20Abi } from "@connext/vector-types";
+import { DEFAULT_CHANNEL_TIMEOUT, ERC20Abi } from "@connext/vector-types";
 import {
   AssetBalance,
   Balances,
@@ -14,40 +14,51 @@ import {
   BigNumberString,
   ActiveStateChannel,
   ChainId,
-  ActiveRouter,
   PersistenceError,
 } from "@hypernetlabs/objects";
-import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IAccountsRepository } from "@interfaces/data";
 import { ethers, constants, BigNumber, Contract } from "ethers";
-import { combine, okAsync, ResultAsync } from "neverthrow";
+import { inject, injectable } from "inversify";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
-import { IStorageUtils } from "@interfaces/data/utilities";
+import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import {
   IVectorUtils,
   IBlockchainProvider,
   IBrowserNodeProvider,
   IBlockchainUtils,
+  IContextProvider,
+  IBlockchainProviderType,
+  IVectorUtilsType,
+  IBrowserNodeProviderType,
+  IBlockchainUtilsType,
+  IContextProviderType,
 } from "@interfaces/utilities";
 
 /**
  * Contains methods for getting Ethereum accounts, public identifiers,
  * state channels, balances for accounts, and depositing & withdrawing assets.
  */
+@injectable()
 export class AccountsRepository implements IAccountsRepository {
   /**
    * Retrieves an instances of the AccountsRepository.
    */
   protected assetInfo: Map<EthereumAddress, AssetInfo>;
   protected erc20Abi: string[];
+  protected activeRoutersKey = "ActiveRouters";
 
   constructor(
+    @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
-    protected vectorUtils: IVectorUtils,
+    @inject(IVectorUtilsType) protected vectorUtils: IVectorUtils,
+    @inject(IBrowserNodeProviderType)
     protected browserNodeProvider: IBrowserNodeProvider,
-    protected blockchainUtils: IBlockchainUtils,
-    protected storageUtils: IStorageUtils,
-    protected logUtils: ILogUtils,
+    @inject(IBlockchainUtilsType) protected blockchainUtils: IBlockchainUtils,
+    @inject(IStorageUtilsType) protected storageUtils: IStorageUtils,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
+    @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {
     // We will cache the info about each asset type, so we only have to look it up once.
     this.assetInfo = new Map();
@@ -67,9 +78,9 @@ export class AccountsRepository implements IAccountsRepository {
     this.erc20Abi.push("function name() view returns (string)");
   }
 
-  public getActiveRouters(): ResultAsync<ActiveRouter[], PersistenceError> {
+  public getActiveRouters(): ResultAsync<PublicIdentifier[], PersistenceError> {
     return this.storageUtils
-      .read<ActiveRouter[]>("ActiveRouters")
+      .read<PublicIdentifier[]>(this.activeRoutersKey)
       .map((activeRouters) => {
         if (activeRouters == null) {
           return [];
@@ -84,7 +95,7 @@ export class AccountsRepository implements IAccountsRepository {
   > {
     // Need to retrieve the list of active routers from the persistence store
     return ResultUtils.combine([
-      this.storageUtils.read<ActiveRouter[]>("ActiveRouters"),
+      this.getActiveRouters(),
       this.browserNodeProvider.getBrowserNode(),
     ]).andThen((vals) => {
       const [activeRouters, browserNode] = vals;
@@ -117,6 +128,86 @@ export class AccountsRepository implements IAccountsRepository {
                 EthereumAddress(fullChannelState.channelAddress),
               );
             });
+        });
+    });
+  }
+
+  public createStateChannel(
+    routerPublicIdentifier: PublicIdentifier,
+    chainId: ChainId,
+  ): ResultAsync<EthereumAddress, PersistenceError | VectorError> {
+    // Make sure we don't already have a state channel like this setup
+    return ResultUtils.combine([
+      this.contextProvider.getContext(),
+      this.browserNodeProvider.getBrowserNode(),
+    ]).andThen((vals) => {
+      const [context, browserNode] = vals;
+      const existingStateChannel = context.activeStateChannels?.find((asc) => {
+        return (
+          asc.chainId == chainId &&
+          asc.routerPublicIdentifier == routerPublicIdentifier
+        );
+      });
+
+      if (existingStateChannel != null) {
+        return okAsync<EthereumAddress, VectorError>(
+          existingStateChannel.channelAddress,
+        );
+      }
+
+      // No existing state channel, we need to create it.
+      return browserNode
+        .setup(
+          routerPublicIdentifier,
+          chainId,
+          DEFAULT_CHANNEL_TIMEOUT.toString(),
+        )
+        .map((response) => {
+          return EthereumAddress(response.channelAddress);
+        })
+        .orElse((e) => {
+          // Channel could be already set up, so we should try restoring the state
+          this.logUtils.warning(
+            "Channel setup with router failed, attempting to restore state and retry",
+          );
+          return browserNode
+            .restoreState(routerPublicIdentifier, chainId)
+            .andThen(() => {
+              return browserNode.getStateChannelByParticipants(
+                routerPublicIdentifier,
+                chainId,
+              );
+            })
+            .andThen((channel) => {
+              if (channel == null) {
+                return errAsync(e);
+              }
+              return okAsync<EthereumAddress, VectorError>(
+                EthereumAddress(channel.channelAddress),
+              );
+            });
+        })
+        .andThen((channelAddress) => {
+          return this.getActiveRouters().andThen((activeRouters) => {
+            if (activeRouters == null) {
+              activeRouters = [];
+            }
+
+            // Check if this router is already in our active list
+            const existingActiveRouter = activeRouters.find((ar) => {
+              return ar == routerPublicIdentifier;
+            });
+
+            if (existingActiveRouter != null) {
+              activeRouters.push(routerPublicIdentifier);
+              return this.storageUtils
+                .write(this.activeRoutersKey, activeRouters)
+                .map(() => {
+                  return channelAddress;
+                });
+            }
+            return okAsync(channelAddress);
+          });
         });
     });
   }
@@ -161,13 +252,13 @@ export class AccountsRepository implements IAccountsRepository {
   > {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
-      this.getActiveStateChannels(),
+      this.contextProvider.getInitializedContext(),
     ])
       .andThen((vals) => {
-        const [browserNode, activeStateChannels] = vals;
+        const [browserNode, context] = vals;
 
         return ResultUtils.combine(
-          activeStateChannels.map((activeStateChannel) => {
+          context.activeStateChannels.map((activeStateChannel) => {
             return browserNode.getStateChannel(
               activeStateChannel.channelAddress,
             );

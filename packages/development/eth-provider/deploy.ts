@@ -11,8 +11,9 @@ import {
 import { DeployFunction } from "hardhat-deploy/types";
 
 import { logger } from "../src.ts/constants";
-import { registerTransfer } from "../src.ts/utils";
 import ERC20Abi from "../src.ts/erc20abi";
+import LiquidityRegistryAbi from "../src.ts/liquidityRegistryAbi";
+import { registerTransfer } from "../src.ts/utils";
 
 const func: DeployFunction = async () => {
   const log = logger.child({ module: "Deploy" });
@@ -98,6 +99,7 @@ const func: DeployFunction = async () => {
     ["Message", []],
     ["Hypertoken", []],
     ["MocRegistry", []],
+    ["LiquidityRegistry", []],
   ];
 
   // Only deploy test fixtures during hardhat tests
@@ -158,8 +160,16 @@ const func: DeployFunction = async () => {
   const testTokenAddress = "0x9FBDa871d559710256a2502A2517b794B482Db40";
   const hyperTokenAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
   const amount = ethers.utils.parseEther("10000.0");
-  const testTokenContract = new ethers.Contract(testTokenAddress, ERC20Abi, signer);
-  const hyperTokenContract = new ethers.Contract(hyperTokenAddress, ERC20Abi, signer);
+  const testTokenContract = new ethers.Contract(
+    testTokenAddress,
+    ERC20Abi,
+    signer,
+  );
+  const hyperTokenContract = new ethers.Contract(
+    hyperTokenAddress,
+    ERC20Abi,
+    signer,
+  );
 
   const userTestTx = await testTokenContract.transfer(userAddress, amount);
   const userHyperTx = await hyperTokenContract.transfer(userAddress, amount);
@@ -172,8 +182,14 @@ const func: DeployFunction = async () => {
   await userHyperTx.wait();
   await userEthTx.wait();
 
-  const galileoTestTx = await testTokenContract.transfer(galileoAddress, amount);
-  const galileoHyperTx = await hyperTokenContract.transfer(galileoAddress, amount);
+  const galileoTestTx = await testTokenContract.transfer(
+    galileoAddress,
+    amount,
+  );
+  const galileoHyperTx = await hyperTokenContract.transfer(
+    galileoAddress,
+    amount,
+  );
   const galileoEthTx = await signer.sendTransaction({
     to: galileoAddress,
     value: amount,
@@ -183,8 +199,14 @@ const func: DeployFunction = async () => {
   await galileoHyperTx.wait();
   await galileoEthTx.wait();
 
-  const hyperpayTestTx = await testTokenContract.transfer(hyperpayAddress, amount);
-  const hyperpayHyperTx = await hyperTokenContract.transfer(hyperpayAddress, amount);
+  const hyperpayTestTx = await testTokenContract.transfer(
+    hyperpayAddress,
+    amount,
+  );
+  const hyperpayHyperTx = await hyperTokenContract.transfer(
+    hyperpayAddress,
+    amount,
+  );
   const hyperpayEthTx = await signer.sendTransaction({
     to: hyperpayAddress,
     value: amount,
@@ -194,6 +216,46 @@ const func: DeployFunction = async () => {
   await hyperpayHyperTx.wait();
   await hyperpayEthTx.wait();
   log.info("Rich uncle is now in the poor house");
+
+  ////////////////////////////////////////
+  log.info("Registering router info");
+  const liquidityRegistryAddress = "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd";
+  const routerPublicIdentifier =
+    "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR";
+  const liquidityRegistryContract = new ethers.Contract(
+    liquidityRegistryAddress,
+    LiquidityRegistryAbi,
+    signer,
+  );
+
+  const registryEntry = {
+    supportedTokens: [
+      {
+        chainId: 1337,
+        tokenAddress: testTokenAddress,
+      },
+      {
+        chainId: 1337,
+        tokenAddress: hyperTokenAddress,
+      },
+      {
+        chainId: 1369,
+        tokenAddress: testTokenAddress,
+      },
+      {
+        chainId: 1369,
+        tokenAddress: hyperTokenAddress,
+      },
+    ],
+    allowedGateways: ["https://localhost:3000/users/v0"],
+  };
+
+  const liquidityRegistryTx = await liquidityRegistryContract.setLiquidity(
+    routerPublicIdentifier,
+    JSON.stringify(registryEntry),
+  );
+  await liquidityRegistryTx.wait();
+  log.info("Deployed liquidity registration");
 
   ////////////////////////////////////////
   // Print summary

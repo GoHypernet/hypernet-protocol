@@ -8,6 +8,7 @@ import {
   IRedirectInfo,
   IResolveInsuranceRequest,
   ISignMessageRequest,
+  IStateChannelRequest,
 } from "@hypernetlabs/gateway-connector";
 import {
   PushPayment,
@@ -111,6 +112,7 @@ class TestGatewayConnector implements IGatewayConnector {
   public authorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
   public resolveInsuranceRequested: Subject<IResolveInsuranceRequest>;
   public signMessageRequested: Subject<ISignMessageRequest>;
+  public stateChannelRequested: Subject<IStateChannelRequest>;
   public displayRequested: Subject<void>;
   public closeRequested: Subject<void>;
   public onPreRedirect: Subject<IRedirectInfo>;
@@ -121,6 +123,7 @@ class TestGatewayConnector implements IGatewayConnector {
     this.authorizeFundsRequested = new Subject<IAuthorizeFundsRequest>();
     this.resolveInsuranceRequested = new Subject();
     this.signMessageRequested = new Subject();
+    this.stateChannelRequested = new Subject();
     this.displayRequested = new Subject<void>();
     this.closeRequested = new Subject<void>();
     this.onPreRedirect = new Subject<IRedirectInfo>();
