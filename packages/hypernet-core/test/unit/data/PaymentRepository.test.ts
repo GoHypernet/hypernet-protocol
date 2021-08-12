@@ -8,7 +8,7 @@ import {
   BigNumberString,
   SortedTransfers,
 } from "@hypernetlabs/objects";
-import { ILogUtils } from "@hypernetlabs/utils";
+import { ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
 import { IPaymentRepository } from "@interfaces/data";
 import { BigNumber } from "ethers";
 import { okAsync, errAsync } from "neverthrow";
@@ -19,7 +19,7 @@ import {
   IVectorUtils,
   IBrowserNodeProvider,
   IPaymentUtils,
-  ITimeUtils,
+  IBlockchainTimeUtils,
 } from "@interfaces/utilities";
 import {
   commonAmount,
@@ -53,6 +53,7 @@ const paymentDetails = new SortedTransfers([], [], [], []);
 
 class PaymentRepositoryMocks {
   public timeUtils = td.object<ITimeUtils>();
+  public blockchainTimeUtils = td.object<IBlockchainTimeUtils>();
   public blockchainProvider = new BlockchainProviderMock();
   public vectorUtils =
     VectorUtilsMockFactory.factoryVectorUtils(expirationDate);
@@ -71,7 +72,7 @@ class PaymentRepositoryMocks {
     includeParameterizedTransfer = true,
   ) {
     td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow as never);
-    td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(
+    td.when(this.blockchainTimeUtils.getBlockchainTimestamp()).thenReturn(
       okAsync(unixNow),
     );
 
@@ -102,6 +103,7 @@ class PaymentRepositoryMocks {
       this.paymentUtils,
       this.logUtils,
       this.timeUtils,
+      this.blockchainTimeUtils,
     );
   }
 
@@ -151,6 +153,7 @@ class PaymentRepositoryErrorMocks {
       this.paymentRepositoryMocks.paymentUtils,
       this.paymentRepositoryMocks.logUtils,
       this.paymentRepositoryMocks.timeUtils,
+      this.paymentRepositoryMocks.blockchainTimeUtils,
     );
   }
 }

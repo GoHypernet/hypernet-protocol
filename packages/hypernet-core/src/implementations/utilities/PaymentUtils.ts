@@ -30,7 +30,7 @@ import {
   InsuranceResolver,
   ParameterizedResolver,
 } from "@hypernetlabs/objects";
-import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { ResultUtils, ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { v4 as uuidv4 } from "uuid";
@@ -40,7 +40,6 @@ import {
   IConfigProvider,
   IPaymentIdUtils,
   IPaymentUtils,
-  ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
 

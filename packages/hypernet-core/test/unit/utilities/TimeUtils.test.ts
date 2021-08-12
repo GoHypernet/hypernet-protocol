@@ -2,16 +2,15 @@ import td from "testdouble";
 import { UUID, UnixTimestamp } from "@hypernetlabs/objects";
 
 import { BlockchainProviderMock } from "@mock/utils";
-import { TimeUtils } from "@implementations/utilities/TimeUtils";
-import { ITimeUtils } from "@interfaces/utilities";
 import moment from "moment";
+import { ITimeUtils, TimeUtils } from "@hypernetlabs/utils";
 
 class TimeUtilsMocks {
   public blockchainProvider = new BlockchainProviderMock();
   constructor() {}
 
   public factoryTimeUtils(): ITimeUtils {
-    return new TimeUtils(this.blockchainProvider);
+    return new TimeUtils();
   }
 }
 
@@ -31,16 +30,16 @@ describe("TimeUtils tests", () => {
     expect(result).toBeLessThanOrEqual(t2);
   });
 
-  test("getBlockchainTimestamp should return lastBlockchainTimestamp", () => {
-    // Arrange
-    const timeUtilsMocks = new TimeUtilsMocks();
-    const timeUtils = timeUtilsMocks.factoryTimeUtils();
-    const t1 = UnixTimestamp(moment().unix());
+  // test("getBlockchainTimestamp should return lastBlockchainTimestamp", () => {
+  //   // Arrange
+  //   const timeUtilsMocks = new TimeUtilsMocks();
+  //   const timeUtils = timeUtilsMocks.factoryTimeUtils();
+  //   const t1 = UnixTimestamp(moment().unix());
 
-    // Act
-    const result = timeUtils.getBlockchainTimestamp();
+  //   // Act
+  //   const result = timeUtils.getBlockchainTimestamp();
 
-    // Assert
-    expect(result).toBeDefined();
-  });
+  //   // Assert
+  //   expect(result).toBeDefined();
+  // });
 });

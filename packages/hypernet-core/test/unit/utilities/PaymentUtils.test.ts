@@ -18,10 +18,9 @@ import { ok, okAsync } from "neverthrow";
 import { PaymentUtils } from "@implementations/utilities";
 import {
   IPaymentIdUtils,
-  ITimeUtils,
   IPaymentUtils,
 } from "@interfaces/utilities";
-import { ILogUtils } from "@hypernetlabs/utils";
+import { ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
 import {
   BlockchainProviderMock,
   ConfigProviderMock,
