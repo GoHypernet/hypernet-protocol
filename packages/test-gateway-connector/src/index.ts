@@ -143,17 +143,19 @@ class TestGatewayConnector implements IGatewayConnector {
 
     this._renderContent();
 
-    // Request a state channel from the core
-    console.log(
-      `Requesting channel with router ${this.routerPublicIdentifier} on chain ${this.chainId}`,
-    );
-    this.stateChannelRequested.next({
-      chainId: this.chainId,
-      routerPublicIdentifiers: [this.routerPublicIdentifier],
-      callback: (channelAddress) => {
-        console.log(`Channel address recieved, ${channelAddress}`);
-      },
-    });
+    setTimeout(() => {
+      // Request a state channel from the core
+      console.log(
+        `Requesting channel with router ${this.routerPublicIdentifier} on chain ${this.chainId}`,
+      );
+      this.stateChannelRequested.next({
+        chainId: this.chainId,
+        routerPublicIdentifiers: [this.routerPublicIdentifier],
+        callback: (channelAddress) => {
+          console.log(`Channel address recieved, ${channelAddress}`);
+        },
+      });
+    }, 1000);
   }
 
   public onPushPaymentSent(payment: PushPayment): void {
