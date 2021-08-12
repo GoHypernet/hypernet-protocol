@@ -592,42 +592,6 @@ export class PaymentUtils implements IPaymentUtils {
     });
   }
 
-  /**
-   * This method is supposed to return a sorted history of the payment's history, but without
-   * a resolvedAt we can't really do that. So this will just have to sit here for a while.
-   * @param sortedTransfers
-   * @returns
-   */
-  public getPaymentStateHistory(
-    sortedTransfers: SortedTransfers,
-  ): ResultAsync<EPaymentState[], never> {
-    // First step, take all the transfers and unsort them; we need them in a continual list based on their timestamp.
-    const allTransfers = new Array<IFullTransferState>()
-      .concat(sortedTransfers.offerTransfers)
-      .concat(sortedTransfers.insuranceTransfers)
-      .concat(sortedTransfers.parameterizedTransfers)
-      .concat(sortedTransfers.pullRecordTransfers);
-
-    // Sort all the transfers by creation date
-    allTransfers.sort((a, b) => {
-      if (a.meta == null || b.meta == null) {
-        return 0;
-      }
-      if (a.meta.createdAt < b.meta.createdAt) {
-        return -1;
-      } else if (a.meta.createdAt > b.meta.createdAt) {
-        return 1;
-      }
-      return 0;
-    });
-
-    this.logUtils.debug(allTransfers);
-
-    const statusHistory = new Array<EPaymentState>();
-
-    return okAsync(statusHistory);
-  }
-
   // Returns true if the insurance transfer is
   public validateInsuranceTransfer(
     transfer: IFullTransferState<InsuranceState>,
