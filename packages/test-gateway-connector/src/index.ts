@@ -19,6 +19,7 @@ import {
   PaymentId,
   Signature,
   BigNumberString,
+  ChainId,
 } from "@hypernetlabs/objects";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { Subject } from "rxjs";
@@ -30,6 +31,12 @@ declare global {
 }
 
 class TestGatewayConnector implements IGatewayConnector {
+  protected routerPublicIdentifier = PublicIdentifier(
+    "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR",
+  );
+
+  protected chainId = ChainId(1337);
+
   async resolveChallenge(paymentId: PaymentId): Promise<IResolutionResult> {
     // What the mediator needs to sign:
     // https://github.com/connext/transfers/blob/20f44307164cb245c075cf3723b09d8ff75901d4/tests/insurance/insurance.spec.ts#L399
@@ -135,6 +142,18 @@ class TestGatewayConnector implements IGatewayConnector {
     this.onPreRedirect = new Subject<IRedirectInfo>();
 
     this._renderContent();
+
+    // Request a state channel from the core
+    console.log(
+      `Requesting channel with router ${this.routerPublicIdentifier} on chain ${this.chainId}`,
+    );
+    this.stateChannelRequested.next({
+      chainId: this.chainId,
+      routerPublicIdentifiers: [this.routerPublicIdentifier],
+      callback: (channelAddress) => {
+        console.log(`Channel address recieved, ${channelAddress}`);
+      },
+    });
   }
 
   public onPushPaymentSent(payment: PushPayment): void {

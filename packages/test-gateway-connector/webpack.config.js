@@ -95,6 +95,7 @@ module.exports = {
       net: false,
       tls: false,
       fs: false,
+      assert: false,
     },
   },
   devtool: "inline-source-map",
