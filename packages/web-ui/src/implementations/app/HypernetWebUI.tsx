@@ -33,12 +33,14 @@ import {
   PUBLIC_IDENTIFIER_WIDGET_ID_SELECTOR,
   WITHDRAW_WIDGET_ID_SELECTOR,
   STATE_CHANNELS_WIDGET_ID_SELECTOR,
+  BALANCES_SUMMARY_WIDGET_ID_SELECTOR,
 } from "@web-ui/constants";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
 import PrivateKeysFlow from "@web-ui/flows/PrivateKeysFlow";
 import { ViewUtils, DateUtils } from "@web-ui/utils";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget";
+import BalancesSummaryWidget from "@web-ui/widgets/BalancesSummaryWidget";
 import FundWidget from "@web-ui/widgets/FundWidget";
 import WithdrawWidget from "@web-ui/widgets/WithdrawWidget";
 import LinksWidget from "@web-ui/widgets/LinksWidget";
@@ -179,6 +181,23 @@ export default class HypernetWebUI implements IHypernetWebUI {
         ),
         this._generateDomElement(
           config?.selector || BALANCES_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderBalancesSummaryWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <BalancesSummaryWidget {...config} />,
+          config?.showInModal,
+        ),
+        this._generateDomElement(
+          config?.selector || BALANCES_SUMMARY_WIDGET_ID_SELECTOR,
         ),
       );
     };
