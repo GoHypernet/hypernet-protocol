@@ -43,7 +43,7 @@ type Action =
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function useBalances() {
-  const { coreProxy } = useStoreContext();
+  const { coreProxy, UIEvents } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const alert = useAlert();
 
@@ -142,9 +142,8 @@ export function useBalances() {
       },
     });
 
-    coreProxy?.UIEvents.onSelectedStateChannelChanged.subscribe({
+    UIEvents.onSelectedStateChannelChanged.subscribe({
       next: (activeStateChannel) => {
-        console.log("activeStateChannel changed: ", activeStateChannel);
         if (cancelRequest) return;
         coreProxy
           ?.getBalances()

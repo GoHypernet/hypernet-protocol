@@ -1,8 +1,4 @@
-import {
-  IHypernetIFrameProxy,
-  GatewayUrl,
-  RenderError,
-} from "@hypernetlabs/objects";
+import { IHypernetCore, IUIEvents, RenderError } from "@hypernetlabs/objects";
 import MainContainer from "@web-ui/containers/MainContainer";
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import {
@@ -50,14 +46,15 @@ import StateChannelsWidget from "@web-ui/widgets/StateChannelsWidget";
 
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
-  protected coreInstance: IHypernetIFrameProxy;
+  protected coreInstance: IHypernetCore;
+  protected UIEvents: IUIEvents;
   protected viewUtils: IViewUtils;
   protected dateUtils: IDateUtils;
-  constructor(_coreInstance?: IHypernetIFrameProxy) {
+  constructor(_coreInstance: IHypernetCore, _UIEvents: IUIEvents) {
     if (_coreInstance) {
       this.coreInstance = _coreInstance;
     } else if (window.hypernetCoreInstance) {
-      this.coreInstance = window.hypernetCoreInstance as IHypernetIFrameProxy;
+      this.coreInstance = window.hypernetCoreInstance as IHypernetCore;
     } else {
       throw new Error("core instance is required");
     }
@@ -65,6 +62,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     // This is to cache web ui instance in window so it may prevent from having multiple web ui instances
     window.hypernetWebUIInstance = HypernetWebUI.instance;
 
+    this.UIEvents = _UIEvents;
     this.viewUtils = new ViewUtils();
     this.dateUtils = new DateUtils();
   }
@@ -102,6 +100,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     return (
       <StoreProvider
         coreProxy={this.coreInstance}
+        UIEvents={this.UIEvents}
         viewUtils={this.viewUtils}
         dateUtils={this.dateUtils}
       >
