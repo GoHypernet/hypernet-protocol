@@ -7,55 +7,6 @@ const webpack = require("webpack");
 
 const configFilePath = require.resolve("./tsconfig.json");
 
-process.env.__IFRAME_SOURCE__ = "http://localhost:5000";
-process.env.__ROUTER_PUBLIC_IDENTIFIER__ =
-  "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR";
-process.env.__CHAIN_ID__ = "1337";
-process.env.__CHAIN_PROVIDERS__ = '{"1337": "http://localhost:8545"}';
-process.env.__CHAIN_ADDRESSES__ =
-  '{ \
-  "1337": { \
-    "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
-    "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", \
-    "hypertokenAddress": "0x9FBDa871d559710256a2502A2517b794B482Db40", \
-    "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
-    "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
-    "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
-    "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a" \
-  } \
-}';
-process.env.__NATS_URL__ = "ws://localhost:4221";
-process.env.__AUTH_URL__ = "http://localhost:5040";
-//process.env.__INFURA_ID__ = "1369";
-process.env.__DEFAULT_CHAIN_ID__ = "1337";
-process.env.__VALIDATOR_IFRAME_URL__ = "http://localhost:5005";
-process.env.__CERAMIC_NODE_URL__ = "https://ceramic-clay.3boxlabs.com";
-process.env.__HYPERTOKEN_ADDRESS__ =
-  "0x9FBDa871d559710256a2502A2517b794B482Db40";
-process.env.__DEBUG__ = true;
-
-/* process.env.__IFRAME_SOURCE__ = "http://localhost:5000";
-process.env.__ROUTER_PUBLIC_IDENTIFIER__ =
-  "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR";
-process.env.__CHAIN_ID__ = "1369";
-process.env.__CHAIN_PROVIDERS__ =
-  '{"1369": "https://eth-provider-dev.hypernetlabs.io"}';
-process.env.__CHAIN_ADDRESSES__ =
-  '{ \
-  "1369": { \
-    "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
-    "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F" \
-  } \
-}';
-process.env.__NATS_URL__ = "ws://localhost:4221";
-process.env.__AUTH_URL__ = "http://localhost:5040";
-process.env.__DEFAULT_CHAIN_ID__ = "1369";
-process.env.__VALIDATOR_IFRAME_URL__ = "http://localhost:5005";
-process.env.__CERAMIC_NODE_URL__ = "https://ceramic-clay.3boxlabs.com";
-process.env.__HYPERTOKEN_ADDRESS__ =
-  "0x9FBDa871d559710256a2502A2517b794B482Db40";
-process.env.__DEBUG__ = true; */
-
 /** @type import('webpack').Configuration */
 module.exports = {
   context: __dirname,
