@@ -9,3 +9,5 @@ export * from "@utils/ILogUtils";
 export * from "@utils/LogUtils";
 export * from "@utils/IValidationUtils";
 export * from "@utils/ValidationUtils";
+export * from "@utils/ITimeUtils";
+export * from "@utils/TimeUtils";

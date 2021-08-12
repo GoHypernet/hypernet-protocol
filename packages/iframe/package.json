@@ -16,7 +16,7 @@
     "alias": "tsc-alias",
     "postCompile": "webpack",
     "prepare": "yarn build",
-    "test": "echo \"Error: no test specified\" && exit 0"
+    "test": "echo \"No tests specified yet\" && exit 0"
   },
   "types": "dist/index.d.ts",
   "dependencies": {

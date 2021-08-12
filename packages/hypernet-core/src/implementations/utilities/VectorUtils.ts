@@ -37,7 +37,7 @@ import {
   IRegisteredTransfer,
   ChainId,
 } from "@hypernetlabs/objects";
-import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { ResultUtils, ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
@@ -50,7 +50,6 @@ import {
   IBlockchainProvider,
   IPaymentIdUtils,
   IBrowserNode,
-  ITimeUtils,
   IBlockchainUtils,
 } from "@interfaces/utilities";
 

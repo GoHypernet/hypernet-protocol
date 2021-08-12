@@ -4,9 +4,9 @@ import {
   UnixTimestamp,
   IBasicTransferResponse,
   Signature,
+  ETransferState,
   BigNumberString,
 } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
 
@@ -161,6 +161,58 @@ export class VectorUtilsMockFactory {
         BigNumberString("1"),
       ),
     ).thenReturn(okAsync({} as IBasicTransferResponse));
+
+    td.when(
+      vectorUtils.getTransferStateFromTransfer(
+        td.matchers.contains({ transferId: offerTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferState.Active));
+    td.when(
+      vectorUtils.getTransferStateFromTransfer(
+        td.matchers.contains({ transferId: insuranceTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferState.Active));
+    td.when(
+      vectorUtils.getTransferStateFromTransfer(
+        td.matchers.contains({ transferId: parameterizedTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferState.Active));
+
+    td.when(
+      vectorUtils.getTransferType(
+        td.matchers.contains({ transferId: offerTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferType.Offer));
+    td.when(
+      vectorUtils.getTransferType(
+        td.matchers.contains({ transferId: insuranceTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferType.Insurance));
+    td.when(
+      vectorUtils.getTransferType(
+        td.matchers.contains({ transferId: parameterizedTransferId }),
+      ),
+    ).thenReturn(okAsync(ETransferType.Parameterized));
+
+    td.when(
+      vectorUtils.getTimestampFromTransfer(
+        td.matchers.contains({ transferId: offerTransferId }),
+      ),
+    ).thenReturn(UnixTimestamp(unixNow - 1) as never);
+    td.when(
+      vectorUtils.getTimestampFromTransfer(
+        td.matchers.contains({ transferId: insuranceTransferId }),
+      ),
+    ).thenReturn(UnixTimestamp(unixNow - 1) as never);
+    td.when(
+      vectorUtils.getTimestampFromTransfer(
+        td.matchers.contains({ transferId: parameterizedTransferId }),
+      ),
+    ).thenReturn(UnixTimestamp(unixNow - 1) as never);
+
+    td.when(vectorUtils.getAllActiveTransfers()).thenReturn(
+      okAsync([activeOfferTransfer]),
+    );
 
     return vectorUtils;
   }

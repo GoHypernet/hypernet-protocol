@@ -39,6 +39,8 @@ import {
   LogUtils,
   IValidationUtils,
   ValidationUtils,
+  ITimeUtils,
+  TimeUtils,
 } from "@hypernetlabs/utils";
 import {
   GatewayConnectorListener,
@@ -95,11 +97,11 @@ import {
   LinkUtils,
   PaymentUtils,
   PaymentIdUtils,
-  TimeUtils,
   VectorUtils,
   EthersBlockchainUtils,
   CeramicUtils,
   MessagingProvider,
+  BlockchainTimeUtils
 } from "@implementations/utilities";
 import {
   GatewayConnectorProxyFactory,
@@ -116,10 +118,10 @@ import {
   ILinkUtils,
   IPaymentIdUtils,
   IPaymentUtils,
-  ITimeUtils,
   IVectorUtils,
   ICeramicUtils,
   IMessagingProvider,
+  IBlockchainTimeUtils,
 } from "@interfaces/utilities";
 import {
   IBrowserNodeFactory,
@@ -161,6 +163,7 @@ export class HypernetCore implements IHypernetCore {
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
+  protected blockchainTimeUtils: IBlockchainTimeUtils;
   protected blockchainProvider: IBlockchainProvider;
   protected configProvider: IConfigProvider;
   protected contextProvider: IContextProvider;
@@ -319,7 +322,11 @@ export class HypernetCore implements IHypernetCore {
       this.internalProviderFactory,
       this.logUtils,
     );
-    this.timeUtils = new TimeUtils(this.blockchainProvider);
+    this.timeUtils = new TimeUtils();
+    this.blockchainTimeUtils = new BlockchainTimeUtils(
+      this.blockchainProvider,
+      this.timeUtils,
+    );
 
     this.ceramicUtils = new CeramicUtils(
       this.configProvider,
@@ -392,6 +399,7 @@ export class HypernetCore implements IHypernetCore {
       this.paymentUtils,
       this.logUtils,
       this.timeUtils,
+      this.blockchainTimeUtils
     );
 
     this.linkRepository = new LinkRepository(

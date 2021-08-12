@@ -28,7 +28,7 @@ import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
 import { Signature } from "@objects/Signature";
-import { ActiveStateChannel } from "@web-integration/ActiveStateChannel";
+import { ActiveStateChannel } from "@objects/ActiveStateChannel";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single

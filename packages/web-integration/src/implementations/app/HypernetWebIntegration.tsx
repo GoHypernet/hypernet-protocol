@@ -1,6 +1,12 @@
-import { IHypernetCore, GatewayUrl } from "@hypernetlabs/objects";
+import {
+  IHypernetCore,
+  GatewayUrl,
+  IUIEvents,
+  ActiveStateChannel,
+} from "@hypernetlabs/objects";
 import HypernetWebUI, { IHypernetWebUI } from "@hypernetlabs/web-ui";
 import { ResultAsync } from "neverthrow";
+import { Subject } from "rxjs";
 
 import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
 import { IHypernetWebIntegration } from "@web-integration/interfaces/app/IHypernetWebIntegration";
@@ -15,6 +21,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
   public webUIClient: IHypernetWebUI;
   public core: HypernetIFrameProxy;
+  public UIEvents: IUIEvents;
 
   constructor(iframeURL?: string) {
     this.iframeURL = iframeURL || this.iframeURL;
@@ -26,15 +33,19 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       "hypernet-core-iframe",
     );
 
-    this.core.onGatewayIFrameDisplayRequested.subscribe((gatewayUrl) => {
-      this.currentGatewayUrl = gatewayUrl;
-    });
+    this.UIEvents = {
+      onSelectedStateChannelChanged: new Subject<ActiveStateChannel>(),
+    };
 
     if (window.hypernetWebUIInstance) {
       this.webUIClient = window.hypernetWebUIInstance as IHypernetWebUI;
     } else {
-      this.webUIClient = new HypernetWebUI(this.core);
+      this.webUIClient = new HypernetWebUI(this.core, this.UIEvents);
     }
+
+    this.core.onGatewayIFrameDisplayRequested.subscribe((gatewayUrl) => {
+      this.currentGatewayUrl = gatewayUrl;
+    });
 
     this.core.onPrivateCredentialsRequested.subscribe(() => {
       //this.webUIClient.renderPrivateKeysModal();

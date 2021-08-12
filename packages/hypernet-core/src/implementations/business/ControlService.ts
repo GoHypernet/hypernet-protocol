@@ -11,9 +11,8 @@ import { InitializedHypernetContext } from "@interfaces/objects";
 import {
   IContextProvider,
   IContextProviderType,
-  ITimeUtils,
-  ITimeUtilsType,
 } from "@interfaces/utilities";
+import { ITimeUtils, ITimeUtilsType } from "@hypernetlabs/utils";
 
 @injectable()
 export class ControlService implements IControlService {

@@ -7,17 +7,17 @@ import {
   MessageState,
   ParameterizedResolver,
 } from "@hypernetlabs/objects";
-import { ILogUtils } from "@hypernetlabs/utils";
+import { ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
 import { errAsync, okAsync } from "neverthrow";
 import td from "testdouble";
 
 import { VectorUtils } from "@implementations/utilities/VectorUtils";
 import {
+  IBlockchainTimeUtils,
   IBlockchainUtils,
   IBrowserNode,
   IBrowserNodeProvider,
   IPaymentIdUtils,
-  ITimeUtils,
 } from "@interfaces/utilities";
 import {
   activeParameterizedTransfer,
@@ -62,6 +62,7 @@ class VectorUtilsMocks {
   public paymentIdUtils = td.object<IPaymentIdUtils>();
   public logUtils = td.object<ILogUtils>();
   public timeUtils = td.object<ITimeUtils>();
+  public blockchainTimeUtils = td.object<IBlockchainTimeUtils>();
 
   constructor(includeExistingStateChannel = true) {
     this.browserNodeProvider = new BrowserNodeProviderMock(
@@ -72,7 +73,7 @@ class VectorUtilsMocks {
       includeExistingStateChannel,
     );
     td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow as never);
-    td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(
+    td.when(this.blockchainTimeUtils.getBlockchainTimestamp()).thenReturn(
       okAsync(unixNow),
     );
 

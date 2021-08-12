@@ -666,16 +666,10 @@ describe("PaymentService tests", () => {
     });
   });
 
-  test("Should acceptOffer return error if payment state is not Proposed", async () => {
+  test("Should acceptOffer return error if payment is not exist", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
-
-    const payment = paymentServiceMock.factoryPushPayment(
-      publicIdentifier2,
-      publicIdentifier2,
-      EPaymentState.Staked,
-    );
-    paymentServiceMock.setExistingPayments([payment]);
+    paymentServiceMock.setExistingPayments([]);
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 
@@ -707,6 +701,12 @@ describe("PaymentService tests", () => {
   test("acceptOffer should return an error if provideStake fails", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
+    const payment = paymentServiceMock.factoryPushPayment(
+      publicIdentifier2,
+      publicIdentifier2,
+      EPaymentState.Staked,
+    );
+    paymentServiceMock.setExistingPayments([payment]);
 
     td.when(
       paymentServiceMock.paymentRepository.provideStake(paymentId, account),
@@ -720,10 +720,7 @@ describe("PaymentService tests", () => {
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeTruthy();
-    expect(result._unsafeUnwrapErr()).toBeInstanceOf(AcceptPaymentError);
-    paymentServiceMock.contextProvider.assertEventCounts({
-      onBalancesChanged: 1,
-    });
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(Error);
   });
 
   test("Should stakePosted run without errors", async () => {
