@@ -278,13 +278,12 @@ services:
     depends_on:
       - core-iframe
       - gateway-iframe
+      - test-gateway
 
   test-gateway:
-    image: node:14
+    image: hypernetlabs/hypernet-protocol-test-gateway:local
     ports:
       - 5010:5010
-    volumes:
-      - ../test-gateway/dist/server-bundle:/app
-      - ../test-gateway/dist/connector-bundle:/app/connector
-    command:
-      node /app/index.js
+    depends_on:
+      - core-iframe
+      - gateway-iframe

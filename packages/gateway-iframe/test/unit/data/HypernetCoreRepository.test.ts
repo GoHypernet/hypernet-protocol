@@ -22,35 +22,7 @@ class HypernetCoreRepositoryMocks {
     this.gatewaySignature,
   );
 
-  constructor() {
-    td.when(
-      this.postmateChildApi.emit("sendFundsRequested", sendFundsRequest),
-    ).thenReturn(undefined);
-    td.when(
-      this.postmateChildApi.emit(
-        "authorizeFundsRequested",
-        authorizeFundsRequest,
-      ),
-    ).thenReturn(undefined);
-    td.when(
-      this.postmateChildApi.emit(
-        "resolveInsuranceRequested",
-        resolveInsuranceRequest,
-      ),
-    ).thenReturn(undefined);
-
-    td.when(this.postmateChildApi.emit("emitDisplayRequested")).thenReturn(
-      undefined,
-    );
-
-    td.when(this.postmateChildApi.emit("emitDisplayRequested")).thenReturn(
-      undefined,
-    );
-
-    td.when(
-      this.postmateChildApi.emit("emitSignMessageRequested", "message"),
-    ).thenReturn(undefined);
-  }
+  constructor() {}
 
   public factoryHypernetCoreRepository(): IHypernetCoreRepository {
     return new HypernetCoreRepository(this.contextProvider);
@@ -60,13 +32,13 @@ class HypernetCoreRepositoryMocks {
 describe("HypernetCoreRepository tests", () => {
   test("Should emitSendFundsRequest works without errors", async () => {
     // Arrange
-    const HypernetCoreRepositoryMock = new HypernetCoreRepositoryMocks();
+    const hypernetCoreRepositoryMock = new HypernetCoreRepositoryMocks();
     const HypernetCoreRepository =
-      HypernetCoreRepositoryMock.factoryHypernetCoreRepository();
-    HypernetCoreRepositoryMock.contextProvider
+      hypernetCoreRepositoryMock.factoryHypernetCoreRepository();
+    hypernetCoreRepositoryMock.contextProvider
       .getGatewayContext()
       .onHypernetCoreProxyActivated.next(
-        HypernetCoreRepositoryMock.postmateChildApi,
+        hypernetCoreRepositoryMock.postmateChildApi,
       );
 
     // Act
@@ -79,17 +51,23 @@ describe("HypernetCoreRepository tests", () => {
     expect(response).toBeDefined();
     expect(response.isErr()).toBeFalsy();
     expect(result).toBe(undefined);
+    td.verify(
+      hypernetCoreRepositoryMock.postmateChildApi.emit(
+        "sendFundsRequested",
+        sendFundsRequest,
+      ),
+    );
   });
 
   test("Should emitAuthorizeFundsRequest works without errors", async () => {
     // Arrange
-    const HypernetCoreRepositoryMock = new HypernetCoreRepositoryMocks();
+    const hypernetCoreRepositoryMock = new HypernetCoreRepositoryMocks();
     const HypernetCoreRepository =
-      HypernetCoreRepositoryMock.factoryHypernetCoreRepository();
-    HypernetCoreRepositoryMock.contextProvider
+      hypernetCoreRepositoryMock.factoryHypernetCoreRepository();
+    hypernetCoreRepositoryMock.contextProvider
       .getGatewayContext()
       .onHypernetCoreProxyActivated.next(
-        HypernetCoreRepositoryMock.postmateChildApi,
+        hypernetCoreRepositoryMock.postmateChildApi,
       );
 
     // Act
@@ -102,17 +80,23 @@ describe("HypernetCoreRepository tests", () => {
     expect(response).toBeDefined();
     expect(response.isErr()).toBeFalsy();
     expect(result).toBe(undefined);
+    td.verify(
+      hypernetCoreRepositoryMock.postmateChildApi.emit(
+        "authorizeFundsRequested",
+        authorizeFundsRequest,
+      ),
+    );
   });
 
   test("Should emitResolveInsuranceRequest works without errors", async () => {
     // Arrange
-    const HypernetCoreRepositoryMock = new HypernetCoreRepositoryMocks();
+    const hypernetCoreRepositoryMock = new HypernetCoreRepositoryMocks();
     const HypernetCoreRepository =
-      HypernetCoreRepositoryMock.factoryHypernetCoreRepository();
-    HypernetCoreRepositoryMock.contextProvider
+      hypernetCoreRepositoryMock.factoryHypernetCoreRepository();
+    hypernetCoreRepositoryMock.contextProvider
       .getGatewayContext()
       .onHypernetCoreProxyActivated.next(
-        HypernetCoreRepositoryMock.postmateChildApi,
+        hypernetCoreRepositoryMock.postmateChildApi,
       );
 
     // Act
@@ -125,17 +109,23 @@ describe("HypernetCoreRepository tests", () => {
     expect(response).toBeDefined();
     expect(response.isErr()).toBeFalsy();
     expect(result).toBe(undefined);
+    td.verify(
+      hypernetCoreRepositoryMock.postmateChildApi.emit(
+        "resolveInsuranceRequested",
+        resolveInsuranceRequest,
+      ),
+    );
   });
 
   test("Should emitDisplayRequested works without errors", async () => {
     // Arrange
-    const HypernetCoreRepositoryMock = new HypernetCoreRepositoryMocks();
+    const hypernetCoreRepositoryMock = new HypernetCoreRepositoryMocks();
     const HypernetCoreRepository =
-      HypernetCoreRepositoryMock.factoryHypernetCoreRepository();
-    HypernetCoreRepositoryMock.contextProvider
+      hypernetCoreRepositoryMock.factoryHypernetCoreRepository();
+    hypernetCoreRepositoryMock.contextProvider
       .getGatewayContext()
       .onHypernetCoreProxyActivated.next(
-        HypernetCoreRepositoryMock.postmateChildApi,
+        hypernetCoreRepositoryMock.postmateChildApi,
       );
 
     // Act
@@ -146,17 +136,23 @@ describe("HypernetCoreRepository tests", () => {
     expect(response).toBeDefined();
     expect(response.isErr()).toBeFalsy();
     expect(result).toBe(undefined);
+    td.verify(
+      hypernetCoreRepositoryMock.postmateChildApi.emit(
+        "displayRequested",
+        hypernetCoreRepositoryMock.gatewayUrl,
+      ),
+    );
   });
 
   test("Should emitCloseRequested works without errors", async () => {
     // Arrange
-    const HypernetCoreRepositoryMock = new HypernetCoreRepositoryMocks();
+    const hypernetCoreRepositoryMock = new HypernetCoreRepositoryMocks();
     const HypernetCoreRepository =
-      HypernetCoreRepositoryMock.factoryHypernetCoreRepository();
-    HypernetCoreRepositoryMock.contextProvider
+      hypernetCoreRepositoryMock.factoryHypernetCoreRepository();
+    hypernetCoreRepositoryMock.contextProvider
       .getGatewayContext()
       .onHypernetCoreProxyActivated.next(
-        HypernetCoreRepositoryMock.postmateChildApi,
+        hypernetCoreRepositoryMock.postmateChildApi,
       );
 
     // Act
@@ -167,17 +163,23 @@ describe("HypernetCoreRepository tests", () => {
     expect(response).toBeDefined();
     expect(response.isErr()).toBeFalsy();
     expect(result).toBe(undefined);
+    td.verify(
+      hypernetCoreRepositoryMock.postmateChildApi.emit(
+        "closeRequested",
+        hypernetCoreRepositoryMock.gatewayUrl,
+      ),
+    );
   });
 
-  test("Should emitCloseRequested works without errors", async () => {
+  test("Should emitSignMessageRequested works without errors", async () => {
     // Arrange
-    const HypernetCoreRepositoryMock = new HypernetCoreRepositoryMocks();
+    const hypernetCoreRepositoryMock = new HypernetCoreRepositoryMocks();
     const HypernetCoreRepository =
-      HypernetCoreRepositoryMock.factoryHypernetCoreRepository();
-    HypernetCoreRepositoryMock.contextProvider
+      hypernetCoreRepositoryMock.factoryHypernetCoreRepository();
+    hypernetCoreRepositoryMock.contextProvider
       .getGatewayContext()
       .onHypernetCoreProxyActivated.next(
-        HypernetCoreRepositoryMock.postmateChildApi,
+        hypernetCoreRepositoryMock.postmateChildApi,
       );
 
     // Act
@@ -190,5 +192,11 @@ describe("HypernetCoreRepository tests", () => {
     expect(response).toBeDefined();
     expect(response.isErr()).toBeFalsy();
     expect(result).toBe(undefined);
+    td.verify(
+      hypernetCoreRepositoryMock.postmateChildApi.emit(
+        "signMessageRequested",
+        "message",
+      ),
+    );
   });
 });

@@ -247,7 +247,10 @@ const func: DeployFunction = async () => {
         tokenAddress: hyperTokenAddress,
       },
     ],
-    allowedGateways: ["https://localhost:3000/users/v0"],
+    allowedGateways: [
+      "https://localhost:3000/users/v0",
+      "http://localhost:5010",
+    ],
   };
 
   const liquidityRegistryTx = await liquidityRegistryContract.setLiquidity(

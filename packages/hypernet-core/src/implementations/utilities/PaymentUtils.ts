@@ -30,7 +30,7 @@ import {
   InsuranceResolver,
   ParameterizedResolver,
 } from "@hypernetlabs/objects";
-import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { ResultUtils, ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import { v4 as uuidv4 } from "uuid";
@@ -40,7 +40,6 @@ import {
   IConfigProvider,
   IPaymentIdUtils,
   IPaymentUtils,
-  ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
 
@@ -590,42 +589,6 @@ export class PaymentUtils implements IPaymentUtils {
       // If none of the above states match, the payment is well and truly EPaymentState.Borked
       return EPaymentState.Borked;
     });
-  }
-
-  /**
-   * This method is supposed to return a sorted history of the payment's history, but without
-   * a resolvedAt we can't really do that. So this will just have to sit here for a while.
-   * @param sortedTransfers
-   * @returns
-   */
-  public getPaymentStateHistory(
-    sortedTransfers: SortedTransfers,
-  ): ResultAsync<EPaymentState[], never> {
-    // First step, take all the transfers and unsort them; we need them in a continual list based on their timestamp.
-    const allTransfers = new Array<IFullTransferState>()
-      .concat(sortedTransfers.offerTransfers)
-      .concat(sortedTransfers.insuranceTransfers)
-      .concat(sortedTransfers.parameterizedTransfers)
-      .concat(sortedTransfers.pullRecordTransfers);
-
-    // Sort all the transfers by creation date
-    allTransfers.sort((a, b) => {
-      if (a.meta == null || b.meta == null) {
-        return 0;
-      }
-      if (a.meta.createdAt < b.meta.createdAt) {
-        return -1;
-      } else if (a.meta.createdAt > b.meta.createdAt) {
-        return 1;
-      }
-      return 0;
-    });
-
-    this.logUtils.debug(allTransfers);
-
-    const statusHistory = new Array<EPaymentState>();
-
-    return okAsync(statusHistory);
   }
 
   // Returns true if the insurance transfer is

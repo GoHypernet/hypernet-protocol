@@ -4,12 +4,11 @@ import {
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
-export interface ITimeUtils {
-  getUnixNow(): UnixTimestamp;
+export interface IBlockchainTimeUtils {
   getBlockchainTimestamp(): ResultAsync<
     UnixTimestamp,
     BlockchainUnavailableError
   >;
 }
 
-export const ITimeUtilsType = Symbol.for("ITimeUtils");
+export const IBlockchainTimeUtilsType = Symbol.for("IBlockchainTimeUtils");

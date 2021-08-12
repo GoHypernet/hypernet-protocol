@@ -1,4 +1,3 @@
-import { NodeResponses } from "@connext/vector-types";
 import {
   EthereumAddress,
   IHypernetOfferDetails,
@@ -34,18 +33,18 @@ import {
   ParameterizedState,
   ChainId,
 } from "@hypernetlabs/objects";
-import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { ResultUtils, ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
 import { IPaymentRepository } from "@interfaces/data";
 import { HypernetConfig } from "@interfaces/objects";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
 import {
+  IBlockchainTimeUtils,
   IBrowserNode,
   IBrowserNodeProvider,
   IConfigProvider,
   IContextProvider,
   IPaymentUtils,
-  ITimeUtils,
   IVectorUtils,
 } from "@interfaces/utilities";
 
@@ -62,6 +61,7 @@ export class PaymentRepository implements IPaymentRepository {
     protected paymentUtils: IPaymentUtils,
     protected logUtils: ILogUtils,
     protected timeUtils: ITimeUtils,
+    protected blockchainTimeUtils: IBlockchainTimeUtils,
   ) {}
 
   public createPullRecord(
@@ -144,7 +144,7 @@ export class PaymentRepository implements IPaymentRepository {
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
       this.paymentUtils.createPaymentId(EPaymentType.Pull),
-      this.timeUtils.getBlockchainTimestamp(),
+      this.blockchainTimeUtils.getBlockchainTimestamp(),
       this.configProvider.getConfig(),
     ]).andThen((vals) => {
       const [browserNode, context, paymentId, timestamp, config] = vals;
@@ -242,7 +242,7 @@ export class PaymentRepository implements IPaymentRepository {
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
       this.paymentUtils.createPaymentId(EPaymentType.Push),
-      this.timeUtils.getBlockchainTimestamp(),
+      this.blockchainTimeUtils.getBlockchainTimestamp(),
       this.configProvider.getConfig(),
     ]).andThen((vals) => {
       const [browserNode, context, paymentId, timestamp, config] = vals;
@@ -605,7 +605,7 @@ export class PaymentRepository implements IPaymentRepository {
       this.configProvider.getConfig(),
       this.contextProvider.getInitializedContext(),
       this._getTransfersByPaymentId(paymentId),
-      this.timeUtils.getBlockchainTimestamp(),
+      this.blockchainTimeUtils.getBlockchainTimestamp(),
     ]).andThen((vals) => {
       const [browserNode, config, context, existingTransfers, timestamp] = vals;
 
@@ -683,7 +683,7 @@ export class PaymentRepository implements IPaymentRepository {
       this.configProvider.getConfig(),
       this.contextProvider.getInitializedContext(),
       this._getTransfersByPaymentId(paymentId),
-      this.timeUtils.getBlockchainTimestamp(),
+      this.blockchainTimeUtils.getBlockchainTimestamp(),
     ]).andThen((vals) => {
       const [browserNode, config, context, existingTransfers, timestamp] = vals;
 

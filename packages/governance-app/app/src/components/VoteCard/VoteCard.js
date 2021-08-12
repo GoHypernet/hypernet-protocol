@@ -16,13 +16,8 @@ const VoteCard = ({ vote, onOpen }) => {
   const theme = useTheme();
   const { pctBase } = useSettings();
 
-  const {
-    connectedAccountVote,
-    data,
-    executionTargetData,
-    numData,
-    voteId,
-  } = vote;
+  const { connectedAccountVote, data, executionTargetData, numData, voteId } =
+    vote;
   const { votingPower, yea, nay } = numData;
   const { metadata, description, delayed, closed, transitionAt } = data;
 

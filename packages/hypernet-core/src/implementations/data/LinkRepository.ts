@@ -8,7 +8,7 @@ import {
   VectorError,
   InvalidPaymentError,
 } from "@hypernetlabs/objects";
-import { ResultUtils } from "@hypernetlabs/utils";
+import { ITimeUtils, ResultUtils } from "@hypernetlabs/utils";
 import { ILinkRepository } from "@interfaces/data";
 import { okAsync, ResultAsync } from "neverthrow";
 
@@ -17,7 +17,6 @@ import {
   IConfigProvider,
   IContextProvider,
   IPaymentUtils,
-  ITimeUtils,
   IVectorUtils,
   ILinkUtils,
 } from "@interfaces/utilities";

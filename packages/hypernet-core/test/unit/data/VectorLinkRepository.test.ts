@@ -18,7 +18,7 @@ import {
   IBrowserNodeProvider,
   IPaymentUtils,
   ILinkUtils,
-  ITimeUtils,
+  IBlockchainTimeUtils,
 } from "@interfaces/utilities";
 import {
   commonAmount,
@@ -45,6 +45,7 @@ import {
   PaymentUtilsMockFactory,
   VectorUtilsMockFactory,
 } from "@mock/utils";
+import { ITimeUtils } from "@hypernetlabs/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
@@ -63,6 +64,7 @@ class VectorLinkRepositoryMocks {
   public browserNodeProvider = new BrowserNodeProviderMock();
   public linkUtils = td.object<ILinkUtils>();
   public timeUtils = td.object<ITimeUtils>();
+  public blockchainTimeUtils = td.object<IBlockchainTimeUtils>();
   public paymentUtils: IPaymentUtils;
   public proposedPayment: PushPayment;
   public stakedPayment: PushPayment;
@@ -106,7 +108,7 @@ class VectorLinkRepositoryMocks {
     ).thenReturn(okAsync([]));
 
     td.when(this.timeUtils.getUnixNow()).thenReturn(unixNow as never);
-    td.when(this.timeUtils.getBlockchainTimestamp()).thenReturn(
+    td.when(this.blockchainTimeUtils.getBlockchainTimestamp()).thenReturn(
       okAsync(unixNow),
     );
   }

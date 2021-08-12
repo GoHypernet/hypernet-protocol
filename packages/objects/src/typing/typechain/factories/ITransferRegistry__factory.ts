@@ -12,11 +12,11 @@ export class ITransferRegistry__factory {
     address: string,
     signerOrProvider: Signer | Provider,
   ): ITransferRegistry {
-    return (new Contract(
+    return new Contract(
       address,
       _abi,
       signerOrProvider,
-    ) as unknown) as ITransferRegistry;
+    ) as unknown as ITransferRegistry;
   }
 }
 
