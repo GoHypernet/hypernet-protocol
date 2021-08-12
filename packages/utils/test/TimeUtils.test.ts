@@ -1,8 +1,23 @@
 import { UnixTimestamp } from "@hypernetlabs/objects";
-
-import moment from "moment";
 import { ITimeUtils, TimeUtils } from "@hypernetlabs/utils";
 
+const unixNow = UnixTimestamp(1318874398);
+
+jest.mock("moment", () => {
+  let mockMoment = {};
+  Object.keys(jest.requireActual("moment")).forEach((key) => {
+    mockMoment = {
+      ...mockMoment,
+      [key]: jest.requireActual("moment")[key],
+    };
+  });
+  return {
+    ...mockMoment,
+    moment: {
+      unix: () => unixNow,
+    },
+  };
+});
 class TimeUtilsMocks {
   constructor() {}
 
@@ -16,14 +31,11 @@ describe("TimeUtils tests", () => {
     // Arrange
     const timeUtilsMocks = new TimeUtilsMocks();
     const timeUtils = timeUtilsMocks.factoryTimeUtils();
-    const t1 = UnixTimestamp(moment().unix());
 
     // Act
     const result = timeUtils.getUnixNow();
-    const t2 = UnixTimestamp(moment().unix());
 
     // Assert
-    expect(result).toBeGreaterThanOrEqual(t1);
-    expect(result).toBeLessThanOrEqual(t2);
+    expect(result).toBe(unixNow);
   });
 });
