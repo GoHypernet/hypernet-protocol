@@ -26,9 +26,7 @@ export class AuthorizedGatewayFormViewModel {
     this.submitButton = new ButtonParams(
       "Authorize Gateway",
       async () => {
-        return await this.integration.core.authorizeGateway(
-          this.gatewayUrl(),
-        );
+        return await this.integration.core.authorizeGateway(this.gatewayUrl());
       },
       EButtonType.Normal,
       ko.pureComputed(() => {

@@ -96,9 +96,7 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
       hasEmptyState={hasEmptyState}
       emptyState={
         <Box>
-          <EmptyState
-            info={<>You don't have any authorized gateways yet</>}
-          />
+          <EmptyState info={<>You don't have any authorized gateways yet</>} />
           {renderGatewayAuthorization()}
         </Box>
       }

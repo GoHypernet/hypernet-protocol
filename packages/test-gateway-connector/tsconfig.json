@@ -1,0 +1,19 @@
+{
+  "extends": "../../tsconfig.build.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "target": "es6",
+    "lib": ["es6", "DOM"],
+    "jsx": "react"
+  },
+  "references": [
+    {
+      "path": "../objects"
+    },
+    {
+      "path": "../gateway-connector"
+    }
+  ],
+  "include": ["./src/**/*.ts", "./src/**/*.tsx"],
+  "exclude": ["node_modules"]
+}

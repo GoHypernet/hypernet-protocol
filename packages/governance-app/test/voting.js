@@ -98,7 +98,8 @@ contract(
       MODIFY_SUPPORT_ROLE = await votingBase.MODIFY_SUPPORT_ROLE();
       MODIFY_QUORUM_ROLE = await votingBase.MODIFY_QUORUM_ROLE();
       MODIFY_BUFFER_BLOCKS_ROLE = await votingBase.MODIFY_BUFFER_BLOCKS_ROLE();
-      MODIFY_EXECUTION_DELAY_ROLE = await votingBase.MODIFY_EXECUTION_DELAY_ROLE();
+      MODIFY_EXECUTION_DELAY_ROLE =
+        await votingBase.MODIFY_EXECUTION_DELAY_ROLE();
     });
 
     beforeEach(async () => {

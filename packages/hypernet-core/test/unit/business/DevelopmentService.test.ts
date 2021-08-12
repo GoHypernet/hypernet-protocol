@@ -30,7 +30,8 @@ describe("DevelopmentService tests", () => {
     // Arrange
     const developmentServiceMock = new DevelopmentServiceMocks();
 
-    const developmentService = developmentServiceMock.factoryDevelopmentService();
+    const developmentService =
+      developmentServiceMock.factoryDevelopmentService();
 
     // Act
     const response = await developmentService.mintTestToken(amount, to);

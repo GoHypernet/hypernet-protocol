@@ -78,4 +78,3 @@ ko.components.register("actions", {
   viewModel: ActionsViewModel,
   template: html,
 });
-

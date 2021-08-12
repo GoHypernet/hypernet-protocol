@@ -33,13 +33,10 @@
       "path": "packages/gateway-connector/test"
     },
     {
-      "path": "packages/test-gateway/src"
+      "path": "packages/test-gateway"
     },
     {
-      "path": "packages/test-gateway/server"
-    },
-    {
-      "path": "packages/test-gateway/test"
+      "path": "packages/test-gateway-connector"
     },
     {
       "path": "packages/web-demo"

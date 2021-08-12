@@ -20,7 +20,7 @@ declare const __VALIDATOR_IFRAME_URL__: string;
 declare const __CERAMIC_NODE_URL__: string;
 declare const __DEBUG__: boolean;
 declare const __INFURA_ID__: string;
-declare const __DEFAULT_CHAIN_ID__: ChainId;
+declare const __GOVERNANCE_CHAIN_ID__: string;
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
@@ -48,7 +48,7 @@ export class ConfigProvider implements IConfigProvider {
     this.config = new HypernetConfig(
       __IFRAME_SOURCE__, // iframeSource
       __INFURA_ID__, // infuraId
-      __DEFAULT_CHAIN_ID__, // governanceChainId
+      ChainId(parseInt(__GOVERNANCE_CHAIN_ID__)), // governanceChainId
       "Hypernet", // Hypernet Protocol Domain for Transfers
       5 * 24 * 60 * 60, // 5 days as the default payment expiration time
       chainProviders, // chainProviders

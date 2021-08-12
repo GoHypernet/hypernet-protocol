@@ -198,7 +198,7 @@ export class AccountsRepository implements IAccountsRepository {
               return ar == routerPublicIdentifier;
             });
 
-            if (existingActiveRouter != null) {
+            if (existingActiveRouter == null) {
               activeRouters.push(routerPublicIdentifier);
               return this.storageUtils
                 .write(this.activeRoutersKey, activeRouters)

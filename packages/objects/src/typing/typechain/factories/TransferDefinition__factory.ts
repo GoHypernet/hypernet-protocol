@@ -12,11 +12,11 @@ export class TransferDefinition__factory {
     address: string,
     signerOrProvider: Signer | Provider,
   ): TransferDefinition {
-    return (new Contract(
+    return new Contract(
       address,
       _abi,
       signerOrProvider,
-    ) as unknown) as TransferDefinition;
+    ) as unknown as TransferDefinition;
   }
 }
 

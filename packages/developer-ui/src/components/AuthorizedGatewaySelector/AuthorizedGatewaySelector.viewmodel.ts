@@ -30,13 +30,12 @@ export class AuthorizedGatewaySelectorViewModel {
     this.selectedAuthorizedGateway = params.selectedAuthorizedGateway;
 
     this.gateways = ko.observable(null);
-    this.authorizedGatewayOptions = ko.observableArray<AuthorizedGatewayOption>();
+    this.authorizedGatewayOptions =
+      ko.observableArray<AuthorizedGatewayOption>();
 
     this.integration.core.onGatewayAuthorized.subscribe((gateway) => {
       const url = gateway.toString();
-      this.authorizedGatewayOptions.push(
-        new AuthorizedGatewayOption(url, url),
-      );
+      this.authorizedGatewayOptions.push(new AuthorizedGatewayOption(url, url));
     });
 
     this.selectedAuthorizedGatewayOption = ko.pureComputed({
@@ -84,9 +83,7 @@ export class AuthorizedGatewaySelectorViewModel {
         for (const keyVal of authorizedGateways) {
           // TODO: Convert the URL to a comercial name
           const url = keyVal[0].toString();
-          authorizedGatewayOptions.push(
-            new AuthorizedGatewayOption(url, url),
-          );
+          authorizedGatewayOptions.push(new AuthorizedGatewayOption(url, url));
         }
 
         this.authorizedGatewayOptions(authorizedGatewayOptions);

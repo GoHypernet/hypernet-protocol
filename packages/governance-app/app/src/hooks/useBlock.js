@@ -18,9 +18,10 @@ const NETWORK_TIMES = new Map([
 export function useBlockTime() {
   const network = useNetwork();
 
-  return useMemo(() => (network ? NETWORK_TIMES.get(network.type) : 5), [
-    network,
-  ]);
+  return useMemo(
+    () => (network ? NETWORK_TIMES.get(network.type) : 5),
+    [network],
+  );
 }
 
 export function useLatestBlock(updateEvery = 1000) {

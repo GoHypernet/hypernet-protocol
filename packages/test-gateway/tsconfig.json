@@ -1,0 +1,24 @@
+{
+  "extends": "../../tsconfig.build.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": "./src/"
+  },
+  "references": [
+    {
+      "path": "../objects"
+    },
+    {
+      "path": "../utils"
+    },
+    {
+      "path": "../gateway-connector"
+    },
+    {
+      "path": "../test-gateway-connector"
+    }
+  ],
+  "include": ["./src/**/*.ts"],
+  "exclude": ["node_modules"]
+}

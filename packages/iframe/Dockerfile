@@ -16,6 +16,7 @@ COPY ./packages/gateway-iframe/package.json /build/packages/gateway-iframe/packa
 COPY ./packages/mobile-integration/package.json /build/packages/mobile-integration/package.json
 COPY ./packages/objects/package.json /build/packages/objects/package.json
 COPY ./packages/test-gateway/package.json /build/packages/test-gateway/package.json
+COPY ./packages/test-gateway-connector/package.json /build/packages/test-gateway-connector/package.json
 COPY ./packages/user-dashboard/package.json /build/packages/user-dashboard/package.json
 COPY ./packages/utils/package.json /build/packages/utils/package.json
 COPY ./packages/web-demo/package.json /build/packages/web-demo/package.json
@@ -60,8 +61,8 @@ ARG CHAIN_ADDRESSES='{ \
     }'
 ENV __CHAIN_ADDRESSES__ $CHAIN_ADDRESSES
 
-ENV DEFAULT_CHAIN_ID=1337
-ARG __DEFAULT_CHAIN_ID__ $DEFAULT_CHAIN_ID
+ARG GOVERNANCE_CHAIN_ID=1337
+ENV __GOVERNANCE_CHAIN_ID__ $GOVERNANCE_CHAIN_ID
 
 ARG NATS_URL=ws://localhost:4221
 ENV __NATS_URL__ $NATS_URL

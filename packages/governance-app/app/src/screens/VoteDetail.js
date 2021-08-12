@@ -46,13 +46,8 @@ function VoteDetail({ vote, onBack, onVote, onExecute }) {
   const { tokenSymbol } = useAppState();
   const connectedAccount = useConnectedAccount();
 
-  const {
-    connectedAccountVote,
-    data,
-    executionTargetData,
-    numData,
-    voteId,
-  } = vote;
+  const { connectedAccountVote, data, executionTargetData, numData, voteId } =
+    vote;
   const { minAcceptQuorum, supportRequired, yea, nay } = numData;
   const { creator, description, metadata, open } = data;
   const quorumProgress = getQuorumProgress(vote);

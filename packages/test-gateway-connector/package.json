@@ -1,0 +1,31 @@
+{
+  "name": "@hypernetlabs/test-gateway-connector",
+  "version": "0.0.1",
+  "description": "Test Gateway Connector",
+  "author": "Charlie Sibbach <charlie@hypernetlabs.io> (https://github.com/HyperCharlie)",
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src",
+    "!dist/test",
+    "!dist/tsconfig.tsbuildinfo"
+  ],
+  "scripts": {
+    "build": "yarn clean && yarn compile && yarn postCompile",
+    "clean": "rimraf dist",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "generate-docs": "npx typedoc --options typedoc.json",
+    "lint": "eslint -c .eslintrc.js \"{src/server, test}/**/*.{js,ts,tsx}\" --quiet",
+    "lint:fix": "eslint -c .eslintrc.js \"{server, test}/**/*.{js,ts,tsx}\" --quiet --fix",
+    "postCompile": "webpack --config webpack.config.js",
+    "test": "mocha -r ts-node/register test/**/*.ts --exit",
+    "test:debug": "mocha -r ts-node/register --inspect-brk test/**/*.ts --exit"
+  },
+  "dependencies": {
+    "@hypernetlabs/gateway-connector": "^0.0.1",
+    "@hypernetlabs/objects": "^0.0.1",
+    "ethers": "^5.0.31",
+    "neverthrow": "^4.1.1",
+    "rxjs": "^6.6.6"
+  }
+}
