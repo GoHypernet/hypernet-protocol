@@ -54,7 +54,7 @@
     "start": "docker-compose up user-dashboard",
     "dev": "docker-compose --file docker-compose.dev.yaml up --detach && lerna run dev",
     "dev2": "lerna run dev",
-    "test": "cd packages/hypernet-core && yarn test"
+    "test": "lerna run test"
   },
   "husky": {
     "hooks": {

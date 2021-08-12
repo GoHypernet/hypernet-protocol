@@ -1,4 +1,8 @@
-import { IHypernetCore, GatewayUrl, RenderError } from "@hypernetlabs/objects";
+import {
+  IHypernetIFrameProxy,
+  GatewayUrl,
+  RenderError,
+} from "@hypernetlabs/objects";
 import MainContainer from "@web-ui/containers/MainContainer";
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import {
@@ -28,6 +32,7 @@ import {
   METAMASK_WARNING_ID_SELECTOR,
   PUBLIC_IDENTIFIER_WIDGET_ID_SELECTOR,
   WITHDRAW_WIDGET_ID_SELECTOR,
+  STATE_CHANNELS_WIDGET_ID_SELECTOR,
 } from "@web-ui/constants";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
@@ -39,17 +44,18 @@ import WithdrawWidget from "@web-ui/widgets/WithdrawWidget";
 import LinksWidget from "@web-ui/widgets/LinksWidget";
 import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
 import PublicIdentifierWidget from "@web-ui/widgets/PublicIdentifierWidget";
+import StateChannelsWidget from "@web-ui/widgets/StateChannelsWidget";
 
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
-  protected coreInstance: IHypernetCore;
+  protected coreInstance: IHypernetIFrameProxy;
   protected viewUtils: IViewUtils;
   protected dateUtils: IDateUtils;
-  constructor(_coreInstance?: IHypernetCore) {
+  constructor(_coreInstance?: IHypernetIFrameProxy) {
     if (_coreInstance) {
       this.coreInstance = _coreInstance;
     } else if (window.hypernetCoreInstance) {
-      this.coreInstance = window.hypernetCoreInstance as IHypernetCore;
+      this.coreInstance = window.hypernetCoreInstance as IHypernetIFrameProxy;
     } else {
       throw new Error("core instance is required");
     }
@@ -275,6 +281,23 @@ export default class HypernetWebUI implements IHypernetWebUI {
         ),
         this._generateDomElement(
           config?.selector || PUBLIC_IDENTIFIER_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderStateChannelsWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <StateChannelsWidget {...config} />,
+          config?.showInModal,
+        ),
+        this._generateDomElement(
+          config?.selector || STATE_CHANNELS_WIDGET_ID_SELECTOR,
         ),
       );
     };

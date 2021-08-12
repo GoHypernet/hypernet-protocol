@@ -50,6 +50,7 @@ export interface IHypernetWebUI {
   renderPublicIdentifierWidget(
     params?: IRenderParams,
   ): Result<void, RenderError>;
+  renderStateChannelsWidget(params?: IRenderParams): Result<void, RenderError>;
   renderPaymentWidget(
     params?: IRenderPaymentWidgetParams,
   ): Result<void, RenderError>;

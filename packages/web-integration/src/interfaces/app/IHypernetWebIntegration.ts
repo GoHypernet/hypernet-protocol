@@ -1,9 +1,13 @@
-import { IHypernetCore, GatewayUrl } from "@hypernetlabs/objects";
+import {
+  IHypernetCore,
+  GatewayUrl,
+  IHypernetIFrameProxy,
+} from "@hypernetlabs/objects";
 import { IHypernetWebUI } from "@hypernetlabs/web-ui";
 import { ResultAsync } from "neverthrow";
 
 export interface IHypernetWebIntegration {
-  core: IHypernetCore;
+  core: IHypernetIFrameProxy;
   webUIClient: IHypernetWebUI;
   getReady: () => ResultAsync<IHypernetCore, Error>;
   displayGatewayIFrame(gatewayUrl: GatewayUrl): void;

@@ -26,6 +26,8 @@ import {
   MessagingError,
   RouterChannelUnknownError,
   ActiveStateChannel,
+  IHypernetIFrameProxy,
+  IUIEvents,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -33,7 +35,7 @@ import { Subject } from "rxjs";
 
 export default class HypernetIFrameProxy
   extends ParentProxy
-  implements IHypernetCore
+  implements IHypernetIFrameProxy
 {
   protected coreInitialized = false;
   protected isInControl = false;
@@ -75,6 +77,9 @@ export default class HypernetIFrameProxy
     this.onCoreIFrameCloseRequested = new Subject();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
+    this.UIEvents = {
+      onSelectedStateChannelChanged: new Subject<ActiveStateChannel>(),
+    };
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -470,4 +475,5 @@ export default class HypernetIFrameProxy
   public onCoreIFrameCloseRequested: Subject<void>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
+  public UIEvents: IUIEvents;
 }

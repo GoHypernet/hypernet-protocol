@@ -32,7 +32,7 @@ export const SelectInput: React.FC<SelectInputProps> = (
 
   return (
     <Box className={classes.wrapper}>
-      <label className={classes.selectLabel}>{label}</label>
+      {label && <label className={classes.selectLabel}>{label}</label>}
       <Box className={classes.select}>
         <select
           className={classes.selectText}
