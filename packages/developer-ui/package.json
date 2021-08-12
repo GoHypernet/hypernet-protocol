@@ -39,7 +39,7 @@
     "compile": "tsc --build && cd ../.. && yarn alias",
     "alias": "tsc-alias",
     "postCompile": "webpack",
-    "test": "echo \"Error: run tests from root\" && exit 0",
+    "test": "echo \"No tests specified yet\" && exit 0",
     "test-integration": "cucumber-js --require-module ts-node/register --require-module tsconfig-paths/register --require 'test/integration/**/*.ts' test/integration/features/**/*.feature"
   },
   "types": "dist/index.d.ts",

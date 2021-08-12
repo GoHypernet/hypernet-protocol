@@ -34,7 +34,7 @@
     "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",
     "generate-docs": "npx typedoc --options typedoc.json",
     "prepare": "yarn build",
-    "test": "yarn compile && yarn test:ci",
+    "test": "yarn build && yarn test:ci",
     "test-integration": "cucumber-js --require-module ts-node/register --require-module tsconfig-paths/register --require 'test/integration/**/*.ts' test/integration/features/**/*.feature",
     "test:ci": "jest --runInBand --coverage --passWithNoTests",
     "test:watch": "jest --watch --color --detectOpenHandles",

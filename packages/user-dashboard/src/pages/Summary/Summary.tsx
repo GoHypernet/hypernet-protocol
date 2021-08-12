@@ -31,8 +31,15 @@ const Summary: React.FC = () => {
       .mapErr(handleError);
 
     hypernetWebIntegration.webUIClient
-      .renderPublicIdentifierWidget({
+      .renderStateChannelsWidget({
         selector: "public-identifier",
+        includeBoxWrapper: true,
+      })
+      .mapErr(handleError);
+
+    hypernetWebIntegration.webUIClient
+      .renderPublicIdentifierWidget({
+        selector: "state-channels",
         includeBoxWrapper: true,
       })
       .mapErr(handleError);
@@ -41,8 +48,13 @@ const Summary: React.FC = () => {
   return (
     <PageWrapper label="SUMMARY">
       <Grid container spacing={3}>
-        <Grid item xs={12} spacing={3}>
+        <Grid item xs={12}>
           <Box id="public-identifier"></Box>
+        </Grid>
+      </Grid>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Box id="state-channels"></Box>
         </Grid>
       </Grid>
       <Grid container spacing={3}>
@@ -51,10 +63,10 @@ const Summary: React.FC = () => {
         </Grid>
         <Grid item xs={4}>
           <Grid container spacing={3}>
-            <Grid item xs={12} spacing={3}>
+            <Grid item xs={12}>
               <Box id="balances-wrapper"></Box>
             </Grid>
-            <Grid item xs={12} spacing={3}>
+            <Grid item xs={12}>
               <Box id="gateway-list-wrapper"></Box>
             </Grid>
           </Grid>

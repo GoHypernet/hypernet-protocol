@@ -43,10 +43,7 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <StoreProvider
-      hypernetCore={integration.core}
-      hypernetWebIntegration={integration}
-    >
+    <StoreProvider hypernetWebIntegration={integration}>
       <Box className={classes.appWrapper}>
         <BrowserRouter>
           <Header />
