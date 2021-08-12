@@ -21,7 +21,6 @@ describe("ConfigProvider tests", () => {
 
     // Act
     const result = await configProvider.getConfig();
-    console.log(result);
 
     // Assert
     expect(result).toBeDefined();
