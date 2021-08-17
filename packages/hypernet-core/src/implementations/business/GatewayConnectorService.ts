@@ -206,8 +206,6 @@ export class GatewayConnectorService implements IGatewayConnectorService {
           routerPublicIdentifiers[
             Math.floor(Math.random() * routerPublicIdentifiers.length)
           ];
-        console.log("routerPublicIdentifiers",routerPublicIdentifiers)
-        console.log("routerPublicIdentifier",routerPublicIdentifier)
 
         return this.assureGatewayAuthorizedByRouter(
           gatewayUrl,
