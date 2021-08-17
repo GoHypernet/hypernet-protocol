@@ -97,7 +97,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
             this.logUtils.debug(
               `Gateway Connector ${proxy.gatewayUrl} requested a state channel with chain ${request.chainId}`,
             );
-
+              console.log("requeest", request);
             this.gatewayConnectorService
               .ensureStateChannel(
                 proxy.gatewayUrl,

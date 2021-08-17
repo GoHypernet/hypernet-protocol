@@ -19,11 +19,7 @@ const BalancesSummary: React.FC = () => {
 
   return (
     <PageWrapper label="BALANCES SUMMARY">
-      <Grid container spacing={3}>
-        <Grid item>
-          <Box id="balances-summary-wrapper"></Box>
-        </Grid>
-      </Grid>
+      <Box id="balances-summary-wrapper"></Box>
     </PageWrapper>
   );
 };

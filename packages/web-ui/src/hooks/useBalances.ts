@@ -31,10 +31,15 @@ interface IState {
   preferredPaymentToken?: ITokenSelectorOption;
 }
 
+interface IBalancesWithStateChannel {
+  balances: Balances;
+  activeStateChannel: ActiveStateChannel;
+}
+
 type Action =
   | { type: EActionTypes.FETCHING }
   | { type: EActionTypes.FETCHED; payload: Balances }
-  | { type: EActionTypes.STATE_CHANNEL_CHANGED; payload: ActiveStateChannel }
+  | { type: EActionTypes.STATE_CHANNEL_CHANGED; payload: IBalancesWithStateChannel }
   | { type: EActionTypes.ERROR; payload: string }
   | {
       type: EActionTypes.TOKEN_SELECTED;
@@ -43,7 +48,7 @@ type Action =
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function useBalances() {
-  const { coreProxy, UIEvents } = useStoreContext();
+  const { coreProxy, UIData } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const alert = useAlert();
 
@@ -105,6 +110,10 @@ export function useBalances() {
     }
   }, initialState);
 
+  // useEffect(() => {
+  //   console.log("STATE CHANNEL CHANGED !")
+  // }, [UIData.getSelectedStateChannel().channelAddress]);
+
   useEffect(() => {
     let cancelRequest = false;
 
@@ -114,12 +123,38 @@ export function useBalances() {
       setLoading(true);
       coreProxy
         ?.getBalances()
-        .map((balance) => {
+        .map((_balances) => {
           setLoading(false);
           dispatch({
             type: EActionTypes.FETCHED,
-            payload: balance,
+            payload: _balances,
           });
+
+          const selectedStateChannel = UIData.getSelectedStateChannel();
+
+          if(selectedStateChannel == null || selectedStateChannel.channelAddress == null) {
+            coreProxy.getActiveStateChannels().map((activeStateChannels) => {
+              dispatch({
+                type: EActionTypes.STATE_CHANNEL_CHANGED,
+                payload: {
+                  balances: _balances,
+                  activeStateChannel: activeStateChannels[0],
+                },
+              });
+            })
+          }
+          else {
+            dispatch({
+              type: EActionTypes.STATE_CHANNEL_CHANGED,
+              payload: {
+                balances: _balances,
+                activeStateChannel: selectedStateChannel,
+              },
+            });
+          }
+
+          
+
         })
         .mapErr((error) => {
           setLoading(false);
@@ -142,24 +177,24 @@ export function useBalances() {
       },
     });
 
-    UIEvents.onSelectedStateChannelChanged.subscribe({
+    UIData.onSelectedStateChannelChanged.subscribe({
       next: (activeStateChannel) => {
         if (cancelRequest) return;
-        coreProxy
-          ?.getBalances()
-          .map((balance) => {
-            setLoading(false);
-            dispatch({
-              type: EActionTypes.FETCHED,
-              payload: balance,
-            });
-          })
-          .map(() => {
-            dispatch({
-              type: EActionTypes.STATE_CHANNEL_CHANGED,
-              payload: activeStateChannel,
-            });
+        coreProxy?.getBalances().map((balances) => {
+          setLoading(false);
+          dispatch({
+            type: EActionTypes.FETCHED,
+            payload: balances,
           });
+
+          dispatch({
+            type: EActionTypes.STATE_CHANNEL_CHANGED,
+            payload: {
+              balances,
+              activeStateChannel,
+            },
+          });
+        });
       },
     });
 
@@ -191,11 +226,11 @@ export function useBalances() {
   }
 
   function prepareBalancesByChannelAddress(
-    stateChannel: ActiveStateChannel,
+    balancesWithStateChannel: IBalancesWithStateChannel,
   ): AssetBalance[] {
-    return state.balances.filter(
+    return balancesWithStateChannel.balances.assets.filter(
       (assetBalance) =>
-        assetBalance.channelAddress === stateChannel.channelAddress,
+        assetBalance.channelAddress === balancesWithStateChannel.activeStateChannel.channelAddress,
     );
   }
 

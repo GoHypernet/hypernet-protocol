@@ -36,11 +36,14 @@ export class RouterRepository implements IRouterRepository {
       this.configProvider.getConfig(),
     ])
       .andThen((vals) => {
+        console.log("getRouterDetails publicIdentifiers",publicIdentifiers)
         const [provider, config] = vals;
 
         const liquidityRegistryAddress =
           config.chainAddresses[config.governanceChainId]
             ?.liquidityRegistryAddress;
+        console.log("config", config);
+        console.log("liquidityRegistryAddress", liquidityRegistryAddress);
         if (liquidityRegistryAddress == null) {
           return errAsync<RouterDetails[], BlockchainUnavailableError>(
             new BlockchainUnavailableError(
@@ -55,6 +58,8 @@ export class RouterRepository implements IRouterRepository {
           provider,
         );
 
+        console.log("liquidityRegistryContract", liquidityRegistryContract);
+
         return ResultUtils.combine(
           publicIdentifiers.map((publicIdentifier) => {
             return ResultAsync.fromPromise(
@@ -68,6 +73,7 @@ export class RouterRepository implements IRouterRepository {
                 );
               },
             ).map((registryString) => {
+              console.log("registryString", registryString);
               const registryEntry = JSON.parse(
                 registryString,
               ) as IRouterDetailsEntry;

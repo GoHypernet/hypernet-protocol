@@ -228,7 +228,7 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
     ])
       .andThen((vals) => {
         const [provider, config] = vals;
-
+        console.log("gatewayUrl", gatewayUrl);
         const gatewayRegistryAddress =
           config.chainAddresses[config.governanceChainId]
             ?.gatewayRegistryAddress;
@@ -257,9 +257,11 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
         );
       })
       .map((registryString) => {
+        console.log("registryString", registryString);
         const registryEntry = JSON.parse(
           registryString,
         ) as IGatewayRegistryEntry;
+        console.log("registryEntry", registryEntry);
 
         return new GatewayRegistrationInfo(
           gatewayUrl,
