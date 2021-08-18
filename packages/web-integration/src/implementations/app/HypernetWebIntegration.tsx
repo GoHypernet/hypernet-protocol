@@ -1,7 +1,7 @@
 import {
   IHypernetCore,
   GatewayUrl,
-  IUIEvents,
+  IUIData,
   ActiveStateChannel,
 } from "@hypernetlabs/objects";
 import HypernetWebUI, { IHypernetWebUI } from "@hypernetlabs/web-ui";
@@ -18,10 +18,11 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   protected getReadyTimeout: number = 15 * 1000;
   protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
   protected getReadyResolved = false;
+  protected selectedStateChannel: ActiveStateChannel = {} as ActiveStateChannel;
 
   public webUIClient: IHypernetWebUI;
   public core: HypernetIFrameProxy;
-  public UIEvents: IUIEvents;
+  public UIData: IUIData;
 
   constructor(iframeURL?: string) {
     this.iframeURL = iframeURL || this.iframeURL;
@@ -33,14 +34,19 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       "hypernet-core-iframe",
     );
 
-    this.UIEvents = {
+    this.UIData = {
       onSelectedStateChannelChanged: new Subject<ActiveStateChannel>(),
+      getSelectedStateChannel: () => this.selectedStateChannel,
     };
+    
+    this.UIData.onSelectedStateChannelChanged.subscribe((stateChannel) => {
+      this.selectedStateChannel = stateChannel;
+    });
 
     if (window.hypernetWebUIInstance) {
       this.webUIClient = window.hypernetWebUIInstance as IHypernetWebUI;
     } else {
-      this.webUIClient = new HypernetWebUI(this.core, this.UIEvents);
+      this.webUIClient = new HypernetWebUI(this.core, this.UIData);
     }
 
     this.core.onGatewayIFrameDisplayRequested.subscribe((gatewayUrl) => {

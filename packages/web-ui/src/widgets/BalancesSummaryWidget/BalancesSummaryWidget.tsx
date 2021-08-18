@@ -24,39 +24,36 @@ const BalancesSummaryWidget: React.FC<IBalancesSummaryWidget> = ({
   const channelAddresses = [...balancesByChannelAddresses.keys()];
 
   return (
-    <CustomBox
-      className={!includeBoxWrapper ? classes.balancesWrapper : ""}
-      label={!noLabel ? "YOUR BALANCES" : undefined}
-      bodyStyle={bodyStyle}
-      hasEmptyState={channelAddresses.length === 0 && !loading}
-      emptyState={
-        <EmptyState
-          info="You don't have any state channels yet, you need to authorize a
+    <>
+      {channelAddresses.map((channelAddress) => (
+        <CustomBox
+          className={!includeBoxWrapper ? classes.balancesWrapper : ""}
+          label={
+            !noLabel
+              ? `Your Balances for State Channel Address: ${channelAddress}`
+              : undefined
+          }
+          bodyStyle={bodyStyle}
+          hasEmptyState={channelAddresses.length === 0 && !loading}
+          emptyState={
+            <EmptyState
+              info="You don't have any state channels yet, you need to authorize a
           gateway first."
-        />
-      }
-    >
-      <Grid container spacing={3}>
-        {channelAddresses.map((channelAddress) => (
-          <Grid item xs={4}>
-            <Box>
-              <Box>{channelAddress}</Box>
-              {balancesByChannelAddresses.get(channelAddress) ? (
-                <Box>
-                  <BalanceList
-                    balances={balancesByChannelAddresses.get(channelAddress)}
-                    viewUtils={viewUtils}
-                    noBorder={includeBoxWrapper}
-                  />
-                </Box>
-              ) : (
-                <Box>No balances yet for this channel address</Box>
-              )}
-            </Box>
-          </Grid>
-        ))}
-      </Grid>
-    </CustomBox>
+            />
+          }
+        >
+          {balancesByChannelAddresses.get(channelAddress) ? (
+            <BalanceList
+              balances={balancesByChannelAddresses.get(channelAddress)}
+              viewUtils={viewUtils}
+              noBorder={includeBoxWrapper}
+            />
+          ) : (
+            <Box>No balances yet for this channel address</Box>
+          )}
+        </CustomBox>
+      ))}
+    </>
   );
 };
 

@@ -104,7 +104,42 @@ class TestGatewayConnector implements IGatewayConnector {
       <div style="text-align: center; display: flex; justify-content: center; flex-direction: column; background-color: #ffffff;">
         <img src="https://res.cloudinary.com/dqueufbs7/image/upload/v1614648372/images/Screen_Shot_2021-03-02_at_04.14.05.png" width="100%" />
         <h2>Galileo gateway connector</h2>
-        <a onclick="window.connector.sendPayment()">Send Payment</a>
+        <div>
+        <style>
+          .input {
+            width: 200px;
+          }
+          .button {
+            width: 210px;
+          }
+        </style>
+        <div>
+          <label for="chainId">Chain ID</label><br />
+          <input
+            type="text"
+            id="chainId"
+            name="chainId"
+            value=""
+            class="input"
+          /><br />
+          <br />
+          <label for="routerPublicIdentifier">Router Public Identifier</label><br />
+          <input
+            type="text"
+            id="routerPublicIdentifier"
+            name="routerPublicIdentifier"
+            value=""
+            class="input"
+          />
+          <br />
+          <br />
+          <button class="button" onclick="window.connector.stateChannelRequested.next({chainId:document.getElementById('chainId').value,routerPublicIdentifiers:[document.getElementById('routerPublicIdentifier').value]})">Save</button>
+        </div>
+        <br />
+        <br />
+        <br />
+        <button class="button" onclick="window.connector.sendPayment()">Send Payment</button>
+      </div>
       </div>
     `;
     window.document.body.appendChild(element);

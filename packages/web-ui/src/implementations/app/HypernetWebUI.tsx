@@ -1,4 +1,4 @@
-import { IHypernetCore, IUIEvents, RenderError } from "@hypernetlabs/objects";
+import { IHypernetCore, IUIData, RenderError } from "@hypernetlabs/objects";
 import MainContainer from "@web-ui/containers/MainContainer";
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import {
@@ -47,10 +47,10 @@ import StateChannelsWidget from "@web-ui/widgets/StateChannelsWidget";
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
   protected coreInstance: IHypernetCore;
-  protected UIEvents: IUIEvents;
+  protected UIData: IUIData;
   protected viewUtils: IViewUtils;
   protected dateUtils: IDateUtils;
-  constructor(_coreInstance: IHypernetCore, _UIEvents: IUIEvents) {
+  constructor(_coreInstance: IHypernetCore, _UIData: IUIData) {
     if (_coreInstance) {
       this.coreInstance = _coreInstance;
     } else if (window.hypernetCoreInstance) {
@@ -62,7 +62,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     // This is to cache web ui instance in window so it may prevent from having multiple web ui instances
     window.hypernetWebUIInstance = HypernetWebUI.instance;
 
-    this.UIEvents = _UIEvents;
+    this.UIData = _UIData;
     this.viewUtils = new ViewUtils();
     this.dateUtils = new DateUtils();
   }
@@ -100,7 +100,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     return (
       <StoreProvider
         coreProxy={this.coreInstance}
-        UIEvents={this.UIEvents}
+        UIData={this.UIData}
         viewUtils={this.viewUtils}
         dateUtils={this.dateUtils}
       >

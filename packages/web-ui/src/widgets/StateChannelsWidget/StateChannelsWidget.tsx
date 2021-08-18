@@ -23,7 +23,7 @@ const StateChannelsWidget: React.FC<IStateChannelsWidget> = ({
   includeBoxWrapper,
   bodyStyle,
 }: IStateChannelsWidget) => {
-  const { coreProxy, UIEvents } = useStoreContext();
+  const { coreProxy, UIData } = useStoreContext();
   const [stateChannels, setStateChannels] = useState<ActiveStateChannel[]>([]);
   const [selectedStateChannelAddress, setSelectedStateChannelAddress] =
     useState<EthereumAddress>(EthereumAddress(""));
@@ -51,7 +51,7 @@ const StateChannelsWidget: React.FC<IStateChannelsWidget> = ({
       setStateChannels(_stateChannels);
       if (_stateChannels[0] != null) {
         setSelectedStateChannelAddress(_stateChannels[0].channelAddress);
-        UIEvents.onSelectedStateChannelChanged.next(_stateChannels[0]);
+        UIData.onSelectedStateChannelChanged.next(_stateChannels[0]);
       }
     });
   }, []);
@@ -62,7 +62,7 @@ const StateChannelsWidget: React.FC<IStateChannelsWidget> = ({
     const val = event.target.value;
     // Publish an event to other widgets
     setSelectedStateChannelAddress(val);
-    UIEvents.onSelectedStateChannelChanged.next(
+    UIData.onSelectedStateChannelChanged.next(
       stateChannels.find((stateChannel) => stateChannel.channelAddress === val),
     );
   };

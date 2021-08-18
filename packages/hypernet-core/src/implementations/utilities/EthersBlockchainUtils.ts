@@ -228,7 +228,6 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
     ])
       .andThen((vals) => {
         const [provider, config] = vals;
-
         const gatewayRegistryAddress =
           config.chainAddresses[config.governanceChainId]
             ?.gatewayRegistryAddress;
