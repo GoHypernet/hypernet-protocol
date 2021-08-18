@@ -39,7 +39,7 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
   public verifyTypedData(
     domain: TypedDataDomain,
     types: Record<string, Array<TypedDataField>>,
-    value: Record<string, any>,
+    value: Record<string, unknown>,
     signature: Signature,
   ): EthereumAddress {
     return EthereumAddress(
@@ -57,7 +57,10 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
       return ResultAsync.fromPromise(
         tokenContract.transfer(channelAddress, amount),
         (err) => {
-          return err as BlockchainUnavailableError;
+          return new BlockchainUnavailableError(
+            "Unable to complete an ERC20 token transfer",
+            err,
+          );
         },
       );
     });
@@ -77,7 +80,7 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
       return ResultAsync.fromPromise(
         testTokenContract.mint(to, amount) as Promise<TransactionResponse>,
         (e) => {
-          return e as BlockchainUnavailableError;
+          return new BlockchainUnavailableError("Unable to mint test token", e);
         },
       );
     });
@@ -102,7 +105,10 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
         ResultAsync.fromPromise(
           messageTransferContract.ResolverEncoding() as Promise<HexString>,
           (e) => {
-            return e as BlockchainUnavailableError;
+            return new BlockchainUnavailableError(
+              "Unable to retrieve the ResolverEncoding from the message transfer contract",
+              e,
+            );
           },
         ),
 

@@ -12,11 +12,11 @@ import { createDefinition, publishSchema } from "@ceramicstudio/idx-tools";
 import {
   PersistenceError,
   BlockchainUnavailableError,
-  EthereumAddress,
   AuthorizedGatewaysSchema,
   HypernetConfig,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { InitializedHypernetContext } from "@interfaces/objects";
 import { Resolver, ResolverRegistry } from "did-resolver";
 import { DID } from "dids";
 import { okAsync, ResultAsync, errAsync } from "neverthrow";
@@ -46,22 +46,16 @@ export class CeramicUtils implements ICeramicUtils {
     protected logUtils: ILogUtils,
   ) {}
 
-  private _initialize(): ResultAsync<
-    void,
-    PersistenceError | BlockchainUnavailableError
-  > {
+  private _initialize(): ResultAsync<void, PersistenceError> {
     if (this.isAuthenticated === true) {
       return okAsync(undefined);
     }
     return this._authenticateUser();
   }
 
-  private _authenticateUser(): ResultAsync<
-    void,
-    PersistenceError | BlockchainUnavailableError
-  > {
-    return this.contextProvider.getInitializedContext().andThen((context) => {
-      return this._setup().andThen(({ config, ceramic, threeIdResolver }) => {
+  private _authenticateUser(): ResultAsync<void, PersistenceError> {
+    return this._setup().andThen(
+      ({ config, ceramic, threeIdResolver, context }) => {
         return this._getDidProvider().andThen((didProvider) => {
           ceramic.setDID(
             new DID({
@@ -104,8 +98,8 @@ export class CeramicUtils implements ICeramicUtils {
               return new PersistenceError("Storage authentication failed", e);
             });
         });
-      });
-    });
+      },
+    );
   }
 
   // This is used to create a difinition derived from a schema, and it shouldn't be called in run time
@@ -226,22 +220,19 @@ export class CeramicUtils implements ICeramicUtils {
       config: HypernetConfig;
       ceramic: CeramicApi;
       threeIdResolver: ResolverRegistry;
+      context: InitializedHypernetContext;
     },
     PersistenceError
   > {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
+      this.contextProvider.getInitializedContext(),
       this.blockchainProvider.getEIP1193Provider(),
-      this._getAdresses(),
     ]).andThen((vals) => {
-      const [config, provider, addresses] = vals;
+      const [config, context, provider] = vals;
 
       this.ceramic = new CeramicClient(config.ceramicNodeUrl);
-      // this.authProvider = new EthereumAuthProvider(provider, addresses[0]);
-      this.authProvider = new EthereumAuthProvider(
-        window.ethereum,
-        addresses[0],
-      );
+      this.authProvider = new EthereumAuthProvider(provider, context.account);
       this.threeIdConnect = new ThreeIdConnect();
       this.threeIdResolver = ThreeIdResolver.getResolver(this.ceramic);
       this.didResolver = new Resolver(this.threeIdResolver);
@@ -249,19 +240,7 @@ export class CeramicUtils implements ICeramicUtils {
         config,
         ceramic: this.ceramic,
         threeIdResolver: this.threeIdResolver,
-      });
-    });
-  }
-
-  private _getAdresses(): ResultAsync<
-    EthereumAddress[],
-    BlockchainUnavailableError
-  > {
-    return this.blockchainProvider.getProvider().andThen((provider) => {
-      return ResultAsync.fromPromise(provider.listAccounts(), (e) => {
-        return e as BlockchainUnavailableError;
-      }).map(async (addresses) => {
-        return addresses.map((val) => EthereumAddress(val));
+        context,
       });
     });
   }

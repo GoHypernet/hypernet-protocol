@@ -4,7 +4,6 @@ import {
   EthereumAddress,
   Signature,
   VectorError,
-  HypernetConfig,
 } from "@hypernetlabs/objects";
 import {
   ILogUtils,
@@ -46,82 +45,87 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
     if (this.browserNodeResult != null) {
       return this.browserNodeResult;
     }
-    let config: HypernetConfig;
-    let signer: ethers.providers.JsonRpcSigner;
-    let account: string;
 
     this.browserNodeResult = ResultUtils.combine([
       this.configProvider.getConfig(),
       this.blockchainProvider.getSigner(),
       this.contextProvider.getAccount(),
       this.browserNodeFactory.factoryBrowserNode(),
-    ])
-      .andThen((vals) => {
-        [config, signer, account, this.browserNode] = vals;
+    ]).andThen((vals) => {
+      const [config, signer, account, browserNode] = vals;
+      this.browserNode = browserNode;
 
-        // Check if the user has a signature in local storage for this account
-        const storedSignature = this.localStorageUtils.getSessionItem(
-          `account-${account}-signature`,
+      // Check if the user has a signature in local storage for this account
+      const storedSignature = this.localStorageUtils.getSessionItem(
+        `account-${account}-signature`,
+      );
+
+      let signatureResult: ResultAsync<string, BlockchainUnavailableError>;
+
+      if (storedSignature != null) {
+        signatureResult = okAsync<string, BlockchainUnavailableError>(
+          storedSignature,
         );
+      }
 
-        if (storedSignature != null) {
-          return okAsync<string[], BlockchainUnavailableError>([
-            account,
-            storedSignature,
-          ]);
-        }
+      signatureResult = ResultAsync.fromPromise(
+        signer.signMessage(NonEIP712Message),
+        (e) => {
+          return e as BlockchainUnavailableError;
+        },
+      );
 
-        return ResultUtils.combine([
-          ResultAsync.fromPromise(signer.getAddress(), (e) => {
-            return e as BlockchainUnavailableError;
-          }),
-          ResultAsync.fromPromise(signer.signMessage(NonEIP712Message), (e) => {
-            return e as BlockchainUnavailableError;
-          }),
-        ]);
-      })
-      .andThen((vals) => {
-        const [address, signature] = vals;
+      return signatureResult
+        .andThen((signature) => {
+          const sigAddress = ethers.utils.verifyMessage(
+            NonEIP712Message,
+            signature,
+          );
 
-        // Store the signature so you don't have to sign again
-        this.localStorageUtils.setSessionItem(
-          `account-${address}-signature`,
-          signature,
-        );
+          this.logUtils.debug(`sigAddress = ${sigAddress}`);
 
-        return this.browserNode.init(
-          Signature(signature),
-          EthereumAddress(account),
-        );
-      })
-      .orElse((e) => {
-        const shouldAttemptRestore = (
-          (e as any).context?.validationError ?? ""
-        ).includes("Channel is already setup");
+          // Store the signature so you don't have to sign again
+          this.localStorageUtils.setSessionItem(
+            `account-${account}-signature`,
+            signature,
+          );
+          this.logUtils.debug(
+            `Initializing browser node with account ${account} and signature ${signature}`,
+          );
+          return this.browserNode.init(
+            Signature(signature),
+            EthereumAddress(account),
+          );
+        })
+        .orElse((e) => {
+          const shouldAttemptRestore = (
+            (e as any).context?.validationError ?? ""
+          ).includes("Channel is already setup");
 
-        if (shouldAttemptRestore && this.browserNode != null) {
-          return this.browserNode
-            .getStateChannelByParticipants(
-              config.routerPublicIdentifier,
-              config.chainId,
-            )
-            .andThen((channelState) => {
-              if (channelState == null && this.browserNode != null) {
-                return this.browserNode.restoreState(
-                  config.routerPublicIdentifier,
-                  config.chainId,
-                );
-              }
-              return okAsync<void, VectorError>(undefined);
-            });
-        } else {
-          return errAsync(e);
-        }
-      })
-      .map(() => {
-        this.logUtils.debug("Successfully started Vector browser node");
-        return this.browserNode;
-      });
+          if (shouldAttemptRestore && this.browserNode != null) {
+            return this.browserNode
+              .getStateChannelByParticipants(
+                config.routerPublicIdentifier,
+                config.chainId,
+              )
+              .andThen((channelState) => {
+                if (channelState == null && this.browserNode != null) {
+                  return this.browserNode.restoreState(
+                    config.routerPublicIdentifier,
+                    config.chainId,
+                  );
+                }
+                return okAsync<void, VectorError>(undefined);
+              });
+          } else {
+            return errAsync(e);
+          }
+        })
+        .map(() => {
+          this.logUtils.debug("Successfully started Vector browser node");
+          return this.browserNode;
+        });
+    });
 
     return this.browserNodeResult;
   }

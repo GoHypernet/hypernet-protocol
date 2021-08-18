@@ -58,10 +58,7 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
     }
     this.getReadyResult = this.core
       .activate()
-      .andThen(() => {
-        return this.core.getEthereumAccounts();
-      })
-      .andThen((accounts) => this.core.initialize(accounts[0]))
+      .andThen(() => this.core.initialize())
       .map(() => {
         // This is for web ui to use if there is no core instance passed in web ui constructor
         window.hypernetCoreInstance = this.core;
