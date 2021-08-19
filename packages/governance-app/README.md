@@ -15,6 +15,11 @@ would attempt to load a malicious Gateway iframe instance into the user's browse
 Gateways can also be removed from the Hypernet Gateway registry through a proposal that will delete their registration 
 from the public registry. 
 
+NOTE:
+
+Everything required to start building UI components is available throught the HypernetGovernor contract. However, I still
+need to add the gateway and liquidity provider mappings and expose the functions required to update them. 
+
 ## Running Contract Tests
 
 ```shell
