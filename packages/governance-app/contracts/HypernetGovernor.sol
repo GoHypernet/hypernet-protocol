@@ -15,6 +15,12 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
         GovernorTimelockControl(_timelock)
     {}
 
+    // mapping for retrieving gateways
+    mapping (string => string) private gateways;
+
+    // mapping for retrieving liquidity providers
+    mapping (string => string) private liquidityProviders;
+
     function votingDelay() public pure override returns (uint256) {
         //return 6575; // 1 day (time is in seconds)
         return 0;
@@ -27,6 +33,38 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
     function proposalThreshold() public pure override returns (uint256) {
         // number of votes required to in order to submit a successful proposal
         return 0;
+    }
+
+    // lookup gateway signature and payload hash via the gateway URL
+    function getGateway(string memory _gatewayurl) 
+        public 
+        view 
+        returns (string memory) 
+    {
+      return gateways[_gatewayurl];
+    }
+
+    // lookup liquidity provider supported tokens via LPs public identifier
+    function getLP(string memory _publicidentifier) 
+        public 
+        view 
+        returns (string memory) 
+    {
+      return liquidityProviders[_publicidentifier];
+    }
+
+    function setGateway(string memory _gatewayurl, string memory _text) 
+        public 
+        onlyGovernance()
+    {
+      gateways[_gatewayurl] = _text;
+    }
+
+    function setLP(string memory _publicidentifier, string memory _text) 
+        public 
+        onlyGovernance()
+    {
+      liquidityProviders[_publicidentifier] = _text;
     }
 
     // The functions below are overrides required by Solidity.
