@@ -11,9 +11,8 @@ import { InitializedHypernetContext } from "@interfaces/objects";
 import {
   IContextProvider,
   IContextProviderType,
-  ITimeUtils,
-  ITimeUtilsType,
 } from "@interfaces/utilities";
+import { ITimeUtils, ITimeUtilsType } from "@hypernetlabs/utils";
 
 @injectable()
 export class ControlService implements IControlService {
@@ -57,9 +56,9 @@ export class ControlService implements IControlService {
       })
       .map(() => {
         // We will continue to send control claims every 5 minutes
-        this.timeout = (setInterval(() => {
+        this.timeout = setInterval(() => {
           // this.messagingRepo.sendControlClaim(controlClaim);
-        }, this.claimPeriod) as unknown) as NodeJS.Timeout;
+        }, this.claimPeriod) as unknown as NodeJS.Timeout;
 
         // Notify the world.
         context.onControlClaimed.next(controlClaim);
@@ -99,14 +98,14 @@ export class ControlService implements IControlService {
         // and take control
         const now = new Date().getTime();
 
-        this.checkControlInterval = (setInterval(() => {
+        this.checkControlInterval = setInterval(() => {
           if (
             this.lastControlClaim != null &&
             now - (this.lastControlClaim.timestamp + this.claimPeriod) > 5000
           ) {
             // TODO: take control of our lives
           }
-        }, this.claimPeriod) as unknown) as NodeJS.Timeout;
+        }, this.claimPeriod) as unknown as NodeJS.Timeout;
 
         // Notify the world.
         context.onControlYielded.next(controlClaim);

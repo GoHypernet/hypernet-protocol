@@ -1,4 +1,4 @@
-import { IHypernetCore, GatewayUrl, RenderError } from "@hypernetlabs/objects";
+import { IHypernetCore, IUIData, RenderError } from "@hypernetlabs/objects";
 import MainContainer from "@web-ui/containers/MainContainer";
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import {
@@ -28,24 +28,29 @@ import {
   METAMASK_WARNING_ID_SELECTOR,
   PUBLIC_IDENTIFIER_WIDGET_ID_SELECTOR,
   WITHDRAW_WIDGET_ID_SELECTOR,
+  STATE_CHANNELS_WIDGET_ID_SELECTOR,
+  BALANCES_SUMMARY_WIDGET_ID_SELECTOR,
 } from "@web-ui/constants";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
 import PrivateKeysFlow from "@web-ui/flows/PrivateKeysFlow";
 import { ViewUtils, DateUtils } from "@web-ui/utils";
 import BalancesWidget from "@web-ui/widgets/BalancesWidget";
+import BalancesSummaryWidget from "@web-ui/widgets/BalancesSummaryWidget";
 import FundWidget from "@web-ui/widgets/FundWidget";
 import WithdrawWidget from "@web-ui/widgets/WithdrawWidget";
 import LinksWidget from "@web-ui/widgets/LinksWidget";
 import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
 import PublicIdentifierWidget from "@web-ui/widgets/PublicIdentifierWidget";
+import StateChannelsWidget from "@web-ui/widgets/StateChannelsWidget";
 
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
   protected coreInstance: IHypernetCore;
+  protected UIData: IUIData;
   protected viewUtils: IViewUtils;
   protected dateUtils: IDateUtils;
-  constructor(_coreInstance?: IHypernetCore) {
+  constructor(_coreInstance: IHypernetCore, _UIData: IUIData) {
     if (_coreInstance) {
       this.coreInstance = _coreInstance;
     } else if (window.hypernetCoreInstance) {
@@ -57,6 +62,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     // This is to cache web ui instance in window so it may prevent from having multiple web ui instances
     window.hypernetWebUIInstance = HypernetWebUI.instance;
 
+    this.UIData = _UIData;
     this.viewUtils = new ViewUtils();
     this.dateUtils = new DateUtils();
   }
@@ -94,6 +100,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     return (
       <StoreProvider
         coreProxy={this.coreInstance}
+        UIData={this.UIData}
         viewUtils={this.viewUtils}
         dateUtils={this.dateUtils}
       >
@@ -173,6 +180,23 @@ export default class HypernetWebUI implements IHypernetWebUI {
         ),
         this._generateDomElement(
           config?.selector || BALANCES_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderBalancesSummaryWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <BalancesSummaryWidget {...config} />,
+          config?.showInModal,
+        ),
+        this._generateDomElement(
+          config?.selector || BALANCES_SUMMARY_WIDGET_ID_SELECTOR,
         ),
       );
     };
@@ -275,6 +299,23 @@ export default class HypernetWebUI implements IHypernetWebUI {
         ),
         this._generateDomElement(
           config?.selector || PUBLIC_IDENTIFIER_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderStateChannelsWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <StateChannelsWidget {...config} />,
+          config?.showInModal,
+        ),
+        this._generateDomElement(
+          config?.selector || STATE_CHANNELS_WIDGET_ID_SELECTOR,
         ),
       );
     };

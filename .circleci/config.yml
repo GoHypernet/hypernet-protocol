@@ -52,7 +52,7 @@ jobs:
       - run:
           name: Run publish script
           command: chmod 755 ./scripts/npmVersion.sh && ./scripts/npmVersion.sh
-  
+
 # Orchestrate our job run sequence
 workflows:
   test_and_publish:
@@ -82,7 +82,7 @@ workflows:
           context: Development
           executor: ubuntu
           use-remote-docker: false
-          extra-build-args: "--build-arg CHAIN_ID=1369 --build-arg IFRAME_SOURCE=https://vector-iframe-dev.hypernetlabs.io --build-arg 'CHAIN_PROVIDERS={\"1369\": \"https://eth-provider-dev.hypernetlabs.io\"}' --build-arg VALIDATOR_IFRAME_URL=https://gateway-iframe-dev.hypernetlabs.io --build-arg NATS_URL=ws://vector-nats-dev.hypernetlabs.io:4221 --build-arg AUTH_URL=https://vector-auth-dev.hypernetlabs.io --build-arg BUILD_ENV=PROD"
+          extra-build-args: '--build-arg CHAIN_ID=1369 --build-arg IFRAME_SOURCE=https://vector-iframe-dev.hypernetlabs.io --build-arg ''CHAIN_PROVIDERS={"1369": "https://eth-provider-dev.hypernetlabs.io"}'' --build-arg VALIDATOR_IFRAME_URL=https://gateway-iframe-dev.hypernetlabs.io --build-arg NATS_URL=ws://vector-nats-dev.hypernetlabs.io:4221 --build-arg AUTH_URL=https://vector-auth-dev.hypernetlabs.io --build-arg BUILD_ENV=PROD'
       - gcr/add-image-tag:
           name: Tag Latest Core Iframe
           image: hypernetlabs/hypernet-protocol-core-iframe
@@ -135,7 +135,7 @@ workflows:
           extra-build-args: "--build-arg CORE_IFRAME_SOURCE=https://core-iframe-dev.hypernetlabs.io --build-arg BUILD_ENV=PROD"
       - gcr/add-image-tag:
           name: Tag Latest User Dashboard
-          image:  hypernetlabs/hypernet-protocol-user-dashboard
+          image: hypernetlabs/hypernet-protocol-user-dashboard
           source-tag: $CIRCLE_SHA1
           target-tag: latest
           requires:

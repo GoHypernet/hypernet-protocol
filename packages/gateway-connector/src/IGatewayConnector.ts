@@ -3,7 +3,6 @@ import {
   PullPayment,
   Balances,
   PublicIdentifier,
-  EthereumAddress,
 } from "@hypernetlabs/objects";
 import { Observable } from "rxjs";
 
@@ -11,6 +10,7 @@ import { IAuthorizeFundsRequest } from "./IAuthorizeFundsRequest";
 import { IResolveInsuranceRequest } from "./IResolveInsuranceRequest";
 import { ISendFundsRequest } from "./ISendFundsRequest";
 import { ISignMessageRequest } from "./ISignMessageRequest";
+import { IStateChannelRequest } from "./IStateChannelRequest";
 
 export interface IGatewayConnector {
   /**
@@ -49,6 +49,14 @@ export interface IGatewayConnector {
    * push payments.
    */
   resolveInsuranceRequested: Observable<IResolveInsuranceRequest>;
+
+  /**
+   * This observable should emit when the connector wants to ensure that a state
+   * channel on a given chain for some set of routers exists. The request contains
+   * the chain and the list of routers, as well as a callback method that will be
+   * called with the channel address of a compatible state channel.
+   */
+  stateChannelRequested: Observable<IStateChannelRequest>;
 
   /**
    * This observable should emit when the connector wants to be displayed.

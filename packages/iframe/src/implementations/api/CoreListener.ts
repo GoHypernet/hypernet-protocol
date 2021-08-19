@@ -47,14 +47,21 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getPublicIdentifier();
         }, data.callId);
       },
+      getActiveStateChannels: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getActiveStateChannels();
+        }, data.callId);
+      },
       depositFunds: (
         data: IIFrameCallData<{
+          channelAddress: EthereumAddress;
           assetAddress: EthereumAddress;
           amount: BigNumberString;
         }>,
       ) => {
         this.returnForModel(() => {
           return this.core.depositFunds(
+            data.data.channelAddress,
             data.data.assetAddress,
             data.data.amount,
           );
@@ -63,6 +70,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
 
       withdrawFunds: (
         data: IIFrameCallData<{
+          channelAddress: EthereumAddress;
           assetAddress: EthereumAddress;
           amount: BigNumberString;
           destinationAddress: EthereumAddress;
@@ -70,6 +78,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       ) => {
         this.returnForModel(() => {
           return this.core.withdrawFunds(
+            data.data.channelAddress,
             data.data.assetAddress,
             data.data.amount,
             data.data.destinationAddress,
@@ -92,9 +101,9 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getActiveLinks();
         }, data.callId);
       },
-      acceptFunds: (data: IIFrameCallData<PaymentId[]>) => {
+      acceptFunds: (data: IIFrameCallData<PaymentId>) => {
         this.returnForModel(() => {
-          return this.core.acceptOffers(data.data);
+          return this.core.acceptOffer(data.data);
         }, data.callId);
       },
       authorizeGateway: (data: IIFrameCallData<GatewayUrl>) => {

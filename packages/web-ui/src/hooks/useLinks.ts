@@ -148,7 +148,7 @@ export function useLinks(): IState {
 
   function acceptPayment(paymentId: PaymentId) {
     setLoading(true);
-    coreProxy.acceptOffers([paymentId]).match(
+    coreProxy.acceptOffer(paymentId).match(
       () => {
         fetchPayments();
         alert.success("Payment accepted successfully.");

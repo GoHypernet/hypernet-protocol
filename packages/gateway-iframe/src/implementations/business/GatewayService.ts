@@ -9,10 +9,13 @@ import {
   Signature,
   GatewayUrl,
   AjaxError,
+  ChainId,
+  UUID,
 } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { injectable, inject } from "inversify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
+import { v4 as uuidv4 } from "uuid";
 
 import { IGatewayService } from "@gateway-iframe/interfaces/business";
 import {
@@ -41,10 +44,14 @@ declare global {
 
 @injectable()
 export class GatewayService implements IGatewayService {
-  protected signMessageCallbacks: Map<
+  protected signMessageCallbacks = new Map<
     string,
     (message: string, signature: Signature) => void
-  >;
+  >();
+  protected assureStateChannelCallbacks = new Map<
+    UUID,
+    (channelAddress: EthereumAddress) => void
+  >();
 
   constructor(
     @inject(IGatewayConnectorRepositoryType)
@@ -54,9 +61,7 @@ export class GatewayService implements IGatewayService {
     @inject(IHypernetCoreRepositoryType)
     protected hypernetCoreRepository: IHypernetCoreRepository,
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
-  ) {
-    this.signMessageCallbacks = new Map();
-  }
+  ) {}
   private static gatewayUrlCacheBusterUsed = false;
 
   public activateGatewayConnector(
@@ -339,9 +344,43 @@ export class GatewayService implements IGatewayService {
   ): ResultAsync<void, never> {
     // We have a signature for a message, find the callback
     const callback = this.signMessageCallbacks.get(message);
+    this.signMessageCallbacks.delete(message);
 
     if (callback != null) {
       callback(message, signature);
+    }
+
+    return okAsync(undefined);
+  }
+
+  public assureStateChannel(
+    chainId: ChainId,
+    routerPublicIdentifiers: PublicIdentifier[],
+    callback: (channelAddress: EthereumAddress) => void,
+  ): ResultAsync<void, never> {
+    // We need to generate an identifier for the callback that is easier than all the data.
+    const id = UUID(uuidv4());
+    // Need to stash the callback so that when the answer is
+    // transmitted back, we can call it.
+    this.assureStateChannelCallbacks.set(id, callback);
+
+    return this.hypernetCoreRepository.emitAssureStateChannel(
+      id,
+      chainId,
+      routerPublicIdentifiers,
+    );
+  }
+
+  public stateChannelAssured(
+    id: UUID,
+    channelAddress: EthereumAddress,
+  ): ResultAsync<void, never> {
+    // We have a signature for a message, find the callback
+    const callback = this.assureStateChannelCallbacks.get(id);
+    this.assureStateChannelCallbacks.delete(id);
+
+    if (callback != null) {
+      callback(channelAddress);
     }
 
     return okAsync(undefined);

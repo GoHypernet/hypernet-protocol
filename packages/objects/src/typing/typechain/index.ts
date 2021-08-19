@@ -39,6 +39,7 @@ export { IInsuranceInterface } from "./Insurance";
 export { IParameterizedInterface } from "./Parameterized";
 
 import InsuranceAbi from "./artifacts/Insurance";
+import LiquidityRegistryAbi from "./artifacts/LiquidityRegistry";
 import MessageTransferAbi from "./artifacts/MessageTransfer";
 import MocRegistryAbi from "./artifacts/MocRegistry";
 import ParameterizedAbi from "./artifacts/Parameterized";
@@ -48,6 +49,7 @@ const TransferAbis = {
   Parameterized: ParameterizedAbi,
   MessageTransfer: MessageTransferAbi,
   MocRegistry: MocRegistryAbi,
+  LiquidityRegistry: LiquidityRegistryAbi,
 };
 
 export { TransferAbis };

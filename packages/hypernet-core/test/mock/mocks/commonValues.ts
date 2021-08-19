@@ -1,7 +1,10 @@
 import {
+  ActiveStateChannel,
   BigNumberString,
+  ChainId,
   EMessageTransferType,
   EthereumAddress,
+  GatewayRegistrationInfo,
   GatewayUrl,
   HexString,
   IFullChannelState,
@@ -23,17 +26,19 @@ import { constants } from "ethers";
 
 export const account = EthereumAddress("0xDEADBEEF");
 export const account2 = EthereumAddress("0xBEEFDEAD");
+export const errorAccount = EthereumAddress("error");
 export const publicIdentifier = PublicIdentifier("vectorDEADBEEF");
 export const publicIdentifier2 = PublicIdentifier("vectorBEEFDEAD");
 export const publicIdentifier3 = PublicIdentifier("vectorDEADPORK");
 export const routerChannelAddress = EthereumAddress(
   "0x0afd1c03a0373b4c99233cbb0719ab0cbe8258eb",
 );
+export const errorRouterChannelAddress = EthereumAddress("error");
 export const routerPublicIdentifier = PublicIdentifier("vectorROUTERPUBLICID");
 export const ethereumAddress = EthereumAddress(
   "0x0000000000000000000000000000000000000000",
 );
-export const chainId = 1337;
+export const chainId = ChainId(1337);
 export const hyperTokenAddress = EthereumAddress(constants.AddressZero);
 export const commonAmount = BigNumberString("1");
 export const uncommonAmount = BigNumberString("2");
@@ -45,6 +50,15 @@ export const erc20AssetAddress = EthereumAddress(
 );
 export const commonPaymentId = PaymentId(
   "See, this doesn't have to be legit data if it's never checked!",
+);
+export const validPaymentId = PaymentId(
+  "0x48797065726e6574202050555348202037074ce539ff4b81b4cb43dcfe3f4513",
+);
+export const invalidPaymentId = PaymentId(
+  "0x48797065726e6574202050555348202037074ce539ff4b81b4cb43dcfe3f4513Z",
+);
+export const invalidPaymentIdWithBadType = PaymentId(
+  "0x48797065726e6574202051555348202037074ce539ff4b81b4cb43dcfe3f4513",
 );
 export const offerTransferId = TransferId("OfferTransferId");
 export const offerTransferId2 = TransferId("OfferTransferId2");
@@ -58,10 +72,17 @@ export const defaultExpirationLength = 5000;
 export const expirationDate = UnixTimestamp(unixNow + defaultExpirationLength);
 export const nowFormatted = "2021-02-03T04:28:09+03:00";
 export const gatewayUrl = GatewayUrl("https://example.gateway.com/");
+export const gatewayUrlError = GatewayUrl("gatewayUrlError");
 export const gatewayUrl2 = GatewayUrl("https://example2.gateway.com/");
 export const gatewayAddress = EthereumAddress("0xMediatorEthereumAddress");
 export const gatewayAddress2 = EthereumAddress("0xMediatorEthereumAddress2");
 export const gatewaySignature = Signature("0xgatewaySignature");
+export const gatewayRegistrationInfo = new GatewayRegistrationInfo(
+  gatewayUrl,
+  gatewayAddress,
+  gatewaySignature,
+);
+export const validDomain = "hypernetProtocolDomain";
 
 export const messageTransferDefinitionAddress = EthereumAddress(
   "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6",
@@ -90,6 +111,8 @@ export const parameterizedTransferResolverEncoding =
   "tuple(tuple(bytes32 UUID, uint256 paymentAmountTaken) data, bytes payeeSignature)";
 
 export const offerDetails: IHypernetOfferDetails = {
+  routerPublicIdentifier: routerPublicIdentifier,
+  chainId: chainId,
   messageType: EMessageTransferType.OFFER,
   requireOnline: false,
   paymentId: commonPaymentId,
@@ -110,7 +133,7 @@ export const activeOfferTransfer: IFullTransferState<
   MessageResolver
 > = {
   balance: {
-    amount: ["43", "43"],
+    amount: [commonAmount],
     to: [destinationAddress],
   },
   assetId: erc20AssetAddress,
@@ -199,7 +222,7 @@ export const activeInsuranceTransfer: IFullTransferState<
     amount: ["43", "43"],
     to: [destinationAddress],
   },
-  assetId: erc20AssetAddress,
+  assetId: hyperTokenAddress,
   channelAddress: routerChannelAddress,
   inDispute: false,
   transferId: insuranceTransferId,
@@ -357,7 +380,7 @@ export const activeParameterizedTransfer: IFullTransferState<
   ParameterizedResolver
 > = {
   balance: {
-    amount: ["43", "43"],
+    amount: [commonAmount],
     to: [destinationAddress],
   },
   assetId: erc20AssetAddress,
@@ -552,3 +575,11 @@ export const channelState: IFullChannelState = {
   defundNonces: [],
   inDispute: false,
 };
+
+export const activeStateChannel = new ActiveStateChannel(
+  ChainId(chainId),
+  routerPublicIdentifier,
+  routerChannelAddress,
+);
+
+export const activeRouters: PublicIdentifier[] = [publicIdentifier];

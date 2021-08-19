@@ -9,7 +9,6 @@ import {
   TransferId,
   Signature,
   InvalidParametersError,
-  RouterChannelUnknownError,
   TransferCreationError,
   TransferResolutionError,
   VectorError,
@@ -19,27 +18,14 @@ import {
   UnixTimestamp,
   ETransferType,
   BlockchainUnavailableError,
+  ChainId,
 } from "@hypernetlabs/objects";
-import { BigNumber } from "ethers";
 import { ResultAsync } from "neverthrow";
 
 /**
  * VectorUtils are for working with low-level transfers and directly with vector concepts.
  */
 export interface IVectorUtils {
-  /**
-   * initialize the Vector utils. This allows us to avoid lazy loading and removes possible
-   * errors from later calls, like getRouterChannelAddress, which will never error after
-   * a successful initialize().
-   */
-  initialize(): ResultAsync<void, RouterChannelUnknownError | VectorError>;
-
-  /**
-   * Returns the address of the channel with the router, if exists.
-   * Otherwise, attempts to create a channel with the router & return the address.
-   */
-  getRouterChannelAddress(): ResultAsync<EthereumAddress, never>;
-
   /**
    * Resolves a message transfer
    * @param transferId
@@ -61,7 +47,7 @@ export interface IVectorUtils {
     transferId: TransferId,
     paymentId: PaymentId,
     gatewaySignature: Signature | null,
-    amount: BigNumber,
+    amount: BigNumberString,
   ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
 
   /**
@@ -107,11 +93,14 @@ export interface IVectorUtils {
    *
    */
   createOfferTransfer(
+    channelAddress: EthereumAddress,
     toAddress: PublicIdentifier,
     message: IHypernetOfferDetails,
   ): ResultAsync<IBasicTransferResponse, TransferCreationError>;
 
   createPullNotificationTransfer(
+    channelAddress: EthereumAddress,
+    chainId: ChainId,
     toAddress: PublicIdentifier,
     message: IHypernetPullPaymentDetails,
   ): ResultAsync<
@@ -130,6 +119,8 @@ export interface IVectorUtils {
    * @param UUID
    */
   createInsuranceTransfer(
+    channelAddress: EthereumAddress,
+    chainId: ChainId,
     toAddress: PublicIdentifier,
     mediatorAddress: EthereumAddress,
     amount: BigNumberString,
@@ -154,6 +145,7 @@ export interface IVectorUtils {
    * @param deltaAmount
    */
   createParameterizedTransfer(
+    channelAddress: EthereumAddress,
     type: EPaymentType,
     toAddress: PublicIdentifier,
     amount: BigNumberString,
@@ -195,6 +187,8 @@ export interface IVectorUtils {
     { transferType: ETransferType; transfer: IFullTransferState },
     VectorError
   >;
+
+  getAllActiveTransfers(): ResultAsync<IFullTransferState[], VectorError>;
 }
 
 export const IVectorUtilsType = Symbol.for("IVectorUtils");

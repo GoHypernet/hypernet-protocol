@@ -14,7 +14,7 @@ const BalancesWidget: React.FC<IBalancesWidget> = ({
   includeBoxWrapper,
   bodyStyle,
 }: IBalancesWidget) => {
-  const { balances, loading } = useBalances();
+  const { loading, balancesByChannelAddress } = useBalances();
   const { viewUtils } = useStoreContext();
 
   const classes = useStyles();
@@ -26,7 +26,7 @@ const BalancesWidget: React.FC<IBalancesWidget> = ({
       className={!includeBoxWrapper ? classes.balancesWrapper : ""}
       label={!noLabel ? "YOUR BALANCES" : undefined}
       bodyStyle={bodyStyle}
-      hasEmptyState={balances.length === 0 && !loading}
+      hasEmptyState={balancesByChannelAddress.length === 0 && !loading}
       emptyState={
         <EmptyState
           info={
@@ -39,7 +39,7 @@ const BalancesWidget: React.FC<IBalancesWidget> = ({
       }
     >
       <BalanceList
-        balances={balances}
+        balances={balancesByChannelAddress}
         viewUtils={viewUtils}
         noBorder={includeBoxWrapper}
       />

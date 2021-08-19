@@ -67,6 +67,7 @@ import {
   activeParameterizedTransfer2,
   parameterizedTransferId,
   parameterizedTransferId2,
+  routerPublicIdentifier,
 } from "@mock/mocks";
 import {
   ConfigProviderMock,
@@ -126,6 +127,7 @@ class PaymentServiceMocks {
     );
 
     this.assetBalance = new AssetBalance(
+      routerChannelAddress,
       hyperTokenAddress,
       "PhoebeCoin",
       "BEEP",
@@ -137,6 +139,8 @@ class PaymentServiceMocks {
 
     td.when(
       this.paymentRepository.createPushPayment(
+        routerPublicIdentifier,
+        chainId,
         publicIdentifier,
         amount,
         expirationDate,
@@ -155,16 +159,15 @@ class PaymentServiceMocks {
       ),
     ).thenReturn(okAsync(new Map<PaymentId, Payment>()));
 
-    td.when(
-      this.accountRepository.getBalanceByAsset(hyperTokenAddress),
-    ).thenReturn(okAsync(this.assetBalance));
-
     td.when(this.paymentRepository.provideStake(paymentId, account)).thenReturn(
       okAsync(this.stakedPushPayment),
     );
 
     td.when(
-      this.accountRepository.getBalanceByAsset(hyperTokenAddress),
+      this.accountRepository.getBalanceByAsset(
+        routerChannelAddress,
+        hyperTokenAddress,
+      ),
     ).thenReturn(okAsync(this.assetBalance));
 
     td.when(this.accountRepository.getBalances()).thenReturn(
@@ -397,6 +400,8 @@ class PaymentServiceMocks {
 
     return new PushPayment(
       paymentId,
+      routerPublicIdentifier,
+      chainId,
       to,
       from,
       state,
@@ -433,6 +438,8 @@ class PaymentServiceMocks {
 
     return new PullPayment(
       paymentId,
+      routerPublicIdentifier,
+      chainId,
       to,
       from,
       state,
@@ -565,6 +572,7 @@ describe("PaymentService tests", () => {
 
     // Act
     const response = await paymentService.sendFunds(
+      routerChannelAddress,
       publicIdentifier,
       amount,
       expirationDate,
@@ -639,44 +647,34 @@ describe("PaymentService tests", () => {
     paymentServiceMock.contextProvider.assertEventCounts({});
   });
 
-  test("Should acceptOffers return Payment without errors", async () => {
+  test("Should acceptOffer return Payment without errors", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.acceptOffers([paymentId]);
+    const result = await paymentService.acceptOffer(paymentId);
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    const payments = result._unsafeUnwrap();
-    expect(payments.length).toBe(1);
-    expect(payments[0].isErr()).toBeFalsy();
-    expect(payments[0]._unsafeUnwrap()).toBe(
-      paymentServiceMock.stakedPushPayment,
-    );
+    const payment = result._unsafeUnwrap();
+    expect(payment).toBe(paymentServiceMock.stakedPushPayment);
     paymentServiceMock.contextProvider.assertEventCounts({
       onBalancesChanged: 1,
     });
   });
 
-  test("Should acceptOffers return error if payment state is not Proposed", async () => {
+  test("Should acceptOffer return error if payment is not exist", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
-
-    const payment = paymentServiceMock.factoryPushPayment(
-      publicIdentifier2,
-      publicIdentifier2,
-      EPaymentState.Staked,
-    );
-    paymentServiceMock.setExistingPayments([payment]);
+    paymentServiceMock.setExistingPayments([]);
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.acceptOffers([paymentId]);
+    const result = await paymentService.acceptOffer(paymentId);
 
     // Assert
     expect(result).toBeDefined();
@@ -685,13 +683,13 @@ describe("PaymentService tests", () => {
     paymentServiceMock.contextProvider.assertEventCounts({});
   });
 
-  test("Should acceptOffers return error if freeAmount is less than totalStakeRequired", async () => {
+  test("Should acceptOffer return error if freeAmount is less than totalStakeRequired", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks(BigNumberString("13"));
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.acceptOffers([paymentId]);
+    const result = await paymentService.acceptOffer(paymentId);
 
     // Assert
     expect(result).toBeDefined();
@@ -700,9 +698,15 @@ describe("PaymentService tests", () => {
     paymentServiceMock.contextProvider.assertEventCounts({});
   });
 
-  test("acceptOffers should return successfully with an error in the results if provideStake fails", async () => {
+  test("acceptOffer should return an error if provideStake fails", async () => {
     // Arrange
     const paymentServiceMock = new PaymentServiceMocks();
+    const payment = paymentServiceMock.factoryPushPayment(
+      publicIdentifier2,
+      publicIdentifier2,
+      EPaymentState.Staked,
+    );
+    paymentServiceMock.setExistingPayments([payment]);
 
     td.when(
       paymentServiceMock.paymentRepository.provideStake(paymentId, account),
@@ -711,20 +715,12 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.acceptOffers([paymentId]);
+    const result = await paymentService.acceptOffer(paymentId);
 
     // Assert
     expect(result).toBeDefined();
-    expect(result.isErr()).toBeFalsy();
-    const paymentResults = result._unsafeUnwrap();
-    expect(paymentResults.length).toBe(1);
-    expect(paymentResults[0].isErr()).toBeTruthy();
-    expect(paymentResults[0]._unsafeUnwrapErr()).toBeInstanceOf(
-      AcceptPaymentError,
-    );
-    paymentServiceMock.contextProvider.assertEventCounts({
-      onBalancesChanged: 1,
-    });
+    expect(result.isErr()).toBeTruthy();
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(Error);
   });
 
   test("Should stakePosted run without errors", async () => {

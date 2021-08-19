@@ -54,7 +54,7 @@
     "start": "docker-compose up user-dashboard",
     "dev": "docker-compose --file docker-compose.dev.yaml up --detach && lerna run dev",
     "dev2": "lerna run dev",
-    "test": "cd packages/hypernet-core && yarn test"
+    "test": "lerna run test"
   },
   "husky": {
     "hooks": {
@@ -159,6 +159,7 @@
     "solium": "^1.2.5",
     "source-map-loader": "^2.0.0",
     "stream-http": "^3.1.1",
+    "stream-browserify": "^3.0.0",
     "style-loader": "^2.0.0",
     "testdouble": "^3.16.1",
     "testdouble-jest": "^2.0.0",

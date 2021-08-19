@@ -2,7 +2,6 @@ import {
   Balances,
   ControlClaim,
   EthereumAddress,
-  HypernetConfig,
   HypernetLink,
   Payment,
   PublicIdentifier,
@@ -28,6 +27,7 @@ import {
   BigNumberString,
   MessagingError,
   RouterChannelUnknownError,
+  ActiveStateChannel,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -39,6 +39,8 @@ import {
   LogUtils,
   IValidationUtils,
   ValidationUtils,
+  ITimeUtils,
+  TimeUtils,
 } from "@hypernetlabs/utils";
 import {
   GatewayConnectorListener,
@@ -58,7 +60,8 @@ import {
   GatewayConnectorRepository,
   NatsMessagingRepository,
   PaymentRepository,
-  VectorLinkRepository,
+  RouterRepository,
+  LinkRepository,
 } from "@implementations/data";
 import {
   IGatewayConnectorListener,
@@ -79,8 +82,9 @@ import {
   IGatewayConnectorRepository,
   IMessagingRepository,
   IPaymentRepository,
+  IRouterRepository,
 } from "@interfaces/data";
-import { HypernetContext } from "@interfaces/objects";
+import { HypernetConfig, HypernetContext } from "@interfaces/objects";
 import { ok, Result, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
@@ -93,11 +97,11 @@ import {
   LinkUtils,
   PaymentUtils,
   PaymentIdUtils,
-  TimeUtils,
   VectorUtils,
   EthersBlockchainUtils,
   CeramicUtils,
   MessagingProvider,
+  BlockchainTimeUtils
 } from "@implementations/utilities";
 import {
   GatewayConnectorProxyFactory,
@@ -114,10 +118,10 @@ import {
   ILinkUtils,
   IPaymentIdUtils,
   IPaymentUtils,
-  ITimeUtils,
   IVectorUtils,
   ICeramicUtils,
   IMessagingProvider,
+  IBlockchainTimeUtils,
 } from "@interfaces/utilities";
 import {
   IBrowserNodeFactory,
@@ -159,6 +163,7 @@ export class HypernetCore implements IHypernetCore {
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
+  protected blockchainTimeUtils: IBlockchainTimeUtils;
   protected blockchainProvider: IBlockchainProvider;
   protected configProvider: IConfigProvider;
   protected contextProvider: IContextProvider;
@@ -187,6 +192,7 @@ export class HypernetCore implements IHypernetCore {
   protected paymentRepository: IPaymentRepository;
   protected gatewayConnectorRepository: IGatewayConnectorRepository;
   protected messagingRepository: IMessagingRepository;
+  protected routerRepository: IRouterRepository;
 
   // Business Layer Stuff
   protected accountService: IAccountService;
@@ -221,10 +227,7 @@ export class HypernetCore implements IHypernetCore {
    * @param network the network to attach to
    * @param config optional config, defaults to localhost/dev config
    */
-  constructor(
-    network: EBlockchainNetwork = EBlockchainNetwork.Main,
-    config?: HypernetConfig,
-  ) {
+  constructor(config?: HypernetConfig) {
     this._inControl = false;
 
     this.onControlClaimed = new Subject<ControlClaim>();
@@ -319,7 +322,11 @@ export class HypernetCore implements IHypernetCore {
       this.internalProviderFactory,
       this.logUtils,
     );
-    this.timeUtils = new TimeUtils(this.blockchainProvider);
+    this.timeUtils = new TimeUtils();
+    this.blockchainTimeUtils = new BlockchainTimeUtils(
+      this.blockchainProvider,
+      this.timeUtils,
+    );
 
     this.ceramicUtils = new CeramicUtils(
       this.configProvider,
@@ -380,6 +387,7 @@ export class HypernetCore implements IHypernetCore {
       this.browserNodeProvider,
       this.blockchainUtils,
       this.storageUtils,
+      this.contextProvider,
       this.logUtils,
     );
 
@@ -391,9 +399,10 @@ export class HypernetCore implements IHypernetCore {
       this.paymentUtils,
       this.logUtils,
       this.timeUtils,
+      this.blockchainTimeUtils
     );
 
-    this.linkRepository = new VectorLinkRepository(
+    this.linkRepository = new LinkRepository(
       this.browserNodeProvider,
       this.configProvider,
       this.contextProvider,
@@ -416,6 +425,11 @@ export class HypernetCore implements IHypernetCore {
     );
     this.messagingRepository = new NatsMessagingRepository(
       this.messagingProvider,
+      this.configProvider,
+    );
+
+    this.routerRepository = new RouterRepository(
+      this.blockchainProvider,
       this.configProvider,
     );
 
@@ -447,6 +461,7 @@ export class HypernetCore implements IHypernetCore {
     this.gatewayConnectorService = new GatewayConnectorService(
       this.gatewayConnectorRepository,
       this.accountRepository,
+      this.routerRepository,
       this.contextProvider,
       this.configProvider,
       this.logUtils,
@@ -463,6 +478,7 @@ export class HypernetCore implements IHypernetCore {
 
     this.gatewayConnectorListener = new GatewayConnectorListener(
       this.accountService,
+      this.gatewayConnectorService,
       this.paymentService,
       this.linkService,
       this.contextProvider,
@@ -523,12 +539,20 @@ export class HypernetCore implements IHypernetCore {
     });
   }
 
+  public getActiveStateChannels(): ResultAsync<
+    ActiveStateChannel[],
+    VectorError | BlockchainUnavailableError | PersistenceError
+  > {
+    return this.accountService.getActiveStateChannels();
+  }
+
   /**
    * Deposit funds into Hypernet Core.
    * @param assetAddress the Ethereum address of the token to deposit
    * @param amount the amount of the token to deposit
    */
   public depositFunds(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
     amount: BigNumberString,
   ): ResultAsync<
@@ -536,7 +560,11 @@ export class HypernetCore implements IHypernetCore {
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
     // console.log(`HypernetCore:depositFunds:assetAddress:${assetAddress}`)
-    return this.accountService.depositFunds(assetAddress, amount);
+    return this.accountService.depositFunds(
+      channelAddress,
+      assetAddress,
+      amount,
+    );
   }
 
   /**
@@ -546,6 +574,7 @@ export class HypernetCore implements IHypernetCore {
    * @param destinationAddress the (Ethereum) address to withdraw to
    */
   public withdrawFunds(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
     amount: BigNumberString,
     destinationAddress: EthereumAddress,
@@ -554,6 +583,7 @@ export class HypernetCore implements IHypernetCore {
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
     return this.accountService.withdrawFunds(
+      channelAddress,
       assetAddress,
       amount,
       destinationAddress,
@@ -595,13 +625,10 @@ export class HypernetCore implements IHypernetCore {
    * Accepts the terms of a push payment, and puts up the stake/insurance transfer.
    * @param paymentId
    */
-  public acceptOffers(
-    paymentIds: PaymentId[],
-  ): ResultAsync<
-    Result<Payment, AcceptPaymentError>[],
-    InsufficientBalanceError | AcceptPaymentError
-  > {
-    return this.paymentService.acceptOffers(paymentIds);
+  public acceptOffer(
+    paymentId: PaymentId,
+  ): ResultAsync<Payment, InsufficientBalanceError | AcceptPaymentError> {
+    return this.paymentService.acceptOffer(paymentId);
   }
 
   /**
@@ -664,10 +691,21 @@ export class HypernetCore implements IHypernetCore {
         return this.contextProvider.setContext(context);
       })
       .andThen(() => {
-        return this.accountService.getPublicIdentifier();
+        return ResultUtils.combine([
+          this.accountRepository.getPublicIdentifier(),
+          this.accountRepository.getActiveStateChannels(),
+        ]);
       })
-      .andThen((publicIdentifier) => {
+      .andThen((vals) => {
+        const [publicIdentifier, activeStateChannels] = vals;
+
+        this.logUtils.debug(
+          `Obtained active state channels: ${activeStateChannels}`,
+        );
+
         context.publicIdentifier = publicIdentifier;
+        context.activeStateChannels = activeStateChannels;
+
         return this.contextProvider.setContext(context);
       })
       .andThen(() => {
@@ -675,9 +713,6 @@ export class HypernetCore implements IHypernetCore {
         // of errors occuring post-initialization (ie, runtime), which makes the
         // whole thing more reliable in operation.
         this.logUtils.debug("Initializing utilities");
-        return ResultUtils.combine([this.vectorUtils.initialize()]);
-      })
-      .andThen(() => {
         this.logUtils.debug("Initializing services");
         return ResultUtils.combine([this.gatewayConnectorService.initialize()]);
       })

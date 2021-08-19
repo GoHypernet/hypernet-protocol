@@ -16,10 +16,10 @@ export default function useExtendedVoteData(vote) {
 
   const tokenContract = useTokenContract();
 
-  const canExecutePromise = useMemo(() => getCanExecute(vote, api), [
-    api,
-    vote,
-  ]);
+  const canExecutePromise = useMemo(
+    () => getCanExecute(vote, api),
+    [api, vote],
+  );
   const canExecute = usePromise(canExecutePromise, [], false);
 
   const canUserVotePromise = useMemo(

@@ -156,8 +156,10 @@ async function main() {
     owner,
   );
 
-  const insuranceRegistryInfo = await insuranceContract.getRegistryInformation();
-  const parameterizedRegistryInfo = await parameterizedContract.getRegistryInformation();
+  const insuranceRegistryInfo =
+    await insuranceContract.getRegistryInformation();
+  const parameterizedRegistryInfo =
+    await parameterizedContract.getRegistryInformation();
   const messageRegistryInfo = await messageContract.getRegistryInformation();
 
   console.log(`Insurance Registry Info: ${insuranceRegistryInfo}`);

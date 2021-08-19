@@ -9,6 +9,8 @@ import {
   VectorError,
   Signature,
   BigNumberString,
+  ActiveStateChannel,
+  PersistenceError,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { IAccountService } from "@interfaces/business";
@@ -46,6 +48,15 @@ export class AccountService implements IAccountService {
     return this.accountRepository.getAccounts();
   }
 
+  public getActiveStateChannels(): ResultAsync<
+    ActiveStateChannel[],
+    VectorError | BlockchainUnavailableError | PersistenceError
+  > {
+    return this.contextProvider.getInitializedContext().map((context) => {
+      return context.activeStateChannels;
+    });
+  }
+
   public getBalances(): ResultAsync<
     Balances,
     BalancesUnavailableError | VectorError
@@ -54,6 +65,7 @@ export class AccountService implements IAccountService {
   }
 
   public depositFunds(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
     amount: BigNumberString,
   ): ResultAsync<
@@ -71,7 +83,11 @@ export class AccountService implements IAccountService {
       .andThen((contextVal) => {
         context = contextVal;
 
-        return this.accountRepository.depositFunds(assetAddress, amount);
+        return this.accountRepository.depositFunds(
+          channelAddress,
+          assetAddress,
+          amount,
+        );
       })
       .andThen(() => {
         return this.accountRepository.getBalances();
@@ -84,6 +100,7 @@ export class AccountService implements IAccountService {
   }
 
   public withdrawFunds(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
     amount: BigNumberString,
     destinationAddress: EthereumAddress,
@@ -98,6 +115,7 @@ export class AccountService implements IAccountService {
       .andThen((contextVal) => {
         context = contextVal;
         return this.accountRepository.withdrawFunds(
+          channelAddress,
           assetAddress,
           amount,
           destinationAddress,

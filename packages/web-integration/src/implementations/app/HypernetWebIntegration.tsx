@@ -1,6 +1,12 @@
-import { IHypernetCore, GatewayUrl } from "@hypernetlabs/objects";
+import {
+  IHypernetCore,
+  GatewayUrl,
+  IUIData,
+  ActiveStateChannel,
+} from "@hypernetlabs/objects";
 import HypernetWebUI, { IHypernetWebUI } from "@hypernetlabs/web-ui";
 import { ResultAsync } from "neverthrow";
+import { Subject } from "rxjs";
 
 import HypernetIFrameProxy from "@web-integration/implementations/proxy/HypernetIFrameProxy";
 import { IHypernetWebIntegration } from "@web-integration/interfaces/app/IHypernetWebIntegration";
@@ -12,9 +18,11 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
   protected getReadyTimeout: number = 15 * 1000;
   protected getReadyResult: ResultAsync<IHypernetCore, Error> | undefined;
   protected getReadyResolved = false;
+  protected selectedStateChannel: ActiveStateChannel = {} as ActiveStateChannel;
 
   public webUIClient: IHypernetWebUI;
   public core: HypernetIFrameProxy;
+  public UIData: IUIData;
 
   constructor(iframeURL?: string) {
     this.iframeURL = iframeURL || this.iframeURL;
@@ -26,15 +34,24 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       "hypernet-core-iframe",
     );
 
-    this.core.onGatewayIFrameDisplayRequested.subscribe((gatewayUrl) => {
-      this.currentGatewayUrl = gatewayUrl;
+    this.UIData = {
+      onSelectedStateChannelChanged: new Subject<ActiveStateChannel>(),
+      getSelectedStateChannel: () => this.selectedStateChannel,
+    };
+    
+    this.UIData.onSelectedStateChannelChanged.subscribe((stateChannel) => {
+      this.selectedStateChannel = stateChannel;
     });
 
     if (window.hypernetWebUIInstance) {
       this.webUIClient = window.hypernetWebUIInstance as IHypernetWebUI;
     } else {
-      this.webUIClient = new HypernetWebUI(this.core);
+      this.webUIClient = new HypernetWebUI(this.core, this.UIData);
     }
+
+    this.core.onGatewayIFrameDisplayRequested.subscribe((gatewayUrl) => {
+      this.currentGatewayUrl = gatewayUrl;
+    });
 
     this.core.onPrivateCredentialsRequested.subscribe(() => {
       //this.webUIClient.renderPrivateKeysModal();

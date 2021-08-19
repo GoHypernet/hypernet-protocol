@@ -39,7 +39,7 @@ export const BalanceList: React.FC<BalanceListProps> = (
             src={
               balance.symbol === "TEST" || balance.symbol === "TEST"
                 ? HYPER_TOKEN_LOGO_URL
-                : `https://icons.bitbot.tools/api/${balance.symbol}/64x64`
+                : `https://cryptoicon-api.vercel.app/api/icon/${balance.symbol.toLocaleLowerCase()}`
             }
             ref={tokenLogoRef}
             onError={() => {
@@ -56,7 +56,9 @@ export const BalanceList: React.FC<BalanceListProps> = (
               }
               placement="top"
             >
-              <Box>{balance.symbol === "TEST" ? "HYPR" : balance.symbol}</Box>
+              <Box style={{ cursor: "pointer" }}>
+                {balance.symbol === "TEST" ? "HYPR" : balance.symbol}
+              </Box>
             </Tooltip>
           </Box>
         </Box>

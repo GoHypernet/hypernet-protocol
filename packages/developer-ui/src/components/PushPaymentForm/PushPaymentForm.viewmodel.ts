@@ -72,7 +72,8 @@ export class PushPaymentFormViewModel {
           return null;
         }
 
-        const selectedGatewayUrl = this.gatewaySelector.selectedAuthorizedGateway();
+        const selectedGatewayUrl =
+          this.gatewaySelector.selectedAuthorizedGateway();
 
         if (selectedGatewayUrl == null) {
           return null;

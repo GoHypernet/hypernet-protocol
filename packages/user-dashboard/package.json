@@ -35,10 +35,10 @@
     "alias": "tsc-alias",
     "postCompile": "webpack",
     "prepare": "yarn build",
-    "start": "webpack serve --config webpack.config.js --mode development",
+    "start": "yarn clean && webpack serve --config webpack.config.js --mode development",
     "start-iframe-watch": "cd ../iframe && yarn start",
     "start-gateway-iframe-watch": "cd ../gateway-iframe && yarn start",
-    "test": "echo \"Error: no test specified\" && exit 0"
+    "test": "echo \"No tests specified yet\" && exit 0"
   },
   "types": "dist/index.d.ts",
   "dependencies": {

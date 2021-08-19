@@ -52,6 +52,13 @@ export class BlockchainProviderMock implements IBlockchainProvider {
     return okAsync(this.provider);
   }
 
+  public getGovernanceProvider(): ResultAsync<
+    ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
+    never
+  > {
+    return okAsync(this.provider);
+  }
+
   public getEIP1193Provider(): ResultAsync<Eip1193Bridge, never> {
     throw new Error("Method not implemented.");
   }

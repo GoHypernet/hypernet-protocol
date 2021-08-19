@@ -9,6 +9,8 @@ import {
   VectorError,
   InvalidParametersError,
   BigNumberString,
+  ActiveStateChannel,
+  PersistenceError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -21,7 +23,12 @@ export interface IAccountService {
     BlockchainUnavailableError | VectorError
   >;
   getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
+  getActiveStateChannels(): ResultAsync<
+    ActiveStateChannel[],
+    VectorError | BlockchainUnavailableError | PersistenceError
+  >;
   depositFunds(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
     amount: BigNumberString,
   ): ResultAsync<
@@ -29,6 +36,7 @@ export interface IAccountService {
     BalancesUnavailableError | BlockchainUnavailableError | VectorError
   >;
   withdrawFunds(
+    channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
     amount: BigNumberString,
     destinationAddress: EthereumAddress,

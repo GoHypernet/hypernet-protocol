@@ -265,30 +265,10 @@ services:
       - router
       - iframe
 
-  user-dashboard:
-    image: hypernetlabs/hypernet-protocol-user-dashboard:local
-    ports: 
-      - 5016:80
-    depends_on:
-      - core-iframe
-      - gateway-iframe
-
-  developer-ui:
-    image: hypernetlabs/hypernet-protocol-developer-ui:local
-    ports: 
-      - 5015:80
-    volumes:
-      - ./packages/developer-ui/dist/bundle:/usr/share/nginx/html
-    depends_on:
-      - core-iframe
-      - gateway-iframe
-
   test-gateway:
-    image: node:14
+    image: hypernetlabs/hypernet-protocol-test-gateway:local
     ports:
       - 5010:5010
-    volumes:
-      - ./packages/test-gateway/dist/server-bundle:/app
-      - ./packages/test-gateway/dist/connector-bundle:/app/connector
-    command:
-      node /app/index.js
+    depends_on:
+    - core-iframe
+    - gateway-iframe

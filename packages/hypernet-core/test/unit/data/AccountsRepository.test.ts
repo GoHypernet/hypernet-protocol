@@ -1,9 +1,4 @@
 import {
-  Log,
-  TransactionReceipt,
-  TransactionResponse,
-} from "@ethersproject/abstract-provider";
-import {
   VectorError,
   BlockchainUnavailableError,
   EthereumAddress,
@@ -11,10 +6,11 @@ import {
   Balances,
   IFullChannelState,
   BigNumberString,
+  PersistenceError,
+  PublicIdentifier,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { IAccountsRepository } from "@interfaces/data/";
-import { BigNumber } from "ethers";
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
@@ -27,8 +23,7 @@ import {
 } from "@interfaces/utilities";
 import {
   account,
-  account2,
-  chainId,
+  activeRouters,
   commonAmount,
   destinationAddress,
   erc20AssetAddress,
@@ -36,89 +31,17 @@ import {
   expirationDate,
   publicIdentifier,
   routerChannelAddress,
+  TransactionResponseMock,
 } from "@mock/mocks";
 import {
   BlockchainProviderMock,
   BrowserNodeProviderMock,
+  ContextProviderMock,
   VectorUtilsMockFactory,
 } from "@mock/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
-
-class TransacationReceiptMock implements TransactionReceipt {
-  public to: string;
-  public from: string;
-  public contractAddress: string;
-  public transactionIndex: number;
-  public root?: string | undefined;
-  public gasUsed: BigNumber;
-  public logsBloom: string;
-  public blockHash: string;
-  public transactionHash: string;
-  public logs: Log[];
-  public blockNumber: number;
-  public confirmations: number;
-  public cumulativeGasUsed: BigNumber;
-  public byzantium: boolean;
-  public status?: number | undefined;
-  public effectiveGasPrice: BigNumber;
-  public type: number;
-
-  constructor() {
-    this.to = account2;
-    this.from = account;
-    this.contractAddress = ethereumAddress;
-    this.transactionIndex = 1;
-    this.gasUsed = BigNumber.from(1);
-    this.logsBloom = "logsBloom";
-    this.blockHash = "blockHash";
-    this.transactionHash = "transactionHash";
-    this.logs = [];
-    this.blockNumber = 1;
-    this.confirmations = 1;
-    this.cumulativeGasUsed = BigNumber.from(1);
-    this.byzantium = false;
-    this.effectiveGasPrice = BigNumber.from(1);
-    this.type = 0;
-  }
-}
-
-class TransactionResponseMock implements TransactionResponse {
-  public hash: string;
-  public blockNumber?: number | undefined;
-  public blockHash?: string | undefined;
-  public timestamp?: number | undefined;
-  public confirmations: number;
-  public from: string;
-  public raw?: string | undefined;
-  public to?: string | undefined;
-  public nonce: number;
-  public gasLimit: BigNumber;
-  public gasPrice: BigNumber;
-  public data: string;
-  public value: BigNumber;
-  public chainId: number;
-  public r?: string | undefined;
-  public s?: string | undefined;
-  public v?: number | undefined;
-
-  constructor() {
-    this.hash = "hash";
-    this.confirmations = 1;
-    this.from = account;
-    this.nonce = 0;
-    this.gasLimit = BigNumber.from(1);
-    this.gasPrice = BigNumber.from(1);
-    this.data = "data";
-    this.value = BigNumber.from(1);
-    this.chainId = chainId;
-  }
-
-  public wait(confirmations?: number | undefined): Promise<TransactionReceipt> {
-    return Promise.resolve(new TransacationReceiptMock());
-  }
-}
 
 class AccountsRepositoryMocks {
   public blockchainProvider = new BlockchainProviderMock();
@@ -128,6 +51,7 @@ class AccountsRepositoryMocks {
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
   public storageUtils = td.object<IStorageUtils>();
+  public contextProvider = new ContextProviderMock();
   public balances: Balances;
   public stateChannel: IFullChannelState | undefined;
 
@@ -149,6 +73,10 @@ class AccountsRepositoryMocks {
       ),
     ).thenReturn(okAsync(new TransactionResponseMock()));
 
+    td.when(
+      this.storageUtils.read<PublicIdentifier[]>("ActiveRouters"),
+    ).thenReturn(okAsync(activeRouters));
+
     this.stateChannel =
       this.browserNodeProvider.stateChannels.get(routerChannelAddress);
     if (this.stateChannel == null) {
@@ -158,6 +86,7 @@ class AccountsRepositoryMocks {
     this.balances = {
       assets: [
         new AssetBalance(
+          routerChannelAddress,
           EthereumAddress(this.stateChannel?.assetIds[0]),
           `Unknown Token (${EthereumAddress(this.stateChannel?.assetIds[0])})`,
           "Unk",
@@ -177,6 +106,7 @@ class AccountsRepositoryMocks {
       this.browserNodeProvider,
       this.blockchainUtils,
       this.storageUtils,
+      this.contextProvider,
       this.logUtils,
     );
   }
@@ -190,11 +120,15 @@ class AccountsRepositoryErrorMocks {
   public logUtils = td.object<ILogUtils>();
   public blockchainUtils = td.object<IBlockchainUtils>();
   public storageUtils = td.object<IStorageUtils>();
+  public contextProvider = new ContextProviderMock();
 
   constructor() {
     td.when(this.browserNodeProvider.getBrowserNode()).thenReturn(
       errAsync(new VectorError()),
     );
+    td.when(
+      this.storageUtils.read<PublicIdentifier[]>("ActiveRouters"),
+    ).thenReturn(errAsync(new PersistenceError()));
     td.when(
       this.blockchainUtils.mintToken(
         td.matchers.argThat((arg: BigNumberString) => {
@@ -212,6 +146,7 @@ class AccountsRepositoryErrorMocks {
       this.browserNodeProvider,
       this.blockchainUtils,
       this.storageUtils,
+      this.contextProvider,
       this.logUtils,
     );
   }
@@ -286,7 +221,7 @@ describe("AccountsRepository tests", () => {
     );
 
     // Act
-    const result = await repo.getBalanceByAsset(assetId);
+    const result = await repo.getBalanceByAsset(routerChannelAddress, assetId);
 
     // Assert
     expect(result).toBeDefined();
@@ -302,7 +237,11 @@ describe("AccountsRepository tests", () => {
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
     // Act
-    const result = await repo.depositFunds(ethereumAddress, commonAmount);
+    const result = await repo.depositFunds(
+      routerChannelAddress,
+      ethereumAddress,
+      commonAmount,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -316,7 +255,11 @@ describe("AccountsRepository tests", () => {
     const repo = accountsRepositoryMocks.factoryAccountsRepository();
 
     // Act
-    const result = await repo.depositFunds(erc20AssetAddress, commonAmount);
+    const result = await repo.depositFunds(
+      routerChannelAddress,
+      erc20AssetAddress,
+      commonAmount,
+    );
 
     // Assert
     expect(result).toBeDefined();
@@ -331,6 +274,7 @@ describe("AccountsRepository tests", () => {
 
     // Act
     const result = await repo.withdrawFunds(
+      routerChannelAddress,
       ethereumAddress,
       commonAmount,
       destinationAddress,
@@ -349,6 +293,7 @@ describe("AccountsRepository tests", () => {
 
     // Act
     const result = await repo.withdrawFunds(
+      routerChannelAddress,
       erc20AssetAddress,
       commonAmount,
       destinationAddress,
@@ -367,6 +312,7 @@ describe("AccountsRepository tests", () => {
 
     // Act
     const result = await repo.withdrawFunds(
+      routerChannelAddress,
       erc20AssetAddress,
       commonAmount,
       destinationAddress,

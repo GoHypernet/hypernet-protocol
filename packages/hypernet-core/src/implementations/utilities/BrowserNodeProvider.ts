@@ -66,14 +66,14 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
         signatureResult = okAsync<string, BlockchainUnavailableError>(
           storedSignature,
         );
+      } else {
+        signatureResult = ResultAsync.fromPromise(
+          signer.signMessage(NonEIP712Message),
+          (e) => {
+            return e as BlockchainUnavailableError;
+          },
+        );
       }
-
-      signatureResult = ResultAsync.fromPromise(
-        signer.signMessage(NonEIP712Message),
-        (e) => {
-          return e as BlockchainUnavailableError;
-        },
-      );
 
       return signatureResult
         .andThen((signature) => {
@@ -96,30 +96,6 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
             Signature(signature),
             EthereumAddress(account),
           );
-        })
-        .orElse((e) => {
-          const shouldAttemptRestore = (
-            (e as any).context?.validationError ?? ""
-          ).includes("Channel is already setup");
-
-          if (shouldAttemptRestore && this.browserNode != null) {
-            return this.browserNode
-              .getStateChannelByParticipants(
-                config.routerPublicIdentifier,
-                config.chainId,
-              )
-              .andThen((channelState) => {
-                if (channelState == null && this.browserNode != null) {
-                  return this.browserNode.restoreState(
-                    config.routerPublicIdentifier,
-                    config.chainId,
-                  );
-                }
-                return okAsync<void, VectorError>(undefined);
-              });
-          } else {
-            return errAsync(e);
-          }
         })
         .map(() => {
           this.logUtils.debug("Successfully started Vector browser node");

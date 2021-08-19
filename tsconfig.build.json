@@ -35,9 +35,8 @@
       "@gateway-connector/*": ["./*"],
       "@gateway-iframe/*": ["./*"],
       "@core-iframe/*": ["./*"],
-      "@test-gateway/*": [
-        "./packages/test-gateway/src/*"
-      ],
+      "@test-gateway/*": ["./*"],
+      "@test-gateway-connector/*": ["./*"],
       "@utils/*": ["./*"],
       "@developer-ui/*": ["./*"],
       "@objects/*": ["./*"],

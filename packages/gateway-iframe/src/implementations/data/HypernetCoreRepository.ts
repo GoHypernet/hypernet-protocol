@@ -3,6 +3,12 @@ import {
   IResolveInsuranceRequest,
   ISendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
+import {
+  ChainId,
+  IStateChannelRequest,
+  PublicIdentifier,
+  UUID,
+} from "@hypernetlabs/objects";
 import { injectable, inject } from "inversify";
 import { okAsync, ResultAsync } from "neverthrow";
 import Postmate from "postmate";
@@ -69,6 +75,20 @@ export class HypernetCoreRepository implements IHypernetCoreRepository {
 
   public emitSignMessageRequested(message: string): ResultAsync<void, never> {
     this.childApi?.emit("signMessageRequested", message);
+
+    return okAsync(undefined);
+  }
+
+  public emitAssureStateChannel(
+    id: UUID,
+    chainId: ChainId,
+    routerPublicIdentifiers: PublicIdentifier[],
+  ): ResultAsync<void, never> {
+    this.childApi?.emit("stateChannelRequested", {
+      id,
+      chainId,
+      routerPublicIdentifiers,
+    } as IStateChannelRequest);
 
     return okAsync(undefined);
   }

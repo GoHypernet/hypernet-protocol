@@ -1,4 +1,5 @@
 import { BrowserNode } from "@connext/vector-browser-node";
+import { ContractAddresses } from "@connext/vector-types";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
 
@@ -17,11 +18,10 @@ export class BrowserNodeFactory implements IBrowserNodeFactory {
       this.logUtils.debug("Creating BrowserNode");
       // Create the browser node
       const vectorBrowserNode = new BrowserNode({
-        routerPublicIdentifier: config.routerPublicIdentifier,
         logger: this.logUtils.getPino(),
         iframeSrc: config.iframeSource,
         chainProviders: config.chainProviders,
-        chainAddresses: config.chainAddresses,
+        chainAddresses: config.chainAddresses as ContractAddresses,
         natsUrl: config.natsUrl,
         authUrl: config.authUrl,
         //messagingUrl: 'localhost:80'

@@ -4,8 +4,7 @@ import {
   InvalidParametersError,
   PrivateCredentials,
   EthereumAddress,
-  IProviderSigner,
-  HypernetConfig,
+  ChainId,
 } from "@hypernetlabs/objects";
 import {
   ILocalStorageUtils,
@@ -14,6 +13,7 @@ import {
   ILogUtilsType,
   ResultUtils,
 } from "@hypernetlabs/utils";
+import { HypernetConfig } from "@interfaces/objects";
 import { IWCEthRpcConnectionOptions } from "@walletconnect/types";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { ethers, providers } from "ethers";
@@ -24,7 +24,6 @@ import Web3Modal, { IProviderOptions } from "web3modal";
 import {
   IContextProvider,
   IConfigProvider,
-  IInternalProvider,
   IContextProviderType,
   IConfigProviderType,
 } from "@interfaces/utilities";
@@ -89,6 +88,30 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
       .orElse((e) => {
         throw new Error(
           "Initialization unsuccessful, you should not have called getProvider()",
+        );
+      });
+  }
+
+  // TODO: Make this actualy return a guaranteed governance chain connected provider.
+  public getGovernanceProvider(): ResultAsync<
+    ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
+    never
+  > {
+    if (this.initializeResult == null) {
+      throw new Error(
+        "Must call BlockchainProvider.initialize() first before you can call getGovernanceProvider()",
+      );
+    }
+
+    return this.initializeResult
+      .map(() => {
+        return this.provider as
+          | ethers.providers.Web3Provider
+          | ethers.providers.JsonRpcProvider;
+      })
+      .orElse((e) => {
+        throw new Error(
+          "Initialization unsuccessful, you should not have called getGovernanceProvider()",
         );
       });
   }
@@ -214,10 +237,18 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
             this.signer = provider.getSigner();
 
             const useMetamask = web3Modal.cachedProvider == "injected";
-            if (useMetamask) {
+            const hypertokenAddress =
+              config.chainAddresses[config.governanceChainId]
+                ?.hypertokenAddress;
+            if (useMetamask && hypertokenAddress != null) {
               return ResultUtils.combine([
-                this.addNetwork(config),
-                this.addTokenAddress(config, useMetamask),
+                this.addNetwork(config.governanceChainId, config),
+                this.addTokenAddress(
+                  config,
+                  useMetamask,
+                  "HyperToken",
+                  hypertokenAddress,
+                ),
               ]).map(() => {});
             }
 
@@ -276,9 +307,10 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
   }
 
   protected addNetwork(
+    chainId: ChainId,
     config: HypernetConfig,
   ): ResultAsync<void, BlockchainUnavailableError> {
-    const network = config.chainProviders[config.chainId];
+    const network = config.chainProviders[chainId];
     const storedNetworks = this._getStoredNetworks();
     if (network.includes("localhost") || storedNetworks.includes(network)) {
       return okAsync(undefined);
@@ -291,7 +323,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
     return ResultAsync.fromPromise(
       this.provider.send("wallet_addEthereumChain", [
         {
-          chainId: `0x${config.chainId.toString(16)}`,
+          chainId: `0x${chainId.toString(16)}`,
           chainName: "Hypernet Protocol Dev Network",
           rpcUrls: [network],
         },
@@ -309,12 +341,11 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
   protected addTokenAddress(
     config: HypernetConfig,
     useMetamask: boolean,
-    tokenName?: string,
-    tokenAddress?: EthereumAddress,
+    tokenName: string,
+    tokenAddress: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError> {
-    const token = tokenAddress || config.hypertokenAddress;
     const storedTokens = this._getStoredTokenAddresses();
-    if (storedTokens.includes(token)) {
+    if (storedTokens.includes(tokenAddress)) {
       return okAsync(undefined);
     }
 
@@ -327,8 +358,8 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
         this.provider.send("wallet_watchAsset", {
           type: "ERC20",
           options: {
-            address: token,
-            symbol: tokenName || "HyperToken",
+            address: tokenAddress,
+            symbol: tokenName,
             decimals: 18,
           },
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -339,7 +370,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
           return new BlockchainUnavailableError(errorMessage, e);
         },
       ).map(() => {
-        return this._storeTokenAddress(token);
+        return this._storeTokenAddress(tokenAddress);
       });
     }
 
@@ -348,7 +379,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
         {
           type: "ERC20",
           options: {
-            address: token,
+            address: tokenAddress,
             symbol: tokenName || "HyperToken",
             decimals: 18,
           },
@@ -360,7 +391,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
         return new BlockchainUnavailableError(errorMessage, e);
       },
     ).map(() => {
-      return this._storeTokenAddress(token);
+      return this._storeTokenAddress(tokenAddress);
     });
   }
 

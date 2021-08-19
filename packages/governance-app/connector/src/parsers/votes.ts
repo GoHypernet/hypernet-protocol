@@ -8,11 +8,9 @@ export function parseVotes(result: QueryResult, connector: any): Vote[] {
     throw new Error("Unable to parse votes.");
   }
 
-  const datas = votes.map(
-    (vote: any): VoteData => {
-      return vote;
-    },
-  );
+  const datas = votes.map((vote: any): VoteData => {
+    return vote;
+  });
 
   return datas.map((data: VoteData) => {
     return new Vote(data, connector);

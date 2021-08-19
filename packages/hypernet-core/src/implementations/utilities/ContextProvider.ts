@@ -59,6 +59,7 @@ export class ContextProvider implements IContextProvider {
     this.context = new HypernetContext(
       null,
       null,
+      null,
       false,
       onControlClaimed,
       onControlYielded,
@@ -120,6 +121,7 @@ export class ContextProvider implements IContextProvider {
         new InitializedHypernetContext(
           EthereumAddress(this.context.account || ""),
           PublicIdentifier(this.context.publicIdentifier || ""),
+          this.context.activeStateChannels || [],
           this.context.inControl,
           this.context.onControlClaimed,
           this.context.onControlYielded,
@@ -166,7 +168,9 @@ export class ContextProvider implements IContextProvider {
 
   protected contextInitialized(): boolean {
     return (
-      this.context.account != null && this.context.publicIdentifier != null
+      this.context.account != null &&
+      this.context.publicIdentifier != null &&
+      this.context.activeStateChannels != null
     );
   }
 }

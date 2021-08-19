@@ -34,7 +34,7 @@
     "copy-dts": "copyfiles -u 1 \"src/**/*.d.ts\" lib",
     "generate-docs": "npx typedoc --options typedoc.json",
     "prepare": "yarn build",
-    "test": "yarn compile && yarn test:ci",
+    "test": "yarn build && yarn test:ci",
     "test-integration": "cucumber-js --require-module ts-node/register --require-module tsconfig-paths/register --require 'test/integration/**/*.ts' test/integration/features/**/*.feature",
     "test:ci": "jest --runInBand --coverage --passWithNoTests",
     "test:watch": "jest --watch --color --detectOpenHandles",
@@ -72,7 +72,6 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^6.6.2",
     "sjcl": "^1.0.8",
-    "stream-browserify": "^3.0.0",
     "uuid": "^8.3.0",
     "web3modal": "^1.9.4"
   }

@@ -13,10 +13,12 @@ import {
   PersistenceError,
   BlockchainUnavailableError,
   AuthorizedGatewaysSchema,
-  HypernetConfig,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
-import { InitializedHypernetContext } from "@interfaces/objects";
+import {
+  HypernetConfig,
+  InitializedHypernetContext,
+} from "@interfaces/objects";
 import { Resolver, ResolverRegistry } from "did-resolver";
 import { DID } from "dids";
 import { okAsync, ResultAsync, errAsync } from "neverthrow";

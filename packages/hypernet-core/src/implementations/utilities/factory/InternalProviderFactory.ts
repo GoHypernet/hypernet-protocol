@@ -1,6 +1,8 @@
-import { PrivateCredentials } from "@hypernetlabs/objects";
-import { InvalidParametersError } from "@hypernetlabs/objects";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
+import {
+  PrivateCredentials,
+  InvalidParametersError,
+} from "@hypernetlabs/objects";
+import { errAsync, ResultAsync } from "neverthrow";
 
 import { InternalProvider } from "@implementations/utilities";
 import { IInternalProvider, IConfigProvider } from "@interfaces/utilities";
@@ -19,8 +21,12 @@ export class InternalProviderFactory implements IInternalProviderFactory {
         ),
       );
     }
-    return okAsync(
-      new InternalProvider(this.configProvider, privateCredentials),
-    );
+    return this.configProvider.getConfig().map((config) => {
+      return new InternalProvider(
+        config.governanceChainId,
+        config,
+        privateCredentials,
+      );
+    });
   }
 }

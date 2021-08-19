@@ -55,7 +55,7 @@ type Action =
     };
 
 export function useFund(): IReducerStateReducer {
-  const { coreProxy } = useStoreContext();
+  const { coreProxy, UIData } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const alert = useAlert();
 
@@ -230,6 +230,7 @@ export function useFund(): IReducerStateReducer {
     setLoading(true);
     coreProxy
       .depositFunds(
+        EthereumAddress(UIData.getSelectedStateChannel().channelAddress),
         EthereumAddress(state.selectedPaymentToken?.address),
         BigNumberString(
           ethers.utils.parseEther(state.amount || "1").toString(),
@@ -263,6 +264,7 @@ export function useFund(): IReducerStateReducer {
     setLoading(true);
     coreProxy
       .withdrawFunds(
+        EthereumAddress(UIData.getSelectedStateChannel().channelAddress),
         EthereumAddress(state.selectedPaymentToken?.address),
         BigNumberString(ethers.utils.parseEther(state.amount).toString()),
         state.destinationAddress,

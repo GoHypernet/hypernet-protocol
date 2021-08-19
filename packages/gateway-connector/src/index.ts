@@ -5,3 +5,4 @@ export * from "./IResolutionResult";
 export * from "./IResolveInsuranceRequest";
 export * from "./ISendFundsRequest";
 export * from "./ISignMessageRequest";
+export * from "./IStateChannelRequest";

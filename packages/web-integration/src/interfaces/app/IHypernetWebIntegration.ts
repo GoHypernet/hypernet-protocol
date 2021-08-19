@@ -1,4 +1,4 @@
-import { IHypernetCore, GatewayUrl } from "@hypernetlabs/objects";
+import { IHypernetCore, GatewayUrl, IUIData } from "@hypernetlabs/objects";
 import { IHypernetWebUI } from "@hypernetlabs/web-ui";
 import { ResultAsync } from "neverthrow";
 
@@ -8,4 +8,5 @@ export interface IHypernetWebIntegration {
   getReady: () => ResultAsync<IHypernetCore, Error>;
   displayGatewayIFrame(gatewayUrl: GatewayUrl): void;
   closeGatewayIFrame(gatewayUrl: GatewayUrl): void;
+  UIData: IUIData;
 }

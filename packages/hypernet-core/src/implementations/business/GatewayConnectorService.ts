@@ -7,24 +7,43 @@ import {
   GatewayAuthorizationDeniedError,
   GatewayUrl,
   Signature,
+  EthereumAddress,
+  ChainId,
+  PublicIdentifier,
+  RouterUnauthorizedError,
 } from "@hypernetlabs/objects";
-import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
+import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IGatewayConnectorService } from "@interfaces/business";
 import {
   IAccountsRepository,
+  IAccountsRepositoryType,
   IGatewayConnectorRepository,
+  IGatewayConnectorRepositoryType,
+  IRouterRepository,
+  IRouterRepositoryType,
 } from "@interfaces/data";
-import { okAsync, ResultAsync } from "neverthrow";
+import { inject, injectable } from "inversify";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
-import { IContextProvider, IConfigProvider } from "@interfaces/utilities";
+import {
+  IContextProvider,
+  IConfigProvider,
+  IConfigProviderType,
+  IContextProviderType,
+} from "@interfaces/utilities";
 
+@injectable()
 export class GatewayConnectorService implements IGatewayConnectorService {
   constructor(
+    @inject(IGatewayConnectorRepositoryType)
     protected gatewayConnectorRepository: IGatewayConnectorRepository,
+    @inject(IAccountsRepositoryType)
     protected accountsRepository: IAccountsRepository,
-    protected contextProvider: IContextProvider,
-    protected configProvider: IConfigProvider,
-    protected logUtils: ILogUtils,
+    @inject(IRouterRepositoryType)
+    protected routerRepository: IRouterRepository,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
+    @inject(IConfigProviderType) protected configProvider: IConfigProvider,
+    @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
   public initialize(): ResultAsync<void, GatewayConnectorError> {
@@ -164,6 +183,83 @@ export class GatewayConnectorService implements IGatewayConnectorService {
             });
         });
     });
+  }
+
+  public ensureStateChannel(
+    gatewayUrl: GatewayUrl,
+    chainId: ChainId,
+    routerPublicIdentifiers: PublicIdentifier[],
+  ): ResultAsync<EthereumAddress, PersistenceError | RouterUnauthorizedError> {
+    return this.contextProvider.getInitializedContext().andThen((context) => {
+      // Check if we have an existing state channel that matches these parameters.
+      const existingStateChannel = context.activeStateChannels.find((asc) => {
+        return (
+          asc.chainId == chainId &&
+          routerPublicIdentifiers.includes(asc.routerPublicIdentifier)
+        );
+      });
+
+      if (existingStateChannel == null) {
+        // No existing channel; we need to create it.
+        // Choose one of the routers at random.
+        const routerPublicIdentifier =
+          routerPublicIdentifiers[
+            Math.floor(Math.random() * routerPublicIdentifiers.length)
+          ];
+
+        return this.assureGatewayAuthorizedByRouter(
+          gatewayUrl,
+          routerPublicIdentifier,
+        ).andThen(() => {
+          // We need to create a state channel
+          return this.accountsRepository.createStateChannel(
+            routerPublicIdentifier,
+            chainId,
+          );
+        });
+      } else {
+        // We need to verify that the router allows the gateway.
+        return this.assureGatewayAuthorizedByRouter(
+          gatewayUrl,
+          existingStateChannel.routerPublicIdentifier,
+        ).map(() => {
+          return existingStateChannel.channelAddress;
+        });
+      }
+    });
+  }
+
+  protected assureGatewayAuthorizedByRouter(
+    gatewayUrl: GatewayUrl,
+    routerPublicIdentifier: PublicIdentifier,
+  ): ResultAsync<void, RouterUnauthorizedError | PersistenceError> {
+    return this.routerRepository
+      .getRouterDetails([routerPublicIdentifier])
+      .andThen((routerDetailsMap) => {
+        const routerDetails = routerDetailsMap.get(routerPublicIdentifier);
+
+        if (routerDetails == null) {
+          // Either the router has not published details (odd), or something else extremely odd has happened.
+          return errAsync(
+            new RouterUnauthorizedError(
+              `No details for router ${routerPublicIdentifier} available. Please contact the gateway.`,
+              gatewayUrl,
+            ),
+          );
+        }
+
+        // Make sure that this gateway is in the allowed list by the router
+        if (routerDetails.allowedGateways.includes(gatewayUrl)) {
+          return okAsync(undefined);
+        }
+
+        return errAsync(
+          new RouterUnauthorizedError(
+            `Gateway ${gatewayUrl} requested use of ${routerPublicIdentifier}, but is not on that router's list of allowed gateways. Please contact the gateway.`,
+            gatewayUrl,
+          ),
+        );
+      });
   }
 
   public deauthorizeGateway(
