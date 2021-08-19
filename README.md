@@ -1,4 +1,6 @@
-![alt](documentation/images/Hypernet-logo.svg)
+<p align="center">
+  <img src="https://github.com/GoHypernet/hypernet-protocol/blob/dev/documentation/images/Hypernet-logo.svg" width="200">
+</p>
 
 # The Hypernet Protocol
 
