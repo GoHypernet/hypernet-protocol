@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/GoHypernet/hypernet-protocol/blob/dev/documentation/images/Hypernet-logo.svg" width="200">
+  <img src="https://github.com/GoHypernet/hypernet-protocol/blob/dev/documentation/images/Hypernet-logo.svg" width="500">
 </p>
 
 # The Hypernet Protocol
