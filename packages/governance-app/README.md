@@ -1,7 +1,7 @@
 # Hypernet Protocol Governance
 
 This package contains the Hypernet Protocol governance contracts. The governance contracts are based on 
-OpenZeppelin's [Governer](https://docs.openzeppelin.com/contracts/4.x/governance) library which are based
+OpenZeppelin's [Governor](https://docs.openzeppelin.com/contracts/4.x/governance) library which are based
 on a reference implementation by [Compound Finance](https://compound.finance/docs/governance).
 
 This particular governance architecture has been adopted by a number of highly successful projects including
