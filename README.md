@@ -4,28 +4,28 @@
 
 # The Hypernet Protocol
 
-The Hypernet Protocol aims to amalgamate blockchain and traditional payment technologies into a secure,
-user-friendly, high-throughput payment stack for use by gateways looking for way to accept cyptocurrency
-payments in their traditional online platforms. The authors of the Hypernet Protocol believe that a decentralized,
-blockchain-secured, community-drive payment solution will revolutionize the cyber-infrastructure landscape
-and that it is broadly generalizable to various decentralized marketplaces and subscription-based services.
+The Hypernet Protocol aims to amalgamate state-of-the-art blockchain and traditional payment technologies into a secure, 
+high-throughput payment stack that enables merchants to accept cyptocurrency payments in their traditional online 
+platforms with minimal intrusion into their existing platform and without specialized knowledge of web3 technology. 
+The authors of the Hypernet Protocol believe that a decentralized, blockchain-secured, community-driven payment solution
+will revolutionize the cyber-infrastructure landscape and that it is broadly generalizable to various decentralized 
+marketplaces and subscription-based services.
 
-A successful payment protocol must solve problem on both sides of the market. On the consumer side, users
-expect a payment solution that quickly executes transactions and is intuitive. To accomplish this, the
-Hypernet Protocol integrates Connext's [Vector](https://github.com/connext/vector) library to enable
-fast, secure, microtransactions, with minimal user intervention. On the gateway side, adopters expect
-a similarly refined onboarding process. The Hypernet Protocol stack offers Gateway developers a flexible
-platform that can adapt to the idiosyncratic requirements of their particular business, and tools to
-streamline software integration. Meeting these needs has led to the development light-weight developer
-abstraction layer. Developer's are isolated from the particulars of layer 2 scaling protocols and are
-presented with a small set of function calls bundled together in an npm package that looks familiar to
-those who have used a traditional payment service provider SDK.
+A successful payment protocol must solve problem on both sides of the market. On the consumer side, users expect a 
+payment solution that quickly executes transactions and is intuitive. To accomplish this, the Hypernet Protocol 
+integrates Connext's [Vector](https://github.com/connext/vector) library to enable fast, secure, microtransactions, 
+with minimal user intervention. On the merchant side, adopters expect a similarly refined onboarding process. The 
+Hypernet Protocol stack offers merchant developers a flexible platform that can adapt to the idiosyncratic requirements 
+of their particular business, and tools to streamline software integration. Meeting these needs has led to the development 
+light-weight developer abstraction layer. Developer's are isolated from the particulars of Layer 2 scaling protocols and 
+are presented with a small set of function calls bundled together in an npm package that looks familiar to those who 
+have used a traditional payment service provider SDK.
 
 This monorepo contains several packages:
 
 - [hypernet-core](packages/hypernet-core): The core of the protocol. HNP is encapsulated into the HypernetCore class, which can be instantiated in a variety of ways.
 - [developer-ui](packages/developer-ui): An example package demonstrating how to consume the Hypernet Core SDK. It is also used for integration testing.
-- [hypernet-contracts](packages/hypernet-contracts): A package containing the Hypernet Protocol smart contracts.
+- [governance-app](packages/govrnance-app): A package containing solidity contracts for Hypernet Protocol Governance and its token. 
 - [iframe](packages/iframe): HypernetCore is designed to run in a browser, but that is a hostile environment. The iframe package is designed to host the running instance of HNC inside an iframe and expose an interface for cross-frame communication. The host window will communicate with the HNC via a proxy.
 - [gateway-connector](packages/gateway-connector): This package is designed for gateways that want to support the Hypernet Protocol. Gateways will need to publish an API and "connector" code that HNP clients will run. Payments sent via HNP are each moderated by a gateway, the connector allows the gateway to keep up to date with the payments the client is actually sending and recieving so that, should any disputes arrive, they can properly moderate the dispute. This package includes the OpenApi specification for the required API, as well as the typescript interface that their published connector must implement.
 - [gateway-iframe](packages/gateway-iframe): Gateway connectors are not allowed to run directly in the same window as HNC for security reasons, to prevent a rogue connector causing issues. gateway-iframe is the source for the iframe that will host the gateway connector. It is responsible for checking the signature of the connector and providing a cross-frame proxy interface to HNC. In production, this pacakge would be published somewhere like IPFS.
