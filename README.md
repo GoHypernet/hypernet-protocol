@@ -4,7 +4,7 @@
 
 # The Hypernet Protocol
 
-The Hypernet Protocol aims to amalgamate state-of-the-art blockchain and traditional payment technologies into a secure, 
+The Hypernet Protocol aims to amalgamate blockchain and traditional payment technologies into a secure, 
 high-throughput payment stack that enables merchants to accept cyptocurrency payments in their traditional online 
 platforms with minimal intrusion into their existing platform and without specialized knowledge of web3 technology. 
 The authors of the Hypernet Protocol believe that a decentralized, blockchain-secured, community-driven payment solution

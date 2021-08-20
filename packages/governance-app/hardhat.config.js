@@ -25,5 +25,16 @@ module.exports = {
         runs: 200
       }
     }
+  },
+  networks: {
+    hardhat: {
+      mining: {
+        auto: false,
+        interval: [3000, 6000]
+      },
+    },
+    dev: {
+      url: 'http://127.0.0.1:8569'
+    }
   }
 };

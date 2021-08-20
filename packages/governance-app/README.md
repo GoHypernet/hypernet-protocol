@@ -20,3 +20,24 @@ from the public registry.
 ```shell
 npx hardhat test
 ```
+
+## Hardhat Network
+
+First, start a hardhat node (edit [hardhat.config.js](https://hardhat.org/config/#networks-configuration) 
+to customize the Hardhat network settings):
+
+```shell
+npx hardhat node
+```
+
+You can run the node on a custom port by adding the `--port flag`:
+
+```shell
+npx hardhat test --port 8569
+```
+
+Once the node is running, deploy the Solidity contracts to the Hardhat network:
+
+```shell
+npx hardhat run scripts/sample-script.js --network hardhat
+```
