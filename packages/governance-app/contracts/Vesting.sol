@@ -3,7 +3,7 @@ pragma solidity ^0.8.2;
 
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 
-contract TreasuryVester {
+contract Vester {
     using SafeMath for uint;
 
     address public h;
@@ -24,9 +24,9 @@ contract TreasuryVester {
         uint vestingCliff_,
         uint vestingEnd_
     ) public {
-        require(vestingBegin_ >= block.timestamp, 'TreasuryVester::constructor: vesting begin too early');
-        require(vestingCliff_ >= vestingBegin_, 'TreasuryVester::constructor: cliff is too early');
-        require(vestingEnd_ > vestingCliff_, 'TreasuryVester::constructor: end is too early');
+        require(vestingBegin_ >= block.timestamp, 'Vester::constructor: vesting begin too early');
+        require(vestingCliff_ >= vestingBegin_, 'Vester::constructor: cliff is too early');
+        require(vestingEnd_ > vestingCliff_, 'Vester::constructor: end is too early');
 
         h = h_;
         recipient = recipient_;
@@ -45,7 +45,7 @@ contract TreasuryVester {
     }
 
     function claim() public {
-        require(block.timestamp >= vestingCliff, 'TreasuryVester::claim: not time yet');
+        require(block.timestamp >= vestingCliff, 'Vester::claim: not time yet');
         uint amount;
         if (block.timestamp >= vestingEnd) {
             amount = IHypertoken(h).balanceOf(address(this));
