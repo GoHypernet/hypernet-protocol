@@ -22,17 +22,16 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
     mapping (string => string) private liquidityProviders;
 
     function votingDelay() public pure override returns (uint256) {
-        //return 6575; // 1 day (time is in seconds)
-        return 0;
+        return 1; // blocks (1 block is about 13 seconds)
     }
 
     function votingPeriod() public pure override returns (uint256) {
-        return 100; // 1 week (time is in seconds)
+        return 100; // blocks
     }
 
     function proposalThreshold() public pure override returns (uint256) {
         // number of votes required to in order to submit a successful proposal
-        return 0;
+        return 1_000_000e18; // 1 percent of all Hypertoken
     }
 
     // lookup gateway signature and payload hash via the gateway URL

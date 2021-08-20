@@ -17,7 +17,7 @@ describe("Governance", function () {
 
     // all tokens are currently owned by owner signer
     // delegate all votes to self
-    // if delegate() is not called, the account has not voting power
+    // if delegate() is not called, the account has no voting power
     const txvotes = await hypertoken.delegate(owner.address)
     const txvotes_receipt = txvotes.wait()
 
