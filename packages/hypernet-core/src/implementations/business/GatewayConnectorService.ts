@@ -228,9 +228,17 @@ export class GatewayConnectorService implements IGatewayConnectorService {
                       channelAddress,
                     ),
                   );
+
                   return this.contextProvider.setContext(context);
                 })
                 .map(() => {
+                  context.onStateChannelCreated.next(
+                    new ActiveStateChannel(
+                      chainId,
+                      routerPublicIdentifier,
+                      channelAddress,
+                    ),
+                  );
                   return channelAddress;
                 });
             });

@@ -99,11 +99,14 @@ export class AccountService implements IAccountService {
                 return this.contextProvider.setContext(context);
               })
               .map(() => {
-                return new ActiveStateChannel(
+                const newActiveStateChannel = new ActiveStateChannel(
                   chainId,
                   routerPublicIdentifier,
                   channelAddress,
                 );
+                context.onStateChannelCreated.next(newActiveStateChannel);
+
+                return newActiveStateChannel;
               });
           });
       } else {

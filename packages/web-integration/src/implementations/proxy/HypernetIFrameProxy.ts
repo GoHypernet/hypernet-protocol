@@ -77,6 +77,7 @@ export default class HypernetIFrameProxy
     this.onCoreIFrameCloseRequested = new Subject();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
+    this.onStateChannelCreated = new Subject();
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -169,6 +170,10 @@ export default class HypernetIFrameProxy
 
         child.on("onAuthorizedGatewayActivationFailed", (data: GatewayUrl) => {
           this.onAuthorizedGatewayActivationFailed.next(data);
+        });
+
+        child.on("onStateChannelCreated", (data: ActiveStateChannel) => {
+          this.onStateChannelCreated.next(data);
         });
 
         // Setup a listener for the "initialized" event.
@@ -494,4 +499,5 @@ export default class HypernetIFrameProxy
   public onCoreIFrameCloseRequested: Subject<void>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
+  public onStateChannelCreated: Subject<ActiveStateChannel>;
 }

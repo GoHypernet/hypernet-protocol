@@ -286,6 +286,10 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       parent.emit("onPrivateCredentialsRequested");
     });
 
+    this.core.onStateChannelCreated.subscribe((activeStateChannel) => {
+      parent.emit("onStateChannelCreated", activeStateChannel);
+    });
+
     this.core.onDeStorageAuthenticationStarted.subscribe(() => {
       this.coreUIService.renderDeStorageAuthenticationUI();
     });

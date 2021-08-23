@@ -270,6 +270,7 @@ export interface IHypernetCore {
   onCoreIFrameCloseRequested: Subject<void>;
   onInitializationRequired: Subject<void>;
   onPrivateCredentialsRequested: Subject<void>;
+  onStateChannelCreated: Subject<ActiveStateChannel>;
 }
 
 export const IHypernetCoreType = Symbol.for("IHypernetCore");

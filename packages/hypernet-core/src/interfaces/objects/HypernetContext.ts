@@ -46,6 +46,7 @@ export class HypernetContext {
     public onInitializationRequired: Subject<void>,
     public onPrivateCredentialsRequested: Subject<void>,
     public onGatewayConnectorProxyActivated: Subject<IGatewayConnectorProxy>,
+    public onStateChannelCreated: Subject<ActiveStateChannel>,
   ) {}
 }
 
@@ -83,6 +84,7 @@ export class InitializedHypernetContext {
     public onInitializationRequired: Subject<void>,
     public onPrivateCredentialsRequested: Subject<void>,
     public onGatewayConnectorProxyActivated: Subject<IGatewayConnectorProxy>,
+    public onStateChannelCreated: Subject<ActiveStateChannel>,
     public authorizedMediators: Map<GatewayUrl, Signature>,
   ) {}
 }

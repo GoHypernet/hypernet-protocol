@@ -162,6 +162,7 @@ export class HypernetCore implements IHypernetCore {
   public onCoreIFrameCloseRequested: Subject<void>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
+  public onStateChannelCreated: Subject<ActiveStateChannel>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -232,32 +233,33 @@ export class HypernetCore implements IHypernetCore {
   constructor(config?: HypernetConfig) {
     this._inControl = false;
 
-    this.onControlClaimed = new Subject<ControlClaim>();
-    this.onControlYielded = new Subject<ControlClaim>();
-    this.onPushPaymentSent = new Subject<PushPayment>();
-    this.onPushPaymentUpdated = new Subject<PushPayment>();
-    this.onPushPaymentReceived = new Subject<PushPayment>();
-    this.onPullPaymentSent = new Subject<PullPayment>();
-    this.onPullPaymentUpdated = new Subject<PullPayment>();
-    this.onPullPaymentReceived = new Subject<PullPayment>();
-    this.onPushPaymentDelayed = new Subject<PushPayment>();
-    this.onPullPaymentDelayed = new Subject<PullPayment>();
-    this.onPushPaymentCanceled = new Subject<PushPayment>();
-    this.onPullPaymentCanceled = new Subject<PullPayment>();
-    this.onBalancesChanged = new Subject<Balances>();
-    this.onDeStorageAuthenticationStarted = new Subject<void>();
-    this.onDeStorageAuthenticationSucceeded = new Subject<void>();
-    this.onDeStorageAuthenticationFailed = new Subject<void>();
-    this.onGatewayAuthorized = new Subject<GatewayUrl>();
-    this.onGatewayDeauthorizationStarted = new Subject<GatewayUrl>();
-    this.onAuthorizedGatewayUpdated = new Subject<GatewayUrl>();
-    this.onAuthorizedGatewayActivationFailed = new Subject<GatewayUrl>();
-    this.onGatewayIFrameDisplayRequested = new Subject<GatewayUrl>();
-    this.onGatewayIFrameCloseRequested = new Subject<GatewayUrl>();
+    this.onControlClaimed = new Subject();
+    this.onControlYielded = new Subject();
+    this.onPushPaymentSent = new Subject();
+    this.onPushPaymentUpdated = new Subject();
+    this.onPushPaymentReceived = new Subject();
+    this.onPullPaymentSent = new Subject();
+    this.onPullPaymentUpdated = new Subject();
+    this.onPullPaymentReceived = new Subject();
+    this.onPushPaymentDelayed = new Subject();
+    this.onPullPaymentDelayed = new Subject();
+    this.onPushPaymentCanceled = new Subject();
+    this.onPullPaymentCanceled = new Subject();
+    this.onBalancesChanged = new Subject();
+    this.onDeStorageAuthenticationStarted = new Subject();
+    this.onDeStorageAuthenticationSucceeded = new Subject();
+    this.onDeStorageAuthenticationFailed = new Subject();
+    this.onGatewayAuthorized = new Subject();
+    this.onGatewayDeauthorizationStarted = new Subject();
+    this.onAuthorizedGatewayUpdated = new Subject();
+    this.onAuthorizedGatewayActivationFailed = new Subject();
+    this.onGatewayIFrameDisplayRequested = new Subject();
+    this.onGatewayIFrameCloseRequested = new Subject();
     this.onCoreIFrameDisplayRequested = new Subject();
     this.onCoreIFrameCloseRequested = new Subject();
     this.onInitializationRequired = new Subject<void>();
-    this.onPrivateCredentialsRequested = new Subject<void>();
+    this.onPrivateCredentialsRequested = new Subject();
+    this.onStateChannelCreated = new Subject();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -300,6 +302,7 @@ export class HypernetCore implements IHypernetCore {
       this.onCoreIFrameCloseRequested,
       this.onInitializationRequired,
       this.onPrivateCredentialsRequested,
+      this.onStateChannelCreated,
     );
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(this.logUtils, config);
