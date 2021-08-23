@@ -26,6 +26,8 @@ import {
   MessagingError,
   RouterChannelUnknownError,
   ActiveStateChannel,
+  ChainId,
+  GatewayTokenInfo,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -279,6 +281,19 @@ export default class HypernetIFrameProxy
     return this._createCall("getActiveStateChannels", null);
   }
 
+  public createStateChannel(
+    routerPublicIdentifiers: PublicIdentifier[],
+    chainId: ChainId,
+  ): ResultAsync<
+    ActiveStateChannel,
+    VectorError | BlockchainUnavailableError | PersistenceError
+  > {
+    return this._createCall("createStateChannel", {
+      routerPublicIdentifiers,
+      chainId,
+    });
+  }
+
   public depositFunds(
     channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
@@ -378,6 +393,15 @@ export default class HypernetIFrameProxy
     PersistenceError
   > {
     return this._createCall("getAuthorizedGatewaysConnectorsStatus", null);
+  }
+
+  public getGatewayTokenInfo(
+    gatewayUrls: GatewayUrl[],
+  ): ResultAsync<
+    Map<GatewayUrl, GatewayTokenInfo[]>,
+    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+  > {
+    return this._createCall("getGatewayTokenInfo", gatewayUrls);
   }
 
   public displayGatewayIFrame(

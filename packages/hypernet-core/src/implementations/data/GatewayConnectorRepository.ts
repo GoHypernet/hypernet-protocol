@@ -18,6 +18,7 @@ import {
   GatewayAuthorizationDeniedError,
   PersistenceError,
   GatewayRegistrationInfo,
+  GatewayTokenInfo,
 } from "@hypernetlabs/objects";
 import {
   ResultUtils,
@@ -140,6 +141,17 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
     // Wait for all the new results, and return the final list
     return ResultUtils.combine(newGatewayResults).map(() => {
       return returnInfo;
+    });
+  }
+
+  public getGatewayTokenInfo(
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<
+    GatewayTokenInfo[],
+    ProxyError | GatewayAuthorizationDeniedError | PersistenceError
+  > {
+    return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
+      return proxy.getGatewayTokenInfo();
     });
   }
 

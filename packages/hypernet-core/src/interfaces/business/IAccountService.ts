@@ -11,6 +11,7 @@ import {
   BigNumberString,
   ActiveStateChannel,
   PersistenceError,
+  ChainId,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -26,6 +27,13 @@ export interface IAccountService {
   getActiveStateChannels(): ResultAsync<
     ActiveStateChannel[],
     VectorError | BlockchainUnavailableError | PersistenceError
+  >;
+  createStateChannel(
+    routerPublicIdentifiers: PublicIdentifier[],
+    chainId: ChainId,
+  ): ResultAsync<
+    ActiveStateChannel,
+    BlockchainUnavailableError | VectorError | PersistenceError
   >;
   depositFunds(
     channelAddress: EthereumAddress,

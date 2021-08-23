@@ -18,6 +18,7 @@ import {
   ChainId,
   EthereumAddress,
   UUID,
+  GatewayTokenInfo,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
@@ -52,6 +53,11 @@ export interface IGatewayConnectorProxy extends ParentProxy {
     Signature,
     GatewayValidationError | ProxyError
   >;
+
+  /**
+   * Returns the GatewayTokenInfo list reported from the gateway connector
+   */
+  getGatewayTokenInfo(): ResultAsync<GatewayTokenInfo[], ProxyError>;
 
   closeGatewayIFrame(): ResultAsync<void, GatewayConnectorError | ProxyError>;
 

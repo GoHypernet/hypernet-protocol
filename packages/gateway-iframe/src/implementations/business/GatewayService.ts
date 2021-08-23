@@ -11,6 +11,7 @@ import {
   AjaxError,
   ChainId,
   UUID,
+  GatewayTokenInfo,
 } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { injectable, inject } from "inversify";
@@ -62,6 +63,7 @@ export class GatewayService implements IGatewayService {
     protected hypernetCoreRepository: IHypernetCoreRepository,
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
   ) {}
+
   private static gatewayUrlCacheBusterUsed = false;
 
   public activateGatewayConnector(
@@ -384,6 +386,23 @@ export class GatewayService implements IGatewayService {
     }
 
     return okAsync(undefined);
+  }
+
+  public getGatewayTokenInfo(): ResultAsync<
+    GatewayTokenInfo[],
+    GatewayValidationError | GatewayConnectorError
+  > {
+    return this._getValidatedGatewayConnector().andThen((gatewayConnector) => {
+      return ResultAsync.fromPromise(
+        gatewayConnector.getGatewayTokenInfo(),
+        (e) => {
+          return new GatewayConnectorError(
+            "getGatewayTokenInfo() returned an error!",
+            e,
+          );
+        },
+      );
+    });
   }
 
   private _getValidatedGatewayConnector(): ResultAsync<

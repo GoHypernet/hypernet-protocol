@@ -78,6 +78,11 @@ export class HypernetCoreListener
           return this.gatewayService.getValidatedSignature();
         }, data.callId);
       },
+      getGatewayTokenInfo: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.gatewayService.getGatewayTokenInfo();
+        }, data.callId);
+      },
       getGatewayUrl: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           return this.gatewayService.getGatewayUrl();

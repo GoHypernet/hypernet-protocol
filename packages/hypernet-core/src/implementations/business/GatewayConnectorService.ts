@@ -11,6 +11,8 @@ import {
   ChainId,
   PublicIdentifier,
   RouterUnauthorizedError,
+  GatewayTokenInfo,
+  ActiveStateChannel,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IGatewayConnectorService } from "@interfaces/business";
@@ -212,10 +214,26 @@ export class GatewayConnectorService implements IGatewayConnectorService {
           routerPublicIdentifier,
         ).andThen(() => {
           // We need to create a state channel
-          return this.accountsRepository.createStateChannel(
-            routerPublicIdentifier,
-            chainId,
-          );
+          return this.accountsRepository
+            .createStateChannel(routerPublicIdentifier, chainId)
+            .andThen((channelAddress) => {
+              return this.accountsRepository
+                .addActiveRouter(routerPublicIdentifier)
+                .andThen(() => {
+                  // We need to add the new state channel to the context
+                  context.activeStateChannels.push(
+                    new ActiveStateChannel(
+                      chainId,
+                      routerPublicIdentifier,
+                      channelAddress,
+                    ),
+                  );
+                  return this.contextProvider.setContext(context);
+                })
+                .map(() => {
+                  return channelAddress;
+                });
+            });
         });
       } else {
         // We need to verify that the router allows the gateway.
@@ -226,6 +244,26 @@ export class GatewayConnectorService implements IGatewayConnectorService {
           return existingStateChannel.channelAddress;
         });
       }
+    });
+  }
+
+  public getGatewayTokenInfo(
+    gatewayUrls: GatewayUrl[],
+  ): ResultAsync<
+    Map<GatewayUrl, GatewayTokenInfo[]>,
+    ProxyError | PersistenceError | GatewayAuthorizationDeniedError
+  > {
+    const retMap = new Map<GatewayUrl, GatewayTokenInfo[]>();
+    return ResultUtils.combine(
+      gatewayUrls.map((gatewayUrl) => {
+        return this.gatewayConnectorRepository
+          .getGatewayTokenInfo(gatewayUrl)
+          .map((gatewayTokenInfo) => {
+            retMap.set(gatewayUrl, gatewayTokenInfo);
+          });
+      }),
+    ).map(() => {
+      return retMap;
     });
   }
 

@@ -28,6 +28,8 @@ import {
   MessagingError,
   RouterChannelUnknownError,
   ActiveStateChannel,
+  ChainId,
+  GatewayTokenInfo,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -101,7 +103,7 @@ import {
   EthersBlockchainUtils,
   CeramicUtils,
   MessagingProvider,
-  BlockchainTimeUtils
+  BlockchainTimeUtils,
 } from "@implementations/utilities";
 import {
   GatewayConnectorProxyFactory,
@@ -399,7 +401,7 @@ export class HypernetCore implements IHypernetCore {
       this.paymentUtils,
       this.logUtils,
       this.timeUtils,
-      this.blockchainTimeUtils
+      this.blockchainTimeUtils,
     );
 
     this.linkRepository = new LinkRepository(
@@ -544,6 +546,19 @@ export class HypernetCore implements IHypernetCore {
     VectorError | BlockchainUnavailableError | PersistenceError
   > {
     return this.accountService.getActiveStateChannels();
+  }
+
+  public createStateChannel(
+    routerPublicIdentifiers: PublicIdentifier[],
+    chainId: ChainId,
+  ): ResultAsync<
+    ActiveStateChannel,
+    BlockchainUnavailableError | VectorError | PersistenceError
+  > {
+    return this.accountService.createStateChannel(
+      routerPublicIdentifiers,
+      chainId,
+    );
   }
 
   /**
@@ -776,6 +791,15 @@ export class HypernetCore implements IHypernetCore {
     PersistenceError
   > {
     return this.gatewayConnectorService.getAuthorizedGatewaysConnectorsStatus();
+  }
+
+  public getGatewayTokenInfo(
+    gatewayUrls: GatewayUrl[],
+  ): ResultAsync<
+    Map<GatewayUrl, GatewayTokenInfo[]>,
+    ProxyError | PersistenceError | GatewayAuthorizationDeniedError
+  > {
+    return this.gatewayConnectorService.getGatewayTokenInfo(gatewayUrls);
   }
 
   public getAuthorizedGateways(): ResultAsync<

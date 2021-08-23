@@ -20,6 +20,7 @@ import {
   ChainId,
   EthereumAddress,
   UUID,
+  GatewayTokenInfo,
 } from "@hypernetlabs/objects";
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { HypernetContext } from "@interfaces/objects";
@@ -117,6 +118,10 @@ export class GatewayConnectorProxy
     GatewayValidationError | ProxyError
   > {
     return this._createCall("getValidatedSignature", null);
+  }
+
+  public getGatewayTokenInfo(): ResultAsync<GatewayTokenInfo[], ProxyError> {
+    return this._createCall("getGatewayTokenInfo", null);
   }
 
   public activateProxy(): ResultAsync<void, ProxyError> {

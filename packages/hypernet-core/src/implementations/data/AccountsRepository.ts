@@ -89,6 +89,27 @@ export class AccountsRepository implements IAccountsRepository {
       });
   }
 
+  public addActiveRouter(
+    routerPublicIdentifier: PublicIdentifier,
+  ): ResultAsync<void, PersistenceError> {
+    return this.getActiveRouters().andThen((activeRouters) => {
+      if (activeRouters == null) {
+        activeRouters = [];
+      }
+
+      // Check if this router is already in our active list
+      const existingActiveRouter = activeRouters.find((ar) => {
+        return ar == routerPublicIdentifier;
+      });
+
+      if (existingActiveRouter == null) {
+        activeRouters.push(routerPublicIdentifier);
+        return this.storageUtils.write(this.activeRoutersKey, activeRouters);
+      }
+      return okAsync(undefined);
+    });
+  }
+
   public getActiveStateChannels(): ResultAsync<
     ActiveStateChannel[],
     VectorError | BlockchainUnavailableError
@@ -186,28 +207,6 @@ export class AccountsRepository implements IAccountsRepository {
                 EthereumAddress(channel.channelAddress),
               );
             });
-        })
-        .andThen((channelAddress) => {
-          return this.getActiveRouters().andThen((activeRouters) => {
-            if (activeRouters == null) {
-              activeRouters = [];
-            }
-
-            // Check if this router is already in our active list
-            const existingActiveRouter = activeRouters.find((ar) => {
-              return ar == routerPublicIdentifier;
-            });
-
-            if (existingActiveRouter == null) {
-              activeRouters.push(routerPublicIdentifier);
-              return this.storageUtils
-                .write(this.activeRoutersKey, activeRouters)
-                .map(() => {
-                  return channelAddress;
-                });
-            }
-            return okAsync(channelAddress);
-          });
         });
     });
   }
