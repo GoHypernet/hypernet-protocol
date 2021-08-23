@@ -10,7 +10,7 @@
   "bugs": {
     "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
   },
-  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/developer-ui#readme",
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/#readme",
   "author": "Charlie Sibbach <charlie@hyperdyne.io>",
   "keywords": [
     "Typescript",

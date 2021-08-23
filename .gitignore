@@ -9,9 +9,8 @@ packages/*/cache
 *.tsbuildinfo
 package-lock.json
 packages/*/package-lock.json
-packages/hypernet-core/log.txt
-packages/hypernet-core/temp.txt
-packages/developer-ui/debug.log
+packages/*/log.txt
+packages/*/temp.txt
 packages/*/src/*.d.ts
 packages/*/coverage
 packages/*/yarn-error.log

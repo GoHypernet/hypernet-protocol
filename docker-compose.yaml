@@ -263,14 +263,6 @@ services:
       - router
       - iframe
 
-  developer-ui:
-    image: hypernetlabs/hypernet-protocol-developer-ui:local
-    ports: 
-      - 5015:80
-    depends_on:
-      - core-iframe
-      - gateway-iframe
-
   user-dashboard:
     image: hypernetlabs/hypernet-protocol-user-dashboard:local
     ports: 

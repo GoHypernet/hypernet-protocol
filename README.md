@@ -22,7 +22,6 @@ those who have used a traditional payment service provider SDK.
 This monorepo contains several packages:
 
 - [hypernet-core](packages/hypernet-core): The core of the protocol. HNP is encapsulated into the HypernetCore class, which can be instantiated in a variety of ways.
-- [developer-ui](packages/developer-ui): An example package demonstrating how to consume the Hypernet Core SDK. It is also used for integration testing.
 - [hypernet-contracts](packages/hypernet-contracts): A package containing the Hypernet Protocol smart contracts.
 - [iframe](packages/iframe): HypernetCore is designed to run in a browser, but that is a hostile environment. The iframe package is designed to host the running instance of HNC inside an iframe and expose an interface for cross-frame communication. The host window will communicate with the HNC via a proxy.
 - [gateway-connector](packages/gateway-connector): This package is designed for gateways that want to support the Hypernet Protocol. Gateways will need to publish an API and "connector" code that HNP clients will run. Payments sent via HNP are each moderated by a gateway, the connector allows the gateway to keep up to date with the payments the client is actually sending and recieving so that, should any disputes arrive, they can properly moderate the dispute. This package includes the OpenApi specification for the required API, as well as the typescript interface that their published connector must implement.

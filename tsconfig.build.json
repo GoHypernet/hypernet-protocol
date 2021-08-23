@@ -27,7 +27,6 @@
       "@implementations/*": ["./implementations/*"],
       "@tests/*": ["../test/*"],
       "@mock/*": ["../test/mock/*"],
-      "@integration-tests/*": ["./packages/developer-ui/test/integration/*"],
       "@mobile-integration": ["./packages/mobile-integration/src/*"],
       "@mobileApp/*": ["./packages/mobileApp/src/*"],
       "@web-integration/*": ["./*"],
@@ -38,7 +37,6 @@
       "@test-gateway/*": ["./*"],
       "@test-gateway-connector/*": ["./*"],
       "@utils/*": ["./*"],
-      "@developer-ui/*": ["./*"],
       "@objects/*": ["./*"],
       "@user-dashboard/*": ["./*"]
     }
