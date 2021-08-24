@@ -1,4 +1,5 @@
 require("@nomiclabs/hardhat-waffle");
+require("hardhat-gas-reporter");
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -29,12 +30,15 @@ module.exports = {
   networks: {
     hardhat: {
       mining: {
-        auto: false,
+        auto: true,
         interval: [3000, 6000]
       },
     },
     dev: {
       url: 'http://127.0.0.1:8569'
     }
+  },
+  gasReporter: {
+    enabled: true
   }
 };

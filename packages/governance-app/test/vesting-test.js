@@ -3,6 +3,7 @@ const { ethers } = require("hardhat")
 
 describe("Vesting", function () {
   it("Test vesting contract.", async function () {
+    this.timeout(50000);
     // get signers
     const [owner, addr1] = await ethers.getSigners()
 

@@ -75,16 +75,16 @@ describe("Governance", function () {
     );
     const tx4_reciept = await tx4.wait()
 
+    // give some tokens to addr1 to force a new block in testing environment
+    const tx6 = await hypertoken.transfer(addr1.address, 1000)
+    const tx6_reciept = await tx6.wait()
+    expect(await hypertoken.balanceOf(addr1.address)).to.equal(1000);
+
     // check state of proposal, should be 1 for Active
     expect(await governorWithSigner.state(proposalID)).to.equal(1);
 
     const tx5 = await governorWithSigner.castVote(proposalID, 1)
     const tx5_reciept = tx5.wait()
-
-    // give some tokens to addr1 to force a new block in testing environment
-    const tx6 = await hypertoken.transfer(addr1.address, 1000)
-    const tx6_reciept = await tx6.wait()
-    expect(await hypertoken.balanceOf(addr1.address)).to.equal(1000);
 
     // check who has voted
     expect(await governorWithSigner.hasVoted(proposalID, owner.address)).to.equal(true);
