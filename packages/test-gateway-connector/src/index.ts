@@ -20,9 +20,9 @@ import {
   Signature,
   BigNumberString,
   ChainId,
-  SupportedToken,
   GatewayUrl,
   GatewayTokenInfo,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { Subject } from "rxjs";
@@ -43,6 +43,7 @@ class TestGatewayConnector implements IGatewayConnector {
 
   protected chainId = ChainId(1337);
   protected gatewayUrl = GatewayUrl("http://localhost:5010");
+  protected channelAddress: EthereumAddress | null = null;
 
   async resolveChallenge(paymentId: PaymentId): Promise<IResolutionResult> {
     // What the mediator needs to sign:
@@ -178,6 +179,7 @@ class TestGatewayConnector implements IGatewayConnector {
         routerPublicIdentifiers: [this.routerPublicIdentifier],
         callback: (channelAddress) => {
           console.log(`Channel address recieved, ${channelAddress}`);
+          this.channelAddress = channelAddress;
         },
       });
     }, 1000);
@@ -253,17 +255,24 @@ class TestGatewayConnector implements IGatewayConnector {
   }
 
   public sendPayment(): void {
+    if (this.channelAddress == null) {
+      alert("Waiting for channel to be established");
+      return;
+    }
     console.log("Emiting sendFundsRequested");
     this.sendFundsRequested.next({
+      channelAddress: this.channelAddress,
       recipientPublicIdentifier: PublicIdentifier(
         "vector71a1WrjwpGYMHRhvb2HAJKspDonJkMDbghygGnCuiULdxmGuG7",
       ), // Galileo account
       amount: BigNumberString("1"),
-      expirationDate: new Date().getTime() / 1000 + 1000000,
+      expirationDate: UnixTimestamp(
+        Math.floor(new Date().getTime() / 1000 + 1000000),
+      ),
       requiredStake: BigNumberString("1"),
       paymentToken: this.paymentToken, // Hypertoken
       metadata: null,
-    } as ISendFundsRequest);
+    });
   }
 
   public async getGatewayTokenInfo(): Promise<GatewayTokenInfo[]> {

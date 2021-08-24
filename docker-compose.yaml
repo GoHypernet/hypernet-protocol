@@ -36,9 +36,17 @@ services:
             "reclaimThreshold": "200000000000000000", 
             "target": "100000000000000000", 
             "collateralizeThreshold": "50000000000000000" 
-          },{ 
+          },
+          { 
             "chainId": 1337, 
             "assetId": "0x9FBDa871d559710256a2502A2517b794B482Db40", 
+            "reclaimThreshold": "2000000000000000000", 
+            "target": "1000000000000000000", 
+            "collateralizeThreshold": "500000000000000000" 
+          },
+          { 
+            "chainId": 1337, 
+            "assetId": "0xAa588d3737B611baFD7bD713445b314BD453a5C8", 
             "reclaimThreshold": "2000000000000000000", 
             "target": "1000000000000000000", 
             "collateralizeThreshold": "500000000000000000" 
@@ -102,6 +110,13 @@ services:
           },{ 
             "chainId": 1337, 
             "assetId": "0x9FBDa871d559710256a2502A2517b794B482Db40", 
+            "reclaimThreshold": "2000000000000000000", 
+            "target": "1000000000000000000", 
+            "collateralizeThreshold": "500000000000000000" 
+          },
+          { 
+            "chainId": 1337, 
+            "assetId": "0xAa588d3737B611baFD7bD713445b314BD453a5C8", 
             "reclaimThreshold": "2000000000000000000", 
             "target": "1000000000000000000", 
             "collateralizeThreshold": "500000000000000000" 
@@ -233,9 +248,17 @@ services:
             "reclaimThreshold": "200000000000000000", 
             "target": "100000000000000000", 
             "collateralizeThreshold": "50000000000000000" 
-          },{ 
+          },
+          { 
             "chainId": 1337, 
             "assetId": "0x9FBDa871d559710256a2502A2517b794B482Db40", 
+            "reclaimThreshold": "2000000000000000000", 
+            "target": "1000000000000000000", 
+            "collateralizeThreshold": "500000000000000000" 
+          },
+          { 
+            "chainId": 1337, 
+            "assetId": "0xAa588d3737B611baFD7bD713445b314BD453a5C8", 
             "reclaimThreshold": "2000000000000000000", 
             "target": "1000000000000000000", 
             "collateralizeThreshold": "500000000000000000" 

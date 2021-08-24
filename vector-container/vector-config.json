@@ -35,6 +35,13 @@
       "reclaimThreshold": "2000000000000000000",
       "target": "1000000000000000000",
       "collateralizeThreshold": "500000000000000000"
+    },
+    { 
+      "chainId": 1337, 
+      "assetId": "0xAa588d3737B611baFD7bD713445b314BD453a5C8", 
+      "reclaimThreshold": "2000000000000000000", 
+      "target": "1000000000000000000", 
+      "collateralizeThreshold": "500000000000000000" 
     }
   ],
   "awsAccessId": "",
