@@ -54,6 +54,14 @@ const StateChannelsWidget: React.FC<IStateChannelsWidget> = ({
         UIData.onSelectedStateChannelChanged.next(_stateChannels[0]);
       }
     });
+
+    coreProxy.onStateChannelCreated.subscribe((activeStateChannel) => {
+      setStateChannels([...stateChannels, activeStateChannel]);
+      if (stateChannels.length === 0) {
+        setSelectedStateChannelAddress(activeStateChannel.channelAddress);
+        UIData.onSelectedStateChannelChanged.next(activeStateChannel);
+      }
+    });
   }, []);
 
   const CustomBox = includeBoxWrapper ? BoxWrapper : Box;

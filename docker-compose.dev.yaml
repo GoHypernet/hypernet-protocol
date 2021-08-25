@@ -295,3 +295,13 @@ services:
     depends_on:
     - core-iframe
     - gateway-iframe
+
+  user-dashboard:
+    image: hypernetlabs/hypernet-protocol-user-dashboard:local
+    ports: 
+      - 5016:80
+    depends_on:
+      - core-iframe
+      - gateway-iframe
+      - test-gateway
+  
