@@ -1,8 +1,10 @@
 import { ResultAsync, Result } from "neverthrow";
 import { Subject } from "rxjs";
 
+import { ActiveStateChannel } from "@objects/ActiveStateChannel";
 import { Balances } from "@objects/Balances";
 import { BigNumberString } from "@objects/BigNumberString";
+import { ChainId } from "@objects/ChainId";
 import { ControlClaim } from "@objects/ControlClaim";
 import {
   AcceptPaymentError,
@@ -20,6 +22,7 @@ import {
   RouterChannelUnknownError,
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
+import { GatewayTokenInfo } from "@objects/GatewayTokenInfo";
 import { GatewayUrl } from "@objects/GatewayUrl";
 import { HypernetLink } from "@objects/HypernetLink";
 import { Payment } from "@objects/Payment";
@@ -28,7 +31,6 @@ import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
 import { Signature } from "@objects/Signature";
-import { ActiveStateChannel } from "@objects/ActiveStateChannel";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -82,6 +84,22 @@ export interface IHypernetCore {
    */
   getActiveStateChannels(): ResultAsync<
     ActiveStateChannel[],
+    VectorError | BlockchainUnavailableError | PersistenceError
+  >;
+
+  /**
+   * Creates a state channel with any of a list of routers on a particular chain.
+   * You can create a state channel with any router you like; however, if you
+   * create it with a router none of your authorized gateways can use, it's of
+   * very limited use.
+   * @param routerPublicIdentifiers
+   * @param chainId
+   */
+  createStateChannel(
+    routerPublicIdentifiers: PublicIdentifier[],
+    chainId: ChainId,
+  ): ResultAsync<
+    ActiveStateChannel,
     VectorError | BlockchainUnavailableError | PersistenceError
   >;
 
@@ -199,6 +217,18 @@ export interface IHypernetCore {
     PersistenceError
   >;
 
+  /**
+   * Returns the token info for each requested gateway.
+   * This is useful for figuring out if you want to create a state channel
+   * @param gatewayUrls the list of gatways URLs that you are interested in
+   */
+  getGatewayTokenInfo(
+    gatewayUrls: GatewayUrl[],
+  ): ResultAsync<
+    Map<GatewayUrl, GatewayTokenInfo[]>,
+    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+  >;
+
   closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayConnectorError>;
@@ -240,6 +270,7 @@ export interface IHypernetCore {
   onCoreIFrameCloseRequested: Subject<void>;
   onInitializationRequired: Subject<void>;
   onPrivateCredentialsRequested: Subject<void>;
+  onStateChannelCreated: Subject<ActiveStateChannel>;
 }
 
 export const IHypernetCoreType = Symbol.for("IHypernetCore");

@@ -104,6 +104,7 @@ module.exports = {
       net: false,
       tls: false,
       fs: false,
+      assert: false,
     },
     alias: {
       "@web-integration": path.resolve(__dirname, "../web-integration/src"),

@@ -188,7 +188,11 @@ export function useFund(): IReducerStateReducer {
     } else {
       return [
         new PaymentTokenOptionViewModel(
-          "HyperToken",
+          "Hyper Token",
+          EthereumAddress("0xAa588d3737B611baFD7bD713445b314BD453a5C8"),
+        ),
+        new PaymentTokenOptionViewModel(
+          "Test Token",
           EthereumAddress("0x9FBDa871d559710256a2502A2517b794B482Db40"),
         ),
         new PaymentTokenOptionViewModel(

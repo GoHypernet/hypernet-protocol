@@ -7,6 +7,7 @@ import {
   PublicIdentifier,
   GatewayUrl,
   Signature,
+  ActiveStateChannel,
 } from "@hypernetlabs/objects";
 import {
   HypernetContext,
@@ -55,6 +56,7 @@ export class ContextProvider implements IContextProvider {
     onCoreIFrameCloseRequested: Subject<void>,
     onInitializationRequired: Subject<void>,
     onPrivateCredentialsRequested: Subject<void>,
+    onStateChannelCreated: Subject<ActiveStateChannel>,
   ) {
     this.context = new HypernetContext(
       null,
@@ -88,6 +90,7 @@ export class ContextProvider implements IContextProvider {
       onInitializationRequired,
       onPrivateCredentialsRequested,
       new Subject<IGatewayConnectorProxy>(),
+      onStateChannelCreated,
     );
     this._initializePromiseResolve = () => null;
     this._initializePromise = new Promise((resolve) => {
@@ -150,6 +153,7 @@ export class ContextProvider implements IContextProvider {
           this.context.onInitializationRequired,
           this.context.onPrivateCredentialsRequested,
           this.context.onGatewayConnectorProxyActivated,
+          this.context.onStateChannelCreated,
           new Map<GatewayUrl, Signature>(),
         ),
       );

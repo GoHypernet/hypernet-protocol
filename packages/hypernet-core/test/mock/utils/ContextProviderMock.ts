@@ -1,4 +1,5 @@
 import {
+  ActiveStateChannel,
   Balances,
   ControlClaim,
   EthereumAddress,
@@ -11,6 +12,7 @@ import {
   HypernetContext,
   InitializedHypernetContext,
 } from "@interfaces/objects";
+import { account, activeStateChannel, publicIdentifier } from "@mock/mocks";
 import { okAsync, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
 
@@ -18,7 +20,6 @@ import {
   IContextProvider,
   IGatewayConnectorProxy,
 } from "@interfaces/utilities";
-import { account, activeStateChannel, publicIdentifier } from "@mock/mocks";
 
 export class ContextProviderMock implements IContextProvider {
   public context: HypernetContext;
@@ -78,6 +79,8 @@ export class ContextProviderMock implements IContextProvider {
   public onPrivateCredentialsRequestedActivationCount = 0;
   public onGatewayConnectorActivated: Subject<IGatewayConnectorProxy>;
   public onGatewayConnectorActivatedActivations: IGatewayConnectorProxy[] = [];
+  public onStateChannelCreated: Subject<ActiveStateChannel>;
+  public onStateChannelCreatedActivations: ActiveStateChannel[] = [];
 
   public authorizedGateways: Map<GatewayUrl, Signature>;
 
@@ -221,6 +224,11 @@ export class ContextProviderMock implements IContextProvider {
       this.onGatewayConnectorActivatedActivations.push(val);
     });
 
+    this.onStateChannelCreated = new Subject();
+    this.onStateChannelCreated.subscribe((val) => {
+      this.onStateChannelCreatedActivations.push(val);
+    });
+
     this.authorizedGateways = new Map<GatewayUrl, Signature>();
 
     if (context != null) {
@@ -258,6 +266,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onInitializationRequired,
         this.onPrivateCredentialsRequested,
         this.onGatewayConnectorActivated,
+        this.onStateChannelCreated,
       );
     }
 
@@ -296,6 +305,7 @@ export class ContextProviderMock implements IContextProvider {
         this.onInitializationRequired,
         this.onPrivateCredentialsRequested,
         this.onGatewayConnectorActivated,
+        this.onStateChannelCreated,
         this.authorizedGateways,
       );
     }

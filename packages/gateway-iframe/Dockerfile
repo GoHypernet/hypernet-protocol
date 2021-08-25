@@ -6,7 +6,6 @@ WORKDIR /build
 # Copy all the stuff needed to run and cache yarn
 COPY ./package.json /build/package.json
 COPY ./yarn.lock /build/yarn.lock
-COPY ./packages/developer-ui/package.json /build/packages/developer-ui/package.json
 COPY ./packages/development/package.json /build/packages/development/package.json
 COPY ./packages/governance-app/package.json /build/packages/governance-app/package.json
 COPY ./packages/hypernet-core/package.json /build/packages/hypernet-core/package.json

@@ -73,7 +73,7 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
   ): ResultAsync<TransactionResponse, BlockchainUnavailableError> {
     return this.blockchainProvider.getSigner().andThen((signer) => {
       const testTokenContract = new Contract(
-        "0x9FBDa871d559710256a2502A2517b794B482Db40",
+        "0x9FBDa871d559710256a2502A2517b794B482Db40", // Test Token address
         artifacts.TestToken.abi,
         signer,
       );
