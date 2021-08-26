@@ -11,11 +11,10 @@ This particular governance architecture has been adopted by a number of highly s
 successful in practice at adopting beneficial proposals to protocol upgrades while preventing adversarial attacks. 
 
 The Hypernet Governance application is used for proposing and vetting new Gateway providers that wish to be added to
-the Hypernet Gateway registry. Hypernet Core uses the Hypernet Gateway registry to prevent cross-site attacks which 
-would attempt to load a malicious Gateway iframe instance into the user's browser context. 
-
-Gateways can also be removed from the Hypernet Gateway registry through a proposal that will delete their registration 
-from the public registry. 
+the Hypernet Non-Fungible Registry (HNFR). Hypernet Core uses the HNFR to prevent cross-site attacks which 
+would attempt to load a malicious Gateway iframe instance into the user's browser context to steal funds. The HNFR is
+based on the [EIP721](https://eips.ethereum.org/EIPS/eip-721) non-fungible token standard. Registration token can be 
+transfered to new ownership accounts and can be burned if a Gateway is voted out of the HNFR by the Governance contract.
 
 ## Install Dependencies
 

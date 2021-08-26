@@ -70,9 +70,23 @@ describe("Registry", function () {
         "ERC721Burnable: caller is not owner nor approved"
     )
 
+    // update the tokenURI
+    // only owner or approved address can update
+    await expectRevert(registry.updateRegistration(
+        1,
+        "new URI"),
+        "NonFungibleRegistry: caller is not owner nor approved"
+    )
+
+    // connect to a new account and try to update and burn
     const newRegistry = registry.connect(addr1)
-    const tx2 = await newRegistry.burn(1)
+
+    const tx2 = await newRegistry.updateRegistration(1, "new URI")
     const tx2_reciept = tx2.wait()
+    expect(await newRegistry.tokenURI(1)).to.equal("new URI")
+
+    const tx3 = await newRegistry.burn(1)
+    const tx3_reciept = tx3.wait()
     expect(await newRegistry.totalSupply()).to.equal(0)
   });
 });

@@ -26,7 +26,7 @@ async function main() {
 
   // all tokens are currently owned by owner signer
   // delegate all votes to self
-  // if delegate() is not called, the account has not voting power
+  // if delegate() is not called, the account has no voting power
   const txvotes = await hypertoken.delegate(owner.address)
   const txvotes_receipt = txvotes.wait()
 
@@ -51,6 +51,14 @@ async function main() {
   // deployer address should now renounce admin role for security
   const tx2 = await timelock.renounceRole(timelock.TIMELOCK_ADMIN_ROLE(), owner.address)
   const tx2_reciept = await tx2.wait()
+
+  // deploy NonFungibleRegistry contract
+  const Registry = await ethers.getContractFactory("NonFungibleRegistry");
+  const registry = await Registry.deploy();
+  registry_reciept = await registry.deployTransaction.wait();
+  const totalSupply = await registry.totalSupply();
+  console.log("Registry Address:", registry.address);
+  console.log("Registry Gas Fee:", registry_reciept.gasUsed.toString())
 }
 
 // We recommend this pattern to be able to use async/await everywhere
