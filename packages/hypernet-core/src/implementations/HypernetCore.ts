@@ -30,6 +30,8 @@ import {
   ActiveStateChannel,
   ChainId,
   GatewayTokenInfo,
+  GatewayRegistrationFilter,
+  GatewayRegistrationInfo,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -85,10 +87,13 @@ import {
   IMessagingRepository,
   IPaymentRepository,
   IRouterRepository,
+  IGatewayRegistrationRepository,
 } from "@interfaces/data";
 import { HypernetConfig, HypernetContext } from "@interfaces/objects";
 import { ok, Result, ResultAsync } from "neverthrow";
 import { Subject } from "rxjs";
+
+import { GatewayRegistrationRepository } from "./data/GatewayRegistrationRepository";
 
 import { StorageUtils } from "@implementations/data/utilities";
 import {
@@ -194,6 +199,7 @@ export class HypernetCore implements IHypernetCore {
   protected linkRepository: ILinkRepository;
   protected paymentRepository: IPaymentRepository;
   protected gatewayConnectorRepository: IGatewayConnectorRepository;
+  protected gatewayRegistrationRepository: IGatewayRegistrationRepository;
   protected messagingRepository: IMessagingRepository;
   protected routerRepository: IRouterRepository;
 
@@ -418,6 +424,11 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.gatewayConnectorRepository = new GatewayConnectorRepository(
+      this.storageUtils,
+      this.gatewayConnectorProxyFactory,
+      this.logUtils,
+    );
+    this.gatewayRegistrationRepository = new GatewayRegistrationRepository(
       this.blockchainProvider,
       this.ajaxUtils,
       this.configProvider,
@@ -445,6 +456,7 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
       this.paymentRepository,
       this.gatewayConnectorRepository,
+      this.gatewayRegistrationRepository,
       this.vectorUtils,
       this.paymentUtils,
       this.logUtils,
@@ -465,10 +477,13 @@ export class HypernetCore implements IHypernetCore {
     this.developmentService = new DevelopmentService(this.accountRepository);
     this.gatewayConnectorService = new GatewayConnectorService(
       this.gatewayConnectorRepository,
+      this.gatewayRegistrationRepository,
       this.accountRepository,
       this.routerRepository,
+      this.blockchainUtils,
       this.contextProvider,
       this.configProvider,
+      this.blockchainProvider,
       this.logUtils,
     );
 
@@ -803,6 +818,12 @@ export class HypernetCore implements IHypernetCore {
     ProxyError | PersistenceError | GatewayAuthorizationDeniedError
   > {
     return this.gatewayConnectorService.getGatewayTokenInfo(gatewayUrls);
+  }
+
+  public getGatewayRegistrationInfo(
+    filter?: GatewayRegistrationFilter,
+  ): ResultAsync<GatewayRegistrationInfo[], PersistenceError> {
+    return this.gatewayConnectorService.getGatewayRegistrationInfo(filter);
   }
 
   public getAuthorizedGateways(): ResultAsync<

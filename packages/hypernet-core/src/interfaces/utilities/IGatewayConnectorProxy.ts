@@ -29,9 +29,14 @@ export interface IGatewayConnectorProxy extends ParentProxy {
 
   /**
    * activateProxy() sets up the gateway iframe and the communication
-   * channel to the iframe. Not.hing else is done
+   * channel to the iframe. Nothing else is done
    */
   activateProxy(): ResultAsync<void, ProxyError>;
+
+  /**
+   * Returns true if the gateway connector is currently active.
+   */
+  getConnectorActivationStatus(): boolean;
 
   /**
    * activateConnector() will actual cause the connector code to execute. This should only

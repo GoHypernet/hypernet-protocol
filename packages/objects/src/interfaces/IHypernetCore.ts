@@ -22,6 +22,8 @@ import {
   RouterChannelUnknownError,
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
+import { GatewayRegistrationFilter } from "@objects/GatewayRegistrationFilter";
+import { GatewayRegistrationInfo } from "@objects/GatewayRegistrationInfo";
 import { GatewayTokenInfo } from "@objects/GatewayTokenInfo";
 import { GatewayUrl } from "@objects/GatewayUrl";
 import { HypernetLink } from "@objects/HypernetLink";
@@ -228,6 +230,15 @@ export interface IHypernetCore {
     Map<GatewayUrl, GatewayTokenInfo[]>,
     PersistenceError | ProxyError | GatewayAuthorizationDeniedError
   >;
+
+  /**
+   * Returns the requested gateway registration info.
+   * This allows you to search for gateways.
+   * @param filter optional; this will filter the gateway results
+   */
+  getGatewayRegistrationInfo(
+    filter?: GatewayRegistrationFilter,
+  ): ResultAsync<GatewayRegistrationInfo[], PersistenceError>;
 
   closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
