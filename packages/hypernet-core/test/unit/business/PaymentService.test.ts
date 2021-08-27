@@ -32,11 +32,8 @@ import {
   ILinkRepository,
   IGatewayConnectorRepository,
   IPaymentRepository,
+  IGatewayRegistrationRepository,
 } from "@interfaces/data";
-import { okAsync, errAsync } from "neverthrow";
-import td from "testdouble";
-
-import { IPaymentUtils } from "@interfaces/utilities";
 import {
   defaultExpirationLength,
   gatewayUrl,
@@ -69,6 +66,10 @@ import {
   parameterizedTransferId2,
   routerPublicIdentifier,
 } from "@mock/mocks";
+import { okAsync, errAsync } from "neverthrow";
+import td from "testdouble";
+
+import { IGatewayConnectorProxy, IPaymentUtils } from "@interfaces/utilities";
 import {
   ConfigProviderMock,
   ContextProviderMock,
@@ -96,6 +97,8 @@ class PaymentServiceMocks {
   public paymentUtils = td.object<IPaymentUtils>();
   public paymentRepository = td.object<IPaymentRepository>();
   public gatewayConnectorRepository = td.object<IGatewayConnectorRepository>();
+  public gatewayRegistrationRepository =
+    td.object<IGatewayRegistrationRepository>();
 
   public proposedPushPayment: PushPayment;
   public stakedPushPayment: PushPayment;
@@ -104,6 +107,7 @@ class PaymentServiceMocks {
 
   public assetBalance: AssetBalance;
   public gatewayRegistrationInfo: GatewayRegistrationInfo;
+  public gatewayConnectorProxy: IGatewayConnectorProxy;
 
   constructor(hypertokenBalance: BigNumberString = amount) {
     this.proposedPushPayment = this.factoryPushPayment();
@@ -195,9 +199,15 @@ class PaymentServiceMocks {
       GatewayUrl,
       GatewayRegistrationInfo
     >();
+
+    this.gatewayConnectorProxy = td.object<IGatewayConnectorProxy>();
+    td.when(
+      this.gatewayConnectorProxy.getConnectorActivationStatus(),
+    ).thenReturn(true);
+
     gatewayRegistrationInfoMap.set(gatewayUrl, this.gatewayRegistrationInfo);
     td.when(
-      this.gatewayConnectorRepository.getGatewayRegistrationInfo(
+      this.gatewayRegistrationRepository.getGatewayRegistrationInfo(
         td.matchers.contains(gatewayUrl),
       ),
     ).thenReturn(okAsync(gatewayRegistrationInfoMap));
@@ -205,17 +215,9 @@ class PaymentServiceMocks {
     td.when(this.gatewayConnectorRepository.getAuthorizedGateways()).thenReturn(
       okAsync(new Map([[gatewayUrl, validatedSignature]])),
     );
-
     td.when(
-      this.gatewayConnectorRepository.addAuthorizedGateway(
-        this.gatewayRegistrationInfo,
-        new Balances([this.assetBalance]),
-      ),
-    ).thenReturn(okAsync(undefined));
-
-    td.when(
-      this.gatewayConnectorRepository.getAuthorizedGatewaysConnectorsStatus(),
-    ).thenReturn(okAsync(new Map([[gatewayUrl, true]])));
+      this.gatewayConnectorRepository.getGatewayProxy(gatewayUrl),
+    ).thenReturn(okAsync(this.gatewayConnectorProxy));
 
     td.when(
       this.paymentRepository.resolveInsurance(
@@ -356,6 +358,7 @@ class PaymentServiceMocks {
       this.configProvider,
       this.paymentRepository,
       this.gatewayConnectorRepository,
+      this.gatewayRegistrationRepository,
       this.vectorUtils,
       this.paymentUtils,
       this.logUtils,
@@ -374,12 +377,6 @@ class PaymentServiceMocks {
     td.when(
       this.paymentRepository.getPaymentsByIds(td.matchers.contains(paymentIds)),
     ).thenReturn(okAsync(returnedPaymentsMap));
-  }
-
-  public setGatewayStatus(gatewayUrl: GatewayUrl, status: boolean) {
-    td.when(
-      this.gatewayConnectorRepository.getAuthorizedGatewaysConnectorsStatus(),
-    ).thenReturn(okAsync(new Map([[gatewayUrl, false]])));
   }
 
   public factoryPushPayment(
@@ -999,7 +996,9 @@ describe("PaymentService tests", () => {
       publicIdentifier,
     );
     paymentServiceMock.setExistingPayments([payment]);
-    paymentServiceMock.setGatewayStatus(gatewayUrl, false);
+    td.when(
+      paymentServiceMock.gatewayConnectorProxy.getConnectorActivationStatus(),
+    ).thenReturn(false);
     paymentServiceMock.contextProvider.context.publicIdentifier =
       publicIdentifier;
 

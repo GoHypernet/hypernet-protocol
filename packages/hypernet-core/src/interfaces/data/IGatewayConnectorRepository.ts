@@ -1,62 +1,42 @@
 import {
-  Balances,
-  GatewayConnectorError,
-  GatewayValidationError,
   PersistenceError,
   ProxyError,
-  BlockchainUnavailableError,
   GatewayUrl,
   Signature,
   GatewayAuthorizationDeniedError,
-  PullPayment,
-  PushPayment,
   GatewayRegistrationInfo,
-  ChainId,
-  PublicIdentifier,
-  GatewayTokenInfo,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
-export interface IGatewayConnectorRepository {
-  /**
-   * Returns a map of gateway URLs to their address
-   * @param gatewayUrls
-   */
-  getGatewayRegistrationInfo(
-    gatewayUrls: GatewayUrl[],
-  ): ResultAsync<
-    Map<GatewayUrl, GatewayRegistrationInfo>,
-    BlockchainUnavailableError
-  >;
+import { IGatewayConnectorProxy } from "@interfaces/utilities";
 
+export interface IGatewayConnectorRepository {
   /**
    * Adds the gateway url as authorized with a particular signature
    * @param gatewayRegistrationInfo
-   * @param initialBalances
    */
   addAuthorizedGateway(
-    gatewayRegistrationInfo: GatewayRegistrationInfo,
-    initialBalances: Balances,
-  ): ResultAsync<
-    void,
-    | PersistenceError
-    | GatewayValidationError
-    | ProxyError
-    | BlockchainUnavailableError
-    | GatewayConnectorError
-    | GatewayAuthorizationDeniedError
-  >;
+    gatewayUrl: GatewayUrl,
+    authorizationSignature: Signature,
+  ): ResultAsync<void, PersistenceError>;
 
   /**
-   * Returns an array of GatewayTokenInfo reported by the gateway.
-   * @param gatewayUrl the registered gateway URL
+   * Returns the activated proxy for the requested gateway URL.
+   * The connector may not be activated; call proxy.getGatewayConnectorStatus() to check.
+   * You can call proxy.activateConnector() to attempt activation
+   * @param gatewayUrl
    */
-  getGatewayTokenInfo(
+  getGatewayProxy(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<
-    GatewayTokenInfo[],
-    ProxyError | GatewayAuthorizationDeniedError | PersistenceError
-  >;
+  ): ResultAsync<IGatewayConnectorProxy, ProxyError>;
+
+  /**
+   * Creates a proxy for a gateway connector. This does not activate the connector, just assures that the proxy exists.
+   * Any requests to getGatewayProxy that are waiting for this proxy will be resolved.
+   */
+  createGatewayProxy(
+    gatewayRegistrationInfo: GatewayRegistrationInfo,
+  ): ResultAsync<IGatewayConnectorProxy, ProxyError>;
 
   /**
    * Deauthorizes a gateway, which will also destroy their proxy.
@@ -64,19 +44,7 @@ export interface IGatewayConnectorRepository {
    */
   deauthorizeGateway(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<
-    void,
-    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
-  >;
-
-  /**
-   * Returns the status of all the authorized gateway's connectors.
-   * @returns A map of gateway URL and a boolean indicating whether or not the connector is active.
-   */
-  getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
-    Map<GatewayUrl, boolean>,
-    PersistenceError
-  >;
+  ): ResultAsync<void, PersistenceError>;
 
   /**
    * Returns a list of authorized gateways and the user's authorization signature for that
@@ -87,62 +55,7 @@ export interface IGatewayConnectorRepository {
     PersistenceError
   >;
 
-  activateAuthorizedGateways(balances: Balances): ResultAsync<void, never>;
-
-  closeGatewayIFrame(
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError>;
-  displayGatewayIFrame(
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError>;
-
   destroyProxy(gatewayUrl: GatewayUrl): void;
-
-  notifyPushPaymentSent(
-    gatewayUrl: GatewayUrl,
-    payment: PushPayment,
-  ): ResultAsync<void, GatewayConnectorError>;
-  notifyPushPaymentUpdated(
-    gatewayUrl: GatewayUrl,
-    payment: PushPayment,
-  ): ResultAsync<void, GatewayConnectorError>;
-  notifyPushPaymentReceived(
-    gatewayUrl: GatewayUrl,
-    payment: PushPayment,
-  ): ResultAsync<void, GatewayConnectorError>;
-  notifyPushPaymentDelayed(
-    gatewayUrl: GatewayUrl,
-    payment: PushPayment,
-  ): ResultAsync<void, GatewayConnectorError>;
-  notifyPushPaymentCanceled(
-    gatewayUrl: GatewayUrl,
-    payment: PushPayment,
-  ): ResultAsync<void, GatewayConnectorError>;
-
-  notifyPullPaymentSent(
-    gatewayUrl: GatewayUrl,
-    payment: PullPayment,
-  ): ResultAsync<void, GatewayConnectorError>;
-  notifyPullPaymentUpdated(
-    gatewayUrl: GatewayUrl,
-    payment: PullPayment,
-  ): ResultAsync<void, GatewayConnectorError>;
-  notifyPullPaymentReceived(
-    gatewayUrl: GatewayUrl,
-    payment: PullPayment,
-  ): ResultAsync<void, GatewayConnectorError>;
-  notifyPullPaymentDelayed(
-    gatewayUrl: GatewayUrl,
-    payment: PullPayment,
-  ): ResultAsync<void, GatewayConnectorError>;
-  notifyPullPaymentCanceled(
-    gatewayUrl: GatewayUrl,
-    payment: PullPayment,
-  ): ResultAsync<void, GatewayConnectorError>;
-
-  notifyBalancesReceived(
-    balances: Balances,
-  ): ResultAsync<void, GatewayConnectorError>;
 }
 
 export interface IAuthorizedGatewayEntry {
