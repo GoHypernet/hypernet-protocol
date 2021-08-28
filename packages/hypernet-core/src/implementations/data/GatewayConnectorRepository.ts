@@ -73,6 +73,13 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
     gatewayRegistrationInfo: GatewayRegistrationInfo,
   ): ResultAsync<IGatewayConnectorProxy, ProxyError> {
     this.logUtils.debug(`Creating proxy for ${gatewayRegistrationInfo.url}`);
+    // Check if we have an existing proxy!
+    const existingProxy = this.existingProxies.get(gatewayRegistrationInfo.url);
+
+    if (existingProxy != null) {
+      return okAsync(existingProxy);
+    }
+
     return this.gatewayConnectorProxyFactory
       .factoryProxy(gatewayRegistrationInfo)
       .andThen((proxy) => {
@@ -187,10 +194,10 @@ export class GatewayConnectorRepository implements IGatewayConnectorRepository {
   ): ResultAsync<void, PersistenceError> {
     const authorizedGatewayEntries = new Array<IAuthorizedGatewayEntry>();
 
-    for (const keyval of authorizedGatewayMap) {
+    for (const [gatewayUrl, authorizationSignature] of authorizedGatewayMap) {
       authorizedGatewayEntries.push({
-        gatewayUrl: GatewayUrl(keyval[0]),
-        authorizationSignature: Signature(keyval[1]),
+        gatewayUrl: GatewayUrl(gatewayUrl),
+        authorizationSignature: Signature(authorizationSignature),
       });
     }
 
