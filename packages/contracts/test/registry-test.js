@@ -3,13 +3,13 @@ const { ethers } = require("hardhat")
 const { BN, expectRevert } = require('@openzeppelin/test-helpers')
 
 describe("Registry", function () {
-  it("Test Registry contract.", async function () {
+  it("Test the Registry contract.", async function () {
     // get signers
     const [owner, addr1] = await ethers.getSigners()
 
     // deploy hypertoken contract
     const Registry = await ethers.getContractFactory("NonFungibleRegistry");
-    const registry = await Registry.deploy();
+    const registry = await Registry.deploy("Gateways", "G", owner.address);
     registry_reciept = await registry.deployTransaction.wait();
     const totalSupply = await registry.totalSupply()
     console.log("Registry Address:", registry.address)
