@@ -7,7 +7,7 @@ describe("Registry", function () {
     // get signers
     const [owner, addr1] = await ethers.getSigners()
 
-    // deploy hypertoken contract
+    // deploy registry contract
     const Registry = await ethers.getContractFactory("NonFungibleRegistry");
     const registry = await Registry.deploy("Gateways", "G", owner.address);
     registry_reciept = await registry.deployTransaction.wait();

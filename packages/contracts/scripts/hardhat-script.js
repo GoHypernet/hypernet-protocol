@@ -52,13 +52,12 @@ async function main() {
   const tx2 = await timelock.renounceRole(timelock.TIMELOCK_ADMIN_ROLE(), owner.address)
   const tx2_reciept = await tx2.wait()
 
-  // deploy NonFungibleRegistry contract
-  const Registry = await ethers.getContractFactory("NonFungibleRegistry");
-  const registry = await Registry.deploy();
-  registry_reciept = await registry.deployTransaction.wait();
-  const totalSupply = await registry.totalSupply();
-  console.log("Registry Address:", registry.address);
-  console.log("Registry Gas Fee:", registry_reciept.gasUsed.toString())
+  // deploy factory contract
+  const FactoryRegistry = await ethers.getContractFactory("RegistryFactory");
+  const factoryregistry = await FactoryRegistry.deploy();
+  registry_reciept = await factoryregistry.deployTransaction.wait();
+  console.log("Factory Address:", factoryregistry.address)
+  console.log("Factory Gas Fee:", registry_reciept.gasUsed.toString())
 }
 
 // We recommend this pattern to be able to use async/await everywhere
