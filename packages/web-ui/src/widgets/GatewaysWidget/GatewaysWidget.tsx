@@ -14,6 +14,7 @@ import {
 } from "@material-ui/core";
 import { Folder, Block } from "@material-ui/icons";
 import { IRenderParams } from "@web-ui/interfaces";
+import GatewayInfoModalWidget from "@web-ui/widgets/GatewayInfoModalWidget";
 import React, { useState, ReactNode } from "react";
 import PulseLoader from "react-spinners/PulseLoader";
 
@@ -37,6 +38,17 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
   const [inputGatewayUrl, setInputGatewayUrl] = useState<GatewayUrl>(
     GatewayUrl(""),
   );
+  const [selectedGatewayUrl, setSelectedGatewayUrl] = useState<GatewayUrl>(
+    GatewayUrl(""),
+  );
+
+  const openGatewayDetailsModal = (gatewayUrl) => {
+    setSelectedGatewayUrl(gatewayUrl);
+  };
+
+  const gatewayModalcloseCallback = () => {
+    setSelectedGatewayUrl(GatewayUrl(""));
+  };
 
   const renderGatewayAuthorization = (): ReactNode => {
     return (
@@ -101,6 +113,12 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
         </Box>
       }
     >
+      {selectedGatewayUrl && (
+        <GatewayInfoModalWidget
+          gatewayUrl={selectedGatewayUrl}
+          closeCallback={gatewayModalcloseCallback}
+        />
+      )}
       <List>
         {[...gatewaysMap.keys()].map((gatewayUrl, index) => (
           <Box key={index}>
@@ -150,10 +168,21 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
               <ListItemSecondaryAction>
                 <Button
                   size="small"
+                  variant="contained"
+                  onClick={() => {
+                    openGatewayDetailsModal(gatewayUrl);
+                  }}
+                >
+                  Details
+                </Button>
+
+                <Button
+                  size="small"
                   color="secondary"
                   onClick={() => {
                     deauthorizeGateway(gatewayUrl);
                   }}
+                  style={{ marginLeft: 20 }}
                 >
                   Deauthorize
                 </Button>
