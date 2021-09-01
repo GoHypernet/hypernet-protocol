@@ -47,7 +47,7 @@ npx hardhat node --port 8569
 Once the node is running, deploy the Solidity contracts to the Hardhat network:
 
 ```shell
-npx hardhat run scripts/sample-script.js --network hardhat
+npx hardhat run scripts/hardhat-script.js --network hardhat
 ```
 
 Use the help tasks defined in `hardhat.confi.js` to interact with the deployed contracts.
