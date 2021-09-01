@@ -13,6 +13,7 @@ import {
   GatewayRegistrationInfo,
   ChainId,
   PublicIdentifier,
+  GatewayTokenInfo,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -44,6 +45,17 @@ export interface IGatewayConnectorRepository {
     | BlockchainUnavailableError
     | GatewayConnectorError
     | GatewayAuthorizationDeniedError
+  >;
+
+  /**
+   * Returns an array of GatewayTokenInfo reported by the gateway.
+   * @param gatewayUrl the registered gateway URL
+   */
+  getGatewayTokenInfo(
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<
+    GatewayTokenInfo[],
+    ProxyError | GatewayAuthorizationDeniedError | PersistenceError
   >;
 
   /**

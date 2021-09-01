@@ -380,7 +380,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
           type: "ERC20",
           options: {
             address: tokenAddress,
-            symbol: tokenName || "HyperToken",
+            symbol: tokenName,
             decimals: 18,
           },
         },

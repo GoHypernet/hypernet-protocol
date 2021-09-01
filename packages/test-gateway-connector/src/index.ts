@@ -20,6 +20,9 @@ import {
   Signature,
   BigNumberString,
   ChainId,
+  GatewayUrl,
+  GatewayTokenInfo,
+  UnixTimestamp,
 } from "@hypernetlabs/objects";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { Subject } from "rxjs";
@@ -34,8 +37,13 @@ class TestGatewayConnector implements IGatewayConnector {
   protected routerPublicIdentifier = PublicIdentifier(
     "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR",
   );
+  protected paymentToken = EthereumAddress(
+    "0xAa588d3737B611baFD7bD713445b314BD453a5C8",
+  ); // HyperToken
 
   protected chainId = ChainId(1337);
+  protected gatewayUrl = GatewayUrl("http://localhost:5010");
+  protected channelAddress: EthereumAddress | null = null;
 
   async resolveChallenge(paymentId: PaymentId): Promise<IResolutionResult> {
     // What the mediator needs to sign:
@@ -78,23 +86,6 @@ class TestGatewayConnector implements IGatewayConnector {
       paymentId,
       gatewaySignature: Signature(gatewaySignature),
       amount: resolutionAmount,
-    });
-  }
-
-  public onIFrameClosed() {
-    console.log("Hey, user just closed gateway iframe");
-  }
-
-  public onIFrameDisplayed() {
-    console.log("Hey, user just opened gateway iframe");
-  }
-
-  public deauthorize() {
-    return new Promise<void>((resolve, reject) => {
-      // async operations, remove stuff from db and other services
-      setTimeout(() => {
-        return resolve(undefined);
-      }, 6000);
     });
   }
 
@@ -188,9 +179,27 @@ class TestGatewayConnector implements IGatewayConnector {
         routerPublicIdentifiers: [this.routerPublicIdentifier],
         callback: (channelAddress) => {
           console.log(`Channel address recieved, ${channelAddress}`);
+          this.channelAddress = channelAddress;
         },
       });
     }, 1000);
+  }
+
+  public onIFrameClosed() {
+    console.log("Hey, user just closed gateway iframe");
+  }
+
+  public onIFrameDisplayed() {
+    console.log("Hey, user just opened gateway iframe");
+  }
+
+  public deauthorize() {
+    return new Promise<void>((resolve, reject) => {
+      // async operations, remove stuff from db and other services
+      setTimeout(() => {
+        return resolve(undefined);
+      }, 6000);
+    });
   }
 
   public onPushPaymentSent(payment: PushPayment): void {
@@ -246,19 +255,32 @@ class TestGatewayConnector implements IGatewayConnector {
   }
 
   public sendPayment(): void {
+    if (this.channelAddress == null) {
+      alert("Waiting for channel to be established");
+      return;
+    }
     console.log("Emiting sendFundsRequested");
     this.sendFundsRequested.next({
+      channelAddress: this.channelAddress,
       recipientPublicIdentifier: PublicIdentifier(
         "vector71a1WrjwpGYMHRhvb2HAJKspDonJkMDbghygGnCuiULdxmGuG7",
       ), // Galileo account
       amount: BigNumberString("1"),
-      expirationDate: new Date().getTime() / 1000 + 1000000,
+      expirationDate: UnixTimestamp(
+        Math.floor(new Date().getTime() / 1000 + 1000000),
+      ),
       requiredStake: BigNumberString("1"),
-      paymentToken: EthereumAddress(
-        "0xAa588d3737B611baFD7bD713445b314BD453a5C8",
-      ), // Hypertoken
+      paymentToken: this.paymentToken, // Hypertoken
       metadata: null,
-    } as ISendFundsRequest);
+    });
+  }
+
+  public async getGatewayTokenInfo(): Promise<GatewayTokenInfo[]> {
+    return [
+      new GatewayTokenInfo(this.paymentToken, this.chainId, [
+        this.routerPublicIdentifier,
+      ]),
+    ];
   }
 }
 

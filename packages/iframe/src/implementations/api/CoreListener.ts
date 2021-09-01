@@ -10,6 +10,8 @@ import {
   PaymentId,
   GatewayUrl,
   BigNumberString,
+  ChainId,
+  PublicIdentifier,
 } from "@hypernetlabs/objects";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import { injectable, inject } from "inversify";
@@ -50,6 +52,19 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       getActiveStateChannels: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           return this.core.getActiveStateChannels();
+        }, data.callId);
+      },
+      createStateChannel: (
+        data: IIFrameCallData<{
+          routerPublicIdentifiers: PublicIdentifier[];
+          chainId: ChainId;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.createStateChannel(
+            data.data.routerPublicIdentifiers,
+            data.data.chainId,
+          );
         }, data.callId);
       },
       depositFunds: (
@@ -142,6 +157,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       getAuthorizedGatewaysConnectorsStatus: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           return this.core.getAuthorizedGatewaysConnectorsStatus();
+        }, data.callId);
+      },
+      getGatewayTokenInfo: (data: IIFrameCallData<GatewayUrl[]>) => {
+        this.returnForModel(() => {
+          return this.core.getGatewayTokenInfo(data.data);
         }, data.callId);
       },
       providePrivateCredentials: (
@@ -264,6 +284,10 @@ export class CoreListener extends ChildProxy implements ICoreListener {
 
     this.core.onPrivateCredentialsRequested.subscribe(() => {
       parent.emit("onPrivateCredentialsRequested");
+    });
+
+    this.core.onStateChannelCreated.subscribe((activeStateChannel) => {
+      parent.emit("onStateChannelCreated", activeStateChannel);
     });
 
     this.core.onDeStorageAuthenticationStarted.subscribe(() => {

@@ -3,6 +3,8 @@ import {
   PullPayment,
   Balances,
   PublicIdentifier,
+  RouterDetails,
+  GatewayTokenInfo,
 } from "@hypernetlabs/objects";
 import { Observable } from "rxjs";
 
@@ -109,4 +111,13 @@ export interface IGatewayConnector {
    * @param balances
    */
   onBalancesReceived(balances: Balances): void;
+
+  /**
+   * getGatewayTokenInfo() must return a promise of an array of GatewayTokenInfo objects.
+   * HypernetProtocol can use this information to open state channels with routers
+   * that are compatible with the gateway, before the gateway has requested a
+   * particular channel. This allows a user to pre-load token into a channel before
+   * it is needed.
+   */
+  getGatewayTokenInfo(): Promise<GatewayTokenInfo[]>;
 }

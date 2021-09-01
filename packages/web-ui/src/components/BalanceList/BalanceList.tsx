@@ -37,7 +37,7 @@ export const BalanceList: React.FC<BalanceListProps> = (
           <img
             className={classes.tokenLogo}
             src={
-              balance.symbol === "TEST" || balance.symbol === "TEST"
+              balance.symbol === "HYPR" || balance.symbol === "HYPR"
                 ? HYPER_TOKEN_LOGO_URL
                 : `https://cryptoicon-api.vercel.app/api/icon/${balance.symbol.toLocaleLowerCase()}`
             }
@@ -50,15 +50,8 @@ export const BalanceList: React.FC<BalanceListProps> = (
             {viewUtils.fromBigNumberEther(balance.freeAmount)}
           </Box>
           <Box className={classes.tokenName}>
-            <Tooltip
-              title={
-                balance.name === "Test Token" ? "HyperToken" : balance.name
-              }
-              placement="top"
-            >
-              <Box style={{ cursor: "pointer" }}>
-                {balance.symbol === "TEST" ? "HYPR" : balance.symbol}
-              </Box>
+            <Tooltip title={balance.name} placement="top">
+              <Box style={{ cursor: "pointer" }}>{balance.symbol}</Box>
             </Tooltip>
           </Box>
         </Box>

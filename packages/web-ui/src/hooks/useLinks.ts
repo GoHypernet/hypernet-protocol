@@ -91,7 +91,6 @@ export function useLinks(): IState {
     });
 
     coreProxy.onPullPaymentReceived.subscribe((payment) => {
-      alert.show("New pull payment received.");
 
       const paymentsAutoAccept = getPaymentAutoAccept();
       if (
@@ -105,7 +104,32 @@ export function useLinks(): IState {
     });
 
     coreProxy.onPushPaymentReceived.subscribe((payment) => {
-      alert.show("New push payment received.");
+
+      const paymentsAutoAccept = getPaymentAutoAccept();
+      if (
+        paymentsAutoAccept == true &&
+        payment.state == EPaymentState.Proposed
+      ) {
+        acceptPayment(payment.id);
+      } else {
+        fetchPayments();
+      }
+    });
+
+    coreProxy.onPullPaymentUpdated.subscribe((payment) => {
+
+      const paymentsAutoAccept = getPaymentAutoAccept();
+      if (
+        paymentsAutoAccept == true &&
+        payment.state == EPaymentState.Proposed
+      ) {
+        acceptPayment(payment.id);
+      } else {
+        fetchPayments();
+      }
+    });
+
+    coreProxy.onPushPaymentUpdated.subscribe((payment) => {
 
       const paymentsAutoAccept = getPaymentAutoAccept();
       if (

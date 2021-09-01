@@ -7,6 +7,7 @@ import {
   ChainId,
   EthereumAddress,
   UUID,
+  GatewayTokenInfo,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -33,6 +34,10 @@ export interface IGatewayService {
     publicIdentifier: PublicIdentifier,
   ): ResultAsync<void, never>;
   getValidatedSignature(): ResultAsync<Signature, GatewayValidationError>;
+  getGatewayTokenInfo(): ResultAsync<
+    GatewayTokenInfo[],
+    GatewayValidationError | GatewayConnectorError
+  >;
   deauthorize(): ResultAsync<
     void,
     GatewayConnectorError | GatewayValidationError

@@ -26,6 +26,8 @@ import {
   MessagingError,
   RouterChannelUnknownError,
   ActiveStateChannel,
+  ChainId,
+  GatewayTokenInfo,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -75,6 +77,7 @@ export default class HypernetIFrameProxy
     this.onCoreIFrameCloseRequested = new Subject();
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
+    this.onStateChannelCreated = new Subject();
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -167,6 +170,10 @@ export default class HypernetIFrameProxy
 
         child.on("onAuthorizedGatewayActivationFailed", (data: GatewayUrl) => {
           this.onAuthorizedGatewayActivationFailed.next(data);
+        });
+
+        child.on("onStateChannelCreated", (data: ActiveStateChannel) => {
+          this.onStateChannelCreated.next(data);
         });
 
         // Setup a listener for the "initialized" event.
@@ -279,6 +286,19 @@ export default class HypernetIFrameProxy
     return this._createCall("getActiveStateChannels", null);
   }
 
+  public createStateChannel(
+    routerPublicIdentifiers: PublicIdentifier[],
+    chainId: ChainId,
+  ): ResultAsync<
+    ActiveStateChannel,
+    VectorError | BlockchainUnavailableError | PersistenceError
+  > {
+    return this._createCall("createStateChannel", {
+      routerPublicIdentifiers,
+      chainId,
+    });
+  }
+
   public depositFunds(
     channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
@@ -380,6 +400,15 @@ export default class HypernetIFrameProxy
     return this._createCall("getAuthorizedGatewaysConnectorsStatus", null);
   }
 
+  public getGatewayTokenInfo(
+    gatewayUrls: GatewayUrl[],
+  ): ResultAsync<
+    Map<GatewayUrl, GatewayTokenInfo[]>,
+    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+  > {
+    return this._createCall("getGatewayTokenInfo", gatewayUrls);
+  }
+
   public displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayConnectorError> {
@@ -470,4 +499,5 @@ export default class HypernetIFrameProxy
   public onCoreIFrameCloseRequested: Subject<void>;
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
+  public onStateChannelCreated: Subject<ActiveStateChannel>;
 }

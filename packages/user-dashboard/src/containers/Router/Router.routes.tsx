@@ -3,6 +3,7 @@ import { FC } from "react";
 import Summary from "@user-dashboard/pages/Summary";
 import DepositAndWithdraw from "@user-dashboard/pages/DepositAndWithdraw";
 import BalancesSummary from "@user-dashboard/pages/BalancesSummary";
+import Gateways from "@user-dashboard/pages/Gateways";
 
 interface IRoute {
   path: string;
@@ -25,5 +26,10 @@ export const routes: IRoute[] = [
     path: "/balances",
     component: BalancesSummary,
     name: "Balances",
+  },
+  {
+    path: "/gateways",
+    component: Gateways,
+    name: "Gateways",
   },
 ];

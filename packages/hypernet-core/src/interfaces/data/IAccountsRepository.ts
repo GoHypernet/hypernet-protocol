@@ -25,6 +25,14 @@ export interface IAccountsRepository {
   getActiveRouters(): ResultAsync<PublicIdentifier[], PersistenceError>;
 
   /**
+   * Stores an active router into the hypernet core persistence layer
+   * @param routerPublicIdentifier
+   */
+  addActiveRouter(
+    routerPublicIdentifier: PublicIdentifier,
+  ): ResultAsync<void, PersistenceError>;
+
+  /**
    * Returns an array of ActiveStateChannel objects.
    * ActiveStateChannels are a summary of the key information for an active
    * state channel- the chain ID, router, and channel address.
