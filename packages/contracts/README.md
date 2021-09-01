@@ -29,6 +29,12 @@ npm install
 npx hardhat test
 ```
 
+## Compiling Contracts to Generate Artifacts
+
+```shell
+npx hardhat compile
+```
+
 ## Hardhat Network
 
 First, start a hardhat node (edit [hardhat.config.js](https://hardhat.org/config/#networks-configuration) 
