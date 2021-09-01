@@ -326,7 +326,9 @@ export class ContextProviderMock implements IContextProvider {
     return okAsync(this.initializedContext);
   }
 
+  public setContextValues = new Array<HypernetContext>();
   public setContext(context: HypernetContext): ResultAsync<void, never> {
+    this.setContextValues.push(context);
     return okAsync<null, never>(null).map(() => {});
   }
 
@@ -355,7 +357,7 @@ export class ContextProviderMock implements IContextProvider {
       onInitializationRequired: 0,
       onPrivateCredentialsRequested: 0,
       onGatewayConnectorActivated: 0,
-      authorizedGateways: 0,
+      onStateChannelCreated: 0,
     };
 
     // Merge the passed in counts with the basic counts
@@ -430,6 +432,9 @@ export class ContextProviderMock implements IContextProvider {
     expect(this.onGatewayConnectorActivatedActivations.length).toBe(
       counts.onGatewayConnectorActivated,
     );
+    expect(this.onStateChannelCreatedActivations.length).toBe(
+      counts.onStateChannelCreated,
+    );
   }
 }
 
@@ -457,5 +462,5 @@ export interface IExpectedEventCounts {
   onInitializationRequired?: number;
   onPrivateCredentialsRequested?: number;
   onGatewayConnectorActivated?: number;
-  authorizedGateways?: number;
+  onStateChannelCreated?: number;
 }
