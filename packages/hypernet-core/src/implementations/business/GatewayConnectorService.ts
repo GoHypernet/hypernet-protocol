@@ -115,7 +115,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     };
   }
 
-  public initialize(): ResultAsync<void, GatewayConnectorError> {
+  public initialize(): ResultAsync<void, never> {
     return this.contextProvider.getContext().map((context) => {
       // Subscribe to the various events, and sort them out for the gateway connector
       context.onPushPaymentSent.subscribe((payment) => {
@@ -436,39 +436,6 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     return this.gatewayRegistrationRepository.getFilteredGatewayRegistrationInfo(
       filter,
     );
-  }
-
-  protected assureGatewayAuthorizedByRouter(
-    gatewayUrl: GatewayUrl,
-    routerPublicIdentifier: PublicIdentifier,
-  ): ResultAsync<void, RouterUnauthorizedError | PersistenceError> {
-    return this.routerRepository
-      .getRouterDetails([routerPublicIdentifier])
-      .andThen((routerDetailsMap) => {
-        const routerDetails = routerDetailsMap.get(routerPublicIdentifier);
-
-        if (routerDetails == null) {
-          // Either the router has not published details (odd), or something else extremely odd has happened.
-          return errAsync(
-            new RouterUnauthorizedError(
-              `No details for router ${routerPublicIdentifier} available. Please contact the gateway.`,
-              gatewayUrl,
-            ),
-          );
-        }
-
-        // Make sure that this gateway is in the allowed list by the router
-        if (routerDetails.allowedGateways.includes(gatewayUrl)) {
-          return okAsync(undefined);
-        }
-
-        return errAsync(
-          new RouterUnauthorizedError(
-            `Gateway ${gatewayUrl} requested use of ${routerPublicIdentifier}, but is not on that router's list of allowed gateways. Please contact the gateway.`,
-            gatewayUrl,
-          ),
-        );
-      });
   }
 
   public deauthorizeGateway(
@@ -932,6 +899,39 @@ export class GatewayConnectorService implements IGatewayConnectorService {
         // Even if we get an error, get rid of the connector. We don't want it doing anything
         this.gatewayConnectorRepository.destroyProxy(gatewayUrl);
         return e;
+      });
+  }
+
+  protected assureGatewayAuthorizedByRouter(
+    gatewayUrl: GatewayUrl,
+    routerPublicIdentifier: PublicIdentifier,
+  ): ResultAsync<void, RouterUnauthorizedError | PersistenceError> {
+    return this.routerRepository
+      .getRouterDetails([routerPublicIdentifier])
+      .andThen((routerDetailsMap) => {
+        const routerDetails = routerDetailsMap.get(routerPublicIdentifier);
+
+        if (routerDetails == null) {
+          // Either the router has not published details (odd), or something else extremely odd has happened.
+          return errAsync(
+            new RouterUnauthorizedError(
+              `No details for router ${routerPublicIdentifier} available. Please contact the gateway.`,
+              gatewayUrl,
+            ),
+          );
+        }
+
+        // Make sure that this gateway is in the allowed list by the router
+        if (routerDetails.allowedGateways.includes(gatewayUrl)) {
+          return okAsync(undefined);
+        }
+
+        return errAsync(
+          new RouterUnauthorizedError(
+            `Gateway ${gatewayUrl} requested use of ${routerPublicIdentifier}, but is not on that router's list of allowed gateways. Please contact the gateway.`,
+            gatewayUrl,
+          ),
+        );
       });
   }
 }

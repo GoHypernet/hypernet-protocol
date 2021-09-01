@@ -19,7 +19,7 @@ import {
 import { ResultAsync } from "neverthrow";
 
 export interface IGatewayConnectorService {
-  initialize(): ResultAsync<void, GatewayConnectorError>;
+  initialize(): ResultAsync<void, never>;
   authorizeGateway(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayValidationError>;

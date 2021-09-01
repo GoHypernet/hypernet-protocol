@@ -5,7 +5,9 @@ import {
   AuthorizedGatewaysSchema,
   Balances,
   BalancesUnavailableError,
+  BigNumberString,
   BlockchainUnavailableError,
+  EPaymentState,
   GatewayActivationError,
   GatewayConnectorError,
   GatewayRegistrationInfo,
@@ -14,12 +16,15 @@ import {
   GatewayValidationError,
   PersistenceError,
   ProxyError,
+  PullPayment,
+  PushPayment,
   RouterDetails,
   RouterUnauthorizedError,
   Signature,
+  SortedTransfers,
   SupportedToken,
 } from "@hypernetlabs/objects";
-import { ILogUtils } from "@hypernetlabs/utils";
+import { ILogUtils, ResultUtils } from "@hypernetlabs/utils";
 import {
   IAccountsRepository,
   IAuthorizedGatewayEntry,
@@ -47,6 +52,12 @@ import {
   gatewaySignature2,
   gatewayRegistrationInfo2,
   gatewaySignature3,
+  publicIdentifier2,
+  unixNow,
+  commonAmount,
+  activeOfferTransfer,
+  activeInsuranceTransfer,
+  activeParameterizedTransfer,
 } from "@mock/mocks";
 import { errAsync, ok, okAsync } from "neverthrow";
 import td, { verify } from "testdouble";
@@ -1563,5 +1574,164 @@ describe("GatewayConnectorService tests", () => {
     expect(
       mocks.contextProvider.onGatewayConnectorActivatedActivations[1],
     ).toBe(mocks.gatewayConnectorProxy2);
+  });
+
+  test("initialize runs", async () => {
+    // Arrange
+    const mocks = new GatewayConnectorServiceMocks(true);
+
+    const gatewayConnectorService = mocks.factoryGatewayConnectorService();
+
+    // Act
+    const response = await gatewayConnectorService.initialize();
+
+    // Assert
+    expect(response).toBeDefined();
+    expect(response.isErr()).toBeFalsy();
+    mocks.contextProvider.assertEventCounts({});
+  });
+
+  test("initialize subscriptions work", async () => {
+    // Arrange
+    const mocks = new GatewayConnectorServiceMocks(true);
+
+    const pushPayment = new PushPayment(
+      commonPaymentId,
+      routerPublicIdentifier,
+      chainId,
+      publicIdentifier2,
+      publicIdentifier,
+      EPaymentState.Proposed,
+      hyperTokenAddress,
+      commonAmount,
+      BigNumberString("0"),
+      expirationDate,
+      unixNow,
+      unixNow,
+      BigNumberString("0"),
+      gatewayUrl,
+      new SortedTransfers(
+        [activeOfferTransfer],
+        [activeInsuranceTransfer],
+        [activeParameterizedTransfer],
+        [],
+      ),
+      null,
+      commonAmount,
+      BigNumberString("0"),
+    );
+
+    const pullPayment = new PullPayment(
+      commonPaymentId,
+      routerPublicIdentifier,
+      chainId,
+      publicIdentifier2,
+      publicIdentifier,
+      EPaymentState.Proposed,
+      hyperTokenAddress,
+      commonAmount,
+      BigNumberString("0"),
+      expirationDate,
+      unixNow,
+      unixNow,
+      BigNumberString("0"),
+      gatewayUrl,
+      new SortedTransfers(
+        [activeOfferTransfer],
+        [activeInsuranceTransfer],
+        [activeParameterizedTransfer],
+        [],
+      ),
+      null,
+      commonAmount,
+      BigNumberString("0"),
+      BigNumberString("0"), // vestedAmount
+      1, // deltaTime
+      BigNumberString("1"), // deltaAmount
+      [], // ledger
+    );
+
+    const newBalances = new Balances([]);
+
+    const gatewayConnectorService = mocks.factoryGatewayConnectorService();
+
+    // Act
+    const response = await gatewayConnectorService
+      .initialize()
+      .andThen(() => {
+        return gatewayConnectorService.activateAuthorizedGateways();
+      })
+      .andThen(() => {
+        mocks.contextProvider.onPushPaymentSent.next(pushPayment);
+        mocks.contextProvider.onPushPaymentUpdated.next(pushPayment);
+        mocks.contextProvider.onPushPaymentReceived.next(pushPayment);
+        mocks.contextProvider.onPushPaymentDelayed.next(pushPayment);
+        mocks.contextProvider.onPushPaymentCanceled.next(pushPayment);
+
+        mocks.contextProvider.onPullPaymentSent.next(pullPayment);
+        mocks.contextProvider.onPullPaymentUpdated.next(pullPayment);
+        mocks.contextProvider.onPullPaymentReceived.next(pullPayment);
+        mocks.contextProvider.onPullPaymentDelayed.next(pullPayment);
+        mocks.contextProvider.onPullPaymentCanceled.next(pullPayment);
+
+        mocks.contextProvider.onBalancesChanged.next(newBalances);
+
+        return ResultUtils.delay(1000);
+      });
+
+    // Assert
+    expect(response).toBeDefined();
+    expect(response.isErr()).toBeFalsy();
+    mocks.contextProvider.assertEventCounts({
+      onGatewayConnectorActivated: 2,
+      onPushPaymentSent: 1,
+      onPushPaymentUpdated: 1,
+      onPushPaymentReceived: 1,
+      onPushPaymentDelayed: 1,
+      onPushPaymentCanceled: 1,
+      onPullPaymentSent: 1,
+      onPullPaymentUpdated: 1,
+      onPullPaymentReceived: 1,
+      onPullPaymentDelayed: 1,
+      onPullPaymentCanceled: 1,
+      onBalancesChanged: 1,
+    });
+    expect(
+      mocks.contextProvider.onGatewayConnectorActivatedActivations[0],
+    ).toBe(mocks.gatewayConnectorProxy);
+    expect(
+      mocks.contextProvider.onGatewayConnectorActivatedActivations[1],
+    ).toBe(mocks.gatewayConnectorProxy2);
+
+    td.verify(mocks.gatewayConnectorProxy.notifyPushPaymentSent(pushPayment));
+    td.verify(
+      mocks.gatewayConnectorProxy.notifyPushPaymentUpdated(pushPayment),
+    );
+    td.verify(
+      mocks.gatewayConnectorProxy.notifyPushPaymentReceived(pushPayment),
+    );
+    td.verify(
+      mocks.gatewayConnectorProxy.notifyPushPaymentDelayed(pushPayment),
+    );
+    td.verify(
+      mocks.gatewayConnectorProxy.notifyPushPaymentCanceled(pushPayment),
+    );
+
+    td.verify(mocks.gatewayConnectorProxy.notifyPullPaymentSent(pullPayment));
+    td.verify(
+      mocks.gatewayConnectorProxy.notifyPullPaymentUpdated(pullPayment),
+    );
+    td.verify(
+      mocks.gatewayConnectorProxy.notifyPullPaymentReceived(pullPayment),
+    );
+    td.verify(
+      mocks.gatewayConnectorProxy.notifyPullPaymentDelayed(pullPayment),
+    );
+    td.verify(
+      mocks.gatewayConnectorProxy.notifyPullPaymentCanceled(pullPayment),
+    );
+
+    td.verify(mocks.gatewayConnectorProxy.notifyBalancesReceived(newBalances));
+    td.verify(mocks.gatewayConnectorProxy2.notifyBalancesReceived(newBalances));
   });
 });
