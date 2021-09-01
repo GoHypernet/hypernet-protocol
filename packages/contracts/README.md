@@ -41,7 +41,7 @@ npx hardhat node
 You can run the node on a custom port by adding the `--port flag`:
 
 ```shell
-npx hardhat test --port 8569
+npx hardhat node --port 8569
 ```
 
 Once the node is running, deploy the Solidity contracts to the Hardhat network:
