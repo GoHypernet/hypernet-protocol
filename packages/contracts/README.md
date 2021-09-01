@@ -49,3 +49,23 @@ Once the node is running, deploy the Solidity contracts to the Hardhat network:
 ```shell
 npx hardhat run scripts/sample-script.js --network hardhat
 ```
+
+Use the help tasks defined in `hardhat.confi.js` to interact with the deployed contracts.
+
+Get Governance contract parameters:
+
+```shell
+npx hardhat governanceParameters --network hardhat
+```
+
+Propose a new Non-Fungible Registry:
+
+```shell
+npx hardhat proposeRegistry --network hardhat --name Gateways --symbol GTW --owner 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
+```
+
+Check the state of an existing Proposal:
+
+```shell
+npx hardhat proposalState --network dev --id 107094546321769118413541746675540020656786334070385123810644935346416886474019
+```

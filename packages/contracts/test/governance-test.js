@@ -34,6 +34,7 @@ describe("Governance", function () {
     const hypernetgovernor_reciept = await hypernetgovernor.deployTransaction.wait();
     console.log("Governor address:", hypernetgovernor.address)
     console.log("Governor Gas Fee:", hypernetgovernor_reciept.gasUsed.toString())
+    console.log("Governor name is:", await hypernetgovernor.name())
 
     // give the governor contract the Proposer role in the timelock contract
     const tx1 = await timelock.grantRole(timelock.PROPOSER_ROLE(), hypernetgovernor.address)
