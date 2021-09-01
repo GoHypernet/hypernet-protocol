@@ -40,13 +40,17 @@ describe("Governance", function () {
     const tx1 = await timelock.grantRole(timelock.PROPOSER_ROLE(), hypernetgovernor.address)
     const tx1_reciept = await tx1.wait()
 
-    // deployer address should now renounce admin role for security
-    const tx2 = await timelock.renounceRole(timelock.TIMELOCK_ADMIN_ROLE(), owner.address)
+    // give the governor contract the Executor role in the timelock contract
+    const tx2 = await timelock.grantRole(timelock.EXECUTOR_ROLE(), hypernetgovernor.address)
     const tx2_reciept = await tx2.wait()
 
-    // give some tokens to the Governor contract
-    const tx3 = await hypertoken.transfer(hypernetgovernor.address, 1000)
+    // deployer address should now renounce admin role for security
+    const tx3 = await timelock.renounceRole(timelock.TIMELOCK_ADMIN_ROLE(), owner.address)
     const tx3_reciept = await tx3.wait()
+
+    // give some tokens to the Governor contract
+    const tx4 = await hypertoken.transfer(hypernetgovernor.address, 1000)
+    const tx4_reciept = await tx4.wait()
     expect(await hypertoken.balanceOf(hypernetgovernor.address)).to.equal(1000);
 
     // hardhat extension to etheres, get token metadata
@@ -68,13 +72,13 @@ describe("Governance", function () {
     ); // pre-compute the proposal ID for easy lookup later
 
     // propose a vote
-    const tx4 = await governorWithSigner["propose(address[],uint256[],bytes[],string)"](
+    const tx5 = await governorWithSigner["propose(address[],uint256[],bytes[],string)"](
         [token.address],
         [0],
         [transferCalldata],
         proposalDescription
     );
-    const tx4_reciept = await tx4.wait()
+    const tx5_reciept = await tx5.wait()
 
     // give some tokens to addr1 to force a new block in testing environment
     const tx6 = await hypertoken.transfer(addr1.address, 1000)
@@ -84,8 +88,8 @@ describe("Governance", function () {
     // check state of proposal, should be 1 for Active
     expect(await governorWithSigner.state(proposalID)).to.equal(1);
 
-    const tx5 = await governorWithSigner.castVote(proposalID, 1)
-    const tx5_reciept = tx5.wait()
+    const tx7 = await governorWithSigner.castVote(proposalID, 1)
+    const tx7_reciept = tx7.wait()
 
     // check who has voted
     expect(await governorWithSigner.hasVoted(proposalID, owner.address)).to.equal(true);

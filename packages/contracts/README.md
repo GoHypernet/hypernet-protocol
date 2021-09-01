@@ -87,3 +87,9 @@ Cast a vote on a proposal (Against (0), For (1), Abstain (2)):
 ```shell
 npx hardhat castVote --network hardhat --id 28355135410951088116862211885830833164558945639064469703190055895859500299438 --support 1
 ```
+
+If a proposal has reached quorum and >50% of votes are in favor, once its deadline has passed it can be executed:
+
+```shell
+npx hardhat executeProposal --network hardhat --id 28355135410951088116862211885830833164558945639064469703190055895859500299438
+```

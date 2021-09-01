@@ -47,18 +47,23 @@ async function main() {
   console.log("Governor address:", hypernetgovernor.address)
   console.log("Governor Gas Fee:", hypernetgovernor_reciept.gasUsed.toString())
 
+  
   // give the governor contract the Proposer role in the timelock contract
   const tx1 = await timelock.grantRole(timelock.PROPOSER_ROLE(), hypernetgovernor.address)
   const tx1_reciept = await tx1.wait()
 
-  // deployer address should now renounce admin role for security
-  const tx2 = await timelock.renounceRole(timelock.TIMELOCK_ADMIN_ROLE(), owner.address)
+  // give the governor contract the Executor role in the timelock contract
+  const tx2 = await timelock.grantRole(timelock.EXECUTOR_ROLE(), hypernetgovernor.address)
   const tx2_reciept = await tx2.wait()
+
+  // deployer address should now renounce admin role for security
+  const tx3= await timelock.renounceRole(timelock.TIMELOCK_ADMIN_ROLE(), owner.address)
+  const tx3_reciept = await tx3.wait()
 
   // deploy factory contract
   const FactoryRegistry = await ethers.getContractFactory("RegistryFactory");
   const factoryregistry = await FactoryRegistry.deploy();
-  registry_reciept = await factoryregistry.deployTransaction.wait();
+  const registry_reciept = await factoryregistry.deployTransaction.wait();
   console.log("Factory Address:", factoryregistry.address)
   console.log("Factory Gas Fee:", registry_reciept.gasUsed.toString())
 }

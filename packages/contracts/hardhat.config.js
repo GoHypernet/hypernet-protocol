@@ -198,7 +198,7 @@ task("governanceParameters", "Prints Governance contracts parameters.")
     console.log("Proposal Executed:", proposal[8]);
   });
 
-  task("executeVote", "Execute a proposal that has been successfully passed.")
+  task("executeProposal", "Execute a proposal that has been successfully passed.")
   .addParam("id", "ID of an existing proposal.")
   .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
@@ -214,15 +214,14 @@ task("governanceParameters", "Prints Governance contracts parameters.")
     const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
 
     const proposalID = taskArgs.id;
-    const tx = await govHandle.castVote(proposalID, support)
-    const tx_rcpt = tx.wait()
-    const proposal = await govHandle.proposals(proposalID);
-
-    console.log("Proposal Originator:", proposal[1]);
-    console.log("Proposal ETA:", proposal[2].toString());
-    console.log("Proposal Votes For:", proposal[5].toString());
-    console.log("Proposal Votes Against:", proposal[6].toString());
-    console.log("Proposal Executed:", proposal[8]);
+    const { targets, values, signatures, calldatas } = await govHandle.getActions(proposalID);
+    console.log("Executing Proposal:", proposalID);
+    console.log("Target Addresses:", targets);
+    console.log("Proposal Values:", values);
+    console.log("Proposal Signatures:", signatures);
+    console.log("Call Datas:", calldatas);
+    const tx = await govHandle["execute(uint256)"](proposalID);
+    const tx_rcp = tx.wait();
   });
 
 // You need to export an object to set up your config
