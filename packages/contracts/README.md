@@ -50,7 +50,7 @@ Once the node is running, deploy the Solidity contracts to the Hardhat network:
 npx hardhat run scripts/hardhat-script.js --network hardhat
 ```
 
-Use the help tasks defined in `hardhat.confi.js` to interact with the deployed contracts.
+Use the help tasks defined in `hardhat.config.js` to interact with the deployed contracts.
 
 Get Governance contract parameters:
 
@@ -67,5 +67,17 @@ npx hardhat proposeRegistry --network hardhat --name Gateways --symbol GTW --own
 Check the state of an existing Proposal:
 
 ```shell
-npx hardhat proposalState --network dev --id 107094546321769118413541746675540020656786334070385123810644935346416886474019
+npx hardhat proposalState --network hardhat --id 28355135410951088116862211885830833164558945639064469703190055895859500299438
+```
+
+Delegate your voting power to a given address:
+
+```shell
+npx hardhat delegateVote --network hardhat --delegate 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+```
+
+Cast a vote on a proposal (Against (0), For (1), Abstain (2)):
+
+```shell
+npx hardhat castVote --network hardhat --id 28355135410951088116862211885830833164558945639064469703190055895859500299438 --support 1
 ```

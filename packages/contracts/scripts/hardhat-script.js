@@ -18,11 +18,14 @@ async function main() {
   // deploy hypertoken contract
   const Hypertoken = await ethers.getContractFactory("Hypertoken");
   const hypertoken = await Hypertoken.deploy();
-  hypertoken_reciept = await hypertoken.deployTransaction.wait();
-  const totalSupply = await hypertoken.totalSupply()
-  console.log("Hypertoken Address:", hypertoken.address)
-  console.log("Hypertoken Supply:", totalSupply.toString())
-  console.log("Hypertoken Gas Fee:", hypertoken_reciept.gasUsed.toString())
+  const hypertoken_reciept = await hypertoken.deployTransaction.wait();
+  const totalSupply = await hypertoken.totalSupply();
+  const recipientBalance = await hypertoken.balanceOf(owner.address)
+  console.log("Hypertoken Address:", hypertoken.address);
+  console.log("Hypertoken Supply:", totalSupply.toString());
+  console.log("Hypertoken Gas Fee:", hypertoken_reciept.gasUsed.toString());
+  console.log("Hypertoken recipient:", owner.address);
+  console.log("Recipient Balance:", recipientBalance.toString());
 
   // all tokens are currently owned by owner signer
   // delegate all votes to self
