@@ -14,6 +14,7 @@ import {
   GatewayTokenInfo,
   GatewayRegistrationFilter,
   GatewayRegistrationInfo,
+  InvalidParametersError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -56,7 +57,10 @@ export interface IGatewayConnectorService {
     gatewayUrl: GatewayUrl,
     chainId: ChainId,
     routerPublicIdentifiers: PublicIdentifier[],
-  ): ResultAsync<EthereumAddress, PersistenceError | RouterUnauthorizedError>;
+  ): ResultAsync<
+    EthereumAddress,
+    PersistenceError | RouterUnauthorizedError | InvalidParametersError
+  >;
 
   getGatewayTokenInfo(
     gatewayUrls: GatewayUrl[],

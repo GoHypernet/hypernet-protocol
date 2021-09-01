@@ -21,6 +21,8 @@ import {
   GatewayRegistrationFilter,
   Balances,
   GatewayActivationError,
+  BalancesUnavailableError,
+  InvalidParametersError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IGatewayConnectorService } from "@interfaces/business";
@@ -34,7 +36,10 @@ import {
   IRouterRepository,
   IRouterRepositoryType,
 } from "@interfaces/data";
-import { InitializedHypernetContext } from "@interfaces/objects";
+import {
+  HypernetContext,
+  InitializedHypernetContext,
+} from "@interfaces/objects";
 import { ethers } from "ethers";
 import { inject, injectable } from "inversify";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
@@ -68,6 +73,17 @@ export class GatewayConnectorService implements IGatewayConnectorService {
   >;
   protected domain: TypedDataDomain;
   protected types: Record<string, TypedDataField[]>;
+  protected authorizationsInProgress = new Map<
+    GatewayUrl,
+    ResultAsync<
+      void,
+      | PersistenceError
+      | BalancesUnavailableError
+      | BlockchainUnavailableError
+      | GatewayAuthorizationDeniedError
+      | GatewayActivationError
+    >
+  >();
 
   constructor(
     @inject(IGatewayConnectorRepositoryType)
@@ -182,125 +198,153 @@ export class GatewayConnectorService implements IGatewayConnectorService {
 
   public authorizeGateway(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayValidationError> {
-    return ResultUtils.combine([
+  ): ResultAsync<
+    void,
+    | PersistenceError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayAuthorizationDeniedError
+    | GatewayActivationError
+  > {
+    const inProgress = this.authorizationsInProgress.get(gatewayUrl);
+
+    if (inProgress != null) {
+      return inProgress;
+    }
+
+    const authorizationProcess = ResultUtils.combine([
       this.contextProvider.getInitializedContext(),
       this.gatewayConnectorRepository.getAuthorizedGateways(),
       this.accountsRepository.getBalances(),
-    ]).andThen((vals) => {
-      const [context, authorizedGatewaysMap, balances] = vals;
+    ])
+      .andThen((vals) => {
+        const [context, authorizedGatewaysMap, balances] = vals;
 
-      let deauthResult: ResultAsync<
-        void,
-        PersistenceError | ProxyError | GatewayAuthorizationDeniedError
-      >;
-      // Remove the gateway iframe proxy related to that gatewayUrl if there is any activated ones.
-      if (authorizedGatewaysMap.get(gatewayUrl)) {
-        deauthResult =
-          this.gatewayConnectorRepository.deauthorizeGateway(gatewayUrl);
-      } else {
-        deauthResult = okAsync(undefined);
-      }
+        const existingAuthorizedProxy = authorizedGatewaysMap.get(gatewayUrl);
+        if (existingAuthorizedProxy != null) {
+          return okAsync<
+            void,
+            | PersistenceError
+            | BalancesUnavailableError
+            | BlockchainUnavailableError
+            | GatewayAuthorizationDeniedError
+            | GatewayActivationError
+          >(undefined);
+        }
 
-      return deauthResult
-        .andThen(() => {
-          return this.gatewayRegistrationRepository.getGatewayRegistrationInfo([
-            gatewayUrl,
-          ]);
-        })
-        .andThen((gatewayRegistrationInfoMap) => {
-          const gatewayRegistrationInfo =
-            gatewayRegistrationInfoMap.get(gatewayUrl);
-          if (gatewayRegistrationInfo == null) {
-            throw new Error(
-              "Gateway registration info not available but no error!",
-            );
-          }
-
-          return this.gatewayConnectorRepository
-            .createGatewayProxy(gatewayRegistrationInfo)
-            .andThen((proxy) => {
-              // With the proxy activated, we can get the validated gateway signature
-              return ResultUtils.combine([
-                proxy.getValidatedSignature(),
-                this.blockchainProvider.getSigner(),
-              ])
-                .andThen((vals) => {
-                  const [gatewaySignature, signer] = vals;
-
-                  // gatewaySignature has been validated by the iframe, so this is already confirmed.
-                  // Now we need to get an authorization signature
-                  const value = {
-                    authorizedGatewayUrl: gatewayRegistrationInfo.url,
-                    gatewayValidatedSignature: gatewaySignature,
-                  } as Record<string, unknown>;
-                  const signerPromise = signer._signTypedData(
-                    this.domain,
-                    this.types,
-                    value,
-                  );
-
-                  return ResultAsync.fromPromise<
-                    string,
-                    GatewayValidationError
-                  >(signerPromise, (e) => e as GatewayValidationError);
-                })
-                .andThen((authorizationSignature) => {
-                  // The connector has been authorized, store it as an authorized connector
-                  return this.gatewayConnectorRepository.addAuthorizedGateway(
-                    gatewayUrl,
-                    Signature(authorizationSignature),
-                  );
-                })
-                .andThen(() => {
-                  // Notify the world that the gateway connector exists
-                  // Notably, API listeners could start
-                  context.onGatewayConnectorProxyActivated.next(proxy);
-
-                  // Activate the gateway connector
-                  return proxy.activateConnector(
-                    context.publicIdentifier,
-                    balances,
-                  );
-                })
-                .map(() => {
-                  // Only if the gateway is successfully activated do we stick it in the list.
-                  this.authorizedGatewayProxies.set(
-                    gatewayRegistrationInfo.url,
-                    okAsync(proxy),
-                  );
-                });
-            })
-            .mapErr((e) => {
-              // If we encounter a problem, destroy the proxy so we can start afresh.
-              this.gatewayConnectorRepository.destroyProxy(
-                gatewayRegistrationInfo.url,
+        return this.gatewayRegistrationRepository
+          .getGatewayRegistrationInfo([gatewayUrl])
+          .andThen((gatewayRegistrationInfoMap) => {
+            const gatewayRegistrationInfo =
+              gatewayRegistrationInfoMap.get(gatewayUrl);
+            if (gatewayRegistrationInfo == null) {
+              throw new Error(
+                "Gateway registration info not available but no error!",
               );
+            }
 
-              // Notify the world
-              if (context != null) {
+            return this.gatewayConnectorRepository
+              .createGatewayProxy(gatewayRegistrationInfo)
+              .andThen((proxy) => {
+                // With the proxy activated, we can get the validated gateway signature
+                return ResultUtils.combine([
+                  proxy.getValidatedSignature(),
+                  this.blockchainProvider.getSigner(),
+                ])
+                  .andThen((vals) => {
+                    const [gatewaySignature, signer] = vals;
+
+                    // gatewaySignature has been validated by the iframe, so this is already confirmed.
+                    // Now we need to get an authorization signature
+                    const value = {
+                      authorizedGatewayUrl: gatewayRegistrationInfo.url,
+                      gatewayValidatedSignature: gatewaySignature,
+                    } as Record<string, unknown>;
+                    const signerPromise = signer._signTypedData(
+                      this.domain,
+                      this.types,
+                      value,
+                    );
+
+                    return ResultAsync.fromPromise<
+                      string,
+                      GatewayValidationError
+                    >(
+                      signerPromise,
+                      (e) =>
+                        new GatewayAuthorizationDeniedError(
+                          "User did not sign the validated connector",
+                          e,
+                        ),
+                    );
+                  })
+                  .andThen((authorizationSignature) => {
+                    // The connector has been authorized, store it as an authorized connector
+                    return this.gatewayConnectorRepository.addAuthorizedGateway(
+                      gatewayUrl,
+                      Signature(authorizationSignature),
+                    );
+                  })
+                  .andThen(() => {
+                    // Activate the gateway connector
+                    return this._activateConnector(context, proxy, balances);
+                  })
+                  .map(() => {
+                    // Only if the gateway is successfully activated do we stick it in the list.
+                    this.authorizedGatewayProxies.set(
+                      gatewayRegistrationInfo.url,
+                      okAsync(proxy),
+                    );
+
+                    context.onGatewayAuthorized.next(gatewayUrl);
+
+                    // No matter what happens, we need to remove the ongoing auth
+                    this.authorizationsInProgress.delete(gatewayUrl);
+                  });
+              })
+              .mapErr((e) => {
+                // If we encounter a problem, destroy the proxy so we can start afresh.
+                this.gatewayConnectorRepository.destroyProxy(
+                  gatewayRegistrationInfo.url,
+                );
+
+                // Notify the world
                 context.onAuthorizedGatewayActivationFailed.next(
                   gatewayRegistrationInfo.url,
                 );
-              }
 
-              return new GatewayActivationError(
-                `Unable to activate gateway ${gatewayRegistrationInfo.url}`,
-                e,
-              );
-            });
-        })
-        .map(() => {
-          context.onGatewayAuthorized.next(gatewayUrl);
-        });
-    });
+                return new GatewayActivationError(
+                  `Unable to activate gateway ${gatewayRegistrationInfo.url}`,
+                  e,
+                );
+              });
+          });
+      })
+      .mapErr((e) => {
+        // No matter what happens, we need to remove the ongoing auth
+        this.authorizationsInProgress.delete(gatewayUrl);
+        return e;
+      });
+
+    this.authorizationsInProgress.set(gatewayUrl, authorizationProcess);
+
+    return authorizationProcess;
   }
 
   public ensureStateChannel(
     gatewayUrl: GatewayUrl,
     chainId: ChainId,
     routerPublicIdentifiers: PublicIdentifier[],
-  ): ResultAsync<EthereumAddress, PersistenceError | RouterUnauthorizedError> {
+  ): ResultAsync<
+    EthereumAddress,
+    PersistenceError | RouterUnauthorizedError | InvalidParametersError
+  > {
+    if (routerPublicIdentifiers.length < 1) {
+      return errAsync(
+        new InvalidParametersError("No routers provided to ensureStateChannel"),
+      );
+    }
+
     return this.contextProvider.getInitializedContext().andThen((context) => {
       // Check if we have an existing state channel that matches these parameters.
       const existingStateChannel = context.activeStateChannels.find((asc) => {
@@ -438,20 +482,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       this._getActivatedGatewayProxy(gatewayUrl),
     ]).andThen((vals) => {
       const [context, proxy] = vals;
-      context.onGatewayDeauthorizationStarted.next(gatewayUrl);
-      return proxy
-        .deauthorize()
-        .andThen(() => {
-          return this.gatewayConnectorRepository.deauthorizeGateway(gatewayUrl);
-        })
-        .map(() => {
-          // Remove the proxy
-          return this.gatewayConnectorRepository.destroyProxy(gatewayUrl);
-        })
-        .orElse(() => {
-          this.gatewayConnectorRepository.destroyProxy(gatewayUrl);
-          return okAsync(undefined);
-        });
+      return this._deauthorizeGateway(gatewayUrl, context, proxy);
     });
   }
 
@@ -519,82 +550,84 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | BlockchainUnavailableError
     | ProxyError
   > {
-    return this.accountsRepository.getBalances().andThen((balances) => {
-      if (this.activateAuthorizedGatewaysResult != null) {
-        return this.activateAuthorizedGatewaysResult;
-      }
+    if (this.activateAuthorizedGatewaysResult != null) {
+      return this.activateAuthorizedGatewaysResult;
+    }
 
-      this.activateAuthorizedGatewaysResult = ResultUtils.combine([
-        this.contextProvider.getInitializedContext(),
-        this.gatewayConnectorRepository.getAuthorizedGateways().orElse((e) => {
-          return okAsync(new Map());
-        }),
-        this.blockchainProvider.getSigner(),
-      ])
-        .andThen((vals) => {
-          const [context, authorizedGateways, signer] = vals;
-          const activationResults = new Array<() => ResultAsync<void, never>>();
+    this.activateAuthorizedGatewaysResult = ResultUtils.combine([
+      this.accountsRepository.getBalances(),
+      this.contextProvider.getInitializedContext(),
+      this.gatewayConnectorRepository.getAuthorizedGateways().orElse((e) => {
+        return okAsync(new Map());
+      }),
+      this.blockchainProvider.getSigner(),
+    ])
+      .andThen((vals) => {
+        const [balances, context, authorizedGateways, signer] = vals;
 
-          const gatewayUrls = new Array<GatewayUrl>();
-          for (const [gatewayUrl] of authorizedGateways) {
-            gatewayUrls.push(gatewayUrl);
-          }
+        const gatewayUrls = new Array<GatewayUrl>();
+        for (const [gatewayUrl] of authorizedGateways) {
+          gatewayUrls.push(gatewayUrl);
+        }
 
-          // Get the registration info
-          return this.gatewayRegistrationRepository
-            .getGatewayRegistrationInfo(gatewayUrls)
-            .andThen((registrationInfoMap) => {
-              for (const [
-                gatewayUrl,
-                authorizationSignature,
-              ] of authorizedGateways) {
-                const registrationInfo = registrationInfoMap.get(gatewayUrl);
+        // Get the registration info
+        return this.gatewayRegistrationRepository
+          .getGatewayRegistrationInfo(gatewayUrls)
+          .andThen((registrationInfoMap) => {
+            const activationResults = new Array<
+              () => ResultAsync<void, never>
+            >();
 
-                // If the registration info is not available, skip it
-                if (registrationInfo == null) {
-                  continue;
-                }
+            for (const [
+              gatewayUrl,
+              authorizationSignature,
+            ] of authorizedGateways) {
+              const registrationInfo = registrationInfoMap.get(gatewayUrl);
 
-                activationResults.push(() => {
-                  return this._activateAuthorizedGateway(
-                    balances,
-                    registrationInfo,
-                    authorizationSignature,
-                    context,
-                    signer,
-                  )
-                    .map((_proxy) => {
-                      return;
-                    })
-                    .orElse((e) => {
-                      // This function will eat all errors, so that startup
-                      // will not be denied.
-                      this.logUtils.error(
-                        `Could not activate authorized gateway ${gatewayUrl}`,
-                      );
-                      this.logUtils.error(e);
-                      return okAsync(undefined);
-                    });
-                });
+              // If the registration info is not available, skip it
+              if (registrationInfo == null) {
+                continue;
               }
 
-              // There is a reason for this
-              // Postmate has issues creating multiple proxies in parallel- the handshake process will break.
-              // I would like to swap out or fix Postmate- there are some forks that would be good- but the easiest
-              // fix is this.
-              return ResultUtils.executeSerially(activationResults);
-            })
-            .map(() => {});
-        })
-        .orElse((e) => {
-          this.logUtils.error(
-            "Could not get prerequisites for activateAuthorizedGateways",
-          );
-          this.logUtils.error(e);
-          return okAsync<void, never>(undefined);
-        });
-      return this.activateAuthorizedGatewaysResult;
-    });
+              activationResults.push(() => {
+                return this._activateAuthorizedGateway(
+                  balances,
+                  registrationInfo,
+                  authorizationSignature,
+                  context,
+                  signer,
+                )
+                  .map((_proxy) => {
+                    return;
+                  })
+                  .orElse((e) => {
+                    // This function will eat all errors, so that startup
+                    // will not be denied.
+                    this.logUtils.error(
+                      `Could not activate authorized gateway ${gatewayUrl}`,
+                    );
+                    this.logUtils.error(e);
+                    return okAsync(undefined);
+                  });
+              });
+            }
+
+            // There is a reason for this
+            // Postmate has issues creating multiple proxies in parallel- the handshake process will break.
+            // I would like to swap out or fix Postmate- there are some forks that would be good- but the easiest
+            // fix is this.
+            return ResultUtils.executeSerially(activationResults);
+          })
+          .map(() => {});
+      })
+      .orElse((e) => {
+        this.logUtils.error(
+          "Could not get prerequisites for activateAuthorizedGateways",
+        );
+        this.logUtils.error(e);
+        return okAsync<void, never>(undefined);
+      });
+    return this.activateAuthorizedGatewaysResult;
   }
 
   public closeGatewayIFrame(
@@ -756,38 +789,28 @@ export class GatewayConnectorService implements IGatewayConnectorService {
           authorizationSignature,
           context,
           signer,
-        )
-          .andThen(() => {
-            return this._activateConnector(context, proxy, balances);
-          })
-          .map(() => {
-            // TODO: make sure of the implementation here, this will trigger an event and a subscribe event in GatewayConnectorListener
-            // will call advanceGatewayUnresolvedPayments.
-            context.onGatewayConnectorProxyActivated.next(proxy);
-            return proxy;
-          })
-          .mapErr((e) => {
-            // Notify the world
-            context.onAuthorizedGatewayActivationFailed.next(
-              gatewayRegistrationInfo.url,
-            );
+        ).andThen(() => {
+          return this._activateConnector(context, proxy, balances);
+        });
+      })
+      .mapErr((e) => {
+        // Notify the world
+        context.onAuthorizedGatewayActivationFailed.next(
+          gatewayRegistrationInfo.url,
+        );
 
-            this.logUtils.error(
-              `Gateway connector ${gatewayRegistrationInfo.url} failed to activate`,
-            );
+        this.logUtils.error(
+          `Gateway connector ${gatewayRegistrationInfo.url} failed to activate`,
+        );
 
-            // TODO: make sure of error cases where we want to destroy the proxy or not
-            if (
-              e instanceof ProxyError ||
-              e instanceof GatewayActivationError
-            ) {
-              this.gatewayConnectorRepository.destroyProxy(
-                gatewayRegistrationInfo.url,
-              );
-            }
+        // TODO: make sure of error cases where we want to destroy the proxy or not
+        if (e instanceof ProxyError || e instanceof GatewayActivationError) {
+          this.gatewayConnectorRepository.destroyProxy(
+            gatewayRegistrationInfo.url,
+          );
+        }
 
-            return e;
-          });
+        return e;
       });
 
     this.authorizedGatewayProxies.set(gatewayRegistrationInfo.url, proxyResult);
@@ -836,7 +859,12 @@ export class GatewayConnectorService implements IGatewayConnectorService {
         );
 
         // Get a new signature from the user
-        return ResultAsync.fromPromise(signerPromise, (e) => e as Error)
+        return ResultAsync.fromPromise(signerPromise, (e) => {
+          return new GatewayAuthorizationDeniedError(
+            `User declined authorization of the gateway`,
+            e,
+          );
+        })
           .andThen((authorizationSignature) => {
             return this.gatewayConnectorRepository.addAuthorizedGateway(
               gatewayUrl,
@@ -850,16 +878,13 @@ export class GatewayConnectorService implements IGatewayConnectorService {
             // We only end up here if the user has denied signing
             // to authorize the new connector.
             // We need to de-authorize this gateway
-            return this.deauthorizeGateway(gatewayUrl).andThen(() => {
-              // And then propagate the error
-              this.logUtils.error(e);
-              return errAsync(
-                new GatewayAuthorizationDeniedError(
-                  `User declined authorization of the gateway`,
-                  e,
-                ),
-              );
-            });
+            return this._deauthorizeGateway(gatewayUrl, context, proxy).andThen(
+              () => {
+                // And then propagate the error
+                this.logUtils.error(e);
+                return errAsync(e);
+              },
+            );
           });
       }
 
@@ -876,8 +901,37 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     return proxy
       .activateConnector(context.publicIdentifier, balances)
       .map(() => {
+        // Notify the world that the gateway connector exists
+        // Notably, API listeners could start
+        context.onGatewayConnectorProxyActivated.next(proxy);
+
         this.logUtils.debug(`Connector activated for ${proxy.gatewayUrl}`);
         return proxy;
+      });
+  }
+
+  protected _deauthorizeGateway(
+    gatewayUrl: GatewayUrl,
+    context: HypernetContext,
+    proxy: IGatewayConnectorProxy,
+  ): ResultAsync<
+    void,
+    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+  > {
+    context.onGatewayDeauthorizationStarted.next(gatewayUrl);
+    return proxy
+      .deauthorize()
+      .andThen(() => {
+        return this.gatewayConnectorRepository.deauthorizeGateway(gatewayUrl);
+      })
+      .map(() => {
+        // Remove the proxy
+        return this.gatewayConnectorRepository.destroyProxy(gatewayUrl);
+      })
+      .mapErr((e) => {
+        // Even if we get an error, get rid of the connector. We don't want it doing anything
+        this.gatewayConnectorRepository.destroyProxy(gatewayUrl);
+        return e;
       });
   }
 }
