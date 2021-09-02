@@ -1,0 +1,56 @@
+{
+  "name": "@hypernetlabs/governance-app",
+  "version": "0.0.1",
+  "description": "Governance app powered by hypernet protocol",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GoHypernet/hypernet-protocol.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GoHypernet/hypernet-protocol/issues"
+  },
+  "homepage": "https://github.com/GoHypernet/hypernet-protocol/tree/master/packages/governance-app#readme",
+  "author": "Charlie Sibbach <charlie@hyperdyne.io>",
+  "keywords": [
+    "Blockchain",
+    "Hypernet",
+    "SDK",
+    "Ethereum",
+    "Vector",
+    "React"
+  ],
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "!dist/test",
+    "!dist/tsconfig.tsbuildinfo"
+  ],
+  "scripts": {
+    "build": "yarn clean && yarn compile && yarn postCompile",
+    "dockerize": "docker build -t hypernetlabs/hypernet-protocol-governance-app:local -f Dockerfile --progress=plain ../..",
+    "docker-push": "docker push hypernetlabs/hypernet-protocol-governance-app:local",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "alias": "tsc-alias",
+    "postCompile": "webpack",
+    "prepare": "yarn build",
+    "start": "yarn clean && webpack serve --config webpack.config.js --mode development",
+    "start-iframe-watch": "cd ../iframe && yarn start",
+    "start-gateway-iframe-watch": "cd ../gateway-iframe && yarn start",
+    "test": "echo \"No tests specified yet\" && exit 0"
+  },
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@hypernetlabs/objects": "^0.0.1",
+    "@hypernetlabs/web-integration": "^0.0.1",
+    "@material-ui/core": "^4.11.4",
+    "path-to-regexp": "^6.2.0",
+    "react": "^17.0.2",
+    "react-alert": "^7.0.3",
+    "react-alert-template-basic": "^1.0.2",
+    "react-dom": "^17.0.2",
+    "react-router-dom": "^5.2.0",
+    "react-spinners": "^0.10.6"
+  }
+}
