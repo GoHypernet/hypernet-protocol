@@ -35,11 +35,6 @@ const Header: React.FC = () => {
             <Link to={route.path}>{route.name}</Link>
           </Box>
         ))}
-        <Box className={`${classes.menuItem} ${classes.inactiveMenuItem}`}>
-          <a href="https://galileo-forum.hypernetlabs.io/" target="_blank">
-            COMMUNITY
-          </a>
-        </Box>
       </Box>
     </Box>
   );
