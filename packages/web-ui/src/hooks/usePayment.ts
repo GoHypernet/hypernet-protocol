@@ -166,7 +166,7 @@ export function usePayment(initialParams: any): IReducerStateReducer {
         });
       } catch (error) {
         if (cancelRequest) return;
-        dispatch({ type: EActionTypes.ERROR, payload: error.message });
+        //dispatch({ type: EActionTypes.ERROR, payload: error.message });
       }
     };
 

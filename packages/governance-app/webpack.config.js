@@ -7,6 +7,17 @@ const webpack = require("webpack");
 
 const configFilePath = require.resolve("./tsconfig.json");
 
+process.env.__CHAIN_PROVIDERS__ = '{"1337": "http://localhost:8545"}';
+process.env.__CHAIN_ADDRESSES__ =
+  '{ \
+  "1337": { \
+    "hypertokenAddress": "0x9FBDa871d559710256a2502A2517b794B482Db40", \
+    "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a" \
+  } \
+}';
+process.env.__GOVERNANCE_CHAIN_ID__ = 1337;
+process.env.__DEBUG__ = true;
+
 /** @type import('webpack').Configuration */
 module.exports = {
   context: __dirname,
@@ -119,10 +130,14 @@ module.exports = {
       process: "process/browser",
     }),
     new webpack.DefinePlugin({
-      __CORE_IFRAME_SOURCE__: JSON.stringify(
-        process.env.__CORE_IFRAME_SOURCE__,
+      __CHAIN_PROVIDERS__: JSON.stringify(process.env.__CHAIN_PROVIDERS__),
+      __CHAIN_ADDRESSES__: JSON.stringify(process.env.__CHAIN_ADDRESSES__),
+      __GOVERNANCE_CHAIN_ID__: JSON.stringify(
+        process.env.__GOVERNANCE_CHAIN_ID__,
       ),
+      __INFURA_ID__: JSON.stringify(process.env.__INFURA_ID__),
       __BUILD_ENV__: JSON.stringify(process.env.__BUILD_ENV__),
+      __DEBUG__: JSON.stringify(process.env.__DEBUG__),
     }),
   ],
 };

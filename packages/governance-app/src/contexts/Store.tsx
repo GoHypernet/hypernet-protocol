@@ -1,27 +1,26 @@
-import { IHypernetCore } from "@hypernetlabs/objects";
-import { IHypernetWebIntegration } from "@hypernetlabs/web-integration";
-import { ViewUtils, IViewUtils } from "@hypernetlabs/web-ui";
+import { IConfigProvider } from "@governance-app/interfaces/utilities/IConfigProvider";
+import { IGovernanceBlockchainProvider } from "@interfaces/utilities";
 import React, { useState, useContext } from "react";
 
 interface IStore {
-  viewUtils: IViewUtils;
-  hypernetWebIntegration: IHypernetWebIntegration;
+  configProvider: IConfigProvider;
+  governanceBlockchainProvider: IGovernanceBlockchainProvider;
 }
 
-interface IStoreProps {
+interface IStoreProps extends IStore {
   children: any;
-  hypernetWebIntegration: IHypernetWebIntegration;
 }
 
 const StoreContext = React.createContext<IStore>(undefined!);
 
 export function StoreProvider({
   children,
-  hypernetWebIntegration,
+  configProvider,
+  governanceBlockchainProvider,
 }: IStoreProps) {
   const initialState: IStore = {
-    viewUtils: new ViewUtils(),
-    hypernetWebIntegration,
+    configProvider,
+    governanceBlockchainProvider,
   };
 
   return (

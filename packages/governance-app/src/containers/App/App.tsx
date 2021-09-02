@@ -1,7 +1,4 @@
-import HypernetWebIntegration, {
-  IHypernetWebIntegration,
-} from "@hypernetlabs/web-integration";
-import { ResultMessage, EResultStatus } from "@hypernetlabs/web-ui";
+import { LogUtils } from "@hypernetlabs/utils";
 import { Box } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
@@ -11,43 +8,51 @@ import { useStyles } from "./App.style";
 import Header from "@governance-app/components/Header";
 import Router from "@governance-app/containers/Router";
 import { useLayoutContext, StoreProvider } from "@governance-app/contexts";
+import {
+  ConfigProvider,
+  GovernanceBlockchainProvider,
+} from "@governance-app/implementations/utilities";
+import {
+  IConfigProvider,
+  IGovernanceBlockchainProvider,
+} from "@governance-app/interfaces/utilities";
 
-declare const __CORE_IFRAME_SOURCE__: string;
-
-const integration: IHypernetWebIntegration = new HypernetWebIntegration(
-  __CORE_IFRAME_SOURCE__,
-);
+const logUtils = new LogUtils();
+const configProvider: IConfigProvider = new ConfigProvider(logUtils);
+const governanceBlockchainProvider: IGovernanceBlockchainProvider =
+  new GovernanceBlockchainProvider(configProvider, logUtils);
 
 const App: React.FC = () => {
   const { setLoading, setResultMessage } = useLayoutContext();
   const classes = useStyles();
-  const [coreReady, setCoreReady] = useState<boolean>(false);
+  const [appReady, setAppReady] = useState<boolean>(false);
 
   useEffect(() => {
-    setLoading(true);
-
-    integration
-      .getReady()
-      .map((coreProxy) => {
-        setLoading(false);
-        setCoreReady(true);
+    governanceBlockchainProvider
+      .initialize()
+      .map(() => {
+        setAppReady(true);
+        governanceBlockchainProvider.getProvider().map((provider) => {
+          console.log("provider: ", provider);
+        });
+        governanceBlockchainProvider.getSigner().map((signer) => {
+          console.log("signer: ", signer);
+        });
       })
       .mapErr((e) => {
-        setResultMessage(
-          new ResultMessage(
-            EResultStatus.FAILURE,
-            e.message || "Something went wrong!",
-          ),
-        );
+        console.log("governanceBlockchainProvider e: ", e);
       });
   }, []);
 
   return (
-    <StoreProvider hypernetWebIntegration={integration}>
+    <StoreProvider
+      configProvider={configProvider}
+      governanceBlockchainProvider={governanceBlockchainProvider}
+    >
       <Box className={classes.appWrapper}>
         <BrowserRouter>
           <Header />
-          {coreReady && <Router />}
+          {appReady && <Router />}
         </BrowserRouter>
       </Box>
     </StoreProvider>
