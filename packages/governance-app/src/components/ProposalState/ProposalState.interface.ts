@@ -1,0 +1,11 @@
+export enum EProposalState {
+  UNDETERMINED = -1,
+  PENDING,
+  ACTIVE,
+  CANCELED,
+  DEFEATED,
+  SUCCEEDED,
+  QUEUED,
+  EXPIRED,
+  EXECUTED,
+}

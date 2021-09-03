@@ -1,5 +1,6 @@
 import { LogUtils } from "@hypernetlabs/utils";
-import { Box } from "@material-ui/core";
+import { Box, ThemeProvider } from "@material-ui/core";
+import { ethers } from "ethers";
 import React, { useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 
@@ -16,7 +17,7 @@ import {
   IConfigProvider,
   IGovernanceBlockchainProvider,
 } from "@governance-app/interfaces/utilities";
-import { ethers, BigNumber } from "ethers";
+import { lightTheme, darkTheme } from "@governance-app/theme";
 
 const logUtils = new LogUtils();
 const configProvider: IConfigProvider = new ConfigProvider(logUtils);
@@ -24,7 +25,7 @@ const governanceBlockchainProvider: IGovernanceBlockchainProvider =
   new GovernanceBlockchainProvider(configProvider, logUtils);
 
 const App: React.FC = () => {
-  const { setLoading, setResultMessage } = useLayoutContext();
+  const { theme } = useLayoutContext();
   const classes = useStyles();
   const [appReady, setAppReady] = useState<boolean>(false);
 
@@ -33,7 +34,7 @@ const App: React.FC = () => {
       .initialize()
       .map(() => {
         setAppReady(true);
-        /* governanceBlockchainProvider.getProvider().map(async (provider) => {
+        /*governanceBlockchainProvider.getProvider().map(async (provider) => {
           const accounts = await provider.listAccounts();
           console.log("accounts: ", accounts);
 
@@ -79,7 +80,7 @@ const App: React.FC = () => {
             const tx_reciept = await tx.wait();
             console.log("tx_reciept: ", tx_reciept);
           });
-        }); */
+        });*/
       })
       .mapErr((e) => {});
   }, []);
@@ -89,12 +90,14 @@ const App: React.FC = () => {
       configProvider={configProvider}
       governanceBlockchainProvider={governanceBlockchainProvider}
     >
-      <Box className={classes.appWrapper}>
-        <BrowserRouter>
-          <Header />
-          {appReady && <Router />}
-        </BrowserRouter>
-      </Box>
+      <ThemeProvider theme={theme ? lightTheme : darkTheme}>
+        <Box className={classes.appWrapper}>
+          <BrowserRouter>
+            <Header />
+            {appReady && <Router />}
+          </BrowserRouter>
+        </Box>
+      </ThemeProvider>
     </StoreProvider>
   );
 };
