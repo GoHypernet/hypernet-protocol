@@ -7,6 +7,7 @@ export * from "@objects/ChainId";
 export * from "@objects/ControlClaim";
 export * from "@objects/DefinitionName";
 export * from "@objects/EthereumAddress";
+export * from "@objects/GatewayRegistrationFilter";
 export * from "@objects/GatewayRegistrationInfo";
 export * from "@objects/GatewayTokenInfo";
 export * from "@objects/GatewayUrl";

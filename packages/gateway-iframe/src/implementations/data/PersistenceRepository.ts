@@ -1,5 +1,6 @@
 import { GatewayUrl } from "@hypernetlabs/objects";
 import { ILocalStorageUtils } from "@hypernetlabs/utils";
+
 import { IPersistenceRepository } from "@gateway-iframe/interfaces/data";
 import { ExpectedRedirect } from "@gateway-iframe/interfaces/objects";
 export class PersistenceRepository implements IPersistenceRepository {
