@@ -77,7 +77,7 @@ const CreateProposal: React.FC = () => {
             <ArrowBackIcon />
           </IconButton>
           <Typography variant="h2" style={{ margin: "0 auto" }}>
-            CreateProposal
+            Create Proposal
           </Typography>
         </Box>
         <ProposedActionItem />
@@ -96,6 +96,7 @@ const CreateProposal: React.FC = () => {
             margin="dense"
             style={{ minHeight: 208 }}
             InputProps={{ disableUnderline: true, style: { minHeight: 208 } }}
+            SelectProps={{ style: { minHeight: 208 } }}
             placeholder={`## Summary \n\nInsert your summary here \n\n## Methodology\n\nInsert your methodology here \n\n## Conclusion \n\nInsert your conclusion here \n\n`}
           />
         </ItemContainer>

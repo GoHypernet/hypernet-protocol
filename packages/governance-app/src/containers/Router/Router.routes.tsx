@@ -1,7 +1,8 @@
 import { FC } from "react";
 
 import Proposals from "@governance-app/pages/Proposals";
-import CreateProposal from "@web-integration/pages/CreateProposal";
+import CreateProposal from "@governance-app/pages/CreateProposal";
+import ProposalDetail from "@governance-app/pages/ProposalDetail";
 
 interface IRoute {
   path: string;
@@ -13,6 +14,7 @@ interface IRoute {
 export const PATH = {
   Proposals: "/",
   CreateProposal: "/create-proposal",
+  ProposalDetail: '/vote/:id',
 };
 
 export const routes: IRoute[] = [
@@ -26,6 +28,12 @@ export const routes: IRoute[] = [
     path: PATH.CreateProposal,
     component: CreateProposal,
     name: "Create Proposal",
+    menuItem: false,
+  },
+  {
+    path: PATH.ProposalDetail,
+    component: ProposalDetail,
+    name: "Proposal Detail",
     menuItem: false,
   },
 ];

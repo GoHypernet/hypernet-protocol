@@ -6,6 +6,7 @@ export const useStyles = makeStyles({
     display: "flex",
     alignItems: "center",
     padding: "12px 16px",
+    cursor: "pointer",
     borderRadius: 12,
     border: 0,
   },

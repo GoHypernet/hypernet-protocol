@@ -12,9 +12,6 @@ import { EProposalAction } from "../CreateProposal.interface";
 import { useStyles } from "./ProposalActionSelector.style";
 import { Divider } from "@material-ui/core";
 
-export enum ProposalAction {
-  ADD_GATEWAY = "Add Gateway",
-}
 
 const ProposalActionSelector: React.FC = () => {
   const classes = useStyles();

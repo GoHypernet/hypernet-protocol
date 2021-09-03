@@ -21,7 +21,6 @@ export function CreateProposalProvider({ children }: ICreateProposalProvider) {
     setIsProposalActionSelectorOpen((open) => !open);
   };
 
-
   const initialState: ICreateProposalContext = {
     isProposalActionSelectorOpen,
     toggleProposalActionSelector,
