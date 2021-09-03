@@ -73,7 +73,7 @@ npx hardhat proposeRegistry --network hardhat --name Gateways --symbol GTW --own
 Check the state of an existing Proposal:
 
 ```shell
-npx hardhat proposalState --network hardhat --id 28355135410951088116862211885830833164558945639064469703190055895859500299438
+npx hardhat proposalState --network hardhat --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
 ```
 
 Delegate your voting power to a given address:
@@ -85,11 +85,11 @@ npx hardhat delegateVote --network hardhat --delegate 0xf39Fd6e51aad88F6F4ce6aB8
 Cast a vote on a proposal (Against (0), For (1), Abstain (2)):
 
 ```shell
-npx hardhat castVote --network hardhat --id 28355135410951088116862211885830833164558945639064469703190055895859500299438 --support 1
+npx hardhat castVote --network hardhat --id 13654425952634501747257196678513303918485643847941868894665917031025800633397 --support 1
 ```
 
 If a proposal has reached quorum and >50% of votes are in favor, once its deadline has passed it can be executed:
 
 ```shell
-npx hardhat executeProposal --network hardhat --id 28355135410951088116862211885830833164558945639064469703190055895859500299438
+npx hardhat executeProposal --network hardhat --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
 ```

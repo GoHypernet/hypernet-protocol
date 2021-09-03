@@ -1,6 +1,7 @@
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-web3");
 require("hardhat-gas-reporter");
+require("hardhat-contract-sizer");
 
 const HT = require("./artifacts/contracts/Hypertoken.sol/Hypertoken.json")
 const HG = require("./artifacts/contracts/HypernetGovernor.sol/HypernetGovernor.json")
@@ -87,10 +88,14 @@ task("governanceParameters", "Prints Governance contracts parameters.")
     let votingDelay = await govHandle.votingDelay();
     let votingPeriod = await govHandle.votingPeriod();
     let proposalThreshold = await govHandle.proposalThreshold();
+    let proposalCount = await govHandle._proposalIdTracker();
+    let mostRecentProposalId = await govHandle._proposalMap(proposalCount)
     console.log("Governance Name:", name);
     console.log("Voting Delay (blocks):", votingDelay.toString());
     console.log("Voting Period (blocks):", votingPeriod.toString());
     console.log("Proposal Quorum (vote threshold):", proposalThreshold.toString());
+    console.log("Proposal Count:", proposalCount.toString());
+    console.log("Must Recent Proposal:", mostRecentProposalId.toString());
   });
 
   task("proposeRegistry", "Propose a new NonFungibleRegistry.")
@@ -105,10 +110,10 @@ task("governanceParameters", "Prints Governance contracts parameters.")
     let factoryAddress;
     if (network["name"] == "hardhat") {
         govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-        factoryAddress = "0x0165878A594ca255338adfa4d48449f69242Eb8F";
+        factoryAddress = "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853";
     } else {
         govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-        factoryAddress = "0x0165878A594ca255338adfa4d48449f69242Eb8F";
+        factoryAddress = "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853";
     }
     const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
     const factoryHandle = new hre.ethers.Contract(factoryAddress, RF.abi, accounts[0]);
@@ -120,20 +125,21 @@ task("governanceParameters", "Prints Governance contracts parameters.")
     const transferCalldata = factoryHandle.interface.encodeFunctionData('createRegistry',[proposalDescription, registrySymbol, registryOwner])
 
     const proposalID = await govHandle.hashProposal(
-        [govAddress],
+        [factoryAddress],
         [0],
         [transferCalldata],
         descriptionHash
     );
     // propose a new registry
     const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
-        [govAddress],
+        [factoryAddress],
         [0],
         [transferCalldata],
         proposalDescription
     );
     const tx_reciept = await tx.wait();
     console.log("Proposal ID:", proposalID.toString());
+    console.log("Description Hash:", descriptionHash.toString());
   });
 
   task("proposalState", "Check the state of an existing proposal")
@@ -198,7 +204,7 @@ task("governanceParameters", "Prints Governance contracts parameters.")
     console.log("Proposal Executed:", proposal[8]);
   });
 
-  task("executeProposal", "Execute a proposal that has been successfully passed.")
+  task("queueProposal", "queue a proposal that has been successfully passed.")
   .addParam("id", "ID of an existing proposal.")
   .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
@@ -220,6 +226,30 @@ task("governanceParameters", "Prints Governance contracts parameters.")
     console.log("Proposal Values:", values);
     console.log("Proposal Signatures:", signatures);
     console.log("Call Datas:", calldatas);
+    const tx = await govHandle["queue(uint256)"](proposalID);
+    const tx_rcp = tx.wait();
+  });
+
+  task("executeProposal", "Execute a proposal that has been successfully passed.")
+  .addParam("id", "ID of an existing proposal.")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+
+    // set governance address based on network
+    let govAddress;
+    let factoryAddress;
+    if (network["name"] == "hardhat") {
+        govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+    } else {
+        govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+    }
+    const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
+
+    const proposalID = taskArgs.id;
+    const descriptionHash = taskArgs.hash;
+    const { targets, values, signatures, calldatas } = await govHandle.getActions(proposalID);
+    console.log("Executing Proposal:", proposalID);
+    console.log("Target Addresses:", targets);
     const tx = await govHandle["execute(uint256)"](proposalID);
     const tx_rcp = tx.wait();
   });
@@ -253,5 +283,10 @@ module.exports = {
   },
   gasReporter: {
     enabled: true
+  },
+  contractSizer: {
+    alphaSort: true,
+    runOnCompile: true,
+    disambiguatePaths: false,
   }
 };

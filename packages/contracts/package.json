@@ -13,6 +13,7 @@
     "web3": "^1.5.2"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.3.0"
+    "@openzeppelin/contracts": "^4.3.0",
+    "hardhat-contract-sizer": "^2.0.3"
   }
 }
