@@ -255,6 +255,27 @@ task("governanceParameters", "Prints Governance contracts parameters.")
     const tx_rcp = tx.wait();
   });
 
+  task("cancelProposal", "Cancel a proposal if it is your or if proposer is below proposal threshold.")
+  .addParam("id", "ID of an existing proposal.")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+
+    // set governance address based on network
+    let govAddress;
+    let factoryAddress;
+    if (network["name"] == "hardhat") {
+        govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+    } else {
+        govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+    }
+    const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
+
+    const proposalID = taskArgs.id;
+    console.log("Cancelling Proposal:", proposalID);
+    const tx = await govHandle["cancel(uint256)"](proposalID);
+    const tx_rcp = tx.wait();
+  });
+
 // You need to export an object to set up your config
 // Go to https://hardhat.org/config/ to learn more
 

@@ -7,35 +7,39 @@ with `18` decimal places of precision. The governance contracts are based on Ope
 implementation by [Compound Finance](https://compound.finance/docs/governance).
 
 This particular governance architecture has been adopted by a number of highly successful projects including
-[Uniswap](https://docs.uniswap.org/protocol/V2/concepts/governance/governance-reference) and has proven highly
-successful in practice at adopting beneficial proposals to protocol upgrades while preventing adversarial attacks. 
+[Uniswap](https://docs.uniswap.org/protocol/V2/concepts/governance/governance-reference) and has proven quite
+successful in practice at adopting beneficial proposals to protocol upgrades while preventing 
+[adversarial attacks](https://docs.uniswap.org/protocol/V2/concepts/governance/adversarial-circumstances). 
 
 The Hypernet Governance application is used for proposing and vetting new NonFungibleRegisties (NFR) which are deployed
 through a RegistryFactory contract. NonFungleRegistries are based on the [EIP721](https://eips.ethereum.org/EIPS/eip-721) 
-non-fungible token standard. Each NFR has a `MINTER_ROLE`, which can mint new entries to the registry, and a 
+non-fungible token standard. A NFR is enumerable and every entry is an ownable token that has a label (seperate from the 
+token URI) that is unique within that specific NFR, that is, two entries can have the same `tokenURI`, but they cannot have
+the same label. This helps to fascilitate lookups more easily for applications in which the registry is used for identity or
+authenticity verification. Each NFR has a `MINTER_ROLE`, which can mint new entries to the registry, and a 
 `DEFAULT_ADMIN_ROLE` which can make modifications to the registry contract parameters. These roles are set through the NFR 
 constructor. 
 
 
-## Install Dependencies
+## Install dependencies
 
 ```shell
 npm install
 ```
 
-## Running Contract Tests
+## Running contract tests
 
 ```shell
 npx hardhat test
 ```
 
-## Compiling Contracts to Generate Artifacts
+## Compiling contracts to generate artifacts
 
 ```shell
 npx hardhat compile
 ```
 
-## Hardhat Network - Full Contract Deployment
+## Hardhat network - full contract deployment
 
 First, start a hardhat node (edit [hardhat.config.js](https://hardhat.org/config/#networks-configuration) 
 to customize the Hardhat network settings):
@@ -64,10 +68,18 @@ Get Governance contract parameters:
 npx hardhat governanceParameters --network hardhat
 ```
 
-Propose a new Non-Fungible Registry, your account must have at least `1000000` Hypertoken (1% of the total supply):
+Propose a new Non-Fungible Registry, your account must have at least `1000000` Hypertoken (1% of the total supply) 
+for the proposal to go through:
 
 ```shell
 npx hardhat proposeRegistry --network hardhat --name Gateways --symbol GTW --owner 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
+```
+
+Additionally, if at any point during the voting process your voting power drops below this 1% threshold, your proposal 
+is vulnerable to being canceled:
+
+```shell
+npx hardhat cancelProposal --network hardhat --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
 ```
 
 Check the state of an existing Proposal:
@@ -94,7 +106,7 @@ If a proposal has reached quorum and >50% of votes are in favor, once its deadli
 npx hardhat executeProposal --network hardhat --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
 ```
 
-## Hardhat Network - Registry Testing deployment 
+## Hardhat network - registry testing deployment 
 
 To simply deploy two registies for registering gateways and liquidity providers, run:
 
