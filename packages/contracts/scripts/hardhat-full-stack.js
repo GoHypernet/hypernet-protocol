@@ -44,11 +44,8 @@ async function main() {
   const HypernetGovernor = await ethers.getContractFactory("HypernetGovernor");
   const hypernetgovernor = await HypernetGovernor.deploy(hypertoken.address, timelock.address);
   const hypernetgovernor_reciept = await hypernetgovernor.deployTransaction.wait();
-  const zeroa = await hypernetgovernor.zero();
   console.log("Governor address:", hypernetgovernor.address)
   console.log("Governor Gas Fee:", hypernetgovernor_reciept.gasUsed.toString())
-  console.log("0 address:", zeroa)
-
   
   // give the governor contract the Proposer role in the timelock contract
   const tx1 = await timelock.grantRole(timelock.PROPOSER_ROLE(), hypernetgovernor.address)
@@ -64,7 +61,7 @@ async function main() {
 
   // deploy factory contract
   const FactoryRegistry = await ethers.getContractFactory("RegistryFactory");
-  const factoryregistry = await FactoryRegistry.deploy();
+  const factoryregistry = await FactoryRegistry.deploy(hypernetgovernor.address);
   const registry_reciept = await factoryregistry.deployTransaction.wait();
   console.log("Factory Address:", factoryregistry.address)
   console.log("Factory Gas Fee:", registry_reciept.gasUsed.toString())

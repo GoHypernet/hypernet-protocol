@@ -69,20 +69,22 @@ contract NonFungibleRegistry is
      *
      * - the caller must have the `MINTER_ROLE`.
      */
-    function register(address to, string memory _name, string memory registrationData) public virtual {
+    function register(address to, string memory label, string memory registrationData) public virtual {
         require(hasRole(MINTER_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have minter role to mint");
-        require(!_mappingExists(_name), "NonFungibleRegistry: agent is already registered.");
+        require(!_mappingExists(label), "NonFungibleRegistry: agent is already registered.");
 
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
+        // Enforce that the counter start at 1 (not 0) so that we can check 
+        // if a name exists
         uint256 tokenId = _tokenIdTracker.current() + 1;
         _mint(to, tokenId);
         _tokenIdTracker.increment();
         _setTokenURI(tokenId, registrationData);
 
         // extend the registry mapping for lookup via gateway URL
-        registryMap[_name] = tokenId;
-        reverseRegistryMap[tokenId] = _name;
+        registryMap[label] = tokenId;
+        reverseRegistryMap[tokenId] = label;
     }
 
     /**
@@ -116,9 +118,9 @@ contract NonFungibleRegistry is
         super._burn(tokenId);
 
         // remove the registry and reverse registry mappings
-        string memory agent = reverseRegistryMap[tokenId];
+        string memory label = reverseRegistryMap[tokenId];
         delete reverseRegistryMap[tokenId];
-        delete registryMap[agent];
+        delete registryMap[label];
     }
 
     /**
@@ -147,8 +149,8 @@ contract NonFungibleRegistry is
      /**
      * @dev Returns whether the registry mapping exists already exists.
      */
-    function _mappingExists(string memory _name) internal view virtual returns (bool) {
-        return !(registryMap[_name] == 0);
+    function _mappingExists(string memory label) internal view virtual returns (bool) {
+        return !(registryMap[label] == 0);
     }
 
     /**

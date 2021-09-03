@@ -1,5 +1,6 @@
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-web3");
+require("@nomiclabs/hardhat-solhint");
 require("hardhat-gas-reporter");
 require("hardhat-contract-sizer");
 

@@ -35,7 +35,7 @@ npx hardhat test
 npx hardhat compile
 ```
 
-## Hardhat Network
+## Hardhat Network - Full Contract Deployment
 
 First, start a hardhat node (edit [hardhat.config.js](https://hardhat.org/config/#networks-configuration) 
 to customize the Hardhat network settings):
@@ -50,10 +50,10 @@ You can run the node on a custom port by adding the `--port flag`:
 npx hardhat node --port 8569
 ```
 
-Once the node is running, deploy the Solidity contracts to the Hardhat network:
+Once the node is running, deploy the full Solidity contract stack to the Hardhat network:
 
 ```shell
-npx hardhat run scripts/hardhat-script.js --network hardhat
+npx hardhat run scripts/hardhat-full-stack.js --network hardhat
 ```
 
 Use the help tasks defined in `hardhat.config.js` to interact with the deployed contracts.
@@ -64,7 +64,7 @@ Get Governance contract parameters:
 npx hardhat governanceParameters --network hardhat
 ```
 
-Propose a new Non-Fungible Registry:
+Propose a new Non-Fungible Registry, your account must have at least `1000000` Hypertoken (1% of the total supply):
 
 ```shell
 npx hardhat proposeRegistry --network hardhat --name Gateways --symbol GTW --owner 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
@@ -92,4 +92,12 @@ If a proposal has reached quorum and >50% of votes are in favor, once its deadli
 
 ```shell
 npx hardhat executeProposal --network hardhat --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
+```
+
+## Hardhat Network - Registry Testing deployment 
+
+To simply deploy two registies for registering gateways and liquidity providers, run:
+
+```shell
+npx hardhat run scripts/hardhat-registies-only.js --network hardhat
 ```
