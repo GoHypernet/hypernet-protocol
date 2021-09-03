@@ -13,6 +13,8 @@ export interface IGovernanceBlockchainProvider {
     ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
     never
   >;
+  getHypernetGovernorContract(): ethers.Contract;
+  getHypertokenContract(): ethers.Contract;
 }
 
 export const IGovernanceBlockchainProviderType = Symbol.for(

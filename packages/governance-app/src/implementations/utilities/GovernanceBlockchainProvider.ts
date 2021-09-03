@@ -11,6 +11,8 @@ import { ethers, providers } from "ethers";
 import { inject, injectable } from "inversify";
 import { okAsync, ResultAsync } from "neverthrow";
 import Web3Modal, { IProviderOptions } from "web3modal";
+import Hypertoken from "@governance-app/artifacts/contracts/Hypertoken.sol/Hypertoken.json";
+import HypernetGovernor from "@governance-app/artifacts/contracts/HypernetGovernor.sol/HypernetGovernor.json";
 
 import {
   IGovernanceBlockchainProvider,
@@ -35,6 +37,8 @@ export class GovernanceBlockchainProvider
     | ethers.providers.JsonRpcProvider
     | null = null;
   protected signer: ethers.providers.JsonRpcSigner | null = null;
+  protected hypernetGovernorContract: ethers.Contract | null = null;
+  protected hypertokenContract: ethers.Contract | null = null;
 
   constructor(
     @inject(IConfigProviderType) protected configProvider: IConfigProvider,
@@ -99,45 +103,47 @@ export class GovernanceBlockchainProvider
     BlockchainUnavailableError | InvalidParametersError
   > {
     if (this.initializeResult == null) {
-      return this.configProvider.getConfig().andThen((config) => {
-        const providerOptions: IProviderOptions = {
-          walletconnect: {
-            package: WalletConnectProvider,
-            options: {
-              infuraId: config.infuraId,
-              rpc: {
-                1337: "http://localhost:8545",
-                1369: "https://eth-provider-dev.hypernetlabs.io",
-              },
-            } as IWCEthRpcConnectionOptions,
-          },
-        };
-        this.logUtils.debug("Initializing Web3Modal");
-        const web3Modal = new Web3Modal({
-          cacheProvider: true,
-          providerOptions,
-        });
+      this.initializeResult = this.configProvider
+        .getConfig()
+        .andThen((config) => {
+          const providerOptions: IProviderOptions = {
+            walletconnect: {
+              package: WalletConnectProvider,
+              options: {
+                infuraId: config.infuraId,
+                rpc: {
+                  [config.governanceChainId]:
+                    config.chainProviders[config.governanceChainId],
+                },
+              } as IWCEthRpcConnectionOptions,
+            },
+          };
+          this.logUtils.debug("Initializing Web3Modal");
+          const web3Modal = new Web3Modal({
+            cacheProvider: true,
+            providerOptions,
+          });
 
-        // Display the modal
-        return ResultAsync.fromPromise(web3Modal.connect(), (e) => {
-          return new BlockchainUnavailableError(
-            "Unable to create Web3Modal",
-            e,
-          );
-        })
-          .andThen((modalProvider) => {
-            this.logUtils.debug("Web3Modal initialized");
-            const provider = new providers.Web3Provider(modalProvider);
+          // Display the modal
+          return ResultAsync.fromPromise(web3Modal.connect(), (e) => {
+            return new BlockchainUnavailableError(
+              "Unable to create Web3Modal",
+              e,
+            );
+          })
+            .andThen((modalProvider) => {
+              this.logUtils.debug("Web3Modal initialized");
+              const provider = new providers.Web3Provider(modalProvider);
 
-            // Return the values for use
-            this.provider = provider;
-            this.signer = provider.getSigner();
+              // Return the values for use
+              this.provider = provider;
+              this.signer = provider.getSigner();
 
-            const useMetamask = web3Modal.cachedProvider == "injected";
-            const hypertokenAddress =
-              config.chainAddresses[config.governanceChainId]
-                ?.hypertokenAddress;
-            /* if (useMetamask && hypertokenAddress != null) {
+              const useMetamask = web3Modal.cachedProvider == "injected";
+              const hypertokenAddress =
+                config.chainAddresses[config.governanceChainId]
+                  ?.hypertokenAddress;
+              /* if (useMetamask && hypertokenAddress != null) {
               return ResultUtils.combine([
                 this.addNetwork(config.governanceChainId, config),
                 this.addTokenAddress(
@@ -148,19 +154,38 @@ export class GovernanceBlockchainProvider
                 ),
               ]).map(() => {});
             } */
+              return this.initializeContracts(config, this.signer);
+            })
+            .mapErr((e) => {
+              this.logUtils.info(
+                "Reverting to using JsonRPCProvider as the blockchain provider, waiting for a key or mnemonic to be provided.",
+              );
 
-            return okAsync(undefined);
-          })
-          .mapErr((e) => {
-            this.logUtils.info(
-              "Reverting to using JsonRPCProvider as the blockchain provider, waiting for a key or mnemonic to be provided.",
-            );
-
-            return e as BlockchainUnavailableError;
-          });
-      });
+              return e as BlockchainUnavailableError;
+            });
+        });
     }
     return this.initializeResult;
+  }
+
+  protected initializeContracts(
+    config: GovernanceAppConfig,
+    signer: ethers.providers.JsonRpcSigner,
+  ): ResultAsync<void, never> {
+    this.hypernetGovernorContract = new ethers.Contract(
+      config.chainAddresses[config.governanceChainId]
+        ?.hypernetGovernorAddress as string,
+      HypernetGovernor.abi,
+      signer,
+    );
+    this.hypertokenContract = new ethers.Contract(
+      config.chainAddresses[config.governanceChainId]
+        ?.hypertokenAddress as string,
+      Hypertoken.abi,
+      signer,
+    );
+
+    return okAsync(undefined);
   }
 
   protected addNetwork(
@@ -238,5 +263,19 @@ export class GovernanceBlockchainProvider
         return new BlockchainUnavailableError(errorMessage, e);
       },
     );
+  }
+
+  public getHypernetGovernorContract(): ethers.Contract {
+    if (this.hypernetGovernorContract == null) {
+      throw new Error("Contract is not initialized yet");
+    }
+    return this.hypernetGovernorContract;
+  }
+
+  public getHypertokenContract(): ethers.Contract {
+    if (this.hypertokenContract == null) {
+      throw new Error("Contract is not initialized yet");
+    }
+    return this.hypertokenContract;
   }
 }

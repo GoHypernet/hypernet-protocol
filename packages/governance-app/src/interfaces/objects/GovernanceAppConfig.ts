@@ -19,5 +19,8 @@ export class HypernetChainAddresses {
 }
 
 export class HypernetContractAddresses {
-  constructor(public hypertokenAddress: EthereumAddress) {}
+  constructor(
+    public hypertokenAddress: EthereumAddress,
+    public hypernetGovernorAddress: EthereumAddress,
+  ) {}
 }

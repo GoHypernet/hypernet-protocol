@@ -7,15 +7,15 @@ const webpack = require("webpack");
 
 const configFilePath = require.resolve("./tsconfig.json");
 
-process.env.__CHAIN_PROVIDERS__ = '{"1337": "http://localhost:8545"}';
+process.env.__CHAIN_PROVIDERS__ = '{"31337": "http://localhost:8545"}';
 process.env.__CHAIN_ADDRESSES__ =
   '{ \
-  "1337": { \
-    "hypertokenAddress": "0x9FBDa871d559710256a2502A2517b794B482Db40", \
-    "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a" \
+  "31337": { \
+    "hypertokenAddress": "0x5FbDB2315678afecb367f032d93F642f64180aa3", \
+    "hypernetGovernorAddress": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9" \
   } \
 }';
-process.env.__GOVERNANCE_CHAIN_ID__ = 1337;
+process.env.__GOVERNANCE_CHAIN_ID__ = 31337;
 process.env.__DEBUG__ = true;
 
 /** @type import('webpack').Configuration */

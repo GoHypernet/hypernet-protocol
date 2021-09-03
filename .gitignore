@@ -4,6 +4,7 @@ npm-debug.log
 packages/*/lib
 packages/*/dist
 packages/*/artifacts
+packages/*/src/artifacts
 packages/*/cache
 .idea
 *.tsbuildinfo
