@@ -1,10 +1,11 @@
-import { Box } from "@material-ui/core";
+import { Box, Switch } from "@material-ui/core";
 import { pathToRegexp } from "path-to-regexp";
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
 import { useStyles } from "@governance-app/components/Header/Header.style";
 import { routes } from "@governance-app/containers/Router/Router.routes";
+import ThemeToggle from "@governance-app/components/ThemeToggle";
 
 const Header: React.FC = () => {
   const classes = useStyles();
@@ -23,19 +24,23 @@ const Header: React.FC = () => {
         />
       </Box>
       <Box className={classes.menuWrapper}>
-        {routes.map((route, index) => (
-          <Box
-            className={`${classes.menuItem} ${
-              isPathMatchRequestedUrl(route.path)
-                ? classes.activeMenuItem
-                : classes.inactiveMenuItem
-            }`}
-            key={index}
-          >
-            <Link to={route.path}>{route.name}</Link>
-          </Box>
-        ))}
+        {routes.map(
+          (route, index) =>
+            route.menuItem && (
+              <Box
+                className={`${classes.menuItem} ${
+                  isPathMatchRequestedUrl(route.path)
+                    ? classes.activeMenuItem
+                    : classes.inactiveMenuItem
+                }`}
+                key={index}
+              >
+                <Link to={route.path}>{route.name}</Link>
+              </Box>
+            ),
+        )}
       </Box>
+      <ThemeToggle />
     </Box>
   );
 };

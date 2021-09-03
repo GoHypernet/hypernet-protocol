@@ -12,6 +12,8 @@ interface ILayout {
   resultMessage: ResultMessage;
   setResultMessage: (resultMessage: ResultMessage) => void;
   handleError: (err: Error | undefined) => void;
+  theme: boolean;
+  toggleTheme: () => void;
 }
 
 interface ILayoutProps {
@@ -22,10 +24,10 @@ const LayoutContext = React.createContext<ILayout>({} as ILayout);
 
 export function LayoutProvider({ children }: ILayoutProps) {
   const [loading, setLoading] = useState<boolean>(false);
+  const [theme, setTheme] = useState<boolean>(true);
   const [resultMessage, setResultMessage] = useState<ResultMessage>(
     new ResultMessage(EResultStatus.IDLE, ""),
   );
-
   useEffect(() => {
     if (resultMessage.status === EResultStatus.FAILURE) {
       // show failure alert
@@ -44,6 +46,8 @@ export function LayoutProvider({ children }: ILayoutProps) {
     }
   };
 
+  const toggleTheme = () => setTheme(!theme);
+
   const handleError = (err: Error | undefined) => {
     setResultMessage(
       new ResultMessage(
@@ -60,6 +64,8 @@ export function LayoutProvider({ children }: ILayoutProps) {
     resultMessage,
     setResultMessage,
     handleError,
+    theme,
+    toggleTheme
   };
 
   const alertOptions = {
