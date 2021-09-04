@@ -35,10 +35,8 @@ const ItemContainer = (props: { children: React.ReactNode; label: string }) => {
 };
 
 const ProposedActionItem = () => {
-  const {
-    toggleProposalActionSelector,
-    selectedProposalAction,
-  } = useCreateProposalContext();
+  const { toggleProposalActionSelector, selectedProposalAction } =
+    useCreateProposalContext();
 
   const handleProposedActionClick = () => {
     toggleProposalActionSelector();

@@ -3,9 +3,10 @@ import { pathToRegexp } from "path-to-regexp";
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
+import Wallet from "@governance-app/components/Wallet";
+import ThemeToggle from "@governance-app/components/ThemeToggle";
 import { useStyles } from "@governance-app/components/Header/Header.style";
 import { routes } from "@governance-app/containers/Router/Router.routes";
-import ThemeToggle from "@governance-app/components/ThemeToggle";
 
 const Header: React.FC = () => {
   const classes = useStyles();
@@ -40,7 +41,10 @@ const Header: React.FC = () => {
             ),
         )}
       </Box>
-      <ThemeToggle />
+      <Box display="flex">
+        <Wallet />
+        <ThemeToggle />
+      </Box>
     </Box>
   );
 };

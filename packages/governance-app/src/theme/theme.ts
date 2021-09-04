@@ -176,7 +176,7 @@ const MuiButton = {
   root: {
     fontSize: EFontSize.BASE,
     textTransform: "none" as const,
-    borderRadius: 3,
+    borderRadius: 12,
   },
   sizeLarge: {
     fontSize: EFontSize.BASE,
