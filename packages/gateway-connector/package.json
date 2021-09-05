@@ -33,9 +33,6 @@
     "alias": "tsc-alias",
     "generate-docs": "npx typedoc --options typedoc.json",
     "prepare": "yarn build",
-    "test": "echo \"No tests specified yet\" && exit 0",
-    "test:ci": "jest --runInBand --coverage --passWithNoTests",
-    "test:watch": "jest --watch --color --detectOpenHandles",
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",
     "postversion": "git push && git push --tags"

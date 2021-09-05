@@ -28,6 +28,8 @@ import {
   ActiveStateChannel,
   ChainId,
   GatewayTokenInfo,
+  GatewayRegistrationFilter,
+  GatewayRegistrationInfo,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -407,6 +409,12 @@ export default class HypernetIFrameProxy
     PersistenceError | ProxyError | GatewayAuthorizationDeniedError
   > {
     return this._createCall("getGatewayTokenInfo", gatewayUrls);
+  }
+
+  public getGatewayRegistrationInfo(
+    filter?: GatewayRegistrationFilter,
+  ): ResultAsync<GatewayRegistrationInfo[], PersistenceError> {
+    return this._createCall("getGatewayRegistrationInfo", filter);
   }
 
   public displayGatewayIFrame(

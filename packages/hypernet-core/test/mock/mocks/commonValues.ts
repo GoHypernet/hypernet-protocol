@@ -77,10 +77,17 @@ export const gatewayUrl2 = GatewayUrl("https://example2.gateway.com/");
 export const gatewayAddress = EthereumAddress("0xMediatorEthereumAddress");
 export const gatewayAddress2 = EthereumAddress("0xMediatorEthereumAddress2");
 export const gatewaySignature = Signature("0xgatewaySignature");
+export const gatewaySignature2 = Signature("0xgatewaySignature2");
+export const gatewaySignature3 = Signature("0xgatewaySignature3");
 export const gatewayRegistrationInfo = new GatewayRegistrationInfo(
   gatewayUrl,
   gatewayAddress,
   gatewaySignature,
+);
+export const gatewayRegistrationInfo2 = new GatewayRegistrationInfo(
+  gatewayUrl2,
+  gatewayAddress2,
+  gatewaySignature2,
 );
 export const validDomain = "hypernetProtocolDomain";
 

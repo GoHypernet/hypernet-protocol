@@ -7,7 +7,6 @@ WORKDIR /build
 COPY ./package.json /build/package.json
 COPY ./yarn.lock /build/yarn.lock
 COPY ./packages/development/package.json /build/packages/development/package.json
-COPY ./packages/governance-app/package.json /build/packages/governance-app/package.json
 COPY ./packages/hypernet-core/package.json /build/packages/hypernet-core/package.json
 COPY ./packages/iframe/package.json /build/packages/iframe/package.json
 COPY ./packages/gateway-connector/package.json /build/packages/gateway-connector/package.json
