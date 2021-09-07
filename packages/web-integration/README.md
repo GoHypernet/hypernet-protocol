@@ -1,5 +1,3 @@
-![alt](documentation/images/Hypernet_Logo.jpg)
-
 # web-integration
 
 This package provides an SDK that a Hypernet Protocol-enabled application, such as Galileo, would use on their website. This package creates a Postmate parent proxy for Hypernet Core, instantiating and connecting to the `iframe` package. This proxy implements the `IHypernetCore` interface and from an end-user standpoint should act functionally identical to having a proper `HypernetCore` instance. This package provides access to this proxy, but the vast majority of users will not need to use it. Instead, the package provides a number of pre-built UI widgets, along with easy utility functions, that make it trivial to display information from HNC.
