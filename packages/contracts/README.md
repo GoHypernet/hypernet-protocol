@@ -7,7 +7,7 @@ with `18` decimal places of precision. The governance contracts are based on Ope
 implementation by [Compound Finance](https://compound.finance/docs/governance).
 
 <p align="center">
-  <img src="https://github.com/GoHypernet/hypernet-protocol/blob/dev/documentation/images/Governance-sequence-diagram.svg" width="500">
+  <img src="https://github.com/GoHypernet/hypernet-protocol/blob/dev/documentation/images/Governance-sequence-diagram.png" width="500">
 </p>
 
 This particular governance architecture has been adopted by a number of highly successful projects including
@@ -16,7 +16,7 @@ successful in practice at adopting beneficial proposals to protocol upgrades whi
 [adversarial attacks](https://docs.uniswap.org/protocol/V2/concepts/governance/adversarial-circumstances). 
 
 <p align="center">
-  <img src="https://github.com/GoHypernet/hypernet-protocol/blob/dev/documentation/images/Hypernet-contracts.svg" width="500">
+  <img src="https://github.com/GoHypernet/hypernet-protocol/blob/dev/documentation/images/Hypernet-contracts.png" width="500">
 </p>
 
 The Hypernet Governance application is used for proposing and vetting new NonFungibleRegisties (NFR) which are deployed
