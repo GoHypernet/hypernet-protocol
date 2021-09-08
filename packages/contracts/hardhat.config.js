@@ -91,12 +91,14 @@ task("governanceParameters", "Prints Governance contracts parameters.")
     let proposalThreshold = await govHandle.proposalThreshold();
     let proposalCount = await govHandle._proposalIdTracker();
     let mostRecentProposalId = await govHandle._proposalMap(proposalCount)
+    let proposalDescription = await govHandle.proposalDescriptions(mostRecentProposalId)
     console.log("Governance Name:", name);
     console.log("Voting Delay (blocks):", votingDelay.toString());
     console.log("Voting Period (blocks):", votingPeriod.toString());
     console.log("Proposal Quorum (vote threshold):", proposalThreshold.toString());
     console.log("Proposal Count:", proposalCount.toString());
     console.log("Must Recent Proposal:", mostRecentProposalId.toString());
+    console.log("Must Recent Proposal Description:", proposalDescription);
   });
 
   task("proposeRegistry", "Propose a new NonFungibleRegistry.")

@@ -22,6 +22,8 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
 
     Counters.Counter public _proposalIdTracker; // track number of proposals in governance
 
+    mapping(uint256 => string) public proposalDescriptions; // description for each proposal
+
     uint256 private _votingDelay = 1; // blocks (1 block is about 13 seconds)
 
     uint256 private _votingPeriod = 40; // blocks
@@ -101,6 +103,7 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
         uint256 proposalCount = _proposalIdTracker.current() + 1;
         _proposalMap[proposalCount] = proposalId;
         _proposalIdTracker.increment();
+        proposalDescriptions[proposalId] = description;
 
         return proposalId;
     }
