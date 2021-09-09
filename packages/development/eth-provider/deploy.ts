@@ -14,6 +14,9 @@ import { logger } from "../src.ts/constants";
 import ERC20Abi from "../src.ts/erc20abi";
 import LiquidityRegistryAbi from "../src.ts/liquidityRegistryAbi";
 import { registerTransfer } from "../src.ts/utils";
+// important address
+const userAddress = "0x243FB44Ea4FDD2651605eC85290f041fF5F876f0";
+
 
 const func: DeployFunction = async () => {
   const log = logger.child({ module: "Deploy" });
@@ -100,6 +103,8 @@ const func: DeployFunction = async () => {
     ["Hypertoken", []],
     ["MocRegistry", []],
     ["LiquidityRegistry", []],
+    ["NonFungibleRegistry", ["Gateways","G",userAddress]],
+    ["NonFungibleRegistry", ["Liquidity Providers","LPs",userAddress]],
   ];
 
   // Only deploy test fixtures during hardhat tests
@@ -154,7 +159,6 @@ const func: DeployFunction = async () => {
   ////////////////////////////////////////
   // Disburse funds of different types to a lot of different wallets
   log.info("Playing rich uncle");
-  const userAddress = "0x243FB44Ea4FDD2651605eC85290f041fF5F876f0";
   const galileoAddress = "0xDcD7698B42FD7b47bB4889B43338897018f7F47d";
   const hyperpayAddress = "0x14791697260E4c9A71f18484C9f997B308e59325";
   const testTokenAddress = "0x9FBDa871d559710256a2502A2517b794B482Db40";
@@ -253,11 +257,11 @@ const func: DeployFunction = async () => {
     ],
   };
 
-  const liquidityRegistryTx = await liquidityRegistryContract.setLiquidity(
-    routerPublicIdentifier,
-    JSON.stringify(registryEntry),
-  );
-  await liquidityRegistryTx.wait();
+//   const liquidityRegistryTx = await liquidityRegistryContract.setLiquidity(
+//     routerPublicIdentifier,
+//     JSON.stringify(registryEntry),
+//   );
+//   await liquidityRegistryTx.wait();
   log.info("Deployed liquidity registration");
 
   ////////////////////////////////////////

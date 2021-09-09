@@ -12,5 +12,6 @@ COPY transferDefinitions/Parameterized.json artifacts/src.sol/transferDefinition
 COPY Hypertoken/Hypertoken.json artifacts/src.sol/testing/Hypertoken.sol/
 COPY MocRegistry/MocRegistry.json artifacts/src.sol/testing/MocRegistry.sol/
 COPY LiquidityRegistry/LiquidityRegistry.json artifacts/src.sol/testing/LiquidityRegistry.sol/
+COPY NonFungibleRegistry/NonFungibleRegistry.json artifacts/src.sol/testing/NonFungibleRegistry.sol/
 COPY src.ts/ src.ts/
 EXPOSE 8545

@@ -303,6 +303,9 @@ module.exports = {
     },
     dev: {
       url: 'http://127.0.0.1:8569'
+    },
+    DevNet: {
+      url: 'https://eth-provider-dev.hypernetlabs.io'
     }
   },
   gasReporter: {

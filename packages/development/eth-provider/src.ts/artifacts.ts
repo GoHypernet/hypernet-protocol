@@ -19,6 +19,7 @@ import * as Insurance from "../artifacts/src.sol/transferDefinitions/Insurance.s
 import * as Message from "../artifacts/src.sol/transferDefinitions/Message.sol/Message.json";
 import * as MocRegistry from "../artifacts/src.sol/testing/MocRegistry.sol/MocRegistry.json";
 import * as LiquidityRegistry from "../artifacts/src.sol/testing/LiquidityRegistry.sol/LiquidityRegistry.json";
+import * as NonFungibleRegistry from "../artifacts/src.sol/testing/NonFungibleRegistry.sol/NonFungibleRegistry.json";
 import * as TestLibIterableMapping from "../artifacts/src.sol/testing/TestLibIterableMapping.sol/TestLibIterableMapping.json";
 import * as ReentrantToken from "../artifacts/src.sol/testing/ReentrantToken.sol/ReentrantToken.json";
 import * as StableSwap from "../artifacts/src.sol/amm/StableSwap.sol/StableSwap.json";
@@ -56,6 +57,7 @@ export const artifacts: Artifacts = {
   Message,
   MocRegistry,
   LiquidityRegistry,
+  NonFungibleRegistry,
 } as any;
 
 export {
@@ -80,4 +82,5 @@ export {
   Message,
   MocRegistry,
   LiquidityRegistry,
+  NonFungibleRegistry,
 };
