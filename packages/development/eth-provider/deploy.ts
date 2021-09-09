@@ -12,8 +12,9 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { logger } from "../src.ts/constants";
 import ERC20Abi from "../src.ts/erc20abi";
-import LiquidityRegistryAbi from "../src.ts/liquidityRegistryAbi";
+import ERC721Abi from "../src.ts/erc721abi";
 import { registerTransfer } from "../src.ts/utils";
+
 // important address
 const userAddress = "0x243FB44Ea4FDD2651605eC85290f041fF5F876f0";
 
@@ -101,10 +102,8 @@ const func: DeployFunction = async () => {
     ["Insurance", []],
     ["Message", []],
     ["Hypertoken", []],
-    ["MocRegistry", []],
-    ["LiquidityRegistry", []],
-    ["NonFungibleRegistry", ["Gateways","G",userAddress]],
-    ["NonFungibleRegistry", ["Liquidity Providers","LPs",userAddress]],
+    ["NonFungibleRegistry", ["Gateways", "G", userAddress]],
+    ["NonFungibleRegistry", ["Liquidity Providers", "LPs", userAddress]],
   ];
 
   // Only deploy test fixtures during hardhat tests
@@ -224,12 +223,13 @@ const func: DeployFunction = async () => {
 
   ////////////////////////////////////////
   log.info("Registering router info");
+  const gatewayRegistryAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
   const liquidityRegistryAddress = "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd";
   const routerPublicIdentifier =
     "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR";
   const liquidityRegistryContract = new ethers.Contract(
     liquidityRegistryAddress,
-    LiquidityRegistryAbi,
+    ERC721Abi,
     signer,
   );
 
