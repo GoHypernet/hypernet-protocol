@@ -160,6 +160,7 @@ const func: DeployFunction = async () => {
   // Disburse funds of different types to a lot of different wallets
   log.info("Playing rich uncle");
   const galileoAddress = "0xDcD7698B42FD7b47bB4889B43338897018f7F47d";
+  const routerAddress = "0x627306090abaB3A6e1400e9345bC60c78a8BEf57"; // candy maple ... Account #1
   const hyperpayAddress = "0x14791697260E4c9A71f18484C9f997B308e59325";
   const testTokenAddress = "0x9FBDa871d559710256a2502A2517b794B482Db40";
   const hyperTokenAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
@@ -257,11 +258,13 @@ const func: DeployFunction = async () => {
     ],
   };
 
-//   const liquidityRegistryTx = await liquidityRegistryContract.setLiquidity(
-//     routerPublicIdentifier,
-//     JSON.stringify(registryEntry),
-//   );
-//   await liquidityRegistryTx.wait();
+  const liquidityRegistryTx = await liquidityRegistryContract.register(
+    routerAddress,
+    routerPublicIdentifier,
+    JSON.stringify(registryEntry),
+  );
+
+  await liquidityRegistryTx.wait();
   log.info("Deployed liquidity registration");
 
   ////////////////////////////////////////
