@@ -69,6 +69,8 @@ export class ConfigProvider implements IConfigProvider {
       "HypernetProtocolControlClaims",
       __DEBUG__, // debug
     );
+
+    this.logUtils.debug("Using Configuration", this.config);
   }
 
   public getConfig(): ResultAsync<HypernetConfig, never> {
