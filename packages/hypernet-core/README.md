@@ -18,6 +18,8 @@ It makes use of the call down, event-up and sideways model. Classes at a higher 
 
 It is important to note that classes within a layer can not communicate laterally either. ServiceA can not inject and use ServiceB, and must instead emit an event. This distinction gets a little fuzzy within the Utilities layer but is otherwise adhered to quite strictly. To make this a bit easier, the top 3 layers each include a sub layer where code that needs to be shared AND that needs to use lower layers can live. Currently, only the Data layer is making use of this.
 
+![alt text](documentation/images/hypercore-diagram.png)
+
 From the top down, the layers are:
 
 1. API
