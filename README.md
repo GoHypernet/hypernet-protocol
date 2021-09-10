@@ -155,19 +155,3 @@ Dev dependencies should be added to the root of the repository, via
 `yarn add <package name> --dev -W`
 
 Normal dependencies and peer dependencies should be added via yarn to the actual pacakge. Refer to the example monorepo above for more examples.
-
-## System Architecture
-
-Hypernet Core is built using a layered architecture with 4 layers; see the system diagram below for a brief description of each one and a sample of the modules within.
-
-![HypernetCore System Architecture](https://github.com/GoHypernet/hypernet-protocol/raw/dev/documentation/images/HypernetCore.png)
-
-## Usage
-
-This will be one of the last sections filled in.
-For now, see the `web-demo` package.
-
-```
-const core = require('core');
-// TODO: DEMONSTRATE API
-```
