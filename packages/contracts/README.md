@@ -15,15 +15,21 @@ successful in practice at adopting beneficial proposals to protocol upgrades whi
 
 ![alt text](/documentation/images/Hypernet-Contract-Flow.png)
 
-The Hypernet Governance application is used for proposing and vetting new NonFungibleRegistries (NFR) which are deployed
-through a RegistryFactory contract. NonFungleRegistries are based on the [EIP721](https://eips.ethereum.org/EIPS/eip-721) 
-non-fungible token standard. A NFR is enumerable and every entry is an ownable token that has a label (seperate from the 
-token URI) that is unique within that specific NFR, that is, two entries can have the same `tokenURI`, but they cannot have
-the same label. This helps to fascilitate lookups more easily for applications in which the registry is used for identity or
-authenticity verification. Each NFR has a `MINTER_ROLE`, which can mint new entries to the registry, and a 
-`DEFAULT_ADMIN_ROLE` which can make modifications to the registry contract parameters. These roles are set through the NFR 
-constructor. 
+The Hypernet Governance application is used for proposing and vetting new Non-Fungible Registries (NFR) which are deployed
+through a registry factory contract. Non-Fungible Registries are based on the [EIP721](https://eips.ethereum.org/EIPS/eip-721) 
+non-fungible token standard. An NFR is enumerable and every entry is an ownable token that has a corresponding `label` (seperate 
+from the `tokenURI`) that is unique within that specific NFR. That is, two entries can have the same `tokenURI`, but they cannot have
+the same `label`. This helps to fascilitate lookups more easily for applications in which the registry is used for identity or
+authenticity verification in which the `tokenId` may not be known *a priori*. 
 
+Each NFR has a `MINTER_ROLE`, which can mint new entries to the registry, and a `DEFAULT_ADMIN_ROLE` which can make modifications 
+to the registry contract parameters. These roles are set through the NFR constructor. Additionally, the `MINTER_ROLE` and 
+the owner of a token have the option to update the information stored in a token after minting unless `allowStorageUpdate` is 
+set to `false` (which it is by default and can be updated by the `DEFAULT_ADMIN_ROLE`). Lastly, each NFR exposes a *lazy registration*
+interface through the `lazyRegister` function. This allows the owner of the `MINTER_ROLE` to offload the burden of gas costs to the 
+recipient of the token by providing them with signature that the recipient can then present to the contract to register at their 
+convenience. This feature is disabled by default but can be activated by the `DEFAULT_ADMIN_ROLE` through the `allowLazyRegister`
+variable. 
 
 ## Install dependencies
 
