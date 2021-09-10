@@ -13,7 +13,7 @@ This particular governance architecture has been adopted by a number of highly s
 successful in practice at adopting beneficial proposals to protocol upgrades while preventing 
 [adversarial attacks](https://docs.uniswap.org/protocol/V2/concepts/governance/adversarial-circumstances). 
 
-![alt text](/documentation/images/Hypernet-contracts.png)
+![alt text](/documentation/images/Hypernet-Contract-Flow.png)
 
 The Hypernet Governance application is used for proposing and vetting new NonFungibleRegisties (NFR) which are deployed
 through a RegistryFactory contract. NonFungleRegistries are based on the [EIP721](https://eips.ethereum.org/EIPS/eip-721) 
