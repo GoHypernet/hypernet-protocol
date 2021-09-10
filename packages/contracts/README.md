@@ -15,7 +15,7 @@ successful in practice at adopting beneficial proposals to protocol upgrades whi
 
 ![alt text](/documentation/images/Hypernet-Contract-Flow.png)
 
-The Hypernet Governance application is used for proposing and vetting new NonFungibleRegisties (NFR) which are deployed
+The Hypernet Governance application is used for proposing and vetting new NonFungibleRegistries (NFR) which are deployed
 through a RegistryFactory contract. NonFungleRegistries are based on the [EIP721](https://eips.ethereum.org/EIPS/eip-721) 
 non-fungible token standard. A NFR is enumerable and every entry is an ownable token that has a label (seperate from the 
 token URI) that is unique within that specific NFR, that is, two entries can have the same `tokenURI`, but they cannot have
