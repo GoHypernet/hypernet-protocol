@@ -1,7 +1,7 @@
 # Hypernet Protocol Contracts
 
-This package contains the Hypernet Protocol solidity contracts for the token and governance. The token is 
-[EIP20](https://eips.ethereum.org/EIPS/eip-20) compliant and is limited to a total supploy of `100,000,000` 
+This package contains the Hypernet Protocol solidity contracts for the token, governance, and identity registries. 
+The token is [EIP20](https://eips.ethereum.org/EIPS/eip-20) compliant and is limited to a total supploy of `100,000,000` 
 with `18` decimal places of precision. The governance contracts are based on OpenZeppelin's 
 [Governor](https://docs.openzeppelin.com/contracts/4.x/governance) library which are based on a reference 
 implementation by [Compound Finance](https://compound.finance/docs/governance).
