@@ -1,20 +1,8 @@
 import {
-  PullPayment,
-  PushPayment,
-  ProxyError,
   BlockchainUnavailableError,
-  EthereumAddress,
-  Signature,
   GatewayUrl,
-  Balances,
-  AuthorizedGatewaysSchema,
-  GatewayConnectorError,
-  GatewayValidationError,
-  GatewayActivationError,
-  GatewayAuthorizationDeniedError,
   PersistenceError,
   GatewayRegistrationInfo,
-  GatewayTokenInfo,
   GatewayRegistrationFilter,
 } from "@hypernetlabs/objects";
 import {
@@ -25,10 +13,8 @@ import {
   ILogUtilsType,
 } from "@hypernetlabs/utils";
 import { IGatewayRegistrationRepository } from "@interfaces/data";
-import { InitializedHypernetContext } from "@interfaces/objects";
-import { ethers } from "ethers";
 import { injectable, inject } from "inversify";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
+import { ResultAsync } from "neverthrow";
 
 import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import {

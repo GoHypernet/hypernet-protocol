@@ -239,21 +239,31 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
           );
         }
 
-        const mocRegistryContract = new Contract(
+        const gatewayRegistryContract = new Contract(
           gatewayRegistryAddress,
-          TransferAbis.MocRegistry.abi,
+          TransferAbis.ERC721.abi,
           provider,
         );
 
         return ResultAsync.fromPromise(
-          mocRegistryContract.getGateway(gatewayUrl) as Promise<string>,
+          gatewayRegistryContract.registryMap(gatewayUrl) as Promise<number>,
           (e) => {
             return new BlockchainUnavailableError(
-              "Cannot get gateway registry entry",
+              "Cannot get index of registration token for gateway",
               e,
             );
           },
-        );
+        ).andThen((registryIndex) => {
+          return ResultAsync.fromPromise(
+            gatewayRegistryContract.tokenURI(registryIndex) as Promise<string>,
+            (e) => {
+              return new BlockchainUnavailableError(
+                "Cannot get index of registration token for gateway",
+                e,
+              );
+            },
+          );
+        });
       })
       .map((registryString) => {
         const registryEntry = JSON.parse(

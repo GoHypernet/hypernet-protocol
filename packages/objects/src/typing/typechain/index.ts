@@ -38,6 +38,7 @@ export { IMessageTransferInterface } from "./MessageTransfer";
 export { IInsuranceInterface } from "./Insurance";
 export { IParameterizedInterface } from "./Parameterized";
 
+import ERC721Abi from "./artifacts/ERC721";
 import InsuranceAbi from "./artifacts/Insurance";
 import LiquidityRegistryAbi from "./artifacts/LiquidityRegistry";
 import MessageTransferAbi from "./artifacts/MessageTransfer";
@@ -45,6 +46,7 @@ import MocRegistryAbi from "./artifacts/MocRegistry";
 import ParameterizedAbi from "./artifacts/Parameterized";
 
 const TransferAbis = {
+  ERC721: ERC721Abi,
   Insurance: InsuranceAbi,
   Parameterized: ParameterizedAbi,
   MessageTransfer: MessageTransferAbi,
