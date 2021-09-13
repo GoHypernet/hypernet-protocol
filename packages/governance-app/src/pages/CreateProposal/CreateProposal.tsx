@@ -30,18 +30,21 @@ import { useStoreContext } from "@governance-app/contexts/Store";
 import { useStyles } from "./CreateProposal.style";
 import { ethers, BigNumber } from "ethers";
 
-const ItemContainer = (props: {
+const ProposalField = (props: {
   children: React.ReactNode;
   label: string;
   style?: CSSProperties;
 }) => {
   const { children, label, style } = props;
+  const classes = useStyles();
+
   return (
     <Card
+      className={classes.proposalFieldContainer}
       style={{ borderRadius: 20, padding: 20, marginTop: 12, ...style }}
       elevation={0}
     >
-      <Typography style={{ marginBottom: 8 }}>{label}</Typography>
+      <Typography className={classes.proposalFieldLabel}>{label}</Typography>
       {children}
     </Card>
   );
@@ -55,7 +58,7 @@ const ProposedActionItem = () => {
     toggleProposalActionSelector();
   };
   return (
-    <ItemContainer label="Proposed Action">
+    <ProposalField label="Proposed Action">
       <Select
         value={selectedProposalAction}
         open={false}
@@ -69,7 +72,7 @@ const ProposedActionItem = () => {
         </MenuItem>
       </Select>
       <ProposalActionSelector />
-    </ItemContainer>
+    </ProposalField>
   );
 };
 
@@ -80,6 +83,8 @@ const SubmitButton = (props: {
   onSubmit: () => void;
 }) => {
   const { isReady, exceedsThreshold, onSubmit, threshold } = props;
+  const classes = useStyles();
+
   const formattedThreshold = threshold
     ? ethers.utils.formatUnits(threshold, 18)
     : "";
@@ -88,10 +93,10 @@ const SubmitButton = (props: {
   if (!isReady) {
     return (
       <Button
+        className={classes.submitButton}
         variant="contained"
         color="primary"
         fullWidth
-        style={{ marginTop: 18, height: 54, borderRadius: 20 }}
         disabled
       >
         <CircularProgress />
@@ -100,21 +105,21 @@ const SubmitButton = (props: {
   }
   return exceedsThreshold ? (
     <Button
+      className={classes.submitButton}
       variant="contained"
       color="primary"
       onClick={onSubmit}
       fullWidth
-      style={{ marginTop: 18, height: 54, borderRadius: 20 }}
     >
       Submit
     </Button>
   ) : (
     <Button
+      className={classes.submitButton}
       variant="contained"
       color="secondary"
       disabled
       fullWidth
-      style={{ marginTop: 18, height: 54, borderRadius: 20 }}
     >
       You must have {formattedThreshold} tokens to submit a proposal
     </Button>
@@ -225,14 +230,14 @@ const CreateProposal: React.FC = () => {
           </Typography>
         </Box>
         <ProposedActionItem />
-        <ItemContainer label="Gateway URL">
+        <ProposalField label="Gateway URL">
           <TextField
             id="gateway-url"
             InputProps={{ disableUnderline: true }}
             placeholder="Gateway URL"
           />
-        </ItemContainer>
-        <ItemContainer label="Proposal" style={{ minHeight: 300 }}>
+        </ProposalField>
+        <ProposalField label="Proposal" style={{ minHeight: 300 }}>
           <TextField
             id="proposal-title"
             placeholder="Proposal Title"
@@ -250,7 +255,7 @@ const CreateProposal: React.FC = () => {
             placeholder={`## Summary \n\nInsert your summary here \n\n## Methodology\n\nInsert your methodology here \n\n## Conclusion \n\nInsert your conclusion here \n\n`}
             inputRef={descriptionRef}
           />
-        </ItemContainer>
+        </ProposalField>
         <SubmitButton
           isReady={isReady}
           exceedsThreshold={exceedsThreshold}
