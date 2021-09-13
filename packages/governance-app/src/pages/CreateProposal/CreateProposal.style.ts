@@ -24,4 +24,5 @@ export const useStyles = makeStyles({
   },
   proposalFieldContainer: { borderRadius: 20, padding: 20, marginTop: 12 },
   proposalFieldLabel: { marginBottom: 8 },
+  submitButton: { marginTop: 18, height: 54, borderRadius: 20 },
 });
