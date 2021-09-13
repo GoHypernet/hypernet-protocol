@@ -5,6 +5,7 @@ import { ethers } from "ethers";
 
 import { useStoreContext } from "@governance-app/contexts/Store";
 import { Box } from "@material-ui/core";
+import { BigNumber } from "ethers";
 
 const parseAccount = (account: string) => {
   const length = account.length;
@@ -20,40 +21,45 @@ const parseAccount = (account: string) => {
 
 const Wallet: React.FC = () => {
   const history = useHistory();
-  const [account, setAccount] = useState<string>("");
-  const [balance, setBalance] = useState<string>("");
 
-  const { governanceBlockchainProvider } = useStoreContext();
-
-  /*
-  useEffect(() => {
-    governanceBlockchainProvider.getProvider().map(async (provider) => {
-      const accounts = await provider.listAccounts();
-      setAccount(accounts[0]);
-      console.log("accounts: ", accounts);
-    });
-  }, []);
-  */
+  const {
+    governanceBlockchainProvider,
+    setAccount,
+    setBalance,
+    setTokenSymbol,
+    balance,
+    account,
+    tokenSymbol,
+  } = useStoreContext();
 
   const handleConnectToAWallet = () => {
     governanceBlockchainProvider.initialize().map(() => {
       governanceBlockchainProvider.getProvider().map(async (provider) => {
         const accounts = await provider.listAccounts();
         setAccount(accounts[0]);
-        console.log("accounts: ", accounts);
 
         const hypertokenContract =
           governanceBlockchainProvider.getHypertokenContract();
 
-        const rawBalance = await hypertokenContract.balanceOf(accounts[0]);
-        const balance = ethers.utils.formatUnits(rawBalance, 18);
-        const symbol = await hypertokenContract.symbol();
+        const balance: BigNumber = await hypertokenContract.balanceOf(
+          accounts[0],
+        );
+        setBalance(balance);
 
-        setBalance(`${balance} ${symbol}`);
-        console.log("balance", balance);
+        const symbol = await hypertokenContract.symbol();
+        setTokenSymbol(symbol);
       });
     });
   };
+
+  const balanceWithSymbol = useMemo(() => {
+    if (!balance) {
+      return "";
+    }
+
+    const formattedBalance = ethers.utils.formatUnits(balance, 18);
+    return `${formattedBalance} ${tokenSymbol}`;
+  }, [balance, tokenSymbol]);
 
   const parsedAccount = useMemo(() => parseAccount(account), [account]);
 
@@ -77,7 +83,7 @@ const Wallet: React.FC = () => {
               borderBottomRightRadius: 0,
             }}
           >
-            {balance}
+            {balanceWithSymbol}
           </Button>
           <Button
             variant="contained"

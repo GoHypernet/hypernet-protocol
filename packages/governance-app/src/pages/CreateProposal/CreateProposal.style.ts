@@ -17,4 +17,9 @@ export const useStyles = makeStyles({
   formItem: {
     borderRadius: 20,
   },
+  proposalDescription: {
+    "& textarea": {
+      height: "100%",
+    },
+  },
 });

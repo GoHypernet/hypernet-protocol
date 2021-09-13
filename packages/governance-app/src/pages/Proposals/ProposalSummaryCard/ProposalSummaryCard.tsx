@@ -8,23 +8,33 @@ import ProposalState, {
 } from "@governance-app/components/ProposalState";
 import { useStyles } from "./ProposalSummaryCard.style";
 import { getRoute, PATH } from "@governance-app/containers/Router";
+import { Proposal } from "../Proposals";
 
-const ProposalSummaryCard: React.FC = () => {
+interface ProposalSummaryCardProps {
+  proposal: Proposal;
+}
+const ProposalSummaryCard: React.FC<ProposalSummaryCardProps> = (props) => {
+  const { proposal } = props;
   const classes = useStyles();
   const history = useHistory();
 
   const handleProposalClick = () => {
-    history.push(getRoute(PATH.ProposalDetail, { id: 5 }));
+    history.push(
+      getRoute(PATH.ProposalDetail, { id: proposal.proposalNumber }),
+      { proposal },
+    );
   };
 
   return (
     <Card className={classes.card} elevation={0} onClick={handleProposalClick}>
-      <Typography className={classes.proposalId}>1.3</Typography>
-      <Typography>
-        Upgrade Governance Contract to Compound's Governor Bravo
+      <Typography className={classes.proposalId}>
+        {proposal.proposalNumber}
       </Typography>
+      <Typography>{proposal.description.split("\n")[0]}</Typography>
       <Box ml="auto">
-        <ProposalState status={EProposalState.ACTIVE} />
+        <ProposalState
+          status={EProposalState[EProposalState[proposal.state]]}
+        />
       </Box>
     </Card>
   );
