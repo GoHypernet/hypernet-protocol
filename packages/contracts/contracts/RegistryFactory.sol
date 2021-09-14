@@ -24,6 +24,9 @@ contract RegistryFactory is AccessControlEnumerable {
     // so storing in an array should be fine
     address[] public registries;
 
+    // enable registry discovery by human-readable name
+    mapping (string => address) public nameToAddress;
+
      /**
      * @dev Emitted when `DEFAULT_ADMIN_ROLE` creates a new registry.
      */
@@ -41,11 +44,21 @@ contract RegistryFactory is AccessControlEnumerable {
     * @dev create a new registry with the given name, symbol and admin address.
     * Address of deployed registry is stored in an array for easy lookup
     */
-    function createRegistry(string memory name_, string memory symbol_, address _admin) external {
+    function createRegistry(string memory _name, string memory _symbol, address _admin) external {
+        require(_admin != address(0), "RegistryFactory: Admin address must not be 0.");
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
+        require(!_registryExists(_name), "RegistryFactory: Registry by that name exists.");
         
-        NonFungibleRegistry registry = new NonFungibleRegistry(name_, symbol_, _admin);
+        NonFungibleRegistry registry = new NonFungibleRegistry(_name, _symbol, _admin);
         registries.push(address(registry));
+        nameToAddress[_name] = address(registry);
         emit RegistryCreated(address(registry));
+    }
+
+    /**
+    * @dev Returns whether the registry name exists already exists.
+    */
+    function _registryExists(string memory _name) internal view virtual returns (bool) {
+        return !(nameToAddress[_name] == address(0));
     }
 }
