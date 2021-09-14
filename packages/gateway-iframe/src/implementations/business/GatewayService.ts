@@ -12,6 +12,7 @@ import {
   ChainId,
   UUID,
   GatewayTokenInfo,
+  ActiveStateChannel,
 } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { injectable, inject } from "inversify";
@@ -51,7 +52,7 @@ export class GatewayService implements IGatewayService {
   >();
   protected assureStateChannelCallbacks = new Map<
     UUID,
-    (channelAddress: EthereumAddress) => void
+    (stateChannel: ActiveStateChannel) => void
   >();
 
   constructor(
@@ -358,7 +359,7 @@ export class GatewayService implements IGatewayService {
   public assureStateChannel(
     chainId: ChainId,
     routerPublicIdentifiers: PublicIdentifier[],
-    callback: (channelAddress: EthereumAddress) => void,
+    callback: (stateChannel: ActiveStateChannel) => void,
   ): ResultAsync<void, never> {
     // We need to generate an identifier for the callback that is easier than all the data.
     const id = UUID(uuidv4());
@@ -375,14 +376,14 @@ export class GatewayService implements IGatewayService {
 
   public stateChannelAssured(
     id: UUID,
-    channelAddress: EthereumAddress,
+    stateChannel: ActiveStateChannel,
   ): ResultAsync<void, never> {
     // We have a signature for a message, find the callback
     const callback = this.assureStateChannelCallbacks.get(id);
     this.assureStateChannelCallbacks.delete(id);
 
     if (callback != null) {
-      callback(channelAddress);
+      callback(stateChannel);
     }
 
     return okAsync(undefined);
