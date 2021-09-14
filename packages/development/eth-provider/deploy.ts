@@ -250,6 +250,7 @@ const func: DeployFunction = async () => {
     allowedGateways: [
       "https://localhost:3000/users/v0",
       "http://localhost:5010",
+      "https://hyperpay-dev.hypernetlabs.io/users/v0",
     ],
   };
 

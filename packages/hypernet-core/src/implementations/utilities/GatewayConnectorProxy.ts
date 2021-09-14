@@ -7,7 +7,6 @@ import {
 import {
   GatewayConnectorError,
   GatewayValidationError,
-  PaymentId,
   ProxyError,
   Signature,
   GatewayUrl,
@@ -17,10 +16,9 @@ import {
   PushPayment,
   GatewayActivationError,
   IStateChannelRequest,
-  ChainId,
-  EthereumAddress,
   UUID,
   GatewayTokenInfo,
+  ActiveStateChannel,
 } from "@hypernetlabs/objects";
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { HypernetContext } from "@interfaces/objects";
@@ -296,11 +294,11 @@ export class GatewayConnectorProxy
 
   public returnStateChannel(
     id: UUID,
-    channelAddress: EthereumAddress,
+    stateChannel: ActiveStateChannel,
   ): ResultAsync<void, ProxyError> {
     return this._createCall("returnStateChannel", {
       id,
-      channelAddress,
+      stateChannel,
     });
   }
 

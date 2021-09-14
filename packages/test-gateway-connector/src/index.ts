@@ -177,9 +177,11 @@ class TestGatewayConnector implements IGatewayConnector {
       this.stateChannelRequested.next({
         chainId: this.chainId,
         routerPublicIdentifiers: [this.routerPublicIdentifier],
-        callback: (channelAddress) => {
-          console.log(`Channel address recieved, ${channelAddress}`);
-          this.channelAddress = channelAddress;
+        callback: (stateChannel) => {
+          console.log(
+            `State channel recieved, address: ${stateChannel.channelAddress}`,
+          );
+          this.channelAddress = stateChannel.channelAddress;
         },
       });
     }, 1000);

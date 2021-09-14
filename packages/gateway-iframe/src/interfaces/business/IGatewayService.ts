@@ -5,9 +5,9 @@ import {
   Signature,
   GatewayUrl,
   ChainId,
-  EthereumAddress,
   UUID,
   GatewayTokenInfo,
+  ActiveStateChannel,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -54,11 +54,12 @@ export interface IGatewayService {
   assureStateChannel(
     chainId: ChainId,
     routerPublicIdentifiers: PublicIdentifier[],
-    callback: (channelAddress: EthereumAddress) => void,
+    callback: (stateChannel: ActiveStateChannel) => void,
   ): ResultAsync<void, never>;
+
   stateChannelAssured(
     id: UUID,
-    channelAddress: EthereumAddress,
+    stateChannel: ActiveStateChannel,
   ): ResultAsync<void, never>;
 }
 

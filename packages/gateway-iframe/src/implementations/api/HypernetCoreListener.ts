@@ -5,10 +5,9 @@ import {
   PublicIdentifier,
   Balances,
   AssetBalance,
-  PaymentId,
   Signature,
   UUID,
-  EthereumAddress,
+  ActiveStateChannel,
 } from "@hypernetlabs/objects";
 import { ChildProxy, IIFrameCallData } from "@hypernetlabs/utils";
 import { injectable, inject } from "inversify";
@@ -200,7 +199,7 @@ export class HypernetCoreListener
         this.returnForModel(() => {
           return this.gatewayService.stateChannelAssured(
             data.data.id,
-            data.data.channelAddress,
+            data.data.stateChannel,
           );
         }, data.callId);
       },
@@ -227,5 +226,5 @@ interface ISignatureResponseData {
 
 interface IStateChannelReturnedResponseData {
   id: UUID;
-  channelAddress: EthereumAddress;
+  stateChannel: ActiveStateChannel;
 }

@@ -19,6 +19,7 @@ import {
   IPaymentServiceType,
   ILinkServiceType,
   IGatewayConnectorService,
+  IGatewayConnectorServiceType,
 } from "@interfaces/business";
 import { BigNumber } from "ethers";
 import { injectable, inject } from "inversify";
@@ -103,8 +104,8 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
                 request.chainId,
                 request.routerPublicIdentifiers,
               )
-              .andThen((channelAddress) => {
-                return proxy.returnStateChannel(request.id, channelAddress);
+              .andThen((stateChannel) => {
+                return proxy.returnStateChannel(request.id, stateChannel);
               })
               .mapErr((e) => {
                 this.logUtils.error(e);
@@ -337,7 +338,4 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
 
     return true;
   }
-}
-function IGatewayConnectorServiceType(IGatewayConnectorServiceType: any) {
-  throw new Error("Function not implemented.");
 }

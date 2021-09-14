@@ -9,12 +9,12 @@ import {
   Signature,
   ChainId,
   PublicIdentifier,
-  EthereumAddress,
   RouterUnauthorizedError,
   GatewayTokenInfo,
   GatewayRegistrationFilter,
   GatewayRegistrationInfo,
   InvalidParametersError,
+  ActiveStateChannel,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -58,7 +58,7 @@ export interface IGatewayConnectorService {
     chainId: ChainId,
     routerPublicIdentifiers: PublicIdentifier[],
   ): ResultAsync<
-    EthereumAddress,
+    ActiveStateChannel,
     PersistenceError | RouterUnauthorizedError | InvalidParametersError
   >;
 
@@ -80,3 +80,7 @@ export interface IGatewayConnectorService {
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayConnectorError>;
 }
+
+export const IGatewayConnectorServiceType = Symbol.for(
+  "IGatewayConnectorService",
+);

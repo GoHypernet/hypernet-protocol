@@ -15,10 +15,9 @@ import {
   PullPayment,
   PushPayment,
   IStateChannelRequest,
-  ChainId,
-  EthereumAddress,
   UUID,
   GatewayTokenInfo,
+  ActiveStateChannel,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
@@ -111,7 +110,7 @@ export interface IGatewayConnectorProxy extends ParentProxy {
 
   returnStateChannel(
     id: UUID,
-    channelAddress: EthereumAddress,
+    stateChannel: ActiveStateChannel,
   ): ResultAsync<void, ProxyError>;
 
   // Signals to the outside world
