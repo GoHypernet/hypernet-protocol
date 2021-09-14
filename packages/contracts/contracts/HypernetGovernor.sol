@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/governance/compatibility/GovernorCompatibilityBr
 import "@openzeppelin/contracts/governance/extensions/GovernorVotes.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorVotesQuorumFraction.sol";
 import "@openzeppelin/contracts/governance/extensions/GovernorTimelockControl.sol";
+import "@openzeppelin/contracts/utils/Counters.sol";
 
 contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes, GovernorVotesQuorumFraction, GovernorTimelockControl {
     constructor(ERC20Votes _token, TimelockController _timelock)
@@ -15,9 +16,17 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
         GovernorTimelockControl(_timelock)
     {}
 
+    using Counters for Counters.Counter;
+
+    mapping(uint256 => uint256) public _proposalMap; // mapping from a counter to a proposalID
+
+    Counters.Counter public _proposalIdTracker; // track number of proposals in governance
+
+    mapping(uint256 => string) public proposalDescriptions; // description for each proposal
+
     uint256 private _votingDelay = 1; // blocks (1 block is about 13 seconds)
 
-    uint256 private _votingPeriod = 100; // blocks
+    uint256 private _votingPeriod = 40; // blocks
 
     uint256 private _proposalThreshold = 1_000_000e18; // number of votes required to in order to submit a successful proposal
 
@@ -88,7 +97,15 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
         override(Governor, GovernorCompatibilityBravo, IGovernor)
         returns (uint256)
     {
-        return super.propose(targets, values, calldatas, description);
+        uint256 proposalId =  super.propose(targets, values, calldatas, description);
+
+        // proposals start at 1
+        uint256 proposalCount = _proposalIdTracker.current() + 1;
+        _proposalMap[proposalCount] = proposalId;
+        _proposalIdTracker.increment();
+        proposalDescriptions[proposalId] = description;
+
+        return proposalId;
     }
 
     function _execute(uint256 proposalId, address[] memory targets, uint256[] memory values, bytes[] memory calldatas, bytes32 descriptionHash)

@@ -37,6 +37,7 @@ export class GatewayConnectorProxy
   implements IGatewayConnectorProxy
 {
   protected static openedIFramesQueue: string[] = [];
+  protected activated = false;
 
   constructor(
     protected element: HTMLElement | null,
@@ -84,18 +85,20 @@ export class GatewayConnectorProxy
     return this._createCall<void, GatewayActivationError | ProxyError>(
       "activateConnector",
       activateData,
-    ).mapErr((e) => {
-      // TODO
-      // _createCall's return type should be adjusted; it's not actually
-      // the type is says
-      return e;
-    });
+    )
+      .map(() => {
+        this.activated = true;
+      })
+      .mapErr((e) => {
+        // TODO
+        // _createCall's return type should be adjusted; it's not actually
+        // the type is says
+        return e;
+      });
   }
 
-  public resolveChallenge(
-    paymentId: PaymentId,
-  ): ResultAsync<IResolutionResult, GatewayConnectorError | ProxyError> {
-    return this._createCall("resolveChallenge", paymentId);
+  public getConnectorActivationStatus(): boolean {
+    return this.activated;
   }
 
   public deauthorize(): ResultAsync<void, never> {

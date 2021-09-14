@@ -17,9 +17,7 @@
     "generate-docs": "npx typedoc --options typedoc.json",
     "lint": "eslint -c .eslintrc.js \"{src/server, test}/**/*.{js,ts,tsx}\" --quiet",
     "lint:fix": "eslint -c .eslintrc.js \"{server, test}/**/*.{js,ts,tsx}\" --quiet --fix",
-    "postCompile": "webpack --config webpack.config.js",
-    "test": "mocha -r ts-node/register test/**/*.ts --exit",
-    "test:debug": "mocha -r ts-node/register --inspect-brk test/**/*.ts --exit"
+    "postCompile": "webpack --config webpack.config.js"
   },
   "dependencies": {
     "@hypernetlabs/gateway-connector": "^0.0.1",

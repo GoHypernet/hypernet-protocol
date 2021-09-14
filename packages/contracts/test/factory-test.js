@@ -1,6 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat")
 const { BN, expectRevert } = require('@openzeppelin/test-helpers')
+const NFR = require("../artifacts/contracts/NonFungibleRegistry.sol/NonFungibleRegistry.json")
 
 describe("Registry Factory", function () {
   it("Test Registry Factory.", async function () {
@@ -12,7 +13,7 @@ describe("Registry Factory", function () {
 
     // deploy factory contract
     const FactoryRegistry = await ethers.getContractFactory("RegistryFactory");
-    const factoryregistry = await FactoryRegistry.deploy();
+    const factoryregistry = await FactoryRegistry.deploy(owner.address);
     registry_reciept = await factoryregistry.deployTransaction.wait();
     console.log("Factory Address:", factoryregistry.address)
 
@@ -26,5 +27,24 @@ describe("Registry Factory", function () {
     expect(await registryHandle.symbol()).to.equal(registrySymbol)
     //expect(await factoryregistry.registries(0)).to.equal(registryAddress)
 
+    // can't create two registries with the same name
+    await expectRevert(
+        factoryregistry.createRegistry(
+            registryName,
+            registrySymbol,
+            owner.address,
+        ),
+        "RegistryFactory: Registry by that name exists.",
+      );
+
+    // can't mint a token associated with the same name
+    await expectRevert(
+        factoryregistry.createRegistry(
+            registryName,
+            registrySymbol,
+            "0x0000000000000000000000000000000000000000",
+        ),
+        "RegistryFactory: Admin address must not be 0.",
+      );
   });
 });

@@ -12,8 +12,12 @@ import { DeployFunction } from "hardhat-deploy/types";
 
 import { logger } from "../src.ts/constants";
 import ERC20Abi from "../src.ts/erc20abi";
-import LiquidityRegistryAbi from "../src.ts/liquidityRegistryAbi";
+import ERC721Abi from "../src.ts/erc721abi";
 import { registerTransfer } from "../src.ts/utils";
+
+// important address
+const userAddress = "0x243FB44Ea4FDD2651605eC85290f041fF5F876f0";
+const registryAccountAddress = "0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef";
 
 const func: DeployFunction = async () => {
   const log = logger.child({ module: "Deploy" });
@@ -22,6 +26,7 @@ const func: DeployFunction = async () => {
   const { deployer } = await getNamedAccounts();
 
   const signer = await ethers.getSigner(deployer);
+  const registrySigner = await ethers.getSigner(registryAccountAddress);
 
   log.info(deployments);
 
@@ -98,8 +103,11 @@ const func: DeployFunction = async () => {
     ["Insurance", []],
     ["Message", []],
     ["Hypertoken", []],
-    ["MocRegistry", []],
-    ["LiquidityRegistry", []],
+    ["NonFungibleRegistry", ["Gateways", "G", registryAccountAddress]],
+    [
+      "NonFungibleRegistry",
+      ["Liquidity Providers", "LPs", registryAccountAddress],
+    ],
   ];
 
   // Only deploy test fixtures during hardhat tests
@@ -154,11 +162,15 @@ const func: DeployFunction = async () => {
   ////////////////////////////////////////
   // Disburse funds of different types to a lot of different wallets
   log.info("Playing rich uncle");
-  const userAddress = "0x243FB44Ea4FDD2651605eC85290f041fF5F876f0";
-  const galileoAddress = "0xDcD7698B42FD7b47bB4889B43338897018f7F47d";
+  // These are account addresses
+  const galileoAccountAddress = "0xDcD7698B42FD7b47bB4889B43338897018f7F47d";
+  const routerAddress = "0x627306090abaB3A6e1400e9345bC60c78a8BEf57"; // candy maple ... Account #1
   const hyperpayAddress = "0x14791697260E4c9A71f18484C9f997B308e59325";
+
+  // These are contract addresses
   const testTokenAddress = "0x9FBDa871d559710256a2502A2517b794B482Db40";
   const hyperTokenAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
+
   const amount = ethers.utils.parseEther("10000.0");
   const testTokenContract = new ethers.Contract(
     testTokenAddress,
@@ -183,15 +195,15 @@ const func: DeployFunction = async () => {
   await userEthTx.wait();
 
   const galileoTestTx = await testTokenContract.transfer(
-    galileoAddress,
+    galileoAccountAddress,
     amount,
   );
   const galileoHyperTx = await hyperTokenContract.transfer(
-    galileoAddress,
+    galileoAccountAddress,
     amount,
   );
   const galileoEthTx = await signer.sendTransaction({
-    to: galileoAddress,
+    to: galileoAccountAddress,
     value: amount,
   });
 
@@ -219,13 +231,18 @@ const func: DeployFunction = async () => {
 
   ////////////////////////////////////////
   log.info("Registering router info");
+  const gatewayRegistryAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a"; // For minting gateway registry
   const liquidityRegistryAddress = "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd";
   const routerPublicIdentifier =
     "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR";
+
+  const registryAccountPrivateKey =
+    "0dbbe8e4ae425a6d2687f1a7e3ba17bc98c673636790f1b8ad91193c05875ef1";
+
   const liquidityRegistryContract = new ethers.Contract(
     liquidityRegistryAddress,
-    LiquidityRegistryAbi,
-    signer,
+    ERC721Abi,
+    registrySigner,
   );
 
   const registryEntry = {
@@ -253,10 +270,13 @@ const func: DeployFunction = async () => {
     ],
   };
 
-  const liquidityRegistryTx = await liquidityRegistryContract.setLiquidity(
+  // Mint a token for the router, mark it as owned by the router
+  const liquidityRegistryTx = await liquidityRegistryContract.register(
+    routerAddress,
     routerPublicIdentifier,
     JSON.stringify(registryEntry),
   );
+
   await liquidityRegistryTx.wait();
   log.info("Deployed liquidity registration");
 

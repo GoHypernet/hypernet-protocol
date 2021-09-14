@@ -12,6 +12,7 @@ import {
   BigNumberString,
   ChainId,
   PublicIdentifier,
+  GatewayRegistrationFilter,
 } from "@hypernetlabs/objects";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import { injectable, inject } from "inversify";
@@ -162,6 +163,13 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       getGatewayTokenInfo: (data: IIFrameCallData<GatewayUrl[]>) => {
         this.returnForModel(() => {
           return this.core.getGatewayTokenInfo(data.data);
+        }, data.callId);
+      },
+      getGatewayRegistrationInfo: (
+        data: IIFrameCallData<GatewayRegistrationFilter>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.getGatewayRegistrationInfo(data.data);
         }, data.callId);
       },
       providePrivateCredentials: (

@@ -27,8 +27,7 @@ jobs:
       - run: echo "registry=https://registry.npmjs.org/" > ~/.npmrc
       - run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
       - run: sudo apt update && sudo apt install -y python
-      - run: yarn install
-      - run: yarn test
+      - run: yarn install && yarn test
       - save_cache:
           paths:
             - node_modules
@@ -82,7 +81,7 @@ workflows:
           context: Development
           executor: ubuntu
           use-remote-docker: false
-          extra-build-args: '--build-arg CHAIN_ID=1369 --build-arg IFRAME_SOURCE=https://vector-iframe-dev.hypernetlabs.io --build-arg ''CHAIN_PROVIDERS={"1369": "https://eth-provider-dev.hypernetlabs.io"}'' --build-arg VALIDATOR_IFRAME_URL=https://gateway-iframe-dev.hypernetlabs.io --build-arg NATS_URL=ws://vector-nats-dev.hypernetlabs.io:4221 --build-arg AUTH_URL=https://vector-auth-dev.hypernetlabs.io --build-arg BUILD_ENV=PROD'
+          extra-build-args: '--build-arg IFRAME_SOURCE=https://vector-iframe-dev.hypernetlabs.io --build-arg ''CHAIN_PROVIDERS={"1369": "https://eth-provider-dev.hypernetlabs.io"}'' --build-arg VALIDATOR_IFRAME_URL=https://gateway-iframe-dev.hypernetlabs.io --build-arg NATS_URL=ws://vector-nats-dev.hypernetlabs.io:4221 --build-arg AUTH_URL=https://vector-auth-dev.hypernetlabs.io --build-arg GOVERNANCE_CHAIN_ID=1369 --build-arg CERAMIC_NODE_URL=https://ceramic-clay.3boxlabs.com --build-arg INFURA_ID=72827ccd538446f2a20e35a632664c52 --build-arg BUILD_ENV=PROD'
       - gcr/add-image-tag:
           name: Tag Latest Core Iframe
           image: hypernetlabs/hypernet-protocol-core-iframe

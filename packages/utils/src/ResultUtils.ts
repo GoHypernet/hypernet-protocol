@@ -223,4 +223,14 @@ export class ResultUtils {
       return mapVals;
     });
   }
+
+  static delay(ms: number): ResultAsync<void, never> {
+    return ResultAsync.fromSafePromise(
+      new Promise((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, ms);
+      }),
+    );
+  }
 }

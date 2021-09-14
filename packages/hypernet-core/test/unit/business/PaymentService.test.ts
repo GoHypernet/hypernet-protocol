@@ -32,11 +32,8 @@ import {
   ILinkRepository,
   IGatewayConnectorRepository,
   IPaymentRepository,
+  IGatewayRegistrationRepository,
 } from "@interfaces/data";
-import { okAsync, errAsync } from "neverthrow";
-import td from "testdouble";
-
-import { IPaymentUtils } from "@interfaces/utilities";
 import {
   defaultExpirationLength,
   gatewayUrl,
@@ -69,19 +66,17 @@ import {
   parameterizedTransferId2,
   routerPublicIdentifier,
 } from "@mock/mocks";
+import { okAsync, errAsync } from "neverthrow";
+import td from "testdouble";
+
+import { IGatewayConnectorProxy, IPaymentUtils } from "@interfaces/utilities";
 import {
   ConfigProviderMock,
   ContextProviderMock,
   VectorUtilsMockFactory,
 } from "@tests/mock/utils";
 
-const requiredStake = BigNumberString("42");
-const paymentToken = mockUtils.generateRandomPaymentToken();
-const amount = BigNumberString("42");
 const expirationDate = UnixTimestamp(unixNow + defaultExpirationLength);
-const paymentId = PaymentId(
-  "See, this doesn't have to be legit data if it's never checked!",
-);
 const nonExistentPaymentId = PaymentId("This payment is not mocked");
 const validatedSignature = Signature("0xValidatedSignature");
 
@@ -96,6 +91,8 @@ class PaymentServiceMocks {
   public paymentUtils = td.object<IPaymentUtils>();
   public paymentRepository = td.object<IPaymentRepository>();
   public gatewayConnectorRepository = td.object<IGatewayConnectorRepository>();
+  public gatewayRegistrationRepository =
+    td.object<IGatewayRegistrationRepository>();
 
   public proposedPushPayment: PushPayment;
   public stakedPushPayment: PushPayment;
@@ -104,26 +101,27 @@ class PaymentServiceMocks {
 
   public assetBalance: AssetBalance;
   public gatewayRegistrationInfo: GatewayRegistrationInfo;
+  public gatewayConnectorProxy: IGatewayConnectorProxy;
 
-  constructor(hypertokenBalance: BigNumberString = amount) {
+  constructor(hypertokenBalance: BigNumberString = commonAmount) {
     this.proposedPushPayment = this.factoryPushPayment();
     this.stakedPushPayment = this.factoryPushPayment(
       publicIdentifier2,
       publicIdentifier,
       EPaymentState.Staked,
-      requiredStake,
+      commonAmount,
     );
     this.approvedPushPayment = this.factoryPushPayment(
       publicIdentifier2,
       publicIdentifier,
       EPaymentState.Approved,
-      requiredStake,
+      commonAmount,
     );
     this.finalizedPushPayment = this.factoryPushPayment(
       publicIdentifier,
       publicIdentifier2,
       EPaymentState.Finalized,
-      requiredStake,
+      commonAmount,
     );
 
     this.assetBalance = new AssetBalance(
@@ -142,10 +140,10 @@ class PaymentServiceMocks {
         routerPublicIdentifier,
         chainId,
         publicIdentifier,
-        amount,
+        commonAmount,
         expirationDate,
-        requiredStake,
-        paymentToken,
+        commonAmount,
+        hyperTokenAddress,
         gatewayUrl,
         null,
       ),
@@ -159,9 +157,9 @@ class PaymentServiceMocks {
       ),
     ).thenReturn(okAsync(new Map<PaymentId, Payment>()));
 
-    td.when(this.paymentRepository.provideStake(paymentId, account)).thenReturn(
-      okAsync(this.stakedPushPayment),
-    );
+    td.when(
+      this.paymentRepository.provideStake(commonPaymentId, account),
+    ).thenReturn(okAsync(this.stakedPushPayment));
 
     td.when(
       this.accountRepository.getBalanceByAsset(
@@ -174,17 +172,17 @@ class PaymentServiceMocks {
       okAsync(new Balances([this.assetBalance])),
     );
 
-    td.when(this.paymentRepository.provideStake(paymentId, account)).thenReturn(
-      okAsync(this.stakedPushPayment),
-    );
+    td.when(
+      this.paymentRepository.provideStake(commonPaymentId, account),
+    ).thenReturn(okAsync(this.stakedPushPayment));
 
-    td.when(this.paymentRepository.provideAsset(paymentId)).thenReturn(
+    td.when(this.paymentRepository.provideAsset(commonPaymentId)).thenReturn(
       okAsync(this.approvedPushPayment),
     );
 
-    td.when(this.paymentRepository.acceptPayment(paymentId, amount)).thenReturn(
-      okAsync(this.finalizedPushPayment),
-    );
+    td.when(
+      this.paymentRepository.acceptPayment(commonPaymentId, commonAmount),
+    ).thenReturn(okAsync(this.finalizedPushPayment));
 
     this.gatewayRegistrationInfo = new GatewayRegistrationInfo(
       gatewayUrl,
@@ -195,9 +193,15 @@ class PaymentServiceMocks {
       GatewayUrl,
       GatewayRegistrationInfo
     >();
+
+    this.gatewayConnectorProxy = td.object<IGatewayConnectorProxy>();
+    td.when(
+      this.gatewayConnectorProxy.getConnectorActivationStatus(),
+    ).thenReturn(true);
+
     gatewayRegistrationInfoMap.set(gatewayUrl, this.gatewayRegistrationInfo);
     td.when(
-      this.gatewayConnectorRepository.getGatewayRegistrationInfo(
+      this.gatewayRegistrationRepository.getGatewayRegistrationInfo(
         td.matchers.contains(gatewayUrl),
       ),
     ).thenReturn(okAsync(gatewayRegistrationInfoMap));
@@ -205,21 +209,13 @@ class PaymentServiceMocks {
     td.when(this.gatewayConnectorRepository.getAuthorizedGateways()).thenReturn(
       okAsync(new Map([[gatewayUrl, validatedSignature]])),
     );
-
     td.when(
-      this.gatewayConnectorRepository.addAuthorizedGateway(
-        this.gatewayRegistrationInfo,
-        new Balances([this.assetBalance]),
-      ),
-    ).thenReturn(okAsync(undefined));
-
-    td.when(
-      this.gatewayConnectorRepository.getAuthorizedGatewaysConnectorsStatus(),
-    ).thenReturn(okAsync(new Map([[gatewayUrl, true]])));
+      this.gatewayConnectorRepository.getGatewayProxy(gatewayUrl),
+    ).thenReturn(okAsync(this.gatewayConnectorProxy));
 
     td.when(
       this.paymentRepository.resolveInsurance(
-        paymentId,
+        commonPaymentId,
         insuranceTransferId,
         BigNumberString("0"),
         null,
@@ -356,6 +352,7 @@ class PaymentServiceMocks {
       this.configProvider,
       this.paymentRepository,
       this.gatewayConnectorRepository,
+      this.gatewayRegistrationRepository,
       this.vectorUtils,
       this.paymentUtils,
       this.logUtils,
@@ -376,12 +373,6 @@ class PaymentServiceMocks {
     ).thenReturn(okAsync(returnedPaymentsMap));
   }
 
-  public setGatewayStatus(gatewayUrl: GatewayUrl, status: boolean) {
-    td.when(
-      this.gatewayConnectorRepository.getAuthorizedGatewaysConnectorsStatus(),
-    ).thenReturn(okAsync(new Map([[gatewayUrl, false]])));
-  }
-
   public factoryPushPayment(
     to: PublicIdentifier = publicIdentifier2,
     from: PublicIdentifier = publicIdentifier,
@@ -399,14 +390,14 @@ class PaymentServiceMocks {
     }
 
     return new PushPayment(
-      paymentId,
+      commonPaymentId,
       routerPublicIdentifier,
       chainId,
       to,
       from,
       state,
-      paymentToken,
-      requiredStake,
+      hyperTokenAddress,
+      commonAmount,
       amountStaked,
       expirationDate,
       unixNow,
@@ -415,7 +406,7 @@ class PaymentServiceMocks {
       gatewayUrl,
       details,
       null,
-      amount,
+      commonAmount,
       BigNumberString("0"),
     );
   }
@@ -437,14 +428,14 @@ class PaymentServiceMocks {
     }
 
     return new PullPayment(
-      paymentId,
+      commonPaymentId,
       routerPublicIdentifier,
       chainId,
       to,
       from,
       state,
-      paymentToken,
-      requiredStake,
+      hyperTokenAddress,
+      commonAmount,
       amountStaked,
       expirationDate,
       unixNow,
@@ -453,7 +444,7 @@ class PaymentServiceMocks {
       gatewayUrl,
       details,
       null,
-      amount,
+      commonAmount,
       BigNumberString("0"),
       BigNumberString("0"), // vestedAmount
       1, // deltaTime
@@ -574,10 +565,10 @@ describe("PaymentService tests", () => {
     const response = await paymentService.sendFunds(
       routerChannelAddress,
       publicIdentifier,
-      amount,
+      commonAmount,
       expirationDate,
-      requiredStake,
-      paymentToken,
+      commonAmount,
+      hyperTokenAddress,
       gatewayUrl,
       null,
     );
@@ -599,7 +590,7 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.offerReceived(paymentId);
+    const result = await paymentService.offerReceived(commonPaymentId);
 
     // Assert
     expect(result).toBeDefined();
@@ -619,7 +610,7 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.offerReceived(paymentId);
+    const result = await paymentService.offerReceived(commonPaymentId);
 
     // Assert
     expect(result).toBeDefined();
@@ -654,7 +645,7 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.acceptOffer(paymentId);
+    const result = await paymentService.acceptOffer(commonPaymentId);
 
     // Assert
     expect(result).toBeDefined();
@@ -674,7 +665,7 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.acceptOffer(paymentId);
+    const result = await paymentService.acceptOffer(commonPaymentId);
 
     // Assert
     expect(result).toBeDefined();
@@ -685,11 +676,11 @@ describe("PaymentService tests", () => {
 
   test("Should acceptOffer return error if freeAmount is less than totalStakeRequired", async () => {
     // Arrange
-    const paymentServiceMock = new PaymentServiceMocks(BigNumberString("13"));
+    const paymentServiceMock = new PaymentServiceMocks(BigNumberString("0"));
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.acceptOffer(paymentId);
+    const result = await paymentService.acceptOffer(commonPaymentId);
 
     // Assert
     expect(result).toBeDefined();
@@ -709,13 +700,16 @@ describe("PaymentService tests", () => {
     paymentServiceMock.setExistingPayments([payment]);
 
     td.when(
-      paymentServiceMock.paymentRepository.provideStake(paymentId, account),
+      paymentServiceMock.paymentRepository.provideStake(
+        commonPaymentId,
+        account,
+      ),
     ).thenReturn(errAsync(new Error("test error")));
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.acceptOffer(paymentId);
+    const result = await paymentService.acceptOffer(commonPaymentId);
 
     // Assert
     expect(result).toBeDefined();
@@ -731,14 +725,14 @@ describe("PaymentService tests", () => {
       publicIdentifier2,
       publicIdentifier,
       EPaymentState.Staked,
-      requiredStake,
+      commonAmount,
     );
     paymentServiceMock.setExistingPayments([payment]);
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.stakePosted(paymentId);
+    const result = await paymentService.stakePosted(commonPaymentId);
 
     // Assert
     expect(result).toBeDefined();
@@ -774,14 +768,14 @@ describe("PaymentService tests", () => {
       publicIdentifier,
       publicIdentifier2,
       EPaymentState.Staked,
-      requiredStake,
+      commonAmount,
     );
     paymentServiceMock.setExistingPayments([payment]);
 
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.stakePosted(paymentId);
+    const result = await paymentService.stakePosted(commonPaymentId);
 
     // Assert
     expect(result).toBeDefined();
@@ -813,7 +807,7 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.paymentPosted(paymentId);
+    const result = await paymentService.paymentPosted(commonPaymentId);
 
     // Assert
     expect(result).toBeDefined();
@@ -841,7 +835,7 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.paymentPosted(paymentId);
+    const result = await paymentService.paymentPosted(commonPaymentId);
 
     // Assert
     expect(result).toBeDefined();
@@ -882,7 +876,7 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.paymentCompleted(paymentId);
+    const result = await paymentService.paymentCompleted(commonPaymentId);
 
     // Assert
     expect(result).toBeDefined();
@@ -935,7 +929,7 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.advancePayments([paymentId]);
+    const result = await paymentService.advancePayments([commonPaymentId]);
     const provideAssetCallingcount = td.explain(
       paymentServiceMock.paymentRepository.provideAsset,
     ).callCount;
@@ -976,7 +970,7 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.advancePayments([paymentId]);
+    const result = await paymentService.advancePayments([commonPaymentId]);
 
     // Assert
     expect(result).toBeDefined();
@@ -999,7 +993,9 @@ describe("PaymentService tests", () => {
       publicIdentifier,
     );
     paymentServiceMock.setExistingPayments([payment]);
-    paymentServiceMock.setGatewayStatus(gatewayUrl, false);
+    td.when(
+      paymentServiceMock.gatewayConnectorProxy.getConnectorActivationStatus(),
+    ).thenReturn(false);
     paymentServiceMock.contextProvider.context.publicIdentifier =
       publicIdentifier;
 
@@ -1013,7 +1009,7 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.advancePayments([paymentId]);
+    const result = await paymentService.advancePayments([commonPaymentId]);
 
     // Assert
     expect(result).toBeDefined();
@@ -1036,7 +1032,7 @@ describe("PaymentService tests", () => {
       publicIdentifier2,
       publicIdentifier,
       EPaymentState.Accepted,
-      requiredStake,
+      commonAmount,
     );
     paymentServiceMock.setExistingPayments([acceptedPayment]);
 
@@ -1061,7 +1057,7 @@ describe("PaymentService tests", () => {
 
     // Act
     const result = await paymentService.resolveInsurance(
-      paymentId,
+      commonPaymentId,
       BigNumberString("0"),
       null,
     );
@@ -1081,7 +1077,7 @@ describe("PaymentService tests", () => {
       publicIdentifier2,
       publicIdentifier,
       EPaymentState.Accepted,
-      requiredStake,
+      commonAmount,
     );
     acceptedPayment.amountStaked = BigNumberString("10");
     paymentServiceMock.setExistingPayments([acceptedPayment]);
@@ -1106,7 +1102,7 @@ describe("PaymentService tests", () => {
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.recoverPayments([paymentId]);
+    const result = await paymentService.recoverPayments([commonPaymentId]);
 
     // Assert
     expect(result).toBeDefined();
@@ -1132,16 +1128,18 @@ describe("PaymentService tests", () => {
 
     td.when(
       paymentServiceMock.paymentRepository.getPaymentsByIds(
-        td.matchers.contains(paymentId),
+        td.matchers.contains(commonPaymentId),
       ),
     ).thenReturn(
-      okAsync(new Map([[paymentId, borkedPushPayment]])),
-      okAsync(new Map([[paymentId, paymentServiceMock.stakedPushPayment]])),
+      okAsync(new Map([[commonPaymentId, borkedPushPayment]])),
+      okAsync(
+        new Map([[commonPaymentId, paymentServiceMock.stakedPushPayment]]),
+      ),
     );
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.recoverPayments([paymentId]);
+    const result = await paymentService.recoverPayments([commonPaymentId]);
 
     // Assert
     expect(result).toBeDefined();
@@ -1169,16 +1167,18 @@ describe("PaymentService tests", () => {
 
     td.when(
       paymentServiceMock.paymentRepository.getPaymentsByIds(
-        td.matchers.contains(paymentId),
+        td.matchers.contains(commonPaymentId),
       ),
     ).thenReturn(
-      okAsync(new Map([[paymentId, borkedPushPayment]])),
-      okAsync(new Map([[paymentId, paymentServiceMock.approvedPushPayment]])),
+      okAsync(new Map([[commonPaymentId, borkedPushPayment]])),
+      okAsync(
+        new Map([[commonPaymentId, paymentServiceMock.approvedPushPayment]]),
+      ),
     );
     const paymentService = paymentServiceMock.factoryPaymentService();
 
     // Act
-    const result = await paymentService.recoverPayments([paymentId]);
+    const result = await paymentService.recoverPayments([commonPaymentId]);
 
     // Assert
     expect(result).toBeDefined();

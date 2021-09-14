@@ -326,7 +326,9 @@ export class ContextProviderMock implements IContextProvider {
     return okAsync(this.initializedContext);
   }
 
+  public setContextValues = new Array<HypernetContext>();
   public setContext(context: HypernetContext): ResultAsync<void, never> {
+    this.setContextValues.push(context);
     return okAsync<null, never>(null).map(() => {});
   }
 
@@ -342,6 +344,8 @@ export class ContextProviderMock implements IContextProvider {
       onPullPaymentUpdated: 0,
       onPushPaymentDelayed: 0,
       onPullPaymentDelayed: 0,
+      onPushPaymentCanceled: 0,
+      onPullPaymentCanceled: 0,
       onBalancesChanged: 0,
       onDeStorageAuthenticationStarted: 0,
       onDeStorageAuthenticationSucceeded: 0,
@@ -355,7 +359,7 @@ export class ContextProviderMock implements IContextProvider {
       onInitializationRequired: 0,
       onPrivateCredentialsRequested: 0,
       onGatewayConnectorActivated: 0,
-      authorizedGateways: 0,
+      onStateChannelCreated: 0,
     };
 
     // Merge the passed in counts with the basic counts
@@ -390,6 +394,12 @@ export class ContextProviderMock implements IContextProvider {
     );
     expect(this.onPullPaymentDelayedActivations.length).toBe(
       counts.onPullPaymentDelayed,
+    );
+    expect(this.onPushPaymentCanceledActivations.length).toBe(
+      counts.onPushPaymentCanceled,
+    );
+    expect(this.onPullPaymentCanceledActivations.length).toBe(
+      counts.onPullPaymentCanceled,
     );
     expect(this.onBalancesChangedActivations.length).toBe(
       counts.onBalancesChanged,
@@ -430,6 +440,9 @@ export class ContextProviderMock implements IContextProvider {
     expect(this.onGatewayConnectorActivatedActivations.length).toBe(
       counts.onGatewayConnectorActivated,
     );
+    expect(this.onStateChannelCreatedActivations.length).toBe(
+      counts.onStateChannelCreated,
+    );
   }
 }
 
@@ -444,6 +457,8 @@ export interface IExpectedEventCounts {
   onPullPaymentUpdated?: number;
   onPushPaymentDelayed?: number;
   onPullPaymentDelayed?: number;
+  onPushPaymentCanceled?: number;
+  onPullPaymentCanceled?: number;
   onBalancesChanged?: number;
   onDeStorageAuthenticationStarted?: number;
   onDeStorageAuthenticationSucceeded?: number;
@@ -457,5 +472,5 @@ export interface IExpectedEventCounts {
   onInitializationRequired?: number;
   onPrivateCredentialsRequested?: number;
   onGatewayConnectorActivated?: number;
-  authorizedGateways?: number;
+  onStateChannelCreated?: number;
 }

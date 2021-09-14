@@ -41,6 +41,8 @@ import {
   IGatewayConnectorRepositoryType,
   IPaymentRepository,
   IPaymentRepositoryType,
+  IGatewayRegistrationRepositoryType,
+  IGatewayRegistrationRepository,
 } from "@interfaces/data";
 import { HypernetContext } from "@interfaces/objects";
 import { BigNumber } from "ethers";
@@ -89,6 +91,8 @@ export class PaymentService implements IPaymentService {
     protected paymentRepository: IPaymentRepository,
     @inject(IGatewayConnectorRepositoryType)
     protected gatewayConnectorRepository: IGatewayConnectorRepository,
+    @inject(IGatewayRegistrationRepositoryType)
+    protected gatewayRegistrationRepository: IGatewayRegistrationRepository,
     @inject(IVectorUtilsType) protected vectorUtils: IVectorUtils,
     @inject(IPaymentUtilsType) protected paymentUtils: IPaymentUtils,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
@@ -363,7 +367,7 @@ export class PaymentService implements IPaymentService {
         }
 
         // We need to make sure that we have a sufficient balance of hypertoken in the channel to accept the payment
-        return this.gatewayConnectorRepository
+        return this.gatewayRegistrationRepository
           .getGatewayRegistrationInfo([payment.gatewayUrl])
           .andThen((registrationInfo) => {
             const gatewayRegistrationInfo = registrationInfo.get(
@@ -1054,17 +1058,13 @@ export class PaymentService implements IPaymentService {
     this.logUtils.debug(`Current payment status is ${payment.state}`);
 
     return this.gatewayConnectorRepository
-      .getAuthorizedGatewaysConnectorsStatus()
-      .andThen((gatewayConnectorStatusMap) => {
-        const gatewayConnectorStatus = gatewayConnectorStatusMap.get(
-          payment.gatewayUrl,
-        );
+      .getGatewayProxy(payment.gatewayUrl)
+      .andThen((proxy) => {
+        const gatewayConnectorStatus = proxy.getConnectorActivationStatus();
         this.logUtils.debug(
-          `In _advancePayment, gatewayConnectorStatus = ${
-            gatewayConnectorStatus == true
-          }`,
+          `In _advancePayment, gatewayConnectorStatus = ${gatewayConnectorStatus}`,
         );
-        if (gatewayConnectorStatus == true) {
+        if (gatewayConnectorStatus) {
           return this._advancePaymentForActivatedGateway(payment, context).map(
             () => {},
           );
