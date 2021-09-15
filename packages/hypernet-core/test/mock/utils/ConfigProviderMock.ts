@@ -49,6 +49,7 @@ export class ConfigProviderMock implements IConfigProvider {
             liquidityRegistryAddress: EthereumAddress(
               "liquidityRegistryAddress",
             ),
+            hypernetGovernorAddress: EthereumAddress("hypernetGovernorAddress"),
           },
         },
         "natsUrl",

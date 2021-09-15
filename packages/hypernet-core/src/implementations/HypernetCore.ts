@@ -32,6 +32,7 @@ import {
   GatewayTokenInfo,
   GatewayRegistrationFilter,
   GatewayRegistrationInfo,
+  Proposal,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -58,6 +59,7 @@ import {
   LinkService,
   GatewayConnectorService,
   PaymentService,
+  GovernanceService,
 } from "@implementations/business";
 import {
   AccountsRepository,
@@ -66,6 +68,7 @@ import {
   PaymentRepository,
   RouterRepository,
   LinkRepository,
+  GovernanceRepository,
 } from "@implementations/data";
 import {
   IGatewayConnectorListener,
@@ -79,6 +82,7 @@ import {
   ILinkService,
   IGatewayConnectorService,
   IPaymentService,
+  IGovernanceService,
 } from "@interfaces/business";
 import {
   IAccountsRepository,
@@ -88,6 +92,7 @@ import {
   IPaymentRepository,
   IRouterRepository,
   IGatewayRegistrationRepository,
+  IGovernanceRepository,
 } from "@interfaces/data";
 import { HypernetConfig, HypernetContext } from "@interfaces/objects";
 import { ok, Result, ResultAsync } from "neverthrow";
@@ -202,6 +207,7 @@ export class HypernetCore implements IHypernetCore {
   protected gatewayRegistrationRepository: IGatewayRegistrationRepository;
   protected messagingRepository: IMessagingRepository;
   protected routerRepository: IRouterRepository;
+  protected governanceRepository: IGovernanceRepository;
 
   // Business Layer Stuff
   protected accountService: IAccountService;
@@ -210,6 +216,7 @@ export class HypernetCore implements IHypernetCore {
   protected linkService: ILinkService;
   protected developmentService: IDevelopmentService;
   protected gatewayConnectorService: IGatewayConnectorService;
+  protected governanceService: IGovernanceService;
 
   // API
   protected vectorAPIListener: IVectorListener;
@@ -449,6 +456,15 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
     );
 
+    this.governanceRepository = new GovernanceRepository(
+      this.blockchainProvider,
+      this.configProvider,
+      this.contextProvider,
+      this.storageUtils,
+      this.blockchainUtils,
+      this.logUtils,
+    );
+
     this.paymentService = new PaymentService(
       this.linkRepository,
       this.accountRepository,
@@ -486,6 +502,7 @@ export class HypernetCore implements IHypernetCore {
       this.blockchainProvider,
       this.logUtils,
     );
+    this.governanceService = new GovernanceService(this.governanceRepository);
 
     this.vectorAPIListener = new VectorAPIListener(
       this.browserNodeProvider,
@@ -852,5 +869,11 @@ export class HypernetCore implements IHypernetCore {
     return this.accountService.providePrivateCredentials(
       new PrivateCredentials(privateKey, mnemonic),
     );
+  }
+
+  public getProposals(
+    _proposalsNumberArr?: number[],
+  ): ResultAsync<Proposal[], BlockchainUnavailableError> {
+    return this.governanceService.getProposals(_proposalsNumberArr);
   }
 }

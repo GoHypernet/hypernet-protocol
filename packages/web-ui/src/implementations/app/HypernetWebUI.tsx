@@ -30,6 +30,7 @@ import {
   WITHDRAW_WIDGET_ID_SELECTOR,
   STATE_CHANNELS_WIDGET_ID_SELECTOR,
   BALANCES_SUMMARY_WIDGET_ID_SELECTOR,
+  PROPOSALS_WIDGET_ID_SELECTOR,
 } from "@web-ui/constants";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
@@ -361,6 +362,23 @@ export default class HypernetWebUI implements IHypernetWebUI {
         ),
         this._generateDomElement(
           config?.selector || ONBOARDING_FLOW_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderProposalsWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <StateChannelsWidget {...config} />,
+          config?.showInModal,
+        ),
+        this._generateDomElement(
+          config?.selector || PROPOSALS_WIDGET_ID_SELECTOR,
         ),
       );
     };

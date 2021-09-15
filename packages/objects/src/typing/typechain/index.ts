@@ -43,6 +43,8 @@ import LiquidityRegistryAbi from "./artifacts/LiquidityRegistry";
 import MessageTransferAbi from "./artifacts/MessageTransfer";
 import MocRegistryAbi from "./artifacts/MocRegistry";
 import ParameterizedAbi from "./artifacts/Parameterized";
+import HypernetGovernorAbi from "./artifacts/HypernetGovernor";
+import HypertokenAbi from "./artifacts/Hypertoken";
 
 const TransferAbis = {
   Insurance: InsuranceAbi,
@@ -52,4 +54,9 @@ const TransferAbis = {
   LiquidityRegistry: LiquidityRegistryAbi,
 };
 
-export { TransferAbis };
+const GovernanceAbis = {
+  HypernetGovernor: HypernetGovernorAbi,
+  Hypertoken: HypertokenAbi,
+};
+
+export { TransferAbis, GovernanceAbis };

@@ -30,6 +30,7 @@ import {
   GatewayTokenInfo,
   GatewayRegistrationFilter,
   GatewayRegistrationInfo,
+  Proposal,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -451,6 +452,14 @@ export default class HypernetIFrameProxy
     return this._createCall("providePrivateCredentials", {
       privateKey,
       mnemonic,
+    });
+  }
+
+  public getProposals(
+    _proposalsNumberArr?: number[],
+  ): ResultAsync<Proposal[], BlockchainUnavailableError> {
+    return this._createCall("getProposals", {
+      _proposalsNumberArr,
     });
   }
 

@@ -64,4 +64,5 @@ export interface IHypernetWebUI {
   renderPrivateKeysModal(): Result<void, RenderError>;
   renderWarningAlertModal(errorMessage?: string): Result<void, RenderError>;
   renderMetamaskWarningModal(): Result<void, RenderError>;
+  renderProposalsWidget(config?: IRenderParams): Result<void, RenderError>;
 }

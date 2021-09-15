@@ -32,3 +32,5 @@ export const METAMASK_WARNING_ID_SELECTOR =
   "hypernet-protocol-metamask-warning";
 export const METAMASK_URL =
   "https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn";
+export const PROPOSALS_WIDGET_ID_SELECTOR =
+  "hypernet-protocol-proposals-widget";

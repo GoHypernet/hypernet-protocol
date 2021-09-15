@@ -33,6 +33,7 @@ import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
 import { Signature } from "@objects/Signature";
+import { Proposal } from "@objects/Proposal";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -251,6 +252,10 @@ export interface IHypernetCore {
     privateKey: string | null,
     mnemonic: string | null,
   ): ResultAsync<void, InvalidParametersError>;
+
+  getProposals(
+    _proposalsNumberArr?: number[],
+  ): ResultAsync<Proposal[], BlockchainUnavailableError>;
 
   /**
    * Observables for seeing what's going on
