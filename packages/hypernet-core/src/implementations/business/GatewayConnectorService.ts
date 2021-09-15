@@ -336,7 +336,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     chainId: ChainId,
     routerPublicIdentifiers: PublicIdentifier[],
   ): ResultAsync<
-    EthereumAddress,
+    ActiveStateChannel,
     PersistenceError | RouterUnauthorizedError | InvalidParametersError
   > {
     if (routerPublicIdentifiers.length < 1) {
@@ -392,7 +392,11 @@ export class GatewayConnectorService implements IGatewayConnectorService {
                       channelAddress,
                     ),
                   );
-                  return channelAddress;
+                  return new ActiveStateChannel(
+                    chainId,
+                    routerPublicIdentifier,
+                    channelAddress,
+                  );
                 });
             });
         });
@@ -402,7 +406,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
           gatewayUrl,
           existingStateChannel.routerPublicIdentifier,
         ).map(() => {
-          return existingStateChannel.channelAddress;
+          return existingStateChannel;
         });
       }
     });

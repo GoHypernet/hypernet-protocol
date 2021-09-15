@@ -1,4 +1,5 @@
 import {
+  ActiveStateChannel,
   ChainId,
   EthereumAddress,
   PublicIdentifier,
@@ -7,5 +8,5 @@ import {
 export interface IStateChannelRequest {
   chainId: ChainId;
   routerPublicIdentifiers: PublicIdentifier[];
-  callback: (channelAddress: EthereumAddress) => void;
+  callback: (stateChannel: ActiveStateChannel) => void;
 }
