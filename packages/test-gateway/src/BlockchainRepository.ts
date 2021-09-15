@@ -3,6 +3,7 @@ import { Contract, ethers } from "ethers";
 
 export class BlockchainRepository {
   protected privateKey = "0x0123456789012345678901234567890123456789012345678901234567890123";
+  protected registryAccountPrivateKey = "0dbbe8e4ae425a6d2687f1a7e3ba17bc98c673636790f1b8ad91193c05875ef1";
   protected provider: ethers.providers.JsonRpcProvider;
   protected wallet: ethers.Wallet;
   protected gatewayRegistryAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
@@ -15,7 +16,7 @@ export class BlockchainRepository {
       this.provider = new ethers.providers.JsonRpcProvider("http://blockchain:8545");
 
       // Create a wallet using that provider. Wallet combines a provider and a signer.
-      this.wallet = new ethers.Wallet(this.privateKey, this.provider);
+      this.wallet = new ethers.Wallet(this.registryAccountPrivateKey, this.provider);
 
       this.address = EthereumAddress(this.wallet.address);
       console.log(`Address: ${this.address}`);
@@ -33,7 +34,7 @@ export class BlockchainRepository {
 
     try {
       console.log("Creating registry contract");
-      const mocRegistryContract = new Contract(this.gatewayRegistryAddress, TransferAbis.MocRegistry.abi, this.wallet);
+      const gatewayRegistryContract = new Contract(this.gatewayRegistryAddress, TransferAbis.ERC721.abi, this.wallet);
 
       const registryEntry: IGatewayRegistryEntry = {
         address: this.address,
@@ -41,7 +42,11 @@ export class BlockchainRepository {
       };
 
       console.log("Setting gateway registry info");
-      const txResponse = await mocRegistryContract.setGateway(gatewayUrl, JSON.stringify(registryEntry));
+      const txResponse = await gatewayRegistryContract.register(
+        this.privateKey,
+        gatewayUrl,
+        JSON.stringify(registryEntry),
+      );
 
       const receipt = await txResponse.wait();
 
