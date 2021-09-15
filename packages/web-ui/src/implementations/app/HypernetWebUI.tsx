@@ -44,6 +44,7 @@ import LinksWidget from "@web-ui/widgets/LinksWidget";
 import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
 import PublicIdentifierWidget from "@web-ui/widgets/PublicIdentifierWidget";
 import StateChannelsWidget from "@web-ui/widgets/StateChannelsWidget";
+import ProposalsWidget from "@web-ui/widgets/ProposalsWidget";
 
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
@@ -374,7 +375,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
     const renderReact = () => {
       return ReactDOM.render(
         this._bootstrapComponent(
-          <StateChannelsWidget {...config} />,
+          <ProposalsWidget {...config} />,
           config?.showInModal,
         ),
         this._generateDomElement(
