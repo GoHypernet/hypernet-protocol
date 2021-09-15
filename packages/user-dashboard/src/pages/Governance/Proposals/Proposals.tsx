@@ -4,14 +4,14 @@ import React, { useEffect } from "react";
 import PageWrapper from "@user-dashboard/components/PageWrapper";
 import { useLayoutContext, useStoreContext } from "@user-dashboard/contexts";
 
-const Gateways: React.FC = () => {
+const Proposals: React.FC = () => {
   const { handleError } = useLayoutContext();
   const { hypernetWebIntegration } = useStoreContext();
 
   useEffect(() => {
     hypernetWebIntegration.webUIClient
       .renderProposalsWidget({
-        selector: "gateways-page-wrapper",
+        selector: "proposals-page-wrapper",
         includeBoxWrapper: true,
       })
       .mapErr(handleError);
@@ -24,4 +24,4 @@ const Gateways: React.FC = () => {
   );
 };
 
-export default Gateways;
+export default Proposals;
