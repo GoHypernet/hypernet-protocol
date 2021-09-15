@@ -1,33 +1,35 @@
 # Hypernet Protocol Contracts
 
-This package contains the Hypernet Protocol solidity contracts for the token and governance. The token is 
-[EIP20](https://eips.ethereum.org/EIPS/eip-20) compliant and is limited to a total supploy of `100,000,000` 
+This package contains the Hypernet Protocol solidity contracts for the token, governance, and identity registries. 
+The token is [EIP20](https://eips.ethereum.org/EIPS/eip-20) compliant and is limited to a total supploy of `100,000,000` 
 with `18` decimal places of precision. The governance contracts are based on OpenZeppelin's 
 [Governor](https://docs.openzeppelin.com/contracts/4.x/governance) library which are based on a reference 
 implementation by [Compound Finance](https://compound.finance/docs/governance).
 
-<p align="center">
-  <img src="https://github.com/GoHypernet/hypernet-protocol/blob/dev/documentation/images/Governance-sequence-diagram.png" width="500">
-</p>
+![alt text](/documentation/images/Governance-sequence-diagram.png)
 
 This particular governance architecture has been adopted by a number of highly successful projects including
 [Uniswap](https://docs.uniswap.org/protocol/V2/concepts/governance/governance-reference) and has proven quite
 successful in practice at adopting beneficial proposals to protocol upgrades while preventing 
 [adversarial attacks](https://docs.uniswap.org/protocol/V2/concepts/governance/adversarial-circumstances). 
 
-<p align="center">
-  <img src="https://github.com/GoHypernet/hypernet-protocol/blob/dev/documentation/images/Hypernet-contracts.png" width="500">
-</p>
+![alt text](/documentation/images/Hypernet-Contract-Flow.png)
 
-The Hypernet Governance application is used for proposing and vetting new NonFungibleRegisties (NFR) which are deployed
-through a RegistryFactory contract. NonFungleRegistries are based on the [EIP721](https://eips.ethereum.org/EIPS/eip-721) 
-non-fungible token standard. A NFR is enumerable and every entry is an ownable token that has a label (seperate from the 
-token URI) that is unique within that specific NFR, that is, two entries can have the same `tokenURI`, but they cannot have
-the same label. This helps to fascilitate lookups more easily for applications in which the registry is used for identity or
-authenticity verification. Each NFR has a `MINTER_ROLE`, which can mint new entries to the registry, and a 
-`DEFAULT_ADMIN_ROLE` which can make modifications to the registry contract parameters. These roles are set through the NFR 
-constructor. 
+The Hypernet Governance application is used for proposing and vetting (by the token holder community) new Non-Fungible Registries (NFR) 
+which are deployed through a registry factory contract. Non-Fungible Registries are based on the [EIP721](https://eips.ethereum.org/EIPS/eip-721) 
+non-fungible token standard. An NFR is enumerable and every entry is an ownable token that has a corresponding `label` (seperate 
+from the `tokenURI`) that is unique within that specific NFR. That is, two entries can have the same `tokenURI`, but they cannot have
+the same `label`. This helps to fascilitate lookups more easily for applications in which the registry is used for identity or
+authenticity verification in which the `tokenId` may not be known *a priori*. 
 
+Each NFR has a `MINTER_ROLE`, which can mint new entries to the registry, and a `DEFAULT_ADMIN_ROLE` which can make modifications 
+to the registry contract parameters. These roles are set through the NFR constructor. Additionally, the `MINTER_ROLE` and 
+the owner of a token have the option to update the information stored in a token after minting unless `allowStorageUpdate` is 
+set to `false` (which it is by default and can be updated by the `DEFAULT_ADMIN_ROLE`). Lastly, each NFR exposes a *lazy registration*
+interface through the `lazyRegister` function. This allows the owner of the `MINTER_ROLE` to offload the burden of gas costs to the 
+recipient of the token by providing them with signature that the recipient can then present to the contract to register at their 
+convenience. This feature is disabled by default but can be activated by the `DEFAULT_ADMIN_ROLE` through the `allowLazyRegister`
+variable. 
 
 ## Install dependencies
 
