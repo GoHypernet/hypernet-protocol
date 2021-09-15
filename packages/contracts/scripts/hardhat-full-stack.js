@@ -35,7 +35,7 @@ async function main() {
 
   // deploy timelock contract
   const Timelock = await ethers.getContractFactory("TimelockController");
-  const timelock = await Timelock.deploy(1, [], []);
+  const timelock = await Timelock.deploy(1, [], ["0x0000000000000000000000000000000000000000"]);
   const timelock_reciept = await timelock.deployTransaction.wait();
   console.log("Timelock Address:", timelock.address)
   console.log("Timelock Gas Fee:", timelock_reciept.gasUsed.toString())
@@ -61,7 +61,7 @@ async function main() {
 
   // deploy factory contract
   const FactoryRegistry = await ethers.getContractFactory("RegistryFactory");
-  const factoryregistry = await FactoryRegistry.deploy(hypernetgovernor.address);
+  const factoryregistry = await FactoryRegistry.deploy([hypernetgovernor.address, timelock.address]);
   const registry_reciept = await factoryregistry.deployTransaction.wait();
   console.log("Factory Address:", factoryregistry.address)
   console.log("Factory Gas Fee:", registry_reciept.gasUsed.toString())

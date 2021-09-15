@@ -67,7 +67,7 @@ npx hardhat node --port 8569
 Once the node is running, deploy the full Solidity contract stack to the Hardhat network:
 
 ```shell
-npx hardhat run scripts/hardhat-full-stack.js --network hardhat
+npx hardhat run scripts/hardhat-full-stack.js --network dev
 ```
 
 Use the help tasks defined in `hardhat.config.js` to interact with the deployed contracts.
@@ -75,45 +75,46 @@ Use the help tasks defined in `hardhat.config.js` to interact with the deployed 
 Get Governance contract parameters:
 
 ```shell
-npx hardhat governanceParameters --network hardhat
+npx hardhat governanceParameters --network dev
 ```
 
 Propose a new Non-Fungible Registry, your account must have at least `1000000` Hypertoken (1% of the total supply) 
 for the proposal to go through:
 
 ```shell
-npx hardhat proposeRegistry --network hardhat --name Gateways --symbol GTW --owner 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
+npx hardhat proposeRegistry --network dev --name Gateways --symbol GTW --owner 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
 ```
 
 Additionally, if at any point during the voting process your voting power drops below this 1% threshold, your proposal 
 is vulnerable to being canceled:
 
 ```shell
-npx hardhat cancelProposal --network hardhat --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
+npx hardhat cancelProposal --network dev --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
 ```
 
 Check the state of an existing Proposal:
 
 ```shell
-npx hardhat proposalState --network hardhat --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
+npx hardhat proposalState --network dev --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
 ```
 
 Delegate your voting power to a given address:
 
 ```shell
-npx hardhat delegateVote --network hardhat --delegate 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+npx hardhat delegateVote --network dev --delegate 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 ```
 
 Cast a vote on a proposal (Against (0), For (1), Abstain (2)):
 
 ```shell
-npx hardhat castVote --network hardhat --id 13654425952634501747257196678513303918485643847941868894665917031025800633397 --support 1
+npx hardhat castVote --network dev --id 13654425952634501747257196678513303918485643847941868894665917031025800633397 --support 1
 ```
 
-If a proposal has reached quorum and >50% of votes are in favor, once its deadline has passed it can be executed:
+If a proposal has reached quorum and >50% of votes are in favor, once its deadline has passed it can be queued then executed:
 
 ```shell
-npx hardhat executeProposal --network hardhat --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
+npx hardhat queueProposal --network dev --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
+npx hardhat executeProposal --network dev --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
 ```
 
 ## Hardhat network - registry testing deployment 
