@@ -577,8 +577,14 @@ describe("GatewayConnectorService tests", () => {
     // Assert
     expect(response).toBeDefined();
     expect(response.isErr()).toBeFalsy();
-    const responseChannelAddress = response._unsafeUnwrap();
-    expect(responseChannelAddress).toBe(routerChannelAddress);
+    const stateChannel = response._unsafeUnwrap();
+    expect(stateChannel).toMatchObject(
+      new ActiveStateChannel(
+        chainId,
+        routerPublicIdentifier,
+        routerChannelAddress,
+      ),
+    );
     expect(mocks.contextProvider.setContextValues.length).toBe(0);
     mocks.contextProvider.assertEventCounts({});
   });
@@ -693,8 +699,14 @@ describe("GatewayConnectorService tests", () => {
     // Assert
     expect(response).toBeDefined();
     expect(response.isErr()).toBeFalsy();
-    const responseChannelAddress = response._unsafeUnwrap();
-    expect(responseChannelAddress).toBe(routerChannelAddress);
+    const stateChannel = response._unsafeUnwrap();
+    expect(stateChannel).toMatchObject(
+      new ActiveStateChannel(
+        chainId,
+        routerPublicIdentifier,
+        routerChannelAddress,
+      ),
+    );
     mocks.contextProvider.assertEventCounts({
       onStateChannelCreated: 1,
     });
