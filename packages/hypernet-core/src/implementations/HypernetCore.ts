@@ -445,6 +445,7 @@ export class HypernetCore implements IHypernetCore {
     );
 
     this.routerRepository = new RouterRepository(
+      this.blockchainUtils,
       this.blockchainProvider,
       this.configProvider,
     );

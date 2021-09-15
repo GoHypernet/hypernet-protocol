@@ -319,37 +319,37 @@ describe("EthersBlockchainUtils tests", () => {
     expect(result._unsafeUnwrap()).toStrictEqual([hexString, hexString]);
   });
 
-  test("getGatewayRegistrationInfo() should return GatewayRegistrationInfo", async () => {
-    // Arrange
-    const mocks = new EthersBlockchainUtilsMocks();
-    const utils = mocks.factoryUtils();
+  // test("getERC721Entry() should return ", async () => {
+  //   // Arrange
+  //   const mocks = new EthersBlockchainUtilsMocks();
+  //   const utils = mocks.factoryUtils();
 
-    // Act
-    const result = await utils.getGatewayRegistrationInfo(gatewayUrl);
+  //   // Act
+  //   const result = await utils.getERC721Entry(gatewayUrl);
 
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeFalsy();
-    expect(result._unsafeUnwrap()).toStrictEqual(
-      new GatewayRegistrationInfo(gatewayUrl, gatewayAddress, gatewaySignature),
-    );
-  });
+  //   // Assert
+  //   expect(result).toBeDefined();
+  //   expect(result.isErr()).toBeFalsy();
+  //   expect(result._unsafeUnwrap()).toStrictEqual(
+  //     new GatewayRegistrationInfo(gatewayUrl, gatewayAddress, gatewaySignature),
+  //   );
+  // });
 
-  test("getGatewayRegistrationInfo() should return new BlockchainUnavailableError('Cannot get gateway registry entry')", async () => {
-    // Arrange
-    const mocks = new EthersBlockchainUtilsMocks();
-    const utils = mocks.factoryUtils();
+  // test("getERC721Entry() should return new BlockchainUnavailableError('Cannot get gateway registry entry')", async () => {
+  //   // Arrange
+  //   const mocks = new EthersBlockchainUtilsMocks();
+  //   const utils = mocks.factoryUtils();
 
-    // Act
-    const result = await utils.getGatewayRegistrationInfo(gatewayUrlError);
-    const wrappedResponse = result._unsafeUnwrapErr();
+  //   // Act
+  //   const result = await utils.getGatewayRegistrationInfo(gatewayUrlError);
+  //   const wrappedResponse = result._unsafeUnwrapErr();
 
-    // Assert
-    expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    expect(wrappedResponse).toBeInstanceOf(BlockchainUnavailableError);
-    expect(wrappedResponse).toStrictEqual(
-      new BlockchainUnavailableError("Cannot get gateway registry entry"),
-    );
-  });
+  //   // Assert
+  //   expect(result).toBeDefined();
+  //   expect(result.isErr()).toBeTruthy();
+  //   expect(wrappedResponse).toBeInstanceOf(BlockchainUnavailableError);
+  //   expect(wrappedResponse).toStrictEqual(
+  //     new BlockchainUnavailableError("Cannot get gateway registry entry"),
+  //   );
+  // });
 });
