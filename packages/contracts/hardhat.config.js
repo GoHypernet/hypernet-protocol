@@ -4,9 +4,15 @@ require("@nomiclabs/hardhat-solhint");
 require("hardhat-gas-reporter");
 require("hardhat-contract-sizer");
 
-const HG = require("./artifacts/contracts/HypernetGovernor.sol/HypernetGovernor.json");
 const HT = require("./artifacts/contracts/Hypertoken.sol/Hypertoken.json");
+const HG = require("./artifacts/contracts/HypernetGovernor.sol/HypernetGovernor.json");
 const RF = require("./artifacts/contracts/RegistryFactory.sol/RegistryFactory.json");
+const NFR = require("./artifacts/contracts/NonFungibleRegistry.sol/NonFungibleRegistry.json");
+
+const govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+const timelockAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+const factoryAddress = "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6";
+const hAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -16,21 +22,14 @@ task("sendhypertoken", "Send hypertoken to another account")
   .setAction(async (taskArgs) => {
     const [owner] = await hre.ethers.getSigners();
 
-    // set token address based on network
-    let hAddress;
-    if (network["name"] == "hardhat") {
-      hAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-    } else {
-      hAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-    }
+  const hypertoken = new hre.ethers.Contract(hAddress, HT.abi, owner);
+  const recipient = taskArgs.recipient;
+  const amount = taskArgs.amount;
+  const tx = await hypertoken.transfer(recipient, amount);
+  const tx_rcpt = await tx.wait();
+  const balR = await hypertoken.balanceOf(recipient)
+  const balS = await hypertoken.balanceOf(owner.address)
 
-    const hypertoken = new hre.ethers.Contract(hAddress, HT.abi, owner);
-    const recipient = taskArgs.recipient;
-    const amount = taskArgs.amount;
-    const tx = await hypertoken.transfer(recipient, amount);
-    const tx_rcpt = await tx.wait();
-    const balR = await hypertoken.balanceOf(recipient);
-    const balS = await hypertoken.balanceOf(owner.address);
 
     console.log("Balance of sender:", balS.toString());
     console.log("Balance of recipient:", balR.toString());
@@ -41,21 +40,13 @@ task("delegateVote", "Delegate your voting power")
   .setAction(async (taskArgs) => {
     const [owner] = await hre.ethers.getSigners();
 
-    // set token address based on network
-    let hAddress;
-    if (network["name"] == "hardhat") {
-      hAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-    } else {
-      hAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-    }
-
     const hypertoken = new hre.ethers.Contract(hAddress, HT.abi, owner);
     const delegate = taskArgs.delegate;
     const amount = taskArgs.amount;
     const tx = await hypertoken.delegate(delegate);
     const tx_rcpt = await tx.wait();
-    const votePowerDelegate = await hypertoken.getVotes(delegate);
-    const votePowerOwner = await hypertoken.getVotes(owner.address);
+    const votePowerDelegate = await hypertoken.getVotes(delegate)
+    const votePowerOwner = await hypertoken.getVotes(owner.address)
 
     console.log("Voting power of Owner:", votePowerOwner.toString());
     console.log("Voting power of Delegate:", votePowerDelegate.toString());
@@ -71,42 +62,70 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   }
 });
 
-task(
-  "governanceParameters",
-  "Prints Governance contracts parameters.",
-).setAction(async (taskArgs) => {
-  const accounts = await hre.ethers.getSigners();
+task("governanceParameters", "Prints Governance parameters.")
+.setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
 
-  // set governance address based on network
-  let govAddress;
-  if (network["name"] == "hardhat") {
-    govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-  } else {
-    govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-  }
-  const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
+    const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
 
-  console.log(network["name"]);
-  let name = await govHandle.name();
-  let votingDelay = await govHandle.votingDelay();
-  let votingPeriod = await govHandle.votingPeriod();
-  let proposalThreshold = await govHandle.proposalThreshold();
-  let proposalCount = await govHandle._proposalIdTracker();
-  let mostRecentProposalId = await govHandle._proposalMap(proposalCount);
-  let proposalDescription = await govHandle.proposalDescriptions(
-    mostRecentProposalId,
-  );
-  console.log("Governance Name:", name);
-  console.log("Voting Delay (blocks):", votingDelay.toString());
-  console.log("Voting Period (blocks):", votingPeriod.toString());
-  console.log(
-    "Proposal Quorum (vote threshold):",
-    proposalThreshold.toString(),
-  );
-  console.log("Proposal Count:", proposalCount.toString());
-  console.log("Must Recent Proposal:", mostRecentProposalId.toString());
-  console.log("Must Recent Proposal Description:", proposalDescription);
-});
+    let name = await govHandle.name();
+    let votingDelay = await govHandle.votingDelay();
+    let votingPeriod = await govHandle.votingPeriod();
+    let proposalThreshold = await govHandle.proposalThreshold();
+    let proposalCount = await govHandle._proposalIdTracker();
+    let mostRecentProposalId = await govHandle._proposalMap(proposalCount)
+    let proposalDescription = await govHandle.proposalDescriptions(mostRecentProposalId)
+    console.log("Governance Name:", name);
+    console.log("Voting Delay (blocks):", votingDelay.toString());
+    console.log("Voting Period (blocks):", votingPeriod.toString());
+    console.log("Proposal Quorum (vote threshold):", proposalThreshold.toString());
+    console.log("Proposal Count:", proposalCount.toString());
+    console.log("Most Recent Proposal:", mostRecentProposalId.toString());
+    console.log("Most Recent Proposal Description:", proposalDescription);
+  });
+
+task("registryParameters", "Prints NFR  parameters.")
+  .addParam("name", "Name of the target registry.")
+  .setAction(async (taskArgs) => {
+    const name = taskArgs.name;
+
+    const accounts = await hre.ethers.getSigners();
+
+    const factoryHandle = new hre.ethers.Contract(factoryAddress, RF.abi, accounts[0]);
+    const registryAddress = await factoryHandle.nameToAddress(name);
+    const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
+
+    const symbol = await registryHandle.symbol();
+    const numberOfEntries = await registryHandle.totalSupply();
+    console.log("Registry Name:", name);
+    console.log("Registry Symbol:", symbol);
+    console.log("Registry Address:", registryAddress);
+    console.log("Number of Entries:", numberOfEntries.toString());
+
+  });
+
+  task("registryEntryByLabel", "Prints NunFungible Identity Data.")
+  .addParam("name", "Target NonFungle Registry Name.")
+  .addParam("label", "NFI label")
+  .setAction(async (taskArgs) => {
+    const name = taskArgs.name;
+    const label = taskArgs.label;
+
+    const accounts = await hre.ethers.getSigners();
+
+    const factoryHandle = new hre.ethers.Contract(factoryAddress, RF.abi, accounts[0]);
+    const registryAddress = await factoryHandle.nameToAddress(name);
+    const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
+    
+    const tokenId = await registryHandle.registryMap(label);
+    const tokenURI = await registryHandle.tokenURI(tokenId);
+    const tokenOwner =  await registryHandle.ownerOf(tokenId);
+
+    console.log("Owner of NFI:", tokenOwner);
+    console.log("Token ID:", tokenId.toString());
+    console.log("NFI Data:", tokenURI);
+
+  });
 
 task("proposeRegistry", "Propose a new NonFungibleRegistry.")
   .addParam("name", "Name for proposed registry.")
@@ -115,16 +134,6 @@ task("proposeRegistry", "Propose a new NonFungibleRegistry.")
   .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
 
-    // set governance address based on network
-    let govAddress;
-    let factoryAddress;
-    if (network["name"] == "hardhat") {
-      govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-      factoryAddress = "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853";
-    } else {
-      govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-      factoryAddress = "0xa513E6E4b8f2a923D98304ec87F64353C4D5C853";
-    }
     const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
     const factoryHandle = new hre.ethers.Contract(
       factoryAddress,
@@ -159,19 +168,56 @@ task("proposeRegistry", "Propose a new NonFungibleRegistry.")
     console.log("Description Hash:", descriptionHash.toString());
   });
 
+task("proposeRegistryEntry", "Propose a new NonFungibleRegistry where Governance Contract is owner.")
+  .addParam("name", "Name of target Registry where NFI is to be entered.")
+  .addParam("label", "NFI label.")
+  .addParam("data", "Data to be written to NFI entry.")
+  .addParam("recipient", "Recipient address of the NFI.")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+    const registryName = taskArgs.name;
+    const NFILabel = taskArgs.label;
+    const NFIData = taskArgs.data;
+    const NFIRecipient = taskArgs.recipient;
+
+    const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
+    const factoryHandle = new hre.ethers.Contract(factoryAddress, RF.abi, accounts[0]);
+
+    // lookup address for target registry
+    const registryAddress = await factoryHandle.nameToAddress(registryName);
+    const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
+
+    // construct proposal
+    const proposalDescription = NFILabel; // just name the proposal after the lable of the NonFungibleIdentity
+    const descriptionHash = hre.ethers.utils.id(proposalDescription);
+    const transferCalldata = registryHandle.interface.encodeFunctionData(
+      "register",
+      [NFIRecipient, NFILabel, NFIData],
+    );
+
+    const proposalID = await govHandle.hashProposal(
+      [registryAddress],
+      [0],
+      [transferCalldata],
+      descriptionHash,
+    );
+    // propose a new registry
+    const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
+      [registryAddress],
+      [0],
+      [transferCalldata],
+      proposalDescription,
+    );
+    const tx_reciept = await tx.wait();
+    console.log("Proposal ID:", proposalID.toString());
+    console.log("Description Hash:", descriptionHash.toString());
+  });
+
 task("proposalState", "Check the state of an existing proposal")
   .addParam("id", "ID of an existing proposal.")
   .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
 
-    // set governance address based on network
-    let govAddress;
-    let factoryAddress;
-    if (network["name"] == "hardhat") {
-      govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-    } else {
-      govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-    }
     const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
 
     const proposalID = taskArgs.id;
@@ -196,16 +242,8 @@ task("castVote", "Cast a vote for an existing proposal")
   .addParam("id", "ID of an existing proposal.")
   .addParam("support", "Against (0), For (1), Abstain (2)")
   .setAction(async (taskArgs) => {
-    const accounts = await hre.ethers.getSigners();
 
-    // set governance address based on network
-    let govAddress;
-    let factoryAddress;
-    if (network["name"] == "hardhat") {
-      govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-    } else {
-      govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-    }
+    const accounts = await hre.ethers.getSigners();
     const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
 
     const proposalID = taskArgs.id;
@@ -226,14 +264,6 @@ task("queueProposal", "queue a proposal that has been successfully passed.")
   .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
 
-    // set governance address based on network
-    let govAddress;
-    let factoryAddress;
-    if (network["name"] == "hardhat") {
-      govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-    } else {
-      govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-    }
     const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
 
     const proposalID = taskArgs.id;
@@ -253,14 +283,6 @@ task("executeProposal", "Execute a proposal that has been successfully passed.")
   .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
 
-    // set governance address based on network
-    let govAddress;
-    let factoryAddress;
-    if (network["name"] == "hardhat") {
-      govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-    } else {
-      govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-    }
     const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
 
     const proposalID = taskArgs.id;
@@ -273,22 +295,12 @@ task("executeProposal", "Execute a proposal that has been successfully passed.")
     const tx_rcp = tx.wait();
   });
 
-task(
-  "cancelProposal",
-  "Cancel a proposal if it is your or if proposer is below proposal threshold.",
-)
+task("cancelProposal", "Cancel a proposal if it is your or if proposer is below proposal threshold.")
+
   .addParam("id", "ID of an existing proposal.")
   .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
 
-    // set governance address based on network
-    let govAddress;
-    let factoryAddress;
-    if (network["name"] == "hardhat") {
-      govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-    } else {
-      govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-    }
     const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
 
     const proposalID = taskArgs.id;
@@ -321,7 +333,7 @@ module.exports = {
       },
     },
     dev: {
-      url: "http://127.0.0.1:8569",
+      url: 'http://127.0.0.1:8545'
     },
     DevNet: {
       url: "https://eth-provider-dev.hypernetlabs.io",

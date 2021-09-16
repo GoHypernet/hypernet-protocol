@@ -36,8 +36,11 @@ contract RegistryFactory is AccessControlEnumerable {
      * @dev Grants `DEFAULT_ADMIN_ROLE`, to the
      * account passed into the constructor.
      */
-    constructor(address _admin)  {
-        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
+    constructor(address[] memory _admins)  {
+                // register executors
+        for (uint256 i = 0; i < _admins.length; ++i) {
+            _setupRole(DEFAULT_ADMIN_ROLE, _admins[i]);
+        }
     }
 
     /**
