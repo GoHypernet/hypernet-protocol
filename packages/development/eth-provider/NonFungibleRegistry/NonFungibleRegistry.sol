@@ -8,7 +8,6 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 
 /**
@@ -40,16 +39,6 @@ contract NonFungibleRegistry is
     // reverse mapping from tokenID to a human-readable name
     mapping(uint256 => string) public reverseRegistryMap;
 
-    // allow lazy minting in this registry
-    bool public allowLazyRegister = false;
-
-    // allow for tokenURI to be updated;
-    bool public allowStorageUpdate = true;
-
-    // dissallow token transfers for all but DEFAULT_ADMIN_ROLE
-    bool public allowTransfers = true;
-
-    // create a MINTER_ROLE to control access to register function
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     Counters.Counter private _tokenIdTracker;
@@ -59,8 +48,7 @@ contract NonFungibleRegistry is
      * account passed into the constructor.
      *
      * Token URIs are set by the MINTER_ROLE and can be updated by 
-     * the token owner or the MINTER_ROLE once minted if the contract
-     * is set to allow for URI updates
+     * the token owner or the MINTER_ROLE once minted
      * See {ERC721-tokenURI}.
      */
     constructor(string memory name_, string memory symbol_, address _admin) ERC721(name_, symbol_) {
@@ -68,22 +56,6 @@ contract NonFungibleRegistry is
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
 
         _setupRole(MINTER_ROLE, _admin);
-    }
-
-    /**
-    * @dev set lazy register functionality
-    */
-    function setLazyRegister(bool _allowLazyRegister) public virtual {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NonFungibleRegistry: must be admin.");
-        allowLazyRegister = _allowLazyRegister;
-    }
-
-    /**
-    * @dev set token URI modification rule
-    */
-    function setStorageUpdate(bool _allowStorageUpdate) public virtual {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NonFungibleRegistry: must be admin.");
-        allowStorageUpdate = _allowStorageUpdate;
     }
 
     /**
@@ -99,13 +71,13 @@ contract NonFungibleRegistry is
      */
     function register(address to, string memory label, string memory registrationData) public virtual {
         require(hasRole(MINTER_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have minter role to mint");
+        require(!_mappingExists(label), "NonFungibleRegistry: agent is already registered.");
 
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
         // Enforce that the counter start at 1 (not 0) so that we can check 
         // if a name exists
         uint256 tokenId = _tokenIdTracker.current() + 1;
-        require(!_mappingExists(label), "NonFungibleRegistry: agent is already registered.");
         _mint(to, tokenId);
         _tokenIdTracker.increment();
         _setTokenURI(tokenId, registrationData);
@@ -121,10 +93,8 @@ contract NonFungibleRegistry is
      * Requirements:
      *
      * - the caller must have the `MINTER_ROLE` or own the token.
-     * - allowStorageUpdate must be set to true.
      */
     function updateRegistration(uint256 tokenId, string memory registrationData) public virtual {
-        require(allowStorageUpdate, "NonFungibleRegistry: Storage updating is disabled.");
         require(_isApprovedOrOwner(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved");
         _setTokenURI(tokenId, registrationData);
     }
@@ -194,53 +164,5 @@ contract NonFungibleRegistry is
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
-    }
-
-    /**
-     * @dev implicit ('lazy') minting by the recipient of an NFT in posession of a valid signature.
-     * This allows for offloading gas costs to the recipient.
-     * Requirements:
-     *
-     * - the caller must have a signature from someone with the `MINTER_ROLE`.
-     */ 
-    function lazyRegister(address to, string memory label, string memory registrationData, bytes memory signature)
-        public {
-        // check if lazy registration is allowed for this NFI
-        require(allowLazyRegister, "NonFungibleRegistry: Lazy registration is disabled.");
-
-        // the token label is the nonce to prevent replay attack
-        require(!_mappingExists(label), "NonFungibleRegistry: Registration label already exists.");
-        
-        // transaction caller must be recipient
-        require(_msgSender() == to, "NonFungibleRegistry: Caller is not recipient.");
-        
-        // require a valid signature from a member of MINTER_ROLE
-        require(isValidSignature(to, label, registrationData, signature), "NonFungibleRegistry: signature failure.");
-        
-        // issue new Ntoken FT here
-        uint256 tokenId = _tokenIdTracker.current() + 1;
-        _mint(to, tokenId);
-        _tokenIdTracker.increment();
-        _setTokenURI(tokenId, registrationData);
-
-        // extend the registry mapping for lookup via gateway URL
-        registryMap[label] = tokenId;
-        reverseRegistryMap[tokenId] = label;
-
-    }
-    
-    /**
-     * @dev helper function that validates a signature 
-     */ 
-    function isValidSignature(address to, string memory label, string memory registrationData, bytes memory signature)
-        internal
-        view
-        returns (bool)
-    {
-        // convert the payload to a 32 byte hash
-        bytes32 hash = ECDSA.toEthSignedMessageHash(keccak256(abi.encodePacked(to, label, registrationData)));
-        
-        // check that the signature is from MINTER_ROLE
-        return hasRole(MINTER_ROLE, ECDSA.recover(hash, signature));
     }
 }

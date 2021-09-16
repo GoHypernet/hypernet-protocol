@@ -58,9 +58,10 @@ export interface IBlockchainUtils {
     chainId: ChainId,
   ): ResultAsync<[string, HexString], BlockchainUnavailableError>;
 
-  getGatewayRegistrationInfo(
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<GatewayRegistrationInfo, BlockchainUnavailableError>;
+  getERC721Entry<T>(
+    contractAddress: EthereumAddress,
+    key: string,
+  ): ResultAsync<T, BlockchainUnavailableError>
 }
 
 export const IBlockchainUtilsType = Symbol.for("IBlockchainUtils");

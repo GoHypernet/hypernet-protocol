@@ -4,12 +4,13 @@
 
 # The Hypernet Protocol
 
-The Hypernet Protocol aims to amalgamate blockchain and traditional payment technologies into a secure, 
-high-throughput payment stack that enables merchants to accept cyptocurrency payments in their traditional online 
-platforms with minimal intrusion into their existing platform and without specialized knowledge of web3 technology. 
-The authors of the Hypernet Protocol believe that a decentralized, blockchain-secured, community-driven payment solution
-will revolutionize the cyber-infrastructure landscape and that it is broadly generalizable to various decentralized 
-marketplaces and subscription-based services.
+The Hypernet Protocol aims to amalgamate instantly finalized, blockchain-based payments with a privacy-preserving,  
+"non-fungible" identity registry. The combination of these two elements enables merchants to accept cyptocurrency 
+payments in their traditional online platforms with minimal code intrusion and without specialized knowledge of web3 
+technology while also complying with various regulations regarding electronic funds transfer. The authors of the 
+Hypernet Protocol believe that a decentralized, blockchain-secured, community-driven payment/identity solution will 
+revolutionize the cyber-infrastructure landscape and that it is broadly generalizable to various decentralized marketplaces 
+and subscription-based services. 
 
 A successful payment protocol must solve problem on both sides of the market. On the consumer side, users expect a 
 payment solution that quickly executes transactions and is intuitive. To accomplish this, the Hypernet Protocol 
@@ -154,19 +155,3 @@ Dev dependencies should be added to the root of the repository, via
 `yarn add <package name> --dev -W`
 
 Normal dependencies and peer dependencies should be added via yarn to the actual pacakge. Refer to the example monorepo above for more examples.
-
-## System Architecture
-
-Hypernet Core is built using a layered architecture with 4 layers; see the system diagram below for a brief description of each one and a sample of the modules within.
-
-![HypernetCore System Architecture](https://github.com/GoHypernet/hypernet-protocol/raw/dev/documentation/images/HypernetCore.png)
-
-## Usage
-
-This will be one of the last sections filled in.
-For now, see the `web-demo` package.
-
-```
-const core = require('core');
-// TODO: DEMONSTRATE API
-```
