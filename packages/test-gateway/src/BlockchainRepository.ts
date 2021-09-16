@@ -9,9 +9,6 @@ export class BlockchainRepository {
   protected provider: ethers.providers.JsonRpcProvider;
   protected wallet: ethers.Wallet;
 
-  protected registryAccountPrivateKey = "0dbbe8e4ae425a6d2687f1a7e3ba17bc98c673636790f1b8ad91193c05875ef1";
-  protected registryAccount = "0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef";
-
   protected signature: Signature | null = null;
   protected address: EthereumAddress;
 
@@ -21,10 +18,11 @@ export class BlockchainRepository {
       this.provider = new ethers.providers.JsonRpcProvider("http://blockchain:8545");
 
       // Create a wallet using that provider. Wallet combines a provider and a signer.
-      this.wallet = new ethers.Wallet(this.registryAccountPrivateKey, this.provider);
+      this.wallet = new ethers.Wallet(this.gatewayAccountPrivateKey, this.provider);
 
       this.address = EthereumAddress(this.wallet.address);
       console.log(`Address: ${this.address}`);
+      console.log(this.gatewayAccount == this.address);
     } catch (e) {
       console.error(e);
       throw e;
@@ -47,13 +45,13 @@ export class BlockchainRepository {
       };
 
       console.log("Setting gateway registry info");
-      const txResponse = await gatewayRegistryContract.register(
-        this.gatewayAccount,
-        gatewayUrl,
+      const tokenId = await gatewayRegistryContract.registryMap(gatewayUrl);
+      const registrationResponse = await gatewayRegistryContract.updateRegistration(
+        tokenId,
         JSON.stringify(registryEntry),
       );
 
-      const receipt = await txResponse.wait();
+      const receipt = await registrationResponse.wait();
 
       console.log(receipt);
     } catch (e) {
