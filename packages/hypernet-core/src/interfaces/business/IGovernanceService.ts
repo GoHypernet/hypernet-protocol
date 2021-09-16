@@ -1,4 +1,8 @@
-import { BlockchainUnavailableError, Proposal } from "@hypernetlabs/objects";
+import {
+  BlockchainUnavailableError,
+  Proposal,
+  EthereumAddress,
+} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 import { BigNumber } from "ethers";
 
@@ -9,4 +13,13 @@ export interface IGovernanceService {
   getProposalsCount(
     _proposalsNumberArr?: number[],
   ): ResultAsync<BigNumber, BlockchainUnavailableError>;
+  createProposal(
+    name: string,
+    symbol: string,
+    owner: EthereumAddress,
+  ): ResultAsync<string, BlockchainUnavailableError>;
+  delegateVote(
+    delegateAddress: EthereumAddress,
+    amount: number | null,
+  ): ResultAsync<void, BlockchainUnavailableError>;
 }

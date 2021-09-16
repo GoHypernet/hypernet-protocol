@@ -257,6 +257,17 @@ export interface IHypernetCore {
     _proposalsNumberArr?: number[],
   ): ResultAsync<Proposal[], BlockchainUnavailableError>;
 
+  createProposal(
+    name: string,
+    symbol: string,
+    owner: EthereumAddress,
+  ): ResultAsync<string, BlockchainUnavailableError>;
+
+  delegateVote(
+    delegateAddress: EthereumAddress,
+    amount: number | null,
+  ): ResultAsync<void, BlockchainUnavailableError>;
+
   /**
    * Observables for seeing what's going on
    */
