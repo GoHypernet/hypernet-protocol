@@ -23,7 +23,7 @@ contract Vester {
         uint vestingBegin_,
         uint vestingCliff_,
         uint vestingEnd_
-    ) public {
+    ) {
         require(vestingBegin_ >= block.timestamp, 'Vester::constructor: vesting begin too early');
         require(vestingCliff_ >= vestingBegin_, 'Vester::constructor: cliff is too early');
         require(vestingEnd_ > vestingCliff_, 'Vester::constructor: end is too early');

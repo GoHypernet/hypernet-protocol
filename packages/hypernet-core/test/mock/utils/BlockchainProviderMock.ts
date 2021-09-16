@@ -9,12 +9,12 @@ import {
   InvalidParametersError,
   EthereumAddress,
 } from "@hypernetlabs/objects";
+import { routerChannelAddress, commonAmount, mockUtils } from "@mock/mocks";
 import { BigNumber, ethers } from "ethers";
 import { ResultAsync, okAsync } from "neverthrow";
 import td from "testdouble";
 
 import { IBlockchainProvider } from "@interfaces/utilities";
-import { routerChannelAddress, commonAmount, mockUtils } from "@mock/mocks";
 
 interface ISendTransactionVals {
   to: EthereumAddress;
@@ -24,6 +24,7 @@ interface ISendTransactionVals {
 export class BlockchainProviderMock implements IBlockchainProvider {
   public signer = td.object<ethers.providers.JsonRpcSigner>();
   public provider = td.object<ethers.providers.Web3Provider>();
+  public governanceProvider = td.object<ethers.providers.Web3Provider>();
 
   constructor() {
     td.when(this.provider.listAccounts()).thenResolve(
@@ -56,7 +57,7 @@ export class BlockchainProviderMock implements IBlockchainProvider {
     ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
     never
   > {
-    return okAsync(this.provider);
+    return okAsync(this.governanceProvider);
   }
 
   public getEIP1193Provider(): ResultAsync<Eip1193Bridge, never> {

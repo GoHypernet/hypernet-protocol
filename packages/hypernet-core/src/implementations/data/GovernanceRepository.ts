@@ -157,12 +157,24 @@ export class GovernanceRepository implements IGovernanceRepository {
       this.blockchainProvider.getSigner(),
     ]).andThen((vals) => {
       const [config, signer] = vals;
-
+      console.log(
+        "hypernetGovernorAddress",
+        config.chainAddresses[config.governanceChainId]
+          ?.hypernetGovernorAddress,
+      );
+      console.log(
+        "hypertokenAddress",
+        config.chainAddresses[config.governanceChainId]?.hypertokenAddress,
+      );
       this.hypernetGovernorContract = new ethers.Contract(
         config.chainAddresses[config.governanceChainId]
           ?.hypernetGovernorAddress as string,
         GovernanceAbis.HypernetGovernor.abi,
         signer,
+      );
+      console.log(
+        "this.hypernetGovernorContract",
+        this.hypernetGovernorContract,
       );
       this.hypertokenContract = new ethers.Contract(
         config.chainAddresses[config.governanceChainId]

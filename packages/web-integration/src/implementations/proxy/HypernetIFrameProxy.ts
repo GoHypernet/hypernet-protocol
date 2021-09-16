@@ -458,9 +458,7 @@ export default class HypernetIFrameProxy
   public getProposals(
     _proposalsNumberArr?: number[],
   ): ResultAsync<Proposal[], BlockchainUnavailableError> {
-    return this._createCall("getProposals", {
-      _proposalsNumberArr,
-    });
+    return this._createCall("getProposals", _proposalsNumberArr);
   }
 
   private _displayCoreIFrame(): void {

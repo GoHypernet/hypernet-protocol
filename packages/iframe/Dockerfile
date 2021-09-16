@@ -39,27 +39,29 @@ ARG CHAIN_ADDRESSES='{ \
       "1337": { \
         "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
         "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", \
-        "hypertokenAddress": "0xAa588d3737B611baFD7bD713445b314BD453a5C8", \
+        "hypertokenAddress": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512", \
         "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
         "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
         "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
         "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a", \
-        "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd" \
+        "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd", \
+        "hypernetGovernorAddress": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9" \
       }, \
       "1369": { \
         "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
         "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", \
-        "hypertokenAddress": "0xAa588d3737B611baFD7bD713445b314BD453a5C8", \
+        "hypertokenAddress": "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512", \
         "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
         "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
         "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
         "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a", \
-        "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd" \
+        "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd", \
+        "hypernetGovernorAddress": "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9" \
       } \
     }'
 ENV __CHAIN_ADDRESSES__ $CHAIN_ADDRESSES
 
-ARG GOVERNANCE_CHAIN_ID=1337
+ARG GOVERNANCE_CHAIN_ID=31337
 ENV __GOVERNANCE_CHAIN_ID__ $GOVERNANCE_CHAIN_ID
 
 ARG NATS_URL=ws://localhost:4221

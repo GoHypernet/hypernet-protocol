@@ -15,21 +15,22 @@ successful in practice at adopting beneficial proposals to protocol upgrades whi
 
 ![alt text](/documentation/images/Hypernet-Contract-Flow.png)
 
-The Hypernet Governance application is used for proposing and vetting (by the token holder community) new Non-Fungible Registries (NFR) 
+The Hypernet Governance application is used for proposing and vetting (by the token holder community) new Non-Fungible Registries (NFRs) 
 which are deployed through a registry factory contract. Non-Fungible Registries are based on the [EIP721](https://eips.ethereum.org/EIPS/eip-721) 
 non-fungible token standard. An NFR is enumerable and every entry is an ownable token that has a corresponding `label` (seperate 
 from the `tokenURI`) that is unique within that specific NFR. That is, two entries can have the same `tokenURI`, but they cannot have
 the same `label`. This helps to fascilitate lookups more easily for applications in which the registry is used for identity or
-authenticity verification in which the `tokenId` may not be known *a priori*. 
+authenticity verification in which the `tokenId` may not be known *a priori*. Entries in an Non-Fungible Registry are referred to, within
+the protocol, as Non-Fungible Identities (NFIs).
 
 Each NFR has a `MINTER_ROLE`, which can mint new entries to the registry, and a `DEFAULT_ADMIN_ROLE` which can make modifications 
 to the registry contract parameters. These roles are set through the NFR constructor. Additionally, the `MINTER_ROLE` and 
 the owner of a token have the option to update the information stored in a token after minting unless `allowStorageUpdate` is 
 set to `false` (which it is by default and can be updated by the `DEFAULT_ADMIN_ROLE`). Lastly, each NFR exposes a *lazy registration*
 interface through the `lazyRegister` function. This allows the owner of the `MINTER_ROLE` to offload the burden of gas costs to the 
-recipient of the token by providing them with signature that the recipient can then present to the contract to register at their 
-convenience. This feature is disabled by default but can be activated by the `DEFAULT_ADMIN_ROLE` through the `allowLazyRegister`
-variable. 
+recipient of the NFI by providing them with signature that the recipient can then present to the contract to register at their 
+convenience with the token `label` serving as a nonce to prevent duplicate registration. This feature is disabled by default 
+but can be activated by the `DEFAULT_ADMIN_ROLE` through the `allowLazyRegister` variable. 
 
 ## Install dependencies
 
@@ -67,7 +68,7 @@ npx hardhat node --port 8569
 Once the node is running, deploy the full Solidity contract stack to the Hardhat network:
 
 ```shell
-npx hardhat run scripts/hardhat-full-stack.js --network hardhat
+npx hardhat run scripts/hardhat-full-stack.js --network dev
 ```
 
 Use the help tasks defined in `hardhat.config.js` to interact with the deployed contracts.
@@ -75,45 +76,64 @@ Use the help tasks defined in `hardhat.config.js` to interact with the deployed 
 Get Governance contract parameters:
 
 ```shell
-npx hardhat governanceParameters --network hardhat
+npx hardhat governanceParameters --network dev
 ```
 
 Propose a new Non-Fungible Registry, your account must have at least `1000000` Hypertoken (1% of the total supply) 
 for the proposal to go through:
 
 ```shell
-npx hardhat proposeRegistry --network hardhat --name Gateways --symbol GTW --owner 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
+npx hardhat proposeRegistry --network dev --name Gateways --symbol GTW --owner 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
 ```
 
 Additionally, if at any point during the voting process your voting power drops below this 1% threshold, your proposal 
 is vulnerable to being canceled:
 
 ```shell
-npx hardhat cancelProposal --network hardhat --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
+npx hardhat cancelProposal --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490
 ```
 
 Check the state of an existing Proposal:
 
 ```shell
-npx hardhat proposalState --network hardhat --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
+npx hardhat proposalState --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490
 ```
 
 Delegate your voting power to a given address:
 
 ```shell
-npx hardhat delegateVote --network hardhat --delegate 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+npx hardhat delegateVote --network dev --delegate 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 ```
 
 Cast a vote on a proposal (Against (0), For (1), Abstain (2)):
 
 ```shell
-npx hardhat castVote --network hardhat --id 13654425952634501747257196678513303918485643847941868894665917031025800633397 --support 1
+npx hardhat castVote --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490 --support 1
 ```
 
-If a proposal has reached quorum and >50% of votes are in favor, once its deadline has passed it can be executed:
+If a proposal has reached quorum and >50% of votes are in favor, once its deadline has passed it can be queued then executed:
 
 ```shell
-npx hardhat executeProposal --network hardhat --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
+npx hardhat queueProposal --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490
+npx hardhat executeProposal --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490
+```
+
+Once a registry has been deployed via the proposal process, get the registry's info:
+
+```shell
+npx hardhat registryParameters --network dev --name Gateways
+```
+
+Propose a new Gateway be added to the Gateways NonFunglebleRegistry we just deployed:
+
+```shell
+npx hardhat proposeRegistryEntry --network dev --name Gateways --label "https://hyperpay.io" --data "biglongsignatureblock" --recipient 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+```
+
+Retrieve data pertaining to a specific entry in a named Hypernet Gateway:
+
+```shell
+npx hardhat registryEntryByLabel --network dev --label https://hyperpay.io --name Gateways
 ```
 
 ## Hardhat network - registry testing deployment 
