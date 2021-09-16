@@ -27,9 +27,6 @@
       "path": "packages/gateway-connector"
     },
     {
-      "path": "packages/gateway-connector/test"
-    },
-    {
       "path": "packages/test-gateway"
     },
     {
@@ -52,3 +49,4 @@
     }
   ]
 }
+ 
