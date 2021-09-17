@@ -49,13 +49,11 @@ export class GovernanceRepository implements IGovernanceRepository {
       let proposalsArrResult: ResultAsync<
         Proposal,
         BlockchainUnavailableError
-      >[];
+      >[] = [];
 
       if (_proposalsNumberArr == null) {
         proposalsNumberArrResult = this.getProposalsCount().map(
           (proposalCounts) => {
-            console.log("proposalCounts: ", proposalCounts);
-            console.log("proposalCounts.toNumber()", proposalCounts.toNumber());
             if (
               proposalCounts.toNumber() == null ||
               proposalCounts.toNumber() == 0
@@ -63,7 +61,7 @@ export class GovernanceRepository implements IGovernanceRepository {
               return [];
             }
             let countsArr: number[] = [];
-            for (let index = 0; index < proposalCounts.toNumber(); index++) {
+            for (let index = 1; index <= proposalCounts.toNumber(); index++) {
               countsArr.push(index);
             }
             return countsArr;
@@ -74,7 +72,6 @@ export class GovernanceRepository implements IGovernanceRepository {
       }
 
       return proposalsNumberArrResult.andThen((proposalNumberArr) => {
-        console.log("proposalNumberArr: ", proposalNumberArr);
         proposalNumberArr.forEach((proposalNumber) => {
           proposalsArrResult.push(
             ResultAsync.fromPromise(
@@ -88,7 +85,6 @@ export class GovernanceRepository implements IGovernanceRepository {
                 );
               },
             ).andThen((propsalId) => {
-              console.log("propsalId: ", propsalId);
               return ResultUtils.combine([
                 ResultAsync.fromPromise(
                   this.hypernetGovernorContract?.proposals(
@@ -124,7 +120,6 @@ export class GovernanceRepository implements IGovernanceRepository {
                   },
                 ),
               ]).map((vals) => {
-                console.log("vals: ", vals);
                 const [proposal, propsalState, proposalDescription] = vals;
 
                 return new Proposal(
@@ -177,7 +172,6 @@ export class GovernanceRepository implements IGovernanceRepository {
           "createRegistry",
           [name, symbol, owner],
         );
-      console.log("transferCalldata", transferCalldata);
 
       return ResultAsync.fromPromise(
         this.hypernetGovernorContract?.hashProposal(
@@ -187,12 +181,9 @@ export class GovernanceRepository implements IGovernanceRepository {
           descriptionHash,
         ) as Promise<string>,
         (e) => {
-          console.log("hashProposal e: ", e);
           return new BlockchainUnavailableError("Unable to hashProposal", e);
         },
       ).andThen((proposalID) => {
-        console.log("proposalID: ", proposalID);
-
         if (this.hypernetGovernorContract == null) {
           throw new BlockchainUnavailableError(
             "hypernetGovernorContract is not available",
@@ -209,16 +200,13 @@ export class GovernanceRepository implements IGovernanceRepository {
             name,
           ) as Promise<any>,
           (e) => {
-            console.log("propose e: ", e);
             return new BlockchainUnavailableError(
               "Unable to propose proposal",
               e,
             );
           },
         ).andThen((tx) => {
-          console.log("tx: ", tx);
           return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
-            console.log("tx e: ", e);
             return new BlockchainUnavailableError("Unable to wait for tx", e);
           }).andThen(() => {
             return okAsync(proposalID);

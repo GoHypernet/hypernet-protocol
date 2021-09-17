@@ -19,19 +19,20 @@ const ProposalsWidget: React.FC<IProposalsWidget> = ({
   const [proposals, setProposals] = useState<Proposal[]>([]);
 
   useEffect(() => {
-    coreProxy
+    // delegate votes, createProposal and then list all proposals
+    /* coreProxy
       .delegateVote(
         EthereumAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"),
         null,
       )
       .map(() => {
-        console.log("delegate worked");
+        console.log("delegate worked123");
         coreProxy.getEthereumAccounts().map((accounts) => {
-          console.log("getEthereumAccounts accounts: ", accounts);
+          console.log("getEthereumAccounts accounts123: ", accounts);
           coreProxy
             .createProposal(
-              "first proposal name",
-              "proposal symbol",
+              "first proposal name4",
+              "proposal symbol1",
               EthereumAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"),
             )
             .map((proposalId) => {
@@ -46,6 +47,15 @@ const ProposalsWidget: React.FC<IProposalsWidget> = ({
             })
             .mapErr(handleError);
         });
+      })
+      .mapErr(handleError); */
+
+    // list all proposals
+    coreProxy
+      .getProposals()
+      .map((proposals) => {
+        console.log("proposal list: ", proposals);
+        setProposals(proposals);
       })
       .mapErr(handleError);
   }, []);
