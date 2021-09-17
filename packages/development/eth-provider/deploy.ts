@@ -245,7 +245,7 @@ const func: DeployFunction = async () => {
     registrySigner,
   );
 
-  const registryEntry = {
+  const routerRegistryEntry = {
     supportedTokens: [
       {
         chainId: 1337,
@@ -275,11 +275,45 @@ const func: DeployFunction = async () => {
   const liquidityRegistryTx = await liquidityRegistryContract.register(
     routerAddress,
     routerPublicIdentifier,
-    JSON.stringify(registryEntry),
+    JSON.stringify(routerRegistryEntry),
   );
 
   await liquidityRegistryTx.wait();
-  log.info("Deployed liquidity registration");
+  log.info("Deployed liquidity registration. Deploying Gateway registration");
+
+  const gatewayRegistryContract = new ethers.Contract(
+    gatewayRegistryAddress,
+    ERC721Abi,
+    registrySigner,
+  );
+
+  const testGatewayRegistrationEntry = {
+    address: hyperpayAddress,
+    signature: "UPDATE ME, I AM NOT A SIGNATURE FOR TEST GATEWAY",
+  };
+
+  const hyperpayGatewayRegistrationEntry = {
+    address: hyperpayAddress,
+    signature: "UPDATE ME, I AM NOT A SIGNATURE FOR HYPERPAY",
+  };
+
+  // Mint a token for the router, mark it as owned by the router
+  const testGatewayRegistryTx = await gatewayRegistryContract.register(
+    hyperpayAddress,
+    "http://localhost:5010",
+    JSON.stringify(testGatewayRegistrationEntry),
+  );
+
+  const hyperpayGatewayRegistryTx = await gatewayRegistryContract.register(
+    hyperpayAddress,
+    "https://localhost:3000/users/v0",
+    JSON.stringify(hyperpayGatewayRegistrationEntry),
+  );
+
+  await testGatewayRegistryTx.wait();
+  await hyperpayGatewayRegistryTx.wait();
+
+  console.info("Deployed registration tokens for test gateway and Hyperpay");
 
   ////////////////////////////////////////
   // Print summary
