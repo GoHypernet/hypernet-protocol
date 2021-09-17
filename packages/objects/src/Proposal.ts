@@ -10,6 +10,12 @@ export enum EProposalState {
   EXECUTED,
 }
 
+export enum EVoteSupport {
+  AGAINST = 0,
+  FOR = 1,
+  ABSTAIN = 2,
+}
+
 export class Proposal {
   constructor(
     public id: string,
@@ -19,6 +25,6 @@ export class Proposal {
     public proposalVotesAgaints: string,
     public proposalETA: string,
     public description: string,
-    public proposalNumber: number,
+    public proposalNumber: number | null,
   ) {}
 }

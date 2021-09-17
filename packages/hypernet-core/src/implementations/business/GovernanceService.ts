@@ -2,10 +2,10 @@ import {
   Proposal,
   BlockchainUnavailableError,
   EthereumAddress,
+  EVoteSupport,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 import { inject } from "inversify";
-import { BigNumber } from "ethers";
 
 import { IGovernanceService } from "@interfaces/business";
 import {
@@ -25,9 +25,7 @@ export class GovernanceService implements IGovernanceService {
     return this.governanceRepository.getProposals(_proposalsNumberArr);
   }
 
-  public getProposalsCount(
-    _proposalsNumberArr?: number[],
-  ): ResultAsync<BigNumber, BlockchainUnavailableError> {
+  public getProposalsCount(): ResultAsync<number, BlockchainUnavailableError> {
     return this.governanceRepository.getProposalsCount();
   }
 
@@ -35,7 +33,7 @@ export class GovernanceService implements IGovernanceService {
     name: string,
     symbol: string,
     owner: EthereumAddress,
-  ): ResultAsync<string, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
     return this.governanceRepository.createProposal(name, symbol, owner);
   }
 
@@ -44,5 +42,18 @@ export class GovernanceService implements IGovernanceService {
     amount: number | null,
   ): ResultAsync<void, BlockchainUnavailableError> {
     return this.governanceRepository.delegateVote(delegateAddress, amount);
+  }
+
+  public getProposalDetails(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this.governanceRepository.getProposalDetails(proposalId);
+  }
+
+  public castVote(
+    proposalId: string,
+    support: EVoteSupport,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this.governanceRepository.castVote(proposalId, support);
   }
 }

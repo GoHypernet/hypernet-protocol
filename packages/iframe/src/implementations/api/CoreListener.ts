@@ -13,6 +13,7 @@ import {
   ChainId,
   PublicIdentifier,
   GatewayRegistrationFilter,
+  EVoteSupport,
 } from "@hypernetlabs/objects";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import { injectable, inject } from "inversify";
@@ -216,6 +217,21 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.delegateAddress,
             data.data.amount,
           );
+        }, data.callId);
+      },
+      getProposalDetails: (data: IIFrameCallData<string>) => {
+        this.returnForModel(() => {
+          return this.core.getProposalDetails(data.data);
+        }, data.callId);
+      },
+      castVote: (
+        data: IIFrameCallData<{
+          proposalId: string;
+          support: EVoteSupport;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.castVote(data.data.proposalId, data.data.support);
         }, data.callId);
       },
     });

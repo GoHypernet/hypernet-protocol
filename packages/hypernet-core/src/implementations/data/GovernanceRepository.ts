@@ -1,6 +1,7 @@
 import {
   BlockchainUnavailableError,
   EthereumAddress,
+  EVoteSupport,
   Proposal,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
@@ -54,14 +55,11 @@ export class GovernanceRepository implements IGovernanceRepository {
       if (_proposalsNumberArr == null) {
         proposalsNumberArrResult = this.getProposalsCount().map(
           (proposalCounts) => {
-            if (
-              proposalCounts.toNumber() == null ||
-              proposalCounts.toNumber() == 0
-            ) {
+            if (proposalCounts == null || proposalCounts == 0) {
               return [];
             }
             let countsArr: number[] = [];
-            for (let index = 1; index <= proposalCounts.toNumber(); index++) {
+            for (let index = 1; index <= proposalCounts; index++) {
               countsArr.push(index);
             }
             return countsArr;
@@ -84,56 +82,14 @@ export class GovernanceRepository implements IGovernanceRepository {
                   e,
                 );
               },
-            ).andThen((propsalId) => {
-              return ResultUtils.combine([
-                ResultAsync.fromPromise(
-                  this.hypernetGovernorContract?.proposals(
-                    propsalId,
-                  ) as Promise<string>,
-                  (e) => {
-                    return new BlockchainUnavailableError(
-                      "Unable to retrieve proposal",
-                      e,
-                    );
-                  },
-                ),
-                ResultAsync.fromPromise(
-                  this.hypernetGovernorContract?.state(
-                    propsalId,
-                  ) as Promise<string>,
-                  (e) => {
-                    return new BlockchainUnavailableError(
-                      "Unable to retrieve proposal state",
-                      e,
-                    );
-                  },
-                ),
-                ResultAsync.fromPromise(
-                  this.hypernetGovernorContract?.proposalDescriptions(
-                    propsalId,
-                  ) as Promise<string>,
-                  (e) => {
-                    return new BlockchainUnavailableError(
-                      "Unable to retrieve proposal description",
-                      e,
-                    );
-                  },
-                ),
-              ]).map((vals) => {
-                const [proposal, propsalState, proposalDescription] = vals;
-
-                return new Proposal(
-                  propsalId,
-                  propsalState.toString() as any,
-                  proposal[1],
-                  proposal[5].toString(),
-                  proposal[6].toString(),
-                  proposal[2].toString(),
-                  proposalDescription,
-                  proposalNumber,
-                );
-              });
-            }),
+            )
+              .andThen((proposalId) => {
+                return this.getProposalDetails(proposalId);
+              })
+              .map((proposalObj) => {
+                proposalObj.proposalNumber = proposalNumber;
+                return proposalObj;
+              }),
           );
         });
 
@@ -142,10 +98,7 @@ export class GovernanceRepository implements IGovernanceRepository {
     });
   }
 
-  public getProposalsCount(): ResultAsync<
-    BigNumber,
-    BlockchainUnavailableError
-  > {
+  public getProposalsCount(): ResultAsync<number, BlockchainUnavailableError> {
     return this.initializeContracts().andThen(() => {
       return ResultAsync.fromPromise(
         this.hypernetGovernorContract?._proposalIdTracker() as Promise<BigNumber>,
@@ -155,7 +108,9 @@ export class GovernanceRepository implements IGovernanceRepository {
             e,
           );
         },
-      );
+      ).map((proposalCounts) => {
+        return proposalCounts.toNumber();
+      });
     });
   }
 
@@ -163,7 +118,7 @@ export class GovernanceRepository implements IGovernanceRepository {
     name: string,
     symbol: string,
     owner: EthereumAddress,
-  ): ResultAsync<string, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
     return this.initializeContracts().andThen(() => {
       const descriptionHash = ethers.utils.id(name);
 
@@ -209,7 +164,7 @@ export class GovernanceRepository implements IGovernanceRepository {
           return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
             return new BlockchainUnavailableError("Unable to wait for tx", e);
           }).andThen(() => {
-            return okAsync(proposalID);
+            return this.getProposalDetails(proposalID);
           });
         });
       });
@@ -234,24 +189,83 @@ export class GovernanceRepository implements IGovernanceRepository {
           console.log("tx e: ", e);
           return new BlockchainUnavailableError("Unable to wait for tx", e);
         }).andThen(() => {
-          const ss = async () => {
-            const votePowerDelegate = await this.hypertokenContract?.getVotes(
-              delegateAddress,
-            );
-            const votePowerOwner = await this.hypertokenContract?.getVotes(
-              "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-            );
-
-            console.log("Voting power of Owner:", votePowerOwner.toString());
-            console.log(
-              "Voting power of Delegate:",
-              votePowerDelegate.toString(),
-            );
-          };
-
-          ss();
-
           return okAsync(undefined);
+        });
+      });
+    });
+  }
+
+  public getProposalDetails(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return ResultUtils.combine([
+      ResultAsync.fromPromise(
+        this.hypernetGovernorContract?.proposals(proposalId) as Promise<string>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to retrieve proposal",
+            e,
+          );
+        },
+      ),
+      ResultAsync.fromPromise(
+        this.hypernetGovernorContract?.state(proposalId) as Promise<string>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to retrieve proposal state",
+            e,
+          );
+        },
+      ),
+      ResultAsync.fromPromise(
+        this.hypernetGovernorContract?.proposalDescriptions(
+          proposalId,
+        ) as Promise<string>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to retrieve proposal description",
+            e,
+          );
+        },
+      ),
+    ]).map((vals) => {
+      const [proposal, propsalState, proposalDescription] = vals;
+
+      return new Proposal(
+        proposalId,
+        propsalState.toString() as any,
+        proposal[1],
+        proposal[5].toString(),
+        proposal[6].toString(),
+        proposal[2].toString(),
+        proposalDescription,
+        null,
+      );
+    });
+  }
+
+  public castVote(
+    proposalId: string,
+    support: EVoteSupport,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this.initializeContracts().andThen(() => {
+      return ResultAsync.fromPromise(
+        this.hypernetGovernorContract?.castVote(
+          proposalId,
+          support,
+        ) as Promise<any>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to castVote proposal",
+            e,
+          );
+        },
+      ).andThen((tx) => {
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+          console.log("tx e: ", e);
+          return new BlockchainUnavailableError("Unable to wait for tx", e);
+        }).andThen(() => {
+          return this.getProposalDetails(proposalId);
         });
       });
     });

@@ -35,8 +35,8 @@ const ProposalsWidget: React.FC<IProposalsWidget> = ({
               "proposal symbol1",
               EthereumAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"),
             )
-            .map((proposalId) => {
-              console.log("proposalId FE: ", proposalId);
+            .map((proposal) => {
+              console.log("proposal FE: ", proposal);
               coreProxy
                 .getProposals()
                 .map((proposals) => {
@@ -55,6 +55,14 @@ const ProposalsWidget: React.FC<IProposalsWidget> = ({
       .getProposals()
       .map((proposals) => {
         console.log("proposal list: ", proposals);
+        setProposals(proposals);
+      })
+      .mapErr(handleError);
+
+    coreProxy
+      .getProposals([2])
+      .map((proposals) => {
+        console.log("proposal list detail: ", proposals);
         setProposals(proposals);
       })
       .mapErr(handleError);

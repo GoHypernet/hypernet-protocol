@@ -31,6 +31,7 @@ import {
   GatewayRegistrationFilter,
   GatewayRegistrationInfo,
   Proposal,
+  EVoteSupport,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -465,7 +466,7 @@ export default class HypernetIFrameProxy
     name: string,
     symbol: string,
     owner: EthereumAddress,
-  ): ResultAsync<string, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
     return this._createCall("createProposal", {
       name,
       symbol,
@@ -480,6 +481,22 @@ export default class HypernetIFrameProxy
     return this._createCall("delegateVote", {
       delegateAddress,
       amount,
+    });
+  }
+
+  public getProposalDetails(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this._createCall("getProposalDetails", proposalId);
+  }
+
+  public castVote(
+    proposalId: string,
+    support: EVoteSupport,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this._createCall("castVote", {
+      proposalId,
+      support,
     });
   }
 

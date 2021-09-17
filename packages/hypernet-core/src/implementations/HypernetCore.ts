@@ -33,6 +33,7 @@ import {
   GatewayRegistrationFilter,
   GatewayRegistrationInfo,
   Proposal,
+  EVoteSupport,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -882,7 +883,7 @@ export class HypernetCore implements IHypernetCore {
     name: string,
     symbol: string,
     owner: EthereumAddress,
-  ): ResultAsync<string, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
     return this.governanceService.createProposal(name, symbol, owner);
   }
 
@@ -891,5 +892,18 @@ export class HypernetCore implements IHypernetCore {
     amount: number | null,
   ): ResultAsync<void, BlockchainUnavailableError> {
     return this.governanceService.delegateVote(delegateAddress, amount);
+  }
+
+  public getProposalDetails(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this.governanceService.getProposalDetails(proposalId);
+  }
+
+  public castVote(
+    proposalId: string,
+    support: EVoteSupport,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this.governanceService.castVote(proposalId, support);
   }
 }

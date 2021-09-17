@@ -33,7 +33,7 @@ import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
 import { Signature } from "@objects/Signature";
-import { Proposal } from "@objects/Proposal";
+import { Proposal, EVoteSupport } from "@objects/Proposal";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -261,12 +261,21 @@ export interface IHypernetCore {
     name: string,
     symbol: string,
     owner: EthereumAddress,
-  ): ResultAsync<string, BlockchainUnavailableError>;
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
 
   delegateVote(
     delegateAddress: EthereumAddress,
     amount: number | null,
   ): ResultAsync<void, BlockchainUnavailableError>;
+
+  getProposalDetails(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+
+  castVote(
+    proposalId: string,
+    support: EVoteSupport,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
 
   /**
    * Observables for seeing what's going on
