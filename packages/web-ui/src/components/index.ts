@@ -17,3 +17,6 @@ export * from "./SliderRange";
 export * from "./BoxWrapper";
 export * from "./WarningAlert";
 export * from "./MetamaskWarning";
+
+export * from "./GovernanceStatusTag";
+export * from "./GovernanceProposalListItem";

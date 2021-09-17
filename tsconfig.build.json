@@ -39,7 +39,8 @@
       "@utils/*": ["./*"],
       "@objects/*": ["./*"],
       "@user-dashboard/*": ["./*"],
-      "@governance-app/*": ["./*"]
+      "@governance-app/*": ["./*"],
+      "@storybook/*": ["./*"]
     }
   }
 }

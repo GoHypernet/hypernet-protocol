@@ -1,0 +1,25 @@
+{
+  "name": "@hypernetlabs/protocol-storybook",
+  "version": "0.0.1",
+  "description": "Hypernet Protocol Storybook",
+  "author": "Charlie Sibbach <charlie@hypernetlabs.io> (https://github.com/HyperCharlie)",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "yarn clean && yarn compile && yarn postCompile",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
+    "compile": "tsc --build && cd ../.. && yarn alias",
+    "alias": "tsc-alias",
+    "postCompile": "webpack",
+    "prepare": "yarn build",
+    "test": "echo \"Error: no test specified\" && exit 0",
+    "storybook": "yarn start-storybook -p 9009"
+  },
+  "dependencies": {
+    "@hypernetlabs/web-ui": ">=0.0.1",
+    "@react-theming/storybook-addon": "^1.1.1",
+    "@storybook/addon-essentials": "^6.3.7",
+    "@storybook/react": "^6.3.7",
+    "storybook-addon-material-ui": "^0.9.0-alpha.24",
+    "storybook-formik": "^2.1.6"
+  }
+}
