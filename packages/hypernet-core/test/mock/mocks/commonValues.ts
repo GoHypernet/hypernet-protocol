@@ -89,6 +89,30 @@ export const gatewayRegistrationInfo2 = new GatewayRegistrationInfo(
   gatewayAddress2,
   gatewaySignature2,
 );
+
+export const channelFactoryAddress = EthereumAddress(
+  "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
+);
+export const transferRegistryAddress = EthereumAddress(
+  "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F",
+);
+export const messageTransferAddress = EthereumAddress("messageTransferAddress");
+export const insuranceTransferAddress = EthereumAddress(
+  "insuranceTransferAddress",
+);
+export const parameterizedTransferAddress = EthereumAddress(
+  "parameterizedTransferAddress",
+);
+export const gatewayRegistryAddress = EthereumAddress("gatewayRegistryAddress");
+export const liquidityRegistryAddress = EthereumAddress(
+  "liquidityRegistryAddress",
+);
+export const hypernetGovernorAddress = EthereumAddress(
+  "hypernetGovernorAddress",
+);
+
+export const registryFactoryAddress = EthereumAddress("registryFactoryAddress");
+
 export const validDomain = "hypernetProtocolDomain";
 
 export const messageTransferDefinitionAddress = EthereumAddress(

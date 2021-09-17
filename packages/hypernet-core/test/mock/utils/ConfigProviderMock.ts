@@ -5,14 +5,23 @@ import {
   SchemaUrl,
 } from "@hypernetlabs/objects";
 import { HypernetConfig } from "@interfaces/objects";
+import {
+  chainId,
+  channelFactoryAddress,
+  defaultExpirationLength,
+  gatewayRegistryAddress,
+  hyperTokenAddress,
+  insuranceTransferAddress,
+  liquidityRegistryAddress,
+  messageTransferAddress,
+  parameterizedTransferAddress,
+  transferRegistryAddress,
+  hypernetGovernorAddress,
+  registryFactoryAddress,
+} from "@mock/mocks";
 import { okAsync, ResultAsync } from "neverthrow";
 
 import { IConfigProvider } from "@interfaces/utilities";
-import {
-  chainId,
-  defaultExpirationLength,
-  hyperTokenAddress,
-} from "@mock/mocks";
 
 export class ConfigProviderMock implements IConfigProvider {
   public config: HypernetConfig;
@@ -31,25 +40,16 @@ export class ConfigProviderMock implements IConfigProvider {
         },
         {
           [chainId]: {
-            channelFactoryAddress: EthereumAddress(
-              "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
-            ),
-            transferRegistryAddress: EthereumAddress(
-              "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F",
-            ),
+            channelFactoryAddress,
+            transferRegistryAddress,
             hypertokenAddress: hyperTokenAddress,
-            messageTransferAddress: EthereumAddress("messageTransferAddress"),
-            insuranceTransferAddress: EthereumAddress(
-              "insuranceTransferAddress",
-            ),
-            parameterizedTransferAddress: EthereumAddress(
-              "parameterizedTransferAddress",
-            ),
-            gatewayRegistryAddress: EthereumAddress("gatewayRegistryAddress"),
-            liquidityRegistryAddress: EthereumAddress(
-              "liquidityRegistryAddress",
-            ),
-            hypernetGovernorAddress: EthereumAddress("hypernetGovernorAddress"),
+            messageTransferAddress,
+            insuranceTransferAddress,
+            parameterizedTransferAddress,
+            gatewayRegistryAddress,
+            liquidityRegistryAddress,
+            hypernetGovernorAddress,
+            registryFactoryAddress,
           },
         },
         "natsUrl",

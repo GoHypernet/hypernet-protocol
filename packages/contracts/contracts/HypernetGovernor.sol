@@ -26,7 +26,7 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
 
     uint256 private _votingDelay = 1; // blocks (1 block is about 13 seconds)
 
-    uint256 private _votingPeriod = 40; // blocks
+    uint256 private _votingPeriod = 20; // blocks
 
     uint256 private _proposalThreshold = 1_000_000e18; // number of votes required to in order to submit a successful proposal
 

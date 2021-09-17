@@ -1,4 +1,8 @@
-import { Proposal, BlockchainUnavailableError } from "@hypernetlabs/objects";
+import {
+  Proposal,
+  BlockchainUnavailableError,
+  EthereumAddress,
+} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 import { inject } from "inversify";
 import { BigNumber } from "ethers";
@@ -25,5 +29,20 @@ export class GovernanceService implements IGovernanceService {
     _proposalsNumberArr?: number[],
   ): ResultAsync<BigNumber, BlockchainUnavailableError> {
     return this.governanceRepository.getProposalsCount();
+  }
+
+  public createProposal(
+    name: string,
+    symbol: string,
+    owner: EthereumAddress,
+  ): ResultAsync<string, BlockchainUnavailableError> {
+    return this.governanceRepository.createProposal(name, symbol, owner);
+  }
+
+  public delegateVote(
+    delegateAddress: EthereumAddress,
+    amount: number | null,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    return this.governanceRepository.delegateVote(delegateAddress, amount);
   }
 }

@@ -46,6 +46,7 @@ import MocRegistryAbi from "./artifacts/MocRegistry";
 import ParameterizedAbi from "./artifacts/Parameterized";
 import HypernetGovernorAbi from "./artifacts/HypernetGovernor";
 import HypertokenAbi from "./artifacts/Hypertoken";
+import RegistryFactoryAbi from "./artifacts/RegistryFactory";
 
 const TransferAbis = {
   ERC721: ERC721Abi,
@@ -59,6 +60,7 @@ const TransferAbis = {
 const GovernanceAbis = {
   HypernetGovernor: HypernetGovernorAbi,
   Hypertoken: HypertokenAbi,
+  RegistryFactory: RegistryFactoryAbi,
 };
 
 export { TransferAbis, GovernanceAbis };

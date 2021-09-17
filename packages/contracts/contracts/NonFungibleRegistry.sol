@@ -10,7 +10,6 @@ import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-
 /**
  * @dev {ERC721} compatible Registry, including:
  *

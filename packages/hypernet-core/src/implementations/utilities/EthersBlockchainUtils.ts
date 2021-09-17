@@ -219,46 +219,33 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
     });
   }
 
-  public getGatewayRegistrationInfo(
-    gatewayUrl: GatewayUrl,
-  ): ResultAsync<GatewayRegistrationInfo, BlockchainUnavailableError> {
-    return ResultUtils.combine([
-      this.blockchainProvider.getGovernanceProvider(),
-      this.configProvider.getConfig(),
-    ])
-      .andThen((vals) => {
-        const [provider, config] = vals;
-        const gatewayRegistryAddress =
-          config.chainAddresses[config.governanceChainId]
-            ?.gatewayRegistryAddress;
-        if (gatewayRegistryAddress == null) {
-          return errAsync<string, BlockchainUnavailableError>(
-            new BlockchainUnavailableError(
-              `Unable to getGatewayRegistrationInfo for chain ${config.governanceChainId}. No configuration info for that chain is available`,
-            ),
-          );
-        }
-
-        const gatewayRegistryContract = new Contract(
-          gatewayRegistryAddress,
+  public getERC721Entry<T>(
+    contractAddress: EthereumAddress,
+    key: string,
+  ): ResultAsync<T, BlockchainUnavailableError> {
+    return this.blockchainProvider
+      .getGovernanceProvider()
+      .andThen((provider) => {
+        const erc721Contract = new Contract(
+          contractAddress,
           TransferAbis.ERC721.abi,
           provider,
         );
 
         return ResultAsync.fromPromise(
-          gatewayRegistryContract.registryMap(gatewayUrl) as Promise<number>,
+          erc721Contract.registryMap(key) as Promise<number>,
           (e) => {
             return new BlockchainUnavailableError(
-              "Cannot get index of registration token for gateway",
+              `Cannot get index of token with key ${key} for contract at ${contractAddress}`,
               e,
             );
           },
         ).andThen((registryIndex) => {
           return ResultAsync.fromPromise(
-            gatewayRegistryContract.tokenURI(registryIndex) as Promise<string>,
+            erc721Contract.tokenURI(registryIndex) as Promise<string>,
             (e) => {
               return new BlockchainUnavailableError(
-                "Cannot get index of registration token for gateway",
+                `Cannot retrieve token at index ${registryIndex} with key ${key} for contract at ${contractAddress}`,
                 e,
               );
             },
@@ -266,20 +253,7 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
         });
       })
       .map((registryString) => {
-        const registryEntry = JSON.parse(
-          registryString,
-        ) as IGatewayRegistryEntry;
-
-        return new GatewayRegistrationInfo(
-          gatewayUrl,
-          registryEntry.address,
-          registryEntry.signature,
-        );
+        return JSON.parse(registryString) as T;
       });
   }
-}
-
-interface IGatewayRegistryEntry {
-  address: EthereumAddress;
-  signature: Signature;
 }

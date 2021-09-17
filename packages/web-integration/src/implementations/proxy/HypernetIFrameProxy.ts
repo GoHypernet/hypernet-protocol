@@ -458,8 +458,28 @@ export default class HypernetIFrameProxy
   public getProposals(
     _proposalsNumberArr?: number[],
   ): ResultAsync<Proposal[], BlockchainUnavailableError> {
-    return this._createCall("getProposals", {
-      _proposalsNumberArr,
+    return this._createCall("getProposals", _proposalsNumberArr);
+  }
+
+  public createProposal(
+    name: string,
+    symbol: string,
+    owner: EthereumAddress,
+  ): ResultAsync<string, BlockchainUnavailableError> {
+    return this._createCall("createProposal", {
+      name,
+      symbol,
+      owner,
+    });
+  }
+
+  public delegateVote(
+    delegateAddress: EthereumAddress,
+    amount: number | null,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    return this._createCall("delegateVote", {
+      delegateAddress,
+      amount,
     });
   }
 

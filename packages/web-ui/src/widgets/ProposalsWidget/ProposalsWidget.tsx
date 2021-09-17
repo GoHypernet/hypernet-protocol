@@ -5,7 +5,7 @@ import { useAlert } from "react-alert";
 
 import { BoxWrapper } from "@web-ui/components";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { Proposal } from "@hypernetlabs/objects";
+import { EthereumAddress, Proposal } from "@hypernetlabs/objects";
 
 interface IProposalsWidget extends IRenderParams {}
 
@@ -20,15 +20,38 @@ const ProposalsWidget: React.FC<IProposalsWidget> = ({
 
   useEffect(() => {
     coreProxy
-      .getProposals()
-      .map((proposals) => {
-        console.log("proposals: ", proposals);
-        setProposals(proposals);
+      .delegateVote(
+        EthereumAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"),
+        null,
+      )
+      .map(() => {
+        console.log("delegate worked");
+        coreProxy.getEthereumAccounts().map((accounts) => {
+          console.log("getEthereumAccounts accounts: ", accounts);
+          coreProxy
+            .createProposal(
+              "first proposal name",
+              "proposal symbol",
+              EthereumAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"),
+            )
+            .map((proposalId) => {
+              console.log("proposalId FE: ", proposalId);
+              coreProxy
+                .getProposals()
+                .map((proposals) => {
+                  console.log("proposals list: ", proposals);
+                  setProposals(proposals);
+                })
+                .mapErr(handleError);
+            })
+            .mapErr(handleError);
+        });
       })
       .mapErr(handleError);
   }, []);
 
   const handleError = (err?: Error) => {
+    console.log("handleError err: ", err);
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };

@@ -2,11 +2,16 @@ import { EthereumAddress, GatewayUrl, Signature, TransferAbis } from "@hypernetl
 import { Contract, ethers } from "ethers";
 
 export class BlockchainRepository {
-  protected privateKey = "0x0123456789012345678901234567890123456789012345678901234567890123";
-  protected registryAccountPrivateKey = "0dbbe8e4ae425a6d2687f1a7e3ba17bc98c673636790f1b8ad91193c05875ef1";
+  protected gatewayAccountPrivateKey = "0x0123456789012345678901234567890123456789012345678901234567890123";
+  protected gatewayAccount = "0x14791697260E4c9A71f18484C9f997B308e59325";
+  protected gatewayRegistryAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
+
   protected provider: ethers.providers.JsonRpcProvider;
   protected wallet: ethers.Wallet;
-  protected gatewayRegistryAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
+
+  protected registryAccountPrivateKey = "0dbbe8e4ae425a6d2687f1a7e3ba17bc98c673636790f1b8ad91193c05875ef1";
+  protected registryAccount = "0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef";
+
   protected signature: Signature | null = null;
   protected address: EthereumAddress;
 
@@ -43,7 +48,7 @@ export class BlockchainRepository {
 
       console.log("Setting gateway registry info");
       const txResponse = await gatewayRegistryContract.register(
-        this.privateKey,
+        this.gatewayAccount,
         gatewayUrl,
         JSON.stringify(registryEntry),
       );

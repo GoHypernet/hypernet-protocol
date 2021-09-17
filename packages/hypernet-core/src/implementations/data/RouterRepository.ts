@@ -1,21 +1,20 @@
 import {
   BlockchainUnavailableError,
   GatewayUrl,
-  PersistenceError,
   PublicIdentifier,
   RouterDetails,
   SupportedToken,
-  TransferAbis,
 } from "@hypernetlabs/objects";
 import { ResultUtils } from "@hypernetlabs/utils";
 import { IRouterRepository } from "@interfaces/data";
-import { Contract } from "ethers";
 import { inject, injectable } from "inversify";
 import { errAsync, ResultAsync } from "neverthrow";
 
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
+  IBlockchainUtils,
+  IBlockchainUtilsType,
   IConfigProvider,
   IConfigProviderType,
 } from "@interfaces/utilities";
@@ -23,6 +22,7 @@ import {
 @injectable()
 export class RouterRepository implements IRouterRepository {
   constructor(
+    @inject(IBlockchainUtilsType) protected blockchainUtils: IBlockchainUtils,
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
     @inject(IConfigProviderType) protected configProvider: IConfigProvider,
@@ -30,14 +30,13 @@ export class RouterRepository implements IRouterRepository {
 
   public getRouterDetails(
     publicIdentifiers: PublicIdentifier[],
-  ): ResultAsync<Map<PublicIdentifier, RouterDetails>, PersistenceError> {
-    return ResultUtils.combine([
-      this.blockchainProvider.getGovernanceProvider(),
-      this.configProvider.getConfig(),
-    ])
-      .andThen((vals) => {
-        const [provider, config] = vals;
-
+  ): ResultAsync<
+    Map<PublicIdentifier, RouterDetails>,
+    BlockchainUnavailableError
+  > {
+    return this.configProvider
+      .getConfig()
+      .andThen((config) => {
         const liquidityRegistryAddress =
           config.chainAddresses[config.governanceChainId]
             ?.liquidityRegistryAddress;
@@ -49,35 +48,20 @@ export class RouterRepository implements IRouterRepository {
           );
         }
 
-        const liquidityRegistryContract = new Contract(
-          liquidityRegistryAddress,
-          TransferAbis.LiquidityRegistry.abi,
-          provider,
-        );
-
         return ResultUtils.combine(
           publicIdentifiers.map((publicIdentifier) => {
-            return ResultAsync.fromPromise(
-              liquidityRegistryContract.getLiquidity(
+            return this.blockchainUtils
+              .getERC721Entry<IRouterDetailsEntry>(
+                liquidityRegistryAddress,
                 publicIdentifier,
-              ) as Promise<string>,
-              (e) => {
-                return new BlockchainUnavailableError(
-                  "Cannot get gateway registry entry",
-                  e,
+              )
+              .map((registryEntry) => {
+                return new RouterDetails(
+                  publicIdentifier,
+                  registryEntry.supportedTokens,
+                  registryEntry.allowedGateways,
                 );
-              },
-            ).map((registryString) => {
-              const registryEntry = JSON.parse(
-                registryString,
-              ) as IRouterDetailsEntry;
-
-              return new RouterDetails(
-                publicIdentifier,
-                registryEntry.supportedTokens,
-                registryEntry.allowedGateways,
-              );
-            });
+              });
           }),
         );
       })

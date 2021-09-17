@@ -32,34 +32,50 @@ ENV __BUILD_ENV__ $BUILD_ENV
 ARG IFRAME_SOURCE=http://localhost:5000
 ENV __IFRAME_SOURCE__ $IFRAME_SOURCE
 
-ARG CHAIN_PROVIDERS='{"1337": "http://localhost:8545"}'
+ARG CHAIN_PROVIDERS='{"1337": "http://localhost:8545", "31337": "http://localhost:8545"}'
 ENV __CHAIN_PROVIDERS__ $CHAIN_PROVIDERS
 
 ARG CHAIN_ADDRESSES='{ \
       "1337": { \
         "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
         "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", \
-        "hypertokenAddress": "0xAa588d3737B611baFD7bD713445b314BD453a5C8", \
+        "hypertokenAddress": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318", \
         "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
         "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
         "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
         "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a", \
-        "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd" \
+        "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd", \
+        "hypernetGovernorAddress": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0", \
+        "registryFactoryAddress": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE" \
+      }, \
+      "31337": { \
+        "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
+        "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", \
+        "hypertokenAddress": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318", \
+        "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
+        "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
+        "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
+        "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a", \
+        "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd", \
+        "hypernetGovernorAddress": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0", \
+        "registryFactoryAddress": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE" \
       }, \
       "1369": { \
         "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
         "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", \
-        "hypertokenAddress": "0xAa588d3737B611baFD7bD713445b314BD453a5C8", \
+        "hypertokenAddress": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318", \
         "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
         "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
         "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
         "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a", \
-        "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd" \
+        "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd", \
+        "hypernetGovernorAddress": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0", \
+        "registryFactoryAddress": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE" \
       } \
     }'
 ENV __CHAIN_ADDRESSES__ $CHAIN_ADDRESSES
 
-ARG GOVERNANCE_CHAIN_ID=1337
+ARG GOVERNANCE_CHAIN_ID=31337
 ENV __GOVERNANCE_CHAIN_ID__ $GOVERNANCE_CHAIN_ID
 
 ARG NATS_URL=ws://localhost:4221
