@@ -16,21 +16,26 @@ successful in practice at adopting beneficial proposals to protocol upgrades whi
 ![alt text](/documentation/images/Hypernet-Contract-Flow.png)
 
 The Hypernet Governance application is used for proposing and vetting (by the token holder community) new Non-Fungible Registries (NFRs) 
-which are deployed through a registry factory contract. Non-Fungible Registries are based on the [EIP721](https://eips.ethereum.org/EIPS/eip-721) 
-non-fungible token standard. An NFR is enumerable and every entry is an ownable token that has a corresponding `label` (seperate 
-from the `tokenURI`) that is unique within that specific NFR. That is, two entries can have the same `tokenURI`, but they cannot have
-the same `label`. This helps to fascilitate lookups more easily for applications in which the registry is used for identity or
-authenticity verification in which the `tokenId` may not be known *a priori*. Entries in an Non-Fungible Registry are referred to, within
-the protocol, as Non-Fungible Identities (NFIs).
+which are deployed through a registry factory contract. Non-Fungible Registries are an extension of the [EIP721](https://eips.ethereum.org/EIPS/eip-721) 
+non-fungible token standard and have several customizable functionalities. An NFR is enumerable and every entry is an ownable token 
+that has a corresponding `label` (seperate from the `tokenURI`) that is unique within that specific NFR. That is, two entries can have 
+the same `tokenURI`, but they cannot have the same `label`. Labels fascilitate lookups more easily for applications in which the registry 
+is used for identity or authenticity verification in which the `tokenId` may not be known *a priori* but the label is. Entries in an 
+Non-Fungible Registry are referred to, within the protocol, as Non-Fungible Identities (NFIs). 
 
 Each NFR has a `MINTER_ROLE`, which can mint new entries to the registry, and a `DEFAULT_ADMIN_ROLE` which can make modifications 
 to the registry contract parameters. These roles are set through the NFR constructor. Additionally, the `MINTER_ROLE` and 
-the owner of a token have the option to update the information stored in a token after minting unless `allowStorageUpdate` is 
-set to `false` (which it is by default and can be updated by the `DEFAULT_ADMIN_ROLE`). Lastly, each NFR exposes a *lazy registration*
-interface through the `lazyRegister` function. This allows the owner of the `MINTER_ROLE` to offload the burden of gas costs to the 
-recipient of the NFI by providing them with signature that the recipient can then present to the contract to register at their 
-convenience with the token `label` serving as a nonce to prevent duplicate registration. This feature is disabled by default 
-but can be activated by the `DEFAULT_ADMIN_ROLE` through the `allowLazyRegister` variable. 
+the owner of a token have the option to update the information stored in the `tokenURI` after minting unless `allowStorageUpdate` is 
+set to `false` (which it is by default and can be updated by the `DEFAULT_ADMIN_ROLE`). The same applies for the token `label`
+through the `allowLabelChange` flag (which is false by default). In some cases, it can be useful to dissallow the transfer of ownership
+of NFIs. This can be done if `DEFAULT_ADMIN_ROLE` sets `allowTransfers` to `false`. 
+
+Lastly, each NFR exposes a *lazy registration* interface through the `lazyRegister` function. This allows the owner of the `MINTER_ROLE` 
+to offload the burden of gas costs to the recipient of the NFI by providing them with signature that the recipient can then present to 
+the contract to register at their convenience with the token `label` serving as a nonce to prevent duplicate registration. This feature 
+is disabled by default but can be activated by the `DEFAULT_ADMIN_ROLE` through the `allowLazyRegister` variable. **NOTE**: If lazy registration
+is enabled, the `allowLabelChange` should be set to `false` as the token label serves as the nonce for lazy registration. If a user is allowed 
+to change their token label, they can register multiple times. 
 
 ## Install dependencies
 

@@ -5,7 +5,7 @@ const { ethers } = require("hardhat");
 describe("Registry", function () {
   it("Test the Registry contract.", async function () {
     // get signers
-    const [owner, addr1] = await ethers.getSigners();
+    const [owner, addr1, addr2] = await ethers.getSigners();
 
     // deploy registry contract
     const Registry = await ethers.getContractFactory("NonFungibleRegistry");
@@ -64,20 +64,20 @@ describe("Registry", function () {
         routerPublicIdentifier,
         JSON.stringify(registryEntry),
       ),
-      "NonFungibleRegistry: agent is already registered.",
+      "NonFungibleRegistry: label is already registered.",
     );
 
     // only owner or approved address can burn
     await expectRevert(
-      registry.burn(1),
-      "ERC721Burnable: caller is not owner nor approved",
+      registry.connect(addr2).burn(1),
+      "NonFungibleRegistry: caller is not owner nor approved nor admin.",
     );
 
     // update the tokenURI
     // only owner or approved address can update
     await expectRevert(
-      registry.updateRegistration(1, "new URI"),
-      "NonFungibleRegistry: caller is not owner nor approved",
+      registry.connect(addr2).updateRegistration(1, "new URI"),
+      "NonFungibleRegistry: caller is not owner nor approved nor admin.",
     );
 
     // connect to a new account and try to update and burn
@@ -87,8 +87,52 @@ describe("Registry", function () {
     const tx2_reciept = tx2.wait();
     expect(await newRegistry.tokenURI(1)).to.equal("new URI");
 
-    const tx3 = await newRegistry.burn(1);
-    const tx3_reciept = tx3.wait();
+    // mint a token to the registry without a label
+    const tx4 = await registry.registerNoLabel(
+        addr2.address,
+        JSON.stringify(registryEntry),
+    );
+    const tx4_reciept = tx4.wait();
+
+    const newerRegistry = registry.connect(addr2);
+
+    // can't update label if updating is disabled
+    await expectRevert(
+        newerRegistry.updateLabel(2, "newDummyString"),
+        "NonFungibleRegistry: Label updating is disabled.",
+    );
+
+    // only admin can update parameters
+    await expectRevert(
+        newerRegistry.setLabelUpdate(true),
+        "NonFungibleRegistry: must be admin.",
+    );
+    
+    // update the label on the NFI that has none
+    const tx5 = await registry.setLabelUpdate(true);
+    const tx5_reciept = tx5.wait();
+
+    // update the label on the NFI that has none
+    const tx6 = await newerRegistry.updateLabel(
+        2,
+        "newDummyString",
+    );
+    const tx6_reciept = tx6.wait();
+
+    // can't add label that already exists in the registry
+    await expectRevert(
+        newerRegistry.updateLabel(2, routerPublicIdentifier),
+        "NonFungibleRegistry: label is already registered.",
+    );
+
+    // let address1 burn their token
+    const tx7 = await newRegistry.burn(1);
+    const tx7_reciept = tx7.wait();
+    expect(await newRegistry.totalSupply()).to.equal(1);
+
+    // let address1 burn their token
+    const tx8 = await newerRegistry.burn(2);
+    const tx8_reciept = tx8.wait();
     expect(await newRegistry.totalSupply()).to.equal(0);
-  });
+});
 });
