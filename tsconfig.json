@@ -46,7 +46,9 @@
     },
     {
       "path": "packages/user-dashboard"
+    },
+    {
+      "path": "packages/storybook"
     }
   ]
 }
- 
