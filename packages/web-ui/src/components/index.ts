@@ -20,3 +20,4 @@ export * from "./MetamaskWarning";
 
 export * from "./GovernanceStatusTag";
 export * from "./GovernanceProposalListItem";
+export * from "./GovernanceLargeField";

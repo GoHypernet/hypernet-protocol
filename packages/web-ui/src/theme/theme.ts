@@ -162,6 +162,11 @@ const typography = {
 
 export const lightTheme = createTheme({
   typography,
+  palette: {
+    text: {
+      primary: colors.GRAY700,
+    },
+  },
   overrides: {
     // @ts-ignore
     MuiTypography,
