@@ -34,6 +34,7 @@ import {
   GatewayRegistrationInfo,
   Proposal,
   EVoteSupport,
+  ProposalVoteReceipt,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -905,5 +906,15 @@ export class HypernetCore implements IHypernetCore {
     support: EVoteSupport,
   ): ResultAsync<Proposal, BlockchainUnavailableError> {
     return this.governanceService.castVote(proposalId, support);
+  }
+
+  public getProposalVotesReceipt(
+    proposalId: string,
+    voterAddress: EthereumAddress,
+  ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError> {
+    return this.governanceService.getProposalVotesReceipt(
+      proposalId,
+      voterAddress,
+    );
   }
 }

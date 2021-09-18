@@ -1,3 +1,5 @@
+import { EthereumAddress } from "./EthereumAddress";
+
 export enum EProposalState {
   UNDETERMINED = -1,
   PENDING,
@@ -14,6 +16,16 @@ export enum EVoteSupport {
   AGAINST = 0,
   FOR = 1,
   ABSTAIN = 2,
+}
+
+export class ProposalVoteReceipt {
+  constructor(
+    public proposalId: string,
+    public voterAddress: EthereumAddress,
+    public hasVoted: boolean,
+    public support: EVoteSupport,
+    public votes: number,
+  ) {}
 }
 
 export class Proposal {

@@ -3,6 +3,7 @@ import {
   BlockchainUnavailableError,
   EthereumAddress,
   EVoteSupport,
+  ProposalVoteReceipt,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 import { inject } from "inversify";
@@ -55,5 +56,15 @@ export class GovernanceService implements IGovernanceService {
     support: EVoteSupport,
   ): ResultAsync<Proposal, BlockchainUnavailableError> {
     return this.governanceRepository.castVote(proposalId, support);
+  }
+
+  public getProposalVotesReceipt(
+    proposalId: string,
+    voterAddress: EthereumAddress,
+  ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError> {
+    return this.governanceRepository.getProposalVotesReceipt(
+      proposalId,
+      voterAddress,
+    );
   }
 }

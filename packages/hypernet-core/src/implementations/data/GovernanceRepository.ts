@@ -3,6 +3,7 @@ import {
   EthereumAddress,
   EVoteSupport,
   Proposal,
+  ProposalVoteReceipt,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IGovernanceRepository } from "@interfaces/data";
@@ -267,6 +268,38 @@ export class GovernanceRepository implements IGovernanceRepository {
         }).andThen(() => {
           return this.getProposalDetails(proposalId);
         });
+      });
+    });
+  }
+
+  public getProposalVotesReceipt(
+    proposalId: string,
+    voterAddress: EthereumAddress,
+  ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError> {
+    return this.initializeContracts().andThen(() => {
+      return ResultAsync.fromPromise(
+        this.hypernetGovernorContract?.getReceipt(
+          proposalId,
+          voterAddress,
+        ) as Promise<{
+          hasVoted: boolean;
+          support: EVoteSupport;
+          votes: number;
+        }>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to castVote proposal",
+            e,
+          );
+        },
+      ).map((receipt) => {
+        return new ProposalVoteReceipt(
+          proposalId,
+          voterAddress,
+          receipt.hasVoted,
+          receipt.support,
+          receipt.votes,
+        );
       });
     });
   }
