@@ -3,6 +3,7 @@ import {
   Proposal,
   EthereumAddress,
   EVoteSupport,
+  ProposalVoteReceipt,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -27,6 +28,10 @@ export interface IGovernanceRepository {
     proposalId: string,
     support: EVoteSupport,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  getProposalVotesReceipt(
+    proposalId: string,
+    voterAddress: EthereumAddress,
+  ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError>;
 }
 
 export const IGovernanceRepositoryType = Symbol.for("IGovernanceRepository");

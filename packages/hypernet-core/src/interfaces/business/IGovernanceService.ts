@@ -3,9 +3,9 @@ import {
   Proposal,
   EthereumAddress,
   EVoteSupport,
+  ProposalVoteReceipt,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
-import { BigNumber } from "ethers";
 
 export interface IGovernanceService {
   getProposals(
@@ -28,4 +28,8 @@ export interface IGovernanceService {
     proposalId: string,
     support: EVoteSupport,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  getProposalVotesReceipt(
+    proposalId: string,
+    voterAddress: EthereumAddress,
+  ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError>;
 }
