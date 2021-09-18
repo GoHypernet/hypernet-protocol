@@ -5,7 +5,7 @@ import { useAlert } from "react-alert";
 
 import { BoxWrapper } from "@web-ui/components";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { EthereumAddress, Proposal } from "@hypernetlabs/objects";
+import { EthereumAddress, EVoteSupport, Proposal } from "@hypernetlabs/objects";
 
 interface IProposalsWidget extends IRenderParams {}
 
@@ -19,6 +19,12 @@ const ProposalsWidget: React.FC<IProposalsWidget> = ({
   const [proposals, setProposals] = useState<Proposal[]>([]);
 
   useEffect(() => {
+    const address = EthereumAddress(
+      "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+    );
+    coreProxy.getEthereumAccounts().map((accounts) => {
+      console.log("accounts: ", accounts);
+    });
     // delegate votes, createProposal and then list all proposals
     /* coreProxy
       .delegateVote(
@@ -51,19 +57,46 @@ const ProposalsWidget: React.FC<IProposalsWidget> = ({
       .mapErr(handleError); */
 
     // list all proposals
-    coreProxy
+    /* coreProxy
       .getProposals()
       .map((proposals) => {
         console.log("proposal list: ", proposals);
         setProposals(proposals);
       })
-      .mapErr(handleError);
+      .mapErr(handleError); */
 
     coreProxy
-      .getProposals([2])
-      .map((proposals) => {
-        console.log("proposal list detail: ", proposals);
-        setProposals(proposals);
+      .createProposal("first proposal name", "proposal symbol1", address)
+      .map((proposal) => {
+        console.log("created proposal FE: ", proposal);
+
+        // get proposal details
+        const propsalId = proposal.id;
+        coreProxy
+          .getProposalDetails(propsalId)
+          .map((proposal) => {
+            console.log("proposal detail from getProposalDetails: ", proposal);
+
+            // get cast a new vote
+            coreProxy
+              .castVote(propsalId, EVoteSupport.FOR)
+              .map((proposal) => {
+                console.log("proposal detail from castVote: ", proposal);
+
+                // get vote history
+                coreProxy
+                  .getProposalVotesReceipt(propsalId, address)
+                  .map((proposal) => {
+                    console.log(
+                      "ProposalVoteReceipt from getProposalVotesReceipt: ",
+                      proposal,
+                    );
+                  })
+                  .mapErr(handleError);
+              })
+              .mapErr(handleError);
+          })
+          .mapErr(handleError);
       })
       .mapErr(handleError);
   }, []);
