@@ -166,6 +166,7 @@ export const lightTheme = createTheme({
     text: {
       primary: colors.GRAY700,
     },
+    divider: colors.GRAY200,
   },
   overrides: {
     // @ts-ignore
