@@ -82,7 +82,7 @@ export const getColorFromStatus = (status: EStatusColor) => {
       return colors.STATUS_RED;
 
     case EStatusColor.PRIMARY:
-      return colors.STATUS_BLUE;
+      return colors.PURPLE400;
 
     case EStatusColor.SUCCESS:
       return colors.STATUS_GREEN;
@@ -163,6 +163,12 @@ const typography = {
 export const lightTheme = createTheme({
   typography,
   palette: {
+    primary: {
+      main: colors.PURPLE400,
+      light: colors.PURPLE300,
+      dark: colors.PURPLE700,
+      contrastText: colors.WHITE,
+    },
     text: {
       primary: colors.GRAY700,
     },
