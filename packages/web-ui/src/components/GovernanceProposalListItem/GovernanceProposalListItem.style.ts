@@ -20,4 +20,10 @@ export const useStyles = makeStyles((theme) => ({
   status: (any) => ({
     marginLeft: "auto",
   }),
+  activePulse: {
+    width: 16,
+    height: 16,
+    backgroundColor: colors.PURPLE400,
+    marginLeft: 36,
+  },
 }));

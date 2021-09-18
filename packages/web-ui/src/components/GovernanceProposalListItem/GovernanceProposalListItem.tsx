@@ -1,5 +1,6 @@
 import React from "react";
 import { Box, Typography, Button } from "@material-ui/core";
+import Skeleton from "@material-ui/lab/Skeleton";
 
 import { colors } from "@web-ui/theme";
 import { useStyles } from "@web-ui/components/GovernanceProposalListItem/GovernanceProposalListItem.style";
@@ -22,6 +23,13 @@ export const GovernanceProposalListItem: React.FC<GovernanceProposalListItemProp
         <Typography variant="h5" className={classes.number}>
           {number}
         </Typography>
+        {status === EProposalState.ACTIVE && (
+          <Skeleton
+            variant="circle"
+            animation="pulse"
+            className={classes.activePulse}
+          />
+        )}
         <Typography variant="h5" className={classes.title}>
           {title}
         </Typography>
