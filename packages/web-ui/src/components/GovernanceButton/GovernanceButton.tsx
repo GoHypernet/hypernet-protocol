@@ -50,11 +50,10 @@ export const GovernanceButton: React.FC<IGovernanceButton> = ({
       autoFocus={autoFocus}
       size={size}
       fullWidth={fullWidth}
-      className={isDangerButton ? classes.dangerButton : ""}
     >
       {children}
       {loading && (
-        <Box paddingLeft={1}>
+        <Box className={classes.loadingWrapper}>
           <CircularProgress color="inherit" size={13} />
         </Box>
       )}

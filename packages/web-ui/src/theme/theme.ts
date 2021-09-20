@@ -75,7 +75,9 @@ export enum EFontSize {
   SUBTITLE1 = "1.266rem",
   BODY1 = "1rem",
   BODY2 = ".889rem",
-  BUTTON = ".889rem",
+  BUTTON_LARGE = "1rem",
+  BUTTON_MEDIUM = ".889rem",
+  BUTTON_SMALL = ".75rem",
 }
 
 export const getColorFromStatus = (status: EStatusColor) => {
@@ -105,12 +107,39 @@ const MuiTypography = {
 
 const MuiButton = {
   root: {
-    fontSize: EFontSize.BUTTON,
+    padding: "12px",
+    fontSize: EFontSize.BUTTON_MEDIUM,
     textTransform: "none" as const,
     borderRadius: 3,
   },
+  outlined: {
+    padding: "12px",
+  },
+  text: {
+    padding: "12px",
+  },
+
+  sizeSmall: {
+    padding: "8px 12px",
+    fontSize: EFontSize.BUTTON_SMALL,
+  },
+  outlinedSizeSmall: {
+    padding: "8px 12px",
+    fontSize: EFontSize.BUTTON_SMALL,
+  },
+  containedSizeSmall: {
+    padding: "8px 12px",
+    fontSize: EFontSize.BUTTON_SMALL,
+  },
+
   sizeLarge: {
-    fontSize: EFontSize.BASE,
+    fontSize: EFontSize.BUTTON_LARGE,
+  },
+  outlinedSizeLarge: {
+    fontSize: EFontSize.BUTTON_LARGE,
+  },
+  containedSizeLarge: {
+    fontSize: EFontSize.BUTTON_LARGE,
   },
 };
 

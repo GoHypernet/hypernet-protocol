@@ -1,43 +1,94 @@
-import { Button } from "@hypernetlabs/web-ui";
-import { EButtonStatus } from "@hypernetlabs/web-ui";
+import { GovernanceButton } from "@hypernetlabs/web-ui";
 
 export default {
-  title: "Layout/Button",
-  component: Button,
+  title: "Layout/GovernanceButton",
+  component: GovernanceButton,
+  argTypes: {
+    size: {
+      options: ["small", "medium", "large"],
+      control: { type: "radio" },
+    },
+  },
 };
 
 const Template = (args) => (
   <>
-    <div style={{ display: "flex", justifyContent: "space-evenly" }}>
-      <Button {...args} status={EButtonStatus.primary} />
-      <Button {...args} status={EButtonStatus.secondary} />
-      <Button {...args} cstatus={EButtonStatus.text} />
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-evenly",
+        marginBottom: 24,
+      }}
+    >
+      <GovernanceButton {...args} variant="contained">
+        Click me!
+      </GovernanceButton>
+      <GovernanceButton {...args} variant="contained" disabled>
+        Click me!
+      </GovernanceButton>
+      <GovernanceButton {...args} variant="contained" loading>
+        Click me!
+      </GovernanceButton>
     </div>
-    <div style={{ display: "flex", justifyContent: "space-evenly" }}>
-      <Button {...args} status={EButtonStatus.primary} hasMaterialUIStyle />
-      <Button {...args} status={EButtonStatus.secondary} hasMaterialUIStyle />
-      <Button {...args} status={EButtonStatus.link} hasMaterialUIStyle />
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-evenly",
+        marginBottom: 24,
+      }}
+    >
+      <GovernanceButton {...args} variant="outlined">
+        Click me!
+      </GovernanceButton>
+      <GovernanceButton {...args} variant="outlined" disabled>
+        Click me!
+      </GovernanceButton>
+      <GovernanceButton {...args} variant="outlined" loading>
+        Click me!
+      </GovernanceButton>
     </div>
-    <div style={{ display: "flex", justifyContent: "space-evenly" }}>
-      <Button {...args} status={EButtonStatus.primary} hasBackIcon />
-      <Button {...args} status={EButtonStatus.secondary} hasBackIcon />
-      <Button {...args} status={EButtonStatus.link} hasBackIcon />
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-evenly",
+        marginBottom: 24,
+      }}
+    >
+      <GovernanceButton {...args} variant="text">
+        Click me!
+      </GovernanceButton>
+      <GovernanceButton {...args} variant="text" disabled>
+        Click me!
+      </GovernanceButton>
+      <GovernanceButton {...args} variant="text" loading>
+        Click me!
+      </GovernanceButton>
     </div>
-    <div style={{ display: "flex", justifyContent: "space-evenly" }}>
-      <Button {...args} status={EButtonStatus.primary} disabled />
-      <Button {...args} status={EButtonStatus.secondary} disabled />
-      <Button {...args} status={EButtonStatus.link} disabled />
+
+    <div style={{ marginBottom: 24 }}>
+      <GovernanceButton {...args} variant="contained" fullWidth>
+        Click me!
+      </GovernanceButton>
     </div>
-    <Button {...args} status={EButtonStatus.primary} fullWidth />
-    <Button {...args} status={EButtonStatus.secondary} fullWidth />
-    <Button {...args} status={EButtonStatus.link} fullWidth />
+
+    <div style={{ marginBottom: 24 }}>
+      <GovernanceButton {...args} variant="outlined" fullWidth>
+        Click me!
+      </GovernanceButton>
+    </div>
+
+    <div style={{ marginBottom: 24 }}>
+      <GovernanceButton {...args} variant="text" fullWidth>
+        Click me!
+      </GovernanceButton>
+    </div>
   </>
 );
 
-export const Contained = Template.bind({});
-Contained.args = {
+export const Primary = Template.bind({});
+Primary.args = {
   onClick: () => {
     console.log("clicked!");
   },
-  label: "Click me!",
+  size: "medium",
 };
