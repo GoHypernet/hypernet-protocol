@@ -14,6 +14,7 @@ import {
   IconButton,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
+import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
 import { Field as FormikField, FieldAttributes, FieldProps } from "formik";
 import { useStyles } from "@web-ui/components/GovernanceDialogSelectField/GovernanceDialogSelectField.style";
 
@@ -53,16 +54,20 @@ export const GovernanceDialogSelectField: React.FC<GovernanceDialogSelectFieldPr
               {titleText}
             </Typography>
           )}
-          <FormikField className={classes.field} {...props} as="select">
+          <FormikField className={classes.field} {...props}>
             {({ field, form, meta }: FieldProps) => {
               return (
                 <>
-                  <Typography variant="body2">
-                    {
-                      options?.find((option) => option.value === field.value)
-                        ?.primaryText
-                    }
-                  </Typography>
+                  <Box className={classes.fieldTextWrapper}>
+                    <Typography variant="body2">
+                      {
+                        options?.find((option) => option.value === field.value)
+                          ?.primaryText
+                      }
+                    </Typography>
+                    <KeyboardArrowDownIcon />
+                  </Box>
+
                   <Dialog
                     open={isDialogOpen}
                     onClose={() => {

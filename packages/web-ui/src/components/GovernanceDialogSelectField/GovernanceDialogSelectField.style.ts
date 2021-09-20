@@ -52,4 +52,8 @@ export const useStyles = makeStyles((theme) => ({
       color: colors.GRAY500,
     },
   },
+  fieldTextWrapper: {
+    display: "flex",
+    justifyContent: "space-between",
+  },
 }));
