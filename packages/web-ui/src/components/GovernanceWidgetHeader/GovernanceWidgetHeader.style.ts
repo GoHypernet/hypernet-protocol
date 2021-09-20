@@ -1,24 +1,23 @@
 import { makeStyles } from "@material-ui/core";
-import { colors, EFontSize } from "@web-ui/theme";
+import { colors, EFontWeight } from "@web-ui/theme";
 
 export const useStyles = makeStyles((theme) => ({
   wrapper: {
     display: "flex",
     alignItems: "center",
-    justifyContent: "space-between",
     marginBottom: 24,
   },
   leftSection: {
     display: "flex",
     flexDirection: "column",
-
     color: colors.GRAY700,
   },
   rightSection: {
     display: "flex",
+    marginLeft: "auto",
   },
   label: {
-    fontWeight: "bold",
+    fontWeight: EFontWeight.BOLD,
   },
   navigationWrapper: {
     display: "flex",
@@ -31,7 +30,7 @@ export const useStyles = makeStyles((theme) => ({
     marginRight: 8,
   },
   navigationLabel: {
-    fontWeight: "bold",
+    fontWeight: EFontWeight.MEDIUM,
   },
   buttonWrapper: {
     marginLeft: 16,

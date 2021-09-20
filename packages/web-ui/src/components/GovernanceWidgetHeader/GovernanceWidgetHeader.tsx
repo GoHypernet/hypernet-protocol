@@ -3,7 +3,7 @@ import React from "react";
 
 import { useStyles } from "@web-ui/components/GovernanceWidgetHeader/GovernanceWidgetHeader.style";
 import { IGovernanceButton, GovernanceButton } from "@web-ui/components";
-import KeyboardBackspaceIcon from "@material-ui/icons/KeyboardBackspace";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 
 interface IHeaderAction extends IGovernanceButton {
   label: string;
@@ -17,13 +17,15 @@ interface INavigationLink {
 interface IGovernanceWidgetHeader {
   navigationLink?: INavigationLink;
   label?: string;
+  rightContent?: React.ReactNode;
   headerActions?: IHeaderAction[];
 }
 
 export const GovernanceWidgetHeader: React.FC<IGovernanceWidgetHeader> = ({
   navigationLink,
   label,
-  headerActions,
+  rightContent,
+  headerActions = [],
 }: IGovernanceWidgetHeader) => {
   const classes = useStyles();
 
@@ -35,8 +37,8 @@ export const GovernanceWidgetHeader: React.FC<IGovernanceWidgetHeader> = ({
             className={classes.navigationWrapper}
             onClick={navigationLink.onClick}
           >
-            <KeyboardBackspaceIcon className={classes.navigationIcon} />
-            <Typography variant="body1" className={classes.navigationLabel}>
+            <ArrowBackIcon className={classes.navigationIcon} />
+            <Typography variant="body2" className={classes.navigationLabel}>
               {navigationLink.label}
             </Typography>
           </Box>
@@ -45,7 +47,7 @@ export const GovernanceWidgetHeader: React.FC<IGovernanceWidgetHeader> = ({
           {label}
         </Typography>
       </Box>
-      {headerActions && (
+      {(headerActions?.length || rightContent) && (
         <Box className={classes.rightSection}>
           {headerActions.map((headerAction) => (
             <Box className={classes.buttonWrapper}>
@@ -54,6 +56,9 @@ export const GovernanceWidgetHeader: React.FC<IGovernanceWidgetHeader> = ({
               </GovernanceButton>
             </Box>
           ))}
+          {rightContent && (
+            <Box className={classes.rightSection}>{rightContent}</Box>
+          )}
         </Box>
       )}
     </Box>
