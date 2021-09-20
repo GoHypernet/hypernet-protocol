@@ -33,7 +33,7 @@ export interface IStatusConfig {
 }
 
 const getStatusConfig = (status: EProposalState): IStatusConfig => {
-  switch (status) {
+  switch (Number(status)) {
     case EProposalState.PENDING:
       return {
         backgroundColor: colors.BLUE100,

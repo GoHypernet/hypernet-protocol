@@ -12,13 +12,12 @@ const Proposals: React.FC = () => {
     hypernetWebIntegration.webUIClient
       .renderProposalsWidget({
         selector: "proposals-page-wrapper",
-        includeBoxWrapper: true,
       })
       .mapErr(handleError);
   }, []);
 
   return (
-    <PageWrapper label="Proposals">
+    <PageWrapper label="Proposals" isGovernance>
       <Box id="proposals-page-wrapper"></Box>
     </PageWrapper>
   );

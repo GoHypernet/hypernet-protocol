@@ -14,12 +14,13 @@ export interface GovernanceDialogProps {
   title?: string;
   description?: string;
   content?: React.ReactNode;
+  onClose?: () => void;
 }
 
 export const GovernanceDialog: React.FC<GovernanceDialogProps> = (
   props: GovernanceDialogProps,
 ) => {
-  const { title, description, content, isOpen } = props;
+  const { title, description, content, isOpen, onClose } = props;
   const classes = useStyles({});
   const [isDialogOpen, setIsDialogOpen] = useState(isOpen);
 
@@ -33,6 +34,7 @@ export const GovernanceDialog: React.FC<GovernanceDialogProps> = (
       open={isDialogOpen}
       onClose={() => {
         setIsDialogOpen(false);
+        onClose && onClose();
       }}
       fullWidth
       maxWidth="sm"

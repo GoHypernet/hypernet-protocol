@@ -23,3 +23,5 @@ export * from "./GovernanceProposalListItem";
 export * from "./GovernanceLargeField";
 export * from "./GovernanceDialogSelectField";
 export * from "./GovernanceDialog";
+export * from "./GovernanceWidgetHeader";
+export * from "./GovernanceButton";

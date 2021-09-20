@@ -1,5 +1,6 @@
 import { IHypernetCore, IUIData, RenderError } from "@hypernetlabs/objects";
 import MainContainer from "@web-ui/containers/MainContainer";
+import { ThemeProvider, Box } from "@material-ui/core";
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import {
   IConnectorAuthorizationFlowParams,
@@ -45,7 +46,7 @@ import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
 import PublicIdentifierWidget from "@web-ui/widgets/PublicIdentifierWidget";
 import StateChannelsWidget from "@web-ui/widgets/StateChannelsWidget";
 import ProposalsWidget from "@web-ui/widgets/ProposalsWidget";
-
+import { lightTheme, darkTheme } from "@web-ui/theme";
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
   protected coreInstance: IHypernetCore;
@@ -95,10 +96,14 @@ export default class HypernetWebUI implements IHypernetWebUI {
     withModal = false,
     closeCallback?: () => void,
     modalStyle?: React.CSSProperties,
+    hasTheme?: boolean,
   ) {
     if (this.coreInstance == null) {
       throw new Error("core instance is required");
     }
+
+    const Theme = hasTheme ? ThemeProvider : Box;
+
     return (
       <StoreProvider
         coreProxy={this.coreInstance}
@@ -106,15 +111,17 @@ export default class HypernetWebUI implements IHypernetWebUI {
         viewUtils={this.viewUtils}
         dateUtils={this.dateUtils}
       >
-        <LayoutProvider>
-          <MainContainer
-            withModal={withModal}
-            closeCallback={closeCallback}
-            modalStyle={modalStyle}
-          >
-            {component}
-          </MainContainer>
-        </LayoutProvider>
+        <Theme theme={true ? lightTheme : darkTheme}>
+          <LayoutProvider>
+            <MainContainer
+              withModal={withModal}
+              closeCallback={closeCallback}
+              modalStyle={modalStyle}
+            >
+              {component}
+            </MainContainer>
+          </LayoutProvider>
+        </Theme>
       </StoreProvider>
     );
   }
@@ -377,6 +384,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <ProposalsWidget {...config} />,
           config?.showInModal,
+          undefined,
+          undefined,
+          true,
         ),
         this._generateDomElement(
           config?.selector || PROPOSALS_WIDGET_ID_SELECTOR,

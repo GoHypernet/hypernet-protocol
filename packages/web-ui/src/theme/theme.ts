@@ -38,6 +38,8 @@ export const colors = {
   RED100: "#FFEBE6",
   RED200: "#FFBDAD",
   RED700: "#BF2600",
+
+  DANGER_ZONE_BUTTON_BG: "#FF5D46",
 };
 
 export enum EStatusColor {

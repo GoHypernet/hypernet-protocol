@@ -3,20 +3,24 @@ import { Box } from "@material-ui/core";
 import { IRenderParams } from "@web-ui/interfaces";
 import { useAlert } from "react-alert";
 
-import { BoxWrapper } from "@web-ui/components";
+import {
+  BoxWrapper,
+  GovernanceProposalListItem,
+  GovernanceWidgetHeader,
+} from "@web-ui/components";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { EthereumAddress, EVoteSupport, Proposal } from "@hypernetlabs/objects";
+import DelegateVotesWidget from "@web-ui/widgets/DelegateVotesWidget";
 
 interface IProposalsWidget extends IRenderParams {}
 
-const ProposalsWidget: React.FC<IProposalsWidget> = ({
-  includeBoxWrapper,
-  bodyStyle,
-}: IProposalsWidget) => {
+const ProposalsWidget: React.FC<IProposalsWidget> = ({}: IProposalsWidget) => {
   const alert = useAlert();
   const { coreProxy, UIData } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [proposals, setProposals] = useState<Proposal[]>([]);
+  const [delegateVotesModalOpen, setDelegateVotesModalOpen] =
+    useState<boolean>(false);
 
   useEffect(() => {
     const address = EthereumAddress(
@@ -57,15 +61,15 @@ const ProposalsWidget: React.FC<IProposalsWidget> = ({
       .mapErr(handleError); */
 
     // list all proposals
-    /* coreProxy
+    coreProxy
       .getProposals()
       .map((proposals) => {
         console.log("proposal list: ", proposals);
         setProposals(proposals);
       })
-      .mapErr(handleError); */
+      .mapErr(handleError);
 
-    coreProxy
+    /* coreProxy
       .createProposal("first proposal name", "proposal symbol1", address)
       .map((proposal) => {
         console.log("created proposal FE: ", proposal);
@@ -98,7 +102,7 @@ const ProposalsWidget: React.FC<IProposalsWidget> = ({
           })
           .mapErr(handleError);
       })
-      .mapErr(handleError);
+      .mapErr(handleError); */
   }, []);
 
   const handleError = (err?: Error) => {
@@ -107,12 +111,40 @@ const ProposalsWidget: React.FC<IProposalsWidget> = ({
     alert.error(err?.message || "Something went wrong!");
   };
 
-  const CustomBox = includeBoxWrapper ? BoxWrapper : Box;
-
   return (
-    <CustomBox label="Current state channel" bodyStyle={bodyStyle}>
-      <Box>ProposalsWidget</Box>
-    </CustomBox>
+    <Box>
+      <GovernanceWidgetHeader
+        label="Proposals"
+        headerActions={[
+          {
+            label: "Create Proposal",
+            onClick: () => {
+              console.log("go to Create Proposal");
+            },
+            variant: "outlined",
+          },
+          {
+            label: "Delegate Voting",
+            onClick: () => setDelegateVotesModalOpen(true),
+            variant: "contained",
+            color: "primary",
+          },
+        ]}
+      />
+      {proposals.map((proposal) => (
+        <GovernanceProposalListItem
+          key={proposal.id}
+          number={proposal.proposalNumber?.toString() || ""}
+          title={proposal.description}
+          status={proposal.state}
+        />
+      ))}
+      {delegateVotesModalOpen && (
+        <DelegateVotesWidget
+          onCloseCallback={() => setDelegateVotesModalOpen(false)}
+        />
+      )}
+    </Box>
   );
 };
 

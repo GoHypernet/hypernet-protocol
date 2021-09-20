@@ -5,14 +5,20 @@ import { useStyles } from "@user-dashboard/components/PageWrapper/PageWrapper.st
 
 interface IPageWrapper {
   children: React.ReactNode;
-  label: string;
+  label?: string;
+  isGovernance?: boolean;
 }
 
 const PageWrapper: React.FC<IPageWrapper> = ({
   children,
   label,
+  isGovernance,
 }: IPageWrapper) => {
   const classes = useStyles();
+
+  if (isGovernance) {
+    return <Box className={classes.governanceWrapper}>{children}</Box>;
+  }
 
   return (
     <Box className={classes.wrapper}>
