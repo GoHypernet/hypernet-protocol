@@ -25,3 +25,4 @@ export * from "./GovernanceDialogSelectField";
 export * from "./GovernanceDialog";
 export * from "./GovernanceWidgetHeader";
 export * from "./GovernanceButton";
+export * from "./GovernanceProgress";

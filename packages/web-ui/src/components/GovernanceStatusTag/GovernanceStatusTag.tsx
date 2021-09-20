@@ -59,7 +59,7 @@ const getStatusConfig = (status: EProposalState): IStatusConfig => {
       return {
         backgroundColor: colors.GREEN100,
         borderColor: colors.GREEN200,
-        textColor: colors.GREEN500,
+        textColor: colors.GREEN700,
         text: "Executed",
       };
     case EProposalState.DEFEATED:

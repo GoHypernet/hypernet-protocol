@@ -29,17 +29,18 @@ export const colors = {
 
   GREEN100: "#E3FCEF",
   GREEN200: "#ABF5D1",
-  GREEN500: "#006644",
+  GREEN500: "#36B37E",
+  GREEN700: "#006644",
 
   BLUE100: "#DEEBFF",
   BLUE200: "#B3D4FF",
+  BLUE400: "#4C9AFF",
   BLUE700: "#0747A6",
 
   RED100: "#FFEBE6",
   RED200: "#FFBDAD",
+  RED400: "#DE350B",
   RED700: "#BF2600",
-
-  DANGER_ZONE_BUTTON_BG: "#FF5D46",
 };
 
 export enum EStatusColor {
