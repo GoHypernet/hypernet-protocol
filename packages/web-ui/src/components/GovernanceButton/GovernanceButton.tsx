@@ -3,12 +3,13 @@ import {
   PropTypes,
   CircularProgress,
   Box,
+  ButtonProps,
 } from "@material-ui/core";
 import React from "react";
 
 import { useStyles } from "@web-ui/components/GovernanceButton/GovernanceButton.style";
 
-export interface IGovernanceButton {
+export interface IGovernanceButton extends ButtonProps {
   color?: PropTypes.Color;
   onClick: () => void;
   disabled?: boolean;

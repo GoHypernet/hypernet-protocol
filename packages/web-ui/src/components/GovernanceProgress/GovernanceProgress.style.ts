@@ -10,7 +10,6 @@ export const useStyles = makeStyles((theme) => ({
     },
     "& .MuiLinearProgress-bar": {
       borderRadius: 3,
-      backgroundColor: colors.GRAY200,
     },
     "& .MuiLinearProgress-bar1Determinate": {
       backgroundColor: props.color,

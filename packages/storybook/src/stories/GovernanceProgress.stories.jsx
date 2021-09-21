@@ -14,7 +14,7 @@ const Template = (args) => (
       justifyContent: "space-evenly",
     }}
   >
-    <GovernanceProgress value={0} />
+    <GovernanceProgress value={10} />
     <GovernanceProgress value={10} color={colors.RED700} />
     <GovernanceProgress value={50} color={colors.GREEN700} />
     <GovernanceProgress value={40} color={colors.GRAY500} />

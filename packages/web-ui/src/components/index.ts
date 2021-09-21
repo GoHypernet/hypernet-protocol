@@ -26,3 +26,4 @@ export * from "./GovernanceDialog";
 export * from "./GovernanceWidgetHeader";
 export * from "./GovernanceButton";
 export * from "./GovernanceProgress";
+export * from "./GovernanceVotingCard";
