@@ -10,6 +10,8 @@ import {
   IOnboardingFlowParams,
   IViewUtils,
   IDateUtils,
+  IProposalsWidgetParams,
+  IProposalCreateWidgetParams,
 } from "@web-ui/interfaces";
 import GatewaysWidget from "@web-ui/widgets/GatewaysWidget";
 import { Result } from "neverthrow";
@@ -32,6 +34,7 @@ import {
   STATE_CHANNELS_WIDGET_ID_SELECTOR,
   BALANCES_SUMMARY_WIDGET_ID_SELECTOR,
   PROPOSALS_WIDGET_ID_SELECTOR,
+  PROPOSAL_CREATE_WIDGET_ID_SELECTOR,
 } from "@web-ui/constants";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
@@ -47,6 +50,7 @@ import PublicIdentifierWidget from "@web-ui/widgets/PublicIdentifierWidget";
 import StateChannelsWidget from "@web-ui/widgets/StateChannelsWidget";
 import ProposalsWidget from "@web-ui/widgets/ProposalsWidget";
 import { lightTheme, darkTheme } from "@web-ui/theme";
+import CreateProposalWidget from "@web-integration/widgets/CreateProposalWidget";
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
   protected coreInstance: IHypernetCore;
@@ -377,7 +381,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
   }
 
   public renderProposalsWidget(
-    config?: IRenderParams,
+    config?: IProposalsWidgetParams,
   ): Result<void, RenderError> {
     const renderReact = () => {
       return ReactDOM.render(
@@ -390,6 +394,26 @@ export default class HypernetWebUI implements IHypernetWebUI {
         ),
         this._generateDomElement(
           config?.selector || PROPOSALS_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderProposalCreateWidget(
+    config?: IProposalCreateWidgetParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <CreateProposalWidget {...config} />,
+          config?.showInModal,
+          undefined,
+          undefined,
+          true,
+        ),
+        this._generateDomElement(
+          config?.selector || PROPOSAL_CREATE_WIDGET_ID_SELECTOR,
         ),
       );
     };

@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { Box } from "@material-ui/core";
-import { IRenderParams } from "@web-ui/interfaces";
 import { useAlert } from "react-alert";
 
 import {
-  BoxWrapper,
   GovernanceProposalListItem,
   GovernanceWidgetHeader,
 } from "@web-ui/components";
+import { IProposalsWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { EthereumAddress, EVoteSupport, Proposal } from "@hypernetlabs/objects";
+import { EthereumAddress, Proposal } from "@hypernetlabs/objects";
 import DelegateVotesWidget from "@web-ui/widgets/DelegateVotesWidget";
 
-interface IProposalsWidget extends IRenderParams {}
-
-const ProposalsWidget: React.FC<IProposalsWidget> = ({}: IProposalsWidget) => {
+const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
+  onProposalCreationNavigate,
+}: IProposalsWidgetParams) => {
   const alert = useAlert();
   const { coreProxy, UIData } = useStoreContext();
   const { setLoading } = useLayoutContext();
@@ -30,37 +29,6 @@ const ProposalsWidget: React.FC<IProposalsWidget> = ({}: IProposalsWidget) => {
       console.log("accounts: ", accounts);
     });
     // delegate votes, createProposal and then list all proposals
-    /* coreProxy
-      .delegateVote(
-        EthereumAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"),
-        null,
-      )
-      .map(() => {
-        console.log("delegate worked123");
-        coreProxy.getEthereumAccounts().map((accounts) => {
-          console.log("getEthereumAccounts accounts123: ", accounts);
-          coreProxy
-            .createProposal(
-              "first proposal name4",
-              "proposal symbol1",
-              EthereumAddress("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"),
-            )
-            .map((proposal) => {
-              console.log("proposal FE: ", proposal);
-              coreProxy
-                .getProposals()
-                .map((proposals) => {
-                  console.log("proposals list: ", proposals);
-                  setProposals(proposals);
-                })
-                .mapErr(handleError);
-            })
-            .mapErr(handleError);
-        });
-      })
-      .mapErr(handleError); */
-
-    // list all proposals
     coreProxy
       .getProposals()
       .map((proposals) => {
@@ -119,6 +87,7 @@ const ProposalsWidget: React.FC<IProposalsWidget> = ({}: IProposalsWidget) => {
           {
             label: "Create Proposal",
             onClick: () => {
+              onProposalCreationNavigate && onProposalCreationNavigate();
               console.log("go to Create Proposal");
             },
             variant: "outlined",

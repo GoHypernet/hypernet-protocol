@@ -34,3 +34,5 @@ export const METAMASK_URL =
   "https://chrome.google.com/webstore/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn";
 export const PROPOSALS_WIDGET_ID_SELECTOR =
   "hypernet-protocol-proposals-widget";
+export const PROPOSAL_CREATE_WIDGET_ID_SELECTOR =
+  "hypernet-protocol-proposal-create-widget";
