@@ -1,5 +1,6 @@
-import React from "react";
-import { Box, Typography } from "@material-ui/core";
+import React, { useEffect, useRef } from "react";
+import { Box, IconButton, Typography } from "@material-ui/core";
+import SaveIcon from "@material-ui/icons/Save";
 import { Field as FormikField, FieldAttributes } from "formik";
 import { useStyles } from "@web-ui/components/GovernanceLargeField/GovernanceLargeField.style";
 
@@ -7,6 +8,8 @@ export interface GovernanceLargeFieldProps extends FieldAttributes<any> {
   title?: string;
   type?: "input" | "textarea" | "select";
   options?: ISelectOption[];
+  onSaveClick?: () => void;
+  focus?: boolean;
 }
 
 export interface ISelectOption {
@@ -17,10 +20,25 @@ export interface ISelectOption {
 export const GovernanceLargeField: React.FC<GovernanceLargeFieldProps> = (
   props: GovernanceLargeFieldProps,
 ) => {
-  const { title, type = "input", required, options } = props;
+  const {
+    title,
+    type = "input",
+    required,
+    options,
+    onSaveClick,
+    focus,
+  } = props;
   const classes = useStyles({});
   const titleText = `${title}${required ? " *" : ""}`;
   const isSelect = type === "select";
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (focus) {
+      inputRef.current?.focus();
+    }
+  }, []);
 
   return (
     <Box className={classes.wrapper}>
@@ -29,8 +47,22 @@ export const GovernanceLargeField: React.FC<GovernanceLargeFieldProps> = (
           {titleText}
         </Typography>
       )}
+
       {!isSelect ? (
-        <FormikField className={classes.field} {...props} component={type} />
+        <Box className={classes.fieldWrapper}>
+          <FormikField
+            innerRef={inputRef}
+            className={classes.field}
+            {...props}
+            component={type}
+          />
+
+          {onSaveClick && (
+            <IconButton className={classes.saveButton} onClick={onSaveClick}>
+              <SaveIcon />
+            </IconButton>
+          )}
+        </Box>
       ) : (
         <FormikField
           className={classes.field}

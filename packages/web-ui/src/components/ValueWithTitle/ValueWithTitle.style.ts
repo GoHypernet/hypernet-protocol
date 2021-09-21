@@ -12,10 +12,11 @@ export const useStyles = makeStyles((theme) => ({
   }),
   title: {
     marginBottom: 28,
-    flex: 1
+    flex: 1,
   },
   value: {
-    flex: 1
+    flex: 1,
+    padding: 2,
   },
   rowWrapper: {
     display: "flex",
