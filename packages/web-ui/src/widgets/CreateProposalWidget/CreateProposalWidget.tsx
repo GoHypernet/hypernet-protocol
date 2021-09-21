@@ -7,6 +7,7 @@ import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { EthereumAddress } from "@hypernetlabs/objects";
 import {
   GovernanceButton,
+  GovernanceDialogSelectField,
   GovernanceLargeField,
   GovernanceWidgetHeader,
 } from "@web-integration/components";
@@ -24,6 +25,8 @@ interface IValues {
   gatewayUrl: string;
   gatewayName: string;
   gatewayLogoUrl: string;
+  gatewayAddress: string;
+  gatewaySignature: string;
   owner: EthereumAddress;
 }
 
@@ -107,6 +110,8 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
           name: "",
           symbol: "",
           gatewayUrl: "",
+          gatewayAddress: "",
+          gatewaySignature: "",
           gatewayName: "",
           gatewayLogoUrl: "",
           owner: accountAddress,
@@ -119,15 +124,25 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
       >
         {({ handleSubmit, isSubmitting, values }) => (
           <Form onSubmit={handleSubmit} id="CreateProposalForm">
-            <GovernanceLargeField
+            <GovernanceDialogSelectField
               name="action"
               title="Proposed Action"
               type="select"
               placeholder={"select action"}
               required={true}
               options={[
-                { label: "Add registry", value: ERegistryAction.ADD_REGISTRY },
-                { label: "Add Gateway", value: ERegistryAction.ADD_GATEWAY },
+                {
+                  primaryText: "Add Registry",
+                  secondaryText: undefined,
+                  action: null,
+                  value: ERegistryAction.ADD_REGISTRY,
+                },
+                {
+                  primaryText: "Add Gateway",
+                  secondaryText: undefined,
+                  action: null,
+                  value: ERegistryAction.ADD_GATEWAY,
+                },
               ]}
             />
             {values.action == ERegistryAction.ADD_REGISTRY && (
@@ -166,7 +181,20 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
                   placeholder="Type a Gateway URL"
                   required={values.action == ERegistryAction.ADD_GATEWAY}
                 />
-
+                <GovernanceLargeField
+                  title="Address"
+                  name="gatewayAddress"
+                  type="input"
+                  placeholder="Type gateway address"
+                  required={false}
+                />
+                <GovernanceLargeField
+                  title="Signature"
+                  name="gatewaySignature"
+                  type="input"
+                  placeholder="Type gateway Signature"
+                  required={false}
+                />
                 <GovernanceLargeField
                   title="Name"
                   name="gatewayName"
