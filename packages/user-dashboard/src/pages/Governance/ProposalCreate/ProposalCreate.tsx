@@ -5,17 +5,17 @@ import { useHistory } from "react-router-dom";
 import PageWrapper from "@user-dashboard/components/PageWrapper";
 import { useLayoutContext, useStoreContext } from "@user-dashboard/contexts";
 
-const Proposals: React.FC = () => {
+const ProposalCreate: React.FC = () => {
   const history = useHistory();
   const { handleError } = useLayoutContext();
   const { hypernetWebIntegration } = useStoreContext();
 
   useEffect(() => {
     hypernetWebIntegration.webUIClient
-      .renderProposalsWidget({
-        selector: "proposals-page-wrapper",
-        onProposalCreationNavigate: () => {
-          history.push("/proposal-create");
+      .renderProposalCreateWidget({
+        selector: "proposal-create-page-wrapper",
+        onProposalListNavigate: () => {
+          history.push("/proposals");
           console.log("onProposalCreationNavigate");
         },
       })
@@ -24,9 +24,9 @@ const Proposals: React.FC = () => {
 
   return (
     <PageWrapper label="Proposals" isGovernance>
-      <Box id="proposals-page-wrapper"></Box>
+      <Box id="proposal-create-page-wrapper"></Box>
     </PageWrapper>
   );
 };
 
-export default Proposals;
+export default ProposalCreate;

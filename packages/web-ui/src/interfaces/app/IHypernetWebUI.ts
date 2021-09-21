@@ -41,6 +41,14 @@ export interface IRenderPaymentWidgetParams extends IRenderParams {
   paymentType: EPaymentType;
 }
 
+export interface IProposalsWidgetParams extends IRenderParams {
+  onProposalCreationNavigate?: () => void;
+}
+
+export interface IProposalCreateWidgetParams extends IRenderParams {
+  onProposalListNavigate?: () => void;
+}
+
 export interface IHypernetWebUI {
   renderBalancesWidget(params?: IRenderParams): Result<void, RenderError>;
   renderGatewaysWidget(params?: IRenderParams): Result<void, RenderError>;
@@ -64,5 +72,10 @@ export interface IHypernetWebUI {
   renderPrivateKeysModal(): Result<void, RenderError>;
   renderWarningAlertModal(errorMessage?: string): Result<void, RenderError>;
   renderMetamaskWarningModal(): Result<void, RenderError>;
-  renderProposalsWidget(config?: IRenderParams): Result<void, RenderError>;
+  renderProposalsWidget(
+    config?: IProposalsWidgetParams,
+  ): Result<void, RenderError>;
+  renderProposalCreateWidget(
+    config?: IProposalCreateWidgetParams,
+  ): Result<void, RenderError>;
 }

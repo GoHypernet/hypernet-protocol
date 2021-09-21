@@ -41,7 +41,8 @@
     "react-alert-template-basic": "^1.0.0",
     "react-spinners": "^0.10.6",
     "formik": "^2.2.9",
-    "formik-material-ui": "^3.0.1"
+    "formik-material-ui": "^3.0.1",
+    "yup": "^0.32.9"
   },
   "peerDependencies": {
     "react": "^17.0.1",
