@@ -917,4 +917,18 @@ export class HypernetCore implements IHypernetCore {
       voterAddress,
     );
   }
+
+  public proposeRegistryEntry(
+    registryName: string,
+    label: string,
+    data: string,
+    recipient: EthereumAddress,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this.governanceService.proposeRegistryEntry(
+      registryName,
+      label,
+      data,
+      recipient,
+    );
+  }
 }

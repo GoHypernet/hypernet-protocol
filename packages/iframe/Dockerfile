@@ -39,37 +39,37 @@ ARG CHAIN_ADDRESSES='{ \
       "1337": { \
         "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
         "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", \
-        "hypertokenAddress": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318", \
+        "hypertokenAddress": "0xF328c11c4dF88d18FcBd30ad38d8B4714F4b33bF", \
         "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
         "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
         "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
         "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a", \
         "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd", \
-        "hypernetGovernorAddress": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0", \
+        "hypernetGovernorAddress": "0xdE5491f774F0Cb009ABcEA7326342E105dbb1B2E", \
         "registryFactoryAddress": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE" \
       }, \
       "31337": { \
         "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
         "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", \
-        "hypertokenAddress": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318", \
+        "hypertokenAddress": "0xF328c11c4dF88d18FcBd30ad38d8B4714F4b33bF", \
         "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
         "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
         "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
         "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a", \
         "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd", \
-        "hypernetGovernorAddress": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0", \
+        "hypernetGovernorAddress": "0xdE5491f774F0Cb009ABcEA7326342E105dbb1B2E", \
         "registryFactoryAddress": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE" \
       }, \
       "1369": { \
         "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
         "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", \
-        "hypertokenAddress": "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318", \
+        "hypertokenAddress": "0xF328c11c4dF88d18FcBd30ad38d8B4714F4b33bF", \
         "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
         "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
         "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
         "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a", \
         "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd", \
-        "hypernetGovernorAddress": "0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0", \
+        "hypernetGovernorAddress": "0xdE5491f774F0Cb009ABcEA7326342E105dbb1B2E", \
         "registryFactoryAddress": "0x9A9f2CCfdE556A7E9Ff0848998Aa4a0CFD8863AE" \
       } \
     }'

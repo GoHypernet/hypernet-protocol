@@ -32,4 +32,10 @@ export interface IGovernanceService {
     proposalId: string,
     voterAddress: EthereumAddress,
   ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError>;
+  proposeRegistryEntry(
+    registryName: string,
+    label: string,
+    data: string,
+    recipient: EthereumAddress,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
 }

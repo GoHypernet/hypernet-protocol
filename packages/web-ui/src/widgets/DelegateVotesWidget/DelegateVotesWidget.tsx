@@ -21,9 +21,6 @@ const DelegateVotesWidget: React.FC<IDelegateVotesWidget> = ({
   );
 
   useEffect(() => {
-    const address = EthereumAddress(
-      "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-    );
     coreProxy.getEthereumAccounts().map((accounts) => {
       console.log("accounts DelegateVotesWidget: ", accounts);
       setAccountAddress(accounts[0]);

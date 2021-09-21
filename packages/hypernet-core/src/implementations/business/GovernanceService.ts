@@ -67,4 +67,18 @@ export class GovernanceService implements IGovernanceService {
       voterAddress,
     );
   }
+
+  public proposeRegistryEntry(
+    registryName: string,
+    label: string,
+    data: string,
+    recipient: EthereumAddress,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this.governanceRepository.proposeRegistryEntry(
+      registryName,
+      label,
+      data,
+      recipient,
+    );
+  }
 }

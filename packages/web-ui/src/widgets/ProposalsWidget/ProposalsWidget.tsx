@@ -22,9 +22,6 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
     useState<boolean>(false);
 
   useEffect(() => {
-    const address = EthereumAddress(
-      "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
-    );
     coreProxy.getEthereumAccounts().map((accounts) => {
       console.log("accounts: ", accounts);
     });

@@ -282,6 +282,13 @@ export interface IHypernetCore {
     voterAddress: EthereumAddress,
   ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError>;
 
+  proposeRegistryEntry(
+    registryName: string,
+    label: string,
+    data: string,
+    recipient: EthereumAddress,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+
   /**
    * Observables for seeing what's going on
    */

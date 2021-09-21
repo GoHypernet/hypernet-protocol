@@ -3,12 +3,12 @@ import { colors, EFontSize } from "@web-ui/theme";
 
 export const useStyles = makeStyles((theme) => ({
   wrapper: (props: any) => ({
-    width: "100%",
     padding: 16,
     marginBottom: 24,
     backgroundColor: colors.GRAY100,
     border: `2px solid ${colors.GRAY200}`,
     borderRadius: 3,
+    textAlign: "left",
   }),
   title: {
     marginBottom: 28,
