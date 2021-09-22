@@ -8,7 +8,7 @@ interface GovernanceRegistryListItemProps {
   registryAddress: string;
   tokenURI: string;
   numberOfEntries: string;
-  onViewDetailsClick: () => {};
+  onViewDetailsClick: () => void;
 }
 
 export const GovernanceRegistryListItem: React.FC<GovernanceRegistryListItemProps> =

@@ -13,6 +13,7 @@ import {
   IProposalsWidgetParams,
   IProposalCreateWidgetParams,
   IProposalDetailWidgetParams,
+  IRegistryListWidgetParams
 } from "@web-ui/interfaces";
 import GatewaysWidget from "@web-ui/widgets/GatewaysWidget";
 import { Result } from "neverthrow";
@@ -53,6 +54,7 @@ import ProposalsWidget from "@web-ui/widgets/ProposalsWidget";
 import { lightTheme, darkTheme } from "@web-ui/theme";
 import CreateProposalWidget from "@web-integration/widgets/CreateProposalWidget";
 import ProposalDetailWidget from "@web-integration/widgets/ProposalDetailWidget";
+import RegistryListWidget from "@web-integration/widgets/RegistryListWidget";
 
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
@@ -437,6 +439,26 @@ export default class HypernetWebUI implements IHypernetWebUI {
         ),
         this._generateDomElement(
           config?.selector || PROPOSAL_CREATE_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderRegistryListWidget(
+    config?: IRegistryListWidgetParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <RegistryListWidget {...config} />,
+          config?.showInModal,
+          undefined,
+          undefined,
+          true,
+        ),
+        this._generateDomElement(
+          config?.selector || PROPOSALS_WIDGET_ID_SELECTOR,
         ),
       );
     };
