@@ -16,18 +16,12 @@ const Template = (args) => (
     }}
   >
     <GovernanceValueWithTitle {...args} />
-    <GovernanceValueWithTitle {...args} showCopy />
+    <GovernanceValueWithTitle {...args} />
+    <GovernanceValueWithTitle {...args} />
     <GovernanceValueWithTitle
       {...args}
       showCopy
-      onEditClick={() => {
-        console.log("Edit clicked!");
-      }}
-    />
-    <GovernanceValueWithTitle
-      {...args}
-      showCopy
-      titleRightContent={
+      topRightContent={
         <div
           style={{
             width: 20,
@@ -35,6 +29,17 @@ const Template = (args) => (
             borderRadius: "50%",
             borderWidth: 4,
             backgroundColor: "gray",
+          }}
+        />
+      }
+      bottomRightContent={
+        <div
+          style={{
+            width: 20,
+            height: 20,
+            borderRadius: "50%",
+            borderWidth: 4,
+            backgroundColor: "yellow",
           }}
         />
       }
@@ -46,5 +51,4 @@ export const Primary = Template.bind({});
 Primary.args = {
   title: "Title",
   value: "This is the value.",
-  showCopy: false,
 };
