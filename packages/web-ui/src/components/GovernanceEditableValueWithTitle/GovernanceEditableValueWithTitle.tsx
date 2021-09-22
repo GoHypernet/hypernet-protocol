@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Box, IconButton } from "@material-ui/core";
 import SaveIcon from "@material-ui/icons/Save";
+import EditIcon from "@material-ui/icons/Edit";
+
 import { Form, Formik, FormikValues } from "formik";
 
 import {
@@ -15,22 +17,14 @@ interface IGovernanceEditableValueWithTitle {
   value: string;
 
   // These should come from ValueWithTitle props interface
-  titleRightContent?: React.ReactNode;
-  valueRightContent?: React.ReactNode;
-  showCopy?: boolean;
+  topRightContent?: React.ReactNode;
+  bottomRightContent?: React.ReactNode;
   onSave: (value: string) => void;
 }
 
 export const GovernanceEditableValueWithTitle: React.FC<IGovernanceEditableValueWithTitle> =
   (props: IGovernanceEditableValueWithTitle) => {
-    const {
-      title,
-      value,
-      titleRightContent,
-      valueRightContent,
-      showCopy,
-      onSave,
-    } = props;
+    const { title, value, topRightContent, bottomRightContent, onSave } = props;
 
     const classes = useStyles({});
     const [isEditing, setIsEditing] = useState(false);
@@ -87,10 +81,18 @@ export const GovernanceEditableValueWithTitle: React.FC<IGovernanceEditableValue
           <GovernanceValueWithTitle
             title={title}
             value={fieldValue}
-            titleRightContent={titleRightContent}
-            valueRightContent={valueRightContent}
-            showCopy={showCopy}
-            onEditClick={handleEditClick}
+            topRightContent={topRightContent}
+            bottomRightContent={
+              <Box>
+                {bottomRightContent}
+                <IconButton
+                  className={classes.iconButton}
+                  onClick={handleEditClick}
+                >
+                  <EditIcon />
+                </IconButton>
+              </Box>
+            }
           />
         )}
       </Box>

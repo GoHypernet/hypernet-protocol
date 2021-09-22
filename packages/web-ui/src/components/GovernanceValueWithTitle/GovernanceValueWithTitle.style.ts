@@ -26,8 +26,4 @@ export const useStyles = makeStyles((theme) => ({
     marginTop: "auto",
     marginLeft: 24,
   },
-  iconButton: {
-    padding: 0,
-    marginLeft: 8,
-  },
 }));

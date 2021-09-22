@@ -28,5 +28,4 @@ export const Primary = Template.bind({});
 Primary.args = {
   title: "This is the title",
   value: "This is the value",
-  showCopy: false,
 };
