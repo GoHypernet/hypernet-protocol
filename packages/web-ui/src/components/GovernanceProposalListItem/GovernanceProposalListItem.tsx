@@ -11,15 +11,16 @@ interface GovernanceProposalListItemProps {
   number: string;
   title: string;
   status: EProposalState;
+  onClick?: () => void;
 }
 
 export const GovernanceProposalListItem: React.FC<GovernanceProposalListItemProps> =
   (props: GovernanceProposalListItemProps) => {
-    const { number, title, status } = props;
+    const { number, title, status, onClick } = props;
     const classes = useStyles();
 
     return (
-      <Button fullWidth className={classes.button}>
+      <Button fullWidth className={classes.button} onClick={onClick}>
         <Typography variant="h5" className={classes.number}>
           {number}
         </Typography>

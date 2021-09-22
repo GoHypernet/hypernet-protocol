@@ -234,7 +234,7 @@ export class GovernanceRepository implements IGovernanceRepository {
       const [proposal, propsalState, proposalDescription] = vals;
 
       return new Proposal(
-        proposalId,
+        BigNumber.from(proposalId),
         propsalState.toString() as any,
         proposal[1],
         proposal[5].toString(),
@@ -295,7 +295,7 @@ export class GovernanceRepository implements IGovernanceRepository {
         },
       ).map((receipt) => {
         return new ProposalVoteReceipt(
-          proposalId,
+          BigNumber.from(proposalId),
           voterAddress,
           receipt.hasVoted,
           receipt.support,

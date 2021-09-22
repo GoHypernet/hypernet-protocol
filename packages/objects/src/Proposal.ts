@@ -1,3 +1,4 @@
+import { BigNumber } from "ethers";
 import { EthereumAddress } from "./EthereumAddress";
 
 export enum EProposalState {
@@ -20,7 +21,7 @@ export enum EVoteSupport {
 
 export class ProposalVoteReceipt {
   constructor(
-    public proposalId: string,
+    public proposalId: BigNumber,
     public voterAddress: EthereumAddress,
     public hasVoted: boolean,
     public support: EVoteSupport,
@@ -30,7 +31,7 @@ export class ProposalVoteReceipt {
 
 export class Proposal {
   constructor(
-    public id: string,
+    public id: BigNumber,
     public state: EProposalState,
     public proposalOriginator: string,
     public proposalVotesFor: string,

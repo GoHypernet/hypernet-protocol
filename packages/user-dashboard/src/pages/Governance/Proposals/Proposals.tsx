@@ -18,6 +18,11 @@ const Proposals: React.FC = () => {
           history.push("/proposal-create");
           console.log("onProposalCreationNavigate");
         },
+        onProposalDetailsNavigate: (proposalId: string) => {
+          console.log('proposalId: ', proposalId);
+          history.push(`/proposals/${proposalId}`);
+          console.log("onProposalDetailsNavigate");
+        },
       })
       .mapErr(handleError);
   }, []);

@@ -13,6 +13,7 @@ import DelegateVotesWidget from "@web-ui/widgets/DelegateVotesWidget";
 
 const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
   onProposalCreationNavigate,
+  onProposalDetailsNavigate,
 }: IProposalsWidgetParams) => {
   const alert = useAlert();
   const { coreProxy, UIData } = useStoreContext();
@@ -85,7 +86,6 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
             label: "Create Proposal",
             onClick: () => {
               onProposalCreationNavigate && onProposalCreationNavigate();
-              console.log("go to Create Proposal");
             },
             variant: "outlined",
           },
@@ -99,7 +99,11 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
       />
       {proposals.map((proposal) => (
         <GovernanceProposalListItem
-          key={proposal.id}
+          onClick={() =>
+            onProposalDetailsNavigate &&
+            onProposalDetailsNavigate(proposal.id._hex)
+          }
+          key={proposal.id._hex}
           number={proposal.proposalNumber?.toString() || ""}
           title={proposal.description}
           status={proposal.state}

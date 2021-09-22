@@ -43,6 +43,7 @@ export interface IRenderPaymentWidgetParams extends IRenderParams {
 
 export interface IProposalsWidgetParams extends IRenderParams {
   onProposalCreationNavigate?: () => void;
+  onProposalDetailsNavigate?: (proposalId: string) => void;
 }
 
 export interface IProposalDetailWidgetParams extends IRenderParams {
