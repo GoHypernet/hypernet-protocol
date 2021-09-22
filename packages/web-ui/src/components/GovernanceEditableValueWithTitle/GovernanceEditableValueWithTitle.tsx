@@ -15,8 +15,6 @@ import { useStyles } from "@web-ui/components/GovernanceEditableValueWithTitle/G
 interface IGovernanceEditableValueWithTitle {
   title: string;
   value: string;
-
-  // These should come from ValueWithTitle props interface
   topRightContent?: React.ReactNode;
   bottomRightContent?: React.ReactNode;
   onSave: (value: string) => void;

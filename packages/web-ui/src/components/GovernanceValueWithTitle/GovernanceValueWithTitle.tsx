@@ -13,7 +13,12 @@ export interface IGovernanceValueWithTitle {
 export const GovernanceValueWithTitle: React.FC<IGovernanceValueWithTitle> = (
   props: IGovernanceValueWithTitle,
 ) => {
-  const { title, value, topRightContent, bottomRightContent } = props;
+  const {
+    title,
+    value,
+    topRightContent,
+    bottomRightContent,
+  } = props;
   const classes = useStyles({});
 
   return (
