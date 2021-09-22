@@ -29,6 +29,7 @@ export class GovernanceRepository implements IGovernanceRepository {
   protected hypernetGovernorContract: ethers.Contract | null = null;
   protected hypertokenContract: ethers.Contract | null = null;
   protected registryFactoryContract: ethers.Contract | null = null;
+  protected nonFungibleRegistryContract: ethers.Contract | null = null;
 
   constructor(
     @inject(IBlockchainProviderType)
@@ -379,6 +380,78 @@ export class GovernanceRepository implements IGovernanceRepository {
     });
   }
 
+  public getRegistries(
+    _tokenIdsArr?: number[],
+  ): ResultAsync<string[], BlockchainUnavailableError> {
+    return this.initializeContracts().andThen(() => {
+      let tokenIdsCountsArrResult: ResultAsync<
+        number[],
+        BlockchainUnavailableError
+      >;
+      let registriesArrResult: ResultAsync<
+        string,
+        BlockchainUnavailableError
+      >[] = [];
+
+      if (_tokenIdsArr == null) {
+        tokenIdsCountsArrResult = this.getTokenIdsCount().map(
+          (tokenIdsCounts) => {
+            console.log("tokenIdsCounts: ", tokenIdsCounts);
+            if (tokenIdsCounts == null || tokenIdsCounts == 0) {
+              return [];
+            }
+            let countsArr: number[] = [];
+            for (let index = 1; index <= tokenIdsCounts; index++) {
+              countsArr.push(index);
+            }
+            return countsArr;
+          },
+        );
+      } else {
+        tokenIdsCountsArrResult = okAsync(_tokenIdsArr);
+      }
+
+      return tokenIdsCountsArrResult.andThen((tokenIdsArr) => {
+        tokenIdsArr.forEach((tokenId) => {
+          registriesArrResult.push(
+            ResultAsync.fromPromise(
+              this.nonFungibleRegistryContract?.reverseRegistryMap(
+                tokenId,
+              ) as Promise<string>,
+              (e) => {
+                return new BlockchainUnavailableError(
+                  "Unable to retrieve reverseRegistryMap id",
+                  e,
+                );
+              },
+            ).map((registryLabel) => {
+              console.log("registryLabel: ", registryLabel);
+              return registryLabel;
+            }),
+          );
+        });
+
+        return ResultUtils.combine(registriesArrResult);
+      });
+    });
+  }
+
+  public getTokenIdsCount(): ResultAsync<number, BlockchainUnavailableError> {
+    return this.initializeContracts().andThen(() => {
+      return ResultAsync.fromPromise(
+        this.nonFungibleRegistryContract?._tokenIdTracker() as Promise<BigNumber>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to retrieve _tokenIdTracker count",
+            e,
+          );
+        },
+      ).map((proposalCounts) => {
+        return proposalCounts.toNumber();
+      });
+    });
+  }
+
   protected initializeContracts(): ResultAsync<
     ethers.providers.JsonRpcSigner,
     BlockchainUnavailableError
@@ -412,6 +485,19 @@ export class GovernanceRepository implements IGovernanceRepository {
       console.log(
         "registryFactoryAddress",
         config.chainAddresses[config.governanceChainId]?.registryFactoryAddress,
+      );
+
+      this.nonFungibleRegistryContract = new ethers.Contract(
+        config.chainAddresses[config.governanceChainId]
+          ?.nonFungibleRegistryAddress as string,
+        GovernanceAbis.NonFungibleRegistry.abi,
+        signer,
+      );
+
+      console.log(
+        "nonFungibleRegistryAddress",
+        config.chainAddresses[config.governanceChainId]
+          ?.nonFungibleRegistryAddress,
       );
 
       return okAsync(signer);

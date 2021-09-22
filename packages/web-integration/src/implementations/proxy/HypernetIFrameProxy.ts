@@ -525,6 +525,12 @@ export default class HypernetIFrameProxy
     });
   }
 
+  public getRegistries(
+    _tokenIdsArr?: number[],
+  ): ResultAsync<string[], BlockchainUnavailableError> {
+    return this._createCall("getRegistries", _tokenIdsArr);
+  }
+
   private _displayCoreIFrame(): void {
     // Show core iframe
     if (this.child != null) {

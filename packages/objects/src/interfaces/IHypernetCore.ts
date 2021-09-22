@@ -289,6 +289,10 @@ export interface IHypernetCore {
     recipient: EthereumAddress,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
 
+  getRegistries(
+    _tokenIdsArr?: number[],
+  ): ResultAsync<string[], BlockchainUnavailableError>;
+
   /**
    * Observables for seeing what's going on
    */

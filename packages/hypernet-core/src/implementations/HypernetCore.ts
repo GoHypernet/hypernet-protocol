@@ -931,4 +931,10 @@ export class HypernetCore implements IHypernetCore {
       recipient,
     );
   }
+
+  public getRegistries(
+    _tokenIdsArr?: number[],
+  ): ResultAsync<string[], BlockchainUnavailableError> {
+    return this.governanceService.getRegistries(_tokenIdsArr);
+  }
 }

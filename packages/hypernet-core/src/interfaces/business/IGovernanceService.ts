@@ -38,4 +38,7 @@ export interface IGovernanceService {
     data: string,
     recipient: EthereumAddress,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  getRegistries(
+    _tokenIdsArr?: number[],
+  ): ResultAsync<string[], BlockchainUnavailableError>;
 }

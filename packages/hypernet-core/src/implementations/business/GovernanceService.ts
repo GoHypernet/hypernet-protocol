@@ -81,4 +81,10 @@ export class GovernanceService implements IGovernanceService {
       recipient,
     );
   }
+
+  public getRegistries(
+    _tokenIdsArr?: number[],
+  ): ResultAsync<string[], BlockchainUnavailableError> {
+    return this.governanceRepository.getRegistries(_tokenIdsArr);
+  }
 }

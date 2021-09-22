@@ -4,7 +4,7 @@ import { Form, Formik, FormikHelpers } from "formik";
 import * as Yup from "yup";
 
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { EthereumAddress } from "@hypernetlabs/objects";
+import { EthereumAddress, EVoteSupport } from "@hypernetlabs/objects";
 import {
   GovernanceButton,
   GovernanceDialogSelectField,
@@ -45,6 +45,13 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
       console.log("accounts CreateProposalWidget: ", accounts);
       setAccountAddress(accounts[0]);
     });
+
+    coreProxy
+      .getRegistries()
+      .map((registriesLabels) => {
+        console.log("registriesLabels: ", registriesLabels);
+      })
+      .mapErr(handleError);
   }, []);
 
   const handleError = (err?: Error) => {
@@ -81,6 +88,8 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
           JSON.stringify({
             gatewayName: values.gatewayName,
             gatewayLogoUrl: values.gatewayLogoUrl,
+            gatewayAddress: values.gatewayAddress,
+            gatewaySignature: values.gatewaySignature,
           }),
           EthereumAddress(values.owner),
         )
