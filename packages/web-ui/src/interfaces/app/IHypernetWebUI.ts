@@ -45,6 +45,11 @@ export interface IProposalsWidgetParams extends IRenderParams {
   onProposalCreationNavigate?: () => void;
 }
 
+export interface IProposalDetailWidgetParams extends IRenderParams {
+  onProposalListNavigate?: () => void;
+  proposalId: string;
+}
+
 export interface IProposalCreateWidgetParams extends IRenderParams {
   onProposalListNavigate?: () => void;
 }
@@ -74,6 +79,9 @@ export interface IHypernetWebUI {
   renderMetamaskWarningModal(): Result<void, RenderError>;
   renderProposalsWidget(
     config?: IProposalsWidgetParams,
+  ): Result<void, RenderError>;
+  renderProposalDetailWidget(
+    config?: IProposalDetailWidgetParams,
   ): Result<void, RenderError>;
   renderProposalCreateWidget(
     config?: IProposalCreateWidgetParams,

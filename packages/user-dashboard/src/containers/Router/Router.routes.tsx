@@ -5,6 +5,7 @@ import DepositAndWithdraw from "@user-dashboard/pages/DepositAndWithdraw";
 import BalancesSummary from "@user-dashboard/pages/BalancesSummary";
 import Gateways from "@user-dashboard/pages/Gateways";
 import Proposals from "@user-dashboard/pages/Governance/Proposals";
+import ProposalDetail from "@user-dashboard/pages/Governance/ProposalDetail";
 import ProposalCreate from "@user-dashboard/pages/Governance/ProposalCreate";
 
 interface IRoute {
@@ -38,6 +39,11 @@ export const routes: IRoute[] = [
     path: "/proposals",
     component: Proposals,
     name: "Proposals",
+  },
+  {
+    path: "/proposals/:proposalId",
+    component: ProposalDetail,
+    name: "Proposal Detail",
   },
   {
     path: "/proposal-create",
