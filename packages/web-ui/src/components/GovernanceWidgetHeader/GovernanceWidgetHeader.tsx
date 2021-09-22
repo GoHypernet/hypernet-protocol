@@ -17,6 +17,7 @@ interface INavigationLink {
 interface IGovernanceWidgetHeader {
   navigationLink?: INavigationLink;
   label?: string;
+  description?: string | React.ReactNode;
   rightContent?: React.ReactNode;
   headerActions?: IHeaderAction[];
 }
@@ -24,6 +25,7 @@ interface IGovernanceWidgetHeader {
 export const GovernanceWidgetHeader: React.FC<IGovernanceWidgetHeader> = ({
   navigationLink,
   label,
+  description,
   rightContent,
   headerActions = [],
 }: IGovernanceWidgetHeader) => {
@@ -45,6 +47,9 @@ export const GovernanceWidgetHeader: React.FC<IGovernanceWidgetHeader> = ({
         )}
         <Typography variant="h1" className={classes.label}>
           {label}
+        </Typography>
+        <Typography className={classes.description}>
+          {description}
         </Typography>
       </Box>
       {(headerActions?.length || rightContent) && (

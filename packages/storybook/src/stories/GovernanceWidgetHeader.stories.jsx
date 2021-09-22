@@ -1,4 +1,9 @@
-import { GovernanceWidgetHeader, GovernanceButton } from "@hypernetlabs/web-ui";
+import {
+  GovernanceWidgetHeader,
+  GovernanceButton,
+  GovernanceStatusTag,
+} from "@hypernetlabs/web-ui";
+import { EProposalState } from "@hypernetlabs/objects";
 
 export default {
   title: "Layout/GovernanceWidgetHeader",
@@ -99,6 +104,17 @@ const Template = (args) => (
           color: "primary",
         },
       ]}
+    />
+    <GovernanceWidgetHeader
+      label="Registries"
+      description={
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <GovernanceStatusTag status={EProposalState.ACTIVE} />
+          <p style={{ marginLeft: 16 }}>
+            You can update the Identity Data information.
+          </p>
+        </div>
+      }
     />
   </div>
 );
