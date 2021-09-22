@@ -1,4 +1,4 @@
-import { ValueWithTitle } from "@hypernetlabs/web-ui";
+import { GovernanceValueWithTitle } from "@hypernetlabs/web-ui";
 
 export default {
   title: "Layout/GovernanceValueWithTitle",
@@ -15,16 +15,16 @@ const Template = (args) => (
       justifyContent: "space-evenly",
     }}
   >
-    <ValueWithTitle {...args} />
-    <ValueWithTitle {...args} showCopy />
-    <ValueWithTitle
+    <GovernanceValueWithTitle {...args} />
+    <GovernanceValueWithTitle {...args} showCopy />
+    <GovernanceValueWithTitle
       {...args}
       showCopy
       onEditClick={() => {
         console.log("Edit clicked!");
       }}
     />
-    <ValueWithTitle
+    <GovernanceValueWithTitle
       {...args}
       showCopy
       titleRightContent={

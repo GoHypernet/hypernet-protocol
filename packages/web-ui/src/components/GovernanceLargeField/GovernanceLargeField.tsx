@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
 import { Box, IconButton, Typography } from "@material-ui/core";
-import SaveIcon from "@material-ui/icons/Save";
 import { Field as FormikField, FieldAttributes } from "formik";
 import { useStyles } from "@web-ui/components/GovernanceLargeField/GovernanceLargeField.style";
 
@@ -8,7 +7,7 @@ export interface GovernanceLargeFieldProps extends FieldAttributes<any> {
   title?: string;
   type?: "input" | "textarea" | "select";
   options?: ISelectOption[];
-  onSaveClick?: () => void;
+  rightContent?: React.ReactNode;
   focus?: boolean;
 }
 
@@ -25,8 +24,8 @@ export const GovernanceLargeField: React.FC<GovernanceLargeFieldProps> = (
     type = "input",
     required,
     options,
-    onSaveClick,
     focus,
+    rightContent,
   } = props;
   const classes = useStyles({});
   const titleText = `${title}${required ? " *" : ""}`;
@@ -57,10 +56,8 @@ export const GovernanceLargeField: React.FC<GovernanceLargeFieldProps> = (
             component={type}
           />
 
-          {onSaveClick && (
-            <IconButton className={classes.saveButton} onClick={onSaveClick}>
-              <SaveIcon />
-            </IconButton>
+          {rightContent && (
+            <Box className={classes.rightContent}>{rightContent}</Box>
           )}
         </Box>
       ) : (

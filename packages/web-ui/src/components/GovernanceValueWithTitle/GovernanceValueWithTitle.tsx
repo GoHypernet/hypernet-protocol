@@ -4,9 +4,9 @@ import { Box, IconButton, Tooltip, Typography } from "@material-ui/core";
 import FileCopyIcon from "@material-ui/icons/FileCopy";
 import EditIcon from "@material-ui/icons/Edit";
 
-import { useStyles } from "@web-ui/components/ValueWithTitle/ValueWithTitle.style";
+import { useStyles } from "@web-integration/components/GovernanceValueWithTitle/GovernanceValueWithTitle.style";
 
-export interface IValueWithTitle {
+export interface IGovernanceValueWithTitle {
   title: string;
   value: string | number;
   titleRightContent?: React.ReactNode;
@@ -15,8 +15,8 @@ export interface IValueWithTitle {
   showCopy?: boolean;
 }
 
-export const ValueWithTitle: React.FC<IValueWithTitle> = (
-  props: IValueWithTitle,
+export const GovernanceValueWithTitle: React.FC<IGovernanceValueWithTitle> = (
+  props: IGovernanceValueWithTitle,
 ) => {
   const {
     title,

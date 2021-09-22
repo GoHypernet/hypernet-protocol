@@ -35,10 +35,8 @@ export const useStyles = makeStyles((theme) => ({
       color: colors.GRAY500,
     },
   },
-  saveButton: {
+  rightContent: {
     marginLeft: "auto",
-    fontSize: 24,
-    padding: 0,
   },
   fieldWrapper: {
     display: "flex",

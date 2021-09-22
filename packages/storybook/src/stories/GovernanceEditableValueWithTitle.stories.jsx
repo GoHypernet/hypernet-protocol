@@ -1,8 +1,8 @@
-import { RegistryFieldWidget } from "@hypernetlabs/web-ui";
+import { GovernanceEditableValueWithTitle } from "@hypernetlabs/web-ui";
 
 export default {
-  title: "Layout/RegistryFieldWidget",
-  component: RegistryFieldWidget,
+  title: "Layout/GovernanceEditableValueWithTitle",
+  component: GovernanceEditableValueWithTitle,
 };
 
 const Template = (args) => (
@@ -15,7 +15,12 @@ const Template = (args) => (
       justifyContent: "space-evenly",
     }}
   >
-    <RegistryFieldWidget {...args} />
+    <GovernanceEditableValueWithTitle
+      {...args}
+      onSave={(value) => {
+        console.log(value);
+      }}
+    />
   </div>
 );
 
@@ -23,6 +28,5 @@ export const Primary = Template.bind({});
 Primary.args = {
   title: "This is the title",
   value: "This is the value",
-  editable: true,
   showCopy: false,
 };
