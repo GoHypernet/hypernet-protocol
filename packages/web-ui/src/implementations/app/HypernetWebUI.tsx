@@ -12,6 +12,7 @@ import {
   IDateUtils,
   IProposalsWidgetParams,
   IProposalCreateWidgetParams,
+  IProposalDetailWidgetParams,
 } from "@web-ui/interfaces";
 import GatewaysWidget from "@web-ui/widgets/GatewaysWidget";
 import { Result } from "neverthrow";
@@ -51,6 +52,8 @@ import StateChannelsWidget from "@web-ui/widgets/StateChannelsWidget";
 import ProposalsWidget from "@web-ui/widgets/ProposalsWidget";
 import { lightTheme, darkTheme } from "@web-ui/theme";
 import CreateProposalWidget from "@web-integration/widgets/CreateProposalWidget";
+import ProposalDetailWidget from "@web-integration/widgets/ProposalDetailWidget";
+
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
   protected coreInstance: IHypernetCore;
@@ -387,6 +390,26 @@ export default class HypernetWebUI implements IHypernetWebUI {
       return ReactDOM.render(
         this._bootstrapComponent(
           <ProposalsWidget {...config} />,
+          config?.showInModal,
+          undefined,
+          undefined,
+          true,
+        ),
+        this._generateDomElement(
+          config?.selector || PROPOSALS_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderProposalDetailWidget(
+    config: IProposalDetailWidgetParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <ProposalDetailWidget {...config} />,
           config?.showInModal,
           undefined,
           undefined,
