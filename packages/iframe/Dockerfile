@@ -46,8 +46,7 @@ ARG CHAIN_ADDRESSES='{ \
         "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a", \
         "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd", \
         "hypernetGovernorAddress": "0x998abeb3E57409262aE5b751f60747921B33613E", \
-        "registryFactoryAddress": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf", \
-        "nonFungibleRegistryAddress": "0x851356ae760d987E095750cCeb3bC6014560891C" \
+        "registryFactoryAddress": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf" \
       }, \
       "31337": { \
         "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
@@ -59,8 +58,7 @@ ARG CHAIN_ADDRESSES='{ \
         "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a", \
         "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd", \
         "hypernetGovernorAddress": "0x998abeb3E57409262aE5b751f60747921B33613E", \
-        "registryFactoryAddress": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf", \
-        "nonFungibleRegistryAddress": "0x851356ae760d987E095750cCeb3bC6014560891C" \
+        "registryFactoryAddress": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf" \
       }, \
       "1369": { \
         "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
@@ -72,8 +70,7 @@ ARG CHAIN_ADDRESSES='{ \
         "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a", \
         "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd", \
         "hypernetGovernorAddress": "0x998abeb3E57409262aE5b751f60747921B33613E", \
-        "registryFactoryAddress": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf", \
-        "nonFungibleRegistryAddress": "0x851356ae760d987E095750cCeb3bC6014560891C" \
+        "registryFactoryAddress": "0x8f86403A4DE0BB5791fa46B8e795C547942fE4Cf" \
       } \
     }'
 ENV __CHAIN_ADDRESSES__ $CHAIN_ADDRESSES

@@ -113,10 +113,6 @@ export const hypernetGovernorAddress = EthereumAddress(
 
 export const registryFactoryAddress = EthereumAddress("registryFactoryAddress");
 
-export const nonFungibleRegistryAddress = EthereumAddress(
-  "nonFungibleRegistryAddress",
-);
-
 export const validDomain = "hypernetProtocolDomain";
 
 export const messageTransferDefinitionAddress = EthereumAddress(

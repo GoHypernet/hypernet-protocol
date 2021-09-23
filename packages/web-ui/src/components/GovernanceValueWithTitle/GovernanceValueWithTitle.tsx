@@ -5,7 +5,7 @@ import { useStyles } from "@web-integration/components/GovernanceValueWithTitle/
 
 export interface IGovernanceValueWithTitle {
   title: string;
-  value: string | number;
+  value: string | number | undefined;
   topRightContent?: React.ReactNode;
   bottomRightContent?: React.ReactNode;
 }
@@ -13,12 +13,7 @@ export interface IGovernanceValueWithTitle {
 export const GovernanceValueWithTitle: React.FC<IGovernanceValueWithTitle> = (
   props: IGovernanceValueWithTitle,
 ) => {
-  const {
-    title,
-    value,
-    topRightContent,
-    bottomRightContent,
-  } = props;
+  const { title, value, topRightContent, bottomRightContent } = props;
   const classes = useStyles({});
 
   return (

@@ -35,6 +35,8 @@ import {
   Proposal,
   EVoteSupport,
   ProposalVoteReceipt,
+  Registry,
+  RegistryEntry,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -62,6 +64,7 @@ import {
   GatewayConnectorService,
   PaymentService,
   GovernanceService,
+  RegistryService,
 } from "@implementations/business";
 import {
   AccountsRepository,
@@ -71,6 +74,7 @@ import {
   RouterRepository,
   LinkRepository,
   GovernanceRepository,
+  RegistryRepository,
 } from "@implementations/data";
 import {
   IGatewayConnectorListener,
@@ -85,6 +89,7 @@ import {
   IGatewayConnectorService,
   IPaymentService,
   IGovernanceService,
+  IRegistryService,
 } from "@interfaces/business";
 import {
   IAccountsRepository,
@@ -95,6 +100,7 @@ import {
   IRouterRepository,
   IGatewayRegistrationRepository,
   IGovernanceRepository,
+  IRegistryRepository,
 } from "@interfaces/data";
 import { HypernetConfig, HypernetContext } from "@interfaces/objects";
 import { ok, Result, ResultAsync } from "neverthrow";
@@ -210,6 +216,7 @@ export class HypernetCore implements IHypernetCore {
   protected messagingRepository: IMessagingRepository;
   protected routerRepository: IRouterRepository;
   protected governanceRepository: IGovernanceRepository;
+  protected registryRepository: IRegistryRepository;
 
   // Business Layer Stuff
   protected accountService: IAccountService;
@@ -219,6 +226,7 @@ export class HypernetCore implements IHypernetCore {
   protected developmentService: IDevelopmentService;
   protected gatewayConnectorService: IGatewayConnectorService;
   protected governanceService: IGovernanceService;
+  protected registryService: IRegistryService;
 
   // API
   protected vectorAPIListener: IVectorListener;
@@ -468,6 +476,12 @@ export class HypernetCore implements IHypernetCore {
       this.logUtils,
     );
 
+    this.registryRepository = new RegistryRepository(
+      this.blockchainProvider,
+      this.configProvider,
+      this.logUtils,
+    );
+
     this.paymentService = new PaymentService(
       this.linkRepository,
       this.accountRepository,
@@ -506,6 +520,7 @@ export class HypernetCore implements IHypernetCore {
       this.logUtils,
     );
     this.governanceService = new GovernanceService(this.governanceRepository);
+    this.registryService = new RegistryService(this.registryRepository);
 
     this.vectorAPIListener = new VectorAPIListener(
       this.browserNodeProvider,
@@ -932,9 +947,32 @@ export class HypernetCore implements IHypernetCore {
     );
   }
 
-  public getRegistries(
-    _tokenIdsArr?: number[],
-  ): ResultAsync<string[], BlockchainUnavailableError> {
-    return this.governanceService.getRegistries(_tokenIdsArr);
+  public getRegistries(): ResultAsync<Registry[], BlockchainUnavailableError> {
+    return this.registryService.getRegistries();
+  }
+
+  public getRegistryByName(
+    registryName: string,
+  ): ResultAsync<Registry, BlockchainUnavailableError> {
+    return this.registryService.getRegistryByName(registryName);
+  }
+
+  public getRegistryByAddress(
+    registryAddress: EthereumAddress,
+  ): ResultAsync<Registry, BlockchainUnavailableError> {
+    return this.registryService.getRegistryByAddress(registryAddress);
+  }
+
+  public getRegistryEntries(
+    registryName: string,
+  ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
+    return this.registryService.getRegistryEntries(registryName);
+  }
+
+  public getRegistryEntryByLabel(
+    registryName: string,
+    label: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+    return this.registryService.getRegistryEntryByLabel(registryName, label);
   }
 }
