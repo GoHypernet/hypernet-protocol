@@ -12,7 +12,6 @@ import {
   IHypernetCore,
   Signature,
   PrivateCredentials,
-  EBlockchainNetwork,
   AcceptPaymentError,
   BalancesUnavailableError,
   BlockchainUnavailableError,
@@ -548,23 +547,35 @@ export class HypernetCore implements IHypernetCore {
     EthereumAddress[],
     BlockchainUnavailableError
   > {
-    return this.accountService.getAccounts();
+    return this.accountService.getAccounts().mapErr((e) => {
+      this.logUtils.error(e);
+      return e;
+    });
   }
 
   /**
    * Returns the (vector) pubId associated with this instance of HypernetCore.
    */
   public getPublicIdentifier(): ResultAsync<PublicIdentifier, never> {
-    return this.contextProvider.getInitializedContext().map((context) => {
-      return context.publicIdentifier;
-    });
+    return this.contextProvider
+      .getInitializedContext()
+      .map((context) => {
+        return context.publicIdentifier;
+      })
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public getActiveStateChannels(): ResultAsync<
     ActiveStateChannel[],
     VectorError | BlockchainUnavailableError | PersistenceError
   > {
-    return this.accountService.getActiveStateChannels();
+    return this.accountService.getActiveStateChannels().mapErr((e) => {
+      this.logUtils.error(e);
+      return e;
+    });
   }
 
   public createStateChannel(
@@ -574,10 +585,12 @@ export class HypernetCore implements IHypernetCore {
     ActiveStateChannel,
     BlockchainUnavailableError | VectorError | PersistenceError
   > {
-    return this.accountService.createStateChannel(
-      routerPublicIdentifiers,
-      chainId,
-    );
+    return this.accountService
+      .createStateChannel(routerPublicIdentifiers, chainId)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   /**
@@ -594,11 +607,12 @@ export class HypernetCore implements IHypernetCore {
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
     // console.log(`HypernetCore:depositFunds:assetAddress:${assetAddress}`)
-    return this.accountService.depositFunds(
-      channelAddress,
-      assetAddress,
-      amount,
-    );
+    return this.accountService
+      .depositFunds(channelAddress, assetAddress, amount)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   /**
@@ -616,33 +630,42 @@ export class HypernetCore implements IHypernetCore {
     Balances,
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
-    return this.accountService.withdrawFunds(
-      channelAddress,
-      assetAddress,
-      amount,
-      destinationAddress,
-    );
+    return this.accountService
+      .withdrawFunds(channelAddress, assetAddress, amount, destinationAddress)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   /**
    * Returns the current balances for this instance of Hypernet Core.
    */
   public getBalances(): ResultAsync<Balances, BalancesUnavailableError> {
-    return this.accountService.getBalances();
+    return this.accountService.getBalances().mapErr((e) => {
+      this.logUtils.error(e);
+      return e;
+    });
   }
 
   /**
    * Return all Hypernet Links.
    */
   public getLinks(): ResultAsync<HypernetLink[], VectorError | Error> {
-    return this.linkService.getLinks();
+    return this.linkService.getLinks().mapErr((e) => {
+      this.logUtils.error(e);
+      return e;
+    });
   }
 
   /**
    * Return all *active* Hypernet Links.
    */
   public getActiveLinks(): ResultAsync<HypernetLink[], VectorError | Error> {
-    return this.linkService.getLinks();
+    return this.linkService.getLinks().mapErr((e) => {
+      this.logUtils.error(e);
+      return e;
+    });
   }
 
   /**
@@ -662,7 +685,10 @@ export class HypernetCore implements IHypernetCore {
   public acceptOffer(
     paymentId: PaymentId,
   ): ResultAsync<Payment, InsufficientBalanceError | AcceptPaymentError> {
-    return this.paymentService.acceptOffer(paymentId);
+    return this.paymentService.acceptOffer(paymentId).mapErr((e) => {
+      this.logUtils.error(e);
+      return e;
+    });
   }
 
   /**
@@ -674,7 +700,10 @@ export class HypernetCore implements IHypernetCore {
     paymentId: PaymentId,
     amount: BigNumberString,
   ): ResultAsync<Payment, VectorError | Error> {
-    return this.paymentService.pullFunds(paymentId, amount);
+    return this.paymentService.pullFunds(paymentId, amount).mapErr((e) => {
+      this.logUtils.error(e);
+      return e;
+    });
   }
 
   /**
@@ -773,6 +802,10 @@ export class HypernetCore implements IHypernetCore {
         }
         this.logUtils.debug(`Hypernet Protocol core initialized successfully`);
         this._initialized = true;
+      })
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
       });
 
     return this._initializeResult;
@@ -785,15 +818,26 @@ export class HypernetCore implements IHypernetCore {
   public mintTestToken(
     amount: BigNumberString,
   ): ResultAsync<void, BlockchainUnavailableError> {
-    return this.contextProvider.getInitializedContext().andThen((context) => {
-      return this.developmentService.mintTestToken(amount, context.account);
-    });
+    return this.contextProvider
+      .getInitializedContext()
+      .andThen((context) => {
+        return this.developmentService.mintTestToken(amount, context.account);
+      })
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public authorizeGateway(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayValidationError> {
-    return this.gatewayConnectorService.authorizeGateway(gatewayUrl);
+    return this.gatewayConnectorService
+      .authorizeGateway(gatewayUrl)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public deauthorizeGateway(
@@ -802,14 +846,24 @@ export class HypernetCore implements IHypernetCore {
     void,
     PersistenceError | ProxyError | GatewayAuthorizationDeniedError
   > {
-    return this.gatewayConnectorService.deauthorizeGateway(gatewayUrl);
+    return this.gatewayConnectorService
+      .deauthorizeGateway(gatewayUrl)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
     PersistenceError
   > {
-    return this.gatewayConnectorService.getAuthorizedGatewaysConnectorsStatus();
+    return this.gatewayConnectorService
+      .getAuthorizedGatewaysConnectorsStatus()
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public getGatewayTokenInfo(
@@ -818,40 +872,66 @@ export class HypernetCore implements IHypernetCore {
     Map<GatewayUrl, GatewayTokenInfo[]>,
     ProxyError | PersistenceError | GatewayAuthorizationDeniedError
   > {
-    return this.gatewayConnectorService.getGatewayTokenInfo(gatewayUrls);
+    return this.gatewayConnectorService
+      .getGatewayTokenInfo(gatewayUrls)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public getGatewayRegistrationInfo(
     filter?: GatewayRegistrationFilter,
   ): ResultAsync<GatewayRegistrationInfo[], PersistenceError> {
-    return this.gatewayConnectorService.getGatewayRegistrationInfo(filter);
+    return this.gatewayConnectorService
+      .getGatewayRegistrationInfo(filter)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
     PersistenceError
   > {
-    return this.gatewayConnectorService.getAuthorizedGateways();
+    return this.gatewayConnectorService.getAuthorizedGateways().mapErr((e) => {
+      this.logUtils.error(e);
+      return e;
+    });
   }
 
   public closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayConnectorError> {
-    return this.gatewayConnectorService.closeGatewayIFrame(gatewayUrl);
+    return this.gatewayConnectorService
+      .closeGatewayIFrame(gatewayUrl)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayConnectorError> {
-    return this.gatewayConnectorService.displayGatewayIFrame(gatewayUrl);
+    return this.gatewayConnectorService
+      .displayGatewayIFrame(gatewayUrl)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public providePrivateCredentials(
     privateKey: string | null,
     mnemonic: string | null,
   ): ResultAsync<void, InvalidParametersError> {
-    return this.accountService.providePrivateCredentials(
-      new PrivateCredentials(privateKey, mnemonic),
-    );
+    return this.accountService
+      .providePrivateCredentials(new PrivateCredentials(privateKey, mnemonic))
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 }

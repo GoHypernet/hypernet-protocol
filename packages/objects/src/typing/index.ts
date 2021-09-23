@@ -1,4 +1,3 @@
-export * from "./EBlockchainNetwork";
 export * from "./EMessageType";
 export * from "./EMessageTransferType";
 export * from "./EPaymentState";
