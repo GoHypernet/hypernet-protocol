@@ -30,3 +30,6 @@ export * from "./GovernanceVotingCard";
 export * from "./GovernanceValueWithTitle";
 export * from "./GovernanceEditableValueWithTitle";
 export * from "./GovernanceMarkdown";
+export * from "./GovernanceListItem";
+export * from "./GovernanceListItemValueWithTitle";
+export * from "./GovernanceRegistryListItem";

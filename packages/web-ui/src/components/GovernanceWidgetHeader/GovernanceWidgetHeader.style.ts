@@ -19,6 +19,9 @@ export const useStyles = makeStyles((theme) => ({
   label: {
     fontWeight: EFontWeight.BOLD,
   },
+  description: {
+    marginTop: 16,
+  },
   navigationWrapper: {
     display: "flex",
     alignItems: "center",

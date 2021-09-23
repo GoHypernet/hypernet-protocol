@@ -1,8 +1,8 @@
 import { makeStyles } from "@material-ui/core";
-import { IStatusConfig } from "@web-ui/components/GovernanceStatusTag";
+import { ITagConfig } from "@web-ui/components/GovernanceTag";
 
 export const useStyles = makeStyles((theme) => ({
-  wrapper: (props: { config: IStatusConfig }) => ({
+  wrapper: (props: { config: ITagConfig }) => ({
     padding: "8px 12px",
     width: 68, //92,
     display: "flex",
@@ -11,7 +11,7 @@ export const useStyles = makeStyles((theme) => ({
     borderRadius: 3,
     border: `1px solid ${props.config.borderColor}`,
   }),
-  text: (props: { config: IStatusConfig }) => ({
+  text: (props: { config: ITagConfig }) => ({
     color: props.config.textColor,
     lineHeight: "15.93px",
   }),
