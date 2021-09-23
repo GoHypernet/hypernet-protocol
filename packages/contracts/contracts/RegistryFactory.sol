@@ -33,6 +33,11 @@ contract RegistryFactory is AccessControlEnumerable {
     event RegistryCreated(address registryAddress);
 
     /**
+     * @dev Emitted when `DEFAULT_ADMIN_ROLE` destroys an existing registry.
+     */
+    event RegistryDestroyed(address registryAddress);
+
+    /**
      * @dev Grants `DEFAULT_ADMIN_ROLE`, to the
      * account passed into the constructor.
      */
@@ -56,6 +61,20 @@ contract RegistryFactory is AccessControlEnumerable {
         registries.push(address(registry));
         nameToAddress[_name] = address(registry);
         emit RegistryCreated(address(registry));
+    }
+
+    /**
+    * @dev destroy an existing registry with the given name.
+    * Address of deployed registry is stored in an array for easy lookup
+    */
+    function destroyRegistry(string memory _name) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to destroy a registry");
+        require(_registryExists(_name), "RegistryFactory: No registry by that name exists.");
+        
+        address regAddress = nameToAddress[_name];
+        NonFungibleRegistry(regAddress).destroyRegistry(getRoleMember(DEFAULT_ADMIN_ROLE,0)); //send any ETH to the timelock
+        delete nameToAddress[_name];
+        emit RegistryDestroyed(address(regAddress));
     }
 
     /**

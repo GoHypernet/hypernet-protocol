@@ -71,6 +71,18 @@ contract NonFungibleRegistry is
     }
 
     /**
+     * @dev Calling this function permanently destroys the registry
+     *
+     * Requirements:
+     *
+     * - the caller must have the `DEFAULT_ADMIN_ROLE`
+     */
+    function destroyRegistry(address recipient) public virtual {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NonFungibleRegistry: must be admin to destroy registry.");
+        selfdestruct(payable(recipient));
+    }
+
+    /**
     * @dev set lazy register functionality
     */
     function setLazyRegister(bool _allowLazyRegister) public virtual {

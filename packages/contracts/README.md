@@ -82,20 +82,20 @@ Propose a new Non-Fungible Registry, your account must have at least `1000000` H
 for the proposal to go through:
 
 ```shell
-npx hardhat proposeRegistry --network dev --name Gateways --symbol GTW --owner 0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9
+npx hardhat proposeRegistry --network dev --name Gateways --symbol GTW --owner 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
 ```
 
 Additionally, if at any point during the voting process your voting power drops below this 1% threshold, your proposal 
 is vulnerable to being canceled:
 
 ```shell
-npx hardhat cancelProposal --network dev --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
+npx hardhat cancelProposal --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490
 ```
 
 Check the state of an existing Proposal:
 
 ```shell
-npx hardhat proposalState --network dev --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
+npx hardhat proposalState --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490
 ```
 
 Delegate your voting power to a given address:
@@ -107,14 +107,32 @@ npx hardhat delegateVote --network dev --delegate 0xf39Fd6e51aad88F6F4ce6aB88272
 Cast a vote on a proposal (Against (0), For (1), Abstain (2)):
 
 ```shell
-npx hardhat castVote --network dev --id 13654425952634501747257196678513303918485643847941868894665917031025800633397 --support 1
+npx hardhat castVote --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490 --support 1
 ```
 
 If a proposal has reached quorum and >50% of votes are in favor, once its deadline has passed it can be queued then executed:
 
 ```shell
-npx hardhat queueProposal --network dev --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
-npx hardhat executeProposal --network dev --id 13654425952634501747257196678513303918485643847941868894665917031025800633397
+npx hardhat queueProposal --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490
+npx hardhat executeProposal --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490
+```
+
+Once a registry has been deployed via the proposal process, get the registry's info:
+
+```shell
+npx hardhat registryParameters --network dev --name Gateways
+```
+
+Propose a new Gateway be added to the Gateways NonFunglebleRegistry we just deployed:
+
+```shell
+npx hardhat proposeRegistryEntry --network dev --name Gateways --label "https://hyperpay.io" --data "biglongsignatureblock" --recipient 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+```
+
+Retrieve data pertaining to a specific entry in a named Hypernet Gateway:
+
+```shell
+npx hardhat registryEntryByLabel --network dev --label https://hyperpay.io --name Gateways
 ```
 
 ## Hardhat network - registry testing deployment 
