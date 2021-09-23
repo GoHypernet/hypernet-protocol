@@ -4,6 +4,7 @@ import {
   EthereumAddress,
   EVoteSupport,
   ProposalVoteReceipt,
+  Registry,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -38,7 +39,4 @@ export interface IGovernanceService {
     data: string,
     recipient: EthereumAddress,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
-  getRegistries(
-    _tokenIdsArr?: number[],
-  ): ResultAsync<string[], BlockchainUnavailableError>;
 }

@@ -6,3 +6,4 @@ export * from "@interfaces/data/IMessagingRepository";
 export * from "@interfaces/data/IPaymentRepository";
 export * from "@interfaces/data/IRouterRepository";
 export * from "@interfaces/data/IGovernanceRepository";
+export * from "@interfaces/data/IRegistryRepository";

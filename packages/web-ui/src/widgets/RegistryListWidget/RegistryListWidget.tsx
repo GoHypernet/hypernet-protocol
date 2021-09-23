@@ -8,6 +8,7 @@ import {
 } from "@web-ui/components";
 import { IRegistryListWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
+import { Registry } from "@hypernetlabs/objects";
 
 const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   onRegistryDetailsNavigate,
@@ -15,11 +16,11 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
-  const [registries, setRegistries] = useState<string[]>([]);
+  const [registries, setRegistries] = useState<Registry[]>([]);
 
   useEffect(() => {
     coreProxy
-      .getRegistries()
+      .getRegistries(10)
       .map((registries) => {
         console.log("registry list: ", registries);
         setRegistries(registries);
@@ -40,7 +41,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
         <GovernanceRegistryListItem
           key={1}
           number="1"
-          title={registry}
+          title={registry.name}
           tokenURI="Token URI"
           numberOfEntries="numberOfEntries"
           registryAddress="Registry Address"

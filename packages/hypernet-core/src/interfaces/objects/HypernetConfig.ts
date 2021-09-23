@@ -42,6 +42,5 @@ export class HypernetContractAddresses {
     public liquidityRegistryAddress: EthereumAddress,
     public hypernetGovernorAddress: EthereumAddress,
     public registryFactoryAddress: EthereumAddress,
-    public nonFungibleRegistryAddress: EthereumAddress,
   ) {}
 }
