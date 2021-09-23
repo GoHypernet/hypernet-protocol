@@ -3,6 +3,7 @@ import {
   ChainId,
   DefinitionName,
   EthereumAddress,
+  ProviderUrl,
   SchemaUrl,
 } from "@hypernetlabs/objects";
 
@@ -11,6 +12,7 @@ export class HypernetConfig {
     public iframeSource: string,
     public infuraId: string,
     public governanceChainId: ChainId,
+    public governanceEthProviderUrl: ProviderUrl,
     public hypernetProtocolDomain: string,
     public defaultPaymentExpiryLength: number,
     public chainProviders: ChainProviders,

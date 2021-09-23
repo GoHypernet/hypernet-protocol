@@ -86,6 +86,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
           | ethers.providers.JsonRpcProvider;
       })
       .orElse((e) => {
+        this.logUtils.error(e);
         throw new Error(
           "Initialization unsuccessful, you should not have called getProvider()",
         );

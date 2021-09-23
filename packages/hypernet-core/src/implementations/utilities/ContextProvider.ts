@@ -8,6 +8,7 @@ import {
   GatewayUrl,
   Signature,
   ActiveStateChannel,
+  ChainId,
 } from "@hypernetlabs/objects";
 import {
   HypernetContext,
@@ -57,6 +58,12 @@ export class ContextProvider implements IContextProvider {
     onInitializationRequired: Subject<void>,
     onPrivateCredentialsRequested: Subject<void>,
     onStateChannelCreated: Subject<ActiveStateChannel>,
+    onChainConnected: Subject<ChainId>,
+    onGovernanceChainConnected: Subject<ChainId>,
+    onChainChanged: Subject<ChainId>,
+    onAccountChanged: Subject<EthereumAddress>,
+    onGovernanceChainChanged: Subject<ChainId>,
+    onGovernanceAccountChanged: Subject<EthereumAddress>,
   ) {
     this.context = new HypernetContext(
       null,
@@ -91,6 +98,12 @@ export class ContextProvider implements IContextProvider {
       onPrivateCredentialsRequested,
       new Subject<IGatewayConnectorProxy>(),
       onStateChannelCreated,
+      onChainConnected,
+      onGovernanceChainConnected,
+      onChainChanged,
+      onAccountChanged,
+      onGovernanceChainChanged,
+      onGovernanceAccountChanged,
     );
     this._initializePromiseResolve = () => null;
     this._initializePromise = new Promise((resolve) => {
@@ -154,6 +167,12 @@ export class ContextProvider implements IContextProvider {
           this.context.onPrivateCredentialsRequested,
           this.context.onGatewayConnectorProxyActivated,
           this.context.onStateChannelCreated,
+          this.context.onChainConnected,
+          this.context.onGovernanceChainConnected,
+          this.context.onChainChanged,
+          this.context.onAccountChanged,
+          this.context.onGovernanceChainChanged,
+          this.context.onGovernanceAccountChanged,
           new Map<GatewayUrl, Signature>(),
         ),
       );

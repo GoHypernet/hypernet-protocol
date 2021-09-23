@@ -46,6 +46,7 @@ import {
   TimeUtils,
 } from "@hypernetlabs/utils";
 import {
+  BlockchainListener,
   GatewayConnectorListener,
   NatsMessagingListener,
   VectorAPIListener,
@@ -67,6 +68,7 @@ import {
   LinkRepository,
 } from "@implementations/data";
 import {
+  IBlockchainListener,
   IGatewayConnectorListener,
   IMessagingListener,
   IVectorListener,
@@ -167,6 +169,12 @@ export class HypernetCore implements IHypernetCore {
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
   public onStateChannelCreated: Subject<ActiveStateChannel>;
+  public onChainConnected: Subject<ChainId>;
+  public onGovernanceChainConnected: Subject<ChainId>;
+  public onChainChanged: Subject<ChainId>;
+  public onAccountChanged: Subject<EthereumAddress>;
+  public onGovernanceChainChanged: Subject<ChainId>;
+  public onGovernanceAccountChanged: Subject<EthereumAddress>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -214,6 +222,7 @@ export class HypernetCore implements IHypernetCore {
   protected vectorAPIListener: IVectorListener;
   protected gatewayConnectorListener: IGatewayConnectorListener;
   protected messagingListener: IMessagingListener;
+  protected blockchainListener: IBlockchainListener;
 
   protected _initializeResult: ResultAsync<
     void,
@@ -265,6 +274,12 @@ export class HypernetCore implements IHypernetCore {
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject();
     this.onStateChannelCreated = new Subject();
+    this.onChainConnected = new Subject();
+    this.onGovernanceChainConnected = new Subject();
+    this.onChainChanged = new Subject();
+    this.onAccountChanged = new Subject();
+    this.onGovernanceChainChanged = new Subject();
+    this.onGovernanceAccountChanged = new Subject();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -308,6 +323,12 @@ export class HypernetCore implements IHypernetCore {
       this.onInitializationRequired,
       this.onPrivateCredentialsRequested,
       this.onStateChannelCreated,
+      this.onChainConnected,
+      this.onGovernanceChainConnected,
+      this.onChainChanged,
+      this.onAccountChanged,
+      this.onGovernanceChainChanged,
+      this.onGovernanceAccountChanged,
     );
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(this.logUtils, config);
@@ -508,6 +529,12 @@ export class HypernetCore implements IHypernetCore {
     this.messagingListener = new NatsMessagingListener(
       this.controlService,
       this.messagingProvider,
+      this.configProvider,
+      this.logUtils,
+    );
+
+    this.blockchainListener = new BlockchainListener(
+      this.blockchainProvider,
       this.configProvider,
       this.logUtils,
     );
@@ -786,6 +813,7 @@ export class HypernetCore implements IHypernetCore {
           this.vectorAPIListener.initialize(),
           this.gatewayConnectorListener.initialize(),
           this.messagingListener.initialize(),
+          this.blockchainListener.initialize(),
         ]);
       })
       .andThen(() => {

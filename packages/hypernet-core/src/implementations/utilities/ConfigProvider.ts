@@ -3,6 +3,7 @@ import {
   AuthorizedGatewaysSchema,
   ChainId,
   DefinitionName,
+  ProviderUrl,
   SchemaUrl,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
@@ -49,6 +50,7 @@ export class ConfigProvider implements IConfigProvider {
       __IFRAME_SOURCE__, // iframeSource
       __INFURA_ID__, // infuraId
       ChainId(parseInt(__GOVERNANCE_CHAIN_ID__)), // governanceChainId
+      ProviderUrl(""), // governanceEthProviderUrl
       "Hypernet", // Hypernet Protocol Domain for Transfers
       5 * 24 * 60 * 60, // 5 days as the default payment expiration time
       chainProviders, // chainProviders

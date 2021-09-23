@@ -24,6 +24,7 @@ export * from "@objects/Payment";
 export * from "@objects/PaymentId";
 export * from "@objects/PaymentStatusViewModel";
 export * from "@objects/PrivateCredentials";
+export * from "@objects/ProviderUrl";
 export * from "@objects/PublicIdentifier";
 export * from "@objects/PublicKey";
 export * from "@objects/PullAmount";
