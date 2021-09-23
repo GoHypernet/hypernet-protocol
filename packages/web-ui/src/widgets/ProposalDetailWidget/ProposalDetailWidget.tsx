@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { Box } from "@material-ui/core";
+import { Box, Typography } from "@material-ui/core";
 import { useAlert } from "react-alert";
 
 import {
   GovernanceWidgetHeader,
   GovernanceVotingCard,
+  GovernanceMarkdown,
 } from "@web-ui/components";
+import { useStyles } from "@web-ui/widgets/ProposalDetailWidget/ProposalDetailWidget.style";
 import { IProposalDetailWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { EProposalState, Proposal } from "@hypernetlabs/objects";
@@ -14,6 +16,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   onProposalListNavigate,
   proposalId,
 }: IProposalDetailWidgetParams) => {
+  const classes = useStyles();
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
@@ -119,6 +122,27 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
           isVoted={false}
           showVoteButton={showVotingButtons}
           disableVoteButton={false}
+        />
+      </Box>
+      <Box>
+        <Box className={classes.proposerSectionWrapper}>
+          <Typography variant="h5" className={classes.proposerLabel}>
+            Proposer
+          </Typography>
+          <Typography variant="h5" className={classes.proposerValue}>
+            {proposal?.proposalOriginator ||
+              "0xf3Fd6e51aad88F6F4ce6aB8827279cffFb92266"}
+          </Typography>
+        </Box>
+        <GovernanceMarkdown
+          source={
+            proposal?.description ||
+            `
+        # Hi
+        ## Hi
+        ### Hi
+        `
+          }
         />
       </Box>
     </Box>

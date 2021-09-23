@@ -29,3 +29,4 @@ export * from "./GovernanceProgress";
 export * from "./GovernanceVotingCard";
 export * from "./GovernanceValueWithTitle";
 export * from "./GovernanceEditableValueWithTitle";
+export * from "./GovernanceMarkdown";

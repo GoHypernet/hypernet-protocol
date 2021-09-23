@@ -124,6 +124,7 @@ export default class HypernetWebUI implements IHypernetWebUI {
               withModal={withModal}
               closeCallback={closeCallback}
               modalStyle={modalStyle}
+              isV2={hasTheme}
             >
               {component}
             </MainContainer>
