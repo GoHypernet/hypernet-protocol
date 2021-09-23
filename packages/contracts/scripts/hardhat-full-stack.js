@@ -26,18 +26,7 @@ async function main() {
   console.log("Hypertoken Gas Fee:", hypertoken_reciept.gasUsed.toString());
   console.log("Hypertoken recipient:", owner.address);
   console.log("Recipient Balance:", recipientBalance.toString());
-
-  // deploy NonFungibleRegistry contract
-  const NonFungibleRegistry = await ethers.getContractFactory(
-    "NonFungibleRegistry",
-  );
-  const nonFungibleRegistry = await NonFungibleRegistry.deploy(
-    "NonFungibleRegistry",
-    "symbol_",
-    owner.address,
-  );
-  console.log("NonFungibleRegistry Address:", nonFungibleRegistry.address);
-
+  
   // all tokens are currently owned by owner signer
   // delegate all votes to self
   // if delegate() is not called, the account has no voting power
