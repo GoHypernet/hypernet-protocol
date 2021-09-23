@@ -11,7 +11,7 @@ import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Registry } from "@hypernetlabs/objects";
 
 const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
-  onRegistryDetailsNavigate,
+  onRegistryEntryListNavigate,
 }: IRegistryListWidgetParams) => {
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
@@ -37,16 +37,28 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   return (
     <Box>
       <GovernanceWidgetHeader label="Registries" />
-      {registries.map((registry) => (
+      {registries.map((registry, index) => (
         <GovernanceRegistryListItem
-          key={1}
+          key={registry.name}
           number="1"
           title={registry.name}
-          tokenURI="Token URI"
-          numberOfEntries="numberOfEntries"
-          registryAddress="Registry Address"
+          fieldWithValueList={[
+            {
+              fieldTitle: "Symbol",
+              fieldValue: registry.symbol,
+            },
+            {
+              fieldTitle: "Address",
+              fieldValue: registry.address,
+            },
+            {
+              fieldTitle: "Number of Entries",
+              fieldValue: registry.numberOfEntries.toString(),
+            },
+          ]}
+          buttonLabel="View Registry Entries"
           onViewDetailsClick={() =>
-            onRegistryDetailsNavigate && onRegistryDetailsNavigate("1")
+            onRegistryEntryListNavigate && onRegistryEntryListNavigate("1")
           }
         />
       ))}

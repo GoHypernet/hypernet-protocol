@@ -38,6 +38,7 @@ export class RegistryRepository implements IRegistryRepository {
         BlockchainUnavailableError
       >[] = [];
 
+      // TODO: reverse the list of registries to start from numberOfRegistries
       // Get registry by index
       for (let index = 0; index < numberOfRegistries; index++) {
         registryListResult.push(this.getRegistryByIndex(index, signer));
@@ -64,7 +65,7 @@ export class RegistryRepository implements IRegistryRepository {
         index,
       ) as Promise<EthereumAddress>,
       (e) => {
-        return new BlockchainUnavailableError("Unable to propose proposal", e);
+        return new BlockchainUnavailableError("Unable to call registries", e);
       },
     )
       .andThen((registryAddress) => {
@@ -97,7 +98,7 @@ export class RegistryRepository implements IRegistryRepository {
           ).andThen((registrySymbol) => {
             console.log("registrySymbol: ", registrySymbol);
             return ResultAsync.fromPromise(
-              registryContract?.totalSupply() as Promise<number>,
+              registryContract?.totalSupply() as Promise<BigNumber>,
               (e) => {
                 return new BlockchainUnavailableError(
                   "Unable to call registryContract totalSupply()",
@@ -111,7 +112,7 @@ export class RegistryRepository implements IRegistryRepository {
                   registryAddress,
                   registryName,
                   registrySymbol,
-                  registryNumberOfEntries,
+                  registryNumberOfEntries.toNumber(),
                 ),
               );
             });
@@ -161,7 +162,7 @@ export class RegistryRepository implements IRegistryRepository {
         ).andThen((registrySymbol) => {
           console.log("registrySymbol: ", registrySymbol);
           return ResultAsync.fromPromise(
-            registryContract?.totalSupply() as Promise<number>,
+            registryContract?.totalSupply() as Promise<BigNumber>,
             (e) => {
               return new BlockchainUnavailableError(
                 "Unable to call registryContract totalSupply()",
@@ -176,7 +177,7 @@ export class RegistryRepository implements IRegistryRepository {
                 registryAddress,
                 registryName,
                 registrySymbol,
-                registryNumberOfEntries,
+                registryNumberOfEntries.toNumber(),
               ),
             );
           });

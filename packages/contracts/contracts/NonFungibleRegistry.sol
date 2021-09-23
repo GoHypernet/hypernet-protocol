@@ -54,7 +54,7 @@ contract NonFungibleRegistry is
     // create a REGISTRAR_ROLE to manage registry functionality
     bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
 
-    Counters.Counter private _tokenIdTracker;
+    Counters.Counter public _tokenIdTracker;
 
     /**
      * @dev Grants `DEFAULT_ADMIN_ROLE`, and `REGISTRAR_ROLE` to the

@@ -56,7 +56,7 @@ export interface IProposalCreateWidgetParams extends IRenderParams {
 }
 
 export interface IRegistryListWidgetParams extends IRenderParams {
-  onRegistryDetailsNavigate?: (proposalId: string) => void;
+  onRegistryEntryListNavigate?: (proposalId: string) => void;
 }
 
 export interface IRegistryDetailWidgetParams extends IRenderParams {
