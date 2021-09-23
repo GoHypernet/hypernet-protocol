@@ -5,6 +5,7 @@ import {
   PrivateCredentials,
   EthereumAddress,
   ChainId,
+  GovernanceSignerUnavailableError,
 } from "@hypernetlabs/objects";
 import {
   ILocalStorageUtils,
@@ -46,11 +47,13 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
     BlockchainUnavailableError | InvalidParametersError
   > | null = null;
 
-  protected provider:
-    | ethers.providers.Web3Provider
-    | ethers.providers.JsonRpcProvider
-    | null = null;
+  protected provider: ethers.providers.JsonRpcProvider | null = null;
   protected signer: ethers.providers.JsonRpcSigner | null = null;
+  protected governanceProvider:
+    | ethers.providers.JsonRpcProvider
+    | ethers.providers.FallbackProvider
+    | null = null;
+  protected governanceSigner: ethers.providers.JsonRpcSigner | null = null;
 
   constructor(
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
@@ -69,10 +72,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
    * getProvider
    * @return ethers.providers.Web3Provider
    */
-  public getProvider(): ResultAsync<
-    ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
-    never
-  > {
+  public getProvider(): ResultAsync<ethers.providers.JsonRpcProvider, never> {
     if (this.initializeResult == null) {
       throw new Error(
         "Must call BlockchainProvider.initialize() first before you can call getProvider()",
@@ -95,7 +95,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
 
   // TODO: Make this actualy return a guaranteed governance chain connected provider.
   public getGovernanceProvider(): ResultAsync<
-    ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
+    ethers.providers.Provider,
     never
   > {
     if (this.initializeResult == null) {
@@ -106,9 +106,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
 
     return this.initializeResult
       .map(() => {
-        return this.provider as
-          | ethers.providers.Web3Provider
-          | ethers.providers.JsonRpcProvider;
+        return this.governanceProvider as ethers.providers.Provider;
       })
       .orElse((e) => {
         throw new Error(
@@ -132,6 +130,32 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
           "Initialization unsuccessful, you should not have called getSigner()",
         );
       });
+  }
+
+  public getGovernanceSigner(): ResultAsync<
+    ethers.providers.JsonRpcSigner,
+    GovernanceSignerUnavailableError
+  > {
+    if (this.initializeResult == null) {
+      throw new Error(
+        "Must call BlockchainProvider.initialize() first before you can call getGovernanceSigner()",
+      );
+    }
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.initializeResult,
+    ]).andThen((vals) => {
+      const [config] = vals;
+
+      if (this.governanceSigner != null) {
+        return okAsync(this.governanceSigner);
+      }
+      return errAsync(
+        new GovernanceSignerUnavailableError(
+          `No governance signer available, using fallback provider. Change you main wallet to connect to chain ${config.governanceChainId}`,
+        ),
+      );
+    });
   }
 
   private eip1193Bridge: Eip1193Bridge | null = null;
@@ -301,6 +325,40 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
                 this.provider = provider;
                 this.signer = provider.getSigner();
               });
+          })
+          .andThen(() => {
+            // Now we have the main provider, as given by the modal or provided externally. We now need to check if that provider is connected to
+            // the governance chain. If it is, great! We're done. If it's not, we need to create a provider using our configured ProviderUrls.
+            // In this case, a signer will not be available.
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const mainProvider = this.provider!;
+            return ResultAsync.fromPromise(mainProvider.getNetwork(), (e) => {
+              return new BlockchainUnavailableError(
+                "Could not get the network for the main blockchain provider!",
+                e,
+              );
+            }).andThen((mainNetwork) => {
+              if (mainNetwork.chainId == config.governanceChainId) {
+                // Whoo-hoo!
+                this.governanceProvider = mainProvider;
+                this.governanceSigner = mainProvider.getSigner();
+                return okAsync(undefined);
+              }
+
+              // We will have to create a provider for the governance chain. We won't bother with the a signer.
+              const providers = config.governanceEthProviderUrls.map(
+                (providerUrl) => {
+                  return new ethers.providers.JsonRpcProvider(
+                    providerUrl,
+                    config.governanceChainId,
+                  );
+                },
+              );
+              this.governanceProvider = new ethers.providers.FallbackProvider(
+                providers,
+              );
+              return okAsync(undefined);
+            });
           });
       });
     }

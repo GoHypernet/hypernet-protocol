@@ -32,7 +32,7 @@ export class ConfigProviderMock implements IConfigProvider {
         "iframeSource",
         "infuraId",
         chainId,
-        ProviderUrl("governanceProviderUrl"),
+        [ProviderUrl("governanceProviderUrl")],
         "hypernetProtocolDomain",
         defaultExpirationLength,
         {

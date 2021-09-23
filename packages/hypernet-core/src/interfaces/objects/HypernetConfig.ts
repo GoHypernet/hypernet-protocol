@@ -12,7 +12,7 @@ export class HypernetConfig {
     public iframeSource: string,
     public infuraId: string,
     public governanceChainId: ChainId,
-    public governanceEthProviderUrl: ProviderUrl,
+    public governanceEthProviderUrls: ProviderUrl[],
     public hypernetProtocolDomain: string,
     public defaultPaymentExpiryLength: number,
     public chainProviders: ChainProviders,

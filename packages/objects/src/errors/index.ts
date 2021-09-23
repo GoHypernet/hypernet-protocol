@@ -10,6 +10,7 @@ export * from "@objects/errors/LogicalError";
 export * from "@objects/errors/GatewayConnectorError";
 export * from "@objects/errors/GatewayActivationError";
 export * from "@objects/errors/GatewayValidationError";
+export * from "@objects/errors/GovernanceSignerUnavailableError";
 export * from "@objects/errors/MessagingError";
 export * from "@objects/errors/OfferMismatchError";
 export * from "@objects/errors/PaymentFinalizeError";

@@ -536,6 +536,7 @@ export class HypernetCore implements IHypernetCore {
     this.blockchainListener = new BlockchainListener(
       this.blockchainProvider,
       this.configProvider,
+      this.contextProvider,
       this.logUtils,
     );
 
