@@ -9,7 +9,7 @@ describe("Registry", function () {
 
     // deploy registry contract
     const Registry = await ethers.getContractFactory("NonFungibleRegistry");
-    const registry = await Registry.deploy("Gateways", "G", owner.address);
+    const registry = await Registry.deploy("Gateways", "G", owner.address, owner.address);
     registry_reciept = await registry.deployTransaction.wait();
     const totalSupply = await registry.totalSupply();
     console.log("Registry Address:", registry.address);
@@ -105,7 +105,7 @@ describe("Registry", function () {
     // only admin can update parameters
     await expectRevert(
         newerRegistry.setLabelUpdate(true),
-        "NonFungibleRegistry: must be admin.",
+        "NonFungibleRegistry: must be registrar.",
     );
     
     // update the label on the NFI that has none

@@ -36,23 +36,21 @@ contract RegistryFactory is AccessControlEnumerable {
      * @dev Grants `DEFAULT_ADMIN_ROLE`, to the
      * account passed into the constructor.
      */
-    constructor(address[] memory _admins)  {
-                // register executors
-        for (uint256 i = 0; i < _admins.length; ++i) {
-            _setupRole(DEFAULT_ADMIN_ROLE, _admins[i]);
-        }
+    constructor(address _admin)  {
+        // register executors
+        _setupRole(DEFAULT_ADMIN_ROLE, _admin);
     }
 
     /**
     * @dev create a new registry with the given name, symbol and admin address.
     * Address of deployed registry is stored in an array for easy lookup
     */
-    function createRegistry(string memory _name, string memory _symbol, address _admin) external {
-        require(_admin != address(0), "RegistryFactory: Admin address must not be 0.");
+    function createRegistry(string memory _name, string memory _symbol, address _registrar) external {
+        require(_registrar != address(0), "RegistryFactory: Registrar address must not be 0.");
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
         require(!_registryExists(_name), "RegistryFactory: Registry by that name exists.");
         
-        NonFungibleRegistry registry = new NonFungibleRegistry(_name, _symbol, _admin);
+        NonFungibleRegistry registry = new NonFungibleRegistry(_name, _symbol, _registrar, getRoleMember(DEFAULT_ADMIN_ROLE, 0));
         registries.push(address(registry));
         nameToAddress[_name] = address(registry);
         emit RegistryCreated(address(registry));
