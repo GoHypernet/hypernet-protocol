@@ -22,7 +22,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
 
   useEffect(() => {
     coreProxy
-      .getRegistries()
+      .getRegistries(10)
       //.getRegistryDetail(registryId)
       .map((registry) => {
         console.log("registry: ", registryId);

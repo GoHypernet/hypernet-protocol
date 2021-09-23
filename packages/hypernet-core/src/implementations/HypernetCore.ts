@@ -947,8 +947,10 @@ export class HypernetCore implements IHypernetCore {
     );
   }
 
-  public getRegistries(): ResultAsync<Registry[], BlockchainUnavailableError> {
-    return this.registryService.getRegistries();
+  public getRegistries(
+    numberOfRegistries: number,
+  ): ResultAsync<Registry[], BlockchainUnavailableError> {
+    return this.registryService.getRegistries(numberOfRegistries);
   }
 
   public getRegistryByName(

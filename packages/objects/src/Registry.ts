@@ -8,12 +8,3 @@ export class Registry {
     public numberOfEntries: number,
   ) {}
 }
-
-export class RegistryEntry {
-  constructor(
-    public label: string,
-    public tokenId: number,
-    public owner: EthereumAddress,
-    public tokenURI: string | null,
-  ) {}
-}

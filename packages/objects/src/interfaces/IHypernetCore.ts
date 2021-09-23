@@ -34,7 +34,8 @@ import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
 import { Signature } from "@objects/Signature";
 import { Proposal, EVoteSupport, ProposalVoteReceipt } from "@objects/Proposal";
-import { Registry, RegistryEntry } from "@objects/Registry";
+import { Registry } from "@objects/Registry";
+import { RegistryEntry } from "@objects/RegistryEntry";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -290,7 +291,9 @@ export interface IHypernetCore {
     recipient: EthereumAddress,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
 
-  getRegistries(): ResultAsync<Registry[], BlockchainUnavailableError>;
+  getRegistries(
+    numberOfRegistries: number,
+  ): ResultAsync<Registry[], BlockchainUnavailableError>;
 
   getRegistryByName(
     registryName: string,

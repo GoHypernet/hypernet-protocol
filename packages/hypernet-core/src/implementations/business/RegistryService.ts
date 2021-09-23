@@ -13,35 +13,37 @@ import { IRegistryRepository, IRegistryRepositoryType } from "@interfaces/data";
 export class RegistryService implements IRegistryService {
   constructor(
     @inject(IRegistryRepositoryType)
-    protected RegistryRepository: IRegistryRepository,
+    protected registryRepository: IRegistryRepository,
   ) {}
 
-  public getRegistries(): ResultAsync<Registry[], BlockchainUnavailableError> {
-    return this.RegistryRepository.getRegistries();
+  public getRegistries(
+    numberOfRegistries: number,
+  ): ResultAsync<Registry[], BlockchainUnavailableError> {
+    return this.registryRepository.getRegistries(numberOfRegistries);
   }
 
   public getRegistryByName(
     registryName: string,
   ): ResultAsync<Registry, BlockchainUnavailableError> {
-    return this.RegistryRepository.getRegistryByName(registryName);
+    return this.registryRepository.getRegistryByName(registryName);
   }
 
   public getRegistryByAddress(
     registryAddress: EthereumAddress,
   ): ResultAsync<Registry, BlockchainUnavailableError> {
-    return this.RegistryRepository.getRegistryByAddress(registryAddress);
+    return this.registryRepository.getRegistryByAddress(registryAddress);
   }
 
   public getRegistryEntries(
     registryName: string,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
-    return this.RegistryRepository.getRegistryEntries(registryName);
+    return this.registryRepository.getRegistryEntries(registryName);
   }
 
   public getRegistryEntryByLabel(
     registryName: string,
     label: string,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
-    return this.RegistryRepository.getRegistryEntryByLabel(registryName, label);
+    return this.registryRepository.getRegistryEntryByLabel(registryName, label);
   }
 }

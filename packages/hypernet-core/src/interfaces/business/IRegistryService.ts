@@ -7,7 +7,9 @@ import {
 import { ResultAsync } from "neverthrow";
 
 export interface IRegistryService {
-  getRegistries(): ResultAsync<Registry[], BlockchainUnavailableError>;
+  getRegistries(
+    numberOfRegistries: number,
+  ): ResultAsync<Registry[], BlockchainUnavailableError>;
   getRegistryByName(
     registryName: string,
   ): ResultAsync<Registry, BlockchainUnavailableError>;

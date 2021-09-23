@@ -29,86 +29,100 @@ export class RegistryRepository implements IRegistryRepository {
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
-  public getRegistries(): ResultAsync<Registry[], BlockchainUnavailableError> {
+  public getRegistries(
+    numberOfRegistries: number = 10,
+  ): ResultAsync<Registry[], BlockchainUnavailableError> {
     return this.initializeContracts().andThen((signer) => {
-      // Get all registries addresses (indexes)
-      return ResultAsync.fromPromise(
-        this.registryFactoryContract?.registries() as Promise<
-          EthereumAddress[]
-        >,
-        (e) => {
-          return new BlockchainUnavailableError(
-            "Unable to propose proposal",
-            e,
-          );
-        },
-      ).andThen((registryAddressList) => {
-        console.log("registryAddresses: ", registryAddressList);
-        const registryListResult: ResultAsync<
-          Registry,
-          BlockchainUnavailableError
-        >[] = [];
+      const registryListResult: ResultAsync<
+        Registry | null,
+        BlockchainUnavailableError
+      >[] = [];
 
-        registryAddressList.forEach((registryAddress) => {
-          // Call the NFT contract of that address
-          const registryContract = new ethers.Contract(
-            registryAddress,
-            GovernanceAbis.NonFungibleRegistry.abi,
-            signer,
-          );
+      // Get registry by index
+      for (let index = 0; index < numberOfRegistries; index++) {
+        registryListResult.push(this.getRegistryByIndex(index, signer));
+      }
 
-          // Get the name, symbol and NumberOfEntries of that registry and return Registry object of each address
+      return ResultUtils.combine(registryListResult).map((vals) => {
+        const registryList: Registry[] = [];
+        vals.forEach((registry) => {
+          if (registry != null) {
+            registryList.push(registry);
+          }
+        });
+        return registryList;
+      });
+    });
+  }
+
+  private getRegistryByIndex(
+    index: number,
+    signer: ethers.providers.JsonRpcSigner,
+  ): ResultAsync<Registry | null, BlockchainUnavailableError> {
+    return ResultAsync.fromPromise(
+      this.registryFactoryContract?.registries(
+        index,
+      ) as Promise<EthereumAddress>,
+      (e) => {
+        return new BlockchainUnavailableError("Unable to propose proposal", e);
+      },
+    )
+      .andThen((registryAddress) => {
+        // Call the NFR contract of that address
+        const registryContract = new ethers.Contract(
+          registryAddress,
+          GovernanceAbis.NonFungibleRegistry.abi,
+          signer,
+        );
+
+        // Get the name, symbol and NumberOfEntries of that registry address
+        return ResultAsync.fromPromise(
+          registryContract?.name() as Promise<string>,
+          (e) => {
+            return new BlockchainUnavailableError(
+              "Unable to call registryContract name()",
+              e,
+            );
+          },
+        ).andThen((registryName) => {
+          console.log("registryName: ", registryName);
           return ResultAsync.fromPromise(
-            registryContract?.name() as Promise<string>,
+            registryContract?.symbol() as Promise<string>,
             (e) => {
               return new BlockchainUnavailableError(
-                "Unable to call registryContract name()",
+                "Unable to call registryContract symbol()",
                 e,
               );
             },
-          ).map((registryName) => {
-            console.log("registryName: ", registryName);
+          ).andThen((registrySymbol) => {
+            console.log("registrySymbol: ", registrySymbol);
             return ResultAsync.fromPromise(
-              registryContract?.symbol() as Promise<string>,
+              registryContract?.totalSupply() as Promise<number>,
               (e) => {
                 return new BlockchainUnavailableError(
-                  "Unable to call registryContract symbol()",
+                  "Unable to call registryContract totalSupply()",
                   e,
                 );
               },
-            ).map((registrySymbol) => {
-              console.log("registrySymbol: ", registrySymbol);
-              return ResultAsync.fromPromise(
-                registryContract?.totalSupply() as Promise<number>,
-                (e) => {
-                  return new BlockchainUnavailableError(
-                    "Unable to call registryContract totalSupply()",
-                    e,
-                  );
-                },
-              ).map((registryNumberOfEntries) => {
-                console.log(
-                  "registryNumberOfEntries: ",
+            ).andThen((registryNumberOfEntries) => {
+              console.log("registryNumberOfEntries: ", registryNumberOfEntries);
+              return okAsync(
+                new Registry(
+                  registryAddress,
+                  registryName,
+                  registrySymbol,
                   registryNumberOfEntries,
-                );
-                registryListResult.push(
-                  okAsync(
-                    new Registry(
-                      registryAddress,
-                      registryName,
-                      registrySymbol,
-                      registryNumberOfEntries,
-                    ),
-                  ),
-                );
-              });
+                ),
+              );
             });
           });
         });
-
-        return ResultUtils.combine(registryListResult);
+      })
+      .orElse((e) => {
+        // We don't want to throw errors when registry is not found
+        this.logUtils.error(e);
+        return okAsync(null as unknown as Registry);
       });
-    });
   }
 
   public getRegistryByName(

@@ -38,6 +38,7 @@ export * from "@objects/UnixTimestamp";
 export * from "@objects/UUID";
 export * from "@objects/Proposal";
 export * from "@objects/Registry";
+export * from "@objects/RegistryEntry";
 
 export * from "@objects/errors";
 export * from "@objects/interfaces";

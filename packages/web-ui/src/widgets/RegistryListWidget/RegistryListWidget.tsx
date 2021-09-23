@@ -20,7 +20,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
 
   useEffect(() => {
     coreProxy
-      .getRegistries()
+      .getRegistries(10)
       .map((registries) => {
         console.log("registry list: ", registries);
         setRegistries(registries);

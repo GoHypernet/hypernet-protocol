@@ -527,8 +527,10 @@ export default class HypernetIFrameProxy
     });
   }
 
-  public getRegistries(): ResultAsync<Registry[], BlockchainUnavailableError> {
-    return this._createCall("getRegistries", {});
+  public getRegistries(
+    numberOfRegistries: number,
+  ): ResultAsync<Registry[], BlockchainUnavailableError> {
+    return this._createCall("getRegistries", numberOfRegistries);
   }
 
   public getRegistryByName(
