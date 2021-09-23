@@ -19,6 +19,7 @@ import {
   ParameterizedResolver,
   UnixTimestamp,
   ChainId,
+  UtilityMessageSignature,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -83,7 +84,9 @@ export interface IBrowserNode {
     chainId: ChainId,
   ): ResultAsync<IRegisteredTransfer[], VectorError>;
 
-  signUtilityMessage(message: string): ResultAsync<Signature, VectorError>;
+  signUtilityMessage(
+    message: string,
+  ): ResultAsync<UtilityMessageSignature, VectorError>;
 
   resolveTransfer(
     channelAddress: EthereumAddress,

@@ -36,6 +36,7 @@ export * from "@objects/SortedTransfers";
 export * from "@objects/SchemaUrl";
 export * from "@objects/TransferId";
 export * from "@objects/UnixTimestamp";
+export * from "@objects/UtilityMessageSignature";
 export * from "@objects/UUID";
 
 export * from "@objects/errors";

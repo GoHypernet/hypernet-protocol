@@ -19,6 +19,7 @@ import {
   UUID,
   GatewayTokenInfo,
   ActiveStateChannel,
+  UtilityMessageSignature,
 } from "@hypernetlabs/objects";
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { HypernetContext } from "@interfaces/objects";
@@ -287,7 +288,7 @@ export class GatewayConnectorProxy
 
   public messageSigned(
     message: string,
-    signature: Signature,
+    signature: UtilityMessageSignature,
   ): ResultAsync<void, ProxyError> {
     return this._createCall("messageSigned", { message, signature });
   }

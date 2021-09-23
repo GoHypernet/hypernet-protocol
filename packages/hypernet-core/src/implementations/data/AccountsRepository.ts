@@ -15,6 +15,7 @@ import {
   ActiveStateChannel,
   ChainId,
   PersistenceError,
+  UtilityMessageSignature,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IAccountsRepository } from "@interfaces/data";
@@ -433,7 +434,10 @@ export class AccountsRepository implements IAccountsRepository {
 
   public signMessage(
     message: string,
-  ): ResultAsync<Signature, BlockchainUnavailableError | VectorError> {
+  ): ResultAsync<
+    UtilityMessageSignature,
+    BlockchainUnavailableError | VectorError
+  > {
     return this.browserNodeProvider.getBrowserNode().andThen((browserNode) => {
       return browserNode.signUtilityMessage(message);
     });
