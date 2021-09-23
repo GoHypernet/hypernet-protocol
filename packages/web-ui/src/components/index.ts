@@ -33,3 +33,6 @@ export * from "./GovernanceMarkdown";
 export * from "./GovernanceListItem";
 export * from "./GovernanceListItemValueWithTitle";
 export * from "./GovernanceRegistryListItem";
+export * from "./GovernanceTable";
+export * from "./GovernanceBasicValueWithTitle";
+export * from "./GovernanceCard";

@@ -2,7 +2,7 @@ import { GovernanceValueWithTitle } from "@hypernetlabs/web-ui";
 
 export default {
   title: "Layout/GovernanceValueWithTitle",
-  component: ValueWithTitle,
+  component: GovernanceValueWithTitle,
 };
 
 const Template = (args) => (
