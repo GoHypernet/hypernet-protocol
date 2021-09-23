@@ -4,4 +4,5 @@ export * from "@interfaces/business/IDevelopmentService";
 export * from "@interfaces/business/ILinkService";
 export * from "@interfaces/business/IGatewayConnectorService";
 export * from "@interfaces/business/IGovernanceService";
+export * from "@interfaces/business/IRegistryService";
 export * from "@interfaces/business/IPaymentService";

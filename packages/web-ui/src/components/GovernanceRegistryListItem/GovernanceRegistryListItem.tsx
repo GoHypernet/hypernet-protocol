@@ -1,14 +1,19 @@
 import React from "react";
 import { GovernanceListItem, GovernanceButton } from "@web-ui/components";
 import { GovernanceListItemValueWithTitle } from "@web-integration/index";
+import { Box } from "@material-ui/core";
+
+interface IFieldWithValueList {
+  fieldTitle: string;
+  fieldValue?: string;
+}
 
 interface GovernanceRegistryListItemProps {
   number: string;
   title: string;
-  registryAddress: string;
-  tokenURI: string;
-  numberOfEntries: string;
   onViewDetailsClick: () => void;
+  fieldWithValueList: IFieldWithValueList[];
+  buttonLabel?: string;
 }
 
 export const GovernanceRegistryListItem: React.FC<GovernanceRegistryListItemProps> =
@@ -16,10 +21,9 @@ export const GovernanceRegistryListItem: React.FC<GovernanceRegistryListItemProp
     const {
       number,
       title,
-      registryAddress,
-      tokenURI,
-      numberOfEntries,
+      fieldWithValueList,
       onViewDetailsClick,
+      buttonLabel,
     } = props;
 
     return (
@@ -32,19 +36,20 @@ export const GovernanceRegistryListItem: React.FC<GovernanceRegistryListItemProp
             variant="contained"
             size="medium"
           >
-            View Details
+            {buttonLabel || "View Details"}
           </GovernanceButton>
         }
       >
-        <GovernanceListItemValueWithTitle
-          title="Registry Address"
-          value={registryAddress}
-        />
-        <GovernanceListItemValueWithTitle title="Token URI" value={tokenURI} />
-        <GovernanceListItemValueWithTitle
-          title="Number of Entries"
-          value={numberOfEntries}
-        />
+        {fieldWithValueList.map((fieldWithValue, index) => (
+          <Box key={index}>
+            {fieldWithValue.fieldValue && (
+              <GovernanceListItemValueWithTitle
+                title={fieldWithValue.fieldTitle}
+                value={fieldWithValue.fieldValue}
+              />
+            )}
+          </Box>
+        ))}
       </GovernanceListItem>
     );
   };

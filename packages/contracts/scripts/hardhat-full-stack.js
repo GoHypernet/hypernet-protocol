@@ -81,10 +81,7 @@ async function main() {
 
   // deploy factory contract
   const FactoryRegistry = await ethers.getContractFactory("RegistryFactory");
-  const factoryregistry = await FactoryRegistry.deploy([
-    hypernetgovernor.address,
-    timelock.address,
-  ]);
+  const factoryregistry = await FactoryRegistry.deploy(timelock.address);
   const registry_reciept = await factoryregistry.deployTransaction.wait();
   console.log("Factory Address:", factoryregistry.address);
   console.log("Factory Gas Fee:", registry_reciept.gasUsed.toString());

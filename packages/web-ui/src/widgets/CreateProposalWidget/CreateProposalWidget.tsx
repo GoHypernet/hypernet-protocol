@@ -47,7 +47,7 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
     });
 
     coreProxy
-      .getRegistries()
+      .getRegistries(10)
       .map((registriesLabels) => {
         console.log("registriesLabels: ", registriesLabels);
       })

@@ -9,6 +9,7 @@ import {
 } from "@web-ui/components";
 import { IRegistryDetailWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
+import { Registry } from "@hypernetlabs/objects";
 
 const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
   onRegistryListNavigate,
@@ -17,11 +18,11 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
-  const [registry, setRegistry] = useState<string>("");
+  const [registry, setRegistry] = useState<Registry>();
 
   useEffect(() => {
     coreProxy
-      .getRegistries()
+      .getRegistries(10)
       //.getRegistryDetail(registryId)
       .map((registry) => {
         console.log("registry: ", registryId);
@@ -48,7 +49,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
         }}
       />
       <Box>
-        <GovernanceValueWithTitle title="Label " value={registry} />
+        <GovernanceValueWithTitle title="Label " value={registry?.name} />
         <GovernanceValueWithTitle title="Token ID " value="Lorem Ipsum" />
         <GovernanceValueWithTitle
           title="Recipient Address"

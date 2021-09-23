@@ -13,7 +13,7 @@ describe("Registry Factory", function () {
 
     // deploy factory contract
     const FactoryRegistry = await ethers.getContractFactory("RegistryFactory");
-    const factoryregistry = await FactoryRegistry.deploy([owner.address]);
+    const factoryregistry = await FactoryRegistry.deploy(owner.address);
     registry_reciept = await factoryregistry.deployTransaction.wait();
     console.log("Factory Address:", factoryregistry.address)
 
@@ -44,7 +44,7 @@ describe("Registry Factory", function () {
             registrySymbol,
             "0x0000000000000000000000000000000000000000",
         ),
-        "RegistryFactory: Admin address must not be 0.",
+        "RegistryFactory: Registrar address must not be 0.",
       );
   });
 });
