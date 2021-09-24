@@ -14,7 +14,7 @@ const RegistryList: React.FC = () => {
     hypernetWebIntegration.webUIClient
       .renderRegistryListWidget({
         selector: "registry-list-page-wrapper",
-        onRegistryEntryListNavigate: (registryName) => {
+        onRegistryEntryListNavigate: (registryName: string) => {
           history.push(`/registries/${registryName}/entries`);
           console.log("onRegistryEntryListNavigate");
         },
