@@ -11,16 +11,6 @@ import {
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { IAccountsRepository } from "@interfaces/data/";
-import { okAsync, errAsync } from "neverthrow";
-import td from "testdouble";
-
-import { AccountsRepository } from "@implementations/data/AccountsRepository";
-import { IStorageUtils } from "@interfaces/data/utilities";
-import {
-  IBrowserNodeProvider,
-  IBlockchainProvider,
-  IBlockchainUtils,
-} from "@interfaces/utilities";
 import {
   account,
   activeRouters,
@@ -33,6 +23,12 @@ import {
   routerChannelAddress,
   TransactionResponseMock,
 } from "@mock/mocks";
+import { okAsync, errAsync } from "neverthrow";
+import td from "testdouble";
+
+import { AccountsRepository } from "@implementations/data/AccountsRepository";
+import { IStorageUtils } from "@interfaces/data/utilities";
+import { IBrowserNodeProvider, IBlockchainUtils } from "@interfaces/utilities";
 import {
   BlockchainProviderMock,
   BrowserNodeProviderMock,

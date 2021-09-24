@@ -268,9 +268,9 @@ export interface IHypernetCore {
   onPushPaymentCanceled: Subject<PushPayment>;
   onPullPaymentCanceled: Subject<PullPayment>;
   onBalancesChanged: Subject<Balances>;
-  onDeStorageAuthenticationStarted: Subject<void>;
-  onDeStorageAuthenticationSucceeded: Subject<void>;
-  onDeStorageAuthenticationFailed: Subject<void>;
+  onCeramicAuthenticationStarted: Subject<void>;
+  onCeramicAuthenticationSucceeded: Subject<void>;
+  onCeramicFailed: Subject<Error>;
   onGatewayAuthorized: Subject<GatewayUrl>;
   onGatewayDeauthorizationStarted: Subject<GatewayUrl>;
   onAuthorizedGatewayUpdated: Subject<GatewayUrl>;
