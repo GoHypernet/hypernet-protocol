@@ -16,7 +16,7 @@ const RegistryEntryList: React.FC = () => {
       .renderRegistryEntryListWidget({
         selector: "registry-entry-list-page-wrapper",
         onRegistryEntryDetailsNavigate: (registryName, entryLabel) => {
-          history.push(`/registries/${registryName}/entry/${entryLabel}`);
+          history.push(`/registries/${registryName}/entries/${entryLabel}`);
           console.log("onRegistryEntryDetailsNavigate");
         },
         onRegistryListNavigate: () => {
