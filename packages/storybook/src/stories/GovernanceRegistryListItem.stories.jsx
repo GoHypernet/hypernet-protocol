@@ -26,8 +26,14 @@ export const Primary = Template.bind({});
 Primary.args = {
   number: "1",
   title: "Registry Name",
-  registryAddress: "0xdca7ef03e98e0dc2b855be647c39abe984fcf21b",
-  tokenURI:
-    "https://ipfs.infura.io/ipfs/QmWc6YHE815F8kExchG9kd2uSsv7ZF1iQNn23bt5iKC6K3/image",
-  numberOfEntries: "391",
+  fieldWithValueList: [
+    {
+      fieldTitle: "Field Title 1",
+      fieldValue: "Field Value 1",
+    },
+    {
+      fieldTitle: "Field Title 2",
+      fieldValue: "Field Value 2",
+    },
+  ],
 };
