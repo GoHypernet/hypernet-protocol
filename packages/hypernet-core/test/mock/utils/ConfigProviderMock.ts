@@ -2,6 +2,7 @@ import {
   AuthorizedGatewaysSchema,
   DefinitionName,
   EthereumAddress,
+  ProviderUrl,
   SchemaUrl,
 } from "@hypernetlabs/objects";
 import { HypernetConfig } from "@interfaces/objects";
@@ -33,6 +34,7 @@ export class ConfigProviderMock implements IConfigProvider {
         "iframeSource",
         "infuraId",
         chainId,
+        [ProviderUrl("governanceProviderUrl")],
         "hypernetProtocolDomain",
         defaultExpirationLength,
         {

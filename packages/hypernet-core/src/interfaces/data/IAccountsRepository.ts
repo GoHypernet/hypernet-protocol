@@ -11,6 +11,7 @@ import {
   ActiveStateChannel,
   PersistenceError,
   ChainId,
+  UtilityMessageSignature,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -76,7 +77,10 @@ export interface IAccountsRepository {
   ): ResultAsync<void, VectorError | BlockchainUnavailableError>;
   signMessage(
     message: string,
-  ): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;
+  ): ResultAsync<
+    UtilityMessageSignature,
+    BlockchainUnavailableError | VectorError
+  >;
 
   mintTestToken(
     amount: BigNumberString,

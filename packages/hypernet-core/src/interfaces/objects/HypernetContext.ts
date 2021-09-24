@@ -8,6 +8,7 @@ import {
   GatewayUrl,
   Signature,
   ActiveStateChannel,
+  ChainId,
 } from "@hypernetlabs/objects";
 import { Subject } from "rxjs";
 
@@ -47,6 +48,12 @@ export class HypernetContext {
     public onPrivateCredentialsRequested: Subject<void>,
     public onGatewayConnectorProxyActivated: Subject<IGatewayConnectorProxy>,
     public onStateChannelCreated: Subject<ActiveStateChannel>,
+    public onChainConnected: Subject<ChainId>,
+    public onGovernanceChainConnected: Subject<ChainId>,
+    public onChainChanged: Subject<ChainId>,
+    public onAccountChanged: Subject<EthereumAddress>,
+    public onGovernanceChainChanged: Subject<ChainId>,
+    public onGovernanceAccountChanged: Subject<EthereumAddress>,
   ) {}
 }
 
@@ -85,6 +92,12 @@ export class InitializedHypernetContext {
     public onPrivateCredentialsRequested: Subject<void>,
     public onGatewayConnectorProxyActivated: Subject<IGatewayConnectorProxy>,
     public onStateChannelCreated: Subject<ActiveStateChannel>,
+    public onChainConnected: Subject<ChainId>,
+    public onGovernanceChainConnected: Subject<ChainId>,
+    public onChainChanged: Subject<ChainId>,
+    public onAccountChanged: Subject<EthereumAddress>,
+    public onGovernanceChainChanged: Subject<ChainId>,
+    public onGovernanceAccountChanged: Subject<EthereumAddress>,
     public authorizedMediators: Map<GatewayUrl, Signature>,
   ) {}
 }

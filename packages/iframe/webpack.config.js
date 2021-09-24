@@ -143,6 +143,9 @@ module.exports = {
       __GOVERNANCE_CHAIN_ID__: JSON.stringify(
         process.env.__GOVERNANCE_CHAIN_ID__,
       ),
+      __GOVERNANCE_PROVIDER_URLS__: JSON.stringify(
+        process.env.__GOVERNANCE_PROVIDER_URLS__,
+      ),
       __BUILD_ENV__: JSON.stringify(process.env.__BUILD_ENV__),
       __DEBUG__: JSON.stringify(process.env.__DEBUG__),
     }),
