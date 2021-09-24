@@ -1,6 +1,7 @@
 import {
   ActiveStateChannel,
   Balances,
+  ChainId,
   ControlClaim,
   EthereumAddress,
   GatewayUrl,
@@ -81,6 +82,18 @@ export class ContextProviderMock implements IContextProvider {
   public onGatewayConnectorActivatedActivations: IGatewayConnectorProxy[] = [];
   public onStateChannelCreated: Subject<ActiveStateChannel>;
   public onStateChannelCreatedActivations: ActiveStateChannel[] = [];
+  public onChainConnected: Subject<ChainId>;
+  public onChainConnectedActivations: ChainId[] = [];
+  public onGovernanceChainConnected: Subject<ChainId>;
+  public onGovernanceChainConnectedActivations: ChainId[] = [];
+  public onChainChanged: Subject<ChainId>;
+  public onChainChangedActivations: ChainId[] = [];
+  public onAccountChanged: Subject<EthereumAddress>;
+  public onAccountChangedActivations: EthereumAddress[] = [];
+  public onGovernanceChainChanged: Subject<ChainId>;
+  public onGovernanceChainChangedActivations: ChainId[] = [];
+  public onGovernanceAccountChanged: Subject<EthereumAddress>;
+  public onGovernanceAccountChangedActivations: EthereumAddress[] = [];
 
   public authorizedGateways: Map<GatewayUrl, Signature>;
 
@@ -229,6 +242,36 @@ export class ContextProviderMock implements IContextProvider {
       this.onStateChannelCreatedActivations.push(val);
     });
 
+    this.onChainConnected = new Subject();
+    this.onChainConnected.subscribe((val) => {
+      this.onChainConnectedActivations.push(val);
+    });
+
+    this.onGovernanceChainConnected = new Subject();
+    this.onGovernanceChainConnected.subscribe((val) => {
+      this.onGovernanceChainConnectedActivations.push(val);
+    });
+
+    this.onChainChanged = new Subject();
+    this.onChainChanged.subscribe((val) => {
+      this.onChainChangedActivations.push(val);
+    });
+
+    this.onAccountChanged = new Subject();
+    this.onAccountChanged.subscribe((val) => {
+      this.onAccountChangedActivations.push(val);
+    });
+
+    this.onGovernanceChainChanged = new Subject();
+    this.onGovernanceChainChanged.subscribe((val) => {
+      this.onGovernanceChainChangedActivations.push(val);
+    });
+
+    this.onGovernanceAccountChanged = new Subject();
+    this.onGovernanceAccountChanged.subscribe((val) => {
+      this.onGovernanceAccountChangedActivations.push(val);
+    });
+
     this.authorizedGateways = new Map<GatewayUrl, Signature>();
 
     if (context != null) {
@@ -267,6 +310,12 @@ export class ContextProviderMock implements IContextProvider {
         this.onPrivateCredentialsRequested,
         this.onGatewayConnectorActivated,
         this.onStateChannelCreated,
+        this.onChainConnected,
+        this.onGovernanceChainConnected,
+        this.onChainChanged,
+        this.onAccountChanged,
+        this.onGovernanceChainChanged,
+        this.onGovernanceAccountChanged,
       );
     }
 
@@ -306,6 +355,12 @@ export class ContextProviderMock implements IContextProvider {
         this.onPrivateCredentialsRequested,
         this.onGatewayConnectorActivated,
         this.onStateChannelCreated,
+        this.onChainConnected,
+        this.onGovernanceChainConnected,
+        this.onChainChanged,
+        this.onAccountChanged,
+        this.onGovernanceChainChanged,
+        this.onGovernanceAccountChanged,
         this.authorizedGateways,
       );
     }
@@ -360,6 +415,12 @@ export class ContextProviderMock implements IContextProvider {
       onPrivateCredentialsRequested: 0,
       onGatewayConnectorActivated: 0,
       onStateChannelCreated: 0,
+      onChainConnected: 0,
+      onGovernanceChainConnected: 0,
+      onChainChanged: 0,
+      onAccountChanged: 0,
+      onGovernanceChainChanged: 0,
+      onGovernanceAccountChanged: 0,
     };
 
     // Merge the passed in counts with the basic counts
@@ -443,6 +504,29 @@ export class ContextProviderMock implements IContextProvider {
     expect(this.onStateChannelCreatedActivations.length).toBe(
       counts.onStateChannelCreated,
     );
+
+    expect(this.onChainConnectedActivations.length).toBe(
+      counts.onChainConnected,
+    );
+
+    expect(this.onGovernanceChainConnectedActivations.length).toBe(
+      counts.onGovernanceChainConnected,
+    );
+
+    expect(this.onChainChangedActivations.length).toBe(counts.onChainChanged);
+
+    expect(this.onAccountChangedActivations.length).toBe(
+      counts.onAccountChanged,
+    );
+
+    expect(this.onGovernanceChainChangedActivations.length).toBe(
+      counts.onGovernanceChainChanged,
+    );
+
+    this.onGovernanceAccountChanged,
+      expect(this.onGovernanceAccountChangedActivations.length).toBe(
+        counts.onGovernanceAccountChanged,
+      );
   }
 }
 
@@ -473,4 +557,10 @@ export interface IExpectedEventCounts {
   onPrivateCredentialsRequested?: number;
   onGatewayConnectorActivated?: number;
   onStateChannelCreated?: number;
+  onChainConnected?: number;
+  onGovernanceChainConnected?: number;
+  onChainChanged?: number;
+  onAccountChanged?: number;
+  onGovernanceChainChanged?: number;
+  onGovernanceAccountChanged?: number;
 }

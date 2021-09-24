@@ -113,6 +113,16 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
       .mapErr(handleError);
   };
 
+  const castVote = (voteSupport: EVoteSupport) => {
+    coreProxy
+      .castVote(proposalId, voteSupport)
+      .map((proposal) => {
+        setProposal(proposal);
+        console.log("proposal", proposal);
+      })
+      .mapErr(handleError);
+  };
+
   const getHeaderActions: () => IHeaderAction[] | undefined = () => {
     if (
       proposal?.state === EProposalState.SUCCEEDED ||
@@ -149,7 +159,12 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         }}
         headerActions={getHeaderActions()}
       />
-      {proposal?.state && <GovernanceStatusTag status={proposal?.state} />}
+
+      {proposal?.state && (
+        <Box className={classes.proposalStatus}>
+          <GovernanceStatusTag status={proposal?.state} />
+        </Box>
+      )}
       <Box display="flex">
         <Grid container spacing={3}>
           <Grid item xs={4}>
@@ -157,9 +172,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
               type="for"
               value={Number(proposal?.proposalVotesFor)}
               progressValue={forPercentage}
-              onVoteClick={() => {
-                console.log("vote");
-              }}
+              onVoteClick={() => castVote(EVoteSupport.FOR)}
               isVoted={supportStatus === EVoteSupport.FOR}
               showVoteButton={showVotingButtons}
               disableVoteButton={supportStatus !== EVoteSupport.FOR}
@@ -170,9 +183,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
               type="against"
               value={Number(proposal?.proposalVotesAgaints)}
               progressValue={againstPercentage}
-              onVoteClick={() => {
-                console.log("vote");
-              }}
+              onVoteClick={() => castVote(EVoteSupport.FOR)}
               isVoted={supportStatus === EVoteSupport.AGAINST}
               showVoteButton={showVotingButtons}
               disableVoteButton={supportStatus !== EVoteSupport.AGAINST}
@@ -183,9 +194,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
               type="abstain"
               value={Number(proposal?.proposalETA)}
               progressValue={abstainPercentage}
-              onVoteClick={() => {
-                console.log("vote");
-              }}
+              onVoteClick={() => castVote(EVoteSupport.FOR)}
               isVoted={supportStatus === EVoteSupport.ABSTAIN}
               showVoteButton={showVotingButtons}
               disableVoteButton={supportStatus !== EVoteSupport.ABSTAIN}

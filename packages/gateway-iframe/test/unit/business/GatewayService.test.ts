@@ -4,6 +4,7 @@ import {
   EthereumAddress,
   Balances,
   AssetBalance,
+  UtilityMessageSignature,
 } from "@hypernetlabs/objects";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
@@ -54,6 +55,7 @@ class GatewayServiceMocks {
   public gatewayUrl = GatewayUrl("http://localhost:5010");
   public gatewayAddress = EthereumAddress("gatewayAddress");
   public gatewaySignature = Signature("gatewaySignature");
+  public messageSignature = UtilityMessageSignature("messageSignature");
   public messageToBeSigned = "message";
   public nowTime = 1487076708000;
   public address = "0x14791697260E4c9A71f18484C9f997B308e59325";
@@ -463,7 +465,7 @@ describe("GatewayService tests", () => {
     // Act
     const response = await gatewayService.messageSigned(
       gatewayServiceMock.messageToBeSigned,
-      gatewayServiceMock.gatewaySignature,
+      gatewayServiceMock.messageSignature,
     );
     const result = response._unsafeUnwrap();
 

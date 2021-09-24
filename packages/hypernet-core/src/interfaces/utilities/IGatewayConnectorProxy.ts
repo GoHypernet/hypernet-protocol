@@ -18,6 +18,7 @@ import {
   UUID,
   GatewayTokenInfo,
   ActiveStateChannel,
+  UtilityMessageSignature,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { ResultAsync } from "neverthrow";
@@ -105,7 +106,7 @@ export interface IGatewayConnectorProxy extends ParentProxy {
 
   messageSigned(
     message: string,
-    signature: Signature,
+    signature: UtilityMessageSignature,
   ): ResultAsync<void, ProxyError>;
 
   returnStateChannel(

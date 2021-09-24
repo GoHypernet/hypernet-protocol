@@ -350,6 +350,12 @@ export interface IHypernetCore {
   onInitializationRequired: Subject<void>;
   onPrivateCredentialsRequested: Subject<void>;
   onStateChannelCreated: Subject<ActiveStateChannel>;
+  onChainConnected: Subject<ChainId>;
+  onGovernanceChainConnected: Subject<ChainId>;
+  onChainChanged: Subject<ChainId>;
+  onAccountChanged: Subject<EthereumAddress>;
+  onGovernanceChainChanged: Subject<ChainId>;
+  onGovernanceAccountChanged: Subject<EthereumAddress>;
 }
 
 export const IHypernetCoreType = Symbol.for("IHypernetCore");

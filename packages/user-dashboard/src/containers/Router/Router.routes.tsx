@@ -9,6 +9,7 @@ import ProposalDetail from "@user-dashboard/pages/Governance/ProposalDetail";
 import ProposalCreate from "@user-dashboard/pages/Governance/ProposalCreate";
 import RegistryList from "@web-integration/pages/Governance/RegistryList";
 import RegistryEntryList from "@web-integration/pages/Governance/RegistryEntryList";
+import RegistryEntryDetail from "@web-integration/pages/Governance/RegistryEntryDetail";
 
 interface IRoute {
   path: string;
@@ -55,7 +56,7 @@ export const routes: IRoute[] = [
   },
   {
     path: "/registries/:registryName/entries/:entryLabel",
-    component: RegistryEntryList,
+    component: RegistryEntryDetail,
     name: "Registry Entry Detail",
   },
   {

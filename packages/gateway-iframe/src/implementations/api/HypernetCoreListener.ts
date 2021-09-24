@@ -8,6 +8,7 @@ import {
   Signature,
   UUID,
   ActiveStateChannel,
+  UtilityMessageSignature,
 } from "@hypernetlabs/objects";
 import { ChildProxy, IIFrameCallData } from "@hypernetlabs/utils";
 import { injectable, inject } from "inversify";
@@ -221,7 +222,7 @@ interface IActivateConnectorData {
 
 interface ISignatureResponseData {
   message: string;
-  signature: Signature;
+  signature: UtilityMessageSignature;
 }
 
 interface IStateChannelReturnedResponseData {

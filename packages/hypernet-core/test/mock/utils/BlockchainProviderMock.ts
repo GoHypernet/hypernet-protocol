@@ -8,6 +8,7 @@ import {
   BlockchainUnavailableError,
   InvalidParametersError,
   EthereumAddress,
+  GovernanceSignerUnavailableError,
 } from "@hypernetlabs/objects";
 import { routerChannelAddress, commonAmount, mockUtils } from "@mock/mocks";
 import { BigNumber, ethers } from "ethers";
@@ -23,8 +24,9 @@ interface ISendTransactionVals {
 
 export class BlockchainProviderMock implements IBlockchainProvider {
   public signer = td.object<ethers.providers.JsonRpcSigner>();
-  public provider = td.object<ethers.providers.Web3Provider>();
-  public governanceProvider = td.object<ethers.providers.Web3Provider>();
+  public provider = td.object<ethers.providers.JsonRpcProvider>();
+  public governanceProvider = td.object<ethers.providers.Provider>();
+  public governanceSigner = td.object<ethers.providers.JsonRpcSigner>();
 
   constructor() {
     td.when(this.provider.listAccounts()).thenResolve(
@@ -49,15 +51,22 @@ export class BlockchainProviderMock implements IBlockchainProvider {
   public getSigner(): ResultAsync<ethers.providers.JsonRpcSigner, never> {
     return okAsync(this.signer);
   }
-  public getProvider(): ResultAsync<ethers.providers.Web3Provider, never> {
+  public getProvider(): ResultAsync<ethers.providers.JsonRpcProvider, never> {
     return okAsync(this.provider);
   }
 
   public getGovernanceProvider(): ResultAsync<
-    ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
+    ethers.providers.Provider,
     never
   > {
     return okAsync(this.governanceProvider);
+  }
+
+  public getGovernanceSigner(): ResultAsync<
+    ethers.providers.JsonRpcSigner,
+    GovernanceSignerUnavailableError
+  > {
+    return okAsync(this.governanceSigner);
   }
 
   public getEIP1193Provider(): ResultAsync<Eip1193Bridge, never> {
