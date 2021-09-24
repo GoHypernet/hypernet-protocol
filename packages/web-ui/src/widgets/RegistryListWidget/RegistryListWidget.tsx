@@ -58,7 +58,8 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
           ]}
           buttonLabel="View Registry Entries"
           onViewDetailsClick={() =>
-            onRegistryEntryListNavigate && onRegistryEntryListNavigate("1")
+            onRegistryEntryListNavigate &&
+            onRegistryEntryListNavigate(registry.name)
           }
         />
       ))}

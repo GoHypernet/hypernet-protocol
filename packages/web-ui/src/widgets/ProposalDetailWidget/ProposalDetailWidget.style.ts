@@ -24,4 +24,7 @@ export const useStyles = makeStyles({
     fontWeight: EFontWeight.MEDIUM,
     paddingBottom: 24,
   },
+  proposalStatus: {
+    marginBottom: 40,
+  },
 });

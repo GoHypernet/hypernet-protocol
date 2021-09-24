@@ -19,7 +19,11 @@ const RegistryEntryList: React.FC = () => {
           registryName: string,
           entryLabel: string,
         ) => {
-          history.push(`/registries/${registryName}/entries/${entryLabel}`);
+          console.log("entryLabel", entryLabel);
+          console.log("encodeURI(entryLabel)", encodeURIComponent(entryLabel));
+          history.push(
+            `/registries/${registryName}/entries/${encodeURIComponent(entryLabel)}`,
+          );
           console.log("onRegistryEntryDetailsNavigate");
         },
         onRegistryListNavigate: () => {

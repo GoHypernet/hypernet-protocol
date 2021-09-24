@@ -18,10 +18,9 @@ const RegistryEntryDetail: React.FC = () => {
         selector: "registry-entry-detail-page-wrapper",
         onRegistryEntryListNavigate: (registryName: string) => {
           history.push(`/registries/${registryName}/entries`);
-          console.log("onRegistryEntryListNavigate");
         },
         registryName,
-        entryLabel,
+        entryLabel: decodeURIComponent(entryLabel),
       })
       .mapErr(handleError);
   }, []);

@@ -269,12 +269,13 @@ export class RegistryRepository implements IRegistryRepository {
           GovernanceAbis.NonFungibleRegistry.abi,
           signer,
         );
-
+        console.log("totalSupply");
         return ResultAsync.fromPromise(
-          registryContract?._tokenIdTracker() as Promise<BigNumber>,
+          registryContract?.totalSupply() as Promise<BigNumber>,
           (e) => {
+            console.log('e: ', e);
             return new BlockchainUnavailableError(
-              "Unable to retrieve _tokenIdTracker count",
+              "Unable to retrieve totalSupply count",
               e,
             );
           },
