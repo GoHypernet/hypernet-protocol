@@ -8,7 +8,7 @@ import {
 } from "@web-ui/components";
 import { IProposalsWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { EthereumAddress, Proposal } from "@hypernetlabs/objects";
+import { Proposal } from "@hypernetlabs/objects";
 import DelegateVotesWidget from "@web-ui/widgets/DelegateVotesWidget";
 
 const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
@@ -23,10 +23,6 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
     useState<boolean>(false);
 
   useEffect(() => {
-    coreProxy.getEthereumAccounts().map((accounts) => {
-      console.log("accounts: ", accounts);
-    });
-    // delegate votes, createProposal and then list all proposals
     coreProxy
       .getProposals()
       .map((proposals) => {
@@ -34,41 +30,6 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
         setProposals(proposals);
       })
       .mapErr(handleError);
-
-    /* coreProxy
-      .createProposal("first proposal name", "proposal symbol1", address)
-      .map((proposal) => {
-        console.log("created proposal FE: ", proposal);
-
-        // get proposal details
-        const propsalId = proposal.id;
-        coreProxy
-          .getProposalDetails(propsalId)
-          .map((proposal) => {
-            console.log("proposal detail from getProposalDetails: ", proposal);
-
-            // get cast a new vote
-            coreProxy
-              .castVote(propsalId, EVoteSupport.FOR)
-              .map((proposal) => {
-                console.log("proposal detail from castVote: ", proposal);
-
-                // get vote history
-                coreProxy
-                  .getProposalVotesReceipt(propsalId, address)
-                  .map((proposal) => {
-                    console.log(
-                      "ProposalVoteReceipt from getProposalVotesReceipt: ",
-                      proposal,
-                    );
-                  })
-                  .mapErr(handleError);
-              })
-              .mapErr(handleError);
-          })
-          .mapErr(handleError);
-      })
-      .mapErr(handleError); */
   }, []);
 
   const handleError = (err?: Error) => {

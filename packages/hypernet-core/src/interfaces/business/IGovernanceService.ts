@@ -39,4 +39,10 @@ export interface IGovernanceService {
     data: string,
     recipient: EthereumAddress,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  queueProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  executeProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
 }

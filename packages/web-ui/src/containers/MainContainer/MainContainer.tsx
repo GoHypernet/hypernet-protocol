@@ -29,10 +29,10 @@ const MainContainer: React.FC<IMainContainer> = ({
         <Modal closeCallback={closeCallback} modalStyle={modalStyle}>
           {children}
         </Modal>
-      ) : !isV2 ? (
-        <Box className={classes.wrapper}>{children}</Box>
-      ) : (
+      ) : isV2 ? (
         children
+      ) : (
+        <Box className={classes.wrapper}>{children}</Box>
       )}
     </>
   );

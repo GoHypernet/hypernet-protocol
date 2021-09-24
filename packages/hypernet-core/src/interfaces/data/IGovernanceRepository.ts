@@ -38,6 +38,12 @@ export interface IGovernanceRepository {
     data: string,
     recipient: EthereumAddress,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  queueProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  executeProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
 }
 
 export const IGovernanceRepositoryType = Symbol.for("IGovernanceRepository");

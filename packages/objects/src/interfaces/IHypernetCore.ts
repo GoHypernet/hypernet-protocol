@@ -312,6 +312,14 @@ export interface IHypernetCore {
     label: string,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
 
+  queueProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+
+  executeProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+
   /**
    * Observables for seeing what's going on
    */

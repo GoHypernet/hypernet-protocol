@@ -5,7 +5,7 @@ import { useStyles } from "@web-ui/components/GovernanceWidgetHeader/GovernanceW
 import { IGovernanceButton, GovernanceButton } from "@web-ui/components";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 
-interface IHeaderAction extends IGovernanceButton {
+export interface IHeaderAction extends IGovernanceButton {
   label: string;
 }
 
@@ -48,9 +48,7 @@ export const GovernanceWidgetHeader: React.FC<IGovernanceWidgetHeader> = ({
         <Typography variant="h1" className={classes.label}>
           {label}
         </Typography>
-        <Typography className={classes.description}>
-          {description}
-        </Typography>
+        <Typography className={classes.description}>{description}</Typography>
       </Box>
       {(headerActions?.length || rightContent) && (
         <Box className={classes.rightSection}>
