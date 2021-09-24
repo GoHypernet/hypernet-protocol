@@ -71,7 +71,7 @@ export interface IRegistryEntryListWidgetParams extends IRenderParams {
 export interface IRegistryEntryDetailWidgetParams extends IRenderParams {
   onRegistryEntryListNavigate?: (registryName: string) => void;
   registryName: string;
-  registryLabel: string;
+  entryLabel: string;
 }
 
 export interface IHypernetWebUI {

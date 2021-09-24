@@ -18,7 +18,7 @@ import {
 const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   onRegistryEntryListNavigate,
   registryName,
-  registryLabel,
+  entryLabel,
 }: IRegistryEntryDetailWidgetParams) => {
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
@@ -38,7 +38,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   useEffect(() => {
     setLoading(true);
     coreProxy
-      .getRegistryEntryByLabel(registryName, registryLabel)
+      .getRegistryEntryByLabel(registryName, entryLabel)
       .map((registryEntry: RegistryEntry) => {
         console.log("registryEntry: ", registryEntry);
         setRegistryEntry(registryEntry);
