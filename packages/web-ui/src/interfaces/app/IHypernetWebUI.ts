@@ -56,7 +56,7 @@ export interface IProposalCreateWidgetParams extends IRenderParams {
 }
 
 export interface IRegistryListWidgetParams extends IRenderParams {
-  onRegistryEntryListNavigate?: (proposalId: string) => void;
+  onRegistryEntryListNavigate?: (registryName: string) => void;
 }
 
 export interface IRegistryEntryListWidgetParams extends IRenderParams {
@@ -68,9 +68,10 @@ export interface IRegistryEntryListWidgetParams extends IRenderParams {
   registryName: string;
 }
 
-export interface IRegistryDetailWidgetParams extends IRenderParams {
-  onRegistryListNavigate?: () => void;
-  registryId: string;
+export interface IRegistryEntryDetailWidgetParams extends IRenderParams {
+  onRegistryEntryListNavigate?: (registryName: string) => void;
+  registryName: string;
+  registryLabel: string
 }
 
 export interface IHypernetWebUI {
