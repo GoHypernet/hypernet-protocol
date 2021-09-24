@@ -43,22 +43,6 @@ export const routes: IRoute[] = [
     isHeaderItem: true,
   },
   {
-    path: "/proposals",
-    component: Proposals,
-    name: "Proposals",
-    isHeaderItem: true,
-  },
-  {
-    path: "/proposals/:proposalId",
-    component: ProposalDetail,
-    name: "Proposal Detail",
-  },
-  {
-    path: "/proposal-create",
-    component: ProposalCreate,
-    name: "Proposal",
-  },
-  {
     path: "/registries",
     component: RegistryList,
     name: "Registries",
@@ -73,5 +57,21 @@ export const routes: IRoute[] = [
     path: "/registries/:registryName/entries/:registryEntry",
     component: RegistryEntryList,
     name: "Registry Entry Detail",
+  },
+  {
+    path: "/proposals",
+    component: Proposals,
+    name: "Proposals",
+    isHeaderItem: true,
+  },
+  {
+    path: "/proposals/:proposalId",
+    component: ProposalDetail,
+    name: "Proposal Detail",
+  },
+  {
+    path: "/proposal-create",
+    component: ProposalCreate,
+    name: "Proposal",
   },
 ];
