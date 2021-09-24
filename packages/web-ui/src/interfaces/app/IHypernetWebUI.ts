@@ -109,7 +109,7 @@ export interface IHypernetWebUI {
   renderRegistryListWidget(
     config?: IRegistryListWidgetParams,
   ): Result<void, RenderError>;
-  renderRegistryDetailWidget(
-    config?: IRegistryDetailWidgetParams,
+  renderRegistryEntryDetailWidget(
+    config?: IRegistryEntryDetailWidgetParams,
   ): Result<void, RenderError>;
 }

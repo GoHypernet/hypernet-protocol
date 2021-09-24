@@ -11,8 +11,8 @@ interface IFieldWithValueList {
 interface GovernanceRegistryListItemProps {
   number: string;
   title: string;
-  onViewDetailsClick: () => void;
   fieldWithValueList: IFieldWithValueList[];
+  onViewDetailsClick: () => void;
   buttonLabel?: string;
 }
 

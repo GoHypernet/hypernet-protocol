@@ -14,7 +14,7 @@ import {
   IProposalCreateWidgetParams,
   IProposalDetailWidgetParams,
   IRegistryListWidgetParams,
-  IRegistryDetailWidgetParams,
+  IRegistryEntryDetailWidgetParams,
 } from "@web-ui/interfaces";
 import GatewaysWidget from "@web-ui/widgets/GatewaysWidget";
 import { Result } from "neverthrow";
@@ -58,7 +58,7 @@ import { lightTheme, darkTheme } from "@web-ui/theme";
 import CreateProposalWidget from "@web-integration/widgets/CreateProposalWidget";
 import ProposalDetailWidget from "@web-integration/widgets/ProposalDetailWidget";
 import RegistryListWidget from "@web-integration/widgets/RegistryListWidget";
-import RegistryDetailWidget from "@web-integration/widgets/RegistryDetailWidget";
+import RegistryEntryDetailWidget from "@web-integration/widgets/RegistryEntryDetailWidget";
 
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
@@ -470,13 +470,13 @@ export default class HypernetWebUI implements IHypernetWebUI {
     return this._getThrowableRender(renderReact);
   }
 
-  public renderRegistryDetailWidget(
-    config: IRegistryDetailWidgetParams,
+  public renderRegistryEntryDetailWidget(
+    config: IRegistryEntryDetailWidgetParams,
   ): Result<void, RenderError> {
     const renderReact = () => {
       return ReactDOM.render(
         this._bootstrapComponent(
-          <RegistryDetailWidget {...config} />,
+          <RegistryEntryDetailWidget {...config} />,
           config?.showInModal,
           undefined,
           undefined,
