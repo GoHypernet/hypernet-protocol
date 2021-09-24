@@ -59,10 +59,20 @@ export interface IRegistryListWidgetParams extends IRenderParams {
   onRegistryEntryListNavigate?: (proposalId: string) => void;
 }
 
+export interface IRegistryEntryListWidgetParams extends IRenderParams {
+  onRegistryEntryDetailsNavigate?: (
+    registryName: string,
+    entryLabel: string,
+  ) => void;
+  onRegistryListNavigate?: () => void;
+  registryName: string;
+}
+
 export interface IRegistryDetailWidgetParams extends IRenderParams {
   onRegistryListNavigate?: () => void;
   registryId: string;
 }
+
 export interface IHypernetWebUI {
   renderBalancesWidget(params?: IRenderParams): Result<void, RenderError>;
   renderGatewaysWidget(params?: IRenderParams): Result<void, RenderError>;
