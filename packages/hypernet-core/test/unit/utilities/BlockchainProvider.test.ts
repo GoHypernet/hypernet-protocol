@@ -1,19 +1,21 @@
+import { Eip1193Bridge } from "@ethersproject/experimental";
 import {
   InvalidParametersError,
   PrivateCredentials,
 } from "@hypernetlabs/objects";
 import { ILocalStorageUtils, ILogUtils } from "@hypernetlabs/utils";
+import { chainId } from "@tests/mock/mocks";
+import { ethers } from "ethers";
 import { Err, Ok, okAsync } from "neverthrow";
 import td from "testdouble";
-import { Eip1193Bridge } from "@ethersproject/experimental";
+
 import { EthersBlockchainProvider } from "@implementations/utilities";
 import { IBlockchainProvider, IBrowserNode } from "@interfaces/utilities";
-import { ConfigProviderMock, ContextProviderMock } from "@mock/utils";
 import { IInternalProviderFactory } from "@interfaces/utilities/factory";
+import { ConfigProviderMock, ContextProviderMock } from "@mock/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
-import { ethers } from "ethers";
 
 jest.mock("web3modal", () => {
   return class Web3Modal {
@@ -28,13 +30,7 @@ jest.mock("web3modal", () => {
 });
 
 jest.mock("ethers", () => {
-  let mockEthers = {
-    providers: {
-      JsonRpcProvider: class JsonRpcProvider {
-        constructor() {}
-      },
-    },
-  };
+  let mockEthers = {};
   Object.keys(jest.requireActual("ethers")).forEach((key) => {
     mockEthers = {
       ...mockEthers,
@@ -44,15 +40,25 @@ jest.mock("ethers", () => {
   return {
     ...mockEthers,
     providers: {
-      ...mockEthers.providers,
-      Web3Provider: class Web3Provider extends mockEthers.providers
-        .JsonRpcProvider {
-        constructor() {
-          super();
-        }
+      JsonRpcProvider: class JsonRpcProvider {
+        constructor() {}
+      },
+      Web3Provider: class Web3Provider {
+        constructor() {}
 
         public getBlock() {
           return okAsync({} as ethers.providers.Block);
+        }
+
+        public getSigner() {
+          return td.object<ethers.providers.JsonRpcSigner>();
+        }
+
+        public getNetwork(): Promise<ethers.providers.Network> {
+          return Promise.resolve({
+            name: "test",
+            chainId: chainId,
+          });
         }
       },
     },
@@ -80,20 +86,20 @@ class BlockchainProviderMocks {
 }
 
 describe("BlockchainProvider tests", () => {
-  test("getProvider returns a Web3Provider", async () => {
+  test("getProvider returns a provider", async () => {
     // Arrange
     const mocks = new BlockchainProviderMocks();
     const blockchainProvider = mocks.factoryProvider();
 
     // Act
-    await blockchainProvider.initialize();
-    const result = await blockchainProvider.getProvider();
-    const wrappedResponse = result._unsafeUnwrap();
+    const result = await blockchainProvider.initialize().andThen(() => {
+      return blockchainProvider.getProvider();
+    });
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(wrappedResponse).toBeInstanceOf(ethers.providers.JsonRpcProvider);
+    const wrappedResponse = result._unsafeUnwrap();
   });
 
   test("getProvider returns Must call BlockchainProvider.initialize() first before you can call getProvider()", async () => {
@@ -119,20 +125,20 @@ describe("BlockchainProvider tests", () => {
     );
   });
 
-  test("getSigner returns a JsonRpcSigner", async () => {
+  test("getSigner returns a signer", async () => {
     // Arrange
     const mocks = new BlockchainProviderMocks();
     const blockchainProvider = mocks.factoryProvider();
 
     // Act
-    await blockchainProvider.initialize();
-    const result = await blockchainProvider.getSigner();
-    const wrappedResponse = result._unsafeUnwrap();
+
+    const result = await blockchainProvider.initialize().andThen(() => {
+      return blockchainProvider.getSigner();
+    });
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(wrappedResponse).toBeInstanceOf(ethers.providers.JsonRpcSigner);
   });
 
   test("getSigner returns Must call BlockchainProvider.initialize() first before you can call getSigner()", async () => {
@@ -158,20 +164,19 @@ describe("BlockchainProvider tests", () => {
     );
   });
 
-  test("getGovernanceProvider returns a JsonRpcSigner", async () => {
+  test("getGovernanceProvider returns a Provider", async () => {
     // Arrange
     const mocks = new BlockchainProviderMocks();
     const blockchainProvider = mocks.factoryProvider();
 
     // Act
-    await blockchainProvider.initialize();
-    const result = await blockchainProvider.getGovernanceProvider();
-    const wrappedResponse = result._unsafeUnwrap();
+    const result = await blockchainProvider.initialize().andThen(() => {
+      return blockchainProvider.getGovernanceProvider();
+    });
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(wrappedResponse).toBeInstanceOf(ethers.providers.JsonRpcProvider);
   });
 
   test("getGovernanceProvider returns Must call BlockchainProvider.initialize() first before you can call getGovernanceProvider()", async () => {
