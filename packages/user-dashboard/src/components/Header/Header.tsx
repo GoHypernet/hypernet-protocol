@@ -23,18 +23,20 @@ const Header: React.FC = () => {
         />
       </Box>
       <Box className={classes.menuWrapper}>
-        {routes.map((route, index) => (
-          <Box
-            className={`${classes.menuItem} ${
-              isPathMatchRequestedUrl(route.path)
-                ? classes.activeMenuItem
-                : classes.inactiveMenuItem
-            }`}
-            key={index}
-          >
-            <Link to={route.path}>{route.name}</Link>
-          </Box>
-        ))}
+        {routes.map((route, index) =>
+          route.isHeaderItem ? (
+            <Box
+              className={`${classes.menuItem} ${
+                isPathMatchRequestedUrl(route.path)
+                  ? classes.activeMenuItem
+                  : classes.inactiveMenuItem
+              }`}
+              key={index}
+            >
+              <Link to={route.path}>{route.name}</Link>
+            </Box>
+          ) : null,
+        )}
       </Box>
     </Box>
   );
