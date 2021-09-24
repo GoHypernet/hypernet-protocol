@@ -1,1 +1,1 @@
-export * from "./GovernanceDialogSelectField";
+export * from "@web-ui/components/GovernanceDialogSelectField/GovernanceDialogSelectField";

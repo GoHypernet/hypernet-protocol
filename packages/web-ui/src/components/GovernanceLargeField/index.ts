@@ -1,1 +1,1 @@
-export * from "./GovernanceLargeField";
+export * from "@web-ui/components/GovernanceLargeField/GovernanceLargeField";

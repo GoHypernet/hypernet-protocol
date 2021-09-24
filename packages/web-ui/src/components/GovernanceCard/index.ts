@@ -1,1 +1,1 @@
-export * from "@web-integration/components/GovernanceCard/GovernanceCard";
+export * from "@web-ui/components/GovernanceCard/GovernanceCard";

@@ -1,1 +1,1 @@
-export * from "./GovernanceBalanceList";
+export * from "@web-ui/components/GovernanceBalanceList/GovernanceBalanceList";

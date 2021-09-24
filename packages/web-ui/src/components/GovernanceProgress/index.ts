@@ -1,1 +1,1 @@
-export * from "./GovernanceProgress";
+export * from "@web-ui/components/GovernanceProgress/GovernanceProgress";
