@@ -40,7 +40,11 @@ export const GovernanceWidgetHeader: React.FC<IGovernanceWidgetHeader> = ({
             onClick={navigationLink.onClick}
           >
             <ArrowBackIcon className={classes.navigationIcon} />
-            <Typography variant="body2" className={classes.navigationLabel}>
+            <Typography
+              variant="body2"
+              color="textPrimary"
+              className={classes.navigationLabel}
+            >
               {navigationLink.label}
             </Typography>
           </Box>
@@ -48,9 +52,7 @@ export const GovernanceWidgetHeader: React.FC<IGovernanceWidgetHeader> = ({
         <Typography variant="h1" className={classes.label}>
           {label}
         </Typography>
-        <Typography className={classes.description}>
-          {description}
-        </Typography>
+        <Typography className={classes.description}>{description}</Typography>
       </Box>
       {(headerActions?.length || rightContent) && (
         <Box className={classes.rightSection}>

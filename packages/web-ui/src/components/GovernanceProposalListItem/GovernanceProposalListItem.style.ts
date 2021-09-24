@@ -15,7 +15,6 @@ export const useStyles = makeStyles((theme) => ({
   },
   title: (any) => ({
     marginLeft: 40,
-    color: colors.GRAY700,
   }),
   status: (any) => ({
     marginLeft: "auto",

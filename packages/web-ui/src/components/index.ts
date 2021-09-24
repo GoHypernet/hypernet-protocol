@@ -36,3 +36,4 @@ export * from "./GovernanceRegistryListItem";
 export * from "./GovernanceTable";
 export * from "./GovernanceBasicValueWithTitle";
 export * from "./GovernanceCard";
+export * from "./GovernanceBalanceList";

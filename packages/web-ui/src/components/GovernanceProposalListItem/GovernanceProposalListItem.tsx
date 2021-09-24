@@ -31,7 +31,7 @@ export const GovernanceProposalListItem: React.FC<GovernanceProposalListItemProp
             className={classes.activePulse}
           />
         )} */}
-        <Typography variant="h5" className={classes.title}>
+        <Typography variant="h5" color="textPrimary" className={classes.title}>
           {title}
         </Typography>
         <Box className={classes.status}>

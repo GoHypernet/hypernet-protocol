@@ -1,4 +1,4 @@
-import { GovernanceCard } from "@hypernetlabs/web-ui";
+import { GovernanceCard, GovernanceCardHeader } from "@hypernetlabs/web-ui";
 
 export default {
   title: "Layout/GovernanceCard",
@@ -16,6 +16,12 @@ const Template = (args) => (
     }}
   >
     <GovernanceCard {...args} />
+
+    <GovernanceCard
+      {...args}
+      title="Card Title"
+      description="Some descriptions lolo tetete"
+    />
   </div>
 );
 
