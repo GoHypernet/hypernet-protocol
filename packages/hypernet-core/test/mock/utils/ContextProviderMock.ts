@@ -57,7 +57,7 @@ export class ContextProviderMock implements IContextProvider {
   public onCeramicAuthenticationStartedActivationCount = 0;
   public onCeramicAuthenticationSucceeded: Subject<void>;
   public onCeramicAuthenticationSucceededActivationCount = 0;
-  public onCeramicFailed: Subject<void>;
+  public onCeramicFailed: Subject<Error>;
   public onCeramicFailedActivationCount = 0;
   public onGatewayAuthorized: Subject<GatewayUrl>;
   public onGatewayAuthorizedActivations: GatewayUrl[] = [];
@@ -103,137 +103,137 @@ export class ContextProviderMock implements IContextProvider {
     initializedContext: InitializedHypernetContext | null = null,
     uninitializedAccount: EthereumAddress | null = null,
   ) {
-    this.onControlClaimed = new Subject<ControlClaim>();
+    this.onControlClaimed = new Subject();
     this.onControlClaimed.subscribe((val) => {
       this.onControlClaimedActivations.push(val);
     });
 
-    this.onControlYielded = new Subject<ControlClaim>();
+    this.onControlYielded = new Subject();
     this.onControlYielded.subscribe((val) => {
       this.onControlYieldedActivations.push(val);
     });
 
-    this.onPushPaymentSent = new Subject<PushPayment>();
+    this.onPushPaymentSent = new Subject();
     this.onPushPaymentSent.subscribe((val) => {
       this.onPushPaymentSentActivations.push(val);
     });
 
-    this.onPullPaymentSent = new Subject<PullPayment>();
+    this.onPullPaymentSent = new Subject();
     this.onPullPaymentSent.subscribe((val) => {
       this.onPullPaymentSentActivations.push(val);
     });
 
-    this.onPushPaymentReceived = new Subject<PushPayment>();
+    this.onPushPaymentReceived = new Subject();
     this.onPushPaymentReceived.subscribe((val) => {
       this.onPushPaymentReceivedActivations.push(val);
     });
 
-    this.onPullPaymentReceived = new Subject<PullPayment>();
+    this.onPullPaymentReceived = new Subject();
     this.onPullPaymentReceived.subscribe((val) => {
       this.onPullPaymentReceivedActivations.push(val);
     });
 
-    this.onPushPaymentUpdated = new Subject<PushPayment>();
+    this.onPushPaymentUpdated = new Subject();
     this.onPushPaymentUpdated.subscribe((val) => {
       this.onPushPaymentUpdatedActivations.push(val);
     });
 
-    this.onPullPaymentUpdated = new Subject<PullPayment>();
+    this.onPullPaymentUpdated = new Subject();
     this.onPullPaymentUpdated.subscribe((val) => {
       this.onPullPaymentUpdatedActivations.push(val);
     });
 
-    this.onPushPaymentDelayed = new Subject<PushPayment>();
+    this.onPushPaymentDelayed = new Subject();
     this.onPushPaymentDelayed.subscribe((val) => {
       this.onPushPaymentDelayedActivations.push(val);
     });
 
-    this.onPullPaymentDelayed = new Subject<PullPayment>();
+    this.onPullPaymentDelayed = new Subject();
     this.onPullPaymentDelayed.subscribe((val) => {
       this.onPullPaymentDelayedActivations.push(val);
     });
 
-    this.onPushPaymentCanceled = new Subject<PushPayment>();
+    this.onPushPaymentCanceled = new Subject();
     this.onPushPaymentCanceled.subscribe((val) => {
       this.onPushPaymentCanceledActivations.push(val);
     });
 
-    this.onPullPaymentCanceled = new Subject<PullPayment>();
+    this.onPullPaymentCanceled = new Subject();
     this.onPullPaymentCanceled.subscribe((val) => {
       this.onPullPaymentCanceledActivations.push(val);
     });
 
-    this.onBalancesChanged = new Subject<Balances>();
+    this.onBalancesChanged = new Subject();
     this.onBalancesChanged.subscribe((val) => {
       this.onBalancesChangedActivations.push(val);
     });
 
-    this.onCeramicAuthenticationStarted = new Subject<void>();
+    this.onCeramicAuthenticationStarted = new Subject();
     this.onCeramicAuthenticationStarted.subscribe(() => {
       this.onCeramicAuthenticationStartedActivationCount++;
     });
 
-    this.onCeramicAuthenticationSucceeded = new Subject<void>();
+    this.onCeramicAuthenticationSucceeded = new Subject();
     this.onCeramicAuthenticationSucceeded.subscribe(() => {
       this.onCeramicAuthenticationSucceededActivationCount++;
     });
 
-    this.onCeramicFailed = new Subject<void>();
+    this.onCeramicFailed = new Subject();
     this.onCeramicFailed.subscribe(() => {
       this.onCeramicFailedActivationCount++;
     });
 
-    this.onGatewayAuthorized = new Subject<GatewayUrl>();
+    this.onGatewayAuthorized = new Subject();
     this.onGatewayAuthorized.subscribe((val) => {
       this.onGatewayAuthorizedActivations.push(val);
     });
 
-    this.onGatewayDeauthorizationStarted = new Subject<GatewayUrl>();
+    this.onGatewayDeauthorizationStarted = new Subject();
     this.onGatewayDeauthorizationStarted.subscribe((val) => {
       this.onGatewayDeauthorizationStartedActivations.push(val);
     });
 
-    this.onAuthorizedGatewayUpdated = new Subject<GatewayUrl>();
+    this.onAuthorizedGatewayUpdated = new Subject();
     this.onAuthorizedGatewayUpdated.subscribe((val) => {
       this.onAuthorizedGatewayUpdatedActivations.push(val);
     });
 
-    this.onAuthorizedGatewayActivationFailed = new Subject<GatewayUrl>();
+    this.onAuthorizedGatewayActivationFailed = new Subject();
     this.onAuthorizedGatewayActivationFailed.subscribe((val) => {
       this.onAuthorizedGatewayActivationFailedActivations.push(val);
     });
 
-    this.onGatewayIFrameDisplayRequested = new Subject<GatewayUrl>();
+    this.onGatewayIFrameDisplayRequested = new Subject();
     this.onGatewayIFrameDisplayRequested.subscribe((val) => {
       this.onGatewayIFrameDisplayRequestedActivations.push(val);
     });
 
-    this.onGatewayIFrameCloseRequested = new Subject<GatewayUrl>();
+    this.onGatewayIFrameCloseRequested = new Subject();
     this.onGatewayIFrameCloseRequested.subscribe((val) => {
       this.onGatewayIFrameCloseRequestedActivations.push(val);
     });
 
-    this.onCoreIFrameDisplayRequested = new Subject<void>();
+    this.onCoreIFrameDisplayRequested = new Subject();
     this.onCoreIFrameDisplayRequested.subscribe(() => {
       this.onCoreIFrameDisplayRequestedActivationCount++;
     });
 
-    this.onCoreIFrameCloseRequested = new Subject<void>();
+    this.onCoreIFrameCloseRequested = new Subject();
     this.onCoreIFrameCloseRequested.subscribe(() => {
       this.onCoreIFrameCloseRequestedActivationCount++;
     });
 
-    this.onInitializationRequired = new Subject<void>();
+    this.onInitializationRequired = new Subject();
     this.onInitializationRequired.subscribe(() => {
       this.onInitializationRequiredActivationCount++;
     });
 
-    this.onPrivateCredentialsRequested = new Subject<void>();
+    this.onPrivateCredentialsRequested = new Subject();
     this.onPrivateCredentialsRequested.subscribe(() => {
       this.onPrivateCredentialsRequestedActivationCount++;
     });
 
-    this.onGatewayConnectorActivated = new Subject<IGatewayConnectorProxy>();
+    this.onGatewayConnectorActivated = new Subject();
     this.onGatewayConnectorActivated.subscribe((val) => {
       this.onGatewayConnectorActivatedActivations.push(val);
     });
@@ -472,9 +472,7 @@ export class ContextProviderMock implements IContextProvider {
     expect(this.onCeramicAuthenticationSucceededActivationCount).toBe(
       counts.onCeramicAuthenticationSucceeded,
     );
-    expect(this.onCeramicFailedActivationCount).toBe(
-      counts.onCeramicFailed,
-    );
+    expect(this.onCeramicFailedActivationCount).toBe(counts.onCeramicFailed);
     expect(this.onGatewayAuthorizedActivations.length).toBe(
       counts.onGatewayAuthorized,
     );

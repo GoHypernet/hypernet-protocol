@@ -1,16 +1,17 @@
+import { PersistenceError } from "@hypernetlabs/objects";
 import { ILocalStorageUtils, ILogUtils } from "@hypernetlabs/utils";
+import { errAsync, okAsync } from "neverthrow";
 import td from "testdouble";
 
 import { StorageUtils } from "@implementations/data/utilities";
 import { IStorageUtils } from "@interfaces/data/utilities";
 import { ICeramicUtils } from "@interfaces/utilities";
-import { ConfigProviderMock, ContextProviderMock } from "@mock/utils";
+import { ContextProviderMock } from "@mock/utils";
 
 class StorageUtilsMocks {
   public contextProvider = new ContextProviderMock();
   public ceramicUtils = td.object<ICeramicUtils>();
   public localStorageUtils = td.object<ILocalStorageUtils>();
-  public configProvider = new ConfigProviderMock();
   public logUtils = td.object<ILogUtils>();
   public exampleKey = "key";
   public exampleData = {
@@ -19,9 +20,18 @@ class StorageUtilsMocks {
       "2": 2,
     },
   };
+  public jsonData = JSON.stringify(this.exampleData);
   constructor() {
-    td.when(this.localStorageUtils.getItem(this.exampleKey)).thenReturn(
-      JSON.stringify(this.exampleData),
+    td.when(this.localStorageUtils.getSessionItem(this.exampleKey)).thenReturn(
+      this.jsonData,
+    );
+
+    td.when(
+      this.ceramicUtils.writeRecord(this.exampleKey, this.exampleData),
+    ).thenReturn(okAsync(undefined));
+
+    td.when(this.ceramicUtils.removeRecord(this.exampleKey)).thenReturn(
+      okAsync(undefined),
     );
   }
 
@@ -36,176 +46,210 @@ class StorageUtilsMocks {
 }
 
 describe("StorageUtils tests", () => {
-  test("StorageUtils writes data using only localstorage when metamask is not installed", async () => {
+  test("StorageUtils.write writes data to both session storage and Ceramic", async () => {
     // Arrange
     const mocks = new StorageUtilsMocks();
     const utils = mocks.factoryStorageUtils();
-    mocks.contextProvider.context.metamaskEnabled = false;
 
     // Act
-    const writeResult = await utils.write<IAuthorizedMerchantEntry[]>(
-      authorizaedMerchantsKey,
-      authorizaedMerchantsData,
-    );
-
-    const readResult = await utils.read<IAuthorizedMerchantEntry[]>(
-      authorizaedMerchantsKey,
-    );
-
-    const ceramicWriteRecordCallingcount = td.explain(
-      mocks.ceramicUtils.writeRecord,
-    ).callCount;
+    const result = await utils.write(mocks.exampleKey, mocks.exampleData);
 
     // Assert
-    expect(writeResult).toBeDefined();
-    expect(writeResult.isErr()).toBeFalsy();
-    expect(readResult).toBeDefined();
-    expect(readResult.isErr()).toBeFalsy();
-    const authorizedMerchants = readResult._unsafeUnwrap();
-    if (authorizedMerchants == null) {
-      throw new Error("couldn't retrieve authorizedMerchants");
-    }
-    expect(authorizedMerchants?.length).toBe(1);
-    expect(authorizedMerchants[0].authorizationSignature).toBe(
-      authorizationSignature,
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+
+    td.verify(
+      mocks.localStorageUtils.setSessionItem(mocks.exampleKey, mocks.jsonData),
     );
-    expect(ceramicWriteRecordCallingcount).toBe(0);
+
+    mocks.contextProvider.assertEventCounts({});
   });
 
-  test("StorageUtils writes data using ceramic and localstorage when metamask is installed", async () => {
+  test("StorageUtils.write returns an error if Ceramic fails, still writes to the session", async () => {
     // Arrange
     const mocks = new StorageUtilsMocks();
     const utils = mocks.factoryStorageUtils();
-    mocks.contextProvider.context.metamaskEnabled = true;
+
+    const err = new PersistenceError();
+    td.when(
+      mocks.ceramicUtils.writeRecord(mocks.exampleKey, mocks.exampleData),
+    ).thenReturn(errAsync(err));
 
     // Act
-    const writeResult = await utils.write<IAuthorizedMerchantEntry[]>(
-      authorizaedMerchantsKey,
-      authorizaedMerchantsData,
-    );
-
-    const readResult = await utils.read<IAuthorizedMerchantEntry[]>(
-      authorizaedMerchantsKey,
-    );
-
-    const ceramicWriteRecordCallingcount = td.explain(
-      mocks.ceramicUtils.writeRecord,
-    ).callCount;
+    const result = await utils.write(mocks.exampleKey, mocks.exampleData);
 
     // Assert
-    expect(writeResult).toBeDefined();
-    expect(writeResult.isErr()).toBeFalsy();
-    expect(readResult).toBeDefined();
-    expect(readResult.isErr()).toBeFalsy();
-    const authorizedMerchants = readResult._unsafeUnwrap();
-    if (authorizedMerchants == null) {
-      throw new Error("couldn't retrieve authorizedMerchants");
-    }
-    expect(authorizedMerchants?.length).toBe(1);
-    expect(authorizedMerchants[0].authorizationSignature).toBe(
-      authorizationSignature,
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeTruthy();
+    const resultErr = result._unsafeUnwrapErr();
+    expect(resultErr).toBeInstanceOf(PersistenceError);
+    expect(resultErr).toBe(err);
+
+    td.verify(
+      mocks.localStorageUtils.setSessionItem(mocks.exampleKey, mocks.jsonData),
     );
-    // Ceramic now is disabled, Remove this comment when we have it enabled again
-    // expect(ceramicWriteRecordCallingcount).toBe(1);
+
+    mocks.contextProvider.assertEventCounts({
+      onCeramicFailed: 1,
+    });
   });
 
-  test("StorageUtils reads data using only localstorage when metamask is not installed", async () => {
+  test("StorageUtils.read returns data from Session Storage if it exists", async () => {
     // Arrange
     const mocks = new StorageUtilsMocks();
     const utils = mocks.factoryStorageUtils();
-    mocks.contextProvider.context.metamaskEnabled = false;
 
     // Act
-    const readResult = await utils.read<IAuthorizedMerchantEntry[]>(
-      authorizaedMerchantsKey,
-    );
-
-    const ceramicReadRecordCallingcount = td.explain(
-      mocks.ceramicUtils.readRecord,
-    ).callCount;
+    const result = await utils.read(mocks.exampleKey);
 
     // Assert
-    expect(readResult).toBeDefined();
-    expect(readResult.isErr()).toBeFalsy();
-    const authorizedMerchants = readResult._unsafeUnwrap();
-    if (authorizedMerchants == null) {
-      throw new Error("couldn't retrieve authorizedMerchants");
-    }
-    expect(authorizedMerchants?.length).toBe(1);
-    expect(authorizedMerchants[0].authorizationSignature).toBe(
-      authorizationSignature,
-    );
-    expect(ceramicReadRecordCallingcount).toBe(0);
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    const resultData = result._unsafeUnwrap();
+    expect(resultData).toMatchObject(mocks.exampleData);
+
+    td.verify(mocks.ceramicUtils.readRecord(mocks.exampleKey), { times: 0 });
+
+    mocks.contextProvider.assertEventCounts({});
   });
 
-  test("StorageUtils reads data using ceramic and localstorage when metamask is installed", async () => {
+  test("StorageUtils.read returns data from Ceramic if Session Storage does not exist", async () => {
     // Arrange
     const mocks = new StorageUtilsMocks();
     const utils = mocks.factoryStorageUtils();
-    mocks.contextProvider.context.metamaskEnabled = true;
 
-    // Act
-    const readResult = await utils.read<IAuthorizedMerchantEntry[]>(
-      authorizaedMerchantsKey,
+    td.when(
+      mocks.localStorageUtils.getSessionItem(mocks.exampleKey),
+    ).thenReturn(null);
+
+    td.when(mocks.ceramicUtils.readRecord(mocks.exampleKey)).thenReturn(
+      okAsync(mocks.exampleData),
     );
 
-    const ceramicReadRecordCallingcount = td.explain(
-      mocks.ceramicUtils.readRecord,
-    ).callCount;
+    // Act
+    const result = await utils.read(mocks.exampleKey);
 
     // Assert
-    expect(readResult).toBeDefined();
-    expect(readResult.isErr()).toBeFalsy();
-    const authorizedMerchants = readResult._unsafeUnwrap();
-    if (authorizedMerchants == null) {
-      throw new Error("couldn't retrieve authorizedMerchants");
-    }
-    expect(authorizedMerchants?.length).toBe(1);
-    expect(authorizedMerchants[0].authorizationSignature).toBe(
-      authorizationSignature,
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    const resultData = result._unsafeUnwrap();
+    expect(resultData).toMatchObject(mocks.exampleData);
+
+    mocks.contextProvider.assertEventCounts({});
+
+    td.verify(
+      mocks.localStorageUtils.setSessionItem(mocks.exampleKey, mocks.jsonData),
+      { times: 1 },
     );
-    // Ceramic now is disabled, Remove this comment when we have it enabled again
-    // expect(ceramicReadRecordCallingcount).toBe(1);
   });
 
-  test("StorageUtils removes data using only localstorage when metamask is not installed", async () => {
+  test("StorageUtils.read returns null and doesn't write if both sesison and Ceramic return null", async () => {
     // Arrange
     const mocks = new StorageUtilsMocks();
     const utils = mocks.factoryStorageUtils();
-    mocks.contextProvider.context.metamaskEnabled = false;
+
+    td.when(
+      mocks.localStorageUtils.getSessionItem(mocks.exampleKey),
+    ).thenReturn(null);
+
+    td.when(mocks.ceramicUtils.readRecord(mocks.exampleKey)).thenReturn(
+      okAsync(null),
+    );
 
     // Act
-    const removeResult = await utils.remove(authorizaedMerchantsKey);
-
-    const ceramicReadRecordCallingcount = td.explain(
-      mocks.ceramicUtils.removeRecord,
-    ).callCount;
+    const result = await utils.read(mocks.exampleKey);
 
     // Assert
-    expect(removeResult).toBeDefined();
-    expect(removeResult.isErr()).toBeFalsy();
-    expect(removeResult._unsafeUnwrap()).toBeUndefined();
-    expect(ceramicReadRecordCallingcount).toBe(0);
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    const resultData = result._unsafeUnwrap();
+    expect(resultData).toBeNull();
+
+    mocks.contextProvider.assertEventCounts({});
+
+    td.verify(
+      mocks.localStorageUtils.setSessionItem(mocks.exampleKey, mocks.jsonData),
+      { times: 0 },
+    );
   });
 
-  test("StorageUtils removes data using only localstorage when metamask is not installed", async () => {
+  test("StorageUtils.read returns an error if Ceramic fails", async () => {
     // Arrange
     const mocks = new StorageUtilsMocks();
     const utils = mocks.factoryStorageUtils();
-    mocks.contextProvider.context.metamaskEnabled = true;
+
+    td.when(
+      mocks.localStorageUtils.getSessionItem(mocks.exampleKey),
+    ).thenReturn(null);
+
+    const err = new PersistenceError();
+    td.when(mocks.ceramicUtils.readRecord(mocks.exampleKey)).thenReturn(
+      errAsync(err),
+    );
 
     // Act
-    const removeResult = await utils.remove(authorizaedMerchantsKey);
-
-    const ceramicReadRecordCallingcount = td.explain(
-      mocks.ceramicUtils.removeRecord,
-    ).callCount;
+    const result = await utils.read(mocks.exampleKey);
 
     // Assert
-    expect(removeResult).toBeDefined();
-    expect(removeResult.isErr()).toBeFalsy();
-    expect(removeResult._unsafeUnwrap()).toBeUndefined();
-    // Ceramic now is disabled, Remove this comment when we have it enabled again
-    // expect(ceramicReadRecordCallingcount).toBe(1);
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeTruthy();
+    const resultErr = result._unsafeUnwrapErr();
+    expect(resultErr).toBeInstanceOf(PersistenceError);
+    expect(resultErr).toBe(err);
+
+    mocks.contextProvider.assertEventCounts({ onCeramicFailed: 1 });
+
+    td.verify(
+      mocks.localStorageUtils.setSessionItem(mocks.exampleKey, mocks.jsonData),
+      { times: 0 },
+    );
+  });
+
+  test("StorageUtils.remove removes data from both session and Ceramic", async () => {
+    // Arrange
+    const mocks = new StorageUtilsMocks();
+    const utils = mocks.factoryStorageUtils();
+
+    // Act
+    const result = await utils.remove(mocks.exampleKey);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+
+    td.verify(mocks.localStorageUtils.removeSessionItem(mocks.exampleKey), {
+      times: 1,
+    });
+
+    mocks.contextProvider.assertEventCounts({});
+  });
+
+  test("StorageUtils.remove returns an error is Ceramic fails", async () => {
+    // Arrange
+    const mocks = new StorageUtilsMocks();
+    const utils = mocks.factoryStorageUtils();
+
+    const err = new PersistenceError();
+    td.when(mocks.ceramicUtils.removeRecord(mocks.exampleKey)).thenReturn(
+      errAsync(err),
+    );
+
+    // Act
+    const result = await utils.remove(mocks.exampleKey);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeTruthy();
+    const resultErr = result._unsafeUnwrapErr();
+    expect(resultErr).toBeInstanceOf(PersistenceError);
+    expect(resultErr).toBe(err);
+
+    td.verify(mocks.localStorageUtils.removeSessionItem(mocks.exampleKey), {
+      times: 1,
+    });
+
+    mocks.contextProvider.assertEventCounts({
+      onCeramicFailed: 1,
+    });
   });
 });
