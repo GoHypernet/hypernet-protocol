@@ -1,6 +1,7 @@
 import { Eip1193Bridge } from "@ethersproject/experimental";
 import {
   BlockchainUnavailableError,
+  GovernanceSignerUnavailableError,
   InvalidParametersError,
   PrivateCredentials,
 } from "@hypernetlabs/objects";
@@ -17,19 +18,18 @@ export interface IBlockchainProvider {
   initialize(): ResultAsync<void, BlockchainUnavailableError>;
 
   getSigner(): ResultAsync<ethers.providers.JsonRpcSigner, never>;
-  getProvider(): ResultAsync<
-    ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
-    never
+  getGovernanceSigner(): ResultAsync<
+    ethers.providers.JsonRpcSigner,
+    GovernanceSignerUnavailableError
   >;
+
+  getProvider(): ResultAsync<ethers.providers.JsonRpcProvider, never>;
   /**
    * Returns a provider that is connected to the governance chain, whatever that may be.
    * If the normal provider is not connected to the governance chain, then a dedicated provider
    * will be created and returned.
    */
-  getGovernanceProvider(): ResultAsync<
-    ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
-    never
-  >;
+  getGovernanceProvider(): ResultAsync<ethers.providers.Provider, never>;
   getEIP1193Provider(): ResultAsync<Eip1193Bridge, never>;
   getLatestBlock(): ResultAsync<
     ethers.providers.Block,

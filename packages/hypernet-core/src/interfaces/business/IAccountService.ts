@@ -12,6 +12,7 @@ import {
   ActiveStateChannel,
   PersistenceError,
   ChainId,
+  UtilityMessageSignature,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -58,7 +59,10 @@ export interface IAccountService {
   ): ResultAsync<void, InvalidParametersError>;
   signMessage(
     message: string,
-  ): ResultAsync<Signature, BlockchainUnavailableError | VectorError>;
+  ): ResultAsync<
+    UtilityMessageSignature,
+    BlockchainUnavailableError | VectorError
+  >;
 }
 
 export const IAccountServiceType = Symbol.for("IAccountService");

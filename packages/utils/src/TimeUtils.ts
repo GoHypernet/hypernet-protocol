@@ -1,5 +1,4 @@
 import { UnixTimestamp } from "@hypernetlabs/objects";
-import moment from "moment";
 
 import { ITimeUtils } from "@utils/ITimeUtils";
 
@@ -9,6 +8,6 @@ export class TimeUtils implements ITimeUtils {
   constructor() {}
 
   public getUnixNow(): UnixTimestamp {
-    return UnixTimestamp(moment().unix());
+    return UnixTimestamp(Math.floor(Date.now() / 1000));
   }
 }

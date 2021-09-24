@@ -24,6 +24,7 @@ import {
   MessageResolver,
   ParameterizedResolver,
   ChainId,
+  UtilityMessageSignature,
 } from "@hypernetlabs/objects";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
@@ -161,7 +162,7 @@ export class WrappedBrowserNode implements IBrowserNode {
 
   public signUtilityMessage(
     message: string,
-  ): ResultAsync<Signature, VectorError> {
+  ): ResultAsync<UtilityMessageSignature, VectorError> {
     return ResultAsync.fromPromise(
       this.browserNode.signUtilityMessage({ message }),
       this.toVectorError,
@@ -169,7 +170,9 @@ export class WrappedBrowserNode implements IBrowserNode {
       if (result.isError) {
         return errAsync(new VectorError(result.getError() as VectorError));
       } else {
-        return okAsync(Signature(result.getValue().signedMessage));
+        return okAsync(
+          UtilityMessageSignature(result.getValue().signedMessage),
+        );
       }
     });
   }

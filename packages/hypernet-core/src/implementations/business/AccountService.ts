@@ -12,6 +12,7 @@ import {
   ActiveStateChannel,
   PersistenceError,
   ChainId,
+  UtilityMessageSignature,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { IAccountService } from "@interfaces/business";
@@ -206,7 +207,10 @@ export class AccountService implements IAccountService {
 
   public signMessage(
     message: string,
-  ): ResultAsync<Signature, BlockchainUnavailableError | VectorError> {
+  ): ResultAsync<
+    UtilityMessageSignature,
+    BlockchainUnavailableError | VectorError
+  > {
     return this.accountRepository.signMessage(message);
   }
 }

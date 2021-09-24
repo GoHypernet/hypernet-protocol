@@ -80,6 +80,12 @@ export default class HypernetIFrameProxy
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject<void>();
     this.onStateChannelCreated = new Subject();
+    this.onChainConnected = new Subject();
+    this.onGovernanceChainConnected = new Subject();
+    this.onChainChanged = new Subject();
+    this.onAccountChanged = new Subject();
+    this.onGovernanceChainChanged = new Subject();
+    this.onGovernanceAccountChanged = new Subject();
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -176,6 +182,30 @@ export default class HypernetIFrameProxy
 
         child.on("onStateChannelCreated", (data: ActiveStateChannel) => {
           this.onStateChannelCreated.next(data);
+        });
+
+        child.on("onChainConnected", (data: ChainId) => {
+          this.onChainConnected.next(data);
+        });
+
+        child.on("onGovernanceChainConnected", (data: ChainId) => {
+          this.onGovernanceChainConnected.next(data);
+        });
+
+        child.on("onChainChanged", (data: ChainId) => {
+          this.onChainChanged.next(data);
+        });
+
+        child.on("onAccountChanged", (data: EthereumAddress) => {
+          this.onAccountChanged.next(data);
+        });
+
+        child.on("onGovernanceChainChanged", (data: ChainId) => {
+          this.onGovernanceChainChanged.next(data);
+        });
+
+        child.on("onGovernanceAccountChanged", (data: EthereumAddress) => {
+          this.onGovernanceAccountChanged.next(data);
         });
 
         // Setup a listener for the "initialized" event.
@@ -508,4 +538,10 @@ export default class HypernetIFrameProxy
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
   public onStateChannelCreated: Subject<ActiveStateChannel>;
+  public onChainConnected: Subject<ChainId>;
+  public onGovernanceChainConnected: Subject<ChainId>;
+  public onChainChanged: Subject<ChainId>;
+  public onAccountChanged: Subject<EthereumAddress>;
+  public onGovernanceChainChanged: Subject<ChainId>;
+  public onGovernanceAccountChanged: Subject<EthereumAddress>;
 }

@@ -13,6 +13,7 @@ import {
   UUID,
   GatewayTokenInfo,
   ActiveStateChannel,
+  UtilityMessageSignature,
 } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { injectable, inject } from "inversify";
@@ -48,7 +49,7 @@ declare global {
 export class GatewayService implements IGatewayService {
   protected signMessageCallbacks = new Map<
     string,
-    (message: string, signature: Signature) => void
+    (message: string, signature: UtilityMessageSignature) => void
   >();
   protected assureStateChannelCallbacks = new Map<
     UUID,
@@ -332,7 +333,7 @@ export class GatewayService implements IGatewayService {
 
   public signMessage(
     message: string,
-    callback: (message: string, signature: Signature) => void,
+    callback: (message: string, signature: UtilityMessageSignature) => void,
   ): ResultAsync<void, never> {
     // Need to stash the callback so that when the answer is
     // transmitted back, we can call it.
@@ -343,7 +344,7 @@ export class GatewayService implements IGatewayService {
 
   public messageSigned(
     message: string,
-    signature: Signature,
+    signature: UtilityMessageSignature,
   ): ResultAsync<void, never> {
     // We have a signature for a message, find the callback
     const callback = this.signMessageCallbacks.get(message);
