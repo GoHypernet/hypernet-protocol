@@ -71,7 +71,7 @@ export interface IRegistryEntryListWidgetParams extends IRenderParams {
 export interface IRegistryEntryDetailWidgetParams extends IRenderParams {
   onRegistryEntryListNavigate?: (registryName: string) => void;
   registryName: string;
-  registryLabel: string
+  registryLabel: string;
 }
 
 export interface IHypernetWebUI {
@@ -108,6 +108,9 @@ export interface IHypernetWebUI {
   ): Result<void, RenderError>;
   renderRegistryListWidget(
     config?: IRegistryListWidgetParams,
+  ): Result<void, RenderError>;
+  renderRegistryEntryListWidget(
+    config?: IRegistryEntryListWidgetParams,
   ): Result<void, RenderError>;
   renderRegistryEntryDetailWidget(
     config?: IRegistryEntryDetailWidgetParams,
