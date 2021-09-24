@@ -10,7 +10,6 @@ export const useStyles = makeStyles((theme) => ({
   leftSection: {
     display: "flex",
     flexDirection: "column",
-    color: colors.GRAY700,
   },
   rightSection: {
     display: "flex",

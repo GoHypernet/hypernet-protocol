@@ -10,7 +10,6 @@ export const useStyles = makeStyles(() => ({
     width: "100%",
   },
   number: {
-    color: colors.GRAY500,
     paddingTop: 15,
   },
   contentWrapper: {
@@ -20,7 +19,6 @@ export const useStyles = makeStyles(() => ({
     flex: 1,
   },
   title: {
-    color: colors.GRAY700,
     paddingTop: 15,
     marginBottom: 27,
   },

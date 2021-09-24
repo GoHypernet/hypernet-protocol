@@ -1,1 +1,1 @@
-export * from "./GovernanceMarkdown";
+export * from "@web-ui/components/GovernanceMarkdown/GovernanceMarkdown";

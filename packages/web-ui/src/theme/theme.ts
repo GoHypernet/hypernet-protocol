@@ -203,6 +203,7 @@ export const lightTheme = createTheme({
     },
     text: {
       primary: colors.GRAY700,
+      secondary: colors.GRAY400,
     },
     divider: colors.GRAY200,
   },
