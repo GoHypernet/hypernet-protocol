@@ -38,5 +38,7 @@ export const PROPOSAL_CREATE_WIDGET_ID_SELECTOR =
   "hypernet-protocol-proposal-create-widget";
 export const REGISTRY_LIST_WIDGET_ID_SELECTOR =
   "hypernet-protocol-registry-list-widget";
-export const REGISTRY_DETAIL_WIDGET_ID_SELECTOR =
-  "hypernet-protocol-registry-detail-widget";
+export const REGISTRY_ENTRY_LIST_WIDGET_ID_SELECTOR =
+  "hypernet-protocol-registry-entry-list-widget";
+export const REGISTRY_ENTRY_DETAIL_WIDGET_ID_SELECTOR =
+  "hypernet-protocol-registry-entry-detail-widget";

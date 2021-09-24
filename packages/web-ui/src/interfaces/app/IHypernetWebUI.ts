@@ -56,13 +56,24 @@ export interface IProposalCreateWidgetParams extends IRenderParams {
 }
 
 export interface IRegistryListWidgetParams extends IRenderParams {
-  onRegistryEntryListNavigate?: (proposalId: string) => void;
+  onRegistryEntryListNavigate?: (registryName: string) => void;
 }
 
-export interface IRegistryDetailWidgetParams extends IRenderParams {
+export interface IRegistryEntryListWidgetParams extends IRenderParams {
+  onRegistryEntryDetailsNavigate?: (
+    registryName: string,
+    entryLabel: string,
+  ) => void;
   onRegistryListNavigate?: () => void;
-  registryId: string;
+  registryName: string;
 }
+
+export interface IRegistryEntryDetailWidgetParams extends IRenderParams {
+  onRegistryEntryListNavigate?: (registryName: string) => void;
+  registryName: string;
+  entryLabel: string;
+}
+
 export interface IHypernetWebUI {
   renderBalancesWidget(params?: IRenderParams): Result<void, RenderError>;
   renderGatewaysWidget(params?: IRenderParams): Result<void, RenderError>;
@@ -98,7 +109,10 @@ export interface IHypernetWebUI {
   renderRegistryListWidget(
     config?: IRegistryListWidgetParams,
   ): Result<void, RenderError>;
-  renderRegistryDetailWidget(
-    config?: IRegistryDetailWidgetParams,
+  renderRegistryEntryListWidget(
+    config?: IRegistryEntryListWidgetParams,
+  ): Result<void, RenderError>;
+  renderRegistryEntryDetailWidget(
+    config?: IRegistryEntryDetailWidgetParams,
   ): Result<void, RenderError>;
 }

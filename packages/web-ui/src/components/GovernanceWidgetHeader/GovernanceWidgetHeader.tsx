@@ -5,7 +5,7 @@ import { useStyles } from "@web-ui/components/GovernanceWidgetHeader/GovernanceW
 import { IGovernanceButton, GovernanceButton } from "@web-ui/components";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 
-interface IHeaderAction extends IGovernanceButton {
+export interface IHeaderAction extends IGovernanceButton {
   label: string;
 }
 

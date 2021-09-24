@@ -7,7 +7,6 @@ export const useStyles = makeStyles((theme) => ({
     backgroundColor: colors.GRAY100,
     border: `1px solid ${colors.GRAY200}`,
     borderRadius: 3,
-    width: "100%",
   },
   titleWrapper: {
     display: "flex",

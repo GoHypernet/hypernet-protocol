@@ -278,6 +278,8 @@ export class GovernanceRepository implements IGovernanceRepository {
     voterAddress: EthereumAddress,
   ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError> {
     return this.initializeContracts().andThen(() => {
+      console.log("getProposalVotesReceipt proposalId", proposalId);
+      console.log("getProposalVotesReceipt voterAddress", voterAddress);
       return ResultAsync.fromPromise(
         this.hypernetGovernorContract?.getReceipt(
           proposalId,
@@ -288,8 +290,9 @@ export class GovernanceRepository implements IGovernanceRepository {
           votes: number;
         }>,
         (e) => {
+          console.log("getProposalVotesReceipt e: ", e);
           return new BlockchainUnavailableError(
-            "Unable to castVote proposal",
+            "Unable to getReceipt proposal",
             e,
           );
         },
@@ -301,6 +304,69 @@ export class GovernanceRepository implements IGovernanceRepository {
           receipt.support,
           receipt.votes,
         );
+      });
+    });
+  }
+
+  public queueProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    console.log("queueProposal proposalId", proposalId);
+    return this.initializeContracts().andThen(() => {
+      if (this.hypernetGovernorContract == null) {
+        throw new BlockchainUnavailableError(
+          "hypernetGovernorContract is not available",
+        );
+      }
+
+      return ResultAsync.fromPromise(
+        this.hypernetGovernorContract["queue(uint256)"](
+          proposalId,
+        ) as Promise<any>,
+        (e) => {
+          console.log("queueProposal e: ", e);
+          return new BlockchainUnavailableError("Unable to queue proposal", e);
+        },
+      ).andThen((tx) => {
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+          console.log("tx e: ", e);
+          return new BlockchainUnavailableError("Unable to wait for tx", e);
+        }).andThen(() => {
+          return this.getProposalDetails(proposalId);
+        });
+      });
+    });
+  }
+
+  public executeProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    console.log("executeProposal proposalId", proposalId);
+    return this.initializeContracts().andThen(() => {
+      if (this.hypernetGovernorContract == null) {
+        throw new BlockchainUnavailableError(
+          "hypernetGovernorContract is not available",
+        );
+      }
+
+      return ResultAsync.fromPromise(
+        this.hypernetGovernorContract["execute(uint256)"](
+          proposalId,
+        ) as Promise<any>,
+        (e) => {
+          console.log("executeProposal e: ", e);
+          return new BlockchainUnavailableError(
+            "Unable to execute proposal",
+            e,
+          );
+        },
+      ).andThen((tx) => {
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+          console.log("tx e: ", e);
+          return new BlockchainUnavailableError("Unable to wait for tx", e);
+        }).andThen(() => {
+          return this.getProposalDetails(proposalId);
+        });
       });
     });
   }

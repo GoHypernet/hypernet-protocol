@@ -561,6 +561,18 @@ export default class HypernetIFrameProxy
     });
   }
 
+  public queueProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this._createCall("queueProposal", proposalId);
+  }
+
+  public executeProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this._createCall("executeProposal", proposalId);
+  }
+
   private _displayCoreIFrame(): void {
     // Show core iframe
     if (this.child != null) {

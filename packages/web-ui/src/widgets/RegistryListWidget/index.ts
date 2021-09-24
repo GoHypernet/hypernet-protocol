@@ -1,1 +1,1 @@
-export { default } from "@web-ui/widgets/ProposalsWidget/ProposalsWidget";
+export { default } from "@web-ui/widgets/RegistryListWidget/RegistryListWidget";

@@ -297,6 +297,16 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           );
         }, data.callId);
       },
+      queueProposal: (data: IIFrameCallData<string>) => {
+        this.returnForModel(() => {
+          return this.core.queueProposal(data.data);
+        }, data.callId);
+      },
+      executeProposal: (data: IIFrameCallData<string>) => {
+        this.returnForModel(() => {
+          return this.core.executeProposal(data.data);
+        }, data.callId);
+      },
     });
   }
 

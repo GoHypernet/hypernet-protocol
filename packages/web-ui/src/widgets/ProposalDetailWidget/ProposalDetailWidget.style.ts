@@ -13,4 +13,15 @@ export const useStyles = makeStyles({
     marginLeft: 16,
     color: colors.GREEN700,
   },
+  proposalDetails: {
+    marginTop: 28,
+    backgroundColor: colors.GRAY100,
+    border: `1px solid ${colors.GRAY200}`,
+    borderRadius: 3,
+    padding: 16,
+  },
+  proposalDetailsLabel: {
+    fontWeight: EFontWeight.MEDIUM,
+    paddingBottom: 24,
+  },
 });
