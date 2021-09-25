@@ -23,12 +23,14 @@ the same `tokenURI`, but they cannot have the same `label`. Labels fascilitate l
 is used for identity or authenticity verification in which the `tokenId` may not be known *a priori* what the label is. Entries in an 
 NFR are referred to, within the protocol, as Non-Fungible Identities (NFIs). 
 
-Each NFR has a `REGISTRAR_ROLE`, which can mint new entries to the registry, and a `DEFAULT_ADMIN_ROLE` which can make modifications 
-to the registry contract parameters. These roles are set through the NFR constructor. Additionally, the `REGISTRAR_ROLE` and 
-the owner of a token have the option to update the information stored in the `tokenURI` after minting unless `allowStorageUpdate` is 
-set to `false` (which it is by default and can be updated by the `DEFAULT_ADMIN_ROLE`). The same applies for the token `label`
-through the `allowLabelChange` flag (which is false by default). In some cases, it can be useful to dissallow the transfer of ownership
-of NFIs. This can be done if `DEFAULT_ADMIN_ROLE` sets `allowTransfers` to `false`. 
+Each NFR has a `REGISTRAR_ROLE`, which can register new identities, and a `DEFAULT_ADMIN_ROLE` which can make modifications 
+to which address have the `REGISTRAR_ROLE` and can also call `selfdestruct` on the registry. Both of these roles are set through 
+the NFR constructor. Additionally, the `REGISTRAR_ROLE` and the owner of a token have the option to update the information stored 
+in the `tokenURI` after registration unless `allowStorageUpdate` is set to `false` (which it is by default and can be updated by 
+the `REGISTRAR_ROLE`). The same applies for the token `label` through the `allowLabelChange` flag (which is false by default). 
+In some cases, it can be useful to dissallow the transfer of ownership of NFIs. This can be done if `REGISTRAR_ROLE` sets 
+`allowTransfers` to `false`. In this case, the `REGISTRAR_ROLE` can still transfer an NFI on the owners behalf if the NFI owner 
+gives approval to the `REGISTRAR_ROLE` through the `approve` function.
 
 Lastly, each NFR exposes a *lazy registration* interface through the `lazyRegister` function. This allows the owner of the `REGISTRAR_ROLE` 
 to offload the burden of gas costs to the recipient of the NFI by providing them with signature that the recipient can then present to 
