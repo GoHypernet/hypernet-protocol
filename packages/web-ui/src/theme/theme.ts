@@ -152,6 +152,14 @@ const MuiButtonBase = {
   },
 };
 
+const MuiTextField = {
+  root: {
+    background: colors.GRAY100,
+    border: `2px solid ${colors.GRAY200}`,
+    borderRadius: 3,
+  },
+};
+
 export const bodyFontFamily = `"Inter", sans-serif`;
 
 const typography = {
@@ -203,7 +211,7 @@ export const lightTheme = createTheme({
     },
     text: {
       primary: colors.GRAY700,
-      secondary: colors.GRAY400,
+      secondary: colors.GRAY500,
     },
     divider: colors.GRAY200,
   },
@@ -211,6 +219,7 @@ export const lightTheme = createTheme({
     // @ts-ignore
     MuiTypography,
     MuiButton,
+    MuiTextField,
   },
   props: {
     MuiButtonBase,
