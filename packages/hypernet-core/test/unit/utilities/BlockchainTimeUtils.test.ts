@@ -1,18 +1,17 @@
-import td from "testdouble";
 import { UnixTimestamp } from "@hypernetlabs/objects";
+import { ITimeUtils } from "@hypernetlabs/utils";
+import td from "testdouble";
+
 import { BlockchainTimeUtils } from "@implementations/utilities";
 import { IBlockchainTimeUtils } from "@interfaces/utilities";
-
 import { BlockchainProviderMock } from "@mock/utils";
-import moment from "moment";
-import { ITimeUtils } from "@hypernetlabs/utils";
 
 class BlockchainTimeUtilsMocks {
   public blockchainProvider = new BlockchainProviderMock();
   public timeUtils = td.object<ITimeUtils>();
   constructor() {
     td.when(this.timeUtils.getUnixNow()).thenReturn(
-      UnixTimestamp(moment().unix()) as never,
+      UnixTimestamp(Math.floor(Date.now() / 1000)) as never,
     );
   }
 

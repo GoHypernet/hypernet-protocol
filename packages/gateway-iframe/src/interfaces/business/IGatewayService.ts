@@ -8,6 +8,7 @@ import {
   UUID,
   GatewayTokenInfo,
   ActiveStateChannel,
+  UtilityMessageSignature,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -44,11 +45,11 @@ export interface IGatewayService {
   >;
   signMessage(
     message: string,
-    callback: (message: string, signature: Signature) => void,
+    callback: (message: string, signature: UtilityMessageSignature) => void,
   ): ResultAsync<void, never>;
   messageSigned(
     message: string,
-    signature: Signature,
+    signature: UtilityMessageSignature,
   ): ResultAsync<void, never>;
 
   assureStateChannel(

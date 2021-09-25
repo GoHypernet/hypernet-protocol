@@ -12,7 +12,6 @@ import {
   IHypernetCore,
   Signature,
   PrivateCredentials,
-  EBlockchainNetwork,
   AcceptPaymentError,
   BalancesUnavailableError,
   BlockchainUnavailableError,
@@ -47,6 +46,7 @@ import {
   TimeUtils,
 } from "@hypernetlabs/utils";
 import {
+  BlockchainListener,
   GatewayConnectorListener,
   NatsMessagingListener,
   VectorAPIListener,
@@ -68,6 +68,7 @@ import {
   LinkRepository,
 } from "@implementations/data";
 import {
+  IBlockchainListener,
   IGatewayConnectorListener,
   IMessagingListener,
   IVectorListener,
@@ -154,9 +155,9 @@ export class HypernetCore implements IHypernetCore {
   public onPushPaymentCanceled = new Subject<PushPayment>();
   public onPullPaymentCanceled = new Subject<PullPayment>();
   public onBalancesChanged: Subject<Balances>;
-  public onDeStorageAuthenticationStarted: Subject<void>;
-  public onDeStorageAuthenticationSucceeded: Subject<void>;
-  public onDeStorageAuthenticationFailed: Subject<void>;
+  public onCeramicAuthenticationStarted: Subject<void>;
+  public onCeramicAuthenticationSucceeded: Subject<void>;
+  public onCeramicFailed: Subject<Error>;
   public onGatewayAuthorized: Subject<GatewayUrl>;
   public onGatewayDeauthorizationStarted: Subject<GatewayUrl>;
   public onAuthorizedGatewayUpdated: Subject<GatewayUrl>;
@@ -168,6 +169,12 @@ export class HypernetCore implements IHypernetCore {
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
   public onStateChannelCreated: Subject<ActiveStateChannel>;
+  public onChainConnected: Subject<ChainId>;
+  public onGovernanceChainConnected: Subject<ChainId>;
+  public onChainChanged: Subject<ChainId>;
+  public onAccountChanged: Subject<EthereumAddress>;
+  public onGovernanceChainChanged: Subject<ChainId>;
+  public onGovernanceAccountChanged: Subject<EthereumAddress>;
 
   // Utils Layer Stuff
   protected timeUtils: ITimeUtils;
@@ -215,6 +222,7 @@ export class HypernetCore implements IHypernetCore {
   protected vectorAPIListener: IVectorListener;
   protected gatewayConnectorListener: IGatewayConnectorListener;
   protected messagingListener: IMessagingListener;
+  protected blockchainListener: IBlockchainListener;
 
   protected _initializeResult: ResultAsync<
     void,
@@ -252,9 +260,9 @@ export class HypernetCore implements IHypernetCore {
     this.onPushPaymentCanceled = new Subject();
     this.onPullPaymentCanceled = new Subject();
     this.onBalancesChanged = new Subject();
-    this.onDeStorageAuthenticationStarted = new Subject();
-    this.onDeStorageAuthenticationSucceeded = new Subject();
-    this.onDeStorageAuthenticationFailed = new Subject();
+    this.onCeramicAuthenticationStarted = new Subject();
+    this.onCeramicAuthenticationSucceeded = new Subject();
+    this.onCeramicFailed = new Subject();
     this.onGatewayAuthorized = new Subject();
     this.onGatewayDeauthorizationStarted = new Subject();
     this.onAuthorizedGatewayUpdated = new Subject();
@@ -266,6 +274,12 @@ export class HypernetCore implements IHypernetCore {
     this.onInitializationRequired = new Subject<void>();
     this.onPrivateCredentialsRequested = new Subject();
     this.onStateChannelCreated = new Subject();
+    this.onChainConnected = new Subject();
+    this.onGovernanceChainConnected = new Subject();
+    this.onChainChanged = new Subject();
+    this.onAccountChanged = new Subject();
+    this.onGovernanceChainChanged = new Subject();
+    this.onGovernanceAccountChanged = new Subject();
 
     this.onControlClaimed.subscribe({
       next: () => {
@@ -295,9 +309,9 @@ export class HypernetCore implements IHypernetCore {
       this.onPushPaymentCanceled,
       this.onPullPaymentCanceled,
       this.onBalancesChanged,
-      this.onDeStorageAuthenticationStarted,
-      this.onDeStorageAuthenticationSucceeded,
-      this.onDeStorageAuthenticationFailed,
+      this.onCeramicAuthenticationStarted,
+      this.onCeramicAuthenticationSucceeded,
+      this.onCeramicFailed,
       this.onGatewayAuthorized,
       this.onGatewayDeauthorizationStarted,
       this.onAuthorizedGatewayUpdated,
@@ -309,6 +323,12 @@ export class HypernetCore implements IHypernetCore {
       this.onInitializationRequired,
       this.onPrivateCredentialsRequested,
       this.onStateChannelCreated,
+      this.onChainConnected,
+      this.onGovernanceChainConnected,
+      this.onChainChanged,
+      this.onAccountChanged,
+      this.onGovernanceChainChanged,
+      this.onGovernanceAccountChanged,
     );
     this.paymentIdUtils = new PaymentIdUtils();
     this.configProvider = new ConfigProvider(this.logUtils, config);
@@ -513,6 +533,13 @@ export class HypernetCore implements IHypernetCore {
       this.logUtils,
     );
 
+    this.blockchainListener = new BlockchainListener(
+      this.blockchainProvider,
+      this.configProvider,
+      this.contextProvider,
+      this.logUtils,
+    );
+
     // This whole rigamarole is to make sure it can only be initialized a single time, and that you can call waitInitialized()
     // before the call to initialize() is made
     this._initializeResult = null;
@@ -548,23 +575,35 @@ export class HypernetCore implements IHypernetCore {
     EthereumAddress[],
     BlockchainUnavailableError
   > {
-    return this.accountService.getAccounts();
+    return this.accountService.getAccounts().mapErr((e) => {
+      this.logUtils.error(e);
+      return e;
+    });
   }
 
   /**
    * Returns the (vector) pubId associated with this instance of HypernetCore.
    */
   public getPublicIdentifier(): ResultAsync<PublicIdentifier, never> {
-    return this.contextProvider.getInitializedContext().map((context) => {
-      return context.publicIdentifier;
-    });
+    return this.contextProvider
+      .getInitializedContext()
+      .map((context) => {
+        return context.publicIdentifier;
+      })
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public getActiveStateChannels(): ResultAsync<
     ActiveStateChannel[],
     VectorError | BlockchainUnavailableError | PersistenceError
   > {
-    return this.accountService.getActiveStateChannels();
+    return this.accountService.getActiveStateChannels().mapErr((e) => {
+      this.logUtils.error(e);
+      return e;
+    });
   }
 
   public createStateChannel(
@@ -574,10 +613,12 @@ export class HypernetCore implements IHypernetCore {
     ActiveStateChannel,
     BlockchainUnavailableError | VectorError | PersistenceError
   > {
-    return this.accountService.createStateChannel(
-      routerPublicIdentifiers,
-      chainId,
-    );
+    return this.accountService
+      .createStateChannel(routerPublicIdentifiers, chainId)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   /**
@@ -594,11 +635,12 @@ export class HypernetCore implements IHypernetCore {
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
     // console.log(`HypernetCore:depositFunds:assetAddress:${assetAddress}`)
-    return this.accountService.depositFunds(
-      channelAddress,
-      assetAddress,
-      amount,
-    );
+    return this.accountService
+      .depositFunds(channelAddress, assetAddress, amount)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   /**
@@ -616,33 +658,42 @@ export class HypernetCore implements IHypernetCore {
     Balances,
     BalancesUnavailableError | BlockchainUnavailableError | VectorError | Error
   > {
-    return this.accountService.withdrawFunds(
-      channelAddress,
-      assetAddress,
-      amount,
-      destinationAddress,
-    );
+    return this.accountService
+      .withdrawFunds(channelAddress, assetAddress, amount, destinationAddress)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   /**
    * Returns the current balances for this instance of Hypernet Core.
    */
   public getBalances(): ResultAsync<Balances, BalancesUnavailableError> {
-    return this.accountService.getBalances();
+    return this.accountService.getBalances().mapErr((e) => {
+      this.logUtils.error(e);
+      return e;
+    });
   }
 
   /**
    * Return all Hypernet Links.
    */
   public getLinks(): ResultAsync<HypernetLink[], VectorError | Error> {
-    return this.linkService.getLinks();
+    return this.linkService.getLinks().mapErr((e) => {
+      this.logUtils.error(e);
+      return e;
+    });
   }
 
   /**
    * Return all *active* Hypernet Links.
    */
   public getActiveLinks(): ResultAsync<HypernetLink[], VectorError | Error> {
-    return this.linkService.getLinks();
+    return this.linkService.getLinks().mapErr((e) => {
+      this.logUtils.error(e);
+      return e;
+    });
   }
 
   /**
@@ -662,7 +713,10 @@ export class HypernetCore implements IHypernetCore {
   public acceptOffer(
     paymentId: PaymentId,
   ): ResultAsync<Payment, InsufficientBalanceError | AcceptPaymentError> {
-    return this.paymentService.acceptOffer(paymentId);
+    return this.paymentService.acceptOffer(paymentId).mapErr((e) => {
+      this.logUtils.error(e);
+      return e;
+    });
   }
 
   /**
@@ -674,7 +728,10 @@ export class HypernetCore implements IHypernetCore {
     paymentId: PaymentId,
     amount: BigNumberString,
   ): ResultAsync<Payment, VectorError | Error> {
-    return this.paymentService.pullFunds(paymentId, amount);
+    return this.paymentService.pullFunds(paymentId, amount).mapErr((e) => {
+      this.logUtils.error(e);
+      return e;
+    });
   }
 
   /**
@@ -757,6 +814,7 @@ export class HypernetCore implements IHypernetCore {
           this.vectorAPIListener.initialize(),
           this.gatewayConnectorListener.initialize(),
           this.messagingListener.initialize(),
+          this.blockchainListener.initialize(),
         ]);
       })
       .andThen(() => {
@@ -773,6 +831,10 @@ export class HypernetCore implements IHypernetCore {
         }
         this.logUtils.debug(`Hypernet Protocol core initialized successfully`);
         this._initialized = true;
+      })
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
       });
 
     return this._initializeResult;
@@ -785,15 +847,26 @@ export class HypernetCore implements IHypernetCore {
   public mintTestToken(
     amount: BigNumberString,
   ): ResultAsync<void, BlockchainUnavailableError> {
-    return this.contextProvider.getInitializedContext().andThen((context) => {
-      return this.developmentService.mintTestToken(amount, context.account);
-    });
+    return this.contextProvider
+      .getInitializedContext()
+      .andThen((context) => {
+        return this.developmentService.mintTestToken(amount, context.account);
+      })
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public authorizeGateway(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayValidationError> {
-    return this.gatewayConnectorService.authorizeGateway(gatewayUrl);
+    return this.gatewayConnectorService
+      .authorizeGateway(gatewayUrl)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public deauthorizeGateway(
@@ -802,14 +875,24 @@ export class HypernetCore implements IHypernetCore {
     void,
     PersistenceError | ProxyError | GatewayAuthorizationDeniedError
   > {
-    return this.gatewayConnectorService.deauthorizeGateway(gatewayUrl);
+    return this.gatewayConnectorService
+      .deauthorizeGateway(gatewayUrl)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
     PersistenceError
   > {
-    return this.gatewayConnectorService.getAuthorizedGatewaysConnectorsStatus();
+    return this.gatewayConnectorService
+      .getAuthorizedGatewaysConnectorsStatus()
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public getGatewayTokenInfo(
@@ -818,40 +901,66 @@ export class HypernetCore implements IHypernetCore {
     Map<GatewayUrl, GatewayTokenInfo[]>,
     ProxyError | PersistenceError | GatewayAuthorizationDeniedError
   > {
-    return this.gatewayConnectorService.getGatewayTokenInfo(gatewayUrls);
+    return this.gatewayConnectorService
+      .getGatewayTokenInfo(gatewayUrls)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public getGatewayRegistrationInfo(
     filter?: GatewayRegistrationFilter,
   ): ResultAsync<GatewayRegistrationInfo[], PersistenceError> {
-    return this.gatewayConnectorService.getGatewayRegistrationInfo(filter);
+    return this.gatewayConnectorService
+      .getGatewayRegistrationInfo(filter)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
     PersistenceError
   > {
-    return this.gatewayConnectorService.getAuthorizedGateways();
+    return this.gatewayConnectorService.getAuthorizedGateways().mapErr((e) => {
+      this.logUtils.error(e);
+      return e;
+    });
   }
 
   public closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayConnectorError> {
-    return this.gatewayConnectorService.closeGatewayIFrame(gatewayUrl);
+    return this.gatewayConnectorService
+      .closeGatewayIFrame(gatewayUrl)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<void, GatewayConnectorError> {
-    return this.gatewayConnectorService.displayGatewayIFrame(gatewayUrl);
+    return this.gatewayConnectorService
+      .displayGatewayIFrame(gatewayUrl)
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 
   public providePrivateCredentials(
     privateKey: string | null,
     mnemonic: string | null,
   ): ResultAsync<void, InvalidParametersError> {
-    return this.accountService.providePrivateCredentials(
-      new PrivateCredentials(privateKey, mnemonic),
-    );
+    return this.accountService
+      .providePrivateCredentials(new PrivateCredentials(privateKey, mnemonic))
+      .mapErr((e) => {
+        this.logUtils.error(e);
+        return e;
+      });
   }
 }

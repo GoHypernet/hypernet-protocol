@@ -70,7 +70,7 @@ export class CeramicUtils implements ICeramicUtils {
             return errAsync(new PersistenceError("did is undefined"));
           }
 
-          context.onDeStorageAuthenticationStarted.next();
+          context.onCeramicAuthenticationStarted.next();
 
           return ResultAsync.fromPromise(
             ceramic.did?.authenticate(),
@@ -81,7 +81,7 @@ export class CeramicUtils implements ICeramicUtils {
               this.logUtils.info(
                 `ceramic logged in, ceramic did id: ${this.ceramic?.did?.id.toString()}`,
               );
-              context.onDeStorageAuthenticationSucceeded.next();
+              context.onCeramicAuthenticationSucceeded.next();
 
               const aliases: Record<string, string> = {};
               for (const [key, value] of config.storageAliases) {
@@ -96,7 +96,11 @@ export class CeramicUtils implements ICeramicUtils {
               return okAsync(undefined);
             })
             .mapErr((e) => {
-              context.onDeStorageAuthenticationFailed.next();
+              const error = new PersistenceError(
+                "Storage authentication failed",
+                e,
+              );
+              context.onCeramicFailed.next(error);
               return new PersistenceError("Storage authentication failed", e);
             });
         });
@@ -167,7 +171,6 @@ export class CeramicUtils implements ICeramicUtils {
     aliasName: string,
     content: T,
   ): ResultAsync<void, PersistenceError> {
-    //return okAsync(undefined);
     return this._initialize().andThen(() => {
       if (this.idx == null) {
         throw new Error("Something went wrong while initializing Ceramic!");
@@ -183,13 +186,6 @@ export class CeramicUtils implements ICeramicUtils {
   public readRecord<T>(
     aliasName: string,
   ): ResultAsync<T | null, PersistenceError> {
-    /* return okAsync(([
-      {
-        gatewayUrl: "http://localhost:5010",
-        authorizationSignature:
-          "0xe7f734f06f49a3de497509089144c6a10227433cdfbd13cc6e482d2d33acb484759492fbc625824f2db3dc9ed531a13e4181d5a8dc9ca6fcae0ee797a658f2181b",
-      },
-    ] as unknown) as T); */
     return this._initialize().andThen(() => {
       if (this.idx == null) {
         throw new Error("Something went wrong while initializing Ceramic!");

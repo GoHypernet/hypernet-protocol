@@ -53,33 +53,39 @@ export default class HypernetIFrameProxy
 
     this._handshakePromise = null;
 
-    this.onControlClaimed = new Subject<ControlClaim>();
-    this.onControlYielded = new Subject<ControlClaim>();
-    this.onPushPaymentSent = new Subject<PushPayment>();
-    this.onPullPaymentSent = new Subject<PullPayment>();
-    this.onPushPaymentReceived = new Subject<PushPayment>();
-    this.onPullPaymentReceived = new Subject<PullPayment>();
-    this.onPushPaymentUpdated = new Subject<PushPayment>();
-    this.onPullPaymentUpdated = new Subject<PullPayment>();
-    this.onPushPaymentDelayed = new Subject<PushPayment>();
-    this.onPullPaymentDelayed = new Subject<PullPayment>();
-    this.onPushPaymentCanceled = new Subject<PushPayment>();
-    this.onPullPaymentCanceled = new Subject<PullPayment>();
+    this.onControlClaimed = new Subject();
+    this.onControlYielded = new Subject();
+    this.onPushPaymentSent = new Subject();
+    this.onPullPaymentSent = new Subject();
+    this.onPushPaymentReceived = new Subject();
+    this.onPullPaymentReceived = new Subject();
+    this.onPushPaymentUpdated = new Subject();
+    this.onPullPaymentUpdated = new Subject();
+    this.onPushPaymentDelayed = new Subject();
+    this.onPullPaymentDelayed = new Subject();
+    this.onPushPaymentCanceled = new Subject();
+    this.onPullPaymentCanceled = new Subject();
     this.onBalancesChanged = new Subject<Balances>();
-    this.onDeStorageAuthenticationStarted = new Subject<void>();
-    this.onDeStorageAuthenticationSucceeded = new Subject<void>();
-    this.onDeStorageAuthenticationFailed = new Subject<void>();
-    this.onGatewayAuthorized = new Subject<GatewayUrl>();
-    this.onGatewayDeauthorizationStarted = new Subject<GatewayUrl>();
-    this.onAuthorizedGatewayUpdated = new Subject<GatewayUrl>();
-    this.onAuthorizedGatewayActivationFailed = new Subject<GatewayUrl>();
-    this.onGatewayIFrameDisplayRequested = new Subject<GatewayUrl>();
-    this.onGatewayIFrameCloseRequested = new Subject<GatewayUrl>();
+    this.onCeramicAuthenticationStarted = new Subject();
+    this.onCeramicAuthenticationSucceeded = new Subject();
+    this.onCeramicFailed = new Subject();
+    this.onGatewayAuthorized = new Subject();
+    this.onGatewayDeauthorizationStarted = new Subject();
+    this.onAuthorizedGatewayUpdated = new Subject();
+    this.onAuthorizedGatewayActivationFailed = new Subject();
+    this.onGatewayIFrameDisplayRequested = new Subject();
+    this.onGatewayIFrameCloseRequested = new Subject();
     this.onCoreIFrameDisplayRequested = new Subject();
     this.onCoreIFrameCloseRequested = new Subject();
-    this.onInitializationRequired = new Subject<void>();
-    this.onPrivateCredentialsRequested = new Subject<void>();
+    this.onInitializationRequired = new Subject();
+    this.onPrivateCredentialsRequested = new Subject();
     this.onStateChannelCreated = new Subject();
+    this.onChainConnected = new Subject();
+    this.onGovernanceChainConnected = new Subject();
+    this.onChainChanged = new Subject();
+    this.onAccountChanged = new Subject();
+    this.onGovernanceChainChanged = new Subject();
+    this.onGovernanceAccountChanged = new Subject();
 
     // Initialize the promise that we'll use to monitor the core
     // initialization status. The iframe will emit an event "initialized"
@@ -142,20 +148,20 @@ export default class HypernetIFrameProxy
           this.onBalancesChanged.next(data);
         });
 
-        child.on("onDeStorageAuthenticationStarted", () => {
+        child.on("onCeramicAuthenticationStarted", () => {
           this._displayCoreIFrame();
 
-          this.onDeStorageAuthenticationStarted.next();
+          this.onCeramicAuthenticationStarted.next();
         });
 
-        child.on("onDeStorageAuthenticationSucceeded", () => {
+        child.on("onCeramicAuthenticationSucceeded", () => {
           this._closeCoreIFrame();
 
-          this.onDeStorageAuthenticationSucceeded.next();
+          this.onCeramicAuthenticationSucceeded.next();
         });
 
-        child.on("onDeStorageAuthenticationFailed", () => {
-          this.onDeStorageAuthenticationFailed.next();
+        child.on("onCeramicFailed", () => {
+          this.onCeramicFailed.next();
         });
 
         child.on("onGatewayAuthorized", (data: GatewayUrl) => {
@@ -176,6 +182,30 @@ export default class HypernetIFrameProxy
 
         child.on("onStateChannelCreated", (data: ActiveStateChannel) => {
           this.onStateChannelCreated.next(data);
+        });
+
+        child.on("onChainConnected", (data: ChainId) => {
+          this.onChainConnected.next(data);
+        });
+
+        child.on("onGovernanceChainConnected", (data: ChainId) => {
+          this.onGovernanceChainConnected.next(data);
+        });
+
+        child.on("onChainChanged", (data: ChainId) => {
+          this.onChainChanged.next(data);
+        });
+
+        child.on("onAccountChanged", (data: EthereumAddress) => {
+          this.onAccountChanged.next(data);
+        });
+
+        child.on("onGovernanceChainChanged", (data: ChainId) => {
+          this.onGovernanceChainChanged.next(data);
+        });
+
+        child.on("onGovernanceAccountChanged", (data: EthereumAddress) => {
+          this.onGovernanceAccountChanged.next(data);
         });
 
         // Setup a listener for the "initialized" event.
@@ -494,9 +524,9 @@ export default class HypernetIFrameProxy
   public onPushPaymentCanceled: Subject<PushPayment>;
   public onPullPaymentCanceled: Subject<PullPayment>;
   public onBalancesChanged: Subject<Balances>;
-  public onDeStorageAuthenticationStarted: Subject<void>;
-  public onDeStorageAuthenticationSucceeded: Subject<void>;
-  public onDeStorageAuthenticationFailed: Subject<void>;
+  public onCeramicAuthenticationStarted: Subject<void>;
+  public onCeramicAuthenticationSucceeded: Subject<void>;
+  public onCeramicFailed: Subject<Error>;
   public onGatewayAuthorized: Subject<GatewayUrl>;
   public onGatewayDeauthorizationStarted: Subject<GatewayUrl>;
   public onAuthorizedGatewayUpdated: Subject<GatewayUrl>;
@@ -508,4 +538,10 @@ export default class HypernetIFrameProxy
   public onInitializationRequired: Subject<void>;
   public onPrivateCredentialsRequested: Subject<void>;
   public onStateChannelCreated: Subject<ActiveStateChannel>;
+  public onChainConnected: Subject<ChainId>;
+  public onGovernanceChainConnected: Subject<ChainId>;
+  public onChainChanged: Subject<ChainId>;
+  public onAccountChanged: Subject<EthereumAddress>;
+  public onGovernanceChainChanged: Subject<ChainId>;
+  public onGovernanceAccountChanged: Subject<EthereumAddress>;
 }

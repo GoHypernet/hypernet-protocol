@@ -3,6 +3,7 @@ import {
   AuthorizedGatewaysSchema,
   ChainId,
   DefinitionName,
+  ProviderUrl,
   SchemaUrl,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
@@ -21,6 +22,7 @@ declare const __CERAMIC_NODE_URL__: string;
 declare const __DEBUG__: boolean;
 declare const __INFURA_ID__: string;
 declare const __GOVERNANCE_CHAIN_ID__: string;
+declare const __GOVERNANCE_PROVIDER_URLS__: string;
 
 export class ConfigProvider implements IConfigProvider {
   protected config: HypernetConfig;
@@ -45,10 +47,15 @@ export class ConfigProvider implements IConfigProvider {
       chainAddresses[parseInt(chainIdStr)] = chainAddressesObj[chainIdStr];
     }
 
+    const governanceProviderUrls = JSON.parse(
+      __GOVERNANCE_PROVIDER_URLS__,
+    ) as ProviderUrl[];
+
     this.config = new HypernetConfig(
       __IFRAME_SOURCE__, // iframeSource
       __INFURA_ID__, // infuraId
       ChainId(parseInt(__GOVERNANCE_CHAIN_ID__)), // governanceChainId
+      governanceProviderUrls, // governanceEthProviderUrl
       "Hypernet", // Hypernet Protocol Domain for Transfers
       5 * 24 * 60 * 60, // 5 days as the default payment expiration time
       chainProviders, // chainProviders

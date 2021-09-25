@@ -268,9 +268,9 @@ export interface IHypernetCore {
   onPushPaymentCanceled: Subject<PushPayment>;
   onPullPaymentCanceled: Subject<PullPayment>;
   onBalancesChanged: Subject<Balances>;
-  onDeStorageAuthenticationStarted: Subject<void>;
-  onDeStorageAuthenticationSucceeded: Subject<void>;
-  onDeStorageAuthenticationFailed: Subject<void>;
+  onCeramicAuthenticationStarted: Subject<void>;
+  onCeramicAuthenticationSucceeded: Subject<void>;
+  onCeramicFailed: Subject<Error>;
   onGatewayAuthorized: Subject<GatewayUrl>;
   onGatewayDeauthorizationStarted: Subject<GatewayUrl>;
   onAuthorizedGatewayUpdated: Subject<GatewayUrl>;
@@ -282,6 +282,12 @@ export interface IHypernetCore {
   onInitializationRequired: Subject<void>;
   onPrivateCredentialsRequested: Subject<void>;
   onStateChannelCreated: Subject<ActiveStateChannel>;
+  onChainConnected: Subject<ChainId>;
+  onGovernanceChainConnected: Subject<ChainId>;
+  onChainChanged: Subject<ChainId>;
+  onAccountChanged: Subject<EthereumAddress>;
+  onGovernanceChainChanged: Subject<ChainId>;
+  onGovernanceAccountChanged: Subject<EthereumAddress>;
 }
 
 export const IHypernetCoreType = Symbol.for("IHypernetCore");

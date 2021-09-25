@@ -8,6 +8,7 @@ import {
   GatewayUrl,
   Signature,
   ActiveStateChannel,
+  ChainId,
 } from "@hypernetlabs/objects";
 import { Subject } from "rxjs";
 
@@ -32,9 +33,9 @@ export class HypernetContext {
     public onPushPaymentCanceled: Subject<PushPayment>,
     public onPullPaymentCanceled: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
-    public onDeStorageAuthenticationStarted: Subject<void>,
-    public onDeStorageAuthenticationSucceeded: Subject<void>,
-    public onDeStorageAuthenticationFailed: Subject<void>,
+    public onCeramicAuthenticationStarted: Subject<void>,
+    public onCeramicAuthenticationSucceeded: Subject<void>,
+    public onCeramicFailed: Subject<Error>,
     public onGatewayAuthorized: Subject<GatewayUrl>,
     public onGatewayDeauthorizationStarted: Subject<GatewayUrl>,
     public onAuthorizedGatewayUpdated: Subject<GatewayUrl>,
@@ -47,6 +48,12 @@ export class HypernetContext {
     public onPrivateCredentialsRequested: Subject<void>,
     public onGatewayConnectorProxyActivated: Subject<IGatewayConnectorProxy>,
     public onStateChannelCreated: Subject<ActiveStateChannel>,
+    public onChainConnected: Subject<ChainId>,
+    public onGovernanceChainConnected: Subject<ChainId>,
+    public onChainChanged: Subject<ChainId>,
+    public onAccountChanged: Subject<EthereumAddress>,
+    public onGovernanceChainChanged: Subject<ChainId>,
+    public onGovernanceAccountChanged: Subject<EthereumAddress>,
   ) {}
 }
 
@@ -70,9 +77,9 @@ export class InitializedHypernetContext {
     public onPushPaymentCanceled: Subject<PushPayment>,
     public onPullPaymentCanceled: Subject<PullPayment>,
     public onBalancesChanged: Subject<Balances>,
-    public onDeStorageAuthenticationStarted: Subject<void>,
-    public onDeStorageAuthenticationSucceeded: Subject<void>,
-    public onDeStorageAuthenticationFailed: Subject<void>,
+    public onCeramicAuthenticationStarted: Subject<void>,
+    public onCeramicAuthenticationSucceeded: Subject<void>,
+    public onCeramicFailed: Subject<Error>,
     public onGatewayAuthorized: Subject<GatewayUrl>,
     public onGatewayDeauthorizationStarted: Subject<GatewayUrl>,
     public onAuthorizedGatewayUpdated: Subject<GatewayUrl>,
@@ -85,6 +92,12 @@ export class InitializedHypernetContext {
     public onPrivateCredentialsRequested: Subject<void>,
     public onGatewayConnectorProxyActivated: Subject<IGatewayConnectorProxy>,
     public onStateChannelCreated: Subject<ActiveStateChannel>,
+    public onChainConnected: Subject<ChainId>,
+    public onGovernanceChainConnected: Subject<ChainId>,
+    public onChainChanged: Subject<ChainId>,
+    public onAccountChanged: Subject<EthereumAddress>,
+    public onGovernanceChainChanged: Subject<ChainId>,
+    public onGovernanceAccountChanged: Subject<EthereumAddress>,
     public authorizedMediators: Map<GatewayUrl, Signature>,
   ) {}
 }

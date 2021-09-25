@@ -241,16 +241,16 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       parent.emit("onBalancesChanged", val);
     });
 
-    this.core.onDeStorageAuthenticationStarted.subscribe(() => {
-      parent.emit("onDeStorageAuthenticationStarted");
+    this.core.onCeramicAuthenticationStarted.subscribe(() => {
+      parent.emit("onCeramicAuthenticationStarted");
     });
 
-    this.core.onDeStorageAuthenticationSucceeded.subscribe(() => {
-      parent.emit("onDeStorageAuthenticationSucceeded");
+    this.core.onCeramicAuthenticationSucceeded.subscribe(() => {
+      parent.emit("onCeramicAuthenticationSucceeded");
     });
 
-    this.core.onDeStorageAuthenticationFailed.subscribe(() => {
-      parent.emit("onDeStorageAuthenticationFailed");
+    this.core.onCeramicFailed.subscribe((val) => {
+      parent.emit("onCeramicFailed", val);
     });
 
     this.core.onGatewayAuthorized.subscribe((val) => {
@@ -298,16 +298,39 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       parent.emit("onStateChannelCreated", activeStateChannel);
     });
 
-    this.core.onDeStorageAuthenticationStarted.subscribe(() => {
-      this.coreUIService.renderDeStorageAuthenticationUI();
+    this.core.onChainConnected.subscribe((chainId) => {
+      parent.emit("onChainConnected", chainId);
     });
 
-    this.core.onDeStorageAuthenticationFailed.subscribe(() => {
-      this.coreUIService.renderDeStorageAuthenticationFailedUI();
+    this.core.onGovernanceChainConnected.subscribe((chainId) => {
+      parent.emit("onGovernanceChainConnected", chainId);
+    });
+    this.core.onChainChanged.subscribe((chainId) => {
+      parent.emit("onChainChanged", chainId);
     });
 
-    this.core.onDeStorageAuthenticationSucceeded.subscribe(() => {
-      this.coreUIService.renderDeStorageAuthenticationSucceededUI();
+    this.core.onAccountChanged.subscribe((account) => {
+      parent.emit("onAccountChanged", account);
+    });
+
+    this.core.onGovernanceChainChanged.subscribe((chainId) => {
+      parent.emit("onGovernanceChainChanged", chainId);
+    });
+
+    this.core.onGovernanceAccountChanged.subscribe((account) => {
+      parent.emit("onGovernanceAccountChanged", account);
+    });
+
+    this.core.onCeramicAuthenticationStarted.subscribe(() => {
+      this.coreUIService.renderCeramicAuthenticationUI();
+    });
+
+    this.core.onCeramicFailed.subscribe(() => {
+      this.coreUIService.renderCeramicFailureUI();
+    });
+
+    this.core.onCeramicAuthenticationSucceeded.subscribe(() => {
+      this.coreUIService.renderCeramicAuthenticationSucceededUI();
     });
   }
 }

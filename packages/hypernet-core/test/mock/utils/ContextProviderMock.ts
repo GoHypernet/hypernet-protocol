@@ -1,12 +1,14 @@
 import {
   ActiveStateChannel,
   Balances,
+  ChainId,
   ControlClaim,
   EthereumAddress,
   GatewayUrl,
   PullPayment,
   PushPayment,
   Signature,
+  PersistenceError,
 } from "@hypernetlabs/objects";
 import {
   HypernetContext,
@@ -51,12 +53,12 @@ export class ContextProviderMock implements IContextProvider {
   public onPullPaymentCanceledActivations: PullPayment[] = [];
   public onBalancesChanged: Subject<Balances>;
   public onBalancesChangedActivations: Balances[] = [];
-  public onDeStorageAuthenticationStarted: Subject<void>;
-  public onDeStorageAuthenticationStartedActivationCount = 0;
-  public onDeStorageAuthenticationSucceeded: Subject<void>;
-  public onDeStorageAuthenticationSucceededActivationCount = 0;
-  public onDeStorageAuthenticationFailed: Subject<void>;
-  public onDeStorageAuthenticationFailedActivationCount = 0;
+  public onCeramicAuthenticationStarted: Subject<void>;
+  public onCeramicAuthenticationStartedActivationCount = 0;
+  public onCeramicAuthenticationSucceeded: Subject<void>;
+  public onCeramicAuthenticationSucceededActivationCount = 0;
+  public onCeramicFailed: Subject<Error>;
+  public onCeramicFailedActivationCount = 0;
   public onGatewayAuthorized: Subject<GatewayUrl>;
   public onGatewayAuthorizedActivations: GatewayUrl[] = [];
   public onGatewayDeauthorizationStarted: Subject<GatewayUrl>;
@@ -81,6 +83,18 @@ export class ContextProviderMock implements IContextProvider {
   public onGatewayConnectorActivatedActivations: IGatewayConnectorProxy[] = [];
   public onStateChannelCreated: Subject<ActiveStateChannel>;
   public onStateChannelCreatedActivations: ActiveStateChannel[] = [];
+  public onChainConnected: Subject<ChainId>;
+  public onChainConnectedActivations: ChainId[] = [];
+  public onGovernanceChainConnected: Subject<ChainId>;
+  public onGovernanceChainConnectedActivations: ChainId[] = [];
+  public onChainChanged: Subject<ChainId>;
+  public onChainChangedActivations: ChainId[] = [];
+  public onAccountChanged: Subject<EthereumAddress>;
+  public onAccountChangedActivations: EthereumAddress[] = [];
+  public onGovernanceChainChanged: Subject<ChainId>;
+  public onGovernanceChainChangedActivations: ChainId[] = [];
+  public onGovernanceAccountChanged: Subject<EthereumAddress>;
+  public onGovernanceAccountChangedActivations: EthereumAddress[] = [];
 
   public authorizedGateways: Map<GatewayUrl, Signature>;
 
@@ -89,137 +103,137 @@ export class ContextProviderMock implements IContextProvider {
     initializedContext: InitializedHypernetContext | null = null,
     uninitializedAccount: EthereumAddress | null = null,
   ) {
-    this.onControlClaimed = new Subject<ControlClaim>();
+    this.onControlClaimed = new Subject();
     this.onControlClaimed.subscribe((val) => {
       this.onControlClaimedActivations.push(val);
     });
 
-    this.onControlYielded = new Subject<ControlClaim>();
+    this.onControlYielded = new Subject();
     this.onControlYielded.subscribe((val) => {
       this.onControlYieldedActivations.push(val);
     });
 
-    this.onPushPaymentSent = new Subject<PushPayment>();
+    this.onPushPaymentSent = new Subject();
     this.onPushPaymentSent.subscribe((val) => {
       this.onPushPaymentSentActivations.push(val);
     });
 
-    this.onPullPaymentSent = new Subject<PullPayment>();
+    this.onPullPaymentSent = new Subject();
     this.onPullPaymentSent.subscribe((val) => {
       this.onPullPaymentSentActivations.push(val);
     });
 
-    this.onPushPaymentReceived = new Subject<PushPayment>();
+    this.onPushPaymentReceived = new Subject();
     this.onPushPaymentReceived.subscribe((val) => {
       this.onPushPaymentReceivedActivations.push(val);
     });
 
-    this.onPullPaymentReceived = new Subject<PullPayment>();
+    this.onPullPaymentReceived = new Subject();
     this.onPullPaymentReceived.subscribe((val) => {
       this.onPullPaymentReceivedActivations.push(val);
     });
 
-    this.onPushPaymentUpdated = new Subject<PushPayment>();
+    this.onPushPaymentUpdated = new Subject();
     this.onPushPaymentUpdated.subscribe((val) => {
       this.onPushPaymentUpdatedActivations.push(val);
     });
 
-    this.onPullPaymentUpdated = new Subject<PullPayment>();
+    this.onPullPaymentUpdated = new Subject();
     this.onPullPaymentUpdated.subscribe((val) => {
       this.onPullPaymentUpdatedActivations.push(val);
     });
 
-    this.onPushPaymentDelayed = new Subject<PushPayment>();
+    this.onPushPaymentDelayed = new Subject();
     this.onPushPaymentDelayed.subscribe((val) => {
       this.onPushPaymentDelayedActivations.push(val);
     });
 
-    this.onPullPaymentDelayed = new Subject<PullPayment>();
+    this.onPullPaymentDelayed = new Subject();
     this.onPullPaymentDelayed.subscribe((val) => {
       this.onPullPaymentDelayedActivations.push(val);
     });
 
-    this.onPushPaymentCanceled = new Subject<PushPayment>();
+    this.onPushPaymentCanceled = new Subject();
     this.onPushPaymentCanceled.subscribe((val) => {
       this.onPushPaymentCanceledActivations.push(val);
     });
 
-    this.onPullPaymentCanceled = new Subject<PullPayment>();
+    this.onPullPaymentCanceled = new Subject();
     this.onPullPaymentCanceled.subscribe((val) => {
       this.onPullPaymentCanceledActivations.push(val);
     });
 
-    this.onBalancesChanged = new Subject<Balances>();
+    this.onBalancesChanged = new Subject();
     this.onBalancesChanged.subscribe((val) => {
       this.onBalancesChangedActivations.push(val);
     });
 
-    this.onDeStorageAuthenticationStarted = new Subject<void>();
-    this.onDeStorageAuthenticationStarted.subscribe(() => {
-      this.onDeStorageAuthenticationStartedActivationCount++;
+    this.onCeramicAuthenticationStarted = new Subject();
+    this.onCeramicAuthenticationStarted.subscribe(() => {
+      this.onCeramicAuthenticationStartedActivationCount++;
     });
 
-    this.onDeStorageAuthenticationSucceeded = new Subject<void>();
-    this.onDeStorageAuthenticationSucceeded.subscribe(() => {
-      this.onDeStorageAuthenticationSucceededActivationCount++;
+    this.onCeramicAuthenticationSucceeded = new Subject();
+    this.onCeramicAuthenticationSucceeded.subscribe(() => {
+      this.onCeramicAuthenticationSucceededActivationCount++;
     });
 
-    this.onDeStorageAuthenticationFailed = new Subject<void>();
-    this.onDeStorageAuthenticationFailed.subscribe(() => {
-      this.onDeStorageAuthenticationFailedActivationCount++;
+    this.onCeramicFailed = new Subject();
+    this.onCeramicFailed.subscribe(() => {
+      this.onCeramicFailedActivationCount++;
     });
 
-    this.onGatewayAuthorized = new Subject<GatewayUrl>();
+    this.onGatewayAuthorized = new Subject();
     this.onGatewayAuthorized.subscribe((val) => {
       this.onGatewayAuthorizedActivations.push(val);
     });
 
-    this.onGatewayDeauthorizationStarted = new Subject<GatewayUrl>();
+    this.onGatewayDeauthorizationStarted = new Subject();
     this.onGatewayDeauthorizationStarted.subscribe((val) => {
       this.onGatewayDeauthorizationStartedActivations.push(val);
     });
 
-    this.onAuthorizedGatewayUpdated = new Subject<GatewayUrl>();
+    this.onAuthorizedGatewayUpdated = new Subject();
     this.onAuthorizedGatewayUpdated.subscribe((val) => {
       this.onAuthorizedGatewayUpdatedActivations.push(val);
     });
 
-    this.onAuthorizedGatewayActivationFailed = new Subject<GatewayUrl>();
+    this.onAuthorizedGatewayActivationFailed = new Subject();
     this.onAuthorizedGatewayActivationFailed.subscribe((val) => {
       this.onAuthorizedGatewayActivationFailedActivations.push(val);
     });
 
-    this.onGatewayIFrameDisplayRequested = new Subject<GatewayUrl>();
+    this.onGatewayIFrameDisplayRequested = new Subject();
     this.onGatewayIFrameDisplayRequested.subscribe((val) => {
       this.onGatewayIFrameDisplayRequestedActivations.push(val);
     });
 
-    this.onGatewayIFrameCloseRequested = new Subject<GatewayUrl>();
+    this.onGatewayIFrameCloseRequested = new Subject();
     this.onGatewayIFrameCloseRequested.subscribe((val) => {
       this.onGatewayIFrameCloseRequestedActivations.push(val);
     });
 
-    this.onCoreIFrameDisplayRequested = new Subject<void>();
+    this.onCoreIFrameDisplayRequested = new Subject();
     this.onCoreIFrameDisplayRequested.subscribe(() => {
       this.onCoreIFrameDisplayRequestedActivationCount++;
     });
 
-    this.onCoreIFrameCloseRequested = new Subject<void>();
+    this.onCoreIFrameCloseRequested = new Subject();
     this.onCoreIFrameCloseRequested.subscribe(() => {
       this.onCoreIFrameCloseRequestedActivationCount++;
     });
 
-    this.onInitializationRequired = new Subject<void>();
+    this.onInitializationRequired = new Subject();
     this.onInitializationRequired.subscribe(() => {
       this.onInitializationRequiredActivationCount++;
     });
 
-    this.onPrivateCredentialsRequested = new Subject<void>();
+    this.onPrivateCredentialsRequested = new Subject();
     this.onPrivateCredentialsRequested.subscribe(() => {
       this.onPrivateCredentialsRequestedActivationCount++;
     });
 
-    this.onGatewayConnectorActivated = new Subject<IGatewayConnectorProxy>();
+    this.onGatewayConnectorActivated = new Subject();
     this.onGatewayConnectorActivated.subscribe((val) => {
       this.onGatewayConnectorActivatedActivations.push(val);
     });
@@ -227,6 +241,36 @@ export class ContextProviderMock implements IContextProvider {
     this.onStateChannelCreated = new Subject();
     this.onStateChannelCreated.subscribe((val) => {
       this.onStateChannelCreatedActivations.push(val);
+    });
+
+    this.onChainConnected = new Subject();
+    this.onChainConnected.subscribe((val) => {
+      this.onChainConnectedActivations.push(val);
+    });
+
+    this.onGovernanceChainConnected = new Subject();
+    this.onGovernanceChainConnected.subscribe((val) => {
+      this.onGovernanceChainConnectedActivations.push(val);
+    });
+
+    this.onChainChanged = new Subject();
+    this.onChainChanged.subscribe((val) => {
+      this.onChainChangedActivations.push(val);
+    });
+
+    this.onAccountChanged = new Subject();
+    this.onAccountChanged.subscribe((val) => {
+      this.onAccountChangedActivations.push(val);
+    });
+
+    this.onGovernanceChainChanged = new Subject();
+    this.onGovernanceChainChanged.subscribe((val) => {
+      this.onGovernanceChainChangedActivations.push(val);
+    });
+
+    this.onGovernanceAccountChanged = new Subject();
+    this.onGovernanceAccountChanged.subscribe((val) => {
+      this.onGovernanceAccountChangedActivations.push(val);
     });
 
     this.authorizedGateways = new Map<GatewayUrl, Signature>();
@@ -252,9 +296,9 @@ export class ContextProviderMock implements IContextProvider {
         this.onPushPaymentCanceled,
         this.onPullPaymentCanceled,
         this.onBalancesChanged,
-        this.onDeStorageAuthenticationStarted,
-        this.onDeStorageAuthenticationSucceeded,
-        this.onDeStorageAuthenticationFailed,
+        this.onCeramicAuthenticationStarted,
+        this.onCeramicAuthenticationSucceeded,
+        this.onCeramicFailed,
         this.onGatewayAuthorized,
         this.onGatewayDeauthorizationStarted,
         this.onAuthorizedGatewayUpdated,
@@ -267,6 +311,12 @@ export class ContextProviderMock implements IContextProvider {
         this.onPrivateCredentialsRequested,
         this.onGatewayConnectorActivated,
         this.onStateChannelCreated,
+        this.onChainConnected,
+        this.onGovernanceChainConnected,
+        this.onChainChanged,
+        this.onAccountChanged,
+        this.onGovernanceChainChanged,
+        this.onGovernanceAccountChanged,
       );
     }
 
@@ -291,9 +341,9 @@ export class ContextProviderMock implements IContextProvider {
         this.onPushPaymentCanceled,
         this.onPullPaymentCanceled,
         this.onBalancesChanged,
-        this.onDeStorageAuthenticationStarted,
-        this.onDeStorageAuthenticationSucceeded,
-        this.onDeStorageAuthenticationFailed,
+        this.onCeramicAuthenticationStarted,
+        this.onCeramicAuthenticationSucceeded,
+        this.onCeramicFailed,
         this.onGatewayAuthorized,
         this.onGatewayDeauthorizationStarted,
         this.onAuthorizedGatewayUpdated,
@@ -306,6 +356,12 @@ export class ContextProviderMock implements IContextProvider {
         this.onPrivateCredentialsRequested,
         this.onGatewayConnectorActivated,
         this.onStateChannelCreated,
+        this.onChainConnected,
+        this.onGovernanceChainConnected,
+        this.onChainChanged,
+        this.onAccountChanged,
+        this.onGovernanceChainChanged,
+        this.onGovernanceAccountChanged,
         this.authorizedGateways,
       );
     }
@@ -347,9 +403,9 @@ export class ContextProviderMock implements IContextProvider {
       onPushPaymentCanceled: 0,
       onPullPaymentCanceled: 0,
       onBalancesChanged: 0,
-      onDeStorageAuthenticationStarted: 0,
-      onDeStorageAuthenticationSucceeded: 0,
-      onDeStorageAuthenticationFailed: 0,
+      onCeramicAuthenticationStarted: 0,
+      onCeramicAuthenticationSucceeded: 0,
+      onCeramicFailed: 0,
       onGatewayAuthorized: 0,
       onGatewayDeauthorizationStarted: 0,
       onAuthorizedGatewayUpdated: 0,
@@ -360,6 +416,12 @@ export class ContextProviderMock implements IContextProvider {
       onPrivateCredentialsRequested: 0,
       onGatewayConnectorActivated: 0,
       onStateChannelCreated: 0,
+      onChainConnected: 0,
+      onGovernanceChainConnected: 0,
+      onChainChanged: 0,
+      onAccountChanged: 0,
+      onGovernanceChainChanged: 0,
+      onGovernanceAccountChanged: 0,
     };
 
     // Merge the passed in counts with the basic counts
@@ -404,15 +466,13 @@ export class ContextProviderMock implements IContextProvider {
     expect(this.onBalancesChangedActivations.length).toBe(
       counts.onBalancesChanged,
     );
-    expect(this.onDeStorageAuthenticationStartedActivationCount).toBe(
-      counts.onDeStorageAuthenticationStarted,
+    expect(this.onCeramicAuthenticationStartedActivationCount).toBe(
+      counts.onCeramicAuthenticationStarted,
     );
-    expect(this.onDeStorageAuthenticationSucceededActivationCount).toBe(
-      counts.onDeStorageAuthenticationSucceeded,
+    expect(this.onCeramicAuthenticationSucceededActivationCount).toBe(
+      counts.onCeramicAuthenticationSucceeded,
     );
-    expect(this.onDeStorageAuthenticationFailedActivationCount).toBe(
-      counts.onDeStorageAuthenticationFailed,
-    );
+    expect(this.onCeramicFailedActivationCount).toBe(counts.onCeramicFailed);
     expect(this.onGatewayAuthorizedActivations.length).toBe(
       counts.onGatewayAuthorized,
     );
@@ -443,6 +503,29 @@ export class ContextProviderMock implements IContextProvider {
     expect(this.onStateChannelCreatedActivations.length).toBe(
       counts.onStateChannelCreated,
     );
+
+    expect(this.onChainConnectedActivations.length).toBe(
+      counts.onChainConnected,
+    );
+
+    expect(this.onGovernanceChainConnectedActivations.length).toBe(
+      counts.onGovernanceChainConnected,
+    );
+
+    expect(this.onChainChangedActivations.length).toBe(counts.onChainChanged);
+
+    expect(this.onAccountChangedActivations.length).toBe(
+      counts.onAccountChanged,
+    );
+
+    expect(this.onGovernanceChainChangedActivations.length).toBe(
+      counts.onGovernanceChainChanged,
+    );
+
+    this.onGovernanceAccountChanged,
+      expect(this.onGovernanceAccountChangedActivations.length).toBe(
+        counts.onGovernanceAccountChanged,
+      );
   }
 }
 
@@ -460,9 +543,9 @@ export interface IExpectedEventCounts {
   onPushPaymentCanceled?: number;
   onPullPaymentCanceled?: number;
   onBalancesChanged?: number;
-  onDeStorageAuthenticationStarted?: number;
-  onDeStorageAuthenticationSucceeded?: number;
-  onDeStorageAuthenticationFailed?: number;
+  onCeramicAuthenticationStarted?: number;
+  onCeramicAuthenticationSucceeded?: number;
+  onCeramicFailed?: number;
   onGatewayAuthorized?: number;
   onGatewayDeauthorizationStarted?: number;
   onAuthorizedGatewayUpdated?: number;
@@ -473,4 +556,10 @@ export interface IExpectedEventCounts {
   onPrivateCredentialsRequested?: number;
   onGatewayConnectorActivated?: number;
   onStateChannelCreated?: number;
+  onChainConnected?: number;
+  onGovernanceChainConnected?: number;
+  onChainChanged?: number;
+  onAccountChanged?: number;
+  onGovernanceChainChanged?: number;
+  onGovernanceAccountChanged?: number;
 }
