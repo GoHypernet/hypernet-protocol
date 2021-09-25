@@ -23,4 +23,14 @@ export interface IRegistryService {
     registryName: string,
     label: string,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+  updateRegistryEntryTokenURI(
+    registryName: string,
+    tokenId: number,
+    registrationData: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+  updateRegistryEntryLabel(
+    registryName: string,
+    tokenId: number,
+    label: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
 }

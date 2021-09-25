@@ -42,9 +42,42 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
       .map((registryEntry: RegistryEntry) => {
         console.log("registryEntry: ", registryEntry);
         setRegistryEntry(registryEntry);
+        setLoading(false);
       })
       .mapErr(handleError);
   }, []);
+
+  const updateLabel = (val: string) => {
+    setLoading(true);
+    coreProxy
+      .updateRegistryEntryLabel(
+        registryName,
+        registryEntry?.tokenId as number,
+        val,
+      )
+      .map((registryEntry: RegistryEntry) => {
+        console.log("updateLabel registryEntry: ", registryEntry);
+        setRegistryEntry(registryEntry);
+        setLoading(false);
+      })
+      .mapErr(handleError);
+  };
+
+  const updateTokenURI = (val: string) => {
+    setLoading(true);
+    coreProxy
+      .updateRegistryEntryTokenURI(
+        registryName,
+        registryEntry?.tokenId as number,
+        val,
+      )
+      .map((registryEntry: RegistryEntry) => {
+        console.log("updateTokenURI registryEntry: ", registryEntry);
+        setRegistryEntry(registryEntry);
+        setLoading(false);
+      })
+      .mapErr(handleError);
+  };
 
   const handleError = (err?: Error) => {
     console.log("handleError err: ", err);
@@ -60,11 +93,13 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
           registryEntry && {
             description:
               accountAddress === registryEntry.owner ? (
-                <Box>
+                <Box display="flex">
                   <GovernanceTag text="Owner" color={ETagColor.GREEN} />
-                  <Typography>
-                    You can update the Identity Data information.
-                  </Typography>
+                  <Box paddingLeft={16}>
+                    <Typography>
+                      You can update the Identity Data information.
+                    </Typography>
+                  </Box>
                 </Box>
               ) : (
                 <Box>
@@ -84,23 +119,39 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
       />
       {registryEntry && (
         <Box>
-          <GovernanceValueWithTitle
-            title="Label"
-            value={registryEntry?.label}
-          />
+          {registryEntry?.canUpdateLabel ? (
+            <GovernanceEditableValueWithTitle
+              title="Label"
+              value={registryEntry?.label}
+              onSave={(newValue) => {
+                updateLabel(newValue);
+              }}
+            />
+          ) : (
+            <GovernanceValueWithTitle
+              title="Label"
+              value={registryEntry?.label}
+            />
+          )}
           <GovernanceValueWithTitle
             title="Token ID"
             value={registryEntry?.tokenId}
           />
-          {registryEntry?.tokenURI && (
-            <GovernanceEditableValueWithTitle
-              title="Token URI"
-              value={registryEntry?.tokenURI}
-              onSave={(newValue) => {
-                console.log(newValue);
-              }}
-            />
-          )}
+          {registryEntry?.tokenURI &&
+            (registryEntry?.canUpdateURI ? (
+              <GovernanceEditableValueWithTitle
+                title="Token URI"
+                value={registryEntry?.tokenURI}
+                onSave={(newValue) => {
+                  updateTokenURI(newValue);
+                }}
+              />
+            ) : (
+              <GovernanceValueWithTitle
+                title="Token URI"
+                value={registryEntry?.tokenURI}
+              />
+            ))}
         </Box>
       )}
     </Box>

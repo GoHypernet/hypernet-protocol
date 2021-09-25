@@ -452,7 +452,7 @@ export class GovernanceRepository implements IGovernanceRepository {
   > {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
-      this.blockchainProvider.getSigner(),
+      this.blockchainProvider.getGovernanceSigner(),
     ]).andThen((vals) => {
       const [config, signer] = vals;
 

@@ -6,5 +6,7 @@ export class RegistryEntry {
     public tokenId: number,
     public owner: EthereumAddress,
     public tokenURI: string | null,
+    public canUpdateURI: boolean,
+    public canUpdateLabel: boolean,
   ) {}
 }

@@ -1098,4 +1098,28 @@ export class HypernetCore implements IHypernetCore {
   ): ResultAsync<Proposal, BlockchainUnavailableError> {
     return this.governanceService.executeProposal(proposalId);
   }
+
+  public updateRegistryEntryTokenURI(
+    registryName: string,
+    tokenId: number,
+    registrationData: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+    return this.registryService.updateRegistryEntryTokenURI(
+      registryName,
+      tokenId,
+      registrationData,
+    );
+  }
+
+  public updateRegistryEntryLabel(
+    registryName: string,
+    tokenId: number,
+    label: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+    return this.registryService.updateRegistryEntryLabel(
+      registryName,
+      tokenId,
+      label,
+    );
+  }
 }

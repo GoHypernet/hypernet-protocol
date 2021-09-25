@@ -7,7 +7,9 @@ import {
 import { ResultAsync } from "neverthrow";
 
 export interface IRegistryRepository {
-  getRegistries(numberOfRegistries: number): ResultAsync<Registry[], BlockchainUnavailableError>;
+  getRegistries(
+    numberOfRegistries: number,
+  ): ResultAsync<Registry[], BlockchainUnavailableError>;
   getRegistryByName(
     registryName: string,
   ): ResultAsync<Registry, BlockchainUnavailableError>;
@@ -19,6 +21,16 @@ export interface IRegistryRepository {
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
   getRegistryEntryByLabel(
     registryName: string,
+    label: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+  updateRegistryEntryTokenURI(
+    registryName: string,
+    tokenId: number,
+    registrationData: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+  updateRegistryEntryLabel(
+    registryName: string,
+    tokenId: number,
     label: string,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
 }

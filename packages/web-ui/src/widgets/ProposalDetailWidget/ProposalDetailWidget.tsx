@@ -91,7 +91,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         )
       : 0;
 
-  const showVotingButtons = proposal?.state === EProposalState.ACTIVE;
+  const showVotingButtons = proposal?.state == EProposalState.ACTIVE;
 
   const queueProposal = () => {
     coreProxy
@@ -131,11 +131,11 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
       return [
         {
           label:
-            proposal?.state === EProposalState.SUCCEEDED
+            proposal?.state == EProposalState.SUCCEEDED
               ? "Queue Proposal"
               : "Exexute Proposal",
           onClick: () => {
-            proposal?.state === EProposalState.SUCCEEDED
+            proposal?.state == EProposalState.SUCCEEDED
               ? queueProposal()
               : executeProposal();
           },

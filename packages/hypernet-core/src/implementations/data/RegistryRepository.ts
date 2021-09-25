@@ -273,7 +273,7 @@ export class RegistryRepository implements IRegistryRepository {
         return ResultAsync.fromPromise(
           registryContract?.totalSupply() as Promise<BigNumber>,
           (e) => {
-            console.log('e: ', e);
+            console.log("e: ", e);
             return new BlockchainUnavailableError(
               "Unable to retrieve totalSupply count",
               e,
@@ -328,7 +328,7 @@ export class RegistryRepository implements IRegistryRepository {
         );
 
         return ResultAsync.fromPromise(
-          registryContract?.registryMap(label) as Promise<number>,
+          registryContract?.registryMap(label) as Promise<BigNumber>,
           (e) => {
             return new BlockchainUnavailableError(
               "Unable to call registryMap registryContract",
@@ -354,12 +354,137 @@ export class RegistryRepository implements IRegistryRepository {
                 );
               },
             ).andThen((tokenURI) => {
-              return okAsync(
-                new RegistryEntry(label, tokenId, owner, tokenURI),
-              );
+              return ResultAsync.fromPromise(
+                registryContract?._storageCanBeUpdated() as Promise<boolean>,
+                (e) => {
+                  return new BlockchainUnavailableError(
+                    "Unable to call tokenURI registryContract",
+                    e,
+                  );
+                },
+              ).andThen((canUpdateURI) => {
+                return ResultAsync.fromPromise(
+                  registryContract?._labelCanBeChanged() as Promise<boolean>,
+                  (e) => {
+                    return new BlockchainUnavailableError(
+                      "Unable to call tokenURI registryContract",
+                      e,
+                    );
+                  },
+                ).andThen((canUpdateLabel) => {
+                  return okAsync(
+                    new RegistryEntry(
+                      label,
+                      tokenId.toNumber(),
+                      owner,
+                      tokenURI,
+                      canUpdateURI,
+                      canUpdateLabel,
+                    ),
+                  );
+                });
+              });
             });
           });
         });
+      });
+    });
+  }
+
+  public updateRegistryEntryTokenURI(
+    registryName: string,
+    tokenId: number,
+    registrationData: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+    return this.initializeContracts().andThen((signer) => {
+      // Get registry address
+      return ResultAsync.fromPromise(
+        this.registryFactoryContract?.nameToAddress(
+          registryName,
+        ) as Promise<EthereumAddress>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to call nameToAddress()",
+            e,
+          );
+        },
+      ).andThen((registryAddress) => {
+        // Call the NFR contract of that address
+        const registryContract = new ethers.Contract(
+          registryAddress,
+          GovernanceAbis.NonFungibleRegistry.abi,
+          signer,
+        );
+
+        return ResultAsync.fromPromise(
+          registryContract?.updateRegistration(
+            BigNumber.from(tokenId),
+            registrationData,
+          ) as Promise<any>,
+          (e) => {
+            return new BlockchainUnavailableError(
+              "Unable to call updateRegistration registryContract",
+              e,
+            );
+          },
+        )
+          .andThen((tx) => {
+            return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+              return new BlockchainUnavailableError("Unable to wait for tx", e);
+            });
+          })
+          .andThen(() => {
+            return this.getRegistryEntryByTokenId(registryContract, tokenId);
+          });
+      });
+    });
+  }
+
+  public updateRegistryEntryLabel(
+    registryName: string,
+    tokenId: number,
+    label: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+    return this.initializeContracts().andThen((signer) => {
+      // Get registry address
+      return ResultAsync.fromPromise(
+        this.registryFactoryContract?.nameToAddress(
+          registryName,
+        ) as Promise<EthereumAddress>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to call nameToAddress()",
+            e,
+          );
+        },
+      ).andThen((registryAddress) => {
+        // Call the NFR contract of that address
+        const registryContract = new ethers.Contract(
+          registryAddress,
+          GovernanceAbis.NonFungibleRegistry.abi,
+          signer,
+        );
+
+        return ResultAsync.fromPromise(
+          registryContract?.updateLabel(
+            BigNumber.from(tokenId),
+            label,
+          ) as Promise<any>,
+          (e) => {
+            return new BlockchainUnavailableError(
+              "Unable to call updateRegistration registryContract",
+              e,
+            );
+          },
+        )
+          .andThen((tx) => {
+            return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+              return new BlockchainUnavailableError("Unable to wait for tx", e);
+            });
+          })
+          .andThen(() => {
+            return this.getRegistryEntryByTokenId(registryContract, tokenId);
+          });
       });
     });
   }
@@ -395,7 +520,36 @@ export class RegistryRepository implements IRegistryRepository {
             );
           },
         ).andThen((tokenURI) => {
-          return okAsync(new RegistryEntry(label, tokenId, owner, tokenURI));
+          return ResultAsync.fromPromise(
+            registryContract?._storageCanBeUpdated() as Promise<boolean>,
+            (e) => {
+              return new BlockchainUnavailableError(
+                "Unable to call tokenURI registryContract",
+                e,
+              );
+            },
+          ).andThen((canUpdateURI) => {
+            return ResultAsync.fromPromise(
+              registryContract?._labelCanBeChanged() as Promise<boolean>,
+              (e) => {
+                return new BlockchainUnavailableError(
+                  "Unable to call tokenURI registryContract",
+                  e,
+                );
+              },
+            ).andThen((canUpdateLabel) => {
+              return okAsync(
+                new RegistryEntry(
+                  label,
+                  tokenId,
+                  owner,
+                  tokenURI,
+                  canUpdateURI,
+                  canUpdateLabel,
+                ),
+              );
+            });
+          });
         });
       });
     });
@@ -407,7 +561,7 @@ export class RegistryRepository implements IRegistryRepository {
   > {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
-      this.blockchainProvider.getSigner(),
+      this.blockchainProvider.getGovernanceSigner(),
     ]).andThen((vals) => {
       const [config, signer] = vals;
 

@@ -320,6 +320,18 @@ export interface IHypernetCore {
     proposalId: string,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
 
+  updateRegistryEntryTokenURI(
+    registryName: string,
+    tokenId: number,
+    registrationData: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+
+  updateRegistryEntryLabel(
+    registryName: string,
+    tokenId: number,
+    label: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+
   /**
    * Observables for seeing what's going on
    */

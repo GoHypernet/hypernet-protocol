@@ -591,6 +591,30 @@ export default class HypernetIFrameProxy
     });
   }
 
+  public updateRegistryEntryTokenURI(
+    registryName: string,
+    tokenId: number,
+    registrationData: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+    return this._createCall("updateRegistryEntryTokenURI", {
+      registryName,
+      tokenId,
+      registrationData,
+    });
+  }
+
+  public updateRegistryEntryLabel(
+    registryName: string,
+    tokenId: number,
+    label: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+    return this._createCall("updateRegistryEntryLabel", {
+      registryName,
+      tokenId,
+      label,
+    });
+  }
+
   public queueProposal(
     proposalId: string,
   ): ResultAsync<Proposal, BlockchainUnavailableError> {
