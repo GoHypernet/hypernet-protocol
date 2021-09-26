@@ -86,7 +86,6 @@ export class RegistryRepository implements IRegistryRepository {
             );
           },
         ).andThen((registryName) => {
-          console.log("registryName: ", registryName);
           return ResultAsync.fromPromise(
             registryContract?.symbol() as Promise<string>,
             (e) => {
@@ -96,7 +95,6 @@ export class RegistryRepository implements IRegistryRepository {
               );
             },
           ).andThen((registrySymbol) => {
-            console.log("registrySymbol: ", registrySymbol);
             return ResultAsync.fromPromise(
               registryContract?.totalSupply() as Promise<BigNumber>,
               (e) => {
@@ -106,7 +104,6 @@ export class RegistryRepository implements IRegistryRepository {
                 );
               },
             ).andThen((registryNumberOfEntries) => {
-              console.log("registryNumberOfEntries: ", registryNumberOfEntries);
               return okAsync(
                 new Registry(
                   registryAddress,
@@ -142,7 +139,6 @@ export class RegistryRepository implements IRegistryRepository {
           );
         },
       ).andThen((registryAddress) => {
-        console.log("registryAddress: ", registryAddress);
         // Call the NFR contract of that address
         const registryContract = new ethers.Contract(
           registryAddress,
@@ -160,7 +156,6 @@ export class RegistryRepository implements IRegistryRepository {
             );
           },
         ).andThen((registrySymbol) => {
-          console.log("registrySymbol: ", registrySymbol);
           return ResultAsync.fromPromise(
             registryContract?.totalSupply() as Promise<BigNumber>,
             (e) => {
@@ -170,8 +165,6 @@ export class RegistryRepository implements IRegistryRepository {
               );
             },
           ).andThen((registryNumberOfEntries) => {
-            console.log("registryNumberOfEntries: ", registryNumberOfEntries);
-
             return okAsync(
               new Registry(
                 registryAddress,
@@ -202,7 +195,6 @@ export class RegistryRepository implements IRegistryRepository {
           );
         },
       ).andThen((registryName) => {
-        console.log("registryName: ", registryName);
         // Call the NFT contract of that address
         const registryContract = new ethers.Contract(
           registryAddress,
@@ -220,7 +212,6 @@ export class RegistryRepository implements IRegistryRepository {
             );
           },
         ).andThen((registrySymbol) => {
-          console.log("registrySymbol: ", registrySymbol);
           return ResultAsync.fromPromise(
             registryContract?.totalSupply() as Promise<number>,
             (e) => {
@@ -230,8 +221,6 @@ export class RegistryRepository implements IRegistryRepository {
               );
             },
           ).andThen((registryNumberOfEntries) => {
-            console.log("registryNumberOfEntries: ", registryNumberOfEntries);
-
             return okAsync(
               new Registry(
                 registryAddress,
@@ -262,14 +251,12 @@ export class RegistryRepository implements IRegistryRepository {
           );
         },
       ).andThen((registryAddress) => {
-        console.log("registryAddress: ", registryAddress);
         // Call the NFR contract of that address
         const registryContract = new ethers.Contract(
           registryAddress,
           GovernanceAbis.NonFungibleRegistry.abi,
           signer,
         );
-        console.log("totalSupply");
         return ResultAsync.fromPromise(
           registryContract?.totalSupply() as Promise<BigNumber>,
           (e) => {
@@ -319,7 +306,6 @@ export class RegistryRepository implements IRegistryRepository {
           );
         },
       ).andThen((registryAddress) => {
-        console.log("registryAddress: ", registryAddress);
         // Call the NFR contract of that address
         const registryContract = new ethers.Contract(
           registryAddress,
@@ -355,31 +341,31 @@ export class RegistryRepository implements IRegistryRepository {
               },
             ).andThen((tokenURI) => {
               return ResultAsync.fromPromise(
-                registryContract?._storageCanBeUpdated() as Promise<boolean>,
+                registryContract?.allowStorageUpdate() as Promise<boolean>,
                 (e) => {
                   return new BlockchainUnavailableError(
-                    "Unable to call tokenURI registryContract",
+                    "Unable to call allowStorageUpdate registryContract",
                     e,
                   );
                 },
-              ).andThen((canUpdateURI) => {
+              ).andThen((storageUpdateAllowed) => {
                 return ResultAsync.fromPromise(
-                  registryContract?._labelCanBeChanged() as Promise<boolean>,
+                  registryContract?.allowLabelChange() as Promise<boolean>,
                   (e) => {
                     return new BlockchainUnavailableError(
-                      "Unable to call tokenURI registryContract",
+                      "Unable to call allowLabelChange registryContract",
                       e,
                     );
                   },
-                ).andThen((canUpdateLabel) => {
+                ).andThen((labelChangeAllowed) => {
                   return okAsync(
                     new RegistryEntry(
                       label,
                       tokenId.toNumber(),
                       owner,
                       tokenURI,
-                      canUpdateURI,
-                      canUpdateLabel,
+                      storageUpdateAllowed,
+                      labelChangeAllowed,
                     ),
                   );
                 });
@@ -521,31 +507,31 @@ export class RegistryRepository implements IRegistryRepository {
           },
         ).andThen((tokenURI) => {
           return ResultAsync.fromPromise(
-            registryContract?._storageCanBeUpdated() as Promise<boolean>,
+            registryContract?.allowStorageUpdate() as Promise<boolean>,
             (e) => {
               return new BlockchainUnavailableError(
-                "Unable to call tokenURI registryContract",
+                "Unable to call allowStorageUpdate registryContract",
                 e,
               );
             },
-          ).andThen((canUpdateURI) => {
+          ).andThen((storageUpdateAllowed) => {
             return ResultAsync.fromPromise(
-              registryContract?._labelCanBeChanged() as Promise<boolean>,
+              registryContract?.allowLabelChange() as Promise<boolean>,
               (e) => {
                 return new BlockchainUnavailableError(
-                  "Unable to call tokenURI registryContract",
+                  "Unable to call allowLabelChange registryContract",
                   e,
                 );
               },
-            ).andThen((canUpdateLabel) => {
+            ).andThen((labelChangeAllowed) => {
               return okAsync(
                 new RegistryEntry(
                   label,
                   tokenId,
                   owner,
                   tokenURI,
-                  canUpdateURI,
-                  canUpdateLabel,
+                  storageUpdateAllowed,
+                  labelChangeAllowed,
                 ),
               );
             });

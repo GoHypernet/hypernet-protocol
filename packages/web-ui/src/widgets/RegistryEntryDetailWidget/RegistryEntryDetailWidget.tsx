@@ -95,7 +95,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
               accountAddress === registryEntry.owner ? (
                 <Box display="flex">
                   <GovernanceTag text="Owner" color={ETagColor.GREEN} />
-                  <Box paddingLeft={16}>
+                  <Box paddingLeft={2}>
                     <Typography>
                       You can update the Identity Data information.
                     </Typography>

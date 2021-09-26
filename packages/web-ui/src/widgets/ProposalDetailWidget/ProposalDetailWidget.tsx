@@ -49,7 +49,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         .map((proposalVoteReceipt) => {
           console.log("proposalVoteReceipt: ", proposalVoteReceipt);
           if (proposalVoteReceipt.hasVoted) {
-            setSupportStatus(proposalVoteReceipt.support);
+            setSupportStatus(Number(proposalVoteReceipt.support));
           }
         })
         .mapErr(handleError);
@@ -91,7 +91,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         )
       : 0;
 
-  const showVotingButtons = proposal?.state == EProposalState.ACTIVE;
+  const showVotingButtons = Number(proposal?.state) === EProposalState.ACTIVE;
 
   const queueProposal = () => {
     coreProxy
@@ -125,17 +125,17 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
   const getHeaderActions: () => IHeaderAction[] | undefined = () => {
     if (
-      proposal?.state === EProposalState.SUCCEEDED ||
-      proposal?.state === EProposalState.QUEUED
+      Number(proposal?.state) === EProposalState.SUCCEEDED ||
+      Number(proposal?.state) === EProposalState.QUEUED
     ) {
       return [
         {
           label:
-            proposal?.state == EProposalState.SUCCEEDED
+            Number(proposal?.state) === EProposalState.SUCCEEDED
               ? "Queue Proposal"
               : "Exexute Proposal",
           onClick: () => {
-            proposal?.state == EProposalState.SUCCEEDED
+            Number(proposal?.state) === EProposalState.SUCCEEDED
               ? queueProposal()
               : executeProposal();
           },
@@ -175,7 +175,9 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
               onVoteClick={() => castVote(EVoteSupport.FOR)}
               isVoted={supportStatus === EVoteSupport.FOR}
               showVoteButton={showVotingButtons}
-              disableVoteButton={supportStatus !== EVoteSupport.FOR}
+              disableVoteButton={
+                Number(proposal?.state) !== EProposalState.ACTIVE
+              }
             />
           </Grid>
           <Grid item xs={4}>
@@ -186,7 +188,9 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
               onVoteClick={() => castVote(EVoteSupport.FOR)}
               isVoted={supportStatus === EVoteSupport.AGAINST}
               showVoteButton={showVotingButtons}
-              disableVoteButton={supportStatus !== EVoteSupport.AGAINST}
+              disableVoteButton={
+                Number(proposal?.state) !== EProposalState.ACTIVE
+              }
             />
           </Grid>
           <Grid item xs={4}>
@@ -197,7 +201,9 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
               onVoteClick={() => castVote(EVoteSupport.FOR)}
               isVoted={supportStatus === EVoteSupport.ABSTAIN}
               showVoteButton={showVotingButtons}
-              disableVoteButton={supportStatus !== EVoteSupport.ABSTAIN}
+              disableVoteButton={
+                Number(proposal?.state) !== EProposalState.ACTIVE
+              }
             />
           </Grid>
         </Grid>
