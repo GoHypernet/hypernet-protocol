@@ -18,6 +18,10 @@ export class ViewUtils implements IViewUtils {
     return utils.formatUnits(value, "ether");
   }
 
+  public toBigNumber(value: number | string): BigNumber {
+    return BigNumber.from(value);
+  }
+
   public fromPaymentState(state: EPaymentState): string {
     return this._factoryPaymentStatusViewModel(state).state;
   }

@@ -18,6 +18,7 @@ import {
   EthereumAddress,
   EVoteSupport,
 } from "@hypernetlabs/objects";
+import ethers from "ethers";
 
 const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   onProposalListNavigate,
@@ -25,7 +26,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 }: IProposalDetailWidgetParams) => {
   const classes = useStyles();
   const alert = useAlert();
-  const { coreProxy } = useStoreContext();
+  const { coreProxy, viewUtils } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [proposal, setProposal] = useState<Proposal>();
 
@@ -33,8 +34,6 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
   useEffect(() => {
     coreProxy.getEthereumAccounts().map((accounts) => {
-      console.log("accounts DelegateVotesWidget: ", accounts);
-
       // delegate votes, createProposal and then list all proposals
       coreProxy
         .getProposalDetails(proposalId)
@@ -57,39 +56,44 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   }, []);
 
   const handleError = (err?: Error) => {
-    console.log("handleError err: ", err);
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };
 
-  const totalVotes: number | undefined = proposal
-    ? Number(proposal.proposalVotesFor) +
-      Number(proposal.proposalVotesAgaints) +
-      Number(proposal.proposalETA)
-    : undefined;
+  const proposalVotesFor = proposal
+    ? Number(
+        viewUtils.fromBigNumberEther(
+          viewUtils.toBigNumber(proposal.proposalVotesFor),
+        ),
+      )
+    : 0;
 
-  const forPercentage: number =
-    proposal && totalVotes
-      ? parseFloat(
-          ((Number(proposal.proposalVotesFor) * 100) / totalVotes).toFixed(0),
-        )
-      : 0;
+  const proposalVotesAgaints = proposal
+    ? Number(
+        viewUtils.fromBigNumberEther(
+          viewUtils.toBigNumber(proposal ? proposal.proposalVotesAgaints : 0),
+        ),
+      )
+    : 0;
 
-  const againstPercentage: number =
-    proposal && totalVotes
-      ? parseFloat(
-          ((Number(proposal.proposalVotesAgaints) * 100) / totalVotes).toFixed(
-            0,
-          ),
-        )
-      : 0;
+  const proposalETA = proposal
+    ? Number(
+        viewUtils.fromBigNumberEther(
+          viewUtils.toBigNumber(proposal.proposalETA),
+        ),
+      )
+    : 0;
 
-  const abstainPercentage: number =
-    proposal && totalVotes
-      ? parseFloat(
-          ((Number(proposal.proposalETA) * 100) / totalVotes).toFixed(0),
-        )
-      : 0;
+  const totalVotes = proposalVotesFor + proposalVotesAgaints + proposalETA;
+
+  const forPercentage =
+    ((proposalVotesFor * 100) / totalVotes).toFixed(0) || "0";
+
+  const againstPercentage =
+    ((proposalVotesAgaints * 100) / totalVotes).toFixed(0) || "0";
+
+  const abstainPercentage =
+    ((proposalETA * 100) / totalVotes).toFixed(0) || "0";
 
   const showVotingButtons = Number(proposal?.state) === EProposalState.ACTIVE;
 
@@ -97,7 +101,6 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
     coreProxy
       .queueProposal(proposalId)
       .map((proposal) => {
-        console.log("queueProposal proposal: ", proposal);
         setProposal(proposal);
       })
       .mapErr(handleError);
@@ -107,7 +110,6 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
     coreProxy
       .executeProposal(proposalId)
       .map((proposal) => {
-        console.log("executeProposal proposal: ", proposal);
         setProposal(proposal);
       })
       .mapErr(handleError);
@@ -118,7 +120,6 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
       .castVote(proposalId, voteSupport)
       .map((proposal) => {
         setProposal(proposal);
-        console.log("proposal", proposal);
       })
       .mapErr(handleError);
   };
@@ -170,8 +171,8 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
           <Grid item xs={4}>
             <GovernanceVotingCard
               type="for"
-              value={Number(proposal?.proposalVotesFor)}
-              progressValue={forPercentage}
+              value={proposalVotesFor}
+              progressValue={parseFloat(forPercentage)}
               onVoteClick={() => castVote(EVoteSupport.FOR)}
               isVoted={supportStatus === EVoteSupport.FOR}
               showVoteButton={showVotingButtons}
@@ -183,8 +184,8 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
           <Grid item xs={4}>
             <GovernanceVotingCard
               type="against"
-              value={Number(proposal?.proposalVotesAgaints)}
-              progressValue={againstPercentage}
+              value={proposalVotesAgaints}
+              progressValue={parseFloat(againstPercentage)}
               onVoteClick={() => castVote(EVoteSupport.FOR)}
               isVoted={supportStatus === EVoteSupport.AGAINST}
               showVoteButton={showVotingButtons}
@@ -196,8 +197,8 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
           <Grid item xs={4}>
             <GovernanceVotingCard
               type="abstain"
-              value={Number(proposal?.proposalETA)}
-              progressValue={abstainPercentage}
+              value={proposalETA}
+              progressValue={parseFloat(abstainPercentage)}
               onVoteClick={() => castVote(EVoteSupport.FOR)}
               isVoted={supportStatus === EVoteSupport.ABSTAIN}
               showVoteButton={showVotingButtons}
