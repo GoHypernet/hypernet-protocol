@@ -3,6 +3,7 @@ import { PersistenceError } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface ICeramicUtils {
+  initialize(): ResultAsync<void, PersistenceError>;
   initiateDefinitions(): ResultAsync<TileDocument[], PersistenceError>;
   writeRecord<T>(
     aliasName: string,
