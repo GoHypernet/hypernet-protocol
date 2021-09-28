@@ -641,6 +641,19 @@ export default class HypernetIFrameProxy
     return this._createCall("getProposalsCount", null);
   }
 
+  public getProposalThreshold(): ResultAsync<
+    number,
+    BlockchainUnavailableError
+  > {
+    return this._createCall("getProposalThreshold", null);
+  }
+
+  public getVotingPower(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this._createCall("getVotingPower", account);
+  }
+
   private _displayCoreIFrame(): void {
     // Show core iframe
     if (this.child != null) {

@@ -339,6 +339,12 @@ export interface IHypernetCore {
     registryName: string,
   ): ResultAsync<number, BlockchainUnavailableError>;
 
+  getProposalThreshold(): ResultAsync<number, BlockchainUnavailableError>;
+
+  getVotingPower(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError>;
+
   /**
    * Observables for seeing what's going on
    */

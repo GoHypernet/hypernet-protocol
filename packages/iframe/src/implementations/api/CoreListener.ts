@@ -355,6 +355,16 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getProposalsCount();
         }, data.callId);
       },
+      getProposalThreshold: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getProposalThreshold();
+        }, data.callId);
+      },
+      getVotingPower: (data: IIFrameCallData<EthereumAddress>) => {
+        this.returnForModel(() => {
+          return this.core.getVotingPower(data.data);
+        }, data.callId);
+      },
     });
   }
 

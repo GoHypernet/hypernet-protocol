@@ -1136,4 +1136,17 @@ export class HypernetCore implements IHypernetCore {
   public getProposalsCount(): ResultAsync<number, BlockchainUnavailableError> {
     return this.governanceService.getProposalsCount();
   }
+
+  public getProposalThreshold(): ResultAsync<
+    number,
+    BlockchainUnavailableError
+  > {
+    return this.governanceService.getProposalThreshold();
+  }
+
+  public getVotingPower(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this.governanceService.getVotingPower(account);
+  }
 }

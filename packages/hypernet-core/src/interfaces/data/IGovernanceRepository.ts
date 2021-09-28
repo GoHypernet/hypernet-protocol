@@ -44,6 +44,10 @@ export interface IGovernanceRepository {
   executeProposal(
     proposalId: string,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  getProposalThreshold(): ResultAsync<number, BlockchainUnavailableError>;
+  getVotingPower(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError>;
 }
 
 export const IGovernanceRepositoryType = Symbol.for("IGovernanceRepository");

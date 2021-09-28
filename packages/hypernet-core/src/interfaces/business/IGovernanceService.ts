@@ -45,4 +45,8 @@ export interface IGovernanceService {
   executeProposal(
     proposalId: string,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  getProposalThreshold(): ResultAsync<number, BlockchainUnavailableError>;
+  getVotingPower(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError>;
 }

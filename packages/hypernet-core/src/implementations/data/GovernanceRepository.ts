@@ -447,6 +447,42 @@ export class GovernanceRepository implements IGovernanceRepository {
     });
   }
 
+  public getProposalThreshold(): ResultAsync<
+    number,
+    BlockchainUnavailableError
+  > {
+    return this.initializeContractsWithProvider().andThen(() => {
+      return ResultAsync.fromPromise(
+        this.hypernetGovernorContract?.proposalThreshold() as Promise<BigNumber>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to call proposalThreshold",
+            e,
+          );
+        },
+      ).map((poposalThreshold) => {
+        return Number(
+          ethers.utils.formatUnits(poposalThreshold.toString(), "ether"),
+        );
+      });
+    });
+  }
+
+  public getVotingPower(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this.initializeContractsWithProvider().andThen(() => {
+      return ResultAsync.fromPromise(
+        this.hypertokenContract?.getVotes(account) as Promise<BigNumber>,
+        (e) => {
+          return new BlockchainUnavailableError("Unable to call getVotes", e);
+        },
+      ).map((votes) => {
+        return Number(ethers.utils.formatUnits(votes.toString(), "ether"));
+      });
+    });
+  }
+
   protected initializeContractsWithSigner(): ResultAsync<
     ethers.providers.JsonRpcSigner,
     BlockchainUnavailableError
