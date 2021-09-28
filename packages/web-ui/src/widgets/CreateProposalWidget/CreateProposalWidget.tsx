@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useAlert } from "react-alert";
 import { Form, Formik, FormikHelpers } from "formik";
 import * as Yup from "yup";
@@ -39,17 +39,31 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
   const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
     EthereumAddress(""),
   );
+  const [proposalThreshold, setProposalThreshold] = useState<number>();
+  const [votingPower, setVotingPower] = useState<number>();
 
   useEffect(() => {
-    coreProxy.getEthereumAccounts().map((accounts) => {
-      console.log("accounts CreateProposalWidget: ", accounts);
-      setAccountAddress(accounts[0]);
-    });
+    coreProxy
+      .getProposalThreshold()
+      .map((_proposalThreshold) => {
+        console.log("_proposalThreshold: ", _proposalThreshold);
+        setProposalThreshold(_proposalThreshold);
+      })
+      .mapErr(handleError);
 
     coreProxy
-      .getRegistries(10)
-      .map((registriesLabels) => {
-        console.log("registriesLabels: ", registriesLabels);
+      .getEthereumAccounts()
+      .map((accounts) => {
+        console.log("accounts CreateProposalWidget: ", accounts);
+        setAccountAddress(accounts[0]);
+
+        coreProxy
+          .getVotingPower(accounts[0])
+          .map((power) => {
+            console.log("power: ", power);
+            setVotingPower(power);
+          })
+          .mapErr(handleError);
       })
       .mapErr(handleError);
   }, []);
@@ -101,6 +115,12 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
         .mapErr(handleError);
     }
   };
+
+  const exceedsThreshold: boolean = useMemo(() => {
+    return !votingPower || !proposalThreshold
+      ? false
+      : votingPower >= proposalThreshold;
+  }, [proposalThreshold, votingPower]);
 
   return (
     <>
@@ -227,9 +247,12 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
               type="submit"
               fullWidth
               color="primary"
+              disabled={!exceedsThreshold}
               onClick={() => {}}
             >
-              Submit
+              {exceedsThreshold
+                ? "Submit"
+                : `You must have ${proposalThreshold} tokens to submit a proposal`}
             </GovernanceButton>
           </Form>
         )}

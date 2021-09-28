@@ -1074,10 +1074,20 @@ export class HypernetCore implements IHypernetCore {
     return this.registryService.getRegistryByAddress(registryAddress);
   }
 
+  public getRegistryEntriesTotalCount(
+    registryName: string,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this.registryService.getRegistryEntriesTotalCount(registryName);
+  }
+
   public getRegistryEntries(
     registryName: string,
+    _registryEntriesNumberArr?: number[],
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
-    return this.registryService.getRegistryEntries(registryName);
+    return this.registryService.getRegistryEntries(
+      registryName,
+      _registryEntriesNumberArr,
+    );
   }
 
   public getRegistryEntryByLabel(
@@ -1121,5 +1131,22 @@ export class HypernetCore implements IHypernetCore {
       tokenId,
       label,
     );
+  }
+
+  public getProposalsCount(): ResultAsync<number, BlockchainUnavailableError> {
+    return this.governanceService.getProposalsCount();
+  }
+
+  public getProposalThreshold(): ResultAsync<
+    number,
+    BlockchainUnavailableError
+  > {
+    return this.governanceService.getProposalThreshold();
+  }
+
+  public getVotingPower(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this.governanceService.getVotingPower(account);
   }
 }

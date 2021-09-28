@@ -93,4 +93,17 @@ export class GovernanceService implements IGovernanceService {
   ): ResultAsync<Proposal, BlockchainUnavailableError> {
     return this.governanceRepository.executeProposal(proposalId);
   }
+
+  public getProposalThreshold(): ResultAsync<
+    number,
+    BlockchainUnavailableError
+  > {
+    return this.governanceRepository.getProposalThreshold();
+  }
+
+  public getVotingPower(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this.governanceRepository.getVotingPower(account);
+  }
 }

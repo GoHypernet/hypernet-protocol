@@ -575,10 +575,20 @@ export default class HypernetIFrameProxy
     return this._createCall("getRegistryByAddress", registryAddress);
   }
 
+  public getRegistryEntriesTotalCount(
+    registryName: string,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this._createCall("getRegistryEntriesTotalCount", registryName);
+  }
+
   public getRegistryEntries(
     registryName: string,
+    _registryEntriesNumberArr?: number[],
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
-    return this._createCall("getRegistryEntries", registryName);
+    return this._createCall("getRegistryEntries", {
+      registryName,
+      _registryEntriesNumberArr,
+    });
   }
 
   public getRegistryEntryByLabel(
@@ -625,6 +635,23 @@ export default class HypernetIFrameProxy
     proposalId: string,
   ): ResultAsync<Proposal, BlockchainUnavailableError> {
     return this._createCall("executeProposal", proposalId);
+  }
+
+  public getProposalsCount(): ResultAsync<number, BlockchainUnavailableError> {
+    return this._createCall("getProposalsCount", null);
+  }
+
+  public getProposalThreshold(): ResultAsync<
+    number,
+    BlockchainUnavailableError
+  > {
+    return this._createCall("getProposalThreshold", null);
+  }
+
+  public getVotingPower(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this._createCall("getVotingPower", account);
   }
 
   private _displayCoreIFrame(): void {

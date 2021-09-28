@@ -18,6 +18,7 @@ export interface IRegistryService {
   ): ResultAsync<Registry, BlockchainUnavailableError>;
   getRegistryEntries(
     registryName: string,
+    _registryEntriesNumberArr?: number[],
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
   getRegistryEntryByLabel(
     registryName: string,
@@ -33,4 +34,7 @@ export interface IRegistryService {
     tokenId: number,
     label: string,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+  getRegistryEntriesTotalCount(
+    registryName: string,
+  ): ResultAsync<number, BlockchainUnavailableError>;
 }

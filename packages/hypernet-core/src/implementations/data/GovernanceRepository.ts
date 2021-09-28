@@ -57,11 +57,12 @@ export class GovernanceRepository implements IGovernanceRepository {
       if (_proposalsNumberArr == null) {
         proposalsNumberArrResult = this.getProposalsCount().map(
           (proposalCounts) => {
+            console.log("proposalCounts: ", proposalCounts);
             if (proposalCounts == null || proposalCounts == 0) {
               return [];
             }
             let countsArr: number[] = [];
-            for (let index = 1; index <= proposalCounts; index++) {
+            for (let index = proposalCounts; index >= 1; index--) {
               countsArr.push(index);
             }
             return countsArr;
@@ -442,6 +443,42 @@ export class GovernanceRepository implements IGovernanceRepository {
             });
           });
         });
+      });
+    });
+  }
+
+  public getProposalThreshold(): ResultAsync<
+    number,
+    BlockchainUnavailableError
+  > {
+    return this.initializeContractsWithProvider().andThen(() => {
+      return ResultAsync.fromPromise(
+        this.hypernetGovernorContract?.proposalThreshold() as Promise<BigNumber>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to call proposalThreshold",
+            e,
+          );
+        },
+      ).map((poposalThreshold) => {
+        return Number(
+          ethers.utils.formatUnits(poposalThreshold.toString(), "ether"),
+        );
+      });
+    });
+  }
+
+  public getVotingPower(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this.initializeContractsWithProvider().andThen(() => {
+      return ResultAsync.fromPromise(
+        this.hypertokenContract?.getVotes(account) as Promise<BigNumber>,
+        (e) => {
+          return new BlockchainUnavailableError("Unable to call getVotes", e);
+        },
+      ).map((votes) => {
+        return Number(ethers.utils.formatUnits(votes.toString(), "ether"));
       });
     });
   }

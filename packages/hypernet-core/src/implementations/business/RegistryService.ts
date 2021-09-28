@@ -34,10 +34,20 @@ export class RegistryService implements IRegistryService {
     return this.registryRepository.getRegistryByAddress(registryAddress);
   }
 
+  public getRegistryEntriesTotalCount(
+    registryName: string,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this.registryRepository.getRegistryEntriesTotalCount(registryName);
+  }
+
   public getRegistryEntries(
     registryName: string,
+    _registryEntriesNumberArr: number[],
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
-    return this.registryRepository.getRegistryEntries(registryName);
+    return this.registryRepository.getRegistryEntries(
+      registryName,
+      _registryEntriesNumberArr,
+    );
   }
 
   public getRegistryEntryByLabel(

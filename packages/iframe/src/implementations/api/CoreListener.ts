@@ -279,9 +279,22 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getRegistryByAddress(data.data);
         }, data.callId);
       },
-      getRegistryEntries: (data: IIFrameCallData<string>) => {
+      getRegistryEntriesTotalCount: (data: IIFrameCallData<string>) => {
         this.returnForModel(() => {
-          return this.core.getRegistryEntries(data.data);
+          return this.core.getRegistryEntriesTotalCount(data.data);
+        }, data.callId);
+      },
+      getRegistryEntries: (
+        data: IIFrameCallData<{
+          registryName: string;
+          _registryEntriesNumberArr?: number[];
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.getRegistryEntries(
+            data.data.registryName,
+            data.data._registryEntriesNumberArr,
+          );
         }, data.callId);
       },
       getRegistryEntryByLabel: (
@@ -335,6 +348,21 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.tokenId,
             data.data.label,
           );
+        }, data.callId);
+      },
+      getProposalsCount: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getProposalsCount();
+        }, data.callId);
+      },
+      getProposalThreshold: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getProposalThreshold();
+        }, data.callId);
+      },
+      getVotingPower: (data: IIFrameCallData<EthereumAddress>) => {
+        this.returnForModel(() => {
+          return this.core.getVotingPower(data.data);
         }, data.callId);
       },
     });

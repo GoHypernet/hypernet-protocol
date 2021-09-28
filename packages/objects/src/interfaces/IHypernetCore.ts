@@ -305,6 +305,7 @@ export interface IHypernetCore {
 
   getRegistryEntries(
     registryName: string,
+    _registryEntriesNumberArr?: number[],
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
 
   getRegistryEntryByLabel(
@@ -331,6 +332,18 @@ export interface IHypernetCore {
     tokenId: number,
     label: string,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+
+  getProposalsCount(): ResultAsync<number, BlockchainUnavailableError>;
+
+  getRegistryEntriesTotalCount(
+    registryName: string,
+  ): ResultAsync<number, BlockchainUnavailableError>;
+
+  getProposalThreshold(): ResultAsync<number, BlockchainUnavailableError>;
+
+  getVotingPower(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError>;
 
   /**
    * Observables for seeing what's going on
