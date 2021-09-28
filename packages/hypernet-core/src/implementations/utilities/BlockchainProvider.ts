@@ -1,4 +1,4 @@
-import { Eip1193Bridge } from "@ethersproject/experimental";
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   BlockchainUnavailableError,
   InvalidParametersError,
@@ -22,6 +22,7 @@ import { inject, injectable } from "inversify";
 import { okAsync, ResultAsync, errAsync } from "neverthrow";
 import Web3Modal, { IProviderOptions } from "web3modal";
 
+import { CeramicEIP1193Bridge } from "@implementations/utilities";
 import {
   IContextProvider,
   IConfigProvider,
@@ -158,8 +159,8 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
     });
   }
 
-  private eip1193Bridge: Eip1193Bridge | null = null;
-  public getEIP1193Provider(): ResultAsync<Eip1193Bridge, never> {
+  private ceramicEIP1193Bridge: CeramicEIP1193Bridge | null = null;
+  public getCeramicEIP1193Provider(): ResultAsync<CeramicEIP1193Bridge, never> {
     if (this.initializeResult == null) {
       throw new Error(
         "Must call BlockchainProvider.initialize() first before you can call getEIP1193Provider()",
@@ -168,16 +169,14 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
 
     return this.initializeResult
       .map(() => {
-        if (this.eip1193Bridge == null) {
-          this.eip1193Bridge = new Eip1193Bridge(
-            this.signer as ethers.providers.JsonRpcSigner,
-            this.provider as
-              | ethers.providers.Web3Provider
-              | ethers.providers.JsonRpcProvider,
+        if (this.ceramicEIP1193Bridge == null) {
+          this.ceramicEIP1193Bridge = new CeramicEIP1193Bridge(
+            this.signer!,
+            this.provider!,
           );
         }
 
-        return this.eip1193Bridge;
+        return this.ceramicEIP1193Bridge;
       })
       .orElse((e) => {
         throw new Error(
@@ -215,6 +214,7 @@ export class EthersBlockchainProvider implements IBlockchainProvider {
     BlockchainUnavailableError | InvalidParametersError
   > {
     if (this.initializeResult == null) {
+      this.logUtils.debug("Initializing BlockchainProvider");
       this.initializeResult = ResultUtils.combine([
         this.contextProvider.getContext(),
         this.configProvider.getConfig(),

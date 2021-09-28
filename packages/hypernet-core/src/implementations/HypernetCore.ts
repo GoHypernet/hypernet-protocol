@@ -359,10 +359,19 @@ export class HypernetCore implements IHypernetCore {
       this.timeUtils,
     );
 
-    this.ceramicUtils = new CeramicUtils(
+    this.browserNodeProvider = new BrowserNodeProvider(
       this.configProvider,
       this.contextProvider,
       this.blockchainProvider,
+      this.logUtils,
+      this.localStorageUtils,
+      this.browserNodeFactory,
+    );
+
+    this.ceramicUtils = new CeramicUtils(
+      this.configProvider,
+      this.contextProvider,
+      this.browserNodeProvider,
       this.logUtils,
     );
 
@@ -373,14 +382,6 @@ export class HypernetCore implements IHypernetCore {
       this.logUtils,
     );
 
-    this.browserNodeProvider = new BrowserNodeProvider(
-      this.configProvider,
-      this.contextProvider,
-      this.blockchainProvider,
-      this.logUtils,
-      this.localStorageUtils,
-      this.browserNodeFactory,
-    );
     this.blockchainUtils = new EthersBlockchainUtils(
       this.blockchainProvider,
       this.configProvider,
@@ -780,6 +781,9 @@ export class HypernetCore implements IHypernetCore {
         context.account = accounts[0];
         this.logUtils.debug(`Obtained accounts: ${accounts}`);
         return this.contextProvider.setContext(context);
+      })
+      .andThen(() => {
+        return this.ceramicUtils.initialize();
       })
       .andThen(() => {
         return ResultUtils.combine([

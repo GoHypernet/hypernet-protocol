@@ -24,8 +24,7 @@ services:
         }, 
         "chainProviders": { 
           "1337": "http://blockchain:8545" 
-        }, 
-        "port": 3001, 
+        },
         "redisUrl": "redis://redis:6379", 
         "allowedSwaps": [ ], 
         "nodeUrl": "http://node:8000", 
@@ -70,7 +69,6 @@ services:
     depends_on:
       - database-node
       - blockchain
-      - messaging
 
   router:
     image: connextproject/vector_router:0.2.5-beta.6
@@ -95,8 +93,7 @@ services:
         }, 
         "chainProviders": { 
           "1337": "http://blockchain:8545" 
-        }, 
-        "port": 3001, 
+        },
         "redisUrl": "redis://redis:6379", 
         "allowedSwaps": [ ], 
         "nodeUrl": "http://node:8000", 
@@ -141,6 +138,7 @@ services:
     depends_on:
       - node
       - database-router
+    restart: on-failure
 
   database-node:
     image: connextproject/vector_database:0.2.5-beta.6
@@ -203,18 +201,6 @@ services:
     environment:
       JWT_SIGNER_PUBLIC_KEY: "-----BEGIN PUBLIC KEY-----MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqU/GXp8MqmugQyRk5FUFBvlJt1/h7L3Crzlzejz/OxriZdq/lBNQW9S1kzGc7qjXprZ1Kg3zP6irr6wmvP0WYBGltWs2cWUAmxh0PSxuKdT/OyL9w+rjKLh4yo3ex6DX3Ij0iP01Ej2POe5WrPDS8j6LT0s4HZ1FprL5h7RUQWV3cO4pF+1kl6HlBpNzEQzocW9ig4DNdSeUENARHWoCixE1gFYo9RXm7acqgqCk3ihdJRIbO4e/m1aZq2mvAFK+yHTIWBL0p5PF0Fe8zcWdNeEATYB+eRdNJ3jjS8447YrcbQcBQmhFjk8hbCnc3Rv3HvAapk8xDFhImdVF1ffDFwIDAQAB-----END PUBLIC KEY-----"
 
-  messaging:
-    image: connextproject/vector_messaging_proxy:0.2.5-beta.6
-    ports:
-      - 3001:80
-    environment:
-      VECTOR_DOMAINNAME: ""
-      VECTOR_AUTH_URL: "auth:5040"
-      VECTOR_NATS_HOST: "nats"
-    depends_on:
-      - nats
-      - auth
-
   iframe:
     image: connextproject/vector_iframe_app:0.2.5-beta.6
     ports:
@@ -236,8 +222,7 @@ services:
         }, 
         "chainProviders": { 
           "1337": "http://blockchain:8545" 
-        }, 
-        "port": 3001, 
+        },
         "redisUrl": "redis://redis:6379", 
         "allowedSwaps": [ ], 
         "nodeUrl": "http://node:8000", 

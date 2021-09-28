@@ -48,6 +48,7 @@ export class StorageUtils implements IStorageUtils {
 
   public read<T>(keyName: string): ResultAsync<T | null, PersistenceError> {
     // Read from session storage first.
+    this.logUtils.debug(`Reading value for key ${keyName}`);
     return this._readSessionStorage<T>(keyName)
       .andThen((val) => {
         // If the value is there, then we're good.
@@ -56,6 +57,9 @@ export class StorageUtils implements IStorageUtils {
         }
 
         // The value is not in SessionStorage, so we need to get it from Ceramic
+        this.logUtils.debug(
+          `Key not found in session storage, reading value for key ${keyName} from Ceramic`,
+        );
         return this.ceramicUtils
           .readRecord<T>(keyName)
           .andThen((ceramicVal) => {

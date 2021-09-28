@@ -1,4 +1,3 @@
-import { Eip1193Bridge } from "@ethersproject/experimental";
 import {
   BlockchainUnavailableError,
   GovernanceSignerUnavailableError,
@@ -7,6 +6,8 @@ import {
 } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
+
+import { CeramicEIP1193Bridge } from "@implementations/utilities";
 
 /**
  * @todo What is the main role/purpose of this class? Description here.
@@ -30,7 +31,7 @@ export interface IBlockchainProvider {
    * will be created and returned.
    */
   getGovernanceProvider(): ResultAsync<ethers.providers.Provider, never>;
-  getEIP1193Provider(): ResultAsync<Eip1193Bridge, never>;
+  getCeramicEIP1193Provider(): ResultAsync<CeramicEIP1193Bridge, never>;
   getLatestBlock(): ResultAsync<
     ethers.providers.Block,
     BlockchainUnavailableError
