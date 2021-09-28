@@ -115,4 +115,13 @@ export interface IHypernetWebUI {
   renderRegistryEntryDetailWidget(
     config?: IRegistryEntryDetailWidgetParams,
   ): Result<void, RenderError>;
+  renderHypertokenBalanceWidget(
+    params?: IRenderParams,
+  ): Result<void, RenderError>;
+  renderVotingPowerWidget(
+    params?: IRenderParams,
+  ): Result<void, RenderError>;
+  renderConnectedAccountWidget(
+    params?: IRenderParams,
+  ): Result<void, RenderError>;
 }

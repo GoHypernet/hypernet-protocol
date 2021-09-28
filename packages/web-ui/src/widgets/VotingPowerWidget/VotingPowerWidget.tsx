@@ -4,8 +4,11 @@ import { Typography } from "@material-ui/core";
 
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { useStyles } from "@web-integration/widgets/VotingPowerWidget/VotingPowerWidget.style";
+import { IRenderParams } from "@web-ui/interfaces";
 
-const VotingPowerWidget: React.FC = () => {
+interface VotingPowerWidgetParams extends IRenderParams {}
+
+const VotingPowerWidget: React.FC<VotingPowerWidgetParams> = () => {
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
   const classes = useStyles();

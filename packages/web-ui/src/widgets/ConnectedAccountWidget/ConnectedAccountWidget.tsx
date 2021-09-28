@@ -4,8 +4,11 @@ import { useAlert } from "react-alert";
 
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { EthereumAddress } from "@hypernetlabs/objects";
+import { IRenderParams } from "@web-ui/interfaces";
 
-const ConnectedAccountWidget: React.FC = () => {
+interface ConnectedAccountWidgetParams extends IRenderParams {}
+
+const ConnectedAccountWidget: React.FC<ConnectedAccountWidgetParams> = () => {
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();

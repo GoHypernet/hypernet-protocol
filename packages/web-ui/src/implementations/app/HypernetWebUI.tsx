@@ -42,6 +42,9 @@ import {
   REGISTRY_LIST_WIDGET_ID_SELECTOR,
   REGISTRY_ENTRY_LIST_WIDGET_ID_SELECTOR,
   REGISTRY_ENTRY_DETAIL_WIDGET_ID_SELECTOR,
+  HYPERTOKEN_BALANCE_WIDGET,
+  VOTING_POWER_WIDGET,
+  CONNECTED_ACCOUNT_WIDGET,
 } from "@web-ui/constants";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
@@ -62,6 +65,9 @@ import ProposalDetailWidget from "@web-integration/widgets/ProposalDetailWidget"
 import RegistryListWidget from "@web-integration/widgets/RegistryListWidget";
 import RegistryEntryDetailWidget from "@web-integration/widgets/RegistryEntryDetailWidget";
 import RegistryEntryListWidget from "@web-integration/widgets/RegistryEntryListWidget";
+import HypertokenBalanceWidget from "@web-integration/widgets/HypertokenBalanceWidget";
+import VotingPowerWidget from "@web-integration/widgets/VotingPowerWidget";
+import ConnectedAccountWidget from "@web-integration/widgets/ConnectedAccountWidget";
 
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
@@ -508,6 +514,50 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._generateDomElement(
           config?.selector || REGISTRY_ENTRY_DETAIL_WIDGET_ID_SELECTOR,
         ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderHypertokenBalanceWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <HypertokenBalanceWidget {...config} />,
+          config?.showInModal,
+        ),
+        this._generateDomElement(config?.selector || HYPERTOKEN_BALANCE_WIDGET),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderVotingPowerWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <VotingPowerWidget {...config} />,
+          config?.showInModal,
+        ),
+        this._generateDomElement(config?.selector || VOTING_POWER_WIDGET),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+  public renderConnectedAccountWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <ConnectedAccountWidget {...config} />,
+          config?.showInModal,
+        ),
+        this._generateDomElement(config?.selector || CONNECTED_ACCOUNT_WIDGET),
       );
     };
     return this._getThrowableRender(renderReact);

@@ -42,3 +42,6 @@ export const REGISTRY_ENTRY_LIST_WIDGET_ID_SELECTOR =
   "hypernet-protocol-registry-entry-list-widget";
 export const REGISTRY_ENTRY_DETAIL_WIDGET_ID_SELECTOR =
   "hypernet-protocol-registry-entry-detail-widget";
+export const HYPERTOKEN_BALANCE_WIDGET = "hypertoken-balance-widget";
+export const VOTING_POWER_WIDGET = "voting-power-widget";
+export const CONNECTED_ACCOUNT_WIDGET = "connected-account-widget";

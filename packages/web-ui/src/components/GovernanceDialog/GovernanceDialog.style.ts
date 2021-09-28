@@ -25,4 +25,7 @@ export const useStyles = makeStyles((theme) => ({
   dialogContent: {
     padding: 0,
   },
+  closeButton: {
+    marginRight: -12,
+  },
 }));

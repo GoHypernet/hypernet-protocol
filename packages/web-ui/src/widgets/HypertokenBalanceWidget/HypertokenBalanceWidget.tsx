@@ -4,13 +4,16 @@ import { useAlert } from "react-alert";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { useStyles } from "@web-integration/widgets/HypertokenBalanceWidget/HypertokenBalanceWidget.style";
 import { GovernanceButton } from "@web-integration/components";
+import { IRenderParams } from "@web-ui/interfaces";
 
-const HypertokenBalanceWidget: React.FC = () => {
+interface HypertokenBalanceWidgetParams extends IRenderParams {}
+
+const HypertokenBalanceWidget: React.FC<HypertokenBalanceWidgetParams> = () => {
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
   const classes = useStyles();
   const { setLoading } = useLayoutContext();
-  const [balance, setBalance] = useState();
+  const [balance, setBalance] = useState(0.0001);
 
   useEffect(() => {
     setLoading(true);
@@ -29,16 +32,7 @@ const HypertokenBalanceWidget: React.FC = () => {
     alert.error(err?.message || "Something went wrong!");
   };
 
-  return (
-    <GovernanceButton onClick={() => {}}>
-      {balance}
-      <img
-        className={classes.logo}
-        src="https://res.cloudinary.com/dqueufbs7/image/upload/v1623464753/images/HNPLogo.png"
-        alt="HNPLogo"
-      />
-    </GovernanceButton>
-  );
+  return <GovernanceButton onClick={() => {}}>{balance} H</GovernanceButton>;
 };
 
 export default HypertokenBalanceWidget;
