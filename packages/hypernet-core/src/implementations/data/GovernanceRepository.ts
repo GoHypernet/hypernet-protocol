@@ -57,11 +57,12 @@ export class GovernanceRepository implements IGovernanceRepository {
       if (_proposalsNumberArr == null) {
         proposalsNumberArrResult = this.getProposalsCount().map(
           (proposalCounts) => {
+            console.log("proposalCounts: ", proposalCounts);
             if (proposalCounts == null || proposalCounts == 0) {
               return [];
             }
             let countsArr: number[] = [];
-            for (let index = 1; index <= proposalCounts; index++) {
+            for (let index = proposalCounts; index >= 1; index--) {
               countsArr.push(index);
             }
             return countsArr;

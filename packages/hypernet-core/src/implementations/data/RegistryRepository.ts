@@ -38,9 +38,8 @@ export class RegistryRepository implements IRegistryRepository {
         BlockchainUnavailableError
       >[] = [];
 
-      // TODO: reverse the list of registries to start from numberOfRegistries
       // Get registry by index
-      for (let index = 0; index < numberOfRegistries; index++) {
+      for (let index = numberOfRegistries; index >= 0; index--) {
         registryListResult.push(this.getRegistryByIndex(index, provider));
       }
 
@@ -235,9 +234,9 @@ export class RegistryRepository implements IRegistryRepository {
     });
   }
 
-  public getRegistryEntries(
+  public getRegistryEntriesTotalCount(
     registryName: string,
-  ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
+  ): ResultAsync<number, BlockchainUnavailableError> {
     return this.initializeContractsWithProvider().andThen((provider) => {
       // Get registry address
       return ResultAsync.fromPromise(
@@ -266,25 +265,83 @@ export class RegistryRepository implements IRegistryRepository {
               e,
             );
           },
-        ).andThen((_tokenIdsCount) => {
-          const tokenIdsCount = _tokenIdsCount.toNumber();
-          const tokenIdsArr: number[] = [];
-          const registryEntriesResult: ResultAsync<
-            RegistryEntry,
-            BlockchainUnavailableError
-          >[] = [];
-
-          for (let index = 1; index <= tokenIdsCount; index++) {
-            tokenIdsArr.push(index);
-          }
-          tokenIdsArr.forEach((tokenId) => {
-            registryEntriesResult.push(
-              this.getRegistryEntryByTokenId(registryContract, tokenId),
-            );
-          });
-
-          return ResultUtils.combine(registryEntriesResult);
+        ).map((_tokenIdsCount) => {
+          return _tokenIdsCount.toNumber();
         });
+      });
+    });
+  }
+
+  public getRegistryEntries(
+    registryName: string,
+    _registryEntriesNumberArr?: number[],
+  ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
+    return this.initializeContractsWithProvider().andThen((provider) => {
+      // Get registry address
+      return ResultAsync.fromPromise(
+        this.registryFactoryContract?.nameToAddress(
+          registryName,
+        ) as Promise<EthereumAddress>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to call nameToAddress()",
+            e,
+          );
+        },
+      ).andThen((registryAddress) => {
+        // Call the NFR contract of that address
+        const registryContract = new ethers.Contract(
+          registryAddress,
+          GovernanceAbis.NonFungibleRegistry.abi,
+          provider,
+        );
+        let registryEntriesNumberArrResult: ResultAsync<
+          number[],
+          BlockchainUnavailableError
+        >;
+
+        if (_registryEntriesNumberArr == null) {
+          registryEntriesNumberArrResult = this.getRegistryEntriesTotalCount(
+            registryName,
+          ).map((registryEntriesCount) => {
+            console.log("registryEntriesCount: ", registryEntriesCount);
+            if (registryEntriesCount == null || registryEntriesCount == 0) {
+              return [];
+            }
+            let countsArr: number[] = [];
+            for (let index = registryEntriesCount; index >= 1; index--) {
+              countsArr.push(index);
+            }
+            return countsArr;
+          });
+        } else {
+          registryEntriesNumberArrResult = okAsync(_registryEntriesNumberArr);
+        }
+
+        const registryEntriesResult: ResultAsync<
+          RegistryEntry | null,
+          BlockchainUnavailableError
+        >[] = [];
+
+        return registryEntriesNumberArrResult.andThen(
+          (registryEntriesNumberArr) => {
+            registryEntriesNumberArr.forEach((tokenId) => {
+              registryEntriesResult.push(
+                this.getRegistryEntryByTokenId(registryContract, tokenId),
+              );
+            });
+
+            return ResultUtils.combine(registryEntriesResult).map((vals) => {
+              const registryEntryList: RegistryEntry[] = [];
+              vals.forEach((registry) => {
+                if (registry != null) {
+                  registryEntryList.push(registry);
+                }
+              });
+              return registryEntryList;
+            });
+          },
+        );
       });
     });
   }
@@ -487,58 +544,64 @@ export class RegistryRepository implements IRegistryRepository {
           e,
         );
       },
-    ).andThen((label) => {
-      return ResultAsync.fromPromise(
-        registryContract?.ownerOf(tokenId) as Promise<EthereumAddress>,
-        (e) => {
-          return new BlockchainUnavailableError(
-            "Unable to call ownerOf registryContract",
-            e,
-          );
-        },
-      ).andThen((owner) => {
+    )
+      .andThen((label) => {
         return ResultAsync.fromPromise(
-          registryContract?.tokenURI(tokenId) as Promise<string>,
+          registryContract?.ownerOf(tokenId) as Promise<EthereumAddress>,
           (e) => {
             return new BlockchainUnavailableError(
-              "Unable to call tokenURI registryContract",
+              "Unable to call ownerOf registryContract",
               e,
             );
           },
-        ).andThen((tokenURI) => {
+        ).andThen((owner) => {
           return ResultAsync.fromPromise(
-            registryContract?.allowStorageUpdate() as Promise<boolean>,
+            registryContract?.tokenURI(tokenId) as Promise<string>,
             (e) => {
               return new BlockchainUnavailableError(
-                "Unable to call allowStorageUpdate registryContract",
+                "Unable to call tokenURI registryContract",
                 e,
               );
             },
-          ).andThen((storageUpdateAllowed) => {
+          ).andThen((tokenURI) => {
             return ResultAsync.fromPromise(
-              registryContract?.allowLabelChange() as Promise<boolean>,
+              registryContract?.allowStorageUpdate() as Promise<boolean>,
               (e) => {
                 return new BlockchainUnavailableError(
-                  "Unable to call allowLabelChange registryContract",
+                  "Unable to call allowStorageUpdate registryContract",
                   e,
                 );
               },
-            ).andThen((labelChangeAllowed) => {
-              return okAsync(
-                new RegistryEntry(
-                  label,
-                  tokenId,
-                  owner,
-                  tokenURI,
-                  storageUpdateAllowed,
-                  labelChangeAllowed,
-                ),
-              );
+            ).andThen((storageUpdateAllowed) => {
+              return ResultAsync.fromPromise(
+                registryContract?.allowLabelChange() as Promise<boolean>,
+                (e) => {
+                  return new BlockchainUnavailableError(
+                    "Unable to call allowLabelChange registryContract",
+                    e,
+                  );
+                },
+              ).andThen((labelChangeAllowed) => {
+                return okAsync(
+                  new RegistryEntry(
+                    label,
+                    tokenId,
+                    owner,
+                    tokenURI,
+                    storageUpdateAllowed,
+                    labelChangeAllowed,
+                  ),
+                );
+              });
             });
           });
         });
+      })
+      .orElse((e) => {
+        // We don't want to throw errors when registry is not found
+        this.logUtils.error(e);
+        return okAsync(null as unknown as RegistryEntry);
       });
-    });
   }
 
   protected initializeContractsWithSigner(): ResultAsync<

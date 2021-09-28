@@ -25,7 +25,21 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       .getRegistryEntries(registryName)
       .map((registryEntries) => {
         console.log("registry entry list: ", registryEntries);
+      })
+      .mapErr(handleError);
+
+    coreProxy
+      .getRegistryEntries(registryName, [1, 2, 3, 4, 5, 6, 7])
+      .map((registryEntries) => {
+        console.log("registry entry list wth filter: ", registryEntries);
         setRegistryEntries(registryEntries);
+      })
+      .mapErr(handleError);
+
+    coreProxy
+      .getRegistryEntriesTotalCount(registryName)
+      .map((count) => {
+        console.log("registry entry list count: ", count);
       })
       .mapErr(handleError);
   }, []);
@@ -50,7 +64,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       {registryEntries.map((registryEntry) => (
         <GovernanceRegistryListItem
           key={registryEntry.label}
-          number="1"
+          number={registryEntry.tokenId.toString()}
           title={registryEntry.label}
           fieldWithValueList={[
             {

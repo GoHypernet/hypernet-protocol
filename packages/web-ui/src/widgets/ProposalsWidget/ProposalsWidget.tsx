@@ -23,8 +23,11 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
     useState<boolean>(false);
 
   useEffect(() => {
+    coreProxy.getProposalsCount().map((counts) => {
+      console.log("counts: ", counts);
+    });
     coreProxy
-      .getProposals()
+      .getProposals([1, 2, 3, 4, 5])
       .map((proposals) => {
         console.log("proposal list: ", proposals);
         setProposals(proposals);
