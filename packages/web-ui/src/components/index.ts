@@ -38,3 +38,4 @@ export * from "./GovernanceBasicValueWithTitle";
 export * from "./GovernanceCard";
 export * from "./GovernanceBalanceList";
 export * from "./GovernanceSideFilter";
+export * from "./GovernancePagination";
