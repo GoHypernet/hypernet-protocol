@@ -8,6 +8,7 @@ export const useStyles = makeStyles(() => ({
     boxShadow: "unset",
     display: "flex",
     width: "100%",
+    marginBottom: 16,
   },
   number: {
     paddingTop: 15,

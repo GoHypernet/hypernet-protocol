@@ -13,5 +13,6 @@ export const useStyles = makeStyles((theme) => ({
   },
   value: {
     marginBottom: 16,
+    overflowWrap: "anywhere",
   },
 }));

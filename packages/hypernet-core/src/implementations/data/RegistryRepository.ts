@@ -32,7 +32,7 @@ export class RegistryRepository implements IRegistryRepository {
   public getRegistries(
     numberOfRegistries: number = 10,
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
-    return this.initializeContracts().andThen((signer) => {
+    return this.initializeContractsWithProvider().andThen((provider) => {
       const registryListResult: ResultAsync<
         Registry | null,
         BlockchainUnavailableError
@@ -41,7 +41,7 @@ export class RegistryRepository implements IRegistryRepository {
       // TODO: reverse the list of registries to start from numberOfRegistries
       // Get registry by index
       for (let index = 0; index < numberOfRegistries; index++) {
-        registryListResult.push(this.getRegistryByIndex(index, signer));
+        registryListResult.push(this.getRegistryByIndex(index, provider));
       }
 
       return ResultUtils.combine(registryListResult).map((vals) => {
@@ -58,7 +58,7 @@ export class RegistryRepository implements IRegistryRepository {
 
   private getRegistryByIndex(
     index: number,
-    signer: ethers.providers.JsonRpcSigner,
+    provider: ethers.providers.Provider,
   ): ResultAsync<Registry | null, BlockchainUnavailableError> {
     return ResultAsync.fromPromise(
       this.registryFactoryContract?.registries(
@@ -73,7 +73,7 @@ export class RegistryRepository implements IRegistryRepository {
         const registryContract = new ethers.Contract(
           registryAddress,
           GovernanceAbis.NonFungibleRegistry.abi,
-          signer,
+          provider,
         );
 
         // Get the name, symbol and NumberOfEntries of that registry address
@@ -126,7 +126,7 @@ export class RegistryRepository implements IRegistryRepository {
   public getRegistryByName(
     registryName: string,
   ): ResultAsync<Registry, BlockchainUnavailableError> {
-    return this.initializeContracts().andThen((signer) => {
+    return this.initializeContractsWithProvider().andThen((provider) => {
       // Get registry address
       return ResultAsync.fromPromise(
         this.registryFactoryContract?.nameToAddress(
@@ -143,7 +143,7 @@ export class RegistryRepository implements IRegistryRepository {
         const registryContract = new ethers.Contract(
           registryAddress,
           GovernanceAbis.NonFungibleRegistry.abi,
-          signer,
+          provider,
         );
 
         // Get the symbol and NumberOfEntries of that registry address
@@ -182,7 +182,7 @@ export class RegistryRepository implements IRegistryRepository {
   public getRegistryByAddress(
     registryAddress: EthereumAddress,
   ): ResultAsync<Registry, BlockchainUnavailableError> {
-    return this.initializeContracts().andThen((signer) => {
+    return this.initializeContractsWithProvider().andThen((provider) => {
       // Get all registries addresses (indexes)
       return ResultAsync.fromPromise(
         this.registryFactoryContract?.addressToName(
@@ -199,7 +199,7 @@ export class RegistryRepository implements IRegistryRepository {
         const registryContract = new ethers.Contract(
           registryAddress,
           GovernanceAbis.NonFungibleRegistry.abi,
-          signer,
+          provider,
         );
 
         // Get the symbol and NumberOfEntries of that registry address
@@ -238,7 +238,7 @@ export class RegistryRepository implements IRegistryRepository {
   public getRegistryEntries(
     registryName: string,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
-    return this.initializeContracts().andThen((signer) => {
+    return this.initializeContractsWithProvider().andThen((provider) => {
       // Get registry address
       return ResultAsync.fromPromise(
         this.registryFactoryContract?.nameToAddress(
@@ -255,7 +255,7 @@ export class RegistryRepository implements IRegistryRepository {
         const registryContract = new ethers.Contract(
           registryAddress,
           GovernanceAbis.NonFungibleRegistry.abi,
-          signer,
+          provider,
         );
         return ResultAsync.fromPromise(
           registryContract?.totalSupply() as Promise<BigNumber>,
@@ -293,7 +293,7 @@ export class RegistryRepository implements IRegistryRepository {
     registryName: string,
     label: string,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
-    return this.initializeContracts().andThen((signer) => {
+    return this.initializeContractsWithProvider().andThen((provider) => {
       // Get registry address
       return ResultAsync.fromPromise(
         this.registryFactoryContract?.nameToAddress(
@@ -310,7 +310,7 @@ export class RegistryRepository implements IRegistryRepository {
         const registryContract = new ethers.Contract(
           registryAddress,
           GovernanceAbis.NonFungibleRegistry.abi,
-          signer,
+          provider,
         );
 
         return ResultAsync.fromPromise(
@@ -382,7 +382,7 @@ export class RegistryRepository implements IRegistryRepository {
     tokenId: number,
     registrationData: string,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
-    return this.initializeContracts().andThen((signer) => {
+    return this.initializeContractsWithSigner().andThen((signer) => {
       // Get registry address
       return ResultAsync.fromPromise(
         this.registryFactoryContract?.nameToAddress(
@@ -431,7 +431,7 @@ export class RegistryRepository implements IRegistryRepository {
     tokenId: number,
     label: string,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
-    return this.initializeContracts().andThen((signer) => {
+    return this.initializeContractsWithSigner().andThen((signer) => {
       // Get registry address
       return ResultAsync.fromPromise(
         this.registryFactoryContract?.nameToAddress(
@@ -541,7 +541,7 @@ export class RegistryRepository implements IRegistryRepository {
     });
   }
 
-  protected initializeContracts(): ResultAsync<
+  protected initializeContractsWithSigner(): ResultAsync<
     ethers.providers.JsonRpcSigner,
     BlockchainUnavailableError
   > {
@@ -559,6 +559,27 @@ export class RegistryRepository implements IRegistryRepository {
       );
 
       return okAsync(signer);
+    });
+  }
+
+  protected initializeContractsWithProvider(): ResultAsync<
+    ethers.providers.Provider,
+    BlockchainUnavailableError
+  > {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.blockchainProvider.getGovernanceProvider(),
+    ]).andThen((vals) => {
+      const [config, provider] = vals;
+
+      this.registryFactoryContract = new ethers.Contract(
+        config.chainAddresses[config.governanceChainId]
+          ?.registryFactoryAddress as string,
+        GovernanceAbis.RegistryFactory.abi,
+        provider,
+      );
+
+      return okAsync(provider);
     });
   }
 }
