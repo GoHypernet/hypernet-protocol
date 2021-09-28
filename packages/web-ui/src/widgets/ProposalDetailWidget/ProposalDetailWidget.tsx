@@ -134,7 +134,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
           label:
             Number(proposal?.state) === EProposalState.SUCCEEDED
               ? "Queue Proposal"
-              : "Exexute Proposal",
+              : "Execute Proposal",
           onClick: () => {
             Number(proposal?.state) === EProposalState.SUCCEEDED
               ? queueProposal()
@@ -151,7 +151,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   return (
     <Box>
       <GovernanceWidgetHeader
-        label="Proposals"
+        label={"Proposal Detail"}
         navigationLink={{
           label: "Proposal List",
           onClick: () => {

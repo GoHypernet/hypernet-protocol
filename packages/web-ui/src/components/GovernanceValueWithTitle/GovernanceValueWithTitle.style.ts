@@ -16,6 +16,7 @@ export const useStyles = makeStyles(() => ({
   value: {
     flex: 1,
     padding: 2,
+    overflowWrap: "anywhere",
   },
   rowWrapper: {
     display: "flex",
