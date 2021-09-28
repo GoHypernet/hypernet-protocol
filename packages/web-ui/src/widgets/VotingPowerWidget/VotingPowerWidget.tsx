@@ -13,14 +13,19 @@ const VotingPowerWidget: React.FC<VotingPowerWidgetParams> = () => {
   const { coreProxy } = useStoreContext();
   const classes = useStyles();
   const { setLoading } = useLayoutContext();
-  const [votingPower, setVotingPower] = useState<string>("");
+  const [votingPower, setVotingPower] = useState<number>();
 
   useEffect(() => {
     coreProxy
-      .getBalances()
+      .getEthereumAccounts()
       .map((accounts) => {
-        console.log("accounts VotingPowerWidget: ", accounts);
-        setVotingPower("0.0000");
+        coreProxy
+          .getVotingPower(accounts[0])
+          .map((votingPower) => {
+            console.log("accounts VotingPowerWidget: ", accounts);
+            setVotingPower(votingPower);
+          })
+          .mapErr(handleError);
       })
       .mapErr(handleError);
   }, []);

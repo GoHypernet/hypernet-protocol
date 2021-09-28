@@ -22,27 +22,28 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   useEffect(() => {
     coreProxy
-      .getRegistryEntries(registryName)
-      .map((registryEntries) => {
-        console.log("registry entry list: ", registryEntries);
+      .getRegistryEntriesTotalCount(registryName)
+      .map((count) => {
+        console.log("registry entry list count: ", count);
+        // state
+        getRegistryList();
       })
       .mapErr(handleError);
+  }, []);
 
+  /* useEffect(() => {
+    getRegistryList(pagenumbers);
+  }, [pageNumber, count]); */
+
+  const getRegistryList = () => {
     coreProxy
-      .getRegistryEntries(registryName, [1, 2, 3, 4, 5, 6, 7])
+      .getRegistryEntries(registryName, [1, 2, 3, 4, 5, 6, 7]) //state
       .map((registryEntries) => {
         console.log("registry entry list wth filter: ", registryEntries);
         setRegistryEntries(registryEntries);
       })
       .mapErr(handleError);
-
-    coreProxy
-      .getRegistryEntriesTotalCount(registryName)
-      .map((count) => {
-        console.log("registry entry list count: ", count);
-      })
-      .mapErr(handleError);
-  }, []);
+  };
 
   const handleError = (err?: Error) => {
     console.log("handleError err: ", err);
