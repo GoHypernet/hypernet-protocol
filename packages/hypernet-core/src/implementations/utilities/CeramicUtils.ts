@@ -1,9 +1,4 @@
-import {
-  ThreeIdConnect,
-  EthereumAuthProvider,
-  DidProviderProxy,
-} from "@3id/connect";
-import ThreeIdResolver from "@ceramicnetwork/3id-did-resolver";
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { CeramicApi } from "@ceramicnetwork/common";
 import CeramicClient from "@ceramicnetwork/http-client";
 import { TileDocument } from "@ceramicnetwork/stream-tile";
@@ -13,95 +8,55 @@ import {
   PersistenceError,
   BlockchainUnavailableError,
   AuthorizedGatewaysSchema,
+  VectorError,
 } from "@hypernetlabs/objects";
-import { ResultUtils, ILogUtils } from "@hypernetlabs/utils";
 import {
-  HypernetConfig,
-  InitializedHypernetContext,
-} from "@interfaces/objects";
-import { Resolver, ResolverRegistry } from "did-resolver";
+  ResultUtils,
+  ILogUtils,
+  ILogUtilsType,
+  CryptoUtils,
+} from "@hypernetlabs/utils";
+import { Resolver } from "did-resolver";
 import { DID } from "dids";
-import { okAsync, ResultAsync, errAsync } from "neverthrow";
+import { inject, injectable } from "inversify";
+import { Ed25519Provider } from "key-did-provider-ed25519";
+import KeyDidResolver from "key-did-resolver";
+import { okAsync, ResultAsync } from "neverthrow";
 
 import {
   ICeramicUtils,
-  IBlockchainProvider,
   IConfigProvider,
   IContextProvider,
   ISchemaWithName,
   IRecordWithDataKey,
+  IBrowserNodeProvider,
+  IConfigProviderType,
+  IContextProviderType,
+  IBrowserNodeProviderType,
 } from "@interfaces/utilities";
 
+@injectable()
 export class CeramicUtils implements ICeramicUtils {
   protected ceramic: CeramicApi | null = null;
-  protected threeIdConnect: ThreeIdConnect | null = null;
-  protected authProvider: EthereumAuthProvider | null = null;
-  protected threeIdResolver: ResolverRegistry | null = null;
+  protected authProvider: Ed25519Provider | null = null;
   protected didResolver: Resolver | null = null;
   protected idx: IDX | null = null;
-  protected isAuthenticated = false;
+  protected initializeResult: ResultAsync<void, PersistenceError> | null = null;
 
   constructor(
-    protected configProvider: IConfigProvider,
-    protected contextProvider: IContextProvider,
-    protected blockchainProvider: IBlockchainProvider,
-    protected logUtils: ILogUtils,
+    @inject(IConfigProviderType) protected configProvider: IConfigProvider,
+    @inject(IContextProviderType) protected contextProvider: IContextProvider,
+    @inject(IBrowserNodeProviderType)
+    protected browserNodeProvider: IBrowserNodeProvider,
+    @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
-  private _initialize(): ResultAsync<void, PersistenceError> {
-    if (this.isAuthenticated === true) {
-      return okAsync(undefined);
+  public initialize(): ResultAsync<void, PersistenceError> {
+    if (this.initializeResult == null) {
+      this.initializeResult = this._authenticateUser();
     }
-    return this._authenticateUser();
-  }
 
-  private _authenticateUser(): ResultAsync<void, PersistenceError> {
-    return this._setup().andThen(
-      ({ config, ceramic, threeIdResolver, context }) => {
-        return this._getDidProvider().andThen((didProvider) => {
-          ceramic.setDID(
-            new DID({
-              provider: didProvider,
-              resolver: threeIdResolver,
-            }),
-          );
-
-          if (!ceramic.did) {
-            return errAsync(new PersistenceError("did is undefined"));
-          }
-
-          context.onDeStorageAuthenticationStarted.next();
-
-          return ResultAsync.fromPromise(
-            ceramic.did?.authenticate(),
-            (e) =>
-              new PersistenceError("Could not authenticate with Ceramic", e),
-          )
-            .andThen(() => {
-              this.logUtils.info(
-                `ceramic logged in, ceramic did id: ${this.ceramic?.did?.id.toString()}`,
-              );
-              context.onDeStorageAuthenticationSucceeded.next();
-
-              const aliases: Record<string, string> = {};
-              for (const [key, value] of config.storageAliases) {
-                aliases[key] = value;
-              }
-
-              this.idx = new IDX({
-                ceramic: ceramic,
-                aliases: aliases,
-              });
-              this.isAuthenticated = true;
-              return okAsync(undefined);
-            })
-            .mapErr((e) => {
-              context.onDeStorageAuthenticationFailed.next();
-              return new PersistenceError("Storage authentication failed", e);
-            });
-        });
-      },
-    );
+    return this.initializeResult;
   }
 
   // This is used to create a difinition derived from a schema, and it shouldn't be called in run time
@@ -109,7 +64,7 @@ export class CeramicUtils implements ICeramicUtils {
     TileDocument[],
     PersistenceError | BlockchainUnavailableError
   > {
-    return this._initialize().andThen(() => {
+    return this.initialize().andThen(() => {
       if (this.ceramic == null || this.idx == null) {
         throw new Error("Something went wrong while initializing Ceramic!");
       }
@@ -167,8 +122,10 @@ export class CeramicUtils implements ICeramicUtils {
     aliasName: string,
     content: T,
   ): ResultAsync<void, PersistenceError> {
-    //return okAsync(undefined);
-    return this._initialize().andThen(() => {
+    if (this.initializeResult == null) {
+      throw new Error("Must call CeramicUtils.initialize() first");
+    }
+    return this.initializeResult.andThen(() => {
       if (this.idx == null) {
         throw new Error("Something went wrong while initializing Ceramic!");
       }
@@ -183,14 +140,10 @@ export class CeramicUtils implements ICeramicUtils {
   public readRecord<T>(
     aliasName: string,
   ): ResultAsync<T | null, PersistenceError> {
-    /* return okAsync(([
-      {
-        gatewayUrl: "http://localhost:5010",
-        authorizationSignature:
-          "0xe7f734f06f49a3de497509089144c6a10227433cdfbd13cc6e482d2d33acb484759492fbc625824f2db3dc9ed531a13e4181d5a8dc9ca6fcae0ee797a658f2181b",
-      },
-    ] as unknown) as T); */
-    return this._initialize().andThen(() => {
+    if (this.initializeResult == null) {
+      throw new Error("Must call CeramicUtils.initialize() first");
+    }
+    return this.initializeResult.andThen(() => {
       if (this.idx == null) {
         throw new Error("Something went wrong while initializing Ceramic!");
       }
@@ -205,7 +158,10 @@ export class CeramicUtils implements ICeramicUtils {
   }
 
   public removeRecord(aliasName: string): ResultAsync<void, PersistenceError> {
-    return this._initialize().andThen(() => {
+    if (this.initializeResult == null) {
+      throw new Error("Must call CeramicUtils.initialize() first");
+    }
+    return this.initializeResult.andThen(() => {
       if (this.idx == null) {
         throw new Error("Something went wrong while initializing Ceramic!");
       }
@@ -217,58 +173,79 @@ export class CeramicUtils implements ICeramicUtils {
     });
   }
 
-  private _setup(): ResultAsync<
-    {
-      config: HypernetConfig;
-      ceramic: CeramicApi;
-      threeIdResolver: ResolverRegistry;
-      context: InitializedHypernetContext;
-    },
-    PersistenceError
-  > {
+  private _authenticateUser(): ResultAsync<void, PersistenceError> {
+    this.logUtils.debug(`Authenticating user with Ceramic`);
     return ResultUtils.combine([
       this.configProvider.getConfig(),
-      this.contextProvider.getInitializedContext(),
-      this.blockchainProvider.getEIP1193Provider(),
+      this.contextProvider.getContext(),
+      this.getProviderSeed(),
     ]).andThen((vals) => {
-      const [config, context, provider] = vals;
+      const [config, context, providerSeed] = vals;
 
+      if (context.account == null) {
+        throw new Error(
+          "Must have established account before trying to setup Ceramic!",
+        );
+      }
+
+      this.logUtils.debug(
+        `Setting up Ceramic client for account ${context.account}`,
+      );
+
+      // Create the CeramicClient
       this.ceramic = new CeramicClient(config.ceramicNodeUrl);
-      this.authProvider = new EthereumAuthProvider(provider, context.account);
-      this.threeIdConnect = new ThreeIdConnect();
-      this.threeIdResolver = ThreeIdResolver.getResolver(this.ceramic);
-      this.didResolver = new Resolver(this.threeIdResolver);
-      return okAsync({
-        config,
-        ceramic: this.ceramic,
-        threeIdResolver: this.threeIdResolver,
-        context,
+
+      // Create a KeyDID provider
+      this.authProvider = new Ed25519Provider(providerSeed);
+
+      // Set DID instance on the client
+      this.ceramic.did = new DID({
+        provider: this.authProvider,
+        resolver: KeyDidResolver.getResolver(),
       });
+
+      this.logUtils.debug(`Starting Ceramic authentication`);
+      context.onCeramicAuthenticationStarted.next();
+      return ResultAsync.fromPromise(this.ceramic.did.authenticate(), (e) => {
+        return new PersistenceError("Could not authenticate with Ceramic", e);
+      })
+        .andThen(() => {
+          this.logUtils.info(
+            `ceramic logged in, ceramic did id: ${this.ceramic?.did?.id.toString()}`,
+          );
+          context.onCeramicAuthenticationSucceeded.next();
+
+          const aliases: Record<string, string> = {};
+          for (const [key, value] of config.storageAliases) {
+            aliases[key] = value;
+          }
+
+          this.idx = new IDX({
+            ceramic: this.ceramic!,
+            aliases: aliases,
+          });
+          return okAsync(undefined);
+        })
+        .mapErr((e) => {
+          const error = new PersistenceError(
+            "Storage authentication failed",
+            e,
+          );
+          context.onCeramicFailed.next(error);
+          return new PersistenceError("Storage authentication failed", e);
+        });
     });
   }
 
-  private _getDidProvider(): ResultAsync<DidProviderProxy, PersistenceError> {
-    if (this.authProvider == null || this.threeIdConnect == null) {
-      throw new Error("Something went wrong while initializing Ceramic!");
-    }
-    const authProvider = this.authProvider;
-    const threeIdConnect = this.threeIdConnect;
-
-    return ResultAsync.fromPromise(
-      threeIdConnect.connect(authProvider),
-      (e) => new PersistenceError("threeIdConnect.connect failed", e),
-    ).andThen(() => {
-      const result = ResultUtils.fromThrowableResult<
-        DidProviderProxy,
-        PersistenceError
-      >(() => {
-        return threeIdConnect.getDidProvider();
+  private getProviderSeed(): ResultAsync<Uint8Array, VectorError> {
+    return this.browserNodeProvider
+      .getBrowserNode()
+      .andThen((browserNode) => {
+        // We will sign a utility message with the browser node to get a fixed key signature
+        return browserNode.signUtilityMessage("Hypernet Protocol Persistence");
+      })
+      .map((signature) => {
+        return CryptoUtils.randomBytes(32, signature);
       });
-
-      if (result.isErr()) {
-        return errAsync(result.error);
-      }
-      return okAsync(result.value);
-    });
   }
 }

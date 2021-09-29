@@ -70,14 +70,14 @@ describe("Registry", function () {
     // only owner or approved address can burn
     await expectRevert(
       registry.connect(addr2).burn(1),
-      "NonFungibleRegistry: caller is not owner nor approved nor admin.",
+      "NonFungibleRegistry: caller is not owner nor approved nor registrar.",
     );
 
     // update the tokenURI
     // only owner or approved address can update
     await expectRevert(
       registry.connect(addr2).updateRegistration(1, "new URI"),
-      "NonFungibleRegistry: caller is not owner nor approved nor admin.",
+      "NonFungibleRegistry: caller is not owner nor approved nor registrar.",
     );
 
     // connect to a new account and try to update and burn

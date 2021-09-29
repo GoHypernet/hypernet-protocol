@@ -11,7 +11,7 @@ import {
   ILocalStorageUtils,
 } from "@hypernetlabs/utils";
 import { ethers } from "ethers";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
+import { okAsync, ResultAsync } from "neverthrow";
 
 import {
   IBrowserNode,
@@ -81,8 +81,6 @@ export class BrowserNodeProvider implements IBrowserNodeProvider {
             NonEIP712Message,
             signature,
           );
-
-          this.logUtils.debug(`sigAddress = ${sigAddress}`);
 
           // Store the signature so you don't have to sign again
           this.localStorageUtils.setSessionItem(

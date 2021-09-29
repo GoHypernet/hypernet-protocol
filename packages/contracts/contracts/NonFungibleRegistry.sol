@@ -73,6 +73,14 @@ contract NonFungibleRegistry is
     }
 
     /**
+    * @dev Permanently destroys the registry, making it inaccessible
+    */
+    function destroyRegistry(address recipient) public virtual {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NonFungibleRegistry: only admin can destroy the registry.");
+        selfdestruct(payable(recipient));
+    }
+
+    /**
     * @dev set lazy register functionality
     */
     function setLazyRegister(bool _allowLazyRegister) public virtual {
@@ -89,7 +97,7 @@ contract NonFungibleRegistry is
     }
 
     /**
-     * @dev Returns whether registration data can be updated or caller is DEFAULT_ADMIN_ROLE
+     * @dev Returns whether registration data can be updated or caller is REGISTRAR_ROLE
      */
     function _storageCanBeUpdated() internal view virtual returns (bool) {
         return (allowStorageUpdate || hasRole(REGISTRAR_ROLE, _msgSender()));
@@ -104,10 +112,10 @@ contract NonFungibleRegistry is
     }
 
     /**
-     * @dev Returns whether labels can be updated or caller is DEFAULT_ADMIN_ROLE
+     * @dev Returns whether labels can be updated or caller is REGISTRAR_ROLE
      */
     function _labelCanBeChanged() internal view virtual returns (bool) {
-        return (allowLabelChange || hasRole(DEFAULT_ADMIN_ROLE, _msgSender()));
+        return (allowLabelChange || hasRole(REGISTRAR_ROLE, _msgSender()));
     }
 
    /**
@@ -119,7 +127,7 @@ contract NonFungibleRegistry is
     }
 
     /**
-     * @dev Returns whether transfers are allowed or caller is DEFAULT_ADMIN_ROLE
+     * @dev Returns whether transfers are allowed or caller is REGISTRAR_ROLE
      */
     function _transfersAllowed() internal view virtual returns (bool) {
         return (allowTransfers || hasRole(REGISTRAR_ROLE, _msgSender()));
@@ -189,7 +197,7 @@ contract NonFungibleRegistry is
      */
     function updateRegistration(uint256 tokenId, string memory registrationData) public virtual {
         require(_storageCanBeUpdated(), "NonFungibleRegistry: Storage updating is disabled.");
-        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor admin.");
+        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         _setTokenURI(tokenId, registrationData);
     }
 
@@ -203,7 +211,7 @@ contract NonFungibleRegistry is
      */
     function updateLabel(uint256 tokenId, string memory label) public virtual {
         require(_labelCanBeChanged(), "NonFungibleRegistry: Label updating is disabled.");
-        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor admin.");
+        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
 
         registryMap[label] = tokenId;
@@ -219,7 +227,7 @@ contract NonFungibleRegistry is
      */
     function burn(uint256 tokenId) public virtual {
         //solhint-disable-next-line max-line-length
-        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor admin.");
+        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         _burn(tokenId);
     }
 

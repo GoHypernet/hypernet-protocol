@@ -4,9 +4,10 @@ import {
   ILogUtilsType,
   ILocalStorageUtils,
   ILocalStorageUtilsType,
+  ResultUtils,
 } from "@hypernetlabs/utils";
 import { inject, injectable } from "inversify";
-import { ResultAsync, okAsync } from "neverthrow";
+import { ResultAsync, okAsync, errAsync } from "neverthrow";
 
 import { IStorageUtils } from "@interfaces/data/utilities";
 import {
@@ -27,42 +28,95 @@ export class StorageUtils implements IStorageUtils {
     protected logUtils: ILogUtils,
   ) {}
 
-  public write<T>(keyName: string, data: T): ResultAsync<void, never> {
-    return this.contextProvider.getContext().andThen((context) => {
-      this.localStorageUtils.setItem(keyName, JSON.stringify(data));
-      if (false) {
-        // context.metamaskEnabled) {
-        this.ceramicUtils.writeRecord(keyName, data).mapErr((err) => {
+  public write<T>(
+    keyName: string,
+    data: T,
+  ): ResultAsync<void, PersistenceError> {
+    return ResultUtils.combine([
+      this.ceramicUtils.writeRecord(keyName, data),
+      this._writeSessionStorage(keyName, data),
+    ])
+      .orElse((err) => {
+        return this.contextProvider.getContext().andThen((context) => {
           this.logUtils.error(err);
+          context.onCeramicFailed.next(err);
+          return errAsync(err);
         });
-        // TODO: More advanced ceramic error handling
-      }
-      return okAsync(undefined);
-    });
+      })
+      .map(() => {});
   }
 
   public read<T>(keyName: string): ResultAsync<T | null, PersistenceError> {
-    return this.contextProvider.getContext().andThen((context) => {
-      if (false) {
-        return this.ceramicUtils.readRecord(keyName);
-      } else {
-        const data = this.localStorageUtils.getItem(keyName);
-        if (data == null) {
-          return okAsync(null);
+    // Read from session storage first.
+    this.logUtils.debug(`Reading value for key ${keyName}`);
+    return this._readSessionStorage<T>(keyName)
+      .andThen((val) => {
+        // If the value is there, then we're good.
+        if (val != null) {
+          return okAsync<T | null, PersistenceError>(val);
         }
-        return okAsync(JSON.parse(data));
-      }
-    });
+
+        // The value is not in SessionStorage, so we need to get it from Ceramic
+        this.logUtils.debug(
+          `Key not found in session storage, reading value for key ${keyName} from Ceramic`,
+        );
+        return this.ceramicUtils
+          .readRecord<T>(keyName)
+          .andThen((ceramicVal) => {
+            if (ceramicVal == null) {
+              // It's really null!
+              return okAsync<T | null, PersistenceError>(ceramicVal);
+            }
+            // Need to update session storage before we return a value.
+            return this._writeSessionStorage(keyName, ceramicVal).map(() => {
+              return ceramicVal;
+            });
+          });
+      })
+      .orElse((err) => {
+        return this.contextProvider.getContext().andThen((context) => {
+          this.logUtils.error(err);
+          context.onCeramicFailed.next(err);
+          return errAsync(err);
+        });
+      });
   }
 
   public remove(keyName: string): ResultAsync<void, PersistenceError> {
-    return this.contextProvider.getContext().andThen((context) => {
-      if (false) {
-        return this.ceramicUtils.removeRecord(keyName);
-      } else {
-        this.localStorageUtils.removeItem(keyName);
-        return okAsync(undefined);
-      }
-    });
+    return ResultUtils.combine([
+      this.ceramicUtils.removeRecord(keyName),
+      this._removeSessionStorage(keyName),
+    ])
+      .orElse((err) => {
+        return this.contextProvider.getContext().andThen((context) => {
+          this.logUtils.error(err);
+          context.onCeramicFailed.next(err);
+          return errAsync(err);
+        });
+      })
+      .map(() => {});
+  }
+
+  private _writeSessionStorage<T>(
+    keyName: string,
+    data: T,
+  ): ResultAsync<void, never> {
+    this.localStorageUtils.setSessionItem(keyName, JSON.stringify(data));
+    return okAsync(undefined);
+  }
+
+  private _readSessionStorage<T>(
+    keyName: string,
+  ): ResultAsync<T | null, never> {
+    const data = this.localStorageUtils.getSessionItem(keyName);
+    if (data == null) {
+      return okAsync(null);
+    }
+    return okAsync(JSON.parse(data) as T);
+  }
+
+  private _removeSessionStorage(keyName: string): ResultAsync<void, never> {
+    this.localStorageUtils.removeSessionItem(keyName);
+    return okAsync(undefined);
   }
 }

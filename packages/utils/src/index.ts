@@ -1,6 +1,7 @@
 export * from "@utils/AxiosAjaxUtils";
 export * from "@utils/ResultUtils";
 export * from "@utils/ChildProxy";
+export * from "@utils//CryptoUtils";
 export * from "@utils/IAjaxUtils";
 export * from "@utils/ILocalStorageUtils";
 export * from "@utils/LocalStorageUtils";

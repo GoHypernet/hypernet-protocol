@@ -1,5 +1,6 @@
 export * from "@implementations/utilities/BlockchainProvider";
 export * from "@implementations/utilities/BrowserNodeProvider";
+export * from "@implementations/utilities/CeramicEIP1193Bridge";
 export * from "@implementations/utilities/CeramicUtils";
 export * from "@implementations/utilities/ChannelUtils";
 export * from "@implementations/utilities/ConfigProvider";

@@ -71,7 +71,7 @@ export class ConfigProvider implements IConfigProvider {
             "kjzl6cwe1jw148ngghzoumihdtadlx9rzodfjlq5tv01jzr7cin7jx3g3gtfxf3",
           ),
         ],
-      ]),
+      ]), // storageAliases
       5 * 1000,
       "HypernetProtocolControlClaims",
       __DEBUG__, // debug
