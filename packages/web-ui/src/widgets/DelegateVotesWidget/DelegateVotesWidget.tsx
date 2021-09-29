@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { TextField } from "@material-ui/core";
+import { TextField, Box } from "@material-ui/core";
 import { useAlert } from "react-alert";
 
 import { GovernanceDialog, GovernanceButton } from "@web-ui/components";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { EthereumAddress } from "@hypernetlabs/objects";
+import { useStyles } from "@web-integration/widgets/DelegateVotesWidget/DelegateVotesWidget.style";
 
 interface IDelegateVotesWidget {
   onCloseCallback: () => void;
@@ -14,6 +15,7 @@ const DelegateVotesWidget: React.FC<IDelegateVotesWidget> = ({
   onCloseCallback,
 }: IDelegateVotesWidget) => {
   const alert = useAlert();
+  const classes = useStyles();
   const { coreProxy, UIData } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
@@ -51,7 +53,7 @@ const DelegateVotesWidget: React.FC<IDelegateVotesWidget> = ({
       isOpen={true}
       onClose={onCloseCallback}
       content={
-        <>
+        <Box className={classes.wrapper}>
           <TextField
             label="Delegate Address"
             fullWidth
@@ -69,7 +71,7 @@ const DelegateVotesWidget: React.FC<IDelegateVotesWidget> = ({
           >
             Delegate Votes
           </GovernanceButton>
-        </>
+        </Box>
       }
     />
   );

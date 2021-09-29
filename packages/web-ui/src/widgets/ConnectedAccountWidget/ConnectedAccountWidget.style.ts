@@ -6,11 +6,5 @@ export const useStyles = makeStyles({
     padding: 8,
     border: `1px solid ${colors.PURPLE400}`,
     borderRadius: 3,
-    display: "flex",
-    alignItems: "center",
-  },
-  logo: {
-    height: 20,
-    marginLeft: 4,
   },
 });

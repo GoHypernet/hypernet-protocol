@@ -345,6 +345,10 @@ export interface IHypernetCore {
     account: EthereumAddress,
   ): ResultAsync<number, BlockchainUnavailableError>;
 
+  getHyperTokenBalance(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError>;
+
   /**
    * Observables for seeing what's going on
    */

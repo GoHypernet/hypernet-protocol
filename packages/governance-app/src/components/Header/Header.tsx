@@ -20,7 +20,7 @@ const Header: React.FC = () => {
       <Box className={classes.logoWrapper}>
         <img
           className={classes.logo}
-          src="https://res.cloudinary.com/dqueufbs7/image/upload/v1623464753/images/HNPLogo.png"
+          src="https://res.cloudinary.com/dqueufbs7/image/upload/v1632907649/images/hpnlogo.png"
           alt=""
         />
       </Box>

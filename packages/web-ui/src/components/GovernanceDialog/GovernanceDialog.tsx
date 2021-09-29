@@ -49,6 +49,7 @@ export const GovernanceDialog: React.FC<GovernanceDialogProps> = (
             aria-label="close"
             onClick={() => {
               setIsDialogOpen(false);
+              onClose && onClose();
             }}
           >
             <CloseIcon />

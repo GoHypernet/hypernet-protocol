@@ -17,13 +17,18 @@ const VotingPowerWidget: React.FC<VotingPowerWidgetParams> = () => {
 
   useEffect(() => {
     coreProxy
-      .getEthereumAccounts()
-      .map((accounts) => {
+      .waitInitialized()
+      .map(() => {
         coreProxy
-          .getVotingPower(accounts[0])
-          .map((votingPower) => {
-            console.log("accounts VotingPowerWidget: ", accounts);
-            setVotingPower(votingPower);
+          .getEthereumAccounts()
+          .map((accounts) => {
+            coreProxy
+              .getVotingPower(accounts[0])
+              .map((votingPower) => {
+                console.log("accounts VotingPowerWidget: ", accounts);
+                setVotingPower(votingPower);
+              })
+              .mapErr(handleError);
           })
           .mapErr(handleError);
       })
@@ -37,7 +42,9 @@ const VotingPowerWidget: React.FC<VotingPowerWidgetParams> = () => {
   };
 
   return (
-    <Typography className={classes.root}>{`${votingPower} votes`}</Typography>
+    <Typography className={classes.root}>{`${
+      votingPower || "0.0000"
+    } votes`}</Typography>
   );
 };
 

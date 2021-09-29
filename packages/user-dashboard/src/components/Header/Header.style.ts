@@ -45,5 +45,9 @@ export const useStyles = makeStyles({
     flexDirection: "row",
     alignItems: "center",
   },
-  widgetWrapper: { marginRight: 4 },
+  widgetWrapper: {
+    marginRight: 15,
+    backgroundColor: "transparent",
+    color: colors.GRAY700,
+  },
 });

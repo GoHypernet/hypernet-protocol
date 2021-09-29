@@ -6,30 +6,12 @@ import {
   GovernancePagination,
   GovernanceProposalListItem,
   GovernanceWidgetHeader,
+  getPageItemIndexList,
 } from "@web-ui/components";
 import { IProposalsWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Proposal } from "@hypernetlabs/objects";
 import DelegateVotesWidget from "@web-ui/widgets/DelegateVotesWidget";
-
-const getPageItemIndexList = (
-  totalItems: number,
-  currentPage: number,
-  itemsPerPage: number,
-) => {
-  const proposalNumberArr: number[] = [];
-  if (totalItems) {
-    for (let i = 1; i <= Math.min(totalItems, itemsPerPage); i++) {
-      // Get indices from current page backwards.
-      const index = totalItems - (currentPage - 1) * itemsPerPage - i + 1;
-      // Proposals starts with index one.
-      if (index > 0) {
-        proposalNumberArr.push(index);
-      }
-    }
-  }
-  return proposalNumberArr;
-};
 
 const PROPOSALS_PER_PAGE = 10;
 
@@ -38,7 +20,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
   onProposalDetailsNavigate,
 }: IProposalsWidgetParams) => {
   const alert = useAlert();
-  const { coreProxy, UIData } = useStoreContext();
+  const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [delegateVotesModalOpen, setDelegateVotesModalOpen] =
@@ -66,7 +48,6 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
       coreProxy
         .getProposals(proposalsNumberArr)
         .map((proposals) => {
-          console.log("proposal list: ", proposals);
           setProposals(proposals);
         })
         .mapErr(handleError);

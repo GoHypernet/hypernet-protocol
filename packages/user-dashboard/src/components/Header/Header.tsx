@@ -18,14 +18,6 @@ const Header: React.FC = () => {
 
   useEffect(() => {
     hypernetWebIntegration.webUIClient
-      .renderConnectedAccountWidget({
-        selector: "connected-account-widget-wrapper",
-      })
-      .mapErr(handleError);
-  }, []);
-
-  useEffect(() => {
-    hypernetWebIntegration.webUIClient
       .renderVotingPowerWidget({
         selector: "voting-power-widget-wrapper",
       })
@@ -34,8 +26,16 @@ const Header: React.FC = () => {
 
   useEffect(() => {
     hypernetWebIntegration.webUIClient
-      .renderConnectedAccountWidget({
+      .renderHypertokenBalanceWidget({
         selector: "hypertoken-balance-widget-wrapper",
+      })
+      .mapErr(handleError);
+  }, []);
+
+  useEffect(() => {
+    hypernetWebIntegration.webUIClient
+      .renderConnectedAccountWidget({
+        selector: "connected-account-widget-wrapper",
       })
       .mapErr(handleError);
   }, []);
@@ -48,7 +48,7 @@ const Header: React.FC = () => {
       <Box className={classes.logoWrapper}>
         <img
           className={classes.logo}
-          src="https://res.cloudinary.com/dqueufbs7/image/upload/v1623464753/images/HNPLogo.png"
+          src="https://res.cloudinary.com/dqueufbs7/image/upload/v1632907649/images/hpnlogo.png"
           alt=""
         />
       </Box>
@@ -80,11 +80,11 @@ const Header: React.FC = () => {
         />
         <Box
           className={classes.widgetWrapper}
-          id="connected-account-widget-wrapper"
+          id="hypertoken-balance-widget-wrapper"
         />
         <Box
           className={classes.widgetWrapper}
-          id="hypertoken-balance-widget-wrapper"
+          id="connected-account-widget-wrapper"
         />
         <Hidden lgUp>
           <MobileOthersMenu />

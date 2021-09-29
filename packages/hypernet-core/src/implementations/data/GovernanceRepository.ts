@@ -483,6 +483,22 @@ export class GovernanceRepository implements IGovernanceRepository {
     });
   }
 
+  public getHyperTokenBalance(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this.initializeContractsWithProvider().andThen(() => {
+      return ResultAsync.fromPromise(
+        this.hypertokenContract?.balanceOf(account) as Promise<BigNumber>,
+        (e) => {
+          return new BlockchainUnavailableError("Unable to call getVotes", e);
+        },
+      ).map((balance) => {
+        console.log("getHyperTokenBalance balance: ", balance);
+        return Number(ethers.utils.formatUnits(balance.toString(), "ether"));
+      });
+    });
+  }
+
   protected initializeContractsWithSigner(): ResultAsync<
     ethers.providers.JsonRpcSigner,
     BlockchainUnavailableError

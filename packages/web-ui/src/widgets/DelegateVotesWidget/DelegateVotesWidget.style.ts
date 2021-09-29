@@ -3,14 +3,10 @@ import { colors } from "@web-ui/theme";
 
 export const useStyles = makeStyles({
   wrapper: {
-    padding: 8,
-    border: `1px solid ${colors.PURPLE400}`,
-    borderRadius: 3,
+    height: 200,
     display: "flex",
-    alignItems: "center",
-  },
-  logo: {
-    height: 20,
-    marginLeft: 4,
+    flexDirection: "column",
+    justifyContent: "space-around",
+    width: "99%",
   },
 });

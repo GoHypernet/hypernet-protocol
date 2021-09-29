@@ -1149,4 +1149,10 @@ export class HypernetCore implements IHypernetCore {
   ): ResultAsync<number, BlockchainUnavailableError> {
     return this.governanceService.getVotingPower(account);
   }
+
+  public getHyperTokenBalance(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this.governanceService.getHyperTokenBalance(account);
+  }
 }

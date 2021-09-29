@@ -48,6 +48,9 @@ export interface IGovernanceRepository {
   getVotingPower(
     account: EthereumAddress,
   ): ResultAsync<number, BlockchainUnavailableError>;
+  getHyperTokenBalance(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError>;
 }
 
 export const IGovernanceRepositoryType = Symbol.for("IGovernanceRepository");

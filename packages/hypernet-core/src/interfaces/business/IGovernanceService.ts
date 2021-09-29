@@ -49,4 +49,7 @@ export interface IGovernanceService {
   getVotingPower(
     account: EthereumAddress,
   ): ResultAsync<number, BlockchainUnavailableError>;
+  getHyperTokenBalance(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError>;
 }

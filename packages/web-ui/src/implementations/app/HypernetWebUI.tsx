@@ -527,6 +527,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <HypertokenBalanceWidget {...config} />,
           config?.showInModal,
+          undefined,
+          undefined,
+          true,
         ),
         this._generateDomElement(config?.selector || HYPERTOKEN_BALANCE_WIDGET),
       );
@@ -542,6 +545,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <VotingPowerWidget {...config} />,
           config?.showInModal,
+          undefined,
+          undefined,
+          true,
         ),
         this._generateDomElement(config?.selector || VOTING_POWER_WIDGET),
       );
@@ -556,6 +562,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <ConnectedAccountWidget {...config} />,
           config?.showInModal,
+          undefined,
+          undefined,
+          true,
         ),
         this._generateDomElement(config?.selector || CONNECTED_ACCOUNT_WIDGET),
       );

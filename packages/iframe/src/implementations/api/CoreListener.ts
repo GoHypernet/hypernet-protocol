@@ -365,6 +365,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getVotingPower(data.data);
         }, data.callId);
       },
+      getHyperTokenBalance: (data: IIFrameCallData<EthereumAddress>) => {
+        this.returnForModel(() => {
+          return this.core.getHyperTokenBalance(data.data);
+        }, data.callId);
+      },
     });
   }
 

@@ -1,14 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Box } from "@material-ui/core";
 import { useAlert } from "react-alert";
 
 import {
   GovernanceRegistryListItem,
   GovernanceWidgetHeader,
+  GovernancePagination,
+  getPageItemIndexList,
 } from "@web-ui/components";
 import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { RegistryEntry } from "@hypernetlabs/objects";
+
+const REGISTRY_ENTRIES_PER_PAGE = 3;
 
 const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   onRegistryEntryDetailsNavigate,
@@ -20,30 +24,38 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const { setLoading } = useLayoutContext();
   const [registryEntries, setRegistryEntries] = useState<RegistryEntry[]>([]);
 
+  const [page, setPage] = useState<number>(1);
+  const [registryEntriesCount, setRegistryEntriesCount] = useState<number>(0);
+
+  const registryEntriesNumberArr = useMemo(
+    () =>
+      getPageItemIndexList(
+        registryEntriesCount,
+        page,
+        REGISTRY_ENTRIES_PER_PAGE,
+      ),
+    [registryEntriesCount, page],
+  );
+
   useEffect(() => {
     coreProxy
       .getRegistryEntriesTotalCount(registryName)
       .map((count) => {
-        console.log("registry entry list count: ", count);
-        // state
-        getRegistryList();
+        setRegistryEntriesCount(count);
       })
       .mapErr(handleError);
   }, []);
 
-  /* useEffect(() => {
-    getRegistryList(pagenumbers);
-  }, [pageNumber, count]); */
-
-  const getRegistryList = () => {
-    coreProxy
-      .getRegistryEntries(registryName, [1, 2, 3, 4, 5, 6, 7]) //state
-      .map((registryEntries) => {
-        console.log("registry entry list wth filter: ", registryEntries);
-        setRegistryEntries(registryEntries);
-      })
-      .mapErr(handleError);
-  };
+  useEffect(() => {
+    if (registryEntriesNumberArr.length) {
+      coreProxy
+        .getRegistryEntries(registryName, registryEntriesNumberArr)
+        .map((registryEntries) => {
+          setRegistryEntries(registryEntries);
+        })
+        .mapErr(handleError);
+    }
+  }, [JSON.stringify(registryEntriesNumberArr)]);
 
   const handleError = (err?: Error) => {
     console.log("handleError err: ", err);
@@ -88,6 +100,17 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           }
         />
       ))}
+      {registryEntriesCount && (
+        <GovernancePagination
+          customPageOptions={{
+            itemsPerPage: REGISTRY_ENTRIES_PER_PAGE,
+            totalItems: registryEntriesCount,
+          }}
+          onChange={(_, page) => {
+            setPage(page);
+          }}
+        />
+      )}
     </Box>
   );
 };

@@ -654,6 +654,12 @@ export default class HypernetIFrameProxy
     return this._createCall("getVotingPower", account);
   }
 
+  public getHyperTokenBalance(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this._createCall("getHyperTokenBalance", account);
+  }
+
   private _displayCoreIFrame(): void {
     // Show core iframe
     if (this.child != null) {

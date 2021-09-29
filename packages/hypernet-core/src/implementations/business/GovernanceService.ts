@@ -106,4 +106,10 @@ export class GovernanceService implements IGovernanceService {
   ): ResultAsync<number, BlockchainUnavailableError> {
     return this.governanceRepository.getVotingPower(account);
   }
+
+  public getHyperTokenBalance(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this.governanceRepository.getHyperTokenBalance(account);
+  }
 }
