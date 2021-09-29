@@ -1,8 +1,0 @@
-{
-  "disableSources": "true",
-  "excludeExternals": "true",
-  "excludePrivate": "true",
-  "excludeProtected": "true",
-  "entryPoints": ["./src/index.tsx"],
-  "out": "../../docs/governance-app"
-}
