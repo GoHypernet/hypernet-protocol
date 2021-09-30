@@ -242,8 +242,10 @@ const func: DeployFunction = async () => {
   log.info("Registering router info");
   const gatewayRegistryAddress = await registryFactoryContract.nameToAddress("Gateways");
   const liquidityRegistryAddress = await registryFactoryContract.nameToAddress("Liquidity Providers");
-//   const gatewayRegistryAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a"; // For minting gateway registry
-//   const liquidityRegistryAddress = "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd";
+
+  log.info(`Gateway Registry Address: ${gatewayRegistryAddress}`);
+  log.info(`Liquidity Registry Address: ${liquidityRegistryAddress}`);
+
   const routerPublicIdentifier =
     "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR";
 
