@@ -13,9 +13,14 @@ describe("Registry Factory", function () {
 
     // deploy factory contract
     const FactoryRegistry = await ethers.getContractFactory("RegistryFactory");
-    const factoryregistry = await FactoryRegistry.deploy(owner.address);
+    const factoryregistry = await FactoryRegistry.deploy(owner.address, ["Test"], ["t"], [owner.address]);
     registry_reciept = await factoryregistry.deployTransaction.wait();
     console.log("Factory Address:", factoryregistry.address)
+
+    const testRegAddress = factoryregistry.nameToAddress("Test");
+    const testReg = new ethers.Contract(testRegAddress, NFR.abi, owner);
+    expect(await testReg.name()).to.equal("Test")
+    expect(await testReg.symbol()).to.equal("t")
 
     const factorytx = await factoryregistry.createRegistry(registryName, registrySymbol, owner.address);
     const factorytx_rcpt = await factorytx.wait(); 

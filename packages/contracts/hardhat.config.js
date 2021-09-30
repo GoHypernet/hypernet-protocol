@@ -4,10 +4,10 @@ require("@nomiclabs/hardhat-solhint");
 require("hardhat-gas-reporter");
 require("hardhat-contract-sizer");
 
-const HT = require("./artifacts/contracts/Hypertoken.sol/Hypertoken.json");
-const HG = require("./artifacts/contracts/HypernetGovernor.sol/HypernetGovernor.json");
-const RF = require("./artifacts/contracts/RegistryFactory.sol/RegistryFactory.json");
-const NFR = require("./artifacts/contracts/NonFungibleRegistry.sol/NonFungibleRegistry.json");
+// const HT = require("./artifacts/contracts/Hypertoken.sol/Hypertoken.json");
+// const HG = require("./artifacts/contracts/HypernetGovernor.sol/HypernetGovernor.json");
+// const RF = require("./artifacts/contracts/RegistryFactory.sol/RegistryFactory.json");
+// const NFR = require("./artifacts/contracts/NonFungibleRegistry.sol/NonFungibleRegistry.json");
 
 const govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
 const timelockAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";

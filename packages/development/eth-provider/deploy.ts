@@ -13,11 +13,16 @@ import { DeployFunction } from "hardhat-deploy/types";
 import { logger } from "../src.ts/constants";
 import ERC20Abi from "../src.ts/erc20abi";
 import ERC721Abi from "../src.ts/erc721abi";
+import registryFactoryAbi from "../src.ts/registryFactoryAbi";
 import { registerTransfer } from "../src.ts/utils";
 
 // important address
 const userAddress = "0x243FB44Ea4FDD2651605eC85290f041fF5F876f0";
 const registryAccountAddress = "0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef";
+const HypertokenContractAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
+const TimelockContractAddress = "0x82D50AD3C1091866E258Fd0f1a7cC9674609D254";
+const GovernanceContractAddress = "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd";
+const RegistryFactoryContractAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
 
 const func: DeployFunction = async () => {
   const log = logger.child({ module: "Deploy" });
@@ -103,10 +108,9 @@ const func: DeployFunction = async () => {
     ["Insurance", []],
     ["Message", []],
     ["Hypertoken", []],
-    ["NonFungibleRegistry", ["Gateways", "G", registryAccountAddress]],
-    [
-      "NonFungibleRegistry",
-      ["Liquidity Providers", "LPs", registryAccountAddress],
+	["RegistryFactory", [TimelockContractAddress, ["Gateways", "Liquidity Providers"], ["G", "LPs"], [registryAccountAddress, registryAccountAddress]]],
+    ["HypernetGovernor", [HypertokenContractAddress, TimelockContractAddress]],
+    ["TimelockController", [1, [GovernanceContractAddress], [GovernanceContractAddress]],
     ],
   ];
 
@@ -182,6 +186,11 @@ const func: DeployFunction = async () => {
     ERC20Abi,
     signer,
   );
+  const registryFactoryContract = new ethers.Contract(
+    RegistryFactoryContractAddress,
+    registryFactoryAbi,
+    signer,
+  );
 
   const userTestTx = await testTokenContract.transfer(userAddress, amount);
   const userHyperTx = await hyperTokenContract.transfer(userAddress, amount);
@@ -231,8 +240,12 @@ const func: DeployFunction = async () => {
 
   ////////////////////////////////////////
   log.info("Registering router info");
-  const gatewayRegistryAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a"; // For minting gateway registry
-  const liquidityRegistryAddress = "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd";
+  const gatewayRegistryAddress = await registryFactoryContract.nameToAddress("Gateways");
+  const liquidityRegistryAddress = await registryFactoryContract.nameToAddress("Liquidity Providers");
+
+  log.info(`Gateway Registry Address: ${gatewayRegistryAddress}`);
+  log.info(`Liquidity Registry Address: ${liquidityRegistryAddress}`);
+
   const routerPublicIdentifier =
     "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR";
 

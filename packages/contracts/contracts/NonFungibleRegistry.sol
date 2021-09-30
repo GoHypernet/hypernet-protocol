@@ -322,6 +322,9 @@ contract NonFungibleRegistry is
         // check if lazy registration is allowed for this NFI
         require(allowLazyRegister, "NonFungibleRegistry: Lazy registration is disabled.");
 
+        // ensure that label changing is disabled since the label is used at the token's nonce
+        require(allowLabelChange, "NonFungibleRegistry: label changes must be disabled for lazy registration.");
+
         // the token label is the nonce to prevent replay attack
         require(!_mappingExists(label), "NonFungibleRegistry: Registration label already exists.");
         

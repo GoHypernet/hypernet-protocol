@@ -43,10 +43,10 @@ ARG CHAIN_ADDRESSES='{ \
         "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
         "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
         "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
-        "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a", \
-        "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd", \
         "hypernetGovernorAddress": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9", \
-        "registryFactoryAddress": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6" \
+        "registryFactoryAddress": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6", \
+        "gatewayRegistryAddress": "0x633BaEfc98220497Eb7eE323480C87ce51a44955", \
+        "liquidityRegistryAddress": "0x10271f4B537610009e1DaF06779b9A8Fde5fF531" \
       }, \
       "31337": { \
         "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
@@ -55,10 +55,10 @@ ARG CHAIN_ADDRESSES='{ \
         "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
         "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
         "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
-        "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a", \
-        "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd", \
         "hypernetGovernorAddress": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9", \
-        "registryFactoryAddress": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6" \
+        "registryFactoryAddress": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6", \
+        "gatewayRegistryAddress": "0x633BaEfc98220497Eb7eE323480C87ce51a44955", \
+        "liquidityRegistryAddress": "0x10271f4B537610009e1DaF06779b9A8Fde5fF531" \
       }, \
       "1369": { \
         "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
@@ -67,10 +67,10 @@ ARG CHAIN_ADDRESSES='{ \
         "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
         "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
         "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
-        "gatewayRegistryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a", \
-        "liquidityRegistryAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd", \
         "hypernetGovernorAddress": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9", \
         "registryFactoryAddress": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6" \
+        "gatewayRegistryAddress": "0x633BaEfc98220497Eb7eE323480C87ce51a44955", \
+        "liquidityRegistryAddress": "0x10271f4B537610009e1DaF06779b9A8Fde5fF531" \
       } \
     }'
 ENV __CHAIN_ADDRESSES__ $CHAIN_ADDRESSES
