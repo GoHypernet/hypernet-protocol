@@ -19,10 +19,10 @@ import { registerTransfer } from "../src.ts/utils";
 // important address
 const userAddress = "0x243FB44Ea4FDD2651605eC85290f041fF5F876f0";
 const registryAccountAddress = "0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef";
-const HypertokenContractAddress = "0x0";
-const TimelockContractAddress = "0x0";
-const GovernanceContractAddress = "0x0";
-const RegistryFactoryContractAddress = "0x0";
+const HypertokenContractAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
+const TimelockContractAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
+const GovernanceContractAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
+const RegistryFactoryContractAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
 
 const func: DeployFunction = async () => {
   const log = logger.child({ module: "Deploy" });
