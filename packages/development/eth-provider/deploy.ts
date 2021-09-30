@@ -22,7 +22,8 @@ const registryAccountAddress = "0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef";
 const HypertokenContractAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
 const TimelockContractAddress = "0x82D50AD3C1091866E258Fd0f1a7cC9674609D254";
 const GovernanceContractAddress = "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd";
-const RegistryFactoryContractAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
+const RegistryFactoryContractAddress =
+  "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
 
 const func: DeployFunction = async () => {
   const log = logger.child({ module: "Deploy" });
@@ -108,9 +109,19 @@ const func: DeployFunction = async () => {
     ["Insurance", []],
     ["Message", []],
     ["Hypertoken", []],
-	["RegistryFactory", [TimelockContractAddress, ["Gateways", "Liquidity Providers"], ["G", "LPs"], [registryAccountAddress, registryAccountAddress]]],
+    [
+      "RegistryFactory",
+      [
+        TimelockContractAddress,
+        ["Gateways", "Liquidity Providers"],
+        ["G", "LPs"],
+        [registryAccountAddress, registryAccountAddress],
+      ],
+    ],
     ["HypernetGovernor", [HypertokenContractAddress, TimelockContractAddress]],
-    ["TimelockController", [1, [GovernanceContractAddress], [GovernanceContractAddress]],
+    [
+      "TimelockController",
+      [1, [GovernanceContractAddress], [GovernanceContractAddress]],
     ],
   ];
 
@@ -240,8 +251,12 @@ const func: DeployFunction = async () => {
 
   ////////////////////////////////////////
   log.info("Registering router info");
-  const gatewayRegistryAddress = await registryFactoryContract.nameToAddress("Gateways");
-  const liquidityRegistryAddress = await registryFactoryContract.nameToAddress("Liquidity Providers");
+  const gatewayRegistryAddress = await registryFactoryContract.nameToAddress(
+    "Gateways",
+  );
+  const liquidityRegistryAddress = await registryFactoryContract.nameToAddress(
+    "Liquidity Providers",
+  );
 
   log.info(`Gateway Registry Address: ${gatewayRegistryAddress}`);
   log.info(`Liquidity Registry Address: ${liquidityRegistryAddress}`);
@@ -317,16 +332,25 @@ const func: DeployFunction = async () => {
     JSON.stringify(testGatewayRegistrationEntry),
   );
 
-  const hyperpayGatewayRegistryTx = await gatewayRegistryContract.register(
+  const hyperpayLocalGatewayRegistryTx = await gatewayRegistryContract.register(
     hyperpayAddress,
     "https://localhost:3000/users/v0",
     JSON.stringify(hyperpayGatewayRegistrationEntry),
   );
 
-  await testGatewayRegistryTx.wait();
-  await hyperpayGatewayRegistryTx.wait();
+  const hyperpayDevGatewayRegistryTx = await gatewayRegistryContract.register(
+    hyperpayAddress,
+    "https://hyperpay-dev.hypernetlabs.io/users/v0",
+    JSON.stringify(hyperpayGatewayRegistrationEntry),
+  );
 
-  console.info("Deployed registration tokens for test gateway and Hyperpay");
+  await testGatewayRegistryTx.wait();
+  await hyperpayLocalGatewayRegistryTx.wait();
+  await hyperpayDevGatewayRegistryTx.wait();
+
+  console.info(
+    "Deployed registration tokens for test gateway and Hyperpay (local and dev)",
+  );
 
   ////////////////////////////////////////
   // Print summary
