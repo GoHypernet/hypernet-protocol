@@ -95,13 +95,19 @@ export class RegistryRepository implements IRegistryRepository {
 
               // Get the symbol and NumberOfEntries of that registry address
               return ResultUtils.combine([
+                this.getRegistryContractRegistrarAddresses(registryContract),
                 this.getRegistryContractSymbol(registryContract),
                 this.getRegistryContractTotalSupply(registryContract),
               ]).map((vals) => {
-                const [registrySymbol, registryNumberOfEntries] = vals;
+                const [
+                  registrarAddresses,
+                  registrySymbol,
+                  registryNumberOfEntries,
+                ] = vals;
                 registriesMap.set(
                   registryName,
                   new Registry(
+                    registrarAddresses,
                     registryAddress,
                     registryName,
                     registrySymbol,
@@ -148,13 +154,19 @@ export class RegistryRepository implements IRegistryRepository {
 
               // Get the symbol and NumberOfEntries of that registry address
               return ResultUtils.combine([
+                this.getRegistryContractRegistrarAddresses(registryContract),
                 this.getRegistryContractSymbol(registryContract),
                 this.getRegistryContractTotalSupply(registryContract),
               ]).map((vals) => {
-                const [registrySymbol, registryNumberOfEntries] = vals;
+                const [
+                  registrarAddresses,
+                  registrySymbol,
+                  registryNumberOfEntries,
+                ] = vals;
                 registriesMap.set(
                   registryName,
                   new Registry(
+                    registrarAddresses,
                     registryAddress,
                     registryName,
                     registrySymbol,
@@ -515,14 +527,21 @@ export class RegistryRepository implements IRegistryRepository {
 
         // Get the name, symbol and NumberOfEntries of that registry address
         return ResultUtils.combine([
+          this.getRegistryContractRegistrarAddresses(registryContract),
           this.getRegistryContractName(registryContract),
           this.getRegistryContractSymbol(registryContract),
           this.getRegistryContractTotalSupply(registryContract),
         ]).andThen((vals) => {
-          const [registryName, registrySymbol, registryNumberOfEntries] = vals;
+          const [
+            registrarAddresses,
+            registryName,
+            registrySymbol,
+            registryNumberOfEntries,
+          ] = vals;
 
           return okAsync(
             new Registry(
+              registrarAddresses,
               registryAddress,
               registryName,
               registrySymbol,
@@ -608,6 +627,53 @@ export class RegistryRepository implements IRegistryRepository {
         this.logUtils.error(e);
         return okAsync(null as unknown as RegistryEntry);
       });
+  }
+
+  private getRegistryContractRegistrarAddresses(
+    registryContract: ethers.Contract,
+  ): ResultAsync<EthereumAddress[], BlockchainUnavailableError> {
+    return ResultAsync.fromPromise(
+      registryContract.getRoleMemberCount(
+        registryContract.REGISTRAR_ROLE(),
+      ) as Promise<BigNumber>,
+      (e) => {
+        return new BlockchainUnavailableError(
+          "Unable to call getRoleMember",
+          e,
+        );
+      },
+    ).andThen((countBigNumber) => {
+      const count = countBigNumber.toNumber();
+      console.log("getRoleMemberCount count: ", count);
+      const registrarResults: ResultAsync<
+        EthereumAddress,
+        BlockchainUnavailableError
+      >[] = [];
+      for (let index = 0; index < count; index++) {
+        registrarResults.push(
+          this.getRegistryContractRegistrar(registryContract, index),
+        );
+      }
+      return ResultUtils.combine(registrarResults);
+    });
+  }
+
+  private getRegistryContractRegistrar(
+    registryContract: ethers.Contract,
+    index: number,
+  ): ResultAsync<EthereumAddress, BlockchainUnavailableError> {
+    return ResultAsync.fromPromise(
+      registryContract.getRoleMember(
+        registryContract.REGISTRAR_ROLE(),
+        index,
+      ) as Promise<EthereumAddress>,
+      (e) => {
+        return new BlockchainUnavailableError(
+          "Unable to call getRoleMember",
+          e,
+        );
+      },
+    );
   }
 
   private getRegistryContractName(

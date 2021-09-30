@@ -19,7 +19,7 @@ export class Proposal {
     public originator: string,
     public votesFor: string,
     public votesAgaints: string,
-    public estimatedTimeArrival: string,
+    public proposalETA: string,
     public description: string,
     public proposalNumber: number | null,
   ) {}

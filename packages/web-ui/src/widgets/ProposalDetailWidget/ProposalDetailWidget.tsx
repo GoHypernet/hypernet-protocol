@@ -75,7 +75,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   const proposalETA = proposal
     ? Number(
         viewUtils.fromBigNumberEther(
-          viewUtils.toBigNumber(proposal.estimatedTimeArrival),
+          viewUtils.toBigNumber(proposal.proposalETA),
         ),
       )
     : 0;

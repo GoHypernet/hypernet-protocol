@@ -50,6 +50,10 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
               fieldValue: registry.address,
             },
             {
+              fieldTitle: "Registrar Addresses",
+              fieldValue: registry.registrarAddresses.join("-"),
+            },
+            {
               fieldTitle: "Number of Entries",
               fieldValue: registry.numberOfEntries.toString(),
             },

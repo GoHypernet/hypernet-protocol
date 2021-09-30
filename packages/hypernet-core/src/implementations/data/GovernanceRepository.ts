@@ -81,7 +81,7 @@ export class GovernanceRepository implements IGovernanceRepository {
             ResultAsync.fromPromise(
               governanceContracts.hypernetGovernorContract._proposalMap(
                 proposalNumber,
-              ) as Promise<string>,
+              ) as Promise<BigNumber>,
               (e) => {
                 return new BlockchainUnavailableError(
                   "Unable to retrieve proposals id",
@@ -90,7 +90,7 @@ export class GovernanceRepository implements IGovernanceRepository {
               },
             )
               .andThen((proposalId) => {
-                return this.getProposalDetails(proposalId);
+                return this.getProposalDetails(proposalId.toString());
               })
               .map((proposalObj) => {
                 proposalObj.proposalNumber = proposalNumber;
