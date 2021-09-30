@@ -108,8 +108,8 @@ const func: DeployFunction = async () => {
     ["Insurance", []],
     ["Message", []],
     ["Hypertoken", []],
-    ["TimelockController", [1, [GovernanceContractAddress], [GovernanceContractAddress]],
     ["HypernetGovernor", [HypertokenContractAddress, TimelockContractAddress]],
+    ["TimelockController", [1, [GovernanceContractAddress], [GovernanceContractAddress]],
     ["RegistryFactory", [TimelockContractAddress, ["Gateways", "Liquidity Providers"], ["G", "LPs"], [registryAccountAddress, registryAccountAddress]]],
     ],
   ];
