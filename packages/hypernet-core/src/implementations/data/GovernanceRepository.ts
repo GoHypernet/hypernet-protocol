@@ -5,13 +5,13 @@ import {
   EProposalVoteSupport,
   Proposal,
   ProposalVoteReceipt,
+  stringToProposalState,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IGovernanceRepository } from "@interfaces/data";
 import { injectable, inject } from "inversify";
 import { okAsync, ResultAsync } from "neverthrow";
-import { BigNumber, ethers } from "ethers";
-import { Result } from "neverthrow";
+import { BigNumber, ethers, utils } from "ethers";
 import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
@@ -236,14 +236,13 @@ export class GovernanceRepository implements IGovernanceRepository {
         ),
       ]).map((vals) => {
         const [proposal, propsalState, proposalDescription] = vals;
-
         return new Proposal(
           BigNumberString(proposalId), // proposalId
-          propsalState.toString() as any, // propsalState
+          stringToProposalState(propsalState.toString()), // propsalState
           proposal[1], // proposalOriginator
-          proposal[5].toString(), // proposalVotesFor
-          proposal[6].toString(), // proposalVotesAgaints
-          proposal[2].toString(), // proposalETA
+          Number(utils.formatEther(proposal[5])), // proposalVotesFor
+          Number(utils.formatEther(proposal[6])), // proposalVotesAgainst
+          Number(utils.formatEther(proposal[2])), // proposalETA
           proposalDescription, // proposalDescription
           null, // proposalNumber
         );

@@ -58,35 +58,19 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
     alert.error(err?.message || "Something went wrong!");
   };
 
-  const proposalVotesFor = proposal
-    ? Number(
-        viewUtils.fromBigNumberEther(viewUtils.toBigNumber(proposal.votesFor)),
-      )
-    : 0;
+  const proposalVotesFor = proposal ? proposal.votesFor : 0;
 
-  const proposalVotesAgaints = proposal
-    ? Number(
-        viewUtils.fromBigNumberEther(
-          viewUtils.toBigNumber(proposal ? proposal.votesAgaints : 0),
-        ),
-      )
-    : 0;
+  const proposalVotesAgainst = proposal ? proposal.votesAgainst : 0;
 
-  const proposalETA = proposal
-    ? Number(
-        viewUtils.fromBigNumberEther(
-          viewUtils.toBigNumber(proposal.proposalETA),
-        ),
-      )
-    : 0;
+  const proposalETA = proposal ? proposal.proposalETA : 0;
 
-  const totalVotes = proposalVotesFor + proposalVotesAgaints + proposalETA;
+  const totalVotes = proposalVotesFor + proposalVotesAgainst + proposalETA;
 
   const forPercentage =
     ((proposalVotesFor * 100) / totalVotes).toFixed(0) || "0";
 
   const againstPercentage =
-    ((proposalVotesAgaints * 100) / totalVotes).toFixed(0) || "0";
+    ((proposalVotesAgainst * 100) / totalVotes).toFixed(0) || "0";
 
   const abstainPercentage =
     ((proposalETA * 100) / totalVotes).toFixed(0) || "0";
@@ -180,7 +164,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
           <Grid item xs={4}>
             <GovernanceVotingCard
               type="against"
-              value={proposalVotesAgaints}
+              value={proposalVotesAgainst}
               progressValue={parseFloat(againstPercentage)}
               onVoteClick={() => castVote(EProposalVoteSupport.FOR)}
               isVoted={supportStatus === EProposalVoteSupport.AGAINST}

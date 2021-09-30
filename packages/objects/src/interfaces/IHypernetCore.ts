@@ -303,7 +303,7 @@ export interface IHypernetCore {
 
   getRegistryByAddress(
     registryAddresses: EthereumAddress[],
-  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError>;
+  ): ResultAsync<Map<EthereumAddress, Registry>, BlockchainUnavailableError>;
 
   getRegistryEntries(
     registryName: string,

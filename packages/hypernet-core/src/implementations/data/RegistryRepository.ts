@@ -126,10 +126,10 @@ export class RegistryRepository implements IRegistryRepository {
 
   public getRegistryByAddress(
     registryAddresses: EthereumAddress[],
-  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError> {
+  ): ResultAsync<Map<EthereumAddress, Registry>, BlockchainUnavailableError> {
     return this.initializeReadOnly().andThen(
       ({ registryContracts, provider }) => {
-        const registriesMap: Map<string, Registry> = new Map();
+        const registriesMap: Map<EthereumAddress, Registry> = new Map();
 
         return ResultUtils.combine(
           registryAddresses.map((registryAddress) => {
@@ -163,8 +163,9 @@ export class RegistryRepository implements IRegistryRepository {
                   registrySymbol,
                   registryNumberOfEntries,
                 ] = vals;
+
                 registriesMap.set(
-                  registryName,
+                  registryAddress,
                   new Registry(
                     registrarAddresses,
                     registryAddress,
@@ -571,16 +572,17 @@ export class RegistryRepository implements IRegistryRepository {
       },
     )
       .andThen((label) => {
-        return ResultAsync.fromPromise(
-          registryContract.ownerOf(tokenId) as Promise<EthereumAddress>,
-          (e) => {
-            return new BlockchainUnavailableError(
-              "Unable to call ownerOf registryContract",
-              e,
-            );
-          },
-        ).andThen((owner) => {
-          return ResultAsync.fromPromise(
+        return ResultUtils.combine([
+          ResultAsync.fromPromise(
+            registryContract.ownerOf(tokenId) as Promise<EthereumAddress>,
+            (e) => {
+              return new BlockchainUnavailableError(
+                "Unable to call ownerOf registryContract",
+                e,
+              );
+            },
+          ),
+          ResultAsync.fromPromise(
             registryContract.tokenURI(tokenId) as Promise<string>,
             (e) => {
               return new BlockchainUnavailableError(
@@ -588,38 +590,38 @@ export class RegistryRepository implements IRegistryRepository {
                 e,
               );
             },
-          ).andThen((tokenURI) => {
-            return ResultAsync.fromPromise(
-              registryContract.allowStorageUpdate() as Promise<boolean>,
-              (e) => {
-                return new BlockchainUnavailableError(
-                  "Unable to call allowStorageUpdate registryContract",
-                  e,
-                );
-              },
-            ).andThen((storageUpdateAllowed) => {
-              return ResultAsync.fromPromise(
-                registryContract.allowLabelChange() as Promise<boolean>,
-                (e) => {
-                  return new BlockchainUnavailableError(
-                    "Unable to call allowLabelChange registryContract",
-                    e,
-                  );
-                },
-              ).andThen((labelChangeAllowed) => {
-                return okAsync(
-                  new RegistryEntry(
-                    label,
-                    tokenId,
-                    owner,
-                    tokenURI,
-                    storageUpdateAllowed,
-                    labelChangeAllowed,
-                  ),
-                );
-              });
-            });
-          });
+          ),
+          ResultAsync.fromPromise(
+            registryContract.allowStorageUpdate() as Promise<boolean>,
+            (e) => {
+              return new BlockchainUnavailableError(
+                "Unable to call allowStorageUpdate registryContract",
+                e,
+              );
+            },
+          ),
+          ResultAsync.fromPromise(
+            registryContract.allowLabelChange() as Promise<boolean>,
+            (e) => {
+              return new BlockchainUnavailableError(
+                "Unable to call allowLabelChange registryContract",
+                e,
+              );
+            },
+          ),
+        ]).andThen((vals) => {
+          const [owner, tokenURI, storageUpdateAllowed, labelChangeAllowed] =
+            vals;
+          return okAsync(
+            new RegistryEntry(
+              label,
+              tokenId,
+              owner,
+              tokenURI,
+              storageUpdateAllowed,
+              labelChangeAllowed,
+            ),
+          );
         });
       })
       .orElse((e) => {
