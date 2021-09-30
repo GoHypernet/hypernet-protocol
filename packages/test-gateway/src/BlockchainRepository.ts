@@ -4,7 +4,7 @@ import { Contract, ethers } from "ethers";
 export class BlockchainRepository {
   protected gatewayAccountPrivateKey = "0x0123456789012345678901234567890123456789012345678901234567890123";
   protected gatewayAccount = "0x14791697260E4c9A71f18484C9f997B308e59325";
-  protected gatewayRegistryAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
+  protected gatewayRegistryAddress = "0x633BaEfc98220497Eb7eE323480C87ce51a44955";
 
   protected provider: ethers.providers.JsonRpcProvider;
   protected wallet: ethers.Wallet;
