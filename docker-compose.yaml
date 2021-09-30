@@ -69,6 +69,7 @@ services:
     depends_on:
       - database-node
       - blockchain
+      - auth
 
   router:
     image: connextproject/vector_router:0.2.5-beta.6
@@ -138,6 +139,7 @@ services:
     depends_on:
       - node
       - database-router
+      - auth
     restart: on-failure
 
   database-node:
