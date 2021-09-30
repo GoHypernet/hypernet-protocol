@@ -27,7 +27,6 @@ const HypertokenBalanceWidget: React.FC<HypertokenBalanceWidgetParams> = () => {
             coreProxy
               .getHyperTokenBalance(accounts[0])
               .map((balance) => {
-                console.log("getHyperTokenBalance balance fe: ", balance);
                 setBalance(balance);
                 setLoading(false);
               })
@@ -39,7 +38,6 @@ const HypertokenBalanceWidget: React.FC<HypertokenBalanceWidgetParams> = () => {
   }, []);
 
   const handleError = (err?: Error) => {
-    console.log("handleError err: ", err);
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };

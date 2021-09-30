@@ -41,7 +41,6 @@ const DelegateVotesWidget: React.FC<IDelegateVotesWidget> = ({
   };
 
   const handleError = (err?: Error) => {
-    console.log("handleError err: ", err);
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };

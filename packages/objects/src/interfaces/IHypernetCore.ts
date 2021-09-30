@@ -33,7 +33,8 @@ import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
 import { Signature } from "@objects/Signature";
-import { Proposal, EVoteSupport, ProposalVoteReceipt } from "@objects/Proposal";
+import { Proposal, ProposalVoteReceipt } from "@objects/Proposal";
+import { EProposalVoteSupport } from "@objects/typing";
 import { Registry } from "@objects/Registry";
 import { RegistryEntry } from "@objects/RegistryEntry";
 
@@ -256,7 +257,7 @@ export interface IHypernetCore {
   ): ResultAsync<void, InvalidParametersError>;
 
   getProposals(
-    _proposalsNumberArr?: number[],
+    proposalsNumberArr?: number[],
   ): ResultAsync<Proposal[], BlockchainUnavailableError>;
 
   createProposal(
@@ -276,7 +277,7 @@ export interface IHypernetCore {
 
   castVote(
     proposalId: string,
-    support: EVoteSupport,
+    support: EProposalVoteSupport,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
 
   getProposalVotesReceipt(
@@ -292,20 +293,21 @@ export interface IHypernetCore {
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
 
   getRegistries(
-    numberOfRegistries: number,
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<Registry[], BlockchainUnavailableError>;
 
   getRegistryByName(
-    registryName: string,
-  ): ResultAsync<Registry, BlockchainUnavailableError>;
+    registryNames: string[],
+  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError>;
 
   getRegistryByAddress(
-    registryAddress: EthereumAddress,
-  ): ResultAsync<Registry, BlockchainUnavailableError>;
+    registryAddresses: EthereumAddress[],
+  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError>;
 
   getRegistryEntries(
     registryName: string,
-    _registryEntriesNumberArr?: number[],
+    registryEntriesNumberArr?: number[],
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
 
   getRegistryEntryByLabel(
@@ -336,8 +338,8 @@ export interface IHypernetCore {
   getProposalsCount(): ResultAsync<number, BlockchainUnavailableError>;
 
   getRegistryEntriesTotalCount(
-    registryName: string,
-  ): ResultAsync<number, BlockchainUnavailableError>;
+    registryNames: string[],
+  ): ResultAsync<Map<string, number>, BlockchainUnavailableError>;
 
   getProposalThreshold(): ResultAsync<number, BlockchainUnavailableError>;
 

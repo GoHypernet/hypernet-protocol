@@ -32,7 +32,7 @@ import {
   GatewayRegistrationFilter,
   GatewayRegistrationInfo,
   Proposal,
-  EVoteSupport,
+  EProposalVoteSupport,
   ProposalVoteReceipt,
   Registry,
   RegistryEntry,
@@ -1003,9 +1003,9 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public getProposals(
-    _proposalsNumberArr?: number[],
+    proposalsNumberArr?: number[],
   ): ResultAsync<Proposal[], BlockchainUnavailableError> {
-    return this.governanceService.getProposals(_proposalsNumberArr);
+    return this.governanceService.getProposals(proposalsNumberArr);
   }
 
   public createProposal(
@@ -1031,7 +1031,7 @@ export class HypernetCore implements IHypernetCore {
 
   public castVote(
     proposalId: string,
-    support: EVoteSupport,
+    support: EProposalVoteSupport,
   ): ResultAsync<Proposal, BlockchainUnavailableError> {
     return this.governanceService.castVote(proposalId, support);
   }
@@ -1061,36 +1061,37 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public getRegistries(
-    numberOfRegistries: number,
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
-    return this.registryService.getRegistries(numberOfRegistries);
+    return this.registryService.getRegistries(pageNumber, pageSize);
   }
 
   public getRegistryByName(
-    registryName: string,
-  ): ResultAsync<Registry, BlockchainUnavailableError> {
-    return this.registryService.getRegistryByName(registryName);
+    registryNames: string[],
+  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError> {
+    return this.registryService.getRegistryByName(registryNames);
   }
 
   public getRegistryByAddress(
-    registryAddress: EthereumAddress,
-  ): ResultAsync<Registry, BlockchainUnavailableError> {
-    return this.registryService.getRegistryByAddress(registryAddress);
+    registryAddresses: EthereumAddress[],
+  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError> {
+    return this.registryService.getRegistryByAddress(registryAddresses);
   }
 
   public getRegistryEntriesTotalCount(
-    registryName: string,
-  ): ResultAsync<number, BlockchainUnavailableError> {
-    return this.registryService.getRegistryEntriesTotalCount(registryName);
+    registryNames: string[],
+  ): ResultAsync<Map<string, number>, BlockchainUnavailableError> {
+    return this.registryService.getRegistryEntriesTotalCount(registryNames);
   }
 
   public getRegistryEntries(
     registryName: string,
-    _registryEntriesNumberArr?: number[],
+    registryEntriesNumberArr?: number[],
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this.registryService.getRegistryEntries(
       registryName,
-      _registryEntriesNumberArr,
+      registryEntriesNumberArr,
     );
   }
 

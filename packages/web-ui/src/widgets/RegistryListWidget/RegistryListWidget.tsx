@@ -20,16 +20,14 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
 
   useEffect(() => {
     coreProxy
-      .getRegistries(10)
+      .getRegistries(1, 10)
       .map((registries) => {
-        console.log("registry list: ", registries);
         setRegistries(registries);
       })
       .mapErr(handleError);
   }, []);
 
   const handleError = (err?: Error) => {
-    console.log("handleError err: ", err);
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };

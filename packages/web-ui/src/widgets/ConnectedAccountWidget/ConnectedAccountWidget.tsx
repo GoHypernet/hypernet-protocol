@@ -24,7 +24,6 @@ const ConnectedAccountWidget: React.FC<ConnectedAccountWidgetParams> = () => {
         coreProxy
           .getEthereumAccounts()
           .map((accounts) => {
-            console.log("accounts ConnectedAccountWidget: ", accounts);
             setAccountAddress(accounts[0]);
             setLoading(false);
           })
@@ -34,7 +33,6 @@ const ConnectedAccountWidget: React.FC<ConnectedAccountWidgetParams> = () => {
   }, []);
 
   const handleError = (err?: Error) => {
-    console.log("handleError err: ", err);
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };

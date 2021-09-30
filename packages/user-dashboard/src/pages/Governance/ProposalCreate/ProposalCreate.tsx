@@ -16,7 +16,6 @@ const ProposalCreate: React.FC = () => {
         selector: "proposal-create-page-wrapper",
         onProposalListNavigate: () => {
           history.push("/proposals");
-          console.log("onProposalCreationNavigate");
         },
       })
       .mapErr(handleError);

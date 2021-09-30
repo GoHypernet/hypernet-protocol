@@ -1,9 +1,8 @@
 import React from "react";
 import { Box, Typography } from "@material-ui/core";
 import { useStyles } from "@web-ui/components/GovernanceVotingCard/GovernanceVotingCard.style";
-import { GovernanceProgress } from "@web-ui/components/GovernanceProgress";
+import { GovernanceProgress, GovernanceButton } from "@web-ui/components";
 import { colors } from "@web-ui/theme";
-import { GovernanceButton } from "../GovernanceButton";
 
 interface GovernanceVotingCardProps {
   type: "for" | "against" | "abstain";

@@ -1,8 +1,7 @@
 import React from "react";
 import { Box, Typography, Button } from "@material-ui/core";
-//import Skeleton from "@material-ui/lab/Skeleton";
+import Skeleton from "@material-ui/lab/Skeleton";
 
-import { colors } from "@web-ui/theme";
 import { useStyles } from "@web-ui/components/GovernanceProposalListItem/GovernanceProposalListItem.style";
 import { GovernanceStatusTag } from "@web-ui/components/GovernanceStatusTag";
 import { EProposalState } from "@hypernetlabs/objects";
@@ -24,13 +23,13 @@ export const GovernanceProposalListItem: React.FC<GovernanceProposalListItemProp
         <Typography variant="h5" className={classes.number}>
           {number}
         </Typography>
-        {/* {status === EProposalState.ACTIVE && (
+        {status === EProposalState.ACTIVE && (
           <Skeleton
             variant="circle"
             animation="pulse"
             className={classes.activePulse}
           />
-        )} */}
+        )}
         <Typography variant="h5" color="textPrimary" className={classes.title}>
           {title}
         </Typography>

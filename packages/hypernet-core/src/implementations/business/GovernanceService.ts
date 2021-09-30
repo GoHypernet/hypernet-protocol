@@ -2,7 +2,7 @@ import {
   Proposal,
   BlockchainUnavailableError,
   EthereumAddress,
-  EVoteSupport,
+  EProposalVoteSupport,
   ProposalVoteReceipt,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
@@ -21,9 +21,9 @@ export class GovernanceService implements IGovernanceService {
   ) {}
 
   public getProposals(
-    _proposalsNumberArr?: number[],
+    proposalsNumberArr?: number[],
   ): ResultAsync<Proposal[], BlockchainUnavailableError> {
-    return this.governanceRepository.getProposals(_proposalsNumberArr);
+    return this.governanceRepository.getProposals(proposalsNumberArr);
   }
 
   public getProposalsCount(): ResultAsync<number, BlockchainUnavailableError> {
@@ -53,7 +53,7 @@ export class GovernanceService implements IGovernanceService {
 
   public castVote(
     proposalId: string,
-    support: EVoteSupport,
+    support: EProposalVoteSupport,
   ): ResultAsync<Proposal, BlockchainUnavailableError> {
     return this.governanceRepository.castVote(proposalId, support);
   }

@@ -16,7 +16,7 @@ import {
   EProposalState,
   Proposal,
   EthereumAddress,
-  EVoteSupport,
+  EProposalVoteSupport,
 } from "@hypernetlabs/objects";
 import ethers from "ethers";
 
@@ -30,7 +30,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   const { setLoading } = useLayoutContext();
   const [proposal, setProposal] = useState<Proposal>();
 
-  const [supportStatus, setSupportStatus] = useState<EVoteSupport>();
+  const [supportStatus, setSupportStatus] = useState<EProposalVoteSupport>();
 
   useEffect(() => {
     coreProxy.getEthereumAccounts().map((accounts) => {
@@ -38,7 +38,6 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
       coreProxy
         .getProposalDetails(proposalId)
         .map((proposal) => {
-          console.log("proposal: ", proposal);
           setProposal(proposal);
         })
         .mapErr(handleError);
@@ -46,7 +45,6 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
       coreProxy
         .getProposalVotesReceipt(proposalId, accounts[0])
         .map((proposalVoteReceipt) => {
-          console.log("proposalVoteReceipt: ", proposalVoteReceipt);
           if (proposalVoteReceipt.hasVoted) {
             setSupportStatus(Number(proposalVoteReceipt.support));
           }
@@ -62,16 +60,14 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
   const proposalVotesFor = proposal
     ? Number(
-        viewUtils.fromBigNumberEther(
-          viewUtils.toBigNumber(proposal.proposalVotesFor),
-        ),
+        viewUtils.fromBigNumberEther(viewUtils.toBigNumber(proposal.votesFor)),
       )
     : 0;
 
   const proposalVotesAgaints = proposal
     ? Number(
         viewUtils.fromBigNumberEther(
-          viewUtils.toBigNumber(proposal ? proposal.proposalVotesAgaints : 0),
+          viewUtils.toBigNumber(proposal ? proposal.votesAgaints : 0),
         ),
       )
     : 0;
@@ -79,7 +75,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   const proposalETA = proposal
     ? Number(
         viewUtils.fromBigNumberEther(
-          viewUtils.toBigNumber(proposal.proposalETA),
+          viewUtils.toBigNumber(proposal.estimatedTimeArrival),
         ),
       )
     : 0;
@@ -115,7 +111,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
       .mapErr(handleError);
   };
 
-  const castVote = (voteSupport: EVoteSupport) => {
+  const castVote = (voteSupport: EProposalVoteSupport) => {
     coreProxy
       .castVote(proposalId, voteSupport)
       .map((proposal) => {
@@ -173,8 +169,8 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
               type="for"
               value={proposalVotesFor}
               progressValue={parseFloat(forPercentage)}
-              onVoteClick={() => castVote(EVoteSupport.FOR)}
-              isVoted={supportStatus === EVoteSupport.FOR}
+              onVoteClick={() => castVote(EProposalVoteSupport.FOR)}
+              isVoted={supportStatus === EProposalVoteSupport.FOR}
               showVoteButton={showVotingButtons}
               disableVoteButton={
                 Number(proposal?.state) !== EProposalState.ACTIVE
@@ -186,8 +182,8 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
               type="against"
               value={proposalVotesAgaints}
               progressValue={parseFloat(againstPercentage)}
-              onVoteClick={() => castVote(EVoteSupport.FOR)}
-              isVoted={supportStatus === EVoteSupport.AGAINST}
+              onVoteClick={() => castVote(EProposalVoteSupport.FOR)}
+              isVoted={supportStatus === EProposalVoteSupport.AGAINST}
               showVoteButton={showVotingButtons}
               disableVoteButton={
                 Number(proposal?.state) !== EProposalState.ACTIVE
@@ -199,8 +195,8 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
               type="abstain"
               value={proposalETA}
               progressValue={parseFloat(abstainPercentage)}
-              onVoteClick={() => castVote(EVoteSupport.FOR)}
-              isVoted={supportStatus === EVoteSupport.ABSTAIN}
+              onVoteClick={() => castVote(EProposalVoteSupport.FOR)}
+              isVoted={supportStatus === EProposalVoteSupport.ABSTAIN}
               showVoteButton={showVotingButtons}
               disableVoteButton={
                 Number(proposal?.state) !== EProposalState.ACTIVE
@@ -218,7 +214,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
             Proposer
           </Typography>
           <Typography variant="h5" className={classes.proposerValue}>
-            {proposal?.proposalOriginator}
+            {proposal?.originator}
           </Typography>
         </Box>
         <GovernanceMarkdown source={proposal?.description} />

@@ -25,7 +25,6 @@ const VotingPowerWidget: React.FC<VotingPowerWidgetParams> = () => {
             coreProxy
               .getVotingPower(accounts[0])
               .map((votingPower) => {
-                console.log("accounts VotingPowerWidget: ", accounts);
                 setVotingPower(votingPower);
               })
               .mapErr(handleError);
@@ -36,7 +35,6 @@ const VotingPowerWidget: React.FC<VotingPowerWidgetParams> = () => {
   }, []);
 
   const handleError = (err?: Error) => {
-    console.log("handleError err: ", err);
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };

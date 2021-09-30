@@ -30,7 +30,6 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
 
   useEffect(() => {
     coreProxy.getEthereumAccounts().map((accounts) => {
-      console.log("accounts RegistryEntryDetailWidget: ", accounts);
       setAccountAddress(accounts[0]);
     });
   }, []);
@@ -40,7 +39,6 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
     coreProxy
       .getRegistryEntryByLabel(registryName, entryLabel)
       .map((registryEntry: RegistryEntry) => {
-        console.log("registryEntry: ", registryEntry);
         setRegistryEntry(registryEntry);
         setLoading(false);
       })
@@ -56,7 +54,6 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
         val,
       )
       .map((registryEntry: RegistryEntry) => {
-        console.log("updateLabel registryEntry: ", registryEntry);
         setRegistryEntry(registryEntry);
         setLoading(false);
       })
@@ -72,7 +69,6 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
         val,
       )
       .map((registryEntry: RegistryEntry) => {
-        console.log("updateTokenURI registryEntry: ", registryEntry);
         setRegistryEntry(registryEntry);
         setLoading(false);
       })
@@ -80,7 +76,6 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   };
 
   const handleError = (err?: Error) => {
-    console.log("handleError err: ", err);
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };

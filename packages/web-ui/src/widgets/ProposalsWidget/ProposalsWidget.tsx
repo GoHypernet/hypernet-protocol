@@ -55,7 +55,6 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
   }, [JSON.stringify(proposalsNumberArr)]);
 
   const handleError = (err?: Error) => {
-    console.log("handleError err: ", err);
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };
@@ -83,16 +82,15 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
       {proposals.map((proposal) => (
         <GovernanceProposalListItem
           onClick={() =>
-            onProposalDetailsNavigate &&
-            onProposalDetailsNavigate(proposal.id._hex)
+            onProposalDetailsNavigate && onProposalDetailsNavigate(proposal.id)
           }
-          key={proposal.id._hex}
+          key={proposal.id}
           number={proposal.proposalNumber?.toString() || ""}
           title={proposal.description}
           status={proposal.state}
         />
       ))}
-      {proposalCount && (
+      {!!proposalCount && (
         <GovernancePagination
           customPageOptions={{
             itemsPerPage: PROPOSALS_PER_PAGE,

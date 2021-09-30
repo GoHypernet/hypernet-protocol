@@ -16,7 +16,6 @@ const RegistryList: React.FC = () => {
         selector: "registry-list-page-wrapper",
         onRegistryEntryListNavigate: (registryName: string) => {
           history.push(`/registries/${registryName}/entries`);
-          console.log("onRegistryEntryListNavigate");
         },
       })
       .mapErr(handleError);

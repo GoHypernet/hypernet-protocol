@@ -4,7 +4,7 @@ import { Form, Formik, FormikHelpers } from "formik";
 import * as Yup from "yup";
 
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { EthereumAddress, EVoteSupport } from "@hypernetlabs/objects";
+import { EthereumAddress } from "@hypernetlabs/objects";
 import {
   GovernanceButton,
   GovernanceDialogSelectField,
@@ -46,7 +46,6 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
     coreProxy
       .getProposalThreshold()
       .map((_proposalThreshold) => {
-        console.log("_proposalThreshold: ", _proposalThreshold);
         setProposalThreshold(_proposalThreshold);
       })
       .mapErr(handleError);
@@ -54,13 +53,11 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
     coreProxy
       .getEthereumAccounts()
       .map((accounts) => {
-        console.log("accounts CreateProposalWidget: ", accounts);
         setAccountAddress(accounts[0]);
 
         coreProxy
           .getVotingPower(accounts[0])
           .map((power) => {
-            console.log("power: ", power);
             setVotingPower(power);
           })
           .mapErr(handleError);
@@ -69,7 +66,6 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
   }, []);
 
   const handleError = (err?: Error) => {
-    console.log("handleError err: ", err);
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };
@@ -78,7 +74,6 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
     values: IValues,
     formikHelpers: FormikHelpers<IValues>,
   ) => {
-    console.log("handleCreatePrposalFormSubmit values", values);
     setLoading(true);
     if (values.action == ERegistryAction.ADD_REGISTRY) {
       coreProxy
@@ -88,13 +83,11 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
           EthereumAddress(values.owner),
         )
         .map((proposal) => {
-          console.log("created proposal FE: ", proposal);
           setLoading(false);
           onProposalListNavigate && onProposalListNavigate();
         })
         .mapErr(handleError);
     } else {
-      console.log("not implemented yet");
       coreProxy
         .proposeRegistryEntry(
           "Gateways",
@@ -108,7 +101,6 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
           EthereumAddress(values.owner),
         )
         .map((proposal) => {
-          console.log("created gateway FE: ", proposal);
           setLoading(false);
           onProposalListNavigate && onProposalListNavigate();
         })

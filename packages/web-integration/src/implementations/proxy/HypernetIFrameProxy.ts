@@ -31,7 +31,7 @@ import {
   GatewayRegistrationFilter,
   GatewayRegistrationInfo,
   Proposal,
-  EVoteSupport,
+  EProposalVoteSupport,
   ProposalVoteReceipt,
   Registry,
   RegistryEntry,
@@ -490,9 +490,9 @@ export default class HypernetIFrameProxy
   }
 
   public getProposals(
-    _proposalsNumberArr?: number[],
+    proposalsNumberArr?: number[],
   ): ResultAsync<Proposal[], BlockchainUnavailableError> {
-    return this._createCall("getProposals", _proposalsNumberArr);
+    return this._createCall("getProposals", proposalsNumberArr);
   }
 
   public createProposal(
@@ -525,7 +525,7 @@ export default class HypernetIFrameProxy
 
   public castVote(
     proposalId: string,
-    support: EVoteSupport,
+    support: EProposalVoteSupport,
   ): ResultAsync<Proposal, BlockchainUnavailableError> {
     return this._createCall("castVote", {
       proposalId,
@@ -558,36 +558,40 @@ export default class HypernetIFrameProxy
   }
 
   public getRegistries(
-    numberOfRegistries: number,
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
-    return this._createCall("getRegistries", numberOfRegistries);
+    return this._createCall("getRegistries", {
+      pageNumber,
+      pageSize,
+    });
   }
 
   public getRegistryByName(
-    registryName: string,
-  ): ResultAsync<Registry, BlockchainUnavailableError> {
-    return this._createCall("getRegistryByName", registryName);
+    registryNames: string[],
+  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError> {
+    return this._createCall("getRegistryByName", registryNames);
   }
 
   public getRegistryByAddress(
-    registryAddress: EthereumAddress,
-  ): ResultAsync<Registry, BlockchainUnavailableError> {
-    return this._createCall("getRegistryByAddress", registryAddress);
+    registryAddresses: EthereumAddress[],
+  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError> {
+    return this._createCall("getRegistryByAddress", registryAddresses);
   }
 
   public getRegistryEntriesTotalCount(
-    registryName: string,
-  ): ResultAsync<number, BlockchainUnavailableError> {
-    return this._createCall("getRegistryEntriesTotalCount", registryName);
+    registryNames: string[],
+  ): ResultAsync<Map<string, number>, BlockchainUnavailableError> {
+    return this._createCall("getRegistryEntriesTotalCount", registryNames);
   }
 
   public getRegistryEntries(
     registryName: string,
-    _registryEntriesNumberArr?: number[],
+    registryEntriesNumberArr?: number[],
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this._createCall("getRegistryEntries", {
       registryName,
-      _registryEntriesNumberArr,
+      registryEntriesNumberArr,
     });
   }
 

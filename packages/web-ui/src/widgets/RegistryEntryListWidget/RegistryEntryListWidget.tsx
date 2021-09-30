@@ -39,9 +39,10 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   useEffect(() => {
     coreProxy
-      .getRegistryEntriesTotalCount(registryName)
-      .map((count) => {
-        setRegistryEntriesCount(count);
+      .getRegistryEntriesTotalCount([registryName])
+      .map((countsMap) => {
+        const count = countsMap.get(registryName);
+        setRegistryEntriesCount(count || 0);
       })
       .mapErr(handleError);
   }, []);
@@ -100,7 +101,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           }
         />
       ))}
-      {registryEntriesCount && (
+      {!!registryEntriesCount && (
         <GovernancePagination
           customPageOptions={{
             itemsPerPage: REGISTRY_ENTRIES_PER_PAGE,

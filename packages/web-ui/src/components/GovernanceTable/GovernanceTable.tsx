@@ -17,7 +17,6 @@ import { useTheme } from "@material-ui/core/styles";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 
-import { colors } from "@web-ui/theme";
 import {
   GovernanceButton,
   GovernanceBasicValueWithTitle,

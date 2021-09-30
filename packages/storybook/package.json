@@ -2,7 +2,7 @@
   "name": "@hypernetlabs/protocol-storybook",
   "version": "0.0.1",
   "description": "Hypernet Protocol Storybook",
-  "author": "Charlie Sibbach <charlie@hypernetlabs.io> (https://github.com/HyperCharlie)",
+  "author": "Baris Hantas <baris.hantas@hypernetlabs.io> (https://github.com/barhantas)",
   "main": "dist/index.js",
   "scripts": {
     "build": "yarn clean && yarn compile && yarn postCompile",

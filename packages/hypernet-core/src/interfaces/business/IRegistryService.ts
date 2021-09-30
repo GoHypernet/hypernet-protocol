@@ -8,17 +8,18 @@ import { ResultAsync } from "neverthrow";
 
 export interface IRegistryService {
   getRegistries(
-    numberOfRegistries: number,
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<Registry[], BlockchainUnavailableError>;
   getRegistryByName(
-    registryName: string,
-  ): ResultAsync<Registry, BlockchainUnavailableError>;
+    registryNames: string[],
+  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError>;
   getRegistryByAddress(
-    registryAddress: EthereumAddress,
-  ): ResultAsync<Registry, BlockchainUnavailableError>;
+    registryAddresses: EthereumAddress[],
+  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError>;
   getRegistryEntries(
     registryName: string,
-    _registryEntriesNumberArr?: number[],
+    registryEntriesNumberArr?: number[],
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
   getRegistryEntryByLabel(
     registryName: string,
@@ -35,6 +36,6 @@ export interface IRegistryService {
     label: string,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
   getRegistryEntriesTotalCount(
-    registryName: string,
-  ): ResultAsync<number, BlockchainUnavailableError>;
+    registryNames: string[],
+  ): ResultAsync<Map<string, number>, BlockchainUnavailableError>;
 }

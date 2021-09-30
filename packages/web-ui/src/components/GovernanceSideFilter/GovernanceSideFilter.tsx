@@ -15,7 +15,7 @@ import {
 import CloseIcon from "@material-ui/icons/Close";
 import React, { useEffect, useState } from "react";
 
-import { useStyles } from "./GovernanceSideFilter.style";
+import { useStyles } from "@web-ui/components/GovernanceSideFilter/GovernanceSideFilter.style";
 
 import { SliderRange } from "@web-ui/components";
 

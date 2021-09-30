@@ -15,7 +15,6 @@ export const GovernanceCard: React.FC<GovernanceCard> = (
   props: GovernanceCard,
 ) => {
   const { title, description, children, className } = props;
-  console.log("children", children);
   const classes = useStyles();
 
   return (
