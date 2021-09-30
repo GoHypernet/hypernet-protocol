@@ -12,6 +12,7 @@ COPY ./packages/utils/package.json ./packages/utils/package.json
 COPY ./packages/gateway-connector/package.json ./packages/gateway-connector/package.json
 COPY ./packages/test-gateway/package.json ./packages/test-gateway/package.json
 COPY ./packages/test-gateway-connector/package.json ./packages/test-gateway-connector/package.json
+RUN yarn config set network-timeout 600000
 RUN yarn install
 
 # Now build the code

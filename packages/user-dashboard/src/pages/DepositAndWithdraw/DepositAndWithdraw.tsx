@@ -36,14 +36,14 @@ const DepositAndWithdraw: React.FC = () => {
   return (
     <PageWrapper label="DEPOSIT & WITHDRAW">
       <Grid container spacing={3}>
-        <Grid item xs={4}>
+        <Grid item xs={12}>
+          <Box id="balances-wrapper"></Box>
+        </Grid>
+        <Grid item xs={6}>
           <Box id="fund-wrapper"></Box>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={6}>
           <Box id="withdraw-wrapper"></Box>
-        </Grid>
-        <Grid item xs={4}>
-          <Box id="balances-wrapper"></Box>
         </Grid>
       </Grid>
     </PageWrapper>

@@ -7,6 +7,7 @@ import {
   Button,
   TextInput,
   BoxWrapper,
+  GovernanceButton,
 } from "@web-ui/components";
 import { useFund } from "@web-ui/hooks";
 import { useStyles } from "@web-ui/widgets/FundWidget/FundWidget.style";
@@ -45,13 +46,15 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
         setSelectedPaymentToken={setSelectedPaymentToken}
       />
       <TextInput label="Amount" value={amount} onChange={setAmount} />
-      <Button
-        label="Withdraw to your metamask wallet"
-        disabled={!selectedPaymentToken?.address}
+      <GovernanceButton
+        fullWidth
+        color="primary"
+        variant="contained"
         onClick={withdrawFunds}
-        fullWidth={true}
-        bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
-      />
+        disabled={!selectedPaymentToken?.address}
+      >
+        Withdraw to your metamask wallet
+      </GovernanceButton>
     </CustomBox>
   );
 };

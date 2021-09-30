@@ -1,23 +1,26 @@
-import { Box } from "@material-ui/core";
-import { IRenderParams } from "@web-ui/interfaces";
 import React from "react";
+import { Form, Formik } from "formik";
+import { IRenderParams } from "@web-ui/interfaces";
 
 import {
   TokenSelector,
-  Button,
   TextInput,
-  BoxWrapper,
+  GovernanceButton,
+  GovernanceCard,
+  GovernanceDialogSelectField,
+  GovernanceLargeField,
 } from "@web-ui/components";
 import { useFund } from "@web-ui/hooks";
 import { useStyles } from "@web-ui/widgets/FundWidget/FundWidget.style";
 
+interface IValues {
+  amount: string;
+  tokenAddress: string;
+}
+
 interface IFundWidget extends IRenderParams {}
 
-const FundWidget: React.FC<IFundWidget> = ({
-  includeBoxWrapper,
-  noLabel,
-  bodyStyle,
-}: IFundWidget) => {
+const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
   const {
     tokenSelectorOptions,
     selectedPaymentToken,
@@ -27,33 +30,68 @@ const FundWidget: React.FC<IFundWidget> = ({
     amount,
     setAmount,
     error,
+    depositFundsV2,
   } = useFund();
   const classes = useStyles({ error });
 
-  const CustomBox = includeBoxWrapper ? BoxWrapper : Box;
+  const handleFormSubmit = (values: IValues) => {
+    depositFundsV2(values.tokenAddress, values.amount);
+  };
 
   return (
-    <CustomBox
+    <GovernanceCard
       className={classes.wrapper}
-      label={!noLabel ? "FUND YOUR CHANNEL" : undefined}
-      bodyStyle={bodyStyle}
+      title={!noLabel ? "FUND YOUR CHANNEL" : undefined}
     >
+      <Formik
+        initialValues={
+          {
+            tokenAddress: tokenSelectorOptions[0]?.address,
+          } as IValues
+        }
+        onSubmit={handleFormSubmit}
+      >
+        {({ handleSubmit, values }) => {
+          return (
+            <Form onSubmit={handleSubmit}>
+              <GovernanceDialogSelectField
+                required
+                title="Token Selector"
+                name="tokenAddress"
+                options={tokenSelectorOptions.map((option) => ({
+                  primaryText: option.tokenName,
+                  value: option.address,
+                }))}
+              />
+              <GovernanceLargeField
+                required
+                name="amount"
+                title="Amount"
+                type="input"
+                placeholder="Type Amount"
+              />
+
+              <GovernanceButton
+                fullWidth
+                color="primary"
+                variant="contained"
+                onClick={handleSubmit}
+                disabled={!selectedPaymentToken?.address}
+              >
+                Fund my wallet
+              </GovernanceButton>
+            </Form>
+          );
+        }}
+      </Formik>
+
       <TokenSelector
         tokenSelectorOptions={tokenSelectorOptions}
         selectedPaymentToken={selectedPaymentToken}
         setSelectedPaymentToken={setSelectedPaymentToken}
       />
       <TextInput label="Amount" value={amount} onChange={setAmount} />
-      <Button
-        label="Fund my wallet"
-        disabled={!selectedPaymentToken?.address}
-        onClick={depositFunds}
-        fullWidth={true}
-        bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
-      />
-      {/* <Button onClick={mintTokens} label="Mint HyperToken" />
-      <br /> */}
-    </CustomBox>
+    </GovernanceCard>
   );
 };
 
