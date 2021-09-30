@@ -12,10 +12,10 @@ export default {
 };
 
 const balances = [
-  new AssetBalance("1", "1", "HYPR", "HYPR", 8, 1000000, 0, 17),
-  new AssetBalance("2", "2", "ETH", "ETH", 8, 1000000, 0, 4),
-  new AssetBalance("3", "3", "TKN3", "TKN3", 8, 1000000, 0, 0),
-  new AssetBalance("4", "4", "TKN4", "TKN4", 8, 1000000, 0, 0),
+  new AssetBalance("1", "1", "HYPERTOKEN", "HYPR", 8, 1000000, 0, 17),
+  new AssetBalance("2", "2", "ETHEREUM", "ETH", 8, 1000000, 0, 4),
+  new AssetBalance("3", "3", "TOKEN3", "TKN3", 8, 1000000, 0, 0),
+  new AssetBalance("4", "4", "TOKEN4", "TKN4", 8, 1000000, 0, 0),
 ];
 
 const Template = (args) => (
