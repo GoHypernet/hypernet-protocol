@@ -36,9 +36,17 @@ contract RegistryFactory is AccessControlEnumerable {
      * @dev Grants `DEFAULT_ADMIN_ROLE`, to the
      * account passed into the constructor.
      */
-    constructor(address _admin)  {
-        // register executors
+    constructor(address _admin, string[] memory _names, string[] memory _symbols, address[] memory _registrars)  {
+        require(_names.length == _symbols.length, "RegistryFactory: Initializer arrays must be equal length.");
+        require(_symbols.length == _registrars.length, "RegistryFactory: Initializer arrays must be equal length.");
+
+        // set the administrator of the registry factory
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
+
+        // deploy initial registries 
+        for (uint256 i = 0; i < _names.length; ++i) {
+            _createRegistry(_names[i], _symbols[i], _registrars[i]);
+        }
     }
 
     /**
@@ -46,8 +54,17 @@ contract RegistryFactory is AccessControlEnumerable {
     * Address of deployed registry is stored in an array for easy lookup
     */
     function createRegistry(string memory _name, string memory _symbol, address _registrar) external {
-        require(_registrar != address(0), "RegistryFactory: Registrar address must not be 0.");
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
+
+        _createRegistry(_name, _symbol, _registrar);        
+    }
+
+    /**
+    * @dev private function for creating a new registry with the given name, symbol and admin address.
+    * Address of deployed registry is stored in an array for easy lookup
+    */
+    function _createRegistry(string memory _name, string memory _symbol, address _registrar) private {
+        require(_registrar != address(0), "RegistryFactory: Registrar address must not be 0.");
         require(!_registryExists(_name), "RegistryFactory: Registry by that name exists.");
         
         NonFungibleRegistry registry = new NonFungibleRegistry(_name, _symbol, _registrar, getRoleMember(DEFAULT_ADMIN_ROLE, 0));
