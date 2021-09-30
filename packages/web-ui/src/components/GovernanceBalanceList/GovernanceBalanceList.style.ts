@@ -13,5 +13,9 @@ export const useStyles = makeStyles({
   },
   tokenLogo: {
     width: 40,
+    marginRight: 32,
+  },
+  tokenAmount: {
+    marginRight: 8,
   },
 });

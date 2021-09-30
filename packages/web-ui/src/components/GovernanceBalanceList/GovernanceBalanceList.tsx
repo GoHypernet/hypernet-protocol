@@ -24,26 +24,35 @@ export const GovernanceBalanceList: React.FC<GovernanceBalanceListProps> = (
     <Box className={classes.container}>
       {balances?.map((balance, index) => (
         <Box key={index} className={`${classes.itemWrapper}`}>
-          <img
-            className={classes.tokenLogo}
-            src={
-              balance.symbol === "HYPR" || balance.symbol === "HYPR"
-                ? HYPER_TOKEN_LOGO_URL
-                : `https://cryptoicon-api.vercel.app/api/icon/${balance.symbol.toLocaleLowerCase()}`
-            }
-            ref={tokenLogoRef}
-            onError={() => {
-              tokenLogoRef.current?.setAttribute("src", HYPER_TOKEN_LOGO_URL);
-            }}
-          />
-          <Typography variant="h4" color="textPrimary">
-            {viewUtils.fromBigNumberEther(balance.freeAmount)}
-          </Typography>
-          <Tooltip title={balance.name} placement="top">
-            <Typography variant="h4" color="textSecondary">
-              {balance.symbol}
+          <Box display="flex" alignItems="center">
+            <img
+              className={classes.tokenLogo}
+              src={
+                balance.symbol === "HYPR" || balance.symbol === "HYPR"
+                  ? HYPER_TOKEN_LOGO_URL
+                  : `https://cryptoicon-api.vercel.app/api/icon/${balance.symbol.toLocaleLowerCase()}`
+              }
+              ref={tokenLogoRef}
+              onError={() => {
+                tokenLogoRef.current?.setAttribute("src", HYPER_TOKEN_LOGO_URL);
+              }}
+            />
+            <Typography variant="h4">{balance.name.toUpperCase()}</Typography>
+          </Box>
+          <Box display="flex">
+            <Typography
+              variant="h4"
+              color="textPrimary"
+              className={classes.tokenAmount}
+            >
+              {viewUtils.fromBigNumberEther(balance.freeAmount)}
             </Typography>
-          </Tooltip>
+            <Tooltip title={balance.name} placement="top">
+              <Typography variant="h4" color="textSecondary">
+                {balance.symbol}
+              </Typography>
+            </Tooltip>
+          </Box>
         </Box>
       ))}
     </Box>
