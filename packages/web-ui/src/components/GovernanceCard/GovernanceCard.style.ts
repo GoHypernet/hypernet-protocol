@@ -7,7 +7,10 @@ export const useStyles = makeStyles((theme) => ({
     border: `1px solid ${colors.GRAY200}`,
     backgroundColor: colors.GRAY100,
   },
-  body: {
+  bodyWithHeader: {
+    padding: "0 16px 16px 16px",
+  },
+  bodyWithoutHeader: {
     padding: 16,
   },
 }));

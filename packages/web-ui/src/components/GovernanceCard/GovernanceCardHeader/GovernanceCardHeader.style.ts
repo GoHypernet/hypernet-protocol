@@ -1,7 +1,7 @@
 import { makeStyles } from "@material-ui/core";
 import { EFontWeight } from "@web-ui/theme";
 
-export const useStyles = makeStyles((theme) => ({
+export const useStyles = makeStyles(() => ({
   wrapper: {
     marginBottom: 24,
   },

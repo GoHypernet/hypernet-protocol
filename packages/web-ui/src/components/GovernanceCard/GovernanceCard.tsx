@@ -1,13 +1,13 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Box } from "@material-ui/core";
 
 import { useStyles } from "@web-ui/components/GovernanceCard/GovernanceCard.style";
 import { GovernanceCardHeader } from "@web-ui/components/GovernanceCard/GovernanceCardHeader";
 
 interface GovernanceCard {
-  title?: string;
+  title?: string | React.ReactNode;
   description?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   className: string;
   hideDivider?: boolean;
 }
@@ -18,17 +18,30 @@ export const GovernanceCard: React.FC<GovernanceCard> = (
   const { title, description, children, className, hideDivider } = props;
   const classes = useStyles();
 
+  const hasCardHeader = useMemo(
+    () => !!title || !!description,
+    [title, description],
+  );
+
   return (
     <Box className={`${classes.wrapper} ${className}`}>
-      {(!!title || !!description) && (
+      {hasCardHeader && (
         <GovernanceCardHeader
           title={title}
           description={description}
           hideDivider={hideDivider}
+          hasBottomMargin={!!children}
         />
       )}
-
-      {!!children && <Box className={classes.body}>{children}</Box>}
+      {!!children && (
+        <Box
+          className={
+            hasCardHeader ? classes.bodyWithHeader : classes.bodyWithoutHeader
+          }
+        >
+          {children}
+        </Box>
+      )}
     </Box>
   );
 };

@@ -7,27 +7,34 @@ interface GovernanceCardHeader {
   title?: string | React.ReactNode;
   description?: string | React.ReactNode;
   hideDivider?: boolean;
+  hasBottomMargin?: boolean;
 }
 
 export const GovernanceCardHeader: React.FC<GovernanceCardHeader> = (
   props: GovernanceCardHeader,
 ) => {
-  const { title, description, hideDivider } = props;
+  const { title, description, hideDivider, hasBottomMargin } = props;
   const classes = useStyles();
 
   return (
-    <Box className={classes.wrapper}>
+    <Box
+      {...(hasBottomMargin && {
+        className: classes.wrapper,
+      })}
+    >
       <Box className={classes.header}>
         <Typography variant="h5" color="textPrimary" className={classes.title}>
           {title}
         </Typography>
-        <Typography
-          variant="body2"
-          color="textPrimary"
-          className={classes.description}
-        >
-          {description}
-        </Typography>
+        {description && (
+          <Typography
+            variant="body2"
+            color="textPrimary"
+            className={classes.description}
+          >
+            {description}
+          </Typography>
+        )}
       </Box>
       {!hideDivider && <Divider />}
     </Box>
