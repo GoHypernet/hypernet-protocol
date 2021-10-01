@@ -39,7 +39,7 @@ const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
     <GovernanceCard
       className={classes.wrapper}
       title={!noLabel ? "Deposit Funds" : undefined}
-      description="Move tokens from your Ethereum wallet into your  Hypernet Protocol account."
+      description={!noLabel ? "Move tokens from your Ethereum wallet into your Hypernet Protocol account." : undefined}
     >
       <Formik
         initialValues={
