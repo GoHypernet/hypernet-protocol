@@ -506,6 +506,12 @@ export class GovernanceRepository implements IGovernanceRepository {
       | ethers.providers.JsonRpcSigner,
   ): ResultAsync<GovernanceContracts, never> {
     return this.configProvider.getConfig().map((config) => {
+      console.log("config: ", config);
+      console.log(
+        "hypernetGovernorAddress address",
+        config.chainAddresses[config.governanceChainId]
+          ?.hypernetGovernorAddress,
+      );
       const hypernetGovernorContract = new ethers.Contract(
         config.chainAddresses[config.governanceChainId]
           ?.hypernetGovernorAddress as string,
@@ -513,6 +519,10 @@ export class GovernanceRepository implements IGovernanceRepository {
         providerOrSigner,
       );
 
+      console.log(
+        "hypertokenAddress address",
+        config.chainAddresses[config.governanceChainId]?.hypertokenAddress,
+      );
       const hypertokenContract = new ethers.Contract(
         config.chainAddresses[config.governanceChainId]
           ?.hypertokenAddress as string,
@@ -520,6 +530,10 @@ export class GovernanceRepository implements IGovernanceRepository {
         providerOrSigner,
       );
 
+      console.log(
+        "registryFactoryAddress address",
+        config.chainAddresses[config.governanceChainId]?.registryFactoryAddress,
+      );
       const registryFactoryContract = new ethers.Contract(
         config.chainAddresses[config.governanceChainId]
           ?.registryFactoryAddress as string,
