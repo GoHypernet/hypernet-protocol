@@ -1,61 +1,104 @@
-import { Box } from "@material-ui/core";
 import { IRenderParams } from "@web-ui/interfaces";
 import React from "react";
 
 import {
-  TokenSelector,
-  Button,
-  TextInput,
-  BoxWrapper,
   GovernanceButton,
+  GovernanceCard,
+  GovernanceDialogSelectField,
+  GovernanceLargeField,
 } from "@web-ui/components";
 import { useFund } from "@web-ui/hooks";
 import { useStyles } from "@web-ui/widgets/FundWidget/FundWidget.style";
+import { Form, Formik } from "formik";
+
+interface IValues {
+  amount: string;
+  tokenAddress: string;
+}
 
 interface IWithdrawWidget extends IRenderParams {}
 
 const WithdrawWidget: React.FC<IWithdrawWidget> = ({
-  includeBoxWrapper,
   noLabel,
-  bodyStyle,
 }: IWithdrawWidget) => {
   const {
     tokenSelectorOptions,
     selectedPaymentToken,
     setSelectedPaymentToken,
-    depositFunds,
     withdrawFunds,
-    setDestinationAddress,
     amount,
     setAmount,
     error,
   } = useFund();
   const classes = useStyles({ error });
 
-  const CustomBox = includeBoxWrapper ? BoxWrapper : Box;
+  const handleFormSubmit = () => {
+    withdrawFunds();
+  };
 
   return (
-    <CustomBox
+    <GovernanceCard
       className={classes.wrapper}
-      label={!noLabel ? "Withdraw Funds" : undefined}
-      bodyStyle={bodyStyle}
+      title={!noLabel ? "Withdraw Funds" : undefined}
+      description={
+        !noLabel
+          ? "Move tokens from your Hypernet Protocol account into your Ethereum wallet."
+          : undefined
+      }
     >
-      <TokenSelector
-        tokenSelectorOptions={tokenSelectorOptions}
-        selectedPaymentToken={selectedPaymentToken}
-        setSelectedPaymentToken={setSelectedPaymentToken}
-      />
-      <TextInput label="Amount" value={amount} onChange={setAmount} />
-      <GovernanceButton
-        fullWidth
-        color="primary"
-        variant="contained"
-        onClick={withdrawFunds}
-        disabled={!selectedPaymentToken?.address}
+      <Formik
+        initialValues={
+          {
+            tokenAddress: tokenSelectorOptions[0]?.address,
+            amount,
+          } as IValues
+        }
+        onSubmit={handleFormSubmit}
       >
-        Withdraw to your metamask wallet
-      </GovernanceButton>
-    </CustomBox>
+        {({ handleSubmit, values }) => {
+          if (values["tokenAddress"] !== selectedPaymentToken?.address) {
+            setSelectedPaymentToken(
+              tokenSelectorOptions.find(
+                (option) => option.address === values["tokenAddress"],
+              ),
+            );
+          }
+          if (values["amount"] !== amount) {
+            setAmount(values["amount"]);
+          }
+          return (
+            <Form onSubmit={handleSubmit}>
+              <GovernanceDialogSelectField
+                required
+                title="Token Selector"
+                name="tokenAddress"
+                options={tokenSelectorOptions.map((option) => ({
+                  primaryText: option.tokenName,
+                  value: option.address,
+                }))}
+              />
+              <GovernanceLargeField
+                required
+                name="amount"
+                title="Amount"
+                type="input"
+                placeholder="Type Amount"
+              />
+
+              <GovernanceButton
+                fullWidth
+                color="primary"
+                variant="contained"
+                onClick={handleSubmit}
+                disabled={!selectedPaymentToken?.address || !amount}
+              >
+                Withdraw to your metamask wallet
+              </GovernanceButton>
+            </Form>
+          );
+        }}
+      </Formik>
+    </GovernanceCard>
   );
 };
 
