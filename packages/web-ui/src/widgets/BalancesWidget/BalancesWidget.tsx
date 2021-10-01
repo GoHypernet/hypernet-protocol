@@ -1,7 +1,7 @@
 import { useStoreContext } from "@web-ui/contexts";
 import { IRenderParams } from "@web-ui/interfaces";
 import React from "react";
-
+import { Box } from "@material-ui/core";
 import {
   GovernanceBalanceList,
   EmptyState,
@@ -23,18 +23,21 @@ const BalancesWidget: React.FC<IBalancesWidget> = ({
 
   return (
     <GovernanceCard
-      title={!noLabel ? "YOUR BALANCES" : undefined}
+      title={!noLabel ? "Your Balances" : undefined}
+      description={!noLabel ? "Available token balances in this Hypernet Protocol account." : undefined}
       className={!includeBoxWrapper ? classes.balancesWrapper : ""}
     >
       {balancesByChannelAddress.length === 0 && !loading ? (
-        <EmptyState
-          info={
-            <>
-              You don't have any balances yet, you can Fund your account from.
-              <a href="/deposit-and-withdraw"> here</a>
-            </>
-          }
-        />
+        <Box display="flex" justifyContent="center">
+          <EmptyState
+            info={
+              <>
+                You don't have any balances yet, you can Fund your account from
+                <a href="/deposit-and-withdraw"> here. </a>
+              </>
+            }
+          />
+        </Box>
       ) : (
         <GovernanceBalanceList
           balances={balancesByChannelAddress}
