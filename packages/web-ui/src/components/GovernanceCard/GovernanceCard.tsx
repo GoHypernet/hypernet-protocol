@@ -9,20 +9,26 @@ interface GovernanceCard {
   description?: string;
   children: React.ReactNode;
   className: string;
+  hideDivider?: boolean;
 }
 
 export const GovernanceCard: React.FC<GovernanceCard> = (
   props: GovernanceCard,
 ) => {
-  const { title, description, children, className } = props;
+  const { title, description, children, className, hideDivider } = props;
   const classes = useStyles();
 
   return (
     <Box className={`${classes.wrapper} ${className}`}>
       {(!!title || !!description) && (
-        <GovernanceCardHeader title={title} description={description} />
+        <GovernanceCardHeader
+          title={title}
+          description={description}
+          hideDivider={hideDivider}
+        />
       )}
-      {children}
+
+      {!!children && <Box className={classes.body}>{children}</Box>}
     </Box>
   );
 };

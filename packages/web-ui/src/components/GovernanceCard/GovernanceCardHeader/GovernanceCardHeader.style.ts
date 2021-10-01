@@ -5,6 +5,9 @@ export const useStyles = makeStyles((theme) => ({
   wrapper: {
     marginBottom: 24,
   },
+  header: {
+    padding: 16,
+  },
   title: {
     fontWeight: EFontWeight.MEDIUM,
   },
