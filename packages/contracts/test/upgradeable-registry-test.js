@@ -8,8 +8,8 @@ describe("Registry", function () {
     const [owner, addr1, addr2] = await ethers.getSigners();
 
     // deploy registry contract
-    const Registry = await ethers.getContractFactory("NonFungibleRegistryUpgradeable");
-    const registry = await upgrades.deployProxy(Registry, ["Gateways", "G", owner.address, owner.address]);
+    const UpgradableRegistry = await ethers.getContractFactory("NonFungibleRegistryUpgradeable");
+    const registry = await upgrades.deployProxy(UpgradableRegistry, ["Gateways", "G", owner.address, owner.address]);
     await registry.deployed();
     const totalSupply = await registry.totalSupply();
     console.log("Registry Address:", registry.address);

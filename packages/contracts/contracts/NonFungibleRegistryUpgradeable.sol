@@ -10,7 +10,7 @@ import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts/proxy/utils/UUPSUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /**
  * @dev {ERC721} compatible Registry, including:
@@ -46,16 +46,16 @@ contract NonFungibleRegistryUpgradeable is
 
     // allow lazy minting in this registry
     // Warning: ensure allowLabelChange is false before enabling
-    bool public allowLazyRegister = false;
+    bool public allowLazyRegister;
 
     // allow for tokenURI to be updated
-    bool public allowStorageUpdate = true;
+    bool public allowStorageUpdate;
 
     // allow for token label to be updated
-    bool public allowLabelChange = false;
+    bool public allowLabelChange;
 
     // disallow token transfers for all but DEFAULT_ADMIN_ROLE
-    bool public allowTransfers = true;
+    bool public allowTransfers;
 
     // create a REGISTRAR_ROLE to manage registry functionality
     bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
@@ -82,6 +82,11 @@ contract NonFungibleRegistryUpgradeable is
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
 
         _setupRole(REGISTRAR_ROLE, _registrar);
+
+        allowLazyRegister = false;
+        allowStorageUpdate = true;
+        allowLabelChange = false;
+        allowTransfers = true;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override {
