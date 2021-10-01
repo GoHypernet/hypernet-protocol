@@ -236,7 +236,7 @@ describe("BlockchainProvider tests", () => {
     expect(result).toBeInstanceOf(Error);
     expect(result).toStrictEqual(
       new Error(
-        "Must call BlockchainProvider.initialize() first before you can call getCeramicEIP1193Provider()",
+        "Must call BlockchainProvider.initialize() first before you can call getEIP1193Provider()",
       ),
     );
   });

@@ -17,9 +17,9 @@ export class Proposal {
     public id: BigNumberString,
     public state: EProposalState,
     public originator: string,
-    public votesFor: string,
-    public votesAgaints: string,
-    public estimatedTimeArrival: string,
+    public votesFor: number,
+    public votesAgainst: number,
+    public proposalETA: number,
     public description: string,
     public proposalNumber: number | null,
   ) {}
