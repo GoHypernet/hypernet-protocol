@@ -89,9 +89,8 @@ contract NonFungibleRegistryUpgradeable is
         allowTransfers = true;
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override {
-        require(hasRole(REGISTRAR_ROLE, _msgSender()) || hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NonFungibleRegistry: only admin or registrar can upgrade.");
-    }
+    // we must implement this function at top level contract definition
+    function _authorizeUpgrade(address newImplementation) internal  onlyOwner {}
 
     /**
     * @dev set lazy register functionality

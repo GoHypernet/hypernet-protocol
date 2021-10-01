@@ -17,10 +17,11 @@ describe("Registry Factory", function () {
     registry_reciept = await factoryregistry.deployTransaction.wait();
     console.log("Factory Address:", factoryregistry.address)
 
-    const testRegAddress = factoryregistry.nameToAddress("Test");
+    const testRegAddress = await factoryregistry.nameToAddress("Test");
     const testReg = new ethers.Contract(testRegAddress, NFR.abi, owner);
     expect(await testReg.name()).to.equal("Test")
     expect(await testReg.symbol()).to.equal("t")
+    console.log("Constructor Registry Address:", testRegAddress)
 
     const factorytx = await factoryregistry.createRegistry(registryName, registrySymbol, owner.address);
     const factorytx_rcpt = await factorytx.wait(); 
@@ -30,7 +31,6 @@ describe("Registry Factory", function () {
     const registryHandle = new ethers.Contract(registryAddress, NFR.abi, owner)
     expect(await registryHandle.name()).to.equal(registryName)
     expect(await registryHandle.symbol()).to.equal(registrySymbol)
-    //expect(await factoryregistry.registries(0)).to.equal(registryAddress)
 
     // can't create two registries with the same name
     await expectRevert(
