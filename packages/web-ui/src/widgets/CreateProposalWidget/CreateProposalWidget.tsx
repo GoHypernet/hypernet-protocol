@@ -108,11 +108,13 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
     }
   };
 
-  const exceedsThreshold: boolean = useMemo(() => {
-    return !votingPower || !proposalThreshold
+  console.log("proposalThreshold", proposalThreshold);
+  console.log("votingPower", votingPower);
+  const exceedsThreshold: boolean =
+    !votingPower || !proposalThreshold
       ? false
       : votingPower >= proposalThreshold;
-  }, [proposalThreshold, votingPower]);
+  console.log("exceedsThreshold", exceedsThreshold);
 
   return (
     <>

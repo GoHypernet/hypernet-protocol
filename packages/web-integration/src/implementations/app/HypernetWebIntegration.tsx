@@ -36,9 +36,10 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
 
     this.UIData = {
       onSelectedStateChannelChanged: new Subject<ActiveStateChannel>(),
+      onVotesDelegated: new Subject<void>(),
       getSelectedStateChannel: () => this.selectedStateChannel,
     };
-    
+
     this.UIData.onSelectedStateChannelChanged.subscribe((stateChannel) => {
       this.selectedStateChannel = stateChannel;
     });

@@ -10,12 +10,19 @@ interface VotingPowerWidgetParams extends IRenderParams {}
 
 const VotingPowerWidget: React.FC<VotingPowerWidgetParams> = () => {
   const alert = useAlert();
-  const { coreProxy } = useStoreContext();
+  const { coreProxy, UIData } = useStoreContext();
   const classes = useStyles();
   const { setLoading } = useLayoutContext();
   const [votingPower, setVotingPower] = useState<number>();
 
   useEffect(() => {
+    getVotingPower();
+    UIData.onVotesDelegated.subscribe(() => {
+      getVotingPower();
+    });
+  }, []);
+
+  const getVotingPower = () => {
     coreProxy
       .waitInitialized()
       .map(() => {
@@ -32,7 +39,7 @@ const VotingPowerWidget: React.FC<VotingPowerWidgetParams> = () => {
           .mapErr(handleError);
       })
       .mapErr(handleError);
-  }, []);
+  };
 
   const handleError = (err?: Error) => {
     setLoading(false);

@@ -491,9 +491,6 @@ export class HypernetCore implements IHypernetCore {
     this.governanceRepository = new GovernanceRepository(
       this.blockchainProvider,
       this.configProvider,
-      this.contextProvider,
-      this.storageUtils,
-      this.blockchainUtils,
       this.logUtils,
     );
 
