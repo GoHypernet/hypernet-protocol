@@ -2,7 +2,6 @@ import {
   TransactionResponse,
   TransactionReceipt,
 } from "@ethersproject/abstract-provider";
-import { Eip1193Bridge } from "@ethersproject/experimental";
 import {
   PrivateCredentials,
   BlockchainUnavailableError,
@@ -16,6 +15,7 @@ import { ResultAsync, okAsync } from "neverthrow";
 import td from "testdouble";
 
 import { IBlockchainProvider } from "@interfaces/utilities";
+import { CeramicEIP1193Bridge } from "@implementations/utilities";
 
 interface ISendTransactionVals {
   to: EthereumAddress;
@@ -69,10 +69,6 @@ export class BlockchainProviderMock implements IBlockchainProvider {
     return okAsync(this.governanceSigner);
   }
 
-  public getEIP1193Provider(): ResultAsync<Eip1193Bridge, never> {
-    throw new Error("Method not implemented.");
-  }
-
   public getLatestBlock(): ResultAsync<
     ethers.providers.Block,
     BlockchainUnavailableError
@@ -84,5 +80,9 @@ export class BlockchainProviderMock implements IBlockchainProvider {
     privateCredentials: PrivateCredentials,
   ): ResultAsync<void, InvalidParametersError> {
     return okAsync(undefined);
+  }
+
+  public getCeramicEIP1193Provider(): ResultAsync<CeramicEIP1193Bridge, never> {
+    return okAsync(new CeramicEIP1193Bridge(this.signer, this.provider));
   }
 }

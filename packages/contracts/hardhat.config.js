@@ -22,14 +22,13 @@ task("sendhypertoken", "Send hypertoken to another account")
   .setAction(async (taskArgs) => {
     const [owner] = await hre.ethers.getSigners();
 
-  const hypertoken = new hre.ethers.Contract(hAddress, HT.abi, owner);
-  const recipient = taskArgs.recipient;
-  const amount = taskArgs.amount;
-  const tx = await hypertoken.transfer(recipient, amount);
-  const tx_rcpt = await tx.wait();
-  const balR = await hypertoken.balanceOf(recipient)
-  const balS = await hypertoken.balanceOf(owner.address)
-
+    const hypertoken = new hre.ethers.Contract(hAddress, HT.abi, owner);
+    const recipient = taskArgs.recipient;
+    const amount = taskArgs.amount;
+    const tx = await hypertoken.transfer(recipient, amount);
+    const tx_rcpt = await tx.wait();
+    const balR = await hypertoken.balanceOf(recipient);
+    const balS = await hypertoken.balanceOf(owner.address);
 
     console.log("Balance of sender:", balS.toString());
     console.log("Balance of recipient:", balR.toString());
