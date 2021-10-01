@@ -2,6 +2,8 @@ FROM connextproject/vector_ethprovider:0.2.5-beta.6
 ARG MNEMONIC_ARG="candy maple cake sugar pudding cream honey rich smooth crumble sweet treat"
 ENV MNEMONIC $MNEMONIC_ARG
 
+RUN apk add vim
+
 ARG CHAIN_ID_ARG="1337"
 ENV CHAIN_ID $CHAIN_ID_ARG
 
