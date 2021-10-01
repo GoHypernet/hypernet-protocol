@@ -5,7 +5,7 @@ import {
   GovernanceButton,
   GovernanceCard,
   GovernanceDialogSelectField,
-  GovernanceLargeField,
+  GovernanceField,
 } from "@web-ui/components";
 import { useFund } from "@web-ui/hooks";
 import { useStyles } from "@web-ui/widgets/FundWidget/FundWidget.style";
@@ -29,11 +29,12 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
     amount,
     setAmount,
     error,
+    withdrawFundsV2,
   } = useFund();
   const classes = useStyles({ error });
 
-  const handleFormSubmit = () => {
-    withdrawFunds();
+  const handleFormSubmit = (values: IValues) => {
+    withdrawFundsV2(values.tokenAddress, values.amount);
   };
 
   return (
@@ -77,7 +78,7 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
                   value: option.address,
                 }))}
               />
-              <GovernanceLargeField
+              <GovernanceField
                 required
                 name="amount"
                 title="Amount"
@@ -90,7 +91,7 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
                 color="primary"
                 variant="contained"
                 onClick={handleSubmit}
-                disabled={!selectedPaymentToken?.address || !amount}
+                disabled={!(!!values.amount && !!values.tokenAddress)}
               >
                 Withdraw to your metamask wallet
               </GovernanceButton>

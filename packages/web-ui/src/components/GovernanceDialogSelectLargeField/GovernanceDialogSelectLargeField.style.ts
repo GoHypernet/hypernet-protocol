@@ -3,8 +3,13 @@ import { colors, EFontSize } from "@web-ui/theme";
 
 export const useStyles = makeStyles((theme) => ({
   wrapper: (props: any) => ({
+    padding: 16,
     marginBottom: 24,
+    backgroundColor: colors.GRAY100,
+    border: `2px solid ${colors.GRAY200}`,
+    borderRadius: 3,
     cursor: "pointer",
+    textAlign: "left",
   }),
   dialogTitle: {
     display: "flex",
@@ -23,10 +28,13 @@ export const useStyles = makeStyles((theme) => ({
     },
   },
   title: {
-    marginBottom: 8,
+    marginBottom: 28,
   },
   field: {
     width: "100%",
+    border: "none",
+    background: "transparent",
+    outline: "none",
     color: theme.palette.text.primary,
     fontSize: EFontSize.BODY2,
 
@@ -47,9 +55,5 @@ export const useStyles = makeStyles((theme) => ({
   fieldTextWrapper: {
     display: "flex",
     justifyContent: "space-between",
-    border: `2px solid ${colors.GRAY200}`,
-    padding: "12px 16px",
-    borderRadius: 3,
-    background: colors.GRAY100,
   },
 }));

@@ -7,7 +7,7 @@ import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { EthereumAddress } from "@hypernetlabs/objects";
 import {
   GovernanceButton,
-  GovernanceDialogSelectField,
+  GovernanceDialogSelectLargeField,
   GovernanceLargeField,
   GovernanceWidgetHeader,
 } from "@web-integration/components";
@@ -145,7 +145,7 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
       >
         {({ handleSubmit, isSubmitting, values }) => (
           <Form onSubmit={handleSubmit} id="CreateProposalForm">
-            <GovernanceDialogSelectField
+            <GovernanceDialogSelectLargeField
               name="action"
               title="Proposed Action"
               type="select"
