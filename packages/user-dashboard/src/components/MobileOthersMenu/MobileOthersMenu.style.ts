@@ -5,6 +5,9 @@ export const useStyles = makeStyles({
   menuItem: {
     textTransform: "uppercase",
   },
+  iconButton: {
+    color: colors.BLACK
+  },
   activeMenuItem: {
     color: colors.PURPLE700,
   },

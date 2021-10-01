@@ -32,7 +32,7 @@ const Header: React.FC = () => {
   return (
     <Box>
       <IconButton
-        style={{ color: "white" }}
+        className={classes.iconButton}
         aria-label="menu-icon"
         onClick={handleClick}
       >
