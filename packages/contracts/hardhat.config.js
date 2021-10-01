@@ -9,10 +9,17 @@ require("hardhat-contract-sizer");
 // const RF = require("./artifacts/contracts/RegistryFactory.sol/RegistryFactory.json");
 // const NFR = require("./artifacts/contracts/NonFungibleRegistry.sol/NonFungibleRegistry.json");
 
-const govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-const timelockAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
-const factoryAddress = "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6";
-const hAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+// hardhat network
+// const govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+// const timelockAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+// const factoryAddress = "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6";
+// const hAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+
+// devnet
+const govAddress = "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd";
+const timelockAddress = "0x82D50AD3C1091866E258Fd0f1a7cC9674609D254";
+const factoryAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
+const hAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -104,7 +111,7 @@ task("registryParameters", "Prints NFR  parameters.")
 
   });
 
-  task("registryEntryByLabel", "Prints NunFungible Identity Data.")
+task("registryEntryByLabel", "Prints NunFungible Identity Data.")
   .addParam("name", "Target NonFungle Registry Name.")
   .addParam("label", "NFI label")
   .setAction(async (taskArgs) => {
@@ -125,7 +132,7 @@ task("registryParameters", "Prints NFR  parameters.")
     console.log("Token ID:", tokenId.toString());
     console.log("NFI Data:", tokenURI);
 
-  });
+});
 
 task("proposeRegistry", "Propose a new NonFungibleRegistry.")
   .addParam("name", "Name for proposed registry.")
