@@ -5,6 +5,7 @@ import {
   ListItemIcon,
   ListItemText,
   Box,
+  Divider,
 } from "@material-ui/core";
 
 import { useStyles } from "@web-ui/components/ListItem/ListItem.style";
@@ -14,15 +15,14 @@ interface ListItemProps {
   description?: string | React.ReactNode;
   icon?: React.ReactNode;
   rightContent?: React.ReactNode;
+  disableDivider?: boolean;
 }
 
-export const ListItem: React.FC<ListItemProps> = (
-  props: ListItemProps,
-) => {
-  const { rightContent, icon, title, description } = props;
+export const ListItem: React.FC<ListItemProps> = (props: ListItemProps) => {
+  const { rightContent, icon, title, description, disableDivider } = props;
   const classes = useStyles();
   return (
-    <List className={classes.list}>
+    <Box className={classes.wrapper} >
       <MuiListItem className={classes.listItem} disableGutters>
         {icon && <ListItemIcon>{icon}</ListItemIcon>}
         {
@@ -39,6 +39,7 @@ export const ListItem: React.FC<ListItemProps> = (
           <Box className={classes.rightContent}>{rightContent}</Box>
         )}
       </MuiListItem>
-    </List>
+      <Divider className={classes.divider} />
+    </Box>
   );
 };

@@ -1,4 +1,4 @@
-import { ListItem } from "@hypernetlabs/web-ui";
+import { List, ListItem } from "@hypernetlabs/web-ui";
 
 export default {
   title: "Layout/ListItem",
@@ -15,21 +15,38 @@ const Template = (args) => (
       padding: "40px 80px",
     }}
   >
-    <ListItem
-      icon={
-        <div
-          style={{
-            width: 20,
-            height: 20,
-            borderRadius: "50%",
-            borderWidth: 4,
-            backgroundColor: "gray",
-          }}
-        />
-      }
-      title="https://hyperpay.com"
-      rightContent={<button>Details</button>}
-    />
+    <List>
+      <ListItem
+        icon={
+          <div
+            style={{
+              width: 20,
+              height: 20,
+              borderRadius: "50%",
+              borderWidth: 4,
+              backgroundColor: "gray",
+            }}
+          />
+        }
+        title="https://hyperpay.com"
+        rightContent={<button>Details</button>}
+      />
+      <ListItem
+        icon={
+          <div
+            style={{
+              width: 20,
+              height: 20,
+              borderRadius: "50%",
+              borderWidth: 4,
+              backgroundColor: "gray",
+            }}
+          />
+        }
+        title="https://hyperpay2.com"
+        rightContent={<button>Details</button>}
+      />
+    </List>
   </div>
 );
 

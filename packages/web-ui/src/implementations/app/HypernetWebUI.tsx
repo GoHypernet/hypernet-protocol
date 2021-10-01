@@ -243,6 +243,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <GatewaysWidget {...config} />,
           config?.showInModal,
+          undefined,
+          undefined,
+          true,
         ),
         this._generateDomElement(
           config?.selector || BALANCES_WIDGET_ID_SELECTOR,
