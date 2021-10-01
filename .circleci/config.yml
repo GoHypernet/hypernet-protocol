@@ -27,7 +27,7 @@ jobs:
       - run: echo "registry=https://registry.npmjs.org/" > ~/.npmrc
       - run: echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" >> ~/.npmrc
       - run: sudo apt update && sudo apt install -y python
-      - run: yarn install && yarn test
+      - run: yarn install && yarn clean && yarn test
       - save_cache:
           paths:
             - node_modules
