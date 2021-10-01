@@ -3,8 +3,6 @@ import { Form, Formik } from "formik";
 import { IRenderParams } from "@web-ui/interfaces";
 
 import {
-  TokenSelector,
-  TextInput,
   GovernanceButton,
   GovernanceCard,
   GovernanceDialogSelectField,
@@ -30,28 +28,39 @@ const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
     amount,
     setAmount,
     error,
-    depositFundsV2,
   } = useFund();
   const classes = useStyles({ error });
 
-  const handleFormSubmit = (values: IValues) => {
-    depositFundsV2(values.tokenAddress, values.amount);
+  const handleFormSubmit = () => {
+    depositFunds();
   };
 
   return (
     <GovernanceCard
       className={classes.wrapper}
-      title={!noLabel ? "FUND YOUR CHANNEL" : undefined}
+      title={!noLabel ? "Deposit Funds" : undefined}
+      description="Move tokens from your Ethereum wallet into your  Hypernet Protocol account."
     >
       <Formik
         initialValues={
           {
             tokenAddress: tokenSelectorOptions[0]?.address,
+            amount,
           } as IValues
         }
         onSubmit={handleFormSubmit}
       >
         {({ handleSubmit, values }) => {
+          if (values["tokenAddress"] !== selectedPaymentToken?.address) {
+            setSelectedPaymentToken(
+              tokenSelectorOptions.find(
+                (option) => option.address === values["tokenAddress"],
+              ),
+            );
+          }
+          if (values["amount"] !== amount) {
+            setAmount(values["amount"]);
+          }
           return (
             <Form onSubmit={handleSubmit}>
               <GovernanceDialogSelectField
@@ -76,7 +85,7 @@ const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
                 color="primary"
                 variant="contained"
                 onClick={handleSubmit}
-                disabled={!selectedPaymentToken?.address}
+                disabled={!selectedPaymentToken?.address || !amount}
               >
                 Fund my wallet
               </GovernanceButton>
@@ -84,13 +93,6 @@ const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
           );
         }}
       </Formik>
-
-      <TokenSelector
-        tokenSelectorOptions={tokenSelectorOptions}
-        selectedPaymentToken={selectedPaymentToken}
-        setSelectedPaymentToken={setSelectedPaymentToken}
-      />
-      <TextInput label="Amount" value={amount} onChange={setAmount} />
     </GovernanceCard>
   );
 };

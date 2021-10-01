@@ -33,7 +33,6 @@ interface IReducerStateReducer {
   depositFunds: () => void;
   withdrawFunds: () => void;
   mintTokens: () => void;
-  depositFundsV2: (tokenAddress: string, amount: string) => void;
 }
 
 interface IReducerState {
@@ -259,32 +258,6 @@ export function useFund(): IReducerStateReducer {
       );
   };
 
-  const depositFundsV2 = (tokenAddress: string, amount: string) => {
-    setLoading(true);
-    coreProxy
-      .depositFunds(
-        EthereumAddress(UIData.getSelectedStateChannel().channelAddress),
-        EthereumAddress(tokenAddress),
-        BigNumberString(ethers.utils.parseEther(amount || "1").toString()),
-      )
-      .match(
-        (balances) => {
-          alert.success("Your fund deposit has succeeded!");
-          setLoading(false);
-          dispatch({
-            type: EActionTypes.SUCCESS,
-          });
-        },
-        (err) => {
-          alert.error(err.message || "Your fund deposit has failed");
-          setLoading(false);
-          dispatch({
-            type: EActionTypes.ERROR,
-          });
-        },
-      );
-  };
-
   const withdrawFunds = () => {
     if (!state.selectedPaymentToken?.address) {
       dispatch({
@@ -352,6 +325,5 @@ export function useFund(): IReducerStateReducer {
     withdrawFunds,
     mintTokens,
     setAmount,
-    depositFundsV2,
   };
 }
