@@ -39,10 +39,10 @@ const DepositAndWithdraw: React.FC = () => {
         <Grid item xs={12}>
           <Box id="balances-wrapper"></Box>
         </Grid>
-        <Grid item xs={6}>
+        <Grid item sm={12} md={6}>
           <Box id="fund-wrapper"></Box>
         </Grid>
-        <Grid item xs={6}>
+        <Grid item sm={12} md={6}>
           <Box id="withdraw-wrapper"></Box>
         </Grid>
       </Grid>

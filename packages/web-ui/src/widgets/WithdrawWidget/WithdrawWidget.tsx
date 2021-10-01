@@ -21,16 +21,7 @@ interface IWithdrawWidget extends IRenderParams {}
 const WithdrawWidget: React.FC<IWithdrawWidget> = ({
   noLabel,
 }: IWithdrawWidget) => {
-  const {
-    tokenSelectorOptions,
-    selectedPaymentToken,
-    setSelectedPaymentToken,
-    withdrawFunds,
-    amount,
-    setAmount,
-    error,
-    withdrawFundsV2,
-  } = useFund();
+  const { tokenSelectorOptions, error, withdrawFundsV2 } = useFund();
   const classes = useStyles({ error });
 
   const handleFormSubmit = (values: IValues) => {
@@ -48,25 +39,16 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
       }
     >
       <Formik
+        enableReinitialize
         initialValues={
           {
             tokenAddress: tokenSelectorOptions[0]?.address,
-            amount,
+            amount: "1",
           } as IValues
         }
         onSubmit={handleFormSubmit}
       >
         {({ handleSubmit, values }) => {
-          if (values["tokenAddress"] !== selectedPaymentToken?.address) {
-            setSelectedPaymentToken(
-              tokenSelectorOptions.find(
-                (option) => option.address === values["tokenAddress"],
-              ),
-            );
-          }
-          if (values["amount"] !== amount) {
-            setAmount(values["amount"]);
-          }
           return (
             <Form onSubmit={handleSubmit}>
               <GovernanceDialogSelectField

@@ -37,9 +37,12 @@ const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
       }
     >
       <Formik
+        enableReinitialize
         initialValues={
           {
             tokenAddress: tokenSelectorOptions[0]?.address,
+
+            amount: "1",
           } as IValues
         }
         onSubmit={handleFormSubmit}
