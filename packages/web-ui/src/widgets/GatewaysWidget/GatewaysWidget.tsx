@@ -169,7 +169,6 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
                     <GovernanceButton
                       size="small"
                       variant="text"
-                      color="secondary"
                       onClick={() => {
                         deauthorizeGateway(gatewayUrl);
                       }}

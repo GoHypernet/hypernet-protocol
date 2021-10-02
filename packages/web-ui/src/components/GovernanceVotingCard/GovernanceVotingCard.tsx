@@ -55,6 +55,7 @@ export const GovernanceVotingCard: React.FC<GovernanceVotingCardProps> = (
         <GovernanceButton
           className={classes.button}
           fullWidth
+          color="primary"
           size="small"
           variant={isVoted ? "contained" : "outlined"}
           disabled={disableVoteButton}

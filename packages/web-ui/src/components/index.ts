@@ -21,6 +21,7 @@ export * from "./List";
 export * from "./ListItem";
 
 export * from "./GovernanceStatusTag";
+export * from "./GovernanceTag";
 export * from "./GovernanceProposalListItem";
 export * from "./GovernanceLargeField";
 export * from "./GovernanceField";

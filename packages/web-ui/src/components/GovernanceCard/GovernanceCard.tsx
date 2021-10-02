@@ -8,7 +8,7 @@ interface GovernanceCard {
   title?: string | React.ReactNode;
   description?: string;
   children?: React.ReactNode;
-  className: string;
+  className?: string;
   hideDivider?: boolean;
 }
 

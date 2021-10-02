@@ -24,7 +24,7 @@ export interface IGovernanceButton extends ButtonProps {
 }
 
 export const GovernanceButton: React.FC<IGovernanceButton> = ({
-  color = "primary",
+  color,
   onClick,
   disabled,
   loading,

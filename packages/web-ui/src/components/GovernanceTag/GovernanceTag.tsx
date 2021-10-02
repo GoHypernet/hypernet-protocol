@@ -32,18 +32,12 @@ export const GovernanceTag: React.FC<GovernanceTagProps> = (
 
   return (
     <Box className={classes.wrapper}>
-      <Typography className={classes.text} variant="button">
+      <Typography className={classes.text} variant="body2">
         {text}
       </Typography>
     </Box>
   );
 };
-
-export interface IStatusConfig {
-  backgroundColor: string;
-  borderColor: string;
-  textColor: string;
-}
 
 const getTagConfig = (color: ETagColor): ITagConfig => {
   switch (color) {
