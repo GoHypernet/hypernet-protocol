@@ -44,6 +44,10 @@ import LiquidityRegistryAbi from "./artifacts/LiquidityRegistry";
 import MessageTransferAbi from "./artifacts/MessageTransfer";
 import MocRegistryAbi from "./artifacts/MocRegistry";
 import ParameterizedAbi from "./artifacts/Parameterized";
+import HypernetGovernorAbi from "./artifacts/HypernetGovernor";
+import HypertokenAbi from "./artifacts/Hypertoken";
+import RegistryFactoryAbi from "./artifacts/RegistryFactory";
+import NonFungibleRegistryAbi from "./artifacts/NonFungibleRegistry";
 
 const TransferAbis = {
   ERC721: ERC721Abi,
@@ -54,4 +58,11 @@ const TransferAbis = {
   LiquidityRegistry: LiquidityRegistryAbi,
 };
 
-export { TransferAbis };
+const GovernanceAbis = {
+  HypernetGovernor: HypernetGovernorAbi,
+  Hypertoken: HypertokenAbi,
+  RegistryFactory: RegistryFactoryAbi,
+  NonFungibleRegistry: NonFungibleRegistryAbi,
+};
+
+export { TransferAbis, GovernanceAbis };

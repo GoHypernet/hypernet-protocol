@@ -1,5 +1,6 @@
 import { IHypernetCore, IUIData, RenderError } from "@hypernetlabs/objects";
 import MainContainer from "@web-ui/containers/MainContainer";
+import { ThemeProvider, Box } from "@material-ui/core";
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import {
   IConnectorAuthorizationFlowParams,
@@ -9,6 +10,12 @@ import {
   IOnboardingFlowParams,
   IViewUtils,
   IDateUtils,
+  IProposalsWidgetParams,
+  IProposalCreateWidgetParams,
+  IProposalDetailWidgetParams,
+  IRegistryListWidgetParams,
+  IRegistryEntryListWidgetParams,
+  IRegistryEntryDetailWidgetParams,
 } from "@web-ui/interfaces";
 import GatewaysWidget from "@web-ui/widgets/GatewaysWidget";
 import { Result } from "neverthrow";
@@ -30,6 +37,14 @@ import {
   WITHDRAW_WIDGET_ID_SELECTOR,
   STATE_CHANNELS_WIDGET_ID_SELECTOR,
   BALANCES_SUMMARY_WIDGET_ID_SELECTOR,
+  PROPOSALS_WIDGET_ID_SELECTOR,
+  PROPOSAL_CREATE_WIDGET_ID_SELECTOR,
+  REGISTRY_LIST_WIDGET_ID_SELECTOR,
+  REGISTRY_ENTRY_LIST_WIDGET_ID_SELECTOR,
+  REGISTRY_ENTRY_DETAIL_WIDGET_ID_SELECTOR,
+  HYPERTOKEN_BALANCE_WIDGET,
+  VOTING_POWER_WIDGET,
+  CONNECTED_ACCOUNT_WIDGET,
 } from "@web-ui/constants";
 import ConnectorAuthorizationFlow from "@web-ui/flows/ConnectorAuthorizationFlow";
 import OnboardingFlow from "@web-ui/flows/OnboardingFlow";
@@ -43,6 +58,16 @@ import LinksWidget from "@web-ui/widgets/LinksWidget";
 import { PaymentWidget } from "@web-ui/widgets/PaymentWidget";
 import PublicIdentifierWidget from "@web-ui/widgets/PublicIdentifierWidget";
 import StateChannelsWidget from "@web-ui/widgets/StateChannelsWidget";
+import ProposalsWidget from "@web-ui/widgets/ProposalsWidget";
+import { lightTheme, darkTheme } from "@web-ui/theme";
+import CreateProposalWidget from "@web-integration/widgets/CreateProposalWidget";
+import ProposalDetailWidget from "@web-integration/widgets/ProposalDetailWidget";
+import RegistryListWidget from "@web-integration/widgets/RegistryListWidget";
+import RegistryEntryDetailWidget from "@web-integration/widgets/RegistryEntryDetailWidget";
+import RegistryEntryListWidget from "@web-integration/widgets/RegistryEntryListWidget";
+import HypertokenBalanceWidget from "@web-integration/widgets/HypertokenBalanceWidget";
+import VotingPowerWidget from "@web-integration/widgets/VotingPowerWidget";
+import ConnectedAccountWidget from "@web-integration/widgets/ConnectedAccountWidget";
 
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
@@ -93,10 +118,14 @@ export default class HypernetWebUI implements IHypernetWebUI {
     withModal = false,
     closeCallback?: () => void,
     modalStyle?: React.CSSProperties,
+    hasTheme?: boolean,
   ) {
     if (this.coreInstance == null) {
       throw new Error("core instance is required");
     }
+
+    const Theme = hasTheme ? ThemeProvider : Box;
+
     return (
       <StoreProvider
         coreProxy={this.coreInstance}
@@ -104,15 +133,18 @@ export default class HypernetWebUI implements IHypernetWebUI {
         viewUtils={this.viewUtils}
         dateUtils={this.dateUtils}
       >
-        <LayoutProvider>
-          <MainContainer
-            withModal={withModal}
-            closeCallback={closeCallback}
-            modalStyle={modalStyle}
-          >
-            {component}
-          </MainContainer>
-        </LayoutProvider>
+        <Theme theme={true ? lightTheme : darkTheme}>
+          <LayoutProvider>
+            <MainContainer
+              withModal={withModal}
+              closeCallback={closeCallback}
+              modalStyle={modalStyle}
+              isV2={hasTheme}
+            >
+              {component}
+            </MainContainer>
+          </LayoutProvider>
+        </Theme>
       </StoreProvider>
     );
   }
@@ -362,6 +394,179 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._generateDomElement(
           config?.selector || ONBOARDING_FLOW_ID_SELECTOR,
         ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderProposalsWidget(
+    config?: IProposalsWidgetParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <ProposalsWidget {...config} />,
+          config?.showInModal,
+          undefined,
+          undefined,
+          true,
+        ),
+        this._generateDomElement(
+          config?.selector || PROPOSALS_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderProposalDetailWidget(
+    config: IProposalDetailWidgetParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <ProposalDetailWidget {...config} />,
+          config?.showInModal,
+          undefined,
+          undefined,
+          true,
+        ),
+        this._generateDomElement(
+          config?.selector || PROPOSALS_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderProposalCreateWidget(
+    config?: IProposalCreateWidgetParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <CreateProposalWidget {...config} />,
+          config?.showInModal,
+          undefined,
+          undefined,
+          true,
+        ),
+        this._generateDomElement(
+          config?.selector || PROPOSAL_CREATE_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderRegistryListWidget(
+    config?: IRegistryListWidgetParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <RegistryListWidget {...config} />,
+          config?.showInModal,
+          undefined,
+          undefined,
+          true,
+        ),
+        this._generateDomElement(
+          config?.selector || REGISTRY_LIST_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderRegistryEntryListWidget(
+    config: IRegistryEntryListWidgetParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <RegistryEntryListWidget {...config} />,
+          config?.showInModal,
+          undefined,
+          undefined,
+          true,
+        ),
+        this._generateDomElement(
+          config?.selector || REGISTRY_ENTRY_LIST_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderRegistryEntryDetailWidget(
+    config: IRegistryEntryDetailWidgetParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <RegistryEntryDetailWidget {...config} />,
+          config?.showInModal,
+          undefined,
+          undefined,
+          true,
+        ),
+        this._generateDomElement(
+          config?.selector || REGISTRY_ENTRY_DETAIL_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderHypertokenBalanceWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <HypertokenBalanceWidget {...config} />,
+          config?.showInModal,
+          undefined,
+          undefined,
+          true,
+        ),
+        this._generateDomElement(config?.selector || HYPERTOKEN_BALANCE_WIDGET),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderVotingPowerWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <VotingPowerWidget {...config} />,
+          config?.showInModal,
+          undefined,
+          undefined,
+          true,
+        ),
+        this._generateDomElement(config?.selector || VOTING_POWER_WIDGET),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+  public renderConnectedAccountWidget(
+    config?: IRenderParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <ConnectedAccountWidget {...config} />,
+          config?.showInModal,
+          undefined,
+          undefined,
+          true,
+        ),
+        this._generateDomElement(config?.selector || CONNECTED_ACCOUNT_WIDGET),
       );
     };
     return this._getThrowableRender(renderReact);

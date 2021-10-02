@@ -27,6 +27,9 @@ contract RegistryFactory is AccessControlEnumerable {
     // enable registry discovery by human-readable name
     mapping (string => address) public nameToAddress;
 
+    // reverse mapping from address to a human-readable name
+    mapping(address => string) public addressToName;
+
      /**
      * @dev Emitted when `DEFAULT_ADMIN_ROLE` creates a new registry.
      */
@@ -70,6 +73,7 @@ contract RegistryFactory is AccessControlEnumerable {
         NonFungibleRegistry registry = new NonFungibleRegistry(_name, _symbol, _registrar, getRoleMember(DEFAULT_ADMIN_ROLE, 0));
         registries.push(address(registry));
         nameToAddress[_name] = address(registry);
+        addressToName[address(registry)] = _name;
         emit RegistryCreated(address(registry));
     }
 

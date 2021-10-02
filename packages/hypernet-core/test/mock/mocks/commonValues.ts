@@ -107,6 +107,11 @@ export const gatewayRegistryAddress = EthereumAddress("gatewayRegistryAddress");
 export const liquidityRegistryAddress = EthereumAddress(
   "liquidityRegistryAddress",
 );
+export const hypernetGovernorAddress = EthereumAddress(
+  "hypernetGovernorAddress",
+);
+
+export const registryFactoryAddress = EthereumAddress("registryFactoryAddress");
 
 export const validDomain = "hypernetProtocolDomain";
 

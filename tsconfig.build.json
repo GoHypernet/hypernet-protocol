@@ -38,7 +38,8 @@
       "@test-gateway-connector/*": ["./*"],
       "@utils/*": ["./*"],
       "@objects/*": ["./*"],
-      "@user-dashboard/*": ["./*"]
+      "@user-dashboard/*": ["./*"],
+      "@storybook/*": ["./*"]
     }
   }
 }

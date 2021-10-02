@@ -8,4 +8,8 @@ export const useStyles = makeStyles({
     fontSize: 24,
     marginBottom: 30,
   },
+  governanceWrapper: {
+    padding: "40px 200px",
+    backgroundColor: "#ffffff",
+  },
 });

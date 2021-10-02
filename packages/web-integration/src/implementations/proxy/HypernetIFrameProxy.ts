@@ -30,6 +30,11 @@ import {
   GatewayTokenInfo,
   GatewayRegistrationFilter,
   GatewayRegistrationInfo,
+  Proposal,
+  EProposalVoteSupport,
+  ProposalVoteReceipt,
+  Registry,
+  RegistryEntry,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -482,6 +487,181 @@ export default class HypernetIFrameProxy
       privateKey,
       mnemonic,
     });
+  }
+
+  public getProposals(
+    proposalsNumberArr?: number[],
+  ): ResultAsync<Proposal[], BlockchainUnavailableError> {
+    return this._createCall("getProposals", proposalsNumberArr);
+  }
+
+  public createProposal(
+    name: string,
+    symbol: string,
+    owner: EthereumAddress,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this._createCall("createProposal", {
+      name,
+      symbol,
+      owner,
+    });
+  }
+
+  public delegateVote(
+    delegateAddress: EthereumAddress,
+    amount: number | null,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    return this._createCall("delegateVote", {
+      delegateAddress,
+      amount,
+    });
+  }
+
+  public getProposalDetails(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this._createCall("getProposalDetails", proposalId);
+  }
+
+  public castVote(
+    proposalId: string,
+    support: EProposalVoteSupport,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this._createCall("castVote", {
+      proposalId,
+      support,
+    });
+  }
+
+  public getProposalVotesReceipt(
+    proposalId: string,
+    voterAddress: EthereumAddress,
+  ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError> {
+    return this._createCall("getProposalVotesReceipt", {
+      proposalId,
+      voterAddress,
+    });
+  }
+
+  public proposeRegistryEntry(
+    registryName: string,
+    label: string,
+    data: string,
+    recipient: EthereumAddress,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this._createCall("proposeRegistryEntry", {
+      registryName,
+      label,
+      data,
+      recipient,
+    });
+  }
+
+  public getRegistries(
+    pageNumber: number,
+    pageSize: number,
+  ): ResultAsync<Registry[], BlockchainUnavailableError> {
+    return this._createCall("getRegistries", {
+      pageNumber,
+      pageSize,
+    });
+  }
+
+  public getRegistryByName(
+    registryNames: string[],
+  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError> {
+    return this._createCall("getRegistryByName", registryNames);
+  }
+
+  public getRegistryByAddress(
+    registryAddresses: EthereumAddress[],
+  ): ResultAsync<Map<EthereumAddress, Registry>, BlockchainUnavailableError> {
+    return this._createCall("getRegistryByAddress", registryAddresses);
+  }
+
+  public getRegistryEntriesTotalCount(
+    registryNames: string[],
+  ): ResultAsync<Map<string, number>, BlockchainUnavailableError> {
+    return this._createCall("getRegistryEntriesTotalCount", registryNames);
+  }
+
+  public getRegistryEntries(
+    registryName: string,
+    registryEntriesNumberArr?: number[],
+  ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
+    return this._createCall("getRegistryEntries", {
+      registryName,
+      registryEntriesNumberArr,
+    });
+  }
+
+  public getRegistryEntryByLabel(
+    registryName: string,
+    label: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+    return this._createCall("getRegistryEntryByLabel", {
+      registryName,
+      label,
+    });
+  }
+
+  public updateRegistryEntryTokenURI(
+    registryName: string,
+    tokenId: number,
+    registrationData: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+    return this._createCall("updateRegistryEntryTokenURI", {
+      registryName,
+      tokenId,
+      registrationData,
+    });
+  }
+
+  public updateRegistryEntryLabel(
+    registryName: string,
+    tokenId: number,
+    label: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+    return this._createCall("updateRegistryEntryLabel", {
+      registryName,
+      tokenId,
+      label,
+    });
+  }
+
+  public queueProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this._createCall("queueProposal", proposalId);
+  }
+
+  public executeProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this._createCall("executeProposal", proposalId);
+  }
+
+  public getProposalsCount(): ResultAsync<number, BlockchainUnavailableError> {
+    return this._createCall("getProposalsCount", null);
+  }
+
+  public getProposalThreshold(): ResultAsync<
+    number,
+    BlockchainUnavailableError
+  > {
+    return this._createCall("getProposalThreshold", null);
+  }
+
+  public getVotingPower(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this._createCall("getVotingPower", account);
+  }
+
+  public getHyperTokenBalance(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this._createCall("getHyperTokenBalance", account);
   }
 
   private _displayCoreIFrame(): void {

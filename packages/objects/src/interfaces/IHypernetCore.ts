@@ -33,6 +33,10 @@ import { PublicIdentifier } from "@objects/PublicIdentifier";
 import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
 import { Signature } from "@objects/Signature";
+import { Proposal, ProposalVoteReceipt } from "@objects/Proposal";
+import { EProposalVoteSupport } from "@objects/typing";
+import { Registry } from "@objects/Registry";
+import { RegistryEntry } from "@objects/RegistryEntry";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -251,6 +255,101 @@ export interface IHypernetCore {
     privateKey: string | null,
     mnemonic: string | null,
   ): ResultAsync<void, InvalidParametersError>;
+
+  getProposals(
+    proposalsNumberArr?: number[],
+  ): ResultAsync<Proposal[], BlockchainUnavailableError>;
+
+  createProposal(
+    name: string,
+    symbol: string,
+    owner: EthereumAddress,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+
+  delegateVote(
+    delegateAddress: EthereumAddress,
+    amount: number | null,
+  ): ResultAsync<void, BlockchainUnavailableError>;
+
+  getProposalDetails(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+
+  castVote(
+    proposalId: string,
+    support: EProposalVoteSupport,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+
+  getProposalVotesReceipt(
+    proposalId: string,
+    voterAddress: EthereumAddress,
+  ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError>;
+
+  proposeRegistryEntry(
+    registryName: string,
+    label: string,
+    data: string,
+    recipient: EthereumAddress,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+
+  getRegistries(
+    pageNumber: number,
+    pageSize: number,
+  ): ResultAsync<Registry[], BlockchainUnavailableError>;
+
+  getRegistryByName(
+    registryNames: string[],
+  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError>;
+
+  getRegistryByAddress(
+    registryAddresses: EthereumAddress[],
+  ): ResultAsync<Map<EthereumAddress, Registry>, BlockchainUnavailableError>;
+
+  getRegistryEntries(
+    registryName: string,
+    registryEntriesNumberArr?: number[],
+  ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
+
+  getRegistryEntryByLabel(
+    registryName: string,
+    label: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+
+  queueProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+
+  executeProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+
+  updateRegistryEntryTokenURI(
+    registryName: string,
+    tokenId: number,
+    registrationData: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+
+  updateRegistryEntryLabel(
+    registryName: string,
+    tokenId: number,
+    label: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+
+  getProposalsCount(): ResultAsync<number, BlockchainUnavailableError>;
+
+  getRegistryEntriesTotalCount(
+    registryNames: string[],
+  ): ResultAsync<Map<string, number>, BlockchainUnavailableError>;
+
+  getProposalThreshold(): ResultAsync<number, BlockchainUnavailableError>;
+
+  getVotingPower(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError>;
+
+  getHyperTokenBalance(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError>;
 
   /**
    * Observables for seeing what's going on

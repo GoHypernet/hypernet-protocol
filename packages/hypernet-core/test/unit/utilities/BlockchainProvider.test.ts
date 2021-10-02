@@ -1,4 +1,3 @@
-import { Eip1193Bridge } from "@ethersproject/experimental";
 import {
   InvalidParametersError,
   PrivateCredentials,
@@ -13,6 +12,7 @@ import { EthersBlockchainProvider } from "@implementations/utilities";
 import { IBlockchainProvider, IBrowserNode } from "@interfaces/utilities";
 import { IInternalProviderFactory } from "@interfaces/utilities/factory";
 import { ConfigProviderMock, ContextProviderMock } from "@mock/utils";
+import { CeramicEIP1193Bridge } from "@implementations/utilities";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);
@@ -202,23 +202,23 @@ describe("BlockchainProvider tests", () => {
     );
   });
 
-  test("getEIP1193Provider returns a Eip1193Bridge", async () => {
+  test("getCeramicEIP1193Provider returns a CeramicEIP1193Bridge", async () => {
     // Arrange
     const mocks = new BlockchainProviderMocks();
     const blockchainProvider = mocks.factoryProvider();
 
     // Act
     await blockchainProvider.initialize();
-    const result = await blockchainProvider.getEIP1193Provider();
+    const result = await blockchainProvider.getCeramicEIP1193Provider();
     const wrappedResponse = result._unsafeUnwrap();
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
-    expect(wrappedResponse).toBeInstanceOf(Eip1193Bridge);
+    expect(wrappedResponse).toBeInstanceOf(CeramicEIP1193Bridge);
   });
 
-  test("getEIP1193Provider returns Must call BlockchainProvider.initialize() first before you can call getEIP1193Provider()", async () => {
+  test("getCeramicEIP1193Provider returns Must call BlockchainProvider.initialize() first before you can call getCeramicEIP1193Provider()", async () => {
     // Arrange
     const mocks = new BlockchainProviderMocks();
     const blockchainProvider = mocks.factoryProvider();
@@ -226,7 +226,7 @@ describe("BlockchainProvider tests", () => {
     // Act
     let result;
     try {
-      await blockchainProvider.getEIP1193Provider();
+      await blockchainProvider.getCeramicEIP1193Provider();
     } catch (err) {
       result = err;
     }
