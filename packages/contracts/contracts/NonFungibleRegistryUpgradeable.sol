@@ -90,7 +90,7 @@ contract NonFungibleRegistryUpgradeable is
     }
 
     // we must implement this function at top level contract definition
-    function _authorizeUpgrade(address newImplementation) internal  onlyOwner {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     /**
     * @dev set lazy register functionality
@@ -231,6 +231,33 @@ contract NonFungibleRegistryUpgradeable is
     }
 
     /**
+     * @dev See {IERC721-transferFrom}.
+     */
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) public virtual override {
+        //solhint-disable-next-line max-line-length
+        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
+
+        _transfer(from, to, tokenId);
+    }
+
+    /**
+     * @dev See {IERC721-safeTransferFrom}.
+     */
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes memory _data
+    ) public virtual override {
+        require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
+        _safeTransfer(from, to, tokenId, _data);
+    }
+
+    /**
      * @dev Burns `tokenId`. See {ERC721-_burn}.
      *
      * Requirements:
@@ -275,7 +302,7 @@ contract NonFungibleRegistryUpgradeable is
     function _isApprovedOrOwnerOrRegistrar(address spender, uint256 tokenId) internal view virtual returns (bool) {
         require(_exists(tokenId), "ERC721: operator query for nonexistent token");
         address owner = ERC721Upgradeable.ownerOf(tokenId);
-        return (spender == owner || getApproved(tokenId) == spender || isApprovedForAll(owner, spender) || hasRole(REGISTRAR_ROLE, _msgSender()));
+        return (spender == owner || getApproved(tokenId) == spender || isApprovedForAll(owner, spender) || hasRole(REGISTRAR_ROLE, spender));
     }
 
     /**

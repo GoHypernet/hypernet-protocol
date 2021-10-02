@@ -87,6 +87,26 @@ describe("Registry", function () {
     const tx2_reciept = tx2.wait();
     expect(await newRegistry.tokenURI(1)).to.equal("new URI");
 
+    // registrar disables transfers in the registry
+    const tx12 = await registry.setAllowTransfers(false);
+    const tx12_reciept = tx12.wait();
+
+    await expectRevert(
+        newRegistry.transferFrom(addr1.address, owner.address, 1),
+        "NonFungibleRegistry: transfers are disabled.",
+    );
+
+    // registrar can transfer NFIs in any circumstance to enable account recovery
+    const tx987 = await registry.connect(owner).transferFrom(addr1.address, owner.address, 1);
+    const tx987_reciept = tx987.wait();
+
+    const tx654 = await registry.connect(owner).transferFrom(owner.address, addr1.address, 1);
+    const tx654_reciept = tx654.wait();
+
+    // registrar re-enables transfers in the registry
+    const tx97 = await registry.setAllowTransfers(true);
+    const tx97_reciept = tx97.wait();
+
     // mint a token to the registry without a label
     const tx4 = await registry.registerNoLabel(
         addr2.address,
