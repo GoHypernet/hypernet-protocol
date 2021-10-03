@@ -12,6 +12,7 @@
     "ethers": "^5.4.7",
     "hardhat": "^2.6.0",
     "hardhat-gas-reporter": "^1.0.4",
+    "hardhat-tracer": "^1.0.0-alpha.6",
     "web3": "^1.5.2"
   },
   "dependencies": {
