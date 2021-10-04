@@ -141,7 +141,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         headerActions={getHeaderActions()}
       />
 
-      {proposal?.state && (
+      {proposal?.state != null && (
         <Box className={classes.proposalStatus}>
           <GovernanceStatusTag status={proposal?.state} />
         </Box>
@@ -166,7 +166,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
               type="against"
               value={proposalVotesAgainst}
               progressValue={parseFloat(againstPercentage)}
-              onVoteClick={() => castVote(EProposalVoteSupport.FOR)}
+              onVoteClick={() => castVote(EProposalVoteSupport.AGAINST)}
               isVoted={supportStatus === EProposalVoteSupport.AGAINST}
               showVoteButton={showVotingButtons}
               disableVoteButton={
@@ -179,7 +179,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
               type="abstain"
               value={proposalETA}
               progressValue={parseFloat(abstainPercentage)}
-              onVoteClick={() => castVote(EProposalVoteSupport.FOR)}
+              onVoteClick={() => castVote(EProposalVoteSupport.ABSTAIN)}
               isVoted={supportStatus === EProposalVoteSupport.ABSTAIN}
               showVoteButton={showVotingButtons}
               disableVoteButton={

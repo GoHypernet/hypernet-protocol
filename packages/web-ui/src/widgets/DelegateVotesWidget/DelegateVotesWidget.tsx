@@ -24,7 +24,6 @@ const DelegateVotesWidget: React.FC<IDelegateVotesWidget> = ({
 
   useEffect(() => {
     coreProxy.getEthereumAccounts().map((accounts) => {
-      console.log("accounts DelegateVotesWidget: ", accounts);
       setAccountAddress(accounts[0]);
     });
   }, []);
@@ -34,6 +33,7 @@ const DelegateVotesWidget: React.FC<IDelegateVotesWidget> = ({
     coreProxy
       .delegateVote(accountAddress, null)
       .map(() => {
+        UIData.onVotesDelegated.next();
         setLoading(false);
         onCloseCallback();
       })
