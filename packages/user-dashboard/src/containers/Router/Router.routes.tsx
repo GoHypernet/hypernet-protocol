@@ -62,7 +62,7 @@ export const routes: IRoute[] = [
   {
     path: "/proposals",
     component: Proposals,
-    name: "Proposals",
+    name: "Governance",
     isHeaderItem: true,
   },
   {

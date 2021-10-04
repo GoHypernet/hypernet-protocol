@@ -40,4 +40,6 @@ FROM nginx:latest AS server
 
 # Copy over the dist files
 COPY --from=builder /build/packages/user-dashboard/dist/bundle /usr/share/nginx/html
+COPY --from=builder /build/packages/user-dashboard/nginx.conf /etc/nginx/nginx.conf
+COPY --from=builder /build/packages/user-dashboard/default.conf /etc/nginx/conf.d/default.conf
 

@@ -12,16 +12,11 @@ import { IGovernanceRepository } from "@interfaces/data";
 import { injectable, inject } from "inversify";
 import { okAsync, ResultAsync } from "neverthrow";
 import { BigNumber, ethers, utils } from "ethers";
-import { IStorageUtils, IStorageUtilsType } from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
   IBlockchainProviderType,
-  IBlockchainUtils,
-  IBlockchainUtilsType,
   IConfigProvider,
   IConfigProviderType,
-  IContextProvider,
-  IContextProviderType,
 } from "@interfaces/utilities";
 import { GovernanceAbis } from "@hypernetlabs/objects";
 
@@ -39,9 +34,6 @@ export class GovernanceRepository implements IGovernanceRepository {
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
     @inject(IConfigProviderType) protected configProvider: IConfigProvider,
-    @inject(IContextProviderType) protected contextProvider: IContextProvider,
-    @inject(IStorageUtilsType) protected storageUtils: IStorageUtils,
-    @inject(IBlockchainUtilsType) protected blockchainUtils: IBlockchainUtils,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
