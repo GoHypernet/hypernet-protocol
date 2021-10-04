@@ -4,31 +4,18 @@ import { colors, EFontSize } from "@web-ui/theme";
 export const useStyles = makeStyles((theme) => ({
   wrapper: (props: any) => ({
     marginBottom: 24,
-    cursor: "pointer",
   }),
-  dialogTitle: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    fontSize: EFontSize.H4,
-  },
-  list: {
-    padding: "24px 40px",
-  },
-  listItem: {
-    padding: "12px 16px",
-    "&:hover": {
-      backgroundColor: colors.GRAY200,
-      borderRadius: 3,
-    },
-  },
   title: {
     marginBottom: 8,
   },
   field: {
     width: "100%",
+    background: colors.GRAY100,
+    borderRadius: 3,
+    padding: "12px 16px",
     color: theme.palette.text.primary,
     fontSize: EFontSize.BODY2,
+    border: `2px solid ${colors.GRAY200}`,
 
     "&::placeholder": {
       /* Chrome, Firefox, Opera, Safari 10.1+ */
@@ -44,12 +31,10 @@ export const useStyles = makeStyles((theme) => ({
       color: colors.GRAY500,
     },
   },
-  fieldTextWrapper: {
+  rightContent: {
+    marginLeft: "auto",
+  },
+  fieldWrapper: {
     display: "flex",
-    justifyContent: "space-between",
-    border: `2px solid ${colors.GRAY200}`,
-    padding: "12px 16px",
-    borderRadius: 3,
-    background: colors.GRAY100,
   },
 }));

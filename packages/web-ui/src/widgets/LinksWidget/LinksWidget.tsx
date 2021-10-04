@@ -1,4 +1,16 @@
-import { PushPayment, PullPayment } from "@hypernetlabs/objects";
+import {
+  PushPayment,
+  PullPayment,
+  PaymentId,
+  UnixTimestamp,
+  BigNumberString,
+  EthereumAddress,
+  ChainId,
+  PublicIdentifier,
+  GatewayUrl,
+  EPaymentState,
+  SortedTransfers,
+} from "@hypernetlabs/objects";
 import { Box, AppBar, IconButton, Switch, Typography } from "@material-ui/core";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import { useStoreContext } from "@web-ui/contexts";
@@ -14,6 +26,7 @@ import {
   SideFilter,
   BoxWrapper,
   EmptyState,
+  GovernanceCard,
 } from "@web-ui/components";
 import { useLinks } from "@web-ui/hooks";
 
@@ -106,6 +119,71 @@ const LinksWidget: React.FC<ILinksWidget> = ({
   };
 
   const getPushPayments = (): PushPayment[] => {
+    const pushpayments = [
+      new PushPayment(
+        PaymentId("asdasd"),
+        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
+        ChainId(2344),
+        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
+        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
+        EPaymentState.Accepted,
+        EthereumAddress("0x431ns34540vncskfn3859khfsdfnkjds"),
+        BigNumberString("43"),
+        BigNumberString("43"),
+        UnixTimestamp(434354),
+        UnixTimestamp(434354),
+        UnixTimestamp(434354),
+        BigNumberString("asdsad"),
+        GatewayUrl("https://www.hyperpay.com"),
+        {} as SortedTransfers,
+        null,
+        BigNumberString("43"),
+        BigNumberString("43"),
+      ),
+      new PushPayment(
+        PaymentId("asdasd"),
+        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
+        ChainId(2344),
+        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
+        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
+        EPaymentState.Proposed,
+        EthereumAddress("0x431ns34540vncskfn3859khfsdfnkjds"),
+        BigNumberString("43"),
+        BigNumberString("43"),
+        UnixTimestamp(434354),
+        UnixTimestamp(434354),
+        UnixTimestamp(434354),
+        BigNumberString("asdsad"),
+        GatewayUrl("https://www.hyperpay.com"),
+        {} as SortedTransfers,
+        null,
+        BigNumberString("43"),
+        BigNumberString("43"),
+      ),
+      new PushPayment(
+        PaymentId("asdasd"),
+        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
+        ChainId(2344),
+        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
+        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
+        EPaymentState.Staked,
+        EthereumAddress("0x431ns34540vncskfn3859khfsdfnkjds"),
+        BigNumberString("43"),
+        BigNumberString("43"),
+        UnixTimestamp(434354),
+        UnixTimestamp(434354),
+        UnixTimestamp(434354),
+        BigNumberString("asdsad"),
+        GatewayUrl("https://www.hyperpay.com"),
+        {} as SortedTransfers,
+        null,
+        BigNumberString("43"),
+        BigNumberString("43"),
+      ),
+    ];
+
+    return pushpayments;
+
     return links.reduce((acc, link) => {
       const pushPayments = link.pushPayments.filter((pushPayment) => {
         return (
@@ -171,38 +249,35 @@ const LinksWidget: React.FC<ILinksWidget> = ({
     setPaymentsAutoAccept(event.target.checked);
   };
 
-  const CustomBox = includeBoxWrapper ? BoxWrapper : Box;
-
   return (
-    <CustomBox
-      label={!noLabel ? "TRANSACTION HISTORY" : undefined}
-      rightComponent={
-        <Box display="flex" alignItems="center">
-          <Box display="flex" alignItems="center" marginRight={1}>
-            <Box marginRight={1} color="#0000008a">
-              Payments auto accept
-            </Box>
-            <Switch
-              checked={paymentsAutoAccept}
-              onChange={onPaymentsAutoAcceptChange}
-              name="paymentsAutoAccept"
-              color="primary"
-              inputProps={{ "aria-label": "primary checkbox" }}
-            />
-          </Box>
-          <IconButton
-            aria-label="list"
-            onClick={() => setIsSideFilterOpen(true)}
-            style={{ height: 30, display: "flex", fontSize: 18 }}
-          >
-            <Box marginRight={1}>Filter</Box>
-            <FilterListIcon />
-          </IconButton>
-        </Box>
-      }
-      bodyStyle={bodyStyle}
-      hasEmptyState={links.length === 0 && !loading}
-      emptyState={<EmptyState info={<>You don't have any payments yet.</>} />}
+    <GovernanceCard
+      title={!noLabel ? "TRANSACTION HISTORY" : undefined}
+      // rightComponent={
+      //   <Box display="flex" alignItems="center">
+      //     <Box display="flex" alignItems="center" marginRight={1}>
+      //       <Box marginRight={1} color="#0000008a">
+      //         Payments auto accept
+      //       </Box>
+      //       <Switch
+      //         checked={paymentsAutoAccept}
+      //         onChange={onPaymentsAutoAcceptChange}
+      //         name="paymentsAutoAccept"
+      //         color="primary"
+      //         inputProps={{ "aria-label": "primary checkbox" }}
+      //       />
+      //     </Box>
+      //     <IconButton
+      //       aria-label="list"
+      //       onClick={() => setIsSideFilterOpen(true)}
+      //       style={{ height: 30, display: "flex", fontSize: 18 }}
+      //     >
+      //       <Box marginRight={1}>Filter</Box>
+      //       <FilterListIcon />
+      //     </IconButton>
+      //   </Box>
+      // }
+      // hasEmptyState={links.length === 0 && !loading}
+      // emptyState={<EmptyState info={<>You don't have any payments yet.</>} />}
     >
       <SideFilter
         visible={isSideFilterOpen}
@@ -236,7 +311,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           onPullFundClick={pullFunds}
         />
       </TabPanel>
-    </CustomBox>
+    </GovernanceCard>
   );
 };
 

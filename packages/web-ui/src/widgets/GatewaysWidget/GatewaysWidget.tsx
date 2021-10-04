@@ -9,7 +9,7 @@ import {
   EmptyState,
   GovernanceButton,
   GovernanceCard,
-  GovernanceLargeField,
+  GovernanceField,
   List,
   ListItem,
 } from "@web-ui/components";
@@ -64,7 +64,7 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
           }
           return (
             <Form onSubmit={handleSubmit}>
-              <GovernanceLargeField
+              <GovernanceField
                 required
                 name="inputGatewayUrl"
                 title="Gateway Url"
@@ -169,7 +169,6 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
                     <GovernanceButton
                       size="small"
                       variant="text"
-                      color="secondary"
                       onClick={() => {
                         deauthorizeGateway(gatewayUrl);
                       }}

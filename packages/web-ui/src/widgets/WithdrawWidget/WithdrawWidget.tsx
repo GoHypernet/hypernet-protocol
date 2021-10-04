@@ -5,7 +5,7 @@ import {
   GovernanceButton,
   GovernanceCard,
   GovernanceDialogSelectField,
-  GovernanceLargeField,
+  GovernanceField,
 } from "@web-ui/components";
 import { useFund } from "@web-ui/hooks";
 import { useStyles } from "@web-ui/widgets/FundWidget/FundWidget.style";
@@ -21,19 +21,11 @@ interface IWithdrawWidget extends IRenderParams {}
 const WithdrawWidget: React.FC<IWithdrawWidget> = ({
   noLabel,
 }: IWithdrawWidget) => {
-  const {
-    tokenSelectorOptions,
-    selectedPaymentToken,
-    setSelectedPaymentToken,
-    withdrawFunds,
-    amount,
-    setAmount,
-    error,
-  } = useFund();
+  const { tokenSelectorOptions, error, withdrawFundsV2 } = useFund();
   const classes = useStyles({ error });
 
-  const handleFormSubmit = () => {
-    withdrawFunds();
+  const handleFormSubmit = (values: IValues) => {
+    withdrawFundsV2(values.tokenAddress, values.amount);
   };
 
   return (
@@ -47,25 +39,16 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
       }
     >
       <Formik
+        enableReinitialize
         initialValues={
           {
             tokenAddress: tokenSelectorOptions[0]?.address,
-            amount,
+            amount: "1",
           } as IValues
         }
         onSubmit={handleFormSubmit}
       >
         {({ handleSubmit, values }) => {
-          if (values["tokenAddress"] !== selectedPaymentToken?.address) {
-            setSelectedPaymentToken(
-              tokenSelectorOptions.find(
-                (option) => option.address === values["tokenAddress"],
-              ),
-            );
-          }
-          if (values["amount"] !== amount) {
-            setAmount(values["amount"]);
-          }
           return (
             <Form onSubmit={handleSubmit}>
               <GovernanceDialogSelectField
@@ -77,7 +60,7 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
                   value: option.address,
                 }))}
               />
-              <GovernanceLargeField
+              <GovernanceField
                 required
                 name="amount"
                 title="Amount"
@@ -90,7 +73,7 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
                 color="primary"
                 variant="contained"
                 onClick={handleSubmit}
-                disabled={!selectedPaymentToken?.address || !amount}
+                disabled={!(!!values.amount && !!values.tokenAddress)}
               >
                 Withdraw to your metamask wallet
               </GovernanceButton>

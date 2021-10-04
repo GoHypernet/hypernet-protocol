@@ -8,6 +8,10 @@ export default {
       options: ["small", "medium", "large"],
       control: { type: "radio" },
     },
+    color: {
+      options: ["primary", "secondary", "default"],
+      control: { type: "radio" },
+    },
   },
 };
 
@@ -82,6 +86,12 @@ const Template = (args) => (
         Click me!
       </GovernanceButton>
     </div>
+
+    <div style={{ marginBottom: 24 }}>
+      <GovernanceButton {...args} variant="text" fullWidth>
+        Click me!
+      </GovernanceButton>
+    </div>
   </>
 );
 
@@ -91,4 +101,5 @@ Primary.args = {
     console.log("clicked!");
   },
   size: "medium",
+  color: "primary",
 };

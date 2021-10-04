@@ -21,8 +21,11 @@ export * from "./List";
 export * from "./ListItem";
 
 export * from "./GovernanceStatusTag";
+export * from "./GovernanceTag";
 export * from "./GovernanceProposalListItem";
 export * from "./GovernanceLargeField";
+export * from "./GovernanceField";
+export * from "./GovernanceDialogSelectLargeField";
 export * from "./GovernanceDialogSelectField";
 export * from "./GovernanceDialog";
 export * from "./GovernanceWidgetHeader";

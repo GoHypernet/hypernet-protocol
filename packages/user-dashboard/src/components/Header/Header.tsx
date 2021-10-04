@@ -46,11 +46,20 @@ const Header: React.FC = () => {
   return (
     <Box className={classes.headerWrapper}>
       <Box className={classes.logoWrapper}>
-        <img
-          className={classes.logo}
-          src="https://res.cloudinary.com/dqueufbs7/image/upload/v1632907649/images/hpnlogo.png"
-          alt=""
-        />
+        <Hidden smDown>
+          <img
+            className={classes.logo}
+            src="https://res.cloudinary.com/dqueufbs7/image/upload/v1632907649/images/hpnlogo.png"
+            alt=""
+          />
+        </Hidden>
+        <Hidden mdUp>
+          <img
+            className={classes.smallLogo}
+            src="https://res.cloudinary.com/dqueufbs7/image/upload/v1632909339/images/Screen_Shot_2021-09-29_at_12.52.03.png"
+            alt=""
+          />
+        </Hidden>
       </Box>
       <Hidden mdDown>
         <Box className={classes.menuWrapper}>

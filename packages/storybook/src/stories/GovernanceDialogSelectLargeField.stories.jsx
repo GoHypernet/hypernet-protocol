@@ -1,8 +1,8 @@
-import { GovernanceDialogSelectField } from "@hypernetlabs/web-ui";
+import { GovernanceDialogSelectLargeField } from "@hypernetlabs/web-ui";
 
 export default {
-  title: "Layout/GovernanceDialogSelectField",
-  component: GovernanceDialogSelectField,
+  title: "Layout/GovernanceDialogSelectLargeField",
+  component: GovernanceDialogSelectLargeField,
 };
 
 const Template = (args) => (
@@ -11,7 +11,7 @@ const Template = (args) => (
       padding: "40px 80px",
     }}
   >
-    <GovernanceDialogSelectField
+    <GovernanceDialogSelectLargeField
       {...args}
       name="98"
       title="Crypto Currency"
@@ -36,7 +36,7 @@ const Template = (args) => (
         },
       ]}
     />
-    <GovernanceDialogSelectField
+    <GovernanceDialogSelectLargeField
       {...args}
       name="99"
       options={[
