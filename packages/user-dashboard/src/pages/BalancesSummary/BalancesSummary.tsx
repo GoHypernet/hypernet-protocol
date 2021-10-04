@@ -18,7 +18,7 @@ const BalancesSummary: React.FC = () => {
   }, []);
 
   return (
-    <PageWrapper label="BALANCES SUMMARY">
+    <PageWrapper label="Balances Summary">
       <Box id="balances-summary-wrapper"></Box>
     </PageWrapper>
   );

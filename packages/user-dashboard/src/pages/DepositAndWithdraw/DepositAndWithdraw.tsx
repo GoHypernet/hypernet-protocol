@@ -34,7 +34,7 @@ const DepositAndWithdraw: React.FC = () => {
   }, []);
 
   return (
-    <PageWrapper label="DEPOSIT & WITHDRAW">
+    <PageWrapper label="Deposit & Withdraw">
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Box id="balances-wrapper"></Box>

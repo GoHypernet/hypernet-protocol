@@ -19,7 +19,6 @@ export const useStyles = makeStyles({
   },
   menuWrapper: {
     display: "flex",
-    textTransform: "uppercase",
     margin: "0 auto",
     height: 40,
     marginBottom: -16,
