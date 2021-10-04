@@ -38,10 +38,11 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
      */
     event RegistryCreated(address registryAddress);
 
-    /**
-     * @dev Grants `DEFAULT_ADMIN_ROLE`, to the
-     * account passed into the constructor.
-     */
+    /// @notice constructor called on contract deployment
+    /// @param _admin address who can call the createRegistry function
+    /// @param _names array of names for the registries created on deployment 
+    /// @param _symbols array of symbols for the registries created on deployment 
+    /// @param _registrars array of addresses to recieve the REGISTRAR_ROLE for the registries created on deployment 
     constructor(address _admin, string[] memory _names, string[] memory _symbols, address[] memory _registrars)  {
         require(_names.length == _symbols.length, "RegistryFactory: Initializer arrays must be equal length.");
         require(_symbols.length == _registrars.length, "RegistryFactory: Initializer arrays must be equal length.");
@@ -60,10 +61,10 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         }
     }
 
-    /**
-    * @dev create a new registry with the given name, symbol and admin address.
-    * Address of deployed registry is stored in an array for easy lookup
-    */
+    /// @notice createRegistry called on contract deployment
+    /// @param _name name of the registry that will be created
+    /// @param _symbol symbol to associate with the registry
+    /// @param _registrar address that will recieve the REGISTRAR_ROLE
     function createRegistry(string memory _name, string memory _symbol, address _registrar) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
 
