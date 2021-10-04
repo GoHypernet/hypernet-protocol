@@ -10,20 +10,32 @@ import {
 } from "@web-ui/components";
 import { useFund } from "@web-ui/hooks";
 import { useStyles } from "@web-ui/widgets/FundWidget/FundWidget.style";
+import { EthereumAddress } from "@hypernetlabs/objects";
 
 interface IValues {
   amount: string;
-  tokenAddress: string;
+  tokenAddress: EthereumAddress;
+  stateChannelAddress: EthereumAddress;
 }
 
 interface IFundWidget extends IRenderParams {}
 
 const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
-  const { tokenSelectorOptions, error, depositFundsV2 } = useFund();
+  const {
+    tokenSelectorOptions,
+    error,
+    depositFunds,
+    activeStateChannels = [],
+    selectedStateChennel,
+  } = useFund();
   const classes = useStyles({ error });
 
   const handleFormSubmit = (values: IValues) => {
-    depositFundsV2(values.tokenAddress, values.amount);
+    depositFunds(
+      values.tokenAddress,
+      values.amount,
+      values.stateChannelAddress,
+    );
   };
 
   return (
@@ -41,8 +53,10 @@ const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
         initialValues={
           {
             tokenAddress: tokenSelectorOptions[0]?.address,
-
             amount: "1",
+            stateChannelAddress:
+              selectedStateChennel?.channelAddress ||
+              activeStateChannels[0]?.channelAddress,
           } as IValues
         }
         onSubmit={handleFormSubmit}
@@ -50,6 +64,15 @@ const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
         {({ handleSubmit, values }) => {
           return (
             <Form onSubmit={handleSubmit}>
+              <GovernanceDialogSelectField
+                required
+                title="State Channel"
+                name="stateChannelAddress"
+                options={activeStateChannels.map((option) => ({
+                  primaryText: option.channelAddress,
+                  value: option.channelAddress,
+                }))}
+              />
               <GovernanceDialogSelectField
                 required
                 title="Token Selector"

@@ -10,10 +10,12 @@ import {
 import { useFund } from "@web-ui/hooks";
 import { useStyles } from "@web-ui/widgets/FundWidget/FundWidget.style";
 import { Form, Formik } from "formik";
+import { EthereumAddress } from "@hypernetlabs/objects";
 
 interface IValues {
   amount: string;
-  tokenAddress: string;
+  tokenAddress: EthereumAddress;
+  stateChannelAddress: EthereumAddress;
 }
 
 interface IWithdrawWidget extends IRenderParams {}
@@ -21,11 +23,21 @@ interface IWithdrawWidget extends IRenderParams {}
 const WithdrawWidget: React.FC<IWithdrawWidget> = ({
   noLabel,
 }: IWithdrawWidget) => {
-  const { tokenSelectorOptions, error, withdrawFundsV2 } = useFund();
+  const {
+    tokenSelectorOptions,
+    error,
+    withdrawFunds,
+    activeStateChannels = [],
+    selectedStateChennel,
+  } = useFund();
   const classes = useStyles({ error });
 
   const handleFormSubmit = (values: IValues) => {
-    withdrawFundsV2(values.tokenAddress, values.amount);
+    withdrawFunds(
+      values.tokenAddress,
+      values.amount,
+      values.stateChannelAddress,
+    );
   };
 
   return (
@@ -44,6 +56,9 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
           {
             tokenAddress: tokenSelectorOptions[0]?.address,
             amount: "1",
+            stateChannelAddress:
+              selectedStateChennel?.channelAddress ||
+              activeStateChannels[0]?.channelAddress,
           } as IValues
         }
         onSubmit={handleFormSubmit}
@@ -51,6 +66,15 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
         {({ handleSubmit, values }) => {
           return (
             <Form onSubmit={handleSubmit}>
+              <GovernanceDialogSelectField
+                required
+                title="State Channel"
+                name="stateChannelAddress"
+                options={activeStateChannels.map((option) => ({
+                  primaryText: option.channelAddress,
+                  value: option.channelAddress,
+                }))}
+              />
               <GovernanceDialogSelectField
                 required
                 title="Token Selector"
