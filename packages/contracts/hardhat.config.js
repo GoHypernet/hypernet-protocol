@@ -8,10 +8,10 @@ require("hardhat-gas-reporter");
 require("hardhat-contract-sizer");
 require("hardhat-tracer");
 
-const HT = require("./artifacts/contracts/Hypertoken.sol/Hypertoken.json");
-const HG = require("./artifacts/contracts/HypernetGovernor.sol/HypernetGovernor.json");
-const RF = require("./artifacts/contracts/RegistryFactory.sol/RegistryFactory.json");
-const NFR = require("./artifacts/contracts/NonFungibleRegistry.sol/NonFungibleRegistry.json");
+// const HT = require("./artifacts/contracts/Hypertoken.sol/Hypertoken.json");
+// const HG = require("./artifacts/contracts/HypernetGovernor.sol/HypernetGovernor.json");
+// const RF = require("./artifacts/contracts/RegistryFactory.sol/RegistryFactory.json");
+// const NFR = require("./artifacts/contracts/NonFungibleRegistry.sol/NonFungibleRegistry.json");
 
 // hardhat network
 // const govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";

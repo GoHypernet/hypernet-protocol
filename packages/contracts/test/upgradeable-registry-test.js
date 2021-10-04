@@ -7,11 +7,24 @@ describe("Registry", function () {
     // get signers
     const [owner, addr1, addr2] = await ethers.getSigners();
 
+    // deploy hypertoken contract
+    const Hypertoken = await ethers.getContractFactory("Hypertoken");
+    const hypertoken = await Hypertoken.deploy();
+    hypertoken_reciept = await hypertoken.deployTransaction.wait();
+    const totalToken = await hypertoken.totalSupply()
+    console.log("Hypertoken Address:", hypertoken.address)
+    console.log("Hypertoken Supply:", totalToken.toString())
+    console.log("Hypertoken Gas Fee:", hypertoken_reciept.gasUsed.toString())
+
+    // give some tokens to the addr2
+    const tx475 = await hypertoken.transfer(addr2.address, ethers.utils.parseEther("2"))
+    const tx475_reciept = await tx475.wait()
+    expect(await hypertoken.balanceOf(addr2.address)).to.equal(ethers.utils.parseEther("2"));
+
     // deploy registry contract
     const UpgradableRegistry = await ethers.getContractFactory("NonFungibleRegistryUpgradeable");
     const registry = await upgrades.deployProxy(UpgradableRegistry, ["Gateways", "G", owner.address, owner.address]);
     await registry.deployed();
-    const totalSupply = await registry.totalSupply();
     console.log("Registry Address:", registry.address);
 
     // mint a token
@@ -154,5 +167,31 @@ describe("Registry", function () {
     const tx8 = await newerRegistry.burn(2);
     const tx8_reciept = tx8.wait();
     expect(await newRegistry.totalSupply()).to.equal(0);
+
+    // the registration token address hasn't been set yet so 
+    // registration by token is currently disabled
+    await expectRevert(
+        newerRegistry.registerByToken(addr2.address, "username", "myprofile"),
+        "NonFungibleRegistry: registration by token not enabled.",
+    )
+
+    // registrar now sets the registratino token to enable token-based registration
+    const tx8878 = await registry.setRegistrationToken(hypertoken.address);
+    const tx8878_reciept = tx8878.wait();
+
+    const regFee =  await registry.registrationFee();
+    console.log("Registration Fee:", ethers.utils.formatEther(regFee.toString()).toString());
+
+    // first the registree needs to approve the registry to pull tokens from its account
+    const tx6548 = await hypertoken.connect(addr2).approve(registry.address, regFee);
+    const tx6548_reciept = tx6548.wait();
+
+    const tx3215 = await newerRegistry.registerByToken(addr2.address, "username", "myprofile");
+    const tx3215_reciept = tx3215.wait();
+
+    const stakeTokenId = await registry.registryMap("username");
+    const tokenStake = await registry.identityStakes(stakeTokenId);
+    expect(tokenStake[1]).to.equal(regFee);
+    expect(await hypertoken.balanceOf(addr2.address)).to.equal(ethers.utils.parseEther("1"));
 });
 });
