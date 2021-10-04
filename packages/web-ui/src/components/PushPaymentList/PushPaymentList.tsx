@@ -4,30 +4,13 @@ import {
   PaymentId,
   EPaymentState,
 } from "@hypernetlabs/objects";
-import {
-  Box,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  IconButton,
-  Collapse,
-  List,
-  ListItem,
-  Typography,
-  Divider,
-  Button,
-} from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
-import { KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
 import { useStoreContext } from "@web-ui/contexts";
 import {
   GovernanceTable,
   ITableCell,
   GovernanceTag,
   ETagColor,
+  GovernanceButton,
 } from "@web-ui/components";
 import React, { useMemo } from "react";
 
@@ -35,13 +18,6 @@ interface IPushPaymentList {
   pushPayments: PushPayment[];
   publicIdentifier: PublicIdentifier;
   onAcceptPushPaymentClick: (paymentId: PaymentId) => void;
-}
-
-interface IPushPaymentRow {
-  pushPayment: PushPayment;
-  acceptPaymentButtonVisible: boolean;
-  onAcceptPushPaymentClick: (paymentId: PaymentId) => void;
-  publicIdentifier: PublicIdentifier;
 }
 
 const tableColumns: ITableCell[] = [
@@ -132,6 +108,13 @@ const tableColumns: ITableCell[] = [
     },
     onlyVisibleInExpandedState: true,
   },
+  {
+    cellValue: "Action",
+    mobileCellValue: " ",
+    tableCellProps: {
+      align: "left",
+    },
+  },
 ];
 
 export const PushPaymentList: React.FC<IPushPaymentList> = (
@@ -163,7 +146,6 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
               align: "left",
             },
           },
-
           {
             cellValue: (
               <GovernanceTag
@@ -189,13 +171,14 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
             onlyVisibleInExpandedState: true,
           },
           {
-            cellValue: item.from,
+            cellValue: `${item.to} ${
+              item.to === publicIdentifier ? "(You)" : ""
+            }`,
             tableCellProps: {
               align: "left",
             },
             onlyVisibleInExpandedState: true,
           },
-
           {
             cellValue: item.to,
             tableCellProps: {
@@ -238,13 +221,21 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
             },
             onlyVisibleInExpandedState: true,
           },
-
           {
-            cellValue: "Action",
+            cellValue: publicIdentifier === item.to &&
+              item.state === EPaymentState.Proposed && (
+                <GovernanceButton
+                  size="small"
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => onAcceptPushPaymentClick(item.id)}
+                >
+                  Accept
+                </GovernanceButton>
+              ),
             tableCellProps: {
-              align: "left",
+              align: "right",
             },
-            onlyVisibleInExpandedState: true,
           },
         ]);
         return acc;
