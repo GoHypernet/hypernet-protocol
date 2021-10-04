@@ -112,7 +112,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @notice setLazyRegister enable or disable the lazy registration feature
     /// @dev only callable by the REGISTRAR_ROLE
     /// @param _allowLazyRegister boolean flag; false disables lazy registration
-    function setLazyRegister(bool _allowLazyRegister) public virtual onlyProxy {
+    function setLazyRegister(bool _allowLazyRegister) external virtual onlyProxy {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
         allowLazyRegister = _allowLazyRegister;
     }
@@ -120,7 +120,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @notice setStorageUpdate enable or disable updating the tokenURI field
     /// @dev only callable by the REGISTRAR_ROLE
     /// @param _allowStorageUpdate boolean flag; false disables updating the tokenURI field for all but REGISTRAR_ROLE
-    function setStorageUpdate(bool _allowStorageUpdate) public virtual onlyProxy {
+    function setStorageUpdate(bool _allowStorageUpdate) external virtual onlyProxy {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
         allowStorageUpdate = _allowStorageUpdate;
     }
@@ -135,7 +135,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @notice setLabelUpdate enable or disable changing a token's label
     /// @dev only callable by the REGISTRAR_ROLE
     /// @param _allowLabelChange boolean flag; false disables transfers for all but REGISTRAR_ROLE
-    function setLabelUpdate(bool _allowLabelChange) public virtual onlyProxy {
+    function setLabelUpdate(bool _allowLabelChange) external virtual onlyProxy {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
         allowLabelChange = _allowLabelChange;
     }
@@ -150,7 +150,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @notice setAllowTransfers enable or disable transfer of ownership of registry tokens
     /// @dev only callable by the REGISTRAR_ROLE
     /// @param _allowTransfers address of the token to use for regsitration
-    function setAllowTransfers(bool _allowTransfers) public virtual onlyProxy {
+    function setAllowTransfers(bool _allowTransfers) external virtual onlyProxy {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
         allowTransfers = _allowTransfers;
     }
@@ -165,7 +165,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @notice setRegistrationToken change the address of the token used for registration
     /// @dev only callable by the REGISTRAR_ROLE
     /// @param _registrationToken address of the token to use for regsitration
-    function setRegistrationToken(address _registrationToken) public virtual onlyProxy {
+    function setRegistrationToken(address _registrationToken) external virtual onlyProxy {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
         registrationToken = _registrationToken;
     }
@@ -173,7 +173,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @notice setRegistrationFee change the amount of token required for registerByToken
     /// @dev only callable by the REGISTRAR_ROLE
     /// @param _registrationFee data to store in the tokenURI
-    function setRegistrationFee(uint256 _registrationFee) public virtual onlyProxy {
+    function setRegistrationFee(uint256 _registrationFee) external virtual onlyProxy {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
         registrationFee = _registrationFee;
     }
@@ -183,7 +183,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @param to address of the recipient of the token
     /// @param label a unique label to attach to the token
     /// @param registrationData data to store in the tokenURI
-    function register(address to, string memory label, string memory registrationData) public virtual onlyProxy {
+    function register(address to, string memory label, string memory registrationData) external virtual onlyProxy {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have registrar role to register.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
 
@@ -198,7 +198,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @dev only callable by the REGISTRAR_ROLE
     /// @param to address of the recipient of the token
     /// @param registrationData data to store in the tokenURI
-    function registerNoLabel(address to, string memory registrationData) public virtual onlyProxy {
+    function registerNoLabel(address to, string memory registrationData) external virtual onlyProxy {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have registrar role to mint");
         _createToken(to, registrationData);
     }
@@ -207,7 +207,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @dev callable by anyone with enough registration token
     /// @param to address of the recipient of the token
     /// @param registrationData data to store in the tokenURI
-    function registerByToken(address to, string memory label, string memory registrationData) public virtual onlyProxy {
+    function registerByToken(address to, string memory label, string memory registrationData) external virtual onlyProxy {
         require(registrationToken != address(0), "NonFungibleRegistry: registration by token not enabled.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
 
@@ -251,7 +251,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @dev only callable by the owner, approved caller when allowStorageUpdate is true or REGISTRAR_ROLE
     /// @param tokenId the tokenId of the target registration
     /// @param registrationData new data to store in the tokenURI
-    function updateRegistration(uint256 tokenId, string memory registrationData) public virtual onlyProxy {
+    function updateRegistration(uint256 tokenId, string memory registrationData) external virtual onlyProxy {
         require(_storageCanBeUpdated(), "NonFungibleRegistry: Storage updating is disabled.");
         require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         _setTokenURI(tokenId, registrationData);
@@ -261,7 +261,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @dev only callable by the owner, approved caller when allowLabelChange is true or REGISTRAR_ROLE
     /// @param tokenId the tokenId of the target registration
     /// @param label new data to associate with the token label
-    function updateLabel(uint256 tokenId, string memory label) public virtual onlyProxy {
+    function updateLabel(uint256 tokenId, string memory label) external virtual onlyProxy {
         require(_labelCanBeChanged(), "NonFungibleRegistry: Label updating is disabled.");
         require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
@@ -330,6 +330,9 @@ contract NonFungibleRegistryUpgradeable is
         string memory label = reverseRegistryMap[tokenId];
         delete reverseRegistryMap[tokenId];
         delete registryMap[label];
+
+        // if the token is burned, the fee goes to the burner
+        // not the owner or minter
     }
 
     /**
@@ -436,4 +439,8 @@ contract NonFungibleRegistryUpgradeable is
         // check that the signature is from REGISTRAR_ROLE
         return hasRole(REGISTRAR_ROLE, ECDSAUpgradeable.recover(hash, signature));
     }
+}
+
+interface IHypertoken {
+    function delegate(address delegatee) external;
 }
