@@ -30,6 +30,9 @@ const Template = (args) => (
         { label: "label1", value: 1 },
         { label: "label2", value: 2 },
       ]}
+      handleChange={(value) => {
+        console.log("value:", value);
+      }}
     />
     <GovernanceField
       {...args}

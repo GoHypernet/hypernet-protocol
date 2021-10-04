@@ -10,6 +10,7 @@ export interface GovernanceFieldProps extends FieldAttributes<any> {
   options?: ISelectOption[];
   rightContent?: React.ReactNode;
   focus?: boolean;
+  handleChange?: (value: any) => void;
 }
 
 export const GovernanceField: React.FC<GovernanceFieldProps> = (
@@ -22,6 +23,7 @@ export const GovernanceField: React.FC<GovernanceFieldProps> = (
     options,
     focus,
     rightContent,
+    handleChange,
   } = props;
   const classes = useStyles({});
   const titleText = `${title}${required ? " *" : ""}`;
@@ -62,6 +64,11 @@ export const GovernanceField: React.FC<GovernanceFieldProps> = (
           {...props}
           as="select"
           component={type}
+          {...(handleChange && {
+            onChange: (e: React.ChangeEvent<any>) => {
+              handleChange(e?.target?.value);
+            },
+          })}
         >
           {options?.length &&
             options.map((option) => (
