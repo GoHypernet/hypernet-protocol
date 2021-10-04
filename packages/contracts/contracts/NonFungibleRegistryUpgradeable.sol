@@ -189,7 +189,7 @@ contract NonFungibleRegistryUpgradeable is
 
         uint256 tokenId = _createToken(to, registrationData);
 
-        // extend the registry mapping for lookup via gateway URL
+        // extend the registry mapping for lookup via token label
         registryMap[label] = tokenId;
         reverseRegistryMap[tokenId] = label;
     }
@@ -203,9 +203,10 @@ contract NonFungibleRegistryUpgradeable is
         _createToken(to, registrationData);
     }
 
-    /// @notice register mints a new Non-Fungible Identity token without a label
-    /// @dev callable by anyone with enough registration token
+    /// @notice registerByToken mints a new Non-Fungible Identity token without a label
+    /// @dev callable by anyone with enough registration token, caller must call `approve` first
     /// @param to address of the recipient of the token
+    /// @param label a unique label to attach to the token
     /// @param registrationData data to store in the tokenURI
     function registerByToken(address to, string memory label, string memory registrationData) external virtual onlyProxy {
         require(registrationToken != address(0), "NonFungibleRegistry: registration by token not enabled.");
@@ -219,9 +220,25 @@ contract NonFungibleRegistryUpgradeable is
         // the fee stays with the token, not the token owner
         identityStakes[tokenId] = Fee(registrationToken, registrationFee); 
 
-        // extend the registry mapping for lookup via gateway URL
+        // extend the registry mapping for lookup via token label
         registryMap[label] = tokenId;
         reverseRegistryMap[tokenId] = label;
+    }
+
+    /// @notice registerByTokenNoLabel mints a new Non-Fungible Identity token without a label
+    /// @dev callable by anyone with enough registration token, caller must call `approve` first
+    /// @param to address of the recipient of the token
+    /// @param registrationData data to store in the tokenURI
+    function registerByTokenNoLabel(address to, string memory registrationData) external virtual onlyProxy {
+        require(registrationToken != address(0), "NonFungibleRegistry: registration by token not enabled.");
+
+        // user must approve the registry to collect the registration fee from their wallet
+        IERC20Upgradeable(registrationToken).transferFrom(_msgSender(), address(this), registrationFee);
+
+        uint256 tokenId = _createToken(to, registrationData);
+
+        // the fee stays with the token, not the token owner
+        identityStakes[tokenId] = Fee(registrationToken, registrationFee); 
     }
 
     /**

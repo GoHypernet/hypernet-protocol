@@ -175,7 +175,7 @@ describe("Registry", function () {
         "NonFungibleRegistry: registration by token not enabled.",
     )
 
-    // registrar now sets the registratino token to enable token-based registration
+    // registrar now sets the registration token to enable token-based registration
     const tx8878 = await registry.setRegistrationToken(hypertoken.address);
     const tx8878_reciept = tx8878.wait();
 
