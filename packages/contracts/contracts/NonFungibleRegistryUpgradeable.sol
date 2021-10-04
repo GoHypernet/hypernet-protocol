@@ -203,7 +203,7 @@ contract NonFungibleRegistryUpgradeable is
         _createToken(to, registrationData);
     }
 
-    /// @notice registerByToken mints a new Non-Fungible Identity token without a label
+    /// @notice registerByToken mints a new Non-Fungible Identity token by staking an ERC20 registration token
     /// @dev callable by anyone with enough registration token, caller must call `approve` first
     /// @param to address of the recipient of the token
     /// @param label a unique label to attach to the token
