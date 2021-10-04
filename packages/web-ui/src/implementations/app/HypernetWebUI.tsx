@@ -363,6 +363,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <StateChannelsWidget {...config} />,
           config?.showInModal,
+          undefined,
+          undefined,
+          true,
         ),
         this._generateDomElement(
           config?.selector || STATE_CHANNELS_WIDGET_ID_SELECTOR,

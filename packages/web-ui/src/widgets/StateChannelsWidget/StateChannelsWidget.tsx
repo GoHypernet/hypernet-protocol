@@ -1,14 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-} from "@material-ui/core";
+import { Box, Typography } from "@material-ui/core";
 import { IRenderParams } from "@web-ui/interfaces";
 
-import { BoxWrapper } from "@web-ui/components";
+import { GovernanceDialogSelectField } from "@web-ui/components";
 import { useStoreContext } from "@web-ui/contexts";
 import {
   ActiveStateChannel,
@@ -16,21 +10,23 @@ import {
   EthereumAddress,
   PublicIdentifier,
 } from "@hypernetlabs/objects";
+import { Form, Formik } from "formik";
+import { useStyles } from "@web-ui/widgets/StateChannelsWidget/StateChannelsWidget.style";
 
 interface IStateChannelsWidget extends IRenderParams {}
 
-const StateChannelsWidget: React.FC<IStateChannelsWidget> = ({
-  includeBoxWrapper,
-  bodyStyle,
-}: IStateChannelsWidget) => {
-  const { coreProxy, UIData } = useStoreContext();
-  const [stateChannels, setStateChannels] = useState<ActiveStateChannel[]>([]);
-  const [selectedStateChannelAddress, setSelectedStateChannelAddress] =
-    useState<EthereumAddress>(EthereumAddress(""));
+const StateChannelsWidget: React.FC<IStateChannelsWidget> =
+  ({}: IStateChannelsWidget) => {
+    const classes = useStyles();
+    const { coreProxy, UIData } = useStoreContext();
+    const [stateChannels, setStateChannels] = useState<ActiveStateChannel[]>(
+      [],
+    );
+    const [selectedStateChannelAddress, setSelectedStateChannelAddress] =
+      useState<EthereumAddress>(EthereumAddress(""));
 
-  useEffect(() => {
-    coreProxy.getActiveStateChannels().map((_stateChannels) => {
-      /* const activeStateChannels = [
+    useEffect(() => {
+      const activeStateChannels = [
         new ActiveStateChannel(
           ChainId(343434),
           PublicIdentifier("sdAsdsad"),
@@ -46,56 +42,66 @@ const StateChannelsWidget: React.FC<IStateChannelsWidget> = ({
           PublicIdentifier("sdAsdsad33"),
           EthereumAddress("asdsadsad33"),
         ),
-      ]; */
+      ];
 
-      setStateChannels(_stateChannels);
-      if (_stateChannels[0] != null) {
-        setSelectedStateChannelAddress(_stateChannels[0].channelAddress);
-        UIData.onSelectedStateChannelChanged.next(_stateChannels[0]);
+      setStateChannels(activeStateChannels);
+      if (activeStateChannels[0] != null) {
+        setSelectedStateChannelAddress(activeStateChannels[0].channelAddress);
+        UIData.onSelectedStateChannelChanged.next(activeStateChannels[0]);
       }
-    });
 
-    coreProxy.onStateChannelCreated.subscribe((activeStateChannel) => {
-      setStateChannels([...stateChannels, activeStateChannel]);
-      if (stateChannels.length === 0) {
-        setSelectedStateChannelAddress(activeStateChannel.channelAddress);
-        UIData.onSelectedStateChannelChanged.next(activeStateChannel);
-      }
-    });
-  }, []);
+      coreProxy.onStateChannelCreated.subscribe((activeStateChannel) => {
+        setStateChannels([...stateChannels, activeStateChannel]);
+        if (stateChannels.length === 0) {
+          setSelectedStateChannelAddress(activeStateChannel.channelAddress);
+          UIData.onSelectedStateChannelChanged.next(activeStateChannel);
+        }
+      });
+    }, []);
 
-  const CustomBox = includeBoxWrapper ? BoxWrapper : Box;
+    const handleChange = (address: EthereumAddress) => {
+      // Publish an event to other widgets
+      setSelectedStateChannelAddress(address);
+      UIData.onSelectedStateChannelChanged.next(
+        stateChannels.find(
+          (stateChannel) => stateChannel.channelAddress === address,
+        ),
+      );
+    };
 
-  const handleChange = (event) => {
-    const val = event.target.value;
-    // Publish an event to other widgets
-    setSelectedStateChannelAddress(val);
-    UIData.onSelectedStateChannelChanged.next(
-      stateChannels.find((stateChannel) => stateChannel.channelAddress === val),
+    return (
+      <Box className={classes.wrapper}>
+        <Typography variant="h5" className={classes.label}>
+          Current Account Address
+        </Typography>
+        <Formik
+          enableReinitialize
+          initialValues={{
+            stateChannel: selectedStateChannelAddress,
+          }}
+          onSubmit={() => {}}
+        >
+          {({ handleSubmit }) => {
+            return (
+              <Form onSubmit={handleSubmit} className={classes.form}>
+                <GovernanceDialogSelectField
+                  required
+                  title="State Channel"
+                  name="stateChannel"
+                  type="select"
+                  options={stateChannels.map(({ channelAddress }) => ({
+                    primaryText: channelAddress,
+                    value: channelAddress,
+                  }))}
+                  fullWidth
+                  handleChange={handleChange}
+                />
+              </Form>
+            );
+          }}
+        </Formik>
+      </Box>
     );
   };
-
-  return (
-    <CustomBox label="Current state channel" bodyStyle={bodyStyle}>
-      <FormControl style={{ display: "flex", padding: "20px 200px" }}>
-        <Select
-          labelId="demo-simple-select-label"
-          id="demo-simple-select"
-          value={selectedStateChannelAddress}
-          onChange={handleChange}
-        >
-          {stateChannels.map((stateChannel) => (
-            <MenuItem
-              key={stateChannel.channelAddress}
-              value={stateChannel.channelAddress}
-            >
-              {stateChannel.channelAddress}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </CustomBox>
-  );
-};
 
 export default StateChannelsWidget;
