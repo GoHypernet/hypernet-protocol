@@ -11,19 +11,14 @@ import {
   EPaymentState,
   SortedTransfers,
 } from "@hypernetlabs/objects";
-import {
-  Box,
-  AppBar,
-  Switch,
-  Typography,
-  Tooltip,
-} from "@material-ui/core";
+import { Box, AppBar, Switch, Typography, Tooltip } from "@material-ui/core";
 import InfoIcon from "@material-ui/icons/Info";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import { useStoreContext } from "@web-ui/contexts";
 import { IRenderParams } from "@web-ui/interfaces";
 import React, { useState, useMemo } from "react";
 
+import { useStyles } from "@web-ui/widgets/LinksWidget/LinksWidget.style";
 import {
   PullPaymentList,
   PushPaymentList,
@@ -57,6 +52,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
   includeBoxWrapper,
   bodyStyle,
 }: ILinksWidget) => {
+  const classes = useStyles();
   const { viewUtils, dateUtils } = useStoreContext();
   const [tabValue, setTabValue] = useState<number>(0);
   const [isSideFilterOpen, setIsSideFilterOpen] = useState(false);
@@ -341,9 +337,11 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           <Box display="flex" alignItems="center" marginLeft="auto">
             <Box display="flex" alignItems="center" marginRight={1}>
               <Tooltip title="Enabling auto-accept will free you from manually approving every change to your Hypernet Protocol account.">
-                <InfoIcon />
+                <InfoIcon className={classes.infoIcon} />
               </Tooltip>
-              <Typography variant="body2">Payments auto-accept</Typography>
+              <Typography variant="body2" className={classes.switchLabel}>
+                Payments auto-accept
+              </Typography>
               <Switch
                 checked={paymentsAutoAccept}
                 onChange={onPaymentsAutoAcceptChange}
