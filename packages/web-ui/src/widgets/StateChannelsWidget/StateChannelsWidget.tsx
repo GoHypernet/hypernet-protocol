@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Box, Typography } from "@material-ui/core";
 import { IRenderParams } from "@web-ui/interfaces";
 
-import { GovernanceField } from "@web-ui/components";
+import { GovernanceDialogSelectField } from "@web-ui/components";
 import { useStoreContext } from "@web-ui/contexts";
 import {
   ActiveStateChannel,
@@ -26,8 +26,6 @@ const StateChannelsWidget: React.FC<IStateChannelsWidget> =
       useState<EthereumAddress>(EthereumAddress(""));
 
     useEffect(() => {
-      console.log("state channel widget use effect");
-
       const activeStateChannels = [
         new ActiveStateChannel(
           ChainId(343434),
@@ -86,12 +84,13 @@ const StateChannelsWidget: React.FC<IStateChannelsWidget> =
           {({ handleSubmit }) => {
             return (
               <Form onSubmit={handleSubmit} className={classes.form}>
-                <GovernanceField
+                <GovernanceDialogSelectField
                   required
+                  title="State Channel"
                   name="stateChannel"
                   type="select"
                   options={stateChannels.map(({ channelAddress }) => ({
-                    label: channelAddress,
+                    primaryText: channelAddress,
                     value: channelAddress,
                   }))}
                   fullWidth

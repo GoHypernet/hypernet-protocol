@@ -8,7 +8,7 @@ export const useStyles = makeStyles((theme) => ({
     backgroundColor: colors.GRAY100,
   },
   bodyWithHeader: {
-    padding: "0 16px 16px 16px",
+    padding: "16px",
   },
   bodyWithoutHeader: {
     padding: 16,

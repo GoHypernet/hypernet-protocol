@@ -18,7 +18,7 @@ const Gateways: React.FC = () => {
   }, []);
 
   return (
-    <PageWrapper label="GATEWAYS">
+    <PageWrapper label="Gateways">
       <Box id="gateways-page-wrapper"></Box>
     </PageWrapper>
   );

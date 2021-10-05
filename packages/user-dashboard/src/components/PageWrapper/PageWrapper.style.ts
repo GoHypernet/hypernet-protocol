@@ -1,3 +1,4 @@
+import { EFontSize, EFontWeight } from "@hypernetlabs/web-ui";
 import { makeStyles } from "@material-ui/core";
 
 export const useStyles = makeStyles({
@@ -7,11 +8,8 @@ export const useStyles = makeStyles({
     margin: "auto",
   },
   label: {
-    fontSize: 24,
+    fontWeight: EFontWeight.BOLD,
+    fontSize: EFontSize.H1,
     marginBottom: 30,
-  },
-  governanceWrapper: {
-    padding: "40px 200px",
-    backgroundColor: "#ffffff",
   },
 });

@@ -28,7 +28,7 @@ export const routes: IRoute[] = [
   {
     path: "/deposit-and-withdraw",
     component: DepositAndWithdraw,
-    name: "deposit & withdraw",
+    name: "Deposit & Withdraw",
     isHeaderItem: true,
   },
   {

@@ -46,7 +46,7 @@ const Summary: React.FC = () => {
   }, []);
 
   return (
-    <PageWrapper label="SUMMARY">
+    <PageWrapper label="Summary">
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Box id="public-identifier"></Box>
