@@ -44,3 +44,4 @@ export * from "./GovernanceCard";
 export * from "./GovernanceBalanceList";
 export * from "./GovernanceSideFilter";
 export * from "./GovernancePagination";
+export * from "./GovernanceTabs";
