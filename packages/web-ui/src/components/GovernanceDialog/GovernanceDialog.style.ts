@@ -4,7 +4,6 @@ import { colors, EFontSize } from "@web-ui/theme";
 export const useStyles = makeStyles((theme) => ({
   dialog: (props: any) => ({
     "& .MuiDialog-paper": {
-      padding: 40,
       borderRadius: 3,
       backgroundColor: colors.GRAY100,
       border: `2px solid ${colors.GRAY200}`,
@@ -19,11 +18,11 @@ export const useStyles = makeStyles((theme) => ({
     alignItems: "center",
     justifyContent: "space-between",
     fontSize: EFontSize.H4,
-    padding: 0,
+    padding: "16px 40px",
   },
   dialogDescription: {},
   dialogContent: {
-    padding: 0,
+    padding: "16px 40px",
   },
   closeButton: {
     marginRight: -12,
