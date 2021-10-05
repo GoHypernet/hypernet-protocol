@@ -47,6 +47,9 @@ contract NonFungibleRegistryUpgradeable is
       uint256 amount;
     }
 
+    // DFDL schema definition for metadata stored in tokenURI
+    string public schema;
+
     // mapping a human-readable label to a tokenID
     mapping(string => uint256) public registryMap;
 
@@ -109,20 +112,35 @@ contract NonFungibleRegistryUpgradeable is
     // we must implement this function at top level contract definition for the upgradable proxy pattern
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
-    /// @notice setLazyRegister enable or disable the lazy registration feature
-    /// @dev only callable by the REGISTRAR_ROLE
+    /// @notice setRegistryParameters enable or disable the lazy registration feature
+    /// @dev only callable by the REGISTRAR_ROLE, use arrays so we don't have to always pass every
+    /// parameter if we don't want to chage it.
+    /// @param _schema DFDL-compatible schema definition
     /// @param _allowLazyRegister boolean flag; false disables lazy registration
-    function setLazyRegister(bool _allowLazyRegister) external virtual onlyProxy {
-        require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
-        allowLazyRegister = _allowLazyRegister;
-    }
-
-    /// @notice setStorageUpdate enable or disable updating the tokenURI field
-    /// @dev only callable by the REGISTRAR_ROLE
     /// @param _allowStorageUpdate boolean flag; false disables updating the tokenURI field for all but REGISTRAR_ROLE
-    function setStorageUpdate(bool _allowStorageUpdate) external virtual onlyProxy {
+    /// @param _allowLabelChange boolean flag; false disables transfers for all but REGISTRAR_ROLE
+    /// @param _allowTransfers address of the token to use for regsitration
+    /// @param _registrationToken address of the token to use for regsitration
+    /// @param _registrationFee data to store in the tokenURI
+    function setRegistryParameters(string[] memory _schema, 
+                                   bool[] memory _allowLazyRegister,
+                                   bool[] memory _allowStorageUpdate,
+                                   bool[] memory _allowLabelChange,
+                                   bool[] memory _allowTransfers,
+                                   address[] memory _registrationToken,
+                                   uint256[] memory  _registrationFee
+                                   ) 
+        external 
+        virtual 
+        onlyProxy {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
-        allowStorageUpdate = _allowStorageUpdate;
+        if (_schema.length > 0) {schema = _schema[0];}
+        if (_allowLazyRegister.length > 0) {allowLazyRegister = _allowLazyRegister[0];}
+        if (_allowStorageUpdate.length > 0) {allowStorageUpdate = _allowStorageUpdate[0];}
+        if (_allowLabelChange.length > 0) {allowLabelChange = _allowLabelChange[0];}
+        if (_allowTransfers.length > 0) {allowTransfers = _allowTransfers[0];}
+        if (_registrationToken.length > 0) {registrationToken = _registrationToken[0];}
+        if (_registrationFee.length > 0) {registrationFee = _registrationFee[0];}
     }
 
     /**
@@ -132,27 +150,11 @@ contract NonFungibleRegistryUpgradeable is
         return (allowStorageUpdate || hasRole(REGISTRAR_ROLE, _msgSender()));
     }
 
-    /// @notice setLabelUpdate enable or disable changing a token's label
-    /// @dev only callable by the REGISTRAR_ROLE
-    /// @param _allowLabelChange boolean flag; false disables transfers for all but REGISTRAR_ROLE
-    function setLabelUpdate(bool _allowLabelChange) external virtual onlyProxy {
-        require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
-        allowLabelChange = _allowLabelChange;
-    }
-
     /**
      * @dev Returns whether labels can be updated or caller is REGISTRAR_ROLE
      */
     function _labelCanBeChanged() internal view virtual returns (bool) {
         return (allowLabelChange || hasRole(REGISTRAR_ROLE, _msgSender()));
-    }
-
-    /// @notice setAllowTransfers enable or disable transfer of ownership of registry tokens
-    /// @dev only callable by the REGISTRAR_ROLE
-    /// @param _allowTransfers address of the token to use for regsitration
-    function setAllowTransfers(bool _allowTransfers) external virtual onlyProxy {
-        require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
-        allowTransfers = _allowTransfers;
     }
 
     /**
@@ -162,45 +164,29 @@ contract NonFungibleRegistryUpgradeable is
         return (allowTransfers || hasRole(REGISTRAR_ROLE, _msgSender()));
     }
 
-    /// @notice setRegistrationToken change the address of the token used for registration
-    /// @dev only callable by the REGISTRAR_ROLE
-    /// @param _registrationToken address of the token to use for regsitration
-    function setRegistrationToken(address _registrationToken) external virtual onlyProxy {
-        require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
-        registrationToken = _registrationToken;
-    }
-
-    /// @notice setRegistrationFee change the amount of token required for registerByToken
-    /// @dev only callable by the REGISTRAR_ROLE
-    /// @param _registrationFee data to store in the tokenURI
-    function setRegistrationFee(uint256 _registrationFee) external virtual onlyProxy {
-        require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
-        registrationFee = _registrationFee;
-    }
-
     /// @notice register mints a new Non-Fungible Identity token
     /// @dev only callable by the REGISTRAR_ROLE
     /// @param to address of the recipient of the token
-    /// @param label a unique label to attach to the token
+    /// @param label a unique label to attach to the token, can pass an empty string to skip labeling
     /// @param registrationData data to store in the tokenURI
     function register(address to, string memory label, string memory registrationData) external virtual onlyProxy {
-        require(hasRole(REGISTRAR_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have registrar role to register.");
-        require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
-
-        uint256 tokenId = _createToken(to, registrationData);
-
-        // extend the registry mapping for lookup via token label
-        registryMap[label] = tokenId;
-        reverseRegistryMap[tokenId] = label;
+        require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must have registrar role to register.");
+        _createLabeledToken(to, label, registrationData);
     }
 
-    /// @notice register mints a new Non-Fungible Identity token without a label
+    /// @notice batchRegister batch mints a sequence of Non-Fungible Identity tokens in one transaction
     /// @dev only callable by the REGISTRAR_ROLE
-    /// @param to address of the recipient of the token
-    /// @param registrationData data to store in the tokenURI
-    function registerNoLabel(address to, string memory registrationData) external virtual onlyProxy {
-        require(hasRole(REGISTRAR_ROLE, _msgSender()), "ERC721PresetMinterPauserAutoId: must have registrar role to mint");
-        _createToken(to, registrationData);
+    /// @param recipients address array of the recipients of the tokens
+    /// @param labels an array of unique labels to attach to the tokens
+    /// @param registrationDatas data to store in the tokenURI
+    function batchRegister(address[] memory recipients, string[] memory labels, string[] memory registrationDatas) external virtual onlyProxy {
+        require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must have registrar role to register.");
+        require(recipients.length == labels.length, "NonFungibleRegistry: recipients array must be same length as labels array.");
+        require(registrationDatas.length == labels.length, "NonFungibleRegistry: registrationDatas array must be same length as labels array.");
+
+        for (uint256 i = 0; i < recipients.length; ++i) {
+            _createLabeledToken(recipients[i], labels[i], registrationDatas[i]);
+        }
     }
 
     /// @notice registerByToken mints a new Non-Fungible Identity token by staking an ERC20 registration token
@@ -214,31 +200,38 @@ contract NonFungibleRegistryUpgradeable is
 
         // user must approve the registry to collect the registration fee from their wallet
         IERC20Upgradeable(registrationToken).transferFrom(_msgSender(), address(this), registrationFee);
-
-        uint256 tokenId = _createToken(to, registrationData);
-
+        uint256 tokenId = _createLabeledToken(to, label, registrationData);
         // the fee stays with the token, not the token owner
-        identityStakes[tokenId] = Fee(registrationToken, registrationFee); 
-
-        // extend the registry mapping for lookup via token label
-        registryMap[label] = tokenId;
-        reverseRegistryMap[tokenId] = label;
+        identityStakes[tokenId] = Fee(registrationToken, registrationFee);
     }
 
-    /// @notice registerByTokenNoLabel mints a new Non-Fungible Identity token without a label
-    /// @dev callable by anyone with enough registration token, caller must call `approve` first
-    /// @param to address of the recipient of the token
-    /// @param registrationData data to store in the tokenURI
-    function registerByTokenNoLabel(address to, string memory registrationData) external virtual onlyProxy {
-        require(registrationToken != address(0), "NonFungibleRegistry: registration by token not enabled.");
+    /**
+     * @dev Creates a new labeled token for `to`. Its token ID will be automatically
+     * assigned (and available on the emitted {IERC721-Transfer} event), and the token
+     * URI autogenerated based on the base URI passed at construction.
+     *
+     * See {ERC721-_mint}.
+     *
+     * Requirements:
+     *
+     * - the caller must have the `REGISTRAR_ROLE`.
+     */
+    function _createLabeledToken(address to, string memory label, string memory registrationData) private returns (uint256 tokenId) {
 
-        // user must approve the registry to collect the registration fee from their wallet
-        IERC20Upgradeable(registrationToken).transferFrom(_msgSender(), address(this), registrationFee);
-
-        uint256 tokenId = _createToken(to, registrationData);
-
-        // the fee stays with the token, not the token owner
-        identityStakes[tokenId] = Fee(registrationToken, registrationFee); 
+        // We cannot just use balanceOf to create the new tokenId because tokens
+        // can be burned (destroyed), so we need a separate counter.
+        // Enforce that the counter start at 1 (not 0) so that we can check 
+        // if a name exists
+        if (bytes(label).length > 0) {
+            require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
+            tokenId = _createToken(to, registrationData);
+            // extend the registry mapping for lookup via token label
+            registryMap[label] = tokenId;
+            reverseRegistryMap[tokenId] = label;
+        } else {
+            // if label is empty, save some gas
+            tokenId = _createToken(to, registrationData);
+        }
     }
 
     /**
@@ -318,13 +311,19 @@ contract NonFungibleRegistryUpgradeable is
         _safeTransfer(from, to, tokenId, _data);
     }
 
-    /// @notice burn removes a token from the registry enumeration
+    /// @notice burn removes a token from the registry enumeration and refunds registration fee to burner
     /// @dev only callable by the owner, approved caller when allowTransfers is true or REGISTRAR_ROLE
     /// @param tokenId unique id to refence the target token
     function burn(uint256 tokenId) public virtual onlyProxy {
         //solhint-disable-next-line max-line-length
         require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         _burn(tokenId);
+
+        // when burning, check if there is a registration fee tied to the token identity 
+        if (identityStakes[tokenId].amount != 0) {
+            // send the registration fee to the token burner
+            IERC20Upgradeable(identityStakes[tokenId].token).transfer(_msgSender(), registrationFee);
+        }
     }
 
     /**
@@ -347,9 +346,6 @@ contract NonFungibleRegistryUpgradeable is
         string memory label = reverseRegistryMap[tokenId];
         delete reverseRegistryMap[tokenId];
         delete registryMap[label];
-
-        // if the token is burned, the fee goes to the burner
-        // not the owner or minter
     }
 
     /**
@@ -414,8 +410,12 @@ contract NonFungibleRegistryUpgradeable is
     /// @param label a unique label to attach to the token
     /// @param registrationData data to store in the tokenURI 
     /// @param signature signature from REGISTRAR_ROLE 
-    function lazyRegister(address to, string memory label, string memory registrationData, bytes memory signature)
-        public onlyProxy {
+    function lazyRegister(address to, 
+                          string memory label, 
+                          string memory registrationData, 
+                          bytes memory signature)
+        public 
+        onlyProxy {
         // check if lazy registration is allowed for this NFI
         require(allowLazyRegister, "NonFungibleRegistry: Lazy registration is disabled.");
 
@@ -431,15 +431,8 @@ contract NonFungibleRegistryUpgradeable is
         // require a valid signature from a member of REGISTRAR_ROLE
         require(_isValidSignature(to, label, registrationData, signature), "NonFungibleRegistry: signature failure.");
         
-        // issue new Ntoken FT here
-        uint256 tokenId = _tokenIdTracker.current() + 1;
-        _mint(to, tokenId);
-        _tokenIdTracker.increment();
-        _setTokenURI(tokenId, registrationData);
-
-        // extend the registry mapping for lookup via gateway URL
-        registryMap[label] = tokenId;
-        reverseRegistryMap[tokenId] = label;
+        // issue new token here
+        _createLabeledToken(to, label, registrationData);
     }
     
     /**
@@ -456,8 +449,4 @@ contract NonFungibleRegistryUpgradeable is
         // check that the signature is from REGISTRAR_ROLE
         return hasRole(REGISTRAR_ROLE, ECDSAUpgradeable.recover(hash, signature));
     }
-}
-
-interface IHypertoken {
-    function delegate(address delegatee) external;
 }
