@@ -5,10 +5,20 @@ import { useStyles } from "@web-ui/components/List/List.style";
 
 interface ListProps {
   children?: React.ReactNode;
+  style?: React.CSSProperties;
 }
 
 export const List: React.FC<ListProps> = (props: ListProps) => {
-  const { children } = props;
+  const { children, style } = props;
   const classes = useStyles();
-  return <MuiList className={classes.list}>{children}</MuiList>;
+  return (
+    <MuiList
+      className={classes.list}
+      {...(style && {
+        style,
+      })}
+    >
+      {children}
+    </MuiList>
+  );
 };

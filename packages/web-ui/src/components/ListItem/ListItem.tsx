@@ -39,7 +39,7 @@ export const ListItem: React.FC<ListItemProps> = (props: ListItemProps) => {
           <Box className={classes.rightContent}>{rightContent}</Box>
         )}
       </MuiListItem>
-      <Divider className={classes.divider} />
+      {!disableDivider && <Divider className={classes.divider} />}
     </Box>
   );
 };
