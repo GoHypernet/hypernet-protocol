@@ -10,6 +10,7 @@ export const useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
+    flexDirection: "row-reverse",
     fontSize: EFontSize.H4,
   },
   list: {
@@ -51,5 +52,8 @@ export const useStyles = makeStyles((theme) => ({
     padding: "12px 16px",
     borderRadius: 3,
     background: colors.GRAY100,
+  },
+  dialogCloseButton: {
+    marginLeft: "auto",
   },
 }));

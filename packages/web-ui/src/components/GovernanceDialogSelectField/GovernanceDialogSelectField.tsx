@@ -81,7 +81,6 @@ export const GovernanceDialogSelectField: React.FC<GovernanceDialogSelectFieldPr
                   >
                     <DialogTitle>
                       <Box className={classes.dialogTitle}>
-                        {titleText}
                         <IconButton
                           aria-label="close"
                           onClick={() => {
@@ -90,6 +89,7 @@ export const GovernanceDialogSelectField: React.FC<GovernanceDialogSelectFieldPr
                         >
                           <CloseIcon />
                         </IconButton>
+                        {title && titleText}
                       </Box>
                     </DialogTitle>
                     <Divider />
