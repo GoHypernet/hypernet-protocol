@@ -86,7 +86,7 @@ const StateChannelsWidget: React.FC<IStateChannelsWidget> =
               <Form onSubmit={handleSubmit} className={classes.form}>
                 <GovernanceDialogSelectField
                   required
-                  title="State Channel"
+                  placeholder="State Channel"
                   name="stateChannel"
                   type="select"
                   options={stateChannels.map(({ channelAddress }) => ({
