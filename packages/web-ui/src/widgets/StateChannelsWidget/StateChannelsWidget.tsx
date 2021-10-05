@@ -25,39 +25,23 @@ const StateChannelsWidget: React.FC<IStateChannelsWidget> =
     const [selectedStateChannelAddress, setSelectedStateChannelAddress] =
       useState<EthereumAddress>(EthereumAddress(""));
 
-    useEffect(() => {
-      const activeStateChannels = [
-        new ActiveStateChannel(
-          ChainId(343434),
-          PublicIdentifier("sdAsdsad"),
-          EthereumAddress("asdsadsad"),
-        ),
-        new ActiveStateChannel(
-          ChainId(34343422),
-          PublicIdentifier("sdAsdsad22"),
-          EthereumAddress("asdsadsad22"),
-        ),
-        new ActiveStateChannel(
-          ChainId(34343433),
-          PublicIdentifier("sdAsdsad33"),
-          EthereumAddress("asdsadsad33"),
-        ),
-      ];
-
-      setStateChannels(activeStateChannels);
-      if (activeStateChannels[0] != null) {
-        setSelectedStateChannelAddress(activeStateChannels[0].channelAddress);
-        UIData.onSelectedStateChannelChanged.next(activeStateChannels[0]);
-      }
-
-      coreProxy.onStateChannelCreated.subscribe((activeStateChannel) => {
-        setStateChannels([...stateChannels, activeStateChannel]);
-        if (stateChannels.length === 0) {
-          setSelectedStateChannelAddress(activeStateChannel.channelAddress);
-          UIData.onSelectedStateChannelChanged.next(activeStateChannel);
-        }
-      });
-    }, []);
+      useEffect(() => {
+        coreProxy.getActiveStateChannels().map((_stateChannels) => {
+          setStateChannels(_stateChannels);
+          if (_stateChannels[0] != null) {
+            setSelectedStateChannelAddress(_stateChannels[0].channelAddress);
+            UIData.onSelectedStateChannelChanged.next(_stateChannels[0]);
+          }
+        });
+    
+        coreProxy.onStateChannelCreated.subscribe((activeStateChannel) => {
+          setStateChannels([...stateChannels, activeStateChannel]);
+          if (stateChannels.length === 0) {
+            setSelectedStateChannelAddress(activeStateChannel.channelAddress);
+            UIData.onSelectedStateChannelChanged.next(activeStateChannel);
+          }
+        });
+      }, []);
 
     const handleChange = (address: EthereumAddress) => {
       // Publish an event to other widgets
