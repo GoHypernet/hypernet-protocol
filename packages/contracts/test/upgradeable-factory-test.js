@@ -15,12 +15,15 @@ describe("Registry Factory", function () {
     const FactoryRegistry = await ethers.getContractFactory("UpgradeableRegistryFactory");
     const factoryregistry = await FactoryRegistry.deploy(owner.address, ["Test"], ["t"], [owner.address]);
     registry_reciept = await factoryregistry.deployTransaction.wait();
-    console.log("Factory Address:", factoryregistry.address)
+    console.log("Factory Address:", factoryregistry.address);
+    console.log("Registry Beacon:", await factoryregistry.registryBeacon());
 
     const testRegAddress = await factoryregistry.nameToAddress("Test");
     const testReg = new ethers.Contract(testRegAddress, NFR.abi, owner);
     expect(await testReg.name()).to.equal("Test")
     expect(await testReg.symbol()).to.equal("t")
+    const regtx = await testReg.register(addr1.address, "dummy", "dummy");
+    const regtxrcpt = regtx.wait();
     console.log("Constructor Registry Address:", testRegAddress)
 
     const factorytx = await factoryregistry.createRegistry(registryName, registrySymbol, owner.address);

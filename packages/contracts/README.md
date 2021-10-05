@@ -123,7 +123,7 @@ npx hardhat delegateVote --network dev --delegate 0xf39Fd6e51aad88F6F4ce6aB88272
 Cast a vote on a proposal (Against (0), For (1), Abstain (2)):
 
 ```shell
-npx hardhat castVote --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490 --support 1
+22104418028353388202287425060500442898792900291568640533228773866112567147490 --support 1
 ```
 
 If a proposal has reached quorum and >50% of votes are in favor, once its deadline has passed it can be queued then executed:
@@ -143,6 +143,12 @@ Propose a new Gateway be added to the Gateways NonFunglebleRegistry we just depl
 
 ```shell
 npx hardhat proposeRegistryEntry --network dev --name Gateways --label "https://hyperpay.io" --data "biglongsignatureblock" --recipient 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+```
+
+Set the registration token address for an NFR:
+
+```shell
+npx hardhat setRegistryParameters --network dev --name Gateways --regtoken 0x5FbDB2315678afecb367f032d93F642f64180aa3
 ```
 
 Add a new NFI by staking tokens:
