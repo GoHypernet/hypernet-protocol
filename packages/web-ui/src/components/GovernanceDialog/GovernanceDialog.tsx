@@ -5,13 +5,14 @@ import {
   DialogTitle,
   DialogContent,
   IconButton,
+  Divider,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import { useStyles } from "@web-ui/components/GovernanceDialog/GovernanceDialog.style";
 
 export interface GovernanceDialogProps {
   isOpen: boolean;
-  title?: string;
+  title?: string | React.ReactNode;
   description?: string;
   content?: React.ReactNode;
   onClose?: () => void;
@@ -56,7 +57,7 @@ export const GovernanceDialog: React.FC<GovernanceDialogProps> = (
           </IconButton>
         </Box>
       </DialogTitle>
-
+      <Divider  />
       <DialogContent className={classes.dialogContent}>{content}</DialogContent>
     </Dialog>
   );
