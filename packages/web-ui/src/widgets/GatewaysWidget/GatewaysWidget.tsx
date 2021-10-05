@@ -6,7 +6,7 @@ import { Form, Formik } from "formik";
 
 import { GatewayUrl } from "@hypernetlabs/objects";
 import {
-  EmptyState,
+  GovernanceEmptyState,
   GovernanceButton,
   GovernanceCard,
   GovernanceField,
@@ -101,7 +101,10 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
       }
     >
       {hasEmptyState ? (
-        <EmptyState info={<>You don't have any authorized gateways yet</>} />
+        <GovernanceEmptyState
+          title="Ups..!"
+          description="You don't have any authorized gateways yet"
+        />
       ) : (
         <>
           {selectedGatewayUrl && (

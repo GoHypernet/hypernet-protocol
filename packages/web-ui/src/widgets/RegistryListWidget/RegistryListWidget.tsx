@@ -5,6 +5,7 @@ import { useAlert } from "react-alert";
 import {
   GovernanceRegistryListItem,
   GovernanceWidgetHeader,
+  GovernanceEmptyState,
 } from "@web-ui/components";
 import { IRegistryListWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -35,6 +36,14 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   return (
     <Box>
       <GovernanceWidgetHeader label="Registries" />
+
+      {!registries.length && (
+        <GovernanceEmptyState
+          title="No registiries found."
+          description="Registiries submitted by community members will appear here."
+        />
+      )}
+
       {registries.map((registry, index) => (
         <GovernanceRegistryListItem
           key={registry.name}
