@@ -16,6 +16,7 @@ import {
   EProposalVoteSupport,
 } from "@hypernetlabs/objects";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
+import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { injectable, inject } from "inversify";
 import Postmate from "postmate";
 
@@ -24,6 +25,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
   constructor(
     @inject(IHypernetCoreType) protected core: IHypernetCore,
     @inject(ICoreUIServiceType) protected coreUIService: ICoreUIService,
+    @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {
     super();
   }
@@ -518,8 +520,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       this.coreUIService.renderCeramicAuthenticationUI();
     });
 
-    this.core.onCeramicFailed.subscribe(() => {
-      this.coreUIService.renderCeramicFailureUI();
+    this.core.onCeramicFailed.subscribe((error) => {
+      this.logUtils.error(
+        error.message || "Something went wrong duting ceramic authentication!",
+      );
+      //this.coreUIService.renderCeramicFailureUI();
     });
 
     this.core.onCeramicAuthenticationSucceeded.subscribe(() => {
