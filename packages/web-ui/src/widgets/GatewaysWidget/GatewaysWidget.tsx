@@ -102,8 +102,8 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
     >
       {hasEmptyState ? (
         <GovernanceEmptyState
-          title="Ups..!"
-          description="You don't have any authorized gateways yet"
+          title="No results!"
+          description="You don't have any authorized gateways yet."
         />
       ) : (
         <>
