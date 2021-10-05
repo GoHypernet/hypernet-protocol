@@ -6,7 +6,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
@@ -16,7 +15,6 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 contract NonFungibleRegistryUpgradeable is
     Initializable,
     ContextUpgradeable,
-    OwnableUpgradeable,
     AccessControlEnumerableUpgradeable,
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
@@ -67,11 +65,17 @@ contract NonFungibleRegistryUpgradeable is
     // create a REGISTRAR_ROLE to manage registry functionality
     bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
 
+    // create an `UPGRADER_ROLE` for safe upgrading
+    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
+
     CountersUpgradeable.Counter private _tokenIdTracker;
 
     event LabelUpdated(uint256 tokenId, string label);
 
     event StorageUpdated(uint256 tokenId, bytes32 registrationData);
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() initializer {}
 
     /// @notice initialize is called once on the creation of an upgradable proxy
     /// @dev can only be called once due to the initializer modifier
@@ -81,15 +85,17 @@ contract NonFungibleRegistryUpgradeable is
     /// @param _admin address that will have the DEFAULT_ADMIN_ROLE
     function initialize(string memory name_, string memory symbol_, address _registrar, address _admin) public initializer {
         __Context_init();
-        __Ownable_init();
         __AccessControlEnumerable_init();
         __ERC721Enumerable_init();
         __ERC721URIStorage_init();
+        __UUPSUpgradeable_init();
         __ERC721_init(name_, symbol_);
 
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
 
         _setupRole(REGISTRAR_ROLE, _registrar);
+
+        _setupRole(UPGRADER_ROLE, _msgSender());
 
         allowLazyRegister = false;
         allowStorageUpdate = true;
@@ -100,7 +106,7 @@ contract NonFungibleRegistryUpgradeable is
     }
 
     // we must implement this function at top level contract definition for the upgradable proxy pattern
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    function _authorizeUpgrade(address newImplementation) internal onlyRole(UPGRADER_ROLE) override {}
 
     /// @notice setRegistryParameters enable or disable the lazy registration feature
     /// @dev only callable by the REGISTRAR_ROLE, use arrays so we don't have to always pass every
@@ -121,8 +127,7 @@ contract NonFungibleRegistryUpgradeable is
                                    uint256[] memory  _registrationFee
                                    )
         external 
-        virtual 
-        onlyProxy {
+        virtual {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
         if (_schema.length > 0) {schema = _schema[0];}
         if (_allowLazyRegister.length > 0) {allowLazyRegister = _allowLazyRegister[0];}
@@ -150,7 +155,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @param to address of the recipient of the token
     /// @param label a unique label to attach to the token, can pass an empty string to skip labeling
     /// @param registrationData data to store in the tokenURI
-    function register(address to, string memory label, string memory registrationData) external virtual onlyProxy {
+    function register(address to, string memory label, string memory registrationData) external virtual {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must have registrar role to register.");
         _createLabeledToken(to, label, registrationData);
     }
@@ -160,7 +165,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @param recipients address array of the recipients of the tokens
     /// @param labels an array of unique labels to attach to the tokens
     /// @param registrationDatas data to store in the tokenURI
-    function batchRegister(address[] memory recipients, string[] memory labels, string[] memory registrationDatas) external virtual onlyProxy {
+    function batchRegister(address[] memory recipients, string[] memory labels, string[] memory registrationDatas) external virtual {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must have registrar role to register.");
         require(recipients.length == labels.length, "NonFungibleRegistry: recipients array must be same length as labels array.");
         require(registrationDatas.length == labels.length, "NonFungibleRegistry: registrationDatas array must be same length as labels array.");
@@ -175,7 +180,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @param to address of the recipient of the token
     /// @param label a unique label to attach to the token
     /// @param registrationData data to store in the tokenURI
-    function registerByToken(address to, string memory label, string memory registrationData) external virtual onlyProxy {
+    function registerByToken(address to, string memory label, string memory registrationData) external virtual {
         require(registrationToken != address(0), "NonFungibleRegistry: registration by token not enabled.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
 
@@ -220,7 +225,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @dev only callable by the owner, approved caller when allowStorageUpdate is true or REGISTRAR_ROLE
     /// @param tokenId the tokenId of the target registration
     /// @param registrationData new data to store in the tokenURI
-    function updateRegistration(uint256 tokenId, string memory registrationData) external virtual onlyProxy {
+    function updateRegistration(uint256 tokenId, string memory registrationData) external virtual {
         require(_storageCanBeUpdated(), "NonFungibleRegistry: Storage updating is disabled.");
         require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         _setTokenURI(tokenId, registrationData);
@@ -231,7 +236,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @dev only callable by the owner, approved caller when allowLabelChange is true or REGISTRAR_ROLE
     /// @param tokenId the tokenId of the target registration
     /// @param label new data to associate with the token label
-    function updateLabel(uint256 tokenId, string memory label) external virtual onlyProxy {
+    function updateLabel(uint256 tokenId, string memory label) external virtual {
         require(_labelCanBeChanged(), "NonFungibleRegistry: Label updating is disabled.");
         require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
@@ -275,7 +280,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @notice burn removes a token from the registry enumeration and refunds registration fee to burner
     /// @dev only callable by the owner, approved caller when allowTransfers is true or REGISTRAR_ROLE
     /// @param tokenId unique id to refence the target token
-    function burn(uint256 tokenId) public virtual onlyProxy {
+    function burn(uint256 tokenId) public virtual {
         //solhint-disable-next-line max-line-length
         require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         _burn(tokenId);
@@ -358,8 +363,7 @@ contract NonFungibleRegistryUpgradeable is
                           string memory label, 
                           string memory registrationData, 
                           bytes memory signature)
-        public 
-        onlyProxy {
+        public {
         // check if lazy registration is allowed for this NFI
         require(allowLazyRegister, "NonFungibleRegistry: Lazy registration is disabled.");
 

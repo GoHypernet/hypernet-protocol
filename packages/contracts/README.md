@@ -145,6 +145,12 @@ Propose a new Gateway be added to the Gateways NonFunglebleRegistry we just depl
 npx hardhat proposeRegistryEntry --network dev --name Gateways --label "https://hyperpay.io" --data "biglongsignatureblock" --recipient 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
 ```
 
+Add a new NFI by staking tokens:
+
+```shell
+npx hardhat registerWithToken --network dev --name Gateways --label "https://hyperpay.io" --data "biglongsignatureblock" --recipient 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+```
+
 Retrieve data pertaining to a specific entry in a named Hypernet Gateway:
 
 ```shell
