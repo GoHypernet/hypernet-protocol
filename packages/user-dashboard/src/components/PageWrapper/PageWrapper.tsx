@@ -16,13 +16,9 @@ const PageWrapper: React.FC<IPageWrapper> = ({
 }: IPageWrapper) => {
   const classes = useStyles();
 
-  if (isGovernance) {
-    return <Box className={classes.governanceWrapper}>{children}</Box>;
-  }
-
   return (
     <Box className={classes.wrapper}>
-      <Box className={classes.label}>{label}</Box>
+      {!isGovernance && <Box className={classes.label}>{label}</Box>}
       {children}
     </Box>
   );
