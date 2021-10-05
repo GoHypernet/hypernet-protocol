@@ -80,7 +80,7 @@ async function main() {
   const tx4_reciept = await tx4.wait();
 
   // deploy factory contract
-  const FactoryRegistry = await ethers.getContractFactory("RegistryFactory");
+  const FactoryRegistry = await ethers.getContractFactory("UpgradeableRegistryFactory");
   const factoryregistry = await FactoryRegistry.deploy(timelock.address, [], [], []);
   const registry_reciept = await factoryregistry.deployTransaction.wait();
   console.log("Factory Address:", factoryregistry.address);

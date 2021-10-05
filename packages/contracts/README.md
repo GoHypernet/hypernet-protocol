@@ -32,12 +32,20 @@ In some cases, it can be useful to dissallow the transfer of ownership of NFIs. 
 `allowTransfers` to `false`. In this case, the `REGISTRAR_ROLE` can still transfer an NFI on the owners behalf if the NFI owner 
 gives approval to the `REGISTRAR_ROLE` through the `approve` function.
 
-Lastly, each NFR exposes a *lazy registration* interface through the `lazyRegister` function. This allows the owner of the `REGISTRAR_ROLE` 
+Each NFR exposes a *lazy registration* interface through the `lazyRegister` function. This allows the owner of the `REGISTRAR_ROLE` 
 to offload the burden of gas costs to the recipient of the NFI by providing them with signature that the recipient can then present to 
 the contract to register at their convenience with the token `label` serving as a nonce to prevent duplicate registration. This feature 
-is disabled by default but can be activated by the `DEFAULT_ADMIN_ROLE` through the `allowLazyRegister` variable. **NOTE**: If lazy registration
+is disabled by default but can be activated by the `REGISTRAR_ROLE` through the `allowLazyRegister` variable. **NOTE**: If lazy registration
 is enabled, the `allowLabelChange` should be set to `false` as the token label serves as the nonce for lazy registration. If a user is allowed 
 to change their token label, they can register multiple times. 
+
+Lastly, the Hypernet NFR implementation allows for registration by staking token. By default, this feature is disabled, but the 
+`REGISTRAR_ROLE` can set `registrationToken` to an address of an EIP20-compatible token which will enable the feature. The default 
+registration fee is `1e18` (1 token assuming 18 decimal places) which can also be updated by the `REGISTRAR_ROLE`. In order to use this 
+feature, a participant will `allow` the NFR to spend `registrationFee` amount of `registrationToken` from their account. The NFR will 
+record the registration token address used and fee amount and associate this staking fee with the NFI `tokenId`. Upon burning of the NFI, 
+any non-zero registration fee associated with the burned `tokenId` will be transfered to the account who burned the token, *not* the owner
+of the token at the time of burning. 
 
 ## Install dependencies
 
@@ -48,7 +56,7 @@ npm install
 ## Running contract tests
 
 ```shell
-npx hardhat test
+npx hardhat test --logs
 ```
 
 ## Compiling contracts to generate artifacts
@@ -115,7 +123,7 @@ npx hardhat delegateVote --network dev --delegate 0xf39Fd6e51aad88F6F4ce6aB88272
 Cast a vote on a proposal (Against (0), For (1), Abstain (2)):
 
 ```shell
-npx hardhat castVote --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490 --support 1
+22104418028353388202287425060500442898792900291568640533228773866112567147490 --support 1
 ```
 
 If a proposal has reached quorum and >50% of votes are in favor, once its deadline has passed it can be queued then executed:
@@ -135,6 +143,18 @@ Propose a new Gateway be added to the Gateways NonFunglebleRegistry we just depl
 
 ```shell
 npx hardhat proposeRegistryEntry --network dev --name Gateways --label "https://hyperpay.io" --data "biglongsignatureblock" --recipient 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+```
+
+Set the registration token address for an NFR:
+
+```shell
+npx hardhat setRegistryParameters --network dev --name Gateways --regtoken 0x5FbDB2315678afecb367f032d93F642f64180aa3
+```
+
+Add a new NFI by staking tokens:
+
+```shell
+npx hardhat registerWithToken --network dev --name Gateways --label "https://hyperpay.io" --data "biglongsignatureblock" --recipient 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
 ```
 
 Retrieve data pertaining to a specific entry in a named Hypernet Gateway:
