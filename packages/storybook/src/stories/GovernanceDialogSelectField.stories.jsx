@@ -1,7 +1,4 @@
-import {
-  GovernanceDialogSelectField,
-  IGovernanceDialogSelectFieldOption,
-} from "@hypernetlabs/web-ui";
+import { GovernanceDialogSelectField } from "@hypernetlabs/web-ui";
 
 export default {
   title: "Layout/GovernanceDialogSelectField",

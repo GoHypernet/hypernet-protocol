@@ -2,12 +2,14 @@ import { makeStyles } from "@material-ui/core";
 import { colors } from "@web-ui/theme";
 
 export const useStyles = makeStyles(() => ({
-  list: {
+  wrapper: {
     display: "flex",
-    flexDirection: "row",
-    borderBottom: `1px solid ${colors.GRAY150}`,
+    flexDirection: "column",
   },
   listItem: {
+    display: "flex",
+    flexDirection: "row",
+    padding: "16px 0",
     "& .MuiListItemIcon-root": {
       minWidth: "unset",
       marginRight: 20,
@@ -15,5 +17,8 @@ export const useStyles = makeStyles(() => ({
   },
   rightContent: {
     marginLeft: "auto",
+  },
+  divider: {
+    color: colors.GRAY150,
   },
 }));

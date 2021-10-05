@@ -1,19 +1,23 @@
 import { PushPayment, PullPayment } from "@hypernetlabs/objects";
-import { Box, AppBar, IconButton, Switch, Typography } from "@material-ui/core";
+import { Box, AppBar, Switch, Typography, Tooltip } from "@material-ui/core";
+import InfoIcon from "@material-ui/icons/Info";
 import FilterListIcon from "@material-ui/icons/FilterList";
 import { useStoreContext } from "@web-ui/contexts";
-import { IFilterItem, EItemType, IRenderParams } from "@web-ui/interfaces";
+import { IRenderParams } from "@web-ui/interfaces";
 import React, { useState, useMemo } from "react";
 
+import { useStyles } from "@web-ui/widgets/LinksWidget/LinksWidget.style";
 import {
   PullPaymentList,
   PushPaymentList,
-  AntTabs,
-  AntTab,
+  GovernanceTabs,
+  GovernanceTab,
   TabPanel,
-  SideFilter,
-  BoxWrapper,
-  EmptyState,
+  GovernanceCard,
+  GovernanceSideFilter,
+  IFilterItemNew,
+  ESideFilterItemType,
+  GovernanceButton,
 } from "@web-ui/components";
 import { useLinks } from "@web-ui/hooks";
 
@@ -36,6 +40,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
   includeBoxWrapper,
   bodyStyle,
 }: ILinksWidget) => {
+  const classes = useStyles();
   const { viewUtils, dateUtils } = useStoreContext();
   const [tabValue, setTabValue] = useState<number>(0);
   const [isSideFilterOpen, setIsSideFilterOpen] = useState(false);
@@ -54,31 +59,31 @@ const LinksWidget: React.FC<ILinksWidget> = ({
     setTabValue(newValue);
   };
 
-  const linksFilter: IFilterItem[] = useMemo(
+  const linksFilter: IFilterItemNew[] = useMemo(
     () => [
       {
         label: "Search By Payment ID",
-        widgetType: EItemType.stringInput,
+        widgetType: ESideFilterItemType.stringInput,
         stateKey: "id",
       },
       {
         label: "Search By From",
-        widgetType: EItemType.stringInput,
+        widgetType: ESideFilterItemType.stringInput,
         stateKey: "from",
       },
       {
         label: "Search By To",
-        widgetType: EItemType.stringInput,
+        widgetType: ESideFilterItemType.stringInput,
         stateKey: "to",
       },
       {
         label: "Search By Gateway URL",
-        widgetType: EItemType.stringInput,
+        widgetType: ESideFilterItemType.stringInput,
         stateKey: "gatewayUrl",
       },
       {
         label: "Search By Payment State",
-        widgetType: EItemType.select,
+        widgetType: ESideFilterItemType.select,
         stateKey: "state",
         defaultValue: "all",
         widgetProps: {
@@ -87,12 +92,12 @@ const LinksWidget: React.FC<ILinksWidget> = ({
       },
       {
         label: "Search By created date",
-        widgetType: EItemType.dateTimeDifference,
+        widgetType: ESideFilterItemType.dateTimeDifference,
         stateKey: "createdTimestamp",
       },
       {
         label: "Search By expiration date",
-        widgetType: EItemType.dateTimeDifference,
+        widgetType: ESideFilterItemType.dateTimeDifference,
         stateKey: "expirationDate",
       },
     ],
@@ -171,55 +176,55 @@ const LinksWidget: React.FC<ILinksWidget> = ({
     setPaymentsAutoAccept(event.target.checked);
   };
 
-  const CustomBox = includeBoxWrapper ? BoxWrapper : Box;
-
   return (
-    <CustomBox
-      label={!noLabel ? "TRANSACTION HISTORY" : undefined}
-      rightComponent={
-        <Box display="flex" alignItems="center">
-          <Box display="flex" alignItems="center" marginRight={1}>
-            <Box marginRight={1} color="#0000008a">
-              Payments auto accept
+    <GovernanceCard
+      title={
+        <Box display="flex">
+          <Typography variant="h5">Transaction History</Typography>
+          <Box display="flex" alignItems="center" marginLeft="auto">
+            <Box display="flex" alignItems="center" marginRight={1}>
+              <Tooltip title="Enabling auto-accept will free you from manually approving every change to your Hypernet Protocol account.">
+                <InfoIcon className={classes.infoIcon} />
+              </Tooltip>
+              <Typography variant="body2" className={classes.switchLabel}>
+                Payments auto-accept
+              </Typography>
+              <Switch
+                checked={paymentsAutoAccept}
+                onChange={onPaymentsAutoAcceptChange}
+                name="paymentsAutoAccept"
+                color="primary"
+                inputProps={{ "aria-label": "primary checkbox" }}
+              />
             </Box>
-            <Switch
-              checked={paymentsAutoAccept}
-              onChange={onPaymentsAutoAcceptChange}
-              name="paymentsAutoAccept"
-              color="primary"
-              inputProps={{ "aria-label": "primary checkbox" }}
-            />
+            <GovernanceButton
+              size="small"
+              onClick={() => setIsSideFilterOpen(true)}
+              endIcon={<FilterListIcon />}
+            >
+              Filter
+            </GovernanceButton>
           </Box>
-          <IconButton
-            aria-label="list"
-            onClick={() => setIsSideFilterOpen(true)}
-            style={{ height: 30, display: "flex", fontSize: 18 }}
-          >
-            <Box marginRight={1}>Filter</Box>
-            <FilterListIcon />
-          </IconButton>
         </Box>
       }
-      bodyStyle={bodyStyle}
-      hasEmptyState={links.length === 0 && !loading}
-      emptyState={<EmptyState info={<>You don't have any payments yet.</>} />}
+      description="Transactions associated with the currently selected Hypernet Protocol account."
     >
-      <SideFilter
+      <GovernanceSideFilter
         visible={isSideFilterOpen}
         onClose={() => setIsSideFilterOpen(false)}
         filterItems={linksFilter}
         onFilterSubmit={handleFilterSubmit}
       />
       <AppBar position="static" color="transparent" elevation={0}>
-        <AntTabs
+        <GovernanceTabs
           value={tabValue}
           onChange={handleChange}
           indicatorColor="primary"
           textColor="primary"
         >
-          <AntTab label="Push Payments" />
-          <AntTab label="Pull Payments" />
-        </AntTabs>
+          <GovernanceTab label="Push Payments" />
+          <GovernanceTab label="Pull Payments" />
+        </GovernanceTabs>
       </AppBar>
       <TabPanel value={tabValue} index={0}>
         <PushPaymentList
@@ -236,7 +241,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           onPullFundClick={pullFunds}
         />
       </TabPanel>
-    </CustomBox>
+    </GovernanceCard>
   );
 };
 

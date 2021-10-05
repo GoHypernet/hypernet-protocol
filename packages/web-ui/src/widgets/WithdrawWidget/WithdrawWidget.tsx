@@ -1,58 +1,111 @@
-import { Box } from "@material-ui/core";
 import { IRenderParams } from "@web-ui/interfaces";
 import React from "react";
 
 import {
-  TokenSelector,
-  Button,
-  TextInput,
-  BoxWrapper,
+  GovernanceButton,
+  GovernanceCard,
+  GovernanceDialogSelectField,
+  GovernanceField,
 } from "@web-ui/components";
 import { useFund } from "@web-ui/hooks";
 import { useStyles } from "@web-ui/widgets/FundWidget/FundWidget.style";
+import { Form, Formik } from "formik";
+import { EthereumAddress } from "@hypernetlabs/objects";
+
+interface IValues {
+  amount: string;
+  tokenAddress: EthereumAddress;
+  stateChannelAddress: EthereumAddress;
+}
 
 interface IWithdrawWidget extends IRenderParams {}
 
 const WithdrawWidget: React.FC<IWithdrawWidget> = ({
-  includeBoxWrapper,
   noLabel,
-  bodyStyle,
 }: IWithdrawWidget) => {
   const {
     tokenSelectorOptions,
-    selectedPaymentToken,
-    setSelectedPaymentToken,
-    depositFunds,
-    withdrawFunds,
-    setDestinationAddress,
-    amount,
-    setAmount,
     error,
+    withdrawFunds,
+    activeStateChannels = [],
+    selectedStateChennel,
   } = useFund();
   const classes = useStyles({ error });
 
-  const CustomBox = includeBoxWrapper ? BoxWrapper : Box;
+  const handleFormSubmit = (values: IValues) => {
+    withdrawFunds(
+      values.tokenAddress,
+      values.amount,
+      values.stateChannelAddress,
+    );
+  };
 
   return (
-    <CustomBox
+    <GovernanceCard
       className={classes.wrapper}
-      label={!noLabel ? "Withdraw Funds" : undefined}
-      bodyStyle={bodyStyle}
+      title={!noLabel ? "Withdraw Funds" : undefined}
+      description={
+        !noLabel
+          ? "Move tokens from your Hypernet Protocol account into your Ethereum wallet."
+          : undefined
+      }
     >
-      <TokenSelector
-        tokenSelectorOptions={tokenSelectorOptions}
-        selectedPaymentToken={selectedPaymentToken}
-        setSelectedPaymentToken={setSelectedPaymentToken}
-      />
-      <TextInput label="Amount" value={amount} onChange={setAmount} />
-      <Button
-        label="Withdraw to your metamask wallet"
-        disabled={!selectedPaymentToken?.address}
-        onClick={withdrawFunds}
-        fullWidth={true}
-        bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
-      />
-    </CustomBox>
+      <Formik
+        enableReinitialize
+        initialValues={
+          {
+            tokenAddress: tokenSelectorOptions[0]?.address,
+            amount: "1",
+            stateChannelAddress:
+              selectedStateChennel?.channelAddress ||
+              activeStateChannels[0]?.channelAddress,
+          } as IValues
+        }
+        onSubmit={handleFormSubmit}
+      >
+        {({ handleSubmit, values }) => {
+          return (
+            <Form onSubmit={handleSubmit}>
+              <GovernanceDialogSelectField
+                required
+                title="State Channel"
+                name="stateChannelAddress"
+                options={activeStateChannels.map((option) => ({
+                  primaryText: option.channelAddress,
+                  value: option.channelAddress,
+                }))}
+              />
+              <GovernanceDialogSelectField
+                required
+                title="Token Selector"
+                name="tokenAddress"
+                options={tokenSelectorOptions.map((option) => ({
+                  primaryText: option.tokenName,
+                  value: option.address,
+                }))}
+              />
+              <GovernanceField
+                required
+                name="amount"
+                title="Amount"
+                type="input"
+                placeholder="Type Amount"
+              />
+
+              <GovernanceButton
+                fullWidth
+                color="primary"
+                variant="contained"
+                onClick={handleSubmit}
+                disabled={!(!!values.amount && !!values.tokenAddress)}
+              >
+                Withdraw to your metamask wallet
+              </GovernanceButton>
+            </Form>
+          );
+        }}
+      </Formik>
+    </GovernanceCard>
   );
 };
 

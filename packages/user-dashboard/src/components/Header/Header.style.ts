@@ -14,9 +14,11 @@ export const useStyles = makeStyles({
   logo: {
     height: 40,
   },
+  smallLogo: {
+    height: 32,
+  },
   menuWrapper: {
     display: "flex",
-    textTransform: "uppercase",
     margin: "0 auto",
     height: 40,
     marginBottom: -16,

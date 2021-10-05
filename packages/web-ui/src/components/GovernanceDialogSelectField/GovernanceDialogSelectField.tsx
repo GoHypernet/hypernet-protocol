@@ -20,6 +20,7 @@ import { useStyles } from "@web-ui/components/GovernanceDialogSelectField/Govern
 
 export interface GovernanceDialogSelectFieldProps extends FieldAttributes<any> {
   title?: string;
+  dialogTitle?: string;
   options?: IGovernanceDialogSelectFieldOption[];
 }
 
@@ -33,7 +34,7 @@ export interface IGovernanceDialogSelectFieldOption {
 
 export const GovernanceDialogSelectField: React.FC<GovernanceDialogSelectFieldProps> =
   (props: GovernanceDialogSelectFieldProps) => {
-    const { title, required, options } = props;
+    const { title, dialogTitle, required, options } = props;
     const classes = useStyles({});
     const titleText = `${title}${required ? " *" : ""}`;
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -81,7 +82,6 @@ export const GovernanceDialogSelectField: React.FC<GovernanceDialogSelectFieldPr
                   >
                     <DialogTitle>
                       <Box className={classes.dialogTitle}>
-                        {titleText}
                         <IconButton
                           aria-label="close"
                           onClick={() => {
@@ -90,6 +90,7 @@ export const GovernanceDialogSelectField: React.FC<GovernanceDialogSelectFieldPr
                         >
                           <CloseIcon />
                         </IconButton>
+                        {dialogTitle || titleText}
                       </Box>
                     </DialogTitle>
                     <Divider />

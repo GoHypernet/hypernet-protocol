@@ -4,12 +4,13 @@ import { Form, Formik, FormikHelpers } from "formik";
 import * as Yup from "yup";
 
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { EthereumAddress } from "@hypernetlabs/objects";
+import { EthereumAddress, Registry } from "@hypernetlabs/objects";
 import {
   GovernanceButton,
-  GovernanceDialogSelectField,
+  GovernanceDialogSelectLargeField,
   GovernanceLargeField,
   GovernanceWidgetHeader,
+  IGovernanceDialogSelectLargeFieldOption,
 } from "@web-integration/components";
 import { IProposalCreateWidgetParams } from "@web-ui/interfaces";
 
@@ -30,6 +31,8 @@ interface IValues {
   owner: EthereumAddress;
 }
 
+const gatewaysRegistryName = "Gateways";
+
 const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
   onProposalListNavigate,
 }: IProposalCreateWidgetParams) => {
@@ -41,12 +44,20 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
   );
   const [proposalThreshold, setProposalThreshold] = useState<number>();
   const [votingPower, setVotingPower] = useState<number>();
+  const [gatewayRegistry, setGatewayRegistry] = useState<Registry>();
 
   useEffect(() => {
     coreProxy
       .getProposalThreshold()
       .map((_proposalThreshold) => {
         setProposalThreshold(_proposalThreshold);
+      })
+      .mapErr(handleError);
+
+    coreProxy
+      .getRegistryByName([gatewaysRegistryName])
+      .map((registryMap) => {
+        setGatewayRegistry(registryMap.get(gatewaysRegistryName));
       })
       .mapErr(handleError);
 
@@ -90,7 +101,7 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
     } else {
       coreProxy
         .proposeRegistryEntry(
-          "Gateways",
+          gatewaysRegistryName,
           values.gatewayUrl,
           JSON.stringify({
             gatewayName: values.gatewayName,
@@ -107,6 +118,30 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
         .mapErr(handleError);
     }
   };
+
+  const isAccountGatewayRegistrarAddress = useMemo(() => {
+    return gatewayRegistry?.registrarAddresses.includes(accountAddress);
+  }, [gatewayRegistry, accountAddress]);
+
+  const actionList: IGovernanceDialogSelectLargeFieldOption[] = useMemo(() => {
+    const actions = [
+      {
+        primaryText: "Add Registry",
+        secondaryText: undefined,
+        action: null,
+        value: ERegistryAction.ADD_REGISTRY,
+      },
+    ];
+    if (isAccountGatewayRegistrarAddress) {
+      actions.push({
+        primaryText: "Add Gateway",
+        secondaryText: undefined,
+        action: null,
+        value: ERegistryAction.ADD_GATEWAY,
+      });
+    }
+    return actions;
+  }, [gatewayRegistry]);
 
   const exceedsThreshold: boolean = useMemo(() => {
     return !votingPower || !proposalThreshold
@@ -145,26 +180,13 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
       >
         {({ handleSubmit, isSubmitting, values }) => (
           <Form onSubmit={handleSubmit} id="CreateProposalForm">
-            <GovernanceDialogSelectField
+            <GovernanceDialogSelectLargeField
               name="action"
               title="Proposed Action"
               type="select"
               placeholder={"select action"}
               required={true}
-              options={[
-                {
-                  primaryText: "Add Registry",
-                  secondaryText: undefined,
-                  action: null,
-                  value: ERegistryAction.ADD_REGISTRY,
-                },
-                {
-                  primaryText: "Add Gateway",
-                  secondaryText: undefined,
-                  action: null,
-                  value: ERegistryAction.ADD_GATEWAY,
-                },
-              ]}
+              options={actionList}
             />
             {values.action == ERegistryAction.ADD_REGISTRY && (
               <>

@@ -13,5 +13,6 @@ export const useStyles = makeStyles({
   },
   appWrapper: {
     margin: 0,
+    background: colors.WHITE,
   },
 });

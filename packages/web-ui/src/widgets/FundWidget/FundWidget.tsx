@@ -1,59 +1,109 @@
-import { Box } from "@material-ui/core";
-import { IRenderParams } from "@web-ui/interfaces";
 import React from "react";
+import { Form, Formik } from "formik";
+import { IRenderParams } from "@web-ui/interfaces";
 
 import {
-  TokenSelector,
-  Button,
-  TextInput,
-  BoxWrapper,
+  GovernanceButton,
+  GovernanceCard,
+  GovernanceDialogSelectField,
+  GovernanceField,
 } from "@web-ui/components";
 import { useFund } from "@web-ui/hooks";
 import { useStyles } from "@web-ui/widgets/FundWidget/FundWidget.style";
+import { EthereumAddress } from "@hypernetlabs/objects";
+
+interface IValues {
+  amount: string;
+  tokenAddress: EthereumAddress;
+  stateChannelAddress: EthereumAddress;
+}
 
 interface IFundWidget extends IRenderParams {}
 
-const FundWidget: React.FC<IFundWidget> = ({
-  includeBoxWrapper,
-  noLabel,
-  bodyStyle,
-}: IFundWidget) => {
+const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
   const {
     tokenSelectorOptions,
-    selectedPaymentToken,
-    setSelectedPaymentToken,
-    depositFunds,
-    mintTokens,
-    amount,
-    setAmount,
     error,
+    depositFunds,
+    activeStateChannels = [],
+    selectedStateChennel,
   } = useFund();
   const classes = useStyles({ error });
 
-  const CustomBox = includeBoxWrapper ? BoxWrapper : Box;
+  const handleFormSubmit = (values: IValues) => {
+    depositFunds(
+      values.tokenAddress,
+      values.amount,
+      values.stateChannelAddress,
+    );
+  };
 
   return (
-    <CustomBox
+    <GovernanceCard
       className={classes.wrapper}
-      label={!noLabel ? "FUND YOUR CHANNEL" : undefined}
-      bodyStyle={bodyStyle}
+      title={!noLabel ? "Deposit Funds" : undefined}
+      description={
+        !noLabel
+          ? "Move tokens from your Ethereum wallet into your Hypernet Protocol account."
+          : undefined
+      }
     >
-      <TokenSelector
-        tokenSelectorOptions={tokenSelectorOptions}
-        selectedPaymentToken={selectedPaymentToken}
-        setSelectedPaymentToken={setSelectedPaymentToken}
-      />
-      <TextInput label="Amount" value={amount} onChange={setAmount} />
-      <Button
-        label="Fund my wallet"
-        disabled={!selectedPaymentToken?.address}
-        onClick={depositFunds}
-        fullWidth={true}
-        bgColor="linear-gradient(98deg, rgba(0,120,255,1) 0%, rgba(126,0,255,1) 100%)"
-      />
-      {/* <Button onClick={mintTokens} label="Mint HyperToken" />
-      <br /> */}
-    </CustomBox>
+      <Formik
+        enableReinitialize
+        initialValues={
+          {
+            tokenAddress: tokenSelectorOptions[0]?.address,
+            amount: "1",
+            stateChannelAddress:
+              selectedStateChennel?.channelAddress ||
+              activeStateChannels[0]?.channelAddress,
+          } as IValues
+        }
+        onSubmit={handleFormSubmit}
+      >
+        {({ handleSubmit, values }) => {
+          return (
+            <Form onSubmit={handleSubmit}>
+              <GovernanceDialogSelectField
+                required
+                title="State Channel"
+                name="stateChannelAddress"
+                options={activeStateChannels.map((option) => ({
+                  primaryText: option.channelAddress,
+                  value: option.channelAddress,
+                }))}
+              />
+              <GovernanceDialogSelectField
+                required
+                title="Token Selector"
+                name="tokenAddress"
+                options={tokenSelectorOptions.map((option) => ({
+                  primaryText: option.tokenName,
+                  value: option.address,
+                }))}
+              />
+              <GovernanceField
+                required
+                name="amount"
+                title="Amount"
+                type="input"
+                placeholder="Type Amount"
+              />
+
+              <GovernanceButton
+                fullWidth
+                color="primary"
+                variant="contained"
+                onClick={handleSubmit}
+                disabled={!(!!values.amount && !!values.tokenAddress)}
+              >
+                Fund my wallet
+              </GovernanceButton>
+            </Form>
+          );
+        }}
+      </Formik>
+    </GovernanceCard>
   );
 };
 

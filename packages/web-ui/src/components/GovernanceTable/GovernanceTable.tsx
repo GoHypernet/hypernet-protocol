@@ -73,7 +73,7 @@ export const GovernanceTable: React.FC<GovernanceTableProps> = (
           <Box className={classes.titleWrapper}>
             <Typography variant="h3">{title}</Typography>
             {headerAction && (
-              <GovernanceButton {...headerAction} size="medium">
+              <GovernanceButton {...headerAction} size="medium" color="primary">
                 {headerAction.label}
               </GovernanceButton>
             )}
@@ -167,8 +167,8 @@ export const GovernanceTable: React.FC<GovernanceTableProps> = (
                               return (
                                 <GovernanceBasicValueWithTitle
                                   title={
-                                    filteredColumns[index].mobileCellValue ||
-                                    filteredColumns[index].cellValue
+                                    filteredColumns[index]?.mobileCellValue ||
+                                    filteredColumns[index]?.cellValue
                                   }
                                   value={
                                     rowItem.mobileCellValue || rowItem.cellValue
@@ -191,7 +191,7 @@ export const GovernanceTable: React.FC<GovernanceTableProps> = (
             {rowItems.map((rowItem, index) => (
               <GovernanceBasicValueWithTitle
                 title={
-                  columns[index].mobileCellValue || columns[index].cellValue
+                  columns[index]?.mobileCellValue || columns[index]?.cellValue
                 }
                 value={rowItem.mobileCellValue || rowItem.cellValue}
               />

@@ -3,18 +3,14 @@ import { colors, EFontSize } from "@web-ui/theme";
 
 export const useStyles = makeStyles((theme) => ({
   wrapper: (props: any) => ({
-    padding: 16,
     marginBottom: 24,
-    backgroundColor: colors.GRAY100,
-    border: `2px solid ${colors.GRAY200}`,
-    borderRadius: 3,
     cursor: "pointer",
-    textAlign: "left",
   }),
   dialogTitle: {
     display: "flex",
     alignItems: "center",
     justifyContent: "space-between",
+    flexDirection: "row-reverse",
     fontSize: EFontSize.H4,
   },
   list: {
@@ -28,13 +24,10 @@ export const useStyles = makeStyles((theme) => ({
     },
   },
   title: {
-    marginBottom: 28,
+    marginBottom: 8,
   },
   field: {
     width: "100%",
-    border: "none",
-    background: "transparent",
-    outline: "none",
     color: theme.palette.text.primary,
     fontSize: EFontSize.BODY2,
 
@@ -55,5 +48,12 @@ export const useStyles = makeStyles((theme) => ({
   fieldTextWrapper: {
     display: "flex",
     justifyContent: "space-between",
+    border: `2px solid ${colors.GRAY200}`,
+    padding: "12px 16px",
+    borderRadius: 3,
+    background: colors.GRAY100,
+  },
+  dialogCloseButton: {
+    marginLeft: "auto",
   },
 }));

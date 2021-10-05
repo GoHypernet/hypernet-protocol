@@ -17,6 +17,7 @@ export interface IGovernanceButton extends ButtonProps {
   variant?: "text" | "outlined" | "contained";
   children?: string | React.ReactNode;
   startIcon?: React.ReactNode;
+  endIcon?: React.ReactNode;
   autoFocus?: boolean;
   size?: "small" | "medium" | "large";
   isDangerButton?: boolean;
@@ -24,13 +25,14 @@ export interface IGovernanceButton extends ButtonProps {
 }
 
 export const GovernanceButton: React.FC<IGovernanceButton> = ({
-  color = "primary",
+  color,
   onClick,
   disabled,
   loading,
   variant,
   children,
   startIcon,
+  endIcon,
   autoFocus,
   size,
   isDangerButton,
@@ -48,6 +50,7 @@ export const GovernanceButton: React.FC<IGovernanceButton> = ({
       color={color}
       disabled={disabled}
       startIcon={startIcon}
+      endIcon={endIcon}
       autoFocus={autoFocus}
       size={size}
       fullWidth={fullWidth}

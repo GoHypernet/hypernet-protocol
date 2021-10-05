@@ -209,6 +209,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <BalancesWidget {...config} />,
           config?.showInModal,
+          undefined,
+          undefined,
+          true,
         ),
         this._generateDomElement(
           config?.selector || BALANCES_WIDGET_ID_SELECTOR,
@@ -226,6 +229,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <BalancesSummaryWidget {...config} />,
           config?.showInModal,
+          undefined,
+          undefined,
+          true,
         ),
         this._generateDomElement(
           config?.selector || BALANCES_SUMMARY_WIDGET_ID_SELECTOR,
@@ -243,6 +249,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <GatewaysWidget {...config} />,
           config?.showInModal,
+          undefined,
+          undefined,
+          true,
         ),
         this._generateDomElement(
           config?.selector || BALANCES_WIDGET_ID_SELECTOR,
@@ -258,6 +267,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <FundWidget {...config} />,
           config?.showInModal,
+          undefined,
+          undefined,
+          true,
         ),
         this._generateDomElement(config?.selector || FUND_WIDGET_ID_SELECTOR),
       );
@@ -273,6 +285,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <WithdrawWidget {...config} />,
           config?.showInModal,
+          undefined,
+          undefined,
+          true,
         ),
         this._generateDomElement(
           config?.selector || WITHDRAW_WIDGET_ID_SELECTOR,
@@ -288,6 +303,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <LinksWidget {...config} />,
           config?.showInModal,
+          undefined,
+          undefined,
+          true,
         ),
         this._generateDomElement(config?.selector || LINKS_WIDGET_ID_SELECTOR),
       );
@@ -345,6 +363,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <StateChannelsWidget {...config} />,
           config?.showInModal,
+          undefined,
+          undefined,
+          true,
         ),
         this._generateDomElement(
           config?.selector || STATE_CHANNELS_WIDGET_ID_SELECTOR,

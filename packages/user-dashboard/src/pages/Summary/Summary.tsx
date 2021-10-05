@@ -46,7 +46,7 @@ const Summary: React.FC = () => {
   }, []);
 
   return (
-    <PageWrapper label="SUMMARY">
+    <PageWrapper label="Summary">
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Box id="public-identifier"></Box>
@@ -58,18 +58,18 @@ const Summary: React.FC = () => {
         </Grid>
       </Grid>
       <Grid container spacing={3}>
-        <Grid item xs={8}>
+        <Grid item xs={12}>
           <Box id="payments-wrapper"></Box>
         </Grid>
-        <Grid item xs={4}>
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Box id="balances-wrapper"></Box>
-            </Grid>
-            <Grid item xs={12}>
-              <Box id="gateway-list-wrapper"></Box>
-            </Grid>
-          </Grid>
+      </Grid>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Box id="balances-wrapper"></Box>
+        </Grid>
+      </Grid>
+      <Grid container spacing={3}>
+        <Grid item xs={12}>
+          <Box id="gateway-list-wrapper"></Box>
         </Grid>
       </Grid>
     </PageWrapper>

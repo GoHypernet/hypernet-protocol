@@ -7,6 +7,7 @@ import {
   GovernanceProposalListItem,
   GovernanceWidgetHeader,
   getPageItemIndexList,
+  GovernanceEmptyState,
 } from "@web-ui/components";
 import { IProposalsWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -79,6 +80,14 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
           },
         ]}
       />
+
+      {!proposals.length && (
+        <GovernanceEmptyState
+          title="No proposals found."
+          description="Proposals submitted by community members will appear here."
+        />
+      )}
+
       {proposals.map((proposal) => (
         <GovernanceProposalListItem
           onClick={() =>
