@@ -1,16 +1,4 @@
-import {
-  PushPayment,
-  PullPayment,
-  PaymentId,
-  UnixTimestamp,
-  BigNumberString,
-  EthereumAddress,
-  ChainId,
-  PublicIdentifier,
-  GatewayUrl,
-  EPaymentState,
-  SortedTransfers,
-} from "@hypernetlabs/objects";
+import { PushPayment, PullPayment } from "@hypernetlabs/objects";
 import { Box, AppBar, Switch, Typography, Tooltip } from "@material-ui/core";
 import InfoIcon from "@material-ui/icons/Info";
 import FilterListIcon from "@material-ui/icons/FilterList";
@@ -22,8 +10,8 @@ import { useStyles } from "@web-ui/widgets/LinksWidget/LinksWidget.style";
 import {
   PullPaymentList,
   PushPaymentList,
-  AntTabs,
-  AntTab,
+  GovernanceTabs,
+  GovernanceTab,
   TabPanel,
   GovernanceCard,
   GovernanceSideFilter,
@@ -123,71 +111,6 @@ const LinksWidget: React.FC<ILinksWidget> = ({
   };
 
   const getPushPayments = (): PushPayment[] => {
-    const pushpayments = [
-      new PushPayment(
-        PaymentId("asdasd"),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        ChainId(2344),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        EPaymentState.Accepted,
-        EthereumAddress("0x431ns34540vncskfn3859khfsdfnkjds"),
-        BigNumberString("43"),
-        BigNumberString("43"),
-        UnixTimestamp(434354),
-        UnixTimestamp(434354),
-        UnixTimestamp(434354),
-        BigNumberString("asdsad"),
-        GatewayUrl("https://www.hyperpay.com"),
-        {} as SortedTransfers,
-        null,
-        BigNumberString("43"),
-        BigNumberString("43"),
-      ),
-      new PushPayment(
-        PaymentId("asdasd"),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        ChainId(2344),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        EPaymentState.Proposed,
-        EthereumAddress("0x431ns34540vncskfn3859khfsdfnkjds"),
-        BigNumberString("43"),
-        BigNumberString("43"),
-        UnixTimestamp(434354),
-        UnixTimestamp(434354),
-        UnixTimestamp(434354),
-        BigNumberString("asdsad"),
-        GatewayUrl("https://www.hyperpay.com"),
-        {} as SortedTransfers,
-        null,
-        BigNumberString("43"),
-        BigNumberString("43"),
-      ),
-      new PushPayment(
-        PaymentId("asdasd"),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        ChainId(2344),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        EPaymentState.Staked,
-        EthereumAddress("0x431ns34540vncskfn3859khfsdfnkjds"),
-        BigNumberString("43"),
-        BigNumberString("43"),
-        UnixTimestamp(434354),
-        UnixTimestamp(434354),
-        UnixTimestamp(434354),
-        BigNumberString("asdsad"),
-        GatewayUrl("https://www.hyperpay.com"),
-        {} as SortedTransfers,
-        null,
-        BigNumberString("43"),
-        BigNumberString("43"),
-      ),
-    ];
-
-    return pushpayments;
-
     return links.reduce((acc, link) => {
       const pushPayments = link.pushPayments.filter((pushPayment) => {
         return (
@@ -219,82 +142,6 @@ const LinksWidget: React.FC<ILinksWidget> = ({
   };
 
   const getPullPayments = (): PullPayment[] => {
-    const pullpayments = [
-      new PullPayment(
-        PaymentId("asdasd"),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        ChainId(2344),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        EPaymentState.Accepted,
-        EthereumAddress("0x431ns34540vncskfn3859khfsdfnkjds"),
-        BigNumberString("43"),
-        BigNumberString("43"),
-        UnixTimestamp(434354),
-        UnixTimestamp(434354),
-        UnixTimestamp(434354),
-        BigNumberString("asdsad"),
-        GatewayUrl("https://www.hyperpay.com"),
-        {} as SortedTransfers,
-        null,
-        BigNumberString("43"),
-        BigNumberString("43"),
-        BigNumberString("43"),
-        43,
-        BigNumberString("43"),
-        [],
-      ),
-      new PullPayment(
-        PaymentId("asdasd"),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        ChainId(2344),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        EPaymentState.Proposed,
-        EthereumAddress("0x431ns34540vncskfn3859khfsdfnkjds"),
-        BigNumberString("43"),
-        BigNumberString("43"),
-        UnixTimestamp(434354),
-        UnixTimestamp(434354),
-        UnixTimestamp(434354),
-        BigNumberString("asdsad"),
-        GatewayUrl("https://www.hyperpay.com"),
-        {} as SortedTransfers,
-        null,
-        BigNumberString("43"),
-        BigNumberString("43"),
-        BigNumberString("43"),
-        43,
-        BigNumberString("43"),
-        [],
-      ),
-      new PullPayment(
-        PaymentId("asdasd"),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        ChainId(2344),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        PublicIdentifier("0x431ns34540vncskfn3859khfsdfnkjds"),
-        EPaymentState.Staked,
-        EthereumAddress("0x431ns34540vncskfn3859khfsdfnkjds"),
-        BigNumberString("43"),
-        BigNumberString("43"),
-        UnixTimestamp(434354),
-        UnixTimestamp(434354),
-        UnixTimestamp(434354),
-        BigNumberString("asdsad"),
-        GatewayUrl("https://www.hyperpay.com"),
-        {} as SortedTransfers,
-        null,
-        BigNumberString("43"),
-        BigNumberString("43"),
-        BigNumberString("43"),
-        43,
-        BigNumberString("43"),
-        [],
-      ),
-    ];
-    return pullpayments;
-
     return links.reduce((acc, link) => {
       const pullPayments = link.pullPayments.filter((pullPayment) => {
         return (
@@ -369,15 +216,15 @@ const LinksWidget: React.FC<ILinksWidget> = ({
         onFilterSubmit={handleFilterSubmit}
       />
       <AppBar position="static" color="transparent" elevation={0}>
-        <AntTabs
+        <GovernanceTabs
           value={tabValue}
           onChange={handleChange}
           indicatorColor="primary"
           textColor="primary"
         >
-          <AntTab label="Push Payments" />
-          <AntTab label="Pull Payments" />
-        </AntTabs>
+          <GovernanceTab label="Push Payments" />
+          <GovernanceTab label="Pull Payments" />
+        </GovernanceTabs>
       </AppBar>
       <TabPanel value={tabValue} index={0}>
         <PushPaymentList
