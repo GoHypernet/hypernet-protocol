@@ -6,7 +6,7 @@ export const useStyles = makeStyles({
     body: {
       margin: 0,
       backgroundColor: colors.BACKGROUND_GREY,
-      color: colors.MAIN_TEXT_BLACK,
+      color: colors.GRAY700,
       fontFamily:
         '"Montserrat", "Roboto", "Helvetica Neue", "Arial", sans-serif',
     },

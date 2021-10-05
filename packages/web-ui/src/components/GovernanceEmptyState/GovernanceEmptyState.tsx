@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Typography } from "@material-ui/core";
 
-import { useStyles } from "@web-integration/components/GovernanceEmptyState/GovernanceEmptyState.style";
+import { useStyles } from "@web-ui/components/GovernanceEmptyState/GovernanceEmptyState.style";
 
 export interface IGovernanceEmptyState {
   title: string | React.ReactNode;
@@ -20,14 +20,16 @@ export const GovernanceEmptyState: React.FC<IGovernanceEmptyState> = (
       {img || (
         <img
           width="150"
-          src="https://res.cloudinary.com/dqueufbs7/image/upload/v1622582034/images/Screen_Shot_2021-06-02_at_00.12.25.png"
+          src="https://res.cloudinary.com/barhantas/image/upload/v1633475136/carry_pwthhs.svg"
         />
       )}
 
-      <Typography variant="body1" className={classes.title}>
+      <Typography variant="body1" color="textPrimary" className={classes.title}>
         {title}
       </Typography>
-      <Typography variant="body2">{description}</Typography>
+      <Typography variant="body2" color="textSecondary">
+        {description}
+      </Typography>
     </Box>
   );
 };

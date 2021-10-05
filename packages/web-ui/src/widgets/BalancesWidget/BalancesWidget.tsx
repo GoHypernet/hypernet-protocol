@@ -36,7 +36,7 @@ const BalancesWidget: React.FC<IBalancesWidget> = ({
           <GovernanceEmptyState
             title="Ups..!"
             description={
-              <Typography variant="body1">
+              <Typography variant="body2">
                 You don't have any balances yet, you can Fund your account from
                 <a href="/deposit-and-withdraw"> here. </a>
               </Typography>
