@@ -113,9 +113,9 @@ const func: DeployFunction = async () => {
       "UpgradeableRegistryFactory",
       [
         TimelockContractAddress,
-        ["Gateways", "Liquidity Providers"],
-        ["G", "LPs"],
-        [registryAccountAddress, registryAccountAddress],
+        ["Gateways", "Liquidity Providers","HyperKYC"],
+        ["G", "LPs","KYC"],
+        [registryAccountAddress, registryAccountAddress, registryAccountAddress],
       ],
     ],
     ["HypernetGovernor", [HypertokenContractAddress, TimelockContractAddress]],
