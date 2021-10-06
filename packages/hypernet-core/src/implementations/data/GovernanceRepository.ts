@@ -234,7 +234,7 @@ export class GovernanceRepository implements IGovernanceRepository {
           proposal[1], // proposalOriginator
           Number(utils.formatEther(proposal[5])), // proposalVotesFor
           Number(utils.formatEther(proposal[6])), // proposalVotesAgainst
-          Number(utils.formatEther(proposal[2])), // proposalETA
+          Number(utils.formatEther(proposal[7])), // proposalAbstain
           proposalDescription, // proposalDescription
           null, // proposalNumber
         );
