@@ -110,7 +110,7 @@ const func: DeployFunction = async () => {
     ["Message", []],
     ["Hypertoken", []],
     [
-      "RegistryFactory",
+      "UpgradeableRegistryFactory",
       [
         TimelockContractAddress,
         ["Gateways", "Liquidity Providers"],
