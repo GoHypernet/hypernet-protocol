@@ -14,6 +14,7 @@ import {
   EthereumAddress,
   BigNumberString,
 } from "@hypernetlabs/objects";
+import { useStyles } from "@web-ui/widgets/GatewayInfoModalWidget/GatewayInfoModalWidget.style";
 
 interface IGatewayInfoModalWidget extends IRenderParams {
   gatewayUrl: GatewayUrl;
@@ -30,6 +31,7 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
   props: IGatewayInfoModalWidget,
 ) => {
   const { gatewayUrl, closeCallback } = props;
+  const classes = useStyles();
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
@@ -158,7 +160,7 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
                     <Tooltip title="Token Already Registered" placement="top">
                       <IconButton
                         aria-label="Registered token"
-                        style={{ cursor: "auto" }}
+                        className={classes.iconButton}
                       >
                         <CheckIcon color="primary" />
                       </IconButton>
@@ -170,7 +172,7 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
                       <Tooltip title="Token Already Registered" placement="top">
                         <IconButton
                           aria-label="Registered token"
-                          style={{ cursor: "auto", paddingRight: 5 }}
+                          className={classes.iconButton}
                         >
                           <CheckIcon color="primary" />
                         </IconButton>

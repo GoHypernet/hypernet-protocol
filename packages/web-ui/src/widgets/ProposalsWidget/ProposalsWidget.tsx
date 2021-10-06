@@ -22,7 +22,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
 }: IProposalsWidgetParams) => {
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
-  const { setLoading } = useLayoutContext();
+  const { loading, setLoading } = useLayoutContext();
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [delegateVotesModalOpen, setDelegateVotesModalOpen] =
     useState<boolean>(false);
@@ -81,7 +81,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
         ]}
       />
 
-      {!proposals.length && (
+      {!loading && !proposals.length && (
         <GovernanceEmptyState
           title="No proposals found."
           description="Proposals submitted by community members will appear here."

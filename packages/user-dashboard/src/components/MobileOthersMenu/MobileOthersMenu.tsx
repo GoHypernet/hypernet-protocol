@@ -39,6 +39,7 @@ const Header: React.FC = () => {
         <MoreVertIcon />
       </IconButton>
       <Menu
+        className={classes.menu}
         id="simple-menu"
         anchorEl={anchorEl}
         keepMounted
