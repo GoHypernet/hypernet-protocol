@@ -3,56 +3,73 @@ const { ethers } = require("hardhat")
 const { BN, expectRevert } = require('@openzeppelin/test-helpers')
 const NFR = require("../artifacts/contracts/NonFungibleRegistryUpgradeable.sol/NonFungibleRegistryUpgradeable.json")
 
-describe("Registry Factory", function () {
-  it("Test Registry Factory.", async function () {
-    // get signers
-    const [owner, addr1] = await ethers.getSigners()
+describe("Registry Factory Unit Tests", function () {
+    
+    let registryfactory; 
+    let owner;
+    let addr1;
 
-    const registryName = "Gateways"
-    const registrySymbol = "HNG"
+    beforeEach(async () => {
+        [owner, addr1] = await ethers.getSigners()
 
-    // deploy factory contract
-    const FactoryRegistry = await ethers.getContractFactory("UpgradeableRegistryFactory");
-    const factoryregistry = await FactoryRegistry.deploy(owner.address, ["Test"], ["t"], [owner.address]);
-    registry_reciept = await factoryregistry.deployTransaction.wait();
-    console.log("Factory Address:", factoryregistry.address);
-    console.log("Registry Beacon:", await factoryregistry.registryBeacon());
+        // deploy factory contract
+        const RegistryFactory = await ethers.getContractFactory("UpgradeableRegistryFactory");
+        registryfactory = await RegistryFactory.deploy(owner.address, ["Test"], ["t"], [owner.address]);
+        await registryfactory.deployTransaction.wait();
+	});
 
-    const testRegAddress = await factoryregistry.nameToAddress("Test");
-    const testReg = new ethers.Contract(testRegAddress, NFR.abi, owner);
-    expect(await testReg.name()).to.equal("Test")
-    expect(await testReg.symbol()).to.equal("t")
-    const regtx = await testReg.register(addr1.address, "dummy", "dummy");
-    const regtxrcpt = regtx.wait();
-    console.log("Constructor Registry Address:", testRegAddress)
+    it("Check the constructor-deployed registries.", async function () {
+        const testRegAddress = await registryfactory.nameToAddress("Test");
+        const testReg = new ethers.Contract(testRegAddress, NFR.abi, owner);
 
-    const factorytx = await factoryregistry.createRegistry(registryName, registrySymbol, owner.address);
-    const factorytx_rcpt = await factorytx.wait(); 
-    const registryAddress = factorytx_rcpt["events"][0]["address"];
-    console.log("Registry Address:", registryAddress)
+        let tx = await testReg.register(addr1.address, "dummy", "dummy");
+        let txrcpt = tx.wait();
 
-    const registryHandle = new ethers.Contract(registryAddress, NFR.abi, owner)
-    expect(await registryHandle.name()).to.equal(registryName)
-    expect(await registryHandle.symbol()).to.equal(registrySymbol)
+        tx = await testReg.register(addr1.address, "", "dummy");
+        txrcpt = tx.wait();
 
-    // can't create two registries with the same name
-    await expectRevert(
-        factoryregistry.createRegistry(
-            registryName,
-            registrySymbol,
-            owner.address,
-        ),
-        "RegistryFactory: Registry by that name exists.",
-      );
+        expect(await testReg.name()).to.equal("Test");
+        expect(await testReg.symbol()).to.equal("t");
+        expect(await testReg.totalSupply()).to.equal(2);
+    });
 
-    // can't mint a token associated with the same name
-    await expectRevert(
-        factoryregistry.createRegistry(
-            registryName,
-            registrySymbol,
-            "0x0000000000000000000000000000000000000000",
-        ),
-        "RegistryFactory: Registrar address must not be 0.",
-      );
-  });
+    it("Test createRegistry.", async function () {
+        const registryName = "Gateways";
+        const registrySymbol = "HNG";
+
+        let tx = await registryfactory.createRegistry(registryName, registrySymbol, owner.address);
+        txrcpt = await tx.wait(); 
+
+        const registryAddress = await registryfactory.nameToAddress(registryName);
+
+        const registryHandle = new ethers.Contract(registryAddress, NFR.abi, owner);
+
+        expect(await registryHandle.name()).to.equal(registryName);
+        expect(await registryHandle.symbol()).to.equal(registrySymbol);
+        expect(await registryHandle.totalSupply()).to.equal(0);
+    });
+
+    it("Prevent duplicate names.", async function () {
+        // can't create two registries with the same name
+        await expectRevert(
+            registryfactory.createRegistry(
+                "Test",
+                "t",
+                owner.address,
+            ),
+            "RegistryFactory: Registry by that name exists.",
+        );
+    });
+
+    it("Prevent ownership by 0 address.", async function () {
+        // can't create two registries with the same name
+        await expectRevert(
+                registryfactory.createRegistry(
+                "Dummy",
+                "d",
+                "0x0000000000000000000000000000000000000000",
+            ),
+            "RegistryFactory: Registrar address must not be 0.",
+          );
+    });
 });
