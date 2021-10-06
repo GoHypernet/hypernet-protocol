@@ -16,7 +16,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
 }: IRegistryListWidgetParams) => {
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
-  const { setLoading } = useLayoutContext();
+  const { loading, setLoading } = useLayoutContext();
   const [registries, setRegistries] = useState<Registry[]>([]);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
     <Box>
       <GovernanceWidgetHeader label="Registries" />
 
-      {!registries.length && (
+      {!loading && !registries.length && (
         <GovernanceEmptyState
           title="No registiries found."
           description="Registiries submitted by community members will appear here."
