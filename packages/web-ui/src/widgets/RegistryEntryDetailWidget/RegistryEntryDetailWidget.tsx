@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Box, Typography } from "@material-ui/core";
 import { useAlert } from "react-alert";
 
@@ -80,30 +80,39 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
     alert.error(err?.message || "Something went wrong!");
   };
 
+  const isOwner = useMemo(() => {
+    if (!accountAddress || !registryEntry) {
+      return false;
+    }
+
+    return accountAddress === registryEntry.owner;
+  }, [accountAddress, registryEntry]);
+
   return (
     <Box>
       <GovernanceWidgetHeader
         label="Registry Entry Details"
         {...(accountAddress &&
           registryEntry && {
-            description:
-              accountAddress === registryEntry.owner ? (
-                <Box display="flex">
-                  <GovernanceTag text="Owner" color={ETagColor.GREEN} />
-                  <Box paddingLeft={2}>
-                    <Typography>
-                      You can update the Identity Data information.
-                    </Typography>
-                  </Box>
+            description: isOwner ? (
+              <Box display="flex">
+                <GovernanceTag text="Owner" color={ETagColor.GREEN} />
+                <Box paddingLeft={2}>
+                  <Typography variant="body1" color="textPrimary">
+                    You can update the Identity Data information.
+                  </Typography>
                 </Box>
-              ) : (
-                <Box>
-                  <GovernanceTag text="Viewer" color={ETagColor.PURPLE} />
-                  <Typography>
+              </Box>
+            ) : (
+              <Box display="flex">
+                <GovernanceTag text="Viewer" color={ETagColor.PURPLE} />
+                <Box paddingLeft={2}>
+                  <Typography variant="body1" color="textPrimary">
                     You can copy the Identity Data information.
                   </Typography>
                 </Box>
-              ),
+              </Box>
+            ),
           })}
         navigationLink={{
           label: "Registry Entries",
@@ -114,7 +123,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
       />
       {registryEntry && (
         <Box>
-          {registryEntry?.canUpdateLabel ? (
+          {registryEntry?.canUpdateLabel && isOwner ? (
             <GovernanceEditableValueWithTitle
               title="Label"
               value={registryEntry?.label}
@@ -133,7 +142,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
             value={registryEntry?.tokenId}
           />
           {registryEntry?.tokenURI &&
-            (registryEntry?.canUpdateURI ? (
+            (registryEntry?.canUpdateURI && isOwner ? (
               <GovernanceEditableValueWithTitle
                 title="Token URI"
                 value={registryEntry?.tokenURI}
