@@ -3,256 +3,254 @@ const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
 
 describe("Registry", function () {
-  it("Test the Registry contract.", async function () {
-    // get signers
-    const [owner, addr1, addr2] = await ethers.getSigners();
+    let hypertoken;
+    let registry;
+    let owner;
+    let addr1; 
 
-    // deploy hypertoken contract to test registerByToken
-    const Hypertoken = await ethers.getContractFactory("Hypertoken");
-    const hypertoken = await Hypertoken.deploy();
-    hypertoken_reciept = await hypertoken.deployTransaction.wait();
-    const totalToken = await hypertoken.totalSupply();
-    console.log("Hypertoken Address:", hypertoken.address);
-    console.log("Hypertoken Supply:", ethers.utils.formatEther(totalToken.toString()));
-    console.log("Hypertoken Gas Fee:", hypertoken_reciept.gasUsed.toString());
+    beforeEach(async () => {
+        [owner, addr1, addr2] = await ethers.getSigners();
 
-    // give some tokens to the addr2
-    const tx475 = await hypertoken.transfer(addr2.address, ethers.utils.parseEther("2"));
-    const tx475_reciept = await tx475.wait();
-    expect(await hypertoken.balanceOf(addr2.address)).to.equal(ethers.utils.parseEther("2"));
+        const Hypertoken = await ethers.getContractFactory("Hypertoken");
+        hypertoken = await Hypertoken.deploy();
+        await hypertoken.deployTransaction.wait();
 
-    // deploy registry contract
-    const UpgradableRegistry = await ethers.getContractFactory("NonFungibleRegistryUpgradeable");
-    const registry = await upgrades.deployProxy(UpgradableRegistry, ["Gateways", "G", owner.address, owner.address]);
-    await registry.deployed();
-    console.log("Registry Address:", registry.address);
+        // deploy registry contract
+        const UpgradableRegistry = await ethers.getContractFactory("NonFungibleRegistryUpgradeable");
+        registry = await upgrades.deployProxy(UpgradableRegistry, ["Gateways", "G", owner.address, owner.address]);
+        await registry.deployed();
+	});
 
-    // construct some realistic registration data
-    const testTokenAddress = 0x0;
-    const hyperTokenAddress = 0x0;
-    const routerPublicIdentifier =
-      "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR";
-    const registryEntry = {
-      supportedTokens: [
-        {
-          chainId: 1337,
-          tokenAddress: testTokenAddress,
-        },
-        {
-          chainId: 1337,
-          tokenAddress: hyperTokenAddress,
-        },
-        {
-          chainId: 1369,
-          tokenAddress: testTokenAddress,
-        },
-        {
-          chainId: 1369,
-          tokenAddress: hyperTokenAddress,
-        },
-      ],
-      allowedGateways: [
-        "https://localhost:3000/users/v0",
-        "http://localhost:5010",
-      ],
-    };
+    it("Test gateway registration.", async function () {
+         // construct some realistic registration data
+        let testTokenAddress = 0x0;
+        let hyperTokenAddress = 0x0;
+        let routerPublicIdentifier = "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR";
+        let registryEntry = {
+            supportedTokens: [
+            {
+                chainId: 1337,
+                tokenAddress: testTokenAddress,
+            },
+            {
+                chainId: 1337,
+                tokenAddress: hyperTokenAddress,
+            },
+            {
+                chainId: 1369,
+                tokenAddress: testTokenAddress,
+            },
+            {
+                chainId: 1369,
+                tokenAddress: hyperTokenAddress,
+            },
+            ],
+            allowedGateways: [
+                "https://localhost:3000/users/v0",
+                "http://localhost:5010",
+            ],
+        };
 
-    // mint a token to the registry
-    const tx1 = await registry.register(
-      addr1.address,
-      routerPublicIdentifier,
-      JSON.stringify(registryEntry),
-    );
-    const tx1_reciept = tx1.wait();
+        // mint a token to the registry
+        let tx = await registry.register(
+            addr1.address,
+            routerPublicIdentifier,
+            JSON.stringify(registryEntry),
+        );
+        tx.wait();
 
-    // check that registration occured properly
-    expect(await registry.registryMap(routerPublicIdentifier)).to.equal(1);
-    expect(await registry.tokenURI(1)).to.equal(JSON.stringify(registryEntry));
-    expect(await registry.totalSupply()).to.equal(1);
-    expect(await registry.ownerOf(1)).to.equal(addr1.address);
+        // check that registration occured properly
+        expect(await registry.registryMap(routerPublicIdentifier)).to.equal(1);
+        expect(await registry.tokenURI(1)).to.equal(JSON.stringify(registryEntry));
+        expect(await registry.totalSupply()).to.equal(1);
+        expect(await registry.ownerOf(1)).to.equal(addr1.address);
+    });
 
-    // can't mint a token associated with the same name
-    await expectRevert(
-      registry.register(
-        addr1.address,
-        routerPublicIdentifier,
-        JSON.stringify(registryEntry),
-      ),
-      "NonFungibleRegistry: label is already registered.",
-    );
+    it("Ensure labels cannot be duplicated.", async function () {
+        const label = "dummy";
+        const registrationData = "dummy";
 
-    // only owner or approved address can burn
-    await expectRevert(
-      registry.connect(addr2).burn(1),
-      "NonFungibleRegistry: caller is not owner nor approved nor registrar.",
-    );
+        let tx = await registry.register(
+            addr1.address,
+            label,
+            registrationData,
+        );
+        tx.wait();
 
-    // update the tokenURI
-    // only owner or approved address can update
-    await expectRevert(
-      registry.connect(addr2).updateRegistration(1, "new URI"),
-      "NonFungibleRegistry: caller is not owner nor approved nor registrar.",
-    );
+        await expectRevert(
+            registry.register(
+              addr2.address,
+              label,
+              registrationData,
+            ),
+            "NonFungibleRegistry: label is already registered.",
+          );
+    });
 
-    // connect to a new account and try to update and burn
-    const newRegistry = registry.connect(addr1);
+    it("Check token burn permissions", async function () {
+        const label = "dummy";
+        const registrationData = "dummy";
 
-    const tx2 = await newRegistry.updateRegistration(1, "new URI");
-    const tx2_reciept = tx2.wait();
-    expect(await newRegistry.tokenURI(1)).to.equal("new URI");
+        let tx = await registry.register( addr1.address, label, registrationData);
+        tx.wait();
 
-    // registrar disables transfers in the registry
-    const tx12 = await registry.setRegistryParameters([], [], [], [], [false], [], [], [], []);
-    const tx12_reciept = tx12.wait();
+        expect(await registry.balanceOf(addr1.address)).to.equal(1);
 
-    // ensure that noone without REGISTRAR_ROLE can transfer tokens
-    await expectRevert(
-        newRegistry.transferFrom(addr1.address, owner.address, 1),
-        "NonFungibleRegistry: transfers are disabled.",
-    );
+        // only owner or approved address can burn
+        await expectRevert(
+            registry.connect(addr2).burn(1),
+            "NonFungibleRegistry: caller is not owner nor approved nor registrar.",
+        );
 
-    // registrar can transfer NFIs in any circumstance to enable account recovery etc.
-    const tx987 = await registry.connect(owner).transferFrom(addr1.address, owner.address, 1);
-    const tx987_reciept = tx987.wait();
+        // REGISTRAR_ROLE can burn all tokens
+        tx = await registry.burn(1);
+        tx.wait();
 
-    const tx654 = await registry.connect(owner).transferFrom(owner.address, addr1.address, 1);
-    const tx654_reciept = tx654.wait();
+        expect(await registry.balanceOf(addr1.address)).to.equal(0);
+    });
 
-    // registrar re-enables transfers in the registry
-    const tx97 = await registry.setRegistryParameters([], [], [], [], [true], [], [], [], []);
-    const tx97_reciept = tx97.wait();
+    it("Check permissions on registry parameter, label, and storage updating.", async function () {
+        const label1 = "dummy1";
+        const registrationData1 = "dummy1";
+        const label2 = "dummy2";
+        const registrationData2 = "dummy2";
 
-    // mint a token to the registry without a label
-    const tx4 = await registry.register(
-        addr2.address,
-        "",
-        JSON.stringify(registryEntry),
-    );
-    const tx4_reciept = tx4.wait();
+        let tx = await registry.register( addr1.address, label1, registrationData1);
+        tx.wait();
 
-    const newerRegistry = registry.connect(addr2);
+        tx = await registry.register( addr1.address, label2, registrationData2);
+        tx.wait();
 
-    // can't update label if updating is disabled
-    await expectRevert(
-        newerRegistry.updateLabel(2, "newDummyString"),
-        "NonFungibleRegistry: Label updating is disabled.",
-    );
+        // only owner or approved address can update
+        await expectRevert(
+            registry.connect(addr2).updateRegistration(1, "new URI"),
+            "NonFungibleRegistry: caller is not owner nor approved nor registrar.",
+        );
 
-    // only admin can update parameters
-    await expectRevert(
-        newerRegistry.setRegistryParameters([], [], [], [true], [], [], [], [], []),
-        "NonFungibleRegistry: must be registrar.",
-    );
-    
-    // update the label on the NFI that has none
-    const tx5 = await registry.setRegistryParameters([], [], [], [true], [], [], [], [], []);
-    const tx5_reciept = tx5.wait();
+        tx = await registry.updateRegistration(1, "new URI");
+        tx.wait();
+        expect(await registry.tokenURI(1)).to.equal("new URI");
 
-    // update the label on the NFI that has none
-    const tx6 = await newerRegistry.updateLabel(
-        2,
-        "newDummyString",
-    );
-    const tx6_reciept = tx6.wait();
+        // can't update label if updating is disabled
+        await expectRevert(
+            registry.connect(addr1).updateLabel(2, "newDummyString"),
+            "NonFungibleRegistry: Label updating is disabled.",
+        );
 
-    // can't add label that already exists in the registry
-    await expectRevert(
-        newerRegistry.updateLabel(2, routerPublicIdentifier),
-        "NonFungibleRegistry: label is already registered.",
-    );
+        // only REGISTRAR_ROLE can update registry parameters
+        await expectRevert(
+            registry.connect(addr1).setRegistryParameters([], [], [], [true], [], [], [], [], []),
+            "NonFungibleRegistry: must be registrar.",
+        );
 
-    // let address1 burn their token
-    const tx7 = await newRegistry.burn(1);
-    const tx7_reciept = tx7.wait();
-    expect(await newRegistry.totalSupply()).to.equal(1);
+        // enable label updating
+        tx = await registry.setRegistryParameters([], [], [], [true], [], [], [], [], []);
+        tx.wait();
 
-    // let address1 burn their token
-    const tx8 = await newerRegistry.burn(2);
-    const tx8_reciept = tx8.wait();
-    expect(await newRegistry.totalSupply()).to.equal(0);
+        // update the label on the NFI that has none
+        tx = await registry.connect(addr1).updateLabel(1, "newDummyString");
+        tx.wait();
 
-    // the registration token address hasn't been set yet so 
-    // registration by token is currently disabled
-    await expectRevert(
-        newerRegistry.registerByToken(addr2.address, "username", "myprofile"),
-        "NonFungibleRegistry: registration by token not enabled.",
-    )
+        // can't add label that already exists in the registry
+        await expectRevert(
+            registry.connect(addr1).updateLabel(2, label2),
+            "NonFungibleRegistry: label is already registered.",
+        );
+    });
 
-    // registrar now sets the registration token to enable token-based registration
-    const tx8878 = await registry.setRegistryParameters([], [], [], [], [], [hypertoken.address], [], [], []);
-    const tx8878_reciept = tx8878.wait();
+    it("Check transfer permissions.", async function () {
+        const label = "dummy";
+        const registrationData = "dummy";
 
-    const regFee =  await registry.registrationFee();
-    const burnFee = await registry.burnFee();
-    console.log("Registration Fee:", ethers.utils.formatEther(regFee.toString()).toString());
-    console.log("Burn Rate:", burnFee.toString())
+        let tx = await registry.register( addr1.address, label, registrationData);
+        tx.wait();
+        expect(await registry.balanceOf(addr1.address)).to.equal(1);
 
-    // first the registree needs to approve the registry to pull tokens from its account
-    const tx6548 = await hypertoken.connect(addr2).approve(registry.address, regFee);
-    const tx6548_reciept = tx6548.wait();
+        // registrar disables transfers in the registry
+        tx = await registry.setRegistryParameters([], [], [], [], [false], [], [], [], []);
+        tx.wait();
 
-    // then they can submit a transaction to register
-    const tx3215 = await newerRegistry.registerByToken(addr2.address, "username1", "myprofile1");
-    const tx3215_reciept = tx3215.wait();
+        // ensure that noone without REGISTRAR_ROLE can transfer tokens
+        await expectRevert(
+            registry.connect(addr1).transferFrom(addr1.address, owner.address, 1),
+            "NonFungibleRegistry: transfers are disabled.",
+        );
 
-    const stakeTokenId = await registry.registryMap("username1");
-    const tokenStake = await registry.identityStakes(stakeTokenId);
-    expect(tokenStake[1]).to.equal(ethers.utils.parseEther("0.95"));
-    expect(await hypertoken.balanceOf(addr2.address)).to.equal(ethers.utils.parseEther("1"));
+        // registrar can transfer NFIs in any circumstance to enable account recovery etc.
+        tx = await registry.transferFrom(addr1.address, owner.address, 1);
+        tx.wait();
+        expect(await registry.balanceOf(owner.address)).to.equal(1);
+        expect(await registry.balanceOf(addr1.address)).to.equal(0);
 
-    // first the registree needs to approve the registry to pull tokens from its account
-    const tx6458 = await hypertoken.connect(addr2).approve(registry.address, regFee);
-    const tx6458_reciept = tx6458.wait();
+        tx = await registry.transferFrom(owner.address, addr1.address, 1);
+        tx.wait();
+        expect(await registry.balanceOf(addr1.address)).to.equal(1);
 
-    // then they can submit a transaction to register
-    const tx3125 = await newerRegistry.registerByToken(addr2.address, "username2", "myprofile2");
-    const tx3125_reciept = tx3125.wait();
+    });
 
-    const stakeTokenId2 = await registry.registryMap("username2");
-    const tokenStake2 = await registry.identityStakes(stakeTokenId2);
-    expect(tokenStake2[1]).to.equal(ethers.utils.parseEther("0.95"));
-    expect(await hypertoken.balanceOf(addr2.address)).to.equal(ethers.utils.parseEther("0"));
-    expect(await hypertoken.balanceOf(registry.address)).to.equal(ethers.utils.parseEther("1.9"));
+    it("Test ERC20 token-based registration.", async function () {
+        // give some tokens to the addr2
+        let tx = await hypertoken.transfer(addr2.address, ethers.utils.parseEther("2"));
+        tx.wait();
+        expect(await hypertoken.balanceOf(addr2.address)).to.equal(ethers.utils.parseEther("2"));
 
-    // non-owners and those without REGISTRAR_ROLE cannot burn tokens
-    const tx8125 = await newerRegistry.burn(stakeTokenId2);
-    const tx8125_reciept = tx8125.wait();
-    expect(await hypertoken.balanceOf(addr2.address)).to.equal(ethers.utils.parseEther("0.95"));
+        let regFee =  await registry.registrationFee();
+        let burnFee = await registry.burnFee();
+       
+        // approve the registry to pull hypertoken from the users wallet
+        tx = await hypertoken.connect(addr2).approve(registry.address, regFee);
+        tx.wait();
 
-    const balancebefore = await hypertoken.balanceOf(owner.address);
-    console.log("Owner balance before burn:", ethers.utils.formatEther(balancebefore.toString()));
+        // registration by token is currently disabled
+        await expectRevert(
+            registry.connect(addr2).registerByToken(addr2.address, "username", "myprofile"),
+            "NonFungibleRegistry: registration by token not enabled.",
+        )
 
-    // account that sends the burn transaction gets the refund, not necessarily the token owner
-    // additionally the _admin role gets the burn fee in this setup, thats why the balance is 0.1 higher
-    const tx8122 = await registry.burn(stakeTokenId);
-    const tx8122_reciept = tx8122.wait();
-    expect(await hypertoken.balanceOf(owner.address)).to.equal(ethers.utils.parseEther("99999999.05"));
+        // registrar now sets the registration token to enable token-based registration
+        tx = await registry.setRegistryParameters([], [], [], [], [], [hypertoken.address], [], [], []);
+        tx.wait();
 
-    const balanceafter = await hypertoken.balanceOf(owner.address);
-    console.log("Owner balance after burn:", ethers.utils.formatEther(balanceafter.toString()));
+        // then they can submit a transaction to register
+        tx = await registry.connect(addr2).registerByToken(addr2.address, "username1", "myprofile1");
+        tx.wait();
 
-    // minting many tokens in a single transaction can save gas:
-    const batchSize = 150;
-    const recipients = [];
-    const labels = [];
-    const emptyLabels = [];
-    const datas = [];
-    for (let i = 0; i < batchSize; i++) {
-        recipients.push(owner.address);
-        labels.push(`tokenLabel${i}`);
-        emptyLabels.push("");
-        datas.push(`tokenusername${i}`)
-    }
-    const tx9999 = await registry.batchRegister(recipients, labels, datas);
-    const tx9999_reciept = tx9999.wait();
-    expect(await registry.totalSupply()).to.equal(batchSize);
+        let stakeTokenId = await registry.registryMap("username1");
+        let tokenStake = await registry.identityStakes(stakeTokenId);
+        expect(tokenStake[1]).to.equal(ethers.utils.parseEther("0.95"));
+        expect(await hypertoken.balanceOf(addr2.address)).to.equal(ethers.utils.parseEther("1"));
 
-    const tx6666 = await registry.batchRegister(recipients, emptyLabels, datas);
-    const tx6666_reciept = tx6666.wait();
-    expect(await registry.totalSupply()).to.equal(2*batchSize);
+        tx = await registry.connect(addr2).burn(stakeTokenId);
+        tx.wait();
+        expect(await hypertoken.balanceOf(addr2.address)).to.equal(ethers.utils.parseEther("1.95"));
+ 
+    });
 
-    const tx66666 = await registry.register(recipients[0], emptyLabels[0], datas[1]);
-    const tx66666_reciept = tx66666.wait();
-    expect(await registry.totalSupply()).to.equal(2*batchSize+1);
-});
+    it("Test batch minting function.", async function () {
+
+      // minting many tokens in a single transaction can save gas:
+      const batchSize = 150;
+      const recipients = [];
+      const labels = [];
+      const emptyLabels = [];
+      const datas = [];
+      for (let i = 0; i < batchSize; i++) {
+          recipients.push(owner.address);
+          labels.push(`tokenLabel${i}`);
+          emptyLabels.push("");
+          datas.push(`tokenusername${i}`)
+      }
+
+      let tx = await registry.batchRegister(recipients, labels, datas);
+      tx.wait();
+      expect(await registry.totalSupply()).to.equal(batchSize);
+
+      tx = await registry.batchRegister(recipients, emptyLabels, datas);
+      tx.wait();
+      expect(await registry.totalSupply()).to.equal(2*batchSize);
+
+      tx = await registry.register(recipients[0], emptyLabels[0], datas[1]);
+      tx.wait();
+      expect(await registry.totalSupply()).to.equal(2*batchSize+1);
+  });
 });
