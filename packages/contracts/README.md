@@ -53,6 +53,12 @@ record the registration token address used and fee amount and associate this sta
 any non-zero registration fee associated with the burned `tokenId` will be transfered to the account who burned the token, *not* the owner
 of the token at the time of burning. 
 
+SECURITY NOTES:
+
+[Known Timelock.sol contract vulnerability](https://forum.openzeppelin.com/t/timelockcontroller-vulnerability-post-mortem/14958)
+[Known UUPSUpgradeable.sol contract vulnerability](https://forum.openzeppelin.com/t/uupsupgradeable-vulnerability-post-mortem/15680)
+[UUPSUpgradeable initialization vulnerability](https://forum.openzeppelin.com/t/security-advisory-initialize-uups-implementation-contracts/15301)
+
 ## Install dependencies
 
 ```shell

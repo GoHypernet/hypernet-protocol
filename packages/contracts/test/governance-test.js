@@ -36,16 +36,17 @@ describe("Governance", function () {
         // deployer address should now renounce admin role for security
         tx = await timelock.renounceRole(timelock.TIMELOCK_ADMIN_ROLE(), owner.address);
         await tx.wait();
-	});
 
-    it("Test vote delegation.", async function () {
-        let tx = await hypertoken.delegate(owner.address);
+        // deletate votes to the owner address
+        tx = await hypertoken.delegate(owner.address);
         tx.wait();
 
         // give some tokens to the timelock contract
         tx = await hypertoken.transfer(timelock.address, ethers.utils.parseEther("1000"))
         tx.wait()
+	});
 
+    it("Test vote delegation.", async function () {
         // if delegate() is not called, the account has no voting power
         expect(await hypertoken.balanceOf(timelock.address)).to.equal(ethers.utils.parseEther("1000"));
         expect(await hypertoken.getVotes(timelock.address)).to.equal(ethers.utils.parseEther("0"));
@@ -54,16 +55,10 @@ describe("Governance", function () {
     });
 
     it("Test successful execution of proposal.", async function () {
-
-        let tx = await hypertoken.delegate(owner.address);
-        tx.wait();
-
-        // Example of proposal creation, this one transfers tokens from governor contract
-        // to a target address
         // create proposal call data
         let proposalDescription = "Proposal #1: Give grant to address" // Human readable description
         let descriptionHash = ethers.utils.id(proposalDescription); // Hash description to help compute the proposal ID
-        let transferCalldata = hypertoken.interface.encodeFunctionData('transfer', [addr1.address, 7]); // encode the function to be called 
+        let transferCalldata = hypertoken.interface.encodeFunctionData('transfer', [addr1.address, ethers.utils.parseEther("7")]); // encode the function to be called 
         let proposalID = await hypernetgovernor.hashProposal(
             [hypertoken.address],
             [0],
@@ -104,5 +99,12 @@ describe("Governance", function () {
         tx = await hypernetgovernor["queue(uint256)"](proposalID);
         tx.wait();
         expect(await hypernetgovernor.state(proposalID)).to.equal(5);
+
+        // execute the proposal
+        tx = await hypernetgovernor["execute(uint256)"](proposalID);
+        tx.wait();
+        expect(await hypernetgovernor.state(proposalID)).to.equal(7);
+        expect(await hypertoken.balanceOf(addr1.address)).to.equal(ethers.utils.parseEther("7"));
+        expect(await hypertoken.balanceOf(timelock.address)).to.equal(ethers.utils.parseEther("993"));
     });
 });
