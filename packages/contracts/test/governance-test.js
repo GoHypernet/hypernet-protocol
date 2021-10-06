@@ -53,7 +53,7 @@ describe("Governance", function () {
 
     });
 
-    it("Test governance proposal.", async function () {
+    it("Test successful execution of proposal.", async function () {
 
         let tx = await hypertoken.delegate(owner.address);
         tx.wait();
@@ -81,10 +81,8 @@ describe("Governance", function () {
         );
         tx.wait()
 
-        // give some tokens to addr1 to force a new block in testing environment
-        tx = await hypertoken.transfer(addr1.address, 1000)
-        tx.wait()
-        expect(await hypertoken.balanceOf(addr1.address)).to.equal(1000);
+        // fast forward 1 block to get the proposal into active state
+        hre.timeAndMine.mine(1);
 
         // check state of proposal, should be 1 for Active
         expect(await hypernetgovernor.state(proposalID)).to.equal(1);
@@ -96,16 +94,15 @@ describe("Governance", function () {
         expect(await hypernetgovernor.hasVoted(proposalID, owner.address)).to.equal(true);
         expect(await hypernetgovernor.hasVoted(proposalID, addr1.address)).to.equal(false);
 
-        // get the blocknumber for a Proposal (i.e "timestamp" it was submitted on)
-        const snapshot = await hypernetgovernor.proposalSnapshot(proposalID);
+        // fast forward 20 blocks to get past proposal deadline
+        hre.timeAndMine.mine(20);
 
-        // get the blocknumber at which the Proposal voting period is done
-        const deadline = await hypernetgovernor.proposalDeadline(proposalID);
+        // check state of proposal, should be 4 for passed
+        expect(await hypernetgovernor.state(proposalID)).to.equal(4);
 
-        // get the required number of votes for successful quorum at a particular block number
-        const quorum = await hypernetgovernor.quorum(snapshot);
-
-        // get Proposal details (defined in GovernorCompatibilityBravo.sol)
-        const proposal = await hypernetgovernor.proposals(proposalID);
+        // queue the proposal
+        tx = await hypernetgovernor["queue(uint256)"](proposalID);
+        tx.wait();
+        expect(await hypernetgovernor.state(proposalID)).to.equal(5);
     });
 });
