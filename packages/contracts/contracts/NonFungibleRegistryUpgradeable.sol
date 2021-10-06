@@ -33,10 +33,10 @@ contract NonFungibleRegistryUpgradeable is
     // DFDL schema definition for metadata stored in tokenURI
     string public schema;
 
-    // mapping a human-readable label to a tokenID
+    // optional mapping a human-readable label to a tokenID
     mapping(string => uint256) public registryMap;
 
-    // reverse mapping from tokenID to a human-readable label
+    // optional reverse mapping from tokenID to a human-readable label
     mapping(uint256 => string) public reverseRegistryMap;
 
     // registration fee belonging to each token which is refunded on burning
@@ -56,17 +56,20 @@ contract NonFungibleRegistryUpgradeable is
     // disallow token transfers for all but DEFAULT_ADMIN_ROLE
     bool public allowTransfers;
 
-    // address of token used for token-based registration
+    // address of ERC20 token used for token-based registration
     address public registrationToken;
 
-    // amount of token required to call registerByToken
+    // amount of registration token required to call registerByToken
     uint256 public registrationFee; 
+
+    // address that burned token is sent to
+    address public burnAddress; 
+
+    // percentage (in basis points) of registration token burned by registerByToken
+    uint256 public burnFee; 
 
     // create a REGISTRAR_ROLE to manage registry functionality
     bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
-
-    // create an `UPGRADER_ROLE` for safe upgrading
-    bytes32 public constant UPGRADER_ROLE = keccak256("UPGRADER_ROLE");
 
     CountersUpgradeable.Counter private _tokenIdTracker;
 
@@ -92,10 +95,7 @@ contract NonFungibleRegistryUpgradeable is
         __ERC721_init(name_, symbol_);
 
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
-
         _setupRole(REGISTRAR_ROLE, _registrar);
-
-        _setupRole(UPGRADER_ROLE, _msgSender());
 
         allowLazyRegister = false;
         allowStorageUpdate = true;
@@ -103,39 +103,46 @@ contract NonFungibleRegistryUpgradeable is
         allowTransfers = true;
         registrationToken = address(0);
         registrationFee = 1e18; // assume there are 18 decimal places in the token
+        burnAddress = _admin;
+        burnFee = 500; // basis points
     }
 
     // we must implement this function at top level contract definition for the upgradable proxy pattern
-    function _authorizeUpgrade(address newImplementation) internal onlyRole(UPGRADER_ROLE) override {}
+    function _authorizeUpgrade(address newImplementation) internal onlyRole(REGISTRAR_ROLE) override {}
 
     /// @notice setRegistryParameters enable or disable the lazy registration feature
     /// @dev only callable by the REGISTRAR_ROLE, use arrays so we don't have to always pass every
-    /// parameter if we don't want to chage it.
-    /// @param _schema DFDL-compatible schema definition
+    /// parameter if we don't want to chage it. I know this function is ugle but it helps to reduce
+    /// the size of the compiled contract compared to having 7 seperate setter fuctions
+    /// @param _schema DFDL-compatible schema definition for dynamic UIs
     /// @param _allowLazyRegister boolean flag; false disables lazy registration
     /// @param _allowStorageUpdate boolean flag; false disables updating the tokenURI field for all but REGISTRAR_ROLE
-    /// @param _allowLabelChange boolean flag; false disables transfers for all but REGISTRAR_ROLE
-    /// @param _allowTransfers address of the token to use for regsitration
-    /// @param _registrationToken address of the token to use for regsitration
-    /// @param _registrationFee data to store in the tokenURI
+    /// @param _allowLabelChange boolean flag; false disables label updating for all but REGISTRAR_ROLE
+    /// @param _allowTransfers boolean flag; false disables transfers for all but   REGISTRAR_ROLE
+    /// @param _registrationToken address of the ERC20 token to use for regsitration
+    /// @param _registrationFee number of registrationToken's needed to call registerByToken
     function setRegistryParameters(string[] memory _schema, 
                                    bool[] memory _allowLazyRegister,
                                    bool[] memory _allowStorageUpdate,
                                    bool[] memory _allowLabelChange,
                                    bool[] memory _allowTransfers,
                                    address[] memory _registrationToken,
-                                   uint256[] memory  _registrationFee
+                                   uint256[] memory  _registrationFee,
+                                   address[] memory _burnAddress,
+                                   uint256[] memory _burnFee
                                    )
         external 
         virtual {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
-        if (_schema.length > 0) {schema = _schema[0];}
-        if (_allowLazyRegister.length > 0) {allowLazyRegister = _allowLazyRegister[0];}
-        if (_allowStorageUpdate.length > 0) {allowStorageUpdate = _allowStorageUpdate[0];}
-        if (_allowLabelChange.length > 0) {allowLabelChange = _allowLabelChange[0];}
-        if (_allowTransfers.length > 0) {allowTransfers = _allowTransfers[0];}
-        if (_registrationToken.length > 0) {registrationToken = _registrationToken[0];}
-        if (_registrationFee.length > 0) {registrationFee = _registrationFee[0];}
+        if (_schema.length > 0) { schema = _schema[0];}
+        if (_allowLazyRegister.length > 0) { allowLazyRegister = _allowLazyRegister[0]; }
+        if (_allowStorageUpdate.length > 0) { allowStorageUpdate = _allowStorageUpdate[0]; }
+        if (_allowLabelChange.length > 0) { allowLabelChange = _allowLabelChange[0]; }
+        if (_allowTransfers.length > 0) { allowTransfers = _allowTransfers[0]; }
+        if (_registrationToken.length > 0) { registrationToken = _registrationToken[0]; }
+        if (_registrationFee.length > 0) { registrationFee = _registrationFee[0]; }
+        if (_burnAddress.length > 0) { burnAddress = _burnAddress[0]; }
+        if (_burnFee.length > 0) { burnFee = _burnFee[0]; }
     }
 
     function _storageCanBeUpdated() internal view virtual returns (bool) {
@@ -187,16 +194,14 @@ contract NonFungibleRegistryUpgradeable is
         // user must approve the registry to collect the registration fee from their wallet
         IERC20Upgradeable(registrationToken).transferFrom(_msgSender(), address(this), registrationFee);
         uint256 tokenId = _createLabeledToken(to, label, registrationData);
+
+        uint256 burnAmount = registrationFee * burnFee / 10000;
+        IERC20Upgradeable(registrationToken).transfer(burnAddress, burnAmount);
         // the fee stays with the token, not the token owner
-        identityStakes[tokenId] = Fee(registrationToken, registrationFee);
+        identityStakes[tokenId] = Fee(registrationToken, registrationFee-burnAmount);
     }
 
     function _createLabeledToken(address to, string memory label, string memory registrationData) private returns (uint256 tokenId) {
-
-        // We cannot just use balanceOf to create the new tokenId because tokens
-        // can be burned (destroyed), so we need a separate counter.
-        // Enforce that the counter start at 1 (not 0) so that we can check 
-        // if a name exists
         if (bytes(label).length > 0) {
             require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
             tokenId = _createToken(to, registrationData);
@@ -288,7 +293,8 @@ contract NonFungibleRegistryUpgradeable is
         // when burning, check if there is a registration fee tied to the token identity 
         if (identityStakes[tokenId].amount != 0) {
             // send the registration fee to the token burner
-            IERC20Upgradeable(identityStakes[tokenId].token).transfer(_msgSender(), registrationFee);
+            IERC20Upgradeable(identityStakes[tokenId].token).transfer(_msgSender(), identityStakes[tokenId].amount);
+            delete identityStakes[tokenId];
         }
     }
 

@@ -11,14 +11,14 @@ describe("Registry", function () {
     const Hypertoken = await ethers.getContractFactory("Hypertoken");
     const hypertoken = await Hypertoken.deploy();
     hypertoken_reciept = await hypertoken.deployTransaction.wait();
-    const totalToken = await hypertoken.totalSupply()
-    console.log("Hypertoken Address:", hypertoken.address)
-    console.log("Hypertoken Supply:", totalToken.toString())
-    console.log("Hypertoken Gas Fee:", hypertoken_reciept.gasUsed.toString())
+    const totalToken = await hypertoken.totalSupply();
+    console.log("Hypertoken Address:", hypertoken.address);
+    console.log("Hypertoken Supply:", ethers.utils.formatEther(totalToken.toString()));
+    console.log("Hypertoken Gas Fee:", hypertoken_reciept.gasUsed.toString());
 
     // give some tokens to the addr2
-    const tx475 = await hypertoken.transfer(addr2.address, ethers.utils.parseEther("2"))
-    const tx475_reciept = await tx475.wait()
+    const tx475 = await hypertoken.transfer(addr2.address, ethers.utils.parseEther("2"));
+    const tx475_reciept = await tx475.wait();
     expect(await hypertoken.balanceOf(addr2.address)).to.equal(ethers.utils.parseEther("2"));
 
     // deploy registry contract
@@ -102,7 +102,7 @@ describe("Registry", function () {
     expect(await newRegistry.tokenURI(1)).to.equal("new URI");
 
     // registrar disables transfers in the registry
-    const tx12 = await registry.setRegistryParameters([], [], [], [], [false], [], []);
+    const tx12 = await registry.setRegistryParameters([], [], [], [], [false], [], [], [], []);
     const tx12_reciept = tx12.wait();
 
     // ensure that noone without REGISTRAR_ROLE can transfer tokens
@@ -119,7 +119,7 @@ describe("Registry", function () {
     const tx654_reciept = tx654.wait();
 
     // registrar re-enables transfers in the registry
-    const tx97 = await registry.setRegistryParameters([], [], [], [], [true], [], []);
+    const tx97 = await registry.setRegistryParameters([], [], [], [], [true], [], [], [], []);
     const tx97_reciept = tx97.wait();
 
     // mint a token to the registry without a label
@@ -140,12 +140,12 @@ describe("Registry", function () {
 
     // only admin can update parameters
     await expectRevert(
-        newerRegistry.setRegistryParameters([], [], [], [true], [], [], []),
+        newerRegistry.setRegistryParameters([], [], [], [true], [], [], [], [], []),
         "NonFungibleRegistry: must be registrar.",
     );
     
     // update the label on the NFI that has none
-    const tx5 = await registry.setRegistryParameters([], [], [], [true], [], [], []);
+    const tx5 = await registry.setRegistryParameters([], [], [], [true], [], [], [], [], []);
     const tx5_reciept = tx5.wait();
 
     // update the label on the NFI that has none
@@ -179,11 +179,13 @@ describe("Registry", function () {
     )
 
     // registrar now sets the registration token to enable token-based registration
-    const tx8878 = await registry.setRegistryParameters([], [], [], [], [], [hypertoken.address], []);
+    const tx8878 = await registry.setRegistryParameters([], [], [], [], [], [hypertoken.address], [], [], []);
     const tx8878_reciept = tx8878.wait();
 
     const regFee =  await registry.registrationFee();
+    const burnFee = await registry.burnFee();
     console.log("Registration Fee:", ethers.utils.formatEther(regFee.toString()).toString());
+    console.log("Burn Rate:", burnFee.toString())
 
     // first the registree needs to approve the registry to pull tokens from its account
     const tx6548 = await hypertoken.connect(addr2).approve(registry.address, regFee);
@@ -195,7 +197,7 @@ describe("Registry", function () {
 
     const stakeTokenId = await registry.registryMap("username1");
     const tokenStake = await registry.identityStakes(stakeTokenId);
-    expect(tokenStake[1]).to.equal(regFee);
+    expect(tokenStake[1]).to.equal(ethers.utils.parseEther("0.95"));
     expect(await hypertoken.balanceOf(addr2.address)).to.equal(ethers.utils.parseEther("1"));
 
     // first the registree needs to approve the registry to pull tokens from its account
@@ -208,22 +210,29 @@ describe("Registry", function () {
 
     const stakeTokenId2 = await registry.registryMap("username2");
     const tokenStake2 = await registry.identityStakes(stakeTokenId2);
-    expect(tokenStake2[1]).to.equal(regFee);
+    expect(tokenStake2[1]).to.equal(ethers.utils.parseEther("0.95"));
     expect(await hypertoken.balanceOf(addr2.address)).to.equal(ethers.utils.parseEther("0"));
-    expect(await hypertoken.balanceOf(registry.address)).to.equal(ethers.utils.parseEther("2"));
+    expect(await hypertoken.balanceOf(registry.address)).to.equal(ethers.utils.parseEther("1.9"));
 
     // non-owners and those without REGISTRAR_ROLE cannot burn tokens
     const tx8125 = await newerRegistry.burn(stakeTokenId2);
     const tx8125_reciept = tx8125.wait();
-    expect(await hypertoken.balanceOf(addr2.address)).to.equal(ethers.utils.parseEther("1"));
+    expect(await hypertoken.balanceOf(addr2.address)).to.equal(ethers.utils.parseEther("0.95"));
+
+    const balancebefore = await hypertoken.balanceOf(owner.address);
+    console.log("Owner balance before burn:", ethers.utils.formatEther(balancebefore.toString()));
 
     // account that sends the burn transaction gets the refund, not necessarily the token owner
+    // additionally the _admin role gets the burn fee in this setup, thats why the balance is 0.1 higher
     const tx8122 = await registry.burn(stakeTokenId);
     const tx8122_reciept = tx8122.wait();
-    expect(await hypertoken.balanceOf(owner.address)).to.equal(ethers.utils.parseEther("99999999"));
+    expect(await hypertoken.balanceOf(owner.address)).to.equal(ethers.utils.parseEther("99999999.05"));
+
+    const balanceafter = await hypertoken.balanceOf(owner.address);
+    console.log("Owner balance after burn:", ethers.utils.formatEther(balanceafter.toString()));
 
     // minting many tokens in a single transaction can save gas:
-    const batchSize = 151;
+    const batchSize = 150;
     const recipients = [];
     const labels = [];
     const emptyLabels = [];
