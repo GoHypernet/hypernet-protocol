@@ -62,9 +62,9 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
   const proposalVotesAgainst = proposal ? proposal.votesAgainst : 0;
 
-  const proposalETA = proposal ? proposal.proposalETA : 0;
+  const proposalVotesAbstain = proposal ? proposal.votesAbstain : 0;
 
-  const totalVotes = proposalVotesFor + proposalVotesAgainst + proposalETA;
+  const totalVotes = proposalVotesFor + proposalVotesAgainst + proposalVotesAbstain;
 
   const forPercentage =
     ((proposalVotesFor * 100) / totalVotes).toFixed(0) || "0";
@@ -73,7 +73,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
     ((proposalVotesAgainst * 100) / totalVotes).toFixed(0) || "0";
 
   const abstainPercentage =
-    ((proposalETA * 100) / totalVotes).toFixed(0) || "0";
+    ((proposalVotesAbstain * 100) / totalVotes).toFixed(0) || "0";
 
   const showVotingButtons = Number(proposal?.state) === EProposalState.ACTIVE;
 
@@ -177,7 +177,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
           <Grid item xs={4}>
             <GovernanceVotingCard
               type="abstain"
-              value={proposalETA}
+              value={proposalVotesAbstain}
               progressValue={parseFloat(abstainPercentage)}
               onVoteClick={() => castVote(EProposalVoteSupport.ABSTAIN)}
               isVoted={supportStatus === EProposalVoteSupport.ABSTAIN}
