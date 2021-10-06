@@ -129,7 +129,7 @@ npx hardhat delegateVote --network dev --delegate 0xf39Fd6e51aad88F6F4ce6aB88272
 Cast a vote on a proposal (Against (0), For (1), Abstain (2)):
 
 ```shell
-22104418028353388202287425060500442898792900291568640533228773866112567147490 --support 1
+npx hardhat castVote --network dev --id 22104418028353388202287425060500442898792900291568640533228773866112567147490 --support 1
 ```
 
 If a proposal has reached quorum and >50% of votes are in favor, once its deadline has passed it can be queued then executed:

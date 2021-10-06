@@ -14,16 +14,16 @@ const RF = require("./artifacts/contracts/UpgradeableRegistryFactory.sol/Upgrade
 const NFR = require("./artifacts/contracts/NonFungibleRegistryUpgradeable.sol/NonFungibleRegistryUpgradeable.json");
 
 // hardhat network
-const govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
-const timelockAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
-const factoryAddress = "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6";
-const hAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+// const govAddress = "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9";
+// const timelockAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0";
+// const factoryAddress = "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6";
+// const hAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 
 // devnet
-// const govAddress = "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd";
-// const timelockAddress = "0x82D50AD3C1091866E258Fd0f1a7cC9674609D254";
-// const factoryAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
-// const hAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
+const govAddress = "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd";
+const timelockAddress = "0x82D50AD3C1091866E258Fd0f1a7cC9674609D254";
+const factoryAddress = "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
+const hAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -108,14 +108,14 @@ task("registryParameters", "Prints NFR  parameters.")
 
     const symbol = await registryHandle.symbol();
     const numberOfEntries = await registryHandle.totalSupply();
-    const registrationToken = await registryHandle.registrationToken();
-    const registrationFee = await registryHandle.registrationFee();
+    // const registrationToken = await registryHandle.registrationToken();
+    // const registrationFee = await registryHandle.registrationFee();
     console.log("Registry Name:", name);
     console.log("Registry Symbol:", symbol);
     console.log("Registry Address:", registryAddress);
     console.log("Number of Entries:", numberOfEntries.toString());
-    console.log("Registration Token:", registrationToken);
-    console.log("Registration Fee:", registrationFee.toString());
+    // console.log("Registration Token:", registrationToken);
+    // console.log("Registration Fee:", registrationFee.toString());
 });
 
 task("setRegistryParameters", "Prints NFR  parameters.")
@@ -132,6 +132,7 @@ task("setRegistryParameters", "Prints NFR  parameters.")
     const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
 
     const tx = await registryHandle.setRegistryParameters([], [], [], [], [], [tokenAddress], []);
+    tx.wait();
 
     const symbol = await registryHandle.symbol();
     const numberOfEntries = await registryHandle.totalSupply();
@@ -165,7 +166,6 @@ task("registryEntryByLabel", "Prints NunFungible Identity Data.")
     console.log("Owner of NFI:", tokenOwner);
     console.log("Token ID:", tokenId.toString());
     console.log("NFI Data:", tokenURI);
-
 });
 
 task("proposeRegistry", "Propose a new NonFungibleRegistry.")

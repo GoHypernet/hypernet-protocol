@@ -223,7 +223,6 @@ describe("Registry", function () {
         tx = await registry.connect(addr2).burn(stakeTokenId);
         tx.wait();
         expect(await hypertoken.balanceOf(addr2.address)).to.equal(ethers.utils.parseEther("1.95"));
- 
     });
 
     it("Test batch minting function.", async function () {
