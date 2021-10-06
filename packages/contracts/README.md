@@ -55,9 +55,9 @@ of the token at the time of burning.
 
 SECURITY NOTES:
 
-[Known Timelock.sol contract vulnerability](https://forum.openzeppelin.com/t/timelockcontroller-vulnerability-post-mortem/14958)
-[Known UUPSUpgradeable.sol contract vulnerability](https://forum.openzeppelin.com/t/uupsupgradeable-vulnerability-post-mortem/15680)
-[UUPSUpgradeable initialization vulnerability](https://forum.openzeppelin.com/t/security-advisory-initialize-uups-implementation-contracts/15301)
+* [Known Timelock.sol contract vulnerability](https://forum.openzeppelin.com/t/timelockcontroller-vulnerability-post-mortem/14958)
+* [Known UUPSUpgradeable.sol contract vulnerability](https://forum.openzeppelin.com/t/uupsupgradeable-vulnerability-post-mortem/15680)
+* [UUPSUpgradeable initialization vulnerability](https://forum.openzeppelin.com/t/security-advisory-initialize-uups-implementation-contracts/15301)
 
 ## Install dependencies
 
