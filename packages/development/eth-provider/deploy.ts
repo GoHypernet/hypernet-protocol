@@ -113,9 +113,9 @@ const func: DeployFunction = async () => {
       "UpgradeableRegistryFactory",
       [
         TimelockContractAddress,
-        ["Gateways", "Liquidity Providers"],
-        ["G", "LPs"],
-        [registryAccountAddress, registryAccountAddress],
+        ["Gateways", "Liquidity Providers","HyperKYC"],
+        ["G", "LPs","KYC"],
+        [registryAccountAddress, registryAccountAddress, registryAccountAddress],
       ],
     ],
     ["HypernetGovernor", [HypertokenContractAddress, TimelockContractAddress]],
@@ -257,9 +257,13 @@ const func: DeployFunction = async () => {
   const liquidityRegistryAddress = await registryFactoryContract.nameToAddress(
     "Liquidity Providers",
   );
+  const kycRegistryAddress = await registryFactoryContract.nameToAddress(
+    "HyperKYC",
+  );
 
   log.info(`Gateway Registry Address: ${gatewayRegistryAddress}`);
   log.info(`Liquidity Registry Address: ${liquidityRegistryAddress}`);
+  log.info(`HyperKYC Registry Address: ${kycRegistryAddress}`);
 
   const routerPublicIdentifier =
     "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR";
