@@ -15,13 +15,19 @@ successful in practice at adopting beneficial proposals to protocol upgrades whi
 
 ![alt text](/documentation/images/Hypernet-Contract-Flow.png)
 
-The Hypernet Governance application is used for proposing and vetting (by the token holder community) new Non-Fungible Registries (NFRs) 
-which are deployed through a registry factory contract. Non-Fungible Registries are an extension of the [EIP721](https://eips.ethereum.org/EIPS/eip-721) 
-non-fungible token standard and have several customizable functionalities. An NFR is enumerable and every entry is an ownable token 
-that has a corresponding `label` (seperate from the `tokenURI`) that is unique within that specific NFR. That is, two entries can have 
-the same `tokenURI`, but they cannot have the same `label`. Labels fascilitate lookups more easily for applications in which the registry 
-is used for identity or authenticity verification in which the `tokenId` may not be known *a priori* what the label is. Entries in an 
-NFR are referred to, within the protocol, as Non-Fungible Identities (NFIs). 
+The Hypernet Governance application is used for proposing and vetting (by the token holder community) new Non-Fungible Registries (NFRs), 
+which are deployed through a registry factory contract, and updating various parameters in the protocol itself. The factory contract 
+implements an [upgradable proxy pattern](https://docs.openzeppelin.com/upgrades-plugins/1.x/proxies#upgrading-via-the-proxy-pattern) 
+for deploying new NFRs in a gas-efficient manner (~82% reduction in gas fee over naive implementation). Each new NFR stores its state 
+in a proxy layer and function calls to that proxy layer are delegated to an implementation contract shared by all copies of the original 
+[beacon implementation](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UpgradeableBeacon).
+
+Non-Fungible Registries are an extension of the [EIP721](https://eips.ethereum.org/EIPS/eip-721) non-fungible token standard and have 
+several customizable functionalities. An NFR is enumerable and every entry is an ownable token that has a corresponding `label` 
+(seperate from the `tokenURI`) that is unique within that specific NFR. That is, two entries can have the same `tokenURI`, but 
+they cannot have the same `label`. Labels fascilitate lookups more easily for applications in which the registry is used for identity 
+or authenticity verification in which the `tokenId` may not be known *a priori* what the label is. Entries in an NFR are referred to, 
+within the protocol, as Non-Fungible Identities (NFIs). 
 
 Each NFR has a `REGISTRAR_ROLE`, which can register new identities, and a `DEFAULT_ADMIN_ROLE` which can make modifications 
 to which address have the `REGISTRAR_ROLE` and can also call `selfdestruct` on the registry. Both of these roles are set through 
