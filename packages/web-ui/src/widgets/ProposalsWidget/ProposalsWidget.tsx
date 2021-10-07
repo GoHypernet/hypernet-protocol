@@ -29,6 +29,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
 
   const [page, setPage] = useState<number>(1);
   const [proposalCount, setProposalCount] = useState<number>(0);
+  const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
 
   const proposalsNumberArr = useMemo(
     () => getPageItemIndexList(proposalCount, page, PROPOSALS_PER_PAGE),
@@ -40,6 +41,9 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
       .getProposalsCount()
       .map((proposalCount) => {
         setProposalCount(proposalCount);
+        if (!proposalCount) {
+          setHasEmptyState(true);
+        }
       })
       .mapErr(handleError);
   }, []);
@@ -57,6 +61,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
 
   const handleError = (err?: Error) => {
     setLoading(false);
+    setHasEmptyState(true);
     alert.error(err?.message || "Something went wrong!");
   };
 
@@ -81,7 +86,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
         ]}
       />
 
-      {!loading && !proposals.length && (
+      {hasEmptyState && (
         <GovernanceEmptyState
           title="No proposals found."
           description="Proposals submitted by community members will appear here."

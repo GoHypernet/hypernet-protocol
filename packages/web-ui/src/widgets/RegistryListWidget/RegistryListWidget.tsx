@@ -18,18 +18,23 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   const { coreProxy } = useStoreContext();
   const { loading, setLoading } = useLayoutContext();
   const [registries, setRegistries] = useState<Registry[]>([]);
+  const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
 
   useEffect(() => {
     coreProxy
       .getRegistries(1, 10)
       .map((registries) => {
         setRegistries(registries);
+        if (!registries.length) {
+          setHasEmptyState(true);
+        }
       })
       .mapErr(handleError);
   }, []);
 
   const handleError = (err?: Error) => {
     setLoading(false);
+    setHasEmptyState(true);
     alert.error(err?.message || "Something went wrong!");
   };
 
@@ -37,7 +42,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
     <Box>
       <GovernanceWidgetHeader label="Registries" />
 
-      {!loading && !registries.length && (
+      {hasEmptyState && (
         <GovernanceEmptyState
           title="No registiries found."
           description="Registiries submitted by community members will appear here."
