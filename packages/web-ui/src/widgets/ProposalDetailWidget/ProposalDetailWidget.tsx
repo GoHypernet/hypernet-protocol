@@ -62,7 +62,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
           setSupportStatus(Number(proposalVoteReceipt.support));
         }
 
-        setLoading(true);
+        setLoading(false);
       })
       .mapErr(handleError);
   };

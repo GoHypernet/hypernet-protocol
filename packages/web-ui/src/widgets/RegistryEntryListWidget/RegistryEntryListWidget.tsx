@@ -7,6 +7,7 @@ import {
   GovernanceWidgetHeader,
   GovernancePagination,
   getPageItemIndexList,
+  GovernanceEmptyState,
 } from "@web-ui/components";
 import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -26,6 +27,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   const [page, setPage] = useState<number>(1);
   const [registryEntriesCount, setRegistryEntriesCount] = useState<number>(0);
+  const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
 
   const registryEntriesNumberArr = useMemo(
     () =>
@@ -43,6 +45,9 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       .map((countsMap) => {
         const count = countsMap.get(registryName);
         setRegistryEntriesCount(count || 0);
+        if (!count) {
+          setHasEmptyState(true);
+        }
       })
       .mapErr(handleError);
   }, []);
@@ -61,6 +66,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const handleError = (err?: Error) => {
     console.log("handleError err: ", err);
     setLoading(false);
+    setHasEmptyState(true);
     alert.error(err?.message || "Something went wrong!");
   };
 
@@ -75,6 +81,14 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           },
         }}
       />
+
+      {hasEmptyState && (
+        <GovernanceEmptyState
+          title="No registiry entries found."
+          description="Registiry entries submitted by community members will appear here."
+        />
+      )}
+
       {registryEntries.map((registryEntry) => (
         <GovernanceRegistryListItem
           key={registryEntry.label}
