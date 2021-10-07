@@ -7,6 +7,7 @@ import {
   GovernanceProposalListItem,
   GovernanceWidgetHeader,
   getPageItemIndexList,
+  GovernanceEmptyState,
 } from "@web-ui/components";
 import { IProposalsWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -21,13 +22,14 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
 }: IProposalsWidgetParams) => {
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
-  const { setLoading } = useLayoutContext();
+  const { loading, setLoading } = useLayoutContext();
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [delegateVotesModalOpen, setDelegateVotesModalOpen] =
     useState<boolean>(false);
 
   const [page, setPage] = useState<number>(1);
   const [proposalCount, setProposalCount] = useState<number>(0);
+  const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
 
   const proposalsNumberArr = useMemo(
     () => getPageItemIndexList(proposalCount, page, PROPOSALS_PER_PAGE),
@@ -39,6 +41,9 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
       .getProposalsCount()
       .map((proposalCount) => {
         setProposalCount(proposalCount);
+        if (!proposalCount) {
+          setHasEmptyState(true);
+        }
       })
       .mapErr(handleError);
   }, []);
@@ -56,6 +61,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
 
   const handleError = (err?: Error) => {
     setLoading(false);
+    setHasEmptyState(true);
     alert.error(err?.message || "Something went wrong!");
   };
 
@@ -79,6 +85,14 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
           },
         ]}
       />
+
+      {hasEmptyState && (
+        <GovernanceEmptyState
+          title="No proposals found."
+          description="Proposals submitted by community members will appear here."
+        />
+      )}
+
       {proposals.map((proposal) => (
         <GovernanceProposalListItem
           onClick={() =>

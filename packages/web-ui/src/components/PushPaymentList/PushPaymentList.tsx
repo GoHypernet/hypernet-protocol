@@ -11,8 +11,10 @@ import {
   GovernanceTag,
   ETagColor,
   GovernanceButton,
+  GovernanceEmptyState,
 } from "@web-ui/components";
 import React, { useMemo } from "react";
+import { useLinks } from "@web-ui/hooks";
 
 interface IPushPaymentList {
   pushPayments: PushPayment[];
@@ -122,6 +124,7 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
 ) => {
   const { pushPayments, publicIdentifier, onAcceptPushPaymentClick } = props;
   const { viewUtils, dateUtils } = useStoreContext();
+  const { loading } = useLinks();
 
   const initialValue: ITableCell[][] = [];
   const rows = useMemo(
@@ -242,6 +245,15 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
       }, initialValue),
     [JSON.stringify(pushPayments)],
   );
+
+  if (!loading && !rows.length) {
+    return (
+      <GovernanceEmptyState
+        title="No results!"
+        description="You don’t have any payments yet."
+      />
+    );
+  }
 
   return <GovernanceTable isExpandable columns={tableColumns} rows={rows} />;
 };

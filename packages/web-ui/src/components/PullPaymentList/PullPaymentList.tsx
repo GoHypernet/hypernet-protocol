@@ -12,7 +12,9 @@ import {
   GovernanceTag,
   ETagColor,
   GovernanceButton,
+  GovernanceEmptyState,
 } from "@web-ui/components";
+import { useLinks } from "@web-ui/hooks";
 
 interface IPullPaymentList {
   pullPayments: PullPayment[];
@@ -128,6 +130,7 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
     onPullFundClick,
   } = props;
   const { viewUtils, dateUtils } = useStoreContext();
+  const { loading } = useLinks();
 
   const initialValue: ITableCell[][] = [];
   const rows = useMemo(
@@ -263,6 +266,15 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
       }, initialValue),
     [JSON.stringify(pullPayments)],
   );
+
+  if (!loading && !rows.length) {
+    return (
+      <GovernanceEmptyState
+        title="No results!"
+        description="You don’t have any payments yet."
+      />
+    );
+  }
 
   return <GovernanceTable isExpandable columns={tableColumns} rows={rows} />;
 };

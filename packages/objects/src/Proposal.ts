@@ -19,7 +19,7 @@ export class Proposal {
     public originator: string,
     public votesFor: number,
     public votesAgainst: number,
-    public proposalETA: number,
+    public votesAbstain: number,
     public description: string,
     public proposalNumber: number | null,
   ) {}
