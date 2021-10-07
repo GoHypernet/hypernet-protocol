@@ -26,11 +26,11 @@ Non-Fungible Registries are an extension of the [EIP721](https://eips.ethereum.o
 several customizable functionalities. An NFR is enumerable and every entry is an ownable token that has a corresponding `label` 
 (seperate from the `tokenURI`) that is unique within that specific NFR. That is, two entries can have the same `tokenURI`, but 
 they cannot have the same `label`. Labels fascilitate lookups more easily for applications in which the registry is used for identity 
-or authenticity verification in which the `tokenId` may not be known *a priori* what the label is. Entries in an NFR are referred to, 
-within the protocol, as Non-Fungible Identities (NFIs). 
+or authenticity verification in which the `tokenId` may not be known *a priori* but the label is (for instance when label is a URL). 
+Entries in an NFR are referred to, within the protocol, as Non-Fungible Identities (NFIs). 
 
 Each NFR has a `REGISTRAR_ROLE`, which can register new identities, and a `DEFAULT_ADMIN_ROLE` which can make modifications 
-to which address have the `REGISTRAR_ROLE` and can also call `selfdestruct` on the registry. Both of these roles are set through 
+to which addresses have the `REGISTRAR_ROLE` and can also call `selfdestruct` on the registry. Both of these roles are set through 
 the NFR constructor. Additionally, the `REGISTRAR_ROLE` and the owner of a token have the option to update the information stored 
 in the `tokenURI` after registration unless `allowStorageUpdate` is set to `false` (which it is by default and can be updated by 
 the `REGISTRAR_ROLE`). The same applies for the token `label` through the `allowLabelChange` flag (which is false by default). 
@@ -43,7 +43,8 @@ to offload the burden of gas costs to the recipient of the NFI by providing them
 the contract to register at their convenience with the token `label` serving as a nonce to prevent duplicate registration. This feature 
 is disabled by default but can be activated by the `REGISTRAR_ROLE` through the `allowLazyRegister` variable. **NOTE**: If lazy registration
 is enabled, the `allowLabelChange` should be set to `false` as the token label serves as the nonce for lazy registration. If a user is allowed 
-to change their token label, they can register multiple times. 
+to change their token label, they can register multiple times. Also, lazy registration only works when the REGISTRAR_ROLE is a signer, 
+contracts cannot provide signatures to validate. 
 
 Lastly, the Hypernet NFR implementation allows for registration by staking token. By default, this feature is disabled, but the 
 `REGISTRAR_ROLE` can set `registrationToken` to an address of an EIP20-compatible token which will enable the feature. The default 

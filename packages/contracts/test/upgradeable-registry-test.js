@@ -252,4 +252,45 @@ describe("Registry", function () {
       tx.wait();
       expect(await registry.totalSupply()).to.equal(2*batchSize+1);
   });
+  
+  it("Test lazy minting.", async function () {
+      let label = "dummylabel";
+      let registrationData = "dummyRegistrationData";
+
+      var hash = ethers.utils.solidityKeccak256(
+          ["address", "string", "string"],
+          [addr1.address, label, registrationData]
+      ).toString('hex');
+      
+      let sig = await owner.signMessage(ethers.utils.arrayify(hash));
+      let fakesig = await addr2.signMessage(ethers.utils.arrayify(hash));
+      
+      await expectRevert(
+        registry.connect(addr1).lazyRegister(addr1.address, label, registrationData, sig),
+        "NonFungibleRegistry: Lazy registration is disabled.",
+      )
+
+      // registrar now sets the registration token to enable token-based registration
+      tx = await registry.setRegistryParameters([], [true], [], [], [], [], [], [], []);
+      tx.wait();
+
+      await expectRevert(
+        registry.connect(addr1).lazyRegister(addr1.address, label, registrationData, fakesig),
+        "NonFungibleRegistry: signature failure.",
+      )
+
+      await expectRevert(
+        registry.connect(addr2).lazyRegister(addr1.address, label, registrationData, sig),
+        "NonFungibleRegistry: Caller is not recipient.",
+      )
+
+      tx = await registry.connect(addr1).lazyRegister(addr1.address, label, registrationData, sig);
+      tx.wait();
+      expect(await registry.totalSupply()).to.equal(1);
+
+      await expectRevert(
+        registry.connect(addr1).lazyRegister(addr1.address, label, registrationData, sig),
+        "NonFungibleRegistry: Registration label already exists.",
+      )
+  });
 });
