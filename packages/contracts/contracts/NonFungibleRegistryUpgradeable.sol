@@ -112,7 +112,7 @@ contract NonFungibleRegistryUpgradeable is
 
     /// @notice setRegistryParameters enable or disable the lazy registration feature
     /// @dev only callable by the REGISTRAR_ROLE, use arrays so we don't have to always pass every
-    /// parameter if we don't want to chage it. I know this function is ugle but it helps to reduce
+    /// parameter if we don't want to chage it. I know this function is ugly but it helps to reduce
     /// the size of the compiled contract compared to having 7 seperate setter fuctions
     /// @param _schema DFDL-compatible schema definition for dynamic UIs
     /// @param _allowLazyRegister boolean flag; false disables lazy registration
@@ -375,6 +375,9 @@ contract NonFungibleRegistryUpgradeable is
 
         // ensure that label changing is disabled since the label is used at the token's nonce
         require(!allowLabelChange, "NonFungibleRegistry: label changes must be disabled for lazy registration.");
+
+        // ensure the label field has not been left blank
+        require((bytes(label).length > 0), "NonFungibleRegistry: label field must not be blank.");
 
         // the token label is the nonce to prevent replay attack
         require(!_mappingExists(label), "NonFungibleRegistry: Registration label already exists.");

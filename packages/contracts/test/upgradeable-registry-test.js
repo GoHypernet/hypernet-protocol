@@ -87,7 +87,7 @@ describe("Registry", function () {
           );
     });
 
-    it("Check token burn permissions", async function () {
+    it("Check token owner burn permissions", async function () {
         const label = "dummy";
         const registrationData = "dummy";
 
@@ -102,7 +102,29 @@ describe("Registry", function () {
             "NonFungibleRegistry: caller is not owner nor approved nor registrar.",
         );
 
-        // REGISTRAR_ROLE can burn all tokens
+        // owner can burn their own tokens
+        tx = await registry.connect(addr1).burn(1);
+        tx.wait();
+
+        expect(await registry.balanceOf(addr1.address)).to.equal(0);
+    });
+
+    it("Check registrar burn permissions", async function () {
+        const label = "dummy";
+        const registrationData = "dummy";
+
+        let tx = await registry.register( addr1.address, label, registrationData);
+        tx.wait();
+
+        expect(await registry.balanceOf(addr1.address)).to.equal(1);
+
+        // only owner or approved address can burn
+        await expectRevert(
+            registry.connect(addr2).burn(1),
+            "NonFungibleRegistry: caller is not owner nor approved nor registrar.",
+        );
+
+        // REGISTRAR_ROLE can burn any token
         tx = await registry.burn(1);
         tx.wait();
 
@@ -273,6 +295,11 @@ describe("Registry", function () {
       // registrar now sets the registration token to enable token-based registration
       tx = await registry.setRegistryParameters([], [true], [], [], [], [], [], [], []);
       tx.wait();
+
+      await expectRevert(
+        registry.connect(addr1).lazyRegister(addr1.address, "", registrationData, fakesig),
+        "NonFungibleRegistry: label field must not be blank.",
+      )
 
       await expectRevert(
         registry.connect(addr1).lazyRegister(addr1.address, label, registrationData, fakesig),
