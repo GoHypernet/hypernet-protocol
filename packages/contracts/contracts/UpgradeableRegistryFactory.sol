@@ -46,6 +46,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     }
 
     /// @notice createRegistry called on contract deployment
+    /// @dev the registry inherents the same admin as the factory
     /// @param _name name of the registry that will be created
     /// @param _symbol symbol to associate with the registry
     /// @param _registrar address that will recieve the REGISTRAR_ROLE

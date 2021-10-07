@@ -44,6 +44,11 @@ contract Vester {
         recipient = recipient_;
     }
 
+    function delegate(address recipient_) public {
+        require(msg.sender == recipient, 'TreasuryVester::setRecipient: unauthorized');
+        IHypertoken(h).delegate(recipient_);        
+    }
+
     function claim() public {
         require(block.timestamp >= vestingCliff, 'Vester::claim: not time yet');
         uint amount;
@@ -60,4 +65,5 @@ contract Vester {
 interface IHypertoken {
     function balanceOf(address account) external view returns (uint);
     function transfer(address dst, uint rawAmount) external returns (bool);
+    function delegate(address delegatee) external virtual; 
 }
