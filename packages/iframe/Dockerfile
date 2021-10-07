@@ -20,7 +20,7 @@ COPY ./packages/utils/package.json /build/packages/utils/package.json
 COPY ./packages/web-demo/package.json /build/packages/web-demo/package.json
 COPY ./packages/web-integration/package.json /build/packages/web-integration/package.json
 COPY ./packages/web-ui/package.json /build/packages/web-ui/package.json
-RUN yarn config set network-timeout 300000
+RUN yarn config set network-timeout 600000
 RUN yarn install
 
 # Configuration for the protocol is baked in at build time
@@ -32,7 +32,7 @@ ENV __BUILD_ENV__ $BUILD_ENV
 ARG IFRAME_SOURCE=http://localhost:5000
 ENV __IFRAME_SOURCE__ $IFRAME_SOURCE
 
-ARG CHAIN_PROVIDERS='{"1337": "http://localhost:8545"}'
+ARG CHAIN_PROVIDERS='{"1337": "http://localhost:8545", "31337": "http://localhost:8545"}'
 ENV __CHAIN_PROVIDERS__ $CHAIN_PROVIDERS
 
 ARG CHAIN_ADDRESSES='{ \
@@ -43,6 +43,20 @@ ARG CHAIN_ADDRESSES='{ \
         "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
         "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
         "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
+        "hypernetGovernorAddress": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9", \
+        "registryFactoryAddress": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6", \
+        "gatewayRegistryAddress": "0x633BaEfc98220497Eb7eE323480C87ce51a44955", \
+        "liquidityRegistryAddress": "0x10271f4B537610009e1DaF06779b9A8Fde5fF531" \
+      }, \
+      "31337": { \
+        "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
+        "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", \
+        "hypertokenAddress": "0xAa588d3737B611baFD7bD713445b314BD453a5C8", \
+        "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
+        "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
+        "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
+        "hypernetGovernorAddress": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9", \
+        "registryFactoryAddress": "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6", \
         "gatewayRegistryAddress": "0x633BaEfc98220497Eb7eE323480C87ce51a44955", \
         "liquidityRegistryAddress": "0x10271f4B537610009e1DaF06779b9A8Fde5fF531" \
       }, \
@@ -53,6 +67,8 @@ ARG CHAIN_ADDRESSES='{ \
         "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
         "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
         "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
+        "hypernetGovernorAddress": "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd", \
+        "registryFactoryAddress": "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a", \
         "gatewayRegistryAddress": "0x633BaEfc98220497Eb7eE323480C87ce51a44955", \
         "liquidityRegistryAddress": "0x10271f4B537610009e1DaF06779b9A8Fde5fF531" \
       } \

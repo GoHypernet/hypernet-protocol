@@ -41,6 +41,39 @@ export interface IRenderPaymentWidgetParams extends IRenderParams {
   paymentType: EPaymentType;
 }
 
+export interface IProposalsWidgetParams extends IRenderParams {
+  onProposalCreationNavigate?: () => void;
+  onProposalDetailsNavigate?: (proposalId: string) => void;
+}
+
+export interface IProposalDetailWidgetParams extends IRenderParams {
+  onProposalListNavigate?: () => void;
+  proposalId: string;
+}
+
+export interface IProposalCreateWidgetParams extends IRenderParams {
+  onProposalListNavigate?: () => void;
+}
+
+export interface IRegistryListWidgetParams extends IRenderParams {
+  onRegistryEntryListNavigate?: (registryName: string) => void;
+}
+
+export interface IRegistryEntryListWidgetParams extends IRenderParams {
+  onRegistryEntryDetailsNavigate?: (
+    registryName: string,
+    entryLabel: string,
+  ) => void;
+  onRegistryListNavigate?: () => void;
+  registryName: string;
+}
+
+export interface IRegistryEntryDetailWidgetParams extends IRenderParams {
+  onRegistryEntryListNavigate?: (registryName: string) => void;
+  registryName: string;
+  entryLabel: string;
+}
+
 export interface IHypernetWebUI {
   renderBalancesWidget(params?: IRenderParams): Result<void, RenderError>;
   renderGatewaysWidget(params?: IRenderParams): Result<void, RenderError>;
@@ -64,4 +97,31 @@ export interface IHypernetWebUI {
   renderPrivateKeysModal(): Result<void, RenderError>;
   renderWarningAlertModal(errorMessage?: string): Result<void, RenderError>;
   renderMetamaskWarningModal(): Result<void, RenderError>;
+  renderProposalsWidget(
+    config?: IProposalsWidgetParams,
+  ): Result<void, RenderError>;
+  renderProposalDetailWidget(
+    config?: IProposalDetailWidgetParams,
+  ): Result<void, RenderError>;
+  renderProposalCreateWidget(
+    config?: IProposalCreateWidgetParams,
+  ): Result<void, RenderError>;
+  renderRegistryListWidget(
+    config?: IRegistryListWidgetParams,
+  ): Result<void, RenderError>;
+  renderRegistryEntryListWidget(
+    config?: IRegistryEntryListWidgetParams,
+  ): Result<void, RenderError>;
+  renderRegistryEntryDetailWidget(
+    config?: IRegistryEntryDetailWidgetParams,
+  ): Result<void, RenderError>;
+  renderHypertokenBalanceWidget(
+    params?: IRenderParams,
+  ): Result<void, RenderError>;
+  renderVotingPowerWidget(
+    params?: IRenderParams,
+  ): Result<void, RenderError>;
+  renderConnectedAccountWidget(
+    params?: IRenderParams,
+  ): Result<void, RenderError>;
 }

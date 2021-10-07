@@ -20,6 +20,12 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     // enable registry discovery by human-readable name
     mapping (string => address) public nameToAddress;
 
+    // reverse mapping from address to a human-readable name
+    mapping(address => string) public addressToName;
+
+     /**
+     * @dev Emitted when `DEFAULT_ADMIN_ROLE` creates a new registry.
+     */
     event RegistryCreated(address registryAddress);
 
     /// @notice constructor called on contract deployment

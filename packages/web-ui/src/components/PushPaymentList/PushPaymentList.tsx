@@ -4,26 +4,17 @@ import {
   PaymentId,
   EPaymentState,
 } from "@hypernetlabs/objects";
-import {
-  Box,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  IconButton,
-  Collapse,
-  List,
-  ListItem,
-  Typography,
-  Divider,
-  Button,
-} from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
-import { KeyboardArrowDown, KeyboardArrowUp } from "@material-ui/icons";
 import { useStoreContext } from "@web-ui/contexts";
-import React from "react";
+import {
+  GovernanceTable,
+  ITableCell,
+  GovernanceTag,
+  ETagColor,
+  GovernanceButton,
+  GovernanceEmptyState,
+} from "@web-ui/components";
+import React, { useMemo } from "react";
+import { useLinks } from "@web-ui/hooks";
 
 interface IPushPaymentList {
   pushPayments: PushPayment[];
@@ -31,200 +22,238 @@ interface IPushPaymentList {
   onAcceptPushPaymentClick: (paymentId: PaymentId) => void;
 }
 
-interface IPushPaymentRow {
-  pushPayment: PushPayment;
-  acceptPaymentButtonVisible: boolean;
-  onAcceptPushPaymentClick: (paymentId: PaymentId) => void;
-  publicIdentifier: PublicIdentifier;
-}
-
-const PushPaymentRow: React.FC<IPushPaymentRow> = (props: IPushPaymentRow) => {
-  const {
-    pushPayment,
-    acceptPaymentButtonVisible,
-    onAcceptPushPaymentClick,
-    publicIdentifier,
-  } = props;
-  const [open, setOpen] = React.useState(false);
-  const { viewUtils, dateUtils } = useStoreContext();
-
-  const StyledTableRow = withStyles((theme) => ({
-    root: {
-      "&:nth-of-type(odd)": {
-        backgroundColor: theme.palette.action.hover,
-      },
-      "& > *": {
-        borderBottom: "unset",
-      },
+const tableColumns: ITableCell[] = [
+  {
+    cellValue: "Gateway",
+    tableCellProps: {
+      align: "left",
     },
-  }))(TableRow);
+  },
+  {
+    cellValue: "Payment Amount",
+    tableCellProps: {
+      align: "left",
+    },
+  },
+  {
+    cellValue: "Amount",
+    tableCellProps: {
+      align: "left",
+    },
+  },
+  {
+    cellValue: "Created",
+    tableCellProps: {
+      align: "left",
+    },
+  },
+  {
+    cellValue: "State",
+    tableCellProps: {
+      align: "left",
+    },
+  },
+  {
+    cellValue: "Payment ID",
+    tableCellProps: {
+      align: "left",
+    },
+    onlyVisibleInExpandedState: true,
+  },
+  {
+    cellValue: "From",
+    tableCellProps: {
+      align: "left",
+    },
+    onlyVisibleInExpandedState: true,
+  },
+  {
+    cellValue: "To",
+    tableCellProps: {
+      align: "left",
+    },
+    onlyVisibleInExpandedState: true,
+  },
+  {
+    cellValue: "Payment Token",
+    tableCellProps: {
+      align: "left",
+    },
+    onlyVisibleInExpandedState: true,
+  },
+  {
+    cellValue: "Required Stake",
+    tableCellProps: {
+      align: "left",
+    },
+    onlyVisibleInExpandedState: true,
+  },
 
-  const renderListItem: (
-    label: string,
-    value: string | number,
-    hideDivider?: boolean,
-  ) => React.ReactNode = (label, value, hideDivider) => {
-    return (
-      <Box margin={2}>
-        <ListItem>
-          <Box display="flex" justifyContent="space-between" width="100%">
-            <Typography style={{ fontWeight: 600, fontSize: 14 }}>
-              {label}:
-            </Typography>
-            <Typography style={{ fontSize: 14 }}>{value}</Typography>
-          </Box>
-        </ListItem>
-        {!hideDivider && <Divider />}
-      </Box>
-    );
-  };
-
-  return (
-    <>
-      <StyledTableRow>
-        <TableCell>
-          <IconButton
-            aria-label="expand row"
-            size="small"
-            onClick={() => setOpen(!open)}
-          >
-            {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-          </IconButton>
-        </TableCell>
-        <TableCell component="th" scope="row">
-          {pushPayment.gatewayUrl}
-        </TableCell>
-        <TableCell align="right">
-          {viewUtils.fromBigNumberWei(pushPayment.paymentAmount)}
-        </TableCell>
-        <TableCell align="right">
-          {viewUtils.fromBigNumberWei(pushPayment.requiredStake)}
-        </TableCell>
-        <TableCell align="right">
-          {viewUtils.fromBigNumberWei(pushPayment.amountStaked)}
-        </TableCell>
-        <TableCell align="right">
-          {dateUtils.fromTimestampToUI(pushPayment.createdTimestamp)}
-        </TableCell>
-        <TableCell align="right">
-          {dateUtils.fromTimestampToUI(pushPayment.expirationDate)}
-        </TableCell>
-        <TableCell
-          align="right"
-          style={{
-            color: viewUtils.fromPaymentStateColor(pushPayment.state),
-          }}
-        >
-          {viewUtils.fromPaymentState(pushPayment.state)}
-        </TableCell>
-        <TableCell align="right">
-          {acceptPaymentButtonVisible && (
-            <Button
-              size="small"
-              variant="outlined"
-              color="primary"
-              onClick={() => onAcceptPushPaymentClick(pushPayment.id)}
-            >
-              Accept
-            </Button>
-          )}
-        </TableCell>
-      </StyledTableRow>
-      <TableCell
-        style={{ paddingBottom: 0, paddingTop: 0, borderBottom: "none" }}
-        colSpan={6}
-      >
-        <Collapse in={open} timeout="auto" unmountOnExit>
-          <Box marginBottom={1}>
-            <List dense={true}>
-              {renderListItem("Payment ID", pushPayment.id)}
-              {renderListItem(
-                "From",
-                `${pushPayment.from} ${
-                  pushPayment.from === publicIdentifier ? "(You)" : ""
-                }`,
-              )}
-              {renderListItem(
-                "To",
-                `${pushPayment.to} ${
-                  pushPayment.to === publicIdentifier ? "(You)" : ""
-                }`,
-              )}
-              {renderListItem(
-                "State",
-                viewUtils.fromPaymentState(pushPayment.state),
-              )}
-              {renderListItem("Payment Token", pushPayment.paymentToken)}
-              {renderListItem(
-                "Required Stake",
-                viewUtils.fromBigNumberWei(pushPayment.requiredStake),
-              )}
-              {renderListItem(
-                "Amount Staked	",
-                viewUtils.fromBigNumberWei(pushPayment.amountStaked),
-              )}
-              {renderListItem(
-                "Expiration Date",
-                dateUtils.fromTimestampToUI(pushPayment.expirationDate),
-              )}
-              {renderListItem(
-                "Created",
-                dateUtils.fromTimestampToUI(pushPayment.createdTimestamp),
-              )}
-              {renderListItem(
-                "Updated",
-                dateUtils.fromTimestampToUI(pushPayment.updatedTimestamp),
-              )}
-              {renderListItem("Gateway URL", pushPayment.gatewayUrl)}
-              {renderListItem(
-                "Payment Amount",
-                viewUtils.fromBigNumberWei(pushPayment.paymentAmount),
-                true,
-              )}
-            </List>
-          </Box>
-        </Collapse>
-      </TableCell>
-    </>
-  );
-};
+  {
+    cellValue: "Amount Staked",
+    tableCellProps: {
+      align: "left",
+    },
+    onlyVisibleInExpandedState: true,
+  },
+  {
+    cellValue: "Expiration Date",
+    tableCellProps: {
+      align: "left",
+    },
+    onlyVisibleInExpandedState: true,
+  },
+  {
+    cellValue: "Updated",
+    tableCellProps: {
+      align: "left",
+    },
+    onlyVisibleInExpandedState: true,
+  },
+  {
+    cellValue: "Action",
+    mobileCellValue: " ",
+    tableCellProps: {
+      align: "left",
+    },
+  },
+];
 
 export const PushPaymentList: React.FC<IPushPaymentList> = (
   props: IPushPaymentList,
 ) => {
   const { pushPayments, publicIdentifier, onAcceptPushPaymentClick } = props;
+  const { viewUtils, dateUtils } = useStoreContext();
+  const { loading } = useLinks();
 
-  return (
-    <TableContainer>
-      <Table aria-label="collapsible table">
-        <TableHead>
-          <TableRow>
-            <TableCell />
-            <TableCell>Gateway</TableCell>
-            <TableCell align="right">Amount</TableCell>
-            <TableCell align="right">Required Stake</TableCell>
-            <TableCell align="right">Amount Staked</TableCell>
-            <TableCell align="right">Created Date</TableCell>
-            <TableCell align="right">Expiration Date</TableCell>
-            <TableCell align="right">State</TableCell>
-            <TableCell align="right"></TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {pushPayments.map((pushPayment) => (
-            <PushPaymentRow
-              key={pushPayment.id}
-              pushPayment={pushPayment}
-              publicIdentifier={publicIdentifier}
-              acceptPaymentButtonVisible={
-                publicIdentifier === pushPayment.to &&
-                pushPayment.state === EPaymentState.Proposed
-              }
-              onAcceptPushPaymentClick={onAcceptPushPaymentClick}
-            />
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+  const initialValue: ITableCell[][] = [];
+  const rows = useMemo(
+    () =>
+      pushPayments.reduce((acc, item) => {
+        acc.push([
+          {
+            cellValue: item.gatewayUrl,
+            tableCellProps: {
+              align: "left",
+            },
+          },
+          {
+            cellValue: item.paymentAmount,
+            tableCellProps: {
+              align: "left",
+            },
+          },
+          {
+            cellValue: dateUtils.fromTimestampToUI(item.createdTimestamp),
+            tableCellProps: {
+              align: "left",
+            },
+          },
+          {
+            cellValue: (
+              <GovernanceTag
+                text={viewUtils.fromPaymentState(item.state)}
+                color={ETagColor.BLUE}
+              />
+            ),
+            tableCellProps: {
+              align: "left",
+            },
+          },
+          {
+            cellValue: viewUtils.fromBigNumberWei(item.paymentAmount),
+            tableCellProps: {
+              align: "left",
+            },
+          },
+          {
+            cellValue: item.id,
+            tableCellProps: {
+              align: "left",
+            },
+            onlyVisibleInExpandedState: true,
+          },
+          {
+            cellValue: `${item.to} ${
+              item.to === publicIdentifier ? "(You)" : ""
+            }`,
+            tableCellProps: {
+              align: "left",
+            },
+            onlyVisibleInExpandedState: true,
+          },
+          {
+            cellValue: item.to,
+            tableCellProps: {
+              align: "left",
+            },
+            onlyVisibleInExpandedState: true,
+          },
+          {
+            cellValue: item.paymentToken,
+            tableCellProps: {
+              align: "left",
+            },
+            onlyVisibleInExpandedState: true,
+          },
+          {
+            cellValue: viewUtils.fromBigNumberWei(item.requiredStake),
+            tableCellProps: {
+              align: "left",
+            },
+            onlyVisibleInExpandedState: true,
+          },
+          {
+            cellValue: viewUtils.fromBigNumberWei(item.amountStaked),
+            tableCellProps: {
+              align: "left",
+            },
+            onlyVisibleInExpandedState: true,
+          },
+          {
+            cellValue: dateUtils.fromTimestampToUI(item.expirationDate),
+            tableCellProps: {
+              align: "left",
+            },
+            onlyVisibleInExpandedState: true,
+          },
+          {
+            cellValue: dateUtils.fromTimestampToUI(item.updatedTimestamp),
+            tableCellProps: {
+              align: "left",
+            },
+            onlyVisibleInExpandedState: true,
+          },
+          {
+            cellValue: publicIdentifier === item.to &&
+              item.state === EPaymentState.Proposed && (
+                <GovernanceButton
+                  size="small"
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => onAcceptPushPaymentClick(item.id)}
+                >
+                  Accept
+                </GovernanceButton>
+              ),
+            tableCellProps: {
+              align: "right",
+            },
+          },
+        ]);
+        return acc;
+      }, initialValue),
+    [JSON.stringify(pushPayments)],
   );
+
+  if (!loading && !rows.length) {
+    return (
+      <GovernanceEmptyState
+        title="No results!"
+        description="You don’t have any payments yet."
+      />
+    );
+  }
+
+  return <GovernanceTable isExpandable columns={tableColumns} rows={rows} />;
 };

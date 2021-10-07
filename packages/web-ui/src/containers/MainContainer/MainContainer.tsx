@@ -10,6 +10,7 @@ interface IMainContainer {
   withModal?: boolean;
   closeCallback?: () => void;
   modalStyle?: React.CSSProperties;
+  isV2?: boolean;
 }
 
 const MainContainer: React.FC<IMainContainer> = ({
@@ -17,6 +18,7 @@ const MainContainer: React.FC<IMainContainer> = ({
   withModal,
   closeCallback,
   modalStyle,
+  isV2,
 }: IMainContainer) => {
   const classes = useStyles();
 
@@ -27,6 +29,8 @@ const MainContainer: React.FC<IMainContainer> = ({
         <Modal closeCallback={closeCallback} modalStyle={modalStyle}>
           {children}
         </Modal>
+      ) : isV2 ? (
+        children
       ) : (
         <Box className={classes.wrapper}>{children}</Box>
       )}

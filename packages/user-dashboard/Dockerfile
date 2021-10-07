@@ -20,7 +20,7 @@ COPY ./packages/utils/package.json /build/packages/utils/package.json
 COPY ./packages/web-demo/package.json /build/packages/web-demo/package.json
 COPY ./packages/web-integration/package.json /build/packages/web-integration/package.json
 COPY ./packages/web-ui/package.json /build/packages/web-ui/package.json
-RUN yarn config set network-timeout 300000
+RUN yarn config set network-timeout 600000
 RUN yarn install
 
 # Configuration for the protocol is baked in at build time
@@ -40,4 +40,6 @@ FROM nginx:latest AS server
 
 # Copy over the dist files
 COPY --from=builder /build/packages/user-dashboard/dist/bundle /usr/share/nginx/html
+COPY --from=builder /build/packages/user-dashboard/nginx.conf /etc/nginx/nginx.conf
+COPY --from=builder /build/packages/user-dashboard/default.conf /etc/nginx/conf.d/default.conf
 

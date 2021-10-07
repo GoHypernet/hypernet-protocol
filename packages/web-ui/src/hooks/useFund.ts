@@ -1,4 +1,5 @@
 import {
+  ActiveStateChannel,
   Balances,
   BigNumberString,
   EthereumAddress,
@@ -19,6 +20,8 @@ enum EActionTypes {
   ERROR = "ERROR",
   AMOUNT_CHANGED = "AMOUNT_CHANGED",
   DESTINATION_ADDRESS_CHANGED = "DESTINATION_ADDRESS_CHANGED",
+  FETCHED_STATE_CHANNELS = "FETCHED_STATE_CHANNELS",
+  STATE_CHANNEL_SELECTED = "STATE_CHANNEL_SELECTED",
 }
 
 interface IReducerStateReducer {
@@ -30,9 +33,19 @@ interface IReducerStateReducer {
   destinationAddress: EthereumAddress;
   setAmount: (amount: string) => void;
   setDestinationAddress: (destinationAddress: string) => void;
-  depositFunds: () => void;
-  withdrawFunds: () => void;
   mintTokens: () => void;
+  depositFunds: (
+    tokenAddress: EthereumAddress,
+    amount: string,
+    stateChannelAddress: EthereumAddress,
+  ) => void;
+  withdrawFunds: (
+    tokenAddress: EthereumAddress,
+    amount: string,
+    stateChannelAddress: EthereumAddress,
+  ) => void;
+  activeStateChannels?: ActiveStateChannel[];
+  selectedStateChennel?: ActiveStateChannel;
 }
 
 interface IReducerState {
@@ -41,12 +54,16 @@ interface IReducerState {
   amount: string;
   destinationAddress: EthereumAddress;
   selectedPaymentToken?: ITokenSelectorOption;
+  activeStateChannels?: ActiveStateChannel[];
+  selectedStateChennel?: ActiveStateChannel;
 }
 
 type Action =
   | { type: EActionTypes.FETCHED; payload: PaymentTokenOptionViewModel[] }
   | { type: EActionTypes.AMOUNT_CHANGED; payload: string }
+  | { type: EActionTypes.FETCHED_STATE_CHANNELS; payload: ActiveStateChannel[] }
   | { type: EActionTypes.DESTINATION_ADDRESS_CHANGED; payload: EthereumAddress }
+  | { type: EActionTypes.STATE_CHANNEL_SELECTED; payload: ActiveStateChannel }
   | { type: EActionTypes.SUCCESS }
   | { type: EActionTypes.ERROR }
   | {
@@ -65,6 +82,7 @@ export function useFund(): IReducerStateReducer {
     selectedPaymentToken: undefined,
     amount: "1",
     destinationAddress: EthereumAddress(""),
+    activeStateChannels: [],
   };
 
   const [state, dispatch] = useReducer(
@@ -93,6 +111,18 @@ export function useFund(): IReducerStateReducer {
             ...state,
             error: false,
             destinationAddress: action.payload,
+          };
+        case EActionTypes.FETCHED_STATE_CHANNELS:
+          return {
+            ...state,
+            error: false,
+            activeStateChannels: action.payload,
+          };
+        case EActionTypes.STATE_CHANNEL_SELECTED:
+          return {
+            ...state,
+            error: false,
+            selectedStateChennel: action.payload,
           };
         case EActionTypes.ERROR:
           return {
@@ -133,6 +163,23 @@ export function useFund(): IReducerStateReducer {
             dispatch({
               type: EActionTypes.DESTINATION_ADDRESS_CHANGED,
               payload: accounts[0],
+            });
+          },
+          (err) => {
+            console.log("err: ", err);
+          },
+        );
+
+        coreProxy.getActiveStateChannels().match(
+          (stateChannels) => {
+            dispatch({
+              type: EActionTypes.FETCHED_STATE_CHANNELS,
+              payload: stateChannels,
+            });
+
+            dispatch({
+              type: EActionTypes.STATE_CHANNEL_SELECTED,
+              payload: UIData.getSelectedStateChannel(),
             });
           },
           (err) => {
@@ -224,21 +271,17 @@ export function useFund(): IReducerStateReducer {
     });
   };
 
-  const depositFunds = () => {
-    if (!state.selectedPaymentToken?.address) {
-      dispatch({
-        type: EActionTypes.ERROR,
-      });
-      return;
-    }
+  const depositFunds = (
+    tokenAddress: EthereumAddress,
+    amount: string,
+    stateChannelAddress: EthereumAddress,
+  ) => {
     setLoading(true);
     coreProxy
       .depositFunds(
-        EthereumAddress(UIData.getSelectedStateChannel().channelAddress),
-        EthereumAddress(state.selectedPaymentToken?.address),
-        BigNumberString(
-          ethers.utils.parseEther(state.amount || "1").toString(),
-        ),
+        stateChannelAddress,
+        tokenAddress,
+        BigNumberString(ethers.utils.parseEther(amount || "1").toString()),
       )
       .match(
         (balances) => {
@@ -258,35 +301,27 @@ export function useFund(): IReducerStateReducer {
       );
   };
 
-  const withdrawFunds = () => {
-    if (!state.selectedPaymentToken?.address) {
-      dispatch({
-        type: EActionTypes.ERROR,
-      });
-      return;
-    }
+  const withdrawFunds = (
+    tokenAddress: EthereumAddress,
+    amount: string,
+    stateChannelAddress: EthereumAddress,
+  ) => {
     setLoading(true);
     coreProxy
       .withdrawFunds(
-        EthereumAddress(UIData.getSelectedStateChannel().channelAddress),
-        EthereumAddress(state.selectedPaymentToken?.address),
-        BigNumberString(ethers.utils.parseEther(state.amount).toString()),
+        stateChannelAddress,
+        tokenAddress,
+        BigNumberString(ethers.utils.parseEther(amount).toString()),
         state.destinationAddress,
       )
       .match(
         () => {
           alert.success("Your funds withdrawl has succeeded!");
           setLoading(false);
-          dispatch({
-            type: EActionTypes.SUCCESS,
-          });
         },
         (err) => {
           alert.error(err.message || "Your funds withdrawl has failed");
           setLoading(false);
-          dispatch({
-            type: EActionTypes.ERROR,
-          });
         },
       );
   };

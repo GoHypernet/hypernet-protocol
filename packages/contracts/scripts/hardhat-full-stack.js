@@ -20,13 +20,13 @@ async function main() {
   const hypertoken = await Hypertoken.deploy();
   const hypertoken_reciept = await hypertoken.deployTransaction.wait();
   const totalSupply = await hypertoken.totalSupply();
-  const recipientBalance = await hypertoken.balanceOf(owner.address)
+  const recipientBalance = await hypertoken.balanceOf(owner.address);
   console.log("Hypertoken Address:", hypertoken.address);
   console.log("Hypertoken Supply:", totalSupply.toString());
   console.log("Hypertoken Gas Fee:", hypertoken_reciept.gasUsed.toString());
   console.log("Hypertoken recipient:", owner.address);
   console.log("Recipient Balance:", recipientBalance.toString());
-
+  
   // all tokens are currently owned by owner signer
   // delegate all votes to self
   // if delegate() is not called, the account has no voting power
@@ -42,25 +42,41 @@ async function main() {
 
   // deploy hypernet governor contract
   const HypernetGovernor = await ethers.getContractFactory("HypernetGovernor");
-  const hypernetgovernor = await HypernetGovernor.deploy(hypertoken.address, timelock.address);
-  const hypernetgovernor_reciept = await hypernetgovernor.deployTransaction.wait();
+  const hypernetgovernor = await HypernetGovernor.deploy(
+    hypertoken.address,
+    timelock.address,
+  );
+  const hypernetgovernor_reciept =
+    await hypernetgovernor.deployTransaction.wait();
   console.log("Governor address:", hypernetgovernor.address);
   console.log("Governor Gas Fee:", hypernetgovernor_reciept.gasUsed.toString());
-  
+
   // give the governor contract the Proposer role in the timelock contract
-  const tx1 = await timelock.grantRole(timelock.PROPOSER_ROLE(), hypernetgovernor.address);
+  const tx1 = await timelock.grantRole(
+    timelock.PROPOSER_ROLE(),
+    hypernetgovernor.address,
+  );
   const tx1_reciept = await tx1.wait();
 
   // give the governor contract the Executor role in the timelock contract
-  const tx2 = await timelock.grantRole(timelock.EXECUTOR_ROLE(), hypernetgovernor.address);
+  const tx2 = await timelock.grantRole(
+    timelock.EXECUTOR_ROLE(),
+    hypernetgovernor.address,
+  );
   const tx2_reciept = await tx2.wait();
 
   // give the governor contract the admin role of the timelock contract
-  const tx3= await timelock.grantRole(timelock.TIMELOCK_ADMIN_ROLE(), hypernetgovernor.address);
+  const tx3 = await timelock.grantRole(
+    timelock.TIMELOCK_ADMIN_ROLE(),
+    hypernetgovernor.address,
+  );
   const tx3_reciept = await tx3.wait();
 
   // deployer address should now renounce admin role for security
-  const tx4= await timelock.renounceRole(timelock.TIMELOCK_ADMIN_ROLE(), owner.address);
+  const tx4 = await timelock.renounceRole(
+    timelock.TIMELOCK_ADMIN_ROLE(),
+    owner.address,
+  );
   const tx4_reciept = await tx4.wait();
 
   // deploy factory contract

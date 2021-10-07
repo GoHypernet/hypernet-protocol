@@ -17,6 +17,8 @@ import {
   messageTransferAddress,
   parameterizedTransferAddress,
   transferRegistryAddress,
+  hypernetGovernorAddress,
+  registryFactoryAddress,
 } from "@mock/mocks";
 import { okAsync, ResultAsync } from "neverthrow";
 
@@ -48,6 +50,8 @@ export class ConfigProviderMock implements IConfigProvider {
             parameterizedTransferAddress,
             gatewayRegistryAddress,
             liquidityRegistryAddress,
+            hypernetGovernorAddress,
+            registryFactoryAddress,
           },
         },
         "natsUrl",

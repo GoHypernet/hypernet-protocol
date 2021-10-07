@@ -13,8 +13,10 @@ import {
   ChainId,
   PublicIdentifier,
   GatewayRegistrationFilter,
+  EProposalVoteSupport,
 } from "@hypernetlabs/objects";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
+import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { injectable, inject } from "inversify";
 import Postmate from "postmate";
 
@@ -23,6 +25,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
   constructor(
     @inject(IHypernetCoreType) protected core: IHypernetCore,
     @inject(ICoreUIServiceType) protected coreUIService: ICoreUIService,
+    @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {
     super();
   }
@@ -185,6 +188,198 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           );
         }, data.callId);
       },
+      getProposals: (data: IIFrameCallData<number[]>) => {
+        this.returnForModel(() => {
+          return this.core.getProposals(data.data);
+        }, data.callId);
+      },
+      createProposal: (
+        data: IIFrameCallData<{
+          name: string;
+          symbol: string;
+          owner: EthereumAddress;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.createProposal(
+            data.data.name,
+            data.data.symbol,
+            data.data.owner,
+          );
+        }, data.callId);
+      },
+      delegateVote: (
+        data: IIFrameCallData<{
+          delegateAddress: EthereumAddress;
+          amount: number | null;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.delegateVote(
+            data.data.delegateAddress,
+            data.data.amount,
+          );
+        }, data.callId);
+      },
+      getProposalDetails: (data: IIFrameCallData<string>) => {
+        this.returnForModel(() => {
+          return this.core.getProposalDetails(data.data);
+        }, data.callId);
+      },
+      castVote: (
+        data: IIFrameCallData<{
+          proposalId: string;
+          support: EProposalVoteSupport;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.castVote(data.data.proposalId, data.data.support);
+        }, data.callId);
+      },
+      getProposalVotesReceipt: (
+        data: IIFrameCallData<{
+          proposalId: string;
+          voterAddress: EthereumAddress;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.getProposalVotesReceipt(
+            data.data.proposalId,
+            data.data.voterAddress,
+          );
+        }, data.callId);
+      },
+      proposeRegistryEntry: (
+        data: IIFrameCallData<{
+          registryName: string;
+          label: string;
+          data: string;
+          recipient: EthereumAddress;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.proposeRegistryEntry(
+            data.data.registryName,
+            data.data.label,
+            data.data.data,
+            data.data.recipient,
+          );
+        }, data.callId);
+      },
+      getRegistries: (
+        data: IIFrameCallData<{
+          pageNumber: number;
+          pageSize: number;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.getRegistries(
+            data.data.pageNumber,
+            data.data.pageSize,
+          );
+        }, data.callId);
+      },
+      getRegistryByName: (data: IIFrameCallData<string[]>) => {
+        this.returnForModel(() => {
+          return this.core.getRegistryByName(data.data);
+        }, data.callId);
+      },
+      getRegistryByAddress: (data: IIFrameCallData<EthereumAddress[]>) => {
+        this.returnForModel(() => {
+          return this.core.getRegistryByAddress(data.data);
+        }, data.callId);
+      },
+      getRegistryEntriesTotalCount: (data: IIFrameCallData<string[]>) => {
+        this.returnForModel(() => {
+          return this.core.getRegistryEntriesTotalCount(data.data);
+        }, data.callId);
+      },
+      getRegistryEntries: (
+        data: IIFrameCallData<{
+          registryName: string;
+          registryEntriesNumberArr?: number[];
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.getRegistryEntries(
+            data.data.registryName,
+            data.data.registryEntriesNumberArr,
+          );
+        }, data.callId);
+      },
+      getRegistryEntryByLabel: (
+        data: IIFrameCallData<{
+          registryName: string;
+          label: string;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.getRegistryEntryByLabel(
+            data.data.registryName,
+            data.data.label,
+          );
+        }, data.callId);
+      },
+      queueProposal: (data: IIFrameCallData<string>) => {
+        this.returnForModel(() => {
+          return this.core.queueProposal(data.data);
+        }, data.callId);
+      },
+      executeProposal: (data: IIFrameCallData<string>) => {
+        this.returnForModel(() => {
+          return this.core.executeProposal(data.data);
+        }, data.callId);
+      },
+      updateRegistryEntryTokenURI: (
+        data: IIFrameCallData<{
+          registryName: string;
+          tokenId: number;
+          registrationData: string;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.updateRegistryEntryTokenURI(
+            data.data.registryName,
+            data.data.tokenId,
+            data.data.registrationData,
+          );
+        }, data.callId);
+      },
+      updateRegistryEntryLabel: (
+        data: IIFrameCallData<{
+          registryName: string;
+          tokenId: number;
+          label: string;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.updateRegistryEntryLabel(
+            data.data.registryName,
+            data.data.tokenId,
+            data.data.label,
+          );
+        }, data.callId);
+      },
+      getProposalsCount: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getProposalsCount();
+        }, data.callId);
+      },
+      getProposalThreshold: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getProposalThreshold();
+        }, data.callId);
+      },
+      getVotingPower: (data: IIFrameCallData<EthereumAddress>) => {
+        this.returnForModel(() => {
+          return this.core.getVotingPower(data.data);
+        }, data.callId);
+      },
+      getHyperTokenBalance: (data: IIFrameCallData<EthereumAddress>) => {
+        this.returnForModel(() => {
+          return this.core.getHyperTokenBalance(data.data);
+        }, data.callId);
+      },
     });
   }
 
@@ -325,8 +520,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       this.coreUIService.renderCeramicAuthenticationUI();
     });
 
-    this.core.onCeramicFailed.subscribe(() => {
-      this.coreUIService.renderCeramicFailureUI();
+    this.core.onCeramicFailed.subscribe((error) => {
+      this.logUtils.error(
+        error.message || "Something went wrong duting ceramic authentication!",
+      );
+      //this.coreUIService.renderCeramicFailureUI();
     });
 
     this.core.onCeramicAuthenticationSucceeded.subscribe(() => {

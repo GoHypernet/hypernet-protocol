@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Box, Tooltip, IconButton } from "@material-ui/core";
+import { Box, Tooltip, IconButton, Typography, Grid } from "@material-ui/core";
 import { IRenderParams } from "@web-ui/interfaces";
 import AddIcon from "@material-ui/icons/Add";
 import LocalGasStationIcon from "@material-ui/icons/LocalGasStation";
 import CheckIcon from "@material-ui/icons/Check";
-import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import Modal from "@web-ui/containers/Modal";
 import { useAlert } from "react-alert";
+
+import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
+import { GovernanceDialog, List, ListItem } from "@web-integration/components";
 import {
   GatewayUrl,
   GatewayTokenInfo,
   EthereumAddress,
   BigNumberString,
 } from "@hypernetlabs/objects";
+import { useStyles } from "@web-ui/widgets/GatewayInfoModalWidget/GatewayInfoModalWidget.style";
 
 interface IGatewayInfoModalWidget extends IRenderParams {
   gatewayUrl: GatewayUrl;
@@ -29,6 +31,7 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
   props: IGatewayInfoModalWidget,
 ) => {
   const { gatewayUrl, closeCallback } = props;
+  const classes = useStyles();
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
@@ -127,88 +130,71 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
   };
 
   return (
-    <Modal
-      closeCallback={closeCallback}
-      modalStyle={{
-        display: "flex",
-        flexDirection: "column",
-        width: 570,
-        paddingRight: 50,
-        paddingLeft: 70,
-      }}
-    >
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="flex-start"
-        width="100%"
-      >
-        <Box paddingTop={2} paddingBottom={2}>
-          <b>Gateway:</b> {gatewayUrl}
-        </Box>
-        <Box display="flex" flexDirection="column" width="100%">
+    <GovernanceDialog
+      title={<Typography variant="h4">{`Gateway: ${gatewayUrl}`}</Typography>}
+      isOpen={true}
+      onClose={closeCallback}
+      content={
+        <List style={{ margin: 0 }}>
           {gatewayTokenInfo.map((gatewayToken) => (
-            <Box
-              key={gatewayToken.tokenAddress}
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-            >
-              <Box fontSize={16}>
-                <b>Token:</b> {gatewayToken.tokenAddress}
-              </Box>
-              {(tokensStateChannelsMap.get(gatewayToken.tokenAddress) == null ||
-                tokensStateChannelsMap.get(gatewayToken.tokenAddress) ===
-                  ETokenState.NOT_REGISTERED) && (
-                <Tooltip title="Add token" placement="top">
-                  <IconButton
-                    aria-label="Add token"
-                    onClick={() => addToken(gatewayToken)}
-                  >
-                    <AddIcon />
-                  </IconButton>
-                </Tooltip>
-              )}
+            <ListItem
+              title={`Token:${gatewayToken.tokenAddress}`}
+              disableDivider
+              rightContent={
+                <>
+                  {(tokensStateChannelsMap.get(gatewayToken.tokenAddress) ==
+                    null ||
+                    tokensStateChannelsMap.get(gatewayToken.tokenAddress) ===
+                      ETokenState.NOT_REGISTERED) && (
+                    <Tooltip title="Add token" placement="top">
+                      <IconButton
+                        aria-label="Add token"
+                        onClick={() => addToken(gatewayToken)}
+                      >
+                        <AddIcon />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {tokensStateChannelsMap.get(gatewayToken.tokenAddress) ===
+                    ETokenState.REGISTERED && (
+                    <Tooltip title="Token Already Registered" placement="top">
+                      <IconButton
+                        aria-label="Registered token"
+                        className={classes.iconButton}
+                      >
+                        <CheckIcon color="primary" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  {tokensStateChannelsMap.get(gatewayToken.tokenAddress) ===
+                    ETokenState.REGISTERED_WITH_NO_FUND && (
+                    <Box display="flex">
+                      <Tooltip title="Token Already Registered" placement="top">
+                        <IconButton
+                          aria-label="Registered token"
+                          className={classes.iconButton}
+                        >
+                          <CheckIcon color="primary" />
+                        </IconButton>
+                      </Tooltip>
 
-              {tokensStateChannelsMap.get(gatewayToken.tokenAddress) ===
-                ETokenState.REGISTERED && (
-                <Tooltip title="Token Already Registered" placement="top">
-                  <IconButton
-                    aria-label="Registered token"
-                    style={{ cursor: "auto" }}
-                  >
-                    <CheckIcon color="primary" />
-                  </IconButton>
-                </Tooltip>
-              )}
-
-              {tokensStateChannelsMap.get(gatewayToken.tokenAddress) ===
-                ETokenState.REGISTERED_WITH_NO_FUND && (
-                <Box display="flex">
-                  <Tooltip title="Token Already Registered" placement="top">
-                    <IconButton
-                      aria-label="Registered token"
-                      style={{ cursor: "auto", paddingRight: 5 }}
-                    >
-                      <CheckIcon color="primary" />
-                    </IconButton>
-                  </Tooltip>
-
-                  <Tooltip title="Fund Your Account" placement="top">
-                    <IconButton
-                      aria-label="Fund your account"
-                      onClick={() => addFunds(gatewayToken)}
-                    >
-                      <LocalGasStationIcon color="secondary" />
-                    </IconButton>
-                  </Tooltip>
-                </Box>
-              )}
-            </Box>
+                      <Tooltip title="Fund Your Account" placement="top">
+                        <IconButton
+                          aria-label="Fund your account"
+                          onClick={() => addFunds(gatewayToken)}
+                        >
+                          <LocalGasStationIcon color="secondary" />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  )}
+                </>
+              }
+            />
           ))}
-        </Box>
-      </Box>
-    </Modal>
+        </List>
+      }
+    />
   );
 };
 

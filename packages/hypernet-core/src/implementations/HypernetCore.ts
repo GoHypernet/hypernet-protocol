@@ -31,6 +31,11 @@ import {
   GatewayTokenInfo,
   GatewayRegistrationFilter,
   GatewayRegistrationInfo,
+  Proposal,
+  EProposalVoteSupport,
+  ProposalVoteReceipt,
+  Registry,
+  RegistryEntry,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -58,6 +63,8 @@ import {
   LinkService,
   GatewayConnectorService,
   PaymentService,
+  GovernanceService,
+  RegistryService,
 } from "@implementations/business";
 import {
   AccountsRepository,
@@ -66,6 +73,8 @@ import {
   PaymentRepository,
   RouterRepository,
   LinkRepository,
+  GovernanceRepository,
+  RegistryRepository,
 } from "@implementations/data";
 import {
   IBlockchainListener,
@@ -80,6 +89,8 @@ import {
   ILinkService,
   IGatewayConnectorService,
   IPaymentService,
+  IGovernanceService,
+  IRegistryService,
 } from "@interfaces/business";
 import {
   IAccountsRepository,
@@ -89,6 +100,8 @@ import {
   IPaymentRepository,
   IRouterRepository,
   IGatewayRegistrationRepository,
+  IGovernanceRepository,
+  IRegistryRepository,
 } from "@interfaces/data";
 import { HypernetConfig, HypernetContext } from "@interfaces/objects";
 import { ok, Result, ResultAsync } from "neverthrow";
@@ -209,6 +222,8 @@ export class HypernetCore implements IHypernetCore {
   protected gatewayRegistrationRepository: IGatewayRegistrationRepository;
   protected messagingRepository: IMessagingRepository;
   protected routerRepository: IRouterRepository;
+  protected governanceRepository: IGovernanceRepository;
+  protected registryRepository: IRegistryRepository;
 
   // Business Layer Stuff
   protected accountService: IAccountService;
@@ -217,6 +232,8 @@ export class HypernetCore implements IHypernetCore {
   protected linkService: ILinkService;
   protected developmentService: IDevelopmentService;
   protected gatewayConnectorService: IGatewayConnectorService;
+  protected governanceService: IGovernanceService;
+  protected registryService: IRegistryService;
 
   // API
   protected vectorAPIListener: IVectorListener;
@@ -471,6 +488,18 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
     );
 
+    this.governanceRepository = new GovernanceRepository(
+      this.blockchainProvider,
+      this.configProvider,
+      this.logUtils,
+    );
+
+    this.registryRepository = new RegistryRepository(
+      this.blockchainProvider,
+      this.configProvider,
+      this.logUtils,
+    );
+
     this.paymentService = new PaymentService(
       this.linkRepository,
       this.accountRepository,
@@ -508,6 +537,8 @@ export class HypernetCore implements IHypernetCore {
       this.blockchainProvider,
       this.logUtils,
     );
+    this.governanceService = new GovernanceService(this.governanceRepository);
+    this.registryService = new RegistryService(this.registryRepository);
 
     this.vectorAPIListener = new VectorAPIListener(
       this.browserNodeProvider,
@@ -966,5 +997,164 @@ export class HypernetCore implements IHypernetCore {
         this.logUtils.error(e);
         return e;
       });
+  }
+
+  public getProposals(
+    proposalsNumberArr?: number[],
+  ): ResultAsync<Proposal[], BlockchainUnavailableError> {
+    return this.governanceService.getProposals(proposalsNumberArr);
+  }
+
+  public createProposal(
+    name: string,
+    symbol: string,
+    owner: EthereumAddress,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this.governanceService.createProposal(name, symbol, owner);
+  }
+
+  public delegateVote(
+    delegateAddress: EthereumAddress,
+    amount: number | null,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    return this.governanceService.delegateVote(delegateAddress, amount);
+  }
+
+  public getProposalDetails(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this.governanceService.getProposalDetails(proposalId);
+  }
+
+  public castVote(
+    proposalId: string,
+    support: EProposalVoteSupport,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this.governanceService.castVote(proposalId, support);
+  }
+
+  public getProposalVotesReceipt(
+    proposalId: string,
+    voterAddress: EthereumAddress,
+  ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError> {
+    return this.governanceService.getProposalVotesReceipt(
+      proposalId,
+      voterAddress,
+    );
+  }
+
+  public proposeRegistryEntry(
+    registryName: string,
+    label: string,
+    data: string,
+    recipient: EthereumAddress,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this.governanceService.proposeRegistryEntry(
+      registryName,
+      label,
+      data,
+      recipient,
+    );
+  }
+
+  public getRegistries(
+    pageNumber: number,
+    pageSize: number,
+  ): ResultAsync<Registry[], BlockchainUnavailableError> {
+    return this.registryService.getRegistries(pageNumber, pageSize);
+  }
+
+  public getRegistryByName(
+    registryNames: string[],
+  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError> {
+    return this.registryService.getRegistryByName(registryNames);
+  }
+
+  public getRegistryByAddress(
+    registryAddresses: EthereumAddress[],
+  ): ResultAsync<Map<EthereumAddress, Registry>, BlockchainUnavailableError> {
+    return this.registryService.getRegistryByAddress(registryAddresses);
+  }
+
+  public getRegistryEntriesTotalCount(
+    registryNames: string[],
+  ): ResultAsync<Map<string, number>, BlockchainUnavailableError> {
+    return this.registryService.getRegistryEntriesTotalCount(registryNames);
+  }
+
+  public getRegistryEntries(
+    registryName: string,
+    registryEntriesNumberArr?: number[],
+  ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
+    return this.registryService.getRegistryEntries(
+      registryName,
+      registryEntriesNumberArr,
+    );
+  }
+
+  public getRegistryEntryByLabel(
+    registryName: string,
+    label: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+    return this.registryService.getRegistryEntryByLabel(registryName, label);
+  }
+
+  public queueProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this.governanceService.queueProposal(proposalId);
+  }
+
+  public executeProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this.governanceService.executeProposal(proposalId);
+  }
+
+  public updateRegistryEntryTokenURI(
+    registryName: string,
+    tokenId: number,
+    registrationData: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+    return this.registryService.updateRegistryEntryTokenURI(
+      registryName,
+      tokenId,
+      registrationData,
+    );
+  }
+
+  public updateRegistryEntryLabel(
+    registryName: string,
+    tokenId: number,
+    label: string,
+  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+    return this.registryService.updateRegistryEntryLabel(
+      registryName,
+      tokenId,
+      label,
+    );
+  }
+
+  public getProposalsCount(): ResultAsync<number, BlockchainUnavailableError> {
+    return this.governanceService.getProposalsCount();
+  }
+
+  public getProposalThreshold(): ResultAsync<
+    number,
+    BlockchainUnavailableError
+  > {
+    return this.governanceService.getProposalThreshold();
+  }
+
+  public getVotingPower(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this.governanceService.getVotingPower(account);
+  }
+
+  public getHyperTokenBalance(
+    account: EthereumAddress,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return this.governanceService.getHyperTokenBalance(account);
   }
 }
