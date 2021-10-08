@@ -139,13 +139,13 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
       .mapErr(handleError);
   };
 
-  const isProposalOwner =
+  const isUserProposalOwner =
     proposal &&
     accountAddress &&
     EthereumAddress(proposal.originator) === accountAddress;
 
   const isProposalCancelable =
-    isProposalOwner &&
+    isUserProposalOwner &&
     (Number(proposal?.state) === EProposalState.PENDING ||
       Number(proposal?.state) === EProposalState.QUEUED ||
       Number(proposal?.state) === EProposalState.ACTIVE);
