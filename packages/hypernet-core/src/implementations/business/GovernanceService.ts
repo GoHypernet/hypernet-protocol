@@ -88,6 +88,12 @@ export class GovernanceService implements IGovernanceService {
     return this.governanceRepository.queueProposal(proposalId);
   }
 
+  public cancelProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this.governanceRepository.cancelProposal(proposalId);
+  }
+
   public executeProposal(
     proposalId: string,
   ): ResultAsync<Proposal, BlockchainUnavailableError> {

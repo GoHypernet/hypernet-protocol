@@ -103,6 +103,17 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
       .mapErr(handleError);
   };
 
+  const cancelProposal = () => {
+    setLoading(true);
+    coreProxy
+      .cancelProposal(proposalId)
+      .map((proposal) => {
+        setProposal(proposal);
+        setLoading(false);
+      })
+      .mapErr(handleError);
+  };
+
   const executeProposal = () => {
     setLoading(true);
     coreProxy
@@ -128,28 +139,53 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
       .mapErr(handleError);
   };
 
-  const getHeaderActions: () => IHeaderAction[] | undefined = () => {
-    if (
-      Number(proposal?.state) === EProposalState.SUCCEEDED ||
-      Number(proposal?.state) === EProposalState.QUEUED
-    ) {
-      return [
-        {
-          label:
-            Number(proposal?.state) === EProposalState.SUCCEEDED
-              ? "Queue Proposal"
-              : "Execute Proposal",
-          onClick: () => {
-            Number(proposal?.state) === EProposalState.SUCCEEDED
-              ? queueProposal()
-              : executeProposal();
-          },
-          variant: "outlined",
-        },
-      ];
-    } else {
-      return undefined;
-    }
+  const isProposalOwner =
+    proposal &&
+    accountAddress &&
+    EthereumAddress(proposal.originator) === accountAddress;
+
+  const isProposalCancelable =
+    isProposalOwner &&
+    (Number(proposal?.state) === EProposalState.PENDING ||
+      Number(proposal?.state) === EProposalState.QUEUED ||
+      Number(proposal?.state) === EProposalState.ACTIVE);
+
+  const getHeaderActions: () => IHeaderAction[] = () => {
+    return [
+      ...(Number(proposal?.state) === EProposalState.SUCCEEDED
+        ? [
+            {
+              label: "Queue Proposal",
+              onClick: () => {
+                queueProposal();
+              },
+              variant: "outlined",
+            },
+          ]
+        : []),
+      ...(Number(proposal?.state) === EProposalState.QUEUED
+        ? [
+            {
+              label: "Execute Proposal",
+              onClick: () => {
+                executeProposal();
+              },
+              variant: "outlined",
+            },
+          ]
+        : []),
+      ...(isProposalCancelable
+        ? [
+            {
+              label: "Cancel Proposal",
+              onClick: () => {
+                cancelProposal();
+              },
+              variant: "outlined",
+            },
+          ]
+        : []),
+    ];
   };
 
   return (
