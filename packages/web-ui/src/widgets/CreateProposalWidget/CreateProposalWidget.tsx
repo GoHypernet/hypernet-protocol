@@ -266,7 +266,7 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
             >
               {exceedsThreshold
                 ? "Submit"
-                : `You must have ${proposalThreshold} tokens to submit a proposal`}
+                : `You must have ${proposalThreshold} votes to submit a proposal`}
             </GovernanceButton>
           </Form>
         )}
