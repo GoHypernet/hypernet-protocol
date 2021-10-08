@@ -26,7 +26,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     uint256 public registrationFee = 50e18; // assume 18 decimal places
 
     // address that token is sent to after registry creation
-    address public burnAddress = address(0); 
+    address public burnAddress = address(0x000000000000000000000000000000000000dEaD); 
 
      /**
      * @dev Emitted when `DEFAULT_ADMIN_ROLE` creates a new registry.
@@ -56,6 +56,10 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         }
     }
 
+    function getNumberOfRegistries() public view returns (uint256 numReg) {
+        numReg = registries.length;
+    }
+
     /// @notice setRegistrationToken setter function for configuring which ERC20 token is burned when adding new apps
     /// @dev can only be called by the DEFAULT_ADMIN_ROLE
     /// @param _registrationToken address of ERC20 token burned during registration
@@ -80,18 +84,17 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         burnAddress = _burnAddress;
     }
 
-    /// @notice createRegistry called on contract deployment
+    /// @notice createRegistry called by DEFAULT_ADMIN_ROLE to create registries without a fee
     /// @dev the registry inherents the same admin as the factory
     /// @param _name name of the registry that will be created
     /// @param _symbol symbol to associate with the registry
     /// @param _registrar address that will recieve the REGISTRAR_ROLE
     function createRegistry(string memory _name, string memory _symbol, address _registrar) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
-
         _createRegistry(_name, _symbol, _registrar);        
     }
 
-    /// @notice createRegistryByToken called on contract deployment
+    /// @notice createRegistryByToken called by any user with sufficient registration token
     /// @dev the registry inherents the same admin as the factory
     /// @param _name name of the registry that will be created
     /// @param _symbol symbol to associate with the registry
@@ -116,6 +119,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     }
 
     function _registryExists(string memory _name) internal view virtual returns (bool) {
-        return !(nameToAddress[_name] == address(0));
+        // registry name must have non-zero length and must not exist already
+        return !((bytes(_name).length > 0) && nameToAddress[_name] == address(0));
     }
 }
