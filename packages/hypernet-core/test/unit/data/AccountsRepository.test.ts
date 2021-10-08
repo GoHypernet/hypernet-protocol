@@ -14,6 +14,9 @@ import { IAccountsRepository } from "@interfaces/data/";
 import {
   account,
   activeRouters,
+  activeStateChannel,
+  chainId,
+  channelState,
   commonAmount,
   destinationAddress,
   erc20AssetAddress,
@@ -21,6 +24,7 @@ import {
   expirationDate,
   publicIdentifier,
   routerChannelAddress,
+  routerPublicIdentifier,
   TransactionResponseMock,
 } from "@mock/mocks";
 import { okAsync, errAsync } from "neverthrow";
@@ -332,5 +336,123 @@ describe("AccountsRepository tests", () => {
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
     expect(result._unsafeUnwrap()).toBe(undefined);
+  });
+
+  test("Should getActiveStateChannels run without errors", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
+
+    // Act
+    const result = await repo.getActiveStateChannels();
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toStrictEqual([activeStateChannel]);
+  });
+
+  test("Should getActiveStateChannels throw persistance error", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryErrorMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
+
+    // Act
+    const result = await repo.getActiveStateChannels();
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeTruthy();
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(PersistenceError);
+  });
+
+  test("Should getActiveRouters run without errors", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
+
+    // Act
+    const result = await repo.getActiveRouters();
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toStrictEqual(activeRouters);
+  });
+
+  test("Should getActiveRouters throw persistance error", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryErrorMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
+
+    // Act
+    const result = await repo.getActiveRouters();
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeTruthy();
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(PersistenceError);
+  });
+
+  test("Should addActiveRouter run without errors", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
+
+    // Act
+    const result = await repo.addActiveRouter(routerPublicIdentifier);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toStrictEqual(undefined);
+  });
+
+  test("Should addActiveRouter throw persistance error", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryErrorMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
+
+    // Act
+    const result = await repo.addActiveRouter(routerPublicIdentifier);
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeTruthy();
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(PersistenceError);
+  });
+
+  test("Should createStateChannel run without errors", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
+
+    // Act
+    const result = await repo.createStateChannel(
+      routerPublicIdentifier,
+      chainId,
+    );
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeFalsy();
+    expect(result._unsafeUnwrap()).toStrictEqual(channelState.channelAddress);
+  });
+
+  test("Should createStateChannel throw VectorError", async () => {
+    // Arrange
+    const accountsRepositoryMocks = new AccountsRepositoryErrorMocks();
+    const repo = accountsRepositoryMocks.factoryAccountsRepository();
+
+    // Act
+    const result = await repo.createStateChannel(
+      routerPublicIdentifier,
+      chainId,
+    );
+
+    // Assert
+    expect(result).toBeDefined();
+    expect(result.isErr()).toBeTruthy();
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(VectorError);
   });
 });
