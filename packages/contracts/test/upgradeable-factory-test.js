@@ -157,8 +157,15 @@ describe("Registry Factory Unit Tests", function () {
 
         tx = await registryfactory.connect(addr1).createRegistryByToken("dummy", "dmy", addr1.address);
         tx.wait();
+
+        let registryAddress = await registryfactory.nameToAddress("dummy");
+        const dummyReg = new ethers.Contract(registryAddress, NFR.abi, addr1);
+
         expect(await registryfactory.getNumberOfRegistries()).to.equal(2);
         expect(await hypertoken.balanceOf(addr1.address)).to.equal(fee);
         expect(await hypertoken.balanceOf(burnAddress)).to.equal(fee);
+        expect(await hypertoken.balanceOf(burnAddress)).to.equal(fee);
+        expect(await dummyReg.name()).to.equal("dummy");
+        expect(await dummyReg.symbol()).to.equal("dmy");
     });
 });
