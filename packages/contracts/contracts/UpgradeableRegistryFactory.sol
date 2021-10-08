@@ -13,15 +13,20 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     // address of our upgradeble registry proxy beacon
     address public registryBeacon;
 
-    // its anticipated that the number of registries will be on the order of 100 in the long run
-    // so storing in an array should be fine
+    // extra array storage fascilitates paginated UI
     address[] public registries;
 
     // enable registry discovery by human-readable name
     mapping (string => address) public nameToAddress;
 
-    // reverse mapping from address to a human-readable name
-    mapping(address => string) public addressToName;
+    // address of ERC20 token used for token-based regsitry creation
+    address public registrationToken = address(0);
+
+    // amount of registration token required to create a registry
+    uint256 public registrationFee = 50e18; // assume 18 decimal places
+
+    // address that token is sent to after registry creation
+    address public burnAddress = address(0); 
 
      /**
      * @dev Emitted when `DEFAULT_ADMIN_ROLE` creates a new registry.
@@ -51,6 +56,30 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         }
     }
 
+    /// @notice setRegistrationToken setter function for configuring which ERC20 token is burned when adding new apps
+    /// @dev can only be called by the DEFAULT_ADMIN_ROLE
+    /// @param _registrationToken address of ERC20 token burned during registration
+    function setRegistrationToken(address _registrationToken) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
+        registrationToken = _registrationToken;
+    }
+
+    /// @notice setRegistrationFee setter function for configuring how much token is burned when adding new apps
+    /// @dev can only be called by the DEFAULT_ADMIN_ROLE
+    /// @param _registrationFee burn fee amount
+    function setRegistrationFee(uint256 _registrationFee) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
+        registrationFee = _registrationFee;
+    }
+
+    /// @notice setBurnAddress setter function for configuring where tokens are sent when calling createRegistryByToken
+    /// @dev can only be called by the DEFAULT_ADMIN_ROLE
+    /// @param _burnAddress address where creation fee is to be sent
+    function setBurnAddress(address _burnAddress) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
+        burnAddress = _burnAddress;
+    }
+
     /// @notice createRegistry called on contract deployment
     /// @dev the registry inherents the same admin as the factory
     /// @param _name name of the registry that will be created
@@ -59,6 +88,19 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     function createRegistry(string memory _name, string memory _symbol, address _registrar) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
 
+        _createRegistry(_name, _symbol, _registrar);        
+    }
+
+    /// @notice createRegistryByToken called on contract deployment
+    /// @dev the registry inherents the same admin as the factory
+    /// @param _name name of the registry that will be created
+    /// @param _symbol symbol to associate with the registry
+    /// @param _registrar address that will recieve the REGISTRAR_ROLE
+    function createRegistryByToken(string memory _name, string memory _symbol, address _registrar) external {
+        require(registrationToken != address(0), "RegistryFactory: registration by token not enabled.");
+
+        // user must call approve first
+        IERC20Upgradeable(registrationToken).transferFrom(_msgSender(), burnAddress, registrationFee);
         _createRegistry(_name, _symbol, _registrar);        
     }
 

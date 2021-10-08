@@ -66,7 +66,10 @@ contract NonFungibleRegistryUpgradeable is
     address public burnAddress; 
 
     // percentage (in basis points) of registration token burned by registerByToken
-    uint256 public burnFee; 
+    uint256 public burnFee;
+
+    // address of primary NFR registry required for participation
+    address public primaryRegistry;
 
     // create a REGISTRAR_ROLE to manage registry functionality
     bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
@@ -105,6 +108,7 @@ contract NonFungibleRegistryUpgradeable is
         registrationFee = 1e18; // assume there are 18 decimal places in the token
         burnAddress = _admin;
         burnFee = 500; // basis points
+        primaryRegistry = address(0);
     }
 
     // we must implement this function at top level contract definition for the upgradable proxy pattern
@@ -129,7 +133,8 @@ contract NonFungibleRegistryUpgradeable is
                                    address[] memory _registrationToken,
                                    uint256[] memory  _registrationFee,
                                    address[] memory _burnAddress,
-                                   uint256[] memory _burnFee
+                                   uint256[] memory _burnFee,
+                                   address[] memory _primaryRegistry
                                    )
         external 
         virtual {
@@ -143,6 +148,7 @@ contract NonFungibleRegistryUpgradeable is
         if (_registrationFee.length > 0) { registrationFee = _registrationFee[0]; }
         if (_burnAddress.length > 0) { burnAddress = _burnAddress[0]; }
         if (_burnFee.length > 0) { burnFee = _burnFee[0]; }
+        if (_primaryRegistry.length > 0) { primaryRegistry = _primaryRegistry[0]; }
     }
 
     function _storageCanBeUpdated() internal view virtual returns (bool) {
@@ -215,6 +221,7 @@ contract NonFungibleRegistryUpgradeable is
     }
 
     function _createToken(address to, string memory registrationData) private returns (uint256 tokenId) {
+        require(_preRegistered(to), "NonFungibleRegistry: recipient must have non-zero balance in primary registry.");
 
         // We cannot just use balanceOf to create the new tokenId because tokens
         // can be burned (destroyed), so we need a separate counter.
@@ -263,6 +270,7 @@ contract NonFungibleRegistryUpgradeable is
     ) public virtual override {
         //solhint-disable-next-line max-line-length
         require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
+        require(_preRegistered(to), "NonFungibleRegistry: recipient must have non-zero balance in primary registry.");
 
         _transfer(from, to, tokenId);
     }
@@ -279,6 +287,7 @@ contract NonFungibleRegistryUpgradeable is
         bytes memory _data
     ) public virtual override {
         require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
+        require(_preRegistered(to), "NonFungibleRegistry: recipient must have non-zero balance in primary registry.");
         _safeTransfer(from, to, tokenId, _data);
     }
 
@@ -346,6 +355,12 @@ contract NonFungibleRegistryUpgradeable is
         return !(registryMap[label] == 0);
     }
 
+    function _preRegistered(address to) internal view virtual returns (bool) {
+        // check if there is a primary registry linked to this registry and if so
+        // does the recipient have a non-zero balance. 
+        return ((primaryRegistry == address(0)) || (IERC721Upgradeable(primaryRegistry).balanceOf(to) > 0));
+    }
+
     /**
      * @dev See {IERC165-supportsInterface}.
      */
@@ -372,6 +387,9 @@ contract NonFungibleRegistryUpgradeable is
         public {
         // check if lazy registration is allowed for this NFI
         require(allowLazyRegister, "NonFungibleRegistry: Lazy registration is disabled.");
+        
+        // check for any required supporting accounts
+        require(_preRegistered(to), "NonFungibleRegistry: recipient must have non-zero balance in primary registry.");
 
         // ensure that label changing is disabled since the label is used at the token's nonce
         require(!allowLabelChange, "NonFungibleRegistry: label changes must be disabled for lazy registration.");
