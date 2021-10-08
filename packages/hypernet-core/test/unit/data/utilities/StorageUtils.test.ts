@@ -53,10 +53,14 @@ describe("StorageUtils tests", () => {
 
     // Act
     const result = await utils.write(mocks.exampleKey, mocks.exampleData);
+    const writeRecordCallingCount = td.explain(
+      mocks.ceramicUtils.writeRecord,
+    ).callCount;
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
+    expect(writeRecordCallingCount).toBe(1);
 
     td.verify(
       mocks.localStorageUtils.setSessionItem(mocks.exampleKey, mocks.jsonData),
@@ -65,7 +69,7 @@ describe("StorageUtils tests", () => {
     mocks.contextProvider.assertEventCounts({});
   });
 
-  test("StorageUtils.write returns an error if Ceramic fails, still writes to the session", async () => {
+  test("StorageUtils.write returns void if Ceramic fails, still writes to the session", async () => {
     // Arrange
     const mocks = new StorageUtilsMocks();
     const utils = mocks.factoryStorageUtils();
@@ -80,17 +84,26 @@ describe("StorageUtils tests", () => {
 
     // Assert
     expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    const resultErr = result._unsafeUnwrapErr();
-    expect(resultErr).toBeInstanceOf(PersistenceError);
-    expect(resultErr).toBe(err);
+    expect(result.isErr()).toBeFalsy();
+    const resultData = result._unsafeUnwrap();
+    expect(resultData).toBe(undefined);
+
+    // wait for backoff and retry
+    await new Promise((r) => setTimeout(r, 1000));
+
+    const writeRecordCallingCount = td.explain(
+      mocks.ceramicUtils.writeRecord,
+    ).callCount;
+
+    expect(writeRecordCallingCount).toBe(2);
 
     td.verify(
       mocks.localStorageUtils.setSessionItem(mocks.exampleKey, mocks.jsonData),
+      { times: 1 },
     );
 
     mocks.contextProvider.assertEventCounts({
-      onCeramicFailed: 1,
+      onCeramicFailed: 2,
     });
   });
 
@@ -128,12 +141,16 @@ describe("StorageUtils tests", () => {
 
     // Act
     const result = await utils.read(mocks.exampleKey);
+    const readRecordCallingCount = td.explain(
+      mocks.ceramicUtils.readRecord,
+    ).callCount;
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
     const resultData = result._unsafeUnwrap();
     expect(resultData).toMatchObject(mocks.exampleData);
+    expect(readRecordCallingCount).toBe(1);
 
     mocks.contextProvider.assertEventCounts({});
 
@@ -173,7 +190,7 @@ describe("StorageUtils tests", () => {
     );
   });
 
-  test("StorageUtils.read returns an error if Ceramic fails", async () => {
+  test("StorageUtils.read returns an error if Ceramic fails with trying to call readRecord twice", async () => {
     // Arrange
     const mocks = new StorageUtilsMocks();
     const utils = mocks.factoryStorageUtils();
@@ -189,6 +206,9 @@ describe("StorageUtils tests", () => {
 
     // Act
     const result = await utils.read(mocks.exampleKey);
+    const readRecordCallingCount = td.explain(
+      mocks.ceramicUtils.readRecord,
+    ).callCount;
 
     // Assert
     expect(result).toBeDefined();
@@ -196,6 +216,7 @@ describe("StorageUtils tests", () => {
     const resultErr = result._unsafeUnwrapErr();
     expect(resultErr).toBeInstanceOf(PersistenceError);
     expect(resultErr).toBe(err);
+    expect(readRecordCallingCount).toBe(2);
 
     mocks.contextProvider.assertEventCounts({ onCeramicFailed: 1 });
 
