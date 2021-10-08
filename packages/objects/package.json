@@ -42,7 +42,7 @@
   "types": "dist/index.d.ts",
   "dependencies": {
     "class-transformer": "^0.3.2",
-    "ethers": "^5.4.3",
+    "ethers": "^5.4.7",
     "reflect-metadata": "^0.1.13",
     "ts-brand": "^0.0.2"
   }

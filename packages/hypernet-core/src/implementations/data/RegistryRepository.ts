@@ -89,7 +89,7 @@ export class RegistryRepository implements IRegistryRepository {
               // Call the NFR contract of that address
               const registryContract = new ethers.Contract(
                 registryAddress,
-                GovernanceAbis.NonFungibleRegistry.abi,
+                GovernanceAbis.NonFungibleRegistryUpgradeable.abi,
                 provider,
               );
 
@@ -148,7 +148,7 @@ export class RegistryRepository implements IRegistryRepository {
               // Call the NFT contract of that address
               const registryContract = new ethers.Contract(
                 registryAddress,
-                GovernanceAbis.NonFungibleRegistry.abi,
+                GovernanceAbis.NonFungibleRegistryUpgradeable.abi,
                 provider,
               );
 
@@ -209,7 +209,7 @@ export class RegistryRepository implements IRegistryRepository {
                 // Call the NFR contract of that address
                 const registryContract = new ethers.Contract(
                   registryAddress,
-                  GovernanceAbis.NonFungibleRegistry.abi,
+                  GovernanceAbis.NonFungibleRegistryUpgradeable.abi,
                   provider,
                 );
                 return this.getRegistryContractTotalSupply(registryContract);
@@ -246,7 +246,7 @@ export class RegistryRepository implements IRegistryRepository {
           // Call the NFR contract of that address
           const registryContract = new ethers.Contract(
             registryAddress,
-            GovernanceAbis.NonFungibleRegistry.abi,
+            GovernanceAbis.NonFungibleRegistryUpgradeable.abi,
             provider,
           );
           let registryEntriesNumberArrResult: ResultAsync<
@@ -317,7 +317,7 @@ export class RegistryRepository implements IRegistryRepository {
           // Call the NFR contract of that address
           const registryContract = new ethers.Contract(
             registryAddress,
-            GovernanceAbis.NonFungibleRegistry.abi,
+            GovernanceAbis.NonFungibleRegistryUpgradeable.abi,
             provider,
           );
 
@@ -413,7 +413,7 @@ export class RegistryRepository implements IRegistryRepository {
           // Call the NFR contract of that address
           const registryContract = new ethers.Contract(
             registryAddress,
-            GovernanceAbis.NonFungibleRegistry.abi,
+            GovernanceAbis.NonFungibleRegistryUpgradeable.abi,
             signer,
           );
 
@@ -470,7 +470,7 @@ export class RegistryRepository implements IRegistryRepository {
           // Call the NFR contract of that address
           const registryContract = new ethers.Contract(
             registryAddress,
-            GovernanceAbis.NonFungibleRegistry.abi,
+            GovernanceAbis.NonFungibleRegistryUpgradeable.abi,
             signer,
           );
 
@@ -522,7 +522,7 @@ export class RegistryRepository implements IRegistryRepository {
         // Call the NFR contract of that address
         const registryContract = new ethers.Contract(
           registryAddress,
-          GovernanceAbis.NonFungibleRegistry.abi,
+          GovernanceAbis.NonFungibleRegistryUpgradeable.abi,
           provider,
         );
 
@@ -765,7 +765,7 @@ export class RegistryRepository implements IRegistryRepository {
       const registryFactoryContract = new ethers.Contract(
         config.chainAddresses[config.governanceChainId]
           ?.registryFactoryAddress as string,
-        GovernanceAbis.RegistryFactory.abi,
+        GovernanceAbis.UpgradeableRegistryFactory.abi,
         providerOrSigner,
       );
 

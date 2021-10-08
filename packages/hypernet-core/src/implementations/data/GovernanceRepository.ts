@@ -366,7 +366,7 @@ export class GovernanceRepository implements IGovernanceRepository {
       ).andThen((registryAddress) => {
         const registryAddressContract = new ethers.Contract(
           registryAddress,
-          GovernanceAbis.NonFungibleRegistry.abi,
+          GovernanceAbis.NonFungibleRegistryUpgradeable.abi,
           signer,
         );
 
@@ -515,7 +515,7 @@ export class GovernanceRepository implements IGovernanceRepository {
       const registryFactoryContract = new ethers.Contract(
         config.chainAddresses[config.governanceChainId]
           ?.registryFactoryAddress as string,
-        GovernanceAbis.RegistryFactory.abi,
+        GovernanceAbis.UpgradeableRegistryFactory.abi,
         providerOrSigner,
       );
 

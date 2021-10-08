@@ -50,7 +50,7 @@
   "dependencies": {
     "@hypernetlabs/objects": "^0.0.1",
     "cors": "^2.8.5",
-    "ethers": "^5.4.3",
+    "ethers": "^5.4.7",
     "express": "^4.17.1"
   }
 }
