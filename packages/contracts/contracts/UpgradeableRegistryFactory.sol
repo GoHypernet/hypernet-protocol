@@ -56,6 +56,8 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         }
     }
 
+    /// @notice getNumberOfRegistries geter function for reading the number of registries
+    /// @dev usefull for paginated UIs
     function getNumberOfRegistries() public view returns (uint256 numReg) {
         numReg = registries.length;
     }

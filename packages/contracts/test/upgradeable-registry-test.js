@@ -161,12 +161,12 @@ describe("Registry", function () {
 
         // only REGISTRAR_ROLE can update registry parameters
         await expectRevert(
-            registry.connect(addr1).setRegistryParameters([], [], [], [true], [], [], [], [], []),
+            registry.connect(addr1).setRegistryParameters([], [], [], [true], [], [], [], [], [], []),
             "NonFungibleRegistry: must be registrar.",
         );
 
         // enable label updating
-        tx = await registry.setRegistryParameters([], [], [], [true], [], [], [], [], []);
+        tx = await registry.setRegistryParameters([], [], [], [true], [], [], [], [], [], []);
         tx.wait();
 
         // update the label on the NFI that has none
@@ -189,7 +189,7 @@ describe("Registry", function () {
         expect(await registry.balanceOf(addr1.address)).to.equal(1);
 
         // registrar disables transfers in the registry
-        tx = await registry.setRegistryParameters([], [], [], [], [false], [], [], [], []);
+        tx = await registry.setRegistryParameters([], [], [], [], [false], [], [], [], [], []);
         tx.wait();
 
         // ensure that noone without REGISTRAR_ROLE can transfer tokens
@@ -230,7 +230,7 @@ describe("Registry", function () {
         )
 
         // registrar now sets the registration token to enable token-based registration
-        tx = await registry.setRegistryParameters([], [], [], [], [], [hypertoken.address], [], [], []);
+        tx = await registry.setRegistryParameters([], [], [], [], [], [hypertoken.address], [], [], [], []);
         tx.wait();
 
         // then they can submit a transaction to register
@@ -293,7 +293,7 @@ describe("Registry", function () {
       )
 
       // registrar now sets the registration token to enable token-based registration
-      tx = await registry.setRegistryParameters([], [true], [], [], [], [], [], [], []);
+      tx = await registry.setRegistryParameters([], [true], [], [], [], [], [], [], [], []);
       tx.wait();
 
       await expectRevert(
