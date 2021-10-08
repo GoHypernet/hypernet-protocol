@@ -184,15 +184,24 @@ export class GatewayService implements IGatewayService {
     return this.gatewayConnectorRepository
       .getGatewayCode(GatewayUrl(gatewayUrl + cacheBuster))
       .andThen((gatewayCode) => {
-        const calculatedAddress = ethers.utils.verifyMessage(
-          gatewayCode,
-          signature,
-        );
+        try {
+          const calculatedAddress = ethers.utils.verifyMessage(
+            gatewayCode,
+            signature,
+          );
 
-        if (calculatedAddress !== address) {
+          if (calculatedAddress !== address) {
+            return errAsync<Signature, GatewayValidationError>(
+              new GatewayValidationError(
+                "Gateway code does not match signature!",
+              ),
+            );
+          }
+        } catch (e) {
           return errAsync<Signature, GatewayValidationError>(
             new GatewayValidationError(
-              "Gateway code does not match signature!",
+              `Gateway ${gatewayUrl} has posted an invalid signature ${signature}`,
+              e,
             ),
           );
         }

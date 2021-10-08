@@ -18,6 +18,7 @@ import { registerTransfer } from "../src.ts/utils";
 
 // important address
 const userAddress = "0x243FB44Ea4FDD2651605eC85290f041fF5F876f0";
+const hyperKYCAddress = "0x821aEa9a577a9b44299B9c15c88cf3087F3b5544";
 const registryAccountAddress = "0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef";
 const HypertokenContractAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
 const TimelockContractAddress = "0x82D50AD3C1091866E258Fd0f1a7cC9674609D254";
@@ -110,12 +111,12 @@ const func: DeployFunction = async () => {
     ["Message", []],
     ["Hypertoken", []],
     [
-      "RegistryFactory",
+      "UpgradeableRegistryFactory",
       [
         TimelockContractAddress,
-        ["Gateways", "Liquidity Providers"],
-        ["G", "LPs"],
-        [registryAccountAddress, registryAccountAddress],
+        ["Gateways", "Liquidity Providers", "HyperID"],
+        ["G", "LPs","HID"],
+        [registryAccountAddress, registryAccountAddress, hyperKYCAddress],
       ],
     ],
     ["HypernetGovernor", [HypertokenContractAddress, TimelockContractAddress]],
@@ -257,9 +258,13 @@ const func: DeployFunction = async () => {
   const liquidityRegistryAddress = await registryFactoryContract.nameToAddress(
     "Liquidity Providers",
   );
+  const hyperidRegistryAddress = await registryFactoryContract.nameToAddress(
+    "HyperID",
+  );
 
   log.info(`Gateway Registry Address: ${gatewayRegistryAddress}`);
   log.info(`Liquidity Registry Address: ${liquidityRegistryAddress}`);
+  log.info(`HyperID Registry Address: ${hyperidRegistryAddress}`);
 
   const routerPublicIdentifier =
     "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR";

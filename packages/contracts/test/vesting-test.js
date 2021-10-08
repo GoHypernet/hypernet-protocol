@@ -2,44 +2,44 @@ const { expect } = require("chai");
 const { ethers } = require("hardhat")
 
 describe("Vesting", function () {
-  it("Test vesting contract.", async function () {
-    this.timeout(50000);
-    // get signers
-    const [owner, addr1] = await ethers.getSigners()
+    let hypertoken;
+    let vester;
+    let owner;
+    let addr1; 
 
-    // deploy hypertoken contract
-    const Hypertoken = await ethers.getContractFactory("Hypertoken");
-    const hypertoken = await Hypertoken.deploy();
-    hypertoken_reciept = await hypertoken.deployTransaction.wait();
-    const totalSupply = await hypertoken.totalSupply()
-    console.log("Hypertoken Address:", hypertoken.address)
-    console.log("Hypertoken Supply:", totalSupply.toString())
-    console.log("Hypertoken Gas Fee:", hypertoken_reciept.gasUsed.toString())
+    const award = ethers.utils.parseEther("100");
+    const timeNow = Date.now();
+    const startTime = timeNow;
+    const cliffTime = timeNow+30;
+    const endTime = timeNow+60;
 
-    // all tokens are currently owned by owner signer
-    // delegate all votes to self
-    // if delegate() is not called, the account has no voting power
-    const txvotes = await hypertoken.delegate(owner.address)
-    const txvotes_receipt = txvotes.wait()
+    beforeEach(async () => {
+        [owner, addr1] = await ethers.getSigners();
 
-    const award = 100
-    const timeNow = Date.now()
-    const startTime = timeNow
-    const cliffTime = timeNow+30
-    const endTime = timeNow+60
-    // deploy Vesting contract
-    const Vester = await ethers.getContractFactory("Vester");
-    const vester = await Vester.deploy(hypertoken.address, addr1.address, award, startTime, cliffTime, endTime);
-    await vester.deployTransaction.wait();
+        // deploy hypertoken contract
+        const Hypertoken = await ethers.getContractFactory("Hypertoken");
+        hypertoken = await Hypertoken.deploy();
+        await hypertoken.deployTransaction.wait();
 
-    const tx1 = await hypertoken.transfer(vester.address, award)
-    const tx1_reciept = await tx1.wait()
+        // deploy Vesting contract
+        const Vester = await ethers.getContractFactory("Vester");
+        vester = await Vester.deploy(hypertoken.address, addr1.address, award, startTime, cliffTime, endTime);
+        await vester.deployTransaction.wait();
+	});
 
-    expect(await vester.vestingAmount()).to.equal(award)
-    expect(await vester.vestingBegin()).to.equal(startTime)
-    expect(await vester.vestingCliff()).to.equal(cliffTime)
-    expect(await vester.vestingEnd()).to.equal(endTime)
-    expect(await vester.recipient()).to.equal(addr1.address)
-    expect(await hypertoken.balanceOf(vester.address)).to.equal(award)
-  });
+    it("Test vesting contract.", async function () {
+        let tx = await hypertoken.transfer(vester.address, award);
+        tx.wait();
+
+        tx = await vester.connect(addr1).delegate(addr1.address);
+        tx.wait();
+
+        expect(await vester.vestingAmount()).to.equal(award);
+        expect(await vester.vestingBegin()).to.equal(startTime);
+        expect(await vester.vestingCliff()).to.equal(cliffTime);
+        expect(await vester.vestingEnd()).to.equal(endTime);
+        expect(await vester.recipient()).to.equal(addr1.address);
+        expect(await hypertoken.balanceOf(vester.address)).to.equal(award);
+        expect(await hypertoken.getVotes(addr1.address)).to.equal(award);
+    });
 });
