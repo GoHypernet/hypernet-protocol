@@ -185,7 +185,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
             },
           ]
         : []),
-    ];
+    ] as IHeaderAction[];
   };
 
   return (
