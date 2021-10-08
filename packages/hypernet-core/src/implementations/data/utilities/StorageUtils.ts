@@ -65,9 +65,7 @@ export class StorageUtils implements IStorageUtils {
           `Key not found in session storage, reading value for key ${keyName} from Ceramic`,
         );
         return ResultUtils.backoffAndRetry(
-          () => {
-            return this.ceramicUtils.readRecord<T>(keyName);
-          },
+          () => this.ceramicUtils.readRecord<T>(keyName),
           [PersistenceError],
           2,
         ).andThen((ceramicVal) => {
@@ -91,18 +89,21 @@ export class StorageUtils implements IStorageUtils {
   }
 
   public remove(keyName: string): ResultAsync<void, PersistenceError> {
-    return ResultUtils.combine([
-      this.ceramicUtils.removeRecord(keyName),
+    return ResultUtils.race([
       this._removeSessionStorage(keyName),
-    ])
-      .orElse((err) => {
-        return this.contextProvider.getContext().andThen((context) => {
-          this.logUtils.error(err);
-          context.onCeramicFailed.next(err);
-          return errAsync(err);
-        });
-      })
-      .map(() => {});
+      ResultUtils.backoffAndRetry(
+        () =>
+          this.ceramicUtils.removeRecord(keyName).orElse((err) => {
+            return this.contextProvider.getContext().andThen((context) => {
+              this.logUtils.error(err);
+              context.onCeramicFailed.next(err);
+              return errAsync(err);
+            });
+          }),
+        [PersistenceError],
+        2,
+      ),
+    ]).map(() => {});
   }
 
   private _writeSessionStorage<T>(

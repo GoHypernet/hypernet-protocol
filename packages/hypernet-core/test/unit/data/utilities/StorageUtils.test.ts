@@ -233,10 +233,14 @@ describe("StorageUtils tests", () => {
 
     // Act
     const result = await utils.remove(mocks.exampleKey);
+    const removeRecordCallingCount = td.explain(
+      mocks.ceramicUtils.removeRecord,
+    ).callCount;
 
     // Assert
     expect(result).toBeDefined();
     expect(result.isErr()).toBeFalsy();
+    expect(removeRecordCallingCount).toBe(1);
 
     td.verify(mocks.localStorageUtils.removeSessionItem(mocks.exampleKey), {
       times: 1,
@@ -245,7 +249,7 @@ describe("StorageUtils tests", () => {
     mocks.contextProvider.assertEventCounts({});
   });
 
-  test("StorageUtils.remove returns an error is Ceramic fails", async () => {
+  test("StorageUtils.remove returns void is Ceramic fails", async () => {
     // Arrange
     const mocks = new StorageUtilsMocks();
     const utils = mocks.factoryStorageUtils();
@@ -258,19 +262,27 @@ describe("StorageUtils tests", () => {
     // Act
     const result = await utils.remove(mocks.exampleKey);
 
+    // wait for backoff and retry
+    await new Promise((r) => setTimeout(r, 1000));
+
+    const removeRecordCallingCount = td.explain(
+      mocks.ceramicUtils.removeRecord,
+    ).callCount;
+
+    expect(removeRecordCallingCount).toBe(2);
+
     // Assert
     expect(result).toBeDefined();
-    expect(result.isErr()).toBeTruthy();
-    const resultErr = result._unsafeUnwrapErr();
-    expect(resultErr).toBeInstanceOf(PersistenceError);
-    expect(resultErr).toBe(err);
+    expect(result.isErr()).toBeFalsy();
+    const resultErr = result._unsafeUnwrap();
+    expect(resultErr).toBe(undefined);
 
     td.verify(mocks.localStorageUtils.removeSessionItem(mocks.exampleKey), {
       times: 1,
     });
 
     mocks.contextProvider.assertEventCounts({
-      onCeramicFailed: 1,
+      onCeramicFailed: 2,
     });
   });
 });
