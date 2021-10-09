@@ -18,8 +18,8 @@ describe("Vesting", function () {
 
         const latestBlock = await hre.ethers.provider.getBlock("latest");
         const timeNow = latestBlock.timestamp;
-        startTime = timeNow+10; 
-        cliffTime = timeNow+30;
+        startTime = timeNow+10; // put start time in the future 
+        cliffTime = timeNow+30; 
         endTime = timeNow+60; 
 
         // deploy hypertoken contract
@@ -41,13 +41,6 @@ describe("Vesting", function () {
         let tx = await vester.connect(addr1).delegate(addr1.address);
         tx.wait();
 
-        let asdf = await vester.vestingBegin();
-        let qwer = await vester.vestingCliff();
-        console.log(startTime)
-        console.log(asdf.toString());
-        console.log(qwer.toString());
-        console.log()
-
         expect(await vester.vestingAmount()).to.equal(award);
         expect(await vester.vestingBegin()).to.equal(startTime);
         expect(await vester.vestingCliff()).to.equal(cliffTime);
@@ -61,15 +54,12 @@ describe("Vesting", function () {
         let tx = await vester.connect(addr1).delegate(addr1.address);
         tx.wait();
 
-        let a = await vester.timeNow();
         hre.timeAndMine.setTimeIncrease("1d");
         hre.timeAndMine.mine("100");
-        let b = await vester.timeNow();
-        console.log(a.toString())
-        console.log(b.toString())
 
         tx = await vester.connect(addr1).claim(); 
         tx.wait();
         expect(await hypertoken.balanceOf(addr1.address)).to.equal(award);
+        expect(await hypertoken.balanceOf(vester.address)).to.equal(0);
     });
 });
