@@ -505,6 +505,25 @@ export class RegistryRepository implements IRegistryRepository {
     );
   }
 
+  public getNumberOfRegistries(): ResultAsync<
+    number,
+    BlockchainUnavailableError
+  > {
+    return this.initializeReadOnly().andThen(
+      ({ registryContracts, provider }) => {
+        return ResultAsync.fromPromise(
+          registryContracts.factoryContract.getNumberOfRegistries() as Promise<BigNumber>,
+          (e) => {
+            return new BlockchainUnavailableError(
+              "Unable to call factoryContract getNumberOfRegistries()",
+              e,
+            );
+          },
+        ).map((numberOfRegistries) => numberOfRegistries.toNumber());
+      },
+    );
+  }
+
   private getRegistryByIndex(
     index: number,
     provider: ethers.providers.Provider,

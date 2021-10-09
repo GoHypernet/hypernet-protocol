@@ -81,4 +81,11 @@ export class RegistryService implements IRegistryService {
       label,
     );
   }
+
+  public getNumberOfRegistries(): ResultAsync<
+    number,
+    BlockchainUnavailableError
+  > {
+    return this.registryRepository.getNumberOfRegistries();
+  }
 }

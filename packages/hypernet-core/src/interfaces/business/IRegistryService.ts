@@ -38,4 +38,5 @@ export interface IRegistryService {
   getRegistryEntriesTotalCount(
     registryNames: string[],
   ): ResultAsync<Map<string, number>, BlockchainUnavailableError>;
+  getNumberOfRegistries(): ResultAsync<number, BlockchainUnavailableError>;
 }

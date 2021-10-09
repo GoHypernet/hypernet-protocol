@@ -1157,4 +1157,11 @@ export class HypernetCore implements IHypernetCore {
   ): ResultAsync<number, BlockchainUnavailableError> {
     return this.governanceService.getHyperTokenBalance(account);
   }
+
+  public getNumberOfRegistries(): ResultAsync<
+    number,
+    BlockchainUnavailableError
+  > {
+    return this.registryService.getNumberOfRegistries();
+  }
 }

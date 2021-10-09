@@ -38,6 +38,7 @@ export interface IRegistryRepository {
   getRegistryEntriesTotalCount(
     registryNames: string[],
   ): ResultAsync<Map<string, number>, BlockchainUnavailableError>;
+  getNumberOfRegistries(): ResultAsync<number, BlockchainUnavailableError>;
 }
 
 export const IRegistryRepositoryType = Symbol.for("IRegistryRepository");
