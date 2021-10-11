@@ -12,7 +12,7 @@ Hypernet Protocol believe that a decentralized, blockchain-secured, community-dr
 revolutionize the cyber-infrastructure landscape and that it is broadly generalizable to various decentralized marketplaces 
 and subscription-based services. 
 
-A successful payment protocol must solve problem on both sides of the market. On the consumer side, users expect a 
+A successful payment protocol must solve problems on both sides of the market. On the consumer side, users expect a 
 payment solution that quickly executes transactions and is intuitive. To accomplish this, the Hypernet Protocol 
 integrates Connext's [Vector](https://github.com/connext/vector) library to enable fast, secure, microtransactions, 
 with minimal user intervention. On the merchant side, adopters expect a similarly refined onboarding process. The 
