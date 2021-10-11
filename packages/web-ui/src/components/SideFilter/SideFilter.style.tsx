@@ -1,8 +1,8 @@
-import { makeStyles, createMuiTheme } from "@material-ui/core/styles";
+import { makeStyles, createTheme } from "@material-ui/core";
 
 import { EFontSize, EFontWeight } from "@web-ui/theme";
 
-export const theme = createMuiTheme({
+export const theme = createTheme({
   palette: {
     primary: {
       main: "#000000",

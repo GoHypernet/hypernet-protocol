@@ -1,5 +1,4 @@
-import { Slider } from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
+import { Slider, withStyles } from "@material-ui/core";
 
 export const CustomSlider = withStyles({
   root: {

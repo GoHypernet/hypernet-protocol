@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import Pagination, { PaginationProps } from "@material-ui/lab/Pagination";
+import { Pagination, PaginationProps } from "@material-ui/lab";
 import { useStyles } from "@web-ui/components/GovernancePagination/GovernancePagination.style";
 
 interface CustomPageProps {

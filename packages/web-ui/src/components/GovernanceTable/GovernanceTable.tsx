@@ -12,10 +12,12 @@ import {
   useMediaQuery,
   IconButton,
   Collapse,
+  useTheme,
 } from "@material-ui/core";
-import { useTheme } from "@material-ui/core/styles";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
+import {
+  ExpandMore as ExpandMoreIcon,
+  ExpandLess as ExpandLessIcon,
+} from "@material-ui/icons";
 
 import {
   GovernanceButton,

@@ -1,6 +1,9 @@
 import { Box, IconButton, Menu, MenuItem } from "@material-ui/core";
 import { pathToRegexp } from "path-to-regexp";
-import MoreVertIcon from "@material-ui/icons/MoreVert";
+import {
+  MoreVert as MoreVertIcon,
+} from "@material-ui/icons";
+
 import React from "react";
 import { Link, useHistory, useLocation } from "react-router-dom";
 

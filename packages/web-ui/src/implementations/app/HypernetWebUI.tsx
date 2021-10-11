@@ -1,6 +1,12 @@
 import { IHypernetCore, IUIData, RenderError } from "@hypernetlabs/objects";
 import MainContainer from "@web-ui/containers/MainContainer";
-import { ThemeProvider, Box } from "@material-ui/core";
+import {
+  ThemeProvider,
+  Box,
+  StylesProvider,
+  createGenerateClassName,
+} from "@material-ui/core";
+
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import {
   IConnectorAuthorizationFlowParams,
@@ -126,6 +132,11 @@ export default class HypernetWebUI implements IHypernetWebUI {
 
     const Theme = hasTheme ? ThemeProvider : Box;
 
+    const generateClassName = createGenerateClassName({
+      disableGlobal: true,
+      seed: new Date().getTime() + "hypernetlabs-web-ui",
+    });
+
     return (
       <StoreProvider
         coreProxy={this.coreInstance}
@@ -133,18 +144,20 @@ export default class HypernetWebUI implements IHypernetWebUI {
         viewUtils={this.viewUtils}
         dateUtils={this.dateUtils}
       >
-        <Theme theme={true ? lightTheme : darkTheme}>
-          <LayoutProvider>
-            <MainContainer
-              withModal={withModal}
-              closeCallback={closeCallback}
-              modalStyle={modalStyle}
-              isV2={hasTheme}
-            >
-              {component}
-            </MainContainer>
-          </LayoutProvider>
-        </Theme>
+        <StylesProvider injectFirst generateClassName={generateClassName}>
+          <Theme theme={true ? lightTheme : darkTheme}>
+            <LayoutProvider>
+              <MainContainer
+                withModal={withModal}
+                closeCallback={closeCallback}
+                modalStyle={modalStyle}
+                isV2={hasTheme}
+              >
+                {component}
+              </MainContainer>
+            </LayoutProvider>
+          </Theme>
+        </StylesProvider>
       </StoreProvider>
     );
   }
@@ -346,6 +359,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <PublicIdentifierWidget {...config} />,
           config?.showInModal,
+          undefined,
+          undefined,
+          true,
         ),
         this._generateDomElement(
           config?.selector || PUBLIC_IDENTIFIER_WIDGET_ID_SELECTOR,

@@ -7,7 +7,8 @@ import {
   IconButton,
   Divider,
 } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
+import { Close as CloseIcon } from "@material-ui/icons";
+
 import { useStyles } from "@web-ui/components/GovernanceDialog/GovernanceDialog.style";
 
 export interface GovernanceDialogProps {
@@ -57,7 +58,7 @@ export const GovernanceDialog: React.FC<GovernanceDialogProps> = (
           </IconButton>
         </Box>
       </DialogTitle>
-      <Divider  />
+      <Divider />
       <DialogContent className={classes.dialogContent}>{content}</DialogContent>
     </Dialog>
   );

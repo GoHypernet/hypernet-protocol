@@ -1,6 +1,6 @@
 import { addDecorator } from "@storybook/react";
 import { withThemes } from "@react-theming/storybook-addon";
-import { ThemeProvider, createTheme } from "@material-ui/core/styles";
+import { ThemeProvider, createTheme } from "@material-ui/core";
 import { lightTheme, darkTheme } from "@hypernetlabs/web-ui";
 import withFormik from "storybook-formik";
 

@@ -1,7 +1,7 @@
 import React, { useState, ReactNode } from "react";
 
 import { Box, Avatar, Tooltip, Typography } from "@material-ui/core";
-import { Folder, Block } from "@material-ui/icons";
+import { Folder as FolderIcon, Block as BlockIcon } from "@material-ui/icons";
 import { Form, Formik } from "formik";
 
 import { GatewayUrl } from "@hypernetlabs/objects";
@@ -138,7 +138,11 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
                           openGatewayIFrame(gatewayUrl);
                       }}
                     >
-                      {gatewaysMap.get(gatewayUrl) ? <Folder /> : <Block />}
+                      {gatewaysMap.get(gatewayUrl) ? (
+                        <FolderIcon />
+                      ) : (
+                        <BlockIcon />
+                      )}
                     </Avatar>
                   </Tooltip>
                 }

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Box, Tooltip, IconButton, Typography, Grid } from "@material-ui/core";
 import { IRenderParams } from "@web-ui/interfaces";
-import AddIcon from "@material-ui/icons/Add";
-import LocalGasStationIcon from "@material-ui/icons/LocalGasStation";
-import CheckIcon from "@material-ui/icons/Check";
+import {
+  Add as AddIcon,
+  LocalGasStation as LocalGasStationIcon,
+  Check as CheckIcon,
+} from "@material-ui/icons";
 import { useAlert } from "react-alert";
 
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
