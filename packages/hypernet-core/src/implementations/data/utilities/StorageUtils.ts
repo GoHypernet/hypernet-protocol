@@ -32,18 +32,22 @@ export class StorageUtils implements IStorageUtils {
     keyName: string,
     data: T,
   ): ResultAsync<void, PersistenceError> {
-    return ResultUtils.combine([
-      this.ceramicUtils.writeRecord(keyName, data),
+    return ResultUtils.race([
       this._writeSessionStorage(keyName, data),
-    ])
-      .orElse((err) => {
-        return this.contextProvider.getContext().andThen((context) => {
-          this.logUtils.error(err);
-          context.onCeramicFailed.next(err);
-          return errAsync(err);
-        });
-      })
-      .map(() => {});
+      ResultUtils.backoffAndRetry(
+        () => {
+          return this.ceramicUtils.writeRecord(keyName, data).orElse((err) => {
+            return this.contextProvider.getContext().andThen((context) => {
+              this.logUtils.error(err);
+              context.onCeramicFailed.next(err);
+              return errAsync(err);
+            });
+          });
+        },
+        [PersistenceError],
+        2,
+      ),
+    ]);
   }
 
   public read<T>(keyName: string): ResultAsync<T | null, PersistenceError> {
@@ -60,18 +64,20 @@ export class StorageUtils implements IStorageUtils {
         this.logUtils.debug(
           `Key not found in session storage, reading value for key ${keyName} from Ceramic`,
         );
-        return this.ceramicUtils
-          .readRecord<T>(keyName)
-          .andThen((ceramicVal) => {
-            if (ceramicVal == null) {
-              // It's really null!
-              return okAsync<T | null, PersistenceError>(ceramicVal);
-            }
-            // Need to update session storage before we return a value.
-            return this._writeSessionStorage(keyName, ceramicVal).map(() => {
-              return ceramicVal;
-            });
+        return ResultUtils.backoffAndRetry(
+          () => this.ceramicUtils.readRecord<T>(keyName),
+          [PersistenceError],
+          2,
+        ).andThen((ceramicVal) => {
+          if (ceramicVal == null) {
+            // It's really null!
+            return okAsync<T | null, PersistenceError>(ceramicVal);
+          }
+          // Need to update session storage before we return a value.
+          return this._writeSessionStorage(keyName, ceramicVal).map(() => {
+            return ceramicVal;
           });
+        });
       })
       .orElse((err) => {
         return this.contextProvider.getContext().andThen((context) => {
@@ -83,18 +89,21 @@ export class StorageUtils implements IStorageUtils {
   }
 
   public remove(keyName: string): ResultAsync<void, PersistenceError> {
-    return ResultUtils.combine([
-      this.ceramicUtils.removeRecord(keyName),
+    return ResultUtils.race([
       this._removeSessionStorage(keyName),
-    ])
-      .orElse((err) => {
-        return this.contextProvider.getContext().andThen((context) => {
-          this.logUtils.error(err);
-          context.onCeramicFailed.next(err);
-          return errAsync(err);
-        });
-      })
-      .map(() => {});
+      ResultUtils.backoffAndRetry(
+        () =>
+          this.ceramicUtils.removeRecord(keyName).orElse((err) => {
+            return this.contextProvider.getContext().andThen((context) => {
+              this.logUtils.error(err);
+              context.onCeramicFailed.next(err);
+              return errAsync(err);
+            });
+          }),
+        [PersistenceError],
+        2,
+      ),
+    ]).map(() => {});
   }
 
   private _writeSessionStorage<T>(
