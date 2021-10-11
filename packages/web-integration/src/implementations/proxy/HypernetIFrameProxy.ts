@@ -664,6 +664,13 @@ export default class HypernetIFrameProxy
     return this._createCall("getHyperTokenBalance", account);
   }
 
+  public getNumberOfRegistries(): ResultAsync<
+    number,
+    BlockchainUnavailableError
+  > {
+    return this._createCall("getNumberOfRegistries", null);
+  }
+
   private _displayCoreIFrame(): void {
     // Show core iframe
     if (this.child != null) {

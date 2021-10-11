@@ -351,6 +351,8 @@ export interface IHypernetCore {
     account: EthereumAddress,
   ): ResultAsync<number, BlockchainUnavailableError>;
 
+  getNumberOfRegistries(): ResultAsync<number, BlockchainUnavailableError>;
+
   /**
    * Observables for seeing what's going on
    */

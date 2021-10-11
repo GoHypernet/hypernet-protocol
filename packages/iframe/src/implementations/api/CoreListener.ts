@@ -380,6 +380,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.getHyperTokenBalance(data.data);
         }, data.callId);
       },
+      getNumberOfRegistries: (data: IIFrameCallData<void>) => {
+        this.returnForModel(() => {
+          return this.core.getNumberOfRegistries();
+        }, data.callId);
+      },
     });
   }
 

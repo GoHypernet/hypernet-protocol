@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Box } from "@material-ui/core";
 import { useAlert } from "react-alert";
 
@@ -6,10 +6,14 @@ import {
   GovernanceRegistryListItem,
   GovernanceWidgetHeader,
   GovernanceEmptyState,
+  getPageItemIndexList,
+  GovernancePagination,
 } from "@web-ui/components";
 import { IRegistryListWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { Registry } from "@hypernetlabs/objects";
+
+const REGISTIRES_PER_PAGE = 2;
 
 const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   onRegistryEntryListNavigate,
@@ -19,10 +23,30 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   const { loading, setLoading } = useLayoutContext();
   const [registries, setRegistries] = useState<Registry[]>([]);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(1);
+  const [registriesCount, setRegistriesCount] = useState<number>(0);
+
+  /* const registriesNumberArr = useMemo(
+    () => getPageItemIndexList(registriesCount, page, REGISTIRES_PER_PAGE),
+    [registriesCount, page],
+  ); */
 
   useEffect(() => {
     coreProxy
-      .getRegistries(1, 10)
+      .getNumberOfRegistries()
+      .map((numberOfRegistries) => {
+        console.log('numberOfRegistries: ', numberOfRegistries);
+        setRegistriesCount(numberOfRegistries);
+        if (!numberOfRegistries) {
+          setHasEmptyState(true);
+        }
+      })
+      .mapErr(handleError);
+  }, []);
+
+  useEffect(() => {
+    coreProxy
+      .getRegistries(page, REGISTIRES_PER_PAGE)
       .map((registries) => {
         setRegistries(registries);
         if (!registries.length) {
@@ -30,7 +54,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
         }
       })
       .mapErr(handleError);
-  }, []);
+  }, [page, registriesCount]);
 
   const handleError = (err?: Error) => {
     setLoading(false);
@@ -79,6 +103,17 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
           }
         />
       ))}
+      {!!registriesCount && (
+        <GovernancePagination
+          customPageOptions={{
+            itemsPerPage: REGISTIRES_PER_PAGE,
+            totalItems: registriesCount,
+          }}
+          onChange={(_, page) => {
+            setPage(page);
+          }}
+        />
+      )}
     </Box>
   );
 };
