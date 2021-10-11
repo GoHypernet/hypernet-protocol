@@ -26,9 +26,9 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     uint256 public registrationFee = 50e18; // assume 18 decimal places
 
     // address that token is sent to after registry creation
-    address public burnAddress = address(0x000000000000000000000000000000000000dEaD); 
+    address public burnAddress = address(0x000000000000000000000000000000000000dEaD);
 
-     /**
+    /**
      * @dev Emitted when `DEFAULT_ADMIN_ROLE` creates a new registry.
      */
     event RegistryCreated(address registryAddress);

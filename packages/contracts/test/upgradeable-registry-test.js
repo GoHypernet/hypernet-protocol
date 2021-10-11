@@ -159,14 +159,27 @@ describe("Registry", function () {
             "NonFungibleRegistry: Label updating is disabled.",
         );
 
+        const abiCoder = ethers.utils.defaultAbiCoder;
+
+        // construct call data via ABI encoding
+        let params = abiCoder.encode(
+            [
+                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+            ], 
+            [ 
+                [
+                    [ ], [ ], [ ], [true], [ ], [ ], [ ], [ ], [ ], [ ]
+                ] 
+            ]);
+
         // only REGISTRAR_ROLE can update registry parameters
         await expectRevert(
-            registry.connect(addr1).setRegistryParameters([], [], [], [true], [], [], [], [], [], []),
+            registry.connect(addr1).setRegistryParameters(params),
             "NonFungibleRegistry: must be registrar.",
         );
 
         // enable label updating
-        tx = await registry.setRegistryParameters([], [], [], [true], [], [], [], [], [], []);
+        tx = await registry.setRegistryParameters(params);
         tx.wait();
 
         // update the label on the NFI that has none
@@ -188,8 +201,21 @@ describe("Registry", function () {
         tx.wait();
         expect(await registry.balanceOf(addr1.address)).to.equal(1);
 
+        const abiCoder = ethers.utils.defaultAbiCoder;
+
+        // construct call data via ABI encoding
+        let params = abiCoder.encode(
+            [
+                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+            ], 
+            [ 
+                [
+                    [], [], [], [], [false], [], [], [], [], []
+                ] 
+            ]);
+
         // registrar disables transfers in the registry
-        tx = await registry.setRegistryParameters([], [], [], [], [false], [], [], [], [], []);
+        tx = await registry.setRegistryParameters(params);
         tx.wait();
 
         // ensure that noone without REGISTRAR_ROLE can transfer tokens
@@ -227,10 +253,23 @@ describe("Registry", function () {
         await expectRevert(
             registry.connect(addr2).registerByToken(addr2.address, "username", "myprofile"),
             "NonFungibleRegistry: registration by token not enabled.",
-        )
+        );
+
+        const abiCoder = ethers.utils.defaultAbiCoder;
+
+        // construct call data via ABI encoding
+        let params = abiCoder.encode(
+            [
+                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+            ], 
+            [ 
+                [
+                    [], [], [], [], [], [hypertoken.address], [], [], [], []
+                ] 
+            ]);
 
         // registrar now sets the registration token to enable token-based registration
-        tx = await registry.setRegistryParameters([], [], [], [], [], [hypertoken.address], [], [], [], []);
+        tx = await registry.setRegistryParameters(params);
         tx.wait();
 
         // then they can submit a transaction to register
@@ -245,6 +284,14 @@ describe("Registry", function () {
         tx = await registry.connect(addr2).burn(stakeTokenId);
         tx.wait();
         expect(await hypertoken.balanceOf(addr2.address)).to.equal(ethers.utils.parseEther("1.95"));
+
+        // approve the registry to pull hypertoken from the users wallet
+        tx = await hypertoken.connect(addr2).approve(registry.address, regFee);
+        tx.wait();
+
+        // then they can submit a transaction to register
+        tx = await registry.connect(addr2).registerByToken(addr2.address, "username2", "myprofile2");
+        tx.wait();
     });
 
     it("Test batch minting function.", async function () {
@@ -290,10 +337,23 @@ describe("Registry", function () {
       await expectRevert(
         registry.connect(addr1).lazyRegister(addr1.address, label, registrationData, sig),
         "NonFungibleRegistry: Lazy registration is disabled.",
-      )
+      );
+
+      const abiCoder = ethers.utils.defaultAbiCoder;
+
+      // construct call data via ABI encoding
+      let params = abiCoder.encode(
+          [
+              "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+          ], 
+          [ 
+              [
+                [], [true], [], [], [], [], [], [], [], []
+              ] 
+          ]);
 
       // registrar now sets the registration token to enable token-based registration
-      tx = await registry.setRegistryParameters([], [true], [], [], [], [], [], [], [], []);
+      tx = await registry.setRegistryParameters(params);
       tx.wait();
 
       await expectRevert(

@@ -30,6 +30,19 @@ contract NonFungibleRegistryUpgradeable is
       uint256 amount;
     }
 
+    struct RegistryParams {
+        string[] _schema;
+        bool[] _allowLazyRegister;
+        bool[] _allowStorageUpdate;
+        bool[] _allowLabelChange;
+        bool[] _allowTransfers;
+        address[] _registrationToken;
+        uint256[]  _registrationFee;
+        address[] _burnAddress;
+        uint256[] _burnFee;
+        address[] _primaryRegistry;
+    }
+
     // DFDL schema definition for metadata stored in tokenURI
     string public schema;
 
@@ -116,39 +129,25 @@ contract NonFungibleRegistryUpgradeable is
 
     /// @notice setRegistryParameters enable or disable the lazy registration feature
     /// @dev only callable by the REGISTRAR_ROLE, use arrays so we don't have to always pass every
-    /// parameter if we don't want to chage it. I know this function is ugly but it helps to reduce
-    /// the size of the compiled contract compared to having 7 seperate setter fuctions
-    /// @param _schema DFDL-compatible schema definition for dynamic UIs
-    /// @param _allowLazyRegister boolean flag; false disables lazy registration
-    /// @param _allowStorageUpdate boolean flag; false disables updating the tokenURI field for all but REGISTRAR_ROLE
-    /// @param _allowLabelChange boolean flag; false disables label updating for all but REGISTRAR_ROLE
-    /// @param _allowTransfers boolean flag; false disables transfers for all but   REGISTRAR_ROLE
-    /// @param _registrationToken address of the ERC20 token to use for regsitration
-    /// @param _registrationFee number of registrationToken's needed to call registerByToken
-    function setRegistryParameters(string[] memory _schema, 
-                                   bool[] memory _allowLazyRegister,
-                                   bool[] memory _allowStorageUpdate,
-                                   bool[] memory _allowLabelChange,
-                                   bool[] memory _allowTransfers,
-                                   address[] memory _registrationToken,
-                                   uint256[] memory  _registrationFee,
-                                   address[] memory _burnAddress,
-                                   uint256[] memory _burnFee,
-                                   address[] memory _primaryRegistry
-                                   )
+    /// parameter if we don't want to chage it.
+    /// @param encodedParameters encoded calldata for registry parameters
+    function setRegistryParameters(bytes calldata encodedParameters)
         external 
         virtual {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must be registrar.");
-        if (_schema.length > 0) { schema = _schema[0];}
-        if (_allowLazyRegister.length > 0) { allowLazyRegister = _allowLazyRegister[0]; }
-        if (_allowStorageUpdate.length > 0) { allowStorageUpdate = _allowStorageUpdate[0]; }
-        if (_allowLabelChange.length > 0) { allowLabelChange = _allowLabelChange[0]; }
-        if (_allowTransfers.length > 0) { allowTransfers = _allowTransfers[0]; }
-        if (_registrationToken.length > 0) { registrationToken = _registrationToken[0]; }
-        if (_registrationFee.length > 0) { registrationFee = _registrationFee[0]; }
-        if (_burnAddress.length > 0) { burnAddress = _burnAddress[0]; }
-        if (_burnFee.length > 0) { burnFee = _burnFee[0]; }
-        if (_primaryRegistry.length > 0) { primaryRegistry = _primaryRegistry[0]; }
+
+        RegistryParams memory params = abi.decode(encodedParameters, (RegistryParams));
+
+        if (params._schema.length > 0) { schema = params._schema[0];}
+        if (params._allowLazyRegister.length > 0) { allowLazyRegister = params._allowLazyRegister[0]; }
+        if (params._allowStorageUpdate.length > 0) { allowStorageUpdate = params._allowStorageUpdate[0]; }
+        if (params._allowLabelChange.length > 0) { allowLabelChange = params._allowLabelChange[0]; }
+        if (params._allowTransfers.length > 0) { allowTransfers = params._allowTransfers[0]; }
+        if (params._registrationToken.length > 0) { registrationToken = params._registrationToken[0]; }
+        if (params._registrationFee.length > 0) { registrationFee = params._registrationFee[0]; }
+        if (params._burnAddress.length > 0) { burnAddress = params._burnAddress[0]; }
+        if (params._burnFee.length > 0) { burnFee = params._burnFee[0]; }
+        if (params._primaryRegistry.length > 0) { primaryRegistry = params._primaryRegistry[0]; }
     }
 
     function _storageCanBeUpdated() internal view virtual returns (bool) {
@@ -168,7 +167,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @param to address of the recipient of the token
     /// @param label a unique label to attach to the token, can pass an empty string to skip labeling
     /// @param registrationData data to store in the tokenURI
-    function register(address to, string memory label, string memory registrationData) external virtual {
+    function register(address to, string calldata label, string calldata registrationData) external virtual {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must have registrar role to register.");
         _createLabeledToken(to, label, registrationData);
     }
@@ -193,7 +192,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @param to address of the recipient of the token
     /// @param label a unique label to attach to the token
     /// @param registrationData data to store in the tokenURI
-    function registerByToken(address to, string memory label, string memory registrationData) external virtual {
+    function registerByToken(address to, string calldata label, string calldata registrationData) external virtual {
         require(registrationToken != address(0), "NonFungibleRegistry: registration by token not enabled.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
 
@@ -237,7 +236,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @dev only callable by the owner, approved caller when allowStorageUpdate is true or REGISTRAR_ROLE
     /// @param tokenId the tokenId of the target registration
     /// @param registrationData new data to store in the tokenURI
-    function updateRegistration(uint256 tokenId, string memory registrationData) external virtual {
+    function updateRegistration(uint256 tokenId, string calldata registrationData) external virtual {
         require(_storageCanBeUpdated(), "NonFungibleRegistry: Storage updating is disabled.");
         require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         _setTokenURI(tokenId, registrationData);
@@ -248,7 +247,7 @@ contract NonFungibleRegistryUpgradeable is
     /// @dev only callable by the owner, approved caller when allowLabelChange is true or REGISTRAR_ROLE
     /// @param tokenId the tokenId of the target registration
     /// @param label new data to associate with the token label
-    function updateLabel(uint256 tokenId, string memory label) external virtual {
+    function updateLabel(uint256 tokenId, string calldata label) external virtual {
         require(_labelCanBeChanged(), "NonFungibleRegistry: Label updating is disabled.");
         require(_isApprovedOrOwnerOrRegistrar(_msgSender(), tokenId), "NonFungibleRegistry: caller is not owner nor approved nor registrar.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
@@ -381,10 +380,10 @@ contract NonFungibleRegistryUpgradeable is
     /// @param registrationData data to store in the tokenURI 
     /// @param signature signature from REGISTRAR_ROLE 
     function lazyRegister(address to, 
-                          string memory label, 
-                          string memory registrationData, 
-                          bytes memory signature)
-        public {
+                          string calldata label, 
+                          string calldata registrationData, 
+                          bytes calldata signature)
+        external {
         // check if lazy registration is allowed for this NFI
         require(allowLazyRegister, "NonFungibleRegistry: Lazy registration is disabled.");
         
