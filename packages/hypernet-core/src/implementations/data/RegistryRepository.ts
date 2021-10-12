@@ -21,7 +21,10 @@ import {
 import { GovernanceAbis } from "@hypernetlabs/objects";
 
 class RegistryContracts {
-  constructor(public factoryContract: ethers.Contract) {}
+  constructor(
+    public factoryContract: ethers.Contract,
+    public hypertokenContract: ethers.Contract,
+  ) {}
 }
 
 @injectable()
@@ -647,6 +650,131 @@ export class RegistryRepository implements IRegistryRepository {
     });
   }
 
+  public createRegistryEntry(
+    registryName: string,
+    label: string,
+    recipientAddress: EthereumAddress,
+    data: string,
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
+    return this.initializeForWrite().andThen(
+      ({ registryContracts, signer }) => {
+        return ResultUtils.combine([
+          this.getRegistryByName([registryName]),
+          this.getSignerAddress(signer),
+        ]).andThen((vals) => {
+          const [registryMap, signerAddress] = vals;
+          const registry = registryMap.get(registryName);
+          if (registry == null) {
+            throw new Error("Registry not found!");
+          }
+
+          let shouldCallRegisterByToken: boolean;
+
+          if (
+            registry.registrarAddresses.includes(
+              EthereumAddress(signerAddress),
+            ) === true
+          ) {
+            shouldCallRegisterByToken = false;
+          } else if (
+            BigNumber.from(registry.registrationToken).isZero() === false
+          ) {
+            shouldCallRegisterByToken = true;
+          } else {
+            return errAsync(
+              new RegistryPermissionError(
+                "you don't have permission to create NFI",
+              ),
+            );
+          }
+
+          // Call the NFI contract of that address
+          const registryContract = new ethers.Contract(
+            registry.address,
+            GovernanceAbis.NonFungibleRegistryUpgradeable.abi,
+            signer,
+          );
+
+          let registerResult: ResultAsync<any, BlockchainUnavailableError>;
+
+          if (shouldCallRegisterByToken === true) {
+            registerResult = ResultAsync.fromPromise(
+              registryContracts.hypertokenContract.approve(
+                registry.address,
+                registry.registrationFee,
+              ) as Promise<any>,
+              (e) => {
+                return new BlockchainUnavailableError(
+                  "Unable to call hypertokenContract approve()",
+                  e,
+                );
+              },
+            )
+              .andThen((tx) => {
+                return ResultAsync.fromPromise(
+                  tx.wait() as Promise<void>,
+                  (e) => {
+                    return new BlockchainUnavailableError(
+                      "Unable to wait for tx",
+                      e,
+                    );
+                  },
+                );
+              })
+              .andThen(() => {
+                return ResultAsync.fromPromise(
+                  registryContract.registerByToken(
+                    recipientAddress,
+                    label,
+                    data,
+                  ) as Promise<any>,
+                  (e) => {
+                    return new BlockchainUnavailableError(
+                      "Unable to call registryContract registerByToken()",
+                      e,
+                    );
+                  },
+                );
+              });
+          } else {
+            registerResult = ResultAsync.fromPromise(
+              registryContract.register(
+                recipientAddress,
+                label,
+                data,
+              ) as Promise<any>,
+              (e) => {
+                return new BlockchainUnavailableError(
+                  "Unable to call registryContract register()",
+                  e,
+                );
+              },
+            );
+          }
+
+          return registerResult
+            .andThen((tx) => {
+              return ResultAsync.fromPromise(
+                tx.wait() as Promise<void>,
+                (e) => {
+                  return new BlockchainUnavailableError(
+                    "Unable to wait for tx",
+                    e,
+                  );
+                },
+              );
+            })
+            .andThen(() => {
+              return this.getRegistryEntryByLabel(registryName, label);
+            });
+        });
+      },
+    );
+  }
+
   private getRegistryByIndex(
     index: number,
     provider: ethers.providers.Provider,
@@ -1094,7 +1222,14 @@ export class RegistryRepository implements IRegistryRepository {
         providerOrSigner,
       );
 
-      return new RegistryContracts(registryFactoryContract);
+      const hypertokenContract = new ethers.Contract(
+        config.chainAddresses[config.governanceChainId]
+          ?.hypertokenAddress as string,
+        GovernanceAbis.Hypertoken.abi,
+        providerOrSigner,
+      );
+
+      return new RegistryContracts(registryFactoryContract, hypertokenContract);
     });
   }
 }

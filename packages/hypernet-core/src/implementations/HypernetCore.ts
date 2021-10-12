@@ -1175,4 +1175,21 @@ export class HypernetCore implements IHypernetCore {
   > {
     return this.registryService.updateRegistryParams(registryParams);
   }
+
+  public createRegistryEntry(
+    registryName: string,
+    label: string,
+    recipientAddress: EthereumAddress,
+    data: string,
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
+    return this.registryService.createRegistryEntry(
+      registryName,
+      label,
+      recipientAddress,
+      data,
+    );
+  }
 }

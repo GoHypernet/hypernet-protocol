@@ -99,4 +99,21 @@ export class RegistryService implements IRegistryService {
   > {
     return this.registryRepository.updateRegistryParams(registryParams);
   }
+
+  public createRegistryEntry(
+    registryName: string,
+    label: string,
+    recipientAddress: EthereumAddress,
+    data: string,
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
+    return this.registryRepository.createRegistryEntry(
+      registryName,
+      label,
+      recipientAddress,
+      data,
+    );
+  }
 }

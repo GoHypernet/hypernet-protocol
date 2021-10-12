@@ -43,5 +43,17 @@ export interface IRegistryService {
   getNumberOfRegistries(): ResultAsync<number, BlockchainUnavailableError>;
   updateRegistryParams(
     registryParams: RegistryParams,
-  ): ResultAsync<Registry, BlockchainUnavailableError | RegistryPermissionError>;
+  ): ResultAsync<
+    Registry,
+    BlockchainUnavailableError | RegistryPermissionError
+  >;
+  createRegistryEntry(
+    registryName: string,
+    label: string,
+    recipientAddress: EthereumAddress,
+    data: string,
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  >;
 }

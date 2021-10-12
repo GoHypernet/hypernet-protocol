@@ -682,6 +682,23 @@ export default class HypernetIFrameProxy
     return this._createCall("updateRegistryParams", registryParams);
   }
 
+  public createRegistryEntry(
+    registryName: string,
+    label: string,
+    recipientAddress: EthereumAddress,
+    data: string,
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
+    return this._createCall("createRegistryEntry", {
+      registryName,
+      label,
+      recipientAddress,
+      data,
+    });
+  }
+
   private _displayCoreIFrame(): void {
     // Show core iframe
     if (this.child != null) {
