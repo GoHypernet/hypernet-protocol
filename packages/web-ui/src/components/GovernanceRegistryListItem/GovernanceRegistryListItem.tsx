@@ -1,19 +1,30 @@
 import React from "react";
-import { GovernanceListItem, GovernanceButton } from "@web-ui/components";
+import {
+  GovernanceListItem,
+  GovernanceButton,
+  IGovernanceButton,
+  GovernanceChip,
+} from "@web-ui/components";
 import { GovernanceListItemValueWithTitle } from "@web-integration/index";
-import { Box } from "@material-ui/core";
+import { Box, Grid } from "@material-ui/core";
+import { useStyles } from "@web-integration/components/GovernanceRegistryListItem/GovernanceRegistryListItem.style";
 
 interface IFieldWithValueList {
   fieldTitle: string;
   fieldValue?: string;
+  fullWidth?: boolean;
+}
+
+interface IListItemAction extends IGovernanceButton {
+  label: string;
 }
 
 interface GovernanceRegistryListItemProps {
   number: string;
   title: string;
   fieldWithValueList: IFieldWithValueList[];
-  onViewDetailsClick: () => void;
-  buttonLabel?: string;
+  actionButtonList?: IListItemAction[];
+  chipItemList?: string[];
 }
 
 export const GovernanceRegistryListItem: React.FC<GovernanceRegistryListItemProps> =
@@ -22,34 +33,68 @@ export const GovernanceRegistryListItem: React.FC<GovernanceRegistryListItemProp
       number,
       title,
       fieldWithValueList,
-      onViewDetailsClick,
-      buttonLabel,
+      actionButtonList = [],
+      chipItemList = [],
     } = props;
+    const classes = useStyles();
 
     return (
       <GovernanceListItem
         number={number}
         title={title}
-        rightContent={
-          <GovernanceButton
-            onClick={onViewDetailsClick}
-            variant="contained"
-            size="medium"
-          >
-            {buttonLabel || "View Details"}
-          </GovernanceButton>
-        }
+        rightContent={actionButtonList.map(
+          (
+            {
+              onClick,
+              label,
+              variant = "contained",
+              size = "small",
+              ...rest
+            }: IListItemAction,
+            index: number,
+          ) => (
+            <GovernanceButton
+              style={{ marginLeft: 16 }}
+              onClick={onClick}
+              variant={variant}
+              size={size}
+              key={index}
+              {...rest}
+            >
+              {label}
+            </GovernanceButton>
+          ),
+        )}
       >
-        {fieldWithValueList.map((fieldWithValue, index) => (
-          <Box key={index}>
-            {fieldWithValue.fieldValue && (
-              <GovernanceListItemValueWithTitle
-                title={fieldWithValue.fieldTitle}
-                value={fieldWithValue.fieldValue}
-              />
-            )}
-          </Box>
-        ))}
+        <Grid container spacing={3}>
+          {fieldWithValueList.map(
+            ({ fieldTitle, fieldValue, fullWidth }, index) => (
+              <Grid
+                key={index}
+                className={classes.gridItem}
+                item
+                xs={fullWidth ? 12 : 6}
+              >
+                {fieldValue && (
+                  <GovernanceListItemValueWithTitle
+                    title={fieldTitle}
+                    value={fieldValue}
+                  />
+                )}
+              </Grid>
+            ),
+          )}
+        </Grid>
+
+        {chipItemList.length && (
+          <Grid container spacing={1}>
+            {chipItemList.map((item, index) => (
+              <Grid key={index} item>
+                <GovernanceChip label={item} color="orange" size="small" />
+              </Grid>
+            ))}
+          </Grid>
+        )}
       </GovernanceListItem>
     );
   };

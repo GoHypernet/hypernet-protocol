@@ -67,11 +67,27 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
               fieldValue: registry.numberOfEntries.toString(),
             },
           ]}
-          buttonLabel="View Registry Entries"
-          onViewDetailsClick={() =>
-            onRegistryEntryListNavigate &&
-            onRegistryEntryListNavigate(registry.name)
-          }
+          actionButtonList={[
+            {
+              label: "Detail",
+              variant: "text",
+              onClick: () =>
+                onRegistryEntryListNavigate &&
+                onRegistryEntryListNavigate(registry.name),
+            },
+            {
+              label: "View Registry Entries",
+              onClick: () =>
+                onRegistryEntryListNavigate &&
+                onRegistryEntryListNavigate(registry.name),
+            },
+          ]}
+          chipItemList={[
+            "Lazy Registration not allowed",
+            "Lazy Registration not allowed",
+            "Lazy Registration not allowed",
+            "Lazy Registration not allowed",
+          ]}
         />
       ))}
     </Box>
