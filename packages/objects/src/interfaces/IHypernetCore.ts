@@ -20,6 +20,7 @@ import {
   GatewayAuthorizationDeniedError,
   MessagingError,
   RouterChannelUnknownError,
+  RegistryPermissionError,
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { GatewayRegistrationFilter } from "@objects/GatewayRegistrationFilter";
@@ -37,6 +38,7 @@ import { Proposal, ProposalVoteReceipt } from "@objects/Proposal";
 import { EProposalVoteSupport } from "@objects/typing";
 import { Registry } from "@objects/Registry";
 import { RegistryEntry } from "@objects/RegistryEntry";
+import { RegistryParams } from "@objects/RegistryParams";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -352,6 +354,10 @@ export interface IHypernetCore {
   ): ResultAsync<number, BlockchainUnavailableError>;
 
   getNumberOfRegistries(): ResultAsync<number, BlockchainUnavailableError>;
+
+  updateRegistryParams(
+    registryParams: RegistryParams,
+  ): ResultAsync<Registry, BlockchainUnavailableError | RegistryPermissionError>;
 
   /**
    * Observables for seeing what's going on

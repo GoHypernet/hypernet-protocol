@@ -35,6 +35,8 @@ import {
   ProposalVoteReceipt,
   Registry,
   RegistryEntry,
+  RegistryParams,
+  RegistryPermissionError,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -669,6 +671,15 @@ export default class HypernetIFrameProxy
     BlockchainUnavailableError
   > {
     return this._createCall("getNumberOfRegistries", null);
+  }
+
+  public updateRegistryParams(
+    registryParams: RegistryParams,
+  ): ResultAsync<
+    Registry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
+    return this._createCall("updateRegistryParams", registryParams);
   }
 
   private _displayCoreIFrame(): void {

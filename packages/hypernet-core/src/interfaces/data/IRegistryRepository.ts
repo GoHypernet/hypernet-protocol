@@ -3,6 +3,8 @@ import {
   EthereumAddress,
   Registry,
   RegistryEntry,
+  RegistryParams,
+  RegistryPermissionError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -39,6 +41,12 @@ export interface IRegistryRepository {
     registryNames: string[],
   ): ResultAsync<Map<string, number>, BlockchainUnavailableError>;
   getNumberOfRegistries(): ResultAsync<number, BlockchainUnavailableError>;
+  updateRegistryParams(
+    registryParams: RegistryParams,
+  ): ResultAsync<
+    Registry,
+    BlockchainUnavailableError | RegistryPermissionError
+  >;
 }
 
 export const IRegistryRepositoryType = Symbol.for("IRegistryRepository");

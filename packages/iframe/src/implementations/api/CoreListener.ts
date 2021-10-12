@@ -14,6 +14,7 @@ import {
   PublicIdentifier,
   GatewayRegistrationFilter,
   EProposalVoteSupport,
+  RegistryParams,
 } from "@hypernetlabs/objects";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
@@ -383,6 +384,11 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       getNumberOfRegistries: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           return this.core.getNumberOfRegistries();
+        }, data.callId);
+      },
+      updateRegistryParams: (data: IIFrameCallData<RegistryParams>) => {
+        this.returnForModel(() => {
+          return this.core.updateRegistryParams(data.data);
         }, data.callId);
       },
     });

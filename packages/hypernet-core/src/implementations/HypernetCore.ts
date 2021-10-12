@@ -36,6 +36,8 @@ import {
   ProposalVoteReceipt,
   Registry,
   RegistryEntry,
+  RegistryParams,
+  RegistryPermissionError,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -1163,5 +1165,14 @@ export class HypernetCore implements IHypernetCore {
     BlockchainUnavailableError
   > {
     return this.registryService.getNumberOfRegistries();
+  }
+
+  public updateRegistryParams(
+    registryParams: RegistryParams,
+  ): ResultAsync<
+    Registry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
+    return this.registryService.updateRegistryParams(registryParams);
   }
 }
