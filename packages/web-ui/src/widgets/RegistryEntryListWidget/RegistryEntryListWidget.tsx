@@ -11,6 +11,7 @@ import {
 import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { RegistryEntry } from "@hypernetlabs/objects";
+import CreateIdentityWidget from "../CreateIdentityWidget";
 
 const REGISTRY_ENTRIES_PER_PAGE = 3;
 
@@ -23,6 +24,8 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [registryEntries, setRegistryEntries] = useState<RegistryEntry[]>([]);
+  const [createIdentityModalOpen, setCreateIdentityModalOpen] =
+    useState<boolean>(false);
 
   const [page, setPage] = useState<number>(1);
   const [registryEntriesCount, setRegistryEntriesCount] = useState<number>(0);
@@ -74,6 +77,14 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
             onRegistryListNavigate?.();
           },
         }}
+        headerActions={[
+          {
+            label: "Create New Identity",
+            onClick: () => setCreateIdentityModalOpen(true),
+            variant: "contained",
+            color: "primary",
+          },
+        ]}
       />
       {registryEntries.map((registryEntry) => (
         <GovernanceRegistryListItem
@@ -92,13 +103,20 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
             {
               fieldTitle: "Token URI",
               fieldValue: registryEntry.tokenURI || undefined,
+              fullWidth: true,
             },
           ]}
-          buttonLabel="View Registry Entry Details"
-          onViewDetailsClick={() =>
-            onRegistryEntryDetailsNavigate &&
-            onRegistryEntryDetailsNavigate(registryName, registryEntry.label)
-          }
+          actionButtonList={[
+            {
+              label: "View Registry Entry Details",
+              onClick: () =>
+                onRegistryEntryDetailsNavigate &&
+                onRegistryEntryDetailsNavigate(
+                  registryName,
+                  registryEntry.label,
+                ),
+            },
+          ]}
         />
       ))}
       {!!registryEntriesCount && (
@@ -110,6 +128,11 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           onChange={(_, page) => {
             setPage(page);
           }}
+        />
+      )}
+      {createIdentityModalOpen && (
+        <CreateIdentityWidget
+          onCloseCallback={() => setCreateIdentityModalOpen(false)}
         />
       )}
     </Box>

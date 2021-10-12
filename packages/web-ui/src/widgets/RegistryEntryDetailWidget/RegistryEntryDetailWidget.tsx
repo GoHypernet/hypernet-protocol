@@ -3,6 +3,7 @@ import { Box, Typography } from "@material-ui/core";
 import { useAlert } from "react-alert";
 
 import {
+  GovernanceDialog,
   GovernanceEditableValueWithTitle,
   GovernanceValueWithTitle,
   GovernanceWidgetHeader,
@@ -14,6 +15,8 @@ import {
   GovernanceTag,
   ETagColor,
 } from "@web-integration/components/GovernanceTag";
+import BurnEntryWidget from "../BurnEntryWidget";
+import TransferIdentityWidget from "../TransferIdentityWidget";
 
 const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   onRegistryEntryListNavigate,
@@ -24,6 +27,9 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [registryEntry, setRegistryEntry] = useState<RegistryEntry>();
+  const [burnEntryModalOpen, setBurnEntryModalOpen] = useState<boolean>(false);
+  const [transferIdentityModalOpen, setTransferIdentityModalOpen] =
+    useState<boolean>(false);
   const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
     EthereumAddress(""),
   );
@@ -111,6 +117,20 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
             onRegistryEntryListNavigate?.(registryName);
           },
         }}
+        headerActions={[
+          {
+            label: "Burn Entry",
+            onClick: () => setBurnEntryModalOpen(true),
+            variant: "contained",
+            color: "secondary",
+          },
+          {
+            label: "Transfer NFI",
+            onClick: () => setTransferIdentityModalOpen(true),
+            variant: "contained",
+            color: "primary",
+          },
+        ]}
       />
       {registryEntry && (
         <Box>
@@ -148,6 +168,17 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
               />
             ))}
         </Box>
+      )}
+      {burnEntryModalOpen && (
+        <BurnEntryWidget
+          entryId=""
+          onCloseCallback={() => setBurnEntryModalOpen(false)}
+        />
+      )}
+      {transferIdentityModalOpen && (
+        <TransferIdentityWidget
+          onCloseCallback={() => setTransferIdentityModalOpen(false)}
+        />
       )}
     </Box>
   );
