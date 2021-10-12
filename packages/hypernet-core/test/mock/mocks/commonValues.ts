@@ -613,4 +613,4 @@ export const activeStateChannel = new ActiveStateChannel(
   routerChannelAddress,
 );
 
-export const activeRouters: PublicIdentifier[] = [publicIdentifier];
+export const activeRouters: PublicIdentifier[] = [routerPublicIdentifier];

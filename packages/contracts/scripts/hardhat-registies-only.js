@@ -16,7 +16,7 @@ async function main() {
   const [owner] = await hre.ethers.getSigners()
 
   // deploy gateway registry
-  const Registry = await ethers.getContractFactory("NonFungibleRegistry");
+  const Registry = await ethers.getContractFactory("NonFungibleRegistryUpgradeable");
   const gateways = await Registry.deploy("Gateways", "Gs", owner.address);
   gateways_reciept = await gateways.deployTransaction.wait();
   console.log("Gateway Registry Address:", gateways.address);

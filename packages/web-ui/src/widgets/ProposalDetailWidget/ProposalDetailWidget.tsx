@@ -18,7 +18,6 @@ import {
   EthereumAddress,
   EProposalVoteSupport,
 } from "@hypernetlabs/objects";
-import ethers from "ethers";
 
 const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   onProposalListNavigate,
@@ -29,11 +28,18 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   const { coreProxy, viewUtils } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [proposal, setProposal] = useState<Proposal>();
-
+  const [accountAddress, setAccountAddress] = useState<EthereumAddress>();
   const [supportStatus, setSupportStatus] = useState<EProposalVoteSupport>();
 
   useEffect(() => {
+    getProposalDetail();
+  }, []);
+
+  const getProposalDetail = () => {
+    setLoading(true);
     coreProxy.getEthereumAccounts().map((accounts) => {
+      setAccountAddress(accounts[0]);
+
       // delegate votes, createProposal and then list all proposals
       coreProxy
         .getProposalDetails(proposalId)
@@ -42,16 +48,24 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         })
         .mapErr(handleError);
 
-      coreProxy
-        .getProposalVotesReceipt(proposalId, accounts[0])
-        .map((proposalVoteReceipt) => {
-          if (proposalVoteReceipt.hasVoted) {
-            setSupportStatus(Number(proposalVoteReceipt.support));
-          }
-        })
-        .mapErr(handleError);
+      getProposalVotesReceipt(accounts[0]);
     });
-  }, []);
+  };
+
+  const getProposalVotesReceipt = (account: EthereumAddress) => {
+    setLoading(true);
+
+    coreProxy
+      .getProposalVotesReceipt(proposalId, account)
+      .map((proposalVoteReceipt) => {
+        if (proposalVoteReceipt.hasVoted) {
+          setSupportStatus(Number(proposalVoteReceipt.support));
+        }
+
+        setLoading(false);
+      })
+      .mapErr(handleError);
+  };
 
   const handleError = (err?: Error) => {
     setLoading(false);
@@ -64,7 +78,8 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
   const proposalVotesAbstain = proposal ? proposal.votesAbstain : 0;
 
-  const totalVotes = proposalVotesFor + proposalVotesAgainst + proposalVotesAbstain;
+  const totalVotes =
+    proposalVotesFor + proposalVotesAgainst + proposalVotesAbstain;
 
   const forPercentage =
     ((proposalVotesFor * 100) / totalVotes).toFixed(0) || "0";
@@ -78,28 +93,37 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
   const showVotingButtons = Number(proposal?.state) === EProposalState.ACTIVE;
 
   const queueProposal = () => {
+    setLoading(true);
     coreProxy
       .queueProposal(proposalId)
       .map((proposal) => {
         setProposal(proposal);
+        setLoading(false);
       })
       .mapErr(handleError);
   };
 
   const executeProposal = () => {
+    setLoading(true);
     coreProxy
       .executeProposal(proposalId)
       .map((proposal) => {
         setProposal(proposal);
+        setLoading(false);
       })
       .mapErr(handleError);
   };
 
   const castVote = (voteSupport: EProposalVoteSupport) => {
+    setLoading(true);
     coreProxy
       .castVote(proposalId, voteSupport)
       .map((proposal) => {
         setProposal(proposal);
+
+        if (accountAddress) {
+          getProposalVotesReceipt(accountAddress);
+        }
       })
       .mapErr(handleError);
   };

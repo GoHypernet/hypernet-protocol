@@ -43,7 +43,7 @@ module.exports = {
         "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
         "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
         "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
-        "gatewayRegistryAddress": "0x633BaEfc98220497Eb7eE323480C87ce51a44955" \
+        "gatewayRegistryAddress": "0xba6f657Fe14Be5697B6A5A836f5C2550F24e6cD5" \
       }, \
       "1369": { \
         "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
@@ -52,7 +52,7 @@ module.exports = {
         "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
         "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
         "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
-        "gatewayRegistryAddress": "0x633BaEfc98220497Eb7eE323480C87ce51a44955" \
+        "gatewayRegistryAddress": "0xba6f657Fe14Be5697B6A5A836f5C2550F24e6cD5" \
       } \
     }',
     __IFRAME_SOURCE__: "http://localhost:5000",

@@ -15,6 +15,6 @@ COPY transferDefinitions/Parameterized.json artifacts/src.sol/transferDefinition
 COPY Hypertoken/Hypertoken.json artifacts/src.sol/testing/Hypertoken.sol/
 COPY TimelockController/TimelockController.json artifacts/src.sol/testing/TimelockController.sol/
 COPY HypernetGovernor/HypernetGovernor.json artifacts/src.sol/testing/HypernetGovernor.sol/
-COPY RegistryFactory/RegistryFactory.json artifacts/src.sol/testing/RegistryFactory.sol/
+COPY UpgradeableRegistryFactory/UpgradeableRegistryFactory.json artifacts/src.sol/testing/UpgradeableRegistryFactory.sol/
 COPY src.ts/ src.ts/
 EXPOSE 8545
