@@ -13,8 +13,10 @@ import {
   Avatar,
   IconButton,
 } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
-import KeyboardArrowDownIcon from "@material-ui/icons/KeyboardArrowDown";
+import {
+  Close as CloseIcon,
+  KeyboardArrowDown as KeyboardArrowDownIcon,
+} from "@material-ui/icons";
 import { Field as FormikField, FieldAttributes, FieldProps } from "formik";
 import { useStyles } from "@web-ui/components/GovernanceDialogSelectField/GovernanceDialogSelectField.style";
 

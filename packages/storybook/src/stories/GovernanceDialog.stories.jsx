@@ -1,4 +1,8 @@
-import { GovernanceDialog } from "@hypernetlabs/web-ui";
+import {
+  GovernanceDialog,
+  GovernanceButton,
+  GovernanceField,
+} from "@hypernetlabs/web-ui";
 import { Button, TextField } from "@material-ui/core";
 
 export default {
@@ -24,15 +28,29 @@ Primary.args = {
   isOpen: true,
   content: (
     <>
-      <TextField label="Delegate Address" fullWidth variant="outlined" />
-      <Button
+      <GovernanceField
+        name="address"
+        label="Delegate Address"
+        fullWidth
+        variant="outlined"
+      />
+      <GovernanceButton
         variant="contained"
         color="primary"
         fullWidth
         style={{ marginTop: 24 }}
       >
         Delegate Votes
-      </Button>
+      </GovernanceButton>
     </>
   ),
 };
+
+const formParams = {
+  formik: {
+    initialValues: {
+      address: "some wallet address",
+    },
+  },
+};
+Primary.parameters = formParams;

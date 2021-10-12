@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { TextField, Box } from "@material-ui/core";
+import { Box } from "@material-ui/core";
 import { useAlert } from "react-alert";
+import { Form, Formik } from "formik";
 
-import { GovernanceDialog, GovernanceButton } from "@web-ui/components";
+import {
+  GovernanceDialog,
+  GovernanceButton,
+  GovernanceField,
+} from "@web-ui/components";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { EthereumAddress } from "@hypernetlabs/objects";
 import { useStyles } from "@web-integration/widgets/DelegateVotesWidget/DelegateVotesWidget.style";
 
+interface IValues {
+  accountAddress: EthereumAddress;
+}
 interface IDelegateVotesWidget {
   onCloseCallback: () => void;
 }
@@ -28,10 +36,10 @@ const DelegateVotesWidget: React.FC<IDelegateVotesWidget> = ({
     });
   }, []);
 
-  const delegateVotes = () => {
+  const handleFormSubmit = (values: IValues) => {
     setLoading(true);
     coreProxy
-      .delegateVote(accountAddress, null)
+      .delegateVote(values.accountAddress, null)
       .map(() => {
         UIData.onVotesDelegated.next();
         setLoading(false);
@@ -53,23 +61,40 @@ const DelegateVotesWidget: React.FC<IDelegateVotesWidget> = ({
       onClose={onCloseCallback}
       content={
         <Box className={classes.wrapper}>
-          <TextField
-            label="Delegate Address"
-            fullWidth
-            variant="outlined"
-            value={accountAddress}
-            onChange={(event) =>
-              setAccountAddress(EthereumAddress(event.target.value))
+          <Formik
+            enableReinitialize
+            initialValues={
+              {
+                accountAddress: accountAddress,
+              } as IValues
             }
-          />
-          <GovernanceButton
-            variant="contained"
-            color="primary"
-            fullWidth
-            onClick={delegateVotes}
+            onSubmit={handleFormSubmit}
           >
-            Delegate Votes
-          </GovernanceButton>
+            {({ handleSubmit, values }) => {
+              return (
+                <Form onSubmit={handleSubmit}>
+                  <GovernanceField
+                    name="accountAddress"
+                    label="Delegate Address"
+                    fullWidth
+                    variant="outlined"
+                    onChange={(event) =>
+                      setAccountAddress(EthereumAddress(event.target.value))
+                    }
+                  />
+                  <GovernanceButton
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    onClick={handleSubmit}
+                    disabled={!values.accountAddress}
+                  >
+                    Delegate Votes
+                  </GovernanceButton>
+                </Form>
+              );
+            }}
+          </Formik>
         </Box>
       }
     />

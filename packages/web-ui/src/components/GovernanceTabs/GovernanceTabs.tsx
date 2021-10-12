@@ -1,6 +1,12 @@
 import React from "react";
-import { Box, Tab, Tabs, TabProps, TabsTypeMap } from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
+import {
+  Box,
+  Tab,
+  Tabs,
+  TabProps,
+  TabsTypeMap,
+  withStyles,
+} from "@material-ui/core";
 
 interface IGovernanceTabPanel {
   children: React.ReactNode;

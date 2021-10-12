@@ -22,7 +22,7 @@ export const ListItem: React.FC<ListItemProps> = (props: ListItemProps) => {
   const { rightContent, icon, title, description, disableDivider } = props;
   const classes = useStyles();
   return (
-    <Box className={classes.wrapper} >
+    <Box className={classes.wrapper}>
       <MuiListItem className={classes.listItem} disableGutters>
         {icon && <ListItemIcon>{icon}</ListItemIcon>}
         {

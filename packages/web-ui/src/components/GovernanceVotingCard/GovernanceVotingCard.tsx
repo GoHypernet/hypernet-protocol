@@ -50,7 +50,10 @@ export const GovernanceVotingCard: React.FC<GovernanceVotingCardProps> = (
           {value}
         </Typography>
       </Box>
-      <GovernanceProgress value={progressValue} color={colorConfig[type]} />
+      <GovernanceProgress
+        value={progressValue}
+        color={colorConfig[type]}
+      />
       {showVoteButton && (
         <GovernanceButton
           className={classes.button}

@@ -15,15 +15,15 @@ const Template = (args) => (
       justifyContent: "space-evenly",
     }}
   >
-    <GovernanceStatusTag status={EProposalState.ACTIVE} />
-    <GovernanceStatusTag status={EProposalState.DEFEATED} />
-    <GovernanceStatusTag status={EProposalState.SUCCEEDED} />
-    <GovernanceStatusTag status={EProposalState.EXECUTED} />
-    <GovernanceStatusTag status={EProposalState.PENDING} />
-    <GovernanceStatusTag status={EProposalState.CANCELED} />
-    <GovernanceStatusTag status={EProposalState.QUEUED} />
-    <GovernanceStatusTag status={EProposalState.EXPIRED} />
-    <GovernanceStatusTag status={EProposalState.UNDETERMINED} />
+    <GovernanceStatusTag {...args} status={EProposalState.ACTIVE} />
+    <GovernanceStatusTag {...args} status={EProposalState.DEFEATED} />
+    <GovernanceStatusTag {...args} status={EProposalState.SUCCEEDED} />
+    <GovernanceStatusTag {...args} status={EProposalState.EXECUTED} />
+    <GovernanceStatusTag {...args} status={EProposalState.PENDING} />
+    <GovernanceStatusTag {...args} status={EProposalState.CANCELED} />
+    <GovernanceStatusTag {...args} status={EProposalState.QUEUED} />
+    <GovernanceStatusTag {...args} status={EProposalState.EXPIRED} />
+    <GovernanceStatusTag {...args} status={EProposalState.UNDETERMINED} />
   </div>
 );
 

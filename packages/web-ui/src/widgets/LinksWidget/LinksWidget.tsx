@@ -1,7 +1,10 @@
 import { PushPayment, PullPayment } from "@hypernetlabs/objects";
 import { Box, AppBar, Switch, Typography, Tooltip } from "@material-ui/core";
-import InfoIcon from "@material-ui/icons/Info";
-import FilterListIcon from "@material-ui/icons/FilterList";
+import {
+  FilterList as FilterListIcon,
+  Info as InfoIcon,
+} from "@material-ui/icons";
+
 import { useStoreContext } from "@web-ui/contexts";
 import { IRenderParams } from "@web-ui/interfaces";
 import React, { useState, useMemo } from "react";
