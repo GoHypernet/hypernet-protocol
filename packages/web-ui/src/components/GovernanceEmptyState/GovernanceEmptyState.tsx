@@ -19,8 +19,8 @@ export const GovernanceEmptyState: React.FC<IGovernanceEmptyState> = (
     <Box className={classes.wrapper}>
       {img || (
         <img
-          width="150"
-          src="https://res.cloudinary.com/barhantas/image/upload/v1633475136/carry_pwthhs.svg"
+          width="120"
+          src="https://res.cloudinary.com/barhantas/image/upload/v1634078961/H_V_2_copy_idcqep.png"
         />
       )}
 
