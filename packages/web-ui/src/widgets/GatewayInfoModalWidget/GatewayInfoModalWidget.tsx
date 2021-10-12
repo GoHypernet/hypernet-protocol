@@ -35,7 +35,7 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
   const { gatewayUrl, closeCallback } = props;
   const classes = useStyles();
   const alert = useAlert();
-  const { coreProxy, widgetUniqueIdentifier } = useStoreContext();
+  const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [gatewayTokenInfo, setGatewayTokenInfo] = useState<GatewayTokenInfo[]>(
     [],
@@ -133,7 +133,6 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
 
   return (
     <GovernanceDialog
-      widgetUniqueIdentifier={widgetUniqueIdentifier}
       title={<Typography variant="h4">{`Gateway: ${gatewayUrl}`}</Typography>}
       isOpen={true}
       onClose={closeCallback}
@@ -141,8 +140,7 @@ const GatewayInfoModalWidget: React.FC<IGatewayInfoModalWidget> = (
         <List style={{ margin: 0 }}>
           {gatewayTokenInfo.map((gatewayToken) => (
             <ListItem
-              widgetUniqueIdentifier={widgetUniqueIdentifier}
-              title={`Token:${gatewayToken.tokenAddress}`}
+                      title={`Token:${gatewayToken.tokenAddress}`}
               disableDivider
               rightContent={
                 <>

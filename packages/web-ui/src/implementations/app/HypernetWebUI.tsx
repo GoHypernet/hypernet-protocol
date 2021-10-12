@@ -131,6 +131,16 @@ export default class HypernetWebUI implements IHypernetWebUI {
       throw new Error("core instance is required");
     }
 
+    // Material-Ui v4 has a problem with multiple theme provider in the same react tree level
+    // For fixing that issue we need to provide a single top level Theme provider.
+    // But we can not do that because of the our widget renderer functions are under control of the customers/our library users
+    // We can export a parent top level theme provider and expect that in the integration flow users should use it for wrapping the our rendered widgets.
+    // But not gonna work in all situations
+    // Also we are using multipe react init point with calling ReactDom.render method. And material ui has some problems with that to.
+    // For fixin these issues first we need to provide a seed for our classname generation on the top of the widget renderer function
+    // And also that seed should be unique for the same react tree level rendered widgets
+    // For making them unique we added widgetUniqueIdentifier as a unique prefix
+
     const widgetUniqueIdentifier = `hypernetlabs-${uuidv4()}`;
 
     const Theme = hasTheme ? ThemeProvider : Box;

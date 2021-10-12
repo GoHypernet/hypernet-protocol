@@ -18,7 +18,6 @@ import React, { useEffect, useState } from "react";
 import { useStyles } from "@web-ui/components/GovernanceSideFilter/GovernanceSideFilter.style";
 
 import { SliderRange } from "@web-ui/components";
-import { defaultWidgetUniqueIdentifier } from "@web-ui/theme";
 
 export const GovernanceSideFilter: React.FC<IGovernanceSideFilterProps> = (
   props: IGovernanceSideFilterProps,
@@ -29,12 +28,13 @@ export const GovernanceSideFilter: React.FC<IGovernanceSideFilterProps> = (
     itemsCount = -1,
     filterItems,
     onFilterSubmit,
-    widgetUniqueIdentifier = defaultWidgetUniqueIdentifier,
   } = props;
-
-  const classes = useStyles({ widgetUniqueIdentifier });
-
+  const classes = useStyles();
   const [filterValues, setFilterValues] = useState({});
+
+  useEffect(() => {
+    setDefaultFilterValues();
+  }, []);
 
   const setDefaultFilterValues = () => {
     const defaultFilterValues = filterItems.reduce((acc, item) => {
@@ -49,10 +49,6 @@ export const GovernanceSideFilter: React.FC<IGovernanceSideFilterProps> = (
     setFilterValues(defaultFilterValues);
     return defaultFilterValues;
   };
-
-  useEffect(() => {
-    setDefaultFilterValues();
-  }, []);
 
   const closeDrawer = () => {
     onClose();
@@ -450,5 +446,4 @@ export interface IGovernanceSideFilterProps {
   filterItems: Array<IFilterItemNew>;
   onFilterSubmit: (values: any) => void;
   onReset?: () => void;
-  widgetUniqueIdentifier?: string;
 }

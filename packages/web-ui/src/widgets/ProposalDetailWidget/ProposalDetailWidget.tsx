@@ -25,7 +25,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 }: IProposalDetailWidgetParams) => {
   const classes = useStyles();
   const alert = useAlert();
-  const { coreProxy, widgetUniqueIdentifier } = useStoreContext();
+  const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [proposal, setProposal] = useState<Proposal>();
   const [accountAddress, setAccountAddress] = useState<EthereumAddress>();
@@ -174,7 +174,6 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         <Grid container spacing={3}>
           <Grid item xs={4}>
             <GovernanceVotingCard
-              widgetUniqueIdentifier={widgetUniqueIdentifier}
               type="for"
               value={proposalVotesFor}
               progressValue={parseFloat(forPercentage)}
@@ -188,7 +187,6 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
           </Grid>
           <Grid item xs={4}>
             <GovernanceVotingCard
-              widgetUniqueIdentifier={widgetUniqueIdentifier}
               type="against"
               value={proposalVotesAgainst}
               progressValue={parseFloat(againstPercentage)}
@@ -202,7 +200,6 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
           </Grid>
           <Grid item xs={4}>
             <GovernanceVotingCard
-              widgetUniqueIdentifier={widgetUniqueIdentifier}
               type="abstain"
               value={proposalVotesAbstain}
               progressValue={parseFloat(abstainPercentage)}

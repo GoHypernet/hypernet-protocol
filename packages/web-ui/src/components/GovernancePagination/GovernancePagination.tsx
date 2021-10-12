@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { Pagination, PaginationProps } from "@material-ui/lab";
 import { useStyles } from "@web-ui/components/GovernancePagination/GovernancePagination.style";
-import { defaultWidgetUniqueIdentifier } from "@web-ui/theme";
 
 interface CustomPageProps {
   itemsPerPage: number;
@@ -11,7 +10,6 @@ interface CustomPageProps {
 
 interface GovernancePaginationProps extends PaginationProps {
   customPageOptions?: CustomPageProps;
-  widgetUniqueIdentifier?: string;
 }
 
 export const getPageItemIndexList = (
@@ -41,10 +39,9 @@ export const GovernancePagination: React.FC<GovernancePaginationProps> = (
     customPageOptions,
     count = 1,
     defaultPage = 1,
-    widgetUniqueIdentifier = defaultWidgetUniqueIdentifier,
     ...rest
   } = props;
-  const classes = useStyles({ widgetUniqueIdentifier });
+  const classes = useStyles();
 
   const customPageCount = useMemo(() => {
     if (!customPageOptions) {

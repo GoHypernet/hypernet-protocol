@@ -25,16 +25,16 @@ const providerFn = ({ theme, children }) => {
   return <ThemeProvider theme={muiTheme}>{children}</ThemeProvider>;
 };
 
-const generateClassName = createGenerateClassName({
-  seed: "storybook",
-});
+// const generateClassName = createGenerateClassName({
+//   seed: "storybook",
+// });
 
-const withStylesProvider = (StoryFn) => (
-  <StylesProvider injectFirst generateClassName={generateClassName}>
-    <StoryFn widgetUniqueIdentifier="storybook" />
-  </StylesProvider>
-);
+// const withStylesProvider = (StoryFn) => (
+//   <StylesProvider injectFirst generateClassName={generateClassName}>
+//     <StoryFn widgetUniqueIdentifier="storybook" />
+//   </StylesProvider>
+// );
 
 addDecorator(withFormik);
 addDecorator(withThemes(null, [lightTheme, darkTheme], { providerFn }));
-addDecorator(withStylesProvider);
+// addDecorator(withStylesProvider);

@@ -10,7 +10,6 @@ import {
 import { Close as CloseIcon } from "@material-ui/icons";
 
 import { useStyles } from "@web-ui/components/GovernanceDialog/GovernanceDialog.style";
-import { defaultWidgetUniqueIdentifier } from "@web-ui/theme";
 
 export interface GovernanceDialogProps {
   isOpen: boolean;
@@ -18,21 +17,13 @@ export interface GovernanceDialogProps {
   description?: string;
   content?: React.ReactNode;
   onClose?: () => void;
-  widgetUniqueIdentifier?: string;
 }
 
 export const GovernanceDialog: React.FC<GovernanceDialogProps> = (
   props: GovernanceDialogProps,
 ) => {
-  const {
-    title,
-    description,
-    content,
-    isOpen,
-    onClose,
-    widgetUniqueIdentifier = defaultWidgetUniqueIdentifier,
-  } = props;
-  const classes = useStyles({ widgetUniqueIdentifier });
+  const { title, description, content, isOpen, onClose } = props;
+  const classes = useStyles();
   const [isDialogOpen, setIsDialogOpen] = useState(isOpen);
 
   const toggleDialogOpen = () => {

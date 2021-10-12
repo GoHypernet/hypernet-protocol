@@ -1,14 +1,20 @@
 import { makeStyles } from "@material-ui/core";
 import { colors } from "@web-ui/theme";
+import { useWidgetUniqueIdentifier } from "@web-ui/hooks";
 
-export const useStyles = makeStyles(() => ({
-  pagination: (props: { widgetUniqueIdentifier: string }) => ({
-    display: "flex",
-    justifyContent: "flex-end",
-    [`& .${props.widgetUniqueIdentifier}-MuiPaginationItem-page.Mui-selected`]:
-      {
+export const useStyles = () => {
+  const widgetUniqueIdentifier = useWidgetUniqueIdentifier();
+
+  const styles = makeStyles(() => ({
+    pagination: {
+      display: "flex",
+      justifyContent: "flex-end",
+      [`& .${widgetUniqueIdentifier}MuiPaginationItem-page.Mui-selected`]: {
         color: colors.GRAY150,
         backgroundColor: colors.GRAY500,
       },
-  }),
-}));
+    },
+  }));
+
+  return styles();
+};

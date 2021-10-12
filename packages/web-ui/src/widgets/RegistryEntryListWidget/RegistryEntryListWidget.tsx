@@ -21,7 +21,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   registryName,
 }: IRegistryEntryListWidgetParams) => {
   const alert = useAlert();
-  const { coreProxy, widgetUniqueIdentifier } = useStoreContext();
+  const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [registryEntries, setRegistryEntries] = useState<RegistryEntry[]>([]);
 
@@ -117,7 +117,6 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       ))}
       {!!registryEntriesCount && (
         <GovernancePagination
-          widgetUniqueIdentifier={widgetUniqueIdentifier}
           customPageOptions={{
             itemsPerPage: REGISTRY_ENTRIES_PER_PAGE,
             totalItems: registryEntriesCount,

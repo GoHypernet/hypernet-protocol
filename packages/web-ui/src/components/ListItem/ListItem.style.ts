@@ -1,24 +1,32 @@
 import { makeStyles } from "@material-ui/core";
-import { colors } from "@web-ui/theme";
 
-export const useStyles = makeStyles(() => ({
-  wrapper: {
-    display: "flex",
-    flexDirection: "column",
-  },
-  listItem: (props: { widgetUniqueIdentifier: string }) => ({
-    display: "flex",
-    flexDirection: "row",
-    padding: "16px 0",
-    [`& .${props.widgetUniqueIdentifier}-MuiListItemIcon-root`]: {
-      minWidth: "unset",
-      marginRight: 20,
+import { colors } from "@web-ui/theme";
+import { useWidgetUniqueIdentifier } from "@web-ui/hooks";
+
+export const useStyles = () => {
+  const widgetUniqueIdentifier = useWidgetUniqueIdentifier();
+
+  const styles = makeStyles(() => ({
+    wrapper: {
+      display: "flex",
+      flexDirection: "column",
     },
-  }),
-  rightContent: {
-    marginLeft: "auto",
-  },
-  divider: {
-    color: colors.GRAY150,
-  },
-}));
+    listItem: () => ({
+      display: "flex",
+      flexDirection: "row",
+      padding: "16px 0",
+      [`& .${widgetUniqueIdentifier}MuiListItemIcon-root`]: {
+        minWidth: "unset",
+        marginRight: 20,
+      },
+    }),
+    rightContent: {
+      marginLeft: "auto",
+    },
+    divider: {
+      color: colors.GRAY150,
+    },
+  }));
+
+  return styles();
+};

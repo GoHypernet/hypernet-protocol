@@ -1,30 +1,38 @@
 import { makeStyles } from "@material-ui/core";
+
 import { colors, EFontSize } from "@web-ui/theme";
+import { useWidgetUniqueIdentifier } from "@web-ui/hooks";
 
-export const useStyles = makeStyles((theme) => ({
-  dialog: (props: { widgetUniqueIdentifier: string }) => ({
-    [`& .${props.widgetUniqueIdentifier}-MuiDialog-paper`]: {
-      borderRadius: 3,
-      backgroundColor: colors.GRAY100,
-      border: `2px solid ${colors.GRAY200}`,
-    },
+export const useStyles = () => {
+  const widgetUniqueIdentifier = useWidgetUniqueIdentifier();
 
-    [`& .${props.widgetUniqueIdentifier}-MuiDialogTitle-root`]: {
-      padding: 0,
+  const styles = makeStyles(() => ({
+    dialog: () => ({
+      [`& .${widgetUniqueIdentifier}MuiDialog-paper`]: {
+        borderRadius: 3,
+        backgroundColor: colors.GRAY100,
+        border: `2px solid ${colors.GRAY200}`,
+      },
+
+      [`& .${widgetUniqueIdentifier}MuiDialogTitle-root`]: {
+        padding: 0,
+      },
+    }),
+    dialogTitle: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      fontSize: EFontSize.H4,
+      padding: "16px 40px",
     },
-  }),
-  dialogTitle: {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    fontSize: EFontSize.H4,
-    padding: "16px 40px",
-  },
-  dialogDescription: {},
-  dialogContent: {
-    padding: "16px 40px",
-  },
-  closeButton: {
-    marginRight: -12,
-  },
-}));
+    dialogDescription: {},
+    dialogContent: {
+      padding: "16px 40px",
+    },
+    closeButton: {
+      marginRight: -12,
+    },
+  }));
+
+  return styles();
+};
