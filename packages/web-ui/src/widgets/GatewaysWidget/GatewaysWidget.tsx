@@ -13,6 +13,7 @@ import {
   List,
   ListItem,
 } from "@web-ui/components";
+import { useStoreContext } from "@web-ui/contexts";
 import GatewayInfoModalWidget from "@web-ui/widgets/GatewayInfoModalWidget";
 import { useGateways } from "@web-ui/hooks";
 import { IRenderParams } from "@web-ui/interfaces";
@@ -30,6 +31,7 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
     authorizeGateway,
     loading,
   } = useGateways();
+  const { widgetUniqueIdentifier } = useStoreContext();
   const classes = useStyles();
 
   const [inputGatewayUrl, setInputGatewayUrl] = useState<GatewayUrl>(
@@ -116,6 +118,7 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
           <List>
             {[...gatewaysMap.keys()].map((gatewayUrl, index) => (
               <ListItem
+                widgetUniqueIdentifier={widgetUniqueIdentifier}
                 key={index}
                 icon={
                   <Tooltip

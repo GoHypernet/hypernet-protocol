@@ -27,6 +27,7 @@ import GatewaysWidget from "@web-ui/widgets/GatewaysWidget";
 import { Result } from "neverthrow";
 import React from "react";
 import ReactDOM from "react-dom";
+import { v4 as uuidv4 } from "uuid";
 
 import { MetamaskWarning, WarningAlert } from "@web-ui/components";
 import {
@@ -130,12 +131,15 @@ export default class HypernetWebUI implements IHypernetWebUI {
       throw new Error("core instance is required");
     }
 
+    const widgetUniqueIdentifier = `hypernetlabs-${uuidv4()}`;
+
     const Theme = hasTheme ? ThemeProvider : Box;
 
     const generateClassName = createGenerateClassName({
-      disableGlobal: true,
-      seed: new Date().getTime() + "hypernetlabs-web-ui",
+      seed: widgetUniqueIdentifier,
     });
+
+    const theme = true ? lightTheme : darkTheme;
 
     return (
       <StoreProvider
@@ -143,9 +147,10 @@ export default class HypernetWebUI implements IHypernetWebUI {
         UIData={this.UIData}
         viewUtils={this.viewUtils}
         dateUtils={this.dateUtils}
+        widgetUniqueIdentifier={widgetUniqueIdentifier}
       >
-        <StylesProvider injectFirst generateClassName={generateClassName}>
-          <Theme theme={true ? lightTheme : darkTheme}>
+        <StylesProvider generateClassName={generateClassName}>
+          <Theme theme={theme}>
             <LayoutProvider>
               <MainContainer
                 withModal={withModal}

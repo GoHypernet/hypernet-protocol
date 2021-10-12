@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Typography } from "@material-ui/core";
 import { useStyles } from "@web-ui/components/GovernanceVotingCard/GovernanceVotingCard.style";
 import { GovernanceProgress, GovernanceButton } from "@web-ui/components";
-import { colors } from "@web-ui/theme";
+import { colors, defaultWidgetUniqueIdentifier } from "@web-ui/theme";
 
 interface GovernanceVotingCardProps {
   type: "for" | "against" | "abstain";
@@ -12,6 +12,7 @@ interface GovernanceVotingCardProps {
   isVoted: boolean;
   showVoteButton: boolean;
   disableVoteButton: boolean;
+  widgetUniqueIdentifier?: string;
 }
 
 const colorConfig = {
@@ -37,6 +38,7 @@ export const GovernanceVotingCard: React.FC<GovernanceVotingCardProps> = (
     isVoted,
     showVoteButton = true,
     disableVoteButton,
+    widgetUniqueIdentifier = defaultWidgetUniqueIdentifier,
   } = props;
   const classes = useStyles({ isVoted });
 
@@ -50,9 +52,14 @@ export const GovernanceVotingCard: React.FC<GovernanceVotingCardProps> = (
           {value}
         </Typography>
       </Box>
-      <GovernanceProgress value={progressValue} color={colorConfig[type]} />
+      <GovernanceProgress
+        value={progressValue}
+        color={colorConfig[type]}
+        widgetUniqueIdentifier={widgetUniqueIdentifier}
+      />
       {showVoteButton && (
         <GovernanceButton
+          widgetUniqueIdentifier={widgetUniqueIdentifier}
           className={classes.button}
           fullWidth
           color="primary"

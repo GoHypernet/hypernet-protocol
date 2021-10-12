@@ -2,14 +2,14 @@ import { makeStyles } from "@material-ui/core";
 import { colors, EFontSize } from "@web-ui/theme";
 
 export const useStyles = makeStyles((theme) => ({
-  dialog: (props: any) => ({
-    "& .MuiDialog-paper": {
+  dialog: (props: { widgetUniqueIdentifier: string }) => ({
+    [`& .${props.widgetUniqueIdentifier}-MuiDialog-paper`]: {
       borderRadius: 3,
       backgroundColor: colors.GRAY100,
       border: `2px solid ${colors.GRAY200}`,
     },
 
-    "& .MuiDialogTitle-root": {
+    [`& .${props.widgetUniqueIdentifier}-MuiDialogTitle-root`]: {
       padding: 0,
     },
   }),

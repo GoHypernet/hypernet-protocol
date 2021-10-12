@@ -6,15 +6,15 @@ export const useStyles = makeStyles(() => ({
     display: "flex",
     flexDirection: "column",
   },
-  listItem: {
+  listItem: (props: { widgetUniqueIdentifier: string }) => ({
     display: "flex",
     flexDirection: "row",
     padding: "16px 0",
-    "& .MuiListItemIcon-root": {
+    [`& .${props.widgetUniqueIdentifier}-MuiListItemIcon-root`]: {
       minWidth: "unset",
       marginRight: 20,
     },
-  },
+  }),
   rightContent: {
     marginLeft: "auto",
   },

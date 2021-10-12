@@ -9,6 +9,7 @@ import {
 } from "@material-ui/core";
 
 import { useStyles } from "@web-ui/components/ListItem/ListItem.style";
+import { defaultWidgetUniqueIdentifier } from "@web-ui/theme";
 
 interface ListItemProps {
   title: string | React.ReactNode;
@@ -16,13 +17,21 @@ interface ListItemProps {
   icon?: React.ReactNode;
   rightContent?: React.ReactNode;
   disableDivider?: boolean;
+  widgetUniqueIdentifier?: string;
 }
 
 export const ListItem: React.FC<ListItemProps> = (props: ListItemProps) => {
-  const { rightContent, icon, title, description, disableDivider } = props;
-  const classes = useStyles();
+  const {
+    rightContent,
+    icon,
+    title,
+    description,
+    disableDivider,
+    widgetUniqueIdentifier = defaultWidgetUniqueIdentifier,
+  } = props;
+  const classes = useStyles({ widgetUniqueIdentifier });
   return (
-    <Box className={classes.wrapper} >
+    <Box className={classes.wrapper}>
       <MuiListItem className={classes.listItem} disableGutters>
         {icon && <ListItemIcon>{icon}</ListItemIcon>}
         {

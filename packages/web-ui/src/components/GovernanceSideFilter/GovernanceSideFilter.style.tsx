@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core";
 import { EFontSize, colors } from "@web-ui/theme";
 
 export const useStyles = makeStyles({
-  drawerContainer: {
+  drawerContainer: (props: { widgetUniqueIdentifier: string }) => ({
     cursor: "pointer",
     width: 400,
     display: "flex",
@@ -11,16 +11,17 @@ export const useStyles = makeStyles({
     justifyContent: "space-between",
     height: "100%",
     overflowX: "hidden",
-    "& .MuiTextField-root": {
+    [`& .${props.widgetUniqueIdentifier}-MuiTextField-root`]: {
       width: "100%",
     },
-    "& .MuiFilledInput-root": {
+    [`& .${props.widgetUniqueIdentifier}-MuiFilledInput-root`]: {
       borderRadius: 0,
     },
-    "& .MuiSelect-outlined.MuiSelect-outlined": {
-      padding: 12,
-    },
-  },
+    [`& .${props.widgetUniqueIdentifier}-MuiSelect-outlined.MuiSelect-outlined`]:
+      {
+        padding: 12,
+      },
+  }),
   header: {
     padding: "8px 40px",
     cursor: "auto",
@@ -82,20 +83,20 @@ export const useStyles = makeStyles({
     alignItems: "center",
     marginBottom: 16,
   },
-  textFieldWrapper: {
+  textFieldWrapper: (props: { widgetUniqueIdentifier: string }) => ({
     margin: 0,
     "& input": {
       fontSize: EFontSize.BODY2,
       padding: 12,
       backgroundColor: colors.GRAY100,
     },
-    "& .MuiInput-underline:after": {
+    [`& .${props.widgetUniqueIdentifier}-MuiInput-underline:after`]: {
       display: "none",
     },
-    "& .MuiInput-underline:before": {
+    [`& .${props.widgetUniqueIdentifier}-MuiInput-underline:before`]: {
       display: "none",
     },
-  },
+  }),
   selectWrapper: {
     border: "none",
   },

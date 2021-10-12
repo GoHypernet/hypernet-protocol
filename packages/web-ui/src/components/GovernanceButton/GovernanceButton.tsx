@@ -8,6 +8,7 @@ import {
 import React from "react";
 
 import { useStyles } from "@web-ui/components/GovernanceButton/GovernanceButton.style";
+import { defaultWidgetUniqueIdentifier } from "@web-ui/theme";
 
 export interface IGovernanceButton extends ButtonProps {
   color?: PropTypes.Color;
@@ -22,6 +23,7 @@ export interface IGovernanceButton extends ButtonProps {
   size?: "small" | "medium" | "large";
   isDangerButton?: boolean;
   fullWidth?: boolean;
+  widgetUniqueIdentifier?: string;
 }
 
 export const GovernanceButton: React.FC<IGovernanceButton> = ({
@@ -37,6 +39,7 @@ export const GovernanceButton: React.FC<IGovernanceButton> = ({
   size,
   isDangerButton,
   fullWidth,
+  widgetUniqueIdentifier = defaultWidgetUniqueIdentifier,
   ...rest
 }: IGovernanceButton) => {
   const classes = useStyles();

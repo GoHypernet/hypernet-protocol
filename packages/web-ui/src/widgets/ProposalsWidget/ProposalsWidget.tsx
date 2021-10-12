@@ -21,7 +21,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
   onProposalDetailsNavigate,
 }: IProposalsWidgetParams) => {
   const alert = useAlert();
-  const { coreProxy } = useStoreContext();
+  const { coreProxy, widgetUniqueIdentifier } = useStoreContext();
   const { loading, setLoading } = useLayoutContext();
   const [proposals, setProposals] = useState<Proposal[]>([]);
   const [delegateVotesModalOpen, setDelegateVotesModalOpen] =
@@ -106,6 +106,7 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
       ))}
       {!!proposalCount && (
         <GovernancePagination
+          widgetUniqueIdentifier={widgetUniqueIdentifier}
           customPageOptions={{
             itemsPerPage: PROPOSALS_PER_PAGE,
             totalItems: proposalCount,

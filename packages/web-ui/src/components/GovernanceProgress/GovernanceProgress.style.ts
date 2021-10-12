@@ -2,16 +2,20 @@ import { makeStyles } from "@material-ui/core";
 import { colors } from "@web-ui/theme";
 
 export const useStyles = makeStyles((theme) => ({
-  wrapper: (props: { color?: string; height?: number }) => ({
-    "&.MuiLinearProgress-root": {
+  wrapper: (props: {
+    color?: string;
+    height?: number;
+    widgetUniqueIdentifier: string;
+  }) => ({
+    [`&.${props.widgetUniqueIdentifier}-MuiLinearProgress-root`]: {
       borderRadius: 3,
       height: props.height || 6,
       backgroundColor: colors.GRAY200,
     },
-    "& .MuiLinearProgress-bar": {
+    [`& .${props.widgetUniqueIdentifier}-MuiLinearProgress-bar`]: {
       borderRadius: 3,
     },
-    "& .MuiLinearProgress-bar1Determinate": {
+    [`& .${props.widgetUniqueIdentifier}-MuiLinearProgress-bar1Determinate`]: {
       backgroundColor: props.color,
     },
   }),

@@ -1,6 +1,11 @@
 import { addDecorator } from "@storybook/react";
 import { withThemes } from "@react-theming/storybook-addon";
-import { ThemeProvider, createTheme } from "@material-ui/core";
+import {
+  ThemeProvider,
+  createTheme,
+  StylesProvider,
+  createGenerateClassName,
+} from "@material-ui/core";
 import { lightTheme, darkTheme } from "@hypernetlabs/web-ui";
 import withFormik from "storybook-formik";
 
@@ -20,5 +25,16 @@ const providerFn = ({ theme, children }) => {
   return <ThemeProvider theme={muiTheme}>{children}</ThemeProvider>;
 };
 
+const generateClassName = createGenerateClassName({
+  seed: "storybook",
+});
+
+const withStylesProvider = (StoryFn) => (
+  <StylesProvider injectFirst generateClassName={generateClassName}>
+    <StoryFn widgetUniqueIdentifier="storybook" />
+  </StylesProvider>
+);
+
 addDecorator(withFormik);
 addDecorator(withThemes(null, [lightTheme, darkTheme], { providerFn }));
+addDecorator(withStylesProvider);

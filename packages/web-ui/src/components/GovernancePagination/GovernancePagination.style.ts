@@ -2,12 +2,13 @@ import { makeStyles } from "@material-ui/core";
 import { colors } from "@web-ui/theme";
 
 export const useStyles = makeStyles(() => ({
-  pagination: {
+  pagination: (props: { widgetUniqueIdentifier: string }) => ({
     display: "flex",
     justifyContent: "flex-end",
-    "& .MuiPaginationItem-page.Mui-selected": {
-      color: colors.GRAY150,
-      backgroundColor: colors.GRAY500,
-    },
-  },
+    [`& .${props.widgetUniqueIdentifier}-MuiPaginationItem-page.Mui-selected`]:
+      {
+        color: colors.GRAY150,
+        backgroundColor: colors.GRAY500,
+      },
+  }),
 }));

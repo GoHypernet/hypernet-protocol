@@ -44,7 +44,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
   bodyStyle,
 }: ILinksWidget) => {
   const classes = useStyles();
-  const { viewUtils, dateUtils } = useStoreContext();
+  const { viewUtils, dateUtils, widgetUniqueIdentifier } = useStoreContext();
   const [tabValue, setTabValue] = useState<number>(0);
   const [isSideFilterOpen, setIsSideFilterOpen] = useState(false);
   const [filter, setFilter] = useState<ISideFilter>();
@@ -213,6 +213,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
       description="Transactions associated with the currently selected Hypernet Protocol account."
     >
       <GovernanceSideFilter
+        widgetUniqueIdentifier={widgetUniqueIdentifier}
         visible={isSideFilterOpen}
         onClose={() => setIsSideFilterOpen(false)}
         filterItems={linksFilter}

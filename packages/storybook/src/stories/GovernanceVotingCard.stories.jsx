@@ -16,28 +16,42 @@ const Template = (args) => (
   >
     <div style={{ display: "flex", flexDirection: "row" }}>
       <GovernanceVotingCard
+        {...args}
         type="for"
         progressValue={10}
         value={(1, 103, 457)}
       />
-      <GovernanceVotingCard type="against" progressValue={20} value={300} />
-      <GovernanceVotingCard type="abstain" progressValue={100} value={21312} />
+      <GovernanceVotingCard
+        {...args}
+        type="against"
+        progressValue={20}
+        value={300}
+      />
+      <GovernanceVotingCard
+        {...args}
+        type="abstain"
+        progressValue={100}
+        value={21312}
+      />
     </div>
 
     <div style={{ display: "flex", flexDirection: "row" }}>
       <GovernanceVotingCard
+        {...args}
         type="for"
         progressValue={10}
         value={(1, 103, 457)}
         isVoted
       />
       <GovernanceVotingCard
+        {...args}
         type="against"
         progressValue={20}
         value={300}
         isVoted
       />
       <GovernanceVotingCard
+        {...args}
         type="abstain"
         progressValue={100}
         value={21312}
@@ -47,18 +61,21 @@ const Template = (args) => (
 
     <div style={{ display: "flex", flexDirection: "row" }}>
       <GovernanceVotingCard
+        {...args}
         type="for"
         progressValue={10}
         value={(1, 103, 457)}
         disableVoteButton
       />
       <GovernanceVotingCard
+        {...args}
         type="against"
         progressValue={20}
         value={300}
         disableVoteButton
       />
       <GovernanceVotingCard
+        {...args}
         type="abstain"
         progressValue={100}
         value={21312}
@@ -68,18 +85,21 @@ const Template = (args) => (
 
     <div style={{ display: "flex", flexDirection: "row" }}>
       <GovernanceVotingCard
+        {...args}
         type="for"
         progressValue={10}
         value={(1, 103, 457)}
         showVoteButton={false}
       />
       <GovernanceVotingCard
+        {...args}
         type="against"
         progressValue={20}
         value={300}
         showVoteButton={false}
       />
       <GovernanceVotingCard
+        {...args}
         type="abstain"
         progressValue={100}
         value={21312}

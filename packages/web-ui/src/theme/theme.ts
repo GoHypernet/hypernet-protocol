@@ -240,3 +240,5 @@ export const darkTheme = createTheme({
     MuiButtonBase,
   },
 });
+
+export const defaultWidgetUniqueIdentifier = "";

@@ -7,6 +7,7 @@ interface IStore {
   UIData: IUIData;
   viewUtils: IViewUtils;
   dateUtils: IDateUtils;
+  widgetUniqueIdentifier: string;
 }
 
 interface IStoreProps extends IStore {
@@ -20,6 +21,7 @@ export function StoreProvider({
   UIData,
   viewUtils,
   dateUtils,
+  widgetUniqueIdentifier,
   children,
 }: IStoreProps) {
   const initialState: IStore = {
@@ -27,6 +29,7 @@ export function StoreProvider({
     UIData,
     viewUtils,
     dateUtils,
+    widgetUniqueIdentifier,
   };
 
   return (
