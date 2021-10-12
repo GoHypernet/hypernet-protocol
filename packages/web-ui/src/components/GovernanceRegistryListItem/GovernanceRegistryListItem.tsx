@@ -15,7 +15,7 @@ interface IFieldWithValueList {
   fullWidth?: boolean;
 }
 
-interface IListItemAction extends IGovernanceButton {
+export interface IRegistryListItemAction extends IGovernanceButton {
   label: string;
 }
 
@@ -23,7 +23,7 @@ interface GovernanceRegistryListItemProps {
   number: string;
   title: string;
   fieldWithValueList: IFieldWithValueList[];
-  actionButtonList?: IListItemAction[];
+  actionButtonList?: IRegistryListItemAction[];
   chipItemList?: string[];
 }
 
@@ -50,7 +50,7 @@ export const GovernanceRegistryListItem: React.FC<GovernanceRegistryListItemProp
               variant = "contained",
               size = "small",
               ...rest
-            }: IListItemAction,
+            }: IRegistryListItemAction,
             index: number,
           ) => (
             <GovernanceButton

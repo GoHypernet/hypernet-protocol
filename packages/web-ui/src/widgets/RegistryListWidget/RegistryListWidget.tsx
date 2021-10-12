@@ -4,12 +4,13 @@ import { useAlert } from "react-alert";
 
 import {
   GovernanceRegistryListItem,
+  IRegistryListItemAction,
   GovernanceWidgetHeader,
   GovernanceEmptyState,
 } from "@web-ui/components";
 import { IRegistryListWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { Registry } from "@hypernetlabs/objects";
+import { EthereumAddress, Registry } from "@hypernetlabs/objects";
 
 const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   onRegistryEntryListNavigate,
@@ -20,7 +21,15 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   const { loading, setLoading } = useLayoutContext();
   const [registries, setRegistries] = useState<Registry[]>([]);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
+  const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
+    EthereumAddress(""),
+  );
 
+  useEffect(() => {
+    coreProxy.getEthereumAccounts().map((accounts) => {
+      setAccountAddress(accounts[0]);
+    });
+  }, []);
   useEffect(() => {
     coreProxy
       .getRegistries(1, 10)
@@ -74,20 +83,26 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
             },
           ]}
           actionButtonList={[
-            {
-              label: "Detail",
-              variant: "text",
-              onClick: () =>
-                onRegistryDetailNavigate &&
-                onRegistryDetailNavigate(registry.name),
-            },
+            ...(registry.registrarAddresses.some(
+              (address) => address === accountAddress,
+            )
+              ? [
+                  {
+                    label: "Detail",
+                    variant: "text",
+                    onClick: () =>
+                      onRegistryDetailNavigate &&
+                      onRegistryDetailNavigate(registry.name),
+                  },
+                ]
+              : []),
             {
               label: "View Registry Entries",
               onClick: () =>
                 onRegistryEntryListNavigate &&
                 onRegistryEntryListNavigate(registry.name),
             },
-          ]}
+          ] as IRegistryListItemAction[]}
           chipItemList={[
             "Lazy Registration not allowed",
             "Lazy Registration not allowed",
