@@ -104,7 +104,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
           >
             {({ handleSubmit, values }) => {
               return (
-                <Form onSubmit={handleSubmit}>
+                <Form className={classes.form} onSubmit={handleSubmit}>
                   <GovernanceCard>
                     <GovernanceField
                       required
