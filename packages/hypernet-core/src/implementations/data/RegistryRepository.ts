@@ -551,7 +551,6 @@ export class RegistryRepository implements IRegistryRepository {
         this.getSignerAddress(signer),
       ]).andThen((vals) => {
         const [registryMap, signerAddress] = vals;
-        console.log("signerAddress: ", signerAddress);
         const registry = registryMap.get(registryParams.name);
         if (registry == null) {
           throw new Error("Registry not found!");
@@ -568,6 +567,7 @@ export class RegistryRepository implements IRegistryRepository {
             ),
           );
         }
+
         // Call the NFI contract of that address
         const registryContract = new ethers.Contract(
           registry.address,
@@ -584,15 +584,31 @@ export class RegistryRepository implements IRegistryRepository {
           [
             [
               [],
-              registryParams.allowLazyRegister || [],
-              registryParams.allowStorageUpdate || [],
-              registryParams.allowLabelChange || [],
-              registryParams.allowTransfers || [],
-              registryParams.registrationToken || [],
-              registryParams.registrationFee || [],
-              registryParams.burnAddress || [],
-              registryParams.burnFee || [],
-              registryParams.primaryRegistry || [],
+              registryParams.allowLazyRegister == null
+                ? []
+                : [registryParams.allowLazyRegister],
+              registryParams.allowStorageUpdate == null
+                ? []
+                : [registryParams.allowStorageUpdate],
+              registryParams.allowLabelChange == null
+                ? []
+                : [registryParams.allowLabelChange],
+              registryParams.allowTransfers == null
+                ? []
+                : [registryParams.allowTransfers],
+              registryParams.registrationToken == null
+                ? []
+                : [registryParams.registrationToken],
+              registryParams.registrationFee == null
+                ? []
+                : [registryParams.registrationFee],
+              registryParams.burnAddress == null
+                ? []
+                : [registryParams.burnAddress],
+              registryParams.burnFee == null ? [] : [registryParams.burnFee],
+              registryParams.primaryRegistry == null
+                ? []
+                : [registryParams.primaryRegistry],
             ],
           ],
         );
@@ -970,10 +986,7 @@ export class RegistryRepository implements IRegistryRepository {
           e,
         );
       },
-    ).map((fee) => {
-      console.log("feefeefeefeef: ", fee);
-      return Number(fee.toString());
-    });
+    ).map((fee) => Number(fee.toString()));
   }
 
   private getRegistryContractBurnAddress(
@@ -1001,10 +1014,7 @@ export class RegistryRepository implements IRegistryRepository {
           e,
         );
       },
-    ).map((fee) => {
-      console.log("getRegistryContractBurnFee feefeefeefeef: ", fee);
-      return Number(fee.toString());
-    });
+    ).map((fee) => Number(fee.toString()));
   }
 
   private getRegistryContractPrimaryRegistry(
