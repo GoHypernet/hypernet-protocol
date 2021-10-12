@@ -46,34 +46,6 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
         }
       })
       .mapErr(handleError);
-
-    coreProxy
-      .getRegistryByName(["reg1"])
-      .map((registryMap) => {
-        const reg = registryMap.get("reg1");
-        console.log("before update reg: ", reg);
-
-        coreProxy
-          .updateRegistryParams(
-            new RegistryParams(
-              "reg1",
-              true,
-              true,
-              true,
-              true,
-              EthereumAddress("0xdac17f958d2ee523a2206206994597c13d831ec7"),
-              2000000000,
-              EthereumAddress("0x0000000000000000000000000000000000000000"),
-              300,
-              EthereumAddress("0xED179b78D5781f93eb169730D8ad1bE7313123F4"),
-            ),
-          )
-          .map((updatedRegistry) => {
-            console.log("updatedRegistry: ", updatedRegistry);
-          })
-          .mapErr(handleError);
-      })
-      .mapErr(handleError);
   }, []);
 
   useEffect(() => {
