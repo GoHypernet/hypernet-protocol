@@ -326,6 +326,7 @@ describe("Registry", function () {
       let label = "dummylabel";
       let registrationData = "dummyRegistrationData";
 
+      // hash the data
       var hash = ethers.utils.solidityKeccak256(
           ["address", "string", "string"],
           [addr1.address, label, registrationData]
