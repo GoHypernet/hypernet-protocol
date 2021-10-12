@@ -2,6 +2,8 @@ import { makeStyles } from "@material-ui/core";
 
 export const useStyles = makeStyles({
   gridItem: {
-    paddingBottom: "unset",
+    "& .MuiGrid-item": {
+      paddingBottom: "unset",
+    },
   },
 });

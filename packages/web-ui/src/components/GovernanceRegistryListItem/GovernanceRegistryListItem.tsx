@@ -86,7 +86,7 @@ export const GovernanceRegistryListItem: React.FC<GovernanceRegistryListItemProp
           )}
         </Grid>
 
-        {chipItemList.length && (
+        {chipItemList.length > 0 && (
           <Grid container spacing={1}>
             {chipItemList.map((item, index) => (
               <Grid key={index} item>

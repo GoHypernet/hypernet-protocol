@@ -17,6 +17,7 @@ import {
 } from "@web-integration/components/GovernanceTag";
 import BurnEntryWidget from "../BurnEntryWidget";
 import TransferIdentityWidget from "../TransferIdentityWidget";
+import { useStyles } from "@web-ui/widgets/RegistryEntryDetailWidget/RegistryEntryDetailWidget.style";
 
 const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   onRegistryEntryListNavigate,
@@ -24,6 +25,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   entryLabel,
 }: IRegistryEntryDetailWidgetParams) => {
   const alert = useAlert();
+  const classes = useStyles();
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [registryEntry, setRegistryEntry] = useState<RegistryEntry>();
@@ -101,22 +103,26 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
         {...(accountAddress &&
           registryEntry && {
             description: isOwner ? (
-              <Box display="flex">
+              <Box className={classes.descriptionContainer}>
                 <GovernanceTag text="Owner" color={ETagColor.GREEN} />
-                <Box paddingLeft={2}>
-                  <Typography variant="body1" color="textPrimary">
-                    You can update the Identity Data information.
-                  </Typography>
-                </Box>
+                <Typography
+                  className={classes.descriptionText}
+                  variant="body1"
+                  color="textPrimary"
+                >
+                  You can update the Identity Data information.
+                </Typography>
               </Box>
             ) : (
-              <Box display="flex">
+              <Box className={classes.descriptionContainer}>
                 <GovernanceTag text="Viewer" color={ETagColor.PURPLE} />
-                <Box paddingLeft={2}>
-                  <Typography variant="body1" color="textPrimary">
-                    You can copy the Identity Data information.
-                  </Typography>
-                </Box>
+                <Typography
+                  className={classes.descriptionText}
+                  variant="body1"
+                  color="textPrimary"
+                >
+                  You can copy the Identity Data information.
+                </Typography>
               </Box>
             ),
           })}

@@ -6,11 +6,13 @@ export const useStyles = makeStyles({
     display: "flex",
     flexDirection: "column",
     justifyContent: "space-around",
-    width: "99%",
   },
   actionContainer: {
     display: "flex",
     flexDirection: "row",
     justifyContent: "flex-end",
+  },
+  saveButton: {
+    marginLeft: 16,
   },
 });

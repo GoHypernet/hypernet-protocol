@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Box } from "@material-ui/core";
+import { Form, Formik } from "formik";
 import { useAlert } from "react-alert";
 
 import {
@@ -54,30 +55,46 @@ const TransferIdentityWidget: React.FC<ITransferIdentityWidget> = ({
       onClose={onCloseCallback}
       content={
         <>
-          <GovernanceField
-            title="Gateway Url"
-            type="input"
-            placeholder="Type a gateway url"
-            required={false}
-            rows={1}
-            handleChange={handleAddressFieldChange}
-          />
-          <Box className={classes.actionContainer}>
-            <GovernanceButton
-              variant="outlined"
-              color="primary"
-              onClick={onCloseCallback}
-            >
-              Cancel
-            </GovernanceButton>
-            <GovernanceButton
-              variant="contained"
-              color="primary"
-              onClick={transferIdentity}
-            >
-              Save
-            </GovernanceButton>
-          </Box>
+          <Formik
+            enableReinitialize
+            initialValues={{
+              address: "",
+            }}
+            onSubmit={transferIdentity}
+          >
+            {({ handleSubmit, values }) => {
+              return (
+                <Form onSubmit={handleSubmit}>
+                  <GovernanceField
+                    title="Address"
+                    name="address"
+                    type="input"
+                    placeholder="Enter the address"
+                    required={true}
+                    handleChange={handleAddressFieldChange}
+                  />
+                  <Box className={classes.actionContainer}>
+                    <GovernanceButton
+                      variant="outlined"
+                      color="primary"
+                      onClick={onCloseCallback}
+                    >
+                      Cancel
+                    </GovernanceButton>
+                    <GovernanceButton
+                      className={classes.saveButton}
+                      disabled={!values?.address}
+                      variant="contained"
+                      color="primary"
+                      onClick={handleSubmit}
+                    >
+                      Save
+                    </GovernanceButton>
+                  </Box>
+                </Form>
+              );
+            }}
+          </Formik>
         </>
       }
     />

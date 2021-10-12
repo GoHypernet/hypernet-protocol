@@ -109,10 +109,12 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
             {
               fieldTitle: "Token ID",
               fieldValue: registryEntry.tokenId.toString(),
+              fullWidth: true,
             },
             {
               fieldTitle: "Owner",
               fieldValue: registryEntry.owner || undefined,
+              fullWidth: true,
             },
             {
               fieldTitle: "Token URI",
