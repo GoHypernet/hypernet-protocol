@@ -10,6 +10,6 @@ export const useStyles = makeStyles(() => ({
     borderRadius: 3,
     color,
     backgroundColor,
-    fontWeight: EFontWeight.LIGHT,
+    fontWeight: EFontWeight.MEDIUM,
   }),
 }));

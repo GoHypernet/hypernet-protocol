@@ -133,7 +133,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           ]}
         />
       ))}
-      {!!registryEntriesCount && (
+      {registryEntriesCount > 0 && (
         <GovernancePagination
           customPageOptions={{
             itemsPerPage: REGISTRY_ENTRIES_PER_PAGE,

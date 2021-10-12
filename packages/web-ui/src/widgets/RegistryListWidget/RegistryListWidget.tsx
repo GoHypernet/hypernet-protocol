@@ -13,6 +13,7 @@ import { Registry } from "@hypernetlabs/objects";
 
 const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   onRegistryEntryListNavigate,
+  onRegistryDetailNavigate,
 }: IRegistryListWidgetParams) => {
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
@@ -77,8 +78,8 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
               label: "Detail",
               variant: "text",
               onClick: () =>
-                onRegistryEntryListNavigate &&
-                onRegistryEntryListNavigate(registry.name),
+                onRegistryDetailNavigate &&
+                onRegistryDetailNavigate(registry.name),
             },
             {
               label: "View Registry Entries",

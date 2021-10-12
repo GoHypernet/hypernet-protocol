@@ -58,7 +58,7 @@ export const GovernanceWidgetHeader: React.FC<IGovernanceWidgetHeader> = ({
         <Box className={classes.rightSection}>
           {headerActions.map((headerAction) => (
             <Box className={classes.buttonWrapper}>
-              <GovernanceButton color="primary" size="medium" {...headerAction}  >
+              <GovernanceButton color="primary" size="medium" {...headerAction}>
                 {headerAction.label}
               </GovernanceButton>
             </Box>

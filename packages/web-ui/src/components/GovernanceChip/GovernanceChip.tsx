@@ -15,11 +15,13 @@ export interface GovernanceChipProps extends ChipPropsExtacted {
 export const GovernanceChip: React.FC<GovernanceChipProps> = (
   props: GovernanceChipProps,
 ) => {
-  const { label, color = "gray", ...rest } = props;
+  const { label, color = "gray", className, ...rest } = props;
   const colorCodes = getChipColorCodes(color);
   const classes = useStyles(colorCodes);
 
-  return <Chip className={classes.chip} label={label} {...rest} />;
+  return (
+    <Chip className={`${classes.chip} ${className}`} label={label} {...rest} />
+  );
 };
 
 const getChipColorCodes = (type: ChipColorTypes) => {
