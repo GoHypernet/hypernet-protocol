@@ -152,17 +152,22 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
               fullWidth: true,
             },
           ]}
-          actionButtonList={[
-            {
-              label: "View Registry Entry Details",
-              onClick: () =>
-                onRegistryEntryDetailsNavigate &&
-                onRegistryEntryDetailsNavigate(
-                  registryName,
-                  registryEntry.label,
-                ),
-            },
-          ]}
+          {...(registryEntry.owner === accountAddress ||
+            (registry?.registrarAddresses.some(
+              (address) => address === accountAddress,
+            ) && {
+              actionButtonList: [
+                {
+                  label: "View Registry Entry Details",
+                  onClick: () =>
+                    onRegistryEntryDetailsNavigate &&
+                    onRegistryEntryDetailsNavigate(
+                      registryName,
+                      registryEntry.label,
+                    ),
+                },
+              ],
+            }))}
         />
       ))}
       {registryEntriesCount > 0 && (
@@ -180,6 +185,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
         <CreateIdentityWidget
           onCloseCallback={() => setCreateIdentityModalOpen(false)}
           registryName={registryName}
+          currentAccountAddress={accountAddress}
         />
       )}
     </Box>

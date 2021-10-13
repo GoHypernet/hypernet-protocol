@@ -16,6 +16,7 @@ import { useStyles } from "@web-ui/widgets/CreateIdentityWidget/CreateIdentityWi
 interface ICreateIdentityWidget {
   onCloseCallback: () => void;
   registryName: string;
+  currentAccountAddress: EthereumAddress;
 }
 
 interface ICreateIdentityFormValues {
@@ -27,6 +28,7 @@ interface ICreateIdentityFormValues {
 const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
   onCloseCallback,
   registryName,
+  currentAccountAddress,
 }: ICreateIdentityWidget) => {
   const alert = useAlert();
   const classes = useStyles();
@@ -70,7 +72,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
           <Formik
             initialValues={{
               label: "",
-              recipientAddress: "",
+              recipientAddress: currentAccountAddress,
               tokenUri: "",
             }}
             onSubmit={handleCreateIdentity}
@@ -80,7 +82,6 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
                 <Form onSubmit={handleSubmit}>
                   <GovernanceField
                     title="Label"
-                    required
                     name="label"
                     type="input"
                     placeholder="Enter a label"
