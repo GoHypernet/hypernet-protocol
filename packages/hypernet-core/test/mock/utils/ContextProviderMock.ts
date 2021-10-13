@@ -279,7 +279,7 @@ export class ContextProviderMock implements IContextProvider {
       this.context = context;
     } else {
       this.context = new HypernetContext(
-        uninitializedAccount,
+        account,
         null,
         [activeStateChannel],
         false,

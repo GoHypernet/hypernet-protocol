@@ -57,6 +57,7 @@ export interface IProposalCreateWidgetParams extends IRenderParams {
 
 export interface IRegistryListWidgetParams extends IRenderParams {
   onRegistryEntryListNavigate?: (registryName: string) => void;
+  onRegistryDetailNavigate?: (registryName: string) => void;
 }
 
 export interface IRegistryEntryListWidgetParams extends IRenderParams {
@@ -72,6 +73,11 @@ export interface IRegistryEntryDetailWidgetParams extends IRenderParams {
   onRegistryEntryListNavigate?: (registryName: string) => void;
   registryName: string;
   entryLabel: string;
+}
+
+export interface IRegistryDetailWidgetParams extends IRenderParams {
+  onRegistryListNavigate?: () => void;
+  registryName: string;
 }
 
 export interface IHypernetWebUI {
@@ -109,6 +115,9 @@ export interface IHypernetWebUI {
   renderRegistryListWidget(
     config?: IRegistryListWidgetParams,
   ): Result<void, RenderError>;
+  renderRegistryDetailWidget(
+    config?: IRegistryDetailWidgetParams,
+  ): Result<void, RenderError>;
   renderRegistryEntryListWidget(
     config?: IRegistryEntryListWidgetParams,
   ): Result<void, RenderError>;
@@ -118,9 +127,7 @@ export interface IHypernetWebUI {
   renderHypertokenBalanceWidget(
     params?: IRenderParams,
   ): Result<void, RenderError>;
-  renderVotingPowerWidget(
-    params?: IRenderParams,
-  ): Result<void, RenderError>;
+  renderVotingPowerWidget(params?: IRenderParams): Result<void, RenderError>;
   renderConnectedAccountWidget(
     params?: IRenderParams,
   ): Result<void, RenderError>;
