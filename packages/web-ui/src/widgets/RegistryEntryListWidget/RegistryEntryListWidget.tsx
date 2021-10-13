@@ -83,14 +83,18 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   useEffect(() => {
     if (registryEntriesNumberArr.length) {
-      coreProxy
-        .getRegistryEntries(registryName, registryEntriesNumberArr)
-        .map((registryEntries) => {
-          setRegistryEntries(registryEntries);
-        })
-        .mapErr(handleError);
+      getRegistryEntries();
     }
   }, [JSON.stringify(registryEntriesNumberArr)]);
+
+  const getRegistryEntries = () => {
+    coreProxy
+      .getRegistryEntries(registryName, registryEntriesNumberArr)
+      .map((registryEntries) => {
+        setRegistryEntries(registryEntries);
+      })
+      .mapErr(handleError);
+  };
 
   const handleError = (err?: Error) => {
     console.log("handleError err: ", err);
@@ -194,7 +198,10 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       )}
       {createIdentityModalOpen && (
         <CreateIdentityWidget
-          onCloseCallback={() => setCreateIdentityModalOpen(false)}
+          onCloseCallback={() => {
+            getRegistryEntries();
+            setCreateIdentityModalOpen(false);
+          }}
           registryName={registryName}
           currentAccountAddress={accountAddress}
         />
