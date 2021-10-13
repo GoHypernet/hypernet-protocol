@@ -99,6 +99,10 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     alert.error(err?.message || "Something went wrong!");
   };
 
+  const isRegistrar = registry?.registrarAddresses.some(
+    (address) => address === accountAddress,
+  );
+
   return (
     <Box>
       <GovernanceWidgetHeader
@@ -109,9 +113,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
             onRegistryListNavigate?.();
           },
         }}
-        {...(registry?.registrarAddresses.some(
-          (address) => address === accountAddress,
-        ) && {
+        {...(isRegistrar && {
           headerActions: [
             {
               label: "Create New Identity",
@@ -153,9 +155,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
             },
           ]}
           {...(registryEntry.owner === accountAddress ||
-            (registry?.registrarAddresses.some(
-              (address) => address === accountAddress,
-            ) && {
+            (isRegistrar && {
               actionButtonList: [
                 {
                   label: "View Registry Entry Details",

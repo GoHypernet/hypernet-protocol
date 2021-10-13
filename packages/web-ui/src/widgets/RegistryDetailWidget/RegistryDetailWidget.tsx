@@ -84,8 +84,6 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
     alert.error(err?.message || "Something went wrong!");
   };
 
-  console.log(registry);
-
   const updateRegistryParams = ({
     registrationFee,
     primaryRegistry,
@@ -119,6 +117,10 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
       })
       .mapErr(handleError);
   };
+
+  const isRegistrar = registry?.registrarAddresses.some(
+    (address) => address === accountAddress,
+  );
 
   return (
     <>
@@ -180,30 +182,35 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                       type="input"
                     />
                     <GovernanceField
+                      {...(isEditing && { className: classes.editableField })}
                       disabled={!isEditing}
                       name="registrationFee"
                       title="Registration Fee"
                       type="input"
                     />
                     <GovernanceField
+                      {...(isEditing && { className: classes.editableField })}
                       disabled={!isEditing}
                       name="primaryRegistry"
                       title="Primary Registry"
                       type="input"
                     />
                     <GovernanceField
+                      {...(isEditing && { className: classes.editableField })}
                       disabled={!isEditing}
                       name="registrationToken"
                       title="Registration Token"
                       type="input"
                     />
                     <GovernanceField
+                      {...(isEditing && { className: classes.editableField })}
                       disabled={!isEditing}
                       name="burnAddress"
                       title="Burn Address"
                       type="input"
                     />
                     <GovernanceField
+                      {...(isEditing && { className: classes.editableField })}
                       disabled={!isEditing}
                       name="burnFee"
                       title="Burn Fee"
@@ -266,26 +273,30 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                     </Box>
                   </GovernanceCard>
 
-                  {isEditing ? (
-                    <GovernanceButton
-                      className={classes.button}
-                      color="primary"
-                      variant="outlined"
-                      onClick={handleSubmit}
-                    >
-                      Save Changes
-                    </GovernanceButton>
-                  ) : (
-                    <GovernanceButton
-                      className={classes.button}
-                      color="primary"
-                      variant="outlined"
-                      onClick={() => {
-                        setIsEditing(true);
-                      }}
-                    >
-                      Edit
-                    </GovernanceButton>
+                  {isRegistrar && (
+                    <>
+                      {isEditing ? (
+                        <GovernanceButton
+                          className={classes.button}
+                          color="primary"
+                          variant="outlined"
+                          onClick={handleSubmit}
+                        >
+                          Save Changes
+                        </GovernanceButton>
+                      ) : (
+                        <GovernanceButton
+                          className={classes.button}
+                          color="primary"
+                          variant="outlined"
+                          onClick={() => {
+                            setIsEditing(true);
+                          }}
+                        >
+                          Edit
+                        </GovernanceButton>
+                      )}
+                    </>
                   )}
                 </Form>
               );

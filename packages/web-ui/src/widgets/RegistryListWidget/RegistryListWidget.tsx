@@ -88,6 +88,9 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
     return items;
   };
 
+  const getIsRegistrar = (registry: Registry) =>
+    registry.registrarAddresses.some((address) => address === accountAddress);
+
   return (
     <Box>
       <GovernanceWidgetHeader label="Registries" />
@@ -124,9 +127,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
           ]}
           actionButtonList={
             [
-              ...(registry.registrarAddresses.some(
-                (address) => true, //address === accountAddress,
-              )
+              ...(getIsRegistrar(registry)
                 ? [
                     {
                       label: "Detail",
