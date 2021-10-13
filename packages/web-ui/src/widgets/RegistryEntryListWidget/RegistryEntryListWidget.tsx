@@ -52,14 +52,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   );
 
   useEffect(() => {
-    coreProxy
-      .getRegistryByName([registryName])
-      .map((registryMap) => {
-        setRegistry(registryMap.get(registryName));
-        setLoading(false);
-      })
-
-      .mapErr(handleError);
+    getRegistry();
   }, []);
 
   useEffect(() => {
@@ -69,16 +62,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   }, []);
 
   useEffect(() => {
-    coreProxy
-      .getRegistryEntriesTotalCount([registryName])
-      .map((countsMap) => {
-        const count = countsMap.get(registryName);
-        setRegistryEntriesCount(count || 0);
-        if (!count) {
-          setHasEmptyState(true);
-        }
-      })
-      .mapErr(handleError);
+    getRegistryEntriesTotalCount();
   }, []);
 
   useEffect(() => {
@@ -87,11 +71,34 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     }
   }, [JSON.stringify(registryEntriesNumberArr)]);
 
+  const getRegistry = () => {
+    coreProxy
+      .getRegistryByName([registryName])
+      .map((registryMap) => {
+        setRegistry(registryMap.get(registryName));
+        setLoading(false);
+      })
+      .mapErr(handleError);
+  };
+
   const getRegistryEntries = () => {
     coreProxy
       .getRegistryEntries(registryName, registryEntriesNumberArr)
       .map((registryEntries) => {
         setRegistryEntries(registryEntries);
+      })
+      .mapErr(handleError);
+  };
+
+  const getRegistryEntriesTotalCount = () => {
+    coreProxy
+      .getRegistryEntriesTotalCount([registryName])
+      .map((countsMap) => {
+        const count = countsMap.get(registryName);
+        setRegistryEntriesCount(count || 0);
+        if (!count) {
+          setHasEmptyState(true);
+        }
       })
       .mapErr(handleError);
   };
@@ -199,7 +206,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       {createIdentityModalOpen && (
         <CreateIdentityWidget
           onCloseCallback={() => {
-            getRegistryEntries();
+            getRegistryEntriesTotalCount();
             setCreateIdentityModalOpen(false);
           }}
           registryName={registryName}
