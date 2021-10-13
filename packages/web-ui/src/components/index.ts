@@ -47,3 +47,4 @@ export * from "./GovernancePagination";
 export * from "./GovernanceTabs";
 export * from "./GovernanceEmptyState";
 export * from "./GovernanceChip";
+export * from "./GovernanceSwitch";
