@@ -4,10 +4,8 @@ import {
   createStyles,
   Switch,
   SwitchProps,
-  Theme,
   withStyles,
 } from "@material-ui/core";
-import { useStyles } from "@web-ui/components/GovernanceSwitch/GovernanceSwitch.style";
 import { colors } from "@web-integration/theme";
 
 type MuiSwitchPropsExtacted = Omit<SwitchProps, "onChange">;
@@ -58,7 +56,6 @@ export const GovernanceSwitch: React.FC<GovernanceSwitchProps> = (
 ) => {
   const { initialValue, onChange } = props;
   const [checked, setChecked] = useState(initialValue);
-  const classes = useStyles({});
 
   const handleToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { checked: newChecked } = event.target;
