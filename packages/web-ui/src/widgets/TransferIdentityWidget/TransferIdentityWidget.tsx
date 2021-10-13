@@ -14,12 +14,14 @@ import { useStyles } from "@web-ui/widgets/TransferIdentityWidget/TransferIdenti
 
 interface ITransferIdentityWidget {
   onCloseCallback: () => void;
+  onSuccessCallback: () => void;
   registryName: string;
   tokenId: number;
 }
 
 const TransferIdentityWidget: React.FC<ITransferIdentityWidget> = ({
   onCloseCallback,
+  onSuccessCallback,
   registryName,
   tokenId,
 }: ITransferIdentityWidget) => {
@@ -41,7 +43,7 @@ const TransferIdentityWidget: React.FC<ITransferIdentityWidget> = ({
       )
       .map(() => {
         setLoading(false);
-        onCloseCallback();
+        onSuccessCallback();
       })
       .mapErr(handleError);
   };

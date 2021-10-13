@@ -13,12 +13,14 @@ import { useStyles } from "@web-ui/widgets/BurnEntryWidget/BurnEntryWidget.style
 
 interface IBurnEntryWidget {
   onCloseCallback: () => void;
+  onSuccessCallback: () => void;
   registryName: string;
   tokenId: number;
 }
 
 const BurnEntryWidget: React.FC<IBurnEntryWidget> = ({
   onCloseCallback,
+  onSuccessCallback,
   registryName,
   tokenId,
 }: IBurnEntryWidget) => {
@@ -33,7 +35,7 @@ const BurnEntryWidget: React.FC<IBurnEntryWidget> = ({
       .burnRegistryEntry(registryName, tokenId)
       .map(() => {
         setLoading(false);
-        onCloseCallback();
+        onSuccessCallback();
       })
       .mapErr(handleError);
   };

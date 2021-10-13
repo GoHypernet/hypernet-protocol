@@ -26,7 +26,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   registryName,
 }: IRegistryEntryListWidgetParams) => {
   const alert = useAlert();
-  const { coreProxy } = useStoreContext();
+  const { coreProxy, viewUtils } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [registryEntries, setRegistryEntries] = useState<RegistryEntry[]>([]);
   const [registry, setRegistry] = useState<Registry>();
@@ -99,9 +99,20 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     alert.error(err?.message || "Something went wrong!");
   };
 
-  const isRegistrar = registry?.registrarAddresses.some(
-    (address) => address === accountAddress,
-  );
+  const isRegistrar = useMemo(() => {
+    return registry?.registrarAddresses.some(
+      (address) => address === accountAddress,
+    );
+  }, [accountAddress, JSON.stringify(registry?.registrarAddresses)]);
+
+  const isRegistrationTokenEnabled = useMemo(() => {
+    return (
+      registry?.registrationToken != null &&
+      !viewUtils.isZeroAddress(registry?.registrationToken)
+    );
+  }, [JSON.stringify(registry?.registrationToken)]);
+
+  const canCreateNewRegistryEntry = isRegistrar || isRegistrationTokenEnabled;
 
   return (
     <Box>
@@ -113,7 +124,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
             onRegistryListNavigate?.();
           },
         }}
-        {...(isRegistrar && {
+        {...(canCreateNewRegistryEntry && {
           headerActions: [
             {
               label: "Create New Identity",
@@ -149,27 +160,25 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
             {
               fieldTitle: "Owner",
               fieldValue: registryEntry.owner || undefined,
-              fullWidth: true,
             },
             {
               fieldTitle: "Token URI",
               fieldValue: registryEntry.tokenURI || undefined,
             },
           ]}
-          {...(registryEntry.owner === accountAddress ||
-            (isRegistrar && {
-              actionButtonList: [
-                {
-                  label: "View Registry Entry Details",
-                  onClick: () =>
-                    onRegistryEntryDetailsNavigate &&
-                    onRegistryEntryDetailsNavigate(
-                      registryName,
-                      registryEntry.label,
-                    ),
-                },
-              ],
-            }))}
+          {...((isRegistrar || registryEntry.owner === accountAddress) && {
+            actionButtonList: [
+              {
+                label: "View Registry Entry Details",
+                onClick: () =>
+                  onRegistryEntryDetailsNavigate &&
+                  onRegistryEntryDetailsNavigate(
+                    registryName,
+                    registryEntry.label,
+                  ),
+              },
+            ],
+          })}
         />
       ))}
       {registryEntriesCount > 0 && (

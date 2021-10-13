@@ -105,6 +105,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
       .map((registryEntry: RegistryEntry) => {
         setRegistryEntry(registryEntry);
         setLoading(false);
+        setIsEditing(false);
       })
       .mapErr(handleError);
   };
@@ -120,6 +121,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
       .map((registryEntry: RegistryEntry) => {
         setRegistryEntry(registryEntry);
         setLoading(false);
+        setIsEditing(false);
       })
       .mapErr(handleError);
   };
@@ -215,7 +217,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
                   <Box className={classes.cardContainer}>
                     <Box className={classes.fieldContainer}>
                       <GovernanceField
-                        disabled={!canUpdateLabel}
+                        disabled={!canUpdateLabel || !isEditing}
                         title="Label"
                         name="label"
                         type="input"
@@ -234,7 +236,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
                         type="input"
                       />
                       <GovernanceField
-                        disabled={!canUpdateTokenURI}
+                        disabled={!canUpdateTokenURI || !isEditing}
                         title="Identity Data"
                         name="tokenURI"
                         type="input"
@@ -259,7 +261,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
                   </Box>
                 </GovernanceCard>
 
-                {canUpdateLabel || canUpdateTokenURI &&
+                {(canUpdateLabel || canUpdateTokenURI) &&
                   (isEditing ? (
                     <GovernanceButton
                       className={classes.button}
@@ -290,14 +292,26 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
         <BurnEntryWidget
           registryName={registryName}
           tokenId={registryEntry.tokenId}
-          onCloseCallback={() => setBurnEntryModalOpen(false)}
+          onSuccessCallback={() => {
+            setBurnEntryModalOpen(false);
+            onRegistryEntryListNavigate?.(registryName);
+          }}
+          onCloseCallback={() => {
+            setBurnEntryModalOpen(false);
+          }}
         />
       )}
       {transferIdentityModalOpen && registryEntry?.tokenId && (
         <TransferIdentityWidget
           registryName={registryName}
           tokenId={registryEntry.tokenId}
-          onCloseCallback={() => setTransferIdentityModalOpen(false)}
+          onSuccessCallback={() => {
+            setTransferIdentityModalOpen(false);
+            onRegistryEntryListNavigate?.(registryName);
+          }}
+          onCloseCallback={() => {
+            setTransferIdentityModalOpen(false);
+          }}
         />
       )}
     </Box>
