@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   createStyles,
@@ -56,6 +56,10 @@ export const GovernanceSwitch: React.FC<GovernanceSwitchProps> = (
 ) => {
   const { initialValue, onChange } = props;
   const [checked, setChecked] = useState(initialValue);
+
+  useEffect(() => {
+    setChecked(initialValue);
+  }, [initialValue]);
 
   const handleToggle = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { checked: newChecked } = event.target;

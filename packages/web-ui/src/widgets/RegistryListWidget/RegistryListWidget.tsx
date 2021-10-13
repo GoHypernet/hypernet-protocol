@@ -58,7 +58,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
       setAccountAddress(accounts[0]);
     });
   }, []);
-  
+
   useEffect(() => {
     coreProxy
       .getRegistries(page, REGISTIRES_PER_PAGE)
@@ -75,6 +75,17 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
     setLoading(false);
     setHasEmptyState(true);
     alert.error(err?.message || "Something went wrong!");
+  };
+
+  const getRegistryNotAllowedChipItems = (registry: Registry) => {
+    const items: string[] = [];
+
+    !registry.allowLazyRegister && items.push("Lazy Registration not allowed");
+    !registry.allowLabelChange && items.push("Label Change not allowed");
+    !registry.allowStorageUpdate && items.push("Storage update not allowed");
+    !registry.allowTransfers && items.push("Transfers not allowed");
+
+    return items;
   };
 
   return (
@@ -111,33 +122,30 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
               fieldValue: registry.registrarAddresses.join("-"),
             },
           ]}
-          actionButtonList={[
-            ...(registry.registrarAddresses.some(
-              (address) => true //address === accountAddress,
-            )
-              ? [
-                  {
-                    label: "Detail",
-                    variant: "text",
-                    onClick: () =>
-                      onRegistryDetailNavigate &&
-                      onRegistryDetailNavigate(registry.name),
-                  },
-                ]
-              : []),
-            {
-              label: "View Registry Entries",
-              onClick: () =>
-                onRegistryEntryListNavigate &&
-                onRegistryEntryListNavigate(registry.name),
-            },
-          ] as IRegistryListItemAction[]}
-          chipItemList={[
-            "Lazy Registration not allowed",
-            "Lazy Registration not allowed",
-            "Lazy Registration not allowed",
-            "Lazy Registration not allowed",
-          ]}
+          actionButtonList={
+            [
+              ...(registry.registrarAddresses.some(
+                (address) => true, //address === accountAddress,
+              )
+                ? [
+                    {
+                      label: "Detail",
+                      variant: "text",
+                      onClick: () =>
+                        onRegistryDetailNavigate &&
+                        onRegistryDetailNavigate(registry.name),
+                    },
+                  ]
+                : []),
+              {
+                label: "View Registry Entries",
+                onClick: () =>
+                  onRegistryEntryListNavigate &&
+                  onRegistryEntryListNavigate(registry.name),
+              },
+            ] as IRegistryListItemAction[]
+          }
+          chipItemList={getRegistryNotAllowedChipItems(registry)}
         />
       ))}
       {!!registriesCount && (

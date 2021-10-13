@@ -111,7 +111,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
                         )
                       }
                     >
-                      Save
+                      Submit
                     </GovernanceButton>
                   </Box>
                 </Form>

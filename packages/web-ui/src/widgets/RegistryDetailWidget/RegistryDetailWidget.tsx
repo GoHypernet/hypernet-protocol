@@ -13,8 +13,26 @@ import {
 } from "@web-ui/components";
 import { IRegistryDetailWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { EthereumAddress, Registry } from "@hypernetlabs/objects";
+import {
+  EthereumAddress,
+  Registry,
+  RegistryParams,
+} from "@hypernetlabs/objects";
 import { useStyles } from "@web-ui/widgets/RegistryDetailWidget/RegistryDetailWidget.style";
+
+interface IRegistryDetailFormValus {
+  symbol: string;
+  numberOfEntries: number;
+  registrationFee: number;
+  primaryRegistry: string;
+  registrationToken: string;
+  burnAddress: string;
+  burnFee: number;
+  allowStorageUpdate: boolean;
+  allowLabelChange: boolean;
+  allowTransfers: boolean;
+  allowLazyRegister: boolean;
+}
 
 const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
   onRegistryListNavigate,
@@ -62,10 +80,45 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
 
   const handleError = (err?: Error) => {
     setLoading(false);
+    setIsEditing(false);
     alert.error(err?.message || "Something went wrong!");
   };
 
-  const handleSave = () => {};
+  console.log(registry);
+
+  const updateRegistryParams = ({
+    registrationFee,
+    primaryRegistry,
+    registrationToken,
+    burnAddress,
+    burnFee,
+    allowStorageUpdate,
+    allowLabelChange,
+    allowTransfers,
+    allowLazyRegister,
+  }: IRegistryDetailFormValus) => {
+    setLoading(true);
+    coreProxy
+      .updateRegistryParams(
+        new RegistryParams(
+          registryName,
+          allowLazyRegister,
+          allowStorageUpdate,
+          allowLabelChange,
+          allowTransfers,
+          EthereumAddress(registrationToken),
+          registrationFee,
+          EthereumAddress(burnAddress),
+          burnFee,
+          EthereumAddress(primaryRegistry),
+        ),
+      )
+      .map((registry) => {
+        setRegistry(registry);
+        setLoading(false);
+      })
+      .mapErr(handleError);
+  };
 
   return (
     <>
@@ -93,22 +146,29 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
 
           <Formik
             enableReinitialize
-            initialValues={{
-              symbol: registry.symbol,
-              numberOfEntries,
-              // registrationFee: 1,
-              registrarAddress: registry.registrarAddresses,
-              //registrationToken: registry.?,
-            }}
-            onSubmit={handleSave}
+            initialValues={
+              {
+                symbol: registry.symbol,
+                numberOfEntries,
+                registrationFee: registry.registrationFee,
+                primaryRegistry: registry.primaryRegistry,
+                registrationToken: registry.registrationToken,
+                burnAddress: registry.burnAddress,
+                burnFee: registry.burnFee,
+                allowStorageUpdate: registry.allowStorageUpdate,
+                allowLabelChange: registry.allowLabelChange,
+                allowTransfers: registry.allowTransfers,
+                allowLazyRegister: registry.allowLazyRegister,
+              } as IRegistryDetailFormValus
+            }
+            onSubmit={updateRegistryParams}
           >
-            {({ handleSubmit, values }) => {
+            {({ handleSubmit, setFieldValue }) => {
               return (
                 <Form className={classes.form} onSubmit={handleSubmit}>
                   <GovernanceCard>
                     <GovernanceField
-                      required
-                      disabled={!isEditing}
+                      disabled
                       name="symbol"
                       title="Symbol"
                       type="input"
@@ -120,21 +180,33 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                       type="input"
                     />
                     <GovernanceField
-                      disabled
-                      name="numberOfEntries"
+                      disabled={!isEditing}
+                      name="registrationFee"
                       title="Registration Fee"
                       type="input"
                     />
                     <GovernanceField
-                      disabled
-                      name="registrarAddress"
-                      title="Registrar Address"
+                      disabled={!isEditing}
+                      name="primaryRegistry"
+                      title="Primary Registry"
                       type="input"
                     />
                     <GovernanceField
-                      disabled
+                      disabled={!isEditing}
                       name="registrationToken"
                       title="Registration Token"
+                      type="input"
+                    />
+                    <GovernanceField
+                      disabled={!isEditing}
+                      name="burnAddress"
+                      title="Burn Address"
+                      type="input"
+                    />
+                    <GovernanceField
+                      disabled={!isEditing}
+                      name="burnFee"
+                      title="Burn Fee"
                       type="input"
                     />
                   </GovernanceCard>
@@ -145,8 +217,10 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                           Allow Lazy Register
                         </Typography>
                         <GovernanceSwitch
-                          initialValue={true}
-                          onChange={() => {}}
+                          initialValue={registry.allowLazyRegister}
+                          onChange={(value) => {
+                            setFieldValue("allowLazyRegister", value);
+                          }}
                           disabled={!isEditing}
                         />
                       </Box>
@@ -155,8 +229,10 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                           Allow Storage Update
                         </Typography>
                         <GovernanceSwitch
-                          initialValue={true}
-                          onChange={() => {}}
+                          initialValue={registry.allowStorageUpdate}
+                          onChange={(value) => {
+                            setFieldValue("allowStorageUpdate", value);
+                          }}
                           disabled={!isEditing}
                         />
                       </Box>
@@ -168,8 +244,10 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                           Allow Label Change
                         </Typography>
                         <GovernanceSwitch
-                          initialValue={true}
-                          onChange={() => {}}
+                          initialValue={registry.allowLabelChange}
+                          onChange={(value) => {
+                            setFieldValue("allowLabelChange", value);
+                          }}
                           disabled={!isEditing}
                         />
                       </Box>
@@ -178,8 +256,10 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                           Allow Transfers
                         </Typography>
                         <GovernanceSwitch
-                          initialValue={true}
-                          onChange={() => {}}
+                          initialValue={registry.allowTransfers}
+                          onChange={(value) => {
+                            setFieldValue("allowTransfers", value);
+                          }}
                           disabled={!isEditing}
                         />
                       </Box>
