@@ -31,12 +31,18 @@ export interface IRegistryService {
     registryName: string,
     tokenId: number,
     registrationData: string,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  >;
   updateRegistryEntryLabel(
     registryName: string,
     tokenId: number,
     label: string,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  >;
   getRegistryEntriesTotalCount(
     registryNames: string[],
   ): ResultAsync<Map<string, number>, BlockchainUnavailableError>;
@@ -56,4 +62,16 @@ export interface IRegistryService {
     RegistryEntry,
     BlockchainUnavailableError | RegistryPermissionError
   >;
+  transferRegistryEntry(
+    registryName: string,
+    tokenId: number,
+    transferToAddress: EthereumAddress,
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  >;
+  burnRegistryEntry(
+    registryName: string,
+    tokenId: number,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
 }

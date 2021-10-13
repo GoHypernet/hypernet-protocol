@@ -329,13 +329,19 @@ export interface IHypernetCore {
     registryName: string,
     tokenId: number,
     registrationData: string,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  >;
 
   updateRegistryEntryLabel(
     registryName: string,
     tokenId: number,
     label: string,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  >;
 
   getProposalsCount(): ResultAsync<number, BlockchainUnavailableError>;
 
@@ -371,6 +377,20 @@ export interface IHypernetCore {
     RegistryEntry,
     BlockchainUnavailableError | RegistryPermissionError
   >;
+
+  transferRegistryEntry(
+    registryName: string,
+    tokenId: number,
+    transferToAddress: EthereumAddress,
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  >;
+
+  burnRegistryEntry(
+    registryName: string,
+    tokenId: number,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
 
   /**
    * Observables for seeing what's going on

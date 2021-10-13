@@ -64,7 +64,10 @@ export class RegistryService implements IRegistryService {
     registryName: string,
     tokenId: number,
     registrationData: string,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
     return this.registryRepository.updateRegistryEntryTokenURI(
       registryName,
       tokenId,
@@ -76,7 +79,10 @@ export class RegistryService implements IRegistryService {
     registryName: string,
     tokenId: number,
     label: string,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
     return this.registryRepository.updateRegistryEntryLabel(
       registryName,
       tokenId,
@@ -115,5 +121,27 @@ export class RegistryService implements IRegistryService {
       recipientAddress,
       data,
     );
+  }
+
+  public transferRegistryEntry(
+    registryName: string,
+    tokenId: number,
+    transferToAddress: EthereumAddress,
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
+    return this.registryRepository.transferRegistryEntry(
+      registryName,
+      tokenId,
+      transferToAddress,
+    );
+  }
+
+  public burnRegistryEntry(
+    registryName: string,
+    tokenId: number,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this.registryRepository.burnRegistryEntry(registryName, tokenId);
   }
 }

@@ -611,7 +611,10 @@ export default class HypernetIFrameProxy
     registryName: string,
     tokenId: number,
     registrationData: string,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
     return this._createCall("updateRegistryEntryTokenURI", {
       registryName,
       tokenId,
@@ -623,7 +626,10 @@ export default class HypernetIFrameProxy
     registryName: string,
     tokenId: number,
     label: string,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
     return this._createCall("updateRegistryEntryLabel", {
       registryName,
       tokenId,
@@ -696,6 +702,31 @@ export default class HypernetIFrameProxy
       label,
       recipientAddress,
       data,
+    });
+  }
+
+  public transferRegistryEntry(
+    registryName: string,
+    tokenId: number,
+    transferToAddress: EthereumAddress,
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
+    return this._createCall("transferRegistryEntry", {
+      registryName,
+      tokenId,
+      transferToAddress,
+    });
+  }
+
+  public burnRegistryEntry(
+    registryName: string,
+    tokenId: number,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this._createCall("burnRegistryEntry", {
+      registryName,
+      tokenId,
     });
   }
 

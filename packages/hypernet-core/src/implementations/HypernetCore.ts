@@ -1117,7 +1117,10 @@ export class HypernetCore implements IHypernetCore {
     registryName: string,
     tokenId: number,
     registrationData: string,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
     return this.registryService.updateRegistryEntryTokenURI(
       registryName,
       tokenId,
@@ -1129,7 +1132,10 @@ export class HypernetCore implements IHypernetCore {
     registryName: string,
     tokenId: number,
     label: string,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
     return this.registryService.updateRegistryEntryLabel(
       registryName,
       tokenId,
@@ -1191,5 +1197,27 @@ export class HypernetCore implements IHypernetCore {
       recipientAddress,
       data,
     );
+  }
+
+  public transferRegistryEntry(
+    registryName: string,
+    tokenId: number,
+    transferToAddress: EthereumAddress,
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
+    return this.registryService.transferRegistryEntry(
+      registryName,
+      tokenId,
+      transferToAddress,
+    );
+  }
+
+  public burnRegistryEntry(
+    registryName: string,
+    tokenId: number,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this.registryService.burnRegistryEntry(registryName, tokenId);
   }
 }
