@@ -17,10 +17,7 @@ import {
   Registry,
   RegistryEntry,
 } from "@hypernetlabs/objects";
-import {
-  GovernanceTag,
-  ETagColor,
-} from "@web-ui/components/GovernanceTag";
+import { GovernanceTag, ETagColor } from "@web-ui/components/GovernanceTag";
 import BurnEntryWidget from "../BurnEntryWidget";
 import TransferIdentityWidget from "../TransferIdentityWidget";
 import { colors } from "@web-ui/theme";
@@ -132,14 +129,6 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
     alert.error(err?.message || "Something went wrong!");
   };
 
-  const isOwner = useMemo(() => {
-    if (!accountAddress || !registryEntry) {
-      return false;
-    }
-
-    return accountAddress === registryEntry.owner;
-  }, [accountAddress, registryEntry]);
-
   const handleSave = ({ label, tokenURI }: IRegistryEntryFormValues) => {
     if (tokenURI !== registryEntry?.tokenURI) {
       updateTokenURI(tokenURI);
@@ -149,35 +138,40 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
     }
   };
 
+  const isRegistrar = useMemo(() => {
+    return registry?.registrarAddresses.some(
+      (address) => address === accountAddress,
+    );
+  }, [accountAddress, JSON.stringify(registry?.registrarAddresses)]);
+
+  const isOwner = useMemo(() => {
+    return accountAddress === registryEntry?.owner;
+  }, [accountAddress, registryEntry]);
+
+  const canBurnOrTransfer = useMemo(() => {
+    return isRegistrar || (isOwner && registry?.allowTransfers);
+  }, [isRegistrar, isOwner]);
+
+  const canUpdateLabel = useMemo(() => {
+    return isRegistrar || (isOwner && registry?.allowLabelChange);
+  }, [isRegistrar, isOwner]);
+
+  const canUpdateTokenURI = useMemo(() => {
+    return isRegistrar || (isOwner && registry?.allowStorageUpdate);
+  }, [isRegistrar, isOwner]);
+
   return (
     <Box>
       <GovernanceWidgetHeader
         label="Registry Entry Details"
         {...(accountAddress &&
           registryEntry && {
-            description: isOwner ? (
-              <Box className={classes.descriptionContainer}>
+            description:
+              isOwner || isRegistrar ? (
                 <GovernanceTag text="Owner" color={ETagColor.GREEN} />
-                <Typography
-                  className={classes.descriptionText}
-                  variant="body1"
-                  color="textPrimary"
-                >
-                  You can update the Identity Data information.
-                </Typography>
-              </Box>
-            ) : (
-              <Box className={classes.descriptionContainer}>
+              ) : (
                 <GovernanceTag text="Viewer" color={ETagColor.PURPLE} />
-                <Typography
-                  className={classes.descriptionText}
-                  variant="body1"
-                  color="textPrimary"
-                >
-                  You can copy the Identity Data information.
-                </Typography>
-              </Box>
-            ),
+              ),
           })}
         navigationLink={{
           label: "Registry Entries",
@@ -185,24 +179,23 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
             onRegistryEntryListNavigate?.(registryName);
           },
         }}
-        {...(isOwner &&
-          registry?.allowTransfers && {
-            headerActions: [
-              {
-                label: "Burn Entry",
-                onClick: () => setBurnEntryModalOpen(true),
-                variant: "contained",
-                color: "secondary",
-                style: { backgroundColor: colors.RED700 },
-              },
-              {
-                label: "Transfer NFI",
-                onClick: () => setTransferIdentityModalOpen(true),
-                variant: "contained",
-                color: "primary",
-              },
-            ],
-          })}
+        {...(canBurnOrTransfer && {
+          headerActions: [
+            {
+              label: "Burn Entry",
+              onClick: () => setBurnEntryModalOpen(true),
+              variant: "contained",
+              color: "secondary",
+              style: { backgroundColor: colors.RED700 },
+            },
+            {
+              label: "Transfer NFI",
+              onClick: () => setTransferIdentityModalOpen(true),
+              variant: "contained",
+              color: "primary",
+            },
+          ],
+        })}
       />
       {registryEntry && (
         <Formik
@@ -222,11 +215,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
                   <Box className={classes.cardContainer}>
                     <Box className={classes.fieldContainer}>
                       <GovernanceField
-                        disabled={
-                          !registryEntry?.canUpdateLabel ||
-                          !isOwner ||
-                          registry?.allowLabelChange
-                        }
+                        disabled={!canUpdateLabel}
                         title="Label"
                         name="label"
                         type="input"
@@ -245,11 +234,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
                         type="input"
                       />
                       <GovernanceField
-                        disabled={
-                          !registryEntry?.canUpdateURI ||
-                          !isOwner ||
-                          registry?.allowStorageUpdate
-                        }
+                        disabled={!canUpdateTokenURI}
                         title="Identity Data"
                         name="tokenURI"
                         type="input"
@@ -274,7 +259,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
                   </Box>
                 </GovernanceCard>
 
-                {isOwner &&
+                {canUpdateLabel || canUpdateTokenURI &&
                   (isEditing ? (
                     <GovernanceButton
                       className={classes.button}

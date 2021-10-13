@@ -136,12 +136,15 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
         <GovernanceRegistryListItem
           key={registryEntry.label}
           number={registryEntry.tokenId.toString()}
-          title={registryEntry.label}
+          title=""
           fieldWithValueList={[
+            {
+              fieldTitle: "Label",
+              fieldValue: registryEntry.label,
+            },
             {
               fieldTitle: "Token ID",
               fieldValue: registryEntry.tokenId.toString(),
-              fullWidth: true,
             },
             {
               fieldTitle: "Owner",
@@ -151,7 +154,6 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
             {
               fieldTitle: "Token URI",
               fieldValue: registryEntry.tokenURI || undefined,
-              fullWidth: true,
             },
           ]}
           {...(registryEntry.owner === accountAddress ||
