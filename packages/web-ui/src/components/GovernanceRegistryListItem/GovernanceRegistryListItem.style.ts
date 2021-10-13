@@ -6,4 +6,7 @@ export const useStyles = makeStyles({
       paddingBottom: "unset",
     },
   },
+  listItemRightButton: {
+    marginLeft: 16,
+  },
 });

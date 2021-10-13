@@ -54,7 +54,7 @@ export const GovernanceRegistryListItem: React.FC<GovernanceRegistryListItemProp
             index: number,
           ) => (
             <GovernanceButton
-              style={{ marginLeft: 16 }}
+              className={classes.listItemRightButton}
               onClick={onClick}
               variant={variant}
               size={size}
