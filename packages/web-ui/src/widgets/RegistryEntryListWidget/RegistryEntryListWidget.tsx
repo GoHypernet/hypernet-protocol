@@ -11,7 +11,12 @@ import {
 } from "@web-ui/components";
 import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { RegistryEntry } from "@hypernetlabs/objects";
+import {
+  EthereumAddress,
+  Registry,
+  RegistryEntry,
+} from "@hypernetlabs/objects";
+import CreateIdentityWidget from "../CreateIdentityWidget";
 
 const REGISTRY_ENTRIES_PER_PAGE = 3;
 
@@ -24,6 +29,13 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [registryEntries, setRegistryEntries] = useState<RegistryEntry[]>([]);
+  const [registry, setRegistry] = useState<Registry>();
+  const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
+    EthereumAddress(""),
+  );
+
+  const [createIdentityModalOpen, setCreateIdentityModalOpen] =
+    useState<boolean>(false);
 
   const [page, setPage] = useState<number>(1);
   const [registryEntriesCount, setRegistryEntriesCount] = useState<number>(0);
@@ -38,6 +50,23 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       ),
     [registryEntriesCount, page],
   );
+
+  useEffect(() => {
+    coreProxy
+      .getRegistryByName([registryName])
+      .map((registryMap) => {
+        setRegistry(registryMap.get(registryName));
+        setLoading(false);
+      })
+
+      .mapErr(handleError);
+  }, []);
+
+  useEffect(() => {
+    coreProxy.getEthereumAccounts().map((accounts) => {
+      setAccountAddress(accounts[0]);
+    });
+  }, []);
 
   useEffect(() => {
     coreProxy
@@ -80,6 +109,18 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
             onRegistryListNavigate?.();
           },
         }}
+        {...(registry?.registrarAddresses.some(
+          (address) => address === accountAddress,
+        ) && {
+          headerActions: [
+            {
+              label: "Create New Identity",
+              onClick: () => setCreateIdentityModalOpen(true),
+              variant: "contained",
+              color: "primary",
+            },
+          ],
+        })}
       />
 
       {hasEmptyState && (
@@ -98,24 +139,38 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
             {
               fieldTitle: "Token ID",
               fieldValue: registryEntry.tokenId.toString(),
+              fullWidth: true,
             },
             {
               fieldTitle: "Owner",
               fieldValue: registryEntry.owner || undefined,
+              fullWidth: true,
             },
             {
               fieldTitle: "Token URI",
               fieldValue: registryEntry.tokenURI || undefined,
+              fullWidth: true,
             },
           ]}
-          buttonLabel="View Registry Entry Details"
-          onViewDetailsClick={() =>
-            onRegistryEntryDetailsNavigate &&
-            onRegistryEntryDetailsNavigate(registryName, registryEntry.label)
-          }
+          {...(registryEntry.owner === accountAddress ||
+            (registry?.registrarAddresses.some(
+              (address) => address === accountAddress,
+            ) && {
+              actionButtonList: [
+                {
+                  label: "View Registry Entry Details",
+                  onClick: () =>
+                    onRegistryEntryDetailsNavigate &&
+                    onRegistryEntryDetailsNavigate(
+                      registryName,
+                      registryEntry.label,
+                    ),
+                },
+              ],
+            }))}
         />
       ))}
-      {!!registryEntriesCount && (
+      {registryEntriesCount > 0 && (
         <GovernancePagination
           customPageOptions={{
             itemsPerPage: REGISTRY_ENTRIES_PER_PAGE,
@@ -124,6 +179,13 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           onChange={(_, page) => {
             setPage(page);
           }}
+        />
+      )}
+      {createIdentityModalOpen && (
+        <CreateIdentityWidget
+          onCloseCallback={() => setCreateIdentityModalOpen(false)}
+          registryName={registryName}
+          currentAccountAddress={accountAddress}
         />
       )}
     </Box>

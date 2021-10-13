@@ -4,6 +4,7 @@ import { useAlert } from "react-alert";
 
 import {
   GovernanceRegistryListItem,
+  IRegistryListItemAction,
   GovernanceWidgetHeader,
   GovernanceEmptyState,
   getPageItemIndexList,
@@ -21,6 +22,7 @@ const REGISTIRES_PER_PAGE = 2;
 
 const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   onRegistryEntryListNavigate,
+  onRegistryDetailNavigate,
 }: IRegistryListWidgetParams) => {
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
@@ -29,6 +31,9 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [registriesCount, setRegistriesCount] = useState<number>(0);
+  const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
+    EthereumAddress(""),
+  );
 
   /* const registriesNumberArr = useMemo(
     () => getPageItemIndexList(registriesCount, page, REGISTIRES_PER_PAGE),
@@ -49,6 +54,12 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   }, []);
 
   useEffect(() => {
+    coreProxy.getEthereumAccounts().map((accounts) => {
+      setAccountAddress(accounts[0]);
+    });
+  }, []);
+
+  useEffect(() => {
     coreProxy
       .getRegistries(page, REGISTIRES_PER_PAGE)
       .map((registries) => {
@@ -64,6 +75,17 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
     setLoading(false);
     setHasEmptyState(true);
     alert.error(err?.message || "Something went wrong!");
+  };
+
+  const getRegistryNotAllowedChipItems = (registry: Registry) => {
+    const items: string[] = [];
+
+    !registry.allowLazyRegister && items.push("Lazy Registration not allowed");
+    !registry.allowLabelChange && items.push("Label Change not allowed");
+    !registry.allowStorageUpdate && items.push("Storage update not allowed");
+    !registry.allowTransfers && items.push("Transfers not allowed");
+
+    return items;
   };
 
   return (
@@ -92,19 +114,38 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
               fieldValue: registry.address,
             },
             {
-              fieldTitle: "Registrar Addresses",
-              fieldValue: registry.registrarAddresses.join("-"),
-            },
-            {
               fieldTitle: "Number of Entries",
               fieldValue: registry.numberOfEntries.toString(),
             },
+            {
+              fieldTitle: "Registrar Addresses",
+              fieldValue: registry.registrarAddresses.join("-"),
+            },
           ]}
-          buttonLabel="View Registry Entries"
-          onViewDetailsClick={() =>
-            onRegistryEntryListNavigate &&
-            onRegistryEntryListNavigate(registry.name)
+          actionButtonList={
+            [
+              ...(registry.registrarAddresses.some(
+                (address) => true, //address === accountAddress,
+              )
+                ? [
+                    {
+                      label: "Detail",
+                      variant: "text",
+                      onClick: () =>
+                        onRegistryDetailNavigate &&
+                        onRegistryDetailNavigate(registry.name),
+                    },
+                  ]
+                : []),
+              {
+                label: "View Registry Entries",
+                onClick: () =>
+                  onRegistryEntryListNavigate &&
+                  onRegistryEntryListNavigate(registry.name),
+              },
+            ] as IRegistryListItemAction[]
           }
+          chipItemList={getRegistryNotAllowedChipItems(registry)}
         />
       ))}
       {!!registriesCount && (
