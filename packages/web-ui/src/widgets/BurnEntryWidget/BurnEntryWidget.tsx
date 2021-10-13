@@ -13,33 +13,29 @@ import { useStyles } from "@web-ui/widgets/BurnEntryWidget/BurnEntryWidget.style
 
 interface IBurnEntryWidget {
   onCloseCallback: () => void;
-  entryId?: string;
+  registryName: string;
+  tokenId: number;
 }
 
 const BurnEntryWidget: React.FC<IBurnEntryWidget> = ({
   onCloseCallback,
-  entryId,
+  registryName,
+  tokenId,
 }: IBurnEntryWidget) => {
   const alert = useAlert();
   const classes = useStyles();
-  const { coreProxy, UIData } = useStoreContext();
+  const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
-  const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
-    EthereumAddress(""),
-  );
 
   const burnEntry = () => {
     setLoading(true);
-    /*
     coreProxy
-      .burnEntry(entryId)
+      .burnRegistryEntry(registryName, tokenId)
       .map(() => {
-        UIData.onVotesDelegated.next();
         setLoading(false);
         onCloseCallback();
       })
       .mapErr(handleError);
-    */
   };
 
   const handleError = (err?: Error) => {

@@ -12,7 +12,11 @@ import {
 } from "@web-ui/components";
 import { IRegistryEntryDetailWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { EthereumAddress, RegistryEntry } from "@hypernetlabs/objects";
+import {
+  EthereumAddress,
+  Registry,
+  RegistryEntry,
+} from "@hypernetlabs/objects";
 import {
   GovernanceTag,
   ETagColor,
@@ -39,6 +43,8 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [registryEntry, setRegistryEntry] = useState<RegistryEntry>();
+  const [registry, setRegistry] = useState<Registry>();
+
   const [burnEntryModalOpen, setBurnEntryModalOpen] = useState<boolean>(false);
   const [isEditing, setIsEditing] = useState(false);
   const [transferIdentityModalOpen, setTransferIdentityModalOpen] =
@@ -62,6 +68,17 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
         setRegistryEntry(registryEntry);
         setLoading(false);
       })
+      .mapErr(handleError);
+  }, []);
+
+  useEffect(() => {
+    coreProxy
+      .getRegistryByName([registryName])
+      .map((registryMap) => {
+        setRegistry(registryMap.get(registryName));
+        setLoading(false);
+      })
+
       .mapErr(handleError);
   }, []);
 
@@ -168,21 +185,24 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
             onRegistryEntryListNavigate?.(registryName);
           },
         }}
-        headerActions={[
-          {
-            label: "Burn Entry",
-            onClick: () => setBurnEntryModalOpen(true),
-            variant: "contained",
-            color: "secondary",
-            style: { backgroundColor: colors.RED700 },
-          },
-          {
-            label: "Transfer NFI",
-            onClick: () => setTransferIdentityModalOpen(true),
-            variant: "contained",
-            color: "primary",
-          },
-        ]}
+        {...(isOwner &&
+          registry?.allowTransfers && {
+            headerActions: [
+              {
+                label: "Burn Entry",
+                onClick: () => setBurnEntryModalOpen(true),
+                variant: "contained",
+                color: "secondary",
+                style: { backgroundColor: colors.RED700 },
+              },
+              {
+                label: "Transfer NFI",
+                onClick: () => setTransferIdentityModalOpen(true),
+                variant: "contained",
+                color: "primary",
+              },
+            ],
+          })}
       />
       {registryEntry && (
         <Formik
@@ -273,9 +293,10 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
           }}
         </Formik>
       )}
-      {burnEntryModalOpen && (
+      {burnEntryModalOpen && registryEntry?.tokenId && (
         <BurnEntryWidget
-          entryId=""
+          registryName={registryName}
+          tokenId={registryEntry.tokenId}
           onCloseCallback={() => setBurnEntryModalOpen(false)}
         />
       )}
