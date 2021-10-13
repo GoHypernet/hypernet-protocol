@@ -9,6 +9,7 @@ import {
   GovernanceWidgetHeader,
   GovernanceField,
   GovernanceButton,
+  GovernanceSwitch,
 } from "@web-ui/components";
 import { IRegistryDetailWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
@@ -95,7 +96,6 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
             initialValues={{
               symbol: registry.symbol,
               numberOfEntries,
-              // numberOfEntries: 1,
               // registrationFee: 1,
               registrarAddress: registry.registrarAddresses,
               //registrationToken: registry.?,
@@ -139,14 +139,50 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                     />
                   </GovernanceCard>
                   <GovernanceCard className={classes.optionsContainer}>
-                    <Box className={classes.optionsRow}>
-                      <Typography>Allow Lazy Register</Typography>
-                      <Typography>Allow Storage Update</Typography>
+                    <Box className={classes.optionsRow} mb={3}>
+                      <Box className={classes.switchContainer}>
+                        <Typography className={classes.switchTitle}>
+                          Allow Lazy Register
+                        </Typography>
+                        <GovernanceSwitch
+                          initialValue={true}
+                          onChange={() => {}}
+                          disabled={!isEditing}
+                        />
+                      </Box>
+                      <Box className={classes.switchContainer}>
+                        <Typography className={classes.switchTitle}>
+                          Allow Storage Update
+                        </Typography>
+                        <GovernanceSwitch
+                          initialValue={true}
+                          onChange={() => {}}
+                          disabled={!isEditing}
+                        />
+                      </Box>
                     </Box>
 
                     <Box className={classes.optionsRow}>
-                      <Typography>Allow Label Change</Typography>
-                      <Typography>Allow Transfers</Typography>
+                      <Box className={classes.switchContainer}>
+                        <Typography className={classes.switchTitle}>
+                          Allow Label Change
+                        </Typography>
+                        <GovernanceSwitch
+                          initialValue={true}
+                          onChange={() => {}}
+                          disabled={!isEditing}
+                        />
+                      </Box>
+                      <Box className={classes.switchContainer}>
+                        <Typography className={classes.switchTitle}>
+                          Allow Transfers
+                        </Typography>
+                        <GovernanceSwitch
+                          initialValue={true}
+                          onChange={() => {}}
+                          disabled={!isEditing}
+                        />
+                      </Box>
                     </Box>
                   </GovernanceCard>
 

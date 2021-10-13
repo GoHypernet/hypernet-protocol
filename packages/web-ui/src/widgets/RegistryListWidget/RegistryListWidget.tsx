@@ -84,7 +84,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
           ]}
           actionButtonList={[
             ...(registry.registrarAddresses.some(
-              (address) => address === accountAddress,
+              (address) => true //address === accountAddress,
             )
               ? [
                   {

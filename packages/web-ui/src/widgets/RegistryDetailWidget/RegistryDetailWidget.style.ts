@@ -1,4 +1,5 @@
 import { makeStyles } from "@material-ui/core";
+import { EFontSize, EFontWeight, colors } from "@web-integration/theme";
 
 export const useStyles = makeStyles({
   form: {
@@ -11,6 +12,17 @@ export const useStyles = makeStyles({
   optionsRow: {
     display: "flex",
     justifyContent: "space-between",
+  },
+  switchContainer: {
+    width: 225,
+    margin: "0 2px",
+    display: "flex",
+    justifyContent: "space-between",
+  },
+  switchTitle: {
+    fontSize: EFontSize.BUTTON_SMALL,
+    fontWeight: EFontWeight.MEDIUM,
+    color: colors.GRAY700,
   },
   headerDescriptionContainer: {
     marginTop: 24,
