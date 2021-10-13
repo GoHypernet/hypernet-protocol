@@ -36,12 +36,6 @@ const tableColumns: ITableCell[] = [
     },
   },
   {
-    cellValue: "Amount",
-    tableCellProps: {
-      align: "left",
-    },
-  },
-  {
     cellValue: "Created",
     tableCellProps: {
       align: "left",
@@ -138,7 +132,7 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
             },
           },
           {
-            cellValue: item.paymentAmount,
+            cellValue: viewUtils.fromBigNumberWei(item.paymentAmount),
             tableCellProps: {
               align: "left",
             },
@@ -161,12 +155,6 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
             },
           },
           {
-            cellValue: viewUtils.fromBigNumberWei(item.paymentAmount),
-            tableCellProps: {
-              align: "left",
-            },
-          },
-          {
             cellValue: item.id,
             tableCellProps: {
               align: "left",
@@ -174,8 +162,8 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
             onlyVisibleInExpandedState: true,
           },
           {
-            cellValue: `${item.to} ${
-              item.to === publicIdentifier ? "(You)" : ""
+            cellValue: `${item.from} ${
+              item.from === publicIdentifier ? "(You)" : ""
             }`,
             tableCellProps: {
               align: "left",
