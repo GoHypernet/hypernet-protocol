@@ -9,12 +9,13 @@ import {
   GovernanceButton,
   GovernanceField,
 } from "@web-ui/components";
+import { EthereumAddress } from "@hypernetlabs/objects";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { useStyles } from "@web-ui/widgets/CreateIdentityWidget/CreateIdentityWidget.style";
 
 interface ICreateIdentityWidget {
   onCloseCallback: () => void;
-  registryId?: string;
+  registryName: string;
 }
 
 interface ICreateIdentityFormValues {
@@ -25,7 +26,7 @@ interface ICreateIdentityFormValues {
 
 const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
   onCloseCallback,
-  registryId,
+  registryName,
 }: ICreateIdentityWidget) => {
   const alert = useAlert();
   const classes = useStyles();
@@ -35,20 +36,28 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
   const handleError = (err?: Error) => {
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
+    onCloseCallback();
   };
 
-  const handleCreateIdentity = (values: ICreateIdentityFormValues) => {
+  const handleCreateIdentity = ({
+    label,
+    recipientAddress,
+    tokenUri,
+  }: ICreateIdentityFormValues) => {
     setLoading(true);
-    /*
+
     coreProxy
-      .createIdentity(registryId, null)
+      .createRegistryEntry(
+        registryName,
+        label,
+        EthereumAddress(recipientAddress),
+        tokenUri,
+      )
       .map(() => {
-        UIData.onVotesDelegated.next();
         setLoading(false);
         onCloseCallback();
       })
       .mapErr(handleError);
-    */
   };
 
   return (

@@ -11,7 +11,11 @@ import {
 } from "@web-ui/components";
 import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { RegistryEntry } from "@hypernetlabs/objects";
+import {
+  EthereumAddress,
+  Registry,
+  RegistryEntry,
+} from "@hypernetlabs/objects";
 import CreateIdentityWidget from "../CreateIdentityWidget";
 
 const REGISTRY_ENTRIES_PER_PAGE = 3;
@@ -25,6 +29,11 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [registryEntries, setRegistryEntries] = useState<RegistryEntry[]>([]);
+  const [registry, setRegistry] = useState<Registry>();
+  const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
+    EthereumAddress(""),
+  );
+
   const [createIdentityModalOpen, setCreateIdentityModalOpen] =
     useState<boolean>(false);
 
@@ -41,6 +50,23 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       ),
     [registryEntriesCount, page],
   );
+
+  useEffect(() => {
+    coreProxy
+      .getRegistryByName([registryName])
+      .map((registryMap) => {
+        setRegistry(registryMap.get(registryName));
+        setLoading(false);
+      })
+
+      .mapErr(handleError);
+  }, []);
+
+  useEffect(() => {
+    coreProxy.getEthereumAccounts().map((accounts) => {
+      setAccountAddress(accounts[0]);
+    });
+  }, []);
 
   useEffect(() => {
     coreProxy
@@ -83,14 +109,18 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
             onRegistryListNavigate?.();
           },
         }}
-        headerActions={[
-          {
-            label: "Create New Identity",
-            onClick: () => setCreateIdentityModalOpen(true),
-            variant: "contained",
-            color: "primary",
-          },
-        ]}
+        {...(registry?.registrarAddresses.some(
+          (address) => address === accountAddress,
+        ) && {
+          headerActions: [
+            {
+              label: "Create New Identity",
+              onClick: () => setCreateIdentityModalOpen(true),
+              variant: "contained",
+              color: "primary",
+            },
+          ],
+        })}
       />
 
       {hasEmptyState && (
@@ -149,6 +179,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       {createIdentityModalOpen && (
         <CreateIdentityWidget
           onCloseCallback={() => setCreateIdentityModalOpen(false)}
+          registryName={registryName}
         />
       )}
     </Box>
