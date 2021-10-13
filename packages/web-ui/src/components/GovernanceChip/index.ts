@@ -1,1 +1,1 @@
-export * from "@web-integration/components/GovernanceChip/GovernanceChip";
+export * from "@web-ui/components/GovernanceChip/GovernanceChip";

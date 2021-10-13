@@ -20,7 +20,7 @@ import {
 import {
   GovernanceTag,
   ETagColor,
-} from "@web-integration/components/GovernanceTag";
+} from "@web-ui/components/GovernanceTag";
 import BurnEntryWidget from "../BurnEntryWidget";
 import TransferIdentityWidget from "../TransferIdentityWidget";
 import { colors } from "@web-ui/theme";

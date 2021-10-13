@@ -7,7 +7,7 @@ import {
 } from "@web-ui/components";
 import { GovernanceListItemValueWithTitle } from "@web-integration/index";
 import { Box, Grid } from "@material-ui/core";
-import { useStyles } from "@web-integration/components/GovernanceRegistryListItem/GovernanceRegistryListItem.style";
+import { useStyles } from "@web-ui/components/GovernanceRegistryListItem/GovernanceRegistryListItem.style";
 
 interface IFieldWithValueList {
   fieldTitle: string;
