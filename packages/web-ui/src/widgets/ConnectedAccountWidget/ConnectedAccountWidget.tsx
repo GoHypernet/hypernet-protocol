@@ -5,7 +5,7 @@ import { useAlert } from "react-alert";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { EthereumAddress } from "@hypernetlabs/objects";
 import { IRenderParams } from "@web-ui/interfaces";
-import { useStyles } from "@web-integration/widgets/ConnectedAccountWidget/ConnectedAccountWidget.style";
+import { useStyles } from "@web-ui/widgets/ConnectedAccountWidget/ConnectedAccountWidget.style";
 
 interface ConnectedAccountWidgetParams extends IRenderParams {}
 
