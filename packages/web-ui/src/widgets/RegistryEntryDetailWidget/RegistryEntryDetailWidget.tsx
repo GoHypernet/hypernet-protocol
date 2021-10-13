@@ -300,8 +300,10 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
           onCloseCallback={() => setBurnEntryModalOpen(false)}
         />
       )}
-      {transferIdentityModalOpen && (
+      {transferIdentityModalOpen && registryEntry?.tokenId && (
         <TransferIdentityWidget
+          registryName={registryName}
+          tokenId={registryEntry.tokenId}
           onCloseCallback={() => setTransferIdentityModalOpen(false)}
         />
       )}

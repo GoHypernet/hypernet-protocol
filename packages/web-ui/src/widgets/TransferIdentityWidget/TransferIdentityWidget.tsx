@@ -14,10 +14,14 @@ import { useStyles } from "@web-ui/widgets/TransferIdentityWidget/TransferIdenti
 
 interface ITransferIdentityWidget {
   onCloseCallback: () => void;
+  registryName: string;
+  tokenId: number;
 }
 
 const TransferIdentityWidget: React.FC<ITransferIdentityWidget> = ({
   onCloseCallback,
+  registryName,
+  tokenId,
 }: ITransferIdentityWidget) => {
   const alert = useAlert();
   const classes = useStyles();
@@ -27,12 +31,15 @@ const TransferIdentityWidget: React.FC<ITransferIdentityWidget> = ({
     EthereumAddress(""),
   );
 
-  const transferIdentity = () => {
+  const transferIdentity = (values: { address: string }) => {
     setLoading(true);
     coreProxy
-      .delegateVote(accountAddress, null)
+      .transferRegistryEntry(
+        registryName,
+        tokenId,
+        EthereumAddress(values.address),
+      )
       .map(() => {
-        UIData.onVotesDelegated.next();
         setLoading(false);
         onCloseCallback();
       })
@@ -88,7 +95,7 @@ const TransferIdentityWidget: React.FC<ITransferIdentityWidget> = ({
                       color="primary"
                       onClick={handleSubmit}
                     >
-                      Save
+                      Transfer
                     </GovernanceButton>
                   </Box>
                 </Form>
