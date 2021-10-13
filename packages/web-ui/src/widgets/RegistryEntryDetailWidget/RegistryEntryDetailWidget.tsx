@@ -222,7 +222,11 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
                   <Box className={classes.cardContainer}>
                     <Box className={classes.fieldContainer}>
                       <GovernanceField
-                        disabled={!registryEntry?.canUpdateLabel || !isOwner}
+                        disabled={
+                          !registryEntry?.canUpdateLabel ||
+                          !isOwner ||
+                          registry?.allowLabelChange
+                        }
                         title="Label"
                         name="label"
                         type="input"
@@ -236,16 +240,20 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
                       />
                       <GovernanceField
                         disabled
-                        title="Recipient Address"
+                        title="Current Owner"
                         name="recipientAddress"
                         type="input"
                       />
                       <GovernanceField
-                        disabled={!registryEntry?.canUpdateURI || !isOwner}
-                        title="Token URI"
+                        disabled={
+                          !registryEntry?.canUpdateURI ||
+                          !isOwner ||
+                          registry?.allowStorageUpdate
+                        }
+                        title="Identity Data"
                         name="tokenURI"
                         type="input"
-                        placeholder="Enter the Token URI"
+                        placeholder="Enter the Identity Data"
                       />
                     </Box>
                     {registryEntry?.tokenURI && (
