@@ -37,12 +37,6 @@ const tableColumns: ITableCell[] = [
     },
   },
   {
-    cellValue: "Amount",
-    tableCellProps: {
-      align: "left",
-    },
-  },
-  {
     cellValue: "Created",
     tableCellProps: {
       align: "left",
@@ -144,7 +138,7 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
             },
           },
           {
-            cellValue: item.authorizedAmount,
+            cellValue: viewUtils.fromBigNumberWei(item.authorizedAmount),
             tableCellProps: {
               align: "left",
             },
@@ -163,12 +157,6 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
                 color={ETagColor.BLUE}
               />
             ),
-            tableCellProps: {
-              align: "left",
-            },
-          },
-          {
-            cellValue: viewUtils.fromBigNumberWei(item.deltaAmount),
             tableCellProps: {
               align: "left",
             },

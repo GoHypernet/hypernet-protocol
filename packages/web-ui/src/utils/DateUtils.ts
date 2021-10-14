@@ -9,7 +9,10 @@ export class DateUtils implements IDateUtils {
     const date = new Date(this._getTimestamp(dateTimestamp));
     return `${
       date.getMonth() + 1
-    }/${date.getDate()}/${date.getFullYear()} ${date.getHours()}:${date.getMinutes()}`;
+    }/${date.getDate()}/${date.getFullYear()} ${date
+      .getHours()
+      .toString()
+      .padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`;
   }
 
   public getCurrentIISODateTime(): string {
