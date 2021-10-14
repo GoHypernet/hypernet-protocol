@@ -21,7 +21,8 @@ export interface IRegistryService {
   ): ResultAsync<Map<EthereumAddress, Registry>, BlockchainUnavailableError>;
   getRegistryEntries(
     registryName: string,
-    registryEntriesNumberArr?: number[],
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
   getRegistryEntryByLabel(
     registryName: string,

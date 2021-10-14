@@ -309,7 +309,8 @@ export interface IHypernetCore {
 
   getRegistryEntries(
     registryName: string,
-    registryEntriesNumberArr?: number[],
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
 
   getRegistryEntryByLabel(

@@ -45,11 +45,13 @@ export class RegistryService implements IRegistryService {
 
   public getRegistryEntries(
     registryName: string,
-    registryEntriesNumberArr?: number[],
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this.registryRepository.getRegistryEntries(
       registryName,
-      registryEntriesNumberArr,
+      pageNumber,
+      pageSize,
     );
   }
 
@@ -142,6 +144,12 @@ export class RegistryService implements IRegistryService {
     registryName: string,
     tokenId: number,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
-    return this.registryRepository.burnRegistryEntry(registryName, tokenId);
+    const ss = this.registryRepository.burnRegistryEntry(registryName, tokenId);
+    ss.map((data) => {
+      console.log("service ata: ", data);
+    }).mapErr((err) => {
+      console.log("service err: ", err);
+    });
+    return ss;
   }
 }

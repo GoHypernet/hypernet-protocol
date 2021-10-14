@@ -38,17 +38,16 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     useState<boolean>(false);
 
   const [page, setPage] = useState<number>(1);
-  const [registryEntriesCount, setRegistryEntriesCount] = useState<number>(0);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
 
   const registryEntriesNumberArr = useMemo(
     () =>
       getPageItemIndexList(
-        registryEntriesCount,
+        registry?.numberOfEntries || 0,
         page,
         REGISTRY_ENTRIES_PER_PAGE,
       ),
-    [registryEntriesCount, page],
+    [registry, page],
   );
 
   useEffect(() => {
@@ -59,10 +58,6 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     coreProxy.getEthereumAccounts().map((accounts) => {
       setAccountAddress(accounts[0]);
     });
-  }, []);
-
-  useEffect(() => {
-    getRegistryEntriesTotalCount();
   }, []);
 
   useEffect(() => {
@@ -83,22 +78,9 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   const getRegistryEntries = () => {
     coreProxy
-      .getRegistryEntries(registryName, registryEntriesNumberArr)
+      .getRegistryEntries(registryName, 1, 12)
       .map((registryEntries) => {
         setRegistryEntries(registryEntries);
-      })
-      .mapErr(handleError);
-  };
-
-  const getRegistryEntriesTotalCount = () => {
-    coreProxy
-      .getRegistryEntriesTotalCount([registryName])
-      .map((countsMap) => {
-        const count = countsMap.get(registryName);
-        setRegistryEntriesCount(count || 0);
-        if (!count) {
-          setHasEmptyState(true);
-        }
       })
       .mapErr(handleError);
   };
@@ -192,11 +174,11 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           })}
         />
       ))}
-      {registryEntriesCount > 0 && (
+      {registry?.numberOfEntries && registry?.numberOfEntries > 0 && (
         <GovernancePagination
           customPageOptions={{
             itemsPerPage: REGISTRY_ENTRIES_PER_PAGE,
-            totalItems: registryEntriesCount,
+            totalItems: registry?.numberOfEntries,
           }}
           onChange={(_, page) => {
             setPage(page);
@@ -206,7 +188,6 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       {createIdentityModalOpen && (
         <CreateIdentityWidget
           onCloseCallback={() => {
-            getRegistryEntriesTotalCount();
             setCreateIdentityModalOpen(false);
           }}
           registryName={registryName}

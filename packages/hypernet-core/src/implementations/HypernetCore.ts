@@ -1086,11 +1086,13 @@ export class HypernetCore implements IHypernetCore {
 
   public getRegistryEntries(
     registryName: string,
-    registryEntriesNumberArr?: number[],
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this.registryService.getRegistryEntries(
       registryName,
-      registryEntriesNumberArr,
+      pageNumber,
+      pageSize,
     );
   }
 
@@ -1218,6 +1220,12 @@ export class HypernetCore implements IHypernetCore {
     registryName: string,
     tokenId: number,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
-    return this.registryService.burnRegistryEntry(registryName, tokenId);
+    const ss = this.registryService.burnRegistryEntry(registryName, tokenId);
+    ss.map((data) => {
+      console.log("core data: ", data);
+    }).mapErr((err) => {
+      console.log("core err: ", err);
+    });
+    return ss;
   }
 }

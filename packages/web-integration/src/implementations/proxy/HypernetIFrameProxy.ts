@@ -589,11 +589,13 @@ export default class HypernetIFrameProxy
 
   public getRegistryEntries(
     registryName: string,
-    registryEntriesNumberArr?: number[],
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this._createCall("getRegistryEntries", {
       registryName,
-      registryEntriesNumberArr,
+      pageNumber,
+      pageSize,
     });
   }
 
@@ -724,6 +726,15 @@ export default class HypernetIFrameProxy
     registryName: string,
     tokenId: number,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    const ss = this._createCall("burnRegistryEntry", {
+      registryName,
+      tokenId,
+    });
+    ss.map((data) => {
+      console.log("iframeProxy ata: ", data);
+    }).mapErr((err) => {
+      console.log("iframeProxy err: ", err);
+    });
     return this._createCall("burnRegistryEntry", {
       registryName,
       tokenId,

@@ -298,13 +298,15 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       getRegistryEntries: (
         data: IIFrameCallData<{
           registryName: string;
-          registryEntriesNumberArr?: number[];
+          pageNumber: number;
+          pageSize: number;
         }>,
       ) => {
         this.returnForModel(() => {
           return this.core.getRegistryEntries(
             data.data.registryName,
-            data.data.registryEntriesNumberArr,
+            data.data.pageNumber,
+            data.data.pageSize,
           );
         }, data.callId);
       },
@@ -430,10 +432,16 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         }>,
       ) => {
         this.returnForModel(() => {
-          return this.core.burnRegistryEntry(
+          const ss = this.core.burnRegistryEntry(
             data.data.registryName,
             data.data.tokenId,
           );
+          ss.map((data) => {
+            console.log("coreListener ata: ", data);
+          }).mapErr((err) => {
+            console.log("coreListener err: ", err);
+          });
+          return ss;
         }, data.callId);
       },
     });

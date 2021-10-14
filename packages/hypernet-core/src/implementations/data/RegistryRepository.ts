@@ -42,30 +42,31 @@ export class RegistryRepository implements IRegistryRepository {
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
     return this.initializeReadOnly().andThen(
       ({ registryContracts, provider }) => {
-        const registryListResult: ResultAsync<
-          Registry | null,
-          BlockchainUnavailableError
-        >[] = [];
+        return this.getNumberOfRegistries().andThen((totalCount) => {
+          const registryListResult: ResultAsync<
+            Registry | null,
+            BlockchainUnavailableError
+          >[] = [];
 
-        // Get registry by index
-        for (
-          let index = pageSize * pageNumber;
-          index >= pageSize * pageNumber - pageSize;
-          index--
-        ) {
-          registryListResult.push(
-            this.getRegistryByIndex(index, provider, registryContracts),
-          );
-        }
+          for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
+            const index = totalCount - (pageNumber - 1) * pageSize - i;
 
-        return ResultUtils.combine(registryListResult).map((vals) => {
-          const registryList: Registry[] = [];
-          vals.forEach((registry) => {
-            if (registry != null) {
-              registryList.push(registry);
+            if (index >= 0) {
+              registryListResult.push(
+                this.getRegistryByIndex(index, provider, registryContracts),
+              );
             }
+          }
+
+          return ResultUtils.combine(registryListResult).map((vals) => {
+            const registryList: Registry[] = [];
+            vals.forEach((registry) => {
+              if (registry != null) {
+                registryList.push(registry);
+              }
+            });
+            return registryList;
           });
-          return registryList;
         });
       },
     );
@@ -95,7 +96,7 @@ export class RegistryRepository implements IRegistryRepository {
               return ResultUtils.combine([
                 this.getRegistryContractRegistrarAddresses(registryContract),
                 this.getRegistryContractSymbol(registryContract),
-                this.getRegistryContractTotalSupply(registryContract),
+                this.getRegistryContractIndexCount(registryContract),
                 this.getRegistryContractAllowLazyRegister(registryContract),
                 this.getRegistryContractAllowStorageUpdate(registryContract),
                 this.getRegistryContractAllowLabelChange(registryContract),
@@ -182,7 +183,7 @@ export class RegistryRepository implements IRegistryRepository {
               return ResultUtils.combine([
                 this.getRegistryContractRegistrarAddresses(registryContract),
                 this.getRegistryContractSymbol(registryContract),
-                this.getRegistryContractTotalSupply(registryContract),
+                this.getRegistryContractIndexCount(registryContract),
                 this.getRegistryContractAllowLazyRegister(registryContract),
                 this.getRegistryContractAllowStorageUpdate(registryContract),
                 this.getRegistryContractAllowLabelChange(registryContract),
@@ -258,7 +259,7 @@ export class RegistryRepository implements IRegistryRepository {
                   GovernanceAbis.NonFungibleRegistryUpgradeable.abi,
                   provider,
                 );
-                return this.getRegistryContractTotalSupply(registryContract);
+                return this.getRegistryContractIndexCount(registryContract);
               })
               .map((totalCount) => {
                 totalCountsMap.set(registryName, totalCount);
@@ -273,7 +274,8 @@ export class RegistryRepository implements IRegistryRepository {
 
   public getRegistryEntries(
     registryName: string,
-    registryEntriesNumberArr?: number[],
+    pageNumber: number, // 1
+    pageSize: number, // 4
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this.initializeReadOnly().andThen(
       ({ registryContracts, provider }) => {
@@ -288,46 +290,30 @@ export class RegistryRepository implements IRegistryRepository {
             GovernanceAbis.NonFungibleRegistryUpgradeable.abi,
             provider,
           );
-          let registryEntriesNumberArrResult: ResultAsync<
-            number[],
-            BlockchainUnavailableError
-          >;
+          return this.getRegistryContractIndexCount(registryContract).andThen(
+            (totalCount) => {
+              const registryEntryListResult: ResultAsync<
+                RegistryEntry,
+                BlockchainUnavailableError
+              >[] = [];
+              for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
+                const index = totalCount - (pageNumber - 1) * pageSize - i;
 
-          if (registryEntriesNumberArr == null) {
-            registryEntriesNumberArrResult = this.getRegistryEntriesTotalCount([
-              registryName,
-            ]).map((registryEntriesCountMap) => {
-              const registryEntriesCount =
-                registryEntriesCountMap.get(registryName);
-              if (registryEntriesCount == null || registryEntriesCount == 0) {
-                return [];
-              }
-              let countsArr: number[] = [];
-              for (let index = registryEntriesCount; index >= 1; index--) {
-                countsArr.push(index);
-              }
-              return countsArr;
-            });
-          } else {
-            registryEntriesNumberArrResult = okAsync(registryEntriesNumberArr);
-          }
-
-          return registryEntriesNumberArrResult.andThen(
-            (registryEntriesNumberArray) => {
-              return ResultUtils.combine(
-                registryEntriesNumberArray.map((tokenId) => {
-                  return this.getRegistryEntryByTokenId(
-                    registryContract,
-                    tokenId,
+                if (index >= 0) {
+                  registryEntryListResult.push(
+                    this.getRegistryContractTokenIdByIndex(
+                      registryContract,
+                      index,
+                    ).andThen((tokenId) => {
+                      return this.getRegistryEntryByTokenId(
+                        registryContract,
+                        tokenId,
+                      );
+                    }),
                   );
-                }),
-              ).map((vals) => {
-                return vals
-                  .filter((registry) => registry != null)
-                  .map((registry) => {
-                    return registry;
-                  });
-              });
+                }
+              }
+              return ResultUtils.combine(registryEntryListResult);
             },
           );
         });
@@ -670,7 +656,7 @@ export class RegistryRepository implements IRegistryRepository {
         ).andThen((tx) => {
           return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
             return new BlockchainUnavailableError("Unable to wait for tx", e);
-          });
+          }).map(() => {});
         });
       });
     });
@@ -773,7 +759,7 @@ export class RegistryRepository implements IRegistryRepository {
           registryContract.setRegistryParameters(params) as Promise<any>,
           (e) => {
             return new BlockchainUnavailableError(
-              "Unable to call factoryContract getNumberOfRegistries()",
+              "Unable to call factoryContract setRegistryParameters()",
               e,
             );
           },
@@ -954,7 +940,7 @@ export class RegistryRepository implements IRegistryRepository {
           this.getRegistryContractRegistrarAddresses(registryContract),
           this.getRegistryContractName(registryContract),
           this.getRegistryContractSymbol(registryContract),
-          this.getRegistryContractTotalSupply(registryContract),
+          this.getRegistryContractIndexCount(registryContract),
           this.getRegistryContractAllowLazyRegister(registryContract),
           this.getRegistryContractAllowStorageUpdate(registryContract),
           this.getRegistryContractAllowLabelChange(registryContract),
@@ -1080,6 +1066,21 @@ export class RegistryRepository implements IRegistryRepository {
       });
   }
 
+  private getRegistryContractTokenIdByIndex(
+    registryContract: ethers.Contract,
+    index: number,
+  ): ResultAsync<number, BlockchainUnavailableError> {
+    return ResultAsync.fromPromise(
+      registryContract.tokenByIndex(index) as Promise<BigNumber>,
+      (e) => {
+        return new BlockchainUnavailableError(
+          "Unable to call getRoleMember",
+          e,
+        );
+      },
+    ).map((tokenId) => tokenId.toNumber());
+  }
+
   private getRegistryContractRegistrarAddresses(
     registryContract: ethers.Contract,
   ): ResultAsync<EthereumAddress[], BlockchainUnavailableError> {
@@ -1095,7 +1096,6 @@ export class RegistryRepository implements IRegistryRepository {
       },
     ).andThen((countBigNumber) => {
       const count = countBigNumber.toNumber();
-      console.log("getRoleMemberCount count: ", count);
       const registrarResults: ResultAsync<
         EthereumAddress,
         BlockchainUnavailableError
@@ -1172,7 +1172,7 @@ export class RegistryRepository implements IRegistryRepository {
     );
   }
 
-  private getRegistryContractTotalSupply(
+  private getRegistryContractIndexCount(
     registryContract: ethers.Contract,
   ): ResultAsync<number, BlockchainUnavailableError> {
     return ResultAsync.fromPromise(

@@ -43,7 +43,6 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [registry, setRegistry] = useState<Registry>();
-  const [numberOfEntries, setNumberOfEntries] = useState<number>();
   const [isEditing, setIsEditing] = useState(false);
   const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
     EthereumAddress(""),
@@ -53,16 +52,6 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
     coreProxy.getEthereumAccounts().map((accounts) => {
       setAccountAddress(accounts[0]);
     });
-  }, []);
-
-  useEffect(() => {
-    coreProxy
-      .getRegistryEntriesTotalCount([registryName])
-      .map((countsMap) => {
-        const count = countsMap.get(registryName);
-        setNumberOfEntries(count || 0);
-      })
-      .mapErr(handleError);
   }, []);
 
   useEffect(() => {
@@ -151,7 +140,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
             initialValues={
               {
                 symbol: registry.symbol,
-                numberOfEntries,
+                numberOfEntries: registry.numberOfEntries,
                 registrationFee: registry.registrationFee,
                 primaryRegistry: registry.primaryRegistry,
                 registrationToken: registry.registrationToken,
