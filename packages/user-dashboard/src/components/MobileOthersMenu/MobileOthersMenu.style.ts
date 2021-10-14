@@ -1,21 +1,41 @@
 import { colors } from "@hypernetlabs/web-ui";
 import { makeStyles } from "@material-ui/core";
 
-export const useStyles = makeStyles({
-  menu: {
-    marginTop: 48,
-    transition: "all 0.3s ease",
-  },
-  menuItem: {
-    textTransform: "uppercase",
-  },
+export const useStyles = makeStyles((theme) => ({
   iconButton: {
     color: colors.BLACK,
   },
-  activeMenuItem: {
-    color: colors.PURPLE700,
+  list: {
+    padding: "0",
   },
-  inactiveMenuItem: {
-    opacity: 0.7,
+  listItem: {
+    padding: 16,
+    borderRadius: 3,
+    // "&:hover": {
+    //   backgroundColor: colors.PURPLE100,
+    // },
   },
-});
+  activeListItem: {
+    backgroundColor: colors.PURPLE100,
+  },
+  inactiveListItem: {},
+  divider: { margin: "24px 0" },
+  drawerContainer: () => ({
+    cursor: "pointer",
+    width: 400,
+    display: "flex",
+    flexDirection: "column",
+    height: "100%",
+    overflowX: "hidden",
+    padding: 16,
+  }),
+  header: {
+    cursor: "auto",
+    marginLeft: "auto",
+  },
+  headerIcon: {
+    fontSize: 24,
+    color: theme.palette.text.secondary,
+    cursor: "pointer",
+  },
+}));

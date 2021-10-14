@@ -7,8 +7,7 @@ export const useStyles = makeStyles({
       margin: 0,
       backgroundColor: colors.BACKGROUND_GREY,
       color: colors.GRAY700,
-      fontFamily:
-        '"Montserrat", "Roboto", "Helvetica Neue", "Arial", sans-serif',
+      fontFamily: '"Inter", sans-serif',
     },
   },
   appWrapper: {
