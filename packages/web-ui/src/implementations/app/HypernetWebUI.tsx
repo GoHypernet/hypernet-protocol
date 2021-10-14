@@ -442,6 +442,8 @@ export default class HypernetWebUI implements IHypernetWebUI {
           />,
           config.showInModal,
           config.closeCallback,
+          undefined,
+          true,
         ),
         this._generateDomElement(
           config?.selector || ONBOARDING_FLOW_ID_SELECTOR,
