@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Box } from "@material-ui/core";
 import { Form, Formik } from "formik";
 
@@ -32,7 +32,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
 }: ICreateIdentityWidget) => {
   const alert = useAlert();
   const classes = useStyles();
-  const { coreProxy, UIData } = useStoreContext();
+  const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
 
   const handleError = (err?: Error) => {
@@ -113,13 +113,7 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
                       variant="contained"
                       color="primary"
                       onClick={handleSubmit}
-                      disabled={
-                        !(
-                          !!values.label &&
-                          !!values.recipientAddress &&
-                          !!values.tokenUri
-                        )
-                      }
+                      disabled={!values.recipientAddress || !values.tokenUri}
                     >
                       Submit
                     </GovernanceButton>

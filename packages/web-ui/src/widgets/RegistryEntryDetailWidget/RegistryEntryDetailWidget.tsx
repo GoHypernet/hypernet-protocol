@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, IconButton, Tooltip, Typography } from "@material-ui/core";
-import { FileCopy as FileCopyIcon } from "@material-ui/icons";
-import { Form, Formik } from "formik";
+import { Box } from "@material-ui/core";
+
 import { useAlert } from "react-alert";
 
 import {
-  GovernanceButton,
   GovernanceCard,
-  GovernanceField,
+  GovernanceEditableValueWithTitle,
+  GovernanceValueWithTitle,
   GovernanceWidgetHeader,
 } from "@web-ui/components";
 import { IRegistryEntryDetailWidgetParams } from "@web-ui/interfaces";
@@ -21,14 +20,6 @@ import { GovernanceTag, ETagColor } from "@web-ui/components/GovernanceTag";
 import BurnEntryWidget from "../BurnEntryWidget";
 import TransferIdentityWidget from "../TransferIdentityWidget";
 import { colors } from "@web-ui/theme";
-import { useStyles } from "@web-ui/widgets/RegistryEntryDetailWidget/RegistryEntryDetailWidget.style";
-
-interface IRegistryEntryFormValues {
-  label: string;
-  tokenId: string;
-  recipientAddress: string;
-  tokenURI: string;
-}
 
 const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   onRegistryEntryListNavigate,
@@ -36,28 +27,36 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   entryLabel,
 }: IRegistryEntryDetailWidgetParams) => {
   const alert = useAlert();
-  const classes = useStyles();
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [registryEntry, setRegistryEntry] = useState<RegistryEntry>();
   const [registry, setRegistry] = useState<Registry>();
-
-  const [burnEntryModalOpen, setBurnEntryModalOpen] = useState<boolean>(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [transferIdentityModalOpen, setTransferIdentityModalOpen] =
-    useState<boolean>(false);
   const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
     EthereumAddress(""),
   );
-  const [isCopyTooltipOpen, setIsCopyTooltipOpen] = useState(false);
+  const [burnEntryModalOpen, setBurnEntryModalOpen] = useState<boolean>(false);
+  const [transferIdentityModalOpen, setTransferIdentityModalOpen] =
+    useState<boolean>(false);
 
   useEffect(() => {
-    coreProxy.getEthereumAccounts().map((accounts) => {
-      setAccountAddress(accounts[0]);
-    });
+    getAccount();
   }, []);
 
   useEffect(() => {
+    getRegistryEntryByLabel();
+  }, []);
+
+  useEffect(() => {
+    getRegistryByName();
+  }, []);
+
+  const getAccount = () => {
+    coreProxy.getEthereumAccounts().map((accounts) => {
+      setAccountAddress(accounts[0]);
+    });
+  };
+
+  const getRegistryEntryByLabel = () => {
     setLoading(true);
     coreProxy
       .getRegistryEntryByLabel(registryName, entryLabel)
@@ -66,32 +65,17 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
         setLoading(false);
       })
       .mapErr(handleError);
-  }, []);
+  };
 
-  useEffect(() => {
+  const getRegistryByName = () => {
+    setLoading(true);
     coreProxy
       .getRegistryByName([registryName])
       .map((registryMap) => {
         setRegistry(registryMap.get(registryName));
         setLoading(false);
       })
-
       .mapErr(handleError);
-  }, []);
-
-  useEffect(() => {
-    const toggleCopyTooltip = setInterval(() => {
-      if (isCopyTooltipOpen) {
-        setIsCopyTooltipOpen(false);
-      }
-    }, 2000);
-
-    return () => clearInterval(toggleCopyTooltip);
-  }, [isCopyTooltipOpen, useState]);
-
-  const copyValueToClipboard = () => {
-    navigator.clipboard.writeText(registryEntry?.tokenURI || "");
-    setIsCopyTooltipOpen(true);
   };
 
   const updateLabel = (val: string) => {
@@ -105,7 +89,6 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
       .map((registryEntry: RegistryEntry) => {
         setRegistryEntry(registryEntry);
         setLoading(false);
-        setIsEditing(false);
       })
       .mapErr(handleError);
   };
@@ -121,7 +104,6 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
       .map((registryEntry: RegistryEntry) => {
         setRegistryEntry(registryEntry);
         setLoading(false);
-        setIsEditing(false);
       })
       .mapErr(handleError);
   };
@@ -129,15 +111,6 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   const handleError = (err?: Error) => {
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
-  };
-
-  const handleSave = ({ label, tokenURI }: IRegistryEntryFormValues) => {
-    if (tokenURI !== registryEntry?.tokenURI) {
-      updateTokenURI(tokenURI);
-    }
-    if (label !== registryEntry?.label) {
-      updateLabel(label);
-    }
   };
 
   const isRegistrar = useMemo(() => {
@@ -200,93 +173,44 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
         })}
       />
       {registryEntry && (
-        <Formik
-          enableReinitialize
-          initialValues={{
-            label: registryEntry.label,
-            tokenId: registryEntry.tokenId.toString(),
-            recipientAddress: registryEntry.owner,
-            tokenURI: registryEntry?.tokenURI || "",
-          }}
-          onSubmit={handleSave}
-        >
-          {({ handleSubmit }) => {
-            return (
-              <Form className={classes.form} onSubmit={handleSubmit}>
-                <GovernanceCard>
-                  <Box className={classes.cardContainer}>
-                    <Box className={classes.fieldContainer}>
-                      <GovernanceField
-                        disabled={!canUpdateLabel || !isEditing}
-                        title="Label"
-                        name="label"
-                        type="input"
-                        placeholder="Enter the label"
-                      />
-                      <GovernanceField
-                        disabled
-                        title="Token ID"
-                        name="tokenId"
-                        type="input"
-                      />
-                      <GovernanceField
-                        disabled
-                        title="Current Owner"
-                        name="recipientAddress"
-                        type="input"
-                      />
-                      <GovernanceField
-                        disabled={!canUpdateTokenURI || !isEditing}
-                        title="Identity Data"
-                        name="tokenURI"
-                        type="input"
-                        placeholder="Enter the Identity Data"
-                      />
-                    </Box>
-                    {registryEntry?.tokenURI && (
-                      <Tooltip
-                        open={isCopyTooltipOpen}
-                        title="Copied!"
-                        arrow
-                        placement="top"
-                      >
-                        <IconButton
-                          className={classes.copyIcon}
-                          onClick={copyValueToClipboard}
-                        >
-                          <FileCopyIcon />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                  </Box>
-                </GovernanceCard>
-
-                {(canUpdateLabel || canUpdateTokenURI) &&
-                  (isEditing ? (
-                    <GovernanceButton
-                      className={classes.button}
-                      color="primary"
-                      variant="outlined"
-                      onClick={handleSubmit}
-                    >
-                      Save Changes
-                    </GovernanceButton>
-                  ) : (
-                    <GovernanceButton
-                      className={classes.button}
-                      color="primary"
-                      variant="outlined"
-                      onClick={() => {
-                        setIsEditing(true);
-                      }}
-                    >
-                      Edit
-                    </GovernanceButton>
-                  ))}
-              </Form>
-            );
-          }}
-        </Formik>
+        <GovernanceCard>
+          {canUpdateLabel ? (
+            <GovernanceEditableValueWithTitle
+              title="Label"
+              value={registryEntry?.label}
+              onSave={(newValue) => {
+                updateLabel(newValue);
+              }}
+            />
+          ) : (
+            <GovernanceValueWithTitle
+              title="Label"
+              value={registryEntry?.label}
+            />
+          )}
+          <GovernanceValueWithTitle
+            title="Token ID"
+            value={registryEntry.tokenId}
+          />
+          <GovernanceValueWithTitle
+            title="Current Owner"
+            value={registryEntry.owner}
+          />
+          {canUpdateTokenURI ? (
+            <GovernanceEditableValueWithTitle
+              title="Identity Data"
+              value={registryEntry?.tokenURI || ""}
+              onSave={(newValue) => {
+                updateTokenURI(newValue);
+              }}
+            />
+          ) : (
+            <GovernanceValueWithTitle
+              title="Identity Data"
+              value={registryEntry?.tokenURI || ""}
+            />
+          )}
+        </GovernanceCard>
       )}
       {burnEntryModalOpen && registryEntry?.tokenId && (
         <BurnEntryWidget
