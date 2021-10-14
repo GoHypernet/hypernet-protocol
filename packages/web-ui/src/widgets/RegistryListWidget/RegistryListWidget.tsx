@@ -18,7 +18,7 @@ import {
   RegistryParams,
 } from "@hypernetlabs/objects";
 
-const REGISTIRES_PER_PAGE = 2;
+const REGISTIRES_PER_PAGE = 3;
 
 const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   onRegistryEntryListNavigate,
@@ -34,11 +34,6 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
     EthereumAddress(""),
   );
-
-  /* const registriesNumberArr = useMemo(
-    () => getPageItemIndexList(registriesCount, page, REGISTIRES_PER_PAGE),
-    [registriesCount, page],
-  ); */
 
   useEffect(() => {
     coreProxy
