@@ -12,7 +12,7 @@ export const useStyles = makeStyles({
     height: "100%",
     width: "100%",
     backgroundColor: "rgba(0,0,0,0.6)",
-    fontFamily: '"Montserrat", "Roboto", "Helvetica Neue", "Arial", sans-serif',
+    fontFamily: '"Inter", sans-serif',
     fontWeight: 400,
   },
   wrapper: {

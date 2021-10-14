@@ -1,4 +1,7 @@
-import { createTheme } from "@material-ui/core";
+import {
+  createTheme,
+  ThemeProvider as MuiThemeProvider,
+} from "@material-ui/core";
 
 export const colors = {
   WHITE: "#FFFFFF",
@@ -240,3 +243,5 @@ export const darkTheme = createTheme({
     MuiButtonBase,
   },
 });
+
+export const ThemeProvider = MuiThemeProvider;

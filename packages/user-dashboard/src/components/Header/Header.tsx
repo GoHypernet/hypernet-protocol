@@ -1,7 +1,13 @@
-import { Box, Hidden, Typography } from "@material-ui/core";
+import {
+  Box,
+  Hidden,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@material-ui/core";
 import { pathToRegexp } from "path-to-regexp";
 import React, { useEffect } from "react";
-import { Link, useHistory, useLocation } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 import MobileOthersMenu from "@user-dashboard/components/MobileOthersMenu";
 
 import { useStyles } from "@user-dashboard/components/Header/Header.style";
@@ -12,6 +18,11 @@ const Header: React.FC = () => {
   const classes = useStyles();
   const { pathname } = useLocation();
   const history = useHistory();
+
+  const theme = useTheme();
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up("md"), {
+    noSsr: true,
+  });
 
   const { handleError } = useLayoutContext();
   const { hypernetWebIntegration } = useStoreContext();
@@ -33,12 +44,14 @@ const Header: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    hypernetWebIntegration.webUIClient
-      .renderConnectedAccountWidget({
-        selector: "connected-account-widget-wrapper",
-      })
-      .mapErr(handleError);
-  }, []);
+    if (isLargeScreen) {
+      hypernetWebIntegration.webUIClient
+        .renderConnectedAccountWidget({
+          selector: "connected-account-widget-wrapper",
+        })
+        .mapErr(handleError);
+    }
+  }, [isLargeScreen]);
 
   const isPathMatchRequestedUrl: (path: string) => boolean = (path: string) =>
     !!pathToRegexp(path).exec(pathname);
@@ -46,22 +59,22 @@ const Header: React.FC = () => {
   return (
     <Box className={classes.headerWrapper}>
       <Box className={classes.logoWrapper}>
-        <Hidden smDown>
+        <Hidden mdDown>
           <img
             className={classes.logo}
             src="https://res.cloudinary.com/dqueufbs7/image/upload/v1632907649/images/hpnlogo.png"
             alt=""
           />
         </Hidden>
-        <Hidden mdUp>
+        <Hidden lgUp>
           <img
             className={classes.smallLogo}
-            src="https://res.cloudinary.com/dqueufbs7/image/upload/v1632909339/images/Screen_Shot_2021-09-29_at_12.52.03.png"
+            src="https://res.cloudinary.com/barhantas/image/upload/v1634078961/H_V_2_copy_idcqep.png"
             alt=""
           />
         </Hidden>
       </Box>
-      <Hidden mdDown>
+      <Hidden smDown>
         <Box className={classes.menuWrapper}>
           {routes.map((route, index) =>
             route.isHeaderItem ? (
@@ -91,13 +104,15 @@ const Header: React.FC = () => {
           className={classes.widgetWrapper}
           id="hypertoken-balance-widget-wrapper"
         />
-        <Box
-          className={classes.widgetWrapper}
-          id="connected-account-widget-wrapper"
-        />
-        <Hidden lgUp>
+
+        {isLargeScreen ? (
+          <Box
+            className={classes.widgetWrapper}
+            id="connected-account-widget-wrapper"
+          />
+        ) : (
           <MobileOthersMenu />
-        </Hidden>
+        )}
       </Box>
     </Box>
   );

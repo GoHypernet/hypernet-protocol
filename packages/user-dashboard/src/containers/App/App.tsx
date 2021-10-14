@@ -1,7 +1,13 @@
 import HypernetWebIntegration, {
   IHypernetWebIntegration,
 } from "@hypernetlabs/web-integration";
-import { ResultMessage, EResultStatus } from "@hypernetlabs/web-ui";
+import {
+  ResultMessage,
+  EResultStatus,
+  lightTheme,
+  darkTheme,
+  ThemeProvider,
+} from "@hypernetlabs/web-ui";
 import { Box } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
@@ -44,12 +50,14 @@ const App: React.FC = () => {
 
   return (
     <StoreProvider hypernetWebIntegration={integration}>
-      <Box className={classes.appWrapper}>
-        <BrowserRouter>
-          <Header />
-          {coreReady && <Router />}
-        </BrowserRouter>
-      </Box>
+      <ThemeProvider theme={true ? lightTheme : darkTheme}>
+        <Box className={classes.appWrapper}>
+          <BrowserRouter>
+            <Header />
+            {coreReady && <Router />}
+          </BrowserRouter>
+        </Box>
+      </ThemeProvider>
     </StoreProvider>
   );
 };
