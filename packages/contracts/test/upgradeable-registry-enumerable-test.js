@@ -2,7 +2,7 @@ const { BN, expectRevert } = require("@openzeppelin/test-helpers");
 const { expect } = require("chai");
 const { ethers, upgrades } = require("hardhat");
 
-describe("Registry with No Enumeration", function () {
+describe("Enumerated Registry", function () {
     let hypertoken;
     let registry;
     let owner;
@@ -16,7 +16,7 @@ describe("Registry with No Enumeration", function () {
         await hypertoken.deployTransaction.wait();
 
         // deploy registry contract
-        const UpgradableRegistry = await ethers.getContractFactory("NonFungibleRegistryUpgradeable");
+        const UpgradableRegistry = await ethers.getContractFactory("NonFungibleRegistryEnumerableUpgradeable");
         registry = await upgrades.deployProxy(UpgradableRegistry, ["Gateways", "G", owner.address, owner.address]);
         await registry.deployed();
 	});
@@ -62,6 +62,7 @@ describe("Registry with No Enumeration", function () {
         // check that registration occured properly
         expect(await registry.registryMap(routerPublicIdentifier)).to.equal(1);
         expect(await registry.tokenURI(1)).to.equal(JSON.stringify(registryEntry));
+        expect(await registry.totalSupply()).to.equal(1);
         expect(await registry.ownerOf(1)).to.equal(addr1.address);
     });
 
@@ -94,6 +95,7 @@ describe("Registry with No Enumeration", function () {
         tx.wait();
 
         expect(await registry.balanceOf(addr1.address)).to.equal(1);
+        expect(await registry.totalSupply()).to.equal(1);
 
         // only owner or approved address can burn
         await expectRevert(
@@ -106,6 +108,7 @@ describe("Registry with No Enumeration", function () {
         tx.wait();
 
         expect(await registry.balanceOf(addr1.address)).to.equal(0);
+        expect(await registry.totalSupply()).to.equal(0);
     });
 
     it("Check registrar burn permissions", async function () {
@@ -132,9 +135,9 @@ describe("Registry with No Enumeration", function () {
 
     it("Check permissions on registry parameter, label, and storage updating.", async function () {
         const label1 = "dummy1";
-        const registrationData1 = "00000000000000030000000061672e7d";
+        const registrationData1 = "dummy1";
         const label2 = "dummy2";
-        const registrationData2 = "00000000000000030000000061672e7d";
+        const registrationData2 = "dummy2";
 
         let tx = await registry.register( addr1.address, label1, registrationData1);
         tx.wait();
@@ -154,7 +157,7 @@ describe("Registry with No Enumeration", function () {
 
         // can't update label if updating is disabled
         await expectRevert(
-            registry.connect(addr1).updateLabel(2, "00000000000000040000000061672e7d"),
+            registry.connect(addr1).updateLabel(2, "newDummyString"),
             "NonFungibleRegistry: Label updating is disabled.",
         );
 
@@ -182,7 +185,7 @@ describe("Registry with No Enumeration", function () {
         tx.wait();
 
         // update the label on the NFI that has none
-        tx = await registry.connect(addr1).updateLabel(1, "00044400000000030000000061672e7d");
+        tx = await registry.connect(addr1).updateLabel(1, "newDummyString");
         tx.wait();
 
         // can't add label that already exists in the registry
@@ -296,7 +299,7 @@ describe("Registry with No Enumeration", function () {
     it("Test batch minting function.", async function () {
 
       // minting many tokens in a single transaction can save gas:
-      const batchSize = 180;
+      const batchSize = 120;
       const recipients = [];
       const labels = [];
       const emptyLabels = [];
@@ -310,12 +313,15 @@ describe("Registry with No Enumeration", function () {
       
       let tx = await registry.batchRegister(recipients, labels, datas);
       tx.wait();
+      expect(await registry.totalSupply()).to.equal(batchSize);
 
       tx = await registry.batchRegister(recipients, emptyLabels, datas);
       tx.wait();
+      expect(await registry.totalSupply()).to.equal(2*batchSize);
 
       tx = await registry.register(recipients[0], emptyLabels[0], datas[1]);
       tx.wait();
+      expect(await registry.totalSupply()).to.equal(2*batchSize+1);
   });
   
   it("Test lazy minting.", async function () {
@@ -370,7 +376,7 @@ describe("Registry with No Enumeration", function () {
 
       tx = await registry.connect(addr1).lazyRegister(addr1.address, label, registrationData, sig);
       tx.wait();
-      expect(await registry.balanceOf(addr1.address)).to.equal(1);
+      expect(await registry.totalSupply()).to.equal(1);
 
       await expectRevert(
         registry.connect(addr1).lazyRegister(addr1.address, label, registrationData, sig),

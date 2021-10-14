@@ -1,7 +1,7 @@
 const HT = require("../artifacts/contracts/governance/Hypertoken.sol/Hypertoken.json");
 const HG = require("../artifacts/contracts/governance/HypernetGovernor.sol/HypernetGovernor.json");
 const RF = require("../artifacts/contracts/identity/UpgradeableRegistryFactory.sol/UpgradeableRegistryFactory.json");
-const NFR = require("../artifacts/contracts/identity/NonFungibleRegistryUpgradeable.sol/NonFungibleRegistryUpgradeable.json");
+const NFR = require("../artifacts/contracts/identity/NonFungibleRegistryEnumerableUpgradeable.sol/NonFungibleRegistryEnumerableUpgradeable.json");
 
 // TODO: comment this out
 // hardhat network

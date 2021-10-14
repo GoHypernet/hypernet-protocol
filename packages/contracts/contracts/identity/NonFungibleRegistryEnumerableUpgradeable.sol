@@ -3,6 +3,7 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721EnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
@@ -11,10 +12,11 @@ import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
-contract NonFungibleRegistryUpgradeable is
+contract NonFungibleRegistryEnumerableUpgradeable is
     Initializable,
     ContextUpgradeable,
     AccessControlEnumerableUpgradeable,
+    ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable,
     UUPSUpgradeable
 {
@@ -104,6 +106,7 @@ contract NonFungibleRegistryUpgradeable is
     function initialize(string memory name_, string memory symbol_, address _registrar, address _admin) public initializer {
         __Context_init();
         __AccessControlEnumerable_init();
+        __ERC721Enumerable_init();
         __ERC721URIStorage_init();
         __UUPSUpgradeable_init();
         __ERC721_init(name_, symbol_);
@@ -309,7 +312,7 @@ contract NonFungibleRegistryUpgradeable is
     ) 
         internal 
         virtual 
-        override(ERC721URIStorageUpgradeable)
+        override(ERC721Upgradeable, ERC721URIStorageUpgradeable)
     {
         super._burn(tokenId);
 
@@ -333,7 +336,7 @@ contract NonFungibleRegistryUpgradeable is
         public 
         view 
         virtual 
-        override(ERC721URIStorageUpgradeable)
+        override(ERC721URIStorageUpgradeable, ERC721Upgradeable)
         returns (string memory) 
     {
         return ERC721URIStorageUpgradeable.tokenURI(tokenId);
@@ -343,7 +346,7 @@ contract NonFungibleRegistryUpgradeable is
         address from,
         address to,
         uint256 tokenId
-    ) internal virtual override(ERC721Upgradeable) {
+    ) internal virtual override(ERC721Upgradeable, ERC721EnumerableUpgradeable) {
         require(_transfersAllowed(), "NonFungibleRegistry: transfers are disabled.");
         super._beforeTokenTransfer(from, to, tokenId);
     }
@@ -365,7 +368,7 @@ contract NonFungibleRegistryUpgradeable is
         public
         view
         virtual
-        override(AccessControlEnumerableUpgradeable, ERC721Upgradeable)
+        override(AccessControlEnumerableUpgradeable, ERC721Upgradeable, ERC721EnumerableUpgradeable)
         returns (bool)
     {
         return super.supportsInterface(interfaceId);

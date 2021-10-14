@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
+import "./NonFungibleRegistryEnumerableUpgradeable.sol";
 import "./NonFungibleRegistryUpgradeable.sol";
 
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
@@ -10,8 +11,14 @@ import "@openzeppelin/contracts/proxy/beacon/BeaconProxy.sol";
 
 contract UpgradeableRegistryFactory is AccessControlEnumerable {
 
-    // address of our upgradeble registry proxy beacon
+    // address of our upgradeble registry with enumeration proxy beacon
+    address public enumerableRegistryBeacon;
+
+    // address of our upgradable registry proxy beacon
     address public registryBeacon;
+
+    // extra array storage fascilitates paginated UI
+    address[] public enumerableRegistries;
 
     // extra array storage fascilitates paginated UI
     address[] public registries;
@@ -45,21 +52,26 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         // set the administrator of the registry factory
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
 
+        // during construction, deploy the upgradable beacon instance of our enumerable registry contract
+        UpgradeableBeacon _enumerableRegistryBeacon = new UpgradeableBeacon(address(new NonFungibleRegistryEnumerableUpgradeable()));
+        _enumerableRegistryBeacon.transferOwnership(_admin);
+        enumerableRegistryBeacon = address(_enumerableRegistryBeacon);
+
         // during construction, deploy the upgradable beacon instance of our registry contract
-        UpgradeableBeacon _registryBeacon = new UpgradeableBeacon(address(new NonFungibleRegistryUpgradeable()));
+        UpgradeableBeacon _registryBeacon = new UpgradeableBeacon(address(new NonFungibleRegistryEnumerableUpgradeable()));
         _registryBeacon.transferOwnership(_admin);
         registryBeacon = address(_registryBeacon);
 
-        // deploy initial registries 
+        // deploy initial enumerable registries 
         for (uint256 i = 0; i < _names.length; ++i) {
-            _createRegistry(_names[i], _symbols[i], _registrars[i]);
+            _createEnumerableRegistry(_names[i], _symbols[i], _registrars[i]);
         }
     }
 
     /// @notice getNumberOfRegistries geter function for reading the number of registries
     /// @dev usefull for paginated UIs
     function getNumberOfRegistries() public view returns (uint256 numReg) {
-        numReg = registries.length;
+        numReg = enumerableRegistries.length;
     }
 
     /// @notice setRegistrationToken setter function for configuring which ERC20 token is burned when adding new apps
@@ -91,9 +103,15 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @param _name name of the registry that will be created
     /// @param _symbol symbol to associate with the registry
     /// @param _registrar address that will recieve the REGISTRAR_ROLE
-    function createRegistry(string memory _name, string memory _symbol, address _registrar) external {
+    /// @param _enumerable boolean declaring if the registry should have the enumeration property
+    function createRegistry(string calldata _name, string calldata _symbol, address _registrar, bool _enumerable) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
-        _createRegistry(_name, _symbol, _registrar);        
+        if (_enumerable) {
+            _createEnumerableRegistry(_name, _symbol, _registrar);
+        } else {
+            _createRegistry(_name, _symbol, _registrar);
+        }
+        
     }
 
     /// @notice createRegistryByToken called by any user with sufficient registration token
@@ -101,12 +119,28 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @param _name name of the registry that will be created
     /// @param _symbol symbol to associate with the registry
     /// @param _registrar address that will recieve the REGISTRAR_ROLE
-    function createRegistryByToken(string memory _name, string memory _symbol, address _registrar) external {
+    function createRegistryByToken(string memory _name, string memory _symbol, address _registrar, bool _enumerable) external {
         require(registrationToken != address(0), "RegistryFactory: registration by token not enabled.");
 
         // user must call approve first
         IERC20Upgradeable(registrationToken).transferFrom(_msgSender(), burnAddress, registrationFee);
-        _createRegistry(_name, _symbol, _registrar);        
+        if (_enumerable) {
+            _createEnumerableRegistry(_name, _symbol, _registrar);
+        } else {
+            _createRegistry(_name, _symbol, _registrar);
+        }
+        
+    }
+
+    function _createEnumerableRegistry(string memory _name, string memory _symbol, address _registrar) private {
+        require(_registrar != address(0), "RegistryFactory: Registrar address must not be 0.");
+        require(!_registryExists(_name), "RegistryFactory: Registry by that name exists.");
+        
+        // cloning the beacon implementation reduced gas by ~80% over naive approach 
+        BeaconProxy proxy = new BeaconProxy(enumerableRegistryBeacon, abi.encodeWithSelector(NonFungibleRegistryEnumerableUpgradeable.initialize.selector, _name, _symbol, _registrar, getRoleMember(DEFAULT_ADMIN_ROLE, 0)));
+        enumerableRegistries.push(address(proxy));
+        nameToAddress[_name] = address(proxy);
+        emit RegistryCreated(address(proxy));
     }
 
     function _createRegistry(string memory _name, string memory _symbol, address _registrar) private {

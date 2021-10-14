@@ -50,15 +50,15 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
  * accounts that have been granted it.
  */
 abstract contract NFTAccessControlUpgradeable is Initializable, ContextUpgradeable, INFTAccessControlUpgradeable, ERC165Upgradeable {
-    function __AccessControl_init(address registry) internal initializer {
+    function __NFTAccessControl_init(address registry) internal initializer {
         __Context_init_unchained();
         __ERC165_init_unchained();
-        __AccessControl_init_unchained();
+        __NFTAccessControl_init_unchained();
 
         _nftRegistry = registry;
     }
 
-    function __AccessControl_init_unchained() internal initializer {
+    function __NFTAccessControl_init_unchained() internal initializer {
     }
     struct RoleData {
         mapping(uint256 => bool) members;
