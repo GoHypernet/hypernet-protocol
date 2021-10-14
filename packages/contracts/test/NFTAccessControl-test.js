@@ -19,7 +19,7 @@ describe("NFT Access Control Testing", function () {
         await hypertoken.deployTransaction.wait();
 
         // deploy registry contract
-        const UpgradableRegistry = await ethers.getContractFactory("NonFungibleRegistryUpgradeable");
+        const UpgradableRegistry = await ethers.getContractFactory("NonFungibleRegistryEnumerableUpgradeable");
         registry = await upgrades.deployProxy(UpgradableRegistry, ["Gateways", "G", owner.address, owner.address]);
         await registry.deployed();
 

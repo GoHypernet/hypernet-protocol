@@ -42,10 +42,13 @@ describe("Registry Factory Unit Tests", function () {
     });
 
     it("Test createRegistry.", async function () {
-        const registryName = "Gateways";
+        const registryName = "GatewaysEnumerable";
         const registrySymbol = "HNG";
 
-        let tx = await registryfactory.createRegistry(registryName, registrySymbol, owner.address);
+        let tx = await registryfactory.createRegistry(registryName, registrySymbol, owner.address, true);
+        txrcpt = await tx.wait(); 
+
+        tx = await registryfactory.createRegistry("Gateways", registrySymbol, owner.address, false);
         txrcpt = await tx.wait(); 
 
         const registryAddress = await registryfactory.nameToAddress(registryName);
@@ -64,6 +67,7 @@ describe("Registry Factory Unit Tests", function () {
                 "Test",
                 "t",
                 owner.address,
+                true
             ),
             "RegistryFactory: Registry by that name exists.",
         );
@@ -76,6 +80,7 @@ describe("Registry Factory Unit Tests", function () {
                 "Dummy",
                 "d",
                 "0x0000000000000000000000000000000000000000",
+                true
             ),
             "RegistryFactory: Registrar address must not be 0.",
           );
@@ -88,6 +93,7 @@ describe("Registry Factory Unit Tests", function () {
                 "Dummy",
                 "d",
                 owner.address,
+                true
             ),
             "RegistryFactory: registration by token not enabled.",
           );
@@ -144,7 +150,8 @@ describe("Registry Factory Unit Tests", function () {
             registryfactory.connect(addr1).createRegistryByToken(
                 "dummy",
                 "dmy",
-                addr1.address
+                addr1.address,
+                true
             ),
         "ERC20: transfer amount exceeds allowance",
         );
@@ -155,17 +162,22 @@ describe("Registry Factory Unit Tests", function () {
         tx = await hypertoken.connect(addr1).approve(registryfactory.address, fee);
         tx.wait();
 
-        tx = await registryfactory.connect(addr1).createRegistryByToken("dummy", "dmy", addr1.address);
+        tx = await registryfactory.connect(addr1).createRegistryByToken("enumerabledummy", "edmy", addr1.address, true);
         tx.wait();
 
-        let registryAddress = await registryfactory.nameToAddress("dummy");
+        let registryAddress = await registryfactory.nameToAddress("enumerabledummy");
         const dummyReg = new ethers.Contract(registryAddress, NFR.abi, addr1);
 
         expect(await registryfactory.getNumberOfRegistries()).to.equal(2);
         expect(await hypertoken.balanceOf(addr1.address)).to.equal(fee);
         expect(await hypertoken.balanceOf(burnAddress)).to.equal(fee);
-        expect(await hypertoken.balanceOf(burnAddress)).to.equal(fee);
-        expect(await dummyReg.name()).to.equal("dummy");
-        expect(await dummyReg.symbol()).to.equal("dmy");
+        expect(await dummyReg.name()).to.equal("enumerabledummy");
+        expect(await dummyReg.symbol()).to.equal("edmy");
+
+        tx = await hypertoken.connect(addr1).approve(registryfactory.address, fee);
+        tx.wait();
+
+        tx = await registryfactory.connect(addr1).createRegistryByToken("dummy", "dmy", addr1.address, false);
+        tx.wait();
     });
 });

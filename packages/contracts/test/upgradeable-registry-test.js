@@ -296,7 +296,7 @@ describe("Registry with No Enumeration", function () {
     it("Test batch minting function.", async function () {
 
       // minting many tokens in a single transaction can save gas:
-      const batchSize = 120;
+      const batchSize = 180;
       const recipients = [];
       const labels = [];
       const emptyLabels = [];
