@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.4;
 
-import "./NonFungibleRegistryUpgradeable.sol";
+import "./NonFungibleRegistryEnumerableUpgradeable.sol";
 
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/proxy/beacon/UpgradeableBeacon.sol";
@@ -46,7 +46,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
 
         // during construction, deploy the upgradable beacon instance of our registry contract
-        UpgradeableBeacon _registryBeacon = new UpgradeableBeacon(address(new NonFungibleRegistryUpgradeable()));
+        UpgradeableBeacon _registryBeacon = new UpgradeableBeacon(address(new NonFungibleRegistryEnumerableUpgradeable()));
         _registryBeacon.transferOwnership(_admin);
         registryBeacon = address(_registryBeacon);
 
@@ -114,7 +114,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         require(!_registryExists(_name), "RegistryFactory: Registry by that name exists.");
         
         // cloning the beacon implementation reduced gas by ~80% over naive approach 
-        BeaconProxy proxy = new BeaconProxy(registryBeacon, abi.encodeWithSelector(NonFungibleRegistryUpgradeable.initialize.selector, _name, _symbol, _registrar, getRoleMember(DEFAULT_ADMIN_ROLE, 0)));
+        BeaconProxy proxy = new BeaconProxy(registryBeacon, abi.encodeWithSelector(NonFungibleRegistryEnumerableUpgradeable.initialize.selector, _name, _symbol, _registrar, getRoleMember(DEFAULT_ADMIN_ROLE, 0)));
         registries.push(address(proxy));
         nameToAddress[_name] = address(proxy);
         emit RegistryCreated(address(proxy));

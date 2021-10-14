@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat")
 const { BN, expectRevert } = require('@openzeppelin/test-helpers')
-const NFR = require("../artifacts/contracts/identity/NonFungibleRegistryUpgradeable.sol/NonFungibleRegistryUpgradeable.json")
+const NFR = require("../artifacts/contracts/identity/NonFungibleRegistryEnumerableUpgradeable.sol/NonFungibleRegistryEnumerableUpgradeable.json")
 
 describe("Registry Factory Unit Tests", function () {
     
