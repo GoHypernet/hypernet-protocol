@@ -128,7 +128,11 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       {registryEntries.map((registryEntry) => (
         <GovernanceRegistryListItem
           key={registryEntry.label}
-          number={registryEntry.tokenId.toString()}
+          number={
+            registryEntry.index != null
+              ? (registryEntry.index + 1).toString()
+              : "-"
+          }
           title=""
           fieldWithValueList={[
             {

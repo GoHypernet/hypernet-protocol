@@ -139,6 +139,7 @@ export class RegistryRepository implements IRegistryRepository {
                     burnAddress,
                     burnFee,
                     primaryRegistry,
+                    null,
                   ),
                 );
               });
@@ -226,6 +227,7 @@ export class RegistryRepository implements IRegistryRepository {
                     burnAddress,
                     burnFee,
                     primaryRegistry,
+                    null,
                   ),
                 );
               });
@@ -274,8 +276,8 @@ export class RegistryRepository implements IRegistryRepository {
 
   public getRegistryEntries(
     registryName: string,
-    pageNumber: number, // 1
-    pageSize: number, // 4
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this.initializeReadOnly().andThen(
       ({ registryContracts, provider }) => {
@@ -308,6 +310,7 @@ export class RegistryRepository implements IRegistryRepository {
                       return this.getRegistryEntryByTokenId(
                         registryContract,
                         tokenId,
+                        index,
                       );
                     }),
                   );
@@ -367,39 +370,15 @@ export class RegistryRepository implements IRegistryRepository {
                   );
                 },
               ),
-              ResultAsync.fromPromise(
-                registryContract.allowStorageUpdate() as Promise<boolean>,
-                (e) => {
-                  return new BlockchainUnavailableError(
-                    "Unable to call allowStorageUpdate registryContract",
-                    e,
-                  );
-                },
-              ),
-              ResultAsync.fromPromise(
-                registryContract.allowLabelChange() as Promise<boolean>,
-                (e) => {
-                  return new BlockchainUnavailableError(
-                    "Unable to call allowLabelChange registryContract",
-                    e,
-                  );
-                },
-              ),
             ]).andThen((vals) => {
-              const [
-                owner,
-                tokenURI,
-                storageUpdateAllowed,
-                labelChangeAllowed,
-              ] = vals;
+              const [owner, tokenURI] = vals;
               return okAsync(
                 new RegistryEntry(
                   label,
                   tokenId.toNumber(),
                   owner,
                   tokenURI,
-                  storageUpdateAllowed,
-                  labelChangeAllowed,
+                  null,
                 ),
               );
             });
@@ -466,7 +445,11 @@ export class RegistryRepository implements IRegistryRepository {
             });
           })
           .andThen(() => {
-            return this.getRegistryEntryByTokenId(registryContract, tokenId);
+            return this.getRegistryEntryByTokenId(
+              registryContract,
+              tokenId,
+              null,
+            );
           });
       });
     });
@@ -529,7 +512,11 @@ export class RegistryRepository implements IRegistryRepository {
             });
           })
           .andThen(() => {
-            return this.getRegistryEntryByTokenId(registryContract, tokenId);
+            return this.getRegistryEntryByTokenId(
+              registryContract,
+              tokenId,
+              null,
+            );
           });
       });
     });
@@ -577,6 +564,7 @@ export class RegistryRepository implements IRegistryRepository {
         return this.getRegistryEntryByTokenId(
           registryContract,
           tokenId,
+          null,
         ).andThen((registryEntry) => {
           return ResultAsync.fromPromise(
             registryContract.transferFrom(
@@ -603,7 +591,11 @@ export class RegistryRepository implements IRegistryRepository {
               );
             })
             .andThen(() => {
-              return this.getRegistryEntryByTokenId(registryContract, tokenId);
+              return this.getRegistryEntryByTokenId(
+                registryContract,
+                tokenId,
+                null,
+              );
             });
         });
       });
@@ -982,6 +974,7 @@ export class RegistryRepository implements IRegistryRepository {
               burnAddress,
               burnFee,
               primaryRegistry,
+              index,
             ),
           );
         });
@@ -996,6 +989,7 @@ export class RegistryRepository implements IRegistryRepository {
   private getRegistryEntryByTokenId(
     registryContract: ethers.Contract,
     tokenId: number,
+    index: number | null,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
     return ResultAsync.fromPromise(
       registryContract?.reverseRegistryMap(tokenId) as Promise<string>,
@@ -1026,36 +1020,10 @@ export class RegistryRepository implements IRegistryRepository {
               );
             },
           ),
-          ResultAsync.fromPromise(
-            registryContract.allowStorageUpdate() as Promise<boolean>,
-            (e) => {
-              return new BlockchainUnavailableError(
-                "Unable to call allowStorageUpdate registryContract",
-                e,
-              );
-            },
-          ),
-          ResultAsync.fromPromise(
-            registryContract.allowLabelChange() as Promise<boolean>,
-            (e) => {
-              return new BlockchainUnavailableError(
-                "Unable to call allowLabelChange registryContract",
-                e,
-              );
-            },
-          ),
         ]).andThen((vals) => {
-          const [owner, tokenURI, storageUpdateAllowed, labelChangeAllowed] =
-            vals;
+          const [owner, tokenURI] = vals;
           return okAsync(
-            new RegistryEntry(
-              label,
-              tokenId,
-              owner,
-              tokenURI,
-              storageUpdateAllowed,
-              labelChangeAllowed,
-            ),
+            new RegistryEntry(label, tokenId, owner, tokenURI, index),
           );
         });
       })

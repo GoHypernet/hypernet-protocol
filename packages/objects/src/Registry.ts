@@ -16,5 +16,6 @@ export class Registry {
     public burnAddress: EthereumAddress,
     public burnFee: number,
     public primaryRegistry: EthereumAddress,
+    public index: number | null,
   ) {}
 }

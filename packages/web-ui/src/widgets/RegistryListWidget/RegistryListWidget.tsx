@@ -100,7 +100,9 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
       {registries.map((registry, index) => (
         <GovernanceRegistryListItem
           key={registry.name}
-          number={(registries.length - index).toString()}
+          number={
+            registry.index != null ? (registry.index + 1).toString() : "-"
+          }
           title={registry.name}
           fieldWithValueList={[
             {
