@@ -14,11 +14,9 @@ const VotingPowerWidget: React.FC<VotingPowerWidgetParams> = () => {
   const classes = useStyles();
   const { setLoading } = useLayoutContext();
   const [votingPower, setVotingPower] = useState<number>();
-  const [balance, setBalance] = useState<number>();
 
   useEffect(() => {
     getVotingPower();
-    getHyperTokenBalance();
     UIData.onVotesDelegated.subscribe(() => {
       getVotingPower();
     });
@@ -43,33 +41,10 @@ const VotingPowerWidget: React.FC<VotingPowerWidgetParams> = () => {
       .mapErr(handleError);
   };
 
-  const getHyperTokenBalance = () => {
-    coreProxy
-      .waitInitialized()
-      .map(() => {
-        coreProxy
-          .getEthereumAccounts()
-          .map((accounts) => {
-            coreProxy
-              .getHyperTokenBalance(accounts[0])
-              .map((balance) => {
-                setBalance(balance);
-              })
-              .mapErr(handleError);
-          })
-          .mapErr(handleError);
-      })
-      .mapErr(handleError);
-  };
-
   const handleError = (err?: Error) => {
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };
-
-  if (votingPower === balance) {
-    return null;
-  }
 
   return (
     <Typography className={classes.root}>{`${
