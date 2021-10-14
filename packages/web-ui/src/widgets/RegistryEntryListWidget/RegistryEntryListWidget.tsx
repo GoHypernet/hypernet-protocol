@@ -6,7 +6,6 @@ import {
   GovernanceRegistryListItem,
   GovernanceWidgetHeader,
   GovernancePagination,
-  getPageItemIndexList,
   GovernanceEmptyState,
 } from "@web-ui/components";
 import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
@@ -40,31 +39,21 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const [page, setPage] = useState<number>(1);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
 
-  const registryEntriesNumberArr = useMemo(
-    () =>
-      getPageItemIndexList(
-        registry?.numberOfEntries || 0,
-        page,
-        REGISTRY_ENTRIES_PER_PAGE,
-      ),
-    [registry, page],
-  );
-
   useEffect(() => {
     getRegistry();
   }, []);
+
+  useEffect(() => {
+    if (registry?.numberOfEntries) {
+      getRegistryEntries();
+    }
+  }, [registry?.numberOfEntries, page, REGISTRY_ENTRIES_PER_PAGE]);
 
   useEffect(() => {
     coreProxy.getEthereumAccounts().map((accounts) => {
       setAccountAddress(accounts[0]);
     });
   }, []);
-
-  useEffect(() => {
-    if (registryEntriesNumberArr.length) {
-      getRegistryEntries();
-    }
-  }, [JSON.stringify(registryEntriesNumberArr)]);
 
   const getRegistry = () => {
     coreProxy
@@ -78,7 +67,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   const getRegistryEntries = () => {
     coreProxy
-      .getRegistryEntries(registryName, 1, 12)
+      .getRegistryEntries(registryName, page, REGISTRY_ENTRIES_PER_PAGE)
       .map((registryEntries) => {
         setRegistryEntries(registryEntries);
       })
@@ -188,6 +177,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       {createIdentityModalOpen && (
         <CreateIdentityWidget
           onCloseCallback={() => {
+            getRegistry();
             setCreateIdentityModalOpen(false);
           }}
           registryName={registryName}
