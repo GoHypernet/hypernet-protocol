@@ -266,6 +266,7 @@ export interface IHypernetCore {
     name: string,
     symbol: string,
     owner: EthereumAddress,
+    enumerable: boolean,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
 
   delegateVote(

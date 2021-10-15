@@ -144,12 +144,6 @@ export class RegistryService implements IRegistryService {
     registryName: string,
     tokenId: number,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
-    const ss = this.registryRepository.burnRegistryEntry(registryName, tokenId);
-    ss.map((data) => {
-      console.log("service ata: ", data);
-    }).mapErr((err) => {
-      console.log("service err: ", err);
-    });
-    return ss;
+    return this.registryRepository.burnRegistryEntry(registryName, tokenId);
   }
 }

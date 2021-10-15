@@ -163,7 +163,7 @@ task("proposeRegistry", "Propose a new NonFungibleRegistry.")
     const registryOwner = taskArgs.owner;
     const transferCalldata = factoryHandle.interface.encodeFunctionData(
       "createRegistry",
-      [proposalDescription, registrySymbol, registryOwner],
+      [proposalDescription, registrySymbol, registryOwner, true], // enumerable
     );
 
     const proposalID = await govHandle.hashProposal(

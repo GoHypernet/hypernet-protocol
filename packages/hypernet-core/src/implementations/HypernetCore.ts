@@ -1011,8 +1011,14 @@ export class HypernetCore implements IHypernetCore {
     name: string,
     symbol: string,
     owner: EthereumAddress,
+    enumerable: boolean,
   ): ResultAsync<Proposal, BlockchainUnavailableError> {
-    return this.governanceService.createProposal(name, symbol, owner);
+    return this.governanceService.createProposal(
+      name,
+      symbol,
+      owner,
+      enumerable,
+    );
   }
 
   public delegateVote(
@@ -1220,12 +1226,6 @@ export class HypernetCore implements IHypernetCore {
     registryName: string,
     tokenId: number,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
-    const ss = this.registryService.burnRegistryEntry(registryName, tokenId);
-    ss.map((data) => {
-      console.log("core data: ", data);
-    }).mapErr((err) => {
-      console.log("core err: ", err);
-    });
-    return ss;
+    return this.registryService.burnRegistryEntry(registryName, tokenId);
   }
 }

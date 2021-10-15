@@ -16,6 +16,7 @@ export interface IGovernanceRepository {
     name: string,
     symbol: string,
     owner: EthereumAddress,
+    enumerable: boolean,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
   delegateVote(
     delegateAddress: EthereumAddress,

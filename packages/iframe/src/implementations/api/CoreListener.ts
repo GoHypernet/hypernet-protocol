@@ -199,6 +199,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           name: string;
           symbol: string;
           owner: EthereumAddress;
+          enumerable: boolean;
         }>,
       ) => {
         this.returnForModel(() => {
@@ -206,6 +207,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.name,
             data.data.symbol,
             data.data.owner,
+            data.data.enumerable,
           );
         }, data.callId);
       },
@@ -432,16 +434,10 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         }>,
       ) => {
         this.returnForModel(() => {
-          const ss = this.core.burnRegistryEntry(
+          return this.core.burnRegistryEntry(
             data.data.registryName,
             data.data.tokenId,
           );
-          ss.map((data) => {
-            console.log("coreListener ata: ", data);
-          }).mapErr((err) => {
-            console.log("coreListener err: ", err);
-          });
-          return ss;
         }, data.callId);
       },
     });

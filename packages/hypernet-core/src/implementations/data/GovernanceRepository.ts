@@ -116,6 +116,7 @@ export class GovernanceRepository implements IGovernanceRepository {
     name: string,
     symbol: string,
     owner: EthereumAddress,
+    enumerable: boolean,
   ): ResultAsync<Proposal, BlockchainUnavailableError> {
     return this.initializeForWrite().andThen((governanceContracts) => {
       const descriptionHash = ethers.utils.id(name);
@@ -123,7 +124,7 @@ export class GovernanceRepository implements IGovernanceRepository {
       const transferCalldata =
         governanceContracts.registryFactoryContract.interface.encodeFunctionData(
           "createRegistry",
-          [name, symbol, owner],
+          [name, symbol, owner, enumerable],
         );
 
       return ResultAsync.fromPromise(
@@ -366,7 +367,7 @@ export class GovernanceRepository implements IGovernanceRepository {
       ).andThen((registryAddress) => {
         const registryAddressContract = new ethers.Contract(
           registryAddress,
-          GovernanceAbis.NonFungibleRegistryUpgradeable.abi,
+          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
           signer,
         );
 

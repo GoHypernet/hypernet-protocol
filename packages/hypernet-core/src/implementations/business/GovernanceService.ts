@@ -34,8 +34,14 @@ export class GovernanceService implements IGovernanceService {
     name: string,
     symbol: string,
     owner: EthereumAddress,
+    enumerable: boolean,
   ): ResultAsync<Proposal, BlockchainUnavailableError> {
-    return this.governanceRepository.createProposal(name, symbol, owner);
+    return this.governanceRepository.createProposal(
+      name,
+      symbol,
+      owner,
+      enumerable,
+    );
   }
 
   public delegateVote(

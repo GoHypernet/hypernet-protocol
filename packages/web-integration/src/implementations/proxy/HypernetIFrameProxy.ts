@@ -501,11 +501,13 @@ export default class HypernetIFrameProxy
     name: string,
     symbol: string,
     owner: EthereumAddress,
+    enumerable: boolean,
   ): ResultAsync<Proposal, BlockchainUnavailableError> {
     return this._createCall("createProposal", {
       name,
       symbol,
       owner,
+      enumerable,
     });
   }
 
@@ -726,15 +728,6 @@ export default class HypernetIFrameProxy
     registryName: string,
     tokenId: number,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
-    const ss = this._createCall("burnRegistryEntry", {
-      registryName,
-      tokenId,
-    });
-    ss.map((data) => {
-      console.log("iframeProxy ata: ", data);
-    }).mapErr((err) => {
-      console.log("iframeProxy err: ", err);
-    });
     return this._createCall("burnRegistryEntry", {
       registryName,
       tokenId,
