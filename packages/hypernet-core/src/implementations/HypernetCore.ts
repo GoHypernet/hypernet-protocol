@@ -1002,9 +1002,10 @@ export class HypernetCore implements IHypernetCore {
   }
 
   public getProposals(
-    proposalsNumberArr?: number[],
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<Proposal[], BlockchainUnavailableError> {
-    return this.governanceService.getProposals(proposalsNumberArr);
+    return this.governanceService.getProposals(pageNumber, pageSize);
   }
 
   public createProposal(

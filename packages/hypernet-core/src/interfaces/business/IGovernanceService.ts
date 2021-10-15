@@ -10,7 +10,8 @@ import { ResultAsync } from "neverthrow";
 
 export interface IGovernanceService {
   getProposals(
-    proposalsNumberArr?: number[],
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<Proposal[], BlockchainUnavailableError>;
   getProposalsCount(): ResultAsync<number, BlockchainUnavailableError>;
   createProposal(

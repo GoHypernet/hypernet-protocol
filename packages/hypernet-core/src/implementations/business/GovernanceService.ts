@@ -21,9 +21,10 @@ export class GovernanceService implements IGovernanceService {
   ) {}
 
   public getProposals(
-    proposalsNumberArr?: number[],
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<Proposal[], BlockchainUnavailableError> {
-    return this.governanceRepository.getProposals(proposalsNumberArr);
+    return this.governanceRepository.getProposals(pageNumber, pageSize);
   }
 
   public getProposalsCount(): ResultAsync<number, BlockchainUnavailableError> {

@@ -259,7 +259,8 @@ export interface IHypernetCore {
   ): ResultAsync<void, InvalidParametersError>;
 
   getProposals(
-    proposalsNumberArr?: number[],
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<Proposal[], BlockchainUnavailableError>;
 
   createProposal(

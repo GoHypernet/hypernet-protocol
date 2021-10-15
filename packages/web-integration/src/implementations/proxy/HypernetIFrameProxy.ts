@@ -492,9 +492,13 @@ export default class HypernetIFrameProxy
   }
 
   public getProposals(
-    proposalsNumberArr?: number[],
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<Proposal[], BlockchainUnavailableError> {
-    return this._createCall("getProposals", proposalsNumberArr);
+    return this._createCall("getProposals", {
+      pageNumber,
+      pageSize,
+    });
   }
 
   public createProposal(

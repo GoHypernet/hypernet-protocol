@@ -38,60 +38,42 @@ export class GovernanceRepository implements IGovernanceRepository {
   ) {}
 
   public getProposals(
-    proposalsNumberArr?: number[],
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<Proposal[], BlockchainUnavailableError> {
     return this.initializeReadOnly().andThen((governanceContracts) => {
-      let proposalsNumberArrResult: ResultAsync<
-        number[],
-        BlockchainUnavailableError
-      >;
-      let proposalsArrResult: ResultAsync<
-        Proposal,
-        BlockchainUnavailableError
-      >[] = [];
+      return this.getProposalsCount().andThen((totalCount) => {
+        const proposalListResult: ResultAsync<
+          Proposal,
+          BlockchainUnavailableError
+        >[] = [];
+        for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
+          const index = totalCount - (pageNumber - 1) * pageSize - i;
 
-      if (proposalsNumberArr == null) {
-        proposalsNumberArrResult = this.getProposalsCount().map(
-          (proposalCounts) => {
-            if (proposalCounts == null || proposalCounts == 0) {
-              return [];
-            }
-            let countsArr: number[] = [];
-            for (let index = proposalCounts; index >= 1; index--) {
-              countsArr.push(index);
-            }
-            return countsArr;
-          },
-        );
-      } else {
-        proposalsNumberArrResult = okAsync(proposalsNumberArr);
-      }
-
-      return proposalsNumberArrResult.andThen((proposalNumberArr) => {
-        proposalNumberArr.forEach((proposalNumber) => {
-          proposalsArrResult.push(
-            ResultAsync.fromPromise(
-              governanceContracts.hypernetGovernorContract._proposalMap(
-                proposalNumber,
-              ) as Promise<BigNumber>,
-              (e) => {
-                return new BlockchainUnavailableError(
-                  "Unable to retrieve proposals id",
-                  e,
-                );
-              },
-            )
-              .andThen((proposalId) => {
-                return this.getProposalDetails(proposalId.toString());
-              })
-              .map((proposalObj) => {
-                proposalObj.proposalNumber = proposalNumber;
-                return proposalObj;
-              }),
-          );
-        });
-
-        return ResultUtils.combine(proposalsArrResult);
+          if (index >= 0) {
+            proposalListResult.push(
+              ResultAsync.fromPromise(
+                governanceContracts.hypernetGovernorContract._proposalMap(
+                  index,
+                ) as Promise<BigNumber>,
+                (e) => {
+                  return new BlockchainUnavailableError(
+                    "Unable to retrieve proposals id",
+                    e,
+                  );
+                },
+              )
+                .andThen((proposalId) => {
+                  return this.getProposalDetails(proposalId.toString());
+                })
+                .map((proposalObj) => {
+                  proposalObj.proposalNumber = index;
+                  return proposalObj;
+                }),
+            );
+          }
+        }
+        return ResultUtils.combine(proposalListResult);
       });
     });
   }
