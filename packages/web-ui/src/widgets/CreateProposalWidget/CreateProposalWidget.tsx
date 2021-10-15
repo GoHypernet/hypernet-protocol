@@ -195,7 +195,7 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
               <>
                 <GovernanceDialogSelectLargeField
                   name="enumerable"
-                  title="Enumerable Status"
+                  title="Enumerable Tokens"
                   type="select"
                   placeholder={"select action"}
                   required={true}
