@@ -12,8 +12,10 @@ import {
   ETagColor,
   GovernanceButton,
   GovernanceEmptyState,
+  GovernancePagination,
+  extractDataByPage,
 } from "@web-ui/components";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useLinks } from "@web-ui/hooks";
 
 interface IPushPaymentList {
@@ -21,6 +23,8 @@ interface IPushPaymentList {
   publicIdentifier: PublicIdentifier;
   onAcceptPushPaymentClick: (paymentId: PaymentId) => void;
 }
+
+const PUSH_PAYMENTS_PER_PAGE = 5;
 
 const tableColumns: ITableCell[] = [
   {
@@ -119,11 +123,18 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
   const { pushPayments, publicIdentifier, onAcceptPushPaymentClick } = props;
   const { viewUtils, dateUtils } = useStoreContext();
   const { loading } = useLinks();
+  const [page, setPage] = useState<number>(1);
 
   const initialValue: ITableCell[][] = [];
+
+  const paginatedPushPayments = useMemo<PushPayment[]>(
+    () => extractDataByPage(pushPayments, PUSH_PAYMENTS_PER_PAGE, page),
+    [JSON.stringify(pushPayments), page],
+  );
+
   const rows = useMemo(
     () =>
-      pushPayments.reduce((acc, item) => {
+      paginatedPushPayments.reduce((acc, item) => {
         acc.push([
           {
             cellValue: item.gatewayUrl,
@@ -231,7 +242,7 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
         ]);
         return acc;
       }, initialValue),
-    [JSON.stringify(pushPayments)],
+    [JSON.stringify(paginatedPushPayments)],
   );
 
   if (!loading && !rows.length) {
@@ -243,5 +254,20 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
     );
   }
 
-  return <GovernanceTable isExpandable columns={tableColumns} rows={rows} />;
+  return (
+    <>
+      <GovernanceTable isExpandable columns={tableColumns} rows={rows} />
+      {pushPayments.length && (
+        <GovernancePagination
+          customPageOptions={{
+            itemsPerPage: PUSH_PAYMENTS_PER_PAGE,
+            totalItems: pushPayments.length,
+          }}
+          onChange={(_, page) => {
+            setPage(page);
+          }}
+        />
+      )}
+    </>
+  );
 };
