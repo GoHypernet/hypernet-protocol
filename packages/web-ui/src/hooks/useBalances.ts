@@ -171,12 +171,20 @@ export function useBalances() {
 
     coreProxy?.onBalancesChanged.subscribe({
       next: (balance) => {
-        console.log("balance updated: ", balance);
         if (cancelRequest) return;
-        console.log("next");
         dispatch({
           type: EActionTypes.FETCHED,
           payload: balance,
+        });
+
+        const selectedStateChannel = UIData.getSelectedStateChannel();
+
+        dispatch({
+          type: EActionTypes.STATE_CHANNEL_CHANGED,
+          payload: {
+            balances: balance,
+            activeStateChannel: selectedStateChannel,
+          },
         });
       },
     });
