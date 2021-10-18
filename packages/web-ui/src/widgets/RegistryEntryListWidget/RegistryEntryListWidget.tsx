@@ -99,7 +99,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   return (
     <Box>
       <GovernanceWidgetHeader
-        label="Registry Entries"
+        label={registry?.name}
         navigationLink={{
           label: "Registry Entry List",
           onClick: () => {

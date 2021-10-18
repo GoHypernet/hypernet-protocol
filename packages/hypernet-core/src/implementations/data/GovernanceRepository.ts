@@ -54,7 +54,7 @@ export class GovernanceRepository implements IGovernanceRepository {
             proposalListResult.push(
               ResultAsync.fromPromise(
                 governanceContracts.hypernetGovernorContract._proposalMap(
-                  index,
+                  index + 1,
                 ) as Promise<BigNumber>,
                 (e) => {
                   return new BlockchainUnavailableError(

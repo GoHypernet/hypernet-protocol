@@ -1,5 +1,5 @@
-import { EthereumAddress } from "./EthereumAddress";
-
+import { BigNumberString } from "@objects/BigNumberString";
+import { EthereumAddress } from "@objects/EthereumAddress";
 export class Registry {
   constructor(
     public registrarAddresses: EthereumAddress[],
@@ -12,9 +12,9 @@ export class Registry {
     public allowLabelChange: boolean,
     public allowTransfers: boolean,
     public registrationToken: EthereumAddress,
-    public registrationFee: number,
+    public registrationFee: BigNumberString,
     public burnAddress: EthereumAddress,
-    public burnFee: number,
+    public burnFee: BigNumberString,
     public primaryRegistry: EthereumAddress,
     public index: number | null,
   ) {}

@@ -1,4 +1,5 @@
 import {
+  BigNumberString,
   BlockchainUnavailableError,
   EthereumAddress,
   Registry,
@@ -735,11 +736,13 @@ export class RegistryRepository implements IRegistryRepository {
                 : [registryParams.registrationToken],
               registryParams.registrationFee == null
                 ? []
-                : [registryParams.registrationFee],
+                : [ethers.utils.parseUnits(registryParams.registrationFee)],
               registryParams.burnAddress == null
                 ? []
                 : [registryParams.burnAddress],
-              registryParams.burnFee == null ? [] : [registryParams.burnFee],
+              registryParams.burnFee == null
+                ? []
+                : [ethers.utils.parseUnits(registryParams.burnFee)],
               registryParams.primaryRegistry == null
                 ? []
                 : [registryParams.primaryRegistry],
@@ -1226,7 +1229,7 @@ export class RegistryRepository implements IRegistryRepository {
 
   private getRegistryContractRegistrationFee(
     registryContract: ethers.Contract,
-  ): ResultAsync<number, BlockchainUnavailableError> {
+  ): ResultAsync<BigNumberString, BlockchainUnavailableError> {
     return ResultAsync.fromPromise(
       registryContract.registrationFee() as Promise<BigNumber>,
       (e) => {
@@ -1235,7 +1238,9 @@ export class RegistryRepository implements IRegistryRepository {
           e,
         );
       },
-    ).map((fee) => Number(fee.toString()));
+    ).map((fee) => {
+      return BigNumberString(ethers.utils.formatUnits(fee, "ether"));
+    });
   }
 
   private getRegistryContractBurnAddress(
@@ -1254,7 +1259,7 @@ export class RegistryRepository implements IRegistryRepository {
 
   private getRegistryContractBurnFee(
     registryContract: ethers.Contract,
-  ): ResultAsync<number, BlockchainUnavailableError> {
+  ): ResultAsync<BigNumberString, BlockchainUnavailableError> {
     return ResultAsync.fromPromise(
       registryContract.burnFee() as Promise<BigNumber>,
       (e) => {
@@ -1263,7 +1268,9 @@ export class RegistryRepository implements IRegistryRepository {
           e,
         );
       },
-    ).map((fee) => Number(fee.toString()));
+    ).map((fee) => {
+      return BigNumberString(ethers.utils.formatUnits(fee, "ether"));
+    });
   }
 
   private getRegistryContractPrimaryRegistry(

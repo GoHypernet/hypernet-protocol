@@ -17,17 +17,18 @@ import {
   EthereumAddress,
   Registry,
   RegistryParams,
+  BigNumberString,
 } from "@hypernetlabs/objects";
 import { useStyles } from "@web-ui/widgets/RegistryDetailWidget/RegistryDetailWidget.style";
 
 interface IRegistryDetailFormValus {
   symbol: string;
   numberOfEntries: number;
-  registrationFee: number;
+  registrationFee: BigNumberString;
   primaryRegistry: string;
   registrationToken: string;
   burnAddress: string;
-  burnFee: number;
+  burnFee: BigNumberString;
   allowStorageUpdate: boolean;
   allowLabelChange: boolean;
   allowTransfers: boolean;
