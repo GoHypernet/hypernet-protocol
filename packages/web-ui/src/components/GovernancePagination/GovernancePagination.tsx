@@ -12,6 +12,21 @@ interface GovernancePaginationProps extends PaginationProps {
   customPageOptions?: CustomPageProps;
 }
 
+export const extractDataByPage = (
+  data: Array<any>,
+  rowsPerPage: number,
+  page: number,
+) => {
+  if (!data.length || !rowsPerPage || rowsPerPage * page) {
+    return data;
+  }
+
+  const startIndex = (page - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+
+  return data.slice(startIndex, endIndex);
+};
+
 export const getPageItemIndexList = (
   totalItems: number,
   currentPage: number,
