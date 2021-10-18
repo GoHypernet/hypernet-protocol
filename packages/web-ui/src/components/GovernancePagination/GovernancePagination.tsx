@@ -17,7 +17,7 @@ export const extractDataByPage = (
   rowsPerPage: number,
   page: number,
 ) => {
-  if (!data.length || !rowsPerPage || rowsPerPage * page) {
+  if (!data.length || !rowsPerPage) {
     return data;
   }
 
