@@ -59,7 +59,9 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     coreProxy
       .getRegistryByName([registryName])
       .map((registryMap) => {
-        setRegistry(registryMap.get(registryName));
+        const registry = registryMap.get(registryName);
+        setRegistry(registry);
+        setHasEmptyState(!registry?.numberOfEntries);
         setLoading(false);
       })
       .mapErr(handleError);
@@ -99,7 +101,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   return (
     <Box>
       <GovernanceWidgetHeader
-        label={registry?.name}
+        label={registryName}
         navigationLink={{
           label: "Registry Entry List",
           onClick: () => {
