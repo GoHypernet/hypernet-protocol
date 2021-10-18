@@ -47,7 +47,7 @@ export const BalanceList: React.FC<BalanceListProps> = (
             }}
           />
           <Box className={classes.tokenAmount}>
-            {viewUtils.fromBigNumberEther(balance.freeAmount)}
+            {viewUtils.convertToEther(balance.freeAmount)}
           </Box>
           <Box className={classes.tokenName}>
             <Tooltip title={balance.name} placement="top">

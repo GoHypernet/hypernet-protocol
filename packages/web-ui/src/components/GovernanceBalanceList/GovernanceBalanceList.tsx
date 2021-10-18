@@ -45,7 +45,7 @@ export const GovernanceBalanceList: React.FC<GovernanceBalanceListProps> = (
               color="textPrimary"
               className={classes.tokenAmount}
             >
-              {viewUtils.fromBigNumberEther(balance.freeAmount)}
+              {viewUtils.convertToEther(balance.freeAmount)}
             </Typography>
             <Tooltip title={balance.name} placement="top">
               <Typography variant="h4" color="textSecondary">

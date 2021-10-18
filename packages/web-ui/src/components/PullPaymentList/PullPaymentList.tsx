@@ -138,7 +138,7 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
             },
           },
           {
-            cellValue: viewUtils.fromBigNumberWei(item.authorizedAmount),
+            cellValue: viewUtils.convertToEther(item.authorizedAmount),
             tableCellProps: {
               align: "left",
             },
@@ -191,14 +191,14 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
             onlyVisibleInExpandedState: true,
           },
           {
-            cellValue: viewUtils.fromBigNumberWei(item.requiredStake),
+            cellValue: viewUtils.convertToEther(item.requiredStake),
             tableCellProps: {
               align: "left",
             },
             onlyVisibleInExpandedState: true,
           },
           {
-            cellValue: viewUtils.fromBigNumberWei(item.amountStaked),
+            cellValue: viewUtils.convertToEther(item.amountStaked),
             tableCellProps: {
               align: "left",
             },

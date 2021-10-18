@@ -10,15 +10,15 @@ import { utils, BigNumber } from "ethers";
 import { getColorFromStatus, EStatusColor } from "@web-ui/theme";
 
 export class ViewUtils implements IViewUtils {
-  public fromBigNumberWei(value: BigNumber | BigNumberString): string {
+  public convertToWei(value: BigNumber | BigNumberString): string {
     return utils.formatUnits(value, "wei");
   }
 
-  public fromBigNumberEther(value: BigNumber | BigNumberString): string {
+  public convertToEther(value: BigNumber | BigNumberString): string {
     return utils.formatUnits(value, "ether");
   }
 
-  public toBigNumber(value: number | string): BigNumber {
+  public convertToBigNumber(value: number | string): BigNumber {
     return BigNumber.from(value);
   }
 
