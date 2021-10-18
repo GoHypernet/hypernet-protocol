@@ -17,6 +17,7 @@ const BalancesWidget: React.FC<IBalancesWidget> = ({
   includeBoxWrapper,
 }: IBalancesWidget) => {
   const { loading, balancesByChannelAddress } = useBalances();
+  console.log("balancesByChannelAddress: ", balancesByChannelAddress);
   const { viewUtils } = useStoreContext();
 
   const classes = useStyles();
