@@ -646,11 +646,7 @@ export class RegistryRepository implements IRegistryRepository {
               e,
             );
           },
-        ).andThen((tx) => {
-          return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
-            return new BlockchainUnavailableError("Unable to wait for tx", e);
-          }).map(() => {});
-        });
+        ).map(() => {});
       });
     });
   }
