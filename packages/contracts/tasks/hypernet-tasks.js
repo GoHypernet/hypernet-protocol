@@ -129,9 +129,11 @@ task("registryParameters", "Prints NFR  parameters.")
 task("setRegistryParameters", "Prints NFR  parameters.")
   .addParam("name", "name of the Registry to update.")
   .addParam("regtoken", "address of token to use for registration by token")
+  .addParam("primaryreg", "NFR for checking preregistration")
   .setAction(async (taskArgs) => {
     const name = taskArgs.name;
     const tokenAddress = taskArgs.regtoken;
+    const primaryreg = taskArgs.primaryreg;
 
     const accounts = await hre.ethers.getSigners();
 
@@ -148,7 +150,7 @@ task("setRegistryParameters", "Prints NFR  parameters.")
         ], 
         [ 
             [
-                [], [], [], [], [], [tokenAddress], [], [], [], []
+                [], [], [], [], [], [tokenAddress], [], [], [], [primaryreg]
             ] 
         ]);
 

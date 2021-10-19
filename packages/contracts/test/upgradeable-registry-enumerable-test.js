@@ -157,16 +157,25 @@ describe("Enumerated Registry", function () {
                 ] 
             ]);
 
+        let disableprimaryregistry = abiCoder.encode(
+            [
+                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+            ], 
+            [ 
+                [
+                    [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], ["0x0000000000000000000000000000000000000000"]
+                ] 
+            ]);
+
         // primary registry must implement the ERC721 interface
         await expectRevert(
             registry.setRegistryParameters(nofunctiondefintion),
             "Transaction reverted: function selector was not recognized and there's no fallback function",
         );
 
-        await expectRevert(
-            registry.setRegistryParameters(noncontractaddress),
-            "Transaction reverted: function selector was not recognized and there's no fallback function",
-        );
+        let tx = await registry.setRegistryParameters(disableprimaryregistry);
+        tx.wait();
+
     });
 
     it("Check permissions on registry parameter, label, and storage updating.", async function () {
