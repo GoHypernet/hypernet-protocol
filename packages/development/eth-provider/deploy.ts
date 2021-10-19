@@ -23,6 +23,8 @@ const registryAccountAddress = "0xC5fdf4076b8F3A5357c5E395ab970B5B54098Fef";
 const HypertokenContractAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
 const TimelockContractAddress = "0x82D50AD3C1091866E258Fd0f1a7cC9674609D254";
 const GovernanceContractAddress = "0x75c35C980C0d37ef46DF04d31A140b65503c0eEd";
+const EnumerableRegistryAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
+const NonEnumerableRegistryAddress = "0xAa588d3737B611baFD7bD713445b314BD453a5C8";
 const RegistryFactoryContractAddress =
   "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
 
@@ -110,13 +112,18 @@ const func: DeployFunction = async () => {
     ["Insurance", []],
     ["Message", []],
     ["Hypertoken", []],
+    ["NonFungibleRegistryEnumerableUpgradeable", []],
+    ["NonFungibleRegistryUpgradeable", []],
     [
       "UpgradeableRegistryFactory",
       [
         TimelockContractAddress,
-        ["Gateways", "Liquidity Providers", "HyperID"],
-        ["G", "LPs","HID"],
-        [registryAccountAddress, registryAccountAddress, hyperKYCAddress],
+        ["Gateways", "Liquidity Providers"],
+        ["G", "LPs"],
+        [registryAccountAddress, registryAccountAddress],
+        EnumerableRegistryAddress,
+        NonEnumerableRegistryAddress,
+        HypertokenContractAddress
       ],
     ],
     ["HypernetGovernor", [HypertokenContractAddress, TimelockContractAddress]],
