@@ -55,6 +55,8 @@ abstract contract NFTAccessControlUpgradeable is Initializable, ContextUpgradeab
         __ERC165_init_unchained();
         __NFTAccessControl_init_unchained();
 
+        require(IERC721EnumerableUpgradeable(registry).supportsInterface(type(IERC721EnumerableUpgradeable).interfaceId), 
+                    "NFTAccessControlUpgradeable: Address does not support ERC721Enumerable interface.");
         _nftRegistry = registry;
     }
 

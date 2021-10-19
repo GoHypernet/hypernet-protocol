@@ -121,7 +121,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         registrationToken = address(0);
         registrationFee = 1e18; // assume there are 18 decimal places in the token
         burnAddress = _admin;
-        burnFee = 500; // basis points
+        burnFee = 500; // basis points, 500 bp = 5%
         primaryRegistry = address(0);
     }
 
@@ -147,8 +147,16 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         if (params._registrationToken.length > 0) { registrationToken = params._registrationToken[0]; }
         if (params._registrationFee.length > 0) { registrationFee = params._registrationFee[0]; }
         if (params._burnAddress.length > 0) { burnAddress = params._burnAddress[0]; }
-        if (params._burnFee.length > 0) { burnFee = params._burnFee[0]; }
-        if (params._primaryRegistry.length > 0) { primaryRegistry = params._primaryRegistry[0]; }
+        if (params._burnFee.length > 0) { 
+            require(params._burnFee[0] <= 10000 && params._burnFee[0] >= 0, 
+            "NonFungibleRegistry: burnFee must be ge than 0 and le than 10000.");
+            burnFee = params._burnFee[0]; 
+        }
+        if (params._primaryRegistry.length > 0) { 
+            require(IERC721Upgradeable(params._primaryRegistry[0]).supportsInterface(type(IERC721Upgradeable).interfaceId), 
+                    "NonFungibleRegistry: Address does not support ERC721 interface.");
+            primaryRegistry = params._primaryRegistry[0]; 
+        }
     }
 
     function _storageCanBeUpdated() internal view virtual returns (bool) {

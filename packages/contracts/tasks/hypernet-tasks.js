@@ -1,4 +1,4 @@
-const {  HT, HG, RF, NFR, govAddress, timelockAddress, factoryAddress, hAddress}  = require("./constants.js");
+const {  HT, HG, RF, NFR, govAddress, factoryAddress, hAddress}  = require("./constants.js");
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -8,7 +8,7 @@ task("sendhypertoken", "Send hypertoken to another account")
   .setAction(async (taskArgs) => {
     const [owner] = await hre.ethers.getSigners();
 
-  const hypertoken = new hre.ethers.Contract(hAddress, HT.abi, owner);
+  const hypertoken = new hre.ethers.Contract(hAddress(), HT.abi, owner);
   const recipient = taskArgs.recipient;
   const amount = taskArgs.amount;
   const tx = await hypertoken.transfer(recipient, amount);
@@ -26,7 +26,7 @@ task("delegateVote", "Delegate your voting power")
   .setAction(async (taskArgs) => {
     const [owner] = await hre.ethers.getSigners();
 
-    const hypertoken = new hre.ethers.Contract(hAddress, HT.abi, owner);
+    const hypertoken = new hre.ethers.Contract(hAddress(), HT.abi, owner);
     const delegate = taskArgs.delegate;
     const amount = taskArgs.amount;
     const tx = await hypertoken.delegate(delegate);
@@ -52,7 +52,7 @@ task("governanceParameters", "Prints Governance parameters.")
 .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
 
-    const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
 
     let name = await govHandle.name();
     let votingDelay = await govHandle.votingDelay();
@@ -70,6 +70,33 @@ task("governanceParameters", "Prints Governance parameters.")
     console.log("Most Recent Proposal Description:", proposalDescription);
 });
 
+task("createRegistryByToken", "Creates a registry by burning token.")
+  .addParam("name", "Name of the target registry.")
+  .addParam("symbol", "Symbol to give to the registry.")
+  .addParam("registrar", "Address to assign the REGISTRAR_ROLE.")
+  .addParam("enumerable", "boolean indicating if the token should be enumerable or not.")
+  .setAction(async (taskArgs) => {
+    const name = taskArgs.name;
+    const symbol = taskArgs.symbol;
+    const registrar = taskArgs.registrar;
+    const enumerable = taskArgs.enumerable;
+
+    const accounts = await hre.ethers.getSigners();
+
+    const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
+    const registryAddress = await factoryHandle.nameToAddress(name);
+    const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
+
+    const numberOfEntries = await registryHandle.totalSupply();
+    const registrationToken = await registryHandle.registrationToken();
+    const registrationFee = await registryHandle.registrationFee();
+    console.log("Registry Name:", name);
+    console.log("Registry Address:", registryAddress);
+    console.log("Number of Entries:", numberOfEntries.toString());
+    console.log("Registration Token:", registrationToken);
+    console.log("Registration Fee:", registrationFee.toString());
+});
+
 task("registryParameters", "Prints NFR  parameters.")
   .addParam("name", "Name of the target registry.")
   .setAction(async (taskArgs) => {
@@ -77,20 +104,20 @@ task("registryParameters", "Prints NFR  parameters.")
 
     const accounts = await hre.ethers.getSigners();
 
-    const factoryHandle = new hre.ethers.Contract(factoryAddress, RF.abi, accounts[0]);
+    const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
     const registryAddress = await factoryHandle.nameToAddress(name);
     const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
 
     const symbol = await registryHandle.symbol();
     const numberOfEntries = await registryHandle.totalSupply();
-    // const registrationToken = await registryHandle.registrationToken();
-    // const registrationFee = await registryHandle.registrationFee();
+    const registrationToken = await registryHandle.registrationToken();
+    const registrationFee = await registryHandle.registrationFee();
     console.log("Registry Name:", name);
     console.log("Registry Symbol:", symbol);
     console.log("Registry Address:", registryAddress);
     console.log("Number of Entries:", numberOfEntries.toString());
-    // console.log("Registration Token:", registrationToken);
-    // console.log("Registration Fee:", registrationFee.toString());
+    console.log("Registration Token:", registrationToken);
+    console.log("Registration Fee:", registrationFee.toString());
 });
 
 task("setRegistryParameters", "Prints NFR  parameters.")
@@ -102,11 +129,24 @@ task("setRegistryParameters", "Prints NFR  parameters.")
 
     const accounts = await hre.ethers.getSigners();
 
-    const factoryHandle = new hre.ethers.Contract(factoryAddress, RF.abi, accounts[0]);
+    const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
     const registryAddress = await factoryHandle.nameToAddress(name);
     const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
 
-    const tx = await registryHandle.setRegistryParameters([], [], [], [], [], [tokenAddress], []);
+    const abiCoder = ethers.utils.defaultAbiCoder;
+
+    // construct call data via ABI encoding
+    let params = abiCoder.encode(
+        [
+            "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+        ], 
+        [ 
+            [
+                [], [], [], [], [], [tokenAddress], [], [], [], []
+            ] 
+        ]);
+
+    const tx = await registryHandle.setRegistryParameters(params);
     tx.wait();
 
     const symbol = await registryHandle.symbol();
@@ -130,7 +170,7 @@ task("registryEntryByLabel", "Prints NunFungible Identity Data.")
 
     const accounts = await hre.ethers.getSigners();
 
-    const factoryHandle = new hre.ethers.Contract(factoryAddress, RF.abi, accounts[0]);
+    const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
     const registryAddress = await factoryHandle.nameToAddress(name);
     const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
     
@@ -143,6 +183,27 @@ task("registryEntryByLabel", "Prints NunFungible Identity Data.")
     console.log("NFI Data:", tokenURI);
 });
 
+task("burnRegistryEntry", "Prints NunFungible Identity Data.")
+  .addParam("name", "Target NonFungle Registry Name.")
+  .addParam("tokenid", "token ID of the NFI.")
+  .setAction(async (taskArgs) => {
+    const name = taskArgs.name;
+    const tokenId = taskArgs.tokenid;
+
+    const accounts = await hre.ethers.getSigners();
+
+    const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
+    const registryAddress = await factoryHandle.nameToAddress(name);
+    const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
+
+    const balanceBefore = awaite.registryHandle.balanceOf(accounts[0].address);
+    const tx = await registryHandle.burn(tokenId);
+    tx.wait();
+    const balanceAfter = awaite.registryHandle.balanceOf(accounts[0].address);
+    console.log("Balance before: ", balanceBefore);
+    console.log("Balance after: ", balanceAfter);
+});
+
 task("proposeRegistry", "Propose a new NonFungibleRegistry.")
   .addParam("name", "Name for proposed registry.")
   .addParam("symbol", "Symbol for proposed registry.")
@@ -150,9 +211,9 @@ task("proposeRegistry", "Propose a new NonFungibleRegistry.")
   .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
 
-    const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
     const factoryHandle = new hre.ethers.Contract(
-      factoryAddress,
+      factoryAddress(),
       RF.abi,
       accounts[0],
     );
@@ -163,18 +224,18 @@ task("proposeRegistry", "Propose a new NonFungibleRegistry.")
     const registryOwner = taskArgs.owner;
     const transferCalldata = factoryHandle.interface.encodeFunctionData(
       "createRegistry",
-      [proposalDescription, registrySymbol, registryOwner],
+      [proposalDescription, registrySymbol, registryOwner, true],
     );
 
     const proposalID = await govHandle.hashProposal(
-      [factoryAddress],
+      [factoryAddress()],
       [0],
       [transferCalldata],
       descriptionHash,
     );
     // propose a new registry
     const tx = await govHandle["propose(address[],uint256[],bytes[],string)"](
-      [factoryAddress],
+      [factoryAddress()],
       [0],
       [transferCalldata],
       proposalDescription,
@@ -196,8 +257,8 @@ task("proposeRegistryEntry", "Propose a new NonFungibleRegistry where Governance
     const NFIData = taskArgs.data;
     const NFIRecipient = taskArgs.recipient;
 
-    const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
-    const factoryHandle = new hre.ethers.Contract(factoryAddress, RF.abi, accounts[0]);
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
+    const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
 
     // lookup address for target registry
     const registryAddress = await factoryHandle.nameToAddress(registryName);
@@ -241,21 +302,23 @@ task("registerWithToken", "Register an NFI with ERC20 token.")
     const NFIData = taskArgs.data;
     const NFIRecipient = taskArgs.recipient;
 
-    const factoryHandle = new hre.ethers.Contract(factoryAddress, RF.abi, accounts[0]);
+    const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
 
+    const registryAddress = await factoryHandle.enumerableRegistries(0);
+    console.log("asdf:", registryAddress)
     // lookup address for target registry
-    const registryAddress = await factoryHandle.nameToAddress(registryName);
-    const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
-    const tokenHandle = new hre.ethers.Contract(hAddress, HT.abi, accounts[0]);
+    //const registryAddress = await factoryHandle.nameToAddress(registryName);
+    // const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
+    // const tokenHandle = new hre.ethers.Contract(hAddress(), HT.abi, accounts[0]);
 
     // approve the transfer of tokens to the NFR
-    const registrationFee = await registryHandle.registrationFee();
-    const txapprove = await tokenHandle.approve(registryAddress, registrationFee);
-    const txapprovercpt = txapprove.wait();
+    // const registrationFee = await registryHandle.registrationFee();
+    // const txapprove = await tokenHandle.approve(registryAddress, registrationFee);
+    // const txapprovercpt = txapprove.wait();
 
-    // call registerByToken on the NFR
-    const txreg = await registryHandle.registerByToken(NFIRecipient, NFILabel, NFIData);
-    const txrcpt = txreg.wait();
+    // // call registerByToken on the NFR
+    // const txreg = await registryHandle.registerByToken(NFIRecipient, NFILabel, NFIData);
+    // const txrcpt = txreg.wait();
 });
 
 task("proposalState", "Check the state of an existing proposal")
@@ -263,7 +326,7 @@ task("proposalState", "Check the state of an existing proposal")
   .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
 
-    const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
 
     const proposalID = taskArgs.id;
     const proposalState = await govHandle.state(proposalID);
@@ -289,7 +352,7 @@ task("castVote", "Cast a vote for an existing proposal")
   .setAction(async (taskArgs) => {
 
     const accounts = await hre.ethers.getSigners();
-    const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
 
     const proposalID = taskArgs.id;
     const support = taskArgs.support;
@@ -309,7 +372,7 @@ task("queueProposal", "queue a proposal that has been successfully passed.")
   .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
 
-    const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
 
     const proposalID = taskArgs.id;
     const { targets, values, signatures, calldatas } =
@@ -328,7 +391,7 @@ task("executeProposal", "Execute a proposal that has been successfully passed.")
   .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
 
-    const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
 
     const proposalID = taskArgs.id;
     const descriptionHash = taskArgs.hash;
@@ -345,7 +408,7 @@ task("cancelProposal", "Cancel a proposal if it is your or if proposer is below 
   .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
 
-    const govHandle = new hre.ethers.Contract(govAddress, HG.abi, accounts[0]);
+    const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
 
     const proposalID = taskArgs.id;
     console.log("Cancelling Proposal:", proposalID);
