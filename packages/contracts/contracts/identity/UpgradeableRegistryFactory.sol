@@ -87,6 +87,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @param _registrationFee burn fee amount
     function setRegistrationFee(uint256 _registrationFee) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to create a registry");
+        require(registrationFee >= 0, "RegsitryFactory: Registration fee must be nonnegative.");
         registrationFee = _registrationFee;
     }
 

@@ -152,6 +152,12 @@ Once a registry has been deployed via the proposal process, get the registry's i
 npx hardhat registryParameters --network dev --name Gateways
 ```
 
+and set the registry's parameters:
+
+```shell
+npx hardhat setRegistryParameters --network dev --name HyperId --0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+``
+
 Propose a new Gateway be added to the Gateways NonFunglebleRegistry we just deployed:
 
 ```shell

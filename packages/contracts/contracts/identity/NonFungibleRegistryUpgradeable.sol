@@ -86,6 +86,9 @@ contract NonFungibleRegistryUpgradeable is
     // create a REGISTRAR_ROLE to manage registry functionality
     bytes32 public constant REGISTRAR_ROLE = keccak256("REGISTRAR_ROLE");
 
+    // create a REGISTRAR_ROLE to manage registry functionality
+    bytes32 public constant REGISTRAR_ROLE_ADMIN = keccak256("REGISTRAR_ROLE_ADMIN");
+
     CountersUpgradeable.Counter private _tokenIdTracker;
 
     event LabelUpdated(uint256 tokenId, string label);
@@ -110,6 +113,9 @@ contract NonFungibleRegistryUpgradeable is
 
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
         _setupRole(REGISTRAR_ROLE, _registrar);
+
+        _setRoleAdmin (REGISTRAR_ROLE, REGISTRAR_ROLE_ADMIN);
+        _setupRole(REGISTRAR_ROLE_ADMIN, _registrar);
 
         allowLazyRegister = false;
         allowStorageUpdate = true;
