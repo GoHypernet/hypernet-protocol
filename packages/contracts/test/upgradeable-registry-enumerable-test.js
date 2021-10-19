@@ -153,7 +153,7 @@ describe("Enumerated Registry", function () {
             ], 
             [ 
                 [
-                    [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [hypertoken.address]
+                    [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [owner.address]
                 ] 
             ]);
 
@@ -171,6 +171,11 @@ describe("Enumerated Registry", function () {
         await expectRevert(
             registry.setRegistryParameters(nofunctiondefintion),
             "Transaction reverted: function selector was not recognized and there's no fallback function",
+        );
+
+        await expectRevert(
+            registry.setRegistryParameters(noncontractaddress),
+            "Transaction reverted: function call to a non-contract account",
         );
 
         let tx = await registry.setRegistryParameters(disableprimaryregistry);
