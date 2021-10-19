@@ -54,6 +54,7 @@ export const GovernancePagination: React.FC<GovernancePaginationProps> = (
     customPageOptions,
     count = 1,
     defaultPage = 1,
+    className,
     ...rest
   } = props;
   const classes = useStyles();
@@ -80,7 +81,7 @@ export const GovernancePagination: React.FC<GovernancePaginationProps> = (
 
   return (
     <Pagination
-      className={classes.pagination}
+      className={`${classes.pagination} ${className}`}
       shape={shape}
       count={customPageOptions ? customPageCount : count}
       {...rest}

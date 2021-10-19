@@ -17,6 +17,7 @@ import {
 } from "@web-ui/components";
 import React, { useMemo, useState } from "react";
 import { useLinks } from "@web-ui/hooks";
+import { useStyles } from "@web-ui/components/PushPaymentList/PushPaymentList.style";
 
 interface IPushPaymentList {
   pushPayments: PushPayment[];
@@ -121,6 +122,7 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
   props: IPushPaymentList,
 ) => {
   const { pushPayments, publicIdentifier, onAcceptPushPaymentClick } = props;
+  const classes = useStyles();
   const { viewUtils, dateUtils } = useStoreContext();
   const { loading } = useLinks();
   const [page, setPage] = useState<number>(1);
@@ -257,8 +259,9 @@ export const PushPaymentList: React.FC<IPushPaymentList> = (
   return (
     <>
       <GovernanceTable isExpandable columns={tableColumns} rows={rows} />
-      {pushPayments.length && (
+      {pushPayments.length > 0 && (
         <GovernancePagination
+          className={classes.pagination}
           customPageOptions={{
             itemsPerPage: PUSH_PAYMENTS_PER_PAGE,
             totalItems: pushPayments.length,

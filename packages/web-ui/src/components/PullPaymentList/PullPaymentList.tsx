@@ -17,6 +17,7 @@ import {
   extractDataByPage,
 } from "@web-ui/components";
 import { useLinks } from "@web-ui/hooks";
+import { useStyles } from "@web-ui/components/PullPaymentList/PullPaymentList.style";
 
 interface IPullPaymentList {
   pullPayments: PullPayment[];
@@ -127,6 +128,7 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
     onAcceptPullPaymentClick,
     onPullFundClick,
   } = props;
+  const classes = useStyles();
   const { viewUtils, dateUtils } = useStoreContext();
   const { loading } = useLinks();
   const [page, setPage] = useState<number>(1);
@@ -278,8 +280,9 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
   return (
     <>
       <GovernanceTable isExpandable columns={tableColumns} rows={rows} />
-      {pullPayments.length && (
+      {pullPayments.length > 0 && (
         <GovernancePagination
+        className={classes.pagination}
           customPageOptions={{
             itemsPerPage: PULL_PAYMENTS_PER_PAGE,
             totalItems: pullPayments.length,
