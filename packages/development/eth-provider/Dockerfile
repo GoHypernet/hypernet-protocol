@@ -16,7 +16,7 @@ COPY Hypertoken/Hypertoken.json artifacts/src.sol/testing/Hypertoken.sol/
 COPY TimelockController/TimelockController.json artifacts/src.sol/testing/TimelockController.sol/
 COPY HypernetGovernor/HypernetGovernor.json artifacts/src.sol/testing/HypernetGovernor.sol/
 COPY UpgradeableRegistryFactory/UpgradeableRegistryFactory.json artifacts/src.sol/testing/UpgradeableRegistryFactory.sol/
-COPY NonFugibleRegistryEnumerableUpgradeable/NonFugibleRegistryEnumerableUpgradeable.json artifacts/src.sol/testing/NonFugibleRegistryEnumerableUpgradeable.sol/
-COPY NonFugibleRegistryUpgradeable/NonFugibleRegistryUpgradeable.json artifacts/src.sol/testing/NonFugibleRegistryUpgradeable.sol/
+COPY NonFungibleRegistryEnumerableUpgradeable/NonFungibleRegistryEnumerableUpgradeable.json artifacts/src.sol/testing/NonFungibleRegistryEnumerableUpgradeable.sol/
+COPY NonFungibleRegistryUpgradeable/NonFungibleRegistryUpgradeable.json artifacts/src.sol/testing/NonFungibleRegistryUpgradeable.sol/
 COPY src.ts/ src.ts/
 EXPOSE 8545
