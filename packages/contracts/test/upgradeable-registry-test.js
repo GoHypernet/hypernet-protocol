@@ -86,6 +86,7 @@ describe("Registry with No Enumeration", function () {
           );
     });
 
+
     it("Check token owner burn permissions", async function () {
         const label = "dummy";
         const registrationData = "dummy";
@@ -128,6 +129,42 @@ describe("Registry with No Enumeration", function () {
         tx.wait();
 
         expect(await registry.balanceOf(addr1.address)).to.equal(0);
+    });
+
+    it("Check primary registry settings", async function () {
+        const abiCoder = ethers.utils.defaultAbiCoder;
+
+        // construct call data via ABI encoding
+        let nofunctiondefintion = abiCoder.encode(
+            [
+                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+            ], 
+            [ 
+                [
+                    [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [hypertoken.address]
+                ] 
+            ]);
+
+        let noncontractaddress = abiCoder.encode(
+            [
+                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+            ], 
+            [ 
+                [
+                    [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [hypertoken.address]
+                ] 
+            ]);
+
+        // primary registry must implement the ERC721 interface
+        await expectRevert(
+            registry.setRegistryParameters(nofunctiondefintion),
+            "Transaction reverted: function selector was not recognized and there's no fallback function",
+        );
+
+        await expectRevert(
+            registry.setRegistryParameters(noncontractaddress),
+            "Transaction reverted: function selector was not recognized and there's no fallback function",
+        );
     });
 
     it("Check permissions on registry parameter, label, and storage updating.", async function () {

@@ -20,9 +20,19 @@ describe("Registry Factory Unit Tests", function () {
         let tx = await hypertoken.transfer(addr1.address, ethers.utils.parseEther("100"));
         tx.wait();
 
+        // deploy enumerable registry contract
+        const EnumerableRegistry = await ethers.getContractFactory("NonFungibleRegistryEnumerableUpgradeable");
+        const enumerableregistry = await EnumerableRegistry.deploy();
+        enumerableregistry.deployTransaction.wait();
+
+        // deploy registry contract
+        const Registry = await ethers.getContractFactory("NonFungibleRegistryUpgradeable");
+        const registry = await Registry.deploy();
+        registry.deployTransaction.wait();
+
         // deploy factory contract
         const RegistryFactory = await ethers.getContractFactory("UpgradeableRegistryFactory");
-        registryfactory = await RegistryFactory.deploy(owner.address, ["Test"], ["t"], [owner.address]);
+        registryfactory = await RegistryFactory.deploy(owner.address, ["Test"], ["t"], [owner.address], enumerableregistry.address, registry.address, hypertoken.address);
         await registryfactory.deployTransaction.wait();
 	});
 
@@ -86,7 +96,11 @@ describe("Registry Factory Unit Tests", function () {
           );
     });
 
-    it("Register By token is disabled by default.", async function () {
+    it("Register By token is disabled when registrationToken is 0 address.", async function () {
+
+        let tx = await registryfactory.setRegistrationToken("0x0000000000000000000000000000000000000000");
+        tx.wait(); 
+
         // can't create two registries with the same name
         await expectRevert(
                 registryfactory.createRegistryByToken(
@@ -168,7 +182,7 @@ describe("Registry Factory Unit Tests", function () {
         let registryAddress = await registryfactory.nameToAddress("enumerabledummy");
         const dummyReg = new ethers.Contract(registryAddress, NFR.abi, addr1);
 
-        expect(await registryfactory.getNumberOfRegistries()).to.equal(2);
+        expect(await registryfactory.getNumberOfEnumerableRegistries()).to.equal(2);
         expect(await hypertoken.balanceOf(addr1.address)).to.equal(fee);
         expect(await hypertoken.balanceOf(burnAddress)).to.equal(fee);
         expect(await dummyReg.name()).to.equal("enumerabledummy");
