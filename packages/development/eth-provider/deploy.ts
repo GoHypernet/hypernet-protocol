@@ -112,8 +112,6 @@ const func: DeployFunction = async () => {
     ["Insurance", []],
     ["Message", []],
     ["Hypertoken", []],
-    ["NonFungibleRegistryEnumerableUpgradeable", []],
-    ["NonFungibleRegistryUpgradeable", []],
     [
       "UpgradeableRegistryFactory",
       [
@@ -131,6 +129,8 @@ const func: DeployFunction = async () => {
       "TimelockController",
       [1, [GovernanceContractAddress], [GovernanceContractAddress]],
     ],
+    ["NonFungibleRegistryEnumerableUpgradeable", []],
+    ["NonFungibleRegistryUpgradeable", []],
   ];
 
   // Only deploy test fixtures during hardhat tests
