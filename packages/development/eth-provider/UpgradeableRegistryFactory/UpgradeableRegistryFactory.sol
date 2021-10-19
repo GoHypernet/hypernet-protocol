@@ -27,7 +27,7 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     mapping (string => address) public nameToAddress;
 
     // address of ERC20 token used for token-based regsitry creation
-    address public registrationToken = address(0);
+    address public registrationToken;
 
     // amount of registration token required to create a registry
     uint256 public registrationFee = 50e18; // assume 18 decimal places
@@ -45,22 +45,33 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     /// @param _names array of names for the registries created on deployment 
     /// @param _symbols array of symbols for the registries created on deployment 
     /// @param _registrars array of addresses to recieve the REGISTRAR_ROLE for the registries created on deployment 
-    constructor(address _admin, string[] memory _names, string[] memory _symbols, address[] memory _registrars)  {
+    /// @param _enumerableRegistry address of implementation of enumerable NFR
+    /// @param _registry address of implementation of non-enumerable NFR
+    /// @param _registrationToken address of ERC20 token used for enabling the creation of registries by burning token
+    constructor(address _admin, 
+                string[] memory _names, 
+                string[] memory _symbols, 
+                address[] memory _registrars, 
+                address _enumerableRegistry, 
+                address _registry,
+                address _registrationToken)  {
         require(_names.length == _symbols.length, "RegistryFactory: Initializer arrays must be equal length.");
         require(_symbols.length == _registrars.length, "RegistryFactory: Initializer arrays must be equal length.");
 
         // set the administrator of the registry factory
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
 
-        // during construction, deploy the upgradable beacon instance of our enumerable registry contract
-        UpgradeableBeacon _enumerableRegistryBeacon = new UpgradeableBeacon(address(new NonFungibleRegistryEnumerableUpgradeable()));
+        // deploy upgradable beacon instance of enumerable registry contract
+        UpgradeableBeacon _enumerableRegistryBeacon = new UpgradeableBeacon(_enumerableRegistry);
         _enumerableRegistryBeacon.transferOwnership(_admin);
         enumerableRegistryBeacon = address(_enumerableRegistryBeacon);
 
-        // during construction, deploy the upgradable beacon instance of our registry contract
-        UpgradeableBeacon _registryBeacon = new UpgradeableBeacon(address(new NonFungibleRegistryEnumerableUpgradeable()));
+        // deploy upgradable beacon instance of registry contract
+        UpgradeableBeacon _registryBeacon = new UpgradeableBeacon(_registry);
         _registryBeacon.transferOwnership(_admin);
         registryBeacon = address(_registryBeacon);
+
+        registrationToken = _registrationToken;
 
         // deploy initial enumerable registries 
         for (uint256 i = 0; i < _names.length; ++i) {
@@ -68,10 +79,16 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
         }
     }
 
-    /// @notice getNumberOfRegistries geter function for reading the number of registries
+    /// @notice getNumberOfEnumerableRegistries getter function for reading the number of enumerable registries
+    /// @dev usefull for paginated UIs
+    function getNumberOfEnumerableRegistries() public view returns (uint256 numReg) {
+        numReg = enumerableRegistries.length;
+    }
+
+    /// @notice getNumberOfRegistries getter function for reading the number of registries
     /// @dev usefull for paginated UIs
     function getNumberOfRegistries() public view returns (uint256 numReg) {
-        numReg = enumerableRegistries.length;
+        numReg = registries.length;
     }
 
     /// @notice setRegistrationToken setter function for configuring which ERC20 token is burned when adding new apps

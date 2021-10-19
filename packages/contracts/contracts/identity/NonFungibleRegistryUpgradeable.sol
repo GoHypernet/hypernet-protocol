@@ -156,7 +156,8 @@ contract NonFungibleRegistryUpgradeable is
             burnFee = params._burnFee[0]; 
         }
         if (params._primaryRegistry.length > 0) { 
-            require(IERC721Upgradeable(params._primaryRegistry[0]).supportsInterface(type(IERC721Upgradeable).interfaceId), 
+            require(IERC721Upgradeable(params._primaryRegistry[0]).supportsInterface(type(IERC721Upgradeable).interfaceId) || 
+                    address(params._primaryRegistry[0]) == address(0), 
                     "NonFungibleRegistry: Address does not support ERC721 interface.");
             primaryRegistry = params._primaryRegistry[0]; 
         }
