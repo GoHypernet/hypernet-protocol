@@ -658,10 +658,10 @@ export class RegistryRepository implements IRegistryRepository {
     return this.initializeReadOnly().andThen(
       ({ registryContracts, provider }) => {
         return ResultAsync.fromPromise(
-          registryContracts.factoryContract.getNumberOfRegistries() as Promise<BigNumber>,
+          registryContracts.factoryContract.getNumberOfEnumerableRegistries() as Promise<BigNumber>,
           (e) => {
             return new BlockchainUnavailableError(
-              "Unable to call factoryContract getNumberOfRegistries()",
+              "Unable to call factoryContract getNumberOfEnumerableRegistries()",
               e,
             );
           },
