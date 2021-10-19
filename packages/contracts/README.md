@@ -176,6 +176,12 @@ Add a new NFI by staking tokens:
 npx hardhat registerWithToken --network dev --name Gateways --label "https://hyperpay.io" --data "biglongsignatureblock" --recipient 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
 ```
 
+burn an NFI if you are the owner or registrar:
+
+```shell
+npx hardhat burnToken --network dev --registry Gateways --tokenid 1
+```
+
 Retrieve data pertaining to a specific entry in a named Hypernet Gateway:
 
 ```shell
