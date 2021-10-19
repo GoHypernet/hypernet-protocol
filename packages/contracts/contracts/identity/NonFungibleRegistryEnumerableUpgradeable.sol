@@ -159,10 +159,14 @@ contract NonFungibleRegistryEnumerableUpgradeable is
             burnFee = params._burnFee[0]; 
         }
         if (params._primaryRegistry.length > 0) { 
-            require(IERC721Upgradeable(params._primaryRegistry[0]).supportsInterface(type(IERC721Upgradeable).interfaceId) || 
-                    address(params._primaryRegistry[0]) == address(0), 
-                    "NonFungibleRegistry: Address does not support ERC721 interface.");
-            primaryRegistry = params._primaryRegistry[0]; 
+            // allow this feature to be disablled by setting to 0 address
+            if (address(params._primaryRegistry[0]) == address(0)) {
+                primaryRegistry = address(0); 
+            } else {
+                require(IERC721Upgradeable(params._primaryRegistry[0]).supportsInterface(type(IERC721Upgradeable).interfaceId), 
+                        "NonFungibleRegistry: Address does not support ERC721 interface.");
+                primaryRegistry = params._primaryRegistry[0]; 
+            }
         }
     }
 
