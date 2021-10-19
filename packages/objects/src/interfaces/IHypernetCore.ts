@@ -20,6 +20,7 @@ import {
   GatewayAuthorizationDeniedError,
   MessagingError,
   RouterChannelUnknownError,
+  RegistryPermissionError,
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { GatewayRegistrationFilter } from "@objects/GatewayRegistrationFilter";
@@ -37,6 +38,7 @@ import { Proposal, ProposalVoteReceipt } from "@objects/Proposal";
 import { EProposalVoteSupport } from "@objects/typing";
 import { Registry } from "@objects/Registry";
 import { RegistryEntry } from "@objects/RegistryEntry";
+import { RegistryParams } from "@objects/RegistryParams";
 
 /**
  * HypernetCore is a single instance of the Hypernet Protocol, representing a single
@@ -257,13 +259,15 @@ export interface IHypernetCore {
   ): ResultAsync<void, InvalidParametersError>;
 
   getProposals(
-    proposalsNumberArr?: number[],
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<Proposal[], BlockchainUnavailableError>;
 
   createProposal(
     name: string,
     symbol: string,
     owner: EthereumAddress,
+    enumerable: boolean,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
 
   delegateVote(
@@ -307,7 +311,8 @@ export interface IHypernetCore {
 
   getRegistryEntries(
     registryName: string,
-    registryEntriesNumberArr?: number[],
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
 
   getRegistryEntryByLabel(
@@ -327,13 +332,19 @@ export interface IHypernetCore {
     registryName: string,
     tokenId: number,
     registrationData: string,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  >;
 
   updateRegistryEntryLabel(
     registryName: string,
     tokenId: number,
     label: string,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  >;
 
   getProposalsCount(): ResultAsync<number, BlockchainUnavailableError>;
 
@@ -352,6 +363,37 @@ export interface IHypernetCore {
   ): ResultAsync<number, BlockchainUnavailableError>;
 
   getNumberOfRegistries(): ResultAsync<number, BlockchainUnavailableError>;
+
+  updateRegistryParams(
+    registryParams: RegistryParams,
+  ): ResultAsync<
+    Registry,
+    BlockchainUnavailableError | RegistryPermissionError
+  >;
+
+  createRegistryEntry(
+    registryName: string,
+    label: string,
+    recipientAddress: EthereumAddress,
+    data: string,
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  >;
+
+  transferRegistryEntry(
+    registryName: string,
+    tokenId: number,
+    transferToAddress: EthereumAddress,
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  >;
+
+  burnRegistryEntry(
+    registryName: string,
+    tokenId: number,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
 
   /**
    * Observables for seeing what's going on

@@ -3,6 +3,8 @@ import {
   EthereumAddress,
   RegistryEntry,
   Registry,
+  RegistryParams,
+  RegistryPermissionError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 import { inject } from "inversify";
@@ -43,11 +45,13 @@ export class RegistryService implements IRegistryService {
 
   public getRegistryEntries(
     registryName: string,
-    registryEntriesNumberArr?: number[],
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this.registryRepository.getRegistryEntries(
       registryName,
-      registryEntriesNumberArr,
+      pageNumber,
+      pageSize,
     );
   }
 
@@ -62,7 +66,10 @@ export class RegistryService implements IRegistryService {
     registryName: string,
     tokenId: number,
     registrationData: string,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
     return this.registryRepository.updateRegistryEntryTokenURI(
       registryName,
       tokenId,
@@ -74,7 +81,10 @@ export class RegistryService implements IRegistryService {
     registryName: string,
     tokenId: number,
     label: string,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
     return this.registryRepository.updateRegistryEntryLabel(
       registryName,
       tokenId,
@@ -87,5 +97,53 @@ export class RegistryService implements IRegistryService {
     BlockchainUnavailableError
   > {
     return this.registryRepository.getNumberOfRegistries();
+  }
+
+  public updateRegistryParams(
+    registryParams: RegistryParams,
+  ): ResultAsync<
+    Registry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
+    return this.registryRepository.updateRegistryParams(registryParams);
+  }
+
+  public createRegistryEntry(
+    registryName: string,
+    label: string,
+    recipientAddress: EthereumAddress,
+    data: string,
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
+    return this.registryRepository.createRegistryEntry(
+      registryName,
+      label,
+      recipientAddress,
+      data,
+    );
+  }
+
+  public transferRegistryEntry(
+    registryName: string,
+    tokenId: number,
+    transferToAddress: EthereumAddress,
+  ): ResultAsync<
+    RegistryEntry,
+    BlockchainUnavailableError | RegistryPermissionError
+  > {
+    return this.registryRepository.transferRegistryEntry(
+      registryName,
+      tokenId,
+      transferToAddress,
+    );
+  }
+
+  public burnRegistryEntry(
+    registryName: string,
+    tokenId: number,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this.registryRepository.burnRegistryEntry(registryName, tokenId);
   }
 }

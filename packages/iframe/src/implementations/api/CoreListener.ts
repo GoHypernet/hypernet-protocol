@@ -14,6 +14,7 @@ import {
   PublicIdentifier,
   GatewayRegistrationFilter,
   EProposalVoteSupport,
+  RegistryParams,
 } from "@hypernetlabs/objects";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
@@ -188,9 +189,17 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           );
         }, data.callId);
       },
-      getProposals: (data: IIFrameCallData<number[]>) => {
+      getProposals: (
+        data: IIFrameCallData<{
+          pageNumber: number;
+          pageSize: number;
+        }>,
+      ) => {
         this.returnForModel(() => {
-          return this.core.getProposals(data.data);
+          return this.core.getProposals(
+            data.data.pageNumber,
+            data.data.pageSize,
+          );
         }, data.callId);
       },
       createProposal: (
@@ -198,6 +207,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           name: string;
           symbol: string;
           owner: EthereumAddress;
+          enumerable: boolean;
         }>,
       ) => {
         this.returnForModel(() => {
@@ -205,6 +215,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.name,
             data.data.symbol,
             data.data.owner,
+            data.data.enumerable,
           );
         }, data.callId);
       },
@@ -297,13 +308,15 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       getRegistryEntries: (
         data: IIFrameCallData<{
           registryName: string;
-          registryEntriesNumberArr?: number[];
+          pageNumber: number;
+          pageSize: number;
         }>,
       ) => {
         this.returnForModel(() => {
           return this.core.getRegistryEntries(
             data.data.registryName,
-            data.data.registryEntriesNumberArr,
+            data.data.pageNumber,
+            data.data.pageSize,
           );
         }, data.callId);
       },
@@ -383,6 +396,56 @@ export class CoreListener extends ChildProxy implements ICoreListener {
       getNumberOfRegistries: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           return this.core.getNumberOfRegistries();
+        }, data.callId);
+      },
+      updateRegistryParams: (data: IIFrameCallData<RegistryParams>) => {
+        this.returnForModel(() => {
+          return this.core.updateRegistryParams(data.data);
+        }, data.callId);
+      },
+      createRegistryEntry: (
+        data: IIFrameCallData<{
+          registryName: string;
+          label: string;
+          recipientAddress: EthereumAddress;
+          data: string;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.createRegistryEntry(
+            data.data.registryName,
+            data.data.label,
+            data.data.recipientAddress,
+            data.data.data,
+          );
+        }, data.callId);
+      },
+      transferRegistryEntry: (
+        data: IIFrameCallData<{
+          registryName: string;
+          tokenId: number;
+          transferToAddress: EthereumAddress;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.transferRegistryEntry(
+            data.data.registryName,
+            data.data.tokenId,
+            data.data.transferToAddress,
+          );
+        }, data.callId);
+      },
+      burnRegistryEntry: (
+        data: IIFrameCallData<{
+          registryName: string;
+          tokenId: number;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.burnRegistryEntry(
+            data.data.registryName,
+            data.data.tokenId,
+          );
         }, data.callId);
       },
     });

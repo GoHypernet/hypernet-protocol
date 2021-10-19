@@ -9,9 +9,12 @@ import { AccountService } from "@implementations/business/AccountService";
 import { IBlockchainProvider } from "@interfaces/utilities";
 import {
   account,
+  activeStateChannel,
+  chainId,
   mockUtils,
   publicIdentifier,
   routerChannelAddress,
+  routerPublicIdentifier,
 } from "@mock/mocks";
 import { ContextProviderMock } from "@mock/utils";
 
@@ -173,5 +176,23 @@ describe("AccountService tests", () => {
     expect(response._unsafeUnwrap()).toBe(accountServiceMock.balances);
     expect(publishedBalances.length).toBe(1);
     expect(publishedBalances[0]).toBe(accountServiceMock.balances);
+  });
+
+  test("Should createStateChannel return ActiveStateChannel", async () => {
+    // Arrange
+    const accountServiceMock = new AccountServiceMocks();
+    const accountService = accountServiceMock.factoryAccountService();
+
+    // Act
+    const getPublicIdentifierResponse = await accountService.createStateChannel(
+      [routerPublicIdentifier],
+      chainId,
+    );
+
+    // Assert
+    expect(getPublicIdentifierResponse.isErr()).toStrictEqual(false);
+    expect(getPublicIdentifierResponse._unsafeUnwrap()).toStrictEqual(
+      activeStateChannel,
+    );
   });
 });

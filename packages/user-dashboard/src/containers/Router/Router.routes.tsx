@@ -7,9 +7,10 @@ import Gateways from "@user-dashboard/pages/Gateways";
 import Proposals from "@user-dashboard/pages/Governance/Proposals";
 import ProposalDetail from "@user-dashboard/pages/Governance/ProposalDetail";
 import ProposalCreate from "@user-dashboard/pages/Governance/ProposalCreate";
-import RegistryList from "@web-integration/pages/Governance/RegistryList";
-import RegistryEntryList from "@web-integration/pages/Governance/RegistryEntryList";
-import RegistryEntryDetail from "@web-integration/pages/Governance/RegistryEntryDetail";
+import RegistryList from "@user-dashboard/pages/Governance/RegistryList";
+import RegistryEntryList from "@user-dashboard/pages/Governance/RegistryEntryList";
+import RegistryEntryDetail from "@user-dashboard/pages/Governance/RegistryEntryDetail";
+import RegistryDetail from "@user-dashboard/pages/Governance/RegistryDetail";
 
 interface IRoute {
   path: string;
@@ -48,6 +49,12 @@ export const routes: IRoute[] = [
     component: RegistryList,
     name: "Registries",
     isHeaderItem: true,
+  },
+  {
+    path: "/registries/:registryName",
+    component: RegistryDetail,
+    name: "Registry Detail",
+    isHeaderItem: false,
   },
   {
     path: "/registries/:registryName/entries",

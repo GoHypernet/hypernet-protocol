@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Typography } from "@material-ui/core";
 
-import { useStyles } from "@web-integration/components/GovernanceListItemValueWithTitle/GovernanceListItemValueWithTitle.style";
+import { useStyles } from "@web-ui/components/GovernanceListItemValueWithTitle/GovernanceListItemValueWithTitle.style";
 
 export interface IGovernanceListItemValueWithTitle {
   title: string;

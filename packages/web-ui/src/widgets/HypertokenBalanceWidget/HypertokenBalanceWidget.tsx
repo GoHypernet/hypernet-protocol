@@ -3,7 +3,7 @@ import { useAlert } from "react-alert";
 import { Typography, Box } from "@material-ui/core";
 
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { useStyles } from "@web-integration/widgets/HypertokenBalanceWidget/HypertokenBalanceWidget.style";
+import { useStyles } from "@web-ui/widgets/HypertokenBalanceWidget/HypertokenBalanceWidget.style";
 import { IRenderParams } from "@web-ui/interfaces";
 import { HYPER_TOKEN_LOGO_PURPLE_URL } from "@web-ui/constants";
 

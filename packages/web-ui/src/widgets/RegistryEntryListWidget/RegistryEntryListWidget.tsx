@@ -6,12 +6,16 @@ import {
   GovernanceRegistryListItem,
   GovernanceWidgetHeader,
   GovernancePagination,
-  getPageItemIndexList,
   GovernanceEmptyState,
 } from "@web-ui/components";
 import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { RegistryEntry } from "@hypernetlabs/objects";
+import {
+  EthereumAddress,
+  Registry,
+  RegistryEntry,
+} from "@hypernetlabs/objects";
+import CreateIdentityWidget from "../CreateIdentityWidget";
 
 const REGISTRY_ENTRIES_PER_PAGE = 3;
 
@@ -21,47 +25,56 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   registryName,
 }: IRegistryEntryListWidgetParams) => {
   const alert = useAlert();
-  const { coreProxy } = useStoreContext();
+  const { coreProxy, viewUtils } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [registryEntries, setRegistryEntries] = useState<RegistryEntry[]>([]);
-
-  const [page, setPage] = useState<number>(1);
-  const [registryEntriesCount, setRegistryEntriesCount] = useState<number>(0);
-  const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
-
-  const registryEntriesNumberArr = useMemo(
-    () =>
-      getPageItemIndexList(
-        registryEntriesCount,
-        page,
-        REGISTRY_ENTRIES_PER_PAGE,
-      ),
-    [registryEntriesCount, page],
+  const [registry, setRegistry] = useState<Registry>();
+  const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
+    EthereumAddress(""),
   );
 
+  const [createIdentityModalOpen, setCreateIdentityModalOpen] =
+    useState<boolean>(false);
+
+  const [page, setPage] = useState<number>(1);
+  const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
+
   useEffect(() => {
-    coreProxy
-      .getRegistryEntriesTotalCount([registryName])
-      .map((countsMap) => {
-        const count = countsMap.get(registryName);
-        setRegistryEntriesCount(count || 0);
-        if (!count) {
-          setHasEmptyState(true);
-        }
-      })
-      .mapErr(handleError);
+    getRegistry();
   }, []);
 
   useEffect(() => {
-    if (registryEntriesNumberArr.length) {
-      coreProxy
-        .getRegistryEntries(registryName, registryEntriesNumberArr)
-        .map((registryEntries) => {
-          setRegistryEntries(registryEntries);
-        })
-        .mapErr(handleError);
+    if (registry?.numberOfEntries) {
+      getRegistryEntries();
     }
-  }, [JSON.stringify(registryEntriesNumberArr)]);
+  }, [registry?.numberOfEntries, page, REGISTRY_ENTRIES_PER_PAGE]);
+
+  useEffect(() => {
+    coreProxy.getEthereumAccounts().map((accounts) => {
+      setAccountAddress(accounts[0]);
+    });
+  }, []);
+
+  const getRegistry = () => {
+    coreProxy
+      .getRegistryByName([registryName])
+      .map((registryMap) => {
+        const registry = registryMap.get(registryName);
+        setRegistry(registry);
+        setHasEmptyState(!registry?.numberOfEntries);
+        setLoading(false);
+      })
+      .mapErr(handleError);
+  };
+
+  const getRegistryEntries = () => {
+    coreProxy
+      .getRegistryEntries(registryName, page, REGISTRY_ENTRIES_PER_PAGE)
+      .map((registryEntries) => {
+        setRegistryEntries(registryEntries);
+      })
+      .mapErr(handleError);
+  };
 
   const handleError = (err?: Error) => {
     console.log("handleError err: ", err);
@@ -70,16 +83,41 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
     alert.error(err?.message || "Something went wrong!");
   };
 
+  const isRegistrar = useMemo(() => {
+    return registry?.registrarAddresses.some(
+      (address) => address === accountAddress,
+    );
+  }, [accountAddress, JSON.stringify(registry?.registrarAddresses)]);
+
+  const isRegistrationTokenEnabled = useMemo(() => {
+    return (
+      registry?.registrationToken != null &&
+      !viewUtils.isZeroAddress(registry?.registrationToken)
+    );
+  }, [JSON.stringify(registry?.registrationToken)]);
+
+  const canCreateNewRegistryEntry = isRegistrar || isRegistrationTokenEnabled;
+
   return (
     <Box>
       <GovernanceWidgetHeader
-        label="Registry Entries"
+        label={registryName}
         navigationLink={{
           label: "Registry Entry List",
           onClick: () => {
             onRegistryListNavigate?.();
           },
         }}
+        {...(canCreateNewRegistryEntry && {
+          headerActions: [
+            {
+              label: "Create New Identity",
+              onClick: () => setCreateIdentityModalOpen(true),
+              variant: "contained",
+              color: "primary",
+            },
+          ],
+        })}
       />
 
       {hasEmptyState && (
@@ -92,9 +130,17 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       {registryEntries.map((registryEntry) => (
         <GovernanceRegistryListItem
           key={registryEntry.label}
-          number={registryEntry.tokenId.toString()}
-          title={registryEntry.label}
+          number={
+            registryEntry.index != null
+              ? (registryEntry.index + 1).toString()
+              : "-"
+          }
+          title=""
           fieldWithValueList={[
+            {
+              fieldTitle: "Label",
+              fieldValue: registryEntry.label,
+            },
             {
               fieldTitle: "Token ID",
               fieldValue: registryEntry.tokenId.toString(),
@@ -108,22 +154,40 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
               fieldValue: registryEntry.tokenURI || undefined,
             },
           ]}
-          buttonLabel="View Registry Entry Details"
-          onViewDetailsClick={() =>
-            onRegistryEntryDetailsNavigate &&
-            onRegistryEntryDetailsNavigate(registryName, registryEntry.label)
-          }
+          {...((isRegistrar || registryEntry.owner === accountAddress) && {
+            actionButtonList: [
+              {
+                label: "View Registry Entry Details",
+                onClick: () =>
+                  onRegistryEntryDetailsNavigate &&
+                  onRegistryEntryDetailsNavigate(
+                    registryName,
+                    registryEntry.label,
+                  ),
+              },
+            ],
+          })}
         />
       ))}
-      {!!registryEntriesCount && (
+      {!!registry?.numberOfEntries && (
         <GovernancePagination
           customPageOptions={{
             itemsPerPage: REGISTRY_ENTRIES_PER_PAGE,
-            totalItems: registryEntriesCount,
+            totalItems: registry?.numberOfEntries,
           }}
           onChange={(_, page) => {
             setPage(page);
           }}
+        />
+      )}
+      {createIdentityModalOpen && (
+        <CreateIdentityWidget
+          onCloseCallback={() => {
+            getRegistry();
+            setCreateIdentityModalOpen(false);
+          }}
+          registryName={registryName}
+          currentAccountAddress={accountAddress}
         />
       )}
     </Box>

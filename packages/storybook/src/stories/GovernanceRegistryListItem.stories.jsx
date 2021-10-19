@@ -17,7 +17,14 @@ const Template = (args) => (
   >
     <GovernanceRegistryListItem
       {...args}
-      onViewDetailsClick={() => console.log("Go to Details")}
+      actionButtonList={[
+        {
+          label: "Details",
+          onClick: () => {
+            console.log("Details Clicked");
+          },
+        },
+      ]}
     />
   </div>
 );

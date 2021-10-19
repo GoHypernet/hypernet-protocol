@@ -1,1 +1,1 @@
-export * from "@web-integration/components/GovernanceEmptyState/GovernanceEmptyState";
+export * from "@web-ui/components/GovernanceEmptyState/GovernanceEmptyState";

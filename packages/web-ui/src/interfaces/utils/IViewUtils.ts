@@ -1,4 +1,8 @@
-import { BigNumberString, EPaymentState } from "@hypernetlabs/objects";
+import {
+  BigNumberString,
+  EPaymentState,
+  EthereumAddress,
+} from "@hypernetlabs/objects";
 import { PaymentStateOption } from "@web-ui/interfaces";
 import { BigNumber } from "ethers";
 
@@ -9,4 +13,5 @@ export interface IViewUtils {
   fromPaymentStateColor(state: EPaymentState): string;
   getPaymentStateOptions(): PaymentStateOption[];
   toBigNumber(value: number | string): BigNumber;
+  isZeroAddress(address: EthereumAddress): boolean;
 }

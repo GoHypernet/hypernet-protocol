@@ -10,13 +10,15 @@ import { ResultAsync } from "neverthrow";
 
 export interface IGovernanceService {
   getProposals(
-    proposalsNumberArr?: number[],
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<Proposal[], BlockchainUnavailableError>;
   getProposalsCount(): ResultAsync<number, BlockchainUnavailableError>;
   createProposal(
     name: string,
     symbol: string,
     owner: EthereumAddress,
+    enumerable: boolean,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
   delegateVote(
     delegateAddress: EthereumAddress,

@@ -39,7 +39,10 @@ interface IBalancesWithStateChannel {
 type Action =
   | { type: EActionTypes.FETCHING }
   | { type: EActionTypes.FETCHED; payload: Balances }
-  | { type: EActionTypes.STATE_CHANNEL_CHANGED; payload: IBalancesWithStateChannel }
+  | {
+      type: EActionTypes.STATE_CHANNEL_CHANGED;
+      payload: IBalancesWithStateChannel;
+    }
   | { type: EActionTypes.ERROR; payload: string }
   | {
       type: EActionTypes.TOKEN_SELECTED;
@@ -132,7 +135,10 @@ export function useBalances() {
 
           const selectedStateChannel = UIData.getSelectedStateChannel();
 
-          if(selectedStateChannel == null || selectedStateChannel.channelAddress == null) {
+          if (
+            selectedStateChannel == null ||
+            selectedStateChannel.channelAddress == null
+          ) {
             coreProxy.getActiveStateChannels().map((activeStateChannels) => {
               dispatch({
                 type: EActionTypes.STATE_CHANNEL_CHANGED,
@@ -141,9 +147,8 @@ export function useBalances() {
                   activeStateChannel: activeStateChannels[0],
                 },
               });
-            })
-          }
-          else {
+            });
+          } else {
             dispatch({
               type: EActionTypes.STATE_CHANNEL_CHANGED,
               payload: {
@@ -152,9 +157,6 @@ export function useBalances() {
               },
             });
           }
-
-          
-
         })
         .mapErr((error) => {
           setLoading(false);
@@ -173,6 +175,16 @@ export function useBalances() {
         dispatch({
           type: EActionTypes.FETCHED,
           payload: balance,
+        });
+
+        const selectedStateChannel = UIData.getSelectedStateChannel();
+
+        dispatch({
+          type: EActionTypes.STATE_CHANNEL_CHANGED,
+          payload: {
+            balances: balance,
+            activeStateChannel: selectedStateChannel,
+          },
         });
       },
     });
@@ -230,7 +242,8 @@ export function useBalances() {
   ): AssetBalance[] {
     return balancesWithStateChannel.balances.assets.filter(
       (assetBalance) =>
-        assetBalance.channelAddress === balancesWithStateChannel.activeStateChannel.channelAddress,
+        assetBalance.channelAddress ===
+        balancesWithStateChannel.activeStateChannel.channelAddress,
     );
   }
 

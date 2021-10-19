@@ -21,9 +21,10 @@ export class GovernanceService implements IGovernanceService {
   ) {}
 
   public getProposals(
-    proposalsNumberArr?: number[],
+    pageNumber: number,
+    pageSize: number,
   ): ResultAsync<Proposal[], BlockchainUnavailableError> {
-    return this.governanceRepository.getProposals(proposalsNumberArr);
+    return this.governanceRepository.getProposals(pageNumber, pageSize);
   }
 
   public getProposalsCount(): ResultAsync<number, BlockchainUnavailableError> {
@@ -34,8 +35,14 @@ export class GovernanceService implements IGovernanceService {
     name: string,
     symbol: string,
     owner: EthereumAddress,
+    enumerable: boolean,
   ): ResultAsync<Proposal, BlockchainUnavailableError> {
-    return this.governanceRepository.createProposal(name, symbol, owner);
+    return this.governanceRepository.createProposal(
+      name,
+      symbol,
+      owner,
+      enumerable,
+    );
   }
 
   public delegateVote(
