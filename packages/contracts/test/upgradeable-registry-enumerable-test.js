@@ -19,9 +19,6 @@ describe("Enumerated Registry", function () {
         const UpgradableRegistry = await ethers.getContractFactory("NonFungibleRegistryEnumerableUpgradeable");
         registry = await upgrades.deployProxy(UpgradableRegistry, ["Gateways", "G", owner.address, owner.address]);
         await registry.deployed();
-
-        registry2 = await upgrades.deployProxy(UpgradableRegistry, ["HyperId", "HID", owner.address, owner.address]);
-        await registry2.deployed();
 	});
 
     it("Test gateway registration.", async function () {

@@ -83,18 +83,21 @@ task("createRegistryByToken", "Creates a registry by burning token.")
 
     const accounts = await hre.ethers.getSigners();
 
+    const hypertoken = new hre.ethers.Contract(hAddress(), HT.abi, accounts[0]);
     const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
-    const registryAddress = await factoryHandle.nameToAddress(name);
-    const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
 
-    const numberOfEntries = await registryHandle.totalSupply();
-    const registrationToken = await registryHandle.registrationToken();
-    const registrationFee = await registryHandle.registrationFee();
-    console.log("Registry Name:", name);
-    console.log("Registry Address:", registryAddress);
-    console.log("Number of Entries:", numberOfEntries.toString());
-    console.log("Registration Token:", registrationToken);
-    console.log("Registration Fee:", registrationFee.toString());
+    const regFee =  await factoryHandle.registrationFee();
+       
+    // approve the registry factory to pull hypertoken from the users wallet
+    let tx = await hypertoken.approve(factoryHandle.address, regFee);
+    tx.wait();
+
+    tx = await factoryHandle.createRegistryByToken(name, symbol, registrar, enumerable);
+    tx.wait();
+
+    const regAddress = await factoryHandle.nameToAddress(name);
+    console.log("Registry Deployed to:", regAddress);
+
 });
 
 task("registryParameters", "Prints NFR  parameters.")
@@ -108,6 +111,8 @@ task("registryParameters", "Prints NFR  parameters.")
     const registryAddress = await factoryHandle.nameToAddress(name);
     const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
 
+    const REGISTRAR_ROLE = registryHandle.REGISTRAR_ROLE();
+    const registrarAddress = await registryHandle.getRoleMember(REGISTRAR_ROLE,0);
     const symbol = await registryHandle.symbol();
     const numberOfEntries = await registryHandle.totalSupply();
     const registrationToken = await registryHandle.registrationToken();
@@ -115,6 +120,7 @@ task("registryParameters", "Prints NFR  parameters.")
     console.log("Registry Name:", name);
     console.log("Registry Symbol:", symbol);
     console.log("Registry Address:", registryAddress);
+    console.log("Registrar:", registrarAddress);
     console.log("Number of Entries:", numberOfEntries.toString());
     console.log("Registration Token:", registrationToken);
     console.log("Registration Fee:", registrationFee.toString());
@@ -291,34 +297,61 @@ task("proposeRegistryEntry", "Propose a new NonFungibleRegistry where Governance
 });
 
 task("registerWithToken", "Register an NFI with ERC20 token.")
-  .addParam("name", "Name of target Registry where NFI is to be entered.")
+  .addParam("registry", "Name of target Registry where NFI is to be entered.")
   .addParam("label", "NFI label.")
   .addParam("data", "Data to be written to NFI entry.")
   .addParam("recipient", "Recipient address of the NFI.")
   .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
-    const registryName = taskArgs.name;
+
+    const registryName = taskArgs.registry;
     const NFILabel = taskArgs.label;
     const NFIData = taskArgs.data;
     const NFIRecipient = taskArgs.recipient;
 
+    const hypertoken = new hre.ethers.Contract(hAddress(), HT.abi, accounts[0]);
     const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
 
-    const registryAddress = await factoryHandle.enumerableRegistries(0);
-    console.log("asdf:", registryAddress)
-    // lookup address for target registry
-    //const registryAddress = await factoryHandle.nameToAddress(registryName);
-    // const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
-    // const tokenHandle = new hre.ethers.Contract(hAddress(), HT.abi, accounts[0]);
+    const registryAddress = await factoryHandle.nameToAddress(registryName);
+    const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
 
     // approve the transfer of tokens to the NFR
-    // const registrationFee = await registryHandle.registrationFee();
-    // const txapprove = await tokenHandle.approve(registryAddress, registrationFee);
-    // const txapprovercpt = txapprove.wait();
+    const registrationFee = await registryHandle.registrationFee();
+    let tx = await hypertoken.approve(registryAddress, registrationFee);
+    tx.wait();
 
-    // // call registerByToken on the NFR
-    // const txreg = await registryHandle.registerByToken(NFIRecipient, NFILabel, NFIData);
-    // const txrcpt = txreg.wait();
+    // call registerByToken on the NFR
+    tx = await registryHandle.registerByToken(NFIRecipient, NFILabel, NFIData);
+    tx.wait();
+
+    const tokenId = await registryHandle.registryMap(NFILabel);
+    console.log("Token ID:", tokenId.toString());
+});
+
+task("burnToken", "Burn a token in the given registry if you are owner or registrar.")
+  .addParam("registry", "Name of target Registry where NFI is to be entered.")
+  .addParam("tokenid", "tokenID of the NFI (not the index or label)")
+  .setAction(async (taskArgs) => {
+    const accounts = await hre.ethers.getSigners();
+
+    const registryName = taskArgs.registry;
+    const tokenid = taskArgs.tokenid;
+
+    const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
+
+    const registryAddress = await factoryHandle.nameToAddress(registryName);
+    const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
+
+    const tokenOwner = await registryHandle.ownerOf(tokenid);
+    console.log("Owner Address:", tokenOwner);
+
+    // call registerByToken on the NFR
+    tx = await registryHandle.burn(tokenid);
+    tx.wait();
+
+    const balanceAfter = await registryHandle.balanceOf(tokenOwner);
+
+    console.log("Balance of ", tokenOwner, "after burn is", balanceAfter.toString());
 });
 
 task("proposalState", "Check the state of an existing proposal")

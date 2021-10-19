@@ -155,7 +155,7 @@ npx hardhat registryParameters --network dev --name Gateways
 and set the registry's parameters:
 
 ```shell
-npx hardhat setRegistryParameters --network dev --name HyperId --0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
+npx hardhat setRegistryParameters --network dev --name HyperId --regtoken 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266
 ``
 
 Propose a new Gateway be added to the Gateways NonFunglebleRegistry we just deployed:
@@ -180,6 +180,12 @@ Retrieve data pertaining to a specific entry in a named Hypernet Gateway:
 
 ```shell
 npx hardhat registryEntryByLabel --network dev --label https://hyperpay.io --name Gateways
+```
+
+create a new registry by burning hypertoken:
+
+```shell
+npx hardhat createRegistryByToken --network dev --name Gateways --symbol GTW --registrar 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --enumerable true
 ```
 
 ## Hardhat network - registry testing deployment 

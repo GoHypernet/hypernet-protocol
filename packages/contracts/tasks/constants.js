@@ -34,7 +34,7 @@ const timelockAddress = function(){
 const factoryAddress = function(){
     const hre = require("hardhat");
     if (hre.hardhatArguments.network == 'dev') {
-        return "0x2279B7A0a67DB372996a5FaB50D91eAA73d2eBe6";
+        return "0x610178dA211FEF7D417bC0e6FeD39F05609AD788";
     } else {
         return "0xf204a4Ef082f5c04bB89F7D5E6568B796096735a";
     }
