@@ -5,7 +5,7 @@ import {
   PaymentId,
 } from "@hypernetlabs/objects";
 import { useStoreContext } from "@web-ui/contexts";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import {
   GovernanceTable,
   ITableCell,
@@ -13,8 +13,11 @@ import {
   ETagColor,
   GovernanceButton,
   GovernanceEmptyState,
+  GovernancePagination,
+  extractDataByPage,
 } from "@web-ui/components";
 import { useLinks } from "@web-ui/hooks";
+import { useStyles } from "@web-ui/components/PullPaymentList/PullPaymentList.style";
 
 interface IPullPaymentList {
   pullPayments: PullPayment[];
@@ -22,6 +25,8 @@ interface IPullPaymentList {
   onAcceptPullPaymentClick: (paymentId: PaymentId) => void;
   onPullFundClick: (paymentId: PaymentId) => void;
 }
+
+const PULL_PAYMENTS_PER_PAGE = 5;
 
 const tableColumns: ITableCell[] = [
   {
@@ -123,13 +128,21 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
     onAcceptPullPaymentClick,
     onPullFundClick,
   } = props;
+  const classes = useStyles();
   const { viewUtils, dateUtils } = useStoreContext();
   const { loading } = useLinks();
+  const [page, setPage] = useState<number>(1);
 
   const initialValue: ITableCell[][] = [];
+
+  const paginatedPullPayments = useMemo<PullPayment[]>(
+    () => extractDataByPage(pullPayments, PULL_PAYMENTS_PER_PAGE, page),
+    [JSON.stringify(pullPayments), page],
+  );
+
   const rows = useMemo(
     () =>
-      pullPayments.reduce((acc, item) => {
+      paginatedPullPayments.reduce((acc, item) => {
         acc.push([
           {
             cellValue: item.gatewayUrl,
@@ -252,7 +265,7 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
         ]);
         return acc;
       }, initialValue),
-    [JSON.stringify(pullPayments)],
+    [JSON.stringify(paginatedPullPayments)],
   );
 
   if (!loading && !rows.length) {
@@ -264,5 +277,21 @@ export const PullPaymentList: React.FC<IPullPaymentList> = (
     );
   }
 
-  return <GovernanceTable isExpandable columns={tableColumns} rows={rows} />;
+  return (
+    <>
+      <GovernanceTable isExpandable columns={tableColumns} rows={rows} />
+      {pullPayments.length > 0 && (
+        <GovernancePagination
+        className={classes.pagination}
+          customPageOptions={{
+            itemsPerPage: PULL_PAYMENTS_PER_PAGE,
+            totalItems: pullPayments.length,
+          }}
+          onChange={(_, page) => {
+            setPage(page);
+          }}
+        />
+      )}
+    </>
+  );
 };
