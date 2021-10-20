@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { Box, Typography, Grid } from "@material-ui/core";
 import { useAlert } from "react-alert";
 
@@ -139,14 +139,38 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
       .mapErr(handleError);
   };
 
-  const isUserProposalOwner =
-    proposal &&
-    accountAddress &&
-    EthereumAddress(proposal.originator) === accountAddress;
+  const isUserProposalOwner = useMemo(
+    () =>
+      proposal &&
+      accountAddress &&
+      EthereumAddress(proposal.originator) === accountAddress,
+    [JSON.stringify(proposal), accountAddress],
+  );
+
+  const canQueueProposal = useMemo(() => {
+    return Number(proposal?.state) === EProposalState.SUCCEEDED;
+  }, [JSON.stringify(proposal)]);
+
+  const canExecuteProposal = useMemo(() => {
+    return Number(proposal?.state) === EProposalState.QUEUED;
+  }, [JSON.stringify(proposal)]);
+
+  const canCancelProposal = useMemo(() => {
+    return (
+      isUserProposalOwner &&
+      [
+        EProposalState.PENDING,
+        EProposalState.QUEUED,
+        EProposalState.ACTIVE,
+        EProposalState.DEFEATED,
+        EProposalState.EXPIRED,
+      ].includes(Number(proposal?.state))
+    );
+  }, [JSON.stringify(proposal), isUserProposalOwner]);
 
   const getHeaderActions = useCallback(() => {
     return [
-      ...(Number(proposal?.state) === EProposalState.SUCCEEDED
+      ...(canQueueProposal
         ? [
             {
               label: "Queue Proposal",
@@ -157,7 +181,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
             },
           ]
         : []),
-      ...(Number(proposal?.state) === EProposalState.QUEUED
+      ...(canExecuteProposal
         ? [
             {
               label: "Execute Proposal",
@@ -168,12 +192,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
             },
           ]
         : []),
-      ...(isUserProposalOwner &&
-      (Number(proposal?.state) === EProposalState.PENDING ||
-        Number(proposal?.state) === EProposalState.QUEUED ||
-        Number(proposal?.state) === EProposalState.ACTIVE ||
-        Number(proposal?.state) === EProposalState.DEFEATED ||
-        Number(proposal?.state) === EProposalState.EXPIRED)
+      ...(canCancelProposal
         ? [
             {
               label: "Cancel Proposal",
@@ -185,7 +204,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
           ]
         : []),
     ] as IHeaderAction[];
-  }, [JSON.stringify(proposal)]);
+  }, [canQueueProposal, canExecuteProposal, canCancelProposal]);
 
   return (
     <Box>
