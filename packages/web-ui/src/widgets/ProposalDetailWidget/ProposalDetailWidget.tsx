@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Box, Typography, Grid } from "@material-ui/core";
 import { useAlert } from "react-alert";
 
@@ -144,13 +144,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
     accountAddress &&
     EthereumAddress(proposal.originator) === accountAddress;
 
-  const isProposalCancelable =
-    isUserProposalOwner &&
-    (Number(proposal?.state) === EProposalState.PENDING ||
-      Number(proposal?.state) === EProposalState.QUEUED ||
-      Number(proposal?.state) === EProposalState.ACTIVE);
-
-  const getHeaderActions: () => IHeaderAction[] = () => {
+  const getHeaderActions = useCallback(() => {
     return [
       ...(Number(proposal?.state) === EProposalState.SUCCEEDED
         ? [
@@ -174,7 +168,12 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
             },
           ]
         : []),
-      ...(isProposalCancelable
+      ...(isUserProposalOwner &&
+      (Number(proposal?.state) === EProposalState.PENDING ||
+        Number(proposal?.state) === EProposalState.QUEUED ||
+        Number(proposal?.state) === EProposalState.ACTIVE ||
+        Number(proposal?.state) === EProposalState.DEFEATED ||
+        Number(proposal?.state) === EProposalState.EXPIRED)
         ? [
             {
               label: "Cancel Proposal",
@@ -186,7 +185,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
           ]
         : []),
     ] as IHeaderAction[];
-  };
+  }, [JSON.stringify(proposal)]);
 
   return (
     <Box>
