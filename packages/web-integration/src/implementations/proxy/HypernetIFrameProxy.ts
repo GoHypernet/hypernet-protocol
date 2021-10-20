@@ -651,6 +651,12 @@ export default class HypernetIFrameProxy
     return this._createCall("queueProposal", proposalId);
   }
 
+  public cancelProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this._createCall("cancelProposal", proposalId);
+  }
+
   public executeProposal(
     proposalId: string,
   ): ResultAsync<Proposal, BlockchainUnavailableError> {
