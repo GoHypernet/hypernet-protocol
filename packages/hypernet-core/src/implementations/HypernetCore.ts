@@ -1116,6 +1116,12 @@ export class HypernetCore implements IHypernetCore {
     return this.governanceService.queueProposal(proposalId);
   }
 
+  public cancelProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this.governanceService.cancelProposal(proposalId);
+  }
+
   public executeProposal(
     proposalId: string,
   ): ResultAsync<Proposal, BlockchainUnavailableError> {

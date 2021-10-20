@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo } from "react";
 import { Box, Typography, Grid } from "@material-ui/core";
 import { useAlert } from "react-alert";
 
@@ -103,6 +103,17 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
       .mapErr(handleError);
   };
 
+  const cancelProposal = () => {
+    setLoading(true);
+    coreProxy
+      .cancelProposal(proposalId)
+      .map((proposal) => {
+        setProposal(proposal);
+        setLoading(false);
+      })
+      .mapErr(handleError);
+  };
+
   const executeProposal = () => {
     setLoading(true);
     coreProxy
@@ -128,29 +139,72 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
       .mapErr(handleError);
   };
 
-  const getHeaderActions: () => IHeaderAction[] | undefined = () => {
-    if (
-      Number(proposal?.state) === EProposalState.SUCCEEDED ||
-      Number(proposal?.state) === EProposalState.QUEUED
-    ) {
-      return [
-        {
-          label:
-            Number(proposal?.state) === EProposalState.SUCCEEDED
-              ? "Queue Proposal"
-              : "Execute Proposal",
-          onClick: () => {
-            Number(proposal?.state) === EProposalState.SUCCEEDED
-              ? queueProposal()
-              : executeProposal();
-          },
-          variant: "outlined",
-        },
-      ];
-    } else {
-      return undefined;
-    }
-  };
+  const isUserProposalOwner = useMemo(
+    () =>
+      proposal &&
+      accountAddress &&
+      EthereumAddress(proposal.originator) === accountAddress,
+    [JSON.stringify(proposal), accountAddress],
+  );
+
+  const canQueueProposal = useMemo(() => {
+    return Number(proposal?.state) === EProposalState.SUCCEEDED;
+  }, [JSON.stringify(proposal)]);
+
+  const canExecuteProposal = useMemo(() => {
+    return Number(proposal?.state) === EProposalState.QUEUED;
+  }, [JSON.stringify(proposal)]);
+
+  const canCancelProposal = useMemo(() => {
+    return (
+      isUserProposalOwner &&
+      [
+        EProposalState.PENDING,
+        EProposalState.QUEUED,
+        EProposalState.ACTIVE,
+        EProposalState.DEFEATED,
+        EProposalState.EXPIRED,
+      ].includes(Number(proposal?.state))
+    );
+  }, [JSON.stringify(proposal), isUserProposalOwner]);
+
+  const getHeaderActions = useCallback(() => {
+    return [
+      ...(canQueueProposal
+        ? [
+            {
+              label: "Queue Proposal",
+              onClick: () => {
+                queueProposal();
+              },
+              variant: "outlined",
+            },
+          ]
+        : []),
+      ...(canExecuteProposal
+        ? [
+            {
+              label: "Execute Proposal",
+              onClick: () => {
+                executeProposal();
+              },
+              variant: "outlined",
+            },
+          ]
+        : []),
+      ...(canCancelProposal
+        ? [
+            {
+              label: "Cancel Proposal",
+              onClick: () => {
+                cancelProposal();
+              },
+              variant: "outlined",
+            },
+          ]
+        : []),
+    ] as IHeaderAction[];
+  }, [canQueueProposal, canExecuteProposal, canCancelProposal]);
 
   return (
     <Box>

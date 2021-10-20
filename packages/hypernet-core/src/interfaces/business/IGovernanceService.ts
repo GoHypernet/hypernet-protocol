@@ -44,6 +44,9 @@ export interface IGovernanceService {
   queueProposal(
     proposalId: string,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  cancelProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError>;
   executeProposal(
     proposalId: string,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
