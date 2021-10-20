@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Form, Formik } from "formik";
 import { IRenderParams } from "@web-ui/interfaces";
 
@@ -38,6 +38,19 @@ const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
     );
   };
 
+  const uniqueActiveStateChannels = useMemo(
+    () =>
+      activeStateChannels.filter((stateChannel, index, self) => {
+        return (
+          index ===
+          self.findIndex(
+            (item) => item.channelAddress === stateChannel.channelAddress,
+          )
+        );
+      }),
+    [JSON.stringify(activeStateChannels)],
+  );
+
   return (
     <GovernanceCard
       className={classes.wrapper}
@@ -56,7 +69,7 @@ const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
             amount: "1",
             stateChannelAddress:
               selectedStateChennel?.channelAddress ||
-              activeStateChannels[0]?.channelAddress,
+              uniqueActiveStateChannels[0]?.channelAddress,
           } as IValues
         }
         onSubmit={handleFormSubmit}
@@ -68,7 +81,7 @@ const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
                 required
                 title="State Channel"
                 name="stateChannelAddress"
-                options={activeStateChannels.map((option) => ({
+                options={uniqueActiveStateChannels.map((option) => ({
                   primaryText: option.channelAddress,
                   value: option.channelAddress,
                 }))}
