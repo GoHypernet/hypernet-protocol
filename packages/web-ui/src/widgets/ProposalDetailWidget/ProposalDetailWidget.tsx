@@ -162,6 +162,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         EProposalState.PENDING,
         EProposalState.QUEUED,
         EProposalState.ACTIVE,
+        EProposalState.SUCCEEDED,
         EProposalState.DEFEATED,
         EProposalState.EXPIRED,
       ].includes(Number(proposal?.state))
