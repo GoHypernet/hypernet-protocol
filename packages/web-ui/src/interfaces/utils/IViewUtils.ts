@@ -12,6 +12,6 @@ export interface IViewUtils {
   fromPaymentState(state: EPaymentState): string;
   fromPaymentStateColor(state: EPaymentState): string;
   getPaymentStateOptions(): PaymentStateOption[];
-  toBigNumber(value: number | string): BigNumber;
+  convertToBigNumber(value: number | string): BigNumber;
   isZeroAddress(address: EthereumAddress): boolean;
 }
