@@ -1,6 +1,12 @@
 import { IHypernetCore, IUIData, RenderError } from "@hypernetlabs/objects";
 import MainContainer from "@web-ui/containers/MainContainer";
-import { ThemeProvider, Box } from "@material-ui/core";
+import {
+  ThemeProvider,
+  Box,
+  StylesProvider,
+  createGenerateClassName,
+} from "@material-ui/core";
+
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import {
   IConnectorAuthorizationFlowParams,
@@ -22,6 +28,7 @@ import GatewaysWidget from "@web-ui/widgets/GatewaysWidget";
 import { Result } from "neverthrow";
 import React from "react";
 import ReactDOM from "react-dom";
+import { v4 as uuidv4 } from "uuid";
 
 import { MetamaskWarning, WarningAlert } from "@web-ui/components";
 import {
@@ -125,7 +132,25 @@ export default class HypernetWebUI implements IHypernetWebUI {
       throw new Error("core instance is required");
     }
 
+    // Material-Ui v4 has a problem with multiple theme provider in the same react tree level
+    // For fixing that issue we need to provide a single top level Theme provider.
+    // But we can not do that because of the our widget renderer functions are under control of the customers/our library users
+    // We can export a parent top level theme provider and expect that in the integration flow users should use it for wrapping the our rendered widgets.
+    // But not gonna work in all situations
+    // Also we are using multipe react init point with calling ReactDom.render method. And material ui has some problems with that to.
+    // For fixin these issues first we need to provide a seed for our classname generation on the top of the widget renderer function
+    // And also that seed should be unique for the same react tree level rendered widgets
+    // For making them unique we added widgetUniqueIdentifier as a unique prefix
+
+    const widgetUniqueIdentifier = `hypernetlabs-${uuidv4()}`;
+
     const Theme = hasTheme ? ThemeProvider : Box;
+
+    const generateClassName = createGenerateClassName({
+      seed: widgetUniqueIdentifier,
+    });
+
+    const theme = true ? lightTheme : darkTheme;
 
     return (
       <StoreProvider
@@ -133,19 +158,22 @@ export default class HypernetWebUI implements IHypernetWebUI {
         UIData={this.UIData}
         viewUtils={this.viewUtils}
         dateUtils={this.dateUtils}
+        widgetUniqueIdentifier={widgetUniqueIdentifier}
       >
-        <Theme theme={true ? lightTheme : darkTheme}>
-          <LayoutProvider>
-            <MainContainer
-              withModal={withModal}
-              closeCallback={closeCallback}
-              modalStyle={modalStyle}
-              isV2={hasTheme}
-            >
-              {component}
-            </MainContainer>
-          </LayoutProvider>
-        </Theme>
+        <StylesProvider generateClassName={generateClassName}>
+          <Theme theme={theme}>
+            <LayoutProvider>
+              <MainContainer
+                withModal={withModal}
+                closeCallback={closeCallback}
+                modalStyle={modalStyle}
+                isV2={hasTheme}
+              >
+                {component}
+              </MainContainer>
+            </LayoutProvider>
+          </Theme>
+        </StylesProvider>
       </StoreProvider>
     );
   }
@@ -347,6 +375,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <PublicIdentifierWidget {...config} />,
           config?.showInModal,
+          undefined,
+          undefined,
+          true,
         ),
         this._generateDomElement(
           config?.selector || PUBLIC_IDENTIFIER_WIDGET_ID_SELECTOR,
@@ -412,6 +443,8 @@ export default class HypernetWebUI implements IHypernetWebUI {
           />,
           config.showInModal,
           config.closeCallback,
+          undefined,
+          true,
         ),
         this._generateDomElement(
           config?.selector || ONBOARDING_FLOW_ID_SELECTOR,

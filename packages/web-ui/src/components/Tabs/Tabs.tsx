@@ -1,5 +1,4 @@
-import { Box, Tab, Tabs, TabTypeMap } from "@material-ui/core";
-import { withStyles } from "@material-ui/core/styles";
+import { Box, Tab, Tabs, TabTypeMap, withStyles } from "@material-ui/core";
 import React from "react";
 
 interface ITabPanel {

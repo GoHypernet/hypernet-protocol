@@ -14,14 +14,24 @@ const Template = (args) => (
       justifyContent: "space-evenly",
     }}
   >
-    <GovernanceProgress value={10} />
-    <GovernanceProgress value={10} color={colors.RED700} />
-    <GovernanceProgress value={50} color={colors.GREEN700} />
-    <GovernanceProgress value={40} color={colors.GRAY500} />
-    <GovernanceProgress value={100} color={colors.GRAY500} />
+    <GovernanceProgress {...args} value={10} />
+    <GovernanceProgress {...args} value={10} color={colors.RED700} />
+    <GovernanceProgress {...args} value={50} color={colors.GREEN700} />
+    <GovernanceProgress {...args} value={40} color={colors.GRAY500} />
+    <GovernanceProgress {...args} value={100} color={colors.GRAY500} />
 
-    <GovernanceProgress value={50} color={colors.GREEN700} height={24} />
-    <GovernanceProgress value={20} color={colors.RED700} height={12} />
+    <GovernanceProgress
+      {...args}
+      value={50}
+      color={colors.GREEN700}
+      height={24}
+    />
+    <GovernanceProgress
+      {...args}
+      value={20}
+      color={colors.RED700}
+      height={12}
+    />
   </div>
 );
 

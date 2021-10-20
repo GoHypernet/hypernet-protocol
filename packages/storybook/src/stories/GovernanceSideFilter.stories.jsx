@@ -54,7 +54,7 @@ const linksFilter = [
 
 const Template = (args) => (
   <div style={{}}>
-    <GovernanceSideFilter {...args} />
+    <GovernanceSideFilter {...args} widgetUniqueIdentifier="storybook" />
   </div>
 );
 

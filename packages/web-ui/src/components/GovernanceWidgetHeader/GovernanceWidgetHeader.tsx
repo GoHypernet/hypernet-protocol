@@ -3,7 +3,7 @@ import React from "react";
 
 import { useStyles } from "@web-ui/components/GovernanceWidgetHeader/GovernanceWidgetHeader.style";
 import { IGovernanceButton, GovernanceButton } from "@web-ui/components";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 
 export interface IHeaderAction extends IGovernanceButton {
   label: string;

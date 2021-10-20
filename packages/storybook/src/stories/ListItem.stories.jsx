@@ -17,6 +17,7 @@ const Template = (args) => (
   >
     <List>
       <ListItem
+        {...args}
         icon={
           <div
             style={{
@@ -32,6 +33,7 @@ const Template = (args) => (
         rightContent={<button>Details</button>}
       />
       <ListItem
+        {...args}
         icon={
           <div
             style={{

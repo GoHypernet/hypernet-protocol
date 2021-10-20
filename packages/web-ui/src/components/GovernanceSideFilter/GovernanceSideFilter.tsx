@@ -12,7 +12,7 @@ import {
   MenuItem,
   Divider,
 } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
+import { Close as CloseIcon } from "@material-ui/icons";
 import React, { useEffect, useState } from "react";
 
 import { useStyles } from "@web-ui/components/GovernanceSideFilter/GovernanceSideFilter.style";
@@ -22,7 +22,6 @@ import { SliderRange } from "@web-ui/components";
 export const GovernanceSideFilter: React.FC<IGovernanceSideFilterProps> = (
   props: IGovernanceSideFilterProps,
 ) => {
-  const classes = useStyles();
   const {
     visible,
     onClose,
@@ -30,7 +29,12 @@ export const GovernanceSideFilter: React.FC<IGovernanceSideFilterProps> = (
     filterItems,
     onFilterSubmit,
   } = props;
+  const classes = useStyles();
   const [filterValues, setFilterValues] = useState({});
+
+  useEffect(() => {
+    setDefaultFilterValues();
+  }, []);
 
   const setDefaultFilterValues = () => {
     const defaultFilterValues = filterItems.reduce((acc, item) => {
@@ -45,10 +49,6 @@ export const GovernanceSideFilter: React.FC<IGovernanceSideFilterProps> = (
     setFilterValues(defaultFilterValues);
     return defaultFilterValues;
   };
-
-  useEffect(() => {
-    setDefaultFilterValues();
-  }, []);
 
   const closeDrawer = () => {
     onClose();

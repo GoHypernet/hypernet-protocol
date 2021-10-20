@@ -17,41 +17,49 @@ const Template = (args) => (
     }}
   >
     <GovernanceProposalListItem
+      {...args}
       number="1.1"
       title="This is my proposal title we can see the second row"
       status={EProposalState.EXECUTED}
     />
     <GovernanceProposalListItem
+      {...args}
       number="1.1"
       title="This is my proposal title we can see the second row"
       status={EProposalState.SUCCEEDED}
     />
     <GovernanceProposalListItem
+      {...args}
       number="1.2"
       title="This is my proposal title we can see the second row"
       status={EProposalState.ACTIVE}
     />
     <GovernanceProposalListItem
+      {...args}
       number="1.3"
       title="This is my proposal title we can see the second row"
       status={EProposalState.DEFEATED}
     />
     <GovernanceProposalListItem
+      {...args}
       number="1.3"
       title="This is my proposal title we can see the second row"
       status={EProposalState.PENDING}
     />
     <GovernanceProposalListItem
+      {...args}
       number="1.4"
       title="This is my proposal title we can see the second row"
       status={EProposalState.QUEUED}
     />
     <GovernanceProposalListItem
+      {...args}
       number="1.5"
       title="This is my proposal title we can see the second row"
       status={EProposalState.CANCELED}
     />
     <GovernanceProposalListItem
+      {...args}
       number="1.6"
       title="This is my proposal title we can see the second row"
       status={EProposalState.EXPIRED}

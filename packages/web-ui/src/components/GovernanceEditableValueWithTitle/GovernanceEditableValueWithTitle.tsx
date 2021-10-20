@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Box, IconButton } from "@material-ui/core";
-import SaveIcon from "@material-ui/icons/Save";
-import EditIcon from "@material-ui/icons/Edit";
+import { Save as SaveIcon, Edit as EditIcon } from "@material-ui/icons";
 
 import { Form, Formik, FormikValues } from "formik";
 

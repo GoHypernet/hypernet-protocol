@@ -1,5 +1,5 @@
 import React from "react";
-import AddIcon from "@material-ui/icons/Add";
+import { Add as AddIcon } from "@material-ui/icons";
 
 import {
   GovernanceTable,
