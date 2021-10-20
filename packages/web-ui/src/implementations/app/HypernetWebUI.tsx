@@ -1,6 +1,12 @@
 import { IHypernetCore, IUIData, RenderError } from "@hypernetlabs/objects";
 import MainContainer from "@web-ui/containers/MainContainer";
-import { ThemeProvider, Box } from "@material-ui/core";
+import {
+  ThemeProvider,
+  Box,
+  StylesProvider,
+  createGenerateClassName,
+} from "@material-ui/core";
+
 import { LayoutProvider, StoreProvider } from "@web-ui/contexts";
 import {
   IConnectorAuthorizationFlowParams,
@@ -16,11 +22,13 @@ import {
   IRegistryListWidgetParams,
   IRegistryEntryListWidgetParams,
   IRegistryEntryDetailWidgetParams,
+  IRegistryDetailWidgetParams,
 } from "@web-ui/interfaces";
 import GatewaysWidget from "@web-ui/widgets/GatewaysWidget";
 import { Result } from "neverthrow";
 import React from "react";
 import ReactDOM from "react-dom";
+import { v4 as uuidv4 } from "uuid";
 
 import { MetamaskWarning, WarningAlert } from "@web-ui/components";
 import {
@@ -60,15 +68,15 @@ import PublicIdentifierWidget from "@web-ui/widgets/PublicIdentifierWidget";
 import StateChannelsWidget from "@web-ui/widgets/StateChannelsWidget";
 import ProposalsWidget from "@web-ui/widgets/ProposalsWidget";
 import { lightTheme, darkTheme } from "@web-ui/theme";
-import CreateProposalWidget from "@web-integration/widgets/CreateProposalWidget";
-import ProposalDetailWidget from "@web-integration/widgets/ProposalDetailWidget";
-import RegistryListWidget from "@web-integration/widgets/RegistryListWidget";
-import RegistryEntryDetailWidget from "@web-integration/widgets/RegistryEntryDetailWidget";
-import RegistryEntryListWidget from "@web-integration/widgets/RegistryEntryListWidget";
-import HypertokenBalanceWidget from "@web-integration/widgets/HypertokenBalanceWidget";
-import VotingPowerWidget from "@web-integration/widgets/VotingPowerWidget";
-import ConnectedAccountWidget from "@web-integration/widgets/ConnectedAccountWidget";
-
+import CreateProposalWidget from "@web-ui/widgets/CreateProposalWidget";
+import ProposalDetailWidget from "@web-ui/widgets/ProposalDetailWidget";
+import RegistryListWidget from "@web-ui/widgets/RegistryListWidget";
+import RegistryEntryDetailWidget from "@web-ui/widgets/RegistryEntryDetailWidget";
+import RegistryDetailWidget from "@web-ui/widgets/RegistryDetailWidget";
+import RegistryEntryListWidget from "@web-ui/widgets/RegistryEntryListWidget";
+import HypertokenBalanceWidget from "@web-ui/widgets/HypertokenBalanceWidget";
+import VotingPowerWidget from "@web-ui/widgets/VotingPowerWidget";
+import ConnectedAccountWidget from "@web-ui/widgets/ConnectedAccountWidget";
 export default class HypernetWebUI implements IHypernetWebUI {
   private static instance: IHypernetWebUI;
   protected coreInstance: IHypernetCore;
@@ -124,7 +132,25 @@ export default class HypernetWebUI implements IHypernetWebUI {
       throw new Error("core instance is required");
     }
 
+    // Material-Ui v4 has a problem with multiple theme provider in the same react tree level
+    // For fixing that issue we need to provide a single top level Theme provider.
+    // But we can not do that because of the our widget renderer functions are under control of the customers/our library users
+    // We can export a parent top level theme provider and expect that in the integration flow users should use it for wrapping the our rendered widgets.
+    // But not gonna work in all situations
+    // Also we are using multipe react init point with calling ReactDom.render method. And material ui has some problems with that to.
+    // For fixin these issues first we need to provide a seed for our classname generation on the top of the widget renderer function
+    // And also that seed should be unique for the same react tree level rendered widgets
+    // For making them unique we added widgetUniqueIdentifier as a unique prefix
+
+    const widgetUniqueIdentifier = `hypernetlabs-${uuidv4()}`;
+
     const Theme = hasTheme ? ThemeProvider : Box;
+
+    const generateClassName = createGenerateClassName({
+      seed: widgetUniqueIdentifier,
+    });
+
+    const theme = true ? lightTheme : darkTheme;
 
     return (
       <StoreProvider
@@ -132,19 +158,22 @@ export default class HypernetWebUI implements IHypernetWebUI {
         UIData={this.UIData}
         viewUtils={this.viewUtils}
         dateUtils={this.dateUtils}
+        widgetUniqueIdentifier={widgetUniqueIdentifier}
       >
-        <Theme theme={true ? lightTheme : darkTheme}>
-          <LayoutProvider>
-            <MainContainer
-              withModal={withModal}
-              closeCallback={closeCallback}
-              modalStyle={modalStyle}
-              isV2={hasTheme}
-            >
-              {component}
-            </MainContainer>
-          </LayoutProvider>
-        </Theme>
+        <StylesProvider generateClassName={generateClassName}>
+          <Theme theme={theme}>
+            <LayoutProvider>
+              <MainContainer
+                withModal={withModal}
+                closeCallback={closeCallback}
+                modalStyle={modalStyle}
+                isV2={hasTheme}
+              >
+                {component}
+              </MainContainer>
+            </LayoutProvider>
+          </Theme>
+        </StylesProvider>
       </StoreProvider>
     );
   }
@@ -346,6 +375,9 @@ export default class HypernetWebUI implements IHypernetWebUI {
         this._bootstrapComponent(
           <PublicIdentifierWidget {...config} />,
           config?.showInModal,
+          undefined,
+          undefined,
+          true,
         ),
         this._generateDomElement(
           config?.selector || PUBLIC_IDENTIFIER_WIDGET_ID_SELECTOR,
@@ -411,6 +443,8 @@ export default class HypernetWebUI implements IHypernetWebUI {
           />,
           config.showInModal,
           config.closeCallback,
+          undefined,
+          true,
         ),
         this._generateDomElement(
           config?.selector || ONBOARDING_FLOW_ID_SELECTOR,
@@ -487,6 +521,26 @@ export default class HypernetWebUI implements IHypernetWebUI {
       return ReactDOM.render(
         this._bootstrapComponent(
           <RegistryListWidget {...config} />,
+          config?.showInModal,
+          undefined,
+          undefined,
+          true,
+        ),
+        this._generateDomElement(
+          config?.selector || REGISTRY_LIST_WIDGET_ID_SELECTOR,
+        ),
+      );
+    };
+    return this._getThrowableRender(renderReact);
+  }
+
+  public renderRegistryDetailWidget(
+    config: IRegistryDetailWidgetParams,
+  ): Result<void, RenderError> {
+    const renderReact = () => {
+      return ReactDOM.render(
+        this._bootstrapComponent(
+          <RegistryDetailWidget {...config} />,
           config?.showInModal,
           undefined,
           undefined,

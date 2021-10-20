@@ -3,7 +3,7 @@ import React from "react";
 
 import { useStyles } from "@web-ui/components/GovernanceWidgetHeader/GovernanceWidgetHeader.style";
 import { IGovernanceButton, GovernanceButton } from "@web-ui/components";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import { ArrowBack as ArrowBackIcon } from "@material-ui/icons";
 
 export interface IHeaderAction extends IGovernanceButton {
   label: string;
@@ -58,7 +58,7 @@ export const GovernanceWidgetHeader: React.FC<IGovernanceWidgetHeader> = ({
         <Box className={classes.rightSection}>
           {headerActions.map((headerAction) => (
             <Box className={classes.buttonWrapper}>
-              <GovernanceButton {...headerAction} size="medium" color="primary">
+              <GovernanceButton color="primary" size="medium" {...headerAction}>
                 {headerAction.label}
               </GovernanceButton>
             </Box>

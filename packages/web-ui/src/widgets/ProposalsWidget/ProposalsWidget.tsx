@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box } from "@material-ui/core";
 import { useAlert } from "react-alert";
 
@@ -6,7 +6,6 @@ import {
   GovernancePagination,
   GovernanceProposalListItem,
   GovernanceWidgetHeader,
-  getPageItemIndexList,
   GovernanceEmptyState,
 } from "@web-ui/components";
 import { IProposalsWidgetParams } from "@web-ui/interfaces";
@@ -31,11 +30,6 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
   const [proposalCount, setProposalCount] = useState<number>(0);
   const [hasEmptyState, setHasEmptyState] = useState<boolean>(false);
 
-  const proposalsNumberArr = useMemo(
-    () => getPageItemIndexList(proposalCount, page, PROPOSALS_PER_PAGE),
-    [proposalCount, page],
-  );
-
   useEffect(() => {
     coreProxy
       .getProposalsCount()
@@ -49,15 +43,13 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
   }, []);
 
   useEffect(() => {
-    if (proposalsNumberArr.length) {
-      coreProxy
-        .getProposals(proposalsNumberArr)
-        .map((proposals) => {
-          setProposals(proposals);
-        })
-        .mapErr(handleError);
-    }
-  }, [JSON.stringify(proposalsNumberArr)]);
+    coreProxy
+      .getProposals(page, PROPOSALS_PER_PAGE)
+      .map((proposals) => {
+        setProposals(proposals);
+      })
+      .mapErr(handleError);
+  }, [page]);
 
   const handleError = (err?: Error) => {
     setLoading(false);
@@ -99,7 +91,11 @@ const ProposalsWidget: React.FC<IProposalsWidgetParams> = ({
             onProposalDetailsNavigate && onProposalDetailsNavigate(proposal.id)
           }
           key={proposal.id}
-          number={proposal.proposalNumber?.toString() || ""}
+          number={
+            proposal.proposalNumber != null
+              ? (proposal.proposalNumber + 1).toString()
+              : "-"
+          }
           title={proposal.description}
           status={proposal.state}
         />

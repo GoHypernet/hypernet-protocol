@@ -7,14 +7,20 @@ describe("Vesting", function () {
     let owner;
     let addr1; 
 
+    let startTime;
+    let cliffTime;
+    let endTime;
+
     const award = ethers.utils.parseEther("100");
-    const timeNow = Date.now();
-    const startTime = timeNow;
-    const cliffTime = timeNow+30;
-    const endTime = timeNow+60;
 
     beforeEach(async () => {
         [owner, addr1] = await ethers.getSigners();
+
+        const latestBlock = await hre.ethers.provider.getBlock("latest");
+        const timeNow = latestBlock.timestamp;
+        startTime = timeNow+10; // put start time in the future 
+        cliffTime = timeNow+30; 
+        endTime = timeNow+60; 
 
         // deploy hypertoken contract
         const Hypertoken = await ethers.getContractFactory("Hypertoken");
@@ -25,13 +31,14 @@ describe("Vesting", function () {
         const Vester = await ethers.getContractFactory("Vester");
         vester = await Vester.deploy(hypertoken.address, addr1.address, award, startTime, cliffTime, endTime);
         await vester.deployTransaction.wait();
-	});
 
-    it("Test vesting contract.", async function () {
         let tx = await hypertoken.transfer(vester.address, award);
         tx.wait();
+	});
 
-        tx = await vester.connect(addr1).delegate(addr1.address);
+    it("Check vesting parameters.", async function () {
+
+        let tx = await vester.connect(addr1).delegate(addr1.address);
         tx.wait();
 
         expect(await vester.vestingAmount()).to.equal(award);
@@ -41,5 +48,18 @@ describe("Vesting", function () {
         expect(await vester.recipient()).to.equal(addr1.address);
         expect(await hypertoken.balanceOf(vester.address)).to.equal(award);
         expect(await hypertoken.getVotes(addr1.address)).to.equal(award);
+    });
+
+    it("Check for full withdrawal.", async function () {
+        let tx = await vester.connect(addr1).delegate(addr1.address);
+        tx.wait();
+
+        hre.timeAndMine.setTimeIncrease("1d");
+        hre.timeAndMine.mine("100");
+
+        tx = await vester.connect(addr1).claim(); 
+        tx.wait();
+        expect(await hypertoken.balanceOf(addr1.address)).to.equal(award);
+        expect(await hypertoken.balanceOf(vester.address)).to.equal(0);
     });
 });

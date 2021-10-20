@@ -3,7 +3,7 @@ import { useAlert } from "react-alert";
 import { Typography } from "@material-ui/core";
 
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { useStyles } from "@web-integration/widgets/VotingPowerWidget/VotingPowerWidget.style";
+import { useStyles } from "@web-ui/widgets/VotingPowerWidget/VotingPowerWidget.style";
 import { IRenderParams } from "@web-ui/interfaces";
 
 interface VotingPowerWidgetParams extends IRenderParams {}

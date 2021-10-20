@@ -1,19 +1,25 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Box, Typography } from "@material-ui/core";
+import { Box } from "@material-ui/core";
+
 import { useAlert } from "react-alert";
 
 import {
+  GovernanceCard,
   GovernanceEditableValueWithTitle,
   GovernanceValueWithTitle,
   GovernanceWidgetHeader,
 } from "@web-ui/components";
 import { IRegistryEntryDetailWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { EthereumAddress, RegistryEntry } from "@hypernetlabs/objects";
 import {
-  GovernanceTag,
-  ETagColor,
-} from "@web-integration/components/GovernanceTag";
+  EthereumAddress,
+  Registry,
+  RegistryEntry,
+} from "@hypernetlabs/objects";
+import { GovernanceTag, ETagColor } from "@web-ui/components/GovernanceTag";
+import BurnEntryWidget from "../BurnEntryWidget";
+import TransferIdentityWidget from "../TransferIdentityWidget";
+import { colors } from "@web-ui/theme";
 
 const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   onRegistryEntryListNavigate,
@@ -24,17 +30,33 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
   const [registryEntry, setRegistryEntry] = useState<RegistryEntry>();
+  const [registry, setRegistry] = useState<Registry>();
   const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
     EthereumAddress(""),
   );
+  const [burnEntryModalOpen, setBurnEntryModalOpen] = useState<boolean>(false);
+  const [transferIdentityModalOpen, setTransferIdentityModalOpen] =
+    useState<boolean>(false);
 
   useEffect(() => {
-    coreProxy.getEthereumAccounts().map((accounts) => {
-      setAccountAddress(accounts[0]);
-    });
+    getAccount();
   }, []);
 
   useEffect(() => {
+    getRegistryEntryByLabel();
+  }, []);
+
+  useEffect(() => {
+    getRegistryByName();
+  }, []);
+
+  const getAccount = () => {
+    coreProxy.getEthereumAccounts().map((accounts) => {
+      setAccountAddress(accounts[0]);
+    });
+  };
+
+  const getRegistryEntryByLabel = () => {
     setLoading(true);
     coreProxy
       .getRegistryEntryByLabel(registryName, entryLabel)
@@ -43,7 +65,18 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
         setLoading(false);
       })
       .mapErr(handleError);
-  }, []);
+  };
+
+  const getRegistryByName = () => {
+    setLoading(true);
+    coreProxy
+      .getRegistryByName([registryName])
+      .map((registryMap) => {
+        setRegistry(registryMap.get(registryName));
+        setLoading(false);
+      })
+      .mapErr(handleError);
+  };
 
   const updateLabel = (val: string) => {
     setLoading(true);
@@ -80,13 +113,27 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
     alert.error(err?.message || "Something went wrong!");
   };
 
-  const isOwner = useMemo(() => {
-    if (!accountAddress || !registryEntry) {
-      return false;
-    }
+  const isRegistrar = useMemo(() => {
+    return registry?.registrarAddresses.some(
+      (address) => address === accountAddress,
+    );
+  }, [accountAddress, JSON.stringify(registry?.registrarAddresses)]);
 
-    return accountAddress === registryEntry.owner;
+  const isOwner = useMemo(() => {
+    return accountAddress === registryEntry?.owner;
   }, [accountAddress, registryEntry]);
+
+  const canBurnOrTransfer = useMemo(() => {
+    return isRegistrar || (isOwner && registry?.allowTransfers);
+  }, [isRegistrar, isOwner]);
+
+  const canUpdateLabel = useMemo(() => {
+    return isRegistrar || (isOwner && registry?.allowLabelChange);
+  }, [isRegistrar, isOwner]);
+
+  const canUpdateTokenURI = useMemo(() => {
+    return isRegistrar || (isOwner && registry?.allowStorageUpdate);
+  }, [isRegistrar, isOwner]);
 
   return (
     <Box>
@@ -94,25 +141,12 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
         label="Registry Entry Details"
         {...(accountAddress &&
           registryEntry && {
-            description: isOwner ? (
-              <Box display="flex">
+            description:
+              isOwner || isRegistrar ? (
                 <GovernanceTag text="Owner" color={ETagColor.GREEN} />
-                <Box paddingLeft={2}>
-                  <Typography variant="body1" color="textPrimary">
-                    You can update the Identity Data information.
-                  </Typography>
-                </Box>
-              </Box>
-            ) : (
-              <Box display="flex">
+              ) : (
                 <GovernanceTag text="Viewer" color={ETagColor.PURPLE} />
-                <Box paddingLeft={2}>
-                  <Typography variant="body1" color="textPrimary">
-                    You can copy the Identity Data information.
-                  </Typography>
-                </Box>
-              </Box>
-            ),
+              ),
           })}
         navigationLink={{
           label: "Registry Entries",
@@ -120,10 +154,27 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
             onRegistryEntryListNavigate?.(registryName);
           },
         }}
+        {...(canBurnOrTransfer && {
+          headerActions: [
+            {
+              label: "Burn Entry",
+              onClick: () => setBurnEntryModalOpen(true),
+              variant: "contained",
+              color: "secondary",
+              style: { backgroundColor: colors.RED700 },
+            },
+            {
+              label: "Transfer NFI",
+              onClick: () => setTransferIdentityModalOpen(true),
+              variant: "contained",
+              color: "primary",
+            },
+          ],
+        })}
       />
       {registryEntry && (
-        <Box>
-          {registryEntry?.canUpdateLabel && isOwner ? (
+        <GovernanceCard>
+          {canUpdateLabel ? (
             <GovernanceEditableValueWithTitle
               title="Label"
               value={registryEntry?.label}
@@ -139,24 +190,53 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
           )}
           <GovernanceValueWithTitle
             title="Token ID"
-            value={registryEntry?.tokenId}
+            value={registryEntry.tokenId}
           />
-          {registryEntry?.tokenURI &&
-            (registryEntry?.canUpdateURI && isOwner ? (
-              <GovernanceEditableValueWithTitle
-                title="Token URI"
-                value={registryEntry?.tokenURI}
-                onSave={(newValue) => {
-                  updateTokenURI(newValue);
-                }}
-              />
-            ) : (
-              <GovernanceValueWithTitle
-                title="Token URI"
-                value={registryEntry?.tokenURI}
-              />
-            ))}
-        </Box>
+          <GovernanceValueWithTitle
+            title="Current Owner"
+            value={registryEntry.owner}
+          />
+          {canUpdateTokenURI ? (
+            <GovernanceEditableValueWithTitle
+              title="Identity Data"
+              value={registryEntry?.tokenURI || ""}
+              onSave={(newValue) => {
+                updateTokenURI(newValue);
+              }}
+            />
+          ) : (
+            <GovernanceValueWithTitle
+              title="Identity Data"
+              value={registryEntry?.tokenURI || ""}
+            />
+          )}
+        </GovernanceCard>
+      )}
+      {burnEntryModalOpen && registryEntry?.tokenId && (
+        <BurnEntryWidget
+          registryName={registryName}
+          tokenId={registryEntry.tokenId}
+          onSuccessCallback={() => {
+            setBurnEntryModalOpen(false);
+            onRegistryEntryListNavigate?.(registryName);
+          }}
+          onCloseCallback={() => {
+            setBurnEntryModalOpen(false);
+          }}
+        />
+      )}
+      {transferIdentityModalOpen && registryEntry?.tokenId && (
+        <TransferIdentityWidget
+          registryName={registryName}
+          tokenId={registryEntry.tokenId}
+          onSuccessCallback={() => {
+            setTransferIdentityModalOpen(false);
+            onRegistryEntryListNavigate?.(registryName);
+          }}
+          onCloseCallback={() => {
+            setTransferIdentityModalOpen(false);
+          }}
+        />
       )}
     </Box>
   );

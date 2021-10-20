@@ -16,18 +16,21 @@ const Template = (args) => (
     }}
   >
     <GovernancePagination
+      {...args}
       count={10}
       onChange={(_, value) => {
         console.log(value);
       }}
     />
     <GovernancePagination
+      {...args}
       customPageOptions={{
         itemsPerPage: 10,
         totalItems: 25,
       }}
     />
     <GovernancePagination
+      {...args}
       customPageOptions={{
         itemsPerPage: 5,
         totalItems: 23,
@@ -38,3 +41,4 @@ const Template = (args) => (
 );
 
 export const Primary = Template.bind({});
+Primary.args = {};

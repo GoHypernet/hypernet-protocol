@@ -45,6 +45,7 @@ const Template = (args) => (
       }
     />
     <GovernanceWidgetHeader
+      {...args}
       label="Proposals"
       headerActions={[
         {
@@ -106,6 +107,7 @@ const Template = (args) => (
       ]}
     />
     <GovernanceWidgetHeader
+      {...args}
       label="Registries"
       description={
         <div style={{ display: "flex", alignItems: "center" }}>

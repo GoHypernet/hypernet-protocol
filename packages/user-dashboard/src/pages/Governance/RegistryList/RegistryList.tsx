@@ -17,6 +17,9 @@ const RegistryList: React.FC = () => {
         onRegistryEntryListNavigate: (registryName: string) => {
           history.push(`/registries/${registryName}/entries`);
         },
+        onRegistryDetailNavigate: (registryName: string) => {
+          history.push(`/registries/${registryName}`);
+        },
       })
       .mapErr(handleError);
   }, []);

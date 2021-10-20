@@ -3,6 +3,7 @@ import { colors } from "@web-ui/theme";
 
 export const useStyles = makeStyles((theme) => ({
   wrapper: {
+    width: "100%",
     padding: 16,
     backgroundColor: colors.GRAY100,
     border: `1px solid ${colors.GRAY200}`,

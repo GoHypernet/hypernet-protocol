@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Typography, Button } from "@material-ui/core";
-import Skeleton from "@material-ui/lab/Skeleton";
+import { Skeleton } from "@material-ui/lab";
 
 import { useStyles } from "@web-ui/components/GovernanceProposalListItem/GovernanceProposalListItem.style";
 import { GovernanceStatusTag } from "@web-ui/components/GovernanceStatusTag";

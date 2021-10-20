@@ -11,10 +11,10 @@ import {
   IconButton,
   InputAdornment,
   MenuItem,
+  ThemeProvider,
 } from "@material-ui/core";
-import { ThemeProvider } from "@material-ui/core/styles";
-import CloseIcon from "@material-ui/icons/Close";
-import SearchIcon from "@material-ui/icons/Search";
+import { Close as CloseIcon, Search as SearchIcon } from "@material-ui/icons";
+
 import { ISideFilterProps, EItemType } from "@web-ui/interfaces";
 import React, { useEffect, useState } from "react";
 

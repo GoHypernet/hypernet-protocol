@@ -7,6 +7,7 @@ import {
   IFullTransferState,
   IRegisteredTransfer,
   IWithdrawResponse,
+  UtilityMessageSignature,
 } from "@hypernetlabs/objects";
 import { okAsync, ResultAsync } from "neverthrow";
 import td from "testdouble";
@@ -204,6 +205,10 @@ export class BrowserNodeProviderMock implements IBrowserNodeProvider {
           } as IRegisteredTransfer,
         ]),
       );
+
+      td.when(
+        this.browserNode.signUtilityMessage(td.matchers.anything()),
+      ).thenReturn(okAsync(UtilityMessageSignature("signature")));
     } else {
       this.browserNode = browserNode;
     }

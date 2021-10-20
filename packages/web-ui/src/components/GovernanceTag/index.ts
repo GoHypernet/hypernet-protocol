@@ -1,1 +1,1 @@
-export * from "@web-integration/components/GovernanceTag/GovernanceTag";
+export * from "@web-ui/components/GovernanceTag/GovernanceTag";
