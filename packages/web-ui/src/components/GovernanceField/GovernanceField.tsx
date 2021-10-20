@@ -24,6 +24,7 @@ export const GovernanceField: React.FC<GovernanceFieldProps> = (
     focus,
     rightContent,
     handleChange,
+    className,
   } = props;
   const classes = useStyles({});
   const titleText = `${title}${required ? " *" : ""}`;
@@ -49,8 +50,8 @@ export const GovernanceField: React.FC<GovernanceFieldProps> = (
         <Box className={classes.fieldWrapper}>
           <FormikField
             innerRef={inputRef}
-            className={classes.field}
             {...props}
+            className={`${classes.field} ${className}`}
             component={type}
           />
 
@@ -60,8 +61,8 @@ export const GovernanceField: React.FC<GovernanceFieldProps> = (
         </Box>
       ) : (
         <FormikField
-          className={classes.field}
           {...props}
+          className={`${classes.field} ${className}`}
           as="select"
           component={type}
           {...(handleChange && {

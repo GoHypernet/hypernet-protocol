@@ -1,1 +1,1 @@
-export * from "@web-integration/components/GovernanceValueWithTitle/GovernanceValueWithTitle";
+export * from "@web-ui/components/GovernanceValueWithTitle/GovernanceValueWithTitle";

@@ -44,6 +44,11 @@ export const colors = {
   RED200: "#FFBDAD",
   RED400: "#DE350B",
   RED700: "#BF2600",
+
+  ORANGE100: "#FFFAE6",
+  ORANGE200: "##FFE380",
+  ORANGE400: "#FFAB00",
+  ORANGE700: "#FF8B00",
 };
 
 export enum EStatusColor {

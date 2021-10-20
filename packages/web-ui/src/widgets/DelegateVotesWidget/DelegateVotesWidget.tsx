@@ -10,7 +10,7 @@ import {
 } from "@web-ui/components";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { EthereumAddress } from "@hypernetlabs/objects";
-import { useStyles } from "@web-integration/widgets/DelegateVotesWidget/DelegateVotesWidget.style";
+import { useStyles } from "@web-ui/widgets/DelegateVotesWidget/DelegateVotesWidget.style";
 
 interface IValues {
   accountAddress: EthereumAddress;

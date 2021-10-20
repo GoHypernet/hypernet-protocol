@@ -28,6 +28,7 @@ interface IValues {
   gatewayLogoUrl: string;
   gatewayAddress: string;
   gatewaySignature: string;
+  enumerable: boolean;
   owner: EthereumAddress;
 }
 
@@ -92,6 +93,7 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
           values.name,
           values.symbol,
           EthereumAddress(values.owner),
+          values.enumerable,
         )
         .map((proposal) => {
           setLoading(false);
@@ -170,6 +172,7 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
           gatewaySignature: "",
           gatewayName: "",
           gatewayLogoUrl: "",
+          enumerable: true,
           owner: accountAddress,
         }}
         enableReinitialize={true}
@@ -190,6 +193,27 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
             />
             {values.action == ERegistryAction.ADD_REGISTRY && (
               <>
+                <GovernanceDialogSelectLargeField
+                  name="enumerable"
+                  title="Enumerable Tokens"
+                  type="select"
+                  placeholder={"select action"}
+                  required={true}
+                  options={[
+                    {
+                      primaryText: "Enabled",
+                      secondaryText: undefined,
+                      action: null,
+                      value: true,
+                    },
+                    {
+                      primaryText: "Disabled",
+                      secondaryText: undefined,
+                      action: null,
+                      value: false,
+                    },
+                  ]}
+                />
                 <GovernanceLargeField
                   title="Name"
                   name="name"

@@ -43,7 +43,7 @@ import HypernetGovernorAbi from "./artifacts/HypernetGovernor";
 import HypertokenAbi from "./artifacts/Hypertoken";
 import InsuranceAbi from "./artifacts/Insurance";
 import MessageTransferAbi from "./artifacts/MessageTransfer";
-import NonFungibleRegistryUpgradeableAbi from "./artifacts/NonFungibleRegistryUpgradeable";
+import NonFungibleRegistryEnumerableUpgradeableAbi from "./artifacts/NonFungibleRegistryEnumerableUpgradeableAbi";
 import ParameterizedAbi from "./artifacts/Parameterized";
 import UpgradeableRegistryFactoryAbi from "./artifacts/UpgradeableRegistryFactory";
 
@@ -58,7 +58,8 @@ const GovernanceAbis = {
   HypernetGovernor: HypernetGovernorAbi,
   Hypertoken: HypertokenAbi,
   UpgradeableRegistryFactory: UpgradeableRegistryFactoryAbi,
-  NonFungibleRegistryUpgradeable: NonFungibleRegistryUpgradeableAbi,
+  NonFungibleRegistryEnumerableUpgradeable:
+    NonFungibleRegistryEnumerableUpgradeableAbi,
 };
 
 export { TransferAbis, GovernanceAbis };

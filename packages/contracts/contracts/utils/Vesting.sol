@@ -39,6 +39,10 @@ contract Vester {
         lastUpdate = vestingBegin;
     }
 
+    function timeNow() public view returns (uint timenow) {
+        timenow = block.timestamp;
+    }
+
     function setRecipient(address recipient_) public {
         require(msg.sender == recipient, 'TreasuryVester::setRecipient: unauthorized');
         recipient = recipient_;

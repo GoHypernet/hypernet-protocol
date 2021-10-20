@@ -3,6 +3,7 @@ import {
   PaymentStatusViewModel,
   PaymentStatusParams,
   BigNumberString,
+  EthereumAddress,
 } from "@hypernetlabs/objects";
 import { IViewUtils, PaymentStateOption } from "@web-ui/interfaces";
 import { utils, BigNumber } from "ethers";
@@ -20,6 +21,10 @@ export class ViewUtils implements IViewUtils {
 
   public convertToBigNumber(value: number | string): BigNumber {
     return BigNumber.from(value);
+  }
+
+  public isZeroAddress(address: EthereumAddress): boolean {
+    return BigNumber.from(address).isZero();
   }
 
   public fromPaymentState(state: EPaymentState): string {

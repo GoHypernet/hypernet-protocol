@@ -2,6 +2,253 @@ import delay from "delay";
 import { err, ok, ResultAsync, Result, okAsync, errAsync } from "neverthrow";
 
 export class ResultUtils {
+  static combine<
+    T,
+    T2,
+    T3,
+    T4,
+    T5,
+    T6,
+    T7,
+    T8,
+    T9,
+    T10,
+    T11,
+    T12,
+    T13,
+    E,
+    E2,
+    E3,
+    E4,
+    E5,
+    E6,
+    E7,
+    E8,
+    E9,
+    E10,
+    E11,
+    E12,
+    E13,
+  >(
+    asyncResultList: [
+      ResultAsync<T, E>,
+      ResultAsync<T2, E2>,
+      ResultAsync<T3, E3>,
+      ResultAsync<T4, E4>,
+      ResultAsync<T5, E5>,
+      ResultAsync<T6, E6>,
+      ResultAsync<T7, E7>,
+      ResultAsync<T8, E8>,
+      ResultAsync<T9, E9>,
+      ResultAsync<T10, E10>,
+      ResultAsync<T11, E11>,
+      ResultAsync<T12, E12>,
+      ResultAsync<T13, E13>,
+    ],
+  ): ResultAsync<
+    [T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13],
+    E | E2 | E3 | E4 | E5 | E6 | E7 | E8 | E9 | E10 | E11 | E12 | E13
+  >;
+
+  static combine<
+    T,
+    T2,
+    T3,
+    T4,
+    T5,
+    T6,
+    T7,
+    T8,
+    T9,
+    T10,
+    T11,
+    T12,
+    E,
+    E2,
+    E3,
+    E4,
+    E5,
+    E6,
+    E7,
+    E8,
+    E9,
+    E10,
+    E11,
+    E12,
+  >(
+    asyncResultList: [
+      ResultAsync<T, E>,
+      ResultAsync<T2, E2>,
+      ResultAsync<T3, E3>,
+      ResultAsync<T4, E4>,
+      ResultAsync<T5, E5>,
+      ResultAsync<T6, E6>,
+      ResultAsync<T7, E7>,
+      ResultAsync<T8, E8>,
+      ResultAsync<T9, E9>,
+      ResultAsync<T10, E10>,
+      ResultAsync<T11, E11>,
+      ResultAsync<T12, E12>,
+    ],
+  ): ResultAsync<
+    [T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12],
+    E | E2 | E3 | E4 | E5 | E6 | E7 | E8 | E9 | E10 | E11 | E12
+  >;
+
+  static combine<
+    T,
+    T2,
+    T3,
+    T4,
+    T5,
+    T6,
+    T7,
+    T8,
+    T9,
+    T10,
+    T11,
+    E,
+    E2,
+    E3,
+    E4,
+    E5,
+    E6,
+    E7,
+    E8,
+    E9,
+    E10,
+    E11,
+  >(
+    asyncResultList: [
+      ResultAsync<T, E>,
+      ResultAsync<T2, E2>,
+      ResultAsync<T3, E3>,
+      ResultAsync<T4, E4>,
+      ResultAsync<T5, E5>,
+      ResultAsync<T6, E6>,
+      ResultAsync<T7, E7>,
+      ResultAsync<T8, E8>,
+      ResultAsync<T9, E9>,
+      ResultAsync<T10, E10>,
+      ResultAsync<T11, E11>,
+    ],
+  ): ResultAsync<
+    [T, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11],
+    E | E2 | E3 | E4 | E5 | E6 | E7 | E8 | E9 | E10 | E11
+  >;
+
+  static combine<
+    T,
+    T2,
+    T3,
+    T4,
+    T5,
+    T6,
+    T7,
+    T8,
+    T9,
+    T10,
+    E,
+    E2,
+    E3,
+    E4,
+    E5,
+    E6,
+    E7,
+    E8,
+    E9,
+    E10,
+  >(
+    asyncResultList: [
+      ResultAsync<T, E>,
+      ResultAsync<T2, E2>,
+      ResultAsync<T3, E3>,
+      ResultAsync<T4, E4>,
+      ResultAsync<T5, E5>,
+      ResultAsync<T6, E6>,
+      ResultAsync<T7, E7>,
+      ResultAsync<T8, E8>,
+      ResultAsync<T9, E9>,
+      ResultAsync<T10, E10>,
+    ],
+  ): ResultAsync<
+    [T, T2, T3, T4, T5, T6, T7, T8, T9, T10],
+    E | E2 | E3 | E4 | E5 | E6 | E7 | E8 | E9 | E10
+  >;
+
+  static combine<
+    T,
+    T2,
+    T3,
+    T4,
+    T5,
+    T6,
+    T7,
+    T8,
+    T9,
+    E,
+    E2,
+    E3,
+    E4,
+    E5,
+    E6,
+    E7,
+    E8,
+    E9,
+  >(
+    asyncResultList: [
+      ResultAsync<T, E>,
+      ResultAsync<T2, E2>,
+      ResultAsync<T3, E3>,
+      ResultAsync<T4, E4>,
+      ResultAsync<T5, E5>,
+      ResultAsync<T6, E6>,
+      ResultAsync<T7, E7>,
+      ResultAsync<T8, E8>,
+      ResultAsync<T9, E9>,
+    ],
+  ): ResultAsync<
+    [T, T2, T3, T4, T5, T6, T7, T8, T9],
+    E | E2 | E3 | E4 | E5 | E6 | E7 | E8 | E9
+  >;
+
+  static combine<T, T2, T3, T4, T5, T6, T7, T8, E, E2, E3, E4, E5, E6, E7, E8>(
+    asyncResultList: [
+      ResultAsync<T, E>,
+      ResultAsync<T2, E2>,
+      ResultAsync<T3, E3>,
+      ResultAsync<T4, E4>,
+      ResultAsync<T5, E5>,
+      ResultAsync<T6, E6>,
+      ResultAsync<T7, E7>,
+      ResultAsync<T8, E8>,
+    ],
+  ): ResultAsync<
+    [T, T2, T3, T4, T5, T6, T7, T8],
+    E | E2 | E3 | E4 | E5 | E6 | E7 | E8
+  >;
+
+  static combine<T, T2, T3, T4, T5, T6, T7, E, E2, E3, E4, E5, E6, E7>(
+    asyncResultList: [
+      ResultAsync<T, E>,
+      ResultAsync<T2, E2>,
+      ResultAsync<T3, E3>,
+      ResultAsync<T4, E4>,
+      ResultAsync<T5, E5>,
+      ResultAsync<T6, E6>,
+      ResultAsync<T7, E7>,
+    ],
+  ): ResultAsync<[T, T2, T3, T4, T5, T6, T7], E | E2 | E3 | E4 | E5 | E6 | E7>;
+  static combine<T, T2, T3, T4, T5, T6, E, E2, E3, E4, E5, E6>(
+    asyncResultList: [
+      ResultAsync<T, E>,
+      ResultAsync<T2, E2>,
+      ResultAsync<T3, E3>,
+      ResultAsync<T4, E4>,
+      ResultAsync<T5, E5>,
+      ResultAsync<T6, E6>,
+    ],
+  ): ResultAsync<[T, T2, T3, T4, T5, T6], E | E2 | E3 | E4 | E5 | E6>;
   static combine<T, T2, T3, T4, T5, E, E2, E3, E4, E5>(
     asyncResultList: [
       ResultAsync<T, E>,
