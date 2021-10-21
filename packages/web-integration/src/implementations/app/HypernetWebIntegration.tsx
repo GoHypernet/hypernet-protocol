@@ -85,7 +85,11 @@ export default class HypernetWebIntegration implements IHypernetWebIntegration {
       })
       .mapErr((err) => {
         this.getReadyResolved = true;
-        this.webUIClient.renderWarningAlertModal(err?.message);
+        this.webUIClient.renderWarningAlertModal(
+          `an error occurred during initialization of hypernet core${
+            err?.message ? `: ${err?.message}` : "."
+          }`,
+        );
         return new Error("Something went wrong!");
       });
 

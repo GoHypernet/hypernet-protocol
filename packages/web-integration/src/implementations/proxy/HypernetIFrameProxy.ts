@@ -707,10 +707,7 @@ export default class HypernetIFrameProxy
     label: string,
     recipientAddress: EthereumAddress,
     data: string,
-  ): ResultAsync<
-    RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
-  > {
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
     return this._createCall("createRegistryEntry", {
       registryName,
       label,

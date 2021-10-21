@@ -1202,10 +1202,7 @@ export class HypernetCore implements IHypernetCore {
     label: string,
     recipientAddress: EthereumAddress,
     data: string,
-  ): ResultAsync<
-    RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
-  > {
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
     return this.registryService.createRegistryEntry(
       registryName,
       label,

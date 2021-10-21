@@ -113,10 +113,7 @@ export class RegistryService implements IRegistryService {
     label: string,
     recipientAddress: EthereumAddress,
     data: string,
-  ): ResultAsync<
-    RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
-  > {
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
     return this.registryRepository.createRegistryEntry(
       registryName,
       label,
