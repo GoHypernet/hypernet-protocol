@@ -1,7 +1,7 @@
 import React from "react";
 import { LinearProgress } from "@material-ui/core";
 
-import { colors } from "@web-integration/theme";
+import { colors } from "@web-ui/theme";
 
 interface GovernanceProgressProps {
   value: number;
