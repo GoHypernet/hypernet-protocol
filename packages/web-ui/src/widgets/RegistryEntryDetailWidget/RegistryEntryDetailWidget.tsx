@@ -24,7 +24,7 @@ import { colors } from "@web-ui/theme";
 const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   onRegistryEntryListNavigate,
   registryName,
-  entryLabel,
+  entryTokenId,
 }: IRegistryEntryDetailWidgetParams) => {
   const alert = useAlert();
   const { coreProxy } = useStoreContext();
@@ -59,7 +59,7 @@ const RegistryEntryDetailWidget: React.FC<IRegistryEntryDetailWidgetParams> = ({
   const getRegistryEntryByLabel = () => {
     setLoading(true);
     coreProxy
-      .getRegistryEntryByLabel(registryName, entryLabel)
+      .getRegistryEntryDetailByTokenId(registryName, entryTokenId)
       .map((registryEntry: RegistryEntry) => {
         setRegistryEntry(registryEntry);
         setLoading(false);

@@ -605,13 +605,13 @@ export default class HypernetIFrameProxy
     });
   }
 
-  public getRegistryEntryByLabel(
+  public getRegistryEntryDetailByTokenId(
     registryName: string,
-    label: string,
+    tokenId: number,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
-    return this._createCall("getRegistryEntryByLabel", {
+    return this._createCall("getRegistryEntryDetailByTokenId", {
       registryName,
-      label,
+      tokenId,
     });
   }
 
