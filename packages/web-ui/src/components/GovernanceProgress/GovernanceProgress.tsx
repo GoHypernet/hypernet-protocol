@@ -1,7 +1,11 @@
 import React from "react";
-import { LinearProgress } from "@material-ui/core";
+import { LinearProgress, ThemeProvider } from "@material-ui/core";
 
-import { useStyles } from "@web-ui/components/GovernanceProgress/GovernanceProgress.style";
+import {
+  progressTheme,
+  useStyles,
+} from "@web-ui/components/GovernanceProgress/GovernanceProgress.style";
+import { colors } from "@web-integration/theme";
 
 interface GovernanceProgressProps {
   value: number;
@@ -12,14 +16,17 @@ interface GovernanceProgressProps {
 export const GovernanceProgress: React.FC<GovernanceProgressProps> = (
   props: GovernanceProgressProps,
 ) => {
-  const { value, color, height } = props;
-  const classes = useStyles({ color, height });
+  const { value, color = colors.GRAY500, height = 4 } = props;
+  const classes = useStyles();
 
   return (
-    <LinearProgress
-      className={classes.wrapper}
-      variant="determinate"
-      value={value}
-    />
+    <ThemeProvider theme={progressTheme}>
+      <LinearProgress
+        style={{ backgroundColor: color, height }}
+        className={classes.wrapper}
+        variant="determinate"
+        value={value}
+      />
+    </ThemeProvider>
   );
 };
