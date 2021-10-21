@@ -315,9 +315,9 @@ export interface IHypernetCore {
     pageSize: number,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
 
-  getRegistryEntryByLabel(
+  getRegistryEntryDetailByTokenId(
     registryName: string,
-    label: string,
+    tokenId: number,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
 
   queueProposal(

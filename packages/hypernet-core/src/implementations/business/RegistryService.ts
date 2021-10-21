@@ -55,11 +55,14 @@ export class RegistryService implements IRegistryService {
     );
   }
 
-  public getRegistryEntryByLabel(
+  public getRegistryEntryDetailByTokenId(
     registryName: string,
-    label: string,
+    tokenId: number,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
-    return this.registryRepository.getRegistryEntryByLabel(registryName, label);
+    return this.registryRepository.getRegistryEntryDetailByTokenId(
+      registryName,
+      tokenId,
+    );
   }
 
   public updateRegistryEntryTokenURI(

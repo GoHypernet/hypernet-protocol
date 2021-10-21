@@ -62,7 +62,7 @@ export const routes: IRoute[] = [
     name: "Registry Entries",
   },
   {
-    path: "/registries/:registryName/entries/:entryLabel",
+    path: "/registries/:registryName/entries/:entryTokenId",
     component: RegistryEntryDetail,
     name: "Registry Entry Detail",
   },

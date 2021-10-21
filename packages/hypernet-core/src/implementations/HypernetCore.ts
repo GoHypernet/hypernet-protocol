@@ -1103,11 +1103,14 @@ export class HypernetCore implements IHypernetCore {
     );
   }
 
-  public getRegistryEntryByLabel(
+  public getRegistryEntryDetailByTokenId(
     registryName: string,
-    label: string,
+    tokenId: number,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
-    return this.registryService.getRegistryEntryByLabel(registryName, label);
+    return this.registryService.getRegistryEntryDetailByTokenId(
+      registryName,
+      tokenId,
+    );
   }
 
   public queueProposal(

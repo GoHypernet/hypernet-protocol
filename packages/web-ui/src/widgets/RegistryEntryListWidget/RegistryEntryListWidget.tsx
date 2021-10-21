@@ -77,7 +77,6 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   };
 
   const handleError = (err?: Error) => {
-    console.log("handleError err: ", err);
     setLoading(false);
     setHasEmptyState(true);
     alert.error(err?.message || "Something went wrong!");
@@ -162,7 +161,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
                   onRegistryEntryDetailsNavigate &&
                   onRegistryEntryDetailsNavigate(
                     registryName,
-                    registryEntry.label,
+                    registryEntry.tokenId,
                   ),
               },
             ],
