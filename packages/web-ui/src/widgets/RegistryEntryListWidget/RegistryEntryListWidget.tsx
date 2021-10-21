@@ -139,7 +139,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           fieldWithValueList={[
             {
               fieldTitle: "Label",
-              fieldValue: registryEntry.label,
+              fieldValue: registryEntry.label || "-",
             },
             {
               fieldTitle: "Token ID",
