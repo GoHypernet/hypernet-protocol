@@ -16,7 +16,7 @@ interface GovernanceProgressProps {
 export const GovernanceProgress: React.FC<GovernanceProgressProps> = (
   props: GovernanceProgressProps,
 ) => {
-  const { value, color = colors.GRAY500, height = 4 } = props;
+  const { value, color = colors.GRAY500, height = 6 } = props;
   const classes = useStyles();
 
   return (
