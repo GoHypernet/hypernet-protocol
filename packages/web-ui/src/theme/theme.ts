@@ -168,6 +168,21 @@ const MuiTextField = {
   },
 };
 
+// GovernanceProgress applies height and backgroundColor inline.
+const MuiLinearProgress = {
+  root: {
+    height: "inherit",
+    borderRadius: 3,
+    backgroundColor: colors.GRAY200,
+  },
+  barColorPrimary: {
+    backgroundColor: "inherit",
+  },
+  bar: {
+    borderRadius: 3,
+  },
+};
+
 export const bodyFontFamily = `"Inter", sans-serif`;
 
 const typography = {
@@ -228,6 +243,7 @@ export const lightTheme = createTheme({
     MuiTypography,
     MuiButton,
     MuiTextField,
+    MuiLinearProgress,
   },
   props: {
     MuiButtonBase,
