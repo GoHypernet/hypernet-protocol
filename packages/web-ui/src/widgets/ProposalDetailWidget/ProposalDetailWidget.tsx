@@ -162,6 +162,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
         EProposalState.PENDING,
         EProposalState.QUEUED,
         EProposalState.ACTIVE,
+        EProposalState.SUCCEEDED,
         EProposalState.DEFEATED,
         EProposalState.EXPIRED,
       ].includes(Number(proposal?.state))
@@ -170,6 +171,18 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
   const getHeaderActions = useCallback(() => {
     return [
+      ...(canCancelProposal
+        ? [
+            {
+              label: "Cancel Proposal",
+              onClick: () => {
+                cancelProposal();
+              },
+              variant: "outlined",
+              color: "secondary",
+            },
+          ]
+        : []),
       ...(canQueueProposal
         ? [
             {
@@ -187,17 +200,6 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
               label: "Execute Proposal",
               onClick: () => {
                 executeProposal();
-              },
-              variant: "outlined",
-            },
-          ]
-        : []),
-      ...(canCancelProposal
-        ? [
-            {
-              label: "Cancel Proposal",
-              onClick: () => {
-                cancelProposal();
               },
               variant: "outlined",
             },

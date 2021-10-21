@@ -157,7 +157,7 @@ export class GovernanceRepository implements IGovernanceRepository {
         ) as Promise<any>,
         (e) => {
           return new BlockchainUnavailableError(
-            "Unable to retrieve proposals count",
+            "Unable to delegate votes",
             e,
           );
         },

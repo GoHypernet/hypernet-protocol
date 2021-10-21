@@ -55,11 +55,14 @@ export class RegistryService implements IRegistryService {
     );
   }
 
-  public getRegistryEntryByLabel(
+  public getRegistryEntryDetailByTokenId(
     registryName: string,
-    label: string,
+    tokenId: number,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
-    return this.registryRepository.getRegistryEntryByLabel(registryName, label);
+    return this.registryRepository.getRegistryEntryDetailByTokenId(
+      registryName,
+      tokenId,
+    );
   }
 
   public updateRegistryEntryTokenURI(
@@ -113,10 +116,7 @@ export class RegistryService implements IRegistryService {
     label: string,
     recipientAddress: EthereumAddress,
     data: string,
-  ): ResultAsync<
-    RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
-  > {
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
     return this.registryRepository.createRegistryEntry(
       registryName,
       label,

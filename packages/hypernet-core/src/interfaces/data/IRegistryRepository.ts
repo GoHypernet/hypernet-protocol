@@ -24,9 +24,9 @@ export interface IRegistryRepository {
     pageNumber: number,
     pageSize: number,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
-  getRegistryEntryByLabel(
+  getRegistryEntryDetailByTokenId(
     registryName: string,
-    label: string,
+    tokenId: number,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
   updateRegistryEntryTokenURI(
     registryName: string,
@@ -59,10 +59,7 @@ export interface IRegistryRepository {
     label: string,
     recipientAddress: EthereumAddress,
     data: string,
-  ): ResultAsync<
-    RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
-  >;
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
   transferRegistryEntry(
     registryName: string,
     tokenId: number,

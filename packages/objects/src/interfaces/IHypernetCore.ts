@@ -315,9 +315,9 @@ export interface IHypernetCore {
     pageSize: number,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
 
-  getRegistryEntryByLabel(
+  getRegistryEntryDetailByTokenId(
     registryName: string,
-    label: string,
+    tokenId: number,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
 
   queueProposal(
@@ -380,10 +380,7 @@ export interface IHypernetCore {
     label: string,
     recipientAddress: EthereumAddress,
     data: string,
-  ): ResultAsync<
-    RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
-  >;
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
 
   transferRegistryEntry(
     registryName: string,

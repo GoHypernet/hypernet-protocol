@@ -4,35 +4,26 @@ import { Form, Formik, FormikHelpers } from "formik";
 import * as Yup from "yup";
 
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
-import { EthereumAddress, Registry } from "@hypernetlabs/objects";
+import { EthereumAddress } from "@hypernetlabs/objects";
 import {
   GovernanceButton,
   GovernanceDialogSelectLargeField,
   GovernanceLargeField,
   GovernanceWidgetHeader,
-  IGovernanceDialogSelectLargeFieldOption,
 } from "@web-integration/components";
 import { IProposalCreateWidgetParams } from "@web-ui/interfaces";
 
 enum ERegistryAction {
   ADD_REGISTRY = 0,
-  ADD_GATEWAY = 1,
 }
 
 interface IValues {
   action: ERegistryAction;
   name: string;
   symbol: string;
-  gatewayUrl: string;
-  gatewayName: string;
-  gatewayLogoUrl: string;
-  gatewayAddress: string;
-  gatewaySignature: string;
   enumerable: boolean;
   owner: EthereumAddress;
 }
-
-const gatewaysRegistryName = "Gateways";
 
 const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
   onProposalListNavigate,
@@ -45,20 +36,12 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
   );
   const [proposalThreshold, setProposalThreshold] = useState<number>();
   const [votingPower, setVotingPower] = useState<number>();
-  const [gatewayRegistry, setGatewayRegistry] = useState<Registry>();
 
   useEffect(() => {
     coreProxy
       .getProposalThreshold()
       .map((_proposalThreshold) => {
         setProposalThreshold(_proposalThreshold);
-      })
-      .mapErr(handleError);
-
-    coreProxy
-      .getRegistryByName([gatewaysRegistryName])
-      .map((registryMap) => {
-        setGatewayRegistry(registryMap.get(gatewaysRegistryName));
       })
       .mapErr(handleError);
 
@@ -87,63 +70,19 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
     formikHelpers: FormikHelpers<IValues>,
   ) => {
     setLoading(true);
-    if (values.action == ERegistryAction.ADD_REGISTRY) {
-      coreProxy
-        .createProposal(
-          values.name,
-          values.symbol,
-          EthereumAddress(values.owner),
-          values.enumerable,
-        )
-        .map((proposal) => {
-          setLoading(false);
-          onProposalListNavigate && onProposalListNavigate();
-        })
-        .mapErr(handleError);
-    } else {
-      coreProxy
-        .proposeRegistryEntry(
-          gatewaysRegistryName,
-          values.gatewayUrl,
-          JSON.stringify({
-            gatewayName: values.gatewayName,
-            gatewayLogoUrl: values.gatewayLogoUrl,
-            gatewayAddress: values.gatewayAddress,
-            gatewaySignature: values.gatewaySignature,
-          }),
-          EthereumAddress(values.owner),
-        )
-        .map((proposal) => {
-          setLoading(false);
-          onProposalListNavigate && onProposalListNavigate();
-        })
-        .mapErr(handleError);
-    }
+    coreProxy
+      .createProposal(
+        values.name,
+        values.symbol,
+        EthereumAddress(values.owner),
+        values.enumerable,
+      )
+      .map((proposal) => {
+        setLoading(false);
+        onProposalListNavigate && onProposalListNavigate();
+      })
+      .mapErr(handleError);
   };
-
-  const isAccountGatewayRegistrarAddress = useMemo(() => {
-    return gatewayRegistry?.registrarAddresses.includes(accountAddress);
-  }, [gatewayRegistry, accountAddress]);
-
-  const actionList: IGovernanceDialogSelectLargeFieldOption[] = useMemo(() => {
-    const actions = [
-      {
-        primaryText: "Add Registry",
-        secondaryText: undefined,
-        action: null,
-        value: ERegistryAction.ADD_REGISTRY,
-      },
-    ];
-    if (isAccountGatewayRegistrarAddress) {
-      actions.push({
-        primaryText: "Add Gateway",
-        secondaryText: undefined,
-        action: null,
-        value: ERegistryAction.ADD_GATEWAY,
-      });
-    }
-    return actions;
-  }, [gatewayRegistry]);
 
   const exceedsThreshold: boolean = useMemo(() => {
     return !votingPower || !proposalThreshold
@@ -167,11 +106,6 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
           action: ERegistryAction.ADD_REGISTRY,
           name: "",
           symbol: "",
-          gatewayUrl: "",
-          gatewayAddress: "",
-          gatewaySignature: "",
-          gatewayName: "",
-          gatewayLogoUrl: "",
           enumerable: true,
           owner: accountAddress,
         }}
@@ -189,7 +123,14 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
               type="select"
               placeholder={"select action"}
               required={true}
-              options={actionList}
+              options={[
+                {
+                  primaryText: "Add Registry",
+                  secondaryText: undefined,
+                  action: null,
+                  value: ERegistryAction.ADD_REGISTRY,
+                },
+              ]}
             />
             {values.action == ERegistryAction.ADD_REGISTRY && (
               <>
@@ -239,45 +180,6 @@ const CreateProposalWidget: React.FC<IProposalCreateWidgetParams> = ({
               </>
             )}
 
-            {values.action == ERegistryAction.ADD_GATEWAY && (
-              <>
-                <GovernanceLargeField
-                  title="Gateway URL"
-                  name="gatewayUrl"
-                  type="input"
-                  placeholder="Type a Gateway URL"
-                  required={values.action == ERegistryAction.ADD_GATEWAY}
-                />
-                <GovernanceLargeField
-                  title="Address"
-                  name="gatewayAddress"
-                  type="input"
-                  placeholder="Type gateway address"
-                  required={false}
-                />
-                <GovernanceLargeField
-                  title="Signature"
-                  name="gatewaySignature"
-                  type="input"
-                  placeholder="Type gateway Signature"
-                  required={false}
-                />
-                <GovernanceLargeField
-                  title="Name"
-                  name="gatewayName"
-                  type="input"
-                  placeholder="Type gateway Name"
-                  required={false}
-                />
-                <GovernanceLargeField
-                  title="Logo URL"
-                  name="gatewayLogoUrl"
-                  type="input"
-                  placeholder="Type gateway logo URL"
-                  required={false}
-                />
-              </>
-            )}
             <GovernanceButton
               variant="contained"
               size="large"

@@ -63,7 +63,7 @@ export interface IRegistryListWidgetParams extends IRenderParams {
 export interface IRegistryEntryListWidgetParams extends IRenderParams {
   onRegistryEntryDetailsNavigate?: (
     registryName: string,
-    entryLabel: string,
+    entryTokenId: number,
   ) => void;
   onRegistryListNavigate?: () => void;
   registryName: string;
@@ -72,7 +72,7 @@ export interface IRegistryEntryListWidgetParams extends IRenderParams {
 export interface IRegistryEntryDetailWidgetParams extends IRenderParams {
   onRegistryEntryListNavigate?: (registryName: string) => void;
   registryName: string;
-  entryLabel: string;
+  entryTokenId: number;
 }
 
 export interface IRegistryDetailWidgetParams extends IRenderParams {

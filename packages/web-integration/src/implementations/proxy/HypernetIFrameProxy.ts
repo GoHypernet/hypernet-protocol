@@ -605,13 +605,13 @@ export default class HypernetIFrameProxy
     });
   }
 
-  public getRegistryEntryByLabel(
+  public getRegistryEntryDetailByTokenId(
     registryName: string,
-    label: string,
+    tokenId: number,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
-    return this._createCall("getRegistryEntryByLabel", {
+    return this._createCall("getRegistryEntryDetailByTokenId", {
       registryName,
-      label,
+      tokenId,
     });
   }
 
@@ -707,10 +707,7 @@ export default class HypernetIFrameProxy
     label: string,
     recipientAddress: EthereumAddress,
     data: string,
-  ): ResultAsync<
-    RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
-  > {
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
     return this._createCall("createRegistryEntry", {
       registryName,
       label,
