@@ -19,7 +19,8 @@ export const WarningAlert: React.FC<IWarningAlert> = (props: IWarningAlert) => {
       <div className={classes.wrapper}>
         {errorMessage && <Box className={classes.title}>{errorMessage}</Box>}
         <Box className={classes.title}>
-          Allow insecure content at the bottom of the site settings page.
+          Make sure to allow insecure content at the bottom of the site settings
+          page.
         </Box>
 
         <Box className={classes.insecureConentWrapper}>

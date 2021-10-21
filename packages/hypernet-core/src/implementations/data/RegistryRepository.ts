@@ -785,10 +785,7 @@ export class RegistryRepository implements IRegistryRepository {
     label: string,
     recipientAddress: EthereumAddress,
     data: string,
-  ): ResultAsync<
-    RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
-  > {
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
     return this.initializeForWrite().andThen(
       ({ registryContracts, signer }) => {
         return ResultUtils.combine([
@@ -897,9 +894,7 @@ export class RegistryRepository implements IRegistryRepository {
                 },
               );
             })
-            .andThen(() => {
-              return this.getRegistryEntryByLabel(registryName, label);
-            });
+            .map(() => {});
         });
       },
     );
