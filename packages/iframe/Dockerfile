@@ -51,12 +51,12 @@ ARG CHAIN_ADDRESSES='{ \
       "31337": { \
         "channelFactoryAddress": "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da", \
         "transferRegistryAddress": "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F", \
-        "hypertokenAddress": "0x5FbDB2315678afecb367f032d93F642f64180aa3", \
+        "hypertokenAddress": "0xAa588d3737B611baFD7bD713445b314BD453a5C8", \
         "messageTransferAddress": "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6", \
         "insuranceTransferAddress": "0x30753E4A8aad7F8597332E813735Def5dD395028", \
         "parameterizedTransferAddress": "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4", \
-        "hypernetGovernorAddress": "0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9", \
-        "registryFactoryAddress": "0x610178dA211FEF7D417bC0e6FeD39F05609AD788", \
+        "hypernetGovernorAddress": "0xdDA6327139485221633A1FcD65f4aC932E60A2e1", \
+        "registryFactoryAddress": "0x82D50AD3C1091866E258Fd0f1a7cC9674609D254", \
         "gatewayRegistryAddress": "0xba6f657Fe14Be5697B6A5A836f5C2550F24e6cD5", \
         "liquidityRegistryAddress": "0x71a31DaF37f1b4b91da1b82148545e5B1Dc4440B" \
       }, \
@@ -75,7 +75,7 @@ ARG CHAIN_ADDRESSES='{ \
     }'
 ENV __CHAIN_ADDRESSES__ $CHAIN_ADDRESSES
 
-ARG GOVERNANCE_CHAIN_ID=31337
+ARG GOVERNANCE_CHAIN_ID=1337
 ENV __GOVERNANCE_CHAIN_ID__ $GOVERNANCE_CHAIN_ID
 
 ARG GOVERNANCE_PROVIDER_URLS='["http://localhost:8545"]'
@@ -107,3 +107,4 @@ FROM nginx:latest AS server
 
 # Copy over the dist files
 COPY --from=builder /build/packages/iframe/dist/bundle /usr/share/nginx/html
+
