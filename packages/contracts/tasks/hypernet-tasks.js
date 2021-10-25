@@ -117,6 +117,7 @@ task("registryParameters", "Prints NFR  parameters.")
     const numberOfEntries = await registryHandle.totalSupply();
     const registrationToken = await registryHandle.registrationToken();
     const registrationFee = await registryHandle.registrationFee();
+    const primaryRegistry = await registryHandle.primaryRegistry();
     console.log("Registry Name:", name);
     console.log("Registry Symbol:", symbol);
     console.log("Registry Address:", registryAddress);
@@ -124,6 +125,7 @@ task("registryParameters", "Prints NFR  parameters.")
     console.log("Number of Entries:", numberOfEntries.toString());
     console.log("Registration Token:", registrationToken);
     console.log("Registration Fee:", registrationFee.toString());
+    console.log("Primary Registry:", primaryRegistry);
 });
 
 task("setRegistryParameters", "Prints NFR  parameters.")
@@ -161,12 +163,14 @@ task("setRegistryParameters", "Prints NFR  parameters.")
     const numberOfEntries = await registryHandle.totalSupply();
     const registrationToken = await registryHandle.registrationToken();
     const registrationFee = await registryHandle.registrationFee();
+    const primaryRegistry = await registryHandle.primaryRegistry();
     console.log("Registry Name:", name);
     console.log("Registry Symbol:", symbol);
     console.log("Registry Address:", registryAddress);
     console.log("Number of Entries:", numberOfEntries.toString());
     console.log("Registration Token:", registrationToken);
     console.log("Registration Fee:", registrationFee.toString());
+    console.log("Primary Registry:", primaryRegistry);
 });
 
 task("registryEntryByLabel", "Prints NunFungible Identity Data.")
@@ -189,6 +193,52 @@ task("registryEntryByLabel", "Prints NunFungible Identity Data.")
     console.log("Owner of NFI:", tokenOwner);
     console.log("Token ID:", tokenId.toString());
     console.log("NFI Data:", tokenURI);
+});
+
+task("registryEntryByTokenID", "Prints NunFungible Identity Data.")
+  .addParam("name", "Target NonFungle Registry Name.")
+  .addParam("tokenid", "NFI label")
+  .setAction(async (taskArgs) => {
+    const name = taskArgs.name;
+    const tokenId = taskArgs.tokenid;
+
+    const accounts = await hre.ethers.getSigners();
+
+    const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
+    const registryAddress = await factoryHandle.nameToAddress(name);
+    const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
+
+    const tokenURI = await registryHandle.tokenURI(tokenId);
+    const tokenOwner =  await registryHandle.ownerOf(tokenId);
+
+    console.log("Owner of NFI:", tokenOwner);
+    console.log("Token ID:", tokenId.toString());
+    console.log("NFI Data:", tokenURI);
+});
+
+task("transferEntryByTokenID", "Transfers a token to a specified participant.")
+  .addParam("name", "Target NonFungle Registry Name")
+  .addParam("tokenid", "NFI tokenId")
+  .addParam("recipient", "Wallet address of the reciever")
+  .setAction(async (taskArgs) => {
+    const name = taskArgs.name;
+    const tokenId = taskArgs.tokenid;
+    const recipient = taskArgs.recipient;
+
+    const accounts = await hre.ethers.getSigners();
+
+    const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
+    const registryAddress = await factoryHandle.nameToAddress(name);
+    const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
+
+    const tokenOwner =  await registryHandle.ownerOf(tokenId);
+
+    let tx = await registryHandle.transferFrom(tokenOwner, recipient, tokenId)
+    tx.wait();
+
+    const newTokenOwner =  await registryHandle.ownerOf(tokenId);
+
+    console.log("New owner of NFI:", newTokenOwner);
 });
 
 task("burnRegistryEntry", "Prints NunFungible Identity Data.")

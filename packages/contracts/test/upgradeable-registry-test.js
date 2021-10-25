@@ -135,35 +135,24 @@ describe("Registry with No Enumeration", function () {
         const abiCoder = ethers.utils.defaultAbiCoder;
 
         // construct call data via ABI encoding
-        let nofunctiondefintion = abiCoder.encode(
-            [
-                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
-            ], 
-            [ 
-                [
-                    [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [hypertoken.address]
-                ] 
-            ]);
+        let nofunctiondefintion = hypertoken.address;
 
-        let noncontractaddress = abiCoder.encode(
-            [
-                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
-            ], 
-            [ 
-                [
-                    [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [hypertoken.address]
-                ] 
-            ]);
+        let noncontractaddress = hypertoken.address;
 
         // primary registry must implement the ERC721 interface
         await expectRevert(
-            registry.setRegistryParameters(nofunctiondefintion),
+            registry.setPrimaryRegistry(nofunctiondefintion),
             "Transaction reverted: function selector was not recognized and there's no fallback function",
         );
 
         await expectRevert(
-            registry.setRegistryParameters(noncontractaddress),
+            registry.setPrimaryRegistry(noncontractaddress),
             "Transaction reverted: function selector was not recognized and there's no fallback function",
+        );
+
+        await expectRevert(
+            registry.connect(addr1).setPrimaryRegistry(noncontractaddress),
+            "NonFungibleRegistry: must be admin.",
         );
     });
 
@@ -200,11 +189,11 @@ describe("Registry with No Enumeration", function () {
         // construct call data via ABI encoding
         let params = abiCoder.encode(
             [
-                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])"
             ], 
             [ 
                 [
-                    [ ], [ ], [ ], [true], [ ], [ ], [ ], [ ], [ ], [ ]
+                    [ ], [ ], [ ], [true], [ ], [ ], [ ], [ ], [ ]
                 ] 
             ]);
 
@@ -242,11 +231,11 @@ describe("Registry with No Enumeration", function () {
         // construct call data via ABI encoding
         let params = abiCoder.encode(
             [
-                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])"
             ], 
             [ 
                 [
-                    [], [], [], [], [false], [], [], [], [], []
+                    [], [], [], [], [false], [], [], [], []
                 ] 
             ]);
 
@@ -296,11 +285,11 @@ describe("Registry with No Enumeration", function () {
         // construct call data via ABI encoding
         let params = abiCoder.encode(
             [
-                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])"
             ], 
             [ 
                 [
-                    [], [], [], [], [], [hypertoken.address], [], [], [], []
+                    [], [], [], [], [], [hypertoken.address], [], [], []
                 ] 
             ]);
 
@@ -378,11 +367,11 @@ describe("Registry with No Enumeration", function () {
       // construct call data via ABI encoding
       let params = abiCoder.encode(
           [
-              "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+              "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])"
           ], 
           [ 
               [
-                [], [true], [], [], [], [], [], [], [], []
+                [], [true], [], [], [], [], [], [], []
               ] 
           ]);
 

@@ -137,48 +137,29 @@ describe("Enumerated Registry", function () {
         const abiCoder = ethers.utils.defaultAbiCoder;
 
         // construct call data via ABI encoding
-        let nofunctiondefintion = abiCoder.encode(
-            [
-                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
-            ], 
-            [ 
-                [
-                    [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [hypertoken.address]
-                ] 
-            ]);
+        let nofunctiondefintion = hypertoken.address;
 
-        let noncontractaddress = abiCoder.encode(
-            [
-                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
-            ], 
-            [ 
-                [
-                    [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [owner.address]
-                ] 
-            ]);
+        let noncontractaddress = owner.address;
 
-        let disableprimaryregistry = abiCoder.encode(
-            [
-                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
-            ], 
-            [ 
-                [
-                    [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], ["0x0000000000000000000000000000000000000000"]
-                ] 
-            ]);
+        let disableprimaryregistry = "0x0000000000000000000000000000000000000000";
 
         // primary registry must implement the ERC721 interface
         await expectRevert(
-            registry.setRegistryParameters(nofunctiondefintion),
+            registry.setPrimaryRegistry(nofunctiondefintion),
             "Transaction reverted: function selector was not recognized and there's no fallback function",
         );
 
         await expectRevert(
-            registry.setRegistryParameters(noncontractaddress),
+            registry.setPrimaryRegistry(noncontractaddress),
             "Transaction reverted: function call to a non-contract account",
         );
 
-        let tx = await registry.setRegistryParameters(disableprimaryregistry);
+        await expectRevert(
+            registry.connect(addr1).setPrimaryRegistry(noncontractaddress),
+            "NonFungibleRegistry: must be admin.",
+        );
+
+        let tx = await registry.setPrimaryRegistry(disableprimaryregistry);
         tx.wait();
 
     });
@@ -216,11 +197,11 @@ describe("Enumerated Registry", function () {
         // construct call data via ABI encoding
         let params = abiCoder.encode(
             [
-                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])"
             ], 
             [ 
                 [
-                    [ ], [ ], [ ], [true], [ ], [ ], [ ], [ ], [ ], [ ]
+                    [ ], [ ], [ ], [true], [ ], [ ], [ ], [ ], [ ]
                 ] 
             ]);
 
@@ -258,11 +239,11 @@ describe("Enumerated Registry", function () {
         // construct call data via ABI encoding
         let params = abiCoder.encode(
             [
-                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])"
             ], 
             [ 
                 [
-                    [], [], [], [], [false], [], [], [], [], []
+                    [], [], [], [], [false], [], [], [], []
                 ] 
             ]);
 
@@ -312,11 +293,11 @@ describe("Enumerated Registry", function () {
         // construct call data via ABI encoding
         let params = abiCoder.encode(
             [
-                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])"
             ], 
             [ 
                 [
-                    [], [], [], [], [], [hypertoken.address], [], [], [], []
+                    [], [], [], [], [], [hypertoken.address], [], [], []
                 ] 
             ]);
 
@@ -397,11 +378,11 @@ describe("Enumerated Registry", function () {
       // construct call data via ABI encoding
       let params = abiCoder.encode(
           [
-              "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+              "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])"
           ], 
           [ 
               [
-                [], [true], [], [], [], [], [], [], [], []
+                [], [true], [], [], [], [], [], [], []
               ] 
           ]);
 

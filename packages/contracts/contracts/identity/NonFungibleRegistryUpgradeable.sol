@@ -9,14 +9,12 @@ import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract NonFungibleRegistryUpgradeable is
     Initializable,
     ContextUpgradeable,
     AccessControlEnumerableUpgradeable,
-    ERC721URIStorageUpgradeable,
-    UUPSUpgradeable
+    ERC721URIStorageUpgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeERC20Upgradeable for IERC20Upgradeable;
@@ -39,7 +37,6 @@ contract NonFungibleRegistryUpgradeable is
         uint256[]  _registrationFee;
         address[] _burnAddress;
         uint256[] _burnFee;
-        address[] _primaryRegistry;
     }
 
     // DFDL schema definition for metadata stored in tokenURI
@@ -108,7 +105,6 @@ contract NonFungibleRegistryUpgradeable is
         __Context_init();
         __AccessControlEnumerable_init();
         __ERC721URIStorage_init();
-        __UUPSUpgradeable_init();
         __ERC721_init(name_, symbol_);
 
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
@@ -128,9 +124,6 @@ contract NonFungibleRegistryUpgradeable is
         primaryRegistry = address(0);
     }
 
-    // we must implement this function at top level contract definition for the upgradable proxy pattern
-    function _authorizeUpgrade(address newImplementation) internal onlyRole(REGISTRAR_ROLE) override {}
-
     /// @notice setRegistryParameters enable or disable the lazy registration feature
     /// @dev only callable by the REGISTRAR_ROLE, use arrays so we don't have to always pass every
     /// parameter if we don't want to chage it.
@@ -142,7 +135,7 @@ contract NonFungibleRegistryUpgradeable is
 
         RegistryParams memory params = abi.decode(encodedParameters, (RegistryParams));
 
-        if (params._schema.length > 0) { schema = params._schema[0];}
+        if (params._schema.length > 0) { schema = params._schema[0]; }
         if (params._allowLazyRegister.length > 0) { allowLazyRegister = params._allowLazyRegister[0]; }
         if (params._allowStorageUpdate.length > 0) { allowStorageUpdate = params._allowStorageUpdate[0]; }
         if (params._allowLabelChange.length > 0) { allowLabelChange = params._allowLabelChange[0]; }
@@ -155,15 +148,21 @@ contract NonFungibleRegistryUpgradeable is
             "NonFungibleRegistry: burnFee must be ge than 0 and le than 10000.");
             burnFee = params._burnFee[0]; 
         }
-        if (params._primaryRegistry.length > 0) { 
-            // allow this feature to be disablled by setting to 0 address
-            if (address(params._primaryRegistry[0]) == address(0)) {
-                primaryRegistry = address(0); 
-            } else {
-                require(IERC721Upgradeable(params._primaryRegistry[0]).supportsInterface(type(IERC721Upgradeable).interfaceId), 
-                        "NonFungibleRegistry: Address does not support ERC721 interface.");
-                primaryRegistry = params._primaryRegistry[0]; 
-            }
+    }
+
+    /// @notice setPrimaryRegistry enable or disable requirement for pre-registration
+    /// @dev only callable by the DEFAULT_ADMIN_ROLE
+    /// @param _primaryRegistry address to set as the primary registry
+    function setPrimaryRegistry(address _primaryRegistry) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NonFungibleRegistry: must be admin.");
+        // allow this feature to be disablled by setting to 0 address
+        if (address(_primaryRegistry) == address(0)) {
+            primaryRegistry = address(0); 
+        } else {
+            // if not disabling, make sure the address is an ERC721 token contract
+            require(IERC721Upgradeable(_primaryRegistry).supportsInterface(type(IERC721Upgradeable).interfaceId), 
+                    "NonFungibleRegistry: Address does not support ERC721 interface.");
+            primaryRegistry = _primaryRegistry; 
         }
     }
 

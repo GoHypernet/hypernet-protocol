@@ -4,7 +4,7 @@ const { BN, expectRevert } = require('@openzeppelin/test-helpers')
 const NFR = require("../artifacts/contracts/identity/NonFungibleRegistryEnumerableUpgradeable.sol/NonFungibleRegistryEnumerableUpgradeable.json")
 
 describe("Registry Factory Unit Tests", function () {
-    
+    const burnAddress = "0x000000000000000000000000000000000000dEaD"; 
     let hypertoken;
     let registryfactory; 
     let owner;
@@ -32,7 +32,15 @@ describe("Registry Factory Unit Tests", function () {
 
         // deploy factory contract
         const RegistryFactory = await ethers.getContractFactory("UpgradeableRegistryFactory");
-        registryfactory = await RegistryFactory.deploy(owner.address, ["Test"], ["t"], [owner.address], enumerableregistry.address, registry.address, hypertoken.address);
+        registryfactory = await RegistryFactory.deploy(
+                owner.address, 
+                ["Test"], 
+                ["t"], 
+                [owner.address], 
+                enumerableregistry.address, 
+                registry.address, 
+                hypertoken.address
+            );
         await registryfactory.deployTransaction.wait();
 	});
 
@@ -176,6 +184,8 @@ describe("Registry Factory Unit Tests", function () {
         tx = await hypertoken.connect(addr1).approve(registryfactory.address, fee);
         tx.wait();
 
+        const previousBalance = await hypertoken.balanceOf(burnAddress);
+
         tx = await registryfactory.connect(addr1).createRegistryByToken("enumerabledummy", "edmy", addr1.address, true);
         tx.wait();
 
@@ -184,7 +194,7 @@ describe("Registry Factory Unit Tests", function () {
 
         expect(await registryfactory.getNumberOfEnumerableRegistries()).to.equal(2);
         expect(await hypertoken.balanceOf(addr1.address)).to.equal(fee);
-        expect(await hypertoken.balanceOf(burnAddress)).to.equal(fee);
+        expect(await hypertoken.balanceOf(burnAddress)).to.equal(previousBalance.add(fee));
         expect(await dummyReg.name()).to.equal("enumerabledummy");
         expect(await dummyReg.symbol()).to.equal("edmy");
 
