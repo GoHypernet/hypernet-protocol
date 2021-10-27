@@ -1,8 +1,8 @@
 import {
-  IAuthorizeFundsRequest,
+  ISignedAuthorizeFundsRequest,
   IResolutionResult,
   IResolveInsuranceRequest,
-  ISendFundsRequest,
+  ISignedSendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
 import {
   GatewayConnectorError,
@@ -57,8 +57,8 @@ export class GatewayConnectorProxy
   }
 
   public signMessageRequested: Subject<string>;
-  public sendFundsRequested: Subject<ISendFundsRequest>;
-  public authorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
+  public sendFundsRequested: Subject<ISignedSendFundsRequest>;
+  public authorizeFundsRequested: Subject<ISignedAuthorizeFundsRequest>;
   public resolveInsuranceRequested: Subject<IResolveInsuranceRequest>;
   public stateChannelRequested: Subject<IStateChannelRequest>;
 
@@ -153,13 +153,13 @@ export class GatewayConnectorProxy
         }
       });
 
-      this.child?.on("sendFundsRequested", (request: ISendFundsRequest) => {
+      this.child?.on("sendFundsRequested", (request: ISignedSendFundsRequest) => {
         this.sendFundsRequested.next(request);
       });
 
       this.child?.on(
         "authorizeFundsRequested",
-        (request: IAuthorizeFundsRequest) => {
+        (request: ISignedAuthorizeFundsRequest) => {
           this.authorizeFundsRequested.next(request);
         },
       );

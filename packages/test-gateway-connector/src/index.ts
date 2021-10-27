@@ -1,11 +1,12 @@
 import { Bytes32 } from "@connext/vector-types";
 import { ChannelSigner } from "@connext/vector-utils";
 import {
-  IAuthorizeFundsRequest,
+  IInitiateAuthorizeFundsRequest,
+  ISignedAuthorizeFundsRequest,
   IGatewayConnector,
-  ISendFundsRequest,
+  IInitiateSendFundsRequest,
+  ISignedSendFundsRequest,
   IResolutionResult,
-  IRedirectInfo,
   IResolveInsuranceRequest,
   ISignMessageRequest,
   IStateChannelRequest,
@@ -23,6 +24,7 @@ import {
   GatewayUrl,
   GatewayTokenInfo,
   UnixTimestamp,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
 import { Subject } from "rxjs";
@@ -37,13 +39,13 @@ class TestGatewayConnector implements IGatewayConnector {
   protected routerPublicIdentifier = PublicIdentifier(
     "vector8AXWmo3dFpK1drnjeWPyi9KTy9Fy3SkCydWx8waQrxhnW4KPmR",
   );
-  protected paymentToken = EthereumAddress(
+  protected paymentToken = EthereumContractAddress(
     "0xAa588d3737B611baFD7bD713445b314BD453a5C8",
   ); // HyperToken
 
   protected chainId = ChainId(1337);
   protected gatewayUrl = GatewayUrl("http://localhost:5010");
-  protected channelAddress: EthereumAddress | null = null;
+  protected channelAddress: EthereumContractAddress | null = null;
 
   async resolveChallenge(paymentId: PaymentId): Promise<IResolutionResult> {
     // What the mediator needs to sign:
@@ -147,25 +149,27 @@ class TestGatewayConnector implements IGatewayConnector {
     }, 10000);
   }
 
-  public sendFundsRequested: Subject<ISendFundsRequest>;
-  public authorizeFundsRequested: Subject<IAuthorizeFundsRequest>;
+  public initiateSendFundsRequested: Subject<IInitiateSendFundsRequest>;
+  public sendFundsRequested: Subject<ISignedSendFundsRequest>;
+  public initiateAuthorizeFundsRequested: Subject<IInitiateAuthorizeFundsRequest>;
+  public authorizeFundsRequested: Subject<ISignedAuthorizeFundsRequest>;
   public resolveInsuranceRequested: Subject<IResolveInsuranceRequest>;
   public signMessageRequested: Subject<ISignMessageRequest>;
   public stateChannelRequested: Subject<IStateChannelRequest>;
   public displayRequested: Subject<void>;
   public closeRequested: Subject<void>;
-  public onPreRedirect: Subject<IRedirectInfo>;
 
   constructor() {
     console.log("Instantiating TestGatewayConnector");
-    this.sendFundsRequested = new Subject<ISendFundsRequest>();
-    this.authorizeFundsRequested = new Subject<IAuthorizeFundsRequest>();
+    this.initiateSendFundsRequested = new Subject();
+    this.sendFundsRequested = new Subject();
+    this.initiateAuthorizeFundsRequested = new Subject();
+    this.authorizeFundsRequested = new Subject();
     this.resolveInsuranceRequested = new Subject();
     this.signMessageRequested = new Subject();
     this.stateChannelRequested = new Subject();
     this.displayRequested = new Subject<void>();
     this.closeRequested = new Subject<void>();
-    this.onPreRedirect = new Subject<IRedirectInfo>();
 
     this._renderContent();
 
@@ -274,6 +278,7 @@ class TestGatewayConnector implements IGatewayConnector {
       requiredStake: BigNumberString("1"),
       paymentToken: this.paymentToken, // Hypertoken
       metadata: null,
+      
     });
   }
 

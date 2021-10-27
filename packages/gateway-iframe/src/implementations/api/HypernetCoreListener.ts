@@ -9,6 +9,7 @@ import {
   UUID,
   ActiveStateChannel,
   UtilityMessageSignature,
+  PaymentId,
 } from "@hypernetlabs/objects";
 import { ChildProxy, IIFrameCallData } from "@hypernetlabs/utils";
 import { injectable, inject } from "inversify";
@@ -19,6 +20,8 @@ import { IHypernetCoreListener } from "@gateway-iframe/interfaces/api";
 import {
   IGatewayService,
   IGatewayServiceType,
+  IPaymentService,
+  IPaymentServiceType,
 } from "@gateway-iframe/interfaces/business";
 import {
   IContextProvider,
@@ -34,6 +37,7 @@ export class HypernetCoreListener
 
   constructor(
     @inject(IGatewayServiceType) protected gatewayService: IGatewayService,
+    @inject(IPaymentServiceType) protected paymentService: IPaymentService,
     @inject(IContextProviderType) protected contextProvider: IContextProvider,
   ) {
     super();
@@ -185,6 +189,28 @@ export class HypernetCoreListener
         }, data.callId);
       },
 
+      sendFundsInitiated: (data: IIFrameCallData<ISendFundsInitiatedData>) => {
+        this.returnForModel(() => {
+          return this.paymentService.sendFundsInitiated(
+            data.data.requestId,
+            data.data.paymentId,
+            data.data.protocolSignature,
+          );
+        }, data.callId);
+      },
+
+      authorizeFundsInitiated: (
+        data: IIFrameCallData<IAuthorizeFundsInitiatedData>,
+      ) => {
+        this.returnForModel(() => {
+          return this.paymentService.authorizeFundsInitiated(
+            data.data.requestId,
+            data.data.paymentId,
+            data.data.protocolSignature,
+          );
+        }, data.callId);
+      },
+
       messageSigned: (data: IIFrameCallData<ISignatureResponseData>) => {
         this.returnForModel(() => {
           return this.gatewayService.messageSigned(
@@ -213,6 +239,18 @@ export class HypernetCoreListener
       .getGatewayContext()
       .onHypernetCoreProxyActivated.next(parent);
   }
+}
+
+interface ISendFundsInitiatedData {
+  requestId: string;
+  paymentId: PaymentId;
+  protocolSignature: Signature;
+}
+
+interface IAuthorizeFundsInitiatedData {
+  requestId: string;
+  paymentId: PaymentId;
+  protocolSignature: Signature;
 }
 
 interface IActivateConnectorData {

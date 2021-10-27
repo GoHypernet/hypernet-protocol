@@ -10,8 +10,8 @@ import {
 } from "@hypernetlabs/objects";
 import { constants } from "ethers";
 import {
-  ISendFundsRequest,
-  IAuthorizeFundsRequest,
+  ISignedSendFundsRequest,
+  ISignedAuthorizeFundsRequest,
   IResolveInsuranceRequest,
 } from "@hypernetlabs/gateway-connector";
 
@@ -68,7 +68,7 @@ export const gatewayAddress2 = EthereumAddress("0xMediatorEthereumAddress2");
 export const gatewaySignature = Signature("0xgatewaySignature");
 export const validDomain = "Hypernet";
 
-export const sendFundsRequest: ISendFundsRequest = {
+export const sendFundsRequest: ISignedSendFundsRequest = {
   channelAddress: routerChannelAddress,
   recipientPublicIdentifier: publicIdentifier,
   amount: commonAmount,
@@ -78,7 +78,7 @@ export const sendFundsRequest: ISendFundsRequest = {
   metadata: "metadata",
 };
 
-export const authorizeFundsRequest: IAuthorizeFundsRequest = {
+export const authorizeFundsRequest: ISignedAuthorizeFundsRequest = {
   channelAddress: routerChannelAddress,
   recipientPublicIdentifier: publicIdentifier,
   totalAuthorized: commonAmount,

@@ -3,16 +3,17 @@ import {
   PullPayment,
   Balances,
   PublicIdentifier,
-  RouterDetails,
   GatewayTokenInfo,
 } from "@hypernetlabs/objects";
 import { Observable } from "rxjs";
 
-import { IAuthorizeFundsRequest } from "./IAuthorizeFundsRequest";
-import { IResolveInsuranceRequest } from "./IResolveInsuranceRequest";
-import { ISendFundsRequest } from "./ISendFundsRequest";
-import { ISignMessageRequest } from "./ISignMessageRequest";
-import { IStateChannelRequest } from "./IStateChannelRequest";
+import { IInitiateAuthorizeFundsRequest } from "@gateway-connector/IInitiateAuthorizeFundsRequest";
+import { IInitiateSendFundsRequest } from "@gateway-connector/IInitiateSendFundsRequest";
+import { IResolveInsuranceRequest } from "@gateway-connector/IResolveInsuranceRequest";
+import { ISignedAuthorizeFundsRequest } from "@gateway-connector/ISignedAuthorizeFundsRequest";
+import { ISignedSendFundsRequest } from "@gateway-connector/ISignedSendFundsRequest";
+import { ISignMessageRequest } from "@gateway-connector/ISignMessageRequest";
+import { IStateChannelRequest } from "@gateway-connector/IStateChannelRequest";
 
 export interface IGatewayConnector {
   /**
@@ -30,17 +31,33 @@ export interface IGatewayConnector {
 
   /**
    * This observable should emit when the connector wants to create a
+   * push payment. The callback will be called with the prospective payment
+   * ID. The gateway then needs to sign the whole request (via EIP-712),
+   * return to the connector, and trigger sendFundsRequested
+   */
+  initiateSendFundsRequested: Observable<IInitiateSendFundsRequest>;
+
+  /**
+   * This observable should emit when the connector wants to create a
    * push payment. The callback will be called after the push payment
    * is initiated.
    */
-  sendFundsRequested: Observable<ISendFundsRequest>;
+  sendFundsRequested: Observable<ISignedSendFundsRequest>;
+
+  /**
+   * This observable should emit when the connector wants to create a
+   * push payment. The callback will be called with the prospective payment
+   * ID. The gateway then needs to sign the whole request (via EIP-712),
+   * return to the connector, and trigger sendFundsRequested
+   */
+  initiateAuthorizeFundsRequested: Observable<IInitiateAuthorizeFundsRequest>;
 
   /**
    * This observable should emit when the connector wants to create a
    * pull payment. The callback will be called after the pull payment
    * is initiated.
    */
-  authorizeFundsRequested: Observable<IAuthorizeFundsRequest>;
+  authorizeFundsRequested: Observable<ISignedAuthorizeFundsRequest>;
 
   /**
    * This observable should emit when the connector wants to resolve

@@ -1,7 +1,7 @@
 import {
-  IAuthorizeFundsRequest,
+  ISignedAuthorizeFundsRequest,
   IResolveInsuranceRequest,
-  ISendFundsRequest,
+  ISignedSendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
 import {
   Balances,
@@ -116,8 +116,8 @@ export interface IGatewayConnectorProxy extends ParentProxy {
 
   // Signals to the outside world
   signMessageRequested: Observable<string>;
-  sendFundsRequested: Observable<ISendFundsRequest>;
-  authorizeFundsRequested: Observable<IAuthorizeFundsRequest>;
+  sendFundsRequested: Observable<ISignedSendFundsRequest>;
+  authorizeFundsRequested: Observable<ISignedAuthorizeFundsRequest>;
   resolveInsuranceRequested: Observable<IResolveInsuranceRequest>;
   stateChannelRequested: Observable<IStateChannelRequest>;
 }

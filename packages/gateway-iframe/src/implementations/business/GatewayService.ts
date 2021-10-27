@@ -1,7 +1,4 @@
-import {
-  IGatewayConnector,
-  IRedirectInfo,
-} from "@hypernetlabs/gateway-connector";
+import { IGatewayConnector } from "@hypernetlabs/gateway-connector";
 import {
   PublicIdentifier,
   Balances,
@@ -215,27 +212,6 @@ export class GatewayService implements IGatewayService {
         // Return the valid signature
         return okAsync<Signature, GatewayValidationError>(signature);
       });
-  }
-
-  public prepareForRedirect(
-    redirectInfo: IRedirectInfo,
-  ): ResultAsync<void, Error> {
-    const context = this.contextProvider.getGatewayContext();
-
-    // Register the redirect
-    this.persistenceRepository.setExpectedRedirect(
-      new ExpectedRedirect(
-        context.gatewayUrl,
-        redirectInfo.redirectParam,
-        redirectInfo.redirectValue,
-      ),
-    );
-
-    // Let the connector know it can move forward
-    redirectInfo.readyFunction();
-
-    // Return
-    return okAsync(undefined);
   }
 
   public autoActivateGatewayConnector(): ResultAsync<

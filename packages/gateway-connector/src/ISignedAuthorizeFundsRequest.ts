@@ -1,18 +1,24 @@
 import {
   BigNumberString,
-  EthereumAddress,
+  EthereumContractAddress,
+  PaymentId,
   PublicIdentifier,
+  Signature,
   UnixTimestamp,
 } from "@hypernetlabs/objects";
 
-export interface IAuthorizeFundsRequest {
-  channelAddress: EthereumAddress;
+export interface ISignedAuthorizeFundsRequest {
+  requestIdentifier: string;
+  channelAddress: EthereumContractAddress;
   recipientPublicIdentifier: PublicIdentifier;
   totalAuthorized: BigNumberString;
   expirationDate: UnixTimestamp;
   deltaAmount: BigNumberString;
   deltaTime: number;
   requiredStake: BigNumberString;
-  paymentToken: EthereumAddress;
+  paymentToken: EthereumContractAddress;
   metadata: string;
+  paymentId: PaymentId;
+  protocolSignature: Signature;
+  gatewaySignature: Signature;
 }

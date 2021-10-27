@@ -1,7 +1,9 @@
 import {
-  IAuthorizeFundsRequest,
+  ISignedAuthorizeFundsRequest,
   IResolveInsuranceRequest,
-  ISendFundsRequest,
+  ISignedSendFundsRequest,
+  IInitiateSendFundsRequest,
+  IInitiateAuthorizeFundsRequest,
 } from "@hypernetlabs/gateway-connector";
 import {
   ChainId,
@@ -33,16 +35,32 @@ export class HypernetCoreRepository implements IHypernetCoreRepository {
       });
   }
 
+  public emitInitiateSendFundsRequest(
+    request: IInitiateSendFundsRequest,
+  ): ResultAsync<void, never> {
+    this.childApi?.emit("initiateSendFundsRequested", request);
+
+    return okAsync(undefined);
+  }
+
   public emitSendFundsRequest(
-    request: ISendFundsRequest,
+    request: ISignedSendFundsRequest,
   ): ResultAsync<void, never> {
     this.childApi?.emit("sendFundsRequested", request);
 
     return okAsync(undefined);
   }
 
+  public emitInitiateAuthorizeFundsRequest(
+    request: IInitiateAuthorizeFundsRequest,
+  ): ResultAsync<void, never> {
+    this.childApi?.emit("initiateAuthorizeFundsRequested", request);
+
+    return okAsync(undefined);
+  }
+
   public emitAuthorizeFundsRequest(
-    request: IAuthorizeFundsRequest,
+    request: ISignedAuthorizeFundsRequest,
   ): ResultAsync<void, never> {
     this.childApi?.emit("authorizeFundsRequested", request);
 

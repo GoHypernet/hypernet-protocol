@@ -1,7 +1,7 @@
 import {
-  IAuthorizeFundsRequest,
+  ISignedAuthorizeFundsRequest,
   IResolveInsuranceRequest,
-  ISendFundsRequest,
+  ISignedSendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
 import { GatewayUrl, PaymentId } from "@hypernetlabs/objects";
 import {
@@ -141,7 +141,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
                 });
             } else {
               this.logUtils.error(
-                `Invalid ISendFundsRequest from gateway connector ${proxy.gatewayUrl}`,
+                `Invalid ISignedSendFundsRequest from gateway connector ${proxy.gatewayUrl}`,
               );
             }
           });
@@ -176,7 +176,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
                 });
             } else {
               this.logUtils.error(
-                `Invalid IAuthorizeFundsRequest from gateway connector ${proxy.gatewayUrl}`,
+                `Invalid ISignedAuthorizeFundsRequest from gateway connector ${proxy.gatewayUrl}`,
               );
             }
           });
@@ -252,7 +252,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
       });
   }
 
-  protected validateSendFundsRequest(request: ISendFundsRequest): boolean {
+  protected validateSendFundsRequest(request: ISignedSendFundsRequest): boolean {
     if (
       !this.validationUtils.validatePublicIdentifier(
         request.recipientPublicIdentifier,
@@ -283,7 +283,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
   }
 
   protected validateAuthorizeFundsRequest(
-    request: IAuthorizeFundsRequest,
+    request: ISignedAuthorizeFundsRequest,
   ): boolean {
     if (
       !this.validationUtils.validatePublicIdentifier(
