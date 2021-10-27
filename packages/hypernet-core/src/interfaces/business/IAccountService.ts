@@ -1,9 +1,7 @@
 import {
   Balances,
-  EthereumAddress,
   PrivateCredentials,
   PublicIdentifier,
-  Signature,
   BalancesUnavailableError,
   BlockchainUnavailableError,
   VectorError,
@@ -13,6 +11,8 @@ import {
   PersistenceError,
   ChainId,
   UtilityMessageSignature,
+  EthereumAccountAddress,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -24,7 +24,10 @@ export interface IAccountService {
     PublicIdentifier,
     BlockchainUnavailableError | VectorError
   >;
-  getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
+  getAccounts(): ResultAsync<
+    EthereumAccountAddress[],
+    BlockchainUnavailableError
+  >;
   getActiveStateChannels(): ResultAsync<
     ActiveStateChannel[],
     VectorError | BlockchainUnavailableError | PersistenceError
@@ -37,18 +40,18 @@ export interface IAccountService {
     BlockchainUnavailableError | VectorError | PersistenceError
   >;
   depositFunds(
-    channelAddress: EthereumAddress,
-    assetAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
+    assetAddress: EthereumContractAddress,
     amount: BigNumberString,
   ): ResultAsync<
     Balances,
     BalancesUnavailableError | BlockchainUnavailableError | VectorError
   >;
   withdrawFunds(
-    channelAddress: EthereumAddress,
-    assetAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
+    assetAddress: EthereumContractAddress,
     amount: BigNumberString,
-    destinationAddress: EthereumAddress,
+    destinationAddress: EthereumAccountAddress,
   ): ResultAsync<
     Balances,
     BalancesUnavailableError | BlockchainUnavailableError | VectorError

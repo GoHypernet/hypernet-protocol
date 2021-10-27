@@ -2,7 +2,8 @@ import {
   ActiveStateChannel,
   Balances,
   BigNumberString,
-  EthereumAddress,
+  EthereumAccountAddress,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import { ITokenSelectorOption } from "@web-ui/interfaces";
@@ -30,19 +31,19 @@ interface IReducerStateReducer {
   selectedPaymentToken?: ITokenSelectorOption;
   setSelectedPaymentToken: (selectedOption?: ITokenSelectorOption) => void;
   amount: string;
-  destinationAddress: EthereumAddress;
+  destinationAddress: EthereumAccountAddress;
   setAmount: (amount: string) => void;
   setDestinationAddress: (destinationAddress: string) => void;
   mintTokens: () => void;
   depositFunds: (
-    tokenAddress: EthereumAddress,
+    tokenAddress: EthereumContractAddress,
     amount: string,
-    stateChannelAddress: EthereumAddress,
+    stateChannelAddress: EthereumContractAddress,
   ) => void;
   withdrawFunds: (
-    tokenAddress: EthereumAddress,
+    tokenAddress: EthereumContractAddress,
     amount: string,
-    stateChannelAddress: EthereumAddress,
+    stateChannelAddress: EthereumContractAddress,
   ) => void;
   activeStateChannels?: ActiveStateChannel[];
   selectedStateChennel?: ActiveStateChannel;
@@ -52,7 +53,7 @@ interface IReducerState {
   error: any;
   tokenSelectorOptions: ITokenSelectorOption[];
   amount: string;
-  destinationAddress: EthereumAddress;
+  destinationAddress: EthereumAccountAddress;
   selectedPaymentToken?: ITokenSelectorOption;
   activeStateChannels?: ActiveStateChannel[];
   selectedStateChennel?: ActiveStateChannel;
@@ -62,7 +63,10 @@ type Action =
   | { type: EActionTypes.FETCHED; payload: PaymentTokenOptionViewModel[] }
   | { type: EActionTypes.AMOUNT_CHANGED; payload: string }
   | { type: EActionTypes.FETCHED_STATE_CHANNELS; payload: ActiveStateChannel[] }
-  | { type: EActionTypes.DESTINATION_ADDRESS_CHANGED; payload: EthereumAddress }
+  | {
+      type: EActionTypes.DESTINATION_ADDRESS_CHANGED;
+      payload: EthereumAccountAddress;
+    }
   | { type: EActionTypes.STATE_CHANNEL_SELECTED; payload: ActiveStateChannel }
   | { type: EActionTypes.SUCCESS }
   | { type: EActionTypes.ERROR }
@@ -81,7 +85,7 @@ export function useFund(): IReducerStateReducer {
     tokenSelectorOptions: [],
     selectedPaymentToken: undefined,
     amount: "1",
-    destinationAddress: EthereumAddress(""),
+    destinationAddress: EthereumAccountAddress(""),
     activeStateChannels: [],
   };
 
@@ -236,15 +240,15 @@ export function useFund(): IReducerStateReducer {
       return [
         new PaymentTokenOptionViewModel(
           "Hypertoken",
-          EthereumAddress("0xAa588d3737B611baFD7bD713445b314BD453a5C8"),
+          EthereumContractAddress("0xAa588d3737B611baFD7bD713445b314BD453a5C8"),
         ),
         new PaymentTokenOptionViewModel(
           "Test Token",
-          EthereumAddress("0x9FBDa871d559710256a2502A2517b794B482Db40"),
+          EthereumContractAddress("0x9FBDa871d559710256a2502A2517b794B482Db40"),
         ),
         new PaymentTokenOptionViewModel(
           "ETH",
-          EthereumAddress("0x0000000000000000000000000000000000000000"),
+          EthereumContractAddress("0x0000000000000000000000000000000000000000"),
         ),
       ];
     }
@@ -267,14 +271,14 @@ export function useFund(): IReducerStateReducer {
   const setDestinationAddress = (enteredAddress: string) => {
     dispatch({
       type: EActionTypes.AMOUNT_CHANGED,
-      payload: EthereumAddress(enteredAddress),
+      payload: EthereumAccountAddress(enteredAddress),
     });
   };
 
   const depositFunds = (
-    tokenAddress: EthereumAddress,
+    tokenAddress: EthereumContractAddress,
     amount: string,
-    stateChannelAddress: EthereumAddress,
+    stateChannelAddress: EthereumContractAddress,
   ) => {
     setLoading(true);
     coreProxy
@@ -302,9 +306,9 @@ export function useFund(): IReducerStateReducer {
   };
 
   const withdrawFunds = (
-    tokenAddress: EthereumAddress,
+    tokenAddress: EthereumContractAddress,
     amount: string,
-    stateChannelAddress: EthereumAddress,
+    stateChannelAddress: EthereumContractAddress,
   ) => {
     setLoading(true);
     coreProxy

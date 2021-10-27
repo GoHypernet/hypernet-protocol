@@ -1,16 +1,16 @@
+import { IGatewayConnector } from "@hypernetlabs/gateway-connector";
 import {
   GatewayUrl,
   Signature,
-  EthereumAddress,
   Balances,
   AssetBalance,
   UtilityMessageSignature,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
+import { JSDOM } from "jsdom";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
-import { JSDOM } from "jsdom";
 
-import { IGatewayConnector } from "@hypernetlabs/gateway-connector";
 import { GatewayService } from "@gateway-iframe/implementations/business";
 import { ContextProvider } from "@gateway-iframe/implementations/utils";
 import { IGatewayService } from "@gateway-iframe/interfaces/business";
@@ -53,7 +53,7 @@ class GatewayServiceMocks {
   public persistenceRepository = td.object<IPersistenceRepository>();
   public hypernetCoreRepository = td.object<IHypernetCoreRepository>();
   public gatewayUrl = GatewayUrl("http://localhost:5010");
-  public gatewayAddress = EthereumAddress("gatewayAddress");
+  public gatewayAddress = EthereumAccountAddress("gatewayAddress");
   public gatewaySignature = Signature("gatewaySignature");
   public messageSignature = UtilityMessageSignature("messageSignature");
   public messageToBeSigned = "message";
@@ -68,7 +68,7 @@ class GatewayServiceMocks {
   );
   public assetBalance = new AssetBalance(
     routerChannelAddress,
-    EthereumAddress(ethereumAddress),
+    ethereumAddress,
     `Unknown Token`,
     "Unk",
     0,
@@ -272,7 +272,7 @@ describe("GatewayService tests", () => {
     const gatewayServiceMock = new GatewayServiceMocks();
     gatewayServiceMock.runFailureScenarios();
     gatewayServiceMock.contextProvider.getGatewayContext().gatewayAddress =
-      EthereumAddress("invalid address");
+      EthereumAccountAddress("invalid address");
 
     const gatewayService = gatewayServiceMock.factoryGatewayService();
 

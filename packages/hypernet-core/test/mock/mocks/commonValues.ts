@@ -3,7 +3,8 @@ import {
   BigNumberString,
   ChainId,
   EMessageTransferType,
-  EthereumAddress,
+  EthereumAccountAddress,
+  EthereumContractAddress,
   GatewayRegistrationInfo,
   GatewayUrl,
   HexString,
@@ -24,28 +25,28 @@ import {
 } from "@hypernetlabs/objects";
 import { constants } from "ethers";
 
-export const account = EthereumAddress("0xDEADBEEF");
-export const account2 = EthereumAddress("0xBEEFDEAD");
-export const errorAccount = EthereumAddress("error");
+export const account = EthereumAccountAddress("0xDEADBEEF");
+export const account2 = EthereumAccountAddress("0xBEEFDEAD");
+export const errorAccount = EthereumAccountAddress("error");
 export const publicIdentifier = PublicIdentifier("vectorDEADBEEF");
 export const publicIdentifier2 = PublicIdentifier("vectorBEEFDEAD");
 export const publicIdentifier3 = PublicIdentifier("vectorDEADPORK");
-export const routerChannelAddress = EthereumAddress(
+export const routerChannelAddress = EthereumContractAddress(
   "0x0afd1c03a0373b4c99233cbb0719ab0cbe8258eb",
 );
-export const errorRouterChannelAddress = EthereumAddress("error");
+export const errorRouterChannelAddress = EthereumContractAddress("error");
 export const routerPublicIdentifier = PublicIdentifier("vectorROUTERPUBLICID");
-export const ethereumAddress = EthereumAddress(
+export const ethereumAddress = EthereumContractAddress(
   "0x0000000000000000000000000000000000000000",
 );
 export const chainId = ChainId(1337);
-export const hyperTokenAddress = EthereumAddress(constants.AddressZero);
+export const hyperTokenAddress = EthereumContractAddress(constants.AddressZero);
 export const commonAmount = BigNumberString("1");
 export const uncommonAmount = BigNumberString("2");
-export const destinationAddress = EthereumAddress(
+export const destinationAddress = EthereumAccountAddress(
   "0x0afd1c03a0373b4c99233cbb0719ab0cbe6374gt",
 );
-export const erc20AssetAddress = EthereumAddress(
+export const erc20AssetAddress = EthereumContractAddress(
   "0x9FBDa871d559710256a2502A2517b794B482Db40",
 );
 export const commonPaymentId = PaymentId(
@@ -74,8 +75,12 @@ export const nowFormatted = "2021-02-03T04:28:09+03:00";
 export const gatewayUrl = GatewayUrl("https://example.gateway.com/");
 export const gatewayUrlError = GatewayUrl("gatewayUrlError");
 export const gatewayUrl2 = GatewayUrl("https://example2.gateway.com/");
-export const gatewayAddress = EthereumAddress("0xMediatorEthereumAddress");
-export const gatewayAddress2 = EthereumAddress("0xMediatorEthereumAddress2");
+export const gatewayAddress = EthereumAccountAddress(
+  "0xMediatorEthereumAddress",
+);
+export const gatewayAddress2 = EthereumAccountAddress(
+  "0xMediatorEthereumAddress2",
+);
 export const gatewaySignature = Signature("0xgatewaySignature");
 export const gatewaySignature2 = Signature("0xgatewaySignature2");
 export const gatewaySignature3 = Signature("0xgatewaySignature3");
@@ -90,32 +95,38 @@ export const gatewayRegistrationInfo2 = new GatewayRegistrationInfo(
   gatewaySignature2,
 );
 
-export const channelFactoryAddress = EthereumAddress(
+export const channelFactoryAddress = EthereumContractAddress(
   "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",
 );
-export const transferRegistryAddress = EthereumAddress(
+export const transferRegistryAddress = EthereumContractAddress(
   "0x8f0483125FCb9aaAEFA9209D8E9d7b9C8B9Fb90F",
 );
-export const messageTransferAddress = EthereumAddress("messageTransferAddress");
-export const insuranceTransferAddress = EthereumAddress(
+export const messageTransferAddress = EthereumContractAddress(
+  "messageTransferAddress",
+);
+export const insuranceTransferAddress = EthereumContractAddress(
   "insuranceTransferAddress",
 );
-export const parameterizedTransferAddress = EthereumAddress(
+export const parameterizedTransferAddress = EthereumContractAddress(
   "parameterizedTransferAddress",
 );
-export const gatewayRegistryAddress = EthereumAddress("gatewayRegistryAddress");
-export const liquidityRegistryAddress = EthereumAddress(
+export const gatewayRegistryAddress = EthereumContractAddress(
+  "gatewayRegistryAddress",
+);
+export const liquidityRegistryAddress = EthereumContractAddress(
   "liquidityRegistryAddress",
 );
-export const hypernetGovernorAddress = EthereumAddress(
+export const hypernetGovernorAddress = EthereumContractAddress(
   "hypernetGovernorAddress",
 );
 
-export const registryFactoryAddress = EthereumAddress("registryFactoryAddress");
+export const registryFactoryAddress = EthereumContractAddress(
+  "registryFactoryAddress",
+);
 
 export const validDomain = "hypernetProtocolDomain";
 
-export const messageTransferDefinitionAddress = EthereumAddress(
+export const messageTransferDefinitionAddress = EthereumContractAddress(
   "0xFB88dE099e13c3ED21F80a7a1E49f8CAEcF10df6",
 );
 export const messageTransferEncodedCancel = HexString(
@@ -123,7 +134,7 @@ export const messageTransferEncodedCancel = HexString(
 );
 export const messageTransferResolverEncoding = "tuple(string message)";
 
-export const insuranceTransferDefinitionAddress = EthereumAddress(
+export const insuranceTransferDefinitionAddress = EthereumContractAddress(
   "0x30753E4A8aad7F8597332E813735Def5dD395028",
 );
 export const insuranceTransferEncodedCancel = HexString(
@@ -132,7 +143,7 @@ export const insuranceTransferEncodedCancel = HexString(
 export const insuranceTransferResolverEncoding =
   "tuple(tuple(uint256 amount, bytes32 UUID) data, bytes signature)";
 
-export const parameterizedTransferDefinitionAddress = EthereumAddress(
+export const parameterizedTransferDefinitionAddress = EthereumContractAddress(
   "0x2C2B9C9a4a25e24B174f26114e8926a9f2128FE4",
 );
 export const parameterizedTransferEncodedCancel = HexString(

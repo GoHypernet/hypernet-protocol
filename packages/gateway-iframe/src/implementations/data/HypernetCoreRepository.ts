@@ -2,13 +2,13 @@ import {
   ISignedAuthorizeFundsRequest,
   IResolveInsuranceRequest,
   ISignedSendFundsRequest,
-  IInitiateSendFundsRequest,
-  IInitiateAuthorizeFundsRequest,
 } from "@hypernetlabs/gateway-connector";
 import {
+  AuthorizeFundsRequestData,
   ChainId,
   IStateChannelRequest,
   PublicIdentifier,
+  SendFundsRequestData,
   UUID,
 } from "@hypernetlabs/objects";
 import { injectable, inject } from "inversify";
@@ -36,7 +36,7 @@ export class HypernetCoreRepository implements IHypernetCoreRepository {
   }
 
   public emitInitiateSendFundsRequest(
-    request: IInitiateSendFundsRequest,
+    request: SendFundsRequestData,
   ): ResultAsync<void, never> {
     this.childApi?.emit("initiateSendFundsRequested", request);
 
@@ -52,7 +52,7 @@ export class HypernetCoreRepository implements IHypernetCoreRepository {
   }
 
   public emitInitiateAuthorizeFundsRequest(
-    request: IInitiateAuthorizeFundsRequest,
+    request: AuthorizeFundsRequestData,
   ): ResultAsync<void, never> {
     this.childApi?.emit("initiateAuthorizeFundsRequested", request);
 

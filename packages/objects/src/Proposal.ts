@@ -1,11 +1,11 @@
-import { EthereumAddress } from "@objects/EthereumAddress";
 import { BigNumberString } from "@objects/BigNumberString";
+import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
 import { EProposalVoteSupport, EProposalState } from "@objects/typing";
 
 export class ProposalVoteReceipt {
   constructor(
     public proposalId: BigNumberString,
-    public voterAddress: EthereumAddress,
+    public voterAddress: EthereumAccountAddress,
     public hasVoted: boolean,
     public support: EProposalVoteSupport,
     public votes: number,

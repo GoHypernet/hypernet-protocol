@@ -3,12 +3,12 @@ import {
   PushPayment,
   PullPayment,
   Balances,
-  EthereumAddress,
   PublicIdentifier,
   GatewayUrl,
   Signature,
   ActiveStateChannel,
   ChainId,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import {
   HypernetContext,
@@ -61,9 +61,9 @@ export class ContextProvider implements IContextProvider {
     onChainConnected: Subject<ChainId>,
     onGovernanceChainConnected: Subject<ChainId>,
     onChainChanged: Subject<ChainId>,
-    onAccountChanged: Subject<EthereumAddress>,
+    onAccountChanged: Subject<EthereumAccountAddress>,
     onGovernanceChainChanged: Subject<ChainId>,
-    onGovernanceAccountChanged: Subject<EthereumAddress>,
+    onGovernanceAccountChanged: Subject<EthereumAccountAddress>,
   ) {
     this.context = new HypernetContext(
       null,
@@ -135,7 +135,7 @@ export class ContextProvider implements IContextProvider {
     if (this.contextInitialized()) {
       this._initializePromiseResolve(
         new InitializedHypernetContext(
-          EthereumAddress(this.context.account || ""),
+          EthereumAccountAddress(this.context.account || ""),
           PublicIdentifier(this.context.publicIdentifier || ""),
           this.context.activeStateChannels || [],
           this.context.inControl,

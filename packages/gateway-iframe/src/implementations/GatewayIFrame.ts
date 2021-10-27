@@ -1,4 +1,8 @@
-import { EthereumAddress, GatewayUrl, Signature } from "@hypernetlabs/objects";
+import {
+  EthereumAccountAddress,
+  GatewayUrl,
+  Signature,
+} from "@hypernetlabs/objects";
 import {
   IAjaxUtils,
   AxiosAjaxUtils,
@@ -7,7 +11,7 @@ import {
   ILogUtils,
   LogUtils,
 } from "@hypernetlabs/utils";
-import { errAsync, okAsync } from "neverthrow";
+import { okAsync } from "neverthrow";
 
 import {
   HypernetCoreListener,
@@ -71,7 +75,7 @@ export class GatewayIFrame {
     // Instantiate all the pieces
     this.contextProvider = new ContextProvider(
       GatewayUrl(""),
-      EthereumAddress(gatewayAddress),
+      EthereumAccountAddress(gatewayAddress),
       Signature(gatewaySignature),
     );
     this.ajaxUtils = new AxiosAjaxUtils();
@@ -99,6 +103,7 @@ export class GatewayIFrame {
 
     this.hypernetCoreListener = new HypernetCoreListener(
       this.gatewayService,
+      this.paymentService,
       this.contextProvider,
     );
     this.gatewayConnectorListener = new GatewayConnectorListener(

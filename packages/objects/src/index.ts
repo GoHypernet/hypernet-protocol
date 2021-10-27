@@ -1,6 +1,7 @@
 export * from "@objects/ActiveStateChannel";
 export * from "@objects/AssetBalance";
 export * from "@objects/AssetInfo";
+export * from "@objects/AuthorizeFundsRequestData";
 export * from "@objects/Balances";
 export * from "@objects/BigNumberString";
 export * from "@objects/ChainId";
@@ -37,6 +38,7 @@ export * from "@objects/RouterDetails";
 export * from "@objects/Signature";
 export * from "@objects/SortedTransfers";
 export * from "@objects/SchemaUrl";
+export * from "@objects/SendFundsRequestData";
 export * from "@objects/TransferId";
 export * from "@objects/UnixTimestamp";
 export * from "@objects/UtilityMessageSignature";

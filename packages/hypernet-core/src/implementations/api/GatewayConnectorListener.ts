@@ -50,6 +50,14 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
     GatewayUrl,
     Subscription
   >();
+  protected initiateSendFundsSubscriptionMap = new Map<
+    GatewayUrl,
+    Subscription
+  >();
+  protected initiateAuthorizeFundsSubscriptionMap = new Map<
+    GatewayUrl,
+    Subscription
+  >();
 
   constructor(
     @inject(IAccountServiceType) protected accountService: IAccountService,
@@ -117,6 +125,40 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
           stateChannelRequestedSubscription,
         );
 
+        const initiateSendFundsSubscription =
+          proxy.initiateSendFundsRequested.subscribe((request) => {
+            this.logUtils.debug(
+              `Gateway Connector ${proxy.gatewayUrl} initiated sending funds`,
+            );
+
+            this.paymentService
+              .initiateSendFunds(
+                proxy.gatewayUrl,
+                request.requestIdentifier,
+                request.channelAddress,
+                request.recipientPublicIdentifier,
+                request.amount,
+                request.expirationDate,
+                request.requiredStake,
+                request.paymentToken,
+                request.metadata,
+              )
+              .andThen((response) => {
+                return proxy.sendFundsInitiated(
+                  request.requestIdentifier,
+                  response.paymentId,
+                );
+              })
+              .mapErr((e) => {
+                this.logUtils.error(e);
+              });
+          });
+
+        this.initiateSendFundsSubscriptionMap.set(
+          proxy.gatewayUrl,
+          initiateSendFundsSubscription,
+        );
+
         const sendFundsRequestedSubscription =
           proxy.sendFundsRequested.subscribe((request) => {
             this.logUtils.debug(
@@ -149,6 +191,47 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
         this.sendFundsRequestedSubscriptionMap.set(
           proxy.gatewayUrl,
           sendFundsRequestedSubscription,
+        );
+
+        this.stateChannelRequestedSubscriptionMap.set(
+          proxy.gatewayUrl,
+          stateChannelRequestedSubscription,
+        );
+
+        const initiateAuthorizeFundsSubscription =
+          proxy.initiateAuthorizeFundsRequested.subscribe((request) => {
+            this.logUtils.debug(
+              `Gateway Connector ${proxy.gatewayUrl} initiated authorizing funds`,
+            );
+
+            this.paymentService
+              .initiateAuthorizeFunds(
+                proxy.gatewayUrl,
+                request.requestIdentifier,
+                request.channelAddress,
+                request.recipientPublicIdentifier,
+                request.totalAuthorized,
+                request.expirationDate,
+                request.deltaAmount,
+                request.deltaTime,
+                request.requiredStake,
+                request.paymentToken,
+                request.metadata,
+              )
+              .andThen((response) => {
+                return proxy.authorizeFundsInitiated(
+                  request.requestIdentifier,
+                  response.paymentId,
+                );
+              })
+              .mapErr((e) => {
+                this.logUtils.error(e);
+              });
+          });
+
+        this.initiateAuthorizeFundsSubscriptionMap.set(
+          proxy.gatewayUrl,
+          initiateAuthorizeFundsSubscription,
         );
 
         const authorizeFundsRequestedSubscription =
@@ -252,7 +335,9 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
       });
   }
 
-  protected validateSendFundsRequest(request: ISignedSendFundsRequest): boolean {
+  protected validateSendFundsRequest(
+    request: ISignedSendFundsRequest,
+  ): boolean {
     if (
       !this.validationUtils.validatePublicIdentifier(
         request.recipientPublicIdentifier,

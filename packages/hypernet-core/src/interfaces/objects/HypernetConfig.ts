@@ -2,7 +2,7 @@ import { ChainProviders } from "@connext/vector-types";
 import {
   ChainId,
   DefinitionName,
-  EthereumAddress,
+  EthereumContractAddress,
   ProviderUrl,
   SchemaUrl,
 } from "@hypernetlabs/objects";
@@ -34,15 +34,15 @@ export class HypernetChainAddresses {
 
 export class HypernetContractAddresses {
   constructor(
-    public channelFactoryAddress: EthereumAddress,
-    public transferRegistryAddress: EthereumAddress,
-    public hypertokenAddress: EthereumAddress,
-    public messageTransferAddress: EthereumAddress,
-    public insuranceTransferAddress: EthereumAddress,
-    public parameterizedTransferAddress: EthereumAddress,
-    public gatewayRegistryAddress: EthereumAddress,
-    public liquidityRegistryAddress: EthereumAddress,
-    public hypernetGovernorAddress: EthereumAddress,
-    public registryFactoryAddress: EthereumAddress,
+    public channelFactoryAddress: EthereumContractAddress,
+    public transferRegistryAddress: EthereumContractAddress,
+    public hypertokenAddress: EthereumContractAddress,
+    public messageTransferAddress: EthereumContractAddress,
+    public insuranceTransferAddress: EthereumContractAddress,
+    public parameterizedTransferAddress: EthereumContractAddress,
+    public gatewayRegistryAddress: EthereumContractAddress,
+    public liquidityRegistryAddress: EthereumContractAddress,
+    public hypernetGovernorAddress: EthereumContractAddress,
+    public registryFactoryAddress: EthereumContractAddress,
   ) {}
 }

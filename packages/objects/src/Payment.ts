@@ -1,6 +1,6 @@
 import { BigNumberString } from "@objects/BigNumberString";
 import { ChainId } from "@objects/ChainId";
-import { EthereumAddress } from "@objects/EthereumAddress";
+import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 import { GatewayUrl } from "@objects/GatewayUrl";
 import { PaymentId } from "@objects/PaymentId";
 import { PublicIdentifier } from "@objects/PublicIdentifier";
@@ -16,7 +16,7 @@ export abstract class Payment {
     public to: PublicIdentifier,
     public from: PublicIdentifier,
     public state: EPaymentState,
-    public paymentToken: EthereumAddress,
+    public paymentToken: EthereumContractAddress,
     public requiredStake: BigNumberString,
     public amountStaked: BigNumberString,
     public expirationDate: UnixTimestamp,

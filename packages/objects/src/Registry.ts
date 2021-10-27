@@ -1,10 +1,12 @@
 import { BigNumberString } from "@objects/BigNumberString";
-import { EthereumAddress } from "@objects/EthereumAddress";
+import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
+import { EthereumContractAddress } from "@objects/EthereumContractAddress";
+
 export class Registry {
   constructor(
-    public registrarAddresses: EthereumAddress[],
-    public registrarAdminAddresses: EthereumAddress[],
-    public address: EthereumAddress,
+    public registrarAddresses: EthereumAccountAddress[],
+    public registrarAdminAddresses: EthereumAccountAddress[],
+    public address: EthereumContractAddress,
     public name: string,
     public symbol: string,
     public numberOfEntries: number,
@@ -12,11 +14,11 @@ export class Registry {
     public allowStorageUpdate: boolean,
     public allowLabelChange: boolean,
     public allowTransfers: boolean,
-    public registrationToken: EthereumAddress,
+    public registrationToken: EthereumContractAddress,
     public registrationFee: BigNumberString,
-    public burnAddress: EthereumAddress,
+    public burnAddress: EthereumAccountAddress,
     public burnFee: number,
-    public primaryRegistry: EthereumAddress,
+    public primaryRegistry: EthereumContractAddress,
     public index: number | null,
   ) {}
 }

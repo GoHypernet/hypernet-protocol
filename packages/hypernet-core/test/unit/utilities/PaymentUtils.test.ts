@@ -12,21 +12,9 @@ import {
   EthereumAddress,
   BigNumberString,
 } from "@hypernetlabs/objects";
-import td from "testdouble";
-import { ok, okAsync } from "neverthrow";
-
-import { PaymentUtils } from "@implementations/utilities";
-import {
-  IPaymentIdUtils,
-  IPaymentUtils,
-} from "@interfaces/utilities";
 import { ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
-import {
-  BlockchainProviderMock,
-  ConfigProviderMock,
-  VectorUtilsMockFactory,
-  BrowserNodeProviderMock,
-} from "@mock/utils";
+import { PaymentUtils } from "@implementations/utilities";
+import { IPaymentIdUtils, IPaymentUtils } from "@interfaces/utilities";
 import {
   commonPaymentId,
   defaultExpirationLength,
@@ -40,6 +28,15 @@ import {
   offerDetails,
   offerTransferId,
 } from "@mock/mocks";
+import { ok, okAsync } from "neverthrow";
+import td from "testdouble";
+
+import {
+  BlockchainProviderMock,
+  ConfigProviderMock,
+  VectorUtilsMockFactory,
+  BrowserNodeProviderMock,
+} from "@mock/utils";
 
 const expirationDate = UnixTimestamp(unixNow + defaultExpirationLength);
 const sortedTransfers = new SortedTransfers(

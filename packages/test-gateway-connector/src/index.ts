@@ -277,8 +277,7 @@ class TestGatewayConnector implements IGatewayConnector {
       ),
       requiredStake: BigNumberString("1"),
       paymentToken: this.paymentToken, // Hypertoken
-      metadata: null,
-      
+      metadata: "",
     });
   }
 

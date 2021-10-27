@@ -1,11 +1,13 @@
-import { BigNumber, ethers } from "ethers";
 import {
   BigNumberString,
-  EthereumAddress,
+  EthereumAccountAddress,
+  EthereumContractAddress,
   GovernanceAbis,
   NonFungibleRegistryContractError,
 } from "@hypernetlabs/objects";
+import { BigNumber, ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
+
 import { INonFungibleRegistryEnumerableUpgradeableContract } from "@contracts/interfaces/utilities";
 
 export class NonFungibleRegistryEnumerableUpgradeableContract
@@ -17,7 +19,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       | ethers.providers.Provider
       | ethers.providers.JsonRpcSigner
       | undefined,
-    registryAddress: EthereumAddress,
+    registryAddress: EthereumContractAddress,
   ) {
     this.contract = new ethers.Contract(
       registryAddress,
@@ -26,8 +28,8 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
-  public getContractAddress(): EthereumAddress {
-    return EthereumAddress(this.contract?.address || "");
+  public getContractAddress(): EthereumContractAddress {
+    return EthereumContractAddress(this.contract?.address || "");
   }
 
   public getRegistrarRoleMemberCount(): ResultAsync<
@@ -49,12 +51,12 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public getRegistrarRoleMember(
     index?: number,
-  ): ResultAsync<EthereumAddress, NonFungibleRegistryContractError> {
+  ): ResultAsync<EthereumAccountAddress, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.getRoleMember(
         this.contract?.REGISTRAR_ROLE(),
         index || 0,
-      ) as Promise<EthereumAddress>,
+      ) as Promise<EthereumAccountAddress>,
       (e) => {
         return new NonFungibleRegistryContractError(
           "Unable to call getRoleMember REGISTRAR_ROLE",
@@ -83,12 +85,12 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public getRegistrarRoleAdminMember(
     index?: number,
-  ): ResultAsync<EthereumAddress, NonFungibleRegistryContractError> {
+  ): ResultAsync<EthereumAccountAddress, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.getRoleMember(
         this.contract?.REGISTRAR_ROLE_ADMIN(),
         index || 0,
-      ) as Promise<EthereumAddress>,
+      ) as Promise<EthereumAccountAddress>,
       (e) => {
         return new NonFungibleRegistryContractError(
           "Unable to call getRegistrarRoleAdminMember REGISTRAR_ROLE_ADMIN",
@@ -192,11 +194,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public registrationToken(): ResultAsync<
-    EthereumAddress,
+    EthereumContractAddress,
     NonFungibleRegistryContractError
   > {
     return ResultAsync.fromPromise(
-      this.contract?.registrationToken() as Promise<EthereumAddress>,
+      this.contract?.registrationToken() as Promise<EthereumContractAddress>,
       (e) => {
         return new NonFungibleRegistryContractError(
           "Unable to call registrationToken()",
@@ -224,11 +226,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public burnAddress(): ResultAsync<
-    EthereumAddress,
+    EthereumAccountAddress,
     NonFungibleRegistryContractError
   > {
     return ResultAsync.fromPromise(
-      this.contract?.burnAddress() as Promise<EthereumAddress>,
+      this.contract?.burnAddress() as Promise<EthereumAccountAddress>,
       (e) => {
         return new NonFungibleRegistryContractError(
           "Unable to call burnAddress()",
@@ -253,11 +255,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public primaryRegistry(): ResultAsync<
-    EthereumAddress,
+    EthereumContractAddress,
     NonFungibleRegistryContractError
   > {
     return ResultAsync.fromPromise(
-      this.contract?.primaryRegistry() as Promise<EthereumAddress>,
+      this.contract?.primaryRegistry() as Promise<EthereumContractAddress>,
       (e) => {
         return new NonFungibleRegistryContractError(
           "Unable to call primaryRegistry()",
@@ -297,9 +299,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public ownerOf(
     tokenId: number,
-  ): ResultAsync<EthereumAddress, NonFungibleRegistryContractError> {
+  ): ResultAsync<EthereumAccountAddress, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.ownerOf(tokenId) as Promise<EthereumAddress>,
+      this.contract?.ownerOf(tokenId) as Promise<EthereumAccountAddress>,
       (e) => {
         return new NonFungibleRegistryContractError(
           "Unable to call ownerOf()",
@@ -331,7 +333,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       this.contract?.updateRegistration(
         BigNumber.from(tokenId),
         registrationData,
-      ) as Promise<any>,
+      ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new NonFungibleRegistryContractError(
           "Unable to call updateRegistration()",
@@ -340,7 +342,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
             "Unable to wait for tx",
             e,
@@ -358,7 +360,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       this.contract?.updateLabel(
         BigNumber.from(tokenId),
         label,
-      ) as Promise<any>,
+      ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new NonFungibleRegistryContractError(
           "Unable to call updateLabel()",
@@ -367,7 +369,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
             "Unable to wait for tx",
             e,
@@ -379,15 +381,15 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public transferFrom(
     tokenId: number,
-    ownerAddress: EthereumAddress,
-    toAddress: EthereumAddress,
+    ownerAddress: EthereumAccountAddress,
+    toAddress: EthereumAccountAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.transferFrom(
         ownerAddress,
         toAddress,
         tokenId,
-      ) as Promise<any>,
+      ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new NonFungibleRegistryContractError(
           "Unable to call transferFrom()",
@@ -396,7 +398,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
             "Unable to wait for tx",
             e,
@@ -410,7 +412,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     tokenId: number,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.burn(tokenId) as Promise<any>,
+      this.contract?.burn(
+        tokenId,
+      ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new NonFungibleRegistryContractError("Unable to call burn()", e);
       },
@@ -421,7 +425,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     params: string,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.setRegistryParameters(params) as Promise<any>,
+      this.contract?.setRegistryParameters(
+        params,
+      ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new NonFungibleRegistryContractError(
           "Unable to call setRegistryParameters()",
@@ -430,7 +436,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
             "Unable to wait for tx",
             e,
@@ -441,7 +447,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public registerByToken(
-    recipientAddress: EthereumAddress,
+    recipientAddress: EthereumAccountAddress,
     label: string,
     data: string,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
@@ -450,7 +456,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         recipientAddress,
         label,
         data,
-      ) as Promise<any>,
+      ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new NonFungibleRegistryContractError(
           "Unable to call registerByToken()",
@@ -459,7 +465,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
             "Unable to wait for tx",
             e,
@@ -470,12 +476,16 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public register(
-    recipientAddress: EthereumAddress,
+    recipientAddress: EthereumAccountAddress,
     label: string,
     data: string,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.register(recipientAddress, label, data) as Promise<any>,
+      this.contract?.register(
+        recipientAddress,
+        label,
+        data,
+      ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new NonFungibleRegistryContractError(
           "Unable to call register()",
@@ -484,7 +494,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
             "Unable to wait for tx",
             e,
@@ -495,10 +505,10 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public grantRole(
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.REGISTRAR_ROLE() as Promise<any>,
+      this.contract?.REGISTRAR_ROLE() as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new NonFungibleRegistryContractError(
           "Unable to call REGISTRAR_ROLE",
@@ -508,7 +518,10 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     )
       .andThen((registrarRole) => {
         return ResultAsync.fromPromise(
-          this.contract?.grantRole(registrarRole, address) as Promise<any>,
+          this.contract?.grantRole(
+            registrarRole,
+            address,
+          ) as Promise<ethers.providers.TransactionResponse>,
           (e) => {
             return new NonFungibleRegistryContractError(
               "Unable to call grantRole",
@@ -518,21 +531,21 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         );
       })
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
             "Unable to wait for tx",
             e,
           );
         });
       })
-      .map(() => {});
+      .map((val) => {});
   }
 
   public revokeRole(
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.REGISTRAR_ROLE() as Promise<any>,
+      this.contract?.REGISTRAR_ROLE() as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new NonFungibleRegistryContractError(
           "Unable to call REGISTRAR_ROLE",
@@ -542,7 +555,10 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     )
       .andThen((registrarRole) => {
         return ResultAsync.fromPromise(
-          this.contract?.revokeRole(registrarRole, address) as Promise<any>,
+          this.contract?.revokeRole(
+            registrarRole,
+            address,
+          ) as Promise<ethers.providers.TransactionResponse>,
           (e) => {
             return new NonFungibleRegistryContractError(
               "Unable to call revokeRole",
@@ -552,7 +568,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         );
       })
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
             "Unable to wait for tx",
             e,
@@ -563,10 +579,10 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public renounceRole(
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.REGISTRAR_ROLE() as Promise<any>,
+      this.contract?.REGISTRAR_ROLE() as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new NonFungibleRegistryContractError(
           "Unable to call REGISTRAR_ROLE",
@@ -576,7 +592,10 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     )
       .andThen((registrarRole) => {
         return ResultAsync.fromPromise(
-          this.contract?.renounceRole(registrarRole, address) as Promise<any>,
+          this.contract?.renounceRole(
+            registrarRole,
+            address,
+          ) as Promise<ethers.providers.TransactionResponse>,
           (e) => {
             return new NonFungibleRegistryContractError(
               "Unable to call renounceRole",
@@ -586,7 +605,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         );
       })
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new NonFungibleRegistryContractError(
             "Unable to wait for tx",
             e,

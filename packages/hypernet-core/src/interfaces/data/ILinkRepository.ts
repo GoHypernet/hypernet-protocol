@@ -5,7 +5,7 @@ import {
   BlockchainUnavailableError,
   InvalidPaymentError,
   PublicIdentifier,
-  EthereumAddress,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -29,7 +29,7 @@ export interface ILinkRepository {
    * @param linkId The ID of the link to retrieve
    */
   getHypernetLink(
-    routerChannelAddress: EthereumAddress,
+    routerChannelAddress: EthereumContractAddress,
     counterpartyId: PublicIdentifier,
   ): ResultAsync<
     HypernetLink,

@@ -2,24 +2,25 @@ import { Balances, AssetBalance, BigNumberString } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { IAccountService } from "@interfaces/business";
 import { IAccountsRepository } from "@interfaces/data";
-import { okAsync } from "neverthrow";
-import td from "testdouble";
-
-import { AccountService } from "@implementations/business/AccountService";
 import { IBlockchainProvider } from "@interfaces/utilities";
 import {
   account,
+  account2,
   activeStateChannel,
   chainId,
-  mockUtils,
+  hyperTokenAddress,
   publicIdentifier,
   routerChannelAddress,
   routerPublicIdentifier,
 } from "@mock/mocks";
+import { okAsync } from "neverthrow";
+import td from "testdouble";
+
+import { AccountService } from "@implementations/business/AccountService";
 import { ContextProviderMock } from "@mock/utils";
 
-const assetAddress = mockUtils.generateRandomEtherAdress();
-const destinationAddress = mockUtils.generateRandomEtherAdress();
+const assetAddress = hyperTokenAddress;
+const destinationAddress = account2;
 const amount = BigNumberString("42");
 
 class AccountServiceMocks {

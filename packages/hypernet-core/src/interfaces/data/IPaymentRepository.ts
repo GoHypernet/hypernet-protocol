@@ -1,5 +1,4 @@
 import {
-  EthereumAddress,
   Payment,
   PublicIdentifier,
   PullPayment,
@@ -20,6 +19,8 @@ import {
   UnixTimestamp,
   Signature,
   ChainId,
+  EthereumContractAddress,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -50,7 +51,7 @@ export interface IPaymentRepository {
     amount: BigNumberString,
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
+    paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError>;
@@ -64,7 +65,7 @@ export interface IPaymentRepository {
     deltaAmount: BigNumberString, // TODO: amounts should be consistently use BigNumber
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString, // TODO: amounts should be consistently use BigNumber
-    paymentToken: EthereumAddress,
+    paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PullPayment, PaymentCreationError>;
@@ -99,7 +100,7 @@ export interface IPaymentRepository {
    */
   provideStake(
     paymentId: PaymentId,
-    gatewayAddress: EthereumAddress,
+    gatewayAddress: EthereumAccountAddress,
   ): ResultAsync<
     Payment,
     | BlockchainUnavailableError

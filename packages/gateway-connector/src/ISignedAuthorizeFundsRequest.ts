@@ -19,6 +19,5 @@ export interface ISignedAuthorizeFundsRequest {
   paymentToken: EthereumContractAddress;
   metadata: string;
   paymentId: PaymentId;
-  protocolSignature: Signature;
   gatewaySignature: Signature;
 }

@@ -1,11 +1,13 @@
-import { BigNumber, ethers } from "ethers";
 import {
   BigNumberString,
-  EthereumAddress,
+  EthereumContractAddress,
   GovernanceAbis,
   ERC20ContractError,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
+import { BigNumber, ethers } from "ethers";
 import { ResultAsync } from "neverthrow";
+
 import { IERC20Contract } from "@contracts/interfaces/utilities";
 
 export class ERC20Contract implements IERC20Contract {
@@ -14,7 +16,7 @@ export class ERC20Contract implements IERC20Contract {
     providerOrSigner:
       | ethers.providers.Provider
       | ethers.providers.JsonRpcSigner,
-    contractAddress: EthereumAddress,
+    contractAddress: EthereumContractAddress,
   ) {
     this.contract = new ethers.Contract(
       contractAddress,
@@ -24,11 +26,14 @@ export class ERC20Contract implements IERC20Contract {
   }
 
   public approve(
-    registryAddress: EthereumAddress,
+    registryAddress: EthereumContractAddress,
     registrationFee: BigNumberString,
   ): ResultAsync<void, ERC20ContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.approve(registryAddress, registrationFee) as Promise<any>,
+      this.contract?.approve(
+        registryAddress,
+        registrationFee,
+      ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new ERC20ContractError(
           "Unable to call hypertokenContract approve()",
@@ -37,7 +42,7 @@ export class ERC20Contract implements IERC20Contract {
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new ERC20ContractError("Unable to wait for tx", e);
         });
       })
@@ -45,10 +50,12 @@ export class ERC20Contract implements IERC20Contract {
   }
 
   public delegate(
-    delegateAddress: EthereumAddress,
+    delegateAddress: EthereumAccountAddress,
   ): ResultAsync<void, ERC20ContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.delegate(delegateAddress) as Promise<any>,
+      this.contract?.delegate(
+        delegateAddress,
+      ) as Promise<ethers.providers.TransactionResponse>,
       (e) => {
         return new ERC20ContractError(
           "Unable to call hypertokenContract delegate()",
@@ -57,7 +64,7 @@ export class ERC20Contract implements IERC20Contract {
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait(), (e) => {
           return new ERC20ContractError("Unable to wait for tx", e);
         });
       })
@@ -65,7 +72,7 @@ export class ERC20Contract implements IERC20Contract {
   }
 
   public balanceOf(
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<BigNumber, ERC20ContractError> {
     return ResultAsync.fromPromise(
       this.contract?.balanceOf(account) as Promise<BigNumber>,
@@ -79,7 +86,7 @@ export class ERC20Contract implements IERC20Contract {
   }
 
   public getVotes(
-    account: EthereumAddress,
+    account: EthereumAccountAddress,
   ): ResultAsync<BigNumber, ERC20ContractError> {
     return ResultAsync.fromPromise(
       this.contract?.getVotes(account) as Promise<BigNumber>,

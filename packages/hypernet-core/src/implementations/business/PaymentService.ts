@@ -1,5 +1,4 @@
 import {
-  EthereumAddress,
   Payment,
   PublicIdentifier,
   PullPayment,
@@ -29,6 +28,8 @@ import {
   MessageState,
   IBasicTransferResponse,
   LogicalError,
+  EthereumContractAddress,
+  EPaymentType,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IPaymentService } from "@interfaces/business";
@@ -44,11 +45,10 @@ import {
   IGatewayRegistrationRepositoryType,
   IGatewayRegistrationRepository,
 } from "@interfaces/data";
-import { HypernetContext } from "@interfaces/objects";
-import { BigNumber } from "ethers";
-import { injectable, inject } from "inversify";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
-
+import {
+  HypernetContext,
+  PaymentInitiationResponse,
+} from "@interfaces/objects";
 import {
   IConfigProvider,
   IConfigProviderType,
@@ -59,6 +59,9 @@ import {
   IVectorUtils,
   IVectorUtilsType,
 } from "@interfaces/utilities";
+import { BigNumber } from "ethers";
+import { injectable, inject } from "inversify";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 type PaymentsByIdsErrors =
   | VectorError
@@ -98,6 +101,22 @@ export class PaymentService implements IPaymentService {
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
+  public initiateAuthorizeFunds(
+    gatewayUrl: GatewayUrl,
+    requestIdentifier: string,
+    channelAddress: EthereumContractAddress,
+    counterPartyAccount: PublicIdentifier,
+    totalAuthorized: BigNumberString,
+    expirationDate: UnixTimestamp,
+    deltaAmount: BigNumberString,
+    deltaTime: number,
+    requiredStake: BigNumberString,
+    paymentToken: EthereumContractAddress,
+    metadata: string | null,
+  ): ResultAsync<PaymentInitiationResponse, PaymentCreationError> {
+    throw new Error("Method not implemented.");
+  }
+
   /**
    * Authorizes funds to a specified counterparty, with an amount, rate, & expiration date.
    * @param counterPartyAccount the public identifier of the counterparty to authorize funds to
@@ -110,14 +129,14 @@ export class PaymentService implements IPaymentService {
    * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   public authorizeFunds(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumberString,
     expirationDate: UnixTimestamp,
     deltaAmount: BigNumberString,
     deltaTime: number,
     requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
+    paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PullPayment, PaymentCreationError> {
@@ -209,6 +228,58 @@ export class PaymentService implements IPaymentService {
   }
 
   /**
+   * This method needs to confirm that the payment is legit, generate a payment ID, and sign everything.
+   * The payment ID and signature are returned to the gateway connector and then to the gateway. The gateway
+   * must then sign all the data, and return the complete request, including the protocol and gateway signatures,
+   * which will go to sendFunds() to actually start the payment.
+   * @param gatewayUrl
+   * @param requestIdentifier
+   * @param channelAddress
+   * @param counterPartyAccount
+   * @param amount
+   * @param expirationDate
+   * @param requiredStake
+   * @param paymentToken
+   * @param metadata
+   */
+  public initiateSendFunds(
+    gatewayUrl: GatewayUrl,
+    requestIdentifier: string,
+    channelAddress: EthereumContractAddress,
+    counterPartyAccount: PublicIdentifier,
+    amount: BigNumberString,
+    expirationDate: UnixTimestamp,
+    requiredStake: BigNumberString,
+    paymentToken: EthereumContractAddress,
+    metadata: string | null,
+  ): ResultAsync<PaymentInitiationResponse, PaymentCreationError> {
+    // TODO: Step 1: Sanity checking on the values
+    return this.contextProvider
+      .getInitializedContext()
+      .andThen((context) => {
+        // Lookup the ActiveStateChannel from the context
+        const activeStateChannel = context.activeStateChannels.find((val) => {
+          return val.channelAddress == channelAddress;
+        });
+
+        if (activeStateChannel == null) {
+          return errAsync<PaymentId, PaymentCreationError>(
+            new PaymentCreationError(
+              `Channel ID ${channelAddress} does not exist`,
+            ),
+          );
+        }
+
+        // Create a payment ID
+        return this.paymentUtils.createPaymentId(EPaymentType.Push);
+      })
+      .map((paymentId) => {
+        // We need to store the payment Id as reserved.
+        return new PaymentInitiationResponse(requestIdentifier, paymentId);
+      });
+  }
+
+  /**
    * Sends a payment to the specified recipient.
    * Internally, creates a null/message/offer transfer to communicate
    * with the counterparty and signal a request for a stake.
@@ -220,19 +291,18 @@ export class PaymentService implements IPaymentService {
    * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   public sendFunds(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     counterPartyAccount: PublicIdentifier,
     amount: BigNumberString,
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
+    paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError> {
     // TODO: Sanity checking on the values
     return this.contextProvider.getInitializedContext().andThen((context) => {
       // Lookup the ActiveStateChannel from the context
-
       const activeStateChannel = context.activeStateChannels.find((val) => {
         return val.channelAddress == channelAddress;
       });

@@ -32,10 +32,11 @@ import {
   InsuranceState,
   ParameterizedState,
   ChainId,
+  EthereumContractAddress,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
 import { IPaymentRepository } from "@interfaces/data";
-import { HypernetConfig } from "@interfaces/objects";
 import { ResultAsync, errAsync, okAsync } from "neverthrow";
 
 import {
@@ -136,7 +137,7 @@ export class PaymentRepository implements IPaymentRepository {
     deltaAmount: BigNumberString,
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
+    paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PullPayment, PaymentCreationError> {
@@ -234,7 +235,7 @@ export class PaymentRepository implements IPaymentRepository {
     amount: BigNumberString,
     expirationDate: UnixTimestamp,
     requiredStake: BigNumberString,
-    paymentToken: EthereumAddress,
+    paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
   ): ResultAsync<PushPayment, PaymentCreationError> {
@@ -589,7 +590,7 @@ export class PaymentRepository implements IPaymentRepository {
    */
   public provideStake(
     paymentId: PaymentId,
-    gatewayAddress: EthereumAddress,
+    gatewayAddress: EthereumAccountAddress,
   ): ResultAsync<
     Payment,
     | BlockchainUnavailableError

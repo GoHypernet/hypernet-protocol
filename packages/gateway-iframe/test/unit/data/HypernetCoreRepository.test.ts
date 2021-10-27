@@ -1,10 +1,14 @@
-import { GatewayUrl, EthereumAddress, Signature } from "@hypernetlabs/objects";
-import td from "testdouble";
+import {
+  GatewayUrl,
+  Signature,
+  EthereumAccountAddress,
+} from "@hypernetlabs/objects";
 import Postmate from "postmate";
+import td from "testdouble";
 
 import { HypernetCoreRepository } from "@gateway-iframe/implementations/data";
-import { IHypernetCoreRepository } from "@gateway-iframe/interfaces/data";
 import { ContextProvider } from "@gateway-iframe/implementations/utils";
+import { IHypernetCoreRepository } from "@gateway-iframe/interfaces/data";
 import {
   authorizeFundsRequest,
   resolveInsuranceRequest,
@@ -14,7 +18,7 @@ import {
 class HypernetCoreRepositoryMocks {
   public postmateChildApi = td.object<Postmate.ChildAPI>();
   public gatewayUrl = GatewayUrl("http://localhost:5010");
-  public gatewayAddress = EthereumAddress("gatewayAddress");
+  public gatewayAddress = EthereumAccountAddress("gatewayAddress");
   public gatewaySignature = Signature("gatewaySignature");
   public contextProvider = new ContextProvider(
     this.gatewayUrl,

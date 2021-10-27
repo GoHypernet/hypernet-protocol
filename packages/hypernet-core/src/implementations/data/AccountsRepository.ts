@@ -16,6 +16,8 @@ import {
   ChainId,
   PersistenceError,
   UtilityMessageSignature,
+  EthereumContractAddress,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IAccountsRepository } from "@interfaces/data";
@@ -46,7 +48,7 @@ export class AccountsRepository implements IAccountsRepository {
   /**
    * Retrieves an instances of the AccountsRepository.
    */
-  protected assetInfo: Map<EthereumAddress, AssetInfo>;
+  protected assetInfo: Map<EthereumContractAddress, AssetInfo>;
   protected erc20Abi: string[];
   protected activeRoutersKey = "ActiveRouters";
 
@@ -66,9 +68,9 @@ export class AccountsRepository implements IAccountsRepository {
 
     // Add a default entry for Ethereum, it's not an ERC20, it's special and it's also universal.
     this.assetInfo.set(
-      EthereumAddress(constants.AddressZero),
+      EthereumContractAddress(constants.AddressZero),
       new AssetInfo(
-        EthereumAddress(constants.AddressZero),
+        EthereumContractAddress(constants.AddressZero),
         "Ethereum",
         "ETH",
         18,
@@ -147,7 +149,7 @@ export class AccountsRepository implements IAccountsRepository {
               return new ActiveStateChannel(
                 ChainId(fullChannelState.networkContext.chainId),
                 PublicIdentifier(fullChannelState.aliceIdentifier),
-                EthereumAddress(fullChannelState.channelAddress),
+                EthereumContractAddress(fullChannelState.channelAddress),
               );
             });
         });
@@ -157,7 +159,7 @@ export class AccountsRepository implements IAccountsRepository {
   public createStateChannel(
     routerPublicIdentifier: PublicIdentifier,
     chainId: ChainId,
-  ): ResultAsync<EthereumAddress, PersistenceError | VectorError> {
+  ): ResultAsync<EthereumContractAddress, PersistenceError | VectorError> {
     // Make sure we don't already have a state channel like this setup
     return ResultUtils.combine([
       this.contextProvider.getContext(),
@@ -172,7 +174,7 @@ export class AccountsRepository implements IAccountsRepository {
       });
 
       if (existingStateChannel != null) {
-        return okAsync<EthereumAddress, VectorError>(
+        return okAsync<EthereumContractAddress, VectorError>(
           existingStateChannel.channelAddress,
         );
       }
@@ -185,7 +187,7 @@ export class AccountsRepository implements IAccountsRepository {
           DEFAULT_CHANNEL_TIMEOUT.toString(),
         )
         .map((response) => {
-          return EthereumAddress(response.channelAddress);
+          return EthereumContractAddress(response.channelAddress);
         })
         .orElse((e) => {
           // Channel could be already set up, so we should try restoring the state
@@ -204,8 +206,8 @@ export class AccountsRepository implements IAccountsRepository {
               if (channel == null) {
                 return errAsync(e);
               }
-              return okAsync<EthereumAddress, VectorError>(
-                EthereumAddress(channel.channelAddress),
+              return okAsync<EthereumContractAddress, VectorError>(
+                EthereumContractAddress(channel.channelAddress),
               );
             });
         });
@@ -228,7 +230,7 @@ export class AccountsRepository implements IAccountsRepository {
    * Get the Ethereum accounts associated with this instance.
    */
   public getAccounts(): ResultAsync<
-    EthereumAddress[],
+    EthereumAccountAddress[],
     BlockchainUnavailableError
   > {
     return this.blockchainProvider.getProvider().andThen((provider) => {
@@ -238,7 +240,7 @@ export class AccountsRepository implements IAccountsRepository {
           e,
         );
       }).map((addresses) => {
-        return addresses.map((val) => EthereumAddress(val));
+        return addresses.map((val) => EthereumAccountAddress(val));
       });
     });
   }
@@ -294,8 +296,8 @@ export class AccountsRepository implements IAccountsRepository {
    * @param assetAddress the (Ethereum) address of the token to get the balance of
    */
   public getBalanceByAsset(
-    channelAddress: EthereumAddress,
-    assetAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
+    assetAddress: EthereumContractAddress,
   ): ResultAsync<AssetBalance, BalancesUnavailableError | VectorError> {
     return this.browserNodeProvider
       .getBrowserNode()
@@ -341,8 +343,8 @@ export class AccountsRepository implements IAccountsRepository {
    * @param amount the amount of the token to deposit
    */
   public depositFunds(
-    channelAddress: EthereumAddress,
-    assetAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
+    assetAddress: EthereumContractAddress,
     amount: BigNumberString,
   ): ResultAsync<null, VectorError | BlockchainUnavailableError> {
     return ResultUtils.combine([
@@ -412,10 +414,10 @@ export class AccountsRepository implements IAccountsRepository {
    * @param destinationAddress the destination (Ethereum) address to withdraw to
    */
   public withdrawFunds(
-    channelAddress: EthereumAddress,
-    assetAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
+    assetAddress: EthereumContractAddress,
     amount: BigNumberString,
-    destinationAddress: EthereumAddress,
+    destinationAddress: EthereumAccountAddress,
   ): ResultAsync<void, VectorError | BlockchainUnavailableError> {
     return this.browserNodeProvider
       .getBrowserNode()
@@ -450,7 +452,7 @@ export class AccountsRepository implements IAccountsRepository {
    */
   public mintTestToken(
     amount: BigNumberString,
-    to: EthereumAddress,
+    to: EthereumAccountAddress,
   ): ResultAsync<void, BlockchainUnavailableError> {
     const resp = this.blockchainUtils.mintToken(amount, to);
 
@@ -472,14 +474,14 @@ export class AccountsRepository implements IAccountsRepository {
     i: number,
     channelState: IFullChannelState,
   ): ResultAsync<AssetBalance, BlockchainUnavailableError> {
-    const assetAddress = EthereumAddress(channelState.assetIds[i]);
+    const assetAddress = EthereumContractAddress(channelState.assetIds[i]);
 
     return this._getAssetInfo(assetAddress).map((assetInfo) => {
       const amount = BigNumberString(channelState.balances[i].amount[1]);
 
       // Return the asset balance
       const assetBalance = new AssetBalance(
-        EthereumAddress(channelState.channelAddress),
+        EthereumContractAddress(channelState.channelAddress),
         assetAddress,
         assetInfo.name,
         assetInfo.symbol,
@@ -494,7 +496,7 @@ export class AccountsRepository implements IAccountsRepository {
   }
 
   protected _getAssetInfo(
-    assetAddress: EthereumAddress,
+    assetAddress: EthereumContractAddress,
   ): ResultAsync<AssetInfo, BlockchainUnavailableError> {
     let name: string;
     let symbol: string;

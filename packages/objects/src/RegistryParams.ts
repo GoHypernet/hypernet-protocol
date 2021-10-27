@@ -1,5 +1,6 @@
-import { EthereumAddress } from "@objects/EthereumAddress";
 import { BigNumberString } from "@objects/BigNumberString";
+import { EthereumAccountAddress } from "@objects/EthereumAccountAddress";
+import { EthereumContractAddress } from "@objects/EthereumContractAddress";
 
 export class RegistryParams {
   constructor(
@@ -8,10 +9,10 @@ export class RegistryParams {
     public allowStorageUpdate: boolean | null,
     public allowLabelChange: boolean | null,
     public allowTransfers: boolean | null,
-    public registrationToken: EthereumAddress | null,
+    public registrationToken: EthereumContractAddress | null,
     public registrationFee: BigNumberString | null,
-    public burnAddress: EthereumAddress | null,
+    public burnAddress: EthereumAccountAddress | null,
     public burnFee: number | null,
-    public primaryRegistry: EthereumAddress | null,
+    public primaryRegistry: EthereumContractAddress | null,
   ) {}
 }

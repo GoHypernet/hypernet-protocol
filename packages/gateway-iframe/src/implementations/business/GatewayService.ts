@@ -2,7 +2,6 @@ import { IGatewayConnector } from "@hypernetlabs/gateway-connector";
 import {
   PublicIdentifier,
   Balances,
-  EthereumAddress,
   Signature,
   GatewayUrl,
   AjaxError,
@@ -11,6 +10,7 @@ import {
   GatewayTokenInfo,
   ActiveStateChannel,
   UtilityMessageSignature,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { injectable, inject } from "inversify";
@@ -165,7 +165,7 @@ export class GatewayService implements IGatewayService {
   private _validateGatewayConnectorCode(
     gatewayUrl: GatewayUrl,
     signature: Signature,
-    address: EthereumAddress,
+    address: EthereumAccountAddress,
     useCacheBuster?: boolean,
   ): ResultAsync<Signature, GatewayValidationError | AjaxError> {
     // If there is no gateway URL set, it's not an error

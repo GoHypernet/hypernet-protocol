@@ -1,6 +1,5 @@
 import {
   ISignedAuthorizeFundsRequest,
-  IResolutionResult,
   IResolveInsuranceRequest,
   ISignedSendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
@@ -20,6 +19,9 @@ import {
   GatewayTokenInfo,
   ActiveStateChannel,
   UtilityMessageSignature,
+  PaymentId,
+  AuthorizeFundsRequestData,
+  SendFundsRequestData,
 } from "@hypernetlabs/objects";
 import { ParentProxy, ResultUtils } from "@hypernetlabs/utils";
 import { HypernetContext } from "@interfaces/objects";
@@ -50,14 +52,21 @@ export class GatewayConnectorProxy
     super(element, iframeUrl, iframeName, debug);
 
     this.signMessageRequested = new Subject();
+
+    this.initiateSendFundsRequested = new Subject();
     this.sendFundsRequested = new Subject();
+
+    this.initiateAuthorizeFundsRequested = new Subject();
     this.authorizeFundsRequested = new Subject();
+
     this.resolveInsuranceRequested = new Subject();
     this.stateChannelRequested = new Subject();
   }
 
   public signMessageRequested: Subject<string>;
+  public initiateSendFundsRequested: Subject<SendFundsRequestData>;
   public sendFundsRequested: Subject<ISignedSendFundsRequest>;
+  public initiateAuthorizeFundsRequested: Subject<AuthorizeFundsRequestData>;
   public authorizeFundsRequested: Subject<ISignedAuthorizeFundsRequest>;
   public resolveInsuranceRequested: Subject<IResolveInsuranceRequest>;
   public stateChannelRequested: Subject<IStateChannelRequest>;
@@ -153,9 +162,26 @@ export class GatewayConnectorProxy
         }
       });
 
-      this.child?.on("sendFundsRequested", (request: ISignedSendFundsRequest) => {
-        this.sendFundsRequested.next(request);
-      });
+      this.child?.on(
+        "initiateSendFundsRequested",
+        (request: SendFundsRequestData) => {
+          this.initiateSendFundsRequested.next(request);
+        },
+      );
+
+      this.child?.on(
+        "sendFundsRequested",
+        (request: ISignedSendFundsRequest) => {
+          this.sendFundsRequested.next(request);
+        },
+      );
+
+      this.child?.on(
+        "initiateAuthorizeFundsRequested",
+        (request: AuthorizeFundsRequestData) => {
+          this.initiateAuthorizeFundsRequested.next(request);
+        },
+      );
 
       this.child?.on(
         "authorizeFundsRequested",
@@ -300,6 +326,25 @@ export class GatewayConnectorProxy
     return this._createCall("returnStateChannel", {
       id,
       stateChannel,
+    });
+  }
+
+  public sendFundsInitiated(
+    requestId: string,
+    paymentId: PaymentId,
+  ): ResultAsync<void, ProxyError> {
+    return this._createCall("sendFundsInitiated", {
+      requestId,
+      paymentId,
+    });
+  }
+  public authorizeFundsInitiated(
+    requestId: string,
+    paymentId: PaymentId,
+  ): ResultAsync<void, ProxyError> {
+    return this._createCall("authorizeFundsInitiated", {
+      requestId,
+      paymentId,
     });
   }
 

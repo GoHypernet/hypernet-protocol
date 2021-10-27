@@ -2,7 +2,6 @@
 import { VectorError } from "@connext/vector-types";
 import {
   ActiveStateChannel,
-  AuthorizedGatewaysSchema,
   Balances,
   BalancesUnavailableError,
   BigNumberString,
@@ -27,17 +26,19 @@ import {
 import { ILogUtils, ResultUtils } from "@hypernetlabs/utils";
 import {
   IAccountsRepository,
-  IAuthorizedGatewayEntry,
   IGatewayConnectorRepository,
   IGatewayRegistrationRepository,
   IRouterRepository,
 } from "@interfaces/data";
 import {
+  IBlockchainUtils,
+  IGatewayConnectorProxy,
+} from "@interfaces/utilities";
+import {
   gatewayUrl,
   account,
   account2,
   routerChannelAddress,
-  insuranceTransferId,
   commonPaymentId,
   gatewaySignature,
   gatewayUrl2,
@@ -59,15 +60,11 @@ import {
   activeInsuranceTransfer,
   activeParameterizedTransfer,
 } from "@mock/mocks";
-import { errAsync, ok, okAsync } from "neverthrow";
-import td, { verify } from "testdouble";
+import { errAsync, okAsync } from "neverthrow";
+import td from "testdouble";
 
 import { GatewayConnectorService } from "@implementations/business/GatewayConnectorService";
 import { IGatewayConnectorService } from "@interfaces/business/IGatewayConnectorService";
-import {
-  IBlockchainUtils,
-  IGatewayConnectorProxy,
-} from "@interfaces/utilities";
 import {
   BlockchainProviderMock,
   ConfigProviderMock,

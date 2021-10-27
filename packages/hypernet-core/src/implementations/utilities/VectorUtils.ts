@@ -1,4 +1,3 @@
-import { DEFAULT_CHANNEL_TIMEOUT } from "@connext/vector-types";
 import { getSignerAddressFromPublicIdentifier } from "@connext/vector-utils";
 import {
   IHypernetOfferDetails,
@@ -36,6 +35,8 @@ import {
   IMessageTransferData,
   IRegisteredTransfer,
   ChainId,
+  EthereumContractAddress,
+  EthereumAccountAddress,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
 import { BigNumber } from "ethers";
@@ -89,7 +90,7 @@ export class VectorUtils implements IVectorUtils {
         .andThen((transfer) => {
           this.logUtils.debug(`Resolving offer transfer ${transferId}`);
           return browserNode.resolveTransfer(
-            EthereumAddress(transfer.channelAddress),
+            EthereumContractAddress(transfer.channelAddress),
             transferId,
             {
               message: message, // This can be literally anything except the blank string; that would be the same as canceling it
@@ -146,7 +147,7 @@ export class VectorUtils implements IVectorUtils {
           };
 
           return browserNode.resolveTransfer(
-            EthereumAddress(transfer.channelAddress),
+            EthereumContractAddress(transfer.channelAddress),
             transferId,
             resolver,
           );
@@ -197,7 +198,7 @@ export class VectorUtils implements IVectorUtils {
           };
 
           return browserNode.resolveTransfer(
-            EthereumAddress(transfer.channelAddress),
+            EthereumContractAddress(transfer.channelAddress),
             transferId,
             resolver,
           );
@@ -216,7 +217,7 @@ export class VectorUtils implements IVectorUtils {
       .andThen((browserNode) => {
         return browserNode.getTransfer(transferId).andThen((transfer) => {
           return browserNode.resolveTransfer(
-            EthereumAddress(transfer.channelAddress),
+            EthereumContractAddress(transfer.channelAddress),
             transferId,
             {
               message: "",
@@ -237,7 +238,7 @@ export class VectorUtils implements IVectorUtils {
       .andThen((browserNode) => {
         return browserNode.getTransfer(transferId).andThen((transfer) => {
           return browserNode.resolveTransfer(
-            EthereumAddress(transfer.channelAddress),
+            EthereumContractAddress(transfer.channelAddress),
             transferId,
             {
               data: {
@@ -264,7 +265,7 @@ export class VectorUtils implements IVectorUtils {
       .andThen((browserNode) => {
         return browserNode.getTransfer(transferId).andThen((transfer) => {
           return browserNode.resolveTransfer(
-            EthereumAddress(transfer.channelAddress),
+            EthereumContractAddress(transfer.channelAddress),
             transferId,
             {
               data: {
@@ -287,7 +288,7 @@ export class VectorUtils implements IVectorUtils {
    * @param message the message to send as IHypernetOfferDetails
    */
   public createPullNotificationTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     chainId: ChainId,
     toAddress: PublicIdentifier,
     message: IHypernetPullPaymentDetails,
@@ -358,7 +359,7 @@ export class VectorUtils implements IVectorUtils {
    * @param message the message to send as IHypernetOfferDetails
    */
   public createOfferTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     toAddress: PublicIdentifier,
     message: IHypernetOfferDetails,
   ): ResultAsync<
@@ -416,10 +417,10 @@ export class VectorUtils implements IVectorUtils {
    * @param paymentId a length-64 hexadecimal string; this becomes the UUID component of the InsuranceState
    */
   public createInsuranceTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     chainId: ChainId,
     toAddress: PublicIdentifier,
-    mediatorAddress: EthereumAddress,
+    mediatorAddress: EthereumAccountAddress,
     amount: BigNumberString,
     expiration: UnixTimestamp,
     paymentId: PaymentId,
@@ -486,11 +487,11 @@ export class VectorUtils implements IVectorUtils {
   }
 
   public createParameterizedTransfer(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     type: EPaymentType,
     toAddress: PublicIdentifier,
     amount: BigNumberString,
-    assetAddress: EthereumAddress,
+    assetAddress: EthereumContractAddress,
     paymentId: PaymentId,
     start: UnixTimestamp,
     expiration: UnixTimestamp,
@@ -797,7 +798,7 @@ export class VectorUtils implements IVectorUtils {
   }
 
   protected _getStateChannel(
-    channelAddress: EthereumAddress,
+    channelAddress: EthereumContractAddress,
     browserNode: IBrowserNode,
   ): ResultAsync<IFullChannelState, RouterChannelUnknownError | VectorError> {
     return browserNode.getStateChannel(channelAddress).andThen((channel) => {
