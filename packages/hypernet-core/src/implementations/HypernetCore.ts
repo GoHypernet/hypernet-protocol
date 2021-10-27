@@ -1069,8 +1069,13 @@ export class HypernetCore implements IHypernetCore {
   public getRegistries(
     pageNumber: number,
     pageSize: number,
+    reversedSorting: boolean,
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
-    return this.registryService.getRegistries(pageNumber, pageSize);
+    return this.registryService.getRegistries(
+      pageNumber,
+      pageSize,
+      reversedSorting,
+    );
   }
 
   public getRegistryByName(
@@ -1095,11 +1100,13 @@ export class HypernetCore implements IHypernetCore {
     registryName: string,
     pageNumber: number,
     pageSize: number,
+    reversedSorting: boolean,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this.registryService.getRegistryEntries(
       registryName,
       pageNumber,
       pageSize,
+      reversedSorting,
     );
   }
 

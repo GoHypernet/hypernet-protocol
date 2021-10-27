@@ -40,6 +40,7 @@ export class RegistryRepository implements IRegistryRepository {
   public getRegistries(
     pageNumber: number,
     pageSize: number,
+    reversedSorting: boolean,
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
     return this.initializeReadOnly().andThen(
       ({ registryContracts, provider }) => {
@@ -50,7 +51,13 @@ export class RegistryRepository implements IRegistryRepository {
           >[] = [];
 
           for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
-            const index = totalCount - (pageNumber - 1) * pageSize - i;
+            let index = 0;
+            if (reversedSorting) {
+              index = totalCount - (pageNumber - 1) * pageSize - i;
+            } else {
+              index =
+                i + pageNumber * Math.min(totalCount, pageSize) - pageSize - 1;
+            }
 
             if (index >= 0) {
               registryListResult.push(
@@ -279,6 +286,7 @@ export class RegistryRepository implements IRegistryRepository {
     registryName: string,
     pageNumber: number,
     pageSize: number,
+    reversedSorting: boolean,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this.initializeReadOnly().andThen(
       ({ registryContracts, provider }) => {
@@ -300,7 +308,16 @@ export class RegistryRepository implements IRegistryRepository {
                 BlockchainUnavailableError
               >[] = [];
               for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
-                const index = totalCount - (pageNumber - 1) * pageSize - i;
+                let index = 0;
+                if (reversedSorting) {
+                  index = totalCount - (pageNumber - 1) * pageSize - i;
+                } else {
+                  index =
+                    i +
+                    pageNumber * Math.min(totalCount, pageSize) -
+                    pageSize -
+                    1;
+                }
 
                 if (index >= 0) {
                   const registryEntryResult: ResultAsync<

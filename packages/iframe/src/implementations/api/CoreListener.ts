@@ -281,12 +281,14 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         data: IIFrameCallData<{
           pageNumber: number;
           pageSize: number;
+          reversedSorting: boolean;
         }>,
       ) => {
         this.returnForModel(() => {
           return this.core.getRegistries(
             data.data.pageNumber,
             data.data.pageSize,
+            data.data.reversedSorting,
           );
         }, data.callId);
       },
@@ -310,6 +312,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           registryName: string;
           pageNumber: number;
           pageSize: number;
+          reversedSorting: boolean;
         }>,
       ) => {
         this.returnForModel(() => {
@@ -317,6 +320,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.registryName,
             data.data.pageNumber,
             data.data.pageSize,
+            data.data.reversedSorting,
           );
         }, data.callId);
       },

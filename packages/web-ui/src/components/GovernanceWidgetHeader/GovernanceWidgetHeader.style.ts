@@ -14,6 +14,7 @@ export const useStyles = makeStyles((theme) => ({
   rightSection: {
     display: "flex",
     marginLeft: "auto",
+    flexDirection: "column",
   },
   label: {
     fontWeight: EFontWeight.BOLD,

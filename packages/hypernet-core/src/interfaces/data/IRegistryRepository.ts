@@ -12,6 +12,7 @@ export interface IRegistryRepository {
   getRegistries(
     pageNumber: number,
     pageSize: number,
+    reversedSorting: boolean,
   ): ResultAsync<Registry[], BlockchainUnavailableError>;
   getRegistryByName(
     registryNames: string[],
@@ -23,6 +24,7 @@ export interface IRegistryRepository {
     registryName: string,
     pageNumber: number,
     pageSize: number,
+    reversedSorting: boolean,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
   getRegistryEntryDetailByTokenId(
     registryName: string,

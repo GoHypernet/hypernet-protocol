@@ -568,10 +568,12 @@ export default class HypernetIFrameProxy
   public getRegistries(
     pageNumber: number,
     pageSize: number,
+    reversedSorting: boolean,
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
     return this._createCall("getRegistries", {
       pageNumber,
       pageSize,
+      reversedSorting,
     });
   }
 
@@ -597,11 +599,13 @@ export default class HypernetIFrameProxy
     registryName: string,
     pageNumber: number,
     pageSize: number,
+    reversedSorting: boolean,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this._createCall("getRegistryEntries", {
       registryName,
       pageNumber,
       pageSize,
+      reversedSorting,
     });
   }
 

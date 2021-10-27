@@ -21,8 +21,13 @@ export class RegistryService implements IRegistryService {
   public getRegistries(
     pageNumber: number,
     pageSize: number,
+    reversedSorting: boolean,
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
-    return this.registryRepository.getRegistries(pageNumber, pageSize);
+    return this.registryRepository.getRegistries(
+      pageNumber,
+      pageSize,
+      reversedSorting,
+    );
   }
 
   public getRegistryByName(
@@ -47,11 +52,13 @@ export class RegistryService implements IRegistryService {
     registryName: string,
     pageNumber: number,
     pageSize: number,
+    reversedSorting: boolean,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this.registryRepository.getRegistryEntries(
       registryName,
       pageNumber,
       pageSize,
+      reversedSorting,
     );
   }
 
