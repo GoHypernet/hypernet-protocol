@@ -21,12 +21,11 @@ import {
   IGatewayConnectorService,
   IGatewayConnectorServiceType,
 } from "@interfaces/business";
+import { IContextProvider, IContextProviderType } from "@interfaces/utilities";
 import { BigNumber } from "ethers";
 import { injectable, inject } from "inversify";
 import { ResultAsync } from "neverthrow";
 import { Subscription } from "rxjs";
-
-import { IContextProvider, IContextProviderType } from "@interfaces/utilities";
 
 @injectable()
 export class GatewayConnectorListener implements IGatewayConnectorListener {
