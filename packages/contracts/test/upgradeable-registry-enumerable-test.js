@@ -164,6 +164,27 @@ describe("Enumerated Registry", function () {
 
     });
 
+    it("Check burn fee bounds", async function () {
+        const abiCoder = ethers.utils.defaultAbiCoder;
+
+        // construct call data via ABI encoding
+        let tooBig = abiCoder.encode(
+            [
+                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])"
+            ], 
+            [ 
+                [
+                    [ ], [ ], [ ], [], [ ], [ ], [ ], [ ], [10001]
+                ] 
+            ]);
+
+        // primary registry must implement the ERC721 interface
+        await expectRevert(
+            registry.setRegistryParameters(tooBig),
+            "NonFungibleRegistry: burnFee must be ge than 0 and le than 10000.",
+        );
+    });
+
     it("Check permissions on registry parameter, label, and storage updating.", async function () {
         const label1 = "dummy1";
         const registrationData1 = "dummy1";

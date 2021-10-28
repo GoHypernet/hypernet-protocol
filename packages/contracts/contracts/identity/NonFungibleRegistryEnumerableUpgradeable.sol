@@ -147,7 +147,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         if (params._registrationFee.length > 0) { registrationFee = params._registrationFee[0]; }
         if (params._burnAddress.length > 0) { burnAddress = params._burnAddress[0]; }
         if (params._burnFee.length > 0) { 
-            require(params._burnFee[0] <= 10000 && params._burnFee[0] >= 0, 
+            require(params._burnFee[0] <= 10000, 
             "NonFungibleRegistry: burnFee must be ge than 0 and le than 10000.");
             burnFee = params._burnFee[0]; 
         }
@@ -209,7 +209,7 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     /// @notice registerByToken mints a new Non-Fungible Identity token by staking an ERC20 registration token
     /// @dev callable by anyone with enough registration token, caller must call `approve` first
     /// @param to address of the recipient of the token
-    /// @param label a unique label to attach to the token
+    /// @param label a unique label to attach to the token, can be empty to skip labelling
     /// @param registrationData data to store in the tokenURI
     function registerByToken(address to, string calldata label, string calldata registrationData) external virtual {
         require(registrationToken != address(0), "NonFungibleRegistry: registration by token not enabled.");
