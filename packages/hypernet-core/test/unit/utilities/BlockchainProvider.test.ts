@@ -8,11 +8,13 @@ import { ethers } from "ethers";
 import { Err, Ok, okAsync } from "neverthrow";
 import td from "testdouble";
 
-import { EthersBlockchainProvider } from "@implementations/utilities";
+import {
+  EthersBlockchainProvider,
+  CeramicEIP1193Bridge,
+} from "@implementations/utilities";
 import { IBlockchainProvider, IBrowserNode } from "@interfaces/utilities";
 import { IInternalProviderFactory } from "@interfaces/utilities/factory";
 import { ConfigProviderMock, ContextProviderMock } from "@mock/utils";
-import { CeramicEIP1193Bridge } from "@implementations/utilities";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 require("testdouble-jest")(td, jest);

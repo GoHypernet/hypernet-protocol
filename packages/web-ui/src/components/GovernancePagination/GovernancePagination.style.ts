@@ -1,6 +1,7 @@
 import { makeStyles } from "@material-ui/core";
-import { colors } from "@web-ui/theme";
+
 import { useWidgetUniqueIdentifier } from "@web-ui/hooks";
+import { colors } from "@web-ui/theme";
 
 export const useStyles = () => {
   const widgetUniqueIdentifier = useWidgetUniqueIdentifier();

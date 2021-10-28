@@ -5,12 +5,6 @@ import {
   IFullTransferState,
   EPaymentState,
 } from "@hypernetlabs/objects";
-import { okAsync } from "neverthrow";
-import td from "testdouble";
-
-import { BrowserNodeProviderMock } from "./BrowserNodeProviderMock";
-
-import { IPaymentUtils } from "@interfaces/utilities";
 import {
   activeInsuranceTransfer,
   activeOfferTransfer,
@@ -19,6 +13,12 @@ import {
   offerTransferId,
   unixPast,
 } from "@mock/mocks";
+import { okAsync } from "neverthrow";
+import td from "testdouble";
+
+import { BrowserNodeProviderMock } from "./BrowserNodeProviderMock";
+
+import { IPaymentUtils } from "@interfaces/utilities";
 
 export class PaymentUtilsMockFactory {
   static factoryPaymentUtils(

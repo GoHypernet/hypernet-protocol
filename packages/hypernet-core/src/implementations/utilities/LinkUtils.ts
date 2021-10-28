@@ -4,8 +4,8 @@ import {
   PublicIdentifier,
   PullPayment,
   PushPayment,
+  InvalidParametersError,
 } from "@hypernetlabs/objects";
-import { InvalidParametersError } from "@hypernetlabs/objects";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
 
 import { IContextProvider } from "@interfaces/utilities";

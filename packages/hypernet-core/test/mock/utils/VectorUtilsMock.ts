@@ -7,12 +7,6 @@ import {
   ETransferState,
   BigNumberString,
 } from "@hypernetlabs/objects";
-import { okAsync } from "neverthrow";
-import td from "testdouble";
-
-import { BrowserNodeProviderMock } from "./BrowserNodeProviderMock";
-
-import { IVectorUtils } from "@interfaces/utilities";
 import {
   activeInsuranceTransfer,
   activeOfferTransfer,
@@ -33,6 +27,12 @@ import {
   routerPublicIdentifier,
   unixNow,
 } from "@mock/mocks";
+import { okAsync } from "neverthrow";
+import td from "testdouble";
+
+import { BrowserNodeProviderMock } from "./BrowserNodeProviderMock";
+
+import { IVectorUtils } from "@interfaces/utilities";
 
 export class VectorUtilsMockFactory {
   static factoryVectorUtils(expirationDate: UnixTimestamp): IVectorUtils {

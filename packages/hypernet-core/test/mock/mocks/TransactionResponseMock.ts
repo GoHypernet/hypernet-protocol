@@ -2,8 +2,8 @@ import {
   TransactionResponse,
   TransactionReceipt,
 } from "@ethersproject/abstract-provider";
-import { BigNumber } from "ethers";
 import { account, chainId, TransactionReceiptMock } from "@mock/mocks";
+import { BigNumber } from "ethers";
 
 export class TransactionResponseMock implements TransactionResponse {
   public hash: string;

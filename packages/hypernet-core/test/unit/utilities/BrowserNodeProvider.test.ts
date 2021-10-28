@@ -1,14 +1,13 @@
 import { NonEIP712Message } from "@connext/vector-browser-node";
 import { Signature } from "@hypernetlabs/objects";
 import { ILocalStorageUtils, ILogUtils } from "@hypernetlabs/utils";
-import { IBrowserNode } from "@interfaces/utilities";
+import { BrowserNodeProvider } from "@implementations/utilities";
+import { IBrowserNode, IBrowserNodeProvider } from "@interfaces/utilities";
 import { gatewayUrl, account } from "@mock/mocks";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
 
-import { BrowserNodeProvider } from "@implementations/utilities/BrowserNodeProvider";
 import { IBrowserNodeFactory } from "@interfaces/utilities/factory";
-import { IBrowserNodeProvider } from "@interfaces/utilities/IBrowserNodeProvider";
 import {
   BlockchainProviderMock,
   ConfigProviderMock,
