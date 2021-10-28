@@ -37,7 +37,7 @@
     "test": "yarn build && yarn test:ci",
     "test-integration": "cucumber-js --require-module ts-node/register --require-module tsconfig-paths/register --require 'test/integration/**/*.ts' test/integration/features/**/*.feature",
     "test:ci": "jest --runInBand --coverage --passWithNoTests",
-    "test:watch": "jest --watch --color --detectOpenHandles",
+    "test:watch": "jest --watch --color --detectOpenHandles"
   },
   "types": "dist/index.d.ts",
   "dependencies": {
