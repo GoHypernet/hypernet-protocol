@@ -143,6 +143,15 @@ export interface IPaymentRepository {
    * @param payment the payment to finalize
    */
   finalizePayment(payment: Payment): ResultAsync<void, TransferResolutionError>;
+
+  addReservedPaymentId(
+    requestId: string,
+    paymentId: PaymentId,
+  ): ResultAsync<void, never>;
+
+  getReservedPaymentIdByRequestId(
+    requestId: string,
+  ): ResultAsync<PaymentId | null, never>;
 }
 
 export const IPaymentRepositoryType = Symbol.for("IPaymentRepository");

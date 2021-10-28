@@ -7,3 +7,4 @@ export * from "@gateway-connector/ISignedAuthorizeFundsRequest";
 export * from "@gateway-connector/ISignedSendFundsRequest";
 export * from "@gateway-connector/ISignMessageRequest";
 export * from "@gateway-connector/IStateChannelRequest";
+export * from "@gateway-connector/PaymentSigningValues";

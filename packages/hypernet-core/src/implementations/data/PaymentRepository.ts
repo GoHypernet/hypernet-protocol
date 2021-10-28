@@ -795,4 +795,19 @@ export class PaymentRepository implements IPaymentRepository {
       )
       .map(() => {});
   }
+
+  protected reservedPaymentMap = new Map<string, PaymentId>();
+  public addReservedPaymentId(
+    requestId: string,
+    paymentId: PaymentId,
+  ): ResultAsync<void, never> {
+    this.reservedPaymentMap.set(requestId, paymentId);
+    return okAsync(undefined);
+  }
+
+  public getReservedPaymentIdByRequestId(
+    requestId: string,
+  ): ResultAsync<PaymentId | null, never> {
+    return okAsync(this.reservedPaymentMap.get(requestId) ?? null);
+  }
 }

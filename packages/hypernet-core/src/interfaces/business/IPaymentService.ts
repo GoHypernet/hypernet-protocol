@@ -51,6 +51,8 @@ export interface IPaymentService {
    * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   authorizeFunds(
+    requestIdentifier: string,
+    paymentId: PaymentId,
     channelAddress: EthereumContractAddress,
     counterPartyAccount: PublicIdentifier,
     totalAuthorized: BigNumberString,
@@ -60,6 +62,7 @@ export interface IPaymentService {
     requiredStake: BigNumberString,
     paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
+    gatewaySignature: Signature,
     metadata: string | null,
   ): ResultAsync<Payment, PaymentCreationError>;
 
@@ -100,6 +103,8 @@ export interface IPaymentService {
    * @param gatewayUrl the registered URL for the gateway that will resolve any disputes.
    */
   sendFunds(
+    requestIdentifier: string,
+    paymentId: PaymentId,
     channelAddress: EthereumContractAddress,
     counterPartyAccount: PublicIdentifier,
     amount: BigNumberString,
@@ -107,6 +112,7 @@ export interface IPaymentService {
     requiredStake: BigNumberString,
     paymentToken: EthereumContractAddress,
     gatewayUrl: GatewayUrl,
+    gatewaySignature: Signature,
     metadata: string | null,
   ): ResultAsync<Payment, PaymentCreationError>;
 

@@ -27,6 +27,7 @@ import { constants } from "ethers";
 
 export const account = EthereumAccountAddress("0xDEADBEEF");
 export const account2 = EthereumAccountAddress("0xBEEFDEAD");
+export const gatewayAccount = EthereumAccountAddress("gateway-account-address");
 export const errorAccount = EthereumAccountAddress("error");
 export const publicIdentifier = PublicIdentifier("vectorDEADBEEF");
 export const publicIdentifier2 = PublicIdentifier("vectorBEEFDEAD");
@@ -94,6 +95,9 @@ export const gatewayRegistrationInfo2 = new GatewayRegistrationInfo(
   gatewayAddress2,
   gatewaySignature2,
 );
+
+export const requestIdentifier1 =
+  "request-identifier-likely-hyperpay-internal-id";
 
 export const channelFactoryAddress = EthereumContractAddress(
   "0xF12b5dd4EAD5F743C6BaA640B0216200e89B60Da",

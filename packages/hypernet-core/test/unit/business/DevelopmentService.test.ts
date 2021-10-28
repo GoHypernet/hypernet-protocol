@@ -1,11 +1,10 @@
 import { BigNumberString } from "@hypernetlabs/objects";
+import { DevelopmentService } from "@implementations/business";
+import { IDevelopmentService } from "@interfaces/business";
 import { IAccountsRepository } from "@interfaces/data";
-import { account } from "@mock/mocks";
+import { account } from "@tests/mock/mocks";
 import { okAsync } from "neverthrow";
 import td from "testdouble";
-
-import { DevelopmentService } from "@implementations/business/DevelopmentService";
-import { IDevelopmentService } from "@interfaces/business/IDevelopmentService";
 
 const amount = BigNumberString("42");
 

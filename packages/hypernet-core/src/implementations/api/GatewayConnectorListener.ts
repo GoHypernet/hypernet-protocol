@@ -79,6 +79,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
 
         this._advanceGatewayRelatedPayments(proxy.gatewayUrl);
 
+        // ******* signMessageRequested ********************************************************
         // When the gateway iframe wants a message signed, we can do it.
         const signMessageRequestedSubscription =
           proxy.signMessageRequested.subscribe((message) => {
@@ -101,6 +102,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
           signMessageRequestedSubscription,
         );
 
+        // ******* stateChannelRequested ********************************************************
         const stateChannelRequestedSubscription =
           proxy.stateChannelRequested.subscribe((request) => {
             this.logUtils.debug(
@@ -125,6 +127,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
           stateChannelRequestedSubscription,
         );
 
+        // ******* initiateSendFundsRequested ********************************************************
         const initiateSendFundsSubscription =
           proxy.initiateSendFundsRequested.subscribe((request) => {
             this.logUtils.debug(
@@ -159,6 +162,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
           initiateSendFundsSubscription,
         );
 
+        // ******* sendFundsRequested ********************************************************
         const sendFundsRequestedSubscription =
           proxy.sendFundsRequested.subscribe((request) => {
             this.logUtils.debug(
@@ -169,6 +173,8 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
             if (this.validateSendFundsRequest(request)) {
               this.paymentService
                 .sendFunds(
+                  request.requestIdentifier,
+                  request.paymentId,
                   request.channelAddress,
                   request.recipientPublicIdentifier,
                   request.amount,
@@ -176,6 +182,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
                   request.requiredStake,
                   request.paymentToken,
                   proxy.gatewayUrl,
+                  request.gatewaySignature,
                   request.metadata,
                 )
                 .mapErr((e) => {
@@ -193,11 +200,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
           sendFundsRequestedSubscription,
         );
 
-        this.stateChannelRequestedSubscriptionMap.set(
-          proxy.gatewayUrl,
-          stateChannelRequestedSubscription,
-        );
-
+        // ******* initiateAuthorizeFundsRequested ********************************************************
         const initiateAuthorizeFundsSubscription =
           proxy.initiateAuthorizeFundsRequested.subscribe((request) => {
             this.logUtils.debug(
@@ -234,6 +237,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
           initiateAuthorizeFundsSubscription,
         );
 
+        // ******* authorizeFundsRequested ********************************************************
         const authorizeFundsRequestedSubscription =
           proxy.authorizeFundsRequested.subscribe((request) => {
             this.logUtils.debug(
@@ -243,6 +247,8 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
             if (this.validateAuthorizeFundsRequest(request)) {
               this.paymentService
                 .authorizeFunds(
+                  request.requestIdentifier,
+                  request.paymentId,
                   request.channelAddress,
                   request.recipientPublicIdentifier,
                   request.totalAuthorized,
@@ -252,6 +258,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
                   request.requiredStake,
                   request.paymentToken,
                   proxy.gatewayUrl,
+                  request.gatewaySignature,
                   request.metadata,
                 )
                 .mapErr((e) => {
@@ -269,6 +276,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
           authorizeFundsRequestedSubscription,
         );
 
+        // ******* resolveInsuranceRequested ********************************************************
         const resolveInsuranceRequestedSubscription =
           proxy.resolveInsuranceRequested.subscribe((request) => {
             this.logUtils.debug(
@@ -301,14 +309,21 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
       // Stop listening for gateway connector events when gateway deauthorization starts
       context.onGatewayDeauthorizationStarted.subscribe((gatewayUrl) => {
         this.signMessageRequestedSubscriptionMap.get(gatewayUrl)?.unsubscribe();
+        this.stateChannelRequestedSubscriptionMap
+          .get(gatewayUrl)
+          ?.unsubscribe();
+
+        this.initiateSendFundsSubscriptionMap.get(gatewayUrl)?.unsubscribe();
         this.sendFundsRequestedSubscriptionMap.get(gatewayUrl)?.unsubscribe();
+
+        this.initiateAuthorizeFundsSubscriptionMap
+          .get(gatewayUrl)
+          ?.unsubscribe();
         this.authorizeFundsRequestedSubscriptionMap
           .get(gatewayUrl)
           ?.unsubscribe();
+
         this.resolveInsuranceRequestedSubscriptionMap
-          .get(gatewayUrl)
-          ?.unsubscribe();
-        this.stateChannelRequestedSubscriptionMap
           .get(gatewayUrl)
           ?.unsubscribe();
       });

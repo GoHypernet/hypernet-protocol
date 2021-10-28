@@ -1,7 +1,6 @@
 import {
   VectorError,
   BlockchainUnavailableError,
-  EthereumAddress,
   AssetBalance,
   Balances,
   IFullChannelState,
