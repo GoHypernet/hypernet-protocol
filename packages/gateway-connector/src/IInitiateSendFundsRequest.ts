@@ -4,7 +4,6 @@ import {
   PaymentId,
   PublicIdentifier,
   SendFundsRequestData,
-  Signature,
   UnixTimestamp,
 } from "@hypernetlabs/objects";
 
@@ -22,5 +21,5 @@ export interface IInitiateSendFundsRequest extends SendFundsRequestData {
   requiredStake: BigNumberString;
   paymentToken: EthereumContractAddress;
   metadata: string | null;
-  callback: (paymentId: PaymentId, protocolSignature: Signature) => void;
+  callback: (paymentId: PaymentId) => void;
 }

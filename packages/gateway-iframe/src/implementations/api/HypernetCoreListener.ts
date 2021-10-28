@@ -5,7 +5,6 @@ import {
   PublicIdentifier,
   Balances,
   AssetBalance,
-  Signature,
   UUID,
   ActiveStateChannel,
   UtilityMessageSignature,
@@ -194,7 +193,6 @@ export class HypernetCoreListener
           return this.paymentService.sendFundsInitiated(
             data.data.requestId,
             data.data.paymentId,
-            data.data.protocolSignature,
           );
         }, data.callId);
       },
@@ -206,7 +204,6 @@ export class HypernetCoreListener
           return this.paymentService.authorizeFundsInitiated(
             data.data.requestId,
             data.data.paymentId,
-            data.data.protocolSignature,
           );
         }, data.callId);
       },
@@ -244,13 +241,11 @@ export class HypernetCoreListener
 interface ISendFundsInitiatedData {
   requestId: string;
   paymentId: PaymentId;
-  protocolSignature: Signature;
 }
 
 interface IAuthorizeFundsInitiatedData {
   requestId: string;
   paymentId: PaymentId;
-  protocolSignature: Signature;
 }
 
 interface IActivateConnectorData {

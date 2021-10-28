@@ -5,7 +5,7 @@ import {
   IInitiateAuthorizeFundsRequest,
   IInitiateSendFundsRequest,
 } from "@hypernetlabs/gateway-connector";
-import { PaymentId, Signature } from "@hypernetlabs/objects";
+import { PaymentId } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface IPaymentService {
@@ -15,7 +15,6 @@ export interface IPaymentService {
   sendFundsInitiated(
     requestId: string,
     paymentId: PaymentId,
-    protocolSignature: Signature,
   ): ResultAsync<void, never>;
   sendFunds(request: ISignedSendFundsRequest): ResultAsync<void, never>;
 
@@ -25,7 +24,6 @@ export interface IPaymentService {
   authorizeFundsInitiated(
     requestId: string,
     paymentId: PaymentId,
-    protocolSignature: Signature,
   ): ResultAsync<void, never>;
   authorizeFunds(
     request: ISignedAuthorizeFundsRequest,

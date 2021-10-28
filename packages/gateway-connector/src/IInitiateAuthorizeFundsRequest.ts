@@ -4,7 +4,6 @@ import {
   EthereumContractAddress,
   PaymentId,
   PublicIdentifier,
-  Signature,
   UnixTimestamp,
 } from "@hypernetlabs/objects";
 
@@ -25,5 +24,5 @@ export interface IInitiateAuthorizeFundsRequest
   requiredStake: BigNumberString;
   paymentToken: EthereumContractAddress;
   metadata: string;
-  callback: (paymentId: PaymentId, protocolSignature: Signature) => void;
+  callback: (paymentId: PaymentId) => void;
 }
