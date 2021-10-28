@@ -36,6 +36,7 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/objects": "^0.3.6"
+    "@hypernetlabs/objects": "^0.3.6",
+    "ethers": "^5.4.7"
   }
 }
