@@ -6,10 +6,9 @@ import {
   IMessagingRepositoryType,
 } from "@interfaces/data";
 import { InitializedHypernetContext } from "@interfaces/objects";
+import { IContextProvider, IContextProviderType } from "@interfaces/utilities";
 import { inject, injectable } from "inversify";
 import { ResultAsync } from "neverthrow";
-
-import { IContextProvider, IContextProviderType } from "@interfaces/utilities";
 
 @injectable()
 export class ControlService implements IControlService {
