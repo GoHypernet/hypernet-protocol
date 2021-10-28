@@ -9,14 +9,12 @@ import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 contract NonFungibleRegistryUpgradeable is
     Initializable,
     ContextUpgradeable,
     AccessControlEnumerableUpgradeable,
-    ERC721URIStorageUpgradeable,
-    UUPSUpgradeable
+    ERC721URIStorageUpgradeable
 {
     using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeERC20Upgradeable for IERC20Upgradeable;
@@ -108,7 +106,6 @@ contract NonFungibleRegistryUpgradeable is
         __Context_init();
         __AccessControlEnumerable_init();
         __ERC721URIStorage_init();
-        __UUPSUpgradeable_init();
         __ERC721_init(name_, symbol_);
 
         _setupRole(DEFAULT_ADMIN_ROLE, _admin);
@@ -127,9 +124,6 @@ contract NonFungibleRegistryUpgradeable is
         burnFee = 500; // basis points
         primaryRegistry = address(0);
     }
-
-    // we must implement this function at top level contract definition for the upgradable proxy pattern
-    function _authorizeUpgrade(address newImplementation) internal onlyRole(REGISTRAR_ROLE) override {}
 
     /// @notice setRegistryParameters enable or disable the lazy registration feature
     /// @dev only callable by the REGISTRAR_ROLE, use arrays so we don't have to always pass every
