@@ -45,7 +45,7 @@
     "compile": "tsc --build && yarn alias",
     "postCompile": "lerna run postCompile",
     "alias": "lerna run alias",
-    "format": "prettier . --write && yarn format:pkg",
+    "format": "eslint --fix 'packages/**/*.ts' && yarn format:pkg",
     "format:pkg": "format-package -w",
     "generate-docs": "lerna run generate-docs",
     "lint": "eslint \"packages/*/{src,test}/**/*.{ts,tsx}\" --quiet",

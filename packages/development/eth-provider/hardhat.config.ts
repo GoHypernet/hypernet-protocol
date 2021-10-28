@@ -56,7 +56,8 @@ const config: HardhatUserConfig = {
         interval: [3000, 6000],
       },
       accounts: {
-        accountsBalance: "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        accountsBalance:
+          "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
         mnemonic,
       },
       chainId,
@@ -65,7 +66,8 @@ const config: HardhatUserConfig = {
     },
     localhost: {
       accounts: {
-        accountsBalance: "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        accountsBalance:
+          "0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
         mnemonic,
       },
       chainId,

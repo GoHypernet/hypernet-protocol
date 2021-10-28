@@ -3,7 +3,7 @@
 ## access
 
 Contains an fork of OpenZeppelin's AccessControl library but specialized for NFT-based
-accounts. 
+accounts.
 
 ## governance
 
@@ -21,4 +21,4 @@ with additional or specialized functionality.
 
 ## utils
 
-Contains various helper contracts including vesting contracts. 
+Contains various helper contracts including vesting contracts.

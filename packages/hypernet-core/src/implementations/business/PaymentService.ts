@@ -311,7 +311,7 @@ export class PaymentService implements IPaymentService {
         // Create a payment ID
         return this.paymentUtils.createPaymentId(EPaymentType.Push);
       })
-      .map((paymentId) => {
+      .andThen((paymentId) => {
         // We need to store the payment Id as reserved.
         return this.paymentRepository
           .addReservedPaymentId(requestIdentifier, paymentId)

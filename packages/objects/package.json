@@ -34,9 +34,10 @@
     "generate-docs": "npx typedoc --options typedoc.json",
     "prepare": "yarn build",
     "test": "echo \"No tests specified yet\" && exit 0",
-    "update-package-json": "ts-node ../../scripts/importDevDependencies.ts",
-    "preversion": "npm run lint",
-    "version": "npm run format && git add -A src",
+    "format": "eslint --fix 'src/**/*.ts' && yarn format:pkg",
+    "format:pkg": "format-package -w",
+    "preversion": "yarn format",
+    "version": "yarn format && git add -A src",
     "postversion": "git push && git push --tags"
   },
   "types": "dist/index.d.ts",

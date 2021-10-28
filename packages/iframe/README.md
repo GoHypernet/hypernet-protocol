@@ -1,6 +1,6 @@
 # `iframe`
 
-This package is a proxy that wraps up the HypernetCore object from the `hypernet-core` object inside the context of an iframe for usage on the web. This package uses webpack to create a single deliverable file; for development purposes this file will be built and served by a small NGINX webserver inside a docker container. 
+This package is a proxy that wraps up the HypernetCore object from the `hypernet-core` object inside the context of an iframe for usage on the web. This package uses webpack to create a single deliverable file; for development purposes this file will be built and served by a small NGINX webserver inside a docker container.
 
 The iframe proxy is based on the Postmate library, and acts as a child in the library. It can emit events and recieve event emissions; out modifications to the library make it act like a proper RPC api.
 
@@ -12,7 +12,7 @@ Currently, event emissions from the HypernetCore objects are subscribed to and p
 
 ## Development
 
-This package inclucde a webpack configuration, which is considered the final deliverable.  
+This package inclucde a webpack configuration, which is considered the final deliverable.
 
 `yarn compile`
 
@@ -33,4 +33,3 @@ Pushes the built docker image with the :local tag up to Docker Hub. Must have pe
 `yarn test`
 
 Runs the unit and integration tests on the package.
-

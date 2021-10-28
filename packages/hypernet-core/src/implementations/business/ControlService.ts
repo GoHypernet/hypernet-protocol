@@ -8,10 +8,7 @@ import {
   IMessagingRepositoryType,
 } from "@interfaces/data";
 import { InitializedHypernetContext } from "@interfaces/objects";
-import {
-  IContextProvider,
-  IContextProviderType,
-} from "@interfaces/utilities";
+import { IContextProvider, IContextProviderType } from "@interfaces/utilities";
 import { ITimeUtils, ITimeUtilsType } from "@hypernetlabs/utils";
 
 @injectable()
