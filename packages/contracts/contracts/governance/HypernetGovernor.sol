@@ -24,6 +24,7 @@ contract HypernetGovernor is Governor, GovernorCompatibilityBravo, GovernorVotes
 
     mapping(uint256 => string) public proposalDescriptions; // description for each proposal
 
+    // be sure to set these to reasonable values for Mainnet
     uint256 private _votingDelay = 1; // blocks (1 block is about 13 seconds)
 
     uint256 private _votingPeriod = 20; // blocks

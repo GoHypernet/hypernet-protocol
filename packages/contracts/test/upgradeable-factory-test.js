@@ -176,6 +176,8 @@ describe("Registry Factory Unit Tests", function () {
         tx = await hypertoken.connect(addr1).approve(registryfactory.address, fee);
         tx.wait();
 
+        const previousBalance = await hypertoken.balanceOf(burnAddress);
+
         tx = await registryfactory.connect(addr1).createRegistryByToken("enumerabledummy", "edmy", addr1.address, true);
         tx.wait();
 
@@ -184,7 +186,7 @@ describe("Registry Factory Unit Tests", function () {
 
         expect(await registryfactory.getNumberOfEnumerableRegistries()).to.equal(2);
         expect(await hypertoken.balanceOf(addr1.address)).to.equal(fee);
-        expect(await hypertoken.balanceOf(burnAddress)).to.equal(fee);
+        expect(await hypertoken.balanceOf(burnAddress)).to.equal(previousBalance.add(fee));
         expect(await dummyReg.name()).to.equal("enumerabledummy");
         expect(await dummyReg.symbol()).to.equal("edmy");
 
