@@ -8,7 +8,7 @@ import {
 import { InitializedHypernetContext } from "@interfaces/objects";
 import { IContextProvider, IContextProviderType } from "@interfaces/utilities";
 import { inject, injectable } from "inversify";
-import { ResultAsync } from "neverthrow";
+import { ResultAsync } from "neverthrow"; 
 
 @injectable()
 export class ControlService implements IControlService {
