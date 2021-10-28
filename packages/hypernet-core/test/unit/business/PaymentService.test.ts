@@ -39,6 +39,11 @@ import {
   IGatewayRegistrationRepository,
 } from "@interfaces/data";
 import {
+  IBlockchainUtils,
+  IGatewayConnectorProxy,
+  IPaymentUtils,
+} from "@interfaces/utilities";
+import {
   defaultExpirationLength,
   gatewayUrl,
   hyperTokenAddress,
@@ -46,7 +51,6 @@ import {
   publicIdentifier,
   publicIdentifier2,
   unixNow,
-  account,
   gatewaySignature,
   activeInsuranceTransfer,
   activeOfferTransfer,
@@ -76,11 +80,6 @@ import {
 import { okAsync, errAsync } from "neverthrow";
 import td from "testdouble";
 
-import {
-  IBlockchainUtils,
-  IGatewayConnectorProxy,
-  IPaymentUtils,
-} from "@interfaces/utilities";
 import {
   ConfigProviderMock,
   ContextProviderMock,
