@@ -261,12 +261,12 @@ task("registryEntryByTokenID", "Prints NunFungible Identity Data.")
     const registryHandle = new hre.ethers.Contract(registryAddress, NFR.abi, accounts[0]);
 
     const tokenURI = await registryHandle.tokenURI(tokenId);
-    const tokenOwner =  await registryHandle.ownerOf(tokenId);
+    const tokenOwner = await registryHandle.ownerOf(tokenId);
 
     console.log("Owner of NFI:", tokenOwner);
     console.log("Token ID:", tokenId.toString());
     console.log("NFI Data:", tokenURI);
-});
+  });
 
 task("transferEntryByTokenID", "Transfers a token to a specified participant.")
   .addParam("name", "Target NonFungle Registry Name")
