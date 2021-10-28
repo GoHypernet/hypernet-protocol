@@ -33,12 +33,7 @@
     "copy-files": "copyfiles -u 1 src/**/*.d.ts dist/",
     "generate-docs": "npx typedoc --options typedoc.json",
     "prepare": "yarn build",
-    "test": "echo \"No tests specified yet\" && exit 0",
-    "format": "eslint --fix 'src/**/*.ts' && yarn format:pkg",
-    "format:pkg": "format-package -w",
-    "preversion": "yarn format",
-    "version": "yarn format && git add -A src",
-    "postversion": "git push && git push --tags"
+    "test": "echo \"No tests specified yet\" && exit 0"
   },
   "types": "dist/index.d.ts",
   "dependencies": {

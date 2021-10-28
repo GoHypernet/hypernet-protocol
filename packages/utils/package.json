@@ -34,12 +34,7 @@
     "test": "yarn build && yarn test:ci",
     "test:ci": "jest --runInBand --coverage",
     "test:watch": "jest --watch --color --detectOpenHandles",
-    "prepare": "yarn build",
-    "format": "eslint --fix 'src/**/*.ts' && yarn format:pkg",
-    "format:pkg": "format-package -w",
-    "preversion": "yarn format",
-    "version": "yarn format && git add -A src",
-    "postversion": "git push && git push --tags"
+    "prepare": "yarn build"
   },
   "types": "dist/index.d.ts",
   "dependencies": {

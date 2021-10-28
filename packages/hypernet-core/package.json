@@ -38,9 +38,6 @@
     "test-integration": "cucumber-js --require-module ts-node/register --require-module tsconfig-paths/register --require 'test/integration/**/*.ts' test/integration/features/**/*.feature",
     "test:ci": "jest --runInBand --coverage --passWithNoTests",
     "test:watch": "jest --watch --color --detectOpenHandles",
-    "preversion": "npm run lint",
-    "version": "npm run format && git add -A src",
-    "postversion": "git push && git push --tags"
   },
   "types": "dist/index.d.ts",
   "dependencies": {
