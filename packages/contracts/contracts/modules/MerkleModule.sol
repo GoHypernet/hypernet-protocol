@@ -18,14 +18,14 @@ contract MerkleModule {
     function redeem(address to, string calldata label, string calldata registrationData, uint256 tokenId, bytes32[] calldata proof, address registry)
     external
     {
-        require(_verify(_leaf(to, label, registrationData), proof), "Invalid merkle proof");
+        require(_verify(_leaf(to, label, registrationData, tokenId), proof), "MerkleModule: Invalid merkle proof");
         INfr(registry).register(to, label, registrationData, tokenId);
     }
 
-    function _leaf(address to, string calldata label, string calldata registrationData)
+    function _leaf(address to, string calldata label, string calldata registrationData, uint256 tokenId)
     internal pure returns (bytes32)
     {
-        return keccak256(abi.encodePacked(to, label, registrationData));
+        return keccak256(abi.encodePacked(to, label, registrationData, tokenId));
     }
 
     function _verify(bytes32 leaf, bytes32[] memory proof)

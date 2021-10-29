@@ -44,7 +44,7 @@ transfer an NFI on the owners behalf if the NFI owner gives approval to the `REG
 Each NFR can augment its registration logic (as well as add novel functionality) through the use of external *modules*. A module is a 
 stateless external contract which can be given the `REGISTRAR_ROLE` and thus extend an NFR's capability in an algorithmic fashion. For 
 example, the a `LazyMintModule.sol` contract offers a means to add lazy minting functionality to an NFR, while the `MerkleDropModule.sol` 
-contract implements a mechanism to fascility airdrop functionality. The `REGISTRAR_ROLE_ADMIN` can add and remove these modules from their
+contract implements a mechanism to fascilitate airdrop functionality. The `REGISTRAR_ROLE_ADMIN` can add and remove these modules from their
 NFR as needed. 
 
 Lastly, the Hypernet NFR implements a native mechanism for registration by staking token. By default, this feature is disabled, but the 
