@@ -365,63 +365,55 @@ describe("Registry with No Enumeration", function () {
       tx.wait();
   });
   
-//   it("Test lazy minting.", async function () {
-//       let label = "dummylabel";
-//       let registrationData = "00000000000000030000000061672e7d";
+  it("Test lazy minting.", async function () {
+    // first deploy the LazyMintModule
+    const LazyMintModule = await ethers.getContractFactory("LazyMintModule");
+    lazymintmodule = await LazyMintModule.deploy(registry.address);
+    await lazymintmodule.deployTransaction.wait();
 
-//       // hash the data
-//       var hash = ethers.utils.solidityKeccak256(
-//           ["address", "string", "string"],
-//           [addr1.address, label, registrationData]
-//       ).toString('hex');
-      
-//       let sig = await owner.signMessage(ethers.utils.arrayify(hash));
-//       let fakesig = await addr2.signMessage(ethers.utils.arrayify(hash));
-      
-//       await expectRevert(
-//         registry.connect(addr1).lazyRegister(addr1.address, label, registrationData, sig),
-//         "NonFungibleRegistry: Lazy registration is disabled.",
-//       );
+    let label = "";
+    let registrationData = "00000000000000030000000061672e7d";
+    let nonce = 007; 
 
-//       const abiCoder = ethers.utils.defaultAbiCoder;
+    // hash the data
+    var hash = ethers.utils.solidityKeccak256(
+        ["address", "string", "string", "uint256"],
+        [addr1.address, label, registrationData, nonce]
+    ).toString('hex');
+    
+    let sig = await owner.signMessage(ethers.utils.arrayify(hash));
+    let fakesig = await addr2.signMessage(ethers.utils.arrayify(hash));
 
-//       // construct call data via ABI encoding
-//       let params = abiCoder.encode(
-//           [
-//               "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])"
-//           ], 
-//           [ 
-//               [
-//                 [], [true], [], [], [], [], [], [], []
-//               ] 
-//           ]);
+    // Lazy minting module wont work without REGISTRAR ROLE permission
+    await expectRevert(
+      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, sig),
+      "NonFungibleRegistry: must have registrar role to register.",
+    )
+    
+    // then add the module as a REGISTRAR
+    const REGISTRAR_ROLE = await registry.REGISTRAR_ROLE();
+    let tx = await registry.grantRole(REGISTRAR_ROLE, lazymintmodule.address);
 
-//       // registrar now sets the registration token to enable token-based registration
-//       tx = await registry.setRegistryParameters(params);
-//       tx.wait();
+    // invalid signatures also won't work
+    await expectRevert(
+      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, fakesig),
+      "LazyMintModule: signature failure.",
+    )
 
-//       await expectRevert(
-//         registry.connect(addr1).lazyRegister(addr1.address, "", registrationData, fakesig),
-//         "NonFungibleRegistry: label field must not be blank.",
-//       )
+    // only the recipient can call the lazy mint function
+    await expectRevert(
+      lazymintmodule.connect(addr2).lazyRegister(addr1.address, label, registrationData, nonce, sig),
+      "LazyMintModule: Caller is not recipient.",
+    )
 
-//       await expectRevert(
-//         registry.connect(addr1).lazyRegister(addr1.address, label, registrationData, fakesig),
-//         "NonFungibleRegistry: signature failure.",
-//       )
+    tx = await lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, sig);
+    tx.wait();
+    expect(await registry.ownerOf(1)).to.equal(addr1.address);
 
-//       await expectRevert(
-//         registry.connect(addr2).lazyRegister(addr1.address, label, registrationData, sig),
-//         "NonFungibleRegistry: Caller is not recipient.",
-//       )
-
-//       tx = await registry.connect(addr1).lazyRegister(addr1.address, label, registrationData, sig);
-//       tx.wait();
-//       expect(await registry.balanceOf(addr1.address)).to.equal(1);
-
-//       await expectRevert(
-//         registry.connect(addr1).lazyRegister(addr1.address, label, registrationData, sig),
-//         "NonFungibleRegistry: Registration label already exists.",
-//       )
-//   });
+    // nonces cannot be reused
+    await expectRevert(
+      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, sig),
+      "LazyMintModule: used nonce.",
+    )
+  });
 });

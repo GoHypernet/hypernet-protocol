@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 
 contract LazyMintModule is Context {
-    // root proof of merkle tree
+
     mapping(uint256 => bool) private usedNonces;
     address public registry;
 
@@ -38,6 +38,8 @@ contract LazyMintModule is Context {
         
         // issue new token here
         INfr(registry).register(to, label, registrationData);
+
+        usedNonces[nonce] = true;
     }
     
     function _isValidSignature(address to, string memory label, string memory registrationData, uint256 nonce, bytes memory signature)
