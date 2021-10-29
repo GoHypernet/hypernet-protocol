@@ -63,6 +63,8 @@ SECURITY NOTES:
 ## Install dependencies
 
 ```shell
+git clone https://github.com/GoHypernet/hypernet-protocol.git
+cd hypernet-protocol/packages/contracts
 npm install
 ```
 
