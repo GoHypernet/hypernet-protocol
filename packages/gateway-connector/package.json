@@ -1,6 +1,6 @@
 {
   "name": "@hypernetlabs/gateway-connector",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Package that defines how to write a Hypernet Gateway.",
   "license": "ISC",
   "repository": {
