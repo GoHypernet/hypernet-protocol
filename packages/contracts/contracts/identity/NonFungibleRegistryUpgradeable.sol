@@ -7,7 +7,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URISto
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract NonFungibleRegistryUpgradeable is
@@ -29,7 +28,6 @@ contract NonFungibleRegistryUpgradeable is
 
     struct RegistryParams {
         string[] _schema;
-        bool[] _allowLazyRegister;
         bool[] _allowStorageUpdate;
         bool[] _allowLabelChange;
         bool[] _allowTransfers;
@@ -50,11 +48,6 @@ contract NonFungibleRegistryUpgradeable is
 
     // registration fee belonging to each token which is refunded on burning
     mapping(uint256 => Fee) public identityStakes; 
-
-    // allow lazy minting in this registry
-    // Warning: ensure allowLabelChange is false before enabling
-    // since the label is used as a nonce
-    bool public allowLazyRegister;
 
     // allow for tokenURI to be updated
     bool public allowStorageUpdate;
@@ -113,7 +106,6 @@ contract NonFungibleRegistryUpgradeable is
         _setRoleAdmin (REGISTRAR_ROLE, REGISTRAR_ROLE_ADMIN);
         _setupRole(REGISTRAR_ROLE_ADMIN, _registrar);
 
-        allowLazyRegister = false;
         allowStorageUpdate = true;
         allowLabelChange = false;
         allowTransfers = true;
@@ -136,7 +128,6 @@ contract NonFungibleRegistryUpgradeable is
         RegistryParams memory params = abi.decode(encodedParameters, (RegistryParams));
 
         if (params._schema.length > 0) { schema = params._schema[0]; }
-        if (params._allowLazyRegister.length > 0) { allowLazyRegister = params._allowLazyRegister[0]; }
         if (params._allowStorageUpdate.length > 0) { allowStorageUpdate = params._allowStorageUpdate[0]; }
         if (params._allowLabelChange.length > 0) { allowLabelChange = params._allowLabelChange[0]; }
         if (params._allowTransfers.length > 0) { allowTransfers = params._allowTransfers[0]; }
@@ -387,53 +378,5 @@ contract NonFungibleRegistryUpgradeable is
         returns (bool)
     {
         return super.supportsInterface(interfaceId);
-    }
-
-    /// @notice lazyRegister REGISTRAR_ROLE to offload gas cost of minting to reciever 
-    /// @dev REGISTRAR_ROLE must provide a signature and allowLabelChange must be false to prevent replay
-    /// @param to address of the recipient of the token
-    /// @param label a unique label to attach to the token
-    /// @param registrationData data to store in the tokenURI 
-    /// @param signature signature from REGISTRAR_ROLE 
-    function lazyRegister(address to, 
-                          string calldata label, 
-                          string calldata registrationData, 
-                          bytes calldata signature)
-        external {
-        // check if lazy registration is allowed for this NFI
-        require(allowLazyRegister, "NonFungibleRegistry: Lazy registration is disabled.");
-        
-        // check for any required supporting accounts
-        require(_preRegistered(to), "NonFungibleRegistry: recipient must have non-zero balance in primary registry.");
-
-        // ensure that label changing is disabled since the label is used at the token's nonce
-        require(!allowLabelChange, "NonFungibleRegistry: label changes must be disabled for lazy registration.");
-
-        // ensure the label field has not been left blank
-        require((bytes(label).length > 0), "NonFungibleRegistry: label field must not be blank.");
-
-        // the token label is the nonce to prevent replay attack
-        require(!_mappingExists(label), "NonFungibleRegistry: Registration label already exists.");
-        
-        // transaction caller must be recipient
-        require(_msgSender() == to, "NonFungibleRegistry: Caller is not recipient.");
-        
-        // require a valid signature from a member of REGISTRAR_ROLE
-        require(_isValidSignature(to, label, registrationData, signature), "NonFungibleRegistry: signature failure.");
-        
-        // issue new token here
-        _createLabeledToken(to, label, registrationData);
-    }
-    
-    function _isValidSignature(address to, string memory label, string memory registrationData, bytes memory signature)
-        internal
-        view
-        returns (bool)
-    {
-        // convert the payload to a 32 byte hash
-        bytes32 hash = ECDSAUpgradeable.toEthSignedMessageHash(keccak256(abi.encodePacked(to, label, registrationData)));
-        
-        // check that the signature is from REGISTRAR_ROLE
-        return hasRole(REGISTRAR_ROLE, ECDSAUpgradeable.recover(hash, signature));
     }
 }
