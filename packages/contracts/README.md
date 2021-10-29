@@ -17,8 +17,8 @@ successful in practice at adopting beneficial proposals to protocol upgrades whi
 ![alt text](/documentation/images/Hypernet-Contract-Flow.png)
 
 The Hypernet Governance application is used for proposing and vetting (by the token holder community) new Non-Fungible Registries (NFRs), 
-which are deployed through a registry factory contract, and updating various parameters in the protocol itself. The factory contract 
-implements an [upgradable beacon pattern](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UpgradeableBeacon) 
+which are deployed through a registry factory contract (`UpgradeableRegistryFactory.sol`), and updating various parameters in the protocol 
+itself. The factory contract implements an [upgradable beacon pattern](https://docs.openzeppelin.com/contracts/4.x/api/proxy#UpgradeableBeacon) 
 for deploying new NFRs in a gas-efficient manner (~80% reduction in gas fee over naive implementation). Each new NFR stores its state 
 in a proxy layer and function calls to that proxy layer are delegated to an implementation contract shared by all copies of the original 
 beacon implementation. Since the reference implementation deployments are not intented to be used directly, the 
@@ -32,10 +32,10 @@ have the same `tokenURI`, but they cannot have the same `label`. Labels fascilit
 registry is used for identity or authenticity verification in which the `tokenId` may not be known *a priori* but the label is (for 
 instance when label is a URL). Entries in an NFR are referred to, within the protocol, as Non-Fungible Identities (NFIs). 
 
-Each NFR has a `REGISTRAR_ROLE`, which can register new identities, a `REGISTRAR_ROLE_ADMIN` which can add and remove address from the 
+Each NFR has a `REGISTRAR_ROLE`, which can register new identities, a `REGISTRAR_ROLE_ADMIN` which can add and remove addresses from the 
 `REGISTRAR_ROLE` as well as update NFR parameters, and a `DEFAULT_ADMIN_ROLE` which can make modifications to which addresses have the 
 `REGISTRAR_ROLE` and `REGISTRAR_ROLE_ADMIN`. Both of these roles are set up through the NFR constructor. Additionally, the 
-`REGISTRAR_ROLE` and the owner of a token have the option to update the information stored in the `tokenURI` after registration unless 
+`REGISTRAR_ROLE` and the owner of an NFI have the option to update the information stored in the `tokenURI` after registration unless 
 `allowStorageUpdate` is set to `false` (which it is by default and can be updated by the `REGISTRAR_ROLE`). The same applies for the 
 token `label` through the `allowLabelChange` flag (which is false by default). In some cases, it can be useful to dissallow the transfer 
 of ownership of NFIs. This can be done if `REGISTRAR_ROLE` sets `allowTransfers` to `false`. In this case, the `REGISTRAR_ROLE` can still 
