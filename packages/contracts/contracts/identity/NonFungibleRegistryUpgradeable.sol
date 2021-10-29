@@ -136,7 +136,7 @@ contract NonFungibleRegistryUpgradeable is
         if (params._burnAddress.length > 0) { burnAddress = params._burnAddress[0]; }
         if (params._burnFee.length > 0) { 
             require(params._burnFee[0] <= 10000, 
-            "NonFungibleRegistry: burnFee must be ge than 0 and le than 10000.");
+            "NonFungibleRegistry: burnFee must be le 10000.");
             burnFee = params._burnFee[0]; 
         }
     }

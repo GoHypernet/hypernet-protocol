@@ -181,7 +181,7 @@ describe("Enumerated Registry", function () {
         // primary registry must implement the ERC721 interface
         await expectRevert(
             registry.setRegistryParameters(tooBig),
-            "NonFungibleRegistry: burnFee must be le than 10000.",
+            "NonFungibleRegistry: burnFee must be le 10000.",
         );
     });
 

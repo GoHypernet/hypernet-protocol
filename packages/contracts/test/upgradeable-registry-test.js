@@ -173,7 +173,7 @@ describe("Registry with No Enumeration", function () {
         // primary registry must implement the ERC721 interface
         await expectRevert(
             registry.setRegistryParameters(tooBig),
-            "NonFungibleRegistry: burnFee must be ge than 0 and le than 10000.",
+            "NonFungibleRegistry: burnFee must be le 10000.",
         );
     });
 
@@ -373,7 +373,7 @@ describe("Registry with No Enumeration", function () {
 
     let label = "";
     let registrationData = "00000000000000030000000061672e7d";
-    let nonce = 007; 
+    let nonce = 1; 
 
     // hash the data
     var hash = ethers.utils.solidityKeccak256(
