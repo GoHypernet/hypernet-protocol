@@ -341,6 +341,10 @@ describe("Registry with No Enumeration", function () {
     });
 
     it("Test batch minting function.", async function () {
+      // first deploy the LazyMintModule
+      const BatchModule = await ethers.getContractFactory("BatchModule");
+      batchmodule = await BatchModule.deploy("Batch Minting");
+      await batchmodule.deployTransaction.wait();
 
       // minting many tokens in a single transaction can save gas:
       const batchSize = 180;
@@ -354,11 +358,16 @@ describe("Registry with No Enumeration", function () {
           emptyLabels.push("");
           datas.push(`00000000000000030000000061672e7d`)
       }
+
+      // then add the module as a REGISTRAR
+      const REGISTRAR_ROLE = await registry.REGISTRAR_ROLE();
+      let tx = await registry.grantRole(REGISTRAR_ROLE, batchmodule.address);
+      tx.wait();
       
-      let tx = await registry.batchRegister(recipients, labels, datas);
+      tx = await batchmodule.batchRegister(recipients, labels, datas, registry.address);
       tx.wait();
 
-      tx = await registry.batchRegister(recipients, emptyLabels, datas);
+      tx = await batchmodule.batchRegister(recipients, emptyLabels, datas, registry.address);
       tx.wait();
 
       tx = await registry.register(recipients[0], emptyLabels[0], datas[1]);
@@ -368,7 +377,7 @@ describe("Registry with No Enumeration", function () {
   it("Test lazy minting.", async function () {
     // first deploy the LazyMintModule
     const LazyMintModule = await ethers.getContractFactory("LazyMintModule");
-    lazymintmodule = await LazyMintModule.deploy(registry.address);
+    lazymintmodule = await LazyMintModule.deploy("Lazy Minting");
     await lazymintmodule.deployTransaction.wait();
 
     let label = "";
@@ -386,33 +395,34 @@ describe("Registry with No Enumeration", function () {
 
     // Lazy minting module wont work without REGISTRAR ROLE permission
     await expectRevert(
-      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, sig),
+      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, sig, registry.address),
       "NonFungibleRegistry: must have registrar role to register.",
     )
     
     // then add the module as a REGISTRAR
     const REGISTRAR_ROLE = await registry.REGISTRAR_ROLE();
     let tx = await registry.grantRole(REGISTRAR_ROLE, lazymintmodule.address);
+    tx.wait();
 
     // invalid signatures also won't work
     await expectRevert(
-      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, fakesig),
+      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, fakesig, registry.address),
       "LazyMintModule: signature failure.",
     )
 
     // only the recipient can call the lazy mint function
     await expectRevert(
-      lazymintmodule.connect(addr2).lazyRegister(addr1.address, label, registrationData, nonce, sig),
+      lazymintmodule.connect(addr2).lazyRegister(addr1.address, label, registrationData, nonce, sig, registry.address),
       "LazyMintModule: Caller is not recipient.",
     )
 
-    tx = await lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, sig);
+    tx = await lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, sig, registry.address);
     tx.wait();
     expect(await registry.ownerOf(1)).to.equal(addr1.address);
 
     // nonces cannot be reused
     await expectRevert(
-      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, sig),
+      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, sig, registry.address),
       "LazyMintModule: used nonce.",
     )
   });

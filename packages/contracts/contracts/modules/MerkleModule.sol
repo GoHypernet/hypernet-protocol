@@ -7,15 +7,15 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 contract MerkleModule {
     // root proof of merkle tree
     bytes32 immutable public root;
-    address public registry;
+    string public name; 
 
-    constructor(address _registry, bytes32 merkleroot)
+    constructor(bytes32 merkleroot, string memory _name)
     {
         root = merkleroot;
-        registry = _registry;
+        name = _name; 
     }
 
-    function redeem(address to, string calldata label, string calldata registrationData, bytes32[] calldata proof)
+    function redeem(address to, string calldata label, string calldata registrationData, bytes32[] calldata proof, address registry)
     external
     {
         require(_verify(_leaf(to, label, registrationData), proof), "Invalid merkle proof");
@@ -35,7 +35,7 @@ contract MerkleModule {
     }
 }
 
-// minimal interfact for the NonFungibleRegistry register function
+// minimal interface for the NonFungibleRegistry register function
 interface INfr {
     function register(address to, string calldata label, string calldata registrationData) external;
 }

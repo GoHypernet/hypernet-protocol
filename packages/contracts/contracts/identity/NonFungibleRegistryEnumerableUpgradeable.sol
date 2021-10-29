@@ -182,21 +182,6 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         _createLabeledToken(to, label, registrationData);
     }
 
-    /// @notice batchRegister batch mints a sequence of Non-Fungible Identity tokens in one transaction
-    /// @dev only callable by the REGISTRAR_ROLE
-    /// @param recipients address array of the recipients of the tokens
-    /// @param labels an array of unique labels to attach to the tokens
-    /// @param registrationDatas data to store in the tokenURI
-    function batchRegister(address[] memory recipients, string[] memory labels, string[] memory registrationDatas) external virtual {
-        require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must have registrar role to register.");
-        require(recipients.length == labels.length, "NonFungibleRegistry: recipients array must be same length as labels array.");
-        require(registrationDatas.length == labels.length, "NonFungibleRegistry: registrationDatas array must be same length as labels array.");
-
-        for (uint256 i = 0; i < recipients.length; ++i) {
-            _createLabeledToken(recipients[i], labels[i], registrationDatas[i]);
-        }
-    }
-
     /// @notice registerByToken mints a new Non-Fungible Identity token by staking an ERC20 registration token
     /// @dev callable by anyone with enough registration token, caller must call `approve` first
     /// @param to address of the recipient of the token

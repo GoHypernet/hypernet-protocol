@@ -8,11 +8,12 @@ import "@openzeppelin/contracts/utils/Context.sol";
 contract LazyMintModule is Context {
 
     mapping(uint256 => bool) private usedNonces;
-    address public registry;
 
-    constructor(address _registry)
+    string public name; 
+
+    constructor(string memory _name)
     {
-        registry = _registry;
+        name = name; 
     }
 
     /// @notice lazyRegister REGISTRAR_ROLE to offload gas cost of minting to reciever 
@@ -25,7 +26,8 @@ contract LazyMintModule is Context {
                           string calldata label, 
                           string calldata registrationData, 
                           uint256 nonce,
-                          bytes calldata signature)
+                          bytes calldata signature,
+                          address registry)
         external {
         // the token label is the nonce to prevent replay attack
         require(_cleanNonce(nonce), "LazyMintModule: used nonce.");
@@ -34,7 +36,7 @@ contract LazyMintModule is Context {
         require(_msgSender() == to, "LazyMintModule: Caller is not recipient.");
         
         // require a valid signature from a member of REGISTRAR_ROLE
-        require(_isValidSignature(to, label, registrationData, nonce, signature), "LazyMintModule: signature failure.");
+        require(_isValidSignature(to, label, registrationData, nonce, signature, registry), "LazyMintModule: signature failure.");
         
         // issue new token here
         INfr(registry).register(to, label, registrationData);
@@ -42,7 +44,7 @@ contract LazyMintModule is Context {
         usedNonces[nonce] = true;
     }
     
-    function _isValidSignature(address to, string memory label, string memory registrationData, uint256 nonce, bytes memory signature)
+    function _isValidSignature(address to, string memory label, string memory registrationData, uint256 nonce, bytes memory signature, address registry)
         internal
         view
         returns (bool)
@@ -60,7 +62,7 @@ contract LazyMintModule is Context {
     }
 }
 
-// minimal interfact for the NonFungibleRegistry register function
+// minimal interface for the NonFungibleRegistry register function
 interface INfr {
     function register(address to, string calldata label, string calldata registrationData) external;
     function hasRole(bytes32 role, address account) external view returns (bool);
