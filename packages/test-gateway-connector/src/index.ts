@@ -30,7 +30,7 @@ import {
 } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";
-import { Subject } from "rxjs";
+import { Subject } from "rxjs"; 
 
 declare global {
   interface Window {
