@@ -28,7 +28,7 @@ interface IRegistryDetailFormValus {
   primaryRegistry: string;
   registrationToken: string;
   burnAddress: string;
-  burnFee: BigNumberString;
+  burnFee: string;
   allowStorageUpdate: boolean;
   allowLabelChange: boolean;
   allowTransfers: boolean;
@@ -97,7 +97,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
           EthereumAddress(registrationToken),
           registrationFee,
           EthereumAddress(burnAddress),
-          burnFee,
+          Number(burnFee) * 100,
           EthereumAddress(primaryRegistry),
         ),
       )
@@ -146,7 +146,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                 primaryRegistry: registry.primaryRegistry,
                 registrationToken: registry.registrationToken,
                 burnAddress: registry.burnAddress,
-                burnFee: registry.burnFee,
+                burnFee: (registry.burnFee / 100).toString(),
                 allowStorageUpdate: registry.allowStorageUpdate,
                 allowLabelChange: registry.allowLabelChange,
                 allowTransfers: registry.allowTransfers,

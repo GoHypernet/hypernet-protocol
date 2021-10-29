@@ -64,6 +64,8 @@ export class StorageUtils implements IStorageUtils {
         this.logUtils.debug(
           `Key not found in session storage, reading value for key ${keyName} from Ceramic`,
         );
+
+        return okAsync<null, PersistenceError>(null);
         return ResultUtils.backoffAndRetry(
           () => this.ceramicUtils.readRecord<T>(keyName),
           [PersistenceError],

@@ -14,7 +14,7 @@ export class Registry {
     public registrationToken: EthereumAddress,
     public registrationFee: BigNumberString,
     public burnAddress: EthereumAddress,
-    public burnFee: BigNumberString,
+    public burnFee: number,
     public primaryRegistry: EthereumAddress,
     public index: number | null,
   ) {}

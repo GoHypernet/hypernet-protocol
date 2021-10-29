@@ -16,7 +16,7 @@ import {
   Registry,
   RegistryEntry,
 } from "@hypernetlabs/objects";
-import CreateIdentityWidget from "../CreateIdentityWidget";
+import CreateIdentityWidget from "@web-ui/widgets/CreateIdentityWidget";
 
 const REGISTRY_ENTRIES_PER_PAGE = 3;
 
@@ -131,7 +131,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           ],
         })}
         rightContent={
-          <Box display="flex" alignItems="center" marginTop={20}>
+          <Box display="flex" alignItems="center" marginTop={5}>
             <Typography style={{ paddingRight: 5 }}>Reverse sorting</Typography>
             <GovernanceSwitch
               initialValue={reversedSortingEnabled}

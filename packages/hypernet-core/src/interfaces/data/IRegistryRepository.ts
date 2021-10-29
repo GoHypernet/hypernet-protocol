@@ -74,6 +74,12 @@ export interface IRegistryRepository {
     registryName: string,
     tokenId: number,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+  createRegistryByToken(
+    name: string,
+    symbol: string,
+    registrarAddress: EthereumAddress,
+    enumerable: boolean,
+  ): ResultAsync<void, BlockchainUnavailableError>;
 }
 
 export const IRegistryRepositoryType = Symbol.for("IRegistryRepository");

@@ -398,6 +398,13 @@ export interface IHypernetCore {
     tokenId: number,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
 
+  createRegistryByToken(
+    name: string,
+    symbol: string,
+    registrarAddress: EthereumAddress,
+    enumerable: boolean,
+  ): ResultAsync<void, BlockchainUnavailableError>;
+
   /**
    * Observables for seeing what's going on
    */

@@ -86,7 +86,6 @@ export class RegistryRepository implements IRegistryRepository {
     return this.initializeReadOnly().andThen(
       ({ registryContracts, provider }) => {
         const registriesMap: Map<string, Registry> = new Map();
-
         return ResultUtils.combine(
           registryNames.map((registryName) => {
             return this.getRegistryAddressByName(
@@ -726,9 +725,7 @@ export class RegistryRepository implements IRegistryRepository {
               registryParams.burnAddress == null
                 ? []
                 : [registryParams.burnAddress],
-              registryParams.burnFee == null
-                ? []
-                : [ethers.utils.parseUnits(registryParams.burnFee)],
+              registryParams.burnFee == null ? [] : [registryParams.burnFee],
               registryParams.primaryRegistry == null
                 ? []
                 : [registryParams.primaryRegistry],
@@ -873,6 +870,79 @@ export class RegistryRepository implements IRegistryRepository {
           }
 
           return registerResult
+            .andThen((tx) => {
+              return ResultAsync.fromPromise(
+                tx.wait() as Promise<void>,
+                (e) => {
+                  return new BlockchainUnavailableError(
+                    "Unable to wait for tx",
+                    e,
+                  );
+                },
+              );
+            })
+            .map(() => {});
+        });
+      },
+    );
+  }
+
+  public createRegistryByToken(
+    name: string,
+    symbol: string,
+    registrarAddress: EthereumAddress,
+    enumerable: boolean,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    return this.initializeForWrite().andThen(
+      ({ registryContracts, signer }) => {
+        return ResultAsync.fromPromise(
+          registryContracts.factoryContract.registrationFee() as Promise<BigNumber>,
+          (e) => {
+            return new BlockchainUnavailableError(
+              "Unable to call registryContract _registrationFee()",
+              e,
+            );
+          },
+        ).andThen((registrationFees) => {
+          return ResultAsync.fromPromise(
+            registryContracts.hypertokenContract.approve(
+              registryContracts.factoryContract.address,
+              registrationFees,
+            ) as Promise<any>,
+            (e) => {
+              return new BlockchainUnavailableError(
+                "Unable to call hypertokenContract approve()",
+                e,
+              );
+            },
+          )
+            .andThen((tx) => {
+              return ResultAsync.fromPromise(
+                tx.wait() as Promise<void>,
+                (e) => {
+                  return new BlockchainUnavailableError(
+                    "Unable to wait for tx",
+                    e,
+                  );
+                },
+              );
+            })
+            .andThen(() => {
+              return ResultAsync.fromPromise(
+                registryContracts.factoryContract.createRegistryByToken(
+                  name,
+                  symbol,
+                  registrarAddress,
+                  enumerable,
+                ) as Promise<any>,
+                (e) => {
+                  return new BlockchainUnavailableError(
+                    "Unable to call hypertokenContract approve()",
+                    e,
+                  );
+                },
+              );
+            })
             .andThen((tx) => {
               return ResultAsync.fromPromise(
                 tx.wait() as Promise<void>,
@@ -1230,7 +1300,7 @@ export class RegistryRepository implements IRegistryRepository {
 
   private getRegistryContractBurnFee(
     registryContract: ethers.Contract,
-  ): ResultAsync<BigNumberString, BlockchainUnavailableError> {
+  ): ResultAsync<number, BlockchainUnavailableError> {
     return ResultAsync.fromPromise(
       registryContract.burnFee() as Promise<BigNumber>,
       (e) => {
@@ -1240,7 +1310,7 @@ export class RegistryRepository implements IRegistryRepository {
         );
       },
     ).map((fee) => {
-      return BigNumberString(ethers.utils.formatUnits(fee, "ether"));
+      return fee.toNumber();
     });
   }
 

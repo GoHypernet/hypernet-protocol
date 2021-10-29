@@ -1242,4 +1242,18 @@ export class HypernetCore implements IHypernetCore {
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
     return this.registryService.burnRegistryEntry(registryName, tokenId);
   }
+
+  public createRegistryByToken(
+    name: string,
+    symbol: string,
+    registrarAddress: EthereumAddress,
+    enumerable: boolean,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    return this.registryService.createRegistryByToken(
+      name,
+      symbol,
+      registrarAddress,
+      enumerable,
+    );
+  }
 }

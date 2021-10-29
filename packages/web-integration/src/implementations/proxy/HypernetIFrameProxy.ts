@@ -745,6 +745,20 @@ export default class HypernetIFrameProxy
     });
   }
 
+  public createRegistryByToken(
+    name: string,
+    symbol: string,
+    registrarAddress: EthereumAddress,
+    enumerable: boolean,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    return this._createCall("createRegistryByToken", {
+      name,
+      symbol,
+      registrarAddress,
+      enumerable,
+    });
+  }
+
   private _displayCoreIFrame(): void {
     // Show core iframe
     if (this.child != null) {

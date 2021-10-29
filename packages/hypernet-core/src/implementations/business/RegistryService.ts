@@ -153,4 +153,18 @@ export class RegistryService implements IRegistryService {
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
     return this.registryRepository.burnRegistryEntry(registryName, tokenId);
   }
+
+  public createRegistryByToken(
+    name: string,
+    symbol: string,
+    registrarAddress: EthereumAddress,
+    enumerable: boolean,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    return this.registryRepository.createRegistryByToken(
+      name,
+      symbol,
+      registrarAddress,
+      enumerable,
+    );
+  }
 }

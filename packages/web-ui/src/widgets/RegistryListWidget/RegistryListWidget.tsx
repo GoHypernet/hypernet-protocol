@@ -18,6 +18,7 @@ import {
   Registry,
   RegistryParams,
 } from "@hypernetlabs/objects";
+import CreateRegistryWidget from "@web-ui/widgets/CreateRegistryWidget";
 
 const REGISTIRES_PER_PAGE = 3;
 
@@ -37,6 +38,8 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
     EthereumAddress(""),
   );
+  const [createRegistryModalOpen, setCreateRegistryModalOpen] =
+    useState<boolean>(false);
 
   useEffect(() => {
     coreProxy
@@ -78,6 +81,8 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
       .mapErr(handleError);
   };
 
+  const createRegistry = () => {};
+
   const handleError = (err?: Error) => {
     setLoading(false);
     setHasEmptyState(true);
@@ -102,8 +107,16 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
     <Box>
       <GovernanceWidgetHeader
         label="Registries"
+        headerActions={[
+          {
+            label: "Create New Registry",
+            onClick: () => setCreateRegistryModalOpen(true),
+            variant: "contained",
+            color: "primary",
+          },
+        ]}
         rightContent={
-          <Box display="flex" alignItems="center">
+          <Box display="flex" alignItems="center" marginTop={3}>
             <Typography style={{ paddingRight: 5 }}>Reverse sorting</Typography>
             <GovernanceSwitch
               initialValue={reversedSortingEnabled}
@@ -181,6 +194,17 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
           onChange={(_, page) => {
             setPage(page);
           }}
+        />
+      )}
+
+      {createRegistryModalOpen && (
+        <CreateRegistryWidget
+          onCloseCallback={() => {
+            setReversedSortingEnabled(true);
+            getRegistries(1);
+            setCreateRegistryModalOpen(false);
+          }}
+          currentAccountAddress={accountAddress}
         />
       )}
     </Box>
