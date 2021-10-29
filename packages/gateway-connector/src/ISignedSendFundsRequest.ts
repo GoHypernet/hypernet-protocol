@@ -5,6 +5,7 @@ import {
   PublicIdentifier,
   Signature,
   UnixTimestamp,
+  PushPayment,
 } from "@hypernetlabs/objects";
 
 export interface ISignedSendFundsRequest {
@@ -18,4 +19,5 @@ export interface ISignedSendFundsRequest {
   metadata: string | null;
   paymentId: PaymentId;
   gatewaySignature: Signature;
+  callback: (err: unknown | null, payment: PushPayment | null) => void;
 }

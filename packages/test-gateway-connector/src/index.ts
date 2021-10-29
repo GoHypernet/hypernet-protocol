@@ -321,7 +321,12 @@ class TestGatewayConnector implements IGatewayConnector {
       requiredStake: amount,
       paymentToken: this.paymentToken, // Hypertoken
       metadata: "",
-      callback: async (paymentId) => {
+      callback: async (_err, paymentId) => {
+        if (paymentId == null) {
+          console.log("No payment ID returned!");
+          return;
+        }
+
         console.log(`Received paymentId ${paymentId}`);
 
         // We need to sign the request
@@ -358,6 +363,9 @@ class TestGatewayConnector implements IGatewayConnector {
           paymentToken: this.paymentToken, // Hypertoken
           metadata: "",
           gatewaySignature: gatewaySignature,
+          callback: (_err, payment) => {
+            console.log("Created payment!", payment);
+          },
         });
       },
     });

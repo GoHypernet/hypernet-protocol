@@ -86,6 +86,7 @@ export const sendFundsRequest: ISignedSendFundsRequest = {
   metadata: "metadata",
   paymentId: commonPaymentId,
   gatewaySignature: gatewaySignature,
+  callback: () => {},
 };
 
 export const authorizeFundsRequest: ISignedAuthorizeFundsRequest = {
@@ -101,6 +102,7 @@ export const authorizeFundsRequest: ISignedAuthorizeFundsRequest = {
   metadata: "metadata",
   paymentId: commonPaymentId,
   gatewaySignature: gatewaySignature,
+  callback: () => {},
 };
 
 export const resolveInsuranceRequest: IResolveInsuranceRequest = {

@@ -24,5 +24,5 @@ export interface IInitiateAuthorizeFundsRequest
   requiredStake: BigNumberString;
   paymentToken: EthereumContractAddress;
   metadata: string;
-  callback: (paymentId: PaymentId) => void;
+  callback: (err: unknown | null, paymentId: PaymentId | null) => void;
 }

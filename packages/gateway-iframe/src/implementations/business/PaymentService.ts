@@ -19,11 +19,11 @@ import {
 export class PaymentService implements IPaymentService {
   protected initiateSendFundsCallbacks = new Map<
     string,
-    (paymentId: PaymentId) => void
+    (err: unknown | null, paymentId: PaymentId | null) => void
   >();
   protected initiateAuthorizeFundsCallbacks = new Map<
     string,
-    (paymentId: PaymentId) => void
+    (err: unknown | null, paymentId: PaymentId | null) => void
   >();
 
   constructor(
@@ -53,7 +53,7 @@ export class PaymentService implements IPaymentService {
     this.initiateSendFundsCallbacks.delete(requestId);
 
     if (callback != null) {
-      callback(paymentId);
+      callback(null, paymentId);
     }
 
     return okAsync(undefined);
@@ -87,7 +87,7 @@ export class PaymentService implements IPaymentService {
     this.initiateAuthorizeFundsCallbacks.delete(requestId);
 
     if (callback != null) {
-      callback(paymentId);
+      callback(null, paymentId);
     }
 
     return okAsync(undefined);

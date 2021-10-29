@@ -21,5 +21,5 @@ export interface IInitiateSendFundsRequest extends SendFundsRequestData {
   requiredStake: BigNumberString;
   paymentToken: EthereumContractAddress;
   metadata: string | null;
-  callback: (paymentId: PaymentId) => void;
+  callback: (err: unknown | null, paymentId: PaymentId | null) => void;
 }

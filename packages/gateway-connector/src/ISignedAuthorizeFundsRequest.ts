@@ -1,3 +1,4 @@
+import { PullPayment } from "@hypernetlabs/objects";
 import {
   BigNumberString,
   EthereumContractAddress,
@@ -20,4 +21,5 @@ export interface ISignedAuthorizeFundsRequest {
   metadata: string;
   paymentId: PaymentId;
   gatewaySignature: Signature;
+  callback: (err: unknown | null, payment: PullPayment | null) => void;
 }
