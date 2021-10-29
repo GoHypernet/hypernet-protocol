@@ -15,11 +15,11 @@ contract MerkleModule {
         name = _name; 
     }
 
-    function redeem(address to, string calldata label, string calldata registrationData, bytes32[] calldata proof, address registry)
+    function redeem(address to, string calldata label, string calldata registrationData, uint256 tokenId, bytes32[] calldata proof, address registry)
     external
     {
         require(_verify(_leaf(to, label, registrationData), proof), "Invalid merkle proof");
-        INfr(registry).register(to, label, registrationData);
+        INfr(registry).register(to, label, registrationData, tokenId);
     }
 
     function _leaf(address to, string calldata label, string calldata registrationData)
@@ -37,5 +37,5 @@ contract MerkleModule {
 
 // minimal interface for the NonFungibleRegistry register function
 interface INfr {
-    function register(address to, string calldata label, string calldata registrationData) external;
+    function register(address to, string calldata label, string calldata registrationData, uint256 tokenId) external;
 }

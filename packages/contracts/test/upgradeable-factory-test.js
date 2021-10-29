@@ -48,10 +48,10 @@ describe("Registry Factory Unit Tests", function () {
         const testRegAddress = await registryfactory.nameToAddress("Test");
         const testReg = new ethers.Contract(testRegAddress, NFR.abi, owner);
 
-        let tx = await testReg.register(addr1.address, "dummy", "dummy");
+        let tx = await testReg.register(addr1.address, "dummy", "dummy", 1);
         let txrcpt = tx.wait();
 
-        tx = await testReg.register(addr1.address, "", "dummy");
+        tx = await testReg.register(addr1.address, "", "dummy", 2);
         txrcpt = tx.wait();
 
         expect(await testReg.name()).to.equal("Test");

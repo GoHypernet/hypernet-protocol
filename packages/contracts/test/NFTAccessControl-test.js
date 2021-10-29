@@ -39,9 +39,9 @@ describe("NFT Access Control Testing", function () {
 
     it("Check Token Role Enforcement.", async function () {
 
-        let tx = await registry.register(addr1.address, "", "dummy1");
+        let tx = await registry.register(addr1.address, "", "dummy1", 1);
         tx.wait();
-        tx = await registry.register(owner.address, "", "dummy2");
+        tx = await registry.register(owner.address, "", "dummy2", 2);
         tx.wait();
 
         const ADMINROLE = test.DEFAULT_ADMIN_ROLE();

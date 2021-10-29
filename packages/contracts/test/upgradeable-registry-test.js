@@ -56,6 +56,7 @@ describe("Registry with No Enumeration", function () {
             addr1.address,
             routerPublicIdentifier,
             JSON.stringify(registryEntry),
+            1,
         );
         tx.wait();
 
@@ -73,6 +74,7 @@ describe("Registry with No Enumeration", function () {
             addr1.address,
             label,
             registrationData,
+            1,
         );
         tx.wait();
 
@@ -81,6 +83,7 @@ describe("Registry with No Enumeration", function () {
               addr2.address,
               label,
               registrationData,
+              2,
             ),
             "NonFungibleRegistry: label is already registered.",
           );
@@ -91,7 +94,7 @@ describe("Registry with No Enumeration", function () {
         const label = "dummy";
         const registrationData = "dummy";
 
-        let tx = await registry.register( addr1.address, label, registrationData);
+        let tx = await registry.register( addr1.address, label, registrationData, 1);
         tx.wait();
 
         expect(await registry.balanceOf(addr1.address)).to.equal(1);
@@ -113,7 +116,7 @@ describe("Registry with No Enumeration", function () {
         const label = "dummy";
         const registrationData = "dummy";
 
-        let tx = await registry.register( addr1.address, label, registrationData);
+        let tx = await registry.register( addr1.address, label, registrationData, 1);
         tx.wait();
 
         expect(await registry.balanceOf(addr1.address)).to.equal(1);
@@ -183,10 +186,10 @@ describe("Registry with No Enumeration", function () {
         const label2 = "dummy2";
         const registrationData2 = "00000000000000030000000061672e7d";
 
-        let tx = await registry.register( addr1.address, label1, registrationData1);
+        let tx = await registry.register( addr1.address, label1, registrationData1, 1);
         tx.wait();
 
-        tx = await registry.register( addr1.address, label2, registrationData2);
+        tx = await registry.register( addr1.address, label2, registrationData2, 2);
         tx.wait();
 
         // only owner or approved address can update
@@ -243,7 +246,7 @@ describe("Registry with No Enumeration", function () {
         const label = "dummy";
         const registrationData = "dummy";
 
-        let tx = await registry.register( addr1.address, label, registrationData);
+        let tx = await registry.register( addr1.address, label, registrationData, 1);
         tx.wait();
         expect(await registry.balanceOf(addr1.address)).to.equal(1);
 
@@ -297,7 +300,7 @@ describe("Registry with No Enumeration", function () {
 
         // registration by token is currently disabled
         await expectRevert(
-            registry.connect(addr2).registerByToken(addr2.address, "username", "myprofile"),
+            registry.connect(addr2).registerByToken(addr2.address, "username", "myprofile", 1),
             "NonFungibleRegistry: registration by token not enabled.",
         );
 
@@ -319,7 +322,7 @@ describe("Registry with No Enumeration", function () {
         tx.wait();
 
         // then they can submit a transaction to register
-        tx = await registry.connect(addr2).registerByToken(addr2.address, "username1", "myprofile1");
+        tx = await registry.connect(addr2).registerByToken(addr2.address, "username1", "myprofile1", 1);
         tx.wait();
 
         let stakeTokenId = await registry.registryMap("username1");
@@ -336,43 +339,47 @@ describe("Registry with No Enumeration", function () {
         tx.wait();
 
         // then they can submit a transaction to register
-        tx = await registry.connect(addr2).registerByToken(addr2.address, "username2", "myprofile2");
+        tx = await registry.connect(addr2).registerByToken(addr2.address, "username2", "myprofile2", 2);
         tx.wait();
     });
 
     it("Test batch minting function.", async function () {
-      // first deploy the LazyMintModule
-      const BatchModule = await ethers.getContractFactory("BatchModule");
-      batchmodule = await BatchModule.deploy("Batch Minting");
-      await batchmodule.deployTransaction.wait();
-
-      // minting many tokens in a single transaction can save gas:
-      const batchSize = 180;
-      const recipients = [];
-      const labels = [];
-      const emptyLabels = [];
-      const datas = [];
-      for (let i = 0; i < batchSize; i++) {
-          recipients.push(owner.address);
-          labels.push(`tokenLabel${i}`);
-          emptyLabels.push("");
-          datas.push(`00000000000000030000000061672e7d`)
-      }
-
-      // then add the module as a REGISTRAR
-      const REGISTRAR_ROLE = await registry.REGISTRAR_ROLE();
-      let tx = await registry.grantRole(REGISTRAR_ROLE, batchmodule.address);
-      tx.wait();
-      
-      tx = await batchmodule.batchRegister(recipients, labels, datas, registry.address);
-      tx.wait();
-
-      tx = await batchmodule.batchRegister(recipients, emptyLabels, datas, registry.address);
-      tx.wait();
-
-      tx = await registry.register(recipients[0], emptyLabels[0], datas[1]);
-      tx.wait();
-  });
+        // first deploy the LazyMintModule
+        const BatchModule = await ethers.getContractFactory("BatchModule");
+        batchmodule = await BatchModule.deploy("Batch Minting");
+        await batchmodule.deployTransaction.wait();
+  
+        // minting many tokens in a single transaction can save gas:
+        const batchSize = 170;
+        const recipients = [];
+        const labels = [];
+        const emptyLabels = [];
+        const datas = [];
+        const tokenIds = [];
+        const tokenIds2 = [];
+        for (let i = 0; i < batchSize; i++) {
+            recipients.push(owner.address);
+            labels.push(`tokenLabel${i}`);
+            emptyLabels.push("");
+            datas.push(`00000000000000030000000061672e7d`);
+            tokenIds.push(i+1);
+            tokenIds2.push(i+1+batchSize);
+        }
+  
+        // then add the module as a REGISTRAR
+        const REGISTRAR_ROLE = await registry.REGISTRAR_ROLE();
+        let tx = await registry.grantRole(REGISTRAR_ROLE, batchmodule.address);
+        tx.wait();
+        
+        tx = await batchmodule.batchRegister(recipients, labels, datas, tokenIds, registry.address);
+        tx.wait();
+  
+        tx = await batchmodule.batchRegister(recipients, emptyLabels, datas, tokenIds2, registry.address);
+        tx.wait();
+  
+        tx = await registry.register(recipients[0], emptyLabels[0], datas[1], 42069);
+        tx.wait();
+    });
   
   it("Test lazy minting.", async function () {
     // first deploy the LazyMintModule
@@ -382,12 +389,12 @@ describe("Registry with No Enumeration", function () {
 
     let label = "";
     let registrationData = "00000000000000030000000061672e7d";
-    let nonce = 1; 
+    let tokenId = 1; 
 
     // hash the data
     var hash = ethers.utils.solidityKeccak256(
         ["address", "string", "string", "uint256"],
-        [addr1.address, label, registrationData, nonce]
+        [addr1.address, label, registrationData, tokenId]
     ).toString('hex');
     
     let sig = await owner.signMessage(ethers.utils.arrayify(hash));
@@ -395,7 +402,7 @@ describe("Registry with No Enumeration", function () {
 
     // Lazy minting module wont work without REGISTRAR ROLE permission
     await expectRevert(
-      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, sig, registry.address),
+      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, tokenId, sig, registry.address),
       "NonFungibleRegistry: must have registrar role to register.",
     )
     
@@ -406,24 +413,24 @@ describe("Registry with No Enumeration", function () {
 
     // invalid signatures also won't work
     await expectRevert(
-      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, fakesig, registry.address),
+      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, tokenId, fakesig, registry.address),
       "LazyMintModule: signature failure.",
     )
 
     // only the recipient can call the lazy mint function
     await expectRevert(
-      lazymintmodule.connect(addr2).lazyRegister(addr1.address, label, registrationData, nonce, sig, registry.address),
+      lazymintmodule.connect(addr2).lazyRegister(addr1.address, label, registrationData, tokenId, sig, registry.address),
       "LazyMintModule: Caller is not recipient.",
     )
 
-    tx = await lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, sig, registry.address);
+    tx = await lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, tokenId, sig, registry.address);
     tx.wait();
     expect(await registry.ownerOf(1)).to.equal(addr1.address);
 
-    // nonces cannot be reused
+    // tokenIds cannot be reused
     await expectRevert(
-      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, sig, registry.address),
-      "LazyMintModule: used nonce.",
+      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, tokenId, sig, registry.address),
+      "ERC721: token already minted",
     )
   });
 });

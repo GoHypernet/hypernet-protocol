@@ -22,7 +22,8 @@ contract BatchModule is Context {
     function batchRegister(
         address[] memory recipients, 
         string[] memory labels, 
-        string[] memory registrationDatas, 
+        string[] memory registrationDatas,
+        uint256[] memory tokenIds,
         address registry
         ) 
         external 
@@ -31,16 +32,17 @@ contract BatchModule is Context {
             require(INfr(registry).hasRole(INfr(registry).REGISTRAR_ROLE(), _msgSender()), "BatchModule: msgSender must be registrar.");
             require(recipients.length == labels.length, "BatchModule: recipients array must be same length as labels array.");
             require(registrationDatas.length == labels.length, "BatchModule: registrationDatas array must be same length as labels array.");
+            require(tokenIds.length == labels.length, "BatchModule: tokenIds array must be same length as labels array.");
 
             for (uint256 i = 0; i < recipients.length; ++i) {
-                INfr(registry).register(recipients[i], labels[i], registrationDatas[i]);
+                INfr(registry).register(recipients[i], labels[i], registrationDatas[i], tokenIds[i]);
             }
         }
 }
 
 // minimal interface for the NonFungibleRegistry register function
 interface INfr {
-    function register(address to, string calldata label, string calldata registrationData) external;
+    function register(address to, string calldata label, string calldata registrationData, uint256 tokenId) external;
     function hasRole(bytes32 role, address account) external view returns (bool);
     function REGISTRAR_ROLE() external view returns (bytes32);
 }

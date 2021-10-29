@@ -56,6 +56,7 @@ describe("Enumerated Registry", function () {
             addr1.address,
             routerPublicIdentifier,
             JSON.stringify(registryEntry),
+            1,
         );
         tx.wait();
 
@@ -74,6 +75,7 @@ describe("Enumerated Registry", function () {
             addr1.address,
             label,
             registrationData,
+            1,
         );
         tx.wait();
 
@@ -82,6 +84,7 @@ describe("Enumerated Registry", function () {
               addr2.address,
               label,
               registrationData,
+              2
             ),
             "NonFungibleRegistry: label is already registered.",
           );
@@ -91,7 +94,7 @@ describe("Enumerated Registry", function () {
         const label = "dummy";
         const registrationData = "dummy";
 
-        let tx = await registry.register( addr1.address, label, registrationData);
+        let tx = await registry.register( addr1.address, label, registrationData, 1);
         tx.wait();
 
         expect(await registry.balanceOf(addr1.address)).to.equal(1);
@@ -115,7 +118,7 @@ describe("Enumerated Registry", function () {
         const label = "dummy";
         const registrationData = "dummy";
 
-        let tx = await registry.register( addr1.address, label, registrationData);
+        let tx = await registry.register( addr1.address, label, registrationData, 1);
         tx.wait();
 
         expect(await registry.balanceOf(addr1.address)).to.equal(1);
@@ -191,10 +194,10 @@ describe("Enumerated Registry", function () {
         const label2 = "dummy2";
         const registrationData2 = "dummy2";
 
-        let tx = await registry.register( addr1.address, label1, registrationData1);
+        let tx = await registry.register( addr1.address, label1, registrationData1, 1);
         tx.wait();
 
-        tx = await registry.register( addr1.address, label2, registrationData2);
+        tx = await registry.register( addr1.address, label2, registrationData2, 2);
         tx.wait();
 
         // only owner or approved address can update
@@ -251,7 +254,7 @@ describe("Enumerated Registry", function () {
         const label = "dummy";
         const registrationData = "dummy";
 
-        let tx = await registry.register( addr1.address, label, registrationData);
+        let tx = await registry.register( addr1.address, label, registrationData, 1);
         tx.wait();
         expect(await registry.balanceOf(addr1.address)).to.equal(1);
 
@@ -305,7 +308,7 @@ describe("Enumerated Registry", function () {
 
         // registration by token is currently disabled
         await expectRevert(
-            registry.connect(addr2).registerByToken(addr2.address, "username", "myprofile"),
+            registry.connect(addr2).registerByToken(addr2.address, "username", "myprofile", 1),
             "NonFungibleRegistry: registration by token not enabled.",
         );
 
@@ -327,7 +330,7 @@ describe("Enumerated Registry", function () {
         tx.wait();
 
         // then they can submit a transaction to register
-        tx = await registry.connect(addr2).registerByToken(addr2.address, "username1", "myprofile1");
+        tx = await registry.connect(addr2).registerByToken(addr2.address, "username1", "myprofile1", 1);
         tx.wait();
 
         let stakeTokenId = await registry.registryMap("username1");
@@ -344,7 +347,7 @@ describe("Enumerated Registry", function () {
         tx.wait();
 
         // then they can submit a transaction to register
-        tx = await registry.connect(addr2).registerByToken(addr2.address, "username2", "myprofile2");
+        tx = await registry.connect(addr2).registerByToken(addr2.address, "username2", "myprofile2", 2);
         tx.wait();
     });
 
@@ -355,16 +358,20 @@ describe("Enumerated Registry", function () {
         await batchmodule.deployTransaction.wait();
   
         // minting many tokens in a single transaction can save gas:
-        const batchSize = 100;
+        const batchSize = 120;
         const recipients = [];
         const labels = [];
         const emptyLabels = [];
         const datas = [];
+        const tokenIds = [];
+        const tokenIds2 = [];
         for (let i = 0; i < batchSize; i++) {
             recipients.push(owner.address);
             labels.push(`tokenLabel${i}`);
             emptyLabels.push("");
-            datas.push(`00000000000000030000000061672e7d`)
+            datas.push(`00000000000000030000000061672e7d`);
+            tokenIds.push(i+1);
+            tokenIds2.push(i+1+batchSize);
         }
   
         // then add the module as a REGISTRAR
@@ -372,13 +379,13 @@ describe("Enumerated Registry", function () {
         let tx = await registry.grantRole(REGISTRAR_ROLE, batchmodule.address);
         tx.wait();
         
-        tx = await batchmodule.batchRegister(recipients, labels, datas, registry.address);
+        tx = await batchmodule.batchRegister(recipients, labels, datas, tokenIds, registry.address);
         tx.wait();
   
-        tx = await batchmodule.batchRegister(recipients, emptyLabels, datas, registry.address);
+        tx = await batchmodule.batchRegister(recipients, emptyLabels, datas, tokenIds2, registry.address);
         tx.wait();
   
-        tx = await registry.register(recipients[0], emptyLabels[0], datas[1]);
+        tx = await registry.register(recipients[0], emptyLabels[0], datas[1], 42069);
         tx.wait();
     });
   
@@ -388,14 +395,14 @@ describe("Enumerated Registry", function () {
       lazymintmodule = await LazyMintModule.deploy("Lazy Registration");
       await lazymintmodule.deployTransaction.wait();
 
-      let label = "dummylabel";
+      let label = "";
       let registrationData = "00000000000000030000000061672e7d";
-      let nonce = 007; 
+      let tokenId = 007; 
 
       // hash the data
       var hash = ethers.utils.solidityKeccak256(
           ["address", "string", "string", "uint256"],
-          [addr1.address, label, registrationData, nonce]
+          [addr1.address, label, registrationData, tokenId]
       ).toString('hex');
       
       let sig = await owner.signMessage(ethers.utils.arrayify(hash));
@@ -403,34 +410,35 @@ describe("Enumerated Registry", function () {
 
       // Lazy minting module wont work without REGISTRAR ROLE permission
       await expectRevert(
-        lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, sig, registry.address),
+        lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, tokenId, sig, registry.address),
         "NonFungibleRegistry: must have registrar role to register.",
       )
       
       // then add the module as a REGISTRAR
       const REGISTRAR_ROLE = await registry.REGISTRAR_ROLE();
       let tx = await registry.grantRole(REGISTRAR_ROLE, lazymintmodule.address);
+      tx.wait();
 
       // invalid signatures also won't work
       await expectRevert(
-        lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, fakesig, registry.address),
+        lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, tokenId, fakesig, registry.address),
         "LazyMintModule: signature failure.",
       )
 
       // only the recipient can call the lazy mint function
       await expectRevert(
-        lazymintmodule.connect(addr2).lazyRegister(addr1.address, label, registrationData, nonce, sig, registry.address),
+        lazymintmodule.connect(addr2).lazyRegister(addr1.address, label, registrationData, tokenId, sig, registry.address),
         "LazyMintModule: Caller is not recipient.",
       )
 
-      tx = await lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, sig, registry.address);
+      tx = await lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, tokenId, sig, registry.address);
       tx.wait();
       expect(await registry.totalSupply()).to.equal(1);
 
-      // nonces cannot be reused
+      // tokenIds cannot be reused
       await expectRevert(
-        lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, nonce, sig, registry.address),
-        "LazyMintModule: used nonce.",
+        lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, tokenId, sig, registry.address),
+        "ERC721: token already minted",
       )
   });
 });

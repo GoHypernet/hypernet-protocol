@@ -7,7 +7,6 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721Enumer
 import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/ERC721URIStorageUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 contract NonFungibleRegistryEnumerableUpgradeable is
@@ -17,7 +16,6 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     ERC721EnumerableUpgradeable,
     ERC721URIStorageUpgradeable
 {
-    using CountersUpgradeable for CountersUpgradeable.Counter;
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
     // since the registration token could be changed by the registrar
@@ -80,8 +78,6 @@ contract NonFungibleRegistryEnumerableUpgradeable is
 
     // create a REGISTRAR_ROLE to manage registry functionality
     bytes32 public constant REGISTRAR_ROLE_ADMIN = keccak256("REGISTRAR_ROLE_ADMIN");
-
-    CountersUpgradeable.Counter private _tokenIdTracker;
 
     event LabelUpdated(uint256 tokenId, string label);
 
@@ -177,9 +173,10 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     /// @param to address of the recipient of the token
     /// @param label a unique label to attach to the token, can pass an empty string to skip labeling
     /// @param registrationData data to store in the tokenURI
-    function register(address to, string calldata label, string calldata registrationData) external virtual {
+    /// @param tokenId unique uint256 identifier for the newly created token
+    function register(address to, string calldata label, string calldata registrationData, uint256 tokenId) external virtual {
         require(hasRole(REGISTRAR_ROLE, _msgSender()), "NonFungibleRegistry: must have registrar role to register.");
-        _createLabeledToken(to, label, registrationData);
+        _createLabeledToken(to, label, registrationData, tokenId);
     }
 
     /// @notice registerByToken mints a new Non-Fungible Identity token by staking an ERC20 registration token
@@ -187,13 +184,14 @@ contract NonFungibleRegistryEnumerableUpgradeable is
     /// @param to address of the recipient of the token
     /// @param label a unique label to attach to the token
     /// @param registrationData data to store in the tokenURI
-    function registerByToken(address to, string calldata label, string calldata registrationData) external virtual {
+    /// @param tokenId unique uint256 identifier for the newly created token
+    function registerByToken(address to, string calldata label, string calldata registrationData, uint256 tokenId) external virtual {
         require(registrationToken != address(0), "NonFungibleRegistry: registration by token not enabled.");
         require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
 
         // user must approve the registry to collect the registration fee from their wallet
         IERC20Upgradeable(registrationToken).transferFrom(_msgSender(), address(this), registrationFee);
-        uint256 tokenId = _createLabeledToken(to, label, registrationData);
+        _createLabeledToken(to, label, registrationData, tokenId);
 
         uint256 burnAmount = registrationFee * burnFee / 10000;
         IERC20Upgradeable(registrationToken).transfer(burnAddress, burnAmount);
@@ -201,29 +199,24 @@ contract NonFungibleRegistryEnumerableUpgradeable is
         identityStakes[tokenId] = Fee(registrationToken, registrationFee-burnAmount);
     }
 
-    function _createLabeledToken(address to, string memory label, string memory registrationData) private returns (uint256 tokenId) {
+    function _createLabeledToken(address to, string memory label, string memory registrationData, uint256 tokenId) private {
         if (bytes(label).length > 0) {
             require(!_mappingExists(label), "NonFungibleRegistry: label is already registered.");
-            tokenId = _createToken(to, registrationData);
+            _createToken(to, registrationData, tokenId);
             // extend the registry mapping for lookup via token label
             registryMap[label] = tokenId;
             reverseRegistryMap[tokenId] = label;
         } else {
             // if label is empty, save some gas
-            tokenId = _createToken(to, registrationData);
+            _createToken(to, registrationData, tokenId);
         }
     }
 
-    function _createToken(address to, string memory registrationData) private returns (uint256 tokenId) {
+    function _createToken(address to, string memory registrationData, uint256 tokenId) private {
         require(_preRegistered(to), "NonFungibleRegistry: recipient must have non-zero balance in primary registry.");
+        require(tokenId != 0, "NonFungibleRegistry: tokenId cannot be 0");
 
-        // We cannot just use balanceOf to create the new tokenId because tokens
-        // can be burned (destroyed), so we need a separate counter.
-        // Enforce that the counter start at 1 (not 0) so that we can check 
-        // if a name exists
-        tokenId = _tokenIdTracker.current() + 1;
         _mint(to, tokenId);
-        _tokenIdTracker.increment();
         _setTokenURI(tokenId, registrationData);
     }
 
