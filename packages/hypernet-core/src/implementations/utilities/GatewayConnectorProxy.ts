@@ -219,7 +219,10 @@ export class GatewayConnectorProxy
       this._pushOpenedGatewayIFrame(this.gatewayUrl);
       this._showGatewayIFrame(context);
 
-      return this._createCall("gatewayIFrameDisplayed", this.gatewayUrl);
+      return this._createCall<void, GatewayConnectorError | ProxyError>(
+        "gatewayIFrameDisplayed",
+        this.gatewayUrl,
+      );
     });
   }
 
@@ -236,7 +239,10 @@ export class GatewayConnectorProxy
       }
 
       // notify the child in gateway connector to tell him that the gateway iframe is going to close up.
-      return this._createCall("gatewayIFrameClosed", this.gatewayUrl);
+      return this._createCall<void, GatewayConnectorError | ProxyError>(
+        "gatewayIFrameClosed",
+        this.gatewayUrl,
+      );
     });
   }
 

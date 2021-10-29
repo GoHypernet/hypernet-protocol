@@ -6,7 +6,6 @@ import {
   IBasicTransferResponse,
   IFullChannelState,
   IFullTransferState,
-  EthereumAddress,
   PaymentId,
   TransferId,
   Signature,
@@ -669,16 +668,18 @@ export class VectorUtils implements IVectorUtils {
     // We need to get the registered transfer definitions as canonical by the browser node
     return this._getRegisteredTransfers(ChainId(transfer.chainId)).map(
       (registeredTransfers) => {
-        const transferMap: Map<EthereumAddress, string> = new Map();
+        const transferMap: Map<EthereumContractAddress, string> = new Map();
         for (const registeredTransfer of registeredTransfers) {
           transferMap.set(
-            EthereumAddress(registeredTransfer.definition),
+            EthereumContractAddress(registeredTransfer.definition),
             registeredTransfer.name,
           );
         }
 
         // If the transfer address is not one we know, we don't know what this is
-        if (!transferMap.has(EthereumAddress(transfer.transferDefinition))) {
+        if (
+          !transferMap.has(EthereumContractAddress(transfer.transferDefinition))
+        ) {
           this.logUtils.log(
             `Transfer type not recognized. Transfer definition: ${
               transfer.transferDefinition
@@ -689,7 +690,7 @@ export class VectorUtils implements IVectorUtils {
           // This is a transfer we know about, but not necessarily one we want.
           // Narrow down to insurance, parameterized, or  offer/messagetransfer
           const thisTransfer = transferMap.get(
-            EthereumAddress(transfer.transferDefinition),
+            EthereumContractAddress(transfer.transferDefinition),
           );
           if (thisTransfer == null) {
             throw new LogicalError(

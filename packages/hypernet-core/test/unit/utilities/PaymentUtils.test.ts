@@ -9,7 +9,7 @@ import {
   PullPayment,
   UUID,
   ETransferState,
-  EthereumAddress,
+  EthereumContractAddress,
   BigNumberString,
 } from "@hypernetlabs/objects";
 import { ILogUtils, ITimeUtils } from "@hypernetlabs/utils";
@@ -628,7 +628,7 @@ describe("PaymentUtils tests", () => {
     const mocks = new PaymentUtilsMocks();
     const utils = mocks.factoryProvider();
     // Invalid the payment
-    transfers[2].assetId = EthereumAddress("invalid address");
+    transfers[2].assetId = EthereumContractAddress("invalid address");
 
     // Act
     const result = await utils.transfersToPayment(commonPaymentId, transfers);

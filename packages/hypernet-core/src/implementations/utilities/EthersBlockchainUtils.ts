@@ -55,7 +55,10 @@ export class EthersBlockchainUtils implements IBlockchainUtils {
     return this.blockchainProvider.getSigner().andThen((signer) => {
       const tokenContract = new Contract(assetAddress, this.erc20Abi, signer);
       return ResultAsync.fromPromise(
-        tokenContract.transfer(channelAddress, amount),
+        tokenContract.transfer(
+          channelAddress,
+          amount,
+        ) as Promise<TransactionResponse>,
         (err) => {
           return new BlockchainUnavailableError(
             "Unable to complete an ERC20 token transfer",

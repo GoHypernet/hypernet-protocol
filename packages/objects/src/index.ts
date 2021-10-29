@@ -26,6 +26,7 @@ export * from "@objects/MessageThread";
 export * from "@objects/MessageTransferData";
 export * from "@objects/Payment";
 export * from "@objects/PaymentId";
+export * from "@objects/PaymentSigningValues";
 export * from "@objects/PaymentStatusViewModel";
 export * from "@objects/PrivateCredentials";
 export * from "@objects/ProviderUrl";

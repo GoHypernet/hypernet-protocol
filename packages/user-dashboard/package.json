@@ -42,7 +42,7 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/objects": "^0.0.1",
+    "@hypernetlabs/objects": "^0.3.6",
     "@hypernetlabs/web-integration": "^0.0.1",
     "@material-ui/core": "4.12.3",
     "path-to-regexp": "^6.2.0",

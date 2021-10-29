@@ -2,6 +2,7 @@ import {
   PublicIdentifier,
   PaymentId,
   EthereumAddress,
+  EthereumContractAddress,
 } from "@hypernetlabs/objects";
 import { MockProvider } from "ethereum-waffle";
 import { providers, ethers } from "ethers";
@@ -29,7 +30,7 @@ class MockUtils {
     "candy maple cake sugar pudding cream honey rich smooth crumble sweet treat";
 
   public generateRandomEtherAdress(): EthereumAddress {
-    return EthereumAddress(
+    return EthereumContractAddress(
       "0x" + randomstring.generate({ length: 40, charset: "hex" }),
     );
   }
@@ -47,7 +48,7 @@ class MockUtils {
   }
 
   public generateRandomPaymentToken(): EthereumAddress {
-    return EthereumAddress(
+    return EthereumContractAddress(
       "0x" + randomstring.generate({ length: 40, charset: "hex" }),
     );
   }

@@ -1,8 +1,4 @@
 import {
-  paymentSigningDomain,
-  pushPaymentSigningTypes,
-} from "@hypernetlabs/gateway-connector";
-import {
   PushPayment,
   Payment,
   AssetBalance,
@@ -29,6 +25,8 @@ import {
   MessageState,
   PaymentCreationError,
   EPaymentType,
+  paymentSigningDomain,
+  pushPaymentSigningTypes,
 } from "@hypernetlabs/objects";
 import { ILogUtils } from "@hypernetlabs/utils";
 import { PaymentService } from "@implementations/business/PaymentService";

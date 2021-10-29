@@ -20,8 +20,8 @@
     "postCompile": "webpack --config webpack.config.js"
   },
   "dependencies": {
-    "@hypernetlabs/gateway-connector": "^0.0.1",
-    "@hypernetlabs/objects": "^0.0.1",
+    "@hypernetlabs/gateway-connector": "^0.0.8",
+    "@hypernetlabs/objects": "^0.3.6",
     "ethers": "^5.4.7",
     "neverthrow": "^4.1.1",
     "rxjs": "^6.6.6"

@@ -11,8 +11,6 @@ import {
   IResolveInsuranceRequest,
   ISignMessageRequest,
   IStateChannelRequest,
-  paymentSigningDomain,
-  pushPaymentSigningTypes,
 } from "@hypernetlabs/gateway-connector";
 import {
   PushPayment,
@@ -27,6 +25,8 @@ import {
   GatewayTokenInfo,
   UnixTimestamp,
   EthereumContractAddress,
+  paymentSigningDomain,
+  pushPaymentSigningTypes,
 } from "@hypernetlabs/objects";
 import { ethers } from "ethers";
 import { defaultAbiCoder, keccak256 } from "ethers/lib/utils";

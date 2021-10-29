@@ -1,8 +1,4 @@
 import {
-  paymentSigningDomain,
-  pushPaymentSigningTypes,
-} from "@hypernetlabs/gateway-connector";
-import {
   Payment,
   PublicIdentifier,
   PullPayment,
@@ -34,7 +30,8 @@ import {
   LogicalError,
   EthereumContractAddress,
   EPaymentType,
-  EthereumAccountAddress,
+  paymentSigningDomain,
+  pushPaymentSigningTypes,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IPaymentService } from "@interfaces/business";
