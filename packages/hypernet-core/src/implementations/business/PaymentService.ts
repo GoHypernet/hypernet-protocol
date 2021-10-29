@@ -393,7 +393,7 @@ export class PaymentService implements IPaymentService {
         expirationDate: expirationDate,
         requiredStake: requiredStake,
         paymentToken: paymentToken,
-        metadata: metadata,
+        metadata: metadata ?? "",
       } as Record<string, unknown>;
 
       const verifiedGatewayAccount = this.blockchainUtils.verifyTypedData(

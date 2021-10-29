@@ -313,7 +313,7 @@ class TestGatewayConnector implements IGatewayConnector {
 
     console.log("Emiting initiateSendFundsRequested");
     this.initiateSendFundsRequested.next({
-      requestIdentifier: (++this.requestIdentifier).toString(),
+      requestIdentifier: this.requestIdentifier.toString(),
       channelAddress: this.channelAddress,
       recipientPublicIdentifier: this.recipientPublicIdentifier,
       amount: amount,
@@ -353,7 +353,7 @@ class TestGatewayConnector implements IGatewayConnector {
           `Signed payment signature = ${gatewaySignature}. Emiting sendFundsRequested`,
         );
         this.sendFundsRequested.next({
-          requestIdentifier: (++this.requestIdentifier).toString(),
+          requestIdentifier: this.requestIdentifier.toString(),
           paymentId: paymentId,
           channelAddress: this.channelAddress!,
           recipientPublicIdentifier: this.recipientPublicIdentifier, // Galileo account
@@ -365,6 +365,7 @@ class TestGatewayConnector implements IGatewayConnector {
           gatewaySignature: gatewaySignature,
           callback: (_err, payment) => {
             console.log("Created payment!", payment);
+            this.requestIdentifier++;
           },
         });
       },

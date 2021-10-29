@@ -16,7 +16,7 @@ export interface ISignedSendFundsRequest {
   expirationDate: UnixTimestamp;
   requiredStake: BigNumberString;
   paymentToken: EthereumContractAddress;
-  metadata: string | null;
+  metadata: string;
   paymentId: PaymentId;
   gatewaySignature: Signature;
   callback: (err: unknown | null, payment: PushPayment | null) => void;
