@@ -77,7 +77,6 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   };
 
   const handleError = (err?: Error) => {
-    console.log("handleError err: ", err);
     setLoading(false);
     setHasEmptyState(true);
     alert.error(err?.message || "Something went wrong!");
@@ -139,7 +138,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
           fieldWithValueList={[
             {
               fieldTitle: "Label",
-              fieldValue: registryEntry.label,
+              fieldValue: registryEntry.label || "-",
             },
             {
               fieldTitle: "Token ID",
@@ -162,7 +161,7 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
                   onRegistryEntryDetailsNavigate &&
                   onRegistryEntryDetailsNavigate(
                     registryName,
-                    registryEntry.label,
+                    registryEntry.tokenId,
                   ),
               },
             ],

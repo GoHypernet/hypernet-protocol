@@ -9,8 +9,8 @@ const RegistryEntryDetail: React.FC = () => {
   const history = useHistory();
   const { handleError } = useLayoutContext();
   const { hypernetWebIntegration } = useStoreContext();
-  const { registryName, entryLabel } =
-    useParams<{ registryName: string; entryLabel: string }>();
+  const { registryName, entryTokenId } =
+    useParams<{ registryName: string; entryTokenId: string }>();
 
   useEffect(() => {
     hypernetWebIntegration.webUIClient
@@ -20,7 +20,7 @@ const RegistryEntryDetail: React.FC = () => {
           history.push(`/registries/${registryName}/entries`);
         },
         registryName,
-        entryLabel: decodeURIComponent(entryLabel),
+        entryTokenId: Number(entryTokenId),
       })
       .mapErr(handleError);
   }, []);

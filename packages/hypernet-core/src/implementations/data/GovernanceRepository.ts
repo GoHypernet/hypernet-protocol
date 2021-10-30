@@ -157,7 +157,7 @@ export class GovernanceRepository implements IGovernanceRepository {
         ) as Promise<any>,
         (e) => {
           return new BlockchainUnavailableError(
-            "Unable to retrieve proposals count",
+            "Unable to delegate votes",
             e,
           );
         },
@@ -293,6 +293,27 @@ export class GovernanceRepository implements IGovernanceRepository {
         ) as Promise<any>,
         (e) => {
           return new BlockchainUnavailableError("Unable to queue proposal", e);
+        },
+      ).andThen((tx) => {
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+          return new BlockchainUnavailableError("Unable to wait for tx", e);
+        }).andThen(() => {
+          return this.getProposalDetails(proposalId);
+        });
+      });
+    });
+  }
+
+  public cancelProposal(
+    proposalId: string,
+  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+    return this.initializeForWrite().andThen((governanceContracts) => {
+      return ResultAsync.fromPromise(
+        governanceContracts.hypernetGovernorContract["cancel(uint256)"](
+          proposalId,
+        ) as Promise<any>,
+        (e) => {
+          return new BlockchainUnavailableError("Unable to cancel proposal", e);
         },
       ).andThen((tx) => {
         return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
