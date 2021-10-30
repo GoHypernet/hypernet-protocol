@@ -69,6 +69,10 @@ contract NonFungibleRegistryUpgradeable is
     uint256 public burnFee;
 
     // address of primary NFR registry required for participation
+    // if the primaryRegistry is address(0), then this variable is ignored
+    // if the primaryRegistry is an ERC721, then the recipient of an NFI must 
+    // have a non-zero balance in that ERC721 contract in order to recieve 
+    // an NFI
     address public primaryRegistry;
 
     // create a REGISTRAR_ROLE to manage registry functionality
