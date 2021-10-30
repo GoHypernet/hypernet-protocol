@@ -17,8 +17,8 @@ task("sendhypertoken", "Send hypertoken to another account")
   const balS = await hypertoken.balanceOf(owner.address);
 
 
-    console.log("Balance of sender:", balS.toString());
-    console.log("Balance of recipient:", balR.toString());
+  console.log("Balance of sender:", balS.toString());
+  console.log("Balance of recipient:", balR.toString());
 });
 
 task("delegateVote", "Delegate your voting power")
@@ -308,12 +308,14 @@ task("proposeRegistryEntry", "Propose a new NonFungibleRegistry where Governance
   .addParam("label", "NFI label.")
   .addParam("data", "Data to be written to NFI entry.")
   .addParam("recipient", "Recipient address of the NFI.")
+  .addParam("tokenid", "desired ID for the NFI")
   .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
     const registryName = taskArgs.name;
     const NFILabel = taskArgs.label;
     const NFIData = taskArgs.data;
     const NFIRecipient = taskArgs.recipient;
+    const tokenid = taskArgs.tokenid;
 
     const govHandle = new hre.ethers.Contract(govAddress(), HG.abi, accounts[0]);
     const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
@@ -327,7 +329,7 @@ task("proposeRegistryEntry", "Propose a new NonFungibleRegistry where Governance
     const descriptionHash = hre.ethers.utils.id(proposalDescription);
     const transferCalldata = registryHandle.interface.encodeFunctionData(
       "register",
-      [NFIRecipient, NFILabel, NFIData],
+      [NFIRecipient, NFILabel, NFIData, tokenid],
     );
 
     const proposalID = await govHandle.hashProposal(
@@ -353,6 +355,7 @@ task("registerWithToken", "Register an NFI with ERC20 token.")
   .addParam("label", "NFI label.")
   .addParam("data", "Data to be written to NFI entry.")
   .addParam("recipient", "Recipient address of the NFI.")
+  .addParam("tokenid", "Desired token ID for NFI to be created.")
   .setAction(async (taskArgs) => {
     const accounts = await hre.ethers.getSigners();
 
@@ -360,6 +363,7 @@ task("registerWithToken", "Register an NFI with ERC20 token.")
     const NFILabel = taskArgs.label;
     const NFIData = taskArgs.data;
     const NFIRecipient = taskArgs.recipient;
+    const tokenid = taskArgs.tokenid;
 
     const hypertoken = new hre.ethers.Contract(hAddress(), HT.abi, accounts[0]);
     const factoryHandle = new hre.ethers.Contract(factoryAddress(), RF.abi, accounts[0]);
@@ -373,7 +377,7 @@ task("registerWithToken", "Register an NFI with ERC20 token.")
     tx.wait();
 
     // call registerByToken on the NFR
-    tx = await registryHandle.registerByToken(NFIRecipient, NFILabel, NFIData);
+    tx = await registryHandle.registerByToken(NFIRecipient, NFILabel, NFIData, tokenid);
     tx.wait();
 
     const tokenId = await registryHandle.registryMap(NFILabel);

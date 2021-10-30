@@ -175,7 +175,7 @@ npx hardhat setRegistryParameters --network dev --name Gateways --regtoken 0x5Fb
 Add a new NFI by staking tokens:
 
 ```shell
-npx hardhat registerWithToken --network dev --name Gateways --label "https://hyperpay.io" --data "biglongsignatureblock" --recipient 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+npx hardhat registerWithToken --network dev --name Gateways --label "https://hyperpay.io" --data "biglongsignatureblock" --recipient 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 --tokenid 007
 ```
 
 burn an NFI if you are the owner or registrar:
