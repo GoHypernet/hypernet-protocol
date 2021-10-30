@@ -11,8 +11,13 @@ Includes the EIP20 compatible token contract and the Governance DOA implementati
 
 ## identity
 
-Contains NonFunglebleRegistry.sol and the associated factory contract that produces
-gas efficient proxy copies. 
+Contains the enumerable and non-enumerable implementations of the NFR as well as the 
+NFR factory contract.
+
+## modules
+
+Contains various stand-alone contracts intended to augment the registration process
+with additional or specialized functionality. 
 
 ## utils
 

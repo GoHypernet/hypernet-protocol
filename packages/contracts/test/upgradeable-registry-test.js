@@ -56,6 +56,7 @@ describe("Registry with No Enumeration", function () {
             addr1.address,
             routerPublicIdentifier,
             JSON.stringify(registryEntry),
+            1,
         );
         tx.wait();
 
@@ -73,6 +74,7 @@ describe("Registry with No Enumeration", function () {
             addr1.address,
             label,
             registrationData,
+            1,
         );
         tx.wait();
 
@@ -81,6 +83,7 @@ describe("Registry with No Enumeration", function () {
               addr2.address,
               label,
               registrationData,
+              2,
             ),
             "NonFungibleRegistry: label is already registered.",
           );
@@ -91,7 +94,7 @@ describe("Registry with No Enumeration", function () {
         const label = "dummy";
         const registrationData = "dummy";
 
-        let tx = await registry.register( addr1.address, label, registrationData);
+        let tx = await registry.register( addr1.address, label, registrationData, 1);
         tx.wait();
 
         expect(await registry.balanceOf(addr1.address)).to.equal(1);
@@ -113,7 +116,7 @@ describe("Registry with No Enumeration", function () {
         const label = "dummy";
         const registrationData = "dummy";
 
-        let tx = await registry.register( addr1.address, label, registrationData);
+        let tx = await registry.register( addr1.address, label, registrationData, 1);
         tx.wait();
 
         expect(await registry.balanceOf(addr1.address)).to.equal(1);
@@ -135,35 +138,45 @@ describe("Registry with No Enumeration", function () {
         const abiCoder = ethers.utils.defaultAbiCoder;
 
         // construct call data via ABI encoding
-        let nofunctiondefintion = abiCoder.encode(
-            [
-                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
-            ], 
-            [ 
-                [
-                    [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [hypertoken.address]
-                ] 
-            ]);
+        let nofunctiondefintion = hypertoken.address;
 
-        let noncontractaddress = abiCoder.encode(
+        let noncontractaddress = hypertoken.address;
+
+        // primary registry must implement the ERC721 interface
+        await expectRevert(
+            registry.setPrimaryRegistry(nofunctiondefintion),
+            "Transaction reverted: function selector was not recognized and there's no fallback function",
+        );
+
+        await expectRevert(
+            registry.setPrimaryRegistry(noncontractaddress),
+            "Transaction reverted: function selector was not recognized and there's no fallback function",
+        );
+
+        await expectRevert(
+            registry.connect(addr1).setPrimaryRegistry(noncontractaddress),
+            "NonFungibleRegistry: must be admin.",
+        );
+    });
+
+    it("Check burn fee bounds", async function () {
+        const abiCoder = ethers.utils.defaultAbiCoder;
+
+        // construct call data via ABI encoding
+        let tooBig = abiCoder.encode(
             [
-                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+                "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])"
             ], 
             [ 
                 [
-                    [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [ ], [hypertoken.address]
+                    [ ], [ ], [], [ ], [ ], [ ], [ ], [10001]
                 ] 
             ]);
 
         // primary registry must implement the ERC721 interface
         await expectRevert(
-            registry.setRegistryParameters(nofunctiondefintion),
-            "Transaction reverted: function selector was not recognized and there's no fallback function",
-        );
-
-        await expectRevert(
-            registry.setRegistryParameters(noncontractaddress),
-            "Transaction reverted: function selector was not recognized and there's no fallback function",
+            registry.setRegistryParameters(tooBig),
+            "NonFungibleRegistry: burnFee must be le 10000.",
         );
     });
 
@@ -173,10 +186,10 @@ describe("Registry with No Enumeration", function () {
         const label2 = "dummy2";
         const registrationData2 = "00000000000000030000000061672e7d";
 
-        let tx = await registry.register( addr1.address, label1, registrationData1);
+        let tx = await registry.register( addr1.address, label1, registrationData1, 1);
         tx.wait();
 
-        tx = await registry.register( addr1.address, label2, registrationData2);
+        tx = await registry.register( addr1.address, label2, registrationData2, 2);
         tx.wait();
 
         // only owner or approved address can update
@@ -200,11 +213,11 @@ describe("Registry with No Enumeration", function () {
         // construct call data via ABI encoding
         let params = abiCoder.encode(
             [
-                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+                "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])"
             ], 
             [ 
                 [
-                    [ ], [ ], [ ], [true], [ ], [ ], [ ], [ ], [ ], [ ]
+                    [ ], [ ], [true], [ ], [ ], [ ], [ ], [ ]
                 ] 
             ]);
 
@@ -233,7 +246,7 @@ describe("Registry with No Enumeration", function () {
         const label = "dummy";
         const registrationData = "dummy";
 
-        let tx = await registry.register( addr1.address, label, registrationData);
+        let tx = await registry.register( addr1.address, label, registrationData, 1);
         tx.wait();
         expect(await registry.balanceOf(addr1.address)).to.equal(1);
 
@@ -242,11 +255,11 @@ describe("Registry with No Enumeration", function () {
         // construct call data via ABI encoding
         let params = abiCoder.encode(
             [
-                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+                "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])"
             ], 
             [ 
                 [
-                    [], [], [], [], [false], [], [], [], [], []
+                    [], [], [], [false], [], [], [], []
                 ] 
             ]);
 
@@ -287,7 +300,7 @@ describe("Registry with No Enumeration", function () {
 
         // registration by token is currently disabled
         await expectRevert(
-            registry.connect(addr2).registerByToken(addr2.address, "username", "myprofile"),
+            registry.connect(addr2).registerByToken(addr2.address, "username", "myprofile", 1),
             "NonFungibleRegistry: registration by token not enabled.",
         );
 
@@ -296,11 +309,11 @@ describe("Registry with No Enumeration", function () {
         // construct call data via ABI encoding
         let params = abiCoder.encode(
             [
-                "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
+                "tuple(string[], bool[], bool[], bool[], address[], uint256[], address[], uint256[])"
             ], 
             [ 
                 [
-                    [], [], [], [], [], [hypertoken.address], [], [], [], []
+                    [], [], [], [], [hypertoken.address], [], [], []
                 ] 
             ]);
 
@@ -309,7 +322,7 @@ describe("Registry with No Enumeration", function () {
         tx.wait();
 
         // then they can submit a transaction to register
-        tx = await registry.connect(addr2).registerByToken(addr2.address, "username1", "myprofile1");
+        tx = await registry.connect(addr2).registerByToken(addr2.address, "username1", "myprofile1", 1);
         tx.wait();
 
         let stakeTokenId = await registry.registryMap("username1");
@@ -326,92 +339,98 @@ describe("Registry with No Enumeration", function () {
         tx.wait();
 
         // then they can submit a transaction to register
-        tx = await registry.connect(addr2).registerByToken(addr2.address, "username2", "myprofile2");
+        tx = await registry.connect(addr2).registerByToken(addr2.address, "username2", "myprofile2", 2);
         tx.wait();
     });
 
     it("Test batch minting function.", async function () {
-
-      // minting many tokens in a single transaction can save gas:
-      const batchSize = 180;
-      const recipients = [];
-      const labels = [];
-      const emptyLabels = [];
-      const datas = [];
-      for (let i = 0; i < batchSize; i++) {
-          recipients.push(owner.address);
-          labels.push(`tokenLabel${i}`);
-          emptyLabels.push("");
-          datas.push(`00000000000000030000000061672e7d`)
-      }
-      
-      let tx = await registry.batchRegister(recipients, labels, datas);
-      tx.wait();
-
-      tx = await registry.batchRegister(recipients, emptyLabels, datas);
-      tx.wait();
-
-      tx = await registry.register(recipients[0], emptyLabels[0], datas[1]);
-      tx.wait();
-  });
+        // first deploy the LazyMintModule
+        const BatchModule = await ethers.getContractFactory("BatchModule");
+        batchmodule = await BatchModule.deploy("Batch Minting");
+        await batchmodule.deployTransaction.wait();
+  
+        // minting many tokens in a single transaction can save gas:
+        const batchSize = 170;
+        const recipients = [];
+        const labels = [];
+        const emptyLabels = [];
+        const datas = [];
+        const tokenIds = [];
+        const tokenIds2 = [];
+        for (let i = 0; i < batchSize; i++) {
+            recipients.push(owner.address);
+            labels.push(`tokenLabel${i}`);
+            emptyLabels.push("");
+            datas.push(`00000000000000030000000061672e7d`);
+            tokenIds.push(i+1);
+            tokenIds2.push(i+1+batchSize);
+        }
+  
+        // then add the module as a REGISTRAR
+        const REGISTRAR_ROLE = await registry.REGISTRAR_ROLE();
+        let tx = await registry.grantRole(REGISTRAR_ROLE, batchmodule.address);
+        tx.wait();
+        
+        tx = await batchmodule.batchRegister(recipients, labels, datas, tokenIds, registry.address);
+        tx.wait();
+  
+        tx = await batchmodule.batchRegister(recipients, emptyLabels, datas, tokenIds2, registry.address);
+        tx.wait();
+  
+        tx = await registry.register(recipients[0], emptyLabels[0], datas[1], 42069);
+        tx.wait();
+    });
   
   it("Test lazy minting.", async function () {
-      let label = "dummylabel";
-      let registrationData = "00000000000000030000000061672e7d";
+    // first deploy the LazyMintModule
+    const LazyMintModule = await ethers.getContractFactory("LazyMintModule");
+    lazymintmodule = await LazyMintModule.deploy("Lazy Minting");
+    await lazymintmodule.deployTransaction.wait();
 
-      // hash the data
-      var hash = ethers.utils.solidityKeccak256(
-          ["address", "string", "string"],
-          [addr1.address, label, registrationData]
-      ).toString('hex');
-      
-      let sig = await owner.signMessage(ethers.utils.arrayify(hash));
-      let fakesig = await addr2.signMessage(ethers.utils.arrayify(hash));
-      
-      await expectRevert(
-        registry.connect(addr1).lazyRegister(addr1.address, label, registrationData, sig),
-        "NonFungibleRegistry: Lazy registration is disabled.",
-      );
+    let label = "";
+    let registrationData = "00000000000000030000000061672e7d";
+    let tokenId = 1; 
 
-      const abiCoder = ethers.utils.defaultAbiCoder;
+    // hash the data
+    var hash = ethers.utils.solidityKeccak256(
+        ["address", "string", "string", "uint256"],
+        [addr1.address, label, registrationData, tokenId]
+    ).toString('hex');
+    
+    let sig = await owner.signMessage(ethers.utils.arrayify(hash));
+    let fakesig = await addr2.signMessage(ethers.utils.arrayify(hash));
 
-      // construct call data via ABI encoding
-      let params = abiCoder.encode(
-          [
-              "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])"
-          ], 
-          [ 
-              [
-                [], [true], [], [], [], [], [], [], [], []
-              ] 
-          ]);
+    // Lazy minting module wont work without REGISTRAR ROLE permission
+    await expectRevert(
+      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, tokenId, sig, registry.address),
+      "NonFungibleRegistry: must have registrar role to register.",
+    )
+    
+    // then add the module as a REGISTRAR
+    const REGISTRAR_ROLE = await registry.REGISTRAR_ROLE();
+    let tx = await registry.grantRole(REGISTRAR_ROLE, lazymintmodule.address);
+    tx.wait();
 
-      // registrar now sets the registration token to enable token-based registration
-      tx = await registry.setRegistryParameters(params);
-      tx.wait();
+    // invalid signatures also won't work
+    await expectRevert(
+      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, tokenId, fakesig, registry.address),
+      "LazyMintModule: signature failure.",
+    )
 
-      await expectRevert(
-        registry.connect(addr1).lazyRegister(addr1.address, "", registrationData, fakesig),
-        "NonFungibleRegistry: label field must not be blank.",
-      )
+    // only the recipient can call the lazy mint function
+    await expectRevert(
+      lazymintmodule.connect(addr2).lazyRegister(addr1.address, label, registrationData, tokenId, sig, registry.address),
+      "LazyMintModule: Caller is not recipient.",
+    )
 
-      await expectRevert(
-        registry.connect(addr1).lazyRegister(addr1.address, label, registrationData, fakesig),
-        "NonFungibleRegistry: signature failure.",
-      )
+    tx = await lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, tokenId, sig, registry.address);
+    tx.wait();
+    expect(await registry.ownerOf(1)).to.equal(addr1.address);
 
-      await expectRevert(
-        registry.connect(addr2).lazyRegister(addr1.address, label, registrationData, sig),
-        "NonFungibleRegistry: Caller is not recipient.",
-      )
-
-      tx = await registry.connect(addr1).lazyRegister(addr1.address, label, registrationData, sig);
-      tx.wait();
-      expect(await registry.balanceOf(addr1.address)).to.equal(1);
-
-      await expectRevert(
-        registry.connect(addr1).lazyRegister(addr1.address, label, registrationData, sig),
-        "NonFungibleRegistry: Registration label already exists.",
-      )
+    // tokenIds cannot be reused
+    await expectRevert(
+      lazymintmodule.connect(addr1).lazyRegister(addr1.address, label, registrationData, tokenId, sig, registry.address),
+      "ERC721: token already minted",
+    )
   });
 });

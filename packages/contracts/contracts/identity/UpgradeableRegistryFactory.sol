@@ -23,6 +23,9 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     // extra array storage fascilitates paginated UI
     address[] public registries;
 
+    // array to store addresses of governance approved modules
+    address[] public modules;
+
     // enable registry discovery by human-readable name
     mapping (string => address) public nameToAddress;
 
@@ -81,15 +84,29 @@ contract UpgradeableRegistryFactory is AccessControlEnumerable {
     }
 
     /// @notice getNumberOfEnumerableRegistries getter function for reading the number of enumerable registries
-    /// @dev usefull for paginated UIs
+    /// @dev useful for paginated UIs
     function getNumberOfEnumerableRegistries() public view returns (uint256 numReg) {
         numReg = enumerableRegistries.length;
     }
 
     /// @notice getNumberOfRegistries getter function for reading the number of registries
-    /// @dev usefull for paginated UIs
+    /// @dev useful for paginated UIs
     function getNumberOfRegistries() public view returns (uint256 numReg) {
         numReg = registries.length;
+    }
+
+    /// @notice getNumberOfModules getter function for reading the number of modules
+    /// @dev useful for paginated UIs
+    function getNumberOfModules() public view returns (uint256 numModules) {
+        numModules = modules.length;
+    }
+
+    /// @notice addModule setter function for configuring which ERC20 token is burned when adding new apps
+    /// @dev can only be called by the DEFAULT_ADMIN_ROLE
+    /// @param _module address of goverance approved module contract
+    function addModule(address _module) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "RegistryFactory: must have admin role to add module");
+        modules.push(_module);
     }
 
     /// @notice setRegistrationToken setter function for configuring which ERC20 token is burned when adding new apps
