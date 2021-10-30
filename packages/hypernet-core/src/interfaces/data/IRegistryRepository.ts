@@ -80,6 +80,10 @@ export interface IRegistryRepository {
     registrarAddress: EthereumAddress,
     enumerable: boolean,
   ): ResultAsync<void, BlockchainUnavailableError>;
+  grantRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
 }
 
 export const IRegistryRepositoryType = Symbol.for("IRegistryRepository");

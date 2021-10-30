@@ -405,6 +405,11 @@ export interface IHypernetCore {
     enumerable: boolean,
   ): ResultAsync<void, BlockchainUnavailableError>;
 
+  grantRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+
   /**
    * Observables for seeing what's going on
    */

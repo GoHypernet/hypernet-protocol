@@ -80,4 +80,8 @@ export interface IRegistryService {
     registrarAddress: EthereumAddress,
     enumerable: boolean,
   ): ResultAsync<void, BlockchainUnavailableError>;
+  grantRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
 }

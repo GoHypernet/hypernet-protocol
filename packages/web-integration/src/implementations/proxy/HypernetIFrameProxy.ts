@@ -759,6 +759,16 @@ export default class HypernetIFrameProxy
     });
   }
 
+  public grantRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this._createCall("grantRegistrarRole", {
+      registryName,
+      address,
+    });
+  }
+
   private _displayCoreIFrame(): void {
     // Show core iframe
     if (this.child != null) {

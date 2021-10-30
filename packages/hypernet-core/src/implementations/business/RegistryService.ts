@@ -167,4 +167,11 @@ export class RegistryService implements IRegistryService {
       enumerable,
     );
   }
+
+  public grantRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this.registryRepository.grantRegistrarRole(registryName, address);
+  }
 }
