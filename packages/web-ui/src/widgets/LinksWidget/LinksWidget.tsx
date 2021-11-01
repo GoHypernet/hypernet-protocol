@@ -186,7 +186,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           <Typography variant="h5">Transaction History</Typography>
           <Box display="flex" alignItems="center" marginLeft="auto">
             <Box display="flex" alignItems="center" marginRight={1}>
-              <Tooltip title="Enabling auto-accept will free you from manually approving every change to your Hypernet Protocol account.">
+              <Tooltip title="Enabling auto-accept will free you from manually approving every change to your Hypernet account.">
                 <InfoIcon className={classes.infoIcon} />
               </Tooltip>
               <Typography variant="body2" className={classes.switchLabel}>
@@ -210,7 +210,7 @@ const LinksWidget: React.FC<ILinksWidget> = ({
           </Box>
         </Box>
       }
-      description="Transactions associated with the currently selected Hypernet Protocol account."
+      description="Transactions associated with the currently selected Hypernet account."
     >
       <GovernanceSideFilter
         visible={isSideFilterOpen}

@@ -235,7 +235,7 @@ export function useFund(): IReducerStateReducer {
     } else {
       return [
         new PaymentTokenOptionViewModel(
-          "Hyper Token",
+          "Hypertoken",
           EthereumAddress("0xAa588d3737B611baFD7bD713445b314BD453a5C8"),
         ),
         new PaymentTokenOptionViewModel(
