@@ -1048,6 +1048,157 @@ export class RegistryRepository implements IRegistryRepository {
     });
   }
 
+  public revokeRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this.initializeForWrite().andThen(({ signer }) => {
+      return ResultUtils.combine([
+        this.getRegistryByName([registryName]),
+        this.getSignerAddress(signer),
+      ]).andThen((vals) => {
+        const [registryMap, signerAddress] = vals;
+        const registry = registryMap.get(registryName);
+        if (registry == null) {
+          throw new Error("Registry not found!");
+        }
+
+        if (
+          registry.registrarAdminAddresses.includes(
+            EthereumAddress(signerAddress),
+          ) === false
+        ) {
+          return errAsync(
+            new RegistryPermissionError(
+              "You don't have permission to revokeRole registry",
+            ),
+          );
+        }
+
+        // Call the NFI contract of that address
+        const registryContract = new ethers.Contract(
+          registry.address,
+          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+          signer,
+        );
+
+        return ResultAsync.fromPromise(
+          registryContract.REGISTRAR_ROLE() as Promise<any>,
+          (e) => {
+            return new BlockchainUnavailableError(
+              "Unable to call getRoleMemberCount REGISTRAR_ROLE",
+              e,
+            );
+          },
+        )
+          .andThen((registrarRole) => {
+            return ResultAsync.fromPromise(
+              registryContract.revokeRole(
+                registrarRole,
+                address,
+              ) as Promise<any>,
+              (e) => {
+                return new BlockchainUnavailableError(
+                  "Unable to call registryContract revokeRole",
+                  e,
+                );
+              },
+            )
+              .andThen((tx) => {
+                return ResultAsync.fromPromise(
+                  tx.wait() as Promise<void>,
+                  (e) => {
+                    return new BlockchainUnavailableError(
+                      "Unable to wait for tx",
+                      e,
+                    );
+                  },
+                );
+              })
+              .map(() => {});
+          })
+          .map(() => {});
+      });
+    });
+  }
+
+  public renounceRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this.initializeForWrite().andThen(({ signer }) => {
+      return ResultUtils.combine([
+        this.getRegistryByName([registryName]),
+        this.getSignerAddress(signer),
+      ]).andThen((vals) => {
+        const [registryMap, signerAddress] = vals;
+        const registry = registryMap.get(registryName);
+        if (registry == null) {
+          throw new Error("Registry not found!");
+        }
+
+        if (
+          registry.registrarAdminAddresses.includes(
+            EthereumAddress(signerAddress),
+          ) === false &&
+          registry.registrarAddresses.includes(
+            EthereumAddress(signerAddress),
+          ) === false
+        ) {
+          return errAsync(
+            new RegistryPermissionError(
+              "You don't have permission to renounceRole registry",
+            ),
+          );
+        }
+
+        // Call the NFI contract of that address
+        const registryContract = new ethers.Contract(
+          registry.address,
+          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+          signer,
+        );
+
+        return ResultAsync.fromPromise(
+          registryContract.REGISTRAR_ROLE() as Promise<any>,
+          (e) => {
+            return new BlockchainUnavailableError(
+              "Unable to call getRoleMemberCount REGISTRAR_ROLE",
+              e,
+            );
+          },
+        )
+          .andThen((registrarRole) => {
+            return ResultAsync.fromPromise(
+              registryContract.renounceRole(
+                registrarRole,
+                address,
+              ) as Promise<any>,
+              (e) => {
+                return new BlockchainUnavailableError(
+                  "Unable to call registryContract revokeRole",
+                  e,
+                );
+              },
+            )
+              .andThen((tx) => {
+                return ResultAsync.fromPromise(
+                  tx.wait() as Promise<void>,
+                  (e) => {
+                    return new BlockchainUnavailableError(
+                      "Unable to wait for tx",
+                      e,
+                    );
+                  },
+                );
+              })
+              .map(() => {});
+          })
+          .map(() => {});
+      });
+    });
+  }
+
   private getRegistryByIndex(
     index: number,
     provider: ethers.providers.Provider,

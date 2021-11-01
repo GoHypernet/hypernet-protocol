@@ -487,6 +487,32 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           );
         }, data.callId);
       },
+      revokeRegistrarRole: (
+        data: IIFrameCallData<{
+          registryName: string;
+          address: EthereumAddress;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.revokeRegistrarRole(
+            data.data.registryName,
+            data.data.address,
+          );
+        }, data.callId);
+      },
+      renounceRegistrarRole: (
+        data: IIFrameCallData<{
+          registryName: string;
+          address: EthereumAddress;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.renounceRegistrarRole(
+            data.data.registryName,
+            data.data.address,
+          );
+        }, data.callId);
+      },
     });
   }
 
