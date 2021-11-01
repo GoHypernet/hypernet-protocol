@@ -24,6 +24,7 @@ export class HypernetConfig {
     public storageAliases: Map<DefinitionName, SchemaUrl>,
     public gatewayDeauthorizationTimeout: number,
     public controlClaimSubject: string,
+    public requireOnline: boolean,
     public debug: boolean,
   ) {}
 }

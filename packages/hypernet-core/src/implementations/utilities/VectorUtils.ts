@@ -479,7 +479,7 @@ export class VectorUtils implements IVectorUtils {
           undefined,
           undefined,
           undefined,
-          {}, // left intentionally blank!
+          { requireOnline: config.requireOnline },
         );
       })
       .mapErr((err) => new TransferCreationError(err, err?.message));
@@ -540,9 +540,11 @@ export class VectorUtils implements IVectorUtils {
       }
     }
 
-    return this.browserNodeProvider
-      .getBrowserNode()
-      .andThen((browserNode) => {
+    return ResultUtils.combine([
+      this.browserNodeProvider.getBrowserNode(),
+      this.configProvider.getConfig(),
+    ])
+      .andThen(([browserNode, config]) => {
         const toEthAddress = getSignerAddressFromPublicIdentifier(toAddress);
 
         // @todo toEthAddress isn't really an eth address, it's the internal signing key
@@ -604,7 +606,7 @@ export class VectorUtils implements IVectorUtils {
           undefined,
           undefined,
           undefined,
-          {}, // intentially left blank!
+          { requireOnline: config.requireOnline },
         );
       })
       .map((val) => val as IBasicTransferResponse)

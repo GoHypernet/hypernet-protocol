@@ -1,5 +1,4 @@
 import {
-  EthereumAddress,
   IHypernetOfferDetails,
   Payment,
   PublicIdentifier,
@@ -73,10 +72,9 @@ export class PaymentRepository implements IPaymentRepository {
       this._getTransfersByPaymentId(paymentId),
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
+      this.configProvider.getConfig(),
     ])
-      .andThen((vals) => {
-        const [transfers, browserNode, context] = vals;
-
+      .andThen(([transfers, browserNode, context, config]) => {
         return this.paymentUtils
           .transfersToPayment(paymentId, transfers)
           .andThen((payment) => {
@@ -95,7 +93,7 @@ export class PaymentRepository implements IPaymentRepository {
             }
             const message: IHypernetPullPaymentDetails = {
               messageType: EMessageTransferType.PULLPAYMENT,
-              requireOnline: true,
+              requireOnline: config.requireOnline,
               paymentId: paymentId,
               to: payment.to,
               from: payment.from,
@@ -147,9 +145,7 @@ export class PaymentRepository implements IPaymentRepository {
       this.paymentUtils.createPaymentId(EPaymentType.Pull),
       this.blockchainTimeUtils.getBlockchainTimestamp(),
       this.configProvider.getConfig(),
-    ]).andThen((vals) => {
-      const [browserNode, context, paymentId, timestamp, config] = vals;
-
+    ]).andThen(([browserNode, context, paymentId, timestamp, config]) => {
       const insuranceToken = config.chainAddresses[chainId]?.hypertokenAddress;
 
       if (insuranceToken == null) {
@@ -178,7 +174,7 @@ export class PaymentRepository implements IPaymentRepository {
         routerPublicIdentifier,
         chainId,
         messageType: EMessageTransferType.OFFER,
-        requireOnline: true,
+        requireOnline: config.requireOnline,
         paymentId,
         creationDate: timestamp,
         to: counterPartyAccount,
@@ -287,7 +283,7 @@ export class PaymentRepository implements IPaymentRepository {
         insuranceToken,
         gatewayUrl,
         metadata,
-        requireOnline: true,
+        requireOnline: config.requireOnline,
       };
 
       // Create a message transfer, with the terms of the payment in the metadata.
