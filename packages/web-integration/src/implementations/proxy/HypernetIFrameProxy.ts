@@ -37,6 +37,7 @@ import {
   RegistryEntry,
   RegistryParams,
   RegistryPermissionError,
+  ERegistrySortOrder,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -568,12 +569,12 @@ export default class HypernetIFrameProxy
   public getRegistries(
     pageNumber: number,
     pageSize: number,
-    reversedSorting: boolean,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
     return this._createCall("getRegistries", {
       pageNumber,
       pageSize,
-      reversedSorting,
+      sortOrder,
     });
   }
 
@@ -599,13 +600,13 @@ export default class HypernetIFrameProxy
     registryName: string,
     pageNumber: number,
     pageSize: number,
-    reversedSorting: boolean,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this._createCall("getRegistryEntries", {
       registryName,
       pageNumber,
       pageSize,
-      reversedSorting,
+      sortOrder,
     });
   }
 

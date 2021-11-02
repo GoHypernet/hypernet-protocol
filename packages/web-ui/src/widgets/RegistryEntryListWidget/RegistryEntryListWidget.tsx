@@ -12,6 +12,7 @@ import {
 import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import {
+  ERegistrySortOrder,
   EthereumAddress,
   Registry,
   RegistryEntry,
@@ -80,7 +81,9 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
         registryName,
         pageNumber,
         REGISTRY_ENTRIES_PER_PAGE,
-        reversedSortingEnabled,
+        reversedSortingEnabled
+          ? ERegistrySortOrder.REVERSED_ORDER
+          : ERegistrySortOrder.DEFAULT,
       )
       .map((registryEntries) => {
         setRegistryEntries(registryEntries);

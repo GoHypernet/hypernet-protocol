@@ -1,6 +1,7 @@
 import {
   BigNumberString,
   BlockchainUnavailableError,
+  ERegistrySortOrder,
   EthereumAddress,
   Registry,
   RegistryEntry,
@@ -40,7 +41,7 @@ export class RegistryRepository implements IRegistryRepository {
   public getRegistries(
     pageNumber: number,
     pageSize: number,
-    reversedSorting: boolean,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
     return this.initializeReadOnly().andThen(
       ({ registryContracts, provider }) => {
@@ -52,7 +53,7 @@ export class RegistryRepository implements IRegistryRepository {
 
           for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
             let index = 0;
-            if (reversedSorting) {
+            if (sortOrder == ERegistrySortOrder.REVERSED_ORDER) {
               index = totalCount - (pageNumber - 1) * pageSize - i;
             } else {
               index =
@@ -299,7 +300,7 @@ export class RegistryRepository implements IRegistryRepository {
     registryName: string,
     pageNumber: number,
     pageSize: number,
-    reversedSorting: boolean,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this.initializeReadOnly().andThen(
       ({ registryContracts, provider }) => {
@@ -322,7 +323,7 @@ export class RegistryRepository implements IRegistryRepository {
               >[] = [];
               for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
                 let index = 0;
-                if (reversedSorting) {
+                if (sortOrder == ERegistrySortOrder.REVERSED_ORDER) {
                   index = totalCount - (pageNumber - 1) * pageSize - i;
                 } else {
                   index =

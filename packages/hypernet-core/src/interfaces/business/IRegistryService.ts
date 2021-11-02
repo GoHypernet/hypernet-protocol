@@ -5,6 +5,7 @@ import {
   Registry,
   RegistryParams,
   RegistryPermissionError,
+  ERegistrySortOrder,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -12,7 +13,7 @@ export interface IRegistryService {
   getRegistries(
     pageNumber: number,
     pageSize: number,
-    reversedSorting: boolean,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<Registry[], BlockchainUnavailableError>;
   getRegistryByName(
     registryNames: string[],
@@ -24,7 +25,7 @@ export interface IRegistryService {
     registryName: string,
     pageNumber: number,
     pageSize: number,
-    reversedSorting: boolean,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
   getRegistryEntryDetailByTokenId(
     registryName: string,

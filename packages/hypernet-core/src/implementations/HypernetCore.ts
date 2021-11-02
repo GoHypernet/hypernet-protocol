@@ -38,6 +38,7 @@ import {
   RegistryEntry,
   RegistryParams,
   RegistryPermissionError,
+  ERegistrySortOrder,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -1069,13 +1070,9 @@ export class HypernetCore implements IHypernetCore {
   public getRegistries(
     pageNumber: number,
     pageSize: number,
-    reversedSorting: boolean,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
-    return this.registryService.getRegistries(
-      pageNumber,
-      pageSize,
-      reversedSorting,
-    );
+    return this.registryService.getRegistries(pageNumber, pageSize, sortOrder);
   }
 
   public getRegistryByName(
@@ -1100,13 +1097,13 @@ export class HypernetCore implements IHypernetCore {
     registryName: string,
     pageNumber: number,
     pageSize: number,
-    reversedSorting: boolean,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this.registryService.getRegistryEntries(
       registryName,
       pageNumber,
       pageSize,
-      reversedSorting,
+      sortOrder,
     );
   }
 

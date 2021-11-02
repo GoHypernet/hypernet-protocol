@@ -16,7 +16,7 @@ import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import {
   EthereumAddress,
   Registry,
-  RegistryParams,
+  ERegistrySortOrder,
 } from "@hypernetlabs/objects";
 import CreateRegistryWidget from "@web-ui/widgets/CreateRegistryWidget";
 
@@ -70,7 +70,13 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
 
   const getRegistries = (pageNumber: number) => {
     coreProxy
-      .getRegistries(pageNumber, REGISTIRES_PER_PAGE, reversedSortingEnabled)
+      .getRegistries(
+        pageNumber,
+        REGISTIRES_PER_PAGE,
+        reversedSortingEnabled
+          ? ERegistrySortOrder.REVERSED_ORDER
+          : ERegistrySortOrder.DEFAULT,
+      )
       .map((registries) => {
         setRegistries(registries);
         setPage(pageNumber);

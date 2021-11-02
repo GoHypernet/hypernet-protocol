@@ -15,6 +15,7 @@ import {
   GatewayRegistrationFilter,
   EProposalVoteSupport,
   RegistryParams,
+  ERegistrySortOrder,
 } from "@hypernetlabs/objects";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
@@ -281,14 +282,14 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         data: IIFrameCallData<{
           pageNumber: number;
           pageSize: number;
-          reversedSorting: boolean;
+          sortOrder: ERegistrySortOrder;
         }>,
       ) => {
         this.returnForModel(() => {
           return this.core.getRegistries(
             data.data.pageNumber,
             data.data.pageSize,
-            data.data.reversedSorting,
+            data.data.sortOrder,
           );
         }, data.callId);
       },
@@ -312,7 +313,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           registryName: string;
           pageNumber: number;
           pageSize: number;
-          reversedSorting: boolean;
+          sortOrder: ERegistrySortOrder;
         }>,
       ) => {
         this.returnForModel(() => {
@@ -320,7 +321,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.registryName,
             data.data.pageNumber,
             data.data.pageSize,
-            data.data.reversedSorting,
+            data.data.sortOrder,
           );
         }, data.callId);
       },

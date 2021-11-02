@@ -5,6 +5,7 @@ import {
   Registry,
   RegistryParams,
   RegistryPermissionError,
+  ERegistrySortOrder,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 import { inject } from "inversify";
@@ -21,12 +22,12 @@ export class RegistryService implements IRegistryService {
   public getRegistries(
     pageNumber: number,
     pageSize: number,
-    reversedSorting: boolean,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
     return this.registryRepository.getRegistries(
       pageNumber,
       pageSize,
-      reversedSorting,
+      sortOrder,
     );
   }
 
@@ -52,13 +53,13 @@ export class RegistryService implements IRegistryService {
     registryName: string,
     pageNumber: number,
     pageSize: number,
-    reversedSorting: boolean,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this.registryRepository.getRegistryEntries(
       registryName,
       pageNumber,
       pageSize,
-      reversedSorting,
+      sortOrder,
     );
   }
 
