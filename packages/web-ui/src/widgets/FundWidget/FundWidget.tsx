@@ -57,7 +57,7 @@ const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
       title={!noLabel ? "Deposit Funds" : undefined}
       description={
         !noLabel
-          ? "Move tokens from your Ethereum wallet into your Hypernet Protocol account."
+          ? "Move tokens from your Ethereum wallet into your Hypernet account."
           : undefined
       }
     >
@@ -79,7 +79,7 @@ const FundWidget: React.FC<IFundWidget> = ({ noLabel }: IFundWidget) => {
             <Form onSubmit={handleSubmit}>
               <GovernanceDialogSelectField
                 required
-                title="State Channel"
+                title="Hypernet Account"
                 name="stateChannelAddress"
                 options={uniqueActiveStateChannels.map((option) => ({
                   primaryText: option.channelAddress,

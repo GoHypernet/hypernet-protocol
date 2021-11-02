@@ -29,7 +29,7 @@ const BalancesSummaryWidget: React.FC<IBalancesSummaryWidget> = ({
       <GovernanceCard>
         <GovernanceEmptyState
           title="Ups..!"
-          description="You don't have any state channels yet, you need to authorize a gateway first."
+          description="You don't have any Hypernet account yet, you need to authorize a gateway first."
         />
       </GovernanceCard>
     );
@@ -42,12 +42,12 @@ const BalancesSummaryWidget: React.FC<IBalancesSummaryWidget> = ({
             <GovernanceCard
               title={
                 !noLabel
-                  ? `Your Balances for State Channel Address: ${channelAddress}`
+                  ? `Your Balances for Hypernet Account Address: ${channelAddress}`
                   : undefined
               }
               description={
                 !noLabel
-                  ? "The current balance of your Hypernet Protocol account."
+                  ? "The current balance of your Hypernet Account."
                   : undefined
               }
               className={!includeBoxWrapper ? classes.balancesWrapper : ""}

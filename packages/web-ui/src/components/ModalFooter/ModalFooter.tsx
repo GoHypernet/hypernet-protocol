@@ -14,7 +14,7 @@ export const ModalFooter: React.FC = () => {
           href="https://hypernet-protocol-dashboard-dev.hypernetlabs.io/"
           target="_blank"
         >
-          View your Hypernet Protocol account.
+          View your Hypernet Account.
         </a>
       </Box>
     </Box>

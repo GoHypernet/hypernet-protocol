@@ -35,7 +35,7 @@ import { PullPayment } from "@objects/PullPayment";
 import { PushPayment } from "@objects/PushPayment";
 import { Signature } from "@objects/Signature";
 import { Proposal, ProposalVoteReceipt } from "@objects/Proposal";
-import { EProposalVoteSupport } from "@objects/typing";
+import { EProposalVoteSupport, ERegistrySortOrder } from "@objects/typing";
 import { Registry } from "@objects/Registry";
 import { RegistryEntry } from "@objects/RegistryEntry";
 import { RegistryParams } from "@objects/RegistryParams";
@@ -299,6 +299,7 @@ export interface IHypernetCore {
   getRegistries(
     pageNumber: number,
     pageSize: number,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<Registry[], BlockchainUnavailableError>;
 
   getRegistryByName(
@@ -313,6 +314,7 @@ export interface IHypernetCore {
     registryName: string,
     pageNumber: number,
     pageSize: number,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
 
   getRegistryEntryDetailByTokenId(
@@ -394,6 +396,28 @@ export interface IHypernetCore {
   burnRegistryEntry(
     registryName: string,
     tokenId: number,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+
+  createRegistryByToken(
+    name: string,
+    symbol: string,
+    registrarAddress: EthereumAddress,
+    enumerable: boolean,
+  ): ResultAsync<void, BlockchainUnavailableError>;
+
+  grantRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+
+  revokeRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+
+  renounceRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
 
   /**

@@ -6,4 +6,5 @@ export * from "./ETransferState";
 export * from "./ETransferType";
 export * from "./EProposalState";
 export * from "./EProposalVoteSupport";
+export * from "./ERegistrySortOrder";
 export * from "./typechain/index";

@@ -15,6 +15,7 @@ import {
   GatewayRegistrationFilter,
   EProposalVoteSupport,
   RegistryParams,
+  ERegistrySortOrder,
 } from "@hypernetlabs/objects";
 import { IIFrameCallData, ChildProxy } from "@hypernetlabs/utils";
 import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
@@ -281,12 +282,14 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         data: IIFrameCallData<{
           pageNumber: number;
           pageSize: number;
+          sortOrder: ERegistrySortOrder;
         }>,
       ) => {
         this.returnForModel(() => {
           return this.core.getRegistries(
             data.data.pageNumber,
             data.data.pageSize,
+            data.data.sortOrder,
           );
         }, data.callId);
       },
@@ -310,6 +313,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           registryName: string;
           pageNumber: number;
           pageSize: number;
+          sortOrder: ERegistrySortOrder;
         }>,
       ) => {
         this.returnForModel(() => {
@@ -317,6 +321,7 @@ export class CoreListener extends ChildProxy implements ICoreListener {
             data.data.registryName,
             data.data.pageNumber,
             data.data.pageSize,
+            data.data.sortOrder,
           );
         }, data.callId);
       },
@@ -450,6 +455,62 @@ export class CoreListener extends ChildProxy implements ICoreListener {
           return this.core.burnRegistryEntry(
             data.data.registryName,
             data.data.tokenId,
+          );
+        }, data.callId);
+      },
+      createRegistryByToken: (
+        data: IIFrameCallData<{
+          name: string;
+          symbol: string;
+          registrarAddress: EthereumAddress;
+          enumerable: boolean;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.createRegistryByToken(
+            data.data.name,
+            data.data.symbol,
+            data.data.registrarAddress,
+            data.data.enumerable,
+          );
+        }, data.callId);
+      },
+      grantRegistrarRole: (
+        data: IIFrameCallData<{
+          registryName: string;
+          address: EthereumAddress;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.grantRegistrarRole(
+            data.data.registryName,
+            data.data.address,
+          );
+        }, data.callId);
+      },
+      revokeRegistrarRole: (
+        data: IIFrameCallData<{
+          registryName: string;
+          address: EthereumAddress;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.revokeRegistrarRole(
+            data.data.registryName,
+            data.data.address,
+          );
+        }, data.callId);
+      },
+      renounceRegistrarRole: (
+        data: IIFrameCallData<{
+          registryName: string;
+          address: EthereumAddress;
+        }>,
+      ) => {
+        this.returnForModel(() => {
+          return this.core.renounceRegistrarRole(
+            data.data.registryName,
+            data.data.address,
           );
         }, data.callId);
       },

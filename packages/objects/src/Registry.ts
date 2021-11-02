@@ -3,6 +3,7 @@ import { EthereumAddress } from "@objects/EthereumAddress";
 export class Registry {
   constructor(
     public registrarAddresses: EthereumAddress[],
+    public registrarAdminAddresses: EthereumAddress[],
     public address: EthereumAddress,
     public name: string,
     public symbol: string,
@@ -14,7 +15,7 @@ export class Registry {
     public registrationToken: EthereumAddress,
     public registrationFee: BigNumberString,
     public burnAddress: EthereumAddress,
-    public burnFee: BigNumberString,
+    public burnFee: number,
     public primaryRegistry: EthereumAddress,
     public index: number | null,
   ) {}

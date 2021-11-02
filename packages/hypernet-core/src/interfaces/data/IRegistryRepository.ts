@@ -1,5 +1,6 @@
 import {
   BlockchainUnavailableError,
+  ERegistrySortOrder,
   EthereumAddress,
   Registry,
   RegistryEntry,
@@ -12,6 +13,7 @@ export interface IRegistryRepository {
   getRegistries(
     pageNumber: number,
     pageSize: number,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<Registry[], BlockchainUnavailableError>;
   getRegistryByName(
     registryNames: string[],
@@ -23,6 +25,7 @@ export interface IRegistryRepository {
     registryName: string,
     pageNumber: number,
     pageSize: number,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
   getRegistryEntryDetailByTokenId(
     registryName: string,
@@ -71,6 +74,24 @@ export interface IRegistryRepository {
   burnRegistryEntry(
     registryName: string,
     tokenId: number,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+  createRegistryByToken(
+    name: string,
+    symbol: string,
+    registrarAddress: EthereumAddress,
+    enumerable: boolean,
+  ): ResultAsync<void, BlockchainUnavailableError>;
+  grantRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+  revokeRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+  renounceRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
 }
 

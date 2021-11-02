@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Box } from "@material-ui/core";
+import { Box, Typography } from "@material-ui/core";
 import { useAlert } from "react-alert";
 
 import {
@@ -7,15 +7,17 @@ import {
   GovernanceWidgetHeader,
   GovernancePagination,
   GovernanceEmptyState,
+  GovernanceSwitch,
 } from "@web-ui/components";
 import { IRegistryEntryListWidgetParams } from "@web-ui/interfaces";
 import { useStoreContext, useLayoutContext } from "@web-ui/contexts";
 import {
+  ERegistrySortOrder,
   EthereumAddress,
   Registry,
   RegistryEntry,
 } from "@hypernetlabs/objects";
-import CreateIdentityWidget from "../CreateIdentityWidget";
+import CreateIdentityWidget from "@web-ui/widgets/CreateIdentityWidget";
 
 const REGISTRY_ENTRIES_PER_PAGE = 3;
 
@@ -32,6 +34,8 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
   const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
     EthereumAddress(""),
   );
+  const [reversedSortingEnabled, setReversedSortingEnabled] =
+    useState<boolean>(false);
 
   const [createIdentityModalOpen, setCreateIdentityModalOpen] =
     useState<boolean>(false);
@@ -45,9 +49,13 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
 
   useEffect(() => {
     if (registry?.numberOfEntries) {
-      getRegistryEntries();
+      getRegistryEntries(page);
     }
   }, [registry?.numberOfEntries, page, REGISTRY_ENTRIES_PER_PAGE]);
+
+  useEffect(() => {
+    getRegistryEntries(1);
+  }, [reversedSortingEnabled]);
 
   useEffect(() => {
     coreProxy.getEthereumAccounts().map((accounts) => {
@@ -67,11 +75,19 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
       .mapErr(handleError);
   };
 
-  const getRegistryEntries = () => {
+  const getRegistryEntries = (pageNumber: number) => {
     coreProxy
-      .getRegistryEntries(registryName, page, REGISTRY_ENTRIES_PER_PAGE)
+      .getRegistryEntries(
+        registryName,
+        pageNumber,
+        REGISTRY_ENTRIES_PER_PAGE,
+        reversedSortingEnabled
+          ? ERegistrySortOrder.REVERSED_ORDER
+          : ERegistrySortOrder.DEFAULT,
+      )
       .map((registryEntries) => {
         setRegistryEntries(registryEntries);
+        setPage(pageNumber);
       })
       .mapErr(handleError);
   };
@@ -117,6 +133,17 @@ const RegistryEntryListWidget: React.FC<IRegistryEntryListWidgetParams> = ({
             },
           ],
         })}
+        rightContent={
+          <Box display="flex" alignItems="center" marginTop={5}>
+            <Typography style={{ paddingRight: 5 }}>Reverse sorting</Typography>
+            <GovernanceSwitch
+              initialValue={reversedSortingEnabled}
+              onChange={(reversedSorting) =>
+                setReversedSortingEnabled(reversedSorting)
+              }
+            />
+          </Box>
+        }
       />
 
       {hasEmptyState && (

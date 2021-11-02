@@ -38,6 +38,7 @@ import {
   RegistryEntry,
   RegistryParams,
   RegistryPermissionError,
+  ERegistrySortOrder,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -1069,8 +1070,9 @@ export class HypernetCore implements IHypernetCore {
   public getRegistries(
     pageNumber: number,
     pageSize: number,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
-    return this.registryService.getRegistries(pageNumber, pageSize);
+    return this.registryService.getRegistries(pageNumber, pageSize, sortOrder);
   }
 
   public getRegistryByName(
@@ -1095,11 +1097,13 @@ export class HypernetCore implements IHypernetCore {
     registryName: string,
     pageNumber: number,
     pageSize: number,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this.registryService.getRegistryEntries(
       registryName,
       pageNumber,
       pageSize,
+      sortOrder,
     );
   }
 
@@ -1234,5 +1238,40 @@ export class HypernetCore implements IHypernetCore {
     tokenId: number,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
     return this.registryService.burnRegistryEntry(registryName, tokenId);
+  }
+
+  public createRegistryByToken(
+    name: string,
+    symbol: string,
+    registrarAddress: EthereumAddress,
+    enumerable: boolean,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    return this.registryService.createRegistryByToken(
+      name,
+      symbol,
+      registrarAddress,
+      enumerable,
+    );
+  }
+
+  public grantRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this.registryService.grantRegistrarRole(registryName, address);
+  }
+
+  public revokeRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this.registryService.revokeRegistrarRole(registryName, address);
+  }
+
+  public renounceRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this.registryService.renounceRegistrarRole(registryName, address);
   }
 }

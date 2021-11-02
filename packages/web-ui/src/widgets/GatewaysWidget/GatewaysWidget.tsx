@@ -97,7 +97,7 @@ const GatewaysWidget: React.FC<IGatewaysWidget> = ({
       title={!noLabel ? "Your Gateways" : undefined}
       description={
         !noLabel
-          ? "Payment processing gateways you have authorized for your Hypernet Protocol accounts."
+          ? "Payment processing gateways you have authorized for your Hypernet accounts."
           : undefined
       }
     >

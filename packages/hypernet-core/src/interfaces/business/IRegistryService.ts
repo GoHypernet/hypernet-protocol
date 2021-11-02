@@ -5,6 +5,7 @@ import {
   Registry,
   RegistryParams,
   RegistryPermissionError,
+  ERegistrySortOrder,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -12,6 +13,7 @@ export interface IRegistryService {
   getRegistries(
     pageNumber: number,
     pageSize: number,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<Registry[], BlockchainUnavailableError>;
   getRegistryByName(
     registryNames: string[],
@@ -23,6 +25,7 @@ export interface IRegistryService {
     registryName: string,
     pageNumber: number,
     pageSize: number,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
   getRegistryEntryDetailByTokenId(
     registryName: string,
@@ -71,5 +74,23 @@ export interface IRegistryService {
   burnRegistryEntry(
     registryName: string,
     tokenId: number,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+  createRegistryByToken(
+    name: string,
+    symbol: string,
+    registrarAddress: EthereumAddress,
+    enumerable: boolean,
+  ): ResultAsync<void, BlockchainUnavailableError>;
+  grantRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+  revokeRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+  renounceRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
 }

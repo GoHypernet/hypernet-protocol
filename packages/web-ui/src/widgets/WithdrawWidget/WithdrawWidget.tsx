@@ -46,7 +46,7 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
       title={!noLabel ? "Withdraw Funds" : undefined}
       description={
         !noLabel
-          ? "Move tokens from your Hypernet Protocol account into your Ethereum wallet."
+          ? "Move tokens from your Hypernet account into your Ethereum wallet."
           : undefined
       }
     >
@@ -68,7 +68,7 @@ const WithdrawWidget: React.FC<IWithdrawWidget> = ({
             <Form onSubmit={handleSubmit}>
               <GovernanceDialogSelectField
                 required
-                title="State Channel"
+                title="Hypernet Account"
                 name="stateChannelAddress"
                 options={activeStateChannels.map((option) => ({
                   primaryText: option.channelAddress,

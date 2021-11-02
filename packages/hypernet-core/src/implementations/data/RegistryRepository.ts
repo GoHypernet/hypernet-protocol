@@ -1,6 +1,7 @@
 import {
   BigNumberString,
   BlockchainUnavailableError,
+  ERegistrySortOrder,
   EthereumAddress,
   Registry,
   RegistryEntry,
@@ -40,6 +41,7 @@ export class RegistryRepository implements IRegistryRepository {
   public getRegistries(
     pageNumber: number,
     pageSize: number,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
     return this.initializeReadOnly().andThen(
       ({ registryContracts, provider }) => {
@@ -50,7 +52,13 @@ export class RegistryRepository implements IRegistryRepository {
           >[] = [];
 
           for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
-            const index = totalCount - (pageNumber - 1) * pageSize - i;
+            let index = 0;
+            if (sortOrder == ERegistrySortOrder.REVERSED_ORDER) {
+              index = totalCount - (pageNumber - 1) * pageSize - i;
+            } else {
+              index =
+                i + pageNumber * Math.min(totalCount, pageSize) - pageSize - 1;
+            }
 
             if (index >= 0) {
               registryListResult.push(
@@ -79,7 +87,6 @@ export class RegistryRepository implements IRegistryRepository {
     return this.initializeReadOnly().andThen(
       ({ registryContracts, provider }) => {
         const registriesMap: Map<string, Registry> = new Map();
-
         return ResultUtils.combine(
           registryNames.map((registryName) => {
             return this.getRegistryAddressByName(
@@ -95,7 +102,12 @@ export class RegistryRepository implements IRegistryRepository {
 
               // Get the symbol and NumberOfEntries of that registry address
               return ResultUtils.combine([
-                this.getRegistryContractRegistrarAddresses(registryContract),
+                this.getRegistryContractRegistrarRoleAddresses(
+                  registryContract,
+                ),
+                this.getRegistryContractRegistrarRoleAdminAddresses(
+                  registryContract,
+                ),
                 this.getRegistryContractSymbol(registryContract),
                 this.getRegistryContractIndexCount(registryContract),
                 this.getRegistryContractAllowLazyRegister(registryContract),
@@ -110,6 +122,7 @@ export class RegistryRepository implements IRegistryRepository {
               ]).map((vals) => {
                 const [
                   registrarAddresses,
+                  registrarAdminAddresses,
                   registrySymbol,
                   registryNumberOfEntries,
                   allowLazyRegister,
@@ -127,6 +140,7 @@ export class RegistryRepository implements IRegistryRepository {
                   registryName,
                   new Registry(
                     registrarAddresses,
+                    registrarAdminAddresses,
                     registryAddress,
                     registryName,
                     registrySymbol,
@@ -183,7 +197,12 @@ export class RegistryRepository implements IRegistryRepository {
 
               // Get the symbol and NumberOfEntries of that registry address
               return ResultUtils.combine([
-                this.getRegistryContractRegistrarAddresses(registryContract),
+                this.getRegistryContractRegistrarRoleAddresses(
+                  registryContract,
+                ),
+                this.getRegistryContractRegistrarRoleAdminAddresses(
+                  registryContract,
+                ),
                 this.getRegistryContractSymbol(registryContract),
                 this.getRegistryContractIndexCount(registryContract),
                 this.getRegistryContractAllowLazyRegister(registryContract),
@@ -198,6 +217,7 @@ export class RegistryRepository implements IRegistryRepository {
               ]).map((vals) => {
                 const [
                   registrarAddresses,
+                  registrarAdminAddresses,
                   registrySymbol,
                   registryNumberOfEntries,
                   allowLazyRegister,
@@ -215,6 +235,7 @@ export class RegistryRepository implements IRegistryRepository {
                   registryAddress,
                   new Registry(
                     registrarAddresses,
+                    registrarAdminAddresses,
                     registryAddress,
                     registryName,
                     registrySymbol,
@@ -279,6 +300,7 @@ export class RegistryRepository implements IRegistryRepository {
     registryName: string,
     pageNumber: number,
     pageSize: number,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this.initializeReadOnly().andThen(
       ({ registryContracts, provider }) => {
@@ -300,7 +322,16 @@ export class RegistryRepository implements IRegistryRepository {
                 BlockchainUnavailableError
               >[] = [];
               for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
-                const index = totalCount - (pageNumber - 1) * pageSize - i;
+                let index = 0;
+                if (sortOrder == ERegistrySortOrder.REVERSED_ORDER) {
+                  index = totalCount - (pageNumber - 1) * pageSize - i;
+                } else {
+                  index =
+                    i +
+                    pageNumber * Math.min(totalCount, pageSize) -
+                    pageSize -
+                    1;
+                }
 
                 if (index >= 0) {
                   const registryEntryResult: ResultAsync<
@@ -709,9 +740,7 @@ export class RegistryRepository implements IRegistryRepository {
               registryParams.burnAddress == null
                 ? []
                 : [registryParams.burnAddress],
-              registryParams.burnFee == null
-                ? []
-                : [ethers.utils.parseUnits(registryParams.burnFee)],
+              registryParams.burnFee == null ? [] : [registryParams.burnFee],
               registryParams.primaryRegistry == null
                 ? []
                 : [registryParams.primaryRegistry],
@@ -873,6 +902,304 @@ export class RegistryRepository implements IRegistryRepository {
     );
   }
 
+  public createRegistryByToken(
+    name: string,
+    symbol: string,
+    registrarAddress: EthereumAddress,
+    enumerable: boolean,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    return this.initializeForWrite().andThen(
+      ({ registryContracts, signer }) => {
+        return ResultAsync.fromPromise(
+          registryContracts.factoryContract.registrationFee() as Promise<BigNumber>,
+          (e) => {
+            return new BlockchainUnavailableError(
+              "Unable to call registryContract _registrationFee()",
+              e,
+            );
+          },
+        ).andThen((registrationFees) => {
+          return ResultAsync.fromPromise(
+            registryContracts.hypertokenContract.approve(
+              registryContracts.factoryContract.address,
+              registrationFees,
+            ) as Promise<any>,
+            (e) => {
+              return new BlockchainUnavailableError(
+                "Unable to call hypertokenContract approve()",
+                e,
+              );
+            },
+          )
+            .andThen((tx) => {
+              return ResultAsync.fromPromise(
+                tx.wait() as Promise<void>,
+                (e) => {
+                  return new BlockchainUnavailableError(
+                    "Unable to wait for tx",
+                    e,
+                  );
+                },
+              );
+            })
+            .andThen(() => {
+              return ResultAsync.fromPromise(
+                registryContracts.factoryContract.createRegistryByToken(
+                  name,
+                  symbol,
+                  registrarAddress,
+                  enumerable,
+                ) as Promise<any>,
+                (e) => {
+                  return new BlockchainUnavailableError(
+                    "Unable to call hypertokenContract approve()",
+                    e,
+                  );
+                },
+              );
+            })
+            .andThen((tx) => {
+              return ResultAsync.fromPromise(
+                tx.wait() as Promise<void>,
+                (e) => {
+                  return new BlockchainUnavailableError(
+                    "Unable to wait for tx",
+                    e,
+                  );
+                },
+              );
+            })
+            .map(() => {});
+        });
+      },
+    );
+  }
+
+  public grantRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this.initializeForWrite().andThen(({ signer }) => {
+      return ResultUtils.combine([
+        this.getRegistryByName([registryName]),
+        this.getSignerAddress(signer),
+      ]).andThen((vals) => {
+        const [registryMap, signerAddress] = vals;
+        const registry = registryMap.get(registryName);
+        if (registry == null) {
+          throw new Error("Registry not found!");
+        }
+
+        if (
+          registry.registrarAdminAddresses.includes(
+            EthereumAddress(signerAddress),
+          ) === false
+        ) {
+          return errAsync(
+            new RegistryPermissionError(
+              "You don't have permission to grantRole registry",
+            ),
+          );
+        }
+
+        // Call the NFI contract of that address
+        const registryContract = new ethers.Contract(
+          registry.address,
+          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+          signer,
+        );
+
+        return ResultAsync.fromPromise(
+          registryContract.REGISTRAR_ROLE() as Promise<any>,
+          (e) => {
+            return new BlockchainUnavailableError(
+              "Unable to call getRoleMemberCount REGISTRAR_ROLE",
+              e,
+            );
+          },
+        )
+          .andThen((registrarRole) => {
+            return ResultAsync.fromPromise(
+              registryContract.grantRole(
+                registrarRole,
+                address,
+              ) as Promise<any>,
+              (e) => {
+                return new BlockchainUnavailableError(
+                  "Unable to call registryContract grantRole",
+                  e,
+                );
+              },
+            )
+              .andThen((tx) => {
+                return ResultAsync.fromPromise(
+                  tx.wait() as Promise<void>,
+                  (e) => {
+                    return new BlockchainUnavailableError(
+                      "Unable to wait for tx",
+                      e,
+                    );
+                  },
+                );
+              })
+              .map(() => {});
+          })
+          .map(() => {});
+      });
+    });
+  }
+
+  public revokeRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this.initializeForWrite().andThen(({ signer }) => {
+      return ResultUtils.combine([
+        this.getRegistryByName([registryName]),
+        this.getSignerAddress(signer),
+      ]).andThen((vals) => {
+        const [registryMap, signerAddress] = vals;
+        const registry = registryMap.get(registryName);
+        if (registry == null) {
+          throw new Error("Registry not found!");
+        }
+
+        if (
+          registry.registrarAdminAddresses.includes(
+            EthereumAddress(signerAddress),
+          ) === false
+        ) {
+          return errAsync(
+            new RegistryPermissionError(
+              "You don't have permission to revokeRole registry",
+            ),
+          );
+        }
+
+        // Call the NFI contract of that address
+        const registryContract = new ethers.Contract(
+          registry.address,
+          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+          signer,
+        );
+
+        return ResultAsync.fromPromise(
+          registryContract.REGISTRAR_ROLE() as Promise<any>,
+          (e) => {
+            return new BlockchainUnavailableError(
+              "Unable to call getRoleMemberCount REGISTRAR_ROLE",
+              e,
+            );
+          },
+        )
+          .andThen((registrarRole) => {
+            return ResultAsync.fromPromise(
+              registryContract.revokeRole(
+                registrarRole,
+                address,
+              ) as Promise<any>,
+              (e) => {
+                return new BlockchainUnavailableError(
+                  "Unable to call registryContract revokeRole",
+                  e,
+                );
+              },
+            )
+              .andThen((tx) => {
+                return ResultAsync.fromPromise(
+                  tx.wait() as Promise<void>,
+                  (e) => {
+                    return new BlockchainUnavailableError(
+                      "Unable to wait for tx",
+                      e,
+                    );
+                  },
+                );
+              })
+              .map(() => {});
+          })
+          .map(() => {});
+      });
+    });
+  }
+
+  public renounceRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this.initializeForWrite().andThen(({ signer }) => {
+      return ResultUtils.combine([
+        this.getRegistryByName([registryName]),
+        this.getSignerAddress(signer),
+      ]).andThen((vals) => {
+        const [registryMap, signerAddress] = vals;
+        const registry = registryMap.get(registryName);
+        if (registry == null) {
+          throw new Error("Registry not found!");
+        }
+
+        if (
+          registry.registrarAdminAddresses.includes(
+            EthereumAddress(signerAddress),
+          ) === false &&
+          registry.registrarAddresses.includes(
+            EthereumAddress(signerAddress),
+          ) === false
+        ) {
+          return errAsync(
+            new RegistryPermissionError(
+              "You don't have permission to renounceRole registry",
+            ),
+          );
+        }
+
+        // Call the NFI contract of that address
+        const registryContract = new ethers.Contract(
+          registry.address,
+          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+          signer,
+        );
+
+        return ResultAsync.fromPromise(
+          registryContract.REGISTRAR_ROLE() as Promise<any>,
+          (e) => {
+            return new BlockchainUnavailableError(
+              "Unable to call getRoleMemberCount REGISTRAR_ROLE",
+              e,
+            );
+          },
+        )
+          .andThen((registrarRole) => {
+            return ResultAsync.fromPromise(
+              registryContract.renounceRole(
+                registrarRole,
+                address,
+              ) as Promise<any>,
+              (e) => {
+                return new BlockchainUnavailableError(
+                  "Unable to call registryContract revokeRole",
+                  e,
+                );
+              },
+            )
+              .andThen((tx) => {
+                return ResultAsync.fromPromise(
+                  tx.wait() as Promise<void>,
+                  (e) => {
+                    return new BlockchainUnavailableError(
+                      "Unable to wait for tx",
+                      e,
+                    );
+                  },
+                );
+              })
+              .map(() => {});
+          })
+          .map(() => {});
+      });
+    });
+  }
+
   private getRegistryByIndex(
     index: number,
     provider: ethers.providers.Provider,
@@ -896,7 +1223,8 @@ export class RegistryRepository implements IRegistryRepository {
 
         // Get the name, symbol and NumberOfEntries of that registry address
         return ResultUtils.combine([
-          this.getRegistryContractRegistrarAddresses(registryContract),
+          this.getRegistryContractRegistrarRoleAddresses(registryContract),
+          this.getRegistryContractRegistrarRoleAdminAddresses(registryContract),
           this.getRegistryContractName(registryContract),
           this.getRegistryContractSymbol(registryContract),
           this.getRegistryContractIndexCount(registryContract),
@@ -912,6 +1240,7 @@ export class RegistryRepository implements IRegistryRepository {
         ]).andThen((vals) => {
           const [
             registrarAddresses,
+            registrarAdminAddresses,
             registryName,
             registrySymbol,
             registryNumberOfEntries,
@@ -928,6 +1257,7 @@ export class RegistryRepository implements IRegistryRepository {
           return okAsync(
             new Registry(
               registrarAddresses,
+              registrarAdminAddresses,
               registryAddress,
               registryName,
               registrySymbol,
@@ -1006,16 +1336,16 @@ export class RegistryRepository implements IRegistryRepository {
     ).map((tokenId) => tokenId.toNumber());
   }
 
-  private getRegistryContractRegistrarAddresses(
+  private getRegistryContractRegistrarRoleAddresses(
     registryContract: ethers.Contract,
   ): ResultAsync<EthereumAddress[], BlockchainUnavailableError> {
     return ResultAsync.fromPromise(
       registryContract.getRoleMemberCount(
-        registryContract.REGISTRAR_ROLE(),
+        registryContract.REGISTRAR_ROLE(), // Get the registrar role addresses numbers
       ) as Promise<BigNumber>,
       (e) => {
         return new BlockchainUnavailableError(
-          "Unable to call getRoleMember",
+          "Unable to call getRoleMemberCount REGISTRAR_ROLE",
           e,
         );
       },
@@ -1034,6 +1364,34 @@ export class RegistryRepository implements IRegistryRepository {
     });
   }
 
+  private getRegistryContractRegistrarRoleAdminAddresses(
+    registryContract: ethers.Contract,
+  ): ResultAsync<EthereumAddress[], BlockchainUnavailableError> {
+    return ResultAsync.fromPromise(
+      registryContract.getRoleMemberCount(
+        registryContract.REGISTRAR_ROLE_ADMIN(), // get the registrar addresses numbers // contractHandle.REGISTRAR_ROLE() return the bytes to handle role argument for grant and revoke etc...
+      ) as Promise<BigNumber>,
+      (e) => {
+        return new BlockchainUnavailableError(
+          "Unable to call getRoleMemberCount REGISTRAR_ROLE_ADMIN",
+          e,
+        );
+      },
+    ).andThen((countBigNumber) => {
+      const count = countBigNumber.toNumber();
+      const registrarResults: ResultAsync<
+        EthereumAddress,
+        BlockchainUnavailableError
+      >[] = [];
+      for (let index = 0; index < count; index++) {
+        registrarResults.push(
+          this.getRegistryContractRegistrarAdmin(registryContract, index),
+        );
+      }
+      return ResultUtils.combine(registrarResults);
+    });
+  }
+
   private getRegistryContractRegistrar(
     registryContract: ethers.Contract,
     index: number,
@@ -1045,7 +1403,25 @@ export class RegistryRepository implements IRegistryRepository {
       ) as Promise<EthereumAddress>,
       (e) => {
         return new BlockchainUnavailableError(
-          "Unable to call getRoleMember",
+          "Unable to call getRoleMember REGISTRAR_ROLE",
+          e,
+        );
+      },
+    );
+  }
+
+  private getRegistryContractRegistrarAdmin(
+    registryContract: ethers.Contract,
+    index: number,
+  ): ResultAsync<EthereumAddress, BlockchainUnavailableError> {
+    return ResultAsync.fromPromise(
+      registryContract.getRoleMember(
+        registryContract.REGISTRAR_ROLE_ADMIN(),
+        index,
+      ) as Promise<EthereumAddress>,
+      (e) => {
+        return new BlockchainUnavailableError(
+          "Unable to call getRoleMember REGISTRAR_ROLE_ADMIN",
           e,
         );
       },
@@ -1213,7 +1589,7 @@ export class RegistryRepository implements IRegistryRepository {
 
   private getRegistryContractBurnFee(
     registryContract: ethers.Contract,
-  ): ResultAsync<BigNumberString, BlockchainUnavailableError> {
+  ): ResultAsync<number, BlockchainUnavailableError> {
     return ResultAsync.fromPromise(
       registryContract.burnFee() as Promise<BigNumber>,
       (e) => {
@@ -1223,7 +1599,7 @@ export class RegistryRepository implements IRegistryRepository {
         );
       },
     ).map((fee) => {
-      return BigNumberString(ethers.utils.formatUnits(fee, "ether"));
+      return fee.toNumber();
     });
   }
 

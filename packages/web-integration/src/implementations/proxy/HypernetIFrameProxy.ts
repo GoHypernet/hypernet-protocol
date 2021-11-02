@@ -37,6 +37,7 @@ import {
   RegistryEntry,
   RegistryParams,
   RegistryPermissionError,
+  ERegistrySortOrder,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -568,10 +569,12 @@ export default class HypernetIFrameProxy
   public getRegistries(
     pageNumber: number,
     pageSize: number,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
     return this._createCall("getRegistries", {
       pageNumber,
       pageSize,
+      sortOrder,
     });
   }
 
@@ -597,11 +600,13 @@ export default class HypernetIFrameProxy
     registryName: string,
     pageNumber: number,
     pageSize: number,
+    sortOrder: ERegistrySortOrder,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
     return this._createCall("getRegistryEntries", {
       registryName,
       pageNumber,
       pageSize,
+      sortOrder,
     });
   }
 
@@ -738,6 +743,50 @@ export default class HypernetIFrameProxy
     return this._createCall("burnRegistryEntry", {
       registryName,
       tokenId,
+    });
+  }
+
+  public createRegistryByToken(
+    name: string,
+    symbol: string,
+    registrarAddress: EthereumAddress,
+    enumerable: boolean,
+  ): ResultAsync<void, BlockchainUnavailableError> {
+    return this._createCall("createRegistryByToken", {
+      name,
+      symbol,
+      registrarAddress,
+      enumerable,
+    });
+  }
+
+  public grantRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this._createCall("grantRegistrarRole", {
+      registryName,
+      address,
+    });
+  }
+
+  public revokeRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this._createCall("revokeRegistrarRole", {
+      registryName,
+      address,
+    });
+  }
+
+  public renounceRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return this._createCall("renounceRegistrarRole", {
+      registryName,
+      address,
     });
   }
 

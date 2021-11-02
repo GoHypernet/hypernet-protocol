@@ -70,7 +70,7 @@ const StateChannelsWidget: React.FC<IStateChannelsWidget> =
               <Form onSubmit={handleSubmit} className={classes.form}>
                 <GovernanceDialogSelectField
                   required
-                  dialogTitle="State Channel"
+                  dialogTitle="Hypernet Account"
                   name="stateChannel"
                   type="select"
                   options={stateChannels.map(({ channelAddress }) => ({

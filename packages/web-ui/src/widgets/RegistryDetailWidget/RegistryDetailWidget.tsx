@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Typography } from "@material-ui/core";
 import { useAlert } from "react-alert";
 import { Form, Formik } from "formik";
@@ -20,6 +20,9 @@ import {
   BigNumberString,
 } from "@hypernetlabs/objects";
 import { useStyles } from "@web-ui/widgets/RegistryDetailWidget/RegistryDetailWidget.style";
+import GrantRoleWidget from "@web-ui/widgets/GrantRoleWidget";
+import RevokeRoleWidget from "@web-ui/widgets/RevokeRoleWidget";
+import RenounceRoleWidget from "@web-ui/widgets/RenounceRoleWidget";
 
 interface IRegistryDetailFormValus {
   symbol: string;
@@ -28,7 +31,7 @@ interface IRegistryDetailFormValus {
   primaryRegistry: string;
   registrationToken: string;
   burnAddress: string;
-  burnFee: BigNumberString;
+  burnFee: string;
   allowStorageUpdate: boolean;
   allowLabelChange: boolean;
   allowTransfers: boolean;
@@ -48,6 +51,11 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
   const [accountAddress, setAccountAddress] = useState<EthereumAddress>(
     EthereumAddress(""),
   );
+  const [grantRoleModalOpen, setGrantRoleModalOpen] = useState<boolean>(false);
+  const [revokeRoleModalOpen, setRevokeRoleModalOpen] =
+    useState<boolean>(false);
+  const [renounceRoleModalOpen, setRenounceRoleModalOpen] =
+    useState<boolean>(false);
 
   useEffect(() => {
     coreProxy.getEthereumAccounts().map((accounts) => {
@@ -56,8 +64,11 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
   }, []);
 
   useEffect(() => {
-    setLoading(true);
+    getRegistryDetails();
+  }, []);
 
+  const getRegistryDetails = () => {
+    setLoading(true);
     coreProxy
       .getRegistryByName([registryName])
       .map((registryMap) => {
@@ -66,7 +77,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
       })
 
       .mapErr(handleError);
-  }, []);
+  };
 
   const handleError = (err?: Error) => {
     setLoading(false);
@@ -97,7 +108,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
           EthereumAddress(registrationToken),
           registrationFee,
           EthereumAddress(burnAddress),
-          burnFee,
+          Number(burnFee) * 100,
           EthereumAddress(primaryRegistry),
         ),
       )
@@ -134,6 +145,44 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                 onRegistryListNavigate?.();
               },
             }}
+            rightContent={
+              <Box display="flex" flexDirection="row">
+                <GovernanceButton
+                  color="secondary"
+                  size="medium"
+                  onClick={() => {
+                    setRevokeRoleModalOpen(true);
+                  }}
+                  variant="outlined"
+                >
+                  Revoke Registrar
+                </GovernanceButton>
+                <Box marginLeft="10px">
+                  <GovernanceButton
+                    color="primary"
+                    size="medium"
+                    onClick={() => {
+                      setRenounceRoleModalOpen(true);
+                    }}
+                    variant="outlined"
+                  >
+                    Renounce Registrar
+                  </GovernanceButton>
+                </Box>
+                <Box marginLeft="10px">
+                  <GovernanceButton
+                    color="primary"
+                    size="medium"
+                    onClick={() => {
+                      setGrantRoleModalOpen(true);
+                    }}
+                    variant="contained"
+                  >
+                    Grant Registrar
+                  </GovernanceButton>
+                </Box>
+              </Box>
+            }
           />
 
           <Formik
@@ -146,7 +195,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                 primaryRegistry: registry.primaryRegistry,
                 registrationToken: registry.registrationToken,
                 burnAddress: registry.burnAddress,
-                burnFee: registry.burnFee,
+                burnFee: (registry.burnFee / 100).toString(),
                 allowStorageUpdate: registry.allowStorageUpdate,
                 allowLabelChange: registry.allowLabelChange,
                 allowTransfers: registry.allowTransfers,
@@ -292,6 +341,34 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
               );
             }}
           </Formik>
+
+          {grantRoleModalOpen && (
+            <GrantRoleWidget
+              onCloseCallback={() => {
+                getRegistryDetails();
+                setGrantRoleModalOpen(false);
+              }}
+              registrarName={registryName}
+            />
+          )}
+          {revokeRoleModalOpen && (
+            <RevokeRoleWidget
+              onCloseCallback={() => {
+                getRegistryDetails();
+                setRevokeRoleModalOpen(false);
+              }}
+              registrarName={registryName}
+            />
+          )}
+          {renounceRoleModalOpen && (
+            <RenounceRoleWidget
+              onCloseCallback={() => {
+                getRegistryDetails();
+                setRenounceRoleModalOpen(false);
+              }}
+              registrarName={registryName}
+            />
+          )}
         </>
       )}
     </>
