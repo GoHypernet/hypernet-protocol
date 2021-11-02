@@ -132,6 +132,10 @@ import {
   BrowserNodeFactory,
   InternalProviderFactory,
 } from "@implementations/utilities/factory";
+import {
+  RegistryFactoryContract,
+  IRegistryFactoryContract,
+} from "@hypernetlabs/contracts";
 import { IStorageUtils } from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
@@ -216,6 +220,7 @@ export class HypernetCore implements IHypernetCore {
   protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory;
   protected browserNodeFactory: IBrowserNodeFactory;
   protected internalProviderFactory: IInternalProviderFactory;
+  protected registryFactoryContract: IRegistryFactoryContract;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
@@ -365,6 +370,7 @@ export class HypernetCore implements IHypernetCore {
     this.internalProviderFactory = new InternalProviderFactory(
       this.configProvider,
     );
+    this.registryFactoryContract = new RegistryFactoryContract(this.logUtils);
 
     this.blockchainProvider = new EthersBlockchainProvider(
       this.contextProvider,
@@ -500,6 +506,7 @@ export class HypernetCore implements IHypernetCore {
     this.registryRepository = new RegistryRepository(
       this.blockchainProvider,
       this.configProvider,
+      this.registryFactoryContract,
       this.logUtils,
     );
 
@@ -843,7 +850,11 @@ export class HypernetCore implements IHypernetCore {
         // whole thing more reliable in operation.
         this.logUtils.debug("Initializing utilities");
         this.logUtils.debug("Initializing services");
-        return ResultUtils.combine([this.gatewayConnectorService.initialize()]);
+        return ResultUtils.combine([
+          this.gatewayConnectorService.initialize(),
+          this.registryService.initializeReadOnly(),
+          this.registryService.initializeForWrite(),
+        ]);
       })
       .andThen(() => {
         this.logUtils.debug("Initializing API listeners");

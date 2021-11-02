@@ -93,4 +93,6 @@ export interface IRegistryService {
     registryName: string,
     address: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+  initializeReadOnly(): ResultAsync<void, BlockchainUnavailableError>;
+  initializeForWrite(): ResultAsync<void, BlockchainUnavailableError>;
 }

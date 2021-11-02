@@ -189,4 +189,12 @@ export class RegistryService implements IRegistryService {
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
     return this.registryRepository.renounceRegistrarRole(registryName, address);
   }
+
+  public initializeReadOnly(): ResultAsync<void, BlockchainUnavailableError> {
+    return this.registryRepository.initializeReadOnly();
+  }
+
+  public initializeForWrite(): ResultAsync<void, BlockchainUnavailableError> {
+    return this.registryRepository.initializeForWrite();
+  }
 }

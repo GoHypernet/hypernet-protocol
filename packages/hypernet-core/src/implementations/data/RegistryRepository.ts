@@ -21,6 +21,10 @@ import {
   IConfigProviderType,
 } from "@interfaces/utilities";
 import { GovernanceAbis } from "@hypernetlabs/objects";
+import {
+  IRegistryFactoryContract,
+  IRegistryFactoryContractType,
+} from "@hypernetlabs/contracts";
 
 class RegistryContracts {
   constructor(
@@ -31,10 +35,14 @@ class RegistryContracts {
 
 @injectable()
 export class RegistryRepository implements IRegistryRepository {
+  protected provider: ethers.providers.Provider | undefined;
+  protected signer: ethers.providers.JsonRpcSigner | null | undefined = null;
   constructor(
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
     @inject(IConfigProviderType) protected configProvider: IConfigProvider,
+    @inject(IRegistryFactoryContractType)
+    protected registryFactoryContract: IRegistryFactoryContract,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
@@ -43,7 +51,7 @@ export class RegistryRepository implements IRegistryRepository {
     pageSize: number,
     sortOrder: ERegistrySortOrder,
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
-    return this.initializeReadOnly().andThen(
+    return this.initializeReadOnly1().andThen(
       ({ registryContracts, provider }) => {
         return this.getNumberOfRegistries().andThen((totalCount) => {
           const registryListResult: ResultAsync<
@@ -84,7 +92,7 @@ export class RegistryRepository implements IRegistryRepository {
   public getRegistryByName(
     registryNames: string[],
   ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError> {
-    return this.initializeReadOnly().andThen(
+    return this.initializeReadOnly1().andThen(
       ({ registryContracts, provider }) => {
         const registriesMap: Map<string, Registry> = new Map();
         return ResultUtils.combine(
@@ -170,54 +178,62 @@ export class RegistryRepository implements IRegistryRepository {
   public getRegistryByAddress(
     registryAddresses: EthereumAddress[],
   ): ResultAsync<Map<EthereumAddress, Registry>, BlockchainUnavailableError> {
-    return this.initializeReadOnly().andThen(
-      ({ registryContracts, provider }) => {
-        const registriesMap: Map<EthereumAddress, Registry> = new Map();
+    const registriesMap: Map<EthereumAddress, Registry> = new Map();
 
-        return ResultUtils.combine(
-          registryAddresses.map((registryAddress) => {
-            // Get all registries addresses (indexes)
-            return ResultAsync.fromPromise(
-              registryContracts.factoryContract.addressToName(
-                registryAddress,
-              ) as Promise<EthereumAddress>,
-              (e) => {
-                return new BlockchainUnavailableError(
-                  "Unable to call addressToName()",
-                  e,
-                );
-              },
-            ).andThen((registryName) => {
-              // Call the NFT contract of that address
-              const registryContract = new ethers.Contract(
-                registryAddress,
-                GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-                provider,
-              );
+    return ResultUtils.combine(
+      registryAddresses.map((registryAddress) => {
+        // Get all registries addresses (indexes)
+        return this.registryFactoryContract
+          .addressToName(registryAddress)
+          .andThen((registryName) => {
+            // Call the NFT contract of that address
+            const registryContract = new ethers.Contract(
+              registryAddress,
+              GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+              this.provider,
+            );
 
-              // Get the symbol and NumberOfEntries of that registry address
-              return ResultUtils.combine([
-                this.getRegistryContractRegistrarRoleAddresses(
-                  registryContract,
-                ),
-                this.getRegistryContractRegistrarRoleAdminAddresses(
-                  registryContract,
-                ),
-                this.getRegistryContractSymbol(registryContract),
-                this.getRegistryContractIndexCount(registryContract),
-                this.getRegistryContractAllowLazyRegister(registryContract),
-                this.getRegistryContractAllowStorageUpdate(registryContract),
-                this.getRegistryContractAllowLabelChange(registryContract),
-                this.getRegistryContractAllowTransfers(registryContract),
-                this.getRegistryContractRegistrationToken(registryContract),
-                this.getRegistryContractRegistrationFee(registryContract),
-                this.getRegistryContractBurnAddress(registryContract),
-                this.getRegistryContractBurnFee(registryContract),
-                this.getRegistryContractPrimaryRegistry(registryContract),
-              ]).map((vals) => {
-                const [
+            // Get the symbol and NumberOfEntries of that registry address
+            return ResultUtils.combine([
+              this.getRegistryContractRegistrarRoleAddresses(registryContract),
+              this.getRegistryContractRegistrarRoleAdminAddresses(
+                registryContract,
+              ),
+              this.getRegistryContractSymbol(registryContract),
+              this.getRegistryContractIndexCount(registryContract),
+              this.getRegistryContractAllowLazyRegister(registryContract),
+              this.getRegistryContractAllowStorageUpdate(registryContract),
+              this.getRegistryContractAllowLabelChange(registryContract),
+              this.getRegistryContractAllowTransfers(registryContract),
+              this.getRegistryContractRegistrationToken(registryContract),
+              this.getRegistryContractRegistrationFee(registryContract),
+              this.getRegistryContractBurnAddress(registryContract),
+              this.getRegistryContractBurnFee(registryContract),
+              this.getRegistryContractPrimaryRegistry(registryContract),
+            ]).map((vals) => {
+              const [
+                registrarAddresses,
+                registrarAdminAddresses,
+                registrySymbol,
+                registryNumberOfEntries,
+                allowLazyRegister,
+                allowStorageUpdate,
+                allowLabelChange,
+                allowTransfers,
+                registrationToken,
+                registrationFee,
+                burnAddress,
+                burnFee,
+                primaryRegistry,
+              ] = vals;
+
+              registriesMap.set(
+                registryAddress,
+                new Registry(
                   registrarAddresses,
                   registrarAdminAddresses,
+                  registryAddress,
+                  registryName,
                   registrySymbol,
                   registryNumberOfEntries,
                   allowLazyRegister,
@@ -229,43 +245,21 @@ export class RegistryRepository implements IRegistryRepository {
                   burnAddress,
                   burnFee,
                   primaryRegistry,
-                ] = vals;
-
-                registriesMap.set(
-                  registryAddress,
-                  new Registry(
-                    registrarAddresses,
-                    registrarAdminAddresses,
-                    registryAddress,
-                    registryName,
-                    registrySymbol,
-                    registryNumberOfEntries,
-                    allowLazyRegister,
-                    allowStorageUpdate,
-                    allowLabelChange,
-                    allowTransfers,
-                    registrationToken,
-                    registrationFee,
-                    burnAddress,
-                    burnFee,
-                    primaryRegistry,
-                    null,
-                  ),
-                );
-              });
+                  null,
+                ),
+              );
             });
-          }),
-        ).map(() => {
-          return registriesMap;
-        });
-      },
-    );
+          });
+      }),
+    ).map(() => {
+      return registriesMap;
+    });
   }
 
   public getRegistryEntriesTotalCount(
     registryNames: string[],
   ): ResultAsync<Map<string, number>, BlockchainUnavailableError> {
-    return this.initializeReadOnly().andThen(
+    return this.initializeReadOnly1().andThen(
       ({ registryContracts, provider }) => {
         const totalCountsMap: Map<string, number> = new Map();
 
@@ -302,7 +296,7 @@ export class RegistryRepository implements IRegistryRepository {
     pageSize: number,
     sortOrder: ERegistrySortOrder,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
-    return this.initializeReadOnly().andThen(
+    return this.initializeReadOnly1().andThen(
       ({ registryContracts, provider }) => {
         // Get registry address
         return this.getRegistryAddressByName(
@@ -386,7 +380,7 @@ export class RegistryRepository implements IRegistryRepository {
     registryName: string,
     tokenId: number,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
-    return this.initializeReadOnly().andThen(
+    return this.initializeReadOnly1().andThen(
       ({ registryContracts, provider }) => {
         // Get registry address
         return this.getRegistryAddressByName(
@@ -414,7 +408,7 @@ export class RegistryRepository implements IRegistryRepository {
     RegistryEntry,
     BlockchainUnavailableError | RegistryPermissionError
   > {
-    return this.initializeForWrite().andThen(({ signer }) => {
+    return this.initializeForWrite1().andThen(({ signer }) => {
       return ResultUtils.combine([
         this.getRegistryByName([registryName]),
         this.getSignerAddress(signer),
@@ -477,7 +471,7 @@ export class RegistryRepository implements IRegistryRepository {
     RegistryEntry,
     BlockchainUnavailableError | RegistryPermissionError
   > {
-    return this.initializeForWrite().andThen(({ signer }) => {
+    return this.initializeForWrite1().andThen(({ signer }) => {
       return ResultUtils.combine([
         this.getRegistryByName([registryName]),
         this.getSignerAddress(signer),
@@ -540,7 +534,7 @@ export class RegistryRepository implements IRegistryRepository {
     RegistryEntry,
     BlockchainUnavailableError | RegistryPermissionError
   > {
-    return this.initializeForWrite().andThen(({ signer }) => {
+    return this.initializeForWrite1().andThen(({ signer }) => {
       return ResultUtils.combine([
         this.getRegistryByName([registryName]),
         this.getSignerAddress(signer),
@@ -611,7 +605,7 @@ export class RegistryRepository implements IRegistryRepository {
     registryName: string,
     tokenId: number,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
-    return this.initializeForWrite().andThen(({ signer }) => {
+    return this.initializeForWrite1().andThen(({ signer }) => {
       return ResultUtils.combine([
         this.getRegistryByName([registryName]),
         this.getSignerAddress(signer),
@@ -659,7 +653,7 @@ export class RegistryRepository implements IRegistryRepository {
     number,
     BlockchainUnavailableError
   > {
-    return this.initializeReadOnly().andThen(
+    return this.initializeReadOnly1().andThen(
       ({ registryContracts, provider }) => {
         return ResultAsync.fromPromise(
           registryContracts.factoryContract.getNumberOfEnumerableRegistries() as Promise<BigNumber>,
@@ -680,7 +674,7 @@ export class RegistryRepository implements IRegistryRepository {
     Registry,
     BlockchainUnavailableError | RegistryPermissionError
   > {
-    return this.initializeForWrite().andThen(({ signer }) => {
+    return this.initializeForWrite1().andThen(({ signer }) => {
       return ResultUtils.combine([
         this.getRegistryByName([registryParams.name]),
         this.getSignerAddress(signer),
@@ -788,7 +782,7 @@ export class RegistryRepository implements IRegistryRepository {
     recipientAddress: EthereumAddress,
     data: string,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
-    return this.initializeForWrite().andThen(
+    return this.initializeForWrite1().andThen(
       ({ registryContracts, signer }) => {
         return ResultUtils.combine([
           this.getRegistryByName([registryName]),
@@ -908,7 +902,7 @@ export class RegistryRepository implements IRegistryRepository {
     registrarAddress: EthereumAddress,
     enumerable: boolean,
   ): ResultAsync<void, BlockchainUnavailableError> {
-    return this.initializeForWrite().andThen(
+    return this.initializeForWrite1().andThen(
       ({ registryContracts, signer }) => {
         return ResultAsync.fromPromise(
           registryContracts.factoryContract.registrationFee() as Promise<BigNumber>,
@@ -979,7 +973,7 @@ export class RegistryRepository implements IRegistryRepository {
     registryName: string,
     address: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
-    return this.initializeForWrite().andThen(({ signer }) => {
+    return this.initializeForWrite1().andThen(({ signer }) => {
       return ResultUtils.combine([
         this.getRegistryByName([registryName]),
         this.getSignerAddress(signer),
@@ -1053,7 +1047,7 @@ export class RegistryRepository implements IRegistryRepository {
     registryName: string,
     address: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
-    return this.initializeForWrite().andThen(({ signer }) => {
+    return this.initializeForWrite1().andThen(({ signer }) => {
       return ResultUtils.combine([
         this.getRegistryByName([registryName]),
         this.getSignerAddress(signer),
@@ -1127,7 +1121,7 @@ export class RegistryRepository implements IRegistryRepository {
     registryName: string,
     address: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
-    return this.initializeForWrite().andThen(({ signer }) => {
+    return this.initializeForWrite1().andThen(({ signer }) => {
       return ResultUtils.combine([
         this.getRegistryByName([registryName]),
         this.getSignerAddress(signer),
@@ -1631,7 +1625,7 @@ export class RegistryRepository implements IRegistryRepository {
     );
   }
 
-  private initializeForWrite(): ResultAsync<
+  private initializeForWrite1(): ResultAsync<
     {
       registryContracts: RegistryContracts;
       signer: ethers.providers.JsonRpcSigner;
@@ -1648,7 +1642,7 @@ export class RegistryRepository implements IRegistryRepository {
     });
   }
 
-  private initializeReadOnly(): ResultAsync<
+  private initializeReadOnly1(): ResultAsync<
     {
       registryContracts: RegistryContracts;
       provider: ethers.providers.Provider;
@@ -1688,6 +1682,36 @@ export class RegistryRepository implements IRegistryRepository {
       );
 
       return new RegistryContracts(registryFactoryContract, hypertokenContract);
+    });
+  }
+
+  public initializeReadOnly(): ResultAsync<void, BlockchainUnavailableError> {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.blockchainProvider.getGovernanceProvider(),
+    ]).map((vals) => {
+      const [config, provider] = vals;
+      this.provider = provider;
+      this.registryFactoryContract.initializeContract(
+        provider,
+        config.chainAddresses[config.governanceChainId]
+          ?.registryFactoryAddress as EthereumAddress,
+      );
+    });
+  }
+
+  public initializeForWrite(): ResultAsync<void, BlockchainUnavailableError> {
+    return ResultUtils.combine([
+      this.configProvider.getConfig(),
+      this.blockchainProvider.getGovernanceSigner(),
+    ]).map((vals) => {
+      const [config, signer] = vals;
+      this.signer = signer;
+      this.registryFactoryContract.initializeContract(
+        signer,
+        config.chainAddresses[config.governanceChainId]
+          ?.registryFactoryAddress as EthereumAddress,
+      );
     });
   }
 }

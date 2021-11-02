@@ -8,6 +8,7 @@ import {
   RegistryPermissionError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
+import { ethers } from "ethers";
 
 export interface IRegistryRepository {
   getRegistries(
@@ -93,6 +94,8 @@ export interface IRegistryRepository {
     registryName: string,
     address: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+  initializeReadOnly(): ResultAsync<void, BlockchainUnavailableError>;
+  initializeForWrite(): ResultAsync<void, BlockchainUnavailableError>;
 }
 
 export const IRegistryRepositoryType = Symbol.for("IRegistryRepository");

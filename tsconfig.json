@@ -49,6 +49,9 @@
     },
     {
       "path": "packages/storybook"
+    },
+    {
+      "path": "packages/contracts"
     }
   ]
 }
