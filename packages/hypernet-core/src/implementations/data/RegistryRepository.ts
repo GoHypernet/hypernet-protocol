@@ -24,6 +24,8 @@ import { GovernanceAbis } from "@hypernetlabs/objects";
 import {
   IRegistryFactoryContract,
   IRegistryFactoryContractType,
+  IHypertokenContract,
+  IHypertokenContractType,
 } from "@hypernetlabs/contracts";
 
 class RegistryContracts {
@@ -36,13 +38,15 @@ class RegistryContracts {
 @injectable()
 export class RegistryRepository implements IRegistryRepository {
   protected provider: ethers.providers.Provider | undefined;
-  protected signer: ethers.providers.JsonRpcSigner | null | undefined = null;
+  protected signer: ethers.providers.JsonRpcSigner | undefined;
   constructor(
     @inject(IBlockchainProviderType)
     protected blockchainProvider: IBlockchainProvider,
     @inject(IConfigProviderType) protected configProvider: IConfigProvider,
     @inject(IRegistryFactoryContractType)
     protected registryFactoryContract: IRegistryFactoryContract,
+    @inject(IHypertokenContractType)
+    protected hypertokenContract: IHypertokenContract,
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
@@ -51,86 +55,97 @@ export class RegistryRepository implements IRegistryRepository {
     pageSize: number,
     sortOrder: ERegistrySortOrder,
   ): ResultAsync<Registry[], BlockchainUnavailableError> {
-    return this.initializeReadOnly1().andThen(
-      ({ registryContracts, provider }) => {
-        return this.getNumberOfRegistries().andThen((totalCount) => {
-          const registryListResult: ResultAsync<
-            Registry | null,
-            BlockchainUnavailableError
-          >[] = [];
+    return this.registryFactoryContract
+      .getNumberOfEnumerableRegistries()
+      .andThen((totalCount) => {
+        const registryListResult: ResultAsync<
+          Registry | null,
+          BlockchainUnavailableError
+        >[] = [];
 
-          for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
-            let index = 0;
-            if (sortOrder == ERegistrySortOrder.REVERSED_ORDER) {
-              index = totalCount - (pageNumber - 1) * pageSize - i;
-            } else {
-              index =
-                i + pageNumber * Math.min(totalCount, pageSize) - pageSize - 1;
-            }
-
-            if (index >= 0) {
-              registryListResult.push(
-                this.getRegistryByIndex(index, provider, registryContracts),
-              );
-            }
+        for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
+          let index = 0;
+          if (sortOrder == ERegistrySortOrder.REVERSED_ORDER) {
+            index = totalCount - (pageNumber - 1) * pageSize - i;
+          } else {
+            index =
+              i + pageNumber * Math.min(totalCount, pageSize) - pageSize - 1;
           }
 
-          return ResultUtils.combine(registryListResult).map((vals) => {
-            const registryList: Registry[] = [];
-            vals.forEach((registry) => {
-              if (registry != null) {
-                registryList.push(registry);
-              }
-            });
-            return registryList;
+          if (index >= 0) {
+            registryListResult.push(this.getRegistryByIndex(index));
+          }
+        }
+
+        return ResultUtils.combine(registryListResult).map((vals) => {
+          const registryList: Registry[] = [];
+          vals.forEach((registry) => {
+            if (registry != null) {
+              registryList.push(registry);
+            }
           });
+          return registryList;
         });
-      },
-    );
+      });
   }
 
   public getRegistryByName(
     registryNames: string[],
   ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError> {
-    return this.initializeReadOnly1().andThen(
-      ({ registryContracts, provider }) => {
-        const registriesMap: Map<string, Registry> = new Map();
-        return ResultUtils.combine(
-          registryNames.map((registryName) => {
-            return this.getRegistryAddressByName(
-              registryContracts,
-              registryName,
-            ).andThen((registryAddress) => {
-              // Call the NFI contract of that address
-              const registryContract = new ethers.Contract(
-                registryAddress,
-                GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-                provider,
-              );
+    const registriesMap: Map<string, Registry> = new Map();
+    return ResultUtils.combine(
+      registryNames.map((registryName) => {
+        return this.registryFactoryContract
+          .nameToAddress(registryName)
+          .andThen((registryAddress) => {
+            // Call the NFI contract of that address
+            const registryContract = new ethers.Contract(
+              registryAddress,
+              GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+              this.provider,
+            );
 
-              // Get the symbol and NumberOfEntries of that registry address
-              return ResultUtils.combine([
-                this.getRegistryContractRegistrarRoleAddresses(
-                  registryContract,
-                ),
-                this.getRegistryContractRegistrarRoleAdminAddresses(
-                  registryContract,
-                ),
-                this.getRegistryContractSymbol(registryContract),
-                this.getRegistryContractIndexCount(registryContract),
-                this.getRegistryContractAllowLazyRegister(registryContract),
-                this.getRegistryContractAllowStorageUpdate(registryContract),
-                this.getRegistryContractAllowLabelChange(registryContract),
-                this.getRegistryContractAllowTransfers(registryContract),
-                this.getRegistryContractRegistrationToken(registryContract),
-                this.getRegistryContractRegistrationFee(registryContract),
-                this.getRegistryContractBurnAddress(registryContract),
-                this.getRegistryContractBurnFee(registryContract),
-                this.getRegistryContractPrimaryRegistry(registryContract),
-              ]).map((vals) => {
-                const [
+            // Get the symbol and NumberOfEntries of that registry address
+            return ResultUtils.combine([
+              this.getRegistryContractRegistrarRoleAddresses(registryContract),
+              this.getRegistryContractRegistrarRoleAdminAddresses(
+                registryContract,
+              ),
+              this.getRegistryContractSymbol(registryContract),
+              this.getRegistryContractIndexCount(registryContract),
+              this.getRegistryContractAllowLazyRegister(registryContract),
+              this.getRegistryContractAllowStorageUpdate(registryContract),
+              this.getRegistryContractAllowLabelChange(registryContract),
+              this.getRegistryContractAllowTransfers(registryContract),
+              this.getRegistryContractRegistrationToken(registryContract),
+              this.getRegistryContractRegistrationFee(registryContract),
+              this.getRegistryContractBurnAddress(registryContract),
+              this.getRegistryContractBurnFee(registryContract),
+              this.getRegistryContractPrimaryRegistry(registryContract),
+            ]).map((vals) => {
+              const [
+                registrarAddresses,
+                registrarAdminAddresses,
+                registrySymbol,
+                registryNumberOfEntries,
+                allowLazyRegister,
+                allowStorageUpdate,
+                allowLabelChange,
+                allowTransfers,
+                registrationToken,
+                registrationFee,
+                burnAddress,
+                burnFee,
+                primaryRegistry,
+              ] = vals;
+
+              registriesMap.set(
+                registryName,
+                new Registry(
                   registrarAddresses,
                   registrarAdminAddresses,
+                  registryAddress,
+                  registryName,
                   registrySymbol,
                   registryNumberOfEntries,
                   allowLazyRegister,
@@ -142,37 +157,15 @@ export class RegistryRepository implements IRegistryRepository {
                   burnAddress,
                   burnFee,
                   primaryRegistry,
-                ] = vals;
-
-                registriesMap.set(
-                  registryName,
-                  new Registry(
-                    registrarAddresses,
-                    registrarAdminAddresses,
-                    registryAddress,
-                    registryName,
-                    registrySymbol,
-                    registryNumberOfEntries,
-                    allowLazyRegister,
-                    allowStorageUpdate,
-                    allowLabelChange,
-                    allowTransfers,
-                    registrationToken,
-                    registrationFee,
-                    burnAddress,
-                    burnFee,
-                    primaryRegistry,
-                    null,
-                  ),
-                );
-              });
+                  null,
+                ),
+              );
             });
-          }),
-        ).map(() => {
-          return registriesMap;
-        });
-      },
-    );
+          });
+      }),
+    ).map(() => {
+      return registriesMap;
+    });
   }
 
   public getRegistryByAddress(
@@ -259,35 +252,29 @@ export class RegistryRepository implements IRegistryRepository {
   public getRegistryEntriesTotalCount(
     registryNames: string[],
   ): ResultAsync<Map<string, number>, BlockchainUnavailableError> {
-    return this.initializeReadOnly1().andThen(
-      ({ registryContracts, provider }) => {
-        const totalCountsMap: Map<string, number> = new Map();
+    const totalCountsMap: Map<string, number> = new Map();
 
-        return ResultUtils.combine(
-          registryNames.map((registryName) => {
-            // Get registry address
-            return this.getRegistryAddressByName(
-              registryContracts,
-              registryName,
-            )
-              .andThen((registryAddress) => {
-                // Call the NFI contract of that address
-                const registryContract = new ethers.Contract(
-                  registryAddress,
-                  GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-                  provider,
-                );
-                return this.getRegistryContractIndexCount(registryContract);
-              })
-              .map((totalCount) => {
-                totalCountsMap.set(registryName, totalCount);
-              });
-          }),
-        ).map(() => {
-          return totalCountsMap;
-        });
-      },
-    );
+    return ResultUtils.combine(
+      registryNames.map((registryName) => {
+        // Get registry address
+        return this.registryFactoryContract
+          .nameToAddress(registryName)
+          .andThen((registryAddress) => {
+            // Call the NFI contract of that address
+            const registryContract = new ethers.Contract(
+              registryAddress,
+              GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+              this.provider,
+            );
+            return this.getRegistryContractIndexCount(registryContract);
+          })
+          .map((totalCount) => {
+            totalCountsMap.set(registryName, totalCount);
+          });
+      }),
+    ).map(() => {
+      return totalCountsMap;
+    });
   }
 
   public getRegistryEntries(
@@ -296,108 +283,96 @@ export class RegistryRepository implements IRegistryRepository {
     pageSize: number,
     sortOrder: ERegistrySortOrder,
   ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
-    return this.initializeReadOnly1().andThen(
-      ({ registryContracts, provider }) => {
-        // Get registry address
-        return this.getRegistryAddressByName(
-          registryContracts,
-          registryName,
-        ).andThen((registryAddress) => {
-          // Call the NFI contract of that address
-          const registryContract = new ethers.Contract(
-            registryAddress,
-            GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-            provider,
-          );
-          return this.getRegistryContractIndexCount(registryContract).andThen(
-            (totalCount) => {
-              const registryEntryListResult: ResultAsync<
-                RegistryEntry | null,
-                BlockchainUnavailableError
-              >[] = [];
-              for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
-                let index = 0;
-                if (sortOrder == ERegistrySortOrder.REVERSED_ORDER) {
-                  index = totalCount - (pageNumber - 1) * pageSize - i;
-                } else {
-                  index =
-                    i +
-                    pageNumber * Math.min(totalCount, pageSize) -
-                    pageSize -
-                    1;
-                }
-
-                if (index >= 0) {
-                  const registryEntryResult: ResultAsync<
-                    RegistryEntry | null,
-                    BlockchainUnavailableError
-                  > = this.getRegistryContractTokenIdByIndex(
-                    registryContract,
-                    index,
-                  ).andThen((tokenId) => {
-                    return this.getRegistryEntryByTokenId(
-                      registryContract,
-                      tokenId,
-                    );
-                  });
-
-                  registryEntryListResult.push(
-                    registryEntryResult
-                      .orElse((err) => {
-                        return okAsync<
-                          RegistryEntry | null,
-                          BlockchainUnavailableError
-                        >(null);
-                      })
-                      .map((registryEntry) => {
-                        if (registryEntry != null) {
-                          registryEntry.index = index;
-                        }
-                        return registryEntry;
-                      }),
-                  );
-                }
+    return this.registryFactoryContract
+      .nameToAddress(registryName)
+      .andThen((registryAddress) => {
+        // Call the NFI contract of that address
+        const registryContract = new ethers.Contract(
+          registryAddress,
+          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+          this.provider,
+        );
+        return this.getRegistryContractIndexCount(registryContract).andThen(
+          (totalCount) => {
+            const registryEntryListResult: ResultAsync<
+              RegistryEntry | null,
+              BlockchainUnavailableError
+            >[] = [];
+            for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
+              let index = 0;
+              if (sortOrder == ERegistrySortOrder.REVERSED_ORDER) {
+                index = totalCount - (pageNumber - 1) * pageSize - i;
+              } else {
+                index =
+                  i +
+                  pageNumber * Math.min(totalCount, pageSize) -
+                  pageSize -
+                  1;
               }
-              return ResultUtils.combine(registryEntryListResult).map(
-                (registryEntriesOrNulls) => {
-                  let registryEntries: RegistryEntry[] = [];
-                  registryEntriesOrNulls.forEach((registryEntryOrNull) => {
-                    if (registryEntryOrNull != null) {
-                      registryEntries.push(registryEntryOrNull);
-                    }
-                  });
-                  return registryEntries;
-                },
-              );
-            },
-          );
-        });
-      },
-    );
+
+              if (index >= 0) {
+                const registryEntryResult: ResultAsync<
+                  RegistryEntry | null,
+                  BlockchainUnavailableError
+                > = this.getRegistryContractTokenIdByIndex(
+                  registryContract,
+                  index,
+                ).andThen((tokenId) => {
+                  return this.getRegistryEntryByTokenId(
+                    registryContract,
+                    tokenId,
+                  );
+                });
+
+                registryEntryListResult.push(
+                  registryEntryResult
+                    .orElse((err) => {
+                      return okAsync<
+                        RegistryEntry | null,
+                        BlockchainUnavailableError
+                      >(null);
+                    })
+                    .map((registryEntry) => {
+                      if (registryEntry != null) {
+                        registryEntry.index = index;
+                      }
+                      return registryEntry;
+                    }),
+                );
+              }
+            }
+            return ResultUtils.combine(registryEntryListResult).map(
+              (registryEntriesOrNulls) => {
+                let registryEntries: RegistryEntry[] = [];
+                registryEntriesOrNulls.forEach((registryEntryOrNull) => {
+                  if (registryEntryOrNull != null) {
+                    registryEntries.push(registryEntryOrNull);
+                  }
+                });
+                return registryEntries;
+              },
+            );
+          },
+        );
+      });
   }
 
   public getRegistryEntryDetailByTokenId(
     registryName: string,
     tokenId: number,
   ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
-    return this.initializeReadOnly1().andThen(
-      ({ registryContracts, provider }) => {
-        // Get registry address
-        return this.getRegistryAddressByName(
-          registryContracts,
-          registryName,
-        ).andThen((registryAddress) => {
-          // Call the NFI contract of that address
-          const registryContract = new ethers.Contract(
-            registryAddress,
-            GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-            provider,
-          );
+    return this.registryFactoryContract
+      .nameToAddress(registryName)
+      .andThen((registryAddress) => {
+        // Call the NFI contract of that address
+        const registryContract = new ethers.Contract(
+          registryAddress,
+          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+          this.provider,
+        );
 
-          return this.getRegistryEntryByTokenId(registryContract, tokenId);
-        });
-      },
-    );
+        return this.getRegistryEntryByTokenId(registryContract, tokenId);
+      });
   }
 
   public updateRegistryEntryTokenURI(
@@ -408,58 +383,55 @@ export class RegistryRepository implements IRegistryRepository {
     RegistryEntry,
     BlockchainUnavailableError | RegistryPermissionError
   > {
-    return this.initializeForWrite1().andThen(({ signer }) => {
-      return ResultUtils.combine([
-        this.getRegistryByName([registryName]),
-        this.getSignerAddress(signer),
-      ]).andThen((vals) => {
-        const [registryMap, signerAddress] = vals;
-        const registry = registryMap.get(registryName);
-        if (registry == null) {
-          throw new Error("Registry not found!");
-        }
+    return ResultUtils.combine([
+      this.getRegistryByName([registryName]),
+      this.getSignerAddress(),
+    ]).andThen((vals) => {
+      const [registryMap, signerAddress] = vals;
+      const registry = registryMap.get(registryName);
+      if (registry == null) {
+        throw new Error("Registry not found!");
+      }
 
-        if (
-          registry.registrarAddresses.includes(
-            EthereumAddress(signerAddress),
-          ) === false &&
-          registry.allowStorageUpdate === false
-        ) {
-          return errAsync(
-            new RegistryPermissionError(
-              "You don't have permission to update registry entry token uri",
-            ),
-          );
-        }
-
-        // Call the NFI contract of that address
-        const registryContract = new ethers.Contract(
-          registry.address,
-          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-          signer,
+      if (
+        registry.registrarAddresses.includes(EthereumAddress(signerAddress)) ===
+          false &&
+        registry.allowStorageUpdate === false
+      ) {
+        return errAsync(
+          new RegistryPermissionError(
+            "You don't have permission to update registry entry token uri",
+          ),
         );
+      }
 
-        return ResultAsync.fromPromise(
-          registryContract.updateRegistration(
-            BigNumber.from(tokenId),
-            registrationData,
-          ) as Promise<any>,
-          (e) => {
-            return new BlockchainUnavailableError(
-              "Unable to call updateRegistration registryContract",
-              e,
-            );
-          },
-        )
-          .andThen((tx) => {
-            return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
-              return new BlockchainUnavailableError("Unable to wait for tx", e);
-            });
-          })
-          .andThen(() => {
-            return this.getRegistryEntryByTokenId(registryContract, tokenId);
+      // Call the NFI contract of that address
+      const registryContract = new ethers.Contract(
+        registry.address,
+        GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+        this.signer,
+      );
+
+      return ResultAsync.fromPromise(
+        registryContract.updateRegistration(
+          BigNumber.from(tokenId),
+          registrationData,
+        ) as Promise<any>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to call updateRegistration registryContract",
+            e,
+          );
+        },
+      )
+        .andThen((tx) => {
+          return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+            return new BlockchainUnavailableError("Unable to wait for tx", e);
           });
-      });
+        })
+        .andThen(() => {
+          return this.getRegistryEntryByTokenId(registryContract, tokenId);
+        });
     });
   }
 
@@ -471,58 +443,55 @@ export class RegistryRepository implements IRegistryRepository {
     RegistryEntry,
     BlockchainUnavailableError | RegistryPermissionError
   > {
-    return this.initializeForWrite1().andThen(({ signer }) => {
-      return ResultUtils.combine([
-        this.getRegistryByName([registryName]),
-        this.getSignerAddress(signer),
-      ]).andThen((vals) => {
-        const [registryMap, signerAddress] = vals;
-        const registry = registryMap.get(registryName);
-        if (registry == null) {
-          throw new Error("Registry not found!");
-        }
+    return ResultUtils.combine([
+      this.getRegistryByName([registryName]),
+      this.getSignerAddress(),
+    ]).andThen((vals) => {
+      const [registryMap, signerAddress] = vals;
+      const registry = registryMap.get(registryName);
+      if (registry == null) {
+        throw new Error("Registry not found!");
+      }
 
-        if (
-          registry.registrarAddresses.includes(
-            EthereumAddress(signerAddress),
-          ) === false &&
-          registry.allowLabelChange === false
-        ) {
-          return errAsync(
-            new RegistryPermissionError(
-              "You don't have permission to update registry entry label",
-            ),
-          );
-        }
-
-        // Call the NFI contract of that address
-        const registryContract = new ethers.Contract(
-          registry.address,
-          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-          signer,
+      if (
+        registry.registrarAddresses.includes(EthereumAddress(signerAddress)) ===
+          false &&
+        registry.allowLabelChange === false
+      ) {
+        return errAsync(
+          new RegistryPermissionError(
+            "You don't have permission to update registry entry label",
+          ),
         );
+      }
 
-        return ResultAsync.fromPromise(
-          registryContract.updateLabel(
-            BigNumber.from(tokenId),
-            label,
-          ) as Promise<any>,
-          (e) => {
-            return new BlockchainUnavailableError(
-              "Unable to call updateRegistration registryContract",
-              e,
-            );
-          },
-        )
-          .andThen((tx) => {
-            return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
-              return new BlockchainUnavailableError("Unable to wait for tx", e);
-            });
-          })
-          .andThen(() => {
-            return this.getRegistryEntryByTokenId(registryContract, tokenId);
+      // Call the NFI contract of that address
+      const registryContract = new ethers.Contract(
+        registry.address,
+        GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+        this.signer,
+      );
+
+      return ResultAsync.fromPromise(
+        registryContract.updateLabel(
+          BigNumber.from(tokenId),
+          label,
+        ) as Promise<any>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to call updateRegistration registryContract",
+            e,
+          );
+        },
+      )
+        .andThen((tx) => {
+          return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+            return new BlockchainUnavailableError("Unable to wait for tx", e);
           });
-      });
+        })
+        .andThen(() => {
+          return this.getRegistryEntryByTokenId(registryContract, tokenId);
+        });
     });
   }
 
@@ -534,41 +503,37 @@ export class RegistryRepository implements IRegistryRepository {
     RegistryEntry,
     BlockchainUnavailableError | RegistryPermissionError
   > {
-    return this.initializeForWrite1().andThen(({ signer }) => {
-      return ResultUtils.combine([
-        this.getRegistryByName([registryName]),
-        this.getSignerAddress(signer),
-      ]).andThen((vals) => {
-        const [registryMap, signerAddress] = vals;
-        const registry = registryMap.get(registryName);
-        if (registry == null) {
-          throw new Error("Registry not found!");
-        }
+    return ResultUtils.combine([
+      this.getRegistryByName([registryName]),
+      this.getSignerAddress(),
+    ]).andThen((vals) => {
+      const [registryMap, signerAddress] = vals;
+      const registry = registryMap.get(registryName);
+      if (registry == null) {
+        throw new Error("Registry not found!");
+      }
 
-        if (
-          registry.registrarAddresses.includes(
-            EthereumAddress(signerAddress),
-          ) === false &&
-          registry.allowTransfers === false
-        ) {
-          return errAsync(
-            new RegistryPermissionError(
-              "You don't have permission to transfer registry entry",
-            ),
-          );
-        }
-
-        // Call the NFI contract of that address
-        const registryContract = new ethers.Contract(
-          registry.address,
-          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-          signer,
+      if (
+        registry.registrarAddresses.includes(EthereumAddress(signerAddress)) ===
+          false &&
+        registry.allowTransfers === false
+      ) {
+        return errAsync(
+          new RegistryPermissionError(
+            "You don't have permission to transfer registry entry",
+          ),
         );
+      }
 
-        return this.getRegistryEntryByTokenId(
-          registryContract,
-          tokenId,
-        ).andThen((registryEntry) => {
+      // Call the NFI contract of that address
+      const registryContract = new ethers.Contract(
+        registry.address,
+        GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+        this.signer,
+      );
+
+      return this.getRegistryEntryByTokenId(registryContract, tokenId).andThen(
+        (registryEntry) => {
           return ResultAsync.fromPromise(
             registryContract.transferFrom(
               registryEntry.owner,
@@ -596,8 +561,8 @@ export class RegistryRepository implements IRegistryRepository {
             .andThen(() => {
               return this.getRegistryEntryByTokenId(registryContract, tokenId);
             });
-        });
-      });
+        },
+      );
     });
   }
 
@@ -605,67 +570,45 @@ export class RegistryRepository implements IRegistryRepository {
     registryName: string,
     tokenId: number,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
-    return this.initializeForWrite1().andThen(({ signer }) => {
-      return ResultUtils.combine([
-        this.getRegistryByName([registryName]),
-        this.getSignerAddress(signer),
-      ]).andThen((vals) => {
-        const [registryMap, signerAddress] = vals;
-        const registry = registryMap.get(registryName);
-        if (registry == null) {
-          throw new Error("Registry not found!");
-        }
+    return ResultUtils.combine([
+      this.getRegistryByName([registryName]),
+      this.getSignerAddress(),
+    ]).andThen((vals) => {
+      const [registryMap, signerAddress] = vals;
+      const registry = registryMap.get(registryName);
+      if (registry == null) {
+        throw new Error("Registry not found!");
+      }
 
-        if (
-          registry.registrarAddresses.includes(
-            EthereumAddress(signerAddress),
-          ) === false &&
-          registry.allowTransfers === false
-        ) {
-          return errAsync(
-            new RegistryPermissionError(
-              "You don't have permission to burn registry entry",
-            ),
-          );
-        }
-
-        // Call the NFI contract of that address
-        const registryContract = new ethers.Contract(
-          registry.address,
-          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-          signer,
+      if (
+        registry.registrarAddresses.includes(EthereumAddress(signerAddress)) ===
+          false &&
+        registry.allowTransfers === false
+      ) {
+        return errAsync(
+          new RegistryPermissionError(
+            "You don't have permission to burn registry entry",
+          ),
         );
+      }
 
-        return ResultAsync.fromPromise(
-          registryContract.burn(tokenId) as Promise<any>,
-          (e) => {
-            return new BlockchainUnavailableError(
-              "Unable to call registryContract burn",
-              e,
-            );
-          },
-        ).map(() => {});
-      });
+      // Call the NFI contract of that address
+      const registryContract = new ethers.Contract(
+        registry.address,
+        GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+        this.signer,
+      );
+
+      return ResultAsync.fromPromise(
+        registryContract.burn(tokenId) as Promise<any>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to call registryContract burn",
+            e,
+          );
+        },
+      ).map(() => {});
     });
-  }
-
-  public getNumberOfRegistries(): ResultAsync<
-    number,
-    BlockchainUnavailableError
-  > {
-    return this.initializeReadOnly1().andThen(
-      ({ registryContracts, provider }) => {
-        return ResultAsync.fromPromise(
-          registryContracts.factoryContract.getNumberOfEnumerableRegistries() as Promise<BigNumber>,
-          (e) => {
-            return new BlockchainUnavailableError(
-              "Unable to call factoryContract getNumberOfEnumerableRegistries()",
-              e,
-            );
-          },
-        ).map((numberOfRegistries) => numberOfRegistries.toNumber());
-      },
-    );
   }
 
   public updateRegistryParams(
@@ -674,105 +617,102 @@ export class RegistryRepository implements IRegistryRepository {
     Registry,
     BlockchainUnavailableError | RegistryPermissionError
   > {
-    return this.initializeForWrite1().andThen(({ signer }) => {
-      return ResultUtils.combine([
-        this.getRegistryByName([registryParams.name]),
-        this.getSignerAddress(signer),
-      ]).andThen((vals) => {
-        const [registryMap, signerAddress] = vals;
-        const registry = registryMap.get(registryParams.name);
-        if (registry == null) {
-          throw new Error("Registry not found!");
-        }
+    return ResultUtils.combine([
+      this.getRegistryByName([registryParams.name]),
+      this.getSignerAddress(),
+    ]).andThen((vals) => {
+      const [registryMap, signerAddress] = vals;
+      const registry = registryMap.get(registryParams.name);
+      if (registry == null) {
+        throw new Error("Registry not found!");
+      }
 
-        if (
-          registry.registrarAddresses.includes(
-            EthereumAddress(signerAddress),
-          ) === false
-        ) {
-          return errAsync(
-            new RegistryPermissionError(
-              "Only registrar is allowed to update registry params",
-            ),
+      if (
+        registry.registrarAddresses.includes(EthereumAddress(signerAddress)) ===
+        false
+      ) {
+        return errAsync(
+          new RegistryPermissionError(
+            "Only registrar is allowed to update registry params",
+          ),
+        );
+      }
+
+      // Call the NFI contract of that address
+      const registryContract = new ethers.Contract(
+        registry.address,
+        GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+        this.signer,
+      );
+
+      const abiCoder = ethers.utils.defaultAbiCoder;
+
+      const params = abiCoder.encode(
+        [
+          "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])",
+        ],
+        [
+          [
+            [],
+            registryParams.allowLazyRegister == null
+              ? []
+              : [registryParams.allowLazyRegister],
+            registryParams.allowStorageUpdate == null
+              ? []
+              : [registryParams.allowStorageUpdate],
+            registryParams.allowLabelChange == null
+              ? []
+              : [registryParams.allowLabelChange],
+            registryParams.allowTransfers == null
+              ? []
+              : [registryParams.allowTransfers],
+            registryParams.registrationToken == null
+              ? []
+              : [registryParams.registrationToken],
+            registryParams.registrationFee == null
+              ? []
+              : [ethers.utils.parseUnits(registryParams.registrationFee)],
+            registryParams.burnAddress == null
+              ? []
+              : [registryParams.burnAddress],
+            registryParams.burnFee == null ? [] : [registryParams.burnFee],
+            registryParams.primaryRegistry == null
+              ? []
+              : [registryParams.primaryRegistry],
+          ],
+        ],
+      );
+
+      return ResultAsync.fromPromise(
+        registryContract.setRegistryParameters(params) as Promise<any>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to call factoryContract setRegistryParameters()",
+            e,
           );
-        }
-
-        // Call the NFI contract of that address
-        const registryContract = new ethers.Contract(
-          registry.address,
-          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-          signer,
-        );
-
-        const abiCoder = ethers.utils.defaultAbiCoder;
-
-        const params = abiCoder.encode(
-          [
-            "tuple(string[], bool[], bool[], bool[], bool[], address[], uint256[], address[], uint256[], address[])",
-          ],
-          [
-            [
-              [],
-              registryParams.allowLazyRegister == null
-                ? []
-                : [registryParams.allowLazyRegister],
-              registryParams.allowStorageUpdate == null
-                ? []
-                : [registryParams.allowStorageUpdate],
-              registryParams.allowLabelChange == null
-                ? []
-                : [registryParams.allowLabelChange],
-              registryParams.allowTransfers == null
-                ? []
-                : [registryParams.allowTransfers],
-              registryParams.registrationToken == null
-                ? []
-                : [registryParams.registrationToken],
-              registryParams.registrationFee == null
-                ? []
-                : [ethers.utils.parseUnits(registryParams.registrationFee)],
-              registryParams.burnAddress == null
-                ? []
-                : [registryParams.burnAddress],
-              registryParams.burnFee == null ? [] : [registryParams.burnFee],
-              registryParams.primaryRegistry == null
-                ? []
-                : [registryParams.primaryRegistry],
-            ],
-          ],
-        );
-
-        return ResultAsync.fromPromise(
-          registryContract.setRegistryParameters(params) as Promise<any>,
-          (e) => {
+        },
+      )
+        .andThen((tx) => {
+          return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
             return new BlockchainUnavailableError(
-              "Unable to call factoryContract setRegistryParameters()",
+              "Unable to wait for setRegistryParameters tx",
               e,
             );
-          },
-        )
-          .andThen((tx) => {
-            return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
-              return new BlockchainUnavailableError(
-                "Unable to wait for setRegistryParameters tx",
-                e,
-              );
-            });
-          })
-          .andThen(() => {
-            return this.getRegistryByName([registryParams.name]);
-          })
-          .andThen((registryMap) => {
-            const registry = registryMap.get(registryParams.name);
-            if (registry != null) {
-              return okAsync(registry);
-            } else {
-              return errAsync(
-                new BlockchainUnavailableError("registry not found"),
-              );
-            }
           });
-      });
+        })
+        .andThen(() => {
+          return this.getRegistryByName([registryParams.name]);
+        })
+        .andThen((registryMap) => {
+          const registry = registryMap.get(registryParams.name);
+          if (registry != null) {
+            return okAsync(registry);
+          } else {
+            return errAsync(
+              new BlockchainUnavailableError("registry not found"),
+            );
+          }
+        });
     });
   }
 
@@ -782,118 +722,86 @@ export class RegistryRepository implements IRegistryRepository {
     recipientAddress: EthereumAddress,
     data: string,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
-    return this.initializeForWrite1().andThen(
-      ({ registryContracts, signer }) => {
-        return ResultUtils.combine([
-          this.getRegistryByName([registryName]),
-          this.getSignerAddress(signer),
-        ]).andThen((vals) => {
-          const [registryMap, signerAddress] = vals;
-          const registry = registryMap.get(registryName);
-          if (registry == null) {
-            throw new Error("Registry not found!");
-          }
+    return ResultUtils.combine([
+      this.getRegistryByName([registryName]),
+      this.getSignerAddress(),
+    ]).andThen((vals) => {
+      const [registryMap, signerAddress] = vals;
+      const registry = registryMap.get(registryName);
+      if (registry == null) {
+        throw new Error("Registry not found!");
+      }
 
-          let shouldCallRegisterByToken: boolean;
+      let shouldCallRegisterByToken: boolean;
 
-          if (
-            registry.registrarAddresses.includes(
-              EthereumAddress(signerAddress),
-            ) === true
-          ) {
-            shouldCallRegisterByToken = false;
-          } else if (
-            BigNumber.from(registry.registrationToken).isZero() === false
-          ) {
-            shouldCallRegisterByToken = true;
-          } else {
-            return errAsync(
-              new RegistryPermissionError(
-                "you don't have permission to create NFI",
-              ),
-            );
-          }
+      if (
+        registry.registrarAddresses.includes(EthereumAddress(signerAddress)) ===
+        true
+      ) {
+        shouldCallRegisterByToken = false;
+      } else if (
+        BigNumber.from(registry.registrationToken).isZero() === false
+      ) {
+        shouldCallRegisterByToken = true;
+      } else {
+        return errAsync(
+          new RegistryPermissionError(
+            "you don't have permission to create NFI",
+          ),
+        );
+      }
 
-          // Call the NFI contract of that address
-          const registryContract = new ethers.Contract(
-            registry.address,
-            GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-            signer,
-          );
+      // Call the NFI contract of that address
+      const registryContract = new ethers.Contract(
+        registry.address,
+        GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+        this.signer,
+      );
 
-          let registerResult: ResultAsync<any, BlockchainUnavailableError>;
+      let registerResult: ResultAsync<any, BlockchainUnavailableError>;
 
-          if (shouldCallRegisterByToken === true) {
-            registerResult = ResultAsync.fromPromise(
-              registryContracts.hypertokenContract.approve(
-                registry.address,
-                registry.registrationFee,
-              ) as Promise<any>,
-              (e) => {
-                return new BlockchainUnavailableError(
-                  "Unable to call hypertokenContract approve()",
-                  e,
-                );
-              },
-            )
-              .andThen((tx) => {
-                return ResultAsync.fromPromise(
-                  tx.wait() as Promise<void>,
-                  (e) => {
-                    return new BlockchainUnavailableError(
-                      "Unable to wait for tx",
-                      e,
-                    );
-                  },
-                );
-              })
-              .andThen(() => {
-                return ResultAsync.fromPromise(
-                  registryContract.registerByToken(
-                    recipientAddress,
-                    label,
-                    data,
-                  ) as Promise<any>,
-                  (e) => {
-                    return new BlockchainUnavailableError(
-                      "Unable to call registryContract registerByToken()",
-                      e,
-                    );
-                  },
-                );
-              });
-          } else {
-            registerResult = ResultAsync.fromPromise(
-              registryContract.register(
+      if (shouldCallRegisterByToken === true) {
+        registerResult = this.hypertokenContract
+          .approve(registry.address, registry.registrationFee)
+          .andThen(() => {
+            return ResultAsync.fromPromise(
+              registryContract.registerByToken(
                 recipientAddress,
                 label,
                 data,
               ) as Promise<any>,
               (e) => {
                 return new BlockchainUnavailableError(
-                  "Unable to call registryContract register()",
+                  "Unable to call registryContract registerByToken()",
                   e,
                 );
               },
             );
-          }
+          });
+      } else {
+        registerResult = ResultAsync.fromPromise(
+          registryContract.register(
+            recipientAddress,
+            label,
+            data,
+          ) as Promise<any>,
+          (e) => {
+            return new BlockchainUnavailableError(
+              "Unable to call registryContract register()",
+              e,
+            );
+          },
+        );
+      }
 
-          return registerResult
-            .andThen((tx) => {
-              return ResultAsync.fromPromise(
-                tx.wait() as Promise<void>,
-                (e) => {
-                  return new BlockchainUnavailableError(
-                    "Unable to wait for tx",
-                    e,
-                  );
-                },
-              );
-            })
-            .map(() => {});
-        });
-      },
-    );
+      return registerResult
+        .andThen((tx) => {
+          return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+            return new BlockchainUnavailableError("Unable to wait for tx", e);
+          });
+        })
+        .map(() => {});
+    });
   }
 
   public createRegistryByToken(
@@ -902,25 +810,73 @@ export class RegistryRepository implements IRegistryRepository {
     registrarAddress: EthereumAddress,
     enumerable: boolean,
   ): ResultAsync<void, BlockchainUnavailableError> {
-    return this.initializeForWrite1().andThen(
-      ({ registryContracts, signer }) => {
-        return ResultAsync.fromPromise(
-          registryContracts.factoryContract.registrationFee() as Promise<BigNumber>,
-          (e) => {
-            return new BlockchainUnavailableError(
-              "Unable to call registryContract _registrationFee()",
-              e,
+    return this.registryFactoryContract
+      .registrationFee()
+      .andThen((registrationFees) => {
+        return this.hypertokenContract
+          .approve(
+            this.registryFactoryContract.getContractAddress(),
+            BigNumberString(registrationFees.toString()),
+          )
+          .andThen(() => {
+            return this.registryFactoryContract.createRegistryByToken(
+              name,
+              symbol,
+              registrarAddress,
+              enumerable,
             );
-          },
-        ).andThen((registrationFees) => {
+          });
+      });
+  }
+
+  public grantRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return ResultUtils.combine([
+      this.getRegistryByName([registryName]),
+      this.getSignerAddress(),
+    ]).andThen((vals) => {
+      const [registryMap, signerAddress] = vals;
+      const registry = registryMap.get(registryName);
+      if (registry == null) {
+        throw new Error("Registry not found!");
+      }
+
+      if (
+        registry.registrarAdminAddresses.includes(
+          EthereumAddress(signerAddress),
+        ) === false
+      ) {
+        return errAsync(
+          new RegistryPermissionError(
+            "You don't have permission to grantRole registry",
+          ),
+        );
+      }
+
+      // Call the NFI contract of that address
+      const registryContract = new ethers.Contract(
+        registry.address,
+        GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+        this.signer,
+      );
+
+      return ResultAsync.fromPromise(
+        registryContract.REGISTRAR_ROLE() as Promise<any>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to call getRoleMemberCount REGISTRAR_ROLE",
+            e,
+          );
+        },
+      )
+        .andThen((registrarRole) => {
           return ResultAsync.fromPromise(
-            registryContracts.hypertokenContract.approve(
-              registryContracts.factoryContract.address,
-              registrationFees,
-            ) as Promise<any>,
+            registryContract.grantRole(registrarRole, address) as Promise<any>,
             (e) => {
               return new BlockchainUnavailableError(
-                "Unable to call hypertokenContract approve()",
+                "Unable to call registryContract grantRole",
                 e,
               );
             },
@@ -936,22 +892,64 @@ export class RegistryRepository implements IRegistryRepository {
                 },
               );
             })
-            .andThen(() => {
-              return ResultAsync.fromPromise(
-                registryContracts.factoryContract.createRegistryByToken(
-                  name,
-                  symbol,
-                  registrarAddress,
-                  enumerable,
-                ) as Promise<any>,
-                (e) => {
-                  return new BlockchainUnavailableError(
-                    "Unable to call hypertokenContract approve()",
-                    e,
-                  );
-                },
+            .map(() => {});
+        })
+        .map(() => {});
+    });
+  }
+
+  public revokeRegistrarRole(
+    registryName: string,
+    address: EthereumAddress,
+  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+    return ResultUtils.combine([
+      this.getRegistryByName([registryName]),
+      this.getSignerAddress(),
+    ]).andThen((vals) => {
+      const [registryMap, signerAddress] = vals;
+      const registry = registryMap.get(registryName);
+      if (registry == null) {
+        throw new Error("Registry not found!");
+      }
+
+      if (
+        registry.registrarAdminAddresses.includes(
+          EthereumAddress(signerAddress),
+        ) === false
+      ) {
+        return errAsync(
+          new RegistryPermissionError(
+            "You don't have permission to revokeRole registry",
+          ),
+        );
+      }
+
+      // Call the NFI contract of that address
+      const registryContract = new ethers.Contract(
+        registry.address,
+        GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+        this.signer,
+      );
+
+      return ResultAsync.fromPromise(
+        registryContract.REGISTRAR_ROLE() as Promise<any>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to call getRoleMemberCount REGISTRAR_ROLE",
+            e,
+          );
+        },
+      )
+        .andThen((registrarRole) => {
+          return ResultAsync.fromPromise(
+            registryContract.revokeRole(registrarRole, address) as Promise<any>,
+            (e) => {
+              return new BlockchainUnavailableError(
+                "Unable to call registryContract revokeRole",
+                e,
               );
-            })
+            },
+          )
             .andThen((tx) => {
               return ResultAsync.fromPromise(
                 tx.wait() as Promise<void>,
@@ -964,156 +962,8 @@ export class RegistryRepository implements IRegistryRepository {
               );
             })
             .map(() => {});
-        });
-      },
-    );
-  }
-
-  public grantRegistrarRole(
-    registryName: string,
-    address: EthereumAddress,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
-    return this.initializeForWrite1().andThen(({ signer }) => {
-      return ResultUtils.combine([
-        this.getRegistryByName([registryName]),
-        this.getSignerAddress(signer),
-      ]).andThen((vals) => {
-        const [registryMap, signerAddress] = vals;
-        const registry = registryMap.get(registryName);
-        if (registry == null) {
-          throw new Error("Registry not found!");
-        }
-
-        if (
-          registry.registrarAdminAddresses.includes(
-            EthereumAddress(signerAddress),
-          ) === false
-        ) {
-          return errAsync(
-            new RegistryPermissionError(
-              "You don't have permission to grantRole registry",
-            ),
-          );
-        }
-
-        // Call the NFI contract of that address
-        const registryContract = new ethers.Contract(
-          registry.address,
-          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-          signer,
-        );
-
-        return ResultAsync.fromPromise(
-          registryContract.REGISTRAR_ROLE() as Promise<any>,
-          (e) => {
-            return new BlockchainUnavailableError(
-              "Unable to call getRoleMemberCount REGISTRAR_ROLE",
-              e,
-            );
-          },
-        )
-          .andThen((registrarRole) => {
-            return ResultAsync.fromPromise(
-              registryContract.grantRole(
-                registrarRole,
-                address,
-              ) as Promise<any>,
-              (e) => {
-                return new BlockchainUnavailableError(
-                  "Unable to call registryContract grantRole",
-                  e,
-                );
-              },
-            )
-              .andThen((tx) => {
-                return ResultAsync.fromPromise(
-                  tx.wait() as Promise<void>,
-                  (e) => {
-                    return new BlockchainUnavailableError(
-                      "Unable to wait for tx",
-                      e,
-                    );
-                  },
-                );
-              })
-              .map(() => {});
-          })
-          .map(() => {});
-      });
-    });
-  }
-
-  public revokeRegistrarRole(
-    registryName: string,
-    address: EthereumAddress,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
-    return this.initializeForWrite1().andThen(({ signer }) => {
-      return ResultUtils.combine([
-        this.getRegistryByName([registryName]),
-        this.getSignerAddress(signer),
-      ]).andThen((vals) => {
-        const [registryMap, signerAddress] = vals;
-        const registry = registryMap.get(registryName);
-        if (registry == null) {
-          throw new Error("Registry not found!");
-        }
-
-        if (
-          registry.registrarAdminAddresses.includes(
-            EthereumAddress(signerAddress),
-          ) === false
-        ) {
-          return errAsync(
-            new RegistryPermissionError(
-              "You don't have permission to revokeRole registry",
-            ),
-          );
-        }
-
-        // Call the NFI contract of that address
-        const registryContract = new ethers.Contract(
-          registry.address,
-          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-          signer,
-        );
-
-        return ResultAsync.fromPromise(
-          registryContract.REGISTRAR_ROLE() as Promise<any>,
-          (e) => {
-            return new BlockchainUnavailableError(
-              "Unable to call getRoleMemberCount REGISTRAR_ROLE",
-              e,
-            );
-          },
-        )
-          .andThen((registrarRole) => {
-            return ResultAsync.fromPromise(
-              registryContract.revokeRole(
-                registrarRole,
-                address,
-              ) as Promise<any>,
-              (e) => {
-                return new BlockchainUnavailableError(
-                  "Unable to call registryContract revokeRole",
-                  e,
-                );
-              },
-            )
-              .andThen((tx) => {
-                return ResultAsync.fromPromise(
-                  tx.wait() as Promise<void>,
-                  (e) => {
-                    return new BlockchainUnavailableError(
-                      "Unable to wait for tx",
-                      e,
-                    );
-                  },
-                );
-              })
-              .map(() => {});
-          })
-          .map(() => {});
-      });
+        })
+        .map(() => {});
     });
   }
 
@@ -1121,98 +971,94 @@ export class RegistryRepository implements IRegistryRepository {
     registryName: string,
     address: EthereumAddress,
   ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
-    return this.initializeForWrite1().andThen(({ signer }) => {
-      return ResultUtils.combine([
-        this.getRegistryByName([registryName]),
-        this.getSignerAddress(signer),
-      ]).andThen((vals) => {
-        const [registryMap, signerAddress] = vals;
-        const registry = registryMap.get(registryName);
-        if (registry == null) {
-          throw new Error("Registry not found!");
-        }
+    return ResultUtils.combine([
+      this.getRegistryByName([registryName]),
+      this.getSignerAddress(),
+    ]).andThen((vals) => {
+      const [registryMap, signerAddress] = vals;
+      const registry = registryMap.get(registryName);
+      if (registry == null) {
+        throw new Error("Registry not found!");
+      }
 
-        if (
-          registry.registrarAdminAddresses.includes(
-            EthereumAddress(signerAddress),
-          ) === false &&
-          registry.registrarAddresses.includes(
-            EthereumAddress(signerAddress),
-          ) === false
-        ) {
-          return errAsync(
-            new RegistryPermissionError(
-              "You don't have permission to renounceRole registry",
-            ),
-          );
-        }
-
-        // Call the NFI contract of that address
-        const registryContract = new ethers.Contract(
-          registry.address,
-          GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-          signer,
+      if (
+        registry.registrarAdminAddresses.includes(
+          EthereumAddress(signerAddress),
+        ) === false &&
+        registry.registrarAddresses.includes(EthereumAddress(signerAddress)) ===
+          false
+      ) {
+        return errAsync(
+          new RegistryPermissionError(
+            "You don't have permission to renounceRole registry",
+          ),
         );
+      }
 
-        return ResultAsync.fromPromise(
-          registryContract.REGISTRAR_ROLE() as Promise<any>,
-          (e) => {
-            return new BlockchainUnavailableError(
-              "Unable to call getRoleMemberCount REGISTRAR_ROLE",
-              e,
-            );
-          },
-        )
-          .andThen((registrarRole) => {
-            return ResultAsync.fromPromise(
-              registryContract.renounceRole(
-                registrarRole,
-                address,
-              ) as Promise<any>,
-              (e) => {
-                return new BlockchainUnavailableError(
-                  "Unable to call registryContract revokeRole",
-                  e,
-                );
-              },
-            )
-              .andThen((tx) => {
-                return ResultAsync.fromPromise(
-                  tx.wait() as Promise<void>,
-                  (e) => {
-                    return new BlockchainUnavailableError(
-                      "Unable to wait for tx",
-                      e,
-                    );
-                  },
-                );
-              })
-              .map(() => {});
-          })
-          .map(() => {});
-      });
+      // Call the NFI contract of that address
+      const registryContract = new ethers.Contract(
+        registry.address,
+        GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
+        this.signer,
+      );
+
+      return ResultAsync.fromPromise(
+        registryContract.REGISTRAR_ROLE() as Promise<any>,
+        (e) => {
+          return new BlockchainUnavailableError(
+            "Unable to call getRoleMemberCount REGISTRAR_ROLE",
+            e,
+          );
+        },
+      )
+        .andThen((registrarRole) => {
+          return ResultAsync.fromPromise(
+            registryContract.renounceRole(
+              registrarRole,
+              address,
+            ) as Promise<any>,
+            (e) => {
+              return new BlockchainUnavailableError(
+                "Unable to call registryContract revokeRole",
+                e,
+              );
+            },
+          )
+            .andThen((tx) => {
+              return ResultAsync.fromPromise(
+                tx.wait() as Promise<void>,
+                (e) => {
+                  return new BlockchainUnavailableError(
+                    "Unable to wait for tx",
+                    e,
+                  );
+                },
+              );
+            })
+            .map(() => {});
+        })
+        .map(() => {});
     });
+  }
+
+  public getNumberOfRegistries(): ResultAsync<
+    number,
+    BlockchainUnavailableError
+  > {
+    return this.registryFactoryContract.getNumberOfEnumerableRegistries();
   }
 
   private getRegistryByIndex(
     index: number,
-    provider: ethers.providers.Provider,
-    registryContracts: RegistryContracts,
   ): ResultAsync<Registry | null, BlockchainUnavailableError> {
-    return ResultAsync.fromPromise(
-      registryContracts.factoryContract.enumerableRegistries(
-        index,
-      ) as Promise<EthereumAddress>,
-      (e) => {
-        return new BlockchainUnavailableError("Unable to call registries", e);
-      },
-    )
+    return this.registryFactoryContract
+      .enumerableRegistries(index)
       .andThen((registryAddress) => {
         // Call the NFI contract of that address
         const registryContract = new ethers.Contract(
           registryAddress,
           GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
-          provider,
+          this.provider,
         );
 
         // Get the name, symbol and NumberOfEntries of that registry address
@@ -1422,23 +1268,6 @@ export class RegistryRepository implements IRegistryRepository {
     );
   }
 
-  private getRegistryAddressByName(
-    registryContracts: RegistryContracts,
-    registryName: string,
-  ): ResultAsync<EthereumAddress, BlockchainUnavailableError> {
-    return ResultAsync.fromPromise(
-      registryContracts.factoryContract.nameToAddress(
-        registryName,
-      ) as Promise<EthereumAddress>,
-      (e) => {
-        return new BlockchainUnavailableError(
-          "Unable to call nameToAddress()",
-          e,
-        );
-      },
-    );
-  }
-
   private getRegistryContractName(
     registryContract: ethers.Contract,
   ): ResultAsync<string, BlockchainUnavailableError> {
@@ -1611,11 +1440,12 @@ export class RegistryRepository implements IRegistryRepository {
     );
   }
 
-  private getSignerAddress(
-    signer: ethers.providers.JsonRpcSigner,
-  ): ResultAsync<string, BlockchainUnavailableError> {
+  private getSignerAddress(): ResultAsync<string, BlockchainUnavailableError> {
+    if (this.signer == null) {
+      throw new Error("Signer is not available");
+    }
     return ResultAsync.fromPromise(
-      signer.getAddress() as Promise<EthereumAddress>,
+      this.signer.getAddress() as Promise<EthereumAddress>,
       (e) => {
         return new BlockchainUnavailableError(
           "Unable to call signer getAddress()",
@@ -1625,66 +1455,6 @@ export class RegistryRepository implements IRegistryRepository {
     );
   }
 
-  private initializeForWrite1(): ResultAsync<
-    {
-      registryContracts: RegistryContracts;
-      signer: ethers.providers.JsonRpcSigner;
-    },
-    BlockchainUnavailableError
-  > {
-    return this.blockchainProvider.getGovernanceSigner().andThen((signer) => {
-      return this.initializeContracts(signer).map((registryContracts) => {
-        return {
-          registryContracts,
-          signer,
-        };
-      });
-    });
-  }
-
-  private initializeReadOnly1(): ResultAsync<
-    {
-      registryContracts: RegistryContracts;
-      provider: ethers.providers.Provider;
-    },
-    BlockchainUnavailableError
-  > {
-    return this.blockchainProvider
-      .getGovernanceProvider()
-      .andThen((provider) => {
-        return this.initializeContracts(provider).map((registryContracts) => {
-          return {
-            registryContracts,
-            provider,
-          };
-        });
-      });
-  }
-
-  private initializeContracts(
-    providerOrSigner:
-      | ethers.providers.Provider
-      | ethers.providers.JsonRpcSigner,
-  ): ResultAsync<RegistryContracts, never> {
-    return this.configProvider.getConfig().map((config) => {
-      const registryFactoryContract = new ethers.Contract(
-        config.chainAddresses[config.governanceChainId]
-          ?.registryFactoryAddress as string,
-        GovernanceAbis.UpgradeableRegistryFactory.abi,
-        providerOrSigner,
-      );
-
-      const hypertokenContract = new ethers.Contract(
-        config.chainAddresses[config.governanceChainId]
-          ?.hypertokenAddress as string,
-        GovernanceAbis.Hypertoken.abi,
-        providerOrSigner,
-      );
-
-      return new RegistryContracts(registryFactoryContract, hypertokenContract);
-    });
-  }
-
   public initializeReadOnly(): ResultAsync<void, BlockchainUnavailableError> {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
@@ -1692,6 +1462,11 @@ export class RegistryRepository implements IRegistryRepository {
     ]).map((vals) => {
       const [config, provider] = vals;
       this.provider = provider;
+      this.registryFactoryContract.initializeContract(
+        provider,
+        config.chainAddresses[config.governanceChainId]
+          ?.registryFactoryAddress as EthereumAddress,
+      );
       this.registryFactoryContract.initializeContract(
         provider,
         config.chainAddresses[config.governanceChainId]

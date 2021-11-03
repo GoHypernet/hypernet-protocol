@@ -27,4 +27,5 @@ export * from "@objects/errors/PaymentCreationError";
 export * from "@objects/errors/GatewayAuthorizationDeniedError";
 export * from "@objects/errors/RegistryPermissionError";
 export * from "@objects/errors/RegistryFactoryContractError";
+export * from "@objects/errors/HypertokenContractError";
 export * from "@objects/errors/RenderError";
