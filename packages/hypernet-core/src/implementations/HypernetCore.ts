@@ -137,6 +137,8 @@ import {
   IRegistryFactoryContract,
   HypertokenContract,
   IHypertokenContract,
+  NonFungibleRegistryEnumerableUpgradeableContract,
+  INonFungibleRegistryEnumerableUpgradeableContract,
 } from "@hypernetlabs/contracts";
 import { IStorageUtils } from "@interfaces/data/utilities";
 import {
@@ -224,6 +226,7 @@ export class HypernetCore implements IHypernetCore {
   protected internalProviderFactory: IInternalProviderFactory;
   protected registryFactoryContract: IRegistryFactoryContract;
   protected hypertokenContract: IHypertokenContract;
+  protected nonFungibleRegistryEnumerableUpgradeableContract: INonFungibleRegistryEnumerableUpgradeableContract;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
@@ -375,6 +378,8 @@ export class HypernetCore implements IHypernetCore {
     );
     this.registryFactoryContract = new RegistryFactoryContract(this.logUtils);
     this.hypertokenContract = new HypertokenContract(this.logUtils);
+    this.nonFungibleRegistryEnumerableUpgradeableContract =
+      new NonFungibleRegistryEnumerableUpgradeableContract(this.logUtils);
 
     this.blockchainProvider = new EthersBlockchainProvider(
       this.contextProvider,
@@ -512,6 +517,7 @@ export class HypernetCore implements IHypernetCore {
       this.configProvider,
       this.registryFactoryContract,
       this.hypertokenContract,
+      this.nonFungibleRegistryEnumerableUpgradeableContract,
       this.logUtils,
     );
 
