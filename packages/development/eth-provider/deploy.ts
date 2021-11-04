@@ -349,6 +349,12 @@ const func: DeployFunction = async () => {
     JSON.stringify(hyperpayGatewayRegistrationEntry),
   );
 
+  const hyperpayLocalGatewayRegistry2Tx = await gatewayRegistryContract.register(
+    hyperpayAddress,
+    "http://localhost:3000/users/v0",
+    JSON.stringify(hyperpayGatewayRegistrationEntry),
+  );
+
   const hyperpayDevGatewayRegistryTx = await gatewayRegistryContract.register(
     hyperpayAddress,
     "https://hyperpay-dev.hypernetlabs.io/users/v0",
@@ -357,6 +363,7 @@ const func: DeployFunction = async () => {
 
   await testGatewayRegistryTx.wait();
   await hyperpayLocalGatewayRegistryTx.wait();
+  await hyperpayLocalGatewayRegistry2Tx.wait();
   await hyperpayDevGatewayRegistryTx.wait();
 
   console.info(
