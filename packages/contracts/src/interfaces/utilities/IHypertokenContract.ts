@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { BigNumber, ethers } from "ethers";
 
 import {
   HypertokenContractError,
@@ -18,6 +18,12 @@ export interface IHypertokenContract {
     registryAddress: EthereumAddress,
     registrationFee: BigNumberString,
   ): ResultAsync<void, HypertokenContractError>;
+  delegate(
+    delegateAddress: EthereumAddress,
+  ): ResultAsync<void, HypertokenContractError>;
+  balanceOf(
+    account: EthereumAddress,
+  ): ResultAsync<BigNumber, HypertokenContractError>;
 }
 
 export const IHypertokenContractType = Symbol.for("IHypertokenContract");

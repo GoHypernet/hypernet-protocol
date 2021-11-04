@@ -1,5 +1,5 @@
 import { BigNumber, ethers } from "ethers";
-import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
+import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { injectable, inject } from "inversify";
 import {
   EthereumAddress,
@@ -9,6 +9,7 @@ import {
 import { ResultAsync } from "neverthrow";
 import { IRegistryFactoryContract } from "@contracts/interfaces/utilities";
 
+@injectable()
 export class RegistryFactoryContract implements IRegistryFactoryContract {
   protected contract: ethers.Contract | null = null;
   constructor(@inject(ILogUtilsType) protected logUtils: ILogUtils) {}
@@ -30,13 +31,15 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
     return EthereumAddress(this.contract?.address || "");
   }
 
+  public getContract(): ethers.Contract | null {
+    return this.contract;
+  }
+
   public addressToName(
     registryAddress: EthereumAddress,
   ): ResultAsync<EthereumAddress, RegistryFactoryContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.factoryContract.addressToName(
-        registryAddress,
-      ) as Promise<EthereumAddress>,
+      this.contract?.addressToName(registryAddress) as Promise<EthereumAddress>,
       (e) => {
         return new RegistryFactoryContractError(
           "Unable to call factoryContract addressToName()",
@@ -50,9 +53,7 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
     index: number,
   ): ResultAsync<EthereumAddress, RegistryFactoryContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.factoryContract.enumerableRegistries(
-        index,
-      ) as Promise<EthereumAddress>,
+      this.contract?.enumerableRegistries(index) as Promise<EthereumAddress>,
       (e) => {
         return new RegistryFactoryContractError(
           "Unable to call factoryContract enumerableRegistries()",
@@ -66,9 +67,7 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
     registryName: string,
   ): ResultAsync<EthereumAddress, RegistryFactoryContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.factoryContract.nameToAddress(
-        registryName,
-      ) as Promise<EthereumAddress>,
+      this.contract?.nameToAddress(registryName) as Promise<EthereumAddress>,
       (e) => {
         return new RegistryFactoryContractError(
           "Unable to call factoryContract nameToAddress()",
@@ -83,7 +82,7 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
     RegistryFactoryContractError
   > {
     return ResultAsync.fromPromise(
-      this.contract?.factoryContract.getNumberOfEnumerableRegistries() as Promise<BigNumber>,
+      this.contract?.getNumberOfEnumerableRegistries() as Promise<BigNumber>,
       (e) => {
         return new RegistryFactoryContractError(
           "Unable to call factoryContract getNumberOfEnumerableRegistries()",
@@ -98,7 +97,7 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
     RegistryFactoryContractError
   > {
     return ResultAsync.fromPromise(
-      this.contract?.factoryContract.registrationFee() as Promise<BigNumber>,
+      this.contract?.registrationFee() as Promise<BigNumber>,
       (e) => {
         return new RegistryFactoryContractError(
           "Unable to call factoryContract registrationFee()",
@@ -115,7 +114,7 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
     enumerable: boolean,
   ): ResultAsync<void, RegistryFactoryContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.factoryContract.createRegistryByToken(
+      this.contract?.createRegistryByToken(
         name,
         symbol,
         registrarAddress,

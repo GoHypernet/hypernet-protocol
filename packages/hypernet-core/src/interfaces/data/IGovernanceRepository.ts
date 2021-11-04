@@ -34,12 +34,6 @@ export interface IGovernanceRepository {
     proposalId: string,
     voterAddress: EthereumAddress,
   ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError>;
-  proposeRegistryEntry(
-    registryName: string,
-    label: string,
-    data: string,
-    recipient: EthereumAddress,
-  ): ResultAsync<Proposal, BlockchainUnavailableError>;
   queueProposal(
     proposalId: string,
   ): ResultAsync<Proposal, BlockchainUnavailableError>;
@@ -56,6 +50,8 @@ export interface IGovernanceRepository {
   getHyperTokenBalance(
     account: EthereumAddress,
   ): ResultAsync<number, BlockchainUnavailableError>;
+  initializeReadOnly(): ResultAsync<void, BlockchainUnavailableError>;
+  initializeForWrite(): ResultAsync<void, BlockchainUnavailableError>;
 }
 
 export const IGovernanceRepositoryType = Symbol.for("IGovernanceRepository");

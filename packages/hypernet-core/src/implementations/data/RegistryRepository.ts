@@ -981,10 +981,10 @@ export class RegistryRepository implements IRegistryRepository {
         config.chainAddresses[config.governanceChainId]
           ?.registryFactoryAddress as EthereumAddress,
       );
-      this.registryFactoryContract.initializeContract(
+      this.hypertokenContract.initializeContract(
         provider,
         config.chainAddresses[config.governanceChainId]
-          ?.registryFactoryAddress as EthereumAddress,
+          ?.hypertokenAddress as EthereumAddress,
       );
     });
   }
@@ -1000,6 +1000,11 @@ export class RegistryRepository implements IRegistryRepository {
         signer,
         config.chainAddresses[config.governanceChainId]
           ?.registryFactoryAddress as EthereumAddress,
+      );
+      this.hypertokenContract.initializeContract(
+        signer,
+        config.chainAddresses[config.governanceChainId]
+          ?.hypertokenAddress as EthereumAddress,
       );
     });
   }

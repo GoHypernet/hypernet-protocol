@@ -1,5 +1,5 @@
 import { BigNumber, ethers } from "ethers";
-import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
+import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { injectable, inject } from "inversify";
 import {
   BigNumberString,
@@ -10,6 +10,7 @@ import {
 import { ResultAsync } from "neverthrow";
 import { IHypertokenContract } from "@contracts/interfaces/utilities";
 
+@injectable()
 export class HypertokenContract implements IHypertokenContract {
   protected contract: ethers.Contract | null = null;
   constructor(@inject(ILogUtilsType) protected logUtils: ILogUtils) {}
@@ -32,7 +33,7 @@ export class HypertokenContract implements IHypertokenContract {
     registrationFee: BigNumberString,
   ): ResultAsync<void, HypertokenContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.factoryContract.addressToName(
+      this.contract?.addressToName(
         registryAddress,
         registrationFee,
       ) as Promise<any>,
@@ -49,5 +50,39 @@ export class HypertokenContract implements IHypertokenContract {
         });
       })
       .map(() => {});
+  }
+
+  public delegate(
+    delegateAddress: EthereumAddress,
+  ): ResultAsync<void, HypertokenContractError> {
+    return ResultAsync.fromPromise(
+      this.contract?.delegate(delegateAddress) as Promise<any>,
+      (e) => {
+        return new HypertokenContractError(
+          "Unable to call hypertokenContract delegate()",
+          e,
+        );
+      },
+    )
+      .andThen((tx) => {
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+          return new HypertokenContractError("Unable to wait for tx", e);
+        });
+      })
+      .map(() => {});
+  }
+
+  public balanceOf(
+    account: EthereumAddress,
+  ): ResultAsync<BigNumber, HypertokenContractError> {
+    return ResultAsync.fromPromise(
+      this.contract?.balanceOf(account) as Promise<BigNumber>,
+      (e) => {
+        return new HypertokenContractError(
+          "Unable to call HypernetGovernorContract balanceOf()",
+          e,
+        );
+      },
+    );
   }
 }

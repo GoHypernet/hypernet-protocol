@@ -139,6 +139,8 @@ import {
   IHypertokenContract,
   NonFungibleRegistryEnumerableUpgradeableContract,
   INonFungibleRegistryEnumerableUpgradeableContract,
+  HypernetGovernorContract,
+  IHypernetGovernorContract,
 } from "@hypernetlabs/contracts";
 import { IStorageUtils } from "@interfaces/data/utilities";
 import {
@@ -227,6 +229,7 @@ export class HypernetCore implements IHypernetCore {
   protected registryFactoryContract: IRegistryFactoryContract;
   protected hypertokenContract: IHypertokenContract;
   protected nonFungibleRegistryEnumerableUpgradeableContract: INonFungibleRegistryEnumerableUpgradeableContract;
+  protected hypernetGovernorContract: IHypernetGovernorContract;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
@@ -380,6 +383,7 @@ export class HypernetCore implements IHypernetCore {
     this.hypertokenContract = new HypertokenContract(this.logUtils);
     this.nonFungibleRegistryEnumerableUpgradeableContract =
       new NonFungibleRegistryEnumerableUpgradeableContract(this.logUtils);
+    this.hypernetGovernorContract = new HypernetGovernorContract(this.logUtils);
 
     this.blockchainProvider = new EthersBlockchainProvider(
       this.contextProvider,
@@ -509,6 +513,9 @@ export class HypernetCore implements IHypernetCore {
     this.governanceRepository = new GovernanceRepository(
       this.blockchainProvider,
       this.configProvider,
+      this.hypernetGovernorContract,
+      this.registryFactoryContract,
+      this.hypertokenContract,
       this.logUtils,
     );
 
@@ -865,6 +872,8 @@ export class HypernetCore implements IHypernetCore {
           this.gatewayConnectorService.initialize(),
           this.registryService.initializeReadOnly(),
           this.registryService.initializeForWrite(),
+          this.governanceService.initializeReadOnly(),
+          this.governanceService.initializeForWrite(),
         ]);
       })
       .andThen(() => {
@@ -1072,20 +1081,6 @@ export class HypernetCore implements IHypernetCore {
     return this.governanceService.getProposalVotesReceipt(
       proposalId,
       voterAddress,
-    );
-  }
-
-  public proposeRegistryEntry(
-    registryName: string,
-    label: string,
-    data: string,
-    recipient: EthereumAddress,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
-    return this.governanceService.proposeRegistryEntry(
-      registryName,
-      label,
-      data,
-      recipient,
     );
   }
 

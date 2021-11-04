@@ -552,20 +552,6 @@ export default class HypernetIFrameProxy
     });
   }
 
-  public proposeRegistryEntry(
-    registryName: string,
-    label: string,
-    data: string,
-    recipient: EthereumAddress,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
-    return this._createCall("proposeRegistryEntry", {
-      registryName,
-      label,
-      data,
-      recipient,
-    });
-  }
-
   public getRegistries(
     pageNumber: number,
     pageSize: number,

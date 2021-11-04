@@ -28,6 +28,7 @@ export interface IRegistryFactoryContract {
   >;
   registrationFee(): ResultAsync<BigNumber, RegistryFactoryContractError>;
   getContractAddress(): EthereumAddress;
+  getContract(): ethers.Contract | null;
   createRegistryByToken(
     name: string,
     symbol: string,

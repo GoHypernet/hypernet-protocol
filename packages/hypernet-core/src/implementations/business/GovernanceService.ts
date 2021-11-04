@@ -75,20 +75,6 @@ export class GovernanceService implements IGovernanceService {
     );
   }
 
-  public proposeRegistryEntry(
-    registryName: string,
-    label: string,
-    data: string,
-    recipient: EthereumAddress,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
-    return this.governanceRepository.proposeRegistryEntry(
-      registryName,
-      label,
-      data,
-      recipient,
-    );
-  }
-
   public queueProposal(
     proposalId: string,
   ): ResultAsync<Proposal, BlockchainUnavailableError> {
@@ -124,5 +110,13 @@ export class GovernanceService implements IGovernanceService {
     account: EthereumAddress,
   ): ResultAsync<number, BlockchainUnavailableError> {
     return this.governanceRepository.getHyperTokenBalance(account);
+  }
+
+  public initializeReadOnly(): ResultAsync<void, BlockchainUnavailableError> {
+    return this.governanceRepository.initializeReadOnly();
+  }
+
+  public initializeForWrite(): ResultAsync<void, BlockchainUnavailableError> {
+    return this.governanceRepository.initializeForWrite();
   }
 }

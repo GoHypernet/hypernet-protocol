@@ -1,5 +1,5 @@
 import { BigNumber, ethers } from "ethers";
-import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
+import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { injectable, inject } from "inversify";
 import {
   BigNumberString,
@@ -10,6 +10,7 @@ import {
 import { ResultAsync } from "neverthrow";
 import { INonFungibleRegistryEnumerableUpgradeableContract } from "@contracts/interfaces/utilities";
 
+@injectable()
 export class NonFungibleRegistryEnumerableUpgradeableContract
   implements INonFungibleRegistryEnumerableUpgradeableContract
 {
