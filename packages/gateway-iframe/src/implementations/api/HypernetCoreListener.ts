@@ -98,7 +98,7 @@ export class HypernetCoreListener
       gatewayIFrameDisplayed: (data: IIFrameCallData<void>) => {
         this.returnForModel(() => {
           const context = this.contextProvider.getGatewayContext();
-          context.gatewayConnector?.onIFrameClosed();
+          context.gatewayConnector?.onIFrameDisplayed();
           return okAsync(undefined);
         }, data.callId);
       },
