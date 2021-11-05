@@ -6,6 +6,9 @@ import {
   Proposal,
   ProposalVoteReceipt,
   stringToProposalState,
+  HypernetGovernorContractError,
+  HypertokenContractError,
+  GovernanceSignerUnavailableError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IGovernanceRepository } from "@interfaces/data";
@@ -48,7 +51,7 @@ export class GovernanceRepository implements IGovernanceRepository {
   public getProposals(
     pageNumber: number,
     pageSize: number,
-  ): ResultAsync<Proposal[], BlockchainUnavailableError> {
+  ): ResultAsync<Proposal[], HypernetGovernorContractError> {
     return this.hypernetGovernorContract
       ._proposalIdTracker()
       .andThen((totalCount) => {
@@ -82,7 +85,7 @@ export class GovernanceRepository implements IGovernanceRepository {
     symbol: string,
     owner: EthereumAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     const descriptionHash = ethers.utils.id(name);
 
     const transferCalldata = this.registryFactoryContract
@@ -115,13 +118,13 @@ export class GovernanceRepository implements IGovernanceRepository {
   public delegateVote(
     delegateAddress: EthereumAddress,
     amount: number | null,
-  ): ResultAsync<void, BlockchainUnavailableError> {
+  ): ResultAsync<void, HypertokenContractError> {
     return this.hypertokenContract.delegate(delegateAddress);
   }
 
   public getProposalDetails(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return ResultUtils.combine([
       this.hypernetGovernorContract.proposals(proposalId),
       this.hypernetGovernorContract.state(proposalId),
@@ -144,7 +147,7 @@ export class GovernanceRepository implements IGovernanceRepository {
   public castVote(
     proposalId: string,
     support: EProposalVoteSupport,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.hypernetGovernorContract
       .castVote(proposalId, support)
       .andThen(() => {
@@ -155,7 +158,7 @@ export class GovernanceRepository implements IGovernanceRepository {
   public getProposalVotesReceipt(
     proposalId: string,
     voterAddress: EthereumAddress,
-  ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError> {
+  ): ResultAsync<ProposalVoteReceipt, HypernetGovernorContractError> {
     return this.hypernetGovernorContract
       .getReceipt(proposalId, voterAddress)
       .map((receipt) => {
@@ -169,13 +172,16 @@ export class GovernanceRepository implements IGovernanceRepository {
       });
   }
 
-  public getProposalsCount(): ResultAsync<number, BlockchainUnavailableError> {
+  public getProposalsCount(): ResultAsync<
+    number,
+    HypernetGovernorContractError
+  > {
     return this.hypernetGovernorContract._proposalIdTracker();
   }
 
   public queueProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.hypernetGovernorContract.queue(proposalId).andThen(() => {
       return this.getProposalDetails(proposalId);
     });
@@ -183,7 +189,7 @@ export class GovernanceRepository implements IGovernanceRepository {
 
   public cancelProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.hypernetGovernorContract.cancel(proposalId).andThen(() => {
       return this.getProposalDetails(proposalId);
     });
@@ -191,7 +197,7 @@ export class GovernanceRepository implements IGovernanceRepository {
 
   public executeProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.hypernetGovernorContract.execute(proposalId).andThen(() => {
       return this.getProposalDetails(proposalId);
     });
@@ -199,7 +205,7 @@ export class GovernanceRepository implements IGovernanceRepository {
 
   public getProposalThreshold(): ResultAsync<
     number,
-    BlockchainUnavailableError
+    HypernetGovernorContractError
   > {
     return this.hypernetGovernorContract
       .proposalThreshold()
@@ -212,7 +218,7 @@ export class GovernanceRepository implements IGovernanceRepository {
 
   public getVotingPower(
     account: EthereumAddress,
-  ): ResultAsync<number, BlockchainUnavailableError> {
+  ): ResultAsync<number, HypernetGovernorContractError> {
     return this.hypernetGovernorContract.getVotes(account).map((votes) => {
       return Number(ethers.utils.formatUnits(votes.toString(), "ether"));
     });
@@ -220,13 +226,13 @@ export class GovernanceRepository implements IGovernanceRepository {
 
   public getHyperTokenBalance(
     account: EthereumAddress,
-  ): ResultAsync<number, BlockchainUnavailableError> {
+  ): ResultAsync<number, HypertokenContractError> {
     return this.hypertokenContract.balanceOf(account).map((balance) => {
       return Number(ethers.utils.formatUnits(balance.toString(), "ether"));
     });
   }
 
-  public initializeReadOnly(): ResultAsync<void, BlockchainUnavailableError> {
+  public initializeReadOnly(): ResultAsync<void, never> {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.blockchainProvider.getGovernanceProvider(),
@@ -251,7 +257,10 @@ export class GovernanceRepository implements IGovernanceRepository {
     });
   }
 
-  public initializeForWrite(): ResultAsync<void, BlockchainUnavailableError> {
+  public initializeForWrite(): ResultAsync<
+    void,
+    GovernanceSignerUnavailableError
+  > {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.blockchainProvider.getGovernanceSigner(),

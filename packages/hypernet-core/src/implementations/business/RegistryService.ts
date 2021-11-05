@@ -6,6 +6,9 @@ import {
   RegistryParams,
   RegistryPermissionError,
   ERegistrySortOrder,
+  NonFungibleRegistryContractError,
+  RegistryFactoryContractError,
+  GovernanceSignerUnavailableError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 import { inject } from "inversify";
@@ -23,7 +26,10 @@ export class RegistryService implements IRegistryService {
     pageNumber: number,
     pageSize: number,
     sortOrder: ERegistrySortOrder,
-  ): ResultAsync<Registry[], BlockchainUnavailableError> {
+  ): ResultAsync<
+    Registry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     return this.registryRepository.getRegistries(
       pageNumber,
       pageSize,
@@ -33,19 +39,28 @@ export class RegistryService implements IRegistryService {
 
   public getRegistryByName(
     registryNames: string[],
-  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError> {
+  ): ResultAsync<
+    Map<string, Registry>,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     return this.registryRepository.getRegistryByName(registryNames);
   }
 
   public getRegistryByAddress(
     registryAddresses: EthereumAddress[],
-  ): ResultAsync<Map<EthereumAddress, Registry>, BlockchainUnavailableError> {
+  ): ResultAsync<
+    Map<EthereumAddress, Registry>,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     return this.registryRepository.getRegistryByAddress(registryAddresses);
   }
 
   public getRegistryEntriesTotalCount(
     registryNames: string[],
-  ): ResultAsync<Map<string, number>, BlockchainUnavailableError> {
+  ): ResultAsync<
+    Map<string, number>,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     return this.registryRepository.getRegistryEntriesTotalCount(registryNames);
   }
 
@@ -54,7 +69,10 @@ export class RegistryService implements IRegistryService {
     pageNumber: number,
     pageSize: number,
     sortOrder: ERegistrySortOrder,
-  ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     return this.registryRepository.getRegistryEntries(
       registryName,
       pageNumber,
@@ -66,7 +84,10 @@ export class RegistryService implements IRegistryService {
   public getRegistryEntryDetailByTokenId(
     registryName: string,
     tokenId: number,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+  ): ResultAsync<
+    RegistryEntry,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     return this.registryRepository.getRegistryEntryDetailByTokenId(
       registryName,
       tokenId,
@@ -79,7 +100,10 @@ export class RegistryService implements IRegistryService {
     registrationData: string,
   ): ResultAsync<
     RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | BlockchainUnavailableError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | RegistryPermissionError
   > {
     return this.registryRepository.updateRegistryEntryTokenURI(
       registryName,
@@ -94,7 +118,10 @@ export class RegistryService implements IRegistryService {
     label: string,
   ): ResultAsync<
     RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | BlockchainUnavailableError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | RegistryPermissionError
   > {
     return this.registryRepository.updateRegistryEntryLabel(
       registryName,
@@ -105,7 +132,7 @@ export class RegistryService implements IRegistryService {
 
   public getNumberOfRegistries(): ResultAsync<
     number,
-    BlockchainUnavailableError
+    RegistryFactoryContractError
   > {
     return this.registryRepository.getNumberOfRegistries();
   }
@@ -114,7 +141,10 @@ export class RegistryService implements IRegistryService {
     registryParams: RegistryParams,
   ): ResultAsync<
     Registry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
   > {
     return this.registryRepository.updateRegistryParams(registryParams);
   }
@@ -124,7 +154,13 @@ export class RegistryService implements IRegistryService {
     label: string,
     recipientAddress: EthereumAddress,
     data: string,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  > {
     return this.registryRepository.createRegistryEntry(
       registryName,
       label,
@@ -139,7 +175,10 @@ export class RegistryService implements IRegistryService {
     transferToAddress: EthereumAddress,
   ): ResultAsync<
     RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
   > {
     return this.registryRepository.transferRegistryEntry(
       registryName,
@@ -151,7 +190,13 @@ export class RegistryService implements IRegistryService {
   public burnRegistryEntry(
     registryName: string,
     tokenId: number,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  > {
     return this.registryRepository.burnRegistryEntry(registryName, tokenId);
   }
 
@@ -160,7 +205,7 @@ export class RegistryService implements IRegistryService {
     symbol: string,
     registrarAddress: EthereumAddress,
     enumerable: boolean,
-  ): ResultAsync<void, BlockchainUnavailableError> {
+  ): ResultAsync<void, RegistryFactoryContractError> {
     return this.registryRepository.createRegistryByToken(
       name,
       symbol,
@@ -172,29 +217,50 @@ export class RegistryService implements IRegistryService {
   public grantRegistrarRole(
     registryName: string,
     address: EthereumAddress,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  > {
     return this.registryRepository.grantRegistrarRole(registryName, address);
   }
 
   public revokeRegistrarRole(
     registryName: string,
     address: EthereumAddress,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  > {
     return this.registryRepository.revokeRegistrarRole(registryName, address);
   }
 
   public renounceRegistrarRole(
     registryName: string,
     address: EthereumAddress,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  > {
     return this.registryRepository.renounceRegistrarRole(registryName, address);
   }
 
-  public initializeReadOnly(): ResultAsync<void, BlockchainUnavailableError> {
+  public initializeReadOnly(): ResultAsync<void, never> {
     return this.registryRepository.initializeReadOnly();
   }
 
-  public initializeForWrite(): ResultAsync<void, BlockchainUnavailableError> {
+  public initializeForWrite(): ResultAsync<
+    void,
+    GovernanceSignerUnavailableError
+  > {
     return this.registryRepository.initializeForWrite();
   }
 }

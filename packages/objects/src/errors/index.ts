@@ -28,6 +28,6 @@ export * from "@objects/errors/GatewayAuthorizationDeniedError";
 export * from "@objects/errors/RegistryPermissionError";
 export * from "@objects/errors/RegistryFactoryContractError";
 export * from "@objects/errors/HypertokenContractError";
-export * from "@objects/errors/NonFungibleRegistryEnumerableUpgradeableContractError";
+export * from "@objects/errors/NonFungibleRegistryContractError";
 export * from "@objects/errors/HypernetGovernorContractError";
 export * from "@objects/errors/RenderError";

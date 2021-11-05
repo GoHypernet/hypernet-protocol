@@ -3,8 +3,11 @@ import {
   BlockchainUnavailableError,
   ERegistrySortOrder,
   EthereumAddress,
+  GovernanceSignerUnavailableError,
+  NonFungibleRegistryContractError,
   Registry,
   RegistryEntry,
+  RegistryFactoryContractError,
   RegistryParams,
   RegistryPermissionError,
 } from "@hypernetlabs/objects";
@@ -51,13 +54,16 @@ export class RegistryRepository implements IRegistryRepository {
     pageNumber: number,
     pageSize: number,
     sortOrder: ERegistrySortOrder,
-  ): ResultAsync<Registry[], BlockchainUnavailableError> {
+  ): ResultAsync<
+    Registry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     return this.registryFactoryContract
       .getNumberOfEnumerableRegistries()
       .andThen((totalCount) => {
         const registryListResult: ResultAsync<
           Registry | null,
-          BlockchainUnavailableError
+          RegistryFactoryContractError | NonFungibleRegistryContractError
         >[] = [];
 
         for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
@@ -88,7 +94,10 @@ export class RegistryRepository implements IRegistryRepository {
 
   public getRegistryByName(
     registryNames: string[],
-  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError> {
+  ): ResultAsync<
+    Map<string, Registry>,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     const registriesMap: Map<string, Registry> = new Map();
     return ResultUtils.combine(
       registryNames.map((registryName) => {
@@ -164,7 +173,10 @@ export class RegistryRepository implements IRegistryRepository {
 
   public getRegistryByAddress(
     registryAddresses: EthereumAddress[],
-  ): ResultAsync<Map<EthereumAddress, Registry>, BlockchainUnavailableError> {
+  ): ResultAsync<
+    Map<EthereumAddress, Registry>,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     const registriesMap: Map<EthereumAddress, Registry> = new Map();
 
     return ResultUtils.combine(
@@ -242,7 +254,10 @@ export class RegistryRepository implements IRegistryRepository {
 
   public getRegistryEntriesTotalCount(
     registryNames: string[],
-  ): ResultAsync<Map<string, number>, BlockchainUnavailableError> {
+  ): ResultAsync<
+    Map<string, number>,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     const totalCountsMap: Map<string, number> = new Map();
 
     return ResultUtils.combine(
@@ -273,7 +288,10 @@ export class RegistryRepository implements IRegistryRepository {
     pageNumber: number,
     pageSize: number,
     sortOrder: ERegistrySortOrder,
-  ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     return this.registryFactoryContract
       .nameToAddress(registryName)
       .andThen((registryAddress) => {
@@ -288,7 +306,7 @@ export class RegistryRepository implements IRegistryRepository {
           .andThen((totalCount) => {
             const registryEntryListResult: ResultAsync<
               RegistryEntry | null,
-              BlockchainUnavailableError
+              NonFungibleRegistryContractError
             >[] = [];
             for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
               let index = 0;
@@ -305,7 +323,7 @@ export class RegistryRepository implements IRegistryRepository {
               if (index >= 0) {
                 const registryEntryResult: ResultAsync<
                   RegistryEntry | null,
-                  BlockchainUnavailableError
+                  NonFungibleRegistryContractError
                 > = this.nonFungibleRegistryContract
                   .tokenByIndex(index)
                   .andThen((tokenId) => {
@@ -317,7 +335,7 @@ export class RegistryRepository implements IRegistryRepository {
                     .orElse((err) => {
                       return okAsync<
                         RegistryEntry | null,
-                        BlockchainUnavailableError
+                        NonFungibleRegistryContractError
                       >(null);
                     })
                     .map((registryEntry) => {
@@ -347,7 +365,10 @@ export class RegistryRepository implements IRegistryRepository {
   public getRegistryEntryDetailByTokenId(
     registryName: string,
     tokenId: number,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+  ): ResultAsync<
+    RegistryEntry,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     return this.registryFactoryContract
       .nameToAddress(registryName)
       .andThen((registryAddress) => {
@@ -367,7 +388,10 @@ export class RegistryRepository implements IRegistryRepository {
     registrationData: string,
   ): ResultAsync<
     RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | BlockchainUnavailableError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | RegistryPermissionError
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
@@ -411,7 +435,10 @@ export class RegistryRepository implements IRegistryRepository {
     label: string,
   ): ResultAsync<
     RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
@@ -455,7 +482,10 @@ export class RegistryRepository implements IRegistryRepository {
     transferToAddress: EthereumAddress,
   ): ResultAsync<
     RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
@@ -500,7 +530,13 @@ export class RegistryRepository implements IRegistryRepository {
   public burnRegistryEntry(
     registryName: string,
     tokenId: number,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
       this.getSignerAddress(),
@@ -537,7 +573,10 @@ export class RegistryRepository implements IRegistryRepository {
     registryParams: RegistryParams,
   ): ResultAsync<
     Registry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryParams.name]),
@@ -627,7 +666,13 @@ export class RegistryRepository implements IRegistryRepository {
     label: string,
     recipientAddress: EthereumAddress,
     data: string,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
       this.getSignerAddress(),
@@ -688,7 +733,7 @@ export class RegistryRepository implements IRegistryRepository {
     symbol: string,
     registrarAddress: EthereumAddress,
     enumerable: boolean,
-  ): ResultAsync<void, BlockchainUnavailableError> {
+  ): ResultAsync<void, RegistryFactoryContractError> {
     return this.registryFactoryContract
       .registrationFee()
       .andThen((registrationFees) => {
@@ -711,7 +756,13 @@ export class RegistryRepository implements IRegistryRepository {
   public grantRegistrarRole(
     registryName: string,
     address: EthereumAddress,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
       this.getSignerAddress(),
@@ -747,7 +798,13 @@ export class RegistryRepository implements IRegistryRepository {
   public revokeRegistrarRole(
     registryName: string,
     address: EthereumAddress,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
       this.getSignerAddress(),
@@ -783,7 +840,13 @@ export class RegistryRepository implements IRegistryRepository {
   public renounceRegistrarRole(
     registryName: string,
     address: EthereumAddress,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
       this.getSignerAddress(),
@@ -820,14 +883,17 @@ export class RegistryRepository implements IRegistryRepository {
 
   public getNumberOfRegistries(): ResultAsync<
     number,
-    BlockchainUnavailableError
+    RegistryFactoryContractError
   > {
     return this.registryFactoryContract.getNumberOfEnumerableRegistries();
   }
 
   private getRegistryByIndex(
     index: number,
-  ): ResultAsync<Registry | null, BlockchainUnavailableError> {
+  ): ResultAsync<
+    Registry | null,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     return this.registryFactoryContract
       .enumerableRegistries(index)
       .andThen((registryAddress) => {
@@ -901,7 +967,7 @@ export class RegistryRepository implements IRegistryRepository {
 
   private getRegistryEntryByTokenId(
     tokenId: number,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+  ): ResultAsync<RegistryEntry, NonFungibleRegistryContractError> {
     return ResultUtils.combine([
       this.nonFungibleRegistryContract.reverseRegistryMap(tokenId),
       this.nonFungibleRegistryContract.ownerOf(tokenId),
@@ -914,7 +980,7 @@ export class RegistryRepository implements IRegistryRepository {
 
   private getRegistryContractRegistrarRoleAddresses(): ResultAsync<
     EthereumAddress[],
-    BlockchainUnavailableError
+    NonFungibleRegistryContractError
   > {
     return this.nonFungibleRegistryContract
       .getRegistrarRoleMemberCount()
@@ -935,7 +1001,7 @@ export class RegistryRepository implements IRegistryRepository {
 
   private getRegistryContractRegistrarRoleAdminAddresses(): ResultAsync<
     EthereumAddress[],
-    BlockchainUnavailableError
+    NonFungibleRegistryContractError
   > {
     return this.nonFungibleRegistryContract
       .getRegistrarRoleAdminMemberCount()
@@ -969,7 +1035,7 @@ export class RegistryRepository implements IRegistryRepository {
     );
   }
 
-  public initializeReadOnly(): ResultAsync<void, BlockchainUnavailableError> {
+  public initializeReadOnly(): ResultAsync<void, never> {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.blockchainProvider.getGovernanceProvider(),
@@ -989,7 +1055,10 @@ export class RegistryRepository implements IRegistryRepository {
     });
   }
 
-  public initializeForWrite(): ResultAsync<void, BlockchainUnavailableError> {
+  public initializeForWrite(): ResultAsync<
+    void,
+    GovernanceSignerUnavailableError
+  > {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.blockchainProvider.getGovernanceSigner(),

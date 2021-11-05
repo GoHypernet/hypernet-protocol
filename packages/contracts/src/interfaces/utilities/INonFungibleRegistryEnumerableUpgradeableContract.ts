@@ -1,7 +1,7 @@
 import { ethers, BigNumber } from "ethers";
 
 import {
-  NonFungibleRegistryEnumerableUpgradeableContractError,
+  NonFungibleRegistryContractError,
   EthereumAddress,
   BigNumberString,
 } from "@hypernetlabs/objects";
@@ -18,125 +18,125 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
   getContractAddress(): EthereumAddress;
   getRegistrarRoleMemberCount(): ResultAsync<
     BigNumber,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   getRegistrarRoleMember(
     index: number,
   ): ResultAsync<
     EthereumAddress,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   getRegistrarRoleAdminMemberCount(): ResultAsync<
     BigNumber,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   getRegistrarRoleAdminMember(
     index: number,
   ): ResultAsync<
     EthereumAddress,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   name(): ResultAsync<
     string,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   symbol(): ResultAsync<
     string,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   totalSupply(): ResultAsync<
     number,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   allowLazyRegister(): ResultAsync<
     boolean,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   allowStorageUpdate(): ResultAsync<
     boolean,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   allowLabelChange(): ResultAsync<
     boolean,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   allowTransfers(): ResultAsync<
     boolean,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   registrationToken(): ResultAsync<
     EthereumAddress,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   registrationFee(): ResultAsync<
     BigNumberString,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   burnAddress(): ResultAsync<
     EthereumAddress,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   burnFee(): ResultAsync<
     number,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   primaryRegistry(): ResultAsync<
     EthereumAddress,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   tokenByIndex(
     index: number,
-  ): ResultAsync<number, NonFungibleRegistryEnumerableUpgradeableContractError>;
+  ): ResultAsync<number, NonFungibleRegistryContractError>;
   reverseRegistryMap(
     tokenId: number,
-  ): ResultAsync<string, NonFungibleRegistryEnumerableUpgradeableContractError>;
+  ): ResultAsync<string, NonFungibleRegistryContractError>;
   ownerOf(
     tokenId: number,
   ): ResultAsync<
     EthereumAddress,
-    NonFungibleRegistryEnumerableUpgradeableContractError
+    NonFungibleRegistryContractError
   >;
   tokenURI(
     tokenId: number,
-  ): ResultAsync<string, NonFungibleRegistryEnumerableUpgradeableContractError>;
+  ): ResultAsync<string, NonFungibleRegistryContractError>;
   updateRegistration(
     tokenId: number,
     registrationData: string,
-  ): ResultAsync<void, NonFungibleRegistryEnumerableUpgradeableContractError>;
+  ): ResultAsync<void, NonFungibleRegistryContractError>;
   updateLabel(
     tokenId: number,
     label: string,
-  ): ResultAsync<void, NonFungibleRegistryEnumerableUpgradeableContractError>;
+  ): ResultAsync<void, NonFungibleRegistryContractError>;
   transferFrom(
     tokenId: number,
     ownerAddress: EthereumAddress,
     toAddress: EthereumAddress,
-  ): ResultAsync<void, NonFungibleRegistryEnumerableUpgradeableContractError>;
+  ): ResultAsync<void, NonFungibleRegistryContractError>;
   burn(
     tokenId: number,
-  ): ResultAsync<void, NonFungibleRegistryEnumerableUpgradeableContractError>;
+  ): ResultAsync<void, NonFungibleRegistryContractError>;
   setRegistryParameters(
     params: string,
-  ): ResultAsync<void, NonFungibleRegistryEnumerableUpgradeableContractError>;
+  ): ResultAsync<void, NonFungibleRegistryContractError>;
   registerByToken(
     recipientAddress: EthereumAddress,
     label: string,
     data: string,
-  ): ResultAsync<void, NonFungibleRegistryEnumerableUpgradeableContractError>;
+  ): ResultAsync<void, NonFungibleRegistryContractError>;
   register(
     recipientAddress: EthereumAddress,
     label: string,
     data: string,
-  ): ResultAsync<void, NonFungibleRegistryEnumerableUpgradeableContractError>;
+  ): ResultAsync<void, NonFungibleRegistryContractError>;
   grantRole(
     address: EthereumAddress,
-  ): ResultAsync<void, NonFungibleRegistryEnumerableUpgradeableContractError>;
+  ): ResultAsync<void, NonFungibleRegistryContractError>;
   revokeRole(
     address: EthereumAddress,
-  ): ResultAsync<void, NonFungibleRegistryEnumerableUpgradeableContractError>;
+  ): ResultAsync<void, NonFungibleRegistryContractError>;
   renounceRole(
     address: EthereumAddress,
-  ): ResultAsync<void, NonFungibleRegistryEnumerableUpgradeableContractError>;
+  ): ResultAsync<void, NonFungibleRegistryContractError>;
 }
 
 export const INonFungibleRegistryEnumerableUpgradeableContractType = Symbol.for(
