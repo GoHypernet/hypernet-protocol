@@ -284,7 +284,6 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
     BigNumber,
     HypernetGovernorContractError
   > {
-    console.log("this.contract", this.contract);
     return ResultAsync.fromPromise(
       this.contract?.proposalThreshold() as Promise<BigNumber>,
       (e) => {

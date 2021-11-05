@@ -33,10 +33,7 @@ export class HypertokenContract implements IHypertokenContract {
     registrationFee: BigNumberString,
   ): ResultAsync<void, HypertokenContractError> {
     return ResultAsync.fromPromise(
-      this.contract?.addressToName(
-        registryAddress,
-        registrationFee,
-      ) as Promise<any>,
+      this.contract?.approve(registryAddress, registrationFee) as Promise<any>,
       (e) => {
         return new HypertokenContractError(
           "Unable to call hypertokenContract approve()",
