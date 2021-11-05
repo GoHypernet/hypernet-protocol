@@ -82,4 +82,18 @@ export class HypertokenContract implements IHypertokenContract {
       },
     );
   }
+
+  public getVotes(
+    account: EthereumAddress,
+  ): ResultAsync<BigNumber, HypertokenContractError> {
+    return ResultAsync.fromPromise(
+      this.contract?.getVotes(account) as Promise<BigNumber>,
+      (e) => {
+        return new HypertokenContractError(
+          "Unable to call HypernetGovernorContract getVotes()",
+          e,
+        );
+      },
+    );
+  }
 }

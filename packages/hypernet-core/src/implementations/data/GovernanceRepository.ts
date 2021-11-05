@@ -219,7 +219,7 @@ export class GovernanceRepository implements IGovernanceRepository {
   public getVotingPower(
     account: EthereumAddress,
   ): ResultAsync<number, HypernetGovernorContractError> {
-    return this.hypernetGovernorContract.getVotes(account).map((votes) => {
+    return this.hypertokenContract.getVotes(account).map((votes) => {
       return Number(ethers.utils.formatUnits(votes.toString(), "ether"));
     });
   }

@@ -24,6 +24,9 @@ export interface IHypertokenContract {
   balanceOf(
     account: EthereumAddress,
   ): ResultAsync<BigNumber, HypertokenContractError>;
+  getVotes(
+    account: EthereumAddress,
+  ): ResultAsync<BigNumber, HypertokenContractError>;
 }
 
 export const IHypertokenContractType = Symbol.for("IHypertokenContract");

@@ -55,9 +55,6 @@ export interface IHypernetGovernorContract {
   cancel(proposalId: string): ResultAsync<void, HypernetGovernorContractError>;
   execute(proposalId: string): ResultAsync<void, HypernetGovernorContractError>;
   proposalThreshold(): ResultAsync<BigNumber, HypernetGovernorContractError>;
-  getVotes(
-    account: EthereumAddress,
-  ): ResultAsync<BigNumber, HypernetGovernorContractError>;
 }
 
 export const IHypernetGovernorContractType = Symbol.for(

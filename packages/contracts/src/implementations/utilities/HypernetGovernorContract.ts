@@ -23,7 +23,7 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
   ): void {
     this.contract = new ethers.Contract(
       contractAddress,
-      GovernanceAbis.Hypertoken.abi,
+      GovernanceAbis.HypernetGovernor.abi,
       providerOrSigner,
     );
   }
@@ -289,20 +289,6 @@ export class HypernetGovernorContract implements IHypernetGovernorContract {
       (e) => {
         return new HypernetGovernorContractError(
           "Unable to call HypernetGovernorContract proposalThreshold()",
-          e,
-        );
-      },
-    );
-  }
-
-  public getVotes(
-    account: EthereumAddress,
-  ): ResultAsync<BigNumber, HypernetGovernorContractError> {
-    return ResultAsync.fromPromise(
-      this.contract?.getVotes(account) as Promise<BigNumber>,
-      (e) => {
-        return new HypernetGovernorContractError(
-          "Unable to call HypernetGovernorContract getVotes()",
           e,
         );
       },
