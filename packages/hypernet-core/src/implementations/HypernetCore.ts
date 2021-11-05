@@ -39,6 +39,10 @@ import {
   RegistryParams,
   RegistryPermissionError,
   ERegistrySortOrder,
+  NonFungibleRegistryContractError,
+  RegistryFactoryContractError,
+  HypernetGovernorContractError,
+  HypertokenContractError,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -132,6 +136,16 @@ import {
   BrowserNodeFactory,
   InternalProviderFactory,
 } from "@implementations/utilities/factory";
+import {
+  RegistryFactoryContract,
+  IRegistryFactoryContract,
+  HypertokenContract,
+  IHypertokenContract,
+  NonFungibleRegistryEnumerableUpgradeableContract,
+  INonFungibleRegistryEnumerableUpgradeableContract,
+  HypernetGovernorContract,
+  IHypernetGovernorContract,
+} from "@hypernetlabs/contracts";
 import { IStorageUtils } from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
@@ -216,6 +230,10 @@ export class HypernetCore implements IHypernetCore {
   protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory;
   protected browserNodeFactory: IBrowserNodeFactory;
   protected internalProviderFactory: IInternalProviderFactory;
+  protected registryFactoryContract: IRegistryFactoryContract;
+  protected hypertokenContract: IHypertokenContract;
+  protected nonFungibleRegistryEnumerableUpgradeableContract: INonFungibleRegistryEnumerableUpgradeableContract;
+  protected hypernetGovernorContract: IHypernetGovernorContract;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
@@ -365,6 +383,11 @@ export class HypernetCore implements IHypernetCore {
     this.internalProviderFactory = new InternalProviderFactory(
       this.configProvider,
     );
+    this.registryFactoryContract = new RegistryFactoryContract(this.logUtils);
+    this.hypertokenContract = new HypertokenContract(this.logUtils);
+    this.nonFungibleRegistryEnumerableUpgradeableContract =
+      new NonFungibleRegistryEnumerableUpgradeableContract(this.logUtils);
+    this.hypernetGovernorContract = new HypernetGovernorContract(this.logUtils);
 
     this.blockchainProvider = new EthersBlockchainProvider(
       this.contextProvider,
@@ -494,12 +517,18 @@ export class HypernetCore implements IHypernetCore {
     this.governanceRepository = new GovernanceRepository(
       this.blockchainProvider,
       this.configProvider,
+      this.hypernetGovernorContract,
+      this.registryFactoryContract,
+      this.hypertokenContract,
       this.logUtils,
     );
 
     this.registryRepository = new RegistryRepository(
       this.blockchainProvider,
       this.configProvider,
+      this.registryFactoryContract,
+      this.hypertokenContract,
+      this.nonFungibleRegistryEnumerableUpgradeableContract,
       this.logUtils,
     );
 
@@ -843,7 +872,13 @@ export class HypernetCore implements IHypernetCore {
         // whole thing more reliable in operation.
         this.logUtils.debug("Initializing utilities");
         this.logUtils.debug("Initializing services");
-        return ResultUtils.combine([this.gatewayConnectorService.initialize()]);
+        return ResultUtils.combine([
+          this.gatewayConnectorService.initialize(),
+          this.registryService.initializeReadOnly(),
+          this.registryService.initializeForWrite(),
+          this.governanceService.initializeReadOnly(),
+          this.governanceService.initializeForWrite(),
+        ]);
       })
       .andThen(() => {
         this.logUtils.debug("Initializing API listeners");
@@ -1005,7 +1040,7 @@ export class HypernetCore implements IHypernetCore {
   public getProposals(
     pageNumber: number,
     pageSize: number,
-  ): ResultAsync<Proposal[], BlockchainUnavailableError> {
+  ): ResultAsync<Proposal[], HypernetGovernorContractError> {
     return this.governanceService.getProposals(pageNumber, pageSize);
   }
 
@@ -1014,7 +1049,7 @@ export class HypernetCore implements IHypernetCore {
     symbol: string,
     owner: EthereumAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceService.createProposal(
       name,
       symbol,
@@ -1026,44 +1061,30 @@ export class HypernetCore implements IHypernetCore {
   public delegateVote(
     delegateAddress: EthereumAddress,
     amount: number | null,
-  ): ResultAsync<void, BlockchainUnavailableError> {
+  ): ResultAsync<void, HypertokenContractError> {
     return this.governanceService.delegateVote(delegateAddress, amount);
   }
 
   public getProposalDetails(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceService.getProposalDetails(proposalId);
   }
 
   public castVote(
     proposalId: string,
     support: EProposalVoteSupport,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceService.castVote(proposalId, support);
   }
 
   public getProposalVotesReceipt(
     proposalId: string,
     voterAddress: EthereumAddress,
-  ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError> {
+  ): ResultAsync<ProposalVoteReceipt, HypernetGovernorContractError> {
     return this.governanceService.getProposalVotesReceipt(
       proposalId,
       voterAddress,
-    );
-  }
-
-  public proposeRegistryEntry(
-    registryName: string,
-    label: string,
-    data: string,
-    recipient: EthereumAddress,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
-    return this.governanceService.proposeRegistryEntry(
-      registryName,
-      label,
-      data,
-      recipient,
     );
   }
 
@@ -1071,25 +1092,37 @@ export class HypernetCore implements IHypernetCore {
     pageNumber: number,
     pageSize: number,
     sortOrder: ERegistrySortOrder,
-  ): ResultAsync<Registry[], BlockchainUnavailableError> {
+  ): ResultAsync<
+    Registry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     return this.registryService.getRegistries(pageNumber, pageSize, sortOrder);
   }
 
   public getRegistryByName(
     registryNames: string[],
-  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError> {
+  ): ResultAsync<
+    Map<string, Registry>,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     return this.registryService.getRegistryByName(registryNames);
   }
 
   public getRegistryByAddress(
     registryAddresses: EthereumAddress[],
-  ): ResultAsync<Map<EthereumAddress, Registry>, BlockchainUnavailableError> {
+  ): ResultAsync<
+    Map<EthereumAddress, Registry>,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     return this.registryService.getRegistryByAddress(registryAddresses);
   }
 
   public getRegistryEntriesTotalCount(
     registryNames: string[],
-  ): ResultAsync<Map<string, number>, BlockchainUnavailableError> {
+  ): ResultAsync<
+    Map<string, number>,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     return this.registryService.getRegistryEntriesTotalCount(registryNames);
   }
 
@@ -1098,7 +1131,10 @@ export class HypernetCore implements IHypernetCore {
     pageNumber: number,
     pageSize: number,
     sortOrder: ERegistrySortOrder,
-  ): ResultAsync<RegistryEntry[], BlockchainUnavailableError> {
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     return this.registryService.getRegistryEntries(
       registryName,
       pageNumber,
@@ -1110,7 +1146,10 @@ export class HypernetCore implements IHypernetCore {
   public getRegistryEntryDetailByTokenId(
     registryName: string,
     tokenId: number,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError> {
+  ): ResultAsync<
+    RegistryEntry,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  > {
     return this.registryService.getRegistryEntryDetailByTokenId(
       registryName,
       tokenId,
@@ -1119,19 +1158,19 @@ export class HypernetCore implements IHypernetCore {
 
   public queueProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceService.queueProposal(proposalId);
   }
 
   public cancelProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceService.cancelProposal(proposalId);
   }
 
   public executeProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError> {
     return this.governanceService.executeProposal(proposalId);
   }
 
@@ -1141,7 +1180,10 @@ export class HypernetCore implements IHypernetCore {
     registrationData: string,
   ): ResultAsync<
     RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | BlockchainUnavailableError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | RegistryPermissionError
   > {
     return this.registryService.updateRegistryEntryTokenURI(
       registryName,
@@ -1156,7 +1198,10 @@ export class HypernetCore implements IHypernetCore {
     label: string,
   ): ResultAsync<
     RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
   > {
     return this.registryService.updateRegistryEntryLabel(
       registryName,
@@ -1165,32 +1210,35 @@ export class HypernetCore implements IHypernetCore {
     );
   }
 
-  public getProposalsCount(): ResultAsync<number, BlockchainUnavailableError> {
+  public getProposalsCount(): ResultAsync<
+    number,
+    HypernetGovernorContractError
+  > {
     return this.governanceService.getProposalsCount();
   }
 
   public getProposalThreshold(): ResultAsync<
     number,
-    BlockchainUnavailableError
+    HypernetGovernorContractError
   > {
     return this.governanceService.getProposalThreshold();
   }
 
   public getVotingPower(
     account: EthereumAddress,
-  ): ResultAsync<number, BlockchainUnavailableError> {
+  ): ResultAsync<number, HypernetGovernorContractError> {
     return this.governanceService.getVotingPower(account);
   }
 
   public getHyperTokenBalance(
     account: EthereumAddress,
-  ): ResultAsync<number, BlockchainUnavailableError> {
+  ): ResultAsync<number, HypertokenContractError> {
     return this.governanceService.getHyperTokenBalance(account);
   }
 
   public getNumberOfRegistries(): ResultAsync<
     number,
-    BlockchainUnavailableError
+    RegistryFactoryContractError
   > {
     return this.registryService.getNumberOfRegistries();
   }
@@ -1199,7 +1247,10 @@ export class HypernetCore implements IHypernetCore {
     registryParams: RegistryParams,
   ): ResultAsync<
     Registry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
   > {
     return this.registryService.updateRegistryParams(registryParams);
   }
@@ -1209,7 +1260,13 @@ export class HypernetCore implements IHypernetCore {
     label: string,
     recipientAddress: EthereumAddress,
     data: string,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  > {
     return this.registryService.createRegistryEntry(
       registryName,
       label,
@@ -1224,7 +1281,10 @@ export class HypernetCore implements IHypernetCore {
     transferToAddress: EthereumAddress,
   ): ResultAsync<
     RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
   > {
     return this.registryService.transferRegistryEntry(
       registryName,
@@ -1236,7 +1296,13 @@ export class HypernetCore implements IHypernetCore {
   public burnRegistryEntry(
     registryName: string,
     tokenId: number,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  > {
     return this.registryService.burnRegistryEntry(registryName, tokenId);
   }
 
@@ -1245,7 +1311,7 @@ export class HypernetCore implements IHypernetCore {
     symbol: string,
     registrarAddress: EthereumAddress,
     enumerable: boolean,
-  ): ResultAsync<void, BlockchainUnavailableError> {
+  ): ResultAsync<void, RegistryFactoryContractError> {
     return this.registryService.createRegistryByToken(
       name,
       symbol,
@@ -1257,21 +1323,39 @@ export class HypernetCore implements IHypernetCore {
   public grantRegistrarRole(
     registryName: string,
     address: EthereumAddress,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  > {
     return this.registryService.grantRegistrarRole(registryName, address);
   }
 
   public revokeRegistrarRole(
     registryName: string,
     address: EthereumAddress,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  > {
     return this.registryService.revokeRegistrarRole(registryName, address);
   }
 
   public renounceRegistrarRole(
     registryName: string,
     address: EthereumAddress,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError> {
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  > {
     return this.registryService.renounceRegistrarRole(registryName, address);
   }
 }

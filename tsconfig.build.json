@@ -39,7 +39,8 @@
       "@utils/*": ["./*"],
       "@objects/*": ["./*"],
       "@user-dashboard/*": ["./*"],
-      "@storybook/*": ["./*"]
+      "@storybook/*": ["./*"],
+      "@contracts/*": ["./*"]
     }
   }
 }

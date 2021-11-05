@@ -21,6 +21,10 @@ import {
   MessagingError,
   RouterChannelUnknownError,
   RegistryPermissionError,
+  RegistryFactoryContractError,
+  NonFungibleRegistryContractError,
+  HypernetGovernorContractError,
+  HypertokenContractError,
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { GatewayRegistrationFilter } from "@objects/GatewayRegistrationFilter";
@@ -261,78 +265,86 @@ export interface IHypernetCore {
   getProposals(
     pageNumber: number,
     pageSize: number,
-  ): ResultAsync<Proposal[], BlockchainUnavailableError>;
+  ): ResultAsync<Proposal[], HypernetGovernorContractError>;
 
   createProposal(
     name: string,
     symbol: string,
     owner: EthereumAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError>;
 
   delegateVote(
     delegateAddress: EthereumAddress,
     amount: number | null,
-  ): ResultAsync<void, BlockchainUnavailableError>;
+  ): ResultAsync<void, HypertokenContractError>;
 
   getProposalDetails(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError>;
 
   castVote(
     proposalId: string,
     support: EProposalVoteSupport,
-  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError>;
 
   getProposalVotesReceipt(
     proposalId: string,
     voterAddress: EthereumAddress,
-  ): ResultAsync<ProposalVoteReceipt, BlockchainUnavailableError>;
-
-  proposeRegistryEntry(
-    registryName: string,
-    label: string,
-    data: string,
-    recipient: EthereumAddress,
-  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  ): ResultAsync<ProposalVoteReceipt, HypernetGovernorContractError>;
 
   getRegistries(
     pageNumber: number,
     pageSize: number,
     sortOrder: ERegistrySortOrder,
-  ): ResultAsync<Registry[], BlockchainUnavailableError>;
+  ): ResultAsync<
+    Registry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
 
   getRegistryByName(
     registryNames: string[],
-  ): ResultAsync<Map<string, Registry>, BlockchainUnavailableError>;
+  ): ResultAsync<
+    Map<string, Registry>,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
 
   getRegistryByAddress(
     registryAddresses: EthereumAddress[],
-  ): ResultAsync<Map<EthereumAddress, Registry>, BlockchainUnavailableError>;
+  ): ResultAsync<
+    Map<EthereumAddress, Registry>,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
 
   getRegistryEntries(
     registryName: string,
     pageNumber: number,
     pageSize: number,
     sortOrder: ERegistrySortOrder,
-  ): ResultAsync<RegistryEntry[], BlockchainUnavailableError>;
+  ): ResultAsync<
+    RegistryEntry[],
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
 
   getRegistryEntryDetailByTokenId(
     registryName: string,
     tokenId: number,
-  ): ResultAsync<RegistryEntry, BlockchainUnavailableError>;
+  ): ResultAsync<
+    RegistryEntry,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
 
   queueProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError>;
 
   cancelProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError>;
 
   executeProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, BlockchainUnavailableError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError>;
 
   updateRegistryEntryTokenURI(
     registryName: string,
@@ -340,7 +352,10 @@ export interface IHypernetCore {
     registrationData: string,
   ): ResultAsync<
     RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | BlockchainUnavailableError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | RegistryPermissionError
   >;
 
   updateRegistryEntryLabel(
@@ -349,24 +364,30 @@ export interface IHypernetCore {
     label: string,
   ): ResultAsync<
     RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | BlockchainUnavailableError
+    | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
+    | RegistryPermissionError
   >;
 
-  getProposalsCount(): ResultAsync<number, BlockchainUnavailableError>;
+  getProposalsCount(): ResultAsync<number, HypernetGovernorContractError>;
 
   getRegistryEntriesTotalCount(
     registryNames: string[],
-  ): ResultAsync<Map<string, number>, BlockchainUnavailableError>;
+  ): ResultAsync<
+    Map<string, number>,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
 
-  getProposalThreshold(): ResultAsync<number, BlockchainUnavailableError>;
+  getProposalThreshold(): ResultAsync<number, HypernetGovernorContractError>;
 
   getVotingPower(
     account: EthereumAddress,
-  ): ResultAsync<number, BlockchainUnavailableError>;
+  ): ResultAsync<number, HypernetGovernorContractError>;
 
   getHyperTokenBalance(
     account: EthereumAddress,
-  ): ResultAsync<number, BlockchainUnavailableError>;
+  ): ResultAsync<number, HypertokenContractError>;
 
   getNumberOfRegistries(): ResultAsync<number, BlockchainUnavailableError>;
 
@@ -374,7 +395,10 @@ export interface IHypernetCore {
     registryParams: RegistryParams,
   ): ResultAsync<
     Registry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
   >;
 
   createRegistryEntry(
@@ -382,7 +406,13 @@ export interface IHypernetCore {
     label: string,
     recipientAddress: EthereumAddress,
     data: string,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  >;
 
   transferRegistryEntry(
     registryName: string,
@@ -390,35 +420,62 @@ export interface IHypernetCore {
     transferToAddress: EthereumAddress,
   ): ResultAsync<
     RegistryEntry,
-    BlockchainUnavailableError | RegistryPermissionError
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
   >;
 
   burnRegistryEntry(
     registryName: string,
     tokenId: number,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  >;
 
   createRegistryByToken(
     name: string,
     symbol: string,
     registrarAddress: EthereumAddress,
     enumerable: boolean,
-  ): ResultAsync<void, BlockchainUnavailableError>;
+  ): ResultAsync<void, RegistryFactoryContractError>;
 
   grantRegistrarRole(
     registryName: string,
     address: EthereumAddress,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  >;
 
   revokeRegistrarRole(
     registryName: string,
     address: EthereumAddress,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  >;
 
   renounceRegistrarRole(
     registryName: string,
     address: EthereumAddress,
-  ): ResultAsync<void, BlockchainUnavailableError | RegistryPermissionError>;
+  ): ResultAsync<
+    void,
+    | NonFungibleRegistryContractError
+    | RegistryFactoryContractError
+    | BlockchainUnavailableError
+    | RegistryPermissionError
+  >;
 
   /**
    * Observables for seeing what's going on
