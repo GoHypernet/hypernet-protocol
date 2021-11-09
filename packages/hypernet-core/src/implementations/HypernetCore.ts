@@ -827,6 +827,10 @@ export class HypernetCore implements IHypernetCore {
         return ResultUtils.combine([
           this.accountRepository.getPublicIdentifier(),
           this.accountRepository.getActiveStateChannels(),
+          this.registryRepository.initializeReadOnly(),
+          this.registryRepository.initializeForWrite(),
+          this.governanceRepository.initializeReadOnly(),
+          this.governanceRepository.initializeForWrite(),
         ]);
       })
       .andThen((vals) => {
@@ -847,13 +851,7 @@ export class HypernetCore implements IHypernetCore {
         // whole thing more reliable in operation.
         this.logUtils.debug("Initializing utilities");
         this.logUtils.debug("Initializing services");
-        return ResultUtils.combine([
-          this.gatewayConnectorService.initialize(),
-          this.registryRepository.initializeReadOnly(),
-          this.registryRepository.initializeForWrite(),
-          this.governanceRepository.initializeReadOnly(),
-          this.governanceRepository.initializeForWrite(),
-        ]);
+        return this.gatewayConnectorService.initialize();
       })
       .andThen(() => {
         this.logUtils.debug("Initializing API listeners");
