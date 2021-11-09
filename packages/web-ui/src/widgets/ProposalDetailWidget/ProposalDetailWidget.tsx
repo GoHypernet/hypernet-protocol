@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Box, Typography, Grid } from "@material-ui/core";
 import { useAlert } from "react-alert";
 
@@ -7,7 +7,7 @@ import {
   GovernanceVotingCard,
   GovernanceMarkdown,
   GovernanceStatusTag,
-  IHeaderAction,
+  GovernanceButton,
 } from "@web-ui/components";
 import { useStyles } from "@web-ui/widgets/ProposalDetailWidget/ProposalDetailWidget.style";
 import { IProposalDetailWidgetParams } from "@web-ui/interfaces";
@@ -169,45 +169,6 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
     );
   }, [JSON.stringify(proposal), isUserProposalOwner]);
 
-  const getHeaderActions = useCallback(() => {
-    return [
-      ...(canCancelProposal
-        ? [
-            {
-              label: "Cancel Proposal",
-              onClick: () => {
-                cancelProposal();
-              },
-              variant: "outlined",
-              color: "secondary",
-            },
-          ]
-        : []),
-      ...(canQueueProposal
-        ? [
-            {
-              label: "Queue Proposal",
-              onClick: () => {
-                queueProposal();
-              },
-              variant: "outlined",
-            },
-          ]
-        : []),
-      ...(canExecuteProposal
-        ? [
-            {
-              label: "Execute Proposal",
-              onClick: () => {
-                executeProposal();
-              },
-              variant: "outlined",
-            },
-          ]
-        : []),
-    ] as IHeaderAction[];
-  }, [canQueueProposal, canExecuteProposal, canCancelProposal]);
-
   return (
     <Box>
       <GovernanceWidgetHeader
@@ -218,7 +179,48 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
             onProposalListNavigate?.();
           },
         }}
-        headerActions={getHeaderActions()}
+        rightContent={
+          <Box display="flex" flexDirection="row">
+            {canCancelProposal && (
+              <Box marginLeft="10px">
+                <GovernanceButton
+                  onClick={() => {
+                    cancelProposal();
+                  }}
+                  variant="outlined"
+                >
+                  Cancel Proposal
+                </GovernanceButton>
+              </Box>
+            )}
+            {canQueueProposal && (
+              <Box marginLeft="10px">
+                <GovernanceButton
+                  color="primary"
+                  size="medium"
+                  onClick={() => {
+                    queueProposal();
+                  }}
+                  variant="outlined"
+                >
+                  Queue Proposal
+                </GovernanceButton>
+              </Box>
+            )}
+            {canExecuteProposal && (
+              <Box marginLeft="10px">
+                <GovernanceButton
+                  onClick={() => {
+                    executeProposal();
+                  }}
+                  variant="outlined"
+                >
+                  Execute Proposal
+                </GovernanceButton>
+              </Box>
+            )}
+          </Box>
+        }
       />
 
       {proposal?.state != null && (

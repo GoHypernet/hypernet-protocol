@@ -67,12 +67,11 @@ export class RegistryRepository implements IRegistryRepository {
         >[] = [];
 
         for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
-          let index = 0;
-          if (sortOrder == ERegistrySortOrder.REVERSED_ORDER) {
+          let index;
+          if (sortOrder == ERegistrySortOrder.DEFAULT) {
             index = totalCount - (pageNumber - 1) * pageSize - i;
           } else {
-            index =
-              i + pageNumber * Math.min(totalCount, pageSize) - pageSize - 1;
+            index = i + pageNumber * pageSize - pageSize - 1;
           }
 
           if (index >= 0) {
@@ -181,71 +180,68 @@ export class RegistryRepository implements IRegistryRepository {
 
     return ResultUtils.combine(
       registryAddresses.map((registryAddress) => {
-        // Get all registries addresses (indexes)
-        return this.registryFactoryContract
-          .addressToName(registryAddress)
-          .andThen((registryName) => {
-            // Call the NFT contract of that address
-            this.nonFungibleRegistryContract.initializeContract(
-              this.provider,
+        // Call the NFT contract of that address
+        this.nonFungibleRegistryContract.initializeContract(
+          this.provider,
+          registryAddress,
+        );
+
+        // Get the symbol and NumberOfEntries of that registry address
+        return ResultUtils.combine([
+          this.getRegistryContractRegistrarRoleAddresses(),
+          this.getRegistryContractRegistrarRoleAdminAddresses(),
+          this.nonFungibleRegistryContract.name(),
+          this.nonFungibleRegistryContract.symbol(),
+          this.nonFungibleRegistryContract.totalSupply(),
+          this.nonFungibleRegistryContract.allowLazyRegister(),
+          this.nonFungibleRegistryContract.allowStorageUpdate(),
+          this.nonFungibleRegistryContract.allowLabelChange(),
+          this.nonFungibleRegistryContract.allowTransfers(),
+          this.nonFungibleRegistryContract.registrationToken(),
+          this.nonFungibleRegistryContract.registrationFee(),
+          this.nonFungibleRegistryContract.burnAddress(),
+          this.nonFungibleRegistryContract.burnFee(),
+          this.nonFungibleRegistryContract.primaryRegistry(),
+        ]).map((vals) => {
+          const [
+            registrarAddresses,
+            registrarAdminAddresses,
+            registryName,
+            registrySymbol,
+            registryNumberOfEntries,
+            allowLazyRegister,
+            allowStorageUpdate,
+            allowLabelChange,
+            allowTransfers,
+            registrationToken,
+            registrationFee,
+            burnAddress,
+            burnFee,
+            primaryRegistry,
+          ] = vals;
+
+          registriesMap.set(
+            registryAddress,
+            new Registry(
+              registrarAddresses,
+              registrarAdminAddresses,
               registryAddress,
-            );
-
-            // Get the symbol and NumberOfEntries of that registry address
-            return ResultUtils.combine([
-              this.getRegistryContractRegistrarRoleAddresses(),
-              this.getRegistryContractRegistrarRoleAdminAddresses(),
-              this.nonFungibleRegistryContract.symbol(),
-              this.nonFungibleRegistryContract.totalSupply(),
-              this.nonFungibleRegistryContract.allowLazyRegister(),
-              this.nonFungibleRegistryContract.allowStorageUpdate(),
-              this.nonFungibleRegistryContract.allowLabelChange(),
-              this.nonFungibleRegistryContract.allowTransfers(),
-              this.nonFungibleRegistryContract.registrationToken(),
-              this.nonFungibleRegistryContract.registrationFee(),
-              this.nonFungibleRegistryContract.burnAddress(),
-              this.nonFungibleRegistryContract.burnFee(),
-              this.nonFungibleRegistryContract.primaryRegistry(),
-            ]).map((vals) => {
-              const [
-                registrarAddresses,
-                registrarAdminAddresses,
-                registrySymbol,
-                registryNumberOfEntries,
-                allowLazyRegister,
-                allowStorageUpdate,
-                allowLabelChange,
-                allowTransfers,
-                registrationToken,
-                registrationFee,
-                burnAddress,
-                burnFee,
-                primaryRegistry,
-              ] = vals;
-
-              registriesMap.set(
-                registryAddress,
-                new Registry(
-                  registrarAddresses,
-                  registrarAdminAddresses,
-                  registryAddress,
-                  registryName,
-                  registrySymbol,
-                  registryNumberOfEntries,
-                  allowLazyRegister,
-                  allowStorageUpdate,
-                  allowLabelChange,
-                  allowTransfers,
-                  registrationToken,
-                  registrationFee,
-                  burnAddress,
-                  burnFee,
-                  primaryRegistry,
-                  null,
-                ),
-              );
-            });
-          });
+              registryName,
+              registrySymbol,
+              registryNumberOfEntries,
+              allowLazyRegister,
+              allowStorageUpdate,
+              allowLabelChange,
+              allowTransfers,
+              registrationToken,
+              registrationFee,
+              burnAddress,
+              burnFee,
+              primaryRegistry,
+              null,
+            ),
+          );
+        });
       }),
     ).map(() => {
       return registriesMap;
@@ -905,8 +901,8 @@ export class RegistryRepository implements IRegistryRepository {
 
         // Get the name, symbol and NumberOfEntries of that registry address
         return ResultUtils.combine([
-          this.getRegistryContractRegistrarRoleAddresses(),
-          this.getRegistryContractRegistrarRoleAdminAddresses(),
+          this.nonFungibleRegistryContract.getRegistrarRoleMember(),
+          this.nonFungibleRegistryContract.getRegistrarRoleAdminMember(),
           this.nonFungibleRegistryContract.name(),
           this.nonFungibleRegistryContract.symbol(),
           this.nonFungibleRegistryContract.totalSupply(),
@@ -938,8 +934,8 @@ export class RegistryRepository implements IRegistryRepository {
           ] = vals;
           return okAsync(
             new Registry(
-              registrarAddresses,
-              registrarAdminAddresses,
+              [registrarAddresses],
+              [registrarAdminAddresses],
               registryAddress,
               registryName,
               registrySymbol,

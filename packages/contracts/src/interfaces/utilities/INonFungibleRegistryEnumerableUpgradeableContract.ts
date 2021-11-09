@@ -21,49 +21,22 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     NonFungibleRegistryContractError
   >;
   getRegistrarRoleMember(
-    index: number,
-  ): ResultAsync<
-    EthereumAddress,
-    NonFungibleRegistryContractError
-  >;
+    index?: number,
+  ): ResultAsync<EthereumAddress, NonFungibleRegistryContractError>;
   getRegistrarRoleAdminMemberCount(): ResultAsync<
     BigNumber,
     NonFungibleRegistryContractError
   >;
   getRegistrarRoleAdminMember(
-    index: number,
-  ): ResultAsync<
-    EthereumAddress,
-    NonFungibleRegistryContractError
-  >;
-  name(): ResultAsync<
-    string,
-    NonFungibleRegistryContractError
-  >;
-  symbol(): ResultAsync<
-    string,
-    NonFungibleRegistryContractError
-  >;
-  totalSupply(): ResultAsync<
-    number,
-    NonFungibleRegistryContractError
-  >;
-  allowLazyRegister(): ResultAsync<
-    boolean,
-    NonFungibleRegistryContractError
-  >;
-  allowStorageUpdate(): ResultAsync<
-    boolean,
-    NonFungibleRegistryContractError
-  >;
-  allowLabelChange(): ResultAsync<
-    boolean,
-    NonFungibleRegistryContractError
-  >;
-  allowTransfers(): ResultAsync<
-    boolean,
-    NonFungibleRegistryContractError
-  >;
+    index?: number,
+  ): ResultAsync<EthereumAddress, NonFungibleRegistryContractError>;
+  name(): ResultAsync<string, NonFungibleRegistryContractError>;
+  symbol(): ResultAsync<string, NonFungibleRegistryContractError>;
+  totalSupply(): ResultAsync<number, NonFungibleRegistryContractError>;
+  allowLazyRegister(): ResultAsync<boolean, NonFungibleRegistryContractError>;
+  allowStorageUpdate(): ResultAsync<boolean, NonFungibleRegistryContractError>;
+  allowLabelChange(): ResultAsync<boolean, NonFungibleRegistryContractError>;
+  allowTransfers(): ResultAsync<boolean, NonFungibleRegistryContractError>;
   registrationToken(): ResultAsync<
     EthereumAddress,
     NonFungibleRegistryContractError
@@ -72,14 +45,8 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     BigNumberString,
     NonFungibleRegistryContractError
   >;
-  burnAddress(): ResultAsync<
-    EthereumAddress,
-    NonFungibleRegistryContractError
-  >;
-  burnFee(): ResultAsync<
-    number,
-    NonFungibleRegistryContractError
-  >;
+  burnAddress(): ResultAsync<EthereumAddress, NonFungibleRegistryContractError>;
+  burnFee(): ResultAsync<number, NonFungibleRegistryContractError>;
   primaryRegistry(): ResultAsync<
     EthereumAddress,
     NonFungibleRegistryContractError
@@ -92,10 +59,7 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
   ): ResultAsync<string, NonFungibleRegistryContractError>;
   ownerOf(
     tokenId: number,
-  ): ResultAsync<
-    EthereumAddress,
-    NonFungibleRegistryContractError
-  >;
+  ): ResultAsync<EthereumAddress, NonFungibleRegistryContractError>;
   tokenURI(
     tokenId: number,
   ): ResultAsync<string, NonFungibleRegistryContractError>;
@@ -112,9 +76,7 @@ export interface INonFungibleRegistryEnumerableUpgradeableContract {
     ownerAddress: EthereumAddress,
     toAddress: EthereumAddress,
   ): ResultAsync<void, NonFungibleRegistryContractError>;
-  burn(
-    tokenId: number,
-  ): ResultAsync<void, NonFungibleRegistryContractError>;
+  burn(tokenId: number): ResultAsync<void, NonFungibleRegistryContractError>;
   setRegistryParameters(
     params: string,
   ): ResultAsync<void, NonFungibleRegistryContractError>;

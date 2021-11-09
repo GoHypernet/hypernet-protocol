@@ -130,13 +130,31 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
           <GovernanceWidgetHeader
             label={registry.name}
             description={
-              <Box className={classes.headerDescriptionContainer}>
-                <Typography>Address:</Typography>
-                <GovernanceChip
-                  className={classes.addressChip}
-                  label={registry?.address}
-                  color="gray"
-                />
+              <Box>
+                <Box className={classes.headerDescriptionContainer}>
+                  <Typography>Address:</Typography>
+                  <GovernanceChip
+                    className={classes.addressChip}
+                    label={registry?.address}
+                    color="gray"
+                  />
+                </Box>
+                <Box className={classes.headerDescriptionContainer}>
+                  <Typography>Registrar Addresses:</Typography>
+                  <GovernanceChip
+                    className={classes.addressChip}
+                    label={registry?.registrarAddresses.join("-")}
+                    color="gray"
+                  />
+                </Box>
+                <Box className={classes.headerDescriptionContainer}>
+                  <Typography>Registrar Admin Addresses:</Typography>
+                  <GovernanceChip
+                    className={classes.addressChip}
+                    label={registry?.registrarAdminAddresses.join("-")}
+                    color="gray"
+                  />
+                </Box>
               </Box>
             }
             navigationLink={{
@@ -154,6 +172,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                     setRevokeRoleModalOpen(true);
                   }}
                   variant="outlined"
+                  disabled={!isRegistrar}
                 >
                   Revoke Registrar
                 </GovernanceButton>
@@ -165,6 +184,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                       setRenounceRoleModalOpen(true);
                     }}
                     variant="outlined"
+                    disabled={!isRegistrar}
                   >
                     Renounce Registrar
                   </GovernanceButton>
@@ -177,6 +197,7 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
                       setGrantRoleModalOpen(true);
                     }}
                     variant="contained"
+                    disabled={!isRegistrar}
                   >
                     Grant Registrar
                   </GovernanceButton>

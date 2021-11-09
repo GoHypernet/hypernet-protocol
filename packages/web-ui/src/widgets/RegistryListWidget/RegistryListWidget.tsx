@@ -45,7 +45,6 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
     coreProxy
       .getNumberOfRegistries()
       .map((numberOfRegistries) => {
-        console.log("numberOfRegistries: ", numberOfRegistries);
         setRegistriesCount(numberOfRegistries);
         if (!numberOfRegistries) {
           setHasEmptyState(true);
@@ -78,16 +77,17 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
           : ERegistrySortOrder.DEFAULT,
       )
       .map((registries) => {
-        setRegistries(registries);
         setPage(pageNumber);
         if (!registries.length) {
+          setRegistries([]);
           setHasEmptyState(true);
+        } else {
+          setRegistries(registries);
+          setHasEmptyState(false);
         }
       })
       .mapErr(handleError);
   };
-
-  const createRegistry = () => {};
 
   const handleError = (err?: Error) => {
     setLoading(false);
@@ -162,23 +162,19 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
               fieldValue: registry.numberOfEntries.toString(),
             },
             {
-              fieldTitle: "Registrar Addresses",
+              fieldTitle: "First Registrar Addresses",
               fieldValue: registry.registrarAddresses.join("-"),
             },
           ]}
           actionButtonList={
             [
-              ...(getIsRegistrar(registry)
-                ? [
-                    {
-                      label: "Detail",
-                      variant: "text",
-                      onClick: () =>
-                        onRegistryDetailNavigate &&
-                        onRegistryDetailNavigate(registry.name),
-                    },
-                  ]
-                : []),
+              {
+                label: "Detail",
+                variant: "text",
+                onClick: () =>
+                  onRegistryDetailNavigate &&
+                  onRegistryDetailNavigate(registry.name),
+              },
               {
                 label: "View Registry Entries",
                 onClick: () =>
