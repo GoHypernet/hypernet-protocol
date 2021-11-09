@@ -1,6 +1,4 @@
 import { BigNumber, ethers } from "ethers";
-import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
-import { injectable, inject } from "inversify";
 import {
   EProposalVoteSupport,
   EthereumAddress,
@@ -10,17 +8,14 @@ import {
 import { ResultAsync } from "neverthrow";
 import { IHypernetGovernorContract } from "@contracts/interfaces/utilities";
 
-@injectable()
 export class HypernetGovernorContract implements IHypernetGovernorContract {
   protected contract: ethers.Contract | null = null;
-  constructor(@inject(ILogUtilsType) protected logUtils: ILogUtils) {}
-
-  public initializeContract(
-    providerOrSigner:
+  constructor(
+    protected providerOrSigner:
       | ethers.providers.Provider
       | ethers.providers.JsonRpcSigner,
-    contractAddress: EthereumAddress,
-  ): void {
+    protected contractAddress: EthereumAddress,
+  ) {
     this.contract = new ethers.Contract(
       contractAddress,
       GovernanceAbis.HypernetGovernor.abi,

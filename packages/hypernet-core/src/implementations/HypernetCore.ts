@@ -42,7 +42,7 @@ import {
   NonFungibleRegistryContractError,
   RegistryFactoryContractError,
   HypernetGovernorContractError,
-  HypertokenContractError,
+  ERC20ContractError,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -136,16 +136,6 @@ import {
   BrowserNodeFactory,
   InternalProviderFactory,
 } from "@implementations/utilities/factory";
-import {
-  RegistryFactoryContract,
-  IRegistryFactoryContract,
-  HypertokenContract,
-  IHypertokenContract,
-  NonFungibleRegistryEnumerableUpgradeableContract,
-  INonFungibleRegistryEnumerableUpgradeableContract,
-  HypernetGovernorContract,
-  IHypernetGovernorContract,
-} from "@hypernetlabs/contracts";
 import { IStorageUtils } from "@interfaces/data/utilities";
 import {
   IBlockchainProvider,
@@ -230,10 +220,6 @@ export class HypernetCore implements IHypernetCore {
   protected gatewayConnectorProxyFactory: IGatewayConnectorProxyFactory;
   protected browserNodeFactory: IBrowserNodeFactory;
   protected internalProviderFactory: IInternalProviderFactory;
-  protected registryFactoryContract: IRegistryFactoryContract;
-  protected hypertokenContract: IHypertokenContract;
-  protected nonFungibleRegistryEnumerableUpgradeableContract: INonFungibleRegistryEnumerableUpgradeableContract;
-  protected hypernetGovernorContract: IHypernetGovernorContract;
 
   // Data Layer Stuff
   protected accountRepository: IAccountsRepository;
@@ -383,11 +369,6 @@ export class HypernetCore implements IHypernetCore {
     this.internalProviderFactory = new InternalProviderFactory(
       this.configProvider,
     );
-    this.registryFactoryContract = new RegistryFactoryContract(this.logUtils);
-    this.hypertokenContract = new HypertokenContract(this.logUtils);
-    this.nonFungibleRegistryEnumerableUpgradeableContract =
-      new NonFungibleRegistryEnumerableUpgradeableContract(this.logUtils);
-    this.hypernetGovernorContract = new HypernetGovernorContract(this.logUtils);
 
     this.blockchainProvider = new EthersBlockchainProvider(
       this.contextProvider,
@@ -517,18 +498,12 @@ export class HypernetCore implements IHypernetCore {
     this.governanceRepository = new GovernanceRepository(
       this.blockchainProvider,
       this.configProvider,
-      this.hypernetGovernorContract,
-      this.registryFactoryContract,
-      this.hypertokenContract,
       this.logUtils,
     );
 
     this.registryRepository = new RegistryRepository(
       this.blockchainProvider,
       this.configProvider,
-      this.registryFactoryContract,
-      this.hypertokenContract,
-      this.nonFungibleRegistryEnumerableUpgradeableContract,
       this.logUtils,
     );
 
@@ -852,6 +827,10 @@ export class HypernetCore implements IHypernetCore {
         return ResultUtils.combine([
           this.accountRepository.getPublicIdentifier(),
           this.accountRepository.getActiveStateChannels(),
+          this.registryRepository.initializeReadOnly(),
+          this.registryRepository.initializeForWrite(),
+          this.governanceRepository.initializeReadOnly(),
+          this.governanceRepository.initializeForWrite(),
         ]);
       })
       .andThen((vals) => {
@@ -872,13 +851,7 @@ export class HypernetCore implements IHypernetCore {
         // whole thing more reliable in operation.
         this.logUtils.debug("Initializing utilities");
         this.logUtils.debug("Initializing services");
-        return ResultUtils.combine([
-          this.gatewayConnectorService.initialize(),
-          this.registryService.initializeReadOnly(),
-          this.registryService.initializeForWrite(),
-          this.governanceService.initializeReadOnly(),
-          this.governanceService.initializeForWrite(),
-        ]);
+        return this.gatewayConnectorService.initialize();
       })
       .andThen(() => {
         this.logUtils.debug("Initializing API listeners");
@@ -1061,7 +1034,7 @@ export class HypernetCore implements IHypernetCore {
   public delegateVote(
     delegateAddress: EthereumAddress,
     amount: number | null,
-  ): ResultAsync<void, HypertokenContractError> {
+  ): ResultAsync<void, ERC20ContractError> {
     return this.governanceService.delegateVote(delegateAddress, amount);
   }
 
@@ -1232,7 +1205,7 @@ export class HypernetCore implements IHypernetCore {
 
   public getHyperTokenBalance(
     account: EthereumAddress,
-  ): ResultAsync<number, HypertokenContractError> {
+  ): ResultAsync<number, ERC20ContractError> {
     return this.governanceService.getHyperTokenBalance(account);
   }
 

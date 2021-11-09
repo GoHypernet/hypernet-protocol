@@ -1,6 +1,4 @@
 import { BigNumber, ethers } from "ethers";
-import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
-import { injectable, inject } from "inversify";
 import {
   BigNumberString,
   EthereumAddress,
@@ -10,20 +8,17 @@ import {
 import { ResultAsync } from "neverthrow";
 import { INonFungibleRegistryEnumerableUpgradeableContract } from "@contracts/interfaces/utilities";
 
-@injectable()
 export class NonFungibleRegistryEnumerableUpgradeableContract
   implements INonFungibleRegistryEnumerableUpgradeableContract
 {
   protected contract: ethers.Contract | null = null;
-  constructor(@inject(ILogUtilsType) protected logUtils: ILogUtils) {}
-
-  public initializeContract(
+  constructor(
     providerOrSigner:
       | ethers.providers.Provider
       | ethers.providers.JsonRpcSigner
       | undefined,
     registryAddress: EthereumAddress,
-  ): void {
+  ) {
     this.contract = new ethers.Contract(
       registryAddress,
       GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,
@@ -53,15 +48,12 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public getRegistrarRoleMember(
-    index: number,
-  ): ResultAsync<
-    EthereumAddress,
-    NonFungibleRegistryContractError
-  > {
+    index?: number,
+  ): ResultAsync<EthereumAddress, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.getRoleMember(
         this.contract?.REGISTRAR_ROLE(),
-        index,
+        index || 0,
       ) as Promise<EthereumAddress>,
       (e) => {
         return new NonFungibleRegistryContractError(
@@ -90,15 +82,12 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   }
 
   public getRegistrarRoleAdminMember(
-    index: number,
-  ): ResultAsync<
-    EthereumAddress,
-    NonFungibleRegistryContractError
-  > {
+    index?: number,
+  ): ResultAsync<EthereumAddress, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.getRoleMember(
         this.contract?.REGISTRAR_ROLE_ADMIN(),
-        index,
+        index || 0,
       ) as Promise<EthereumAddress>,
       (e) => {
         return new NonFungibleRegistryContractError(
@@ -109,25 +98,16 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
-  public name(): ResultAsync<
-    string,
-    NonFungibleRegistryContractError
-  > {
+  public name(): ResultAsync<string, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.name() as Promise<string>,
       (e) => {
-        return new NonFungibleRegistryContractError(
-          "Unable to call name()",
-          e,
-        );
+        return new NonFungibleRegistryContractError("Unable to call name()", e);
       },
     );
   }
 
-  public symbol(): ResultAsync<
-    string,
-    NonFungibleRegistryContractError
-  > {
+  public symbol(): ResultAsync<string, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.symbol() as Promise<string>,
       (e) => {
@@ -139,10 +119,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
-  public totalSupply(): ResultAsync<
-    number,
-    NonFungibleRegistryContractError
-  > {
+  public totalSupply(): ResultAsync<number, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.totalSupply() as Promise<BigNumber>,
       (e) => {
@@ -261,10 +238,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     );
   }
 
-  public burnFee(): ResultAsync<
-    number,
-    NonFungibleRegistryContractError
-  > {
+  public burnFee(): ResultAsync<number, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.burnFee() as Promise<BigNumber>,
       (e) => {
@@ -295,10 +269,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public tokenByIndex(
     index: number,
-  ): ResultAsync<
-    number,
-    NonFungibleRegistryContractError
-  > {
+  ): ResultAsync<number, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.tokenByIndex(index) as Promise<BigNumber>,
       (e) => {
@@ -312,10 +283,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public reverseRegistryMap(
     tokenId: number,
-  ): ResultAsync<
-    string,
-    NonFungibleRegistryContractError
-  > {
+  ): ResultAsync<string, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.reverseRegistryMap(tokenId) as Promise<string>,
       (e) => {
@@ -329,10 +297,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public ownerOf(
     tokenId: number,
-  ): ResultAsync<
-    EthereumAddress,
-    NonFungibleRegistryContractError
-  > {
+  ): ResultAsync<EthereumAddress, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.ownerOf(tokenId) as Promise<EthereumAddress>,
       (e) => {
@@ -346,10 +311,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
 
   public tokenURI(
     tokenId: number,
-  ): ResultAsync<
-    string,
-    NonFungibleRegistryContractError
-  > {
+  ): ResultAsync<string, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.tokenURI(tokenId) as Promise<string>,
       (e) => {
@@ -450,10 +412,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
     return ResultAsync.fromPromise(
       this.contract?.burn(tokenId) as Promise<any>,
       (e) => {
-        return new NonFungibleRegistryContractError(
-          "Unable to call burn()",
-          e,
-        );
+        return new NonFungibleRegistryContractError("Unable to call burn()", e);
       },
     ).map(() => {});
   }

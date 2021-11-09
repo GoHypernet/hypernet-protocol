@@ -1,12 +1,10 @@
 import {
   Proposal,
-  BlockchainUnavailableError,
   EthereumAddress,
   EProposalVoteSupport,
   ProposalVoteReceipt,
   HypernetGovernorContractError,
-  HypertokenContractError,
-  GovernanceSignerUnavailableError,
+  ERC20ContractError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 import { inject } from "inversify";
@@ -54,7 +52,7 @@ export class GovernanceService implements IGovernanceService {
   public delegateVote(
     delegateAddress: EthereumAddress,
     amount: number | null,
-  ): ResultAsync<void, HypertokenContractError> {
+  ): ResultAsync<void, ERC20ContractError> {
     return this.governanceRepository.delegateVote(delegateAddress, amount);
   }
 
@@ -114,18 +112,7 @@ export class GovernanceService implements IGovernanceService {
 
   public getHyperTokenBalance(
     account: EthereumAddress,
-  ): ResultAsync<number, HypertokenContractError> {
+  ): ResultAsync<number, ERC20ContractError> {
     return this.governanceRepository.getHyperTokenBalance(account);
-  }
-
-  public initializeReadOnly(): ResultAsync<void, never> {
-    return this.governanceRepository.initializeReadOnly();
-  }
-
-  public initializeForWrite(): ResultAsync<
-    void,
-    GovernanceSignerUnavailableError
-  > {
-    return this.governanceRepository.initializeForWrite();
   }
 }
