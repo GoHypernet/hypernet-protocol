@@ -1,6 +1,4 @@
 import { BigNumber, ethers } from "ethers";
-import { ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
-import { injectable, inject } from "inversify";
 import {
   BigNumberString,
   EthereumAddress,
@@ -10,20 +8,17 @@ import {
 import { ResultAsync } from "neverthrow";
 import { INonFungibleRegistryEnumerableUpgradeableContract } from "@contracts/interfaces/utilities";
 
-@injectable()
 export class NonFungibleRegistryEnumerableUpgradeableContract
   implements INonFungibleRegistryEnumerableUpgradeableContract
 {
   protected contract: ethers.Contract | null = null;
-  constructor(@inject(ILogUtilsType) protected logUtils: ILogUtils) {}
-
-  public initializeContract(
+  constructor(
     providerOrSigner:
       | ethers.providers.Provider
       | ethers.providers.JsonRpcSigner
       | undefined,
     registryAddress: EthereumAddress,
-  ): void {
+  ) {
     this.contract = new ethers.Contract(
       registryAddress,
       GovernanceAbis.NonFungibleRegistryEnumerableUpgradeable.abi,

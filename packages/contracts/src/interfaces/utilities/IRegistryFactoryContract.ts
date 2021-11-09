@@ -7,12 +7,6 @@ import {
 import { ResultAsync } from "neverthrow";
 
 export interface IRegistryFactoryContract {
-  initializeContract(
-    providerOrSigner:
-      | ethers.providers.Provider
-      | ethers.providers.JsonRpcSigner,
-    contractAddress: EthereumAddress,
-  ): void;
   addressToName(
     registryAddress: EthereumAddress,
   ): ResultAsync<EthereumAddress, RegistryFactoryContractError>;

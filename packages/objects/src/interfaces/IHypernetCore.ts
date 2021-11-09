@@ -24,7 +24,7 @@ import {
   RegistryFactoryContractError,
   NonFungibleRegistryContractError,
   HypernetGovernorContractError,
-  HypertokenContractError,
+  ERC20ContractError,
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { GatewayRegistrationFilter } from "@objects/GatewayRegistrationFilter";
@@ -277,7 +277,7 @@ export interface IHypernetCore {
   delegateVote(
     delegateAddress: EthereumAddress,
     amount: number | null,
-  ): ResultAsync<void, HypertokenContractError>;
+  ): ResultAsync<void, ERC20ContractError>;
 
   getProposalDetails(
     proposalId: string,
@@ -387,7 +387,7 @@ export interface IHypernetCore {
 
   getHyperTokenBalance(
     account: EthereumAddress,
-  ): ResultAsync<number, HypertokenContractError>;
+  ): ResultAsync<number, ERC20ContractError>;
 
   getNumberOfRegistries(): ResultAsync<number, BlockchainUnavailableError>;
 

@@ -159,6 +159,4 @@ export interface IRegistryService {
     | BlockchainUnavailableError
     | RegistryPermissionError
   >;
-  initializeReadOnly(): ResultAsync<void, never>;
-  initializeForWrite(): ResultAsync<void, GovernanceSignerUnavailableError>;
 }

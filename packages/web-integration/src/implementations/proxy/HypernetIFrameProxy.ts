@@ -41,7 +41,7 @@ import {
   RegistryFactoryContractError,
   NonFungibleRegistryContractError,
   HypernetGovernorContractError,
-  HypertokenContractError,
+  ERC20ContractError,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -523,7 +523,7 @@ export default class HypernetIFrameProxy
   public delegateVote(
     delegateAddress: EthereumAddress,
     amount: number | null,
-  ): ResultAsync<void, HypertokenContractError> {
+  ): ResultAsync<void, ERC20ContractError> {
     return this._createCall("delegateVote", {
       delegateAddress,
       amount,
@@ -704,7 +704,7 @@ export default class HypernetIFrameProxy
 
   public getHyperTokenBalance(
     account: EthereumAddress,
-  ): ResultAsync<number, HypertokenContractError> {
+  ): ResultAsync<number, ERC20ContractError> {
     return this._createCall("getHyperTokenBalance", account);
   }
 

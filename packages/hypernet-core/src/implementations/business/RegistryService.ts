@@ -252,15 +252,4 @@ export class RegistryService implements IRegistryService {
   > {
     return this.registryRepository.renounceRegistrarRole(registryName, address);
   }
-
-  public initializeReadOnly(): ResultAsync<void, never> {
-    return this.registryRepository.initializeReadOnly();
-  }
-
-  public initializeForWrite(): ResultAsync<
-    void,
-    GovernanceSignerUnavailableError
-  > {
-    return this.registryRepository.initializeForWrite();
-  }
 }

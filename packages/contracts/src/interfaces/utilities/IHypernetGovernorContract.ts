@@ -8,12 +8,6 @@ import {
 import { ResultAsync } from "neverthrow";
 
 export interface IHypernetGovernorContract {
-  initializeContract(
-    providerOrSigner:
-      | ethers.providers.Provider
-      | ethers.providers.JsonRpcSigner,
-    contractAddress: EthereumAddress,
-  ): void;
   getContractAddress(): EthereumAddress;
   _proposalIdTracker(): ResultAsync<number, HypernetGovernorContractError>;
   _proposalMap(

@@ -8,13 +8,6 @@ import {
 import { ResultAsync } from "neverthrow";
 
 export interface INonFungibleRegistryEnumerableUpgradeableContract {
-  initializeContract(
-    providerOrSigner:
-      | ethers.providers.Provider
-      | ethers.providers.JsonRpcSigner
-      | undefined,
-    contractAddress: EthereumAddress,
-  ): void;
   getContractAddress(): EthereumAddress;
   getRegistrarRoleMemberCount(): ResultAsync<
     BigNumber,
