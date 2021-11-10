@@ -34,9 +34,7 @@ const ConnectedAccountWidget: React.FC<ConnectedAccountWidgetParams> = () => {
 
   const handleError = (err) => {
     setLoading(false);
-    alert.error(
-      err?.src?.data?.message || err?.message || "Something went wrong!",
-    );
+    alert.error(err?.message || "Something went wrong!");
   };
 
   if (accountAddress == null) return <></>;

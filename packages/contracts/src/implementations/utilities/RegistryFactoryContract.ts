@@ -35,9 +35,9 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
   ): ResultAsync<EthereumAddress, RegistryFactoryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.addressToName(registryAddress) as Promise<EthereumAddress>,
-      (e: any) => {
+      (e) => {
         return new RegistryFactoryContractError(
-          e?.data?.message || "Unable to call factoryContract addressToName()",
+          "Unable to call factoryContract addressToName()",
           e,
         );
       },
@@ -49,10 +49,9 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
   ): ResultAsync<EthereumAddress, RegistryFactoryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.enumerableRegistries(index) as Promise<EthereumAddress>,
-      (e: any) => {
+      (e) => {
         return new RegistryFactoryContractError(
-          e?.data?.message ||
-            "Unable to call factoryContract enumerableRegistries()",
+          "Unable to call factoryContract enumerableRegistries()",
           e,
         );
       },
@@ -64,9 +63,9 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
   ): ResultAsync<EthereumAddress, RegistryFactoryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.nameToAddress(registryName) as Promise<EthereumAddress>,
-      (e: any) => {
+      (e) => {
         return new RegistryFactoryContractError(
-          e?.data?.message || "Unable to call factoryContract nameToAddress()",
+          "Unable to call factoryContract nameToAddress()",
           e,
         );
       },
@@ -79,10 +78,9 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
   > {
     return ResultAsync.fromPromise(
       this.contract?.getNumberOfEnumerableRegistries() as Promise<BigNumber>,
-      (e: any) => {
+      (e) => {
         return new RegistryFactoryContractError(
-          e?.data?.message ||
-            "Unable to call factoryContract getNumberOfEnumerableRegistries()",
+          "Unable to call factoryContract getNumberOfEnumerableRegistries()",
           e,
         );
       },
@@ -95,10 +93,9 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
   > {
     return ResultAsync.fromPromise(
       this.contract?.registrationFee() as Promise<BigNumber>,
-      (e: any) => {
+      (e) => {
         return new RegistryFactoryContractError(
-          e?.data?.message ||
-            "Unable to call factoryContract registrationFee()",
+          "Unable to call factoryContract registrationFee()",
           e,
         );
       },
@@ -118,20 +115,16 @@ export class RegistryFactoryContract implements IRegistryFactoryContract {
         registrarAddress,
         enumerable,
       ) as Promise<any>,
-      (e: any) => {
+      (e) => {
         return new RegistryFactoryContractError(
-          e?.data?.message ||
-            "Unable to call factoryContract createRegistryByToken()",
+          "Unable to call factoryContract createRegistryByToken()",
           e,
         );
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e: any) => {
-          return new RegistryFactoryContractError(
-            e?.data?.message || "Unable to wait for tx",
-            e,
-          );
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+          return new RegistryFactoryContractError("Unable to wait for tx", e);
         });
       })
       .map(() => {});

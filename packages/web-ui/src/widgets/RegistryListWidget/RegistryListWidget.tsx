@@ -92,9 +92,7 @@ const RegistryListWidget: React.FC<IRegistryListWidgetParams> = ({
   const handleError = (err) => {
     setLoading(false);
     setHasEmptyState(true);
-    alert.error(
-      err?.src?.data?.message || err?.message || "Something went wrong!",
-    );
+    alert.error(err?.message || "Something went wrong!");
   };
 
   const getRegistryNotAllowedChipItems = (registry: Registry) => {

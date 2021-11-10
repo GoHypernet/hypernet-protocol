@@ -69,9 +69,7 @@ const ProposalDetailWidget: React.FC<IProposalDetailWidgetParams> = ({
 
   const handleError = (err) => {
     setLoading(false);
-    alert.error(
-      err?.src?.data?.message || err?.message || "Something went wrong!",
-    );
+    alert.error(err?.message || "Something went wrong!");
   };
 
   const proposalVotesFor = proposal ? proposal.votesFor : 0;
