@@ -5,7 +5,12 @@ import {
   IInitiateSendFundsRequest,
   IInitiateAuthorizeFundsRequest,
 } from "@hypernetlabs/gateway-connector";
-import { PaymentId } from "@hypernetlabs/objects";
+import {
+  EPaymentType,
+  PaymentId,
+  PullPayment,
+  PushPayment,
+} from "@hypernetlabs/objects";
 import { injectable, inject } from "inversify";
 import { okAsync, ResultAsync } from "neverthrow";
 
@@ -24,6 +29,13 @@ export class PaymentService implements IPaymentService {
   protected initiateAuthorizeFundsCallbacks = new Map<
     string,
     (err: unknown | null, paymentId: PaymentId | null) => void
+  >();
+  protected getPaymentCallbacks = new Map<
+    PaymentId,
+    (
+      payment: PushPayment | PullPayment | null,
+      paymentType: EPaymentType,
+    ) => void
   >();
 
   constructor(
@@ -103,5 +115,33 @@ export class PaymentService implements IPaymentService {
     request: IResolveInsuranceRequest,
   ): ResultAsync<void, Error> {
     return this.hypernetCoreRepository.emitResolveInsuranceRequest(request);
+  }
+
+  public getPayment(
+    paymentId: PaymentId,
+    callback: (
+      payment: PushPayment | PullPayment | null,
+      paymentType: EPaymentType,
+    ) => void,
+  ): ResultAsync<void, never> {
+    this.getPaymentCallbacks.set(paymentId, callback);
+
+    return this.hypernetCoreRepository.emitGetPayment(paymentId);
+  }
+
+  public paymentReceived(
+    paymentId: PaymentId,
+    payment: PushPayment | PullPayment | null,
+    paymentType: EPaymentType,
+  ): ResultAsync<void, never> {
+    // We have a signature for a message, find the callback
+    const callback = this.getPaymentCallbacks.get(paymentId);
+    this.getPaymentCallbacks.delete(paymentId);
+
+    if (callback != null) {
+      callback(payment, paymentType);
+    }
+
+    return okAsync(undefined);
   }
 }

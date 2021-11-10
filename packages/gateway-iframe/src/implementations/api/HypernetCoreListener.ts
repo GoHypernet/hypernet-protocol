@@ -9,6 +9,7 @@ import {
   ActiveStateChannel,
   UtilityMessageSignature,
   PaymentId,
+  EPaymentType,
 } from "@hypernetlabs/objects";
 import { ChildProxy, IIFrameCallData } from "@hypernetlabs/utils";
 import { injectable, inject } from "inversify";
@@ -227,6 +228,16 @@ export class HypernetCoreListener
           );
         }, data.callId);
       },
+
+      returnPayment: (data: IIFrameCallData<IPaymentReturnedResponseData>) => {
+        this.returnForModel(() => {
+          return this.paymentService.paymentReceived(
+            data.data.paymentId,
+            data.data.payment,
+            data.data.paymentType,
+          );
+        }, data.callId);
+      },
     });
   }
 
@@ -261,4 +272,10 @@ interface ISignatureResponseData {
 interface IStateChannelReturnedResponseData {
   id: UUID;
   stateChannel: ActiveStateChannel;
+}
+
+interface IPaymentReturnedResponseData {
+  paymentId: PaymentId;
+  payment: PushPayment | PullPayment | null;
+  paymentType: EPaymentType;
 }

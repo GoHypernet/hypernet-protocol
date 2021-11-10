@@ -1,4 +1,5 @@
 export * from "@gateway-connector/IGatewayConnector";
+export * from "@gateway-connector/IGetPaymentRequest";
 export * from "@gateway-connector/IInitiateSendFundsRequest";
 export * from "@gateway-connector/IInitiateAuthorizeFundsRequest";
 export * from "@gateway-connector/IResolutionResult";
