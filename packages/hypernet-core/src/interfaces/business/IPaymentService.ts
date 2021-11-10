@@ -20,6 +20,9 @@ import {
   BigNumberString,
   Signature,
   EthereumContractAddress,
+  PushPayment,
+  PullPayment,
+  EPaymentType,
 } from "@hypernetlabs/objects";
 import { PaymentInitiationResponse } from "@interfaces/objects";
 import { ResultAsync } from "neverthrow";
@@ -313,6 +316,21 @@ export interface IPaymentService {
     | InvalidParametersError
     | TransferResolutionError
   >;
+
+  /**
+   * getPayment() will return information about the requested payment ID, but only if it's a payment for the gateway
+   */
+  getPayment(
+    paymentId: PaymentId,
+    gatewayUrl: GatewayUrl,
+  ): ResultAsync<GetPaymentResponse, VectorError | InvalidPaymentError>;
+}
+
+export class GetPaymentResponse {
+  public constructor(
+    public payment: PushPayment | PullPayment | null,
+    public paymentType: EPaymentType,
+  ) {}
 }
 
 export const IPaymentServiceType = Symbol.for("IPaymentService");

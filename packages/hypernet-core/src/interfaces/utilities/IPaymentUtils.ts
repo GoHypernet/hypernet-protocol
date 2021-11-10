@@ -1,5 +1,4 @@
 import {
-  Payment,
   PullPayment,
   PushPayment,
   SortedTransfers,
@@ -51,7 +50,7 @@ export interface IPaymentUtils {
   transfersToPayments(
     transfers: IFullTransferState[],
   ): ResultAsync<
-    Payment[],
+    (PushPayment | PullPayment)[],
     VectorError | InvalidPaymentError | InvalidParametersError
   >;
 
@@ -65,7 +64,10 @@ export interface IPaymentUtils {
   transfersToPayment(
     fullPaymentId: PaymentId,
     transfers: IFullTransferState[],
-  ): ResultAsync<Payment, InvalidPaymentError | InvalidParametersError>;
+  ): ResultAsync<
+    PushPayment | PullPayment,
+    InvalidPaymentError | InvalidParametersError
+  >;
 
   /**
    *

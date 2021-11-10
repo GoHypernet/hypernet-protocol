@@ -1,6 +1,5 @@
 import {
   IHypernetOfferDetails,
-  Payment,
   PublicIdentifier,
   PullPayment,
   PushPayment,
@@ -67,7 +66,7 @@ export class PaymentRepository implements IPaymentRepository {
   public createPullRecord(
     paymentId: PaymentId,
     amount: string,
-  ): ResultAsync<Payment, PaymentCreationError> {
+  ): ResultAsync<PullPayment, PaymentCreationError> {
     return ResultUtils.combine([
       this._getTransfersByPaymentId(paymentId),
       this.browserNodeProvider.getBrowserNode(),
@@ -120,6 +119,14 @@ export class PaymentRepository implements IPaymentRepository {
 
             // Convert the list of transfers to a payment (again)
             return this.paymentUtils.transfersToPayment(paymentId, transfers);
+          })
+          .map((payment) => {
+            if (payment instanceof PullPayment) {
+              return payment;
+            }
+            throw new Error(
+              "Somehow, we were able to add a pull record to a non-PullPayment",
+            );
           });
       })
 
@@ -406,7 +413,7 @@ export class PaymentRepository implements IPaymentRepository {
   public getPaymentsByIds(
     paymentIds: PaymentId[],
   ): ResultAsync<
-    Map<PaymentId, Payment>,
+    Map<PaymentId, PushPayment | PullPayment>,
     | VectorError
     | BlockchainUnavailableError
     | InvalidPaymentError
@@ -495,7 +502,7 @@ export class PaymentRepository implements IPaymentRepository {
         return payments.reduce((map, obj) => {
           map.set(obj.id, obj);
           return map;
-        }, new Map<PaymentId, Payment>());
+        }, new Map<PaymentId, PushPayment | PullPayment>());
       });
   }
 
@@ -510,7 +517,7 @@ export class PaymentRepository implements IPaymentRepository {
     paymentId: PaymentId,
     amount: BigNumberString,
   ): ResultAsync<
-    Payment,
+    PushPayment | PullPayment,
     | VectorError
     | BlockchainUnavailableError
     | PaymentFinalizeError
@@ -588,7 +595,7 @@ export class PaymentRepository implements IPaymentRepository {
     paymentId: PaymentId,
     gatewayAddress: EthereumAccountAddress,
   ): ResultAsync<
-    Payment,
+    PushPayment | PullPayment,
     | BlockchainUnavailableError
     | PaymentStakeError
     | TransferResolutionError
@@ -666,7 +673,7 @@ export class PaymentRepository implements IPaymentRepository {
   public provideAsset(
     paymentId: PaymentId,
   ): ResultAsync<
-    Payment,
+    PushPayment | PullPayment,
     | BlockchainUnavailableError
     | PaymentStakeError
     | TransferResolutionError
@@ -783,7 +790,7 @@ export class PaymentRepository implements IPaymentRepository {
   }
 
   public finalizePayment(
-    payment: Payment,
+    payment: PushPayment | PullPayment,
   ): ResultAsync<void, TransferResolutionError> {
     return this.vectorUtils
       .resolveMessageTransfer(

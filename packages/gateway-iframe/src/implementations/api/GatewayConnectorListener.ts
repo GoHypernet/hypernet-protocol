@@ -57,6 +57,16 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
         });
       }
 
+      if (connector.getPaymentRequested != null) {
+        connector.getPaymentRequested.subscribe((request) => {
+          this.paymentService
+            .getPayment(request.paymentId, request.callback)
+            .mapErr((e) => {
+              this.logUtils.error(e);
+            });
+        });
+      }
+
       if (connector.initiateSendFundsRequested != null) {
         connector.initiateSendFundsRequested.subscribe((request) => {
           this.paymentService.initiateSendFunds(request).mapErr((e) => {
