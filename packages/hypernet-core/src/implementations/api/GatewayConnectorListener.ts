@@ -49,6 +49,10 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
     GatewayUrl,
     Subscription
   >();
+  protected getPaymentRequestedSubscriptionMap = new Map<
+    GatewayUrl,
+    Subscription
+  >();
   protected initiateSendFundsSubscriptionMap = new Map<
     GatewayUrl,
     Subscription
@@ -124,6 +128,31 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
         this.stateChannelRequestedSubscriptionMap.set(
           proxy.gatewayUrl,
           stateChannelRequestedSubscription,
+        );
+
+        // ******* getPaymentRequested ********************************************************
+        const getPaymentRequestedSubscription =
+          proxy.getPaymentRequested.subscribe((paymentId) => {
+            this.logUtils.debug(
+              `Gateway Connector ${proxy.gatewayUrl} requests details of payment ${paymentId}`,
+            );
+            this.paymentService
+              .getPayment(paymentId, proxy.gatewayUrl)
+              .andThen((paymentResponse) => {
+                return proxy.returnPayment(
+                  paymentId,
+                  paymentResponse.payment,
+                  paymentResponse.paymentType,
+                );
+              })
+              .mapErr((e) => {
+                this.logUtils.error(e);
+              });
+          });
+
+        this.getPaymentRequestedSubscriptionMap.set(
+          proxy.gatewayUrl,
+          getPaymentRequestedSubscription,
         );
 
         // ******* initiateSendFundsRequested ********************************************************
@@ -311,6 +340,7 @@ export class GatewayConnectorListener implements IGatewayConnectorListener {
         this.stateChannelRequestedSubscriptionMap
           .get(gatewayUrl)
           ?.unsubscribe();
+        this.getPaymentRequestedSubscriptionMap.get(gatewayUrl)?.unsubscribe();
 
         this.initiateSendFundsSubscriptionMap.get(gatewayUrl)?.unsubscribe();
         this.sendFundsRequestedSubscriptionMap.get(gatewayUrl)?.unsubscribe();
