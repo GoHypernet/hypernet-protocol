@@ -79,10 +79,12 @@ const RegistryDetailWidget: React.FC<IRegistryDetailWidgetParams> = ({
       .mapErr(handleError);
   };
 
-  const handleError = (err?: Error) => {
+  const handleError = (err) => {
     setLoading(false);
     setIsEditing(false);
-    alert.error(err?.message || "Something went wrong!");
+    alert.error(
+      err?.src?.data?.message || err?.message || "Something went wrong!",
+    );
   };
 
   const updateRegistryParams = ({

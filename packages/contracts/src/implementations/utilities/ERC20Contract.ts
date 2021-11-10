@@ -29,16 +29,19 @@ export class ERC20Contract implements IERC20Contract {
   ): ResultAsync<void, ERC20ContractError> {
     return ResultAsync.fromPromise(
       this.contract?.approve(registryAddress, registrationFee) as Promise<any>,
-      (e) => {
+      (e: any) => {
         return new ERC20ContractError(
-          "Unable to call hypertokenContract approve()",
+          e?.data?.message || "Unable to call hypertokenContract approve()",
           e,
         );
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
-          return new ERC20ContractError("Unable to wait for tx", e);
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e: any) => {
+          return new ERC20ContractError(
+            e?.data?.message || "Unable to wait for tx",
+            e,
+          );
         });
       })
       .map(() => {});
@@ -49,16 +52,19 @@ export class ERC20Contract implements IERC20Contract {
   ): ResultAsync<void, ERC20ContractError> {
     return ResultAsync.fromPromise(
       this.contract?.delegate(delegateAddress) as Promise<any>,
-      (e) => {
+      (e: any) => {
         return new ERC20ContractError(
-          "Unable to call hypertokenContract delegate()",
+          e?.data?.message || "Unable to call hypertokenContract delegate()",
           e,
         );
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
-          return new ERC20ContractError("Unable to wait for tx", e);
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e: any) => {
+          return new ERC20ContractError(
+            e?.data?.message || "Unable to wait for tx",
+            e,
+          );
         });
       })
       .map(() => {});
@@ -69,9 +75,10 @@ export class ERC20Contract implements IERC20Contract {
   ): ResultAsync<BigNumber, ERC20ContractError> {
     return ResultAsync.fromPromise(
       this.contract?.balanceOf(account) as Promise<BigNumber>,
-      (e) => {
+      (e: any) => {
         return new ERC20ContractError(
-          "Unable to call HypernetGovernorContract balanceOf()",
+          e?.data?.message ||
+            "Unable to call HypernetGovernorContract balanceOf()",
           e,
         );
       },
@@ -83,9 +90,10 @@ export class ERC20Contract implements IERC20Contract {
   ): ResultAsync<BigNumber, ERC20ContractError> {
     return ResultAsync.fromPromise(
       this.contract?.getVotes(account) as Promise<BigNumber>,
-      (e) => {
+      (e: any) => {
         return new ERC20ContractError(
-          "Unable to call HypernetGovernorContract getVotes()",
+          e?.data?.message ||
+            "Unable to call HypernetGovernorContract getVotes()",
           e,
         );
       },

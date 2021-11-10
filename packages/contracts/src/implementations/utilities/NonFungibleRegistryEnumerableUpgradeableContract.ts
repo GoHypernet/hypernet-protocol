@@ -38,9 +38,10 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       this.contract?.getRoleMemberCount(
         this.contract?.REGISTRAR_ROLE(), // Get the registrar role addresses numbers
       ) as Promise<BigNumber>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call getRoleMemberCount REGISTRAR_ROLE",
+          e?.data?.message ||
+            "Unable to call getRoleMemberCount REGISTRAR_ROLE",
           e,
         );
       },
@@ -55,9 +56,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         this.contract?.REGISTRAR_ROLE(),
         index || 0,
       ) as Promise<EthereumAddress>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call getRoleMember REGISTRAR_ROLE",
+          e?.data?.message || "Unable to call getRoleMember REGISTRAR_ROLE",
           e,
         );
       },
@@ -72,9 +73,10 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       this.contract?.getRoleMemberCount(
         this.contract?.REGISTRAR_ROLE_ADMIN(), // Get the registrar role addresses numbers
       ) as Promise<BigNumber>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call getRegistrarRoleAdminMemberCount REGISTRAR_ROLE_ADMIN",
+          e?.data?.message ||
+            "Unable to call getRegistrarRoleAdminMemberCount REGISTRAR_ROLE_ADMIN",
           e,
         );
       },
@@ -89,9 +91,10 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         this.contract?.REGISTRAR_ROLE_ADMIN(),
         index || 0,
       ) as Promise<EthereumAddress>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call getRegistrarRoleAdminMember REGISTRAR_ROLE_ADMIN",
+          e?.data?.message ||
+            "Unable to call getRegistrarRoleAdminMember REGISTRAR_ROLE_ADMIN",
           e,
         );
       },
@@ -101,7 +104,7 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   public name(): ResultAsync<string, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.name() as Promise<string>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError("Unable to call name()", e);
       },
     );
@@ -110,9 +113,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   public symbol(): ResultAsync<string, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.symbol() as Promise<string>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call symbol()",
+          e?.data?.message || "Unable to call symbol()",
           e,
         );
       },
@@ -122,9 +125,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   public totalSupply(): ResultAsync<number, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.totalSupply() as Promise<BigNumber>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call totalSupply()",
+          e?.data?.message || "Unable to call totalSupply()",
           e,
         );
       },
@@ -137,9 +140,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   > {
     return ResultAsync.fromPromise(
       this.contract?.allowLazyRegister() as Promise<boolean>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call allowLazyRegister()",
+          e?.data?.message || "Unable to call allowLazyRegister()",
           e,
         );
       },
@@ -152,9 +155,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   > {
     return ResultAsync.fromPromise(
       this.contract?.allowStorageUpdate() as Promise<boolean>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call allowStorageUpdate()",
+          e?.data?.message || "Unable to call allowStorageUpdate()",
           e,
         );
       },
@@ -167,9 +170,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   > {
     return ResultAsync.fromPromise(
       this.contract?.allowLabelChange() as Promise<boolean>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call allowLabelChange()",
+          e?.data?.message || "Unable to call allowLabelChange()",
           e,
         );
       },
@@ -182,9 +185,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   > {
     return ResultAsync.fromPromise(
       this.contract?.allowTransfers() as Promise<boolean>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call allowTransfers()",
+          e?.data?.message || "Unable to call allowTransfers()",
           e,
         );
       },
@@ -197,9 +200,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   > {
     return ResultAsync.fromPromise(
       this.contract?.registrationToken() as Promise<EthereumAddress>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call registrationToken()",
+          e?.data?.message || "Unable to call registrationToken()",
           e,
         );
       },
@@ -212,9 +215,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   > {
     return ResultAsync.fromPromise(
       this.contract?.registrationFee() as Promise<BigNumber>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call registrationFee()",
+          e?.data?.message || "Unable to call registrationFee()",
           e,
         );
       },
@@ -229,9 +232,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   > {
     return ResultAsync.fromPromise(
       this.contract?.burnAddress() as Promise<EthereumAddress>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call burnAddress()",
+          e?.data?.message || "Unable to call burnAddress()",
           e,
         );
       },
@@ -241,9 +244,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   public burnFee(): ResultAsync<number, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.burnFee() as Promise<BigNumber>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call burnFee()",
+          e?.data?.message || "Unable to call burnFee()",
           e,
         );
       },
@@ -258,9 +261,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   > {
     return ResultAsync.fromPromise(
       this.contract?.primaryRegistry() as Promise<EthereumAddress>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call primaryRegistry()",
+          e?.data?.message || "Unable to call primaryRegistry()",
           e,
         );
       },
@@ -272,9 +275,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   ): ResultAsync<number, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.tokenByIndex(index) as Promise<BigNumber>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call tokenByIndex()",
+          e?.data?.message || "Unable to call tokenByIndex()",
           e,
         );
       },
@@ -286,9 +289,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   ): ResultAsync<string, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.reverseRegistryMap(tokenId) as Promise<string>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call reverseRegistryMap()",
+          e?.data?.message || "Unable to call reverseRegistryMap()",
           e,
         );
       },
@@ -300,9 +303,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   ): ResultAsync<EthereumAddress, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.ownerOf(tokenId) as Promise<EthereumAddress>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call ownerOf()",
+          e?.data?.message || "Unable to call ownerOf()",
           e,
         );
       },
@@ -314,9 +317,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   ): ResultAsync<string, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.tokenURI(tokenId) as Promise<string>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call tokenURI()",
+          e?.data?.message || "Unable to call tokenURI()",
           e,
         );
       },
@@ -332,17 +335,17 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         BigNumber.from(tokenId),
         registrationData,
       ) as Promise<any>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call updateRegistration()",
+          e?.data?.message || "Unable to call updateRegistration()",
           e,
         );
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e: any) => {
           return new NonFungibleRegistryContractError(
-            "Unable to wait for tx",
+            e?.data?.message || "Unable to wait for tx",
             e,
           );
         });
@@ -359,17 +362,17 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         BigNumber.from(tokenId),
         label,
       ) as Promise<any>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call updateLabel()",
+          e?.data?.message || "Unable to call updateLabel()",
           e,
         );
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e: any) => {
           return new NonFungibleRegistryContractError(
-            "Unable to wait for tx",
+            e?.data?.message || "Unable to wait for tx",
             e,
           );
         });
@@ -388,17 +391,17 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         toAddress,
         tokenId,
       ) as Promise<any>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call transferFrom()",
+          e?.data?.message || "Unable to call transferFrom()",
           e,
         );
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e: any) => {
           return new NonFungibleRegistryContractError(
-            "Unable to wait for tx",
+            e?.data?.message || "Unable to wait for tx",
             e,
           );
         });
@@ -411,8 +414,11 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.burn(tokenId) as Promise<any>,
-      (e) => {
-        return new NonFungibleRegistryContractError("Unable to call burn()", e);
+      (e: any) => {
+        return new NonFungibleRegistryContractError(
+          e?.data?.message || "Unable to call burn()",
+          e,
+        );
       },
     ).map(() => {});
   }
@@ -422,17 +428,17 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.setRegistryParameters(params) as Promise<any>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call setRegistryParameters()",
+          e?.data?.message || "Unable to call setRegistryParameters()",
           e,
         );
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e: any) => {
           return new NonFungibleRegistryContractError(
-            "Unable to wait for tx",
+            e?.data?.message || "Unable to wait for tx",
             e,
           );
         });
@@ -451,17 +457,17 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
         label,
         data,
       ) as Promise<any>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call registerByToken()",
+          e?.data?.message || "Unable to call registerByToken()",
           e,
         );
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e: any) => {
           return new NonFungibleRegistryContractError(
-            "Unable to wait for tx",
+            e?.data?.message || "Unable to wait for tx",
             e,
           );
         });
@@ -476,17 +482,17 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.register(recipientAddress, label, data) as Promise<any>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call register()",
+          e?.data?.message || "Unable to call register()",
           e,
         );
       },
     )
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e: any) => {
           return new NonFungibleRegistryContractError(
-            "Unable to wait for tx",
+            e?.data?.message || "Unable to wait for tx",
             e,
           );
         });
@@ -499,9 +505,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.REGISTRAR_ROLE() as Promise<any>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call REGISTRAR_ROLE",
+          e?.data?.message || "Unable to call REGISTRAR_ROLE",
           e,
         );
       },
@@ -509,18 +515,18 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       .andThen((registrarRole) => {
         return ResultAsync.fromPromise(
           this.contract?.grantRole(registrarRole, address) as Promise<any>,
-          (e) => {
+          (e: any) => {
             return new NonFungibleRegistryContractError(
-              "Unable to call grantRole",
+              e?.data?.message || "Unable to call grantRole",
               e,
             );
           },
         );
       })
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e: any) => {
           return new NonFungibleRegistryContractError(
-            "Unable to wait for tx",
+            e?.data?.message || "Unable to wait for tx",
             e,
           );
         });
@@ -533,9 +539,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.REGISTRAR_ROLE() as Promise<any>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call REGISTRAR_ROLE",
+          e?.data?.message || "Unable to call REGISTRAR_ROLE",
           e,
         );
       },
@@ -543,18 +549,18 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       .andThen((registrarRole) => {
         return ResultAsync.fromPromise(
           this.contract?.revokeRole(registrarRole, address) as Promise<any>,
-          (e) => {
+          (e: any) => {
             return new NonFungibleRegistryContractError(
-              "Unable to call revokeRole",
+              e?.data?.message || "Unable to call revokeRole",
               e,
             );
           },
         );
       })
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e: any) => {
           return new NonFungibleRegistryContractError(
-            "Unable to wait for tx",
+            e?.data?.message || "Unable to wait for tx",
             e,
           );
         });
@@ -567,9 +573,9 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
   ): ResultAsync<void, NonFungibleRegistryContractError> {
     return ResultAsync.fromPromise(
       this.contract?.REGISTRAR_ROLE() as Promise<any>,
-      (e) => {
+      (e: any) => {
         return new NonFungibleRegistryContractError(
-          "Unable to call REGISTRAR_ROLE",
+          e?.data?.message || "Unable to call REGISTRAR_ROLE",
           e,
         );
       },
@@ -577,18 +583,18 @@ export class NonFungibleRegistryEnumerableUpgradeableContract
       .andThen((registrarRole) => {
         return ResultAsync.fromPromise(
           this.contract?.renounceRole(registrarRole, address) as Promise<any>,
-          (e) => {
+          (e: any) => {
             return new NonFungibleRegistryContractError(
-              "Unable to call renounceRole",
+              e?.data?.message || "Unable to call renounceRole",
               e,
             );
           },
         );
       })
       .andThen((tx) => {
-        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e) => {
+        return ResultAsync.fromPromise(tx.wait() as Promise<void>, (e: any) => {
           return new NonFungibleRegistryContractError(
-            "Unable to wait for tx",
+            e?.data?.message || "Unable to wait for tx",
             e,
           );
         });

@@ -405,6 +405,16 @@ export class CoreListener extends ChildProxy implements ICoreListener {
         }>,
       ) => {
         this.returnForModel(() => {
+          const ss = this.core
+            .createRegistryEntry(
+              data.data.registryName,
+              data.data.label,
+              data.data.recipientAddress,
+              data.data.data,
+            )
+            .mapErr((err) => {
+              console.log("returnForModel createRegistryEntry err: ", err);
+            });
           return this.core.createRegistryEntry(
             data.data.registryName,
             data.data.label,

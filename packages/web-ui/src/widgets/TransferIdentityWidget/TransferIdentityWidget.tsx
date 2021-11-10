@@ -48,9 +48,11 @@ const TransferIdentityWidget: React.FC<ITransferIdentityWidget> = ({
       .mapErr(handleError);
   };
 
-  const handleError = (err?: Error) => {
+  const handleError = (err) => {
     setLoading(false);
-    alert.error(err?.message || "Something went wrong!");
+    alert.error(
+      err?.src?.data?.message || err?.message || "Something went wrong!",
+    );
   };
 
   const handleAddressFieldChange = (value: string) => {
