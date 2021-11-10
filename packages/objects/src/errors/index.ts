@@ -31,3 +31,4 @@ export * from "@objects/errors/ERC20ContractError";
 export * from "@objects/errors/NonFungibleRegistryContractError";
 export * from "@objects/errors/HypernetGovernorContractError";
 export * from "@objects/errors/RenderError";
+export * from "@objects/errors/ProviderRpcError";

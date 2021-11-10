@@ -35,7 +35,8 @@ const CreateIdentityWidget: React.FC<ICreateIdentityWidget> = ({
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
 
-  const handleError = (err?: Error) => {
+  const handleError = (err) => {
+    console.log("handleError err: ", err);
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
     onCloseCallback();

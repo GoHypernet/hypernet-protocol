@@ -43,7 +43,7 @@ const GrantRoleWidget: React.FC<IGrantRoleWidget> = ({
       .mapErr(handleError);
   };
 
-  const handleError = (err?: Error) => {
+  const handleError = (err) => {
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
   };

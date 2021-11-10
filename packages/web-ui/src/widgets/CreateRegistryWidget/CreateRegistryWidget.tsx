@@ -35,7 +35,7 @@ const CreateRegistryWidget: React.FC<ICreateRegistryWidget> = ({
   const { coreProxy } = useStoreContext();
   const { setLoading } = useLayoutContext();
 
-  const handleError = (err?: Error) => {
+  const handleError = (err) => {
     setLoading(false);
     alert.error(err?.message || "Something went wrong!");
     onCloseCallback();

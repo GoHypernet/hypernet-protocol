@@ -23,14 +23,10 @@ import {
   IConfigProvider,
   IConfigProviderType,
 } from "@interfaces/utilities";
-import { GovernanceAbis } from "@hypernetlabs/objects";
 import {
   IRegistryFactoryContract,
-  IRegistryFactoryContractType,
   IERC20Contract,
-  IERC20ContractType,
   INonFungibleRegistryEnumerableUpgradeableContract,
-  INonFungibleRegistryEnumerableUpgradeableContractType,
   RegistryFactoryContract,
   ERC20Contract,
   NonFungibleRegistryEnumerableUpgradeableContract,
