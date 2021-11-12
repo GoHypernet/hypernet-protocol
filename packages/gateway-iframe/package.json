@@ -44,7 +44,7 @@
   },
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@hypernetlabs/gateway-connector": "^0.0.10",
+    "@hypernetlabs/gateway-connector": "^0.0.11",
     "@hypernetlabs/objects": "^0.3.7",
     "@hypernetlabs/utils": "^0.4.6",
     "ethers": "^5.4.7",
