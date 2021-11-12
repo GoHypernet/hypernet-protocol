@@ -68,6 +68,7 @@ export class ConfigProviderMock implements IConfigProvider {
         ]), // storageAliases
         5 * 1000,
         "HypernetProtocolControlClaims", // controlClaimSubject
+        false, // requireOnline
         false, // debug is off for testing
       );
   }
