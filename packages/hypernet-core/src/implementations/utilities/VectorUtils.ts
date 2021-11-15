@@ -82,7 +82,10 @@ export class VectorUtils implements IVectorUtils {
   public resolveMessageTransfer(
     transferId: TransferId,
     message = "Finalized",
-  ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
+  ): ResultAsync<
+    IBasicTransferResponse,
+    TransferResolutionError | VectorError | BlockchainUnavailableError
+  > {
     return this.browserNodeProvider.getBrowserNode().andThen((browserNode) => {
       return browserNode
         .getTransfer(transferId)
@@ -118,7 +121,10 @@ export class VectorUtils implements IVectorUtils {
     return this.browserNodeProvider
       .getBrowserNode()
       .andThen((browserNode) => {
-        let signatureResult: ResultAsync<string, TransferResolutionError>;
+        let signatureResult: ResultAsync<
+          string,
+          TransferResolutionError | VectorError
+        >;
         if (gatewaySignature == null) {
           const resolverDataEncoding = ["tuple(uint256 amount, bytes32 UUID)"];
           const encodedResolverData = defaultAbiCoder.encode(
@@ -163,7 +169,10 @@ export class VectorUtils implements IVectorUtils {
     transferId: TransferId,
     paymentId: PaymentId,
     amount: BigNumberString,
-  ): ResultAsync<IBasicTransferResponse, TransferResolutionError> {
+  ): ResultAsync<
+    IBasicTransferResponse,
+    TransferResolutionError | VectorError | BlockchainUnavailableError
+  > {
     const resolverData: ParameterizedResolverData = {
       UUID: paymentId,
       paymentAmountTaken: amount,
@@ -324,7 +333,10 @@ export class VectorUtils implements IVectorUtils {
         const hypertokenAddress =
           config.chainAddresses[chainId]?.hypertokenAddress;
         if (hypertokenAddress == null) {
-          return errAsync<IBasicTransferResponse, TransferCreationError>(
+          return errAsync<
+            IBasicTransferResponse,
+            TransferCreationError | InvalidParametersError | VectorError
+          >(
             new TransferCreationError(
               undefined,
               `Unable to create insurance transfer on chain ${chainId}. No configuration info for that chain is available`,
@@ -451,7 +463,10 @@ export class VectorUtils implements IVectorUtils {
         const hypertokenAddress =
           config.chainAddresses[chainId]?.hypertokenAddress;
         if (hypertokenAddress == null) {
-          return errAsync<IBasicTransferResponse, TransferCreationError>(
+          return errAsync<
+            IBasicTransferResponse,
+            TransferCreationError | VectorError
+          >(
             new TransferCreationError(
               undefined,
               `Unable to create insurance transfer on chain ${chainId}. No configuration info for that chain is available`,
@@ -498,48 +513,11 @@ export class VectorUtils implements IVectorUtils {
     deltaAmount?: BigNumberString,
   ): ResultAsync<
     IBasicTransferResponse,
-    TransferCreationError | InvalidParametersError
+    | TransferCreationError
+    | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
   > {
-    // Sanity check
-    if (type === EPaymentType.Pull && deltaTime == null) {
-      this.logUtils.error("Must provide deltaTime for Pull payments");
-      return errAsync(
-        new InvalidParametersError("Must provide deltaTime for Pull payments"),
-      );
-    }
-
-    if (type === EPaymentType.Pull && deltaAmount == null) {
-      this.logUtils.error("Must provide deltaAmount for Pull payments");
-      return errAsync(
-        new InvalidParametersError(
-          "Must provide deltaAmount for Pull payments",
-        ),
-      );
-    }
-
-    if (BigNumber.from(amount).isZero()) {
-      this.logUtils.error("Amount cannot be zero.");
-      return errAsync(new InvalidParametersError("Amount cannot be zero."));
-    }
-
-    // Make sure the paymentId is valid:
-    const validPayment = this.paymentIdUtils.isValidPaymentId(paymentId);
-    if (validPayment.isErr()) {
-      this.logUtils.error(validPayment.error);
-      return errAsync(validPayment.error);
-    } else {
-      if (!validPayment.value) {
-        this.logUtils.error(
-          `CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`,
-        );
-        return errAsync(
-          new InvalidParametersError(
-            `CreatePaymentTransfer: Invalid paymentId: '${paymentId}'`,
-          ),
-        );
-      }
-    }
-
     return this.browserNodeProvider
       .getBrowserNode()
       .andThen((browserNode) => {
@@ -562,7 +540,13 @@ export class VectorUtils implements IVectorUtils {
             this.logUtils.error(
               "Somehow, deltaTime or deltaAmount were not set!",
             );
-            return errAsync(
+            return errAsync<
+              IBasicTransferResponse,
+              | TransferCreationError
+              | InvalidParametersError
+              | VectorError
+              | BlockchainUnavailableError
+            >(
               new InvalidParametersError(
                 "Somehow, deltaTime or deltaAmount were not set!",
               ),
@@ -745,7 +729,7 @@ export class VectorUtils implements IVectorUtils {
 
   public getAllActiveTransfers(): ResultAsync<
     IFullTransferState[],
-    VectorError
+    VectorError | BlockchainUnavailableError
   > {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),

@@ -70,6 +70,9 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       | GatewayValidationError
       | GatewayAuthorizationDeniedError
       | ProxyError
+      | BalancesUnavailableError
+      | BlockchainUnavailableError
+      | VectorError
     >
   >;
   protected domain: TypedDataDomain;
@@ -182,7 +185,17 @@ export class GatewayConnectorService implements IGatewayConnectorService {
 
       context.onBalancesChanged.subscribe((balances) => {
         const results = new Array<
-          ResultAsync<void, GatewayConnectorError | ProxyError>
+          ResultAsync<
+            void,
+            | GatewayConnectorError
+            | ProxyError
+            | PersistenceError
+            | GatewayAuthorizationDeniedError
+            | BalancesUnavailableError
+            | BlockchainUnavailableError
+            | GatewayActivationError
+            | VectorError
+          >
         >();
         return this.gatewayConnectorRepository
           .getAuthorizedGateways()
@@ -274,7 +287,10 @@ export class GatewayConnectorService implements IGatewayConnectorService {
 
                     return ResultAsync.fromPromise<
                       string,
-                      GatewayValidationError | ProxyError
+                      | GatewayValidationError
+                      | ProxyError
+                      | GatewayAuthorizationDeniedError
+                      | BalancesUnavailableError
                     >(
                       signerPromise,
                       (e) =>
@@ -425,7 +441,13 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     gatewayUrls: GatewayUrl[],
   ): ResultAsync<
     Map<GatewayUrl, GatewayTokenInfo[]>,
-    ProxyError | PersistenceError | GatewayAuthorizationDeniedError
+    | ProxyError
+    | PersistenceError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayActivationError
+    | VectorError
   > {
     const retMap = new Map<GatewayUrl, GatewayTokenInfo[]>();
     return ResultUtils.combine(
@@ -455,7 +477,13 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+    | PersistenceError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayActivationError
+    | VectorError
   > {
     return ResultUtils.combine([
       this.contextProvider.getContext(),
@@ -630,7 +658,13 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     IGatewayConnectorProxy,
-    ProxyError | GatewayAuthorizationDeniedError | PersistenceError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | PersistenceError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayActivationError
+    | VectorError
   > {
     // The goal of this method is to return an activated gateway proxy,
     // and not resolve unless all hope is lost.
@@ -744,6 +778,9 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | GatewayValidationError
     | GatewayAuthorizationDeniedError
     | ProxyError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | VectorError
   > {
     // Do some initial cleanup, so that this can be called repeatedly.
     const existingProxyResult = this.authorizedGatewayProxies.get(
@@ -810,6 +847,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | GatewayValidationError
     | ProxyError
     | PersistenceError
+    | VectorError
   > {
     this.logUtils.debug(`Validating code signature for ${gatewayUrl}`);
     return proxy.getValidatedSignature().andThen((validatedSignature) => {
@@ -896,7 +934,10 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     proxy: IGatewayConnectorProxy,
   ): ResultAsync<
     void,
-    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+    | PersistenceError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | VectorError
   > {
     context.onGatewayDeauthorizationStarted.next(gatewayUrl);
     return proxy

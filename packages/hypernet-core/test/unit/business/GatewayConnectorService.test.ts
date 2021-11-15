@@ -538,7 +538,7 @@ describe("GatewayConnectorService tests", () => {
     // Arrange
     const mocks = new GatewayConnectorServiceMocks();
 
-    const err = new PersistenceError();
+    const err = new GatewayActivationError();
     td.when(
       mocks.gatewayConnectorProxy.activateConnector(publicIdentifier, balances),
     ).thenReturn(errAsync(err));

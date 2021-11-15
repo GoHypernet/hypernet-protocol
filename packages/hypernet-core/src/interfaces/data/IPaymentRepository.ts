@@ -53,7 +53,14 @@ export interface IPaymentRepository {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PushPayment, PaymentCreationError | TransferCreationError>;
+  ): ResultAsync<
+    PushPayment,
+    | PaymentCreationError
+    | TransferCreationError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  >;
 
   createPullPayment(
     routerPublicIdentifier: PublicIdentifier,
@@ -67,7 +74,14 @@ export interface IPaymentRepository {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PullPayment, PaymentCreationError | TransferCreationError>;
+  ): ResultAsync<
+    PullPayment,
+    | PaymentCreationError
+    | TransferCreationError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  >;
 
   createPullRecord(
     paymentId: PaymentId,
@@ -141,7 +155,12 @@ export interface IPaymentRepository {
    * This method will resolve the offer transfer for a payment
    * @param payment the payment to finalize
    */
-  finalizePayment(payment: Payment): ResultAsync<void, TransferResolutionError>;
+  finalizePayment(
+    payment: Payment,
+  ): ResultAsync<
+    void,
+    TransferResolutionError | VectorError | BlockchainUnavailableError
+  >;
 }
 
 export const IPaymentRepositoryType = Symbol.for("IPaymentRepository");

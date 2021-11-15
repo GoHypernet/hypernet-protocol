@@ -43,6 +43,9 @@ import {
   HypernetGovernorContractError,
   ERC20ContractError,
   InvalidPaymentError,
+  TransferCreationError,
+  PaymentStakeError,
+  TransferResolutionError,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -326,7 +329,7 @@ export default class HypernetIFrameProxy
 
   public getActiveStateChannels(): ResultAsync<
     ActiveStateChannel[],
-    VectorError | BlockchainUnavailableError | PersistenceError
+    VectorError | BlockchainUnavailableError | PersistenceError | ProxyError
   > {
     return this._createCall("getActiveStateChannels", null);
   }
@@ -336,7 +339,7 @@ export default class HypernetIFrameProxy
     chainId: ChainId,
   ): ResultAsync<
     ActiveStateChannel,
-    VectorError | BlockchainUnavailableError | PersistenceError
+    VectorError | BlockchainUnavailableError | PersistenceError | ProxyError
   > {
     return this._createCall("createStateChannel", {
       routerPublicIdentifiers,
@@ -378,7 +381,7 @@ export default class HypernetIFrameProxy
 
   public getBalances(): ResultAsync<
     Balances,
-    BalancesUnavailableError | VectorError
+    BalancesUnavailableError | VectorError | ProxyError
   > {
     return this._createCall("getBalances", null);
   }
@@ -401,14 +404,17 @@ export default class HypernetIFrameProxy
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    | InsufficientBalanceError
-    | AcceptPaymentError
-    | BalancesUnavailableError
-    | GatewayValidationError
+    | TransferCreationError
     | VectorError
+    | BalancesUnavailableError
     | BlockchainUnavailableError
     | InvalidPaymentError
     | InvalidParametersError
+    | PaymentStakeError
+    | TransferResolutionError
+    | AcceptPaymentError
+    | InsufficientBalanceError
+    | ProxyError
   > {
     return this._createCall("acceptFunds", paymentId);
   }
@@ -433,7 +439,7 @@ export default class HypernetIFrameProxy
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    GatewayValidationError | PersistenceError | VectorError
+    GatewayValidationError | PersistenceError | VectorError | ProxyError
   > {
     return this._createCall("authorizeGateway", gatewayUrl);
   }
@@ -449,14 +455,14 @@ export default class HypernetIFrameProxy
 
   public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
-    PersistenceError | VectorError
+    PersistenceError | VectorError | ProxyError
   > {
     return this._createCall("getAuthorizedGateways", null);
   }
 
   public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
-    PersistenceError | VectorError
+    PersistenceError | VectorError | ProxyError
   > {
     return this._createCall("getAuthorizedGatewaysConnectorsStatus", null);
   }
@@ -472,13 +478,19 @@ export default class HypernetIFrameProxy
 
   public getGatewayRegistrationInfo(
     filter?: GatewayRegistrationFilter,
-  ): ResultAsync<GatewayRegistrationInfo[], PersistenceError | VectorError> {
+  ): ResultAsync<
+    GatewayRegistrationInfo[],
+    PersistenceError | VectorError | ProxyError
+  > {
     return this._createCall("getGatewayRegistrationInfo", filter);
   }
 
   public displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError | PersistenceError | VectorError> {
+  ): ResultAsync<
+    void,
+    GatewayConnectorError | PersistenceError | VectorError | ProxyError
+  > {
     return this.getAuthorizedGatewaysConnectorsStatus().andThen(
       (gatewaysMap) => {
         if (gatewaysMap.get(gatewayUrl) == true) {
@@ -497,7 +509,10 @@ export default class HypernetIFrameProxy
 
   public closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError | PersistenceError | VectorError> {
+  ): ResultAsync<
+    void,
+    GatewayConnectorError | PersistenceError | VectorError | ProxyError
+  > {
     this._closeCoreIFrame();
 
     return this._createCall("closeGatewayIFrame", gatewayUrl);
@@ -582,7 +597,7 @@ export default class HypernetIFrameProxy
     sortOrder: ERegistrySortOrder,
   ): ResultAsync<
     Registry[],
-    RegistryFactoryContractError | NonFungibleRegistryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   > {
     return this._createCall("getRegistries", {
       pageNumber,
@@ -595,7 +610,7 @@ export default class HypernetIFrameProxy
     registryNames: string[],
   ): ResultAsync<
     Map<string, Registry>,
-    RegistryFactoryContractError | NonFungibleRegistryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   > {
     return this._createCall("getRegistryByName", registryNames);
   }
@@ -604,7 +619,7 @@ export default class HypernetIFrameProxy
     registryAddresses: EthereumAddress[],
   ): ResultAsync<
     Map<EthereumAddress, Registry>,
-    RegistryFactoryContractError | NonFungibleRegistryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   > {
     return this._createCall("getRegistryByAddress", registryAddresses);
   }
@@ -613,7 +628,7 @@ export default class HypernetIFrameProxy
     registryNames: string[],
   ): ResultAsync<
     Map<string, number>,
-    RegistryFactoryContractError | NonFungibleRegistryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   > {
     return this._createCall("getRegistryEntriesTotalCount", registryNames);
   }
@@ -625,7 +640,7 @@ export default class HypernetIFrameProxy
     sortOrder: ERegistrySortOrder,
   ): ResultAsync<
     RegistryEntry[],
-    RegistryFactoryContractError | NonFungibleRegistryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   > {
     return this._createCall("getRegistryEntries", {
       registryName,
@@ -640,7 +655,7 @@ export default class HypernetIFrameProxy
     tokenId: number,
   ): ResultAsync<
     RegistryEntry,
-    RegistryFactoryContractError | NonFungibleRegistryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   > {
     return this._createCall("getRegistryEntryDetailByTokenId", {
       registryName,
@@ -658,6 +673,7 @@ export default class HypernetIFrameProxy
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
     | RegistryPermissionError
+    | ProxyError
   > {
     return this._createCall("updateRegistryEntryTokenURI", {
       registryName,
@@ -676,6 +692,7 @@ export default class HypernetIFrameProxy
     | RegistryFactoryContractError
     | NonFungibleRegistryContractError
     | RegistryPermissionError
+    | ProxyError
   > {
     return this._createCall("updateRegistryEntryLabel", {
       registryName,
@@ -718,7 +735,10 @@ export default class HypernetIFrameProxy
 
   public getVotingPower(
     account: EthereumAddress,
-  ): ResultAsync<number, HypernetGovernorContractError | ProxyError> {
+  ): ResultAsync<
+    number,
+    HypernetGovernorContractError | ERC20ContractError | ProxyError
+  > {
     return this._createCall("getVotingPower", account);
   }
 
@@ -730,7 +750,7 @@ export default class HypernetIFrameProxy
 
   public getNumberOfRegistries(): ResultAsync<
     number,
-    RegistryFactoryContractError | NonFungibleRegistryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError | ProxyError
   > {
     return this._createCall("getNumberOfRegistries", null);
   }
@@ -743,6 +763,7 @@ export default class HypernetIFrameProxy
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ProxyError
   > {
     return this._createCall("updateRegistryParams", registryParams);
   }
@@ -758,6 +779,7 @@ export default class HypernetIFrameProxy
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ProxyError
   > {
     return this._createCall("createRegistryEntry", {
       registryName,
@@ -777,6 +799,7 @@ export default class HypernetIFrameProxy
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ProxyError
   > {
     return this._createCall("transferRegistryEntry", {
       registryName,
@@ -794,6 +817,7 @@ export default class HypernetIFrameProxy
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ProxyError
   > {
     return this._createCall("burnRegistryEntry", {
       registryName,
@@ -806,7 +830,10 @@ export default class HypernetIFrameProxy
     symbol: string,
     registrarAddress: EthereumAddress,
     enumerable: boolean,
-  ): ResultAsync<void, RegistryFactoryContractError> {
+  ): ResultAsync<
+    void,
+    RegistryFactoryContractError | ERC20ContractError | ProxyError
+  > {
     return this._createCall("createRegistryByToken", {
       name,
       symbol,
@@ -824,6 +851,7 @@ export default class HypernetIFrameProxy
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ProxyError
   > {
     return this._createCall("grantRegistrarRole", {
       registryName,
@@ -840,6 +868,7 @@ export default class HypernetIFrameProxy
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ProxyError
   > {
     return this._createCall("revokeRegistrarRole", {
       registryName,
@@ -856,6 +885,7 @@ export default class HypernetIFrameProxy
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ProxyError
   > {
     return this._createCall("renounceRegistrarRole", {
       registryName,

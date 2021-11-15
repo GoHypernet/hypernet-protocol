@@ -1,23 +1,39 @@
 import { TileDocument } from "@ceramicnetwork/stream-tile";
-import { PersistenceError, VectorError } from "@hypernetlabs/objects";
+import {
+  BlockchainUnavailableError,
+  PersistenceError,
+  VectorError,
+} from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
 export interface ICeramicUtils {
-  initialize(): ResultAsync<void, PersistenceError | VectorError>;
+  initialize(): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  >;
   initiateDefinitions(): ResultAsync<
     TileDocument[],
-    PersistenceError | VectorError
+    PersistenceError | VectorError | BlockchainUnavailableError
   >;
   writeRecord<T>(
     aliasName: string,
     content: T,
-  ): ResultAsync<void, PersistenceError | VectorError>;
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  >;
   readRecord<T>(
     aliasName: string,
-  ): ResultAsync<T | null, PersistenceError | VectorError>;
+  ): ResultAsync<
+    T | null,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  >;
   removeRecord(
     aliasName: string,
-  ): ResultAsync<void, PersistenceError | VectorError>;
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  >;
 }
 
 export interface ISchemaWithName {

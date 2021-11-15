@@ -34,7 +34,10 @@ export interface IVectorUtils {
   resolveMessageTransfer(
     transferId: TransferId,
     message?: string,
-  ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
+  ): ResultAsync<
+    IBasicTransferResponse,
+    TransferResolutionError | VectorError | BlockchainUnavailableError
+  >;
 
   /**
    *
@@ -60,7 +63,10 @@ export interface IVectorUtils {
     transferId: TransferId,
     paymentId: PaymentId,
     amount: BigNumberString,
-  ): ResultAsync<IBasicTransferResponse, TransferResolutionError>;
+  ): ResultAsync<
+    IBasicTransferResponse,
+    TransferResolutionError | VectorError | BlockchainUnavailableError
+  >;
 
   /**
    * Cancels a Message transfer.
@@ -96,7 +102,10 @@ export interface IVectorUtils {
     channelAddress: EthereumAddress,
     toAddress: PublicIdentifier,
     message: IHypernetOfferDetails,
-  ): ResultAsync<IBasicTransferResponse, TransferCreationError>;
+  ): ResultAsync<
+    IBasicTransferResponse,
+    TransferCreationError | InvalidParametersError
+  >;
 
   createPullNotificationTransfer(
     channelAddress: EthereumAddress,
@@ -157,7 +166,10 @@ export interface IVectorUtils {
     deltaAmount?: BigNumberString,
   ): ResultAsync<
     IBasicTransferResponse,
-    TransferCreationError | InvalidParametersError
+    | TransferCreationError
+    | InvalidParametersError
+    | VectorError
+    | BlockchainUnavailableError
   >;
 
   getTimestampFromTransfer(transfer: IFullTransferState): UnixTimestamp;
@@ -179,16 +191,19 @@ export interface IVectorUtils {
    */
   getTransferType(
     transfer: IFullTransferState,
-  ): ResultAsync<ETransferType, VectorError>;
+  ): ResultAsync<ETransferType, VectorError | BlockchainUnavailableError>;
 
   getTransferTypeWithTransfer(
     transfer: IFullTransferState,
   ): ResultAsync<
     { transferType: ETransferType; transfer: IFullTransferState },
-    VectorError
+    VectorError | BlockchainUnavailableError
   >;
 
-  getAllActiveTransfers(): ResultAsync<IFullTransferState[], VectorError>;
+  getAllActiveTransfers(): ResultAsync<
+    IFullTransferState[],
+    VectorError | BlockchainUnavailableError
+  >;
 }
 
 export const IVectorUtilsType = Symbol.for("IVectorUtils");

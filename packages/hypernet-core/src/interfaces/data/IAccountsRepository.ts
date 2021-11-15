@@ -55,18 +55,27 @@ export interface IAccountsRepository {
   createStateChannel(
     routerPublicIdentifier: PublicIdentifier,
     chainId: ChainId,
-  ): ResultAsync<EthereumAddress, PersistenceError | VectorError>;
+  ): ResultAsync<
+    EthereumAddress,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  >;
 
   getPublicIdentifier(): ResultAsync<
     PublicIdentifier,
     BlockchainUnavailableError | VectorError
   >;
   getAccounts(): ResultAsync<EthereumAddress[], BlockchainUnavailableError>;
-  getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError>;
+  getBalances(): ResultAsync<
+    Balances,
+    BalancesUnavailableError | VectorError | BlockchainUnavailableError
+  >;
   getBalanceByAsset(
     channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,
-  ): ResultAsync<AssetBalance, BalancesUnavailableError | VectorError>;
+  ): ResultAsync<
+    AssetBalance,
+    BalancesUnavailableError | VectorError | BlockchainUnavailableError
+  >;
   depositFunds(
     channelAddress: EthereumAddress,
     assetAddress: EthereumAddress,

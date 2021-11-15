@@ -43,7 +43,7 @@ export class CeramicUtils implements ICeramicUtils {
   protected idx: IDX | null = null;
   protected initializeResult: ResultAsync<
     void,
-    PersistenceError | VectorError
+    PersistenceError | VectorError | BlockchainUnavailableError
   > | null = null;
 
   constructor(
@@ -54,7 +54,10 @@ export class CeramicUtils implements ICeramicUtils {
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
-  public initialize(): ResultAsync<void, PersistenceError | VectorError> {
+  public initialize(): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  > {
     if (this.initializeResult == null) {
       this.initializeResult = this._authenticateUser();
     }
@@ -65,7 +68,7 @@ export class CeramicUtils implements ICeramicUtils {
   // This is used to create a difinition derived from a schema, and it shouldn't be called in run time
   public initiateDefinitions(): ResultAsync<
     TileDocument[],
-    PersistenceError | VectorError
+    PersistenceError | VectorError | BlockchainUnavailableError
   > {
     return this.initialize().andThen(() => {
       if (this.ceramic == null || this.idx == null) {
@@ -74,12 +77,12 @@ export class CeramicUtils implements ICeramicUtils {
 
       const promisesOfPublishSchema: ResultAsync<
         ISchemaWithName,
-        PersistenceError
+        PersistenceError | VectorError | BlockchainUnavailableError
       >[] = [];
 
       const promisesOfCreateDifnition: ResultAsync<
         TileDocument,
-        PersistenceError
+        PersistenceError | VectorError | BlockchainUnavailableError
       >[] = [];
 
       const schemas = [AuthorizedGatewaysSchema];
@@ -124,7 +127,10 @@ export class CeramicUtils implements ICeramicUtils {
   public writeRecord<T>(
     aliasName: string,
     content: T,
-  ): ResultAsync<void, PersistenceError | VectorError> {
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  > {
     if (this.initializeResult == null) {
       throw new Error("Must call CeramicUtils.initialize() first");
     }
@@ -142,7 +148,10 @@ export class CeramicUtils implements ICeramicUtils {
 
   public readRecord<T>(
     aliasName: string,
-  ): ResultAsync<T | null, PersistenceError | VectorError> {
+  ): ResultAsync<
+    T | null,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  > {
     if (this.initializeResult == null) {
       throw new Error("Must call CeramicUtils.initialize() first");
     }
@@ -162,7 +171,10 @@ export class CeramicUtils implements ICeramicUtils {
 
   public removeRecord(
     aliasName: string,
-  ): ResultAsync<void, PersistenceError | VectorError> {
+  ): ResultAsync<
+    void,
+    PersistenceError | VectorError | BlockchainUnavailableError
+  > {
     if (this.initializeResult == null) {
       throw new Error("Must call CeramicUtils.initialize() first");
     }
@@ -180,7 +192,7 @@ export class CeramicUtils implements ICeramicUtils {
 
   private _authenticateUser(): ResultAsync<
     void,
-    PersistenceError | VectorError
+    PersistenceError | VectorError | BlockchainUnavailableError
   > {
     this.logUtils.debug(`Authenticating user with Ceramic`);
     return ResultUtils.combine([
@@ -245,7 +257,10 @@ export class CeramicUtils implements ICeramicUtils {
     });
   }
 
-  private getProviderSeed(): ResultAsync<Uint8Array, VectorError> {
+  private getProviderSeed(): ResultAsync<
+    Uint8Array,
+    VectorError | BlockchainUnavailableError
+  > {
     return this.browserNodeProvider
       .getBrowserNode()
       .andThen((browserNode) => {

@@ -44,6 +44,13 @@ import {
   HypernetGovernorContractError,
   ERC20ContractError,
   InvalidPaymentError,
+  GatewayActivationError,
+  InvalidPaymentIdError,
+  GovernanceSignerUnavailableError,
+  TransferResolutionError,
+  TransferCreationError,
+  PaymentStakeError,
+  PaymentFinalizeError,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -258,6 +265,15 @@ export class HypernetCore implements IHypernetCore {
     | GatewayConnectorError
     | GatewayValidationError
     | ProxyError
+    | PersistenceError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | InvalidPaymentIdError
+    | GovernanceSignerUnavailableError
+    | TransferResolutionError
+    | TransferCreationError
+    | PaymentStakeError
+    | PaymentFinalizeError
   > | null;
   protected _initialized: boolean;
   protected _initializePromise: Promise<void>;
@@ -757,14 +773,16 @@ export class HypernetCore implements IHypernetCore {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    | InsufficientBalanceError
-    | AcceptPaymentError
-    | BalancesUnavailableError
-    | GatewayValidationError
+    | TransferCreationError
     | VectorError
+    | BalancesUnavailableError
     | BlockchainUnavailableError
     | InvalidPaymentError
     | InvalidParametersError
+    | PaymentStakeError
+    | TransferResolutionError
+    | AcceptPaymentError
+    | InsufficientBalanceError
   > {
     return this.paymentService.acceptOffer(paymentId).mapErr((e) => {
       this.logUtils.error(e);
@@ -809,7 +827,16 @@ export class HypernetCore implements IHypernetCore {
     | RouterChannelUnknownError
     | GatewayConnectorError
     | GatewayValidationError
+    | PersistenceError
     | ProxyError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | InvalidPaymentIdError
+    | GovernanceSignerUnavailableError
+    | TransferResolutionError
+    | TransferCreationError
+    | PaymentStakeError
+    | PaymentFinalizeError
   > {
     if (this._initializeResult != null) {
       return this._initializeResult;
@@ -922,7 +949,12 @@ export class HypernetCore implements IHypernetCore {
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    GatewayValidationError | PersistenceError | VectorError
+    | PersistenceError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayAuthorizationDeniedError
+    | GatewayActivationError
+    | VectorError
   > {
     return this.gatewayConnectorService
       .authorizeGateway(gatewayUrl)
@@ -936,7 +968,13 @@ export class HypernetCore implements IHypernetCore {
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
     void,
-    PersistenceError | ProxyError | GatewayAuthorizationDeniedError
+    | PersistenceError
+    | ProxyError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayActivationError
+    | VectorError
   > {
     return this.gatewayConnectorService
       .deauthorizeGateway(gatewayUrl)
@@ -962,7 +1000,13 @@ export class HypernetCore implements IHypernetCore {
     gatewayUrls: GatewayUrl[],
   ): ResultAsync<
     Map<GatewayUrl, GatewayTokenInfo[]>,
-    ProxyError | PersistenceError | GatewayAuthorizationDeniedError
+    | VectorError
+    | ProxyError
+    | PersistenceError
+    | GatewayAuthorizationDeniedError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayActivationError
   > {
     return this.gatewayConnectorService
       .getGatewayTokenInfo(gatewayUrls)
@@ -1256,6 +1300,7 @@ export class HypernetCore implements IHypernetCore {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ERC20ContractError
   > {
     return this.registryService.createRegistryEntry(
       registryName,
@@ -1301,7 +1346,7 @@ export class HypernetCore implements IHypernetCore {
     symbol: string,
     registrarAddress: EthereumAddress,
     enumerable: boolean,
-  ): ResultAsync<void, RegistryFactoryContractError> {
+  ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError> {
     return this.registryService.createRegistryByToken(
       name,
       symbol,

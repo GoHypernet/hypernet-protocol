@@ -29,6 +29,7 @@ import {
   MessageState,
   IBasicTransferResponse,
   LogicalError,
+  ProxyError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IPaymentService } from "@interfaces/business";
@@ -114,7 +115,14 @@ export class PaymentService implements IPaymentService {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PullPayment, PaymentCreationError | TransferCreationError> {
+  ): ResultAsync<
+    PullPayment,
+    | PaymentCreationError
+    | TransferCreationError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  > {
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
     // totalAuthorized / (deltaAmount/deltaTime) > ((expiration date - now) + someMinimumNumDays)
 
@@ -158,7 +166,12 @@ export class PaymentService implements IPaymentService {
     amount: BigNumberString,
   ): ResultAsync<
     Payment,
-    PaymentCreationError | VectorError | BalancesUnavailableError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | BalancesUnavailableError
+    | PaymentCreationError
   > {
     // Pull the up the payment
     return this.paymentRepository
@@ -171,7 +184,15 @@ export class PaymentService implements IPaymentService {
           const amountTransferred = BigNumber.from(payment.amountTransferred);
           // Verify that we're not pulling too quickly (greater than the average rate)
           if (amountTransferred.add(amount).gt(payment.vestedAmount)) {
-            return errAsync(
+            return errAsync<
+              Payment,
+              | VectorError
+              | BlockchainUnavailableError
+              | InvalidPaymentError
+              | InvalidParametersError
+              | BalancesUnavailableError
+              | PaymentCreationError
+            >(
               new InvalidParametersError(
                 `Amount of ${amount} exceeds the vested payment amount of ${payment.vestedAmount}`,
               ),
@@ -180,7 +201,15 @@ export class PaymentService implements IPaymentService {
 
           // Verify that the amount we're trying to pull does not exceed the total authorized amount
           if (amountTransferred.add(amount).gt(payment.authorizedAmount)) {
-            return errAsync(
+            return errAsync<
+              Payment,
+              | VectorError
+              | BlockchainUnavailableError
+              | InvalidPaymentError
+              | InvalidParametersError
+              | BalancesUnavailableError
+              | PaymentCreationError
+            >(
               new InvalidParametersError(
                 `Amount of ${amount} exceeds the total authorized amount of ${payment.authorizedAmount}`,
               ),
@@ -196,7 +225,15 @@ export class PaymentService implements IPaymentService {
               });
             });
         } else {
-          return errAsync(
+          return errAsync<
+            Payment,
+            | VectorError
+            | BlockchainUnavailableError
+            | InvalidPaymentError
+            | InvalidParametersError
+            | BalancesUnavailableError
+            | PaymentCreationError
+          >(
             new InvalidParametersError(
               "Can not pull funds from a non pull payment",
             ),
@@ -225,7 +262,14 @@ export class PaymentService implements IPaymentService {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PushPayment, PaymentCreationError | TransferCreationError> {
+  ): ResultAsync<
+    PushPayment,
+    | PaymentCreationError
+    | TransferCreationError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  > {
     // TODO: Sanity checking on the values
     return this.contextProvider.getInitializedContext().andThen((context) => {
       // Lookup the ActiveStateChannel from the context
@@ -290,7 +334,14 @@ export class PaymentService implements IPaymentService {
       const payment = payments.get(paymentId);
 
       if (payment == null) {
-        return errAsync(
+        return errAsync<
+          void,
+          | VectorError
+          | BlockchainUnavailableError
+          | InvalidPaymentError
+          | InvalidParametersError
+          | BalancesUnavailableError
+        >(
           new InvalidPaymentError(
             `PaymentService:offerReceived():Could not get payment!`,
           ),
@@ -333,14 +384,16 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     Payment,
-    | InsufficientBalanceError
-    | AcceptPaymentError
-    | BalancesUnavailableError
-    | GatewayValidationError
+    | TransferCreationError
     | VectorError
+    | BalancesUnavailableError
     | BlockchainUnavailableError
     | InvalidPaymentError
     | InvalidParametersError
+    | PaymentStakeError
+    | TransferResolutionError
+    | AcceptPaymentError
+    | InsufficientBalanceError
   > {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
@@ -361,6 +414,8 @@ export class PaymentService implements IPaymentService {
           | InvalidParametersError
           | PaymentStakeError
           | TransferResolutionError
+          | AcceptPaymentError
+          | InsufficientBalanceError
         >(new AcceptPaymentError(`Payment ${paymentId} does not exist!`));
       }
 
@@ -400,6 +455,8 @@ export class PaymentService implements IPaymentService {
               | InvalidParametersError
               | PaymentStakeError
               | TransferResolutionError
+              | AcceptPaymentError
+              | InsufficientBalanceError
             >(
               new AcceptPaymentError(
                 `Gateway ${payment.gatewayUrl} is not currently active!`,
@@ -422,6 +479,7 @@ export class PaymentService implements IPaymentService {
               | InvalidParametersError
               | PaymentStakeError
               | TransferResolutionError
+              | AcceptPaymentError
             >(
               new AcceptPaymentError(
                 `Can not accept a payment on chain ${payment.chainId}, no configuration found for HyperToken`,
@@ -448,6 +506,7 @@ export class PaymentService implements IPaymentService {
                   | InvalidParametersError
                   | PaymentStakeError
                   | TransferResolutionError
+                  | InsufficientBalanceError
                 >(
                   new InsufficientBalanceError(
                     "Not enough Hypertoken to cover provided payments.",
@@ -474,7 +533,6 @@ export class PaymentService implements IPaymentService {
     paymentId: PaymentId,
   ): ResultAsync<
     void,
-    | InvalidPaymentError
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
@@ -483,6 +541,8 @@ export class PaymentService implements IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | ProxyError
+    | BalancesUnavailableError
   > {
     this.logUtils.debug(`Insurance transfer created for payment ${paymentId}`);
 
@@ -529,6 +589,8 @@ export class PaymentService implements IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | ProxyError
+    | BalancesUnavailableError
   > {
     this.logUtils.debug(`Payment transfer created for payment ${paymentId}`);
 
@@ -574,6 +636,8 @@ export class PaymentService implements IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | ProxyError
+    | BalancesUnavailableError
   > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
@@ -612,6 +676,8 @@ export class PaymentService implements IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | ProxyError
+    | BalancesUnavailableError
   > {
     this.logUtils.debug(`Offer transfer resolved for payment ${paymentId}`);
 
@@ -657,6 +723,8 @@ export class PaymentService implements IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | ProxyError
+    | BalancesUnavailableError
   > {
     this.logUtils.debug(`Insurance transfer resolved for payment ${paymentId}`);
 
@@ -691,7 +759,14 @@ export class PaymentService implements IPaymentService {
    */
   public pullRecorded(
     paymentId: PaymentId,
-  ): ResultAsync<void, VectorError | BalancesUnavailableError> {
+  ): ResultAsync<
+    void,
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | BalancesUnavailableError
+  > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getContext(),
@@ -700,7 +775,14 @@ export class PaymentService implements IPaymentService {
       const payment = payments.get(paymentId);
 
       if (payment == null) {
-        return errAsync(new InvalidParametersError("Invalid payment ID!"));
+        return errAsync<
+          void,
+          | VectorError
+          | BlockchainUnavailableError
+          | InvalidPaymentError
+          | InvalidParametersError
+          | BalancesUnavailableError
+        >(new InvalidParametersError("Invalid payment ID!"));
       }
 
       // Notify the world that this pull payment was updated
@@ -794,7 +876,14 @@ export class PaymentService implements IPaymentService {
           .andThen((payments) => {
             const payment = payments.get(paymentId);
             if (payment == null) {
-              return errAsync(new InvalidParametersError("Invalid payment ID"));
+              return errAsync<
+                Payment,
+                | VectorError
+                | BlockchainUnavailableError
+                | InvalidPaymentError
+                | InvalidParametersError
+                | TransferResolutionError
+              >(new InvalidParametersError("Invalid payment ID"));
             }
             return okAsync(payment);
           });
@@ -813,6 +902,8 @@ export class PaymentService implements IPaymentService {
     | InvalidPaymentError
     | InvalidParametersError
     | TransferCreationError
+    | ProxyError
+    | BalancesUnavailableError
   > {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds(paymentIds),
@@ -832,6 +923,8 @@ export class PaymentService implements IPaymentService {
             | InvalidPaymentError
             | InvalidParametersError
             | TransferCreationError
+            | ProxyError
+            | BalancesUnavailableError
           >
         >();
         for (const payment of payments.values()) {
@@ -886,7 +979,10 @@ export class PaymentService implements IPaymentService {
   protected _recoverPayment(
     payment: Payment,
     context: HypernetContext,
-  ): ResultAsync<void, BlockchainUnavailableError | TransferResolutionError> {
+  ): ResultAsync<
+    void,
+    BlockchainUnavailableError | TransferResolutionError | VectorError
+  > {
     // We need to figure out why the payment is borked. We'll start looking at each possible cause
     // Depending on if the payment is too us or from us, there are different things we can fix.
     // The main things we can recover from are A. multiple payments/transfers, and B. invalid
@@ -1115,6 +1211,8 @@ export class PaymentService implements IPaymentService {
     | BlockchainUnavailableError
     | InvalidPaymentError
     | InvalidParametersError
+    | ProxyError
+    | BalancesUnavailableError
     | TransferCreationError
   > {
     this.logUtils.debug(`Advancing payment ${payment.id}`);
@@ -1128,9 +1226,12 @@ export class PaymentService implements IPaymentService {
           `In _advancePayment, gatewayConnectorStatus = ${gatewayConnectorStatus}`,
         );
         if (gatewayConnectorStatus) {
-          return this._advancePaymentForActivatedGateway(payment, context).map(
-            () => {},
-          );
+          return this._advancePaymentForActivatedGateway(
+            payment,
+            context,
+          ).andThen(() => {
+            return okAsync(undefined);
+          });
         } else {
           // Gateway is not active, so we will not advance the payment
           this.logUtils.debug(
@@ -1240,7 +1341,7 @@ export class PaymentService implements IPaymentService {
   // Caculates balances and update the context after that
   private _refreshBalances(): ResultAsync<
     void,
-    BalancesUnavailableError | VectorError
+    BalancesUnavailableError | VectorError | BlockchainUnavailableError
   > {
     return ResultUtils.combine([
       this.contextProvider.getContext(),

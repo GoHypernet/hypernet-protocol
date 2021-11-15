@@ -8,7 +8,7 @@ import {
   ERegistrySortOrder,
   RegistryFactoryContractError,
   NonFungibleRegistryContractError,
-  GovernanceSignerUnavailableError,
+  ERC20ContractError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -97,10 +97,11 @@ export interface IRegistryService {
     data: string,
   ): ResultAsync<
     void,
-    | NonFungibleRegistryContractError
     | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ERC20ContractError
   >;
   transferRegistryEntry(
     registryName: string,
@@ -128,7 +129,7 @@ export interface IRegistryService {
     symbol: string,
     registrarAddress: EthereumAddress,
     enumerable: boolean,
-  ): ResultAsync<void, RegistryFactoryContractError>;
+  ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError>;
   grantRegistrarRole(
     registryName: string,
     address: EthereumAddress,

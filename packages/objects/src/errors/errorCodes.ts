@@ -22,6 +22,17 @@ const errorCodes = {
   PaymentFinalizeError: "21",
   PaymentStakeError: "22",
   PersistenceError: "23",
+  PostmateError: "24",
+  ProviderRpcError: "25",
+  ProxyError: "26",
+  RegistryFactoryContractError: "27",
+  RegistryPermissionError: "28",
+  RenderError: "29",
+  RouterChannelUnknownError: "30",
+  RouterUnauthorizedError: "31",
+  TransferCreationError: "32",
+  TransferResolutionError: "33",
+  VectorError: "34",
 };
 
 export default errorCodes;

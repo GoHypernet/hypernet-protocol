@@ -9,6 +9,7 @@ import {
   NonFungibleRegistryContractError,
   RegistryFactoryContractError,
   GovernanceSignerUnavailableError,
+  ERC20ContractError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 import { inject } from "inversify";
@@ -132,7 +133,7 @@ export class RegistryService implements IRegistryService {
 
   public getNumberOfRegistries(): ResultAsync<
     number,
-    RegistryFactoryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
     return this.registryRepository.getNumberOfRegistries();
   }
@@ -156,10 +157,11 @@ export class RegistryService implements IRegistryService {
     data: string,
   ): ResultAsync<
     void,
-    | NonFungibleRegistryContractError
     | RegistryFactoryContractError
+    | NonFungibleRegistryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ERC20ContractError
   > {
     return this.registryRepository.createRegistryEntry(
       registryName,
@@ -205,7 +207,7 @@ export class RegistryService implements IRegistryService {
     symbol: string,
     registrarAddress: EthereumAddress,
     enumerable: boolean,
-  ): ResultAsync<void, RegistryFactoryContractError> {
+  ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError> {
     return this.registryRepository.createRegistryByToken(
       name,
       symbol,

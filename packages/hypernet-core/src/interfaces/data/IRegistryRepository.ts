@@ -1,5 +1,6 @@
 import {
   BlockchainUnavailableError,
+  ERC20ContractError,
   ERegistrySortOrder,
   EthereumAddress,
   GovernanceSignerUnavailableError,
@@ -103,6 +104,7 @@ export interface IRegistryRepository {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ERC20ContractError
   >;
   transferRegistryEntry(
     registryName: string,
@@ -130,7 +132,7 @@ export interface IRegistryRepository {
     symbol: string,
     registrarAddress: EthereumAddress,
     enumerable: boolean,
-  ): ResultAsync<void, RegistryFactoryContractError>;
+  ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError>;
   grantRegistrarRole(
     registryName: string,
     address: EthereumAddress,

@@ -1,6 +1,7 @@
 import {
   BigNumberString,
   BlockchainUnavailableError,
+  ERC20ContractError,
   ERegistrySortOrder,
   EthereumAddress,
   GovernanceSignerUnavailableError,
@@ -409,7 +410,13 @@ export class RegistryRepository implements IRegistryRepository {
           false &&
         registry.allowStorageUpdate === false
       ) {
-        return errAsync(
+        return errAsync<
+          RegistryEntry,
+          | BlockchainUnavailableError
+          | RegistryFactoryContractError
+          | NonFungibleRegistryContractError
+          | RegistryPermissionError
+        >(
           new RegistryPermissionError(
             "You don't have permission to update registry entry token uri",
           ),
@@ -457,7 +464,13 @@ export class RegistryRepository implements IRegistryRepository {
           false &&
         registry.allowLabelChange === false
       ) {
-        return errAsync(
+        return errAsync<
+          RegistryEntry,
+          | NonFungibleRegistryContractError
+          | RegistryFactoryContractError
+          | BlockchainUnavailableError
+          | RegistryPermissionError
+        >(
           new RegistryPermissionError(
             "You don't have permission to update registry entry label",
           ),
@@ -505,7 +518,13 @@ export class RegistryRepository implements IRegistryRepository {
           false &&
         registry.allowTransfers === false
       ) {
-        return errAsync(
+        return errAsync<
+          RegistryEntry,
+          | NonFungibleRegistryContractError
+          | RegistryFactoryContractError
+          | BlockchainUnavailableError
+          | RegistryPermissionError
+        >(
           new RegistryPermissionError(
             "You don't have permission to transfer registry entry",
           ),
@@ -556,7 +575,13 @@ export class RegistryRepository implements IRegistryRepository {
           false &&
         registry.allowTransfers === false
       ) {
-        return errAsync(
+        return errAsync<
+          void,
+          | NonFungibleRegistryContractError
+          | RegistryFactoryContractError
+          | BlockchainUnavailableError
+          | RegistryPermissionError
+        >(
           new RegistryPermissionError(
             "You don't have permission to burn registry entry",
           ),
@@ -659,9 +684,13 @@ export class RegistryRepository implements IRegistryRepository {
           if (registry != null) {
             return okAsync(registry);
           } else {
-            return errAsync(
-              new BlockchainUnavailableError("registry not found"),
-            );
+            return errAsync<
+              Registry,
+              | NonFungibleRegistryContractError
+              | RegistryFactoryContractError
+              | BlockchainUnavailableError
+              | RegistryPermissionError
+            >(new BlockchainUnavailableError("registry not found"));
           }
         });
     });
@@ -678,6 +707,7 @@ export class RegistryRepository implements IRegistryRepository {
     | RegistryFactoryContractError
     | BlockchainUnavailableError
     | RegistryPermissionError
+    | ERC20ContractError
   > {
     return ResultUtils.combine([
       this.getRegistryByName([registryName]),
@@ -701,7 +731,14 @@ export class RegistryRepository implements IRegistryRepository {
       ) {
         shouldCallRegisterByToken = true;
       } else {
-        return errAsync(
+        return errAsync<
+          void,
+          | NonFungibleRegistryContractError
+          | RegistryFactoryContractError
+          | BlockchainUnavailableError
+          | RegistryPermissionError
+          | ERC20ContractError
+        >(
           new RegistryPermissionError(
             "you don't have permission to create NFI",
           ),
@@ -740,7 +777,7 @@ export class RegistryRepository implements IRegistryRepository {
     symbol: string,
     registrarAddress: EthereumAddress,
     enumerable: boolean,
-  ): ResultAsync<void, RegistryFactoryContractError> {
+  ): ResultAsync<void, RegistryFactoryContractError | ERC20ContractError> {
     return this.registryFactoryContract
       .registrationFee()
       .andThen((registrationFees) => {
@@ -785,7 +822,13 @@ export class RegistryRepository implements IRegistryRepository {
           EthereumAddress(signerAddress),
         ) === false
       ) {
-        return errAsync(
+        return errAsync<
+          void,
+          | NonFungibleRegistryContractError
+          | RegistryFactoryContractError
+          | BlockchainUnavailableError
+          | RegistryPermissionError
+        >(
           new RegistryPermissionError(
             "You don't have permission to grantRole registry",
           ),
@@ -828,7 +871,13 @@ export class RegistryRepository implements IRegistryRepository {
           EthereumAddress(signerAddress),
         ) === false
       ) {
-        return errAsync(
+        return errAsync<
+          void,
+          | NonFungibleRegistryContractError
+          | RegistryFactoryContractError
+          | BlockchainUnavailableError
+          | RegistryPermissionError
+        >(
           new RegistryPermissionError(
             "You don't have permission to revokeRole registry",
           ),
@@ -873,7 +922,13 @@ export class RegistryRepository implements IRegistryRepository {
         registry.registrarAddresses.includes(EthereumAddress(signerAddress)) ===
           false
       ) {
-        return errAsync(
+        return errAsync<
+          void,
+          | NonFungibleRegistryContractError
+          | RegistryFactoryContractError
+          | BlockchainUnavailableError
+          | RegistryPermissionError
+        >(
           new RegistryPermissionError(
             "You don't have permission to renounceRole registry",
           ),
