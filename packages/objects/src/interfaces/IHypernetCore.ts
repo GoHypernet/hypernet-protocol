@@ -190,13 +190,6 @@ export interface IHypernetCore {
   getActiveLinks(): ResultAsync<HypernetLink[], VectorError | Error>;
 
   /**
-   * Returns the Hypernet Ledger for the user with the specified counterparty
-   */
-  getLinkByCounterparty(
-    counterPartyAccount: PublicIdentifier,
-  ): Promise<HypernetLink>;
-
-  /**
    * For a specified payment, puts up stake to accept the payment
    * @param paymentId the payment ID to accept funds
    */

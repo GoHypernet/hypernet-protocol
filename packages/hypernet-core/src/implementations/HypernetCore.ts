@@ -758,16 +758,6 @@ export class HypernetCore implements IHypernetCore {
   }
 
   /**
-   * Returns all links with a specified counterparty.
-   * @param counterPartyAccount
-   */
-  public async getLinkByCounterparty(
-    counterPartyAccount: PublicIdentifier,
-  ): Promise<HypernetLink> {
-    throw new Error("Method not yet implemented.");
-  }
-
-  /**
    * Accepts the terms of a push payment, and puts up the stake/insurance transfer.
    * @param paymentId
    */
