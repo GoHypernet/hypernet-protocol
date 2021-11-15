@@ -4,6 +4,7 @@ import {
   ERegistrySortOrder,
   EthereumAddress,
   GovernanceSignerUnavailableError,
+  InvalidParametersError,
   NonFungibleRegistryContractError,
   Registry,
   RegistryEntry,
@@ -998,7 +999,7 @@ export class RegistryRepository implements IRegistryRepository {
         const count = countBigNumber.toNumber();
         const registrarResults: ResultAsync<
           EthereumAddress,
-          BlockchainUnavailableError
+          NonFungibleRegistryContractError
         >[] = [];
         for (let index = 0; index < count; index++) {
           registrarResults.push(
@@ -1019,7 +1020,7 @@ export class RegistryRepository implements IRegistryRepository {
         const count = countBigNumber.toNumber();
         const registrarResults: ResultAsync<
           EthereumAddress,
-          BlockchainUnavailableError
+          NonFungibleRegistryContractError
         >[] = [];
         for (let index = 0; index < count; index++) {
           registrarResults.push(
@@ -1067,7 +1068,9 @@ export class RegistryRepository implements IRegistryRepository {
 
   public initializeForWrite(): ResultAsync<
     void,
-    GovernanceSignerUnavailableError
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
   > {
     return ResultUtils.combine([
       this.configProvider.getConfig(),

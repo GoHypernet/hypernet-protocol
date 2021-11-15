@@ -623,7 +623,7 @@ export class VectorUtils implements IVectorUtils {
 
   public getTransferStateFromTransfer(
     transfer: IFullTransferState,
-  ): ResultAsync<ETransferState, BlockchainUnavailableError> {
+  ): ResultAsync<ETransferState, VectorError | BlockchainUnavailableError> {
     if (transfer.transferResolver != null) {
       // If the transfer isn't resolved, it can't be canceled
 

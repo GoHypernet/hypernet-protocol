@@ -1,4 +1,4 @@
-import { PersistenceError } from "@hypernetlabs/objects";
+import { PersistenceError, VectorError } from "@hypernetlabs/objects";
 import {
   ILogUtils,
   ILogUtilsType,
@@ -31,7 +31,7 @@ export class StorageUtils implements IStorageUtils {
   public write<T>(
     keyName: string,
     data: T,
-  ): ResultAsync<void, PersistenceError> {
+  ): ResultAsync<void, PersistenceError | VectorError> {
     return ResultUtils.race([
       this._writeSessionStorage(keyName, data),
       ResultUtils.backoffAndRetry(
@@ -50,7 +50,9 @@ export class StorageUtils implements IStorageUtils {
     ]);
   }
 
-  public read<T>(keyName: string): ResultAsync<T | null, PersistenceError> {
+  public read<T>(
+    keyName: string,
+  ): ResultAsync<T | null, PersistenceError | VectorError> {
     // Read from session storage first.
     this.logUtils.debug(`Reading value for key ${keyName}`);
     return this._readSessionStorage<T>(keyName)
@@ -89,7 +91,9 @@ export class StorageUtils implements IStorageUtils {
       });
   }
 
-  public remove(keyName: string): ResultAsync<void, PersistenceError> {
+  public remove(
+    keyName: string,
+  ): ResultAsync<void, PersistenceError | VectorError> {
     return ResultUtils.race([
       this._removeSessionStorage(keyName),
       ResultUtils.backoffAndRetry(

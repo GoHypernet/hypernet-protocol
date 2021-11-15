@@ -14,7 +14,10 @@ import {
   GatewayRegistrationFilter,
   GatewayRegistrationInfo,
   InvalidParametersError,
+  BalancesUnavailableError,
+  GatewayActivationError,
   ActiveStateChannel,
+  VectorError,
 } from "@hypernetlabs/objects";
 import { ResultAsync } from "neverthrow";
 
@@ -22,7 +25,15 @@ export interface IGatewayConnectorService {
   initialize(): ResultAsync<void, never>;
   authorizeGateway(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayValidationError>;
+  ): ResultAsync<
+    void,
+    | PersistenceError
+    | BalancesUnavailableError
+    | BlockchainUnavailableError
+    | GatewayAuthorizationDeniedError
+    | GatewayActivationError
+    | VectorError
+  >;
   deauthorizeGateway(
     gatewayUrl: GatewayUrl,
   ): ResultAsync<
@@ -31,11 +42,11 @@ export interface IGatewayConnectorService {
   >;
   getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
-    PersistenceError
+    PersistenceError | VectorError
   >;
   getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
-    PersistenceError
+    PersistenceError | VectorError
   >;
   activateAuthorizedGateways(): ResultAsync<
     void,
@@ -59,7 +70,10 @@ export interface IGatewayConnectorService {
     routerPublicIdentifiers: PublicIdentifier[],
   ): ResultAsync<
     ActiveStateChannel,
-    PersistenceError | RouterUnauthorizedError | InvalidParametersError
+    | PersistenceError
+    | RouterUnauthorizedError
+    | InvalidParametersError
+    | VectorError
   >;
 
   getGatewayTokenInfo(
@@ -75,10 +89,10 @@ export interface IGatewayConnectorService {
 
   closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError>;
+  ): ResultAsync<void, GatewayConnectorError | PersistenceError | VectorError>;
   displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError>;
+  ): ResultAsync<void, GatewayConnectorError | PersistenceError | VectorError>;
 }
 
 export const IGatewayConnectorServiceType = Symbol.for(

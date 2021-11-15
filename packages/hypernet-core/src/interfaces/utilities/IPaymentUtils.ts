@@ -65,7 +65,10 @@ export interface IPaymentUtils {
   transfersToPayment(
     fullPaymentId: PaymentId,
     transfers: IFullTransferState[],
-  ): ResultAsync<Payment, InvalidPaymentError | InvalidParametersError>;
+  ): ResultAsync<
+    Payment,
+    InvalidPaymentError | InvalidParametersError | VectorError
+  >;
 
   /**
    *
@@ -118,7 +121,7 @@ export interface IPaymentUtils {
    */
   getPaymentState(
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<EPaymentState, BlockchainUnavailableError>;
+  ): ResultAsync<EPaymentState, VectorError | BlockchainUnavailableError>;
 
   /**
    * This returns true if the provided insurance transfer matches the terms of the offer details

@@ -88,9 +88,10 @@ export class PaymentRepository implements IPaymentRepository {
             });
 
             if (stateChannel == null) {
-              return errAsync<IBasicTransferResponse, PaymentCreationError>(
-                new PaymentCreationError(`State channel does not exist`),
-              );
+              return errAsync<
+                IBasicTransferResponse,
+                InvalidParametersError | TransferCreationError
+              >(new PaymentCreationError(`State channel does not exist`));
             }
             const message: IHypernetPullPaymentDetails = {
               messageType: EMessageTransferType.PULLPAYMENT,
@@ -139,7 +140,7 @@ export class PaymentRepository implements IPaymentRepository {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PullPayment, PaymentCreationError> {
+  ): ResultAsync<PullPayment, PaymentCreationError | TransferCreationError> {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),
@@ -237,7 +238,7 @@ export class PaymentRepository implements IPaymentRepository {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PushPayment, PaymentCreationError> {
+  ): ResultAsync<PushPayment, PaymentCreationError | TransferCreationError> {
     return ResultUtils.combine([
       this.browserNodeProvider.getBrowserNode(),
       this.contextProvider.getInitializedContext(),

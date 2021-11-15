@@ -3,6 +3,7 @@ import {
   ERegistrySortOrder,
   EthereumAddress,
   GovernanceSignerUnavailableError,
+  InvalidParametersError,
   NonFungibleRegistryContractError,
   Registry,
   RegistryEntry,
@@ -161,7 +162,12 @@ export interface IRegistryRepository {
     | RegistryPermissionError
   >;
   initializeReadOnly(): ResultAsync<void, never>;
-  initializeForWrite(): ResultAsync<void, GovernanceSignerUnavailableError>;
+  initializeForWrite(): ResultAsync<
+    void,
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
+  >;
 }
 
 export const IRegistryRepositoryType = Symbol.for("IRegistryRepository");

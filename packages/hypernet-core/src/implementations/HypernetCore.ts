@@ -43,6 +43,7 @@ import {
   RegistryFactoryContractError,
   HypernetGovernorContractError,
   ERC20ContractError,
+  InvalidPaymentError,
 } from "@hypernetlabs/objects";
 import {
   AxiosAjaxUtils,
@@ -708,7 +709,10 @@ export class HypernetCore implements IHypernetCore {
   /**
    * Returns the current balances for this instance of Hypernet Core.
    */
-  public getBalances(): ResultAsync<Balances, BalancesUnavailableError> {
+  public getBalances(): ResultAsync<
+    Balances,
+    BalancesUnavailableError | VectorError
+  > {
     return this.accountService.getBalances().mapErr((e) => {
       this.logUtils.error(e);
       return e;
@@ -751,7 +755,17 @@ export class HypernetCore implements IHypernetCore {
    */
   public acceptOffer(
     paymentId: PaymentId,
-  ): ResultAsync<Payment, InsufficientBalanceError | AcceptPaymentError> {
+  ): ResultAsync<
+    Payment,
+    | InsufficientBalanceError
+    | AcceptPaymentError
+    | BalancesUnavailableError
+    | GatewayValidationError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
+  > {
     return this.paymentService.acceptOffer(paymentId).mapErr((e) => {
       this.logUtils.error(e);
       return e;
@@ -906,7 +920,10 @@ export class HypernetCore implements IHypernetCore {
 
   public authorizeGateway(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayValidationError> {
+  ): ResultAsync<
+    void,
+    GatewayValidationError | PersistenceError | VectorError
+  > {
     return this.gatewayConnectorService
       .authorizeGateway(gatewayUrl)
       .mapErr((e) => {
@@ -931,7 +948,7 @@ export class HypernetCore implements IHypernetCore {
 
   public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
-    PersistenceError
+    PersistenceError | VectorError
   > {
     return this.gatewayConnectorService
       .getAuthorizedGatewaysConnectorsStatus()
@@ -968,7 +985,7 @@ export class HypernetCore implements IHypernetCore {
 
   public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
-    PersistenceError
+    PersistenceError | VectorError
   > {
     return this.gatewayConnectorService.getAuthorizedGateways().mapErr((e) => {
       this.logUtils.error(e);
@@ -978,7 +995,7 @@ export class HypernetCore implements IHypernetCore {
 
   public closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError> {
+  ): ResultAsync<void, GatewayConnectorError | PersistenceError | VectorError> {
     return this.gatewayConnectorService
       .closeGatewayIFrame(gatewayUrl)
       .mapErr((e) => {
@@ -989,7 +1006,7 @@ export class HypernetCore implements IHypernetCore {
 
   public displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError> {
+  ): ResultAsync<void, GatewayConnectorError | PersistenceError | VectorError> {
     return this.gatewayConnectorService
       .displayGatewayIFrame(gatewayUrl)
       .mapErr((e) => {
@@ -1199,7 +1216,7 @@ export class HypernetCore implements IHypernetCore {
 
   public getVotingPower(
     account: EthereumAddress,
-  ): ResultAsync<number, HypernetGovernorContractError> {
+  ): ResultAsync<number, HypernetGovernorContractError | ERC20ContractError> {
     return this.governanceService.getVotingPower(account);
   }
 
@@ -1211,7 +1228,7 @@ export class HypernetCore implements IHypernetCore {
 
   public getNumberOfRegistries(): ResultAsync<
     number,
-    RegistryFactoryContractError
+    RegistryFactoryContractError | NonFungibleRegistryContractError
   > {
     return this.registryService.getNumberOfRegistries();
   }

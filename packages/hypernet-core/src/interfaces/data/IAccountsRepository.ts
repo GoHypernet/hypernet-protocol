@@ -23,7 +23,10 @@ export interface IAccountsRepository {
    * Returns an array of public identifiers of routers we have a connection with
    * ActiveRouters are held in HNP persistence, but can be recovered via evaluation of the blockchain and subgraphs.
    */
-  getActiveRouters(): ResultAsync<PublicIdentifier[], PersistenceError>;
+  getActiveRouters(): ResultAsync<
+    PublicIdentifier[],
+    PersistenceError | VectorError
+  >;
 
   /**
    * Stores an active router into the hypernet core persistence layer
@@ -31,7 +34,7 @@ export interface IAccountsRepository {
    */
   addActiveRouter(
     routerPublicIdentifier: PublicIdentifier,
-  ): ResultAsync<void, PersistenceError>;
+  ): ResultAsync<void, PersistenceError | VectorError>;
 
   /**
    * Returns an array of ActiveStateChannel objects.

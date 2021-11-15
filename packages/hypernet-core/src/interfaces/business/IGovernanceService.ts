@@ -47,7 +47,7 @@ export interface IGovernanceService {
   getProposalThreshold(): ResultAsync<number, HypernetGovernorContractError>;
   getVotingPower(
     account: EthereumAddress,
-  ): ResultAsync<number, HypernetGovernorContractError>;
+  ): ResultAsync<number, HypernetGovernorContractError | ERC20ContractError>;
   getHyperTokenBalance(
     account: EthereumAddress,
   ): ResultAsync<number, ERC20ContractError>;

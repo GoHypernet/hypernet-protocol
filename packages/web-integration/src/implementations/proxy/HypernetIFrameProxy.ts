@@ -42,6 +42,7 @@ import {
   NonFungibleRegistryContractError,
   HypernetGovernorContractError,
   ERC20ContractError,
+  InvalidPaymentError,
 } from "@hypernetlabs/objects";
 import { ParentProxy } from "@hypernetlabs/utils";
 import { Result, ResultAsync, ok, okAsync } from "neverthrow";
@@ -301,7 +302,7 @@ export default class HypernetIFrameProxy
 
   public getEthereumAccounts(): ResultAsync<
     EthereumAddress[],
-    BlockchainUnavailableError
+    BlockchainUnavailableError | ProxyError
   > {
     return this._createCall("getEthereumAccounts", null);
   }
@@ -375,7 +376,10 @@ export default class HypernetIFrameProxy
     });
   }
 
-  public getBalances(): ResultAsync<Balances, BalancesUnavailableError> {
+  public getBalances(): ResultAsync<
+    Balances,
+    BalancesUnavailableError | VectorError
+  > {
     return this._createCall("getBalances", null);
   }
 
@@ -395,7 +399,17 @@ export default class HypernetIFrameProxy
 
   public acceptOffer(
     paymentId: PaymentId,
-  ): ResultAsync<Payment, InsufficientBalanceError | AcceptPaymentError> {
+  ): ResultAsync<
+    Payment,
+    | InsufficientBalanceError
+    | AcceptPaymentError
+    | BalancesUnavailableError
+    | GatewayValidationError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
+  > {
     return this._createCall("acceptFunds", paymentId);
   }
 
@@ -411,13 +425,16 @@ export default class HypernetIFrameProxy
 
   public mintTestToken(
     amount: BigNumberString,
-  ): ResultAsync<void, BlockchainUnavailableError> {
+  ): ResultAsync<void, BlockchainUnavailableError | ProxyError> {
     return this._createCall("mintTestToken", amount);
   }
 
   public authorizeGateway(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayValidationError> {
+  ): ResultAsync<
+    void,
+    GatewayValidationError | PersistenceError | VectorError
+  > {
     return this._createCall("authorizeGateway", gatewayUrl);
   }
 
@@ -432,14 +449,14 @@ export default class HypernetIFrameProxy
 
   public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
-    PersistenceError
+    PersistenceError | VectorError
   > {
     return this._createCall("getAuthorizedGateways", null);
   }
 
   public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
-    PersistenceError
+    PersistenceError | VectorError
   > {
     return this._createCall("getAuthorizedGatewaysConnectorsStatus", null);
   }
@@ -455,13 +472,13 @@ export default class HypernetIFrameProxy
 
   public getGatewayRegistrationInfo(
     filter?: GatewayRegistrationFilter,
-  ): ResultAsync<GatewayRegistrationInfo[], PersistenceError> {
+  ): ResultAsync<GatewayRegistrationInfo[], PersistenceError | VectorError> {
     return this._createCall("getGatewayRegistrationInfo", filter);
   }
 
   public displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError> {
+  ): ResultAsync<void, GatewayConnectorError | PersistenceError | VectorError> {
     return this.getAuthorizedGatewaysConnectorsStatus().andThen(
       (gatewaysMap) => {
         if (gatewaysMap.get(gatewayUrl) == true) {
@@ -480,7 +497,7 @@ export default class HypernetIFrameProxy
 
   public closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError> {
+  ): ResultAsync<void, GatewayConnectorError | PersistenceError | VectorError> {
     this._closeCoreIFrame();
 
     return this._createCall("closeGatewayIFrame", gatewayUrl);
@@ -489,7 +506,7 @@ export default class HypernetIFrameProxy
   public providePrivateCredentials(
     privateKey: string | null,
     mnemonic: string | null,
-  ): ResultAsync<void, InvalidParametersError> {
+  ): ResultAsync<void, InvalidParametersError | ProxyError> {
     return this._createCall("providePrivateCredentials", {
       privateKey,
       mnemonic,
@@ -499,7 +516,7 @@ export default class HypernetIFrameProxy
   public getProposals(
     pageNumber: number,
     pageSize: number,
-  ): ResultAsync<Proposal[], HypernetGovernorContractError> {
+  ): ResultAsync<Proposal[], HypernetGovernorContractError | ProxyError> {
     return this._createCall("getProposals", {
       pageNumber,
       pageSize,
@@ -511,7 +528,7 @@ export default class HypernetIFrameProxy
     symbol: string,
     owner: EthereumAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> {
     return this._createCall("createProposal", {
       name,
       symbol,
@@ -523,7 +540,7 @@ export default class HypernetIFrameProxy
   public delegateVote(
     delegateAddress: EthereumAddress,
     amount: number | null,
-  ): ResultAsync<void, ERC20ContractError> {
+  ): ResultAsync<void, ERC20ContractError | ProxyError> {
     return this._createCall("delegateVote", {
       delegateAddress,
       amount,
@@ -532,14 +549,14 @@ export default class HypernetIFrameProxy
 
   public getProposalDetails(
     proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> {
     return this._createCall("getProposalDetails", proposalId);
   }
 
   public castVote(
     proposalId: string,
     support: EProposalVoteSupport,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> {
     return this._createCall("castVote", {
       proposalId,
       support,
@@ -549,7 +566,10 @@ export default class HypernetIFrameProxy
   public getProposalVotesReceipt(
     proposalId: string,
     voterAddress: EthereumAddress,
-  ): ResultAsync<ProposalVoteReceipt, HypernetGovernorContractError> {
+  ): ResultAsync<
+    ProposalVoteReceipt,
+    HypernetGovernorContractError | ProxyError
+  > {
     return this._createCall("getProposalVotesReceipt", {
       proposalId,
       voterAddress,
@@ -666,45 +686,45 @@ export default class HypernetIFrameProxy
 
   public queueProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> {
     return this._createCall("queueProposal", proposalId);
   }
 
   public cancelProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> {
     return this._createCall("cancelProposal", proposalId);
   }
 
   public executeProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError> {
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError> {
     return this._createCall("executeProposal", proposalId);
   }
 
   public getProposalsCount(): ResultAsync<
     number,
-    HypernetGovernorContractError
+    HypernetGovernorContractError | ProxyError
   > {
     return this._createCall("getProposalsCount", null);
   }
 
   public getProposalThreshold(): ResultAsync<
     number,
-    HypernetGovernorContractError
+    HypernetGovernorContractError | ProxyError
   > {
     return this._createCall("getProposalThreshold", null);
   }
 
   public getVotingPower(
     account: EthereumAddress,
-  ): ResultAsync<number, HypernetGovernorContractError> {
+  ): ResultAsync<number, HypernetGovernorContractError | ProxyError> {
     return this._createCall("getVotingPower", account);
   }
 
   public getHyperTokenBalance(
     account: EthereumAddress,
-  ): ResultAsync<number, ERC20ContractError> {
+  ): ResultAsync<number, ERC20ContractError | ProxyError> {
     return this._createCall("getHyperTokenBalance", account);
   }
 

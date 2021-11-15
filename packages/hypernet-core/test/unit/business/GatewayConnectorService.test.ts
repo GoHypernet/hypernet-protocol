@@ -593,7 +593,7 @@ describe("GatewayConnectorService tests", () => {
     // Arrange
     const mocks = new GatewayConnectorServiceMocks();
 
-    const err = new PersistenceError();
+    const err = new BlockchainUnavailableError();
     td.when(
       mocks.routerRepository.getRouterDetails([routerPublicIdentifier]),
     ).thenReturn(errAsync(err));

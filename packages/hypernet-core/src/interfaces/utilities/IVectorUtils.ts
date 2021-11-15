@@ -171,7 +171,7 @@ export interface IVectorUtils {
    */
   getTransferStateFromTransfer(
     transfer: IFullTransferState,
-  ): ResultAsync<ETransferState, BlockchainUnavailableError>;
+  ): ResultAsync<ETransferState, VectorError | BlockchainUnavailableError>;
 
   /**
    *

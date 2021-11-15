@@ -25,6 +25,7 @@ import {
   NonFungibleRegistryContractError,
   HypernetGovernorContractError,
   ERC20ContractError,
+  InvalidPaymentError,
 } from "@objects/errors";
 import { EthereumAddress } from "@objects/EthereumAddress";
 import { GatewayRegistrationFilter } from "@objects/GatewayRegistrationFilter";
@@ -64,7 +65,7 @@ export interface IHypernetCore {
    */
   getEthereumAccounts(): ResultAsync<
     EthereumAddress[],
-    BlockchainUnavailableError
+    BlockchainUnavailableError | ProxyError
   >;
 
   /**
@@ -152,7 +153,7 @@ export interface IHypernetCore {
    * Returns the balance account, including funds within
    * the general channel, and funds locked inside transfers within the channel.
    */
-  getBalances(): ResultAsync<Balances, BalancesUnavailableError>;
+  getBalances(): ResultAsync<Balances, BalancesUnavailableError | VectorError>;
 
   /**
    * Returns all Hypernet Ledger for the user
@@ -178,7 +179,17 @@ export interface IHypernetCore {
    */
   acceptOffer(
     paymentId: PaymentId,
-  ): ResultAsync<Payment, InsufficientBalanceError | AcceptPaymentError>;
+  ): ResultAsync<
+    Payment,
+    | InsufficientBalanceError
+    | AcceptPaymentError
+    | BalancesUnavailableError
+    | GatewayValidationError
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
+  >;
 
   /**
    * Pulls an incremental amount from an authorized payment
@@ -206,11 +217,11 @@ export interface IHypernetCore {
    */
   mintTestToken(
     amount: BigNumberString,
-  ): ResultAsync<void, BlockchainUnavailableError>;
+  ): ResultAsync<void, BlockchainUnavailableError | ProxyError>;
 
   authorizeGateway(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayValidationError>;
+  ): ResultAsync<void, GatewayValidationError | PersistenceError | VectorError>;
 
   deauthorizeGateway(
     gatewayUrl: GatewayUrl,
@@ -221,12 +232,12 @@ export interface IHypernetCore {
 
   getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
-    PersistenceError
+    PersistenceError | VectorError
   >;
 
   getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
-    PersistenceError
+    PersistenceError | VectorError
   >;
 
   /**
@@ -248,50 +259,53 @@ export interface IHypernetCore {
    */
   getGatewayRegistrationInfo(
     filter?: GatewayRegistrationFilter,
-  ): ResultAsync<GatewayRegistrationInfo[], PersistenceError>;
+  ): ResultAsync<GatewayRegistrationInfo[], PersistenceError | VectorError>;
 
   closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError>;
+  ): ResultAsync<void, GatewayConnectorError | PersistenceError | VectorError>;
   displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError>;
+  ): ResultAsync<void, GatewayConnectorError | PersistenceError | VectorError>;
 
   providePrivateCredentials(
     privateKey: string | null,
     mnemonic: string | null,
-  ): ResultAsync<void, InvalidParametersError>;
+  ): ResultAsync<void, InvalidParametersError | ProxyError>;
 
   getProposals(
     pageNumber: number,
     pageSize: number,
-  ): ResultAsync<Proposal[], HypernetGovernorContractError>;
+  ): ResultAsync<Proposal[], HypernetGovernorContractError | ProxyError>;
 
   createProposal(
     name: string,
     symbol: string,
     owner: EthereumAddress,
     enumerable: boolean,
-  ): ResultAsync<Proposal, HypernetGovernorContractError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
 
   delegateVote(
     delegateAddress: EthereumAddress,
     amount: number | null,
-  ): ResultAsync<void, ERC20ContractError>;
+  ): ResultAsync<void, ERC20ContractError | ProxyError>;
 
   getProposalDetails(
     proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
 
   castVote(
     proposalId: string,
     support: EProposalVoteSupport,
-  ): ResultAsync<Proposal, HypernetGovernorContractError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
 
   getProposalVotesReceipt(
     proposalId: string,
     voterAddress: EthereumAddress,
-  ): ResultAsync<ProposalVoteReceipt, HypernetGovernorContractError>;
+  ): ResultAsync<
+    ProposalVoteReceipt,
+    HypernetGovernorContractError | ProxyError
+  >;
 
   getRegistries(
     pageNumber: number,
@@ -336,15 +350,15 @@ export interface IHypernetCore {
 
   queueProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
 
   cancelProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
 
   executeProposal(
     proposalId: string,
-  ): ResultAsync<Proposal, HypernetGovernorContractError>;
+  ): ResultAsync<Proposal, HypernetGovernorContractError | ProxyError>;
 
   updateRegistryEntryTokenURI(
     registryName: string,
@@ -370,7 +384,10 @@ export interface IHypernetCore {
     | RegistryPermissionError
   >;
 
-  getProposalsCount(): ResultAsync<number, HypernetGovernorContractError>;
+  getProposalsCount(): ResultAsync<
+    number,
+    HypernetGovernorContractError | ProxyError
+  >;
 
   getRegistryEntriesTotalCount(
     registryNames: string[],
@@ -379,17 +396,23 @@ export interface IHypernetCore {
     RegistryFactoryContractError | NonFungibleRegistryContractError
   >;
 
-  getProposalThreshold(): ResultAsync<number, HypernetGovernorContractError>;
+  getProposalThreshold(): ResultAsync<
+    number,
+    HypernetGovernorContractError | ProxyError
+  >;
 
   getVotingPower(
     account: EthereumAddress,
-  ): ResultAsync<number, HypernetGovernorContractError>;
+  ): ResultAsync<number, HypernetGovernorContractError | ProxyError>;
 
   getHyperTokenBalance(
     account: EthereumAddress,
-  ): ResultAsync<number, ERC20ContractError>;
+  ): ResultAsync<number, ERC20ContractError | ProxyError>;
 
-  getNumberOfRegistries(): ResultAsync<number, BlockchainUnavailableError>;
+  getNumberOfRegistries(): ResultAsync<
+    number,
+    RegistryFactoryContractError | NonFungibleRegistryContractError
+  >;
 
   updateRegistryParams(
     registryParams: RegistryParams,

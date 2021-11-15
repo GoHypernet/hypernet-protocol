@@ -53,7 +53,7 @@ export interface IPaymentRepository {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PushPayment, PaymentCreationError>;
+  ): ResultAsync<PushPayment, PaymentCreationError | TransferCreationError>;
 
   createPullPayment(
     routerPublicIdentifier: PublicIdentifier,
@@ -67,7 +67,7 @@ export interface IPaymentRepository {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PullPayment, PaymentCreationError>;
+  ): ResultAsync<PullPayment, PaymentCreationError | TransferCreationError>;
 
   createPullRecord(
     paymentId: PaymentId,

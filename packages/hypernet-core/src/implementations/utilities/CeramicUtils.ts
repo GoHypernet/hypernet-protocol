@@ -41,7 +41,10 @@ export class CeramicUtils implements ICeramicUtils {
   protected authProvider: Ed25519Provider | null = null;
   protected didResolver: Resolver | null = null;
   protected idx: IDX | null = null;
-  protected initializeResult: ResultAsync<void, PersistenceError> | null = null;
+  protected initializeResult: ResultAsync<
+    void,
+    PersistenceError | VectorError
+  > | null = null;
 
   constructor(
     @inject(IConfigProviderType) protected configProvider: IConfigProvider,
@@ -51,7 +54,7 @@ export class CeramicUtils implements ICeramicUtils {
     @inject(ILogUtilsType) protected logUtils: ILogUtils,
   ) {}
 
-  public initialize(): ResultAsync<void, PersistenceError> {
+  public initialize(): ResultAsync<void, PersistenceError | VectorError> {
     if (this.initializeResult == null) {
       this.initializeResult = this._authenticateUser();
     }
@@ -62,7 +65,7 @@ export class CeramicUtils implements ICeramicUtils {
   // This is used to create a difinition derived from a schema, and it shouldn't be called in run time
   public initiateDefinitions(): ResultAsync<
     TileDocument[],
-    PersistenceError | BlockchainUnavailableError
+    PersistenceError | VectorError
   > {
     return this.initialize().andThen(() => {
       if (this.ceramic == null || this.idx == null) {
@@ -121,7 +124,7 @@ export class CeramicUtils implements ICeramicUtils {
   public writeRecord<T>(
     aliasName: string,
     content: T,
-  ): ResultAsync<void, PersistenceError> {
+  ): ResultAsync<void, PersistenceError | VectorError> {
     if (this.initializeResult == null) {
       throw new Error("Must call CeramicUtils.initialize() first");
     }
@@ -139,7 +142,7 @@ export class CeramicUtils implements ICeramicUtils {
 
   public readRecord<T>(
     aliasName: string,
-  ): ResultAsync<T | null, PersistenceError> {
+  ): ResultAsync<T | null, PersistenceError | VectorError> {
     if (this.initializeResult == null) {
       throw new Error("Must call CeramicUtils.initialize() first");
     }
@@ -157,7 +160,9 @@ export class CeramicUtils implements ICeramicUtils {
     });
   }
 
-  public removeRecord(aliasName: string): ResultAsync<void, PersistenceError> {
+  public removeRecord(
+    aliasName: string,
+  ): ResultAsync<void, PersistenceError | VectorError> {
     if (this.initializeResult == null) {
       throw new Error("Must call CeramicUtils.initialize() first");
     }
@@ -173,7 +178,10 @@ export class CeramicUtils implements ICeramicUtils {
     });
   }
 
-  private _authenticateUser(): ResultAsync<void, PersistenceError> {
+  private _authenticateUser(): ResultAsync<
+    void,
+    PersistenceError | VectorError
+  > {
     this.logUtils.debug(`Authenticating user with Ceramic`);
     return ResultUtils.combine([
       this.configProvider.getConfig(),

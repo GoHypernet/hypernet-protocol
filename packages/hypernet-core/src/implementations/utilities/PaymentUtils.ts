@@ -308,7 +308,10 @@ export class PaymentUtils implements IPaymentUtils {
   public transfersToPayment(
     paymentId: PaymentId,
     transfers: IFullTransferState[],
-  ): ResultAsync<Payment, InvalidPaymentError | InvalidParametersError> {
+  ): ResultAsync<
+    Payment,
+    InvalidPaymentError | InvalidParametersError | VectorError
+  > {
     let paymentType: EPaymentType;
     return this.configProvider
       .getConfig()
@@ -383,7 +386,7 @@ export class PaymentUtils implements IPaymentUtils {
    */
   public getPaymentState(
     sortedTransfers: SortedTransfers,
-  ): ResultAsync<EPaymentState, BlockchainUnavailableError> {
+  ): ResultAsync<EPaymentState, VectorError | BlockchainUnavailableError> {
     // We are going to remove all canceled transfers from consideration.
     // Canceled transfers are irrelevant; artifacts of things gone wonky.
     return ResultUtils.combine([
@@ -690,7 +693,10 @@ export class PaymentUtils implements IPaymentUtils {
         // Loop over them and convert them to proper payments.
         // This is all async, so we can do the whole thing in parallel.
         const paymentResults = new Array<
-          ResultAsync<Payment, InvalidPaymentError | InvalidParametersError>
+          ResultAsync<
+            Payment,
+            InvalidPaymentError | InvalidParametersError | VectorError
+          >
         >();
         transfersByPaymentId.forEach((transferArray, paymentId) => {
           const paymentResult = this.transfersToPayment(

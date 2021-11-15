@@ -60,12 +60,6 @@ import {
   IVectorUtilsType,
 } from "@interfaces/utilities";
 
-type PaymentsByIdsErrors =
-  | VectorError
-  | BlockchainUnavailableError
-  | InvalidPaymentError
-  | InvalidParametersError;
-
 /**
  * PaymentService uses Vector internally to send payments on the requested channel.
  * The order of operations for sending funds is as follows:
@@ -120,7 +114,7 @@ export class PaymentService implements IPaymentService {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PullPayment, PaymentCreationError> {
+  ): ResultAsync<PullPayment, PaymentCreationError | TransferCreationError> {
     // @TODO Check deltaAmount, deltaTime, totalAuthorized, and expiration date
     // totalAuthorized / (deltaAmount/deltaTime) > ((expiration date - now) + someMinimumNumDays)
 
@@ -162,7 +156,10 @@ export class PaymentService implements IPaymentService {
   public pullFunds(
     paymentId: PaymentId,
     amount: BigNumberString,
-  ): ResultAsync<Payment, PaymentsByIdsErrors | PaymentCreationError> {
+  ): ResultAsync<
+    Payment,
+    PaymentCreationError | VectorError | BalancesUnavailableError
+  > {
     // Pull the up the payment
     return this.paymentRepository
       .getPaymentsByIds([paymentId])
@@ -228,7 +225,7 @@ export class PaymentService implements IPaymentService {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<PushPayment, PaymentCreationError> {
+  ): ResultAsync<PushPayment, PaymentCreationError | TransferCreationError> {
     // TODO: Sanity checking on the values
     return this.contextProvider.getInitializedContext().andThen((context) => {
       // Lookup the ActiveStateChannel from the context
@@ -274,7 +271,14 @@ export class PaymentService implements IPaymentService {
    */
   public offerReceived(
     paymentId: PaymentId,
-  ): ResultAsync<void, PaymentsByIdsErrors> {
+  ): ResultAsync<
+    void,
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
+    | BalancesUnavailableError
+  > {
     const prerequisites = ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getInitializedContext(),
@@ -333,94 +337,132 @@ export class PaymentService implements IPaymentService {
     | AcceptPaymentError
     | BalancesUnavailableError
     | GatewayValidationError
-    | PaymentsByIdsErrors
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
   > {
     return ResultUtils.combine([
       this.configProvider.getConfig(),
       this.contextProvider.getContext(),
       this.paymentRepository.getPaymentsByIds([paymentId]),
-    ])
-      .andThen((vals) => {
-        const [config, context, payments] = vals;
-        const payment = payments.get(paymentId);
+    ]).andThen((vals) => {
+      const [config, context, payments] = vals;
+      const payment = payments.get(paymentId);
 
-        if (payment == null) {
-          return errAsync<Payment, AcceptPaymentError>(
-            new AcceptPaymentError(`Payment ${paymentId} does not exist!`),
-          );
-        }
+      if (payment == null) {
+        return errAsync<
+          Payment,
+          | TransferCreationError
+          | VectorError
+          | BalancesUnavailableError
+          | BlockchainUnavailableError
+          | InvalidPaymentError
+          | InvalidParametersError
+          | PaymentStakeError
+          | TransferResolutionError
+        >(new AcceptPaymentError(`Payment ${paymentId} does not exist!`));
+      }
 
-        // Get the state channel for the payment
-        const stateChannel = context.activeStateChannels?.find((asc) => {
-          return (
-            asc.chainId == payment.chainId &&
-            asc.routerPublicIdentifier == payment.routerPublicIdentifier
-          );
-        });
-
-        if (stateChannel == null) {
-          return errAsync<Payment, AcceptPaymentError>(
-            new AcceptPaymentError(
-              "State channel for payment ${paymentId} does not exist",
-            ),
-          );
-        }
-
-        // We need to make sure that we have a sufficient balance of hypertoken in the channel to accept the payment
-        return this.gatewayRegistrationRepository
-          .getGatewayRegistrationInfo([payment.gatewayUrl])
-          .andThen((registrationInfo) => {
-            const gatewayRegistrationInfo = registrationInfo.get(
-              payment.gatewayUrl,
-            );
-
-            // If we don't have a public key for each gateway, then we should not proceed.
-            if (gatewayRegistrationInfo == null) {
-              return errAsync<Payment, AcceptPaymentError>(
-                new AcceptPaymentError(
-                  `Gateway ${payment.gatewayUrl} is not currently active!`,
-                ),
-              );
-            }
-
-            // Get the address of HyperToken for this particular chain
-            const hypertokenAddress =
-              config.chainAddresses[payment.chainId]?.hypertokenAddress;
-
-            if (hypertokenAddress == null) {
-              return errAsync<Payment, AcceptPaymentError>(
-                new AcceptPaymentError(
-                  `Can not accept a payment on chain ${payment.chainId}, no configuration found for HyperToken`,
-                ),
-              );
-            }
-
-            return this.accountRepository
-              .getBalanceByAsset(stateChannel.channelAddress, hypertokenAddress)
-              .andThen((hypertokenBalance) => {
-                // Check the balance and make sure you have enough HyperToken to cover it
-                if (
-                  BigNumber.from(hypertokenBalance.freeAmount).lt(
-                    payment.requiredStake,
-                  )
-                ) {
-                  return errAsync<Payment, InsufficientBalanceError>(
-                    new InsufficientBalanceError(
-                      "Not enough Hypertoken to cover provided payments.",
-                    ),
-                  );
-                }
-
-                return this.paymentRepository.provideStake(
-                  payment.id,
-                  gatewayRegistrationInfo.address,
-                );
-              });
-          });
-      })
-      .andThen((paymentsResult) => {
-        return this._refreshBalances().map(() => paymentsResult);
+      // Get the state channel for the payment
+      const stateChannel = context.activeStateChannels?.find((asc) => {
+        return (
+          asc.chainId == payment.chainId &&
+          asc.routerPublicIdentifier == payment.routerPublicIdentifier
+        );
       });
+
+      if (stateChannel == null) {
+        return errAsync<Payment, AcceptPaymentError>(
+          new AcceptPaymentError(
+            "State channel for payment ${paymentId} does not exist",
+          ),
+        );
+      }
+
+      // We need to make sure that we have a sufficient balance of hypertoken in the channel to accept the payment
+      return this.gatewayRegistrationRepository
+        .getGatewayRegistrationInfo([payment.gatewayUrl])
+        .andThen((registrationInfo) => {
+          const gatewayRegistrationInfo = registrationInfo.get(
+            payment.gatewayUrl,
+          );
+
+          // If we don't have a public key for each gateway, then we should not proceed.
+          if (gatewayRegistrationInfo == null) {
+            return errAsync<
+              Payment,
+              | TransferCreationError
+              | VectorError
+              | BalancesUnavailableError
+              | BlockchainUnavailableError
+              | InvalidPaymentError
+              | InvalidParametersError
+              | PaymentStakeError
+              | TransferResolutionError
+            >(
+              new AcceptPaymentError(
+                `Gateway ${payment.gatewayUrl} is not currently active!`,
+              ),
+            );
+          }
+
+          // Get the address of HyperToken for this particular chain
+          const hypertokenAddress =
+            config.chainAddresses[payment.chainId]?.hypertokenAddress;
+
+          if (hypertokenAddress == null) {
+            return errAsync<
+              Payment,
+              | TransferCreationError
+              | VectorError
+              | BalancesUnavailableError
+              | BlockchainUnavailableError
+              | InvalidPaymentError
+              | InvalidParametersError
+              | PaymentStakeError
+              | TransferResolutionError
+            >(
+              new AcceptPaymentError(
+                `Can not accept a payment on chain ${payment.chainId}, no configuration found for HyperToken`,
+              ),
+            );
+          }
+
+          return this.accountRepository
+            .getBalanceByAsset(stateChannel.channelAddress, hypertokenAddress)
+            .andThen((hypertokenBalance) => {
+              // Check the balance and make sure you have enough HyperToken to cover it
+              if (
+                BigNumber.from(hypertokenBalance.freeAmount).lt(
+                  payment.requiredStake,
+                )
+              ) {
+                return errAsync<
+                  Payment,
+                  | TransferCreationError
+                  | VectorError
+                  | BalancesUnavailableError
+                  | BlockchainUnavailableError
+                  | InvalidPaymentError
+                  | InvalidParametersError
+                  | PaymentStakeError
+                  | TransferResolutionError
+                >(
+                  new InsufficientBalanceError(
+                    "Not enough Hypertoken to cover provided payments.",
+                  ),
+                );
+              }
+
+              return this.paymentRepository
+                .provideStake(payment.id, gatewayRegistrationInfo.address)
+                .andThen((paymentsResult) => {
+                  return this._refreshBalances().map(() => paymentsResult);
+                });
+            });
+        });
+    });
   }
 
   /**
@@ -436,7 +478,10 @@ export class PaymentService implements IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | PaymentsByIdsErrors
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
     | TransferCreationError
   > {
     this.logUtils.debug(`Insurance transfer created for payment ${paymentId}`);
@@ -479,7 +524,10 @@ export class PaymentService implements IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | PaymentsByIdsErrors
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
     | TransferCreationError
   > {
     this.logUtils.debug(`Payment transfer created for payment ${paymentId}`);
@@ -521,7 +569,10 @@ export class PaymentService implements IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | PaymentsByIdsErrors
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
     | TransferCreationError
   > {
     return ResultUtils.combine([
@@ -601,7 +652,10 @@ export class PaymentService implements IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | PaymentsByIdsErrors
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
     | TransferCreationError
   > {
     this.logUtils.debug(`Insurance transfer resolved for payment ${paymentId}`);
@@ -637,7 +691,7 @@ export class PaymentService implements IPaymentService {
    */
   public pullRecorded(
     paymentId: PaymentId,
-  ): ResultAsync<void, PaymentsByIdsErrors> {
+  ): ResultAsync<void, VectorError | BalancesUnavailableError> {
     return ResultUtils.combine([
       this.paymentRepository.getPaymentsByIds([paymentId]),
       this.contextProvider.getContext(),
@@ -754,7 +808,10 @@ export class PaymentService implements IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | PaymentsByIdsErrors
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
     | TransferCreationError
   > {
     return ResultUtils.combine([
@@ -770,7 +827,10 @@ export class PaymentService implements IPaymentService {
             | PaymentFinalizeError
             | PaymentStakeError
             | TransferResolutionError
-            | PaymentsByIdsErrors
+            | VectorError
+            | BlockchainUnavailableError
+            | InvalidPaymentError
+            | InvalidParametersError
             | TransferCreationError
           >
         >();
@@ -1051,7 +1111,10 @@ export class PaymentService implements IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | PaymentsByIdsErrors
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
     | TransferCreationError
   > {
     this.logUtils.debug(`Advancing payment ${payment.id}`);
@@ -1094,7 +1157,10 @@ export class PaymentService implements IPaymentService {
     | PaymentFinalizeError
     | PaymentStakeError
     | TransferResolutionError
-    | PaymentsByIdsErrors
+    | VectorError
+    | BlockchainUnavailableError
+    | InvalidPaymentError
+    | InvalidParametersError
     | TransferCreationError
   > {
     // Notified the UI, move on to advancing the state of the payment.

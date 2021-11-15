@@ -9,6 +9,7 @@ import {
   HypernetGovernorContractError,
   ERC20ContractError,
   GovernanceSignerUnavailableError,
+  InvalidParametersError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IGovernanceRepository } from "@interfaces/data";
@@ -56,7 +57,7 @@ export class GovernanceRepository implements IGovernanceRepository {
       .andThen((totalCount) => {
         const proposalListResult: ResultAsync<
           Proposal,
-          BlockchainUnavailableError
+          HypernetGovernorContractError
         >[] = [];
         for (let i = 1; i <= Math.min(totalCount, pageSize); i++) {
           const index = totalCount - (pageNumber - 1) * pageSize - i;
@@ -217,7 +218,7 @@ export class GovernanceRepository implements IGovernanceRepository {
 
   public getVotingPower(
     account: EthereumAddress,
-  ): ResultAsync<number, HypernetGovernorContractError> {
+  ): ResultAsync<number, HypernetGovernorContractError | ERC20ContractError> {
     return this.hypertokenContract.getVotes(account).map((votes) => {
       return Number(ethers.utils.formatUnits(votes.toString(), "ether"));
     });
@@ -258,7 +259,9 @@ export class GovernanceRepository implements IGovernanceRepository {
 
   public initializeForWrite(): ResultAsync<
     void,
-    GovernanceSignerUnavailableError
+    | GovernanceSignerUnavailableError
+    | BlockchainUnavailableError
+    | InvalidParametersError
   > {
     return ResultUtils.combine([
       this.configProvider.getConfig(),

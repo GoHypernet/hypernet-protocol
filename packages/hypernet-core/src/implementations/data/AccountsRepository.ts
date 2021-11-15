@@ -79,7 +79,10 @@ export class AccountsRepository implements IAccountsRepository {
     this.erc20Abi.push("function name() view returns (string)");
   }
 
-  public getActiveRouters(): ResultAsync<PublicIdentifier[], PersistenceError> {
+  public getActiveRouters(): ResultAsync<
+    PublicIdentifier[],
+    PersistenceError | VectorError
+  > {
     return this.storageUtils
       .read<PublicIdentifier[]>(this.activeRoutersKey)
       .map((activeRouters) => {
@@ -92,7 +95,7 @@ export class AccountsRepository implements IAccountsRepository {
 
   public addActiveRouter(
     routerPublicIdentifier: PublicIdentifier,
-  ): ResultAsync<void, PersistenceError> {
+  ): ResultAsync<void, PersistenceError | VectorError> {
     return this.getActiveRouters().andThen((activeRouters) => {
       if (activeRouters == null) {
         activeRouters = [];
@@ -304,7 +307,10 @@ export class AccountsRepository implements IAccountsRepository {
       })
       .andThen((stateChannel) => {
         if (stateChannel == null) {
-          return okAsync<AssetBalance | null, VectorError>(null);
+          return okAsync<
+            AssetBalance | null,
+            BalancesUnavailableError | VectorError
+          >(null);
         }
         for (let i = 0; i < stateChannel.assetIds.length; i++) {
           if (stateChannel.assetIds[i] == assetAddress) {
@@ -312,7 +318,10 @@ export class AccountsRepository implements IAccountsRepository {
           }
         }
 
-        return okAsync<AssetBalance | null, VectorError>(null);
+        return okAsync<
+          AssetBalance | null,
+          BalancesUnavailableError | VectorError
+        >(null);
       })
       .andThen((assetBalance) => {
         if (assetBalance != null) {

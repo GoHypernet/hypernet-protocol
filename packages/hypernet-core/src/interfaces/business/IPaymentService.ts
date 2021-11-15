@@ -46,7 +46,7 @@ export interface IPaymentService {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<Payment, PaymentCreationError>;
+  ): ResultAsync<Payment, PaymentCreationError | TransferCreationError>;
 
   /**
    * Record a pull against a Pull Payment's authorized funds. Doesn't actually
@@ -57,11 +57,7 @@ export interface IPaymentService {
     amount: BigNumberString,
   ): ResultAsync<
     Payment,
-    | VectorError
-    | BlockchainUnavailableError
-    | InvalidPaymentError
-    | InvalidParametersError
-    | PaymentCreationError
+    PaymentCreationError | VectorError | BalancesUnavailableError
   >;
 
   /**
@@ -82,7 +78,7 @@ export interface IPaymentService {
     paymentToken: EthereumAddress,
     gatewayUrl: GatewayUrl,
     metadata: string | null,
-  ): ResultAsync<Payment, PaymentCreationError>;
+  ): ResultAsync<Payment, PaymentCreationError | TransferCreationError>;
 
   /**
    * Called by the person on the receiving end of a push payment,
@@ -178,13 +174,7 @@ export interface IPaymentService {
    */
   pullRecorded(
     paymentId: PaymentId,
-  ): ResultAsync<
-    void,
-    | VectorError
-    | BlockchainUnavailableError
-    | InvalidPaymentError
-    | InvalidParametersError
-  >;
+  ): ResultAsync<void, VectorError | BalancesUnavailableError>;
 
   /**
    * Notify the service that a stake has been created/posted.

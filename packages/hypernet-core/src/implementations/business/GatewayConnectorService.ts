@@ -23,6 +23,7 @@ import {
   GatewayActivationError,
   BalancesUnavailableError,
   InvalidParametersError,
+  VectorError,
 } from "@hypernetlabs/objects";
 import { ResultUtils, ILogUtils, ILogUtilsType } from "@hypernetlabs/utils";
 import { IGatewayConnectorService } from "@interfaces/business";
@@ -82,6 +83,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       | BlockchainUnavailableError
       | GatewayAuthorizationDeniedError
       | GatewayActivationError
+      | VectorError
     >
   >();
 
@@ -179,7 +181,9 @@ export class GatewayConnectorService implements IGatewayConnectorService {
       });
 
       context.onBalancesChanged.subscribe((balances) => {
-        const results = new Array<ResultAsync<void, GatewayConnectorError>>();
+        const results = new Array<
+          ResultAsync<void, GatewayConnectorError | ProxyError>
+        >();
         return this.gatewayConnectorRepository
           .getAuthorizedGateways()
           .andThen((authorizedGateways) => {
@@ -205,6 +209,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     | BlockchainUnavailableError
     | GatewayAuthorizationDeniedError
     | GatewayActivationError
+    | VectorError
   > {
     const inProgress = this.authorizationsInProgress.get(gatewayUrl);
 
@@ -229,6 +234,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
             | BlockchainUnavailableError
             | GatewayAuthorizationDeniedError
             | GatewayActivationError
+            | VectorError
           >(undefined);
         }
 
@@ -268,7 +274,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
 
                     return ResultAsync.fromPromise<
                       string,
-                      GatewayValidationError
+                      GatewayValidationError | ProxyError
                     >(
                       signerPromise,
                       (e) =>
@@ -337,7 +343,10 @@ export class GatewayConnectorService implements IGatewayConnectorService {
     routerPublicIdentifiers: PublicIdentifier[],
   ): ResultAsync<
     ActiveStateChannel,
-    PersistenceError | RouterUnauthorizedError | InvalidParametersError
+    | PersistenceError
+    | RouterUnauthorizedError
+    | InvalidParametersError
+    | VectorError
   > {
     if (routerPublicIdentifiers.length < 1) {
       return errAsync(
@@ -459,14 +468,14 @@ export class GatewayConnectorService implements IGatewayConnectorService {
 
   public getAuthorizedGateways(): ResultAsync<
     Map<GatewayUrl, Signature>,
-    PersistenceError
+    PersistenceError | VectorError
   > {
     return this.gatewayConnectorRepository.getAuthorizedGateways();
   }
 
   public getAuthorizedGatewaysConnectorsStatus(): ResultAsync<
     Map<GatewayUrl, boolean>,
-    PersistenceError
+    PersistenceError | VectorError
   > {
     if (this.activateAuthorizedGatewaysResult == null) {
       throw new Error("You must call activateAuthorizedGateways first!");
@@ -603,7 +612,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
 
   public closeGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError> {
+  ): ResultAsync<void, GatewayConnectorError | PersistenceError | VectorError> {
     return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
       return proxy.closeGatewayIFrame();
     });
@@ -611,7 +620,7 @@ export class GatewayConnectorService implements IGatewayConnectorService {
 
   public displayGatewayIFrame(
     gatewayUrl: GatewayUrl,
-  ): ResultAsync<void, GatewayConnectorError> {
+  ): ResultAsync<void, GatewayConnectorError | PersistenceError | VectorError> {
     return this._getActivatedGatewayProxy(gatewayUrl).andThen((proxy) => {
       return proxy.displayGatewayIFrame();
     });
@@ -909,7 +918,10 @@ export class GatewayConnectorService implements IGatewayConnectorService {
   protected assureGatewayAuthorizedByRouter(
     gatewayUrl: GatewayUrl,
     routerPublicIdentifier: PublicIdentifier,
-  ): ResultAsync<void, RouterUnauthorizedError | PersistenceError> {
+  ): ResultAsync<
+    void,
+    RouterUnauthorizedError | PersistenceError | VectorError
+  > {
     return this.routerRepository
       .getRouterDetails([routerPublicIdentifier])
       .andThen((routerDetailsMap) => {
